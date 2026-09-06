@@ -481,10 +481,8 @@
                         <button id="play-button" class="primary-button mt-4 w-full px-4 py-3 text-sm" type="button"
                             disabled>Play</button>
 
-                        <p id="source-note" class="mb-0 mt-5 text-xs leading-5 text-[var(--muted)]">A local server OBB
-                            is detected automatically but is never downloaded until you ask. You can also share a URL
-                            with <code
-                                class="rounded bg-[#101217] px-1.5 py-0.5 font-mono text-[11px] text-[#cdd2da]">?obb=…</code>.
+                        <p class="mb-0 mt-5 text-xs leading-5 text-[var(--muted)]">A local server OBB
+                            is detected automatically but is never downloaded until you ask.
                         </p>
                     </section>
                 </div>
@@ -640,9 +638,9 @@
         const playButton = document.getElementById("play-button");
         const status = document.getElementById("status");
         const statusText = document.getElementById("status-text");
-        const sourceNote = document.getElementById("source-note");
         const runtimeError = document.getElementById("runtime-error");
         const obbName = "main.1060.com.wb.lego.tcs.obb";
+        const corsProxyOrigin = "https://cors-header-proxy.avery-eae.workers.dev";
         let resolveRuntime;
         let rejectRuntime;
         let started = false;
@@ -732,6 +730,8 @@
                 Module.callMain([]);
             } catch (error) {
                 started = false;
+                siteShell.hidden = false;
+                game.classList.remove("running");
                 setBusy(false);
                 setStatus(error instanceof Error ? error.message : String(error), true);
                 throw error;
@@ -739,11 +739,18 @@
         }
 
         async function fetchUrl(url, label) {
+            const source = new URL(url, location.href);
+            if (source.protocol !== "http:" && source.protocol !== "https:") {
+                throw new Error("The OBB URL must use HTTP or HTTPS.");
+            }
+            const downloadUrl = source.origin === location.origin || source.origin === corsProxyOrigin
+                ? source.href
+                : `${corsProxyOrigin}/download/${encodeURIComponent(source.href)}/${obbName}`;
             let response;
             try {
-                response = await fetch(url);
+                response = await fetch(downloadUrl, { credentials: "omit" });
             } catch (error) {
-                throw new Error("The OBB source blocked this browser download. It must allow cross-origin requests.");
+                throw new Error("The OBB download could not be reached. Check the URL and try again.");
             }
             if (!response.ok) throw new Error(`OBB download failed: HTTP ${response.status}`);
             if ((response.headers.get("content-type") || "").includes("text/html")) {
@@ -756,15 +763,10 @@
             const queryObb = new URLSearchParams(location.search).get("obb");
             if (queryObb) {
                 urlInput.value = queryObb;
-                sourceNote.textContent = "An OBB was supplied by this page URL. It will not be downloaded until you ask.";
-                setBusy(true);
-                setStatus("Checking the OBB from the page URL…");
                 try {
-                    detectedObbUrl = new URL(queryObb, location.href);
-                    localObbLoad.textContent = "Load linked OBB";
-                    localObbLoad.classList.remove("hidden");
-                    setBusy(false);
-                    setStatus("Linked OBB ready to load.", false, true);
+                    const resolvedUrl = new URL(queryObb, location.href);
+                    await loadObb(() => fetchUrl(resolvedUrl, "Downloading OBB..."), "Downloading OBB...");
+                    startGame();
                 } catch (error) {
                     setBusy(false);
                     setStatus(error instanceof Error ? error.message : String(error), true);
