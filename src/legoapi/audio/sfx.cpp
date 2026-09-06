@@ -10,8 +10,6 @@
 
 #include <string.h>
 
-struct SoundTable;
-
 enum RepeatSfxState : u8 {
     REPEAT_SFX_INACTIVE = 0,
     REPEAT_SFX_INITIAL_DELAY = 1,
@@ -32,14 +30,20 @@ DECOMP_ASSERT(sizeof(RepeatSfx) == 0x10, "RepeatSfx size");
 
 static i32 repsfxcount;
 static RepeatSfx repsfxtab[32];
+static f32 MusicVolume = 1.0f;
+static f32 CutVolume = 0.8f;
 
 extern "C" {
     u16 GlobalSfxBits[100];
+    SoundTable CurrentSFXTAB;
 }
 
 i32 GroupBuffer_GetSample(i32 group_id, i32 sequential);
 i32 GroupBuffer_GetNumInGroup(i32 group_id);
 i32 GroupBuffer_GetSampleByIndex(i32 group_id, i32 sample_index);
+void PlayAMusic(i32 stream, i32 track, i32 volume, i32 one_shot);
+
+extern "C" void NuGCutSetCutAudioStream(i32 stream);
 
 bool HandleGroupLimit(i32 group_id) {
     i32 voice_count = 0;
@@ -74,7 +78,16 @@ bool HandleGroupLimit(i32 group_id) {
 
 extern "C" void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pitch);
 void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
+void GameAudio_AddSfx(i32 sfx, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx);
 void SetSfxBit_OnEx(i32);
+void AddLevelSfxFromName(char *sfx_name, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx_count);
+void AddLevelSfxGizmoSys(GIZMOSYS_s *gizmo_sys, void *world_info, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx_count);
+void SetSpecialSfxBits(i32 *sfx_ids, i32 *sfx_count, WORLDINFO_s *world);
+
+extern "C" {
+    void SetSfxBit_On(i32 sound);
+    void SetSoundBitsById(const i32 *sound_ids, void (*set_bit)(i32));
+}
 
 i32 ActionFromQuiet(i32 idx) {
     static i16 ActionPairTab[14] = {-1};
@@ -108,7 +121,39 @@ extern "C" void ResetSounds(void) {
 }
 
 void SetLevelSfxBits(WORLDINFO *world) {
-    (void)world;
+    i32 sfx_ids[1024];
+    i32 sfx_count = 0;
+
+    for (i32 i = 0; i < world->level_sfx_count; ++i) {
+        sfx_ids[sfx_count++] = world->level_sfx[i].id;
+    }
+
+    GameAudio_AddSfx(0x50, sfx_ids, &sfx_count, 1024);
+    GameAudio_AddSfx(0x51, sfx_ids, &sfx_count, 1024);
+    GameAudio_AddSfx(0x52, sfx_ids, &sfx_count, 1024);
+    AddLevelSfxFromName(const_cast<char *>("Grv_GuardWeaponLp"), sfx_ids, &sfx_count, 1024);
+
+    if (world->cutscene_sys != NULL) {
+        for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
+            CUTINFO *cut = world->cutscene_sys->cuts[i];
+            if (cut == NULL) {
+                continue;
+            }
+            for (CUTSCENESFX &sfx : cut->sfx) {
+                if (sfx.id != -1) {
+                    sfx_ids[sfx_count++] = sfx.id;
+                }
+            }
+        }
+    }
+
+    AddLevelSfxGizmoSys(world->gizmo_sys, world, sfx_ids, &sfx_count, 1024);
+    SetSpecialSfxBits(sfx_ids, &sfx_count, world);
+    sfx_ids[sfx_count] = -1;
+    if (sfx_count > 0) {
+        SetSoundBitsById(sfx_ids, SetSfxBit_On);
+    }
+    memcpy(CurrentSFXTAB.bits, SfxBits, sizeof(CurrentSFXTAB.bits));
 }
 void ResetLevSfx(WORLDINFO *world) {
     for (i32 i = 0; i < 0x40; i++) {
@@ -154,6 +199,10 @@ extern "C" {
     }
 
     void PauseGameAudio(void) {
+        if (NOSOUND == 0) {
+            NuSound3StopSFX();
+            NuSound3SetSFXPitch(0);
+        }
     }
 
     void PauseGameMusic(void) {
@@ -165,7 +214,45 @@ extern "C" {
     void PlayAltGameMusic(void) {
     }
 
-    void PlayCutMusic(void) {
+    i32 PlayCutMusic(i32 track, i32 state, void *context) {
+        if (NOSOUND != 0 || NOMUSIC != 0 || track < 0 || static_cast<u32>(track) >= SFX_MUSIC_COUNT) {
+            return 0;
+        }
+
+        Music.queued_track = static_cast<i16>(track);
+        Music.transition_frames = 0;
+
+        const i32 stream = 1 - Music.primary_stream;
+        reinterpret_cast<u8 *>(&Music)[0x12 + stream] = 6;
+        NuSound3CancelCheckStereo();
+        NuSound3PauseStereoStream(Music.primary_stream);
+
+        const i32 volume = static_cast<i32>(static_cast<f32>(g_music[track].index) * CutVolume);
+        NuSound3SetStereoStreamVolume(Music.primary_stream, volume);
+
+        i32 started = 0;
+        if (Music.requested_track != track || Music.pause_requested ||
+            NuSound3GetStereoStreamStatus(stream) == NUSOUND_STEREO_STREAM_FINISHED) {
+            PlayAMusic(stream, track, volume, 0);
+            started = 1;
+        } else {
+            NuSound3ResumeStereoStream(stream);
+            NuSound3SetStereoStreamVolume(stream, volume);
+        }
+
+        NuGCutSetCutAudioStream(stream);
+        Music.requested_track = -1;
+        Music.pause_requested = false;
+        Music.transition = 1.0f;
+        if (state == MUSIC_PLAYBACK_DUAL_STREAM_PENDING) {
+            Music.state = MUSIC_PLAYBACK_DUAL_STREAM_PENDING;
+        } else if (state == 12) {
+            Music.state = static_cast<MusicPlaybackState>(12);
+        } else {
+            Music.state = Music.state < 1 ? static_cast<MusicPlaybackState>(12) : MUSIC_PLAYBACK_DUAL_STREAM_PENDING;
+        }
+        Music.track_data = context;
+        return started;
     }
 
     void PlayMusic(void) {
@@ -353,13 +440,32 @@ extern "C" {
         }
     }
 
-    void PlayingCutMusic(void) {
+    i32 PlayingCutMusic(void) {
+        const i32 stream = 1 - Music.primary_stream;
+        u8 &delay = reinterpret_cast<u8 *>(&Music)[0x12 + stream];
+        if (delay != 0) {
+            --delay;
+            return 0;
+        }
+        if (NOSOUND != 0 || NOMUSIC != 0) {
+            return 0;
+        }
+        return NuSound3GetStereoStreamStatus(stream) != NUSOUND_STEREO_STREAM_FINISHED;
     }
 
     void PrepareAllSounds(void) {
+        memset(SfxBits, 0xff, sizeof(SfxBits));
     }
 
-    void RegisterSounds(void) {
+    void RegisterSounds(SoundTable *table) {
+        memset(table->bits, 0, sizeof(table->bits));
+        if (table->names == NULL) {
+            return;
+        }
+        for (const char **name = table->names; *name != NULL; ++name) {
+            i32 id = GetSfxId(*name);
+            table->bits[id >> 4] |= static_cast<u16>(1 << (id & 0xf));
+        }
     }
 
     void ResetPreSeek(void) {
@@ -385,13 +491,28 @@ extern "C" {
     void SetAudioFadeLevel(void) {
     }
 
-    void SetCutVolume(void) {
+    void SetCutVolume(f32 volume) {
+        CutVolume = volume;
     }
 
-    void SetLinkedCutSceneMusic(void) {
+    void SetLinkedCutSceneMusic(void *context, i32 state) {
+        Music.track_data = context;
+        if (static_cast<u16>(Music.state - MUSIC_PLAYBACK_DUAL_STREAM) <= 2) {
+            Music.state = state == MUSIC_PLAYBACK_DUAL_STREAM_PENDING ? MUSIC_PLAYBACK_DUAL_STREAM_PENDING
+                                                                      : MUSIC_PLAYBACK_DUAL_STREAM;
+        }
     }
 
-    void SetMusicVolume(void) {
+    void SetMusicVolume(f32 volume) {
+        if (NOSOUND != 0 || NOMUSIC != 0) {
+            return;
+        }
+        MusicVolume = volume;
+        if (Music.state == MUSIC_PLAYBACK_ACTIVE) {
+            NuSound3SetStereoStreamVolume(
+                Music.primary_stream,
+                static_cast<i32>(static_cast<f32>(g_music[Music.current_track].index) * volume));
+        }
     }
 
     void SetPreSeekStartPoint(void) {
@@ -420,13 +541,15 @@ extern "C" {
     void SfxBitTab(void) {
     }
 
-    void SfxBitsRestore(void) {
+    void SfxBitsRestore(SoundTable *table) {
+        memcpy(SfxBits, table->bits, sizeof(SfxBits));
     }
 
     void SfxBitsSetAll(void) {
     }
 
-    void SfxBitsStore(void) {
+    void SfxBitsStore(SoundTable *table) {
+        memcpy(table->bits, SfxBits, sizeof(SfxBits));
     }
 
     void StopAltGameMusic(void) {

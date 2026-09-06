@@ -374,20 +374,20 @@ struct AIGROUP_s;
 struct AILOCATOR_s;
 struct AIPACKET_s;
 struct AIPATHCNXCONTROLLER_s {
-    NULISTLNK links;                  // 0x00
-    AIPATHCNX_s *connection;          // 0x08
+    NULISTLNK links;         // 0x00
+    AIPATHCNX_s *connection; // 0x08
     union {
-        void *target;                 // 0x0c, gizmo/cutscene/fake-animation target
-        nuhspecial_s special;         // 0x0c, target_type == 0
-        i32 fake_animation_id;        // 0x0c, target_type == 5
+        void *target;          // 0x0c, gizmo/cutscene/fake-animation target
+        nuhspecial_s special;  // 0x0c, target_type == 0
+        i32 fake_animation_id; // 0x0c, target_type == 5
     };
-    i32 gizmo_output;                 // 0x18
-    u32 on_flags;                     // 0x1c
-    u32 off_flags;                    // 0x20
-    u32 on_frames[32];                // 0x24, one bit per frame (maximum 1024)
-    u8 target_type;                   // 0xa4
-    u8 path_index;                    // 0xa5
-    u8 flags;                         // 0xa6
+    i32 gizmo_output;  // 0x18
+    u32 on_flags;      // 0x1c
+    u32 off_flags;     // 0x20
+    u32 on_frames[32]; // 0x24, one bit per frame (maximum 1024)
+    u8 target_type;    // 0xa4
+    u8 path_index;     // 0xa5
+    u8 flags;          // 0xa6
     u8 padding_0xa7;
 };
 DECOMP_ASSERT(sizeof(AIPATHCNXCONTROLLER_s) == 0xa8, "AIPATHCNXCONTROLLER_s size");
@@ -565,37 +565,80 @@ DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, primary_name_unlocked) == 0x34, "CUSTOMI
 DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, secondary_name) == 0x4c, "CUSTOMISESAVE secondary name offset");
 DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, secondary_name_unlocked) == 0x6c, "CUSTOMISESAVE secondary flag offset");
 struct CUSTOMPIECE {};
+struct CUTSCENESFX {
+    i16 id;
+    u8 flags;
+    u8 pad_03;
+    f32 frame;
+    NUVEC position;
+};
+DECOMP_ASSERT(sizeof(CUTSCENESFX) == 0x14, "CUTSCENESFX size");
+
+struct CUTSCENEPLAYEROBJ {
+    nuhspecial_s special;
+    u32 flags;
+};
+DECOMP_ASSERT(sizeof(CUTSCENEPLAYEROBJ) == 0x10, "CUTSCENEPLAYEROBJ size");
+
+struct CUTSCENETEXANIM {
+    f32 frame;
+    i32 index;
+};
+DECOMP_ASSERT(sizeof(CUTSCENETEXANIM) == 8, "CUTSCENETEXANIM size");
+
+struct CUTSCENEFADEFOG {
+    f32 frame;
+    f32 near_distance;
+    f32 far_distance;
+    f32 value;
+};
+DECOMP_ASSERT(sizeof(CUTSCENEFADEFOG) == 0x10, "CUTSCENEFADEFOG size");
+
 struct CUTINFO {
     void *scene;
     void *instance;
     char name[0x40];
-    void *state_entries;
+    CUTSCENEPLAYEROBJ *state_entries;
     u8 state_count;
     u8 pad_4d[3];
     u32 flags;
     f32 previous_frame;
-    i32 field_58;
+    f32 field_58;
     f32 frames_per_second;
-    f32 field_60;
-    u8 pad_64[0x6c - 0x64];
+    f32 burnout_threshold;
+    f32 burnout_intensity;
+    f32 burnout_flare;
     f32 camera_near_clip; // 0x6c, zero keeps the level display setting
-    u8 pad_70[0xe8 - 0x70];
-    u16 camera_far_clip; // 0xe8, zero keeps the level display setting
-    u8 pad_ea[2];
+    CUTSCENESFX sfx[6];   // 0x70
+    u16 camera_far_clip;  // 0xe8, zero keeps the level display setting
+    i16 legacy_music_index;
     i16 skip_level; // 0xec, optional level selected when a stopped cutscene is skipped
     u8 linked_audio;
-    u8 pad_ef[4];
+    u8 blob_shadow_alpha;
+    u8 blob_shadow_fade_near;
+    u8 blob_shadow_fade_far;
+    u8 reflection_range;
     i8 debris_render_group;
     char door_name[0x10];
     char next_cutscene[0x40];
-    u8 pad_144[0x18a - 0x144];
+    CUTSCENETEXANIM texture_animations[4];
+    CUTSCENEFADEFOG fade_fog[2];
+    void *subtitle_data;
+    u16 subtitle_count;
     u8 end_flags;
     u8 pad_18b;
     i32 music_handle;
-    u8 pad_190[8];
+    f32 low_end_distance;
+    f32 field_194;
 };
+DECOMP_ASSERT(offsetof(CUTINFO, burnout_threshold) == 0x60, "CUTINFO burnout threshold offset");
+DECOMP_ASSERT(offsetof(CUTINFO, texture_animations) == 0x144, "CUTINFO texture animations offset");
+DECOMP_ASSERT(offsetof(CUTINFO, fade_fog) == 0x164, "CUTINFO fade-fog offset");
+DECOMP_ASSERT(offsetof(CUTINFO, subtitle_data) == 0x184, "CUTINFO subtitle data offset");
 DECOMP_ASSERT(offsetof(CUTINFO, camera_near_clip) == 0x6c, "CUTINFO near-clip offset");
+DECOMP_ASSERT(offsetof(CUTINFO, sfx) == 0x70, "CUTINFO SFX offset");
 DECOMP_ASSERT(offsetof(CUTINFO, camera_far_clip) == 0xe8, "CUTINFO far-clip offset");
+DECOMP_ASSERT(offsetof(CUTINFO, legacy_music_index) == 0xea, "CUTINFO legacy music-index offset");
 DECOMP_ASSERT(offsetof(CUTINFO, skip_level) == 0xec, "CUTINFO skip-level offset");
 DECOMP_ASSERT(offsetof(CUTINFO, debris_render_group) == 0xf3, "CUTINFO debris render-group offset");
 DECOMP_ASSERT(offsetof(CUTINFO, next_cutscene) == 0x104, "CUTINFO chained-cutscene offset");
@@ -1657,7 +1700,11 @@ struct SUPERCOUNTER {
 DECOMP_ASSERT(sizeof(SUPERCOUNTER) == 0x1e8, "SUPERCOUNTER size");
 struct SUPERCOUNTERPICKUP {};
 struct ShaderObjectKey;
-struct SoundTable {};
+struct SoundTable {
+    u16 bits[100];
+    const char **names;
+};
+DECOMP_ASSERT(sizeof(SoundTable) == 0xcc, "SoundTable size");
 struct TECHNO_s;
 struct TERRPICKUPSET {};
 

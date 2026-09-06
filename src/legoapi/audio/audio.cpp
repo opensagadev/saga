@@ -39,11 +39,15 @@ struct MUSIC_CUT_STOP_INFO {
 DECOMP_ASSERT(offsetof(MUSIC_CUT_STOP_INFO, level_index) == 0xec, "MUSIC_CUT_STOP_INFO level offset");
 
 void PlayAMusic(i32 a, i32 b, i32 c, i32 d) {
-    (void)a;
-    (void)b;
-    (void)c;
-    (void)d;
-    LOG_DEBUG("PlayAMusic %d %d %d %d", a, b, c, d);
+    if (NOSOUND != 0 || NOMUSIC != 0) {
+        return;
+    }
+
+    NuSound3StopStereoStream(a);
+    NuSound3PlayStereoV(NUSOUNDPLAYTOK_STEREOSTREAM, a, NUSOUNDPLAYTOK_SAMPLE, b, NUSOUNDPLAYTOK_VOL, c,
+                        d == 1 ? NUSOUNDPLAYTOK_ONESHOT : static_cast<NUSOUNDPLAYTOK>(0), NUSOUNDPLAYTOK_END);
+    Music.secondary_stream = static_cast<i16>(a);
+    Music.transition_frames = 0;
 }
 i16 GetMusicIndex(char *name, nusound_filename_info_s *table, i32 def) {
     if (name == nullptr || table == nullptr) {
@@ -75,7 +79,7 @@ void MusicClearAll() {
 void SpaceAudioPoint() {
 }
 void legoSetCutVolume(float v) {
-    (void)v;
+    music_man.SetClassVolume(TRACK_CLASS_CUTSCENE, v);
 }
 void GetAudioFadeLevel() {
 }

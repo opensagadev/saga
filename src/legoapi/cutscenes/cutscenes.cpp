@@ -9,10 +9,14 @@
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/props/doors/door.h"
 #include "legoapi/world/level.h"
+#include "legoapi/world/levels/levels.h"
 #include "nu2api/nucore/nuhgobj.h"
 #include "nu2api/nucore/nugcutscene.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nugscn.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/numusic/numusic.h"
+#include "nu2api/nusound/nusound.h"
 
 #include <string.h>
 
@@ -21,12 +25,14 @@ extern "C" i32 CUTDRAWWORLD;
 extern "C" i32 Paused;
 extern i32 CutSceneWaiting;
 extern i32 CUTCAMONLY;
+extern i32 cut_waiting_for_new_level;
+extern i32 waiting_for_level;
+extern i32 newlevel_resumecutaudio;
 extern CUTSYS *CS_cutsys;
 extern FadeSystem FadeSys;
 CUTSCENESYS *CutSceneSys;
 
-static void CutScene_DrawCharacter(instNUGCUTSCENE_s *, NUGCUTSCENE_s *, instNUGCUTCHAR_s *, NUGCUTCHAR_s *, f32,
-                                   i32);
+static void CutScene_DrawCharacter(instNUGCUTSCENE_s *, NUGCUTSCENE_s *, instNUGCUTCHAR_s *, NUGCUTCHAR_s *, f32, i32);
 static void CutScene_EvalCharacter(instNUGCUTSCENE_s *, NUGCUTSCENE_s *, instNUGCUTCHAR_s *, NUGCUTCHAR_s *, f32);
 static void CutScene_FindCharacters(NUGCUTSCENE_s *);
 static void CutScene_ResetCharacters(instNUGCUTSCENE_s *);
@@ -39,6 +45,7 @@ extern "C" {
     void instNuGCutScenePause(instNUGCUTSCENE_s *, u8);
     void instNuGCutSceneReset(instNUGCUTSCENE_s *);
     void instNuGCutSceneStart(instNUGCUTSCENE_s *);
+    void instNuGCutSceneStop(instNUGCUTSCENE_s *);
     void instNuGCutSceneDestroy(instNUGCUTSCENE_s *);
     void NuGCutSceneDestroy(NUGCUTSCENE_s *);
     void NuGCutSceneSysRender(f32);
@@ -55,17 +62,46 @@ void EnableShadowMapRendering(i32);
 void ResetShadowMapRendering(void);
 i32 CutScenePlayer_Active(void);
 void CutScenePlayer_SetObjects(CUTINFO *);
+void AddPartDebris(PARTDEBSYS_s *, i32, nuvec_s *);
 extern "C" void DebrisSetRenderGroup(i32);
+extern AREADATA_s *BONUS_GUNSHIP_ADATA;
+extern AREADATA_s *GUNSHIP_ADATA;
+extern AREADATA_s *BATTLEOVERCORUSCANT_ADATA;
+
+extern "C" {
+    extern i16 id_ANAKINSPODGREEN;
+    extern i16 id_ANAKINSNEWPOD;
+    extern i16 id_ANAKINSNEWPODGREEN;
+    extern i16 id_REPUBLICGUNSHIP_GREEN;
+    extern i16 id_NEW_REPUBLIC_GUNSHIP_GREEN;
+    extern i16 id_JEDISTARFIGHTERYELLOWEP3;
+}
 
 i32 CutInstEndCount;
 static instNUGCUTSCENE_s *CutInstEnd[4];
 static i32 CutInstEndStop;
 static i32 cutaudiopaused;
+static CUTINFO *g_lastCutInfo;
+static f32 g_lastCutsceneTime;
+static f32 g_accumCutsceneTime;
 i32 NewCutInfoCount;
 static CUTINFO *NewCutInfo[8];
+i32 CUTNOFOG;
+
+extern "C" {
+    void PauseGameAudio(void);
+    void PauseGameCut(void);
+    void SetLinkedCutSceneMusic(void *context, i32 state);
+    void PlaySfxById(i32 sfx_id, nuvec_s *position);
+}
 
 static void CutScene_Start(WORLDINFO_s *world, CUTINFO *cut, i32) {
     instNUGCUTSCENE_s *instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
+    if (cut->music_handle != -1) {
+        g_lastCutsceneTime = 0.0f;
+        g_accumCutsceneTime = 0.0f;
+        g_lastCutInfo = NULL;
+    }
     instNuGCutSceneReset(instance);
     if (CutScene_StartFn != NULL) {
         CutScene_StartFn(cut);
@@ -81,6 +117,27 @@ static void CutScene_Start(WORLDINFO_s *world, CUTINFO *cut, i32) {
         instance->flags_88 &= ~8U;
     }
     cut->previous_frame = 0.0f;
+    cut->field_58 = 0;
+
+    if (cut->music_handle != -1) {
+        music_man.SelectTrackByHandle(TRACK_CLASS_CUTSCENE, cut->music_handle);
+        i32 status = music_man.PlayTrack(TRACK_CLASS_CUTSCENE, 0);
+        instance->rate = 0.0f;
+        if ((cut->flags & 1) != 0 && status == 1) {
+            CutSceneWaiting = 1;
+            PauseGameAudio();
+            cutaudiopaused = 1;
+        }
+    } else {
+        PauseGameAudio();
+        SetLinkedCutSceneMusic(instance, cut->linked_audio == 0 ? MUSIC_PLAYBACK_DUAL_STREAM
+                                                                : MUSIC_PLAYBACK_DUAL_STREAM_PENDING);
+        instance->rate = cut->frames_per_second * FRAMETIME;
+        if ((cut->flags & 1) != 0) {
+            CutSceneWaiting = 0;
+            cutaudiopaused = 0;
+        }
+    }
 
     if ((cut->flags & 1) == 0) {
         return;
@@ -140,7 +197,16 @@ void CutScenes_Draw(WORLDINFO_s *world) {
     }
 }
 
-void CutScenes_Stop(CUTSYS *) {
+void CutScenes_Stop(CUTSYS *system) {
+    if (system == NULL || system->count <= 0) {
+        return;
+    }
+    for (i32 i = 0; i < system->count; ++i) {
+        CUTINFO *cut = system->cuts[i];
+        if (cut->instance != NULL) {
+            instNuGCutSceneStop(static_cast<instNUGCUTSCENE_s *>(cut->instance));
+        }
+    }
 }
 
 void CutScenes_Reset(WORLDINFO_s *world) {
@@ -224,8 +290,13 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
             continue;
         }
         active_before[i] = 1;
+        cut->previous_frame = instance->current_frame;
+        cut->field_58 += FRAMETIME;
+        if (cutaudiopaused != 0 && cut->field_58 >= 3.0f) {
+            cutaudiopaused = 0;
+        }
+
         instance->rate = cut->frames_per_second * FRAMETIME;
-        instNuGCutScenePause(instance, 0);
         ++ACTIVECUTCOUNT;
         if ((cut->flags & 1) != 0) {
             CUTSTOPGAME = 1;
@@ -236,7 +307,64 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
             CUTDRAWWORLD = 1;
         }
     }
+
+    for (i32 i = 0; i < system->count; ++i) {
+        if (active_before[i] == 0) {
+            continue;
+        }
+        CUTINFO *cut = system->cuts[i];
+        instNUGCUTSCENE_s *instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
+        if (stop_index != -1 && i != stop_index) {
+            instance->rate = 0.0f;
+            instNuGCutScenePause(instance, 1);
+            continue;
+        }
+
+        if (i == stop_index && NOSOUND == 0 && NOMUSIC == 0) {
+            i32 music_status = music_man.GetStatus(TRACK_CLASS_CUTSCENE, NULL);
+            if (instance->current_frame == 0.0f && cut->music_handle != -1 && music_status != 4) {
+                music_man.PlayTrack(TRACK_CLASS_CUTSCENE, 0);
+            } else if (music_status == 4) {
+                if (g_lastCutInfo != cut) {
+                    g_accumCutsceneTime += g_lastCutsceneTime;
+                    g_lastCutInfo = cut;
+                    NUGCUTSCENE_s *scene = static_cast<NUGCUTSCENE_s *>(cut->scene);
+                    g_lastCutsceneTime = scene->duration / cut->frames_per_second;
+                }
+                f32 audio_frame =
+                    (music_man.GetPlaybackTime(TRACK_CLASS_CUTSCENE) - g_accumCutsceneTime) * cut->frames_per_second;
+                if (audio_frame < 0.0f) {
+                    audio_frame = 0.0f;
+                }
+                f32 rate = audio_frame - (instance->current_frame - 1.0f);
+                instance->rate = rate > 0.0f ? rate : 0.0f;
+            }
+            if (CutSceneWaiting != 0) {
+                CutSceneWaiting = 0;
+                cutaudiopaused = 0;
+            }
+        }
+        instNuGCutScenePause(instance, 0);
+    }
     NuGCutSceneSysUpdate(paused, 0, 1.0f);
+
+    if (paused == 0) {
+        for (i32 i = 0; i < system->count; ++i) {
+            if (active_before[i] == 0) {
+                continue;
+            }
+            CUTINFO *cut = system->cuts[i];
+            instNUGCUTSCENE_s *instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
+            if (instance->rate <= 0.0f) {
+                continue;
+            }
+            for (CUTSCENESFX &sfx : cut->sfx) {
+                if (sfx.id != -1 && sfx.frame > cut->previous_frame && sfx.frame <= instance->current_frame) {
+                    PlaySfxById(sfx.id, (sfx.flags & 1) != 0 ? &sfx.position : NULL);
+                }
+            }
+        }
+    }
     for (i32 i = 0; i < system->count; ++i) {
         CUTINFO *cut = system->cuts[i];
         if (cut == NULL || cut->instance == NULL || active_before[i] == 0) {
@@ -290,6 +418,14 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
         }
     }
 
+    if (waiting_for_level != -1) {
+        cut_waiting_for_new_level = 1;
+        PauseGameCut();
+        music_man.PauseTrack(TRACK_CLASS_CUTSCENE);
+        newlevel_resumecutaudio = 1;
+    }
+    CUTNOFOG = 0;
+
     if (CutInstEndCount < 4) {
         CutInstEndStop = CutInstEndCount;
         CutInstEnd[CutInstEndCount++] = stop_instance;
@@ -341,7 +477,10 @@ i32 CutScene_HasPlayed(CUTINFO *cut) {
     return has_played;
 }
 
-void CutScene_SnapToEnd(CUTINFO *) {
+void CutScene_SnapToEnd(CUTINFO *cut) {
+    if (cut != NULL) {
+        instNuGCutSceneEnd(static_cast<instNUGCUTSCENE_s *>(cut->instance));
+    }
 }
 
 void CutScene_StartAudio() {
@@ -365,8 +504,8 @@ void CutScenes_InitSystem(CUTSCENESYS *system) {
     NuSetCutSceneRigidPostRenderFn(CutScene_RigidPostRender);
 }
 
-static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTSCENE_s *,
-                                   instNUGCUTCHAR_s *instance, NUGCUTCHAR_s *character, f32 frame, i32 paused) {
+static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTSCENE_s *, instNUGCUTCHAR_s *instance,
+                                   NUGCUTCHAR_s *character, f32 frame, i32 paused) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
     if (world->cutscene_sys == NULL) {
         return;
@@ -393,13 +532,13 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
     f32 animation_start_frame = 0.0f;
     i32 layer_mask = -1;
     NuGCutCharAnimProcess(character, frame, &world_matrix, &visible, &animation_index, &animation_rate, &blend_time,
-                           &animation_start_frame, &layer_mask);
+                          &animation_start_frame, &layer_mask);
     if (paused != 0) {
         animation_rate = 0.0f;
     }
     if (layer_mask == -1) {
         layer_mask = static_cast<i32>(reinterpret_cast<u8 *>(CutSceneSys)[7] == 0 ? game_data->layer_mask_special
-                                                                                 : game_data->layer_mask);
+                                                                                  : game_data->layer_mask);
     }
     if (static_cast<i8>(cutscene_instance->flags_88) < 0) {
         NuMtxMul(&world_matrix, &world_matrix, &cutscene_instance->matrix);
@@ -513,7 +652,8 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
         const f32 end_frame = AnimEndFrame(model, animation_a_index - 1);
         instance->animation_frame_a += FRAMETIME * 60.0f * animation_rate;
         if (instance->animation_frame_a > end_frame) {
-            CHARACTERANIM_s *animation_info = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation_a_index - 1]);
+            CHARACTERANIM_s *animation_info =
+                static_cast<CHARACTERANIM_s *>(model->model_data_a[animation_a_index - 1]);
             instance->animation_frame_a = animation_info != NULL && (animation_info->flags & 2) != 0
                                               ? instance->animation_frame_a - end_frame + 1.0f
                                               : end_frame;
@@ -527,8 +667,8 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
     ResetShadowMapRendering();
 }
 
-static void CutScene_EvalCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTSCENE_s *,
-                                   instNUGCUTCHAR_s *instance, NUGCUTCHAR_s *character, f32 frame) {
+static void CutScene_EvalCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTSCENE_s *, instNUGCUTCHAR_s *instance,
+                                   NUGCUTCHAR_s *character, f32 frame) {
     NUMTX matrix;
     i32 visible;
     u32 animation_index;
@@ -537,7 +677,7 @@ static void CutScene_EvalCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
     f32 animation_start_frame;
     i32 layer_mask = -1;
     NuGCutCharAnimProcess(character, frame, &matrix, &visible, &animation_index, &animation_rate, &blend_time,
-                           &animation_start_frame, &layer_mask);
+                          &animation_start_frame, &layer_mask);
     if (static_cast<i8>(cutscene_instance->flags_88) < 0) {
         NuMtxMul(&matrix, &matrix, &cutscene_instance->matrix);
     }
@@ -605,7 +745,18 @@ static void CutScene_CreateCharacterInstance(NUGCUTCHAR_s *character, instNUGCUT
 void CutScene_DrawSubtitles() {
 }
 
-void CutScene_StoppedFn_LSW(CUTINFO *) {
+void CutScene_StoppedFn_LSW(CUTINFO *cut) {
+    if (cut != game_cutscenes.cutscene) {
+        return;
+    }
+
+    for (i32 i = 50; i <= 51; ++i) {
+        nuhspecial_s *special = &LevHSpecial[i];
+        if (NuSpecialExistsFn(special) != 0) {
+            AddPartDebris(WORLD->part_debris_sys, 0x10, NuSpecialGetDrawPos(special));
+            NuSpecialSetVisibility(special, 0);
+        }
+    }
 }
 
 void CutScenes_BGLoadManager() {
@@ -620,11 +771,78 @@ void CutScene_PreUpdateFn_LSW(CUTINFO *) {
 void CutScene_PostUpdateFn_LSW() {
 }
 
-i32 CutScene_PlayingOrRequested(CUTINFO *) {
+i32 CutScene_PlayingOrRequested(CUTINFO *cut) {
+    if (cut == NULL) {
+        return CutStopInfo != NULL || NewCutInfoCount != 0;
+    }
+    if (CutStopInfo == cut) {
+        return 1;
+    }
+    for (i32 i = 0; i < NewCutInfoCount; ++i) {
+        if (NewCutInfo[i] == cut) {
+            return 1;
+        }
+    }
     return 0;
 }
 
-void CutScene_ReplaceCharacterModelFn_LSW(CUTINFO *, NUGCUTCHAR_s *) {
+i32 CutScene_ReplaceCharacterModelFn_LSW(CUTINFO *cut, NUGCUTCHAR_s *character) {
+    if (character == NULL || cut == NULL) {
+        return -1;
+    }
+
+    if (PODRACE_ADATA != NULL && PODRACE_ADATA == WORLD->area) {
+        if (cut != game_cutscenes.podrace_pod_explode && cut != game_cutscenes.podrace_out_of_time &&
+            cut != game_cutscenes.podrace_sebulba) {
+            return -1;
+        }
+        if (id_ANAKINSPOD == -1 || NuStrICmp(apicharsys->char_data[id_ANAKINSPOD].file, character->name) != 0) {
+            return -1;
+        }
+        GameObject_s *vehicle = CutDeadVehiclePlayer != NULL ? CutDeadVehiclePlayer : player;
+        if (vehicle != NULL && vehicle->id == id_ANAKINSPODGREEN) {
+            return vehicle->id;
+        }
+        return -1;
+    }
+
+    if (WORLD->current_level == PODSPRINTA_LDATA) {
+        if (cut != game_cutscenes.podsprint_out_of_time && cut != game_cutscenes.podsprint_sebulba) {
+            return -1;
+        }
+        if (id_ANAKINSNEWPOD == -1 || NuStrICmp(apicharsys->char_data[id_ANAKINSNEWPOD].file, character->name) != 0) {
+            return -1;
+        }
+        GameObject_s *vehicle = CutDeadVehiclePlayer != NULL ? CutDeadVehiclePlayer : player;
+        if (vehicle != NULL && vehicle->id == id_ANAKINSNEWPODGREEN) {
+            return vehicle->id;
+        }
+        return id_ANAKINSNEWPOD;
+    }
+
+    if (BONUS_GUNSHIP_ADATA != NULL && BONUS_GUNSHIP_ADATA == WORLD->area) {
+        if (cut == game_cutscenes.bonus_gunship_cavalry_explode && player != NULL &&
+            player->id == id_REPUBLICGUNSHIP_GREEN) {
+            return player->id;
+        }
+        return -1;
+    }
+
+    if (GUNSHIP_ADATA != NULL && GUNSHIP_ADATA == WORLD->area) {
+        if (cut != game_cutscenes.bonus_gunship_cavalry_explode) {
+            return -1;
+        }
+        if (player != NULL && player->id == id_NEW_REPUBLIC_GUNSHIP_GREEN) {
+            return player->id;
+        }
+        return id_NEW_REPUBLIC_GUNSHIP;
+    }
+
+    if (BATTLEOVERCORUSCANT_ADATA != NULL && BATTLEOVERCORUSCANT_ADATA == WORLD->area &&
+        cut == game_cutscenes.dogfight_die && player != NULL && player->id == id_JEDISTARFIGHTERYELLOWEP3) {
+        return player->id;
+    }
+    return -1;
 }
 
 void ResetScene(nugscn_s *, SCENEPROGRESS_s *) {

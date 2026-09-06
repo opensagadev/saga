@@ -45,7 +45,10 @@ extern "C" {
     void CheckStreamFileID(void) {
     }
 
-    void ClearLinkedCutSceneMusic(void) {
+    void ClearLinkedCutSceneMusic(void *context) {
+        if (context == NULL || Music.track_data == context) {
+            Music.track_data = NULL;
+        }
     }
 
     void DisplayCutSceneMemory(void) {
@@ -130,10 +133,6 @@ extern "C" {
     }
 
     void instNuGCutSceneEnable(void) {
-    }
-
-    void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance) {
-        instNuGCutSceneEndButNotSystems(instance);
     }
 
     void instNuGCutSceneFind(void) {

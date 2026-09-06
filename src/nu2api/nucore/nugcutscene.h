@@ -258,18 +258,20 @@ struct instNUGCUTSCENE_s {
 };
 
 typedef void (*NUGCUTSCENECHARACTERCREATEDATAFN)(NUGCUTCHAR_s *, instNUGCUTCHAR_s *, variptr_u *);
-typedef void (*NUGCUTSCENECHARACTEREVALFN)(instNUGCUTSCENE_s *, NUGCUTSCENE_s *, instNUGCUTCHAR_s *,
-                                           NUGCUTCHAR_s *, f32);
-typedef void (*NUGCUTSCENECHARACTERPROCESSFN)(instNUGCUTSCENE_s *, NUGCUTSCENE_s *, instNUGCUTCHAR_s *,
-                                              NUGCUTCHAR_s *, f32, i32);
-typedef void (*NUGCUTSCENECHARACTERRENDERFN)(instNUGCUTSCENE_s *, NUGCUTSCENE_s *, instNUGCUTCHAR_s *,
-                                             NUGCUTCHAR_s *, f32, i32);
+typedef void (*NUGCUTSCENECHARACTEREVALFN)(instNUGCUTSCENE_s *, NUGCUTSCENE_s *, instNUGCUTCHAR_s *, NUGCUTCHAR_s *,
+                                           f32);
+typedef void (*NUGCUTSCENECHARACTERRELEASEFN)(instNUGCUTCHAR_s *, NUGCUTCHAR_s *);
+typedef void (*NUGCUTSCENECHARACTERPROCESSFN)(instNUGCUTSCENE_s *, NUGCUTSCENE_s *, instNUGCUTCHAR_s *, NUGCUTCHAR_s *,
+                                              f32, i32);
+typedef void (*NUGCUTSCENECHARACTERRENDERFN)(instNUGCUTSCENE_s *, NUGCUTSCENE_s *, instNUGCUTCHAR_s *, NUGCUTCHAR_s *,
+                                             f32, i32);
 typedef void (*NUGCUTSCENEFINDCHARACTERSFN)(NUGCUTSCENE_s *);
 typedef void (*NUGCUTSCENERESETCHARACTERSFN)(instNUGCUTSCENE_s *);
 typedef void (*NUGCUTSCENERIGIDPOSTRENDERFN)(NUGCUTRIGID_s *, instNUGCUTRIGID_s *, NUMTX *);
 
 extern "C" NUGCUTSCENECHARACTERCREATEDATAFN NuCutSceneCharacterCreateData;
 extern "C" NUGCUTSCENECHARACTEREVALFN NuCutSceneCharacterEval;
+extern "C" NUGCUTSCENECHARACTERRELEASEFN NuCutSceneCharacterRelease;
 extern "C" NUGCUTSCENECHARACTERPROCESSFN NuCutSceneCharacterProcess;
 extern "C" NUGCUTSCENECHARACTERRENDERFN NuCutSceneCharacterRender;
 extern "C" NUGCUTSCENEFINDCHARACTERSFN NuCutSceneFindCharacters;
@@ -278,21 +280,21 @@ extern "C" NUGCUTSCENERIGIDPOSTRENDERFN NuCutSceneRigidPostRender;
 
 extern "C" void NuSetCutSceneCharacterCreateDataFn(NUGCUTSCENECHARACTERCREATEDATAFN function);
 extern "C" void NuSetCutSceneCharacterEvalFn(NUGCUTSCENECHARACTEREVALFN function);
+extern "C" void NuSetCutSceneCharacterReleaseFn(NUGCUTSCENECHARACTERRELEASEFN function);
 extern "C" void NuSetCutSceneCharacterProcessFn(NUGCUTSCENECHARACTERPROCESSFN function);
 extern "C" void NuSetCutSceneCharacterRenderFn(NUGCUTSCENECHARACTERRENDERFN function);
 extern "C" void NuSetCutSceneFindCharactersFn(NUGCUTSCENEFINDCHARACTERSFN function);
 extern "C" void NuSetCutSceneResetCharactersFn(NUGCUTSCENERESETCHARACTERSFN function);
 extern "C" void NuSetCutSceneRigidPostRenderFn(NUGCUTSCENERIGIDPOSTRENDERFN function);
-extern "C" void NuGCutSceneRemapFocusIdToLocaterNum(NUGCUTSCENE_s *cutscene, VARIPTR *buffer);
+void NuGCutSceneRemapFocusIdToLocaterNum(NUGCUTSCENE_s *cutscene, VARIPTR *buffer);
 extern "C" void instNuGCutSceneCreateCamTgtArray(instNUGCUTSCENE_s *instance, i32 count, VARIPTR *buffer);
 extern "C" i32 instNuGCutSceneAddCamTgt(instNUGCUTSCENE_s *instance, NUVEC *target, f32 start_frame, f32 duration,
-                                          i8 target_index);
+                                        i8 target_index);
 extern "C" void NuGCutCharAnimProcess(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible,
-                                        u32 *animation_index, f32 *animation_rate, f32 *blend_time,
-                                        f32 *animation_start_frame, i32 *layer_mask);
-void NuGCutCharAnimProcess_3(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible,
-                             u32 *animation_index, f32 *animation_rate, f32 *blend_time,
-                             f32 *animation_start_frame, i32 *layer_mask);
+                                      u32 *animation_index, f32 *animation_rate, f32 *blend_time,
+                                      f32 *animation_start_frame, i32 *layer_mask);
+void NuGCutCharAnimProcess_3(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible, u32 *animation_index,
+                             f32 *animation_rate, f32 *blend_time, f32 *animation_start_frame, i32 *layer_mask);
 
 DECOMP_ASSERT(sizeof(StateAnim) == 0x0c, "StateAnim must match the original x86 layout");
 DECOMP_ASSERT(sizeof(NUGCUTLOCATOR_s) == 0x64, "NUGCUTLOCATOR_s must match the original x86 layout");

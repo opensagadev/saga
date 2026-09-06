@@ -72,6 +72,7 @@ struct ani3_animheader_s;
 
 extern "C" {
     u8 CutSceneBoundingBoxTrackRoot = 0;
+    i32 NuGCutAudioStream = 0;
     NUANIMBUFFEVALUATECB AnimBuffEvalCB = NULL;
     void **AnimBuffEvalData = NULL;
     i32 *AnimBuffEvalJoint = NULL;
@@ -3145,7 +3146,8 @@ extern "C" {
     }
     void NuGCutSceneSysPostBackgroundLoad(void) {
     }
-    void NuGCutSetCutAudioStream(void) {
+    void NuGCutSetCutAudioStream(i32 stream) {
+        NuGCutAudioStream = stream;
     }
     void NuGSceneProcessCrossFade(void) {
     }
@@ -3806,7 +3808,8 @@ extern "C" {
     void NuSetCutSceneCharacterProcessFn(NUGCUTSCENECHARACTERPROCESSFN function) {
         NuCutSceneCharacterProcess = function;
     }
-    void NuSetCutSceneCharacterReleaseFn(void) {
+    void NuSetCutSceneCharacterReleaseFn(NUGCUTSCENECHARACTERRELEASEFN function) {
+        NuCutSceneCharacterRelease = function;
     }
     void NuSetCutSceneCharacterRenderFn(NUGCUTSCENECHARACTERRENDERFN function) {
         NuCutSceneCharacterRender = function;

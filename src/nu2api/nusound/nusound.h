@@ -27,6 +27,7 @@ typedef enum {
     NUSOUNDPLAYTOK_PITCH = 9,
     NUSOUNDPLAYTOK_STARTOFFSET = 10,
     NUSOUNDPLAYTOK_LOOPTYPE = 11,
+    NUSOUNDPLAYTOK_ONESHOT = 12,
 } NUSOUNDPLAYTOK;
 
 typedef enum {
@@ -38,6 +39,7 @@ typedef enum {
 #ifdef __cplusplus
 enum MusicPlaybackState : i16 {
     MUSIC_PLAYBACK_STOPPED = 0,
+    MUSIC_PLAYBACK_ACTIVE = 4,
     // Both transition states keep the non-primary stereo stream alive while
     // a game cutscene temporarily owns the mixer.
     MUSIC_PLAYBACK_DUAL_STREAM = 11,
@@ -57,11 +59,11 @@ struct MusicPlayback {
     bool restore_requested;
     bool field_0x12;
     bool field_0x13;
-    void *track_data;
+    void *context;
     f32 transition;
     u16 update_delay;
     i16 resume_track;
-    void *context;
+    void *track_data;
 };
 
 DECOMP_ASSERT(sizeof(MusicPlayback) == 0x24, "MusicPlayback size");
@@ -109,6 +111,7 @@ extern "C" {
     // 0/1 (one per music voice); both status queries use the enum above.
     void NuSound3Update(void);
     i32 NuSound3GetStereoStreamStatus(i32 stream_index);
+    f32 NuSound3GetStreamPlaybackTime(i32 stream_index);
 
     void NuSound3StopStereoStream(i32 stream_index);
     void NuSound3PauseStereoStream(i32 stream_index);
@@ -116,6 +119,8 @@ extern "C" {
     void NuSound3CancelCheckStereo(void);
     i32 NuSound3StreamKeyStatus(i32 stream_index);
     void NuSound3SetStereoStreamVolume(i32 stream_index, i32 volume);
+    void NuSound3StopSFX(void);
+    void NuSound3SetSFXPitch(i32 pitch);
     f32 NuSound3dBToAmplitude(f32 db);
 #ifdef __cplusplus
 }
