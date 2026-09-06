@@ -62,7 +62,7 @@ See https://ttdecomp.github.io/saga/
 | `MechInputTouch` | 9.7% | 6.1% |
 | `editor` | 3.2% | 1.7% |
 | `gameapi` | 12.0% | 1.5% |
-| `gameframework` | 84.0% | 5.9% |
+| `gameframework` | 99.9% | 5.9% |
 | `gamelib` | 9.0% | 5.1% |
 | `java` | 10.5% | 0.0% |
 | `legoapi` | 17.5% | 7.8% |
