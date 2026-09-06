@@ -1,6 +1,16 @@
-load("@rules_python//python:defs.bzl", "py_binary", "py_library")
+load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
 
 _PYTHON_ENV = {"PYTHONDONTWRITEBYTECODE": "1"}
+
+py_test(
+    name = "test_pages",
+    size = "small",
+    srcs = ["test_pages.py"],
+    deps = [":plot_binary_match_map_lib"],
+    env = _PYTHON_ENV,
+    main = "test_pages.py",
+    visibility = ["//scripts/checks:__pkg__"],
+)
 
 py_binary(
     name = "wasm_server",
@@ -14,7 +24,11 @@ py_binary(
 py_library(
     name = "plot_binary_match_map_lib",
     srcs = ["plot_binary_match_map.py"],
-    data = ["plot_binary_match_map.html"],
+    data = [
+        "plot_binary_match_map.html",
+        "site.css",
+        "wasm_player.html",
+    ],
 )
 
 py_binary(
@@ -43,7 +57,11 @@ py_binary(
 py_binary(
     name = "plot_binary_match_map",
     srcs = ["plot_binary_match_map.py"],
-    data = ["plot_binary_match_map.html"],
+    data = [
+        "plot_binary_match_map.html",
+        "site.css",
+        "wasm_player.html",
+    ],
     env = _PYTHON_ENV,
     main = "plot_binary_match_map.py",
 )

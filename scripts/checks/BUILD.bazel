@@ -82,6 +82,7 @@ py_test(
 test_suite(
     name = "checks",
     tests = [
+        "//scripts:test_pages",
         ":check_bazel_optimization_map",
         ":check_duplicate_definitions",
         ":check_host_boundary",

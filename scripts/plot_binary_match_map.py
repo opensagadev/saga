@@ -12,6 +12,7 @@ import argparse
 import json
 import math
 import os
+import shutil
 from pathlib import Path
 import sys
 
@@ -203,7 +204,15 @@ def generate_site(report_path, output_path, row_bytes, cell_bytes):
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", encoding="utf-8") as output_file:
         output_file.write(render_html(payload))
-    with (output_path.parent / "coi-serviceworker.js").open(
+    shutil.copyfile(
+        HTML_TEMPLATE_PATH.with_name("site.css"), output_path.parent / "site.css"
+    )
+    player_directory = output_path.parent / "play"
+    player_directory.mkdir(exist_ok=True)
+    shutil.copyfile(
+        HTML_TEMPLATE_PATH.with_name("wasm_player.html"), player_directory / "index.html"
+    )
+    with (player_directory / "coi-serviceworker.js").open(
         "w", encoding="utf-8"
     ) as service_worker_file:
         service_worker_file.write(COI_SERVICE_WORKER)

@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="darkreader-lock">
+    <meta name="description"
+        content="Experimental browser player for the saga WebAssembly build.">
+    <meta name="theme-color" content="#111318">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="saga | Experimental WASM player">
+    <meta property="og:description" content="Experimental browser player for the saga WebAssembly build.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="saga | Experimental WASM player">
+    <meta name="twitter:description" content="Experimental browser player for the saga WebAssembly build.">
+    <title>saga | Experimental WASM player</title>
+    <script>
+        const initialObbUrl = new URLSearchParams(location.search).get("obb");
+        if (initialObbUrl) document.documentElement.classList.add("loading-game");
+    </script>
+    <script src="./coi-serviceworker.js"></script>
+    <link rel="stylesheet" href="../site.css">
+</head>
+
+<body class="player-page">
+    <main id="loading-screen" aria-labelledby="loading-title">
+        <div class="loading-content">
+            <p class="loading-wordmark">saga</p>
+            <h1 id="loading-title">Loading game</h1>
+            <p id="loading-status" role="status" aria-live="polite">Preparing your game...</p>
+            <progress id="loading-progress" max="1" aria-label="Game data download progress"></progress>
+            <a class="loading-back" href="?">Back to launcher</a>
+        </div>
+    </main>
+    <div id="site-shell">
+        <nav class="site-nav" aria-label="Main navigation">
+            <a href="../">Progress</a>
+            <span class="experimental-badge">Experimental player</span>
+        </nav>
+        <main class="player-stage">
+            <section id="launcher" aria-labelledby="launcher-title">
+                <h1 id="launcher-title" class="loading-wordmark">saga</h1>
+                <label class="file-picker">
+                    Select OBB file
+                    <input id="obb-file" type="file" accept=".obb,application/octet-stream" aria-label="Select OBB file">
+                </label>
+                <div class="source-divider">or</div>
+                <form id="url-form" class="player-url-form">
+                    <input id="obb-url" class="text-input" type="url" inputmode="url" autocomplete="url"
+                        placeholder="Paste an OBB URL" aria-label="OBB URL" required>
+                    <button id="url-submit" class="primary-button" type="submit">Load</button>
+                </form>
+                <button id="local-obb-load" class="secondary-button" type="button" hidden>Load local OBB</button>
+                <p id="status" role="status" aria-live="polite"><span id="status-text">Preparing browser...</span></p>
+            </section>
+        </main>
+    </div>
+
+    <div id="game" aria-label="Game viewport">
+        <canvas id="canvas" tabindex="-1" aria-label="saga game" oncontextmenu="event.preventDefault()"></canvas>
+        <div class="game-toolbar">
+            <button id="leave-game" class="secondary-button"
+                type="button">Back</button>
+        </div>
+    </div>
+    <div id="runtime-error" role="alert" hidden></div>
+    <script>
+        const siteShell = document.getElementById("site-shell");
+        const game = document.getElementById("game");
+        const gameCanvas = document.getElementById("canvas");
+        const fileInput = document.getElementById("obb-file");
+        const urlForm = document.getElementById("url-form");
+        const urlInput = document.getElementById("obb-url");
+        const urlSubmit = document.getElementById("url-submit");
+        const localObbLoad = document.getElementById("local-obb-load");
+        const status = document.getElementById("status");
+        const statusText = document.getElementById("status-text");
+        const loadingStatus = document.getElementById("loading-status");
+        const loadingProgress = document.getElementById("loading-progress");
+        const runtimeError = document.getElementById("runtime-error");
+        const obbName = "main.1060.com.wb.lego.tcs.obb";
+        const corsProxyOrigin = "https://cors-header-proxy.avery-eae.workers.dev";
+        let resolveRuntime;
+        let rejectRuntime;
+        let started = false;
+        let runtimeLoadStarted = false;
+        let loadedObb = null;
+        let detectedObbUrl = null;
+        const runtimeReady = new Promise((resolve, reject) => {
+            resolveRuntime = resolve;
+            rejectRuntime = reject;
+        });
+
+        function setStatus(message, isError = false, isReady = false) {
+            statusText.textContent = message;
+            loadingStatus.textContent = message;
+            status.classList.toggle("error", isError);
+            status.classList.toggle("ready", isReady);
+            if (isError) document.documentElement.classList.remove("loading-game");
+        }
+
+        function setBusy(busy) {
+            fileInput.disabled = busy;
+            urlInput.disabled = busy;
+            urlSubmit.disabled = busy;
+            localObbLoad.disabled = busy;
+        }
+
+        function showRuntimeError(error) {
+            const message = error instanceof Error ? error.message : String(error);
+            runtimeError.textContent = message;
+            runtimeError.hidden = false;
+            console.error(error);
+        }
+
+        async function readResponse(response, label) {
+            const size = Number(response.headers.get("content-length"));
+            if (!response.body || !Number.isSafeInteger(size) || size <= 0) {
+                return response.arrayBuffer();
+            }
+            const reader = response.body.getReader();
+            const output = new Uint8Array(size);
+            let offset = 0;
+            while (true) {
+                const { done, value: chunk } = await reader.read();
+                if (done) break;
+                if (offset + chunk.byteLength > output.byteLength) {
+                    throw new Error("The OBB was larger than the server reported.");
+                }
+                output.set(chunk, offset);
+                offset += chunk.byteLength;
+                loadingProgress.value = offset / size;
+                setStatus(`${label} ${Math.floor(offset * 100 / size)}%`);
+            }
+            if (offset !== size) throw new Error("The OBB transfer was incomplete.");
+            return output.buffer;
+        }
+
+        async function loadObb(load, label) {
+            document.documentElement.classList.add("loading-game");
+            setBusy(true);
+            loadingProgress.removeAttribute("value");
+            setStatus("Preparing game...");
+            try {
+                await ensureRuntimeLoaded();
+                setStatus(label);
+                const buffer = await load();
+                if (!buffer.byteLength) throw new Error("The selected OBB is empty.");
+                loadedObb = buffer;
+                loadingProgress.value = 1;
+                startGame();
+            } catch (error) {
+                loadedObb = null;
+                setBusy(false);
+                setStatus(error instanceof Error ? error.message : String(error), true);
+                throw error;
+            }
+        }
+
+        function startGame() {
+            if (started || loadedObb === null) return;
+            started = true;
+            setBusy(true);
+            setStatus("Starting game…");
+            try {
+                const buffer = loadedObb;
+                loadedObb = null;
+                Module.FS.mkdirTree("/res");
+                Module.FS.writeFile(`/res/${obbName}`, new Uint8Array(buffer), { canOwn: true });
+                siteShell.hidden = true;
+                document.documentElement.classList.remove("loading-game");
+                game.classList.add("running");
+                gameCanvas.focus();
+                Module.callMain([]);
+            } catch (error) {
+                started = false;
+                siteShell.hidden = false;
+                game.classList.remove("running");
+                setBusy(false);
+                setStatus(error instanceof Error ? error.message : String(error), true);
+                throw error;
+            }
+        }
+
+        async function fetchUrl(url, label) {
+            const source = new URL(url, location.href);
+            if (source.protocol !== "http:" && source.protocol !== "https:") {
+                throw new Error("The OBB URL must use HTTP or HTTPS.");
+            }
+            const downloadUrl = source.origin === location.origin || source.origin === corsProxyOrigin
+                ? source.href
+                : `${corsProxyOrigin}/download/${encodeURIComponent(source.href)}/${obbName}`;
+            let response;
+            try {
+                response = await fetch(downloadUrl, { credentials: "omit" });
+            } catch (error) {
+                throw new Error("The OBB download could not be reached. Check the URL and try again.");
+            }
+            if (!response.ok) throw new Error(`OBB download failed: HTTP ${response.status}`);
+            if ((response.headers.get("content-type") || "").includes("text/html")) {
+                throw new Error("The URL returned a web page instead of an OBB.");
+            }
+            return readResponse(response, label);
+        }
+
+        async function loadInitialObb() {
+            const queryObb = initialObbUrl;
+            if (queryObb) {
+                urlInput.value = queryObb;
+                try {
+                    const resolvedUrl = new URL(queryObb, location.href);
+                    await loadObb(() => fetchUrl(resolvedUrl, "Downloading OBB..."), "Downloading OBB...");
+                } catch (error) {
+                    setBusy(false);
+                    setStatus(error instanceof Error ? error.message : String(error), true);
+                }
+                return;
+            }
+
+            const rootObb = new URL(`../${obbName}`, location.href);
+            try {
+                const available = await fetch(rootObb, { method: "HEAD", cache: "no-store" });
+                if (!available.ok) {
+                    setStatus("Choose an OBB to load.", false, true);
+                    return;
+                }
+                detectedObbUrl = rootObb;
+                localObbLoad.hidden = false;
+                setStatus("Local OBB detected — load it when ready.", false, true);
+            } catch (error) {
+                setBusy(false);
+                setStatus("Choose an OBB to load.", false, true);
+                console.debug("No web-root OBB was available.", error);
+            }
+        }
+
+        fileInput.addEventListener("change", async () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+            try {
+                await loadObb(() => readResponse(new Response(file, {
+                    headers: { "Content-Length": String(file.size) },
+                }), "Loading file..."), "Loading file...");
+            } catch (error) {
+                console.error(error);
+            }
+        });
+
+        urlForm.addEventListener("submit", async event => {
+            event.preventDefault();
+            setBusy(true);
+            try {
+                const resolvedUrl = new URL(urlInput.value, location.href);
+                await loadObb(() => fetchUrl(resolvedUrl, "Downloading OBB…"), "Downloading OBB…");
+            } catch (error) {
+                setBusy(false);
+                setStatus(error instanceof Error ? error.message : String(error), true);
+                console.error(error);
+            }
+        });
+
+        localObbLoad.addEventListener("click", async () => {
+            if (detectedObbUrl === null) return;
+            try {
+                await loadObb(() => fetchUrl(detectedObbUrl, "Loading OBB…"), "Loading OBB…");
+            } catch (error) {
+                console.error(error);
+            }
+        });
+
+        document.getElementById("leave-game").addEventListener("click", () => location.assign("./"));
+
+        var Module = {
+            canvas: gameCanvas,
+            noInitialRun: true,
+            print: (...args) => console.log(...args),
+            printErr: (...args) => console.error(...args),
+            setStatus(message) {
+                if (started && message) setStatus(message);
+            },
+            onRuntimeInitialized() {
+                resolveRuntime();
+            },
+            onAbort: showRuntimeError,
+        };
+
+        window.addEventListener("error", event => showRuntimeError(event.error || event.message));
+        window.addEventListener("unhandledrejection", event => showRuntimeError(event.reason));
+        gameCanvas.addEventListener("webglcontextlost", event => {
+            event.preventDefault();
+            showRuntimeError("The WebGL context was lost. Reload the page to restart the game.");
+        });
+        gameCanvas.addEventListener("webglcontextcreationerror", event => {
+            showRuntimeError(`WebGL context creation failed: ${event.statusMessage || "unknown browser error"}`);
+        });
+
+        function ensureRuntimeLoaded() {
+            if (runtimeLoadStarted) return runtimeReady;
+            if (!window.crossOriginIsolated) {
+                return Promise.reject(new Error("The isolated WebAssembly runtime is not ready. Reload the page once setup completes."));
+            }
+            runtimeLoadStarted = true;
+            const runtimeScript = document.createElement("script");
+            runtimeScript.src = "../saga.js";
+            runtimeScript.async = true;
+            runtimeScript.addEventListener("error", () => {
+                const error = new Error("The WebAssembly build could not be loaded.");
+                setStatus(error.message, true);
+                rejectRuntime(error);
+            });
+            document.head.append(runtimeScript);
+            return runtimeReady;
+        }
+
+        setBusy(true);
+        setStatus("Preparing browser runtime...");
+        window.sagaIsolationReady.then(() => {
+            setBusy(false);
+            return loadInitialObb();
+        }).catch(error => {
+            setBusy(true);
+            setStatus(error instanceof Error ? error.message : String(error), true);
+        });
+    </script>
+</body>
+</html>

@@ -41,21 +41,28 @@ symbol names in `original_text_symbols`. CI uses that derived symbol surface to
 run `check_symbols` without requiring the copyrighted reference binary.
 
 The second script fills `scripts/plot_binary_match_map.html` with the compact
-report payload to produce the unified `index.html` landing page. That page also
-launches the browser build from a user-selected OBB, an `obb` query parameter,
-or the expected OBB filename at the page root. An `obb` query parameter loads
-the supplied URL and starts the game automatically after browser isolation and
-the WASM runtime are ready. Other sources wait for user selection and a Play
-click. The Pages workflow builds the WASM target, copies `saga.js` and
-`saga.wasm` next to the generated page, and deploys `doc/pages/`.
+report payload to produce the progress homepage, `index.html`. The generator
+also copies `scripts/wasm_player.html` to `play/index.html` and the shared
+`scripts/site.css` to `site.css`. The experimental player contains no matching
+report or D3 dependency; the progress page does not initialize the game.
+
+The player accepts local files, a server OBB at the site root, or a remote
+URL. Opening `play/?obb=<encoded-url>` shows a dedicated loading splash and
+automatically starts the game after browser isolation, WASM initialization,
+and the download finish. Existing homepage `?obb=` links redirect to the
+player with their query intact. Selecting a file or submitting a URL also
+shows loading progress and starts the game as soon as the data is ready.
+The Pages workflow builds the WASM target, copies `saga.js` and `saga.wasm`
+to the site root, and deploys `doc/pages/`. The player loads those shared
+artifacts from its parent directory.
 
 Remote OBB downloads always use
 `https://cors-header-proxy.avery-eae.workers.dev`, including sources that already
 support CORS. Signed source URLs are encoded into the proxy path, which ends
 in `.obb`. URLs already using the proxy are not wrapped again; same-origin
 server OBBs and local file uploads remain local. A generated service worker
-provides the cross-origin isolation required by the threaded WASM build on
-GitHub Pages.
+in `play/` provides the cross-origin isolation required by the threaded WASM
+build on GitHub Pages.
 
 The pre-commit hook is a small shim for the `//scripts:pre_commit` Bazel
 `py_binary`. That target runs the build, symbol check, and Bazel report
