@@ -302,7 +302,8 @@
             }
             runtimeLoadStarted = true;
             const runtimeScript = document.createElement("script");
-            runtimeScript.src = "../saga.js";
+            // Keep pthread worker URLs inside the isolation service worker scope.
+            runtimeScript.src = "./saga.js";
             runtimeScript.async = true;
             runtimeScript.addEventListener("error", () => {
                 const error = new Error("The WebAssembly build could not be loaded.");

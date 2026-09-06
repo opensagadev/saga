@@ -89,8 +89,8 @@ class WasmRequestHandler(SimpleHTTPRequestHandler):
         if path == f"/{OBB_NAME}":
             self._serve_local_obb(head_only=False)
             return
-        if path in {"/saga.js", "/saga.wasm"} and self._serve_wasm_asset(
-            path[1:], head_only=False
+        if path in {"/saga.js", "/saga.wasm", "/play/saga.js", "/play/saga.wasm"} and self._serve_wasm_asset(
+            path.rsplit("/", 1)[-1], head_only=False
         ):
             return
         if path == "/":
@@ -106,8 +106,8 @@ class WasmRequestHandler(SimpleHTTPRequestHandler):
         if path == f"/{OBB_NAME}":
             self._serve_local_obb(head_only=True)
             return
-        if path in {"/saga.js", "/saga.wasm"} and self._serve_wasm_asset(
-            path[1:], head_only=True
+        if path in {"/saga.js", "/saga.wasm", "/play/saga.js", "/play/saga.wasm"} and self._serve_wasm_asset(
+            path.rsplit("/", 1)[-1], head_only=True
         ):
             return
         if path == "/":

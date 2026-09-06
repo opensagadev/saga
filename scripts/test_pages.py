@@ -43,7 +43,7 @@ class PagesTest(unittest.TestCase):
             self.assertNotIn('id="progress"', player)
             self.assertNotIn("d3.min.js", player)
             self.assertIn('src="./coi-serviceworker.js"', player)
-            self.assertIn('runtimeScript.src = "../saga.js"', player)
+            self.assertIn('runtimeScript.src = "./saga.js"', player)
             self.assertIn('href="../site.css"', player)
             self.assertTrue((output.parent / "site.css").is_file())
             self.assertTrue((output.parent / "play/coi-serviceworker.js").is_file())

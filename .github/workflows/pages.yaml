@@ -44,7 +44,9 @@ jobs:
         run: bazel build --config=wasm //src:saga_wasm
 
       - name: Assemble Pages
-        run: cp bazel-bin/src/saga.js bazel-bin/src/saga.wasm doc/pages/
+        run: |
+          mkdir -p doc/pages/play
+          cp bazel-bin/src/saga.js bazel-bin/src/saga.wasm doc/pages/play/
 
       - name: Build Pages
         run: bazel run //scripts:plot_binary_match_map
