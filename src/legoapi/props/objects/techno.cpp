@@ -26,9 +26,6 @@ void Techno_FindNearest(WORLDINFO_s *, nuvec_s *, GameObject_s *, float *) {
 void Technos_MoveTarget(TECHNO_s *, GameObject_s *) {
 }
 
-void Techno_FindOperator(void *, GAMEPAD_s **, GameObject_s **) {
-}
-
 void GizTechno_CanUseTechno(GameObject_s *, TECHNO_s *) {
 }
 

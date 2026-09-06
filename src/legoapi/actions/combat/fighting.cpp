@@ -25,9 +25,6 @@ void IsDownSwipe(NuVec2 const &, NuVec2 const &) {
 void TakeHitCode(GameObject_s *) {
 }
 
-void FaceOpponent(GameObject_s *, nuvec_s *) {
-}
-
 void ComboHitFrame(GameObject_s *object, i32 damage) {
     object->context_flags |= 0x40;
     object->sabre_flags |= 5;

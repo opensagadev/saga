@@ -59,6 +59,9 @@ DECOMP_ASSERT(offsetof(TECHNO, flags) == 0x3c, "TECHNO flags offset");
 DECOMP_ASSERT(offsetof(TECHNO, controlled_object) == 0x6c, "TECHNO controlled-object offset");
 
 extern TECHNO_CONFIG TechnoSys;
+struct GAMEPAD_s;
+struct GameObject_s;
+i32 Techno_FindOperator(void *target, GAMEPAD_s **pad, GameObject_s **operator_object);
 
 extern i32 techno_gizmotype_id;
 

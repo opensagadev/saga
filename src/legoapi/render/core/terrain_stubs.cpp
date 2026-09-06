@@ -310,7 +310,8 @@ extern "C" void TerrainPlatformOldUpdate(void) {
             DeletePlatinst(CurTerr->removed_platforms[i]);
         CurTerr->removed_platform_count = 0;
         curSphereter = 0;
-        if (CurTerr->max_platforms <= 0) return;
+        if (CurTerr->max_platforms <= 0)
+            return;
         TERRAIN_PLATFORM *platform = CurTerr->platforms;
         TERRAIN_PLATFORM *end = platform + CurTerr->max_platforms;
         for (; platform != end; ++platform) {
@@ -324,8 +325,10 @@ extern "C" void TerrainPlatformNewUpdate(void) {
         for (i32 i = 0; i < 64; ++i) {
             TERRAIN_TRACK_SLOT &slot = CurTerr->track_slots[i];
             if (slot.id != NULL) {
-                if (slot.platform_contact_state > 0) --slot.platform_contact_state;
-                if (slot.wall_contact_state > 0) --slot.wall_contact_state;
+                if (slot.platform_contact_state > 0)
+                    --slot.platform_contact_state;
+                if (slot.wall_contact_state > 0)
+                    --slot.wall_contact_state;
             }
         }
         for (i32 i = 0; i < 16; ++i) {
@@ -337,7 +340,8 @@ extern "C" void TerrainPlatformNewUpdate(void) {
         PlatCallback[i].function(PlatCallback[i].argument);
     PlatCodeCallback = 0;
     cntrots = 0;
-    if (CurTerr == NULL) return;
+    if (CurTerr == NULL)
+        return;
 
     const NUMTX &camera = global_camera.mtx;
     const f32 negative_distance = -TerrPlatScanDist;
@@ -379,10 +383,13 @@ extern "C" void TerrainPlatformNewUpdate(void) {
         if (platform.scene_transform != NULL) {
             const u8 visibility = *static_cast<u8 *>(platform.scene_transform);
             if ((platform.flags & TERRAIN_PLATFORM_FLAG_DISPLAY_LIST_BACKED) != 0) {
-                if ((visibility & 2) == 0) continue;
-            } else if ((visibility & 1) == 0) continue;
+                if ((visibility & 2) == 0)
+                    continue;
+            } else if ((visibility & 1) == 0)
+                continue;
         }
-        if (group.chunk_type == 0) continue;
+        if (group.chunk_type == 0)
+            continue;
         NUMTX *matrix = static_cast<NUMTX *>(platform.scene_object);
         if (matrix != NULL) {
             if (platform.bounce_frames != 0) {
@@ -392,8 +399,7 @@ extern "C" void TerrainPlatformNewUpdate(void) {
                                platform.bounce_velocity;
                 const f32 offset = platform.bounce_offset;
                 --platform.bounce_frames;
-                velocity += -offset * fabsf(offset) * platform.bounce_spring * 0.5f -
-                            platform.bounce_spring * offset;
+                velocity += -offset * fabsf(offset) * platform.bounce_spring * 0.5f - platform.bounce_spring * offset;
                 platform.bounce_velocity = velocity;
                 platform.bounce_offset = velocity + offset;
                 matrix->m31 += platform.bounce_offset;
@@ -401,7 +407,8 @@ extern "C" void TerrainPlatformNewUpdate(void) {
             group.origin = *NUMTX_GET_ROW_VEC(matrix, 3);
         }
         const u8 flags = platform.flags;
-        if ((flags & TERRAIN_PLATFORM_FLAG_COLLIDED) != 0) platform.bounce_frames = 128;
+        if ((flags & TERRAIN_PLATFORM_FLAG_COLLIDED) != 0)
+            platform.bounce_frames = 128;
         platform.field_0x44 = 0;
         platform.flags &= ~TERRAIN_PLATFORM_FLAG_COLLIDED;
         if ((flags & TERRAIN_PLATFORM_FLAG_ROTATING) == 0) {
@@ -1097,9 +1104,11 @@ extern "C" {
     }
 
     i32 DeletePlatinst(i32 index) {
-        if (index < 0 || index >= CurTerr->max_platforms) return 0;
+        if (index < 0 || index >= CurTerr->max_platforms)
+            return 0;
         TERRAIN_PLATFORM &platform = CurTerr->platforms[index];
-        if (platform.scene_object == NULL) return 0;
+        if (platform.scene_object == NULL)
+            return 0;
         const i16 last_group = --CurTerr->group_count;
         --CurTerr->group_index_count;
         TERRAIN_GROUP &last = CurTerr->groups[last_group];
@@ -1142,14 +1151,17 @@ extern "C" {
 
     i32 NewPlatInst(void *object, i32 instance) {
         if (CurTerr == NULL || CurTerr->group_index_count >= CurTerr->max_group_indices ||
-            CurTerr->group_count >= CurTerr->max_groups || object == NULL || CurTerr->max_platforms <= 0) return -1;
+            CurTerr->group_count >= CurTerr->max_groups || object == NULL || CurTerr->max_platforms <= 0)
+            return -1;
         i32 index = 0;
         while (CurTerr->platforms[index].scene_object != NULL) {
-            if (++index == CurTerr->max_platforms) return -1;
+            if (++index == CurTerr->max_platforms)
+                return -1;
         }
         for (i32 source = 0; source < CurTerr->max_platforms; ++source) {
             TERRAIN_PLATFORM &original = CurTerr->platforms[source];
-            if (original.scene_object == NULL || static_cast<i16>(original.scene_object_index) != instance) continue;
+            if (original.scene_object == NULL || static_cast<i16>(original.scene_object_index) != instance)
+                continue;
             const i16 group_index = CurTerr->group_count;
             TERRAIN_GROUP &group = CurTerr->groups[group_index];
             group = CurTerr->groups[original.terrain_group_index];
@@ -1211,7 +1223,8 @@ extern "C" {
     void NewRayCastScaleY(void) {
     }
 
-    void NewRayCastScaleYMask(void) {
+    i32 NewRayCastScaleYMask(NUVEC *, NUVEC *, f32, f32, i32, u32) {
+        return 0;
     }
 
     void NewRayCastSet(void) {

@@ -8,6 +8,7 @@
 #include "legoapi/characters/motion.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/items/base/apiobject.h"
 #include "legoapi/world/world_shared.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
@@ -16,6 +17,27 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nutrig.h"
+
+i32 Techno_FindOperator(void *target, GAMEPAD_s **pad, GameObject_s **operator_object) {
+    for (i32 index = 0; index < 8; ++index) {
+        if (Player[index] != NULL && Player[index]->character_context == 0x51 && Player[index]->field_0x788 != NULL) {
+            TECHNO *techno = static_cast<TECHNO *>(Player[index]->field_0x788);
+            if ((techno->target_mode == 2 &&
+                 NuSpecialCompare(static_cast<nuhspecial_s *>(target),
+                                  static_cast<nuhspecial_s *>(techno->controlled_object)) != 0) ||
+                static_cast<TECHNO *>(Player[index]->field_0x788)->controlled_object == target) {
+                if (pad != NULL) {
+                    *pad = Player[index]->pad_gamepad;
+                }
+                if (operator_object != NULL) {
+                    *operator_object = Player[index];
+                }
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
 
 struct TECHNOPROGRESS {
     i32 state[2];

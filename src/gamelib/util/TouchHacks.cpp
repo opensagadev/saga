@@ -7,6 +7,11 @@
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nuvec.h"
+#include "nu2api/nucore/nuvuvec.hpp"
+#include "legoapi/render/light/shadow.h"
+
+f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 
 NUCOLOUR3 flashCol = {2.0f, 2.0f, 2.0f};
 bool TouchHacks::TouchControlsActive;
@@ -92,7 +97,30 @@ void TouchHacks::CanUseVehicleSmartBomb(GameObject_s &) {
 void TouchHacks::CanUseZipup(GameObject_s &) {
 }
 
-void TouchHacks::CheckForAboutToRunIntoKillTerrain(GameObject_s &, float) {
+bool TouchHacks::CheckForAboutToRunIntoKillTerrain(GameObject_s &object, float time) {
+    if (WORLD->current_level != SPEEDERCHASEA_LDATA) {
+        const f32 dx = object.apiobj.velocity.x * time;
+        const f32 dz = time * object.apiobj.velocity.z;
+        VuVec position(object.apiobj.position.x, object.apiobj.position.y, object.apiobj.position.z, 1.0f);
+        position.x = dx + position.x;
+        position.z = dz + position.z;
+        position.y += 0.3f;
+        if (GameShadow(&object, reinterpret_cast<NUVEC *>(&position), 5.0f, -1) == 2000000.0f)
+            return false;
+        u32 layer = EShadowInfo();
+        if (layer > 16 || (TerLayer[layer].flags & 1) == 0)
+            return false;
+        VuVec direction(object.apiobj.velocity.x, 0.0f, object.apiobj.velocity.z, 1.0f);
+        NuVecNorm(reinterpret_cast<NUVEC *>(&direction), reinterpret_cast<NUVEC *>(&direction));
+        const f32 radius = object.apiobj.collision_radius * 0.8f;
+        position.x += direction.x * radius;
+        position.z += radius * direction.z;
+        if (GameShadow(&object, reinterpret_cast<NUVEC *>(&position), 5.0f, -1) == 0.0f)
+            return true;
+        layer = EShadowInfo();
+        return layer > 16 || (TerLayer[layer].flags & 1) != 0;
+    }
+    return false;
 }
 
 void TouchHacks::CheckForAboutToRunOffAnEdge(GameObject_s &, float) {
@@ -153,8 +181,8 @@ bool TouchHacks::ShouldFlash(float timer) {
 }
 
 bool TouchHacks::ShouldKeepWeaponOut(GameObject_s &object) {
-    return TouchControlsActive && object.id != id_GRABCONTROL &&
-           (object.apiobj.flags_low & 0x80) != 0 && object.ai.opponent != NULL && object.character_context == -1;
+    return TouchControlsActive && object.id != id_GRABCONTROL && (object.apiobj.flags_low & 0x80) != 0 &&
+           object.ai.opponent != NULL && object.character_context == -1;
 }
 
 bool TouchHacks::ShouldPutWeaponAway(GameObject_s &object) {

@@ -216,12 +216,15 @@ i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
 }
 
 void InitGameObjectLights(void) {
-    for (i32 i = 0; i < 64; ++i) Obj[i].dynamic_light_id = -1;
+    for (i32 i = 0; i < 64; ++i)
+        Obj[i].dynamic_light_id = -1;
     for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
         GameObject_s *object = &Obj[i];
-        if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001) continue;
+        if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001)
+            continue;
         object->dynamic_light_id = rtlDynamicAlloc();
-        if (object->dynamic_light_id == -1) continue;
+        if (object->dynamic_light_id == -1)
+            continue;
         rtlDynamicSetType(object->dynamic_light_id, 2);
         rtlDynamicEnable(object->dynamic_light_id, 0);
     }
@@ -236,16 +239,7 @@ static __used__ void ShieldCode(GameObject_s *) {
 static __used__ void TrenchMove(GameObject_s *) {
 }
 
-static __used__ void PooCode(GameObject_s *) {
-}
-
 static __used__ void ZapCode(GameObject_s *, i32, i32) {
-}
-
-static __used__ void PunchCode(GameObject_s *, i32, i32, i32, i32, f32) {
-}
-
-static __used__ void ShootCode(GameObject_s *, i32, i32, i32, i32, i32) {
 }
 
 static __used__ void Punch_HitHold(GameObject_s *, GameObject_s *) {
@@ -297,10 +291,6 @@ static __used__ void ZipUp_GetStartPoint(GameObject_s *, nuvec_s *) {
 static __used__ void SurfaceInfo_ExtraReflect(GameObject_s *) {
 }
 
-static __used__ i32 Slam_GetDebris_Game(GameObject_s *, i32) {
-    return 0;
-}
-
 static __used__ void PauseGame_ExtraCode() {
 }
 
@@ -312,9 +302,6 @@ static __used__ i32 SpecialObjectFilter(void *) {
 }
 
 static __used__ void KilledTrooperCannon(GameObject_s *) {
-}
-
-static __used__ void DodgeCode(GameObject_s *, int, int) {
 }
 
 static __used__ void FireCode(GameObject_s *, int, int, float, int) {

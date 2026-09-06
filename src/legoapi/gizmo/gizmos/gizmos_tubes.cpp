@@ -1,3 +1,4 @@
+#include "legoapi/world/world.h"
 #include "legoapi/legoapi_types.h"
 
 #include "gamelib/util/gamelib_util_types.h"
@@ -70,11 +71,22 @@ i32 Tube_IsObjBitSet(TUBE *tube, i32 object_index) {
 void Torpedo_UpdateBolt(BOLT_s *) {
 }
 
-void Tube_InAnyCylinder(WORLDINFO_s *, GameObject_s *, i32) {
-}
-
 void Torpedo_InitRicochet(BOLT_s *, nuvec_s *) {
 }
 
 void Torpedo_UpdateJobbies(GameObject_s *) {
+}
+
+TUBE *Tube_InAnyCylinder(WORLDINFO_s *world, GameObject_s *object, i32 ignore_height) {
+    TUBE *tube = world->tubes;
+    if (tube != NULL) {
+        for (i32 index = 0; index < world->tube_count; ++index, ++tube) {
+            if ((tube->flags & (TUBE_FLAG_ACTIVE | TUBE_FLAG_VISIBLE | TUBE_FLAG_DIRECTIONAL)) ==
+                    (TUBE_FLAG_ACTIVE | TUBE_FLAG_VISIBLE) &&
+                Tube_InCylinder(object, tube, NULL, ignore_height) != 0) {
+                return tube;
+            }
+        }
+    }
+    return NULL;
 }

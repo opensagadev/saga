@@ -56,7 +56,7 @@ void GameAnimSet_EvaluateState(GAMEANIMSET_s *set);
 i32 GameAnimSet_GetCentreAndRadius(GAMEANIMSET_s *set, NUVEC *centre, f32 *radius, i32 frame_selection,
                                    i32 include_animated, i32 include_static);
 i32 GameAnimSet_GetAveragePos(GAMEANIMSET_s *set, NUVEC *position, i32 frame_selection, i32 include_animated,
-                               i32 include_static);
+                              i32 include_static);
 f32 GameAnimSet_GetCompletionRatio(GAMEANIMSET_s *set);
 GAMEANIMSET_VISIBILITY GameAnimSet_GetVisibility(GAMEANIMSET_s *set);
 void GameAnimSet_JumpToAnimPos(GAMEANIMSET_s *set, f32 position);
@@ -79,7 +79,9 @@ void AnimatePlayer(GameObject_s *object);
 extern "C" {
 #endif
     i32 CurrentAnim(ANIMPACKET_s *packet);
+    f32 AnimSpeed(CHARACTERMODEL_s *model, i32 animation);
     void ResetAnimPacket(ANIMPACKET_s *packet, i16 animation);
+    f32 AnimStopFrame(CHARACTERMODEL_s *model, i32 animation);
     void UpdateAnimPacket(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, f32 frame_step, f32 movement_speed,
                           f32 blend_step, f32 backwards_multiplier);
 #ifdef __cplusplus

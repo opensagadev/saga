@@ -27,7 +27,8 @@ void PartDraw_ThermalDetonator(PART_s *) {
 void PartKill_ThermalDetonator(PART_s *, i32) {
 }
 
-void ThermalDetonator_MoveCode(GameObject_s *) {
+i32 ThermalDetonator_MoveCode(GameObject_s *) {
+    return 0;
 }
 
 void ThermalDetonator_ThrowMom(GameObject_s *, nuvec_s *) {

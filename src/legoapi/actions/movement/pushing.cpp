@@ -25,12 +25,6 @@ void FindForcePushTarget(GameObject_s *, i32, i32) {
 void PushingTowardsAngle(u16, u16) {
 }
 
-void ForcePushed_YRotation(GameObject_s *) {
-}
-
-void ForcePushed_SetTargetMom(GameObject_s *, float *) {
-}
-
 void ForcePushed_SuperPush_Occurring(GameObject_s *, GameObject_s *) {
 }
 

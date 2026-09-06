@@ -578,7 +578,8 @@ void GameTiming(WORLDINFO_s *, float *game_time) {
         if (CUTSTOPGAME == 0) {
             UpdateGameMessages();
             f32 target = 0.0f;
-            if (DoubleScore != 0 && GetMenuID() == -1) target = 1.0f;
+            if (DoubleScore != 0 && GetMenuID() == -1)
+                target = 1.0f;
             DoubleScoreTime = SeekLinearF(DoubleScoreTime, target, FRAMETIME);
         } else {
             DoubleScoreTime = 0.0f;
@@ -609,7 +610,13 @@ void GameFog_Set() {
                 GameFog.high_quality_density);
 }
 
-void GameRayCast(nuvec_s *, nuvec_s *, float, i32) {
+extern "C" i32 NewRayCastScaleYMask(NUVEC *, NUVEC *, f32, f32, i32, u32);
+extern i32 RAYCASTCALLS;
+
+i32 GameRayCast(NUVEC *position, NUVEC *displacement, f32 radius, i32 mask) {
+    i32 hit = NewRayCastScaleYMask(position, displacement, radius, 1.0f, 0, mask);
+    ++RAYCASTCALLS;
+    return hit;
 }
 
 void GameAIProcess() {
@@ -1492,32 +1499,41 @@ void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
 extern "C" i32 AddGameDebrisRot(APIDEBRISSYS_s *, i32, NUVEC *, i32, i16, i16);
 
 static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
-    if (object->weapon_scale < 1.0f) return;
+    if (object->weapon_scale < 1.0f)
+        return;
     const i8 context = object->character_context;
-    if ((context == 0 && (object->action_movement_state == 4 || object->action_movement_state == 2)) ||
-        context == 4 || context == 16 || (context == 13 && object->id != id_THEEMPEROR) || context == 14 ||
+    if ((context == 0 && (object->action_movement_state == 4 || object->action_movement_state == 2)) || context == 4 ||
+        context == 16 || (context == 13 && object->id != id_THEEMPEROR) || context == 14 ||
         (context == 31 && object->field_0x7a3 == 1) ||
         ((object->apiobj.flags_low & 0x80) != 0 && Cheat_PowerUpActive(object->apiobj.field_0x27c))) {
         object->sabre_flags |= 2;
     }
-    if (object->id == id_IMPERIALGUARD) object->sabre_flags &= ~3;
-    if (object->sabre_flags == 0 || object->apiobj.field_0x288 == 0 || (object->field_0xe23 & 8) == 0) return;
+    if (object->id == id_IMPERIALGUARD)
+        object->sabre_flags &= ~3;
+    if (object->sabre_flags == 0 || object->apiobj.field_0x288 == 0 || (object->field_0xe23 & 8) == 0)
+        return;
     GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
     const i32 joint_a = data->streak_joints[blade][0];
     const i32 joint_b = data->streak_joints[blade][1];
-    if (joint_a == -1 || object->apiobj.character_model->points_of_interest[joint_a] == NULL ||
-        joint_b == -1 || object->apiobj.character_model->points_of_interest[joint_b] == NULL) return;
+    if (joint_a == -1 || object->apiobj.character_model->points_of_interest[joint_a] == NULL || joint_b == -1 ||
+        object->apiobj.character_model->points_of_interest[joint_b] == NULL)
+        return;
     object->blade_states[blade] = -1;
     NUVEC points[3];
     points[0] = *NUMTX_GET_ROW_VEC(&object->joint_matrices[joint_a], 3);
     points[1] = *NUMTX_GET_ROW_VEC(&object->joint_matrices[joint_b], 3);
     if ((object->sabre_flags & 2) != 0) {
         i32 colour;
-        if (object->apiobj.field_0x27c != -1 && Cheat_IsOn(25)) colour = 0;
-        else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object)) colour = 3;
-        else if (object->id == id_GRIEVOUS && (blade == 3 || blade == 0)) colour = 2;
-        else if (AnakinGreenSabre(object) || (object->id == id_BOB && (object->field_0xefd & 2) != 0)) colour = 1;
-        else colour = static_cast<i8>(GCDataList[object->id].field_0x117);
+        if (object->apiobj.field_0x27c != -1 && Cheat_IsOn(25))
+            colour = 0;
+        else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object))
+            colour = 3;
+        else if (object->id == id_GRIEVOUS && (blade == 3 || blade == 0))
+            colour = 2;
+        else if (AnakinGreenSabre(object) || (object->id == id_BOB && (object->field_0xefd & 2) != 0))
+            colour = 1;
+        else
+            colour = static_cast<i8>(GCDataList[object->id].field_0x117);
         object->blade_states[blade] = colour;
         if (object->apiobj.model_draw_result != 0) {
             const u8 *rgb = BladeTab[colour].colour;
@@ -1525,7 +1541,8 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
             AddStreakPoints(points, 0.25f, packed, &object->sabre_streaks[blade][0], 0, object);
             if (object->field_0x1087 != 0 && object->field_0x1020 != 2000000.0f) {
                 f32 plane = object->field_0x1020;
-                if (WORLD->current_level->unknown_0cc != 2000000.0f) plane = WORLD->current_level->unknown_0cc;
+                if (WORLD->current_level->unknown_0cc != 2000000.0f)
+                    plane = WORLD->current_level->unknown_0cc;
                 NUVEC reflected[2] = {points[0], points[1]};
                 reflected[0].y = plane - (reflected[0].y - plane);
                 reflected[1].y = plane - (reflected[1].y - plane);
@@ -1533,10 +1550,14 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
             }
         }
     }
-    if ((object->sabre_flags & 7) == 0) return;
-    if (object->apiobj.field_0x27c != -1 && Cheat_IsOn(25)) effect = 1;
-    else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object)) effect = 4;
-    else if (object->id == id_GRIEVOUS) effect = (blade == 3 || blade == 0) ? 3 : 2;
+    if ((object->sabre_flags & 7) == 0)
+        return;
+    if (object->apiobj.field_0x27c != -1 && Cheat_IsOn(25))
+        effect = 1;
+    else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object))
+        effect = 4;
+    else if (object->id == id_GRIEVOUS)
+        effect = (blade == 3 || blade == 0) ? 3 : 2;
     if (data->field275_0x116 == 12 && context == 5 && object->combo_stage == 2 && object->context_animation == 52 &&
         object->apiobj.character_model->points_of_interest[4] != NULL) {
         points[0] = *NUMTX_GET_ROW_VEC(&object->joint_matrices[4], 3);
@@ -1575,28 +1596,33 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
         minimum = NUVEC{points[2].x - extent, points[2].y - extent, points[2].z - extent};
         maximum = NUVEC{points[2].x + extent, points[2].y + extent, points[2].z + extent};
     }
-    if ((object->sabre_flags & 5) == 0) return;
+    if ((object->sabre_flags & 5) == 0)
+        return;
     GameObject_s *nearest = NULL;
     i32 nearest_point = 0;
     f32 nearest_distance = 1000000.0f;
     for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
         GameObject_s *target = &Obj[i];
         if (target == object || (target->apiobj.field_0x1f8 & 0x1001) != 0x1001 || target->use_model_origin <= 1 ||
-            target->apiobj.field_0x287 != 0 || (target->character_context & 0xfd) == 57 || target->character_context == 60 ||
-            (CInfo[target->character_context].flags & 0x8000) != 0) continue;
+            target->apiobj.field_0x287 != 0 || (target->character_context & 0xfd) == 57 ||
+            target->character_context == 60 || (CInfo[target->character_context].flags & 0x8000) != 0)
+            continue;
         GAMECHARACTERDATA *target_data = static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24);
         if ((target_data->flags_090 & 0x8000) != 0 || target->apiobj.collision_min.x > maximum.x ||
             target->apiobj.collision_max.x < minimum.x || target->apiobj.collision_min.z > maximum.z ||
             target->apiobj.collision_max.z < minimum.z || target->apiobj.collision_min.y > maximum.y ||
-            target->apiobj.collision_max.y < minimum.y) continue;
+            target->apiobj.collision_max.y < minimum.y)
+            continue;
         for (i32 point = 2; point >= 0; --point) {
             if (!SphereSphereOverlapScaleY(&target->apiobj.collision_position, target->apiobj.field_0x1dc,
-                                          target->apiobj.field_0x1e0, &points[point], object->sabre_collision_radius,
-                                          object->sabre_collision_radius)) continue;
+                                           target->apiobj.field_0x1e0, &points[point], object->sabre_collision_radius,
+                                           object->sabre_collision_radius))
+                continue;
             if ((object->sabre_flags & 1) != 0) {
                 AddGameDebrisRot(WORLD->debris_sys, effect, &points[point], ParticlesPerSecond(10.0f, FRAMETIME), 0, 0);
             }
-            const f32 distance = NuVecDistSqr(&object->apiobj.collision_position, &target->apiobj.collision_position, NULL);
+            const f32 distance =
+                NuVecDistSqr(&object->apiobj.collision_position, &target->apiobj.collision_position, NULL);
             if (distance < nearest_distance) {
                 nearest_distance = distance;
                 nearest_point = point;
@@ -1632,13 +1658,16 @@ void GameObjectStuffAfterAnimation() {
     for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
         GameObject_s *object = &Obj[i];
         if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || object->apiobj.field_0x287 != 0 ||
-            object->apiobj.field_0x288 == 0 || object->apiobj.model_draw_result == 0) continue;
+            object->apiobj.field_0x288 == 0 || object->apiobj.model_draw_result == 0)
+            continue;
         GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
         if ((object->apiobj.character_data->model_flags & 8) == 0 && object->id != id_BODYGUARD &&
-            object->id != id_IMPERIALGUARD) continue;
+            object->id != id_IMPERIALGUARD)
+            continue;
         const i32 effect = object->blade_index == -1 ? -1 : BladeTab[object->blade_index].hit_effect;
         if ((data->field275_0x116 == 3 || object->id == id_GRIEVOUS || object->id == id_COUNTDOOKU) &&
-            object->character_context == 0 && object->action_movement_state == 3) object->sabre_flags |= 2;
+            object->character_context == 0 && object->action_movement_state == 3)
+            object->sabre_flags |= 2;
         const u8 streak = object->sabre_flags & 2;
         LightSabreStreakCode(object, 0, effect);
         if (object->id == id_DARTHMAUL) {
@@ -2064,7 +2093,11 @@ static __used__ void LEGO_100PercentFn() {
 static __used__ void LEGO_AllGoldBricksFn() {
 }
 
-void NoLayerKill(GameObject_s *) {
+i32 NoLayerKill(GameObject_s *object) {
+    GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+    if ((data->flags_094[2] & 0x80) != 0)
+        return object->apiobj.field_0x27f == 6;
+    return 0;
 }
 
 void GetUsageMask(NuShaderUsageMask_s *) {

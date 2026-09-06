@@ -463,7 +463,7 @@ struct BOLT_s {
     u8 pad_0xd0[0xf0 - 0xd0];
     u8 flags; // 0xf0
     u8 pad_0xf1[0x100 - 0xf1];
-    u8 active; // 0x100
+    u8 active;  // 0x100
     u8 type_id; // 0x101
     u8 pad_0x102[0x138 - 0x102];
 };
@@ -1406,8 +1406,14 @@ struct PLAYERPACKET_s {
     u8 pad_634[0x648 - 0x634];
     u32 field_0x648;
     u8 pad_64c[0x654 - 0x64c];
-    union { i32 force_glow_mode; void *force_glow_object; };
-    union { i32 force_glow_state; void *force_glow_candidate; };
+    union {
+        i32 force_glow_mode;
+        void *force_glow_object;
+    };
+    union {
+        i32 force_glow_state;
+        void *force_glow_candidate;
+    };
     u8 pad_65c[0x660 - 0x65c];
     u32 input_state; // 0x660
     u32 field_0x664;
@@ -1576,8 +1582,20 @@ struct SUIT_s {
     char *base_character_name;
     char *suit_character_name;
     i16 *text_id;
-    u8 store_flag;
-    u8 initially_available;
+    union {
+        u16 flags;
+        struct {
+            u8 store_flag;
+            u8 initially_available;
+        };
+        struct {
+            u16 : 1;
+            u16 can_glide : 1;
+            u16 : 4;
+            u16 can_magnet_climb : 1;
+            u16 : 9;
+        };
+    };
     u8 group;
     char letter;
     u32 character_flags;
@@ -1904,17 +1922,17 @@ struct TERRSET {
     TERRAIN_GROUP *groups; // 0x000
     u8 pad_0x004[0x60];
     void *field_0x064;
-    TERRAIN_PLATFORM *platforms; // 0x068
-    i16 active_platform_groups[96]; // 0x06c
-    i32 active_platform_count; // 0x12c
-    NUVEC platform_scan_min; // 0x130
-    NUVEC platform_scan_max; // 0x13c
-    TERRAIN_SPATIAL_NODE *spatial_nodes; // 0x148
-    i16 group_count;                     // 0x14c
-    u16 file_version;                    // 0x14e
-    i32 group_index_count;               // 0x150
-    i32 removed_platform_count; // 0x154
-    i16 removed_platforms[32]; // 0x158
+    TERRAIN_PLATFORM *platforms;                                 // 0x068
+    i16 active_platform_groups[96];                              // 0x06c
+    i32 active_platform_count;                                   // 0x12c
+    NUVEC platform_scan_min;                                     // 0x130
+    NUVEC platform_scan_max;                                     // 0x13c
+    TERRAIN_SPATIAL_NODE *spatial_nodes;                         // 0x148
+    i16 group_count;                                             // 0x14c
+    u16 file_version;                                            // 0x14e
+    i32 group_index_count;                                       // 0x150
+    i32 removed_platform_count;                                  // 0x154
+    i16 removed_platforms[32];                                   // 0x158
     TERRAIN_TRACK_SLOT track_slots[TERRAIN_TRACK_SLOT_COUNT];    // 0x198
     TERRAIN_CELL cells[TERRAIN_CELL_RECORD_COUNT];               // 0x798
     i32 minimum_height;                                          // 0x1bac
@@ -2681,17 +2699,17 @@ DECOMP_ASSERT(offsetof(GIZBUILDITANIMDATA_s, wobble_time) == 0xc0, "BuildIt wobb
 
 struct GIZBUILDIT_s {
     char name[0x10];
-    GAMEANIMSET_s *anim_set;      // 0x10
-    GAMEANIMOBJ_s **anim_objects; // 0x14
-    GIZBUILDIT_s *linked_buildit; // 0x18
+    GAMEANIMSET_s *anim_set;                    // 0x10
+    GAMEANIMOBJ_s **anim_objects;               // 0x14
+    GIZBUILDIT_s *linked_buildit;               // 0x18
     MechObjectInterface *mech_object_interface; // 0x1c
-    NUVEC file_position;    // 0x20
-    NUVEC start_position;   // 0x2c, centre of the unbuilt pieces
-    NUVEC position;         // 0x38, centre of the completed build
-    f32 bounds_radius;      // 0x44
-    f32 step_timer;         // 0x48
-    f32 step_duration;      // 0x4c
-    f32 interaction_radius; // 0x50
+    NUVEC file_position;                        // 0x20
+    NUVEC start_position;                       // 0x2c, centre of the unbuilt pieces
+    NUVEC position;                             // 0x38, centre of the completed build
+    f32 bounds_radius;                          // 0x44
+    f32 step_timer;                             // 0x48
+    f32 step_duration;                          // 0x4c
+    f32 interaction_radius;                     // 0x50
     f32 field_0x54;
     f32 radius_scale; // 0x58
     i16 field_0x5c;
@@ -2787,7 +2805,13 @@ enum GIZFORCE_GROUP_FLAGS : u8 {
 struct GIZFORCEANIMDATA_s {
     u16 flags;
     i16 platform_id;
-    u32 field_0x04;
+    union {
+        u32 field_0x04;
+        struct {
+            u32 force_glow_active : 1;
+            u32 : 31;
+        };
+    };
 };
 DECOMP_ASSERT(sizeof(GIZFORCEANIMDATA_s) == 8, "GIZFORCE animation data ABI");
 
@@ -3166,7 +3190,7 @@ struct GIZPANEL_s {
     u8 field_0x5e[3];
     u8 model_variant; // 0x61
     u8 field_0x62[2];
-    f32 flash_timer;                // 0x64
+    f32 flash_timer; // 0x64
     union {
         GIZPANEL_FLAGS flags; // 0x68
         struct {
@@ -3485,7 +3509,7 @@ struct LEVER_s {
             u8 flags_high;
         };
     };
-    char model_variant;         // 0x9e
+    char model_variant; // 0x9e
     u8 field_0x9f[9];
 
     void ClearMechObjectInterface();
@@ -3614,7 +3638,11 @@ struct OcclusionManager {
 struct PART_s {
     union {
         NUMTX transform;
-        struct { u8 pad_000[0x30]; NUVEC position; u32 field_03c; };
+        struct {
+            u8 pad_000[0x30];
+            NUVEC position;
+            u32 field_03c;
+        };
     };
     u8 pad_040[0x80 - 0x40];
     NUVEC velocity;

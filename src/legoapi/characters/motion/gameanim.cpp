@@ -22,6 +22,18 @@
 #include <float.h>
 #include <string.h>
 
+i32 LEGOCONTEXT_SUPERCARRY = -1;
+
+i32 SuperCarry_Carrying(GameObject_s *object) {
+    if (LEGOCONTEXT_SUPERCARRY != -1 && object->character_context == LEGOCONTEXT_SUPERCARRY) {
+        if (static_cast<u8>(object->field_0x7a3 - 2) < 2)
+            return 1;
+        if (object->field_0x7a3 == 6)
+            return 1;
+    }
+    return 0;
+}
+
 float CalcValue1648(char *, i32, i32, float, ani3_scalemin_s *);
 void EvalAnim(nuhspecial_s *special, f32 frame, numtx_s *matrix, i32 include_instance_translation);
 bool UseFallAnim(GameObject_s *object);
@@ -443,8 +455,7 @@ void Animate_JEDI(GameObject_s *object) {
     PlaySfxByIdAndSetVolume(GetSfxId(loop_sfx), &object->apiobj.collision_position, object->weapon_scale);
 }
 
-static void MoveAnim_Manage(GameObject_s *object, f32 movement_speed, i32 allow_tiptoe,
-                                                            i32 weapon_variant) {
+static void MoveAnim_Manage(GameObject_s *object, f32 movement_speed, i32 allow_tiptoe, i32 weapon_variant) {
     GAMECHARACTERDATA *game_character = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
     CHARACTERMODEL_s *model = object->apiobj.character_model;
 
@@ -1050,16 +1061,22 @@ void GameAnimSet_EvaluateState(GAMEANIMSET_s *set) {
 i32 GameAnimSet_GetAveragePos(GAMEANIMSET_s *set, NUVEC *position, i32 frame_selection, i32 include_animated,
                               i32 include_static) {
     NUVEC sum = {0.0f, 0.0f, 0.0f};
-    if (position == NULL || set == NULL || set->object_count == 0 || set->objects == NULL) return 0;
+    if (position == NULL || set == NULL || set->object_count == 0 || set->objects == NULL)
+        return 0;
     i32 count = 0;
     for (GAMEANIMOBJ_s *object = set->objects; object != NULL; object = object->next) {
-        if ((object->flags & 1) != 0) continue;
+        if ((object->flags & 1) != 0)
+            continue;
         if (object->instance_animation != NULL) {
-            if (include_animated == 0) continue;
+            if (include_animated == 0)
+                continue;
             f32 frame;
-            if (frame_selection == 0) frame = object->start_frame;
-            else if (frame_selection == 1) frame = object->end_frame;
-            else frame = object->instance_animation->ltime;
+            if (frame_selection == 0)
+                frame = object->start_frame;
+            else if (frame_selection == 1)
+                frame = object->end_frame;
+            else
+                frame = object->instance_animation->ltime;
             NUMTX matrix;
             EvalAnim(&object->special, frame, &matrix, 1);
             NuVecAdd(&sum, &sum, NUMTX_GET_ROW_VEC(&matrix, 3));
@@ -1069,7 +1086,8 @@ i32 GameAnimSet_GetAveragePos(GAMEANIMSET_s *set, NUVEC *position, i32 frame_sel
             ++count;
         }
     }
-    if (count == 0) return 0;
+    if (count == 0)
+        return 0;
     NuVecScale(position, &sum, 1.0f / static_cast<f32>(count));
     return 1;
 }
@@ -1831,20 +1849,18 @@ extern "C" {
     }
 
     f32 *AnimPlaying(ANIMPACKET_s *packet, i32 animation, i32 target, i32 source) {
-        if (packet == NULL || animation == -1) return NULL;
+        if (packet == NULL || animation == -1)
+            return NULL;
         if (packet->blending == 0) {
-            if (packet->animation_index == animation) return &packet->current_time;
+            if (packet->animation_index == animation)
+                return &packet->current_time;
         } else {
-            if (target != 0 && packet->blend_animation_b == animation) return &packet->blend_target_time;
-            if (source != 0 && packet->blend_animation_a == animation) return &packet->blend_source_time;
+            if (target != 0 && packet->blend_animation_b == animation)
+                return &packet->blend_target_time;
+            if (source != 0 && packet->blend_animation_a == animation)
+                return &packet->blend_source_time;
         }
         return NULL;
-    }
-
-    void AnimSpeed(void) {
-    }
-
-    void AnimStopFrame(void) {
     }
 
     void AnimsAvailableToBothCharacters(void) {
@@ -2319,7 +2335,8 @@ static char **TexAnimList;
 
 void InitTexAnimScripts(char **names) {
     TexAnimList = names;
-    if (names == NULL) return;
+    if (names == NULL)
+        return;
     while (*names != NULL) {
         permbuffer_ptr.addr = ALIGN(permbuffer_ptr.addr, 4);
         char path[72];

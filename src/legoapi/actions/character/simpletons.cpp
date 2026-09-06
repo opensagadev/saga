@@ -12,7 +12,8 @@ struct SHOPINPUT;
 void GetGenericGoon(i32) {
 }
 
-void ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32) {
+i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32) {
+    return 0;
 }
 
 i32 objInNetWaitContext(GameObject_s *object, i32 context) {

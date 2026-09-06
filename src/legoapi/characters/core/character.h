@@ -72,7 +72,7 @@ struct CHARACTERANIM_s {
             f32 event_frame_4;
         };
     };
-    f32 stop_frame;        // 0x38
+    f32 stop_frame; // 0x38
     union {
         u8 field_0x3c[0x0c];
         NUVEC root_translation;
@@ -236,24 +236,40 @@ struct GAMECHARACTERDATA_s {
         };
     };
     union {
-        struct { u32 field_0xd0; u32 field_0xd4; u32 field_0xd8; };
+        struct {
+            u32 field_0xd0;
+            u32 field_0xd4;
+            u32 field_0xd8;
+        };
         i16 sfx_misc[6];
     };
     union {
         u32 field_0xdc;
-        struct { i16 sfx_die; i16 sfx_hurt; };
+        struct {
+            i16 sfx_die;
+            i16 sfx_hurt;
+        };
     };
     union {
         u32 field_0xe0;
-        struct { i16 sfx_grunt; i16 sfx_engine; };
+        struct {
+            i16 sfx_grunt;
+            i16 sfx_engine;
+        };
     };
     union {
         u32 field_0xe4;
-        struct { i16 sfx_shoot; i16 sfx_footstep; };
+        struct {
+            i16 sfx_shoot;
+            i16 sfx_footstep;
+        };
     };
     union {
         u32 field_0xe8;
-        struct { i16 sfx_chatter; i16 sfx_sabre; };
+        struct {
+            i16 sfx_chatter;
+            i16 sfx_sabre;
+        };
     };
     union {
         u32 field_0xec;
@@ -264,7 +280,10 @@ struct GAMECHARACTERDATA_s {
     };
     union {
         u32 field_0xf0;
-        struct { u16 shadow_locators; u16 thrust_locators; };
+        struct {
+            u16 shadow_locators;
+            u16 thrust_locators;
+        };
     };
     u8 hitpoints; // 0xf4
     u8 field_0xf5;
@@ -287,29 +306,56 @@ struct GAMECHARACTERDATA_s {
     };
     union {
         u32 field_0x108;
-        struct { i8 hand_locators[2]; i8 grapple_locators[2]; };
+        struct {
+            i8 hand_locators[2];
+            i8 grapple_locators[2];
+        };
     };
     union {
         u32 field_0x10c;
-        struct { i8 rocket_locator; i8 shield_locator; i8 head_locator; i8 collision_locator; };
+        struct {
+            i8 rocket_locator;
+            i8 shield_locator;
+            i8 head_locator;
+            i8 collision_locator;
+        };
     };
     union {
         u32 field_0x110;
-        struct { i8 thingy_locator; i8 helmet_locator; i8 throw_locator; i8 ride_locator; };
+        struct {
+            i8 thingy_locator;
+            i8 helmet_locator;
+            i8 throw_locator;
+            i8 ride_locator;
+        };
     };
     union {
         u16 field_0x114;
-        struct { i8 poo_locator; i8 hair_layer; };
+        struct {
+            i8 poo_locator;
+            i8 hair_layer;
+        };
     };
-    union { u8 field275_0x116; u8 uses_weapon_action; };
+    union {
+        u8 field275_0x116;
+        u8 uses_weapon_action;
+    };
     u8 field_0x117;
     union {
         u32 field_0x118;
-        struct { i8 head_joint; i8 cloak_joint; i8 cloak_joint_2; i8 place_locator; };
+        struct {
+            i8 head_joint;
+            i8 cloak_joint;
+            i8 cloak_joint_2;
+            i8 place_locator;
+        };
     };
     union {
         u16 field_0x11c;
-        struct { i8 cape_layer; i8 extra_character_locator; };
+        struct {
+            i8 cape_layer;
+            i8 extra_character_locator;
+        };
     };
     u8 field_0x11e;
     u8 layer_count; // 0x11f
@@ -324,7 +370,8 @@ DECOMP_ASSERT(offsetof(GAMECHARACTERDATA_s, shadow_locators) == 0xf0, "GAMECHARA
 DECOMP_ASSERT(offsetof(GAMECHARACTERDATA_s, weapon_shoot_joints) == 0xfc, "GAMECHARACTER shooting locators offset");
 DECOMP_ASSERT(offsetof(GAMECHARACTERDATA_s, collision_locator) == 0x10f, "GAMECHARACTER collision locator offset");
 DECOMP_ASSERT(offsetof(GAMECHARACTERDATA_s, head_joint) == 0x118, "GAMECHARACTER head joint offset");
-DECOMP_ASSERT(offsetof(GAMECHARACTERDATA_s, extra_character_locator) == 0x11d, "GAMECHARACTER attachment locator offset");
+DECOMP_ASSERT(offsetof(GAMECHARACTERDATA_s, extra_character_locator) == 0x11d,
+              "GAMECHARACTER attachment locator offset");
 
 enum CHARACTER_MODEL_FLAGS : u32 {
     CHARACTER_MODEL_FLAG_CONFIGURED = 0x00000001,
@@ -460,12 +507,13 @@ DECOMP_ASSERT(offsetof(CHARACTERDATA, model_scale) == 0x3c, "CHARACTERDATA model
 
 extern "C" i32 MakeLayerList_Index(CHARACTERMODEL_s *model, i16 *layers, u32 mask);
 extern "C" void StoreLocatorCoordinates(CHARACTERMODEL_s *model, NUMTX *world_matrix, NUMTX *joint_matrices,
-                                         NUVEC *positions, NUMTX *matrices);
+                                        NUVEC *positions, NUMTX *matrices);
 extern "C" i32 APIDrawCharacterModel(CHARACTERMODEL_s *model, CHARACTERDATA *character_data, ANIMPACKET_s *animation,
                                      numtx_s *matrix, numtx_s *secondary_matrix, numtx_s *reflection_matrix,
-                                     NUVEC *locator_positions, numtx_s *auxiliary_matrix, GameObject_s *object, u32 flags,
-                                     NUJOINTANIM_s *joint_overrides, i32 joint_override_count, WORLDINFO_s *world,
-                                     f32 far_clip, numtx_s *output_matrices, i32 value_15, void *level_model);
+                                     NUVEC *locator_positions, numtx_s *auxiliary_matrix, GameObject_s *object,
+                                     u32 flags, NUJOINTANIM_s *joint_overrides, i32 joint_override_count,
+                                     WORLDINFO_s *world, f32 far_clip, numtx_s *output_matrices, i32 value_15,
+                                     void *level_model);
 
 extern i32 CHARCOUNT;
 extern CHARACTERDATA *CDataList;
@@ -541,6 +589,8 @@ extern "C" {
     extern i16 id_COUNTDOOKU;
     extern i16 id_OBIWANKENOBIJEDIMASTER;
     extern i16 id_GRIEVOUS;
+    extern i16 id_THEEMPEROR;
+    extern i16 id_SERVICECAR;
     extern i16 id_JANGOFETT;
     extern i16 id_MOSEISLEYCITIZEN;
     extern i16 id_CANTINAALIEN;

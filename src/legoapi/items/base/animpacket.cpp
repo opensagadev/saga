@@ -1,4 +1,19 @@
 #include "legoapi/items/base/animpacket.h"
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/motion/gameanim.h"
+
+extern "C" f32 AnimStopFrame(CHARACTERMODEL_s *model, i32 animation) {
+    return animation != -1 && model->model_data_b[animation] != NULL
+               ? static_cast<CHARACTERANIM_s *>(model->model_data_a[animation])->stop_frame
+               : 0.0f;
+}
+
+extern "C" f32 AnimSpeed(CHARACTERMODEL_s *model, i32 animation) {
+    return animation != -1 && model->model_data_b[animation] != NULL
+               ? static_cast<CHARACTERANIM_s *>(model->model_data_a[animation])->action_speed
+               : 0.0f;
+}
 
 extern "C" void ResetMiniAnimPacket(MINIANIMPACKET_s *packet, i32 animation) {
     if (packet != NULL) {

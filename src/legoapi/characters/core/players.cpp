@@ -726,7 +726,8 @@ float GetHoverPosY(GameObject_s *obj) {
 }
 
 i32 Player_HasPurpleForce(GameObject_s *obj) {
-    if (Cheat_IsOn(0x1c)) return 1;
+    if (Cheat_IsOn(0x1c))
+        return 1;
     return obj != NULL && obj->field_0xdec > 0.0f;
 }
 
@@ -774,7 +775,8 @@ void SuperCarry_Release(GameObject_s *);
 void SpecialMove_ReleaseVictim(GameObject_s *);
 
 void Player_ClearContext(GameObject_s *object, i32 mode) {
-    if (Player_ClearContextFn != NULL) Player_ClearContextFn(object, mode);
+    if (Player_ClearContextFn != NULL)
+        Player_ClearContextFn(object, mode);
     Whip_Release(object);
     SuperCarry_Release(object);
     SpecialMove_ReleaseVictim(object);
@@ -874,10 +876,6 @@ static __used__ i32 ShootThisFrame(GameObject_s *, i32, i32) {
 }
 
 static __used__ void Player_ClearContext_Game(GameObject_s *, i32) {
-}
-
-static __used__ u16 CanGlide_Game(GameObject_s *) {
-    return {};
 }
 
 static __used__ unsigned int CanStartHold_Game(GameObject_s *) {
@@ -1123,10 +1121,12 @@ void CollectHitPoint(GameObject_s *, nuvec_s *, i32) {
 }
 
 i32 DeactivatePlayer(GameObject_s *object, f32 duration, GameObject_s *source) {
-    if (object->character_context == 0x17 && duration <= object->context_animation_timer) return 0;
+    if (object->character_context == 0x17 && duration <= object->context_animation_timer)
+        return 0;
     f32 model_state = object->field_0xd24;
     Player_ClearContext(object, 1);
-    if (object->character_context == 0x3e) return 0;
+    if (object->character_context == 0x3e)
+        return 0;
     Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
     object->character_context = 0x17;
     object->field_0xd24 = model_state;
@@ -1137,8 +1137,8 @@ i32 DeactivatePlayer(GameObject_s *object, f32 duration, GameObject_s *source) {
     CHARACTERDATA *character = object->apiobj.character_data;
     CHARACTERMODEL_s *model = object->apiobj.character_model;
     GAMECHARACTERDATA *runtime = static_cast<GAMECHARACTERDATA *>(character->field11_0x24);
-    if (source != NULL && (source->apiobj.character_data->model_flags & 0x40) != 0 &&
-        runtime->field275_0x116 == 1 && model->model_data_b[0x62] != NULL) {
+    if (source != NULL && (source->apiobj.character_data->model_flags & 0x40) != 0 && runtime->field275_0x116 == 1 &&
+        model->model_data_b[0x62] != NULL) {
         duration = 4.0f;
         object->context_animation = 0x62;
     } else if (model->model_data_b[0x81] != NULL &&
@@ -1147,7 +1147,8 @@ i32 DeactivatePlayer(GameObject_s *object, f32 duration, GameObject_s *source) {
     } else {
         object->context_animation = model->model_data_b[0x41] != NULL ? 0x41 : 1;
     }
-    if ((character->model_flags & 0x20) != 0) SetProtocolDroidDeactivatedAction(object);
+    if ((character->model_flags & 0x20) != 0)
+        SetProtocolDroidDeactivatedAction(object);
     object->action_movement_state = 0;
     object->context_animation_timer = duration;
     object->airborne_action_duration = 0.0f;
@@ -1213,8 +1214,7 @@ bool FindNearestPlayerToVec(nuvec_s *position, GameObject_s **nearest_player, fl
 void SetPlayerGroupPosition(float, float, float) {
 }
 
-void UpdateLastSafePosition(GameObject_s *) {
-}
+i32 (*LastSafePosExtraFn)(GameObject_s *) = NULL;
 
 void CheckForPlayersTurnedOff() {
 }

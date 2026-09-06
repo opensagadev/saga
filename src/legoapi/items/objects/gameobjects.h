@@ -10,6 +10,7 @@
 // only need a declaration.
 
 struct GameObject_s;
+i32 NoLayerKill(GameObject_s *object);
 struct CABLE_s;
 struct AISYS_s;
 struct WORLDINFO_s;

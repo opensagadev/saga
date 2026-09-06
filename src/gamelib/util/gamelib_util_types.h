@@ -310,7 +310,7 @@ struct TouchHacks {
     void CanUseTeleport(GameObject_s &);
     void CanUseVehicleSmartBomb(GameObject_s &);
     void CanUseZipup(GameObject_s &);
-    void CheckForAboutToRunIntoKillTerrain(GameObject_s &, float);
+    static bool CheckForAboutToRunIntoKillTerrain(GameObject_s &, float);
     void CheckForAboutToRunOffAnEdge(GameObject_s &, float);
     void CheckJumpForLandingSpot(GameObject_s &, float);
     static void CleanupAllMechObjectInterfaces(WORLDINFO_s *);

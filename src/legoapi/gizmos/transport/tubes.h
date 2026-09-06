@@ -6,6 +6,7 @@
 #ifdef __cplusplus
 
 struct GameObject_s;
+struct WORLDINFO_s;
 
 enum TUBE_FLAGS {
     TUBE_FLAG_ACTIVE = 1 << 0,
@@ -40,6 +41,7 @@ DECOMP_ASSERT(sizeof(TUBE) == 0x40, "TUBE ABI");
 DECOMP_ASSERT(offsetof(TUBE, flags) == 0x34, "TUBE flags offset");
 
 i32 Tube_InCylinder(GameObject_s *object, TUBE *tube, f32 *horizontal_distance_squared, i32 ignore_height);
+TUBE *Tube_InAnyCylinder(WORLDINFO_s *world, GameObject_s *object, i32 ignore_height);
 i32 Tube_IsObjBitSet(TUBE *tube, i32 object_index);
 void Tube_SetObjBit(TUBE *tube, i32 object_index);
 
