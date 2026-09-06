@@ -4,6 +4,9 @@
 #include "nu2api/nucore/common.h"
 
 struct NuSoundStreamingSample;
+class NuSoundVoice;
+struct nuvec_s;
+struct VuMtx;
 
 typedef struct nusound_filename_info_s {
     const char *filename;
@@ -82,7 +85,25 @@ extern "C" {
     void NuSound3SetSampleTable(NUSOUND_FILENAME_INFO *info, VARIPTR *buffer_start, VARIPTR buffer_end);
     void NuSound3SetRequestTable(u16 *request_bits, i32 short_count);
     void NuSound3SetLoopHoldTime(float t);
+    bool NuSound3IsSampleLoaded(i32 sample_index);
     i32 NuSound3LoadingSfx(void);
+    const VuMtx *NuSound3GetListener(void);
+    void NuSound3StopVoice(NuSoundVoice *voice);
+    i32 NuSound3CountVoices(i32 sample_index);
+    NuSoundVoice *NuSound3FindOldestVoice(i32 sample_index, f32 *playback_position);
+    void NuSound3Play(i32 sample_index, i32 volume_left, i32 volume_right, f32 pitch, f32 buzz_timer,
+                      i32 rumble_strength, f32 rumble_sustain, f32 rumble_release);
+    void NuSound3PlayPri(i32 sample_index, i32 volume_left, i32 volume_right, f32 pitch, f32 buzz_timer,
+                         i32 rumble_strength, f32 rumble_sustain, f32 rumble_release, i32 priority);
+    void NuSound3Play3d(nuvec_s *position, i32 sample_index, f32 falloff_near, f32 falloff_far, i32 volume_left,
+                        i32 volume_right, f32 pitch, f32 buzz_timer, i32 rumble_strength, f32 rumble_sustain,
+                        f32 rumble_release);
+    void NuSound3Play3dPri(nuvec_s *position, i32 sample_index, f32 falloff_near, f32 falloff_far, i32 volume_left,
+                           i32 volume_right, f32 pitch, f32 buzz_timer, i32 rumble_strength, f32 rumble_sustain,
+                           f32 rumble_release, i32 priority);
+    void NuSound3Play3dLoopSfx(nuvec_s *position, i32 sample_index, f32 falloff_near, f32 falloff_far, i32 volume_left,
+                               i32 volume_right, f32 pitch, f32 buzz_timer, i32 rumble_strength, f32 rumble_sustain,
+                               f32 rumble_release);
 
     // Stereo-stream control used by the NuMusic player. Streams live in slots
     // 0/1 (one per music voice); both status queries use the enum above.

@@ -94,10 +94,10 @@ class NuSoundVoice : public NuSoundBufferCallback {
     VuVec position;
     VuVec direction;
     VuVec velocity;
-    f32 pitch;        // +0xf8
-    f32 volume;       // +0xfc
-    f32 falloff_a;    // +0x100
-    f32 falloff_b;    // +0x104
+    f32 pitch;  // +0xf8
+    f32 volume; // +0xfc
+    f32 falloff_a; // +0x100
+    f32 falloff_b; // +0x104
     u32 falloff_type; // +0x108
 
     f32 field113_0x10c; // LFE gain
@@ -110,10 +110,7 @@ class NuSoundVoice : public NuSoundBufferCallback {
 
     NuSoundBus *output_bus; // +0x11c, defaults to NuSoundSystem::sMasterBus
 
-    struct HandleLinks {
-        NuSoundHandle *previous;
-        NuSoundHandle *next;
-    } handles_start, handles_end;
+    struct HandleLinks { NuSoundHandle *previous; NuSoundHandle *next; } handles_start, handles_end;
     NuSoundHandle *handles_head;
     NuSoundHandle *handles_tail;
     u32 handle_count;
@@ -165,13 +162,13 @@ class NuSoundVoice : public NuSoundBufferCallback {
     void UpdateEffects(f32 frametime, NuSoundEffect::EffectProcessStage stage);
 
     // Platform half, dispatched through the object vtable in the original.
-    virtual void StartHardwareVoice() = 0;            // vtable +0x20
-    virtual void StopHardwareVoice() = 0;             // vtable +0x24
-    virtual void PauseHardwareVoice() = 0;            // vtable +0x28
-    virtual void ResumeHardwareVoice() = 0;           // vtable +0x2c
-    virtual void UpdateHardwareVoice(f32 frametime) { // vtable +0x30
+    virtual void StartHardwareVoice() = 0;               // vtable +0x20
+    virtual void StopHardwareVoice() = 0;                // vtable +0x24
+    virtual void PauseHardwareVoice() = 0;               // vtable +0x28
+    virtual void ResumeHardwareVoice() = 0;              // vtable +0x2c
+    virtual void UpdateHardwareVoice(f32 frametime) {  // vtable +0x30
     }
-    virtual void ApplyHardwareVoiceMix() = 0; // vtable +0x34
+    virtual void ApplyHardwareVoiceMix() = 0;            // vtable +0x34
 
     // Remaining original surface (off the title music path; kept as stubs).
     bool AddEffect(NuSoundEffect *effect);
@@ -179,32 +176,32 @@ class NuSoundVoice : public NuSoundBufferCallback {
     f32 CalculateFieldAngle(f32 distance);
     void CalculatePositionalCoefficients(f32 *gains, VuVec const &position, VuMtx const &mtx, f32 falloff_a,
                                          f32 falloff_b);
-    i32 GetControllerBits() const;
-    const VuVec *GetDirection() const;
-    NuSoundSystem::DownmixType GetDownmixerType() const;
-    NuSoundEffect *GetEffect(NuSoundEffect::EffectType type);
-    NuSoundSystem::FalloffType GetFalloffType() const;
-    f32 GetFar() const;
-    f32 GetLowFrequencyMix() const;
-    f32 GetNear() const;
-    u32 GetNumEffects() const;
-    NuSoundBus *GetOutputBus() const;
-    f32 GetPenetration() const;
-    f32 GetPitch() const;
+    void GetControllerBits() const;
+    void GetDirection() const;
+    void GetDownmixerType() const;
+    void GetEffect(NuSoundEffect::EffectType type);
+    void GetFalloffType() const;
+    void GetFar() const;
+    void GetLowFrequencyMix() const;
+    void GetNear() const;
+    void GetNumEffects() const;
+    void GetOutputBus() const;
+    void GetPenetration() const;
+    void GetPitch() const;
     f32 GetPlaybackPositionSeconds();
-    const VuVec *GetPosition() const;
-    f32 GetReverbWetMix() const;
-    NuSoundRoutingTable *GetRoutingTable() const;
-    f32 GetSpeakerBleedAngle() const;
-    f32 GetSpeakerBleedFar() const;
-    f32 GetSpeakerBleedNear() const;
-    f32 GetSpeakerFieldAngleMax() const;
-    f32 GetSpeakerFieldAngleMin() const;
-    f32 GetStartOffset() const;
-    NuSoundSystem::SurroundMode GetSurroundMode() const;
-    const VuVec *GetVelocity() const;
-    f32 GetVolume() const;
-    bool IsLooping() const;
+    void GetPosition() const;
+    void GetReverbWetMix() const;
+    void GetRoutingTable() const;
+    void GetSpeakerBleedAngle() const;
+    void GetSpeakerBleedFar() const;
+    void GetSpeakerBleedNear() const;
+    void GetSpeakerFieldAngleMax() const;
+    void GetSpeakerFieldAngleMin() const;
+    void GetStartOffset() const;
+    void GetSurroundMode() const;
+    void GetVelocity() const;
+    void GetVolume() const;
+    void IsLooping() const;
     void RemoveEffect(NuSoundEffect *effect);
     void SetControllerBits(i32 bits);
     void SetCustomSurroundMix(f32 *mix);

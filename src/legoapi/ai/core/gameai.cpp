@@ -40,9 +40,6 @@ i32 CheckPosAIArea(AIAREA_s *area, nuvec_s *position, float tolerance) {
 void GetTakeOverPos(GameObject_s *, nuvec_s *) {
 }
 
-void HandleGroupLimit(i32) {
-}
-
 void ResetAdaptiveDifficulty() {
     ADAPTIVEDIFFICULTY_s *difficulty = (ADAPTIVEDIFFICULTY_s *)adaptivedifficulty;
     difficulty->multiplier = 0.5f;

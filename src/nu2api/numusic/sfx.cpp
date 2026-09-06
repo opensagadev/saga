@@ -26,6 +26,9 @@ static i32 sfx_refcount[1600] = {0};
 
 static char cfgfile_name[256] = "Audio/audio.cfg";
 
+i32 GroupBuffer_MakeGroup(i32 sample_id);
+void GroupBuffer_AddToGroup(i32 group_id, i32 sample_id);
+
 void InitSoundInfo(i32 index) {
     NUSOUNDINFO *info = &g_soundInfo[index];
     info->index = -1;
@@ -190,32 +193,24 @@ static void fnAudioSample(nufpar_s *fpar) {
 }
 
 static void fnAudioGroup(nufpar_s *fpar) {
-    bool bVar1;
-    i32 iVar2;
-    i32 iVar3;
+    i32 group_id = -1;
+    i32 first = 1;
 
-    iVar3 = -1;
-    bVar1 = true;
-    iVar2 = NuFParGetWord(fpar);
-    do {
-        if (iVar2 == 0) {
-            return;
-        }
-        iVar2 = GetSfxId(fpar->word_buf);
-        if (bVar1) {
-            if (iVar2 == -1) {
+    while (NuFParGetWord(fpar) != 0) {
+        i32 sfx_id = GetSfxId(fpar->word_buf);
+        if (first) {
+            if (sfx_id == -1) {
                 return;
             }
-            // iVar3 = GroupBuffer_MakeGroup(iVar2);
+            group_id = GroupBuffer_MakeGroup(sfx_id);
         } else {
-            iVar2 = GetSfxId(fpar->word_buf);
-            if (iVar2 != -1) {
-                // GroupBuffer_AddToGroup(iVar3, iVar2);
+            sfx_id = GetSfxId(fpar->word_buf);
+            if (sfx_id != -1) {
+                GroupBuffer_AddToGroup(group_id, sfx_id);
             }
         }
-        bVar1 = false;
-        iVar2 = NuFParGetWord(fpar);
-    } while (true);
+        first = 0;
+    }
 }
 
 static NUFPCOMJMP audioCom[] = {

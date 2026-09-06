@@ -1,18 +1,23 @@
 #pragma once
 
-#include "nu2api/nusound/nulist.hpp"
+#include "nu2api/nucore/common.h"
+
+#include "decomp.h"
 
 class NuSoundEffect;
 
 class NuSoundBus {
-  public:
-    NuSoundBus *previous;
-    NuSoundBus *next;
-    float output_mix[8];
-
-  private:
+    NuSoundBus *intrusive_prev;
+    NuSoundBus *intrusive_next;
+    f32 output_mix[8];
     NuSoundBus *parent_bus;
-    NuList<NuSoundEffect *> effects;
+    void *effect_begin_prev;
+    void *effect_begin_next;
+    void *effect_end_prev;
+    void *effect_end_next;
+    void *effect_begin;
+    void *effect_end;
+    i32 effect_count;
     char name[128];
 
   public:
@@ -30,3 +35,5 @@ class NuSoundBus {
     void SetOutputMix(float *);
     void SetOutputBus(NuSoundBus *);
 };
+
+DECOMP_ASSERT(sizeof(NuSoundBus) == 0xc8, "NuSoundBus size");

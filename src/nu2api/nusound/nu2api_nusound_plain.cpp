@@ -11,6 +11,8 @@ i32 GroupBuffer_GetSampleByIndex(i32 group_id, i32 sample_index);
 extern "C" {
 
     u16 SfxBits[100];
+    i32 g_NuSoundMaxVoicesPerSample = 3;
+    f32 AUDIOFADELEVEL = 1.0f;
     f32 MASTERVOLUME = 1.0f;
     i32 gcutSoundMusVol = 30;
     i32 gcutSoundVol = 100;
