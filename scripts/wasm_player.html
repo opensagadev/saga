@@ -80,7 +80,6 @@
         const loadingProgress = document.getElementById("loading-progress");
         const runtimeError = document.getElementById("runtime-error");
         const obbName = "main.1060.com.wb.lego.tcs.obb";
-        const corsProxyOrigin = "https://cors-header-proxy.avery-eae.workers.dev";
         let resolveRuntime;
         let rejectRuntime;
         let started = false;
@@ -188,12 +187,9 @@
             if (source.protocol !== "http:" && source.protocol !== "https:") {
                 throw new Error("The OBB URL must use HTTP or HTTPS.");
             }
-            const downloadUrl = source.origin === location.origin || source.origin === corsProxyOrigin
-                ? source.href
-                : `${corsProxyOrigin}/download/${encodeURIComponent(source.href)}/${obbName}`;
             let response;
             try {
-                response = await fetch(downloadUrl, { credentials: "omit" });
+                response = await fetch(source.href, { credentials: "omit" });
             } catch (error) {
                 throw new Error("The OBB download could not be reached. Check the URL and try again.");
             }

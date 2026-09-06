@@ -56,11 +56,9 @@ The Pages workflow builds the WASM target, copies `saga.js` and `saga.wasm`
 to the site root, and deploys `doc/pages/`. The player loads those shared
 artifacts from its parent directory.
 
-Remote OBB downloads always use
-`https://cors-header-proxy.avery-eae.workers.dev`, including sources that already
-support CORS. Signed source URLs are encoded into the proxy path, which ends
-in `.obb`. URLs already using the proxy are not wrapped again; same-origin
-server OBBs and local file uploads remain local. A generated service worker
+Remote OBB downloads fetch the source URL directly, so the host must
+permit cross-origin access. Same-origin server OBBs and local file uploads
+remain local. A generated service worker
 in `play/` provides the cross-origin isolation required by the threaded WASM
 build on GitHub Pages.
 
