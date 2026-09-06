@@ -137,6 +137,10 @@ COI_SERVICE_WORKER = r"""if (typeof window === "undefined") {
   self.addEventListener("install", () => self.skipWaiting());
   self.addEventListener("activate", event => event.waitUntil(self.clients.claim()));
   self.addEventListener("fetch", event => {
+    // Only browsing contexts and workers need synthetic isolation headers.
+    // Leave downloads to the browser so long OBB streams do not depend on
+    // the service worker lifetime. Returning without respondWith bypasses it.
+    if (!["document", "worker", "sharedworker"].includes(event.request.destination)) return;
     if (event.request.cache === "only-if-cached" && event.request.mode !== "same-origin") return;
     event.respondWith(fetch(event.request).then(response => {
       if (response.status === 0) return response;
