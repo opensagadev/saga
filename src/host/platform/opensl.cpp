@@ -139,10 +139,11 @@ namespace hostsl {
         // to Enqueue (the decoder ring reuses it for the next chunk), so the
         // device keeps its own copy until the entry is consumed.
         struct QueueEntry {
-            u8 *data;        // the device copy (stream source format)
-            u32 stream_size; // the copy size in the stream source format
-            u32 fed;         // bytes already handed to the device-side buffer
-            u32 sl_size;     // the size the game enqueued (SL accounting)
+            u8 *data;             // the device copy (stream source format)
+            u32 stream_size;      // the copy size in the stream source format
+            u32 fed;              // bytes already handed to the device-side buffer
+            u32 sl_size;          // the size the game enqueued (SL accounting)
+            u64 end_device_frame; // playhead position at which SL consumes this entry
         };
 
         struct Player {
@@ -186,6 +187,8 @@ namespace hostsl {
             QueueEntry queue[HOST_PLAYER_MAX_QUEUE];
             u32 queue_head;
             u32 queue_count;
+            u64 queue_source_frames;
+            u64 queue_played_device_frames;
 
             // underrun tracking (the HEADATEND condition: playing, queue empty)
             bool underrunning;
@@ -269,21 +272,18 @@ namespace hostsl {
         // shared registry (device callback thread vs NuMain thread)
         // ---------------------------------------------------------------------------
 
-        // Keep one SDL callback period between the OpenSL queue and the device.
-        // Feeding four periods here removed both of the game's initial stream
-        // buffers from GetState() in one callback, before its original two-buffer
-        // low-watermark logic could observe and refill the queue.
-        const u32 HOST_TRACK_CAP_BYTES = 4096;
-
         // Frees and drops every queued entry.
         void host_queue_release_all(Player *player) {
             while (player->queue_count > 0) {
                 QueueEntry *entry = &player->queue[player->queue_head];
                 free(entry->data);
-                entry->data = NULL;
+                memset(entry, 0, sizeof(*entry));
                 player->queue_head = (player->queue_head + 1) % HOST_PLAYER_MAX_QUEUE;
                 player->queue_count--;
             }
+            player->queue_head = 0;
+            player->queue_source_frames = 0;
+            player->queue_played_device_frames = 0;
         }
 
         pthread_mutex_t host_lock = PTHREAD_MUTEX_INITIALIZER;
@@ -636,6 +636,10 @@ namespace hostsl {
                 entry->stream_size = size;
             }
 
+            const u32 source_frame_bytes = player->channels * (player->bits / 8);
+            player->queue_source_frames += size / source_frame_bytes;
+            entry->end_device_frame =
+                (player->queue_source_frames * (u64)host_device_spec.freq + player->rate - 1) / player->rate;
             player->queue_count++;
             host_stats.bytes_enqueued += size;
             pthread_mutex_unlock(&host_lock);
@@ -649,32 +653,31 @@ namespace hostsl {
                 SDL_ClearAudioStream(player->stream);
             }
             host_queue_release_all(player);
+            player->underrunning = false;
             pthread_mutex_unlock(&host_lock);
             return HOST_SL_RESULT_SUCCESS;
         }
 
-        // Drops queue entries that have been handed completely to the
-        // device-side buffer; returns the hand-off count for queue accounting.
-        u32 host_queue_count_handed_off(Player *player) {
-            u32 done = 0;
+        // OpenSL removes an entry from BufferQueueState only when the playhead
+        // passes it. SDL keeps an internal converted copy, so merely handing an
+        // entry to SDL must not make the game observe that entry as consumed.
+        void host_queue_release_played(Player *player) {
             while (player->queue_count > 0) {
                 QueueEntry *entry = &player->queue[player->queue_head];
-                if (entry->fed != entry->stream_size) {
+                if (entry->fed != entry->stream_size || player->queue_played_device_frames < entry->end_device_frame) {
                     break;
                 }
                 free(entry->data);
-                entry->data = NULL;
+                memset(entry, 0, sizeof(*entry));
                 player->queue_head = (player->queue_head + 1) % HOST_PLAYER_MAX_QUEUE;
                 player->queue_count--;
-                done++;
             }
-            return done;
         }
 
         u32 host_queue_get_state(void *self, u32 *count) {
             Player *player = (Player *)HOSTSL_CONTAINER_OF(self, Player, queue_itf);
             pthread_mutex_lock(&host_lock);
-            host_queue_count_handed_off(player);
+            host_queue_release_played(player);
             *count = player->queue_count;
             pthread_mutex_unlock(&host_lock);
             return HOST_SL_RESULT_SUCCESS;
@@ -710,26 +713,22 @@ namespace hostsl {
         const u32 HOST_MIX_CHUNK_BYTES = 4096; // one pull per player per pass
         enum { HOST_FIRED_MAX = 64 };
 
-        // Hands queue data to the device-side buffer while it has room (the
-        // AudioTrack analog). Finishing an SL queue entry is not a play-interface
-        // event: SL_PLAYEVENT_HEADATEND fires only when the play head itself
-        // reaches the end of all queued audio.
+        // Hand every not-yet-fed queue entry to SDL's device-side conversion
+        // stream. The entries themselves remain in the OpenSL queue until the
+        // playhead reaches their end_device_frame above.
         void host_top_up_player_stream(Player *player) {
-            host_queue_count_handed_off(player);
+            host_queue_release_played(player);
 
-            const u32 available = (u32)SDL_GetAudioStreamAvailable(player->stream);
-            u32 space = HOST_TRACK_CAP_BYTES > available ? HOST_TRACK_CAP_BYTES - available : 0;
-            space &= ~3u; // whole s16 stereo frames in the device format
-            while (space > 0 && player->queue_count > 0) {
-                QueueEntry *entry = &player->queue[player->queue_head];
+            for (u32 i = 0; i < player->queue_count; i++) {
+                QueueEntry *entry = &player->queue[(player->queue_head + i) % HOST_PLAYER_MAX_QUEUE];
                 const u32 remaining = entry->stream_size - entry->fed;
-                const u32 take = remaining < space ? remaining : space;
-                if (!SDL_PutAudioStreamData(player->stream, entry->data + entry->fed, (int)take)) {
+                if (remaining == 0) {
+                    continue;
+                }
+                if (!SDL_PutAudioStreamData(player->stream, entry->data + entry->fed, (int)remaining)) {
                     break;
                 }
-                entry->fed += take;
-                space -= take;
-                host_queue_count_handed_off(player);
+                entry->fed = entry->stream_size;
             }
         }
 
@@ -812,6 +811,7 @@ namespace hostsl {
                     }
 
                     player->consumed_device_frames += (u32)got / 4;
+                    player->queue_played_device_frames += (u32)got / 4;
                     host_stats.bytes_consumed += (u32)got;
                 }
 

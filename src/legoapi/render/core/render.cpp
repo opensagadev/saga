@@ -2814,7 +2814,6 @@ void BackDrop_Draw(float alpha, i32 flags) {
         f32 y = mtx.m31;
         f32 z = mtx.m32;
         u16 angle = (u16)qrand();
-        NuSpecialDrawAtAlpha(special, &mtx, alpha);
         for (i32 i = 0; i < 3; ++i) {
             mtx.m30 = NuTrigTable[angle >> 1] * 0.01f + x;
             mtx.m31 = NuTrigTable[((i32)angle + 0x4000) >> 1 & 0x7fff] * 0.01f + y;

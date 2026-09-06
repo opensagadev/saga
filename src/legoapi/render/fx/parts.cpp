@@ -55,6 +55,8 @@ extern "C" {
     extern i32 MAXPARTS;
     extern i32 i_part;
 
+    void ResetParts(void);
+
     i32 DebAlloc(void);
     void DebrisStartOffset(i32, f32);
     void DebrisEmitterPos(i32, f32, f32, f32);
@@ -738,7 +740,16 @@ extern "C" {
     void GetPartName(void) {
     }
 
-    void InitParts(i32, VARIPTR *, VARIPTR) {
+    // libTTapp.so 0x41d640: reserve the permanent PART array directly from
+    // the caller's arena, then clear it through the normal reset path.
+    void InitParts(i32 max_parts, VARIPTR *buffer, VARIPTR buffer_end) {
+        (void)buffer_end;
+
+        MAXPARTS = max_parts;
+        buffer->addr = (buffer->addr + 0xf) & ~static_cast<usize>(0xf);
+        Part = reinterpret_cast<PART_s *>(buffer->void_ptr);
+        buffer->addr += static_cast<usize>(MAXPARTS) * sizeof(PART_s);
+        ResetParts();
     }
 
     void KillAllParts(void) {

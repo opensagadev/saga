@@ -855,7 +855,7 @@ load_type_done:
         }
 
         NuRndrBeginScene(-1);
-        if (HUB_ADATA != NULL && HUB_ADATA->index == Area) {
+        if (load_type == 2) {
             const u32 top_colour = 0x80000000u | (static_cast<u32>(backdrop_top_b) & 0xff) << 16 |
                                    (static_cast<u32>(backdrop_top_g) & 0xff) << 8 |
                                    (static_cast<u32>(backdrop_top_r) & 0xff);
@@ -866,11 +866,11 @@ load_type_done:
         } else {
             NuRndrGradClear(0xf00, static_cast<i32>(0x80000000u), static_cast<i32>(0x80000000u), 1.0f);
         }
-        const f32 backdrop_alpha =
-            loadareacharacters_no_backdrop_reset == 0 && LoadTime < 0.5f ? LoadTime * 2.0f : 1.0f;
-        BackDrop_Draw(backdrop_alpha, 1);
-
         if (load_type == 2) {
+            const f32 backdrop_alpha =
+                loadareacharacters_no_backdrop_reset == 0 && LoadTime < 0.5f ? LoadTime * 2.0f : 1.0f;
+            BackDrop_Draw(backdrop_alpha, 1);
+
             f32 crawl_alpha = 1.0f;
             if (AreaDataLoaded != 0 && !character_load_active && LoadWait >= 0.1f) {
                 crawl_alpha = (LoadWait - 0.1f) / (LOADWAITTIME - 0.1f);
@@ -888,6 +888,8 @@ load_type_done:
                 const i32 prompt_alpha = static_cast<i32>(32.0f - prompt_wave * 32.0f);
                 Text3DEx(TTab[tTOUCHTOSTART], 0.0f, 0.745f, 1.0f, 0.4f, 0.4f, 0.4f, 0, 255, 255, 255, prompt_alpha);
             }
+        } else if (load_type == 1) {
+            BackDrop_Draw(1.0f, 1);
         }
 
         if (LoadWait == LOADWAITTIME && HUB_ADATA != NULL && HUB_ADATA->index == Area && CharacterDataLoad != 0 &&
