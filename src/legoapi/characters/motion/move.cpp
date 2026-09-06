@@ -17,6 +17,7 @@
 #include "legoapi/props/system/socksys.h"
 #include "legoapi/render/core/rtl.h"
 #include "legoapi/render/fx.h"
+#include "legoapi/render/fx/spline_position.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
@@ -669,7 +670,95 @@ void Move_DROIDGENERIC(GameObject_s *) {
 void MovePlayer_ROLLING(GameObject_s *) {
 }
 
-void MoveSplinePosition(SPLINEPOS_s *, float) {
+void MoveSplinePosition(SPLINEPOS_s *position, float movement) {
+    if (position == NULL) {
+        return;
+    }
+    SPLINEPOSITION_RUNTIME_s *runtime = reinterpret_cast<SPLINEPOSITION_RUNTIME_s *>(position);
+    NUGSPLINE *spline = runtime->spline;
+    if (spline == NULL || spline->length < 2) {
+        return;
+    }
+
+    const i32 point_count = spline->length;
+    const i32 segment_limit = point_count + 1 - (runtime->looping == 0);
+    const i32 last_segment = segment_limit - 1;
+    if (runtime->segment >= last_segment) {
+        return;
+    }
+
+    const auto point_at = [spline](i32 index) -> const NUVEC * {
+        return reinterpret_cast<const NUVEC *>(reinterpret_cast<const u8 *>(spline->pts) +
+                                               (index % spline->length) * spline->pt_size);
+    };
+
+    if (movement < 0.0f) {
+        if (runtime->segment < 0) {
+            return;
+        }
+        f32 remaining = movement + runtime->distance;
+        runtime->distance = remaining;
+        while (remaining < 0.0f) {
+            const i16 old_segment = runtime->segment;
+            --runtime->segment;
+            if (runtime->segment < 0) {
+                if (runtime->looping == 0) {
+                    runtime->finished = 1;
+                    runtime->position = *point_at(0);
+                    runtime->segment = old_segment;
+                    runtime->normalized_position = 0.0f;
+                    runtime->distance = 0.0f;
+                    return;
+                }
+                runtime->segment = static_cast<i16>(segment_limit - 2);
+            }
+
+            runtime->segment_length = NuVecDist(const_cast<NUVEC *>(point_at(runtime->segment + 1)),
+                                                const_cast<NUVEC *>(point_at(runtime->segment)), NULL);
+            runtime->distance = runtime->segment_length;
+            if (remaining == 0.0f) {
+                runtime->position = *point_at(runtime->segment + 1);
+            }
+            remaining += runtime->segment_length;
+            runtime->distance = remaining;
+        }
+    } else if (movement > 0.0f) {
+        f32 remaining = movement + runtime->distance;
+        runtime->distance = remaining;
+        while (runtime->segment_length <= remaining) {
+            const i16 old_segment = runtime->segment;
+            remaining -= runtime->segment_length;
+            ++runtime->segment;
+            if (runtime->segment >= last_segment) {
+                if (runtime->looping == 0) {
+                    runtime->finished = 1;
+                    runtime->position = *point_at(runtime->segment);
+                    runtime->segment = old_segment;
+                    runtime->normalized_position = 1.0f;
+                    runtime->distance = runtime->segment_length;
+                    return;
+                }
+                runtime->segment = 0;
+            }
+
+            runtime->distance = 0.0f;
+            runtime->segment_length = NuVecDist(const_cast<NUVEC *>(point_at(runtime->segment + 1)),
+                                                const_cast<NUVEC *>(point_at(runtime->segment)), NULL);
+            if (remaining == 0.0f) {
+                runtime->position = *point_at(runtime->segment);
+            }
+            runtime->distance = remaining;
+        }
+    }
+
+    const NUVEC *start = point_at(runtime->segment);
+    const NUVEC *end = point_at(runtime->segment + 1);
+    NUVEC delta;
+    NuVecSub(&delta, const_cast<NUVEC *>(end), const_cast<NUVEC *>(start));
+    const f32 ratio = runtime->segment_length != 0.0f ? runtime->distance / runtime->segment_length : 0.0f;
+    NuVecScale(&delta, &delta, ratio);
+    NuVecAdd(&runtime->position, const_cast<NUVEC *>(start), &delta);
+    runtime->normalized_position = (ratio + runtime->segment) / static_cast<f32>(last_segment);
 }
 
 void MoveBlocksOverBlock(WORLDINFO_s *, pushblock_s *, i32, nuvec_s *) {

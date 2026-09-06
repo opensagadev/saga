@@ -20,6 +20,7 @@ extern "C" {
 #endif
 
     NUGSPLINE *NuSplineFind(NUGSCN *scene, char *name);
+    i32 NuSplineFindAllBeg(NUGSCN *scene, char *prefix, NUGSPLINE **results, i32 max_results);
 
 #ifdef __cplusplus
 }

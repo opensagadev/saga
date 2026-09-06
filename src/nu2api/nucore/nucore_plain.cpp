@@ -3048,9 +3048,8 @@ extern "C" {
     }
     void NuHGobjToVideoMem(void) {
     }
-    void NuGCutCharAnimProcess(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible,
-                               u32 *animation_index, f32 *animation_rate, f32 *blend_time,
-                               f32 *animation_start_frame, i32 *layer_mask) {
+    void NuGCutCharAnimProcess(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible, u32 *animation_index,
+                               f32 *animation_rate, f32 *blend_time, f32 *animation_start_frame, i32 *layer_mask) {
         nuanimdata2_s *animation = character->animation;
         if (animation == NULL) {
             *visible = character->flags & 1;
@@ -3093,9 +3092,8 @@ extern "C" {
         }
         if (animation_start_frame != NULL) {
             if (animation_index != NULL && *animation_index != 0 && *animation_index != 0xff) {
-                *animation_start_frame = animation->curve_count < 11
-                                             ? static_cast<f32>(character->animation_start_frame)
-                                             : curve_value(10);
+                *animation_start_frame =
+                    animation->curve_count < 11 ? static_cast<f32>(character->animation_start_frame) : curve_value(10);
             } else {
                 *animation_start_frame = 0.0f;
             }
@@ -3837,8 +3835,6 @@ extern "C" {
     // Spline / online / net / other gameplay support
     // ---------------------------------------------------------------------------
 
-    void NuSplineFindAllBeg(void) {
-    }
     void NuSplineFindAllSub(void) {
     }
     void NuSplineFindNextBeg(void) {

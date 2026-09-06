@@ -3,6 +3,8 @@
 #include "legoapi/characters/core/character.h"
 #include "nu2api/nufile/nufpar.h"
 
+struct CHARCATEGORY;
+
 struct CHARACTER_EFFECT_s {
     i16 character_id;
     i16 debris_id;
@@ -56,3 +58,6 @@ DECOMP_ASSERT(offsetof(CHARCONFIG_s, animation_names) == 0x28, "CHARCONFIG names
 extern CHARCONFIG_s charconfig;
 extern NUFPCOMJMP ConfigChar_GameKeywords[];
 NUFPCOMJMP *CharConfig_GetKeywords();
+void CharCategories_Init(CHARCATEGORY *categories);
+i32 CharCategory_FindByName(char *name);
+i32 CharCategory_IsCategory(GameObject_s *object, i32 category);

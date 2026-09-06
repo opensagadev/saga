@@ -208,10 +208,11 @@ typedef struct AIPACKET_s {
         void *opponent;
         GameObject_s **action_target_ref;
     };
-    u8 pad_e8[0xec - 0xe8];
+    f32 opponent_metric; // 0xe8
     u32 field_0xec;
     u32 field_0xf0;
-    u8 pad_f4[0x104 - 0xf4];
+    GameObject_s *dont_avoid_character; // 0xf4
+    u8 pad_f8[0x104 - 0xf8];
     union {
         NUVEC movement_destination; // 0x104
         NUVEC reset_position;
@@ -683,15 +684,15 @@ typedef struct GameObject_s {
         i32 pause_input_state; // 0x0d5c, cleared when entering pause
         f32 hud_icon_timer;    // countdown controlling the portrait blink during death/drop transitions
     };
-    u8 pad_d60[0xd64 - 0xd60];       // 0x0d60 .. 0x0d64
-    f32 jump_variant_timer;          // 0x0d64
-    f32 jump_chain_timer;            // 0x0d68
-    f32 field_0xd6c;                 // 0x0d6c  surface/contact state
+    u8 pad_d60[0xd64 - 0xd60];            // 0x0d60 .. 0x0d64
+    f32 jump_variant_timer;               // 0x0d64
+    f32 jump_chain_timer;                 // 0x0d68
+    f32 field_0xd6c;                      // 0x0d6c  surface/contact state
     f32 movement_animation_hold_timer;    // 0x0d70
     f32 movement_animation_release_timer; // 0x0d74
-    f32 field_0xd78;                 // 0x0d78
-    f32 terrain_origin_floor_offset; // 0x0d7c
-    f32 field_0xd80;                 // 0x0d80
+    f32 field_0xd78;                      // 0x0d78
+    f32 terrain_origin_floor_offset;      // 0x0d7c
+    f32 field_0xd80;                      // 0x0d80
     f32 force_glow_target;
     f32 force_glow_step;
     f32 field_0xd8c; // 0x0d8c
@@ -723,7 +724,7 @@ typedef struct GameObject_s {
     u16 force_heading;
     u16 current_input_angle; // 0x0e0c
     u8 pad_e0e[2];
-    i16 previous_block_animation;   // 0x0e10
+    i16 previous_block_animation; // 0x0e10
     u8 pad_e12[2];
     i16 held_movement_animation;     // 0x0e14
     i16 released_movement_animation; // 0x0e16
@@ -774,7 +775,8 @@ typedef struct GameObject_s {
     GAMEOBJECTADDONS_s *addons;                 // 0x0e54
     u8 pad_e58[0xe70 - 0xe58];                  // 0x0e58 .. 0x0e70
     nugspline_s *movement_spline;               // 0x0e70
-    u8 pad_e74[0xeb4 - 0xe74];                  // 0x0e74 .. 0x0eb4
+    u8 pad_e74[0xeb0 - 0xe74];                  // 0x0e74 .. 0x0eb0
+    GameObject_s *takeover_target;              // 0x0eb0
     u32 field_0xeb4;                            // 0x0eb4, cleared on hub room changes
     NUVEC *context_target_position;             // 0x0eb8
     u32 field_0xebc;                            // 0x0ebc
@@ -783,20 +785,23 @@ typedef struct GameObject_s {
     u32 field_0xec8;                            // 0x0ec8
     u32 field_0xecc;                            // 0x0ecc
     u32 field_0xed0;                            // 0x0ed0
-    u32 field_0xed4;                            // 0x0ed4
-    u32 field_0xed8;                            // 0x0ed8
-    u8 pad_edc[0xee0 - 0xedc];                  // 0x0edc .. 0x0ee0
-    f32 field_0xee0;                            // 0x0ee0
-    u8 pad_ee4[0xee8 - 0xee4];                  // 0x0ee4 .. 0x0ee8
-    f32 field_0xee8;                            // 0x0ee8
-    f32 field_0xeec;                            // 0x0eec
-    u8 pad_ef0[0xef4 - 0xef0];                  // 0x0ef0 .. 0x0ef4
-    i32 pause_context_state;                    // 0x0ef4, cleared when entering pause
-    u8 field_0xef8;                             // 0x0ef8
-    u8 field_0xef9;                             // 0x0ef9
-    u8 field_0xefa;                             // 0x0efa
-    u8 field_0xefb;                             // 0x0efb, bit 3 requests the two-row hit-point layout
-    u8 field_0xefc;                             // 0x0efc
+    union {
+        u32 field_0xed4;
+        f32 current_speed_multiplier; // 0x0ed4
+    };
+    u32 field_0xed8;           // 0x0ed8
+    u8 pad_edc[0xee0 - 0xedc]; // 0x0edc .. 0x0ee0
+    f32 field_0xee0;           // 0x0ee0
+    f32 walk_speed_override;   // 0x0ee4
+    f32 field_0xee8;           // 0x0ee8
+    f32 field_0xeec;           // 0x0eec
+    u8 pad_ef0[0xef4 - 0xef0]; // 0x0ef0 .. 0x0ef4
+    i32 pause_context_state;   // 0x0ef4, cleared when entering pause
+    u8 field_0xef8;            // 0x0ef8
+    u8 field_0xef9;            // 0x0ef9
+    u8 field_0xefa;            // 0x0efa
+    u8 field_0xefb;            // 0x0efb, bit 3 requests the two-row hit-point layout
+    u8 field_0xefc;            // 0x0efc
     union {
         u8 field_0xefd;
         struct {
@@ -856,7 +861,9 @@ typedef struct GameObject_s {
     f32 shadow_opacity;        // 0x102c
     f32 shadow_radius;         // 0x1030
     f32 hover_height_override; // 0x1034
-    u8 pad_1038[0x1048 - 0x1038];
+    u8 pad_1038[0x1040 - 0x1038];
+    f32 animation_speed_multiplier; // 0x1040
+    u8 pad_1044[0x1048 - 0x1044];
     f32 fall_acceleration_timer;  // 0x1048
     CABLE_s *cable;               // 0x104c
     u32 field_0x1050;             // 0x1050
@@ -889,8 +896,10 @@ typedef struct GameObject_s {
     u8 current_hp;       // 0x108b
     i8 head_target_priority;
     u8 pad_108d;
-    u8 field_0x108e;                       // 0x108e
-    u8 pad_108f[0x1092 - 0x108f];          // 0x108f .. 0x1092
+    u8 field_0x108e; // 0x108e
+    u8 pad_108f;
+    u8 one_at_once_player;                 // 0x1090 (0xff when no attack slot is assigned)
+    u8 attack_override;                    // 0x1091
     u8 field_0x1092;                       // 0x1092
     u8 field_0x1093;                       // 0x1093
     u8 pad_1094[0x109c - 0x1094];          // 0x1094 .. 0x109c

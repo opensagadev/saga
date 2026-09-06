@@ -1,6 +1,15 @@
 #include "decomp.h"
 #include "gameapi/ai/aisys/aisys.h"
+#include "globals.h"
+#include "legoapi/ai/core/ai_sys_stubs.h"
+#include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/gizmos/door/zipups.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmos/object/newblowup.h"
+#include "legoapi/gizmos/traps/gizforce.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/world/world.h"
+#include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nutex.h"
 
 #include <string.h>
@@ -10,6 +19,13 @@ struct AIROW_s;
 struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
+
+extern "C" void *AIPAthFindPathCnx(AISYS_s *, AIPATH_s *, char *, char *, i32 *);
+extern void *CutScene_FindInst(CUTSYS *, char *);
+extern GIZBUILDIT_s *GizBuildIt_Find(WORLDINFO_s *, char *);
+extern FLOWBOX_s *FlowBoxFindByName(GIZFLOW_s *, char *);
+extern f32 *fakeanimendframe;
+extern f32 *fakeanimframe;
 
 void AIPathCalcExtents(AIPATH *path) {
     const f32 max_float = 3.402823466e+38f;
@@ -65,9 +81,7 @@ i32 AIPathCheckExtents(AIPATH *path, NUVEC *position) {
 void pathEditorDrawNode(nuvec_s *, float, float, float, u32, numtl_s *, i32, i32) {
 }
 
-extern "C" {
-    void (*AIPathCnxHelperSysInitFn)(WORLDINFO_s *) = NULL;
-}
+void (*AIPathCnxHelperSysInitFn)(WORLDINFO_s *) = NULL;
 
 void AIPathCnxHelperSysReset(WORLDINFO_s *world, AIPATHCNXHELPERSYS_s *system) {
     if (system != NULL) {
@@ -81,9 +95,25 @@ void AIPathCnxHelperSysReset(WORLDINFO_s *world, AIPATHCNXHELPERSYS_s *system) {
     }
 }
 
-void AIPathCnxHelperSys_Find(AIPATHCNXHELPERSYS_s *, GameObject_s *, AIPATHCNX_s *, unsigned char, unsigned char,
-                             i32 (*)(AIPATHCNXHELPER_s *, GameObject_s *, AIPATHCNX_s *, unsigned char,
-                                     unsigned char)) {
+AIPATHCNXHELPER_s *AIPathCnxHelperSys_Find(AIPATHCNXHELPERSYS_s *system, GameObject_s *object, AIPATHCNX_s *connection,
+                                           u8 direction, u8 type,
+                                           i32 (*filter)(AIPATHCNXHELPER_s *, GameObject_s *, AIPATHCNX_s *, u8, u8)) {
+    if (connection == NULL && object != NULL) {
+        connection = object->ai.path_info.connection;
+        direction = object->ai.path_info.direction;
+    }
+    if (connection == NULL || system == NULL) {
+        return NULL;
+    }
+
+    for (i32 index = 0; index < system->helper_count; ++index) {
+        AIPATHCNXHELPER_s *helper = &system->helpers[index];
+        if (helper->connection == connection && (helper->direction == 0xff || helper->direction == direction) &&
+            helper->type == type && (filter == NULL || filter(helper, object, connection, direction, type) == 0)) {
+            return helper;
+        }
+    }
+    return NULL;
 }
 
 void AIPathCnxControlSysReset(AIPATHCNXCONTROLSYS_s *system) {
@@ -93,31 +123,302 @@ void AIPathCnxControlSysReset(AIPATHCNXCONTROLSYS_s *system) {
 
     system->available_controllers.head = NULL;
     system->available_controllers.tail = NULL;
-    system->field_0x10 = 0;
-    system->field_0x14 = 0;
+    system->active_controllers.head = NULL;
+    system->active_controllers.tail = NULL;
     memset(system->controllers, 0, system->controller_count * sizeof(*system->controllers));
     for (i32 i = 0; i < system->controller_count; ++i) {
         NuLinkedListAppend(&system->available_controllers, &system->controllers[i].links);
     }
 }
 
-void AIPathCnxControlSysUpdate(AIPATHCNXCONTROLSYS_s *) {
+static bool AIPathCnxControllerIsOn(AIPATHCNXCONTROLLER_s *controller) {
+    switch (controller->target_type) {
+        case 0: {
+            if ((controller->flags & 4) != 0 && NuSpecialGetVisibilityFn(&controller->special) == 0) {
+                return false;
+            }
+            nuinstanim_s *animation = NuSpecialGetInstAnim(&controller->special);
+            i32 frame = animation != NULL ? static_cast<i32>(animation->ltime) : 0;
+            i32 end_frame = static_cast<i32>(NuSpecialGetAnimEndFrame(&controller->special));
+            if (frame < 1 || end_frame < 1) {
+                frame = 0;
+            } else {
+                frame = frame < end_frame ? frame : end_frame;
+                frame = frame < 1024 ? frame : 1024;
+                --frame;
+            }
+            return (controller->on_frames[frame >> 5] & (1u << (frame & 31))) != 0;
+        }
+        case 1: {
+            if (controller->target == NULL) {
+                return false;
+            }
+            const u8 *instance = static_cast<const u8 *>(controller->target);
+            const f32 end_frame = *reinterpret_cast<f32 *const *>(instance + 0x58) != NULL
+                                      ? *reinterpret_cast<f32 *>(*reinterpret_cast<u8 *const *>(instance + 0x58) + 8)
+                                      : 0.0f;
+            i32 frame = static_cast<i32>(*reinterpret_cast<const f32 *>(instance + 0x90));
+            if (frame < 1 || end_frame < 1.0f) {
+                frame = 0;
+            } else {
+                frame = frame < static_cast<i32>(end_frame) ? frame : static_cast<i32>(end_frame);
+                frame = frame < 1024 ? frame : 1024;
+                --frame;
+            }
+            return (controller->on_frames[frame >> 5] & (1u << (frame & 31))) != 0;
+        }
+        case 2:
+            return controller->target != NULL && static_cast<GIZBUILDIT_s *>(controller->target)->build_state == 2;
+        case 3:
+            return controller->target != NULL && WORLD != NULL &&
+                   GizmoGetOutput(WORLD->gizmo_sys, static_cast<GIZMO *>(controller->target), controller->gizmo_output,
+                                  1) != 0;
+        case 4:
+            return controller->target != NULL &&
+                   (static_cast<GIZMOBLOWUP_s *>(controller->target)->status_flags & 1) == 0;
+        case 5: {
+            if (fakeanimframe == NULL || fakeanimendframe == NULL) {
+                return false;
+            }
+            i32 frame = static_cast<i32>(fakeanimframe[controller->fake_animation_id]);
+            const i32 end_frame = static_cast<i32>(fakeanimendframe[controller->fake_animation_id]);
+            if (frame < 1) {
+                frame = 0;
+            } else {
+                frame = frame < end_frame ? frame : end_frame;
+                frame = frame < 1024 ? frame : 1024;
+                --frame;
+            }
+            return (controller->on_frames[frame >> 5] & (1u << (frame & 31))) != 0;
+        }
+        case 6:
+            return controller->target != NULL && (static_cast<FLOWBOX_s *>(controller->target)->state_flags & 2) != 0;
+        case 7:
+            return controller->target != NULL && GizForce_Complete(static_cast<GIZFORCE_s *>(controller->target)) != 0;
+        case 8:
+            return controller->target != NULL && static_cast<GIZOBSTACLE_s *>(controller->target)->anim_set != NULL &&
+                   static_cast<GIZOBSTACLE_s *>(controller->target)->anim_set->state == GAMEANIMSET_STATE_AT_END;
+        case 9:
+            return controller->target != NULL &&
+                   (static_cast<ZIPUP *>(controller->target)->flags & (ZIPUP_FLAG_ACTIVE | ZIPUP_FLAG_VISIBLE)) ==
+                       (ZIPUP_FLAG_ACTIVE | ZIPUP_FLAG_VISIBLE);
+        default:
+            return false;
+    }
 }
 
-void AIPathCnxControllerCreate(AIPATHCNXCONTROLSYS_s *, AISYS_s *, AIPATH_s *, char *, char *, i32, char *, i32, i32) {
+static void AIPathCnxControllerApply(AIPATHCNXCONTROLLER_s *controller, bool on) {
+    controller->flags = static_cast<u8>((controller->flags & ~0x20) | (on ? 0x20 : 0));
+    controller->connection->open = on ? ((controller->flags & 8) >> 3) : ((controller->flags & 0x10) >> 4);
+
+    const u32 add_flags = on ? controller->on_flags : controller->off_flags;
+    const u32 remove_flags = on ? controller->off_flags : controller->on_flags;
+    const u8 direction = controller->flags & 1;
+    controller->connection->traversal_flags[direction] &= ~remove_flags;
+    controller->connection->traversal_flags[direction] |= add_flags;
+    if ((controller->flags & 2) != 0) {
+        controller->connection->traversal_flags[direction ^ 1] &= ~remove_flags;
+        controller->connection->traversal_flags[direction ^ 1] |= add_flags;
+    }
 }
 
-void AIPathCnxControllerDestroy(AIPATHCNXCONTROLSYS_s *, AIPATHCNXCONTROLLER_s *) {
+void AIPathCnxControlSysUpdate(AIPATHCNXCONTROLSYS_s *system) {
+    if (system == NULL) {
+        return;
+    }
+    for (NULISTLNK *node = NuLinkedListGetHead(&system->active_controllers); node != NULL;
+         node = NuLinkedListGetNext(&system->active_controllers, node)) {
+        AIPathCnxControllerApply(reinterpret_cast<AIPATHCNXCONTROLLER_s *>(node),
+                                 AIPathCnxControllerIsOn(reinterpret_cast<AIPATHCNXCONTROLLER_s *>(node)));
+    }
 }
 
-void AIPathCnxSetTemporaryBlock(AIPATH_s *, char *, char *, i32) {
+AIPATHCNXCONTROLLER_s *AIPathCnxControllerCreate(AIPATHCNXCONTROLSYS_s *control_system, AISYS_s *ai_system,
+                                                 AIPATH_s *path, char *from, char *to, i32 target_type,
+                                                 char *target_name, i32 fake_animation_id, i32 gizmo_output) {
+    if (from == NULL || to == NULL || control_system == NULL) {
+        return NULL;
+    }
+
+    i32 direction = 0;
+    AIPATHCNX *connection = static_cast<AIPATHCNX *>(AIPAthFindPathCnx(ai_system, path, from, to, &direction));
+    if (connection == NULL) {
+        return NULL;
+    }
+
+    nuhspecial_s special = {};
+    void *target = NULL;
+    switch (target_type) {
+        case 0:
+            if (target_name != NULL) {
+                NuSpecialFind(ai_system->scene, &special, target_name, 1);
+            }
+            break;
+        case 1:
+            target = WORLD != NULL ? CutScene_FindInst(WORLD->cutscene_sys, target_name) : NULL;
+            break;
+        case 2:
+            target = WORLD != NULL ? GizBuildIt_Find(WORLD, target_name) : NULL;
+            break;
+        case 3:
+            target = WORLD != NULL ? GizmoFindByName(WORLD->gizmo_sys, -1, target_name) : NULL;
+            break;
+        case 4:
+        case 7:
+        case 8:
+        case 9: {
+            i32 gizmo_type = target_type == 4   ? blowup_gizmotype_id
+                             : target_type == 7 ? force_gizmotype_id
+                             : target_type == 8 ? obstacle_gizmotype_id
+                                                : zipup_gizmotype_id;
+            GIZMO *gizmo = WORLD != NULL ? GizmoFindByName(WORLD->gizmo_sys, gizmo_type, target_name) : NULL;
+            target = gizmo != NULL ? gizmo->object : NULL;
+            break;
+        }
+        case 5:
+            if (fake_animation_id != 0) {
+                return NULL;
+            }
+            break;
+        case 6:
+            target = WORLD != NULL ? FlowBoxFindByName(WORLD->giz_flow, target_name) : NULL;
+            break;
+        default:
+            break;
+    }
+    if (target == NULL && NuSpecialExistsFn(&special) == 0 && target_type != 5) {
+        return NULL;
+    }
+
+    NULISTLNK *node = NuLinkedListGetHead(&control_system->available_controllers);
+    if (node == NULL) {
+        return NULL;
+    }
+    NuLinkedListRemove(&control_system->available_controllers, node);
+    NuLinkedListAppend(&control_system->active_controllers, node);
+
+    AIPATHCNXCONTROLLER_s *controller = reinterpret_cast<AIPATHCNXCONTROLLER_s *>(node);
+    if (ai_system != NULL && ai_system->path_sys != NULL) {
+        for (u8 index = 0; index < ai_system->path_sys->path_count; ++index) {
+            if (ai_system->path_sys->paths[index] == path) {
+                controller->path_index = index;
+                break;
+            }
+        }
+    }
+    controller->connection = connection;
+    controller->flags = static_cast<u8>((controller->flags & ~1) | (direction & 1));
+    controller->gizmo_output = gizmo_output;
+    if (target != NULL) {
+        controller->target = target;
+    } else if (NuSpecialExistsFn(&special) != 0) {
+        controller->special = special;
+    } else {
+        controller->fake_animation_id = fake_animation_id;
+    }
+    controller->target_type = static_cast<u8>(target_type);
+    return controller;
 }
 
-void AIPathCnxHelperSys_AddHelper(AIPATHCNXHELPERSYS_s *, AIPATHCNX_s *, unsigned char, void *, unsigned char) {
+void AIPathCnxControllerDestroy(AIPATHCNXCONTROLSYS_s *system, AIPATHCNXCONTROLLER_s *controller) {
+    if (system == NULL || controller == NULL) {
+        return;
+    }
+    NuLinkedListRemove(&system->active_controllers, &controller->links);
+    memset(controller, 0, sizeof(*controller));
+    NuLinkedListAppend(&system->available_controllers, &controller->links);
+}
+
+void AIPathCnxSetTemporaryBlock(AIPATH_s *path, char *from_name, char *to_name, i32 blocked) {
+    if (path == NULL || from_name == NULL || to_name == NULL) {
+        return;
+    }
+    AIPATHNODE *from = AIPathFindNode(NULL, path, from_name);
+    AIPATHNODE *to = AIPathFindNode(NULL, path, to_name);
+    if (from == NULL || to == NULL || from->connections == NULL) {
+        return;
+    }
+    const u8 to_index = static_cast<u8>(to - path->nodes);
+    for (i32 index = 0; index < from->connection_count; ++index) {
+        AIPATHCNX *connection = from->connections[index];
+        for (i32 direction = 0; direction < 2; ++direction) {
+            if (connection->node_indices[direction] == to_index) {
+                if (blocked != 0) {
+                    connection->traversal_flags[direction] |= 0x80000000u;
+                } else {
+                    connection->traversal_flags[direction] &= 0x7fffffffu;
+                }
+                return;
+            }
+        }
+    }
+}
+
+AIPATHCNXHELPER_s *AIPathCnxHelperSys_AddHelper(AIPATHCNXHELPERSYS_s *system, AIPATHCNX_s *connection, u8 direction,
+                                                void *target, u8 type) {
+    if (system == NULL || system->helper_count >= system->field_0x00 || target == NULL || connection == NULL) {
+        return NULL;
+    }
+
+    for (i32 index = 0; index < system->helper_count; ++index) {
+        AIPATHCNXHELPER_s *helper = &system->helpers[index];
+        if (helper->connection == connection && helper->type == type && helper->target == target) {
+            if (helper->direction != direction) {
+                helper->direction = 0xff;
+            }
+            return helper;
+        }
+    }
+
+    AIPATHCNXHELPER_s *helper = &system->helpers[system->helper_count++];
+    helper->connection = connection;
+    helper->target = target;
+    helper->direction = direction;
+    helper->type = type;
+    return helper;
 }
 
 void pathEditorDrawConnectionInfo(nuvec_s *, float, nuvec_s *, u32, i32) {
 }
 
-void AIPathCnxControllerSetOnRange(AIPATHCNXCONTROLLER_s *, i32, i32) {
+void AIPathCnxControllerSetOnRange(AIPATHCNXCONTROLLER_s *controller, i32 start_frame, i32 end_frame) {
+    if (controller == NULL) {
+        return;
+    }
+
+    i32 animation_end = 1;
+    switch (controller->target_type) {
+        case 0:
+            animation_end = static_cast<i32>(NuSpecialGetAnimEndFrame(&controller->special));
+            break;
+        case 1:
+            if (controller->target != NULL) {
+                u8 *animation = *reinterpret_cast<u8 **>(static_cast<u8 *>(controller->target) + 0x58);
+                animation_end = animation != NULL ? static_cast<i32>(*reinterpret_cast<f32 *>(animation + 8)) : 1;
+            }
+            break;
+        case 2:
+        case 3:
+        case 4:
+        case 6:
+            return;
+        case 5:
+            animation_end =
+                fakeanimendframe != NULL ? static_cast<i32>(fakeanimendframe[controller->fake_animation_id]) : 1;
+            break;
+        default:
+            animation_end = 1;
+            break;
+    }
+    if (animation_end > 1024) {
+        animation_end = 1024;
+    }
+
+    i32 first = start_frame == -1 ? animation_end : start_frame == -2 ? animation_end - 1 : start_frame;
+    i32 last = end_frame == -1 ? animation_end : end_frame == -2 ? animation_end - 1 : end_frame;
+    first = first > 0 ? first - 1 : 0;
+    last = last < animation_end ? last : animation_end;
+    for (i32 frame = first; frame < last; ++frame) {
+        controller->on_frames[frame >> 5] |= 1u << (frame & 31);
+    }
 }

@@ -361,7 +361,7 @@ bool g_forceSysMemVbs = false;
 i32 g_forceETC1 = 0;
 i32 Reflections_On = 1;
 i32 disable_narrow_socks = 0;
-i32 script_spline_selected = 0;
+nugspline_s *script_spline_selected = NULL;
 f32 character_farclip = 0.0f;
 f32 CutBorderScale = 0.0f;
 i32 LEGOCAMMODE_DOORCUT = -1;
@@ -1261,7 +1261,18 @@ LEVELSPLINE SplTab[26] = {
     {NULL, "mission_cam", 2, 2, -1, -1},
     {NULL, NULL, 0, 0, 0, 0},
 };
-u8 LSW_CharCategory[0x78]; // LSW character-category table
+CHARCAT_s LSW_CharCategory[10] = {
+    {"Jedi", 0x00000008, 0},
+    {"JediBaddie", 0x0000000c, 0},
+    {"BountyHunter", 0x01100080, 0},
+    {"Teleport", 0x00040000, 0},
+    {"HighJump", 0, 0x00400000},
+    {"Astromech", 0x00000040, 0},
+    {"Protocol", 0x00000020, 0},
+    {"ZipUp", 0x00100080, 0},
+    {"Blaster", 0x00000080, 0},
+    {NULL, 0, 0},
+};
 extern i16 tCHEAT_EXTRATOGGLE;
 extern i16 tCHEAT_POO;
 extern i16 tCHEAT_DISGUISE;
@@ -1831,8 +1842,16 @@ i32 LEGO_AIPATHCNX_REQUIRESPERMISSION = 0;
 i32 LEGO_AIPATHCNX_NO_DESTINATION_CHECK = 0;
 i32 LEGO_AIPATHCNX_JUMP_NOW = 0;
 i32 LEGO_AIPATHCNX_DONT_JUMP_NOW = 0;
+f32 *fakeanimendframe = NULL;
+f32 *fakeanimframe = NULL;
+f32 ai_moveradius = 0.1f;
 i32 mechAutoJumpFlags = 0;
 i32 mechAutoJumpCantReachFlags = 0;
+i32 ai_fighting = 0;
+f32 aitol = 0.5f;
+f32 DEFAULT_MOVE_RANGE = 0.0f;
+f32 engagefiretime = 2.0f;
+f32 idealgoalrange = 1.5f;
 
 // Shared symbols recovered from the original global data surface.
 i32 NetPaused = 0;

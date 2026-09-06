@@ -31,16 +31,54 @@ void CharVariant_Find(char *) {
 void CharVariants_Init(CHARVARIANT *, i32) {
 }
 
-void CharCategories_Init(CHARCATEGORY *) {
+void CharCategories_Init(CHARCATEGORY *categories) {
+    CharCategory = reinterpret_cast<CHARCAT_s *>(categories);
+    CHARCATEGORYCOUNT = 0;
+    if (CharCategory != NULL) {
+        while (CharCategory[CHARCATEGORYCOUNT].name != NULL) {
+            ++CHARCATEGORYCOUNT;
+        }
+    }
 }
 
 void CanWearHatsInFreePlay(i32) {
 }
 
-void CharCategory_FindByName(char *) {
+i32 CharCategory_FindByName(char *name) {
+    if (CharCategory != NULL && name != NULL) {
+        for (i32 index = 0; index < CHARCATEGORYCOUNT; ++index) {
+            if (NuStrICmp(CharCategory[index].name, name) == 0) {
+                return index;
+            }
+        }
+    }
+    return -1;
 }
 
-void CharCategory_IsCategory(GameObject_s *, i32) {
+i32 CharCategory_IsCategory(GameObject_s *object, i32 category) {
+    if (object == NULL || object->apiobj.character_data == NULL || category < 0 || category >= CHARCATEGORYCOUNT) {
+        return 0;
+    }
+
+    const CHARCAT_s &entry = CharCategory[category];
+    characterdata_s *character = object->apiobj.character_data;
+    if (entry.model_flags != 0) {
+        GAMECHARACTERDATA_s *runtime = static_cast<GAMECHARACTERDATA_s *>(character->field11_0x24);
+        if ((entry.model_flags & 8) != 0 && (runtime == NULL || static_cast<i8>(runtime->flags_094[1]) < 0)) {
+            return 0;
+        }
+        if ((character->model_flags & entry.model_flags) != entry.model_flags) {
+            return 0;
+        }
+    }
+
+    if (entry.game_flags != 0) {
+        GAMECHARACTERDATA_s *runtime = static_cast<GAMECHARACTERDATA_s *>(character->field11_0x24);
+        if (runtime == NULL || (runtime->flags_090 & entry.game_flags) != entry.game_flags) {
+            return 0;
+        }
+    }
+    return 1;
 }
 
 CHARCONFIG_s charconfig;

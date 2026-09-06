@@ -247,9 +247,9 @@ struct STATUSCOLLECTLIST_s {
 DECOMP_ASSERT(sizeof(STATUSCOLLECTLIST_s) == 0x10, "STATUSCOLLECTLIST size");
 
 struct CHARCAT_s {
-    undefined field0_0x0[4];
-    u32 field1_0x4;
-    i32 field2_0x8;
+    char *name;
+    u32 model_flags;
+    u32 game_flags;
 };
 
 struct ARCADEITEM_s {
@@ -508,7 +508,7 @@ extern i32 g_forceETC1;
 extern i32 texanimbits;
 extern i32 Reflections_On;
 extern i32 disable_narrow_socks;
-extern i32 script_spline_selected;
+extern nugspline_s *script_spline_selected;
 extern f32 character_farclip;
 extern f32 CutBorderScale;
 extern i32 LEGOCAMMODE_DOORCUT;
@@ -569,6 +569,28 @@ enum GAMEPAD_BUTTON_FLAGS {
 };
 extern u32 GAMEPAD_SKIP;
 extern i32 MiniCutCam;
+extern i32 ai_fighting;
+extern i32 LEGO_AIPATHCNX_FORGOODIES;
+extern i32 LEGO_AIPATHCNX_FORBADDIES;
+extern i32 LEGO_AIPATHCNX_JUMP;
+extern i32 LEGO_AIPATHCNX_DOUBLE_JUMP;
+extern i32 LEGO_AIPATHCNX_HIGH_JUMP;
+extern i32 LEGO_AIPATHCNX_R2D2GLIDE;
+extern i32 LEGO_AIPATHCNX_BLOCKAGE;
+extern i32 LEGO_AIPATHCNX_DONTTOGGLE;
+extern i32 LEGO_AIPATHCNX_FULLTERRAIN;
+extern i32 LEGO_AIPATHCNX_BIGJUMP;
+extern i32 LEGO_AIPATHCNX_REQUIRESPERMISSION;
+extern i32 LEGO_AIPATHCNX_NO_DESTINATION_CHECK;
+extern i32 LEGO_AIPATHCNX_JUMP_NOW;
+extern i32 LEGO_AIPATHCNX_DONT_JUMP_NOW;
+extern f32 *fakeanimendframe;
+extern f32 *fakeanimframe;
+extern f32 ai_moveradius;
+extern f32 aitol;
+extern f32 DEFAULT_MOVE_RANGE;
+extern f32 engagefiretime;
+extern f32 idealgoalrange;
 extern i32 LEGOCONTEXT_DROPIN;
 extern i32 LEGOCONTEXT_COMBO;
 extern i32 LEGOCONTEXT_JUMP;
@@ -990,7 +1012,7 @@ extern void (*AIPathCnxHelperSysInitFn)(WORLDINFO_s *);
 // ------------------------------------------------------------------------
 extern LEVELOBJECT ObjTab[0x2ee]; // level-object type table (.data @0x618240, 0xff-terminated)
 extern struct LEVELSPLINE SplTab[26];
-extern u8 LSW_CharCategory[0x78];
+extern CHARCAT_s LSW_CharCategory[10];
 extern CHEAT Cheat[45];
 extern u8 CharVariants_Game[0x5c];
 extern MemoryManager theMemoryManager;

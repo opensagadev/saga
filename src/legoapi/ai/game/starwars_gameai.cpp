@@ -2,6 +2,7 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/nucore/nustring.h"
 
 struct AIROW_s;
 struct AISYS_s;
@@ -98,7 +99,74 @@ void StarWars_GameAISysInit() {
 void StarWars_PrepareR2D2Glide(AIPACKET_s *, APIOBJECT_s *, i32) {
 }
 
-void StarWars_ParseAIPathCnxFlag(char *) {
+u32 StarWars_ParseAIPathCnxFlag(char *name) {
+    if (NuStrICmp(name, "DBLJUMP") == 0) {
+        return 0x00000002;
+    }
+    if (NuStrICmp(name, "R2D2GLIDE") == 0) {
+        return 0x00000004;
+    }
+    if (NuStrICmp(name, "ZIPUP") == 0) {
+        return 0x00000008;
+    }
+    if (NuStrICmp(name, "USEHATCH") == 0) {
+        return 0x00000010;
+    }
+    if (NuStrICmp(name, "JARJARJUMP") == 0) {
+        return 0x00000020;
+    }
+    if (NuStrICmp(name, "HOVERTUBE") == 0) {
+        return 0x00000040;
+    }
+    if (NuStrICmp(name, "SWAMP") == 0) {
+        return 0x00004000;
+    }
+    if (NuStrICmp(name, "TAKEOVER") == 0) {
+        return 0x00008000;
+    }
+    if (NuStrICmp(name, "VEHICLE") == 0) {
+        return 0x00010000;
+    }
+    if (NuStrICmp(name, "PARTY") == 0) {
+        return 0x00020000;
+    }
+    if (NuStrICmp(name, "FORGOODIES") == 0) {
+        return 0x00000080;
+    }
+    if (NuStrICmp(name, "FORBADDIES") == 0) {
+        return 0x00000100;
+    }
+    if (NuStrICmp(name, "OBSTACLE") == 0) {
+        return 0x20000000;
+    }
+    if (NuStrICmp(name, "JUMP_NOW") == 0) {
+        return 0x00000400;
+    }
+    if (NuStrICmp(name, "DONT_JUMP_NOW") == 0) {
+        return 0x00000800;
+    }
+    if (NuStrICmp(name, "BLOCKAGE") == 0) {
+        return 0x00040000;
+    }
+    if (NuStrICmp(name, "JUMP") == 0) {
+        return 0x00000001;
+    }
+    if (NuStrICmp(name, "DONTTOGGLE") == 0) {
+        return 0x00080000;
+    }
+    if (NuStrICmp(name, "FULLTERRAIN") == 0) {
+        return 0x00100000;
+    }
+    if (NuStrICmp(name, "AUTOJUMP") == 0) {
+        return 0x00200000;
+    }
+    if (NuStrICmp(name, "AUTODBLJUMP") == 0) {
+        return 0x00400000;
+    }
+    if (NuStrICmp(name, "AUTOHIGHJUMP") == 0) {
+        return 0x00800000;
+    }
+    return 0;
 }
 
 void StarWars_AutoSetAICapabilities(GameObject_s *object) {

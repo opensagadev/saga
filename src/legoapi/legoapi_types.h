@@ -374,20 +374,40 @@ struct AIGROUP_s;
 struct AILOCATOR_s;
 struct AIPACKET_s;
 struct AIPATHCNXCONTROLLER_s {
-    NULISTLNK links;
-    u8 pad_0x08[0xa8 - 0x08];
+    NULISTLNK links;                  // 0x00
+    AIPATHCNX_s *connection;          // 0x08
+    union {
+        void *target;                 // 0x0c, gizmo/cutscene/fake-animation target
+        nuhspecial_s special;         // 0x0c, target_type == 0
+        i32 fake_animation_id;        // 0x0c, target_type == 5
+    };
+    i32 gizmo_output;                 // 0x18
+    u32 on_flags;                     // 0x1c
+    u32 off_flags;                    // 0x20
+    u32 on_frames[32];                // 0x24, one bit per frame (maximum 1024)
+    u8 target_type;                   // 0xa4
+    u8 path_index;                    // 0xa5
+    u8 flags;                         // 0xa6
+    u8 padding_0xa7;
 };
 DECOMP_ASSERT(sizeof(AIPATHCNXCONTROLLER_s) == 0xa8, "AIPATHCNXCONTROLLER_s size");
+DECOMP_ASSERT(offsetof(AIPATHCNXCONTROLLER_s, connection) == 0x08, "AI path controller connection offset");
+DECOMP_ASSERT(offsetof(AIPATHCNXCONTROLLER_s, on_frames) == 0x24, "AI path controller frame mask offset");
+DECOMP_ASSERT(offsetof(AIPATHCNXCONTROLLER_s, flags) == 0xa6, "AI path controller flags offset");
 struct AIPATHCNXCONTROLSYS_s {
     i32 controller_count;
     AIPATHCNXCONTROLLER_s *controllers;
     NULISTHDR available_controllers;
-    i32 field_0x10;
-    i32 field_0x14;
+    NULISTHDR active_controllers;
 };
 DECOMP_ASSERT(sizeof(AIPATHCNXCONTROLSYS_s) == 0x18, "AIPATHCNXCONTROLSYS_s size");
 struct AIPATHCNXHELPER_s {
-    u8 data[0x10];
+    AIPATHCNX_s *connection;
+    void *target;
+    u8 direction;
+    u8 type;
+    u8 padding_0x0a[2];
+    f32 jump_off_dy;
 };
 DECOMP_ASSERT(sizeof(AIPATHCNXHELPER_s) == 0x10, "AIPATHCNXHELPER_s size");
 struct AIPATHCNXHELPERSYS_s {
