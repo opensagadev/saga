@@ -189,6 +189,16 @@ _ZL9count_leni
 _ZL15MoveAnim_ManageP12GameObject_sfii
 _ZL35GizObstacle_SatisfyingTerrainChecksP13GIZOBSTACLE_sP12GameObject_s
 
+# Current PlayerCamPos and DrawParaphernalia bodies are inlined into their
+# callers at O3. BlockCode is emitted as a constant-propagated clone.
+_ZL12PlayerCamPosP12GameObject_sP7nuvec_sS2_
+_ZL17DrawParaphernaliaP12GameObject_s
+_ZL9BlockCodeP12GameObject_siiii
+
+# DrawLightningBolts remains an empty placeholder, eliminated at O3. This is
+# an outstanding implementation gap, not a completed or matched function.
+_ZL18DrawLightningBoltsP12GameObject_sS0_i
+
 # glibc symbols
 sprintf
 strstr
