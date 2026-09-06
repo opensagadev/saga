@@ -250,7 +250,7 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
         }
 
         force->animation_speed = SeekValF(force->animation_speed, 1.0f, 5.0f);
-        if (being_used) {
+        if (being_used || (force->runtime_flags & GIZFORCE_RUNTIME_PENDING_COMPLETION) != 0) {
             force->runtime_flags &= static_cast<u8>(~GIZFORCE_RUNTIME_COMPLETION_RELEASED);
             GizForce_PlayForwards(force);
             if ((force->progress_flags & GIZFORCE_PROGRESS_ANIMATION_REVERSED) == 0) {

@@ -10,6 +10,7 @@
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/gizmos/traps/gizforce.h"
 #include "legoapi/gizmos/trigger/gizspecial.h"
 #include "legoapi/gizmos/object/gizobstacles.h"
 #include "legoapi/items/base/apiobject.h"
@@ -80,12 +81,14 @@ static __used__ f32 Condition_EmptyTakeOver(AISYS_s *, AISCRIPTPROCESS_s *, AIPA
     return 0;
 }
 
-static __used__ f32 Condition_ForceComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
+static f32 Condition_ForceComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
+    return force != NULL && GizForce_Complete(force) != 0 ? 1.0f : 0.0f;
 }
 
-static __used__ f32 Condition_ForceFinished(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
+static f32 Condition_ForceFinished(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
+    return force != NULL && GizForce_AnimComplete(force) != 0 ? 1.0f : 0.0f;
 }
 
 static __used__ f32 Condition_GotLocatorSet(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *, char *, void *) {
@@ -1016,8 +1019,9 @@ static __used__ f32 Condition_CanFightLikeAJedi(AISYS_s *, AISCRIPTPROCESS_s *, 
     return 0;
 }
 
-static __used__ void *Condition_ForceCompleteInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
+static void *Condition_ForceCompleteInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, force_gizmotype_id, name);
+    return gizmo != NULL ? gizmo->object : NULL;
 }
 
 static __used__ void *Condition_HintAvailableInit(AISYS_s *, char *, AISCRIPT_s *) {
@@ -1854,6 +1858,10 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_OFF_SCREEN_TIMER].init_fn = Condition_OffScreenTimerInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_SPECIAL_AT_START].eval_fn = Condition_ObstacleAtStart;
             lego_aiconditiondefs[LEGO_AI_CONDITION_SPECIAL_AT_START].init_fn = Condition_GizSpecialInit;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_FORCE_COMPLETE].eval_fn = Condition_ForceComplete;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_FORCE_COMPLETE].init_fn = Condition_ForceCompleteInit;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_FORCE_FINISHED].eval_fn = Condition_ForceFinished;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_FORCE_FINISHED].init_fn = Condition_ForceCompleteInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CATEGORY_IS].init_fn = Condition_CategoryIsInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_NUM_IN_SET_ALIVE].eval_fn = Condition_NumInSetAlive;
             lego_aiconditiondefs[LEGO_AI_CONDITION_NUM_IN_SET_ALIVE].init_fn = Condition_IsSetAliveInit;
