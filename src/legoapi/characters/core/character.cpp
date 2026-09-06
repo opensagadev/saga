@@ -107,6 +107,7 @@ extern "C" {
     i16 id_SUPERBATTLEDROID = -1;
     i16 id_BOBAFETT = -1;
     i16 id_TRAININGREMOTE = -1;
+    i16 id_ATAT = -1;
     i16 id_SERVICECAR = -1;
     i16 id_DRAGBOMB = -1;
     i16 id_CLONEWALKER = -1;
@@ -320,6 +321,7 @@ extern "C" {
         {"superbattledroid", &id_SUPERBATTLEDROID},
         {"bobafett", &id_BOBAFETT},
         {"trainingremote", &id_TRAININGREMOTE},
+        {"atat", &id_ATAT},
         {"service_car", &id_SERVICECAR},
         {"dragbomb", &id_DRAGBOMB},
         {"clonewalker", &id_CLONEWALKER},
