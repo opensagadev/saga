@@ -1,12 +1,17 @@
 #include "gamelib_util_types.h"
 
 #include "globals.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/numath/nufloat.h"
 
 NUCOLOUR3 flashCol = {2.0f, 2.0f, 2.0f};
 bool TouchHacks::TouchControlsActive;
 extern i32 BonusArea;
+extern "C" i16 id_GRABCONTROL, id_WICKET, id_EWOK;
 
 void TouchHacks::AiPlayerTakeDamageOnKillRescue(GameObject_s &) {
 }
@@ -20,7 +25,11 @@ void TouchHacks::CalculateJumpVelToHitPointDblJump(GameObject_s &, VuVec const &
 void TouchHacks::CalculateXZVelForArcToHitPoint(VuVec const &, VuVec const &, float, float) {
 }
 
-void TouchHacks::CanBlowupBeBlownUp(GIZMOBLOWUP_s &, i32) {
+i32 TouchHacks::CanBlowupBeBlownUp(GIZMOBLOWUP_s &blowup, i32 hit_type) {
+    if (hit_type != 1) {
+        return 1;
+    }
+    return (blowup.draw_flags >> 7) & 1;
 }
 
 void TouchHacks::CanForceTargetObj(GameObject_s &, GameObject_s &) {
@@ -129,7 +138,11 @@ void TouchHacks::PlaySmartBombBuildupEffects(GameObject_s &, float, float) {
 void TouchHacks::ShouldAutoGrabDragBomb(GameObject_s &) {
 }
 
-void TouchHacks::ShouldBlock(GameObject_s &) {
+bool TouchHacks::ShouldBlock(GameObject_s &object) {
+    if (TouchControlsActive && object.incoming_melee != NULL && object.apiobj.field_0x27c == -1) {
+        return qrand() > 14999;
+    }
+    return true;
 }
 
 void TouchHacks::ShouldDeflectBolt(GameObject_s &, BOLT_s &) {
@@ -139,10 +152,15 @@ bool TouchHacks::ShouldFlash(float timer) {
     return timer > 0.0f && NuFmod(timer, 0.3f) < 0.15f;
 }
 
-void TouchHacks::ShouldKeepWeaponOut(GameObject_s &) {
+bool TouchHacks::ShouldKeepWeaponOut(GameObject_s &object) {
+    return TouchControlsActive && object.id != id_GRABCONTROL &&
+           (object.apiobj.flags_low & 0x80) != 0 && object.ai.opponent != NULL && object.character_context == -1;
 }
 
-void TouchHacks::ShouldPutWeaponAway(GameObject_s &) {
+bool TouchHacks::ShouldPutWeaponAway(GameObject_s &object) {
+    return TouchControlsActive && object.id != id_GRABCONTROL && object.id != id_WICKET && object.id != id_EWOK &&
+           (object.apiobj.flags_low & 0x80) != 0 && object.ai.opponent == NULL && object.weapon_out_timer > 5.0f &&
+           object.character_context == -1 && object.field_0xe31 != 1;
 }
 
 bool TouchHacks::SolveRoot(float a, float b, float c, float &root1, float &root2) {

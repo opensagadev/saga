@@ -111,6 +111,7 @@ extern "C" {
     i16 id_DRAGBOMB = -1;
     i16 id_CLONEWALKER = -1;
     i16 id_WICKET = -1;
+    i16 id_EWOK = -1;
     i16 id_CATAPULT = -1;
     i16 id_BASKETCANNON = -1;
     i16 id_BANTHA = -1;
@@ -184,6 +185,7 @@ extern "C" {
     i16 id_IMPERIALOFFICER = -1;
     i16 id_GRANDMOFFTARKIN = -1;
     i16 id_GONKDROID = -1;
+    i16 id_JAWA = -1;
     i16 id_MOONCAR = -1;
     i16 id_MAPCAR = -1;
     i16 id_WOOKIEFLYER = -1;
@@ -322,6 +324,7 @@ extern "C" {
         {"dragbomb", &id_DRAGBOMB},
         {"clonewalker", &id_CLONEWALKER},
         {"wicket", &id_WICKET},
+        {"ewok", &id_EWOK},
         {"catapult", &id_CATAPULT},
         {"basketcannon", &id_BASKETCANNON},
         {"bantha", &id_BANTHA},
@@ -395,6 +398,7 @@ extern "C" {
         {"imperialofficer", &id_IMPERIALOFFICER},
         {"grandmofftarkin", &id_GRANDMOFFTARKIN},
         {"gonkdroid", &id_GONKDROID},
+        {"jawa", &id_JAWA},
         {"mooncar", &id_MOONCAR},
         {"mapcar", &id_MAPCAR},
         {"wookieflyer", &id_WOOKIEFLYER},
@@ -701,10 +705,6 @@ CharacterObjectInterface::~CharacterObjectInterface() {
 static __used__ void NewCharacterIdle(GameObject_s *, i32) {
 }
 
-static __used__ bool IsWearingBackPack_Game(GameObject_s *) {
-    return false;
-}
-
 static __used__ void ExtraDieSfx_LSW(GameObject_s *) {
 }
 
@@ -727,17 +727,6 @@ static __used__ int IsGrabbable(GameObject_s *) {
     return 0;
 }
 
-static __used__ void ForcePushed_MoveCode(GameObject_s *) {
-}
-
-static __used__ int Fighting_WeaponInAction_Game(GameObject_s *) {
-    return 0;
-}
-
-static __used__ int Fighting_WeaponOutAction_Game(GameObject_s *) {
-    return 0;
-}
-
 static __used__ void GameObjectForceApart2D(APIOBJECT_s *, APIOBJECT_s *) {
 }
 
@@ -745,16 +734,7 @@ static __used__ bool FindSlamOrigin_UseCPos(GameObject_s *) {
     return false;
 }
 
-static __used__ void DrawWeapons(GameObject_s *, int, float) {
-}
-
 static __used__ void DrawCharacterAttachments(GameObject_s *, numtx_s *) {
-}
-
-static __used__ void DrawWeapon_SetSabreObjects(GameObject_s *, int, int, int, int, int *, int *) {
-}
-
-static __used__ void CharConfig(int, char *, char *, variptr_u *, variptr_u *, int, char *, int, int, nufpcomjmp_s *) {
 }
 
 static __used__ void AddToModelList(APICHARACTERMODELLIST_s *, int *, int, int, int, EXTRAMODEL *) {
@@ -941,7 +921,8 @@ extern "C" {
     // render path; DWA, locator/effect, transparency and random-shadow branches
     // remain separate pending transcriptions of their original helpers.
     i32 APIDrawCharacterModel(CHARACTERMODEL_s *model, CHARACTERDATA *, ANIMPACKET_s *animation, NUMTX *matrix, NUMTX *,
-                              NUMTX *reflection_matrix, i32, NUMTX *, GameObject_s *object, u32 flags,
+                              NUMTX *reflection_matrix, NUVEC *locator_positions, NUMTX *locator_matrices,
+                              GameObject_s *object, u32 flags,
                               NUJOINTANIM_s *joint_overrides, i32 joint_override_count, WORLDINFO_s *, f32,
                               NUMTX *output_matrices, i32, void *) {
         drawcharactermodel_locatorsupdated = 0;
@@ -1039,6 +1020,7 @@ extern "C" {
             NuHGobjEval(model->hierarchy, joint_override_count,
                         reinterpret_cast<nuhgobjjointoverride_s *>(joint_overrides), output_matrices);
         }
+        StoreLocatorCoordinates(model, matrix, output_matrices, locator_positions, locator_matrices);
         drawcharactermodel_locatorsupdated = 1;
 
         if (object != NULL && apicharsys != NULL && apicharsys->set_creature_lights != NULL) {

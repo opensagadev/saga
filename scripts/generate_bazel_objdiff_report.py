@@ -362,7 +362,8 @@ def build_custom_report(original: Path, report: dict, units: list[dict]) -> dict
         candidates = details_by_key.get((offset, symbol["name"]), [])
         detail = candidates[0] if candidates else None
         metadata = detail.get("metadata", {}) if detail else {}
-        score = detail.get("fuzzy_match_percent") if detail else None
+        # Protobuf JSON omits scalar fields whose value is zero.
+        score = detail.get("fuzzy_match_percent", 0.0) if detail is not None else None
         candidate_units = sorted(symbol_units.get(symbol["name"], set()))
         record = {
             "name": symbol["name"],

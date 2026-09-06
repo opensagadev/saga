@@ -2,6 +2,8 @@
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nucore/nuhgobj.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
 #include "globals.h"
@@ -118,7 +120,12 @@ i32 OnOrInsidePlane(nuvec_s *point, nuvec_s *plane_point, nuvec_s *plane_normal,
 void PackCharIntoInt(char, char, char, char) {
 }
 
-void TerCrossProduct(nuvec_s *, nuvec_s *) {
+NUVEC TerCrossProduct(NUVEC *a, NUVEC *b) {
+    NUVEC result;
+    result.x = a->y * b->z - a->z * b->y;
+    result.y = a->z * b->x - b->z * a->x;
+    result.z = a->x * b->y - b->x * a->y;
+    return result;
 }
 
 void DistanceToLineXZ(nuvec_s *, nuvec_s *, nuvec_s *) {
@@ -156,10 +163,24 @@ void UnpackShortFromInt(i32, i16 &, i16 &) {
 void AnglesBetweenPoints(nuvec_s *, nuvec_s *, u16 *, u16 *) {
 }
 
-void LineIntersectCircle(nuvec_s *, nuvec_s *, nuvec_s *, float) {
+bool LineIntersectCircle(NUVEC *origin, NUVEC *direction, NUVEC *center, f32 radius_squared) {
+    f32 x = center->x - origin->x;
+    f32 z = center->z - origin->z;
+    f32 projection = direction->x * x + direction->z * z;
+    if (projection >= 0.0f) return x * x + z * z - projection * projection <= radius_squared;
+    return false;
 }
 
-void LineIntersectSphere(nuvec_s *, nuvec_s *, nuvec_s *, float, float *) {
+i32 LineIntersectSphere(NUVEC *origin, NUVEC *direction, NUVEC *center, f32 radius_squared, f32 *distance_squared) {
+    f32 x = center->x - origin->x;
+    f32 y = center->y - origin->y;
+    f32 z = center->z - origin->z;
+    f32 projection = direction->x * x + direction->y * y + direction->z * z;
+    if (projection < 0.0f) return 0;
+    f32 distance = x * x + y * y + z * z - projection * projection;
+    if (radius_squared < distance) return 0;
+    if (distance_squared != NULL) *distance_squared = distance;
+    return 1;
 }
 
 void LineToPlaneDistance(VuVec &, VuVec &, VuVec &) {
@@ -171,10 +192,47 @@ void LineToPointDistance(VuVec &, VuVec &, VuVec &, VuVec *) {
 void RatioBetweenEdgesXZ(nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *) {
 }
 
-void SphereSphereOverlap(nuvec_s *, float, nuvec_s *, float) {
+bool SphereSphereOverlap(NUVEC *a, f32 radius_a, NUVEC *b, f32 radius_b) {
+    const f32 x = b->x - a->x;
+    const f32 y = b->y - a->y;
+    const f32 z = b->z - a->z;
+    const f32 radius = radius_b + radius_a;
+    return x * x + y * y + z * z <= radius * radius;
 }
 
-void CalcAveragePosAndRad(GIZBUILDIT_s &, VuVec &, float &, bool) {
+void CalcAveragePosAndRad(GIZBUILDIT_s &buildit, VuVec &position, float &radius, bool include_built) {
+    u32 first = 0;
+    if (!include_built) first = buildit.built_object_count;
+    position = VuVec(0, 0, 0, 1);
+    radius = 0.0f;
+    i32 count = 0;
+    for (u32 i = first; i < buildit.anim_object_count; ++i) {
+        GAMEANIMOBJ_s *object = buildit.anim_objects[i];
+        if (object != NULL) {
+            NUMTX *matrix = NuSpecialGetMtx(&object->special);
+            ++count;
+            position.x += matrix->m30;
+            position.y += matrix->m31;
+            position.z += matrix->m32;
+        }
+    }
+    position.x /= static_cast<f32>(count);
+    position.y /= static_cast<f32>(count);
+    position.z /= static_cast<f32>(count);
+    f32 maximum = 0.0f;
+    for (u32 i = first; i < buildit.anim_object_count; ++i) {
+        GAMEANIMOBJ_s *object = buildit.anim_objects[i];
+        if (object != NULL) {
+            NUMTX *matrix = NuSpecialGetMtx(&object->special);
+            const f32 x = position.x - matrix->m30;
+            const f32 z = position.z - matrix->m32;
+            const f32 distance = x * x + 0.0f + z * z;
+            if (maximum <= distance) maximum = distance;
+        }
+    }
+    if (maximum > 0.0f) maximum = NuFsqrt(maximum);
+    radius = maximum;
+    if (buildit.radius_scale > 0.0f) radius = maximum * buildit.radius_scale;
 }
 
 void LineToPlaneIntersecion(VuVec &, VuVec &, VuVec &, VuVec *) {

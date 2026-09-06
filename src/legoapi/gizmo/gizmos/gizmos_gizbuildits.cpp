@@ -6,6 +6,7 @@
 #include "legoapi/render/fx.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/numath/nuvec.h"
 
 void (*GizBuildIt_FinishFn)(GIZBUILDIT_s *) = NULL;
 i32 (*GizBuildit_AutoBuildPosFn)(void *, NUVEC *, NUVEC *, u16 *) = NULL;
@@ -144,8 +145,40 @@ void GizBuildIt_SetToStart(GIZBUILDIT_s *buildit, i32 emit_debris, i32 keep_buil
 void GizBuildIt_AnyReacting(WORLDINFO_s *) {
 }
 
-GIZBUILDIT_s *GizBuildIt_FindNearest(WORLDINFO_s *, GameObject_s *, BUILDIT_FIND_ENUM, i32) {
-    return NULL;
+GIZBUILDIT_s *GizBuildIt_FindNearest(WORLDINFO_s *world, GameObject_s *player, BUILDIT_FIND_ENUM mode, i32 shadow) {
+    GIZBUILDITSYS_s *system = world->giz_buildit_sys;
+    if (system == NULL || player == NULL) return NULL;
+    NUVEC position = player->apiobj.collision_position;
+    const f32 bottom = player->apiobj.lower_position.y;
+    const f32 top = player->apiobj.upper_position.y;
+    GIZBUILDIT_s *nearest = NULL;
+    f32 nearest_distance = 1000000.0f;
+    GIZBUILDIT_s *buildit = system->buildits;
+    for (i32 i = 0; i < world->giz_buildit_sys->count; ++i, ++buildit) {
+        if (mode != BUILDIT_FIND_ANY) {
+            if ((buildit->availability_flags & GIZBUILDIT_AVAILABILITY_VISIBLE) == 0 ||
+                (buildit->availability_flags & GIZBUILDIT_AVAILABILITY_ACTIVE) == 0 ||
+                ((buildit->state_flags & 0x80) != 0 && shadow == 0)) continue;
+            if (mode == BUILDIT_FIND_AVAILABLE) {
+                if (buildit->build_state != 0 || LEGOCONTEXT_BUILDIT == -1) continue;
+                i32 occupied = 0;
+                for (i32 p = 0; p < 8; ++p) {
+                    if (Player[p] != NULL && Player[p]->build_context == LEGOCONTEXT_BUILDIT &&
+                        Player[p]->field_0x788 == buildit) occupied = 1;
+                }
+                if (occupied != 0) continue;
+            }
+        }
+        const f32 height = static_cast<f32>(static_cast<u32>(buildit->progress)) / 100.0f * buildit->bounds_radius;
+        if (top < buildit->start_position.y - height || buildit->start_position.y + height < bottom) continue;
+        const f32 radius = buildit->bounds_radius + 0.3f;
+        const f32 distance = NuVecXZDistSqr(&buildit->start_position, &position, NULL);
+        if (distance < radius * radius && distance < nearest_distance) {
+            nearest_distance = distance;
+            nearest = buildit;
+        }
+    }
+    return nearest;
 }
 
 void GizBuildIt_SetStepTime(GIZBUILDIT_s *buildit, GameObject_s *player) {
@@ -162,7 +195,15 @@ void GizBuildIts_TotalScore(void *) {
 void GizBuildIts_UpdateHint(HINT_s *) {
 }
 
-void GizBuildIt_SetHeadTarget(GIZBUILDIT_s *, GameObject_s *) {
+void SetHeadTarget(GameObject_s *, NUVEC *, i8, f32, f32, f32);
+
+void GizBuildIt_SetHeadTarget(GIZBUILDIT_s *buildit, GameObject_s *player) {
+    if (buildit->anim_object_count != 0) {
+        u32 index = buildit->built_object_count;
+        if (buildit->anim_object_count <= index) index = buildit->anim_object_count - 1;
+        GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[index]->object_data);
+        SetHeadTarget(player, reinterpret_cast<NUVEC *>(&data->start_mtx.m30), 0, 2.0f, 1.0f, 2.0f);
+    }
 }
 
 void GizBuildItPushAwayFromEnd(GameObject_s *) {
@@ -172,9 +213,13 @@ void GizBuildItPushAwayFromStart(GameObject_s *, GIZBUILDIT_s *) {
 }
 
 void GIZBUILDIT_s::ClearMechObjectInterface() {
+    if (mech_object_interface != NULL) delete mech_object_interface;
 }
 
-void GIZBUILDIT_s::GetMechObjectInterface() {
+MechObjectInterface *GIZBUILDIT_s::GetMechObjectInterface() {
+    if (mech_object_interface != NULL) return mech_object_interface;
+    new GizBuildItObjectInterface(*this);
+    return mech_object_interface;
 }
 
 // Static build-it helper callbacks. Moved from gizmisc_stubs.cpp.

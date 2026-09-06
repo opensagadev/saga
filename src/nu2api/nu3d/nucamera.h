@@ -49,6 +49,8 @@ extern "C" {
 
     extern NUMTX vpc_sci_mtx;
     extern NUMTX vpc_vport_mtx;
+    extern NUMTX pc_vport_mtx;
+    extern f32 nucamera_farclip_hack;
 
     extern NUCLIPPLANES ClipPlanes;
 
@@ -67,6 +69,8 @@ extern "C" {
 
     void NuCameraSet(NUCAMERA *cam);
     void NuCameraSetEx(NUCAMERA *cam, i32 fast);
+    void NuCameraSetVPortClipMtx(NUMTX *out, NUMTX *view, NUCAMERA *camera, i32 fast);
+    void NuCameraSetScissorClipMtx(NUMTX *out, NUMTX *view, NUCAMERA *camera, i32 fast);
     void NuCameraSetProjectionMtx(NUMTX *mtx, f32 fov, f32 aspect, f32 near_clip, f32 far_clip);
 
     NUCAMERA *NuCameraGetCam(void);

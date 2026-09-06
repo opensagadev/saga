@@ -73,9 +73,33 @@ struct spacelevel_s;
 struct CHARSCENE_s;
 
 struct BOLTTYPE_s {
-    u8 data[0xa4];
+    char name[16];
+    f32 field_10;
+    f32 field_14;
+    f32 field_18;
+    f32 field_1c;
+    f32 field_20;
+    f32 field_24;
+    i32 field_28;
+    i32 field_2c;
+    i32 field_30;
+    i32 field_34;
+    i16 field_38;
+    i16 field_3a;
+    u8 field_3c;
+    u8 field_3d;
+    u16 field_3e;
+    u8 pad_40[0x18];
+    char *hit_sfx;
+    char *shoot_sfx;
+    u32 field_60;
+    i16 hit_sfx_id;
+    i16 shoot_sfx_id;
+    u8 pad_68[0x3c];
 };
 DECOMP_ASSERT(sizeof(BOLTTYPE_s) == 0xa4, "BOLTTYPE_s size");
+DECOMP_ASSERT(offsetof(BOLTTYPE_s, hit_sfx) == 0x58, "BOLTTYPE hit sound offset");
+DECOMP_ASSERT(offsetof(BOLTTYPE_s, hit_sfx_id) == 0x64, "BOLTTYPE hit sound id offset");
 
 struct LEVELSFXENTRY_s {
     i16 id;

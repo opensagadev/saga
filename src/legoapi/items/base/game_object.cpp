@@ -1,6 +1,7 @@
 #include "legoapi/world/world_shared.h"
 
 #include "decomp.h"
+#include "legoapi/render/core/rtl.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/core/input/gamepads.h"
@@ -215,6 +216,15 @@ i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
 }
 
 void InitGameObjectLights(void) {
+    for (i32 i = 0; i < 64; ++i) Obj[i].dynamic_light_id = -1;
+    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
+        GameObject_s *object = &Obj[i];
+        if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001) continue;
+        object->dynamic_light_id = rtlDynamicAlloc();
+        if (object->dynamic_light_id == -1) continue;
+        rtlDynamicSetType(object->dynamic_light_id, 2);
+        rtlDynamicEnable(object->dynamic_light_id, 0);
+    }
 }
 
 // Local (static) game-object behaviour codes and per-object helpers. Stubbed
@@ -236,9 +246,6 @@ static __used__ void PunchCode(GameObject_s *, i32, i32, i32, i32, f32) {
 }
 
 static __used__ void ShootCode(GameObject_s *, i32, i32, i32, i32, i32) {
-}
-
-static __used__ void SwipeCode(GameObject_s *, i32, i32) {
 }
 
 static __used__ void Punch_HitHold(GameObject_s *, GameObject_s *) {
@@ -284,10 +291,6 @@ static __used__ void TightRope_Attach(GameObject_s *, WORLDINFO_s *) {
 static __used__ void TightRope_MoveUpdate(GameObject_s *, i32) {
 }
 
-static __used__ i32 UsingExtraActions_Game(GameObject_s *) {
-    return 0;
-}
-
 static __used__ void ZipUp_GetStartPoint(GameObject_s *, nuvec_s *) {
 }
 
@@ -309,12 +312,6 @@ static __used__ i32 SpecialObjectFilter(void *) {
 }
 
 static __used__ void KilledTrooperCannon(GameObject_s *) {
-}
-
-static __used__ void DeactivatedCode(GameObject_s *) {
-}
-
-static __used__ void BlockCode(GameObject_s *, int, int, int, int) {
 }
 
 static __used__ void DodgeCode(GameObject_s *, int, int) {

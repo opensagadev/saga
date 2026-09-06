@@ -59,7 +59,3 @@ static void VuMtxTranspose(NUMTX *dst, NUMTX *src) {
     (void)dst;
     (void)src;
 }
-
-static void NuVecClear(NUVEC *v) {
-    (void)v;
-}

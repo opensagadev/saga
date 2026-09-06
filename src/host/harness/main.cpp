@@ -63,7 +63,7 @@ namespace {
         printf("  --no-msaa              Disable native-host 4x multisampling\n");
         printf("  --no-portals           Disable portal culling for host comparison captures\n");
         printf("  --script-tail-ms <ms>  Wait after scripted input completes (default: 8000)\n");
-        printf("  --timeout-ms <ms>      Stop the window utility after this time (default: 90000)\n");
+        printf("  --timeout-ms <ms>      Stop the window utility after this time (default: unlimited)\n");
     }
 
     bool host_parse_milliseconds(const char *option, const char *value, u64 &result) {

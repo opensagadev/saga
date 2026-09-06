@@ -1,6 +1,7 @@
 
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numath/numtx.h"
+#include "nu2api/numath/nuvec4.h"
 
 extern "C" {
 
@@ -26,11 +27,21 @@ extern "C" {
     }
     void NuVec4MtxTransformHVU0(void) {
     }
-    void NuVec4MtxTransformVU0(void) {
+    void NuVec4MtxTransformVU0(NUVEC4 *out, NUVEC4 *in, NUMTX *matrix) {
+        f32 x = in->x * matrix->m00 + in->y * matrix->m10 + in->z * matrix->m20 + in->w * matrix->m30;
+        f32 y = in->x * matrix->m01 + in->y * matrix->m11 + in->z * matrix->m21 + in->w * matrix->m31;
+        f32 z = in->x * matrix->m02 + in->y * matrix->m12 + in->z * matrix->m22 + in->w * matrix->m32;
+        f32 w = in->x * matrix->m03 + in->y * matrix->m13 + in->z * matrix->m23 + in->w * matrix->m33;
+        out->x = x;
+        out->y = y;
+        out->z = z;
+        out->w = w;
     }
     void NuVec4MtxTransformVU0x2(void) {
     }
-    void NuVec4MtxTransformVU0x3(void) {
+    void NuVec4MtxTransformVU0x3(NUVEC4 *out, NUVEC4 *in, NUMTX *matrix) {
+        for (i32 i = 0; i < 3; ++i, ++out, ++in)
+            NuVec4MtxTransformVU0(out, in, matrix);
     }
     void NuVec4MtxTransformVU0x4(void) {
     }

@@ -18,6 +18,8 @@ extern "C" {
     void NuVec4Scale(NUVEC4 *v, NUVEC4 *v0, f32 k);
     f32 NuVec4Dot(NUVEC4 *v0, NUVEC4 *v1);
     void NuVec4MtxTransformH(NUVEC4 *v, NUVEC4 *v0, NUMTX *m0);
+    void NuVec4MtxTransformVU0(NUVEC4 *out, NUVEC4 *in, NUMTX *matrix);
+    void NuVec4MtxTransformVU0x3(NUVEC4 *out, NUVEC4 *in, NUMTX *matrix);
 #ifdef __cplusplus
 }
 #endif

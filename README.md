@@ -1,8 +1,9 @@
 # _saga_
 
-![Progress](https://img.shields.io/badge/matching-16.21%25-red)
+![Progress](https://img.shields.io/badge/matching-17.54%25-red)
 [![Bazel build](https://github.com/ttdecomp/saga/actions/workflows/build-bazel.yaml/badge.svg)](https://github.com/ttdecomp/saga/actions/workflows/build-bazel.yaml)
 [![Discord](https://img.shields.io/discord/1467775700894224555?color=%235865F2&logo=discord&logoColor=%23FFFFFF)](https://discord.gg/2HJuMtzA7q)
+[![status & wasm build](https://img.shields.io/badge/status%20%26%20wasm%20build-click%20here-orange?style=flat)](https://ttdecomp.github.io/saga/)
 
 This is a decompilation of _LEGO Star Wars: The Complete Saga_, based on the
 Android x86 release. The repository builds three variants:
@@ -58,29 +59,29 @@ See https://ttdecomp.github.io/saga/
 | Directory | Fuzzy % | Funcs % |
 |---|---:|---:|
 | `(root)` | 61.8% | 0.0% |
-| `MechInputTouch` | 8.5% | 4.2% |
+| `MechInputTouch` | 9.7% | 6.1% |
 | `editor` | 3.2% | 1.7% |
-| `gameapi` | 8.4% | 1.5% |
+| `gameapi` | 12.0% | 1.5% |
 | `gameframework` | 84.0% | 5.9% |
-| `gamelib` | 6.8% | 4.3% |
+| `gamelib` | 8.2% | 5.1% |
 | `java` | 10.5% | 0.0% |
-| `legoapi` | 15.4% | 7.2% |
-| `legoapi/actions` | 6.6% | 1.3% |
-| `legoapi/ai` | 13.0% | 0.0% |
-| `legoapi/audio` | 7.8% | 5.7% |
-| `legoapi/characters` | 11.3% | 4.0% |
-| `legoapi/core` | 24.9% | 6.6% |
+| `legoapi` | 16.7% | 7.4% |
+| `legoapi/actions` | 8.0% | 1.3% |
+| `legoapi/ai` | 13.1% | 0.0% |
+| `legoapi/audio` | 8.2% | 5.7% |
+| `legoapi/characters` | 15.6% | 4.9% |
+| `legoapi/core` | 25.7% | 6.6% |
 | `legoapi/cutscenes` | 11.3% | 2.3% |
-| `legoapi/gizmo` | 12.5% | 2.9% |
-| `legoapi/gizmos` | 40.2% | 28.0% |
-| `legoapi/items` | 9.1% | 3.9% |
-| `legoapi/menus` | 15.8% | 6.4% |
-| `legoapi/misc` | 8.9% | 3.5% |
+| `legoapi/gizmo` | 15.5% | 3.9% |
+| `legoapi/gizmos` | 40.3% | 28.0% |
+| `legoapi/items` | 10.1% | 3.9% |
+| `legoapi/menus` | 16.0% | 6.4% |
+| `legoapi/misc` | 9.7% | 4.0% |
 | `legoapi/props` | 28.4% | 2.2% |
-| `legoapi/render` | 12.1% | 6.2% |
-| `legoapi/world` | 23.9% | 6.4% |
-| `legogame` | 50.3% | 0.0% |
-| `nu2api` | 33.0% | 14.7% |
+| `legoapi/render` | 13.0% | 6.2% |
+| `legoapi/world` | 24.1% | 6.4% |
+| `legogame` | 52.0% | 14.3% |
+| `nu2api` | 33.9% | 14.8% |
 
 <!-- matching-table-end -->
 

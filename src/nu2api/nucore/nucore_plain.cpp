@@ -326,6 +326,8 @@ extern "C" {
             pmtx.m21 += global_camera.unknown_54;
         }
 
+        NuCameraSetVPortClipMtx(&vpc_vport_mtx, &vmtx, &global_camera, fast);
+        NuCameraSetScissorClipMtx(&vpc_sci_mtx, &vmtx, &global_camera, fast);
         NuMtxMulH(&vpmtx, &vmtx, &pmtx);
 
         if (fast == 0) {
@@ -378,13 +380,46 @@ extern "C" {
     }
     void NuCameraSetReflect(void) {
     }
-    void NuCameraSetScissorClipMtx(void) {
+    static void NuCameraBuildClipProjection(NUMTX *projection, NUCAMERA *camera, f32 x_scale, f32 y_scale) {
+        f32 far_clip = camera->unknown_64;
+        if (far_clip == 0.0f) far_clip = camera->far_clip;
+        far_clip -= nucamera_farclip_hack;
+        f32 near_clip = camera->unknown_60;
+        if (near_clip == 0.0f) near_clip = camera->near_clip;
+        const i32 angle = static_cast<i32>(camera->fov * 0.5f * 10430.378f);
+        const f32 cotangent = NuTrigTable[(angle + 0x4000) >> 1 & 0x7fff] / NuTrigTable[angle >> 1 & 0x7fff];
+        const f32 x = camera->aspect * cotangent * x_scale;
+        const f32 y = cotangent * y_scale;
+        memset(projection, 0, sizeof(*projection));
+        projection->m00 = x;
+        projection->m11 = y;
+        projection->m23 = 1.0f;
+        projection->m22 = (far_clip + near_clip) / (far_clip - near_clip);
+        projection->m32 = (far_clip * -2.0f * near_clip) / (far_clip - near_clip);
     }
-    void NuCameraSetVPortClipMtx(void) {
+    void NuCameraSetScissorClipMtx(NUMTX *out, NUMTX *view, NUCAMERA *camera, i32 fast) {
+        static NUMTX cmtx;
+        if (fast == 0) {
+            NUVIEWPORT *viewport = NuVpGetCurrentViewport();
+            NuCameraBuildClipProjection(&cmtx, camera, viewport->scissor_width, viewport->scissor_height);
+        }
+        NuMtxMulVU0(out, view, &cmtx);
+    }
+    void NuCameraSetVPortClipMtx(NUMTX *out, NUMTX *view, NUCAMERA *camera, i32 fast) {
+        if (fast == 0) {
+            NUVIEWPORT *viewport = NuVpGetCurrentViewport();
+            NuCameraBuildClipProjection(&pc_vport_mtx, camera, viewport->clip_width, viewport->clip_height);
+        }
+        NuMtxMulVU0(out, view, &pc_vport_mtx);
     }
     void NuCameraTransformScreen(void) {
     }
-    void NuCameraTransformScreenClip(NUVEC *, NUVEC *, i32, NUMTX *) {
+    void NuCameraTransformScreenClip(NUVEC *screen, NUVEC *world, i32 count, NUMTX *matrix) {
+        NUVEC *end = world + count;
+        NUMTX transform;
+        if (matrix == NULL) transform = vpc_vport_mtx;
+        else NuMtxMulH(&transform, matrix, &vpc_vport_mtx);
+        for (; world < end; ++world, ++screen) NuVecMtxTransformH(screen, world, &transform);
     }
     void NuCameraTransformScreenVU0(void) {
     }
@@ -2788,7 +2823,10 @@ extern "C" {
     }
     void NuHGobjPOILocalMtxFromIX(void) {
     }
-    void NuHGobjPOIMtx(void) {
+    void NuHGobjPOIMtx(nuhgobj_s *object, u8 index, NUMTX *world_matrix, NUMTX *joint_matrices, NUMTX *result) {
+        nuhgobjpoi_s *point = &object->points_of_interest[object->point_of_interest_map[index]];
+        NuMtxMulVU0(result, &point->local_matrix, &joint_matrices[point->joint_index]);
+        NuMtxMulVU0(result, result, world_matrix);
     }
     void NuHGobjPOIMtxFromIX(void) {
     }
@@ -3415,10 +3453,6 @@ extern "C" {
     }
     void NuLstAttachTail(void) {
     }
-    void NuLstCreateBuff(void) {
-    }
-    void NuLstGetByIdx(void) {
-    }
     void NuLstGetFree(void) {
     }
     void NuLstGetPrev(void) {
@@ -3452,7 +3486,7 @@ extern "C" {
     }
     void NuGetError(void) {
     }
-    void NuSevereWarning(void) {
+    void NuSevereWarning(const char *, ...) {
     }
     void NuWarningProlog(void) {
     }

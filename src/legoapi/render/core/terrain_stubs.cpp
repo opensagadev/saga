@@ -7,6 +7,7 @@
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nurand.h"
 #include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/nucamera.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -29,6 +30,16 @@ TERRSET *CurTerr;
 // Runtime-selected groups appended after the fixed terrain allocation.
 i32 curPickInst;
 i32 WallSplinesOnly;
+f32 TerrPlatScanDist = 10.0f;
+i32 cntrots;
+struct TERRAIN_PLATFORM_CALLBACK {
+    void (*function)(void *);
+    void *argument;
+};
+static i32 PlatCodeCallback;
+static TERRAIN_PLATFORM_CALLBACK PlatCallback[8];
+extern "C" i32 DeletePlatinst(i32 platform_index);
+void ScanTerrIDRemovePlat(i32 platform_index);
 
 u8 TerrainHitInfo[4];
 i32 plathitid;
@@ -290,11 +301,121 @@ extern "C" void TerrainSetCur(void *terrain) {
     CurTerr = static_cast<TERRSET *>(terrain);
 }
 extern "C" void TerrSetPlatScanDist(f32 dist) {
-    (void)dist;
+    TerrPlatScanDist = dist;
 }
 extern "C" void TerrainPlatformOldUpdate(void) {
+    if (CurTerr != NULL) {
+        curPickInst = 0;
+        for (i32 i = 0; i < CurTerr->removed_platform_count; ++i)
+            DeletePlatinst(CurTerr->removed_platforms[i]);
+        CurTerr->removed_platform_count = 0;
+        curSphereter = 0;
+        if (CurTerr->max_platforms <= 0) return;
+        TERRAIN_PLATFORM *platform = CurTerr->platforms;
+        TERRAIN_PLATFORM *end = platform + CurTerr->max_platforms;
+        for (; platform != end; ++platform) {
+            if (platform->scene_object != NULL)
+                platform->previous_matrix = *static_cast<NUMTX *>(platform->scene_object);
+        }
+    }
 }
 extern "C" void TerrainPlatformNewUpdate(void) {
+    if (CurTerr != NULL) {
+        for (i32 i = 0; i < 64; ++i) {
+            TERRAIN_TRACK_SLOT &slot = CurTerr->track_slots[i];
+            if (slot.id != NULL) {
+                if (slot.platform_contact_state > 0) --slot.platform_contact_state;
+                if (slot.wall_contact_state > 0) --slot.wall_contact_state;
+            }
+        }
+        for (i32 i = 0; i < 16; ++i) {
+            if (static_cast<i16>(CurTerr->index_levels[i].entry_count) > 0)
+                --CurTerr->index_levels[i].entry_count;
+        }
+    }
+    for (i32 i = 0; i < PlatCodeCallback; ++i)
+        PlatCallback[i].function(PlatCallback[i].argument);
+    PlatCodeCallback = 0;
+    cntrots = 0;
+    if (CurTerr == NULL) return;
+
+    const NUMTX &camera = global_camera.mtx;
+    const f32 negative_distance = -TerrPlatScanDist;
+    const f32 back_x = negative_distance * camera.m20 * 0.25f;
+    const f32 back_z = negative_distance * camera.m22 * 0.25f;
+    f32 min_x = camera.m00 * negative_distance * 0.25f + back_x;
+    f32 min_z = camera.m02 * negative_distance * 0.25f + back_z;
+    f32 max_x = camera.m00 * negative_distance * 0.35f + camera.m20 * TerrPlatScanDist;
+    f32 max_z = camera.m02 * negative_distance * 0.35f + camera.m22 * TerrPlatScanDist;
+    f32 x = min_x;
+    f32 z = min_z;
+    min_x = MIN(min_x, max_x);
+    min_z = MIN(min_z, max_z);
+    max_x = MAX(x, max_x);
+    max_z = MAX(z, max_z);
+    x = camera.m00 * TerrPlatScanDist * 0.35f + camera.m20 * TerrPlatScanDist;
+    z = TerrPlatScanDist * camera.m02 * 0.35f + camera.m22 * TerrPlatScanDist;
+    min_x = MIN(min_x, x);
+    max_x = MAX(max_x, x);
+    min_z = MIN(min_z, z);
+    max_z = MAX(max_z, z);
+    x = camera.m00 * TerrPlatScanDist * 0.25f + back_x;
+    z = TerrPlatScanDist * camera.m02 * 0.25f + back_z;
+    min_x = MIN(min_x, x) + (camera.m30 - 1.0f);
+    max_x = MAX(max_x, x) + (camera.m30 + 1.0f);
+    min_z = MIN(min_z, z) + (camera.m32 - 1.0f);
+    max_z = MAX(max_z, z) + (camera.m32 + 1.0f);
+    CurTerr->platform_scan_min.x = min_x;
+    CurTerr->platform_scan_min.z = min_z;
+    CurTerr->platform_scan_max.x = max_x;
+    CurTerr->platform_scan_max.z = max_z;
+    CurTerr->active_platform_count = 0;
+    TERRAIN_CELL &cell = CurTerr->cells[TERRAIN_PLATFORM_CELL];
+    i16 *group_index = CurTerr->group_indices + cell.first_group;
+    i16 *end = group_index + cell.group_count;
+    for (; group_index != end; ++group_index) {
+        TERRAIN_GROUP &group = CurTerr->groups[*group_index];
+        TERRAIN_PLATFORM &platform = CurTerr->platforms[group.scene_index];
+        if (platform.scene_transform != NULL) {
+            const u8 visibility = *static_cast<u8 *>(platform.scene_transform);
+            if ((platform.flags & TERRAIN_PLATFORM_FLAG_DISPLAY_LIST_BACKED) != 0) {
+                if ((visibility & 2) == 0) continue;
+            } else if ((visibility & 1) == 0) continue;
+        }
+        if (group.chunk_type == 0) continue;
+        NUMTX *matrix = static_cast<NUMTX *>(platform.scene_object);
+        if (matrix != NULL) {
+            if (platform.bounce_frames != 0) {
+                f32 velocity = platform.bounce_velocity - platform.bounce_damping * platform.bounce_velocity;
+                if (platform.bounce_frames >= 125)
+                    velocity = (platform.bounce_impulse - platform.bounce_damping * platform.bounce_velocity) +
+                               platform.bounce_velocity;
+                const f32 offset = platform.bounce_offset;
+                --platform.bounce_frames;
+                velocity += -offset * fabsf(offset) * platform.bounce_spring * 0.5f -
+                            platform.bounce_spring * offset;
+                platform.bounce_velocity = velocity;
+                platform.bounce_offset = velocity + offset;
+                matrix->m31 += platform.bounce_offset;
+            }
+            group.origin = *NUMTX_GET_ROW_VEC(matrix, 3);
+        }
+        const u8 flags = platform.flags;
+        if ((flags & TERRAIN_PLATFORM_FLAG_COLLIDED) != 0) platform.bounce_frames = 128;
+        platform.field_0x44 = 0;
+        platform.flags &= ~TERRAIN_PLATFORM_FLAG_COLLIDED;
+        if ((flags & TERRAIN_PLATFORM_FLAG_ROTATING) == 0) {
+            if (group.bounds_min.x + group.origin.x > max_x || group.origin.x + group.bounds_max.x < min_x ||
+                group.bounds_min.z + group.origin.z > max_z || group.origin.z + group.bounds_max.z < min_z)
+                continue;
+        } else {
+            if (group.origin.x - group.radius > max_x || group.origin.x + group.radius < min_x ||
+                group.origin.z - group.radius > max_z || group.origin.z + group.radius < min_z)
+                continue;
+        }
+        if (CurTerr->active_platform_count < 96)
+            CurTerr->active_platform_groups[CurTerr->active_platform_count++] = *group_index;
+    }
 }
 void *InitPartDebris(VARIPTR *buf, VARIPTR *buf_end, i32 param1, i32 param2, char **param3, i32 page) {
     (void)buf;
@@ -569,7 +690,10 @@ extern "C" {
     void DebrisDrawGlassEx(i32) {
     }
 
-    void DebrisEmitterMomentum(void) {
+    void DebrisEmitterMomentum(i32 handle, f32 x, f32 y, f32 z) {
+        if (handle != -1) {
+            debkeydata[handle].emitter_momentum = NUVEC{x, y, z};
+        }
     }
 
     void DebrisEmitterOrientation(i32 handle, i16 z, i16 y, i16 x) {
@@ -665,7 +789,10 @@ extern "C" {
         }
     }
 
-    void DebrisParticleMomentum(void) {
+    void DebrisParticleMomentum(i32 handle, f32 x, f32 y, f32 z) {
+        if (handle != -1) {
+            debkeydata[handle].momentum = NUVEC{x, y, z};
+        }
     }
 
     void DebrisPopulateInstance(i32 handle, f32 duration) {
@@ -779,7 +906,10 @@ extern "C" {
         }
     }
 
-    void DebrisRegisterCutoffCameraVec(void *) {
+    NUVEC *CutoffCameraVec = NULL;
+
+    void DebrisRegisterCutoffCameraVec(void *position) {
+        CutoffCameraVec = static_cast<NUVEC *>(position);
     }
 
     void DebrisReserveTrashableSpace(void) {
@@ -966,7 +1096,28 @@ extern "C" {
     void DebrisTypeStatusNormal(void) {
     }
 
-    void DeletePlatinst(i32) {
+    i32 DeletePlatinst(i32 index) {
+        if (index < 0 || index >= CurTerr->max_platforms) return 0;
+        TERRAIN_PLATFORM &platform = CurTerr->platforms[index];
+        if (platform.scene_object == NULL) return 0;
+        const i16 last_group = --CurTerr->group_count;
+        --CurTerr->group_index_count;
+        TERRAIN_GROUP &last = CurTerr->groups[last_group];
+        CurTerr->platforms[last.scene_index].terrain_group_index = platform.terrain_group_index;
+        CurTerr->groups[platform.terrain_group_index] = last;
+        last.chunk_type = -1;
+        platform.scene_object = NULL;
+        TERRAIN_CELL &cell = CurTerr->cells[TERRAIN_PLATFORM_CELL];
+        i16 *indices = CurTerr->group_indices + cell.first_group;
+        for (i32 i = 0; i < cell.group_count; ++i) {
+            if (indices[i] == last_group) {
+                indices[i] = CurTerr->group_indices[CurTerr->group_index_count];
+                break;
+            }
+        }
+        --cell.group_count;
+        ScanTerrIDRemovePlat(index);
+        return 1;
     }
 
     void DrawHitTerrain(void) {
@@ -975,14 +1126,52 @@ extern "C" {
     void DrawPlatform(void) {
     }
 
-    i32 FindPlatInst(i32) {
+    i32 FindPlatInst(i32 instance) {
+        if (instance != -1) {
+            for (i32 i = 0; i < CurTerr->max_platforms; ++i) {
+                TERRAIN_PLATFORM *platform = &CurTerr->platforms[i];
+                if (platform->scene_object != NULL && static_cast<i16>(platform->scene_object_index) == instance)
+                    return i;
+            }
+        }
         return -1;
     }
 
     void NewMSituTerrEx(void) {
     }
 
-    void NewPlatInst(void) {
+    i32 NewPlatInst(void *object, i32 instance) {
+        if (CurTerr == NULL || CurTerr->group_index_count >= CurTerr->max_group_indices ||
+            CurTerr->group_count >= CurTerr->max_groups || object == NULL || CurTerr->max_platforms <= 0) return -1;
+        i32 index = 0;
+        while (CurTerr->platforms[index].scene_object != NULL) {
+            if (++index == CurTerr->max_platforms) return -1;
+        }
+        for (i32 source = 0; source < CurTerr->max_platforms; ++source) {
+            TERRAIN_PLATFORM &original = CurTerr->platforms[source];
+            if (original.scene_object == NULL || static_cast<i16>(original.scene_object_index) != instance) continue;
+            const i16 group_index = CurTerr->group_count;
+            TERRAIN_GROUP &group = CurTerr->groups[group_index];
+            group = CurTerr->groups[original.terrain_group_index];
+            group.scene_index = index;
+            group.chunk_type = 1;
+            TERRAIN_PLATFORM &platform = CurTerr->platforms[index];
+            platform.scene_object = object;
+            platform.terrain_group_index = group_index;
+            platform.scene_object_index = instance;
+            platform.scene_transform = NULL;
+            platform.flags = (platform.flags & ~1) | (original.flags & 1);
+            CurTerr->group_indices[CurTerr->group_index_count++] = group_index;
+            platform.bounce_impulse = 0.0f;
+            platform.bounce_offset = 0.0f;
+            platform.bounce_velocity = 0.0f;
+            platform.bounce_damping = 0.0f;
+            platform.bounce_spring = 0.0f;
+            ++CurTerr->group_count;
+            ++CurTerr->cells[TERRAIN_PLATFORM_CELL].group_count;
+            return index;
+        }
+        return -1;
     }
 
     void NewPlatInstMSitu(void) {
@@ -1349,7 +1538,11 @@ extern "C" {
     void PlatInstGetHit(void) {
     }
 
-    void PlatInstRotate(i32, i32) {
+    void PlatInstRotate(i32 index, i32 rotate) {
+        if (index >= 0 && index < CurTerr->max_platforms) {
+            TERRAIN_PLATFORM &platform = CurTerr->platforms[index];
+            platform.flags = (platform.flags & ~1) | (rotate & 1);
+        }
     }
 
     void PlatInstSkinRegister(void) {
@@ -1358,7 +1551,15 @@ extern "C" {
     void PlatInstSkinRegisterEx(void) {
     }
 
-    void PlatOnOff(i32, i32) {
+    void PlatOnOff(i32 index, i32 enabled) {
+        if (CurTerr != NULL && index >= 0 && index < CurTerr->max_platforms) {
+            TERRAIN_GROUP &group = CurTerr->groups[CurTerr->platforms[index].terrain_group_index];
+            if (enabled != 0) {
+                group.chunk_type = 1;
+                return;
+            }
+            group.chunk_type = -1;
+        }
     }
 
     void PlatSkinEndReigster(void) {
@@ -1373,10 +1574,23 @@ extern "C" {
     void PlatformCrush(void) {
     }
 
-    void PlatformRemoveCallback(void) {
+    void PlatformRemoveCallback(void (*function)(void *)) {
+        for (i32 i = 0; i < PlatCodeCallback; ++i) {
+            if (PlatCallback[i].function == function) {
+                --PlatCodeCallback;
+                PlatCallback[i].function = PlatCallback[PlatCodeCallback].function;
+                PlatCallback[i].argument = PlatCallback[PlatCodeCallback].argument;
+                --i;
+            }
+        }
     }
 
-    void PlatformUpdateCallback(void) {
+    void PlatformUpdateCallback(void (*function)(void *), void *argument) {
+        if (PlatCodeCallback < 8) {
+            PlatCallback[PlatCodeCallback].function = function;
+            PlatCallback[PlatCodeCallback].argument = argument;
+            ++PlatCodeCallback;
+        }
     }
 
     void QuickNewRayCast(void) {

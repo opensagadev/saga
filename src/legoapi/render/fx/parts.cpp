@@ -1,7 +1,11 @@
 #include "legoapi/legoapi_types.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nurand.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/nu3d/nuspecial.h"
 
 #include <float.h>
 #include <math.h>
@@ -18,6 +22,15 @@ extern "C" {
     extern DEBRISMOMENTUMADJUSTER gencodetab[7];
     extern f32 globaltime;
     extern f32 panelglobaltime;
+    extern f32 timeincrement;
+    f32 CameraEmitterDistance(NUVEC *);
+    void SetSfxBit_On(i32);
+    void PlaySfxByIdEx(i32, NUVEC *, f32, f32);
+    void DebrisEmitterMomentum(i32, f32, f32, f32);
+    void DebrisParticleMomentum(i32, f32, f32, f32);
+    void AddFiniteShotDebrisEffect2(i32 *, i32, NUVEC *, NUVEC *, NUVEC *, i32);
+    void AddVariableShotDebrisEffectMtx3(i32, NUVEC *, NUVEC *, i32, NUMTX *, NUMTX *);
+    void AddVariableShotDebrisEffectMtx4(i32, NUVEC *, NUVEC *, i32, NUMTX *, NUMTX *, i16, u8);
     extern i32 debris_suspended;
     extern f32 debris_thinning_level;
     extern i32 forced_debris_thinning;
@@ -65,6 +78,10 @@ void RemoveChunkControlFromStack(debris_chunk_control_s *, debris_chunk_control_
 void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
 void DebrisGetControlStackLock();
 void DebrisReleaseControlStackLock();
+void FindAnglesZX(NUVEC *, u16 *, u16 *);
+extern f32 AreaPickupGravity;
+extern i16 temp_xrot;
+extern i16 temp_zrot;
 
 // Forward declarations for local (static) part/gizmo helper stubs.
 struct CUSTOMPIECEANIM;
@@ -217,7 +234,7 @@ extern "C" {
         }
         memset(&key.emission_position, 0, sizeof(key.emission_position));
         memset(&key.momentum, 0, sizeof(key.momentum));
-        memset(key.fields_1b4, 0, sizeof(key.fields_1b4));
+        memset(&key.emitter_momentum, 0, sizeof(key.emitter_momentum));
         key.orientation_dirty = 0.0f;
         key.cutoff_distance = 1000000.0f;
         key.field_2f2 = -1;
@@ -266,10 +283,52 @@ extern "C" {
         }
     }
 
-    void AddFiniteShotDebrisEffect(void) {
+    void AddFiniteShotDebrisEffect(i32 *handle, i32 effect, NUVEC *position, i32 count) {
+        AddFiniteShotDebrisEffect2(handle, effect, position, NULL, NULL, count);
     }
 
-    void AddFiniteShotDebrisEffect2(void) {
+    void AddFiniteShotDebrisEffect2(i32 *handle, i32 effect, NUVEC *position,
+                                  NUVEC *emitter_momentum, NUVEC *particle_momentum, i32 count) {
+        if (debris_suspended != 0) return;
+        AddDebrisEffect(handle, effect, position->x, position->y, position->z);
+        if (*handle == -1) return;
+        debkeydatatype_s &key = debkeydata[*handle];
+        key.field_1d4 = count;
+        const f32 now = debtab[effect]->time_group == 4 ? panelglobaltime : globaltime;
+        key.field_184 = 1;
+        key.field_1d8 = 0;
+        const f32 offset = key.emission_time - now;
+        key.emission_time -= offset;
+        key.field_1e4 -= offset;
+        key.emission_epoch = key.last_update_time;
+        key.cutoff_distance = CameraEmitterDistance(position);
+        if (key.process_collision_sound != 0) {
+            f32 range = debtab[effect]->sound_range_override;
+            if (range == 0.0f) range = debtab[effect]->sound_range;
+            if (range == 0.0f) range = debtab[effect]->clip_extent;
+            f32 volume = 0.0f;
+            if (key.cutoff_distance < range) {
+                for (i32 i = 0; i < 4; ++i) {
+                    const i32 sound = debtab[effect]->sound_data[i * 3];
+                    if (sound != -1) SetSfxBit_On(sound);
+                }
+                volume = (range - key.cutoff_distance) / range;
+            }
+            if (key.cutoff_distance < range) {
+                for (i32 i = 0; i < 4; ++i) {
+                    const i32 sound = debtab[effect]->sound_data[i * 3];
+                    if (sound != -1 && debtab[effect]->sound_data[i * 3 + 1] == 1) {
+                        PlaySfxByIdEx(sound, position, volume, 1.0f);
+                    }
+                }
+            }
+        }
+        if (emitter_momentum != NULL) {
+            DebrisEmitterMomentum(*handle, emitter_momentum->x, emitter_momentum->y, emitter_momentum->z);
+        }
+        if (particle_momentum != NULL) {
+            DebrisParticleMomentum(*handle, particle_momentum->x, particle_momentum->y, particle_momentum->z);
+        }
     }
 
     void AddFiniteShotDebrisEffectUserData(void) {
@@ -278,7 +337,7 @@ extern "C" {
     void AddFiniteShotPART(i32, void *, i32) {
     }
 
-    void *AddGameDebris(void *, i32, void *) {
+    void *AddGameDebris(APIDEBRISSYS_s *, i32, void *) {
         return NULL;
     }
 
@@ -291,7 +350,15 @@ extern "C" {
     void AddGameDebrisMtx(void) {
     }
 
-    void AddGameDebrisRot(void) {
+    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
+
+    i32 AddGameDebrisRot(APIDEBRISSYS_s *system, i32 effect, NUVEC *position, i32 count,
+                         i16 z_rotation, i16 y_rotation) {
+        if (effect < 0 || effect >= system->capacity || system->entries[effect].effect == -1 || count < 1) {
+            return 0;
+        }
+        AddVariableShotDebrisEffect(system->entries[effect].effect, position, count, z_rotation, y_rotation);
+        return 1;
     }
 
     void AddGameDebrisXYZ(void) {
@@ -349,19 +416,51 @@ extern "C" {
     void AddScaledVariableShotPARTEffect(void) {
     }
 
-    void AddVariableShotDebrisEffect(void) {
+    void AddVariableShotDebrisEffectMtx(i32, NUVEC *, i32, i16, i16, NUMTX *);
+
+    void AddVariableShotDebrisEffect(i32 effect, NUVEC *position, i32 count, i16 z_rotation, i16 y_rotation) {
+        AddVariableShotDebrisEffectMtx(effect, position, count, z_rotation, y_rotation, NULL);
     }
 
-    void AddVariableShotDebrisEffectMtx(void) {
+    void AddVariableShotDebrisEffectMtx(i32 effect, NUVEC *position, i32 count, i16 z_rotation,
+                                      i16 y_rotation, NUMTX *particle_orientation) {
+        NUMTX orientation;
+        NuMtxSetIdentity(&orientation);
+        NuMtxRotateZ(&orientation, z_rotation);
+        NuMtxRotateY(&orientation, y_rotation);
+        AddVariableShotDebrisEffectMtx3(effect, position, &nuvec_zero, count, &orientation, particle_orientation);
     }
 
-    void AddVariableShotDebrisEffectMtx3(void) {
+    void AddVariableShotDebrisEffectMtx3(i32 effect, NUVEC *position, NUVEC *momentum, i32 count,
+                                       NUMTX *emitter_orientation, NUMTX *particle_orientation) {
+        if (effect < 0 || debtab[effect] == NULL) return;
+        i16 priority = 20000;
+        switch (debtab[effect]->particle_type) {
+            case 2: priority = static_cast<i16>(40000); break;
+            case 3: priority = 30000; break;
+            case 7: priority = 10000; break;
+        }
+        AddVariableShotDebrisEffectMtx4(effect, position, momentum, count, emitter_orientation,
+                                       particle_orientation, priority, 0);
     }
 
-    void AddVariableShotDebrisEffectMtx4(void) {
+    void AddVariableShotDebrisEffectMtx4(i32 effect, NUVEC *position, NUVEC *momentum, i32 count,
+                                       NUMTX *emitter_orientation, NUMTX *particle_orientation,
+                                       i16 priority, u8 flags) {
+        AddVariableShotDebrisEffectTimed5(effect, position, momentum, NULL, count * 30, timeincrement,
+                                         emitter_orientation, particle_orientation, priority, flags);
     }
 
-    void AddVariableShotDebrisEffectTimed1(void) {
+    void AddVariableShotDebrisEffectTimed3(i32, NUVEC *, NUVEC *, i32, f32, NUMTX *, NUMTX *);
+
+    void AddVariableShotDebrisEffectTimed1(i32 effect, NUVEC *position, i32 count, f32 time,
+                                         i16 z_rotation, i16 y_rotation, NUMTX *particle_orientation) {
+        NUMTX orientation;
+        NuMtxSetIdentity(&orientation);
+        NuMtxRotateZ(&orientation, z_rotation);
+        NuMtxRotateY(&orientation, y_rotation);
+        AddVariableShotDebrisEffectTimed3(effect, position, &nuvec_zero, count, time,
+                                         &orientation, particle_orientation);
     }
 
     void AddVariableShotDebrisEffectTimed3(i32 effect_index, NUVEC *position, NUVEC *momentum, i32 count, f32 time,
@@ -639,7 +738,7 @@ extern "C" {
     void KillPartsByScene(void) {
     }
 
-    void NewPartRotation(void) {
+    void NewPartRotation(PART_s *) {
     }
 
     void PARTEmitterOrientation(void) {
@@ -713,7 +812,23 @@ void AddHeartAsPart(GameObject_s *, nuvec_s *, nuvec_s *, float, float) {
 void FindPartDebris(PARTDEBSYS_s *, char *) {
 }
 
-void MakePartVector(nuvec_s *, nuvec_s *, float) {
+void MakePartVector(NUVEC *velocity, NUVEC *direction, f32 scale) {
+    if (direction == NULL) {
+        f32 random = static_cast<f32>(qrand()) * (1.0f / 65535.0f);
+        velocity->x = random + random - 1.0f;
+        velocity->y = AreaPickupGravity == 0.0f ? 0.0f : static_cast<f32>(qrand()) * (1.0f / 65535.0f) + 1.0f;
+        random = static_cast<f32>(qrand()) * (1.0f / 65535.0f);
+        velocity->z = random + random - 1.0f;
+        NuVecScale(velocity, velocity, AreaPickupScale);
+    } else {
+        FindAnglesZX(direction, NULL, NULL);
+        *velocity = v010;
+        const i32 z_random = qrand();
+        const i32 x_random = qrand();
+        NuVecRotateZ(velocity, velocity, (z_random / 6 + static_cast<u16>(temp_zrot) - 0x1555) & 0xffff);
+        NuVecRotateX(velocity, velocity, (x_random / 6 + static_cast<u16>(temp_xrot) - 0x1555) & 0xffff);
+        NuVecScale(velocity, velocity, scale);
+    }
 }
 
 void PartCollide_2D(PART_s *) {
@@ -731,7 +846,35 @@ void AddCoinsAsParts(i32, nuvec_s *, nuvec_s *, float, float) {
 void UpdatePartEmits(float) {
 }
 
-void FindIncomingPart(void *, nuvec_s *, float, u32, float) {
+i32 LineIntersectSphere(NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
+
+PART_s *FindIncomingPart(void *owner, NUVEC *position, f32 radius, u32 flags, f32 range) {
+    PART_s *nearest = NULL;
+    f32 nearest_distance = range > 0.0f ? range : 100.0f;
+    for (i32 i = 0; i < MAXPARTS; ++i) {
+        PART_s *part = &Part[i];
+        if ((part->active & 1) == 0 || part->owner == owner || (part->flags & flags) != flags) continue;
+        if (range <= 0.0f) {
+            f32 speed = NuVecMag(&part->velocity);
+            if (speed != 0.0f) {
+                NUVEC direction;
+                NuVecScale(&direction, &part->velocity, 1.0f / speed);
+                f32 distance = NuVecDistSqr(&part->position, position, NULL);
+                if (distance < speed * 0.5f * speed * 0.5f &&
+                    LineIntersectSphere(&part->position, &direction, position, radius * radius, NULL)) {
+                    nearest_distance = distance;
+                    nearest = part;
+                }
+            }
+        } else {
+            f32 distance = NuVecDistSqr(&part->position, position, NULL);
+            if (distance < nearest_distance) {
+                nearest_distance = distance;
+                nearest = part;
+            }
+        }
+    }
+    return nearest;
 }
 
 void InstantKillParts(GameObject_s *, i32, float) {
@@ -761,7 +904,13 @@ void PartImpact_Basketball(PART_s *) {
 void PartUpdate_Basketball(PART_s *) {
 }
 
-void Part_FindFromHSpecial(nuhspecial_s *) {
+PART_s *Part_FindFromHSpecial(nuhspecial_s *special) {
+    if (special != NULL) {
+        for (i32 i = 0; i < MAXPARTS; ++i) {
+            if ((Part[i].active & 1) != 0 && NuSpecialCompare(&Part[i].special, special)) return &Part[i];
+        }
+    }
+    return NULL;
 }
 
 void NewPartOrderedRotation(PART_s *) {

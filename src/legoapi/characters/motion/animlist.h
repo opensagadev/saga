@@ -9,3 +9,7 @@ struct ANIMLIST_s {
 };
 
 DECOMP_ASSERT(sizeof(ANIMLIST_s) == 0x34, "ANIMLIST_s size");
+
+struct CHARACTERMODEL_s;
+extern "C" f32 AnimListFrame(CHARACTERMODEL_s *model, i32 animation, i32 frame);
+extern "C" f32 *AnimListFrameArray(CHARACTERMODEL_s *model, i32 animation);

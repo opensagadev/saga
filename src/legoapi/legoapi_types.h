@@ -437,15 +437,42 @@ struct BATARANG_s {
     u8 pad_0xae[0xb4 - 0xae];
 };
 DECOMP_ASSERT(sizeof(BATARANG_s) == 0xb4, "BATARANG_s size");
-struct BOLTSYS {};
+struct BOLTTYPE_s;
+struct BOLTSYS {
+    BOLTTYPE_s *types;
+    i32 count;
+    void (*stop_targeting)(GameObject_s *, NUVEC *);
+    void (*debris)(BOLT_s *, NUVEC *, i32, NUVEC *, i32);
+    void (*shoot_origin)(GameObject_s *, NUVEC *);
+    void (*shoot_direction)(GameObject_s *, NUVEC *);
+    void *field_18;
+    void *field_1c;
+};
+DECOMP_ASSERT(sizeof(BOLTSYS) == 0x20, "BOLTSYS ABI");
+DECOMP_ASSERT(offsetof(BOLTSYS, stop_targeting) == 8, "BOLTSYS targeting callback offset");
+extern BOLTSYS *BoltSys;
 struct BOLT_s {
-    u8 pad_0x00[0xf0];
+    u32 field_0x00;
+    GameObject_s *owner; // 0x04
+    u8 pad_0x08[0x88 - 0x08];
+    NUVEC position; // 0x88
+    u8 pad_0x94[0xac - 0x94];
+    NUVEC field_0xac;
+    u8 pad_0xb8[0xcc - 0xb8];
+    f32 speed;
+    u8 pad_0xd0[0xf0 - 0xd0];
     u8 flags; // 0xf0
     u8 pad_0xf1[0x100 - 0xf1];
     u8 active; // 0x100
-    u8 pad_0x101[0x138 - 0x101];
+    u8 type_id; // 0x101
+    u8 pad_0x102[0x138 - 0x102];
 };
 DECOMP_ASSERT(sizeof(BOLT_s) == 0x138, "BOLT_s ABI");
+DECOMP_ASSERT(offsetof(BOLT_s, owner) == 4, "BOLT owner offset");
+DECOMP_ASSERT(offsetof(BOLT_s, position) == 0x88, "BOLT position offset");
+DECOMP_ASSERT(offsetof(BOLT_s, field_0xac) == 0xac, "BOLT deflection position offset");
+DECOMP_ASSERT(offsetof(BOLT_s, type_id) == 0x101, "BOLT type offset");
+DECOMP_ASSERT(offsetof(BOLT_s, speed) == 0xcc, "BOLT speed offset");
 enum BUILDIT_FIND_ENUM : i32 {
     BUILDIT_FIND_USABLE = 0,
     BUILDIT_FIND_AVAILABLE = 1,
@@ -481,7 +508,9 @@ struct CHARVARIANT {};
 struct CHEAT;
 struct CLIMBOBJECTSYS_s {};
 struct CUSTOMISER {
-    u8 pad_0x00[0x178];
+    u8 pad_0x00[0x6c];
+    i16 character_ids[2];
+    u8 pad_0x70[0x178 - 0x70];
     ANIMPACKET_s animation_packets[2]; // 0x178
     i32 model_texture_ids[18];         // 0x208
     u8 pad_0x250[0xa6c - 0x250];
@@ -490,6 +519,7 @@ struct CUSTOMISER {
     i32 animation_values[2]; // 0xa70
 };
 DECOMP_ASSERT(sizeof(CUSTOMISER) == 0xa78, "CUSTOMISER size");
+DECOMP_ASSERT(offsetof(CUSTOMISER, character_ids) == 0x6c, "CUSTOMISER character IDs offset");
 DECOMP_ASSERT(offsetof(CUSTOMISER, animation_packets) == 0x178, "CUSTOMISER animation packets offset");
 DECOMP_ASSERT(offsetof(CUSTOMISER, model_texture_ids) == 0x208, "CUSTOMISER model texture IDs offset");
 DECOMP_ASSERT(offsetof(CUSTOMISER, animation_active) == 0xa6c, "CUSTOMISER animation active offset");
@@ -748,17 +778,20 @@ struct GAMECAMERA_s {
     NUVEC blend_start_target; // 0x164
     u8 pad_170[0x17c - 0x170];
     NUVEC blend_end_target; // 0x17c
-    u8 pad_188[0x1b8 - 0x188];
+    u8 pad_188[0x194 - 0x188];
+    NUVEC shake_offset;    // 0x194; filtered camera shake applied to render_mtx
+    NUVEC shake_direction; // 0x1a0; current random shake direction
+    NUVEC shake_target;    // 0x1ac; next random shake direction
     f32 field_0x1b8;
-    f32 blend_time;     // 0x1bc
-    f32 blend_duration; // 0x1c0
-    f32 blend_curve;    // 0x1c4
-    f32 field_0x1c8;
-    u8 pad_1cc[4];
-    f32 field_0x1d0;
-    f32 field_0x1d4;
-    f32 field_0x1d8;
-    f32 field_0x1dc;
+    f32 blend_time;          // 0x1bc
+    f32 blend_duration;      // 0x1c0
+    f32 blend_curve;         // 0x1c4
+    f32 judder_time;         // 0x1c8; remaining impact-judder time
+    f32 judder_duration;     // 0x1cc; initial impact-judder time
+    f32 shake_amplitude;     // 0x1d0; filtered ambient-shake amplitude
+    f32 shake_target_amount; // 0x1d4; amplitude used while shake_time is active
+    f32 shake_time;          // 0x1d8; remaining forced-shake time
+    f32 shake_speed;         // 0x1dc; forced-shake direction/filter speed
     f32 position_seek;
     f32 angle_seek;
     f32 field_0x1e8;
@@ -780,13 +813,14 @@ struct GAMECAMERA_s {
     f32 field_0x210;
     f32 field_0x214;
     f32 field_0x218;
-    u16 blend_start_pitch; // 0x21c
-    u16 desired_pitch;     // 0x21e
-    u16 blend_start_yaw;   // 0x220
-    u16 desired_yaw;       // 0x222
-    u16 blend_start_roll;  // 0x224
-    u16 desired_roll;      // 0x226
-    u8 pad_228[2];
+    u16 blend_start_pitch;   // 0x21c
+    u16 desired_pitch;       // 0x21e
+    u16 blend_start_yaw;     // 0x220
+    u16 desired_yaw;         // 0x222
+    u16 blend_start_roll;    // 0x224
+    u16 desired_roll;        // 0x226
+    u8 judder_reverse;       // 0x228
+    u8 judder_axis;          // 0x229; 0 pitch, 1 yaw, otherwise roll
     u8 reset_blend;          // 0x22a
     u8 blend_mode;           // 0x22b
     i8 mode;                 // 0x22c
@@ -795,6 +829,10 @@ struct GAMECAMERA_s {
     u8 pad_22f;
 };
 DECOMP_ASSERT(sizeof(GAMECAMERA_s) == 0x230, "GAMECAMERA_s ABI");
+DECOMP_ASSERT(offsetof(GAMECAMERA_s, shake_offset) == 0x194, "GAMECAMERA shake offset");
+DECOMP_ASSERT(offsetof(GAMECAMERA_s, judder_time) == 0x1c8, "GAMECAMERA judder offset");
+DECOMP_ASSERT(offsetof(GAMECAMERA_s, shake_amplitude) == 0x1d0, "GAMECAMERA shake amplitude offset");
+DECOMP_ASSERT(offsetof(GAMECAMERA_s, judder_reverse) == 0x228, "GAMECAMERA judder flags offset");
 
 // Camera-space containment plane: one point on the plane followed by its
 // inward-facing normal.  The original PlayPlane global contains six of these.
@@ -821,7 +859,9 @@ DECOMP_ASSERT(sizeof(GAMECUTSCENES_s) == 0x28, "GAMECUTSCENES_s size");
 DECOMP_ASSERT(offsetof(GAMECUTSCENES_s, cutscene) == 0x1c, "GAMECUTSCENES_s active cutscene offset");
 
 struct GAMEMESSAGE_s {
-    char pad_0x00[0xe6];
+    char pad_0x00[0x88];
+    NUVEC target_position;
+    char pad_0x94[0xe6 - 0x94];
     u16 icon;   // 0xe6
     u32 color1; // 0xe8
     u32 color2; // 0xec
@@ -829,9 +869,13 @@ struct GAMEMESSAGE_s {
     char pad_0xf4[0xf7 - 0xf4];
     u8 alpha;  // 0xf7
     u8 active; // 0xf8
-    u8 pad_0xf9[0x114 - 0xf9];
+    u8 pad_0xf9[4];
+    i8 player_index;
+    u8 pad_0xfe[0x114 - 0xfe];
 };
 DECOMP_ASSERT(sizeof(GAMEMESSAGE_s) == 0x114, "GAMEMESSAGE_s size");
+static_assert(offsetof(GAMEMESSAGE_s, target_position) == 0x88, "game message target position offset");
+static_assert(offsetof(GAMEMESSAGE_s, player_index) == 0xfd, "game message player index offset");
 // Rumble state packet embedded in GAMEPAD_s (20 bytes; floats driven by
 // NuSound3UpdateRumble / UpdateRumble).
 struct RUMBLEPACKET {
@@ -1281,7 +1325,6 @@ struct HINTUIBUTTON_s {
 DECOMP_ASSERT(sizeof(HINTUIBUTTON_s) == 0xa4, "HINTUIBUTTON_s size");
 struct HOTHBATTLE_MELEE_s {};
 struct HashRedirect;
-struct HashedKey {};
 struct LANGUAGEDATA {
     i32 language;   // 0x00
     i32 unknown_04; // 0x04 (Game_LanguageList entries: {1,0},{2,0},{4,0},{5,0},{3,0},{8,0},{-1,0})
@@ -1357,8 +1400,8 @@ struct PLAYERPACKET_s {
     u8 pad_634[0x648 - 0x634];
     u32 field_0x648;
     u8 pad_64c[0x654 - 0x64c];
-    i32 force_glow_mode;  // 0x654
-    i32 force_glow_state; // 0x658
+    union { i32 force_glow_mode; void *force_glow_object; };
+    union { i32 force_glow_state; void *force_glow_candidate; };
     u8 pad_65c[0x660 - 0x65c];
     u32 input_state; // 0x660
     u32 field_0x664;
@@ -1751,26 +1794,33 @@ DECOMP_ASSERT(offsetof(TERRAIN_GROUP, scene_index) == 0x30, "TERRAIN_GROUP scene
 DECOMP_ASSERT(offsetof(TERRAIN_GROUP, radius) == 0x34, "TERRAIN_GROUP radius offset");
 
 enum TERRAIN_PLATFORM_FLAGS : u8 {
+    TERRAIN_PLATFORM_FLAG_ROTATING = 0x01,
     TERRAIN_PLATFORM_FLAG_COLLIDED = 0x02,
     TERRAIN_PLATFORM_FLAG_DISPLAY_LIST_BACKED = 0x04,
 };
 
 struct TERRAIN_PLATFORM {
-    u8 pad_0x00[0x40];
+    NUMTX previous_matrix;
     void *scene_object; // 0x40
-    void *field_0x44;
+    i32 field_0x44;
     i16 terrain_group_index; // 0x48
     u16 scene_object_index;  // 0x4a
     u8 flags;                // 0x4c, TERRAIN_PLATFORM_FLAGS
-    u8 pad_0x4d[7];
-    u32 field_0x54;
-    u32 field_0x58;
-    u32 field_0x5c;
-    u32 field_0x60;
-    u32 field_0x64;
+    u8 pad_0x4d[3];
+    i16 bounce_frames;
+    u8 pad_0x52[2];
+    f32 bounce_impulse;
+    f32 bounce_offset;
+    f32 bounce_velocity;
+    f32 bounce_spring;
+    f32 bounce_damping;
     void *scene_transform; // 0x68
 };
 DECOMP_ASSERT(sizeof(TERRAIN_PLATFORM) == 0x6c, "TERRAIN_PLATFORM ABI");
+DECOMP_ASSERT(offsetof(TERRAIN_PLATFORM, previous_matrix) == 0, "TERRAIN_PLATFORM previous matrix offset");
+DECOMP_ASSERT(offsetof(TERRAIN_PLATFORM, bounce_frames) == 0x50, "TERRAIN_PLATFORM bounce frames offset");
+DECOMP_ASSERT(offsetof(TERRAIN_PLATFORM, bounce_impulse) == 0x54, "TERRAIN_PLATFORM bounce impulse offset");
+DECOMP_ASSERT(offsetof(TERRAIN_PLATFORM, bounce_damping) == 0x64, "TERRAIN_PLATFORM bounce damping offset");
 DECOMP_ASSERT(offsetof(TERRAIN_PLATFORM, scene_object) == 0x40, "TERRAIN_PLATFORM scene_object offset");
 DECOMP_ASSERT(offsetof(TERRAIN_PLATFORM, terrain_group_index) == 0x48, "TERRAIN_PLATFORM terrain_group_index offset");
 DECOMP_ASSERT(offsetof(TERRAIN_PLATFORM, flags) == 0x4c, "TERRAIN_PLATFORM flags offset");
@@ -1782,6 +1832,12 @@ struct TERRAIN_SPATIAL_NODE {
     NUVEC points[1]; // variable-length array stored in the terrain file
 };
 DECOMP_ASSERT(offsetof(TERRAIN_SPATIAL_NODE, points) == 4, "TERRAIN_SPATIAL_NODE points offset");
+
+struct TERRAIN_WALL_POINT {
+    NUVEC position;
+    u8 material[4];
+};
+DECOMP_ASSERT(sizeof(TERRAIN_WALL_POINT) == 0x10, "TERRAIN_WALL_POINT ABI");
 
 enum TERRAIN_TRACK_FLAGS : u16 {
     TERRAIN_TRACK_FLAG_NONE = 0x00,
@@ -1843,15 +1899,16 @@ struct TERRSET {
     u8 pad_0x004[0x60];
     void *field_0x064;
     TERRAIN_PLATFORM *platforms; // 0x068
-    u8 pad_0x06c[0xc0];
-    void *field_0x12c;
-    u8 pad_0x130[0x18];
+    i16 active_platform_groups[96]; // 0x06c
+    i32 active_platform_count; // 0x12c
+    NUVEC platform_scan_min; // 0x130
+    NUVEC platform_scan_max; // 0x13c
     TERRAIN_SPATIAL_NODE *spatial_nodes; // 0x148
     i16 group_count;                     // 0x14c
     u16 file_version;                    // 0x14e
     i32 group_index_count;               // 0x150
-    void *field_0x154;
-    u8 pad_0x158[0x40];
+    i32 removed_platform_count; // 0x154
+    i16 removed_platforms[32]; // 0x158
     TERRAIN_TRACK_SLOT track_slots[TERRAIN_TRACK_SLOT_COUNT];    // 0x198
     TERRAIN_CELL cells[TERRAIN_CELL_RECORD_COUNT];               // 0x798
     i32 minimum_height;                                          // 0x1bac
@@ -1864,6 +1921,10 @@ struct TERRSET {
 };
 DECOMP_ASSERT(sizeof(TERRSET) == 0xa490, "TERRSET ABI");
 DECOMP_ASSERT(offsetof(TERRSET, platforms) == 0x68, "TERRSET platforms offset");
+DECOMP_ASSERT(offsetof(TERRSET, active_platform_groups) == 0x6c, "TERRSET active platform groups offset");
+DECOMP_ASSERT(offsetof(TERRSET, active_platform_count) == 0x12c, "TERRSET active platform count offset");
+DECOMP_ASSERT(offsetof(TERRSET, platform_scan_min) == 0x130, "TERRSET platform scan minimum offset");
+DECOMP_ASSERT(offsetof(TERRSET, removed_platform_count) == 0x154, "TERRSET removed platform count offset");
 DECOMP_ASSERT(offsetof(TERRSET, spatial_nodes) == 0x148, "TERRSET spatial_nodes offset");
 DECOMP_ASSERT(offsetof(TERRSET, group_count) == 0x14c, "TERRSET group_count offset");
 DECOMP_ASSERT(offsetof(TERRSET, file_version) == 0x14e, "TERRSET file_version offset");
@@ -1926,7 +1987,8 @@ struct debinftype {
     u8 status;                   // 0x02f
     u8 fields_030[8];            // 0x030
     f32 clip_extent;             // 0x038
-    u8 fields_03c[8];
+    f32 sound_range;
+    f32 sound_range_override;
     f32 field_044;
     f32 field_048;
     f32 field_04c;
@@ -2069,7 +2131,7 @@ struct debkeydatatype_s {
     NUVEC position;                     // 0x190
     NUVEC emission_position;            // 0x19c
     NUVEC momentum;                     // 0x1a8
-    u8 fields_1b4[0x0c];
+    NUVEC emitter_momentum;
     DEBRISGENERATOR generator;                // 0x1c0 (target)
     DEBRISMOMENTUMADJUSTER momentum_adjuster; // 0x1c4 (target)
     debkeydatatype_s *previous;               // 0x1c8 (target)
@@ -2616,7 +2678,7 @@ struct GIZBUILDIT_s {
     GAMEANIMSET_s *anim_set;      // 0x10
     GAMEANIMOBJ_s **anim_objects; // 0x14
     GIZBUILDIT_s *linked_buildit; // 0x18
-    u8 field_0x1c[4];
+    MechObjectInterface *mech_object_interface; // 0x1c
     NUVEC file_position;    // 0x20
     NUVEC start_position;   // 0x2c, centre of the unbuilt pieces
     NUVEC position;         // 0x38, centre of the completed build
@@ -2625,7 +2687,7 @@ struct GIZBUILDIT_s {
     f32 step_duration;      // 0x4c
     f32 interaction_radius; // 0x50
     f32 field_0x54;
-    u32 field_0x58;
+    f32 radius_scale; // 0x58
     i16 field_0x5c;
     i16 field_0x5e;
     i16 field_0x60;
@@ -2646,9 +2708,11 @@ struct GIZBUILDIT_s {
     u8 field_0x83;
 
     void ClearMechObjectInterface();
-    void GetMechObjectInterface();
+    MechObjectInterface *GetMechObjectInterface();
 };
 DECOMP_ASSERT(sizeof(GIZBUILDIT_s) == 0x84, "GIZBUILDIT_s ABI");
+DECOMP_ASSERT(offsetof(GIZBUILDIT_s, mech_object_interface) == 0x1c, "GIZBUILDIT interface offset");
+DECOMP_ASSERT(offsetof(GIZBUILDIT_s, radius_scale) == 0x58, "GIZBUILDIT radius scale offset");
 DECOMP_ASSERT(offsetof(GIZBUILDIT_s, start_position) == 0x2c, "GIZBUILDIT start position offset");
 DECOMP_ASSERT(offsetof(GIZBUILDIT_s, position) == 0x38, "GIZBUILDIT position offset");
 DECOMP_ASSERT(offsetof(GIZBUILDIT_s, bounds_radius) == 0x44, "GIZBUILDIT bounds radius offset");
@@ -3517,9 +3581,47 @@ struct OcclusionManager {
     ~OcclusionManager();
 };
 struct PART_s {
+    union {
+        NUMTX transform;
+        struct { u8 pad_000[0x30]; NUVEC position; u32 field_03c; };
+    };
+    u8 pad_040[0x80 - 0x40];
+    NUVEC velocity;
+    u8 pad_08c[0xd4 - 0x8c];
+    GameObject_s *owner;
+    u8 pad_0d8[0xe0 - 0xd8];
+    f32 radius;
+    u32 field_0e4;
+    f32 gravity;
+    u8 pad_0ec[0x108 - 0xec];
+    u32 flags;
+    u8 pad_10c[0x144 - 0x10c];
+    u8 active;
+    u8 pad_145[3];
+    nuhspecial_s special;
+    u8 pad_154[0x1b0 - 0x154];
+    void (*move_callback)(PART_s *, f32);
+    void (*update_callback)(PART_s *);
+    u8 pad_1b8[0x206 - 0x1b8];
+    i8 force_player_mask;
+    u8 pad_207[0x218 - 0x207];
+    u32 force_flags;
+    u8 pad_21c[8];
     void ClearMechObjectInterface();
     void GetMechObjectInterface();
 };
+DECOMP_ASSERT(sizeof(PART_s) == 0x224, "PART size");
+DECOMP_ASSERT(offsetof(PART_s, position) == 0x30, "PART position offset");
+DECOMP_ASSERT(offsetof(PART_s, velocity) == 0x80, "PART velocity offset");
+DECOMP_ASSERT(offsetof(PART_s, owner) == 0xd4, "PART owner offset");
+DECOMP_ASSERT(offsetof(PART_s, flags) == 0x108, "PART flags offset");
+DECOMP_ASSERT(offsetof(PART_s, active) == 0x144, "PART active offset");
+DECOMP_ASSERT(offsetof(PART_s, radius) == 0xe0, "PART radius offset");
+DECOMP_ASSERT(offsetof(PART_s, special) == 0x148, "PART special offset");
+DECOMP_ASSERT(offsetof(PART_s, gravity) == 0xe8, "PART gravity offset");
+DECOMP_ASSERT(offsetof(PART_s, move_callback) == 0x1b0, "PART move callback offset");
+DECOMP_ASSERT(offsetof(PART_s, force_player_mask) == 0x206, "PART Force player mask offset");
+DECOMP_ASSERT(offsetof(PART_s, force_flags) == 0x218, "PART Force flags offset");
 struct PartObjectInterface {
     void GetPos(VuVec &, i32) const;
     void GetRadius() const;
@@ -3703,11 +3805,25 @@ struct ShaderManagerOpenGL {
     virtual ~ShaderManagerOpenGL();
 };
 struct ShaderMtlDescFilter {
-    void getVertexFlags() const;
-    void hasDiffuseMap(i32) const;
-    void hasLayer(i32) const;
+    u32 getVertexFlags() const;
+    bool hasDiffuseMap(i32) const;
+    bool hasLayer(i32) const;
     void internalInit(nushadermtldesc_s const *, numtl_s const *, i32, i32);
+
+    const nushadermtldesc_s *desc; // 0x00
+    const numtl_s *mtl;            // 0x04
+    i32 flags_in;                  // 0x08
+    i32 variant;                   // 0x0c
+    i32 field_0x10;
+    i32 field_0x14;
+    i32 field_0x18;
+    i32 layer_count; // 0x1c
+    i32 texture_id_threshold;
 };
+DECOMP_ASSERT(sizeof(ShaderMtlDescFilter) == 0x24, "ShaderMtlDescFilter ABI");
+DECOMP_ASSERT(offsetof(ShaderMtlDescFilter, variant) == 0x0c, "ShaderMtlDescFilter variant offset");
+DECOMP_ASSERT(offsetof(ShaderMtlDescFilter, texture_id_threshold) == 0x20,
+              "ShaderMtlDescFilter texture threshold offset");
 struct SpecialObject {
     void Exists() const;
     void GetCollision() const;

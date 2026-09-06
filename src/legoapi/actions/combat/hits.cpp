@@ -1,4 +1,6 @@
 #include "decomp.h"
+#include "globals.h"
+#include "legoapi/characters/core/character.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/nufloat.h"
@@ -16,7 +18,7 @@ extern i32 curSphereter;
 extern i32 plathitid;
 extern TERRAIN_SPHERE SphereData[16];
 
-void HitWallSpline();
+i32 HitWallSpline();
 void DeRotatePoint(NUVEC *point);
 void DeRotateTerrain(tertype *surface);
 void RotateVec(NUVEC *source, NUVEC *destination);
@@ -27,7 +29,10 @@ i32 CheckSphere(i32 vertex_index);
 i32 CheckSphereTer(NUVEC *position, f32 radius);
 i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 secondary_end, tertype *surface);
 
-void CannotKill(GameObject_s *) {
+i32 CannotKill(GameObject_s *object) {
+    GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+    return (CInfo[object->character_context].flags & 0x2000000) != 0 ||
+           ((data->field_0x94 & 0x800) != 0 && object->apiobj.field_0x27c == -1);
 }
 
 i32 HitTerrain() {
@@ -486,9 +491,6 @@ i32 CheckCylinder(i32 first_vertex, i32 second_vertex, i32 *vertex_mask, i32 rem
     return 0;
 }
 
-void HitWallSpline() {
-}
-
 i32 CheckSphereTer(NUVEC *position, f32 radius) {
     const f32 terrain_radius = TerI->collision_radius;
     const f32 combined_radius = radius + terrain_radius;
@@ -589,7 +591,14 @@ i16 InsidePolLines(f32 point_x, f32 point_y, f32 point_z, f32 edge_a_x, f32 edge
     return InsideLineF(point_y, point_z, edge_a_y, edge_a_z, edge_b_y, edge_b_z) != 0;
 }
 
-void ObjHitObj_Flags(GameObject_s *) {
+u16 ObjHitObj_Flags(GameObject_s *object) {
+    if (object == NULL) return 0;
+    const bool player = (object->apiobj.flags_low & 0x80) != 0;
+    const u16 ordinary = player ? 0x80c : 0x00a;
+    const u16 special = player ? 0x824 : 0x022;
+    const u16 scripted = player ? 0x804 : 0x002;
+    if ((object->apiobj.field_0x1f4 & 0x10001) != 0) return scripted | 0x10;
+    return (object->apiobj.field_0x1f4 & 4) != 0 ? special : ordinary;
 }
 
 void CollideGameObjects(WORLDINFO_s *) {
@@ -786,7 +795,8 @@ void CheckCol(nutex_s *, i32, i32, i32, i32) {
 void HitRumble(GameObject_s *) {
 }
 
-void ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32) {
+i32 ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32) {
+    return 0;
 }
 
 void RayImpact(nuvec_s *) {

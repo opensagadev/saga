@@ -1,6 +1,7 @@
 #pragma once
 
 #include "nu2api/nucore/common.h"
+#include "decomp_assert.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,7 +30,12 @@ extern "C" {
         u16 padding[2];
     } NULSTHDR;
 
+    DECOMP_ASSERT(sizeof(NULNKHDR) == 0x10, "List node header size");
+    DECOMP_ASSERT(sizeof(NULSTHDR) == 0x20, "List header size");
+
     NULSTHDR *NuLstCreate(i32 element_count, i32 element_size);
+    NULSTHDR *NuLstCreateBuff(i32 element_count, i32 element_size, VARIPTR *buffer, VARIPTR end, i32 alignment);
+    NULNKHDR *NuLstGetByIdx(NULSTHDR *list, i32 index);
     void NuLstDestroy(NULSTHDR *list);
 
     NULNKHDR *NuLstAlloc(NULSTHDR *list);

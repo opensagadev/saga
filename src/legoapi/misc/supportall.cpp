@@ -72,7 +72,14 @@ void CatchUpCode(GameObject_s *, float, float, i32) {
 void RndrTexQuad(float, float, float, float, i32, numtl_s *, i32) {
 }
 
-void SuperWeirdo(GameObject_s *) {
+i32 SuperWeirdo(GameObject_s *object) {
+    if ((object->apiobj.flags_low & 0x80) != 0 && (Game.field_0x7c26[1] & 1) != 0 &&
+        CharacterCustomiser != NULL &&
+        (object->id == CharacterCustomiser->character_ids[0] ||
+         object->id == CharacterCustomiser->character_ids[1])) {
+        return 1;
+    }
+    return 0;
 }
 
 void bgProcClose() {

@@ -38,6 +38,7 @@ void NuSound3CreateVoice(nuvec_s *position, i32 sample_index, f32 volume_bits, f
 
 extern "C" void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pitch);
 void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
+void SetSfxBit_OnEx(i32);
 
 i32 ActionFromQuiet(i32 idx) {
     static i16 ActionPairTab[14] = {-1};
@@ -140,7 +141,11 @@ extern "C" {
     void PlaySfxAndSetPitch(void) {
     }
 
-    void PlaySfxAndSetVolume(void) {
+    void PlaySfxAndSetVolume(char *name, nuvec_s *position, f32 volume) {
+        i32 id = GetSfxId(name);
+        if (id != -1) {
+            PlaySfxByIdEx(id, position, volume, 1.0f);
+        }
     }
 
     void PlaySfxAndSetVolumeAndPitch(void) {
@@ -237,7 +242,8 @@ extern "C" {
     void SetSfxBit_Off(void) {
     }
 
-    void SetSfxBit_On(void) {
+    void SetSfxBit_On(i32 sound) {
+        if (sound >= 0) SetSfxBit_OnEx(g_soundInfo[sound].index);
     }
 
     void SfxBit(void) {
@@ -330,7 +336,10 @@ void ResetRepeatSfx() {
     repsfxtab[0].sfx_id = -1;
 }
 
-void SetSfxBit_OnEx(i32) {
+void SetSfxBit_OnEx(i32 sound) {
+    if (static_cast<u32>(sound) < 1600) {
+        SfxBits[sound >> 4] |= 1 << (sound & 15);
+    }
 }
 
 void UpdateLevelSfx(WORLDINFO_s *, i32) {

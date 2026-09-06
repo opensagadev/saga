@@ -83,7 +83,6 @@ _NATIVE_PLATFORM_SRCS = ["host/platform/native_render_device.cpp"] + select({
 })
 
 _WASM_PLATFORM_SRCS = [
-    "host/platform/wasm/compatibility.cpp",
     "host/platform/wasm/graphics.cpp",
     "host/platform/wasm/input.cpp",
     "host/platform/wasm/render_device.cpp",

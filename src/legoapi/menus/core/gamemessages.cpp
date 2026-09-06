@@ -482,7 +482,7 @@ void AddGoldBrickMessage(STATUSPACKET_s *packet, i16 brick) {
     AddToGoldBricks();
 }
 
-void TransformGameMessages(nuvec_s *camera_position, nuvec_s *camera_direction, nuvec_s *camera_scale) {
+void TransformGameMessages(nuvec_s *camera_position, nuvec_s *camera_scale, nuvec_s *camera_direction) {
     GAME_MESSAGE_DATA *message = reinterpret_cast<GAME_MESSAGE_DATA *>(&GameMessage[0]);
     GAME_MESSAGE_DATA *end = reinterpret_cast<GAME_MESSAGE_DATA *>(&GameMessage[128]);
     for (; message != end; ++message) {
@@ -498,7 +498,7 @@ void TransformGameMessages(nuvec_s *camera_position, nuvec_s *camera_direction, 
         } else {
             message->field_0xfb = 1;
         }
-        if ((message->flags & 4) != 0) {
+        if (depth > 0.0f && (message->flags & 4) != 0) {
             const f32 offset = message->field_0xb4;
             NUVEC target = {message->position.x + offset * camera_scale->x,
                             message->position.y + offset * camera_scale->y,
@@ -506,7 +506,8 @@ void TransformGameMessages(nuvec_s *camera_position, nuvec_s *camera_direction, 
             NUVEC transformed;
             NuCameraTransformScreenClip(&transformed, &target, 1, NULL);
             message->field_0xb8 = __builtin_fabsf(message->start_position.x - transformed.x) * 0.525f;
-        } else if ((message->flags & 2) == 0) {
+        }
+        if ((message->flags & 2) == 0) {
             message->field_0xf9 = 1;
         }
         message->start_position.z = 1.0f;

@@ -306,5 +306,16 @@ void SpawnCreatureFromCrate(GameObject_s *, float, float) {
 void SpawnMeleeCreatureType(i32) {
 }
 
-void AlertSurroundingCreatures(GameObject_s *, nuvec_s *) {
+GameObject_s *alert_obj;
+NUVEC alert_pos;
+f32 alert_timer;
+f32 alert_time = 10.0f;
+
+void AlertSurroundingCreatures(GameObject_s *object, nuvec_s *position) {
+    if (object != NULL && ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
+        (object->apiobj.field_0x1f4 & 5) != 0 ||
+        (static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->flags_090 & 0x8000) != 0)) return;
+    alert_obj = object;
+    alert_pos = *position;
+    alert_timer = alert_time;
 }

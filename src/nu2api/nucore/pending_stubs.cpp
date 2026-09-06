@@ -5,6 +5,10 @@
 
 #include "globals.h"
 #include "nu2api/nu3d/nutexanm.h"
+#include "nu2api/nu3d/numtl.h"
+#include "nu2api/nucore/numemory.h"
+#include "nu2api/nucore/nuthread.h"
+#include "nu2api/numath/nurand.h"
 
 extern "C" void NuShaderManagerDestroy(void) {
 }
@@ -67,77 +71,6 @@ extern "C" void NuShaderObjectSetElementsfv_transpose(void) {
 }
 
 extern "C" void NuShaderObjectUnserialize(void) {
-}
-
-extern "C" void NuTexAnimAddList(void) {
-}
-
-extern "C" void NuTexAnimCreate(void) {
-}
-
-extern "C" void NuTexAnimDestroy(void) {
-}
-
-extern "C" void NuTexAnimEnvCreate(void) {
-}
-
-extern "C" void NuTexAnimEnvDestroy(void) {
-}
-
-extern "C" void NuTexAnimEnvProc(void) {
-}
-
-extern "C" void NuTexAnimEnvReset(nutexanimenv_s *env) {
-    if (env == NULL) {
-        return;
-    }
-
-    env->texture = NULL;
-    env->program = NULL;
-    env->field_cc = NULL;
-    env->field_d0 = NULL;
-    env->field_d4 = NULL;
-    env->field_d8 = NULL;
-    env->field_e4 = NULL;
-}
-
-extern "C" void NuTexAnimFind(void) {
-}
-
-extern "C" void NuTexAnimProgAssembleEnd(void) {
-}
-
-extern "C" void NuTexAnimProgCreate(void) {
-}
-
-extern "C" void NuTexAnimProgDestroy(void) {
-}
-
-extern "C" void NuTexAnimProgFind(void) {
-}
-
-extern "C" void NuTexAnimProgRead(void) {
-}
-
-extern "C" void NuTexAnimProgReadCFG(void) {
-}
-
-extern "C" void NuTexAnimProgReadScript(void) {
-}
-
-extern "C" void NuTexAnimProgRelease(void) {
-}
-
-extern "C" void NuTexAnimProgSysInit(void) {
-}
-
-extern "C" void NuTexAnimProgWrite(void) {
-}
-
-extern "C" void NuTexAnimRemoveList(void *) {
-}
-
-extern "C" void NuTexAnimRestart(void) {
 }
 
 extern "C" void _Z26DisplayListLinkDynamicMtlsv(void) {

@@ -11,6 +11,10 @@
 #include "nu2api/numath/nuvec4.h"
 
 NUCAMERA global_camera;
+f32 nucamera_farclip_hack = 0.1f;
+NUMTX pc_vport_mtx = {
+    1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+};
 
 NUMTX clip_planes = {
     1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,

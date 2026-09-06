@@ -2,7 +2,7 @@
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "globals.h"
 
-u8 LSW_HintConditions[4];
+u32 LSW_HintConditions;
 HINTSYS_s hintsys = {};
 HINTUIBUTTON_s *hintUIButton = NULL;
 f32 AlphaBlendTime = 1.0f;

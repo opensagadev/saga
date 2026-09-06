@@ -6,6 +6,7 @@ struct HINT_s;
 
 #include "gameapi/edtools/edstubs.h"
 #include "gameapi/gui/apimenu.h"
+#include "gameapi/ai/aisys/aisys.h"
 #include "globals.h"
 #include "legoapi/world/area.h"
 #include "legoapi/characters/core/character.h"
@@ -51,11 +52,13 @@ extern i32 SetObjOnSurface(GameObject_s *obj, i32 mode);
 extern void GizForce_ResetLOS(GameObject_s *obj);
 extern void PortalGameObject(GameObject_s *obj, i32 enable, i32 immediate, i16 portal, nugscn_s *scene);
 
-extern "C" void ResetMiniAnimPacket(void *packet, i32 animation);
 extern "C" void ComplexSockAngles(SOCKPOSITION *position);
 
 void ResetPlayerAI(GameObject_s *obj);
 void ResetPlayerMoves(GameObject_s *obj);
+void SetProtocolDroidDeactivatedAction(GameObject_s *);
+void NewBuzz(nupad_s *, f32, i32);
+extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 
 void Players_Init(void) {
     memset(Player, 0, sizeof(Player));
@@ -688,12 +691,6 @@ void DrawOffsetCode(GameObject_s *obj, i32 param) {
     (void)param;
 }
 
-// rtlDynamicEnable uses C linkage in the original binary (plain symbol name).
-extern "C" void rtlDynamicEnable(i32 id, i32 param) {
-    (void)id;
-    (void)param;
-}
-
 i32 GameObjectNearFloor(GameObject_s *obj, f32 h, f32 *out) {
     // Target 0x46e7b0..0x46e862. GameShadow uses a large positive
     // sentinel when it does not find terrain, rather than -1.
@@ -729,8 +726,8 @@ float GetHoverPosY(GameObject_s *obj) {
 }
 
 i32 Player_HasPurpleForce(GameObject_s *obj) {
-    (void)obj;
-    return 0;
+    if (Cheat_IsOn(0x1c)) return 1;
+    return obj != NULL && obj->field_0xdec > 0.0f;
 }
 
 void PlayerTakeHit(GameObject_s *, GameObject_s *) {
@@ -771,7 +768,17 @@ i32 Players_BothActive() {
 void PlayerItemType_Find(i32) {
 }
 
-void Player_ClearContext(GameObject_s *, i32) {
+void (*Player_ClearContextFn)(GameObject_s *, i32);
+void Whip_Release(GameObject_s *);
+void SuperCarry_Release(GameObject_s *);
+void SpecialMove_ReleaseVictim(GameObject_s *);
+
+void Player_ClearContext(GameObject_s *object, i32 mode) {
+    if (Player_ClearContextFn != NULL) Player_ClearContextFn(object, mode);
+    Whip_Release(object);
+    SuperCarry_Release(object);
+    SpecialMove_ReleaseVictim(object);
+    object->movement_runtime_flags &= ~0x0c;
 }
 
 i32 Player_HasFastBuild(GameObject_s *player) {
@@ -842,7 +849,11 @@ void Player_HasDoubleBoltDamage(GameObject_s *) {
 void PlayerButton_OnHold_Callback(MechTouchUIElement &, TouchHolder &) {
 }
 
-void Player_HasDoubleWeaponDamage(GameObject_s *) {
+i32 Player_HasDoubleWeaponDamage(GameObject_s *object) {
+    if (Cheats_CheckFlags(0x400) == 0 && (object == NULL || object->field_0xdec <= 0.0f)) {
+        return 0;
+    }
+    return 1;
 }
 
 void PlayerButton_OnLeave_Callback(MechTouchUIElement &, TouchHolder &) {
@@ -860,9 +871,6 @@ static __used__ i32 SelectOpponent(GameObject_s *, f32, f32, i32, i32) {
 
 static __used__ i32 ShootThisFrame(GameObject_s *, i32, i32) {
     return 0;
-}
-
-static __used__ void SetComboOpponent(GameObject_s *, f32, i32, i32) {
 }
 
 static __used__ void Player_ClearContext_Game(GameObject_s *, i32) {
@@ -946,7 +954,7 @@ void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap
 
         ResetRumble(&obj->pad_gamepad->rumble_packet);
         ResetLights(&obj->apiobj.position, &obj->light_data, WORLD->rtl_set);
-        ResetMiniAnimPacket(obj->mini_anim_packet, -1);
+        ResetMiniAnimPacket(&obj->mini_animation, -1);
 
         obj->sock_position.location.sock = -1;
         obj->sock_position.location.segment = -1;
@@ -1042,7 +1050,15 @@ void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap
 void ResetPlayerAI(GameObject_s *) {
 }
 
-void ActivatePlayer(GameObject_s *) {
+void ActivatePlayer(GameObject_s *object) {
+    object->character_context = -1;
+    if (object->apiobj.character_model->model_data_b[0x80] != NULL) {
+        object->character_context = 0x41;
+        object->context_animation = 0x80;
+        f32 duration = AnimDuration(object->id, 0x80, 0.0f, 0.0f, 1);
+        object->airborne_action_duration = 0.0f;
+        object->context_animation_timer = duration;
+    }
 }
 
 i32 MakePlayerList(i32 count) {
@@ -1106,7 +1122,38 @@ i32 MakePlayerList(i32 count) {
 void CollectHitPoint(GameObject_s *, nuvec_s *, i32) {
 }
 
-void DeactivatePlayer(GameObject_s *, float, GameObject_s *) {
+i32 DeactivatePlayer(GameObject_s *object, f32 duration, GameObject_s *source) {
+    if (object->character_context == 0x17 && duration <= object->context_animation_timer) return 0;
+    f32 model_state = object->field_0xd24;
+    Player_ClearContext(object, 1);
+    if (object->character_context == 0x3e) return 0;
+    Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
+    object->character_context = 0x17;
+    object->field_0xd24 = model_state;
+    AISCRIPTPROCESS *process = reinterpret_cast<AISCRIPTPROCESS *>(&object->ai);
+    if (AIScriptSetBaseScriptStateByName(process, "BeenDeactivated")) {
+        AIScriptProcess(WORLD->ai_sys, &object->apiobj, &object->ai, process, FRAMETIME);
+    }
+    CHARACTERDATA *character = object->apiobj.character_data;
+    CHARACTERMODEL_s *model = object->apiobj.character_model;
+    GAMECHARACTERDATA *runtime = static_cast<GAMECHARACTERDATA *>(character->field11_0x24);
+    if (source != NULL && (source->apiobj.character_data->model_flags & 0x40) != 0 &&
+        runtime->field275_0x116 == 1 && model->model_data_b[0x62] != NULL) {
+        duration = 4.0f;
+        object->context_animation = 0x62;
+    } else if (model->model_data_b[0x81] != NULL &&
+               (static_cast<CHARACTERANIM_s *>(model->model_data_a[0x81])->flags & 2) == 0) {
+        object->context_animation = 0x81;
+    } else {
+        object->context_animation = model->model_data_b[0x41] != NULL ? 0x41 : 1;
+    }
+    if ((character->model_flags & 0x20) != 0) SetProtocolDroidDeactivatedAction(object);
+    object->action_movement_state = 0;
+    object->context_animation_timer = duration;
+    object->airborne_action_duration = 0.0f;
+    object->field_0x768 = 0.0f;
+    NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
+    return 1;
 }
 
 void ResetPlayerMoves(GameObject_s *) {

@@ -1,5 +1,7 @@
 #include "decomp.h"
 #include "legoapi/items/base/apiobject.h"
+#include "legoapi/characters/core/character.h"
+#include "nu2api/nucore/nuhgobj.h"
 #include "legoapi/legoapi_types.h"
 #include "globals.h"
 #include "nu2api/nu3d/nugscn.h"
@@ -99,7 +101,24 @@ extern "C" {
         }
     }
 
-    void StoreLocatorCoordinates(void) {
+    void StoreLocatorCoordinates(CHARACTERMODEL_s *model, NUMTX *world_matrix, NUMTX *joint_matrices,
+                                 NUVEC *positions, NUMTX *matrices) {
+        if (positions != NULL || matrices != NULL) {
+            for (i32 index = 0; index < 16; ++index) {
+                if (model->points_of_interest[index] != NULL) {
+                    NUMTX matrix;
+                    NuHGobjPOIMtx(model->hierarchy, static_cast<u8>(index), world_matrix, joint_matrices, &matrix);
+                    if (positions != NULL) {
+                        positions[index].x = matrix.m30;
+                        positions[index].y = matrix.m31;
+                        positions[index].z = matrix.m32;
+                    }
+                    if (matrices != NULL) {
+                        matrices[index] = matrix;
+                    }
+                }
+            }
+        }
     }
 
     void WindShear(void) {

@@ -17,7 +17,8 @@ namespace {
     };
 }
 
-void GizForce_Throw(GameObject_s *, GIZFORCE_s *, float, float, i32) {
+PART_s *GizForce_Throw(GameObject_s *, GIZFORCE_s *, float, float, i32) {
+    return NULL;
 }
 
 i32 GizForce_Complete(GIZFORCE_s *force) {
@@ -147,8 +148,8 @@ void GizForce_SetVisibility(GIZFORCE_s *force, i32 visibility) {
     }
 }
 
-void GizForces_AngleToForce(nuvec_s *position, GIZFORCE_s *force) {
-    NuAtan2D(force->position.x - position->x, force->position.z - position->z);
+u16 GizForces_AngleToForce(nuvec_s *position, GIZFORCE_s *force) {
+    return NuAtan2D(force->position.x - position->x, force->position.z - position->z);
 }
 
 i32 GizForce_GameObjUsingForce(GameObject_s *object, GIZFORCE_s *force) {

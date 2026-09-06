@@ -1,4 +1,9 @@
 #include "decomp.h"
+#include "globals.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/gizmo/base/gizactions.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
 
@@ -17,7 +22,24 @@ enum PushBlockCompletionFlags {
 void KnockPushBlock(pushblock_s *, nuvec_s *) {
 }
 
-void NewBlockAction(GameObject_s *) {
+i32 NewBlockAction(GameObject_s *object) {
+    i32 actions[3];
+    i32 count = 0;
+    for (i32 action = 0; action < apicharsys->model_id_capacity && count < 3; ++action) {
+        if ((ActionInfo[action].flags & 8) != 0 && object->apiobj.character_model->model_data_b[action] != NULL) {
+            actions[count++] = action;
+        }
+    }
+    if (count == 0) return 0;
+    i32 action = actions[0];
+    if (count != 1) {
+        do {
+            action = actions[qrand() / (0xffff / count + 1)];
+        } while (action == object->previous_block_animation);
+    }
+    object->previous_block_animation = action;
+    object->context_animation = action;
+    return 1;
 }
 
 void NearestPushBlock(WORLDINFO_s *, nuvec_s *, float) {

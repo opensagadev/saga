@@ -41,7 +41,7 @@ enum HATMACHINE_PLATFORM_TYPE {
 };
 
 extern "C" {
-    void DeletePlatinst(i32 platform_id);
+    i32 DeletePlatinst(i32 platform_id);
     i16 NewPlatPickupInst(void *object, i32 object_type);
     void PlatInstRotate(i32 platform_id, i32 enabled);
 }

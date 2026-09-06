@@ -66,6 +66,7 @@ struct ANIMPACKET_s {
 };
 
 DECOMP_ASSERT(sizeof(ANIMPACKET_s) == 0x48, "ANIMPACKET_s size");
+extern "C" f32 *AnimPlaying(ANIMPACKET_s *packet, i32 animation, i32 target, i32 source);
 
 struct MINIANIMPACKET_s {
     f32 current_time; // 0x00
@@ -87,6 +88,7 @@ struct MINIANIMPACKET_s {
 };
 
 DECOMP_ASSERT(sizeof(MINIANIMPACKET_s) == 0x24, "MINIANIMPACKET_s size");
+extern "C" void ResetMiniAnimPacket(MINIANIMPACKET_s *, i32);
 DECOMP_ASSERT(offsetof(MINIANIMPACKET_s, previous_time) == 0x14, "MINIANIMPACKET_s previous time offset");
 DECOMP_ASSERT(offsetof(MINIANIMPACKET_s, animation_index) == 0x1e, "MINIANIMPACKET_s animation offset");
 DECOMP_ASSERT(offsetof(MINIANIMPACKET_s, requested_animation_id) == 0x22,

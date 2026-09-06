@@ -1,6 +1,10 @@
 #pragma once
 
 #include "decomp.h"
+
+struct GIZMOBLOWUP_s;
+struct PART_s;
+struct BOLT_s;
 #include "gameapi/ai/aisys/aipath.h"
 #include "legoapi/items/base/animpacket.h"
 #include "legoapi/props/system/socksys.h"
@@ -193,11 +197,11 @@ typedef struct AIPACKET_s {
     void *field_0xc8;
     AISCRIPTPROCESS_s *alternate_script_process;
     GameObject_s *owner;         // 0xd0
-    void *nearest_opponent;      // 0xd4
+    union { void *nearest_opponent; GameObject_s **primary_target_ref; };
     f32 nearest_opponent_metric; // 0xd8
     u32 field_0xdc;
     u32 field_0xe0;
-    void *opponent; // 0xe4
+    union { void *opponent; GameObject_s **action_target_ref; };
     u8 pad_e8[0xec - 0xe8];
     u32 field_0xec;
     u32 field_0xf0;
@@ -217,7 +221,8 @@ typedef struct AIPACKET_s {
         i16 field_0x124;
     };
     u8 pad1b[0x3ec - 0x3e6];
-    u64 character_type_mask;  // 0x3ec overall
+    u32 character_type_mask_low;  // 0x3ec overall
+    u32 character_type_mask_high; // 0x3f0 overall
     u8 field_0x134;           // 0x3f4 overall: source creature index
     u8 path_connection_state; // 0x3f5 overall
     u16 available_routes;     // 0x3f6 overall
@@ -479,13 +484,8 @@ DECOMP_ASSERT(sizeof(OBJECTLIGHTINGSTATE_s) == 0x54, "OBJECTLIGHTINGSTATE_s size
 
 typedef struct GameObject_s {
     APIOBJECT apiobj; // 0x0000 .. 0x02a8
-    union {
-        struct {
-            u32 field_0x2a8;
-            u32 field_0x2ac;
-        };
-        u64 ai_area_mask; // one bit per AIAREA occupied by this object
-    };
+    union { u32 field_0x2a8; u32 ai_area_mask_low; };
+    union { u32 field_0x2ac; u32 ai_area_mask_high; };
     union {
         u8 pad_2b0[0x10]; // 0x02b0 .. 0x02c0
         struct {
@@ -528,7 +528,9 @@ typedef struct GameObject_s {
         u8 player_packet[0x780 - 0x6b4]; // 0x06b4, PLAYERPACKET_s begins here
         CHARACTER_SHADOW_s character_shadows[5];
         struct {
-            u8 player_packet_prefix[0x768 - 0x6b4];
+            u8 player_packet_prefix[0x738 - 0x6b4];
+            NUVEC external_force;
+            u8 pad_744[0x768 - 0x744];
             f32 field_0x768; // 0x0768
             union {
                 f32 context_animation_timer; // 0x076c
@@ -543,10 +545,12 @@ typedef struct GameObject_s {
             f32 jump_start_height;     // 0x077c
         };
     };
-    void *field_0x780;            // 0x0780
-    u8 pad_784[0x788 - 0x784];    // 0x0784 .. 0x0788
+    union { void *field_0x780; GameObject_s *force_target; };
+    GIZMOBLOWUP_s *blowup_target; // 0x0784
     void *field_0x788;            // 0x0788
-    u8 pad_78c[0x79a - 0x78c];    // 0x078c .. 0x079a
+    u8 pad_78c[0x790 - 0x78c];
+    void *big_jump_data;          // 0x0790
+    u8 pad_794[0x79a - 0x794];
     i16 context_animation;        // 0x079a, action-owned animation index
     i16 queued_context_animation; // 0x079c, base action used by combo branches
     u8 combo_branch;              // 0x079e, selected offset from the base combo action
@@ -570,7 +574,8 @@ typedef struct GameObject_s {
     };
     u8 action_movement_state;  // 0x07a8
     u8 jump_sequence;          // 0x07a9, 1 for the first jump and 2 for the second
-    u8 pad_7aa[0x7ac - 0x7aa]; // 0x07aa .. 0x07ac
+    u8 field_0x7aa;
+    i8 hit_variant;
     u8 context_flags;          // 0x07ac
     i8 context_variant_flags;  // 0x07ad
     u8 jump_flags;             // 0x07ae
@@ -592,19 +597,37 @@ typedef struct GameObject_s {
     u8 pad_bf4[0xc34 - 0xbf4];      // 0x0bf4 .. 0x0c34
     u32 field_0xc34;                // 0x0c34
     f32 field_0xc38;                // 0x0c38
-    u8 pad_c3c[0xc54 - 0xc3c];      // 0x0c3c .. 0x0c54
+    u32 field_0xc3c;
+    NUVEC weapon_trail_offset;      // 0x0c40
+    f32 head_target_facing;
+    u8 pad_c50[4];
     f32 field_0xc54;                // 0x0c54
-    u8 pad_c58[0xc94 - 0xc58];      // 0x0c58 .. 0x0c94
+    NUVEC force_glow_position;
+    u8 pad_c64[0xc94 - 0xc64];
     struct GAMEPAD_s *pad_gamepad;  // 0x0c94  (originally inside PLAYERPACKET_s)
     SOCKPOSITION *oldpos;           // 0x0c98
-    u8 pad_c9c[0xca8 - 0xc9c];      // 0x0c9c .. 0x0ca8
-    void *field_0xca8;              // 0x0ca8
+    u32 directional_input_state;
+    PART_s *incoming_part;
+    PART_s *blocked_part;
+    union { void *field_0xca8; PART_s *force_part; };
     void *suit;                     // 0x0cac
     void *batarang;                 // 0x0cb0
     TORPEDOPACKET *torpedo;         // 0x0cb4
-    u8 pad_cb8[0xcc0 - 0xcb8];      // 0x0cb8 .. 0x0cc0
+    GameObject_s *collision_target;
+    u32 field_0xcbc;
     GameObject_s *field_0xcc0;      // 0x0cc0
-    u8 pad_cc4[0xd10 - 0xcc4];      // 0x0cc4 .. 0x0d10
+    GameObject_s *takeover_source;
+    void *sabre_streaks[4][2];       // 0x0cc8
+    GameObject_s *block_attacker;
+    GameObject_s *incoming_melee;
+    GameObject_s *incoming_special;
+    BOLT_s *incoming_bolt;
+    BOLT_s *blocked_bolt;
+    u32 field_0xcfc;
+    GameObject_s *force_throw_target;
+    void *force_glow_previous;
+    void *force_glow_object;
+    void *force_glow_candidate;
     f32 airborne_reset_timer;       // 0x0d10
     u32 field_0xd14;                // 0x0d14
     f32 ground_contact_grace_timer; // 0x0d18, keeps airborne animation briefly after contact
@@ -614,11 +637,12 @@ typedef struct GameObject_s {
     u8 pad_d28[0xd30 - 0xd28];      // 0x0d28 .. 0x0d30
     f32 weapon_scale;               // 0x0d30, 0.0 retracted .. 1.0 extended
     f32 weapon_scale_rate;          // 0x0d34
-    u8 pad_d38[0xd3c - 0xd38];      // 0x0d38 .. 0x0d3c
+    f32 sabre_collision_radius;     // 0x0d38
     f32 weapon_out_timer;           // 0x0d3c
     f32 delayed_turn_timer;         // 0x0d40
     f32 combo_input_timer;          // 0x0d44
-    u8 pad_d48[0xd5c - 0xd48];      // 0x0d48 .. 0x0d5c
+    f32 ai_combo_cooldown;
+    u8 pad_d4c[0xd5c - 0xd4c];
     union {
         i32 pause_input_state; // 0x0d5c, cleared when entering pause
         f32 hud_icon_timer;    // countdown controlling the portrait blink during death/drop transitions
@@ -631,9 +655,12 @@ typedef struct GameObject_s {
     f32 field_0xd78;                 // 0x0d78
     f32 terrain_origin_floor_offset; // 0x0d7c
     f32 field_0xd80;                 // 0x0d80
-    u8 pad_d84[0xd8c - 0xd84];       // 0x0d84 .. 0x0d8c
+    f32 force_glow_target;
+    f32 force_glow_step;
     f32 field_0xd8c;                 // 0x0d8c
-    u8 pad_d90[0xda0 - 0xd90];       // 0x0d90 .. 0x0da0
+    f32 force_hold_time;
+    f32 force_use_volume;
+    u8 pad_d98[0xda0 - 0xd98];
     f32 nearby_floor_distance;       // 0x0da0, sentinel when no floor is nearby
     f32 input_toggle_hold_time;      // 0x0da4, reset when entering pause
     f32 field_0xda8;                 // 0x0da8
@@ -642,17 +669,22 @@ typedef struct GameObject_s {
     f32 field_0xdbc;                 // 0x0dbc
     u8 pad_dc0[0xdc8 - 0xdc0];       // 0x0dc0 .. 0x0dc8
     f32 field_0xdc8;                 // 0x0dc8
-    u8 pad_dcc[0xde0 - 0xdcc];       // 0x0dcc .. 0x0de0
+    u8 pad_dcc[0xdd8 - 0xdcc];
+    f32 block_cooldown;
+    u8 pad_ddc[4];
     f32 field_0xde0;                 // 0x0de0
-    u8 pad_de4[0xdec - 0xde4];       // 0x0de4 .. 0x0dec
+    f32 hold_timer;                 // 0x0de4
+    u8 pad_de8[0xdec - 0xde8];
     f32 field_0xdec;                 // 0x0dec
     u8 pad_df0[0xdf8 - 0xdf0];       // 0x0df0 .. 0x0df8
     NUVEC reset_velocity;            // 0x0df8 .. 0x0e04
-    u8 pad_e04[0xe08 - 0xe04];       // 0x0e04 .. 0x0e08
+    i32 dynamic_light_id;
     u16 delayed_turn_target_angle;   // 0x0e08
-    u8 pad_e0a[0xe0c - 0xe0a];       // 0x0e0a .. 0x0e0c
+    u16 force_heading;
     u16 current_input_angle;         // 0x0e0c
-    u8 pad_e0e[0xe18 - 0xe0e];       // 0x0e0e .. 0x0e18
+    u8 pad_e0e[2];
+    i16 previous_block_animation;   // 0x0e10
+    u8 pad_e12[0xe18 - 0xe12];
     i16 movement_lean_angle;         // 0x0e18
     i16 secondary_lean_angle;        // 0x0e1a
     i16 tertiary_lean_angle;         // 0x0e1c
@@ -668,20 +700,30 @@ typedef struct GameObject_s {
     u8 field_0xe23;            // 0x0e23
     u8 field_0xe24;            // 0x0e24
     u8 movement_runtime_flags; // 0x0e25
-    u8 pad_e26[0xe31 - 0xe26]; // 0x0e26 .. 0x0e31
+    u8 pad_e26[0xe2b - 0xe26];
+    u8 force_glow_kind;
+    u8 force_glow_candidate_kind;
+    u8 blocked_attack_stage;
+    u8 block_latch;
+    u8 pad_e2f[2];
     u8 field_0xe31;            // 0x0e31
     union {
         u8 field_0xe32;
         WEAPON_SCALE_STATE weapon_scale_state; // 0x0e32
     };
-    u8 pad_e33[0xe36 - 0xe33];                  // 0x0e33 .. 0x0e36
+    u8 sabre_flags;                            // 0x0e33
+    u8 sabre_damage;                           // 0x0e34
+    u8 field_0xe35;
     u8 field_0xe36;                             // 0x0e36
     u8 field_0xe37;                             // 0x0e37
     u8 field_0xe38;                             // 0x0e38
     u8 pad_e39[0xe40 - 0xe39];                  // 0x0e39 .. 0x0e40
     u8 combo_alternate;                         // 0x0e40, alternates the opening saber action
     u8 field_0xe41;                             // 0x0e41  current surface type
-    u8 pad_e42[0xe50 - 0xe42];                  // 0x0e42 .. 0x0e50
+    i8 blade_index;                             // 0x0e42
+    i8 blade_states[4];                         // 0x0e43
+    u8 pad_e47[0xe4c - 0xe47];
+    struct MechTouchTask *touch_task;            // 0x0e4c
     MechObjectInterface *mech_object_interface; // 0x0e50
     GAMEOBJECTADDONS_s *addons;                 // 0x0e54
     u8 pad_e58[0xe70 - 0xe58];                  // 0x0e58 .. 0x0e70
@@ -720,13 +762,19 @@ typedef struct GameObject_s {
         u8 field_0xf04;
         u8 jump_input_flags; // 0x0f04, buffered airborne action inputs
     };
-    u8 pad_f05[0xf1c - 0xf05];
+    u8 pad_f05[0xf0c - 0xf05];
+    u8 use_action;
+    u8 pad_f0d[0xf1c - 0xf0d];
     f32 field_0xf1c; // 0x0f1c
     u8 pad_f20[0xf24 - 0xf20];
     NUVEC target_velocity;  // 0x0f24
     NUVEC surface_normal;   // 0x0f30
     NUVEC facing_direction; // 0x0f3c
-    u8 pad_f48[0xffc - 0xf48];
+    u8 pad_f48[0xfe4 - 0xf48];
+    NUVEC *head_target;
+    NUVEC head_target_position;
+    f32 head_target_timer;
+    f32 head_target_delay;
     union {
         f32 field_0xffc;
         f32 character_bottom; // 0x0ffc, unscaled lower character bound
@@ -737,7 +785,7 @@ typedef struct GameObject_s {
     };
     f32 field_0x1004; // 0x1004
     f32 field_0x1008; // 0x1008
-    u8 pad_100c[0x1010 - 0x100c];
+    f32 spawn_protection_timer;
     f32 collision_y_scale; // 0x1010
     u8 pad_1014[0x1018 - 0x1014];
     f32 field_0x1018; // 0x1018
@@ -777,7 +825,8 @@ typedef struct GameObject_s {
     u8 field_0x1089;                       // 0x1089
     u8 hitpoints;                          // 0x108a
     u8 current_hp;                         // 0x108b
-    u8 pad_108c[0x108e - 0x108c];          // 0x108c .. 0x108e
+    i8 head_target_priority;
+    u8 pad_108d;
     u8 field_0x108e;                       // 0x108e
     u8 pad_108f[0x1092 - 0x108f];          // 0x108f .. 0x1092
     u8 field_0x1092;                       // 0x1092
@@ -808,6 +857,13 @@ typedef struct GameObject_s {
 
 DECOMP_ASSERT(sizeof(GameObject_s) == 0x10e4, "GameObject size");
 DECOMP_ASSERT(sizeof(AIPACKET) == 0x208, "AIPACKET size");
+static_assert(sizeof(void *) != 4 || sizeof(AIPACKET) == 0x208, "AIPACKET 32-bit size");
+static_assert(sizeof(void *) != 4 || sizeof(GameObject_s) == 0x10e4, "GameObject 32-bit size");
+static_assert(sizeof(void *) != 4 || offsetof(GameObject_s, hold_timer) == 0xde4, "GameObject hold timer offset");
+static_assert(sizeof(void *) != 4 || offsetof(GameObject_s, previous_block_animation) == 0xe10,
+              "GameObject previous block animation offset");
+static_assert(sizeof(void *) != 4 || offsetof(AIPACKET, character_type_mask_low) == 0x12c,
+              "AIPACKET character mask 32-bit offset");
 DECOMP_ASSERT(offsetof(AIPACKET, alternate_script_process) == 0xcc, "AIPACKET alternate script processor offset");
 DECOMP_ASSERT(offsetof(AIPACKET, movement_destination) == 0x104, "AIPACKET destination offset");
 DECOMP_ASSERT(offsetof(AIPACKET, movement_target_direction) == 0x147, "AIPACKET target direction offset");
@@ -849,12 +905,16 @@ DECOMP_ASSERT(offsetof(APIOBJECT, collision_position) == 0x80, "APIOBJECT collis
 DECOMP_ASSERT(offsetof(APIOBJECT, pitch_angle) == 0x274, "APIOBJECT pitch angle offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, supporting_platform_id) == 0x27a, "APIOBJECT supporting platform id offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, model_draw_result) == 0x284, "APIOBJECT model draw result offset");
-DECOMP_ASSERT(offsetof(GameObject_s, ai_area_mask) == 0x2a8, "GameObject AI area mask offset");
+DECOMP_ASSERT(offsetof(GameObject_s, ai_area_mask_low) == 0x2a8, "GameObject AI area mask offset");
 DECOMP_ASSERT(offsetof(GameObject_s, sock_position) == 0x660, "GameObject socket position offset");
 DECOMP_ASSERT(offsetof(GameObject_s, contact_position) == 0x698, "GameObject contact position offset");
 DECOMP_ASSERT(offsetof(GameObject_s, contact_normal) == 0x6a4, "GameObject contact normal offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x6b0) == 0x6b0, "GameObject terrain contact state offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x780) == 0x780, "GameObject field_0x780 offset");
+DECOMP_ASSERT(offsetof(GameObject_s, takeover_source) == 0xcc4, "GameObject takeover source offset");
+DECOMP_ASSERT(offsetof(GameObject_s, spawn_protection_timer) == 0x100c, "GameObject spawn protection offset");
+DECOMP_ASSERT(offsetof(AIPACKET, primary_target_ref) == 0xd4, "AI primary target reference offset");
+DECOMP_ASSERT(offsetof(AIPACKET, action_target_ref) == 0xe4, "AI action target reference offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x788) == 0x788, "GameObject field_0x788 offset");
 DECOMP_ASSERT(offsetof(GameObject_s, context_animation) == 0x79a, "GameObject context animation offset");
 DECOMP_ASSERT(offsetof(GameObject_s, queued_context_animation) == 0x79c, "GameObject queued context animation offset");
@@ -867,16 +927,47 @@ DECOMP_ASSERT(offsetof(GameObject_s, movement_context_state) == 0x7a4, "GameObje
 DECOMP_ASSERT(offsetof(GameObject_s, build_context) == 0x7a5, "GameObject Build-It context offset");
 DECOMP_ASSERT(offsetof(GameObject_s, character_context) == 0x7a5, "GameObject character context offset");
 DECOMP_ASSERT(offsetof(GameObject_s, action_movement_state) == 0x7a8, "GameObject action movement state offset");
+DECOMP_ASSERT(offsetof(GameObject_s, external_force) == 0x738, "GameObject external force offset");
+DECOMP_ASSERT(offsetof(GameObject_s, hit_variant) == 0x7ab, "GameObject hit variant offset");
 DECOMP_ASSERT(offsetof(GameObject_s, context_flags) == 0x7ac, "GameObject context flags offset");
 DECOMP_ASSERT(offsetof(GameObject_s, context_variant_flags) == 0x7ad, "GameObject context variant flags offset");
 DECOMP_ASSERT(offsetof(GameObject_s, mini_anim_packet) == 0x7c0, "GameObject mini animation packet offset");
 DECOMP_ASSERT(offsetof(GameObject_s, joint_matrices) == 0x7f4, "GameObject joint-matrix offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0xcc0) == 0xcc0, "GameObject linked object offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0xca8) == 0xca8, "GameObject field_0xca8 offset");
+DECOMP_ASSERT(offsetof(GameObject_s, force_throw_target) == 0xd00, "GameObject Force throw target offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0xd14) == 0xd14, "GameObject input state offset");
+DECOMP_ASSERT(offsetof(GameObject_s, force_glow_step) == 0xd88, "GameObject force glow step offset");
+DECOMP_ASSERT(offsetof(GameObject_s, use_action) == 0xf0c, "GameObject use action offset");
+DECOMP_ASSERT(offsetof(GameObject_s, force_use_volume) == 0xd94, "GameObject force volume offset");
+DECOMP_ASSERT(offsetof(GameObject_s, incoming_part) == 0xca0, "GameObject incoming part offset");
+DECOMP_ASSERT(offsetof(GameObject_s, collision_target) == 0xcb8, "GameObject collision target offset");
+DECOMP_ASSERT(offsetof(GameObject_s, block_attacker) == 0xce8, "GameObject block attacker offset");
+DECOMP_ASSERT(offsetof(GameObject_s, incoming_bolt) == 0xcf4, "GameObject incoming bolt offset");
+DECOMP_ASSERT(offsetof(GameObject_s, block_cooldown) == 0xdd8, "GameObject block cooldown offset");
+DECOMP_ASSERT(offsetof(GameObject_s, ai_combo_cooldown) == 0xd48, "GameObject AI combo cooldown offset");
+DECOMP_ASSERT(offsetof(GameObject_s, force_glow_position) == 0xc58, "GameObject force glow position offset");
+DECOMP_ASSERT(offsetof(GameObject_s, force_glow_candidate) == 0xd0c, "GameObject force glow candidate offset");
+DECOMP_ASSERT(offsetof(GameObject_s, force_heading) == 0xe0a, "GameObject force heading offset");
+DECOMP_ASSERT(offsetof(GameObject_s, dynamic_light_id) == 0xe04, "GameObject dynamic light offset");
+DECOMP_ASSERT(offsetof(GameObject_s, force_glow_kind) == 0xe2b, "GameObject force glow kind offset");
+DECOMP_ASSERT(offsetof(GameObject_s, head_target) == 0xfe4, "GameObject head target offset");
+DECOMP_ASSERT(offsetof(GameObject_s, head_target_priority) == 0x108c, "GameObject head priority offset");
+DECOMP_ASSERT(offsetof(GameObject_s, blocked_attack_stage) == 0xe2d, "GameObject blocked stage offset");
 DECOMP_ASSERT(offsetof(GameObject_s, ground_contact_grace_timer) == 0xd18,
               "GameObject ground-contact grace timer offset");
 DECOMP_ASSERT(offsetof(GameObject_s, weapon_scale) == 0xd30, "GameObject weapon scale offset");
+DECOMP_ASSERT(offsetof(GameObject_s, sabre_flags) == 0xe33, "GameObject sabre flags offset");
+static_assert(sizeof(void *) != 4 || offsetof(GameObject_s, sabre_flags) == 0xe33,
+              "GameObject sabre flags must preserve the 32-bit ABI");
+static_assert(sizeof(void *) != 4 || offsetof(GameObject_s, field_0xf00) == 0xf00,
+              "GameObject update flags must preserve the 32-bit ABI");
+DECOMP_ASSERT(offsetof(GameObject_s, sabre_damage) == 0xe34, "GameObject sabre damage offset");
+DECOMP_ASSERT(offsetof(GameObject_s, blowup_target) == 0x784, "GameObject blowup target offset");
+DECOMP_ASSERT(offsetof(GameObject_s, sabre_streaks) == 0xcc8, "GameObject sabre streaks offset");
+DECOMP_ASSERT(offsetof(GameObject_s, sabre_collision_radius) == 0xd38, "GameObject sabre radius offset");
+DECOMP_ASSERT(offsetof(GameObject_s, blade_states) == 0xe43, "GameObject blade states offset");
+DECOMP_ASSERT(offsetof(GameObject_s, weapon_trail_offset) == 0xc40, "GameObject weapon trail offset");
 DECOMP_ASSERT(offsetof(GameObject_s, weapon_scale_rate) == 0xd34, "GameObject weapon scale rate offset");
 DECOMP_ASSERT(offsetof(GameObject_s, weapon_out_timer) == 0xd3c, "GameObject weapon timer offset");
 DECOMP_ASSERT(offsetof(GameObject_s, combo_input_timer) == 0xd44, "GameObject combo input timer offset");
@@ -891,6 +982,7 @@ DECOMP_ASSERT(offsetof(GameObject_s, delayed_turn_target_angle) == 0xe08, "GameO
 DECOMP_ASSERT(offsetof(GameObject_s, current_input_angle) == 0xe0c, "GameObject input angle offset");
 DECOMP_ASSERT(offsetof(GameObject_s, movement_lean_angle) == 0xe18, "GameObject movement lean offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0xe1e) == 0xe1e, "GameObject force glow index offset");
+DECOMP_ASSERT(offsetof(GameObject_s, touch_task) == 0xe4c, "GameObject touch task offset");
 DECOMP_ASSERT(offsetof(GameObject_s, weapon_scale_state) == 0xe32, "GameObject weapon scale state offset");
 DECOMP_ASSERT(offsetof(GameObject_s, combo_alternate) == 0xe40, "GameObject alternate combo offset");
 DECOMP_ASSERT(offsetof(GameObject_s, context_target_position) == 0xeb8, "GameObject context target offset");

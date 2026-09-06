@@ -10,6 +10,9 @@
 #include "nu2api/nu3d/nuspline.h"
 #include "nu2api/numath/nuvec.h"
 
+void ActivatePlayer(GameObject_s *);
+i32 DeactivatePlayer(GameObject_s *, f32, GameObject_s *);
+
 // Per-player saved progress.  Stride is 0x10 in the original binary.
 typedef struct playerprogress_s {
     u32 coins;     // 0x00
@@ -128,10 +131,11 @@ i32 MakePlayerList(i32 count);
 // ---- Player/gameobject helpers (defined in players.cpp) ----
 
 void DrawOffsetCode(GameObject_s *obj, i32 param);
-extern "C" void rtlDynamicEnable(i32 id, i32 param);
+extern "C" bool rtlDynamicEnable(i32 id, i32 param);
 i32 GameObjectNearFloor(GameObject_s *obj, f32 h, f32 *out);
 float GetHoverPosY(GameObject_s *obj);
 i32 Player_HasPurpleForce(GameObject_s *obj);
+i32 Player_HasDoubleWeaponDamage(GameObject_s *object);
 i32 Player_HasFastBuild(GameObject_s *obj);
 extern u32 GAMEPAD_ACTION;
 extern u32 GAMEPAD_DDOWN;

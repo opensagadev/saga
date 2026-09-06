@@ -71,6 +71,14 @@ typedef i32 (*USING_EXTRA_ACTIONS_FN)(GameObject_s *object);
 
 extern CHARACTER_CONTEXT_INFO_s *CInfo;
 extern USING_EXTRA_ACTIONS_FN UsingExtraActionsFn;
+extern u32 LSW_HintConditions;
+extern bool (*IsWearingBackPackFn)(GameObject_s *);
+extern i32 LEGOCONTEXT_LAND_JUMP;
+extern i16 LEGOACT_LAND;
+extern i16 LEGOACT_LAND2;
+extern i16 LEGOACT_FALLLAND;
+extern i16 LEGOACT_BACKPACKFALLLAND;
+extern i16 LEGOACT_EXTRA_LAND2;
 
 struct AREA_GLOBAL_VALUES {
     i32 field_0x00;
@@ -523,6 +531,11 @@ extern u32 GAMEPAD_SKIP;
 extern i32 MiniCutCam;
 extern i32 LEGOCONTEXT_DROPIN;
 extern i32 LEGOCONTEXT_DOOMED;
+extern i32 LEGOCONTEXT_LAND_COMBATROLL;
+extern i32 LEGOCONTEXT_WALLSHUFFLE;
+extern i32 LEGOCONTEXT_NETWAIT;
+extern i16 LEGOACT_BUILD;
+extern i32 LEGOHINT_BUILD;
 extern i32 LEGOCONTEXT_BEENTAKENOVER;
 extern i32 LEGOCONTEXT_WEAPONIN;
 extern i32 LEGOCONTEXT_WEAPONOUT;

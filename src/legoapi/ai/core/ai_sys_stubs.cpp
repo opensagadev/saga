@@ -1254,8 +1254,8 @@ extern "C" {
             return;
         }
 
-        const u32 character_mask_low = static_cast<u32>(packet->character_type_mask);
-        const u32 character_mask_high = static_cast<u32>(packet->character_type_mask >> 32);
+        const u32 character_mask_low = packet->character_type_mask_low;
+        const u32 character_mask_high = packet->character_type_mask_high;
         for (i32 route_index = 0; route_index < path->route_count; ++route_index) {
             AIPATHROUTE &route = path->routes[route_index];
             if ((route.character_mask[0] & character_mask_low) != 0 ||

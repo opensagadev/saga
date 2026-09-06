@@ -5,6 +5,7 @@
 
 #include "gameapi/gui/apimenu.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/core/config/cheat.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/core/input/qrand.h"
@@ -40,7 +41,6 @@ extern void ReCalculateCompletionPoints(void);
 extern void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
 extern "C" void NuSound3StopRumble(void);
 extern i16 id_DEFAULTCHARACTER[2];
-extern volatile u8 LSW_HintConditions[4];
 extern "C" i32 NewMode;
 extern "C" i32 Paused;
 extern "C" i32 memcard_autosavedisabled;
@@ -158,7 +158,29 @@ void InitGameMode() {
     ConfigureComplexShadow(NULL);
 }
 
-void IncreaseScore(u32 *, u64, i32) {
+void IncreaseScore(u32 *total, u64 amount, i32 apply_multiplier) {
+    if (apply_multiplier != 0 && BonusArea == 0) {
+        if (Cheats_CheckFlags(4) != 0) {
+            amount *= 2;
+        }
+        if (Cheats_CheckFlags(8) != 0) {
+            amount *= 4;
+        }
+        if (Cheats_CheckFlags(0x10) != 0) {
+            amount *= 6;
+        }
+        if (Cheats_CheckFlags(0x20) != 0) {
+            amount *= 8;
+        }
+        if (Cheats_CheckFlags(0x40) != 0) {
+            amount *= 10;
+        }
+    }
+    amount += *total;
+    if (amount > 4000000000ULL) {
+        amount = 4000000000ULL;
+    }
+    *total = static_cast<u32>(amount);
 }
 
 void RegisterHelpers() {
@@ -201,7 +223,7 @@ void NewGame() {
 
     Cheats_TurnOff(0);
     Hint_ClearHintsAndDoneFlags();
-    LSW_HintConditions[0] &= static_cast<u8>(~7);
+    LSW_HintConditions &= ~7u;
     GamePad_InitButtons();
     Tag_DoneFirst = 0;
     Tag_DoneAny = 0;

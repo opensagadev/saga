@@ -594,22 +594,37 @@ void GizTurretObjectInterface::TargetedFlash() {
 GizTurretObjectInterface::~GizTurretObjectInterface() {
 }
 
-void GizBuildItObjectInterface::GetPos(VuVec &, i32) const {
+void CalcAveragePosAndRad(GIZBUILDIT_s &, VuVec &, f32 &, bool);
+f32 hackFlashTimer;
+GAMEANIMSET_s *hackFlashingGameAnimSet;
+
+void GizBuildItObjectInterface::GetPos(VuVec &position, i32) const {
+    f32 radius;
+    CalcAveragePosAndRad(*buildit, position, radius, true);
 }
 
-void GizBuildItObjectInterface::GetRadius() const {
+f32 GizBuildItObjectInterface::GetRadius() const {
+    f32 radius;
+    VuVec position;
+    CalcAveragePosAndRad(*buildit, position, radius, true);
+    return radius;
 }
 
-void GizBuildItObjectInterface::GetTargetName() const {
+const char *GizBuildItObjectInterface::GetTargetName() const {
+    return buildit->name;
 }
 
-GizBuildItObjectInterface::GizBuildItObjectInterface(GIZBUILDIT_s &) {
+GizBuildItObjectInterface::GizBuildItObjectInterface(GIZBUILDIT_s &object) : buildit(&object) {
+    object.mech_object_interface = this;
 }
 
 void GizBuildItObjectInterface::TargetedFlash() {
+    hackFlashTimer = 1.0f;
+    hackFlashingGameAnimSet = buildit->anim_set;
 }
 
 GizBuildItObjectInterface::~GizBuildItObjectInterface() {
+    buildit->mech_object_interface = NULL;
 }
 
 void HatMachineObjectInterface::GetPos(VuVec &, i32) const {

@@ -1,6 +1,7 @@
 #include "decomp.h"
 #include "gameapi/edtools/edfile.h"
 #include "globals.h"
+#include "nu2api/nu3d/nutexanm.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
@@ -86,7 +87,7 @@ static bool HasCharacterAnimation(const GameObject_s *object, i32 animation) {
     return object != NULL && HasAnimation(object->apiobj.character_model, animation);
 }
 
-static __attribute__((used, noinline)) void MoveAnim_Check(GameObject_s *object) {
+static void MoveAnim_Check(GameObject_s *object) {
     if (object == NULL || HasCharacterAnimation(object, object->apiobj.anim_packet.requested_animation)) {
         return;
     }
@@ -103,27 +104,37 @@ static __attribute__((used, noinline)) void MoveAnim_Check(GameObject_s *object)
     }
 }
 
-static __used__ bool JumpAnim_HasAction(const GameObject_s *object, i16 action) {
-    return object != NULL && action >= 0 && object->apiobj.character_model != NULL &&
-           object->apiobj.character_model->model_data_b != NULL &&
-           object->apiobj.character_model->model_data_b[action] != NULL;
-}
-
-static __used__ void JumpAnimCode(GameObject_s *object) {
-    if (object == NULL) {
+static void JumpAnimCode(GameObject_s *object) {
+    if (object->context_variant_flags >= 0) {
+        ANIMPACKET_s *packet = &object->apiobj.anim_packet;
+        packet->requested_animation = object->context_animation;
+        const u8 state = object->action_movement_state;
+        if (object->context_animation != 0x49 && (state == 6 || state < 2 || state == 7 || state == 9)) {
+            if (packet->blending == 0 && object->context_animation == packet->animation_index &&
+                (packet->flags & 1) != 0) {
+                object->airborne_input_timer += FRAMETIME;
+                if (object->airborne_input_timer >= 0.1f &&
+                    (object->nearby_floor_distance == 2000000.0f || object->nearby_floor_distance > 0.35f)) {
+                    object->context_variant_flags |= 0x80;
+                }
+            } else {
+                object->airborne_input_timer = 0.0f;
+            }
+        }
         return;
     }
 
-    i16 action = object->context_animation;
-    if (object->context_variant_flags < 0) {
-        if (object->action_movement_state == PLAYER_JUMP_MOVEMENT_COMBAT_ROLL &&
-            JumpAnim_HasAction(object, PLAYER_JUMP_ACTION_COMBAT_ROLL_FALL)) {
-            action = PLAYER_JUMP_ACTION_COMBAT_ROLL_FALL;
-        } else if (JumpAnim_HasAction(object, PLAYER_JUMP_ACTION_FALL)) {
-            action = PLAYER_JUMP_ACTION_FALL;
-        }
+    void **animations = object->apiobj.character_model->model_data_b;
+    if (object->action_movement_state == PLAYER_JUMP_MOVEMENT_COMBAT_ROLL &&
+        animations[PLAYER_JUMP_ACTION_COMBAT_ROLL_FALL] != NULL) {
+        object->apiobj.anim_packet.requested_animation = PLAYER_JUMP_ACTION_COMBAT_ROLL_FALL;
+        return;
     }
-    object->apiobj.anim_packet.requested_animation = action;
+    if (animations[PLAYER_JUMP_ACTION_FALL] != NULL) {
+        object->apiobj.anim_packet.requested_animation = PLAYER_JUMP_ACTION_FALL;
+        return;
+    }
+    object->apiobj.anim_packet.requested_animation = object->context_animation;
 }
 
 static CHARACTERANIM_s *GetAnimationInfo(const CHARACTERMODEL_s *model, i32 animation) {
@@ -432,7 +443,7 @@ void Animate_JEDI(GameObject_s *object) {
     PlaySfxByIdAndSetVolume(GetSfxId(loop_sfx), &object->apiobj.collision_position, object->weapon_scale);
 }
 
-static __attribute__((used, noinline)) void MoveAnim_Manage(GameObject_s *object, f32 movement_speed, i32 allow_tiptoe,
+static void MoveAnim_Manage(GameObject_s *object, f32 movement_speed, i32 allow_tiptoe,
                                                             i32 weapon_variant) {
     GAMECHARACTERDATA *game_character = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
     CHARACTERMODEL_s *model = object->apiobj.character_model;
@@ -1036,7 +1047,31 @@ void GameAnimSet_EvaluateState(GAMEANIMSET_s *set) {
     }
 }
 
-void GameAnimSet_GetAveragePos(GAMEANIMSET_s *, nuvec_s *, i32, i32, i32) {
+i32 GameAnimSet_GetAveragePos(GAMEANIMSET_s *set, NUVEC *position, i32 frame_selection, i32 include_animated,
+                              i32 include_static) {
+    NUVEC sum = {0.0f, 0.0f, 0.0f};
+    if (position == NULL || set == NULL || set->object_count == 0 || set->objects == NULL) return 0;
+    i32 count = 0;
+    for (GAMEANIMOBJ_s *object = set->objects; object != NULL; object = object->next) {
+        if ((object->flags & 1) != 0) continue;
+        if (object->instance_animation != NULL) {
+            if (include_animated == 0) continue;
+            f32 frame;
+            if (frame_selection == 0) frame = object->start_frame;
+            else if (frame_selection == 1) frame = object->end_frame;
+            else frame = object->instance_animation->ltime;
+            NUMTX matrix;
+            EvalAnim(&object->special, frame, &matrix, 1);
+            NuVecAdd(&sum, &sum, NUMTX_GET_ROW_VEC(&matrix, 3));
+            ++count;
+        } else if (include_static != 0) {
+            NuVecAdd(&sum, &sum, NuSpecialGetDrawPos(&object->special));
+            ++count;
+        }
+    }
+    if (count == 0) return 0;
+    NuVecScale(position, &sum, 1.0f / static_cast<f32>(count));
+    return 1;
 }
 
 GAMEANIMSET_VISIBILITY GameAnimSet_GetVisibility(GAMEANIMSET_s *set) {
@@ -1761,10 +1796,20 @@ extern "C" {
         return 0.0f;
     }
 
-    void AnimListFrame(void) {
+    f32 AnimListFrame(CHARACTERMODEL_s *model, i32 animation, i32 frame) {
+        if (animation == -1 || model->model_data_b[animation] == NULL || frame < 0 || frame > 3) {
+            return 0.0f;
+        }
+        CHARACTERANIM_s *info = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation]);
+        return info->event_frames[frame];
     }
 
-    void AnimListFrameArray(void) {
+    f32 *AnimListFrameArray(CHARACTERMODEL_s *model, i32 animation) {
+        if (animation == -1 || model->model_data_b[animation] == NULL) {
+            return NULL;
+        }
+        CHARACTERANIM_s *info = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation]);
+        return info->event_frames;
     }
 
     void AnimList_NoLoad(void) {
@@ -1785,7 +1830,15 @@ extern "C" {
     void AnimPacket_MiniToFull(void) {
     }
 
-    void AnimPlaying(void) {
+    f32 *AnimPlaying(ANIMPACKET_s *packet, i32 animation, i32 target, i32 source) {
+        if (packet == NULL || animation == -1) return NULL;
+        if (packet->blending == 0) {
+            if (packet->animation_index == animation) return &packet->current_time;
+        } else {
+            if (target != 0 && packet->blend_animation_b == animation) return &packet->blend_target_time;
+            if (source != 0 && packet->blend_animation_a == animation) return &packet->blend_source_time;
+        }
+        return NULL;
     }
 
     void AnimSpeed(void) {
@@ -1934,20 +1987,6 @@ extern "C" {
         packet->current_reversed = 0;
         packet->blend_source_reversed = 0;
         packet->blend_target_reversed = 0;
-    }
-
-    void __attribute__((weak, optimize("O0"))) ResetMiniAnimPacket(void *raw_packet, i32 animation) {
-        MINIANIMPACKET_s *packet = static_cast<MINIANIMPACKET_s *>(raw_packet);
-        if (packet != NULL) {
-            packet->requested_animation_id = static_cast<i16>(animation);
-            packet->previous_animation_id = packet->requested_animation_id;
-            packet->current_animation_id = packet->previous_animation_id;
-            packet->target_time = 1.0f;
-            packet->previous_time = packet->target_time;
-            packet->current_time = packet->previous_time;
-            packet->field_0x19 = 0;
-            packet->reset_state = 4;
-        }
     }
 
     void RootFn(NUMTX *matrix, void *data, NUVEC *source_root, NUVEC *target_root, NUVEC *root_delta, f32 blend) {
@@ -2276,7 +2315,20 @@ void GetAnimDirection(nuinstanim_s *) {
 void FindTexAnimFromMtl(nugscn_s *, numtl_s *) {
 }
 
-void InitTexAnimScripts(char **) {
+static char **TexAnimList;
+
+void InitTexAnimScripts(char **names) {
+    TexAnimList = names;
+    if (names == NULL) return;
+    while (*names != NULL) {
+        permbuffer_ptr.addr = ALIGN(permbuffer_ptr.addr, 4);
+        char path[72];
+        NuStrCpy(path, "stuff\\ats\\");
+        NuStrCat(path, *names++);
+        NuStrCat(path, ".ats");
+        NuTexAnimProgReadScript(path, &permbuffer_ptr);
+    }
+    permbuffer_ptr.addr = ALIGN(permbuffer_ptr.addr, 16);
 }
 
 i32 GizmoFileReadGameAnimSet(GAMEANIMSET_s *set, void *world_ptr,

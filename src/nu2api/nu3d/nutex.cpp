@@ -8,6 +8,7 @@
 #include "nu2api/nucore/nustring.h"
 #include <pthread.h>
 #include <string.h>
+#include "nu2api/nucore/numemory.h"
 
 struct nutextureformat_e {};
 struct nutexanimprog_s;
@@ -140,6 +141,16 @@ i32 NuTexCreateNative(NUNATIVETEX *tex, bool is_pvrtc) {
 
     pthread_mutex_unlock(&criticalSection);
 
+    return 0;
+}
+
+extern "C" i32 NuTexGenTexture(NUNATIVETEX *tex) {
+    for (i32 i = 0; i < max_textures; ++i) {
+        if (texture_list[i] == NULL) {
+            texture_list[i] = tex;
+            return i + 1;
+        }
+    }
     return 0;
 }
 
@@ -360,25 +371,11 @@ void NuTexManagerInit(VARIPTR *buf, VARIPTR) {
     buf->addr = reinterpret_cast<usize>(g_texman + 1);
 }
 
-void NuTexAnimProgInit(nutexanimprog_s *) {
-}
-
 void NuTextureCreate3D(i32, i32, i32, i32, i32, nutextureformat_e) {
-}
-
-void NuTexAnimResetList(nutexanim_s *anim) {
-    for (; anim != NULL; anim = anim->next) {
-        if (anim->env != NULL) {
-            NuTexAnimEnvReset(anim->env);
-        }
-    }
 }
 
 void NuTexManagerStream(nugscn_s *) {
     streamOff = 1;
-}
-
-void NuTexAnimProgParseFile(i32, variptr_u *, variptr_u, i32) {
 }
 
 i32 NuTexGetUnresolvedTextureTIDPS() {

@@ -1,4 +1,6 @@
 #include "decomp.h"
+#include "globals.h"
+#include "legoapi/characters/motion.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
 
@@ -13,7 +15,11 @@ void GetGenericGoon(i32) {
 void ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32) {
 }
 
-void objInNetWaitContext(GameObject_s *, i32) {
+i32 objInNetWaitContext(GameObject_s *object, i32 context) {
+    if (LEGOCONTEXT_NETWAIT != -1 && object != NULL && LEGOCONTEXT_NETWAIT == object->character_context) {
+        return object->context_animation == context;
+    }
+    return false;
 }
 
 void oneAtOnce_CanAttack(GameObject_s *, GameObject_s *) {

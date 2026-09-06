@@ -5,6 +5,9 @@
 #include "gameframework/saveload.h"
 #include "legoapi/menus/core/text.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/world/level.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/items/objects/gameobjects.h"
@@ -15,6 +18,7 @@
 #include "legoapi/world/mission.h"
 #include "legoapi/world/world_shared.h"
 #include "globals.h"
+#include "nu2api/nu3d/nutexanm.h"
 struct starfighter_s;
 struct rtl_s;
 struct rtlidata_s;
@@ -24,6 +28,7 @@ struct rtlidata_s;
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nuqfnt.h"
 #include "nu2api/nu3d/nurndrstat.h"
+#include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nuvport.h"
 #include "nu2api/nu3d/NuRenderDevice.h"
 #include "nu2api/nu3d/nuspecial.h"
@@ -41,6 +46,7 @@ struct rtlidata_s;
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/numath/numath.h"
+#include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 
@@ -61,9 +67,12 @@ extern i16 tHELPANDOPTIONS;
 extern i16 tGOLDBRICKS;
 extern i16 tSTORYCLIPS;
 extern i16 tENTERCODE;
+i32 AnakinGreenSabre(GameObject_s *object);
+i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 
 f32 HUB_EPISODESUBTITLEY = -0.745f;
 f32 HUB_EPISODETITLEY = -0.595f;
+i32 draw_para = 1;
 
 void DisplayListGenerateTransforms(nudisplayscene_s *scene);
 void DrawGameObjectsDraw(i32 pass);
@@ -728,6 +737,30 @@ static NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path, NU
             }
         }
         NuGScnFixupTIDs(fixed_scene);
+        nutexanim_s *animations = static_cast<nutexanim_s *>(fixed_scene->texture_anims);
+        u32 animation_texture_count = 0;
+        for (i32 i = 0; i < fixed_scene->num_texture_anims; ++i) {
+            u32 end = reinterpret_cast<usize>(animations[i].texture_ids) + animations[i].texture_count;
+            if (animation_texture_count < end) animation_texture_count = end;
+        }
+        for (u32 i = 0; i < animation_texture_count; ++i) {
+            fixed_scene->texture_anim_ids[i] = fixed_scene->texture_ids[fixed_scene->texture_anim_ids[i]];
+        }
+        for (i32 i = 0; i < fixed_scene->num_texture_anims; ++i) {
+            nutexanim_s *anim = &animations[i];
+            anim->flags = 0;
+            anim->next = NULL;
+            anim->previous = NULL;
+            anim->texture_ids = fixed_scene->texture_anim_ids + reinterpret_cast<usize>(anim->texture_ids);
+            anim->material = fixed_scene->mtls[reinterpret_cast<usize>(anim->material)];
+            nutexanimprog_s *program = NuTexAnimProgFind(anim->program_name);
+            anim->env = NuTexAnimEnvCreate(buf, anim->material, anim->texture_ids, program);
+        }
+        for (i32 i = 0; i < fixed_scene->num_texture_anims - 1; ++i) {
+            animations[i].next = &animations[i + 1];
+            animations[i + 1].previous = &animations[i];
+        }
+        NuTexAnimAddList(animations);
         if (fixed_scene->display_list != NULL) {
             NuDisplaySceneAdd(reinterpret_cast<NUDLDLISTSCENE *>(fixed_scene->display_list));
         }
@@ -831,7 +864,7 @@ void DrawStreaks() {
 void Draw_LOADED() {
 }
 
-__attribute__((force_align_arg_pointer)) void Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position,
+void Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position,
                                                            u16 x_rotation, u16 y_rotation, u16 z_rotation,
                                                            float scale_x, float scale_y, float scale_z,
                                                            i32 rotate_order) {
@@ -932,9 +965,9 @@ void DrawQuestion(nuvec_s *, float, float) {
 void DrawRectRGBA(float, float, float, float, u32, numtl_s *, i32, float) {
 }
 
-__attribute__((force_align_arg_pointer)) void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value,
+void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value,
                                                        float unused, float y_push, u16 x_rot, u16 y_rot, u16 z_rot);
-static __attribute__((noinline)) void Shop_DrawCharacter(shopitem_s *item, NUVEC *position, f32 scale_value, f32 ypush,
+static void Shop_DrawCharacter(shopitem_s *item, NUVEC *position, f32 scale_value, f32 ypush,
                                                          u16 xrot, u16 yrot, u16 zrot);
 
 void DrawSubItems() {
@@ -1104,7 +1137,7 @@ void DrawSubItems() {
     }
 }
 
-static __attribute__((noinline)) void Shop_DrawCharacter(shopitem_s *item, NUVEC *position, f32 scale_value, f32 ypush,
+static void Shop_DrawCharacter(shopitem_s *item, NUVEC *position, f32 scale_value, f32 ypush,
                                                          u16 xrot, u16 yrot, u16 zrot) {
     const bool top_shelf_character = item == &TopShelf[1];
     if (top_shelf_character) {
@@ -1592,7 +1625,7 @@ void DrawGameMessages() {
         void (*end_fn)(GAMEMESSAGE_s *);
     };
     extern GAMEMESSAGE_s GameMessage[128];
-    extern void DrawPanel3DObjectNoAlpha(float, float, float, float, float, float, u16, u16, u16, nuhspecial_s *, i32);
+    extern i32 DrawPanel3DObjectNoAlpha(float, float, float, float, float, float, u16, u16, u16, nuhspecial_s *, i32);
 
     auto draw_special = [](nuhspecial_s *special, RENDER_MESSAGE *message, f32 x, f32 y, f32 z, f32 scale, f32 alpha) {
         if (NuSpecialExistsFn(special) == 0) {
@@ -1614,78 +1647,80 @@ void DrawGameMessages() {
         if (message->active == 0) {
             continue;
         }
-        if (message->field_0xfb != 0 && (message->flags & 4) == 0) {
+        if (message->field_0xfb != 0 && (message->flags & 0x40000) == 0) {
             continue;
         }
         if (message->field_0xd0 > 0.0f) {
             continue;
         }
-        if (message->elapsed > message->duration && message->field_0xfa == 0) {
+        if (message->elapsed >= message->duration && message->field_0xfa == 0) {
             continue;
         }
 
-        f32 progress = message->elapsed;
+        f32 progress = message->elapsed / message->duration;
         if ((message->flags & 0x100) != 0) {
-            progress = message->duration != 0.0f ? message->elapsed / message->duration : 0.0f;
+            progress = 1.0f - NU_SIN_LUT(static_cast<i32>(progress * 16384.0f + 16384.0f));
         } else if ((message->flags & 0x200) != 0) {
-            progress = NU_SIN_LUT(static_cast<i32>(message->elapsed * 16384.0f));
+            progress = NU_SIN_LUT(static_cast<i32>(progress * 16384.0f));
         } else if ((message->flags & 0x400) != 0) {
-            progress = NU_SIN_LUT(static_cast<i32>(message->elapsed * 32768.0f));
+            progress = NU_SIN_LUT(static_cast<i32>(progress * 32768.0f));
         } else if ((message->flags & 0x800) != 0) {
-            progress = NU_SIN_LUT(static_cast<i32>(message->elapsed * 32768.0f));
+            progress = 1.0f - NU_SIN_LUT(static_cast<i32>(progress * 32768.0f));
         }
 
         NUVEC position = message->start_position;
-        if ((message->field_0xd4 != 0.0f || message->field_0xd4 != message->field_0xd4) && message->field_0xfb == 0) {
-            if (position.x < -1.0f) {
-                position.x = -1.0f;
-            } else if (position.x > 1.0f) {
-                position.x = 1.0f;
+        if (message->field_0xd4 != 0.0f && message->field_0xfb == 0) {
+            const f32 limit = message->field_0xd4;
+            if (position.x < -limit) {
+                position.x = -limit;
+            } else if (position.x > limit) {
+                position.x = limit;
             }
-            if (position.y < -1.0f) {
-                position.y = -1.0f;
-            } else if (position.y > 1.0f) {
-                position.y = 1.0f;
+            if (position.y < -limit) {
+                position.y = -limit;
+            } else if (position.y > limit) {
+                position.y = limit;
             }
         }
 
-        f32 scale = message->field_0xb4;
+        f32 scale = (message->flags & 5) == 5 ? message->field_0xb8 : message->field_0xb4;
+        if ((message->flags & 8) != 0) {
+            if (message->update_fn != NULL) {
+                message->update_fn(reinterpret_cast<GAMEMESSAGE_s *>(message));
+            }
+            position.x =
+                position.x + (message->target_position.x - position.x) * progress;
+            position.y =
+                position.y + (message->target_position.y - position.y) * progress;
+            position.z =
+                position.z + (message->target_position.z - position.z) * progress;
+        }
         if ((message->flags & 0x20) != 0) {
             scale += (message->target_scale - scale) * progress;
         }
         position.x += message->field_0xc4;
         position.z += message->field_0xc8;
 
-        if ((message->flags & 8) != 0) {
-            if (message->update_fn != NULL) {
-                message->update_fn(reinterpret_cast<GAMEMESSAGE_s *>(message));
-            }
-            position.x =
-                message->start_position.x + (message->target_position.x - message->start_position.x) * progress;
-            position.y =
-                message->start_position.y + (message->target_position.y - message->start_position.y) * progress;
-            position.z =
-                message->start_position.z + (message->target_position.z - message->start_position.z) * progress;
-        }
-
         if (message->draw_fn != NULL) {
             message->draw_fn(reinterpret_cast<GAMEMESSAGE_s *>(message), &position, scale);
             continue;
         }
 
+        if (NuSpecialExistsFn(&message->extra_special) == 0) {
+            char *text = message->text != NULL ? message->text : message->text_buffer;
+            Text3DEx(text, position.x, position.y, position.z, scale, scale, scale, message->field_0xfc, message->red,
+                     message->green, message->blue, message->alpha);
+            continue;
+        }
         draw_special(&message->extra_special, message, position.x, position.y, position.z, scale,
-                     static_cast<f32>(message->alpha) * (1.0f / 255.0f));
+                     (message->flags & 0x10000) != 0 ? static_cast<f32>(message->alpha) / 128.0f : 1.0f);
         if (GameMsg_GetExtraObjFn != NULL) {
             nuhspecial_s *extra = GameMsg_GetExtraObjFn(reinterpret_cast<GAMEMESSAGE_s *>(message));
             if (extra != NULL) {
                 draw_special(extra, message, position.x, position.y, position.z, scale,
-                             static_cast<f32>(message->alpha) * (1.0f / 255.0f));
+                             (message->flags & 0x10000) != 0 ? static_cast<f32>(message->alpha) / 128.0f : 1.0f);
             }
         }
-
-        char *text = message->text != NULL ? message->text : message->text_buffer;
-        Text3DEx(text, position.x, position.y, position.z, scale, scale, scale, message->field_0xfc, message->red,
-                 message->green, message->blue, message->alpha);
     }
 }
 
@@ -1757,7 +1792,7 @@ void DrawStatusScreen(WORLDINFO_s *) {
 void Draw_LOADCORRUPT() {
 }
 
-__attribute__((force_align_arg_pointer)) void Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position,
+void Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position,
                                                                 u16 x_rotation, u16 y_rotation, u16 z_rotation,
                                                                 float scale_x, float scale_y, float scale_z,
                                                                 i32 rotate_order, float alpha) {
@@ -2128,7 +2163,20 @@ void DrawGameMessage_Targets(GAMEMESSAGE_s *, nuvec_s *, float) {
 void DrawTorpedoTargetSprite(void *, unsigned char, float) {
 }
 
-void DrawPanel3DObjectNoAlpha(float, float, float, float, float, float, u16, u16, u16, nuhspecial_s *, i32) {
+i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float scale_y, float scale_z,
+                            u16 rotate_x, u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order) {
+    if (special == NULL || NuSpecialExistsFn(special) == 0) return 0;
+    if (scale_y == 0.0f && scale_x == 0.0f && scale_z == 0.0f) return 0;
+    NUVEC scale = {scale_x / CameraZoom, scale_y / CameraZoom, scale_z / CameraZoom};
+    NUMTX matrix;
+    NuMtxSetScale(&matrix, &scale);
+    RotateGameMatrix(&matrix, rotate_order, rotate_x, rotate_y, rotate_z);
+    matrix.m30 = x * PANEL3DMULX;
+    matrix.m31 = y * PANEL3DMULY;
+    matrix.m32 = z;
+    NuMtxMulVU0(&matrix, &matrix, NuCameraGetMtx());
+    NuSpecialDrawAt(special, &matrix);
+    return 0;
 }
 
 void DrawPanel3DObjectMtxNoAlpha(nuhspecial_s *, numtx_s *) {
@@ -2137,7 +2185,7 @@ void DrawPanel3DObjectMtxNoAlpha(nuhspecial_s *, numtx_s *) {
 void Draw_OK(MENU_s *) {
 }
 
-__attribute__((force_align_arg_pointer)) void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value,
+void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value,
                                                        float, float y_push, u16 x_rot, u16 y_rot, u16 z_rot) {
     if (position != NULL) {
         if (NuSpecialExistsFn(special) != 0) {
@@ -2259,8 +2307,13 @@ static void DrawHitPoints(GameObject_s *object, float x, float y, float scale, f
     }
 }
 
+void TransformGameMessages(nuvec_s *, nuvec_s *, nuvec_s *);
+
 void DrawPanel() {
     SetQFont2D();
+    if (CUTSTOPGAME == 0) {
+        TransformGameMessages(&GameCam->pos, &GameCam->shaken_right, &GameCam->dir);
+    }
 
     if (editor_active == 0 && PANELOFF == 0 && WORLD != NULL && WORLD->current_level != NULL) {
         LEVELDATA *level = WORLD->current_level;
@@ -2338,7 +2391,197 @@ static __used__ bool MatrixReflection_CanOverride() {
 static __used__ void DrawStarFighter(starfighter_s *) {
 }
 
-static __used__ void DrawParaphernalia(GameObject_s *) {
+static void DrawWeapon_SetSabreObjects(GameObject_s *object, i32 red, i32 green, i32 blue, i32 purple,
+                                      i32 *models, i32 *hilt) {
+    if (red || green || blue || purple) {
+        if (object->id == id_DARTHMAUL) {
+            *hilt = models[0] = 0x12;
+        } else if (object->id == id_COUNTDOOKU && WORLD->lev_objs[0x13].active) {
+            *hilt = models[0] = 0x13;
+        } else {
+            *hilt = models[0] = 0x11;
+        }
+        if (red) {
+            if (object->apiobj.field_0x287 != 0) {
+                return;
+            }
+            if (object->id == id_DARTHMAUL) {
+                models[1] = 0x6d;
+                models[2] = 0x6e;
+                if (object->field_0xe22 & 8) {
+                    models[3] = 0x6e;
+                }
+            } else {
+                models[1] = 0x65;
+                models[2] = 0x66;
+                if (object->field_0xe22 & 8) {
+                    models[3] = 0x66;
+                }
+            }
+            return;
+        }
+        if (green) {
+            if (object->apiobj.field_0x287 != 0) {
+                return;
+            }
+            models[1] = 0x67;
+            models[2] = 0x68;
+            if (object->field_0xe22 & 8) {
+                models[3] = 0x68;
+            }
+            return;
+        }
+    }
+    if (blue) {
+        if (object->apiobj.field_0x287 == 0) {
+            models[1] = 0x69;
+            models[2] = 0x6a;
+            if (object->field_0xe22 & 8) {
+                models[3] = 0x6a;
+            }
+        }
+    } else if (purple && object->apiobj.field_0x287 == 0) {
+        models[1] = 0x6b;
+        models[2] = 0x6c;
+        if (object->field_0xe22 & 8) {
+            models[3] = 0x6c;
+        }
+    }
+}
+
+static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) {
+    i32 models[4] = {-1, -1, -1, -1};
+    i32 hilt = -1;
+    i32 reflected_models[4] = {-1, -1, -1, -1};
+    if (weapon_scale <= 0.0f) {
+        return;
+    }
+    GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+    if (data->field_0x94 & 0x200000) {
+        return;
+    }
+    bool sabre = false;
+    u16 rotation = 0;
+    for (i32 hand = 0; hand < 4; ++hand) {
+        const i32 joint = data->weapon_joints[hand];
+        if (joint != -1 && object->apiobj.character_model->points_of_interest[joint] != NULL) {
+            if (Cheat_IsOn(15) && (data->field275_0x116 == 8 || data->field275_0x116 == 1)) {
+                models[0] = 0x59;
+            } else {
+                models[0] = data->weapon_model;
+                if (models[0] == -1) {
+                    if ((object->apiobj.character_data->model_flags & 0x90) == 0x80) {
+                        models[0] = 0xd;
+                    } else {
+                        i32 color = data->field_0x117;
+                        if (object->id == id_BOB) {
+                            color = (object->field_0xefd & 2) ? 1 : 2;
+                        } else if (AnakinGreenSabre(object)) {
+                            color = 1;
+                        }
+                        if (color < 4) {
+                            if (object->apiobj.field_0x27c != -1 && Cheat_IsOn(25)) {
+                                color = 0;
+                            } else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object)) {
+                                color = 3;
+                            } else if (color == 1 && object->id == id_GRIEVOUS && (hand == 0 || hand == 3)) {
+                                color = 2;
+                            }
+                            DrawWeapon_SetSabreObjects(object, color == 0, color == 1, color == 2, color == 3,
+                                                       models, &hilt);
+                            sabre = true;
+                        }
+                    }
+                }
+            }
+            if (data->weapon_model != -1 || models[0] == 0x59) {
+                if (object->id == id_JANGOFETT) {
+                    rotation = 0xd1c8;
+                } else if (models[0] == 0x65 || models[0] == 0x67 || models[0] == 0x69 || models[0] == 0x6b) {
+                    i32 color = (models[0] - 0x65) / 2;
+                    if (object->apiobj.field_0x27c != -1 && Cheat_IsOn(25)) {
+                        color = 0;
+                    } else if (object->apiobj.field_0x27c != -1 && Player_HasPurpleForce(object)) {
+                        color = 3;
+                    }
+                    DrawWeapon_SetSabreObjects(object, color == 0, color == 1, color == 2, color == 3, models, &hilt);
+                    sabre = true;
+                }
+            }
+            i32 count = 0;
+            for (i32 part = 0; part < 4; ++part) {
+                if (models[part] != -1) {
+                    reflected_models[part] = LevelObject_GetReflection(models[part]);
+                    if (part != 3) {
+                        ++count;
+                    }
+                }
+            }
+            if (count != 0) {
+                NUMTX blade_matrix = object->joint_matrices[joint];
+                NUMTX hilt_matrix;
+                NUVEC scale = {weapon_scale, weapon_scale, weapon_scale};
+                if (hilt != -1) {
+                    f32 hilt_scale = weapon_scale + weapon_scale;
+                    if (hilt_scale > 1.0f) {
+                        hilt_scale = 1.0f;
+                    }
+                    NUVEC hilt_scale_vec = {hilt_scale, hilt_scale, hilt_scale};
+                    hilt_matrix = blade_matrix;
+                    NuMtxPreScale(&hilt_matrix, &hilt_scale_vec);
+                }
+                if (rotation != 0) {
+                    NuMtxPreRotateX(&blade_matrix, rotation);
+                }
+                NuMtxPreScale(&blade_matrix, &scale);
+                const NUMTX saved_matrix = blade_matrix;
+                for (i32 side = 0; ; ++side) {
+                    for (i32 part = 0; part < 4; ++part) {
+                        if (models[part] == -1 || (side && models[part] == hilt)) {
+                            continue;
+                        }
+                        if (part == 3) {
+                            blade_matrix.m30 += object->weapon_trail_offset.x;
+                            blade_matrix.m31 += object->weapon_trail_offset.y;
+                            blade_matrix.m32 += object->weapon_trail_offset.z;
+                        }
+                        NUMTX *matrix = models[part] == hilt ? &hilt_matrix : &blade_matrix;
+                        Draw3DObjectMtx(NULL, models[part], matrix);
+                        if (reflection) {
+                            i32 model = reflected_models[part];
+                            if (model == -1 || !WORLD->lev_objs[model].active) {
+                                model = models[part];
+                            }
+                            NUMTX reflected;
+                            if (MatrixReflection(matrix, object->field_0x1087, object->field_0x1020,
+                                                 WORLD->current_level->unknown_0cc, &reflected)) {
+                                NuRndrStartReflectionRender(0);
+                                Draw3DObjectMtx(NULL, model, &reflected);
+                                NuRndrEndReflectionRender();
+                            }
+                        }
+                    }
+                    if (side || object->id != id_DARTHMAUL || object->apiobj.field_0x27c == -1 ||
+                        (!Cheat_IsOn(25) && !Player_HasPurpleForce(object))) {
+                        break;
+                    }
+                    blade_matrix = saved_matrix;
+                    NUVEC reverse = {1.0f, -1.0f, 1.0f};
+                    NuMtxPreScale(&blade_matrix, &reverse);
+                }
+            }
+        }
+        if (sabre && object->id != id_GRIEVOUS) {
+            return;
+        }
+    }
+}
+
+static void DrawParaphernalia(GameObject_s *object) {
+    if (draw_para == 0) {
+        return;
+    }
+    DrawWeapons(object, object->field_0x1088, object->weapon_scale);
 }
 
 static __used__ void DrawFalconSpotLights(GameObject_s *) {

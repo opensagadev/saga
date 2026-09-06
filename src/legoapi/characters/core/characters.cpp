@@ -7,6 +7,7 @@
 #include "nu2api/nu3d/nutex.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/charconfig.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/items/base/collection.h"
 #include "legoapi/items/objects/gameobjects.h"
@@ -30,7 +31,7 @@
 // otherwise C-linkage engine subsystems.  Keep these declarations local: the
 // individual subsystem TUs intentionally expose their original plain names.
 extern "C" {
-    void rtlInitDynamic(VARIPTR *, VARIPTR, i32);
+    i32 rtlInitDynamic(VARIPTR *, VARIPTR, i32);
     void DebrisSetup(VARIPTR *, VARIPTR, char *, i32, i32, i32);
     void DebrisRegisterCutoffCameraVec(void *);
     void edgraSetup(VARIPTR *, VARIPTR, i32, i32, i32);
@@ -642,7 +643,10 @@ void TakeOverYodaSeekDistanceHack(GameObject_s *, GameObject_s *, nuvec_s *) {
 void SetProtocolDroidInterfaceAction(GameObject_s *) {
 }
 
-void SetProtocolDroidDeactivatedAction(GameObject_s *) {
+void SetProtocolDroidDeactivatedAction(GameObject_s *object) {
+    if (object->field_0xe38 == 3) object->context_animation = 0x42;
+    else if (object->field_0xe38 == 2) object->context_animation = 0x43;
+    else if (object->field_0xe38 == 1) object->context_animation = 0x44;
 }
 
 void LoadPerm1() {
@@ -733,7 +737,7 @@ void LoadPerm2() {
     extern i16 tBLASTER;
     extern i16 tBOUNTYHUNTERCHARACTERS;
 
-    CharConfig_ConfigureAll(1, NULL);
+    CharConfig_ConfigureAll(1, ConfigChar_GameKeywords);
     ExtraCharacterFixUpAfterConfig();
     apiloadcharactermodels_nopakfile = CHARPAK == 0;
     APILoadCharacterModels(PermModelList, 1, &permbuffer_ptr, permbuffer_end, 1);

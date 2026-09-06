@@ -1,4 +1,5 @@
 #include "legogame/game.h"
+#include "legoapi/characters/motion.h"
 
 #include <string.h>
 
@@ -7,6 +8,12 @@
 #include "gameframework/saveload.h"
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
+extern i32 LEGOCONTEXT_HOLD;
+extern i32 LEGOCONTEXT_JUMP;
+extern i32 DoubleJump_JediSlam;
+extern i16 LEGOACT_SLAM;
+extern i32 (*CanStartHoldFn)(GameObject_s *);
+static i32 CanStartHold_Game(GameObject_s *) { return 1; }
 #include "legoapi/audio/audio.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/props/doors/door.h"
@@ -21,6 +28,29 @@
 #include "nu2api/nucore/nuapi.h"
 #include "nu2api/nucore/nuvideo.h"
 #include "nu2api/nufile/nufpar.h"
+
+extern i32 (*Fighting_WeaponInActionFn)(GameObject_s *);
+extern i32 (*Fighting_WeaponOutActionFn)(GameObject_s *);
+
+static bool IsWearingBackPack_Game(GameObject_s *object) {
+    SUIT_s *suit = static_cast<SUIT_s *>(object->suit);
+    return suit != NULL ? (suit->initially_available & 1) : 0;
+}
+
+static i32 UsingExtraActions_Game(GameObject_s *object) {
+    return object->id == id_GRIEVOUS &&
+           ((object->field_0xe22 & 1) == 0 || object->weapon_scale_state == 2);
+}
+
+static i32 Fighting_WeaponInAction_Game(GameObject_s *object) {
+    GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+    return data->field275_0x116 == 0 && (object->apiobj.character_data->model_flags & 0x80) != 0 ? 126 : 16;
+}
+
+static i32 Fighting_WeaponOutAction_Game(GameObject_s *object) {
+    GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+    return data->field275_0x116 == 0 && (object->apiobj.character_data->model_flags & 0x80) != 0 ? 127 : 17;
+}
 
 extern "C" i32 NuIOS_IsSmallScreen(void);
 extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
@@ -463,7 +493,7 @@ void InitGameAfterConfig(void) {
                                 bVar1 = pAVar2[(char)episode].episode_index;
                                 level->unknown_0ae = bVar1;
                                 if ((pAVar2[(char)episode].flags & 1) != 0) {
-                                    level->unknown_0d9 = 0x32;
+                                    level->camera_judder_distance = 0x32;
                                     level->unknown_0da = 0x14;
                                 }
                                 if (((bVar1 != 0xff) && ((pAVar2[(char)episode].flags & 0x106) == 0)) &&
@@ -530,7 +560,7 @@ void InitGameAfterConfig(void) {
     //  troopers_gdeb._12_4_ = 0x4b;
     //  LEGOHINT_SHOOTCAMERAS = 0x266;
     //  LEGOHINT_PUSHBLOCKS = 0x267;
-    //  LEGOHINT_BUILD = 0x25c;
+    LEGOHINT_BUILD = 0x25c;
     //  LEGOHINT_FREEPLAYTOGGLE = 600;
     //  PUNCHGAP = 0.3;
     //  PUNCHCHARGAP = 0.3;
@@ -558,11 +588,11 @@ void InitGameAfterConfig(void) {
     //  SuperCarry_UseActionButton = 1;
     //  CutScene_OverrideConfigFileNameFn = CutScene_OverrideConfigFileName_LSW;
     //  CharPivot_Init((CHARPIVOT *)CharPivot_LSW);
-    //  DIEAIRSPEED = 0x40600000;
-    //  DIEAIRJUMPSPEED = 0x40200000;
-    //  ForcePush_Waft = 1;
-    //  ForcePush_SuperPush = 1;
-    //  ForcePush_SuperMindTrick = 1;
+    DIEAIRSPEED = 3.5f;
+    DIEAIRJUMPSPEED = 2.5f;
+    ForcePush_Waft = 1;
+    ForcePush_SuperPush = 1;
+    ForcePush_SuperMindTrick = 1;
     //  Lighting_HighlightFlash = 1;
     //  Lighting_BlueFlickerFn = ObjZappedBlue;
     //  AddGameMsg_Default._56_4_ = GameMsg_EndDelay_Game;
@@ -573,16 +603,16 @@ void InitGameAfterConfig(void) {
     //  LEGOACT_IDLE = 1;
     //  LEGOACT_WALK = 0;
     //  LEGOACT_JUMP = 6;
-    //  LEGOACT_LAND = 7;
+    LEGOACT_LAND = 7;
     //  LEGOACT_JUMP2 = 9;
     //  LEGOACT_JUMP3 = 0xe;
-    //  LEGOACT_LAND2 = 10;
+    LEGOACT_LAND2 = 10;
     //  LEGOACT_LAND3 = 0x15;
     //  LEGOACT_COMBOJUMP = 0x12;
     //  LEGOACT_COMBOLAND = 0x13;
     //  LEGOACT_FALL = 5;
-    //  LEGOACT_FALLLAND = 0x59;
-    //  LEGOACT_BACKPACKFALLLAND = 0xb3;
+    LEGOACT_FALLLAND = 0x59;
+    LEGOACT_BACKPACKFALLLAND = 0xb3;
     //  LEGOACT_DEACTIVATED = 0x41;
     //  LEGOACT_PUNCH_BEHIND = 0x94;
     //  LEGOACT_SHOOTRIGHT = 0x5b;
@@ -606,7 +636,7 @@ void InitGameAfterConfig(void) {
     //  LEGOACT_SUPERPUSH_IDLE = 0xae;
     //  LEGOACT_SUPERPUSH_PUSH = 0xaf;
     //  LEGOACT_SUPERPUSH_PULL = 0xb0;
-    //  LEGOACT_BUILD = 0x5f;
+    LEGOACT_BUILD = 0x5f;
     //  LEGOACT_FLIP = 0xc;
     //  LEGOACT_FLIPLAND = 0xd;
     //  LEGOACT_BACKFLIP = 0x77;
@@ -633,7 +663,9 @@ void InitGameAfterConfig(void) {
     //  LEGOACT_MAGNET_LAND = 0xca;
     //  LEGOACT_LUNGE = 0x1f;
     //  LEGOACT_LUNGELAND = 0x20;
-    //  LEGOACT_SLAM = 0x21;
+    LEGOACT_SLAM = 0x21;
+    LEGOCONTEXT_JUMP = 0;
+    DoubleJump_JediSlam = 1;
     //  LEGOACT_SLAMLAND = 0x22;
     //  LEGOACT_COMBATROLL_JUMP = 0xb4;
     //  LEGOACT_COMBATROLL_FALL = 0xb5;
@@ -642,7 +674,7 @@ void InitGameAfterConfig(void) {
     //  LEGOACT_EXTRA_JUMP = 0x78;
     //  LEGOACT_EXTRA_JUMP2 = 0x79;
     //  LEGOACT_EXTRA_LAND = 0x7a;
-    //  LEGOACT_EXTRA_LAND2 = 0x7b;
+    LEGOACT_EXTRA_LAND2 = 0x7b;
     //  LEGOACT_BUCK = 0x2a;
     //  LEGOACT_TEETER = 0xdb;
     //  LEGOACT_WHIP_START = 0xdc;
@@ -655,7 +687,7 @@ void InitGameAfterConfig(void) {
     //  LEGOCONTEXT_TUBE = 0x11;
     //  LEGOCONTEXT_GLIDE = 0x4f;
     //  LEGOCONTEXT_BLOCK = 0xc;
-    //  LEGOCONTEXT_HOLD = 0x18;
+    LEGOCONTEXT_HOLD = 0x18;
     LEGOCONTEXT_DROPIN = 0x23;
     LEGOCONTEXT_DOOMED = 0x2b;
     //  LEGOCONTEXT_LEDGETERRAIN = 0x55;
@@ -663,7 +695,7 @@ void InitGameAfterConfig(void) {
     //  LEGOCONTEXT_HANG = 0x4e;
     //  LEGOCONTEXT_JUMP = 0;
     //  LEGOCONTEXT_BIGJUMP = 0x1f;
-    //  LEGOCONTEXT_WALLSHUFFLE = 0x45;
+    LEGOCONTEXT_WALLSHUFFLE = 0x45;
     //  LEGOCONTEXT_COMBO = 5;
     //  LEGOCONTEXT_PUNCH = 0x26;
     //  LEGOCONTEXT_PUSH = 0x27;
@@ -678,20 +710,20 @@ void InitGameAfterConfig(void) {
     //  LEGOCONTEXT_WALLJUMPWAIT = 0x57;
     //  LEGOCONTEXT_GRAPPLE = 0x46;
     //  LEGOCONTEXT_SUPERCARRY = 0x58;
-    //  LEGOCONTEXT_LAND_JUMP = 1;
+    LEGOCONTEXT_LAND_JUMP = 1;
     //  LEGOCONTEXT_LAND_JUMP2 = 2;
     //  LEGOCONTEXT_LAND_FLIP = 3;
     //  LEGOCONTEXT_LAND_COMBOJUMP = 4;
     //  LEGOCONTEXT_LAND_LUNGE = 0xd;
     //  LEGOCONTEXT_LAND_SLAM = 0xe;
     //  LEGOCONTEXT_LAND_SPECIAL = 0x19;
-    //  LEGOCONTEXT_LAND_COMBATROLL = 0x29;
+    LEGOCONTEXT_LAND_COMBATROLL = 0x29;
     //  LEGOCONTEXT_EATEN = 0x39;
     //  LEGOCONTEXT_SPECIALMOVE_ATTACKER = 0x26;
     //  LEGOCONTEXT_SPECIALMOVE_VICTIM = 0x30;
     //  LEGOCONTEXT_BUCK = 0x3e;
     //  LEGOCONTEXT_WHIP = 0x62;
-    //  LEGOCONTEXT_NETWAIT = 99;
+    LEGOCONTEXT_NETWAIT = 99;
     //  LEGOMENU_TITLES = 0;
     LEGOMENU_NEWGAME = LEGO_MENU_NEW_GAME;
     LEGOMENU_PAUSEMAIN = LEGO_MENU_PAUSE_MAIN;
@@ -739,18 +771,18 @@ void InitGameAfterConfig(void) {
     //  CanSuperCarryFn = CanSuperCarry_Game;
     //  CanPushBlocksFn = CanPushBlocks_Game;
     //  CanGlideFn = CanGlide_Game;
-    //  UsingExtraActionsFn = UsingExtraActions_Game;
-    //  CanStartHoldFn = CanStartHold_Game;
+    UsingExtraActionsFn = UsingExtraActions_Game;
+    CanStartHoldFn = CanStartHold_Game;
     //  Player_ClearContextFn = Player_ClearContext_Game;
     //  LEGOTHINGSSCENE_TER_SPINBASE = 0;
     //  LEGOTHINGSSCENE_TER_SPINARM = 1;
     //  GizBuildit_AutoBuildPosFn = GizBuildit_AutoBuildPos_Game;
-    //  Fighting_WeaponInActionFn = Fighting_WeaponInAction_Game;
-    //  Fighting_WeaponOutActionFn = Fighting_WeaponOutAction_Game;
+    Fighting_WeaponInActionFn = Fighting_WeaponInAction_Game;
+    Fighting_WeaponOutActionFn = Fighting_WeaponOutAction_Game;
     //  LEGOOBJ_FLOORTARGET = 0x55;
     //  LEGOOBJ_GRAPPLE_HOOK = 0x3d;
     //  Slam_GetDebrisFn = Slam_GetDebris_Game;
-    //  IsWearingBackPackFn = IsWearingBackPack_Game;
+    IsWearingBackPackFn = IsWearingBackPack_Game;
     //  Grass_Available = 1;
     //  PauseGame_ExtraCodeFn = PauseGame_ExtraCode;
     //  Hub_PanelBusyFn = Hub_PanelBusy;

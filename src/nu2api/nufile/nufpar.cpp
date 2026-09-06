@@ -1,4 +1,5 @@
 #include "nu2api/nufile/nufpar.h"
+#include "nu2api/nu3d/nutexanm.h"
 
 #include <string.h>
 
@@ -766,69 +767,6 @@ NUWCHAR NuGetWChar(NUFPAR *parser) {
 
     return c;
 }
-static __used__ void pftaRepeat(nufpar_s *) {
-}
-
-static __used__ void pftaRepend(nufpar_s *) {
-}
-
-static __used__ void pftaTexAdj(nufpar_s *) {
-}
-
-static __used__ void pftaTexAdjR(nufpar_s *) {
-}
-
-static __used__ void pftaUntiltex(nufpar_s *) {
-}
-
-static __used__ void pftaScriptMask(nufpar_s *) {
-}
-
-static __used__ void pftaScriptname(nufpar_s *) {
-}
-
-static __used__ void pftaOn(nufpar_s *) {
-}
-
-static __used__ void pftaEnd(nufpar_s *) {
-}
-
-static __used__ void pftaOff(nufpar_s *) {
-}
-
-static __used__ void pftaRet(nufpar_s *) {
-}
-
-static __used__ void pftaTex(nufpar_s *) {
-}
-
-static __used__ void pftaBtex(nufpar_s *) {
-}
-
-static __used__ void pftaGoto(nufpar_s *) {
-}
-
-static __used__ void pftaGosub(nufpar_s *) {
-}
-
-static __used__ void pftaLabel(nufpar_s *) {
-}
-
-static __used__ void pftaRate(nufpar_s *) {
-}
-
-static __used__ void pftaTexR(nufpar_s *) {
-}
-
-static __used__ void pftaWait(nufpar_s *) {
-}
-
-static __used__ void pftaXDef(nufpar_s *) {
-}
-
-static __used__ void pftaXRef(nufpar_s *) {
-}
-
 static __used__ void xChild_Col(nufpar_s *) {
 }
 

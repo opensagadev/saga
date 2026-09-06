@@ -29,8 +29,6 @@ void AddPickups(i32 count, i32 pickup_type, i32 param3, i32 param4, NUVEC *posit
                 i32 source, f32 scatter_height, f32 lifetime, GameObject_s *owner, i32 param12, i32 param13,
                 bool param14);
 void GameAudio_PlaySfxById(i32 sfx_id, NUVEC *position, i32 flags, i32 volume);
-void GameAnimSet_GetAveragePos(GAMEANIMSET_s *set, NUVEC *position, i32 include_static, i32 include_animated,
-                               i32 include_hidden);
 void GameAnimSet_DrawReflection(GAMEANIMSET_s *set, i32 flags, f32 alpha, numtx_s *matrix);
 
 namespace {

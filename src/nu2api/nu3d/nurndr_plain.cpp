@@ -28,6 +28,8 @@
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nucore/nucore.hpp"
 #include "globals.h"
+#include "nu2api/nu3d/nutexanm.h"
+#include "nu2api/nucore/nuthread.h"
 #include "nu2api/nucore/common.h"
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nu3d/nudlist.h"
@@ -359,19 +361,6 @@ extern "C" void NuRndrSwapScreenEx(i32 /*mode*/, void (*callback)(void)) {
         callback();
     }
     NuRndrSwapScreen();
-}
-
-// ---------------------------------------------------------------------------
-// Texture-animation pump — empty until the texanim subsystem is transcribed.
-// No texture animations run during boot, so these are intentional no-ops.
-// Originals 0x2ccb10 / ...
-// ---------------------------------------------------------------------------
-
-extern "C" void NuTexAnimProcess(f32) {
-}
-extern "C" void NuTexAnimProcessEx(void) {
-}
-extern "C" void NuTexAnimProcessList(void) {
 }
 
 // ---------------------------------------------------------------------------

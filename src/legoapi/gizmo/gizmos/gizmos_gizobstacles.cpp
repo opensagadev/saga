@@ -1,5 +1,6 @@
 #include "decomp.h"
 #include "globals.h"
+#include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/gizmos/object/gizobstacles.h"
 #include "legoapi/items/base/apiobject.h"
@@ -143,12 +144,24 @@ void GizObstacle_SetDefaultSFXFn_LSW(void *, GIZOBSTACLE_s *) {
 void GizObstacle_SetTechnoControlled(GIZOBSTACLE_s *, float) {
 }
 
-// The obstacle update path treats this callback as a boolean predicate.
-i32 GizObstacle_CheckExcludeFlagsFn_LSW(GIZOBSTACLE_s *, GameObject_s *) {
+void Move_BEAST(GameObject_s *object);
+
+i32 GizObstacle_CheckExcludeFlagsFn_LSW(GIZOBSTACLE_s *obstacle, GameObject_s *object) {
+    if ((obstacle->field_0x6c & 1) != 0 &&
+        static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->field275_0x116 != 10) {
+        return 1;
+    }
+    if ((obstacle->field_0x6c & 2) != 0 && object->apiobj.character_data->move_fn != Move_BEAST) {
+        return 1;
+    }
     return 0;
 }
 
-void GizObstacle_EvalAveragePosAndRadius(GIZOBSTACLE_s *, i32) {
+void GizObstacle_EvalAveragePosAndRadius(GIZOBSTACLE_s *obstacle, i32 state) {
+    obstacle->field_0x58 = 1.0f;
+    obstacle->evaluated_position = obstacle->position;
+    GameAnimSet_GetCentreAndRadius(obstacle->anim_set, &obstacle->evaluated_position, &obstacle->field_0x58,
+                                    state, 1, 1);
 }
 
 void GIZOBSTACLE_s::ClearMechObjectInterface() {

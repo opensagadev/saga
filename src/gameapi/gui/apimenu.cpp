@@ -247,7 +247,6 @@ extern i16 tCONTROLLERCONNECTED;
 extern i16 tTOUCH;
 extern i16 tCONSOLE;
 extern "C" bool TestForController();
-extern volatile u8 LSW_HintConditions[4];
 extern "C" void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment,
                             u8 red, u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box,
                             i32 suppress_draw, u32 alpha);
@@ -786,9 +785,7 @@ void MenuUpdateNewGame(MENU *menu) {
         GameSetSoundVolume(&Game.options_save);
         legoSetMusicVolume(SuperOptions.music_enabled != 0 ? GameGetMusicVolume(&TempOptions) : 0.0f);
         Hint_LoadAllGameState();
-        u8 hint_conditions = LSW_HintConditions[0];
-        hint_conditions |= 7;
-        LSW_HintConditions[0] = hint_conditions;
+        LSW_HintConditions |= 7;
         newgamealpha = 0.0f;
 
         u8 brightness = Game.options_save.field12_0xc;

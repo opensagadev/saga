@@ -29,6 +29,9 @@ GIZMOBLOWUPTYPE_s *GizmoBlowup_FindType(char *name, WORLDINFO_s *world);
 void GameAntiNodeData_Init(GAMEANTINODEDATA_s *data, nuhspecial_s *special);
 void GameAntiNodeData_Read(GAMEANTINODEDATA_s *data);
 void GizBlowup_Respawn(GIZMOBLOWUP_s *blowup);
+void UpdateMidPos(GIZMOBLOWUP_s *blowup);
+i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *, i32, i32, i32, GameObject_s *, i32);
+extern "C" void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
 void GizmoBlowupGenDecalMatrix(GIZMOBLOWUP_s *blowup, NUMTX *matrix, i32 alternate);
 void GizmoBlowupGenShadowMatrix(GIZMOBLOWUP_s *blowup, NUMTX *matrix);
 int MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
@@ -123,8 +126,86 @@ void GizmoBlowupEarlyUpdate(void *world_ptr, void *, float) {
         bool requires_update = ((blowup->state_flags & GIZMOBLOWUP_STATE_ACTIVATED) != 0 &&
                                 (blowup->output_flags & GIZMOBLOWUP_OUTPUT_BLOWN_UP) == 0) ||
                                (blowup->state_flags & GIZMOBLOWUP_STATE_DELAY_ACTIVE) != 0;
-        if (!requires_update && (blowup->state_flags & GIZMOBLOWUP_STATE_ACTIVATED) == 0 && animation != NULL &&
-            animation->playing != 0) {
+        if (requires_update) {
+            GIZMOBLOWUPTYPE_s *type = blowup->type;
+            if ((blowup->draw_flags & 0x400000) != 0) {
+                nuhspecial_s *special = blowup->override_special;
+                if (special == NULL || !NuSpecialExistsFn(special)) {
+                    special = &type->animated_special;
+                }
+                blowup->transform = *NuSpecialGetInstanceMtx(special);
+                blowup->state_flags |= GIZMOBLOWUP_STATE_ACTIVE;
+            }
+            if ((blowup->state_flags & GIZMOBLOWUP_STATE_ACTIVE) != 0) {
+                UpdateMidPos(blowup);
+            }
+            if (animation != NULL) {
+                const f32 end_frame = NuAnimEndFrameOld(
+                    type->animated_special.scene->instance_animation_data[animation->anim_ix]);
+                if ((blowup->state_flags & GIZMOBLOWUP_STATE_REPEAT_ANIMATION) != 0) {
+                    if ((type->animation_runtime_flags & GIZMOBLOWUPTYPE_ANIMATION_UPDATED) == 0 &&
+                        ((type->animation_flags & GIZMOBLOWUPTYPE_ANIMATION_INCLUDES_INSTANCE_TRANSFORM) != 0 ||
+                         (blowup->state_flags & GIZMOBLOWUP_STATE_REPEATING) != 0)) {
+                        type->animation_base_frame += FRAMETIME * 60.0f * animation->tfactor;
+                        blowup->state_flags |= GIZMOBLOWUP_STATE_ACTIVE;
+                        if (type->animation_base_frame >= end_frame) {
+                            if (animation->repeating != 0) {
+                                type->animation_base_frame = 1.0f;
+                            } else {
+                                blowup->field_0x9f |= 1;
+                            }
+                        }
+                        type->animation_runtime_flags |= GIZMOBLOWUPTYPE_ANIMATION_UPDATED;
+                    }
+                    blowup->state_flags |= GIZMOBLOWUP_STATE_ACTIVE;
+                    blowup->animation_time += FRAMETIME * 60.0f * animation->tfactor;
+                    NUMTX matrix;
+                    EvalAnim(&type->animated_special, blowup->animation_time, &matrix, 0);
+                    blowup->mid_position.x = matrix.m30 + blowup->position.x;
+                    blowup->mid_position.y = matrix.m31 + blowup->position.y;
+                    blowup->mid_position.z = matrix.m32 + blowup->position.z;
+                    if (blowup->animation_time >= end_frame) {
+                        if (animation->repeating != 0) {
+                            blowup->animation_time = 0.0f;
+                        } else {
+                            blowup->animation_time = type->animation_start_frame;
+                            blowup->field_0x9f |= 1;
+                        }
+                    }
+                }
+            }
+            if ((blowup->state_flags & 4) != 0) {
+                if (blowup->activation_delay > 0.0f) {
+                    blowup->activation_delay -= FRAMETIME;
+                    if (blowup->activation_delay <= 0.0f) {
+                        if (animation == NULL || (blowup->state_flags & GIZMOBLOWUP_STATE_REPEAT_ANIMATION) != 0) {
+                            blowup->field_0x9f |= 1;
+                        } else {
+                            blowup->state_flags |= GIZMOBLOWUP_STATE_REPEAT_ANIMATION;
+                        }
+                        blowup->state_flags &= ~4;
+                    }
+                }
+            } else if ((blowup->state_flags & GIZMOBLOWUP_STATE_DELAY_ACTIVE) != 0) {
+                if (blowup->animation_time <= 0.0f) {
+                    blowup->state_flags &= ~GIZMOBLOWUP_STATE_DELAY_ACTIVE;
+                } else {
+                    blowup->animation_time -= FRAMETIME;
+                }
+            }
+            if ((blowup->field_0x9f & 1) != 0) {
+                GizmoBlowupBlowup(blowup, 1, -1, 1, NULL, 1);
+            }
+            if (type->particle_types[7] != -1) {
+                AddVariableShotDebrisEffectTimed1(type->particle_types[7], &blowup->mid_position, 60,
+                                                 FRAMETIME, 0, 0, NULL);
+            }
+            if (type->particle_types[8] != -1) {
+                AddVariableShotDebrisEffectTimed1(type->particle_types[8], &blowup->mid_position, 60,
+                                                 FRAMETIME, 0, 0, NULL);
+            }
+        } else if ((blowup->state_flags & GIZMOBLOWUP_STATE_ACTIVATED) == 0 && animation != NULL &&
+                   animation->playing != 0) {
             animation->playing = 0;
         }
     }

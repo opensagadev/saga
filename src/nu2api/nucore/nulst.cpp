@@ -60,6 +60,45 @@ void NuLstDestroy(NULSTHDR *list) {
     NuMemoryGet()->GetThreadMem()->BlockFree(list, 0);
 }
 
+NULSTHDR *NuLstCreateBuff(i32 count, i32 size, VARIPTR *buffer, VARIPTR end, i32 alignment) {
+    NULSTHDR *list = NULL;
+    buffer->addr = (buffer->addr + alignment - 1) & -static_cast<usize>(alignment);
+    u32 stride = (alignment + size + sizeof(NULNKHDR) - 1) & -alignment;
+    usize bytes = count * stride + sizeof(NULSTHDR);
+    if (bytes < end.addr - buffer->addr) {
+        list = static_cast<NULSTHDR *>(buffer->void_ptr);
+        buffer->addr += bytes;
+        list->free = reinterpret_cast<NULNKHDR *>(list + 1);
+        list->head = NULL;
+        list->tail = NULL;
+        list->element_count = count;
+        list->element_size = size;
+        list->element_size_total = stride;
+        list->used_count = 0;
+        NULNKHDR *node = list->free;
+        i32 i;
+        for (i = 1; i < count; ++i) {
+            NULNKHDR *next = reinterpret_cast<NULNKHDR *>(reinterpret_cast<u8 *>(node) + stride);
+            node->next = next;
+            node->id = i - 1;
+            node->owner = list;
+            node = next;
+        }
+        node->next = NULL;
+        list->free_tail = node;
+        node->id = i - 1;
+        node->owner = list;
+        list->safe_thread = nu_current_thread_id;
+    }
+    return list;
+}
+
+NULNKHDR *NuLstGetByIdx(NULSTHDR *list, i32 index) {
+    NULNKHDR *node = reinterpret_cast<NULNKHDR *>(reinterpret_cast<u8 *>(list + 1) +
+        static_cast<i16>(list->element_size_total) * index);
+    return node->is_used ? node + 1 : NULL;
+}
+
 NULNKHDR *NuLstAlloc(NULSTHDR *list) {
     return NuLstAllocHead(list);
 }

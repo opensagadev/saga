@@ -3,6 +3,7 @@
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/menus/core/text.h"
+#include "legoapi/menus/screens/store.h"
 #include "legoapi/render/core/render.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
@@ -233,8 +234,89 @@ void Episodes_CompleteAllSuperStories() {
 void Episode_FindFromArea(i32) {
 }
 
-i32 Episode_CountOpenAreas(i32, i32, AREASAVE_s *) {
-    return 0;
+i32 EpCompleteTotal, EpCompleteCount;
+i32 EpMiniKitTotal, EpMiniKitCount;
+i32 EpCharKitTotal, EpCharKitCount;
+i32 EpBuildUpTotal, EpBuildUpCount;
+i32 EpStoryBuildUpTotal, EpStoryBuildUpCount;
+i32 EpFreePlayBuildUpTotal, EpFreePlayBuildUpCount;
+i32 EpRedBrickTotal, EpRedBrickCount;
+i32 EpGoldBrickTotal, EpGoldBrickCount;
+
+i32 Episode_CountOpenAreas(i32 episode_index, i32 area_index, AREASAVE_s *saves) {
+    EpCompleteTotal = EpCompleteCount = 0;
+    EpMiniKitTotal = EpMiniKitCount = 0;
+    EpCharKitTotal = EpCharKitCount = 0;
+    EpBuildUpTotal = EpBuildUpCount = 0;
+    EpStoryBuildUpTotal = EpStoryBuildUpCount = 0;
+    EpFreePlayBuildUpTotal = EpFreePlayBuildUpCount = 0;
+    EpRedBrickTotal = EpRedBrickCount = 0;
+    EpGoldBrickTotal = EpGoldBrickCount = 0;
+    if (episode_index == -1) return 0;
+    if (GOLDBRICKFORSUPERSTORY != 0 && area_index == -1) {
+        EpGoldBrickTotal = 1;
+        if (Game_EpisodeSave != NULL && (Game_EpisodeSave[episode_index].flags & 0xff) != 0)
+            EpGoldBrickCount = 1;
+    }
+    i32 open = 0;
+    for (i32 i = 0; i < EDataList[episode_index].area_count; ++i) {
+        const i32 id = EDataList[episode_index].area_ids[i];
+        if (id != area_index && area_index != -1) continue;
+        AREADATA *area = &ADataList[id];
+        if (area == HUB_ADATA || (area->flags & 0x22) != 0) continue;
+        if ((area->flags & 0x100) != 0) {
+            if (GOLDBRICKFORSUPERBONUS != 0) {
+                ++EpGoldBrickTotal;
+                if (saves[i].area_complete != 0) ++EpGoldBrickCount;
+            }
+            continue;
+        }
+        if ((area->flags & 4) != 0) continue;
+        AREASAVE_s *save = &saves[id];
+        ++EpCompleteTotal;
+        EpMiniKitTotal += 10;
+        if (save->complete != 0) ++open;
+        if (save->area_complete != 0) {
+            ++EpCompleteCount;
+            ++EpGoldBrickCount;
+        }
+        ++EpGoldBrickTotal;
+        if ((area->flags & 0x10) == 0) continue;
+        if (save->minikit_count != 0) ++EpGoldBrickCount;
+        EpMiniKitCount += save->field_0x5[0];
+        if (BOTHTRUEJEDIGOLDBRICKS == 0) {
+            ++EpBuildUpTotal;
+            EpGoldBrickTotal += 2;
+            if (save->story_buildup_complete != 0 || save->freeplay_buildup_complete != 0) {
+                ++EpGoldBrickCount;
+                ++EpBuildUpCount;
+            }
+        } else {
+            if (save->story_buildup_complete != 0) {
+                ++EpBuildUpCount;
+                ++EpGoldBrickCount;
+                ++EpStoryBuildUpCount;
+            }
+            EpBuildUpTotal += 2;
+            EpGoldBrickTotal += 3;
+            if (save->freeplay_buildup_complete != 0) {
+                ++EpBuildUpCount;
+                ++EpGoldBrickCount;
+                ++EpFreePlayBuildUpCount;
+            }
+        }
+        ++EpRedBrickTotal;
+        if (save->field_0x5[1] != 0) ++EpRedBrickCount;
+        if (Store_IsPackUnlocked(8)) {
+            ++EpCharKitTotal;
+            if (GOLDBRICKFORCHALLENGE != 0) ++EpGoldBrickTotal;
+            if (save->field_0x5[2] != 0) {
+                ++EpCharKitCount;
+                if (GOLDBRICKFORCHALLENGE != 0) ++EpGoldBrickCount;
+            }
+        }
+    }
+    return open;
 }
 
 void InitSuperStory(i32) {

@@ -15,7 +15,7 @@ NUMTL *SolidMtl3D;
 
 extern "C" {
     u32 LAYER_HOVERIGNORE = 0xffffffff;
-    volatile u16 SURFACEBITS_DUST;
+    u16 SURFACEBITS_DUST;
     u16 SURFACEBITS_NODUST;
     TERRAIN_SURFACE_s TerSurface[32] = {
         {1.0f, 0, 0xffff},     {1.0f, 65, 0xffff},   {1.0f, 2, 0xffff},      {1.0f, 8, 0xffff},   {1.0f, 65536, 0xffff},

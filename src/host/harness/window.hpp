@@ -17,7 +17,7 @@ struct HostWindowOptions {
     bool msaa = true;
     bool portals = true;
     u64 script_tail_ms = 8000;
-    u64 timeout_ms = 90000;
+    u64 timeout_ms = 0;
 };
 
 // Host harness command entry point.

@@ -33,7 +33,15 @@ struct NUJOINTANIM_s {
 using NUJOINTPROCANIMFN = void (*)(nuanimbuff_s *, struct nuhgobj_s *, i32, NUJOINTANIM_s *);
 
 struct nuhgobjpoi_s {
-    u8 data[0x50];
+    union {
+        u8 data[0x50];
+        struct {
+            NUMTX local_matrix;
+            u32 field_0x40;
+            u8 joint_index;
+            u8 field_0x45[0x0b];
+        };
+    };
 };
 
 struct nuhgobjjoint_s {
@@ -86,6 +94,7 @@ struct nuhgobj_s {
 };
 
 DECOMP_ASSERT(sizeof(nuhgobjpoi_s) == 0x50, "nuhgobjpoi_s size");
+DECOMP_ASSERT(offsetof(nuhgobjpoi_s, joint_index) == 0x44, "nuhgobjpoi_s joint offset");
 DECOMP_ASSERT(sizeof(nuhgobjjoint_s) == 0x60, "nuhgobjjoint_s size");
 DECOMP_ASSERT(sizeof(nuhgobjjointoverride_s) == 0x34, "nuhgobjjointoverride_s size");
 DECOMP_ASSERT(sizeof(NUJOINTANIM_s) == 0x34, "NUJOINTANIM_s size");
@@ -106,6 +115,7 @@ extern "C" {
                                        NUJOINTANIM_s *overrides);
     nuhgobj_s *NuGHGRead(char *path, VARIPTR *buf, VARIPTR buf_end);
     nuhgobjpoi_s *NuHGobjGetPOI(nuhgobj_s *object, i32 index);
+    void NuHGobjPOIMtx(nuhgobj_s *object, u8 index, NUMTX *world_matrix, NUMTX *joint_matrices, NUMTX *result);
     i32 NuHGobjGetLayerIndex(char *name, nuhgobj_s *object);
     void NuHGobjEval(nuhgobj_s *object, i32 override_count, nuhgobjjointoverride_s *overrides, NUMTX *matrices);
     void NuHGobjEvalAnim2(nuhgobj_s *object, ani3_animheader_s *animation, f32 time, i32 override_count,

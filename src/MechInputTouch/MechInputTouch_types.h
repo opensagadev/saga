@@ -3,6 +3,8 @@
 #pragma once
 
 #include "nu2api/nucore/fixed_width.h"
+#include "nu2api/nucore/hashedkey.hpp"
+#include "nu2api/nucore/numechptr.hpp"
 #include "nu2api/nucore/nulist.h"
 #include "legoapi/items/objects/basething.h"
 #include "legoapi/render/core/SwipeDecalRenderer.h"
@@ -406,9 +408,42 @@ struct MechJumpAutoPilotAddon {
     void Recalculate();
     virtual ~MechJumpAutoPilotAddon();
 };
-struct MechObjectInterface {
-    void GetFloorTargetPos(VuVec &, i32) const;
+struct GIZOBSTACLE_s;
+struct GIZMOBLOWUP_s;
+struct GIZFORCE_s;
+struct GIZBUILDIT_s;
+struct LEVER_s;
+struct TELEPORT_s;
+struct HATMACHINE_s;
+struct GIZPANEL_s;
+struct GIZTURRET_s;
+struct PART_s;
+
+struct MechObjectInterface : NuMechPtr<MechObjectInterface, 4>::ManagedBase {
+    virtual ~MechObjectInterface() {}
+    virtual void GetPos(VuVec &, i32) const {}
+    virtual void GetFloorTargetPos(VuVec &, i32) const;
+    virtual f32 GetRadius() const { return 0.0f; }
+    virtual f32 GetHeight() const { const f32 radius = GetRadius(); return radius + radius; }
+    virtual const char *GetTargetName() const { return ""; }
+    virtual i32 GetObjectType() const { return 0; }
+    virtual void TargetedFlash() {}
+    virtual i32 IsDead() { return 1; }
+    virtual void *GetTgtVoidPtr() { return NULL; }
+    virtual GameObject_s *GetCharacterObject() { return NULL; }
+    virtual GIZOBSTACLE_s *GetGizObstacle() { return NULL; }
+    virtual GIZMOBLOWUP_s *GetGizBlowup() { return NULL; }
+    virtual GIZFORCE_s *GetGizForce() { return NULL; }
+    virtual GIZBUILDIT_s *GetGizBuildit() { return NULL; }
+    virtual LEVER_s *GetGizLever() { return NULL; }
+    virtual TELEPORT_s *GetTeleport() { return NULL; }
+    virtual HATMACHINE_s *GetHatMachine() { return NULL; }
+    virtual GIZPANEL_s *GetPanel() { return NULL; }
+    virtual GIZTURRET_s *GetGizTurret() { return NULL; }
+    virtual PART_s *GetPart() { return NULL; }
 };
+DECOMP_ASSERT(sizeof(MechObjectInterface) == 8, "MechObjectInterface ABI");
+DECOMP_ASSERT(sizeof(NuMechPtr<MechObjectInterface, 4>) == 12, "Mech object reference ABI");
 // MechSystems is a BaseThing: AddOnceOnlyThings registers it on the
 // GameThingManager and ProcessThings dispatches into it every frame.
 // Virtual order = vtable for MechSystems @0x66b320 (rel slots):
@@ -472,7 +507,26 @@ struct MechTempPosInterface {
 struct MechTouchTask {
     MechTouchTask(MechInputTouchGestureBasedController &);
     virtual ~MechTouchTask();
+    virtual const HashedKey &GetHashId() { return HashId; }
+    virtual void OnStart() {}
+    virtual void OnStop() {}
+    virtual void OnSuspend() {}
+    virtual void OnResume() {}
+    virtual void Update() {}
+    virtual void BackgroundProcess() {}
+    virtual void Render() {}
+    virtual void UpdateTarget(MechObjectInterface &) {}
+    virtual i32 IsGoToTask() { return 0; }
+    virtual i32 IsBigJumpTask() { return 0; }
+    static HashedKey HashId;
+    MechTouchTask *next;
+    MechInputTouchGestureBasedController *controller;
+    u32 field_0xc;
+    f32 elapsed;
+    u8 flags;
+    u8 pad_15[3];
 };
+DECOMP_ASSERT(sizeof(MechTouchTask) == 0x18, "MechTouchTask ABI");
 struct MechTouchTaskAstroJetPack {
     MechTouchTaskAstroJetPack(MechInputTouchGestureBasedController &);
     void Update();
@@ -493,19 +547,45 @@ struct MechTouchTaskBlock {
     MechTouchTaskBlock(MechInputTouchGestureBasedController &);
     void Update();
 };
-struct MechTouchTaskBuildIt {
-    MechTouchTaskBuildIt(MechInputTouchGestureBasedController &, MechObjectInterface *, VuVec const &);
-    void Update();
-};
-struct MechTouchTaskGoTo {
+struct MechTouchTaskGoTo : MechTouchTask {
     MechTouchTaskGoTo(MechInputTouchGestureBasedController &, MechObjectInterface *);
-    void OnStart();
-    void OnStop();
-    void Render();
-    void Update();
+    const HashedKey &GetHashId() override { return HashId; }
+    void OnStart() override;
+    void OnStop() override;
+    void Render() override;
+    void Update() override;
     void UpdateStuck();
-    void UpdateTarget(MechObjectInterface &);
+    void UpdateTarget(MechObjectInterface &) override;
+    i32 IsGoToTask() override { return 1; }
     virtual ~MechTouchTaskGoTo();
+    static HashedKey HashId;
+    NuMechPtr<MechObjectInterface, 4> target;
+    u8 pad_24[8];
+    i32 room;
+    f32 field_30;
+    f32 field_34;
+    f32 field_38;
+    f32 field_3c;
+    f32 field_40;
+    f32 field_44;
+    u32 field_48;
+    u8 field_4c;
+    u8 field_4d;
+    u8 field_4e;
+    u8 field_4f;
+    u8 field_50;
+    u8 field_51;
+    u8 pad_52[2];
+    f32 field_54;
+    f32 field_58;
+    f32 field_5c;
+};
+DECOMP_ASSERT(sizeof(MechTouchTaskGoTo) == 0x60, "MechTouchTaskGoTo ABI");
+struct MechTouchTaskBuildIt : MechTouchTaskGoTo {
+    MechTouchTaskBuildIt(MechInputTouchGestureBasedController &, MechObjectInterface *, VuVec const &);
+    const HashedKey &GetHashId() override { return HashId; }
+    void Update() override;
+    static HashedKey HashId;
 };
 struct MechTouchTaskHatMachine {
     MechTouchTaskHatMachine(MechInputTouchGestureBasedController &, MechObjectInterface *, VuVec const &);

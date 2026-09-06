@@ -1,10 +1,25 @@
 #ifndef LEGOAPI_CHARACTERS_MOTION_H
 #define LEGOAPI_CHARACTERS_MOTION_H
 
+extern int ForcePush_Waft;
+extern int ForcePush_SuperPush;
+extern int ForcePush_SuperMindTrick;
+extern float DIEAIRSPEED;
+extern float DIEAIRJUMPSPEED;
+
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
 
 // Character motion / animation / camera helpers (module legoapi/characters).
+extern MechObjectInterface *forceNextAttackOpponent;
+extern MechObjectInterface *nextShootTarget;
+extern f32 ComboOpponent_Range2;
+extern i32 ComboOpponent_Behind;
+extern f32 PlayerOpponent_Range2;
+extern f32 GizmoBlowUpOpponent_Range2;
+extern i32 GizmoBlowUpOpponent_Behind;
+GameObject_s *ObjOpponent(GameObject_s *, f32, f32, i32, i32, i32);
+GIZMOBLOWUP_s *GizmoBlowUpOpponent(GameObject_s *, f32, f32, f32, i32, u32, u32, u32);
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,10 +31,12 @@ extern "C" {
 float SeekLinearF(float current, float target, float step);
 float SeekValF(float current, float target, float step);
 i32 RotDiff(u16 current, u16 target);
+i32 ObjLandReady(GameObject_s *object);
+i32 objInNetWaitContext(GameObject_s *object, i32 context);
 u16 TurnRot(u16 current, u16 target, i32 speed, i32 *difference);
 u16 SeekRot(u16 current, u16 target, float rate);
 void SeekVec(NUVEC *result, NUVEC *current, NUVEC *target, float rate);
-void GameCam_NewShake(GAMECAMERA_s *cam, float a, float b, float c);
+void GameCam_NewShake(GAMECAMERA_s *camera, float amount, float duration, float speed);
 void GameCam_HitJudder(void);
 void GameCam_Reset(GAMECAMERA_s *camera);
 void ChrisAllocLevelStuff(WORLDINFO_s *world);

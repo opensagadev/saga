@@ -214,7 +214,7 @@ extern "C" {
     };
 
 #ifdef __cplusplus
-#if !defined(__x86_64__) // the tidy pre-pass parses as 64-bit host; real build is i686
+#if UINTPTR_MAX == UINT32_MAX
     static_assert(sizeof(NUDLDLISTSCENE) == 0x90, "dlist scene size");
     static_assert(offsetof(NUDLDLISTSCENE, clip_used) == 0x30, "scene.clip_used");
     static_assert(offsetof(NUDLDLISTSCENE, clip_counts) == 0x18, "scene.clip_counts");
@@ -277,7 +277,7 @@ extern "C" {
     } NUDLIST_MANAGER;
 
 #ifdef __cplusplus
-#if !defined(__x86_64__) // the tidy pre-pass parses as 64-bit host; real build is i686
+#if UINTPTR_MAX == UINT32_MAX
     static_assert(sizeof(NUDLIST_MANAGER) == 0x604, "manager size");
     static_assert(offsetof(NUDLIST_MANAGER, dlists) == 0x004, "mgr.dlists");
     static_assert(offsetof(NUDLIST_MANAGER, dyn_mtl_dlist) == 0x404, "mgr.dyn_mtl_dlist");
@@ -296,7 +296,7 @@ extern "C" {
     static_assert(offsetof(NUDLIST_MANAGER, fx_items) == 0x5e8, "mgr.fx_items");
     static_assert(offsetof(NUDLIST_MANAGER, loading_critical_section) == 0x5ec, "mgr.loading_critical_section");
 #endif
-#if !defined(__x86_64__) // the tidy pre-pass parses as 64-bit host; real build is i686
+#if UINTPTR_MAX == UINT32_MAX
     static_assert(sizeof(NUDISPLAYLISTITEM) == 0x10, "item size");
     static_assert(sizeof(NUDISPLAYLIST) == 0x44, "displaylist size");
     static_assert(sizeof(NUSORTPRI) == 0x24, "sortpri size");

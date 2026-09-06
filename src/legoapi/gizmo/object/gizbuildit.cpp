@@ -1,5 +1,9 @@
 #include "decomp.h"
 #include "globals.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/menus/core/gamehint.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/world.h"
@@ -30,7 +34,86 @@ void ReleaseBuildIt(GameObject_s *player, i32 completed) {
     GameCam_Blend(GameCam, 0.5f, completion_blend, 1);
 }
 
-void BuildIt_MoveCode(GameObject_s *) {
+extern NuMechPtr<MechObjectInterface, 4> nextBuildit;
+i32 (*GizBuildIt_CanStartBuildingFn)(GIZBUILDIT_s *, GameObject_s *);
+GIZBUILDIT_s *GizBuildIt_FindNearest(WORLDINFO_s *, GameObject_s *, BUILDIT_FIND_ENUM, i32);
+void GizBuildIt_SetHeadTarget(GIZBUILDIT_s *, GameObject_s *);
+void GizBuildIt_SetStepTime(GIZBUILDIT_s *, GameObject_s *);
+void GizBuildItPushAwayFromStart(GameObject_s *, GIZBUILDIT_s *);
+void GizBuildItPushAwayFromEnd(GameObject_s *);
+
+void BuildIt_MoveCode(GameObject_s *player) {
+    if (LEGOCONTEXT_BUILDIT == -1) return;
+    if ((player->apiobj.character_data->model_flags & 0x2010) != 0) return;
+    if (player->build_context != LEGOCONTEXT_BUILDIT) {
+        if (LEGOACT_BUILD == -1 || player->apiobj.character_model->model_data_b[LEGOACT_BUILD] == NULL) return;
+        if (AnimPlaying(&player->apiobj.anim_packet, LEGOACT_BUILD, 1, 1) != NULL) return;
+        if (player->apiobj.field_0x27d == 0) return;
+        if (ObjLandReady(player) == 0 && objInNetWaitContext(player, LEGOCONTEXT_BUILDIT) == 0) return;
+        if (player->touch_task != NULL && player->touch_task->GetHashId().value != MechTouchTaskBuildIt::HashId.value) return;
+        GIZBUILDIT_s *buildit = nextBuildit.Get() != NULL ? nextBuildit->GetGizBuildit() : NULL;
+        if (buildit == NULL) buildit = GizBuildIt_FindNearest(WORLD, player, BUILDIT_FIND_AVAILABLE, ShadowMode);
+        if (objInNetWaitContext(player, LEGOCONTEXT_BUILDIT) != 0) {
+            player->context_animation_timer -= FRAMETIME;
+            if (player->context_animation_timer <= 0.0f) {
+                player->build_context = -1;
+                player->big_jump_data = NULL;
+            }
+        }
+        if (buildit == NULL || static_cast<i8>(player->apiobj.flags_low) >= 0) return;
+        if (player->apiobj.field_0x27d != 0 && (buildit->state_flags & 4) != 0) {
+            GizBuildItPushAwayFromStart(player, buildit);
+        }
+        GizBuildIt_SetHeadTarget(buildit, player);
+        buildit->availability_flags |= GIZBUILDIT_AVAILABILITY_INTERACTING;
+        if ((player->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) != 0 ||
+            (objInNetWaitContext(player, LEGOCONTEXT_BUILDIT) != 0 &&
+             (player->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) != 0)) {
+            if (GizBuildIt_CanStartBuildingFn != NULL && GizBuildIt_CanStartBuildingFn(buildit, player) == 0) return;
+            nextBuildit.Reset();
+            player->context_animation_timer = 0.4f;
+            player->field_0x788 = buildit;
+            player->build_button_taps = 0;
+            player->build_context = LEGOCONTEXT_BUILDIT;
+            player->context_animation = LEGOACT_BUILD;
+            player->field_0xe21 &= ~0x40;
+            GizBuildIt_SetStepTime(buildit, player);
+            GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
+            Hint_SetComplete(LEGOHINT_BUILD);
+        }
+        if (static_cast<i8>(player->apiobj.flags_low) < 0 && player->apiobj.field_0x27d != 0) {
+            GizBuildItPushAwayFromEnd(player);
+        }
+        return;
+    }
+    if (BoltSys->stop_targeting != NULL) BoltSys->stop_targeting(player, &player->apiobj.collision_position);
+    GIZBUILDIT_s *buildit = static_cast<GIZBUILDIT_s *>(player->field_0x788);
+    if (buildit == NULL) return;
+    GizBuildIt_SetHeadTarget(buildit, player);
+    buildit = static_cast<GIZBUILDIT_s *>(player->field_0x788);
+    if ((buildit->state_flags & 0x80) != 0 && ShadowMode == 0) {
+        player->build_context = -1;
+        buildit->builders_active = 1;
+        static_cast<GIZBUILDIT_s *>(player->field_0x788)->availability_flags |= GIZBUILDIT_AVAILABILITY_INTERACTING;
+    }
+    const i32 animation = player->context_animation;
+    if (player->apiobj.character_model->model_data_b[animation] != NULL &&
+        AnimPlaying(&player->apiobj.anim_packet, animation, 1, 0) == NULL) return;
+    buildit = static_cast<GIZBUILDIT_s *>(player->field_0x788);
+    if (buildit->build_state == 0 && (player->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) != 0 &&
+        player->context_animation_timer < 0.2f) {
+        player->context_animation_timer = 0.2f;
+    } else {
+        player->context_animation_timer -= FRAMETIME;
+        if (player->context_animation_timer <= 0.0f) {
+            player->build_context = -1;
+            return;
+        }
+    }
+    if (player->build_context != -1) {
+        buildit->builders_active = 1;
+        static_cast<GIZBUILDIT_s *>(player->field_0x788)->availability_flags |= GIZBUILDIT_AVAILABILITY_INTERACTING;
+    }
 }
 
 void GizBuildit_Reset(GIZBUILDIT_s *buildit, void *world_ptr) {
@@ -139,7 +222,10 @@ void GizBuildit_Reset(GIZBUILDIT_s *buildit, void *world_ptr) {
 void GizDrawBuildItPiece(GameObject_s *, i32) {
 }
 
-void ForceBuildItToUseNext(GIZBUILDIT_s &) {
+NuMechPtr<MechObjectInterface, 4> nextBuildit;
+
+void ForceBuildItToUseNext(GIZBUILDIT_s &buildit) {
+    nextBuildit = NuMechPtr<MechObjectInterface, 4>(buildit.GetMechObjectInterface());
 }
 
 void GizGetBuildItPlayerPos(GameObject_s *, nuvec_s *, nuvec_s *) {
