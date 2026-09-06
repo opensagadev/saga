@@ -701,7 +701,8 @@
             setBusy(true);
             setStatus(label);
             try {
-                const [buffer] = await Promise.all([load(), ensureRuntimeLoaded()]);
+                await ensureRuntimeLoaded();
+                const buffer = await load();
                 if (!buffer.byteLength) throw new Error("The selected OBB is empty.");
                 loadedObb = buffer;
                 playButton.disabled = false;
@@ -867,7 +868,15 @@
             return runtimeReady;
         }
 
-        void loadInitialObb();
+        setBusy(true);
+        setStatus("Preparing browser runtime...");
+        window.sagaIsolationReady.then(() => {
+            setBusy(false);
+            return loadInitialObb();
+        }).catch(error => {
+            setBusy(true);
+            setStatus(error instanceof Error ? error.message : String(error), true);
+        });
     </script>
     <script>
         const data = /*__DATA__*/;

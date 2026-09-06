@@ -150,12 +150,39 @@ COI_SERVICE_WORKER = r"""if (typeof window === "undefined") {
       });
     }));
   });
-} else if (!window.crossOriginIsolated && "serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./coi-serviceworker.js").then(() => {
-    if (!navigator.serviceWorker.controller) {
-      navigator.serviceWorker.addEventListener("controllerchange", () => location.reload(), {once: true});
+} else {
+  window.sagaIsolationReady = new Promise((resolve, reject) => {
+    const reloadKey = "saga-isolation-reload";
+    if (window.crossOriginIsolated) {
+      sessionStorage.removeItem(reloadKey);
+      resolve();
+      return;
     }
+    if (!window.isSecureContext || !("serviceWorker" in navigator)) {
+      reject(new Error("This build needs service workers and a secure browser window. Open the HTTPS site in a normal window; private browsing may disable service workers."));
+      return;
+    }
+    let reloading = false;
+    function reloadWhenControlled() {
+      if (!navigator.serviceWorker.controller || reloading) return;
+      try {
+        if (sessionStorage.getItem(reloadKey)) {
+          reject(new Error("Browser isolation setup failed after reloading. Allow service workers/site storage for this site, then reload in a normal browser window."));
+          return;
+        }
+        reloading = true;
+        sessionStorage.setItem(reloadKey, "1");
+        location.reload();
+      } catch (error) {
+        reject(error);
+      }
+    }
+    navigator.serviceWorker.addEventListener("controllerchange", reloadWhenControlled);
+    navigator.serviceWorker.register("./coi-serviceworker.js").then(reloadWhenControlled, error => {
+      reject(new Error(`Browser isolation setup failed: ${error.message}. Allow service workers/site storage for this site and reload.`));
+    });
   });
+  window.sagaIsolationReady.catch(() => {});
 }
 """
 
