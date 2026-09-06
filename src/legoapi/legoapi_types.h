@@ -1107,6 +1107,12 @@ struct GIZMOPICKUP_s {
     union {
         u8 state_flags; // GIZMOPICKUP_STATE_FLAGS
         u8 runtime_flags;
+        struct {
+            u8 state_active : 1;
+            u8 state_enabled : 1;
+            u8 state_visible : 1;
+            u8 other_state_flags : 5;
+        };
     }; // 0x17
     union {
         u8 activation_group;
@@ -3161,7 +3167,19 @@ struct GIZPANEL_s {
     u8 model_variant; // 0x61
     u8 field_0x62[2];
     f32 flash_timer;                // 0x64
-    GIZPANEL_FLAGS flags;           // 0x68
+    union {
+        GIZPANEL_FLAGS flags; // 0x68
+        struct {
+            u8 reserved_flag : 1;
+            u8 state : 1;
+            u8 visible : 1;
+            u8 track_player : 1;
+            u8 player_near : 1;
+            u8 hide_base : 1;
+            u8 hide_target : 1;
+            u8 baddie : 1;
+        };
+    };
     GIZPANEL_DRAW_FLAGS draw_flags; // 0x69
     u8 field_0x6a[2];
     NUVEC floor_position;  // 0x6c
@@ -3453,7 +3471,20 @@ struct LEVER_s {
     u16 animation_frame;        // 0x96
     u16 target_x_rotation;      // 0x98
     u16 target_z_rotation;      // 0x9a
-    u16 flags;                  // 0x9c, LEVER_FLAGS
+    union {
+        u16 flags; // 0x9c, LEVER_FLAGS
+        struct {
+            u8 interacting : 1;
+            u8 being_pulled : 1;
+            u8 goodie : 1;
+            u8 baddie : 1;
+            u8 visible : 1;
+            u8 auto_reset : 1;
+            u8 returning : 1;
+            u8 enabled : 1;
+            u8 flags_high;
+        };
+    };
     char model_variant;         // 0x9e
     u8 field_0x9f[9];
 

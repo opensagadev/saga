@@ -377,7 +377,7 @@ static i32 Grapple_GetNumOutputs(GIZMO *) {
 static void Grapple_Activate(GIZMO *gizmo, i32 active) {
     if (gizmo != NULL) {
         GRAPPLE *grapple = static_cast<GRAPPLE *>(gizmo->object);
-        grapple->flags = (grapple->flags & ~GRAPPLE_FLAG_ACTIVE) | (active != 0 ? GRAPPLE_FLAG_ACTIVE : 0);
+        grapple->active = active != 0;
         if ((grapple->flags & GRAPPLE_FLAG_ACTIVE) != 0) {
             grapple->activation_progress = 1.0f;
         }
@@ -387,8 +387,7 @@ static void Grapple_Activate(GIZMO *gizmo, i32 active) {
 static void Grapple_SetVisibility(GIZMO *gizmo, i32 visible) {
     if (gizmo != NULL) {
         GRAPPLE *grapple = static_cast<GRAPPLE *>(gizmo->object);
-        const u8 visible_flag = visible != 0;
-        grapple->flags = static_cast<u8>((grapple->flags & ~GRAPPLE_FLAG_VISIBLE) | (visible_flag << 1));
+        grapple->visible = visible != 0;
     }
 }
 

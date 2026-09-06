@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 17.535992,
+    "fuzzy_match_percent": 17.545746,
     "total_code": "4722419",
-    "matched_code": "39843",
-    "matched_code_percent": 0.843699,
+    "matched_code": "40744",
+    "matched_code_percent": 0.8627782,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 998,
-    "matched_functions_percent": 7.415113,
+    "matched_functions": 1020,
+    "matched_functions_percent": 7.578572,
     "total_units": 1
   },
   "text": {
@@ -52185,7 +52185,7 @@
           "address": 4411584,
           "offset": 3521616,
           "size": 34,
-          "match_percent": 66.111115
+          "match_percent": 100.0
         },
         {
           "name": "_ZL22instNuGCutCamSysUpdateP17instNUGCUTSCENE_sf",
@@ -57624,7 +57624,7 @@
           "address": 5241728,
           "offset": 4351760,
           "size": 34,
-          "match_percent": 97.5
+          "match_percent": 100.0
         },
         {
           "name": "_ZL18Plug_SetVisibilityP7GIZMO_si",
@@ -57632,7 +57632,7 @@
           "address": 5241776,
           "offset": 4351808,
           "size": 36,
-          "match_percent": 92.333336
+          "match_percent": 100.0
         },
         {
           "name": "_ZL11Plugs_ResetPvS_S_",
@@ -57736,7 +57736,7 @@
           "address": 5242480,
           "offset": 4352512,
           "size": 146,
-          "match_percent": 86.22449
+          "match_percent": 86.53061
         },
         {
           "name": "_ZL10Plugs_LoadPvS_",
@@ -57744,7 +57744,7 @@
           "address": 5242640,
           "offset": 4352672,
           "size": 299,
-          "match_percent": 81.655914
+          "match_percent": 81.97849
         },
         {
           "name": "_ZL19Plugs_StoreProgressPvS_S_",
@@ -58276,7 +58276,7 @@
           "address": 1906160,
           "offset": 1016192,
           "size": 45,
-          "match_percent": 58.266666
+          "match_percent": 100.0
         },
         {
           "name": "_ZL19ZipUp_SetVisibilityP7GIZMO_si",
@@ -58284,7 +58284,7 @@
           "address": 1906208,
           "offset": 1016240,
           "size": 37,
-          "match_percent": 93.333336
+          "match_percent": 100.0
         },
         {
           "name": "_ZL19ZipUps_GetMaxGizmosPv",
@@ -58530,7 +58530,7 @@
           "address": 4976192,
           "offset": 4086224,
           "size": 37,
-          "match_percent": 44.666668
+          "match_percent": 100.0
         },
         {
           "name": "_ZL18GizmoPickup_GetPosP7GIZMO_s",
@@ -59174,7 +59174,7 @@
           "address": 1995360,
           "offset": 1105392,
           "size": 32,
-          "match_percent": 85.35714
+          "match_percent": 100.0
         },
         {
           "name": "_ZL22GizPanel_GetOutputNameP7GIZMO_si",
@@ -59198,7 +59198,7 @@
           "address": 1995440,
           "offset": 1105472,
           "size": 587,
-          "match_percent": 65.19075
+          "match_percent": 67.42197
         },
         {
           "name": "_ZL28GizPanels_ReserveBufferSpacePv",
@@ -59254,7 +59254,7 @@
           "address": 2000080,
           "offset": 1110112,
           "size": 163,
-          "match_percent": 49.0
+          "match_percent": 54.80357
         },
         {
           "name": "_ZL13GizPanel_DrawPvS_f",
@@ -59270,7 +59270,7 @@
           "address": 2004432,
           "offset": 1114464,
           "size": 197,
-          "match_percent": 69.393936
+          "match_percent": 98.92424
         },
         {
           "name": "_ZL17GizPanel_ActivateP7GIZMO_si",
@@ -59460,7 +59460,7 @@
           "address": 1897840,
           "offset": 1007872,
           "size": 86,
-          "match_percent": 14.642858
+          "match_percent": 100.0
         },
         {
           "name": "_ZL19Levers_GetMaxGizmosPv",
@@ -59476,7 +59476,7 @@
           "address": 1897968,
           "offset": 1008000,
           "size": 19,
-          "match_percent": 71.111115
+          "match_percent": 100.0
         },
         {
           "name": "_ZL19Lever_GetOutputNameP7GIZMO_si",
@@ -59548,7 +59548,7 @@
           "address": 1899600,
           "offset": 1009632,
           "size": 231,
-          "match_percent": 66.56061
+          "match_percent": 83.51515
         },
         {
           "name": "_ZL11Lever_ResetP7LEVER_s",
@@ -59564,7 +59564,7 @@
           "address": 1900832,
           "offset": 1010864,
           "size": 215,
-          "match_percent": 41.555557
+          "match_percent": 42.27778
         },
         {
           "name": "_ZL14Lever_ActivateP7GIZMO_si",
@@ -59627,7 +59627,7 @@
           "address": 4945280,
           "offset": 4055312,
           "size": 71,
-          "match_percent": 59.791668
+          "match_percent": 100.0
         },
         {
           "name": "_ZL20Blowup_GetOutputNameP7GIZMO_si",
@@ -59786,7 +59786,7 @@
           "address": 1943792,
           "offset": 1053824,
           "size": 36,
-          "match_percent": 93.333336
+          "match_percent": 100.0
         },
         {
           "name": "_ZL15Techno_ActivateP7GIZMO_si",
@@ -59794,7 +59794,7 @@
           "address": 1943840,
           "offset": 1053872,
           "size": 34,
-          "match_percent": 96.42857
+          "match_percent": 98.92857
         },
         {
           "name": "_ZL19Technos_EarlyUpdatePvS_f",
@@ -60072,7 +60072,7 @@
           "address": 5057248,
           "offset": 4167280,
           "size": 45,
-          "match_percent": 97.64706
+          "match_percent": 100.0
         },
         {
           "name": "_ZL21Grapple_SetVisibilityP7GIZMO_si",
@@ -60080,7 +60080,7 @@
           "address": 5057296,
           "offset": 4167328,
           "size": 36,
-          "match_percent": 92.333336
+          "match_percent": 100.0
         },
         {
           "name": "_ZL21Grapples_GetMaxGizmosPv",
@@ -60152,7 +60152,7 @@
           "address": 5058464,
           "offset": 4168496,
           "size": 1461,
-          "match_percent": 32.293335
+          "match_percent": 32.77667
         },
         {
           "name": "_ZL22Grapples_StoreProgressPvS_S_",
@@ -60572,7 +60572,7 @@
           "address": 5135968,
           "offset": 4246000,
           "size": 34,
-          "match_percent": 97.5
+          "match_percent": 100.0
         },
         {
           "name": "_ZL16Tube_ActivateRevP7GIZMO_sii",
@@ -60588,7 +60588,7 @@
           "address": 5136112,
           "offset": 4246144,
           "size": 36,
-          "match_percent": 93.333336
+          "match_percent": 100.0
         },
         {
           "name": "_ZL11Tubes_ResetPvS_S_",
@@ -60874,7 +60874,7 @@
           "address": 2301152,
           "offset": 1411184,
           "size": 34,
-          "match_percent": 97.5
+          "match_percent": 100.0
         },
         {
           "name": "_ZL19GizmoBombGen_GetPosP7GIZMO_s",
@@ -60970,7 +60970,7 @@
           "address": 2302080,
           "offset": 1412112,
           "size": 96,
-          "match_percent": 96.51724
+          "match_percent": 99.965515
         },
         {
           "name": "_ZL21GizBombGens_AddGizmosP10GIZMOSYS_siPvS1_",
@@ -61216,7 +61216,7 @@
           "address": 2072272,
           "offset": 1182304,
           "size": 36,
-          "match_percent": 93.333336
+          "match_percent": 100.0
         },
         {
           "name": "_ZL16GizTorp_ActivateP7GIZMO_si",
@@ -61224,7 +61224,7 @@
           "address": 2072320,
           "offset": 1182352,
           "size": 34,
-          "match_percent": 96.42857
+          "match_percent": 100.0
         },
         {
           "name": "_ZL14GizTorps_ResetPvS_S_",
@@ -62445,7 +62445,7 @@
           "address": 3959387,
           "offset": 3069419,
           "size": 66,
-          "match_percent": 55.894737
+          "match_percent": 100.0
         },
         {
           "name": "APIObjectCreate",
@@ -86842,7 +86842,7 @@
           "address": 2990928,
           "offset": 2100960,
           "size": 38,
-          "match_percent": 65.333336
+          "match_percent": 65.75
         },
         {
           "name": "_Z16NuGScnRestoreTIDP8nugscn_si",
@@ -111717,7 +111717,7 @@
           "address": 3281232,
           "offset": 2391264,
           "size": 46,
-          "match_percent": 63.8125
+          "match_percent": 100.0
         },
         {
           "name": "_ZN19NuSoundMemoryBuffer7GetSizeEv",
@@ -111725,7 +111725,7 @@
           "address": 3281280,
           "offset": 2391312,
           "size": 39,
-          "match_percent": 65.61539
+          "match_percent": 100.0
         },
         {
           "name": "_ZN19NuSoundMemoryBuffer10SetAddressEPv",
@@ -111749,7 +111749,7 @@
           "address": 3281360,
           "offset": 2391392,
           "size": 28,
-          "match_percent": 88.888885
+          "match_percent": 100.0
         },
         {
           "name": "_ZN19NuSoundMemoryBuffer9IsAllocedEv",
@@ -111813,7 +111813,7 @@
           "address": 3281568,
           "offset": 2391600,
           "size": 98,
-          "match_percent": 25.851852
+          "match_percent": 99.96296
         },
         {
           "name": "_ZN19NuSoundMemoryBuffer6UnlockEv",
@@ -111821,7 +111821,7 @@
           "address": 3281680,
           "offset": 2391712,
           "size": 54,
-          "match_percent": 84.0
+          "match_percent": 99.92308
         },
         {
           "name": "_ZN19NuSoundMemoryBuffer8IsLockedEv",

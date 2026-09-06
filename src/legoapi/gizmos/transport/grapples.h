@@ -19,7 +19,14 @@ typedef struct GRAPPLE_s {
     NUVEC position;          // 0x10
     u8 has_terrain_platform; // 0x1c
     u8 retain_attachment;    // 0x1d
-    u8 flags;                // 0x1e
+    union {
+        u8 flags;
+        struct {
+            u8 active : 1;
+            u8 visible : 1;
+            u8 reserved_flags : 6;
+        };
+    };
     u8 field_0x1f;
     u16 y_rotation;              // 0x20
     u16 x_rotation;              // 0x22

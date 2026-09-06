@@ -38,7 +38,14 @@ typedef struct ZIPUP_s {
     u16 direction;               // 0x62
     u16 facing_angle;            // 0x64
     u8 reserved_0x66[2];         // 0x66 .. 0x68
-    u8 flags;                    // 0x68
+    union {
+        u8 flags;
+        struct {
+            u8 configuration_flags : 6;
+            u8 active : 1;
+            u8 visible : 1;
+        };
+    };
     u8 runtime_flags;            // 0x69
     u8 reserved_0x6a[2];         // 0x6a .. 0x6c
     f32 lower_ground_height;     // 0x6c

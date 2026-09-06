@@ -389,6 +389,10 @@ typedef struct APIOBJECT_s {
             u8 flags_low;
             u8 flags_high;
         };
+        struct {
+            u16 in_use : 1;
+            u16 other_object_flags : 15;
+        };
     };
     u8 field_0x1fa; // 0x1fa
     u8 field_0x1fb;
@@ -453,7 +457,7 @@ DECOMP_ASSERT(sizeof(APIOBJECTSYS_s) == 0x214, "APIOBJECTSYS size");
 extern "C" APIOBJECT *APIObjectCreate(APIOBJECTSYS_s *system);
 extern "C" void APIObjectDestroy(APIOBJECTSYS_s *system, APIOBJECT *object);
 extern "C" void APIObjectDestroyAll(APIOBJECTSYS_s *system);
-extern "C" void APIObjectSetUsed(APIOBJECT *object, u8 index, i32 used);
+extern "C" void APIObjectSetUsed(APIOBJECT *object, i32 index, i32 used);
 extern "C" void APIObjectVelocities(GameObject_s *object);
 
 struct rtldata_s {

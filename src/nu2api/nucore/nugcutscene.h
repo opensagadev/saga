@@ -153,7 +153,14 @@ struct instNUGCUTSCENE_s {
     NUGCUTSCENE_s *cutscene;
     NUGCUTSCENE_s *cutscene_copy;
     u8 pad_60[0x88 - 0x60];
-    u8 flags_88;
+    union {
+        u8 flags_88;
+        struct {
+            u8 flags_88_low : 2;
+            u8 paused : 1;
+            u8 flags_88_high : 5;
+        };
+    };
     u8 flags_89;
     u8 flags_8a;
     u8 flags_8b;

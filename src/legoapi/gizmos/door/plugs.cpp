@@ -65,8 +65,7 @@ static void Plug_Activate(GIZMO *gizmo, i32 active) {
         return;
     }
     PLUG *plug = static_cast<PLUG *>(gizmo->object);
-    const u8 active_flag = active != 0;
-    plug->flags = static_cast<u8>((plug->flags & ~PLUG_FLAG_ACTIVE) | active_flag);
+    plug->active = active != 0;
 }
 
 static void Plug_SetVisibility(GIZMO *gizmo, i32 visible) {
@@ -74,8 +73,7 @@ static void Plug_SetVisibility(GIZMO *gizmo, i32 visible) {
         return;
     }
     PLUG *plug = static_cast<PLUG *>(gizmo->object);
-    const u8 visible_flag = visible != 0;
-    plug->flags = static_cast<u8>((plug->flags & ~PLUG_FLAG_VISIBLE) | (visible_flag << 1));
+    plug->visible = visible != 0;
 }
 
 static NUVEC *Plug_GetPos(GIZMO *gizmo) {

@@ -25,11 +25,7 @@ void NuSoundMemoryBuffer::SetPrev(NuSoundMemoryBuffer *prev) {
 }
 
 void NuSoundMemoryBuffer::SetSize(u32 size) {
-    this->size_l = size;
-    this->size_m = (size >> 8);
-    this->size_h = (size >> 16);
-
-    this->flags = this->flags & 0xc0 | (u8)(size >> 24) & 63;
+    this->size = size;
 }
 
 void NuSoundMemoryBuffer::SetAddress(void *address) {
@@ -38,20 +34,18 @@ void NuSoundMemoryBuffer::SetAddress(void *address) {
 
 // libTTapp.so 0x3211d0: alloced flag = flags bit 6.
 void NuSoundMemoryBuffer::SetAlloced(bool alloced) {
-    this->flags = (this->flags & ~0x40) | (((u8)alloced & 1) << 6);
+    this->alloced = alloced;
 }
 
 void *NuSoundMemoryBuffer::Lock(const char *name) {
     BeginCriticalSection();
 
-    u8 c = this->flags;
-    while (c < 0) {
+    while (this->locked) {
         EndCriticalSection();
         NuThreadSleep(0);
         BeginCriticalSection();
-        c = this->flags;
     }
-    this->flags = c | 0x80;
+    this->locked = true;
 
     EndCriticalSection();
 
@@ -60,7 +54,7 @@ void *NuSoundMemoryBuffer::Lock(const char *name) {
 
 void NuSoundMemoryBuffer::Unlock() {
     BeginCriticalSection();
-    this->flags = this->flags & 0x7f;
+    this->locked = false;
     EndCriticalSection();
 }
 
@@ -81,25 +75,24 @@ NuSoundMemoryBuffer *NuSoundMemoryBuffer::GetPrev() {
 
 // libTTapp.so 0x321180
 u32 NuSoundMemoryBuffer::GetSize() {
-    return (u32)this->size_l | (u32)this->size_m << 8 | (u32)this->size_h << 16 | (u32)(this->flags & 63) << 24;
+    return this->size;
 }
 
 // libTTapp.so 0x3211f0: alloced flag = flags bit 6.
 bool NuSoundMemoryBuffer::IsAlloced() {
-    return (this->flags >> 6) & 1;
+    return this->alloced;
 }
 
 // libTTapp.so 0x3211e0: locked flag = flags bit 7.
 bool NuSoundMemoryBuffer::IsLocked() {
-    return (this->flags >> 7) & 1;
+    return this->locked;
 }
 
 NuSoundMemoryBuffer::NuSoundMemoryBuffer() {
     this->address = NULL;
-    this->size_l = 0;
-    this->size_m = 0;
-    this->size_h = 0;
-    this->flags = 0;
+    this->size = 0;
+    this->alloced = false;
+    this->locked = false;
     this->prev = NULL;
     this->next = NULL;
 }
@@ -110,7 +103,7 @@ NuSoundMemoryBuffer::~NuSoundMemoryBuffer() {
 // libTTapp.so 0x321510: the buffer headers come out of the SCRATCH heap.
 NuSoundMemoryBuffer *NuSoundMemoryManager::PopFreeBuffer() {
     NuSoundMemoryBuffer *buf = (NuSoundMemoryBuffer *)NuSoundSystem::_AllocMemory(
-        NuSoundSystem::MemoryDiscipline::SCRATCH, 0x10, 4,
+        NuSoundSystem::MemoryDiscipline::SCRATCH, sizeof(NuSoundMemoryBuffer), 4,
         "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound_memorymanager.cpp:339");
 
     new (buf) NuSoundMemoryBuffer{};

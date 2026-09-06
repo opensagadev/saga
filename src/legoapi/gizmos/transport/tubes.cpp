@@ -131,7 +131,7 @@ static i32 Tube_GetNumOutputs(GIZMO *) {
 static void Tube_Activate(GIZMO *gizmo, i32 active) {
     if (gizmo != NULL) {
         TUBE *tube = static_cast<TUBE *>(gizmo->object);
-        tube->flags = (tube->flags & ~TUBE_FLAG_ACTIVE) | (active != 0 ? TUBE_FLAG_ACTIVE : 0);
+        tube->active = active != 0;
     }
 }
 
@@ -156,8 +156,7 @@ static i32 Tube_ActivateRev(GIZMO *gizmo, i32 reverse, i32 check_only) {
 static void Tube_SetVisibility(GIZMO *gizmo, i32 visible) {
     if (gizmo != NULL) {
         TUBE *tube = static_cast<TUBE *>(gizmo->object);
-        const u8 visible_flag = visible != 0;
-        tube->flags = static_cast<u8>((tube->flags & ~TUBE_FLAG_VISIBLE) | (visible_flag << 1));
+        tube->visible = visible != 0;
     }
 }
 

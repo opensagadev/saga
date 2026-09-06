@@ -27,7 +27,14 @@ typedef struct GIZBOMBGEN_s {
     i32 interval;
     GameObject_s *generated_bomb;
     i16 field_0x28;
-    u8 flags;
+    union {
+        u8 flags;
+        struct {
+            u8 active : 1;
+            u8 visible : 1;
+            u8 reserved_flags : 6;
+        };
+    };
     u8 field_0x2b;
 } GIZBOMBGEN;
 

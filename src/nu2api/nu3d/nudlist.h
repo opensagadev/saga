@@ -187,6 +187,11 @@ extern "C" {
                 u8 render_buffer; // 0x75 bit7 selects the current clip/mtl buffer
             };
             u16 flags_word;
+            struct {
+                u16 update_flags : 5;
+                u16 material_layer_mask : 8;
+                u16 buffer_flags : 3;
+            };
         };
         u8 instance_visibility_enabled; // 0x76 bit0: per-instance visibility buffer is active
         u8 pad_77;

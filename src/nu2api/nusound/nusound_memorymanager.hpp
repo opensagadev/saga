@@ -1,25 +1,23 @@
 #pragma once
 
+#include "decomp_assert.h"
 #include "nu2api/nucore/common.h"
 
 #include <pthread.h>
 
-// libTTapp.so layout: address@0x0, size bytes@0x4..0x6, flags@0x7
-// (bit7 = locked, bit6 = alloced), prev@0x8, next@0xc.
 class NuSoundMemoryBuffer {
     void *address;
-    u8 size_l;
-    u8 size_m;
-    u8 size_h;
-    u8 flags;
+    u32 size : 30;
+    bool alloced : 1;
+    bool locked : 1;
     NuSoundMemoryBuffer *prev;
     NuSoundMemoryBuffer *next;
 
   private:
     static pthread_mutex_t s_cs;
 
-    void BeginCriticalSection();
-    void EndCriticalSection();
+    static void BeginCriticalSection();
+    static void EndCriticalSection();
 
   public:
     NuSoundMemoryBuffer();
@@ -40,7 +38,9 @@ class NuSoundMemoryBuffer {
     bool IsAlloced();
     bool IsLocked();
     const char *GetLockReason(); // 0x321360: lock-reason getter, always NULL on device
-};
+} __attribute__((packed));
+
+DECOMP_ASSERT(sizeof(NuSoundMemoryBuffer) == 0x10, "NuSoundMemoryBuffer size");
 
 class NuSoundMemoryManager {
     void *memory;

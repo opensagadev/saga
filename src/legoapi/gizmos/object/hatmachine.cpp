@@ -355,11 +355,11 @@ static void HatMachine_Activate(GIZMO *gizmo, i32 enabled) {
     }
 
     HATMACHINE *machine = static_cast<HATMACHINE *>(gizmo->object);
-    if (enabled != 0) {
-        machine->flags = static_cast<HATMACHINE_FLAGS>(machine->flags | HATMACHINE_FLAG_ENABLED);
+    if (enabled) {
+        machine->progress_state0 = 1;
         HatMachine_Reset(machine);
     } else {
-        machine->flags = static_cast<HATMACHINE_FLAGS>(machine->flags & ~HATMACHINE_FLAG_ENABLED);
+        machine->progress_state0 = 0;
     }
 }
 

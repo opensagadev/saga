@@ -19,7 +19,14 @@ typedef struct GIZTORPMACHINE_s {
     f32 activation_time; // 0x1c
     u16 y_rotation;      // 0x20
     u8 reserved_0x22[9];
-    u8 flags; // 0x2b
+    union {
+        u8 flags;
+        struct {
+            u8 active : 1;
+            u8 visible : 1;
+            u8 reserved_flags : 6;
+        };
+    };
 } GIZTORPMACHINE;
 
 DECOMP_ASSERT(sizeof(GIZTORPMACHINE) == 0x2c, "GIZTORPMACHINE ABI");

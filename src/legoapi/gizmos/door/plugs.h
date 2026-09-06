@@ -21,7 +21,14 @@ typedef struct PLUG_s {
     u16 y_rotation;
     u16 target_id;
     u8 enabled;
-    u8 flags;
+    union {
+        u8 flags;
+        struct {
+            u8 active : 1;
+            u8 visible : 1;
+            u8 reserved_flags : 6;
+        };
+    };
     u8 reserved[0x10];
 } PLUG;
 

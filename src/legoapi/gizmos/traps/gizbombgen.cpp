@@ -213,8 +213,7 @@ static i32 GizmoBombGen_GetNumOutputs(GIZMO *) {
 static void GizmoBombGen_Activate(GIZMO *gizmo, i32 active) {
     if (gizmo != NULL) {
         GIZBOMBGEN *bomb_generator = static_cast<GIZBOMBGEN *>(gizmo->object);
-        bomb_generator->flags =
-            (bomb_generator->flags & ~GIZBOMBGEN_FLAG_ACTIVE) | (active != 0 ? GIZBOMBGEN_FLAG_ACTIVE : 0);
+        bomb_generator->active = active != 0;
     }
 }
 
@@ -222,9 +221,7 @@ static void GizmoBombGen_SetVisibility(GIZMO *gizmo, i32 visible) {
     if (gizmo != NULL && gizmo->object != NULL) {
         GIZBOMBGEN *bomb_generator = static_cast<GIZBOMBGEN *>(gizmo->object);
         GameAnimSet_SetVisibility(bomb_generator->anim_set, visible);
-        const u8 visible_flag = visible != 0;
-        bomb_generator->flags =
-            static_cast<u8>((bomb_generator->flags & ~GIZBOMBGEN_FLAG_VISIBLE) | (visible_flag << 1));
+        bomb_generator->visible = visible != 0;
     }
 }
 

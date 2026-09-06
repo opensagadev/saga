@@ -129,16 +129,14 @@ static i32 GizTorp_GetNumOutputs(GIZMO *) {
 static void GizTorp_Activate(GIZMO *gizmo, i32 active) {
     if (gizmo != NULL) {
         GIZTORPMACHINE *machine = static_cast<GIZTORPMACHINE *>(gizmo->object);
-        const u8 active_flag = active != 0;
-        machine->flags = static_cast<u8>((machine->flags & ~GIZTORPMACHINE_FLAG_ACTIVE) | active_flag);
+        machine->active = active != 0;
     }
 }
 
 static void GizTorp_SetVisibility(GIZMO *gizmo, i32 visible) {
     if (gizmo != NULL) {
         GIZTORPMACHINE *machine = static_cast<GIZTORPMACHINE *>(gizmo->object);
-        const u8 visible_flag = visible != 0;
-        machine->flags = static_cast<u8>((machine->flags & ~GIZTORPMACHINE_FLAG_VISIBLE) | (visible_flag << 1));
+        machine->visible = visible != 0;
     }
 }
 

@@ -20,12 +20,12 @@ extern "C" {
     void APIObjectCollisions(void) {
     }
 
-    void APIObjectSetUsed(APIOBJECT *object, u8 index, i32 used) {
+    void APIObjectSetUsed(APIOBJECT *object, i32 index, i32 used) {
         if (used != 0) {
-            object->field_0x1f8 |= APIOBJECT_FLAG_IN_USE;
+            object->in_use = 1;
             object->field_0x289 = index;
         } else {
-            object->field_0x1f8 &= ~APIOBJECT_FLAG_IN_USE;
+            object->in_use = 0;
         }
     }
 

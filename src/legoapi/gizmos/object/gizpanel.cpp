@@ -377,13 +377,13 @@ static char *GizPanel_GetGizmoName(GIZMO *gizmo) {
 }
 
 static i32 GizPanel_GetOutput(GIZMO *gizmo, i32, i32) {
-    u8 flags = static_cast<GIZPANEL *>(gizmo->object)->flags;
+    GIZPANEL *panel = static_cast<GIZPANEL *>(gizmo->object);
+    u8 flags = panel->flags;
     if ((flags & (GIZPANEL_FLAG_VISIBLE | GIZPANEL_FLAG_TRACK_PLAYER)) !=
         (GIZPANEL_FLAG_VISIBLE | GIZPANEL_FLAG_TRACK_PLAYER)) {
         return 0;
     }
-    flags >>= 1;
-    return flags & 1;
+    return panel->state;
 }
 
 static char *GizPanel_GetOutputName(GIZMO *, i32 output_index) {
@@ -488,16 +488,11 @@ static void GizPanels_Reset(void *world_ptr, void *, void *progress_ptr) {
             GizPanel_Reset(panel);
             if (index < 32 && progress != NULL) {
                 const u32 bit = 1u << index;
-                u8 flags = panel->flags;
                 if ((progress->state & bit) != 0) {
-                    flags |= GIZPANEL_FLAG_STATE;
-                    panel->flags = static_cast<GIZPANEL_FLAGS>(flags);
+                    panel->state = 1;
                 }
-                const u8 visible = ((progress->baddie_state & bit) != 0) << 2;
-                panel->flags = static_cast<GIZPANEL_FLAGS>((flags & ~GIZPANEL_FLAG_VISIBLE) | visible);
-                panel->flags =
-                    static_cast<GIZPANEL_FLAGS>((flags & ~(GIZPANEL_FLAG_TRACK_PLAYER | GIZPANEL_FLAG_VISIBLE)) |
-                                                visible | (((progress->goodie_state & bit) != 0) << 3));
+                panel->visible = (progress->baddie_state & bit) != 0;
+                panel->track_player = (progress->goodie_state & bit) != 0;
             }
             ++index;
             if (panel_sys->count <= index) {

@@ -228,7 +228,7 @@ static void ZipUp_Activate(GIZMO *gizmo, i32 active) {
         zipup->direction = 0;
         active_flag = 1;
     }
-    zipup->flags = static_cast<u8>((zipup->flags & ~ZIPUP_FLAG_ACTIVE) | (active_flag << 6));
+    zipup->active = active_flag;
 }
 
 static i32 ZipUp_ActivateRev(GIZMO *gizmo, i32 active, i32 query) {
@@ -253,8 +253,7 @@ static i32 ZipUp_ActivateRev(GIZMO *gizmo, i32 active, i32 query) {
 static void ZipUp_SetVisibility(GIZMO *gizmo, i32 visible) {
     if (gizmo != NULL) {
         ZIPUP *zipup = static_cast<ZIPUP *>(gizmo->object);
-        const u8 visible_flag = visible != 0;
-        zipup->flags = static_cast<u8>((zipup->flags & ~ZIPUP_FLAG_VISIBLE) | (visible_flag << 7));
+        zipup->visible = visible != 0;
     }
 }
 

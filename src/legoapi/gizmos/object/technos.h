@@ -40,7 +40,14 @@ typedef struct TECHNO_s {
     u8 enabled;
     u8 target_mode;
     i32 output;
-    u8 flags;
+    union {
+        u8 flags;
+        struct {
+            u8 active : 1;
+            u8 visible : 1;
+            u8 reserved_flags : 6;
+        };
+    };
     char target_name[16];
     char target_object_name[31];
     void *controlled_object;

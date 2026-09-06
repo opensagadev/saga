@@ -488,7 +488,7 @@ extern "C" {
     }
 
     void instNuGCutScenePause(instNUGCUTSCENE_s *instance, u8 paused) {
-        instance->flags_88 = (instance->flags_88 & 0xfb) | ((paused & 1) << 2);
+        instance->paused = paused;
     }
 } // extern "C"
 

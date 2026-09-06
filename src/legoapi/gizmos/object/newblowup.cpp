@@ -370,14 +370,24 @@ static i32 Blowup_GetOutput(GIZMO *gizmo, i32 output_index, i32) {
     GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(gizmo->object);
     switch (output_index) {
         case 0:
-            return (blowup->output_flags & GIZMOBLOWUP_OUTPUT_BLOWN_UP) != 0;
+            if ((blowup->output_flags & GIZMOBLOWUP_OUTPUT_BLOWN_UP) != 0) {
+                return 1;
+            }
+            break;
         case 1:
-            return (blowup->output_flags & GIZMOBLOWUP_OUTPUT_PUNCHED) != 0;
+            if ((blowup->output_flags & GIZMOBLOWUP_OUTPUT_PUNCHED) != 0) {
+                return 1;
+            }
+            break;
         case 2:
-            return (blowup->field_0x9f & 0x10) != 0;
+            if ((blowup->field_0x9f & 0x10) != 0) {
+                return 1;
+            }
+            break;
         default:
             return 0;
     }
+    return 0;
 }
 
 static char *Blowup_GetOutputName(GIZMO *gizmo, i32 output_index) {

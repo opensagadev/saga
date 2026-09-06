@@ -24,7 +24,14 @@ typedef struct TUBE_s {
     f32 top;            // 0x28
     f32 radius_squared; // 0x2c
     f32 audio_cooldown; // 0x30
-    u8 flags;           // 0x34
+    union {
+        u8 flags;
+        struct {
+            u8 active : 1;
+            u8 visible : 1;
+            u8 reserved_flags : 6;
+        };
+    };
     u8 reserved_0x35[3];
     u32 occupied_object_masks[2]; // 0x38, one bit per player/object slot
 } TUBE;

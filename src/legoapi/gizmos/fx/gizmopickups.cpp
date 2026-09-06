@@ -402,7 +402,7 @@ static void GizmoPickup_SetVisibility(GIZMO *gizmo, i32 visible) {
         return;
     }
     GIZMOPICKUP_s *pickup = static_cast<GIZMOPICKUP_s *>(gizmo->object);
-    pickup->state_flags = static_cast<u8>((pickup->state_flags & ~GIZMOPICKUP_STATE_VISIBLE) | ((visible != 0) << 2));
+    pickup->state_visible = visible != 0;
 }
 
 static NUVEC *GizmoPickup_GetPos(GIZMO *gizmo) {

@@ -193,7 +193,7 @@ static void Techno_Activate(GIZMO *gizmo, i32 active) {
         return;
     }
     TECHNO *techno = static_cast<TECHNO *>(gizmo->object);
-    techno->flags = static_cast<u8>((techno->flags & ~TECHNO_FLAG_ACTIVE) | (active != 0 ? TECHNO_FLAG_ACTIVE : 0));
+    techno->active = active != 0;
 }
 
 static void Techno_SetVisibility(GIZMO *gizmo, i32 visible) {
@@ -201,8 +201,7 @@ static void Techno_SetVisibility(GIZMO *gizmo, i32 visible) {
         return;
     }
     TECHNO *techno = static_cast<TECHNO *>(gizmo->object);
-    const u8 visible_flag = visible != 0;
-    techno->flags = static_cast<u8>((techno->flags & ~TECHNO_FLAG_VISIBLE) | (visible_flag << 1));
+    techno->visible = visible != 0;
 }
 
 static NUVEC *Techno_GetPos(GIZMO *gizmo) {

@@ -34,9 +34,9 @@ f32 GameShadow(GameObject_s *object, NUVEC *position, f32 probe_height, i32 plat
 void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
 
 struct LEVERPROGRESS {
-    u32 pulled_down;
-    u32 enabled;
-    u32 visible;
+    u32 pulled_down[1];
+    u32 enabled[1];
+    u32 visible[1];
 };
 
 DECOMP_ASSERT(sizeof(LEVERPROGRESS) == 0xc, "LEVER progress ABI");
@@ -274,7 +274,7 @@ static void Levers_Draw(void *world_ptr, void *, float) {
 }
 
 static char *Lever_GetGizmoName(GIZMO *gizmo) {
-    if (gizmo == NULL || gizmo->object == NULL) {
+    if (gizmo == NULL) {
         return NULL;
     }
     return static_cast<LEVER_s *>(gizmo->object)->name;
@@ -343,18 +343,14 @@ static i32 Lever_ActivateRev(GIZMO *gizmo, i32 value, i32 query) {
     }
 
     LEVER_s *lever = static_cast<LEVER_s *>(gizmo->object);
-    if ((query & 1) == 0) {
-        if (value == 0) {
-            lever->flags |= LEVER_FLAG_ENABLED;
-        } else {
-            lever->flags &= ~LEVER_FLAG_ENABLED;
+    if ((query & 1) != 0) {
+        if (!lever->enabled) {
+            return value == 0;
         }
-        return 1;
+        return value;
     }
-    if ((lever->flags & LEVER_FLAG_ENABLED) == 0) {
-        return value == 0;
-    }
-    return value;
+    lever->enabled = value == 0;
+    return 1;
 }
 
 static void Lever_SetVisibility(GIZMO *gizmo, i32 visible) {
@@ -388,9 +384,9 @@ static void Levers_ClearProgress(void *, void *progress_data) {
         return;
     }
 
-    progress->pulled_down = 0;
-    progress->enabled = 0xffffffff;
-    progress->visible = 0xffffffff;
+    progress->pulled_down[0] = 0;
+    progress->enabled[0] = 0xffffffff;
+    progress->visible[0] = 0xffffffff;
 }
 
 static void Levers_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
@@ -405,18 +401,22 @@ static void Levers_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
         return;
     }
 
-    const i32 count = world->nlevers < 32 ? world->nlevers : 32;
-    for (i32 index = 0; index < count; ++index) {
-        const LEVER_s &lever = world->levers[index];
+    const i32 count = world->nlevers;
+    const LEVER_s *lever = world->levers;
+    for (i32 index = 0; index < count; ++index, ++lever) {
+        if (index == 32) {
+            break;
+        }
+        const i32 word = index >> 5;
         const u32 bit = 1u << index;
-        if ((lever.flags & LEVER_FLAG_BEING_PULLED) != 0 && lever.pull_progress >= 1.0f) {
-            progress->pulled_down |= bit;
+        if (lever->being_pulled && lever->pull_progress >= 1.0f) {
+            progress->pulled_down[word] |= bit;
         }
-        if ((lever.flags & LEVER_FLAG_VISIBLE) == 0) {
-            progress->visible &= ~bit;
+        if (!lever->visible) {
+            progress->visible[word] &= ~bit;
         }
-        if ((lever.flags & LEVER_FLAG_ENABLED) == 0) {
-            progress->enabled &= ~bit;
+        if (!lever->enabled) {
+            progress->enabled[word] &= ~bit;
         }
     }
 }
@@ -436,17 +436,17 @@ static void Levers_Reset(void *world_ptr, void *, void *progress_ptr) {
         }
 
         const u32 bit = 1u << index;
-        if ((progress->pulled_down & bit) != 0) {
+        if ((progress->pulled_down[0] & bit) != 0) {
             lever.pull_progress = 1.0f;
             lever.flags |= LEVER_FLAG_BEING_PULLED;
             lever.animation_frame = 0x8000;
         }
-        if ((progress->visible & bit) != 0) {
+        if ((progress->visible[0] & bit) != 0) {
             lever.flags |= LEVER_FLAG_VISIBLE;
         } else {
             lever.flags &= ~LEVER_FLAG_VISIBLE;
         }
-        if ((progress->enabled & bit) != 0) {
+        if ((progress->enabled[0] & bit) != 0) {
             lever.flags |= LEVER_FLAG_ENABLED;
         } else {
             lever.flags &= ~LEVER_FLAG_ENABLED;
