@@ -114,6 +114,7 @@ extern "C" {
     void NuAnimBuffProceduralAnimation(nuanimbuff_s *buffer, nuhgobj_s *object, i32 override_count,
                                        NUJOINTANIM_s *overrides);
     nuhgobj_s *NuGHGRead(char *path, VARIPTR *buf, VARIPTR buf_end);
+    void NuHGobjDestroy(nuhgobj_s *object);
     nuhgobjpoi_s *NuHGobjGetPOI(nuhgobj_s *object, i32 index);
     void NuHGobjPOIMtx(nuhgobj_s *object, u8 index, NUMTX *world_matrix, NUMTX *joint_matrices, NUMTX *result);
     i32 NuHGobjGetLayerIndex(char *name, nuhgobj_s *object);

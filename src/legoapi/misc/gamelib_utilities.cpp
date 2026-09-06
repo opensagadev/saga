@@ -1,5 +1,7 @@
 #include "legoapi/legoapi_types.h"
 #include "globals.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nuquat.h"
 #include "nu2api/numath/nurand.h"
 #include "nu2api/numusic/sfx.h"
 #include "nu2api/nusound/nusound.h"
@@ -182,7 +184,51 @@ extern "C" {
     void UtilGetTime(void) {
     }
 
-    void VuQuatSlerpFast(void) {
+    // Original @0x286a8b. This is the VU-friendly approximation used while
+    // blending sampled animation quaternions. The polynomial is an even
+    // approximation of cos(), evaluated after an inexpensive acos estimate.
+    void VuQuatSlerpFast(NUQUAT *out, NUQUAT *from, NUQUAT *to, f32 t) {
+        f32 dot = NuQuatDot(from, to);
+        NUQUAT target;
+        if (dot < 0.0f) {
+            dot = -dot;
+            NuQuatNeg2(&target, to);
+        } else {
+            target = *to;
+        }
+
+        if (dot > 0.85f) {
+            NuQuatLerp2(out, from, &target, t);
+            NuQuatNormalise(out, out);
+            return;
+        }
+
+        if (dot > 0.995f) {
+            dot = 0.995f;
+        }
+
+        const f32 estimate = dot * 0.22340366f * dot + 2.2184808f;
+        const f32 linear = dot * 2.4418843f;
+        const f32 angle = NuFsqrt(estimate - linear) - NuFsqrt(estimate + linear) + 1.5707964f + dot * 0.63912874f;
+        const f32 inverse_sine = 1.0f / NuFsqrt(1.0f - dot * dot);
+
+        f32 from_angle = (1.0f - t) * angle - 1.5707964f;
+        from_angle *= from_angle;
+        f32 to_angle = t * angle - 1.5707964f;
+        to_angle *= to_angle;
+
+        const f32 from_weight =
+            ((((from_angle * 2.3154014e-5f - 0.0013853709f) * from_angle + 0.041663583f) * from_angle -
+               0.49999905f) *
+                  from_angle +
+              0.99999994f) *
+            inverse_sine;
+        const f32 to_weight =
+            ((((to_angle * 2.3154014e-5f - 0.0013853709f) * to_angle + 0.041663583f) * to_angle - 0.49999905f) *
+                  to_angle +
+              0.99999994f) *
+            inverse_sine;
+        NuQuatBlend(out, from, &target, from_weight, to_weight);
     }
 
     void buildBitCountTable(void) {

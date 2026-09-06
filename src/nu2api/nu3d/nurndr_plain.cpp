@@ -22,6 +22,7 @@
 // until their subsystems are transcribed.  Their signatures are not yet
 // recovered, so they are left as `void(void)`.
 
+#include <float.h>
 #include <string.h>
 #include <float.h>
 #include "nu2api/numath/nufloat.h"
@@ -33,6 +34,7 @@
 #include "nu2api/nu3d/nutexanm.h"
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/nucore/common.h"
+#include "nu2api/numath/nufloat.h"
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/numtl.h"
@@ -748,7 +750,10 @@ extern "C" i32 NuRndrSetAmbientLightPS(const NUCOLOUR3 *colour) {
     render_state.state.lights_id++;
     return 1;
 }
-extern "C" void NuRndrSetAmbientLightSpecular(void) {
+extern "C" i32 NuRndrSetAmbientLightSpecular(const NUCOLOUR4 *colour) {
+    render_state.global_specular = colour->a;
+    NuRndrSetAmbientLightPS(reinterpret_cast<const NUCOLOUR3 *>(colour));
+    return 0;
 }
 extern "C" void NuRndrSetBlendData(void) {
 }
@@ -783,8 +788,111 @@ extern "C" void NuRndrSetGlobalMipMapBias(void) {
 extern "C" void NuRndrSetParticleRotation(NUMTX *rotation) {
     NuRndr_DebrisRotMtxPtr = rotation;
 }
-extern "C" void NuRndrStateSetSpecularLightEx(NUVEC *, NUMTX *, const NUCOLOUR4 *);
+extern "C" void NuRndrStateSetSpecularLight(const NUMTX *matrix, const NUCOLOUR3 *colour) {
+    if (matrix != nullptr) {
+        render_state.specular_mtx = *matrix;
+    }
+    if (colour != nullptr) {
+        render_state.specular_colour = *colour;
+    }
+    render_state.light_state = nullptr;
+    render_state.state.global_id++;
+    render_state.state.lights_id++;
+}
 
+extern "C" void NuRndrStateSetSpecularLightEx(const NUVEC *direction, const NUMTX *matrix,
+                                                const NUCOLOUR3 *colour) {
+    render_state.specular_mtx = *matrix;
+    render_state.specular_colour = *colour;
+    render_state.specular_intensity = *direction;
+    render_state.light_state = nullptr;
+    render_state.state.global_id++;
+    render_state.state.lights_id++;
+}
+
+extern "C" i32 NuRndrSetSpecularLightPS(const NUVEC *direction, const NUCOLOUR4 *intensity) {
+    static NUVEC rndrstream_specular_dir = {0.0f, 0.0f, 1.0f};
+    static NUCOLOUR4 rndrstream_specular_intensity = {1.0f, 1.0f, 1.0f, 1.0f};
+    static NUVEC camvec = {0.0f, 0.0f, -1.0f};
+
+    if (direction != nullptr) {
+        rndrstream_specular_dir = *direction;
+    }
+    if (intensity != nullptr) {
+        rndrstream_specular_intensity = *intensity;
+    }
+
+    NUVEC camera_light_direction;
+    NuVecInvMtxRotate(&camera_light_direction, &rndrstream_specular_dir, &global_camera.mtx);
+
+    NUVEC half_vector;
+    NuVecLerp(&half_vector, &camera_light_direction, &camvec, 0.5f);
+    NuVecMtxRotate(&half_vector, &half_vector, &global_camera.mtx);
+    NuVecNorm(&half_vector, &half_vector);
+
+    NUVEC world_direction;
+    NuVecNorm(&world_direction, &rndrstream_specular_dir);
+
+    NUVEC camera_forward = {-global_camera.mtx.m20, -global_camera.mtx.m21, -global_camera.mtx.m22};
+    f32 facing = NuVecDot(&camera_forward, &world_direction);
+
+    NUMTX specular_mtx = numtx_identity;
+    f32 horizontal = NuFsqrt(half_vector.x * half_vector.x + half_vector.z * half_vector.z);
+    if (horizontal <= FLT_MIN) {
+        specular_mtx.m11 = 0.0f;
+        specular_mtx.m12 = -half_vector.y;
+        specular_mtx.m21 = half_vector.y;
+        specular_mtx.m22 = 0.0f;
+    } else {
+        specular_mtx.m00 = half_vector.z / horizontal;
+        specular_mtx.m10 = half_vector.x * half_vector.y / horizontal;
+        specular_mtx.m20 = -half_vector.x;
+        specular_mtx.m01 = 0.0f;
+        specular_mtx.m11 = horizontal;
+        specular_mtx.m21 = half_vector.y;
+        specular_mtx.m02 = half_vector.x / horizontal;
+        specular_mtx.m12 = -half_vector.y * half_vector.z / horizontal;
+        specular_mtx.m22 = half_vector.z;
+    }
+
+    if (facing < 0.0f) {
+        f32 weight = facing * facing;
+        weight *= weight;
+        weight *= weight;
+        weight *= weight;
+        weight *= weight;
+        f32 inverse = 1.0f - weight;
+
+        f32 column_dot = specular_mtx.m00 * world_direction.x + specular_mtx.m10 * world_direction.y +
+                         specular_mtx.m20 * world_direction.z;
+        if (column_dot < 0.0f) {
+            specular_mtx.m00 = specular_mtx.m00 * inverse - world_direction.x * weight;
+            specular_mtx.m10 = specular_mtx.m10 * inverse - world_direction.y * weight;
+            specular_mtx.m20 = specular_mtx.m20 * inverse - world_direction.z * weight;
+        } else {
+            specular_mtx.m00 = specular_mtx.m00 * inverse + world_direction.x * weight;
+            specular_mtx.m10 = specular_mtx.m10 * inverse + world_direction.y * weight;
+            specular_mtx.m20 = specular_mtx.m20 * inverse + world_direction.z * weight;
+        }
+
+        column_dot = specular_mtx.m01 * world_direction.x + specular_mtx.m11 * world_direction.y +
+                     specular_mtx.m21 * world_direction.z;
+        if (column_dot < 0.0f) {
+            specular_mtx.m01 = specular_mtx.m01 * inverse - world_direction.x * weight;
+            specular_mtx.m11 = specular_mtx.m11 * inverse - world_direction.y * weight;
+            specular_mtx.m21 = specular_mtx.m21 * inverse - world_direction.z * weight;
+        } else {
+            specular_mtx.m01 = specular_mtx.m01 * inverse + world_direction.x * weight;
+            specular_mtx.m11 = specular_mtx.m11 * inverse + world_direction.y * weight;
+            specular_mtx.m21 = specular_mtx.m21 * inverse + world_direction.z * weight;
+        }
+    }
+
+    NuVecNeg(&camera_light_direction, &camera_light_direction);
+    NuRndrStateSetSpecularLightEx(&camera_light_direction, &specular_mtx,
+                                  reinterpret_cast<const NUCOLOUR3 *>(&rndrstream_specular_intensity));
+    return 1;
+}
 extern "C" void NuRndrSetWind(void) {
 }
 extern "C" void NuRndrShadPolys(void *) {
@@ -810,18 +918,6 @@ extern "C" void NuRndrStartShadowReceiveRender(void) {
 extern "C" void NuRndrStateGetFogEnabled(void) {
 }
 extern "C" void NuRndrStateInit(void) {
-}
-extern "C" void NuRndrStateSetSpecularLight(void) {
-}
-extern "C" void NuRndrStateSetSpecularLightEx(NUVEC *direction, NUMTX *matrix, const NUCOLOUR4 *colour) {
-    render_state.specular_mtx = *matrix;
-    render_state.specular_colour.r = colour->r;
-    render_state.specular_colour.g = colour->g;
-    render_state.specular_colour.b = colour->b;
-    render_state.specular_intensity = *direction;
-    render_state.light_state = NULL;
-    render_state.state.global_id++;
-    render_state.state.lights_id++;
 }
 extern "C" void NuRndrStateUpdateCameraState(void) {
     NUMTX *projection = NuCameraGetProjectionMtx();

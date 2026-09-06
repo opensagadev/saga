@@ -96,9 +96,9 @@ static f32 GameFogDuration;
 static f32 GameFogTime;
 
 enum AI_ACTION_SPEED_MODE : u8 {
-    AI_ACTION_SPEED_LEGO = 0,
-    AI_ACTION_SPEED_RUN = 1,
-    AI_ACTION_SPEED_WALK = 2,
+    AI_ACTION_SPEED_RUN = 0,
+    AI_ACTION_SPEED_WALK = 1,
+    AI_ACTION_SPEED_TIPTOE = 2,
 };
 
 enum SCRIPT_ERROR_LEVEL : u32 {
@@ -332,11 +332,11 @@ static f32 GetCharacterGoalSpeed(APIOBJECT *object) {
     }
 
     switch (object->ai->goal_speed_mode) {
-        case AI_ACTION_SPEED_LEGO:
-            return static_cast<GAMECHARACTERDATA *>(object->character_data->field11_0x24)->movement_speed * FRAMETIME;
         case AI_ACTION_SPEED_RUN:
-            return static_cast<GAMECHARACTERDATA *>(object->character_data->field11_0x24)->field_0x18 * FRAMETIME;
+            return static_cast<GAMECHARACTERDATA *>(object->character_data->field11_0x24)->movement_speed * FRAMETIME;
         case AI_ACTION_SPEED_WALK:
+            return static_cast<GAMECHARACTERDATA *>(object->character_data->field11_0x24)->field_0x18 * FRAMETIME;
+        case AI_ACTION_SPEED_TIPTOE:
             return static_cast<GAMECHARACTERDATA *>(object->character_data->field11_0x24)->field_0x14 * FRAMETIME;
         default:
             return 0.0f;
@@ -344,16 +344,16 @@ static f32 GetCharacterGoalSpeed(APIOBJECT *object) {
 }
 
 static i32 GameAIActionParseSpeed(char *name, u8 *speed) {
-    if (NuStrICmp(name, "LEGO") == 0) {
-        *speed = AI_ACTION_SPEED_LEGO;
-        return 1;
-    }
     if (NuStrICmp(name, "RUN") == 0) {
         *speed = AI_ACTION_SPEED_RUN;
         return 1;
     }
     if (NuStrICmp(name, "WALK") == 0) {
         *speed = AI_ACTION_SPEED_WALK;
+        return 1;
+    }
+    if (NuStrICmp(name, "TIPTOE") == 0) {
+        *speed = AI_ACTION_SPEED_TIPTOE;
         return 1;
     }
     return 0;

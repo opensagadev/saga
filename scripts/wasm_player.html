@@ -5,8 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="darkreader-lock">
-    <meta name="description"
-        content="Experimental browser player for the saga WebAssembly build.">
+    <meta name="description" content="Experimental browser player for the saga WebAssembly build.">
     <meta name="theme-color" content="#111318">
     <meta property="og:type" content="website">
     <meta property="og:title" content="saga | Experimental WASM player">
@@ -43,12 +42,13 @@
                 <h1 id="launcher-title" class="loading-wordmark">saga</h1>
                 <label class="file-picker">
                     Select OBB file
-                    <input id="obb-file" type="file" accept=".obb,application/octet-stream" aria-label="Select OBB file">
+                    <input id="obb-file" type="file" accept=".obb,application/octet-stream"
+                        aria-label="Select OBB file">
                 </label>
                 <div class="source-divider">or</div>
                 <form id="url-form" class="player-url-form">
                     <input id="obb-url" class="text-input" type="url" inputmode="url" autocomplete="url"
-                        placeholder="Paste an OBB URL" aria-label="OBB URL" required>
+                        placeholder="Paste an OBB URL (main.1060.com.wb.lego.tcs.obb)" aria-label="OBB URL" required>
                     <button id="url-submit" class="primary-button" type="submit">Load</button>
                 </form>
                 <button id="local-obb-load" class="secondary-button" type="button" hidden>Load local OBB</button>
@@ -60,8 +60,7 @@
     <div id="game" aria-label="Game viewport">
         <canvas id="canvas" tabindex="-1" aria-label="saga game" oncontextmenu="event.preventDefault()"></canvas>
         <div class="game-toolbar">
-            <button id="leave-game" class="secondary-button"
-                type="button">Back</button>
+            <button id="leave-game" class="secondary-button" type="button">Back</button>
         </div>
     </div>
     <div id="runtime-error" role="alert" hidden></div>
@@ -321,4 +320,5 @@
         });
     </script>
 </body>
+
 </html>

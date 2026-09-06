@@ -49,6 +49,7 @@ void ComboHitFrame(GameObject_s *object, i32 damage);
 i32 Grapple_LookAtPos(GameObject_s *object, NUVEC *position);
 NUVEC *Technos_TgtPos(TECHNO_s *techno);
 void GameCam_UpdateLookRot(GAMECAMERA_s *camera);
+void GameCam_ResetLookRot(GAMECAMERA_s *camera);
 void GameCam_UpdateShake(GAMECAMERA_s *camera, f32 ambient_amount);
 void MakePlayPlanes(GAMECAMERA_s *camera);
 u16 SeekRot(u16 current, u16 target, f32 rate);
@@ -364,14 +365,14 @@ void MovePlayer(GameObject_s *object) {
     }
 
     enum AI_GOAL_SPEED_MODE : u8 {
-        AI_GOAL_SPEED_DEFAULT = 0,
-        AI_GOAL_SPEED_RUN = 1,
-        AI_GOAL_SPEED_WALK = 2,
+        AI_GOAL_SPEED_RUN = 0,
+        AI_GOAL_SPEED_WALK = 1,
+        AI_GOAL_SPEED_TIPTOE = 2,
     };
     if (!accepts_player_input) {
-        if (object->ai.goal_speed_mode == AI_GOAL_SPEED_RUN && pad->input_magnitude > game_character->walk_speed) {
+        if (object->ai.goal_speed_mode == AI_GOAL_SPEED_WALK && pad->input_magnitude > game_character->walk_speed) {
             pad->input_magnitude = game_character->walk_speed;
-        } else if (object->ai.goal_speed_mode == AI_GOAL_SPEED_WALK &&
+        } else if (object->ai.goal_speed_mode == AI_GOAL_SPEED_TIPTOE &&
                    pad->input_magnitude > game_character->tiptoe_speed) {
             pad->input_magnitude = game_character->tiptoe_speed;
         }
@@ -522,6 +523,25 @@ void MoveGameCamera(GAMECAMERA_s *camera) {
     // many gameplay camera modes; only this currently reachable mode is
     // transcribed here.
     if (camera == NULL || WORLD == NULL || WORLD->current_level == NULL) {
+        return;
+    }
+
+    extern NUMTX cutscenecammtx;
+    extern u8 set_cutscenecammtx;
+    extern i32 CUTCAMONLY;
+    if (CutSceneCameraCTRL != 0) {
+        if (CUTSTOPGAME == 0 && CUTCAMONLY == 0) {
+            GameCam_ResetLookRot(camera);
+            return;
+        }
+        camera->render_mtx = cutscenecammtx;
+        camera->mtx = cutscenecammtx;
+        set_cutscenecammtx = 0;
+        if (pNuCam != NULL) {
+            pNuCam->mtx = cutscenecammtx;
+            NuCameraSet(pNuCam);
+        }
+        camera->pos = *NUMTX_GET_ROW_VEC(&cutscenecammtx, 3);
         return;
     }
 

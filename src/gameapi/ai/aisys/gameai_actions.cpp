@@ -4,6 +4,7 @@
 #include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/gizmos/trigger/gizspecial.h"
 #include "legoapi/items/base/apiobject.h"
@@ -145,8 +146,41 @@ static __used__ i32 Action_NotifyStateChange(AISYS_s *, AISCRIPTPROCESS_s *, AIP
     return 0;
 }
 
-static __used__ i32 Action_OverrideAnimation(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
-    return 0;
+static __used__ i32 Action_OverrideAnimation(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet,
+                                             char **params, i32 param_count, i32 first_time, f32) {
+    if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL || first_time == 0) {
+        return 1;
+    }
+
+    i16 from = -1;
+    i16 to = -1;
+    for (i32 index = 0; index < param_count; ++index) {
+        char *param = params[index];
+        if (NuStrICmp(param, "from=All") == 0) {
+            from = 0xe9;
+            continue;
+        }
+
+        char *value = NuStrIStr(param, "from=");
+        if (value != NULL) {
+            from = static_cast<i16>(FindAnimIX(packet->owner->apiobj.character_data, value + 5));
+            continue;
+        }
+
+        value = NuStrIStr(param, "to=");
+        if (value != NULL) {
+            to = static_cast<i16>(FindAnimIX(packet->owner->apiobj.character_data, value + 3));
+            continue;
+        }
+
+        if (processor != NULL) {
+            processor->action_timer = AIParamToFloatEx(packet, processor, params[0]);
+        }
+    }
+
+    packet->animation_override_from = to != -1 ? from : -1;
+    packet->animation_override_to = to;
+    return 1;
 }
 
 static __used__ i32 Action_PlayerSpeederHack(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
@@ -1165,6 +1199,7 @@ static __used__ f32 Condition_InSameTriggerAreaAsNearestPlayer(AISYS_s *, AISCRI
 namespace {
     struct GameAIRegistryCallbacks {
         GameAIRegistryCallbacks() {
+            api_aiactiondefs[API_AI_ACTION_OVERRIDE_ANIMATION].eval_fn = Action_OverrideAnimation;
             lego_aiactiondefs[LEGO_AI_ACTION_SET_DOOMED_ESCAPE_LOCATOR].eval_fn = Action_SetDoomedEscapeLocator;
             lego_aiactiondefs[LEGO_AI_ACTION_SNAP_TO_SOCK_POSITION].eval_fn = Action_SnapToSockPosition;
             lego_aiactiondefs[LEGO_AI_ACTION_CAN_SHOOT_OFF_SCREEN].eval_fn = Action_CanShootOffScreen;

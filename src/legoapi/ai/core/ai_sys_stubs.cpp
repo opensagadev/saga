@@ -2007,7 +2007,43 @@ extern "C" {
     void FindLocalAIMessage(void) {
     }
 
-    void FollowAPIObject(void) {
+    void FollowAPIObject(APIOBJECT *object, APIOBJECT *target, i32 flags, f32 movement_parameter) {
+        AIPACKET *packet = object->ai;
+        AIPACKET *target_packet = target->ai;
+
+        NUVEC *destination;
+        i32 movement_mode;
+        if ((flags & 1) == 0) {
+            destination = &target_packet->last_path_position;
+            movement_mode = AIPACKET_MOVEMENT_TO_DESTINATION;
+        } else {
+            bool use_target_path_position = false;
+            AIPATH *path = packet->path_info.path;
+            if (path != NULL && path == target_packet->path_info.path) {
+                if ((target_packet->path_info.flags & AIPATHINFO_FLAG_ON_PATH) != 0 &&
+                    packet->path_info.connection != NULL && target_packet->path_info.connection != NULL &&
+                    (packet->runtime_flags & AIPACKET_RUNTIME_ROUTE_SELECTED) == 0) {
+                    const u8 object_direction = packet->path_info.connection->direction_a;
+                    const u8 target_direction = target_packet->path_info.connection->direction_a;
+                    if (path->route_matrix[object_direction][target_direction] != 0xff ||
+                        object_direction == target_direction) {
+                        use_target_path_position = true;
+                    }
+                }
+            }
+
+            if (use_target_path_position) {
+                destination = &target_packet->last_path_position;
+                movement_mode = AIPACKET_MOVEMENT_TO_DESTINATION;
+            } else {
+                destination = &target_packet->terrain_origin;
+                movement_mode = AIPACKET_MOVEMENT_DIRECT;
+            }
+        }
+
+        const f32 stopping_distance = (flags & 2) != 0 ? 0.0f : target_packet->mover_height;
+        AIMoveInstruction(packet, destination, stopping_distance, &target_packet->path_info, movement_mode,
+                          movement_parameter);
     }
 
     void GetAIMessage(void) {

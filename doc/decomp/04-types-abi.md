@@ -16,33 +16,33 @@ golden rule is *the binary's mangled name is the spec*.
 Compiled one function per signature, `nm`'d the `.o`, demangled back with
 `i686-linux-android-c++filt`. All verified:
 
-| C++ type            | mangle | verified symbol (demangled)      |
-|---------------------|--------|----------------------------------|
-| `int`               | `i`    | `_Z5f_inti` → `f_int(int)`       |
-| `unsigned int`      | `j`    | `_Z5f_intj`-style `_Z8f_myuintj` |
-| `long`              | `l`    | `_Z6f_longl` → `f_long(long)`    |
-| `unsigned long`     | `m`    | `_Z11f_abi_ulongm`               |
-| `long long`         | `x`    | `_Z3f_xx` → `f_x(long long)`     |
-| `unsigned long long`| `y`    | `_Z3f_yy`                        |
-| `char`              | `c`    | `_Z3f_cc`                        |
-| `signed char`       | `a`    | `_Z3f_aa`                        |
-| `unsigned char`     | `h`    | `_Z3f_hh`                        |
-| `short`             | `s`    | `_Z3f_ss`                        |
-| `unsigned short`    | `t`    | `_Z3f_tt`                        |
-| `bool`              | `b`    | `_Z3f_bb`                        |
-| `float`             | `f`    | `_Z3f_ff`                        |
-| `double`            | `d`    | `_Z3f_dd`                        |
-| `void *`            | `Pv`   | `_Z5f_PvPv`                      |
-| `int *`             | `Pi`   | `_Z5f_PiPi`                      |
-| `char *`            | `Pc`   | `_Z5f_PcPc`                      |
-| `const int *`       | `PKi`  | `_Z5f_PKiPKi`                    |
-| `int &`             | `Ri`   | `_Z5f_RiRi`                      |
-| `int[5]` param      | `A5_i` | `_Z6f_A5_iPi` (decays to `Pi`)   |
-| `int(*)(int,double)`| `PFid` | `_Z6f_PFidPFiidE`                |
-| `float(*)(void)`    | `PFfv` | `_Z6f_fPvfPFfvE`                 |
-| namespace `ns1::ns2`| `_ZN…` | `_ZN3ns13ns21fEi`                |
-| member `Widget::method` | `_ZN…` | `_ZN6Widget6methodEii`       |
-| struct arg           | by name | `_Z4f_PSP1S` (`S` param → `P1S`) |
+| C++ type                | mangle  | verified symbol (demangled)      |
+| ----------------------- | ------- | -------------------------------- |
+| `int`                   | `i`     | `_Z5f_inti` → `f_int(int)`       |
+| `unsigned int`          | `j`     | `_Z5f_intj`-style `_Z8f_myuintj` |
+| `long`                  | `l`     | `_Z6f_longl` → `f_long(long)`    |
+| `unsigned long`         | `m`     | `_Z11f_abi_ulongm`               |
+| `long long`             | `x`     | `_Z3f_xx` → `f_x(long long)`     |
+| `unsigned long long`    | `y`     | `_Z3f_yy`                        |
+| `char`                  | `c`     | `_Z3f_cc`                        |
+| `signed char`           | `a`     | `_Z3f_aa`                        |
+| `unsigned char`         | `h`     | `_Z3f_hh`                        |
+| `short`                 | `s`     | `_Z3f_ss`                        |
+| `unsigned short`        | `t`     | `_Z3f_tt`                        |
+| `bool`                  | `b`     | `_Z3f_bb`                        |
+| `float`                 | `f`     | `_Z3f_ff`                        |
+| `double`                | `d`     | `_Z3f_dd`                        |
+| `void *`                | `Pv`    | `_Z5f_PvPv`                      |
+| `int *`                 | `Pi`    | `_Z5f_PiPi`                      |
+| `char *`                | `Pc`    | `_Z5f_PcPc`                      |
+| `const int *`           | `PKi`   | `_Z5f_PKiPKi`                    |
+| `int &`                 | `Ri`    | `_Z5f_RiRi`                      |
+| `int[5]` param          | `A5_i`  | `_Z6f_A5_iPi` (decays to `Pi`)   |
+| `int(*)(int,double)`    | `PFid`  | `_Z6f_PFidPFiidE`                |
+| `float(*)(void)`        | `PFfv`  | `_Z6f_fPvfPFfvE`                 |
+| namespace `ns1::ns2`    | `_ZN…`  | `_ZN3ns13ns21fEi`                |
+| member `Widget::method` | `_ZN…`  | `_ZN6Widget6methodEii`           |
+| struct arg              | by name | `_Z4f_PSP1S` (`S` param → `P1S`) |
 
 ### THE TRAP: `int` vs `long` (both 4 bytes, different mangles)
 
@@ -352,9 +352,6 @@ same symbol and the same codegen.
   tangents or flags above it; confirm the original mask and shift before
   assigning bitfields. A layout that consumes the correct total byte count can
   still be semantically wrong.
-- **SAGA_NOMATCH**: `__attribute__((section(".text.nomatch")))`
-  (`decomp.h:32`) parks functions that will never byte-match (e.g. original
-  compiler artifacts) so they don't pollute diffing.
 
 ## 11. Open questions
 

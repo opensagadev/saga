@@ -10,6 +10,7 @@
 
 #include "decomp.h"
 #include "globals.h"
+#include "gameapi/ai/aisys/aisys.h"
 #include "gameapi/gui/apimenu.h"
 #include "gameframework/saveload.h"
 #include "host/harness/window.hpp"
@@ -338,6 +339,43 @@ namespace {
                  snapshot.camera_look_yaw);
     }
 
+    static void host_log_ai_script(const AISCRIPT *script) {
+        if (script == nullptr) {
+            return;
+        }
+
+        LOG_INFO("scripted AI script: name=%s base=%s", script->name != nullptr ? script->name : "-",
+                 script->derived_from != nullptr ? script->derived_from : "-");
+        for (const NULISTLNK *state_node = script->states.head; state_node != nullptr; state_node = state_node->next) {
+            const AISTATE *state = reinterpret_cast<const AISTATE *>(state_node);
+            LOG_INFO("scripted AI state: script=%s state=%s", script->name != nullptr ? script->name : "-",
+                     state->name != nullptr ? state->name : "-");
+            for (const NULISTLNK *action_node = state->actions.head; action_node != nullptr;
+                 action_node = action_node->next) {
+                const AIACTION *action = reinterpret_cast<const AIACTION *>(action_node);
+                LOG_INFO("scripted AI action: script=%s state=%s action=%s params=%d",
+                         script->name != nullptr ? script->name : "-", state->name != nullptr ? state->name : "-",
+                         action->def != nullptr && action->def->name != nullptr ? action->def->name : "-",
+                         action->param_count);
+                for (i32 param = 0; param < action->param_count; ++param) {
+                    LOG_INFO("scripted AI action param: script=%s state=%s action=%s index=%d value=%s",
+                             script->name != nullptr ? script->name : "-", state->name != nullptr ? state->name : "-",
+                             action->def != nullptr && action->def->name != nullptr ? action->def->name : "-", param,
+                             action->params != nullptr && action->params[param] != nullptr ? action->params[param] : "-");
+                }
+            }
+            for (const NULISTLNK *condition_node = state->conditions.head; condition_node != nullptr;
+                 condition_node = condition_node->next) {
+                const AICONDITION *condition = reinterpret_cast<const AICONDITION *>(condition_node);
+                LOG_INFO("scripted AI condition: script=%s state=%s condition=%s arg=%s next=%s",
+                         script->name != nullptr ? script->name : "-", state->name != nullptr ? state->name : "-",
+                         condition->def != nullptr && condition->def->name != nullptr ? condition->def->name : "-",
+                         condition->arg != nullptr ? condition->arg : "-",
+                         condition->next_state_name != nullptr ? condition->next_state_name : "-");
+            }
+        }
+    }
+
     static void host_log_animation_trace(const char *stage, const HostScriptedPlaySnapshot &snapshot) {
         LOG_INFO("scripted animation %s: current=%d requested=%d previous=%d time=%.3f flags=0x%x format=0x%x "
                  "blend=(active=%u,source=%d,target=%d,elapsed=%.3f,duration=%.3f) "
@@ -620,6 +658,13 @@ namespace {
     static std::atomic<i32> host_numain_result{0};
     static std::atomic<bool> host_numain_done{false};
 
+    static void host_resume_game_complete() {
+        // ResumeGame clears the menu stack in the middle of the current game
+        // tick. Keep host-side menu queries disabled until DrawMenu validates
+        // another active menu.
+        MenuValidated = 0;
+    }
+
     static i32 host_menu_id() {
         // GetMenuID is an original game helper and assumes the menu system has
         // already been initialized. The host thread starts polling before
@@ -692,6 +737,7 @@ i32 host_run_window(const HostWindowOptions &options) {
     // The host upload boundary decodes ETC1 when the driver cannot upload it.
     NuPlatform::Get()->SetCurrentPlatform(ANDROID_ETC1_PLATFORM);
     HostInputReset();
+    ResumeGame_ExtraCodeFn = host_resume_game_complete;
 
     host_numain_result.store(0, std::memory_order_relaxed);
     host_numain_done.store(false, std::memory_order_relaxed);
@@ -1355,9 +1401,10 @@ i32 host_run_window(const HostWindowOptions &options) {
         LOG_INFO("scripted objects: high=%d active=%d models=%d drawn=%d", HIGHGAMEOBJECT, active_objects,
                  model_objects, drawn_objects);
         host_log_pickup_trace("after");
+        std::vector<const AISCRIPT *> logged_ai_scripts;
         for (i32 index = 0; Obj != nullptr && index < HIGHGAMEOBJECT; ++index) {
             const GameObject_s &object = Obj[index];
-            if ((object.apiobj.field_0x1f8 & 1) == 0 || object.apiobj.model_draw_result == 0) {
+            if ((object.apiobj.field_0x1f8 & 1) == 0) {
                 continue;
             }
             const CHARACTERDATA *character = object.apiobj.character_data;
@@ -1382,6 +1429,41 @@ i32 host_run_window(const HostWindowOptions &options) {
                 animations != nullptr && animations[118] != nullptr, object.apiobj.field_0x1f8,
                 object.apiobj.field_0x1f4, config != nullptr ? config->model_origin_joint : -2,
                 config != nullptr ? config->collision_origin_joint : -2);
+
+            if ((object.apiobj.field_0x1f4 & APIOBJECT_MOTION_FLAG_AI_CONTROLLED) != 0) {
+                const AISCRIPTPROCESS *processor = reinterpret_cast<const AISCRIPTPROCESS *>(&object.ai);
+                const AIACTION *action = reinterpret_cast<const AIACTION *>(processor->action_node);
+                LOG_INFO(
+                    "scripted object[%d] AI: script=%s state=%s action=%s first=%u disabled=%u "
+                    "movement=(flags=0x%x,runtime=0x%x,event=0x%x,speed=%u,target=%p) "
+                    "destination=(%.3f,%.3f,%.3f) waypoint=(%.3f,%.3f,%.3f) pad=(%.3f,%u)",
+                    index, processor->script != nullptr && processor->script->name != nullptr
+                               ? processor->script->name
+                               : "-",
+                    processor->state != nullptr && processor->state->name != nullptr ? processor->state->name : "-",
+                    action != nullptr && action->def != nullptr && action->def->name != nullptr ? action->def->name : "-",
+                    processor->is_first_time_action, processor->is_disabled, object.ai.movement_flags,
+                    object.ai.runtime_flags, object.ai.movement_event_flags, object.ai.goal_speed_mode,
+                    object.ai.movement_target, object.ai.movement_destination.x, object.ai.movement_destination.y,
+                    object.ai.movement_destination.z, object.ai.movement_position.x, object.ai.movement_position.y,
+                    object.ai.movement_position.z,
+                    object.pad_gamepad != nullptr ? object.pad_gamepad->input_magnitude : -1.0f,
+                    object.pad_gamepad != nullptr ? object.pad_gamepad->input_angle : 0);
+
+                if (object.id == id_CANTINABAND && processor->script != nullptr) {
+                    bool already_logged = false;
+                    for (const AISCRIPT *script : logged_ai_scripts) {
+                        if (script == processor->script) {
+                            already_logged = true;
+                            break;
+                        }
+                    }
+                    if (!already_logged) {
+                        logged_ai_scripts.push_back(processor->script);
+                        host_log_ai_script(processor->script);
+                    }
+                }
+            }
         }
         if (Player[0] != nullptr) {
             const CHARACTERMODEL_s *model = Player[0]->apiobj.character_model;

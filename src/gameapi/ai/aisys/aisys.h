@@ -608,8 +608,11 @@ typedef struct AISCRIPTCONDITIONDEF_s {
 enum AISCRIPT_REGISTRY_INDEX {
     API_AI_ACTION_IDLE = 0,
     API_AI_ACTION_RESET_TIMER = 2,
+    API_AI_ACTION_FOLLOW_PLAYER = 11,
+    API_AI_ACTION_FOLLOW_OPPONENT = 13,
     API_AI_ACTION_GO_TO_LOCATOR = 35,
     API_AI_ACTION_FOLLOW_PATH = 38,
+    API_AI_ACTION_OVERRIDE_ANIMATION = 40,
     API_AI_CONDITION_TIMER = 2,
     API_AI_CONDITION_RANDOM = 3,
 
@@ -751,6 +754,7 @@ extern "C" {
     void AISysProcess(AISYS *system, APIOBJECT *player_1, APIOBJECT *player_2);
     void AIMoveInstruction(AIPACKET *packet, NUVEC *destination, f32 stopping_distance, AIPATHINFO *path_info, i32 mode,
                            f32 movement_parameter);
+    void FollowAPIObject(APIOBJECT *object, APIOBJECT *target, i32 flags, f32 movement_parameter);
     void AIScriptProcess(AISYS *system, APIOBJECT *object, AIPACKET *packet, AISCRIPTPROCESS *processor, f32 elapsed);
 #ifdef __cplusplus
 }

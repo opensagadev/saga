@@ -111,7 +111,7 @@ void instNuGCutSceneSwapBuffers(instNUGCUTSCENE_s *, i32) {
 }
 
 void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *instance) {
-    if (instance != NULL && instance->camera_instance != NULL && instance->camera_instance->lock_state >= 0) {
+    if (instance != NULL && instance->camera_instance != NULL && instance->camera_instance->camera_index >= 0) {
         CutSceneCameraCTRL = 0;
     }
 }
@@ -119,7 +119,13 @@ void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *instance) {
 void instNuGCutSceneEndFirstFrame(instNUGCUTSCENE_s *) {
 }
 
-void instNuGCutSceneEndButNotSystems(instNUGCUTSCENE_s *) {
+void instNuGCutSceneEndButNotSystems(instNUGCUTSCENE_s *instance) {
+    instance->flags_88 &= ~2U;
+    instance->current_frame = instance->cutscene->duration;
+    instance->flags_89 |= 0x10;
+    instance->render_frame = instance->cutscene->duration;
+    instance->flags_8c &= ~0x40U;
+    instNuGCutSceneResetCamLock(instance);
 }
 
 void instNuGCutContainsInstancedRigids(instNUGCUTSCENE_s *) {

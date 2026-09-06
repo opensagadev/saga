@@ -178,5 +178,6 @@ __attribute__((weak)) i32 NuGScnReadTexturesPS(i32 file, variptr_u *buf, variptr
     return bytes_read;
 }
 
-void NuGScnBufferAllocAligned(i32, i32) {
+void *NuGScnBufferAllocAligned(i32, i32) {
+    return NULL;
 }

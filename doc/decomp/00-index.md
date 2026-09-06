@@ -32,6 +32,8 @@ Native and WASM builds define `HOST_BUILD` and use the host harness.
 | [07-diagnostics.md](07-diagnostics.md) | symptom-to-cause mismatch diagnosis |
 | [08-asm-review.md](08-asm-review.md) | raw symbol and disassembly review |
 | [09-objdiff-cli.md](09-objdiff-cli.md) | compact per-symbol objdiff helper |
+| [10-animation-regression-audit.md](10-animation-regression-audit.md) | historical animation-related regression audit |
+| [11-animation-runtime-inventory.md](11-animation-runtime-inventory.md) | animation runtime coverage, active paths, and remaining gaps |
 
 ## Non-negotiable matching facts
 

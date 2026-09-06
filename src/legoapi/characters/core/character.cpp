@@ -731,9 +731,6 @@ static __used__ void GameObjectForceApart2D(APIOBJECT_s *, APIOBJECT_s *) {
 static __used__ void DrawCharacterAttachments(GameObject_s *, numtx_s *) {
 }
 
-static __used__ void AddToModelList(APICHARACTERMODELLIST_s *, int *, int, int, int, EXTRAMODEL *) {
-}
-
 static void NormalizeAnimPath(char *path) {
     while (*path != '\0') {
         *path = static_cast<char>(NuToUpper(*path));
@@ -1037,7 +1034,19 @@ extern "C" {
         return result;
     }
 
-    void APIDumpCharacterModels(i32) {
+    // Original @0x3cd1ea. Destroy either the area-loaded hierarchy tail
+    // (mode 0) or every loaded hierarchy (non-zero mode). The model slots are
+    // reset by APILoadCharacterModels after their display scenes have been
+    // unregistered here.
+    void APIDumpCharacterModels(i32 mode) {
+        i32 model_index = mode == 0 ? apicharsys->permanent_model_count : 0;
+        while (model_index < apicharsys->loaded_model_count) {
+            APICHARACTERMODEL &model = apicharsys->models[model_index];
+            if (model.hierarchy != NULL) {
+                NuHGobjDestroy(model.hierarchy);
+            }
+            ++model_index;
+        }
     }
 
     void APILoadCharacterModels(APICHARACTERMODELLIST_s *list, i32 area_animation, VARIPTR *buf, VARIPTR buf_end,

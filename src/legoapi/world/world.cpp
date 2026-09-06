@@ -76,6 +76,7 @@ i32 DEFAULT_PLAYERHITPOINTS = 8;
 u32 LEGOOBJ_DEFAULTLASTCOIN = -1;
 
 APICHARACTERSYS *apicharsys;
+void CutScenes_Destroy(CUTSYS *system);
 
 // --- World-module helpers (kept with the WorldInfo API) ---
 
@@ -99,6 +100,7 @@ void WorldInfo_Dump(WORLDINFO *world) {
     // The full routine also tears down the level's gameplay subsystems and
     // editor pages. These scene removals are the original calls at
     // 0x481bcc..0x481d6b and must happen before Reset reuses the bump buffer.
+    CutScenes_Destroy(world->cutscene_sys);
     if (world->icons_gscn != nullptr) {
         NuGScnRemove(world->icons_gscn);
         world->icons_gscn = nullptr;

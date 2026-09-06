@@ -27,9 +27,6 @@ void nugraph_blend(i32, i32, i32 *, float) {
 void BezierLineEval(VuVec &, VuVec &, VuVec &, VuVec &, VuVec &, float) {
 }
 
-void GetIntCurveVal(ani3_animheader_s *, float *, i32) {
-}
-
 void nugraph_linear(i32, nuvec_s *, nuvec_s *, i32) {
 }
 

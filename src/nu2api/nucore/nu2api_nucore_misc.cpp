@@ -28,6 +28,14 @@ void NuGCutRigidCalcMtx_3(NUGCUTRIGID_s *, f32, numtx_s *);
 extern void *globalbuffer;
 extern i32 MaxAnimJoints;
 
+i32 GetIntCurveVal(ani3_animheader_s *animation, f32 *values, i32 curve) {
+    if (animation->curve_types[curve] == 10) {
+        return reinterpret_cast<i32 *>(values)[curve];
+    }
+    const f32 value = values[curve];
+    return static_cast<i32>(value < 0.0f ? value - 0.5f : value + 0.5f);
+}
+
 extern "C" void NuAnimBuffCreateScratch(nuanimbuff_s *buffer);
 extern "C" void NuAnimBuffDestroyScratch(nuanimbuff_s *buffer);
 extern "C" void NuAnimBuffAccumulate_3(nuanimbuff_s *buffer, ani3_animheader_s *animation, f32 time, i32 overwrite,
@@ -461,7 +469,58 @@ void __attribute__((weak)) NuIOSDLSkinMtxCallback(void *data) {
     }
 }
 
-void NuGCutCharAnimProcess_3(NUGCUTCHAR_s *, float, numtx_s *, i32 *, u32 *, float *, float *, float *, i32 *) {
+void NuGCutCharAnimProcess_3(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible,
+                             u32 *animation_index, f32 *animation_rate, f32 *blend_time,
+                             f32 *animation_start_frame, i32 *layer_mask) {
+    ani3_animheader_s *animation = reinterpret_cast<ani3_animheader_s *>(character->animation);
+    f32 *values = NuAnimCurveExtractAllNodeCurves_3(animation, 0, frame, NULL);
+    const u16 curve_count = animation->curve_count;
+
+    *visible = curve_count < 7 ? character->flags & 1 : GetIntCurveVal(animation, values, 6);
+    if (animation_index != NULL) {
+        *animation_index = curve_count < 8 ? character->animation_index : GetIntCurveVal(animation, values, 7);
+    }
+    if (animation_start_frame != NULL) {
+        if (animation_index != NULL && *animation_index != 0 && *animation_index != 0xff) {
+            *animation_start_frame = curve_count < 11 ? static_cast<f32>(character->animation_start_frame)
+                                                       : values[10];
+        } else {
+            *animation_start_frame = 0.0f;
+        }
+    }
+    if (*visible == 0) {
+        return;
+    }
+    if (layer_mask != NULL) {
+        *layer_mask = curve_count < 12 ? -1 : GetIntCurveVal(animation, values, 11);
+    }
+
+    if ((animation->node_flags[0] & NUANIM_NODE_HAS_ROTATION) != 0) {
+        NUANGVEC rotation = {
+            static_cast<NUANG>(values[3] * 10430.378f),
+            static_cast<NUANG>(values[4] * 10430.378f),
+            static_cast<NUANG>(values[5] * 10430.378f),
+        };
+        NuMtxSetRotateXYZ(matrix, &rotation);
+    } else {
+        NuMtxSetIdentity(matrix);
+    }
+    NuMtxTranslate(matrix, reinterpret_cast<NUVEC *>(values));
+    matrix->m02 = -matrix->m02;
+    matrix->m12 = -matrix->m12;
+    matrix->m20 = -matrix->m20;
+    matrix->m21 = -matrix->m21;
+    matrix->m23 = -matrix->m23;
+    matrix->m32 = -matrix->m32;
+
+    NUVEC scale = NuMtxGetScale(&character->base_matrix);
+    NuMtxPreScale(matrix, &scale);
+    if (animation_rate != NULL) {
+        *animation_rate = curve_count < 10 ? character->animation_rate : values[9];
+    }
+    if (blend_time != NULL) {
+        *blend_time = curve_count < 9 ? static_cast<f32>(character->blend_time) : values[8];
+    }
 }
 
 i32 NuGCutLocatorIsVisble_3(NUGCUTLOCATOR_s *locator, float frame, float *scale, float *rate) {
@@ -609,9 +668,16 @@ void NuIOS_GetShaderProgramKey(ShaderObjectKey const &) {
 void NuSpecialFindByPlatformID(nugscn_s *, nuhspecial_s *, i32) {
 }
 
-void NuAnimBuffEvaluate_3_QuatB(numtx_s *, nuanimbuff_s *, nugscn_s *, numtx_s *, ani3_animheader_s *,
-                                void (*)(numtx_s *, void *, nuvec_s *, nuvec_s *, nuvec_s *, float), nuvec_s *,
-                                void *) {
+// The original main evaluator delegates quaternion buffers here with a NULL
+// first argument. The shared reconstructed evaluator already selects matrix
+// construction from buffer->use_quaternions, so retain the ABI entry point and
+// feed it into that common path.
+void NuAnimBuffEvaluate_3_QuatB(numtx_s *, nuanimbuff_s *buffer, nugscn_s *scene, numtx_s *matrices,
+                                ani3_animheader_s *animation,
+                                void (*root_fn)(numtx_s *, void *, nuvec_s *, nuvec_s *, nuvec_s *, float),
+                                nuvec_s *root_translation, void *root_data) {
+    NuAnimBuffEvaluate_3(buffer, reinterpret_cast<nuhgobj_s *>(scene), matrices, animation, root_fn,
+                         root_translation, root_data);
 }
 
 void NuDDSSetTextureDescription(char *, NUTEXFORMAT, i32, i32, i32, i32, nutexturetype_e) {
@@ -634,6 +700,10 @@ void NuHGobjEvalAnimBlend2Root_3(nugscn_s *scene, ani3_animheader_s *animation_a
     NUVEC root_translation = {0.0f, 0.0f, 0.0f};
 
     NuAnimBuffCreateScratch(&buffer);
+    const i32 use_quaternions =
+        NuAnimGetUseQuatsFlag() |
+        ((animation_a->format_flags | animation_b->format_flags) & ANI3_FORMAT_QUATERNION_ROTATION);
+    NuAnimPushSetUseQuatsFlag(use_quaternions);
     NuAnimBuffAccumulate_3(&buffer, animation_a, time_a, 1, 0.0f, 0, object, &root_a);
     NuAnimBuffAccumulate_3(&buffer, animation_b, time_b, 0, blend, 0, object, &root_b);
     if (override_count != 0 && JointProcAnimFn != NULL) {
@@ -641,6 +711,7 @@ void NuHGobjEvalAnimBlend2Root_3(nugscn_s *scene, ani3_animheader_s *animation_a
     }
     NuAnimBuffEvaluate_3(&buffer, object, matrices, animation_a, root_fn, &root_translation, root_data);
     NuAnimBuffDestroyScratch(&buffer);
+    NuAnimPopUseQuatsFlag();
 }
 
 void NuIOSDLVertexGroupsCallback(void *) {
@@ -862,7 +933,22 @@ void NuOnlineSetDefaultContextProfilePS(i32, i32, i32) {
 void NuRenderContextForceSamplerStatePS(i32, d3dsamplerstate_u const *) {
 }
 
-void NuGCutSceneRemapFocusIdToLocaterNum(NUGCUTSCENE_s *, variptr_u *) {
+void NuGCutSceneRemapFocusIdToLocaterNum(NUGCUTSCENE_s *cutscene, variptr_u *buffer) {
+    if (cutscene->version <= 4 || cutscene->camera_system == NULL ||
+        cutscene->camera_system->focus_state_animation == NULL || cutscene->locator_system == NULL) {
+        return;
+    }
+
+    buffer->addr = ALIGN(buffer->addr, 2);
+    cutscene->focus_camera_indices = reinterpret_cast<u16 *>(buffer->void_ptr);
+    NUGCUTLOCATORSYS_s *system = cutscene->locator_system;
+    for (u32 i = 0; i < system->locator_count; ++i) {
+        NUGCUTLOCATOR_s *locator = &system->locators[i];
+        if ((system->types[locator->type_index].flags & 8) != 0) {
+            *reinterpret_cast<u16 *>(buffer->void_ptr) = static_cast<u16>(i);
+            buffer->void_ptr = reinterpret_cast<u16 *>(buffer->void_ptr) + 1;
+        }
+    }
 }
 
 void NuIOSDLDeferredTransformParamsCallback(void *) {

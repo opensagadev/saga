@@ -226,7 +226,9 @@ typedef struct AIPACKET_s {
         i16 inside_path_node; // 0x3e4 overall (-1 when not inside a node)
         i16 field_0x124;
     };
-    u8 pad1b[0x3ec - 0x3e6];
+    i16 animation_override_from; // 0x126 (0xe9 means every ordinary animation)
+    i16 animation_override_to;   // 0x128
+    u8 pad1b[0x12c - 0x12a];
     u32 character_type_mask_low;  // 0x3ec overall
     u32 character_type_mask_high; // 0x3f0 overall
     u8 field_0x134;               // 0x3f4 overall: source creature index
@@ -685,7 +687,8 @@ typedef struct GameObject_s {
     f32 jump_variant_timer;          // 0x0d64
     f32 jump_chain_timer;            // 0x0d68
     f32 field_0xd6c;                 // 0x0d6c  surface/contact state
-    u8 pad_d70[0xd78 - 0xd70];       // 0x0d70 .. 0x0d78
+    f32 movement_animation_hold_timer;    // 0x0d70
+    f32 movement_animation_release_timer; // 0x0d74
     f32 field_0xd78;                 // 0x0d78
     f32 terrain_origin_floor_offset; // 0x0d7c
     f32 field_0xd80;                 // 0x0d80
@@ -720,12 +723,14 @@ typedef struct GameObject_s {
     u16 force_heading;
     u16 current_input_angle; // 0x0e0c
     u8 pad_e0e[2];
-    i16 previous_block_animation; // 0x0e10
-    u8 pad_e12[0xe18 - 0xe12];
-    i16 movement_lean_angle;  // 0x0e18
-    i16 secondary_lean_angle; // 0x0e1a
-    i16 tertiary_lean_angle;  // 0x0e1c
-    i16 field_0xe1e;          // 0x0e1e
+    i16 previous_block_animation;   // 0x0e10
+    u8 pad_e12[2];
+    i16 held_movement_animation;     // 0x0e14
+    i16 released_movement_animation; // 0x0e16
+    i16 movement_lean_angle;         // 0x0e18
+    i16 secondary_lean_angle;        // 0x0e1a
+    i16 tertiary_lean_angle;         // 0x0e1c
+    i16 field_0xe1e;                 // 0x0e1e
     union {
         struct {
             u8 field_0xe20;
@@ -919,10 +924,16 @@ static_assert(sizeof(void *) != 4 || sizeof(GameObject_s) == 0x10e4, "GameObject
 static_assert(sizeof(void *) != 4 || offsetof(GameObject_s, hold_timer) == 0xde4, "GameObject hold timer offset");
 static_assert(sizeof(void *) != 4 || offsetof(GameObject_s, previous_block_animation) == 0xe10,
               "GameObject previous block animation offset");
+static_assert(sizeof(void *) != 4 || offsetof(GameObject_s, held_movement_animation) == 0xe14,
+              "GameObject held movement animation offset");
+static_assert(sizeof(void *) != 4 || offsetof(GameObject_s, released_movement_animation) == 0xe16,
+              "GameObject released movement animation offset");
 static_assert(sizeof(void *) != 4 || offsetof(AIPACKET, character_type_mask_low) == 0x12c,
               "AIPACKET character mask 32-bit offset");
 DECOMP_ASSERT(offsetof(AIPACKET, alternate_script_process) == 0xcc, "AIPACKET alternate script processor offset");
 DECOMP_ASSERT(offsetof(AIPACKET, movement_destination) == 0x104, "AIPACKET destination offset");
+DECOMP_ASSERT(offsetof(AIPACKET, animation_override_from) == 0x126, "AIPACKET animation override source offset");
+DECOMP_ASSERT(offsetof(AIPACKET, animation_override_to) == 0x128, "AIPACKET animation override target offset");
 DECOMP_ASSERT(offsetof(AIPACKET, movement_target_direction) == 0x147, "AIPACKET target direction offset");
 DECOMP_ASSERT(offsetof(AIPACKET, movement_target) == 0x184, "AIPACKET movement target offset");
 DECOMP_ASSERT(offsetof(AIPACKET, intersection_connection) == 0x18c, "AIPACKET intersection connection offset");
@@ -1039,6 +1050,10 @@ DECOMP_ASSERT(offsetof(GameObject_s, pause_input_state) == 0xd5c, "GameObject pa
 DECOMP_ASSERT(offsetof(GameObject_s, input_toggle_hold_time) == 0xda4, "GameObject toggle hold time offset");
 DECOMP_ASSERT(offsetof(GameObject_s, nearby_floor_distance) == 0xda0, "GameObject nearby-floor offset");
 DECOMP_ASSERT(offsetof(GameObject_s, fall_animation_timer) == 0xdac, "GameObject fall animation timer offset");
+DECOMP_ASSERT(offsetof(GameObject_s, movement_animation_hold_timer) == 0xd70,
+              "GameObject movement animation hold timer offset");
+DECOMP_ASSERT(offsetof(GameObject_s, movement_animation_release_timer) == 0xd74,
+              "GameObject movement animation release timer offset");
 DECOMP_ASSERT(offsetof(GameObject_s, pause_context_state) == 0xef4, "GameObject pause context state offset");
 DECOMP_ASSERT(offsetof(GameObject_s, delayed_turn_target_angle) == 0xe08, "GameObject delayed turn target offset");
 DECOMP_ASSERT(offsetof(GameObject_s, current_input_angle) == 0xe0c, "GameObject input angle offset");

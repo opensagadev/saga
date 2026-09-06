@@ -50,8 +50,6 @@ enum AREA_FLAGS {
     AREAFLAG_NO_FREEPLAY = 0x1000,
 };
 
-#define SAGA_NOMATCH __attribute__((section(".text.nomatch")))
-
 #define __used__ __attribute__((used)) // NOLINT(readability-identifier-naming)
 
 // regparm only exists on 32-bit x86; 64-bit host builds compile it out.

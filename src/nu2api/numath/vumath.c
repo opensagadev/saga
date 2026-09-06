@@ -6,39 +6,41 @@
 #include "nu2api/numath/nuvec.h"
 
 static void VuQuatCopy(NUQUAT *dst, NUQUAT *src) {
-    (void)dst;
-    (void)src;
+    *dst = *src;
 }
 
 static void VuQuatBlend(NUQUAT *out, NUQUAT *a, NUQUAT *b, f32 t, f32 w) {
-    (void)out;
-    (void)a;
-    (void)b;
-    (void)t;
-    (void)w;
+    out->x = a->x * t + b->x * w;
+    out->y = a->y * t + b->y * w;
+    out->z = a->z * t + b->z * w;
+    out->w = a->w * t + b->w * w;
 }
 
 static f32 VuQuatDot(NUQUAT *a, NUQUAT *b) {
-    (void)a;
-    (void)b;
-    return 0;
+    return a->x * b->x + a->y * b->y + a->z * b->z + a->w * b->w;
 }
 
 static void VuQuatLerp(NUQUAT *out, NUQUAT *a, NUQUAT *b, f32 t) {
-    (void)out;
-    (void)a;
-    (void)b;
-    (void)t;
+    out->x = (b->x - a->x) * t + a->x;
+    out->y = (b->y - a->y) * t + a->y;
+    out->z = (b->z - a->z) * t + a->z;
+    out->w = (b->w - a->w) * t + a->w;
 }
 
 static void VuQuatNeg2(NUQUAT *out, NUQUAT *in) {
-    (void)out;
-    (void)in;
+    out->x = -in->x;
+    out->y = -in->y;
+    out->z = -in->z;
+    out->w = -in->w;
 }
 
 static void VuQuatNormalise(NUQUAT *out, NUQUAT *in) {
-    (void)out;
-    (void)in;
+    f32 magnitude = NuFsqrt(in->x * in->x + in->y * in->y + in->z * in->z + in->w * in->w);
+    magnitude = magnitude > 0.0f ? 1.0f / magnitude : 0.0f;
+    out->x = in->x * magnitude;
+    out->y = in->y * magnitude;
+    out->z = in->z * magnitude;
+    out->w = in->w * magnitude;
 }
 
 static void VuVecMtxMul(NUVEC *out, NUVEC *v, NUMTX *m) {

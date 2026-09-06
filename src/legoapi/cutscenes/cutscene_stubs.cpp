@@ -9,6 +9,7 @@
 
 extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *, f32, nuanimtime_s *, f32 *, f32 *);
 extern "C" i32 NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *, f32, NUMTX *, nuanimtime_s *);
+void instNuGCutSceneEndButNotSystems(instNUGCUTSCENE_s *instance);
 
 extern "C" {
     extern debinftype **debtab;
@@ -84,7 +85,18 @@ extern "C" {
     void instCutSceneTimeElapsed(void) {
     }
 
-    void instNuGCutSceneAddCamTgt(void) {
+    i32 instNuGCutSceneAddCamTgt(instNUGCUTSCENE_s *instance, NUVEC *target, f32 start_frame, f32 duration,
+                                 i8 target_index) {
+        instNUGCUTSCENECAMERA_s *camera = instance->camera_instance;
+        if (camera == NULL || camera->target_count >= camera->target_capacity) {
+            return 0;
+        }
+        instNUGCUTCAMTGT_s *entry = &camera->targets[camera->target_count++];
+        entry->target = target;
+        entry->start_frame = start_frame;
+        entry->duration = duration;
+        entry->target_index = target_index;
+        return 1;
     }
 
     void instNuGCutSceneAddCleanUpItem(void) {
@@ -102,10 +114,16 @@ extern "C" {
     void instNuGCutSceneCleanUp(void) {
     }
 
-    void instNuGCutSceneCreateCamTgtArray(void) {
-    }
-
-    void instNuGCutSceneDestroy(void) {
+    void instNuGCutSceneCreateCamTgtArray(instNUGCUTSCENE_s *instance, i32 count, VARIPTR *buf) {
+        if (count == 0 || instance->camera_instance == NULL) {
+            return;
+        }
+        instNUGCUTSCENECAMERA_s *camera = instance->camera_instance;
+        camera->target_capacity = static_cast<u8>(count);
+        buf->addr = ALIGN(buf->addr, 0x10);
+        camera->targets = reinterpret_cast<instNUGCUTCAMTGT_s *>(buf->void_ptr);
+        buf->void_ptr = camera->targets + count;
+        memset(camera->targets, 0, count * sizeof(instNUGCUTCAMTGT_s));
     }
 
     void instNuGCutSceneDisable(void) {
@@ -114,14 +132,15 @@ extern "C" {
     void instNuGCutSceneEnable(void) {
     }
 
-    void instNuGCutSceneEnd(instNUGCUTSCENE_s *) {
+    void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance) {
+        instNuGCutSceneEndButNotSystems(instance);
     }
 
     void instNuGCutSceneFind(void) {
     }
 
-    i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *) {
-        return 0;
+    i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *instance) {
+        return (instance->flags_89 & 0x10) != 0 ? -1 : 0;
     }
 
     void instNuGCutSceneJumpToEnd(void) {

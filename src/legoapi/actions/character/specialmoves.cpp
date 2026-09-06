@@ -1,6 +1,8 @@
 #include "legoapi/legoapi_types.h"
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/core/input/gamepads.h"
 #include "legoapi/items/base/apiobject.h"
 
 struct SPECIALMOVE_s {
@@ -20,6 +22,8 @@ SPECIALMOVE_s *SpecialMove;
 i32 SpecialMoveCount;
 i32 LEGOCONTEXT_SPECIALMOVE_ATTACKER = -1;
 i32 LEGOCONTEXT_SPECIALMOVE_VICTIM = -1;
+
+i32 StartBackFlip(GameObject_s *object);
 
 i32 SpecialMove_Check(GameObject_s *attacker, GameObject_s *victim) {
     if (SpecialMove != NULL && ((attacker->apiobj.flags_low & 0x80) == 0 || attacker->field_0xda8 <= 0.0f) &&
@@ -76,7 +80,35 @@ void SpecialMove_Attacker_SetTargetMom(GameObject_s *) {
 static __used__ void JediBKilledCallback(GameObject_s *) {
 }
 
-void BackFlipCode(GameObject_s *) {
+void BackFlipCode(GameObject_s *object) {
+    if (LEGOCONTEXT_BACKFLIP == -1 || object->character_context != LEGOCONTEXT_BACKFLIP) {
+        return;
+    }
+
+    if ((object->field_0xe22 & 0x10) != 0 &&
+        (object->pad_gamepad->buttons_held & GAMEPAD_JUMP) == 0) {
+        object->field_0xe22 &= static_cast<u8>(~0x10u);
+    }
+
+    const i32 animation = object->context_animation;
+    if (object->apiobj.character_model->model_data_b[animation] != NULL &&
+        CurrentAnim(&object->apiobj.anim_packet) != animation) {
+        return;
+    }
+
+    object->context_animation_timer -= FRAMETIME;
+    if (object->context_animation_timer > 0.0f) {
+        return;
+    }
+
+    object->character_context = -1;
+    if ((object->pad_gamepad->buttons_held & GAMEPAD_JUMP) != 0 &&
+        (object->field_0xe22 & 0x10) == 0) {
+        StartBackFlip(object);
+    } else {
+        object->apiobj.velocity.x = 0.0f;
+        object->apiobj.velocity.z = 0.0f;
+    }
 }
 
 void SetSpecialMove(GameObject_s *, AIPATHNODE_s *, AIPATHNODE_s *, char) {

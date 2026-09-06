@@ -61,7 +61,32 @@ void Action_CirclePlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, 
 void Action_EndCameraCut(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
 }
 
-void Action_FollowPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+i32 Action_FollowPlayer(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
+                        i32 param_count, i32 first_time, float) {
+    if (packet == NULL) {
+        return 1;
+    }
+
+    if (first_time != 0) {
+        for (i32 index = 0; index < param_count; ++index) {
+            if (AIActionParseSpeedFn != NULL && AIActionParseSpeedFn(params[index], &packet->goal_speed_mode) != 0) {
+                continue;
+            }
+            if (NuStrICmp(params[index], "nearest") == 0) {
+                processor->action_data_1 |= 2;
+            } else if (NuStrICmp(params[index], "ignore_radius") == 0) {
+                processor->action_data_1 |= 1;
+            } else {
+                packet->movement_instruction_parameter = AIParamToFloatEx(packet, processor, params[index]);
+            }
+        }
+    }
+
+    if (sys != NULL && sys->player_1 != NULL && sys->player_1->ai != NULL) {
+        FollowAPIObject(&packet->owner->apiobj, sys->player_1, processor->action_data_1,
+                        packet->movement_instruction_parameter);
+    }
+    return 0;
 }
 
 void Action_PlayCutScene(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {

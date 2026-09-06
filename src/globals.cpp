@@ -35,6 +35,8 @@ void *globalbuffer = NULL;
 i32 MaxAnimJoints = 0;
 u8 ForcePlayEndFrame = 0;
 u8 ForceEulerToQuat = 0;
+u8 QuatPushes[4] = {};
+i32 NumQuatPushes = 0;
 extern const u8 CurveGroupMasks[3] = {
     NUANIMBUFF_JOINT_TRANSLATION,
     NUANIMBUFF_JOINT_ROTATION,
@@ -61,7 +63,13 @@ u8 CutSceneCameraCTRL = 0;
 f32 nusound_fade_start = 2.0f;
 f32 nusound_fade_end = 15.0f;
 i32 (*SetSoundFadeDistCallBackFn)(WORLDINFO_s *world) = NULL;
+NUGCUTSCENECHARACTERCREATEDATAFN NuCutSceneCharacterCreateData = NULL;
+NUGCUTSCENECHARACTEREVALFN NuCutSceneCharacterEval = NULL;
+NUGCUTSCENECHARACTERPROCESSFN NuCutSceneCharacterProcess = NULL;
+NUGCUTSCENECHARACTERRENDERFN NuCutSceneCharacterRender = NULL;
+NUGCUTSCENEFINDCHARACTERSFN NuCutSceneFindCharacters = NULL;
 NUGCUTSCENERESETCHARACTERSFN NuCutSceneResetCharactersFn = NULL;
+NUGCUTSCENERIGIDPOSTRENDERFN NuCutSceneRigidPostRender = NULL;
 __attribute__((visibility("hidden"))) GameObject_s *ForceBackObj asm("_ZL12ForceBackObj") = NULL;
 __attribute__((visibility("hidden"))) NUVEC *ForceBackPos asm("_ZL12ForceBackPos") = NULL;
 
@@ -1675,7 +1683,7 @@ vufnt_s *QFont3D = nullptr;
 vufnt_s *QFont2DZ = nullptr;
 vufnt_s *QFont2DLower = nullptr;
 vufnt_s *QFont3DZ = nullptr;
-vufnt_s *QFont3DTime = nullptr;
+f32 QFont3DTime = 0.0f;
 vufnt_s *SmartTextFont = nullptr;
 i32 create_qfont3d = 0;
 i32 create_qfont2dz = 0;

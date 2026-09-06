@@ -6,6 +6,7 @@
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/legoapi_types.h"
@@ -17,6 +18,7 @@
 extern i32 Hub_GetRandomCharType();
 
 i32 Action_SetState(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
+i32 Action_FollowPlayer(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 static i32 Action_GoToOriginalPath(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 static i32 Action_BigJumpToLocator(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 static i32 Action_UseBigJumpToJump(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
@@ -1243,12 +1245,16 @@ __used__ static i32 Action_SetAnimation(AISYS *sys, AISCRIPTPROCESS *processor, 
                                         i32 param_4, i32 param_5, f32 param_6) {
     (void)sys;
     (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
     (void)param_6;
-    return 0;
+    if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL &&
+        param_5 != 0 && param_4 == 1) {
+        GameObject_s *object = packet->owner->apiobj.objptr;
+        const i32 animation = FindAnimIX(object->apiobj.character_data, params[0]);
+        if (animation != -1) {
+            ResetAnimPacket(&object->apiobj.anim_packet, animation);
+        }
+    }
+    return 1;
 }
 
 __used__ static i32 Action_SetForceBack(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
@@ -1663,24 +1669,33 @@ __used__ static i32 Action_AlwaysBackFlip(AISYS *sys, AISCRIPTPROCESS *processor
                                           i32 param_4, i32 param_5, f32 param_6) {
     (void)sys;
     (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
     (void)param_5;
     (void)param_6;
-    return 0;
+    if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL) {
+        GameObject_s *object = packet->owner->apiobj.objptr;
+        object->field_0xef9 |= 0x01;
+        for (i32 index = 0; index < param_4; ++index) {
+            if (NuStrICmp(params[index], "FALSE") == 0) {
+                object->field_0xef9 &= static_cast<u8>(~0x01u);
+            }
+        }
+    }
+    return 1;
 }
 
 __used__ static i32 Action_AnimTimeRandom(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                           i32 param_4, i32 param_5, f32 param_6) {
     (void)sys;
     (void)processor;
-    (void)packet;
     (void)params;
     (void)param_4;
     (void)param_5;
     (void)param_6;
-    return 0;
+    if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL) {
+        GameObject_s *object = packet->owner->apiobj.objptr;
+        SetAnimTimeRandom(object->apiobj.character_model, &object->apiobj.anim_packet);
+    }
+    return 1;
 }
 
 __used__ static i32 Action_AttackOpponent(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
@@ -1756,14 +1771,31 @@ __used__ static i32 Action_EngageOpponent(AISYS *sys, AISCRIPTPROCESS *processor
 }
 
 __used__ static i32 Action_FollowOpponent(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
-                                          i32 param_4, i32 param_5, f32 param_6) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
-    (void)param_6;
+                                           i32 param_count, i32 first_time, f32) {
+    if (packet == NULL) {
+        return 1;
+    }
+
+    if (first_time != 0) {
+        for (i32 index = 0; index < param_count; ++index) {
+            if (AIActionParseSpeedFn != NULL && AIActionParseSpeedFn(params[index], &packet->goal_speed_mode) != 0) {
+                continue;
+            }
+            if (NuStrICmp(params[index], "nearest") == 0) {
+                processor->action_data_1 |= 2;
+            } else if (NuStrICmp(params[index], "ignore_radius") == 0) {
+                processor->action_data_1 |= 1;
+            } else {
+                packet->movement_instruction_parameter = AIParamToFloatEx(packet, processor, params[index]);
+            }
+        }
+    }
+
+    APIOBJECT *target = static_cast<APIOBJECT *>(packet->opponent);
+    if (target != NULL && target->ai != NULL) {
+        FollowAPIObject(&packet->owner->apiobj, target, processor->action_data_1,
+                        packet->movement_instruction_parameter);
+    }
     return 0;
 }
 
@@ -3486,6 +3518,8 @@ namespace {
         AISysRegistryCallbacks() {
             api_aiactiondefs[API_AI_ACTION_IDLE].eval_fn = Action_Idle;
             api_aiactiondefs[API_AI_ACTION_RESET_TIMER].eval_fn = Action_ResetTimer;
+            api_aiactiondefs[API_AI_ACTION_FOLLOW_PLAYER].eval_fn = Action_FollowPlayer;
+            api_aiactiondefs[API_AI_ACTION_FOLLOW_OPPONENT].eval_fn = Action_FollowOpponent;
             api_aiactiondefs[API_AI_ACTION_GO_TO_LOCATOR].eval_fn = Action_GoToLocator;
             api_aiactiondefs[API_AI_ACTION_FOLLOW_PATH].eval_fn = Action_FollowPath;
             api_aiconditiondefs[API_AI_CONDITION_TIMER].eval_fn = Condition_Timer;

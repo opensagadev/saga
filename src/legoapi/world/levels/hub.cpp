@@ -1,5 +1,7 @@
 #include "globals.h"
 #include "batman.h"
+#include "gameapi/gui/apimenu.h"
+#include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/gizmo/base/gizmo.h"
@@ -11,6 +13,7 @@
 #include "legoapi/menus/screens/store.h"
 #include "legoapi/menus/screens/gamemenuall.h"
 #include "legoapi/props/doors/door.h"
+#include "legoapi/render/core/render.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/levels/episode.h"
 #include "legoapi/world/world.h"
@@ -53,6 +56,16 @@ extern void NewGameMode();
 extern f32 MainRenderTargetTime;
 extern void ResetIconWibble();
 extern void MakeFreePlayModelList(i32 first_model, i32 second_model, i32 area, i32 level, i32 include_bonus);
+extern void GameDrawMenuEntry(MENU *menu, char *text);
+extern i32 GameAudio_GetSfxId(i32 sfx);
+extern i32 MenuSFX;
+extern char **TTab;
+extern i16 tPLAYER1;
+extern i16 tPLAYER2;
+extern i16 tPLAY;
+extern f32 ICONX;
+extern f32 ICONSIZE;
+extern void NewLevelFromMenu(LEVELDATA_s *level, i32 menu_id, i32 menu_y, i32 remember_hub);
 
 // These two arrays are generic level-loader state rather than hub-owned state.
 extern u64 LevHSpecialExists;
@@ -86,6 +99,9 @@ f32 goldbricktime = 0.0f;
 u8 hub_custodians_finished_loading = 0;
 i32 hub_freeplay_area = 0;
 i32 freeplaymode = 0;
+i32 hub_selectmode = 0;
+f32 selectmodetime = 0.0f;
+i32 selectmodemode = 0;
 i32 freeplay_selected[2] = {};
 f32 uprepeattime[2] = {};
 f32 rightrepeattime[2] = {};
@@ -132,6 +148,7 @@ static inline void Hub_SetStatsTextMtx(NUMTX *mtx, i32 angle) {
 void Hub_ClearStats();
 void Hub_UpdateMiniKits(WORLDINFO_s *);
 void Hub_InitFreePlaySelect(i32, i32, i32);
+void WipeBackToHub();
 static void Hub_MakeFreePlayList(i32 first_model, i32 second_model);
 
 enum HUB_DOOR_MENU_ID {
@@ -624,7 +641,38 @@ bool HubCustomiserUnlocked() {
     return true;
 }
 
+static const char *Hub_FreePlayModelName(i32 model) {
+    if (model < 0 || model >= CHARCOUNT) {
+        return "";
+    }
+    if (CDataList[model].name_id >= 0) {
+        return TTab[CDataList[model].name_id];
+    }
+    if (GlobalCharacterNameFn != NULL) {
+        const char *name = GlobalCharacterNameFn(model);
+        if (name != NULL) {
+            return name;
+        }
+    }
+    return "";
+}
+
 void Hub_DrawFreePlaySelect() {
+    MENU *menu = &GameMenu[GameMenuLevel];
+    char text[256];
+
+    snprintf(text, sizeof(text), "%s: %s", TTab[tPLAYER1], Hub_FreePlayModelName(MenuPacket.player_model[0]));
+    GameDrawMenuEntry(menu, text);
+    snprintf(text, sizeof(text), "%s: %s", TTab[tPLAYER2], Hub_FreePlayModelName(MenuPacket.player_model[1]));
+    GameDrawMenuEntry(menu, text);
+    GameDrawMenuEntry(menu, TTab[tPLAY]);
+
+    if (MenuPacket.player_model[0] >= 0 && MenuPacket.player_model[0] < CHARCOUNT) {
+        DrawCharIcon(MenuPacket.player_model[0], -ICONX, STATSPOSY, 0.0f, ICONSIZE, 0xa6, 1.0f, 1.0f, 1, NULL);
+    }
+    if (MenuPacket.player_model[1] >= 0 && MenuPacket.player_model[1] < CHARCOUNT) {
+        DrawCharIcon(MenuPacket.player_model[1], ICONX, STATSPOSY, 0.0f, ICONSIZE, 0xa5, 1.0f, 1.0f, 1, NULL);
+    }
 }
 
 void Hub_DrawImportantBrick(i32, float, float, float, i32, i32) {
@@ -690,6 +738,72 @@ bool HubMinikitViewerUnlocked() {
 }
 
 void Hub_UpdateFreePlaySelect() {
+    MENU *menu = &GameMenu[GameMenuLevel];
+
+    if (menu->cancel_pressed != 0) {
+        MenuSFX = GameAudio_GetSfxId(0x31);
+        WipeBackToHub();
+        return;
+    }
+
+    if (menu->selected_item < 2 && fpcount > 0 && (menu->left_pressed != 0 || menu->right_pressed != 0)) {
+        const i32 player = menu->selected_item;
+        const i32 current = MenuPacket.player_model[player];
+        i32 index = -1;
+        for (i32 i = 0; i < fpcount; ++i) {
+            if (fplist[i].model_id == current) {
+                index = i;
+                break;
+            }
+        }
+
+        if (menu->right_pressed != 0) {
+            index = (index + 1) % fpcount;
+        } else {
+            index = index <= 0 ? fpcount - 1 : index - 1;
+        }
+        MenuPacket.player_model[player] = fplist[index].model_id;
+        freeplay_selected[player] = index;
+        MenuSFX = GameAudio_GetSfxId(0x2f);
+        ResetIconWibble();
+        return;
+    }
+
+    if (menu->confirm_pressed == 0 || menu->selected_item != 2) {
+        return;
+    }
+
+    i32 first_model = MenuPacket.player_model[0];
+    i32 second_model = MenuPacket.player_model[1];
+    if ((first_model < 0 || first_model >= CHARCOUNT) && fpcount > 0) {
+        first_model = fplist[0].model_id;
+    }
+    if ((second_model < 0 || second_model >= CHARCOUNT) && fpcount > 0) {
+        second_model = fplist[fpcount > 1 ? 1 : 0].model_id;
+    }
+    if (first_model < 0 || first_model >= CHARCOUNT) {
+        MenuSFX = GameAudio_GetSfxId(0x32);
+        return;
+    }
+    if (second_model < 0 || second_model >= CHARCOUNT) {
+        second_model = first_model;
+    }
+
+    MenuPacket.player_model[0] = static_cast<i16>(first_model);
+    MenuPacket.player_model[1] = static_cast<i16>(second_model);
+    MakeFreePlayModelList(first_model, second_model, hub_freeplay_area, -1, 1);
+    makeplayerlist_freeplay = 1;
+    NextArea_FreePlay = 1;
+    FreePlay = 1;
+    loadareacharacters_no_backdrop_reset = 1;
+
+    LEVELDATA_s *level = Area_FindNextPlayLevel(hub_new_level);
+    if (level == NULL) {
+        MenuSFX = GameAudio_GetSfxId(0x32);
+        return;
+    }
+    MenuSFX = GameAudio_GetSfxId(0x30);
+    NewLevelFromMenu(level, -1, -1, 1);
 }
 
 static void Hub_FindSpecial(WORLDINFO_s *world, nuhspecial_s *special, const char *name) {
@@ -891,6 +1005,23 @@ static void Hub_MakeFreePlayList(i32 first_model, i32 second_model) {
             const bool area_uses_vehicles = area != -1 && (ADataList[area].flags & AREAFLAG_VEHICLE_AREA) != 0;
             if ((area == -1 || is_vehicle == area_uses_vehicles) && Collection_Got(model) != 0) {
                 fplist[fpcount++] = FreePlayModelList[index];
+            }
+        }
+    }
+
+    // MakeFreePlayModelList is still only partially reconstructed. Until it supplies
+    // the resident/bonus tail, use the same area collection the original selector
+    // filters so the UI has the unlocked roster rather than an empty list.
+    if (fpcount == 0) {
+        COLLECTION_s *collection = GetFreePlayCollection(area);
+        if (collection != NULL && collection->list != NULL) {
+            for (i32 index = 0; index < collection->count_y && fpcount < 340; ++index) {
+                const i32 model = collection->list[index].id;
+                if (model >= 0 && model < CHARCOUNT && Collection_Got(model) != 0) {
+                    fplist[fpcount].model_id = static_cast<i16>(model);
+                    fplist[fpcount].count = 1;
+                    ++fpcount;
+                }
             }
         }
     }

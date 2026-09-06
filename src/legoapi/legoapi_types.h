@@ -413,7 +413,12 @@ struct AITRIGGERSETSYS_s {
     i32 field_0x4300;
 };
 DECOMP_ASSERT(sizeof(AITRIGGERSETSYS_s) == 0x4304, "AITRIGGERSETSYS_s size");
-struct ANIMREDIRECT {};
+struct ANIMREDIRECT {
+    char *name;
+    i16 animation_id;
+    u8 pad_06[2];
+};
+DECOMP_ASSERT(sizeof(ANIMREDIRECT) == 0x8, "ANIMREDIRECT ABI");
 struct AREADATA_s;
 struct AREASAVE_s {
     u8 complete;
@@ -556,10 +561,26 @@ struct CUTINFO {
     f32 camera_near_clip; // 0x6c, zero keeps the level display setting
     u8 pad_70[0xe8 - 0x70];
     u16 camera_far_clip; // 0xe8, zero keeps the level display setting
-    u8 pad_ea[0x198 - 0xea];
+    u8 pad_ea[2];
+    i16 skip_level; // 0xec, optional level selected when a stopped cutscene is skipped
+    u8 linked_audio;
+    u8 pad_ef[4];
+    i8 debris_render_group;
+    char door_name[0x10];
+    char next_cutscene[0x40];
+    u8 pad_144[0x18a - 0x144];
+    u8 end_flags;
+    u8 pad_18b;
+    i32 music_handle;
+    u8 pad_190[8];
 };
 DECOMP_ASSERT(offsetof(CUTINFO, camera_near_clip) == 0x6c, "CUTINFO near-clip offset");
 DECOMP_ASSERT(offsetof(CUTINFO, camera_far_clip) == 0xe8, "CUTINFO far-clip offset");
+DECOMP_ASSERT(offsetof(CUTINFO, skip_level) == 0xec, "CUTINFO skip-level offset");
+DECOMP_ASSERT(offsetof(CUTINFO, debris_render_group) == 0xf3, "CUTINFO debris render-group offset");
+DECOMP_ASSERT(offsetof(CUTINFO, next_cutscene) == 0x104, "CUTINFO chained-cutscene offset");
+DECOMP_ASSERT(offsetof(CUTINFO, end_flags) == 0x18a, "CUTINFO end-flags offset");
+DECOMP_ASSERT(offsetof(CUTINFO, music_handle) == 0x18c, "CUTINFO music-handle offset");
 DECOMP_ASSERT(sizeof(CUTINFO) == 0x198, "CUTINFO size");
 struct CUTSCENESYS {
     i16 blaster_object_0;
