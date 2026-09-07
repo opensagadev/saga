@@ -17,6 +17,7 @@
 #include "nu2api/nusound/nusound_loader.hpp"
 #include "nu2api/nusound/nusound_loader_ogg.hpp"
 #include "nu2api/nusound/nusound_streamer.hpp"
+#include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nusound/nusound_voice.hpp"
 #include "nu2api/nusound/nusound_decoder.hpp"
 
@@ -54,7 +55,6 @@ NuSoundWeakPtr<NuSoundVoice> NuSound3Stream::mVoice;
 DECOMP_ASSERT(sizeof(NuSound3Stream::mVoice) == 0x10, "NuSound3Stream voice pointer size");
 
 static NuSoundListener g_NuSoundListener;
-static NUMTX g_NuSoundHeadMatrix;
 // The original focused the listener on the player object; the title screen
 // runs before gameplay, where it is NULL and the focus stays disabled.
 static nuvec_s g_NuSoundFocusPosition;
@@ -379,10 +379,11 @@ void NuSound3Init(i32 zero) {
         NuCore::m_threadManager->CreateThread(NuSound3SampleLoadThread, NULL, 0, "NuSoundLoadThread", 0,
                                               NUTHREADCAFECORE_UNKNOWN_1, NUTHREADXBOX360CORE_UNKNOWN_1);
 
-    // NuSound3Init registers the single 3D listener with the head matrix of
-    // the title screen camera.
+    // NuSound3Init registers the single 3D listener against the live global
+    // camera matrix.  The camera object is updated in place for every view,
+    // so positional audio follows it without a per-frame listener call.
     NuSound.AddListener(&g_NuSoundListener);
-    g_NuSoundListener.SetHeadMatrix((const VuMtx *)&g_NuSoundHeadMatrix);
+    g_NuSoundListener.SetHeadMatrix((const VuMtx *)&global_camera.mtx);
     g_NuSoundListener.Enable();
 
     g_NuSoundStreamBuffers[0].Allocate(NuSoundSystem::GetStreamBufferSize() / 2,
