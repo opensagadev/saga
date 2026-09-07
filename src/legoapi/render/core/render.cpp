@@ -44,6 +44,7 @@ struct rtlidata_s;
 #include "nu2api/nucore/nuhgobj.h"
 #include "nu2api/nucore/nuptrblock.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/nuthread.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/numath/numath.h"
 #include "nu2api/numath/numtx.h"
@@ -54,6 +55,7 @@ struct rtlidata_s;
 
 extern NuVertexFormatPS *g_nuFaceOnVertexFormat;
 extern NuVertexFormatPS *g_nuDebrisVertexFormat;
+void NuIOS_ResetVAODuplicateFinder();
 extern i32 VehicleArea;
 extern i32 GAMEDEMO;
 extern STATUSPACKET_s StatusPacket;
@@ -2658,11 +2660,27 @@ extern "C" void NuGScnFixupPS(NUGSCN *scene) {
             geometry->index_count = 0;
             geometry->vertex_count = 0;
         }
-        if (geometry->immediate == 0) {
-            geometry->vertex_format = 0;
-        } else {
+        if (geometry->immediate != 0) {
+            BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nugscn_android.c", 0x25b);
+            NuIOSBindVAO(0);
+            glGenBuffers(1, reinterpret_cast<GLuint *>(&geometry->vertex_format));
+            glBindBuffer(GL_ARRAY_BUFFER, geometry->vertex_format);
+            glBufferData(GL_ARRAY_BUFFER, geometry->vertex_stride * geometry->vertex_count, NULL, GL_DYNAMIC_DRAW);
+            EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nugscn_android.c", 0x262);
+            if (bgProcIsBgThread()) {
+                NuIOS_YieldThread();
+            }
             dynamic_indices[ndynamic++] = index_index;
+        } else {
+            geometry->vertex_format = 0;
         }
+    }
+    if (scene != NULL && scene->display_list != NULL && scene->display_list->name != NULL &&
+        NuStrIStr(scene->display_list->name, "cloudcityescape_c") != NULL && native_scene != NULL &&
+        native_scene->ngeometries > 0 && native_scene->geometries[native_scene->ngeometries - 1] != NULL) {
+        NUDISPLAYLISTGEOM *geometry = native_scene->geometries[native_scene->ngeometries - 1];
+        geometry->index_count = 0;
+        geometry->vertex_count = 0;
     }
     for (i32 i = 0; i < ndynamic; ++i) {
         g_VideoResHeader.vertex_buffers[dynamic_indices[i]] = 0;
@@ -2683,7 +2701,10 @@ extern "C" void NuGScnFixupPS(NUGSCN *scene) {
         NuMtlUpdate(scene->mtls[i]);
     }
     NuPortalMaxDepth(scene, scene->max_portals);
+    NuThreadCriticalSectionBegin(g_vaoLifetimeMutex);
+    NuIOS_ResetVAODuplicateFinder();
     PreWarmGeomsAndBakeVAOs(reinterpret_cast<nudisplayscene_s *>(scene->display_list), scene->field437_0x1d0);
+    NuThreadCriticalSectionEnd(g_vaoLifetimeMutex);
 }
 
 #include "legoapi/legoapi_types.h"
