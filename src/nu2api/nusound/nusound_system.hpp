@@ -123,10 +123,12 @@ class NuSoundClock {
 };
 
 class NuSoundListener {
-  private:
+  public:
     void *field_0x0;
     void *field_0x4;
     void *field_0x8;
+
+  private:
     const VuMtx *head_matrix;
     const VuVec *focus_position;
     const VuVec *screen_position;
@@ -444,11 +446,13 @@ class NuSoundSystem {
     u8 unknown_fc[0xc];
     bool initialised;
 
-    // The original class contains additional intrusive lists and bookkeeping
-    // between the update gate at +0x108 and the fields reconstructed above.
-    // Keep their storage in the target object even before their types are
-    // known, so the OpenSL handles retain their observed ABI offsets.
-    u8 unknown_before_device_handles[3];
+    // The target keeps several still-untyped lists/fields between the voice
+    // factory bookkeeping and the listener list at +0xd4.
+    u8 unknown_before_listener[0x74];
+    NuEList<NuSoundListener, DefaultElist> listener_list;
+
+    // Remaining fields through the update gate at +0x108.
+    u8 unknown_before_device_handles[0x1c];
 
     // OpenSL ES handles at +0x10c/+0x110/+0x114 in the target object.
     void *engine_object; // SL engine object (realize / GetInterface / destroy)
@@ -567,7 +571,7 @@ class NuSoundSystem {
     void GetGfxMemorySize();
     void GetLanguageString(bool);
     void GetLargestMemoryFragment(NuSoundSystem::MemoryDiscipline);
-    void GetListeners();
+    NuEList<NuSoundListener, DefaultElist> *GetListeners();
     NuSoundListener *GetNearestRealListener(NuEList<NuSoundListener, DefaultElist> const &, VuVec const &);
     NuSoundListener *GetNearestFocusListener(NuEList<NuSoundListener, DefaultElist> const &, VuVec const &, float &);
     NuSoundVoice *GetOldestVoice(NuSoundSample *, float &);

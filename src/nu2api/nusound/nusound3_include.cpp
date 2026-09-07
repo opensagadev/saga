@@ -51,6 +51,8 @@ class NuSound3Stream {
 
 DECOMP_ASSERT(sizeof(NuSound3Stream::mVoice) == 0x10, "NuSound3Stream voice pointer size");
 
+static NuSoundListener g_NuSoundListener;
+static NUMTX g_NuSoundHeadMatrix;
 // The original focused the listener on the player object; the title screen
 // runs before gameplay, where it is NULL and the focus stays disabled.
 static void *g_NuSoundFocusPlayer = NULL;

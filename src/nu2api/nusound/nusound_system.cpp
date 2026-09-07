@@ -769,13 +769,7 @@ i32 NuSoundStreamDesc::GetLoopEnd() const {
 }
 
 bool NuSoundSystem::AddListener(NuSoundListener *listener) {
-    NuSoundListener *previous = listeners.tail->prev;
-    listeners.tail->prev = listener;
-    listener->prev = previous;
-    previous->next = listener;
-    listener->next = listeners.tail;
-    ++listeners.length;
-    return true;
+    return this->listener_list.PushBack(listener);
 }
 
 void NuSoundSystem::AddRoutingTable(NuSoundRoutingTable *table) {
@@ -1022,8 +1016,8 @@ u32 NuSoundSystem::GetLargestMemoryFragment(NuSoundSystem::MemoryDiscipline disc
     return 0;
 }
 
-NuEList<NuSoundListener, DefaultElist> const *NuSoundSystem::GetListeners() {
-    return &listeners;
+NuEList<NuSoundListener, DefaultElist> *NuSoundSystem::GetListeners() {
+    return &this->listener_list;
 }
 
 i32 NuSoundSystem::GetNumAvailableOutputDevices() {
@@ -1204,15 +1198,7 @@ void NuSoundSystem::ReleaseSample(NuSoundSample *sample) {
 }
 
 void NuSoundSystem::RemoveListener(NuSoundListener *listener) {
-    if (listener->next != NULL || listener->prev != NULL) {
-        --listeners.length;
-        NuSoundListener *next = listener->next;
-        NuSoundListener *previous = listener->prev;
-        if (previous != NULL) previous->next = next;
-        if (next != NULL) next->prev = previous;
-        listener->next = NULL;
-        listener->prev = NULL;
-    }
+    this->listener_list.Remove(listener);
 }
 
 void NuSoundSystem::ResumeAllVoices() {

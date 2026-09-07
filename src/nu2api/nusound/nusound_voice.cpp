@@ -596,30 +596,29 @@ f32 NuSoundVoice::CalculateFalloffAttenuation(f32 distance) {
 }
 
 f32 NuSoundVoice::CalculateFalloffAttenuation(f32 distance) {
-    if (distance <= this->falloff_a) {
-        return 1.0f;
-    }
-
-    if (this->falloff_type == 0) {
-        return (this->falloff_b - distance) / (this->falloff_b - this->falloff_a);
-    }
-    if (this->falloff_type == 1) {
-        f32 ratio = (this->falloff_b - distance) / (this->falloff_b - this->falloff_a);
-        f32 scale = (1.0f - ratio) * 10.0f + 1.0f;
-        return 1.0f / (scale * scale);
+    if (distance > this->falloff_a) {
+        if (this->falloff_type == 0) {
+            return (this->falloff_b - distance) / (this->falloff_b - this->falloff_a);
+        }
+        if (this->falloff_type == 1) {
+            f32 ratio = (this->falloff_b - distance) / (this->falloff_b - this->falloff_a);
+            f32 scale = (1.0f - ratio) * 10.0f + 1.0f;
+            return 1.0f / (scale * scale);
+        }
     }
     return 1.0f;
 }
 
 f32 NuSoundVoice::CalculateFieldAngle(f32 distance) {
-    if (distance < this->field72_0xbc) {
-        return this->field70_0xb4;
+    f32 result = this->field69_0xb0;
+    if (this->field73_0xc0 > distance) {
+        if (this->field72_0xbc > distance) {
+            return this->field70_0xb4;
+        }
+        result += ((this->field73_0xc0 - distance) / (this->field73_0xc0 - this->field72_0xbc)) *
+                  (this->field70_0xb4 - result);
     }
-    if (distance < this->field73_0xc0) {
-        return this->field69_0xb0 + ((this->field73_0xc0 - distance) / (this->field73_0xc0 - this->field72_0xbc)) *
-                                        (this->field70_0xb4 - this->field69_0xb0);
-    }
-    return this->field69_0xb0;
+    return result;
 }
 
 i32 NuSoundVoice::GetControllerBits() const {
@@ -780,7 +779,10 @@ void NuSoundVoice::SetCustomSurroundMix(f32 *mix) {
 
 void NuSoundVoice::SetDirection(VuVec *value) {
     if (value != NULL) {
-        this->direction = *value;
+        this->direction.x = value->x;
+        this->direction.y = value->y;
+        this->direction.z = value->z;
+        this->direction.w = value->w;
         NuVecNorm(reinterpret_cast<NUVEC *>(&this->direction), reinterpret_cast<NUVEC *>(&this->direction));
     }
 }
@@ -815,7 +817,7 @@ void NuSoundVoice::SetPenetration(f32 penetration) {
 
 void NuSoundVoice::SetPosition(VuVec *value) {
     if (value != NULL) {
-        this->position = *value;
+        memcpy(&this->position, value, sizeof(this->position));
     }
 }
 
@@ -857,7 +859,7 @@ void NuSoundVoice::SetSurroundMode(NuSoundSystem::SurroundMode mode) {
 }
 
 void NuSoundVoice::SetVelocity(VuVec const &value) {
-    this->velocity = value;
+    memcpy(&this->velocity, &value, sizeof(this->velocity));
 }
 
 void NuSoundVoice::UnregisterHandle(NuSoundHandle *) {
