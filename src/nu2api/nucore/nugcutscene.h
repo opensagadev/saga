@@ -155,6 +155,17 @@ struct NUGCUTCHARANIM_s {
     u8 pad_08[8];
 };
 
+struct NUGCUTTRIGGEREVENT_s {
+    i32 field_00;
+    void *field_04;
+    StateAnim *state_animation;
+};
+
+struct NUGCUTTRIGGERSYS_s {
+    i32 event_count;
+    NUGCUTTRIGGEREVENT_s *events;
+};
+
 struct NUGCUTSCENE_s {
     i32 version;
     isize string_delta;
@@ -165,7 +176,7 @@ struct NUGCUTSCENE_s {
     NUGCUTCHARSYS_s *character_system;
     NUGCUTLOCATORSYS_s *locator_system;
     void *bounds;
-    void *trigger_system;
+    NUGCUTTRIGGERSYS_s *trigger_system;
     isize relocation_delta;
     char *filename;
     NUGCUTSCENE_s *stream_buffer_0;
