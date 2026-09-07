@@ -80,6 +80,10 @@ static void CS_play_sfx(NUFPAR *fp) {
     }
 }
 
+static void copyAnims(NUGCUTSCENE_s *, NUGCUTSCENE_s *);
+void NewCopyAnims(instNUGCUTSCENE_s *);
+i32 instNuGCutSceneSwapBuffers(instNUGCUTSCENE_s *, i32);
+
 static void CS_sfx(NUFPAR *fp) {
     if (NuFParGetWord(fp) != 0) {
         CS_CutInfo->legacy_music_index = GetMusicIndex(fp->word_buf, MusicInfo, -1);
@@ -651,7 +655,13 @@ extern "C" {
 }
 void NuGCutRigidCalcMtx(NUGCUTRIGID_s *, f32, numtx_s *);
 
+static instNUGCUTSCENE_s *background_cutscene_instances;
 static instNUGCUTSCENE_s *active_cutscene_instances;
+
+extern "C" {
+    instNUGCUTSCENE_s *cutscene_load_instance;
+    i32 NumCommonStreamingBuffers = 2;
+}
 
 static void NuGCutSceneFixPtrs_Title(NUGCUTSCENE_s *cutscene, isize anim_delta) {
     usize data_delta = (usize)cutscene->string_delta;
@@ -1071,6 +1081,93 @@ extern "C" {
         } else {
             instance->previous->next = instance->next;
         }
+    }
+
+    i32 NuGCutSceneIsBackgroundLoading(void) {
+        return 1;
+    }
+
+    i32 instNuGCutScenePreload(instNUGCUTSCENE_s *instance) {
+        if (cutscene_load_instance != NULL) {
+            return 0;
+        }
+        cutscene_load_instance = instance;
+        return 1;
+    }
+
+    void instNuGCutSceneServiceLoad(void) {
+        if (cutscene_load_instance == NULL || cutscene_load_instance->cutscene == NULL) {
+            return;
+        }
+
+        char path[256];
+        char extension[8];
+        NuStrCpy(path, cutscene_load_instance->cutscene->filename);
+        char *dot = strchr(path, '.');
+        NuStrCpy(extension, dot);
+
+        i32 stream_number = cutscene_load_instance->stream_index + 1;
+        i32 tens = stream_number / 10;
+        if (tens != 0) {
+            *dot++ = static_cast<char>('0' + tens);
+        }
+        *dot = static_cast<char>('0' + stream_number - tens * 10);
+        NuStrCpy(dot + 1, extension);
+
+        instNUGCUTSCENE_s *instance = cutscene_load_instance;
+        VARIPTR buffer = {instance->pending_stream_buffer};
+        instance->pending_stream_buffer = NULL;
+        if (buffer.void_ptr == NULL) {
+            return;
+        }
+
+        instance->flags_8c |= 0x80;
+        VARIPTR buffer_end;
+        buffer_end.addr = buffer.addr + instance->cutscene->stream_buffer_size;
+        NuGCutSceneLoad(path, &buffer, &buffer_end, 1);
+        instance = cutscene_load_instance;
+        instance->flags_8b |= 8;
+        if (instance->stream_index == 0 && (instance->cutscene->flags & 8) != 0) {
+            instNuGCutSceneSwapBuffers(instance, 1);
+            instance = cutscene_load_instance;
+            if (NumCommonStreamingBuffers > 1) {
+                instance->flags_8b |= 0x10;
+                NewCopyAnims(instance);
+            } else {
+                copyAnims(instance->cutscene, static_cast<NUGCUTSCENE_s *>(instance->cutscene->stream_buffer_1));
+            }
+            instance->cutscene->flags &= ~8U;
+            instance->flags_8b &= ~8U;
+            instance->stream_index = 1;
+        }
+        instance->flags_8c &= ~0x80U;
+        cutscene_load_instance = NULL;
+    }
+
+    void NuGCutSceneSysBackgroundFlush(void) {
+        background_cutscene_instances = NULL;
+    }
+
+    void NuGCutSceneSysPostBackgroundLoad(void) {
+        instNUGCUTSCENE_s *instance = background_cutscene_instances;
+        instNUGCUTSCENE_s *active = active_cutscene_instances;
+        if (instance == NULL) {
+            return;
+        }
+
+        do {
+            instNUGCUTSCENE_s *next = instance->next;
+            instance->next = active;
+            if (active != NULL) {
+                active->previous = instance;
+            }
+            instance->previous = NULL;
+            active = instance;
+            instance = next;
+        } while (instance != NULL);
+
+        background_cutscene_instances = NULL;
+        active_cutscene_instances = active;
     }
 } // extern "C"
 
@@ -1522,12 +1619,6 @@ extern "C" void NuGCutSceneSysRender(i32 paused) {
     }
 }
 
-static __used__ void bgAckStreamCutScene(bgprocinfo_s *) {
-}
-
-static __used__ void bgLoadStreamCutScene(bgprocinfo_s *) {
-}
-
 static __used__ unsigned int CutScenePlayer_Accept(CUTSCENEPLAYERCLIP *) {
     return {};
 }
@@ -1535,5 +1626,139 @@ static __used__ unsigned int CutScenePlayer_Accept(CUTSCENEPLAYERCLIP *) {
 static __used__ void CutScene_OverrideConfigFileName_LSW(char *, int, int) {
 }
 
-static __used__ void copyAnims(NUGCUTSCENE_s *, NUGCUTSCENE_s *) {
+void NewCopyAnims(instNUGCUTSCENE_s *instance) {
+    NUGCUTSCENE_s *source = instance->cutscene_copy;
+    NUGCUTSCENE_s *destination =
+        (instance->flags_8b & 0x10) != 0 ? instance->stream_buffer_1 : instance->stream_buffer_0;
+    instance->cutscene = destination;
+
+    destination->filename = source->filename;
+    destination->stream_buffer_0 = source->stream_buffer_0;
+    destination->stream_buffer_1 = source->stream_buffer_1;
+    reinterpret_cast<u8 *>(&destination->flags)[0] =
+        (reinterpret_cast<u8 *>(&destination->flags)[0] & ~2U) | (reinterpret_cast<u8 *>(&source->flags)[0] & 2);
+
+    NUGCUTLOCATORSYS_s *destination_locators = destination->locator_system;
+    NUGCUTLOCATORSYS_s *source_locators = source->locator_system;
+    if (destination_locators != NULL) {
+        if (destination_locators->locator_count != 0) {
+            for (i32 i = 0; i < destination_locators->locator_count; ++i) {
+                nuanimdata2_s *animation = destination_locators->locators[i].animation;
+                destination_locators->locators[i] = source_locators->locators[i];
+                destination_locators->locators[i].animation = animation;
+            }
+        }
+        destination_locators->types = source_locators->types;
+    }
+
+    NUGCUTRIGIDSYS_s *destination_rigids = destination->rigid_system;
+    NUGCUTRIGIDSYS_s *source_rigids = source->rigid_system;
+    if (destination_rigids != NULL && destination_rigids->rigids != NULL && destination_rigids->count != 0) {
+        for (i32 i = 0; i < destination_rigids->count; ++i) {
+            nuanimdata2_s *animation = destination_rigids->rigids[i].animation;
+            StateAnim *state_animation = destination_rigids->rigids[i].state_animation;
+            destination_rigids->rigids[i] = source_rigids->rigids[i];
+            destination_rigids->rigids[i].animation = animation;
+            destination_rigids->rigids[i].state_animation = state_animation;
+            NUGCUTRIGID_s *rigid = &destination_rigids->rigids[i];
+            if (rigid->locator != 0 && rigid->locator_count != 0 && rigid->locator_index != 0xff) {
+                rigid->locator = reinterpret_cast<usize>(&destination_locators->locators[rigid->locator_index]);
+            }
+        }
+    }
+
+    NUGCUTCHARSYS_s *destination_characters = destination->character_system;
+    NUGCUTCHARSYS_s *source_characters = source->character_system;
+    if (destination_characters != NULL && destination_characters->character_count != 0) {
+        for (i32 i = 0; i < destination_characters->character_count; ++i) {
+            NUGCUTCHAR_s *character = &destination_characters->characters[i];
+            nuanimdata2_s *animation = character->animation;
+            nuanimdata2_s *face_animation = character->face_animation;
+            nuanimdata2_s *extra_animation = character->extra_animation;
+            NUGCUTLOCATOR_s *locator = character->locator;
+            *character = source_characters->characters[i];
+            character->animation = animation;
+            character->face_animation = face_animation;
+            character->extra_animation = extra_animation;
+            if (locator != NULL && character->has_locator != 0 && character->locator_index != 0xff) {
+                character->locator = &destination_locators->locators[character->locator_index];
+            }
+        }
+    }
+
+    if (destination->trigger_system != NULL) {
+        i32 *destination_triggers = static_cast<i32 *>(destination->trigger_system);
+        i32 *source_triggers = static_cast<i32 *>(source->trigger_system);
+        i32 *destination_events = reinterpret_cast<i32 *>(destination_triggers[1]);
+        i32 *source_events = reinterpret_cast<i32 *>(source_triggers[1]);
+        for (i32 i = 0; i < destination_triggers[0]; ++i) {
+            destination_events[i * 3] = source_events[i * 3];
+            destination_events[i * 3 + 1] = source_events[i * 3 + 1];
+        }
+    }
+}
+
+static __used__ void copyAnims(NUGCUTSCENE_s *destination, NUGCUTSCENE_s *source) {
+    NUGCUTCAMERASYS_s *destination_camera = destination->camera_system;
+    NUGCUTCAMERASYS_s *source_camera = source->camera_system;
+    if (destination->version > 4) {
+        destination_camera->focus_animation = source_camera->focus_animation;
+        destination_camera->focus_state_animation = source_camera->focus_state_animation;
+    }
+    if (source_camera->animation != NULL) {
+        destination_camera->animation = source_camera->animation;
+    }
+    destination_camera->state_animation = source_camera->state_animation;
+
+    NUGCUTLOCATORSYS_s *source_locators = source->locator_system;
+    if (source_locators != NULL && source_locators->locators != NULL && source_locators->locator_count != 0) {
+        NUGCUTLOCATORSYS_s *destination_locators = destination->locator_system;
+        for (i32 i = 0; i < source_locators->locator_count; ++i) {
+            if (source_locators->locators[i].animation != NULL) {
+                destination_locators->locators[i].animation = source_locators->locators[i].animation;
+            }
+        }
+        destination_locators->types = source_locators->types;
+    }
+
+    NUGCUTRIGIDSYS_s *source_rigids = source->rigid_system;
+    if (source_rigids != NULL && source_rigids->rigids != NULL && source_rigids->count != 0) {
+        NUGCUTRIGIDSYS_s *destination_rigids = destination->rigid_system;
+        for (i32 i = 0; i < source_rigids->count; ++i) {
+            if (source_rigids->rigids[i].animation != NULL) {
+                destination_rigids->rigids[i].animation = source_rigids->rigids[i].animation;
+            }
+            destination_rigids->rigids[i].state_animation = source_rigids->rigids[i].state_animation;
+        }
+    }
+
+    NUGCUTCHARSYS_s *source_characters = source->character_system;
+    if (source_characters != NULL && source_characters->characters != NULL && source_characters->character_count != 0) {
+        NUGCUTCHARSYS_s *destination_characters = destination->character_system;
+        for (i32 i = 0; i < source_characters->character_count; ++i) {
+            if (source_characters->characters[i].animation != NULL) {
+                destination_characters->characters[i].animation = source_characters->characters[i].animation;
+            }
+            if (source_characters->characters[i].face_animation != NULL) {
+                destination_characters->characters[i].face_animation = source_characters->characters[i].face_animation;
+            }
+            if (source_characters->characters[i].extra_animation != NULL) {
+                destination_characters->characters[i].extra_animation =
+                    source_characters->characters[i].extra_animation;
+            }
+        }
+    }
+
+    if (source->trigger_system != NULL) {
+        i32 *source_triggers = static_cast<i32 *>(source->trigger_system);
+        if (source_triggers[1] != 0 && source_triggers[0] > 0) {
+            i32 *destination_triggers = static_cast<i32 *>(destination->trigger_system);
+            i32 *source_events = reinterpret_cast<i32 *>(source_triggers[1]);
+            i32 *destination_events = reinterpret_cast<i32 *>(destination_triggers[1]);
+            for (i32 i = 0; i < source_triggers[0]; ++i) {
+                destination_events[i * 3 + 2] = source_events[i * 3 + 2];
+            }
+        }
+    }
+    destination->duration = source->duration;
 }

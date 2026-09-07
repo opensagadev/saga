@@ -19,9 +19,6 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-void NewCopyAnims(instNUGCUTSCENE_s *) {
-}
-
 i32 RedirectAnim(char *path, ANIMREDIRECT *redirects, ANIMLIST_s *animation_list, char *directory) {
     CHARACTERANIM_s *animation = reinterpret_cast<CHARACTERANIM_s *>(animation_list);
     for (ANIMREDIRECT *redirect = redirects; redirect->name != NULL; ++redirect) {

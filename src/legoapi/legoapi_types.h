@@ -594,6 +594,25 @@ struct CUTSCENEFADEFOG {
 };
 DECOMP_ASSERT(sizeof(CUTSCENEFADEFOG) == 0x10, "CUTSCENEFADEFOG size");
 
+struct CUTSCENESUBTITLE {
+    i16 text_id;
+    u8 red;
+    u8 green;
+    u8 blue;
+    u8 alpha;
+    u8 alignment;
+    u8 pad_07;
+    f32 start_frame;
+    f32 end_frame;
+    f32 x;
+    f32 y;
+    f32 x_scale;
+    f32 y_scale;
+    f32 max_width;
+    f32 fade_time;
+};
+DECOMP_ASSERT(sizeof(CUTSCENESUBTITLE) == 0x28, "CUTSCENESUBTITLE size");
+
 struct CUTINFO {
     void *scene;
     void *instance;
@@ -623,7 +642,7 @@ struct CUTINFO {
     char next_cutscene[0x40];
     CUTSCENETEXANIM texture_animations[4];
     CUTSCENEFADEFOG fade_fog[2];
-    void *subtitle_data;
+    CUTSCENESUBTITLE *subtitle_data;
     u16 subtitle_count;
     u8 end_flags;
     u8 pad_18b;

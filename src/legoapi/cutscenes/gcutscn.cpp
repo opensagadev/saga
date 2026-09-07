@@ -107,7 +107,23 @@ void instGetLookAtLocatorInfo(instNUGCUTSCENE_s *, instNUGCUTLOOKAT_s *) {
 void instNuGCutGetNextRigidInfo(instNUGCUTSCENE_s *, float, i32, numtx_s *, nuhspecial_s *) {
 }
 
-void instNuGCutSceneSwapBuffers(instNUGCUTSCENE_s *, i32) {
+__attribute__((visibility("hidden"))) i32 instNuGCutSceneSwapBuffers(instNUGCUTSCENE_s *instance, i32 force) {
+    if (static_cast<i8>(instance->flags_8c) >= 0 || force != 0) {
+        if (instance->pending_stream_buffer == NULL) {
+            u8 flags = instance->flags_8b;
+            if ((flags & 0x10) != 0) {
+                flags &= ~0x10U;
+                instance->flags_8b = flags;
+                instance->pending_stream_buffer = instance->stream_buffer_1;
+            } else {
+                flags |= 0x10;
+                instance->flags_8b = flags;
+                instance->pending_stream_buffer = instance->stream_buffer_0;
+            }
+            return 1;
+        }
+    }
+    return 0;
 }
 
 void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *instance) {

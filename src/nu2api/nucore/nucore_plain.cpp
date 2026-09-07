@@ -3258,16 +3258,10 @@ extern "C" {
     }
     void NuGCutSceneDestroy(NUGCUTSCENE_s *) {
     }
-    void NuGCutSceneIsBackgroundLoading(void) {
-    }
     void NuGCutSceneLoadAddr(void) {
-    }
-    void NuGCutSceneSysBackgroundFlush(void) {
     }
     void NuGCutSceneSysInit(NUGCUTLOCATORFNENTRY_s *locator_functions) {
         locatorfns = locator_functions;
-    }
-    void NuGCutSceneSysPostBackgroundLoad(void) {
     }
     void NuGCutSetCutAudioStream(i32 stream) {
         NuGCutAudioStream = stream;

@@ -7,6 +7,7 @@
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/menus/core/text.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
 #include "legoapi/items/base/apiobject.h"
@@ -18,6 +19,7 @@
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nucore/nuhgobj.h"
 #include "nu2api/nucore/nugcutscene.h"
+#include "nu2api/nucore/bgproc.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nu3d/nurndr.h"
@@ -123,6 +125,7 @@ static CUTINFO *g_lastCutInfo;
 static f32 g_lastCutsceneTime;
 static f32 g_accumCutsceneTime;
 static i32 CutFrame;
+static i32 stream_cut_issued;
 i32 NewCutInfoCount;
 static CUTINFO *NewCutInfo[8];
 i32 CUTNOFOG;
@@ -139,6 +142,19 @@ extern "C" {
     void PauseGameCut(void);
     void SetLinkedCutSceneMusic(void *context, i32 state);
     void PlaySfxById(i32 sfx_id, nuvec_s *position);
+    extern instNUGCUTSCENE_s *cutscene_load_instance;
+    void instNuGCutSceneServiceLoad(void);
+    void NuGCutSceneSysPostBackgroundLoad(void);
+}
+
+static void bgAckStreamCutScene(bgprocinfo_s *) {
+    stream_cut_issued = 0;
+}
+
+static void bgLoadStreamCutScene(bgprocinfo_s *) {
+    if (cutscene_load_instance != NULL) {
+        instNuGCutSceneServiceLoad();
+    }
 }
 
 static void CutScene_Start(WORLDINFO_s *world, CUTINFO *cut, i32) {
@@ -1205,6 +1221,33 @@ static void CutScene_CreateCharacterInstance(NUGCUTCHAR_s *character, instNUGCUT
 }
 
 void CutScene_DrawSubtitles() {
+    CUTINFO *cut = static_cast<CUTINFO *>(CutStopInfo);
+    if (cut == NULL || cut->subtitle_data == NULL || cut->subtitle_count == 0) {
+        return;
+    }
+
+    CUTSCENESUBTITLE *subtitle = cut->subtitle_data;
+    for (i32 i = 0; i < cut->subtitle_count; ++i, ++subtitle) {
+        f32 frame = cut->field_58;
+        if (frame >= subtitle->start_frame && subtitle->end_frame >= frame) {
+            f32 alpha = 1.0f;
+            if (subtitle->fade_time > 0.0f) {
+                f32 fade_end = subtitle->start_frame + subtitle->fade_time;
+                if (fade_end > frame) {
+                    alpha = (frame - subtitle->start_frame) / (fade_end - subtitle->start_frame);
+                } else {
+                    f32 fade_start = subtitle->end_frame - subtitle->fade_time;
+                    if (frame > fade_start) {
+                        alpha = 1.0f - (frame - fade_start) / (subtitle->end_frame - fade_start);
+                    }
+                }
+            }
+
+            SmartTextEx(TTab[subtitle->text_id], subtitle->x, subtitle->y, 1.0f, subtitle->x_scale, subtitle->y_scale,
+                        1.0f, subtitle->alignment, subtitle->red, subtitle->green, subtitle->blue, subtitle->max_width,
+                        1, NULL, 0, static_cast<i32>(static_cast<f32>(static_cast<i32>(subtitle->alpha)) * alpha));
+        }
+    }
 }
 
 void CutScene_StoppedFn_LSW(CUTINFO *cut) {
@@ -1222,6 +1265,11 @@ void CutScene_StoppedFn_LSW(CUTINFO *cut) {
 }
 
 void CutScenes_BGLoadManager() {
+    if (cutscene_load_instance != NULL && stream_cut_issued == 0) {
+        stream_cut_issued = 1;
+        bgPostRequest(bgLoadStreamCutScene, bgAckStreamCutScene, NULL, 0);
+    }
+    NuGCutSceneSysPostBackgroundLoad();
 }
 
 void CutScenes_ConfigureList(char *, variptr_u *, variptr_u) {

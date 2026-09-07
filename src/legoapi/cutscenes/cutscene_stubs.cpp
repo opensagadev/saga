@@ -151,16 +151,10 @@ extern "C" {
     void instNuGCutScenePlay(void) {
     }
 
-    void instNuGCutScenePreload(void) {
-    }
-
     void instNuGCutSceneResetCleanUp(void) {
     }
 
     void instNuGCutSceneRotateY(void) {
-    }
-
-    void instNuGCutSceneServiceLoad(void) {
     }
 
     void instNuGCutSceneSetEndCallback(void) {

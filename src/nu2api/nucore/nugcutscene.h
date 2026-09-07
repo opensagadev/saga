@@ -168,10 +168,11 @@ struct NUGCUTSCENE_s {
     void *trigger_system;
     isize relocation_delta;
     char *filename;
-    void *stream_buffer_0;
-    void *stream_buffer_1;
+    NUGCUTSCENE_s *stream_buffer_0;
+    NUGCUTSCENE_s *stream_buffer_1;
     u32 flags;
-    u8 pad_3c[8];
+    i32 stream_buffer_size;
+    u32 field_40;
     NUGSCN *scene;
     void *extra_scene;
     u32 field_4c;
@@ -251,12 +252,27 @@ struct instNUGCUTSCENE_s {
     instNUGCUTCHARSYS_s *character_instance;
     instNUGCUTLOCATORSYS_s *locator_instance;
     void *trigger_instance;
-    u8 pad_b0[0xe8 - 0xb0];
+    u8 pad_b0[0xbc - 0xb0];
+    NUGCUTSCENE_s *stream_buffer_0;
+    NUGCUTSCENE_s *stream_buffer_1;
+    void *field_c4;
+    void *field_c8;
+    u8 pad_cc[0xdf - 0xcc];
+    u8 stream_index;
+    u8 pad_e0[8];
     f32 alpha;
-    u8 pad_ec[4];
+    void *pending_stream_buffer;
     i32 allocation_size;
     u8 pad_f4[4];
 };
+
+DECOMP_ASSERT(offsetof(NUGCUTSCENE_s, stream_buffer_size) == 0x3c, "NUGCUTSCENE stream-buffer size offset");
+DECOMP_ASSERT(offsetof(instNUGCUTSCENE_s, stream_buffer_0) == 0xbc, "cutscene instance stream-buffer 0 offset");
+DECOMP_ASSERT(offsetof(instNUGCUTSCENE_s, stream_buffer_1) == 0xc0, "cutscene instance stream-buffer 1 offset");
+DECOMP_ASSERT(offsetof(instNUGCUTSCENE_s, stream_index) == 0xdf, "cutscene instance stream index offset");
+DECOMP_ASSERT(offsetof(instNUGCUTSCENE_s, pending_stream_buffer) == 0xec,
+              "cutscene instance pending stream-buffer offset");
+DECOMP_ASSERT(sizeof(instNUGCUTSCENE_s) == 0xf8, "cutscene instance size");
 
 typedef void (*NUGCUTSCENECHARACTERCREATEDATAFN)(NUGCUTCHAR_s *, instNUGCUTCHAR_s *, variptr_u *);
 typedef void (*NUGCUTSCENECHARACTEREVALFN)(instNUGCUTSCENE_s *, NUGCUTSCENE_s *, instNUGCUTCHAR_s *, NUGCUTCHAR_s *,
