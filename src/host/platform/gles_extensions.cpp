@@ -28,4 +28,3 @@ extern "C" void glGenVertexArraysOESC(GLsizei count, GLuint *arrays) {
 extern "C" void glDeleteVertexArraysOESC(GLsizei count, const GLuint *arrays) {
     host_glDeleteVertexArraysOES(count, arrays);
 }
-
