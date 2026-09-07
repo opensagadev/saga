@@ -2231,8 +2231,9 @@ extern "C" {
                 keys += 4;
             } else if (type == 10) {
                 u32 index = keys[quarter];
-                i32 packed = static_cast<i32>(constants[index + 1]) | (static_cast<i32>(constants[index]) << 16);
-                *values = static_cast<float>(packed);
+                const u32 packed = static_cast<u32>(static_cast<i32>(constants[index + 1])) |
+                                   (static_cast<u32>(static_cast<i32>(constants[index])) << 16);
+                memcpy(values, &packed, sizeof(packed));
                 keys += 4;
             } else if (type == 6) {
                 u32 first = *reinterpret_cast<u32 *>(keys);
