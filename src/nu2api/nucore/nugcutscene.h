@@ -227,7 +227,8 @@ struct instNUGCUTSCENE_s {
     NUMTX matrix;
     NUGCUTSCENE_s *cutscene;
     NUGCUTSCENE_s *cutscene_copy;
-    u8 pad_60[0x88 - 0x60];
+    NUVEC transformed_bounds_center;
+    u8 pad_6c[0x88 - 0x6c];
     union {
         u8 flags_88;
         struct {
@@ -277,6 +278,7 @@ extern "C" NUGCUTSCENECHARACTERRENDERFN NuCutSceneCharacterRender;
 extern "C" NUGCUTSCENEFINDCHARACTERSFN NuCutSceneFindCharacters;
 extern "C" NUGCUTSCENERESETCHARACTERSFN NuCutSceneResetCharactersFn;
 extern "C" NUGCUTSCENERIGIDPOSTRENDERFN NuCutSceneRigidPostRender;
+extern "C" void instNuGCutSceneSetMtx(instNUGCUTSCENE_s *instance, NUMTX *matrix);
 
 extern "C" void NuSetCutSceneCharacterCreateDataFn(NUGCUTSCENECHARACTERCREATEDATAFN function);
 extern "C" void NuSetCutSceneCharacterEvalFn(NUGCUTSCENECHARACTEREVALFN function);

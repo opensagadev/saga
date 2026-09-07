@@ -1657,7 +1657,7 @@ NUGSCN *button_scene = NULL;
 FadeSystem *pFadeInfo = NULL;
 
 // Cut-scene / gameplay hook wiring (original .data function pointers).
-void (*CutScene_StartFn)(CUTINFO *) = NULL;
+i32 (*CutScene_StartFn)(CUTINFO *) = NULL;
 void (*CutScene_PreUpdateFn)(CUTINFO *) = NULL;
 void (*CutScene_PostUpdateFn)(void) = NULL;
 void (*CutScene_StoppedFn)(CUTINFO *) = NULL;

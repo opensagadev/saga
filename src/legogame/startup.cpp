@@ -158,7 +158,7 @@ struct CHARFIXUP;
 extern CHARFIXUP CharFixUp[222]; // characters.cpp
 
 // LSW gameplay hooks wired by LoadPermData.
-void CutScene_StartFn_LSW(CUTINFO *);
+i32 CutScene_StartFn_LSW(CUTINFO *);
 void CutScene_PreUpdateFn_LSW(CUTINFO *);
 void CutScene_PostUpdateFn_LSW(void);
 void CutScene_StoppedFn_LSW(CUTINFO *);

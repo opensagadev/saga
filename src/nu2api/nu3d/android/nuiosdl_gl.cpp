@@ -138,6 +138,8 @@ extern "C" f32 g_renderContext_world[16];
 extern "C" f32 g_renderContext_kTint[4];
 extern void (*g_glConstantSetterTable[4])(u32 loc, i32 count, const void *vals);
 extern "C" void NuShaderManagerSetfv(i32 semantic, const f32 *values);
+extern "C" void NuShaderManagerSetElementsfv(i32 semantic, i32 first_element, i32 count, const f32 *values);
+extern "C" void NuShaderManagerSetElementsfv_transpose(i32 semantic, i32 first_element, i32 count, const f32 *values);
 extern "C" void NuRenderContextSetViewProj(NUMTX *view, NUMTX *projection);
 
 // ---------------------------------------------------------------------------
@@ -319,6 +321,64 @@ extern "C" void NuRenderContextSetZFunc(i32 zfunc) {
             break;
     }
     g_renderContext_zFunc = zfunc;
+}
+
+extern "C" {
+    static f32 *NuRenderContextGetKTint(void) {
+        return g_renderContext_kTint;
+    }
+
+    static numtl_s *NuRenderContextGetMaterialInUse(void) {
+        return g_renderContext_materialInUse;
+    }
+
+    static void NuRenderContextSetZFunc_inline(i32 zfunc) {
+        if (zfunc != g_renderContext_zFunc) {
+            switch (zfunc) {
+                case 0:
+                    glEnable(GL_DEPTH_TEST);
+                    glDepthMask(GL_TRUE);
+                    glDepthFunc(GL_LEQUAL);
+                    break;
+                case 1:
+                    glEnable(GL_DEPTH_TEST);
+                    glDepthMask(GL_FALSE);
+                    glDepthFunc(GL_LEQUAL);
+                    break;
+                case 2:
+                    glDisable(GL_DEPTH_TEST);
+                    glDepthMask(GL_TRUE);
+                    break;
+                case 3:
+                    glDisable(GL_DEPTH_TEST);
+                    glDepthMask(GL_FALSE);
+                    break;
+            }
+        }
+        g_renderContext_zFunc = zfunc;
+    }
+
+    static void NuRenderContextSetWorld(NUMTX *world) {
+        struct WorldMatrices {
+            NUMTX world;
+            NUMTX world_view_projection;
+            NUMTX world_view;
+        } matrices;
+
+        matrices.world = *world;
+        NuMtxMulH(&matrices.world_view_projection, world, reinterpret_cast<NUMTX *>(g_renderContext_viewProj));
+        NuMtxMul(&matrices.world_view, world, reinterpret_cast<NUMTX *>(g_renderContext_view));
+        NuShaderManagerSetElementsfv(0x52, 0, 3, reinterpret_cast<const f32 *>(&matrices));
+        NuShaderManagerSetfv(0x3c, reinterpret_cast<const f32 *>(world));
+    }
+
+    static __used__ void NuRenderContextSetWorld_transpose(NUMTX *world) {
+        NuMtxTranspose(world, world);
+        NuShaderManagerSetElementsfv_transpose(0x3c, 0, 1, reinterpret_cast<const f32 *>(world));
+    }
+}
+
+static void Nu360SetObjectShadowFactor(f32) {
 }
 
 // ---------------------------------------------------------------------------
@@ -797,27 +857,24 @@ void NuIOSDLGeomCallback(void *arg) {
 // the per-instance opacity to the current tint.
 void NuIOSDLTransformCallback(void *arg) {
     auto *world = static_cast<NUMTX *>(arg);
+    NUVEC4 tint = *reinterpret_cast<NUVEC4 *>(NuRenderContextGetKTint());
     const f32 opacity = world->m33;
     const f32 shadow_factor = world->m23;
-    f32 tint[4] = {
-        g_renderContext_kTint[0],
-        g_renderContext_kTint[1],
-        g_renderContext_kTint[2],
-        g_renderContext_kTint[3],
-    };
 
     if (opacity < 1.0f) {
-        tint[3] *= opacity;
-        NuRenderContextSetZFunc(1);
-    } else if (g_renderContext_materialInUse != nullptr) {
-        NuRenderContextSetZFunc(g_renderContext_materialInUse->attribs.z_mode);
+        tint.w *= opacity;
+        NuRenderContextSetZFunc_inline(1);
+        NuShaderManagerSetfv(0x44, &tint.x);
+    } else {
+        numtl_s *material = NuRenderContextGetMaterialInUse();
+        NuRenderContextSetZFunc_inline(material->attribs.z_mode);
+        NuShaderManagerSetfv(0x44, &tint.x);
     }
-    NuShaderManagerSetfv(0x44, tint);
 
+    Nu360SetObjectShadowFactor(shadow_factor);
     world->m33 = 1.0f;
     world->m23 = 0.0f;
-    memcpy(g_renderContext_world, world, sizeof(NUMTX));
-    NuShaderManagerSetfv(0x3c, reinterpret_cast<const f32 *>(world));
+    NuRenderContextSetWorld(world);
     world->m33 = opacity;
     world->m23 = shadow_factor;
 }

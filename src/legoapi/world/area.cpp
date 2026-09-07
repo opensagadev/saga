@@ -52,6 +52,7 @@ extern AREADATA *ANEWHOPE_ADATA;
 extern AREADATA *PODSPRINT_ADATA;
 extern AREADATA *PODRACE_ADATA;
 extern AREADATA *BONUS_GUNSHIP_ADATA;
+extern AREADATA *VEHICLES_ADATA;
 extern AREADATA *NEGOTIATIONS_ADATA;
 extern AREADATA *GUNGAN_ADATA;
 extern AREADATA *RESCUE_ADATA;
@@ -807,10 +808,11 @@ load_type_done:
         Game.field30_0x7c2c += FRAMETIME;
         LoadTime += FRAMETIME;
 
-        if (load_type == 2 && LoadWait == LOADWAITTIME && LoadTime < 45.0f && !skip_text_scroll) {
-            if (NuSound3LoadingSfx() == 0 || LoadTime >= 20.0f) {
+        if (load_type == 2) {
+            if (AreaDataLoaded != 0 && !character_load_active && LoadWait == LOADWAITTIME && LoadTime < 45.0f &&
+                !skip_text_scroll && (NuSound3LoadingSfx() == 0 || LoadTime >= 20.0f)) {
                 const u32 skip_buttons = GAMEPAD_JUMP | GAMEPAD_START | GAMEPAD_SPECIAL | GAMEPAD_ACTION | GAMEPAD_TAG;
-                if (HUB_ADATA != NULL && HUB_ADATA->index == Area) {
+                if (VEHICLES_ADATA != NULL && VEHICLES_ADATA->index == Area) {
                     skip_text_scroll = true;
                     draw_touch_prompt = false;
                 } else if (((GamePad[0].buttons_pressed | GamePad[1].buttons_pressed) & skip_buttons) != 0 ||
@@ -820,10 +822,14 @@ load_type_done:
                     MechSystems::SkipTextScroll = 0;
                 } else {
                     draw_touch_prompt = true;
-                    touch_prompt_time += FRAMETIME;
                 }
+                touch_prompt_time += FRAMETIME;
             }
+        } else if (AreaDataLoaded != 0 && !character_load_active) {
+            skip_text_scroll = true;
+            draw_touch_prompt = false;
         }
+        MechSystems::SkipTextScroll = 0;
 
         if (icon_stage == 0 &&
             (CharacterDataLoad == 2 || (CharacterDataLoad != 0 && APICharacterLoaded(PlayerID[0]) != NULL &&
@@ -853,6 +859,7 @@ load_type_done:
             NuSound3Update();
             music_man.Process(FRAMETIME);
         }
+        music_man.Process(FRAMETIME);
 
         NuRndrBeginScene(-1);
         if (load_type == 2) {

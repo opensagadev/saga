@@ -617,30 +617,10 @@ extern "C" {
     static __used__ void NuIOS_GetAlphaTestParameters(f32 *) {
     }
 
-    static __used__ u8 *NuRenderContextGetKTint(void) {
-        return nullptr;
-    }
-
-    static __used__ struct numtl_s *NuRenderContextGetMaterialInUse(void) {
-        return nullptr;
-    }
-
     static __used__ void NuRenderContextSetKTint(f32 *) {
-    }
-
-    static __used__ void NuRenderContextSetWorld(NUMTX *) {
-    }
-
-    static __used__ void NuRenderContextSetWorld_transpose(NUMTX *) {
-    }
-
-    static __used__ void NuRenderContextSetZFunc_inline(i32) {
     }
 }
 
 static __used__ i32 NuIOS_GetOrCreateVAO(u32, u32, u32, NuVertexFormatPS *) {
     return 0;
-}
-
-static __used__ void Nu360SetObjectShadowFactor(f32) {
 }

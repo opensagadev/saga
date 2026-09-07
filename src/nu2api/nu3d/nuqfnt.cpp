@@ -967,7 +967,6 @@ static inline void NuQFntAdd3DVertex(f32 x, f32 y, f32 z, u32 colour, f32 u, f32
     vertex->y = y;
     vertex->z = z;
     g_NuPrim_StreamBufferPtr->addr += sizeof(NuQFntVertex);
-    g_NuPrim_VertexCount++;
 }
 
 void NuQFntPrintCharW(NUQFNT *font, u16 *text, u32 flags) {
@@ -1024,6 +1023,7 @@ void NuQFntPrintCharW(NUQFNT *font, u16 *text, u32 flags) {
                 NuQFntAdd3DVertex(right, y, z, colour, u1, v0);
                 NuQFntAdd3DVertex(left, y, z, colour, u0, v0);
                 NuQFntAdd3DVertex(left, top, z, colour, u0, v1);
+                g_NuPrim_VertexCount += 6;
             } else {
                 NuQFntVertex *vertex = reinterpret_cast<NuQFntVertex *>(g_NuPrim_StreamBufferPtr->void_ptr);
                 NuQFntSetVertexAttributes(vertex, colour, u0, v0);

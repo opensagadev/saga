@@ -147,7 +147,10 @@ typedef struct LEVELDATA_s {
     char cam_pos_seek;
     char cam_angle_seek;
 
-    char camera_judder_distance;
+    union {
+        char camera_judder_distance;
+        char reflection_range;
+    };
     char unknown_0da;
     char unknown_0db;
 

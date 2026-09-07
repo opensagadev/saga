@@ -3,6 +3,7 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/core/input/qrand.h"
 #include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/world/area.h"
@@ -15,6 +16,7 @@
 #include "nu2api/nucore/nugcutscene.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nugscn.h"
+#include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/numusic/numusic.h"
 #include "nu2api/nusound/nusound.h"
@@ -50,7 +52,7 @@ extern "C" {
     void instNuGCutSceneStop(instNUGCUTSCENE_s *);
     void instNuGCutSceneDestroy(instNUGCUTSCENE_s *);
     void NuGCutSceneDestroy(NUGCUTSCENE_s *);
-    void NuGCutSceneSysRender(f32);
+    void NuGCutSceneSysRender(i32);
     void NuGCutSceneSysUpdate(i32, i32, f32);
     void NuGCutSceneSysInit(NUGCUTLOCATORFNENTRY_s *);
     extern NUGCUTLOCATORFNENTRY_s cutscene_locatorfns[];
@@ -65,6 +67,11 @@ void GameFog_Reset(void);
 void NeedScreenGrab(i32);
 void EnableShadowMapRendering(i32);
 void ResetShadowMapRendering(void);
+i32 qrand(void);
+void NewRumbleAllPlayers(f32, f32, i32, i32);
+f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
+extern "C" i32 ShadowInfo(void);
+extern "C" TERRAIN_SURFACE_s TerSurface[32];
 i32 CutScenePlayer_Active(void);
 void CutScenePlayer_SetObjects(CUTINFO *);
 void AddPartDebris(PARTDEBSYS_s *, i32, nuvec_s *);
@@ -72,6 +79,18 @@ extern "C" void DebrisSetRenderGroup(i32);
 extern AREADATA_s *BONUS_GUNSHIP_ADATA;
 extern AREADATA_s *GUNSHIP_ADATA;
 extern AREADATA_s *BATTLEOVERCORUSCANT_ADATA;
+
+static NUVEC PodRaceADiePos = {350.0f, 0.25f, -15.0f};
+static NUVEC PodRaceBDiePos = {138.0f, 0.15f, 178.0f};
+static NUVEC PodRaceCDiePos = {140.0f, -7.2f, 52.0f};
+static NUVEC GunshipADiePos = {10.0f, -1.0f, -20.0f};
+static NUVEC GunshipBDiePos = {0.0f, -1.0f, -150.0f};
+static NUVEC PodAvalanchePeakPos = {-110.0f, -10.0f, -455.0f};
+static u8 CutBlobShadowAlpha;
+static f32 CutBlobShadowFadeNear;
+static f32 CutBlobShadowFadeFar;
+static f32 CutReflectRange;
+static f32 CutReflectRange2;
 
 extern "C" {
     extern i16 id_ANAKINSPODGREEN;
@@ -212,12 +231,25 @@ void CutScenes_End() {
 void CutScenes_Draw(WORLDINFO_s *world) {
     if (world->cutscene_sys != NULL && ACTIVECUTCOUNT > 0) {
         SetLevelLights(world->rtl_set, 1.0f);
-        NuGCutSceneSysRender(static_cast<f32>(Paused));
+
+        CUTINFO *cut = static_cast<CUTINFO *>(CutStopInfo);
+        if (cut == NULL) {
+            CutBlobShadowAlpha = static_cast<u8>(world->current_level->blob_shadow_alpha);
+            CutBlobShadowFadeNear = static_cast<f32>(static_cast<u8>(world->current_level->blob_shadow_fade_near));
+            CutBlobShadowFadeFar = static_cast<f32>(static_cast<u8>(world->current_level->blob_shadow_fade_far));
+            CutReflectRange = static_cast<f32>(static_cast<u8>(world->current_level->reflection_range));
+        } else {
+            CutBlobShadowAlpha = cut->blob_shadow_alpha;
+            CutBlobShadowFadeNear = static_cast<f32>(cut->blob_shadow_fade_near);
+            CutBlobShadowFadeFar = static_cast<f32>(cut->blob_shadow_fade_far);
+            CutReflectRange = static_cast<f32>(cut->reflection_range);
+        }
+        CutReflectRange2 = CutReflectRange * CutReflectRange;
+        NuGCutSceneSysRender(Paused);
 
         if (CUTDRAWWORLD != 0 && world->current_gscn != NULL) {
             SetLevelLights(world->rtl_set, 1.0f);
             NuGScnRndr3(world->current_gscn);
-            CUTINFO *cut = static_cast<CUTINFO *>(CutStopInfo);
             if (world->gizmo_sys != NULL && cut != NULL && (cut->flags & 0x8000) != 0) {
                 GizmoSysDraw(world->gizmo_sys, world, FRAMETIME);
             }
@@ -594,7 +626,39 @@ i32 CutScene_IsSkippable(CUTINFO *cut) {
     return FadeSys.fade == 0.0f && cut != NULL && (CutStopInfo != cut || CutSceneWaiting == 0 || cutaudiopaused == 0);
 }
 
-void CutScene_StartFn_LSW(CUTINFO *) {
+i32 CutScene_StartFn_LSW(CUTINFO *cut) {
+    if (PODRACE_ADATA != NULL && PODRACE_ADATA == WORLD->area) {
+        if (cut != game_cutscenes.podrace_pod_explode && cut != game_cutscenes.podrace_out_of_time) {
+            return 0;
+        }
+        NUMTX matrix;
+        NUVEC *position;
+        NUANG rotation;
+        if (WORLD->current_level == PODRACEA_LDATA) {
+            position = &PodRaceADiePos;
+            rotation = 0;
+        } else {
+            rotation = 0x4000;
+            position = WORLD->current_level == PODRACEB_LDATA ? &PodRaceBDiePos : &PodRaceCDiePos;
+        }
+
+        NuMtxSetRotationY(&matrix, rotation);
+        NuMtxTranslate(&matrix, position);
+        instNuGCutSceneSetMtx(static_cast<instNUGCUTSCENE_s *>(cut->instance), &matrix);
+        return 1;
+    }
+
+    if (BONUS_GUNSHIP_ADATA == NULL || BONUS_GUNSHIP_ADATA != WORLD->area ||
+        cut != game_cutscenes.bonus_gunship_cavalry_explode) {
+        return 0;
+    }
+
+    NUMTX matrix;
+    NUVEC *position = WORLD->current_level == BONUS_GUNSHIPA_LDATA ? &GunshipADiePos : &GunshipBDiePos;
+    NuMtxSetRotationY(&matrix, 0);
+    NuMtxTranslate(&matrix, position);
+    instNuGCutSceneSetMtx(static_cast<instNUGCUTSCENE_s *>(cut->instance), &matrix);
+    return 1;
 }
 
 void CutScenes_InitSystem(CUTSCENESYS *system) {
@@ -837,7 +901,47 @@ static void CutScene_ResetCharacters(instNUGCUTSCENE_s *instance) {
     }
 }
 
-static void CutScene_RigidPostRender(NUGCUTRIGID_s *, instNUGCUTRIGID_s *, NUMTX *) {
+static void CutScene_RigidPostRender(NUGCUTRIGID_s *rigid, instNUGCUTRIGID_s *instance, NUMTX *matrix) {
+    if (Reflections_On == 0 || (rigid->flags & 0x10) == 0) {
+        return;
+    }
+
+    NUVEC *position = reinterpret_cast<NUVEC *>(&matrix->m30);
+    if (NuVecDistSqr(position, reinterpret_cast<NUVEC *>(&GameCam->render_mtx.m30), NULL) >= CutReflectRange2) {
+        return;
+    }
+
+    volatile f32 ground = GameShadow(NULL, position, 5.0f, -1);
+    if (ground == 2000000.0f) {
+        return;
+    }
+    i32 surface = ShadowInfo();
+    if (static_cast<u32>(surface) > 0x20 || (TerSurface[surface].flags & 2) == 0) {
+        return;
+    }
+
+    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+    NUMTX reflection = *matrix;
+    reflection.m01 = -reflection.m01;
+    reflection.m11 = -reflection.m11;
+    reflection.m21 = -reflection.m21;
+    reflection.m31 = ground - (reflection.m31 - ground);
+
+    nuhspecial_s *special = reinterpret_cast<nuhspecial_s *>(instance);
+    i32 object_index = LevelObject_FindIndexFromName_RefOnly(NuSpecialGetName(special));
+    if (object_index != -1) {
+        i32 reflection_index = LevelObject_GetReflection(object_index);
+        if (reflection_index != -1) {
+            nuhspecial_s *reflection_special = &world->lev_objs[reflection_index].special;
+            if (reflection_special != NULL) {
+                special = reflection_special;
+            }
+        }
+    }
+
+    NuRndrStartReflectionRender(0);
+    NuSpecialDrawAt(special, &reflection);
+    NuRndrEndReflectionRender();
 }
 
 static void CutScene_CreateCharacterInstance(NUGCUTCHAR_s *character, instNUGCUTCHAR_s *instance, variptr_u *) {
@@ -869,7 +973,25 @@ void CutScenes_BGLoadManager() {
 void CutScenes_ConfigureList(char *, variptr_u *, variptr_u) {
 }
 
-void CutScene_PreUpdateFn_LSW(CUTINFO *) {
+void CutScene_PreUpdateFn_LSW(CUTINFO *cut) {
+    if (cut != game_cutscenes.podrace_avalanche && cut != game_cutscenes.cutscene) {
+        return;
+    }
+
+    instNUGCUTSCENE_s *instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
+    f32 intensity = 111.0f - instance->current_frame;
+    if (-110.0f > intensity) {
+        intensity = 110.0f;
+    }
+    intensity = 1.0f - __builtin_fabsf(intensity) / 110.0f;
+
+    f32 distance = NuVecDist(&GameCam->pos, &PodAvalanchePeakPos, NULL);
+    if (distance < 750.0f) {
+        intensity *= 1.0f - distance / 750.0f;
+    }
+
+    NewRumbleAllPlayers(static_cast<f32>(qrand()) * (1.0f / 65535.0f) * intensity, 0.0f, 0, 0);
+    GameCam_NewShake(GameCam, intensity + intensity, 0.1f, 1.25f);
 }
 
 void CutScene_PostUpdateFn_LSW() {

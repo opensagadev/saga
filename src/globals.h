@@ -1033,7 +1033,7 @@ extern NUGSCN *button_scene;
 extern FadeSystem *pFadeInfo;
 
 // Cut-scene / gameplay hook wiring (original .data function pointers).
-extern void (*CutScene_StartFn)(CUTINFO *);
+extern i32 (*CutScene_StartFn)(CUTINFO *);
 extern void (*CutScene_PreUpdateFn)(CUTINFO *);
 extern void (*CutScene_PostUpdateFn)(void);
 extern void (*CutScene_StoppedFn)(CUTINFO *);

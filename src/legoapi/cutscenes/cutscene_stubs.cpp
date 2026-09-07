@@ -166,7 +166,22 @@ extern "C" {
     void instNuGCutSceneSetEndCallback(void) {
     }
 
-    void instNuGCutSceneSetMtx(void) {
+    void instNuGCutSceneSetMtx(instNUGCUTSCENE_s *instance, NUMTX *matrix) {
+        instance->flags_88 |= 0x80;
+        instance->matrix = *matrix;
+
+        NUMTX *instance_matrix = &instance->matrix;
+        NUVEC *bounds = static_cast<NUVEC *>(instance->cutscene->bounds);
+        if (bounds != NULL) {
+            instance->transformed_bounds_center.x = (bounds[1].x + bounds[0].x) * 0.5f;
+            instance->transformed_bounds_center.y = (bounds[1].y + bounds[0].y) * 0.5f;
+            instance->transformed_bounds_center.z = (bounds[1].z + bounds[0].z) * 0.5f;
+        } else {
+            instance->transformed_bounds_center.x = 0.0f;
+            instance->transformed_bounds_center.y = 0.0f;
+            instance->transformed_bounds_center.z = 0.0f;
+        }
+        NuVecMtxTransform(&instance->transformed_bounds_center, &instance->transformed_bounds_center, instance_matrix);
     }
 
     void instNuGCutSceneSetPos(void) {
