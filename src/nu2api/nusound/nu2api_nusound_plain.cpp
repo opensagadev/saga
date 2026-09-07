@@ -1,7 +1,10 @@
 #include "decomp.h"
+#include "gameapi/edtools/gameapi_edtools_types.h"
 #include "nu2api/numusic/numusic.h"
 #include "nu2api/numusic/sfx.h"
 #include "nu2api/nusound/nusound.h"
+
+#include <string.h>
 
 typedef void (*SoundBitCallback)(i32 sound_id);
 
@@ -10,6 +13,7 @@ i32 GroupBuffer_GetSampleByIndex(i32 group_id, i32 sample_index);
 extern "C" void MusicPreSeek(i32 track);
 extern "C" void RestoreGameMusic(void);
 extern "C" f32 MusicVolume __asm__("_ZL11MusicVolume") __attribute__((visibility("hidden")));
+extern "C" edanim_param_s AnimParams[64];
 
 struct SoundTrackData {
     u8 reserved_00[0x88];
@@ -238,7 +242,20 @@ extern "C" {
             MusicPreSeek(Music.requested_track);
         }
     }
-    void edanimSoundDestroy(void) {
+    void edanimSoundDestroy(i32 parameter_index, i32 sound_index) {
+        edanim_param_s &params = AnimParams[parameter_index];
+        i32 final_count = params.sound_count - 1;
+        while (sound_index < final_count) {
+            params.sound_values[sound_index] = params.sound_values[sound_index + 1];
+            params.sound_ids[sound_index] = params.sound_ids[sound_index + 1];
+            params.sound_positions[sound_index][0] = params.sound_positions[sound_index + 1][0];
+            params.sound_positions[sound_index][1] = params.sound_positions[sound_index + 1][1];
+            params.sound_positions[sound_index][2] = params.sound_positions[sound_index + 1][2];
+            strcpy(params.sound_names[sound_index], params.sound_names[sound_index + 1]);
+            sound_index++;
+            final_count = params.sound_count - 1;
+        }
+        params.sound_count = final_count;
     }
     void edbitsSoundPlay(void) {
     }
