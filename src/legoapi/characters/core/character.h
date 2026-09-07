@@ -466,6 +466,7 @@ struct characterdata_s { /* PlaceHolder Structure */
     union {
         void *field11_0x24;
         PLAYERCHARACTERCONFIG_s *player_config;
+        GAMECHARACTERDATA_s *game_character;
     };
     union {
         undefined4 field12_0x28;

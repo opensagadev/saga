@@ -32,7 +32,7 @@ class NuSoundStreamDesc {
     virtual u64 GetDecodedLengthBytes() const {
         return GetEncodedLengthBytes();
     }
-    virtual i32 DecodeStreamOnOpen() const;
+    virtual bool DecodeStreamOnOpen() const;
     virtual i32 GetLoopStart() const;
     virtual i32 GetLoopEnd() const;
     virtual u16 GetInterleaveSize() const {
@@ -45,6 +45,6 @@ class NuSoundStreamDesc {
         return 0;
     }
     virtual void *GetExtendedData() const {
-        return nullptr;
+        return NULL;
     }
 };

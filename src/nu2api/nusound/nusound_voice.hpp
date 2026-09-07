@@ -13,6 +13,7 @@
 #include "nu2api/nucore/nuelist.hpp"
 #include "nu2api/nusound/nusound_buffer.hpp"
 #include "nu2api/nusound/nusound_system.hpp"
+#include "nu2api/nusound/nusound_sync.hpp"
 #include "nu2api/nusound/nusound_weakptr.hpp"
 
 #include <pthread.h>
@@ -40,6 +41,8 @@ class NuSoundBufferCallback : public NuSoundWeakPtrObj<NuSoundBufferCallback> {
 };
 
 class NuSoundVoice : public NuSoundBufferCallback {
+    friend class NuSoundHandle;
+
   public:
     enum PlayState {
         PLAYSTATE_STOPPED = 1,
@@ -67,22 +70,20 @@ class NuSoundVoice : public NuSoundBufferCallback {
     u32 downmixer_type;
     NuSoundRoutingTable *routing_table;
 
-    // Effects list (elist nodes at +0x40..+0x48).
-    NuEListNode<NuSoundEffect> *effects_start;
-    NuEListNode<NuSoundEffect> *effects_end;
-    NuEListNode<NuSoundEffect> *effects_tail;
-
-    u32 field20_0x4c;
-    u32 field21_0x50;
-    u32 field22_0x54;
-    u32 field23_0x58;
+    NuList<NuSoundEffect *> effects; // +0x40
 
     // +0x5c..0x7c: the eight output channel gains (the positional mix).
     f32 mix_gains[8];
 
     f32 *custom_surround_mix;
 
-    NuSoundEffect::ManagedReference positional_references[2];
+    void *field57_0x80;
+    void *field58_0x84;
+    void *field59_0x88;
+
+    void *field60_0x8c;
+    void *field61_0x90;
+    void *field62_0x94;
 
     f32 field63_0x98;
     f32 field64_0x9c;
@@ -117,11 +118,7 @@ class NuSoundVoice : public NuSoundBufferCallback {
 
     NuSoundBus *output_bus; // +0x11c, defaults to NuSoundSystem::sMasterBus
 
-    struct HandleLinks { NuSoundHandle *previous; NuSoundHandle *next; } handles_start, handles_end;
-    NuSoundHandle *handles_head;
-    NuSoundHandle *handles_tail;
-    u32 handle_count;
-    NuEList<NuSoundListener, DefaultElist> const *listeners;
+    NuEList<NuSoundHandle> handles; // +0x120
 
     NuEList<NuSoundListener, DefaultElist> const *listeners; // +0x13c
     PlayState state;                                         // +0x140, guarded by sStateCriticalSection
@@ -136,11 +133,19 @@ class NuSoundVoice : public NuSoundBufferCallback {
 
     // NuSoundBufferCallback: implemented by NuVoiceAndroid (the device write).
     void SubmitBuffer(NuSoundBuffer *buffer) override = 0;
+
+    // Original virtual surface in vtable order.
     virtual void CheckStarvedBuffers();
     virtual u64 GetPlaybackPositionSamples() = 0;
     virtual void Update(f32 frametime);
     virtual bool CreateHardwareVoice() = 0;
     virtual void DestroyHardwareVoice() = 0;
+    virtual void StartHardwareVoice() = 0;
+    virtual void StopHardwareVoice() = 0;
+    virtual void PauseHardwareVoice() = 0;
+    virtual void ResumeHardwareVoice() = 0;
+    virtual void UpdateHardwareVoice(f32 frametime);
+    virtual void ApplyHardwareVoiceMix() = 0;
 
     // Play state.
     PlayState GetState() const;
@@ -168,48 +173,38 @@ class NuSoundVoice : public NuSoundBufferCallback {
     f32 CalculateEffectAttenuation();
     f32 CalculateEffectPitchScale();
     void UpdateEffects(f32 frametime, NuSoundEffect::EffectProcessStage stage);
-
-    // Platform half, dispatched through the object vtable in the original.
-    virtual void StartHardwareVoice() = 0;               // vtable +0x20
-    virtual void StopHardwareVoice() = 0;                // vtable +0x24
-    virtual void PauseHardwareVoice() = 0;               // vtable +0x28
-    virtual void ResumeHardwareVoice() = 0;              // vtable +0x2c
-    virtual void UpdateHardwareVoice(f32 frametime) {  // vtable +0x30
-    }
-    virtual void ApplyHardwareVoiceMix() = 0;            // vtable +0x34
-
     // Remaining original surface (off the title music path; kept as stubs).
-    void AddEffect(NuSoundEffect *effect);
+    bool AddEffect(NuSoundEffect *effect);
     f32 CalculateFalloffAttenuation(f32 distance);
     f32 CalculateFieldAngle(f32 distance);
-    void CalculatePositionalCoefficients(f32 *gains, VuVec const &position, VuMtx const &mtx, f32 falloff_a,
-                                         f32 falloff_b);
-    void GetControllerBits() const;
-    void GetDirection() const;
-    void GetDownmixerType() const;
-    void GetEffect(NuSoundEffect::EffectType type);
-    void GetFalloffType() const;
-    void GetFar() const;
-    void GetLowFrequencyMix() const;
-    void GetNear() const;
-    void GetNumEffects() const;
-    void GetOutputBus() const;
-    void GetPenetration() const;
-    void GetPitch() const;
+    void CalculatePositionalCoefficients(f32 *gains, VuVec const &position, VuMtx const &mtx,
+                                         f32 speaker_field_angle_min, f32 speaker_field_angle_max);
+    u8 GetControllerBits() const;
+    const VuVec *GetDirection() const;
+    NuSoundSystem::DownmixType GetDownmixerType() const;
+    NuSoundEffect *GetEffect(NuSoundEffect::EffectType type);
+    NuSoundSystem::FalloffType GetFalloffType() const;
+    f32 GetFar() const;
+    f32 GetLowFrequencyMix() const;
+    f32 GetNear() const;
+    i32 GetNumEffects() const;
+    NuSoundBus *GetOutputBus() const;
+    f32 GetPenetration() const;
+    f32 GetPitch() const;
     f32 GetPlaybackPositionSeconds();
-    void GetPosition() const;
-    void GetReverbWetMix() const;
-    void GetRoutingTable() const;
-    void GetSpeakerBleedAngle() const;
-    void GetSpeakerBleedFar() const;
-    void GetSpeakerBleedNear() const;
-    void GetSpeakerFieldAngleMax() const;
-    void GetSpeakerFieldAngleMin() const;
-    void GetStartOffset() const;
-    void GetSurroundMode() const;
-    void GetVelocity() const;
-    void GetVolume() const;
-    void IsLooping() const;
+    const VuVec *GetPosition() const;
+    f32 GetReverbWetMix() const;
+    NuSoundRoutingTable *GetRoutingTable() const;
+    f32 GetSpeakerBleedAngle() const;
+    f32 GetSpeakerBleedFar() const;
+    f32 GetSpeakerBleedNear() const;
+    f32 GetSpeakerFieldAngleMax() const;
+    f32 GetSpeakerFieldAngleMin() const;
+    f32 GetStartOffset() const;
+    NuSoundSystem::SurroundMode GetSurroundMode() const;
+    const VuVec *GetVelocity() const;
+    f32 GetVolume() const;
+    bool IsLooping() const;
     void RemoveEffect(NuSoundEffect *effect);
     void SetControllerBits(i32 bits);
     void SetCustomSurroundMix(f32 *mix);
@@ -245,7 +240,7 @@ class NuVoiceAndroid : public NuSoundVoice {
     void *field4_0x158;
     void *volume_interface; // +0x15c SLVolumeItf
 
-    pthread_mutex_t mutex; // +0x160
+    NuSoundMutex mutex; // +0x160
 
     u32 field7_0x164;  // playback block position (low)
     u32 field8_0x168;  // playback block position (high)
@@ -264,7 +259,7 @@ class NuVoiceAndroid : public NuSoundVoice {
     // NuSoundBufferCallback: the device write (Enqueue).
     void SubmitBuffer(NuSoundBuffer *buffer) override;
 
-    bool CreateHardwareVoice();
+    bool CreateHardwareVoice() override;
     bool RealiseObject();
     bool GetInterfaces();
     void StartHardwareVoice() override;
@@ -277,7 +272,7 @@ class NuVoiceAndroid : public NuSoundVoice {
     bool UpdateState();
     void UpdateSamplePlaybackCount();
     u64 GetPlaybackPositionSamples() override;
-    void DestroyHardwareVoice();
+    void DestroyHardwareVoice() override;
     void OnPlayerEvent(u32 event);
 
     // The SL play-interface callback (static; registered by GetInterfaces).

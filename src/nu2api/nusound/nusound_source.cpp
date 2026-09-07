@@ -56,6 +56,12 @@ void NuSoundSource::SetStreamDesc(NuSoundStreamDesc *desc) {
 }
 
 NuSoundSource::~NuSoundSource() {
+    if (this->name != theEmptyString) {
+        NuMemoryGet()->GetThreadMem()->BlockFree(const_cast<char *>(this->name), 4);
+    }
+    this->name = NULL;
+    this->name_length = 0;
+    this->name_capacity = 0;
 }
 
 void NuSoundSource::VoiceReference() {

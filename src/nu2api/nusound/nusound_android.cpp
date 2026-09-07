@@ -19,8 +19,9 @@ i32 NuSoundAndroid::m_workerThreadCount = 0;
 void NuSoundAndroid::AndroidNuSoundClockThread(void *) {
     // 5 ms tick driving the audio clock callbacks (the callback list is
     // empty in practice on the title screen).
+    NuSoundAndroid *system = &NuSound;
     while (NuSoundAndroid::m_workerThreadCount != 0) {
-        NuSoundSystem::Get()->clock.HandleCallbacks();
+        system->clock.HandleCallbacks();
         NuThreadSleep(5);
     }
 }
@@ -41,15 +42,35 @@ NuSoundVoice *NuSoundAndroid::CreateVoice(NuSoundSource *source, bool loop) {
 }
 
 bool NuSoundAndroid::IsValidBitRate(u32 bits) {
-    return bits == 16 || bits == 8;
+    return !(bits != 16 && bits != 8);
 }
 
 bool NuSoundAndroid::IsValidSampleRate(u32 rate_millis) {
-    return rate_millis == 8000000 || rate_millis == 11025000 || rate_millis == 12000000
-        || rate_millis == 16000000 || rate_millis == 22050000 || rate_millis == 24000000
-        || rate_millis == 32000000 || rate_millis == 44100000 || rate_millis == 48000000
-        || rate_millis == 64000000 || rate_millis == 88200000 || rate_millis == 96000000
-        || rate_millis == 192000000;
+    if (rate_millis == 8000000)
+        return true;
+    if (rate_millis == 11025000)
+        return true;
+    if (rate_millis == 12000000)
+        return true;
+    if (rate_millis == 16000000)
+        return true;
+    if (rate_millis == 22050000)
+        return true;
+    if (rate_millis == 24000000)
+        return true;
+    if (rate_millis == 32000000)
+        return true;
+    if (rate_millis == 44100000)
+        return true;
+    if (rate_millis == 48000000)
+        return true;
+    if (rate_millis == 64000000)
+        return true;
+    if (rate_millis == 88200000)
+        return true;
+    if (rate_millis == 96000000)
+        return true;
+    return rate_millis == 192000000;
 }
 
 u32 NuSoundAndroid::ReportErrorCode(u32 error, const char *message) {
@@ -66,7 +87,7 @@ namespace {
     typedef u32 (*EngineCreateOutputMixFn)(void *, void **, u32, const void **, const u32 *);
     typedef u32 (*QuerySupportedProfilesFn)(void *, u16 *);
     typedef u32 (*QueryAvailableVoicesFn)(void *, u32, i16 *, u32 *, i16 *);
-    typedef u32 (*VolumeSetMuteFn)(void *, u32);
+    typedef u32 (*VolumeSetVolumeLevelFn)(void *, i32);
     typedef u32 (*EnvironmentalReverbSetPropertiesFn)(void *, const void *);
 
 #define SL_SLOT(itf, fn_type, byte_offset) (*(fn_type *)((char *)(*(void **)(itf)) + (byte_offset)))
@@ -95,26 +116,30 @@ bool NuSoundAndroid::InitAudioDevice() {
     if (ReportErrorCode(error, "Get engine capabilities interface") == 0) {
         u16 profiles = 0;
         error = SL_SLOT(capabilities, QuerySupportedProfilesFn, 0)(capabilities, &profiles);
-        bool supports_3d = ReportErrorCode(error, "QuerySupportedProfiles") == 0 && (profiles & 4) != 0;
         i16 max_voices = 0;
         u32 absolute_max = 0;
         i16 free_voices = 0;
-        error = SL_SLOT(capabilities, QueryAvailableVoicesFn, 4)(capabilities, 1, &max_voices, &absolute_max,
-                                                                 &free_voices);
-        ReportErrorCode(error, "QueryAvailableVoices(SL_VOICETYPE_2D_AUDIO)");
-        if (supports_3d) {
-            i16 max_voices = 0;
-            u32 absolute_max = 0;
-            i16 free_voices = 0;
+        if (ReportErrorCode(error, "QuerySupportedProfiles") == 0 && (profiles & 4) != 0) {
+            error = SL_SLOT(capabilities, QueryAvailableVoicesFn, 4)(capabilities, 1, &max_voices, &absolute_max,
+                                                                     &free_voices);
+            ReportErrorCode(error, "QueryAvailableVoices(SL_VOICETYPE_2D_AUDIO)");
+
+            max_voices = 0;
+            absolute_max = 0;
+            free_voices = 0;
             error = SL_SLOT(capabilities, QueryAvailableVoicesFn, 4)(capabilities, 4, &max_voices, &absolute_max,
                                                                      &free_voices);
             ReportErrorCode(error, "QueryAvailableVoices(SL_VOICETYPE_3D_AUDIO)");
+        } else {
+            error = SL_SLOT(capabilities, QueryAvailableVoicesFn, 4)(capabilities, 1, &max_voices, &absolute_max,
+                                                                     &free_voices);
+            ReportErrorCode(error, "QueryAvailableVoices(SL_VOICETYPE_2D_AUDIO)");
         }
     }
 
     error = SL_SLOT(this->engine_object, ObjectGetInterfaceFn, 0xc)(this->engine_object, SL_IID_ENGINE,
                                                                     &this->audio_engine);
-    if (ReportErrorCode(error, "Get engine interface") != 0) {
+    if (ReportErrorCode(error, "Get the engine interface") != 0) {
         return false;
     }
 
@@ -133,21 +158,20 @@ bool NuSoundAndroid::InitAudioDevice() {
 
     error = SL_SLOT(this->output_mix, ObjectGetInterfaceFn, 0xc)(this->output_mix, SL_IID_VOLUME, &this->mix_volume);
     if (ReportErrorCode(error, "Get output volume interface") == 0) {
-        SL_SLOT(this->mix_volume, VolumeSetMuteFn, 0xc)(this->mix_volume, 0);
+        SL_SLOT(this->mix_volume, VolumeSetVolumeLevelFn, 0xc)(this->mix_volume, 0);
     }
 
     error = SL_SLOT(this->output_mix, ObjectGetInterfaceFn, 0xc)(this->output_mix, SL_IID_ENVIRONMENTALREVERB,
                                                                  &this->mix_reverb);
     if (ReportErrorCode(error, "Get output environmental reverb interface") == 0) {
-        SL_SLOT(this->mix_reverb, EnvironmentalReverbSetPropertiesFn, 0x50)(this->mix_reverb,
-                                                                                    this->reverb_properties);
+        SL_SLOT(this->mix_reverb, EnvironmentalReverbSetPropertiesFn, 0x50)(this->mix_reverb, this->reverb_properties);
     }
 
     NuSoundSystem::sOutputConfig = this->GetClosestSupportedConfig(2);
     NuSoundSystem::sNumAvailableOutputDevices = 1;
 
     if (++NuSoundAndroid::m_workerThreadCount == 1) {
-        NuCore::m_threadManager->CreateThread(AndroidNuSoundClockThread, this, 2, "AndroidNuSoundClock", 0,
+        NuCore::m_threadManager->CreateThread(AndroidNuSoundClockThread, this, 2, "NuSoundClockThread", 0,
                                               NUTHREADCAFECORE_UNKNOWN_1, NUTHREADXBOX360CORE_UNKNOWN_1);
     }
 
@@ -157,7 +181,7 @@ bool NuSoundAndroid::InitAudioDevice() {
 void NuSoundAndroid::ShutdownAudioDevice() {
     // libTTapp.so 0x32aec0 only drops the worker count. Object ownership is
     // released by the surrounding NuSound shutdown path.
-    if (NuSoundAndroid::m_workerThreadCount > 0) {
+    if (NuSoundAndroid::m_workerThreadCount != 0) {
         NuSoundAndroid::m_workerThreadCount--;
     }
 }

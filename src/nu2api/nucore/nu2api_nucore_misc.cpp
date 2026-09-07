@@ -11,6 +11,7 @@
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nucore/nuhgobj.h"
 #include "nu2api/nucore/nuanim3.h"
+#include "nu2api/numath/nufloat.h"
 
 #include <GLES2/gl2.h>
 #include <string.h>
@@ -975,10 +976,11 @@ void NuIOSDLDeferredTransformParamsCallback(void *) {
 void NuOnlineSetDefaultPresenceModeProfilePS(i32, i32) {
 }
 
-void NuATanf(float) {
+f32 NuATanf(f32 value) {
+    return atanf(value);
 }
 
-f32 NuATan2f(float y, float x) {
+f32 NuATan2f(f32 y, f32 x) {
     return atan2f(y, x);
 }
 

@@ -137,7 +137,7 @@ void GroupBuffer_RemoveGroup(i32 group_id) {
     memmove(&g_groups[group_id], &g_groups[group_id + 1], static_cast<usize>(g_numGroups - 1) * sizeof(SoundGroup));
     g_numGroups--;
 
-    for (u32 i = 0; i < SFX_MUSIC_COUNT; i++) {
+    for (i32 i = 0; i < SFX_MUSIC_COUNT; i++) {
         if (g_soundInfo[i].group > group_id) {
             g_soundInfo[i].group--;
         } else if (g_soundInfo[i].group == group_id) {

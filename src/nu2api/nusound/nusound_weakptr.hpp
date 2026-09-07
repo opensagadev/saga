@@ -52,11 +52,20 @@ template <typename T> class NuSoundWeakPtrObj {
     void Link(NuSoundWeakPtrListNode *node) {
         NuSoundWeakPtrListNode::sPtrListLock.Lock();
 
-        // libTTapp.so 0x315320: insert immediately before the tail sentinel.
-        node->prev = this->tail->prev;
-        node->next = this->tail;
-        this->tail->prev->next = node;
-        this->tail->prev = node;
+        NuSoundWeakPtrListNode *tail = this->tail;
+        NuSoundWeakPtrListNode **tail_prev = tail != NULL ? &tail->prev : NULL;
+        NuSoundWeakPtrListNode *previous = tail_prev != NULL ? *tail_prev : NULL;
+        if (previous != NULL) {
+            *tail_prev = node;
+            node->prev = previous;
+            previous->next = node;
+        } else {
+            if (tail_prev != NULL) {
+                *tail_prev = node;
+            }
+            node->prev = NULL;
+        }
+        node->next = tail;
         this->weak_count++;
 
         NuSoundWeakPtrListNode::sPtrListLock.Unlock();
@@ -65,10 +74,20 @@ template <typename T> class NuSoundWeakPtrObj {
     void Unlink(NuSoundWeakPtrListNode *node) {
         NuSoundWeakPtrListNode::sPtrListLock.Lock();
 
-        node->prev->next = node->next;
-        node->next->prev = node->prev;
-
+        NuSoundWeakPtrListNode *next = node->next;
+        NuSoundWeakPtrListNode *previous = node->prev;
         this->weak_count--;
+
+        if (next != NULL) {
+            if (previous != NULL) {
+                previous->next = next;
+                next->prev = previous;
+            } else {
+                next->prev = NULL;
+            }
+        } else if (previous != NULL) {
+            previous->next = NULL;
+        }
 
         node->prev = NULL;
         node->next = NULL;
@@ -79,18 +98,35 @@ template <typename T> class NuSoundWeakPtrObj {
     virtual ~NuSoundWeakPtrObj() {
         NuSoundWeakPtrListNode::sPtrListLock.Lock();
 
-        NuSoundWeakPtrListNode *node = this->head->next;
-        while (node != this->tail) {
-            NuSoundWeakPtrListNode *next = node->next;
-            node->Clear();
-            node->prev = NULL;
-            node->next = NULL;
-            node = next;
-        }
+        if (this->weak_count != 0) {
+            // The two list sentinels are biased NuSoundWeakPtrListNode
+            // pointers.  The target identifies the end sentinel by its null
+            // next link rather than comparing it with the cached end pointer.
+            NuSoundWeakPtrListNode *node = this->head->next;
+            while (node != NULL && node->prev != NULL && node->next != NULL) {
+                NuSoundWeakPtrListNode *next = node->next;
+                node->Clear();
+                node = next;
+            }
 
-        this->head->next = this->tail;
-        this->tail->prev = this->head;
-        this->weak_count = 0;
+            // Clear() only releases the weak reference.  The target then
+            // removes every entry from the intrusive list while still holding
+            // the global list lock.
+            while (this->weak_count != 0) {
+                node = this->head->next;
+                NuSoundWeakPtrListNode *previous = node->prev;
+                NuSoundWeakPtrListNode *next = node->next;
+                if (previous != NULL) {
+                    previous->next = next;
+                }
+                if (next != NULL) {
+                    next->prev = previous;
+                }
+                node->prev = NULL;
+                node->next = NULL;
+                this->weak_count--;
+            }
+        }
 
         NuSoundWeakPtrListNode::sPtrListLock.Unlock();
     }
@@ -106,29 +142,27 @@ template <typename T> class NuSoundWeakPtr : public NuSoundWeakPtrListNode {
         this->next = NULL;
     }
 
-    explicit NuSoundWeakPtr(T *ptr) : obj(NULL) {
+    NuSoundWeakPtr(T *ptr) : obj(NULL) {
         this->prev = NULL;
         this->next = NULL;
-        this->Set(ptr);
+        Set(ptr);
     }
 
     NuSoundWeakPtr(const NuSoundWeakPtr &other) : obj(NULL) {
         this->prev = NULL;
         this->next = NULL;
-        this->Set((T *)other.obj);
+        // The source pointer must be read while the list lock is held.  The
+        // target wraps the generated weak-pointer copy in this outer lock;
+        // Set() and Link() take the same recursive lock again.
+        NuSoundWeakPtrListNode::sPtrListLock.Lock();
+        Set((T *)other.obj);
+        NuSoundWeakPtrListNode::sPtrListLock.Unlock();
     }
 
     NuSoundWeakPtr &operator=(const NuSoundWeakPtr &other) {
-        this->Set((T *)other.obj);
-        return *this;
-    }
-
-    NuSoundWeakPtr(const NuSoundWeakPtr &other) : obj(NULL) {
+        NuSoundWeakPtrListNode::sPtrListLock.Lock();
         Set((T *)other.obj);
-    }
-
-    NuSoundWeakPtr &operator=(const NuSoundWeakPtr &other) {
-        Set((T *)other.obj);
+        NuSoundWeakPtrListNode::sPtrListLock.Unlock();
         return *this;
     }
 
@@ -147,5 +181,22 @@ template <typename T> class NuSoundWeakPtr : public NuSoundWeakPtrListNode {
         this->obj = NULL;
     }
 
-    void Set(T *ptr);
+    __attribute__((noinline)) void Set(T *ptr) {
+        NuSoundWeakPtrListNode::sPtrListLock.Lock();
+
+        if (this->obj != (void *)ptr) {
+            if (this->obj != NULL) {
+                this->obj->Unlink(this);
+            }
+
+            if (ptr != NULL) {
+                // Register this weak pointer in the target's list.
+                ((NuSoundWeakPtrObj<T> *)ptr)->Link(this);
+            }
+
+            this->obj = (NuSoundWeakPtrObj<T> *)ptr;
+        }
+
+        NuSoundWeakPtrListNode::sPtrListLock.Unlock();
+    }
 };

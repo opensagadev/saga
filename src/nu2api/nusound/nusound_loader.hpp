@@ -14,8 +14,8 @@ class NuSoundLoadTrigger {
   public:
     pthread_mutex_t mutex;
     pthread_cond_t cond;
-    bool a;
-    bool b;
+    volatile bool a;
+    volatile bool b;
 
     NuSoundLoadTrigger() {
         pthread_mutex_init(&mutex, NULL);
@@ -42,7 +42,7 @@ class NuSoundLoader {
     NuSoundLoader();
 
     void CloseStream();
-    static u64 Deinterleave(char *data, int length, char **dest, int count, NuSoundSystem::ChannelConfig config);
+    static u64 Deinterleave(char *data, int length, char **dest, int sample_size, NuSoundSystem::ChannelConfig config);
     static void *GetChannelAddress(NuSoundBuffer *, NuSoundStreamDesc *, NuSoundSystem::AudioChannel);
     // libTTapp calls this after clearing its loader pointer.  The routine never
     // reads `this`; exposing that original static-style semantic to sanitizer
@@ -80,7 +80,9 @@ struct FileHeaderWAV {
     u16 block_size;
     u16 bits_per_channel;
     u16 extended_size;
-};
+} __attribute__((packed));
+
+DECOMP_ASSERT(sizeof(FileHeaderWAV) == 0x12, "FileHeaderWAV size");
 
 // Stream desc for WAV / MIB files: raw PCM, encoded and decoded format are
 // identical, so these sources never need a decoder.
@@ -100,11 +102,17 @@ class NuSoundHeaderWAV : public NuSoundStreamDesc {
     DataFormat GetDecodedDataFormat() const override {
         return DataFormat::ZERO;
     }
+    DataFormat GetEncodedDataFormat() const override {
+        return DataFormat::ZERO;
+    }
     u64 GetEncodedLengthBytes() const override {
         return this->encoded_length_bytes;
     }
+    u64 GetDecodedLengthBytes() const override {
+        return this->encoded_length_bytes;
+    }
     u64 GetLengthSamples() const override {
-        return GetEncodedLengthBytes() / (static_cast<i32>(GetBitsPerChannel()) / 8);
+        return GetEncodedLengthBytes() / ((GetBitsPerChannel() + 7) / 8);
     }
     f32 GetLengthSeconds() const override {
         return (f32)GetLengthSamples() / (f32)GetSampleRate();
@@ -124,6 +132,18 @@ class NuSoundHeaderWAV : public NuSoundStreamDesc {
     u32 GetBlockSize() const override {
         return this->block_size;
     }
+    u16 GetInterleaveSize() const override {
+        return 0;
+    }
+    u16 GetFormatID() const override {
+        return this->format_id;
+    }
+    u16 GetExtendedDataSize() const override {
+        return this->extended_data_size;
+    }
+    void *GetExtendedData() const override {
+        return (void *)&this->extended_data;
+    }
 };
 
 class NuSoundLoaderWAV : public NuSoundLoader {
@@ -138,9 +158,9 @@ class NuSoundLoaderWAV : public NuSoundLoader {
     // (fmt / data), the reader callbacks and the found chunk infos + state.
     struct ChunkReadRequest {
         u32 chunk_id;
-        ChunkInfo chunk_info;
+        u32 (*reader)(i32 file, NuSoundStreamDesc *desc, const ChunkInfo &info, NuSoundLoaderWAV *loader);
         u32 state;
-        void (*reader)(i32 file, NuSoundStreamDesc *desc, const ChunkInfo &info, NuSoundLoaderWAV *loader);
+        ChunkInfo chunk_info;
     };
 
     NuSoundLoaderWAV();
@@ -151,8 +171,8 @@ class NuSoundLoaderWAV : public NuSoundLoader {
     bool SeekPCMSample(u64 index) override;
     bool SeekTime(f64 seconds) override;
 
-    static void ReadDataChunk(i32 file, NuSoundStreamDesc *desc, const ChunkInfo &info, NuSoundLoaderWAV *loader);
-    static void ReadRIFFHeaderChunk(i32 file, NuSoundStreamDesc *desc, const ChunkInfo &info, NuSoundLoaderWAV *loader);
+    static u32 ReadDataChunk(i32 file, NuSoundStreamDesc *desc, const ChunkInfo &info, NuSoundLoaderWAV *loader);
+    static u32 ReadRIFFHeaderChunk(i32 file, NuSoundStreamDesc *desc, const ChunkInfo &info, NuSoundLoaderWAV *loader);
     u32 FindChunk(i32 file, u32 id, ChunkInfo &info);
     u32 FindChunks(i32 file, NuSoundStreamDesc *desc, ChunkReadRequest *requests, u32 count);
     static u32 MakeFourCC(char *cc);

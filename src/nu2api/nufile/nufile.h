@@ -291,7 +291,7 @@ extern "C" {
     i32 NuFileExists(char *name);
     i64 NuFileSize(char *filepath);
     i32 NuFileExtConvert(char *dest, char *path);
-    i32 NuFileExtGetExt(char *dest, i32 capacity, NUFILETYPE type);
+    i32 NuFileExtGetExt(char *dest, i32 dest_size, NUFILETYPE type);
     i64 NuFilePos(NUFILE file);
     void NuFileUpCase(NUFILE_DEVICE *device, char *filepath);
 

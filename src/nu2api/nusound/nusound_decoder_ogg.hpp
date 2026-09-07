@@ -19,10 +19,10 @@ class NuSoundDecoderOGG : public NuSoundDecoder, public NuSoundBufferCallback {
         OGGReadCallbacksDecoder();
 
         void SetDecoder(NuSoundDecoderOGG *decoder);
-        virtual int Read(void *dest, unsigned int size);
-        virtual void Seek(int origin, unsigned int offset);
-        virtual void Close();
-        virtual int GetPosition() const;
+        int Read(void *dest, unsigned int size) override;
+        i32 Seek(i32 offset, u32 origin) override;
+        void Close() override;
+        int GetPosition() const override;
 
       private:
         NuSoundDecoderOGG *decoder;

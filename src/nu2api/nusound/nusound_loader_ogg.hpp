@@ -49,7 +49,7 @@ class NuSoundLoaderOGG : public NuSoundLoader {
       public:
         virtual void SetFile(NUFILE file);
         virtual i32 Read(void *dest, u32 size);
-        virtual void Seek(i32 origin, u32 offset);
+        virtual i32 Seek(i32 offset, u32 origin);
         virtual void Close();
         virtual i32 GetPosition() const;
         virtual NUFILE GetFile() const;

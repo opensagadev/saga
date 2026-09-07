@@ -1,8 +1,4 @@
 #include "nu2api_nusound_types.h"
-#include "nusound_android.hpp"
-
-static_assert(sizeof(void *) != 4 || offsetof(NuSoundEffectFader, curve) == 0x44,
-              "fader curve must retain its Android offset");
 
 bool NuSoundEffectFader::AttachBus(NuSoundBus *) {
     return true;
@@ -17,59 +13,51 @@ void NuSoundEffectFader::Disable() {
 }
 
 void NuSoundEffectFader::Enable() {
-    unknown_08[2] = unknown_58 < 1.0f;
     enabled = true;
+    state = progress < 1.0f;
 }
 
-NuSoundEffectFader::NuSoundEffectFader() {
-    unknown_08[0] = 0;
-    unknown_08[1] = 0;
-    unknown_08[2] = 0;
-    unknown_08[3] = 2;
-    system_owned = false;
-    attenuation = 1.0f;
-    enabled = true;
-    pitch_scale = 1.0f;
-    curve.mode = 0;
-    curve.data = NULL;
-    unknown_4c = 1.0f;
-    unknown_50 = 1.0f;
-    unknown_54 = 0;
-    unknown_58 = 1.0f;
-    unknown_5c = 0;
-    unknown_60 = 0;
-    unknown_64 = 0;
-    unknown_68 = false;
+NuSoundEffectFader::NuSoundEffectFader()
+    : NuSoundEffect(EffectType::FADER, EffectProcessStage::ZERO), curve{0, NULL}, start_mix(1.0f), target_mix(1.0f),
+      duration(0.0f), progress(1.0f), decreasing(0), finish_state(FinishState::NONE), callback(NULL), finished(false) {
+    state = 0;
 }
 
 void NuSoundEffectFader::Process(float frametime) {
-    if (!enabled || !(unknown_58 < 1.0f)) return;
-    unknown_08[2] = 1;
-    if (unknown_54 == 0.0f) {
-        unknown_58 = 1.0f;
-        attenuation = unknown_50;
+    if (!enabled || progress >= 1.0f) {
         return;
     }
-    f32 step = frametime == 0.0f ? 0.0f : frametime / unknown_54;
-    f32 progress = unknown_58 + step;
-    if (progress < 1.0f && progress < 0.0f) progress = 0.0f;
-    else if (!(progress < 1.0f)) progress = 1.0f;
-    unknown_58 = progress;
-    f32 destination_weight = 0.0f;
-    f32 source_weight = 1.0f;
-    if (curve.mode == 0) {
-        destination_weight = progress;
-        source_weight = 1.0f - progress;
-    } else if (curve.mode == 1) {
-        destination_weight = NuSound.CalculateCrossfadeHeight(
-            *static_cast<NuSoundSystem::CurveData *>(curve.data), progress);
-        source_weight = 1.0f - destination_weight;
-        progress = unknown_58;
+
+    state = 1;
+    if (duration == 0.0f) {
+        progress = 1.0f;
+        output_mix = target_mix;
+        return;
     }
-    attenuation = destination_weight * unknown_50 + source_weight * unknown_4c;
+
+    f32 step = frametime != 0.0f ? frametime / duration : 0.0f;
+    progress += step;
+    if (progress < 0.0f) {
+        progress = 0.0f;
+    } else if (progress > 1.0f) {
+        progress = 1.0f;
+    }
+
+    f32 target_weight = 0.0f;
+    f32 start_weight = 1.0f;
+    if (curve.type == 0) {
+        target_weight = progress;
+        start_weight = 1.0f - progress;
+    } else if (curve.type == 1) {
+        target_weight = NuSoundSystem::Get()->CalculateCrossfadeHeight(
+            *static_cast<const NuSoundSystem::CurveData *>(curve.data), progress);
+        start_weight = 1.0f - target_weight;
+    }
+
+    output_mix = target_weight * target_mix + start_weight * start_mix;
     if (progress == 1.0f) {
-        unknown_08[2] = 0;
-        unknown_68 = true;
+        state = 0;
+        finished = true;
     }
 }
 
@@ -77,48 +65,53 @@ void NuSoundEffectFader::ProcessBus(NuSoundBus *, float) {
 }
 
 void NuSoundEffectFader::ProcessVoice(NuSoundVoice *voice, float) {
-    if (!unknown_68) return;
-    switch (unknown_60) {
-    case 1:
-        voice->Stop(true);
-        break;
-    case 2:
-        voice->Pause();
-        break;
-    case 3:
-        if (unknown_64 != NULL) unknown_64->OnFinish();
-        break;
+    if (!finished) {
+        return;
     }
-    unknown_68 = false;
+
+    if (finish_state == FinishState::PAUSE) {
+        voice->Pause();
+    } else if (finish_state == FinishState::CALLBACK) {
+        if (callback != NULL) {
+            typedef void (*CallbackFn)(void *);
+            CallbackFn *vtable = *reinterpret_cast<CallbackFn **>(callback);
+            vtable[0](callback);
+        }
+    } else if (finish_state == FinishState::STOP) {
+        voice->Stop(true);
+    }
+    finished = false;
 }
 
-void NuSoundEffectFader::SetCurveParams(NuSoundEffectFader::Curve const &value) {
-    curve = value;
+void NuSoundEffectFader::SetCurveParams(NuSoundEffectFader::Curve const &new_curve) {
+    curve = new_curve;
 }
 
-void NuSoundEffectFader::SetParameters(float target, float duration, NuSoundEffectFader::FinishState state) {
-    if (target != unknown_50 || duration != unknown_54) {
-        f32 current = attenuation;
-        unknown_4c = current;
-        unknown_5c = !(target > current);
-        f32 progress = 0.0f;
-        if (!(duration > 0.0f)) {
-            attenuation = target;
-            unknown_08[2] = 0;
-            progress = 1.0f;
+void NuSoundEffectFader::SetParameters(float target, float time, NuSoundEffectFader::FinishState finish) {
+    if (target != target_mix || time != duration) {
+        start_mix = output_mix;
+        f32 current = start_mix;
+        f32 initial_progress = 0.0f;
+        decreasing = target <= current;
+
+        if (time <= 0.0f) {
+            output_mix = target;
+            state = 0;
+            initial_progress = 1.0f;
             current = target;
         }
+
         if (target == current) {
-            unknown_58 = 1.0f;
-            unknown_08[2] = 0;
-            unknown_68 = true;
+            progress = 1.0f;
+            state = 0;
+            finished = true;
         } else {
-            unknown_58 = progress;
+            progress = initial_progress;
         }
-        unknown_50 = target;
-        unknown_54 = duration;
+        target_mix = target;
+        duration = time;
     }
-    unknown_60 = static_cast<u32>(state);
+    finish_state = finish;
 }
 
 NuSoundEffectFader::~NuSoundEffectFader() {

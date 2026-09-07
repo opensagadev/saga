@@ -1,19 +1,19 @@
 #pragma once
 
-#include "decomp_assert.h"
 #include "nu2api/nucore/NuMemoryManager.h"
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/nuelist.hpp"
+#include "nu2api/nucore/numap.hpp"
 #include "nu2api/nucore/nuvuvec.hpp"
 #include "nu2api/nusound/nulist.hpp"
 #include "nu2api/nusound/nusound_memorymanager.hpp"
 #include "nu2api/nusound/nusound_source.hpp"
 #include "nu2api/nusound/nusound_streamdesc.hpp"
+#include "nu2api/nusound/nusound_sync.hpp"
 
 #include "nu2api/nufile/nufile.h"
 
 #include "decomp.h"
-#include <string.h>
 
 struct VuMtx;
 
@@ -27,66 +27,65 @@ class NuSoundVoice;
 class NuThread;
 class NuSoundOutOfMemCallback;
 
-class NuSoundMemory {
-  public:
-    template <typename T> static void PushNuListNode(NuList<T> &list, const T &value);
-};
-
 class NuSoundEffect {
+    friend class NuSoundBus;
+    friend class NuSoundSystem;
+    friend class NuSoundVoice;
+
   public:
-    enum class EffectType : u32 {};
+    enum class EffectType : u32 {
+        ATTENUATION = 0,
+        PITCH = 1,
+        FADER = 2,
+        PITCH_RAMP = 3,
+        RANDOM_VOLUME = 4,
+        RANDOM_PITCH = 5,
+        REPEAT = 6,
+        UNKNOWN = 7,
+        DOPPLER = 8,
+    };
     enum class EffectProcessStage : u32 {
         ZERO = 0,
         ONE = 1,
+        TWO = 2,
     };
-    virtual bool Initialise();
-    virtual void Shutdown() {}
-    virtual void Enable() { enabled = true; }
-    virtual void Disable() { enabled = false; }
-    virtual ~NuSoundEffect();
-    virtual bool AttachVoice(NuSoundVoice *) { return true; }
-    virtual void DetachVoice(NuSoundVoice *) {}
-    virtual void ProcessVoice(NuSoundVoice *, f32) {}
-    virtual bool AttachBus(NuSoundBus *) { return false; }
-    virtual void DetachBus(NuSoundBus *) {}
-    virtual void ProcessBus(NuSoundBus *, f32) {}
-    virtual void Process(f32) {}
 
-    struct ManagedReference;
-    struct ReferenceTarget { void *unknown_00; void *unknown_04; ManagedReference *references; };
-    struct ManagedReference {
-        ReferenceTarget *object;
-        ManagedReference *next;
-        ManagedReference *previous;
-    };
-    ManagedReference *references;
-    u32 unknown_08[4];
+  protected:
+    void *field_0x04;
+    EffectProcessStage process_stage;
+    u32 stop_effect;
+    u32 state;
+    EffectType type;
     bool enabled;
-    u8 unknown_19[3];
-    f32 attenuation;
-    f32 pitch_scale;
-    bool system_owned;
-    u8 unknown_25[3];
-    struct ReferenceNode {
-        ReferenceNode *prev;
-        ReferenceNode *next;
-        ManagedReference reference;
-    };
-    struct ReferenceLinks { ReferenceNode *prev; ReferenceNode *next; } reference_start, reference_end;
-    ReferenceNode *reference_head;
-    ReferenceNode *reference_tail;
-    u32 reference_count;
+    u8 padding_0x19[3];
+    f32 output_mix;
+    f32 pitch_mix;
+    bool keep_attached;
+    u8 padding_0x25[3];
+    NuList<void *> attachments;
 
-    NuSoundEffect() : references(NULL) {
-        reference_head = reinterpret_cast<ReferenceNode *>(&reference_start);
-        reference_tail = reinterpret_cast<ReferenceNode *>(&reference_end);
-        reference_start.prev = NULL;
-        reference_start.next = reference_tail;
-        reference_end.prev = reference_head;
-        reference_end.next = NULL;
-        reference_count = 0;
+  protected:
+    NuSoundEffect(EffectType type, EffectProcessStage stage)
+        : field_0x04(NULL), process_stage(stage), stop_effect(0), state(1), type(type), enabled(true), output_mix(1.0f),
+          pitch_mix(1.0f), keep_attached(false) {
     }
+
+  public:
+    virtual bool Initialise();
+    virtual void Shutdown();
+    virtual void Enable();
+    virtual void Disable();
+    virtual ~NuSoundEffect();
+    virtual bool AttachVoice(NuSoundVoice *voice);
+    virtual void DetachVoice(NuSoundVoice *voice);
+    virtual void ProcessVoice(NuSoundVoice *voice, f32 frametime);
+    virtual bool AttachBus(NuSoundBus *bus);
+    virtual void DetachBus(NuSoundBus *bus);
+    virtual void ProcessBus(NuSoundBus *bus, f32 frametime);
+    virtual void Process(f32 frametime);
 };
+
+DECOMP_ASSERT(sizeof(NuSoundEffect) == 0x44, "NuSoundEffect size");
 
 // --- subsystem classes without a dedicated header (definitions live in their
 // --- .cpp files; the declarations used to sit in the legacy types catalog) ---
@@ -94,24 +93,17 @@ class NuSoundEffect {
 class NuSoundClock {
   public:
     struct Callback {
-        virtual void OnCallback(u64 elapsed, u64 frequency) {}
-        Callback *prev;
-        Callback *next;
+        virtual void OnCallback(u64 elapsed_ticks, u64 clock_frequency);
+        Callback *intrusive_prev;
+        Callback *intrusive_next;
     };
 
   private:
-    struct Links { Callback *prev; Callback *next; } start, end;
-    Callback *head;
-    Callback *tail;
-    u32 callback_count;
-    u64 frequency;
-    u64 last_ticks;
-    static Links *GetLinks(Callback *callback) {
-        return reinterpret_cast<Links *>(reinterpret_cast<char *>(callback) + sizeof(void *));
-    }
+    NuEListOffset<Callback, 4> callbacks;
+    u64 clock_frequency;
+    u64 previous_ticks;
 
   public:
-
     NuSoundClock();
     ~NuSoundClock();
 
@@ -121,6 +113,8 @@ class NuSoundClock {
     u64 GetClockFrequency() const;
     u64 GetTicks() const;
 };
+
+DECOMP_ASSERT(sizeof(NuSoundClock) == 0x2c, "NuSoundClock size");
 
 class NuSoundListener {
   public:
@@ -140,17 +134,6 @@ class NuSoundListener {
     i32 output_devices;
 
   public:
-    NuSoundListener *prev;
-    NuSoundListener *next;
-    NuSoundEffect::ManagedReference *references;
-    const VuMtx *head_matrix;
-    const VuVec *focus_position;
-    const VuVec *screen_position;
-    VuVec velocity;
-    bool enabled;
-    bool focus_enabled;
-    f32 sensitivity;
-    i32 output_devices;
     NuSoundListener();
     ~NuSoundListener();
 
@@ -179,139 +162,144 @@ class NuSoundListener {
 
 DECOMP_ASSERT(sizeof(NuSoundListener) == 0x34, "NuSoundListener size");
 
-class NuSoundEffectDoppler {
-  public:
-    struct Links { NuSoundListener *prev; NuSoundListener *next; };
-    Links start;
-    Links end;
-    NuSoundListener *head;
-    NuSoundListener *tail;
-    u32 length;
+class NuSoundEffectAttenuation : public NuSoundEffect {
+    f32 attenuation;
 
-    NuEList() {
-        head = reinterpret_cast<NuSoundListener *>(&start);
-        tail = reinterpret_cast<NuSoundListener *>(&end);
-        start.prev = NULL;
-        start.next = tail;
-        end.prev = head;
-        end.next = NULL;
-        length = 0;
+  public:
+    NuSoundEffectAttenuation() : NuSoundEffect(EffectType::ATTENUATION, EffectProcessStage::ZERO), attenuation(1.0f) {
+    }
+    ~NuSoundEffectAttenuation() override {
+    }
+    bool AttachBus(NuSoundBus *bus) override;
+    void ProcessVoice(NuSoundVoice *voice, f32 frametime) override;
+};
+
+class NuSoundEffectPitch : public NuSoundEffect {
+  public:
+    NuSoundEffectPitch() : NuSoundEffect(EffectType::PITCH, EffectProcessStage::TWO) {
+    }
+    ~NuSoundEffectPitch() override {
     }
 };
 
-class NuSoundEffectDoppler : public NuSoundEffect {
+class NuSoundEffectRandomVolume : public NuSoundEffect {
   public:
+    NuSoundEffectRandomVolume() : NuSoundEffect(EffectType::RANDOM_VOLUME, EffectProcessStage::TWO) {
+    }
+    ~NuSoundEffectRandomVolume() override {
+    }
+};
+
+class NuSoundEffectRandomPitch : public NuSoundEffect {
+  public:
+    NuSoundEffectRandomPitch() : NuSoundEffect(EffectType::RANDOM_PITCH, EffectProcessStage::TWO) {
+    }
+    ~NuSoundEffectRandomPitch() override {
+    }
+};
+
+class NuSoundEffectRepeat : public NuSoundEffect {
+    f32 delay;
+    i32 repeat_count;
+    bool armed;
+    u8 padding_0x4d[3];
+    f32 remaining_delay;
+
+  public:
+    NuSoundEffectRepeat()
+        : NuSoundEffect(EffectType::REPEAT, EffectProcessStage::ONE), delay(0.0f), repeat_count(1), armed(true),
+          remaining_delay(0.0f) {
+    }
+    ~NuSoundEffectRepeat() override {
+    }
+    void ProcessVoice(NuSoundVoice *voice, f32 frametime) override;
+};
+
+class NuSoundEffectDoppler : public NuSoundEffect {
     f32 speed_of_sound;
     f32 velocity_scale;
     const NuEList<NuSoundListener, DefaultElist> *listeners;
-    NuSoundEffectDoppler();
-    virtual ~NuSoundEffectDoppler();
 
-    void ProcessVoice(NuSoundVoice *voice, f32 frametime);
+  public:
+    NuSoundEffectDoppler();
+    ~NuSoundEffectDoppler() override;
+
+    void ProcessVoice(NuSoundVoice *voice, f32 frametime) override;
     void SetParameters(f32 a, f32 b, const NuEList<NuSoundListener, DefaultElist> *listeners);
 };
 
 class NuSoundEffectFader : public NuSoundEffect {
   public:
-    struct Curve { u32 mode; void *data; };
-    enum class FinishState : u32 {};
-    struct FinishCallback { virtual void OnFinish() = 0; };
+    struct Curve {
+        u32 type;
+        const void *data;
+    };
+    enum class FinishState : u32 {
+        NONE = 0,
+        STOP = 1,
+        PAUSE = 2,
+        CALLBACK = 3,
+    };
 
+  private:
     Curve curve;
-    f32 unknown_4c;
-    f32 unknown_50;
-    f32 unknown_54;
-    f32 unknown_58;
-    u32 unknown_5c;
-    u32 unknown_60;
-    FinishCallback *unknown_64;
-    bool unknown_68;
+    f32 start_mix;
+    f32 target_mix;
+    f32 duration;
+    f32 progress;
+    u32 decreasing;
+    FinishState finish_state;
+    void *callback;
+    bool finished;
+    u8 padding_0x69[3];
 
+  public:
     NuSoundEffectFader();
-    virtual ~NuSoundEffectFader();
+    ~NuSoundEffectFader() override;
 
-    bool AttachBus(NuSoundBus *bus);
-    bool AttachVoice(NuSoundVoice *voice);
-    void Enable();
-    void Disable();
-    void Process(f32 frametime);
-    void ProcessBus(NuSoundBus *bus, f32 frametime);
-    void ProcessVoice(NuSoundVoice *voice, f32 frametime);
+    bool AttachBus(NuSoundBus *bus) override;
+    bool AttachVoice(NuSoundVoice *voice) override;
+    void Enable() override;
+    void Disable() override;
+    void Process(f32 frametime) override;
+    void ProcessBus(NuSoundBus *bus, f32 frametime) override;
+    void ProcessVoice(NuSoundVoice *voice, f32 frametime) override;
     void SetCurveParams(const Curve &curve);
     void SetParameters(f32 a, f32 b, FinishState state);
 };
 
 class NuSoundEffectPitchRamp : public NuSoundEffect {
   public:
-    enum class FinishState : u32 {};
-    f32 field_44;
-    f32 field_48;
-    bool field_4c;
-    u32 field_50;
+    enum class FinishState : u32 {
+        NONE = 0,
+        STOP = 1,
+    };
 
+  private:
+    f32 target_pitch;
+    f32 duration;
+    bool finished;
+    u8 padding_0x4d[3];
+    FinishState finish_state;
+
+  public:
     NuSoundEffectPitchRamp();
-    virtual ~NuSoundEffectPitchRamp();
+    ~NuSoundEffectPitchRamp() override;
 
     bool AttachVoice(NuSoundVoice *voice) override;
-    void Process(f32 frametime);
-    void ProcessVoice(NuSoundVoice *voice, f32 frametime);
+    void Process(f32 frametime) override;
+    void ProcessVoice(NuSoundVoice *voice, f32 frametime) override;
     void SetParameters(f32 a, f32 b, FinishState state);
 };
 
-class NuSoundEffectAttenuation : public NuSoundEffect {
-  public:
-    f32 value;
-    NuSoundEffectAttenuation() {
-        unknown_08[0] = 0; unknown_08[1] = 0; unknown_08[2] = 1; unknown_08[3] = 0;
-        attenuation = 1.0f; pitch_scale = 1.0f; system_owned = false; enabled = true;
-        value = 1.0f;
-    }
-    ~NuSoundEffectAttenuation() {}
-    bool AttachBus(NuSoundBus *) { return true; }
-    void ProcessVoice(NuSoundVoice *, f32);
-};
-
-class NuSoundEffectPitch : public NuSoundEffect {
-  public:
-    NuSoundEffectPitch() {
-        unknown_08[0] = 2; unknown_08[1] = 0; unknown_08[2] = 1; unknown_08[3] = 1;
-        attenuation = 1.0f; pitch_scale = 1.0f; system_owned = false; enabled = true;
-    }
-    ~NuSoundEffectPitch() {}
-};
-
-class NuSoundEffectRandomVolume : public NuSoundEffect {
-  public:
-    NuSoundEffectRandomVolume() {
-        unknown_08[0] = 2; unknown_08[1] = 0; unknown_08[2] = 1; unknown_08[3] = 4;
-        attenuation = 1.0f; pitch_scale = 1.0f; system_owned = false; enabled = true;
-    }
-    ~NuSoundEffectRandomVolume() {}
-};
-
-class NuSoundEffectRandomPitch : public NuSoundEffect {
-  public:
-    NuSoundEffectRandomPitch() {
-        unknown_08[0] = 2; unknown_08[1] = 0; unknown_08[2] = 1; unknown_08[3] = 5;
-        attenuation = 1.0f; pitch_scale = 1.0f; system_owned = false; enabled = true;
-    }
-    ~NuSoundEffectRandomPitch() {}
-};
-
-class NuSoundEffectRepeat : public NuSoundEffect {
-  public:
-    f32 delay;
-    u32 repeats;
-    bool armed;
-    f32 remaining;
-    NuSoundEffectRepeat() {
-        unknown_08[0] = 1; unknown_08[1] = 0; unknown_08[2] = 1; unknown_08[3] = 6;
-        attenuation = 1.0f; pitch_scale = 1.0f; system_owned = false; enabled = true;
-        repeats = 1; delay = 0.0f; armed = true;
-    }
-    ~NuSoundEffectRepeat() {}
-    void ProcessVoice(NuSoundVoice *, f32);
-};
+DECOMP_ASSERT(sizeof(NuSoundEffectAttenuation) == 0x48, "NuSoundEffectAttenuation size");
+DECOMP_ASSERT(sizeof(NuSoundEffectPitch) == 0x44, "NuSoundEffectPitch size");
+DECOMP_ASSERT(sizeof(NuSoundEffectRandomVolume) == 0x44, "NuSoundEffectRandomVolume size");
+DECOMP_ASSERT(sizeof(NuSoundEffectRandomPitch) == 0x44, "NuSoundEffectRandomPitch size");
+DECOMP_ASSERT(sizeof(NuSoundEffectRepeat) == 0x54, "NuSoundEffectRepeat size");
+DECOMP_ASSERT(sizeof(NuSoundEffectDoppler) == 0x50, "NuSoundEffectDoppler size");
+DECOMP_ASSERT(sizeof(NuSoundEffectFader) == 0x6c, "NuSoundEffectFader size");
+DECOMP_ASSERT(sizeof(NuSoundEffectPitchRamp) == 0x54, "NuSoundEffectPitchRamp size");
 
 // Voice factories (nu2api.2013/nusound/nusound.cpp): one factory per decoded
 // data format, indexed by NuSoundStreamDesc::DataFormat.
@@ -328,13 +316,13 @@ class NuSoundVoiceFactoryAndroid_PCM : public NuSoundVoiceFactory {
 class NuSoundVoiceFactoryList {
   public:
     NuSoundVoiceFactory **factories;
+    u32 length;
     u32 capacity;
-    u32 count;
 
   public:
     NuSoundVoiceFactoryList();
     ~NuSoundVoiceFactoryList() {
-        count = 0;
+        length = 0;
         if (factories != NULL) {
             NuMemoryGet()->GetThreadMem()->BlockFree(factories, 0);
             capacity = 0;
@@ -345,32 +333,6 @@ class NuSoundVoiceFactoryList {
     NuSoundVoiceFactory *GetFactory(NuSoundStreamDesc::DataFormat format);
 };
 
-class NuSoundSystemCallbacks : public NuMemoryManager::IEventHandler {
-  public:
-    void *scratch;
-    u32 scratch_size;
-
-    bool AllocatePage(NuMemoryManager *manager, u32 size, u32 unknown) override {
-        if (scratch == NULL) return false;
-        manager->AddPage(scratch, scratch_size, false);
-        scratch = NULL;
-        return true;
-    }
-    bool ReleasePage(NuMemoryManager *manager, void *ptr, u32 unknown) override {
-        return false;
-    }
-    virtual bool OpenDump(NuMemoryManager *manager, const char *filename, u32 &id) {
-        id = NuFileOpen(const_cast<char *>(filename), NUFILE_WRITE);
-        return id != 0;
-    }
-    virtual void CloseDump(NuMemoryManager *manager, u32 id) {
-        NuFileClose(id);
-    }
-    virtual void Dump(NuMemoryManager *manager, u32 id, const char *message) {
-        NuFileWrite(id, const_cast<char *>(message), strlen(message));
-    }
-};
-
 class NuSoundSystem {
   public:
     enum class MemoryDiscipline : u32 {
@@ -379,11 +341,13 @@ class NuSoundSystem {
         DECODER = 2,
     };
 
-    enum ChannelConfig : u32 {};
+    enum class ChannelConfig : u32 {};
 
     enum class AudioChannel : u32 {};
-    struct CurveData {};
-    enum class DownmixType : u32 { ZERO = 0 };
+    struct CurveData {
+        u8 data[0x800];
+    };
+    enum class DownmixType : u32 { ZERO = 0, ONE = 1, TWO = 2, THREE = 3 };
     enum class FalloffType : u32 { LINEAR = 0, CURVED = 1 };
     enum class SurroundMode : u32 { ZERO = 0, ONE = 1, TWO = 2, THREE = 3, CUSTOM = 4 };
 
@@ -406,53 +370,22 @@ class NuSoundSystem {
     };
 
   public:
-    pthread_mutex_t mutex;
+    NuSoundCriticalSection mutex;
     NuSoundClock clock;
-    struct SampleLinks { NuSoundSample *previous; NuSoundSample *next; } sample_start, sample_end;
-    NuSoundSample *sample_head;
-    NuSoundSample *sample_tail;
-    u32 sample_list_count;
-
-  private:
+    NuEListOffset<NuSoundDecoder, 0x20> decoder_list;
     NuSoundSample **samples;
     u32 sample_count;
-
-  public:
     NuSoundVoiceFactoryList factory_list;
-    // Voice bookkeeping: an intrusive doubly-linked list of all live voices
-    // (links live in the voices at +0x24/+0x28), the per-format voice factory
-    // and the audio clock.
-    struct VoiceLinks { NuSoundVoice *prev; NuSoundVoice *next; } voice_start, voice_end;
-    NuSoundVoice *voice_head;
-    NuSoundVoice *voice_tail;
-    i32 voice_count;
-    struct EffectLinks { NuEListNode<NuSoundEffect> *prev; NuEListNode<NuSoundEffect> *next; } effect_start, effect_end;
-    NuEListNode<NuSoundEffect> *effect_head;
-    NuEListNode<NuSoundEffect> *effect_tail;
-    u32 effect_count;
-    struct BusLinks { NuSoundBus *previous; NuSoundBus *next; } bus_start, bus_end;
-    NuSoundBus *bus_head;
-    NuSoundBus *bus_tail;
-    u32 bus_count;
-    struct RoutingLinks { NuSoundRoutingTable *prev; NuSoundRoutingTable *next; };
-    RoutingLinks routing_start;
-    RoutingLinks routing_end;
-    NuSoundRoutingTable *routing_head;
-    NuSoundRoutingTable *routing_tail;
-    u32 routing_count;
-    NuEList<NuSoundListener, DefaultElist> listeners;
-    u32 unknown_f0[2];
-    u32 sample_load_count;
-    u8 unknown_fc[0xc];
-    bool initialised;
-
-    // The target keeps several still-untyped lists/fields between the voice
-    // factory bookkeeping and the listener list at +0xd4.
-    u8 unknown_before_listener[0x74];
+    NuEListOffset<NuSoundVoice, 0x24> voice_list;
+    NuList<NuSoundEffect *> effect_update_list;
+    NuEList<NuSoundBus, DefaultElist> bus_list;
+    NuEList<NuSoundRoutingTable, DefaultElist> routing_table_list;
     NuEList<NuSoundListener, DefaultElist> listener_list;
-
-    // Remaining fields through the update gate at +0x108.
-    u8 unknown_before_device_handles[0x1c];
+    NuMap<u32, CurveData> crossfade_curves;
+    u32 field_0xf8;
+    u8 padding_0xfc[0xc];
+    bool initialised;
+    u8 padding_0x109[3];
 
     // OpenSL ES handles at +0x10c/+0x110/+0x114 in the target object.
     void *engine_object; // SL engine object (realize / GetInterface / destroy)
@@ -467,6 +400,7 @@ class NuSoundSystem {
 
     static i32 sAllocdMemory[3];
     static i32 sTotalMemory[3];
+    static i32 sPeakAllocdMemory[3];
     static u32 sGfxMemorySize;
 
     static void *sScratchMemory;
@@ -484,33 +418,38 @@ class NuSoundSystem {
         return s_staticInstance;
     }
 
-    static NuSoundSystemCallbacks g_handler;
+    static struct : NuMemoryManager::IEventHandler {
+        u32 unknown;
+        void *scratch;
+        u32 scratch_size;
+
+        virtual bool AllocatePage(NuMemoryManager *manager, u32 size, u32 _unknown) {
+            (void)size;
+            (void)_unknown;
+            if (scratch == NULL) {
+                return false;
+            }
+            manager->AddPage(scratch, scratch_size, false);
+            scratch = NULL;
+            return true;
+        }
+        virtual bool ReleasePage(NuMemoryManager *manager, void *ptr, u32 _unknown) {
+            (void)manager;
+            (void)ptr;
+            (void)_unknown;
+            return false;
+        }
+    } g_handler;
 
     static NuMemoryManager *sScratchMemMgr;
 
     NuSoundSystem();
 
-    virtual ~NuSoundSystem();
-    virtual NuSoundEffect *CreateEffect(NuSoundEffect::EffectType);
-    virtual void ReleaseEffect(NuSoundEffect *);
-    virtual NuSoundBus *CreateBus(const char *name, bool is_master);
-    virtual NuSoundBus *GetBus(const char *name);
-    virtual void ReleaseBus(NuSoundBus *);
-    virtual bool IsUserPlayingMusic() { return false; }
-    virtual void PauseUserMusic() {}
-    virtual void ResumeUserMusic() {}
-    virtual bool TitleHasUserMusicControl() { return true; }
-    virtual void OnEnterSystemMenu() {}
-    virtual void OnExitSystemMenu() {}
-    virtual bool InitAudioDevice() = 0;
-    virtual void ShutdownAudioDevice() = 0;
-    virtual void UpdateAudioDevice() = 0;
-
     NuSoundVoice *CreateVoice(NuSoundSource *source, bool loop);
     void ReleaseVoice(NuSoundVoice *voice);
     static bool SourceRequiresDecoder(NuSoundSource *source);
     i32 GetNumAvailableOutputDevices();
-    static NuSoundRoutingTable *GetDefaultRoutingTable();
+    NuSoundRoutingTable *GetDefaultRoutingTable();
     void Update(f32 frametime);
 
   public:
@@ -535,64 +474,69 @@ class NuSoundSystem {
 
     NuSoundSample *GetSample(const char *path);
 
-    static i32 GenerateHash(const char *str);
+    i32 GenerateHash(const char *str);
 
-    // vtable:
-    // create_effect
-    // release_effect
-    // release_bus
-    // is_user_playing_music
-    // pause_user_music
-    // resume_user_music
-    // title_has_user_music_control
-    // on_enter_system_menu
-    // on_exit_system_menu
-    // init_audio_device
-    // shutdown_audio_device
-    // update_audio_device
-
+    virtual ~NuSoundSystem();
+    virtual NuSoundEffect *CreateEffect(NuSoundEffect::EffectType);
+    virtual void ReleaseEffect(NuSoundEffect *);
+    virtual NuSoundBus *CreateBus(const char *name, bool is_master);
+    virtual NuSoundBus *GetBus(const char *name);
+    virtual void ReleaseBus(NuSoundBus *);
+    virtual bool IsUserPlayingMusic();
+    virtual void PauseUserMusic();
+    virtual void ResumeUserMusic();
+    virtual bool TitleHasUserMusicControl();
+    virtual void OnEnterSystemMenu();
+    virtual void OnExitSystemMenu();
+    virtual bool InitAudioDevice() = 0;
+    virtual void ShutdownAudioDevice() = 0;
+    virtual void UpdateAudioDevice() = 0;
 
     bool AddListener(NuSoundListener *);
     void AddRoutingTable(NuSoundRoutingTable *);
-    static f32 AmplitudeTodB(float);
+    static f32 AmplitudeTodB(f32 amplitude);
     f32 CalculateCrossfadeHeight(NuSoundSystem::CurveData const &, float) const;
-    void CreateCrossfadeCurve(unsigned int);
+    CurveData *CreateCrossfadeCurve(unsigned int);
     static NuSoundDecoder *CreateDecoder(NuSoundSource *source);
     void DefragmentSampleMemory();
     static FileType DetermineFileType(NUFILETYPE);
-    void Disable();
-    static bool FileTypeSupported(NuSoundSystem::FileType);
+    static void Disable();
+    static bool FileTypeSupported(NuSoundSystem::FileType type);
     static NuSoundSystem *Get();
-    static u32 GetAllocdMemory(NuSoundSystem::MemoryDiscipline);
+    static u32 GetAllocdMemory(NuSoundSystem::MemoryDiscipline discipline);
     static u32 GetBufferAlignment();
-    i32 GetClosestSupportedConfig(i32 config);
-    void GetCrossfadeCurve(unsigned int) const;
-    void GetDefaultFileType(NuSoundSource::FeedType);
-    void GetGfxMemorySize();
-    void GetLanguageString(bool);
-    void GetLargestMemoryFragment(NuSoundSystem::MemoryDiscipline);
+    static i32 GetClosestSupportedConfig(i32 config);
+    const CurveData *GetCrossfadeCurve(unsigned int) const;
+    static FileType GetDefaultFileType(NuSoundSource::FeedType);
+    static u32 GetGfxMemorySize();
+    static const char *GetLanguageString(bool full);
+    static u32 GetLargestMemoryFragment(NuSoundSystem::MemoryDiscipline);
     NuEList<NuSoundListener, DefaultElist> *GetListeners();
-    NuSoundListener *GetNearestRealListener(NuEList<NuSoundListener, DefaultElist> const &, VuVec const &);
-    NuSoundListener *GetNearestFocusListener(NuEList<NuSoundListener, DefaultElist> const &, VuVec const &, float &);
+    static NuSoundListener *GetNearestRealListener(NuEList<NuSoundListener, DefaultElist> const &, VuVec const &);
+    static NuSoundListener *GetNearestFocusListener(NuEList<NuSoundListener, DefaultElist> const &, VuVec const &,
+                                                    float &);
     NuSoundVoice *GetOldestVoice(NuSoundSample *, float &);
-    i32 GetOutputChannelConfig();
-    void GetPeakAllocdMemory(NuSoundSystem::MemoryDiscipline);
+    i32 GetVoiceCount() const {
+        return voice_list.length;
+    }
+    static i32 GetOutputChannelConfig();
+    static u32 GetPeakAllocdMemory(NuSoundSystem::MemoryDiscipline discipline);
     static const char *GetPlatformString();
     NuSoundVoice *GetQuietestVoice(NuSoundSample *, float &);
     NuSoundRoutingTable *GetRoutingTable(char const *);
-    static u32 GetTotalMemory(NuSoundSystem::MemoryDiscipline);
+    static u32 GetTotalMemory(NuSoundSystem::MemoryDiscipline discipline);
     bool LoadSample(NuSoundSample *, void *, int, NuSoundOutOfMemCallback *);
     void PauseAllVoices();
     void PauseVoices(int);
-    void ReAllocMemory(NuSoundSystem::MemoryDiscipline, unsigned int, unsigned int);
+    void *ReAllocMemory(NuSoundSystem::MemoryDiscipline address, unsigned int size, unsigned int unused);
     void ReleaseCrossfadeCurve(unsigned int);
     static void ReleaseDecoder(NuSoundDecoder *decoder);
     void ReleaseSample(NuSoundSample *);
     void RemoveListener(NuSoundListener *);
     void ResumeAllVoices();
     void ResumeVoices(int);
-    static void SetDefaultRoutingTable(NuSoundRoutingTable *);
-    static void SetGfxMemorySize(unsigned int);
+    void SetDefaultRoutingTable(NuSoundRoutingTable *);
+    static void SetGfxMemorySize(u32 size);
     void SetMainThreadID(NuThread *);
     void Shutdown();
     void StopAllVoices();
@@ -600,139 +544,128 @@ class NuSoundSystem {
     void StopVoices(int);
     void UnloadAllSamples();
     bool UnloadSample(NuSoundSample *);
-    void dBToAmplitude(float);
+    static f32 dBToAmplitude(f32 db);
 };
+
+namespace NuSoundMemory {
+    template <typename T> void PushNuListNode(NuList<T> &list, T const &value);
+} // namespace NuSoundMemory
 // One row of a routing table: an N-in by M-out gain matrix pointing at one of
 // the static NuSoundRoutingTable* matrices.
 struct NuSoundMixMatrix {
     u32 in;
     u32 out;
-    f32 *matrix;
-    u8 flag;
+    const f32 *matrix;
+    bool flag;
+    u8 padding[3];
+
+    NuSoundMixMatrix(NuSoundSystem::ChannelConfig from, NuSoundSystem::ChannelConfig to, const f32 *values)
+        : in(static_cast<u32>(from)), out(static_cast<u32>(to)), matrix(values), flag(true) {
+    }
 };
 
 class NuSoundMixer {
   public:
-    enum OutputLayout : u32 {};
+    enum class OutputLayout : u32 { ZERO = 0, ONE = 1 };
+
+  private:
+    NuSoundSystem::ChannelConfig input_config;
+    NuSoundSystem::ChannelConfig output_config;
+    OutputLayout output_layout;
+    NuSoundSystem::DownmixType downmix_type;
+    NuSoundRoutingTable *routing_table;
+
+  public:
+    static u8 sDownmixerChannelMaps[4][8];
 
     NuSoundMixer(NuSoundSystem::ChannelConfig config, NuSoundSystem::ChannelConfig output,
                  NuSoundMixer::OutputLayout layout, NuSoundSystem::DownmixType downmix, NuSoundRoutingTable *table);
     ~NuSoundMixer();
 
     void Mix(f32 *in, f32 *out);
-    i32 GetOutputIndex(i32 output, i32 index);
-
-    NuSoundSystem::ChannelConfig input_config;
-    NuSoundSystem::ChannelConfig output_config;
-    OutputLayout output_layout;
-    NuSoundSystem::DownmixType downmix_type;
-    NuSoundRoutingTable *routing_table;
-    static u8 sDownmixerChannelMaps[4][8];
+    i32 GetOutputIndex(i32 input, i32 output);
 };
+
+DECOMP_ASSERT(sizeof(NuSoundMixer) == 0x14, "NuSoundMixer size");
 class NuSoundRoutingTable {
+    NuSoundRoutingTable *intrusive_prev;
+    NuSoundRoutingTable *intrusive_next;
+    u16 name_capacity;
+    u16 name_length;
+    char *name;
+    char name_storage[32];
+    NuSoundMixMatrix *matrices[36];
+
   public:
     NuSoundRoutingTable(const char *name);
     NuSoundRoutingTable(const char *name, const NuSoundRoutingTable *parent);
-    ~NuSoundRoutingTable();
 
     void SetMatrix(NuSoundSystem::ChannelConfig from, NuSoundSystem::ChannelConfig to, NuSoundMixMatrix *matrix);
     NuSoundMixMatrix *GetMatrix(NuSoundSystem::ChannelConfig from, NuSoundSystem::ChannelConfig to) const;
-    static NuSoundSystem::ChannelConfig GetConfig(i32 config);
+    static NuSoundSystem::ChannelConfig GetConfig(i32 index);
     static i32 GetIndex(NuSoundSystem::ChannelConfig config);
     const char *GetName() const;
-    NuSoundRoutingTable *unknown_00;
-    NuSoundRoutingTable *unknown_04;
-    u16 name_capacity;
-    u16 name_length;
-    char *name_data;
-    char name_storage[32];
-    NuSoundMixMatrix *matrices[6][6];
 };
-class NuSoundHandle {
-  public:
-    // Callback slots recovered from handle destruction, voice invalidation,
-    // and ResetFrameCount; this list does not contain sound effects.
-    class Callback {
-      public:
-        virtual void OnDestroy(NuSoundHandle *) = 0;
-        virtual void OnInvalidateVoice(NuSoundHandle *) = 0;
-        virtual void OnResetFrameCount(NuSoundHandle *) = 0;
-    };
 
-  private:
-    NuSoundHandle *previous;
-    NuSoundHandle *next;
-    NuSoundVoice *voice;
-    NuList<Callback *> callbacks;
+DECOMP_ASSERT(sizeof(NuSoundMixMatrix) == 0x10, "NuSoundMixMatrix size");
+DECOMP_ASSERT(sizeof(NuSoundRoutingTable) == 0xc0, "NuSoundRoutingTable size");
+class NuSoundHandle {
     friend class NuSoundVoice;
 
+    NuSoundHandle *intrusive_prev;
+    NuSoundHandle *intrusive_next;
+    NuSoundVoice *voice;
+    NuList<NuSoundEffect *> effects;
+
   public:
+    static pthread_mutex_t sCriticalSection;
+
     NuSoundHandle();
     NuSoundHandle(NuSoundHandle &other);
     ~NuSoundHandle();
 
     void SetVoice(NuSoundVoice *voice);
-    void GetVoice() const;
+    NuSoundVoice *GetVoice() const;
     void InvalidateVoice();
     void Play();
     void Pause();
     void Resume();
     void Stop();
     void SetVolume(f32 volume);
-    void GetVolume() const;
+    f32 GetVolume() const;
     void SetPitch(f32 pitch);
-    void GetPitch() const;
+    f32 GetPitch() const;
     void SetPosition(VuVec *position);
-    void GetPosition() const;
+    const VuVec *GetPosition() const;
     void SetVelocity(const VuVec &velocity);
-    void GetVelocity() const;
+    const VuVec *GetVelocity() const;
     void SetFalloff(f32 near, f32 far, NuSoundSystem::FalloffType type);
-    void GetFalloffType() const;
-    void GetNear() const;
-    void GetFar() const;
-    void GetState() const;
-    void IsLooping() const;
-    void GetPlaybackPositionSamples();
-    void GetPlaybackPositionSeconds() const;
-    void GetTotalLengthSamples() const;
-    void GetTotalLengthSeconds() const;
-    void GetLastAttenuation() const;
-    void GetLastAttenuationListener() const;
-    void GetLastDistanceAttenuation() const;
-    void GetLastListenerDistance() const;
-    void GetLastPositionalListener() const;
-    void GetSurroundMode() const;
-    void AddEffect(NuSoundEffect *effect);
+    NuSoundSystem::FalloffType GetFalloffType() const;
+    f32 GetNear() const;
+    f32 GetFar() const;
+    i32 GetState() const;
+    bool IsLooping() const;
+    u64 GetPlaybackPositionSamples();
+    f32 GetPlaybackPositionSeconds() const;
+    u64 GetTotalLengthSamples() const;
+    f32 GetTotalLengthSeconds() const;
+    f32 GetLastAttenuation() const;
+    NuSoundListener *GetLastAttenuationListener() const;
+    f32 GetLastDistanceAttenuation() const;
+    f32 GetLastListenerDistance() const;
+    NuSoundListener *GetLastPositionalListener() const;
+    NuSoundSystem::SurroundMode GetSurroundMode() const;
+    bool AddEffect(NuSoundEffect *effect);
     void RemoveEffect(NuSoundEffect *effect);
-    void GetEffect(NuSoundEffect::EffectType type);
+    NuSoundEffect *GetEffect(NuSoundEffect::EffectType type);
     void ResetFrameCount();
-    void operator=(NuSoundHandle &other);
-    void operator==(NuSoundHandle const &other);
+    NuSoundHandle &operator=(NuSoundHandle &other);
+    bool operator==(NuSoundHandle const &other);
 }; // namespace NuSoundSystem
 
-// Binary layouts below describe Android. Host/WASM builds use their own ABI,
-// including native mutex sizes and 64-bit member alignment.
-#if defined(__arm__)
-// Original ARM constructors: clock 0x2f2af8, system 0x2ee5f4;
-// InitAudioDevice 0x2fce38 passes this+0x110 to slCreateEngine.
-DECOMP_ASSERT(sizeof(NuSoundClock) == 0x30, "ARM sound clock layout");
-DECOMP_ASSERT(__builtin_offsetof(NuSoundSystem, factory_list) == 0x5c, "ARM voice factory offset");
-DECOMP_ASSERT(__builtin_offsetof(NuSoundSystem, initialised) == 0x10c, "ARM audio update gate offset");
-DECOMP_ASSERT(__builtin_offsetof(NuSoundSystem, engine_object) == 0x110, "ARM OpenSL engine handle offset");
-#else
-DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NuSoundClock) == 0x2c, "Android sound clock layout");
-DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundSystem, factory_list) == 0x58, "Android voice factory offset");
-DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundSystem, initialised) == 0x108, "Android audio update gate offset");
-DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundSystem, engine_object) == 0x10c,
-              "Android OpenSL engine handle offset");
-#endif
-DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NuSoundVoiceFactoryList) == 0xc, "Android voice factory list layout");
-DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundSystem, clock) == 8, "Android sound clock offset");
+DECOMP_ASSERT(sizeof(NuSoundHandle) == 0x28, "NuSoundHandle size");
 
 class NuSoundOutOfMemCallback {
   public:
-    // Slot names are descriptive; the reference establishes their order,
-    // 32-bit size argument, and boolean result through indirect calls.
-    virtual bool OnAllocationFailure(u32 size) = 0;
-    virtual bool OnAllocationFailureMinusTwo(u32 size) = 0;
+    virtual void operator()() = 0;
 };

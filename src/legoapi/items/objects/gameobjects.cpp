@@ -1713,12 +1713,6 @@ void GameObjectToCameraDistances() {
     }
 }
 
-void GameAudio_PlaySfxAndSetVolume(i32, nuvec_s *, float) {
-}
-
-void GameAudio_SetActionMusicTimes(float, float) {
-}
-
 void GameCreatureOpponentSelection(AISYS_s *, i32, APIOBJECT_s **, i32, APIOBJECT_s **, i32, APIOBJECT_s **, u64,
                                    float) {
 }

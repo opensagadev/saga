@@ -8,7 +8,6 @@
 #include "nu2api/nusound/nusound_loader.hpp"
 
 #include <new>
-#include <string.h>
 
 NuList<NuSoundStreamer *> NuSoundStreamer::sStreamers;
 i32 NuSoundStreamer::sThreadPriority = 2;
@@ -19,8 +18,7 @@ NUTHREAD_CORE NuSoundStreamer::sThreadCoreId = {.value = 0};
 // NuSoundStreamer
 // ---------------------------------------------------------------------------
 
-NuSoundStreamer::NuSoundStreamer()
-    : queue1(), queue2(), semaphore(32) {
+NuSoundStreamer::NuSoundStreamer() : queue1(), queue2(), semaphore(32) {
     this->running = true;
     thread =
         NuCore::m_threadManager->CreateThread(ThreadFunc, this, sThreadPriority, "NuSoundStreamThread",
@@ -35,7 +33,8 @@ NuSoundStreamer::NuSoundStreamer()
 }
 
 NuSoundStreamer::~NuSoundStreamer() {
-    running = false;
+    this->running = false;
+
     for (NuListNodeBase *node = sStreamers.Head(); node != sStreamers.Tail();) {
         NuListNodeBase *next = node->GetNext();
         if (static_cast<NuListNode<NuSoundStreamer *> *>(node)->value == this) {
@@ -127,9 +126,11 @@ void NuSoundStreamer::ShutdownThread() {
     this->queue1.Push(element);
 
     this->semaphore.Signal();
-    while (running) {
+
+    while (this->running) {
         NuThreadSleep(1);
     }
+
     NuSoundWeakPtrListNode::sPtrListLock.Lock();
     NuSoundWeakPtrListNode::sPtrListLock.Unlock();
 }
@@ -206,9 +207,9 @@ NuSoundStreamingSample::NuSoundStreamingSample(const char *file)
 }
 
 NuSoundStreamingSample::~NuSoundStreamingSample() {
-    if (file_loader != NULL) {
-        NuSoundSystem::ReleaseFileLoader(file_loader);
-        file_loader = NULL;
+    if (this->file_loader != NULL) {
+        NuSoundSystem::ReleaseFileLoader(this->file_loader);
+        this->file_loader = NULL;
     }
 }
 
@@ -219,7 +220,8 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
     }
 
     NuSoundStreamDesc *desc = NULL;
-    i32 open_result;
+    i32 error = 0;
+    i32 open_result = 0;
 
     if (this->sound_buffer1 == NULL) {
         u32 stream_buffer_size = NuSoundSystem::GetStreamBufferSize();
@@ -257,42 +259,45 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
 
     open_result = this->file_loader->OpenForStreaming(this->name, start_offset, desc, weak_flag);
     if (open_result != 1) {
-    open_error:
-        ErrorState error = ErrorState::FILE_NOT_FOUND;
         switch (open_result) {
+            case 2:
+                error = 1;
+                break;
             case 3:
-            case 4: error = ErrorState::OUT_OF_MEMORY; break;
-            case 5: error = ErrorState::UNSUPPORTED; break;
+            case 4:
+                error = 2;
+                break;
+            case 5:
+                error = 3;
+                break;
+            default:
+                error = 1;
+                break;
         }
-        NuSoundSystem::ReleaseFileLoader(this->file_loader);
-        this->file_loader = NULL;
-        NuSoundSystem::FreeMemory(NuSoundSystem::MemoryDiscipline::SCRATCH, (usize)desc, 0);
-        this->SetStreamDesc(NULL);
-        this->SetLoadState(LoadState::NOT_LOADED);
-        this->SetLastErrorState(error);
-        return (i32)error;
+        goto open_error;
     }
 
     {
-        NuSoundBuffer::Context context = {};
-        context.flags = 1;
-        context.flags |= 1; // streaming
+        NuSoundBuffer::Context context;
+        context.flags &= ~2;
+        context.flags |= 1;
 
         context = this->file_loader->FillStreamBuffer(this->sound_buffer1, loop);
 
         if (context.size2 != 0) {
             this->some_count++;
-        } else if (this->some_count == 0) {
-            this->file_loader->CloseStream();
-            this->sound_buffer1->SetCurrentContext(context);
-            context.flags &= ~1;
-            open_result = 4;
-            goto open_error;
         }
         this->sound_buffer1->SetCurrentContext(context);
-        context.flags &= ~1;
         u32 first_flags = context.flags;
 
+        if (context.size2 == 0 && this->some_count == 0) {
+            this->file_loader->CloseStream();
+            this->sound_buffer1->SetCurrentContext(context);
+            error = (first_flags & 2) != 0 ? 4 : 2;
+            goto open_error;
+        }
+
+        context.flags &= ~1u;
         if ((first_flags & 2) == 0) {
             context = this->file_loader->FillStreamBuffer(this->sound_buffer2, loop);
 
@@ -301,7 +306,7 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
             } else if (this->some_count == 0) {
                 this->file_loader->CloseStream();
                 this->sound_buffer2->SetCurrentContext(context);
-                open_result = 4;
+                error = 4;
                 goto open_error;
             }
             this->sound_buffer2->SetCurrentContext(context);
@@ -311,6 +316,15 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
     this->SetLoadState(LoadState::STREAM_READY);
     this->SetLastErrorState(ErrorState::NONE);
     return 0;
+
+open_error:
+    NuSoundSystem::ReleaseFileLoader(this->file_loader);
+    this->file_loader = NULL;
+    NuSoundSystem::FreeMemory(NuSoundSystem::MemoryDiscipline::SCRATCH, (usize)desc, 0);
+    this->SetStreamDesc(NULL);
+    this->SetLoadState(LoadState::NOT_LOADED);
+    this->SetLastErrorState(static_cast<ErrorState>(error));
+    return error;
 
 alloc_error:
     if (this->sound_buffer1 != NULL) {
@@ -392,8 +406,8 @@ i32 NuSoundStreamingSample::ReCue(f32 start_offset, bool loop) {
 
     this->file_loader->SeekTime(start_offset);
 
-    NuSoundBuffer::Context context = {};
-    context.flags = 1;
+    NuSoundBuffer::Context context;
+    context.flags &= ~2;
     context.flags |= 1;
 
     this->sound_buffer1->Lock();
@@ -402,7 +416,8 @@ i32 NuSoundStreamingSample::ReCue(f32 start_offset, bool loop) {
     if (context.size2 != 0) {
         this->some_count++;
     } else if ((context.flags & 2) == 0) {
-        goto refill_error;
+        this->file_loader->CloseStream();
+        return 2;
     }
     this->sound_buffer1->SetCurrentContext(context);
     context.flags &= ~1;
@@ -415,7 +430,8 @@ i32 NuSoundStreamingSample::ReCue(f32 start_offset, bool loop) {
         if (context.size2 != 0) {
             this->some_count++;
         } else if ((context.flags & 2) == 0) {
-            goto refill_error;
+            this->file_loader->CloseStream();
+            return 2;
         }
         this->sound_buffer2->SetCurrentContext(context);
         context.flags &= ~1;
@@ -423,10 +439,6 @@ i32 NuSoundStreamingSample::ReCue(f32 start_offset, bool loop) {
     }
 
     return 0;
-
-refill_error:
-    this->file_loader->CloseStream();
-    return 2;
 }
 
 bool NuSoundStreamingSample::IsLocked() const {
@@ -437,6 +449,12 @@ bool NuSoundStreamingSample::IsLocked() const {
         return true;
     }
     return false;
+}
+
+// libTTapp.so 0x326f10: streaming samples are open at STREAM_READY, unlike
+// resident samples, whose inherited implementation tests LOADED.
+bool NuSoundStreamingSample::IsStreamOpen() const {
+    return GetLoadState() == LoadState::STREAM_READY;
 }
 
 void NuSoundStreamingSample::Lock() {

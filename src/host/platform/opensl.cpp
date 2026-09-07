@@ -3,7 +3,7 @@
 // The vtables mirror the SLOT OFFSETS the decompiled code calls (documented
 // in nusound_voice_android.cpp): ObjectItf {Realize 0x0, GetInterface 0xc,
 // Destroy 0x18}, EngineItf {CreateAudioPlayer 0x8, CreateOutputMix 0x1c},
-// PlayItf {SetPlayState 0x4, GetPlayState 0x8, GetPosition 0xc,
+// PlayItf {SetPlayState 0x0, GetPlayState 0x4, GetPosition 0xc,
 // RegisterCallback 0x10, SetCallbackEventsMask 0x14},
 // AndroidSimpleBufferQueueItf {Enqueue 0x0, Clear 0x4, GetState 0x8},
 // VolumeItf {SetVolumeLevel 0xc, EnableStereoPosition 0x14,
@@ -61,7 +61,7 @@ namespace hostsl {
 
         struct ObjectVTable {
             u32 (*realize)(void *, u32);                         // 0x00
-            u32 (*resume)(void *);                               // 0x04
+            u32 (*resume)(void *, u32);                          // 0x04
             u32 (*get_state)(void *, u32 *);                     // 0x08
             u32 (*get_interface)(void *, const void *, void **); // 0x0c
             void *pad_0x10[2];
@@ -86,9 +86,9 @@ namespace hostsl {
         typedef void (*PlayCallbackFn)(const SLPlayItf_ *const *, void *, u32);
 
         struct PlayVTable {
-            void *pad_0x00;
-            u32 (*set_play_state)(void *, u32);                       // 0x04
-            u32 (*get_play_state)(void *, u32 *);                     // 0x08
+            u32 (*set_play_state)(void *, u32);   // 0x00
+            u32 (*get_play_state)(void *, u32 *); // 0x04
+            void *pad_0x08;
             u32 (*get_position)(void *, u32 *);                       // 0x0c
             u32 (*register_callback)(void *, PlayCallbackFn, void *); // 0x10
             u32 (*set_callback_events_mask)(void *, u32);             // 0x14
@@ -101,9 +101,8 @@ namespace hostsl {
         };
 
         struct VolumeVTable {
-            void *pad_0x00[3];
-            u32 (*set_volume_level)(void *, i32); // 0x0c
-            void *pad_0x10;
+            u32 (*set_volume_level)(void *, i32); // 0x00
+            void *pad_0x04[4];
             u32 (*enable_stereo_position)(void *, u32); // 0x14
             void *pad_0x18;
             u32 (*set_stereo_position)(void *, i32); // 0x1c
@@ -201,7 +200,7 @@ namespace hostsl {
 
         // ObjectItf (shared by engine / mix / player)
         u32 host_object_realize(void *self, u32 async);
-        u32 host_object_resume(void *self);
+        u32 host_object_resume(void *self, u32 async);
         u32 host_object_get_state(void *self, u32 *out);
         u32 host_object_get_interface(void *self, const void *iid, void **out);
         u32 host_object_destroy(void *self);
@@ -249,12 +248,8 @@ namespace hostsl {
             host_engine_query_realtime,
         };
         const PlayVTable host_play_vt = {
-            NULL,
-            host_play_set_play_state,
-            host_play_get_play_state,
-            host_play_get_position,
-            host_play_register_callback,
-            host_play_set_callback_events_mask,
+            host_play_set_play_state, host_play_get_play_state,    NULL,
+            host_play_get_position,   host_play_register_callback, host_play_set_callback_events_mask,
         };
         const QueueVTable host_queue_vt = {
             host_queue_enqueue,
@@ -262,10 +257,8 @@ namespace hostsl {
             host_queue_get_state,
         };
         const VolumeVTable host_volume_vt = {
-            NULL, NULL,
-            NULL, host_volume_set_volume_level,
-            NULL, host_volume_enable_stereo_position,
-            NULL, host_volume_set_stereo_position,
+            host_volume_set_volume_level,    NULL, NULL, NULL, NULL, host_volume_enable_stereo_position, NULL,
+            host_volume_set_stereo_position,
         };
 
         // ---------------------------------------------------------------------------
@@ -338,8 +331,9 @@ namespace hostsl {
 
         // SLObjectItf::Resume (object vtable slot 0x4). The engine's state poll uses
         // it to resume a suspended player object.
-        u32 host_object_resume(void *self) {
+        u32 host_object_resume(void *self, u32 async) {
             (void)self;
+            (void)async;
             return HOST_SL_RESULT_SUCCESS;
         }
 

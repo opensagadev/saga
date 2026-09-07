@@ -4,6 +4,7 @@
 
 #include "legoapi/characters/core/CharacterObjectInterface.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/world/area.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nucore/nuanim3.h"
 #include "nu2api/nucore/nuhgobj.h"
@@ -12,6 +13,7 @@
 #include "nu2api/nufile/nufilepak.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/numtl.h"
+#include "nu2api/numusic/sfx.h"
 
 #include <string.h>
 struct numtx_s;
@@ -726,8 +728,45 @@ i32 GameAudio_CheckReverb_LSW() {
     return 0;
 }
 
-static __used__ int GameAudio_OverrideFootStep_LSW(GameObject_s *, int) {
-    return 0;
+extern AREADATA *DAGOBAH_ADATA;
+extern AREADATA *DEATHSTARESCAPE_ADATA;
+extern AREADATA *DEATHSTARRESCUE_ADATA;
+extern AREADATA *HOTHESCAPE_ADATA;
+extern AREADATA *JABBASPALACE_ADATA;
+
+extern __attribute__((visibility("hidden"))) i32
+GameAudio_OverrideFootStep_LSW(GameObject_s *, i32) asm("_ZL30GameAudio_OverrideFootStep_LSWP12GameObject_si");
+
+i32 GameAudio_OverrideFootStep_LSW(GameObject_s *object, i32 alternate) {
+    WORLDINFO *world = WorldInfo_CurrentlyActive();
+    AREADATA *area = world->area;
+    LEVELDATA *level = world->current_level;
+
+    if ((area == HOTHESCAPE_ADATA || level == JABBASPALACEE_LDATA) && alternate == 0) {
+        return GetSfxId("fs_ice");
+    }
+
+    if (area == DAGOBAH_ADATA && alternate == 0) {
+        if (level != DAGOBAHA_LDATA || object->apiobj.field_0x281 != 0x14) {
+            if (level != DAGOBAHD_LDATA) {
+                if (level != DAGOBAHE_LDATA ||
+                    (GameCam->sock_position.location.sock != 4 && GameCam->sock_position.location.sock != 1)) {
+                    return GetSfxId("fs_swamp");
+                }
+            }
+        }
+    }
+
+    if (level == JABBASPALACEA_LDATA && (object->apiobj.field_0x281 == 9 || object->apiobj.field_0x281 == 0x18)) {
+        return GetSfxId("fs_ice");
+    }
+
+    if ((area == DEATHSTARRESCUE_ADATA || area == DEATHSTARESCAPE_ADATA || WORLD->area == JABBASPALACE_ADATA) &&
+        object->apiobj.field_0x281 == 0x14) {
+        return GetSfxId("FS_JWalkM");
+    }
+
+    return -1;
 }
 
 static __used__ int IsGrabbable(GameObject_s *) {

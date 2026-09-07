@@ -4,10 +4,8 @@
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/nusound/nusound_buffer.hpp"
 #include "nu2api/nusound/nusound_source.hpp"
-#include "nu2api/nusound/nusound_buffer.hpp"
+#include "nu2api/nusound/nusound_sync.hpp"
 #include "nu2api/nusound/nusound_weakptr.hpp"
-
-#include <pthread.h>
 
 class NuSoundBufferCallback;
 class NuSoundDecodeThread;
@@ -23,8 +21,6 @@ class NuSoundDecoder : public NuSoundSource {
   public:
     NuSoundDecoder(char const *name, NuSoundSource *source);
     virtual ~NuSoundDecoder();
-    const char *GetName() const override { return source != NULL ? source->GetName() : "NuSoundDecoder"; }
-    NuSoundSource *GetEncodedSource() override { return source; }
 
     void CloseStream();
     const char *GetName() const override;
@@ -34,7 +30,7 @@ class NuSoundDecoder : public NuSoundSource {
     bool IsStreamOpen() const override;
     void Lock();
     bool OpenStream(bool loop) override;
-    void Shutdown();
+    static void Shutdown();
     void Unlock();
     void VoiceReference() override;
     void VoiceRelease() override;
@@ -58,10 +54,10 @@ class NuSoundDecoder : public NuSoundSource {
     NuSoundSource *source;    // +0x20: wrapped source
     NuSoundBuffer buffers[2]; // +0x24: two inline 0x40-byte ring buffers
     u32 buffer_size;          // bytes per ring buffer
-    u32 ring_count;           // buffers filled so far
-    u32 decode_pos;           // next buffer index to decode
-    u32 consumed_pos;         // next buffer index to hand out
-    u32 buffers_started;
+    i32 ring_count;           // buffers filled so far
+    i32 decode_pos;           // next buffer index to decode
+    i32 consumed_pos;         // next buffer index to hand out
+    i32 buffers_started;
     u64 decoded_bytes; // bytes decoded since stream start
     u32 field_0xc0;
     u32 field_0xc4;
@@ -71,8 +67,8 @@ class NuSoundDecoder : public NuSoundSource {
     bool stream_open; // +0xd8
     bool closing;     // +0xd9
     u8 padding_0xda[2];
-    pthread_mutex_t decode_mutex; // +0xdc: decode-completion sync pair
-    pthread_cond_t decode_cond;   // +0xe0
+    NuSoundMutex decode_mutex;    // +0xdc: decode-completion sync pair
+    NuSoundCondition decode_cond; // +0xe0
     bool decode_done;             // +0xe4
     bool decode_broadcast;        // +0xe5: manual-reset/broadcast mode
     u8 padding_0xe6[2];
@@ -95,20 +91,24 @@ class NuSoundDecodeThread {
         bool loop;                                      // +0x18
     };
 
+    union LoaderSlot {
+        u32 alignment;
+        u8 storage[sizeof(Loader)];
+    };
+
     NuSoundDecodeThread();
     ~NuSoundDecodeThread();
 
     static void ThreadFunc(void *self_);
     void Shutdown();
     void RequestDecode(NuSoundDecoder &, NuSoundBuffer &, NuSoundWeakPtr<NuSoundBufferCallback>, bool);
-    static NuThreadSemaphore sShutdownSemaphore;
-    static i32 sThreadPriority;
 
     NuThread *thread;            // +0x000
-    union {
-        Loader loaders[128];     // +0x004; lifetime spans enqueue to dequeue
-    };
-    i32 tail_index; // +0xe04, producer (RequestDecode) write index
-    i32 head_index; // +0xe08, consumer (ThreadFunc) read index
+    LoaderSlot loaders[128];     // +0x004; raw storage, not automatically destroyed
+    u32 tail_index;              // +0xe04, producer (RequestDecode) write index
+    u32 head_index;              // +0xe08, consumer (ThreadFunc) read index
     NuThreadSemaphore semaphore; // +0xe0c
+
+    static i32 sThreadPriority;
+    static NuThreadSemaphore sShutdownSemaphore;
 };

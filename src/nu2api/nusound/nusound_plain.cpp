@@ -1,5 +1,7 @@
 #include "nu2api/nusound/nusound.h"
 
+#include "nu2api/nusound/nusound_system.hpp"
+
 extern __attribute__((visibility("hidden"))) u16 *g_NuSoundLoadBits asm("_ZL17g_NuSoundLoadBits");
 extern __attribute__((visibility("hidden"))) u16 *g_NuSoundLoadBitsCache asm("_ZL22g_NuSoundLoadBitsCache");
 extern __attribute__((visibility("hidden"))) i32 g_NuSoundNumLoadBitShorts asm("_ZL25g_NuSoundNumLoadBitShorts");
@@ -21,6 +23,9 @@ extern "C" {
     void NuSound3AddStream(void) {
     }
     void NuSound3AddStreamEx(void) {
+    }
+    f32 NuSound3AmplitudeTodB(f32 amplitude) {
+        return NuSoundSystem::AmplitudeTodB(amplitude);
     }
     void NuSound3BeginWaitUpdate(void) {
     }
@@ -125,8 +130,8 @@ extern "C" {
     }
     void NuSound3SetStreamPitch(void) {
     }
-    i32 NuSound3SetStreamVolume(i32 index, i32 volume) {
-        NuSound3SetStereoStreamVolume(index, volume);
+    i32 NuSound3SetStreamVolume(i32 stream_index, i32 volume) {
+        NuSound3SetStereoStreamVolume(stream_index, volume);
         return 1;
     }
     void NuSound3StopRumble(void) {

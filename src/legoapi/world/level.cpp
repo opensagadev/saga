@@ -1832,13 +1832,15 @@ void FixUpLevels(LEVELFIXUP *fixup) {
     }
 
     {
-        LEVELDATA *level = Level_FindByName("dagobah_d", NULL);
+        LEVELDATA *level = Level_FindByName("dagobah_e", NULL);
+        DAGOBAHE_LDATA = level;
         if (level != NULL) {
         }
     }
 
     {
-        LEVELDATA *level = Level_FindByName("dagobah_d", NULL);
+        LEVELDATA *level = Level_FindByName("dagobah_e", NULL);
+        DAGOBAHE_LDATA = level;
         if (level != NULL) {
             level->init_fn = DagobahE_Init;
         }

@@ -1,9 +1,11 @@
 #include "legoapi/world/world_shared.h"
 #include "legoapi/audio/audio.h"
+#include "legoapi/core/config/cheat.h"
 #include "legoapi/characters/core/charconfig.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/mission.h"
+#include "legoapi/props/system/socksys.h"
 #include "nu2api/numath/nurand.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
@@ -11,8 +13,10 @@
 #include "nu2api/numusic/numusic.h"
 #include "nu2api/numusic/sfx.h"
 #include "nu2api/nusound/nusound.h"
+#include "nu2api/nufile/nufile.h"
 #include "decomp_assert.h"
 
+#include <stdio.h>
 #include <string.h>
 
 enum RepeatSfxState : u8 {
@@ -35,12 +39,19 @@ DECOMP_ASSERT(sizeof(RepeatSfx) == 0x10, "RepeatSfx size");
 
 static i32 repsfxcount;
 static RepeatSfx repsfxtab[32];
-static f32 MusicVolume = 1.0f;
+static i32 ticktock;
+static i32 deathstar_hold_count;
+extern "C" f32 MusicVolume __asm__("_ZL11MusicVolume") __attribute__((visibility("hidden"))) = 1.0f;
+extern "C" i32 NumSfx __asm__("_ZL6NumSfx") __attribute__((visibility("hidden")));
+extern "C" i32 NumSfxInst __asm__("_ZL10NumSfxInst") __attribute__((visibility("hidden")));
 static f32 CutVolume = 0.8f;
 
 extern "C" {
     u16 GlobalSfxBits[100];
     SoundTable CurrentSFXTAB;
+    void (*ExtraDieSfxFn)(GameObject_s *);
+    void (*ExtraHurtSfxFn)(GameObject_s *);
+    i32 CruiserD_LiftChase;
 }
 
 i32 GroupBuffer_GetSample(i32 group_id, i32 sequential);
@@ -84,13 +95,35 @@ bool HandleGroupLimit(i32 group_id) {
 extern "C" void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pitch);
 extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
+void GameAudio_PlaySfx(i32 sfx, nuvec_s *position, i32 flags, i32 volume);
+i32 GameAudio_GetPlrSfxBits(void *object);
 void GameAudio_AddSfx(i32 sfx, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx);
 void SetSfxBit_OnEx(i32);
+void SetSfxBit_OffEx(i32);
+void SetSfxBitTab_OnEx(SoundTable *, i32);
+void SetSfxBitTab_OffEx(SoundTable *, i32);
+i32 SfxBitEx(i32);
+i32 SfxBitTabEx(const SoundTable *, i32);
 void AddLevelSfxFromName(char *sfx_name, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx_count);
 void AddLevelSfxGizmoSys(GIZMOSYS_s *gizmo_sys, void *world_info, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx_count);
 void SetSpecialSfxBits(i32 *sfx_ids, i32 *sfx_count, WORLDINFO_s *world);
+int SpecialSfxLoad(char *path, WORLDINFO_s *world);
+void SetupBlowupSfx(WORLDINFO_s *world, specialsfx_s *special_sfx);
 void Pulses_AddSfx(PULSESYS_s *system, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx_count);
 void Move_BEAST(GameObject_s *object);
+void PlayFootStepSfx(GameObject_s *object);
+i32 CheckMusicOther(void);
+i32 qrand(void);
+void GameCam_NewShake(GAMECAMERA_s *camera, f32 amount, f32 duration, f32 speed);
+void GameCam_Judder(GAMECAMERA_s *camera, f32 amount, i32 axis, nuvec_s *source);
+void NewRumbleAllPlayers(f32 intensity, f32 duration, i32 flags, i32 player_index);
+extern "C" TERRAIN_SURFACE_s TerSurface[32];
+i32 Players_AveragePos(nuvec_s *position, SOCKPOSITION_s *socket_position);
+i32 Hub_Outside(void);
+i32 KaminoInside(void);
+i32 KaminoDiscoOn(void);
+i32 DeathStarShieldDown(void);
+i32 SarlaccPitDiscoActive(WORLDINFO_s *world);
 
 extern AREADATA *BONUS_GUNSHIP_ADATA;
 extern AREADATA *DAGOBAH_ADATA;
@@ -105,6 +138,8 @@ extern i16 id_CHEWBACCA;
 extern i16 id_EWOK;
 extern i16 id_GAMORREANGUARD;
 extern i16 id_WICKET;
+extern f32 chattersfxwait;
+extern i32 DoubleScore;
 
 extern __attribute__((visibility("hidden"))) GAMEAUDIO *GameAudio asm("_ZL9GameAudio");
 
@@ -112,6 +147,8 @@ extern "C" {
     void SetSfxBit_On(i32 sound);
     void SetSoundBitsById(const i32 *sound_ids, void (*set_bit)(i32));
     void SfxBitsStore(SoundTable *table);
+    void MusicPreSeek(i32 track);
+    void NuSound3FlushLoops(void);
     i32 NuSound3SetReverb(i32 mode);
 }
 
@@ -143,7 +180,7 @@ i32 AmbientFromQuiet(i32 idx) {
 }
 
 extern "C" void ResetSounds(void) {
-    memcpy(SfxBits, GlobalSfxBits, sizeof(SfxBits));
+    memmove(SfxBits, GlobalSfxBits, sizeof(SfxBits));
 }
 
 void SetLevelSfxBits(WORLDINFO *world) {
@@ -434,9 +471,8 @@ void SetLevelSfxBits(WORLDINFO *world) {
         ADD_SFX("Dianoga_Roar");
     } else if (level == DEATHSTARESCAPEB_LDATA) {
         ADD_SFX("SqueakWash");
-    } else if (level == DEATHSTARESCAPEC_LDATA || level == DEATHSTARBATTLEA_LDATA ||
-               level == DEATHSTARBATTLEB_LDATA || level == DEATHSTARBATTLEC_LDATA ||
-               level == DEATHSTARBATTLED_LDATA || level == DEATHSTAR2BATTLEB_LDATA ||
+    } else if (level == DEATHSTARESCAPEC_LDATA || level == DEATHSTARBATTLEA_LDATA || level == DEATHSTARBATTLEB_LDATA ||
+               level == DEATHSTARBATTLEC_LDATA || level == DEATHSTARBATTLED_LDATA || level == DEATHSTAR2BATTLEB_LDATA ||
                level == SPEEDERCHASEA_LDATA || level == ENDORBATTLED_LDATA) {
         ADD_SFX("FField");
         ADD_SFX("FFieldOff");
@@ -583,8 +619,8 @@ void SetLevelSfxBits(WORLDINFO *world) {
         } else if ((character->model_flags & 8) != 0) {
             ADD_SFX("ForceMindTrick");
         }
-        if (game_character->uses_weapon_action == 12 && (character->model_flags & 8) != 0 &&
-            id_GAMORREANGUARD != -1 && apicharsys->playermodelids[id_GAMORREANGUARD] != -1) {
+        if (game_character->uses_weapon_action == 12 && (character->model_flags & 8) != 0 && id_GAMORREANGUARD != -1 &&
+            apicharsys->playermodelids[id_GAMORREANGUARD] != -1) {
             ADD_SFX("ForceChokeCrunch");
         }
         if ((game_character->flags_094[3] & 0x20) != 0) {
@@ -643,29 +679,127 @@ void ResetLevSfx(WORLDINFO *world) {
     world->level_sfx_count = 0;
 }
 
-void InitSpecialSfx(WORLDINFO *world) {
-    (void)world;
+bool InitSpecialSfx(WORLDINFO *world) {
+    bool result = false;
+    if (world != NULL) {
+        world->special_sfx_count = 0;
+        world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
+        world->special_sfx = reinterpret_cast<specialsfx_s *>(world->giz_buffer.void_ptr);
+        world->giz_buffer.addr += 0xf00;
+        memset(world->special_sfx, 0, 0xf00);
+
+        world->special_sfx_event_count = 0;
+        world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 0x10);
+        world->special_sfx_events = reinterpret_cast<SPECIALSFXEVENT_s *>(world->giz_buffer.void_ptr);
+        world->giz_buffer.addr += 0xc00;
+        memset(world->special_sfx_events, 0, 0xc00);
+        result = true;
+    }
+    return result;
 }
 void LoadSpecialSfxFile(WORLDINFO *world) {
-    (void)world;
+    char path[268];
+    sprintf(path, "%s.sfx", world->config_file);
+    if (NuFileExists(path) != 0 && SpecialSfxLoad(path, world) != 0) {
+        for (i32 i = 0; i < world->special_sfx_count; i++) {
+            if ((world->special_sfx[i].flags & 0xf) == 1) {
+                SetupBlowupSfx(world, &world->special_sfx[i]);
+            }
+        }
+    }
 }
 
 i32 ActionMusicFn() {
-    return {};
+    LEVELDATA_s *level = WORLD->current_level;
+    if (Arcade != 0 || DoubleScore != 0 || Cheat_PowerUpActive(-1) != 0 ||
+        (level == CRUISERA_LDATA && MiniCutCam != 0) || (level == CRUISERD_LDATA && CruiserD_LiftChase != 0) ||
+        level == DEATHSTARRESCUEE_LDATA) {
+        return 1;
+    }
+    if (level == MOSEISLEYD_LDATA && CheckMusicOther() != 0) {
+        return 1;
+    }
+    if (level == CLOUDCITYESCAPEA_LDATA) {
+        return 1;
+    }
+    if (level == SPEEDERCHASEA_LDATA) {
+        nuvec_s position;
+        SOCKPOSITION_s socket_position;
+        if (Players_AveragePos(&position, &socket_position) != 0) {
+            const i8 socket = socket_position.location.sock;
+            if (socket == 7 || socket == 8) {
+                return 1;
+            }
+            if (socket == 2 || socket == 3 || socket == 4 || socket == 6 || socket == 9) {
+                return 0;
+            }
+        }
+        level = WORLD->current_level;
+    }
+    if (level == HUB_LDATA) {
+        return ai_fighting != 0;
+    }
+    for (i32 i = 0; i < 2; ++i) {
+        GameObject_s *player = Player[i];
+        if (player != NULL &&
+            (player->ai.opponent != NULL || (player->ai.nearest_opponent != NULL &&
+                                             static_cast<APIOBJECT *>(player->ai.nearest_opponent)->field_0x287 == 0 &&
+                                             player->ai.nearest_opponent_metric < 3.0f))) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 i32 CheckMusicOther() {
-    return {};
+    nuvec_s position;
+    SOCKPOSITION_s socket_position;
+    if (Players_AveragePos(&position, &socket_position) == 0) {
+        return 0;
+    }
+    LEVELDATA_s *level = WORLD->current_level;
+    if (level == HUB_LDATA) {
+        return Hub_Outside() != 0;
+    }
+    if (level == KAMINOA_LDATA) {
+        return KaminoInside() != 0;
+    }
+    if (level == KAMINOC_LDATA) {
+        return KaminoDiscoOn() != 0;
+    }
+    if (level == KAMINOE_LDATA) {
+        return KaminoInside() == 0;
+    }
+    if (level == MOSEISLEYD_LDATA) {
+        return socket_position.location.sock == 3;
+    }
+    if (level == DEATHSTARBATTLED_LDATA) {
+        if (DeathStarShieldDown() != 0) {
+            deathstar_hold_count = 30;
+            return 1;
+        }
+        if (deathstar_hold_count > 0) {
+            --deathstar_hold_count;
+            return 1;
+        }
+    } else if (level == ASTEROIDCHASEB_LDATA) {
+        return GameCam->sock_position.location.sock == 4;
+    } else if (level == SARLACCPITB_LDATA) {
+        return SarlaccPitDiscoActive(WORLD) != 0;
+    }
+    return 0;
 }
 
 extern "C" {
 
     f32 sfx_wait;
 
-    void GetLogicalSfxCount(void) {
+    i32 GetLogicalSfxCount(void) {
+        return NumSfxInst;
     }
 
-    void GetSfxCount(void) {
+    i32 GetSfxCount(void) {
+        return NumSfx;
     }
 
     i32 GetSfxIdN(char *name, i32 length) {
@@ -693,16 +827,36 @@ extern "C" {
     }
 
     void PauseGameMusic(void) {
+        if (NOMUSIC == 0 && NOSOUND == 0 && NUSOUND_STREAM_3 != -1 && static_cast<u16>(Music.state - 11) > 2) {
+            NuSound3CancelCheckStereo();
+            NuSound3PauseStereoStream(Music.primary_stream);
+            if (static_cast<u16>(Music.state - 5) < 6) {
+                NuSound3PauseStereoStream(1 - Music.primary_stream);
+            }
+        }
+        Music.restore_requested = false;
     }
 
     void PauseGameSfx(void) {
+        NuSound3StopSFX();
+        NuSound3FlushLoops();
+        NuSound3SetSFXPitch(0);
     }
 
-    void PlayAltGameMusic(void) {
+    void PlayAltGameMusic(i32 track) {
+        Music.update_delay = 1;
+        if (Music.requested_track == track && !Music.pause_requested) {
+            i32 stream = 1 - Music.primary_stream;
+            NuSound3ResumeStereoStream(stream);
+            NuSound3SetStereoStreamVolume(stream, static_cast<i32>(g_music[track].index * MusicVolume));
+            Music.resume_track = -1;
+        } else {
+            PlayAMusic(1 - Music.primary_stream, track, static_cast<i32>(g_music[track].index * MusicVolume), 0);
+        }
     }
 
     i32 PlayCutMusic(i32 track, i32 state, void *context) {
-        if (NOSOUND != 0 || NOMUSIC != 0 || track < 0 || static_cast<u32>(track) >= SFX_MUSIC_COUNT) {
+        if (NOSOUND != 0 || NOMUSIC != 0 || track < 0 || track >= SFX_MUSIC_COUNT) {
             return 0;
         }
 
@@ -736,13 +890,87 @@ extern "C" {
         } else if (state == 12) {
             Music.state = static_cast<MusicPlaybackState>(12);
         } else {
-            Music.state = Music.state < 1 ? static_cast<MusicPlaybackState>(12) : MUSIC_PLAYBACK_DUAL_STREAM_PENDING;
+            Music.state =
+                static_cast<u16>(Music.state) < 1 ? static_cast<MusicPlaybackState>(12) : MUSIC_PLAYBACK_DUAL_STREAM;
         }
         Music.track_data = context;
         return started;
     }
 
-    void PlayMusic(void) {
+    void PlayMusic(i32 track, i32 mode) {
+        if (NOSOUND != 0 || NOMUSIC != 0) {
+            return;
+        }
+
+        i16 previous_state = Music.state;
+        i16 previous_stream = Music.primary_stream;
+        i16 previous_track = Music.current_track;
+
+        if (track < 0 || track >= SFX_MUSIC_COUNT) {
+            Music.state = static_cast<MusicPlaybackState>((mode == 3) * 2 + 7);
+            Music.primary_stream = 1 - Music.primary_stream;
+            Music.current_track = static_cast<i16>(track);
+            Music.queued_track = previous_track;
+            Music.restore_requested = false;
+            Music.transition = 0.0f;
+            return;
+        }
+
+        Music.transition_frames = 0;
+        Music.queued_track = Music.current_track;
+        Music.current_track = static_cast<i16>(track);
+
+        i32 requested;
+        i32 stream;
+        if (Music.state == MUSIC_PLAYBACK_STOPPED) {
+            requested = Music.requested_track;
+            stream = Music.primary_stream;
+            reinterpret_cast<u8 *>(&Music)[0x12 + stream] = 0;
+            if (requested == track) {
+                Music.primary_stream = 1 - previous_stream;
+                stream = Music.primary_stream;
+            }
+        } else if (mode != 1 && NUSOUND_STREAM_3 != -1) {
+            requested = Music.requested_track;
+            Music.primary_stream = 1 - Music.primary_stream;
+            stream = Music.primary_stream;
+            reinterpret_cast<u8 *>(&Music)[0x12 + stream] = 0;
+            if (requested == track && !Music.pause_requested) {
+                Music.state = static_cast<MusicPlaybackState>((mode == 3) * 2 + 7);
+                NuSound3ResumeStereoStream(stream);
+                NuSound3SetStereoStreamVolume(stream, 0);
+            } else {
+                Music.state = static_cast<MusicPlaybackState>((mode == 3) * 2 + 8);
+                PlayAMusic(stream, track, 0, 0);
+            }
+            Music.requested_track = -1;
+            Music.pause_requested = false;
+            Music.restore_requested = false;
+            Music.transition = 0.0f;
+            return;
+        } else {
+            requested = Music.requested_track;
+            stream = Music.primary_stream;
+            reinterpret_cast<u8 *>(&Music)[0x12 + stream] = 0;
+            if (requested == track && previous_state != MUSIC_PLAYBACK_DUAL_STREAM) {
+                Music.primary_stream = 1 - previous_stream;
+                stream = Music.primary_stream;
+            }
+        }
+
+        NuSound3StopStereoStream(1 - stream);
+        if (Music.requested_track == track && !Music.pause_requested &&
+            NuSound3GetStereoStreamStatus(Music.primary_stream) != NUSOUND_STEREO_STREAM_FINISHED) {
+            NuSound3ResumeStereoStream(Music.primary_stream);
+            NuSound3SetStereoStreamVolume(Music.primary_stream, static_cast<i32>(g_music[track].index * MusicVolume));
+        } else {
+            PlayAMusic(Music.primary_stream, track, static_cast<i32>(g_music[track].index * MusicVolume), 0);
+        }
+        Music.transition = 1.0f;
+        Music.restore_requested = false;
+        Music.pause_requested = false;
+        Music.requested_track = -1;
+        Music.state = MUSIC_PLAYBACK_ACTIVE;
     }
 
     void PlaySfx(char *name, struct nuvec_s *position) {
@@ -836,10 +1064,6 @@ extern "C" {
 
         const NUMTX *listener = reinterpret_cast<const NUMTX *>(NuSound3GetListener());
         if (listener == NULL) {
-            if (custom_falloff) {
-                nusound_fade_start = saved_fade_start;
-                nusound_fade_end = saved_fade_end;
-            }
             return;
         }
 
@@ -858,10 +1082,6 @@ extern "C" {
         }
 
         if (sound->group != -1 && !HandleGroupLimit(sound->group)) {
-            if (custom_falloff) {
-                nusound_fade_start = saved_fade_start;
-                nusound_fade_end = saved_fade_end;
-            }
             return;
         }
 
@@ -900,7 +1120,7 @@ extern "C" {
             if (position != NULL) {
                 if (loop) {
                     NuSound3Play3dLoopSfx(position, sample_index, falloff_near, falloff_far, voice_volume, voice_volume,
-                                          pitch, buzz_timer, rumble_strength, rumble_sustain, rumble_release);
+                                          pitch);
                 } else if (priority == 0) {
                     NuSound3Play3d(position, sample_index, falloff_near, falloff_far, voice_volume, voice_volume, pitch,
                                    buzz_timer, rumble_strength, rumble_sustain, rumble_release);
@@ -924,7 +1144,7 @@ extern "C" {
                     nuvec_s *forward = reinterpret_cast<nuvec_s *>(const_cast<f32 *>(&listener->m20));
                     NuVecAdd(&pos, &pos, forward);
                     NuSound3Play3dLoopSfx(&pos, sample_index, falloff_near, falloff_far, volume_left, volume_right,
-                                          pitch, buzz_timer, rumble_strength, rumble_sustain, rumble_release);
+                                          pitch);
                 } else if (priority == 0) {
                     NuSound3Play(sample_index, volume_left, volume_right, pitch, buzz_timer, rumble_strength,
                                  rumble_sustain, rumble_release);
@@ -977,10 +1197,22 @@ extern "C" {
             Music.requested_track = -1;
             Music.pause_requested = false;
         }
-        Music.track_data = NULL;
+        Music.seek_offset = 0.0f;
     }
 
     void RestoreGameMusic(void) {
+        if ((NOMUSIC == 0 || NOSOUND == 0) && NUSOUND_STREAM_3 != -1) {
+            if (Music.transition_frames < 25) {
+                Music.restore_requested = true;
+                return;
+            }
+            if (static_cast<u16>(Music.state - 11) > 2) {
+                NuSound3ResumeStereoStream(Music.primary_stream);
+                if (static_cast<u16>(Music.state - 5) < 6) {
+                    NuSound3ResumeStereoStream(1 - Music.primary_stream);
+                }
+            }
+        }
     }
 
     void ResumeGameAudio(void) {
@@ -989,7 +1221,8 @@ extern "C" {
     void SOUND_SFXRequest_Table(void) {
     }
 
-    void SetAudioFadeLevel(void) {
+    void SetAudioFadeLevel(f32 level) {
+        AUDIOFADELEVEL = level;
     }
 
     void SetCutVolume(f32 volume) {
@@ -1015,16 +1248,26 @@ extern "C" {
         }
     }
 
-    void SetPreSeekStartPoint(void) {
+    void SetPreSeekStartPoint(f32 start_point) {
+        Music.seek_offset = start_point;
     }
 
-    void SetSfxBitTab_Off(void) {
+    void SetSfxBitTab_Off(SoundTable *table, i32 sound) {
+        if (sound >= 0) {
+            SetSfxBitTab_OffEx(table, g_soundInfo[sound].index);
+        }
     }
 
-    void SetSfxBitTab_On(void) {
+    void SetSfxBitTab_On(SoundTable *table, i32 sound) {
+        if (sound >= 0) {
+            SetSfxBitTab_OnEx(table, g_soundInfo[sound].index);
+        }
     }
 
-    void SetSfxBit_Off(void) {
+    void SetSfxBit_Off(i32 sound) {
+        if (sound >= 0) {
+            SetSfxBit_OffEx(g_soundInfo[sound].index);
+        }
     }
 
     void SetSfxBit_On(i32 sound) {
@@ -1032,62 +1275,282 @@ extern "C" {
             SetSfxBit_OnEx(g_soundInfo[sound].index);
     }
 
-    void SfxBit(void) {
+    i32 SfxBit(i32 sound) {
+        if (sound < 0) {
+            return 0;
+        }
+        return SfxBitEx(g_soundInfo[sound].index);
     }
 
-    void SfxBitMaskTable(void) {
+    void SfxBitMaskTable(u16 *bits, const u16 *mask) {
+        for (i32 i = 0; i < 100; i++) {
+            bits[i] &= mask[i];
+        }
     }
 
-    void SfxBitTab(void) {
+    i32 SfxBitTab(const SoundTable *table, i32 sound) {
+        if (sound < 0) {
+            return 0;
+        }
+        return SfxBitTabEx(table, g_soundInfo[sound].index);
     }
 
     void SfxBitsRestore(SoundTable *table) {
-        memcpy(SfxBits, table->bits, sizeof(SfxBits));
+        memmove(SfxBits, table->bits, sizeof(SfxBits));
     }
 
-    void SfxBitsSetAll(void) {
+    void SfxBitsSetAll(u16 *bits) {
+        memset(bits, 0xff, sizeof(SfxBits));
     }
 
     void SfxBitsStore(SoundTable *table) {
-        memcpy(table->bits, SfxBits, sizeof(SfxBits));
+        memmove(table->bits, SfxBits, sizeof(SfxBits));
     }
 
     void StopAltGameMusic(void) {
+        NuSound3CancelCheckStereo();
+        NuSound3PauseStereoStream(1 - Music.primary_stream);
+        Music.update_delay = 0;
+        Music.queued_track = -1;
+        Music.requested_track = -1;
+        if (Music.resume_track >= 0) {
+            MusicPreSeek(Music.resume_track);
+        }
     }
 
-    void SwapMusic(void) {
+    void SwapMusic(i32 mode) {
+        if (NOSOUND != 0 || NOMUSIC != 0) {
+            return;
+        }
+
+        i16 previous_track = Music.current_track;
+        i16 queued_track = Music.queued_track;
+        Music.primary_stream = 1 - Music.primary_stream;
+        Music.current_track = queued_track;
+        Music.queued_track = previous_track;
+        NuSound3ResumeStereoStream(Music.primary_stream);
+
+        if (mode == 1) {
+            NuSound3SetStereoStreamVolume(Music.primary_stream,
+                                          static_cast<i32>(g_music[queued_track].index * MusicVolume));
+            NuSound3PauseStereoStream(1 - Music.primary_stream);
+            NuSound3SetStereoStreamVolume(1 - Music.primary_stream, 0);
+            Music.state = MUSIC_PLAYBACK_ACTIVE;
+            Music.transition = 1.0f;
+        } else {
+            f32 transition = 0.0f;
+            if (static_cast<u16>(Music.state - 5) < 2) {
+                transition = 1.0f - Music.transition;
+            }
+            Music.transition = transition;
+            NuSound3SetStereoStreamVolume(Music.primary_stream,
+                                          static_cast<i32>(g_music[queued_track].index * transition));
+            Music.state = static_cast<MusicPlaybackState>((mode == 3) + 5);
+        }
     }
 
 } // extern "C"
 
-void PlayDieSfx(GameObject_s *) {
+void PlayDieSfx(GameObject_s *object) {
+    CHARACTERDATA *character = object->apiobj.character_data;
+    GAMECHARACTERDATA_s *config = character->game_character;
+    i32 sfx = config->sfx_die;
+    if (sfx == -1) {
+        const u32 flags = character->model_flags;
+        if ((config->flags_090 & 0x800) != 0 || (flags & 0x2000) != 0) {
+            sfx = GameAudio->sfx_ids[0x18];
+        } else if ((flags & 0x04000000) != 0) {
+            sfx = GameAudio->sfx_ids[0x19];
+        } else if ((flags & 0x10) != 0) {
+            sfx = GameAudio->sfx_ids[0x1a];
+        } else if ((flags & 0x40000000) == 0) {
+            sfx = GameAudio->sfx_ids[(object->field_0xf01 & 8) != 0 ? 0x1b : 0x1c];
+        }
+        if (sfx == -1) {
+            goto extra;
+        }
+    }
+    GameAudio_PlaySfxById(sfx, &object->apiobj.collision_position, 0, 0);
+extra:
+    if (ExtraDieSfxFn != NULL) {
+        ExtraDieSfxFn(object);
+    }
 }
 
-void PlayHurtSfx(GameObject_s *) {
+void PlayHurtSfx(GameObject_s *object) {
+    CHARACTERDATA *character = object->apiobj.character_data;
+    i32 sfx = character->game_character->sfx_hurt;
+    if (sfx == -1) {
+        if ((character->model_flags & 0x44002010) != 0) {
+            goto extra;
+        }
+        sfx = GameAudio->sfx_ids[(object->field_0xf01 & 8) != 0 ? 0x16 : 0x17];
+        if (sfx == -1) {
+            goto extra;
+        }
+    }
+    GameAudio_PlaySfxById(sfx, &object->apiobj.collision_position, 0, 0);
+extra:
+    if (ExtraHurtSfxFn != NULL) {
+        ExtraHurtSfxFn(object);
+    }
 }
 
-void PlayJumpSfx(GameObject_s *, i32) {
+void PlayJumpSfx(GameObject_s *object, i32 type) {
+    i32 sfx;
+    const u32 flags = object->apiobj.character_data->model_flags;
+    if ((flags & 0x40) != 0) {
+        sfx = GameAudio->sfx_ids[1];
+    } else if ((flags & 8) == 0) {
+        sfx = GameAudio->sfx_ids[0];
+    } else {
+        static const u8 jump_sfx[5] = {2, 3, 6, 4, 5};
+        if (static_cast<u32>(type) >= 5) {
+            return;
+        }
+        sfx = GameAudio->sfx_ids[jump_sfx[type]];
+    }
+    if (sfx != -1) {
+        if (static_cast<i8>(object->apiobj.flags_high) >= 0 && (object->field_0xefb & 8) == 0) {
+            PlaySfxByIdAndSetVolume(sfx, &object->apiobj.lower_position, 0.5f);
+        } else {
+            GameAudio_PlaySfxById(sfx, &object->apiobj.lower_position, 0, 1);
+        }
+    }
 }
 
-void PlayLandSfx(GameObject_s *, i32, i32) {
+void PlayLandSfx(GameObject_s *object, i32 type, i32) {
+    i32 sfx;
+    if (type == 1) {
+        if ((object->apiobj.character_data->model_flags & 8) == 0) {
+            return;
+        }
+        sfx = GameAudio->sfx_ids[0xb];
+    } else if (type >= 2 && type <= 4) {
+        sfx = GameAudio->sfx_ids[type + 0xa];
+    } else {
+        if (object->apiobj.is_underwater != 0) {
+            return;
+        }
+        const bool alternate = (WorldInfo_CurrentlyActive()->current_level->flags & 0x1000) != 0;
+        if ((object->apiobj.character_data->model_flags & 0x10) != 0) {
+            sfx = GameAudio->sfx_ids[alternate ? 10 : 9];
+        } else {
+            if (type != 0) {
+                return;
+            }
+            sfx = GameAudio->sfx_ids[alternate ? 8 : 7];
+        }
+    }
+    if (sfx != -1) {
+        if (static_cast<i8>(object->apiobj.flags_high) < 0 || (object->field_0xefb & 8) != 0) {
+            GameAudio_PlaySfxById(sfx, &object->apiobj.lower_position, 0, 1);
+        } else {
+            PlaySfxByIdAndSetVolume(sfx, &object->apiobj.lower_position, 0.5f);
+        }
+    }
 }
 
-void SfxBitTabEx(SoundTable const *, i32) {
+i32 SfxBitTabEx(SoundTable const *table, i32 sound) {
+    if (static_cast<u32>(sound) >= 1600) {
+        return -1;
+    }
+    return (table->bits[sound >> 4] & (1 << (sound & 15))) != 0;
 }
 
 void TickTockSfx() {
+    if (ticktock == 0) {
+        GameAudio_PlaySfx(0x1e, NULL, 0, 0);
+        ticktock = 1;
+    } else {
+        GameAudio_PlaySfx(0x1d, NULL, 0, 0);
+        ticktock = 0;
+    }
 }
 
-void AddFootSteps(GameObject_s *) {
+void AddFootSteps(GameObject_s *object) {
+    ANIMPACKET_s &packet = object->apiobj.anim_packet;
+    if (packet.blending != 0 || packet.animation_index == -1) {
+        return;
+    }
+    CHARACTERMODEL_s *model = object->apiobj.character_model;
+    const i32 animation = packet.animation_index;
+    if (model->model_data_b[animation] == NULL) {
+        return;
+    }
+    CHARACTERANIM_s *config = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation]);
+    if (config == NULL || (config->flags & CHARACTER_ANIMATION_FLAG_FOOTSTEPS) == 0 ||
+        packet.current_time == packet.previous_time) {
+        return;
+    }
+
+    bool crossed = false;
+    for (i32 i = 0; i < 4; ++i) {
+        const f32 frame = config->event_frames[i];
+        if (frame < 1.0f) {
+            continue;
+        }
+        if ((packet.flags & ANIMPACKET_FLAG_LOOPED) != 0) {
+            crossed = frame > packet.previous_time || frame <= packet.current_time;
+        } else if ((packet.flags & ANIMPACKET_FLAG_PLAYING_REVERSED) != 0) {
+            crossed = frame <= packet.previous_time && frame > packet.current_time;
+        } else {
+            crossed = frame > packet.previous_time && frame <= packet.current_time;
+        }
+        if (crossed) {
+            break;
+        }
+    }
+    if (crossed) {
+        PlayFootStepSfx(object);
+    }
 }
 
-void PlayGruntSfx(GameObject_s *) {
+void PlayGruntSfx(GameObject_s *object) {
+    CHARACTERDATA *character = object->apiobj.character_data;
+    i32 sfx = character->game_character->sfx_grunt;
+    if (sfx == -1) {
+        if ((character->model_flags & 0x44002010) != 0) {
+            return;
+        }
+        sfx = GameAudio->sfx_ids[(object->field_0xf01 & 8) != 0 ? 0x14 : 0x15];
+        if (sfx == -1) {
+            return;
+        }
+    }
+    GameAudio_PlaySfxById(sfx, &object->apiobj.collision_position, 0, 0);
 }
 
-void PlaySabreSfx(char *, GameObject_s *, nuvec_s *, i32) {
+void PlaySabreSfx(char *name, GameObject_s *object, nuvec_s *position, i32) {
+    const u8 player = static_cast<u8>(object->apiobj.field_0x27c);
+    if (player == 0xff && WORLD->rooms_visible_ptr[object->room_id] == 0) {
+        return;
+    }
+    i32 player_bits = 0;
+    if (static_cast<i8>(object->apiobj.flags_high) < 0) {
+        player_bits = 1 << (player & 0x1f);
+    }
+    if (name == NULL) {
+        const i32 sfx = object->apiobj.character_data->game_character->sfx_sabre;
+        if (sfx == -1) {
+            GameAudio_PlaySfx(0x40, &object->apiobj.collision_position, 0, 1);
+        } else {
+            GameAudio_PlaySfxById(sfx, &object->apiobj.collision_position, player_bits, 1);
+        }
+    } else {
+        if (position == NULL) {
+            position = &object->apiobj.collision_position;
+        }
+        GameAudio_PlaySfxById(GetSfxId(name), position, 0, 1);
+    }
 }
 
-void LevChatterSfx(char *, nuvec_s *) {
+void LevChatterSfx(char *name, nuvec_s *position) {
+    if (chattersfxwait <= 0.0f && qrand() < 0x400) {
+        PlaySfx(name, position);
+        const i32 random = qrand();
+        chattersfxwait = static_cast<f32>(random) * (1.0f / 65535.0f) * 2.0f + 3.0f;
+    }
 }
 
 void PlayRepeatSfx(char *name, i32 sfx_id, f32 initial_delay, char play_count, f32 interval, nuvec_s *position) {
@@ -1156,7 +1619,51 @@ enable_reverb:
     goto update_ambient;
 }
 
-void PlayFootStepSfx(GameObject_s *) {
+void PlayFootStepSfx(GameObject_s *object) {
+    i32 on_platform = 1;
+    const i8 surface = static_cast<i8>(object->apiobj.field_0x281);
+    if (object->field_0x1078 == -1 && object->apiobj.supporting_platform_id == -1 &&
+        (surface == -1 || (TerSurface[surface].flags & 2) == 0)) {
+        on_platform = 0;
+    }
+
+    i32 sfx = object->apiobj.character_data->game_character->sfx_footstep;
+    if (sfx == -1 && (GameAudio->override_footstep_fn == NULL ||
+                      (sfx = GameAudio->override_footstep_fn(object, on_platform)) == -1)) {
+        if (object->apiobj.is_underwater == 0 && object->apiobj.intersects_water == 0) {
+            const bool alternate = (WorldInfo_CurrentlyActive()->current_level->flags & 0x1000) != 0;
+            if ((object->apiobj.character_data->model_flags & 0x10) == 0) {
+                sfx = GameAudio->sfx_ids[alternate ? 0x10 : 0xf];
+            } else {
+                sfx = GameAudio->sfx_ids[alternate ? 0x12 : 0x11];
+            }
+        } else {
+            sfx = GameAudio->sfx_ids[0x13];
+        }
+    }
+
+    if (sfx != -1) {
+        if (static_cast<i8>(object->apiobj.flags_high) < 0 || (object->field_0xefb & 8) != 0) {
+            GameAudio_PlaySfxById(sfx, &object->apiobj.lower_position, 0, 0);
+        } else {
+            PlaySfxByIdAndSetVolume(sfx, &object->apiobj.lower_position, 0.5f);
+        }
+    }
+
+    ANIMPACKET_s &packet = object->apiobj.anim_packet;
+    if (packet.blending == 0 && packet.animation_index != -1) {
+        CHARACTERANIM_s *config =
+            static_cast<CHARACTERANIM_s *>(object->apiobj.character_model->model_data_a[packet.animation_index]);
+        if (config != NULL) {
+            if ((config->flags & 0x20000) != 0) {
+                GameCam_Judder(GameCam, -0.25f, 0, &object->apiobj.collision_position);
+                NewRumbleAllPlayers(0.6f, 0.0f, 0, 0);
+            } else if ((config->flags & 0x40000) != 0 && VehicleArea == 0) {
+                GameCam_NewShake(GameCam, 0.5f, 0.5f, 1.0f);
+                NewRumbleAllPlayers(0.5f, 0.0f, 0, 0);
+            }
+        }
+    }
 }
 
 void SetSfxBit_OffEx(i32 sound) {
@@ -1267,11 +1774,45 @@ void AddLevelSfxGizmoSys(GIZMOSYS_s *gizmo_sys, void *world_info, i32 *sfx_ids, 
     }
 }
 
-void BlockSfx(GameObject_s *) {
+void BlockSfx(GameObject_s *object) {
+    GameObject_s *target = object->force_target;
+    if (target != NULL) {
+        const u32 context_flags = CInfo[target->character_context].flags;
+        if ((context_flags & 0x4000000) != 0 || ((context_flags & 0x8000000) != 0 && (target->jump_flags & 2) != 0)) {
+            const i32 sfx_bits = GameAudio_GetPlrSfxBits(target);
+            GameAudio_PlaySfx(0x3f, &object->apiobj.collision_position, sfx_bits, 0);
+        }
+    }
 }
 
-void SfxBitEx(i32) {
+i32 SfxBitEx(i32 sound) {
+    if (static_cast<u32>(sound) >= 1600) {
+        return -1;
+    }
+    return (SfxBits[sound >> 4] & (1 << (sound & 15))) != 0;
 }
 
-void AddLevSfx(WORLDINFO_s *, nuvec_s *, char *, i32) {
+void AddLevSfx(WORLDINFO_s *world, nuvec_s *position, char *name, i32 sfx) {
+    if (sfx == -1 && name != NULL) {
+        sfx = GetSfxId(name);
+    }
+    if (sfx == -1) {
+        return;
+    }
+
+    i32 index = 0;
+    while (index < world->level_sfx_count && world->level_sfx[index].id != sfx) {
+        ++index;
+    }
+    if (index == world->level_sfx_count) {
+        if (index >= 64) {
+            return;
+        }
+        world->level_sfx[index].position = position != NULL ? *position : nuvec_zero;
+        world->level_sfx[index].id = static_cast<i16>(sfx);
+        world->level_sfx[index].references = 1;
+        world->level_sfx_count = index + 1;
+    } else if (world->level_sfx[index].references != -1) {
+        ++world->level_sfx[index].references;
+    }
 }

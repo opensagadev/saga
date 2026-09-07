@@ -211,11 +211,12 @@ SUPEROPTIONS_s SuperOptions = {};
 static CUTSCENESYS CutSceneSys_LSW = {0x5b, 0x5c, 0xe7, 2};
 void CutScenes_InitSystem(CUTSCENESYS *);
 void GameAudio_Init(GAMEAUDIO *);
+extern __attribute__((visibility("hidden"))) i32 GameAudio_CheckReverb_LSW() asm("_ZL25GameAudio_CheckReverb_LSWv");
 extern __attribute__((visibility("hidden"))) i32
-GameAudio_CheckReverb_LSW() asm("_ZL25GameAudio_CheckReverb_LSWv");
+GameAudio_OverrideFootStep_LSW(GameObject_s *, i32) asm("_ZL30GameAudio_OverrideFootStep_LSWP12GameObject_si");
 
 static GAMEAUDIO GameAudio_LSW = {
-    NULL,
+    GameAudio_OverrideFootStep_LSW,
     GameAudio_CheckReverb_LSW,
     {
         "Jp_Ami_Jump",

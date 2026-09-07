@@ -141,8 +141,25 @@ NuSoundBuffer::Context &NuSoundBuffer::GetCurrentContext() {
     return this->context;
 }
 
-void NuSoundBuffer::GetSegmentAddress(u32, u32, u32) const {
+void *NuSoundBuffer::GetSegmentAddress(u32 index, u32 segments, u32 alignment) const {
+    void *address = this->address;
+    u64 segment_size = GetBufferSize() / segments;
+    usize segment = (usize)address + (u32)segment_size * index;
+    return (void *)((segment + alignment - 1) & -alignment);
 }
 
-void NuSoundBuffer::GetSegmentSize(u32, u32) const {
+u32 NuSoundBuffer::GetSegmentSize(u32 segments, u32 alignment) const {
+    u32 result = (u32)GetBufferSize() / segments;
+    if (segments != 0) {
+        for (u32 index = 0; index < segments; index++) {
+            u32 segment_size = (u32)GetBufferSize() / segments;
+            u32 segment_start = segment_size * index;
+            u32 aligned_start = (segment_start + alignment - 1) & -alignment;
+            u32 available = ((u32)GetBufferSize() / segments + segment_start) - aligned_start;
+            if (result > available) {
+                result = available;
+            }
+        }
+    }
+    return result;
 }

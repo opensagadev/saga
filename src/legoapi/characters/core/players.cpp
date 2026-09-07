@@ -19,6 +19,7 @@ struct HINT_s;
 #include "legoapi/props/doors/door.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/props/system/socksys.h"
+#include "legoapi/render/fx.h"
 #include "legoapi/core/input/timer.h"
 #include "legogame/game.h"
 #include "nu2api/nu3d/nutex.h"
@@ -58,7 +59,9 @@ void ResetPlayerAI(GameObject_s *obj);
 void ResetPlayerMoves(GameObject_s *obj);
 void SetProtocolDroidDeactivatedAction(GameObject_s *);
 void NewBuzz(nupad_s *, f32, i32);
+void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
 extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
+extern "C" f32 chattersfxwait;
 
 void Players_Init(void) {
     memset(Player, 0, sizeof(Player));
@@ -677,9 +680,18 @@ void *CutScenePlayer_Available(void) {
 }
 
 void ChatterSfx(GameObject_s *g, i32 a, float b) {
-    (void)g;
-    (void)a;
-    (void)b;
+    if (chattersfxwait <= 0.0f && ParticlesPerSecond(2.0f, FRAMETIME) > 0 && g->apiobj.field_0x287 == 0 &&
+        static_cast<i8>(g->player_packet[0xf1]) == -1) {
+        if (a != last_chatter_sfx || b <= 0.0f) {
+            GameAudio_PlaySfxById(a, &g->apiobj.collision_position, 0, 0);
+            const i32 random = qrand();
+            last_chatter_sfx = a;
+            chattersfxwait = static_cast<f32>(random) * (1.0f / 65535.0f) * 2.0f + 3.0f;
+        } else {
+            chattersfxwait = b;
+            last_chatter_sfx = -1;
+        }
+    }
 }
 
 void Move_VEHICLE(GameObject_s *g) {

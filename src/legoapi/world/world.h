@@ -102,10 +102,32 @@ DECOMP_ASSERT(offsetof(BOLTTYPE_s, hit_sfx) == 0x58, "BOLTTYPE hit sound offset"
 DECOMP_ASSERT(offsetof(BOLTTYPE_s, hit_sfx_id) == 0x64, "BOLTTYPE hit sound id offset");
 
 struct LEVELSFXENTRY_s {
+    NUVEC position;
     i16 id;
-    u8 reserved_02[0xe];
+    i8 references;
+    u8 reserved_0f;
 };
 DECOMP_ASSERT(sizeof(LEVELSFXENTRY_s) == 0x10, "LEVELSFXENTRY_s size");
+
+struct SPECIALSFXEVENT_s {
+    f32 previous_frame;
+    u8 flags;
+    u8 reserved_05;
+    i16 sfx_id;
+    f32 trigger_frame;
+    SPECIALSFXEVENT_s *next;
+};
+DECOMP_ASSERT(sizeof(SPECIALSFXEVENT_s) == 0x10, "SPECIALSFXEVENT_s size");
+
+struct specialsfx_s {
+    u8 flags;
+    u8 reserved_01;
+    i8 event_count;
+    i8 animation_playing;
+    nuhspecial_s special;
+    SPECIALSFXEVENT_s *events;
+};
+DECOMP_ASSERT(sizeof(specialsfx_s) == 0x14, "specialsfx_s size");
 
 // A portal-position spline stores camera/player points as position/target
 // pairs (six floats per point).  MoveGameCamera uses portal_places[2] for
@@ -212,34 +234,39 @@ typedef struct WORLDINFO_s {
     CLIMBOBJECTSYS_s *climb_object_sys;
     MechAutoJumpManager *mech_auto_jump_manager;
 
-    TELEPORT_s *teleports;                // 0x4684
-    i32 teleport_count;                   // 0x4688
-    struct ZIPUP_s *zipups;               // 0x468c
-    i32 zipup_count;                      // 0x4690
-    struct TUBE_s *tubes;                 // 0x4694
-    i32 tube_count;                       // 0x4698
-    DOOR_s *doors;                        // 0x469c
-    i32 door_count;                       // 0x46a0
-    DOOR_s *start_door;                   // 0x46a4
-    GIZOBSTACLESYS_s *giz_obstacle_sys;   // 0x46a8
-    GIZBUILDITSYS_s *giz_buildit_sys;     // 0x46ac
-    GIZFORCESYS_s *giz_force_sys;         // 0x46b0
-    char filler7a[0x46bc - 0x46b4];       // 0x46b4 .. 0x46bc
-    GIZTURRETSYS_s *giz_turret_sys;       // 0x46bc
-    pushblock_s *push_blocks;             // 0x46c0
-    i32 push_block_count;                 // 0x46c4
-    char filler7b[0x46e4 - 0x46c8];       // 0x46c8 .. 0x46e4
-    GIZSPINNER_s *spinners;               // 0x46e4
-    i32 spinner_count;                    // 0x46e8
-    GAMEANIMOBJPOOL_s *spinner_anim_pool; // 0x46ec
+    TELEPORT_s *teleports;                 // 0x4684
+    i32 teleport_count;                    // 0x4688
+    struct ZIPUP_s *zipups;                // 0x468c
+    i32 zipup_count;                       // 0x4690
+    struct TUBE_s *tubes;                  // 0x4694
+    i32 tube_count;                        // 0x4698
+    DOOR_s *doors;                         // 0x469c
+    i32 door_count;                        // 0x46a0
+    DOOR_s *start_door;                    // 0x46a4
+    GIZOBSTACLESYS_s *giz_obstacle_sys;    // 0x46a8
+    GIZBUILDITSYS_s *giz_buildit_sys;      // 0x46ac
+    GIZFORCESYS_s *giz_force_sys;          // 0x46b0
+    char filler7a[0x46bc - 0x46b4];        // 0x46b4 .. 0x46bc
+    GIZTURRETSYS_s *giz_turret_sys;        // 0x46bc
+    pushblock_s *push_blocks;              // 0x46c0
+    i32 push_block_count;                  // 0x46c4
+    char filler7b[0x46d0 - 0x46c8];        // 0x46c8 .. 0x46d0
+    i32 special_sfx_count;                 // 0x46d0
+    specialsfx_s *special_sfx;             // 0x46d4
+    i32 special_sfx_event_count;           // 0x46d8
+    SPECIALSFXEVENT_s *special_sfx_events; // 0x46dc
+    char filler7c[0x46e4 - 0x46e0];        // 0x46e0 .. 0x46e4
+    GIZSPINNER_s *spinners;                // 0x46e4
+    i32 spinner_count;                     // 0x46e8
+    GAMEANIMOBJPOOL_s *spinner_anim_pool;  // 0x46ec
 
     GRABBER_s *grabber; // 0x46f0
 
     union {
         struct {
-            u8 reserved_46f4[0x4720 - 0x46f4];
-            LEVELSFXENTRY_s level_sfx[64]; // 0x4720
-            u8 reserved_4b20[0x5038 - 0x4b20];
+            u8 reserved_46f4[0x4714 - 0x46f4];
+            LEVELSFXENTRY_s level_sfx[64]; // 0x4714
+            u8 reserved_4b14[0x5038 - 0x4b14];
         };
         struct {
             u8 reserved_to_4b14[0x4b14 - 0x46f4];
@@ -331,7 +358,7 @@ DECOMP_ASSERT(offsetof(WORLDINFO, gizmo_blowup_types) == 0x50c8, "WORLDINFO blow
 DECOMP_ASSERT(offsetof(WORLDINFO, portal_doors) == 0x504c, "WORLDINFO portal-door array offset");
 DECOMP_ASSERT(offsetof(WORLDINFO, portal_door_count) == 0x5050, "WORLDINFO portal-door count offset");
 DECOMP_ASSERT(offsetof(WORLDINFO, pulses_sys) == 0x5054, "WORLDINFO pulse system offset");
-DECOMP_ASSERT(offsetof(WORLDINFO, level_sfx) == 0x4720, "WORLDINFO level SFX array offset");
+DECOMP_ASSERT(offsetof(WORLDINFO, level_sfx) == 0x4714, "WORLDINFO level SFX array offset");
 DECOMP_ASSERT(offsetof(WORLDINFO, level_sfx_count) == 0x4b14, "WORLDINFO level SFX count offset");
 DECOMP_ASSERT(offsetof(WORLDINFO, bolt_types) == 0x4b18, "WORLDINFO bolt types offset");
 DECOMP_ASSERT(offsetof(WORLDINFO, faders) == 0x5038, "WORLDINFO fader array offset");

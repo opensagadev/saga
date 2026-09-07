@@ -27,11 +27,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      # pull_request_target checks out the pr head
+      # pull_request_target checks out trusted code from the PR's base. The PR
+      # matching file is read as data from Git without checking out its tree.
       - name: Checkout trusted report script
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.base.sha }}
           fetch-depth: 1
 
       - name: Read matching reports

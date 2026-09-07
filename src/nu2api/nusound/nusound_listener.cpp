@@ -1,6 +1,4 @@
 #include "nu2api_nusound_types.h"
-#include "nu2api/numath/nuvec.h"
-#include <float.h>
 
 #include "nu2api/numath/nuvec.h"
 
@@ -123,19 +121,34 @@ void NuSoundListener::SetVelocity(VuVec const &value) {
 }
 
 NuSoundListener::~NuSoundListener() {
-    NuSoundEffect::ManagedReference *head = references;
-    if (head != NULL) {
-        while (head->next != head) {
-            NuSoundEffect::ManagedReference *ref = head->next;
-            NuSoundEffect::ManagedReference *next = ref->next;
-            ref->object = NULL;
-            head->next = next;
-            ref->previous = NULL;
-            ref->next = NULL;
-        }
-        head->object = NULL;
-        head->previous = NULL;
-        head->next = NULL;
-        references = NULL;
+    // Every positional voice contributes one of its embedded three-word
+    // listener links to this circular chain.  The target tears the chain down
+    // from the predecessor of the anchor and clears the embedded links in the
+    // voices; leaving this destructor empty leaves listener->field_0x8
+    // pointing at detached/reused voice storage.
+    struct ListenerVoiceLink {
+        void *listener;
+        ListenerVoiceLink *previous;
+        ListenerVoiceLink *next;
+    };
+
+    ListenerVoiceLink *anchor = static_cast<ListenerVoiceLink *>(field_0x8);
+    if (anchor == NULL) {
+        return;
     }
+
+    ListenerVoiceLink *link = anchor->previous;
+    while (link != anchor) {
+        ListenerVoiceLink *previous = link->previous;
+        link->listener = NULL;
+        anchor->previous = previous;
+        link->next = NULL;
+        link->previous = NULL;
+        link = anchor->previous;
+    }
+
+    anchor->listener = NULL;
+    anchor->next = NULL;
+    anchor->previous = NULL;
+    field_0x8 = NULL;
 }

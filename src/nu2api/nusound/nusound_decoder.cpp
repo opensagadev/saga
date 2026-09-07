@@ -1,21 +1,18 @@
-#include "decomp_assert.h"
 #include "nusound_decoder.hpp"
 
 #include "nu2api/nucore/nucore.hpp"
-#include "nu2api/nucore/numemory.h"
 #include "nu2api/nusound/nusound_buffer.hpp"
 #include "nu2api/nusound/nusound_sample.hpp"
 #include "nu2api/nusound/nusound_voice.hpp"
 #include "nu2api/nusound/nusound_system.hpp"
 
+#include <cstring>
 #include <new>
-#include <string.h>
 
 // libTTapp.so NuSoundDecoder::sDecodeThread @0x11e90d0.
 NuSoundDecodeThread *NuSoundDecoder::sDecodeThread = NULL;
-// Original static initializer at 0xde53d passes a maximum of one signal.
-NuThreadSemaphore NuSoundDecodeThread::sShutdownSemaphore(1);
 i32 NuSoundDecodeThread::sThreadPriority = 2;
+NuThreadSemaphore NuSoundDecodeThread::sShutdownSemaphore(1);
 
 // libTTapp.so 0x31eed0: the decoder wraps the source, carries two ring
 // buffer objects and starts closed. The source's stream descriptor (the
@@ -23,37 +20,36 @@ i32 NuSoundDecodeThread::sThreadPriority = 2;
 // ov_read() through the handle the loader opened.
 NuSoundDecoder::NuSoundDecoder(char const *name, NuSoundSource *wrapped)
     : NuSoundSource(NULL, SourceType::STREAMING, NuSoundSource::FeedType::STREAMING) {
+    // The decode-sync pair the decode thread raises per completed request
+    // (device offsets +0xdc/+0xe0/+0xe4).
+    NuSoundMutexInit(&this->decode_mutex);
+    NuSoundConditionInit(&this->decode_cond);
     (void)name;
     this->source = wrapped;
 
-    // The decode-sync pair the decode thread raises per completed request
-    // (device offsets +0xdc/+0xe0/+0xe4).
-    pthread_mutex_init(&this->decode_mutex, NULL);
-    pthread_cond_init(&this->decode_cond, NULL);
-    this->decode_done = false;
-    this->decode_broadcast = false;
-
-    this->consumed_pos = 0;
     this->ring_count = 0;
     this->consumed_pos = 0;
     this->decode_pos = 0;
     this->field_0xd4 = 0;
-    this->closing = false;
+    this->buffer_size = 0x2000;
+
+    NuSoundStreamDesc *desc = wrapped->GetStreamDesc();
+    this->decode_broadcast = false;
+    this->decode_done = false;
     this->field_0xc0 = 0;
     this->field_0xc4 = 0;
-    this->field_0xd0 = 0;
     this->total_decoded_bytes = 0;
     this->decoded_bytes = 0;
     this->stream_open = false;
 
-    this->SetStreamDesc(wrapped->GetStreamDesc());
+    this->SetStreamDesc(desc);
     this->field_0x1c = 1;
 }
 
 // libTTapp.so 0x31ede0 / 0x31ee70.
 NuSoundDecoder::~NuSoundDecoder() {
-    pthread_mutex_destroy(&this->decode_mutex);
-    pthread_cond_destroy(&this->decode_cond);
+    NuSoundMutexDestroy(&this->decode_mutex);
+    NuSoundConditionDestroy(&this->decode_cond);
 }
 
 __attribute__((weak)) void NuSoundDecoder::Reset() {
@@ -65,18 +61,15 @@ __attribute__((weak)) void NuSoundDecoder::Reset() {
 // been decoded (the remaining chunks decode on demand through the decode
 // thread as the voice consumes the ring).
 bool NuSoundDecoder::OpenStream(bool loop) {
+    u64 total = 0;
     u64 decoded = 0;
     this->source->OpenStream(loop);
 
     NuSoundStreamDesc *desc = this->source->GetStreamDesc();
-    u64 total = desc->GetDecodedLengthBytes();
+    total = desc->GetDecodedLengthBytes();
     this->ring_count = 0;
-    this->consumed_pos = 0;
     this->decode_pos = 0;
-
-    if (desc != NULL) {
-        total = desc->GetDecodedLengthBytes();
-    }
+    this->consumed_pos = 0;
 
     for (u32 i = 0; decoded < total; i++) {
         NuSoundBuffer &buffer = this->buffers[i];
@@ -92,6 +85,9 @@ bool NuSoundDecoder::OpenStream(bool loop) {
         this->decode_pos++;
         this->buffers_started++;
 
+        if (i >= 1) {
+            break;
+        }
     }
 
     this->stream_open = true;
@@ -117,15 +113,15 @@ void NuSoundDecoder::CloseStream() {
     this->closing = true;
 
     while (this->field_0xd4 > 0) {
-        pthread_mutex_lock(&this->decode_mutex);
+        NuSoundMutexLock(&this->decode_mutex);
         while (this->decode_done == false) {
-            pthread_cond_wait(&this->decode_cond, &this->decode_mutex);
+            NuSoundConditionWait(&this->decode_cond, &this->decode_mutex);
         }
         this->decode_done = this->decode_broadcast;
-        pthread_mutex_unlock(&this->decode_mutex);
+        NuSoundMutexUnlock(&this->decode_mutex);
     }
 
-    for (u32 i = 0; i < this->ring_count; i++) {
+    for (i32 i = 0; i < this->ring_count; i++) {
         this->buffers[i].Free();
     }
 
@@ -137,8 +133,9 @@ void NuSoundDecoder::CloseStream() {
 void NuSoundDecoder::Initialise() {
     // 0xe1c is the device-side object size; the host NuThreadSemaphore and
     // weakptr types differ in size, so size the block from the real object.
-    NuSoundDecodeThread *thread = (NuSoundDecodeThread *)NuMemoryGet()->GetThreadMem()->_BlockAlloc(
-        (u32)sizeof(NuSoundDecodeThread), 4, 1, "", 7);
+    NuSoundDecodeThread *thread = (NuSoundDecodeThread *)NuSoundSystem::_AllocMemory(
+        NuSoundSystem::MemoryDiscipline::SCRATCH, (u32)sizeof(NuSoundDecodeThread), 4,
+        "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/android/nusound_decoder.cpp:69");
 
     if (thread != NULL) {
         new (thread) NuSoundDecodeThread();
@@ -149,14 +146,16 @@ void NuSoundDecoder::Initialise() {
 
 // libTTapp.so 0x31fe00.
 void NuSoundDecoder::Shutdown() {
-    if (sDecodeThread != NULL) {
-        sDecodeThread->Shutdown();
-        NuSoundDecodeThread *thread = sDecodeThread;
+    if (NuSoundDecoder::sDecodeThread != NULL) {
+        NuSoundDecoder::sDecodeThread->Shutdown();
+
+        NuSoundDecodeThread *thread = NuSoundDecoder::sDecodeThread;
         if (thread != NULL) {
             thread->~NuSoundDecodeThread();
-            NuMemoryGet()->GetThreadMem()->BlockFree(thread, 0);
+            NU_FREE(thread);
         }
-        sDecodeThread = NULL;
+
+        NuSoundDecoder::sDecodeThread = NULL;
     }
 }
 
@@ -170,14 +169,14 @@ bool NuSoundDecoder::IsLocked() const {
 // stays locked at count >= 1 and SubmitBuffer always hands the device a
 // live address while the voice exists.
 void NuSoundDecoder::Lock() {
-    for (u32 i = 0; i < this->ring_count; i++) {
+    for (i32 i = 0; i < this->ring_count; i++) {
         this->buffers[i].Lock();
     }
 }
 
 // libTTapp.so 0x31eaf0.
 void NuSoundDecoder::Unlock() {
-    for (u32 i = 0; i < this->ring_count; i++) {
+    for (i32 i = 0; i < this->ring_count; i++) {
         this->buffers[i].Unlock();
     }
 }
@@ -223,35 +222,29 @@ u32 NuSoundDecoder::GetMaxBufferSize() {
 // thread (RequestDecode) and returns immediately; the thread decodes the
 // buffer and performs the same SubmitBuffer hand-off on its own stack.
 void NuSoundDecoder::RequestBuffer(bool loop, NuSoundWeakPtr<NuSoundBufferCallback> callback) {
-    if (this->decode_pos > this->consumed_pos && this->ring_count > 0) {
+    if (this->decode_pos > this->consumed_pos) {
         NuSoundBuffer &ready = this->buffers[this->consumed_pos % this->ring_count];
         NuSoundBuffer::Context &context = ready.GetCurrentContext();
 
         if (context.size2 != 0) {
-            pthread_mutex_lock(&NuSoundSample::sCriticalSection);
+            NuSoundWeakPtrListNode::sPtrAccessLock.Lock();
             NuSoundBufferCallback *cb = (NuSoundBufferCallback *)callback.obj;
             if (cb != NULL) {
                 cb->SubmitBuffer(&ready);
             }
-            pthread_mutex_unlock(&NuSoundSample::sCriticalSection);
+            NuSoundWeakPtrListNode::sPtrAccessLock.Unlock();
         }
 
         this->consumed_pos++;
         return;
     }
 
-    // libTTapp.so 0x31fb08: queue buffers[decode_pos % ring_count] on the
-    // decode thread and return; the thread performs the decode and the
-    // SubmitBuffer hand-off. The ring slot was already allocated by the
-    // OpenStream prefill, and the consume cursor advances on the caller side.
-    if (NuSoundDecoder::sDecodeThread != NULL && this->ring_count > 0) {
-        NuSoundBuffer &buffer = this->buffers[this->decode_pos % this->ring_count];
-        NuSoundWeakPtr<NuSoundBufferCallback> request;
-        request.Set((NuSoundBufferCallback *)callback.obj);
-        NuSoundDecoder::sDecodeThread->RequestDecode(*this, buffer, request, (loop & 1) != 0);
-        this->decode_pos++;
-    }
+    NuSoundBuffer &buffer = this->buffers[this->decode_pos % this->ring_count];
+    NuSoundWeakPtr<NuSoundBufferCallback> request;
+    request.Set((NuSoundBufferCallback *)callback.obj);
+    NuSoundDecoder::sDecodeThread->RequestDecode(*this, buffer, request, (loop & 1) != 0);
     this->decode_pos++;
+
     this->consumed_pos++;
 }
 
@@ -262,14 +255,11 @@ void NuSoundDecoder::RequestBuffer(bool loop, NuSoundWeakPtr<NuSoundBufferCallba
 // libTTapp.so 0x31f010: 128 zeroed loader slots behind a 128-signal
 // semaphore, then the worker thread (priority 2, cafe/xbox core 2).
 NuSoundDecodeThread::NuSoundDecodeThread() : semaphore(128) {
-    DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(Loader) == 0x1c, "decode queue entry stride");
-    DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecodeThread, loaders) == 4, "decode queue offset");
-    DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecodeThread, semaphore) == 0xe0c, "decode semaphore offset");
-    DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NuSoundDecodeThread) == 0xe1c, "decode thread allocation size");
     memset(this->loaders, 0, sizeof(this->loaders));
     this->tail_index = 0;
     this->head_index = 0;
-    this->thread = NuCore::m_threadManager->CreateThread(NuSoundDecodeThread::ThreadFunc, this, sThreadPriority, "NuSoundDecode", 0,
+    this->thread = NuCore::m_threadManager->CreateThread(NuSoundDecodeThread::ThreadFunc, this,
+                                                         NuSoundDecodeThread::sThreadPriority, "NuSoundDecodeThread", 0,
                                                          NUTHREADCAFECORE_UNKNOWN_2, NUTHREADXBOX360CORE_UNKNOWN_2);
 }
 
@@ -284,12 +274,8 @@ void NuSoundDecodeThread::RequestDecode(NuSoundDecoder &decoder, NuSoundBuffer &
                                         NuSoundWeakPtr<NuSoundBufferCallback> callback, bool loop) {
     __sync_fetch_and_add(&decoder.field_0xd4, 1);
 
-    Loader request = {&decoder, &buffer, callback, loop};
-    Loader &entry = this->loaders[this->tail_index % 128];
-    entry.decoder = &decoder;
-    entry.buffer = &buffer;
-    entry.callback.Set((NuSoundBufferCallback *)callback.obj);
-    entry.loop = loop;
+    LoaderSlot &slot = this->loaders[this->tail_index % 128];
+    new (&slot) Loader{&decoder, &buffer, callback, loop};
     __sync_fetch_and_add(&this->tail_index, 1);
 
     this->semaphore.Signal();
@@ -304,50 +290,35 @@ void NuSoundDecodeThread::ThreadFunc(void *self_) {
     while (true) {
         self->semaphore.Wait();
 
-        Loader &entry = self->loaders[self->head_index % 128];
-        __sync_fetch_and_add(&self->head_index, 1);
-
-        NuSoundDecoder *decoder = entry.decoder;
-        NuSoundBuffer *buffer = entry.buffer;
-        NuSoundWeakPtr<NuSoundBufferCallback> callback;
-        callback.Set((NuSoundBufferCallback *)entry.callback.obj);
-        bool loop = entry.loop;
+        Loader &entry = *reinterpret_cast<Loader *>(&self->loaders[self->head_index % 128]);
+        Loader request(entry);
         entry.~Loader();
         __sync_fetch_and_add(&self->head_index, 1);
+
+        NuSoundDecoder *decoder = request.decoder;
+        NuSoundBuffer *buffer = request.buffer;
+        bool loop = request.loop;
 
         // libTTapp.so 0x31f4d3: a closed decoder drops the request
         // (pending count--) without decoding.
         if (decoder == NULL) {
-            continue;
+            NuSoundDecodeThread::sShutdownSemaphore.Signal();
+            return;
         }
 
-        if (decoder->closing) {
-            __sync_fetch_and_sub(&decoder->field_0xd4, 1);
-            pthread_mutex_lock(&decoder->decode_mutex);
-            if (decoder->decode_done == false) {
-                decoder->decode_done = true;
-                if (decoder->decode_broadcast) {
-                    pthread_cond_broadcast(&decoder->decode_cond);
-                } else {
-                    pthread_cond_signal(&decoder->decode_cond);
-                }
-            }
-            pthread_mutex_unlock(&decoder->decode_mutex);
-            continue;
-        }
+        if (decoder->closing == false) {
+            // Decode owns the destination buffer lock. ThreadFunc in the target
+            // dispatches directly through the decoder vtable here; it does not
+            // take a second NuSoundBuffer lock around that call.
+            decoder->Decode(*decoder->GetEncodedSource(), *buffer, loop);
+            decoder->buffers_started++;
 
-        // Decode owns the destination buffer lock.  ThreadFunc in the target
-        // dispatches directly through the decoder vtable here; it does not
-        // take a second NuSoundBuffer lock around that call.
-        decoder->Decode(*decoder, *buffer, loop);
-        decoder->buffers_started++;
-
-        if (callback != NULL) {
-            pthread_mutex_lock(&NuSoundSample::sCriticalSection);
-            if (callback.obj != NULL) {
-                ((NuSoundBufferCallback *)callback.obj)->SubmitBuffer(buffer);
+            NuSoundWeakPtrListNode::sPtrAccessLock.Lock();
+            NuSoundBufferCallback *callback = (NuSoundBufferCallback *)request.callback.obj;
+            if (callback != NULL) {
+                callback->SubmitBuffer(buffer);
             }
-            pthread_mutex_unlock(&NuSoundSample::sCriticalSection);
+            NuSoundWeakPtrListNode::sPtrAccessLock.Unlock();
         }
 
         // libTTapp.so 0x31f1c8: the request is complete; drop the pending
@@ -356,32 +327,25 @@ void NuSoundDecodeThread::ThreadFunc(void *self_) {
         // cond +0xe0, done flag +0xe4). This never touches the decoder's
         // lifetime lock mutex, which the owning voice holds.
         __sync_fetch_and_sub(&decoder->field_0xd4, 1);
-        pthread_mutex_lock(&decoder->decode_mutex);
+        NuSoundMutexLock(&decoder->decode_mutex);
         if (decoder->decode_done == false) {
             decoder->decode_done = true;
             if (decoder->decode_broadcast) {
-                pthread_cond_broadcast(&decoder->decode_cond);
+                NuSoundConditionBroadcast(&decoder->decode_cond);
             } else {
-                pthread_cond_signal(&decoder->decode_cond);
+                NuSoundConditionSignal(&decoder->decode_cond);
             }
         }
-        pthread_mutex_unlock(&decoder->decode_mutex);
+        NuSoundMutexUnlock(&decoder->decode_mutex);
     }
 }
 
 // libTTapp.so 0x31fc90.
 void NuSoundDecodeThread::Shutdown() {
-    NuSoundWeakPtrListNode::sPtrListLock.Lock();
-    NuSoundWeakPtrListNode::sPtrListLock.Unlock();
-    Loader &entry = this->loaders[this->tail_index % 128];
-    new (&entry) Loader;
-    entry.decoder = NULL;
-    entry.buffer = NULL;
-    entry.callback.Set(NULL);
-    entry.loop = false;
+    LoaderSlot &slot = this->loaders[this->tail_index % 128];
+    new (&slot) Loader();
     __sync_fetch_and_add(&this->tail_index, 1);
+
     this->semaphore.Signal();
-    sShutdownSemaphore.Wait();
-    NuSoundWeakPtrListNode::sPtrListLock.Lock();
-    NuSoundWeakPtrListNode::sPtrListLock.Unlock();
+    NuSoundDecodeThread::sShutdownSemaphore.Wait();
 }

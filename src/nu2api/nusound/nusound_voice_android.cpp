@@ -12,6 +12,8 @@
 #include "decomp.h"
 
 #include <new>
+#include <stdio.h>
+#include <string.h>
 
 #include "nu2api/nucore/nucore.hpp"
 #include "nu2api/nusound/nusound_android.hpp"
@@ -19,8 +21,6 @@
 #include "nu2api/nusound/nusound_streamer.hpp"
 
 #include <math.h>
-#include <stdio.h>
-#include <string.h>
 
 namespace {
 
@@ -29,7 +29,7 @@ namespace {
     typedef u32 (*ObjectResumeFn)(void *, u32);
     typedef u32 (*ObjectGetStateFn)(void *, u32 *);
     typedef u32 (*ObjectGetInterfaceFn)(void *, const void *, void **);
-    typedef void (*ObjectDestroyFn)(void *);
+    typedef u32 (*ObjectDestroyFn)(void *);
     typedef u32 (*EngineCreateAudioPlayerFn)(void *, void **, void *, void *, u32, const void **, const u32 *);
     typedef u32 (*PlaySetPlayStateFn)(void *, u32);
     typedef u32 (*PlayGetPlayStateFn)(void *, u32 *);
@@ -38,14 +38,35 @@ namespace {
     typedef u32 (*PlaySetCallbackEventsMaskFn)(void *, u32);
     typedef u32 (*QueueEnqueueFn)(void *, void *, u32);
     typedef u32 (*QueueClearFn)(void *);
-    struct QueueState {
-        u32 count;
-        u32 index;
-    };
-    typedef u32 (*QueueGetStateFn)(void *, QueueState *);
-    typedef u32 (*VolumeSetVolumeLevelFn)(void *, i16);
+    typedef u32 (*QueueGetStateFn)(void *, u32 *);
+    typedef u32 (*VolumeSetVolumeLevelFn)(void *, i32);
     typedef u32 (*VolumeEnableStereoPositionFn)(void *, u32);
-    typedef u32 (*VolumeSetStereoPositionFn)(void *, i16);
+    typedef u32 (*VolumeSetStereoPositionFn)(void *, i32);
+
+    struct OpenSLBufferQueueLocator {
+        u32 locator_type;
+        u32 num_buffers;
+    };
+
+    struct OpenSLPcmFormat {
+        u32 format_type;
+        u32 channels;
+        u32 sample_rate;
+        u32 bits;
+        u32 container_bits;
+        u32 speaker_mask;
+        u32 endianness;
+    };
+
+    struct OpenSLDataEndpoint {
+        void *locator;
+        void *format;
+    };
+
+    struct OpenSLOutputMixLocator {
+        u32 locator_type;
+        void *output_mix;
+    };
 
 #define SL_SLOT(itf, fn_type, byte_offset) (*(fn_type *)((char *)(*(void **)(itf)) + (byte_offset)))
 
@@ -62,11 +83,7 @@ NuVoiceAndroid::NuVoiceAndroid(NuSoundSource *sound_source, bool loop) : NuSound
     this->field4_0x158 = NULL;
     this->volume_interface = NULL;
 
-    pthread_mutexattr_t attributes;
-    pthread_mutexattr_init(&attributes);
-    pthread_mutexattr_settype(&attributes, 1);
-    pthread_mutex_init(&this->mutex, &attributes);
-    pthread_mutexattr_destroy(&attributes);
+    NuSoundMutexInit(&this->mutex);
 
     this->field7_0x164 = 0;
     this->field8_0x168 = 0;
@@ -75,7 +92,8 @@ NuVoiceAndroid::NuVoiceAndroid(NuSoundSource *sound_source, bool loop) : NuSound
     this->field11_0x174 = 0;
     this->field12_0x178 = 0;
 
-    this->hardware_flags &= 0xf0;
+    this->last_volume_level = -0x8000; // muted until the first mix arrives
+    this->hardware_flags = 0;
 
     // libTTapp.so ctor tail (0x32c1ae): the platform voice builds its OpenSL
     // player immediately, before any Play.
@@ -84,7 +102,7 @@ NuVoiceAndroid::NuVoiceAndroid(NuSoundSource *sound_source, bool loop) : NuSound
 
 NuVoiceAndroid::~NuVoiceAndroid() {
     this->DestroyHardwareVoice();
-    pthread_mutex_destroy(&this->mutex);
+    NuSoundMutexDestroy(&this->mutex);
 }
 
 // ---------------------------------------------------------------------------
@@ -98,17 +116,16 @@ void NuVoiceAndroid::SubmitBuffer(NuSoundBuffer *buffer) {
 
     u32 max_buffer_size = this->sound_source->GetMaxBufferSize();
     NuSoundBuffer::Context &context = buffer->GetCurrentContext();
-    // libTTapp.so 0x32bbbe reads the context field at +8 for enqueue length.
     u32 size = (u32)context.size2;
+    NuSoundStreamDesc *desc = this->sound_source->GetStreamDesc();
+    u32 blocks = size / desc->GetBlockSize();
 
-    u32 block_count = size / this->sound_source->GetStreamDesc()->GetBlockSize();
+    NuSoundMutexLock(&this->mutex);
 
-    pthread_mutex_lock(&this->mutex);
-
-    char debug_line[256] = {0};
-    sprintf(debug_line + strlen(debug_line), "%s ", this->sound_source->GetName());
-    strcat(debug_line, "Submit   ");
-    sprintf(debug_line + strlen(debug_line), "%12d ", block_count);
+    char debug[256] = {};
+    sprintf(debug + strlen(debug), "%s ", this->sound_source->GetName());
+    strcat(debug, "Submit   ");
+    sprintf(debug + strlen(debug), "%12d ", blocks);
 
     if (size != 0) {
         u32 error =
@@ -118,13 +135,13 @@ void NuVoiceAndroid::SubmitBuffer(NuSoundBuffer *buffer) {
     }
 
     if (size < max_buffer_size) {
-        this->flags |= 2; // 0x32bd0e
+        this->flags2 |= 2; // 0x32bd0e
         if (size == 0) {
             this->hardware_flags |= 2; // 0x32bd16
         }
     }
 
-    pthread_mutex_unlock(&this->mutex);
+    NuSoundMutexUnlock(&this->mutex);
 }
 
 // ---------------------------------------------------------------------------
@@ -132,56 +149,71 @@ void NuVoiceAndroid::SubmitBuffer(NuSoundBuffer *buffer) {
 // ---------------------------------------------------------------------------
 
 bool NuVoiceAndroid::CreateHardwareVoice() {
-    NuSoundSource *source = this->sound_source;
-    if (source == NULL) {
+    if (this->sound_source == NULL) {
         return false;
     }
-    NuSoundStreamDesc *desc = source->GetStreamDesc();
+    NuSoundStreamDesc *desc = this->sound_source->GetStreamDesc();
     if (desc == NULL) {
         return false;
     }
 
-    u32 pcm_format[7];
-    pcm_format[0] = 2;
-    pcm_format[1] = desc->GetNumChannels();
-    if (pcm_format[1] == 1) {
-        pcm_format[5] = 4;
-    } else if (pcm_format[1] == 2) {
-        pcm_format[5] = 3;
+    struct {
+        OpenSLBufferQueueLocator locator;
+        OpenSLDataEndpoint audio_src;
+        OpenSLOutputMixLocator mix_locator;
+        OpenSLDataEndpoint audio_sink;
+        const void *iids[2];
+        u32 required[2];
+        OpenSLPcmFormat pcm_format;
+    } data;
+
+    data.pcm_format.format_type = 2;
+    u32 channels = (u32)desc->GetNumChannels();
+    data.pcm_format.channels = channels;
+    if (channels == 1) {
+        data.pcm_format.speaker_mask = 4;
+    } else if (channels == 2) {
+        data.pcm_format.speaker_mask = 3;
     } else {
         return false;
     }
-    // OpenSL speaker mask: front-centre for mono, front-left|front-right for
-    // stereo.
-    pcm_format[2] = desc->GetSampleRate() * 1000;
-    if (NuSoundAndroid::IsValidSampleRate(pcm_format[2]) == false) {
+
+    u32 rate_millis = (u32)desc->GetSampleRate() * 1000;
+    data.pcm_format.sample_rate = rate_millis;
+    if (NuSoundAndroid::IsValidSampleRate(rate_millis) == false) {
         return false;
     }
 
-    pcm_format[3] = desc->GetBitsPerChannel();
-    if (NuSoundAndroid::IsValidBitRate(pcm_format[3]) == false) {
+    u32 bits = desc->GetBitsPerChannel();
+    data.pcm_format.bits = bits;
+    if (NuSoundAndroid::IsValidBitRate(bits) == false) {
         return false;
     }
+    data.pcm_format.container_bits = desc->GetBitsPerChannel();
+    data.pcm_format.endianness = 2;
 
-    pcm_format[4] = desc->GetBitsPerChannel();
-    pcm_format[6] = 2;
     // SLDataLocator_AndroidSimpleBufferQueue { locator type, numBuffers = 2 }.
-    u32 locator[2] = {0x800007bd, 2};
+    data.locator.locator_type = 0x800007bd;
+    data.locator.num_buffers = 2;
     // SLDataFormat_PCM { format type, channels, rate (milliHz), bits,
     // container bits, channel mask, little endian }.
-    void *audio_src[2] = {locator, pcm_format};
+    data.audio_src.locator = &data.locator;
+    data.audio_src.format = &data.pcm_format;
 
     // Output mix sink.
-    void *mix_locator[2] = {(void *)4, NuSoundSystem::Get()->output_mix};
-    void *audio_sink[2] = {mix_locator, NULL};
+    data.mix_locator.locator_type = 4;
+    data.mix_locator.output_mix = NuSoundSystem::Get()->output_mix;
+    data.audio_sink.locator = &data.mix_locator;
+    data.audio_sink.format = NULL;
 
-    const void *iids[2] = {SL_IID_ANDROIDSIMPLEBUFFERQUEUE, SL_IID_VOLUME};
-    const u32 required[2] = {1, 1};
+    data.iids[0] = SL_IID_ANDROIDSIMPLEBUFFERQUEUE;
+    data.iids[1] = SL_IID_VOLUME;
+    data.required[0] = 1;
+    data.required[1] = 1;
 
-    EngineCreateAudioPlayerFn create_player =
-        SL_SLOT(NuSoundSystem::Get()->audio_engine, EngineCreateAudioPlayerFn, 8);
-    u32 error = create_player(NuSoundSystem::Get()->audio_engine, &this->player_object, audio_src,
-                                                                  audio_sink, 2, iids, required);
+    u32 error = SL_SLOT(NuSoundSystem::Get()->audio_engine, EngineCreateAudioPlayerFn,
+                        8)(NuSoundSystem::Get()->audio_engine, &this->player_object, &data.audio_src, &data.audio_sink,
+                           2, data.iids, data.required);
     if (NuSoundAndroid::ReportErrorCode(error, "Create audio player") != 0) {
         return false;
     }
@@ -258,7 +290,7 @@ void NuVoiceAndroid::StopHardwareVoice() {
     error = SL_SLOT(this->queue_interface, QueueClearFn, 4)(this->queue_interface);
     NuSoundAndroid::ReportErrorCode(error, "Cleared the buffer queue");
 
-    this->flags &= 0xfd;
+    this->flags2 &= 0xfd;
 }
 
 void NuVoiceAndroid::PauseHardwareVoice() {
@@ -322,7 +354,7 @@ bool NuVoiceAndroid::UpdateState() {
 
     // Realized: a looping voice re-realizes and restarts per the voice state;
     // a non-looping voice is finished.
-    if ((this->flags & 8) != 0) {
+    if ((this->flags2 & 8) != 0) {
         if (this->RealiseObject() == false) {
             return false;
         }
@@ -357,24 +389,24 @@ bool NuVoiceAndroid::UpdateQueue() {
         return true;
     }
 
-    QueueState state;
-    u32 error = SL_SLOT(this->queue_interface, QueueGetStateFn, 8)(this->queue_interface, &state);
+    u32 count = 0;
+    u32 error = SL_SLOT(this->queue_interface, QueueGetStateFn, 8)(this->queue_interface, &count);
     if (NuSoundAndroid::ReportErrorCode(error, "Get queue state") != 0) {
         return false;
     }
 
-    if (this->sound_source->feed_type == NuSoundSource::FeedType::STREAMING && (this->flags & 2) == 0) {
+    if (this->sound_source->feed_type == NuSoundSource::FeedType::STREAMING && (this->flags2 & 2) == 0) {
         // Starvation watchdog: remember whether the queue ever ran ahead, and
         // request a refill as soon as it runs low.
         // libTTapp.so 0x32c37e..0x32c3ad reads and writes voice+0x17e,
-        // NuVoiceAndroid::hardware_flags. Using NuSoundVoice::flags (+0x30)
+        // NuVoiceAndroid::hardware_flags. Using NuSoundVoice::flags (+0x31)
         // left bit 4 invisible to UpdateHardwareVoice and delayed every refill
         // until HEADATEND.
         if ((this->hardware_flags & 8) == 0) {
-            if (state.count > 1) {
+            if (count > 1) {
                 this->hardware_flags |= 8;
             }
-        } else if (state.count < 2) {
+        } else if (count < 2) {
             this->hardware_flags &= 0xf7;
             this->hardware_flags |= 4;
         }
@@ -413,11 +445,7 @@ void NuVoiceAndroid::UpdateHardwareVoice(f32 frametime) {
     }
 
     if ((this->hardware_flags & 4) != 0) {
-        // The queue drained: ask the source for the next buffer (streaming
-        // fills are asynchronous through the streamer, the voice is the
-        // callback).
-        this->sound_source->RequestBuffer(
-            (this->flags >> 3) & 1, NuSoundWeakPtr<NuSoundBufferCallback>(this));
+        this->sound_source->RequestBuffer((this->flags2 >> 3) & 1, this);
         this->hardware_flags &= 0xfb;
     }
 
@@ -431,7 +459,7 @@ void NuVoiceAndroid::ApplyHardwareVoiceMix() {
 
     f32 gain = this->field67_0xa8;
     i16 level = -0x8000;
-    if (!(gain < 0.01f)) {
+    if (gain >= 0.01f) {
         level = (i16)(i32)(log10((f64)gain) * 2000.0);
     }
 
@@ -447,22 +475,23 @@ void NuVoiceAndroid::ApplyHardwareVoiceMix() {
         // Mono sources are panned through the stereo position interface from
         // the eight positional gains.
         f32 stereo_gains[64] = {0};
-        NuSoundMixer mixer((NuSoundSystem::ChannelConfig){1}, (NuSoundSystem::ChannelConfig){2},
-                           (NuSoundMixer::OutputLayout){1}, (NuSoundSystem::DownmixType)this->downmixer_type,
+        NuSoundMixer mixer(static_cast<NuSoundSystem::ChannelConfig>(1), static_cast<NuSoundSystem::ChannelConfig>(2),
+                           NuSoundMixer::OutputLayout::ONE, (NuSoundSystem::DownmixType)this->downmixer_type,
                            this->routing_table);
         mixer.Mix(this->mix_gains, stereo_gains);
 
-        f32 maximum = stereo_gains[0] > stereo_gains[1] ? stereo_gains[0] : stereo_gains[1];
-        i16 position = 0;
+        f32 left = stereo_gains[0];
+        f32 right = stereo_gains[1];
+        f32 maximum = left > right ? left : right;
+        i16 pan = 0;
         if (maximum > 0.0f) {
-            position = (i16)(i32)((stereo_gains[1] - stereo_gains[0]) * (1.0f / maximum) * 1000.0f);
+            pan = (i16)(i32)(((right - left) / maximum) * 1000.0f);
         }
 
         u32 error = SL_SLOT(this->volume_interface, VolumeEnableStereoPositionFn, 0x14)(this->volume_interface, 1);
         NuSoundAndroid::ReportErrorCode(error, "Volume EnableStereoPosition(true)");
 
-        error = SL_SLOT(this->volume_interface, VolumeSetStereoPositionFn, 0x1c)(this->volume_interface,
-                                                                                 position);
+        error = SL_SLOT(this->volume_interface, VolumeSetStereoPositionFn, 0x1c)(this->volume_interface, pan);
         NuSoundAndroid::ReportErrorCode(error, "Volume SetStereoPosition");
     } else {
         u32 error = SL_SLOT(this->volume_interface, VolumeEnableStereoPositionFn, 0x14)(this->volume_interface, 0);
@@ -479,27 +508,24 @@ void NuVoiceAndroid::OnPlayerEvent(u32 event) {
         return;
     }
 
+    NuSoundMutexLock(&this->mutex);
+
+    bool finished;
     if (this->sound_source->feed_type == NuSoundSource::FeedType::STREAMING) {
-        pthread_mutex_lock(&this->mutex);
         // Streaming: a looping stream always refills; a non-looping one stops
         // refilling once its last buffer has been queued.
-        if ((this->flags & 8) != 0) {
-            this->hardware_flags |= 4;
-        } else if ((this->flags & 2) != 0) {
-            this->hardware_flags |= 2;
-        } else {
-            this->hardware_flags |= 4;
-        }
+        finished = (this->flags2 & 8) == 0 && (this->flags2 & 2) != 0;
     } else {
-        pthread_mutex_lock(&this->mutex);
-        if ((this->flags & 8) != 0) {
-            this->hardware_flags |= 4;
-        } else {
-            this->hardware_flags |= 2;
-        }
+        finished = (this->flags2 & 8) == 0;
     }
 
-    pthread_mutex_unlock(&this->mutex);
+    if (finished) {
+        this->hardware_flags |= 2; // 0x32c8c3
+    } else {
+        this->hardware_flags |= 4; // 0x32c900
+    }
+
+    NuSoundMutexUnlock(&this->mutex);
 }
 
 void NuVoiceAndroid::PlayerCallback(const SLPlayItf_ *const *player, void *context, u32 event) {
@@ -526,48 +552,56 @@ void NuVoiceAndroid::UpdateSamplePlaybackCount() {
 
     NuSoundSource *source = this->sound_source;
     NuSoundStreamDesc *desc = source->GetStreamDesc();
-    i32 rate = desc->GetSampleRate();
-    u32 position = (rate / 1000) * millisec;
+    i32 rate = (i32)desc->GetSampleRate();
+    i32 position = (rate / 1000) * (i32)millisec;
 
     if (source->feed_type != NuSoundSource::FeedType::STREAMING) {
-        this->field11_0x174 = (i32)position;
+        this->field11_0x174 = position;
         this->field12_0x178 = 0;
         return;
     }
 
-    // Streaming sources report a block-wrapped position: the device position
-    // counts inside the two stream buffers, the wrap counters turn it into an
-    // absolute sample count.
-    i32 max_buffer_size = source->GetMaxBufferSize();
-    i32 block_size = desc->GetBlockSize();
-    u64 block_samples = (u64)max_buffer_size / (u64)block_size;
-    u64 block_position = (u64)position % block_samples;
+    u64 max_buffer_size = (u64)(i64)(i32)source->GetMaxBufferSize();
+    u64 block_size = (u64)(i64)(i32)desc->GetBlockSize();
+    u64 block_samples = max_buffer_size / block_size;
+    u64 relative_position = (u64)(u32)position % block_samples;
 
-    u64 prev = ((u64)(u32)this->field8_0x168 << 32) | (u32)this->field7_0x164;
-    u64 wrap = ((u64)(u32)this->field10_0x170 << 32) | (u32)this->field9_0x16c;
-    if (block_position < prev) {
-        ++wrap;
-        this->field9_0x16c = (i32)wrap;
-        this->field10_0x170 = (i32)(wrap >> 32);
+    u64 previous_position = ((u64)(u32)this->field8_0x168 << 32) | (u32)this->field7_0x164;
+    u64 wraps = ((u64)(u32)this->field10_0x170 << 32) | (u32)this->field9_0x16c;
+    if (relative_position < previous_position) {
+        wraps++;
+        this->field9_0x16c = (i32)wraps;
+        this->field10_0x170 = (i32)(wraps >> 32);
     }
-    this->field7_0x164 = (i32)block_position;
-    this->field8_0x168 = (i32)(block_position >> 32);
 
-    u64 estimate = block_position + block_samples * wrap;
+    this->field7_0x164 = (i32)relative_position;
+    this->field8_0x168 = (i32)(relative_position >> 32);
 
-    u64 samples;
-    if ((estimate >> 32) != 0 || position < (u32)estimate) {
-        samples = estimate;
-    } else {
-        samples = (u64)position;
+    u64 wrapped_position = block_samples * wraps;
+    u64 estimated_position = relative_position + wrapped_position;
+    bool player_position = true;
+    u64 samples = (u64)(u32)position;
+    if (samples < estimated_position) {
+        player_position = false;
+        samples = estimated_position;
     }
 
     this->field11_0x174 = (i32)samples;
     this->field12_0x178 = (i32)(samples >> 32);
+
+    char debug[256] = {};
+    strcat(debug, "Position ");
+    sprintf(debug + strlen(debug), "%12d ", (u64)(u32)position);
+    sprintf(debug + strlen(debug), "%12d ", relative_position);
+    sprintf(debug + strlen(debug), "%12d ", block_samples);
+    sprintf(debug + strlen(debug), "%12d ", wraps);
+    sprintf(debug + strlen(debug), "%12d ", wrapped_position);
+    sprintf(debug + strlen(debug), "%12d ", estimated_position);
+    strcpy(debug + strlen(debug), player_position ? "PLAYER" : "ESTIMATED");
 }
 
 u64 NuVoiceAndroid::GetPlaybackPositionSamples() {
-    return ((u64)(u32)this->field12_0x178 << 32) | (u32)this->field11_0x174;
+    return *reinterpret_cast<u64 *>(&this->field11_0x174);
 }
 
 // ---------------------------------------------------------------------------
@@ -586,17 +620,12 @@ NuSoundVoice *NuSoundVoiceFactoryAndroid_PCM::CreateVoice(NuSoundSource *source,
 
 NuSoundVoiceFactoryList::NuSoundVoiceFactoryList() {
     factories = NULL;
+    length = 0;
     capacity = 0;
-    count = 0;
-    NuSoundVoiceFactory **storage = static_cast<NuSoundVoiceFactory **>(
-        NuMemoryGet()->GetThreadMem()->_BlockReAlloc(NULL, 16 * sizeof(*factories), 4, 0x41, "", 0));
-    if (storage != factories) {
-        for (u32 i = 0; i < count; i++) storage[i] = factories[i];
-        NuMemoryGet()->GetThreadMem()->BlockFree(factories, 0);
-    }
+    factories = static_cast<NuSoundVoiceFactory **>(NuMemoryGet()->GetThreadMem()->_BlockReAlloc(
+        factories, 16 * sizeof(NuSoundVoiceFactory *), 4, 0x41, "", NUMEMORY_CATEGORY_NONE));
+    length = 16;
     capacity = 16;
-    factories = storage;
-    count = 16;
 }
 
 void NuSoundVoiceFactoryList::RegisterFactory(NuSoundVoiceFactory *factory, NuSoundStreamDesc::DataFormat format) {

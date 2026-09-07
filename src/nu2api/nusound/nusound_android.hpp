@@ -17,7 +17,7 @@ struct NuSoundAndroid : public NuSoundSystem {
 
     static void AndroidNuSoundClockThread(void *);
     NuSoundEffect *CreateEffect(NuSoundEffect::EffectType) override;
-    virtual NuSoundVoice *CreateVoice(NuSoundSource *, bool);
+    NuSoundVoice *CreateVoice(NuSoundSource *, bool);
     static bool IsValidBitRate(u32 bits);
     static bool IsValidSampleRate(u32 rate_millis);
     static u32 ReportErrorCode(u32 error, const char *message);

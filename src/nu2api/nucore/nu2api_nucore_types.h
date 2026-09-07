@@ -238,7 +238,7 @@ struct NuMemoryManager {
     void DumpBlocksForContext(u32, NuSymbolQuery *, NuMemoryManager::Context *, u32);
     void FindAndTouchMatchingBlocks(NuMemoryManager::DebugHeader *, u32 *, u32);
     void GetAllocatedBytes();
-    void GetBlockAlignment(void *);
+    u32 GetBlockAlignment(void *);
     void GetBlockDebugBackTrace(void *, void **);
     void GetBlockDebugContext(void *);
     u32 GetBlockSize(void *);

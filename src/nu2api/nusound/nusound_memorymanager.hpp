@@ -7,6 +7,7 @@
 
 class NuSoundMemoryBuffer {
     friend class NuSoundMemoryManager;
+
     void *address;
     u32 size : 30;
     bool alloced : 1;
@@ -84,13 +85,13 @@ class NuSoundMemoryManager {
 
     // Debug/diagnostic helpers (device addresses in nusound_memorymanager.cpp).
     void *AllocAddress(u32 size);
-    void CheckList();
+    bool CheckList();
     u32 CountAdjacentFreeBuffers(NuSoundMemoryBuffer *buffer);
     void EnableDebug(bool enable);
     void EnableDefragOnFree(bool enable);
     void FreeAddress(void *address);
     NuSoundMemoryBuffer *MoveLargestTrailingBufferIntoBuffer(NuSoundMemoryBuffer *buffer, NuSoundMemoryBuffer **out_a,
-                                             NuSoundMemoryBuffer **out_b);
+                                                             NuSoundMemoryBuffer **out_b);
     void OutputList();
     void OutputMap();
     void RenderMap(f32 x, f32 y, f32 scale);

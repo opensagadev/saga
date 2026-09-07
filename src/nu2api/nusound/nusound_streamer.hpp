@@ -49,9 +49,7 @@ class NuSoundStreamingSample : public NuSoundSample {
     i32 ReCue(f32 start_offset, bool loop);
 
     bool IsLocked() const override;
-    bool IsStreamOpen() const override {
-        return GetLoadState() == LoadState::STREAM_READY;
-    }
+    bool IsStreamOpen() const override;
     void Lock();
     void Unlock();
 
@@ -155,6 +153,4 @@ class NuSoundStreamer {
 };
 
 DECOMP_ASSERT(sizeof(NuSoundStreamer::QueueElement) == 0x28, "NuSoundStreamer queue element size");
-#ifndef HOST_BUILD
 DECOMP_ASSERT(sizeof(NuSoundStreamer::RingQueue) == 0x518, "NuSoundStreamer ring queue size");
-#endif

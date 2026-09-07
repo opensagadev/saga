@@ -250,7 +250,14 @@ void NuMemoryManager::FindAndTouchMatchingBlocks(NuMemoryManager::DebugHeader *,
 void NuMemoryManager::GetAllocatedBytes() {
 }
 
-void NuMemoryManager::GetBlockAlignment(void *) {
+u32 NuMemoryManager::GetBlockAlignment(void *ptr) {
+    ValidateAddress(ptr, __FUNCTION__);
+
+    Header *header = reinterpret_cast<Header *>(reinterpret_cast<usize>(ptr) - m_headerSize);
+    ValidateBlockIsAllocated(header, __FUNCTION__);
+    ValidateBlockEndTags(header, __FUNCTION__);
+
+    return 2u << ((header->value & 0x78000000) >> 27);
 }
 
 void NuMemoryManager::GetBlockDebugBackTrace(void *, void **) {

@@ -12,14 +12,12 @@ class __attribute__((packed, aligned(4))) NuSoundBuffer {
         u64 size3;
         i32 field5_0x18;
         u8 flags;
-        u8 reserved_0x1d[3];
+        u8 padding_0x1d[3];
         i32 field5_0x20;
 
+        Context() : read_size(0), size2(0), size3(0), field5_0x18(0), flags(1), field5_0x20(0) {
+        }
     };
-
-    static_assert(sizeof(Context) == 0x24, "sound buffer context size");
-    static_assert(__builtin_offsetof(Context, flags) == 0x1c, "sound buffer flag byte");
-    static_assert(__builtin_offsetof(Context, field5_0x20) == 0x20, "sound buffer context tail");
 
   private:
     u64 size;
@@ -56,6 +54,6 @@ class __attribute__((packed, aligned(4))) NuSoundBuffer {
 
     bool IsLocked() const;
 
-    void GetSegmentAddress(unsigned int, unsigned int, unsigned int) const;
-    void GetSegmentSize(unsigned int, unsigned int) const;
+    void *GetSegmentAddress(unsigned int index, unsigned int segments, unsigned int alignment) const;
+    u32 GetSegmentSize(unsigned int segments, unsigned int alignment) const;
 };

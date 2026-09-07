@@ -23,11 +23,9 @@ class NuSoundSample : public NuSoundSource {
         UNSUPPORTED = 3,
     };
 
-  public:
-    NuSoundSample *list_previous;
-    NuSoundSample *list_next;
-
   protected:
+    i32 field1_0x20;
+    i32 field2_0x24;
     NuSoundBuffer buffer;
     NuSoundSystem::FileType file_type;
 
@@ -70,9 +68,15 @@ class NuSoundSample : public NuSoundSource {
 
     // NuSoundSource overrides (the original dispatched through the source
     // vtable; Play() calls RequestBuffer to obtain its initial buffers).
+    bool OpenStream(bool) override {
+        return true;
+    }
+    void CloseStream() override {
+    }
     bool IsStreamOpen() const override;
-    bool OpenStream(bool) override { return true; }
-    void CloseStream() override {}
+    u32 GetMaxBufferSize() override {
+        return 0;
+    }
     void RequestBuffer(bool loop, NuSoundWeakPtr<NuSoundBufferCallback> callback) override;
 
     ~NuSoundSample();
