@@ -9,6 +9,7 @@
 #include <math.h>
 
 #include "legoapi/characters/core/character.h"
+#include "legoapi/menus/core/text.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
 #include "nu2api/nu3d/nuspecial.h"
@@ -98,6 +99,18 @@ i32 CS_area = 0;
 CUTSYS *CS_cutsys = NULL;
 WORLDINFO *CS_worldinfo = NULL;
 f32 CutSceneScale = 1.0f;
+extern "C" {
+    u8 CUTSUBTITLEDEFAULT_R = 0xff;
+    u8 CUTSUBTITLEDEFAULT_G = 0xff;
+    u8 CUTSUBTITLEDEFAULT_B = 0xff;
+    u8 CUTSUBTITLEDEFAULT_A = 0x80;
+    u8 CUTSUBTITLEDEFAULT_ALIGN = 0;
+    f32 CUTSUBTITLEDEFAULT_X = 0.0f;
+    f32 CUTSUBTITLEDEFAULT_Y = -0.5f;
+    f32 CUTSUBTITLEDEFAULT_SCALEX = 1.0f;
+    f32 CUTSUBTITLEDEFAULT_SCALEY = 1.0f;
+    f32 CUTSUBTITLEDEFAULT_FITWIDTH = 1.7f;
+}
 i32 CUTCAM = 0;
 i32 CUTCAMONLY = 0;
 NUMTX cutscenecammtx = {};
@@ -368,8 +381,99 @@ static void CS_goto_level(NUFPAR *fp) {
     CS_CutInfo->skip_level = static_cast<i16>(level_index);
 }
 
-// The original subtitle parser is a separate large routine and is recovered independently.
-static void CS_subtitle(NUFPAR *) {
+static void CS_subtitle(NUFPAR *fp) {
+    if (CS_CutInfo->subtitle_data == NULL) {
+        CS_CutInfo->subtitle_data = reinterpret_cast<CUTSCENESUBTITLE *>(CS_buffptr->addr);
+    }
+
+    CUTSCENESUBTITLE *subtitle = &CS_CutInfo->subtitle_data[CS_CutInfo->subtitle_count];
+    subtitle->text_id = -1;
+    subtitle->start_frame = 0.0f;
+    subtitle->end_frame = 0.0f;
+    subtitle->red = CUTSUBTITLEDEFAULT_R;
+    subtitle->green = CUTSUBTITLEDEFAULT_G;
+    subtitle->blue = CUTSUBTITLEDEFAULT_B;
+    subtitle->alpha = CUTSUBTITLEDEFAULT_A;
+    subtitle->alignment = CUTSUBTITLEDEFAULT_ALIGN;
+    subtitle->x = CUTSUBTITLEDEFAULT_X;
+    subtitle->y = CUTSUBTITLEDEFAULT_Y;
+    subtitle->x_scale = CUTSUBTITLEDEFAULT_SCALEX;
+    subtitle->y_scale = CUTSUBTITLEDEFAULT_SCALEY;
+    subtitle->max_width = CUTSUBTITLEDEFAULT_FITWIDTH;
+    subtitle->fade_time = 0.0f;
+
+    while (NuFParGetWord(fp) != 0) {
+        if (NuStrICmp(fp->word_buf, "text_id") == 0) {
+            subtitle->text_id = static_cast<i16>(NuFParGetInt(fp));
+        } else if (NuStrICmp(fp->word_buf, "colour") == 0) {
+            subtitle->red = static_cast<u8>(NuFParGetFloat(fp) * 255.0f);
+            subtitle->green = static_cast<u8>(NuFParGetFloat(fp) * 255.0f);
+            subtitle->blue = static_cast<u8>(NuFParGetFloat(fp) * 255.0f);
+            subtitle->alpha = static_cast<u8>(NuFParGetFloat(fp) * 128.0f);
+        } else if (NuStrICmp(fp->word_buf, "r") == 0) {
+            subtitle->red = static_cast<u8>(NuFParGetFloat(fp) * 255.0f);
+        } else if (NuStrICmp(fp->word_buf, "g") == 0) {
+            subtitle->green = static_cast<u8>(NuFParGetFloat(fp) * 255.0f);
+        } else if (NuStrICmp(fp->word_buf, "b") == 0) {
+            subtitle->blue = static_cast<u8>(NuFParGetFloat(fp) * 255.0f);
+        } else if (NuStrICmp(fp->word_buf, "a") == 0) {
+            subtitle->alpha = static_cast<u8>(NuFParGetFloat(fp) * 128.0f);
+        } else if (NuStrICmp(fp->word_buf, "align") == 0) {
+            if (NuStrICmp(fp->word_buf, "centre") == 0) {
+                subtitle->alignment = 0;
+            } else if (NuStrICmp(fp->word_buf, "top") == 0) {
+                subtitle->alignment = 1;
+            } else if (NuStrICmp(fp->word_buf, "top_right") == 0) {
+                subtitle->alignment = 9;
+            } else if (NuStrICmp(fp->word_buf, "right") == 0) {
+                subtitle->alignment = 8;
+            } else if (NuStrICmp(fp->word_buf, "bottom_right") == 0) {
+                subtitle->alignment = 12;
+            } else if (NuStrICmp(fp->word_buf, "bottom") == 0) {
+                subtitle->alignment = 4;
+            } else if (NuStrICmp(fp->word_buf, "bottom_left") == 0) {
+                subtitle->alignment = 6;
+            } else if (NuStrICmp(fp->word_buf, "left") == 0) {
+                subtitle->alignment = 2;
+            } else if (NuStrICmp(fp->word_buf, "top_left") == 0) {
+                subtitle->alignment = 3;
+            }
+        } else if (NuStrICmp(fp->word_buf, "start_time") == 0) {
+            subtitle->start_frame = NuFabs(NuFParGetFloat(fp));
+        } else if (NuStrICmp(fp->word_buf, "end_time") == 0) {
+            subtitle->end_frame = NuFabs(NuFParGetFloat(fp));
+        } else if (NuStrICmp(fp->word_buf, "pos") == 0) {
+            subtitle->x = NuFParGetFloat(fp);
+            subtitle->y = NuFParGetFloat(fp);
+        } else if (NuStrICmp(fp->word_buf, "x") == 0) {
+            subtitle->x = NuFParGetFloat(fp);
+        } else if (NuStrICmp(fp->word_buf, "y") == 0) {
+            subtitle->y = NuFParGetFloat(fp);
+        }
+
+        if (NuStrICmp(fp->word_buf, "scale") == 0) {
+            subtitle->x_scale = NuFParGetFloat(fp);
+            subtitle->y_scale = subtitle->x_scale;
+        } else if (NuStrICmp(fp->word_buf, "x_scale") == 0) {
+            subtitle->x_scale = NuFParGetFloat(fp);
+        } else if (NuStrICmp(fp->word_buf, "y_scale") == 0) {
+            subtitle->y_scale = NuFParGetFloat(fp);
+        } else if (NuStrICmp(fp->word_buf, "fit_width") == 0) {
+            subtitle->max_width = NuFabs(NuFParGetFloat(fp));
+        } else if (NuStrICmp(fp->word_buf, "fade_time") == 0) {
+            subtitle->fade_time = NuFabs(NuFParGetFloat(fp));
+        }
+    }
+
+    i16 text_id = subtitle->text_id;
+    if (text_id >= 0 && text_id < Text_GetMaxOverallStrings() && TTab[text_id] != NULL &&
+        subtitle->start_frame < subtitle->end_frame) {
+        if (subtitle->fade_time > 0.0f && subtitle->end_frame - subtitle->start_frame < subtitle->fade_time * 2.0f) {
+            subtitle->fade_time = 0.0f;
+        }
+        CS_buffptr->addr += sizeof(CUTSCENESUBTITLE);
+        ++CS_CutInfo->subtitle_count;
+    }
 }
 
 static NUFPCOMJMP CutScene_ConfigKeywords[] = {

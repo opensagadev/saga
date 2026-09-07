@@ -508,21 +508,15 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
                     PlaySfxById(sfx.id, (sfx.flags & 1) != 0 ? &sfx.position : NULL);
                 }
             }
-        }
-    }
-    for (i32 i = 0; i < system->count; ++i) {
-        CUTINFO *cut = system->cuts[i];
-        if (cut == NULL || cut->instance == NULL || active_before[i] == 0) {
-            continue;
-        }
-        instNUGCUTSCENE_s *instance = reinterpret_cast<instNUGCUTSCENE_s *>(cut->instance);
-        if ((i != stop_index || stop_index == -1) && instNuGCutSceneIsFinished(instance) != 0) {
-            if (CutScene_StoppedFn != NULL) {
-                CutScene_StoppedFn(cut);
-            }
-            if (CutInstEndCount < 4) {
-                CutInstEnd[CutInstEndCount++] = instance;
-                instance->flags_88 |= 2;
+
+            if ((i != stop_index || stop_index == -1) && instNuGCutSceneIsFinished(instance) != 0) {
+                if (CutScene_StoppedFn != NULL) {
+                    CutScene_StoppedFn(cut);
+                }
+                if (CutInstEndCount < 4) {
+                    CutInstEnd[CutInstEndCount++] = instance;
+                    instance->flags_88 |= 2;
+                }
             }
         }
     }
