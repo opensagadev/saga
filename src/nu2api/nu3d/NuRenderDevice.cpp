@@ -89,31 +89,7 @@ NuRenderDevice::NuRenderDevice() : NuRenderDeviceGen() {
 // Optional GLES2 extensions (loaded via eglGetProcAddress)
 // ---------------------------------------------------------------------------
 
-extern "C" {
-void (*glGetProgramBinaryOES)(GLuint, GLsizei, GLsizei *, GLenum *, void *);
-void (*glProgramBinaryOES)(GLuint, GLenum, const void *, GLint);
-void (*glDiscardFramebufferEXT)(GLenum, GLsizei, const GLenum *);
-void (*glGenVertexArraysOES)(GLsizei, GLuint *);
-void (*glBindVertexArrayOES)(GLuint);
-void (*glDeleteVertexArraysOES)(GLsizei, const GLuint *);
-}
-
-__attribute__((weak)) void NuGLES2ExtensionsInit() {
-    glGetProgramBinaryOES = reinterpret_cast<decltype(glGetProgramBinaryOES)>(eglGetProcAddress("glGetProgramBinaryOES"));
-    glProgramBinaryOES = reinterpret_cast<decltype(glProgramBinaryOES)>(eglGetProcAddress("glProgramBinaryOES"));
-    glDiscardFramebufferEXT = reinterpret_cast<decltype(glDiscardFramebufferEXT)>(eglGetProcAddress("glDiscardFramebufferEXT"));
-    glGenVertexArraysOES = reinterpret_cast<decltype(glGenVertexArraysOES)>(eglGetProcAddress("glGenVertexArraysOES"));
-    glBindVertexArrayOES = reinterpret_cast<decltype(glBindVertexArrayOES)>(eglGetProcAddress("glBindVertexArrayOES"));
-    glDeleteVertexArraysOES = reinterpret_cast<decltype(glDeleteVertexArraysOES)>(eglGetProcAddress("glDeleteVertexArraysOES"));
-}
-
-extern "C" void glGenVertexArraysOESC(GLsizei count, GLuint *arrays) {
-    glGenVertexArraysOES(count, arrays);
-}
-
-extern "C" void glDeleteVertexArraysOESC(GLsizei count, const GLuint *arrays) {
-    glDeleteVertexArraysOES(count, arrays);
-}
+void NuGLES2ExtensionsInit();
 
 __attribute__((weak)) void NuRenderInspectEGLConfig(EGLDisplay display, EGLConfig config) {
     EGLint config_attribs[6] = {};

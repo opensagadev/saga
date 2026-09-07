@@ -1,5 +1,6 @@
 #pragma once
 
+#include "decomp_assert.h"
 #include "nu2api/nucore/NuMemoryManager.h"
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/nuelist.hpp"
@@ -689,22 +690,24 @@ class NuSoundHandle {
     void operator==(NuSoundHandle const &other);
 }; // namespace NuSoundSystem
 
+// Binary layouts below describe Android. Host/WASM builds use their own ABI,
+// including native mutex sizes and 64-bit member alignment.
 #if defined(__arm__)
 // Original ARM constructors: clock 0x2f2af8, system 0x2ee5f4;
 // InitAudioDevice 0x2fce38 passes this+0x110 to slCreateEngine.
-static_assert(sizeof(NuSoundClock) == 0x30, "ARM sound clock layout");
-static_assert(__builtin_offsetof(NuSoundSystem, factory_list) == 0x5c, "ARM voice factory offset");
-static_assert(__builtin_offsetof(NuSoundSystem, initialised) == 0x10c, "ARM audio update gate offset");
-static_assert(__builtin_offsetof(NuSoundSystem, engine_object) == 0x110, "ARM OpenSL engine handle offset");
+DECOMP_ASSERT(sizeof(NuSoundClock) == 0x30, "ARM sound clock layout");
+DECOMP_ASSERT(__builtin_offsetof(NuSoundSystem, factory_list) == 0x5c, "ARM voice factory offset");
+DECOMP_ASSERT(__builtin_offsetof(NuSoundSystem, initialised) == 0x10c, "ARM audio update gate offset");
+DECOMP_ASSERT(__builtin_offsetof(NuSoundSystem, engine_object) == 0x110, "ARM OpenSL engine handle offset");
 #else
-static_assert(sizeof(void *) != 4 || sizeof(NuSoundClock) == 0x2c, "Android sound clock layout");
-static_assert(sizeof(void *) != 4 || __builtin_offsetof(NuSoundSystem, factory_list) == 0x58, "Android voice factory offset");
-static_assert(sizeof(void *) != 4 || __builtin_offsetof(NuSoundSystem, initialised) == 0x108, "Android audio update gate offset");
-static_assert(sizeof(void *) != 4 || __builtin_offsetof(NuSoundSystem, engine_object) == 0x10c,
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NuSoundClock) == 0x2c, "Android sound clock layout");
+DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundSystem, factory_list) == 0x58, "Android voice factory offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundSystem, initialised) == 0x108, "Android audio update gate offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundSystem, engine_object) == 0x10c,
               "Android OpenSL engine handle offset");
 #endif
-static_assert(sizeof(void *) != 4 || sizeof(NuSoundVoiceFactoryList) == 0xc, "Android voice factory list layout");
-static_assert(sizeof(void *) != 4 || __builtin_offsetof(NuSoundSystem, clock) == 8, "Android sound clock offset");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NuSoundVoiceFactoryList) == 0xc, "Android voice factory list layout");
+DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundSystem, clock) == 8, "Android sound clock offset");
 
 class NuSoundOutOfMemCallback {
   public:

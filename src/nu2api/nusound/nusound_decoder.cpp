@@ -1,3 +1,4 @@
+#include "decomp_assert.h"
 #include "nusound_decoder.hpp"
 
 #include "nu2api/nucore/nucore.hpp"
@@ -23,12 +24,12 @@ i32 NuSoundDecodeThread::sThreadPriority = 2;
 NuSoundDecoder::NuSoundDecoder(char const *name, NuSoundSource *wrapped)
     : NuSoundSource(NULL, SourceType::STREAMING, NuSoundSource::FeedType::STREAMING) {
     (void)name;
-    static_assert(sizeof(void *) != 4 || sizeof(NuSoundBuffer) == 0x40, "decoder ring buffer stride");
-    static_assert(sizeof(void *) != 4 || sizeof(NuSoundDecoder) == 0xe8, "decoder callback base offset");
-    static_assert(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecoder, buffers) == 0x24, "embedded decoder buffers");
-    static_assert(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecoder, decoded_bytes) == 0xb8, "decoder byte counter");
-    static_assert(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecoder, total_decoded_bytes) == 0xc8, "decoder total byte counter");
-    static_assert(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecoder, decode_mutex) == 0xdc, "decoder completion mutex");
+    DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NuSoundBuffer) == 0x40, "decoder ring buffer stride");
+    DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NuSoundDecoder) == 0xe8, "decoder callback base offset");
+    DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecoder, buffers) == 0x24, "embedded decoder buffers");
+    DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecoder, decoded_bytes) == 0xb8, "decoder byte counter");
+    DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecoder, total_decoded_bytes) == 0xc8, "decoder total byte counter");
+    DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecoder, decode_mutex) == 0xdc, "decoder completion mutex");
     // The decode-sync pair the decode thread raises per completed request
     // (device offsets +0xdc/+0xe0/+0xe4).
     pthread_mutex_init(&this->decode_mutex, NULL);
@@ -245,10 +246,10 @@ void NuSoundDecoder::RequestBuffer(bool loop, NuSoundWeakPtr<NuSoundBufferCallba
 // libTTapp.so 0x31f010: 128 zeroed loader slots behind a 128-signal
 // semaphore, then the worker thread (priority 2, cafe/xbox core 2).
 NuSoundDecodeThread::NuSoundDecodeThread() : semaphore(128) {
-    static_assert(sizeof(void *) != 4 || sizeof(Loader) == 0x1c, "decode queue entry stride");
-    static_assert(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecodeThread, loaders) == 4, "decode queue offset");
-    static_assert(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecodeThread, semaphore) == 0xe0c, "decode semaphore offset");
-    static_assert(sizeof(void *) != 4 || sizeof(NuSoundDecodeThread) == 0xe1c, "decode thread allocation size");
+    DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(Loader) == 0x1c, "decode queue entry stride");
+    DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecodeThread, loaders) == 4, "decode queue offset");
+    DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecodeThread, semaphore) == 0xe0c, "decode semaphore offset");
+    DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NuSoundDecodeThread) == 0xe1c, "decode thread allocation size");
     memset(this->loaders, 0, sizeof(this->loaders));
     this->tail_index = 0;
     this->head_index = 0;

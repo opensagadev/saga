@@ -22,6 +22,14 @@ support device execution and do not imply ARM assembly matching.
   selection remains in the toolchain and ABI assertions; host asset/window stubs
   remain under `src/host/platform` and are excluded from the target.
 
+The Android GLES extension-pointer table is also selected only for the target;
+the host adapter uses private pointer names so they cannot collide with GL
+functions exported by Emscripten or a native GL implementation. Native component
+source lists select the JNI stub instead of the Android activity implementation.
+Binary-layout checks use the existing `DECOMP_ASSERT` boundary: Android builds
+retain the checks, while host/WASM builds use their platform's alignment and
+mutex layout.
+
 The original instruction shapes support corrections to per-source optimization
 for Android file access, sound and occlusion. O0 frame/error, wind-group and
 specular-light code now has separate source ownership instead of inheriting O3
@@ -66,6 +74,8 @@ Verified on 2026-09-07:
 - `bazel build --config=target //src:saga_target` passes.
 - `bazel build --config=android-armv7 //src:saga_target` passes, with undefined
   references rejected by the linker.
+- `bazel build --config=wasm //src:saga_wasm` passes through the final HTML,
+  JavaScript and WASM link on Windows.
 - `bazel test //scripts/checks:checks` passes all four checks: optimization map,
   duplicate definitions, host boundaries and Pages tests.
 - The symbol check passes: no unignored missing symbols and no extra-symbol

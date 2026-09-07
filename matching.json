@@ -85828,7 +85828,14 @@
           "offset": 1893568,
           "size": 1133,
           "match_percent": 70.347984
-        },
+        }
+      ]
+    },
+    {
+      "name": "nu2api/nu3d/android/gles_extensions.cpp.o",
+      "source": "src/nu2api/nu3d/android/gles_extensions.cpp",
+      "object": "bazel-out/x64_windows-fastbuild/bin/src/_objs/saga_target_nu2api/gles_extensions.o",
+      "functions": [
         {
           "name": "_Z21NuGLES2ExtensionsInitv",
           "demangled_name": "NuGLES2ExtensionsInit()",
@@ -131159,7 +131166,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 502,
+    "bazel_units": 503,
     "functions": 13454,
     "assigned_functions": 12175,
     "ambiguous_functions": 243,

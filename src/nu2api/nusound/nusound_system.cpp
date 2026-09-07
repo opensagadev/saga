@@ -1,3 +1,4 @@
+#include "decomp_assert.h"
 #include "nu2api/nusound/nusound_system.hpp"
 #include "nu2api/nusound/nusound_android.hpp"
 
@@ -16,17 +17,18 @@
 #include "nu2api/nucore/numemory.h"
 
 #include <cstdio>
+#include <cfloat>
 #include <cstring>
 #include <new>
 
-static_assert(sizeof(void *) != 4 || sizeof(NuSoundEffectAttenuation) == 0x48, "attenuation effect ABI");
-static_assert(sizeof(void *) != 4 || sizeof(NuSoundEffectPitch) == 0x44, "pitch effect ABI");
-static_assert(sizeof(void *) != 4 || sizeof(NuSoundEffectRandomVolume) == 0x44, "random volume effect ABI");
-static_assert(sizeof(void *) != 4 || sizeof(NuSoundEffectRandomPitch) == 0x44, "random pitch effect ABI");
-static_assert(sizeof(void *) != 4 || sizeof(NuSoundEffectRepeat) == 0x54, "repeat effect ABI");
-static_assert(sizeof(void *) != 4 || sizeof(NuSoundEffectDoppler) == 0x50, "Doppler effect ABI");
-static_assert(sizeof(void *) != 4 || sizeof(NuSoundEffectFader) == 0x6c, "fader effect ABI");
-static_assert(sizeof(void *) != 4 || sizeof(NuSoundEffectPitchRamp) == 0x54, "pitch ramp effect ABI");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NuSoundEffectAttenuation) == 0x48, "attenuation effect ABI");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NuSoundEffectPitch) == 0x44, "pitch effect ABI");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NuSoundEffectRandomVolume) == 0x44, "random volume effect ABI");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NuSoundEffectRandomPitch) == 0x44, "random pitch effect ABI");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NuSoundEffectRepeat) == 0x54, "repeat effect ABI");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NuSoundEffectDoppler) == 0x50, "Doppler effect ABI");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NuSoundEffectFader) == 0x6c, "fader effect ABI");
+DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NuSoundEffectPitchRamp) == 0x54, "pitch ramp effect ABI");
 
 // Sentinels contain only the intrusive links, with the same adjusted object
 // pointers used by the original NuEList<NuSoundVoice>.
@@ -35,18 +37,18 @@ static NuSoundSystem::VoiceLinks *VoiceLinksFor(NuSoundVoice *voice) {
         reinterpret_cast<char *>(voice) + offsetof(NuSoundVoice, field_0x24)) : NULL;
 }
 
-static_assert(sizeof(void *) != 4 || offsetof(NuSoundVoice, field_0x24) == 0x24,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(NuSoundVoice, field_0x24) == 0x24,
               "voice intrusive links must retain their Android offset");
 #if defined(__arm__)
-static_assert(offsetof(NuSoundSystem, voice_head) == 0x78, "ARM voice list head offset");
-static_assert(offsetof(NuSoundSystem, effect_head) == 0x94, "ARM effect list head offset");
+DECOMP_ASSERT(offsetof(NuSoundSystem, voice_head) == 0x78, "ARM voice list head offset");
+DECOMP_ASSERT(offsetof(NuSoundSystem, effect_head) == 0x94, "ARM effect list head offset");
 #else
-static_assert(sizeof(void *) != 4 || offsetof(NuSoundSystem, voice_head) == 0x74,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(NuSoundSystem, voice_head) == 0x74,
               "voice list head must retain its Android offset");
-static_assert(sizeof(void *) != 4 || offsetof(NuSoundSystem, effect_head) == 0x90,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(NuSoundSystem, effect_head) == 0x90,
               "effect list head must retain its Android offset");
 #endif
-static_assert(sizeof(void *) != 4 || offsetof(NuSoundEffect, system_owned) == 0x24,
+DECOMP_ASSERT(sizeof(void *) != 4 || offsetof(NuSoundEffect, system_owned) == 0x24,
               "effect ownership flag must retain its Android offset");
 
 NuSoundBus *NuSoundSystem::sMasterBus = NULL;
