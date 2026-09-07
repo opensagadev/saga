@@ -769,7 +769,7 @@ extern void BackDrop_UpdateColours(i32 instant);
 extern i32 Paused;
 extern f32 PauseMenus_X;
 extern i32 PauseMenus_Align;
-extern i32 CutScenePlayer_Active();
+extern void *CutScenePlayer_Active();
 
 void UpdateGameMessages();
 extern i32 DoubleScore;

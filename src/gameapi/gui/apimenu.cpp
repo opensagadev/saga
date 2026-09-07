@@ -145,7 +145,7 @@ void GameDrawMenuEntry(MENU *menu, char *text);
 void DropOut(i32 player, i32 show_effect, i32 silent, i32 force);
 LEVELDATA_s *CanSaveAndExit(WORLDINFO_s *world);
 void NewLevelFromMenu(LEVELDATA_s *level, i32 menu_id, i32 menu_y, i32 remember_hub);
-extern i32 CutScenePlayer_Active(void);
+extern void *CutScenePlayer_Active(void);
 extern i32 saveload_autosave;
 extern FadeSystem FadeSys;
 extern i32 level_already_loaded;

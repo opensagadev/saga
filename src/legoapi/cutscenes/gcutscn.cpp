@@ -20,7 +20,7 @@ DECOMP_ASSERT(sizeof(CUTSCENEPLAYERCLIP_s) == 0x44, "CUTSCENEPLAYERCLIP ABI");
 
 struct CUTSCENEPLAYER_s {
     CUTSCENEPLAYERCLIP_s *clips;
-    i32 active;
+    void *active;
     u16 clip_count;
 };
 
@@ -35,7 +35,7 @@ void CutScenePlayer_Reset() {
 void CutScenePlayer_Start(i32, i32) {
 }
 
-i32 CutScenePlayer_Active() {
+void *CutScenePlayer_Active() {
     return CutScenePlayer != NULL ? CutScenePlayer->active : 0;
 }
 
