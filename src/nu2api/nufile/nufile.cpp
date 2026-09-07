@@ -1461,7 +1461,8 @@ i32 NuFileExtGetExt(char *dest, i32 capacity, NUFILETYPE type) {
     FILEEXTINFO *info = extensions;
     while (info != NULL) {
         if (info->platform == 4 && static_cast<signed char>(info->type) == static_cast<i32>(type)) {
-            if (static_cast<signed char>(info->len) > capacity) return 0;
+            if (static_cast<signed char>(info->len) > capacity)
+                return 0;
             char *source = reinterpret_cast<char *>(info) + static_cast<signed char>(info->len);
             i32 index = 0;
             while (index < static_cast<signed char>(info->len)) {

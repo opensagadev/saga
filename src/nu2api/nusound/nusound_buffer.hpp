@@ -14,7 +14,6 @@ class __attribute__((packed, aligned(4))) NuSoundBuffer {
         u8 flags;
         u8 reserved_0x1d[3];
         i32 field5_0x20;
-
     };
 
     static_assert(sizeof(Context) == 0x24, "sound buffer context size");

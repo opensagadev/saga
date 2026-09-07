@@ -44,13 +44,16 @@ void NuSoundClock::RemoveCallback(NuSoundClock::Callback *callback) {
         --callback_count;
         Callback *next = callback->next;
         Callback *prev = callback->prev;
-        if (prev != NULL) GetLinks(prev)->next = next;
-        if (next != NULL) GetLinks(next)->prev = prev;
+        if (prev != NULL)
+            GetLinks(prev)->next = next;
+        if (next != NULL)
+            GetLinks(next)->prev = prev;
         callback->next = NULL;
         callback->prev = NULL;
     }
 }
 
 NuSoundClock::~NuSoundClock() {
-    while (callback_count != 0) RemoveCallback(GetLinks(head)->next);
+    while (callback_count != 0)
+        RemoveCallback(GetLinks(head)->next);
 }

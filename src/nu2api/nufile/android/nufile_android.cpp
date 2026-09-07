@@ -27,10 +27,18 @@ NuFileAndroidAPK::~NuFileAndroidAPK() {
 i64 NuFileAndroidAPK::Seek(i64 offset, NuFile::SeekOrigin::T origin) {
     i32 next;
     switch (origin) {
-        case NuFile::SeekOrigin::START: next = offset; break;
-        case NuFile::SeekOrigin::CURRENT: next = position + offset; break;
-        case NuFile::SeekOrigin::END: next = file_size + offset; break;
-        default: next = position; break;
+        case NuFile::SeekOrigin::START:
+            next = offset;
+            break;
+        case NuFile::SeekOrigin::CURRENT:
+            next = position + offset;
+            break;
+        case NuFile::SeekOrigin::END:
+            next = file_size + offset;
+            break;
+        default:
+            next = position;
+            break;
     }
     position = MIN(file_size, (MAX(0, next)));
     return position;
@@ -63,7 +71,8 @@ isize NuFileAndroidAPK::Read(void *buf, usize size) {
             remaining -= count;
             position += count;
             output += count;
-            if (remaining == 0) break;
+            if (remaining == 0)
+                break;
         }
         return position - start;
     } else {

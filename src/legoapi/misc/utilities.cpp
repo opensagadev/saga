@@ -28,8 +28,8 @@ void HashString(unsigned char *) {
 #ifdef _WIN32
 // MinGW lacks the POSIX srand48 family; nothing in the tree reads drand48
 // state, so seed the C RNG instead.
-static void srand48(long seed) {
-    srand(static_cast<unsigned int>(seed));
+static void srand48(i32 seed) {
+    srand(static_cast<u32>(seed));
 }
 #endif
 

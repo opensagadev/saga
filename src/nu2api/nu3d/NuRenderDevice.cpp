@@ -405,16 +405,20 @@ void __attribute__((weak)) NuRenderDevice::InitialiseOpenGLContext(ANativeWindow
                 EGL_NONE,
             };
             this->pbuffers[0] = eglCreatePbufferSurface(this->egl_display, this->egl_config, pbuffer_attribs);
-            this->contexts[0] = eglCreateContext(this->egl_display, this->egl_config, this->contexts[3], this->attrib_list);
+            this->contexts[0] =
+                eglCreateContext(this->egl_display, this->egl_config, this->contexts[3], this->attrib_list);
             this->pbuffers[1] = eglCreatePbufferSurface(this->egl_display, this->egl_config, pbuffer_attribs);
-            this->contexts[1] = eglCreateContext(this->egl_display, this->egl_config, this->contexts[3], this->attrib_list);
+            this->contexts[1] =
+                eglCreateContext(this->egl_display, this->egl_config, this->contexts[3], this->attrib_list);
             this->pbuffers[2] = eglCreatePbufferSurface(this->egl_display, this->egl_config, pbuffer_attribs);
         } else {
             // Alias the window surface.
             this->pbuffers[0] = this->pbuffers[3];
-            this->contexts[0] = eglCreateContext(this->egl_display, this->egl_config, this->contexts[3], this->attrib_list);
+            this->contexts[0] =
+                eglCreateContext(this->egl_display, this->egl_config, this->contexts[3], this->attrib_list);
             this->pbuffers[1] = this->pbuffers[3];
-            this->contexts[1] = eglCreateContext(this->egl_display, this->egl_config, this->contexts[3], this->attrib_list);
+            this->contexts[1] =
+                eglCreateContext(this->egl_display, this->egl_config, this->contexts[3], this->attrib_list);
             this->pbuffers[2] = this->pbuffers[3];
         }
 
@@ -433,8 +437,8 @@ void __attribute__((weak)) NuRenderDevice::InitialiseOpenGLContext(ANativeWindow
 
         EGLint visual_id;
         eglGetConfigAttrib(this->egl_display, this->egl_config, EGL_NATIVE_VISUAL_ID, &visual_id);
-        ANativeWindow_setBuffersGeometry(reinterpret_cast<ANativeWindow *>(this->native_window),
-                                        this->backing_width, this->backing_height, visual_id);
+        ANativeWindow_setBuffersGeometry(reinterpret_cast<ANativeWindow *>(this->native_window), this->backing_width,
+                                         this->backing_height, visual_id);
         eglMakeCurrent(this->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 
         g_backingWidth = static_cast<i32>(this->backing_width);
@@ -467,8 +471,8 @@ void __attribute__((weak)) NuRenderDevice::InitialiseOpenGLContext(ANativeWindow
         DetermineBackBufferResolution(this->width, this->height);
         EGLint visual_id;
         eglGetConfigAttrib(this->egl_display, this->egl_config, EGL_NATIVE_VISUAL_ID, &visual_id);
-        ANativeWindow_setBuffersGeometry(reinterpret_cast<ANativeWindow *>(this->native_window),
-                                        this->backing_width, this->backing_height, visual_id);
+        ANativeWindow_setBuffersGeometry(reinterpret_cast<ANativeWindow *>(this->native_window), this->backing_width,
+                                         this->backing_height, visual_id);
         eglMakeCurrent(this->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     }
 
@@ -541,7 +545,8 @@ i32 NuRenderDevice::DetermineNominalAspectRatio(u32 w, u32 h) const {
         error = widescreen_error;
         result = 1;
     }
-    if (error > fabsf(ratio - 1.6f)) result = 2;
+    if (error > fabsf(ratio - 1.6f))
+        result = 2;
     return result;
 }
 
@@ -552,7 +557,8 @@ void NuRenderDevice::ResizeDevice(i32 w, i32 h, i32, bool, bool, bool, bool) {
     DetermineBackBufferResolution(w, h);
     nominal_aspect_ratio = DetermineNominalAspectRatio(width, height);
     aspect_ratio = static_cast<f32>(width) / static_cast<f32>(height);
-    g_renderDevice.EndCriticalSection("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/NuRenderDevice_gles2.cpp", 0x452);
+    g_renderDevice.EndCriticalSection("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/NuRenderDevice_gles2.cpp",
+                                      0x452);
 }
 
 void NuRenderDevice::PreInitialize() {

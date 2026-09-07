@@ -21,7 +21,8 @@ NuSoundEffectPitchRamp::NuSoundEffectPitchRamp() {
 }
 
 void NuSoundEffectPitchRamp::Process(float frametime) {
-    if (!enabled || pitch_scale == field_44) return;
+    if (!enabled || pitch_scale == field_44)
+        return;
     unknown_08[2] = 1;
     field_4c = false;
     if (field_48 == 0.0f) {
@@ -48,7 +49,8 @@ void NuSoundEffectPitchRamp::Process(float frametime) {
 
 void NuSoundEffectPitchRamp::ProcessVoice(NuSoundVoice *voice, float) {
     if (field_4c) {
-        if (field_50 == 1) voice->Stop(true);
+        if (field_50 == 1)
+            voice->Stop(true);
         field_4c = false;
     }
 }
@@ -57,8 +59,10 @@ void NuSoundEffectPitchRamp::SetParameters(float target, float divisor, NuSoundE
     field_50 = static_cast<u32>(state);
     field_44 = target;
     field_48 = divisor;
-    if (0.01f > target) field_44 = 0.01f;
-    if (divisor == 0.0f) pitch_scale = target;
+    if (0.01f > target)
+        field_44 = 0.01f;
+    if (divisor == 0.0f)
+        pitch_scale = target;
 }
 
 NuSoundEffectPitchRamp::~NuSoundEffectPitchRamp() {

@@ -1,0 +1,399 @@
+diff --git a/include/vorbis/codec.h b/include/vorbis/codec.h
+--- a/include/vorbis/codec.h
++++ b/include/vorbis/codec.h
+@@ -18,7 +18,7 @@
+ #ifndef _vorbis_codec_h_
+ #define _vorbis_codec_h_
+ 
+-#ifdef __cplusplus
++#if defined(__cplusplus) && !defined(SAGA_VORBIS_CPP)
+ extern "C"
+ {
+ #endif /* __cplusplus */
+@@ -235,7 +235,7 @@
+ #define OV_EBADLINK   -137
+ #define OV_ENOSEEK    -138
+ 
+-#ifdef __cplusplus
++#if defined(__cplusplus) && !defined(SAGA_VORBIS_CPP)
+ }
+ #endif /* __cplusplus */
+ 
+diff --git a/include/vorbis/vorbisfile.h b/include/vorbis/vorbisfile.h
+--- a/include/vorbis/vorbisfile.h
++++ b/include/vorbis/vorbisfile.h
+@@ -18,7 +18,7 @@
+ #ifndef _OV_FILE_H_
+ #define _OV_FILE_H_
+ 
+-#ifdef __cplusplus
++#if defined(__cplusplus) && !defined(SAGA_VORBIS_CPP)
+ extern "C"
+ {
+ #endif /* __cplusplus */
+@@ -198,7 +198,7 @@
+ extern int ov_halfrate(OggVorbis_File *vf,int flag);
+ extern int ov_halfrate_p(OggVorbis_File *vf);
+ 
+-#ifdef __cplusplus
++#if defined(__cplusplus) && !defined(SAGA_VORBIS_CPP)
+ }
+ #endif /* __cplusplus */
+ 
+diff --git a/lib/backends.h b/lib/backends.h
+--- a/lib/backends.h
++++ b/lib/backends.h
+@@ -92,7 +92,7 @@
+                                  vorbis_info_residue *);
+   void (*free_info)    (vorbis_info_residue *);
+   void (*free_look)    (vorbis_look_residue *);
+-  long **(*class)      (struct vorbis_block *,vorbis_look_residue *,
++  long **(*vorbis_class)      (struct vorbis_block *,vorbis_look_residue *,
+                         int **,int *,int);
+   int  (*forward)      (oggpack_buffer *,struct vorbis_block *,
+                         vorbis_look_residue *,
+diff --git a/lib/codebook.c b/lib/codebook.c
+--- a/lib/codebook.c
++++ b/lib/codebook.c
+@@ -53,10 +53,10 @@
+     oggpack_write(opb,c->lengthlist[0]-1,5); /* 1 to 32 */
+ 
+     for(i=1;i<c->entries;i++){
+-      long this=c->lengthlist[i];
++      long vorbis_this=c->lengthlist[i];
+       long last=c->lengthlist[i-1];
+-      if(this>last){
+-        for(j=last;j<this;j++){
++      if(vorbis_this>last){
++        for(j=last;j<vorbis_this;j++){
+           oggpack_write(opb,i-count,_ilog(c->entries-count));
+           count=i;
+         }
+diff --git a/lib/envelope.c b/lib/envelope.c
+--- a/lib/envelope.c
++++ b/lib/envelope.c
+@@ -172,10 +172,10 @@
+ 
+     /* convert amplitude to delta */
+     {
+-      int p,this=filters[j].ampptr;
++      int p,vorbis_this=filters[j].ampptr;
+       float postmax,postmin,premax=-99999.f,premin=99999.f;
+ 
+-      p=this;
++      p=vorbis_this;
+       p--;
+       if(p<0)p+=VE_AMP;
+       postmax=max(acc,filters[j].ampbuf[p]);
+@@ -192,7 +192,7 @@
+       valmax=postmax-premax;
+ 
+       /*filters[j].markers[pos]=valmax;*/
+-      filters[j].ampbuf[this]=acc;
++      filters[j].ampbuf[vorbis_this]=acc;
+       filters[j].ampptr++;
+       if(filters[j].ampptr>=VE_AMP)filters[j].ampptr=0;
+     }
+diff --git a/lib/floor0.c b/lib/floor0.c
+--- a/lib/floor0.c
++++ b/lib/floor0.c
+@@ -216,6 +216,9 @@
+ }
+ 
+ /* export hooks */
++#ifdef SAGA_VORBIS_CPP
++extern
++#endif
+ const vorbis_func_floor floor0_exportbundle={
+   NULL,&floor0_unpack,&floor0_look,&floor0_free_info,
+   &floor0_free_look,&floor0_inverse1,&floor0_inverse2
+diff --git a/lib/floor1.c b/lib/floor1.c
+--- a/lib/floor1.c
++++ b/lib/floor1.c
+@@ -858,9 +858,9 @@
+ 
+     /* partition by partition */
+     for(i=0,j=2;i<info->partitions;i++){
+-      int class=info->partitionclass[i];
+-      int cdim=info->class_dim[class];
+-      int csubbits=info->class_subs[class];
++      int vorbis_class=info->partitionclass[i];
++      int cdim=info->class_dim[vorbis_class];
++      int csubbits=info->class_subs[vorbis_class];
+       int csub=1<<csubbits;
+       int bookas[8]={0,0,0,0,0,0,0,0};
+       int cval=0;
+@@ -871,11 +871,11 @@
+       if(csubbits){
+         int maxval[8];
+         for(k=0;k<csub;k++){
+-          int booknum=info->class_subbook[class][k];
++          int booknum=info->class_subbook[vorbis_class][k];
+           if(booknum<0){
+             maxval[k]=1;
+           }else{
+-            maxval[k]=sbooks[info->class_subbook[class][k]]->entries;
++            maxval[k]=sbooks[info->class_subbook[vorbis_class][k]]->entries;
+           }
+         }
+         for(k=0;k<cdim;k++){
+@@ -891,14 +891,14 @@
+         }
+         /* write it */
+         look->phrasebits+=
+-          vorbis_book_encode(books+info->class_book[class],cval,opb);
++          vorbis_book_encode(books+info->class_book[vorbis_class],cval,opb);
+ 
+ #ifdef TRAIN_FLOOR1
+         {
+           FILE *of;
+           char buffer[80];
+           sprintf(buffer,"line_%dx%ld_class%d.vqd",
+-                  vb->pcmend/2,posts-2,class);
++                  vb->pcmend/2,posts-2,vorbis_class);
+           of=fopen(buffer,"a");
+           fprintf(of,"%d\n",cval);
+           fclose(of);
+@@ -908,7 +908,7 @@
+ 
+       /* write post values */
+       for(k=0;k<cdim;k++){
+-        int book=info->class_subbook[class][bookas[k]];
++        int book=info->class_subbook[vorbis_class][bookas[k]];
+         if(book>=0){
+           /* hack to allow training with 'bad' books */
+           if(out[j+k]<(books+book)->entries)
+@@ -922,7 +922,7 @@
+             FILE *of;
+             char buffer[80];
+             sprintf(buffer,"line_%dx%ld_%dsub%d.vqd",
+-                    vb->pcmend/2,posts-2,class,bookas[k]);
++                    vb->pcmend/2,posts-2,vorbis_class,bookas[k]);
+             of=fopen(buffer,"a");
+             fprintf(of,"%d\n",out[j+k]);
+             fclose(of);
+@@ -982,21 +982,21 @@
+ 
+     /* partition by partition */
+     for(i=0,j=2;i<info->partitions;i++){
+-      int class=info->partitionclass[i];
+-      int cdim=info->class_dim[class];
+-      int csubbits=info->class_subs[class];
++      int vorbis_class=info->partitionclass[i];
++      int cdim=info->class_dim[vorbis_class];
++      int csubbits=info->class_subs[vorbis_class];
+       int csub=1<<csubbits;
+       int cval=0;
+ 
+       /* decode the partition's first stage cascade value */
+       if(csubbits){
+-        cval=vorbis_book_decode(books+info->class_book[class],&vb->opb);
++        cval=vorbis_book_decode(books+info->class_book[vorbis_class],&vb->opb);
+ 
+         if(cval==-1)goto eop;
+       }
+ 
+       for(k=0;k<cdim;k++){
+-        int book=info->class_subbook[class][cval&(csub-1)];
++        int book=info->class_subbook[vorbis_class][cval&(csub-1)];
+         cval>>=csubbits;
+         if(book>=0){
+           if((fit_value[j+k]=vorbis_book_decode(books+book,&vb->opb))==-1)
+@@ -1093,6 +1093,9 @@
+ }
+ 
+ /* export hooks */
++#ifdef SAGA_VORBIS_CPP
++extern
++#endif
+ const vorbis_func_floor floor1_exportbundle={
+   &floor1_pack,&floor1_unpack,&floor1_look,&floor1_free_info,
+   &floor1_free_look,&floor1_inverse1,&floor1_inverse2
+diff --git a/lib/lsp.c b/lib/lsp.c
+--- a/lib/lsp.c
++++ b/lib/lsp.c
+@@ -314,7 +314,7 @@
+   for(i=0;i<=ord;i++)defl[i]=a[i];
+ 
+   for(m=ord;m>0;m--){
+-    double new=0.f,delta;
++    double vorbis_new=0.f,delta;
+ 
+     /* iterate a root */
+     while(1){
+@@ -322,9 +322,9 @@
+ 
+       /* eval the polynomial and its first two derivatives */
+       for(i=m;i>0;i--){
+-        ppp = new*ppp + pp;
+-        pp  = new*pp  + p;
+-        p   = new*p   + defl[i-1];
++        ppp = vorbis_new*ppp + pp;
++        pp  = vorbis_new*pp  + p;
++        p   = vorbis_new*p   + defl[i-1];
+       }
+ 
+       /* Laguerre's method */
+@@ -341,20 +341,20 @@
+       }
+ 
+       delta  = m*p/denom;
+-      new   -= delta;
++      vorbis_new   -= delta;
+ 
+       if(delta<0.f)delta*=-1;
+ 
+-      if(fabs(delta/new)<10e-12)break;
++      if(fabs(delta/vorbis_new)<10e-12)break;
+       lastdelta=delta;
+     }
+ 
+-    r[m-1]=new;
++    r[m-1]=vorbis_new;
+ 
+     /* forward deflation */
+ 
+     for(i=m;i>0;i--)
+-      defl[i-1]+=new*defl[i];
++      defl[i-1]+=vorbis_new*defl[i];
+     defl++;
+ 
+   }
+diff --git a/lib/mapping0.c b/lib/mapping0.c
+--- a/lib/mapping0.c
++++ b/lib/mapping0.c
+@@ -679,7 +679,7 @@
+         }
+ 
+         classifications=_residue_P[ci->residue_type[resnum]]->
+-          class(vb,b->residue[resnum],couple_bundle,zerobundle,ch_in_bundle);
++          vorbis_class(vb,b->residue[resnum],couple_bundle,zerobundle,ch_in_bundle);
+ 
+         ch_in_bundle=0;
+         for(j=0;j<vi->channels;j++)
+@@ -807,6 +807,9 @@
+ }
+ 
+ /* export hooks */
++#ifdef SAGA_VORBIS_CPP
++extern
++#endif
+ const vorbis_func_mapping mapping0_exportbundle={
+   &mapping0_pack,
+   &mapping0_unpack,
+diff --git a/lib/registry.h b/lib/registry.h
+--- a/lib/registry.h
++++ b/lib/registry.h
+@@ -25,8 +25,35 @@
+ #define VI_RESB 3
+ #define VI_MAPB 1
+ 
++#ifdef SAGA_VORBIS_CPP
++// The original Android build has a local registry in each consumer.
++extern const vorbis_func_floor     floor0_exportbundle;
++extern const vorbis_func_floor     floor1_exportbundle;
++extern const vorbis_func_residue   residue0_exportbundle;
++extern const vorbis_func_residue   residue1_exportbundle;
++extern const vorbis_func_residue   residue2_exportbundle;
++extern const vorbis_func_mapping   mapping0_exportbundle;
++
++const vorbis_func_floor     *const _floor_P[]={
++  &floor0_exportbundle,
++  &floor1_exportbundle,
++};
++
++const vorbis_func_residue   *const _residue_P[]={
++  &residue0_exportbundle,
++  &residue1_exportbundle,
++  &residue2_exportbundle,
++};
++
++const vorbis_func_mapping   *const _mapping_P[]={
++  &mapping0_exportbundle,
++};
++
++#else
+ extern const vorbis_func_floor     *const _floor_P[];
+ extern const vorbis_func_residue   *const _residue_P[];
+ extern const vorbis_func_mapping   *const _mapping_P[];
+ 
+ #endif
++
++#endif
+diff --git a/lib/res0.c b/lib/res0.c
+--- a/lib/res0.c
++++ b/lib/res0.c
+@@ -361,14 +361,14 @@
+     int maxval = book->minval + book->delta*(book->quantvals-1);
+     for(i=0;i<book->entries;i++){
+       if(c->lengthlist[i]>0){
+-        int this=0;
++        int vorbis_this=0;
+         for(j=0;j<dim;j++){
+           int val=(e[j]-a[j]);
+-          this+=val*val;
++          vorbis_this+=val*val;
+         }
+-        if(best==-1 || this<best){
++        if(best==-1 || vorbis_this<best){
+           memcpy(p,e,sizeof(p));
+-          best=this;
++          best=vorbis_this;
+           index=i;
+         }
+       }
+@@ -855,6 +855,9 @@
+ }
+ 
+ 
++#ifdef SAGA_VORBIS_CPP
++extern
++#endif
+ const vorbis_func_residue residue0_exportbundle={
+   NULL,
+   &res0_unpack,
+@@ -866,6 +869,9 @@
+   &res0_inverse
+ };
+ 
++#ifdef SAGA_VORBIS_CPP
++extern
++#endif
+ const vorbis_func_residue residue1_exportbundle={
+   &res0_pack,
+   &res0_unpack,
+@@ -877,6 +883,9 @@
+   &res1_inverse
+ };
+ 
++#ifdef SAGA_VORBIS_CPP
++extern
++#endif
+ const vorbis_func_residue residue2_exportbundle={
+   &res0_pack,
+   &res0_unpack,
+diff --git a/lib/saga_vorbis.h b/lib/saga_vorbis.h
+new file mode 100644
+--- /dev/null
++++ b/lib/saga_vorbis.h
+@@ -0,0 +1,20 @@
++#ifndef SAGA_VORBIS_COMPAT_H
++#define SAGA_VORBIS_COMPAT_H
++
++// Target-only integration: the original allocator also zeroes each allocation.
++#include <ogg/ogg.h>
++extern "C" {
++void *OggAllocMem(unsigned int bytes);
++void *OggReAllocMem(void *memory, unsigned int bytes);
++void OggFreeMem(void *memory);
++}
++#undef _ogg_malloc
++#undef _ogg_calloc
++#undef _ogg_realloc
++#undef _ogg_free
++#define _ogg_malloc OggAllocMem
++#define _ogg_calloc(count, size) OggAllocMem((count) * (size))
++#define _ogg_realloc OggReAllocMem
++#define _ogg_free OggFreeMem
++
++#endif

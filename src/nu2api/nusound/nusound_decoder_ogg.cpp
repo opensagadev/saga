@@ -80,7 +80,8 @@ int NuSoundDecoderOGG::OGGReadCallbacksDecoder::Read(void *dest, unsigned int si
         u32 available = (u32)context.read_size - this->position;
         u32 boundary = context.size3 != 0 ? (u32)context.size3 - this->position : available;
         u32 take = remaining < available ? remaining : available;
-        if (take > boundary) take = boundary;
+        if (take > boundary)
+            take = boundary;
         memmove(out, (u8 *)buffer->GetAddress() + this->position, take);
         this->position += take;
         out += take;
@@ -118,8 +119,8 @@ int NuSoundDecoderOGG::OGGReadCallbacksDecoder::Read(void *dest, unsigned int si
             this->decoder->locked_buffer = next_buffer;
 
             {
-                this->decoder->source->RequestBuffer(
-                    this->decoder->ogg_loop, NuSoundWeakPtr<NuSoundBufferCallback>(this->decoder));
+                this->decoder->source->RequestBuffer(this->decoder->ogg_loop,
+                                                     NuSoundWeakPtr<NuSoundBufferCallback>(this->decoder));
             }
 
             this->decoder->locked_buffer->Lock();

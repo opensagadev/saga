@@ -104,11 +104,11 @@ void NuSoundSample::SetLoadState(LoadState state) {
 
 NuSoundSample::~NuSoundSample() {
     if (stream_desc != NULL) {
-        NuSoundSystem::FreeMemory(NuSoundSystem::MemoryDiscipline::SCRATCH,
-                                  reinterpret_cast<usize>(stream_desc), 0);
+        NuSoundSystem::FreeMemory(NuSoundSystem::MemoryDiscipline::SCRATCH, reinterpret_cast<usize>(stream_desc), 0);
         SetStreamDesc(NULL);
     }
-    if (buffer.IsAllocated()) Unload();
+    if (buffer.IsAllocated())
+        Unload();
 }
 
 void NuSoundSample::SetLastErrorState(ErrorState state) {
@@ -141,8 +141,7 @@ i32 NuSoundSample::Unload() {
     NuSoundStreamDesc *desc = this->stream_desc;
     if (desc != NULL) {
         desc->~NuSoundStreamDesc();
-        NuSoundSystem::FreeMemory(NuSoundSystem::MemoryDiscipline::SCRATCH, reinterpret_cast<usize>(desc),
-                                  0);
+        NuSoundSystem::FreeMemory(NuSoundSystem::MemoryDiscipline::SCRATCH, reinterpret_cast<usize>(desc), 0);
         SetStreamDesc(NULL);
     }
 

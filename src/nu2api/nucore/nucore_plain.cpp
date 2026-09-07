@@ -327,7 +327,8 @@ extern "C" {
     void NuCameraMotionBlurParams(void) {
     }
     void NuCameraRelock(void) {
-        if (prev_lock == 1) NuCameraSet(&locked_camera);
+        if (prev_lock == 1)
+            NuCameraSet(&locked_camera);
     }
     void NuCameraRestoreState(void) {
     }
@@ -363,7 +364,8 @@ extern "C" {
             NuMtxInv(&camera_inverse, &global_camera.mtx);
             NuMtxInv(&reflect_inverse, &global_reflect.mtx);
             vmtx = reflect_inverse;
-            if (camfx == 1) NuMtxMul(&vmtx, &vmtx, &mirror);
+            if (camfx == 1)
+                NuMtxMul(&vmtx, &vmtx, &mirror);
             NuMtxMul(&vmtx, &vmtx, &global_reflect.mtx);
             NuMtxMul(&vmtx, &vmtx, &camera_inverse);
         }
@@ -424,7 +426,8 @@ extern "C" {
         NuRndrLightingStateCurrent.field_0x74 = 0;
         NuRndrSetSpecularLightPS(NULL, NULL);
         NuRndrStateUpdateCameraState();
-        if (NuOcclusionManagerIsInitialised()) NuOcclusionManagerOnCameraSet();
+        if (NuOcclusionManagerIsInitialised())
+            NuOcclusionManagerOnCameraSet();
     }
     void NuCameraSetProjectionMtx(NUMTX *mtx, f32 fov, f32 aspect, f32 near_clip, f32 far_clip) {
         if (near_clip < 0.1f) {
@@ -496,7 +499,8 @@ extern "C" {
     void NuCameraTransformView(void) {
     }
     void NuCameraUnlock(void) {
-        if (prev_lock == 1) NuCameraSet(&cam_copy);
+        if (prev_lock == 1)
+            NuCameraSet(&cam_copy);
     }
 
     // ---------------------------------------------------------------------------
@@ -972,13 +976,9 @@ extern "C" {
     extern void (*postRenderFlashingHack)(void);
     extern void (*nuapi_endframe_callbackfn)(void);
 
-
-
     // Faithful transcription of the original frame-end pump. Waits for the
     // target frame interval, ticks material/tex/wind anims, swaps screens
     // via NuRndrSwapScreenEx, then advances nuapi clocks and pad state.
-
-
 
     // ---------------------------------------------------------------------------
     // iOS / platform
@@ -2684,14 +2684,9 @@ extern "C" {
     extern "C++" NuWindGType *NuWindAllocateGrp();
     extern "C++" void NuWindFreeGrp(NuWindGType *group);
 
-
     i32 NuWindCurrent(NUWIND *wind) {
         return wind != NULL && wind->unk1 >= 0 ? wind->unk0[wind->unk1] : -1;
     }
-
-
-
-
 
     i32 NuWindLoad(NUWIND *wind, i32 index, char *name, VARIPTR *buffer, VARIPTR *buffer_end) {
         if (wind != NULL && (u32)index < 8) {
@@ -2707,8 +2702,6 @@ extern "C" {
         }
         return -1;
     }
-
-
 
     void NuWindSetCurrent(NUWIND *wind, i32 index) {
         if ((u32)index > 7 || wind == NULL) {
@@ -2729,8 +2722,6 @@ extern "C" {
         }
     }
 
-
-
     void NuWindUnload(NUWIND *wind, i32 index) {
         if (wind != NULL && wind->unk0[index] >= 0) {
             NuTexDestroy(wind->unk0[index]);
@@ -2738,7 +2729,6 @@ extern "C" {
         }
     }
     void NuWindUpdateArray(NUVEC **);
-
 
     void NuPartEnableRayCasts(void) {
     }
@@ -3535,10 +3525,8 @@ extern "C" {
     // Debug / error / html / profiling
     // ---------------------------------------------------------------------------
 
-
     void NuErrorCheck(void) {
     }
-
 
     void NuErrorSetFilter(void) {
     }
@@ -3549,8 +3537,6 @@ extern "C" {
     }
     void NuDebugMsgPrologTTY(void) {
     }
-
-
 
     void NuWarningProlog(void) {
     }

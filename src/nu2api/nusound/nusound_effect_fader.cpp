@@ -43,7 +43,8 @@ NuSoundEffectFader::NuSoundEffectFader() {
 }
 
 void NuSoundEffectFader::Process(float frametime) {
-    if (!enabled || !(unknown_58 < 1.0f)) return;
+    if (!enabled || !(unknown_58 < 1.0f))
+        return;
     unknown_08[2] = 1;
     if (unknown_54 == 0.0f) {
         unknown_58 = 1.0f;
@@ -52,8 +53,10 @@ void NuSoundEffectFader::Process(float frametime) {
     }
     f32 step = frametime == 0.0f ? 0.0f : frametime / unknown_54;
     f32 progress = unknown_58 + step;
-    if (progress < 1.0f && progress < 0.0f) progress = 0.0f;
-    else if (!(progress < 1.0f)) progress = 1.0f;
+    if (progress < 1.0f && progress < 0.0f)
+        progress = 0.0f;
+    else if (!(progress < 1.0f))
+        progress = 1.0f;
     unknown_58 = progress;
     f32 destination_weight = 0.0f;
     f32 source_weight = 1.0f;
@@ -61,8 +64,8 @@ void NuSoundEffectFader::Process(float frametime) {
         destination_weight = progress;
         source_weight = 1.0f - progress;
     } else if (curve.mode == 1) {
-        destination_weight = NuSound.CalculateCrossfadeHeight(
-            *static_cast<NuSoundSystem::CurveData *>(curve.data), progress);
+        destination_weight =
+            NuSound.CalculateCrossfadeHeight(*static_cast<NuSoundSystem::CurveData *>(curve.data), progress);
         source_weight = 1.0f - destination_weight;
         progress = unknown_58;
     }
@@ -77,17 +80,19 @@ void NuSoundEffectFader::ProcessBus(NuSoundBus *, float) {
 }
 
 void NuSoundEffectFader::ProcessVoice(NuSoundVoice *voice, float) {
-    if (!unknown_68) return;
+    if (!unknown_68)
+        return;
     switch (unknown_60) {
-    case 1:
-        voice->Stop(true);
-        break;
-    case 2:
-        voice->Pause();
-        break;
-    case 3:
-        if (unknown_64 != NULL) unknown_64->OnFinish();
-        break;
+        case 1:
+            voice->Stop(true);
+            break;
+        case 2:
+            voice->Pause();
+            break;
+        case 3:
+            if (unknown_64 != NULL)
+                unknown_64->OnFinish();
+            break;
     }
     unknown_68 = false;
 }

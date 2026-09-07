@@ -27,7 +27,10 @@ struct NuSoundWeakPtrListNode {
 
 template <typename T> class NuSoundWeakPtrObj {
   public:
-    struct Links { NuSoundWeakPtrListNode *prev; NuSoundWeakPtrListNode *next; } start, end;
+    struct Links {
+        NuSoundWeakPtrListNode *prev;
+        NuSoundWeakPtrListNode *next;
+    } start, end;
 
     NuSoundWeakPtrListNode *head;
     NuSoundWeakPtrListNode *tail;
@@ -35,9 +38,7 @@ template <typename T> class NuSoundWeakPtrObj {
 
   public:
     static Links *GetLinks(NuSoundWeakPtrListNode *node) {
-        return node != NULL
-                   ? reinterpret_cast<Links *>(reinterpret_cast<char *>(node) + sizeof(void *))
-                   : NULL;
+        return node != NULL ? reinterpret_cast<Links *>(reinterpret_cast<char *>(node) + sizeof(void *)) : NULL;
     }
 
     NuSoundWeakPtrObj() {

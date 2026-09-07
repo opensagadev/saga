@@ -178,10 +178,9 @@ bool NuVoiceAndroid::CreateHardwareVoice() {
     const void *iids[2] = {SL_IID_ANDROIDSIMPLEBUFFERQUEUE, SL_IID_VOLUME};
     const u32 required[2] = {1, 1};
 
-    EngineCreateAudioPlayerFn create_player =
-        SL_SLOT(NuSoundSystem::Get()->audio_engine, EngineCreateAudioPlayerFn, 8);
-    u32 error = create_player(NuSoundSystem::Get()->audio_engine, &this->player_object, audio_src,
-                                                                  audio_sink, 2, iids, required);
+    EngineCreateAudioPlayerFn create_player = SL_SLOT(NuSoundSystem::Get()->audio_engine, EngineCreateAudioPlayerFn, 8);
+    u32 error = create_player(NuSoundSystem::Get()->audio_engine, &this->player_object, audio_src, audio_sink, 2, iids,
+                              required);
     if (NuSoundAndroid::ReportErrorCode(error, "Create audio player") != 0) {
         return false;
     }
@@ -416,8 +415,7 @@ void NuVoiceAndroid::UpdateHardwareVoice(f32 frametime) {
         // The queue drained: ask the source for the next buffer (streaming
         // fills are asynchronous through the streamer, the voice is the
         // callback).
-        this->sound_source->RequestBuffer(
-            (this->flags >> 3) & 1, NuSoundWeakPtr<NuSoundBufferCallback>(this));
+        this->sound_source->RequestBuffer((this->flags >> 3) & 1, NuSoundWeakPtr<NuSoundBufferCallback>(this));
         this->hardware_flags &= 0xfb;
     }
 
@@ -460,8 +458,7 @@ void NuVoiceAndroid::ApplyHardwareVoiceMix() {
         u32 error = SL_SLOT(this->volume_interface, VolumeEnableStereoPositionFn, 0x14)(this->volume_interface, 1);
         NuSoundAndroid::ReportErrorCode(error, "Volume EnableStereoPosition(true)");
 
-        error = SL_SLOT(this->volume_interface, VolumeSetStereoPositionFn, 0x1c)(this->volume_interface,
-                                                                                 position);
+        error = SL_SLOT(this->volume_interface, VolumeSetStereoPositionFn, 0x1c)(this->volume_interface, position);
         NuSoundAndroid::ReportErrorCode(error, "Volume SetStereoPosition");
     } else {
         u32 error = SL_SLOT(this->volume_interface, VolumeEnableStereoPositionFn, 0x14)(this->volume_interface, 0);
@@ -590,7 +587,8 @@ NuSoundVoiceFactoryList::NuSoundVoiceFactoryList() {
     NuSoundVoiceFactory **storage = static_cast<NuSoundVoiceFactory **>(
         NuMemoryGet()->GetThreadMem()->_BlockReAlloc(NULL, 16 * sizeof(*factories), 4, 0x41, "", 0));
     if (storage != factories) {
-        for (u32 i = 0; i < count; i++) storage[i] = factories[i];
+        for (u32 i = 0; i < count; i++)
+            storage[i] = factories[i];
         NuMemoryGet()->GetThreadMem()->BlockFree(factories, 0);
     }
     capacity = 16;

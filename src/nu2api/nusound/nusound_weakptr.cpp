@@ -17,8 +17,10 @@ template <typename T> NuSoundWeakPtrObj<T>::~NuSoundWeakPtrObj() {
 
     while (weak_count != 0) {
         node = GetLinks(head)->next;
-        if (node->prev != NULL) GetLinks(node->prev)->next = node->next;
-        if (node->next != NULL) GetLinks(node->next)->prev = node->prev;
+        if (node->prev != NULL)
+            GetLinks(node->prev)->next = node->next;
+        if (node->next != NULL)
+            GetLinks(node->next)->prev = node->prev;
         node->next = NULL;
         node->prev = NULL;
         --weak_count;
@@ -29,8 +31,10 @@ template <typename T> NuSoundWeakPtrObj<T>::~NuSoundWeakPtrObj() {
     // The embedded list's destructor follows the owner's locked detach pass.
     while (weak_count != 0) {
         node = GetLinks(head)->next;
-        if (node->prev != NULL) GetLinks(node->prev)->next = node->next;
-        if (node->next != NULL) GetLinks(node->next)->prev = node->prev;
+        if (node->prev != NULL)
+            GetLinks(node->prev)->next = node->next;
+        if (node->next != NULL)
+            GetLinks(node->next)->prev = node->prev;
         node->next = NULL;
         node->prev = NULL;
         --weak_count;
@@ -41,8 +45,10 @@ template <typename T> NuSoundWeakPtrObj<T>::~NuSoundWeakPtrObj() {
 template <typename T> void NuSoundWeakPtr<T>::Set(T *ptr) {
     NuSoundWeakPtrListNode::sPtrListLock.Lock();
     if (this->obj != (void *)ptr) {
-        if (this->obj != NULL) this->obj->Unlink(this);
-        if (ptr != NULL) ((NuSoundWeakPtrObj<T> *)ptr)->Link(this);
+        if (this->obj != NULL)
+            this->obj->Unlink(this);
+        if (ptr != NULL)
+            ((NuSoundWeakPtrObj<T> *)ptr)->Link(this);
         this->obj = (NuSoundWeakPtrObj<T> *)ptr;
     }
     NuSoundWeakPtrListNode::sPtrListLock.Unlock();

@@ -76,7 +76,8 @@ class NuSoundStreamer {
         NuSoundWeakPtr<NuSoundBufferCallback> weak_ptr;
         bool weak_flag;
 
-        QueueElement() : sample(NULL), loop(false), start_offset(0.0f), buffer(NULL), weak_flag(false) {}
+        QueueElement() : sample(NULL), loop(false), start_offset(0.0f), buffer(NULL), weak_flag(false) {
+        }
 
         ~QueueElement() = default;
     };
@@ -92,12 +93,16 @@ class NuSoundStreamer {
     NuThread *thread;
     bool running;
 
-    union { QueueElement queue1[32]; }; // control queue storage
+    union {
+        QueueElement queue1[32];
+    }; // control queue storage
     i32 queue1_length;
     i32 queue1_index;
     NuThreadSemaphore queue1_semaphore;
 
-    union { QueueElement queue2[32]; }; // fill queue storage
+    union {
+        QueueElement queue2[32];
+    }; // fill queue storage
     i32 queue2_length;
     i32 queue2_index;
     NuThreadSemaphore queue2_semaphore;

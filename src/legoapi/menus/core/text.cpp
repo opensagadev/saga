@@ -780,8 +780,6 @@ extern "C" {
 }
 void LookupHash(u32, u32 *, HashRedirect *, u32) {
 }
-void _make_words(abi_long *, abi_long, abi_long) {
-}
 void MultilineDump(char const *) {
 }
 void GetMatchLength(unsigned char *, unsigned char *, abi_ulong) {

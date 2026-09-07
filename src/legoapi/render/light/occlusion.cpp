@@ -69,26 +69,24 @@ void OccluderSet::Init(u32 max_occluders, VARIPTR *buffer, VARIPTR buffer_end) {
 }
 
 bool OccluderSet::IsOccludedOBB(nuvec_s const *minimum, nuvec_s const *maximum, numtx_s const *matrix) {
-    if (!queries_prepared) return false;
-    NUVEC4 corners[8] = {
-        {minimum->x, maximum->y, minimum->z, 1.0f},
-        {minimum->x, maximum->y, maximum->z, 1.0f},
-        {maximum->x, maximum->y, maximum->z, 1.0f},
-        {maximum->x, maximum->y, minimum->z, 1.0f},
-        {minimum->x, minimum->y, minimum->z, 1.0f},
-        {minimum->x, minimum->y, maximum->z, 1.0f},
-        {maximum->x, minimum->y, maximum->z, 1.0f},
-        {maximum->x, minimum->y, minimum->z, 1.0f}
-    };
+    if (!queries_prepared)
+        return false;
+    NUVEC4 corners[8] = {{minimum->x, maximum->y, minimum->z, 1.0f}, {minimum->x, maximum->y, maximum->z, 1.0f},
+                         {maximum->x, maximum->y, maximum->z, 1.0f}, {maximum->x, maximum->y, minimum->z, 1.0f},
+                         {minimum->x, minimum->y, minimum->z, 1.0f}, {minimum->x, minimum->y, maximum->z, 1.0f},
+                         {maximum->x, minimum->y, maximum->z, 1.0f}, {maximum->x, minimum->y, minimum->z, 1.0f}};
     NUMTX transform;
-    if (matrix) NuMtxMulH(&transform, const_cast<NUMTX *>(matrix), &projection_matrix);
-    else transform = projection_matrix;
+    if (matrix)
+        NuMtxMulH(&transform, const_cast<NUMTX *>(matrix), &projection_matrix);
+    else
+        transform = projection_matrix;
     float min_x = 1000000.0f, min_y = 1000000.0f, min_depth = 1000000.0f;
     float max_x = -1000000.0f, max_y = -1000000.0f;
     for (u32 i = 0; i < 8; ++i) {
         NUVEC4 &v = corners[i];
         NuVec4MtxTransform(&v, reinterpret_cast<NUVEC *>(&v), &transform);
-        if (v.w <= 0.0f) return false;
+        if (v.w <= 0.0f)
+            return false;
         v.x /= v.w;
         v.y /= v.w;
         v.z /= v.w;
@@ -100,14 +98,15 @@ bool OccluderSet::IsOccludedOBB(nuvec_s const *minimum, nuvec_s const *maximum, 
     }
     i32 limit = static_cast<i32>(count) < 100 ? static_cast<i32>(count) : 100;
     for (i32 i = 0; i != limit; ++i) {
-        if (indices[i] == 0xffffffffu) continue;
+        if (indices[i] == 0xffffffffu)
+            continue;
         OccluderRecord &record = occluders[indices[i]];
-        if (record.depth > min_depth - 2.0f) return false;
-        if (min_x > record.max_x || min_y > record.max_y ||
-            record.min_x > max_x || record.min_y > max_y) continue;
+        if (record.depth > min_depth - 2.0f)
+            return false;
+        if (min_x > record.max_x || min_y > record.max_y || record.min_x > max_x || record.min_y > max_y)
+            continue;
         NUVEC4 *v = record.transformed;
-        float winding = (v[2].x - v[0].x) * (v[1].y - v[0].y) -
-                        (v[1].x - v[0].x) * (v[2].y - v[0].y);
+        float winding = (v[2].x - v[0].x) * (v[1].y - v[0].y) - (v[1].x - v[0].x) * (v[2].y - v[0].y);
         bool inside = true;
         for (i32 edge = 0; edge < 4 && inside; ++edge) {
             i32 start = winding > 0.0f ? edge : 3 - edge;
@@ -116,40 +115,43 @@ bool OccluderSet::IsOccludedOBB(nuvec_s const *minimum, nuvec_s const *maximum, 
             NuVecNorm(reinterpret_cast<NUVEC *>(&normal), reinterpret_cast<NUVEC *>(&normal));
             normal.z = normal.w = 0.0f;
             for (u32 corner = 0; corner < 8; ++corner) {
-                float distance = (corners[corner].x - v[start].x) * normal.x +
-                                 (corners[corner].y - v[start].y) * normal.y + 0.0f;
+                float distance =
+                    (corners[corner].x - v[start].x) * normal.x + (corners[corner].y - v[start].y) * normal.y + 0.0f;
                 if (distance < 0.01f) {
                     inside = false;
                     break;
                 }
             }
         }
-        if (inside) return true;
+        if (inside)
+            return true;
     }
     return false;
 }
 
 bool OccluderSet::IsOccludedSphere(nuvec_s const *center, float radius) {
-    if (!queries_prepared) return false;
+    if (!queries_prepared)
+        return false;
     NUVEC4 projected;
     NuVec4MtxTransform(&projected, const_cast<NUVEC *>(center), &projection_matrix);
-    if (radius > projected.w) return false;
+    if (radius > projected.w)
+        return false;
     projected.x /= projected.w;
     projected.y /= projected.w;
     projected.z /= projected.w;
     float screen_radius = radius / projected.w;
     i32 limit = static_cast<i32>(count) < 100 ? static_cast<i32>(count) : 100;
     for (i32 i = 0; i != limit; ++i) {
-        if (indices[i] == 0xffffffffu) continue;
+        if (indices[i] == 0xffffffffu)
+            continue;
         OccluderRecord &record = occluders[indices[i]];
-        if (record.depth > projected.w - radius - 2.0f) return false;
-        if (projected.x - screen_radius > record.max_x ||
-            projected.y - screen_radius > record.max_y ||
-            record.min_x > projected.x + screen_radius ||
-            record.min_y > projected.y + screen_radius) continue;
+        if (record.depth > projected.w - radius - 2.0f)
+            return false;
+        if (projected.x - screen_radius > record.max_x || projected.y - screen_radius > record.max_y ||
+            record.min_x > projected.x + screen_radius || record.min_y > projected.y + screen_radius)
+            continue;
         NUVEC4 *v = record.transformed;
-        float winding = (v[1].y - v[0].y) * (v[2].x - v[0].x) -
-                        (v[1].x - v[0].x) * (v[2].y - v[0].y);
+        float winding = (v[1].y - v[0].y) * (v[2].x - v[0].x) - (v[1].x - v[0].x) * (v[2].y - v[0].y);
         bool inside = true;
         for (i32 edge = 0; edge < 4; ++edge) {
             i32 start = winding > 0.0f ? edge : 3 - edge;
@@ -157,14 +159,15 @@ bool OccluderSet::IsOccludedSphere(nuvec_s const *center, float radius) {
             NUVEC4 normal = {v[end].y - v[start].y, -(v[end].x - v[start].x), 0.0f, 0.0f};
             NuVecNorm(reinterpret_cast<NUVEC *>(&normal), reinterpret_cast<NUVEC *>(&normal));
             normal.z = normal.w = 0.0f;
-            float distance = (projected.x - v[start].x) * normal.x +
-                             (projected.y - v[start].y) * normal.y + 0.0f - screen_radius;
+            float distance =
+                (projected.x - v[start].x) * normal.x + (projected.y - v[start].y) * normal.y + 0.0f - screen_radius;
             if (distance < 0.0f) {
                 inside = false;
                 break;
             }
         }
-        if (inside) return true;
+        if (inside)
+            return true;
     }
     return false;
 }
@@ -201,8 +204,7 @@ void OccluderSet::PrepareForQueries(numtx_s const *query, numtx_s const *project
             record.min_depth = v.w < record.min_depth ? v.w : record.min_depth;
             record.depth = v.w > record.depth ? v.w : record.depth;
         }
-        if (valid && (record.depth < 0.0f || record.min_depth < 0.0f ||
-                      record.max_x < -1.0f || record.min_x > 1.0f ||
+        if (valid && (record.depth < 0.0f || record.min_depth < 0.0f || record.max_x < -1.0f || record.min_x > 1.0f ||
                       record.max_y < -1.0f || record.min_y > 1.0f)) {
             valid = false;
         }
@@ -219,13 +221,14 @@ void OccluderSet::RenderOccluders(bool depth_only) const {
         NuPrimSetCoordinateSystem(NUPRIM_SCALEMODE_NORMALISED);
         NuPrim2DBegin(0, 5, depth_only ? ms_pZOnlyMtl2D : NULL);
         for (u32 i = 0; i < count; ++i) {
-            if (indices[i] == 0xffffffffu) continue;
+            if (indices[i] == 0xffffffffu)
+                continue;
             const OccluderRecord &record = occluders[indices[i]];
-            if (record.min_depth < 0.0f || record.depth < 0.0f) continue;
+            if (record.min_depth < 0.0f || record.depth < 0.0f)
+                continue;
             u32 colour = static_cast<u32>(record.vertices[0].x * record.vertices[0].z) | 0xff000000u;
             for (u32 vertex = 0; vertex < 6; ++vertex) {
-                u32 packed = g_NuPrim_NeedsOverbrightening ? colour :
-                             ((colour >> 1) & 0x007f7f7fu) | 0xff000000u;
+                u32 packed = g_NuPrim_NeedsOverbrightening ? colour : ((colour >> 1) & 0x007f7f7fu) | 0xff000000u;
                 *reinterpret_cast<u32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = packed;
                 const NUVEC4 &v = record.transformed[triangle_indices[vertex]];
                 NuPrim2DAddXYZ(v.x, -v.y, v.z);
@@ -240,8 +243,7 @@ void OccluderSet::RenderOccluders(bool depth_only) const {
             const OccluderRecord &record = occluders[i];
             u32 colour = static_cast<u32>(record.vertices[0].x * record.vertices[0].z) | 0xff000000u;
             for (u32 vertex = 0; vertex < 6; ++vertex) {
-                u32 packed = g_NuPrim_NeedsOverbrightening ? colour :
-                             ((colour >> 1) & 0x007f7f7fu) | 0xff000000u;
+                u32 packed = g_NuPrim_NeedsOverbrightening ? colour : ((colour >> 1) & 0x007f7f7fu) | 0xff000000u;
                 *reinterpret_cast<u32 *>(g_NuPrim_StreamBufferPtr->addr + 12) = packed;
                 const NUVEC4 &v = record.vertices[triangle_indices[vertex]];
                 *reinterpret_cast<NUVEC *>(g_NuPrim_StreamBufferPtr->addr) = NUVEC{v.x, v.y, v.z};
@@ -256,8 +258,10 @@ void OccluderSet::RenderOccluders(bool depth_only) const {
 i32 OccluderSet::SortByDepth(void const *left, void const *right) {
     i32 a = *static_cast<const i32 *>(left);
     i32 b = *static_cast<const i32 *>(right);
-    if (a == -1) return 1;
-    if (b == -1) return -1;
+    if (a == -1)
+        return 1;
+    if (b == -1)
+        return -1;
     OccluderRecord *records = g_OcclusionManager.current_set->occluders;
     return records[b].depth > records[a].depth ? -1 : 1;
 }
@@ -266,39 +270,31 @@ OccluderSet::~OccluderSet() {
 }
 
 void OcclusionManager::AddOccluder(nuvec_s const *center, float radius) {
-    if (!initialized || !enabled) return;
+    if (!initialized || !enabled)
+        return;
     NUMTX *view = NuCameraGetViewMtx();
     NUVEC right = {view->m00 * radius, view->m10 * radius, view->m20 * radius};
     NUVEC up = {view->m01 * radius, view->m11 * radius, view->m21 * radius};
     NUVEC forward = {view->m02 * radius, view->m12 * radius, radius * view->m22};
-    NUVEC4 a = {((center->x + up.x) - right.x) - forward.x,
-                ((center->y + up.y) - right.y) - forward.y,
+    NUVEC4 a = {((center->x + up.x) - right.x) - forward.x, ((center->y + up.y) - right.y) - forward.y,
                 ((center->z + up.z) - right.z) - forward.z, 1.0f};
-    NUVEC4 b = {((center->x + up.x) + right.x) + forward.x,
-                ((center->y + up.y) + right.y) + forward.y,
+    NUVEC4 b = {((center->x + up.x) + right.x) + forward.x, ((center->y + up.y) + right.y) + forward.y,
                 ((center->z + up.z) + right.z) + forward.z, 1.0f};
-    NUVEC4 c = {(right.x + (center->x - up.x)) + forward.x,
-                (right.y + (center->y - up.y)) + forward.y,
+    NUVEC4 c = {(right.x + (center->x - up.x)) + forward.x, (right.y + (center->y - up.y)) + forward.y,
                 (right.z + (center->z - up.z)) + forward.z, 1.0f};
-    NUVEC4 d = {((center->x - up.x) - right.x) - forward.x,
-                ((center->y - up.y) - right.y) - forward.y,
+    NUVEC4 d = {((center->x - up.x) - right.x) - forward.x, ((center->y - up.y) - right.y) - forward.y,
                 ((center->z - up.z) - right.z) - forward.z, 1.0f};
-    AddOccluder(reinterpret_cast<NUVEC *>(&a), reinterpret_cast<NUVEC *>(&b),
-                reinterpret_cast<NUVEC *>(&c), reinterpret_cast<NUVEC *>(&d));
+    AddOccluder(reinterpret_cast<NUVEC *>(&a), reinterpret_cast<NUVEC *>(&b), reinterpret_cast<NUVEC *>(&c),
+                reinterpret_cast<NUVEC *>(&d));
 }
 
 void OcclusionManager::AddOccluder(nuvec_s const *minimum, nuvec_s const *maximum, numtx_s const *matrix) {
-    if (!initialized || !enabled) return;
-    NUVEC4 corners[8] = {
-        {minimum->x, maximum->y, minimum->z, 1.0f},
-        {maximum->x, maximum->y, maximum->z, 1.0f},
-        {maximum->x, minimum->y, maximum->z, 1.0f},
-        {minimum->x, minimum->y, minimum->z, 1.0f},
-        {minimum->x, maximum->y, maximum->z, 1.0f},
-        {maximum->x, maximum->y, minimum->z, 1.0f},
-        {maximum->x, minimum->y, minimum->z, 1.0f},
-        {minimum->x, minimum->y, maximum->z, 1.0f}
-    };
+    if (!initialized || !enabled)
+        return;
+    NUVEC4 corners[8] = {{minimum->x, maximum->y, minimum->z, 1.0f}, {maximum->x, maximum->y, maximum->z, 1.0f},
+                         {maximum->x, minimum->y, maximum->z, 1.0f}, {minimum->x, minimum->y, minimum->z, 1.0f},
+                         {minimum->x, maximum->y, maximum->z, 1.0f}, {maximum->x, maximum->y, minimum->z, 1.0f},
+                         {maximum->x, minimum->y, minimum->z, 1.0f}, {minimum->x, minimum->y, maximum->z, 1.0f}};
     for (u32 i = 0; i < 8; ++i) {
         NUVEC *vertex = reinterpret_cast<NUVEC *>(&corners[i]);
         NuVecMtxTransform(vertex, vertex, const_cast<NUMTX *>(matrix));
@@ -310,7 +306,8 @@ void OcclusionManager::AddOccluder(nuvec_s const *minimum, nuvec_s const *maximu
 }
 
 void OcclusionManager::AddOccluder(nuvec_s const *a, nuvec_s const *b, nuvec_s const *c, nuvec_s const *d) {
-    if (!initialized || !enabled || building_set->count >= building_set->capacity) return;
+    if (!initialized || !enabled || building_set->count >= building_set->capacity)
+        return;
     if (unknown_158 > 0.0f || unknown_15c > 0.0f) {
         NUVEC4 projected[4];
         NuVec4MtxTransform(&projected[0], const_cast<NUVEC *>(a), NuCameraGetVPMtx());
@@ -321,17 +318,18 @@ void OcclusionManager::AddOccluder(nuvec_s const *a, nuvec_s const *b, nuvec_s c
                         projected[1].z - projected[0].z};
             NUVEC ac = {projected[2].x - projected[0].x, projected[2].y - projected[0].y,
                         projected[2].z - projected[0].z};
-            NUVEC normal = {ac.z * ab.y - ac.y * ab.z, ab.z * ac.x - ac.z * ab.x,
-                            ab.x * ac.y - ab.y * ac.x};
+            NUVEC normal = {ac.z * ab.y - ac.y * ab.z, ab.z * ac.x - ac.z * ab.x, ab.x * ac.y - ab.y * ac.x};
             NuVecNorm(&normal, &normal);
-            if (unknown_158 > fabsf(normal.z)) return;
+            if (unknown_158 > fabsf(normal.z))
+                return;
         }
         NuVec4MtxTransform(&projected[3], const_cast<NUVEC *>(d), NuCameraGetVPMtx());
         float min_x = 1000000.0f, min_y = 1000000.0f;
         float max_x = -1000000.0f, max_y = -1000000.0f;
         for (u32 i = 0; i < 4; ++i) {
             NUVEC4 &v = projected[i];
-            if (v.w < 0.001f) return;
+            if (v.w < 0.001f)
+                return;
             v.x /= v.w;
             v.y /= v.w;
             v.z /= v.w;
@@ -340,7 +338,8 @@ void OcclusionManager::AddOccluder(nuvec_s const *a, nuvec_s const *b, nuvec_s c
             max_x = v.x > max_x ? v.x : max_x;
             max_y = v.y > max_y ? v.y : max_y;
         }
-        if (unknown_15c > 0.0f && unknown_15c > (max_x - min_x) * (max_y - min_y) * 0.25f) return;
+        if (unknown_15c > 0.0f && unknown_15c > (max_x - min_x) * (max_y - min_y) * 0.25f)
+            return;
     }
     building_set->AddOccluder(a, b, c, d);
 }
@@ -373,7 +372,8 @@ void OcclusionManager::Init(u32 capacity, VARIPTR *buffer, VARIPTR buffer_end) {
 }
 
 bool OcclusionManager::IsOccludedOBB(nuvec_s const *minimum, nuvec_s const *maximum, numtx_s const *matrix) {
-    if (!initialized || !enabled) return false;
+    if (!initialized || !enabled)
+        return false;
     if (!current_set->queries_prepared) {
         NUMTX *projection = NuCameraGetVPMtx();
         NUMTX *view = NuCameraGetViewMtx();
@@ -381,12 +381,14 @@ bool OcclusionManager::IsOccludedOBB(nuvec_s const *minimum, nuvec_s const *maxi
     }
     ++unknown_164;
     bool occluded = current_set->IsOccludedOBB(minimum, maximum, matrix);
-    if (occluded) ++unknown_160;
+    if (occluded)
+        ++unknown_160;
     return occluded;
 }
 
 bool OcclusionManager::IsOccludedSphere(nuvec_s const *center, float radius) {
-    if (!initialized || !enabled) return false;
+    if (!initialized || !enabled)
+        return false;
     if (!current_set->queries_prepared) {
         NUMTX *projection = NuCameraGetVPMtx();
         NUMTX *view = NuCameraGetViewMtx();
@@ -394,23 +396,26 @@ bool OcclusionManager::IsOccludedSphere(nuvec_s const *center, float radius) {
     }
     ++unknown_164;
     bool occluded = current_set->IsOccludedSphere(center, radius);
-    if (occluded) ++unknown_160;
+    if (occluded)
+        ++unknown_160;
     return occluded;
 }
 
-OcclusionManager::OcclusionManager() : initialized(false), enabled(true), building_set(NULL), current_set(NULL),
-    unknown_158(0.3f), unknown_15c(-1.0f) {
+OcclusionManager::OcclusionManager()
+    : initialized(false), enabled(true), building_set(NULL), current_set(NULL), unknown_158(0.3f), unknown_15c(-1.0f) {
 }
 
 void OcclusionManager::OnCameraSet() {
-    if (initialized && enabled) current_set->OnCameraSet();
+    if (initialized && enabled)
+        current_set->OnCameraSet();
 }
 
 void OcclusionManager::RenderStats() const {
 }
 
 void OcclusionManager::RenderZPass() const {
-    if (initialized && enabled) current_set->RenderOccluders(true);
+    if (initialized && enabled)
+        current_set->RenderOccluders(true);
 }
 
 void OcclusionManager::SetEnabled(bool value) {

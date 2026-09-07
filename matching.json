@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 19.808786,
+    "fuzzy_match_percent": 23.734074,
     "total_code": "4722419",
-    "matched_code": "44456",
-    "matched_code_percent": 0.941382,
+    "matched_code": "54060",
+    "matched_code_percent": 1.1447523,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 1182,
-    "matched_functions_percent": 8.7822275,
+    "matched_functions": 1218,
+    "matched_functions_percent": 9.049706,
     "total_units": 1
   },
   "text": {
@@ -45682,7 +45682,7 @@
           "address": 2496897,
           "offset": 1606929,
           "size": 91,
-          "match_percent": 8.484848
+          "match_percent": 12.727273
         },
         {
           "name": "_ZL7AddNodeP9nuqthdr_si",
@@ -45690,7 +45690,7 @@
           "address": 2496988,
           "offset": 1607020,
           "size": 177,
-          "match_percent": 6.779661
+          "match_percent": 7.118644
         },
         {
           "name": "_ZL11AddElementRP9nuqthdr_siP9nuqtdim_sS2_Pvi",
@@ -45698,7 +45698,7 @@
           "address": 2497165,
           "offset": 1607197,
           "size": 2134,
-          "match_percent": 0.588235
+          "match_percent": 0.617647
         },
         {
           "name": "OggAllocMem",
@@ -45706,7 +45706,7 @@
           "address": 3333024,
           "offset": 2443056,
           "size": 80,
-          "match_percent": 11.0
+          "match_percent": 99.95
         },
         {
           "name": "OggReAllocMem",
@@ -45714,7 +45714,7 @@
           "address": 3333104,
           "offset": 2443136,
           "size": 42,
-          "match_percent": 27.5
+          "match_percent": 99.916664
         },
         {
           "name": "OggFreeMem",
@@ -45722,7 +45722,7 @@
           "address": 3333152,
           "offset": 2443184,
           "size": 34,
-          "match_percent": 33.0
+          "match_percent": 99.9
         },
         {
           "name": "_ZL19bark_noise_hybridmpiPKlPKfPffi",
@@ -45730,7 +45730,7 @@
           "address": 5348944,
           "offset": 4458976,
           "size": 1541,
-          "match_percent": 0.973236
+          "match_percent": 1.751825
         }
       ]
     },
@@ -68102,14 +68102,6 @@
           "match_percent": 67.5
         },
         {
-          "name": "_Z11_make_wordsPlll",
-          "demangled_name": "_make_words(long*, long, long)",
-          "address": 5374928,
-          "offset": 4484960,
-          "size": 662,
-          "match_percent": 2.660099
-        },
-        {
           "name": "_Z14GetMatchLengthPhS_m",
           "demangled_name": "GetMatchLength(unsigned char*, unsigned char*, unsigned long)",
           "address": 5465648,
@@ -78081,102 +78073,6 @@
           "offset": 1663659,
           "size": 599,
           "match_percent": 2.547771
-        },
-        {
-          "name": "_Z12res2_inverseP12vorbis_blockPvPPfPii",
-          "demangled_name": "res2_inverse(vorbis_block*, void*, float**, int*, int)",
-          "address": 5368384,
-          "offset": 4478416,
-          "size": 602,
-          "match_percent": 2.321429
-        },
-        {
-          "name": "_Z10res2_classP12vorbis_blockPvPPiS2_i",
-          "demangled_name": "res2_class(vorbis_block*, void*, int**, int*, int)",
-          "address": 5368992,
-          "offset": 4479024,
-          "size": 559,
-          "match_percent": 2.011834
-        },
-        {
-          "name": "_Z10res1_classP12vorbis_blockPvPPiS2_i",
-          "demangled_name": "res1_class(vorbis_block*, void*, int**, int*, int)",
-          "address": 5369552,
-          "offset": 4479584,
-          "size": 614,
-          "match_percent": 1.920904
-        },
-        {
-          "name": "_Z12res1_inverseP12vorbis_blockPvPPfPii",
-          "demangled_name": "res1_inverse(vorbis_block*, void*, float**, int*, int)",
-          "address": 5370976,
-          "offset": 4481008,
-          "size": 147,
-          "match_percent": 6.538462
-        },
-        {
-          "name": "_Z12res0_inverseP12vorbis_blockPvPPfPii",
-          "demangled_name": "res0_inverse(vorbis_block*, void*, float**, int*, int)",
-          "address": 5371136,
-          "offset": 4481168,
-          "size": 147,
-          "match_percent": 6.538462
-        },
-        {
-          "name": "_Z9res0_lookP16vorbis_dsp_statePv",
-          "demangled_name": "res0_look(vorbis_dsp_state*, void*)",
-          "address": 5371296,
-          "offset": 4481328,
-          "size": 614,
-          "match_percent": 1.920904
-        },
-        {
-          "name": "_Z9res0_packPvP14oggpack_buffer",
-          "demangled_name": "res0_pack(void*, oggpack_buffer*)",
-          "address": 5371920,
-          "offset": 4481952,
-          "size": 425,
-          "match_percent": 2.809917
-        },
-        {
-          "name": "_Z14res0_free_lookPv",
-          "demangled_name": "res0_free_look(void*)",
-          "address": 5372352,
-          "offset": 4482384,
-          "size": 238,
-          "match_percent": 4.691358
-        },
-        {
-          "name": "_Z14res0_free_infoPv",
-          "demangled_name": "res0_free_info(void*)",
-          "address": 5372592,
-          "offset": 4482624,
-          "size": 76,
-          "match_percent": 12.222222
-        },
-        {
-          "name": "_Z11res0_unpackP11vorbis_infoP14oggpack_buffer",
-          "demangled_name": "res0_unpack(vorbis_info*, oggpack_buffer*)",
-          "address": 5372672,
-          "offset": 4482704,
-          "size": 605,
-          "match_percent": 1.931818
-        },
-        {
-          "name": "_Z12res1_forwardP14oggpack_bufferP12vorbis_blockPvPPiS4_iPPli",
-          "demangled_name": "res1_forward(oggpack_buffer*, vorbis_block*, void*, int**, int*, int, long**, int)",
-          "address": 5374144,
-          "offset": 4484176,
-          "size": 144,
-          "match_percent": 7.083334
-        },
-        {
-          "name": "_Z12res2_forwardP14oggpack_bufferP12vorbis_blockPvPPiS4_iPPli",
-          "demangled_name": "res2_forward(oggpack_buffer*, vorbis_block*, void*, int**, int*, int, long**, int)",
-          "address": 5374288,
-          "offset": 4484320,
-          "size": 244,
-          "match_percent": 4.938271
         },
         {
           "name": "_Z12refpack_initv",
@@ -115855,7 +115751,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -115981,7 +115876,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -116107,7 +116001,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -116244,7 +116137,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -116407,7 +116299,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -116544,7 +116435,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -116681,7 +116571,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -116818,7 +116707,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -116955,7 +116843,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -117092,7 +116979,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -117293,7 +117179,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -117430,7 +117315,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -117567,7 +117451,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -117749,7 +117632,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -117897,7 +117779,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -118162,7 +118043,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -118381,7 +118261,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -118601,7 +118480,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -118738,7 +118616,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -118875,7 +118752,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -119012,7 +118888,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -119209,7 +119084,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -119346,7 +119220,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -119494,7 +119367,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -119631,7 +119503,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -119780,7 +119651,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -119917,7 +119787,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -120080,7 +119949,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -120217,7 +120085,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -120354,7 +120221,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -120491,7 +120357,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -120691,7 +120556,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -120828,7 +120692,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -120965,7 +120828,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -121774,7 +121636,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -122023,7 +121884,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -122247,7 +122107,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -122656,7 +122515,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -122793,7 +122651,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/gameantinode.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/audio/gamelib_ogg.cpp.o",
         "legoapi/audio/specialsfx.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/characters/motion/animation.cpp.o",
@@ -123626,7 +123483,7 @@
       "address": 933632,
       "offset": 43664,
       "size": 1409,
-      "match_percent": 11.306452
+      "match_percent": 99.86828
     },
     {
       "name": "_ZN6squish19DecompressAlphaDxt3EPhPKv",
@@ -123634,7 +123491,7 @@
       "address": 935056,
       "offset": 45088,
       "size": 336,
-      "match_percent": 16.176
+      "match_percent": 100.0
     },
     {
       "name": "_ZN6squish17CompressAlphaDxt5EPKhiPv",
@@ -123642,7 +123499,7 @@
       "address": 935392,
       "offset": 45424,
       "size": 11528,
-      "match_percent": 3.659931
+      "match_percent": 88.66199
     },
     {
       "name": "_ZN6squish19DecompressAlphaDxt5EPhPKv",
@@ -123650,7 +123507,7 @@
       "address": 946928,
       "offset": 56960,
       "size": 793,
-      "match_percent": 4.538462
+      "match_percent": 100.0
     },
     {
       "name": "_ZN6squish10ClusterFitC1EPKNS_9ColourSetEi",
@@ -123658,7 +123515,7 @@
       "address": 947728,
       "offset": 57760,
       "size": 271,
-      "match_percent": 0.0
+      "match_percent": 99.932434
     },
     {
       "name": "_ZN6squish10ClusterFitC2EPKNS_9ColourSetEi",
@@ -123666,7 +123523,7 @@
       "address": 947728,
       "offset": 57760,
       "size": 271,
-      "match_percent": 0.0
+      "match_percent": 99.932434
     },
     {
       "name": "_ZN6squish10ClusterFit17ConstructOrderingERKNS_4Vec3Ei",
@@ -123674,7 +123531,7 @@
       "address": 948000,
       "offset": 58032,
       "size": 690,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_ZN6squish10ClusterFit9Compress4EPv",
@@ -123682,7 +123539,7 @@
       "address": 948704,
       "offset": 58736,
       "size": 5019,
-      "match_percent": 0.0
+      "match_percent": 33.447815
     },
     {
       "name": "_ZN6squish10ClusterFit9Compress3EPv",
@@ -123690,7 +123547,7 @@
       "address": 953728,
       "offset": 63760,
       "size": 4395,
-      "match_percent": 0.0
+      "match_percent": 26.388813
     },
     {
       "name": "_ZN6squish17WriteColourBlock3ERKNS_4Vec3ES2_PKhPv",
@@ -123698,7 +123555,7 @@
       "address": 958128,
       "offset": 68160,
       "size": 1307,
-      "match_percent": 0.0
+      "match_percent": 99.9898
     },
     {
       "name": "_ZN6squish17WriteColourBlock4ERKNS_4Vec3ES2_PKhPv",
@@ -123706,7 +123563,7 @@
       "address": 959440,
       "offset": 69472,
       "size": 529,
-      "match_percent": 0.0
+      "match_percent": 99.960266
     },
     {
       "name": "_ZN6squish16DecompressColourEPhPKvb",
@@ -123714,7 +123571,7 @@
       "address": 959984,
       "offset": 70016,
       "size": 1241,
-      "match_percent": 14.517242
+      "match_percent": 100.0
     },
     {
       "name": "_ZN6squish9ColourFitC1EPKNS_9ColourSetEi",
@@ -123722,7 +123579,7 @@
       "address": 961232,
       "offset": 71264,
       "size": 41,
-      "match_percent": 49.0
+      "match_percent": 99.818184
     },
     {
       "name": "_ZN6squish9ColourFitC2EPKNS_9ColourSetEi",
@@ -123730,7 +123587,7 @@
       "address": 961232,
       "offset": 71264,
       "size": 41,
-      "match_percent": 49.0
+      "match_percent": 99.818184
     },
     {
       "name": "_ZN6squish9ColourFit8CompressEPv",
@@ -123738,7 +123595,7 @@
       "address": 961280,
       "offset": 71312,
       "size": 105,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_ZN6squish9ColourSetC1EPKhii",
@@ -123746,7 +123603,7 @@
       "address": 961392,
       "offset": 71424,
       "size": 803,
-      "match_percent": 0.0
+      "match_percent": 90.31156
     },
     {
       "name": "_ZN6squish9ColourSetC2EPKhii",
@@ -123754,7 +123611,7 @@
       "address": 961392,
       "offset": 71424,
       "size": 803,
-      "match_percent": 0.0
+      "match_percent": 90.31156
     },
     {
       "name": "_ZNK6squish9ColourSet12RemapIndicesEPKhPh",
@@ -123762,7 +123619,7 @@
       "address": 962208,
       "offset": 72240,
       "size": 658,
-      "match_percent": 8.666667
+      "match_percent": 100.0
     },
     {
       "name": "_ZN6squishL23GetMultiplicity1EvectorERKNS_6Sym3x3Ef",
@@ -123770,7 +123627,7 @@
       "address": 962880,
       "offset": 72912,
       "size": 381,
-      "match_percent": 0.0
+      "match_percent": 99.9829
     },
     {
       "name": "_ZN6squish25ComputeWeightedCovarianceEiPKNS_4Vec3EPKf",
@@ -123778,7 +123635,7 @@
       "address": 963264,
       "offset": 73296,
       "size": 451,
-      "match_percent": 0.0
+      "match_percent": 99.98305
     },
     {
       "name": "_ZN6squish25ComputePrincipleComponentERKNS_6Sym3x3E",
@@ -123786,7 +123643,7 @@
       "address": 963728,
       "offset": 73760,
       "size": 1366,
-      "match_percent": 0.0
+      "match_percent": 85.91456
     },
     {
       "name": "_ZN6squish8RangeFit9Compress4EPv",
@@ -123794,7 +123651,7 @@
       "address": 965104,
       "offset": 75136,
       "size": 833,
-      "match_percent": 0.0
+      "match_percent": 99.97814
     },
     {
       "name": "_ZN6squish8RangeFit9Compress3EPv",
@@ -123802,7 +123659,7 @@
       "address": 965952,
       "offset": 75984,
       "size": 622,
-      "match_percent": 0.0
+      "match_percent": 99.97872
     },
     {
       "name": "_ZN6squish8RangeFitC1EPKNS_9ColourSetEi",
@@ -123810,7 +123667,7 @@
       "address": 966576,
       "offset": 76608,
       "size": 2319,
-      "match_percent": 0.0
+      "match_percent": 33.325348
     },
     {
       "name": "_ZN6squish8RangeFitC2EPKNS_9ColourSetEi",
@@ -123818,7 +123675,7 @@
       "address": 966576,
       "offset": 76608,
       "size": 2319,
-      "match_percent": 0.0
+      "match_percent": 33.325348
     },
     {
       "name": "_ZN6squish15SingleColourFitC1EPKNS_9ColourSetEi",
@@ -123826,7 +123683,7 @@
       "address": 968896,
       "offset": 78928,
       "size": 226,
-      "match_percent": 0.0
+      "match_percent": 99.929825
     },
     {
       "name": "_ZN6squish15SingleColourFitC2EPKNS_9ColourSetEi",
@@ -123834,7 +123691,7 @@
       "address": 968896,
       "offset": 78928,
       "size": 226,
-      "match_percent": 0.0
+      "match_percent": 99.929825
     },
     {
       "name": "_ZN6squish15SingleColourFit16ComputeEndPointsEPKPKNS_18SingleColourLookupE",
@@ -123842,7 +123699,7 @@
       "address": 969136,
       "offset": 79168,
       "size": 649,
-      "match_percent": 0.0
+      "match_percent": 99.9774
     },
     {
       "name": "_ZN6squish15SingleColourFit9Compress4EPv",
@@ -123850,7 +123707,7 @@
       "address": 969792,
       "offset": 79824,
       "size": 158,
-      "match_percent": 14.268292
+      "match_percent": 99.92683
     },
     {
       "name": "_ZN6squish15SingleColourFit9Compress3EPv",
@@ -123858,7 +123715,7 @@
       "address": 969952,
       "offset": 79984,
       "size": 158,
-      "match_percent": 14.268292
+      "match_percent": 99.92683
     },
     {
       "name": "_ZN6squish14CompressMaskedEPKhiPvi",
@@ -123866,7 +123723,7 @@
       "address": 970112,
       "offset": 80144,
       "size": 485,
-      "match_percent": 0.0
+      "match_percent": 99.990654
     },
     {
       "name": "_ZN6squish8CompressEPKhPvi",
@@ -123874,7 +123731,7 @@
       "address": 970608,
       "offset": 80640,
       "size": 58,
-      "match_percent": 55.266666
+      "match_percent": 99.933334
     },
     {
       "name": "_ZN6squish10DecompressEPhPKvi",
@@ -123882,7 +123739,7 @@
       "address": 970672,
       "offset": 80704,
       "size": 218,
-      "match_percent": 3.580645
+      "match_percent": 99.98387
     },
     {
       "name": "_ZN6squish22GetStorageRequirementsEiii",
@@ -123890,7 +123747,7 @@
       "address": 970896,
       "offset": 80928,
       "size": 144,
-      "match_percent": 1.282609
+      "match_percent": 100.0
     },
     {
       "name": "_ZN6squish13CompressImageEPKhiiPvi",
@@ -123898,7 +123755,7 @@
       "address": 971040,
       "offset": 81072,
       "size": 2414,
-      "match_percent": 10.042373
+      "match_percent": 99.99788
     },
     {
       "name": "_ZN6squish15DecompressImageEPhiiPKvi",
@@ -123906,7 +123763,7 @@
       "address": 973456,
       "offset": 83488,
       "size": 1893,
-      "match_percent": 10.136891
+      "match_percent": 99.99768
     },
     {
       "name": "_ZL26SetLayers_MOSEISLEYCITIZENP12GameObject_s.isra.2",
@@ -127090,7 +126947,7 @@
       "address": 5256336,
       "offset": 4366368,
       "size": 263,
-      "match_percent": 0.0
+      "match_percent": 99.9881
     },
     {
       "name": "_ZL14_get_next_pageP14OggVorbis_FileP8ogg_pagex.constprop.12",
@@ -127098,7 +126955,7 @@
       "address": 5256608,
       "offset": 4366640,
       "size": 404,
-      "match_percent": 0.0
+      "match_percent": 99.99174
     },
     {
       "name": "_ZL14_fetch_headersP14OggVorbis_FileP11vorbis_infoP14vorbis_commentPPlPiP8ogg_page.constprop.10",
@@ -127106,7 +126963,7 @@
       "address": 5257024,
       "offset": 4367056,
       "size": 691,
-      "match_percent": 0.0
+      "match_percent": 99.9946
     },
     {
       "name": "_ZL18_initial_pcmoffsetP14OggVorbis_FileP11vorbis_info",
@@ -127114,7 +126971,7 @@
       "address": 5257728,
       "offset": 4367760,
       "size": 502,
-      "match_percent": 0.0
+      "match_percent": 99.99286
     },
     {
       "name": "_ZL14_fetch_headersP14OggVorbis_FileP11vorbis_infoP14vorbis_commentPPlPiP8ogg_page.constprop.11",
@@ -127122,7 +126979,7 @@
       "address": 5258240,
       "offset": 4368272,
       "size": 964,
-      "match_percent": 0.0
+      "match_percent": 99.99593
     },
     {
       "name": "_ZL21_get_prev_page_serialP14OggVorbis_FilePliPiPx",
@@ -127130,7 +126987,7 @@
       "address": 5259216,
       "offset": 4369248,
       "size": 1116,
-      "match_percent": 0.0
+      "match_percent": 99.99651
     },
     {
       "name": "_ZL25_fetch_and_process_packetP14OggVorbis_FileP10ogg_packetii.constprop.7",
@@ -127138,7 +126995,7 @@
       "address": 5260336,
       "offset": 4370368,
       "size": 1405,
-      "match_percent": 0.0
+      "match_percent": 99.997375
     },
     {
       "name": "_ZL25_fetch_and_process_packetP14OggVorbis_FileP10ogg_packetii.constprop.8",
@@ -127146,7 +127003,7 @@
       "address": 5261744,
       "offset": 4371776,
       "size": 1309,
-      "match_percent": 0.0
+      "match_percent": 99.99717
     },
     {
       "name": "_ZL10_ov_getlapP14OggVorbis_FileP11vorbis_infoP16vorbis_dsp_statePPfi.isra.1",
@@ -127154,7 +127011,7 @@
       "address": 5263056,
       "offset": 4373088,
       "size": 468,
-      "match_percent": 0.0
+      "match_percent": 99.99363
     },
     {
       "name": "_ZL24_bisect_forward_serialnoP14OggVorbis_FilexxxxiPlil",
@@ -127162,7 +127019,7 @@
       "address": 5263536,
       "offset": 4373568,
       "size": 2227,
-      "match_percent": 0.0
+      "match_percent": 99.998314
     },
     {
       "name": "_Z8ov_clearP14OggVorbis_File",
@@ -127170,7 +127027,7 @@
       "address": 5265776,
       "offset": 4375808,
       "size": 389,
-      "match_percent": 0.0
+      "match_percent": 99.99174
     },
     {
       "name": "_ZL9_ov_open1PvP14OggVorbis_FilePKcl12ov_callbacks",
@@ -127178,7 +127035,7 @@
       "address": 5266176,
       "offset": 4376208,
       "size": 597,
-      "match_percent": 0.0
+      "match_percent": 97.898735
     },
     {
       "name": "_Z13ov_halfrate_pP14OggVorbis_File",
@@ -127186,7 +127043,7 @@
       "address": 5266784,
       "offset": 4376816,
       "size": 55,
-      "match_percent": 0.0
+      "match_percent": 99.9375
     },
     {
       "name": "_Z17ov_test_callbacksPvP14OggVorbis_FilePKcl12ov_callbacks",
@@ -127194,7 +127051,7 @@
       "address": 5266848,
       "offset": 4376880,
       "size": 69,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_Z7ov_testP7__sFILEP14OggVorbis_FilePKcl",
@@ -127202,7 +127059,7 @@
       "address": 5266928,
       "offset": 4376960,
       "size": 98,
-      "match_percent": 0.0
+      "match_percent": 99.791664
     },
     {
       "name": "_Z10ov_streamsP14OggVorbis_File",
@@ -127210,7 +127067,7 @@
       "address": 5267040,
       "offset": 4377072,
       "size": 12,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_Z11ov_seekableP14OggVorbis_File",
@@ -127218,7 +127075,7 @@
       "address": 5267056,
       "offset": 4377088,
       "size": 12,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_Z18ov_bitrate_instantP14OggVorbis_File",
@@ -127226,7 +127083,7 @@
       "address": 5267072,
       "offset": 4377104,
       "size": 110,
-      "match_percent": 0.0
+      "match_percent": 99.933334
     },
     {
       "name": "_Z15ov_serialnumberP14OggVorbis_Filei",
@@ -127234,7 +127091,7 @@
       "address": 5267184,
       "offset": 4377216,
       "size": 84,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_Z12ov_raw_totalP14OggVorbis_Filei",
@@ -127242,7 +127099,7 @@
       "address": 5267280,
       "offset": 4377312,
       "size": 186,
-      "match_percent": 0.0
+      "match_percent": 99.98245
     },
     {
       "name": "_Z12ov_pcm_totalP14OggVorbis_Filei",
@@ -127250,7 +127107,7 @@
       "address": 5267472,
       "offset": 4377504,
       "size": 180,
-      "match_percent": 0.0
+      "match_percent": 99.98148
     },
     {
       "name": "_Z11ov_raw_seekP14OggVorbis_Filex",
@@ -127258,7 +127115,7 @@
       "address": 5267664,
       "offset": 4377696,
       "size": 1507,
-      "match_percent": 0.0
+      "match_percent": 99.997406
     },
     {
       "name": "_ZL15_open_seekable2P14OggVorbis_File",
@@ -127266,7 +127123,7 @@
       "address": 5269184,
       "offset": 4379216,
       "size": 559,
-      "match_percent": 0.0
+      "match_percent": 99.99351
     },
     {
       "name": "_Z12ov_test_openP14OggVorbis_File",
@@ -127274,7 +127131,7 @@
       "address": 5269744,
       "offset": 4379776,
       "size": 117,
-      "match_percent": 0.0
+      "match_percent": 99.97059
     },
     {
       "name": "_Z17ov_open_callbacksPvP14OggVorbis_FilePKcl12ov_callbacks",
@@ -127282,7 +127139,7 @@
       "address": 5269872,
       "offset": 4379904,
       "size": 191,
-      "match_percent": 0.0
+      "match_percent": 99.98113
     },
     {
       "name": "_Z7ov_openP7__sFILEP14OggVorbis_FilePKcl",
@@ -127290,7 +127147,7 @@
       "address": 5270064,
       "offset": 4380096,
       "size": 98,
-      "match_percent": 0.0
+      "match_percent": 99.791664
     },
     {
       "name": "_Z8ov_fopenPKcP14OggVorbis_File",
@@ -127298,7 +127155,7 @@
       "address": 5270176,
       "offset": 4380208,
       "size": 135,
-      "match_percent": 0.0
+      "match_percent": 99.942856
     },
     {
       "name": "_Z16ov_pcm_seek_pageP14OggVorbis_Filex",
@@ -127306,7 +127163,7 @@
       "address": 5270320,
       "offset": 4380352,
       "size": 4925,
-      "match_percent": 0.0
+      "match_percent": 99.99911
     },
     {
       "name": "_Z11ov_pcm_seekP14OggVorbis_Filex",
@@ -127314,7 +127171,7 @@
       "address": 5275248,
       "offset": 4385280,
       "size": 1625,
-      "match_percent": 0.0
+      "match_percent": 99.99764
     },
     {
       "name": "_Z11ov_halfrateP14OggVorbis_Filei",
@@ -127322,7 +127179,7 @@
       "address": 5276880,
       "offset": 4386912,
       "size": 237,
-      "match_percent": 0.0
+      "match_percent": 99.98649
     },
     {
       "name": "_Z13ov_time_totalP14OggVorbis_Filei",
@@ -127330,7 +127187,7 @@
       "address": 5277120,
       "offset": 4387152,
       "size": 220,
-      "match_percent": 0.0
+      "match_percent": 99.965515
     },
     {
       "name": "_Z17ov_time_seek_pageP14OggVorbis_Filed",
@@ -127338,7 +127195,7 @@
       "address": 5277344,
       "offset": 4387376,
       "size": 305,
-      "match_percent": 0.0
+      "match_percent": 99.9881
     },
     {
       "name": "_Z12ov_time_seekP14OggVorbis_Filed",
@@ -127346,7 +127203,7 @@
       "address": 5277664,
       "offset": 4387696,
       "size": 305,
-      "match_percent": 0.0
+      "match_percent": 99.9881
     },
     {
       "name": "_Z10ov_bitrateP14OggVorbis_Filei",
@@ -127354,7 +127211,7 @@
       "address": 5277984,
       "offset": 4388016,
       "size": 619,
-      "match_percent": 0.0
+      "match_percent": 99.98889
     },
     {
       "name": "_Z11ov_raw_tellP14OggVorbis_File",
@@ -127362,7 +127219,7 @@
       "address": 5278608,
       "offset": 4388640,
       "size": 35,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_Z11ov_pcm_tellP14OggVorbis_File",
@@ -127370,7 +127227,7 @@
       "address": 5278656,
       "offset": 4388688,
       "size": 35,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_Z12ov_time_tellP14OggVorbis_File",
@@ -127378,7 +127235,7 @@
       "address": 5278704,
       "offset": 4388736,
       "size": 467,
-      "match_percent": 0.0
+      "match_percent": 99.98425
     },
     {
       "name": "_Z7ov_infoP14OggVorbis_Filei",
@@ -127386,7 +127243,7 @@
       "address": 5279184,
       "offset": 4389216,
       "size": 59,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_ZL14_ov_d_seek_lapP14OggVorbis_FiledPFiS0_dE",
@@ -127394,7 +127251,7 @@
       "address": 5279248,
       "offset": 4389280,
       "size": 1159,
-      "match_percent": 0.0
+      "match_percent": 99.991455
     },
     {
       "name": "_ZL15_ov_64_seek_lapP14OggVorbis_FilexPFiS0_xE",
@@ -127402,7 +127259,7 @@
       "address": 5280416,
       "offset": 4390448,
       "size": 1175,
-      "match_percent": 0.0
+      "match_percent": 99.9916
     },
     {
       "name": "_Z10ov_commentP14OggVorbis_Filei",
@@ -127410,7 +127267,7 @@
       "address": 5281600,
       "offset": 4391632,
       "size": 59,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_Z14ov_read_filterP14OggVorbis_FilePciiiiPiPFvPPfllPvES5_",
@@ -127418,7 +127275,7 @@
       "address": 5281664,
       "offset": 4391696,
       "size": 1373,
-      "match_percent": 0.0
+      "match_percent": 99.985954
     },
     {
       "name": "_Z7ov_readP14OggVorbis_FilePciiiiPi",
@@ -127426,7 +127283,7 @@
       "address": 5283040,
       "offset": 4393072,
       "size": 98,
-      "match_percent": 0.0
+      "match_percent": 99.958336
     },
     {
       "name": "_Z13ov_read_floatP14OggVorbis_FilePPPfiPi",
@@ -127434,7 +127291,7 @@
       "address": 5283152,
       "offset": 4393184,
       "size": 270,
-      "match_percent": 0.0
+      "match_percent": 99.98864
     },
     {
       "name": "_Z11ov_crosslapP14OggVorbis_FileS0_",
@@ -127442,7 +127299,7 @@
       "address": 5283424,
       "offset": 4393456,
       "size": 1166,
-      "match_percent": 0.0
+      "match_percent": 99.9915
     },
     {
       "name": "_Z15ov_raw_seek_lapP14OggVorbis_Filex",
@@ -127450,7 +127307,7 @@
       "address": 5284592,
       "offset": 4394624,
       "size": 48,
-      "match_percent": 0.0
+      "match_percent": 99.833336
     },
     {
       "name": "_Z15ov_pcm_seek_lapP14OggVorbis_Filex",
@@ -127458,7 +127315,7 @@
       "address": 5284640,
       "offset": 4394672,
       "size": 48,
-      "match_percent": 0.0
+      "match_percent": 99.833336
     },
     {
       "name": "_Z20ov_pcm_seek_page_lapP14OggVorbis_Filex",
@@ -127466,7 +127323,7 @@
       "address": 5284688,
       "offset": 4394720,
       "size": 48,
-      "match_percent": 0.0
+      "match_percent": 99.833336
     },
     {
       "name": "_Z16ov_time_seek_lapP14OggVorbis_Filed",
@@ -127474,7 +127331,7 @@
       "address": 5284736,
       "offset": 4394768,
       "size": 32,
-      "match_percent": 0.0
+      "match_percent": 99.666664
     },
     {
       "name": "_Z21ov_time_seek_page_lapP14OggVorbis_Filed",
@@ -127482,7 +127339,7 @@
       "address": 5284768,
       "offset": 4394800,
       "size": 32,
-      "match_percent": 0.0
+      "match_percent": 99.666664
     },
     {
       "name": "_ZL22_preextrapolate_helperP16vorbis_dsp_state",
@@ -127490,7 +127347,7 @@
       "address": 5284800,
       "offset": 4394832,
       "size": 336,
-      "match_percent": 0.0
+      "match_percent": 99.9901
     },
     {
       "name": "_Z17vorbis_block_initP16vorbis_dsp_stateP12vorbis_block",
@@ -127498,7 +127355,7 @@
       "address": 5285136,
       "offset": 4395168,
       "size": 262,
-      "match_percent": 0.0
+      "match_percent": 99.98734
     },
     {
       "name": "_Z19_vorbis_block_allocP12vorbis_blockl",
@@ -127506,7 +127363,7 @@
       "address": 5285408,
       "offset": 4395440,
       "size": 143,
-      "match_percent": 0.0
+      "match_percent": 99.976746
     },
     {
       "name": "_Z21_vorbis_block_ripcordP12vorbis_block",
@@ -127514,7 +127371,7 @@
       "address": 5285552,
       "offset": 4395584,
       "size": 136,
-      "match_percent": 0.0
+      "match_percent": 99.976746
     },
     {
       "name": "_Z18vorbis_block_clearP12vorbis_block",
@@ -127522,7 +127379,7 @@
       "address": 5285696,
       "offset": 4395728,
       "size": 200,
-      "match_percent": 0.0
+      "match_percent": 99.98485
     },
     {
       "name": "_Z16vorbis_dsp_clearP16vorbis_dsp_state",
@@ -127530,7 +127387,7 @@
       "address": 5285904,
       "offset": 4395936,
       "size": 725,
-      "match_percent": 0.0
+      "match_percent": 99.94561
     },
     {
       "name": "_ZL16_vds_shared_initP16vorbis_dsp_stateP11vorbis_infoi",
@@ -127538,7 +127395,7 @@
       "address": 5286640,
       "offset": 4396672,
       "size": 1451,
-      "match_percent": 0.0
+      "match_percent": 99.96875
     },
     {
       "name": "_Z20vorbis_analysis_initP16vorbis_dsp_stateP11vorbis_info",
@@ -127546,7 +127403,7 @@
       "address": 5288096,
       "offset": 4398128,
       "size": 159,
-      "match_percent": 0.0
+      "match_percent": 99.975
     },
     {
       "name": "_Z22vorbis_analysis_bufferP16vorbis_dsp_statei",
@@ -127554,7 +127411,7 @@
       "address": 5288256,
       "offset": 4398288,
       "size": 255,
-      "match_percent": 0.0
+      "match_percent": 99.9881
     },
     {
       "name": "_Z21vorbis_analysis_wroteP16vorbis_dsp_statei",
@@ -127562,7 +127419,7 @@
       "address": 5288512,
       "offset": 4398544,
       "size": 394,
-      "match_percent": 0.0
+      "match_percent": 99.99187
     },
     {
       "name": "_Z24vorbis_analysis_blockoutP16vorbis_dsp_stateP12vorbis_block",
@@ -127570,7 +127427,7 @@
       "address": 5288912,
       "offset": 4398944,
       "size": 1012,
-      "match_percent": 0.0
+      "match_percent": 99.99666
     },
     {
       "name": "_Z24vorbis_synthesis_restartP16vorbis_dsp_state",
@@ -127578,7 +127435,7 @@
       "address": 5289936,
       "offset": 4399968,
       "size": 127,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_Z21vorbis_synthesis_initP16vorbis_dsp_stateP11vorbis_info",
@@ -127586,7 +127443,7 @@
       "address": 5290064,
       "offset": 4400096,
       "size": 95,
-      "match_percent": 0.0
+      "match_percent": 99.96
     },
     {
       "name": "_Z24vorbis_synthesis_blockinP16vorbis_dsp_stateP12vorbis_block",
@@ -127594,7 +127451,7 @@
       "address": 5290160,
       "offset": 4400192,
       "size": 4122,
-      "match_percent": 0.0
+      "match_percent": 99.999016
     },
     {
       "name": "_Z23vorbis_synthesis_pcmoutP16vorbis_dsp_statePPPf",
@@ -127602,7 +127459,7 @@
       "address": 5294288,
       "offset": 4404320,
       "size": 122,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_Z21vorbis_synthesis_readP16vorbis_dsp_statei",
@@ -127610,7 +127467,7 @@
       "address": 5294416,
       "offset": 4404448,
       "size": 38,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_Z23vorbis_synthesis_lapoutP16vorbis_dsp_statePPPf",
@@ -127618,7 +127475,7 @@
       "address": 5294464,
       "offset": 4404496,
       "size": 845,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_Z13vorbis_windowP16vorbis_dsp_statei",
@@ -127626,7 +127483,7 @@
       "address": 5295312,
       "offset": 4405344,
       "size": 68,
-      "match_percent": 0.0
+      "match_percent": 99.954544
     },
     {
       "name": "_ZL7_ve_ampP15envelope_lookupP22vorbis_info_psy_globalPfP13envelope_bandP21envelope_filter_state",
@@ -127634,7 +127491,7 @@
       "address": 5295392,
       "offset": 4405424,
       "size": 1172,
-      "match_percent": 0.0
+      "match_percent": 99.960365
     },
     {
       "name": "_Z17_ve_envelope_initP15envelope_lookupP11vorbis_info",
@@ -127642,7 +127499,7 @@
       "address": 5296576,
       "offset": 4406608,
       "size": 591,
-      "match_percent": 0.0
+      "match_percent": 99.954544
     },
     {
       "name": "_Z18_ve_envelope_clearP15envelope_lookup",
@@ -127650,7 +127507,7 @@
       "address": 5297168,
       "offset": 4407200,
       "size": 253,
-      "match_percent": 0.0
+      "match_percent": 99.986115
     },
     {
       "name": "_Z19_ve_envelope_searchP16vorbis_dsp_state",
@@ -127658,7 +127515,7 @@
       "address": 5297424,
       "offset": 4407456,
       "size": 716,
-      "match_percent": 0.0
+      "match_percent": 99.995026
     },
     {
       "name": "_Z17_ve_envelope_markP16vorbis_dsp_state",
@@ -127666,7 +127523,7 @@
       "address": 5298144,
       "offset": 4408176,
       "size": 245,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_Z18_ve_envelope_shiftP15envelope_lookupl",
@@ -127674,7 +127531,7 @@
       "address": 5298400,
       "offset": 4408432,
       "size": 153,
-      "match_percent": 0.0
+      "match_percent": 99.97561
     },
     {
       "name": "_ZL11floor0_lookP16vorbis_dsp_statePv",
@@ -127682,7 +127539,7 @@
       "address": 5298560,
       "offset": 4408592,
       "size": 92,
-      "match_percent": 0.0
+      "match_percent": 99.958336
     },
     {
       "name": "_ZL15floor0_inverse1P12vorbis_blockPv",
@@ -127690,7 +127547,7 @@
       "address": 5298656,
       "offset": 4408688,
       "size": 696,
-      "match_percent": 0.0
+      "match_percent": 99.995026
     },
     {
       "name": "_ZL16floor0_free_lookPv",
@@ -127698,7 +127555,7 @@
       "address": 5299360,
       "offset": 4409392,
       "size": 202,
-      "match_percent": 0.0
+      "match_percent": 99.98462
     },
     {
       "name": "_ZL16floor0_free_infoPv",
@@ -127706,7 +127563,7 @@
       "address": 5299568,
       "offset": 4409600,
       "size": 154,
-      "match_percent": 0.0
+      "match_percent": 99.97959
     },
     {
       "name": "_ZL15floor0_inverse2P12vorbis_blockPvS1_Pf",
@@ -127714,7 +127571,7 @@
       "address": 5299728,
       "offset": 4409760,
       "size": 802,
-      "match_percent": 0.0
+      "match_percent": 99.93121
     },
     {
       "name": "_ZL13floor0_unpackP11vorbis_infoP14oggpack_buffer",
@@ -127722,7 +127579,7 @@
       "address": 5300544,
       "offset": 4410576,
       "size": 390,
-      "match_percent": 0.0
+      "match_percent": 99.99152
     },
     {
       "name": "_ZL15floor1_inverse2P12vorbis_blockPvS1_Pf",
@@ -127730,7 +127587,7 @@
       "address": 5300976,
       "offset": 4411008,
       "size": 928,
-      "match_percent": 0.0
+      "match_percent": 99.98496
     },
     {
       "name": "_ZL15floor1_inverse1P12vorbis_blockPv",
@@ -127738,7 +127595,7 @@
       "address": 5301904,
       "offset": 4411936,
       "size": 959,
-      "match_percent": 0.0
+      "match_percent": 99.996124
     },
     {
       "name": "_ZL16floor1_free_lookPv",
@@ -127746,7 +127603,7 @@
       "address": 5302864,
       "offset": 4412896,
       "size": 154,
-      "match_percent": 0.0
+      "match_percent": 99.97959
     },
     {
       "name": "_ZL16floor1_free_infoPv",
@@ -127754,7 +127611,7 @@
       "address": 5303024,
       "offset": 4413056,
       "size": 154,
-      "match_percent": 0.0
+      "match_percent": 99.97959
     },
     {
       "name": "_ZL11floor1_lookP16vorbis_dsp_statePv",
@@ -127762,7 +127619,7 @@
       "address": 5303184,
       "offset": 4413216,
       "size": 826,
-      "match_percent": 0.0
+      "match_percent": 99.98446
     },
     {
       "name": "_ZL11floor1_packPvP14oggpack_buffer",
@@ -127770,7 +127627,7 @@
       "address": 5304016,
       "offset": 4414048,
       "size": 706,
-      "match_percent": 0.0
+      "match_percent": 99.99468
     },
     {
       "name": "_ZL14accumulate_fitPKfS0_iiP9lsfit_acciP18vorbis_info_floor1.isra.1",
@@ -127778,7 +127635,7 @@
       "address": 5304736,
       "offset": 4414768,
       "size": 748,
-      "match_percent": 0.0
+      "match_percent": 99.981926
     },
     {
       "name": "_ZL8fit_lineP9lsfit_acciPiS1_P18vorbis_info_floor1.isra.2",
@@ -127786,7 +127643,7 @@
       "address": 5305488,
       "offset": 4415520,
       "size": 738,
-      "match_percent": 0.0
+      "match_percent": 99.97849
     },
     {
       "name": "_ZL13floor1_unpackP11vorbis_infoP14oggpack_buffer",
@@ -127794,7 +127651,7 @@
       "address": 5306240,
       "offset": 4416272,
       "size": 1015,
-      "match_percent": 0.0
+      "match_percent": 99.98855
     },
     {
       "name": "_Z10floor1_fitP12vorbis_blockP18vorbis_look_floor1PKfS4_",
@@ -127802,7 +127659,7 @@
       "address": 5307264,
       "offset": 4417296,
       "size": 3040,
-      "match_percent": 0.0
+      "match_percent": 99.9914
     },
     {
       "name": "_Z22floor1_interpolate_fitP12vorbis_blockP18vorbis_look_floor1PiS3_i",
@@ -127810,7 +127667,7 @@
       "address": 5310304,
       "offset": 4420336,
       "size": 211,
-      "match_percent": 0.0
+      "match_percent": 99.98412
     },
     {
       "name": "_Z13floor1_encodeP14oggpack_bufferP12vorbis_blockP18vorbis_look_floor1PiS5_",
@@ -127818,7 +127675,7 @@
       "address": 5310528,
       "offset": 4420560,
       "size": 2036,
-      "match_percent": 0.0
+      "match_percent": 99.99823
     },
     {
       "name": "_ZL20_vorbis_pack_commentP14oggpack_bufferP14vorbis_comment",
@@ -127826,7 +127683,7 @@
       "address": 5312576,
       "offset": 4422608,
       "size": 506,
-      "match_percent": 0.0
+      "match_percent": 99.973915
     },
     {
       "name": "_Z19vorbis_comment_initP14vorbis_comment",
@@ -127834,7 +127691,7 @@
       "address": 5313088,
       "offset": 4423120,
       "size": 32,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_Z18vorbis_comment_addP14vorbis_commentPKc",
@@ -127842,7 +127699,7 @@
       "address": 5313120,
       "offset": 4423152,
       "size": 203,
-      "match_percent": 0.0
+      "match_percent": 99.98276
     },
     {
       "name": "_Z22vorbis_comment_add_tagP14vorbis_commentPKcS2_",
@@ -127850,7 +127707,7 @@
       "address": 5313328,
       "offset": 4423360,
       "size": 139,
-      "match_percent": 0.0
+      "match_percent": 99.97619
     },
     {
       "name": "_Z20vorbis_comment_queryP14vorbis_commentPKci",
@@ -127858,7 +127715,7 @@
       "address": 5313472,
       "offset": 4423504,
       "size": 294,
-      "match_percent": 0.0
+      "match_percent": 99.97959
     },
     {
       "name": "_Z26vorbis_comment_query_countP14vorbis_commentPKc",
@@ -127866,7 +127723,7 @@
       "address": 5313776,
       "offset": 4423808,
       "size": 268,
-      "match_percent": 0.0
+      "match_percent": 99.978264
     },
     {
       "name": "_Z20vorbis_comment_clearP14vorbis_comment",
@@ -127874,7 +127731,7 @@
       "address": 5314048,
       "offset": 4424080,
       "size": 146,
-      "match_percent": 0.0
+      "match_percent": 99.97872
     },
     {
       "name": "_Z21vorbis_info_blocksizeP11vorbis_infoi",
@@ -127882,7 +127739,7 @@
       "address": 5314208,
       "offset": 4424240,
       "size": 25,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_Z16vorbis_info_initP11vorbis_info",
@@ -127890,7 +127747,7 @@
       "address": 5314240,
       "offset": 4424272,
       "size": 157,
-      "match_percent": 0.0
+      "match_percent": 99.97727
     },
     {
       "name": "_Z17vorbis_info_clearP11vorbis_info",
@@ -127898,7 +127755,7 @@
       "address": 5314400,
       "offset": 4424432,
       "size": 457,
-      "match_percent": 0.0
+      "match_percent": 99.90345
     },
     {
       "name": "_Z25vorbis_synthesis_idheaderP10ogg_packet",
@@ -127906,7 +127763,7 @@
       "address": 5314864,
       "offset": 4424896,
       "size": 287,
-      "match_percent": 0.0
+      "match_percent": 99.970146
     },
     {
       "name": "_Z25vorbis_synthesis_headerinP11vorbis_infoP14vorbis_commentP10ogg_packet",
@@ -127914,7 +127771,7 @@
       "address": 5315152,
       "offset": 4425184,
       "size": 2120,
-      "match_percent": 0.0
+      "match_percent": 98.84528
     },
     {
       "name": "_Z24vorbis_commentheader_outP14vorbis_commentP10ogg_packet",
@@ -127922,7 +127779,7 @@
       "address": 5317280,
       "offset": 4427312,
       "size": 191,
-      "match_percent": 0.0
+      "match_percent": 99.978264
     },
     {
       "name": "_Z25vorbis_analysis_headeroutP16vorbis_dsp_stateP14vorbis_commentP10ogg_packetS4_S4_",
@@ -127930,7 +127787,7 @@
       "address": 5317472,
       "offset": 4427504,
       "size": 2709,
-      "match_percent": 0.0
+      "match_percent": 99.97929
     },
     {
       "name": "_Z19vorbis_granule_timeP16vorbis_dsp_statex",
@@ -127938,7 +127795,7 @@
       "address": 5320192,
       "offset": 4430224,
       "size": 150,
-      "match_percent": 0.0
+      "match_percent": 99.89744
     },
     {
       "name": "_Z21vorbis_version_stringv",
@@ -127946,7 +127803,7 @@
       "address": 5320352,
       "offset": 4430384,
       "size": 22,
-      "match_percent": 0.0
+      "match_percent": 99.75
     },
     {
       "name": "_Z20vorbis_lpc_from_dataPfS_ii",
@@ -127954,7 +127811,7 @@
       "address": 5320384,
       "offset": 4430416,
       "size": 665,
-      "match_percent": 0.0
+      "match_percent": 99.96429
     },
     {
       "name": "_Z18vorbis_lpc_predictPfS_iS_l",
@@ -127962,7 +127819,7 @@
       "address": 5321056,
       "offset": 4431088,
       "size": 419,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_ZL4compPKvS0_",
@@ -127970,7 +127827,7 @@
       "address": 5321488,
       "offset": 4431520,
       "size": 35,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_Z19vorbis_lsp_to_curvePfPiiiS_iff",
@@ -127978,7 +127835,7 @@
       "address": 5322816,
       "offset": 4432848,
       "size": 652,
-      "match_percent": 0.0
+      "match_percent": 99.95031
     },
     {
       "name": "_Z17vorbis_lpc_to_lspPfS_i",
@@ -127986,7 +127843,7 @@
       "address": 5323472,
       "offset": 4433504,
       "size": 1388,
-      "match_percent": 0.0
+      "match_percent": 99.99263
     },
     {
       "name": "_ZL16mapping0_inverseP12vorbis_blockPv",
@@ -127994,7 +127851,7 @@
       "address": 5324864,
       "offset": 4434896,
       "size": 1089,
-      "match_percent": 0.0
+      "match_percent": 99.94242
     },
     {
       "name": "_ZL13mapping0_packP11vorbis_infoPvP14oggpack_buffer",
@@ -128002,7 +127859,7 @@
       "address": 5325968,
       "offset": 4436000,
       "size": 589,
-      "match_percent": 0.0
+      "match_percent": 99.99363
     },
     {
       "name": "_ZL16mapping0_forwardP12vorbis_block",
@@ -128010,7 +127867,7 @@
       "address": 5326560,
       "offset": 4436592,
       "size": 3825,
-      "match_percent": 0.0
+      "match_percent": 99.97883
     },
     {
       "name": "_ZL18mapping0_free_infoPv",
@@ -128018,7 +127875,7 @@
       "address": 5330400,
       "offset": 4440432,
       "size": 76,
-      "match_percent": 0.0
+      "match_percent": 99.94444
     },
     {
       "name": "_ZL15mapping0_unpackP11vorbis_infoP14oggpack_buffer",
@@ -128026,7 +127883,7 @@
       "address": 5330480,
       "offset": 4440512,
       "size": 746,
-      "match_percent": 0.0
+      "match_percent": 99.99519
     },
     {
       "name": "_ZL16mdct_butterfliesP11mdct_lookupPfi.isra.0",
@@ -128034,7 +127891,7 @@
       "address": 5331232,
       "offset": 4441264,
       "size": 13524,
-      "match_percent": 0.0
+      "match_percent": 99.98623
     },
     {
       "name": "_Z9mdct_initP11mdct_lookupi",
@@ -128042,7 +127899,7 @@
       "address": 5344768,
       "offset": 4454800,
       "size": 801,
-      "match_percent": 0.0
+      "match_percent": 99.95673
     },
     {
       "name": "_Z10mdct_clearP11mdct_lookup",
@@ -128050,7 +127907,7 @@
       "address": 5345584,
       "offset": 4455616,
       "size": 108,
-      "match_percent": 0.0
+      "match_percent": 99.96296
     },
     {
       "name": "_Z13mdct_backwardP11mdct_lookupPfS1_",
@@ -128058,7 +127915,7 @@
       "address": 5345696,
       "offset": 4455728,
       "size": 1304,
-      "match_percent": 0.0
+      "match_percent": 99.981766
     },
     {
       "name": "_Z12mdct_forwardP11mdct_lookupPfS1_",
@@ -128066,7 +127923,7 @@
       "address": 5347008,
       "offset": 4457040,
       "size": 1239,
-      "match_percent": 0.0
+      "match_percent": 99.98412
     },
     {
       "name": "_ZL6apsortPKvS0_",
@@ -128074,7 +127931,7 @@
       "address": 5348256,
       "offset": 4458288,
       "size": 39,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_ZL17setup_tone_curvesPffiff",
@@ -128082,7 +127939,7 @@
       "address": 5350496,
       "offset": 4460528,
       "size": 4661,
-      "match_percent": 0.0
+      "match_percent": 99.929504
     },
     {
       "name": "_ZL15noise_normalizeP15vorbis_look_psyiPfS1_S1_PifiiS2_.isra.0",
@@ -128090,7 +127947,7 @@
       "address": 5355168,
       "offset": 4465200,
       "size": 1180,
-      "match_percent": 0.0
+      "match_percent": 99.97427
     },
     {
       "name": "_ZL19bark_noise_hybridmpiPKlPKfPffi.constprop.1",
@@ -128098,7 +127955,7 @@
       "address": 5356352,
       "offset": 4466384,
       "size": 1116,
-      "match_percent": 0.0
+      "match_percent": 99.9338
     },
     {
       "name": "_ZL15noise_normalizeP15vorbis_look_psyiPfS1_S1_PifiiS2_.isra.0.constprop.2",
@@ -128106,7 +127963,7 @@
       "address": 5357472,
       "offset": 4467504,
       "size": 863,
-      "match_percent": 0.0
+      "match_percent": 99.975
     },
     {
       "name": "_Z15_vp_global_lookP11vorbis_info",
@@ -128114,7 +127971,7 @@
       "address": 5358336,
       "offset": 4468368,
       "size": 84,
-      "match_percent": 0.0
+      "match_percent": 99.95
     },
     {
       "name": "_Z15_vp_global_freeP22vorbis_look_psy_global",
@@ -128122,7 +127979,7 @@
       "address": 5358432,
       "offset": 4468464,
       "size": 154,
-      "match_percent": 0.0
+      "match_percent": 99.97959
     },
     {
       "name": "_Z13_vi_gpsy_freeP22vorbis_info_psy_global",
@@ -128130,7 +127987,7 @@
       "address": 5358592,
       "offset": 4468624,
       "size": 154,
-      "match_percent": 0.0
+      "match_percent": 99.97959
     },
     {
       "name": "_Z12_vi_psy_freeP15vorbis_info_psy",
@@ -128138,7 +127995,7 @@
       "address": 5358752,
       "offset": 4468784,
       "size": 154,
-      "match_percent": 0.0
+      "match_percent": 99.97959
     },
     {
       "name": "_Z12_vp_psy_initP15vorbis_look_psyP15vorbis_info_psyP22vorbis_info_psy_globalil",
@@ -128146,7 +128003,7 @@
       "address": 5358912,
       "offset": 4468944,
       "size": 2416,
-      "match_percent": 0.0
+      "match_percent": 92.64844
     },
     {
       "name": "_Z13_vp_psy_clearP15vorbis_look_psy",
@@ -128154,7 +128011,7 @@
       "address": 5361328,
       "offset": 4471360,
       "size": 430,
-      "match_percent": 0.0
+      "match_percent": 99.992645
     },
     {
       "name": "_Z13_vp_noisemaskP15vorbis_look_psyPfS1_",
@@ -128162,7 +128019,7 @@
       "address": 5361760,
       "offset": 4471792,
       "size": 604,
-      "match_percent": 0.0
+      "match_percent": 98.68306
     },
     {
       "name": "_Z12_vp_tonemaskP15vorbis_look_psyPfS1_ff",
@@ -128170,7 +128027,7 @@
       "address": 5362368,
       "offset": 4472400,
       "size": 1182,
-      "match_percent": 0.0
+      "match_percent": 99.98087
     },
     {
       "name": "_Z18_vp_offset_and_mixP15vorbis_look_psyPfS1_iS1_S1_S1_",
@@ -128178,7 +128035,7 @@
       "address": 5363552,
       "offset": 4473584,
       "size": 689,
-      "match_percent": 0.0
+      "match_percent": 90.7734
     },
     {
       "name": "_Z16_vp_ampmax_decayfP16vorbis_dsp_state",
@@ -128186,7 +128043,7 @@
       "address": 5364256,
       "offset": 4474288,
       "size": 108,
-      "match_percent": 0.0
+      "match_percent": 99.92593
     },
     {
       "name": "_Z29_vp_couple_quantize_normalizeiP22vorbis_info_psy_globalP15vorbis_look_psyP20vorbis_info_mapping0PPfPPiS7_ii",
@@ -128194,7 +128051,7 @@
       "address": 5364368,
       "offset": 4474400,
       "size": 2833,
-      "match_percent": 0.0
+      "match_percent": 99.98435
     },
     {
       "name": "_ZL20local_book_besterrorP8codebookPi",
@@ -128202,7 +128059,31 @@
       "address": 5367216,
       "offset": 4477248,
       "size": 1160,
-      "match_percent": 0.0
+      "match_percent": 100.0
+    },
+    {
+      "name": "_Z12res2_inverseP12vorbis_blockPvPPfPii",
+      "demangled_name": "res2_inverse(vorbis_block*, void*, float**, int*, int)",
+      "address": 5368384,
+      "offset": 4478416,
+      "size": 602,
+      "match_percent": 99.99405
+    },
+    {
+      "name": "_Z10res2_classP12vorbis_blockPvPPiS2_i",
+      "demangled_name": "res2_class(vorbis_block*, void*, int**, int*, int)",
+      "address": 5368992,
+      "offset": 4479024,
+      "size": 559,
+      "match_percent": 99.99408
+    },
+    {
+      "name": "_Z10res1_classP12vorbis_blockPvPPiS2_i",
+      "demangled_name": "res1_class(vorbis_block*, void*, int**, int*, int)",
+      "address": 5369552,
+      "offset": 4479584,
+      "size": 614,
+      "match_percent": 18.542374
     },
     {
       "name": "_ZL11_encodepartP14oggpack_bufferPiiP8codebookPl",
@@ -128210,7 +128091,7 @@
       "address": 5370176,
       "offset": 4480208,
       "size": 149,
-      "match_percent": 0.0
+      "match_percent": 99.979164
     },
     {
       "name": "_ZL10_01inverseP12vorbis_blockPvPPfiPFlP8codebookS2_P14oggpack_bufferiE",
@@ -128218,7 +128099,63 @@
       "address": 5370336,
       "offset": 4480368,
       "size": 639,
-      "match_percent": 0.0
+      "match_percent": 99.99507
+    },
+    {
+      "name": "_Z12res1_inverseP12vorbis_blockPvPPfPii",
+      "demangled_name": "res1_inverse(vorbis_block*, void*, float**, int*, int)",
+      "address": 5370976,
+      "offset": 4481008,
+      "size": 147,
+      "match_percent": 99.96154
+    },
+    {
+      "name": "_Z12res0_inverseP12vorbis_blockPvPPfPii",
+      "demangled_name": "res0_inverse(vorbis_block*, void*, float**, int*, int)",
+      "address": 5371136,
+      "offset": 4481168,
+      "size": 147,
+      "match_percent": 99.96154
+    },
+    {
+      "name": "_Z9res0_lookP16vorbis_dsp_statePv",
+      "demangled_name": "res0_look(vorbis_dsp_state*, void*)",
+      "address": 5371296,
+      "offset": 4481328,
+      "size": 614,
+      "match_percent": 99.99435
+    },
+    {
+      "name": "_Z9res0_packPvP14oggpack_buffer",
+      "demangled_name": "res0_pack(void*, oggpack_buffer*)",
+      "address": 5371920,
+      "offset": 4481952,
+      "size": 425,
+      "match_percent": 99.99174
+    },
+    {
+      "name": "_Z14res0_free_lookPv",
+      "demangled_name": "res0_free_look(void*)",
+      "address": 5372352,
+      "offset": 4482384,
+      "size": 238,
+      "match_percent": 99.987656
+    },
+    {
+      "name": "_Z14res0_free_infoPv",
+      "demangled_name": "res0_free_info(void*)",
+      "address": 5372592,
+      "offset": 4482624,
+      "size": 76,
+      "match_percent": 99.94444
+    },
+    {
+      "name": "_Z11res0_unpackP11vorbis_infoP14oggpack_buffer",
+      "demangled_name": "res0_unpack(vorbis_info*, oggpack_buffer*)",
+      "address": 5372672,
+      "offset": 4482704,
+      "size": 605,
+      "match_percent": 99.994316
     },
     {
       "name": "_ZL10_01forwardP14oggpack_bufferP12vorbis_blockPvPPiiPPlPFiS0_S4_iP8codebookS6_Ei.isra.0.constprop.1",
@@ -128226,7 +128163,23 @@
       "address": 5373280,
       "offset": 4483312,
       "size": 863,
-      "match_percent": 0.0
+      "match_percent": 99.9956
+    },
+    {
+      "name": "_Z12res1_forwardP14oggpack_bufferP12vorbis_blockPvPPiS4_iPPli",
+      "demangled_name": "res1_forward(oggpack_buffer*, vorbis_block*, void*, int**, int*, int, long**, int)",
+      "address": 5374144,
+      "offset": 4484176,
+      "size": 144,
+      "match_percent": 100.0
+    },
+    {
+      "name": "_Z12res2_forwardP14oggpack_bufferP12vorbis_blockPvPPiS4_iPPli",
+      "demangled_name": "res2_forward(oggpack_buffer*, vorbis_block*, void*, int**, int*, int, long**, int)",
+      "address": 5374288,
+      "offset": 4484320,
+      "size": 244,
+      "match_percent": 99.987656
     },
     {
       "name": "_Z5_ilogj",
@@ -128234,7 +128187,7 @@
       "address": 5374576,
       "offset": 4484608,
       "size": 25,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_Z13_float32_packf",
@@ -128242,7 +128195,7 @@
       "address": 5374608,
       "offset": 4484640,
       "size": 202,
-      "match_percent": 0.0
+      "match_percent": 99.92
     },
     {
       "name": "_Z15_float32_unpackl",
@@ -128250,7 +128203,15 @@
       "address": 5374816,
       "offset": 4484848,
       "size": 106,
-      "match_percent": 0.0
+      "match_percent": 99.93104
+    },
+    {
+      "name": "_Z11_make_wordsPlll",
+      "demangled_name": "_make_words(long*, long, long)",
+      "address": 5374928,
+      "offset": 4484960,
+      "size": 662,
+      "match_percent": 99.99507
     },
     {
       "name": "_Z24_book_maptype1_quantvalsPK15static_codebook",
@@ -128258,7 +128219,7 @@
       "address": 5375600,
       "offset": 4485632,
       "size": 190,
-      "match_percent": 0.0
+      "match_percent": 99.965515
     },
     {
       "name": "_Z16_book_unquantizePK15static_codebookiPi",
@@ -128266,7 +128227,7 @@
       "address": 5375792,
       "offset": 4485824,
       "size": 1653,
-      "match_percent": 0.0
+      "match_percent": 99.98081
     },
     {
       "name": "_Z25vorbis_staticbook_destroyP15static_codebook",
@@ -128274,7 +128235,7 @@
       "address": 5377456,
       "offset": 4487488,
       "size": 186,
-      "match_percent": 0.0
+      "match_percent": 99.98333
     },
     {
       "name": "_Z17vorbis_book_clearP8codebook",
@@ -128282,7 +128243,7 @@
       "address": 5377648,
       "offset": 4487680,
       "size": 189,
-      "match_percent": 0.0
+      "match_percent": 99.983604
     },
     {
       "name": "_Z23vorbis_book_init_encodeP8codebookPK15static_codebook",
@@ -128290,7 +128251,7 @@
       "address": 5377840,
       "offset": 4487872,
       "size": 320,
-      "match_percent": 0.0
+      "match_percent": 99.987656
     },
     {
       "name": "_Z23vorbis_book_init_decodeP8codebookPK15static_codebook",
@@ -128298,7 +128259,7 @@
       "address": 5378160,
       "offset": 4488192,
       "size": 1510,
-      "match_percent": 0.0
+      "match_percent": 99.99566
     },
     {
       "name": "_Z20vorbis_book_codewordP8codebooki",
@@ -128306,7 +128267,7 @@
       "address": 5379680,
       "offset": 4489712,
       "size": 28,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_Z19vorbis_book_codelenP8codebooki",
@@ -128314,7 +128275,7 @@
       "address": 5379712,
       "offset": 4489744,
       "size": 28,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_ZL6dradf2iiPfS_S_",
@@ -128322,7 +128283,7 @@
       "address": 5379744,
       "offset": 4489776,
       "size": 639,
-      "match_percent": 0.0
+      "match_percent": 99.988235
     },
     {
       "name": "_ZL6dradf4iiPfS_S_S_S_",
@@ -128330,7 +128291,7 @@
       "address": 5380384,
       "offset": 4490416,
       "size": 1144,
-      "match_percent": 0.0
+      "match_percent": 99.98929
     },
     {
       "name": "_ZL6dradb2iiPfS_S_",
@@ -128338,7 +128299,7 @@
       "address": 5381536,
       "offset": 4491568,
       "size": 599,
-      "match_percent": 0.0
+      "match_percent": 99.987656
     },
     {
       "name": "_ZL6dradb3iiPfS_S_S_",
@@ -128346,7 +128307,7 @@
       "address": 5382144,
       "offset": 4492176,
       "size": 746,
-      "match_percent": 0.0
+      "match_percent": 99.98404
     },
     {
       "name": "_ZL6dradb4iiPfS_S_S_S_",
@@ -128354,7 +128315,7 @@
       "address": 5382896,
       "offset": 4492928,
       "size": 1084,
-      "match_percent": 0.0
+      "match_percent": 99.988846
     },
     {
       "name": "_ZL6dradbgiiiiPfS_S_S_S_S_",
@@ -128362,7 +128323,7 @@
       "address": 5383984,
       "offset": 4494016,
       "size": 8210,
-      "match_percent": 0.0
+      "match_percent": 99.99825
     },
     {
       "name": "_ZL6dradfgiiiiPfS_S_S_S_S_",
@@ -128370,7 +128331,7 @@
       "address": 5392208,
       "offset": 4502240,
       "size": 8446,
-      "match_percent": 0.0
+      "match_percent": 99.99831
     },
     {
       "name": "_Z12drft_forwardP11drft_lookupPf",
@@ -128378,7 +128339,7 @@
       "address": 5400656,
       "offset": 4510688,
       "size": 787,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_Z13drft_backwardP11drft_lookupPf",
@@ -128386,7 +128347,7 @@
       "address": 5401456,
       "offset": 4511488,
       "size": 967,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_Z9drft_initP11drft_lookupi",
@@ -128394,7 +128355,7 @@
       "address": 5402432,
       "offset": 4512464,
       "size": 811,
-      "match_percent": 0.0
+      "match_percent": 99.98029
     },
     {
       "name": "_Z10drft_clearP11drft_lookup",
@@ -128402,7 +128363,7 @@
       "address": 5403248,
       "offset": 4513280,
       "size": 94,
-      "match_percent": 0.0
+      "match_percent": 99.96
     },
     {
       "name": "_Z16vorbis_synthesisP12vorbis_blockP10ogg_packet",
@@ -128410,7 +128371,7 @@
       "address": 5403344,
       "offset": 4513376,
       "size": 550,
-      "match_percent": 0.0
+      "match_percent": 99.98726
     },
     {
       "name": "_Z26vorbis_synthesis_trackonlyP12vorbis_blockP10ogg_packet",
@@ -128418,7 +128379,7 @@
       "address": 5403904,
       "offset": 4513936,
       "size": 319,
-      "match_percent": 0.0
+      "match_percent": 99.9881
     },
     {
       "name": "_Z23vorbis_packet_blocksizeP11vorbis_infoP10ogg_packet",
@@ -128426,7 +128387,7 @@
       "address": 5404224,
       "offset": 4514256,
       "size": 154,
-      "match_percent": 0.0
+      "match_percent": 99.979164
     },
     {
       "name": "_Z25vorbis_synthesis_halfrateP11vorbis_infoi",
@@ -128434,7 +128395,7 @@
       "address": 5404384,
       "offset": 4514416,
       "size": 62,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_Z27vorbis_synthesis_halfrate_pP11vorbis_info",
@@ -128442,7 +128403,7 @@
       "address": 5404448,
       "offset": 4514480,
       "size": 16,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_Z18_vorbis_window_geti",
@@ -128450,7 +128411,7 @@
       "address": 5404464,
       "offset": 4514496,
       "size": 25,
-      "match_percent": 0.0
+      "match_percent": 99.0
     },
     {
       "name": "_Z20_vorbis_apply_windowPfPiPliii",
@@ -128458,7 +128419,7 @@
       "address": 5404496,
       "offset": 4514528,
       "size": 1169,
-      "match_percent": 0.0
+      "match_percent": 99.963585
     },
     {
       "name": "_Z19vorbis_bitrate_initP11vorbis_infoP21bitrate_manager_state",
@@ -128466,7 +128427,7 @@
       "address": 5405680,
       "offset": 4515712,
       "size": 416,
-      "match_percent": 0.0
+      "match_percent": 99.97872
     },
     {
       "name": "_Z20vorbis_bitrate_clearP21bitrate_manager_state",
@@ -128474,7 +128435,7 @@
       "address": 5406096,
       "offset": 4516128,
       "size": 93,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_Z22vorbis_bitrate_managedP12vorbis_block",
@@ -128482,7 +128443,7 @@
       "address": 5406192,
       "offset": 4516224,
       "size": 35,
-      "match_percent": 0.0
+      "match_percent": 100.0
     },
     {
       "name": "_Z23vorbis_bitrate_addblockP12vorbis_block",
@@ -128490,7 +128451,7 @@
       "address": 5406240,
       "offset": 4516272,
       "size": 1455,
-      "match_percent": 0.0
+      "match_percent": 99.99277
     },
     {
       "name": "_Z26vorbis_bitrate_flushpacketP16vorbis_dsp_stateP10ogg_packet",
@@ -128498,7 +128459,7 @@
       "address": 5407696,
       "offset": 4517728,
       "size": 212,
-      "match_percent": 0.0
+      "match_percent": 99.98305
     },
     {
       "name": "_Z22vorbis_staticbook_packPK15static_codebookP14oggpack_buffer",
@@ -128506,7 +128467,7 @@
       "address": 5407920,
       "offset": 4517952,
       "size": 1085,
-      "match_percent": 0.0
+      "match_percent": 99.99651
     },
     {
       "name": "_Z24vorbis_staticbook_unpackP14oggpack_buffer",
@@ -128514,7 +128475,7 @@
       "address": 5409008,
       "offset": 4519040,
       "size": 1461,
-      "match_percent": 0.0
+      "match_percent": 99.99753
     },
     {
       "name": "_Z18vorbis_book_encodeP8codebookiP14oggpack_buffer",
@@ -128522,7 +128483,7 @@
       "address": 5410480,
       "offset": 4520512,
       "size": 124,
-      "match_percent": 0.0
+      "match_percent": 99.97298
     },
     {
       "name": "_Z18vorbis_book_decodeP8codebookP14oggpack_buffer",
@@ -128530,7 +128491,7 @@
       "address": 5410608,
       "offset": 4520640,
       "size": 440,
-      "match_percent": 0.0
+      "match_percent": 99.992905
     },
     {
       "name": "_Z24vorbis_book_decodevs_addP8codebookPfP14oggpack_bufferi",
@@ -128538,7 +128499,7 @@
       "address": 5411056,
       "offset": 4521088,
       "size": 707,
-      "match_percent": 0.0
+      "match_percent": 99.995865
     },
     {
       "name": "_Z23vorbis_book_decodev_addP8codebookPfP14oggpack_bufferi",
@@ -128546,7 +128507,7 @@
       "address": 5411776,
       "offset": 4521808,
       "size": 1810,
-      "match_percent": 0.0
+      "match_percent": 99.99593
     },
     {
       "name": "_Z23vorbis_book_decodev_setP8codebookPfP14oggpack_bufferi",
@@ -128554,7 +128515,7 @@
       "address": 5413600,
       "offset": 4523632,
       "size": 753,
-      "match_percent": 0.0
+      "match_percent": 99.99578
     },
     {
       "name": "_Z24vorbis_book_decodevv_addP8codebookPPfliP14oggpack_bufferi",
@@ -128562,7 +128523,7 @@
       "address": 5414368,
       "offset": 4524400,
       "size": 693,
-      "match_percent": 0.0
+      "match_percent": 99.99522
     },
     {
       "name": "_GLOBAL__sub_I_glutils.c",
@@ -131168,8 +131129,8 @@
   "summary": {
     "bazel_units": 503,
     "functions": 13454,
-    "assigned_functions": 12175,
+    "assigned_functions": 12162,
     "ambiguous_functions": 243,
-    "unassigned_functions": 1036
+    "unassigned_functions": 1049
   }
 }

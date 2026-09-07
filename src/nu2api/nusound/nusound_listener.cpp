@@ -18,7 +18,7 @@ void NuSoundListener::EnableFocusPosition() {
     focus_enabled = true;
 }
 
-const VuVec * NuSoundListener::Get2DScreenPosition() const {
+const VuVec *NuSoundListener::Get2DScreenPosition() const {
     return screen_position;
 }
 
@@ -30,13 +30,15 @@ f32 NuSoundListener::GetAttenuationDistance(VuVec const &position) const {
 const VuVec *NuSoundListener::GetAttenuationPosition(VuVec const &position) const {
     if (focus_position != NULL && focus_enabled) {
         f32 focus_distance = NuVecDist((NUVEC *)focus_position, (NUVEC *)&position, NULL);
-        if (!(focus_distance > GetHeadDistance(position))) return focus_position;
+        if (!(focus_distance > GetHeadDistance(position)))
+            return focus_position;
     }
     return reinterpret_cast<const VuVec *>(reinterpret_cast<const char *>(head_matrix) + 0x30);
 }
 
 const VuVec *NuSoundListener::GetFocusPosition() const {
-    if (focus_position != NULL && focus_enabled) return focus_position;
+    if (focus_position != NULL && focus_enabled)
+        return focus_position;
     if (head_matrix != NULL) {
         return reinterpret_cast<const VuVec *>(reinterpret_cast<const char *>(head_matrix) + 0x30);
     }
@@ -44,12 +46,13 @@ const VuVec *NuSoundListener::GetFocusPosition() const {
 }
 
 f32 NuSoundListener::GetHeadDistance(VuVec const &position) const {
-    if (head_matrix == NULL) return FLT_MAX;
+    if (head_matrix == NULL)
+        return FLT_MAX;
     const char *translation = reinterpret_cast<const char *>(head_matrix) + 0x30;
     return NuVecDist((NUVEC *)translation, (NUVEC *)&position, NULL);
 }
 
-const VuMtx * NuSoundListener::GetHeadMatrix() const {
+const VuMtx *NuSoundListener::GetHeadMatrix() const {
     return head_matrix;
 }
 
@@ -61,7 +64,7 @@ f32 NuSoundListener::GetSensitivity() const {
     return sensitivity;
 }
 
-const VuVec * NuSoundListener::GetVelocity() const {
+const VuVec *NuSoundListener::GetVelocity() const {
     return &velocity;
 }
 
@@ -102,7 +105,8 @@ void NuSoundListener::SetOutputDevices(i32 value) {
 }
 
 void NuSoundListener::SetSensitivity(float value) {
-    if (value >= 0.0f) sensitivity = value;
+    if (value >= 0.0f)
+        sensitivity = value;
 }
 
 void NuSoundListener::SetVelocity(VuVec const &value) {

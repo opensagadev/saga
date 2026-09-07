@@ -899,8 +899,7 @@ extern "C" void DisplayListUpdateRenderState(void *display_list, void *state) {
             VARIPTR *buffer = NuDisplayListGetBuffer();
             auto *packet = static_cast<CameraPacket *>(buffer->void_ptr);
             global->camera_state = packet;
-            packet->id = nuapi.frame_count +
-                         (global->state.camera_id + 5) * (global->state.global_id + 13);
+            packet->id = nuapi.frame_count + (global->state.camera_id + 5) * (global->state.global_id + 13);
             packet->view = global->view;
             memset(&packet->projection, 0, sizeof(packet->projection));
             packet->projection.m00 = global->proj_00;

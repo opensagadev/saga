@@ -276,6 +276,7 @@ class NuMemoryManager {
 
   public:
     u32 CalculateLargestFragmentSize();
+
   private:
     u32 CalculateFreeBytes();
 

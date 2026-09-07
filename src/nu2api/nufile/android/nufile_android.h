@@ -16,7 +16,9 @@ class NuFileAndroidAPK : public NuFileBase {
     static NuFileAndroidAPK *Open(const char *filepath, NuFile::OpenMode::T mode);
     static void ResetId(i32 id);
     static i32 SetFileId(NuFileAndroidAPK *file);
-    static NuFileAndroidAPK *GetFile(i32 id) { return ms_fileId[id - 0x2000]; }
+    static NuFileAndroidAPK *GetFile(i32 id) {
+        return ms_fileId[id - 0x2000];
+    }
 
     virtual i64 Seek(i64 offset, NuFile::SeekOrigin::T) override;
     virtual isize Read(void *buf, usize size) override;
@@ -42,8 +44,12 @@ class NuFileAndroidAPK : public NuFileBase {
         return GetFile(file)->Read(buf, size);
     }
 
-    static i64 GetFilePos(NUFILE file) { return GetFile(file)->GetPos(); }
-    static i64 GetFileSize(NUFILE file) { return GetFile(file)->GetSize(); }
+    static i64 GetFilePos(NUFILE file) {
+        return GetFile(file)->GetPos();
+    }
+    static i64 GetFileSize(NUFILE file) {
+        return GetFile(file)->GetSize();
+    }
 
   protected:
     virtual ~NuFileAndroidAPK() override;

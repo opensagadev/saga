@@ -34,7 +34,9 @@ class NuSoundSource {
     virtual ~NuSoundSource();
 
     virtual const char *GetName() const;
-    virtual NuSoundSource *GetEncodedSource() { return this; }
+    virtual NuSoundSource *GetEncodedSource() {
+        return this;
+    }
 
     void SetStreamDesc(NuSoundStreamDesc *desc);
     NuSoundStreamDesc *GetStreamDesc() const {
@@ -48,7 +50,9 @@ class NuSoundSource {
     virtual void CloseStream() = 0;
     virtual bool IsStreamOpen() const = 0;
     virtual void RequestBuffer(bool loop, NuSoundWeakPtr<NuSoundBufferCallback> callback) = 0;
-    virtual u32 GetMaxBufferSize() { return 0; }
+    virtual u32 GetMaxBufferSize() {
+        return 0;
+    }
     virtual void Lock() = 0;
     virtual void Unlock() = 0;
     virtual bool IsLocked() const = 0;

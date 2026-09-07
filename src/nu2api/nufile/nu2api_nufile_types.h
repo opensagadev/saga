@@ -13,8 +13,11 @@ enum NuFileDeviceType { NUFILE_DEVICE_UNKNOWN = 1, NUFILE_DEVICE_ANDROID_APK = 3
 struct nufile_info_s;
 
 namespace NuFile {
-    struct InitData { u32 flags; u32 unknown; };
-}
+    struct InitData {
+        u32 flags;
+        u32 unknown;
+    };
+} // namespace NuFile
 struct NuFileDevice {
     static void AddDevice(NuFileDevice *);
     void AddPathRule(NuFileDeviceType, char const *);
@@ -31,19 +34,44 @@ struct NuFileDevice {
     virtual NuFileBase *FileOpen(char const *, NuFile::OpenMode::T) const;
     virtual i64 FileSize(char const *) const;
     // The original base implementations report unsupported operations.
-    virtual bool FileRename(char const *, char const *) { return false; }
-    virtual bool FileGetInfo(char const *, nufile_info_s *) { return false; }
-    virtual bool FileDelete(char const *) { return false; }
-    virtual bool FileTouch(char const *) { return false; }
-    virtual i32 DirOpen(char const *) { return 0; }
-    virtual void DirClose(i32) {}
-    virtual bool DirExists(char const *) { return false; }
-    virtual bool DirRead(i32, nufile_info_s *) { return false; }
-    virtual bool DirCreatePath(char const *) { return false; }
-    virtual bool DirRemove(char const *) { return false; }
-    virtual bool DirRemoveRecursive(char const *, bool) { return false; }
-    virtual bool DirRename(char const *, char const *) { return false; }
-    virtual bool GetPositionOnDisc(char const *, i64 &) const { return false; }
+    virtual bool FileRename(char const *, char const *) {
+        return false;
+    }
+    virtual bool FileGetInfo(char const *, nufile_info_s *) {
+        return false;
+    }
+    virtual bool FileDelete(char const *) {
+        return false;
+    }
+    virtual bool FileTouch(char const *) {
+        return false;
+    }
+    virtual i32 DirOpen(char const *) {
+        return 0;
+    }
+    virtual void DirClose(i32) {
+    }
+    virtual bool DirExists(char const *) {
+        return false;
+    }
+    virtual bool DirRead(i32, nufile_info_s *) {
+        return false;
+    }
+    virtual bool DirCreatePath(char const *) {
+        return false;
+    }
+    virtual bool DirRemove(char const *) {
+        return false;
+    }
+    virtual bool DirRemoveRecursive(char const *, bool) {
+        return false;
+    }
+    virtual bool DirRename(char const *, char const *) {
+        return false;
+    }
+    virtual bool GetPositionOnDisc(char const *, i64 &) const {
+        return false;
+    }
     virtual i32 FormatName(char *, i32, char const *) const;
     virtual void SetCurrentDir(char const *);
     virtual ~NuFileDevice();

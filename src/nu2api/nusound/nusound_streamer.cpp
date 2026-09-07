@@ -325,8 +325,12 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
         ErrorState error = ErrorState::FILE_NOT_FOUND;
         switch (open_result) {
             case 3:
-            case 4: error = ErrorState::OUT_OF_MEMORY; break;
-            case 5: error = ErrorState::UNSUPPORTED; break;
+            case 4:
+                error = ErrorState::OUT_OF_MEMORY;
+                break;
+            case 5:
+                error = ErrorState::UNSUPPORTED;
+                break;
         }
         NuSoundSystem::ReleaseFileLoader(this->file_loader);
         this->file_loader = NULL;

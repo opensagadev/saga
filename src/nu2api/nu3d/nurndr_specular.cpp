@@ -10,8 +10,10 @@ extern "C" i32 NuRndrSetSpecularLightPS(const NUVEC *direction, const NUCOLOUR4 
     static NUVEC rndrstream_specular_dir = {0.0f, 0.0f, 1.0f};
     static NUCOLOUR4 rndrstream_specular_intensity = {1.0f, 1.0f, 1.0f, 1.0f};
     static NUVEC camvec = {0.0f, 0.0f, -1.0f};
-    if (direction != NULL) rndrstream_specular_dir = *direction;
-    if (intensity != NULL) rndrstream_specular_intensity = *intensity;
+    if (direction != NULL)
+        rndrstream_specular_dir = *direction;
+    if (intensity != NULL)
+        rndrstream_specular_intensity = *intensity;
     NUVEC view_direction, half_direction, light_direction, eye_direction;
     NuVecInvMtxRotate(&view_direction, &rndrstream_specular_dir, &global_camera.mtx);
     NuVecLerp(&half_direction, &view_direction, &camvec, 0.5f);

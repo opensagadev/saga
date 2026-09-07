@@ -5,25 +5,24 @@
 void bgSuspendMain(i32);
 void NuPadRecordEndFrame();
 extern "C" {
-i32 NuHasError();
-void NuMtlAnimate(f32);
-void NuTexAnimProcess(f32);
-void NuWindAnimate(NUWIND *, f32);
-void NuOcclusionManagerEndFrame();
-void NuTimeBarSetRender(i32);
-void NuPad_Interface_Render();
-void NuPadUpdatePads();
-void NuRndrSwapScreenEx(i32, void (*)());
-extern void (*preRenderFlashingHack)();
-extern void (*postRenderFlashingHack)();
-extern void (*nuapi_endframe_callbackfn)();
-static i32 min_delay = 20;
+    i32 NuHasError();
+    void NuMtlAnimate(f32);
+    void NuTexAnimProcess(f32);
+    void NuWindAnimate(NUWIND *, f32);
+    void NuOcclusionManagerEndFrame();
+    void NuTimeBarSetRender(i32);
+    void NuPad_Interface_Render();
+    void NuPadUpdatePads();
+    void NuRndrSwapScreenEx(i32, void (*)());
+    extern void (*preRenderFlashingHack)();
+    extern void (*postRenderFlashingHack)();
+    extern void (*nuapi_endframe_callbackfn)();
+    static i32 min_delay = 20;
     f32 NuFrameEnd(void) {
         static i32 ShowingError = 0; // _ZZ10NuFrameEndE12ShowingError
 
         i32 done = 0;
         i32 has_error = NuHasError();
-
 
         if (nuapi.max_fps != 0) {
             // Wait until at least 1/max_fps seconds have elapsed since frame

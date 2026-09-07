@@ -191,7 +191,6 @@ void NuLgtArcLaserDraw(i32) {
 void NuVpSetSourceRect(float, float, float, float) {
 }
 
-
 void NuFadeObjAllocData(i32) {
 }
 

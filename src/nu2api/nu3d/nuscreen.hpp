@@ -13,7 +13,9 @@ class NuScreen {
     ~NuScreen();
 
     static bool Exists();
-    static NuScreen *Get() { return ms_instance; }
+    static NuScreen *Get() {
+        return ms_instance;
+    }
     static void Create();
 
     void Destroy();

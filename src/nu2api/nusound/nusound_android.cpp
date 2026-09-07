@@ -45,11 +45,10 @@ bool NuSoundAndroid::IsValidBitRate(u32 bits) {
 }
 
 bool NuSoundAndroid::IsValidSampleRate(u32 rate_millis) {
-    return rate_millis == 8000000 || rate_millis == 11025000 || rate_millis == 12000000
-        || rate_millis == 16000000 || rate_millis == 22050000 || rate_millis == 24000000
-        || rate_millis == 32000000 || rate_millis == 44100000 || rate_millis == 48000000
-        || rate_millis == 64000000 || rate_millis == 88200000 || rate_millis == 96000000
-        || rate_millis == 192000000;
+    return rate_millis == 8000000 || rate_millis == 11025000 || rate_millis == 12000000 || rate_millis == 16000000 ||
+           rate_millis == 22050000 || rate_millis == 24000000 || rate_millis == 32000000 || rate_millis == 44100000 ||
+           rate_millis == 48000000 || rate_millis == 64000000 || rate_millis == 88200000 || rate_millis == 96000000 ||
+           rate_millis == 192000000;
 }
 
 u32 NuSoundAndroid::ReportErrorCode(u32 error, const char *message) {
@@ -99,8 +98,8 @@ bool NuSoundAndroid::InitAudioDevice() {
         i16 max_voices = 0;
         u32 absolute_max = 0;
         i16 free_voices = 0;
-        error = SL_SLOT(capabilities, QueryAvailableVoicesFn, 4)(capabilities, 1, &max_voices, &absolute_max,
-                                                                 &free_voices);
+        error =
+            SL_SLOT(capabilities, QueryAvailableVoicesFn, 4)(capabilities, 1, &max_voices, &absolute_max, &free_voices);
         ReportErrorCode(error, "QueryAvailableVoices(SL_VOICETYPE_2D_AUDIO)");
         if (supports_3d) {
             i16 max_voices = 0;
@@ -139,8 +138,7 @@ bool NuSoundAndroid::InitAudioDevice() {
     error = SL_SLOT(this->output_mix, ObjectGetInterfaceFn, 0xc)(this->output_mix, SL_IID_ENVIRONMENTALREVERB,
                                                                  &this->mix_reverb);
     if (ReportErrorCode(error, "Get output environmental reverb interface") == 0) {
-        SL_SLOT(this->mix_reverb, EnvironmentalReverbSetPropertiesFn, 0x50)(this->mix_reverb,
-                                                                                    this->reverb_properties);
+        SL_SLOT(this->mix_reverb, EnvironmentalReverbSetPropertiesFn, 0x50)(this->mix_reverb, this->reverb_properties);
     }
 
     NuSoundSystem::sOutputConfig = this->GetClosestSupportedConfig(2);

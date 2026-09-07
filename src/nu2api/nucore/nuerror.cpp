@@ -4,7 +4,7 @@
 void NuErrorPrint(char *);
 void NuDebugMsgPrint(char *);
 extern "C" {
-typedef void (*NuErrorFunctionPtr)(char *, ...);
+    typedef void (*NuErrorFunctionPtr)(char *, ...);
     static i32 bHaveErr;
     static char ErrMsg[1024];
     static char *nufile;

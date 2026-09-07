@@ -17,9 +17,11 @@ NuSoundEffectDoppler::NuSoundEffectDoppler() {
 }
 
 void NuSoundEffectDoppler::ProcessVoice(NuSoundVoice *voice, float) {
-    if (!enabled || listeners == NULL || voice->GetPosition() == NULL) return;
+    if (!enabled || listeners == NULL || voice->GetPosition() == NULL)
+        return;
     NuSoundListener *listener = NuSoundSystem::GetNearestRealListener(*listeners, *voice->GetPosition());
-    if (listener == NULL || listener->GetFocusPosition() == NULL || voice->GetPosition() == NULL) return;
+    if (listener == NULL || listener->GetFocusPosition() == NULL || voice->GetPosition() == NULL)
+        return;
     const VuVec *source_velocity = voice->GetVelocity();
     const VuVec *listener_velocity = listener->GetVelocity();
     const VuVec *source_position = voice->GetPosition();
@@ -29,8 +31,10 @@ void NuSoundEffectDoppler::ProcessVoice(NuSoundVoice *voice, float) {
     direction.y = listener_position->y - source_position->y;
     direction.z = listener_position->z - source_position->z;
     NuVecNorm(&direction, &direction);
-    float listener_speed = (listener_velocity->x * direction.x + listener_velocity->y * direction.y) + listener_velocity->z * direction.z;
-    float source_speed = (direction.x * source_velocity->x + direction.y * source_velocity->y) + direction.z * source_velocity->z;
+    float listener_speed =
+        (listener_velocity->x * direction.x + listener_velocity->y * direction.y) + listener_velocity->z * direction.z;
+    float source_speed =
+        (direction.x * source_velocity->x + direction.y * source_velocity->y) + direction.z * source_velocity->z;
     pitch_scale = (speed_of_sound - listener_speed * velocity_scale) / (speed_of_sound - source_speed * velocity_scale);
 }
 

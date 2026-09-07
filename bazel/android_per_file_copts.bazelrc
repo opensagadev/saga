@@ -228,6 +228,7 @@ build:target --per_file_copt=^src/legoapi/audio/audio\.cpp$@-O2
 build:target --per_file_copt=^src/nu2api/nuplatform/nuplatform\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nusound/nusound_loader\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nusound/nusound_loader_ogg\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/audio/gamelib_ogg\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nusound/nusound_loader_wav\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nusound/nusound_decoder\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nusound/nusound_sample\.cpp$@-O3

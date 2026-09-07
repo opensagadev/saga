@@ -29,8 +29,7 @@ i32 AndroidOBBUtils::LookupPackagePath(char *output, NuFileDeviceAndroidOBBType:
     if ((type == NuFileDeviceAndroidOBBType::MAIN && g_obbMainSize > 0) ||
         (type != NuFileDeviceAndroidOBBType::MAIN && g_obbPatchSize > 0)) {
         directory[0] = '\0';
-        sprintf(filename, "%s%s.%04d.0000.%s", directory,
-                type == NuFileDeviceAndroidOBBType::MAIN ? "main" : "patch",
+        sprintf(filename, "%s%s.%04d.0000.%s", directory, type == NuFileDeviceAndroidOBBType::MAIN ? "main" : "patch",
                 type == NuFileDeviceAndroidOBBType::MAIN ? g_obbMainVersion : g_obbPatchVersion, "jpg");
         AAsset *asset = AAssetManager_open(g_assetManager, filename, AASSET_MODE_UNKNOWN);
         if (asset != NULL) {
@@ -51,10 +50,8 @@ i32 AndroidOBBUtils::LookupPackagePath(char *output, NuFileDeviceAndroidOBBType:
         strcat(directory, "obb/");
         strcat(directory, g_activityName);
         strcat(directory, "/");
-        sprintf(filename, "%s%s.%04d.%s.%s", directory,
-                type == NuFileDeviceAndroidOBBType::MAIN ? "main" : "patch",
-                type == NuFileDeviceAndroidOBBType::MAIN ? g_obbMainVersion : g_obbPatchVersion,
-                g_activityName, "obb");
+        sprintf(filename, "%s%s.%04d.%s.%s", directory, type == NuFileDeviceAndroidOBBType::MAIN ? "main" : "patch",
+                type == NuFileDeviceAndroidOBBType::MAIN ? g_obbMainVersion : g_obbPatchVersion, g_activityName, "obb");
         FILE *file = fopen(filename, "rb");
         if (file != NULL) {
             fclose(file);
@@ -75,10 +72,8 @@ i32 AndroidOBBUtils::LookupPackagePath(char *output, NuFileDeviceAndroidOBBType:
         strcat(directory, "/TTGames/");
         strcat(directory, g_activityName);
         strcat(directory, "/obb/");
-        sprintf(filename, "%s%s.%04d.%s.%s", directory,
-                type == NuFileDeviceAndroidOBBType::MAIN ? "main" : "patch",
-                type == NuFileDeviceAndroidOBBType::MAIN ? g_obbMainVersion : g_obbPatchVersion,
-                g_activityName, "obb");
+        sprintf(filename, "%s%s.%04d.%s.%s", directory, type == NuFileDeviceAndroidOBBType::MAIN ? "main" : "patch",
+                type == NuFileDeviceAndroidOBBType::MAIN ? g_obbMainVersion : g_obbPatchVersion, g_activityName, "obb");
         FILE *file = fopen(filename, "rb");
         if (file != NULL) {
             fclose(file);

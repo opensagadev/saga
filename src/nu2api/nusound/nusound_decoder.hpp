@@ -23,8 +23,12 @@ class NuSoundDecoder : public NuSoundSource {
   public:
     NuSoundDecoder(char const *name, NuSoundSource *source);
     virtual ~NuSoundDecoder();
-    const char *GetName() const override { return source != NULL ? source->GetName() : "NuSoundDecoder"; }
-    NuSoundSource *GetEncodedSource() override { return source; }
+    const char *GetName() const override {
+        return source != NULL ? source->GetName() : "NuSoundDecoder";
+    }
+    NuSoundSource *GetEncodedSource() override {
+        return source;
+    }
 
     void CloseStream();
     static void Initialise();
@@ -53,12 +57,12 @@ class NuSoundDecoder : public NuSoundSource {
     virtual void Reset(); // original vtable slot +0x40, after Decode
 
   protected:
-    NuSoundSource *source;     // wrapped source
-    NuSoundBuffer buffers[2];  // +0x24, +0x64: embedded ring buffers
-    i32 buffer_size;           // bytes per ring buffer
-    i32 ring_count;            // buffers filled so far
-    i32 decode_pos;            // next buffer index to decode
-    i32 consumed_pos;          // next buffer index to hand out
+    NuSoundSource *source;    // wrapped source
+    NuSoundBuffer buffers[2]; // +0x24, +0x64: embedded ring buffers
+    i32 buffer_size;          // bytes per ring buffer
+    i32 ring_count;           // buffers filled so far
+    i32 decode_pos;           // next buffer index to decode
+    i32 consumed_pos;         // next buffer index to hand out
     u32 buffers_started;
     u64 decoded_bytes; // bytes decoded since stream start
     u32 field_0xc0;
@@ -100,11 +104,11 @@ class NuSoundDecodeThread {
     static NuThreadSemaphore sShutdownSemaphore;
     static i32 sThreadPriority;
 
-    NuThread *thread;            // +0x000
+    NuThread *thread; // +0x000
     union {
-        Loader loaders[128];     // +0x004; lifetime spans enqueue to dequeue
+        Loader loaders[128]; // +0x004; lifetime spans enqueue to dequeue
     };
-    i32 tail_index; // +0xe04, producer (RequestDecode) write index
-    i32 head_index; // +0xe08, consumer (ThreadFunc) read index
+    i32 tail_index;              // +0xe04, producer (RequestDecode) write index
+    i32 head_index;              // +0xe08, consumer (ThreadFunc) read index
     NuThreadSemaphore semaphore; // +0xe0c
 };

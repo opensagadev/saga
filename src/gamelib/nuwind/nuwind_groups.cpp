@@ -6,14 +6,14 @@
 
 // The legacy wind-group routines have unoptimized code in the reference.
 extern "C" {
-struct NuPlainSpecialHandleLayout {
-    NUGSCN *scene;
-    void *special;
-    void *display_special;
-};
-extern "C++" NuWindGType *NuWindAllocateGrp();
-extern "C++" void NuWindFreeGrp(NuWindGType *);
-void NuWindUpdateArray(NUVEC **);
+    struct NuPlainSpecialHandleLayout {
+        NUGSCN *scene;
+        void *special;
+        void *display_special;
+    };
+    extern "C++" NuWindGType *NuWindAllocateGrp();
+    extern "C++" void NuWindFreeGrp(NuWindGType *);
+    void NuWindUpdateArray(NUVEC **);
     static i32 maxwindmats;
     static i32 maxgroups;
     NuWindGType *NuWindGroup;
@@ -23,9 +23,8 @@ void NuWindUpdateArray(NUVEC **);
     i32 NuWindDir2;
     u32 NuWindQS = 0x1365;
 
-    NuWindGType *NuWindCreateMtx(u32 *source, NUMTX *matrices, i16 count,
-                               f32 value20, f32 value24, i32 flags,
-                               f32 near_distance, f32 far_distance) {
+    NuWindGType *NuWindCreateMtx(u32 *source, NUMTX *matrices, i16 count, f32 value20, f32 value24, i32 flags,
+                                 f32 near_distance, f32 far_distance) {
         NuWindGType *group = NuWindAllocateGrp();
         NUMTX *matrix = matrices;
         if (group == NULL || matrix == NULL) {
@@ -50,20 +49,25 @@ void NuWindUpdateArray(NUVEC **);
         min_x = min_y = min_z = 10000000.0f;
         max_x = max_y = max_z = -10000000.0f;
         for (i32 index = 0; index < count; ++index, ++matrix) {
-            if (min_x > matrix->m30) min_x = matrix->m30;
-            if (min_y > matrix->m31) min_y = matrix->m31;
-            if (min_z > matrix->m32) min_z = matrix->m32;
-            if (matrix->m30 > max_x) max_x = matrix->m30;
-            if (matrix->m31 > max_y) max_y = matrix->m31;
-            if (matrix->m32 > max_z) max_z = matrix->m32;
+            if (min_x > matrix->m30)
+                min_x = matrix->m30;
+            if (min_y > matrix->m31)
+                min_y = matrix->m31;
+            if (min_z > matrix->m32)
+                min_z = matrix->m32;
+            if (matrix->m30 > max_x)
+                max_x = matrix->m30;
+            if (matrix->m31 > max_y)
+                max_y = matrix->m31;
+            if (matrix->m32 > max_z)
+                max_z = matrix->m32;
         }
         group->center.x = 0.5f * (max_x + min_x);
         group->center.y = 0.5f * (max_y + min_y);
         group->center.z = 0.5f * (max_z + min_z);
-        group->radius_squared = 1.5f +
-            ((0.5f * (max_x - min_x)) * ((max_x - min_x) * 0.5f) +
-             ((max_y - min_y) * 0.5f) * (0.5f * (max_y - min_y)) +
-             ((max_z - min_z) * 0.5f) * (0.5f * (max_z - min_z)));
+        group->radius_squared = 1.5f + ((0.5f * (max_x - min_x)) * ((max_x - min_x) * 0.5f) +
+                                        ((max_y - min_y) * 0.5f) * (0.5f * (max_y - min_y)) +
+                                        ((max_z - min_z) * 0.5f) * (0.5f * (max_z - min_z)));
         group->extended_radius_squared += group->radius_squared;
         group->radius = NuFsqrt(group->radius_squared);
         return group;
@@ -74,7 +78,8 @@ void NuWindUpdateArray(NUVEC **);
         special.special = NULL;
         NuWindGType *group = NuWindGroup;
         for (i32 index = 0; index < maxgroups; ++index, ++group) {
-            if (group->in_use == 0 || group->visible == 0) continue;
+            if (group->in_use == 0 || group->visible == 0)
+                continue;
             NuWindCurGrp = group;
             group->drawn = 0;
             NUMTX *matrix = group->matrices;
@@ -92,7 +97,8 @@ void NuWindUpdateArray(NUVEC **);
                     matrix->m23 = near_squared > distance_squared ? 0.0f : 1.0e-11f;
                     special.scene = reinterpret_cast<NUGSCN *>((usize)group->unknown_0x04);
                     special.display_special = reinterpret_cast<void *>((usize)group->unknown_0x08);
-                    if (NuSpecialDrawAt(&special, matrix) != 0) group->drawn = 1;
+                    if (NuSpecialDrawAt(&special, matrix) != 0)
+                        group->drawn = 1;
                 }
                 matrix->m23 = saved_m23;
                 matrix->m33 = saved_m33;
@@ -148,19 +154,20 @@ void NuWindUpdateArray(NUVEC **);
         NuWindDir = (i32)((u32)NuWindDir + 377);
         f32 wind_x = NU_SIN_LUT((i32)(16384.0f + NU_SIN_LUT(NuWindWave) * 8192.0f)) * 0.75f +
                      NU_SIN_LUT((i32)((u32)NuWindDir + 0x4000)) * 0.15f;
-        f32 wind_z = NU_SIN_LUT((i32)(NU_SIN_LUT(NuWindWave) * 8192.0f)) * 0.75f -
-                     NU_SIN_LUT(NuWindDir) * 0.15f;
+        f32 wind_z = NU_SIN_LUT((i32)(NU_SIN_LUT(NuWindWave) * 8192.0f)) * 0.75f - NU_SIN_LUT(NuWindDir) * 0.15f;
         i32 any_interaction = 0;
         i32 nearby[8];
         for (i32 index = 0; index < maxgroups; ++index, ++group) {
-            if (group->in_use == 0) continue;
+            if (group->in_use == 0)
+                continue;
             f32 dx = group->center.x - global_camera.mtx.m30;
             f32 dy = group->center.y - global_camera.mtx.m31;
             f32 dz = group->center.z - global_camera.mtx.m32;
             f32 distance_squared = dz * dz + (dx * dx + dy * dy);
             if (group->extended_radius_squared > distance_squared) {
                 group->visible = 1;
-                if (group->drawn == 0 || !(group->unknown_0x20 > 0.0f)) continue;
+                if (group->drawn == 0 || !(group->unknown_0x20 > 0.0f))
+                    continue;
                 if (group->flags != 0) {
                     for (i32 object = 0; object < 8; ++object) {
                         if (positions[object] == NULL) {
@@ -190,7 +197,8 @@ void NuWindUpdateArray(NUVEC **);
                     if (interacting) {
                         f32 closest_squared = 1000000.0f;
                         for (i32 object = 0; object < 8; ++object) {
-                            if (positions[object] == NULL) continue;
+                            if (positions[object] == NULL)
+                                continue;
                             f32 x = matrix->m30 - positions[object]->x;
                             f32 z = matrix->m32 - positions[object]->z;
                             f32 squared = x * x + z * z;
@@ -199,7 +207,8 @@ void NuWindUpdateArray(NUVEC **);
                                 closest = object;
                             }
                         }
-                        if (closest == -1) break;
+                        if (closest == -1)
+                            break;
                         f32 height = positions[closest]->y - matrix->m31;
                         if (height > (group->unknown_0x24 * matrix->m33) / group->unknown_0x20) {
                             contact_radius = 0.0f;
@@ -220,8 +229,7 @@ void NuWindUpdateArray(NUVEC **);
                     }
                     f32 phase = (f32)NuWindDir2 + (matrix->m30 + matrix->m32) * 8192.0f;
                     f32 target_x = matrix->m33 * wind_x * (NU_SIN_LUT((i32)phase) * 0.5f + 1.0f);
-                    f32 target_z = matrix->m33 * wind_z *
-                        (NU_SIN_LUT((i32)(16384.0f + phase)) * 0.5f + 1.0f);
+                    f32 target_z = matrix->m33 * wind_z * (NU_SIN_LUT((i32)(16384.0f + phase)) * 0.5f + 1.0f);
                     if (!interacting) {
                         matrix->m10 += (target_x - matrix->m10) * 0.2f;
                         matrix->m12 += (target_z - matrix->m12) * 0.2f;
@@ -267,11 +275,13 @@ void NuWindUpdateArray(NUVEC **);
                         matrix->m12 += (target_z - matrix->m12) * 0.05f;
                     }
                     f32 scale = 1.0f - NuFsqrt(matrix->m10 * matrix->m10 + matrix->m12 * matrix->m12) * 0.35f;
-                    if (0.05f > scale) scale = 0.05f;
+                    if (0.05f > scale)
+                        scale = 0.05f;
                     matrix->m10 *= scale;
                     matrix->m12 *= scale;
                     matrix->m23 = 1.0f / scale;
-                    if (0.19f > scale) scale = 0.19f;
+                    if (0.19f > scale)
+                        scale = 0.19f;
                     matrix->m11 = (matrix->m33 / group->unknown_0x20) * scale;
                 }
             } else {

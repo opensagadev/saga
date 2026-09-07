@@ -37,7 +37,7 @@ u64 NuSoundLoader::Deinterleave(char *data, i32 length, char **dest, i32 count, 
 }
 
 void *NuSoundLoader::GetChannelAddress(NuSoundBuffer *buffer, NuSoundStreamDesc *desc,
-                                     NuSoundSystem::AudioChannel channel) {
+                                       NuSoundSystem::AudioChannel channel) {
     i32 channels = desc->GetNumChannels();
     u32 channel_size = buffer->GetBufferSize() / (u64)(i64)channels;
     return static_cast<char *>(buffer->GetAddress()) + channel_size * (u32)channel;
@@ -80,9 +80,8 @@ i32 NuSoundLoader::Load(NuSoundStreamDesc *desc, NuSoundBuffer *buffer) {
     result = buffer->Allocate(length, NuSoundSystem::MemoryDiscipline::SAMPLE);
     if (result != 1) {
         if (this->oom != NULL) {
-            bool retry = result == -2
-                ? this->oom->OnAllocationFailureMinusTwo((u32)length)
-                : this->oom->OnAllocationFailure((u32)length);
+            bool retry = result == -2 ? this->oom->OnAllocationFailureMinusTwo((u32)length)
+                                      : this->oom->OnAllocationFailure((u32)length);
             if (!retry) {
                 Close();
                 return 5;
@@ -166,7 +165,8 @@ NuSoundBuffer::Context NuSoundLoader::FillStreamBuffer(NuSoundBuffer *buffer, bo
         context.read_size += size;
         context.size2 += size;
         data += size;
-        if (read_size == size) continue;
+        if (read_size == size)
+            continue;
 
         SeekRawData(0);
 

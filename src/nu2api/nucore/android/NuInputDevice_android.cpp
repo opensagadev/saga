@@ -38,7 +38,8 @@ namespace NuInputDevicePS {
         memset(&m_touchDataW, 0, sizeof(m_touchDataW));
         memset(m_touchActive, 0, sizeof(m_touchActive));
         m_classInitCalled = true;
-        for (i32 i = 0; i < 8; ++i) m_gamePadAxis[i] = 0.0f;
+        for (i32 i = 0; i < 8; ++i)
+            m_gamePadAxis[i] = 0.0f;
         return 2;
     }
 
@@ -53,19 +54,19 @@ namespace NuInputDevicePS {
             for (i32 i = 0; i != m_touchEventQueueSize; ++i) {
                 const TouchEvent &event = m_touchEventQueue[i];
                 switch (event.type) {
-                case 0:
-                    m_touchDataW.touch_events[event.device].unknown_14 = event.touch;
-                    m_touchDataW.touch_events[event.device].unknown_04 = event.x / width;
-                    m_touchDataW.touch_events[event.device].unknown_08 = event.y / height;
-                    m_touchActive[event.device] = true;
-                    break;
-                case 1:
-                    m_touchActive[event.device] = false;
-                    break;
-                case 2:
-                    m_touchDataW.touch_events[event.device].unknown_04 = event.x / width;
-                    m_touchDataW.touch_events[event.device].unknown_08 = event.y / height;
-                    break;
+                    case 0:
+                        m_touchDataW.touch_events[event.device].unknown_14 = event.touch;
+                        m_touchDataW.touch_events[event.device].unknown_04 = event.x / width;
+                        m_touchDataW.touch_events[event.device].unknown_08 = event.y / height;
+                        m_touchActive[event.device] = true;
+                        break;
+                    case 1:
+                        m_touchActive[event.device] = false;
+                        break;
+                    case 2:
+                        m_touchDataW.touch_events[event.device].unknown_04 = event.x / width;
+                        m_touchDataW.touch_events[event.device].unknown_08 = event.y / height;
+                        break;
                 }
             }
             m_touchEventQueueSize = 0;
@@ -164,7 +165,8 @@ namespace NuInputDevicePS {
     }
 
     void ReadTouchDataPS(u32 port, NuInputTouchData *data) {
-        if (port == 0) memcpy(data, &m_touchDataR, sizeof(*data));
+        if (port == 0)
+            memcpy(data, &m_touchDataR, sizeof(*data));
     }
 
     void ReadMouseDataPS(u32 port, NuInputMouseData *data) {
@@ -175,14 +177,40 @@ namespace NuInputDevicePS {
         *port = 0;
         u32 button = 0;
         switch (key) {
-        case 3: case 108: *port = 1; button = 0x800; break;
-        case 4: button = 0x80000000; break;
-        case 19: case 20: case 21: case 22:
-        case 102: case 103: case 106: case 107: *port = 1; break;
-        case 96: *port = 1; button = 0x40; break;
-        case 97: *port = 1; button = 0x20; break;
-        case 99: *port = 1; button = 0x80; break;
-        case 100: *port = 1; button = 0x10; break;
+            case 3:
+            case 108:
+                *port = 1;
+                button = 0x800;
+                break;
+            case 4:
+                button = 0x80000000;
+                break;
+            case 19:
+            case 20:
+            case 21:
+            case 22:
+            case 102:
+            case 103:
+            case 106:
+            case 107:
+                *port = 1;
+                break;
+            case 96:
+                *port = 1;
+                button = 0x40;
+                break;
+            case 97:
+                *port = 1;
+                button = 0x20;
+                break;
+            case 99:
+                *port = 1;
+                button = 0x80;
+                break;
+            case 100:
+                *port = 1;
+                button = 0x10;
+                break;
         }
         return button;
     }

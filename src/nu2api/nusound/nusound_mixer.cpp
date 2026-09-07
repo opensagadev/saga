@@ -3,11 +3,7 @@
 #include <string.h>
 
 u8 NuSoundMixer::sDownmixerChannelMaps[4][8] = {
-    {1, 1, 1, 1, 1, 1, 1, 1},
-    {1, 1, 1, 1, 0, 0, 0, 0},
-    {1, 1, 0, 0, 0, 0, 0, 0},
-    {0, 0, 1, 0, 0, 0, 0, 0}
-};
+    {1, 1, 1, 1, 1, 1, 1, 1}, {1, 1, 1, 1, 0, 0, 0, 0}, {1, 1, 0, 0, 0, 0, 0, 0}, {0, 0, 1, 0, 0, 0, 0, 0}};
 
 i32 NuSoundMixer::GetOutputIndex(i32 output, i32 index) {
     if (output_layout != 0) {
@@ -22,12 +18,13 @@ void NuSoundMixer::Mix(float *in, float *out) {
     const u8 *channel_map = sDownmixerChannelMaps[static_cast<u32>(downmix_type)];
     memset(out, 0, input_config * output_config * sizeof(f32));
     for (i32 input = 0; input < (i32)input_config; ++input) {
-        if ((i32)output_config < (i32)input_config && channel_map[input] == 0) continue;
+        if ((i32)output_config < (i32)input_config && channel_map[input] == 0)
+            continue;
         for (i32 output = 0; output < (i32)output_config; ++output) {
             f32 gain = 0.0f;
             for (i32 channel = 0; channel < 8; ++channel) {
-                gain += input_matrix[channel * input_config + input] * in[channel]
-                      * output_matrix[output * 8 + channel];
+                gain +=
+                    input_matrix[channel * input_config + input] * in[channel] * output_matrix[output * 8 + channel];
             }
             i32 index = GetOutputIndex(input, output);
             out[index] = !(gain < 1.0f) ? 1.0f : (gain < 0.0f ? 0.0f : gain);

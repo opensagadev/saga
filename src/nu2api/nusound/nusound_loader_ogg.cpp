@@ -122,9 +122,7 @@ i32 NuSoundLoaderOGG::ReadHeader(NuSoundStreamDesc *desc) {
     NuSoundHeaderOGG *header = (NuSoundHeaderOGG *)desc;
     OggVorbis_File *ogg_file = &header->ogg_file;
 
-    ov_callbacks callbacks = {
-        OggCallbackRead, OggCallbackSeek, NULL, OggCallbackTell
-    };
+    ov_callbacks callbacks = {OggCallbackRead, OggCallbackSeek, NULL, OggCallbackTell};
     file_callbacks.SetFile(file);
 
     i32 result = ov_open_callbacks(&file_callbacks, ogg_file, NULL, 0, callbacks);

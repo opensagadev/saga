@@ -26,10 +26,14 @@ NuSoundDecoder::NuSoundDecoder(char const *name, NuSoundSource *wrapped)
     (void)name;
     DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NuSoundBuffer) == 0x40, "decoder ring buffer stride");
     DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NuSoundDecoder) == 0xe8, "decoder callback base offset");
-    DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecoder, buffers) == 0x24, "embedded decoder buffers");
-    DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecoder, decoded_bytes) == 0xb8, "decoder byte counter");
-    DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecoder, total_decoded_bytes) == 0xc8, "decoder total byte counter");
-    DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecoder, decode_mutex) == 0xdc, "decoder completion mutex");
+    DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecoder, buffers) == 0x24,
+                  "embedded decoder buffers");
+    DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecoder, decoded_bytes) == 0xb8,
+                  "decoder byte counter");
+    DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecoder, total_decoded_bytes) == 0xc8,
+                  "decoder total byte counter");
+    DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecoder, decode_mutex) == 0xdc,
+                  "decoder completion mutex");
     // The decode-sync pair the decode thread raises per completed request
     // (device offsets +0xdc/+0xe0/+0xe4).
     pthread_mutex_init(&this->decode_mutex, NULL);
@@ -90,7 +94,6 @@ bool NuSoundDecoder::OpenStream(bool loop) {
         this->ring_count++;
         this->decode_pos++;
         this->buffers_started++;
-
     }
 
     this->stream_open = true;
@@ -248,13 +251,15 @@ void NuSoundDecoder::RequestBuffer(bool loop, NuSoundWeakPtr<NuSoundBufferCallba
 NuSoundDecodeThread::NuSoundDecodeThread() : semaphore(128) {
     DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(Loader) == 0x1c, "decode queue entry stride");
     DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecodeThread, loaders) == 4, "decode queue offset");
-    DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecodeThread, semaphore) == 0xe0c, "decode semaphore offset");
+    DECOMP_ASSERT(sizeof(void *) != 4 || __builtin_offsetof(NuSoundDecodeThread, semaphore) == 0xe0c,
+                  "decode semaphore offset");
     DECOMP_ASSERT(sizeof(void *) != 4 || sizeof(NuSoundDecodeThread) == 0xe1c, "decode thread allocation size");
     memset(this->loaders, 0, sizeof(this->loaders));
     this->tail_index = 0;
     this->head_index = 0;
-    this->thread = NuCore::m_threadManager->CreateThread(NuSoundDecodeThread::ThreadFunc, this, sThreadPriority, "NuSoundDecode", 0,
-                                                         NUTHREADCAFECORE_UNKNOWN_2, NUTHREADXBOX360CORE_UNKNOWN_2);
+    this->thread =
+        NuCore::m_threadManager->CreateThread(NuSoundDecodeThread::ThreadFunc, this, sThreadPriority, "NuSoundDecode",
+                                              0, NUTHREADCAFECORE_UNKNOWN_2, NUTHREADXBOX360CORE_UNKNOWN_2);
 }
 
 NuSoundDecodeThread::~NuSoundDecodeThread() {

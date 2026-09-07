@@ -17,7 +17,6 @@
 #include <io.h>
 #include <sys/stat.h>
 
-#define mkdir(path, mode) mkdir((path))
 #endif
 
 i32 saveload_status;
@@ -128,7 +127,11 @@ i32 saveloadSaveSlot(i32 slot, void *buffer, i32 size) {
 }
 
 void createslotfolder(i32 slot) {
+#if defined(HOST_BUILD) && defined(_WIN32)
+    mkdir(slotfolder(slot));
+#else
     mkdir(slotfolder(slot), 0777);
+#endif
 }
 
 extern "C" {

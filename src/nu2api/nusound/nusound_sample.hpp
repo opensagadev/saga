@@ -71,8 +71,11 @@ class NuSoundSample : public NuSoundSource {
     // NuSoundSource overrides (the original dispatched through the source
     // vtable; Play() calls RequestBuffer to obtain its initial buffers).
     bool IsStreamOpen() const override;
-    bool OpenStream(bool) override { return true; }
-    void CloseStream() override {}
+    bool OpenStream(bool) override {
+        return true;
+    }
+    void CloseStream() override {
+    }
     void RequestBuffer(bool loop, NuSoundWeakPtr<NuSoundBufferCallback> callback) override;
 
     ~NuSoundSample();

@@ -90,7 +90,7 @@ class NuSoundMemoryManager {
     void EnableDefragOnFree(bool enable);
     void FreeAddress(void *address);
     NuSoundMemoryBuffer *MoveLargestTrailingBufferIntoBuffer(NuSoundMemoryBuffer *buffer, NuSoundMemoryBuffer **out_a,
-                                             NuSoundMemoryBuffer **out_b);
+                                                             NuSoundMemoryBuffer **out_b);
     void OutputList();
     void OutputMap();
     void RenderMap(f32 x, f32 y, f32 scale);
