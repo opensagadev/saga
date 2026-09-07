@@ -7,6 +7,7 @@
 struct nudldlistscene_s;
 struct nugscn_s;
 struct ani3_animheader_s;
+struct nuanimdata2_s;
 struct nuanimbuff_s;
 using NUHGOBJROOTFN = void (*)(NUMTX *, void *, NUVEC *, NUVEC *, NUVEC *, f32);
 
@@ -131,6 +132,9 @@ extern "C" {
     void NuHGobjEvalAnimBlend2Root(nuhgobj_s *object, ani3_animheader_s *animation_a, f32 time_a,
                                    ani3_animheader_s *animation_b, f32 time_b, f32 blend, i32 override_count,
                                    NUJOINTANIM_s *overrides, NUMTX *matrices, NUHGOBJROOTFN root_fn, void *root_data);
+    void **NuHGobjEvalDwa2(i32 render_count, i16 *render_indices, nuanimdata2_s *animation, f32 frame);
+    void **NuHGobjEvalDwaBlend2(i32 render_count, i16 *render_indices, nuanimdata2_s *animation_a, f32 frame_a,
+                                nuanimdata2_s *animation_b, f32 frame_b, f32 blend);
     i32 NuHGobjRndrMtxDwa(nuhgobj_s *object, NUMTX *world_matrix, i32 render_count, i16 *render_indices,
                           NUMTX *joint_matrices, void **blend_values, i32 render_flags);
 #ifdef __cplusplus

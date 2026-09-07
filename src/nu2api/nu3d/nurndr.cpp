@@ -126,9 +126,6 @@ void NuRndrCalcRandEllipsePos(nuvec4_s *, numtx_s *, nuvec_s *) {
 void NuRndrCalcRandCylinderPos(nuvec4_s *, numtx_s *, nuvec_s *) {
 }
 
-void NuRndrCreateBlendShapeDWAPointers(i32) {
-}
-
 extern "C" {
     i32 NuRndrSetAmbientLightPS(const NUCOLOUR3 *);
     i32 NuRndrSetDirectionalLightsPS(const NUVEC *, const NUCOLOUR3 *, const NUVEC *, const NUCOLOUR3 *, const NUVEC *,

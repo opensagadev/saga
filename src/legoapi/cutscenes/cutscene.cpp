@@ -105,7 +105,7 @@ f32 cutscenecam_focusDistance = 0.0f;
 f32 cutscenecam_focalLength = 0.0f;
 i32 CameraDOFHack = 0;
 u8 set_cutscenecammtx = 0;
-CHARSCENE_s *CharScene_Area = NULL;
+__attribute__((visibility("hidden"))) CHARSCENE_s *CharScene_Area = NULL;
 
 static void CS_no_fog(NUFPAR *) {
     CS_CutInfo->flags |= 4;

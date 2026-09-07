@@ -2915,11 +2915,134 @@ extern "C" {
     }
     void NuHGobjEvalDwa(void) {
     }
-    void NuHGobjEvalDwa2(void) {
+    void **NuHGobjEvalDwa2(i32 render_count, i16 *render_indices, nuanimdata2_s *animation, f32 frame) {
+        if (animation == NULL || render_count == 0) {
+            return NULL;
+        }
+
+        nuanimtime_s time;
+        NuAnimData2CalcTime(animation, frame, &time);
+
+        usize clear_size;
+        if (render_indices == NULL) {
+            render_count = 1;
+            clear_size = 1;
+        } else {
+            clear_size = (static_cast<usize>(render_count) * sizeof(void *) + 0xf) >> 4;
+        }
+
+        f32 **weights_by_render = NuRndrCreateBlendShapeDWAPointers(render_count);
+        if (weights_by_render == NULL) {
+            return NULL;
+        }
+        memset(weights_by_render, 0, clear_size);
+
+        for (i32 render = 0; render < render_count; ++render) {
+            i32 node = render_indices == NULL ? 0 : render_indices[render];
+            if (node < 0) {
+                continue;
+            }
+            if (node >= NuAnimNumNodes(animation)) {
+                weights_by_render[render] = NuRndrCreateBlendShapeDeformerWeightsArray(0);
+                continue;
+            }
+
+            i32 curve_count = static_cast<i16>(animation->curve_count);
+            f32 *weights = NuRndrCreateBlendShapeDeformerWeightsArray(curve_count);
+            weights_by_render[render] = weights;
+            nuanimcurve2_s *curves = animation->curves + curve_count * node;
+            u8 *types = animation->curve_types + curve_count * node;
+            if (weights == NULL || curve_count <= 0) {
+                continue;
+            }
+            for (i32 curve = 0; curve < curve_count; ++curve) {
+                if (types[curve] == 0) {
+                    weights[curve + 1] = curves[curve].data.constant;
+                } else {
+                    weights[curve + 1] = NuAnimCurve2CalcValEx(&curves[curve], &time, types[curve]);
+                }
+            }
+        }
+        return reinterpret_cast<void **>(weights_by_render);
     }
     void NuHGobjEvalDwaBlend(void) {
     }
-    void NuHGobjEvalDwaBlend2(void) {
+    void **NuHGobjEvalDwaBlend2(i32 render_count, i16 *render_indices, nuanimdata2_s *animation_a, f32 frame_a,
+                                nuanimdata2_s *animation_b, f32 frame_b, f32 blend) {
+        const bool has_a = animation_a != NULL;
+        const bool has_b = animation_b != NULL;
+        if ((!has_a && !has_b) || render_count == 0) {
+            return NULL;
+        }
+
+        nuanimtime_s time_a;
+        nuanimtime_s time_b;
+        if (has_a) {
+            NuAnimData2CalcTime(animation_a, frame_a, &time_a);
+        }
+        if (has_b) {
+            NuAnimData2CalcTime(animation_b, frame_b, &time_b);
+        }
+
+        usize clear_size;
+        if (render_indices == NULL) {
+            render_count = 1;
+            clear_size = 1;
+        } else {
+            clear_size = (static_cast<usize>(render_count) * sizeof(void *) + 0xf) >> 4;
+        }
+        f32 **weights_by_render = NuRndrCreateBlendShapeDWAPointers(render_count);
+        if (weights_by_render == NULL) {
+            return NULL;
+        }
+        memset(weights_by_render, 0, clear_size);
+
+        for (i32 render = 0; render < render_count; ++render) {
+            i32 node = render_indices == NULL ? 0 : render_indices[render];
+            if (node < 0) {
+                continue;
+            }
+
+            i32 count_a = 0;
+            nuanimcurve2_s *curves_a = NULL;
+            u8 *types_a = NULL;
+            if (has_a && node < NuAnimNumNodes(animation_a)) {
+                count_a = static_cast<i16>(animation_a->curve_count);
+                curves_a = animation_a->curves + count_a * node;
+                types_a = animation_a->curve_types + count_a * node;
+            }
+
+            i32 count_b = 0;
+            nuanimcurve2_s *curves_b = NULL;
+            u8 *types_b = NULL;
+            if (has_b && node < NuAnimNumNodes(animation_b)) {
+                count_b = static_cast<i16>(animation_b->curve_count);
+                curves_b = animation_b->curves + count_b * node;
+                types_b = animation_b->curve_types + count_b * node;
+            }
+
+            i32 curve_count = count_a < count_b ? count_b : count_a;
+            f32 *weights = NuRndrCreateBlendShapeDeformerWeightsArray(curve_count);
+            weights_by_render[render] = weights;
+            if (weights == NULL || curve_count <= 0) {
+                continue;
+            }
+
+            for (i32 curve = 0; curve < curve_count; ++curve) {
+                f32 value_a = 0.0f;
+                if (curve < count_a) {
+                    value_a = types_a[curve] == 0 ? curves_a[curve].data.constant
+                                                  : NuAnimCurve2CalcValEx(&curves_a[curve], &time_a, types_a[curve]);
+                }
+                f32 value_b = 0.0f;
+                if (curve < count_b) {
+                    value_b = types_b[curve] == 0 ? curves_b[curve].data.constant
+                                                  : NuAnimCurve2CalcValEx(&curves_b[curve], &time_b, types_b[curve]);
+                }
+                weights[curve + 1] = value_b * blend + (1.0f - blend) * value_a;
+            }
+        }
+        return reinterpret_cast<void **>(weights_by_render);
     }
     i32 NuHGobjForceShadowsOnCharacters(i32 enabled) {
         i32 previous = nuapi.force_shadows_on_characters;

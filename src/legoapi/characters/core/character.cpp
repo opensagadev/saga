@@ -35,6 +35,7 @@ struct APIOBJECT_s;
 
 extern "C" {
     NUMTL *APITrans_Mtl[2];
+    i32 notransparentchardraw;
 
     i16 id_WEIRDO1 = -1;
     i16 id_WEIRDO2 = -1;
@@ -1286,7 +1287,41 @@ extern "C" {
         }
     }
 
-    void APITransparentCharDraw(void) {
+    void APITransparentCharDraw(nuhgobj_s *object, NUMTX *world_matrix, i32 render_count, i16 *render_indices,
+                                NUMTX *joint_matrices, void **dwa, i32 render_flags) {
+        i32 layer_six = 0;
+        i32 layer_zero = 0;
+        if (notransparentchardraw == 1 || APITrans_Mtl[0] == NULL) {
+            return;
+        }
+
+        if (render_count > 1) {
+            for (i32 i = 0; i < render_count; ++i) {
+                if (render_indices[i] == 6) {
+                    render_indices[i] = render_indices[render_count - 1];
+                    layer_six = render_count - 1;
+                    --render_count;
+                }
+                if (render_indices[i] == 0) {
+                    render_indices[i] = render_indices[render_count - 1];
+                    layer_zero = render_count - 1;
+                    --render_count;
+                }
+            }
+        }
+
+        u8 previous_alpha_mode = object->data_0x198[8];
+        object->data_0x198[8] = 1;
+        NuSpecialConstAlpha(1, 0.0f);
+        NuHGobjRndrMtxDwa(object, world_matrix, render_count, render_indices, joint_matrices, dwa, render_flags);
+        NuSpecialConstAlpha(0, 0.0f);
+        object->data_0x198[8] = previous_alpha_mode;
+        if (layer_six != 0) {
+            render_indices[layer_six] = 6;
+        }
+        if (layer_zero != 0) {
+            render_indices[layer_zero] = 0;
+        }
     }
 
     void APITransparentInit(void) {

@@ -3,6 +3,7 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/core/config/cheat.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/gizmo/base/gizmo.h"
@@ -12,6 +13,9 @@
 #include "legoapi/props/doors/door.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/levels/levels.h"
+#include "legoapi/render/light/shadow.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nucore/nuhgobj.h"
 #include "nu2api/nucore/nugcutscene.h"
 #include "nu2api/nucore/nustring.h"
@@ -67,11 +71,21 @@ void GameFog_Reset(void);
 void NeedScreenGrab(i32);
 void EnableShadowMapRendering(i32);
 void ResetShadowMapRendering(void);
+i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
+f32 FindReflectionNoPlatforms(NUVEC *);
+extern "C" i32 NewShadowOnPlatform(void);
+void FindAnglesZX(NUVEC *, u16 *, u16 *);
+void CharScene_Draw(WORLDINFO_s *, i32, NUMTX *, NUMTX *);
+void DrawObjectOnCharacter(WORLDINFO_s *, GameObject_s *, i32, nuhspecial_s *, i32, i32, NUMTX *, i32, u32, NUMTX *,
+                           NUVEC *, f32, f32);
 i32 qrand(void);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 extern "C" i32 ShadowInfo(void);
 extern "C" TERRAIN_SURFACE_s TerSurface[32];
+extern "C" void APITransparentCharDraw(nuhgobj_s *, NUMTX *, i32, i16 *, NUMTX *, void **, i32);
+extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
+                                        NUGCUTLOCATOR_s *, f32, NUMTX *, i32);
 i32 CutScenePlayer_Active(void);
 void CutScenePlayer_SetObjects(CUTINFO *);
 void AddPartDebris(PARTDEBSYS_s *, i32, nuvec_s *);
@@ -675,20 +689,46 @@ void CutScenes_InitSystem(CUTSCENESYS *system) {
 static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTSCENE_s *, instNUGCUTCHAR_s *instance,
                                    NUGCUTCHAR_s *character, f32 frame, i32 paused) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    if (world->cutscene_sys == NULL) {
+    CUTSYS *cutscene_system = world->cutscene_sys;
+    if (cutscene_system == NULL) {
         return;
     }
 
-    // Characters found by CutScene_FindCharacters carry an ordinary loaded
-    // APICHARACTERMODEL directly in their instance data (flags bit 1).
-    CHARACTERMODEL_s *model = static_cast<CHARACTERMODEL_s *>(instance->character_model);
-    if ((character->flags & 2) == 0 || model == NULL || model->hierarchy == NULL) {
+    CUTINFO *cut = NULL;
+    for (i32 i = 0; i < cutscene_system->count; ++i) {
+        CUTINFO *candidate = cutscene_system->cuts[i];
+        if (candidate->instance == cutscene_instance) {
+            cut = candidate;
+            break;
+        }
+    }
+
+    GameObject_s *scene_object = NULL;
+    CHARACTERMODEL_s *model = NULL;
+    if (cut != NULL && CutScene_ReplaceCharacterModelFn != NULL) {
+        i32 replacement_id = CutScene_ReplaceCharacterModelFn(cut, character);
+        if (replacement_id != -1 && apicharsys->playermodelids[replacement_id] != -1) {
+            model = &apicharsys->models[apicharsys->playermodelids[replacement_id]];
+        }
+    }
+    if (model == NULL) {
+        if ((character->flags & 2) == 0) {
+            scene_object = static_cast<GameObject_s *>(instance->character_model);
+            if (scene_object != NULL) {
+                model = scene_object->apiobj.character_model;
+            }
+        } else {
+            model = static_cast<CHARACTERMODEL_s *>(instance->character_model);
+        }
+    }
+    if (model == NULL || model->hierarchy == NULL) {
         return;
     }
+
     const i32 character_id = model->model_id;
     CHARACTERDATA *character_data = &apicharsys->char_data[character_id];
     GAMECHARACTERDATA *game_data = static_cast<GAMECHARACTERDATA *>(character_data->field11_0x24);
-    if (game_data == NULL || game_data->make_layer_list == NULL) {
+    if (game_data == NULL) {
         return;
     }
 
@@ -701,18 +741,49 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
     i32 layer_mask = -1;
     NuGCutCharAnimProcess(character, frame, &world_matrix, &visible, &animation_index, &animation_rate, &blend_time,
                           &animation_start_frame, &layer_mask);
+    bool use_low_detail = false;
+    if (cut != NULL) {
+        use_low_detail = (cut->flags & 0x10000) != 0 && g_isLowEndDevice != 0;
+        if (cut->low_end_distance > 0.0f && g_isLowEndDevice != 0 &&
+            NuVecDistSqr(reinterpret_cast<NUVEC *>(&world_matrix.m30), reinterpret_cast<NUVEC *>(&pNuCam->mtx.m30),
+                         NULL) > cut->low_end_distance * cut->low_end_distance) {
+            return;
+        }
+    }
     if (paused != 0) {
         animation_rate = 0.0f;
     }
     if (layer_mask == -1) {
-        layer_mask = static_cast<i32>(reinterpret_cast<u8 *>(CutSceneSys)[7] == 0 ? game_data->layer_mask_special
-                                                                                  : game_data->layer_mask);
+        if (use_low_detail) {
+            layer_mask = static_cast<i32>(game_data->layer_mask_low);
+        } else if (reinterpret_cast<u8 *>(CutSceneSys)[7] == 0) {
+            layer_mask = static_cast<i32>(game_data->layer_mask_special);
+        } else {
+            layer_mask = static_cast<i32>(game_data->layer_mask);
+        }
     }
     if (static_cast<i8>(cutscene_instance->flags_88) < 0) {
         NuMtxMul(&world_matrix, &world_matrix, &cutscene_instance->matrix);
     }
+    if (scene_object != NULL) {
+        scene_object->apiobj.field_0xb8 = world_matrix;
+        scene_object->apiobj.position = *reinterpret_cast<NUVEC *>(&world_matrix.m30);
+    }
     if (visible == 0) {
         return;
+    }
+
+    if (NuIOS_IsLowEndDevice() != 0 && RETAKEINTRO2_LDATA != NULL && RETAKEINTRO2_LDATA == world->current_level) {
+        static f32 lastFrameTime;
+        static i32 gungansRenderedThisFrame;
+        layer_mask = static_cast<i32>(game_data->layer_mask_medium);
+        if (frame != lastFrameTime) {
+            gungansRenderedThisFrame = 0;
+            lastFrameTime = frame;
+        }
+        if (model->model_id == id_GUNGAN && gungansRenderedThisFrame++ > 7) {
+            return;
+        }
     }
 
     i16 render_indices[32];
@@ -777,27 +848,37 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
     }
 
     ani3_animheader_s *animation_a;
+    nuanimdata2_s *dwa_animation_a;
     if (animation_a_index == 0) {
         instance->animation_frame_a = frame;
         animation_a = reinterpret_cast<ani3_animheader_s *>(character->face_animation);
+        dwa_animation_a = character->extra_animation;
     } else {
         animation_a = static_cast<ani3_animheader_s *>(model->model_data_b[animation_a_index - 1]);
+        dwa_animation_a = static_cast<nuanimdata2_s *>(model->model_data_c[animation_a_index - 1]);
     }
 
     NUMTX joint_matrices[256];
+    void **dwa = NULL;
     if (!blending) {
         if (animation_a == NULL) {
             NuHGobjEval(model->hierarchy, 0, NULL, joint_matrices);
         } else {
             NuHGobjEvalAnim2(model->hierarchy, animation_a, instance->animation_frame_a, 0, NULL, joint_matrices);
         }
+        if (dwa_animation_a != NULL) {
+            dwa = NuHGobjEvalDwa2(render_count, render_indices, dwa_animation_a, instance->animation_frame_a);
+        }
     } else {
         ani3_animheader_s *animation_b;
+        nuanimdata2_s *dwa_animation_b;
         if (instance->field_17 == 0) {
             instance->animation_frame_b = frame;
             animation_b = reinterpret_cast<ani3_animheader_s *>(character->face_animation);
+            dwa_animation_b = character->extra_animation;
         } else {
             animation_b = static_cast<ani3_animheader_s *>(model->model_data_b[instance->field_17 - 1]);
+            dwa_animation_b = static_cast<nuanimdata2_s *>(model->model_data_c[instance->field_17 - 1]);
         }
         if (animation_a != NULL && animation_b != NULL) {
             NuHGobjEvalAnimBlend2(model->hierarchy, animation_a, instance->animation_frame_a, animation_b,
@@ -809,6 +890,26 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
         } else {
             NuHGobjEval(model->hierarchy, 0, NULL, joint_matrices);
         }
+
+        if (dwa_animation_a != NULL && dwa_animation_b != NULL) {
+            dwa = NuHGobjEvalDwaBlend2(render_count, render_indices, dwa_animation_a, instance->animation_frame_a,
+                                       dwa_animation_b, instance->animation_frame_b, instance->field_04);
+        }
+
+        if (animation_b != NULL && instance->field_17 != 0xff && instance->field_17 != 0 &&
+            (cut == NULL || cut != CutStopInfo || CutSceneWaiting == 0)) {
+            const f32 end_frame = AnimEndFrame(model, static_cast<u8>(instance->field_17) - 1);
+            instance->animation_frame_b += FRAMETIME * 60.0f * animation_rate;
+            if (instance->animation_frame_b > end_frame) {
+                CHARACTERANIM_s *animation_info =
+                    static_cast<CHARACTERANIM_s *>(model->model_data_a[static_cast<u8>(instance->field_17) - 1]);
+                if ((animation_info->flags & 2) == 0) {
+                    instance->animation_frame_b = end_frame;
+                } else {
+                    instance->animation_frame_b = instance->animation_frame_b - end_frame + 1.0f;
+                }
+            }
+        }
     }
 
     NUVEC locator_positions[16];
@@ -816,23 +917,176 @@ static void CutScene_DrawCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTS
     StoreLocatorCoordinates(model, &world_matrix, joint_matrices, locator_positions, locator_matrices);
 
     if (animation_a != NULL && animation_a_index != 0 && animation_a_index != 0xff &&
-        (CutStopInfo == NULL || CutSceneWaiting == 0)) {
+        (cut == NULL || cut != CutStopInfo || CutSceneWaiting == 0)) {
         const f32 end_frame = AnimEndFrame(model, animation_a_index - 1);
         instance->animation_frame_a += FRAMETIME * 60.0f * animation_rate;
         if (instance->animation_frame_a > end_frame) {
             CHARACTERANIM_s *animation_info =
                 static_cast<CHARACTERANIM_s *>(model->model_data_a[animation_a_index - 1]);
-            instance->animation_frame_a = animation_info != NULL && (animation_info->flags & 2) != 0
-                                              ? instance->animation_frame_a - end_frame + 1.0f
-                                              : end_frame;
+            if ((animation_info->flags & 2) == 0) {
+                instance->animation_frame_a = end_frame;
+            } else {
+                instance->animation_frame_a = instance->animation_frame_a - end_frame + 1.0f;
+            }
         }
     }
 
     EnableShadowMapRendering(0);
-    FindAndSetLights(reinterpret_cast<NUVEC *>(&world_matrix.m30), 1.0f, world->rtl_set);
-    NuHGobjRndrMtxDwa(model->hierarchy, &world_matrix, render_count, render_indices, joint_matrices, NULL,
+    if (Cheats_CheckFlags(1) == 0) {
+        FindAndSetLights(reinterpret_cast<NUVEC *>(&world_matrix.m30), 1.0f, world->rtl_set);
+    } else {
+        SetZeroLights();
+    }
+
+    u8 render_character = 1;
+    if ((character->flags & 0x20) == 0 && (character_data->model_flags & 0x20000) != 0) {
+        render_character = static_cast<u8>(((character->flags >> 4) ^ 1) & 1);
+    }
+    reinterpret_cast<u8 *>(model->hierarchy)[0x1c4] = render_character;
+
+    if ((game_data->flags_090 & 0x8000) != 0) {
+        APITransparentCharDraw(model->hierarchy, &world_matrix, render_count, render_indices, joint_matrices, dwa,
+                               character->flags & 8);
+    }
+    NuHGobjRndrMtxDwa(model->hierarchy, &world_matrix, render_count, render_indices, joint_matrices, dwa,
                       character->flags & 8);
+
+    NUMTX *attachment_matrix = NULL;
+    if ((character_data->flags & 1) != 0) {
+        attachment_matrix = &world_matrix;
+        i32 locator = game_data->thingy_locator;
+        if (locator != -1 && model->points_of_interest[locator] != NULL) {
+            attachment_matrix = &locator_matrices[locator];
+        }
+        CharScene_Draw(world, character_id, attachment_matrix, NULL);
+    }
     ResetShadowMapRendering();
+
+    f32 ground_height = 2000000.0f;
+    i32 platform = -1;
+    i32 surface = -1;
+    bool shadow_sampled = false;
+    if ((character->flags & 0x10) != 0 && CutBlobShadowAlpha != 0 && (character_data->model_flags & 0x20000) == 0 &&
+        g_isLowEndDevice == 0) {
+        u8 shadow_alpha = CutBlobShadowAlpha;
+        if (game_data->field_0xf6 != 0xff) {
+            shadow_alpha = game_data->field_0xf6;
+        }
+        if (shadow_alpha != 0) {
+            f32 shadow_radius = game_data->field_0x8c;
+            if (game_data->shadow_locators == 0) {
+                if (shadow_radius >= 99.0f) {
+                    shadow_radius = character_data->collision_radius * character_data->model_scale * 2.0f;
+                }
+                if (shadow_radius > 0.0f) {
+                    ground_height = GameShadow(NULL, reinterpret_cast<NUVEC *>(&world_matrix.m30), 5.0f, -1);
+                    if (ground_height != 2000000.0f) {
+                        platform = NewShadowOnPlatform();
+                        surface = ShadowInfo();
+                        if (ShadNorm.y > 0.0f) {
+                            NUVEC shadow_position = *reinterpret_cast<NUVEC *>(&world_matrix.m30);
+                            shadow_position.y = ground_height + 0.005f;
+                            f32 alpha = BlobShadowFade(&shadow_position, CutBlobShadowFadeNear, CutBlobShadowFadeFar,
+                                                       ShadNorm.y);
+                            if (alpha > 0.0f) {
+                                u16 x_rotation;
+                                u16 z_rotation;
+                                FindAnglesZX(&ShadNorm, &x_rotation, &z_rotation);
+                                NuRndrAddShadow(&shadow_position, shadow_radius,
+                                                static_cast<i32>(static_cast<f32>(shadow_alpha) * alpha * ShadNorm.y),
+                                                x_rotation, 0, z_rotation);
+                            }
+                        }
+                    }
+                    shadow_sampled = true;
+                }
+            } else {
+                if (shadow_radius >= 99.0f) {
+                    shadow_radius = character_data->collision_radius * character_data->model_scale;
+                }
+                if (shadow_radius > 0.0f) {
+                    f32 alpha = BlobShadowFade(reinterpret_cast<NUVEC *>(&world_matrix.m30), CutBlobShadowFadeNear,
+                                               CutBlobShadowFadeFar, 1.0f);
+                    if (alpha > 0.0f) {
+                        for (i32 i = 0; i < 16; ++i) {
+                            if ((game_data->shadow_locators & (1 << i)) != 0 && model->points_of_interest[i] != NULL) {
+                                NUVEC shadow_position = locator_positions[i];
+                                f32 locator_ground = GameShadow(NULL, &shadow_position, 5.0f, -1);
+                                if (locator_ground != 2000000.0f && ShadNorm.y > 0.0f) {
+                                    shadow_position.y = locator_ground + 0.005f;
+                                    u16 x_rotation;
+                                    u16 z_rotation;
+                                    FindAnglesZX(&ShadNorm, &x_rotation, &z_rotation);
+                                    NuRndrAddShadow(
+                                        &shadow_position, shadow_radius,
+                                        static_cast<i32>(alpha * static_cast<f32>(shadow_alpha) * ShadNorm.y),
+                                        x_rotation, 0, z_rotation);
+                                }
+                            }
+                        }
+                    }
+                }
+                ground_height = 2000000.0f;
+                platform = -1;
+                shadow_sampled = false;
+            }
+        }
+    }
+
+    f32 reflection_height = 2000000.0f;
+    if ((character->flags & 0x20) != 0 && (game_data->flags_090 & 0x8000) == 0 && Reflections_On != 0 &&
+        NuVecDistSqr(reinterpret_cast<NUVEC *>(&world_matrix.m30), reinterpret_cast<NUVEC *>(&GameCam->render_mtx.m30),
+                     NULL) < CutReflectRange2) {
+        if (!shadow_sampled) {
+            ground_height = GameShadow(NULL, reinterpret_cast<NUVEC *>(&world_matrix.m30), 5.0f, -1);
+            if (ground_height != 2000000.0f) {
+                platform = NewShadowOnPlatform();
+                surface = ShadowInfo();
+            }
+        }
+        if (surface >= 0 && surface < 32 && (TerSurface[surface].flags & 2) != 0 && ground_height != 2000000.0f) {
+            reflection_height = ground_height;
+        } else if (platform != -1) {
+            reflection_height = FindReflectionNoPlatforms(reinterpret_cast<NUVEC *>(&world_matrix.m30));
+        }
+        if (reflection_height != 2000000.0f) {
+            NUMTX reflection_matrix;
+            if (MatrixReflection(&world_matrix, 2, reflection_height, world->current_level->unknown_0cc,
+                                 &reflection_matrix) != 0) {
+                NuRndrStartReflectionRender(0);
+                NuHGobjRndrMtxDwa(model->hierarchy, &reflection_matrix, render_count, render_indices, joint_matrices,
+                                  dwa, character->flags & 8);
+                if (attachment_matrix != NULL) {
+                    NUMTX attachment_reflection;
+                    if (MatrixReflection(attachment_matrix, 2, reflection_height, world->current_level->unknown_0cc,
+                                         &attachment_reflection) != 0) {
+                        CharScene_Draw(world, character_id, NULL, &attachment_reflection);
+                    }
+                }
+                NuRndrEndReflectionRender();
+            }
+        }
+    }
+
+    if (character->locator_index != 0xff) {
+        NUGCUTLOCATORSYS_s *locator_system = cutscene_instance->cutscene->locator_system;
+        for (i32 i = 0; i < character->locator_count; ++i) {
+            i32 locator_index = character->locator_index + i;
+            NUGCUTLOCATOR_s *locator = &locator_system->locators[locator_index];
+            NUMTX *parent_matrix = &world_matrix;
+            if (locator->field_5a != 0xff) {
+                NUMTX locator_parent;
+                NuMtxMulVU0(&locator_parent, &joint_matrices[locator->field_5a], &world_matrix);
+                instNuGCutLocatorUpdate(cutscene_instance, locator_system,
+                                        &cutscene_instance->locator_instance->locators[locator_index], locator, frame,
+                                        &locator_parent, paused);
+            } else {
+                instNuGCutLocatorUpdate(cutscene_instance, locator_system,
+                                        &cutscene_instance->locator_instance->locators[locator_index], locator, frame,
+                                        parent_matrix, paused);
+            }
+        }
+    }
 }
 
 static void CutScene_EvalCharacter(instNUGCUTSCENE_s *cutscene_instance, NUGCUTSCENE_s *, instNUGCUTCHAR_s *instance,

@@ -147,7 +147,18 @@ void TakeOverYoda(GameObject_s *, GameObject_s *, i32, i32) {
 void fullcodename(i32) {
 }
 
-void CharScene_Draw(WORLDINFO_s *, i32, numtx_s *, numtx_s *) {
+nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id);
+
+void CharScene_Draw(WORLDINFO_s *world, i32 character_id, numtx_s *matrix, numtx_s *reflection_matrix) {
+    nuhspecial_s *special = CharScene_FindHSpecial(world, character_id);
+    if (special != NULL) {
+        if (matrix != NULL) {
+            NuSpecialDrawAt(special, matrix);
+        }
+        if (reflection_matrix != NULL) {
+            NuSpecialDrawAt(special, reflection_matrix);
+        }
+    }
 }
 
 void CharScenes_Init(variptr_u *buf, variptr_u *) {
@@ -596,7 +607,20 @@ void LocalGetRandomLocator(AILOCATOR_s **, i32, float, nuvec_s *, float, i32, fl
 void PostAnimate_ASTROMECH(GameObject_s *) {
 }
 
-void CharScene_FindHSpecial(WORLDINFO_s *, i32) {
+nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id) {
+    CHARSCENE_s *scene;
+    if (CharScene_Area != NULL && CharScene_Area[character_id].scene != NULL) {
+        scene = &CharScene_Area[character_id];
+    } else {
+        scene = &world->minikit.character_scenes[character_id];
+        if (scene->scene == NULL) {
+            scene = NULL;
+        }
+    }
+    if (scene != NULL && NuSpecialExistsFn(&scene->special_scene) == 0) {
+        scene = NULL;
+    }
+    return scene == NULL ? NULL : &scene->special_scene;
 }
 
 void LocalGetNearestLocator(AILOCATOR_s **, i32, float, nuvec_s *, float, i32, float, float) {

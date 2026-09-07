@@ -65,6 +65,9 @@ extern "C" {
 
     void FaceYDirStream(i32 y_angle);
     void NuRndrAddShadow(NUVEC *position, f32 radius, i32 opacity, i32 x_rotation, i32 y_rotation, i32 z_rotation);
+    f32 *NuRndrCreateBlendShapeDeformerWeightsArray(i32 count);
 #ifdef __cplusplus
 }
+
+f32 **NuRndrCreateBlendShapeDWAPointers(i32 count);
 #endif
