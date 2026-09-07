@@ -884,27 +884,24 @@ void NuIOSDLTransformCallback(void *arg) {
 // to the shader state.
 void NuIOSDLTransformParamsCallback(void *arg) {
     auto *stream_matrix = static_cast<NUMTX *>(arg);
+    NUVEC4 tint = *reinterpret_cast<NUVEC4 *>(NuRenderContextGetKTint());
     const f32 opacity = stream_matrix->m33;
     const f32 shadow_factor = stream_matrix->m32;
-    f32 tint[4] = {
-        g_renderContext_kTint[0],
-        g_renderContext_kTint[1],
-        g_renderContext_kTint[2],
-        g_renderContext_kTint[3],
-    };
+    numtl_s *material = NuRenderContextGetMaterialInUse();
 
     if (opacity < 1.0f) {
-        tint[3] *= opacity;
-        NuRenderContextSetZFunc(1);
-    } else if (g_renderContext_materialInUse != nullptr) {
-        NuRenderContextSetZFunc(g_renderContext_materialInUse->attribs.z_mode);
+        tint.w *= opacity;
+        NuRenderContextSetZFunc_inline(1);
+        NuShaderManagerSetfv(0x44, &tint.x);
+    } else {
+        NuRenderContextSetZFunc_inline(material->attribs.z_mode);
+        NuShaderManagerSetfv(0x44, &tint.x);
     }
-    NuShaderManagerSetfv(0x44, tint);
 
+    Nu360SetObjectShadowFactor(shadow_factor);
     stream_matrix->m33 = 1.0f;
     stream_matrix->m32 = 0.0f;
-    NuMtxTranspose(reinterpret_cast<NUMTX *>(g_renderContext_world), stream_matrix);
-    NuShaderManagerSetfv(0x3c, g_renderContext_world);
+    NuRenderContextSetWorld_transpose(stream_matrix);
     stream_matrix->m33 = opacity;
     stream_matrix->m32 = shadow_factor;
 }
