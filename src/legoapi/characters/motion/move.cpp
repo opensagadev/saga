@@ -223,6 +223,7 @@ i32 GetMenuID(void);
 // keeps this as writable camera state (default 1.0), rather than folding it
 // into the socket seek rate.
 f32 CamStopBlend = 1.0f;
+i32 netcamera;
 
 extern "C" {
     extern i16 id_BODYGUARD;
@@ -306,6 +307,7 @@ void MovePlayer(GameObject_s *object) {
 
     f32 input_x = 0.0f;
     f32 input_z = 0.0f;
+    f32 ai_input_magnitude = 0.0f;
     const bool accepts_player_input = (api.field_0x1f8 & APIOBJECT_FLAG_AI_PLAYER_MASK) == APIOBJECT_FLAG_PLAYER_ACTIVE;
     const i32 menu_id = GetMenuID();
     const bool input_blocked =
@@ -329,12 +331,26 @@ void MovePlayer(GameObject_s *object) {
             }
         }
     } else if (!accepts_player_input) {
-        const f32 delta_x = object->ai.movement_position.x - api.position.x;
-        const f32 delta_z = object->ai.movement_position.z - api.position.z;
-        const f32 distance = NuFsqrt(delta_x * delta_x + delta_z * delta_z);
-        if (distance > 0.0f) {
-            input_x = delta_x / distance;
-            input_z = delta_z / distance;
+        if ((object->field_0xefc & 0x10) != 0) {
+            pad->buttons_held = 0;
+            pad->buttons_pressed = 0;
+        } else if (object->ai.movement_stopped != 1 &&
+                   (object->character_context != 0x17 || (object->field_0xf04 & 1) != 0)) {
+            const f32 delta_x = object->ai.movement_position.x - api.position.x;
+            const f32 delta_z = object->ai.movement_position.z - api.position.z;
+            if (delta_x == 0.0f && delta_z == 0.0f) {
+                pad->input_angle = 0;
+            } else {
+                const f32 distance = NuFsqrt(delta_x * delta_x + delta_z * delta_z);
+                const f32 inverse_distance = 1.0f / distance;
+                input_x = delta_x * inverse_distance;
+                input_z = delta_z * inverse_distance;
+                ai_input_magnitude = distance / ai_moveradius;
+                if (ai_input_magnitude > 1.0f) {
+                    ai_input_magnitude = 1.0f;
+                }
+                pad->input_angle = NuAngSub(NuAtan2D(input_x, input_z), GameCam->input_yaw);
+            }
         }
         pad->input_state = 1;
     } else {
@@ -346,7 +362,7 @@ void MovePlayer(GameObject_s *object) {
     pad->input_direction_z = input_z;
     pad->input_direction_x = input_x;
     pad->input_magnitude = 0.0f;
-    if (stick_magnitude >= 0.2f) {
+    if (accepts_player_input && stick_magnitude >= 0.2f) {
         if (stick_magnitude < 0.5f && (game_character->flags_090 & 0x08) == 0) {
             pad->input_magnitude = game_character->tiptoe_speed;
         } else if (stick_magnitude < 0.8f) {
@@ -356,13 +372,7 @@ void MovePlayer(GameObject_s *object) {
         }
         if (pad->input_magnitude > 0.0f) {
             const NUANG world_input_angle = NuAtan2D(input_x, input_z);
-            // AI destinations are already expressed in world space.  The
-            // shared directional mover consumes camera-relative controller
-            // angles and adds GameCam's yaw again, so match the target's
-            // MovePlayer AI branch by removing that yaw here.
-            pad->input_angle = !accepts_player_input && GameCam != NULL
-                                   ? NuAngSub(world_input_angle, GameCam->input_yaw)
-                                   : world_input_angle;
+            pad->input_angle = world_input_angle;
         }
     }
 
@@ -372,11 +382,24 @@ void MovePlayer(GameObject_s *object) {
         AI_GOAL_SPEED_TIPTOE = 2,
     };
     if (!accepts_player_input) {
-        if (object->ai.goal_speed_mode == AI_GOAL_SPEED_WALK && pad->input_magnitude > game_character->walk_speed) {
-            pad->input_magnitude = game_character->walk_speed;
-        } else if (object->ai.goal_speed_mode == AI_GOAL_SPEED_TIPTOE &&
-                   pad->input_magnitude > game_character->tiptoe_speed) {
-            pad->input_magnitude = game_character->tiptoe_speed;
+        if (object->context_target_position == NULL) {
+            const f32 run_speed = object->field_0xee0 == 1000000000.0f ? game_character->run_speed : object->field_0xee0;
+            const f32 walk_speed = object->walk_speed_override == 1000000000.0f
+                                       ? game_character->walk_speed : object->walk_speed_override;
+            if ((object->ai.runtime_flags & 4) == 0) {
+                pad->input_magnitude = ai_input_magnitude * run_speed;
+            }
+            if ((object->ai.runtime_flags & 8) == 0 && pad->input_magnitude < game_character->tiptoe_speed * 0.5f) {
+                pad->input_magnitude = 0.0f;
+            }
+            if ((object->ai.movement_flags & 8) == 0) {
+                if (object->ai.goal_speed_mode == AI_GOAL_SPEED_WALK && pad->input_magnitude > walk_speed) {
+                    pad->input_magnitude = walk_speed;
+                } else if (object->ai.goal_speed_mode == AI_GOAL_SPEED_TIPTOE &&
+                           pad->input_magnitude > game_character->tiptoe_speed) {
+                    pad->input_magnitude = game_character->tiptoe_speed;
+                }
+            }
         }
     }
 
@@ -585,7 +608,12 @@ void MoveGameCamera(GAMECAMERA_s *camera) {
     NUVEC player_positions[2];
     i32 player_count = 0;
     for (i32 i = 0; i < 2; ++i) {
-        if (Player[i] == NULL) {
+        // Original rail-camera eligibility (0x11138b..0x1113dc): an AI
+        // companion contributes to the focus only when LookAtBoth is set.
+        if (Player[i] == NULL ||
+            (static_cast<i8>(Player[i]->apiobj.flags_low) >= 0 && LookAtBoth == 0) ||
+            (netcamera != 0 && (Player[i]->apiobj.field_0x1f4 & 0x40000) != 0) ||
+            (BonusWinner != -1 && i != BonusWinner)) {
             continue;
         }
         PlayerCamPos(Player[i], &player_camera_positions[player_count], &camera->pos);

@@ -923,7 +923,7 @@ i32 RandomIDFromFlags(u32, u32, i32, APICHARACTERMODELLIST_s *, i32);
 void MakeFreePlayModelList(i32 model1, i32 model2, i32 area, i32 level, i32 param5) {
     i32 flags = 0;
     if (WORLD != NULL && WORLD->area != NULL && WORLD->area == HUB_ADATA && bonusmodearcade != 0)
-        flags = Arcade_Mode[ArcadeItem.field_c_0xc * 3].field8_0x8;
+        flags = Arcade_Mode[ArcadeItem.field_c_0xc].field8_0x8;
 
     FreePlayModelCount = 0;
     FreePlayResidentCount = 0;

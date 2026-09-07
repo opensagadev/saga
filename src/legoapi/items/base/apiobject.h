@@ -245,7 +245,8 @@ typedef struct AIPACKET_s {
     };
     u8 reset_mode;      // 0x3fa overall: AI reset/activation state
     u8 goal_speed_mode; // 0x3fb overall: walk/run/tiptoe speed selector
-    u8 pad1c_end[0x400 - 0x3fc];
+    u8 movement_stopped; // 0x13c, suppresses synthesized AI movement input
+    u8 pad1c_end[0x400 - 0x3fd];
     AIGROUP_s *group;                   // 0x400 overall
     u8 group_row;                       // 0x404 overall
     u8 group_column;                    // 0x405 overall
@@ -617,7 +618,13 @@ typedef struct GameObject_s {
     u8 context_flags;          // 0x07ac
     i8 context_variant_flags;  // 0x07ad
     u8 jump_flags;             // 0x07ae
-    u8 pad_7af[0x7c0 - 0x7af]; // 0x07af .. 0x07c0
+    u8 pad_7af;                 // 0x07af
+    f32 tag_context_timer;      // 0x07b0, PLAYERPACKET_s + 0xfc
+    i8 tag_target_player;       // 0x07b4, PLAYERPACKET_s + 0x100
+    u8 tag_context_flags;       // 0x07b5, PLAYERPACKET_s + 0x101
+    u8 pad_7b6[2];              // 0x07b6 .. 0x07b8
+    GameObject_s *tag_target;   // 0x07b8, PLAYERPACKET_s + 0x104
+    u8 pad_7bc[4];              // 0x07bc .. 0x07c0
     union {
         u8 mini_anim_packet[0x24]; // 0x07c0 .. 0x07e4
         MINIANIMPACKET_s mini_animation;
@@ -691,6 +698,7 @@ typedef struct GameObject_s {
     union {
         i32 pause_input_state; // 0x0d5c, cleared when entering pause
         f32 hud_icon_timer;    // countdown controlling the portrait blink during death/drop transitions
+        f32 tag_state;         // PLAYERPACKET_s + 0x6a8, tag/input transition state
     };
     u8 pad_d60[0xd64 - 0xd60];            // 0x0d60 .. 0x0d64
     f32 jump_variant_timer;               // 0x0d64
@@ -804,7 +812,7 @@ typedef struct GameObject_s {
     f32 walk_speed_override;   // 0x0ee4
     f32 field_0xee8;           // 0x0ee8
     f32 field_0xeec;           // 0x0eec
-    u8 pad_ef0[0xef4 - 0xef0]; // 0x0ef0 .. 0x0ef4
+    u32 field_0xef0;           // 0x0ef0
     i32 pause_context_state;   // 0x0ef4, cleared when entering pause
     u8 field_0xef8;            // 0x0ef8
     u8 field_0xef9;            // 0x0ef9
@@ -963,6 +971,7 @@ DECOMP_ASSERT(offsetof(AIPACKET, path_info) == 0x154, "AIPACKET path-info offset
 DECOMP_ASSERT(offsetof(AIPACKET, last_path_position) == 0x16c, "AIPACKET last path position offset");
 DECOMP_ASSERT(offsetof(AIPACKET, goal_path_node) == 0x178, "AIPACKET goal-node offset");
 DECOMP_ASSERT(offsetof(AIPACKET, navigation_flags) == 0x1e8, "AIPACKET navigation flags offset");
+DECOMP_ASSERT(offsetof(AIPACKET, movement_stopped) == 0x13c, "AIPACKET movement stop offset");
 DECOMP_ASSERT(offsetof(AIPACKET, movement_target_radius) == 0x1ec, "AIPACKET target-radius offset");
 DECOMP_ASSERT(offsetof(AIPACKET, capabilities) == 0x1f0, "AIPACKET capabilities offset");
 DECOMP_ASSERT(offsetof(AIPACKET, fallback_path_info) == 0x1c8, "AIPACKET fallback path-info offset");

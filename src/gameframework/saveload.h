@@ -31,6 +31,7 @@ extern "C" {
     extern i32 memcard_autosave;
     extern i32 memcard_autosaveenabled;
     extern i32 memcard_autosavestarted;
+    extern i32 memcard_autosaveinprogress;
     extern i32 memcard_autosaveneeded;
     extern f32 memcard_autosavepredelay;
     extern f32 memcard_autosavepostdelay;
@@ -41,6 +42,7 @@ extern "C" {
     i32 saveloadSaveSlot(i32 slot, void *buffer, i32 size);
 
     i32 TriggerExtraDataLoad(void);
+    i32 TriggerAutoSave(void);
     bool TriggerExtraDataSave(void);
 
     void SaveSystemInitialise(i32 slots, void *makeSaveHash, void *save, i32 saveSize, i32 saveCount,

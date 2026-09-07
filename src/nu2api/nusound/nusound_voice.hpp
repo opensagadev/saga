@@ -62,8 +62,16 @@ class NuSoundVoice : public NuSoundBufferCallback {
     // +0x2c sound source; +0x30 owns the lifetime/loop flags.  The playback
     // pause/mix-update flags are a separate byte at +0x119.
     NuSoundSource *sound_source;
-    u8 flags2; // bit0: auto delete; bit1: last buffer queued; bit2: stop effects
-               // running; bit3: looping (from the CreateVoice loop argument)
+    union {
+        u8 flags2;
+        struct {
+            bool auto_delete : 1;
+            bool last_buffer_queued : 1;
+            bool stop_effects_running : 1;
+            bool looping : 1;
+            u8 reserved : 4;
+        } source_flags;
+    };
     u8 padding_0x31[3];
 
     u32 surround_mode;
@@ -250,7 +258,16 @@ class NuVoiceAndroid : public NuSoundVoice {
     i32 field12_0x178; // playback position in samples (high)
 
     i16 last_volume_level; // +0x17c centibels cache (-32768 = mute)
-    u8 hardware_flags;     // +0x17e bit0: start; bit1: stop; bit2: request buffer
+    union {               // +0x17e
+        u8 hardware_flags;
+        struct {
+            u8 start : 1;
+            u8 stop : 1;
+            u8 request_buffer : 1;
+            u8 queue_ran_ahead : 1;
+            u8 reserved : 4;
+        } hardware_state;
+    };
 
   public:
     NuVoiceAndroid(NuSoundSource *sound_source, bool loop);

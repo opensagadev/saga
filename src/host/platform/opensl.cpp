@@ -97,7 +97,7 @@ namespace hostsl {
         struct QueueVTable {
             u32 (*enqueue)(void *, void *, u32); // 0x00
             u32 (*clear)(void *);                // 0x04
-            u32 (*get_state)(void *, u32 *);     // 0x08
+            u32 (*get_state)(void *, SLAndroidSimpleBufferQueueState_ *); // 0x08
         };
 
         struct VolumeVTable {
@@ -186,6 +186,7 @@ namespace hostsl {
             QueueEntry queue[HOST_PLAYER_MAX_QUEUE];
             u32 queue_head;
             u32 queue_count;
+            u32 queue_index;
             u64 queue_source_frames;
             u64 queue_played_device_frames;
 
@@ -225,7 +226,7 @@ namespace hostsl {
         // AndroidSimpleBufferQueueItf
         u32 host_queue_enqueue(void *self, void *data, u32 size);
         u32 host_queue_clear(void *self);
-        u32 host_queue_get_state(void *self, u32 *count);
+        u32 host_queue_get_state(void *self, SLAndroidSimpleBufferQueueState_ *state);
 
         // VolumeItf
         u32 host_volume_set_volume_level(void *self, i32 level);
@@ -275,6 +276,7 @@ namespace hostsl {
                 player->queue_count--;
             }
             player->queue_head = 0;
+            player->queue_index = 0;
             player->queue_source_frames = 0;
             player->queue_played_device_frames = 0;
         }
@@ -665,14 +667,16 @@ namespace hostsl {
                 memset(entry, 0, sizeof(*entry));
                 player->queue_head = (player->queue_head + 1) % HOST_PLAYER_MAX_QUEUE;
                 player->queue_count--;
+                player->queue_index++;
             }
         }
 
-        u32 host_queue_get_state(void *self, u32 *count) {
+        u32 host_queue_get_state(void *self, SLAndroidSimpleBufferQueueState_ *state) {
             Player *player = (Player *)HOSTSL_CONTAINER_OF(self, Player, queue_itf);
             pthread_mutex_lock(&host_lock);
             host_queue_release_played(player);
-            *count = player->queue_count;
+            state->count = player->queue_count;
+            state->index = player->queue_index;
             pthread_mutex_unlock(&host_lock);
             return HOST_SL_RESULT_SUCCESS;
         }

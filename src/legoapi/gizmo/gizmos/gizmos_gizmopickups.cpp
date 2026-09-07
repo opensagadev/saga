@@ -59,7 +59,41 @@ GIZMOPICKUP_s *GizmoPickups_Collide(WORLDINFO_s *world, GameObject_s *object, i3
     return pickup;
 }
 
+i32 Arcade_GetMode(u32 *flags);
+
 void GizmoPickups_SetOnOff() {
+    u32 arcade_flags;
+    Arcade_GetMode(&arcade_flags);
+    WORLDINFO_s *world = WORLD;
+    for (i32 index = 0; index < 10; ++index) {
+        if (ChallengeMode != 0) {
+            if (index == 7) {
+                GizmoPickupType[index].field_0x0f = 0;
+            } else {
+                GizmoPickupType[index].field_0x0f = 1;
+            }
+            continue;
+        }
+        if (index == 7) {
+            GizmoPickupType[index].field_0x0f = 1;
+            continue;
+        }
+        if (index == 6) {
+            if (world->level_sub_id != -1 && Game.area_save[world->level_sub_id].field_0x5[1] != 0) {
+                GizmoPickupType[index].field_0x0f = 1;
+                continue;
+            }
+        } else if (index == 4) {
+            if (SuperStory != 0) {
+                GizmoPickupType[index].field_0x0f = 1;
+                continue;
+            }
+        } else if (index == 9 && world->area != NULL && (world->area->flags & 0x100) != 0) {
+            GizmoPickupType[index].field_0x0f = 1;
+            continue;
+        }
+        GizmoPickupType[index].field_0x0f = (arcade_flags & 0x20) != 0 && index != 5 && index != 9;
+    }
 }
 
 void GizmoPickup_FindByName(WORLDINFO_s *, char *) {

@@ -206,6 +206,21 @@ Authoring rule: define the ctor/dtor out-of-line in the `.cpp` and all
 variants come for free. The dtor will only produce `D0` if the dtor is
 virtual (`D0` calls `operator delete`).
 
+For virtual destruction followed by custom storage release, use a typed,
+unqualified call such as `voice->~NuSoundVoice()`, then the original allocator's
+free operation. This still dispatches to the complete-object destructor;
+`delete voice` would also invoke storage deallocation. Do not reinterpret the
+vtable entry as `void (*)(void *)`: WebAssembly complete-object destructors
+return `this`, so that cast produces a runtime signature mismatch.
+
+Verified with the repository toolchains on 2026-09-08: replacing the five raw
+destructor calls in `NuSoundSystem` (`ReleaseVoice`, `ReleaseDecoder`,
+`ReleaseEffect`, `ReleaseSample`, and `Shutdown`) with typed calls preserves
+each Android function's objdiff score against the original, and the before/after
+functions compare at 100%. This preserves existing matches; it does not mean
+all five functions fully match the original. WebAssembly instead emits the
+required pointer-returning indirect call and discards the result.
+
 ### Vtables
 
 - Section `.data.rel.ro._ZTV<class>` (relocated read-only), symbol type `V`

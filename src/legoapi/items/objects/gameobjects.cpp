@@ -65,11 +65,17 @@ void LightGameObject(GameObject_s *object, void *set);
 void InitSurfaceInfo(GameObject_s *object);
 i32 SetObjOnSurface(GameObject_s *object, i32 mode);
 void PortalGameObject(GameObject_s *object, i32 enable, i32 immediate, i16 portal, nugscn_s *scene);
-void Arcade_GetMode(u32 *mode);
+i32 Arcade_GetMode(u32 *mode);
 void StarWars_GameAISysInit();
 void GameAISysSetGame();
 void ClearAICreatures();
 void CollideGameObjects(WORLDINFO_s *world);
+void GameCam_Blend(GAMECAMERA_s *camera, f32 duration, f32 curve, i32 mode);
+i32 TagCode(GameObject_s *source, GameObject_s *target, i32 takeover, i32 blend, i32 mode);
+extern i32 do_player_tag;
+extern f32 player_tag_timer;
+extern GameObject_s *player_tag_from;
+extern GameObject_s *player_tag_to;
 APIOBJECT *GameAPIOBJECTFromObjID(u8 object_id);
 i32 EquivalentObject_Find(WORLDINFO_s *world, nuhspecial_s *special);
 void AIPathCnxControlSysReset(AIPATHCNXCONTROLSYS_s *system);
@@ -2749,6 +2755,54 @@ void UpdateGameObjects(WORLDINFO_s *world) {
     }
 
     CollideGameObjects(world);
+
+    if (do_player_tag == 0) {
+        bool pending_tag_valid = false;
+        if (player_tag_timer > 0.0f) {
+            player_tag_timer -= FRAMETIME;
+            const u16 required_flags = APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_PLAYER_CHARACTER;
+            pending_tag_valid = player_tag_timer >= 0.0f && player_tag_to != NULL && player_tag_from != NULL &&
+                                (player_tag_to->apiobj.field_0x1f8 & required_flags) == required_flags &&
+                                player_tag_to->apiobj.field_0x287 == 0 &&
+                                (player_tag_to->tag_context_flags & 2) == 0 &&
+                                (player_tag_from->apiobj.field_0x1f8 & required_flags) == required_flags &&
+                                player_tag_from->apiobj.field_0x287 == 0 &&
+                                (player_tag_from->tag_context_flags & 2) == 0;
+        }
+        if (!pending_tag_valid) {
+            player_tag_to = NULL;
+            player_tag_timer = 0.0f;
+            player_tag_from = NULL;
+            do_player_tag = 0;
+        }
+    } else {
+        const u16 required_flags = APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_PLAYER_CHARACTER;
+        bool clear_pending_tag = true;
+        if (player_tag_to != NULL && player_tag_from != NULL && player_tag_to != player_tag_from &&
+            (player_tag_to->apiobj.field_0x1f8 & required_flags) == required_flags &&
+            player_tag_to->apiobj.field_0x287 == 0 && (player_tag_to->tag_context_flags & 2) == 0 &&
+            (player_tag_from->apiobj.field_0x1f8 & required_flags) == required_flags &&
+            player_tag_from->apiobj.field_0x287 == 0 && (player_tag_from->tag_context_flags & 2) == 0) {
+            const i32 tag_result = TagCode(player_tag_to, player_tag_from, 0, 0, 1);
+            if (tag_result == 1) {
+                GameAudio_PlaySfx(0x22, &player_tag_to->apiobj.collision_position, 0, 0);
+                GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
+                const i32 player_1_id = Player[1] == NULL ? -1 : Player[1]->id;
+                const i32 player_0_id = Player[0] == NULL ? -1 : Player[0]->id;
+                RememberPlayerIDs(0, player_0_id, player_1_id);
+                player_tag_to->tag_state = 2.0f;
+                player_tag_from->tag_state = 2.0f;
+            } else if (tag_result == 2) {
+                clear_pending_tag = false;
+            }
+        }
+        if (clear_pending_tag) {
+            player_tag_to = NULL;
+            player_tag_timer = 0.0f;
+            player_tag_from = NULL;
+            do_player_tag = 0;
+        }
+    }
 }
 
 GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *script_name, AIPATHINFO_s *path_info,

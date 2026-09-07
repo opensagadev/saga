@@ -845,7 +845,16 @@ void Player_ResetContexts(PLAYERPACKET_s *packet) {
     packet->linked_object = NULL;
 }
 
-void Player_CopyEssentials(GameObject_s *, GameObject_s *) {
+void Player_CopyEssentials(GameObject_s *source, GameObject_s *destination) {
+    destination->pad_gamepad = source->pad_gamepad;
+    destination->coinpacket = source->coinpacket;
+    destination->gizforce_los_info = source->gizforce_los_info;
+    destination->batarang = source->batarang;
+    destination->torpedo = source->torpedo;
+    destination->oldpos = source->oldpos;
+    destination->hitpoints = source->hitpoints;
+    destination->field_0xeb4 = source->field_0xeb4;
+    destination->apiobj.field_0x1f4 = source->apiobj.field_0x1f4;
 }
 
 void Player_HasDeflectBolts(GameObject_s *) {

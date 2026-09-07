@@ -38,7 +38,7 @@ namespace {
     typedef u32 (*PlaySetCallbackEventsMaskFn)(void *, u32);
     typedef u32 (*QueueEnqueueFn)(void *, void *, u32);
     typedef u32 (*QueueClearFn)(void *);
-    typedef u32 (*QueueGetStateFn)(void *, u32 *);
+    typedef u32 (*QueueGetStateFn)(void *, SLAndroidSimpleBufferQueueState_ *);
     typedef u32 (*VolumeSetVolumeLevelFn)(void *, i32);
     typedef u32 (*VolumeEnableStereoPositionFn)(void *, u32);
     typedef u32 (*VolumeSetStereoPositionFn)(void *, i32);
@@ -389,26 +389,26 @@ bool NuVoiceAndroid::UpdateQueue() {
         return true;
     }
 
-    u32 count = 0;
-    u32 error = SL_SLOT(this->queue_interface, QueueGetStateFn, 8)(this->queue_interface, &count);
+    SLAndroidSimpleBufferQueueState_ state;
+    u32 error = SL_SLOT(this->queue_interface, QueueGetStateFn, 8)(this->queue_interface, &state);
     if (NuSoundAndroid::ReportErrorCode(error, "Get queue state") != 0) {
         return false;
     }
 
-    if (this->sound_source->feed_type == NuSoundSource::FeedType::STREAMING && (this->flags2 & 2) == 0) {
+    if (this->sound_source->feed_type == NuSoundSource::FeedType::STREAMING && !this->source_flags.last_buffer_queued) {
         // Starvation watchdog: remember whether the queue ever ran ahead, and
         // request a refill as soon as it runs low.
         // libTTapp.so 0x32c37e..0x32c3ad reads and writes voice+0x17e,
         // NuVoiceAndroid::hardware_flags. Using NuSoundVoice::flags (+0x31)
         // left bit 4 invisible to UpdateHardwareVoice and delayed every refill
         // until HEADATEND.
-        if ((this->hardware_flags & 8) == 0) {
-            if (count > 1) {
-                this->hardware_flags |= 8;
+        if (!this->hardware_state.queue_ran_ahead) {
+            if (state.count > 1) {
+                this->hardware_state.queue_ran_ahead = 1;
             }
-        } else if (count < 2) {
-            this->hardware_flags &= 0xf7;
-            this->hardware_flags |= 4;
+        } else if (state.count < 2) {
+            this->hardware_state.queue_ran_ahead = 0;
+            this->hardware_state.request_buffer = 1;
         }
     }
     return true;
@@ -508,23 +508,22 @@ void NuVoiceAndroid::OnPlayerEvent(u32 event) {
         return;
     }
 
-    NuSoundMutexLock(&this->mutex);
-
-    bool finished;
     if (this->sound_source->feed_type == NuSoundSource::FeedType::STREAMING) {
-        // Streaming: a looping stream always refills; a non-looping one stops
-        // refilling once its last buffer has been queued.
-        finished = (this->flags2 & 8) == 0 && (this->flags2 & 2) != 0;
+        NuSoundMutexLock(&this->mutex);
+        if (!this->source_flags.looping && this->source_flags.last_buffer_queued) {
+            goto finished;
+        }
     } else {
-        finished = (this->flags2 & 8) == 0;
+        NuSoundMutexLock(&this->mutex);
+        if (!this->source_flags.looping) {
+            goto finished;
+        }
     }
-
-    if (finished) {
-        this->hardware_flags |= 2; // 0x32c8c3
-    } else {
-        this->hardware_flags |= 4; // 0x32c900
-    }
-
+    this->hardware_state.request_buffer = 1;
+    goto unlock;
+finished:
+    this->hardware_state.stop = 1;
+unlock:
     NuSoundMutexUnlock(&this->mutex);
 }
 

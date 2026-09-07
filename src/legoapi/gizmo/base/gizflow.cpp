@@ -2,6 +2,7 @@
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nucore/nuhgobj.h"
 #include "nu2api/nucore/nustring.h"
@@ -80,10 +81,32 @@ i32 LayerFromName(GAMECHARACTERDATA_s *character, char *name) {
 void ProcessGizFlow(GIZFLOW_s *, float) {
 }
 
-void FlowBoxFindByName(GIZFLOW_s *, char *) {
+FLOWBOX_s *FlowBoxFindByName(GIZFLOW_s *flow, char *name) {
+    if (name != NULL && flow != NULL && flow->flowbox_count > 0) {
+        for (i32 index = 0; index < flow->flowbox_count; ++index) {
+            if (NuStrICmp(flow->flowboxes[index].name, name) == 0) {
+                return &flow->flowboxes[index];
+            }
+        }
+    }
+    return NULL;
 }
 
-void SetGizFlowVisible(GIZFLOW_s *) {
+void SetGizFlowVisible(GIZFLOW_s *flow) {
+    if (flow != NULL) {
+        FLOWBOX_s *box = flow->flowboxes;
+        for (i32 index = 0; index < flow->flowbox_count; ++index, ++box) {
+            if (box->type == 0 && box->data != NULL) {
+                FLOWBOXGIZMODATA_s *data = box->data;
+                for (i32 gizmo_index = 0; gizmo_index < data->gizmo_count; ++gizmo_index) {
+                    GIZMO_s **gizmo = data->gizmos[gizmo_index];
+                    if (gizmo != NULL && *gizmo != NULL) {
+                        GizmoSetVisibility(flow->gizmo_sys, *gizmo, 1, 1);
+                    }
+                }
+            }
+        }
+    }
 }
 
 void GizFlowStoreProgress(GIZFLOW_s *, GIZFLOWPROGRESS_s *) {

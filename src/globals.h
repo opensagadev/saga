@@ -253,14 +253,28 @@ struct CHARCAT_s {
 };
 
 struct ARCADEITEM_s {
-    undefined field0_0x0[0xc];
+    i16 *level_text;
+    i8 level;
+    u8 level_count;
+    u16 pad_06;
+    i16 *mode_text;
     char field_c_0xc;
+    u8 mode_count;
+    u16 pad_0e;
+    i16 *play_text;
+    i8 play;
+    u8 play_count;
+    u16 pad_16;
 };
+DECOMP_ASSERT(sizeof(ARCADEITEM_s) == 0x18, "ArcadeItem ABI");
+DECOMP_ASSERT(offsetof(ARCADEITEM_s, field_c_0xc) == 0xc, "ArcadeItem mode offset");
 
 struct ARCADE_MODE_s {
-    undefined field0_0x0[8];
+    i16 *text;
+    i32 target;
     i32 field8_0x8;
 };
+DECOMP_ASSERT(sizeof(ARCADE_MODE_s) == 0xc, "Arcade mode ABI");
 
 struct GAME_CUSTOMISER_s {
     undefined field0_0x0[0x6c];
@@ -434,6 +448,8 @@ extern f32 COINTOTAL_COINSIZE;
 extern f32 COINTOTAL_SCORESIZE;
 extern f32 PANEL_COINADJUSTDY;
 extern f32 PANEL_COINSCALE_END;
+extern f32 PANEL_SCORESCALE;
+extern f32 PANEL_SCOREX;
 extern f32 PANEL_COINSCALE_START;
 extern f32 PANEL_COINY;
 extern f32 PANEL_COINX;

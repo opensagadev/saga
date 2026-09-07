@@ -2,6 +2,11 @@
 
 #include "nu2api/nucore/common.h"
 
+struct SLAndroidSimpleBufferQueueState_ {
+    u32 count;
+    u32 index;
+};
+
 // The shipping binary imports this small OpenSL ES surface from
 // libOpenSLES.so.  Keeping the API declarations local avoids making shared
 // NuSound code depend on an Android SDK header; the host supplies the same C

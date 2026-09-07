@@ -95,6 +95,7 @@ extern "C" {
     i32 NuSound3LoadingSfx(void);
     const VuMtx *NuSound3GetListener(void);
     void NuSound3StopVoice(NuSoundVoice *voice);
+    void NuSound3StopRumble(void);
     i32 NuSound3CountVoices(i32 sample_index);
     NuSoundVoice *NuSound3FindOldestVoice(i32 sample_index, f32 *playback_position);
     void NuSound3Play(i32 sample_index, i32 volume_left, i32 volume_right, f32 pitch, f32 buzz_timer,

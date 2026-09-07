@@ -63,6 +63,7 @@ extern STATUS_STAGE_s *StatusStages;
 extern f32 iconalphaoverride;
 extern f32 icon_y;
 extern i32 draw_player_icons;
+extern f32 FORCEGLOWTIME;
 extern i16 tHINTS;
 extern i16 tCHARACTERS;
 extern i16 tHELPANDOPTIONS;
@@ -1926,7 +1927,65 @@ void DrawSuperStoryTime(float, float, float, i32, i32) {
 void DrawForceBackEffect(nuhspecial_s *) {
 }
 
-void DrawForceGlowSprite(nuvec_s *, float, i32, float, GameObject_s *) {
+static inline void RotateForceGlowMatrix(NUMTX *matrix, i32 angle) {
+    const f32 cosine = NU_COS_LUT(angle);
+    const f32 sine = NU_SIN_LUT(angle);
+    const f32 x0 = matrix->m00;
+    const f32 x1 = matrix->m10;
+    const f32 x2 = matrix->m20;
+    const f32 x3 = matrix->m30;
+    matrix->m00 = x0 * cosine - matrix->m01 * sine;
+    matrix->m01 = x0 * sine + matrix->m01 * cosine;
+    matrix->m10 = x1 * cosine - matrix->m11 * sine;
+    matrix->m11 = x1 * sine + matrix->m11 * cosine;
+    matrix->m20 = x2 * cosine - matrix->m21 * sine;
+    matrix->m21 = x2 * sine + matrix->m21 * cosine;
+    matrix->m30 = x3 * cosine - matrix->m31 * sine;
+    matrix->m31 = x3 * sine + matrix->m31 * cosine;
+}
+
+void DrawForceGlowSprite(nuvec_s *position, float radius, i32 model, float alpha, GameObject_s *) {
+    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+    if (model == -1 || world->lev_objs[model].active == 0) {
+        return;
+    }
+    ResetShadowMapRendering();
+    NUVEC scale __attribute__((aligned(16)));
+    NUVEC direction;
+    NUVEC draw_position;
+    NuVecSub(&direction, position, reinterpret_cast<NUVEC *>(&pNuCam->mtx.m30));
+    const f32 distance = NuFsqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
+    NuVecNorm(&direction, &direction);
+    f32 offset = radius;
+    if (radius < distance - 0.2f || (offset = distance - 0.2f, !(distance < 0.2f))) {
+        NuVecScale(&direction, &direction, offset);
+        NuVecSub(&draw_position, position, &direction);
+        if (offset != 0.0f) {
+            scale.x = scale.y = scale.z = radius * (distance - offset) / distance;
+            goto draw_glow;
+        }
+    } else {
+        NuVecScale(&direction, &direction, 0.0f);
+        NuVecSub(&draw_position, position, &direction);
+    }
+    scale.x = scale.y = scale.z = radius;
+draw_glow:
+    NUMTX matrix __attribute__((aligned(16)));
+    NuMtxSetScale(&matrix, &scale);
+    u16 angle = static_cast<i32>(NuFmod(GameTimer.time_elapsed, 20.0f) / 20.0f * 65536.0f);
+    RotateForceGlowMatrix(&matrix, -angle);
+    NuMtxMulR(&matrix, &matrix, &GameCam->render_mtx);
+    NuMtxTranslate(&matrix, &draw_position);
+    NuSpecialDrawAtAlpha(&WORLD->lev_objs[model].special, &matrix, alpha);
+    if (WORLD->lev_objs[model + 1].active != 0) {
+        NuMtxSetScale(&matrix, &scale);
+        angle = static_cast<i32>(NuFmod(GameTimer.time_elapsed, 16.777f) / 16.777f * 65536.0f);
+        RotateForceGlowMatrix(&matrix, angle);
+        NuMtxMulR(&matrix, &matrix, &GameCam->render_mtx);
+        NuMtxTranslate(&matrix, &draw_position);
+        NuSpecialDrawAtAlpha(&WORLD->lev_objs[model + 1].special, &matrix, alpha);
+    }
+    EnableShadowMapRendering(0);
 }
 
 void DrawGameObjectsDraw(i32) {
@@ -1954,11 +2013,14 @@ void DrawGameObjectsDraw(i32) {
 
         if (drawn != 0) {
             DrawParaphernalia(object);
+        } else if (((object->field_0xe21 & 4) != 0 || object->character_context == 8) &&
+                   object->field_0xd80 > 0.0f && object->field_0xd8c > 0.0f &&
+                   WORLD->lev_objs[object->field_0xe1e].active != 0 &&
+                   (object->apiobj.character_data->game_character->flags_090 & 0x400) == 0) {
+            DrawForceGlowSprite(&object->force_glow_position, object->field_0xd8c, object->field_0xe1e,
+                                object->field_0xd80 / FORCEGLOWTIME, object);
         }
 
-        // The force-glow branch rejoins here after its level-character and
-        // character-variant visibility tests. Those structures are not typed
-        // yet; keep the ordinary original path intact while they are recovered.
         if (object->field_0x10b8 != NULL) {
             DrawSnakeBody(object);
         }
@@ -2580,6 +2642,12 @@ static void DrawParaphernalia(GameObject_s *object) {
         return;
     }
     DrawWeapons(object, object->field_0x1088, object->weapon_scale);
+    if (object->character_context != 0x22 && object->field_0xd80 > 0.0f && object->field_0xd8c > 0.0f &&
+        WORLD->lev_objs[object->field_0xe1e].active != 0 &&
+        (object->apiobj.character_data->game_character->flags_090 & 0x400) == 0) {
+        DrawForceGlowSprite(&object->force_glow_position, object->field_0xd8c, object->field_0xe1e,
+                            object->field_0xd80 / FORCEGLOWTIME, object);
+    }
 }
 
 static __used__ void DrawFalconSpotLights(GameObject_s *) {
