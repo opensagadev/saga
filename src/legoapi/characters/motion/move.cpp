@@ -169,6 +169,7 @@ void Player_ClearContext(GameObject_s *, i32);
 void Player_ResetContexts(PLAYERPACKET_s *);
 void PlayDieSfx(GameObject_s *);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
+void GameAudio_PlaySfxById(i32, NUVEC *, i32, i32);
 static void CommunicateCode(GameObject_s *, i32, i32);
 static void PunchCode(GameObject_s *, i32, i32, i32, i32, f32);
 static void ShootCode(GameObject_s *, i32, i32, i32, i32, i32);
@@ -1922,6 +1923,49 @@ i32 ForcePushed_YRotation(GameObject_s *object) {
     return 0;
 }
 
+i32 ForcePushed_SuperPush_Occurring(GameObject_s *first, GameObject_s *second) {
+    if (first->character_context == 0x1c) {
+        if (first->action_movement_state != 0) {
+            return 0;
+        }
+        GameObject_s *source = first->force_target;
+        if (source == NULL || source->character_context != 0x1b || (source->action_flags & 0x380) != 0 ||
+            second->id == id_GONKDROID || (second->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
+            second->apiobj.field_0x287 != 0 || source == second || first == second ||
+            second->apiobj.field_0x27c != -1 || (second->field_0xefb & 8) != 0 || CannotKill(second) != 0) {
+            return 0;
+        }
+        CHARACTERDATA *character = second->apiobj.character_data;
+        if ((character->model_flags & 0x4002010) != 0x10) {
+            return 0;
+        }
+        GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(character->field11_0x24);
+        if ((data->flags_090 & 0x40) != 0 || (data->flags_094[1] & 2) != 0) {
+            return 0;
+        }
+        return 1;
+    }
+    if (second->character_context != 0x1c || second->action_movement_state != 0) {
+        return 0;
+    }
+    GameObject_s *source = second->force_target;
+    if (source == NULL || source->character_context != 0x1b || (source->action_flags & 0x380) != 0 ||
+        first->id == id_GONKDROID || (first->apiobj.field_0x1f8 & 0x1001) != 0x1001 || first->apiobj.field_0x287 != 0 ||
+        first == second || first == source || first->apiobj.field_0x27c != -1 || (first->field_0xefb & 8) != 0 ||
+        CannotKill(first) != 0) {
+        return 0;
+    }
+    CHARACTERDATA *character = first->apiobj.character_data;
+    if ((character->model_flags & 0x4002010) != 0x10) {
+        return 0;
+    }
+    GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(character->field11_0x24);
+    if ((data->flags_090 & 0x40) != 0 || (data->flags_094[1] & 2) != 0) {
+        return 0;
+    }
+    return 1;
+}
+
 static void ForcePushed_MoveCode(GameObject_s *object) {
     NuFmax(NuFmax(0.4f, 1.2f), 0.8f);
     if (object->character_context != 0x1c)
@@ -3390,7 +3434,55 @@ void SetObjTarget(GameObject_s *, GameObject_s *) {
 void SnapPosTaken(WORLDINFO_s *, pushblock_s *, nuvec_s *, i32) {
 }
 
-void StartFlatten(GameObject_s *, GameObject_s *) {
+void StartFlatten(GameObject_s *source, GameObject_s *target) {
+    if (target->character_context == 0x33) {
+        return;
+    }
+    if (target->character_context == 0x3d) {
+        return;
+    }
+    GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24);
+    if ((data->flags_090 & 0x40) != 0) {
+        return;
+    }
+    if (data->field_0x28 != 0.0f && target->field_0xe31 == 1) {
+        return;
+    }
+    if ((source->apiobj.field_0x1f8 & 4) != 0) {
+        return;
+    }
+    if (target->apiobj.field_0x27d == 0) {
+        return;
+    }
+
+    Player_ClearContext(target, 0);
+    Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(target->player_packet));
+    target->character_context = 0x3d;
+    target->context_animation_timer = 0.0f;
+    target->apiobj.velocity.x *= 0.5f;
+    target->apiobj.velocity.z *= 0.5f;
+    target->context_animation = target->apiobj.character_model->model_data_b[0x85] != NULL ? 0x85 : 5;
+    target->airborne_action_duration = static_cast<f32>(qrand()) * (1.0f / 65535.0f) + 1.0f;
+
+    NUVEC direction;
+    NuVecSub(&direction, &target->apiobj.collision_position, &source->apiobj.collision_position);
+    u16 angle = static_cast<u16>(NuAtan2D(direction.x, direction.z));
+    i32 reverse = 0;
+    if (direction.x * target->facing_direction.x + direction.z * target->facing_direction.z < 0.0f) {
+        angle += 0x8000;
+        reverse = 1;
+    }
+    target->field_0x7a3 = reverse;
+    if (target->context_animation != 0x85) {
+        target->apiobj.field_0x276 = angle;
+        target->apiobj.facing_angle = angle;
+        target->apiobj.movement_facing_angle = angle;
+    }
+    target->delayed_turn_timer = 0.0f;
+    NewBuzzFrames(source->pad_gamepad->pad, 1, 0);
+    data = static_cast<GAMECHARACTERDATA *>(target->apiobj.character_data->field11_0x24);
+    GameAudio_PlaySfxById(data->sfx_hurt, &target->apiobj.collision_position, 0, 0);
+    NewBuzz(target->pad_gamepad->pad, 0.1f, 0);
 }
 
 GAMEANTINODE_s *GameAntinode_RegisterAntiNodeUsingData(GAMEANTINODESYS_s *, NUVEC *, u16, GAMEANTINODEDATA_s *, f32,

@@ -453,9 +453,12 @@ typedef struct APIOBJECT_s {
     u8 field_0x287; // 0x287  owner/controller player index
     u8 field_0x288; // 0x288
     u8 field_0x289; // 0x289
-    undefined field_0x28a[0x16];
-    u32 field387_0x2a0; // 0x2a0
-    u32 field388_0x2a4; // 0x2a4
+    undefined field_0x28a[0x0a];
+    APIOBJECT_s *collision_link; // 0x294, paired objects do not collide with each other
+    u32 collision_mask_low;      // 0x298
+    u32 collision_mask_high;     // 0x29c
+    u32 field387_0x2a0;          // 0x2a0
+    u32 field388_0x2a4;          // 0x2a4
 } APIOBJECT;
 
 struct APIOBJECTSYS_s {
@@ -471,6 +474,10 @@ extern "C" void APIObjectDestroy(APIOBJECTSYS_s *system, APIOBJECT *object);
 extern "C" void APIObjectDestroyAll(APIOBJECTSYS_s *system);
 extern "C" void APIObjectSetUsed(APIOBJECT *object, i32 index, i32 used);
 extern "C" void APIObjectVelocities(GameObject_s *object);
+extern "C" i32 APIObjectCollision(APIOBJECT *first, APIOBJECT *second);
+extern "C" i32 APIObjectCollision2D(APIOBJECT *first, APIOBJECT *second);
+extern "C" void APIObjectCollisions(i32 count, APIOBJECT **objects, NUVEC *minimums, NUVEC *maximums,
+                                    i32 (*collision_callback)(APIOBJECT *, APIOBJECT *));
 
 struct rtldata_s {
     union {
@@ -598,7 +605,8 @@ typedef struct GameObject_s {
                 i8 character_context;  // 0x07a5, current action owner (-1 when unowned)
                 i8 build_context;      // Build-It alias retained for its existing callers
             };
-            u8 pad_7a6[0x7a8 - 0x7a6]; // 0x07a6 .. 0x07a8
+            u8 field_0x7a6;
+            i8 field_0x7a7;
         };
         u32 movement_context_state; // 0x07a4, packed action context and variant state
     };
@@ -707,9 +715,10 @@ typedef struct GameObject_s {
     u8 pad_db0[4];
     f32 fall_hover_height; // 0x0db4
     u8 pad_db8[4];
-    f32 field_0xdbc;           // 0x0dbc
-    u8 pad_dc0[0xdc8 - 0xdc0]; // 0x0dc0 .. 0x0dc8
-    f32 field_0xdc8;           // 0x0dc8
+    f32 field_0xdbc; // 0x0dbc
+    u8 pad_dc0[4];   // 0x0dc0 .. 0x0dc4
+    f32 field_0xdc4; // 0x0dc4
+    f32 field_0xdc8; // 0x0dc8
     u8 pad_dcc[0xdd8 - 0xdcc];
     f32 block_cooldown;
     f32 field_0xddc;

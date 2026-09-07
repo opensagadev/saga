@@ -1,7 +1,11 @@
 #include "decomp.h"
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/items/base/apiobject.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/world.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/nufloat.h"
 
@@ -28,11 +32,82 @@ i32 CheckCylinder(i32 first_vertex, i32 second_vertex, i32 *vertex_mask, i32 rem
 i32 CheckSphere(i32 vertex_index);
 i32 CheckSphereTer(NUVEC *position, f32 radius);
 i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 secondary_end, tertype *surface);
+i32 ForcePushed_SuperPush_Occurring(GameObject_s *first, GameObject_s *second);
+void StartFlatten(GameObject_s *source, GameObject_s *target);
 
 i32 CannotKill(GameObject_s *object) {
     GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
     return (CInfo[object->character_context].flags & 0x2000000) != 0 ||
            ((data->field_0x94 & 0x800) != 0 && object->apiobj.field_0x27c == -1);
+}
+
+static i32 Collide2Objects(APIOBJECT *first, APIOBJECT *second) {
+    const f32 first_vertical_velocity = first->velocity.y;
+    const f32 second_vertical_velocity = second->velocity.y;
+    GameObject_s *first_object = first->objptr;
+    GameObject_s *second_object = second->objptr;
+    i32 collision_result = ForcePushed_SuperPush_Occurring(first_object, second_object);
+    if (collision_result == 0) {
+        if (WORLD->current_level == DOGFIGHTA_LDATA) {
+            collision_result = APIObjectCollision(first, second);
+        } else {
+            collision_result = APIObjectCollision2D(first, second);
+        }
+
+        if (collision_result == 2 && VehicleArea == 0) {
+            GAMECHARACTERDATA *first_data =
+                static_cast<GAMECHARACTERDATA *>(first_object->apiobj.character_data->field11_0x24);
+            GAMECHARACTERDATA *second_data =
+                static_cast<GAMECHARACTERDATA *>(second_object->apiobj.character_data->field11_0x24);
+            if ((first_data->flags_090 & 0x1000) != 0 &&
+                first->horizontal_velocity_magnitude > first_data->movement_speed * 0.5f) {
+                StartFlatten(first_object, second_object);
+            } else if ((second_data->flags_090 & 0x1000) != 0 &&
+                       second->horizontal_velocity_magnitude > second_data->movement_speed * 0.5f) {
+                StartFlatten(second_object, first_object);
+            } else if (second_vertical_velocity < 0.0f && (first_data->flags_090 & 0x40) != 0 &&
+                       first_object->field_0x107c == -1) {
+                first->velocity.y += second_vertical_velocity * 0.5f;
+            } else if (first_vertical_velocity < 0.0f && (second_data->flags_090 & 0x40) != 0 &&
+                       second_object->field_0x107c == -1) {
+                second->velocity.y += first_vertical_velocity * 0.5f;
+            }
+        }
+
+        f32 maximum_velocity = first->character_data->game_character->movement_speed * 1.25f;
+        if (maximum_velocity < 1.0f) {
+            maximum_velocity = 1.0f;
+        }
+        f32 velocity_squared = first->velocity.x * first->velocity.x + first->velocity.z * first->velocity.z;
+        if (velocity_squared > maximum_velocity * maximum_velocity) {
+            const f32 scale = maximum_velocity / NuFsqrt(velocity_squared);
+            first->velocity.x *= scale;
+            first->velocity.z *= scale;
+        }
+
+        maximum_velocity = second->character_data->game_character->movement_speed * 1.25f;
+        if (maximum_velocity < 1.0f) {
+            maximum_velocity = 1.0f;
+        }
+        velocity_squared = second->velocity.x * second->velocity.x + second->velocity.z * second->velocity.z;
+        if (velocity_squared > maximum_velocity * maximum_velocity) {
+            const f32 scale = maximum_velocity / NuFsqrt(velocity_squared);
+            second->velocity.x *= scale;
+            second->velocity.z *= scale;
+        }
+    } else {
+        collision_result = (second_object->apiobj.field_0x1e8 & first_object->apiobj.field_0x1f0) != 0 ||
+                                   (second_object->apiobj.field_0x1e4 & first_object->apiobj.field_0x1ec) != 0 ||
+                                   (first_object->apiobj.field_0x1e8 & second_object->apiobj.field_0x1f0) != 0 ||
+                                   (first_object->apiobj.field_0x1e4 & second_object->apiobj.field_0x1ec) != 0
+                               ? 1
+                               : 2;
+        first->field_0x1ec |= second->field_0x1e4;
+        first->field_0x1f0 |= second->field_0x1e8;
+        second->field_0x1ec |= first->field_0x1e4;
+        second->field_0x1f0 |= first->field_0x1e8;
+    }
+    return collision_result;
 }
 
 i32 HitTerrain() {
@@ -603,7 +678,131 @@ u16 ObjHitObj_Flags(GameObject_s *object) {
     return (object->apiobj.field_0x1f4 & 4) != 0 ? special : ordinary;
 }
 
-void CollideGameObjects(WORLDINFO_s *) {
+void CollideGameObjects(WORLDINFO_s *world) {
+    if (world->level_sub_id != -1 && (world->area->flags & 0x80) != 0) {
+        return;
+    }
+
+    u64 narrow_speeder_mask = 0;
+    u64 flattened_mask = 0;
+    u64 player_collision_mask = 0;
+    u64 no_vertical_movement_mask = 0;
+    u64 vertical_movement_mask = 0;
+    u64 player_slot_mask = 0;
+
+    for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
+        GameObject_s *object = &Obj[index];
+        if ((object->apiobj.field_0x1f8 & APIOBJECT_FLAG_IN_USE) == 0) {
+            continue;
+        }
+
+        const u64 bit = static_cast<u64>(1) << object->apiobj.field_0x289;
+        if (object->apiobj.field_0x27c != -1) {
+            player_slot_mask |= bit;
+        }
+        GAMECHARACTERDATA *data = object->apiobj.character_data->game_character;
+        if (data->field_0x28 <= 0.0f) {
+            no_vertical_movement_mask |= bit;
+        } else {
+            vertical_movement_mask |= bit;
+        }
+        if (((object->apiobj.flags_low & APIOBJECT_FLAG_PLAYER_ACTIVE) != 0 || (object->field_0xf02 & 8) != 0) &&
+            (data->flags_090 & 0x40) == 0) {
+            player_collision_mask |= bit;
+        }
+        if (object->character_context == 0x3d && (object->apiobj.flags_low & APIOBJECT_FLAG_PLAYER_ACTIVE) == 0) {
+            flattened_mask |= bit;
+        }
+        if (WORLD->current_level == SPEEDERCHASEA_LDATA && disable_narrow_socks == 0 && object->id == id_SPEEDERBIKE &&
+            object->apiobj.field_0x27c != -1) {
+            narrow_speeder_mask |= bit;
+        }
+    }
+
+    APIOBJECT *collision_objects[64];
+    NUVEC collision_minimums[64];
+    NUVEC collision_maximums[64];
+    i32 collision_count = 0;
+    for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
+        GameObject_s *object = &Obj[index];
+        if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || object->apiobj.field_0x287 != 0 ||
+            object->apiobj.model_draw_result == 0 || object->use_model_origin <= 1) {
+            continue;
+        }
+
+        const i8 context = object->character_context;
+        if ((CInfo[context].flags & 0x8000) != 0 || context == 0x3b || context == 0x3c || context == 0x0f ||
+            context == 0x39) {
+            continue;
+        }
+        if (context == 0x26 && object->field_0x7a7 != -1 && (object->context_variant_flags & 2) != 0) {
+            continue;
+        }
+        if (context == 0x1f && object->field_0x7a3 == 1) {
+            continue;
+        }
+
+        GAMECHARACTERDATA *data = object->apiobj.character_data->game_character;
+        if ((data->flags_090 & 0x8000) != 0 || (object->action_flags & 0x20) != 0 ||
+            (context == 0x47 && object->field_0x788 != NULL &&
+             (*reinterpret_cast<u8 *>(static_cast<u8 *>(object->field_0x788) + 0x68) & 1) != 0)) {
+            continue;
+        }
+
+        collision_objects[collision_count] = &object->apiobj;
+        collision_minimums[collision_count] = object->apiobj.collision_min;
+        collision_maximums[collision_count] = object->apiobj.collision_max;
+        ++collision_count;
+
+        object->apiobj.collision_mask_low = 0;
+        object->apiobj.collision_mask_high = 0;
+        u64 collision_mask = 0;
+        if ((data->flags_090 & 0x1000) != 0) {
+            collision_mask = flattened_mask;
+        }
+
+        if (object->field_0x107c != -1) {
+            collision_mask |= player_collision_mask;
+            for (i32 player_index = 0; player_index < 8; ++player_index) {
+                GameObject_s *player = Player[player_index];
+                if (player == NULL || (player->apiobj.field_0x1f8 & 0x1001) != 0x1001 || player == object ||
+                    player->field_0xdc4 <= 0.0f || player->apiobj.supporting_platform_id != object->field_0x107c ||
+                    (object->field_0x107c == player->field_0x1078 &&
+                     (player->apiobj.field_0x27d != 0 || GameObjectNearFloor(player, 3.0f, NULL) != 0))) {
+                    continue;
+                }
+                NUVEC direction = {object->apiobj.collision_position.x - player->apiobj.collision_position.x, 0.0f,
+                                   object->apiobj.collision_position.z - player->apiobj.collision_position.z};
+                NuVecNorm(&direction, &direction);
+                object->apiobj.movement_direction.x = direction.x;
+                object->apiobj.movement_direction.z = direction.z;
+            }
+        }
+
+        if (context == CHARACTER_CONTEXT_JUMP && object->airborne_collision_target != NULL) {
+            collision_mask |= static_cast<u64>(1) << object->airborne_collision_target->apiobj.field_0x289;
+        }
+        if (WORLD->current_level == SPEEDERCHASEA_LDATA && disable_narrow_socks == 0 && object->id == id_SPEEDERBIKE &&
+            object->apiobj.field_0x27c != -1) {
+            collision_mask |= narrow_speeder_mask;
+        }
+
+        if (VehicleArea != 0 && WORLD->current_level != BOUNTYHUNTERPURSUITA_LDATA &&
+            WORLD->current_level != DOGFIGHTA_LDATA) {
+            if (object->apiobj.field_0x27c == -1 && data->field_0x28 != 0.0f) {
+                collision_mask |= (vertical_movement_mask & player_slot_mask) | no_vertical_movement_mask;
+            } else if (data->field_0x28 == 0.0f) {
+                collision_mask |= (~player_slot_mask) & vertical_movement_mask;
+            } else {
+                collision_mask |= vertical_movement_mask;
+            }
+        }
+
+        object->apiobj.collision_mask_low = static_cast<u32>(collision_mask);
+        object->apiobj.collision_mask_high = static_cast<u32>(collision_mask >> 32);
+    }
+
+    APIObjectCollisions(collision_count, collision_objects, collision_minimums, collision_maximums, Collide2Objects);
 }
 
 void CalculateRayBoxIntersection(VuVec const &, VuVec const &, VuVec const &, VuVec const &, float, float &) {

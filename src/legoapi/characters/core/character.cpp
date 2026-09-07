@@ -774,9 +774,6 @@ static __used__ int IsGrabbable(GameObject_s *) {
     return 0;
 }
 
-static __used__ void GameObjectForceApart2D(APIOBJECT_s *, APIOBJECT_s *) {
-}
-
 static __used__ void DrawCharacterAttachments(GameObject_s *, numtx_s *) {
 }
 

@@ -76,10 +76,6 @@ extern "C" APIOBJECTSYS_s *APIObjectSysInit(i32 size, VARIPTR *buf, VARIPTR *buf
     return system;
 }
 
-static __used__ int Collide2Objects(APIOBJECT_s *, APIOBJECT_s *) {
-    return {};
-}
-
 static __used__ unsigned int CalculateIntersection(AISYS_s *, AIPACKET_s *, APIOBJECT_s *, AIPATHCNX_s *,
                                                    AIPATHCNX_s *) {
     return {};

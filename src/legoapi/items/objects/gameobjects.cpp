@@ -69,6 +69,7 @@ void Arcade_GetMode(u32 *mode);
 void StarWars_GameAISysInit();
 void GameAISysSetGame();
 void ClearAICreatures();
+void CollideGameObjects(WORLDINFO_s *world);
 APIOBJECT *GameAPIOBJECTFromObjID(u8 object_id);
 i32 EquivalentObject_Find(WORLDINFO_s *world, nuhspecial_s *special);
 void AIPathCnxControlSysReset(AIPATHCNXCONTROLSYS_s *system);
@@ -2746,6 +2747,8 @@ void UpdateGameObjects(WORLDINFO_s *world) {
             LightGameObject(object, world->rtl_set);
         }
     }
+
+    CollideGameObjects(world);
 }
 
 GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *script_name, AIPATHINFO_s *path_info,
