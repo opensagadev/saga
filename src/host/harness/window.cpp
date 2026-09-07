@@ -361,7 +361,8 @@ namespace {
                     LOG_INFO("scripted AI action param: script=%s state=%s action=%s index=%d value=%s",
                              script->name != nullptr ? script->name : "-", state->name != nullptr ? state->name : "-",
                              action->def != nullptr && action->def->name != nullptr ? action->def->name : "-", param,
-                             action->params != nullptr && action->params[param] != nullptr ? action->params[param] : "-");
+                             action->params != nullptr && action->params[param] != nullptr ? action->params[param]
+                                                                                           : "-");
                 }
             }
             for (const NULISTLNK *condition_node = state->conditions.head; condition_node != nullptr;
@@ -1437,11 +1438,11 @@ i32 host_run_window(const HostWindowOptions &options) {
                     "scripted object[%d] AI: script=%s state=%s action=%s first=%u disabled=%u "
                     "movement=(flags=0x%x,runtime=0x%x,event=0x%x,speed=%u,target=%p) "
                     "destination=(%.3f,%.3f,%.3f) waypoint=(%.3f,%.3f,%.3f) pad=(%.3f,%u)",
-                    index, processor->script != nullptr && processor->script->name != nullptr
-                               ? processor->script->name
-                               : "-",
+                    index,
+                    processor->script != nullptr && processor->script->name != nullptr ? processor->script->name : "-",
                     processor->state != nullptr && processor->state->name != nullptr ? processor->state->name : "-",
-                    action != nullptr && action->def != nullptr && action->def->name != nullptr ? action->def->name : "-",
+                    action != nullptr && action->def != nullptr && action->def->name != nullptr ? action->def->name
+                                                                                                : "-",
                     processor->is_first_time_action, processor->is_disabled, object.ai.movement_flags,
                     object.ai.runtime_flags, object.ai.movement_event_flags, object.ai.goal_speed_mode,
                     object.ai.movement_target, object.ai.movement_destination.x, object.ai.movement_destination.y,

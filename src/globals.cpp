@@ -436,6 +436,7 @@ TERRAIN_LAYER_s TerLayer[17] = {
 };
 GameObject_s *player = NULL;
 GameObject_s *player2 = NULL;
+GameObject_s *CutDeadVehiclePlayer = NULL;
 i32 avg_currentspeed_mul = 0;
 i32 pause_rndr_on = 0;
 i32 pause_fade = 0;
@@ -1263,16 +1264,11 @@ LEVELSPLINE SplTab[26] = {
     {NULL, NULL, 0, 0, 0, 0},
 };
 CHARCAT_s LSW_CharCategory[10] = {
-    {"Jedi", 0x00000008, 0},
-    {"JediBaddie", 0x0000000c, 0},
-    {"BountyHunter", 0x01100080, 0},
-    {"Teleport", 0x00040000, 0},
-    {"HighJump", 0, 0x00400000},
-    {"Astromech", 0x00000040, 0},
-    {"Protocol", 0x00000020, 0},
-    {"ZipUp", 0x00100080, 0},
-    {"Blaster", 0x00000080, 0},
-    {NULL, 0, 0},
+    {"Jedi", 0x00000008, 0},         {"JediBaddie", 0x0000000c, 0},
+    {"BountyHunter", 0x01100080, 0}, {"Teleport", 0x00040000, 0},
+    {"HighJump", 0, 0x00400000},     {"Astromech", 0x00000040, 0},
+    {"Protocol", 0x00000020, 0},     {"ZipUp", 0x00100080, 0},
+    {"Blaster", 0x00000080, 0},      {NULL, 0, 0},
 };
 extern i16 tCHEAT_EXTRATOGGLE;
 extern i16 tCHEAT_POO;

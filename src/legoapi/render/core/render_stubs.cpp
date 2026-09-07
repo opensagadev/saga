@@ -6,9 +6,11 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/nu3d/android/nuiosdl_gl.h"
+#include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nurndrstat.h"
+#include "nu2api/nu3d/nuvport.h"
 #include "globals.h"
 
 #include <string.h>
@@ -239,9 +241,29 @@ extern "C" {
     }
 
     void *DisplayListCreateGeomTransformPS(VARIPTR *buffer, NUMTX *transform, NUMTL *mtl, void *next, void *tx) {
+        static NUMTX scale;
+        static NUMTX translate;
+        static NUMTX viewtranslate;
+        static NUMTX viewscale;
+        static NUMTX viewTransform;
+
         (void)mtl;
         (void)next;
         (void)tx;
+
+        NUMTX *projection = NuCameraGetProjectionMtx();
+        NUMTX *view = NuCameraGetViewMtx();
+        (void)projection;
+        (void)view;
+
+        NUVEC scale_vector = {1.0f, 1.0f, 1.0f};
+        NUVEC translation_vector = {0.0f, 0.0f, 0.0f};
+        scale_vector.x = g_NuVpRegion.projection_x_scale;
+        scale_vector.y = g_NuVpRegion.projection_y_scale;
+        NuMtxSetScale(&scale, &scale_vector);
+        translation_vector.x = g_NuVpRegion.projection_x_offset;
+        translation_vector.y = g_NuVpRegion.projection_y_offset;
+        NuMtxSetTranslation(&translate, &translation_vector);
 
         buffer->addr = ALIGN(buffer->addr, 4);
         NUMTX *result = static_cast<NUMTX *>(buffer->void_ptr);
@@ -498,7 +520,23 @@ extern "C" {
     void RndrOSquare(void) {
     }
 
-    void RndrStateBuildFogState(void) {
+    void *RndrStateBuildFogState(NUGLOBALRNDRSTATE *state) {
+        VARIPTR *buffer = NuDisplayListGetBuffer();
+        void *result = buffer->void_ptr;
+
+        *buffer->u32_ptr = state->fog_enabled;
+        buffer->u32_ptr++;
+        if (state->fog_enabled != 0) {
+            *buffer->u32_ptr = state->fog_rgba;
+            buffer->u32_ptr++;
+            *reinterpret_cast<f32 *>(buffer->u32_ptr) = state->fog_near;
+            buffer->u32_ptr++;
+            *reinterpret_cast<f32 *>(buffer->u32_ptr) = state->fog_far;
+            buffer->u32_ptr++;
+            *reinterpret_cast<f32 *>(buffer->u32_ptr) = state->fog_density;
+            buffer->u32_ptr++;
+        }
+        return result;
     }
 
     void RndrStateBuildLightState(void) {

@@ -113,6 +113,17 @@ typedef struct nulightstate_s {
     NUVEC specular_intensity;
 } NULIGHTSTATE;
 
+// Display-list fog packet built from NUGLOBALRNDRSTATE (original size 0x14).
+// When enabled, the remaining fields carry the packed colour, near/far
+// distances, and exponential density used by NuIOSDLFogCallback.
+typedef struct nufogstate_s {
+    i32 enabled;
+    u32 colour;
+    f32 near_distance;
+    f32 far_distance;
+    f32 density;
+} NUFOGSTATE;
+
 #ifdef __cplusplus
 #if !defined(__x86_64__) // the tidy pre-pass parses as 64-bit host; real build is i686
 static_assert(sizeof(NURNDRSTATE) == 52, "nurndrstate_s size");
@@ -126,6 +137,7 @@ static_assert(offsetof(NURNDRSTATE, fog_id) == 0x2e, "state.fog_id");
 static_assert(offsetof(NURNDRSTATE, reflection_id) == 0x32, "state.reflection_id");
 static_assert(sizeof(NUGLOBALRNDRSTATE) == 0x1b0, "nuglobalrndrstate_s size");
 static_assert(sizeof(NULIGHTINGSTATE) == 0x78, "nulightingstate_s size");
+static_assert(sizeof(NUFOGSTATE) == 0x14, "nufogstate_s size");
 static_assert(offsetof(NUGLOBALRNDRSTATE, camera_state) == 0x110, "global camera_state");
 static_assert(offsetof(NUGLOBALRNDRSTATE, view) == 0x120, "global view");
 static_assert(offsetof(NUGLOBALRNDRSTATE, vpx) == 0x190, "global viewport");

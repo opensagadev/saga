@@ -15,8 +15,8 @@
 
 i32 openlevels = 0;
 
-static void AddToModelList(APICHARACTERMODELLIST_s *list, i32 *count, i32 capacity, i32 character_id,
-                           i32 load_model, EXTRAMODEL *extra_models) {
+static void AddToModelList(APICHARACTERMODELLIST_s *list, i32 *count, i32 capacity, i32 character_id, i32 load_model,
+                           EXTRAMODEL *extra_models) {
     if (*count < capacity && InModelList(list, character_id, NULL) == 0) {
         list[*count].model_id = static_cast<i16>(character_id);
         list[*count].count = static_cast<i16>(load_model);
@@ -187,8 +187,7 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
     }
     NuFParDestroy(fp);
 
-    APICHARACTERMODELLIST_s *player_models =
-        reinterpret_cast<APICHARACTERMODELLIST_s *>(Area_PlayerModelList);
+    APICHARACTERMODELLIST_s *player_models = reinterpret_cast<APICHARACTERMODELLIST_s *>(Area_PlayerModelList);
     if (Area_PlayerModelCount == 0) {
         i16 player_id = Area_StoryModelList[0].model_id;
         if (player_id == -1) {

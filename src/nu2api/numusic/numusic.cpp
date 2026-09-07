@@ -700,8 +700,8 @@ i32 NuMusic::PlayTrack(TRACK_CLASS track) {
     return PlayTrackI(track, 0);
 }
 
-void NuMusic::PlayTrack(u32 track, u32 unused) {
-    PlayTrackI((TRACK_CLASS)track, unused);
+i32 NuMusic::PlayTrack(u32 track, u32 unused) {
+    return PlayTrackI((TRACK_CLASS)track, unused);
 }
 
 i32 NuMusic::StopAll(i32 toggle) {
@@ -1200,13 +1200,58 @@ void NuMusic::Debug(i32, i32) {
 void NuMusic::GetAlbumHandle(char const *) {
 }
 
-void NuMusic::GetPlaybackTime(u32) {
+f32 NuMusic::GetPlaybackTime(u32 clazz) {
+    Voice *voice = &voices[0];
+    Track *track = voice->tracks[voice->track_index];
+    if (track == NULL || (track->clazz & clazz) == 0 || voice->status != VOICE_STATUS_PLAYING_LOADED) {
+        voice = &voices[1];
+        track = voice->tracks[voice->track_index];
+        if (track == NULL || (track->clazz & clazz) == 0 || voice->status != VOICE_STATUS_PLAYING_LOADED) {
+            return 0.0f;
+        }
+    }
+    return NuSound3GetStreamPlaybackTime(voice->stream_index);
 }
 
 void NuMusic::GetPlayer() {
 }
 
-void NuMusic::GetStatus(u32, i32 *) {
+int NuMusic::GetStatus(u32 clazz, i32 *class_status) {
+    if (this == NULL || the_music_player == NULL) {
+        return 0;
+    }
+
+    if (class_status != NULL) {
+        memset(class_status, 0, sizeof(i32) * 6);
+    }
+
+    i32 result = 0;
+    for (i32 i = 0; i < 2; ++i) {
+        Voice *voice = &voices[i];
+        Track *track = voice->tracks[voice->track_index];
+        if (track == NULL || (track->clazz & clazz) == 0) {
+            continue;
+        }
+
+        i32 status = 0;
+        if (voice->status <= VOICE_STATUS_PLAYING_LOADED) {
+            const u32 status_bit = 1u << voice->status;
+            if ((status_bit & 0x75) != 0) {
+                status = 1;
+            } else if ((status_bit & 0x80) != 0) {
+                status = 4;
+            } else if ((status_bit & 8) != 0) {
+                status = 2;
+            }
+        }
+
+        result |= status;
+        const i32 class_index = ClassToIX(track->clazz);
+        if (class_status != NULL && class_index != -1) {
+            class_status[class_index] |= status;
+        }
+    }
+    return result;
 }
 
 void NuMusic::NoMusic(i32) {

@@ -617,8 +617,7 @@ void Area_CharIDInCurrentList(i32) {
 void SetProtocolDroidFallAnim(GameObject_s *object) {
     static const i16 fall_animations[] = {76, 75, 40};
     const u8 variant = object->field_0xe38;
-    object->apiobj.anim_packet.requested_animation =
-        variant >= 1 && variant <= 3 ? fall_animations[variant - 1] : 5;
+    object->apiobj.anim_packet.requested_animation = variant >= 1 && variant <= 3 ? fall_animations[variant - 1] : 5;
 }
 
 void CollectCharactersOff_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32) {
@@ -645,9 +644,12 @@ void TakeOverYodaSeekDistanceHack(GameObject_s *, GameObject_s *, nuvec_s *) {
 }
 
 void SetProtocolDroidInterfaceAction(GameObject_s *object) {
-    if (object->field_0xe38 == 3) object->context_animation = 0x45;
-    else if (object->field_0xe38 == 2) object->context_animation = 0x46;
-    else if (object->field_0xe38 == 1) object->context_animation = 0x47;
+    if (object->field_0xe38 == 3)
+        object->context_animation = 0x45;
+    else if (object->field_0xe38 == 2)
+        object->context_animation = 0x46;
+    else if (object->field_0xe38 == 1)
+        object->context_animation = 0x47;
 }
 
 void SetProtocolDroidDeactivatedAction(GameObject_s *object) {

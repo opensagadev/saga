@@ -532,8 +532,7 @@ extern "C" {
         MusicVolume = volume;
         if (Music.state == MUSIC_PLAYBACK_ACTIVE) {
             NuSound3SetStereoStreamVolume(
-                Music.primary_stream,
-                static_cast<i32>(static_cast<f32>(g_music[Music.current_track].index) * volume));
+                Music.primary_stream, static_cast<i32>(static_cast<f32>(g_music[Music.current_track].index) * volume));
         }
     }
 
@@ -658,7 +657,10 @@ void UpdateLevelSfx(WORLDINFO_s *, i32) {
 void PlayFootStepSfx(GameObject_s *) {
 }
 
-void SetSfxBit_OffEx(i32) {
+void SetSfxBit_OffEx(i32 sound) {
+    if (static_cast<u32>(sound) < 1600) {
+        SfxBits[sound >> 4] &= ~(1 << (sound & 15));
+    }
 }
 
 void UpdateRepeatSfx() {
@@ -710,10 +712,16 @@ void AddLevelSfxFromId(i32 sfx_id, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx) {
     ++*sfx_count;
 }
 
-void SetSfxBitTab_OnEx(SoundTable *, i32) {
+void SetSfxBitTab_OnEx(SoundTable *table, i32 sound) {
+    if (static_cast<u32>(sound) < 1600) {
+        table->bits[sound >> 4] |= 1 << (sound & 15);
+    }
 }
 
-void SetSfxBitTab_OffEx(SoundTable *, i32) {
+void SetSfxBitTab_OffEx(SoundTable *table, i32 sound) {
+    if (static_cast<u32>(sound) < 1600) {
+        table->bits[sound >> 4] &= ~(1 << (sound & 15));
+    }
 }
 
 void SfxCheckMusicOnOff(OPTIONSSAVE_s *) {

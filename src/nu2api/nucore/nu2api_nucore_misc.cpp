@@ -255,7 +255,28 @@ void NuGCutRigidCalcMtx(NUGCUTRIGID_s *rigid, float frame, numtx_s *mtx) {
     NuMtxTranslate(mtx, reinterpret_cast<NUVEC *>(&rigid->base_matrix.m30));
 }
 
-void NuIOSDLFogCallback(void *) {
+void NuIOSDLFogCallback(void *arg) {
+    const NUFOGSTATE *fog = static_cast<const NUFOGSTATE *>(arg);
+    if (fog->enabled != 0) {
+        const u32 colour = fog->colour;
+        const f32 fog_colour[4] = {
+            static_cast<f32>(colour & 0xff) / 255.0f,
+            static_cast<f32>((colour >> 8) & 0xff) / 255.0f,
+            static_cast<f32>((colour >> 16) & 0xff) / 255.0f,
+            static_cast<f32>(colour >> 24) / 255.0f,
+        };
+        const f32 fog_params[4] = {
+            fog->near_distance,
+            fog->far_distance,
+            fog->far_distance - fog->near_distance,
+            fog->density,
+        };
+        NuShaderManagerSetfv(0x47, fog_colour);
+        NuShaderManagerSetfv(0x48, fog_params);
+    } else {
+        const f32 fog_params[4] = {100000.0f, 0.0f, 100000.0f, 0.0f};
+        NuShaderManagerSetfv(0x48, fog_params);
+    }
 }
 
 // original 0x295420 -- legacy packet containing three texture ids.
@@ -469,9 +490,8 @@ void __attribute__((weak)) NuIOSDLSkinMtxCallback(void *data) {
     }
 }
 
-void NuGCutCharAnimProcess_3(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible,
-                             u32 *animation_index, f32 *animation_rate, f32 *blend_time,
-                             f32 *animation_start_frame, i32 *layer_mask) {
+void NuGCutCharAnimProcess_3(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible, u32 *animation_index,
+                             f32 *animation_rate, f32 *blend_time, f32 *animation_start_frame, i32 *layer_mask) {
     ani3_animheader_s *animation = reinterpret_cast<ani3_animheader_s *>(character->animation);
     f32 *values = NuAnimCurveExtractAllNodeCurves_3(animation, 0, frame, NULL);
     const u16 curve_count = animation->curve_count;
@@ -482,8 +502,7 @@ void NuGCutCharAnimProcess_3(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, 
     }
     if (animation_start_frame != NULL) {
         if (animation_index != NULL && *animation_index != 0 && *animation_index != 0xff) {
-            *animation_start_frame = curve_count < 11 ? static_cast<f32>(character->animation_start_frame)
-                                                       : values[10];
+            *animation_start_frame = curve_count < 11 ? static_cast<f32>(character->animation_start_frame) : values[10];
         } else {
             *animation_start_frame = 0.0f;
         }
@@ -676,8 +695,8 @@ void NuAnimBuffEvaluate_3_QuatB(numtx_s *, nuanimbuff_s *buffer, nugscn_s *scene
                                 ani3_animheader_s *animation,
                                 void (*root_fn)(numtx_s *, void *, nuvec_s *, nuvec_s *, nuvec_s *, float),
                                 nuvec_s *root_translation, void *root_data) {
-    NuAnimBuffEvaluate_3(buffer, reinterpret_cast<nuhgobj_s *>(scene), matrices, animation, root_fn,
-                         root_translation, root_data);
+    NuAnimBuffEvaluate_3(buffer, reinterpret_cast<nuhgobj_s *>(scene), matrices, animation, root_fn, root_translation,
+                         root_data);
 }
 
 void NuDDSSetTextureDescription(char *, NUTEXFORMAT, i32, i32, i32, i32, nutexturetype_e) {
@@ -700,9 +719,8 @@ void NuHGobjEvalAnimBlend2Root_3(nugscn_s *scene, ani3_animheader_s *animation_a
     NUVEC root_translation = {0.0f, 0.0f, 0.0f};
 
     NuAnimBuffCreateScratch(&buffer);
-    const i32 use_quaternions =
-        NuAnimGetUseQuatsFlag() |
-        ((animation_a->format_flags | animation_b->format_flags) & ANI3_FORMAT_QUATERNION_ROTATION);
+    const i32 use_quaternions = NuAnimGetUseQuatsFlag() | ((animation_a->format_flags | animation_b->format_flags) &
+                                                           ANI3_FORMAT_QUATERNION_ROTATION);
     NuAnimPushSetUseQuatsFlag(use_quaternions);
     NuAnimBuffAccumulate_3(&buffer, animation_a, time_a, 1, 0.0f, 0, object, &root_a);
     NuAnimBuffAccumulate_3(&buffer, animation_b, time_b, 0, blend, 0, object, &root_b);

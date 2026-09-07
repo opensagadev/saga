@@ -61,9 +61,8 @@ namespace {
     };
 
     DECOMP_ASSERT(sizeof(LegacyInstanceAnimationLink) == 0x4c, "legacy instance animation link ABI");
-    DECOMP_ASSERT(offsetof(LegacyInstanceAnimationLink, animation) == 0x48,
-                  "legacy instance animation pointer offset");
-}
+    DECOMP_ASSERT(offsetof(LegacyInstanceAnimationLink, animation) == 0x48, "legacy instance animation pointer offset");
+} // namespace
 
 void ReadInstAnimBlock(i32 file, nugscn_s *scene) {
     scene->num_instance_animations = static_cast<i16>(NuFileReadInt(file));
@@ -74,8 +73,8 @@ void ReadInstAnimBlock(i32 file, nugscn_s *scene) {
         nuinstanim_s *animation = scene->instance_animations;
         if (animation != NULL) {
             for (i32 instance_index = 0; instance_index < scene->num_instances; ++instance_index) {
-                LegacyInstanceAnimationLink *instance = reinterpret_cast<LegacyInstanceAnimationLink *>(
-                    scene->instances + instance_index * 0x50);
+                LegacyInstanceAnimationLink *instance =
+                    reinterpret_cast<LegacyInstanceAnimationLink *>(scene->instances + instance_index * 0x50);
                 if (instance->animation == NULL) {
                     continue;
                 }
@@ -89,8 +88,8 @@ void ReadInstAnimBlock(i32 file, nugscn_s *scene) {
     } else if (scene->instance_animations != NULL && scene->num_instance_animations > 0) {
         for (i32 animation_index = 0; animation_index < scene->num_instance_animations; ++animation_index) {
             nuinstanim_s *animation = &scene->instance_animations[animation_index];
-            LegacyInstanceAnimationLink *instance = reinterpret_cast<LegacyInstanceAnimationLink *>(
-                scene->instances + animation->instance_ix * 0x50);
+            LegacyInstanceAnimationLink *instance =
+                reinterpret_cast<LegacyInstanceAnimationLink *>(scene->instances + animation->instance_ix * 0x50);
             instance->animation = animation;
             animation->mtx = instance->matrix;
         }

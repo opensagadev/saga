@@ -150,8 +150,7 @@ static void MoveAnim_Check(GameObject_s *object) {
                 bool retain_previous = false;
                 if (previous == CHARACTER_ANIMATION_RUN) {
                     retain_previous = requested == CHARACTER_ANIMATION_WALK ||
-                                      requested == CHARACTER_ANIMATION_TIPTOE ||
-                                      requested == CHARACTER_ANIMATION_IDLE;
+                                      requested == CHARACTER_ANIMATION_TIPTOE || requested == CHARACTER_ANIMATION_IDLE;
                 } else if (previous == CHARACTER_ANIMATION_SABER_RUN) {
                     const GAMECHARACTERDATA *game_character =
                         static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
@@ -425,10 +424,9 @@ static inline void GetAni4SamplePosition(const ani3_animheader_s *anim, f32 fram
 }
 
 static inline f32 DecodeAni4QuaternionScalar(const ani3_animheader_s *anim, u16 type, u32 quarter, f32 fraction,
-                                              u8 *&keys, ani3_scalemin_s *&scale_min) {
+                                             u8 *&keys, ani3_scalemin_s *&scale_min) {
     if (type == 7) {
-        const f32 value =
-            CalcValue1648(reinterpret_cast<char *>(keys), quarter, anim->key_stride, fraction, scale_min);
+        const f32 value = CalcValue1648(reinterpret_cast<char *>(keys), quarter, anim->key_stride, fraction, scale_min);
         keys += 8;
         ++scale_min;
         return value;
@@ -447,10 +445,9 @@ static inline f32 DecodeAni4QuaternionScalar(const ani3_animheader_s *anim, u16 
 }
 
 static inline void DecodeAni4QuaternionPair(const ani3_animheader_s *anim, u16 type, u32 quarter, u8 *&keys,
-                                             ani3_scalemin_s *&scale_min, f32 &first, f32 &second) {
+                                            ani3_scalemin_s *&scale_min, f32 &first, f32 &second) {
     if (type == 7) {
-        CalcValue1648Get2Values(reinterpret_cast<char *>(keys), quarter, anim->key_stride, scale_min, &first,
-                                &second);
+        CalcValue1648Get2Values(reinterpret_cast<char *>(keys), quarter, anim->key_stride, scale_min, &first, &second);
         keys += 8;
         ++scale_min;
         return;
@@ -458,8 +455,7 @@ static inline void DecodeAni4QuaternionPair(const ani3_animheader_s *anim, u16 t
     if (type == 9) {
         const u16 *samples = reinterpret_cast<const u16 *>(keys);
         first = static_cast<f32>(samples[quarter]) * scale_min->scale + scale_min->minimum;
-        const u16 next = quarter == 3 ? *reinterpret_cast<const u16 *>(keys + anim->key_stride)
-                                      : samples[quarter + 1];
+        const u16 next = quarter == 3 ? *reinterpret_cast<const u16 *>(keys + anim->key_stride) : samples[quarter + 1];
         second = static_cast<f32>(next) * scale_min->scale + scale_min->minimum;
         keys += 8;
         ++scale_min;
@@ -477,13 +473,12 @@ static inline void DecodeAni4QuaternionPair(const ani3_animheader_s *anim, u16 t
         return;
     }
 
-    first = second = static_cast<f32>(reinterpret_cast<const u16 *>(anim->constants)[type - 16]) * anim->scale +
-                     anim->minimum;
+    first = second =
+        static_cast<f32>(reinterpret_cast<const u16 *>(anim->constants)[type - 16]) * anim->scale + anim->minimum;
 }
 
 static inline NUQUAT DecodeAni4Quaternion(const ani3_animheader_s *anim, i32 component_count, const u16 *types,
-                                          u32 quarter, f32 fraction, u8 *&keys,
-                                          ani3_scalemin_s *&scale_min) {
+                                          u32 quarter, f32 fraction, u8 *&keys, ani3_scalemin_s *&scale_min) {
     NUQUAT first = {0.0f, 0.0f, 0.0f, 0.0f};
     NUQUAT second = {0.0f, 0.0f, 0.0f, 0.0f};
     f32 *first_values = &first.x;
@@ -506,7 +501,7 @@ static inline NUQUAT DecodeAni4Quaternion(const ani3_animheader_s *anim, i32 com
 }
 
 static inline void SkipAni4QuaternionJoint(const ani3_animheader_s *anim, i32 quaternion_components, i32 joint,
-                                            const u16 *types, u8 *&keys, ani3_scalemin_s *&scale_min) {
+                                           const u16 *types, u8 *&keys, ani3_scalemin_s *&scale_min) {
     const u8 flags = anim->node_flags[joint];
     if ((flags & NUANIMBUFF_JOINT_TRANSLATION) != 0) {
         for (i32 component = 0; component < 3; ++component) {
@@ -794,8 +789,7 @@ void AnimatePlayer(GameObject_s *object) {
     }
 
     const i16 override_from = object->ai.animation_override_from;
-    if ((override_from == 0xe9 && object->character_context != 0x1c) ||
-        override_from == packet.requested_animation) {
+    if ((override_from == 0xe9 && object->character_context != 0x1c) || override_from == packet.requested_animation) {
         packet.requested_animation = object->ai.animation_override_to;
     }
 
@@ -952,8 +946,7 @@ void Animate_DROIDEKA(GameObject_s *object) {
             }
         }
 
-        if (UseFallAnim(object) ||
-            (object->character_context == -1 && object->apiobj.field_0x27d == 0)) {
+        if (UseFallAnim(object) || (object->character_context == -1 && object->apiobj.field_0x27d == 0)) {
             packet.requested_animation = CHARACTER_ANIMATION_FALL;
         } else if ((object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
                    object->pad_gamepad->input_magnitude > 0.0f) {
@@ -1657,8 +1650,8 @@ void Animate_SUPERBATTLEDROID(GameObject_s *object) {
             packet.requested_animation = CHARACTER_ANIMATION_FALL;
         } else if (packet.requested_animation != CHARACTER_ANIMATION_FALL) {
             const GAMECHARACTERDATA *game_character = GetGameCharacterData(object);
-            const bool weapon_out = (object->field_0xe22 & GAMEOBJECT_E22_FLAG_WEAPON_ANIMATION) != 0 ||
-                                    object->weapon_scale > 0.0f;
+            const bool weapon_out =
+                (object->field_0xe22 & GAMEOBJECT_E22_FLAG_WEAPON_ANIMATION) != 0 || object->weapon_scale > 0.0f;
             if ((object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
                 object->pad_gamepad->input_magnitude > 0.0f) {
                 const f32 run_threshold = (game_character->walk_speed + game_character->run_speed) * 0.5f;
@@ -2548,8 +2541,8 @@ extern "C" {
                 f32 sampled[3];
                 f32 *translation = &joint.translation.x;
                 for (i32 component = 0; component < 3; ++component) {
-                    sampled[component] = DecodeAni4V4Curve(anim, curve_types[component], quarter, fraction, keys,
-                                                           scale_min);
+                    sampled[component] =
+                        DecodeAni4V4Curve(anim, curve_types[component], quarter, fraction, keys, scale_min);
                     translation[component] += (sampled[component] - translation[component]) * blend;
                 }
                 if (root != NULL) {
@@ -2572,8 +2565,8 @@ extern "C" {
             if ((flags & NUANIMBUFF_JOINT_ROTATION) != 0) {
                 f32 euler[3];
                 for (i32 component = 0; component < 3; ++component) {
-                    euler[component] = DecodeAni4V4Curve(anim, curve_types[3 + component], quarter, fraction, keys,
-                                                         scale_min);
+                    euler[component] =
+                        DecodeAni4V4Curve(anim, curve_types[3 + component], quarter, fraction, keys, scale_min);
                 }
                 NuQuatFromEulerXYZ(&sampled_rotation, static_cast<NUANG>(euler[0] * 10430.378f),
                                    static_cast<NUANG>(euler[1] * 10430.378f),
@@ -2585,8 +2578,8 @@ extern "C" {
             if ((flags & NUANIMBUFF_JOINT_SCALE) != 0) {
                 f32 *scale = &joint.scale.x;
                 for (i32 component = 0; component < 3; ++component) {
-                    const f32 sampled = DecodeAni4V4Curve(anim, curve_types[6 + component], quarter, fraction, keys,
-                                                          scale_min);
+                    const f32 sampled =
+                        DecodeAni4V4Curve(anim, curve_types[6 + component], quarter, fraction, keys, scale_min);
                     scale[component] += (sampled - scale[component]) * blend;
                 }
             } else {
@@ -2600,8 +2593,8 @@ extern "C" {
         }
     }
 
-    i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer,
-                                              i32 joint_count, i32 first_joint) {
+    i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, i32 joint_count,
+                                              i32 first_joint) {
         buffer->use_quaternions = 1;
 
         u32 quarter;
@@ -2636,8 +2629,8 @@ extern "C" {
             if ((flags & NUANIMBUFF_JOINT_TRANSLATION) != 0) {
                 f32 *translation = &joint.translation.x;
                 for (i32 component = 0; component < 3; ++component) {
-                    translation[component] = DecodeAni4V4Curve(anim, curve_types[component], quarter, fraction, keys,
-                                                               scale_min);
+                    translation[component] =
+                        DecodeAni4V4Curve(anim, curve_types[component], quarter, fraction, keys, scale_min);
                 }
             } else {
                 joint.translation = {0.0f, 0.0f, 0.0f};
@@ -2647,8 +2640,8 @@ extern "C" {
             if ((flags & NUANIMBUFF_JOINT_ROTATION) != 0) {
                 f32 euler[3];
                 for (i32 component = 0; component < 3; ++component) {
-                    euler[component] = DecodeAni4V4Curve(anim, curve_types[3 + component], quarter, fraction, keys,
-                                                         scale_min);
+                    euler[component] =
+                        DecodeAni4V4Curve(anim, curve_types[3 + component], quarter, fraction, keys, scale_min);
                 }
                 NuQuatFromEulerXYZ(rotation, static_cast<NUANG>(euler[0] * 10430.378f),
                                    static_cast<NUANG>(euler[1] * 10430.378f),
@@ -2660,8 +2653,8 @@ extern "C" {
             if ((flags & NUANIMBUFF_JOINT_SCALE) != 0) {
                 f32 *scale = &joint.scale.x;
                 for (i32 component = 0; component < 3; ++component) {
-                    scale[component] = DecodeAni4V4Curve(anim, curve_types[6 + component], quarter, fraction, keys,
-                                                         scale_min);
+                    scale[component] =
+                        DecodeAni4V4Curve(anim, curve_types[6 + component], quarter, fraction, keys, scale_min);
                 }
             } else {
                 joint.scale = {1.0f, 1.0f, 1.0f};
@@ -2675,8 +2668,7 @@ extern "C" {
     void AddAnimEffects(void) {
     }
 
-    i32 AnimBlendingFromTo(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, i32 source_animation,
-                           i32 target_animation) {
+    i32 AnimBlendingFromTo(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, i32 source_animation, i32 target_animation) {
         if (packet->blending == 0 || source_animation == -1 || packet->blend_animation_a != source_animation ||
             target_animation == -1 || packet->blend_animation_b != target_animation) {
             return 0;
@@ -2971,8 +2963,7 @@ extern "C" {
             return 0.0f;
         }
 
-        return static_cast<f32>(
-            scene->animation_end_frames[instance_animation->end_frame_lookup_index - 1].end_frame);
+        return static_cast<f32>(scene->animation_end_frames[instance_animation->end_frame_lookup_index - 1].end_frame);
     }
 
     void ResetAnimPacket(ANIMPACKET_s *packet, i16 animation) {
@@ -3462,8 +3453,8 @@ static i32 PlayAni4Quaternion(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *
         if ((flags & NUANIMBUFF_JOINT_TRANSLATION) != 0) {
             f32 *translation = &joint.translation.x;
             for (i32 component = 0; component < 3; ++component) {
-                translation[component] = DecodeAni4QuaternionScalar(anim, curve_types[component], quarter, fraction,
-                                                                    keys, scale_min);
+                translation[component] =
+                    DecodeAni4QuaternionScalar(anim, curve_types[component], quarter, fraction, keys, scale_min);
             }
         } else {
             joint.translation = {0.0f, 0.0f, 0.0f};
@@ -3471,8 +3462,8 @@ static i32 PlayAni4Quaternion(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *
 
         NUQUAT *rotation = reinterpret_cast<NUQUAT *>(&joint.rotation);
         if ((flags & NUANIMBUFF_JOINT_ROTATION) != 0) {
-            *rotation = DecodeAni4Quaternion(anim, quaternion_components, curve_types + 3, quarter, fraction, keys,
-                                             scale_min);
+            *rotation =
+                DecodeAni4Quaternion(anim, quaternion_components, curve_types + 3, quarter, fraction, keys, scale_min);
         } else {
             *rotation = {0.0f, 0.0f, 0.0f, 1.0f};
         }
@@ -3493,9 +3484,8 @@ static i32 PlayAni4Quaternion(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *
     return 0;
 }
 
-static void BlendAni4Quaternion(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, f32 blend,
-                                i32 joint_count, i32 first_joint, NUVEC *root_translation,
-                                i32 quaternion_components) {
+static void BlendAni4Quaternion(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, f32 blend, i32 joint_count,
+                                i32 first_joint, NUVEC *root_translation, i32 quaternion_components) {
     u32 quarter;
     f32 fraction;
     i32 key_offset;
@@ -3526,8 +3516,8 @@ static void BlendAni4Quaternion(ani3_animheader_s *anim, f32 frame, nuanimbuff_s
             f32 sampled[3];
             f32 *translation = &joint.translation.x;
             for (i32 component = 0; component < 3; ++component) {
-                sampled[component] = DecodeAni4QuaternionScalar(anim, curve_types[component], quarter, fraction,
-                                                                keys, scale_min);
+                sampled[component] =
+                    DecodeAni4QuaternionScalar(anim, curve_types[component], quarter, fraction, keys, scale_min);
                 translation[component] += (sampled[component] - translation[component]) * blend;
             }
             if (root != NULL) {
@@ -3548,8 +3538,8 @@ static void BlendAni4Quaternion(ani3_animheader_s *anim, f32 frame, nuanimbuff_s
 
         NUQUAT sampled_rotation = {0.0f, 0.0f, 0.0f, 1.0f};
         if ((flags & NUANIMBUFF_JOINT_ROTATION) != 0) {
-            sampled_rotation = DecodeAni4Quaternion(anim, quaternion_components, curve_types + 3, quarter, fraction,
-                                                    keys, scale_min);
+            sampled_rotation =
+                DecodeAni4Quaternion(anim, quaternion_components, curve_types + 3, quarter, fraction, keys, scale_min);
         }
         NUQUAT *rotation = reinterpret_cast<NUQUAT *>(&joint.rotation);
         VuQuatSlerpFast(rotation, rotation, &sampled_rotation, blend);

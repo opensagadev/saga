@@ -85,8 +85,7 @@ void BackFlipCode(GameObject_s *object) {
         return;
     }
 
-    if ((object->field_0xe22 & 0x10) != 0 &&
-        (object->pad_gamepad->buttons_held & GAMEPAD_JUMP) == 0) {
+    if ((object->field_0xe22 & 0x10) != 0 && (object->pad_gamepad->buttons_held & GAMEPAD_JUMP) == 0) {
         object->field_0xe22 &= static_cast<u8>(~0x10u);
     }
 
@@ -102,8 +101,7 @@ void BackFlipCode(GameObject_s *object) {
     }
 
     object->character_context = -1;
-    if ((object->pad_gamepad->buttons_held & GAMEPAD_JUMP) != 0 &&
-        (object->field_0xe22 & 0x10) == 0) {
+    if ((object->pad_gamepad->buttons_held & GAMEPAD_JUMP) != 0 && (object->field_0xe22 & 0x10) == 0) {
         StartBackFlip(object);
     } else {
         object->apiobj.velocity.x = 0.0f;

@@ -242,12 +242,12 @@ class NuMusic {
     i32 CueTrack(u32);
     void Debug(i32, i32);
     void GetAlbumHandle(char const *);
-    void GetPlaybackTime(u32);
+    f32 GetPlaybackTime(u32);
     void GetPlayer();
-    void GetStatus(u32, i32 *);
+    i32 GetStatus(u32, i32 *);
     void NoMusic(i32);
     i32 PauseTrack(u32);
-    void PlayTrack(u32, u32);
+    i32 PlayTrack(u32, u32);
     void Process(float);
     bool SelectTrack(u32, char const *);
     void SetAlbum(char const *);

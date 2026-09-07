@@ -420,8 +420,7 @@ static NUFPCOMJMP CutScene_ConfigKeywords[] = {
     {NULL, NULL},
 };
 
-__attribute__((noinline)) static void CutScene_Configure(CUTINFO *cut, char *name, VARIPTR *buf,
-                                                         VARIPTR *buf_end) {
+__attribute__((noinline)) static void CutScene_Configure(CUTINFO *cut, char *name, VARIPTR *buf, VARIPTR *buf_end) {
     CUTSCENEPLAYEROBJ state_entries[32];
 
     CS_CutInfo = cut;

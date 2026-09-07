@@ -800,8 +800,7 @@ extern "C" void NuRndrStateSetSpecularLight(const NUMTX *matrix, const NUCOLOUR3
     render_state.state.lights_id++;
 }
 
-extern "C" void NuRndrStateSetSpecularLightEx(const NUVEC *direction, const NUMTX *matrix,
-                                                const NUCOLOUR3 *colour) {
+extern "C" void NuRndrStateSetSpecularLightEx(const NUVEC *direction, const NUMTX *matrix, const NUCOLOUR3 *colour) {
     render_state.specular_mtx = *matrix;
     render_state.specular_colour = *colour;
     render_state.specular_intensity = *direction;
@@ -945,6 +944,7 @@ extern "C" void NuRndrStateUpdateCameraState(void) {
 }
 
 void *RndrStateBuildKonstState(NUGLOBALRNDRSTATE *state);
+extern "C" void *RndrStateBuildFogState(NUGLOBALRNDRSTATE *state);
 
 static void *RndrStateBuildLightState(NUGLOBALRNDRSTATE *state) {
     VARIPTR *buffer = NuDisplayListGetBuffer();
@@ -1013,6 +1013,13 @@ extern "C" void DisplayListUpdateRenderState(void *display_list, void *state) {
         }
         NuDisplayListLinkItem(dl, 0x9a, global->camera_state);
         dl->state->camera_id = global->state.camera_id;
+    }
+    if (dl->state->fog_id != global->state.fog_id) {
+        if (global->fog_state == nullptr) {
+            global->fog_state = RndrStateBuildFogState(global);
+        }
+        NuDisplayListLinkItem(dl, 0xa6, global->fog_state);
+        dl->state->fog_id = global->state.fog_id;
     }
     if (dl->state->konst_id != global->state.konst_id) {
         if (global->konst_state == nullptr) {

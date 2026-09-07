@@ -218,15 +218,14 @@ extern "C" {
         to_angle *= to_angle;
 
         const f32 from_weight =
-            ((((from_angle * 2.3154014e-5f - 0.0013853709f) * from_angle + 0.041663583f) * from_angle -
-               0.49999905f) *
-                  from_angle +
-              0.99999994f) *
+            ((((from_angle * 2.3154014e-5f - 0.0013853709f) * from_angle + 0.041663583f) * from_angle - 0.49999905f) *
+                 from_angle +
+             0.99999994f) *
             inverse_sine;
         const f32 to_weight =
             ((((to_angle * 2.3154014e-5f - 0.0013853709f) * to_angle + 0.041663583f) * to_angle - 0.49999905f) *
-                  to_angle +
-              0.99999994f) *
+                 to_angle +
+             0.99999994f) *
             inverse_sine;
         NuQuatBlend(out, from, &target, from_weight, to_weight);
     }

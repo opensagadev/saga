@@ -57,19 +57,19 @@ class NuSoundDecoder : public NuSoundSource {
   protected:
     NuSoundSource *source;    // +0x20: wrapped source
     NuSoundBuffer buffers[2]; // +0x24: two inline 0x40-byte ring buffers
-    u32 buffer_size;           // bytes per ring buffer
-    u32 ring_count;            // buffers filled so far
-    u32 decode_pos;            // next buffer index to decode
-    u32 consumed_pos;          // next buffer index to hand out
+    u32 buffer_size;          // bytes per ring buffer
+    u32 ring_count;           // buffers filled so far
+    u32 decode_pos;           // next buffer index to decode
+    u32 consumed_pos;         // next buffer index to hand out
     u32 buffers_started;
     u64 decoded_bytes; // bytes decoded since stream start
     u32 field_0xc0;
     u32 field_0xc4;
-    u64 total_decoded_bytes;     // +0xc8
+    u64 total_decoded_bytes; // +0xc8
     u32 field_0xd0;
-    i32 field_0xd4;               // atomic count of queued decode requests
-    bool stream_open;             // +0xd8
-    bool closing;                 // +0xd9
+    i32 field_0xd4;   // atomic count of queued decode requests
+    bool stream_open; // +0xd8
+    bool closing;     // +0xd9
     u8 padding_0xda[2];
     pthread_mutex_t decode_mutex; // +0xdc: decode-completion sync pair
     pthread_cond_t decode_cond;   // +0xe0

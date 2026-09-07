@@ -92,8 +92,8 @@ extern "C" {
     f32 AnimStopFrame(CHARACTERMODEL_s *model, i32 animation);
     void UpdateAnimPacket(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, f32 frame_step, f32 movement_speed,
                           f32 blend_step, f32 backwards_multiplier);
-    void UpdateMiniAnimPacket(CHARACTERMODEL_s *model, MINIANIMPACKET_s *packet, f32 frame_step,
-                              f32 movement_speed, f32 blend_step);
+    void UpdateMiniAnimPacket(CHARACTERMODEL_s *model, MINIANIMPACKET_s *packet, f32 frame_step, f32 movement_speed,
+                              f32 blend_step);
 #ifdef __cplusplus
 }
 #endif

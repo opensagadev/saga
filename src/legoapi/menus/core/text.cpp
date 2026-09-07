@@ -180,9 +180,8 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
                         chapter_text = chapter_buffer;
                     }
                 } else {
-                    i16 *bonus_text = (area->flags & AREAFLAG_VEHICLE_AREA) != 0
-                                          ? s_crawlPtr->vehicle_bonus_text
-                                          : s_crawlPtr->character_bonus_text;
+                    i16 *bonus_text = (area->flags & AREAFLAG_VEHICLE_AREA) != 0 ? s_crawlPtr->vehicle_bonus_text
+                                                                                 : s_crawlPtr->character_bonus_text;
                     if (bonus_text != NULL) {
                         chapter_text = TTab[*bonus_text];
                     }
@@ -191,7 +190,7 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
             if (area->name_id != -1) {
                 area_name = TTab[area->name_id];
             }
-            paragraph_count = area->text_id_value;
+            paragraph_count = 0;
         }
     }
 
@@ -215,29 +214,46 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
     if (paragraphs == 0 && QFont3DTime >= 55.0f) {
         colour_scale = 1.0f - (QFont3DTime - 55.0f) / 5.0f;
     }
-    const u32 colour = (static_cast<u32>(128.0f * colour_scale * alpha) << 24) |
-                       (static_cast<u32>(111.0f * colour_scale) << 8) | 0xff;
+    const u32 colour =
+        (static_cast<u32>(128.0f * colour_scale * alpha) << 24) | (static_cast<u32>(111.0f * colour_scale) << 8) | 0xff;
     NuQFntSetColour(QFont3DZ, colour);
 
     f32 y = QFont3DTime * 0.4f - 4.5f;
     const f32 x_scale = APITEXTSCALEX * 0.01f;
     const f32 y_scale = APITEXTSCALEY * 0.01f;
-    u16 encoded[1022];
+    u16 encoded[1024];
 
-    char *headings[] = {episode_name, episode_text, chapter_text, area_name};
-    const f32 heading_scales[] = {1.0f, 2.0f, 1.0f, 2.0f};
-    for (i32 i = 0; i < 4; ++i) {
-        if (headings[i] == NULL) {
-            continue;
+    if (episode_name != NULL) {
+        if (text != NULL && NuStrCmp(text, "?") == 0) {
+            NuQFntSetScale(QFont3DZ, x_scale * 2.0f, y_scale * 3.0f);
+        } else {
+            NuQFntSetScale(QFont3DZ, x_scale, y_scale);
         }
-        f32 heading_x_scale = x_scale;
-        f32 heading_y_scale = y_scale * heading_scales[i];
-        if (i == 0 && text != NULL && NuStrCmp(text, "?") == 0) {
-            heading_x_scale *= 2.0f;
-            heading_y_scale = y_scale * 3.0f;
-        }
-        NuQFntSetScale(QFont3DZ, heading_x_scale, heading_y_scale);
-        Text3DStringEncode(headings[i], encoded);
+        Text3DStringEncode(episode_name, encoded);
+        NuQFntMove(QFont3DZ, NuQFntPrintLenW(QFont3DZ, encoded) * -0.5f, y, 0.0f);
+        NuQFntPrintW(QFont3DZ, encoded);
+        y += NuQFntHeight(QFont3DZ) * 1.5f;
+    }
+
+    if (episode_text != NULL) {
+        NuQFntSetScale(QFont3DZ, x_scale, y_scale * 2.0f);
+        Text3DStringEncode(episode_text, encoded);
+        NuQFntMove(QFont3DZ, NuQFntPrintLenW(QFont3DZ, encoded) * -0.5f, y, 0.0f);
+        NuQFntPrintW(QFont3DZ, encoded);
+        y += NuQFntHeight(QFont3DZ) * 1.5f;
+    }
+
+    if (chapter_text != NULL) {
+        NuQFntSetScale(QFont3DZ, x_scale, y_scale);
+        Text3DStringEncode(chapter_text, encoded);
+        NuQFntMove(QFont3DZ, NuQFntPrintLenW(QFont3DZ, encoded) * -0.5f, y, 0.0f);
+        NuQFntPrintW(QFont3DZ, encoded);
+        y += NuQFntHeight(QFont3DZ) * 1.5f;
+    }
+
+    if (area_name != NULL) {
+        NuQFntSetScale(QFont3DZ, x_scale, y_scale * 2.0f);
+        Text3DStringEncode(area_name, encoded);
         NuQFntMove(QFont3DZ, NuQFntPrintLenW(QFont3DZ, encoded) * -0.5f, y, 0.0f);
         NuQFntPrintW(QFont3DZ, encoded);
         y += NuQFntHeight(QFont3DZ) * 1.5f;
@@ -254,8 +270,9 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
                 break;
             }
             Text3DStringEncode(paragraph, encoded);
-            y += NuQFntPrintJustifiedW(QFont3DZ, encoded, -3.5f, y, 0.0f, x_scale, y_scale, 7.0f, 1.3f,
-                                       colour, &matrix) + NuQFntHeight(QFont3DZ);
+            y += NuQFntPrintJustifiedW(QFont3DZ, encoded, -3.5f, y, 0.0f, x_scale, y_scale, 7.0f, 1.3f, colour,
+                                       &matrix) +
+                 NuQFntHeight(QFont3DZ);
         }
     }
     NuQFntPopPrintMode();

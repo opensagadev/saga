@@ -110,8 +110,8 @@ extern "C" NuSoundVoice *NuSound3FindQuietestVoice(i32 index, f32 &volume) {
 
 static NuSoundStream *g_NuSoundStreams[4] = {0};
 
-extern "C" f32 NuSound3GetStreamPlaybackTime(i32 index) {
-    if (g_NuSoundStreams[index] != NULL && NuSound3Stream::mVoice.obj != NULL) {
+extern "C" f32 NuSound3GetStreamPlaybackTime(i32 stream_index) {
+    if (g_NuSoundStreams[stream_index] != NULL && NuSound3Stream::mVoice.obj != NULL) {
         return reinterpret_cast<NuSoundVoice *>(NuSound3Stream::mVoice.obj)->GetPlaybackPositionSeconds();
     }
     return 0.0f;

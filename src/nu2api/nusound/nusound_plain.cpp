@@ -117,7 +117,7 @@ extern "C" {
     }
     void NuSound3SetRumblePads(void *, void *) {
     }
-    void NuSound3SetSFXPitch(void) {
+    void NuSound3SetSFXPitch(i32) {
     }
     void NuSound3SetSampleTableFromPakFile(void) {
     }

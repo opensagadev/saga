@@ -33,7 +33,19 @@ void DisorientateCode(GameObject_s *, nuvec_s *, float) {
 void UpdateSpecialSfx(WORLDINFO_s *) {
 }
 
-void SetSpecialSfxBits(i32 *, i32 *, WORLDINFO_s *) {
+void SetSpecialSfxBits(i32 *sfx_ids, i32 *sfx_count, WORLDINFO_s *world) {
+    if (world == NULL) {
+        return;
+    }
+
+    const i32 count = *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(world) + 0x46d8);
+    const u8 *entries = *reinterpret_cast<u8 **>(reinterpret_cast<u8 *>(world) + 0x46dc);
+    for (i32 i = 0; i < count; ++i, entries += 0x10) {
+        i32 id = *reinterpret_cast<const i16 *>(entries + 6);
+        if (id != -1) {
+            sfx_ids[(*sfx_count)++] = id;
+        }
+    }
 }
 
 extern "C" i32 GetSfxIdN(char *, i32);
