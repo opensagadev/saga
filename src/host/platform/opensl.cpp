@@ -77,7 +77,7 @@ namespace hostsl {
 
         struct EngineCapsVTable {
             u32 (*query_supported_profiles)(void *, u16 *);                   // 0x00
-            u32 (*query_available_outputs)(void *, u32, u32 *, u32 *, u32 *); // 0x04
+            u32 (*query_available_outputs)(void *, u32, i16 *, u32 *, i16 *); // 0x04
             u32 (*query_realtime)(void *, u32 *);                             // 0x08
         };
 
@@ -211,8 +211,8 @@ namespace hostsl {
         u32 host_engine_create_output_mix(void *self, void **mix_object, u32 num_interfaces, const void **interface_ids,
                                           const u32 *required);
         u32 host_engine_query_supported_profiles(void *self, u16 *profiles);
-        u32 host_engine_query_available_outputs(void *self, u32 max_outputs, u32 *output_ids, u32 *output_details,
-                                                u32 *num_outputs);
+        u32 host_engine_query_available_outputs(void *self, u32 voice_type, i16 *max_voices, u32 *absolute_max,
+                                                i16 *free_voices);
         u32 host_engine_query_realtime(void *self, u32 *config);
 
         // PlayItf
@@ -528,13 +528,13 @@ namespace hostsl {
             return HOST_SL_RESULT_SUCCESS;
         }
 
-        u32 host_engine_query_available_outputs(void *self, u32 max_outputs, u32 *output_ids, u32 *output_details,
-                                                u32 *num_outputs) {
+        u32 host_engine_query_available_outputs(void *self, u32 voice_type, i16 *max_voices, u32 *absolute_max,
+                                                i16 *free_voices) {
             (void)self;
-            (void)max_outputs;
-            (void)output_ids;
-            (void)output_details;
-            *num_outputs = 0;
+            (void)voice_type;
+            *max_voices = 0;
+            *absolute_max = 0;
+            *free_voices = 0;
             return HOST_SL_RESULT_SUCCESS;
         }
 

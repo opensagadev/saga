@@ -610,7 +610,7 @@ u64 NuVoiceAndroid::GetPlaybackPositionSamples() {
 
 NuSoundVoice *NuSoundVoiceFactoryAndroid_PCM::CreateVoice(NuSoundSource *source, bool loop) {
     NuVoiceAndroid *voice = (NuVoiceAndroid *)NuSoundSystem::_AllocMemory(
-        NuSoundSystem::MemoryDiscipline::SCRATCH, 0x180, 4,
+        NuSoundSystem::MemoryDiscipline::SCRATCH, sizeof(NuVoiceAndroid), 4,
         "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/android/nusound_android.cpp:292");
     if (voice != NULL) {
         new (voice) NuVoiceAndroid(source, loop);
