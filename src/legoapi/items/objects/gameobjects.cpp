@@ -1067,7 +1067,7 @@ i32 GameAudio_GetSfxId(i32 sfx);
 void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
 
 static GAMEAUDIO GameAudio_Default;
-static GAMEAUDIO *GameAudio;
+__attribute__((visibility("hidden"))) GAMEAUDIO *GameAudio asm("_ZL9GameAudio");
 
 void GameAudio_Init(GAMEAUDIO *audio) {
     GameAudio = audio;

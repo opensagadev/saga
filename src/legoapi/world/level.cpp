@@ -1473,7 +1473,8 @@ void FixUpLevels(LEVELFIXUP *fixup) {
     }
 
     {
-        LEVELDATA *level = Level_FindByName("BlockadeRunner_D", NULL);
+        LEVELDATA *level = Level_FindByName("tatooine_b", NULL);
+        TATOOINEB_LDATA = level;
         if (level != NULL) {
             level->init_fn = TatooineB_Init;
         }

@@ -20,10 +20,8 @@ NUTHREAD_CORE NuSoundStreamer::sThreadCoreId = {.value = 0};
 // ---------------------------------------------------------------------------
 
 NuSoundStreamer::NuSoundStreamer()
-    : queue1_semaphore(32), queue2_semaphore(32), semaphore(32), queue1_length(0), queue1_index(0), queue2_length(0),
-      queue2_index(0), running(true) {
-    memset(queue1, 0, sizeof(queue1));
-    memset(queue2, 0, sizeof(queue2));
+    : queue1(), queue2(), semaphore(32) {
+    this->running = true;
     thread =
         NuCore::m_threadManager->CreateThread(ThreadFunc, this, sThreadPriority, "NuSoundStreamThread",
                                               sThreadStackSize, sThreadCoreId.cafe_core, sThreadCoreId.xbox360_core);
@@ -52,57 +50,32 @@ void NuSoundStreamer::RequestCue(NuSoundStreamingSample *streaming_sample, bool 
     streaming_sample->AddedToThreadQueue();
     streaming_sample->streamer = this;
 
-    QueueElement *element = &this->queue1[this->queue1_length % 32];
-    new (element) QueueElement;
-    element->message = QueueElement::Message::OPEN_SAMPLE;
-    element->sample = streaming_sample;
-    element->loop = loop;
-    element->start_offset = start_offset;
-    element->buffer = NULL;
+    QueueElement element;
+    element.message = QueueElement::Message::OPEN_SAMPLE;
+    element.sample = streaming_sample;
+    element.loop = loop;
+    element.start_offset = start_offset;
+    element.buffer = NULL;
+    element.weak_ptr.Set(NULL);
+    element.weak_flag = weak_flag;
 
-    NuSoundWeakPtrListNode::sPtrListLock.Lock();
-    if (element->weak_ptr.obj != NULL) {
-        element->weak_ptr.obj->Unlink(&element->weak_ptr);
-        element->weak_ptr.obj = NULL;
-    }
-    NuSoundWeakPtrListNode::sPtrListLock.Unlock();
-
-    element->weak_flag = weak_flag;
-
-    __sync_fetch_and_add(&this->queue1_length, 1);
+    this->queue1.Push(element);
 
     this->semaphore.Signal();
 }
 
 void NuSoundStreamer::RequestFill(NuSoundStreamingSample *sample, NuSoundBuffer *buffer, bool loop,
                                   NuSoundWeakPtr<NuSoundBufferCallback> callback) {
-    // Fill requests go to the priority queue so the streamer always services
-    // them before any pending control request.
-    QueueElement request;
-    request.message = QueueElement::Message::FILL_STREAM_BUFFER;
-    request.sample = sample;
-    request.loop = loop;
-    request.start_offset = 0.0f;
-    request.buffer = buffer;
-    request.weak_ptr = callback;
-    request.weak_flag = false;
+    QueueElement element;
+    element.message = QueueElement::Message::FILL_STREAM_BUFFER;
+    element.sample = sample;
+    element.loop = loop;
+    element.start_offset = 0.0f;
+    element.buffer = buffer;
+    element.weak_ptr.Set((NuSoundBufferCallback *)callback.obj);
+    element.weak_flag = false;
 
-    NuSoundWeakPtrListNode::sPtrListLock.Lock();
-    NuSoundWeakPtr<NuSoundBufferCallback> local;
-    local.Set((NuSoundBufferCallback *)callback.obj);
-    if (element->weak_ptr.obj != local.obj) {
-        if (element->weak_ptr.obj != NULL) {
-            element->weak_ptr.obj->Unlink(&element->weak_ptr);
-        }
-        if (local.obj != NULL) {
-            local.obj->Link(&element->weak_ptr);
-        }
-        element->weak_ptr.obj = local.obj;
-    }
-    NuSoundWeakPtrListNode::sPtrListLock.Unlock();
-    element->weak_flag = false;
-
-    __sync_fetch_and_add(&this->queue2_length, 1);
+    this->queue2.Push(element);
 
     this->semaphore.Signal();
 }
@@ -110,24 +83,16 @@ void NuSoundStreamer::RequestFill(NuSoundStreamingSample *sample, NuSoundBuffer 
 void NuSoundStreamer::RequestClose(NuSoundStreamingSample *sample) {
     sample->AddedToThreadQueue();
 
-    QueueElement *element = &this->queue1[this->queue1_length % 32];
-    new (element) QueueElement;
-    element->message = QueueElement::Message::CLOSE_SAMPLE;
-    element->sample = sample;
-    element->loop = false;
-    element->start_offset = 0.0f;
-    element->buffer = NULL;
+    QueueElement element;
+    element.message = QueueElement::Message::CLOSE_SAMPLE;
+    element.sample = sample;
+    element.loop = false;
+    element.start_offset = 0.0f;
+    element.buffer = NULL;
+    element.weak_ptr.Set(NULL);
+    element.weak_flag = false;
 
-    NuSoundWeakPtrListNode::sPtrListLock.Lock();
-    if (element->weak_ptr.obj != NULL) {
-        element->weak_ptr.obj->Unlink(&element->weak_ptr);
-        element->weak_ptr.obj = NULL;
-    }
-    NuSoundWeakPtrListNode::sPtrListLock.Unlock();
-
-    element->weak_flag = false;
-
-    __sync_fetch_and_add(&this->queue1_length, 1);
+    this->queue1.Push(element);
 
     this->semaphore.Signal();
 }
@@ -135,45 +100,31 @@ void NuSoundStreamer::RequestClose(NuSoundStreamingSample *sample) {
 void NuSoundStreamer::RequestReCue(NuSoundStreamingSample *sample, bool loop, f32 start_offset) {
     sample->AddedToThreadQueue();
 
-    QueueElement *element = &this->queue1[this->queue1_length % 32];
-    new (element) QueueElement;
-    element->message = QueueElement::Message::RECUE_SAMPLE;
-    element->sample = sample;
-    element->loop = loop;
-    element->start_offset = start_offset;
-    element->buffer = NULL;
+    QueueElement element;
+    element.message = QueueElement::Message::RECUE_SAMPLE;
+    element.sample = sample;
+    element.loop = loop;
+    element.start_offset = start_offset;
+    element.buffer = NULL;
+    element.weak_ptr.Set(NULL);
+    element.weak_flag = false;
 
-    NuSoundWeakPtrListNode::sPtrListLock.Lock();
-    if (element->weak_ptr.obj != NULL) {
-        element->weak_ptr.obj->Unlink(&element->weak_ptr);
-        element->weak_ptr.obj = NULL;
-    }
-    NuSoundWeakPtrListNode::sPtrListLock.Unlock();
-
-    element->weak_flag = false;
-
-    __sync_fetch_and_add(&this->queue1_length, 1);
+    this->queue1.Push(element);
 
     this->semaphore.Signal();
 }
 
 void NuSoundStreamer::ShutdownThread() {
-    QueueElement *element = &this->queue1[this->queue1_length % 32];
-    new (element) QueueElement;
-    element->message = QueueElement::Message::SHUTDOWN;
-    element->sample = NULL;
-    element->loop = false;
-    element->start_offset = 0.0f;
-    element->buffer = NULL;
-    NuSoundWeakPtrListNode::sPtrListLock.Lock();
-    if (element->weak_ptr.obj != NULL) {
-        element->weak_ptr.obj->Unlink(&element->weak_ptr);
-        element->weak_ptr.obj = NULL;
-    }
-    NuSoundWeakPtrListNode::sPtrListLock.Unlock();
-    element->weak_flag = false;
+    QueueElement element;
+    element.message = QueueElement::Message::SHUTDOWN;
+    element.sample = NULL;
+    element.loop = false;
+    element.start_offset = 0.0f;
+    element.buffer = NULL;
+    element.weak_ptr.Set(NULL);
+    element.weak_flag = false;
 
-    __sync_fetch_and_add(&this->queue1_length, 1);
+    this->queue1.Push(element);
 
     this->semaphore.Signal();
     while (running) {
@@ -190,8 +141,6 @@ void NuSoundStreamer::ShutdownAll() {
 }
 
 void NuSoundStreamer::ThreadFunc(void *self) {
-    LOG_INFO("NuSoundStreamer::ThreadFunc(self=%p)", self);
-
     NuSoundStreamer *streamer = (NuSoundStreamer *)self;
     if (streamer->running == false) {
         return;
@@ -200,27 +149,7 @@ void NuSoundStreamer::ThreadFunc(void *self) {
     do {
         streamer->semaphore.Wait();
 
-        QueueElement element;
-        QueueElement *slot;
-        bool is_fill;
-        if (streamer->queue2_index == streamer->queue2_length) {
-            slot = &streamer->queue1[streamer->queue1_index % 32];
-            is_fill = false;
-        } else {
-            slot = &streamer->queue2[streamer->queue2_index % 32];
-            is_fill = true;
-        }
-
-        // libTTapp.so 0x325976: copy the queued weak pointer into the local
-        // element (linking a new node), then unlink the queue-slot node.
-        QueueElement element(*slot);
-        slot->weak_ptr.Set(NULL);
-        slot->weak_flag = false;
-
-        LOG_INFO("NuSoundStreamer::ThreadFunc: processing element %p (message=%d, sample=%p, loop=%d, "
-                 "start_offset=%f, buffer=%p, weak_ptr.obj=%p)",
-                 &element, (u32)element.message, element.sample, element.loop, element.start_offset, element.buffer,
-                 element.weak_ptr.obj);
+        QueueElement element = streamer->queue2.Empty() ? streamer->queue1.Pop() : streamer->queue2.Pop();
 
         switch (element.message) {
             case QueueElement::Message::OPEN_SAMPLE:
@@ -235,8 +164,9 @@ void NuSoundStreamer::ThreadFunc(void *self) {
                 NuSoundBuffer::Context &context = element.buffer->GetCurrentContext();
                 if (context.size2 != 0) {
                     NuSoundWeakPtrListNode::sPtrAccessLock.Lock();
-                    if (element.weak_ptr.obj != NULL) {
-                        ((NuSoundBufferCallback *)element.weak_ptr.obj)->SubmitBuffer(element.buffer);
+                    NuSoundBufferCallback *callback = (NuSoundBufferCallback *)element.weak_ptr.obj;
+                    if (callback != NULL) {
+                        callback->SubmitBuffer(element.buffer);
                     }
                     NuSoundWeakPtrListNode::sPtrAccessLock.Unlock();
                 }

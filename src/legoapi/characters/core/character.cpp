@@ -713,7 +713,16 @@ static __used__ void ExtraDieSfx_LSW(GameObject_s *) {
 static __used__ void ExtraHurtSfx_LSW(GameObject_s *) {
 }
 
-static __used__ int GameAudio_CheckReverb_LSW() {
+extern __attribute__((visibility("hidden"))) i32 GameAudio_CheckReverb_LSW() asm("_ZL25GameAudio_CheckReverb_LSWv");
+
+i32 GameAudio_CheckReverb_LSW() {
+    LEVELDATA *level = WorldInfo_CurrentlyActive()->current_level;
+    if (level == HOTHBATTLEB_LDATA || level == TATOOINED_LDATA) {
+        return 1;
+    }
+    if (level == ASTEROIDCHASEB_LDATA && GameCam->sock_position.location.sock == 4) {
+        return 1;
+    }
     return 0;
 }
 

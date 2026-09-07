@@ -835,8 +835,8 @@ DECOMP_ASSERT(sizeof(GAMEANTINODEDATA_s) == 0x24, "GAMEANTINODEDATA_s ABI");
 struct GAMEANTINODESYS_s {};
 struct GAMEANTINODE_s {};
 struct GAMEAUDIO {
-    void (*action_music_fn)(void);
-    void (*reset_music_fn)(void);
+    i32 (*override_footstep_fn)(GameObject_s *, i32);
+    i32 (*check_reverb_fn)(void);
     const char *sfx_names[0x55];
     i16 sfx_ids[0x55];
 };
