@@ -23,6 +23,8 @@
 // recovered, so they are left as `void(void)`.
 
 #include <string.h>
+#include <float.h>
+#include "nu2api/numath/nufloat.h"
 
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
@@ -67,7 +69,7 @@ extern "C" {
 } // extern "C"
 
 // Swap/present pacing flags (original BSS).
-i32 g_isBlockedInSwapScreen = 0;
+volatile bool g_isBlockedInSwapScreen = false;
 i32 rndr_blend_shape_deformer_wt_cnt = 0;
 i32 rndr_blend_shape_deformer_wt_ptrs_cnt = 0;
 
@@ -324,7 +326,7 @@ extern "C" void NuRndrEndSceneEx(i32) {
 
 // Original 0x2967db — swap display-list and stream buffers, kick the render
 // thread, then pace the game thread until the app leaves the running state.
-extern "C" __attribute__((weak)) i32 NuRndrSwapScreen(void) {
+extern "C" __attribute__((weak)) i32 NuRndrSwapScreen(i32 /*mode*/) {
     NuRenderThreadLock();
     rndr_blend_shape_deformer_wt_cnt = 0x3f00;
     rndr_blend_shape_deformer_wt_ptrs_cnt = 0x800;
@@ -339,7 +341,7 @@ extern "C" __attribute__((weak)) i32 NuRndrSwapScreen(void) {
     NuRenderThreadUnlock();
     NuRenderThreadStartRender();
 
-    // Spin until the application status is no longer "running" (1).
+    // Status 1 suspends presentation until the lifecycle makes the app active.
     // On Android this is released by the activity lifecycle
     // (nativeSetSurface / nativeOnPause flip NUAPPLICATIONSTATUS).
     for (;;) {
@@ -356,11 +358,11 @@ extern "C" __attribute__((weak)) i32 NuRndrSwapScreen(void) {
 }
 
 // Original 0x296888
-extern "C" void NuRndrSwapScreenEx(i32 /*mode*/, void (*callback)(void)) {
+extern "C" i32 NuRndrSwapScreenEx(i32 mode, void (*callback)(void)) {
     if (callback != nullptr) {
         callback();
     }
-    NuRndrSwapScreen();
+    return NuRndrSwapScreen(mode);
 }
 
 // ---------------------------------------------------------------------------
@@ -781,8 +783,8 @@ extern "C" void NuRndrSetGlobalMipMapBias(void) {
 extern "C" void NuRndrSetParticleRotation(NUMTX *rotation) {
     NuRndr_DebrisRotMtxPtr = rotation;
 }
-extern "C" void NuRndrSetSpecularLightPS(const NUVEC *, const NUCOLOUR4 *) {
-}
+extern "C" void NuRndrStateSetSpecularLightEx(NUVEC *, NUMTX *, const NUCOLOUR4 *);
+
 extern "C" void NuRndrSetWind(void) {
 }
 extern "C" void NuRndrShadPolys(void *) {
@@ -811,7 +813,15 @@ extern "C" void NuRndrStateInit(void) {
 }
 extern "C" void NuRndrStateSetSpecularLight(void) {
 }
-extern "C" void NuRndrStateSetSpecularLightEx(void) {
+extern "C" void NuRndrStateSetSpecularLightEx(NUVEC *direction, NUMTX *matrix, const NUCOLOUR4 *colour) {
+    render_state.specular_mtx = *matrix;
+    render_state.specular_colour.r = colour->r;
+    render_state.specular_colour.g = colour->g;
+    render_state.specular_colour.b = colour->b;
+    render_state.specular_intensity = *direction;
+    render_state.light_state = NULL;
+    render_state.state.global_id++;
+    render_state.state.lights_id++;
 }
 extern "C" void NuRndrStateUpdateCameraState(void) {
     NUMTX *projection = NuCameraGetProjectionMtx();
@@ -889,7 +899,7 @@ extern "C" void DisplayListUpdateRenderState(void *display_list, void *state) {
             VARIPTR *buffer = NuDisplayListGetBuffer();
             auto *packet = static_cast<CameraPacket *>(buffer->void_ptr);
             global->camera_state = packet;
-            packet->id = *reinterpret_cast<i32 *>(&nuapi.field19_0x3c) +
+            packet->id = nuapi.frame_count +
                          (global->state.camera_id + 5) * (global->state.global_id + 13);
             packet->view = global->view;
             memset(&packet->projection, 0, sizeof(packet->projection));

@@ -3,6 +3,7 @@
 #include "nu2api/nucore/android/NuThread_android.h"
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/nusound/nusound_source.hpp"
+#include "nu2api/nusound/nusound_buffer.hpp"
 #include "nu2api/nusound/nusound_weakptr.hpp"
 
 #include <pthread.h>
@@ -22,6 +23,8 @@ class NuSoundDecoder : public NuSoundSource {
   public:
     NuSoundDecoder(char const *name, NuSoundSource *source);
     virtual ~NuSoundDecoder();
+    const char *GetName() const override { return source != NULL ? source->GetName() : "NuSoundDecoder"; }
+    NuSoundSource *GetEncodedSource() override { return source; }
 
     void CloseStream();
     static void Initialise();
@@ -37,7 +40,6 @@ class NuSoundDecoder : public NuSoundSource {
     u32 GetMaxBufferSize() override;
     unsigned int GetNumRingBuffers() const;
     void RequestBuffer(bool loop, NuSoundWeakPtr<NuSoundBufferCallback> callback) override;
-    void Reset();
 
     // libTTapp.so @0x11e90d0: the singleton decode thread created by Initialise.
     static NuSoundDecodeThread *sDecodeThread;
@@ -48,37 +50,28 @@ class NuSoundDecoder : public NuSoundSource {
     // to two ring buffers upfront in OpenStream; further chunks are decoded
     // through the decode thread as the voice consumes them.
     virtual u64 Decode(NuSoundSource &source, NuSoundBuffer &buffer, bool loop) = 0;
+    virtual void Reset(); // original vtable slot +0x40, after Decode
 
   protected:
     NuSoundSource *source;     // wrapped source
-    NuSoundBuffer *buffers[2]; // the two ring buffer objects
-    u32 buffer_size;           // bytes per ring buffer
-    u32 ring_count;            // buffers filled so far
-    u32 decode_pos;            // next buffer index to decode
-    u32 consumed_pos;          // next buffer index to hand out
+    NuSoundBuffer buffers[2];  // +0x24, +0x64: embedded ring buffers
+    i32 buffer_size;           // bytes per ring buffer
+    i32 ring_count;            // buffers filled so far
+    i32 decode_pos;            // next buffer index to decode
+    i32 consumed_pos;          // next buffer index to hand out
     u32 buffers_started;
     u64 decoded_bytes; // bytes decoded since stream start
     u32 field_0xc0;
     u32 field_0xc4;
-    u32 field_0xc8;
-    u32 field_0xcc;
     u64 total_decoded_bytes;
+    u32 field_0xd0;
     u32 field_0xd4;
+    bool stream_open;             // +0xd8
+    bool closing;                 // +0xd9
     pthread_mutex_t decode_mutex; // +0xdc: decode-completion sync pair
     pthread_cond_t decode_cond;   // +0xe0
     bool decode_done;             // +0xe4
-    bool stream_open;
-    pthread_mutex_t mutex;
-    pthread_cond_t cond;
-    bool locked_flag;
-    bool loop_flag;
-
-    // Still-unidentified target fields. They put NuSoundDecoderOGG's
-    // NuSoundBufferCallback base at +0xe8 in the original (the three _ZThn232
-    // thunks encode that adjustment). Host pthread objects are larger, so host
-    // code must use C++ base conversions rather than copying this target
-    // offset.
-    u8 field_0x7c_to_0xe8[0x6c];
+    bool field_0xe5;
 };
 
 // libTTapp.so: the async decode worker. RequestDecode parks a 0x1c-byte
@@ -104,10 +97,14 @@ class NuSoundDecodeThread {
     static void ThreadFunc(void *self_);
     void Shutdown();
     void RequestDecode(NuSoundDecoder &, NuSoundBuffer &, NuSoundWeakPtr<NuSoundBufferCallback>, bool);
+    static NuThreadSemaphore sShutdownSemaphore;
+    static i32 sThreadPriority;
 
+    NuThread *thread;            // +0x000
+    union {
+        Loader loaders[128];     // +0x004; lifetime spans enqueue to dequeue
+    };
+    i32 tail_index; // +0xe04, producer (RequestDecode) write index
+    i32 head_index; // +0xe08, consumer (ThreadFunc) read index
     NuThreadSemaphore semaphore; // +0xe0c
-    Loader loaders[128];         // +0x004
-    NuThread *thread;
-    u32 tail_index; // +0xe04, producer (RequestDecode) write index
-    u32 head_index; // +0xe08, consumer (ThreadFunc) read index
 };

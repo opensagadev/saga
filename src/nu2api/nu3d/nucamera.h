@@ -23,6 +23,12 @@ typedef struct nucamera_s {
     NUVEC scale;
 } NUCAMERA;
 
+struct NuCameraReflect {
+    u32 unknown_00;
+    NUMTX mtx;
+    u32 unknown_44[16];
+};
+
 typedef struct nuclipplanes_s {
     NUMTX frustum_planes;
     NUMTX scissor_planes;
@@ -79,6 +85,13 @@ extern "C" {
     void NuCameraGetClipMtx(NUMTX *viewport, NUMTX *scissor);
     NUMTX *NuCameraGetProjectionMtx(void);
     NUMTX *NuCameraGetScalingMtx(void);
+    NUMTX *NuCameraGetClippingMtx(void);
+    NUMTX *NuCameraGetPCMtx(void);
+    NUMTX *NuCameraGetPCSMtx(void);
+    NUMTX *NuCameraGetVPCSMtx(void);
+    extern NUMTX cmtx;
+    extern NUMTX psmtx;
+    extern NUMTX vpsmtx;
     NUMTX *NuCameraGetViewMtx(void);
     NUMTX *NuCameraGetVPMtx(void);
     NUMTX *NuCameraGetVPCMtx(void);

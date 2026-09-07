@@ -31,8 +31,6 @@ extern "C" {
     void NuIOS_WaitForRenderThreadCompletion(void);
     void NuIOS_WakeRenderThread(void);
 
-    // original 0xe3450
-    i64 getCurrentTime(void);
     extern i64 g_renderStartTime; // @0x66c9a8
 #ifdef __cplusplus
 }

@@ -9,10 +9,12 @@
 
 namespace {
     struct OGGCallbacksVTable {
+        void (*set_file)(void *, NUFILE);
         i32 (*read)(void *, void *, u32);
         void (*seek)(void *, i32, u32);
         void (*close)(void *);
         i32 (*get_position)(const void *);
+        NUFILE (*get_file)(const void *);
     };
 } // namespace
 
@@ -98,9 +100,9 @@ i32 NuSoundLoaderOGG::OpenFileForStreaming(const char *path, bool flag) {
 }
 
 void NuSoundLoaderOGG::Close() {
-    if (this->desc != NULL) {
+    NuSoundHeaderOGG *header = (NuSoundHeaderOGG *)this->desc;
+    if (header != NULL) {
         NuIOS_IsLowEndDevice();
-        NuSoundHeaderOGG *header = (NuSoundHeaderOGG *)this->desc;
         ov_clear(&header->ogg_file);
     }
     if (this->file != 0) {
@@ -120,26 +122,18 @@ i32 NuSoundLoaderOGG::ReadHeader(NuSoundStreamDesc *desc) {
     NuSoundHeaderOGG *header = (NuSoundHeaderOGG *)desc;
     OggVorbis_File *ogg_file = &header->ogg_file;
 
+    ov_callbacks callbacks = {
+        OggCallbackRead, OggCallbackSeek, NULL, OggCallbackTell
+    };
     file_callbacks.SetFile(file);
 
-    u32 channels = ov_open_callbacks( //
-        &file_callbacks,              //
-        ogg_file,                     //
-        NULL,                         //
-        0,                            //
-        (ov_callbacks){
-            .read_func = OggCallbackRead,
-            .seek_func = OggCallbackSeek,
-            .close_func = OggCallbackClose,
-            .tell_func = OggCallbackTell,
-        } //
-    );
+    i32 result = ov_open_callbacks(&file_callbacks, ogg_file, NULL, 0, callbacks);
 
-    if (channels >= 0) {
+    if (result >= 0) {
         vorbis_info *info = ov_info(ogg_file, 0);
         if (info != NULL) {
-            channels = info->channels;
-            u16 rate = info->rate;
+            i32 channels = info->channels;
+            i32 rate = info->rate;
             header->sample_rate = rate;
             header->bits_per_channel = 16;
             header->format_id = -2;
@@ -149,31 +143,19 @@ i32 NuSoundLoaderOGG::ReadHeader(NuSoundStreamDesc *desc) {
             header->extended_data_size = 0x16;
             *(u16 *)&header->extended_data[0] = 0x10;
             if (channels > 0) {
-                u32 channel_mask = 0;
+                u32 channel_mask = *(u32 *)&header->extended_data[2];
                 for (u32 channel = 0; channel < (u32)channels; channel++) {
                     channel_mask |= 1 << channel;
                 }
                 *(u32 *)&header->extended_data[2] = channel_mask;
             }
 
-            // header->extended_data[0] = 0x10;
-            // if (channels > 0) {
-            //     u32 uVar2 = *(u32 *)(header->extended_data + 1);
-            //     rate = 0;
-            //     do {
-            //         bVar3 = (byte)rate;
-            //         rate = rate + 1;
-            //         uVar2 = uVar2 | 1 << (bVar3 & 0x1f);
-            //     } while (rate != channels);
-            //     *(u32 *)((header->parent).extended_data + 1) = uVar2;
-            // }
-
             header->encoded_length_bytes = NuFileOpenSize(file);
 
-            u32 total = ov_pcm_total(ogg_file, -1);
+            i32 total = ov_pcm_total(ogg_file, -1);
             header->decoded_length_bytes = header->block_size * total;
 
-            u32 pcm_total = ov_pcm_total(ogg_file, -1);
+            i64 pcm_total = ov_pcm_total(ogg_file, -1);
             header->length_samples = pcm_total;
 
             double time_total = ov_time_total(ogg_file, -1);
@@ -217,7 +199,7 @@ u64 NuSoundHeaderOGG::GetDataOffset() const {
     return 0;
 }
 
-u16 NuSoundHeaderOGG::GetNumChannels() const {
+u32 NuSoundHeaderOGG::GetNumChannels() const {
     return num_channels;
 }
 
@@ -225,11 +207,11 @@ u32 NuSoundHeaderOGG::GetSampleRate() const {
     return sample_rate;
 }
 
-u16 NuSoundHeaderOGG::GetBitsPerChannel() const {
+u32 NuSoundHeaderOGG::GetBitsPerChannel() const {
     return bits_per_channel;
 }
 
-u16 NuSoundHeaderOGG::GetBlockSize() const {
+u32 NuSoundHeaderOGG::GetBlockSize() const {
     return block_size;
 }
 

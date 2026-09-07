@@ -175,13 +175,61 @@ NuSoundMemoryManager::NuSoundMemoryManager() {
 }
 
 NuSoundMemoryManager::~NuSoundMemoryManager() {
+    Release();
+    pthread_mutex_destroy(&mutex);
+    name = NULL;
+    name_length = 0;
+    name_length2 = 0;
 }
 
-// libTTapp.so 0x3221e0: relocate trailing blocks to satisfy an alloc. Not
-// transcribed yet; returns no block so Alloc fails cleanly.
+// libTTapp.so 0x3221e0: compact free space, stopping when a requested size fits.
 NuSoundMemoryBuffer *NuSoundMemoryManager::Defragment(u32 size) {
-    (void)size;
-    return NULL;
+    pthread_mutex_lock(&mutex);
+    NuSoundMemoryBuffer::BeginCriticalSection();
+    NuSoundMemoryBuffer *result = NULL;
+    if (free_count != 0) {
+        NuSoundMemoryBuffer *buffer = free_list_head;
+        while (buffer != NULL) {
+            NuSoundMemoryBuffer *next = buffer->GetNext();
+            if (next == NULL) break;
+            if (buffer->IsAlloced()) {
+                buffer = next;
+                continue;
+            }
+            if (!next->IsAlloced()) {
+                buffer = MergeFreeBuffer(buffer);
+                if (size != 0 && buffer->GetSize() >= size) {
+                    result = buffer;
+                    break;
+                }
+                continue;
+            }
+            NuSoundMemoryBuffer *remainder = NULL;
+            NuSoundMemoryBuffer *merged = NULL;
+            NuSoundMemoryBuffer *moved = MoveLargestTrailingBufferIntoBuffer(buffer, &remainder, &merged);
+            if (size != 0 && merged != NULL && merged->GetSize() >= size) {
+                result = merged;
+                break;
+            }
+            if (moved != buffer) {
+                buffer = moved;
+                continue;
+            }
+            u32 previous_size = buffer->GetSize();
+            do {
+                buffer = SwapOrMergeAdjacentBuffers(buffer);
+            } while (buffer != NULL && buffer->GetSize() <= previous_size);
+            if (buffer == NULL) break;
+            if (size != 0 && buffer->GetSize() >= size) {
+                result = buffer;
+                break;
+            }
+        }
+        if (result == NULL || size == 0) free_count = 0;
+    }
+    NuSoundMemoryBuffer::EndCriticalSection();
+    pthread_mutex_unlock(&mutex);
+    return result;
 }
 
 // libTTapp.so 0x3223c0
@@ -204,10 +252,9 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::Alloc(u32 size) {
     if (alloc_size <= this->GetFree()) {
         for (NuSoundMemoryBuffer *buf = this->free_list_head; buf != NULL;) {
             if (!buf->IsAlloced()) {
-                u32 buf_size = buf->GetSize();
-                if (buf_size >= alloc_size) {
-                    if (best == NULL || best->GetSize() > buf_size) {
-                        if (buf_size == alloc_size) {
+                if (buf->GetSize() >= alloc_size) {
+                    if (best == NULL || best->GetSize() > buf->GetSize()) {
+                        if (buf->GetSize() == alloc_size) {
                             best = buf;
                             break;
                         }
@@ -218,12 +265,12 @@ NuSoundMemoryBuffer *NuSoundMemoryManager::Alloc(u32 size) {
             buf = buf->GetNext();
         }
 
-        if (best == NULL && (this->flags & 2) != 0) {
+        if ((this->flags & 2) != 0 && best == NULL) {
             best = this->Defragment(alloc_size);
         }
 
         if (best != NULL) {
-            if (best->GetSize() != alloc_size) {
+            if (best->GetSize() > alloc_size) {
                 best = this->SplitFreeBuffer(best, alloc_size, NULL);
             }
             best->SetAlloced(true);
@@ -273,7 +320,7 @@ void NuSoundMemoryManager::Free(NuSoundMemoryBuffer *buffer) {
     pthread_mutex_lock(&this->mutex);
 
     buffer->SetAlloced(false);
-    this->free_bytes = this->free_bytes + buffer->GetSize();
+    this->free_bytes += buffer->GetSize();
     this->MergeFreeBuffer(buffer);
     this->free_count = this->free_count + 1;
 
@@ -368,11 +415,11 @@ bool NuSoundMemoryManager::Release() {
     return true;
 }
 
-// libTTapp.so 0x322550 (AllocAddress). Debug-only; not transcribed yet. It
-// takes a raw pool offset, so returning nothing keeps every caller's flow
-// intact without inventing behavior.
-void NuSoundMemoryManager::AllocAddress(u32 address) {
-    (void)address;
+// libTTapp.so 0x322550: allocate a block and expose its data address.
+void *NuSoundMemoryManager::AllocAddress(u32 size) {
+    NuSoundMemoryBuffer *buffer = Alloc(size);
+    if (buffer != NULL) return buffer->GetAddress();
+    return NULL;
 }
 
 // libTTapp.so 0x3225a0 (CheckList). Debug-only list validator; not
@@ -380,36 +427,65 @@ void NuSoundMemoryManager::AllocAddress(u32 address) {
 void NuSoundMemoryManager::CheckList() {
 }
 
-// libTTapp.so 0x321f40 (CountAdjacentFreeBuffers). Debug-only; not
-// transcribed yet.
-void NuSoundMemoryManager::CountAdjacentFreeBuffers(NuSoundMemoryBuffer *buffer) {
-    (void)buffer;
+// libTTapp.so 0x321f40: count free neighbors for buffer relocation.
+u32 NuSoundMemoryManager::CountAdjacentFreeBuffers(NuSoundMemoryBuffer *buffer) {
+    u32 count = 0;
+    if (buffer->GetPrev() != NULL && !buffer->GetPrev()->IsAlloced()) count = 1;
+    if (buffer->GetNext() != NULL && !buffer->GetNext()->IsAlloced()) ++count;
+    return count;
 }
 
-// libTTapp.so 0x322750 (EnableDebug). Debug-only flag setter; not transcribed
-// yet.
+// libTTapp.so 0x322750: debug flag, preserving the other configuration bits.
 void NuSoundMemoryManager::EnableDebug(bool enable) {
-    (void)enable;
+    flags = (flags & 0xfe) | static_cast<u8>(enable);
 }
 
-// libTTapp.so 0x322790 (EnableDefragOnFree). Debug-only flag setter; not
-// transcribed yet.
+// libTTapp.so 0x322790: defragment-on-free configuration bit.
 void NuSoundMemoryManager::EnableDefragOnFree(bool enable) {
-    (void)enable;
+    flags = (flags & 0xfb) | (static_cast<u8>(enable) << 2);
 }
 
-// libTTapp.so 0x3219e0 (FreeAddress). Debug-only; not transcribed yet.
+// libTTapp.so 0x3219e0: release the first block with the requested address.
 void NuSoundMemoryManager::FreeAddress(void *address) {
-    (void)address;
+    pthread_mutex_lock(&mutex);
+    for (NuSoundMemoryBuffer *buffer = free_list_head; buffer != NULL; buffer = buffer->GetNext()) {
+        if (buffer->GetAddress() == address) {
+            Free(buffer);
+            break;
+        }
+    }
+    pthread_mutex_unlock(&mutex);
 }
 
-// libTTapp.so 0x321fe0 (MoveLargestTrailingBufferIntoBuffer). Defrag
-// helper; not transcribed yet.
-void NuSoundMemoryManager::MoveLargestTrailingBufferIntoBuffer(NuSoundMemoryBuffer *buffer, NuSoundMemoryBuffer **out_a,
+// libTTapp.so 0x321fe0: select a trailing allocation to fill a free block.
+NuSoundMemoryBuffer *NuSoundMemoryManager::MoveLargestTrailingBufferIntoBuffer(NuSoundMemoryBuffer *buffer, NuSoundMemoryBuffer **out_a,
                                                                NuSoundMemoryBuffer **out_b) {
-    (void)buffer;
-    (void)out_a;
-    (void)out_b;
+    if (buffer->IsAlloced() || buffer->IsLocked()) return buffer;
+    NuSoundMemoryBuffer *last = buffer;
+    while (last != NULL && last->GetNext() != NULL) last = last->GetNext();
+    NuSoundMemoryBuffer *best = NULL;
+    u32 best_neighbors = 0;
+    for (NuSoundMemoryBuffer *candidate = last; candidate != NULL && candidate != buffer; candidate = candidate->GetPrev()) {
+        if (!candidate->IsAlloced() || candidate->IsLocked() || buffer->GetSize() < candidate->GetSize()) continue;
+        if (best == NULL) {
+            best = candidate;
+        } else if (best->GetSize() == candidate->GetSize()) {
+            u32 neighbors = CountAdjacentFreeBuffers(candidate);
+            if (neighbors > best_neighbors) {
+                best_neighbors = neighbors;
+                best = candidate;
+            }
+        } else if (best->GetSize() < candidate->GetSize()) {
+            best_neighbors = CountAdjacentFreeBuffers(candidate);
+            best = candidate;
+        }
+    }
+    if (best == NULL) return buffer;
+    if (buffer->GetSize() > best->GetSize()) buffer = SplitFreeBuffer(buffer, best->GetSize(), out_a);
+    if (!SwapSimilarBuffers(best, buffer)) return buffer;
+    NuSoundMemoryBuffer *merged = MergeFreeBuffer(buffer);
+    if (out_b != NULL) *out_b = merged;
+    return best->GetNext();
 }
 
 // libTTapp.so 0x322640 (OutputList). Debug dump over the free list; not
@@ -429,15 +505,86 @@ void NuSoundMemoryManager::RenderMap(f32 x, f32 y, f32 scale) {
     (void)scale;
 }
 
-// libTTapp.so 0x321d10 (SwapOrMergeAdjacentBuffers). Defrag helper; not
-// transcribed yet.
-void NuSoundMemoryManager::SwapOrMergeAdjacentBuffers(NuSoundMemoryBuffer *buffer) {
-    (void)buffer;
+// libTTapp.so 0x321d10: slide an adjacent allocation into the free space.
+NuSoundMemoryBuffer *NuSoundMemoryManager::SwapOrMergeAdjacentBuffers(NuSoundMemoryBuffer *buffer) {
+    if (buffer->IsAlloced() || buffer->IsLocked()) return buffer;
+    NuSoundMemoryBuffer *next = buffer->GetNext();
+    if (next == NULL || next->IsLocked()) return NULL;
+    if (next->IsAlloced()) {
+        buffer->Lock("SwapOrMergeAdjacentBuffers buffer");
+        next->Lock("SwapOrMergeAdjacentBuffers next");
+        u32 free_size = buffer->GetSize();
+        u32 bytes = next->GetSize();
+        char *source = static_cast<char *>(next->GetAddress());
+        char *destination = static_cast<char *>(buffer->GetAddress());
+        buffer->SetAddress(destination + bytes);
+        next->SetAddress(destination);
+        if (free_size >= bytes) {
+            memmove(destination, source, bytes);
+        } else {
+            while (bytes != 0) {
+                i32 chunk = static_cast<i32>(bytes) <= static_cast<i32>(free_size) ? static_cast<i32>(bytes) : static_cast<i32>(free_size);
+                memmove(destination, source, chunk);
+                destination += chunk;
+                source += chunk;
+                bytes -= chunk;
+            }
+        }
+        next->Unlock();
+        buffer->Unlock();
+        NuSoundMemoryBuffer *previous = buffer->GetPrev();
+        NuSoundMemoryBuffer *following = next->GetNext();
+        if (previous != NULL) previous->SetNext(next);
+        next->SetPrev(previous);
+        next->SetNext(buffer);
+        buffer->SetPrev(next);
+        buffer->SetNext(following);
+        if (following != NULL) following->SetPrev(buffer);
+    }
+    return CheckAndMergeFreeBufferNext(buffer);
 }
 
-// libTTapp.so 0x321a60 (SwapSimilarBuffers). Defrag helper; not transcribed
-// yet.
-void NuSoundMemoryManager::SwapSimilarBuffers(NuSoundMemoryBuffer *a, NuSoundMemoryBuffer *b) {
-    (void)a;
-    (void)b;
+// libTTapp.so 0x321a60: relocate an unlocked allocation into an equal-sized free block.
+bool NuSoundMemoryManager::SwapSimilarBuffers(NuSoundMemoryBuffer *a, NuSoundMemoryBuffer *b) {
+    if (!a->IsAlloced() || a->IsLocked() || b->IsAlloced() || b->IsLocked()) return false;
+    u32 bytes = a->GetSize();
+    if (bytes != b->GetSize()) return false;
+    a->Lock("SwapSimilarBuffers src");
+    b->Lock("SwapSimilarBuffers dest");
+    void *source = a->GetAddress();
+    void *destination = b->GetAddress();
+    memmove(destination, source, bytes);
+    a->SetAddress(destination);
+    b->SetAddress(source);
+    b->Unlock();
+    a->Unlock();
+    NuSoundMemoryBuffer *b_prev = b->GetPrev();
+    NuSoundMemoryBuffer *b_next = b->GetNext();
+    NuSoundMemoryBuffer *a_prev = a->GetPrev();
+    NuSoundMemoryBuffer *a_next = a->GetNext();
+    if (b_next == a) {
+        if (b_prev != NULL) b_prev->SetNext(a);
+        a->SetPrev(b_prev);
+        a->SetNext(b);
+        b->SetPrev(a);
+        b->SetNext(a_next);
+        if (a_next != NULL) a_next->SetPrev(b);
+    } else if (a_next == b) {
+        if (a_prev != NULL) a_prev->SetNext(b);
+        b->SetPrev(a_prev);
+        b->SetNext(a);
+        a->SetPrev(b);
+        a->SetNext(b_next);
+        if (b_next != NULL) b_next->SetPrev(a);
+    } else {
+        if (b_prev != NULL) b_prev->SetNext(a);
+        a->SetPrev(b_prev);
+        a->SetNext(b_next);
+        if (b_next != NULL) b_next->SetPrev(a);
+        if (a_prev != NULL) a_prev->SetNext(b);
+        b->SetPrev(a_prev);
+        b->SetNext(a_next);
+        if (a_next != NULL) a_next->SetPrev(b);
+    }
+    return true;
 }

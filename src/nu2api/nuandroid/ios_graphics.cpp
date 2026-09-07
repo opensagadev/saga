@@ -135,16 +135,16 @@ static i32 g_awaitingRenderWake;
 static i32 g_wakeRenderThread;
 static i32 g_renderThreadDoneThread;
 
-// Timestamp (ms) when the current frame's render was kicked — original
+// Timestamp when the current frame's render was kicked — original
 // @0x66c9a8, set in NuIOS_WakeRenderThread and sampled in
 // NuIOS_WaitForRenderThreadCompletion for 60 Hz pacing.
 i64 g_renderStartTime;
 
-// original 0xe3450 — monotonic millisecond clock.
-i64 getCurrentTime(void) {
+// Original 0xe3450 adds raw nanoseconds to seconds scaled by 1000.
+extern "C" i64 getCurrentTime(void) {
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
-    return (i64)ts.tv_sec * 1000 + (i64)ts.tv_nsec / 1000000;
+    return (i64)ts.tv_sec * 1000 + (i64)ts.tv_nsec;
 }
 
 void NuIOS_InitRenderThread() {

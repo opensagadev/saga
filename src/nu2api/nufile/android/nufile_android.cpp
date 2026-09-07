@@ -11,6 +11,8 @@
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nufile/tmclient.h"
+#include "java/asset_manager.h"
+#include "java/android.h"
 
 char g_datfileMode = 1;
 
@@ -22,12 +24,52 @@ NuFileAndroidAPK::~NuFileAndroidAPK() {
     Close();
 }
 
-i64 NuFileAndroidAPK::Seek(i64 offset, NuFile::SeekOrigin::T) {
-    return {};
+i64 NuFileAndroidAPK::Seek(i64 offset, NuFile::SeekOrigin::T origin) {
+    i32 next;
+    switch (origin) {
+        case NuFile::SeekOrigin::START: next = offset; break;
+        case NuFile::SeekOrigin::CURRENT: next = position + offset; break;
+        case NuFile::SeekOrigin::END: next = file_size + offset; break;
+        default: next = position; break;
+    }
+    position = MIN(file_size, (MAX(0, next)));
+    return position;
 }
 
 isize NuFileAndroidAPK::Read(void *buf, usize size) {
-    return {};
+    if (chunk_size != 0) {
+        u64 remaining = size < static_cast<usize>(file_size - position) ? size : file_size - position;
+        i32 start = position;
+        u8 *output = static_cast<u8 *>(buf);
+        while (position < file_size) {
+            u32 index = static_cast<u32>(position) / chunk_size;
+            if (asset_index != index) {
+                char next_path[256];
+                strcpy(next_path, asset_path);
+                char *part = strstr(next_path, ".0000.jpg");
+                sprintf(part, ".%04d.jpg", index);
+                AAsset_close(asset);
+                asset = AAssetManager_open(g_assetManager, next_path, AASSET_MODE_UNKNOWN);
+                asset_index = index;
+            }
+            i32 current = position;
+            i32 chunk = chunk_size;
+            AAsset_seek(asset, current - index * chunk, SEEK_SET);
+            i32 amount = ((current & -chunk) + chunk) - current;
+            if (static_cast<i64>(amount) > static_cast<i64>(remaining)) {
+                amount = remaining;
+            }
+            u32 count = AAsset_read(asset, output, amount);
+            remaining -= count;
+            position += count;
+            output += count;
+            if (remaining == 0) break;
+        }
+        return position - start;
+    } else {
+        AAsset_seek(asset, position, SEEK_SET);
+        return AAsset_read(asset, buf, size);
+    }
 }
 
 isize NuFileAndroidAPK::Write(const void *buf, usize size) {
@@ -35,36 +77,10 @@ isize NuFileAndroidAPK::Write(const void *buf, usize size) {
 }
 
 void NuFileAndroidAPK::Close() {
-}
-
-SAGA_NOMATCH i32 NuFileAndroidAPK::OpenFile(const char *filepath, NuFile::OpenMode::T mode) {
-    UNIMPLEMENTED("android specific");
-    return {};
-}
-
-SAGA_NOMATCH i32 NuFileAndroidAPK::CloseFile(NUFILE file) {
-    UNIMPLEMENTED("android specific");
-    return {};
-}
-
-SAGA_NOMATCH i64 NuFileAndroidAPK::SeekFile(NUFILE file, i64 offset, NuFile::SeekOrigin::T mode) {
-    UNIMPLEMENTED("android specific");
-    return {};
-}
-
-SAGA_NOMATCH i32 NuFileAndroidAPK::ReadFile(NUFILE file, void *buf, u32 size) {
-    UNIMPLEMENTED("android specific");
-    return {};
-}
-
-SAGA_NOMATCH i64 NuFileAndroidAPK::GetFilePos(NUFILE file) {
-    UNIMPLEMENTED("android specific");
-    return {};
-}
-
-SAGA_NOMATCH i64 NuFileAndroidAPK::GetFileSize(NUFILE file) {
-    UNIMPLEMENTED("android specific");
-    return {};
+    if (asset != NULL) {
+        AAsset_close(asset);
+        asset = NULL;
+    }
 }
 
 static FILE *g_fileHandles[32] = {NULL};

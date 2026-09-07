@@ -31,6 +31,15 @@ extern "C" NUGCUTLOCATORFNENTRY_s *locatorfns;
 // alphabetical; every stub is an empty body that matches the original linkage.
 
 #include <string.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include "nu2api/nucore/nustring.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/nu3d/nuqfnt.h"
+
+void NuErrorPrint(char *);
+void NuDebugMsgPrint(char *);
 
 #include "decomp.h"
 #include "java/java.h"
@@ -49,6 +58,7 @@ extern "C" NUGCUTLOCATORFNENTRY_s *locatorfns;
 #include "nu2api/nu3d/nurndrstat.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nuvport.h"
+#include "nu2api/nu3d/nuocclusion.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nufloat.h"
@@ -151,11 +161,11 @@ extern "C" {
     // Display-list bootstrap (original nucore TU file-statics)
     // ---------------------------------------------------------------------------
 
-    void NuHasError(void);
+    i32 NuHasError(void);
     void NuMtlAnimate(f32 frame_time);
     void NuTexAnimProcess(f32 frame_time);
-    void NuWindAnimate(void);
-    void NuTimeBarSetRender(void);
+    void NuWindAnimate(NUWIND *wind, f32 frametime);
+    void NuTimeBarSetRender(i32 set);
     void NuRndrSwapScreenEx(i32 mode, void (*callback)(void));
     void NuShaderManagerSetfv(i32 semantic, const f32 *values);
     void *NuScratchAlloc32(i32 size);
@@ -278,25 +288,46 @@ extern "C" {
     }
     void NuCameraGetAxes(void) {
     }
-    void NuCameraGetClippingMtx(void) {
+    NUMTX *NuCameraGetClippingMtx(void) {
+        return &cmtx;
     }
     void NuCameraGetClippingRatios(void) {
     }
-    void NuCameraGetPCMtx(void) {
+    NUMTX *NuCameraGetPCMtx(void) {
+        return &pc_vport_mtx;
     }
-    void NuCameraGetPCSMtx(void) {
+    NUMTX *NuCameraGetPCSMtx(void) {
+        return &psmtx;
     }
-    void NuCameraGetVPCSMtx(void) {
+    NUMTX *NuCameraGetVPCSMtx(void) {
+        return &vpsmtx;
     }
     void NuCameraIntersectsAABB(void) {
     }
-    void NuCameraLock(i32) {
+    i32 prev_lock;
+    NUCAMERA locked_camera;
+    NUCAMERA cam_copy;
+    i32 camfx;
+    NuCameraReflect global_reflect;
+    DECOMP_ASSERT(sizeof(NuCameraReflect) == 0x84, "camera reflection state size");
+    DECOMP_ASSERT(__builtin_offsetof(NuCameraReflect, mtx) == 4, "camera reflection matrix offset");
+
+    void NuCameraLock(i32 lock) {
+        if (lock != prev_lock && prev_lock == 0) {
+            locked_camera = *NuCameraGetCam();
+        }
+        if (lock != 0) {
+            cam_copy = *NuCameraGetCam();
+            NuCameraSet(&locked_camera);
+        }
+        prev_lock = lock;
     }
     void NuCameraMotionBlurEffect(void) {
     }
     void NuCameraMotionBlurParams(void) {
     }
     void NuCameraRelock(void) {
+        if (prev_lock == 1) NuCameraSet(&locked_camera);
     }
     void NuCameraRestoreState(void) {
     }
@@ -307,15 +338,35 @@ extern "C" {
     }
     void NuCameraSetAxes(void) {
     }
+    i32 PS2_REZ_W = 1280;
+    i32 PS2_REZ_H = 720;
+    i32 PS2_SREZ_W = 4096;
+    i32 PS2_SREZ_H = 4096;
+    static volatile i32 current_clip_scissor_to_viewport;
     void NuCameraSetEx(NUCAMERA *cam, i32 fast) {
         global_camera = *cam;
+        FaceYDirStream(NuAtan2D(-global_camera.mtx.m20, -global_camera.mtx.m22));
 
         if (fast == 0) {
             NuVpUpdate();
         }
 
-        NuMtxInv(&vmtx, &global_camera.mtx);
-        NuMtxScale(&vmtx, &global_camera.scale);
+        if (camfx == 0) {
+            NuMtxInv(&vmtx, &global_camera.mtx);
+            NuMtxScale(&vmtx, &global_camera.scale);
+        } else {
+            NUMTX mirror;
+            NUMTX camera_inverse;
+            NUMTX reflect_inverse;
+            NuMtxSetIdentity(&mirror);
+            mirror.m11 = -1.0f;
+            NuMtxInv(&camera_inverse, &global_camera.mtx);
+            NuMtxInv(&reflect_inverse, &global_reflect.mtx);
+            vmtx = reflect_inverse;
+            if (camfx == 1) NuMtxMul(&vmtx, &vmtx, &mirror);
+            NuMtxMul(&vmtx, &vmtx, &global_reflect.mtx);
+            NuMtxMul(&vmtx, &vmtx, &camera_inverse);
+        }
 
         if (fast == 0) {
             NuCameraSetProjectionMtx(&pmtx, global_camera.fov, global_camera.aspect, global_camera.near_clip,
@@ -327,8 +378,15 @@ extern "C" {
         }
 
         NuCameraSetVPortClipMtx(&vpc_vport_mtx, &vmtx, &global_camera, fast);
+        if (current_clip_scissor_to_viewport != 0) {
+            current_clip_scissor_to_viewport = 0;
+            fast = 0;
+        }
         NuCameraSetScissorClipMtx(&vpc_sci_mtx, &vmtx, &global_camera, fast);
+        NuVpGetScalingMtx(&smtx);
         NuMtxMulH(&vpmtx, &vmtx, &pmtx);
+        NuMtxMulH(&vpsmtx, &vpmtx, &smtx);
+        NuMtxMulH(&psmtx, &pmtx, &smtx);
 
         if (fast == 0) {
             i32 angle = static_cast<i32>(global_camera.fov * 0.5f * 10430.378f);
@@ -339,8 +397,8 @@ extern "C" {
 
             // PS2_SREZ_W/H are 4096; PS2_REZ_W/H track the current render
             // dimensions. These ratios define the scissor frustum.
-            zxs = nurndr_pixel_width != 0 ? 4096.0f * zx / static_cast<f32>(nurndr_pixel_width) : zx;
-            zys = nurndr_pixel_height != 0 ? 4096.0f * zy / static_cast<f32>(nurndr_pixel_height) : zy;
+            zxs = static_cast<f32>(PS2_SREZ_W) * zx / static_cast<f32>(PS2_REZ_W);
+            zys = static_cast<f32>(PS2_SREZ_H) * zy / static_cast<f32>(PS2_REZ_H);
 
             clip_planes.m13 = -clip_planes.m12;
             clip_planes.m02 = 0.0f;
@@ -361,8 +419,12 @@ extern "C" {
             NuCameraBuildClipPlanes();
         }
 
-        NuRndrSetViewMtx(&vpmtx, &vpc_vport_mtx, &vpc_sci_mtx);
+        NuRndrSetViewMtx(&vpsmtx, &vpc_vport_mtx, &vpc_sci_mtx);
+        NuRndrLightingStateCurrent.field_0x60 = 1;
+        NuRndrLightingStateCurrent.field_0x74 = 0;
+        NuRndrSetSpecularLightPS(NULL, NULL);
         NuRndrStateUpdateCameraState();
+        if (NuOcclusionManagerIsInitialised()) NuOcclusionManagerOnCameraSet();
     }
     void NuCameraSetProjectionMtx(NUMTX *mtx, f32 fov, f32 aspect, f32 near_clip, f32 far_clip) {
         if (near_clip < 0.1f) {
@@ -378,7 +440,10 @@ extern "C" {
         mtx->m23 = 1.0f;
         mtx->m32 = -depth * near_clip;
     }
-    void NuCameraSetReflect(void) {
+    void NuCameraSetReflect(NUCAMERA *camera, NuCameraReflect *reflect) {
+        global_reflect = *reflect;
+        NuCameraSet(camera);
+        *reflect = global_reflect;
     }
     static void NuCameraBuildClipProjection(NUMTX *projection, NUCAMERA *camera, f32 x_scale, f32 y_scale) {
         f32 far_clip = camera->unknown_64;
@@ -426,6 +491,7 @@ extern "C" {
     void NuCameraTransformView(void) {
     }
     void NuCameraUnlock(void) {
+        if (prev_lock == 1) NuCameraSet(&cam_copy);
     }
 
     // ---------------------------------------------------------------------------
@@ -901,90 +967,13 @@ extern "C" {
     extern void (*postRenderFlashingHack)(void);
     extern void (*nuapi_endframe_callbackfn)(void);
 
-    static f32 NuFrameEnd_min_delay = 0;
+
 
     // Faithful transcription of the original frame-end pump. Waits for the
     // target frame interval, ticks material/tex/wind anims, swaps screens
     // via NuRndrSwapScreenEx, then advances nuapi clocks and pad state.
-    f32 NuFrameEnd(void) {
-        static i32 ShowingError = 0; // _ZZ10NuFrameEndE12ShowingError
 
-        i32 done = 0;
-        NuHasError(); // original records the result for the error dialog
-        i32 has_error = 0;
 
-        static int dbg_fe = 0;
-        if (dbg_fe++ < 3 || dbg_fe % 1000 == 0) {
-            LOG_INFO("NuFrameEnd #%d max_fps=%d time=%u.%u", dbg_fe, nuapi.max_fps, nuapi.time.high, nuapi.time.low);
-        }
-
-        if (nuapi.max_fps != 0) {
-            // Wait until at least 1/max_fps seconds have elapsed since frame
-            // begin (nuapi.time), then record the elapsed time.
-            f32 target = 1.0f / (f32)nuapi.max_fps;
-
-            NUTIME now;
-            NUTIME delta;
-            do {
-                NuTimeGet(&now);
-                NuTimeSub(&delta, &now, &nuapi.time);
-            } while (target > NuTimeSeconds(&delta));
-
-            nuapi.frametime = NuTimeSeconds(&delta);
-        }
-
-        NuMtlAnimate(nuapi.frametime);
-        NuTexAnimProcess(nuapi.frametime);
-        NuWindAnimate(); // original: (wind, frametime)
-        NuOcclusionManagerEndFrame();
-        NuPadRecordEndFrame();
-        NuTimeBarSetRender(); // original passes -1
-        NuPad_Interface_Render();
-
-        done = 1;
-
-        if (preRenderFlashingHack != NULL) {
-            preRenderFlashingHack();
-        }
-
-        NuRndrSwapScreenEx(-1, nuapi_endframe_callbackfn);
-
-        NUTIME end;
-        NUTIME delta2;
-        NuTimeGet(&end);
-        NuTimeSub(&delta2, &end, &nuapi.time);
-        nuapi.frametime = NuTimeSeconds(&delta2);
-        nuapi.time = end;
-
-        if (nuapi.frametime > 0.1f) {
-            nuapi.frametime = 0.1f;
-        }
-
-        NuTimeGet(&nuapi.time2);
-
-        if (done && NuFrameEnd_min_delay != 0) {
-            bgSuspendMain((i32)NuFrameEnd_min_delay);
-        }
-
-        if (postRenderFlashingHack != NULL) {
-            postRenderFlashingHack();
-        }
-
-        NuPadUpdatePads();
-        nuapi.field19_0x3c++;
-        nuapi.nuframe_begin_cnt--;
-
-        if (ShowingError == 0 && has_error != 0) {
-            ShowingError = 1;
-            // Original shows an error dialog here.
-        } else if (ShowingError != 0) {
-            ShowingError = 0;
-        }
-
-        return nuapi.frametime;
-    }
-    void NuFrameSetMinDelay(void) {
-    }
 
     // ---------------------------------------------------------------------------
     // iOS / platform
@@ -1078,7 +1067,7 @@ extern "C" {
     }
     void NuIOS_RecordFlurryEvent(char *event_name) {
         JNIEnv *env = NULL;
-        if (g_javaVM.functions->GetEnv(&g_javaVM, (void **)&env, JNI_VERSION_1_6) < 0) {
+        if (g_javaVM->functions->GetEnv(g_javaVM, (void **)&env, JNI_VERSION_1_6) < 0) {
             return;
         }
 
@@ -1992,19 +1981,32 @@ extern "C" {
     }
     void NuQFntEncodeUnicodeString(void) {
     }
-    void NuQFntGetCoordinateSystem(void) {
+    NUQFNT_CSMODE NuQFntGetCoordinateSystem(void) {
+        return NuQFntCSMode;
     }
     void NuQFntGetPrintMode(void) {
     }
-    void NuQFntHeightScale(void) {
+    f32 NuQFntHeightScale(void) {
+        return qfnt_height_scale;
     }
-    void NuQFntLenScale(void) {
+    f32 NuQFntLenScale(void) {
+        return qfnt_len_scale;
     }
-    void NuQFntMove2d(void) {
+    void NuQFntMove2d(NUQFNT *font, f32 x, f32 y, f32 z) {
+        NuQFntPushPrintMode(2);
+        NuQFntMove(font, x, y, z);
+        NuQFntPopPrintMode();
     }
     void NuQFntPopCoordinateSystem(void) {
+        if (NuQFntCSModeStackIndex > 0) {
+            --NuQFntCSModeStackIndex;
+            NuQFntSetCoordinateSystem(NuQFntCSModeStack[NuQFntCSModeStackIndex]);
+        }
     }
-    void NuQFntPrint2dU(void) {
+    void NuQFntPrint2dU(NUQFNT *font, char *text) {
+        NuQFntPushPrintMode(2);
+        NuQFntPrintU(font, text);
+        NuQFntPopPrintMode();
     }
     void NuQFntPrint2dW(void) {
     }
@@ -2018,11 +2020,19 @@ extern "C" {
     }
     void NuQFntPrintV(void) {
     }
-    void NuQFntPushCoordinateSystem(void) {
+    void NuQFntPushCoordinateSystem(NUQFNT_CSMODE mode) {
+        if (NuQFntCSModeStackIndex < 16) {
+            NuQFntCSModeStack[NuQFntCSModeStackIndex] = NuQFntCSMode;
+            ++NuQFntCSModeStackIndex;
+        }
+        NuQFntSetCoordinateSystem(mode);
     }
     void NuQFntSet2d(void) {
     }
-    void NuQFntSetColour2d(void) {
+    void NuQFntSetColour2d(NUQFNT *font, u32 colour) {
+        NuQFntPushPrintMode(2);
+        NuQFntSetColour(font, colour);
+        NuQFntPopPrintMode();
     }
     void NuQFntSetPointSize(void) {
     }
@@ -2327,8 +2337,6 @@ extern "C" {
         NuShaderManagerSetfv(0x4a, frustum);
     }
     void NuRenderContextSetViewport(void) {
-    }
-    void NuRenderDeviceIsContextValid(void) {
     }
     void NuSpecialAddShadowLight(void) {
     }
@@ -2657,34 +2665,76 @@ extern "C" {
     }
     void NuDynamicLightTestShadowExtrusionsSpecial(void) {
     }
-    void NuWindAnimate(void) {
+    void NuWindAnimate(NUWIND *wind, f32 frametime) {
+        if (wind != NULL) {
+            wind->unk2.z += (1.0f / 256.0f) * wind->unk2.y * frametime;
+            if (wind->unk2.z >= 1.0f) {
+                wind->unk2.z = NuFmod(wind->unk2.z, 1.0f);
+            }
+            f32 scaled_time = 5.0f * frametime;
+            wind->unk2.w = frametime + wind->unk2.w;
+            wind->unk3 = scaled_time + wind->unk3;
+        }
     }
-    void NuWindCreateMtx(void) {
+    extern "C++" NuWindGType *NuWindAllocateGrp();
+    extern "C++" void NuWindFreeGrp(NuWindGType *group);
+
+
+    i32 NuWindCurrent(NUWIND *wind) {
+        return wind != NULL && wind->unk1 >= 0 ? wind->unk0[wind->unk1] : -1;
     }
-    void NuWindCurrent(void) {
+
+
+
+
+
+    i32 NuWindLoad(NUWIND *wind, i32 index, char *name, VARIPTR *buffer, VARIPTR *buffer_end) {
+        if (wind != NULL && (u32)index < 8) {
+            if (wind->unk0[index] >= 0) {
+                NuTexDestroy(wind->unk0[index]);
+            }
+            i32 texture = NuTexRead(name, buffer, buffer_end);
+            if (texture != 0) {
+                wind->unk0[index] = texture;
+                return texture;
+            }
+            wind->unk0[index] = -1;
+        }
+        return -1;
     }
-    void NuWindDraw(void) {
+
+
+
+    void NuWindSetCurrent(NUWIND *wind, i32 index) {
+        if ((u32)index > 7 || wind == NULL) {
+            nuapi.wind = NULL;
+        } else if (wind->unk0[index] >= 0) {
+            wind->unk1 = index;
+            nuapi.wind = wind;
+        }
     }
-    void NuWindInit(void) {
+    void NuWindSetSpeed(NUWIND *wind, f32 speed) {
+        if (wind != NULL) {
+            wind->unk2.y = 1.0f <= speed ? speed : 1.0f;
+        }
     }
-    void NuWindLoad(void) {
+    void NuWindSetWorldSize(NUWIND *wind, f32 size) {
+        if (wind != NULL) {
+            wind->unk2.x = 1.0f <= size ? size : 1.0f;
+        }
     }
-    void NuWindRand(void) {
+
+
+
+    void NuWindUnload(NUWIND *wind, i32 index) {
+        if (wind != NULL && wind->unk0[index] >= 0) {
+            NuTexDestroy(wind->unk0[index]);
+            wind->unk0[index] = -1;
+        }
     }
-    void NuWindSetCurrent(void) {
-    }
-    void NuWindSetSpeed(void) {
-    }
-    void NuWindSetWorldSize(void) {
-    }
-    void NuWindSetup(void) {
-    }
-    void NuWindUnload(void) {
-    }
-    void NuWindUpdate(void) {
-    }
-    void NuWindUpdateArray(void *) {
-    }
+    void NuWindUpdateArray(NUVEC **);
+
+
     void NuPartEnableRayCasts(void) {
     }
     void NuPartGetSeed(void) {
@@ -3219,35 +3269,49 @@ extern "C" {
     }
     void NuVisiOctree(void) {
     }
-    void NuOcclusionManagerAddOccluderOBB(void) {
+    void NuOcclusionManagerAddOccluderOBB(const NUVEC *minimum, const NUVEC *maximum, const NUMTX *matrix) {
+        g_OcclusionManager.AddOccluder(minimum, maximum, matrix);
     }
-    void NuOcclusionManagerAddOccluderQuad(void) {
+    void NuOcclusionManagerAddOccluderQuad(const NUVEC *a, const NUVEC *b, const NUVEC *c, const NUVEC *d) {
+        g_OcclusionManager.AddOccluder(a, b, c, d);
     }
-    void NuOcclusionManagerAddOccluderSphere(void) {
+    void NuOcclusionManagerAddOccluderSphere(const NUVEC *center, f32 radius) {
+        g_OcclusionManager.AddOccluder(center, radius);
     }
     void NuOcclusionManagerEndFrame(void) {
+        g_OcclusionManager.EndFrame();
     }
-    void NuOcclusionManagerInit(void) {
+    void NuOcclusionManagerInit(u32 capacity, VARIPTR *buffer, VARIPTR buffer_end) {
+        g_OcclusionManager.Init(capacity, buffer, buffer_end);
     }
-    void NuOcclusionManagerIsEnabled(void) {
+    bool NuOcclusionManagerIsEnabled(void) {
+        return g_OcclusionManager.initialized && g_OcclusionManager.enabled;
     }
-    void NuOcclusionManagerIsInitialised(void) {
+    bool NuOcclusionManagerIsInitialised(void) {
+        return g_OcclusionManager.initialized;
     }
-    void NuOcclusionManagerIsOccludedOBB(void) {
+    i32 NuOcclusionManagerIsOccludedOBB(const NUVEC *minimum, const NUVEC *maximum, const NUMTX *matrix) {
+        return g_OcclusionManager.IsOccludedOBB(minimum, maximum, matrix);
     }
-    void NuOcclusionManagerIsOccludedSphere(void) {
+    i32 NuOcclusionManagerIsOccludedSphere(const NUVEC *center, f32 radius) {
+        return g_OcclusionManager.IsOccludedSphere(center, radius);
     }
     void NuOcclusionManagerOnCameraSet(void) {
+        g_OcclusionManager.OnCameraSet();
     }
     void NuOcclusionManagerRenderStats(void) {
     }
     void NuOcclusionManagerRenderZPass(void) {
+        g_OcclusionManager.RenderZPass();
     }
-    void NuOcclusionManagerSetEnabled(void) {
+    void NuOcclusionManagerSetEnabled(i32 enabled) {
+        g_OcclusionManager.SetEnabled(enabled != 0);
     }
-    void NuOcclusionManagerSetOccluderDotProductThreshold(void) {
+    void NuOcclusionManagerSetOccluderDotProductThreshold(f32 threshold) {
+        g_OcclusionManager.unknown_158 = threshold;
     }
-    void NuOcclusionManagerSetOccluderScreenSpaceThreshold(void) {
+    void NuOcclusionManagerSetOccluderScreenSpaceThreshold(f32 threshold) {
+        g_OcclusionManager.unknown_15c = threshold;
     }
     void NuInvalidateClipRanges(void) {
     }
@@ -3466,28 +3530,23 @@ extern "C" {
     // Debug / error / html / profiling
     // ---------------------------------------------------------------------------
 
-    void NuClearError(void) {
-    }
+
     void NuErrorCheck(void) {
     }
-    void NuErrorProlog(void) {
-    }
+
+
     void NuErrorSetFilter(void) {
     }
     void NuErrorSleep(void) {
     }
-    void NuHasError(void) {
-    }
+
     void NuDebugMsgProlog(void) {
     }
     void NuDebugMsgPrologTTY(void) {
     }
-    void NuGetErrN(void) {
-    }
-    void NuGetError(void) {
-    }
-    void NuSevereWarning(const char *, ...) {
-    }
+
+
+
     void NuWarningProlog(void) {
     }
     void NuHtmlBanner(void) {
@@ -3527,7 +3586,7 @@ extern "C" {
     void NuTimeBarResetPeaks(void) {
         NuTimeBar_PeakReset = 1;
     }
-    void NuTimeBarSetRender(void) {
+    void NuTimeBarSetRender(i32) {
     }
     void NuTimeBarSetRenderHorizontal(void) {
     }

@@ -274,7 +274,9 @@ class NuMemoryManager {
     void StatsAddFragment(FreeHeader *header);
     void StatsRemoveFragment(FreeHeader *header);
 
+  public:
     u32 CalculateLargestFragmentSize();
+  private:
     u32 CalculateFreeBytes();
 
     FreeHeader *FindLargestFragment();

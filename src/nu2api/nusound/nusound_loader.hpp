@@ -14,8 +14,8 @@ class NuSoundLoadTrigger {
   public:
     pthread_mutex_t mutex;
     pthread_cond_t cond;
-    volatile bool a;
-    volatile bool b;
+    bool a;
+    bool b;
 
     NuSoundLoadTrigger() {
         pthread_mutex_init(&mutex, NULL);
@@ -41,9 +41,9 @@ class NuSoundLoader {
   public:
     NuSoundLoader();
 
-    i32 CloseStream();
-    u64 Deinterleave(char *data, int length, char **dest, int count, NuSoundSystem::ChannelConfig config);
-    void GetChannelAddress(NuSoundBuffer *, NuSoundStreamDesc *, NuSoundSystem::AudioChannel);
+    void CloseStream();
+    static u64 Deinterleave(char *data, int length, char **dest, int count, NuSoundSystem::ChannelConfig config);
+    static void *GetChannelAddress(NuSoundBuffer *, NuSoundStreamDesc *, NuSoundSystem::AudioChannel);
     // libTTapp calls this after clearing its loader pointer.  The routine never
     // reads `this`; exposing that original static-style semantic to sanitizer
     // builds avoids manufacturing a non-null object that the target did not use.
@@ -57,7 +57,7 @@ class NuSoundLoader {
     virtual NuSoundStreamDesc *CreateHeader() = 0;
 
     virtual i32 OpenForStreaming(const char *path, f64 param2, NuSoundStreamDesc *desc, bool param4);
-    virtual void FillStreamBuffer(NuSoundBuffer *buffer, bool param2);
+    virtual NuSoundBuffer::Context FillStreamBuffer(NuSoundBuffer *buffer, bool param2);
 
     virtual bool SeekRawData(u64 position);
     virtual bool SeekPCMSample(u64 index) = 0;
@@ -100,17 +100,11 @@ class NuSoundHeaderWAV : public NuSoundStreamDesc {
     DataFormat GetDecodedDataFormat() const override {
         return DataFormat::ZERO;
     }
-    DataFormat GetEncodedDataFormat() const override {
-        return DataFormat::ZERO;
-    }
     u64 GetEncodedLengthBytes() const override {
         return this->encoded_length_bytes;
     }
-    u64 GetDecodedLengthBytes() const override {
-        return this->encoded_length_bytes;
-    }
     u64 GetLengthSamples() const override {
-        return GetEncodedLengthBytes() / ((GetBitsPerChannel() + 7) / 8);
+        return GetEncodedLengthBytes() / (static_cast<i32>(GetBitsPerChannel()) / 8);
     }
     f32 GetLengthSeconds() const override {
         return (f32)GetLengthSamples() / (f32)GetSampleRate();
@@ -118,29 +112,17 @@ class NuSoundHeaderWAV : public NuSoundStreamDesc {
     u64 GetDataOffset() const override {
         return this->data_position;
     }
-    u16 GetNumChannels() const override {
+    u32 GetNumChannels() const override {
         return this->num_channels;
     }
     u32 GetSampleRate() const override {
         return this->sample_rate;
     }
-    u16 GetBitsPerChannel() const override {
+    u32 GetBitsPerChannel() const override {
         return this->bits_per_channel;
     }
-    u16 GetBlockSize() const override {
+    u32 GetBlockSize() const override {
         return this->block_size;
-    }
-    u16 GetInterleaveSize() const override {
-        return 0;
-    }
-    u16 GetFormatID() const override {
-        return this->format_id;
-    }
-    u16 GetExtendedDataSize() const override {
-        return this->extended_data_size;
-    }
-    void *GetExtendedData() const override {
-        return (void *)&this->extended_data;
     }
 };
 

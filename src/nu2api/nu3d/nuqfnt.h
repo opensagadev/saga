@@ -77,6 +77,11 @@ i32 NuQFntReadPS(VUFNT *font, i32 tex_id, i32 flags, i32 render_plane, VARIPTR *
 extern "C" {
 #endif
     extern NUQFNT_CSMODE NuQFntCSMode;
+    extern i32 NuQFntCSModeStackIndex;
+    extern NUQFNT_CSMODE NuQFntCSModeStack[16];
+    NUQFNT_CSMODE NuQFntGetCoordinateSystem(void);
+    void NuQFntPushCoordinateSystem(NUQFNT_CSMODE mode);
+    void NuQFntPopCoordinateSystem(void);
 
     extern f32 qfnt_rezscale_w;
     extern f32 qfnt_rezscale_h;
@@ -120,6 +125,11 @@ extern "C" {
     void NuQFntPrintU(NUQFNT *font, char *text);
     void NuQFntPushPrintMode(u32 mode);
     void NuQFntPopPrintMode(void);
+    f32 NuQFntHeightScale(void);
+    f32 NuQFntLenScale(void);
+    void NuQFntMove2d(NUQFNT *font, f32 x, f32 y, f32 z);
+    void NuQFntPrint2dU(NUQFNT *font, char *text);
+    void NuQFntSetColour2d(NUQFNT *font, u32 colour);
     void NuQFntSetSpaceWidth(NUQFNT *font, f32 width);
     u16 NuQFntEncodeUnicodeChar(NUQFNT *font, u16 character);
     NUQFNT *NuQFntLoadPtr(char *path, char *name, i32 flags, i32 render_plane, VARIPTR *buf, VARIPTR *buf_end);

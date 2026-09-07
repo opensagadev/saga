@@ -30,9 +30,11 @@ struct JNIInvokeInterface stub = {
     .AttachCurrentThreadAsDaemon = NULL,
 };
 
-JavaVM g_javaVM = {
+static JavaVM host_javaVM = {
     .functions = &stub,
 };
+
+JavaVM *g_javaVM = &host_javaVM;
 
 jclass g_activityClass;
 

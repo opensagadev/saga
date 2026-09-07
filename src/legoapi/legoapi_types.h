@@ -10,6 +10,7 @@
 #include "nu2api/nu3d/nuhspecial.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/numath/nuvec4.h"
 
 #include "legoapi/items/base/apiobject.h"
 #include "MechInputTouch/MechInputTouch_types.h"
@@ -3606,28 +3607,58 @@ struct MoveToMarker {
     void Process(float);
     void Render();
 };
+struct OccluderRecord {
+    NUVEC4 vertices[4];
+    NUVEC4 transformed[4];
+    f32 min_x, max_x, min_y, max_y, min_depth;
+    f32 depth;
+};
+DECOMP_ASSERT(sizeof(OccluderRecord) == 0x98, "occluder record size");
+DECOMP_ASSERT(offsetof(OccluderRecord, depth) == 0x94, "occluder depth offset");
 struct OccluderSet {
+    OccluderRecord *occluders;
+    u32 *indices;
+    u32 capacity;
+    u32 count;
+    bool queries_prepared;
+    u8 unknown_11[0x0f];
+    NUMTX projection_matrix;
+    NUMTX query_matrix;
+    static numtl_s *ms_pZOnlyMtl3D;
+    static numtl_s *ms_pZOnlyMtl2D;
+    static numtl_s *ms_pAlphaMtl2D;
     void AddOccluder(nuvec_s const *, nuvec_s const *, nuvec_s const *, nuvec_s const *);
     void Clear();
     void Init(u32, variptr_u *, variptr_u);
-    void IsOccludedOBB(nuvec_s const *, nuvec_s const *, numtx_s const *);
-    void IsOccludedSphere(nuvec_s const *, float);
+    bool IsOccludedOBB(nuvec_s const *, nuvec_s const *, numtx_s const *);
+    bool IsOccludedSphere(nuvec_s const *, float);
     OccluderSet();
     void OnCameraSet();
     void PrepareForQueries(numtx_s const *, numtx_s const *);
     void RenderOccluders(bool) const;
-    void SortByDepth(void const *, void const *);
+    static i32 SortByDepth(void const *, void const *);
     ~OccluderSet();
 };
 struct OcclusionManager {
+    bool initialized;
+    bool enabled;
+    u8 unknown_02[0x0e];
+    OccluderSet sets[2];
+    OccluderSet *building_set;
+    OccluderSet *current_set;
+    f32 unknown_158;
+    f32 unknown_15c;
+    u32 unknown_160;
+    u32 unknown_164;
+    u8 unknown_168[8];
     void AddOccluder(nuvec_s const *, float);
     void AddOccluder(nuvec_s const *, nuvec_s const *, numtx_s const *);
     void AddOccluder(nuvec_s const *, nuvec_s const *, nuvec_s const *, nuvec_s const *);
     void BeginFrame();
     void EndFrame();
     void Init(u32, variptr_u *, variptr_u);
-    void IsOccludedOBB(nuvec_s const *, nuvec_s const *, numtx_s const *);
-    void IsOccludedSphere(nuvec_s const *, float);
+    bool IsOccludedOBB(nuvec_s const *, nuvec_s const *, numtx_s const *);
+    bool IsOccludedSphere(nuvec_s const *, float);
     OcclusionManager();
     void OnCameraSet();
     void RenderStats() const;
@@ -3635,6 +3666,10 @@ struct OcclusionManager {
     void SetEnabled(bool);
     ~OcclusionManager();
 };
+DECOMP_ASSERT(sizeof(OccluderSet) == 0xa0, "occluder set size");
+DECOMP_ASSERT(sizeof(OcclusionManager) == 0x170, "occlusion manager size");
+DECOMP_ASSERT(offsetof(OcclusionManager, current_set) == 0x154, "current occluder set offset");
+extern OcclusionManager g_OcclusionManager;
 struct PART_s {
     union {
         NUMTX transform;

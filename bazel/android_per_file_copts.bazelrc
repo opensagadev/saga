@@ -7,6 +7,14 @@
 # apply only to the corresponding source.
 
 build:target --per_file_copt=^src/batman\.cpp$@-O2
+# Recovered Android entry points; -O2 and -O3 emit the same measured bodies.
+build:target --per_file_copt=^src/java/android\.cpp$@-O2
+# Original OBB lookup uses optimized inlined strlen/strcat and omits leaf frames.
+build:target --per_file_copt=^src/gamelib/util/AndroidOBBUtils\.cpp$@-O3
+# Recovered stub-only device units: -O3 reproduces FileSize exactly and the
+# APK constructor/CreateNuFile and SetCurrentDir bodies apart from relocation.
+build:target --per_file_copt=^src/nu2api/nufile/nufiledevice\.cpp$@-O3
+build:target --per_file_copt=^src/nu2api/nufile/NuFileDeviceAndroidAPK\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/ai/aisys/aiscript\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/ai/aisys/aistate\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/ai/aisys/aisys\.cpp$@-O3
@@ -201,12 +209,14 @@ build:target --per_file_copt=^src/nu2api/nucore/nupad_interface\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nucore/nunew\.cpp$@-O2
 build:target --per_file_copt=^src/nu2api/nucore/nustring\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nucore/nuios_metrics\.cpp$@-O2
-build:target --per_file_copt=^src/nu2api/nucore/android/NuInputDevice_android\.cpp$@-O2
+# Recovered ClassInitPS and UpdateAllPS require the original vectorization and
+# ten-touch loop unrolling: -O3 reproduces both bodies above 99%.
+build:target --per_file_copt=^src/nu2api/nucore/android/NuInputDevice_android\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nucore/android/NuThread_android\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nucore/android/bgproc_android\.cpp$@-O2
 build:target --per_file_copt=^src/nu2api/nucore/android/numemory_android\.cpp$@-O2
 build:target --per_file_copt=^src/nu2api/nufile/nufile\.c$@-O2
-build:target --per_file_copt=^src/nu2api/nufile/nufile_android\.cpp$@-O2
+build:target --per_file_copt=^src/nu2api/nufile/nufile_android\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nufile/nufilebase\.cpp$@-O2
 build:target --per_file_copt=^src/nu2api/nufile/tmclient\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nufile/android/nufile_android\.cpp$@-O2
@@ -231,6 +241,18 @@ build:target --per_file_copt=^src/nu2api/nusound/nusound_memorymanager\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nusound/nusound_system\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nusound/nusound_voice\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nusound/nusound_weakptr\.cpp$@-O3
+build:target --per_file_copt=^src/nu2api/nu3d/nuocclusion\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/render/light/occlusion\.cpp$@-O3
+build:target --per_file_copt=^src/nu2api/nusound/nusound_bus\.cpp$@-O3
+build:target --per_file_copt=^src/nu2api/nusound/nusound_clock\.cpp$@-O3
+build:target --per_file_copt=^src/nu2api/nusound/nusound_effect_doppler\.cpp$@-O3
+build:target --per_file_copt=^src/nu2api/nusound/nusound_effect_fader\.cpp$@-O3
+build:target --per_file_copt=^src/nu2api/nusound/nusound_effect_pitchramp\.cpp$@-O3
+build:target --per_file_copt=^src/nu2api/nusound/nusound_listener\.cpp$@-O3
+build:target --per_file_copt=^src/nu2api/nusound/nusound_routing\.cpp$@-O3
+build:target --per_file_copt=^src/nu2api/nusound/nusound_mixer\.cpp$@-O3
+build:target --per_file_copt=^src/nu2api/nusound/nusound_android\.cpp$@-O3
+build:target --per_file_copt=^src/nu2api/nusound/nusound_voice_android\.cpp$@-O3
 build:target --per_file_copt=^src/MechInputTouch/MechInputTouchButton\.cpp$@-O2
 build:target --per_file_copt=^src/MechInputTouch/MechInputTouchMainController\.cpp$@-O2
 build:target --per_file_copt=^src/MechInputTouch/MechSystems\.cpp$@-O2

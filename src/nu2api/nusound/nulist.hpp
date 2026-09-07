@@ -7,6 +7,8 @@ class NuSoundHandle;
 
 class NuListNodeBase {
     friend class NuSoundHandle;
+    friend class NuSoundVoice;
+    friend class NuSoundBus;
 
     NuListNodeBase *prev;
     NuListNodeBase *next;
@@ -52,6 +54,8 @@ template <typename T> class NuListNode : public NuListNodeBase {
 
 template <typename T> class NuList {
     friend class NuSoundHandle;
+    friend class NuSoundVoice;
+    friend class NuSoundBus;
 
     NuListNodeBase start;
     NuListNodeBase end;

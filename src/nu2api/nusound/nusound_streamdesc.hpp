@@ -22,17 +22,29 @@ class NuSoundStreamDesc {
     virtual u64 GetLengthSamples() const = 0;
     virtual f32 GetLengthSeconds() const = 0;
     virtual u64 GetDataOffset() const = 0;
-    virtual u16 GetNumChannels() const = 0;
+    virtual u32 GetNumChannels() const = 0;
     virtual u32 GetSampleRate() const = 0;
-    virtual u16 GetBitsPerChannel() const = 0;
-    virtual u16 GetBlockSize() const = 0;
-    virtual DataFormat GetEncodedDataFormat() const = 0;
-    virtual u64 GetDecodedLengthBytes() const = 0;
+    virtual u32 GetBitsPerChannel() const = 0;
+    virtual u32 GetBlockSize() const = 0;
+    virtual DataFormat GetEncodedDataFormat() const {
+        return GetDecodedDataFormat();
+    }
+    virtual u64 GetDecodedLengthBytes() const {
+        return GetEncodedLengthBytes();
+    }
     virtual i32 DecodeStreamOnOpen() const;
     virtual i32 GetLoopStart() const;
     virtual i32 GetLoopEnd() const;
-    virtual u16 GetInterleaveSize() const = 0;
-    virtual u16 GetFormatID() const = 0;
-    virtual u16 GetExtendedDataSize() const = 0;
-    virtual void *GetExtendedData() const = 0;
+    virtual u16 GetInterleaveSize() const {
+        return 0;
+    }
+    virtual u16 GetFormatID() const {
+        return 1;
+    }
+    virtual u16 GetExtendedDataSize() const {
+        return 0;
+    }
+    virtual void *GetExtendedData() const {
+        return nullptr;
+    }
 };

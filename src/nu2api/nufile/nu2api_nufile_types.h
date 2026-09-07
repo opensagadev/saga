@@ -3,59 +3,82 @@
 #pragma once
 
 #include "nu2api/nucore/common.h"
+#include "nu2api/nufile/android/nufile_android.h"
 
-struct NuFile;
 struct NuFileAndroidAPK;
 struct NuFileBase;
 struct NuFileDevice;
 struct NuFileDeviceAndroidAPK;
-struct NuFileDeviceType;
+enum NuFileDeviceType { NUFILE_DEVICE_UNKNOWN = 1, NUFILE_DEVICE_ANDROID_APK = 3 };
+struct nufile_info_s;
 
-struct NuFileDeviceType {};
-
-struct NuFile {
-    struct InitData {};
-    struct OpenMode {
-        struct T {};
-    };
-};
-struct NuFileAndroidAPK {
-    static NuFileAndroidAPK *ms_fileId[0x400];
-
-    void Init();
-    void Open(char const *, NuFile::OpenMode::T);
-    static void ResetId(i32 id);
-    static i32 SetFileId(NuFileAndroidAPK *file);
-};
-struct NuFileBase {
-    void Closedown();
-    void Init();
-};
+namespace NuFile {
+    struct InitData { u32 flags; u32 unknown; };
+}
 struct NuFileDevice {
-    void AddDevice(NuFileDevice *);
+    static void AddDevice(NuFileDevice *);
     void AddPathRule(NuFileDeviceType, char const *);
     void AllocDirectoryHandle(char const *);
-    void ClearPathRules();
-    void FileOpen(char const *, NuFile::OpenMode::T) const;
-    void FileSize(char const *) const;
-    void FormatName(char *, i32, char const *) const;
+    static void ClearPathRules();
     void FreeDirectoryHandle(i32);
     void GetDeviceByType(NuFileDeviceType);
-    void GetDeviceFromDirectoryHandle(i32);
+    static NuFileDevice *GetDeviceFromDirectoryHandle(i32);
     void GetDeviceFromPath(char const *);
-    void Interrogate();
     NuFileDevice();
-    void QueryInstallProgress();
-    void SetCurrentDir(char const *);
-    void SetDefaultDevice(NuFileDeviceType);
+    static void SetDefaultDevice(NuFileDeviceType);
     void SetLabel(char *);
     void SetMountName(char *);
+    virtual NuFileBase *FileOpen(char const *, NuFile::OpenMode::T) const;
+    virtual i64 FileSize(char const *) const;
+    // The original base implementations report unsupported operations.
+    virtual bool FileRename(char const *, char const *) { return false; }
+    virtual bool FileGetInfo(char const *, nufile_info_s *) { return false; }
+    virtual bool FileDelete(char const *) { return false; }
+    virtual bool FileTouch(char const *) { return false; }
+    virtual i32 DirOpen(char const *) { return 0; }
+    virtual void DirClose(i32) {}
+    virtual bool DirExists(char const *) { return false; }
+    virtual bool DirRead(i32, nufile_info_s *) { return false; }
+    virtual bool DirCreatePath(char const *) { return false; }
+    virtual bool DirRemove(char const *) { return false; }
+    virtual bool DirRemoveRecursive(char const *, bool) { return false; }
+    virtual bool DirRename(char const *, char const *) { return false; }
+    virtual bool GetPositionOnDisc(char const *, i64 &) const { return false; }
+    virtual i32 FormatName(char *, i32, char const *) const;
+    virtual void SetCurrentDir(char const *);
     virtual ~NuFileDevice();
+    virtual void Interrogate();
+    virtual i32 QueryInstallProgress();
+    virtual NuFileBase *CreateNuFile(char const *, NuFile::OpenMode::T) const = 0;
+
+    static NuFileDevice *sm_Devices[16];
+    static i32 sm_NumDevices;
+    static NuFileDevice *sm_DefaultDevice;
+    static NuFileDevice *sm_HostDevice;
+    static i32 sm_NumRules;
+    struct DirectoryHandle {
+        NuFileDevice *device;
+        i32 handle;
+    };
+    static DirectoryHandle sm_DirectoryHandles[16];
+
+  protected:
+    i32 device_id;
+    NuFileDeviceType device_type;
+    u32 flags;
+    i32 status;
+    const char *separator;
+    const char *label;
+    const char *mount_name;
+    char current_dir[128];
 };
-struct NuFileDeviceAndroidAPK {
-    void CreateNuFile(char const *, NuFile::OpenMode::T) const;
+struct NuFileDeviceAndroidAPK : NuFileDevice {
+    virtual NuFileBase *CreateNuFile(char const *, NuFile::OpenMode::T) const override;
     NuFileDeviceAndroidAPK(char const *, NuFile::InitData const &);
     virtual ~NuFileDeviceAndroidAPK();
 };
+
+DECOMP_ASSERT(sizeof(NuFileDevice) == 0xa0, "NuFileDevice target layout");
+DECOMP_ASSERT(sizeof(NuFileDeviceAndroidAPK) == 0xa0, "APK device target layout");
 
 #endif // NU2API_NUFILE_TYPES_H

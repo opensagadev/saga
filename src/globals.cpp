@@ -349,7 +349,7 @@ u8 aicreature_sets_alive[16] = {};
 // ------------------------------------------------------------------------
 // Render / compatibility options
 // ------------------------------------------------------------------------
-i32 g_forceSysMemVbs = 0;
+bool g_forceSysMemVbs = false;
 i32 g_forceETC1 = 0;
 i32 Reflections_On = 1;
 i32 disable_narrow_socks = 0;

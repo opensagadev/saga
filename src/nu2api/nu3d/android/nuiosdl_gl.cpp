@@ -53,9 +53,8 @@ u32 g_lastAlphaRef = 0;
 u32 g_lastAlphaBlend = 0;
 i32 g_renderingReflection = 0; // original bss @0x99b360 — flips cull when reflecting.
 
-// GLES2 has no VAOs; the original file-static at 0x2a3168 only cached the
-// last-bound handle to avoid redundant binds.
-static u32 g_lastBoundVAO = 0;
+// The original helper at 0x293168 updates the shared renderer cache.
+extern u32 g_lastBoundVAO;
 static void NuIOSBindVAO(u32 vao) {
     if (vao != g_lastBoundVAO) {
         g_lastBoundVAO = vao;
@@ -79,7 +78,7 @@ extern u32 g_readBufferIndex;
 // Refraction texture used by glass debris — lazily allocated.
 static i32 NuIOSDLMtlCallback_refractionRT = 0;                 // @0x99b480
 static NUNATIVETEX NuIOSDLMtlCallback_nativeRefractionTex = {}; // @0x99b4a0
-static i32 NuIOSDLMtlCallback_lastFrameCount = 0;
+static i32 NuIOSDLMtlCallback_lastFrameCount = -1;
 
 // ---------------------------------------------------------------------------
 // Cross-TU imports.
@@ -102,8 +101,8 @@ static inline isize PtrToArgInt(const void *p) {
 }
 
 static inline i32 NuApiFrameCount() {
-    // Original reads *(i32*)(&nuapi + 0x60) directly.
-    return *(i32 *)((u8 *)&nuapi + 0x60);
+    // Original 0x29c90e reads the counter at nuapi + 0x3c.
+    return nuapi.frame_count;
 }
 
 static inline usize ptrToUsize(const void *p) {

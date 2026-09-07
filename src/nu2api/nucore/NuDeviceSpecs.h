@@ -1,7 +1,3 @@
 #pragma once
 
-struct NuDeviceSpecs {
-    void Exists();
-    NuDeviceSpecs();
-    ~NuDeviceSpecs();
-};
+#include "nu2api/nuplatform/nudevicespecs.hpp"

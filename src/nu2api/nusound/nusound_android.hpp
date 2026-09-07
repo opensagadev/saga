@@ -16,12 +16,12 @@ struct NuSoundAndroid : public NuSoundSystem {
     static i32 m_workerThreadCount;
 
     static void AndroidNuSoundClockThread(void *);
-    void CreateEffect(NuSoundEffect::EffectType);
-    NuSoundVoice *CreateVoice(NuSoundSource *, bool) override;
+    NuSoundEffect *CreateEffect(NuSoundEffect::EffectType) override;
+    virtual NuSoundVoice *CreateVoice(NuSoundSource *, bool);
     static bool IsValidBitRate(u32 bits);
     static bool IsValidSampleRate(u32 rate_millis);
     static u32 ReportErrorCode(u32 error, const char *message);
-    void ShutdownAudioDevice();
+    void ShutdownAudioDevice() override;
     void UpdateAudioDevice() override;
 };
 

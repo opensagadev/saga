@@ -202,15 +202,6 @@ void NuInputDevicePS::EnableDPDPS(u32) {
 void NuInputDevicePS::GetIdentifierPS(u32) {
 }
 
-void NuInputDevicePS::HandleGamePadAxis_ANDROID_SPECIFIC(float, float, float, float, float, float) {
-}
-
-void NuInputDevicePS::HandleSensor_ANDROID_SPECIFIC(i32, float, float, float) {
-}
-
-void NuInputDevicePS::HandleTouch_ANDROID_SPECIFIC(i32, i32, i32, float, float) {
-}
-
 NuTouchInputStick::NuTouchInputStick(NuTouchInputElement::TYPE, i32, u32, float, float, float, float) {
 }
 

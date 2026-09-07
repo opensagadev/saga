@@ -19,9 +19,8 @@ i32 NuSoundAndroid::m_workerThreadCount = 0;
 void NuSoundAndroid::AndroidNuSoundClockThread(void *) {
     // 5 ms tick driving the audio clock callbacks (the callback list is
     // empty in practice on the title screen).
-    NuSoundAndroid *system = &NuSound;
     while (NuSoundAndroid::m_workerThreadCount != 0) {
-        system->clock.HandleCallbacks();
+        NuSoundSystem::Get()->clock.HandleCallbacks();
         NuThreadSleep(5);
     }
 }
@@ -33,7 +32,8 @@ NuSoundAndroid::NuSoundAndroid() : NuSoundSystem() {
     this->factory_list.RegisterFactory(factory, NuSoundStreamDesc::DataFormat::ZERO);
 }
 
-void NuSoundAndroid::CreateEffect(NuSoundEffect::EffectType) {
+NuSoundEffect *NuSoundAndroid::CreateEffect(NuSoundEffect::EffectType) {
+    return NULL;
 }
 
 NuSoundVoice *NuSoundAndroid::CreateVoice(NuSoundSource *source, bool loop) {
@@ -41,26 +41,15 @@ NuSoundVoice *NuSoundAndroid::CreateVoice(NuSoundSource *source, bool loop) {
 }
 
 bool NuSoundAndroid::IsValidBitRate(u32 bits) {
-    // OpenSL PCM supports 8 / 16 / 24 bit containers.
-    return bits == 8 || bits == 16 || bits == 24;
+    return bits == 16 || bits == 8;
 }
 
 bool NuSoundAndroid::IsValidSampleRate(u32 rate_millis) {
-    // OpenSL accepts the standard rates, expressed in milli Hertz.
-    switch (rate_millis / 1000) {
-        case 8000:
-        case 11025:
-        case 12000:
-        case 16000:
-        case 22050:
-        case 24000:
-        case 32000:
-        case 44100:
-        case 48000:
-            return true;
-        default:
-            return false;
-    }
+    return rate_millis == 8000000 || rate_millis == 11025000 || rate_millis == 12000000
+        || rate_millis == 16000000 || rate_millis == 22050000 || rate_millis == 24000000
+        || rate_millis == 32000000 || rate_millis == 44100000 || rate_millis == 48000000
+        || rate_millis == 64000000 || rate_millis == 88200000 || rate_millis == 96000000
+        || rate_millis == 192000000;
 }
 
 u32 NuSoundAndroid::ReportErrorCode(u32 error, const char *message) {
@@ -77,7 +66,7 @@ namespace {
     typedef u32 (*EngineCreateOutputMixFn)(void *, void **, u32, const void **, const u32 *);
     typedef u32 (*QuerySupportedProfilesFn)(void *, u16 *);
     typedef u32 (*QueryAvailableVoicesFn)(void *, u32, i16 *, u32 *, i16 *);
-    typedef u32 (*VolumeSetVolumeLevelFn)(void *, i32);
+    typedef u32 (*VolumeSetMuteFn)(void *, u32);
     typedef u32 (*EnvironmentalReverbSetPropertiesFn)(void *, const void *);
 
 #define SL_SLOT(itf, fn_type, byte_offset) (*(fn_type *)((char *)(*(void **)(itf)) + (byte_offset)))
@@ -96,36 +85,36 @@ bool NuSoundAndroid::InitAudioDevice() {
     }
 
     error = SL_SLOT(this->engine_object, ObjectRealizeFn, 0)(this->engine_object, 0);
-    if (ReportErrorCode(error, "Realize the engine object") != 0) {
+    if (ReportErrorCode(error, "Engine realize") != 0) {
         return false;
     }
 
     void *capabilities = NULL;
     error = SL_SLOT(this->engine_object, ObjectGetInterfaceFn, 0xc)(this->engine_object, SL_IID_ENGINECAPABILITIES,
                                                                     &capabilities);
-    if (ReportErrorCode(error, "Get the engine capabilities interface") == 0) {
+    if (ReportErrorCode(error, "Get engine capabilities interface") == 0) {
         u16 profiles = 0;
         error = SL_SLOT(capabilities, QuerySupportedProfilesFn, 0)(capabilities, &profiles);
-        if (ReportErrorCode(error, "QuerySupportedProfiles") == 0 && (profiles & 4) != 0) {
+        bool supports_3d = ReportErrorCode(error, "QuerySupportedProfiles") == 0 && (profiles & 4) != 0;
+        i16 max_voices = 0;
+        u32 absolute_max = 0;
+        i16 free_voices = 0;
+        error = SL_SLOT(capabilities, QueryAvailableVoicesFn, 4)(capabilities, 1, &max_voices, &absolute_max,
+                                                                 &free_voices);
+        ReportErrorCode(error, "QueryAvailableVoices(SL_VOICETYPE_2D_AUDIO)");
+        if (supports_3d) {
             i16 max_voices = 0;
             u32 absolute_max = 0;
             i16 free_voices = 0;
-            error = SL_SLOT(capabilities, QueryAvailableVoicesFn, 4)(capabilities, 1, &max_voices, &absolute_max,
-                                                                     &free_voices);
-            ReportErrorCode(error, "QueryAvailableVoices (2D audio)");
-
-            max_voices = 0;
-            absolute_max = 0;
-            free_voices = 0;
             error = SL_SLOT(capabilities, QueryAvailableVoicesFn, 4)(capabilities, 4, &max_voices, &absolute_max,
                                                                      &free_voices);
-            ReportErrorCode(error, "QueryAvailableVoices (vibra)");
+            ReportErrorCode(error, "QueryAvailableVoices(SL_VOICETYPE_3D_AUDIO)");
         }
     }
 
     error = SL_SLOT(this->engine_object, ObjectGetInterfaceFn, 0xc)(this->engine_object, SL_IID_ENGINE,
                                                                     &this->audio_engine);
-    if (ReportErrorCode(error, "Get the engine interface") != 0) {
+    if (ReportErrorCode(error, "Get engine interface") != 0) {
         return false;
     }
 
@@ -133,27 +122,25 @@ bool NuSoundAndroid::InitAudioDevice() {
     const u32 mix_required[2] = {0, 0};
     error = SL_SLOT(this->audio_engine, EngineCreateOutputMixFn, 0x1c)(this->audio_engine, &this->output_mix, 2,
                                                                        mix_iids, mix_required);
-    if (ReportErrorCode(error, "Create the output mix object") != 0) {
+    if (ReportErrorCode(error, "Create output mix") != 0) {
         return false;
     }
 
     error = SL_SLOT(this->output_mix, ObjectRealizeFn, 0)(this->output_mix, 0);
-    if (ReportErrorCode(error, "Realize the output mix object") != 0) {
+    if (ReportErrorCode(error, "Realize output mix") != 0) {
         return false;
     }
 
     error = SL_SLOT(this->output_mix, ObjectGetInterfaceFn, 0xc)(this->output_mix, SL_IID_VOLUME, &this->mix_volume);
-    if (ReportErrorCode(error, "Get the output mix volume interface") == 0) {
-        error = SL_SLOT(this->mix_volume, VolumeSetVolumeLevelFn, 0xc)(this->mix_volume, 0);
-        ReportErrorCode(error, "Set the output mix volume");
+    if (ReportErrorCode(error, "Get output volume interface") == 0) {
+        SL_SLOT(this->mix_volume, VolumeSetMuteFn, 0xc)(this->mix_volume, 0);
     }
 
     error = SL_SLOT(this->output_mix, ObjectGetInterfaceFn, 0xc)(this->output_mix, SL_IID_ENVIRONMENTALREVERB,
                                                                  &this->mix_reverb);
-    if (ReportErrorCode(error, "Get the environmental reverb interface") == 0) {
-        error = SL_SLOT(this->mix_reverb, EnvironmentalReverbSetPropertiesFn, 0x50)(this->mix_reverb,
+    if (ReportErrorCode(error, "Get output environmental reverb interface") == 0) {
+        SL_SLOT(this->mix_reverb, EnvironmentalReverbSetPropertiesFn, 0x50)(this->mix_reverb,
                                                                                     this->reverb_properties);
-        ReportErrorCode(error, "Set the environmental reverb properties");
     }
 
     NuSoundSystem::sOutputConfig = this->GetClosestSupportedConfig(2);

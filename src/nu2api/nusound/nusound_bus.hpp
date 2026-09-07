@@ -1,9 +1,18 @@
 #pragma once
 
+#include "nu2api/nusound/nulist.hpp"
+
 class NuSoundEffect;
 
 class NuSoundBus {
+  public:
+    NuSoundBus *previous;
+    NuSoundBus *next;
+    float output_mix[8];
+
+  private:
     NuSoundBus *parent_bus;
+    NuList<NuSoundEffect *> effects;
     char name[128];
 
   public:
@@ -13,7 +22,7 @@ class NuSoundBus {
 
     const char *GetName();
 
-    void AddEffect(NuSoundEffect *);
+    bool AddEffect(NuSoundEffect *);
     void RemoveEffect(NuSoundEffect *);
     void ApplyFinalMix(float *);
     void GetOutputMix(float *);

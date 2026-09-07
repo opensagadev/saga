@@ -136,9 +136,6 @@ void NewScanRot(nuvec_s *position, i32 terrain_mask) {
     TerI->scan_list = TerI->scan_list_storage;
 }
 
-void AndroidMain(void *) {
-}
-
 void ObjZappedBlue(GameObject_s *) {
 }
 

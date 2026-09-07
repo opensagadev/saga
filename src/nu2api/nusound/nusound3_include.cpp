@@ -3,6 +3,7 @@
 #include "decomp.h"
 
 #include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nucore/nucore.hpp"
 #include "nu2api/nucore/nutime.h"
 #include "nu2api/nucore/numemory.h"
@@ -26,15 +27,15 @@
 
 // Stereo stream slot (0x10 bytes in the original):
 //   +0x0 stream            the streaming sample playing in this slot
-//   +0x4 volume            the PS2 volume (0..16383) as raw bits
-//   +0x8 loop              PENDING-START flag: PlayStereoV sets it to 1, and
+//   +0x4 loop              PENDING-START flag: PlayStereoV sets it to 1, and
 //                          NuSound3Update clears it once the voice is created
+//   +0x8 volume            the PS2 volume (0..16383) as raw bits
 //   +0xc field_0xc         the voice/loader loop flag (PlayStereoV key 0xb)
 //   +0xd field_0xd         started flag: set once the voice began playing
 struct NuSoundStream {
     NuSoundStreamingSample *stream;
+    u8 loop;
     i32 ps2volume;
-    i32 loop;
     u8 field_0xc;
     u8 field_0xd;
 };
@@ -46,14 +47,10 @@ class NuSound3Stream {
     static NuSoundWeakPtr<NuSoundVoice> mVoice;
 };
 
-NuSoundWeakPtr<NuSoundVoice> NuSound3Stream::mVoice;
+
 
 DECOMP_ASSERT(sizeof(NuSound3Stream::mVoice) == 0x10, "NuSound3Stream voice pointer size");
 
-static NuSoundListener g_NuSoundListener;
-static NuEListNode<NuSoundListener> g_NuSoundListenerNode;
-static NuEList<NuSoundListener> g_NuSoundListenerList;
-static NUMTX g_NuSoundHeadMatrix;
 // The original focused the listener on the player object; the title screen
 // runs before gameplay, where it is NULL and the focus stays disabled.
 static void *g_NuSoundFocusPlayer = NULL;
@@ -63,11 +60,65 @@ extern "C" {
     const char *audio_ps2_music_ext = ".vag";
 }
 
+template <> class NuVector<nusound_filename_info_s> {
+  public:
+    nusound_filename_info_s *data;
+    u32 capacity;
+    u32 length;
+    NuVector() : data(NULL), capacity(0), length(0) {}
+    ~NuVector() {
+        if (length != 0) length = 0;
+        if (data != NULL) {
+            NuMemoryGet()->GetThreadMem()->BlockFree(data, 0);
+            capacity = 0;
+            data = NULL;
+        }
+    }
+    void PushBack(const nusound_filename_info_s &value) {
+        if (length + 1 > capacity) {
+            u32 new_capacity = (length + 4) & ~3u;
+            nusound_filename_info_s *replacement = static_cast<nusound_filename_info_s *>(
+                NuMemoryGet()->GetThreadMem()->_BlockReAlloc(data, new_capacity * sizeof(*data),
+                                                            4, 0x41, "", NUMEMORY_CATEGORY_NONE));
+            if (replacement != data) {
+                nusound_filename_info_s *previous = data;
+                for (u32 i = 0; i < length; ++i) replacement[i] = previous[i];
+                NuMemoryGet()->GetThreadMem()->BlockFree(previous, 0);
+            }
+            capacity = new_capacity;
+            data = replacement;
+        }
+        data[length++] = value;
+    }
+};
+
 static NuVector<nusound_filename_info_s> g_NuSoundSamples;
+
+extern "C" bool NuSound3IsSampleLoaded(i32 index) {
+    return g_NuSoundSamples.data[index].sample->GetLoadState() == NuSoundSample::LoadState::LOADED;
+}
+
+extern "C" NuSoundVoice *NuSound3FindOldestVoice(i32 index, f32 &age) {
+    NuSoundSample *sample = g_NuSoundSamples.data[index].sample;
+    return sample != NULL ? NuSound.GetOldestVoice(sample, age) : NULL;
+}
+
+extern "C" NuSoundVoice *NuSound3FindQuietestVoice(i32 index, f32 &volume) {
+    NuSoundSample *sample = g_NuSoundSamples.data[index].sample;
+    return sample != NULL ? NuSound.GetQuietestVoice(sample, volume) : NULL;
+}
 
 static NuSoundStream *g_NuSoundStreams[4] = {0};
 
+extern "C" f32 NuSound3GetStreamPlaybackTime(i32 index) {
+    if (g_NuSoundStreams[index] != NULL && NuSound3Stream::mVoice.obj != NULL) {
+        return reinterpret_cast<NuSoundVoice *>(NuSound3Stream::mVoice.obj)->GetPlaybackPositionSeconds();
+    }
+    return 0.0f;
+}
+
 static NuSoundLoadTrigger g_NuSoundLoadTrigger;
+static NuCriticalSection g_NuSoundLoadCriticalSection("NuSoundCriticalSection::mCriticalSection");
 
 // 0x44-byte voice wrapper the NuSound3 API keeps per playing source. The
 // elists link these while they are pending playback / active / pending
@@ -81,42 +132,73 @@ struct NuSound3Voice {
     f32 falloff_b; // +0x28
     bool has_3d;
     nuvec_s position;
-    f32 pan;
-    f32 rnd;
-    f32 rumble;
+    nuvec_s *position_source;
     i32 pause_counter; // frames in the update sweep
 };
 
-DECOMP_ASSERT(sizeof(NuSound3Voice) == 0x44, "NuSound3Voice size");
+DECOMP_ASSERT(sizeof(NuSound3Voice) == 0x3c, "NuSound3Voice payload size");
+
+template <> class NuEListNode<NuSound3Voice, DefaultElist> {
+  public:
+    NuEListNode *prev;
+    NuEListNode *next;
+    NuSound3Voice data;
+};
+
+DECOMP_ASSERT(sizeof(NuSoundStream) == 0x10, "stream slot size");
+DECOMP_ASSERT(offsetof(NuSoundStream, loop) == 4, "stream pending flag offset");
+DECOMP_ASSERT(offsetof(NuSoundStream, ps2volume) == 8, "stream volume offset");
+
+template <> class NuEList<NuSound3Voice, DefaultElist> {
+  public:
+    typedef NuEListNode<NuSound3Voice> Node;
+    struct VoiceQueueLinks { Node *prev; Node *next; } start, end;
+    Node *head;
+    Node *tail;
+    u32 length;
+    NuEList() {
+        head = reinterpret_cast<Node *>(&start);
+        tail = reinterpret_cast<Node *>(&end);
+        start.prev = NULL;
+        end.next = NULL;
+        start.next = tail;
+        end.prev = head;
+        length = 0;
+    }
+    ~NuEList() {
+        while (length != 0) {
+            Node *node = head->next;
+            if (node->prev != NULL) node->prev->next = node->next;
+            if (node->next != NULL) node->next->prev = node->prev;
+            --length;
+            node->next = NULL;
+            node->prev = NULL;
+            delete node;
+        }
+    }
+};
+
+DECOMP_ASSERT(sizeof(NuEList<NuSound3Voice>) == 0x1c, "voice queue size");
+DECOMP_ASSERT(sizeof(NuEListNode<NuSound3Voice>) == 0x44, "voice node size");
 
 namespace {
 
     // NuEList append/remove, done here as local helpers so the list header keeps
     // emitting no inline code into every translation unit that pulls it in.
     void StreamListPushBack(NuEList<NuSound3Voice> *list, NuEListNode<NuSound3Voice> *node) {
-        node->prev = list->tail;
-        node->next = NULL;
-        if (list->tail != NULL) {
-            list->tail->next = node;
-        } else {
-            list->head = node;
-        }
-        list->tail = node;
-        list->length++;
+        node->prev = list->tail->prev;
+        node->next = list->tail;
+        list->tail->prev->next = node;
+        list->tail->prev = node;
+        ++list->length;
     }
 
     void StreamListRemove(NuEList<NuSound3Voice> *list, NuEListNode<NuSound3Voice> *node) {
-        if (node->prev != NULL) {
-            node->prev->next = node->next;
-        } else {
-            list->head = node->next;
-        }
-        if (node->next != NULL) {
-            node->next->prev = node->prev;
-        } else {
-            list->tail = node->prev;
-        }
-        list->length--;
+        if (node->prev != NULL) node->prev->next = node->next;
+        if (node->next != NULL) node->next->prev = node->prev;
+        --list->length;
+        node->prev = NULL;
+        node->next = NULL;
     }
 
 } // namespace
@@ -124,8 +206,54 @@ namespace {
 static NuEList<NuSound3Voice> g_NuSoundVoicesPendingPlayback{};
 static NuEList<NuSound3Voice> g_NuSoundVoicesActive{};
 static NuEList<NuSound3Voice> g_NuSoundVoicesPendingDestruction{};
+static i32 g_NuSoundNumReplaceableVoices;
+
+NuSoundWeakPtr<NuSoundVoice> NuSound3Stream::mVoice;
+
+extern "C" void NuSound3StopVoice(NuSoundVoice *voice) {
+    if (voice == NULL) return;
+    voice->Stop(false);
+    for (NuEListNode<NuSound3Voice> *node = g_NuSoundVoicesActive.head->next;
+         node != g_NuSoundVoicesActive.tail; node = node->next) {
+        if (reinterpret_cast<NuSoundVoice *>(node->data.weak_ptr.obj) != voice) continue;
+        if (node->next != g_NuSoundVoicesActive.tail || node != NULL) {
+            if (node->next != NULL || node->prev != NULL) {
+                --g_NuSoundVoicesActive.length;
+                if (node->prev != NULL) node->prev->next = node->next;
+                if (node->next != NULL) node->next->prev = node->prev;
+                node->next = NULL;
+                node->prev = NULL;
+            }
+            StreamListPushBack(&g_NuSoundVoicesPendingDestruction, node);
+            ++g_NuSoundNumReplaceableVoices;
+        }
+        return;
+    }
+}
+
+extern "C" i32 NuSound3CountVoices(i32 index) {
+    NuSoundSample *sample = g_NuSoundSamples.data[index].sample;
+    if (sample == NULL) return 0;
+    i32 count = sample->field_0x18;
+    for (NuEListNode<NuSound3Voice> *node = g_NuSoundVoicesPendingPlayback.head->next;
+         node != g_NuSoundVoicesPendingPlayback.tail; node = node->next) {
+        if (node->data.source == sample) ++count;
+    }
+    return count;
+}
 
 static NuSoundBuffer g_NuSoundStreamBuffers[4];
+
+static NuSoundListener g_NuSoundListener;
+
+extern "C" void NuSound3Listener(const VuMtx *matrix) {
+    g_NuSoundListener.SetHeadMatrix(matrix);
+}
+
+extern "C" const VuMtx *NuSound3GetListener() {
+    return g_NuSoundListener.GetHeadMatrix();
+}
+
 
 static NuSoundStreamer *g_NuSoundStreamer = NULL;
 
@@ -133,7 +261,7 @@ __attribute__((visibility("hidden"))) u16 *g_NuSoundLoadBits asm("_ZL17g_NuSound
 __attribute__((visibility("hidden"))) u16 *g_NuSoundLoadBitsCache asm("_ZL22g_NuSoundLoadBitsCache") = NULL;
 __attribute__((visibility("hidden"))) i32 g_NuSoundNumLoadBitShorts asm("_ZL25g_NuSoundNumLoadBitShorts") = 0;
 static NuThread *g_NuSoundLoadThread = NULL;
-static pthread_mutex_t g_NuSoundLoadCriticalSection = PTHREAD_MUTEX_INITIALIZER;
+
 
 void NuSound3SampleLoadThread(void *arg) {
     (void)arg;
@@ -150,7 +278,7 @@ void NuSound3SampleLoadThread(void *arg) {
             continue;
         }
 
-        pthread_mutex_lock(&g_NuSoundLoadCriticalSection);
+        pthread_mutex_lock(&g_NuSoundLoadCriticalSection.mutex);
 
         for (u32 i = 0; i < g_NuSoundSamples.length; i++) {
             nusound_filename_info_s &info = g_NuSoundSamples.data[i];
@@ -158,15 +286,15 @@ void NuSound3SampleLoadThread(void *arg) {
                 continue;
             }
 
-            u16 request = g_NuSoundLoadBits[i >> 4] & static_cast<u16>(1 << (i & 0xf));
-            NuSoundSample *sample = reinterpret_cast<NuSoundSample *>(info.sample);
-            NuSoundSample::LoadState load_state = sample->GetLoadState();
-            sample->GetLastErrorState();
+            i32 request = static_cast<u16>(g_NuSoundLoadBits[i >> 4] & (1 << (i & 0xf)));
+            NuSoundSample::LoadState load_state = info.sample->GetLoadState();
+            info.sample->GetLastErrorState();
+            NuSoundSample *sample = info.sample;
 
             if (request == 0 && load_state != NuSoundSample::LoadState::NOT_LOADED && sample != NULL &&
                 sample->field_0x18 == 0) {
                 sample->Release();
-                sample->Unload();
+                info.sample->Unload();
             }
         }
 
@@ -176,19 +304,19 @@ void NuSound3SampleLoadThread(void *arg) {
                 continue;
             }
 
-            u16 request = g_NuSoundLoadBits[i >> 4] & static_cast<u16>(1 << (i & 0xf));
-            NuSoundSample *sample = reinterpret_cast<NuSoundSample *>(info.sample);
-            NuSoundSample::LoadState load_state = sample->GetLoadState();
-            NuSoundSample::ErrorState error = sample->GetLastErrorState();
+            i32 request = static_cast<u16>(g_NuSoundLoadBits[i >> 4] & (1 << (i & 0xf)));
+            NuSoundSample::LoadState load_state = info.sample->GetLoadState();
+            NuSoundSample::ErrorState error = info.sample->GetLastErrorState();
+            NuSoundSample *sample = info.sample;
 
             if (request != 0 && error != NuSoundSample::ErrorState::FILE_NOT_FOUND &&
                 load_state == NuSoundSample::LoadState::NOT_LOADED && sample != NULL) {
                 sample->Reference();
-                sample->Load(NULL, 0, NULL);
+                info.sample->Load(NULL, 0, NULL);
             }
         }
 
-        pthread_mutex_unlock(&g_NuSoundLoadCriticalSection);
+        pthread_mutex_unlock(&g_NuSoundLoadCriticalSection.mutex);
     }
 }
 
@@ -245,11 +373,11 @@ NuSoundLoader *NuSoundSystem::CreateFileLoader(FileType type) {
 }
 
 void NuSound3Init(i32 zero) {
-    bool is_crappy = NuIOS_IsLowEndDevice();
+    i32 extra_memory = NuIOS_IsLowEndDevice() ? 0 : 0x1ccccd;
 
     NuCore::Initialize();
 
-    NuSound.Initialise(0x633333 + (is_crappy ? 0 : 0x1ccccd));
+    NuSound.Initialise(0x633333 + extra_memory);
     // libTTapp.so 0x3109af: NuSound3Init brings up the decoder singleton
     // thread right after the sound system.
     NuSoundDecoder::Initialise();
@@ -271,7 +399,7 @@ void NuSound3Init(i32 zero) {
     // NuSound3Init registers the single 3D listener with the head matrix of
     // the title screen camera.
     NuSound.AddListener(&g_NuSoundListener);
-    g_NuSoundListener.SetHeadMatrix((const VuMtx *)&g_NuSoundHeadMatrix);
+    g_NuSoundListener.SetHeadMatrix(reinterpret_cast<const VuMtx *>(&global_camera.mtx));
     g_NuSoundListener.Enable();
 
     g_NuSoundStreamBuffers[0].Allocate(NuSoundSystem::GetStreamBufferSize() / 2,
@@ -405,14 +533,19 @@ void NuSound3StopStereoStream(i32 stream_index) {
     if (NuSound3Stream::mVoice.obj != NULL && stream->field_0xd != 0) {
         ((NuSoundVoice *)NuSound3Stream::mVoice.obj)->Stop(true);
         NuSound.ReleaseVoice((NuSoundVoice *)NuSound3Stream::mVoice.obj);
-        NuSound3Stream::mVoice.Set(NULL);
+        NuSoundWeakPtrListNode::sPtrListLock.Lock();
+        if (NuSound3Stream::mVoice.obj != NULL) {
+            NuSound3Stream::mVoice.obj->Unlink(&NuSound3Stream::mVoice);
+            NuSound3Stream::mVoice.obj = NULL;
+        }
+        NuSoundWeakPtrListNode::sPtrListLock.Unlock();
         stream->field_0xd = 0;
     }
 
     NuSoundStreamingSample *sample = stream->stream;
     if (sample != NULL && sample->GetResourceCount() > 0) {
-        sample->Release();
-        g_NuSoundStreamer->RequestClose(sample);
+        stream->stream->Release();
+        g_NuSoundStreamer->RequestClose(stream->stream);
     }
 }
 
@@ -430,70 +563,72 @@ void NuSound3ResumeStereoStream(i32 stream_index) {
     }
 }
 
-// NuSound3CreateVoice wraps a one-shot 3D sound source into a NuSound3Voice
-// and queues it for voice creation in NuSound3Update. Sources are limited to
-// three pending plays each, sixteen in flight overall, and the oldest active
-// voice gets stolen first when the budget is exhausted.
-void NuSound3CreateVoice(nuvec_s *pos, i32 index, f32 volume, f32 pitch, i32 falloff_a, i32 falloff_b, f32 pan,
-                         bool has_3d) {
-    if (NuSound.GetNumAvailableOutputDevices() < 1 || index < 0 || g_NuSoundSamples.length <= index) {
-        LOG_INFO("NuSound3 rejected one-shot sample=%d devices=%d samples=%d", index,
-                 NuSound.GetNumAvailableOutputDevices(), g_NuSoundSamples.length);
-        return;
+// Queue a source using the reference per-source replacement policy.
+void NuSound3CreateVoice(nuvec_s *pos, i32 index, f32 falloff_a, f32 falloff_b,
+                        i32 volume, i32 unused, f32 pitch, bool has_3d) {
+    if (NuSound.GetNumAvailableOutputDevices() < 1 || index < 0 ||
+        index >= static_cast<i32>(g_NuSoundSamples.length)) return;
+    NuSoundSample *sample = g_NuSoundSamples.data[index].sample;
+    if (sample == NULL || sample->GetLoadState() != NuSoundSample::LoadState::LOADED) return;
+    if (sample->GetResourceCount() <= 0) return;
+    i32 total = g_NuSoundVoicesPendingPlayback.length + g_NuSoundVoicesActive.length;
+    i32 count = sample->field_0x18;
+    for (NuEListNode<NuSound3Voice> *node = g_NuSoundVoicesPendingPlayback.head->next;
+         node != g_NuSoundVoicesPendingPlayback.tail; node = node->next) {
+        if (node->data.source == sample) ++count;
     }
-
-    NuSoundSource *source = g_NuSoundSamples.data[index].sample;
-    NuSoundSample *sample = (NuSoundSample *)source;
-    if (sample == NULL || sample->GetLoadState() != NuSoundSample::LoadState::LOADED ||
-        sample->GetResourceCount() < 1) {
-        LOG_INFO("NuSound3 rejected unloaded one-shot sample=%d source=%p state=%d resources=%d", index,
-                 static_cast<void *>(sample), sample != NULL ? static_cast<i32>(sample->GetLoadState()) : -1,
-                 sample != NULL ? sample->GetResourceCount() : -1);
-        return;
+    if (count > 2 || total > 15) {
+        if (has_3d || g_NuSoundSamples.data[index].field7_0x1c == 0 || count <= 2) return;
+        f32 age = 0.0f;
+        NuSoundVoice *oldest = NuSound.GetOldestVoice(sample, age);
+        if (oldest != NULL) NuSound3StopVoice(oldest);
     }
-
-    // Per-source pending limit: three wrappers already queued for this source.
-    i32 pending = 0;
-    for (NuEListNode<NuSound3Voice> *node = g_NuSoundVoicesPendingPlayback.head; node != NULL; node = node->next) {
-        if (node->data->source == source) {
-            pending++;
-        }
-    }
-    if (pending >= 3) {
-        return;
-    }
-
-    // Total in-flight budget (pending + active); steal the oldest otherwise.
-    while (g_NuSoundVoicesPendingPlayback.length + g_NuSoundVoicesActive.length >= 16) {
-        NuEListNode<NuSound3Voice> *oldest = g_NuSoundVoicesActive.head;
-        if (oldest == NULL) {
-            return;
-        }
-        if (oldest->data->weak_ptr.obj != NULL) {
-            ((NuSoundVoice *)oldest->data->weak_ptr.obj)->Stop(true);
-            NuSound.ReleaseVoice((NuSoundVoice *)oldest->data->weak_ptr.obj);
-            oldest->data->weak_ptr.Set(NULL);
-        }
-        StreamListRemove(&g_NuSoundVoicesActive, oldest);
-        delete oldest->data;
-        delete oldest;
-    }
-
-    NuSound3Voice *voice = new NuSound3Voice();
-    voice->source = source;
-    voice->pitch = pitch;
-    voice->volume = *(i32 *)&volume;
-    voice->falloff_a = (f32)falloff_a;
-    voice->falloff_b = (f32)falloff_b;
-    voice->has_3d = has_3d;
-    voice->position = *pos;
-    voice->pan = pan;
-    voice->pause_counter = 0;
-
     NuEListNode<NuSound3Voice> *node = new NuEListNode<NuSound3Voice>();
-    node->data = voice;
+    node->data.source = sample;
+    node->data.falloff_a = falloff_a;
+    node->data.falloff_b = falloff_b;
+    node->data.volume = volume;
+    node->data.pitch = pitch;
+    node->data.has_3d = has_3d;
+    node->data.position_source = pos;
+    if (pos != NULL) node->data.position = *pos;
     StreamListPushBack(&g_NuSoundVoicesPendingPlayback, node);
-    LOG_INFO("NuSound3 queued one-shot sample=%d pending=%d", index, g_NuSoundVoicesPendingPlayback.length);
+}
+
+extern "C" void NuSound3Play(i32 index, i32 volume, i32 unused, f32 pitch) {
+    NuSound3CreateVoice(NULL, index, 0.0f, 0.0f, volume, unused, pitch, false);
+}
+
+extern "C" void NuSound3Play3d(nuvec_s *position, i32 index, f32 near_distance, f32 far_distance,
+                                i32 volume, i32 unused, f32 pitch) {
+    NuSound3CreateVoice(position, index, near_distance, far_distance, volume, unused, pitch, false);
+}
+
+extern "C" void NuSound3Play3dPri(nuvec_s *position, i32 index, f32 unused_near, f32 unused_far,
+                                   i32 volume, i32 unused, f32 pitch) {
+    NuSound3CreateVoice(position, index, 0.0f, 0.0f, volume, unused, pitch, false);
+}
+
+extern "C" void NuSound3PlayPri(i32 index, i32 volume, i32 unused, f32 pitch) {
+    NuSound3CreateVoice(NULL, index, 0.0f, 0.0f, volume, unused, pitch, false);
+}
+
+extern "C" void NuSound3Play3dLoopSfx(nuvec_s *position, i32 index, f32 near_distance,
+                                     f32 far_distance, i32 volume, i32 unused, f32 pitch) {
+    for (NuEListNode<NuSound3Voice> *node = g_NuSoundVoicesActive.head->next;
+         node != g_NuSoundVoicesActive.tail; node = node->next) {
+        if (node->data.position_source != position) continue;
+        node->data.pause_counter = 0;
+        if (node->data.weak_ptr.obj != NULL) {
+            reinterpret_cast<NuSoundVoice *>(node->data.weak_ptr.obj)->SetPosition(reinterpret_cast<VuVec *>(position));
+            reinterpret_cast<NuSoundVoice *>(node->data.weak_ptr.obj)->SetVolume(PS2VolumeToScalar(volume));
+            reinterpret_cast<NuSoundVoice *>(node->data.weak_ptr.obj)->SetPitch(pitch);
+            reinterpret_cast<NuSoundVoice *>(node->data.weak_ptr.obj)->SetFalloff(
+                near_distance, far_distance, static_cast<NuSoundSystem::FalloffType>(0));
+        }
+        return;
+    }
+    NuSound3CreateVoice(position, index, near_distance, far_distance, volume, unused, pitch, true);
 }
 
 void NuSound3Update(void) {
@@ -513,68 +648,66 @@ void NuSound3Update(void) {
     pthread_mutex_lock(&NuSound.mutex);
 
     // (a) Voices queued for destruction: release and unlink.
-    for (NuEListNode<NuSound3Voice> *node = g_NuSoundVoicesPendingDestruction.head; node != NULL;) {
+    for (NuEListNode<NuSound3Voice> *node = g_NuSoundVoicesPendingDestruction.head->next; node != g_NuSoundVoicesPendingDestruction.tail;) {
         NuEListNode<NuSound3Voice> *next = node->next;
-        if (node->data->weak_ptr.obj != NULL) {
-            NuSound.ReleaseVoice((NuSoundVoice *)node->data->weak_ptr.obj);
-            node->data->weak_ptr.Set(NULL);
+        if (node->data.weak_ptr.obj != NULL) {
+            NuSound.ReleaseVoice((NuSoundVoice *)node->data.weak_ptr.obj);
+            node->data.weak_ptr.Set(NULL);
         }
         StreamListRemove(&g_NuSoundVoicesPendingDestruction, node);
-        delete node->data;
         delete node;
         node = next;
     }
 
-    // (b) Active sweep: release stopped voices and long-paused ones.
-    for (NuEListNode<NuSound3Voice> *node = g_NuSoundVoicesActive.head; node != NULL;) {
+    // (b) Active sweep: release stopped voices and unrefreshed loops.
+    for (NuEListNode<NuSound3Voice> *node = g_NuSoundVoicesActive.head->next; node != g_NuSoundVoicesActive.tail;) {
         NuEListNode<NuSound3Voice> *next = node->next;
-        NuSoundVoice *voice = (NuSoundVoice *)node->data->weak_ptr.obj;
+        NuSoundVoice *voice = (NuSoundVoice *)node->data.weak_ptr.obj;
 
         if (voice != NULL) {
             NuSoundVoice::PlayState state = voice->GetState();
-            if (state != NuSoundVoice::PLAYSTATE_STOPPED && node->data->pause_counter < 16) {
+            if (state != NuSoundVoice::PLAYSTATE_STOPPED && node->data.pause_counter < 16) {
                 if ((voice->flags & 8) != 0) {
-                    node->data->pause_counter++;
+                    node->data.pause_counter++;
                 }
                 node = next;
                 continue;
             }
             voice->Stop(true);
-            NuSound.ReleaseVoice(voice);
-            node->data->weak_ptr.Set(NULL);
+            NuSound.ReleaseVoice(reinterpret_cast<NuSoundVoice *>(node->data.weak_ptr.obj));
         }
 
         StreamListRemove(&g_NuSoundVoicesActive, node);
-        delete node->data;
         delete node;
         node = next;
     }
 
     // (c) Pending playback: create voices while the budget allows.
     while (NuSound.voice_count < 30) {
-        NuEListNode<NuSound3Voice> *node = g_NuSoundVoicesPendingPlayback.head;
-        if (node == NULL) {
+        NuEListNode<NuSound3Voice> *node = g_NuSoundVoicesPendingPlayback.head->next;
+        if (node == g_NuSoundVoicesPendingPlayback.tail) {
             break;
         }
 
-        NuSoundVoice *voice = NuSound.CreateVoice(node->data->source, false);
+        StreamListRemove(&g_NuSoundVoicesPendingPlayback, node);
+        NuSoundVoice *voice = NuSound.CreateVoice(node->data.source, node->data.has_3d);
         if (voice == NULL) {
-            break;
+            delete node;
+            continue;
         }
 
-        node->data->weak_ptr.Set(voice);
+        node->data.weak_ptr.Set(voice);
         voice->SetAutoDelete(true);
-        voice->SetVolume(PS2VolumeToScalar(node->data->volume));
-        voice->SetPitch(node->data->pitch);
-        if (node->data->has_3d) {
-            voice->SetFalloff(node->data->falloff_a, node->data->falloff_b, NuSoundSystem::FalloffType::LINEAR);
-            voice->SetPosition((VuVec *)&node->data->position);
+        voice->SetVolume(PS2VolumeToScalar(node->data.volume));
+        voice->SetPitch(node->data.pitch);
+        if (node->data.position_source != NULL) {
+            voice->SetFalloff(node->data.falloff_a, node->data.falloff_b, NuSoundSystem::FalloffType::LINEAR);
+            voice->SetPosition((VuVec *)&node->data.position);
             voice->SetSurroundMode(NuSoundSystem::SurroundMode::ZERO);
-            voice->SetListeners(&g_NuSoundListenerList);
+            voice->SetListeners(NuSound.GetListeners());
         }
         voice->Play();
 
-        StreamListRemove(&g_NuSoundVoicesPendingPlayback, node);
         StreamListPushBack(&g_NuSoundVoicesActive, node);
     }
 
@@ -588,32 +721,30 @@ void NuSound3Update(void) {
             continue;
         }
 
-        if (stream->loop != 0) {
-            if (NuSound3Stream::mVoice.obj == NULL) {
+        if (stream->loop != 0 && NuSound3Stream::mVoice.obj == NULL) {
                 NuSoundStreamingSample *sample = stream->stream;
                 if (sample != NULL && sample->GetLoadState() == NuSoundSample::LoadState::STREAM_READY &&
-                    sample->GetResourceCount() >= 1 && sample->GetThreadQueueCount() == 0) {
-                    NuSoundVoice *voice = NuSound.CreateVoice(sample, stream->field_0xc != 0);
-                    if (voice != NULL) {
-                        NuSound3Stream::mVoice.Set(voice);
-                        voice->SetAutoDelete(false);
-                        voice->SetVolume(PS2VolumeToScalar(stream->ps2volume));
-                        voice->Play();
+                    stream->stream->GetResourceCount() >= 1 && stream->stream->GetThreadQueueCount() == 0) {
+                    NuSound3Stream::mVoice.Set(NuSound.CreateVoice(stream->stream, stream->field_0xc != 0));
+                    if (NuSound3Stream::mVoice.obj != NULL) {
+                        ((NuSoundVoice *)NuSound3Stream::mVoice.obj)->SetAutoDelete(false);
+                        ((NuSoundVoice *)NuSound3Stream::mVoice.obj)->SetVolume(PS2VolumeToScalar(stream->ps2volume));
+                        ((NuSoundVoice *)NuSound3Stream::mVoice.obj)->Play();
                         stream->loop = 0;
                         stream->field_0xd = 1;
                     }
                 }
-            }
         } else if (stream->field_0xd != 0) {
             if (NuSound3Stream::mVoice.obj != NULL) {
                 ((NuSoundVoice *)NuSound3Stream::mVoice.obj)->SetVolume(PS2VolumeToScalar(stream->ps2volume));
                 if (((NuSoundVoice *)NuSound3Stream::mVoice.obj)->GetState() == NuSoundVoice::PLAYSTATE_STOPPED) {
                     NuSound3StopStereoStream(i);
                 }
-            } else {
-                // The voice was released elsewhere; retire the stream.
-                NuSound3StopStereoStream(i);
             }
+        }
+
+        if (stream->field_0xd != 0 && NuSound3Stream::mVoice.obj == NULL) {
+            NuSound3StopStereoStream(i);
         }
 
         // Slot cleanup: fully unloaded streams free their node.
@@ -679,9 +810,6 @@ i32 NuSound3StreamKeyStatus(i32 stream_index) {
 // Volume arrives as the PS2-style 0..16383 fixed point computed by
 // NuMusic::Process. The streamer applies it when mixing.
 void NuSound3SetStereoStreamVolume(i32 stream_index, i32 volume) {
-    if (stream_index < 0 || stream_index >= 4) {
-        return;
-    }
     NuSoundStream *stream = g_NuSoundStreams[stream_index];
     if (stream != NULL) {
         stream->ps2volume = volume;
@@ -693,6 +821,10 @@ void NuSound3SetStereoStreamVolume(i32 stream_index, i32 volume) {
 
 // Decibel attenuation from music.cfg (DUCK/ATTENUATION/GLOBALATTENUATION with
 // negative values): -100 dB and below is silence, 0 dB and above is unity.
+extern "C" f32 NuSound3AmplitudeTodB(f32 amplitude) {
+    return NuSoundSystem::AmplitudeTodB(amplitude);
+}
+
 f32 NuSound3dBToAmplitude(f32 db) {
     if (db <= -100.0f) {
         return 0.0f;
@@ -708,14 +840,14 @@ void NuSound3SetSampleTable(nusound_filename_info_s *info, variptr_u *buffer_sta
         return;
     }
 
-    for (; info->index != -1; info++) {
+    for (; info != NULL && info->index != -1; info++) {
         // TODO: dont cast classes
-        if (info->index < 0x1000) {
-            info->sample = (NuSoundStreamingSample *)NuSound.AddSample(info->filename, NuSoundSystem::FileType::OGG,
-                                                                       NuSoundSource::FeedType::STREAMING);
-        } else {
+        if (info->index > 0xfff) {
             info->sample = (NuSoundStreamingSample *)NuSound.AddSample(info->filename, NuSoundSystem::FileType::WAV,
                                                                        NuSoundSource::FeedType::ZERO);
+        } else {
+            info->sample = (NuSoundStreamingSample *)NuSound.AddSample(info->filename, NuSoundSystem::FileType::OGG,
+                                                                       NuSoundSource::FeedType::STREAMING);
         }
 
         g_NuSoundSamples.PushBack(*info);

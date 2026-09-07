@@ -22,6 +22,10 @@ build:target --extra_toolchains=@android_ndk_r8e//:toolchain
 build:target --define=SAGA_BUILD=target
 try-import %workspace%/bazel/android_per_file_copts.bazelrc
 
+build:android-armv7 --config=target
+build:android-armv7 --platforms=//bazel/platforms:android_armv7
+build:android-armv7 --extra_toolchains=@android_ndk_r8e//:toolchain_armv7
+
 build:native --config=saga-common
 build:native --define=SAGA_BUILD=native
 build:native --define=SAGA_MODE=debug

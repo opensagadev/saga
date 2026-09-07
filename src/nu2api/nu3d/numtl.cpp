@@ -3,12 +3,15 @@
 #include <string.h>
 
 #include "decomp.h"
+#include "gamelib/util/gamelib_util_types.h"
+#include "nu2api/nu3d/NuRenderDevice.h"
 #include "nu2api/nu3d/android/nuvertexformat_android.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nushader.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nucore/common.h"
 #include "nu2api/nufile/nufile.h"
+#include "nu2api/nufile/nu2api_nufile_types.h"
 
 // Shader manager API (transcribed in nushadermanager_plain.cpp).
 extern "C" void *NuShaderManagerRetrieveShader(NUSHADERMTLDESC *desc, void *mtl);
@@ -34,11 +37,57 @@ void NuMtlInitEx(VARIPTR *buf, i32 mtl_count) {
     max_materials = mtl_count;
     material_list = (NUMTL *)ALIGN(buf->addr, 0x10);
     buf->addr = (usize)material_list + mtl_count * sizeof(NUMTL);
+    memset(material_list, 0, mtl_count * sizeof(NUMTL));
+    numtl_defaultmtl3d = NuMtlCreate3D(1);
+    numtl_defaultmtl2d = NuMtlCreate(1);
 
-    // Original 0x2f2773: platform texture setup is part of material-system
-    // initialization.  Besides the two environment maps this creates the
-    // 1x1 white fallback used whenever a display-list texture is absent.
+    NUSHADERMTLDESC desc2d;
+    memset(&desc2d, 0, sizeof(desc2d));
+    desc2d.byte4 |= 0x10;
+    desc2d.flags = 0x1000;
+    desc2d.diffuse_color[0] = 0xffffffff;
+    desc2d.unknown_24 = 1.0f;
+    desc2d.vtx_desc.has_position = 1;
+    desc2d.vtx_desc.has_diffuse = 1;
+    desc2d.vtx_desc.has_no_transform = 1;
+    NUSHADERMTLDESC desc3d;
+    memset(&desc3d, 0, sizeof(desc3d));
+    desc3d.byte4 |= 0x10;
+    desc3d.flags = 0x1000;
+    desc3d.diffuse_color[0] = 0xffffffff;
+    desc3d.unknown_24 = 1.0f;
+    desc3d.vtx_desc.has_position = 1;
+    desc3d.vtx_desc.has_diffuse = 1;
+    NuMtlSetShaderDescPS(numtl_defaultmtl2d, &desc2d);
+    NuMtlSetShaderDescPS(numtl_defaultmtl3d, &desc3d);
+
+    char package_path[512];
+    i32 package = AndroidOBBUtils::LookupPackagePath(package_path, NuFileDeviceAndroidOBBType::MAIN);
+    if (package == 1) {
+        NuDatSet(NuDatOpen(package_path, buf, NULL));
+    } else if (package == 2) {
+        if (g_apkFileDevice == NULL) {
+            NuFile::InitData init = {};
+            g_apkFileDevice = new NuFileDeviceAndroidAPK("apk:", init);
+            NuDatSet(NuDatOpen(package_path, buf, NULL));
+        }
+    }
+    package = AndroidOBBUtils::LookupPackagePath(package_path, NuFileDeviceAndroidOBBType::PATCH);
+    if (package == 1) {
+        NuDatSet(NuDatOpen(package_path, buf, NULL));
+    } else if (package == 2) {
+        if (g_apkFileDevice == NULL) {
+            NuFile::InitData init = {};
+            g_apkFileDevice = new NuFileDeviceAndroidAPK("apk:", init);
+            NuDatSet(NuDatOpen(package_path, buf, NULL));
+        }
+    }
+    BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/numtl_gen.c", 0xd5);
     NuTexInitExPS(buf);
+    numtl_defaultmtl2d->attribs.alpha_mode = 1;
+    NuMtlUpdate(numtl_defaultmtl2d);
+    NuMtlUpdate(numtl_defaultmtl3d);
+    EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/numtl_gen.c", 0xee);
 }
 
 void DefaultMtl(NUMTL *mtl) {

@@ -14,6 +14,8 @@
 
 #include <GLES2/gl2.h>
 #include <string.h>
+#include <stdio.h>
+#include <math.h>
 
 extern "C" void BeginCriticalSectionGL(const char *, i32);
 extern "C" void EndCriticalSectionGL(const char *, i32);
@@ -52,7 +54,8 @@ void NuMemDumpFn(i32) {
 void NuDDSGetSize(char const *) {
 }
 
-void NuErrorPrint(char *) {
+void NuErrorPrint(char *message) {
+    printf("%s", message);
 }
 
 void NuFntFindEnd(nutex_s *, i32 *, i32 *, i32, i32) {
@@ -64,7 +67,10 @@ void NuMemFlushFn() {
 void NuBridgeAlloc() {
 }
 
-void NuWindFreeGrp(NuWindGType *) {
+void NuWindFreeGrp(NuWindGType *group) {
+    if (group != NULL) {
+        group->in_use = 0;
+    }
 }
 
 extern "C" void *NuAnimBuffCreate(i32 max_joints, variptr_u *buf);
@@ -92,7 +98,8 @@ void NuASin_Accurate(float) {
 void NuBez3EvaluateX(nuvec4_s *, float) {
 }
 
-void NuDebugMsgPrint(char *) {
+void NuDebugMsgPrint(char *message) {
+    printf("%s", message);
 }
 
 // original 0x2955ee -- lightmap display-list packet.  Mode 1 installs one
@@ -184,8 +191,6 @@ void NuLgtArcLaserDraw(i32) {
 void NuVpSetSourceRect(float, float, float, float) {
 }
 
-void NuWindAllocateGrp() {
-}
 
 void NuFadeObjAllocData(i32) {
 }
@@ -870,7 +875,8 @@ void NuOnlineSetDefaultPresenceModeProfilePS(i32, i32) {
 void NuATanf(float) {
 }
 
-void NuATan2f(float, float) {
+f32 NuATan2f(float y, float x) {
+    return atan2f(y, x);
 }
 
 void NuFntSave(nufnt_s *, i32, char *) {

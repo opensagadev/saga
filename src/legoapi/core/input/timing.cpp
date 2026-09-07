@@ -2,6 +2,7 @@
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
+#include <time.h>
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -13,7 +14,11 @@ i32 do_multiframe_update;
 void TimingBars() {
 }
 
-void getCurrentTime() {
+// Original C++ entry point 0x2a6020, distinct from the C entry point.
+i64 getCurrentTime() {
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    return (i64)ts.tv_sec * 1000 + (i64)ts.tv_nsec;
 }
 
 void SetFramesToWait(u32) {

@@ -8,6 +8,7 @@
 #include "nu2api/nusound/nusound_loader.hpp"
 
 #include <new>
+#include <string.h>
 
 NuList<NuSoundStreamer *> NuSoundStreamer::sStreamers;
 i32 NuSoundStreamer::sThreadPriority = 2;
@@ -21,6 +22,8 @@ NUTHREAD_CORE NuSoundStreamer::sThreadCoreId = {.value = 0};
 NuSoundStreamer::NuSoundStreamer()
     : queue1_semaphore(32), queue2_semaphore(32), semaphore(32), queue1_length(0), queue1_index(0), queue2_length(0),
       queue2_index(0), running(true) {
+    memset(queue1, 0, sizeof(queue1));
+    memset(queue2, 0, sizeof(queue2));
     thread =
         NuCore::m_threadManager->CreateThread(ThreadFunc, this, sThreadPriority, "NuSoundStreamThread",
                                               sThreadStackSize, sThreadCoreId.cafe_core, sThreadCoreId.xbox360_core);
@@ -34,6 +37,14 @@ NuSoundStreamer::NuSoundStreamer()
 }
 
 NuSoundStreamer::~NuSoundStreamer() {
+    running = false;
+    for (NuListNodeBase *node = sStreamers.Head(); node != sStreamers.Tail();) {
+        NuListNodeBase *next = node->GetNext();
+        if (static_cast<NuListNode<NuSoundStreamer *> *>(node)->value == this) {
+            sStreamers.Remove(node);
+        }
+        node = next;
+    }
 }
 
 void NuSoundStreamer::RequestCue(NuSoundStreamingSample *streaming_sample, bool loop, f32 start_offset,
@@ -42,6 +53,7 @@ void NuSoundStreamer::RequestCue(NuSoundStreamingSample *streaming_sample, bool 
     streaming_sample->streamer = this;
 
     QueueElement *element = &this->queue1[this->queue1_length % 32];
+    new (element) QueueElement;
     element->message = QueueElement::Message::OPEN_SAMPLE;
     element->sample = streaming_sample;
     element->loop = loop;
@@ -66,27 +78,17 @@ void NuSoundStreamer::RequestFill(NuSoundStreamingSample *sample, NuSoundBuffer 
                                   NuSoundWeakPtr<NuSoundBufferCallback> callback) {
     // Fill requests go to the priority queue so the streamer always services
     // them before any pending control request.
-    QueueElement *element = &this->queue2[this->queue2_length % 32];
-    element->message = QueueElement::Message::FILL_STREAM_BUFFER;
-    element->sample = sample;
-    element->loop = loop;
-    element->start_offset = 0.0f;
-    element->buffer = buffer;
+    QueueElement request;
+    request.message = QueueElement::Message::FILL_STREAM_BUFFER;
+    request.sample = sample;
+    request.loop = loop;
+    request.start_offset = 0.0f;
+    request.buffer = buffer;
+    request.weak_ptr = callback;
+    request.weak_flag = false;
 
-    NuSoundWeakPtrListNode::sPtrListLock.Lock();
-    NuSoundWeakPtr<NuSoundBufferCallback> local;
-    local.obj = callback.obj;
-    if (element->weak_ptr.obj != local.obj) {
-        if (element->weak_ptr.obj != NULL) {
-            element->weak_ptr.obj->Unlink(&element->weak_ptr);
-        }
-        if (local.obj != NULL) {
-            local.obj->Link(&element->weak_ptr);
-        }
-        element->weak_ptr.obj = local.obj;
-    }
-    NuSoundWeakPtrListNode::sPtrListLock.Unlock();
-    element->weak_flag = false;
+    QueueElement *element = &this->queue2[this->queue2_length % 32];
+    new (element) QueueElement(request);
 
     __sync_fetch_and_add(&this->queue2_length, 1);
 
@@ -97,6 +99,7 @@ void NuSoundStreamer::RequestClose(NuSoundStreamingSample *sample) {
     sample->AddedToThreadQueue();
 
     QueueElement *element = &this->queue1[this->queue1_length % 32];
+    new (element) QueueElement;
     element->message = QueueElement::Message::CLOSE_SAMPLE;
     element->sample = sample;
     element->loop = false;
@@ -121,6 +124,7 @@ void NuSoundStreamer::RequestReCue(NuSoundStreamingSample *sample, bool loop, f3
     sample->AddedToThreadQueue();
 
     QueueElement *element = &this->queue1[this->queue1_length % 32];
+    new (element) QueueElement;
     element->message = QueueElement::Message::RECUE_SAMPLE;
     element->sample = sample;
     element->loop = loop;
@@ -143,17 +147,28 @@ void NuSoundStreamer::RequestReCue(NuSoundStreamingSample *sample, bool loop, f3
 
 void NuSoundStreamer::ShutdownThread() {
     QueueElement *element = &this->queue1[this->queue1_length % 32];
+    new (element) QueueElement;
     element->message = QueueElement::Message::SHUTDOWN;
     element->sample = NULL;
     element->loop = false;
     element->start_offset = 0.0f;
     element->buffer = NULL;
-    element->weak_ptr.obj = NULL;
+    NuSoundWeakPtrListNode::sPtrListLock.Lock();
+    if (element->weak_ptr.obj != NULL) {
+        element->weak_ptr.obj->Unlink(&element->weak_ptr);
+        element->weak_ptr.obj = NULL;
+    }
+    NuSoundWeakPtrListNode::sPtrListLock.Unlock();
     element->weak_flag = false;
 
     __sync_fetch_and_add(&this->queue1_length, 1);
 
     this->semaphore.Signal();
+    while (running) {
+        NuThreadSleep(1);
+    }
+    NuSoundWeakPtrListNode::sPtrListLock.Lock();
+    NuSoundWeakPtrListNode::sPtrListLock.Unlock();
 }
 
 void NuSoundStreamer::ShutdownAll() {
@@ -173,6 +188,7 @@ void NuSoundStreamer::ThreadFunc(void *self) {
     do {
         streamer->semaphore.Wait();
 
+        QueueElement element;
         QueueElement *slot;
         bool is_fill;
         if (streamer->queue2_index == streamer->queue2_length) {
@@ -183,18 +199,17 @@ void NuSoundStreamer::ThreadFunc(void *self) {
             is_fill = true;
         }
 
-        // Take a copy of the element; the queue slot releases its weak
-        // reference as soon as the element is taken.
-        QueueElement element;
-        element.message = slot->message;
-        element.sample = slot->sample;
-        element.loop = slot->loop;
-        element.start_offset = slot->start_offset;
-        element.buffer = slot->buffer;
-        element.weak_ptr.obj = slot->weak_ptr.obj;
-        element.weak_flag = slot->weak_flag;
-        slot->weak_ptr.obj = NULL;
-        slot->weak_flag = false;
+        // Release the queue slot before assigning the request to the worker.
+        {
+            QueueElement dequeued(*slot);
+            slot->~QueueElement();
+            if (is_fill) {
+                __sync_fetch_and_add(&streamer->queue2_index, 1);
+            } else {
+                __sync_fetch_and_add(&streamer->queue1_index, 1);
+            }
+            element = dequeued;
+        }
 
         LOG_INFO("NuSoundStreamer::ThreadFunc: processing element %p (message=%d, sample=%p, loop=%d, "
                  "start_offset=%f, buffer=%p, weak_ptr.obj=%p)",
@@ -237,18 +252,6 @@ void NuSoundStreamer::ThreadFunc(void *self) {
                 break;
         }
 
-        if (element.weak_ptr.obj != NULL) {
-            NuSoundWeakPtrListNode::sPtrListLock.Lock();
-            element.weak_ptr.obj->Unlink(&element.weak_ptr);
-            element.weak_ptr.obj = NULL;
-            NuSoundWeakPtrListNode::sPtrListLock.Unlock();
-        }
-
-        if (is_fill) {
-            __sync_fetch_and_add(&streamer->queue2_index, 1);
-        } else {
-            __sync_fetch_and_add(&streamer->queue1_index, 1);
-        }
     } while (streamer->running != false);
 }
 
@@ -267,14 +270,20 @@ NuSoundStreamingSample::NuSoundStreamingSample(const char *file)
 }
 
 NuSoundStreamingSample::~NuSoundStreamingSample() {
+    if (file_loader != NULL) {
+        NuSoundSystem::ReleaseFileLoader(file_loader);
+        file_loader = NULL;
+    }
 }
 
 i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
-    if (GetResourceCount() == 0 || GetLoadState() == LoadState::STREAM_READY) {
+    LoadState load_state = GetLoadState();
+    if (GetResourceCount() == 0 || load_state == LoadState::STREAM_READY) {
         return 0;
     }
 
     NuSoundStreamDesc *desc = NULL;
+    i32 open_result;
 
     if (this->sound_buffer1 == NULL) {
         u32 stream_buffer_size = NuSoundSystem::GetStreamBufferSize();
@@ -310,42 +319,54 @@ i32 NuSoundStreamingSample::Open(f32 start_offset, bool loop, bool weak_flag) {
 
     this->SetStreamDesc(desc);
 
-    if (this->file_loader->OpenForStreaming(this->name, start_offset, desc, weak_flag) != 1) {
+    open_result = this->file_loader->OpenForStreaming(this->name, start_offset, desc, weak_flag);
+    if (open_result != 1) {
+    open_error:
+        ErrorState error = ErrorState::FILE_NOT_FOUND;
+        switch (open_result) {
+            case 3:
+            case 4: error = ErrorState::OUT_OF_MEMORY; break;
+            case 5: error = ErrorState::UNSUPPORTED; break;
+        }
         NuSoundSystem::ReleaseFileLoader(this->file_loader);
         this->file_loader = NULL;
-        NuSoundSystem::FreeMemory(NuSoundSystem::MemoryDiscipline::SAMPLE, (usize)desc, 0);
+        NuSoundSystem::FreeMemory(NuSoundSystem::MemoryDiscipline::SCRATCH, (usize)desc, 0);
         this->SetStreamDesc(NULL);
         this->SetLoadState(LoadState::NOT_LOADED);
-        this->SetLastErrorState(ErrorState::NONE);
-        return 1;
+        this->SetLastErrorState(error);
+        return (i32)error;
     }
 
     {
-        NuSoundBuffer::Context context;
+        NuSoundBuffer::Context context = {};
+        context.flags = 1;
         context.flags |= 1; // streaming
 
-        this->file_loader->FillStreamBuffer(this->sound_buffer1, loop);
-        context = this->sound_buffer1->GetCurrentContext();
+        context = this->file_loader->FillStreamBuffer(this->sound_buffer1, loop);
 
         if (context.size2 != 0) {
             this->some_count++;
+        } else if (this->some_count == 0) {
+            this->file_loader->CloseStream();
+            this->sound_buffer1->SetCurrentContext(context);
+            context.flags &= ~1;
+            open_result = 4;
+            goto open_error;
         }
         this->sound_buffer1->SetCurrentContext(context);
+        context.flags &= ~1;
         u32 first_flags = context.flags;
 
         if ((first_flags & 2) == 0) {
-            this->file_loader->FillStreamBuffer(this->sound_buffer2, loop);
-            context = this->sound_buffer2->GetCurrentContext();
+            context = this->file_loader->FillStreamBuffer(this->sound_buffer2, loop);
 
             if (context.size2 != 0) {
                 this->some_count++;
             } else if (this->some_count == 0) {
-                // Nothing decoded at all: the stream is unusable.
                 this->file_loader->CloseStream();
                 this->sound_buffer2->SetCurrentContext(context);
-                this->SetLoadState(LoadState::NOT_LOADED);
-                this->SetLastErrorState(ErrorState::NONE);
-                return 4;
+                open_result = 4;
+                goto open_error;
             }
             this->sound_buffer2->SetCurrentContext(context);
         }
@@ -435,38 +456,41 @@ i32 NuSoundStreamingSample::ReCue(f32 start_offset, bool loop) {
 
     this->file_loader->SeekTime(start_offset);
 
-    NuSoundBuffer::Context context;
+    NuSoundBuffer::Context context = {};
+    context.flags = 1;
     context.flags |= 1;
 
     this->sound_buffer1->Lock();
-    this->file_loader->FillStreamBuffer(this->sound_buffer1, loop);
-    context = this->sound_buffer1->GetCurrentContext();
+    context = this->file_loader->FillStreamBuffer(this->sound_buffer1, loop);
 
     if (context.size2 != 0) {
         this->some_count++;
+    } else if ((context.flags & 2) == 0) {
+        goto refill_error;
     }
     this->sound_buffer1->SetCurrentContext(context);
-    u32 first_flags = context.flags;
+    context.flags &= ~1;
     this->sound_buffer1->Unlock();
 
-    if ((first_flags & 2) == 0) {
+    if ((context.flags & 2) == 0) {
         this->sound_buffer2->Lock();
-        this->file_loader->FillStreamBuffer(this->sound_buffer2, loop);
-        context = this->sound_buffer2->GetCurrentContext();
+        context = this->file_loader->FillStreamBuffer(this->sound_buffer2, loop);
 
         if (context.size2 != 0) {
             this->some_count++;
-        } else {
-            // Ran out of data while re-filling the second buffer.
-            this->file_loader->CloseStream();
-            this->sound_buffer2->Unlock();
-            return 2;
+        } else if ((context.flags & 2) == 0) {
+            goto refill_error;
         }
         this->sound_buffer2->SetCurrentContext(context);
+        context.flags &= ~1;
         this->sound_buffer2->Unlock();
     }
 
     return 0;
+
+refill_error:
+    this->file_loader->CloseStream();
+    return 2;
 }
 
 bool NuSoundStreamingSample::IsLocked() const {
@@ -503,10 +527,7 @@ void NuSoundStreamingSample::RequestBuffer(bool loop, NuSoundWeakPtr<NuSoundBuff
         // thread; the voice gets it once the fill completes.
         NuSoundBuffer *buffer = (&this->sound_buffer1)[this->some_count % 2];
 
-        NuSoundWeakPtr<NuSoundBufferCallback> local;
-        local.obj = callback.obj;
-
-        this->streamer->RequestFill(this, buffer, loop, local);
+        this->streamer->RequestFill(this, buffer, loop, callback);
         this->some_count++;
     }
 

@@ -95,8 +95,8 @@ void *NuThread::ThreadMain(void *thread) {
 
     jni_env = NULL;
 
-    g_javaVM.GetEnv((void **)&jni_env, JNI_VERSION_1_4);
-    g_javaVM.AttachCurrentThread(&jni_env, NULL);
+    g_javaVM->GetEnv((void **)&jni_env, JNI_VERSION_1_4);
+    g_javaVM->AttachCurrentThread(&jni_env, NULL);
 
     self = ((NuThread *)thread);
     g_currentThread = self;
@@ -112,7 +112,7 @@ void *NuThread::ThreadMain(void *thread) {
 
     delete self;
 
-    g_javaVM.DetachCurrentThread();
+    g_javaVM->DetachCurrentThread();
 
     return NULL;
 }

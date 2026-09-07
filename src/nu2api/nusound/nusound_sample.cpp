@@ -7,8 +7,8 @@ pthread_mutex_t NuSoundSample::sCriticalSection = PTHREAD_MUTEX_INITIALIZER;
 
 NuSoundSample::NuSoundSample(const char *path, FeedType feed_type)
     : NuSoundSource(path, SourceType::ZERO, feed_type), buffer{} {
-    this->field2_0x24 = 0;
-    this->field1_0x20 = 0;
+    this->list_next = NULL;
+    this->list_previous = NULL;
     this->file_type = NuSoundSystem::DetermineFileType(path);
     this->load_state = LoadState::NOT_LOADED;
     this->last_error = ErrorState::NONE;
@@ -103,6 +103,12 @@ void NuSoundSample::SetLoadState(LoadState state) {
 }
 
 NuSoundSample::~NuSoundSample() {
+    if (stream_desc != NULL) {
+        NuSoundSystem::FreeMemory(NuSoundSystem::MemoryDiscipline::SCRATCH,
+                                  reinterpret_cast<usize>(stream_desc), 0);
+        SetStreamDesc(NULL);
+    }
+    if (buffer.IsAllocated()) Unload();
 }
 
 void NuSoundSample::SetLastErrorState(ErrorState state) {
@@ -132,9 +138,10 @@ i32 NuSoundSample::Unload() {
         this->buffer.Free();
     }
 
-    if (this->stream_desc != NULL) {
-        this->stream_desc->~NuSoundStreamDesc();
-        NuSoundSystem::FreeMemory(NuSoundSystem::MemoryDiscipline::SCRATCH, reinterpret_cast<usize>(this->stream_desc),
+    NuSoundStreamDesc *desc = this->stream_desc;
+    if (desc != NULL) {
+        desc->~NuSoundStreamDesc();
+        NuSoundSystem::FreeMemory(NuSoundSystem::MemoryDiscipline::SCRATCH, reinterpret_cast<usize>(desc),
                                   0);
         SetStreamDesc(NULL);
     }

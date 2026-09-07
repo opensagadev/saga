@@ -28,10 +28,10 @@ class NuSoundHeaderOGG : public NuSoundStreamDesc {
     u64 GetLengthSamples() const;
     f32 GetLengthSeconds() const;
     u64 GetDataOffset() const;
-    u16 GetNumChannels() const;
+    u32 GetNumChannels() const;
     u32 GetSampleRate() const;
-    u16 GetBitsPerChannel() const;
-    u16 GetBlockSize() const;
+    u32 GetBitsPerChannel() const;
+    u32 GetBlockSize() const;
     DataFormat GetEncodedDataFormat() const;
     u64 GetDecodedLengthBytes() const;
     u16 GetInterleaveSize() const;
@@ -47,12 +47,12 @@ class NuSoundLoaderOGG : public NuSoundLoader {
         NUFILE file;
 
       public:
+        virtual void SetFile(NUFILE file);
         virtual i32 Read(void *dest, u32 size);
         virtual void Seek(i32 origin, u32 offset);
         virtual void Close();
-        void SetFile(NUFILE file);
-        NUFILE GetFile() const;
         virtual i32 GetPosition() const;
+        virtual NUFILE GetFile() const;
     };
 
     NuSoundLoaderOGG();

@@ -128,7 +128,7 @@ struct NuInputTouchData;
 struct NuSoundBuffer;
 struct NuSoundSource;
 struct NuSymbolQuery {};
-struct NuWindGType {};
+#include "gamelib/nuwind/nuwind.h"
 struct SLPlayItf_ {};
 struct ShaderObjectKey;
 struct VuMtx;
@@ -194,7 +194,7 @@ struct NuInputDevicePS {
     void GetIdentifierPS(u32);
     void HandleGamePadAxis_ANDROID_SPECIFIC(float, float, float, float, float, float);
     void HandleSensor_ANDROID_SPECIFIC(i32, float, float, float);
-    void HandleTouch_ANDROID_SPECIFIC(i32, i32, i32, float, float);
+    i32 HandleTouch_ANDROID_SPECIFIC(i32, i32, i32, float, float);
 };
 struct NuInputManager {
     void GetDevice(u32) const;
@@ -284,22 +284,7 @@ struct NuMemory {
     void MoveFreeMem2IntoMem1();
     void SetSoakTestMode();
 };
-struct NuRenderDevice {
-    void DetermineNominalAspectRatio(u32, u32) const;
-    void IsContextValid() const;
-    void MultiThreadRender() const;
-    void OnAppPaused();
-    void OnAppRestarted();
-    void OnAppResume();
-    void OnAppStarted();
-    void OnAppStopped();
-    void OnGainedFocus();
-    void OnLostFocus();
-    void OnWindowDestroy();
-    void OpenglErrorCallback(u32, u32, u32, u32, i32, char const *, void *);
-    void PreInitialize();
-    void ResizeDevice(i32, i32, i32, bool, bool, bool, bool);
-};
+class NuRenderDevice;
 struct NuThread {
     void Resume();
     void SetDebugName(char const *);

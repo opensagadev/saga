@@ -85,10 +85,10 @@ void NuSoundHandle::RemoveEffect(NuSoundEffect *) {
 }
 
 void NuSoundHandle::ResetFrameCount() {
-    NuListNodeBase *node = effects.head->next;
-    NuListNodeBase *end = effects.tail;
+    NuListNodeBase *node = callbacks.head->next;
+    NuListNodeBase *end = callbacks.tail;
     for (; node != end; node = node->next) {
-        static_cast<NuListNode<NuSoundEffect *> *>(node)->value->Initialise();
+        static_cast<NuListNode<Callback *> *>(node)->value->OnResetFrameCount(this);
     }
 }
 

@@ -17,15 +17,30 @@ NuSoundLoader::NuSoundLoader() {
 NuSoundLoader::~NuSoundLoader() {
 }
 
-i32 NuSoundLoader::CloseStream() {
-    return 0;
+void NuSoundLoader::CloseStream() {
+    Close();
 }
 
 u64 NuSoundLoader::Deinterleave(char *data, i32 length, char **dest, i32 count, NuSoundSystem::ChannelConfig config) {
-    return 0;
+    i32 frames = length / (count * (i32)config);
+    u64 copied = 0;
+    for (i32 frame = 0; frame < frames; ++frame) {
+        for (i32 channel = 0; channel < (i32)config; ++channel) {
+            for (i32 byte = 0; byte < count; ++byte) {
+                *dest[channel] = *data++;
+                ++dest[channel];
+                ++copied;
+            }
+        }
+    }
+    return copied;
 }
 
-void NuSoundLoader::GetChannelAddress(NuSoundBuffer *, NuSoundStreamDesc *, NuSoundSystem::AudioChannel) {
+void *NuSoundLoader::GetChannelAddress(NuSoundBuffer *buffer, NuSoundStreamDesc *desc,
+                                     NuSoundSystem::AudioChannel channel) {
+    i32 channels = desc->GetNumChannels();
+    u32 channel_size = buffer->GetBufferSize() / (u64)(i64)channels;
+    return static_cast<char *>(buffer->GetAddress()) + channel_size * (u32)channel;
 }
 
 void NuSoundLoader::ReleaseHeader(NuSoundStreamDesc *desc) {
@@ -56,15 +71,22 @@ i32 NuSoundLoader::Load(NuSoundStreamDesc *desc, NuSoundBuffer *buffer) {
     }
 
     bool decode_on_open = desc->DecodeStreamOnOpen();
-    char *path = const_cast<char *>(this->path);
-    bool use_decoded_length = NuStrIStr(path, "coin") != NULL || NuStrIStr(path, "counter") != NULL ||
-                              NuStrIStr(path, "fs_") != NULL || NuStrIStr(path, "saber") != NULL || decode_on_open;
+    bool use_decoded_length = NuStrIStr(const_cast<char *>(this->path), "coin") != NULL ||
+                              NuStrIStr(const_cast<char *>(this->path), "counter") != NULL ||
+                              NuStrIStr(const_cast<char *>(this->path), "fs_") != NULL ||
+                              NuStrIStr(const_cast<char *>(this->path), "saber") != NULL || decode_on_open;
     u64 length = use_decoded_length ? desc->GetDecodedLengthBytes() : desc->GetEncodedLengthBytes();
 
     result = buffer->Allocate(length, NuSoundSystem::MemoryDiscipline::SAMPLE);
     if (result != 1) {
         if (this->oom != NULL) {
-            (*this->oom)();
+            bool retry = result == -2
+                ? this->oom->OnAllocationFailureMinusTwo((u32)length)
+                : this->oom->OnAllocationFailure((u32)length);
+            if (!retry) {
+                Close();
+                return 5;
+            }
         }
         result = buffer->Allocate(length, NuSoundSystem::MemoryDiscipline::SAMPLE);
         if (result != 1) {
@@ -79,7 +101,8 @@ i32 NuSoundLoader::Load(NuSoundStreamDesc *desc, NuSoundBuffer *buffer) {
     SeekRawData(0);
     u64 read = ReadData(buffer->GetAddress(), length);
 
-    NuSoundBuffer::Context context;
+    NuSoundBuffer::Context context = {};
+    context.flags = 1;
     context.read_size = read;
     context.size2 = read;
     context.size3 = 0;
@@ -88,11 +111,12 @@ i32 NuSoundLoader::Load(NuSoundStreamDesc *desc, NuSoundBuffer *buffer) {
     buffer->SetCurrentContext(context);
     buffer->Unlock();
 
-    Close();
     if (read == 0) {
+        Close();
         buffer->Free();
         return 4;
     }
+    Close();
     return 1;
 }
 
@@ -117,57 +141,44 @@ i32 NuSoundLoader::OpenForStreaming(const char *path, f64 length, NuSoundStreamD
     return 1;
 }
 
-void NuSoundLoader::FillStreamBuffer(NuSoundBuffer *buffer, bool param3) {
-    NuSoundBuffer::Context context;
+NuSoundBuffer::Context NuSoundLoader::FillStreamBuffer(NuSoundBuffer *buffer, bool param3) {
+    NuSoundBuffer::Context context = {};
+    context.flags = 1;
+    memset(&context, 0, sizeof(context));
 
     if (this->file == 0) {
-        return;
+        return context;
     }
 
     buffer->Lock();
     u8 *data = (u8 *)buffer->GetAddress();
     u64 buffer_size = buffer->GetBufferSize();
 
-    u64 uVar3iVar2 = context.size2;
-
-    u64 read_size, size;
-
-    do {
-        do {
-            if (buffer_size <= uVar3iVar2) {
-            LAB_0033fce8:
-                buffer->SetCurrentContext(context);
-                buffer->Unlock();
-                return;
-            }
-            read_size = buffer_size - uVar3iVar2;
-            size = ReadData(data, read_size);
-
-            context.read_size += size;
-
-            data += size;
-
-            context.size2 += size;
-            uVar3iVar2 = context.size2;
-
-        } while (read_size == size);
+    for (;;) {
+        if (buffer_size <= context.size2) {
+        filled:
+            buffer->SetCurrentContext(context);
+            buffer->Unlock();
+            return context;
+        }
+        u64 read_size = buffer_size - context.size2;
+        u64 size = ReadData(data, read_size);
+        context.read_size += size;
+        context.size2 += size;
+        data += size;
+        if (read_size == size) continue;
 
         SeekRawData(0);
 
         context.size3 = context.read_size;
 
-        u32 uVar5 = buffer->GetBufferSize();
-
-        u32 uVar6 = this->desc->GetEncodedLengthBytes();
-
-        if ((uVar6 <= uVar5) || (!param3)) {
+        u64 capacity = buffer->GetBufferSize();
+        u64 encoded_length = this->desc->GetEncodedLengthBytes();
+        if ((capacity >= encoded_length) || (!param3)) {
             context.flags |= 2;
-            goto LAB_0033fce8;
+            goto filled;
         }
-
-        uVar3iVar2 = context.size2;
-
-    } while (true);
+    }
 }
 
 bool NuSoundLoader::SeekRawData(u64 position) {

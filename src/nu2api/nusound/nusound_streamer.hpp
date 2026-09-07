@@ -46,6 +46,9 @@ class NuSoundStreamingSample : public NuSoundSample {
     i32 ReCue(f32 start_offset, bool loop);
 
     bool IsLocked() const override;
+    bool IsStreamOpen() const override {
+        return GetLoadState() == LoadState::STREAM_READY;
+    }
     void Lock();
     void Unlock();
 
@@ -73,16 +76,9 @@ class NuSoundStreamer {
         NuSoundWeakPtr<NuSoundBufferCallback> weak_ptr;
         bool weak_flag;
 
-        QueueElement() = default;
+        QueueElement() : sample(NULL), loop(false), start_offset(0.0f), buffer(NULL), weak_flag(false) {}
 
-        ~QueueElement() {
-            NuSoundWeakPtrListNode::sPtrListLock.Lock();
-            if (this->weak_ptr.obj != NULL) {
-                this->weak_ptr.obj->Unlink(&this->weak_ptr);
-                this->weak_ptr.obj = NULL;
-            }
-            NuSoundWeakPtrListNode::sPtrListLock.Unlock();
-        }
+        ~QueueElement() = default;
     };
 
   public:
@@ -96,12 +92,12 @@ class NuSoundStreamer {
     NuThread *thread;
     bool running;
 
-    QueueElement queue1[32]; // control queue (open / close / recue / shutdown)
+    union { QueueElement queue1[32]; }; // control queue storage
     i32 queue1_length;
     i32 queue1_index;
     NuThreadSemaphore queue1_semaphore;
 
-    QueueElement queue2[32]; // fill queue — always drained first
+    union { QueueElement queue2[32]; }; // fill queue storage
     i32 queue2_length;
     i32 queue2_index;
     NuThreadSemaphore queue2_semaphore;

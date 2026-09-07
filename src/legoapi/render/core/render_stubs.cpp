@@ -598,10 +598,4 @@ extern "C" {
     void SphereDrawEx(void) {
     }
 
-    void glDeleteVertexArraysOESC(void) {
-    }
-
-    void glGenVertexArraysOESC(void) {
-    }
-
 } // extern "C"

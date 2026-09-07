@@ -433,6 +433,8 @@ u8 sysfont[] = {
 NUQFNT *system_qfont;
 
 NUQFNT_CSMODE NuQFntCSMode;
+i32 NuQFntCSModeStackIndex;
+NUQFNT_CSMODE NuQFntCSModeStack[16];
 
 f32 qfnt_rezscale_w = 1.0f;
 f32 qfnt_rezscale_h = 1.0f;
