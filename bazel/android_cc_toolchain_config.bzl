@@ -1,4 +1,4 @@
-"""NDK r8e toolchains for Android x86 matching and ARMv7 builds."""
+"""NDK r8e: x86 assembly matching and ARMv7 hardware runtime testing only."""
 
 load("@rules_cc//cc:action_names.bzl", "ACTION_NAMES")
 load("@rules_cc//cc:cc_toolchain_config_lib.bzl", "feature", "flag_group", "flag_set", "tool_path")

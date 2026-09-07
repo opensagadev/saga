@@ -4,6 +4,12 @@ This change restores native interfaces used by the original APK's Java activity
 and adds an NDK r8e ARMv7 build. The intended deployment keeps the original Java
 and replaces `libTTapp.so`. It does not include a replacement Java application.
 
+**ARMv7 is only for runtime testing on real Android hardware. It is not a
+matching target.** Android x86 (`--config=target`) remains the matching target
+against `res/libTTapp.so`; all matching percentages and regression comparisons
+in this document and the generated report refer to x86. ARM ABI/layout checks
+support device execution and do not imply ARM assembly matching.
+
 ## Implemented areas
 
 - JNI activity lifecycle, surface handling, input forwarding, device information,

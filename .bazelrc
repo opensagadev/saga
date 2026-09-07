@@ -22,6 +22,8 @@ build:target --extra_toolchains=@android_ndk_r8e//:toolchain
 build:target --define=SAGA_BUILD=target
 try-import %workspace%/bazel/android_per_file_copts.bazelrc
 
+# Runtime testing on real Android hardware only; not an assembly-matching target.
+# Android x86 (--config=target) remains the reference matching configuration.
 build:android-armv7 --config=target
 build:android-armv7 --platforms=//bazel/platforms:android_armv7
 build:android-armv7 --extra_toolchains=@android_ndk_r8e//:toolchain_armv7
