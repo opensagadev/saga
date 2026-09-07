@@ -3936,7 +3936,8 @@ extern "C" {
     void NuSetCutSceneFindCharactersFn(NUGCUTSCENEFINDCHARACTERSFN function) {
         NuCutSceneFindCharacters = function;
     }
-    void NuSetCutSceneRequestSFXFn(void) {
+    void NuSetCutSceneRequestSFXFn(NUGCUTSCENEREQUESTSFXFN function) {
+        NuCutSceneRequestSFX = function;
     }
     void NuSetCutSceneResetCharactersFn(NUGCUTSCENERESETCHARACTERSFN function) {
         NuCutSceneResetCharactersFn = function;
@@ -3946,9 +3947,11 @@ extern "C" {
     void NuSetCutSceneRigidPostRenderFn(NUGCUTSCENERIGIDPOSTRENDERFN function) {
         NuCutSceneRigidPostRender = function;
     }
-    void NuSetCutSceneSFXFixUpFn(void) {
+    void NuSetCutSceneSFXFixUpFn(NUGCUTSCENESFXFIXUPFN function) {
+        NuCutSceneSFXFixUp = function;
     }
-    void NuSetCutSceneSFXUpdateFn(void) {
+    void NuSetCutSceneSFXUpdateFn(NUGCUTSCENESFXUPDATEFN function) {
+        NuCutSceneSFXUpdate = function;
     }
 
     // ---------------------------------------------------------------------------

@@ -72,6 +72,7 @@ NUGCUTSCENECHARACTERRENDERFN NuCutSceneCharacterRender = NULL;
 NUGCUTSCENEFINDCHARACTERSFN NuCutSceneFindCharacters = NULL;
 NUGCUTSCENERESETCHARACTERSFN NuCutSceneResetCharactersFn = NULL;
 NUGCUTSCENERIGIDPOSTRENDERFN NuCutSceneRigidPostRender = NULL;
+NUGCUTSCENEREQUESTSFXFN NuCutSceneRequestSFX = NULL;
 __attribute__((visibility("hidden"))) GameObject_s *ForceBackObj asm("_ZL12ForceBackObj") = NULL;
 __attribute__((visibility("hidden"))) NUVEC *ForceBackPos asm("_ZL12ForceBackPos") = NULL;
 

@@ -1,5 +1,6 @@
 #include "legoapi/legoapi_types.h"
 #include "globals.h"
+#include "MechInputTouch/MechInputTouch_types.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion.h"
@@ -157,7 +158,7 @@ static void bgLoadStreamCutScene(bgprocinfo_s *) {
     }
 }
 
-static void CutScene_Start(WORLDINFO_s *world, CUTINFO *cut, i32) {
+__attribute__((noinline)) static void CutScene_Start(WORLDINFO_s *world, CUTINFO *cut, i32) {
     instNUGCUTSCENE_s *instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
     if (cut->music_handle != -1) {
         g_lastCutsceneTime = 0.0f;
@@ -334,9 +335,11 @@ void CutScenes_Reset(WORLDINFO_s *world) {
 void CutScenes_Start(WORLDINFO_s *world) {
     for (i32 i = 0; i < NewCutInfoCount; ++i) {
         CUTINFO *cut = NewCutInfo[i];
+        MechSystems::Get()->PauseButton().skip_prompt_timer = 0.0f;
         if (cut == NULL || cut->instance == NULL) {
             continue;
         }
+        LEVEL_PROGRESS_s *level_progress = world->level_progress;
         i32 cutscene_index = -1;
         if (world->cutscene_sys != NULL) {
             for (i32 j = 0; j < world->cutscene_sys->count; ++j) {
@@ -344,13 +347,14 @@ void CutScenes_Start(WORLDINFO_s *world) {
                     cutscene_index = j;
                 }
             }
-        }
-        if (world->level_progress != NULL && cutscene_index != -1) {
-            const u32 bit = 1U << (cutscene_index & 0x1f);
-            if ((cut->end_flags & 1) != 0 && (world->level_progress->played_cutscene_mask & bit) != 0) {
-                continue;
+            if (level_progress != NULL) {
+                const u32 bit = 1U << (cutscene_index & 0x1f);
+                if (static_cast<i16>(cutscene_index) != -1 && (cut->end_flags & 1) != 0 &&
+                    (level_progress->played_cutscene_mask & bit) != 0) {
+                    continue;
+                }
+                level_progress->played_cutscene_mask |= bit;
             }
-            world->level_progress->played_cutscene_mask |= bit;
         }
         CutScene_Start(world, cut, cutscene_index);
     }
@@ -593,7 +597,15 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
     }
 }
 
-void CutScene_FindInst(CUTSYS *, char *) {
+void *CutScene_FindInst(CUTSYS *system, char *name) {
+    if (system != NULL) {
+        for (i32 i = 0; i < system->count; ++i) {
+            if (NuStrICmp(system->cuts[i]->name, name) == 0) {
+                return system->cuts[i]->instance;
+            }
+        }
+    }
+    return NULL;
 }
 
 void CutScenes_Destroy(CUTSYS *system) {

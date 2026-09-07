@@ -166,6 +166,11 @@ struct NUGCUTTRIGGERSYS_s {
     NUGCUTTRIGGEREVENT_s *events;
 };
 
+struct instNUGCUTTRIGGERSYS_s {
+    void *owner;
+    u32 *event_states;
+};
+
 struct NUGCUTSCENE_s {
     i32 version;
     isize string_delta;
@@ -240,7 +245,9 @@ struct instNUGCUTSCENE_s {
     NUGCUTSCENE_s *cutscene;
     NUGCUTSCENE_s *cutscene_copy;
     NUVEC transformed_bounds_center;
-    u8 pad_6c[0x88 - 0x6c];
+    NUVEC bounds_min;
+    NUVEC bounds_max;
+    f32 max_camera_distance_squared;
     union {
         u8 flags_88;
         struct {
@@ -262,19 +269,24 @@ struct instNUGCUTSCENE_s {
     instNUGCUTRIGIDSYS_s *rigid_instance;
     instNUGCUTCHARSYS_s *character_instance;
     instNUGCUTLOCATORSYS_s *locator_instance;
-    void *trigger_instance;
-    u8 pad_b0[0xbc - 0xb0];
+    instNUGCUTTRIGGERSYS_s *trigger_instance;
+    instNUGCUTSCENE_s *chained_instance;
+    void (*end_callback)(instNUGCUTSCENE_s *);
+    u32 field_b8;
     NUGCUTSCENE_s *stream_buffer_0;
     NUGCUTSCENE_s *stream_buffer_1;
     void *field_c4;
     void *field_c8;
-    u8 pad_cc[0xdf - 0xcc];
+    u8 pad_cc[0xd8 - 0xcc];
+    i16 skip_countdown;
+    u8 pad_da[0xdf - 0xda];
     u8 stream_index;
-    u8 pad_e0[8];
+    f32 accumulated_stream_duration;
+    f32 elapsed;
     f32 alpha;
     void *pending_stream_buffer;
     i32 allocation_size;
-    u8 pad_f4[4];
+    instNUGCUTSCENE_s *queued_stream_instance;
 };
 
 DECOMP_ASSERT(offsetof(NUGCUTSCENE_s, stream_buffer_size) == 0x3c, "NUGCUTSCENE stream-buffer size offset");
@@ -296,6 +308,10 @@ typedef void (*NUGCUTSCENECHARACTERRENDERFN)(instNUGCUTSCENE_s *, NUGCUTSCENE_s 
 typedef void (*NUGCUTSCENEFINDCHARACTERSFN)(NUGCUTSCENE_s *);
 typedef void (*NUGCUTSCENERESETCHARACTERSFN)(instNUGCUTSCENE_s *);
 typedef void (*NUGCUTSCENERIGIDPOSTRENDERFN)(NUGCUTRIGID_s *, instNUGCUTRIGID_s *, NUMTX *);
+typedef void (*NUGCUTSCENEREQUESTSFXFN)(instNUGCUTSCENE_s *);
+typedef i32 (*NUGCUTSCENESFXFIXUPFN)(usize);
+typedef void (*NUGCUTSCENESFXUPDATEFN)(NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *, NUGCUTLOCATOR_s *, f32, NUMTX *,
+                                       i32);
 
 extern "C" NUGCUTSCENECHARACTERCREATEDATAFN NuCutSceneCharacterCreateData;
 extern "C" NUGCUTSCENECHARACTEREVALFN NuCutSceneCharacterEval;
@@ -305,6 +321,9 @@ extern "C" NUGCUTSCENECHARACTERRENDERFN NuCutSceneCharacterRender;
 extern "C" NUGCUTSCENEFINDCHARACTERSFN NuCutSceneFindCharacters;
 extern "C" NUGCUTSCENERESETCHARACTERSFN NuCutSceneResetCharactersFn;
 extern "C" NUGCUTSCENERIGIDPOSTRENDERFN NuCutSceneRigidPostRender;
+extern "C" NUGCUTSCENEREQUESTSFXFN NuCutSceneRequestSFX;
+extern "C" NUGCUTSCENESFXFIXUPFN NuCutSceneSFXFixUp;
+extern "C" NUGCUTSCENESFXUPDATEFN NuCutSceneSFXUpdate;
 extern "C" void instNuGCutSceneSetMtx(instNUGCUTSCENE_s *instance, NUMTX *matrix);
 
 extern "C" void NuSetCutSceneCharacterCreateDataFn(NUGCUTSCENECHARACTERCREATEDATAFN function);
@@ -315,6 +334,9 @@ extern "C" void NuSetCutSceneCharacterRenderFn(NUGCUTSCENECHARACTERRENDERFN func
 extern "C" void NuSetCutSceneFindCharactersFn(NUGCUTSCENEFINDCHARACTERSFN function);
 extern "C" void NuSetCutSceneResetCharactersFn(NUGCUTSCENERESETCHARACTERSFN function);
 extern "C" void NuSetCutSceneRigidPostRenderFn(NUGCUTSCENERIGIDPOSTRENDERFN function);
+extern "C" void NuSetCutSceneRequestSFXFn(NUGCUTSCENEREQUESTSFXFN function);
+extern "C" void NuSetCutSceneSFXFixUpFn(NUGCUTSCENESFXFIXUPFN function);
+extern "C" void NuSetCutSceneSFXUpdateFn(NUGCUTSCENESFXUPDATEFN function);
 void NuGCutSceneRemapFocusIdToLocaterNum(NUGCUTSCENE_s *cutscene, VARIPTR *buffer);
 extern "C" void instNuGCutSceneCreateCamTgtArray(instNUGCUTSCENE_s *instance, i32 count, VARIPTR *buffer);
 extern "C" i32 instNuGCutSceneAddCamTgt(instNUGCUTSCENE_s *instance, NUVEC *target, f32 start_frame, f32 duration,
