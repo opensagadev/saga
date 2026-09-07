@@ -34,9 +34,6 @@ extern "C" void NuShaderManagerSetCurrentShader(void) {
 extern "C" void NuShaderManagerSetElementfv(void) {
 }
 
-extern "C" void NuShaderManagerSetElementsfv_transpose(void) {
-}
-
 extern "C" void NuShaderManagerSetShaderSaveFolder(void) {
 }
 
@@ -65,9 +62,6 @@ extern "C" void NuShaderObjectKeySetUberShaderHash(void) {
 }
 
 extern "C" void NuShaderObjectLoadFromFile(void) {
-}
-
-extern "C" void NuShaderObjectSetElementsfv_transpose(void) {
 }
 
 extern "C" void NuShaderObjectUnserialize(void) {
