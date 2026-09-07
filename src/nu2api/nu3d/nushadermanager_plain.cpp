@@ -465,7 +465,7 @@ namespace nu2api {
         const bool flag10Path = baseVariant && (flagsIn & 0x10) != 0 && !specialVertexPath;
 
         filter->field4_0x10 = flag10Path;
-        filter->field6_0x18 = ((filter->variant != 0) || ((flagsIn & 0x10) != 0)) && !specialVertexPath;
+        filter->field6_0x18 = !specialVertexPath;
 
         const bool deferredPath = baseVariant && (flagsIn & 0x20) != 0 && !specialVertexPath;
         filter->field5_0x14 = deferredPath;

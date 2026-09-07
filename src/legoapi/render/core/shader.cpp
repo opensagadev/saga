@@ -117,7 +117,7 @@ void ShaderMtlDescFilter::internalInit(nushadermtldesc_s const *material_desc, n
     const bool special_vertex_path = (vertex_descriptor[2] & 4) != 0 || (material_bytes[0x41] & 0x40) != 0;
     const bool base_variant = variant == 0;
     field_0x10 = base_variant && (flags & 0x10) != 0 && !special_vertex_path;
-    field_0x18 = (variant != 0 || (flags & 0x10) != 0) && !special_vertex_path;
+    field_0x18 = !special_vertex_path;
     field_0x14 = base_variant && (flags & 0x20) != 0 && !special_vertex_path;
 
     layer_count = 0;
