@@ -1206,7 +1206,13 @@ f32 NuMusic::GetPlaybackTime(u32 clazz) {
     if (track == NULL || (track->clazz & clazz) == 0 || voice->status != VOICE_STATUS_PLAYING_LOADED) {
         voice = &voices[1];
         track = voice->tracks[voice->track_index];
-        if (track == NULL || (track->clazz & clazz) == 0 || voice->status != VOICE_STATUS_PLAYING_LOADED) {
+        if (track == NULL) {
+            return 0.0f;
+        }
+        if ((track->clazz & clazz) == 0) {
+            return 0.0f;
+        }
+        if (voice->status != VOICE_STATUS_PLAYING_LOADED) {
             return 0.0f;
         }
     }
@@ -1222,31 +1228,58 @@ int NuMusic::GetStatus(u32 clazz, i32 *class_status) {
     }
 
     if (class_status != NULL) {
-        memset(class_status, 0, sizeof(i32) * 6);
+        class_status[0] = 0;
+        class_status[1] = 0;
+        class_status[2] = 0;
+        class_status[3] = 0;
+        class_status[4] = 0;
+        class_status[5] = 0;
     }
 
     i32 result = 0;
-    for (i32 i = 0; i < 2; ++i) {
-        Voice *voice = &voices[i];
-        Track *track = voice->tracks[voice->track_index];
-        if (track == NULL || (track->clazz & clazz) == 0) {
-            continue;
-        }
-
-        i32 status = 0;
-        if (voice->status <= VOICE_STATUS_PLAYING_LOADED) {
-            const u32 status_bit = 1u << voice->status;
+    Track *track = voices[0].tracks[voices[0].track_index];
+    if (track != NULL && (track->clazz & clazz) != 0) {
+        if (voices[0].status <= VOICE_STATUS_PLAYING_LOADED) {
+            u32 status_bit = 1u << voices[0].status;
             if ((status_bit & 0x75) != 0) {
-                status = 1;
+                result = 1;
             } else if ((status_bit & 0x80) != 0) {
-                status = 4;
+                result = 4;
             } else if ((status_bit & 8) != 0) {
-                status = 2;
+                result = 2;
+            } else {
+                result = 0;
             }
         }
+        i32 class_index = ClassToIX(track->clazz);
+        if (class_status != NULL && class_index != -1) {
+            class_status[class_index] |= result;
+        }
+    }
 
+    track = voices[1].tracks[voices[1].track_index];
+    if (track != NULL && (track->clazz & clazz) != 0) {
+        i32 status = result;
+        switch (voices[1].status) {
+            case VOICE_STATUS_NONE:
+            case VOICE_STATUS_STOPPING:
+            case VOICE_STATUS_CUED:
+            case VOICE_STATUS_ENDED:
+            case VOICE_STATUS_PLAYING:
+                status = 1;
+                break;
+            case VOICE_STATUS_READY:
+                status = 0;
+                break;
+            case VOICE_STATUS_STOPPED:
+                status = 2;
+                break;
+            case VOICE_STATUS_PLAYING_LOADED:
+                status = 4;
+                break;
+        }
         result |= status;
-        const i32 class_index = ClassToIX(track->clazz);
+        i32 class_index = ClassToIX(track->clazz);
         if (class_status != NULL && class_index != -1) {
             class_status[class_index] |= status;
         }

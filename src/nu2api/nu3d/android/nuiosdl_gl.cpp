@@ -411,11 +411,14 @@ static void NuIOS_BindVertexAttributes(isize dataAddr, usize baseVertex) {
     NuIOS_BindVertexAttributesInternal(dataAddr, baseVertex, fmt, fmt[0]);
 }
 
-// original 0x293a65 — bind with an explicit format override (2D path).
-static void NuIOS_BindVertexAttributesImmediateOverrideDataLayout(isize dataAddr, usize baseVertex, const u32 *fmt) {
+// original 0x293a65 — bind immediate data with an explicit record layout.
+// The first argument is unused; the active mask still comes from the current
+// bound vertex format, while `fmt` supplies the attribute records.
+static void NuIOS_BindVertexAttributesImmediateOverrideDataLayout(isize, isize dataAddr, const u32 *fmt) {
     NuIOSBindVAO(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    NuIOS_BindVertexAttributesInternal(dataAddr, baseVertex, fmt, fmt[0]);
+    const u32 *bound_format = static_cast<const u32 *>(usizeToPtr(g_boundVertexFormat));
+    NuIOS_BindVertexAttributesInternal(dataAddr, 0, fmt, bound_format[0]);
 }
 
 // ---------------------------------------------------------------------------
@@ -714,7 +717,7 @@ void NuIOSDLGeom2DCallback(void *arg) {
 
     u32 pt = geom->prim_type;
     if (pt < 5) {
-        NuIOS_BindVertexAttributesImmediateOverrideDataLayout(PtrToArgInt(geom->vertices), 0,
+        NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, PtrToArgInt(geom->vertices),
                                                               (const u32 *)g_nuPrimVertexFormat);
         glDrawArrays((GLenum)kPrimModes[pt], 0, (GLsizei)geom->vertex_count);
     }
@@ -732,27 +735,27 @@ void NuIOSDLGeomCallback(void *arg) {
     NuShaderObjectGLSLSetupMaterial(shader, g_LastMtl);
     switch (geom->primitive_type) {
         case 0:
-            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(immediate_vertices, 0,
+            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, immediate_vertices,
                                                                   (const u32 *)g_nuPrimVertexFormat);
             glDrawArrays(GL_TRIANGLES, 0, geom->vertex_count);
             break;
         case 1:
-            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(immediate_vertices, 0,
+            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, immediate_vertices,
                                                                   (const u32 *)g_nuPrimVertexFormat);
             glDrawArrays(GL_TRIANGLE_STRIP, 0, geom->vertex_count);
             break;
         case 2:
-            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(immediate_vertices, 0,
+            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, immediate_vertices,
                                                                   (const u32 *)g_nuPrimVertexFormat);
             glDrawArrays(GL_LINES, 0, geom->vertex_count);
             break;
         case 3:
-            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(immediate_vertices, 0,
+            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, immediate_vertices,
                                                                   (const u32 *)g_nuPrimVertexFormat);
             glDrawArrays(GL_LINE_STRIP, 0, geom->vertex_count);
             break;
         case 5:
-            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(immediate_vertices, 0,
+            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, immediate_vertices,
                                                                   (const u32 *)g_nuPrimVertexFormat);
             glDrawArrays(GL_TRIANGLE_FAN, 0, geom->vertex_count);
             break;
@@ -782,7 +785,7 @@ void NuIOSDLGeomCallback(void *arg) {
             break;
         }
         case 0x32:
-            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(immediate_vertices, 0,
+            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, immediate_vertices,
                                                                   (const u32 *)g_nuPrimVertexFormat);
             glDrawArrays(GL_POINTS, 0, geom->vertex_count);
             break;

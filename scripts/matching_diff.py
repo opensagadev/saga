@@ -69,6 +69,12 @@ class Change:
         return self.new.source or self.old.source or "(unassigned)"
 
 
+@dataclass(frozen=True)
+class Report:
+    fuzzy_match_percent: float
+    functions: dict[int, Function]
+
+
 def _score(value: object) -> float | None:
     if value is None:
         return None
@@ -112,13 +118,22 @@ def _add_function(
         function.labels.append(label)
 
 
-def load_functions(path: Path) -> dict[int, Function]:
-    """Load and de-duplicate original functions by their stable ELF address."""
+def load_report(path: Path) -> Report:
+    """Load aggregate measures and functions keyed by their stable ELF address."""
     with path.open(encoding="utf-8") as report_file:
         report = json.load(report_file)
 
     if not isinstance(report, dict) or not isinstance(report.get("units"), list):
         raise ValueError(f"{path}: not a matching.json report")
+    try:
+        fuzzy_match_percent = float(report["measures"]["fuzzy_match_percent"])
+    except (KeyError, TypeError, ValueError) as error:
+        raise ValueError(f"{path}: report has no valid fuzzy match percent") from error
+    if not 0.0 <= fuzzy_match_percent <= 100.0:
+        raise ValueError(
+            f"{path}: fuzzy match percent is outside 0..100: "
+            f"{fuzzy_match_percent}"
+        )
 
     builders: dict[int, _FunctionBuilder] = {}
     for unit in report["units"]:
@@ -142,7 +157,7 @@ def load_functions(path: Path) -> dict[int, Function]:
             source=builder.source,
             label=label,
         )
-    return functions
+    return Report(fuzzy_match_percent=fuzzy_match_percent, functions=functions)
 
 
 def compare(old: dict[int, Function], new: dict[int, Function]) -> list[Change]:
@@ -187,6 +202,22 @@ def _delta(delta: float) -> str:
 def _magnitude(delta: float) -> str:
     precision = 4 if abs(delta) < 0.01 else 2
     return f"{abs(delta):.{precision}f} pp"
+
+
+def _overall_percent(score: float) -> str:
+    return f"{score:.4f}%"
+
+
+def _overall_delta(old: float, new: float) -> str:
+    delta = new - old
+    if delta > SCORE_EPSILON:
+        direction = "▲"
+    elif delta < -SCORE_EPSILON:
+        direction = "▼"
+    else:
+        direction = "—"
+    change = f"{delta:+.4f} pp" if direction != "—" else "no change"
+    return f"{direction} {change}"
 
 
 def _cell(value: str) -> str:
@@ -263,6 +294,8 @@ def _group_table(changes: list[Change], group_limit: int) -> list[str]:
 
 def render_report(
     changes: list[Change],
+    old_fuzzy_match_percent: float,
+    new_fuzzy_match_percent: float,
     old_label: str,
     new_label: str,
     detail_limit: int,
@@ -276,6 +309,12 @@ def render_report(
     lines = [
         REPORT_MARKER,
         "## Function matching report",
+        "",
+        f"# {_overall_percent(new_fuzzy_match_percent)}",
+        "",
+        f"**Overall fuzzy match** · {_overall_percent(old_fuzzy_match_percent)} → "
+        f"{_overall_percent(new_fuzzy_match_percent)} · "
+        f"**{_overall_delta(old_fuzzy_match_percent, new_fuzzy_match_percent)}**",
         "",
         f"Comparing `{_cell(old_label)}` → `{_cell(new_label)}`.",
         "",
@@ -383,9 +422,9 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 2
     try:
-        old = load_functions(_workspace_path(args.old))
-        new = load_functions(_workspace_path(args.new))
-        changes = compare(old, new)
+        old = load_report(_workspace_path(args.old))
+        new = load_report(_workspace_path(args.new))
+        changes = compare(old.functions, new.functions)
     except (OSError, ValueError, json.JSONDecodeError) as error:
         print(f"matching_diff.py: {error}", file=sys.stderr)
         return 2
@@ -393,6 +432,8 @@ def main(argv: list[str] | None = None) -> int:
     print(
         render_report(
             changes,
+            old.fuzzy_match_percent,
+            new.fuzzy_match_percent,
             args.old_label or args.old.name,
             args.new_label or args.new.name,
             args.detail_limit,

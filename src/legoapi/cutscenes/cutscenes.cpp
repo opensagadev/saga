@@ -5,6 +5,7 @@
 #include "legoapi/characters/motion.h"
 #include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/props/doors/door.h"
@@ -23,6 +24,7 @@
 extern i32 ACTIVECUTCOUNT;
 extern "C" i32 CUTDRAWWORLD;
 extern "C" i32 Paused;
+extern i32 CUTCAM;
 extern i32 CutSceneWaiting;
 extern i32 CUTCAMONLY;
 extern i32 cut_waiting_for_new_level;
@@ -58,6 +60,9 @@ void SetLevelLights(void *, f32);
 void NewLevelFromMenu(LEVELDATA_s *, i32, i32, i32);
 void FindAndSetLights(NUVEC *, f32, void *);
 void SetZeroLights(void);
+void Panel_Clear(void);
+void GameFog_Reset(void);
+void NeedScreenGrab(i32);
 void EnableShadowMapRendering(i32);
 void ResetShadowMapRendering(void);
 i32 CutScenePlayer_Active(void);
@@ -84,9 +89,17 @@ static i32 cutaudiopaused;
 static CUTINFO *g_lastCutInfo;
 static f32 g_lastCutsceneTime;
 static f32 g_accumCutsceneTime;
+static i32 CutFrame;
 i32 NewCutInfoCount;
 static CUTINFO *NewCutInfo[8];
 i32 CUTNOFOG;
+i32 CUTSKIPLOCK;
+f32 LevelNameMul;
+f32 LevelNameTime;
+
+extern i32 drawcharactermodel_nobsa;
+extern "C" i32 NewMode;
+void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
 
 extern "C" {
     void PauseGameAudio(void);
@@ -116,14 +129,15 @@ static void CutScene_Start(WORLDINFO_s *world, CUTINFO *cut, i32) {
     } else {
         instance->flags_88 &= ~8U;
     }
-    cut->previous_frame = 0.0f;
-    cut->field_58 = 0;
+    cut->field_58 = 0.0f;
 
     if (cut->music_handle != -1) {
         music_man.SelectTrackByHandle(TRACK_CLASS_CUTSCENE, cut->music_handle);
         i32 status = music_man.PlayTrack(TRACK_CLASS_CUTSCENE, 0);
         instance->rate = 0.0f;
-        if ((cut->flags & 1) != 0 && status == 1) {
+        if ((cut->flags & 1) == 0 || status != 1) {
+            cutaudiopaused = 0;
+        } else {
             CutSceneWaiting = 1;
             PauseGameAudio();
             cutaudiopaused = 1;
@@ -142,8 +156,8 @@ static void CutScene_Start(WORLDINFO_s *world, CUTINFO *cut, i32) {
     if ((cut->flags & 1) == 0) {
         return;
     }
-    CutSceneWaiting = 0;
-    cutaudiopaused = 0;
+    Panel_Clear();
+    CutFrame = 0;
     for (i32 i = 0; i < world->cutscene_sys->count; ++i) {
         CUTINFO *other = world->cutscene_sys->cuts[i];
         if (other == NULL || other->instance == NULL) {
@@ -152,15 +166,29 @@ static void CutScene_Start(WORLDINFO_s *world, CUTINFO *cut, i32) {
         instNUGCUTSCENE_s *other_instance = static_cast<instNUGCUTSCENE_s *>(other->instance);
         if ((other_instance->flags_88 & 2) != 0) {
             other_instance->rate = 0.0f;
-            instNuGCutScenePause(other_instance, 1);
+            if (other == cut || (other->flags & 1) == 0) {
+                instNuGCutScenePause(other_instance, 1);
+            } else {
+                instNuGCutSceneStop(other_instance);
+            }
         }
     }
     CUTSTOPGAME = 1;
+    CUTNOFOG = cut->flags & 4;
     CUTDRAWWORLD = cut->flags & 2;
     CutStopInfo = cut;
     DebrisSetRenderGroup(cut->debris_render_group);
+    LevelNameTime = 0.0f;
+    LevelNameMul = 0.0f;
     ACTIVECUTCOUNT = 1;
     CutBorderScale = 1.0f;
+    cut_waiting_for_new_level = 0;
+    GameFog_Reset();
+    for (CUTSCENETEXANIM &animation : cut->texture_animations) {
+        if (animation.index != -1) {
+            texanimbits &= ~(1U << (animation.index & 0x1f));
+        }
+    }
 }
 
 void CutScenes_End() {
@@ -269,17 +297,27 @@ void CutScenes_Start(WORLDINFO_s *world) {
 
 void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
     i32 active_before[32] = {};
-    i32 stop_index = -1;
+    if (CutScenePlayer_Active() != 0 && CutStopInfo != NULL) {
+        CutScenePlayer_SetObjects(static_cast<CUTINFO *>(CutStopInfo));
+    }
+
     CutInstEnd[0] = NULL;
     CutInstEndStop = -1;
-    CutInstEndCount = 0;
-    ACTIVECUTCOUNT = 0;
     CUTSTOPGAME = 0;
+    CutInstEndCount = 0;
+    CUTCAMONLY = 0;
+    CutStopInfo = NULL;
+    CUTCAM = 0;
     CUTDRAWWORLD = 0;
-    if (world == NULL || world->cutscene_sys == NULL) {
+    CUTNOFOG = 0;
+    CUTSKIPLOCK = 0;
+
+    CUTSYS *system = world->cutscene_sys;
+    if (system == NULL) {
         return;
     }
-    CUTSYS *system = world->cutscene_sys;
+
+    i32 stop_index = -1;
     for (i32 i = 0; i < system->count; ++i) {
         CUTINFO *cut = system->cuts[i];
         if (cut == NULL || cut->instance == NULL) {
@@ -289,6 +327,38 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
         if ((instance->flags_88 & 2) == 0) {
             continue;
         }
+        if ((cut->flags & 1) != 0) {
+            CUTSTOPGAME = 1;
+            CUTDRAWWORLD = cut->flags & 2;
+            CUTNOFOG = cut->flags & 4;
+            CutStopInfo = cut;
+            stop_index = i;
+            DebrisSetRenderGroup(cut->debris_render_group);
+            ++CutFrame;
+            LevelNameTime = 0.0f;
+            LevelNameMul = 0.0f;
+            break;
+        } else if ((cut->flags & 0x20) != 0) {
+            CUTCAMONLY = 1;
+        }
+    }
+    if (stop_index == -1) {
+        DebrisSetRenderGroup(1);
+    }
+
+    ACTIVECUTCOUNT = 0;
+    for (i32 i = 0; i < system->count; ++i) {
+        CUTINFO *cut = system->cuts[i];
+        if (cut == NULL || cut->instance == NULL) {
+            active_before[i] = 0;
+            continue;
+        }
+        instNUGCUTSCENE_s *instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
+        if ((instance->flags_88 & 2) == 0) {
+            active_before[i] = 0;
+            continue;
+        }
+
         active_before[i] = 1;
         cut->previous_frame = instance->current_frame;
         cut->field_58 += FRAMETIME;
@@ -296,57 +366,69 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
             cutaudiopaused = 0;
         }
 
-        instance->rate = cut->frames_per_second * FRAMETIME;
-        ++ACTIVECUTCOUNT;
-        if ((cut->flags & 1) != 0) {
-            CUTSTOPGAME = 1;
-            CutStopInfo = cut;
-            stop_index = i;
-        }
-        if ((cut->flags & 2) != 0) {
-            CUTDRAWWORLD = 1;
-        }
-    }
+        if (i == stop_index || stop_index == -1) {
+            bool waiting_for_audio = false;
+            if (NOSOUND == 0 && NOMUSIC == 0 && i == stop_index && cut->music_handle != -1 && instance->rate == 0.0f &&
+                cutaudiopaused != 0 && music_man.GetStatus(TRACK_CLASS_CUTSCENE, NULL) != 4) {
+                instance->rate = 0.0f;
+                CutSceneWaiting = 1;
+                waiting_for_audio = true;
+            }
 
-    for (i32 i = 0; i < system->count; ++i) {
-        if (active_before[i] == 0) {
-            continue;
-        }
-        CUTINFO *cut = system->cuts[i];
-        instNUGCUTSCENE_s *instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
-        if (stop_index != -1 && i != stop_index) {
+            if (!waiting_for_audio) {
+                i32 music_status = music_man.GetStatus(TRACK_CLASS_CUTSCENE, NULL);
+                if (instance->current_frame == 1.0f && cut->music_handle != -1 && music_status != 4) {
+                    music_man.PlayTrack(TRACK_CLASS_CUTSCENE, 0);
+                } else if (music_status == 4) {
+                    if (g_lastCutInfo != cut) {
+                        g_accumCutsceneTime += g_lastCutsceneTime;
+                        g_lastCutsceneTime =
+                            static_cast<NUGCUTSCENE_s *>(cut->scene)->duration / cut->frames_per_second;
+                        g_lastCutInfo = cut;
+                    }
+                    f32 audio_frame = (music_man.GetPlaybackTime(TRACK_CLASS_CUTSCENE) - g_accumCutsceneTime) *
+                                      cut->frames_per_second;
+                    if (audio_frame < 0.0f) {
+                        audio_frame = 0.0f;
+                    }
+                    f32 rate = audio_frame - (instance->current_frame - 1.0f);
+                    instance->rate = rate < 0.0f ? 0.0f : rate;
+                } else {
+                    instance->rate = cut->frames_per_second * FRAMETIME;
+                }
+
+                if (i == stop_index && CutSceneWaiting != 0) {
+                    CutSceneWaiting = 0;
+                    cutaudiopaused = 0;
+                }
+            }
+
+            instNuGCutScenePause(instance, 0);
+            if (CutScene_PreUpdateFn != NULL) {
+                CutScene_PreUpdateFn(cut);
+            }
+            for (CUTSCENETEXANIM &animation : cut->texture_animations) {
+                if (animation.index != -1) {
+                    const u32 bit = 1U << (animation.index & 0x1f);
+                    if ((texanimbits & bit) == 0 && animation.frame <= instance->current_frame) {
+                        texanimbits |= bit;
+                    }
+                }
+            }
+        } else {
             instance->rate = 0.0f;
             instNuGCutScenePause(instance, 1);
-            continue;
         }
+        ++ACTIVECUTCOUNT;
+    }
 
-        if (i == stop_index && NOSOUND == 0 && NOMUSIC == 0) {
-            i32 music_status = music_man.GetStatus(TRACK_CLASS_CUTSCENE, NULL);
-            if (instance->current_frame == 0.0f && cut->music_handle != -1 && music_status != 4) {
-                music_man.PlayTrack(TRACK_CLASS_CUTSCENE, 0);
-            } else if (music_status == 4) {
-                if (g_lastCutInfo != cut) {
-                    g_accumCutsceneTime += g_lastCutsceneTime;
-                    g_lastCutInfo = cut;
-                    NUGCUTSCENE_s *scene = static_cast<NUGCUTSCENE_s *>(cut->scene);
-                    g_lastCutsceneTime = scene->duration / cut->frames_per_second;
-                }
-                f32 audio_frame =
-                    (music_man.GetPlaybackTime(TRACK_CLASS_CUTSCENE) - g_accumCutsceneTime) * cut->frames_per_second;
-                if (audio_frame < 0.0f) {
-                    audio_frame = 0.0f;
-                }
-                f32 rate = audio_frame - (instance->current_frame - 1.0f);
-                instance->rate = rate > 0.0f ? rate : 0.0f;
-            }
-            if (CutSceneWaiting != 0) {
-                CutSceneWaiting = 0;
-                cutaudiopaused = 0;
-            }
-        }
-        instNuGCutScenePause(instance, 0);
+    if (g_isLowEndDevice != 0 && ACTIVECUTCOUNT > 0) {
+        drawcharactermodel_nobsa = 0;
     }
     NuGCutSceneSysUpdate(paused, 0, 1.0f);
+    if (CutScene_PostUpdateFn != NULL) {
+        CutScene_PostUpdateFn();
+    }
 
     if (paused == 0) {
         for (i32 i = 0; i < system->count; ++i) {
@@ -359,7 +441,8 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
                 continue;
             }
             for (CUTSCENESFX &sfx : cut->sfx) {
-                if (sfx.id != -1 && sfx.frame > cut->previous_frame && sfx.frame <= instance->current_frame) {
+                if (sfx.id != -1 && cut->previous_frame <= sfx.frame && sfx.frame != cut->previous_frame &&
+                    sfx.frame <= instance->current_frame) {
                     PlaySfxById(sfx.id, (sfx.flags & 1) != 0 ? &sfx.position : NULL);
                 }
             }
@@ -371,21 +454,14 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
             continue;
         }
         instNUGCUTSCENE_s *instance = reinterpret_cast<instNUGCUTSCENE_s *>(cut->instance);
-        if (i != stop_index && instNuGCutSceneIsFinished(instance) != 0 && CutInstEndCount < 4) {
+        if ((i != stop_index || stop_index == -1) && instNuGCutSceneIsFinished(instance) != 0) {
             if (CutScene_StoppedFn != NULL) {
                 CutScene_StoppedFn(cut);
             }
-            if (cut->skip_level != -1) {
-                NewLData = &LDataList[cut->skip_level];
+            if (CutInstEndCount < 4) {
+                CutInstEnd[CutInstEndCount++] = instance;
+                instance->flags_88 |= 2;
             }
-            if ((cut->flags & 1) != 0) {
-                CutInstEndStop = CutInstEndCount;
-                FADETYPE fade_type;
-                fade_type.type = FADE_TYPE_STILL_WIPE;
-                FadeSys.SetFade(fade_type, 0);
-            }
-            CutInstEnd[CutInstEndCount++] = instance;
-            instance->flags_88 |= 2;
         }
     }
     if (stop_index == -1) {
@@ -394,14 +470,22 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
 
     CUTINFO *stop_cut = system->cuts[stop_index];
     instNUGCUTSCENE_s *stop_instance = static_cast<instNUGCUTSCENE_s *>(stop_cut->instance);
+    GameFog_Reset();
     if (instNuGCutSceneIsFinished(stop_instance) == 0) {
         return;
     }
-    FADETYPE fade_type;
-    fade_type.type = FADE_TYPE_STILL_WIPE;
-    FadeSys.SetFade(fade_type, 0);
+    if (NewLData == NULL || NewLData == WORLD->current_level || NewLData != HUB_LDATA) {
+        FADETYPE fade_type;
+        fade_type.type = FADE_TYPE_STILL_WIPE;
+        FadeSys.SetFade(fade_type, 0);
+    }
     if (CutScene_StoppedFn != NULL) {
         CutScene_StoppedFn(stop_cut);
+    }
+    for (CUTSCENETEXANIM &animation : stop_cut->texture_animations) {
+        if (animation.index != -1) {
+            texanimbits &= ~(1U << (animation.index & 0x1f));
+        }
     }
 
     if (stop_cut->skip_level == -1) {
@@ -409,10 +493,30 @@ void CutScenes_Update(WORLDINFO_s *world, i32 paused) {
         if (CutScenePlayer_Active() != 0 && next == NULL) {
             NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
             hub_from_cutsceneplayer = 1;
+        } else if ((stop_cut->flags & 0x400) != 0) {
+            NewMode = 1;
+        } else if (stop_cut->door_name[0] != '\0') {
+            DOOR_s *door = Door_FindByName(world, stop_cut->door_name);
+            if (door != NULL) {
+                Door_GoThrough(world, door, 1);
+            }
+        } else if ((stop_cut->flags & 0x100) != 0) {
+            FADETYPE fade_type;
+            fade_type.type = FADE_TYPE_STILL_WIPE;
+            FadeSys.SetFade(fade_type, 0);
+            NeedScreenGrab(1);
+            FadeSys.SetStage(1);
+            GameAudio_PlaySfx(0x2d, NULL, 0, 0);
         }
     } else {
         NewLData = &LDataList[stop_cut->skip_level];
-        if (NewLData == HUB_LDATA && CutScenePlayer_Active() != 0) {
+        if (NewLData == HUB_LDATA && CutScenePlayer_Active() == 0) {
+            if (WORLD->area != NULL && (WORLD->area->flags & 2) != 0) {
+                NewLData = SuperStory == 0 ? CREDITS_LDATA : STATUS_LDATA;
+            }
+        } else if (CutScenePlayer_Active() != 0 &&
+                   ((NewLData->flags & (LEVEL_OUTRO | LEVEL_MIDTRO | LEVEL_INTRO)) == 0 &&
+                    (stop_cut->end_flags & 2) == 0)) {
             NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
             hub_from_cutsceneplayer = 1;
         }

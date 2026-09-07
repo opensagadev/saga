@@ -447,8 +447,9 @@ void NuVoiceAndroid::ApplyHardwareVoiceMix() {
         // Mono sources are panned through the stereo position interface from
         // the eight positional gains.
         f32 stereo_gains[64] = {0};
-        NuSoundMixer mixer(static_cast<NuSoundSystem::ChannelConfig>(1), static_cast<NuSoundSystem::ChannelConfig>(2),
-                           static_cast<NuSoundMixer::OutputLayout>(1), this->field15_0x38, this->field16_0x3c);
+        NuSoundMixer mixer((NuSoundSystem::ChannelConfig){1}, (NuSoundSystem::ChannelConfig){2},
+                           (NuSoundMixer::OutputLayout){1}, (NuSoundSystem::DownmixType)this->downmixer_type,
+                           this->routing_table);
         mixer.Mix(this->mix_gains, stereo_gains);
 
         f32 maximum = stereo_gains[0] > stereo_gains[1] ? stereo_gains[0] : stereo_gains[1];

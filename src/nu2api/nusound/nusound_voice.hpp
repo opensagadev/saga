@@ -56,23 +56,31 @@ class NuSoundVoice : public NuSoundBufferCallback {
     NuSoundVoice *field_0x24;
     NuSoundVoice *field_0x28;
 
-    // +0x2c sound source; +0x30/0x31 the flags/flags2 bytes.
+    // +0x2c sound source; +0x30 owns the lifetime/loop flags.  The playback
+    // pause/mix-update flags are a separate byte at +0x119.
     NuSoundSource *sound_source;
-    u8 flags;  // low nybble: pause counter; bit3: request loop; bit4: mix update
     u8 flags2; // bit0: auto delete; bit1: last buffer queued; bit2: stop effects
                // running; bit3: looping (from the CreateVoice loop argument)
+    u8 padding_0x31[3];
 
     u32 surround_mode;
-    NuSoundSystem::DownmixType field15_0x38;
-    NuSoundRoutingTable *field16_0x3c;
+    u32 downmixer_type;
+    NuSoundRoutingTable *routing_table;
 
     // Effects list (elist nodes at +0x40..+0x48).
-    NuList<NuSoundEffect *> effects;
+    NuEListNode<NuSoundEffect> *effects_start;
+    NuEListNode<NuSoundEffect> *effects_end;
+    NuEListNode<NuSoundEffect> *effects_tail;
+
+    u32 field20_0x4c;
+    u32 field21_0x50;
+    u32 field22_0x54;
+    u32 field23_0x58;
 
     // +0x5c..0x7c: the eight output channel gains (the positional mix).
     f32 mix_gains[8];
 
-    void *field56_0x7c;
+    f32 *custom_surround_mix;
 
     NuSoundEffect::ManagedReference positional_references[2];
 
@@ -83,29 +91,29 @@ class NuSoundVoice : public NuSoundBufferCallback {
     f32 field67_0xa8; // final mix scalar fed to the hardware volume
     f32 field68_0xac; // pitch scale
 
-    f32 field69_0xb0; // 20.0
-    f32 field70_0xb4; // 180.0
-    f32 field71_0xb8; // 70.0
-    f32 field72_0xbc;
-    f32 field73_0xc0;
-    f32 field74_0xc4; // 1.0
+    f32 field69_0xb0; // speaker field minimum, 20.0
+    f32 field70_0xb4; // speaker field maximum, 180.0
+    f32 field71_0xb8; // speaker bleed angle, 70.0
+    f32 field72_0xbc; // speaker bleed near
+    f32 field73_0xc0; // speaker bleed far
+    f32 field74_0xc4; // penetration, 1.0
 
-    VuVec position;
-    VuVec direction;
-    VuVec velocity;
-    f32 pitch;  // +0xf8
-    f32 volume; // +0xfc
-    f32 falloff_a; // +0x100
-    f32 falloff_b; // +0x104
+    VuVec position;  // +0xc8
+    VuVec direction; // +0xd8
+    VuVec velocity;  // +0xe8
+
+    f32 pitch;        // +0xf8 (SetPitch rejects negative values)
+    f32 volume;       // +0xfc (SetVolume rejects values outside 0..1)
+    f32 falloff_a;    // +0x100, near distance; defaults to 1.0
+    f32 falloff_b;    // +0x104, far distance; defaults to 6.0
     u32 falloff_type; // +0x108
 
     f32 field113_0x10c; // LFE gain
-    f32 field114_0x110;
-    u32 field115_0x114; // 1
-    u8 control_118;
-    u8 mix_flags;
-    u8 control_11a;
-    u8 control_11b;
+    f32 start_offset;   // +0x110
+    u32 output_devices; // +0x114, defaults to device bit 0
+    u8 controller_bits; // +0x118
+    u8 flags;           // +0x119: low nybble pause counter; bit4 requests a mix update
+    u8 padding_0x11a[2];
 
     NuSoundBus *output_bus; // +0x11c, defaults to NuSoundSystem::sMasterBus
 
@@ -115,7 +123,8 @@ class NuSoundVoice : public NuSoundBufferCallback {
     u32 handle_count;
     NuEList<NuSoundListener, DefaultElist> const *listeners;
 
-    PlayState state; // +0x140, guarded by sStateCriticalSection
+    NuEList<NuSoundListener, DefaultElist> const *listeners; // +0x13c
+    PlayState state;                                         // +0x140, guarded by sStateCriticalSection
     f32 field130_0x144;
     i32 field131_0x148; // -1
 
@@ -170,7 +179,7 @@ class NuSoundVoice : public NuSoundBufferCallback {
     virtual void ApplyHardwareVoiceMix() = 0;            // vtable +0x34
 
     // Remaining original surface (off the title music path; kept as stubs).
-    bool AddEffect(NuSoundEffect *effect);
+    void AddEffect(NuSoundEffect *effect);
     f32 CalculateFalloffAttenuation(f32 distance);
     f32 CalculateFieldAngle(f32 distance);
     void CalculatePositionalCoefficients(f32 *gains, VuVec const &position, VuMtx const &mtx, f32 falloff_a,
@@ -222,11 +231,9 @@ class NuSoundVoice : public NuSoundBufferCallback {
     void SetListeners(NuEList<NuSoundListener, DefaultElist> const *listeners);
     void SetSurroundMode(NuSoundSystem::SurroundMode mode);
     void SetVelocity(VuVec const &velocity);
-
-  protected:
-    // The 3D positional state; only the surround_mode == 2 (2D omni) path is
-    // exercised by the title music.
 };
+
+DECOMP_ASSERT(sizeof(NuSoundVoice) == 0x14c, "NuSoundVoice size");
 
 class NuVoiceAndroid : public NuSoundVoice {
   public:

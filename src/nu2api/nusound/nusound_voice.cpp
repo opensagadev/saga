@@ -37,6 +37,8 @@ NuSoundVoice::NuSoundVoice(NuSoundSource *sound_source, bool loop) {
     this->effects_end = NULL;
     this->effects_tail = NULL;
     this->field20_0x4c = 0;
+    this->field21_0x50 = 0;
+    this->field22_0x54 = 0;
     this->field23_0x58 = 0;
     this->field57_0x80 = NULL;
     this->field58_0x84 = NULL;
@@ -66,8 +68,8 @@ NuSoundVoice::NuSoundVoice(NuSoundSource *sound_source, bool loop) {
     this->field66_0xa4 = 0.0f;
     this->field67_0xa8 = 1.0f; // final mix scalar
     this->field68_0xac = 1.0f; // pitch scale
-    this->volume = 1.0f;
     this->pitch = 1.0f;
+    this->volume = 1.0f;
     this->falloff_a = 1.0f;
     this->falloff_b = 6.0f;
     this->field69_0xb0 = 20.0f;
@@ -76,19 +78,19 @@ NuSoundVoice::NuSoundVoice(NuSoundSource *sound_source, bool loop) {
     this->field72_0xbc = 0.0f;
     this->field73_0xc0 = 0.0f;
     this->field74_0xc4 = 1.0f;
-    this->field113_0x10c = 1.0f; // LFE gain
-    this->field114_0x110 = 0;
-    this->field115_0x114 = 1;
-    this->control_118 = 0;
-    this->output_bus = NuSoundSystem::sMasterBus;
-    this->field15_0x38 = static_cast<NuSoundSystem::DownmixType>(0);
-    this->field16_0x3c = NuSoundSystem::GetDefaultRoutingTable();
-    this->listeners = NULL;
-    this->field56_0x7c = NULL;
-    this->surround_mode = 2; // 2D omni
     this->falloff_type = 0;
+    this->field113_0x10c = 1.0f; // LFE gain
+    this->start_offset = 0.0f;
+    this->output_devices = 1;
+    this->controller_bits = 0;
+    this->output_bus = NuSoundSystem::sMasterBus;
+    this->downmixer_type = 0;
+    this->routing_table = NuSoundSystem::sDefaultRoutingTable;
+    this->surround_mode = 2; // 2D omni
+    this->listeners = NULL;
     this->field130_0x144 = 1.0f;
     this->field131_0x148 = -1;
+    this->custom_surround_mix = NULL;
 
     this->flags = (u8)(this->flags & 0xf6 | loop << 3);
     this->flags &= 0xf9;
@@ -593,47 +595,31 @@ f32 NuSoundVoice::CalculateFalloffAttenuation(f32 distance) {
     return 1.0f;
 }
 
-f32 NuSoundVoice::CalculateFieldAngle(f32 distance) {
-    f32 angle = field69_0xb0;
-    if (field73_0xc0 > distance) {
-        if (field72_0xbc > distance) return field70_0xb4;
-        f32 scale = (field73_0xc0 - distance) / (field73_0xc0 - field72_0xbc);
-        angle += scale * (field70_0xb4 - angle);
+f32 NuSoundVoice::CalculateFalloffAttenuation(f32 distance) {
+    if (distance <= this->falloff_a) {
+        return 1.0f;
     }
-    return angle;
+
+    if (this->falloff_type == 0) {
+        return (this->falloff_b - distance) / (this->falloff_b - this->falloff_a);
+    }
+    if (this->falloff_type == 1) {
+        f32 ratio = (this->falloff_b - distance) / (this->falloff_b - this->falloff_a);
+        f32 scale = (1.0f - ratio) * 10.0f + 1.0f;
+        return 1.0f / (scale * scale);
+    }
+    return 1.0f;
 }
 
-void NuSoundVoice::CalculatePositionalCoefficients(f32 *gains, VuVec const &position,
-                                                VuMtx const &mtx, f32 inner_angle, f32 outer_angle) {
-    NUVEC local;
-    NuVecInvMtxTransform(&local, (NUVEC *)&position, (numtx_s *)&mtx);
-    f32 angle = NuFmod(NuATan2f(local.x, local.z) * 180.0f / 3.1415927410125732f, 360.0f);
-    outer_angle *= 0.5f;
-    f32 outer_left = NuFmod(angle - outer_angle, 360.0f);
-    f32 outer_right = NuFmod(angle + outer_angle, 360.0f);
-    inner_angle *= 0.5f;
-    f32 inner_left = NuFmod(angle - inner_angle, 360.0f);
-    f32 inner_right = NuFmod(angle + inner_angle, 360.0f);
-    // The reference visits both wrapped representations before the positive
-    // center endpoint. Existing nonzero gains are preserved; LFE is untouched.
-    const f32 speaker_angles[] = {-360, -330, -270, -210, -150, -90, -30,
-                                   0,   30,   90,  150,  210, 270, 330, 360};
-    const u32 channels[] = {2, 1, 5, 7, 6, 4, 0, 2, 1, 5, 7, 6, 4, 0, 2};
-    for (u32 i = 0; i < 15; ++i) {
-        f32 speaker = speaker_angles[i];
-        u32 channel = channels[i];
-        if (gains[channel] == 0.0f && speaker > outer_left && outer_right > speaker) {
-            if (speaker > inner_left && inner_right > speaker) {
-                gains[channel] = 1.0f;
-            } else {
-                bool left = speaker - angle < 0.0f;
-                f32 outer = left ? outer_left : outer_right;
-                f32 inner = left ? inner_left : inner_right;
-                f32 gain = fabsf((outer - speaker) / (outer - inner));
-                gains[channel] = gain < 1.0f ? gain : 1.0f;
-            }
-        }
+f32 NuSoundVoice::CalculateFieldAngle(f32 distance) {
+    if (distance < this->field72_0xbc) {
+        return this->field70_0xb4;
     }
+    if (distance < this->field73_0xc0) {
+        return this->field69_0xb0 + ((this->field73_0xc0 - distance) / (this->field73_0xc0 - this->field72_0xbc)) *
+                                        (this->field70_0xb4 - this->field69_0xb0);
+    }
+    return this->field69_0xb0;
 }
 
 i32 NuSoundVoice::GetControllerBits() const {
@@ -784,55 +770,53 @@ void NuSoundVoice::RemoveEffect(NuSoundEffect *effect) {
     NuSoundSystem::sAllocdMemory[0] -= sizeof(NuListNode<NuSoundEffect *>);
 }
 
-
-
 void NuSoundVoice::SetControllerBits(i32 bits) {
-    control_118 = static_cast<u8>(bits);
+    this->controller_bits = (u8)bits;
 }
 
-void NuSoundVoice::SetCustomSurroundMix(f32 *) {
+void NuSoundVoice::SetCustomSurroundMix(f32 *mix) {
+    this->custom_surround_mix = mix;
 }
 
 void NuSoundVoice::SetDirection(VuVec *value) {
     if (value != NULL) {
-        direction.x = value->x;
-        direction.y = value->y;
-        direction.z = value->z;
-        direction.w = value->w;
-        NuVecNorm(reinterpret_cast<NUVEC *>(&direction), reinterpret_cast<NUVEC *>(&direction));
+        this->direction = *value;
+        NuVecNorm(reinterpret_cast<NUVEC *>(&this->direction), reinterpret_cast<NUVEC *>(&this->direction));
     }
 }
 
 void NuSoundVoice::SetDownmixerType(NuSoundSystem::DownmixType type) {
-    field15_0x38 = type;
+    this->downmixer_type = (u32)type;
 }
 
-void NuSoundVoice::SetFalloff(f32 near, f32 far, NuSoundSystem::FalloffType type) {
-    if (near >= 0.0f && far > near) {
-        falloff_a = near;
-        falloff_b = far;
-        falloff_type = static_cast<u32>(type);
+void NuSoundVoice::SetFalloff(f32 near_distance, f32 far_distance, NuSoundSystem::FalloffType type) {
+    if (near_distance >= 0.0f && far_distance > near_distance) {
+        this->falloff_a = near_distance;
+        this->falloff_b = far_distance;
+        this->falloff_type = (u32)type;
     }
 }
 
 void NuSoundVoice::SetLowFrequencyMix(f32 mix) {
-    field113_0x10c = mix;
+    this->field113_0x10c = mix;
 }
 
 void NuSoundVoice::SetOutputBus(NuSoundBus *bus) {
-    output_bus = bus == NULL ? NuSoundSystem::sMasterBus : bus;
+    this->output_bus = bus != NULL ? bus : NuSoundSystem::sMasterBus;
 }
 
 void NuSoundVoice::SetOutputDevices(i32 devices) {
-    field115_0x114 = devices;
+    this->output_devices = (u32)devices;
 }
 
 void NuSoundVoice::SetPenetration(f32 penetration) {
-    field74_0xc4 = penetration;
+    this->field74_0xc4 = penetration;
 }
 
 void NuSoundVoice::SetPosition(VuVec *value) {
-    if (value != NULL) position = *value;
+    if (value != NULL) {
+        this->position = *value;
+    }
 }
 
 void NuSoundVoice::SetReverbWetMix(f32 mix) {
@@ -840,43 +824,40 @@ void NuSoundVoice::SetReverbWetMix(f32 mix) {
 }
 
 void NuSoundVoice::SetRoutingTable(NuSoundRoutingTable *table) {
-    field16_0x3c = table;
+    this->routing_table = table;
 }
 
 void NuSoundVoice::SetSpeakerBleedAngle(f32 angle) {
-    field71_0xb8 = angle;
+    this->field71_0xb8 = angle;
 }
 
 void NuSoundVoice::SetSpeakerBleedFar(f32 distance) {
-    field73_0xc0 = distance;
+    this->field73_0xc0 = distance;
 }
 
 void NuSoundVoice::SetSpeakerBleedNear(f32 distance) {
-    field72_0xbc = distance;
+    this->field72_0xbc = distance;
 }
 
 void NuSoundVoice::SetSpeakerFieldAngle(f32 minimum, f32 maximum) {
-    field69_0xb0 = minimum;
-    field70_0xb4 = maximum;
+    this->field69_0xb0 = minimum;
+    this->field70_0xb4 = maximum;
 }
 
 void NuSoundVoice::SetStartOffset(f32 offset) {
-    field114_0x110 = offset;
+    this->start_offset = offset;
 }
 
 void NuSoundVoice::SetListeners(NuEList<NuSoundListener, DefaultElist> const *value) {
-    listeners = value;
+    this->listeners = value;
 }
 
-void NuSoundVoice::SetSurroundMode(NuSoundSystem::SurroundMode value) {
-    surround_mode = static_cast<u32>(value);
+void NuSoundVoice::SetSurroundMode(NuSoundSystem::SurroundMode mode) {
+    this->surround_mode = (u32)mode;
 }
 
 void NuSoundVoice::SetVelocity(VuVec const &value) {
-    velocity.x = value.x;
-    velocity.y = value.y;
-    velocity.z = value.z;
-    velocity.w = value.w;
+    this->velocity = value;
 }
 
 void NuSoundVoice::UnregisterHandle(NuSoundHandle *) {

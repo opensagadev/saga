@@ -381,9 +381,9 @@ class NuSoundSystem {
 
     enum class AudioChannel : u32 {};
     struct CurveData {};
-    enum class DownmixType : u32 {};
-    enum class FalloffType { LINEAR = 0 };
-    enum class SurroundMode { ZERO = 0 };
+    enum class DownmixType : u32 { ZERO = 0 };
+    enum class FalloffType : u32 { LINEAR = 0, CURVED = 1 };
+    enum class SurroundMode : u32 { ZERO = 0, ONE = 1, TWO = 2, THREE = 3, CUSTOM = 4 };
 
     // "wav", "adp", "ima", "caf", "xma", "ogg",  "dsp", "msf", "vag", "gcm", "wua", "cbx"
     enum class FileType : u32 {
@@ -571,7 +571,7 @@ class NuSoundSystem {
     NuSoundListener *GetNearestRealListener(NuEList<NuSoundListener, DefaultElist> const &, VuVec const &);
     NuSoundListener *GetNearestFocusListener(NuEList<NuSoundListener, DefaultElist> const &, VuVec const &, float &);
     NuSoundVoice *GetOldestVoice(NuSoundSample *, float &);
-    void GetOutputChannelConfig();
+    i32 GetOutputChannelConfig();
     void GetPeakAllocdMemory(NuSoundSystem::MemoryDiscipline);
     static const char *GetPlatformString();
     NuSoundVoice *GetQuietestVoice(NuSoundSample *, float &);
