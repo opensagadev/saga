@@ -12,8 +12,12 @@
 
 // libTTapp.so 0x32e630: the OGG decoder extends the base decoder with the
 // streaming reader subobject and a 0x2b000-byte ring buffer size.
-NuSoundDecoderOGG::NuSoundDecoderOGG(char const *name, NuSoundSource *wrapped)
-    : NuSoundDecoder(name, wrapped), field_0x108(0) {
+NuSoundDecoderOGG::NuSoundDecoderOGG(char const *name, NuSoundSource *wrapped) : NuSoundDecoder(name, wrapped) {
+    this->field_0x108 = 0;
+
+    new (&this->read_callbacks) OGGReadCallbacksDecoder();
+
+    this->ring_read_pos = 0;
     this->ring_write_pos = 0;
     this->ring_read_pos = 0;
     this->read_callbacks.SetDecoder(this);

@@ -47,10 +47,9 @@ class NuSoundVoice : public NuSoundBufferCallback {
         PLAYSTATE_PLAYING = 3,
     };
 
-    // Weak-reference bookkeeping (the original embedded NuSoundWeakPtrObj at
-    // the start of the voice). queued_buffers counts buffers handed to the
-    // hardware but not yet consumed; Play() refuses to double-start while it
-    // is non-zero.
+    // The NuSoundBufferCallback base supplies the weak-reference bookkeeping
+    // at +0x00..+0x1f. queued_buffers counts buffers handed to the hardware
+    // but not yet consumed.
     u32 queued_buffers;
 
     // System intrusive list links.

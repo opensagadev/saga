@@ -2,13 +2,13 @@
 
 #include "nu2api/nucore/android/NuThread_android.h"
 #include "nu2api/nucore/nuthread.h"
+#include "nu2api/nusound/nusound_buffer.hpp"
 #include "nu2api/nusound/nusound_source.hpp"
 #include "nu2api/nusound/nusound_buffer.hpp"
 #include "nu2api/nusound/nusound_weakptr.hpp"
 
 #include <pthread.h>
 
-class NuSoundBuffer;
 class NuSoundBufferCallback;
 class NuSoundDecodeThread;
 class NuSoundStreamDesc;
@@ -27,8 +27,10 @@ class NuSoundDecoder : public NuSoundSource {
     NuSoundSource *GetEncodedSource() override { return source; }
 
     void CloseStream();
+    const char *GetName() const override;
+    NuSoundSource *GetEncodedSource() override;
     static void Initialise();
-    bool IsLocked() const;
+    bool IsLocked() const override;
     bool IsStreamOpen() const override;
     void Lock();
     bool OpenStream(bool loop) override;
@@ -50,28 +52,30 @@ class NuSoundDecoder : public NuSoundSource {
     // to two ring buffers upfront in OpenStream; further chunks are decoded
     // through the decode thread as the voice consumes them.
     virtual u64 Decode(NuSoundSource &source, NuSoundBuffer &buffer, bool loop) = 0;
-    virtual void Reset(); // original vtable slot +0x40, after Decode
+    virtual void Reset();
 
   protected:
-    NuSoundSource *source;     // wrapped source
-    NuSoundBuffer buffers[2];  // +0x24, +0x64: embedded ring buffers
-    i32 buffer_size;           // bytes per ring buffer
-    i32 ring_count;            // buffers filled so far
-    i32 decode_pos;            // next buffer index to decode
-    i32 consumed_pos;          // next buffer index to hand out
+    NuSoundSource *source;    // +0x20: wrapped source
+    NuSoundBuffer buffers[2]; // +0x24: two inline 0x40-byte ring buffers
+    u32 buffer_size;           // bytes per ring buffer
+    u32 ring_count;            // buffers filled so far
+    u32 decode_pos;            // next buffer index to decode
+    u32 consumed_pos;          // next buffer index to hand out
     u32 buffers_started;
     u64 decoded_bytes; // bytes decoded since stream start
     u32 field_0xc0;
     u32 field_0xc4;
-    u64 total_decoded_bytes;
+    u64 total_decoded_bytes;     // +0xc8
     u32 field_0xd0;
-    u32 field_0xd4;
+    i32 field_0xd4;               // atomic count of queued decode requests
     bool stream_open;             // +0xd8
     bool closing;                 // +0xd9
+    u8 padding_0xda[2];
     pthread_mutex_t decode_mutex; // +0xdc: decode-completion sync pair
     pthread_cond_t decode_cond;   // +0xe0
     bool decode_done;             // +0xe4
-    bool field_0xe5;
+    bool decode_broadcast;        // +0xe5: manual-reset/broadcast mode
+    u8 padding_0xe6[2];
 };
 
 // libTTapp.so: the async decode worker. RequestDecode parks a 0x1c-byte

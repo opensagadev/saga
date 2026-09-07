@@ -33,18 +33,24 @@ static_assert(sizeof(void *) != 4 || offsetof(NuVoiceAndroid, player_object) == 
 NuSoundVoice::NuSoundVoice(NuSoundSource *sound_source, bool loop) {
     this->field_0x24 = NULL;
     this->field_0x28 = NULL;
-    for (u32 i = 0; i < 2; ++i) {
-        positional_references[i].object = NULL;
-        positional_references[i].next = NULL;
-        positional_references[i].previous = NULL;
-    }
-    handles_head = reinterpret_cast<NuSoundHandle *>(&handles_start);
-    handles_tail = reinterpret_cast<NuSoundHandle *>(&handles_end);
-    handles_start.previous = NULL;
-    handles_start.next = handles_tail;
-    handles_end.previous = handles_head;
-    handles_end.next = NULL;
-    handle_count = 0;
+    this->effects_start = NULL;
+    this->effects_end = NULL;
+    this->effects_tail = NULL;
+    this->field20_0x4c = 0;
+    this->field23_0x58 = 0;
+    this->field57_0x80 = NULL;
+    this->field58_0x84 = NULL;
+    this->field59_0x88 = NULL;
+    this->field60_0x8c = NULL;
+    this->field61_0x90 = NULL;
+    this->field62_0x94 = NULL;
+    this->field121_0x120 = NULL;
+    this->field122_0x124 = NULL;
+    this->field123_0x128 = NULL;
+    this->field124_0x12c = NULL;
+    this->field125_0x130 = NULL;
+    this->field126_0x134 = NULL;
+    this->field127_0x138 = 0;
     this->queued_buffers = 0;
 
     // The source is locked for the lifetime of the voice and keeps the stream

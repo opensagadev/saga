@@ -27,39 +27,36 @@ struct NuSoundWeakPtrListNode {
 
 template <typename T> class NuSoundWeakPtrObj {
   public:
-    struct Links { NuSoundWeakPtrListNode *prev; NuSoundWeakPtrListNode *next; } start, end;
-
+    // The original object is also the list's head sentinel.  The second
+    // sentinel begins eight bytes into the object; the two cached pointers
+    // at +0x14/+0x18 address those sentinels.
+    NuSoundWeakPtrListNode *head_sentinel_prev;
+    NuSoundWeakPtrListNode *head_sentinel_next;
+    NuSoundWeakPtrListNode *tail_sentinel_prev;
+    NuSoundWeakPtrListNode *tail_sentinel_next;
     NuSoundWeakPtrListNode *head;
     NuSoundWeakPtrListNode *tail;
     i32 weak_count;
 
   public:
-    static Links *GetLinks(NuSoundWeakPtrListNode *node) {
-        return node != NULL
-                   ? reinterpret_cast<Links *>(reinterpret_cast<char *>(node) + sizeof(void *))
-                   : NULL;
-    }
-
     NuSoundWeakPtrObj() {
-        head = reinterpret_cast<NuSoundWeakPtrListNode *>(reinterpret_cast<char *>(&start) - sizeof(void *));
-        tail = reinterpret_cast<NuSoundWeakPtrListNode *>(reinterpret_cast<char *>(&end) - sizeof(void *));
-        start.prev = NULL;
-        start.next = tail;
-        end.prev = head;
-        end.next = NULL;
-        weak_count = 0;
+        this->head_sentinel_prev = NULL;
+        this->head_sentinel_next = (NuSoundWeakPtrListNode *)((u8 *)this + 8);
+        this->tail_sentinel_prev = (NuSoundWeakPtrListNode *)this;
+        this->tail_sentinel_next = NULL;
+        this->head = (NuSoundWeakPtrListNode *)this;
+        this->tail = (NuSoundWeakPtrListNode *)((u8 *)this + 8);
+        this->weak_count = 0;
     }
 
     void Link(NuSoundWeakPtrListNode *node) {
         NuSoundWeakPtrListNode::sPtrListLock.Lock();
 
-        NuSoundWeakPtrListNode *insertion_point = tail;
-        Links *tail_links = GetLinks(insertion_point);
-        NuSoundWeakPtrListNode *previous = tail_links->prev;
-        tail_links->prev = node;
-        node->prev = previous;
-        GetLinks(previous)->next = node;
-        node->next = insertion_point;
+        // libTTapp.so 0x315320: insert immediately before the tail sentinel.
+        node->prev = this->tail->prev;
+        node->next = this->tail;
+        this->tail->prev->next = node;
+        this->tail->prev = node;
         this->weak_count++;
 
         NuSoundWeakPtrListNode::sPtrListLock.Unlock();
@@ -68,22 +65,35 @@ template <typename T> class NuSoundWeakPtrObj {
     void Unlink(NuSoundWeakPtrListNode *node) {
         NuSoundWeakPtrListNode::sPtrListLock.Lock();
 
-        if (node->next != NULL || node->prev != NULL) {
-            --this->weak_count;
-            if (node->prev != NULL) {
-                GetLinks(node->prev)->next = node->next;
-            }
-            if (node->next != NULL) {
-                GetLinks(node->next)->prev = node->prev;
-            }
-            node->next = NULL;
-            node->prev = NULL;
-        }
+        node->prev->next = node->next;
+        node->next->prev = node->prev;
+
+        this->weak_count--;
+
+        node->prev = NULL;
+        node->next = NULL;
 
         NuSoundWeakPtrListNode::sPtrListLock.Unlock();
     }
 
-    virtual ~NuSoundWeakPtrObj();
+    virtual ~NuSoundWeakPtrObj() {
+        NuSoundWeakPtrListNode::sPtrListLock.Lock();
+
+        NuSoundWeakPtrListNode *node = this->head->next;
+        while (node != this->tail) {
+            NuSoundWeakPtrListNode *next = node->next;
+            node->Clear();
+            node->prev = NULL;
+            node->next = NULL;
+            node = next;
+        }
+
+        this->head->next = this->tail;
+        this->tail->prev = this->head;
+        this->weak_count = 0;
+
+        NuSoundWeakPtrListNode::sPtrListLock.Unlock();
+    }
 };
 
 template <typename T> class NuSoundWeakPtr : public NuSoundWeakPtrListNode {
@@ -110,6 +120,15 @@ template <typename T> class NuSoundWeakPtr : public NuSoundWeakPtrListNode {
 
     NuSoundWeakPtr &operator=(const NuSoundWeakPtr &other) {
         this->Set((T *)other.obj);
+        return *this;
+    }
+
+    NuSoundWeakPtr(const NuSoundWeakPtr &other) : obj(NULL) {
+        Set((T *)other.obj);
+    }
+
+    NuSoundWeakPtr &operator=(const NuSoundWeakPtr &other) {
+        Set((T *)other.obj);
         return *this;
     }
 

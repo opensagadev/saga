@@ -87,8 +87,20 @@ void NuSoundStreamer::RequestFill(NuSoundStreamingSample *sample, NuSoundBuffer 
     request.weak_ptr = callback;
     request.weak_flag = false;
 
-    QueueElement *element = &this->queue2[this->queue2_length % 32];
-    new (element) QueueElement(request);
+    NuSoundWeakPtrListNode::sPtrListLock.Lock();
+    NuSoundWeakPtr<NuSoundBufferCallback> local;
+    local.Set((NuSoundBufferCallback *)callback.obj);
+    if (element->weak_ptr.obj != local.obj) {
+        if (element->weak_ptr.obj != NULL) {
+            element->weak_ptr.obj->Unlink(&element->weak_ptr);
+        }
+        if (local.obj != NULL) {
+            local.obj->Link(&element->weak_ptr);
+        }
+        element->weak_ptr.obj = local.obj;
+    }
+    NuSoundWeakPtrListNode::sPtrListLock.Unlock();
+    element->weak_flag = false;
 
     __sync_fetch_and_add(&this->queue2_length, 1);
 
@@ -199,17 +211,11 @@ void NuSoundStreamer::ThreadFunc(void *self) {
             is_fill = true;
         }
 
-        // Release the queue slot before assigning the request to the worker.
-        {
-            QueueElement dequeued(*slot);
-            slot->~QueueElement();
-            if (is_fill) {
-                __sync_fetch_and_add(&streamer->queue2_index, 1);
-            } else {
-                __sync_fetch_and_add(&streamer->queue1_index, 1);
-            }
-            element = dequeued;
-        }
+        // libTTapp.so 0x325976: copy the queued weak pointer into the local
+        // element (linking a new node), then unlink the queue-slot node.
+        QueueElement element(*slot);
+        slot->weak_ptr.Set(NULL);
+        slot->weak_flag = false;
 
         LOG_INFO("NuSoundStreamer::ThreadFunc: processing element %p (message=%d, sample=%p, loop=%d, "
                  "start_offset=%f, buffer=%p, weak_ptr.obj=%p)",
@@ -527,7 +533,10 @@ void NuSoundStreamingSample::RequestBuffer(bool loop, NuSoundWeakPtr<NuSoundBuff
         // thread; the voice gets it once the fill completes.
         NuSoundBuffer *buffer = (&this->sound_buffer1)[this->some_count % 2];
 
-        this->streamer->RequestFill(this, buffer, loop, callback);
+        NuSoundWeakPtr<NuSoundBufferCallback> local;
+        local.Set((NuSoundBufferCallback *)callback.obj);
+
+        this->streamer->RequestFill(this, buffer, loop, local);
         this->some_count++;
     }
 

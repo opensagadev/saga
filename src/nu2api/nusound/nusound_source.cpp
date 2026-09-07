@@ -42,6 +42,10 @@ const char *NuSoundSource::GetName() const {
     return this->name;
 }
 
+NuSoundSource *NuSoundSource::GetEncodedSource() {
+    return this;
+}
+
 void NuSoundSource::SetStreamDesc(NuSoundStreamDesc *desc) {
     if (desc != NULL && this->source_type != SourceType::ZERO) {
         // (*(code *)desc->vtable->get_decoded_data_format)(desc);

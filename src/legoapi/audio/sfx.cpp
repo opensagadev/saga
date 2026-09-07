@@ -3,6 +3,7 @@
 #include "nu2api/numath/nurand.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/nucore/nustring.h"
 #include "nu2api/numusic/numusic.h"
 #include "nu2api/numusic/sfx.h"
 #include "nu2api/nusound/nusound.h"
@@ -77,6 +78,7 @@ bool HandleGroupLimit(i32 group_id) {
 }
 
 extern "C" void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pitch);
+extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
 void GameAudio_AddSfx(i32 sfx, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx);
 void SetSfxBit_OnEx(i32);
@@ -187,15 +189,21 @@ extern "C" {
     void GetSfxCount(void) {
     }
 
-    i32 GetSfxIdN(char *, i32) {
+    i32 GetSfxIdN(char *name, i32 length) {
+        for (i32 index = 0; index < 1600; ++index) {
+            if (NuStrNICmp(name, g_soundInfo[index].sfx_name, length) == 0) {
+                return index;
+            }
+        }
         return -1;
     }
 
-    void GetSfxName(void) {
+    char *GetSfxName(i32 sfx_id) {
+        return sfx_id < 0 ? NULL : const_cast<char *>(g_soundInfo[sfx_id].sfx_name);
     }
 
-    i32 IsSfxLooping(i32) {
-        return 0;
+    i32 IsSfxLooping(i32 sfx_id) {
+        return sfx_id == -1 ? -1 : g_soundInfo[sfx_id].loop;
     }
 
     void PauseGameAudio(void) {
@@ -258,10 +266,18 @@ extern "C" {
     void PlayMusic(void) {
     }
 
-    void PlaySfx(char *, struct nuvec_s *) {
+    void PlaySfx(char *name, struct nuvec_s *position) {
+        i32 sfx_id = GetSfxId(name);
+        if (sfx_id != -1) {
+            PlaySfxById(sfx_id, position);
+        }
     }
 
-    void PlaySfxAndSetPitch(void) {
+    void PlaySfxAndSetPitch(char *name, nuvec_s *position, f32 pitch) {
+        i32 sfx_id = GetSfxId(name);
+        if (sfx_id != -1) {
+            PlaySfxByIdEx(sfx_id, position, 1.0f, pitch);
+        }
     }
 
     void PlaySfxAndSetVolume(char *name, nuvec_s *position, f32 volume) {
@@ -271,21 +287,27 @@ extern "C" {
         }
     }
 
-    void PlaySfxAndSetVolumeAndPitch(void) {
+    void PlaySfxAndSetVolumeAndPitch(char *name, nuvec_s *position, f32 volume, f32 pitch) {
+        i32 sfx_id = GetSfxId(name);
+        if (sfx_id != -1) {
+            PlaySfxByIdEx(sfx_id, position, volume, pitch);
+        }
     }
 
     void PlaySfxById(i32 sfx_id, nuvec_s *position) {
         PlaySfxByIdEx(sfx_id, position, 1.0f, 1.0f);
     }
 
-    void PlaySfxByIdAndSetPitch(void) {
+    void PlaySfxByIdAndSetPitch(i32 sfx_id, nuvec_s *position, f32 pitch) {
+        PlaySfxByIdEx(sfx_id, position, 1.0f, pitch);
     }
 
     void PlaySfxByIdAndSetVolume(i32 sfx_id, nuvec_s *position, f32 volume) {
         PlaySfxByIdEx(sfx_id, position, volume, 1.0f);
     }
 
-    void PlaySfxByIdAndSetVolumeAndPitch(void) {
+    void PlaySfxByIdAndSetVolumeAndPitch(i32 sfx_id, nuvec_s *position, f32 volume, f32 pitch) {
+        PlaySfxByIdEx(sfx_id, position, volume, pitch);
     }
 
     void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pitch) {

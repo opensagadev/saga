@@ -1146,7 +1146,12 @@ void NuSoundSystem::ReleaseCrossfadeCurve(u32) {
 }
 
 void NuSoundSystem::ReleaseDecoder(NuSoundDecoder *decoder) {
-    decoder->~NuSoundDecoder();
+    // libTTapp.so 0x31aafb: invoke vtable slot 0 (the complete-object
+    // destructor) without using the deleting-destructor slot; the scratch
+    // allocator owns the storage release below.
+    typedef void (*CompleteDestructor)(void *);
+    CompleteDestructor *vtable = *(CompleteDestructor **)decoder;
+    vtable[0](decoder);
     FreeMemory(MemoryDiscipline::SCRATCH, reinterpret_cast<usize>(decoder), 0);
 }
 
@@ -1450,7 +1455,9 @@ void NuSoundSystem::ReleaseVoice(NuSoundVoice *voice) {
 
     // libTTapp.so 0x31b394: run the voice's complete destructor (vtable slot
     // 0, no free), then hand the block back through FreeMemory(SCRATCH).
-    voice->~NuSoundVoice();
+    typedef void (*CompleteDestructor)(void *);
+    CompleteDestructor *vtable = *(CompleteDestructor **)voice;
+    vtable[0](voice);
     NuSoundSystem::FreeMemory(NuSoundSystem::MemoryDiscipline::SCRATCH, (usize)voice, 0);
     pthread_mutex_unlock(&NuSoundWeakPtrListNode::sPtrAccessLock.mutex);
 
