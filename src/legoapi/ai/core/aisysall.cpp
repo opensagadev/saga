@@ -125,10 +125,23 @@ static __used__ u32 CalculateIntersection(AISYS *system, AIPACKET *packet, APIOB
 void AISysGetPathPos2(AISYS_s *, nuvec_s *, AIPATHINFO_s *, nuvec_s *, AIPATH_s *, i32) {
 }
 
-void ClearAICreatures() {
-}
-
-void AIMoveCanReachPath(AISYS_s *, AIPATH_s *, AIPATH_s *) {
+i32 AIMoveCanReachPath(AISYS_s *system, AIPATH_s *path, AIPATH_s *destination) {
+    AIPATHNODELINK *links = path->special_routes;
+    for (i32 link_index = 0; link_index < path->special_route_count; ++link_index) {
+        AIPATHSPECIALROUTE *route =
+            &system->path_sys->special_routes[links[link_index].special_route_index];
+        // The original increments the outer cursor here and recursively tests
+        // the same path pair. Preserve those accesses, including path slot zero.
+        for (i32 path_index = 0; path_index < route->path_count; ++link_index) {
+            if (route->paths[path_index] == destination) {
+                return 1;
+            }
+            if (AIMoveCanReachPath(system, path, destination) != 0) {
+                return 1;
+            }
+        }
+    }
+    return 0;
 }
 
 void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
@@ -335,9 +348,6 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
     if (next_waypoint_index < path->node_count) {
         packet->movement_destination = path->nodes[next_waypoint_index].position;
     }
-}
-
-void AICreatureResumeScript(GameObject_s *) {
 }
 
 void AIRetreatFromDestination(AISYS_s *, AIPACKET_s *, APIOBJECT_s *, i32) {

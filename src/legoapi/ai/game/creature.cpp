@@ -16,6 +16,29 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
+void FreeTorpedoPacket(TORPEDOPACKET_s **packet);
+void RemoveGameObject(GameObject_s *object, i32 immediate);
+
+void ClearAICreatures() {
+    GameObject_s *object = Obj;
+    for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
+        if ((object->apiobj.field_0x1f8 & APIOBJECT_FLAG_IN_USE) != 0 &&
+            (object->apiobj.field_0x1f4 & APIOBJECT_MOTION_FLAG_AI_CONTROLLED) != 0) {
+            FreeTorpedoPacket(&object->torpedo);
+            RemoveGameObject(object, 1);
+        }
+    }
+}
+
+void AICreatureResumeScript(GameObject_s *object) {
+    AISCRIPT *script = object->ai.script_process.base_script;
+    if (script != NULL) {
+        AIScriptProcessorInit(WORLD->ai_sys, &object->ai, &object->ai.script_process,
+                              NULL, NULL, NULL, 0, script, script->base_state);
+        object->ai.script_process.active_ref_count = 0;
+    }
+}
+
 extern "C" {
     extern NUVEC plr_lastpos;
     AIGROUP *CreateAIGroup(AISYS *system, u8 count_across, f32 x_spacing, f32 z_spacing, f32 max_speed);
