@@ -98,9 +98,6 @@ static __used__ i32 Action_DrawBossHitPoints(AISYS_s *, AISCRIPTPROCESS_s *, AIP
     return 0;
 }
 
-static __used__ i32 Action_IgnoreShoveSystem(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
-    return 0;
-}
 
 static i32 Action_FollowCharacter(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
                                   i32 param_count, i32 first_time, f32) {

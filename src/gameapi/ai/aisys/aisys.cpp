@@ -957,6 +957,19 @@ __used__ static i32 Action_GoToNode(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
 
 void LevelScriptReStoreProgress(WORLDINFO_s *, LEVELSCRIPTPROCESS_s *);
 
+static i32 Action_IgnoreShoveSystem(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
+                                  i32 param_count, i32 first_time, f32) {
+    GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+    if (object != NULL && first_time) {
+        object->field_0xefc |= 1;
+        for (i32 index = 0; index < param_count; ++index) {
+            if (NuStrICmp(params[index], "FALSE") == 0)
+                object->field_0xefc &= ~1;
+        }
+    }
+    return 1;
+}
+
 static i32 Action_SelectRandomSpline(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **params,
                                     i32 param_count, i32 first_time, f32) {
     if (first_time) {
@@ -4433,7 +4446,7 @@ extern "C" {
         {"SetDefaultMovementRange", NULL, 0, 0, 0},
         {"SetGravityHeight", NULL, 0, 0, 0},
         {"ApplyGravity", Action_ApplyGravity, 0, 0, 0},
-        {"IgnoreShoveSystem", NULL, 0, 0, 0},
+        {"IgnoreShoveSystem", Action_IgnoreShoveSystem, 0, 0, 0},
         {"CannotBeSeen", Action_CannotBeSeen, 0, 0, 0},
         {"CannotBeForcedBack", NULL, 0, 0, 0},
         {"CanTurn", Action_CanTurn, 0, 0, 0},
