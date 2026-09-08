@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "batman.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "globals.h"
 #include "legoapi/ai/core/ai_sys_stubs.h"
@@ -1074,6 +1075,18 @@ static i32 Action_SetShootOpponents(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet
         for (i32 index = 0; index < param_count; ++index) {
             if (NuStrICmp(params[index], "false") == 0)
                 object->field_0xef8 &= ~0x80;
+        }
+    }
+    return 1;
+}
+
+static i32 Action_PartyCanBeUnderCover(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **params,
+                                     i32 param_count, i32 first_time, f32) {
+    if (first_time) {
+        party_cant_be_under_cover = 0;
+        for (i32 index = 0; index < param_count; ++index) {
+            if (NuStrICmp(params[index], "FALSE") == 0)
+                party_cant_be_under_cover = 1;
         }
     }
     return 1;
@@ -4784,7 +4797,7 @@ extern "C" {
         {"CanHelpWithTriggers", NULL, 0, 0, 0},
         {"CanCollideWithObjects", NULL, 0, 0, 0},
         {"SetShootOpponents", Action_SetShootOpponents, 0, 0, 0},
-        {"PartyCanBeUnderCover", NULL, 0, 0, 0},
+        {"PartyCanBeUnderCover", Action_PartyCanBeUnderCover, 0, 0, 0},
         {"SetLapTime", NULL, 0, 0, 0},
         {"CreatePod", NULL, 0, 0, 0},
         {"MushroomCollapse", NULL, 0, 0, 0},
