@@ -5336,16 +5336,6 @@ __used__ static f32 Condition_InMiniCut(AISYS *sys, AISCRIPTPROCESS *processor, 
     return 0.0f;
 }
 
-__used__ static f32 Condition_LastLevel(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                        void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
-}
-
 __used__ static f32 Condition_Player1Is(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
                                         void *void_arg) {
     (void)sys;

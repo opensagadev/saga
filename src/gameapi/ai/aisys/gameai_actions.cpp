@@ -85,10 +85,6 @@ static f32 Condition_ForceFinished(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *,
 
 
 
-static __used__ void *Condition_LastLevelInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
-}
-
 
 static f32 Condition_NumInSetAlive(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *void_arg) {
     isize creature_set = AIConditionArgumentValue(void_arg);

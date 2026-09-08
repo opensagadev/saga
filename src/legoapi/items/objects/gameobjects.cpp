@@ -186,6 +186,24 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 
 static const f32 AI_RESPAWN_DELAY = 2.0f;
 
+static void *Condition_LastLevelInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    if (name != NULL && system != NULL && WORLD->area != NULL) {
+        for (i32 index = 0; index < LEVELCOUNT; ++index) {
+            if (NuStrICmp(name, LDataList[index].name) == 0) {
+                return reinterpret_cast<void *>(static_cast<isize>(index));
+            }
+        }
+    }
+    return reinterpret_cast<void *>(static_cast<isize>(-1));
+}
+
+static f32 Condition_LastLevel(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    if (LastLData != NULL) {
+        return LastLData->idx == static_cast<i32>(reinterpret_cast<isize>(argument)) ? 1.0f : 0.0f;
+    }
+    return 0.0f;
+}
+
 static void *Condition_IsVisibleInit(AISYS_s *, char *name, AISCRIPT_s *) {
     return name;
 }
@@ -374,7 +392,7 @@ extern "C" {
         {"NumBaddies", NULL, NULL},
         {"NumForceObjects", NULL, NULL},
         {"BeenToLevel", NULL, NULL},
-        {"LastLevel", NULL, NULL},
+        {"LastLevel", Condition_LastLevel, Condition_LastLevelInit},
         {"Message", NULL, NULL},
         {"ScriptParam", NULL, NULL},
         {"CutSceneStarted", NULL, NULL},
