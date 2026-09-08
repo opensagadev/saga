@@ -516,9 +516,7 @@ MechTempPosInterface::MechTempPosInterface(VuVec const &value) {
 }
 
 MechTempPosInterface::MechTempPosInterface(nuvec_s const &value) {
-    position.x = value.x;
-    position.y = value.y;
-    position.z = value.z;
+    position.xyz = value;
     radius = 0.2f;
 }
 

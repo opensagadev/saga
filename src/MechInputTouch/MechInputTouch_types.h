@@ -541,9 +541,7 @@ struct MechTempPosInterface : MechObjectInterface {
     VuVec position;
     f32 radius;
     void GetPos(VuVec &result, i32) const override {
-        result.x = position.x;
-        result.y = position.y;
-        result.z = position.z;
+        result.xyz = position.xyz;
     }
     void GetFloorTargetPos(VuVec &, i32) const override;
     f32 GetRadius() const override { return radius; }
