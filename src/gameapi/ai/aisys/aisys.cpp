@@ -6047,7 +6047,7 @@ static f32 Condition_IsAlive(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, voi
         if (group != NULL) {
             for (i32 index = 0; index < group->member_count; ++index) {
                 APIOBJECT *member = group->members[index];
-                if (member != NULL && (member->object_flags & 0x1001) == 0x1001 && member->field_0x287 == 0)
+                if (member != NULL && (member->field_0x1f8 & 0x1001) == 0x1001 && member->field_0x287 == 0)
                     return 1.0f;
             }
         } else if ((object->flags_high & 0x10) != 0 && object->field_0x287 == 0) {
