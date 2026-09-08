@@ -6434,13 +6434,16 @@ static void *Condition_AreaCompleteInit(AISYS *, char *name, AISCRIPT *) {
     return name != NULL ? Area_FindByName(name, NULL) : NULL;
 }
 
-__used__ static f32 Condition_BehindCamera(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                           void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
+static f32 Condition_BehindCamera(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *) {
+    if (packet != NULL && packet->owner != NULL) {
+        GameObject *object = packet->owner->apiobj.objptr;
+        if (object != NULL) {
+            NUVEC delta;
+            NuVecSub(&delta, &object->apiobj.collision_position, &GameCam->pos);
+            return delta.x * GameCam->dir.x + delta.y * GameCam->dir.y + delta.z * GameCam->dir.z < 0.0f
+                       ? 1.0f : 0.0f;
+        }
+    }
     return 0.0f;
 }
 
@@ -8104,6 +8107,7 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_SHOP_ACTIVE].eval_fn = Condition_ShopActive;
             lego_aiconditiondefs[LEGO_AI_CONDITION_SCREEN_WIPE].eval_fn = Condition_ScreenWipe;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CAN_HEAR_RADIO].eval_fn = Condition_CanHearRadio;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_BEHIND_CAMERA].eval_fn = Condition_BehindCamera;
             lego_aiconditiondefs[LEGO_AI_CONDITION_BLOWUP_BLOWNUP].eval_fn = Condition_BlowupBlownup;
             lego_aiconditiondefs[LEGO_AI_CONDITION_BLOWUP_BLOWNUP].init_fn = Condition_BlowupInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_ANIM_SPEED_MUL].eval_fn = Condition_AnimSpeedMul;
