@@ -5200,11 +5200,6 @@ __used__ static f32 Condition_IsAlive(AISYS *sys, AISCRIPTPROCESS *processor, AI
     return 0.0f;
 }
 
-static f32 Condition_Message(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *void_arg) {
-    GIZAIMESSAGE_s *message = static_cast<GIZAIMESSAGE_s *>(void_arg);
-    return message != NULL ? message->value : 0.0f;
-}
-
 
 __used__ static f32 Condition_GlynTest(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
                                        void *void_arg) {
@@ -5665,13 +5660,6 @@ __used__ static void *Condition_IsAliveInit(AISYS *sys, char *arg, AISCRIPT *scr
     (void)arg;
     (void)script;
     return NULL;
-}
-
-static void *Condition_MessageInit(AISYS *system, char *arg, AISCRIPT *) {
-    if (system == NULL || arg == NULL || gizaimessagesys == NULL) {
-        return NULL;
-    }
-    return CheckGizAIMessage(gizaimessagesys, arg, NULL);
 }
 
 
@@ -7185,8 +7173,6 @@ namespace {
 
             lego_aiconditiondefs[LEGO_AI_CONDITION_CATEGORY_IS].eval_fn = Condition_CategoryIs;
             lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_TO_LEVEL].eval_fn = Condition_BeenToLevel;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_MESSAGE].eval_fn = Condition_Message;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_MESSAGE].init_fn = Condition_MessageInit;
 
             lego_aiactiondefs[LEGO_AI_ACTION_SET_CURRENT_SPEED].eval_fn = Action_SetCurrentSpeed;
             lego_aiactiondefs[LEGO_AI_ACTION_USE_CURRENT_SPEED].eval_fn = Action_UseCurrentSpeed;

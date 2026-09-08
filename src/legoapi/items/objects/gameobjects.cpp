@@ -546,6 +546,16 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+static f32 Condition_Message(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GIZAIMESSAGE_s *message = static_cast<GIZAIMESSAGE_s *>(argument);
+    return message != NULL ? message->value : 0.0f;
+}
+
+static void *Condition_MessageInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    if (name != NULL && system != NULL && gizaimessagesys != NULL) return CheckGizAIMessage(gizaimessagesys, name, NULL);
+    return NULL;
+}
+
 static f32 Condition_ScriptParam(AISYS_s *, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *, void *argument) {
     i32 index = reinterpret_cast<intptr_t>(argument);
     return index >= 0 ? process->params[index] : 0.0f;
@@ -1028,7 +1038,7 @@ extern "C" {
         {"NumForceObjects", Condition_NumForceObjects, Condition_NumForceObjectsInit},
         {"BeenToLevel", NULL, NULL},
         {"LastLevel", Condition_LastLevel, Condition_LastLevelInit},
-        {"Message", NULL, NULL},
+        {"Message", Condition_Message, Condition_MessageInit},
         {"ScriptParam", Condition_ScriptParam, Condition_ScriptParamInit},
         {"CutSceneStarted", NULL, NULL},
         {"CutSceneFinished", NULL, NULL},
