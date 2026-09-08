@@ -5487,16 +5487,6 @@ __used__ static f32 Condition_PlayerRange(AISYS *sys, AISCRIPTPROCESS *processor
     return NuVecDist(&sys->player_1->position, &packet->owner->apiobj.position, NULL);
 }
 
-__used__ static f32 Condition_ScriptParam(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                          void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
-}
-
 static f32 Condition_TimeOffPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *) {
     return packet != NULL ? packet->time_off_path : 0.0f;
 }

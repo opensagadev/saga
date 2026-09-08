@@ -546,6 +546,21 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+static f32 Condition_ScriptParam(AISYS_s *, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *, void *argument) {
+    i32 index = reinterpret_cast<intptr_t>(argument);
+    return index >= 0 ? process->params[index] : 0.0f;
+}
+
+static void *Condition_ScriptParamInit(AISYS_s *, char *name, AISCRIPT_s *script) {
+    if (name != NULL) {
+        for (i32 index = 0; index < 4; ++index) {
+            if (NuStrICmp(script->params[index].name, name) == 0) return reinterpret_cast<void *>(static_cast<intptr_t>(index));
+        }
+        return reinterpret_cast<void *>(static_cast<intptr_t>(NuAToI(name)));
+    }
+    return reinterpret_cast<void *>(static_cast<intptr_t>(-1));
+}
+
 static f32 Condition_Blocking(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
     if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL) {
         GameObject *object = packet->owner->apiobj.objptr;
@@ -1014,7 +1029,7 @@ extern "C" {
         {"BeenToLevel", NULL, NULL},
         {"LastLevel", Condition_LastLevel, Condition_LastLevelInit},
         {"Message", NULL, NULL},
-        {"ScriptParam", NULL, NULL},
+        {"ScriptParam", Condition_ScriptParam, Condition_ScriptParamInit},
         {"CutSceneStarted", NULL, NULL},
         {"CutSceneFinished", NULL, NULL},
         {"CutSceneExists", NULL, NULL},
