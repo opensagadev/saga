@@ -6426,6 +6426,10 @@ __used__ static f32 Condition_AnimSpeedMul(AISYS *sys, AISCRIPTPROCESS *processo
 
 extern FLOWBOX_s *FlowBoxFindByName(GIZFLOW_s *, char *);
 
+static void *Condition_GizmoOutputInit(AISYS *, char *name, AISCRIPT *) {
+    return name != NULL ? GizmoFindByName(WORLD->gizmo_sys, -1, name) : NULL;
+}
+
 static f32 Condition_LocatorOnScreen(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *, char *, void *argument) {
     AILOCATOR *locator = static_cast<AILOCATOR *>(argument);
     if (locator == NULL)
@@ -6493,44 +6497,32 @@ __used__ static f32 Condition_CanHearRadio(AISYS *sys, AISCRIPTPROCESS *processo
     return 0.0f;
 }
 
-__used__ static f32 Condition_GizmoOutput0(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                           void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
+static f32 Condition_GizmoOutput0(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *argument) {
+    f32 output = 0.0f;
+    if (argument != NULL)
+        output = static_cast<f32>(static_cast<u32>(GizmoGetOutput(WORLD->gizmo_sys, static_cast<GIZMO *>(argument), 0, 1)));
+    return output;
 }
 
-__used__ static f32 Condition_GizmoOutput1(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                           void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
+static f32 Condition_GizmoOutput1(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *argument) {
+    f32 output = 0.0f;
+    if (argument != NULL)
+        output = static_cast<f32>(static_cast<u32>(GizmoGetOutput(WORLD->gizmo_sys, static_cast<GIZMO *>(argument), 1, 1)));
+    return output;
 }
 
-__used__ static f32 Condition_GizmoOutput2(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                           void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
+static f32 Condition_GizmoOutput2(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *argument) {
+    f32 output = 0.0f;
+    if (argument != NULL)
+        output = static_cast<f32>(static_cast<u32>(GizmoGetOutput(WORLD->gizmo_sys, static_cast<GIZMO *>(argument), 2, 1)));
+    return output;
 }
 
-__used__ static f32 Condition_GizmoOutput3(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                           void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
+static f32 Condition_GizmoOutput3(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *argument) {
+    f32 output = 0.0f;
+    if (argument != NULL)
+        output = static_cast<f32>(static_cast<u32>(GizmoGetOutput(WORLD->gizmo_sys, static_cast<GIZMO *>(argument), 3, 1)));
+    return output;
 }
 
 static f32 Condition_LocatorRange(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg) {
@@ -8139,6 +8131,14 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_NEUTRAL].eval_fn = Condition_IAmANeutral;
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_PARTY_CHARACTER].eval_fn = Condition_IAmAPartyCharacter;
             lego_aiconditiondefs[LEGO_AI_CONDITION_LOCATOR_ON_SCREEN].eval_fn = Condition_LocatorOnScreen;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_OUTPUT_0].eval_fn = Condition_GizmoOutput0;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_OUTPUT_0].init_fn = Condition_GizmoOutputInit;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_OUTPUT_1].eval_fn = Condition_GizmoOutput1;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_OUTPUT_1].init_fn = Condition_GizmoOutputInit;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_OUTPUT_2].eval_fn = Condition_GizmoOutput2;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_OUTPUT_2].init_fn = Condition_GizmoOutputInit;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_OUTPUT_3].eval_fn = Condition_GizmoOutput3;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_OUTPUT_3].init_fn = Condition_GizmoOutputInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_LOCATOR_ON_SCREEN].init_fn = Condition_LocatorOnScreenInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_VISIBILITY].eval_fn = Condition_GizmoVisibility;
             lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_VISIBILITY].init_fn = Condition_GizmoVisibilityInit;
