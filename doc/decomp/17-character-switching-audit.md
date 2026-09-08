@@ -63,6 +63,25 @@ and particle callbacks that modify the supplied position. The target and
 native builds pass. These comparisons instrument particle submission and do
 not establish visible effects in an ordinary playthrough.
 
+## Script action recovery (2026-09-08)
+
+`Action_TagCharacter` (`0x19cca0`) now handles the existing script registration
+instead of returning zero from an empty body. The original first-action gate,
+owner-derived default character, case-insensitive substring parameters,
+`character=` precedence, and `tag_to=` selection are restored. Nonzero
+parameter counts permit switching (including negative counts, whose parsing
+loop is skipped); a zero count does not switch. A non-null source calls
+`TagCharacter` and then `SetPlayer`, independently of the switch return value.
+
+Matching improves from 5.443% to 99.772%, with the original 279-byte size.
+The remaining differences are two register operands and address relocations.
+All 216 mapped original/current cases agree on named-object lookups, switch
+arguments, `SetPlayer` calls and return values. The cases cover null packets,
+null owners, null owner object pointers, first-action gating, parameter-count
+boundaries, repeated parameters, mixed case and embedded prefixes. Calls to
+named lookup, substring search, switching and `SetPlayer` are instrumented;
+this verifies action dispatch, not those dependency implementations.
+
 ## Remaining scope
 
 Recover and compare the original bodies and callers in this area, rather than
@@ -70,7 +89,7 @@ stopping at the two visible symptoms:
 
 | Path | Current work remaining |
 |---|---|
-| `TagCharacter`, `Action_TagCharacter` | Improve the recovered body; recover the empty script action and its registration/caller path |
+| `TagCharacter`, `Action_TagCharacter` | Improve body matching and verify script-driven switching in gameplay; action recovered at 99.772% |
 | `TagCode`, `Tag_Check`, `Player_ToggleCharacter` | Audit and match complete transition/input logic and state writes |
 | `Tag_NewTransfer`, `Tag_ResetTransfers`, `Tag_UpdateTransfers` | Improve lifecycle matching; recovered update is 45.572% |
 | `Tag_DrawIcon_LSW`, `Tag_DrawIcon_Batman`, `Tag_NoHiddenIcon` | Finish renderer matching and verify actual mode dispatch |

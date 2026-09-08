@@ -42,6 +42,8 @@ extern void oneAtOnce_SetInitDistPerRow(f32 distance);
 extern bool oneAtOnce_CanAttack(GameObject_s *object, GameObject_s *opponent);
 extern f32 oneAtOnce_GetHoldRange(GameObject_s *object);
 extern void Hint_CancelCurrent();
+extern i32 TagCharacter(GameObject_s *source, GameObject_s *target, i32 mode);
+extern void SetPlayer();
 extern void PlayRepeatSfx(char *name, i32 sfx_id, f32 initial_delay, char play_count, f32 interval, nuvec_s *position);
 extern void ResetAICreature(GameObject_s *object, AISYS_s *system);
 extern void DeactivateGameObject(GameObject_s *object);
@@ -2626,14 +2628,31 @@ __used__ static i32 Action_SnapToOrigin(AISYS *sys, AISCRIPTPROCESS *processor, 
 
 __used__ static i32 Action_TagCharacter(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                         i32 param_4, i32 param_5, f32 param_6) {
-    (void)sys;
     (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
     (void)param_6;
-    return 0;
+    if (param_5 == 0) {
+        return 1;
+    }
+    GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+    if (param_4 != 0) {
+        GameObject_s *target = NULL;
+        for (i32 index = 0; index < param_4; ++index) {
+            char *value = NuStrIStr(params[index], "character=");
+            if (value != NULL) {
+                object = GetNamedGameObject(sys, value + 10);
+            } else {
+                value = NuStrIStr(params[index], "tag_to=");
+                if (value != NULL) {
+                    target = GetNamedGameObject(sys, value + 7);
+                }
+            }
+        }
+        if (object != NULL) {
+            TagCharacter(object, target, 0);
+            SetPlayer();
+        }
+    }
+    return 1;
 }
 
 __used__ static i32 Action_TurnOnPickup(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
