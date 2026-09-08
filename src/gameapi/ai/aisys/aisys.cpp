@@ -1097,6 +1097,31 @@ static i32 Action_CanCollideWithObjects(AISYS *, AISCRIPTPROCESS *, AIPACKET *pa
     return 1;
 }
 
+static i32 Action_AwkwardShapeOverride(AISYS *system, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
+                                     i32 param_count, i32 first_time, f32) {
+    if (first_time) {
+        GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+        i32 enabled = 1;
+        if (param_count != 0) {
+            for (i32 index = 0; index < param_count; ++index) {
+                if (NuStrICmp(params[index], "FALSE") == 0) {
+                    enabled = 0;
+                } else {
+                    char *value = NuStrIStr(params[index], "character=");
+                    if (value != NULL)
+                        object = GetNamedGameObject(system, value + 10);
+                }
+            }
+        }
+        if (object != NULL) {
+            if (object->character_context == 0x3c || object->field_0xcc0 != NULL)
+                Player_ClearContext(object, 1);
+            object->field_0xf00 = (object->field_0xf00 & 0x7f) | ((u8)enabled << 7);
+        }
+    }
+    return 1;
+}
+
 static i32 Action_IgnoreLastSafePathPos(AISYS *system, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
                                       i32 param_count, i32 first_time, f32) {
     if (first_time) {
@@ -4808,7 +4833,7 @@ extern "C" {
         {"SetCanTakeOver", Action_SetCanTakeOver, 0, 0, 0},
         {"CanBeCarried", Action_CanBeCarried, 1, 0, 0},
         {"IgnoreLastSafePathPos", Action_IgnoreLastSafePathPos, 0, 0, 0},
-        {"AwkwardShapeOverride", NULL, 0, 0, 0},
+        {"AwkwardShapeOverride", Action_AwkwardShapeOverride, 0, 0, 0},
         {"IgnoreSlideTerrain", Action_IgnoreSlideTerrain, 0, 0, 0},
         {"SplineFollowTerrain", Action_SplineFollowTerrain, 0, 0, 0},
         {"SetLayer", Action_SetLayer, 0, 0, 0},
