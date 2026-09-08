@@ -485,6 +485,14 @@ static f32 Condition_IsVisible(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, cha
     return result;
 }
 
+static f32 Condition_NumInSetAlive(AISYS_s *, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *, void *argument) {
+    i32 set = reinterpret_cast<intptr_t>(argument);
+    if (set == -1) set = process->unknown_b0;
+    f32 result = 0.0f;
+    if (set != 0) result = static_cast<u32>(aicreature_sets_alive[set - 1]);
+    return result;
+}
+
 static f32 Condition_IsSetAlive(AISYS_s *, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *, void *argument) {
     i32 set = reinterpret_cast<intptr_t>(argument);
     if (set == -1) set = process->unknown_b0;
@@ -759,7 +767,7 @@ extern "C" {
         {"Player1Is", NULL, NULL},
         {"Player2Is", NULL, NULL},
         {"IsSetAlive", Condition_IsSetAlive, Condition_IsSetAliveInit},
-        {"NumInSetAlive", NULL, Condition_IsSetAliveInit},
+        {"NumInSetAlive", Condition_NumInSetAlive, Condition_IsSetAliveInit},
         {"Context", NULL, NULL},
         {"InContext", Condition_InContext, Condition_InContextInit},
         {"OpponentContext", Condition_OpponentContext, Condition_InContextInit},
