@@ -859,27 +859,27 @@ __used__ static i32 Action_BlockPath(AISYS *sys, AISCRIPTPROCESS *processor, AIP
     (void)processor;
     (void)packet;
     (void)param_6;
-    if (sys != NULL && sys->path_sys != NULL && sys->path_sys->active_path != NULL && param_5 != 0 && param_4 > 0) {
+    if (sys != NULL && sys->path_sys != NULL && sys->path_sys->path_count != 0 && param_5 != 0 && param_4 > 0) {
         char *from = NULL;
         char *to = NULL;
-        bool both_ways = false;
+        i32 both_ways = 0;
         i32 blocked = 1;
         for (i32 index = 0; index < param_4; ++index) {
             char *value = NuStrIStr(params[index], "from=");
             if (value != NULL) {
-                from = value + NuStrLen("from=");
+                from = value + 5;
                 continue;
             }
             value = NuStrIStr(params[index], "to=");
             if (value != NULL) {
-                to = value + NuStrLen("to=");
+                to = value + 3;
             } else if (NuStrICmp(params[index], "bothways") == 0) {
-                both_ways = true;
+                both_ways = 1;
             } else if (NuStrICmp(params[index], "FALSE") == 0) {
                 blocked = 0;
             }
         }
-        if (from != NULL && to != NULL) {
+        if (to != NULL && from != NULL) {
             AIPathCnxSetTemporaryBlock(sys->path_sys->active_path, from, to, blocked);
             if (both_ways) {
                 AIPathCnxSetTemporaryBlock(sys->path_sys->active_path, to, from, blocked);
