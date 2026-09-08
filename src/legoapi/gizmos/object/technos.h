@@ -45,7 +45,9 @@ typedef struct TECHNO_s {
         struct {
             u8 active : 1;
             u8 visible : 1;
-            u8 reserved_flags : 6;
+            u8 used_this_frame : 1;
+            u8 complete : 1;
+            u8 reserved_flags : 4;
         };
     };
     char target_name[16];

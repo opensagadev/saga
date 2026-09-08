@@ -1043,7 +1043,7 @@ static i32 Action_SetTechnoComplete(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet
         if (object != NULL)
             techno = Technos_FindControllingTechno(object);
         if (techno != NULL)
-            techno->flags = (techno->flags & ~TECHNO_FLAG_COMPLETE) | ((u8)complete << 3);
+            techno->complete = complete;
     }
     return 1;
 }
