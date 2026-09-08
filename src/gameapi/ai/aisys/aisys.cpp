@@ -5395,15 +5395,6 @@ __used__ static f32 Condition_HoverPhase(AISYS *sys, AISCRIPTPROCESS *processor,
     return 0.0f;
 }
 
-__used__ static f32 Condition_IAmPlayer2(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                         void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
-}
 
 __used__ static f32 Condition_IsOnScreen(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
                                          void *void_arg) {

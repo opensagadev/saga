@@ -485,6 +485,18 @@ static f32 Condition_IsVisible(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, cha
     return result;
 }
 
+static f32 Condition_IAmPlayer2(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    f32 result = 0.0f;
+    if (packet != NULL && packet->owner != NULL) {
+        if (player == Player[0]) {
+            result = packet->owner->apiobj.objptr == Player[1] ? 1.0f : 0.0f;
+        } else if (player == Player[1]) {
+            result = packet->owner->apiobj.objptr == Player[0] ? 1.0f : 0.0f;
+        }
+    }
+    return result;
+}
+
 static f32 Condition_PlayerOnObject(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     i32 platform = reinterpret_cast<intptr_t>(argument);
     f32 result = 0.0f;
@@ -790,7 +802,7 @@ extern "C" {
         {"IsVisible", Condition_IsVisible, Condition_IsVisibleInit},
         {"MySet", NULL, NULL},
         {"ScreenWipe", NULL, NULL},
-        {"IAmPlayer2", NULL, NULL},
+        {"IAmPlayer2", Condition_IAmPlayer2, NULL},
         {"HeadTurnRestricted", NULL, NULL},
         {"ShopActive", NULL, NULL},
         {"Side", NULL, NULL},
