@@ -19,6 +19,7 @@
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/ai/core/ai_sys_stubs.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/render/fx.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nucore/nustring.h"
@@ -4139,6 +4140,18 @@ __used__ static i32 Action_CreateCreatures(AISYS *sys, AISCRIPTPROCESS *processo
     return 1;
 }
 
+void PartKill_ForceThrow(PART_s *, i32);
+
+static i32 Action_RemoveThrownForceObjects(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32) {
+    PART_s *part = Part;
+    for (i32 index = 0; index < MAXPARTS; ++index, ++part) {
+        if ((part->active & 1) != 0 && part->kill_callback == PartKill_ForceThrow) {
+            KillPart(part, 0);
+        }
+    }
+    return 1;
+}
+
 static i32 Action_MoveAwayFromLastAttacker(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                            i32 param_count, i32 first_time, f32) {
     if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL) {
@@ -4308,7 +4321,7 @@ extern "C" {
         {"FollowPlayer", NULL, 0, 0, 0},
         {"MoveForward", NULL, 0, 0, 0},
         {"SetFormationCommander", NULL, 0, 0, 0},
-        {"RemoveThrownForceObjects", NULL, 0, 0, 0},
+        {"RemoveThrownForceObjects", Action_RemoveThrownForceObjects, 0, 0, 0},
         {"AlwaysTriggerObstacle", NULL, 0, 0, 0},
         {"CanTriggerObstacle", NULL, 0, 0, 0},
         {"PlayGizObstacle", NULL, 1, 0, 0},
