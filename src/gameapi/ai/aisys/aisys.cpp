@@ -5755,8 +5755,28 @@ static i32 Action_SetFullPathSearch(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *
     return 1;
 }
 
-static __used__ i32 Action_SetRespawnLocator(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
-    return 0;
+static i32 Action_SetRespawnLocator(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet,
+                                   char **params, i32 param_count, i32 first_time, f32) {
+    AILOCATOR *locators[32];
+    if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL && first_time != 0) {
+        packet->respawn_locator = processor->unknown_a4;
+        i32 count = 0;
+        for (i32 i = 0; i < param_count; i++) {
+            char *value = NuStrIStr(params[i], "locator");
+            if (value != NULL) {
+                if (count < 32) {
+                    locators[count] = AIPathFindLocator(sys, value + 8);
+                    if (locators[count] != NULL) {
+                        count++;
+                    }
+                }
+            }
+        }
+        if (count != 0) {
+            packet->respawn_locator = locators[NuRand(NULL) % count];
+        }
+    }
+    return 1;
 }
 
 static __used__ i32 Action_OverrideAnimation(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
