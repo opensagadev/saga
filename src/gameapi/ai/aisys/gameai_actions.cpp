@@ -597,14 +597,6 @@ static __used__ void *Condition_AreaCompleteInit(AISYS_s *, char *, AISCRIPT_s *
 }
 
 
-static f32 Condition_CutSceneFinished(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *void_arg) {
-    CUTINFO *cutscene = static_cast<CUTINFO *>(void_arg);
-    if (cutscene == NULL || cutscene->instance == NULL) {
-        return 0.0f;
-    }
-    return instNuGCutSceneIsFinished(static_cast<instNUGCUTSCENE_s *>(cutscene->instance)) != 0 ? 1.0f : 0.0f;
-}
-
 
 static __used__ f32 Condition_IAmAGoodieBaddie(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return 0;
@@ -1061,13 +1053,6 @@ static __used__ i32 Action_SetDefaultMovementRange(AISYS_s *, AISCRIPTPROCESS_s 
 }
 
 
-static void *Condition_CutSceneFinishedInit(AISYS_s *, char *arg, AISCRIPT_s *) {
-    if (WORLD == NULL) {
-        return NULL;
-    }
-    return CutScene_Find(WORLD->cutscene_sys, arg);
-}
-
 static __used__ f32 Condition_EitherPlayerOnObject(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return 0;
 }
@@ -1278,8 +1263,6 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_OFF_SCREEN_TIMER].init_fn = Condition_OffScreenTimerInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CATEGORY_IS].init_fn = Condition_CategoryIsInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_TO_LEVEL].init_fn = Condition_BeenToLevelInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_CUT_SCENE_FINISHED].eval_fn = Condition_CutSceneFinished;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_CUT_SCENE_FINISHED].init_fn = Condition_CutSceneFinishedInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_FINISHED_SPLINE].eval_fn = Condition_FinishedSpline;
             lego_aiconditiondefs[LEGO_AI_CONDITION_IS_LOW_END_DEVICE].eval_fn = Condition_IsLowEndDevice;
             lego_aiconditiondefs[LEGO_AI_CONDITION_RANDOM_MAP_CHARS_AVAILABLE].eval_fn =

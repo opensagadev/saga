@@ -548,6 +548,18 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+extern "C" i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *cutscene);
+
+static f32 Condition_CutSceneFinished(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    CUTINFO *cut = static_cast<CUTINFO *>(argument);
+    return cut != NULL && cut->instance != NULL &&
+        instNuGCutSceneIsFinished(static_cast<instNUGCUTSCENE_s *>(cut->instance)) != 0 ? 1.0f : 0.0f;
+}
+
+static void *Condition_CutSceneFinishedInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    return CutScene_Find(WORLD->cutscene_sys, name);
+}
+
 static f32 Condition_CutSceneStarted(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     CUTINFO *cut = static_cast<CUTINFO *>(argument);
     return cut != NULL && cut->instance != NULL &&
@@ -1070,7 +1082,7 @@ extern "C" {
         {"Message", Condition_Message, Condition_MessageInit},
         {"ScriptParam", Condition_ScriptParam, Condition_ScriptParamInit},
         {"CutSceneStarted", Condition_CutSceneStarted, Condition_CutSceneStartedInit},
-        {"CutSceneFinished", NULL, NULL},
+        {"CutSceneFinished", Condition_CutSceneFinished, Condition_CutSceneFinishedInit},
         {"CutSceneExists", Condition_CutSceneExists, Condition_CutSceneExistsInit},
         {"PlayerInSock", NULL, NULL},
         {"CutScenePlaying", Condition_CutScenePlaying, Condition_CutScenePlayingInit},
