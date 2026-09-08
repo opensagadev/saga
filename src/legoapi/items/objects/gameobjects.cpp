@@ -4,6 +4,7 @@
 #include "gameapi/edtools/edfile.h"
 #include "gameapi/gui/apimenu.h"
 #include "globals.h"
+#include "legoapi/world/mission.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/fx/spline_position.h"
@@ -485,6 +486,10 @@ static f32 Condition_IsVisible(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, cha
     return result;
 }
 
+static f32 Condition_MissionWon(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return MissionSys != NULL && MissionSys->field8_0x1d == 2 ? 1.0f : 0.0f;
+}
+
 static f32 Condition_NumInSetAlive(AISYS_s *, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *, void *argument) {
     i32 set = reinterpret_cast<intptr_t>(argument);
     if (set == -1) set = process->unknown_b0;
@@ -796,7 +801,7 @@ extern "C" {
         {"Freeplay", NULL, NULL},
         {"Indy", NULL, NULL},
         {"MissionMode", NULL, NULL},
-        {"MissionWon", NULL, NULL},
+        {"MissionWon", Condition_MissionWon, NULL},
         {"ChallengeMode", NULL, NULL},
         {"PSP", NULL, NULL},
         {"AIOverrideControl", NULL, NULL},
