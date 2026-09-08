@@ -793,9 +793,6 @@ static __used__ int IsGrabbable(GameObject_s *) {
     return 0;
 }
 
-static __used__ void DrawCharacterAttachments(GameObject_s *, numtx_s *) {
-}
-
 static void NormalizeAnimPath(char *path) {
     while (*path != '\0') {
         *path = static_cast<char>(NuToUpper(*path));

@@ -888,7 +888,10 @@ typedef struct GameObject_s {
         };
     };
     f32 field_0xdc8; // 0x0dc8
-    u8 pad_dcc[4];
+    union {
+        u8 pad_dcc[4];
+        f32 thrust_effect_scale; // 0x0dcc, scales the character's thrust-locator models
+    };
     f32 takeover_timer; // 0x0dd0
     union {
         u8 pad_dd4[4];
@@ -1385,6 +1388,7 @@ DECOMP_ASSERT(offsetof(GameObject_s, timer_d28) == 0xd28, "GameObject D28 timer 
 DECOMP_ASSERT(offsetof(GameObject_s, timer_d50) == 0xd50, "GameObject D50 timer offset");
 DECOMP_ASSERT(offsetof(GameObject_s, flicker_flags) == 0xe26, "GameObject flicker flags offset");
 DECOMP_ASSERT(offsetof(GameObject_s, communicate_blend) == 0xd2c, "GameObject communicate blend offset");
+DECOMP_ASSERT(offsetof(GameObject_s, thrust_effect_scale) == 0xdcc, "GameObject thrust-effect scale offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0xefd) == 0xefd, "GameObject character flags offset");
 DECOMP_ASSERT(offsetof(GameObject_s, terrain_origin_floor_offset) == 0xd7c, "GameObject terrain-origin floor offset");
 DECOMP_ASSERT(offsetof(GameObject_s, gizforce_target) == 0x10d8, "GameObject Force target offset");

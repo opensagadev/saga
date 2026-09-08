@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 29.343859,
+    "fuzzy_match_percent": 29.463026,
     "total_code": "4722419",
     "matched_code": "59776",
     "matched_code_percent": 1.265792,
@@ -46055,14 +46055,6 @@
       "object": "bazel-out/x64_windows-fastbuild/bin/src/_objs/saga_target_legoapi/character.o",
       "functions": [
         {
-          "name": "_ZL24DrawCharacterAttachmentsP12GameObject_sP7numtx_s",
-          "demangled_name": "DrawCharacterAttachments(GameObject_s*, numtx_s*)",
-          "address": 1082560,
-          "offset": 192592,
-          "size": 1009,
-          "match_percent": 1.834061
-        },
-        {
           "name": "_ZL15ExtraDieSfx_LSWP12GameObject_s",
           "demangled_name": "ExtraDieSfx_LSW(GameObject_s*)",
           "address": 1158672,
@@ -63588,7 +63580,7 @@
           "address": 1935552,
           "offset": 1045584,
           "size": 34,
-          "match_percent": 46.666668
+          "match_percent": 99.77778
         },
         {
           "name": "_Z24Batarang_StartTargettingP12GameObject_s",
@@ -73762,6 +73754,14 @@
           "match_percent": 6.698341
         },
         {
+          "name": "_ZL24DrawCharacterAttachmentsP12GameObject_sP7numtx_s",
+          "demangled_name": "DrawCharacterAttachments(GameObject_s*, numtx_s*)",
+          "address": 1082560,
+          "offset": 192592,
+          "size": 1009,
+          "match_percent": 83.46725
+        },
+        {
           "name": "_ZL11DrawWeaponsP12GameObject_sif",
           "demangled_name": "DrawWeapons(GameObject_s*, int, float)",
           "address": 1091424,
@@ -73770,12 +73770,20 @@
           "match_percent": 0.0
         },
         {
+          "name": "_ZL17DrawParaphernaliaP12GameObject_s",
+          "demangled_name": "DrawParaphernalia(GameObject_s*)",
+          "address": 1095536,
+          "offset": 205568,
+          "size": 12138,
+          "match_percent": 36.947323
+        },
+        {
           "name": "_Z19DrawGameObjectsDrawi",
           "demangled_name": "DrawGameObjectsDraw(int)",
           "address": 1107680,
           "offset": 217712,
           "size": 586,
-          "match_percent": 16.588652
+          "match_percent": 67.049644
         },
         {
           "name": "_Z15DrawGameObjectsv",
@@ -73927,7 +73935,7 @@
           "address": 1316752,
           "offset": 426784,
           "size": 12845,
-          "match_percent": 11.275157
+          "match_percent": 11.279332
         },
         {
           "name": "_Z14ResetForceBackv",
@@ -74151,7 +74159,7 @@
           "address": 2400800,
           "offset": 1510832,
           "size": 6077,
-          "match_percent": 9.274746
+          "match_percent": 9.315449
         },
         {
           "name": "_Z17DrawSubItemMenu3Dv",
@@ -74719,7 +74727,7 @@
           "address": 4802912,
           "offset": 3912944,
           "size": 377,
-          "match_percent": 62.98969
+          "match_percent": 63.14433
         },
         {
           "name": "_Z20DrawPanel3DObjectMtxP12nuhspecial_sP7numtx_sf",
@@ -74743,7 +74751,7 @@
           "address": 4803600,
           "offset": 3913632,
           "size": 2060,
-          "match_percent": 92.167435
+          "match_percent": 92.2156
         },
         {
           "name": "_Z16DrawMiniKitCountffii",
@@ -124008,14 +124016,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZL17DrawParaphernaliaP12GameObject_s",
-      "demangled_name": "DrawParaphernalia(GameObject_s*)",
-      "address": 1095536,
-      "offset": 205568,
-      "size": 12138,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZL12PlayerCamPosP12GameObject_sP7nuvec_sS2_",
       "demangled_name": "PlayerCamPos(GameObject_s*, nuvec_s*, nuvec_s*)",
       "address": 1108416,
@@ -131123,8 +131123,8 @@
   "summary": {
     "bazel_units": 504,
     "functions": 13454,
-    "assigned_functions": 12197,
+    "assigned_functions": 12198,
     "ambiguous_functions": 237,
-    "unassigned_functions": 1020
+    "unassigned_functions": 1019
   }
 }

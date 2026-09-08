@@ -59,7 +59,8 @@ void Batarang_StartTargetting(GameObject_s *) {
 void Batarang_StartThrowQuick(GameObject_s *) {
 }
 
-void Batarang_GetObjectFromCharID(i32) {
+i32 Batarang_GetObjectFromCharID(i32 character) {
+    return 0x32 + (character == id_ROBIN);
 }
 
 void GetShootDirection_Batman(GameObject_s *, nuvec_s *) {
