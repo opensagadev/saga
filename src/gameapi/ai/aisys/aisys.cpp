@@ -1594,16 +1594,17 @@ __used__ static i32 Action_FaceLocator(AISYS *sys, AISCRIPTPROCESS *processor, A
     return locator != NULL;
 }
 
-__used__ static i32 Action_FlatTerrain(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
-                                       i32 param_4, i32 param_5, f32 param_6) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
-    (void)param_6;
-    return 0;
+static i32 Action_FlatTerrain(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
+                               i32 param_count, i32 first_time, f32) {
+    if (packet != NULL && packet->owner != NULL && first_time != 0) {
+        packet->owner->apiobj.flags_low |= 0x10;
+        for (i32 i = 0; i < param_count; i++) {
+            if (NuStrICmp(params[i], "false") == 0) {
+                packet->owner->apiobj.flags_low &= ~0x10;
+            }
+        }
+    }
+    return 1;
 }
 
 __used__ static i32 Action_GoToLocator(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
@@ -3007,16 +3008,17 @@ __used__ static i32 Action_SetMoveRadius(AISYS *sys, AISCRIPTPROCESS *processor,
     return 1;
 }
 
-__used__ static i32 Action_ShadowTerrain(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
-                                         i32 param_4, i32 param_5, f32 param_6) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
-    (void)param_6;
-    return 0;
+static i32 Action_ShadowTerrain(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
+                               i32 param_count, i32 first_time, f32) {
+    if (packet != NULL && packet->owner != NULL && first_time != 0) {
+        packet->owner->apiobj.flags_low |= 8;
+        for (i32 i = 0; i < param_count; i++) {
+            if (NuStrICmp(params[i], "false") == 0) {
+                packet->owner->apiobj.flags_low &= ~8;
+            }
+        }
+    }
+    return 1;
 }
 
 __used__ static i32 Action_SnapToLocator(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
