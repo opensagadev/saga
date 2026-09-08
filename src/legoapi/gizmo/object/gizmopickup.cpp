@@ -63,7 +63,7 @@ void RegisterTakeOverObject(GameObject_s *object) {
     if (script != NULL && script->name != NULL) {
         NuStrNCpy(takeoverobjects[index].script_name, script->name, 0x10);
     }
-    takeoverobjects[index].character_id = static_cast<u16>(object->id);
+    takeoverobjects[index].character_id = object->id;
     takeoverobjects[index].registered_level = level;
     takeoverobjects[index].current_level = level;
     takeoverobjects[index].source_creature = object->ai.field_0x134;
