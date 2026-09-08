@@ -485,9 +485,6 @@ static __used__ i32 Action_CanHelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *, A
     return 0;
 }
 
-static __used__ i32 Action_ClearTakeOverTarget(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
-    return 0;
-}
 
 static __used__ i32 Action_ImmuneToKillTerrain(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
     return 0;

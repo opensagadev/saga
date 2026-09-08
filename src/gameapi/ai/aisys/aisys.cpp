@@ -1122,6 +1122,21 @@ static i32 Action_SetZeroAcceleration(AISYS *, AISCRIPTPROCESS *, AIPACKET *pack
     return 1;
 }
 
+static i32 Action_ClearTakeOverTarget(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **, i32,
+                                      i32 first_time, f32) {
+    if (first_time) {
+        GameObject_s *object = packet->owner->apiobj.objptr;
+        if (object != NULL) {
+            GameObject_s *target = object->takeover_target;
+            if (target != NULL) {
+                object->takeover_target = NULL;
+                target->takeover_target = NULL;
+            }
+        }
+    }
+    return 1;
+}
+
 static i32 Action_SetDoomedEscapeLocator(AISYS *system, AISCRIPTPROCESS *processor, AIPACKET *packet,
                                        char **params, i32 param_count, i32 first_time, f32) {
     if (first_time) {
@@ -4916,7 +4931,7 @@ extern "C" {
         {"ReleaseTakeOver", NULL, 1, 0, 0},
         {"RegisterTakeOverObject", NULL, 0, 0, 0},
         {"SetTakeOverTarget", Action_SetTakeOverTarget, 0, 0, 0},
-        {"ClearTakeOverTarget", NULL, 0, 0, 0},
+        {"ClearTakeOverTarget", Action_ClearTakeOverTarget, 0, 0, 0},
         {"AddGameMsgCount", Action_AddGameMsgCount, 1, 0, 0},
         {"AddMiscPickups", Action_AddMiscPickups, 0, 0, 0},
         {"SetCanTakeOver", Action_SetCanTakeOver, 0, 0, 0},
