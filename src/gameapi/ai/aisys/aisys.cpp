@@ -6576,7 +6576,49 @@ i32 Action_CircleOpponent(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet,
     }
     return 0;
 }
-i32 Action_CirclePlayer(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
+i32 Action_CirclePlayer(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
+                       i32 param_count, i32 first_time, f32) {
+    NUVEC difference;
+    if (packet == NULL || sys == NULL || sys->player_1 == NULL) {
+        return 1;
+    }
+    if (first_time != 0) {
+        for (i32 i = 0; i < param_count; i++) {
+            if (AIActionParseSpeedFn != NULL && AIActionParseSpeedFn(params[i], &packet->goal_speed_mode) != 0) {
+                continue;
+            }
+            if (NuStrICmp(params[i], "ANTICLOCKWISE") == 0) {
+                packet->circle_clockwise = 0;
+            } else if (NuStrICmp(params[i], "CLOCKWISE") == 0) {
+                packet->circle_clockwise = 1;
+            } else if (NuStrICmp(params[i], "REVERSE") == 0) {
+                packet->circle_clockwise = !packet->circle_clockwise;
+            } else if (NuStrICmp(params[i], "facing") == 0) {
+                processor->action_data_1 |= 1;
+            } else if (NuStrICmp(params[i], "can_go_off_path") == 0) {
+                processor->action_data_1 |= 2;
+            } else if (NuStrICmp(params[i], "currentdist") == 0) {
+                processor->action_data_1 |= 4;
+            } else {
+                packet->movement_instruction_parameter = AIParamToFloatEx(packet, processor, params[i]);
+            }
+        }
+    }
+    if (sys->player_1 != NULL) {
+        if ((processor->action_data_1 & 4) != 0) {
+            packet->movement_instruction_parameter =
+                NuVecXZDist(&packet->terrain_origin, &sys->player_1->ai->last_path_position, &difference);
+        }
+        AIPACKET *target = sys->player_1->ai;
+        NUVEC *position = (processor->action_data_1 & 2) != 0 ? &target->terrain_origin : &target->last_path_position;
+        AIMoveInstruction(packet, position, target->mover_height, &target->path_info,
+                          AIPACKET_MOVEMENT_CIRCLE, packet->movement_instruction_parameter);
+        if ((processor->action_data_1 & 1) != 0) {
+            packet->movement_look_target = position;
+        }
+    }
+    return 0;
+}
 i32 Action_FollowPlayer(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 
 AIACTIONDEF api_aiactiondefs[] = {
