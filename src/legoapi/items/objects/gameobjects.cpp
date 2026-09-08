@@ -186,6 +186,23 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 
 static const f32 AI_RESPAWN_DELAY = 2.0f;
 
+static void *Condition_OnSpeederBikeInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    return name != NULL && system != NULL ? GetNamedGameObject(system, name) : NULL;
+}
+
+static f32 Condition_OnSpeederBike(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    GameObject_s *object = static_cast<GameObject_s *>(argument);
+    if (object == NULL && packet->owner != NULL) {
+        object = packet->owner->apiobj.objptr;
+    }
+    f32 result = 0.0f;
+    if (object != NULL && object->field_0xcc0 != NULL && object->character_context == 0x3b &&
+        object->field_0xcc0->id == id_SPEEDERBIKE) {
+        result = 1.0f;
+    }
+    return result;
+}
+
 static f32 Condition_Player2Active(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return player2 != NULL ? 1.0f : 0.0f;
 }
@@ -462,7 +479,7 @@ extern "C" {
         {"PlayerTakenOver", NULL, NULL},
         {"EitherPlayerTakenOver", NULL, NULL},
         {"BeenTakenOver", NULL, NULL},
-        {"OnSpeederBike", NULL, NULL},
+        {"OnSpeederBike", Condition_OnSpeederBike, Condition_OnSpeederBikeInit},
         {"UnderPlayerControl", NULL, NULL},
         {"CharacterExists", NULL, NULL},
         {"CharacterTypeExists", NULL, NULL},

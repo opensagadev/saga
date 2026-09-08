@@ -101,10 +101,6 @@ static __used__ f32 Condition_ObstacleAtEnd(AISYS_s *, AISCRIPTPROCESS_s *, AIPA
     return 0;
 }
 
-static __used__ f32 Condition_OnSpeederBike(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
-
 
 
 static __used__ f32 Condition_TakeOverRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
@@ -842,10 +838,6 @@ static __used__ f32 Condition_MaulShouldRunAway(AISYS_s *, AISCRIPTPROCESS_s *, 
 
 static __used__ f32 Condition_NearestPartyRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return 0;
-}
-
-static __used__ void *Condition_OnSpeederBikeInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
 }
 
 
