@@ -853,9 +853,6 @@ static __used__ i32 Action_CreateSplineCreatures(AISYS_s *system, AISCRIPTPROCES
     return 1;
 }
 
-static __used__ i32 Action_IgnoreLastSafePathPos(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
-    return 0;
-}
 
 static __used__ i32 Action_SetFormationCommander(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
     return 0;

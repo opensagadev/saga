@@ -1080,6 +1080,31 @@ static i32 Action_SetShootOpponents(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet
     return 1;
 }
 
+static i32 Action_IgnoreLastSafePathPos(AISYS *system, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
+                                      i32 param_count, i32 first_time, f32) {
+    if (first_time) {
+        GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+        i32 ignore = 1;
+        if (param_count != 0) {
+            for (i32 index = 0; index < param_count; ++index) {
+                if (NuStrICmp(params[index], "FALSE") == 0) {
+                    ignore = 0;
+                } else {
+                    char *value = NuStrIStr(params[index], "character=");
+                    if (value != NULL)
+                        object = GetNamedGameObject(system, value + 10);
+                }
+            }
+        }
+        if (object != NULL) {
+            if (object->character_context == 0x3c || object->field_0xcc0 != NULL)
+                Player_ClearContext(object, 1);
+            object->field_0xf03 = (object->field_0xf03 & ~1) | (u8)ignore;
+        }
+    }
+    return 1;
+}
+
 static i32 Action_PartyCanBeUnderCover(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **params,
                                      i32 param_count, i32 first_time, f32) {
     if (first_time) {
@@ -4765,7 +4790,7 @@ extern "C" {
         {"AddMiscPickups", Action_AddMiscPickups, 0, 0, 0},
         {"SetCanTakeOver", Action_SetCanTakeOver, 0, 0, 0},
         {"CanBeCarried", Action_CanBeCarried, 1, 0, 0},
-        {"IgnoreLastSafePathPos", NULL, 0, 0, 0},
+        {"IgnoreLastSafePathPos", Action_IgnoreLastSafePathPos, 0, 0, 0},
         {"AwkwardShapeOverride", NULL, 0, 0, 0},
         {"IgnoreSlideTerrain", Action_IgnoreSlideTerrain, 0, 0, 0},
         {"SplineFollowTerrain", Action_SplineFollowTerrain, 0, 0, 0},
