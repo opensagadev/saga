@@ -196,7 +196,13 @@ static void *Condition_UsingForceInit(AISYS_s *, char *name, AISCRIPT_s *) {
 
 static f32 Condition_ForceBeingUsed(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
-    return force != NULL && ((force->field_0xaa & 0x20) != 0 || force->field_0x3c != 0) ? 1.0f : 0.0f;
+    if (force == NULL) {
+        return 0.0f;
+    }
+    if ((force->field_0xaa & 0x20) == 0 && force->field_0x3c == 0) {
+        return 0.0f;
+    }
+    return 1.0f;
 }
 
 static void *Condition_ForceInit(AISYS_s *, char *name, AISCRIPT_s *) {
