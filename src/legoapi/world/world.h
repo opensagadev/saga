@@ -405,6 +405,7 @@ DECOMP_ASSERT(offsetof(WORLDINFO, push_block_count) == 0x46c4, "WORLDINFO push-b
 DECOMP_ASSERT(offsetof(WORLDINFO, gizmo_pickup_sys) == 0x50bc, "WORLDINFO pickup system offset");
 DECOMP_ASSERT(offsetof(WORLDINFO, giz_torp_machine_sys) == 0x5104, "WORLDINFO torpedo-machine system offset");
 DECOMP_ASSERT(offsetof(WORLDINFO, giz_bombgen_sys) == 0x5118, "WORLDINFO bomb-generator system offset");
+DECOMP_ASSERT(offsetof(WORLDINFO, current_gscn) == 0x13c, "WORLDINFO current scene offset");
 DECOMP_ASSERT(sizeof(WORLDINFO) == 0x51b0, "WORLDINFO ABI");
 
 extern void (*WorldInfo_InitMenuFn)(WORLDINFO *, i32 *, i32 *);

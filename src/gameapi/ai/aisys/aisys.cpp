@@ -968,9 +968,9 @@ static i32 Action_SelectRandomSpline(AISYS *, AISCRIPTPROCESS *, AIPACKET *, cha
         for (i32 index = 0; index < param_count; ++index) {
             char *value = NuStrIStr(params[index], "splines=");
             if (value != NULL) {
-                count += NuSplineFindAllBeg(WORLD->scene, value + 8, &splines[count], 32 - count);
+                count += NuSplineFindAllBeg(WORLD->current_gscn, value + 8, &splines[count], 32 - count);
             } else if ((value = NuStrIStr(params[index], "spline=")) != NULL) {
-                NUGSPLINE *spline = NuSplineFind(WORLD->scene, value + 7);
+                NUGSPLINE *spline = NuSplineFind(WORLD->current_gscn, value + 7);
                 if (spline != NULL && count < 32)
                     splines[count++] = spline;
             } else if (NuStrIStr(params[index], "unused") != NULL) {
@@ -1065,7 +1065,7 @@ static i32 Action_AddScriptProcessor(AISYS *sys, AISCRIPTPROCESS *processor, AIP
                 if ((u32)set >= 17)
                     set = 0;
             } else if ((value = NuStrIStr(params[index], "spline=")) != NULL) {
-                spline = NuSplineFind(WORLD->scene, value + 7);
+                spline = NuSplineFind(WORLD->current_gscn, value + 7);
             } else if ((value = NuStrIStr(params[index], "param")) != NULL && override_count < 4) {
                 NuStrNCpy(override_names[override_count], value + 6, 32);
                 char *separator = NuStrIStr(override_names[override_count], "=");
