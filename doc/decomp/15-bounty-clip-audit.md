@@ -223,3 +223,52 @@ processing/rendering and `Hint_Process`, which remain unfinished.
 
 Update this audit when the structures, recovered behavior, or matching status
 change. The live source and a fresh objdiff run remain authoritative.
+
+## Shop panel dispatch recovery (2026-09-08)
+
+The missing category text had a missing caller: `Hub_DrawPanel`
+(`0x1af380`, original size `0x28d7`) was empty. The original calls
+`DrawShopPanel` at `0x1af3c2`, after its new-game map-title fade and before
+episode, area, minikit-viewer, and build-progress panels. The recovered body
+preserves that dispatch and reconstructs those surrounding branches. It does
+not move the shop call into a different menu or renderer.
+
+`DrawItemMenu2D` also used the wrong localization variable for category 2:
+the original GOT reference at `0x2428e8` is `tEXTRAS`, not
+`tHELPANDOPTIONS`. Its high instruction-match percentage did not establish
+that the global reference was correct; the instrumented original-code
+comparison exposed the different title.
+
+| Function | Current match | Original/current bytes |
+|---|---:|---:|
+| `Hub_DrawPanel` | 30.886% | 10455 / 10788 |
+| `Hub_DrawMiniKitCount` | 96.569% | 603 / 603 |
+| `DrawItemMenu2D` | 99.792% | 358 / 358 |
+
+The private counter helper now formats the count, selects the normal or
+challenge-kit icon, clears the one-shot icon selector, and reproduces the
+original scale and rotation arithmetic. Its calling convention is inferred
+by the original compiler from real callers; there is no forced ABI or
+optimization attribute.
+
+Verification used mapped original and target x86 machine code, with rendering
+outputs instrumented and identical initialized state:
+
+- All 960 combinations of shop activity, six categories, title opacity,
+  new-game camera activity, and fade-boundary times produced identical text
+  calls, including position, scale, colour, and alpha.
+- All 720 counter cases agreed on formatted text, selected icon, position,
+  scale, rotations, and clearing the one-shot selector.
+- A native capture entered the shop through the physical counter surface and
+  displayed the `Characters` category title. The text callback ran 53 times
+  for that title. ASan and UBSan were enabled.
+- Two subsequent character-submenu capture attempts stopped before shop
+  entry on the outstanding `MovePlayer` / `NuAtan2D` invalid-angle error
+  (`nutrig.cpp:62`). These are failures, not successful submenu checks.
+
+Target and native builds and all four repository checks passed. This is not
+a claim that the entire shop or other hub panels are complete: several panel
+leaf functions, including `Hub_DrawAreaStats`, `Hub_DrawImportantBrick`,
+`Hub_DrawArcadeStats`, and `Hub_DrawSuperBonusStats`, remain stubs. The larger
+panel function and shop submenu routines still need matching improvements
+and broader runtime verification. No gizmo implementation was changed.

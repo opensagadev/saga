@@ -70,7 +70,7 @@ extern i32 draw_player_icons;
 extern f32 FORCEGLOWTIME;
 extern i16 tHINTS;
 extern i16 tCHARACTERS;
-extern i16 tHELPANDOPTIONS;
+extern i16 tEXTRAS;
 extern i16 tGOLDBRICKS;
 extern i16 tSTORYCLIPS;
 extern i16 tENTERCODE;
@@ -1631,7 +1631,7 @@ void DrawItemMenu2D() {
         } else if (picked == 1) {
             text_id = tCHARACTERS;
         } else if (picked == 2) {
-            text_id = tHELPANDOPTIONS;
+            text_id = tEXTRAS;
         } else if (picked == 4) {
             text_id = tGOLDBRICKS;
         } else if (picked == 5) {
