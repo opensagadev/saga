@@ -486,8 +486,11 @@ static f32 Condition_IsVisible(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, cha
 
 static f32 Condition_UnderPlayerControl(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     GameObject_s *object = static_cast<GameObject_s *>(argument);
-    if (object != NULL && (object->apiobj.flags_low & 0x80) != 0) return 1.0f;
-    return 0.0f;
+    f32 result = 0.0f;
+    if (object != NULL) {
+        if ((object->apiobj.flags_low & 0x80) != 0) result = 1.0f;
+    }
+    return result;
 }
 
 static void *Condition_UnderPlayerControlInit(AISYS_s *system, char *name, AISCRIPT_s *) {
