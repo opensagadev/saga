@@ -5420,18 +5420,6 @@ __used__ static f32 Condition_BeenAlerted(AISYS *sys, AISCRIPTPROCESS *processor
     return 0.0f;
 }
 
-__used__ static f32 Condition_BeenSpawned(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                          void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)arg;
-    (void)void_arg;
-    return packet != NULL && packet->owner != NULL && packet->owner->apiobj.field_0x27c == -1 &&
-                   packet->field_0x134 == 0xff
-               ? 1.0f
-               : 0.0f;
-}
-
 static f32 Condition_BeenToLevel(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *void_arg) {
     const isize area_level = AIConditionArgumentValue(void_arg);
     if (area_level == -1) {
@@ -7249,7 +7237,6 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_TO_LEVEL].eval_fn = Condition_BeenToLevel;
             lego_aiconditiondefs[LEGO_AI_CONDITION_MESSAGE].eval_fn = Condition_Message;
             lego_aiconditiondefs[LEGO_AI_CONDITION_MESSAGE].init_fn = Condition_MessageInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_SPAWNED].eval_fn = Condition_BeenSpawned;
             lego_aiconditiondefs[LEGO_AI_CONDITION_MUSIC_ON].eval_fn = Condition_MusicOn;
 
             lego_aiactiondefs[LEGO_AI_ACTION_SET_CURRENT_SPEED].eval_fn = Action_SetCurrentSpeed;

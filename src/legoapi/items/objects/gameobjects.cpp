@@ -541,6 +541,15 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+static f32 Condition_CannotReachDestination(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    return packet != NULL && (packet->runtime_flags & 0x40) != 0 ? 1.0f : 0.0f;
+}
+
+static f32 Condition_BeenSpawned(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    return packet != NULL && packet->owner != NULL && packet->owner->apiobj.field_0x27c == -1 &&
+        packet->field_0x134 == 0xff ? 1.0f : 0.0f;
+}
+
 static f32 Condition_ShouldAttackOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
     if (packet != NULL && packet->owner != NULL) {
         GameObject *object = packet->owner->apiobj.objptr;
@@ -908,11 +917,11 @@ extern "C" {
         {"HelpWithTriggers", Condition_HelpWithTriggers, NULL},
         {"EitherPlayerPushingSpinner", NULL, NULL},
         {"CharacterRange", NULL, NULL},
-        {"BeenSpawned", NULL, NULL},
+        {"BeenSpawned", Condition_BeenSpawned, NULL},
         {"LastAttackerRange", NULL, NULL},
         {"LastAttackerIsActivePlayer", NULL, NULL},
         {"PartyContainsDroids", Condition_PartyContainsDroids, NULL},
-        {"CannotReachDestination", NULL, NULL},
+        {"CannotReachDestination", Condition_CannotReachDestination, NULL},
         {"TakenOver", Condition_TakenOver, Condition_TakenOverInit},
         {"PlayerTakenOver", Condition_PlayerTakenOver, NULL},
         {"EitherPlayerTakenOver", Condition_EitherPlayerTakenOver, NULL},

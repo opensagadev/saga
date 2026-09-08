@@ -1192,11 +1192,6 @@ static __used__ f32 Condition_SockXDistanceToPlayer(AISYS_s *, AISCRIPTPROCESS_s
 }
 
 
-static __used__ f32 Condition_CannotReachDestination(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *,
-                                                     void *) {
-    return packet != NULL && (packet->runtime_flags & 0x40) != 0 ? 1.0f : 0.0f;
-}
-
 static __used__ f32 Condition_EitherPlayerUsingPanel(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return 0;
 }
@@ -1362,7 +1357,6 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_CUT_SCENE_FINISHED].eval_fn = Condition_CutSceneFinished;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CUT_SCENE_FINISHED].init_fn = Condition_CutSceneFinishedInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_FINISHED_SPLINE].eval_fn = Condition_FinishedSpline;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_CANNOT_REACH_DESTINATION].eval_fn = Condition_CannotReachDestination;
             lego_aiconditiondefs[LEGO_AI_CONDITION_IS_LOW_END_DEVICE].eval_fn = Condition_IsLowEndDevice;
             lego_aiconditiondefs[LEGO_AI_CONDITION_RANDOM_MAP_CHARS_AVAILABLE].eval_fn =
                 Condition_RandomMapCharsAvailable;
