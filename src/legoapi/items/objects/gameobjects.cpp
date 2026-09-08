@@ -484,6 +484,15 @@ static f32 Condition_IsVisible(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, cha
     return result;
 }
 
+static f32 Condition_PartyContainsDroids(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    for (i32 index = 0; index < 8; ++index) {
+        GameObject_s *object = Player[index];
+        if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001 &&
+            (object->field_0xeff & 1) == 0 && (object->apiobj.character_data->model_flags & 0x10) != 0) return 1.0f;
+    }
+    return 0.0f;
+}
+
 static f32 Condition_OpponentContext(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
     f32 result = 0.0f;
     if (packet != NULL && packet->opponent_object != NULL) {
@@ -704,7 +713,7 @@ extern "C" {
         {"BeenSpawned", NULL, NULL},
         {"LastAttackerRange", NULL, NULL},
         {"LastAttackerIsActivePlayer", NULL, NULL},
-        {"PartyContainsDroids", NULL, NULL},
+        {"PartyContainsDroids", Condition_PartyContainsDroids, NULL},
         {"CannotReachDestination", NULL, NULL},
         {"TakenOver", Condition_TakenOver, Condition_TakenOverInit},
         {"PlayerTakenOver", NULL, NULL},

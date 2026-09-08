@@ -1175,9 +1175,6 @@ static __used__ f32 Condition_NearestPartyXZRange(AISYS_s *, AISCRIPTPROCESS_s *
 
 
 
-static __used__ f32 Condition_PartyContainsDroids(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
 
 
 
