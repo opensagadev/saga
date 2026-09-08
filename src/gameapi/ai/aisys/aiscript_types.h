@@ -157,7 +157,10 @@ typedef struct AISCRIPTPROCESS_s {
     NUGSPLINE *unknown_ac;
 
     // Types uncertain.
-    u8 unknown_b0;
+    union {
+        u8 unknown_b0;
+        u8 creature_set;
+    };
     u16 unknown_b2;
 
     u8 interrupt_priority;

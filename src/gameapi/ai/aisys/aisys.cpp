@@ -5978,14 +5978,8 @@ __used__ static f32 Condition_Debug(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
     return 0.0f;
 }
 
-__used__ static f32 Condition_MySet(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                    void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
+static f32 Condition_MySet(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *, char *, void *) {
+    return static_cast<f32>(processor->creature_set);
 }
 
 __used__ static f32 Condition_Param(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg, void *) {
@@ -8136,6 +8130,7 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_ON_GROUND].eval_fn = Condition_OnGround;
             lego_aiconditiondefs[LEGO_AI_CONDITION_COLLIDING].eval_fn = Condition_Colliding;
             lego_aiconditiondefs[LEGO_AI_CONDITION_GOT_VICTIM].eval_fn = Condition_GotVictim;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_MY_SET].eval_fn = Condition_MySet;
             lego_aiconditiondefs[LEGO_AI_CONDITION_ON_OBJECT].eval_fn = Condition_OnObject;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CONTEXT].eval_fn = Condition_Context;
             lego_aiconditiondefs[LEGO_AI_CONDITION_IN_SWAMP].eval_fn = Condition_InSwamp;
