@@ -502,14 +502,6 @@ static __used__ i32 Action_LaunchGuidedMissile(AISYS_s *, AISCRIPTPROCESS_s *, A
 
 
 
-static __used__ i32 Action_CanShootObstructions(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params,
-                                                i32 param_count, i32 first_time, f32) {
-    GameObject_s *object = ActionOwner(packet);
-    if (first_time != 0 && object != NULL) {
-        object->field_0xefb = (object->field_0xefb & ~0x10u) | (ActionToggleEnabled(params, param_count) ? 0x10u : 0u);
-    }
-    return 1;
-}
 
 
 
@@ -954,7 +946,6 @@ namespace {
             lego_aiactiondefs[LEGO_AI_ACTION_CAN_SHOOT_OFF_SCREEN].eval_fn = Action_CanShootOffScreen;
             lego_aiactiondefs[LEGO_AI_ACTION_SET_BOLTS_DONT_GET_DEFLECTED_BACK].eval_fn =
                 Action_SetBoltsDontGetDeflectedBack;
-            lego_aiactiondefs[LEGO_AI_ACTION_CAN_SHOOT_OBSTRUCTIONS].eval_fn = Action_CanShootObstructions;
             lego_aiactiondefs[LEGO_AI_ACTION_CAN_HIT_FORCE_OBJECTS].eval_fn = Action_CanHitForceObjects;
             lego_aiactiondefs[LEGO_AI_ACTION_PLAYER_SPEEDER_HACK].eval_fn = Action_PlayerSpeederHack;
             lego_aiactiondefs[LEGO_AI_ACTION_CHAR_CLIP_TO_BLOB_SHADOWS].eval_fn = Action_CharClipToBlobShadows;

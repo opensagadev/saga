@@ -1171,6 +1171,23 @@ static i32 Action_ImmuneToKillTerrain(AISYS *, AISCRIPTPROCESS *, AIPACKET *pack
     return 1;
 }
 
+static i32 Action_CanShootObstructions(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
+                                       i32 param_count, i32, f32) {
+    if (packet == NULL || packet->owner == NULL)
+        return 1;
+    GameObject_s *object = packet->owner->apiobj.objptr;
+    if (object == NULL)
+        return 1;
+    object->field_0xefb |= 0x10;
+    if (param_count != 0) {
+        for (i32 index = 0; index < param_count; ++index) {
+            if (NuStrICmp(params[index], "FALSE") == 0)
+                object->field_0xefb &= ~0x10;
+        }
+    }
+    return 1;
+}
+
 static i32 Action_SetDoomedEscapeLocator(AISYS *system, AISCRIPTPROCESS *processor, AIPACKET *packet,
                                        char **params, i32 param_count, i32 first_time, f32) {
     if (first_time) {
@@ -4829,7 +4846,7 @@ extern "C" {
         {"ResetContext", Action_ResetContext, 0, 0, 0},
         {"PrefersPlayers", Action_PrefersPlayers, 0, 0, 0},
         {"SetBoltsDontGetDeflectedBack", NULL, 0, 0, 0},
-        {"CanShootObstructions", NULL, 0, 0, 0},
+        {"CanShootObstructions", Action_CanShootObstructions, 0, 0, 0},
         {"UseBigJumpToJump", Action_UseBigJumpToJump, 0, 0, 0},
         {"SetTaggable", Action_SetTaggable, 1, 0, 0},
         {"CatchUpForbidden", Action_CatchUpForbidden, 0, 0, 0},
