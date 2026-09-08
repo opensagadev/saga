@@ -1211,10 +1211,10 @@ __used__ static i32 Action_FacePlayer(AISYS *sys, AISCRIPTPROCESS *processor, AI
         f32 min_time = 0.0f;
         f32 max_time = 0.0f;
         for (i32 index = 0; index < param_count; ++index) {
-            char *value = NuStrIStr(params[index], "mintime=");
+            char *value = NuStrIStr(params[index], "mintime");
             if (value != NULL) {
                 min_time = AIParamToFloatEx(packet, processor, value + 8);
-            } else if ((value = NuStrIStr(params[index], "maxtime=")) != NULL) {
+            } else if ((value = NuStrIStr(params[index], "maxtime")) != NULL) {
                 max_time = AIParamToFloatEx(packet, processor, value + 8);
             } else {
                 processor->action_timer = AIParamToFloatEx(packet, processor, params[index]);
@@ -1293,9 +1293,10 @@ __used__ static i32 Action_FollowPath(AISYS *sys, AISCRIPTPROCESS *processor, AI
 
 __used__ static i32 Action_GoToOrigin(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                       i32 param_count, i32 first_time, f32 elapsed) {
-    if (sys == NULL || packet == NULL || packet->owner == NULL || packet->path_info.path == NULL ||
+    NUVEC difference;
+    if (packet == NULL || packet->owner == NULL || packet->path_info.path == NULL ||
         packet->path_info.connection == NULL || (packet->owner->apiobj.field_0x1f4 & 0x400) == 0 ||
-        packet->field_0x134 == 0xff || packet->field_0x134 >= sys->creature_count) {
+        packet->field_0x134 == 0xff) {
         return 1;
     }
     AICREATURE *creature = &sys->creatures[packet->field_0x134];
@@ -1312,23 +1313,27 @@ __used__ static i32 Action_GoToOrigin(AISYS *sys, AISCRIPTPROCESS *processor, AI
             if (AIActionParseSpeedFn != NULL && AIActionParseSpeedFn(params[index], &packet->goal_speed_mode) != 0) {
                 continue;
             }
-            char *value = ActionParamValue(params[index], "waittime");
+            char *value = NuStrIStr(params[index], "waittime");
             if (value != NULL) {
-                processor->action_timer = AIParamToFloatEx(packet, processor, value);
-            } else if ((value = ActionParamValue(params[index], "mintime")) != NULL) {
-                min_time = AIParamToFloatEx(packet, processor, value);
-            } else if ((value = ActionParamValue(params[index], "maxtime")) != NULL) {
-                max_time = AIParamToFloatEx(packet, processor, value);
+                processor->action_timer = AIParamToFloatEx(packet, processor, value + NuStrLen("waittime") + 1);
+            } else if ((value = NuStrIStr(params[index], "mintime")) != NULL) {
+                min_time = AIParamToFloatEx(packet, processor, value + NuStrLen("mintime") + 1);
+            } else if ((value = NuStrIStr(params[index], "maxtime")) != NULL) {
+                max_time = AIParamToFloatEx(packet, processor, value + NuStrLen("maxtime") + 1);
             } else if (NuStrICmp(params[index], "xz_rangecheck") == 0) {
                 processor->action_data_2 = 1;
-            } else if ((value = ActionParamValue(params[index], "goalrange")) != NULL) {
-                packet->movement_instruction_parameter = AIParamToFloatEx(packet, processor, value);
+            } else if ((value = NuStrIStr(params[index], "goalrange")) != NULL) {
+                packet->movement_instruction_parameter = AIParamToFloatEx(packet, processor, value + NuStrLen("goalrange") + 1);
             } else {
                 packet->movement_instruction_parameter = AIParamToFloatEx(packet, processor, params[index]);
             }
         }
         if (processor->action_timer == 0.0f) {
-            processor->action_timer = min_time < max_time ? NuRandFloat() * (max_time - min_time) + min_time : 0.01f;
+            if (min_time < max_time) {
+                processor->action_timer = NuRandFloat() * (max_time - min_time) + min_time;
+            } else {
+                processor->action_timer = 0.01f;
+            }
         }
         AIMoveInstruction(packet, origin, 0.0f, &creature->path_info, AIPACKET_MOVEMENT_TO_DESTINATION,
                           packet->movement_instruction_parameter);
@@ -1340,17 +1345,19 @@ __used__ static i32 Action_GoToOrigin(AISYS *sys, AISCRIPTPROCESS *processor, AI
 
     AIMoveInstruction(packet, origin, 0.0f, &creature->path_info, AIPACKET_MOVEMENT_TO_DESTINATION,
                       packet->movement_instruction_parameter);
-    const f32 distance_squared = processor->action_data_2 == 0 ? NuVecDistSqr(&packet->terrain_origin, origin, NULL)
-                                                               : NuVecXZDistSqr(&packet->terrain_origin, origin, NULL);
+    const f32 distance_squared = processor->action_data_2 != 0 ? NuVecXZDistSqr(&packet->terrain_origin, origin, &difference)
+                                                               : NuVecDistSqr(&packet->terrain_origin, origin, &difference);
     const f32 range = packet->movement_instruction_parameter + ai_moveradius +
                       elapsed * packet->owner->apiobj.horizontal_velocity_magnitude;
     if (distance_squared < range * range) {
+        f32 remaining_time = processor->action_timer;
         packet->movement_look_target = &processor->action_pos;
-        if (processor->action_timer <= 0.0f) {
+        if (!(remaining_time > 0.0f)) {
             return 1;
         }
-        processor->action_timer -= elapsed;
-        if (processor->action_timer < 0.0f) {
+        remaining_time -= elapsed;
+        processor->action_timer = remaining_time;
+        if (remaining_time < 0.0f) {
             processor->action_timer = 0.0f;
         }
     }
@@ -2168,12 +2175,12 @@ __used__ static i32 Action_FaceOpponent(AISYS *sys, AISCRIPTPROCESS *processor, 
             if (AIActionParseSpeedFn != NULL && AIActionParseSpeedFn(params[index], &packet->goal_speed_mode) != 0) {
                 continue;
             }
-            char *value = NuStrIStr(params[index], "mintime=");
+            char *value = NuStrIStr(params[index], "mintime");
             if (value != NULL) {
                 min_time = AIParamToFloatEx(packet, processor, value + 8);
-            } else if ((value = NuStrIStr(params[index], "maxtime=")) != NULL) {
+            } else if ((value = NuStrIStr(params[index], "maxtime")) != NULL) {
                 max_time = AIParamToFloatEx(packet, processor, value + 8);
-            } else if ((value = NuStrIStr(params[index], "faceoffset=")) != NULL) {
+            } else if ((value = NuStrIStr(params[index], "faceoffset")) != NULL) {
                 processor->action_data_4 = AIParamToFloatEx(packet, processor, value + 11);
             } else if (NuStrICmp(params[index], "nearest_opponent") == 0) {
                 processor->action_data_1 = 1;
