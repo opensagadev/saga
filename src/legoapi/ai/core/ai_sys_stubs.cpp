@@ -1946,7 +1946,53 @@ extern "C" {
         ai_usepackfile = enabled;
     }
 
-    void CalculateLocatorDirection(void) {
+    void CalculateLocatorDirection(i32 direction, numtx_s *matrix, NUVEC *out) {
+        switch (direction) {
+            case 0:
+            case 1:
+                out->z = 0.0f;
+                out->x = 0.0f;
+                out->y = 1.0f;
+                return;
+            case 2:
+                out->z = 0.0f;
+                out->x = 0.0f;
+                out->y = -1.0f;
+                return;
+            case 3:
+                out->x = -1.0f;
+                out->y = 0.0f;
+                out->z = 0.0f;
+                break;
+            case 4:
+                out->x = 1.0f;
+                out->y = 0.0f;
+                out->z = 0.0f;
+                break;
+            case 5:
+                out->x = 0.0f;
+                out->y = -1.0f;
+                out->z = 0.0f;
+                break;
+            case 6:
+                out->x = 0.0f;
+                out->y = 1.0f;
+                out->z = 0.0f;
+                break;
+            case 7:
+                out->x = 0.0f;
+                out->y = 0.0f;
+                out->z = 1.0f;
+                break;
+            case 8:
+                out->x = 0.0f;
+                out->y = 0.0f;
+                out->z = -1.0f;
+                break;
+            default:
+                return;
+        }
+        NuVecMtxRotate(out, out, matrix);
     }
 
 
