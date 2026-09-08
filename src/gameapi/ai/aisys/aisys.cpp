@@ -5326,16 +5326,6 @@ __used__ static f32 Condition_IAmAGoody(AISYS *sys, AISCRIPTPROCESS *processor, 
     return 0.0f;
 }
 
-__used__ static f32 Condition_InContext(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                        void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
-}
-
 __used__ static f32 Condition_InMiniCut(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
                                         void *void_arg) {
     (void)sys;

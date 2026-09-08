@@ -186,6 +186,33 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 
 static const f32 AI_RESPAWN_DELAY = 2.0f;
 
+static void *Condition_InContextInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    i32 context;
+    if (NuStrICmp(name, "DEACTIVATED") == 0) context = 0x17;
+    else if (NuStrICmp(name, "FORCEDBACK") == 0) context = 0x22;
+    else if (NuStrICmp(name, "GRAB") == 0) context = 0x38;
+    else if (NuStrICmp(name, "EAT") == 0) context = 0x3f;
+    else if (NuStrICmp(name, "FORCEPUSHED") == 0) context = 0x1c;
+    else if (NuStrICmp(name, "FORCEPUSH") == 0) context = 0x1b;
+    else if (NuStrICmp(name, "GETIN") == 0) context = 0x3c;
+    else if (NuStrICmp(name, "BALLOONING") == 0) context = 0x5d;
+    else if (NuStrICmp(name, "STUNNED") == 0) context = 0x5a;
+    else if (NuStrICmp(name, "FLOAT") == 0) context = 0x4b;
+    else if (NuStrICmp(name, "GRAPPLE") == 0) context = 0x46;
+    else context = 0x64;
+    return reinterpret_cast<void *>(static_cast<isize>(context));
+}
+
+static f32 Condition_InContext(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    if (packet != NULL && packet->owner != NULL) {
+        GameObject_s *object = packet->owner->apiobj.objptr;
+        if (object != NULL) {
+            return object->character_context == static_cast<i32>(reinterpret_cast<isize>(argument)) ? 1.0f : 0.0f;
+        }
+    }
+    return 0.0f;
+}
+
 static void *Condition_HitPointsInit(AISYS_s *system, char *name, AISCRIPT_s *) {
     return name != NULL && system != NULL ? GetNamedGameObject(system, name) : NULL;
 }
@@ -326,7 +353,7 @@ extern "C" {
         {"IsSetAlive", NULL, NULL},
         {"NumInSetAlive", NULL, NULL},
         {"Context", NULL, NULL},
-        {"InContext", NULL, NULL},
+        {"InContext", Condition_InContext, Condition_InContextInit},
         {"OpponentContext", NULL, NULL},
         {"Player2Active", NULL, NULL},
         {"NumBaddies", NULL, NULL},
