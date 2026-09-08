@@ -1642,14 +1642,16 @@ __used__ static i32 Action_GoToLocator(AISYS *sys, AISCRIPTPROCESS *processor, A
             return 1;
         }
 
-        const i32 movement_mode = (processor->action_data_1 & GO_TO_LOCATOR_IGNORE_PATH) != 0
-                                      ? AIPACKET_MOVEMENT_DIRECT
-                                      : AIPACKET_MOVEMENT_TO_DESTINATION;
-        AIMoveInstruction(packet, &locator->position, 0.0f, reinterpret_cast<AIPATHINFO *>(&locator->path),
-                          movement_mode, packet->movement_instruction_parameter);
+        if ((processor->action_data_1 & GO_TO_LOCATOR_IGNORE_PATH) != 0) {
+            AIMoveInstruction(packet, &locator->position, 0.0f, reinterpret_cast<AIPATHINFO *>(&locator->path),
+                              AIPACKET_MOVEMENT_DIRECT, packet->movement_instruction_parameter);
+        } else {
+            AIMoveInstruction(packet, &locator->position, 0.0f, reinterpret_cast<AIPATHINFO *>(&locator->path),
+                              AIPACKET_MOVEMENT_TO_DESTINATION, packet->movement_instruction_parameter);
+        }
 
-        if ((processor->action_data_1 & GO_TO_LOCATOR_FACE_OPPONENT) != 0 && packet->opponent != NULL) {
-            packet->movement_look_target = &static_cast<APIOBJECT *>(packet->opponent)->position;
+        if ((processor->action_data_1 & GO_TO_LOCATOR_FACE_OPPONENT) != 0 && packet->opponent_object != NULL) {
+            packet->movement_look_target = &packet->opponent_object->position;
         }
         if ((processor->action_data_1 & GO_TO_LOCATOR_ON_GROUND) != 0 && packet->owner->apiobj.field_0x27d == 0) {
             return 0;
@@ -1659,9 +1661,9 @@ __used__ static i32 Action_GoToLocator(AISYS *sys, AISCRIPTPROCESS *processor, A
         const f32 distance_squared = (processor->action_data_1 & GO_TO_LOCATOR_XZ_RANGE_CHECK) != 0
                                          ? NuVecXZDistSqr(&packet->terrain_origin, &locator->position, &distance_vector)
                                          : NuVecDistSqr(&packet->terrain_origin, &locator->position, &distance_vector);
-        const f32 reach_distance = packet->movement_instruction_parameter + 0.1f +
+        const f32 reach_distance = packet->movement_instruction_parameter + ai_moveradius +
                                    elapsed * packet->owner->apiobj.horizontal_velocity_magnitude;
-        if (reach_distance * reach_distance <= distance_squared) {
+        if (!(reach_distance * reach_distance > distance_squared)) {
             if ((packet->field_0x1e6 & 0x40) != 0 &&
                 (processor->action_data_1 & GO_TO_LOCATOR_MUST_REACH_DESTINATION) != 0 &&
                 AIBigJumpToDestinationFn != NULL) {
@@ -1670,10 +1672,10 @@ __used__ static i32 Action_GoToLocator(AISYS *sys, AISCRIPTPROCESS *processor, A
             return 0;
         }
 
-        if ((processor->action_data_1 & GO_TO_LOCATOR_FACE_OPPONENT) == 0 || packet->opponent == NULL) {
+        if ((processor->action_data_1 & GO_TO_LOCATOR_FACE_OPPONENT) == 0 || packet->opponent_object == NULL) {
             packet->movement_look_target = &processor->action_pos;
         }
-        if (processor->action_timer <= 0.0f) {
+        if (!(processor->action_timer > 0.0f)) {
             return 1;
         }
         processor->action_timer -= elapsed;
@@ -1693,87 +1695,87 @@ __used__ static i32 Action_GoToLocator(AISYS *sys, AISCRIPTPROCESS *processor, A
     f32 maximum_time = 0.0f;
     char locator_name[64];
 
-    for (i32 index = 0; index < param_count; ++index) {
-        char *param = params[index];
-        if (AIActionParseSpeedFn != NULL && AIActionParseSpeedFn(param, &packet->goal_speed_mode) != 0) {
-            continue;
-        }
-
-        if (NuStrIStr(param, "name") != NULL && ++index < param_count) {
-            if (use_indexed_name != 0 && packet->owner->apiobj.field_0x27c != -1) {
-                sprintf(locator_name, "%s_%d", params[index], packet->owner->apiobj.field_0x27c);
-            } else if (use_personal_name != 0 && packet->owner->apiobj.character_data != NULL &&
-                       packet->owner->apiobj.character_data->file != NULL) {
-                sprintf(locator_name, "%s_%s", params[index], packet->owner->apiobj.character_data->file);
-            } else if (random_locator_count != 0) {
-                sprintf(locator_name, "%s_%d", params[index], NuRand(NULL) % random_locator_count);
-            } else {
-                sprintf(locator_name, params[index]);
+    if (param_count != 0) {
+        for (i32 index = 0; index < param_count; ++index) {
+            if (AIActionParseSpeedFn != NULL && AIActionParseSpeedFn(params[index], &packet->goal_speed_mode) != 0) {
+                continue;
             }
 
-            processor->action_data_3 = AIPathFindLocator(sys, locator_name);
-            if (NuStrIStr(params[index - 1], "teleport") != NULL) {
-                AILOCATOR *locator = static_cast<AILOCATOR *>(processor->action_data_3);
-                if (locator == NULL) {
+            if (NuStrIStr(params[index], "name") != NULL || NuStrIStr(params[index], "teleport") != NULL) {
+                ++index;
+                if (index < param_count) {
+                    if (use_indexed_name != 0 && packet->owner->apiobj.field_0x27c != -1) {
+                        sprintf(locator_name, "%s_%d", params[index], packet->owner->apiobj.field_0x27c);
+                    } else if (use_personal_name != 0 && packet->owner->apiobj.character_data != NULL) {
+                        sprintf(locator_name, "%s_%s", params[index], packet->owner->apiobj.character_data->file);
+                    } else if (random_locator_count != 0) {
+                        sprintf(locator_name, "%s_%d", params[index], NuRand(NULL) % random_locator_count);
+                    } else {
+                        sprintf(locator_name, params[index]);
+                    }
+
+                    processor->action_data_3 = AIPathFindLocator(sys, locator_name);
+                }
+                if (NuStrIStr(params[index - 1], "teleport") != NULL) {
+                    AILOCATOR *locator = static_cast<AILOCATOR *>(processor->action_data_3);
+                    if (locator == NULL) {
+                        return 1;
+                    }
+                    packet->owner->apiobj.position = locator->position;
                     return 1;
                 }
-                packet->owner->apiobj.position = locator->position;
-                return 1;
+                continue;
             }
-            continue;
-        }
 
-        if (NuStrIStr(param, "teleport") != NULL) {
-            continue;
-        }
-        if (NuStrIStr(param, "personal") != NULL) {
-            use_personal_name = 1;
-            continue;
-        }
-        if (NuStrIStr(param, "indexed") != NULL) {
-            use_indexed_name = 1;
-            continue;
-        }
+            if (NuStrIStr(params[index], "personal") != NULL) {
+                use_personal_name = 1;
+                continue;
+            }
+            if (NuStrIStr(params[index], "indexed") != NULL) {
+                use_indexed_name = 1;
+                continue;
+            }
 
-        char *value = NuStrIStr(param, "random");
-        if (value != NULL) {
-            random_locator_count = AIParamToFloatEx(packet, processor, value + NuStrLen("random") + 1);
-            continue;
-        }
-        value = NuStrIStr(param, "waittime");
-        if (value != NULL) {
-            processor->action_timer = AIParamToFloatEx(packet, processor, value + NuStrLen("waittime") + 1);
-            continue;
-        }
-        value = NuStrIStr(param, "mintime");
-        if (value != NULL) {
-            minimum_time = AIParamToFloatEx(packet, processor, value + NuStrLen("mintime") + 1);
-            continue;
-        }
-        value = NuStrIStr(param, "maxtime");
-        if (value != NULL) {
-            maximum_time = AIParamToFloatEx(packet, processor, value + NuStrLen("maxtime") + 1);
-            continue;
-        }
-        value = NuStrIStr(param, "goalrange");
-        if (value != NULL) {
-            packet->movement_instruction_parameter =
-                AIParamToFloatEx(packet, processor, value + NuStrLen("goalrange") + 1);
-            continue;
-        }
+            char *value = NuStrIStr(params[index], "random");
+            if (value != NULL) {
+                random_locator_count = AIParamToFloatEx(packet, processor, value + NuStrLen("random") + 1);
+                continue;
+            }
+            value = NuStrIStr(params[index], "waittime");
+            if (value != NULL) {
+                processor->action_timer = AIParamToFloatEx(packet, processor, value + NuStrLen("waittime") + 1);
+                continue;
+            }
+            value = NuStrIStr(params[index], "mintime");
+            if (value != NULL) {
+                minimum_time = AIParamToFloatEx(packet, processor, value + NuStrLen("mintime") + 1);
+                continue;
+            }
+            value = NuStrIStr(params[index], "maxtime");
+            if (value != NULL) {
+                maximum_time = AIParamToFloatEx(packet, processor, value + NuStrLen("maxtime") + 1);
+                continue;
+            }
+            value = NuStrIStr(params[index], "goalrange");
+            if (value != NULL) {
+                packet->movement_instruction_parameter =
+                    AIParamToFloatEx(packet, processor, value + NuStrLen("goalrange") + 1);
+                continue;
+            }
 
-        if (NuStrICmp(param, "on_ground") == 0) {
-            processor->action_data_1 |= GO_TO_LOCATOR_ON_GROUND;
-        } else if (NuStrICmp(param, "xz_rangecheck") == 0) {
-            processor->action_data_1 |= GO_TO_LOCATOR_XZ_RANGE_CHECK;
-        } else if (NuStrICmp(param, "face_opponent") == 0) {
-            processor->action_data_1 |= GO_TO_LOCATOR_FACE_OPPONENT;
-        } else if (NuStrICmp(param, "ignore_path") == 0) {
-            processor->action_data_1 |= GO_TO_LOCATOR_IGNORE_PATH;
-        } else if (NuStrICmp(param, "must_reach_destination") == 0) {
-            processor->action_data_1 |= GO_TO_LOCATOR_MUST_REACH_DESTINATION;
-        } else {
-            packet->movement_instruction_parameter = AIParamToFloatEx(packet, processor, param);
+            if (NuStrICmp(params[index], "on_ground") == 0) {
+                processor->action_data_1 |= GO_TO_LOCATOR_ON_GROUND;
+            } else if (NuStrICmp(params[index], "xz_rangecheck") == 0) {
+                processor->action_data_1 |= GO_TO_LOCATOR_XZ_RANGE_CHECK;
+            } else if (NuStrICmp(params[index], "face_opponent") == 0) {
+                processor->action_data_1 |= GO_TO_LOCATOR_FACE_OPPONENT;
+            } else if (NuStrICmp(params[index], "ignore_path") == 0) {
+                processor->action_data_1 |= GO_TO_LOCATOR_IGNORE_PATH;
+            } else if (NuStrICmp(params[index], "must_reach_destination") == 0) {
+                processor->action_data_1 |= GO_TO_LOCATOR_MUST_REACH_DESTINATION;
+            } else {
+                packet->movement_instruction_parameter = AIParamToFloatEx(packet, processor, params[index]);
+            }
         }
     }
 
@@ -1790,11 +1792,13 @@ __used__ static i32 Action_GoToLocator(AISYS *sys, AISCRIPTPROCESS *processor, A
         return 1;
     }
 
-    const i32 movement_mode = (processor->action_data_1 & GO_TO_LOCATOR_IGNORE_PATH) != 0
-                                  ? AIPACKET_MOVEMENT_DIRECT
-                                  : AIPACKET_MOVEMENT_TO_DESTINATION;
-    AIMoveInstruction(packet, &locator->position, 0.0f, reinterpret_cast<AIPATHINFO *>(&locator->path), movement_mode,
-                      packet->movement_instruction_parameter);
+    if ((processor->action_data_1 & GO_TO_LOCATOR_IGNORE_PATH) != 0) {
+        AIMoveInstruction(packet, &locator->position, 0.0f, reinterpret_cast<AIPATHINFO *>(&locator->path),
+                          AIPACKET_MOVEMENT_DIRECT, packet->movement_instruction_parameter);
+    } else {
+        AIMoveInstruction(packet, &locator->position, 0.0f, reinterpret_cast<AIPATHINFO *>(&locator->path),
+                          AIPACKET_MOVEMENT_TO_DESTINATION, packet->movement_instruction_parameter);
+    }
 
     processor->action_pos.x = 0.0f;
     processor->action_pos.y = 0.0f;
