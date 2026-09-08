@@ -1079,6 +1079,28 @@ static i32 Action_SetShootOpponents(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet
     return 1;
 }
 
+static i32 Action_SplineFollowTerrain(AISYS *system, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
+                                    i32 param_count, i32 first_time, f32) {
+    if (first_time) {
+        GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+        i32 follow = 1;
+        if (param_count != 0) {
+            for (i32 index = 0; index < param_count; ++index) {
+                if (NuStrICmp(params[index], "FALSE") == 0) {
+                    follow = 0;
+                } else {
+                    char *value = NuStrIStr(params[index], "character=");
+                    if (value != NULL)
+                        object = GetNamedGameObject(system, value + 10);
+                }
+            }
+        }
+        if (object != NULL)
+            object->field_0xf01 = (object->field_0xf01 & ~0x10) | ((u8)follow << 4);
+    }
+    return 1;
+}
+
 static i32 Action_IgnoreSlideTerrain(AISYS *system, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
                                     i32 param_count, i32 first_time, f32) {
     if (first_time) {
@@ -4699,7 +4721,7 @@ extern "C" {
         {"IgnoreLastSafePathPos", NULL, 0, 0, 0},
         {"AwkwardShapeOverride", NULL, 0, 0, 0},
         {"IgnoreSlideTerrain", Action_IgnoreSlideTerrain, 0, 0, 0},
-        {"SplineFollowTerrain", NULL, 0, 0, 0},
+        {"SplineFollowTerrain", Action_SplineFollowTerrain, 0, 0, 0},
         {"SetLayer", Action_SetLayer, 0, 0, 0},
         {"CreateRider", Action_CreateRider, 0, 0, 0},
         {"AddTorpedoPacket", NULL, 1, 0, 0},
