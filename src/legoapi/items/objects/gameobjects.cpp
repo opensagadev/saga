@@ -539,6 +539,10 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+static f32 Condition_DropBackInTimer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return drop_back_in_timer;
+}
+
 static f32 Condition_InMiniCut(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *arg, void *) {
     return MiniCutCam != 0 || (arg != NULL && ObstacleCamSpl != NULL) ? 1.0f : 0.0f;
 }
@@ -862,7 +866,7 @@ extern "C" {
         {"RespawnLocatorIs", NULL, NULL},
         {"InMiniCut", Condition_InMiniCut, NULL},
         {"MaulShouldRunAway", NULL, NULL},
-        {"DropBackInTimer", NULL, NULL},
+        {"DropBackInTimer", Condition_DropBackInTimer, NULL},
         {"HelpWithTriggers", NULL, NULL},
         {"EitherPlayerPushingSpinner", NULL, NULL},
         {"CharacterRange", NULL, NULL},
