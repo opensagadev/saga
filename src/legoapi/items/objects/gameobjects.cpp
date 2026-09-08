@@ -541,6 +541,22 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+static f32 Condition_MaulShouldRunAway(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    if (packet->owner != NULL) {
+        i32 angle = NuAtan2D(packet->owner->apiobj.collision_position.x - 5.5f,
+                            packet->owner->apiobj.collision_position.z - 3.65f);
+        for (i32 index = 0; index < 2; ++index) {
+            GameObject *object = Player[index];
+            if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001) {
+                f32 x = object->apiobj.collision_position.x - 5.5f;
+                f32 z = object->apiobj.collision_position.z - 3.65f;
+                if (x * x + z * z < 25.0f && NuAngSub(NuAtan2D(x, z), angle) <= 0xe37) return 1.0f;
+            }
+        }
+    }
+    return 0.0f;
+}
+
 static f32 Condition_BeenTakenOver(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
     GameObject *object = static_cast<GameObject *>(argument);
     if (object == NULL && packet->owner != NULL) object = packet->owner->apiobj.objptr;
@@ -943,7 +959,7 @@ extern "C" {
         {"BigJumpComplete", Condition_BigJumpComplete, NULL},
         {"RespawnLocatorIs", Condition_RespawnLocatorIs, Condition_RespawnLocatorIsInit},
         {"InMiniCut", Condition_InMiniCut, NULL},
-        {"MaulShouldRunAway", NULL, NULL},
+        {"MaulShouldRunAway", Condition_MaulShouldRunAway, NULL},
         {"DropBackInTimer", Condition_DropBackInTimer, NULL},
         {"HelpWithTriggers", Condition_HelpWithTriggers, NULL},
         {"EitherPlayerPushingSpinner", NULL, NULL},
