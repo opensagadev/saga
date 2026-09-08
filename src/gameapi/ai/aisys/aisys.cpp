@@ -17,6 +17,7 @@
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/gizmos/traps/gizturrets.h"
 #include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/gizmos/object/newblowup.h"
 #include "legoapi/gizmos/transport/grapples.h"
 #include "legoapi/items/objects/gameobjects.h"
@@ -6661,6 +6662,20 @@ static void *Condition_CharacterExistsInit(AISYS *system, char *name, AISCRIPT *
     return NULL;
 }
 
+static f32 Condition_BuildItComplete(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *argument) {
+    if (argument != NULL) {
+        GIZBUILDIT *build = static_cast<GIZBUILDIT *>(static_cast<GIZMO *>(argument)->object);
+        if (build != NULL) {
+            return build->build_state == 2 ? 1.0f : 0.0f;
+        }
+    }
+    return 0.0f;
+}
+
+static void *Condition_BuildItCompleteInit(AISYS *, char *name, AISCRIPT *) {
+    return GizmoFindByName(WORLD->gizmo_sys, gizbuildit_gizmotype_id, name);
+}
+
 static void *Condition_CategoryIsInit(AISYS *system, char *arg, AISCRIPT *) {
     isize category = -1;
     if (arg != NULL && system != NULL && CharCategory != NULL) {
@@ -8524,6 +8539,8 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_Z_POS].init_fn = Condition_XYZPosInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_TAKE_OVER_RANGE].eval_fn = Condition_TakeOverRange;
             lego_aiconditiondefs[LEGO_AI_CONDITION_HAS_TAKE_OVER].eval_fn = Condition_HasTakeOver;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_BUILD_IT_COMPLETE].eval_fn = Condition_BuildItComplete;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_BUILD_IT_COMPLETE].init_fn = Condition_BuildItCompleteInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CHARACTER_EXISTS].eval_fn = Condition_CharacterExists;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CHARACTER_EXISTS].init_fn = Condition_CharacterExistsInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_TO_LEVEL].init_fn = Condition_BeenToLevelInit;
