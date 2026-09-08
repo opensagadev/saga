@@ -189,6 +189,16 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 
 static const f32 AI_RESPAWN_DELAY = 2.0f;
 
+static void *Condition_UsingForceInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    GIZMO_s *gizmo = GizmoFindByName(WORLD->gizmo_sys, force_gizmotype_id, name);
+    return gizmo != NULL ? gizmo->object : NULL;
+}
+
+static f32 Condition_ForceBeingUsed(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
+    return force != NULL && ((force->field_0xaa & 0x20) != 0 || force->field_0x3c != 0) ? 1.0f : 0.0f;
+}
+
 static void *Condition_ForceInit(AISYS_s *, char *name, AISCRIPT_s *) {
     return GizmoFindByName(WORLD->gizmo_sys, force_gizmotype_id, name);
 }
@@ -478,7 +488,7 @@ extern "C" {
         {"OnForcePlatform", NULL, NULL},
         {"PlayerOnForcePlatform", NULL, NULL},
         {"EitherPlayerOnForcePlatform", NULL, NULL},
-        {"ForceBeingUsed", NULL, NULL},
+        {"ForceBeingUsed", Condition_ForceBeingUsed, Condition_UsingForceInit},
         {"ForcePushing", NULL, NULL},
         {"TurretAlive", NULL, NULL},
         {"PlayerDeflectingPart", NULL, NULL},

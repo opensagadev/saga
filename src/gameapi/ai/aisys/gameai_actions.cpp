@@ -275,10 +275,6 @@ static __used__ f32 Condition_FinishedSpline(AISYS_s *, AISCRIPTPROCESS_s *, AIP
     return object->movement_spline != NULL && finished == 0 ? 0.0f : 1.0f;
 }
 
-static __used__ f32 Condition_ForceBeingUsed(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
-
 static __used__ f32 Condition_GotOpponentLOS(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return 0;
 }
@@ -334,10 +330,6 @@ static __used__ f32 Condition_PlayerOnObject(AISYS_s *, AISCRIPTPROCESS_s *, AIP
 
 static __used__ f32 Condition_RigidAnimFrame(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return 0;
-}
-
-static __used__ void *Condition_UsingForceInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
 }
 
 static __used__ i32 Action_AddScriptProcessor(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
