@@ -210,6 +210,25 @@ static f32 Condition_OnForcePlatform(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s 
     return 0.0f;
 }
 
+static f32 Condition_PlayerOnForcePlatform(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
+    if (force != NULL && player != NULL) {
+        GameObject_s *object = player;
+        if ((object->apiobj.field_0x27d != 0 || object->apiobj.field_0x27e != 0) &&
+            object->apiobj.supporting_platform_id != -1) {
+            i16 platform = object->apiobj.supporting_platform_id;
+            NUMTX *transform = static_cast<NUMTX *>(CurTerr->platforms[platform].scene_object);
+            if (object->apiobj.position.y >= transform->m31) {
+                for (GAMEANIMOBJ_s *animation = force->anim_set->objects; animation != NULL; animation = animation->next) {
+                    GIZFORCEANIMDATA_s *data = static_cast<GIZFORCEANIMDATA_s *>(animation->object_data);
+                    if (platform == data->platform_id) return 1.0f;
+                }
+            }
+        }
+    }
+    return 0.0f;
+}
+
 static void *Condition_OnForcePlatformInit(AISYS_s *, char *name, AISCRIPT_s *) {
     GIZMO_s *gizmo = GizmoFindByName(WORLD->gizmo_sys, force_gizmotype_id, name);
     if (gizmo != NULL) {
@@ -555,7 +574,7 @@ extern "C" {
         {"EitherPlayerUsingForce", Condition_EitherPlayerUsingForce, Condition_UsingForceInit},
         {"UsingForce", Condition_UsingForce, Condition_UsingForceInit},
         {"OnForcePlatform", Condition_OnForcePlatform, Condition_OnForcePlatformInit},
-        {"PlayerOnForcePlatform", NULL, NULL},
+        {"PlayerOnForcePlatform", Condition_PlayerOnForcePlatform, Condition_OnForcePlatformInit},
         {"EitherPlayerOnForcePlatform", NULL, NULL},
         {"ForceBeingUsed", Condition_ForceBeingUsed, Condition_UsingForceInit},
         {"ForcePushing", Condition_ForcePushing, Condition_ForcePushingInit},
