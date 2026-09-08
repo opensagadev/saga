@@ -424,9 +424,12 @@ struct AISCRIPT_s;
 struct AITRIGGERSET_s {
     u8 pad_0x000[0x204];
     i8 trigger_indices[8];
-    u8 pad_0x20c[8];
+    u8 pad_0x20c[2];
+    u16 field_0x20e; // Tested by Condition_HelpWithTriggers.
+    u8 pad_0x210[4];
 };
 DECOMP_ASSERT(sizeof(AITRIGGERSET_s) == 0x214, "AITRIGGERSET_s size");
+DECOMP_ASSERT(offsetof(AITRIGGERSET_s, field_0x20e) == 0x20e, "AITRIGGERSET help field offset");
 struct AITRIGGERSETSYS_s {
     AITRIGGERSET_s sets[32];
     i8 field_0x4280[64];

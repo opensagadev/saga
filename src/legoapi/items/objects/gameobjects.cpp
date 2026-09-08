@@ -539,6 +539,15 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+static f32 Condition_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    AITRIGGERSETSYS_s *system = WORLD->ai_trigger_set_sys;
+    if (system != NULL && packet != NULL && packet->owner != NULL) {
+        u8 index = packet->owner->apiobj.field_0x289;
+        if (system->field_0x42c0[index] != -1 && system->sets[system->field_0x4280[index]].field_0x20e != 0) return 1.0f;
+    }
+    return 0.0f;
+}
+
 static f32 Condition_DropBackInTimer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return drop_back_in_timer;
 }
@@ -867,7 +876,7 @@ extern "C" {
         {"InMiniCut", Condition_InMiniCut, NULL},
         {"MaulShouldRunAway", NULL, NULL},
         {"DropBackInTimer", Condition_DropBackInTimer, NULL},
-        {"HelpWithTriggers", NULL, NULL},
+        {"HelpWithTriggers", Condition_HelpWithTriggers, NULL},
         {"EitherPlayerPushingSpinner", NULL, NULL},
         {"CharacterRange", NULL, NULL},
         {"BeenSpawned", NULL, NULL},
