@@ -61,6 +61,7 @@ extern "C" {
     extern i16 id_JAWA;
     extern i16 id_UGNAUGHT;
     extern i16 id_ATAT;
+    extern i16 id_GONKDROID;
 }
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
@@ -2364,7 +2365,18 @@ i32 Game_IgnoreInput() {
     return newgamecam != 0;
 }
 
-void GameAI_TotalScore() {
+u32 GameAI_TotalScore() {
+    GameObject_s *object = Obj;
+    u32 score = 0;
+    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
+        if ((object->apiobj.flags_low & 1) && (object->apiobj.field_0x1f4 & 0x400) &&
+            object->ai.field_0x134 != 0xff) {
+            GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+            if (!(data->flags_090 & 0x40) && object->id != id_GONKDROID)
+                score += data->score;
+        }
+    }
+    return score;
 }
 
 void GameAudio_PlaySfx(i32 sfx, nuvec_s *position, i32 flags, i32 volume) {

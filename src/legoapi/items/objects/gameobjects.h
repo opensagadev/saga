@@ -14,6 +14,7 @@ i32 NoLayerKill(GameObject_s *object);
 struct CABLE_s;
 struct AISYS_s;
 struct WORLDINFO_s;
+u32 GameAI_TotalScore();
 
 struct GAMEFOG_STATE {
     f32 high_quality_colour_channels[4];

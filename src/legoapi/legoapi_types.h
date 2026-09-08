@@ -1232,6 +1232,7 @@ DECOMP_ASSERT(sizeof(GIZMOPICKUP_s) == 0x2c, "GIZMOPICKUP_s ABI");
 DECOMP_ASSERT(offsetof(GIZMOPICKUP_s, position) == 0x08, "GIZMOPICKUP position offset");
 DECOMP_ASSERT(offsetof(GIZMOPICKUP_s, state_flags) == 0x17, "GIZMOPICKUP state flags offset");
 DECOMP_ASSERT(offsetof(GIZMOPICKUP_s, floor_height) == 0x1c, "GIZMOPICKUP floor height offset");
+DECOMP_ASSERT(offsetof(GIZMOPICKUP_s, type_index) == 0x25, "GIZMOPICKUP type index offset");
 
 typedef void (*GIZMOPICKUPUPDATEFN)(WORLDINFO_s *, GIZMOPICKUP_s *);
 typedef void (*GIZMOPICKUPCOLLECTFN)(WORLDINFO_s *, GIZMOPICKUP_s *, i32, GameObject_s *, i32);
@@ -1259,6 +1260,7 @@ struct GIZMO_PICKUP_TYPE {
 };
 DECOMP_ASSERT(sizeof(GIZMO_PICKUP_TYPE) == 0x38, "GIZMO_PICKUP_TYPE ABI");
 DECOMP_ASSERT(offsetof(GIZMO_PICKUP_TYPE, type_code) == 0x0c, "GIZMO_PICKUP_TYPE code offset");
+DECOMP_ASSERT(offsetof(GIZMO_PICKUP_TYPE, score) == 0x12, "GIZMO_PICKUP_TYPE score offset");
 DECOMP_ASSERT(offsetof(GIZMO_PICKUP_TYPE, update_fn) == 0x24, "GIZMO_PICKUP_TYPE update offset");
 
 struct GIZMOPICKUPSYS_s {

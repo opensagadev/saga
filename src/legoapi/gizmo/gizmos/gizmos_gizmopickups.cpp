@@ -193,9 +193,6 @@ void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_ind
 void GizmoPickup_FindNearest(WORLDINFO_s *, nuvec_s *, float *) {
 }
 
-void GizmoPickups_TotalScore(void *) {
-}
-
 
 void GizmoPickup_NumberOfType(WORLDINFO_s *, i32, char) {
 }

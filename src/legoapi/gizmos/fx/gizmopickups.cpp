@@ -31,6 +31,17 @@ GIZMOPICKUP_s *GizmoPickup_FindByName(WORLDINFO_s *world, char *name) {
 i32 GizmoPickup_BeenTurnedOn(GIZMOPICKUP_s *pickup) {
     return pickup != NULL ? pickup->state_activated : 0;
 }
+
+u32 GizmoPickups_TotalScore(void *world) {
+    GIZMOPICKUPRUNTIMESYS_s *system = static_cast<WORLDINFO_s *>(world)->gizmo_pickup_sys;
+    GIZMOPICKUP_s *pickup = system->pickups;
+    u32 score = 0;
+    if (pickup != NULL) {
+        for (i32 i = 0; i < system->pickup_count; ++i, ++pickup)
+            score += GizmoPickupSys_Game.types[pickup->type_index].score;
+    }
+    return score;
+}
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/numath/nufloat.h"
