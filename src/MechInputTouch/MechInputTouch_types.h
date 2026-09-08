@@ -102,10 +102,17 @@ struct MechInputTouchGestureTracker {
     virtual bool OnSwipe(GameObject_s &, TouchHolder &, i32);
 };
 typedef void (*MechTouchUICallback)(MechTouchUIElement &, TouchHolder &);
+float GetAspectRatio();
+
 struct MechTouchUIElement {
     MechTouchUIElement()
         : managed_links(NULL), position(), radius_x(0.0f), radius_y(0.0f), on_down(NULL), on_click(NULL), on_hold(NULL),
           on_release(NULL), on_leave(NULL), hovered(0), disabled(0), visible(1), rectangular(0), owner(NULL) {
+    }
+    MechTouchUIElement(VuVec const &pos, float radius)
+        : managed_links(NULL), position(pos), radius_x(GetAspectRatio() * radius), radius_y(radius), on_down(NULL),
+          on_click(NULL), on_hold(NULL), on_release(NULL), on_leave(NULL), hovered(0), disabled(0), visible(1),
+          owner(NULL) {
     }
     virtual ~MechTouchUIElement();
     virtual void Process(float);
@@ -836,7 +843,15 @@ struct MechTouchUICharIcon : MechTouchUIElement {
     i32 character_id;
     f32 icon_scale;
     u8 selected;
-    u8 field_0x45[0x60 - 0x45];
+    u8 field_0x45;
+    u8 field_0x46;
+    u8 field_0x47;
+    f32 *alpha_target;
+    f32 alpha_start;
+    f32 alpha_end;
+    f32 alpha_elapsed;
+    f32 alpha_duration;
+    f32 alpha_delay;
     f32 icon_alpha;
     MechTouchUIPartySelector *selector;
     u8 field_0x68[0x80 - 0x68];

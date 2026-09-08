@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 30.49926,
+    "fuzzy_match_percent": 30.508015,
     "total_code": "4722419",
     "matched_code": "60480",
     "matched_code_percent": 1.2806996,
@@ -17976,7 +17976,7 @@
           "address": 4552464,
           "offset": 3662496,
           "size": 261,
-          "match_percent": 20.741936
+          "match_percent": 99.951614
         },
         {
           "name": "_ZN19MechTouchUICharIconC2ER24MechTouchUIPartySelectorRK5VuVecif",
@@ -17984,7 +17984,7 @@
           "address": 4552464,
           "offset": 3662496,
           "size": 261,
-          "match_percent": 20.741936
+          "match_percent": 99.951614
         },
         {
           "name": "_ZN19MechTouchUICharIcon13SetupDisabledEv",

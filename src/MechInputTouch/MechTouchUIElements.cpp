@@ -219,7 +219,18 @@ void MechTouchUI::Render() {
 MechTouchUI::~MechTouchUI() {
 }
 
-MechTouchUICharIcon::MechTouchUICharIcon(MechTouchUIPartySelector &, VuVec const &, i32, float) {
+MechTouchUICharIcon::MechTouchUICharIcon(MechTouchUIPartySelector &party, VuVec const &pos, i32 id, float scale)
+    : MechTouchUIElement(pos, scale), character_id(id), icon_scale(scale), alpha_target(&icon_alpha),
+      alpha_duration(-1.0f), selector(&party) {
+    alpha_elapsed = 0.0f;
+    field_0x45 = 0;
+    alpha_delay = 0.0f;
+    selected = 0;
+    icon_alpha = 0.0f;
+    rectangular = 1;
+    alpha_end = 0.0f;
+    field_0x46 = 0;
+    alpha_start = 0.0f;
 }
 
 void MechTouchUICharIcon::Process(float) {
