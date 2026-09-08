@@ -243,26 +243,6 @@ static __used__ f32 Condition_OffScreenTimer(AISYS_s *, AISCRIPTPROCESS_s *, AIP
 
 
 
-static __used__ i32 Action_GizmoSetVisibility(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **params,
-                                              i32 param_count, i32 first_time, f32) {
-    if (first_time == 0 || WORLD == NULL || WORLD->gizmo_sys == NULL) {
-        return 1;
-    }
-    GIZMO *gizmo = NULL;
-    i32 visible = 1;
-    for (i32 index = 0; index < param_count; ++index) {
-        char *value = NuStrIStr(params[index], "name=");
-        if (value != NULL) {
-            gizmo = GizmoFindByName(WORLD->gizmo_sys, -1, value + NuStrLen("name="));
-        } else if (NuStrICmp(params[index], "FALSE") == 0) {
-            visible = 0;
-        }
-    }
-    if (gizmo != NULL) {
-        GizmoSetVisibility(WORLD->gizmo_sys, gizmo, visible, 1);
-    }
-    return 1;
-}
 
 
 
@@ -723,7 +703,6 @@ namespace {
             lego_aiactiondefs[LEGO_AI_ACTION_CREATE_SPLINE_CREATURES].eval_fn = Action_CreateSplineCreatures;
             lego_aiactiondefs[LEGO_AI_ACTION_FOLLOW_CHARACTER].eval_fn = Action_FollowCharacter;
             lego_aiactiondefs[LEGO_AI_ACTION_MOVE_FORWARD].eval_fn = Action_MoveForward;
-            lego_aiactiondefs[LEGO_AI_ACTION_GIZMO_SET_VISIBILITY].eval_fn = Action_GizmoSetVisibility;
 
 
             lego_aiconditiondefs[LEGO_AI_CONDITION_OFF_SCREEN_TIMER].eval_fn = Condition_OffScreenTimer;

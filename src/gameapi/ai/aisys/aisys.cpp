@@ -5209,6 +5209,27 @@ static i32 Action_AlwaysTriggerObstacle(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET
     return 1;
 }
 
+static i32 Action_GizmoSetVisibility(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **params,
+                                    i32 param_count, i32 first_time, f32) {
+    if (first_time == 0) {
+        return 1;
+    }
+    GIZMO *gizmo = NULL;
+    i32 visible = 1;
+    for (i32 index = 0; index < param_count; ++index) {
+        char *value = NuStrIStr(params[index], "name=");
+        if (value != NULL) {
+            gizmo = GizmoFindByName(WORLD->gizmo_sys, -1, value + NuStrLen("name="));
+        } else if (NuStrICmp(params[index], "FALSE") == 0) {
+            visible = 0;
+        }
+    }
+    if (gizmo != NULL) {
+        GizmoSetVisibility(WORLD->gizmo_sys, gizmo, visible, 1);
+    }
+    return 1;
+}
+
 extern "C" {
     // Keep this registry in the exact order used by the shipped script parser.
     AIACTIONDEF lego_aiactiondefs[] = {
@@ -5403,7 +5424,7 @@ extern "C" {
         {"GoToNewLevel", Action_GoToNewLevel, 0, 0, 0},
         {"CircleLocator", Action_CircleLocator, 0, 0, 0},
         {"GizmoActivate", Action_GizmoActivate, 0, 0, 0},
-        {"GizmoSetVisibility", NULL, 0, 0, 0},
+        {"GizmoSetVisibility", Action_GizmoSetVisibility, 0, 0, 0},
         {"TurnOnPickup", Action_TurnOnPickup, 0, 0, 0},
         {"CanHelpWithTriggers", Action_CanHelpWithTriggers, 0, 0, 0},
         {"CanCollideWithObjects", Action_CanCollideWithObjects, 0, 0, 0},
