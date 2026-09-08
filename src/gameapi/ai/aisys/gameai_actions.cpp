@@ -552,15 +552,6 @@ static __used__ i32 Action_AlwaysTriggerObstacle(AISYS_s *, AISCRIPTPROCESS_s *,
 }
 
 
-static i32 Action_CharClipToBlobShadows(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params,
-                                        i32 param_count, i32 first_time, f32) {
-    GameObject_s *object = ActionOwner(packet);
-    if (first_time != 0 && object != NULL) {
-        object->jump_input_flags =
-            (object->jump_input_flags & ~0x80u) | (ActionToggleEnabled(params, param_count) ? 0x80u : 0u);
-    }
-    return 1;
-}
 
 static void PositionSplineCreature(GameObject_s *object) {
     SPLINEPOSITION_RUNTIME_s *runtime = reinterpret_cast<SPLINEPOSITION_RUNTIME_s *>(&object->movement_spline);
@@ -939,7 +930,6 @@ namespace {
             lego_aiactiondefs[LEGO_AI_ACTION_SET_BOLTS_DONT_GET_DEFLECTED_BACK].eval_fn =
                 Action_SetBoltsDontGetDeflectedBack;
             lego_aiactiondefs[LEGO_AI_ACTION_PLAYER_SPEEDER_HACK].eval_fn = Action_PlayerSpeederHack;
-            lego_aiactiondefs[LEGO_AI_ACTION_CHAR_CLIP_TO_BLOB_SHADOWS].eval_fn = Action_CharClipToBlobShadows;
             lego_aiactiondefs[LEGO_AI_ACTION_DEFLECT_PLAYERS_PART].eval_fn = Action_DeflectPlayersPart;
             lego_aiactiondefs[LEGO_AI_ACTION_SET_AI_OVERRIDE_CONTROL].eval_fn = Action_SetAIOverrideControl;
             lego_aiactiondefs[LEGO_AI_ACTION_SET_LAST_SAFE_PATH_POS].eval_fn = Action_SetLastSafePathPos;

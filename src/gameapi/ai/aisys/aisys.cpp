@@ -1205,6 +1205,23 @@ static i32 Action_CanHitForceObjects(AISYS *, AISCRIPTPROCESS *, AIPACKET *packe
     return 1;
 }
 
+static i32 Action_CharClipToBlobShadows(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
+                                       i32 param_count, i32 first_time, f32) {
+    if (packet == NULL || packet->owner == NULL)
+        return 1;
+    GameObject_s *object = packet->owner->apiobj.objptr;
+    if (object == NULL)
+        return 1;
+    if (first_time) {
+        object->jump_input_flags |= 0x80;
+        for (i32 index = 0; index < param_count; ++index) {
+            if (NuStrICmp(params[index], "false") == 0)
+                object->jump_input_flags &= ~0x80;
+        }
+    }
+    return 1;
+}
+
 static i32 Action_SetDoomedEscapeLocator(AISYS *system, AISCRIPTPROCESS *processor, AIPACKET *packet,
                                        char **params, i32 param_count, i32 first_time, f32) {
     if (first_time) {
@@ -4887,7 +4904,7 @@ extern "C" {
         {"EatVictim", Action_EatVictim, 0, 0, 0},
         {"ReleaseVictim", Action_ReleaseVictim, 0, 0, 0},
         {"CanDefend", Action_CanDefend, 0, 0, 0},
-        {"CharClipToBlobShadows", NULL, 0, 0, 0},
+        {"CharClipToBlobShadows", Action_CharClipToBlobShadows, 0, 0, 0},
         {"DontAimAt", Action_DontAimAt, 0, 0, 0},
         {"CanUseWeapon", Action_CanUseWeapon, 0, 0, 0},
         {"SetBoss", Action_SetBoss, 0, 0, 0},
