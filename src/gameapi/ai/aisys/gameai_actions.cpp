@@ -302,9 +302,6 @@ static __used__ i32 Action_SnapToSockPosition(AISYS_s *, AISCRIPTPROCESS_s *, AI
     return 0;
 }
 
-static __used__ i32 Action_UseTimeBasedUpdate(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
-    return 0;
-}
 
 static void *Condition_BeenToLevelInit(AISYS_s *system, char *arg, AISCRIPT_s *) {
     if (system == NULL || arg == NULL || WORLD == NULL || WORLD->area == NULL) {

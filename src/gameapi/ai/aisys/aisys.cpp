@@ -4999,6 +4999,24 @@ static i32 Action_MoveAwayFromLastAttacker(AISYS *, AISCRIPTPROCESS *processor, 
     return 0;
 }
 
+static i32 Action_UseTimeBasedUpdate(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
+                                    i32 param_count, i32 first_time, f32) {
+    if (packet != NULL && packet->owner != NULL) {
+        GameObject *object = packet->owner->apiobj.objptr;
+        i32 enabled = 0;
+        if (first_time != 0) {
+            for (i32 index = 0; index < param_count; ++index) {
+                if (NuStrICmp(params[index], "TRUE") == 0)
+                    enabled = 1;
+                else if (NuStrICmp(params[index], "FALSE") == 0)
+                    enabled = 0;
+            }
+        }
+        object->field_0xf00 = (object->field_0xf00 & ~0x20) | (((enabled ^ 1) & 1) << 5);
+    }
+    return 1;
+}
+
 static i32 Action_SetShieldHitPoints(AISYS *system, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                      i32 param_count, i32 first_time, f32) {
     if (first_time != 0) {
@@ -5220,7 +5238,7 @@ extern "C" {
         {"ThrowDetonator", Action_ThrowDetonator, 0, 0, 0},
         {"SetScaleOverride", NULL, 0, 0, 0},
         {"DisableNarrowSocks", Action_DisableNarrowSocks, 1, 0, 0},
-        {"UseTimeBasedUpdate", NULL, 0, 0, 0},
+        {"UseTimeBasedUpdate", Action_UseTimeBasedUpdate, 0, 0, 0},
         {"ForceLightning", Action_ForceLightning, 0, 0, 0},
         {"WalkBackwards", Action_WalkBackwards, 0, 0, 0},
         {"AddScriptProcessor", Action_AddScriptProcessor, 0, 0, 0},
