@@ -214,12 +214,6 @@ void GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object
     }
 }
 
-void GIZFORCE_s::ClearMechObjectInterface() {
-}
-
-void GIZFORCE_s::GetMechObjectInterface() {
-}
-
 // Static force SFX nufpar helpers. Moved from gizmisc_stubs.cpp.
 
 static __used__ void GizForceSFX_forcename(nufpar_s *) {

@@ -1,4 +1,5 @@
 #include "legoapi/gizmos/traps/gizforce.h"
+#include "legoapi/gizmo/base/GizForceObjectInterface.h"
 #include "legoapi/world/world.h"
 #include "legoapi/legoapi_types.h"
 
@@ -41,6 +42,17 @@ extern "C" {
 }
 
 i32 force_gizmotype_id = -1;
+
+void GIZFORCE_s::ClearMechObjectInterface() {
+    if (mech_object_interface != NULL)
+        delete mech_object_interface;
+}
+
+MechObjectInterface *GIZFORCE_s::GetMechObjectInterface() {
+    if (mech_object_interface == NULL)
+        new GizForceObjectInterface(*this);
+    return mech_object_interface;
+}
 
 namespace {
 

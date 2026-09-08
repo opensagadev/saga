@@ -3023,15 +3023,16 @@ struct GIZFORCE_s {
     i16 score;             // 0x92
     NUVEC effect_position; // 0x94
     f32 activation_radius; // 0xa0
-    u32 field_0xa4;
+    MechObjectInterface *mech_object_interface; // 0xa4
     u8 progress_flags; // 0xa8
     u8 runtime_flags;  // 0xa9, GIZFORCE_RUNTIME_FLAGS
     u8 field_0xaa;
     u8 field_0xab;
     void ClearMechObjectInterface();
-    void GetMechObjectInterface();
+    MechObjectInterface *GetMechObjectInterface();
 };
 DECOMP_ASSERT(sizeof(GIZFORCE_s) == 0xac, "GIZFORCE_s ABI");
+DECOMP_ASSERT(offsetof(GIZFORCE_s, mech_object_interface) == 0xa4, "Force object interface offset");
 DECOMP_ASSERT(offsetof(GIZFORCE_s, completion_score) == 0x8e, "GIZFORCE completion score offset");
 DECOMP_ASSERT(offsetof(GIZFORCE_s, anim_set) == 0x28, "GIZFORCE animation set offset");
 DECOMP_ASSERT(offsetof(GIZFORCE_s, config_flags) == 0x78, "GIZFORCE config flags offset");

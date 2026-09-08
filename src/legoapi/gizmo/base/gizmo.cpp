@@ -478,25 +478,56 @@ void GizmoSysClearLevelProgress(void *unknown, i32 type_id) {
     }
 }
 
-void GizForceObjectInterface::GetPos(VuVec &, i32) const {
+extern "C" {
+    extern f32 hackFlashTimer;
+    extern GAMEANIMSET_s *hackFlashingGameAnimSet;
+    nuhspecial_s *hackFlashingSpecial;
 }
 
-void GizForceObjectInterface::GetRadius() const {
+void GizForceObjectInterface::GetPos(VuVec &result, i32) const {
+    if (selected_object != NULL) {
+        NUVEC *position = NuSpecialGetDrawPos(&selected_object->special);
+        result = VuVec(position->x, position->y, position->z, 1.0f);
+    } else {
+        result = VuVec(force.position.x, force.position.y, force.position.z, 1.0f);
+    }
 }
 
-void GizForceObjectInterface::GetTargetName() const {
+f32 GizForceObjectInterface::GetRadius() const {
+    if (selected_object != NULL)
+        return NuSpecialGetOriginRadius(&selected_object->special);
+    return force.radius;
 }
 
-void GizForceObjectInterface::GetTgtVoidPtr() {
+const char *GizForceObjectInterface::GetTargetName() const {
+    return force.name;
 }
 
-GizForceObjectInterface::GizForceObjectInterface(GIZFORCE_s &) {
+void *GizForceObjectInterface::GetTgtVoidPtr() {
+    if (selected_object != NULL)
+        return selected_object;
+    return &force;
+}
+
+GizForceObjectInterface::GizForceObjectInterface(GIZFORCE_s &value) : force(value) {
+    force.mech_object_interface = this;
 }
 
 void GizForceObjectInterface::TargetedFlash() {
+    if (!(force.field_0xaa & 0x40)) {
+        hackFlashTimer = 1.0f;
+        if (selected_object != NULL) {
+            hackFlashingSpecial = &selected_object->special;
+            hackFlashingGameAnimSet = NULL;
+        } else {
+            hackFlashingSpecial = NULL;
+            hackFlashingGameAnimSet = force.anim_set;
+        }
+    }
 }
 
 GizForceObjectInterface::~GizForceObjectInterface() {
+    force.mech_object_interface = NULL;
 }
 
 void MechObjectInterface::GetFloorTargetPos(VuVec &position, i32 mode) const {
