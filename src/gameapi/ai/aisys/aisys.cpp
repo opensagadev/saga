@@ -6424,6 +6424,19 @@ __used__ static f32 Condition_AnimSpeedMul(AISYS *sys, AISCRIPTPROCESS *processo
     return 0.0f;
 }
 
+extern FLOWBOX_s *FlowBoxFindByName(GIZFLOW_s *, char *);
+
+static f32 Condition_FlowBoxComplete(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *argument) {
+    FLOWBOX_s *box = static_cast<FLOWBOX_s *>(argument);
+    if (box != NULL && (box->state_flags_low & 2) != 0)
+        return 1.0f;
+    return 0.0f;
+}
+
+static void *Condition_FlowBoxCompleteInit(AISYS *, char *name, AISCRIPT *) {
+    return name != NULL ? FlowBoxFindByName(WORLD->giz_flow, name) : NULL;
+}
+
 static f32 Condition_AreaComplete(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *argument) {
     AREADATA *area = static_cast<AREADATA *>(argument);
     return area != NULL && Game.area_save[area->index].area_complete == 1 ? 1.0f : 0.0f;
@@ -8098,6 +8111,8 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_BADDY].eval_fn = Condition_IAmABaddy;
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_NEUTRAL].eval_fn = Condition_IAmANeutral;
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_PARTY_CHARACTER].eval_fn = Condition_IAmAPartyCharacter;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_FLOW_BOX_COMPLETE].eval_fn = Condition_FlowBoxComplete;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_FLOW_BOX_COMPLETE].init_fn = Condition_FlowBoxCompleteInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_AREA_COMPLETE].eval_fn = Condition_AreaComplete;
             lego_aiconditiondefs[LEGO_AI_CONDITION_AREA_COMPLETE].init_fn = Condition_AreaCompleteInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A].eval_fn = Condition_IAmA;

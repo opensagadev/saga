@@ -802,6 +802,7 @@ struct FLOWBOX_s {
     char *name;
 };
 DECOMP_ASSERT(sizeof(FLOWBOX_s) == 0x20, "FLOWBOX_s ABI");
+DECOMP_ASSERT(offsetof(FLOWBOX_s, state_flags_low) == 0xa, "FLOWBOX completion flags offset");
 DECOMP_ASSERT(offsetof(FLOWBOX_s, ai_trigger_group) == 4, "FLOWBOX AI trigger group offset");
 struct FS_FILEENTRYHDR {};
 struct FadeBase {
