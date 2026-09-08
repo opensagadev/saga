@@ -1190,10 +1190,6 @@ static __used__ void *Condition_NumForceObjectsInit(AISYS_s *, char *, AISCRIPT_
     return nullptr;
 }
 
-static __used__ void *Condition_OnForcePlatformInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
-}
-
 
 static __used__ f32 Condition_PartyContainsDroids(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return 0;
