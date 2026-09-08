@@ -5327,9 +5327,13 @@ __used__ static f32 Condition_IAmANeutral(AISYS *sys, AISCRIPTPROCESS *processor
 
 __used__ static f32 Condition_InLevelNode(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
                                           void *void_arg) {
-    if (void_arg != NULL && packet != NULL && sys != NULL) {
-        AIPATHNODE *node = static_cast<AIPATHNODE *>(void_arg);
-        return packet->inside_path_node == node - sys->path_sys->active_path->nodes ? 1.0f : 0.0f;
+    if (void_arg != NULL && packet != NULL) {
+        if (sys != NULL) {
+            AIPATHNODE *node = static_cast<AIPATHNODE *>(void_arg);
+            if (packet->inside_path_node == node - sys->path_sys->active_path->nodes) {
+                return 1.0f;
+            }
+        }
     }
     return 0.0f;
 }
@@ -5890,7 +5894,9 @@ static void *Condition_InLevelNodeInit(AISYS *sys, char *arg, AISCRIPT *) {
 static f32 Condition_PlayerInLevelNode(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *void_arg) {
     if (sys != NULL && sys->player_1 != NULL && void_arg != NULL) {
         AIPATHNODE *node = static_cast<AIPATHNODE *>(void_arg);
-        return sys->player_1->ai->inside_path_node == node - sys->path_sys->active_path->nodes ? 1.0f : 0.0f;
+        if (sys->player_1->ai->inside_path_node == node - sys->path_sys->active_path->nodes) {
+            return 1.0f;
+        }
     }
     return 0;
 }
@@ -5902,12 +5908,28 @@ static void *Condition_PlayerInLevelNodeInit(AISYS *sys, char *arg, AISCRIPT *) 
     return NULL;
 }
 
-static __used__ f32 Condition_EitherPlayerInLevelNode(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+static f32 Condition_EitherPlayerInLevelNode(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *void_arg) {
+    if (void_arg != NULL && sys != NULL) {
+        AIPATHNODE *node = static_cast<AIPATHNODE *>(void_arg);
+        if (sys->player_1 != NULL &&
+            sys->player_1->ai->inside_path_node == node - sys->path_sys->active_path->nodes) {
+            return 1.0f;
+        }
+        if (sys->player_2 != NULL &&
+            sys->player_2->ai->inside_path_node == node - sys->path_sys->active_path->nodes) {
+            return 1.0f;
+        }
+    }
     return 0;
 }
 
-static __used__ f32 Condition_LevelNodeRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
+static f32 Condition_LevelNodeRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *void_arg) {
+    NUVEC difference;
+    if (packet != NULL && packet->owner != NULL && void_arg != NULL) {
+        AIPATHNODE *node = static_cast<AIPATHNODE *>(void_arg);
+        return NuVecDist(&node->position, &packet->owner->apiobj.position, &difference);
+    }
+    return 3.402823466e+38f;
 }
 
 static void *Condition_LevelNodeRangeInit(AISYS *sys, char *arg, AISCRIPT *) {
