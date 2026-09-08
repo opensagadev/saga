@@ -8,6 +8,10 @@
 #include "legoapi/audio/sfx.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/animlist.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/menus/core/gamehint.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/render/fx.h"
@@ -44,6 +48,80 @@ DECOMP_ASSERT(sizeof(LEVERPROGRESS) == 0xc, "LEVER progress ABI");
 LEVER_CONFIG LeverSys = {0x55, 0};
 
 i32 lever_gizmotype_id = -1;
+extern "C" {
+    u8 show_lever_hint = 0;
+}
+extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
+
+void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
+    f32 distance = 1.0e9f;
+    if (object->character_context == 0x4a) {
+        object->field_0x768 += FRAMETIME;
+        if (object->field_0x768 > 1.0f)
+            object->field_0x768 = 1.0f;
+        object->context_animation_timer += FRAMETIME;
+        if (object->context_animation_timer >= object->airborne_action_duration) {
+            object->character_context = -1;
+            if (object->context_flags & 0x40)
+                return;
+        } else {
+            if (object->context_flags & 0x40)
+                return;
+            if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL) {
+                f32 *playing = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0);
+                if (playing == NULL)
+                    return;
+                f32 frame = *playing;
+                if (!(frame >= AnimListFrame(object->apiobj.character_model, object->context_animation, 0)))
+                    return;
+            } else if (!(object->context_animation_timer >= 0.25f)) {
+                return;
+            }
+        }
+        if (object->apiobj.character_data->model_flags & 4)
+            static_cast<LEVER_s *>(object->field_0x788)->baddie = 1;
+        else if (!(object->apiobj.character_data->model_flags & 0x200))
+            static_cast<LEVER_s *>(object->field_0x788)->goodie = 1;
+        static_cast<LEVER_s *>(object->field_0x788)->flags_high |= 8;
+        object->context_flags |= 0x40;
+        if (object->apiobj.object_flags & 0x80)
+            Hint_SetComplete(0x60c);
+        return;
+    }
+    if (object->apiobj.character_model->model_data_b[0x5d] == NULL || object->apiobj.field_0x27d == 0)
+        return;
+    if (!ObjLandReady(object) && !objInNetWaitContext(object, 0x4a))
+        return;
+    LEVER_s *lever = Lever_FindNearest(world, &object->apiobj.lower_position, object, &distance);
+    if (objInNetWaitContext(object, 0x4a)) {
+        object->context_animation_timer -= FRAMETIME;
+        if (object->context_animation_timer <= 0.0f) {
+            object->character_context = -1;
+            object->big_jump_data = NULL;
+        }
+    }
+    if (lever == NULL)
+        return;
+    if (object == player)
+        show_lever_hint = distance < 1.0f;
+    f32 range = (object->apiobj.field_0x1dc + 0.25f) * lever->target_indicator_scale;
+    if (!(distance < range * range))
+        return;
+    if (!(object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) && !objInNetWaitContext(object, 0x4a))
+        return;
+    object->field_0x788 = lever;
+    object->context_animation_timer = 0.0f;
+    object->character_context = 0x4a;
+    object->field_0x768 = 0.0f;
+    object->context_animation = 0x5d;
+    f32 duration = AnimDuration(object->id, 0x5d, 0.0f, 0.0f, 1);
+    object->airborne_action_duration = duration <= 0.0f ? 1.0f : duration;
+    object->context_flags &= ~0x40;
+    object->apiobj.movement_facing_angle = static_cast<LEVER_s *>(object->field_0x788)->y_rotation;
+    static_cast<LEVER_s *>(object->field_0x788)->interacting = 1;
+    static_cast<LEVER_s *>(object->field_0x788)->pull_progress = 0.0f;
+    static_cast<LEVER_s *>(object->field_0x788)->auto_reset_timer = 0.0f;
+}
 
 void Lever_GetAbsTargetPos(LEVER_s *lever, nuvec_s *target_position) {
     if (target_position != NULL && lever != NULL) {

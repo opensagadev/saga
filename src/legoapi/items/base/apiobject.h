@@ -152,6 +152,7 @@ struct CHARACTERMODEL_s {
 };
 
 DECOMP_ASSERT(sizeof(CHARACTERMODEL_s) == 0x54, "CHARACTERMODEL_s size");
+DECOMP_ASSERT(offsetof(CHARACTERMODEL_s, model_data_b) == 0xc, "Character animation table offset");
 
 struct CHARACTER_SHADOW_s {
     NUVEC position;
@@ -1171,6 +1172,9 @@ DECOMP_ASSERT(offsetof(AIPACKET, action_target_ref) == 0xe4, "AI action target r
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x788) == 0x788, "GameObject field_0x788 offset");
 DECOMP_ASSERT(offsetof(GameObject_s, trigger_set) == 0x10e0, "GameObject trigger set offset");
 DECOMP_ASSERT(offsetof(GameObject_s, context_animation) == 0x79a, "GameObject context animation offset");
+DECOMP_ASSERT(offsetof(GameObject_s, field_0x768) == 0x768, "GameObject interaction blend offset");
+DECOMP_ASSERT(offsetof(GameObject_s, context_animation_timer) == 0x76c, "GameObject interaction timer offset");
+DECOMP_ASSERT(offsetof(GameObject_s, airborne_action_duration) == 0x774, "GameObject interaction duration offset");
 DECOMP_ASSERT(offsetof(GameObject_s, queued_context_animation) == 0x79c, "GameObject queued context animation offset");
 DECOMP_ASSERT(offsetof(GameObject_s, combo_branch) == 0x79e, "GameObject combo branch offset");
 DECOMP_ASSERT(offsetof(GameObject_s, combo_input_latched) == 0x7a0, "GameObject combo input latch offset");
