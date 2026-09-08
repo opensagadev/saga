@@ -5940,6 +5940,17 @@ static f32 Condition_GotLocator(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
     return processor->unknown_a4 != NULL ? 1.0f : 0.0f;
 }
 
+static f32 Condition_IAmAGoodieBaddie(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *) {
+    return packet != NULL && packet->owner != NULL && (packet->owner->apiobj.field_0x1f4 & 0x10000) != 0
+               ? 1.0f : 0.0f;
+}
+
+static f32 Condition_PlayerCategoryIs(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *argument) {
+    const isize category = reinterpret_cast<isize>(argument);
+    return category != -1 && player != NULL && CharCategory_IsCategory(player, static_cast<i32>(category)) != 0
+               ? 1.0f : 0.0f;
+}
+
 __used__ static f32 Condition_HoverPhase(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
                                          void *void_arg) {
     (void)sys;
@@ -7781,6 +7792,8 @@ namespace {
         AISysRegistryCallbacks() {
 
             lego_aiconditiondefs[LEGO_AI_CONDITION_CATEGORY_IS].eval_fn = Condition_CategoryIs;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_PLAYER_CATEGORY_IS].eval_fn = Condition_PlayerCategoryIs;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_GOODIE_BADDIE].eval_fn = Condition_IAmAGoodieBaddie;
             lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_TO_LEVEL].eval_fn = Condition_BeenToLevel;
 
             lego_aiactiondefs[LEGO_AI_ACTION_SET_CURRENT_SPEED].eval_fn = Action_SetCurrentSpeed;
