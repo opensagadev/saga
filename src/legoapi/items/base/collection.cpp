@@ -68,10 +68,10 @@ i32 Collection_Got(i32 id) {
         if (Game_AreaSave == NULL) {
             return 0;
         }
-        return Game_AreaSave[area].minikit_count >= 1 ? 2 : 0;
+        return Game_AreaSave[area].minikit_complete >= SAVE_COMPLETE ? 2 : 0;
     }
 
-    if (Game_CharacterSave != NULL && (Game_CharacterSave[id] & 1) == 0) {
+    if (Game_CharacterSave != NULL && (Game_CharacterSave[id] & SAVE_CHARACTER_AVAILABLE) == 0) {
         return 0;
     }
     return 1;
@@ -509,7 +509,7 @@ void ShipDropCoins(starfighter_s *) {
 i32 AddToCollection(i32 id) {
     if (id > 0 && id < CHARCOUNT && InCollectList_Index(id, NULL, 0) != -1 && Collection_Got(id) == 0) {
         if (Game_CharacterSave != NULL)
-            Game_CharacterSave[id] |= 3;
+            Game_CharacterSave[id] |= SAVE_CHARACTER_AVAILABLE | SAVE_CHARACTER_UNLOCKED;
         return 1;
     }
     return 0;
@@ -523,10 +523,10 @@ void AddToGoldBricks() {
     const i32 points = GOLDBRICKPOINTS;
     if (save != NULL && save->gold_bricks < points) {
         ++save->gold_bricks;
-        if (save->gold_bricks == points && (save->flags & 2) == 0) {
+        if (save->gold_bricks == points && (save->flags & SAVE_REWARD_ALL_GOLD_BRICKS) == 0) {
             if (Game_AllGoldBricksFn != NULL)
                 Game_AllGoldBricksFn();
-            reinterpret_cast<STATUSCOLLECT_s *>(Game_CompletionSave)->flags |= 2;
+            reinterpret_cast<STATUSCOLLECT_s *>(Game_CompletionSave)->flags |= SAVE_REWARD_ALL_GOLD_BRICKS;
         }
     }
 }
@@ -595,12 +595,12 @@ void AddToCompletionPoints(u32 points) {
         save->completion_points += points;
         if (save->completion_points >= maximum) {
             save->completion_points = maximum;
-            if ((save->flags & 1) == 0) {
+            if ((save->flags & SAVE_REWARD_100_PERCENT) == 0) {
                 if (Game_100PercentFn != NULL) {
                     Game_100PercentFn();
                     save = reinterpret_cast<STATUSCOLLECT_s *>(Game_CompletionSave);
                 }
-                save->flags |= 1;
+                save->flags |= SAVE_REWARD_100_PERCENT;
             }
         }
     }

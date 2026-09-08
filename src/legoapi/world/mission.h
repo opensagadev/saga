@@ -4,8 +4,15 @@
 #include "nu2api/nucore/common.h"
 
 typedef struct MISSIONSAVE_s {
-    char data[0xc];
+    union {
+        char data[0x64];
+        struct {
+            f32 best_times[20];
+            u8 completed[20];
+        };
+    };
 } MISSIONSAVE;
+static_assert(sizeof(MISSIONSAVE) == 0x64, "MISSIONSAVE size");
 
 // One mission entry in the mission buffer; 0x18 bytes each.
 typedef struct MISSIONDATA_s {

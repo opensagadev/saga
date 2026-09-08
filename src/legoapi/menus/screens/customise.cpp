@@ -154,7 +154,34 @@ void Customiser_ResetModelTextureIDs(CUSTOMISER *customiser) {
 void Customiser_RestoreModelTextureIDs(CUSTOMISER *) {
 }
 
-void Customiser_CopyDefaultPiecesToSave(CUSTOMISER *, CUSTOMISESAVE_s *) {
+void Customiser_CopyDefaultPiecesToSave(CUSTOMISER *customiser, CUSTOMISESAVE_s *save) {
+    if (customiser == NULL) {
+        return;
+    }
+    if (save == NULL) {
+        save = customiser->save;
+        if (save == NULL) {
+            return;
+        }
+    }
+    save->pieces[0] = customiser->default_pieces[0][0];
+    save->pieces[1] = customiser->default_pieces[0][1];
+    save->pieces[2] = customiser->default_pieces[0][2];
+    save->pieces[3] = customiser->default_pieces[0][3];
+    save->pieces[4] = customiser->default_pieces[0][4];
+    save->pieces[5] = customiser->default_pieces[0][5];
+    save->pieces[6] = customiser->default_pieces[0][6];
+    save->pieces[7] = customiser->default_pieces[0][7];
+    save->pieces[8] = customiser->default_pieces[0][8];
+    save->secondary_pieces[0] = customiser->default_pieces[1][0];
+    save->secondary_pieces[1] = customiser->default_pieces[1][1];
+    save->secondary_pieces[2] = customiser->default_pieces[1][2];
+    save->secondary_pieces[3] = customiser->default_pieces[1][3];
+    save->secondary_pieces[4] = customiser->default_pieces[1][4];
+    save->secondary_pieces[5] = customiser->default_pieces[1][5];
+    save->secondary_pieces[6] = customiser->default_pieces[1][6];
+    save->secondary_pieces[7] = customiser->default_pieces[1][7];
+    save->secondary_pieces[8] = customiser->default_pieces[1][8];
 }
 
 static __used__ bool Customiser_PieceAvailable_Default(CUSTOMPIECE *) {

@@ -161,33 +161,71 @@ DECOMP_ASSERT(offsetof(CHEAT, extra_price) == 0x14, "CHEAT extra price offset");
 DECOMP_ASSERT(offsetof(CHEAT, extra_name) == 0x18, "CHEAT extra name offset");
 DECOMP_ASSERT(offsetof(CHEAT, flag) == 0x1c, "CHEAT flags offset");
 
-struct OPTIONSSAVE_s { /* PlaceHolder Structure */
-    undefined field0_0x0;
-    undefined field1_0x1;
-    undefined field2_0x2;
-    undefined field3_0x3;
-    undefined field4_0x4;
-    undefined field5_0x5;
-    undefined field6_0x6;
+#include "legoapi/core/save_values.h"
+
+struct OPTIONSSAVE_s {
+    union {
+        undefined field0_0x0;
+        u8 player1_rumble;
+    };
+    union {
+        undefined field1_0x1;
+        u8 player2_rumble;
+    };
+    union {
+        undefined field2_0x2;
+        u8 surround_sound;
+    };
+    union {
+        undefined field3_0x3;
+        u8 sound_volume;
+    };
+    union {
+        undefined field4_0x4;
+        u8 music_volume;
+    };
+    union {
+        undefined field5_0x5;
+        u8 master_volume;
+    };
+    union {
+        undefined field6_0x6;
+        u8 music_enabled;
+    };
     undefined field7_0x7;
     undefined field8_0x8;
     undefined field9_0x9;
     undefined field10_0xa;
-    undefined field11_0xb;
-    undefined field12_0xc;
+    union {
+        undefined field11_0xb;
+        u8 widescreen;
+    };
+    union {
+        undefined field12_0xc;
+        u8 brightness;
+    };
 };
 typedef struct OPTIONSSAVE_s OPTIONSSAVE;
 
 struct SUPEROPTIONS_s {
-    i16 field0_0x0;
+    union {
+        i16 field0_0x0;
+        u16 store_pack_flags;
+    };
     u8 touch_controls;
-    u8 field2_0x3;
+    union {
+        u8 field2_0x3;
+        u8 dpad_locked;
+    };
     f32 left_control_x;
     f32 left_control_y;
     f32 right_control_x;
     f32 right_control_y;
     u8 music_enabled;
-    i8 field8_0x15;
+    union {
+        i8 field8_0x15;
+        u8 store_bundle_flags;
+    };
     u8 field9_0x16[2];
 };
 DECOMP_ASSERT(sizeof(SUPEROPTIONS_s) == 0x18, "SUPEROPTIONS size");
@@ -205,33 +243,53 @@ DECOMP_ASSERT(sizeof(EPISODESAVE_s) == 0xc, "EPISODESAVE size");
 
 struct GAMESAVE_s {
     u8 field_0x0;
-    u8 save_version;
+    union {
+        u8 save_version;
+        u8 difficulty;
+    };
     u8 field_0x2[2];
     struct OPTIONSSAVE_s options_save;
-    u8 level_save[0x781b];
-    AREASAVE_s area_save[72];
     union {
-        EPISODESAVE_s episode_save[9];
+        u8 level_save[0x781b];
         struct {
-            u8 reserved_episode_data[0x64];
-            u32 unlocked_extra_bits[2]; // 0x7bf0
+            LEVELSAVE_s level_records[366];
+            u8 level_save_padding[3];
         };
     };
-    u32 field_0x7bf8;
-    u32 initial_store_pack_flags;
+    AREASAVE_s area_save[72];
+    EPISODESAVE_s episode_save[6];
+    u32 shop_hint_purchased_bits[3];
+    u32 shop_character_purchased_bits[4];
+    union { u32 extra_unlocked_bits[2]; u32 unlocked_extra_bits[2]; };
+    union {
+        u32 field_0x7bf8;
+        u32 shop_gold_brick_purchased_bits;
+    };
+    union {
+        u32 initial_store_pack_flags;
+        u32 suit_flags;
+    };
     union {
         u8 field_0x7c00[8];
+        u32 extra_purchased_bits[2];
         u32 purchased_extra_bits[2];
     };
     u32 hint_completion_bits[6]; // 0x7c08
     u32 coins;
     u16 completion;
-    u8 field_0x7c26[6];
-    f32 field30_0x7c2c;
+    union {
+        u8 field_0x7c26[6];
+        struct {
+            u8 gold_bricks, reward_flags, hub_build_flags, indy_unlocked, reserved_0x7c2a[2];
+        };
+    };
+    union {
+        f32 field30_0x7c2c;
+        f32 gameplay_seconds;
+    };
     CUSTOMISESAVE customizer;
     u8 field_0x7c9f;
     MISSIONSAVE mission_save;
-    u8 mission_save_extra[0x58];
     u8 character_save[0x154];
 };
 DECOMP_ASSERT(sizeof(GAMESAVE_s) == 0x7e58, "GAMESAVE size");
@@ -240,6 +298,9 @@ DECOMP_ASSERT(offsetof(GAMESAVE_s, area_save) == 0x782c, "GAMESAVE area save off
 DECOMP_ASSERT(offsetof(GAMESAVE_s, unlocked_extra_bits) == 0x7bf0, "GAMESAVE unlocked extras offset");
 DECOMP_ASSERT(offsetof(GAMESAVE_s, purchased_extra_bits) == 0x7c00, "GAMESAVE purchased extras offset");
 DECOMP_ASSERT(offsetof(GAMESAVE_s, episode_save) == 0x7b8c, "GAMESAVE episode save offset");
+DECOMP_ASSERT(offsetof(GAMESAVE_s, shop_hint_purchased_bits) == 0x7bd4, "GAMESAVE shop hints offset");
+DECOMP_ASSERT(offsetof(GAMESAVE_s, extra_unlocked_bits) == 0x7bf0, "GAMESAVE unlocked extras offset");
+DECOMP_ASSERT(offsetof(GAMESAVE_s, mission_save) == 0x7ca0, "GAMESAVE missions offset");
 DECOMP_ASSERT(offsetof(GAMESAVE_s, initial_store_pack_flags) == 0x7bfc, "GAMESAVE store flags offset");
 DECOMP_ASSERT(offsetof(GAMESAVE_s, customizer) == 0x7c30, "GAMESAVE customizer offset");
 DECOMP_ASSERT(offsetof(GAMESAVE_s, character_save) == 0x7d04, "GAMESAVE character save offset");

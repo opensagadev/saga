@@ -118,7 +118,7 @@ COLLECTID *CollectIDUnlocked(i32 id) {
     }
 
     COLLECTID *entry = &CollectList[index];
-    if (Game_CharacterSave != NULL && (Game_CharacterSave[id] & 2) != 0) {
+    if (Game_CharacterSave != NULL && (Game_CharacterSave[id] & SAVE_CHARACTER_UNLOCKED) != 0) {
         return entry;
     }
 

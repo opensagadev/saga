@@ -289,7 +289,7 @@ i32 Episode_CountOpenAreas(i32 episode_index, i32 area_index, AREASAVE_s *saves)
         ++EpGoldBrickTotal;
         if ((area->flags & 0x10) == 0)
             continue;
-        if (save->minikit_count != 0)
+        if (save->minikit_complete != 0)
             ++EpGoldBrickCount;
         EpMiniKitCount += save->field_0x5[0];
         if (BOTHTRUEJEDIGOLDBRICKS == 0) {

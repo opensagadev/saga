@@ -263,7 +263,15 @@ void BuyAllShopExtras() {
 void GetShopCamLookPos(nuvec_s *) {
 }
 
-void Shop_CollectAllCharacters(i32) {
+void Shop_CollectAllCharacters(i32 mode) {
+    if (mode != 0)
+        return;
+    const i32 count = ShopCollection.count_y;
+    for (i32 i = 0; i != count && i != 100; ++i) {
+        Game.shop_character_purchased_bits[i >> 5] |= static_cast<u32>(u64(1) << (i & 31));
+        if (WORLD->current_level == HUB_LDATA)
+            CharItems[i].unlocked = SAVE_ON;
+    }
 }
 
 void InitShop(WORLDINFO_s *world) {

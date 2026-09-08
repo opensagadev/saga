@@ -30,6 +30,8 @@ void *Suit_GetDefault(i32) {
 }
 
 void Suits_CollectAll() {
+    Game.suit_flags = SAVE_SUIT_ALL;
+    areaSuitBits = SAVE_SUIT_ALL;
 }
 
 void Suit_FindFromLetter(char) {

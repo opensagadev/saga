@@ -766,12 +766,12 @@ void InitStatusScreen(WORLDINFO_s *world) {
     }
     if (p.collected_score > 0.0f)
         AddStatusStage(&p, 3, 0);
-    if (p.minikit_max != 0 && (p.area->flags & 0x36) == 0x10 && Game.area_save[area].minikit_count == 0 &&
-        AreaGlobals.values.field_0x10 > 0) {
+    if (p.minikit_max != 0 && (p.area->flags & 0x36) == 0x10 &&
+        Game.area_save[area].minikit_complete == SAVE_INCOMPLETE && AreaGlobals.values.field_0x10 > 0) {
         p.new_minikits = AreaGlobals.values.field_0x10;
         i32 gold = 0;
         if (p.minikit_max <= Game.area_save[area].field_0x5[0]) {
-            Game.area_save[area].minikit_count = 1;
+            Game.area_save[area].minikit_complete = SAVE_COMPLETE;
             p.field_0xb0 |= 0x10;
             AddToCompletionPoints(POINTS_PER_MINIKIT);
             gold = AddGoldBrickMessage(&p, tMINIKIT);

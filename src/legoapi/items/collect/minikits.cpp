@@ -35,7 +35,7 @@ i32 AllMiniKitsDone(AREASAVE_s *save) {
     }
 
     for (i32 i = 0; i < AREACOUNT; ++i, ++save) {
-        if ((ADataList[i].flags & AREAFLAG_MINIKIT) != 0 && save->minikit_count == 0) {
+        if ((ADataList[i].flags & AREAFLAG_MINIKIT) != 0 && save->minikit_complete == SAVE_INCOMPLETE) {
             return 0;
         }
     }
@@ -208,7 +208,15 @@ i32 UpdateNewMiniKits(STATUSPACKET_s *, STATUS_STAGE_s *stage) {
     return 0;
 }
 
-void CollectAllMiniKits(AREASAVE_s *) {
+void CollectAllMiniKits(AREASAVE_s *save) {
+    if (save == NULL)
+        return;
+    for (i32 i = 0; i < AREACOUNT; ++i) {
+        if ((ADataList[i].flags & AREAFLAG_MINIKIT) != 0 && save[i].complete != SAVE_INCOMPLETE) {
+            save[i].minikit_count = 10;
+            save[i].minikit_complete = SAVE_COMPLETE;
+        }
+    }
 }
 
 void MiniKit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {

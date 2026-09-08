@@ -1,0 +1,157 @@
+#pragma once
+
+#include "nu2api/nucore/common.h"
+
+// Serialized values, verified against res/libTTapp.so. Keep the schema in the
+// host save utility in sync when these enums or the save structures change.
+enum SAVE_SWITCH : u8 { SAVE_OFF = 0, SAVE_ON = 1 };
+enum SAVE_PROGRESS : u8 { SAVE_INCOMPLETE = 0, SAVE_COMPLETE = 1 };
+enum SAVE_CHARACTER_FLAGS : u8 {
+    SAVE_CHARACTER_AVAILABLE = 1,
+    SAVE_CHARACTER_UNLOCKED = 2, // CollectIDUnlocked; may be unlocked but not owned.
+};
+enum SAVE_REWARD_FLAGS : u8 {
+    SAVE_REWARD_100_PERCENT = 1,
+    SAVE_REWARD_ALL_GOLD_BRICKS = 2,
+};
+enum SAVE_ARCADE_FLAGS : u8 {
+    SAVE_ARCADE_BATTLE = 1,
+    SAVE_ARCADE_COLLECT = 2,
+    SAVE_ARCADE_HUNT = 4,
+};
+enum SAVE_EPISODE_FLAGS : u32 { SAVE_SUPERSTORY_COMPLETE = 1 };
+enum SAVE_TOUCH_CONTROLS : u8 { SAVE_VIRTUAL_CONSOLE = 0, SAVE_TOUCH = 1 };
+enum SAVE_CUSTOM_NAME_SOURCE : u8 { SAVE_CHARACTER_DEFAULT_NAME = 0, SAVE_CUSTOM_NAME = 1 };
+enum SAVE_SUIT_FLAGS : u32 {
+    SAVE_SUIT_SHADOW = 1,
+    SAVE_SUIT_GLIDE = 2,
+    SAVE_SUIT_DEMOLITION = 4,
+    SAVE_SUIT_SONAR = 8,
+    SAVE_SUIT_WATER = 16,
+    SAVE_SUIT_TECHNOLOGY = 32,
+    SAVE_SUIT_MAGNET = 64,
+    SAVE_SUIT_ATTRACT = 128,
+    SAVE_SUIT_ALL = 0xffffffffu,
+};
+// Collection IDs and hint IDs are asset indices, not fixed bit enums. Their
+// masks use word = index / 32 and bit = index % 32.
+enum SAVE_HINT_BANK : u8 { SAVE_HINT_CONSOLE = 0, SAVE_HINT_TOUCH = 1 };
+// Generic index masks: BIT_n names a bit within a stored 32-bit word.
+enum SAVE_INDEX_FLAGS : u32 {
+    SAVE_BIT_0 = u32(1) << 0,
+    SAVE_BIT_1 = u32(1) << 1,
+    SAVE_BIT_2 = u32(1) << 2,
+    SAVE_BIT_3 = u32(1) << 3,
+    SAVE_BIT_4 = u32(1) << 4,
+    SAVE_BIT_5 = u32(1) << 5,
+    SAVE_BIT_6 = u32(1) << 6,
+    SAVE_BIT_7 = u32(1) << 7,
+    SAVE_BIT_8 = u32(1) << 8,
+    SAVE_BIT_9 = u32(1) << 9,
+    SAVE_BIT_10 = u32(1) << 10,
+    SAVE_BIT_11 = u32(1) << 11,
+    SAVE_BIT_12 = u32(1) << 12,
+    SAVE_BIT_13 = u32(1) << 13,
+    SAVE_BIT_14 = u32(1) << 14,
+    SAVE_BIT_15 = u32(1) << 15,
+    SAVE_BIT_16 = u32(1) << 16,
+    SAVE_BIT_17 = u32(1) << 17,
+    SAVE_BIT_18 = u32(1) << 18,
+    SAVE_BIT_19 = u32(1) << 19,
+    SAVE_BIT_20 = u32(1) << 20,
+    SAVE_BIT_21 = u32(1) << 21,
+    SAVE_BIT_22 = u32(1) << 22,
+    SAVE_BIT_23 = u32(1) << 23,
+    SAVE_BIT_24 = u32(1) << 24,
+    SAVE_BIT_25 = u32(1) << 25,
+    SAVE_BIT_26 = u32(1) << 26,
+    SAVE_BIT_27 = u32(1) << 27,
+    SAVE_BIT_28 = u32(1) << 28,
+    SAVE_BIT_29 = u32(1) << 29,
+    SAVE_BIT_30 = u32(1) << 30,
+    SAVE_BIT_31 = u32(1) << 31,
+};
+enum SAVE_HUB_BUILD_FLAGS : u8 {
+    SAVE_HUB_BUILD_0 = 1,
+    SAVE_HUB_BUILD_1 = 2,
+    SAVE_HUB_BUILD_2 = 4,
+    SAVE_HUB_BUILD_3 = 8,
+    SAVE_HUB_BUILD_4 = 16,
+    SAVE_HUB_BUILD_5 = 32,
+    SAVE_HUB_BUILD_6 = 64,
+    SAVE_HUB_LEVEL_BUILD = 128,
+};
+enum SAVE_STORE_PACK_FLAGS : u16 {
+    SAVE_PACK_EPISODE_II = 1,
+    SAVE_PACK_EPISODE_III = 2,
+    SAVE_PACK_EPISODE_IV = 4,
+    SAVE_PACK_EPISODE_V = 8,
+    SAVE_PACK_EPISODE_VI = 16,
+    SAVE_PACK_ARCADE = 32,
+    SAVE_PACK_BONUS = 64,
+    SAVE_PACK_BOUNTY = 128,
+    SAVE_PACK_CHALLENGE = 256,
+    SAVE_PACK_JEDI = 512,
+    SAVE_PACK_SITH = 1024,
+};
+enum SAVE_STORE_BUNDLE_FLAGS : u8 {
+    SAVE_BUNDLE_PREQUEL = 1,
+    SAVE_BUNDLE_ORIGINAL = 2,
+    SAVE_BUNDLE_COMPLETE = 4,
+};
+// Bit positions are Cheat[] indices, NOT Cheat[i].flag (runtime effect flags).
+enum SAVE_EXTRA_INDEX : u8 {
+    SAVE_EXTRA_EXTRATOGGLE,
+    SAVE_EXTRA_POO,
+    SAVE_EXTRA_DISGUISES,
+    SAVE_EXTRA_DAISYCHAINS,
+    SAVE_EXTRA_C3POBITS,
+    SAVE_EXTRA_TOWDEATHSTAR,
+    SAVE_EXTRA_SILHOUETTES,
+    SAVE_EXTRA_BEEPBEEP,
+    SAVE_EXTRA_SUPERGONK,
+    SAVE_EXTRA_POOMONEY,
+    SAVE_EXTRA_WALKIETALKIEDISABLE,
+    SAVE_EXTRA_POWERBRICKDETECTOR,
+    SAVE_EXTRA_SUPERSLAP,
+    SAVE_EXTRA_FORCEZIPUP,
+    SAVE_EXTRA_COINMAGNET,
+    SAVE_EXTRA_DISARMTROOPERS,
+    SAVE_EXTRA_CHARACTERSTUDS,
+    SAVE_EXTRA_PERFECTDEFLECT,
+    SAVE_EXTRA_EXPLODINGBLASTERBOLTS,
+    SAVE_EXTRA_FORCEPULL,
+    SAVE_EXTRA_VEHICLESMARTBOMB,
+    SAVE_EXTRA_SUPERASTROMECH,
+    SAVE_EXTRA_SUPERJEDISLAM,
+    SAVE_EXTRA_SUPERTHERMALDETONATOR,
+    SAVE_EXTRA_DEFLECTBOLTS,
+    SAVE_EXTRA_DARKSIDE,
+    SAVE_EXTRA_SUPERBLASTERS,
+    SAVE_EXTRA_FASTFORCE,
+    SAVE_EXTRA_SUPERSABRES,
+    SAVE_EXTRA_TRACTORBEAM,
+    SAVE_EXTRA_INVINCIBILITY,
+    SAVE_EXTRA_SCOREX2,
+    SAVE_EXTRA_SELFDESTRUCT,
+    SAVE_EXTRA_FASTBUILD,
+    SAVE_EXTRA_SCOREX4,
+    SAVE_EXTRA_REGENERATE,
+    SAVE_EXTRA_MINIKITDETECTOR,
+    SAVE_EXTRA_SCOREX6,
+    SAVE_EXTRA_SUPERZAPPER,
+    SAVE_EXTRA_ROCKETS,
+    SAVE_EXTRA_SCOREX8,
+    SAVE_EXTRA_SUPEREWOKCATAPULT,
+    SAVE_EXTRA_INFINITETORPEDOS,
+    SAVE_EXTRA_SCOREX10,
+    SAVE_EXTRA_COUNT
+};
+
+struct LEVELSAVE_s {
+    char minikit_names[10][8];
+    u8 minikit_count;
+    u8 reserved_0x51[2];
+    u8 arcade_flags;
+};
+static_assert(sizeof(LEVELSAVE_s) == 0x54, "LEVELSAVE size");

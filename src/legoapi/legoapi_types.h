@@ -529,8 +529,13 @@ struct AREASAVE_s {
     u8 area_complete;
     u8 story_buildup_complete;
     u8 freeplay_buildup_complete;
-    u8 minikit_count;
-    u8 field_0x5[3];
+    u8 minikit_complete;
+    union {
+        u8 field_0x5[3];
+        struct {
+            u8 minikit_count, red_brick_collected, reserved_0x7;
+        };
+    };
     f32 challenge_trial_time;
 };
 DECOMP_ASSERT(sizeof(AREASAVE_s) == 0xc, "AREASAVE_s size");
@@ -701,38 +706,44 @@ struct CUSTOMISER {
         };
     };
     i16 character_ids[2];
-    u8 pad_0x70[0x178 - 0x70];
+    u8 pad_0x70[0x174 - 0x70];
+    CUSTOMISESAVE_s *save;             // 0x174
     ANIMPACKET_s animation_packets[2]; // 0x178
     i32 model_texture_ids[18];         // 0x208
     u8 pad_0x250[0xa6c - 0x250];
     u8 animation_active[2];  // 0xa6c
     u8 animation_state[2];   // 0xa6e
     i32 animation_values[2]; // 0xa70
+    u8 pad_0xa78[0xc28 - 0xa78];
+    i16 default_pieces[2][10]; // 0xc28; nine saved pieces plus one unused entry per character
 };
-DECOMP_ASSERT(sizeof(CUSTOMISER) == 0xa78, "CUSTOMISER size");
-DECOMP_ASSERT(offsetof(CUSTOMISER, pieces) == 0x38, "CUSTOMISER pieces offset");
+DECOMP_ASSERT(sizeof(CUSTOMISER) == 0xc50, "CUSTOMISER recovered prefix size");
+DECOMP_ASSERT(offsetof(CUSTOMISER, save) == 0x174, "CUSTOMISER save offset");
+DECOMP_ASSERT(offsetof(CUSTOMISER, default_pieces) == 0xc28, "CUSTOMISER default pieces offset");
 DECOMP_ASSERT(offsetof(CUSTOMISER, character_ids) == 0x6c, "CUSTOMISER character IDs offset");
 DECOMP_ASSERT(offsetof(CUSTOMISER, animation_packets) == 0x178, "CUSTOMISER animation packets offset");
 DECOMP_ASSERT(offsetof(CUSTOMISER, model_texture_ids) == 0x208, "CUSTOMISER model texture IDs offset");
 DECOMP_ASSERT(offsetof(CUSTOMISER, animation_active) == 0xa6c, "CUSTOMISER animation active offset");
 struct __attribute__((packed)) CUSTOMISESAVE_s {
-    i16 pieces[9];            // 0x00
-    u8 field_0x12[2];         // 0x12
-    char primary_name[0x20];  // 0x14
-    u8 primary_name_unlocked; // 0x34
+    i16 pieces[9];           // 0x00
+    u8 field_0x12[2];        // 0x12
+    char primary_name[0x20]; // 0x14
     union {
-        u8 field_0x35[0x17];
-        struct __attribute__((packed)) {
-            u8 pad_secondary_pieces[3];
-            i16 secondary_pieces[9]; // 0x38
-            u8 secondary_piece_flags[2];
-        };
-    };
-    char secondary_name[0x20];  // 0x4c
-    u8 secondary_name_unlocked; // 0x6c
-    u8 field_0x6d[2];           // 0x6d
+        u8 primary_name_unlocked;
+        u8 primary_use_saved_name;
+    }; // 0x34
+    u8 field_0x35[3];          // 0x35
+    i16 secondary_pieces[9];   // 0x38
+    union { u8 field_0x4a[2]; u8 secondary_piece_flags[2]; };          // 0x4a
+    char secondary_name[0x20]; // 0x4c
+    union {
+        u8 secondary_name_unlocked;
+        u8 secondary_use_saved_name;
+    }; // 0x6c
+    u8 field_0x6d[2]; // 0x6d
 };
 DECOMP_ASSERT(sizeof(CUSTOMISESAVE_s) == 0x6f, "CUSTOMISESAVE_s size");
+DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, secondary_pieces) == 0x38, "CUSTOMISESAVE secondary pieces offset");
 DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, primary_name) == 0x14, "CUSTOMISESAVE primary name offset");
 DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, primary_name_unlocked) == 0x34, "CUSTOMISESAVE primary flag offset");
 DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, secondary_name) == 0x4c, "CUSTOMISESAVE secondary name offset");

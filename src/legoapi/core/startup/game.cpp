@@ -255,19 +255,19 @@ void NewGame() {
     }
 
     if (id_DEFAULTCHARACTER[0] != -1) {
-        Game.character_save[id_DEFAULTCHARACTER[0]] |= 3;
+        Game.character_save[id_DEFAULTCHARACTER[0]] |= SAVE_CHARACTER_AVAILABLE | SAVE_CHARACTER_UNLOCKED;
     }
     if (id_DEFAULTCHARACTER[1] != -1) {
-        Game.character_save[id_DEFAULTCHARACTER[1]] |= 3;
+        Game.character_save[id_DEFAULTCHARACTER[1]] |= SAVE_CHARACTER_AVAILABLE | SAVE_CHARACTER_UNLOCKED;
     }
     if (id_WEIRDO1 != -1) {
-        Game.character_save[id_WEIRDO1] |= 3;
+        Game.character_save[id_WEIRDO1] |= SAVE_CHARACTER_AVAILABLE | SAVE_CHARACTER_UNLOCKED;
     }
     if (id_WEIRDO1 != -1 && CDataList != NULL) {
         CDataList[id_WEIRDO1].field0_0x0 = kPrimaryCustomNameTextId;
     }
     if (id_WEIRDO2 != -1) {
-        Game.character_save[id_WEIRDO2] |= 3;
+        Game.character_save[id_WEIRDO2] |= SAVE_CHARACTER_AVAILABLE | SAVE_CHARACTER_UNLOCKED;
     }
     if (id_WEIRDO2 != -1 && CDataList != NULL) {
         CDataList[id_WEIRDO2].field0_0x0 = kSecondaryCustomNameTextId;

@@ -69,7 +69,7 @@ void Areas_OpenAll(i32 mode) {
     AREADATA *area;
     AREASAVE_s *save = Game.area_save;
 
-    if (mode != 0 && !Store_IsPackUnlocked(STORE_PACK_OPEN_ALL_AREAS)) {
+    if (mode != 0 && !Store_IsPackUnlocked(STORE_PACK_CHALLENGE)) {
         return;
     }
 
@@ -77,15 +77,15 @@ void Areas_OpenAll(i32 mode) {
         area = &ADataList[area_index];
 
         if ((area->flags & AREAFLAG_MINIKIT) != 0) {
-            if ((area->episode_index == AREA_EPISODE_I && !Store_IsPackUnlocked(STORE_PACK_EPISODE_I)) ||
-                (area->episode_index == AREA_EPISODE_II && !Store_IsPackUnlocked(STORE_PACK_EPISODE_II)) ||
+            if ((area->episode_index == AREA_EPISODE_II && !Store_IsPackUnlocked(STORE_PACK_EPISODE_II)) ||
                 (area->episode_index == AREA_EPISODE_III && !Store_IsPackUnlocked(STORE_PACK_EPISODE_III)) ||
                 (area->episode_index == AREA_EPISODE_IV && !Store_IsPackUnlocked(STORE_PACK_EPISODE_IV)) ||
-                (area->episode_index == AREA_EPISODE_V && !Store_IsPackUnlocked(STORE_PACK_EPISODE_V))) {
+                (area->episode_index == AREA_EPISODE_V && !Store_IsPackUnlocked(STORE_PACK_EPISODE_V)) ||
+                (area->episode_index == AREA_EPISODE_VI && !Store_IsPackUnlocked(STORE_PACK_EPISODE_VI))) {
                 continue;
             }
         } else if ((area->flags & (AREAFLAG_VEHICLE_AREA | AREAFLAG_SUPER_BONUS_AREA)) == AREAFLAG_BONUS_AREA &&
-                   area->episode_index != AREA_EPISODE_NONE && !Store_IsPackUnlocked(STORE_PACK_BONUS_AREA)) {
+                   area->episode_index != AREA_EPISODE_NONE && !Store_IsPackUnlocked(STORE_PACK_ARCADE)) {
             continue;
         }
 

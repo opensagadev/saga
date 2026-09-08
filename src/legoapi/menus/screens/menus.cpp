@@ -35,6 +35,14 @@ void UpdateGameMenu(GAMEPAD_s *pad, i32 a2) {
     if (pad == nullptr || GameMenuLevel < 0)
         return;
 
+    // Original UpdateGameMenu (0x1192b0) skips menu callbacks while a level
+    // change is pending. Re-entering the title menu here starts NewGame and
+    // erases the save that the preceding frame just loaded.
+    if (NewLData != NULL) {
+        loadsaveCallEachFrame();
+        return;
+    }
+
     const u32 held = GamePad[0].unknown_04 | GamePad[1].unknown_04;
     const u32 pressed = GamePad[0].buttons_down_08 | GamePad[1].buttons_down_08;
     const u32 alternate_held = GamePad[0].unknown_0c | GamePad[1].unknown_0c;
