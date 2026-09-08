@@ -453,46 +453,47 @@ void Hub_Update(WORLDINFO_s *world) {
         }
     }
 
-    for (i32 pack = 0; pack < 11; ++pack) {
-        STOREPACK &store_pack = StorePack[pack];
-        if (store_pack.id == NULL || *store_pack.id == -1 || Store_IsPackUnlocked(pack) != 0) {
-            continue;
-        }
-        const i32 id = *store_pack.id;
-        if ((store_pack.field44_0x32 != 0xff && store_pack.field44_0x32 != GameCam->sock_position.location.sock) ||
-            APICharacterLoaded(id) == NULL || FindGameObject(id, 0, 0, 0, 0) != NULL) {
-            continue;
-        }
-        AIPATHINFO_s *path_info = NULL;
-        AILOCATORSET *locator_set = AIPathFindLocatorSet(world->ai_sys, store_pack.custodian_locator_set);
-        if (locator_set != NULL) {
-            AILOCATOR *locators[64] = {};
-            AILocatorSet_CheckLocatorsStillAssigned(world->ai_sys, locator_set);
-            i32 count = 0;
-            for (i32 i = 0; i < locator_set->locator_count && count < 64; ++i) {
-                if (locator_set->assigned[i] == 0xff) {
-                    locators[count++] = &world->ai_sys->locators[locator_set->locator_entries[i]];
+    STOREPACK *current_pack = StorePack;
+    for (i32 pack = 0; pack < 11; ++pack, ++current_pack) {
+        STOREPACK &store_pack = *current_pack;
+        if (store_pack.id != NULL) {
+            const i32 id = *store_pack.id;
+            if (id != -1 && Store_IsPackUnlocked(pack) == 0 &&
+                (store_pack.field44_0x32 == 0xff ||
+                 store_pack.field44_0x32 == static_cast<u8>(GameCam->sock_position.location.sock)) &&
+                APICharacterLoaded(id) != NULL && FindGameObject(id, 0, 0, 0, 0) == NULL) {
+                AIPATHINFO_s *path_info = NULL;
+                AILOCATORSET *locator_set = AIPathFindLocatorSet(world->ai_sys, store_pack.custodian_locator_set);
+                if (locator_set != NULL) {
+                    AILOCATOR *locators[64] = {};
+                    AILocatorSet_CheckLocatorsStillAssigned(world->ai_sys, locator_set);
+                    i32 count = 0;
+                    for (i32 i = 0; i < locator_set->locator_count && count < 64; ++i) {
+                        if (locator_set->assigned[i] == 0xff) {
+                            locators[count++] = &world->ai_sys->locators[locator_set->locator_entries[i]];
+                        }
+                    }
+                    if (count != 0) {
+                        AILOCATOR *locator = LocalGetNearestLocator(locators, count, 0.0f, &player->apiobj.position,
+                                                                    1000000000.0f, 0, 1000000000.0f, 1000000000.0f);
+                        if (locator != NULL) {
+                            path_info = reinterpret_cast<AIPATHINFO_s *>(&locator->path);
+                        }
+                    }
+                }
+                GameObject_s *custodian =
+                    AddDynamicCreature(id, &store_pack.custodian_position, store_pack.custodian_angle,
+                                       const_cast<char *>("party"), path_info, NULL, 1, NULL, NULL, 0, 1);
+                if (custodian != NULL) {
+                    custodian->field_0xee8 = store_pack.custodian_position.x;
+                    custodian->field_0xeec = store_pack.custodian_position.z;
+                    custodian->field_0x106e = store_pack.custodian_angle;
+                    Store_RootPackCustodian(pack, custodian);
+                    AddGameDebris(world->debris_sys, 92, &custodian->apiobj.collision_position);
                 }
             }
-            if (count != 0) {
-                AILOCATOR *locator = LocalGetNearestLocator(locators, count, 0.0f, &player->apiobj.position,
-                                                            1000000000.0f, 0, 1000000000.0f, 1000000000.0f);
-                if (locator != NULL) {
-                    path_info = reinterpret_cast<AIPATHINFO_s *>(&locator->path);
-                }
-            }
-        }
-        GameObject_s *custodian = AddDynamicCreature(id, &store_pack.custodian_position, store_pack.custodian_angle,
-                                                     const_cast<char *>("party"), path_info, NULL, 1, NULL, NULL, 0, 1);
-        if (custodian != NULL) {
-            custodian->field_0xee8 = store_pack.custodian_position.x;
-            custodian->field_0xeec = store_pack.custodian_position.z;
-            custodian->field_0x106e = store_pack.custodian_angle;
-            Store_RootPackCustodian(pack, custodian);
-            AddGameDebris(world->debris_sys, 92, &custodian->apiobj.collision_position);
         }
     }
-
     if (buildits_reset == 0) {
         i32 buildit_index = 0;
         for (i32 i = 0; HubAreaInfo[i].area_name != NULL; ++i) {
@@ -517,9 +518,9 @@ void Hub_Update(WORLDINFO_s *world) {
         Hub_PreventDropOutTime = 1.0f;
     }
 
-    const f32 pulse_time = NuFmod(GlobalTimer.time_elapsed, 0.5f);
-    TJTYPEA = static_cast<i32>(NU_SIN_LUT((pulse_time + pulse_time) * 65536.0f) * 16.0f + 80.0f);
-    if (menu == 8 && !memory_card_menu) {
+    const f32 pulse_time = NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.5f);
+    TJTYPEA = static_cast<i32>(NU_SIN_LUT(static_cast<u16>((pulse_time + pulse_time) * 65536.0f)) * 16.0f + 80.0f);
+    if (menu == 8) {
         hub_jabbaawake = 1.0f;
     } else if (hub_jabbaawake > 0.0f) {
         hub_jabbaawake -= FRAMETIME * 0.333f;
