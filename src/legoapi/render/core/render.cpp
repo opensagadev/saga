@@ -2323,7 +2323,7 @@ void DrawSubItemMenu2D() {
             if (since_touch > 4.0f) {
                 i32 angle = static_cast<i32>(NuFmod(since_touch, 4.0f) * 0.25f * 65536.0f);
                 f32 value = NuTrigTable[(angle >> 1) & 0x7fff] - 0.8f;
-                if (value >= 0.0f)
+                if (!(value < 0.0f))
                     pulse = value + 1.0f;
             }
         }
@@ -2333,7 +2333,8 @@ void DrawSubItemMenu2D() {
         DrawPanel3DObject(0.3f, -0.3f, 1.0f, size, size, size, 0, 0, 0, &WORLD->lev_objs[165].special, 0,
                           ShopNameAlpha);
         f32 text_size = pulse * 0.6f;
-        u8 text_alpha = static_cast<i32>(128.0f * ShopNameAlpha);
+        f32 alpha = static_cast<i32>(128.0f * ShopNameAlpha);
+        u8 text_alpha = static_cast<i32>(alpha);
         Text3DEx("$", -0.3f, -0.3f, 1.0f, 1.3f * text_size, text_size, text_size, 0, 0, 255, 0, text_alpha);
         Text3DEx("X", 0.3f, -0.31f, 1.0f, 1.3f * text_size, text_size, text_size, 0, 255, 0, 0, text_alpha);
         MENU_s *menu = &GameMenu[GameMenuLevel];
@@ -2341,10 +2342,11 @@ void DrawSubItemMenu2D() {
         menu->item_y[11] = -0.3f;
         menu->item_x[12] = 0.3f;
         menu->item_y[12] = -0.3f;
-        menu->item_width[11] = menu->item_width[12] = size;
+        menu->item_width[11] = size;
         menu->item_column[11] = 0;
         menu->item_row[11] = 2;
         menu->item_column[12] = 1;
+        menu->item_width[12] = size;
         menu->item_row[12] = 2;
     }
 }

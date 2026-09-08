@@ -292,3 +292,13 @@ sounds, and resulting selection/scales agreed exactly. Rendering, availability,
 and audio callees were instrumented; this does not validate purchasing,
 confirmation-button rendering, or a complete native shop session. The native
 submenu capture limitation described above remains outstanding.
+
+The confirmation-control follow-up restores the original intermediate float
+in text opacity conversion, unordered pulse comparison, and menu-field write
+order (`0x2439a0`–`0x243d1c`). Matching is now 35.297%, with 3802 current
+bytes. The extended mapped-code comparison passed all 20,160 cases, adding
+confirmation selection, controller presence, seven touch-idle times around
+the pulse threshold and cycle, both icon draws, both text draws, and a hash
+of all menu bytes after each call. Rendering and input detection remain
+instrumented; this is confirmation-layout evidence, not native purchasing
+or end-to-end gameplay verification.
