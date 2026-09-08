@@ -3386,8 +3386,8 @@ static i32 Action_SetMaxMovementRange(AISYS *, AISCRIPTPROCESS *processor, AIPAC
     }
 
     if (all_non_party) {
-        for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
-            GameObject_s *object = &Obj[index];
+        GameObject_s *object = Obj;
+        for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
             if ((object->apiobj.field_0x1f8 & (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER)) !=
                     (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER) ||
                 (object->apiobj.field_0x1f4 & 0x400) == 0) {
