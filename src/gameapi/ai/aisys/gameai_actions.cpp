@@ -378,9 +378,6 @@ static __used__ i32 Action_GizmoSetVisibility(AISYS_s *, AISCRIPTPROCESS_s *, AI
     return 1;
 }
 
-static __used__ i32 Action_IgnoreSlideTerrain(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
-    return 0;
-}
 
 
 static __used__ i32 Action_PressSpecialButton(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet,
