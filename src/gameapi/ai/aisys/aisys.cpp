@@ -957,6 +957,36 @@ __used__ static i32 Action_GoToNode(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
 
 void LevelScriptReStoreProgress(WORLDINFO_s *, LEVELSCRIPTPROCESS_s *);
 
+#include "legoapi/gizmos/object/technos.h"
+
+static i32 Action_SetTechnoComplete(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
+                                  i32 param_count, i32 first_time, f32) {
+    GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+    if (first_time) {
+        TECHNO *techno = NULL;
+        i32 complete = 1;
+        for (i32 index = 0; index < param_count; ++index) {
+            char *value = NuStrIStr(params[index], "techno");
+            if (value != NULL) {
+                char *name = value + NuStrLen("techno") + 1;
+                i32 type = GizmoGetTypeIDByName(WORLD->gizmo_sys, "Techno");
+                GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, type, name);
+                if (gizmo != NULL && gizmo->object != NULL)
+                    techno = static_cast<TECHNO *>(gizmo->object);
+            } else if (NuStrICmp(params[index], "FALSE") == 0) {
+                complete = 0;
+            } else if ((value = NuStrIStr(params[index], "controlling")) != NULL) {
+                object = GetNamedGameObject(WORLD->ai_sys, value + NuStrLen("controlling") + 1);
+            }
+        }
+        if (object != NULL)
+            techno = Technos_FindControllingTechno(object);
+        if (techno != NULL)
+            techno->flags = (techno->flags & ~TECHNO_FLAG_COMPLETE) | ((u8)complete << 3);
+    }
+    return 1;
+}
+
 static i32 Action_SetShootOpponents(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
                                    i32 param_count, i32 first_time, f32) {
     if (packet == NULL || packet->owner == NULL)
@@ -4609,7 +4639,7 @@ extern "C" {
         {"SetAO_AttackersPerRow", Action_SetAttackersPerRow, 0, 0, 0},
         {"SetAO_RowDist", NULL, 0, 0, 0},
         {"SetAO_InitRowDist", Action_InitRowDist, 0, 0, 0},
-        {"SetTechnoComplete", NULL, 0, 0, 0},
+        {"SetTechnoComplete", Action_SetTechnoComplete, 0, 0, 0},
         {"LetGoOfBalloon", Action_LetGoOfBalloon, 0, 0, 0},
         {"DrawBossHitPoints", Action_DrawBossHitPoints, 1, 0, 0},
         {"CompleteLevel", Action_CompleteLevel, 1, 0, 0},
