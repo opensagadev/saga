@@ -748,6 +748,7 @@ struct FADETYPE {
     FADETYPE_VALUE type;
 };
 DECOMP_ASSERT(sizeof(FADETYPE) == 4, "FADETYPE ABI");
+struct FLOWBOXACTIONDATA_s;
 struct FLOWBOXGIZMODATA_s {
     i32 gizmo_count;
     u8 pad_0x04[4];
@@ -769,7 +770,10 @@ struct FLOWBOX_s {
             u8 state_flags_high;
         };
     };
-    FLOWBOXGIZMODATA_s *data;
+    union {
+        FLOWBOXGIZMODATA_s *data;
+        FLOWBOXACTIONDATA_s *actions;
+    };
     FLOWBOX_s **parents;
     FLOWBOX_s **children;
     u8 *output_indices;
@@ -1078,6 +1082,18 @@ struct GIZACTIONDEFN_s {
     GIZACTIONFN *action_fn;
 };
 DECOMP_ASSERT(sizeof(GIZACTIONDEFN_s) == 8, "GIZACTIONDEFN_s ABI");
+
+struct FLOWBOXACTIONDATA_s {
+    FLOWBOXACTIONDATA_s *next;
+    char **arguments;
+    i32 argument_count;
+    GIZACTIONDEFN_s *definition;
+};
+DECOMP_ASSERT(sizeof(FLOWBOXACTIONDATA_s) == 0x10, "FLOWBOXACTIONDATA size");
+DECOMP_ASSERT(offsetof(FLOWBOXACTIONDATA_s, arguments) == 4, "FLOWBOXACTIONDATA arguments offset");
+DECOMP_ASSERT(offsetof(FLOWBOXACTIONDATA_s, argument_count) == 8, "FLOWBOXACTIONDATA argument count offset");
+DECOMP_ASSERT(offsetof(FLOWBOXACTIONDATA_s, definition) == 0xc, "FLOWBOXACTIONDATA definition offset");
+DECOMP_ASSERT(offsetof(FLOWBOX_s, actions) == 0xc, "FLOWBOX actions offset");
 
 
 // The AI message system: a fixed pool of 0x38-byte messages; the free list

@@ -139,7 +139,14 @@ void GizFlowStoreProgress(GIZFLOW_s *flow, GIZFLOWPROGRESS_s *progress) {
 void GizmoTypeGetProgress(GIZMOSYS_s *, void *, i32, i32, char *, void **) {
 }
 
-void PerformActionFlowBox(GIZFLOW_s *, FLOWBOX_s *) {
+void PerformActionFlowBox(GIZFLOW_s *flow, FLOWBOX_s *box) {
+    if (box != NULL && box->type == 2) {
+        for (FLOWBOXACTIONDATA_s *action = box->actions; action != NULL; action = action->next) {
+            if (action->definition != NULL && action->definition->action_fn != NULL) {
+                action->definition->action_fn(flow, box, action->arguments, action->argument_count);
+            }
+        }
+    }
 }
 
 void ResetGizFlowPointers(GIZFLOW_s *) {
