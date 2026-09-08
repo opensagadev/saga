@@ -934,12 +934,6 @@ static __used__ f32 Condition_NearestPartyXZRange(AISYS_s *, AISCRIPTPROCESS_s *
 
 
 
-static __used__ i32 Action_SetDefaultMovementRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32,
-                                                   f32) {
-    return 0;
-}
-
-
 static __used__ f32 Condition_EitherPlayerOnObject(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return 0;
 }
