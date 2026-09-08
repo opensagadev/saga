@@ -1123,6 +1123,7 @@ DECOMP_ASSERT(offsetof(APIOBJECT, field_0x27f) == 0x27f, "APIOBJECT swamp-state 
 DECOMP_ASSERT(offsetof(AIPACKET, reset_mode) == 0x13a, "AIPACKET activation state offset");
 DECOMP_ASSERT(offsetof(AIPACKET, field_0x134) == 0x134, "AIPACKET source creature index offset");
 DECOMP_ASSERT(offsetof(AIPACKET, terrain_origin) == 0x148, "AIPACKET terrain origin offset");
+DECOMP_ASSERT(offsetof(AIPACKET, inside_path_node) == 0x124, "AIPACKET containing path node index offset");
 DECOMP_ASSERT(offsetof(AIPACKET, script_process) == 0, "AIPACKET primary script processor offset");
 static_assert(sizeof(void *) != 4 || sizeof(AIPACKET) == 0x208, "AIPACKET 32-bit size");
 static_assert(sizeof(void *) != 4 || sizeof(GameObject_s) == 0x10e4, "GameObject 32-bit size");

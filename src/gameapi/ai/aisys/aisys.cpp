@@ -6287,8 +6287,7 @@ static f32 Condition_IAmAPartyCharacter(AISYS *, AISCRIPTPROCESS *, AIPACKET *pa
                ? 1.0f : 0.0f;
 }
 
-__used__ static f32 Condition_InLevelNode(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                          void *void_arg) {
+static f32 Condition_InLevelNode(AISYS *sys, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *void_arg) {
     if (void_arg != NULL && packet != NULL) {
         if (sys != NULL) {
             AIPATHNODE *node = static_cast<AIPATHNODE *>(void_arg);
