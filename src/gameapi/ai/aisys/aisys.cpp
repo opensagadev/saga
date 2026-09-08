@@ -6828,6 +6828,78 @@ DECOMP_ASSERT(sizeof(api_aiactiondefs) == 0x294, "API action registry size");
 DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size");
 
 
+extern "C" void AILocatorSet_CheckLocatorsStillAssigned(AISYS *system, AILOCATORSET *locator_set) {
+    if (locator_set == NULL || APIOBJECTFromObjIDFn == NULL) {
+        return;
+    }
+
+    for (i32 index = 0; index < locator_set->locator_count; ++index) {
+        const u8 assignment = locator_set->assigned[index];
+        if (assignment == 0x80 || assignment == 0xff) {
+            continue;
+        }
+
+        u8 locator_index = 0xff;
+        APIOBJECT *object = APIOBJECTFromObjIDFn(assignment);
+        if (object != NULL && object->ai != NULL && object->ai->locator != NULL) {
+            locator_index = object->ai->locator - system->locators;
+        }
+        if (locator_index != locator_set->locator_entries[index]) {
+            locator_set->assigned[index] = 0xff;
+        }
+    }
+}
+
+extern "C" void AILocatorSet_AssignRandomLocator(AISYS *system, AILOCATORSET *locator_set, APIOBJECT *object, f32 max_range,
+                                      NUVEC *position, f32 off_screen_radius, i32 ignore_assigned) {
+    if (object == NULL || locator_set == NULL || object->ai == NULL) {
+        return;
+    }
+
+    const f32 max_distance = max_range > 0.0f ? max_range * max_range : FLT_MAX;
+    NUVEC difference;
+    if (ignore_assigned != 0) {
+        AILocatorSet_CheckLocatorsStillAssigned(system, locator_set);
+    }
+    i32 candidate_count = 0;
+    for (i32 index = 0; index < locator_set->locator_count; ++index) {
+        if (ignore_assigned != 0 && locator_set->assigned[index] != 0xff) {
+            continue;
+        }
+
+        AILOCATOR *locator = &system->locators[locator_set->locator_entries[index]];
+        if (off_screen_radius != 0.0f &&
+            NuCameraClipTestSphere(&locator->position, off_screen_radius, &numtx_identity) == 0) {
+            continue;
+        }
+        if (NuVecDistSqr(position, &locator->position, &difference) <= max_distance) {
+            ++candidate_count;
+        }
+    }
+
+    if (candidate_count == 0) {
+        return;
+    }
+
+    const i32 selected_candidate = NuRandInt() % candidate_count;
+    i32 candidate_index = 0;
+    for (i32 index = 0; index < locator_set->locator_count; ++index) {
+        if (ignore_assigned != 0 && locator_set->assigned[index] != 0xff) {
+            continue;
+        }
+
+        AILOCATOR *locator = &system->locators[locator_set->locator_entries[index]];
+        if (NuVecDistSqr(&object->position, &locator->position, &difference) <= max_distance) {
+            if (candidate_index == selected_candidate) {
+                object->ai->locator = locator;
+                locator_set->assigned[index] = object->field_0x289;
+                break;
+            }
+            ++candidate_index;
+        }
+    }
+}
+
 namespace {
     struct AISysRegistryCallbacks {
         AISysRegistryCallbacks() {
