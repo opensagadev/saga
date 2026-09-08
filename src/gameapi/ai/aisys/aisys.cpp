@@ -5943,38 +5943,23 @@ __used__ static f32 Condition_Side(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
 
 static f32 Condition_XPos(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *argument) {
     GameObject_s *object = static_cast<GameObject_s *>(argument);
-    if (object == NULL) {
-        if (packet == NULL || packet->owner == NULL)
-            return 0.0f;
-        object = packet->owner->apiobj.objptr;
-    }
-    if (object != NULL)
-        return object->apiobj.collision_position.x;
-    return 0.0f;
+    if (object == NULL)
+        object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+    return object != NULL ? object->apiobj.collision_position.x : 0.0f;
 }
 
 static f32 Condition_YPos(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *argument) {
     GameObject_s *object = static_cast<GameObject_s *>(argument);
-    if (object == NULL) {
-        if (packet == NULL || packet->owner == NULL)
-            return 0.0f;
-        object = packet->owner->apiobj.objptr;
-    }
-    if (object != NULL)
-        return object->apiobj.collision_position.y;
-    return 0.0f;
+    if (object == NULL)
+        object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+    return object != NULL ? object->apiobj.collision_position.y : 0.0f;
 }
 
 static f32 Condition_ZPos(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *argument) {
     GameObject_s *object = static_cast<GameObject_s *>(argument);
-    if (object == NULL) {
-        if (packet == NULL || packet->owner == NULL)
-            return 0.0f;
-        object = packet->owner->apiobj.objptr;
-    }
-    if (object != NULL)
-        return object->apiobj.collision_position.z;
-    return 0.0f;
+    if (object == NULL)
+        object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+    return object != NULL ? object->apiobj.collision_position.z : 0.0f;
 }
 
 __used__ static f32 Condition_Debug(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
