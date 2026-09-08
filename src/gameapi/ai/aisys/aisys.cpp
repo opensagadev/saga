@@ -1112,14 +1112,16 @@ static i32 Action_SetFormationCommander(AISYS *, AISCRIPTPROCESS *, AIPACKET *pa
     if (packet->group_member_index != group->member_count - 1) return 1;
     if (group->count_across != 1 && group->member_count % group->count_across != 1) return 1;
     packet->movement_event_flags |= 1;
+    i32 commander_id;
     if (object->id == id_BATTLEDROID || object->id == id_BATTLEDROIDSECURITY ||
         object->id == id_BATTLEDROIDGEONOSIAN) {
-        NewPlayerCharacter(object, id_BATTLEDROIDCOMMANDER, object->id, 1);
+        commander_id = id_BATTLEDROIDCOMMANDER;
     } else if (object->id == id_CLONEEP3) {
-        NewPlayerCharacter(object, id_CLONEEP3SAND, object->id, 1);
+        commander_id = id_CLONEEP3SAND;
     } else {
         return 1;
     }
+    NewPlayerCharacter(object, commander_id, object->id, 1);
     object->current_hp = object->apiobj.character_data->game_character->hitpoints;
     object->hitpoints = object->apiobj.character_data->game_character->hitpoints;
     return 1;
