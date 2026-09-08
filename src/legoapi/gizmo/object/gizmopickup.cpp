@@ -84,8 +84,8 @@ void StoreStatusTakeOverObjectSys() {
         return;
     }
     u8 level = static_cast<u8>(WORLD->current_level->area_level_index);
-    for (i32 index = 0; index < num_takeoverobjects; ++index) {
-        TAKEOVEROBJECT_s *record = &takeoverobjects[index];
+    TAKEOVEROBJECT_s *record = takeoverobjects;
+    for (i32 index = 0; index < num_takeoverobjects; ++index, ++record) {
         GameObject_s *object = record->object;
         if (object == NULL) {
             continue;
