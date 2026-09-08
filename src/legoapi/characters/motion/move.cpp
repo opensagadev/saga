@@ -3114,12 +3114,18 @@ extern i16 id_ATST, id_MINIATST, id_ATST_LOWRES, id_ATAT, id_MINIATAT, id_MINIAT
 }
 
 i32 CanObjSlide(GameObject_s *object, i32) {
-    const u8 surface = object->apiobj.field_0x281;
-    if (surface > 31 || (TerSurface[surface].flags & 0x400) == 0)
+    const i8 surface = object->apiobj.field_0x281;
+    if (static_cast<u8>(surface) >= 32)
         return 0;
-    if (surface == 5 && CanMagnetClimbFn != NULL && CanMagnetClimbFn(object))
-        return 0;
-    return 1;
+    if ((TerSurface[surface].flags & 0x400) != 0) {
+        if (surface == 5 && CanMagnetClimbFn != NULL) {
+            if (CanMagnetClimbFn(object) == 0)
+                return 1;
+        } else {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 i32 StartSlide(GameObject_s *object, i32 check_contact) {
