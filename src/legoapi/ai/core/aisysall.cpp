@@ -146,6 +146,73 @@ void ClearAICreatures() {
 void AIMoveCanReachPath(AISYS_s *, AIPATH_s *, AIPATH_s *) {
 }
 
+static __attribute__((noinline)) AIPATHCNX *GetNextConnection(const AIPACKET *packet, i32 *direction) {
+    if (packet->goal_path_node == NULL || packet->path_info.connection == NULL) {
+        return NULL;
+    }
+    i32 current = packet->path_info.connection->node_indices[packet->path_info.direction == 0];
+    AIPATH *path = packet->path_info.path;
+    AIPATHNODE *node = &path->nodes[current];
+    i32 goal = packet->goal_path_node - path->nodes;
+    if (static_cast<u32>(goal) > 0xff) {
+        return NULL;
+    }
+    AIPATHCNX *connection = NULL;
+    i32 next = path->route_matrix[current][goal];
+    if (next < node->connection_count) {
+        connection = node->connections[next];
+        *direction = connection->node_indices[0] != current;
+    }
+    u8 route = packet->current_route;
+    if (route == 0xff) {
+        return connection;
+    }
+    if (((static_cast<u64>(static_cast<u16>(node->value_0x58)) >> route) & 1) == 0) {
+        return NULL;
+    }
+    if (((static_cast<u64>(static_cast<u16>(node->value_0x5a)) >> route) & 1) != 0) {
+        if (connection == NULL) {
+            return NULL;
+        }
+        if (((static_cast<u64>(connection->route_mask) >> route) & 1) == 0) {
+            return connection;
+        }
+    }
+    AIPATHROUTE *route_info = &path->routes[route];
+    if (((static_cast<u64>(static_cast<u16>(path->nodes[goal].value_0x58)) >> route) & 1) != 0) {
+        next = route_info->route_nodes[route_info->node_routes[current]][route_info->node_routes[goal]];
+    } else {
+        if (route_info->character_count == 0) {
+            return NULL;
+        }
+        f32 best_distance = 3.4028234663852886e+38f;
+        i32 exit_node = 0;
+        for (i32 i = 0; i < route_info->character_count; ++i) {
+            f32 first = AIPathNodeDistanceToPathNode(packet->path_info.path, current, route_info->characters[i],
+                                                     packet->current_route, 0);
+            f32 second = AIPathNodeDistanceToPathNode(packet->path_info.path, route_info->characters[i], goal, 0xff,
+                                                      static_cast<u32>(u64(1) << packet->current_route));
+            f32 distance = first != 3.4028234663852886e+38f && second != 3.4028234663852886e+38f
+                               ? first + second
+                               : 3.4028234663852886e+38f;
+            if (distance < best_distance) {
+                best_distance = distance;
+                exit_node = route_info->characters[i];
+            }
+        }
+        if (best_distance == 3.4028234663852886e+38f) {
+            return NULL;
+        }
+        next = route_info->route_nodes[route_info->node_routes[current]][route_info->node_routes[exit_node]];
+    }
+    if (next >= node->connection_count) {
+        return NULL;
+    }
+    connection = node->connections[next];
+    *direction = connection->node_indices[0] != current;
+    return connection;
+}
+
 void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
     AIPATH *path = packet->path_info.path;
     AIPATHCNX *connection = packet->path_info.connection;
@@ -269,12 +336,9 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
     AIPATHCNX *next_connection = NULL;
     if (goal_index == waypoint_index) {
         next_connection = destination_connection;
-    } else if (path->route_matrix != NULL && path->route_matrix[waypoint_index] != NULL &&
-               waypoint->connections != NULL) {
-        const u8 next_connection_index = path->route_matrix[waypoint_index][goal_index];
-        if (next_connection_index < waypoint->connection_count) {
-            next_connection = waypoint->connections[next_connection_index];
-        }
+    } else {
+        i32 direction;
+        next_connection = GetNextConnection(packet, &direction);
     }
 
     if (next_connection == NULL || next_connection == connection) {

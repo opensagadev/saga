@@ -360,6 +360,25 @@ movement input, but still reports the known NPC angle-table sanitizer error
 (`/tmp/saga-intersection-integration.log`). Full movement correctness remains
 open, including the incomplete destination solver and formation updates.
 
+`GetNextConnection` now reconstructs the original general-matrix selection,
+route membership and boundary masks, mapped route lookup, and nearest-exit
+distance selection. The obsolete private placeholder is removed from
+`ai_sys.cpp`; the destination solver calls the recovered helper in place of
+its general-matrix-only lookup. The helper compares at **35.790%** (905 bytes
+versus 849 original), and `AIMoveToDestination` improves from **11.209%** to
+**12.588%**. These remain partial matches; the full solver still needs recovery.
+
+An isolated ELF mapping fixture executes the original helper at `0x3ed4a0`
+using its original private register calling convention. Eight cases cover
+general selection in both directions, an unavailable matrix entry, route
+membership rejection, mapped route selection, boundary fallback, an outside
+goal with no exits, and a null goal. Native GDB calls agree on both the selected
+connection and the direction output, including rejection after direction was
+already updated (`/tmp/saga-original-nextconnection.log`,
+`/tmp/saga-nextconnection-runtime.log`). These cases do not exercise the
+nearest-exit distance calls or prove ordinary NPC movement. Target/native
+builds and all four repository checks pass.
+
 A native build-sound inventory confirms event 0x3a resolves to `MK-Pickup`
 (SFX 50, sample 357, 22050 Hz, enabled) and event 0x3b to `LegoForm` (SFX 128,
 sample 434, 11025 Hz, enabled and looping). Both have volume 16383. The
