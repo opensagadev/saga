@@ -79,11 +79,6 @@ extern "C" APIOBJECTSYS_s *APIObjectSysInit(i32 size, VARIPTR *buf, VARIPTR *buf
     return system;
 }
 
-static __used__ unsigned int CalculateIntersection(AISYS_s *, AIPACKET_s *, APIOBJECT_s *, AIPATHCNX_s *,
-                                                   AIPATHCNX_s *) {
-    return {};
-}
-
 static __used__ unsigned int AISysCharacterTestPathCnx(AISYS_s *, APIOBJECT_s *, AIPACKET_s *, AIPATHCNX_s *, int,
                                                        float *) {
     return {};

@@ -6,6 +6,8 @@
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/nurand.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nuvec.h"
 #include "nu2api/numath/nutrig.h"
 
 struct AIROW_s;
@@ -13,63 +15,126 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-// The target computes two tangent points for a corner. Until that curved-path
-// helper is recovered, stage a turn at the shared node so ordinary followers
-// cannot cut directly across level geometry.
-static i32 CalculateIntersection(AISYS_s *, AIPACKET_s *packet, APIOBJECT_s *object, AIPATHCNX_s *current_connection,
-                                 AIPATHCNX_s *target_connection) {
-    if (packet->intersection_connection != current_connection ||
-        packet->intersection_target_connection != target_connection) {
-        packet->movement_flags &=
-            static_cast<u8>(~(AIPACKET_MOVEMENT_DIVERSION_RIGHT | AIPACKET_MOVEMENT_DIVERSION_LEFT));
-        packet->intersection_connection = current_connection;
-        packet->intersection_target_connection = target_connection;
-    }
+static i16 IntersectionAngle(f32 value) {
+    f32 absolute = NuFabs(value);
+    f32 root = NuFsqrt(1.0f - value * value);
+    f32 small = root < absolute ? root : absolute;
+    f32 side = (absolute - 0.70710677f) * 3.40282e+38f;
+    side = side < 1.0f ? (side > -1.0f ? side : -1.0f) : 1.0f;
+    f32 sign = value * 3.40282e+38f;
+    sign = sign < 1.0f ? (sign > -1.0f ? sign : -1.0f) : 1.0f;
+    f32 product = side * sign;
+    f32 x = small * product;
+    f32 x2 = x * x;
+    f32 x3 = x * x2;
+    f32 x4 = x2 * x2;
+    f32 x5 = x2 * x3;
+    return static_cast<i16>(static_cast<i32>(((sign + product) * 0.785398f - x + (x * -0.166667f) * x2 +
+                                              (-0.075f * x2) * x3 + (-0.0446429f * x3) * x4 + (x4 * -0.0303819f) * x5) *
+                                             10430.4f));
+}
 
-    AIPATH *path = packet->path_info.path;
-    if (path == NULL || path->nodes == NULL || current_connection == NULL || target_connection == NULL) {
-        packet->movement_destination = object->position;
-        packet->movement_stopping_distance = 0.0f;
-        packet->runtime_flags |= AIPACKET_RUNTIME_PATH_BLOCKED;
-        return 0;
-    }
-
-    u8 shared_node_index = 0xff;
-    for (i32 current_end = 0; current_end < 2 && shared_node_index == 0xff; ++current_end) {
-        for (i32 target_end = 0; target_end < 2; ++target_end) {
-            if (current_connection->node_indices[current_end] == target_connection->node_indices[target_end]) {
-                shared_node_index = current_connection->node_indices[current_end];
-                break;
-            }
-        }
-    }
-    if (shared_node_index >= path->node_count) {
-        packet->movement_destination = object->position;
-        packet->movement_stopping_distance = 0.0f;
-        packet->runtime_flags |= AIPACKET_RUNTIME_PATH_BLOCKED;
-        return 0;
-    }
-
-    NUANG incoming_angle = current_connection->rotation;
-    if (shared_node_index == current_connection->direction_a) {
-        incoming_angle = NuAngAdd(incoming_angle, NUANG_180DEG);
-    }
-    NUANG outgoing_angle = target_connection->rotation;
-    if (shared_node_index == target_connection->direction_b) {
-        outgoing_angle = NuAngAdd(outgoing_angle, NUANG_180DEG);
-    }
-
-    const i32 turn = static_cast<i16>(NuAngSub(outgoing_angle, incoming_angle));
-    if (turn < -0x100 || turn > 0x100) {
-        const NUVEC &shared_position = path->nodes[shared_node_index].position;
-        packet->right_diversion = shared_position;
-        packet->left_diversion = shared_position;
-        packet->movement_flags |= AIPACKET_MOVEMENT_DIVERSION_RIGHT | AIPACKET_MOVEMENT_DIVERSION_LEFT;
-        packet->runtime_flags &= static_cast<u8>(~AIPACKET_RUNTIME_PATH_BLOCKED);
+static i32 CalculateRightIntersection(APIOBJECT_s *object, AIPATHCNX_s *first_connection,
+                                      AIPATHCNX_s *second_connection, i32 first_angle, i32 second_angle,
+                                      AIPATHNODE_s *first, AIPATHNODE_s *middle, AIPATHNODE_s *last, NUVEC *result) {
+    const f32 margin = object->collision_radius + 0.05f;
+    f32 first_radius = first->radius - margin;
+    f32 middle_radius = middle->radius - margin;
+    f32 last_radius = last->radius - margin;
+    if (first_radius < 0.0f)
+        first_radius = 0.0f;
+    if (middle_radius < 0.0f)
+        middle_radius = 0.0f;
+    if (last_radius < 0.0f)
+        last_radius = 0.0f;
+    NUVEC a = {first_radius, 0.0f, 0.0f};
+    NUVEC b = {first_radius, 0.0f, first_connection->horizontal_distance};
+    i32 angle = NuAngAdd(first_angle,
+                         IntersectionAngle((middle_radius - first_radius) / first_connection->horizontal_distance));
+    NuVecRotateY(&a, &a, angle);
+    NuVecRotateY(&b, &b, angle);
+    NuVecAdd(&a, &a, &first->position);
+    NuVecAdd(&b, &b, &first->position);
+    NUVEC c = {-last_radius, 0.0f, 0.0f};
+    NUVEC d = {-last_radius, 0.0f, second_connection->horizontal_distance};
+    angle = NuAngSub(second_angle,
+                     IntersectionAngle((middle_radius - last_radius) / second_connection->horizontal_distance));
+    NuVecRotateY(&c, &c, angle);
+    NuVecRotateY(&d, &d, angle);
+    NuVecAdd(&c, &c, &last->position);
+    NuVecAdd(&d, &d, &last->position);
+    NUVEC first_point = a;
+    NUVEC first_vector;
+    NuVecSub(&first_vector, &b, &first_point);
+    NUVEC second_point = c;
+    NUVEC second_vector;
+    NuVecSub(&second_vector, &d, &second_point);
+    f32 s;
+    f32 t;
+    if (NuLineLineIntersect(&first_point, &first_vector, &second_point, &second_vector, &s, &t) != 0 && s >= 0.0f &&
+        t >= 0.0f && s <= 1.0f && t <= 1.0f) {
+        first_point.y = middle->position.y * s + (1.0f - s) * first->position.y;
+        NuVecScale(&first_vector, &first_vector, s);
+        NuVecAdd(result, &first_point, &first_vector);
         return 1;
     }
-    packet->runtime_flags &= static_cast<u8>(~AIPACKET_RUNTIME_PATH_BLOCKED);
     return 0;
+}
+
+static __attribute__((noinline)) i32 CalculateIntersection(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *object,
+                                                           AIPATHCNX_s *current_connection,
+                                                           AIPATHCNX_s *target_connection) {
+    if (packet->intersection_connection == current_connection &&
+        packet->intersection_target_connection == target_connection) {
+        return ((packet->movement_flags >> 5) | (packet->movement_flags >> 6)) & 1;
+    }
+    packet->movement_flags &= 0x9f;
+    packet->intersection_connection = current_connection;
+    packet->intersection_target_connection = target_connection;
+    AIPATH *path = packet->path_info.path;
+    AIPATHNODE *first;
+    AIPATHNODE *middle;
+    AIPATHNODE *last;
+    i32 first_angle;
+    i32 second_angle;
+    if (current_connection->node_indices[0] == target_connection->node_indices[0]) {
+        first = &path->nodes[current_connection->node_indices[1]];
+        middle = &path->nodes[current_connection->node_indices[0]];
+        last = &path->nodes[target_connection->node_indices[1]];
+        first_angle = NuAngAdd(current_connection->rotation, 0x8000);
+        second_angle = NuAngAdd(target_connection->rotation, 0x8000);
+    } else if (current_connection->node_indices[0] == target_connection->node_indices[1]) {
+        first = &path->nodes[current_connection->node_indices[1]];
+        middle = &path->nodes[current_connection->node_indices[0]];
+        last = &path->nodes[target_connection->node_indices[0]];
+        first_angle = NuAngAdd(current_connection->rotation, 0x8000);
+        second_angle = target_connection->rotation;
+    } else if (current_connection->node_indices[1] == target_connection->node_indices[0]) {
+        first = &path->nodes[current_connection->node_indices[0]];
+        middle = &path->nodes[target_connection->node_indices[0]];
+        last = &path->nodes[target_connection->node_indices[1]];
+        first_angle = current_connection->rotation;
+        second_angle = NuAngAdd(target_connection->rotation, 0x8000);
+    } else if (current_connection->node_indices[1] == target_connection->node_indices[1]) {
+        first = &path->nodes[current_connection->node_indices[0]];
+        middle = &path->nodes[target_connection->node_indices[1]];
+        last = &path->nodes[target_connection->node_indices[0]];
+        first_angle = current_connection->rotation;
+        second_angle = target_connection->rotation;
+    } else {
+        return 0;
+    }
+    if (WithinConnection(system, &last->position, path, current_connection, 1, current_connection,
+                         packet->current_route, object->field_0x289, NULL, 0.0f, 1) != 0) {
+        return 0;
+    }
+    i32 right = CalculateRightIntersection(object, current_connection, target_connection, first_angle, second_angle,
+                                           first, middle, last, &packet->right_diversion);
+    packet->movement_flags = (packet->movement_flags & 0xdf) | ((right & 1) << 5);
+    i32 left = CalculateRightIntersection(object, target_connection, current_connection, second_angle, first_angle,
+                                          last, middle, first, &packet->left_diversion);
+    packet->movement_flags = (packet->movement_flags & 0xbf) | ((left & 1) << 6);
+    return (left | (packet->movement_flags >> 5)) & 1;
 }
 
 void AISysGetPathPos2(AISYS_s *, nuvec_s *, AIPATHINFO_s *, nuvec_s *, AIPATH_s *, i32) {

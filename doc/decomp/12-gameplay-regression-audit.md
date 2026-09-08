@@ -328,6 +328,38 @@ count is zero (`/tmp/saga-resume-runtime-fixed.log`, exit 0, no sanitizer
 diagnostic before fixture completion). This checks script resumption, not
 resolution of the separate movement normalization issue.
 
+The former `CalculateIntersection` implementation substituted the shared
+path node for both corner diversions. It is replaced by the original
+connection-pair cache, four endpoint arrangements, corridor test and mirrored
+right/left boundary intersections. The obsolete static placeholder in
+`ai_sys.cpp` is removed. The real helper stays out of line, matching the
+original caller convention, and compares at **86.810%** (831 bytes versus
+823 original). `CalculateRightIntersection` reconstructs the original
+0.05 radius margin, clamped node radii, inline angle approximation, rotated
+boundary segments, segment intersection and height interpolation. It compares
+at **83.278%**, with the original 1588-byte size. A temporary target copy
+normalizes its compiler `.isra.0` suffix to original `.isra.50` for comparison;
+the reference remains unchanged. Both functions remain partially matched.
+
+An isolated 32-bit harness executes the original right-intersection bytes
+from mapped ELF segments (`/tmp/saga-original-intersection.c`). It resolves
+only the audited `sqrtf`/`sin` imports to local libm, relocates the sine-table
+pointer, and calls original `NuTrigInit` before testing. Initial harness
+failures were unresolved imports/table initialization, not game crashes.
+Four right-angle cases with different node radii, including clamping below
+the collision margin, produce coordinates agreeing with the reconstructed
+native helper within `1e-6`. A fifth straight-corridor case rejects the
+intersection and preserves the output sentinel in both implementations
+(`/tmp/saga-original-intersection.log`, `/tmp/saga-intersection-runtime.log`).
+This checks geometry against original machine code, with local libm and host
+floating-point differences as limits; it is not full byte equivalence.
+
+Target/native builds and all four checks pass. The current Cantina integration
+fixture retains tagged-player control for 180 rendered frames and responds to
+movement input, but still reports the known NPC angle-table sanitizer error
+(`/tmp/saga-intersection-integration.log`). Full movement correctness remains
+open, including the incomplete destination solver and formation updates.
+
 A native build-sound inventory confirms event 0x3a resolves to `MK-Pickup`
 (SFX 50, sample 357, 22050 Hz, enabled) and event 0x3b to `LegoForm` (SFX 128,
 sample 434, 11025 Hz, enabled and looping). Both have volume 16383. The
