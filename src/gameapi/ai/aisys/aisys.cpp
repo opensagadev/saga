@@ -1256,7 +1256,9 @@ static i32 Action_SetAIOverrideControl(AISYS *system, AISCRIPTPROCESS *processor
                                        char **params, i32 param_count, i32 first_time, f32) {
     APIOBJECT *object;
     i32 enabled = 1;
-    if (first_time) {
+    if (!first_time) {
+        object = static_cast<APIOBJECT *>(processor->action_data_3);
+    } else {
         object = packet != NULL ? reinterpret_cast<APIOBJECT *>(packet->owner) : NULL;
         for (i32 index = 0; index < param_count; ++index) {
             char *value = NuStrIStr(params[index], "character");
@@ -1268,8 +1270,6 @@ static i32 Action_SetAIOverrideControl(AISYS *system, AISCRIPTPROCESS *processor
             }
         }
         processor->action_data_3 = object;
-    } else {
-        object = static_cast<APIOBJECT *>(processor->action_data_3);
     }
     if (object != NULL) {
         if (enabled) {
