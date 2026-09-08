@@ -546,6 +546,15 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+static f32 Condition_Blocking(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL) {
+        GameObject *object = packet->owner->apiobj.objptr;
+        u32 flags = CInfo[object->character_context].flags;
+        if ((flags & 0x04000000) != 0 || ((flags & 0x08000000) != 0 && (object->jump_flags & 2) != 0)) return 1.0f;
+    }
+    return 0.0f;
+}
+
 static f32 Condition_RaceLap(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return static_cast<f32>(Lap);
 }
@@ -937,7 +946,7 @@ extern "C" {
         {"SpawnCount", NULL, NULL},
         {"BehindCamera", NULL, NULL},
         {"LocatorOnScreen", NULL, NULL},
-        {"Blocking", NULL, NULL},
+        {"Blocking", Condition_Blocking, NULL},
         {"BeenHit", NULL, NULL},
         {"HoverPhase", NULL, NULL},
         {"HitPoints", Condition_HitPoints, Condition_HitPointsInit},
