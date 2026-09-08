@@ -3467,7 +3467,8 @@ __used__ static i32 Action_ForceLightning(AISYS *sys, AISCRIPTPROCESS *processor
 __used__ static i32 Action_GoToNodeRandom(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                           i32 param_count, i32 first_time, f32 elapsed) {
     (void)elapsed;
-    if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL ||
+    NUVEC difference;
+    if (packet == NULL || packet->owner == NULL ||
         packet->path_info.path == NULL || packet->path_info.connection == NULL) {
         return 1;
     }
@@ -3481,17 +3482,19 @@ __used__ static i32 Action_GoToNodeRandom(AISYS *sys, AISCRIPTPROCESS *processor
         }
         processor->action_data_3 = AIPathFindNode(sys, packet->path_info.path, params[selected]);
         AIPATHNODE *node = static_cast<AIPATHNODE *>(processor->action_data_3);
-        if (node != NULL && node->connection_count != 0 && node->connections != NULL) {
+        if (node != NULL && node->connection_count != 0) {
+            i32 node_index = node - packet->path_info.path->nodes;
             processor->path_info.path = packet->path_info.path;
             processor->path_info.connection = node->connections[0];
+            processor->path_info.dist =
+                node_index == processor->path_info.connection->node_indices[0] ? 0.0f : 1.0f;
             processor->path_info.direction = 0;
             processor->path_info.flags |= 1;
-            processor->path_info.dist =
-                static_cast<u8>(node - packet->path_info.path->nodes) == node->connections[0]->node_indices[0] ? 0.0f
-                                                                                                               : 1.0f;
             processor->path_info.width = 0.0f;
             AIMoveInstruction(packet, &node->position, 0.0f, &processor->path_info, AIPACKET_MOVEMENT_TO_DESTINATION,
                               packet->movement_instruction_parameter);
+        } else {
+            return 1;
         }
         return 0;
     }
@@ -3499,7 +3502,7 @@ __used__ static i32 Action_GoToNodeRandom(AISYS *sys, AISCRIPTPROCESS *processor
     if (node == NULL) {
         return 1;
     }
-    const f32 distance_squared = NuVecXZDistSqr(&packet->terrain_origin, &node->position, NULL);
+    const f32 distance_squared = NuVecXZDistSqr(&packet->terrain_origin, &node->position, &difference);
     AIMoveInstruction(packet, &node->position, 0.0f, &processor->path_info, AIPACKET_MOVEMENT_TO_DESTINATION,
                       packet->movement_instruction_parameter);
     return distance_squared < node->radius_squared;
