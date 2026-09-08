@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 30.477976,
+    "fuzzy_match_percent": 30.489414,
     "total_code": "4722419",
     "matched_code": "60480",
     "matched_code_percent": 1.2806996,
@@ -73863,7 +73863,7 @@
           "address": 1306096,
           "offset": 416128,
           "size": 6194,
-          "match_percent": 37.948544
+          "match_percent": 39.130096
         },
         {
           "name": "_Z14DrawBonusScorefiifPi",
@@ -74103,7 +74103,7 @@
           "address": 2373360,
           "offset": 1483392,
           "size": 3747,
-          "match_percent": 35.297256
+          "match_percent": 35.854256
         },
         {
           "name": "_Z8DrawItemP12nuhspecial_sP7nuvec_sfffttt",
@@ -74703,7 +74703,7 @@
           "address": 4802480,
           "offset": 3912512,
           "size": 431,
-          "match_percent": 0.0
+          "match_percent": 99.962265
         },
         {
           "name": "_Z24DrawPanel3DObjectNoAlphafffffftttP12nuhspecial_si",
@@ -81985,7 +81985,7 @@
           "address": 1304960,
           "offset": 414992,
           "size": 639,
-          "match_percent": 87.597015
+          "match_percent": 89.98508
         },
         {
           "name": "_Z16DoubleScoreAlphav",
@@ -109498,7 +109498,7 @@
           "address": 3222336,
           "offset": 2332368,
           "size": 583,
-          "match_percent": 65.354034
+          "match_percent": 65.347824
         },
         {
           "name": "NuSound3Update",

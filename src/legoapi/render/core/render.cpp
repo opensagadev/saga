@@ -2156,24 +2156,21 @@ void DrawBossHitPoints(GameObject_s *) {
 void DrawCameraTarget2(nuvec_s *) {
 }
 
-void DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
-                       u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order, float alpha) {
-    if (alpha <= 0.0f || special == NULL || NuSpecialExistsFn(special) == 0) {
-        return;
+i32 DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
+                      u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order, float alpha) {
+    if (alpha > 0.0f && special != NULL && NuSpecialExistsFn(special) != 0 &&
+        (scale_y != 0.0f || scale_x != 0.0f || scale_z != 0.0f)) {
+        NUVEC scale = {scale_x / CameraZoom, scale_y / CameraZoom, scale_z / CameraZoom};
+        NUMTX matrix __attribute__((aligned(16)));
+        NuMtxSetScale(&matrix, &scale);
+        RotateGameMatrix(&matrix, rotate_order, rotate_x, rotate_y, rotate_z);
+        matrix.m30 = x * PANEL3DMULX;
+        matrix.m31 = y * PANEL3DMULY;
+        matrix.m32 = z;
+        NuMtxMulVU0(&matrix, &matrix, NuCameraGetMtx());
+        NuSpecialDrawAtAlpha(special, &matrix, alpha);
     }
-    if (scale_x == 0.0f && scale_y == 0.0f && scale_z == 0.0f) {
-        return;
-    }
-
-    NUVEC scale = {scale_x / CameraZoom, scale_y / CameraZoom, scale_z / CameraZoom};
-    NUMTX matrix;
-    NuMtxSetScale(&matrix, &scale);
-    RotateGameMatrix(&matrix, rotate_order, rotate_x, rotate_y, rotate_z);
-    matrix.m30 = x * PANEL3DMULX;
-    matrix.m31 = y * PANEL3DMULY;
-    matrix.m32 = z;
-    NuMtxMulVU0(&matrix, &matrix, NuCameraGetMtx());
-    NuSpecialDrawAtAlpha(special, &matrix, alpha);
+    return 0;
 }
 
 void DrawStatusMiniKit(float, float, float, float, float, i32, STATUSPACKET_s *, float) {

@@ -20,7 +20,7 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-void DrawPanel3DObject(float, float, float, float, float, float, u16, u16, u16, nuhspecial_s *, i32, float);
+i32 DrawPanel3DObject(float, float, float, float, float, float, u16, u16, u16, nuhspecial_s *, i32, float);
 void DrawTouchPrompt(char *, char *, bool, bool);
 void DrawCharIcon(i32, float, float, float, float, i32, float, float, i32, nuhspecial_s *);
 void DrawPauseFade(void);
