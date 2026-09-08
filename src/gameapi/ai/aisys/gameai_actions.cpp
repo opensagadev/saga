@@ -652,10 +652,6 @@ static __used__ void *Condition_PlayerInSockInit(AISYS_s *, char *, AISCRIPT_s *
     return nullptr;
 }
 
-static __used__ f32 Condition_RespawnLocatorIs(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
-
 static __used__ i32 Action_AwkwardShapeOverride(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
     return 0;
 }
@@ -1157,10 +1153,6 @@ static __used__ f32 Condition_OpponentPathPosRange(AISYS_s *, AISCRIPTPROCESS_s 
 
 static __used__ f32 Condition_PlayerDeflectingPart(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return 0;
-}
-
-static __used__ void *Condition_RespawnLocatorIsInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
 }
 
 static __used__ f32 Condition_ShouldAttackOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {

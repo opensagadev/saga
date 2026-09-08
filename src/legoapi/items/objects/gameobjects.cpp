@@ -539,6 +539,14 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+static f32 Condition_RespawnLocatorIs(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    return argument != NULL && packet != NULL && packet->respawn_locator == argument ? 1.0f : 0.0f;
+}
+
+static void *Condition_RespawnLocatorIsInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    return name != NULL ? AIPathFindLocator(system, name) : NULL;
+}
+
 static f32 Condition_BoltsDontGetDeflectedBack(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
     return packet != NULL && packet->owner != NULL &&
         (packet->owner->apiobj.objptr->field_0xefc & 8) != 0 ? 1.0f : 0.0f;
@@ -878,7 +886,7 @@ extern "C" {
         {"BoltsDontGetDeflectedBack", Condition_BoltsDontGetDeflectedBack, NULL},
         {"CheatProgress", Condition_CheatProgress, NULL},
         {"BigJumpComplete", Condition_BigJumpComplete, NULL},
-        {"RespawnLocatorIs", NULL, NULL},
+        {"RespawnLocatorIs", Condition_RespawnLocatorIs, Condition_RespawnLocatorIsInit},
         {"InMiniCut", Condition_InMiniCut, NULL},
         {"MaulShouldRunAway", NULL, NULL},
         {"DropBackInTimer", Condition_DropBackInTimer, NULL},
