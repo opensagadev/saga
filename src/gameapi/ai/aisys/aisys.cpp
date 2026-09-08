@@ -6337,15 +6337,12 @@ static f32 Condition_PathBlocked(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKE
     return packet != NULL && (packet->runtime_flags & AIPACKET_RUNTIME_USING_PATH_WAYPOINT) != 0 ? 1.0f : 0.0f;
 }
 
-__used__ static f32 Condition_PlayerRange(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                          void *void_arg) {
-    (void)processor;
-    (void)arg;
-    (void)void_arg;
+static f32 Condition_PlayerRange(AISYS *sys, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *) {
     if (packet == NULL || packet->owner == NULL || sys == NULL || sys->player_1 == NULL) {
-        return 1.0e9f;
+        return FLT_MAX;
     }
-    return NuVecDist(&sys->player_1->position, &packet->owner->apiobj.position, NULL);
+    NUVEC delta;
+    return NuVecDist(&sys->player_1->position, &packet->owner->apiobj.position, &delta);
 }
 
 static f32 Condition_TimeOffPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *) {
