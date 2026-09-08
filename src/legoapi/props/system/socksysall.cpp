@@ -711,7 +711,9 @@ extern "C" {
 
     void SetSockPostion(SOCKSYS *system, SOCKPOSITION *position, i32 index, i32 segment, f32 ratio) {
         position->location.sock = -1;
-        if (system == NULL || index < 0 || index > 63)
+        if (system == NULL)
+            return;
+        if (index < 0 || index > 63)
             return;
         SOCK *sock = &system->sock[index];
         i32 length;
