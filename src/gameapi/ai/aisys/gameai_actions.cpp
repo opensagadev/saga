@@ -261,10 +261,6 @@ static __used__ f32 Condition_FinishedSpline(AISYS_s *, AISCRIPTPROCESS_s *, AIP
     return object->movement_spline != NULL && finished == 0 ? 0.0f : 1.0f;
 }
 
-static __used__ f32 Condition_GotOpponentLOS(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
-
 
 static __used__ f32 Condition_IsLowEndDevice(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return g_lowEndLevelBehaviour != 0 ? 1.0f : 0.0f;

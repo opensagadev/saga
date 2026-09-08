@@ -546,6 +546,17 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+static f32 Condition_GotOpponentLOS(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL) {
+        GameObject *object = packet->owner->apiobj.objptr;
+        APIOBJECT *opponent = object->character_context == 0x1b ?
+            reinterpret_cast<APIOBJECT *>(object->force_target) : packet->opponent_object;
+        if (opponent != NULL && ((WORLD->api_object_sys->line_of_sight[packet->owner->apiobj.field_0x289] >>
+                                 opponent->field_0x289) & 1) != 0) return 1.0f;
+    }
+    return 0.0f;
+}
+
 static f32 Condition_GotLocatorInSet(AISYS_s *system, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *, void *argument) {
     AILOCATORSET *set = static_cast<AILOCATORSET *>(argument);
     if (set != NULL && process->unknown_a4 != NULL) {
@@ -1033,7 +1044,7 @@ extern "C" {
         {"CharacterExists", NULL, NULL},
         {"CharacterTypeExists", NULL, NULL},
         {"GotLocatorInSet", Condition_GotLocatorInSet, Condition_GotLocatorInSetInit},
-        {"GotOpponentLOS", NULL, NULL},
+        {"GotOpponentLOS", Condition_GotOpponentLOS, NULL},
         {"EmptyTakeOver", Condition_EmptyTakeOver, NULL},
         {"HasTakeOverTarget", NULL, NULL},
         {"TakeOverRange", NULL, NULL},

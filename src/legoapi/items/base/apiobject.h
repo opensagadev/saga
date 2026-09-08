@@ -524,10 +524,17 @@ DECOMP_ASSERT(offsetof(APIOBJECT, ai_area_mask_high) == 0x2ac, "APIOBJECT area m
 struct APIOBJECTSYS_s {
     u32 object_size;
     APIOBJECT *objects;
-    u8 state[0x214 - 8];
+    union {
+        u8 state[0x214 - 8];
+        struct {
+            u64 line_of_sight[64]; // 0x008, one opponent bit per object slot
+            u8 padding_0x208[0x0c];
+        };
+    };
 };
 
 DECOMP_ASSERT(sizeof(APIOBJECTSYS_s) == 0x214, "APIOBJECTSYS size");
+DECOMP_ASSERT(offsetof(APIOBJECTSYS_s, line_of_sight) == 8, "APIOBJECTSYS line-of-sight offset");
 
 extern "C" APIOBJECT *APIObjectCreate(APIOBJECTSYS_s *system);
 extern "C" void APIObjectDestroy(APIOBJECTSYS_s *system, APIOBJECT *object);
