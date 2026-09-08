@@ -1266,10 +1266,6 @@ static __used__ f32 Condition_EitherPlayerPushingSpinner(AISYS_s *, AISCRIPTPROC
     return 0;
 }
 
-static __used__ f32 Condition_LastAttackerIsActivePlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
-
 static __used__ f32 Condition_AngleAboutMyLocatorToPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *,
                                                           void *) {
     return 0;

@@ -541,6 +541,15 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+static f32 Condition_LastAttackerIsActivePlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    f32 result = 0.0f;
+    if (packet != NULL && packet->owner != NULL) {
+        GameObject *attacker = packet->owner->apiobj.objptr->last_attacker;
+        if (attacker != NULL && (attacker->apiobj.flags_low & 0x80) != 0) result = 1.0f;
+    }
+    return result;
+}
+
 static f32 Condition_CannotReachDestination(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
     return packet != NULL && (packet->runtime_flags & 0x40) != 0 ? 1.0f : 0.0f;
 }
@@ -919,7 +928,7 @@ extern "C" {
         {"CharacterRange", NULL, NULL},
         {"BeenSpawned", Condition_BeenSpawned, NULL},
         {"LastAttackerRange", NULL, NULL},
-        {"LastAttackerIsActivePlayer", NULL, NULL},
+        {"LastAttackerIsActivePlayer", Condition_LastAttackerIsActivePlayer, NULL},
         {"PartyContainsDroids", Condition_PartyContainsDroids, NULL},
         {"CannotReachDestination", Condition_CannotReachDestination, NULL},
         {"TakenOver", Condition_TakenOver, Condition_TakenOverInit},

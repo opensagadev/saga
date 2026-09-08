@@ -993,7 +993,7 @@ typedef struct GameObject_s {
         };
     };
     void *opponent;                        // 0x10b0
-    void *last_attacker;                   // 0x10b4
+    GameObject_s *last_attacker;           // 0x10b4
     void *field_0x10b8;                    // 0x10b8
     void (*move_override)(GameObject_s *); // 0x10bc
     u8 pad_10c0[0x10c4 - 0x10c0];
@@ -1014,6 +1014,7 @@ typedef struct GameObject_s {
 } GameObject;
 
 DECOMP_ASSERT(sizeof(GameObject_s) == 0x10e4, "GameObject size");
+DECOMP_ASSERT(offsetof(GameObject_s, last_attacker) == 0x10b4, "Last attacker offset");
 DECOMP_ASSERT(offsetof(GameObject_s, use_target) == 0xf08, "GameObject use target offset");
 DECOMP_ASSERT(offsetof(GameObject_s, use_attach_frames) == 0xf0d, "GameObject use attachment frames offset");
 DECOMP_ASSERT(offsetof(GameObject_s, use_distance) == 0xf10, "GameObject use distance offset");
