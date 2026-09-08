@@ -858,7 +858,8 @@ typedef struct GameObject_s {
     u8 field_0xe23;            // 0x0e23
     u8 field_0xe24;            // 0x0e24
     u8 movement_runtime_flags; // 0x0e25
-    u8 pad_e26[0xe2b - 0xe26];
+    u8 flicker_flags; // 0xe26
+    u8 pad_e27[0xe2b - 0xe27];
     u8 force_glow_kind;
     u8 force_glow_candidate_kind;
     u8 blocked_attack_stage;
@@ -1010,7 +1011,7 @@ typedef struct GameObject_s {
     f32 field_0x1018; // 0x1018
     f32 field_0x101c; // 0x101c
     f32 field_0x1020; // 0x1020
-    u8 pad_1024[4];
+    f32 flicker_timer; // 0x1024
     f32 ai_update_distance;    // 0x1028, distance used to select the staggered AI cadence
     f32 shadow_opacity;        // 0x102c
     f32 shadow_radius;         // 0x1030
@@ -1194,6 +1195,8 @@ DECOMP_ASSERT(offsetof(GameObject_s, takeover_source) == 0xcc4, "GameObject take
 DECOMP_ASSERT(offsetof(GameObject_s, field_0xf14) == 0xf14, "GameObject character-switch preserved state offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0xf20) == 0xf20, "GameObject character-switch preserved state offset");
 DECOMP_ASSERT(offsetof(GameObject_s, spawn_protection_timer) == 0x100c, "GameObject spawn protection offset");
+DECOMP_ASSERT(offsetof(GameObject_s, flicker_timer) == 0x1024, "GameObject flicker timer offset");
+DECOMP_ASSERT(offsetof(GameObject_s, flicker_flags) == 0xe26, "GameObject flicker flags offset");
 DECOMP_ASSERT(offsetof(AIPACKET, primary_target_ref) == 0xd4, "AI primary target reference offset");
 DECOMP_ASSERT(offsetof(AIPACKET, action_target_ref) == 0xe4, "AI action target reference offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x788) == 0x788, "GameObject field_0x788 offset");

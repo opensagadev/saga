@@ -23,9 +23,6 @@ extern "C" {
     void rtlApplySetScale(void *, rtldata_s *, NUVEC *, NUMTX *, i32, f32);
 }
 
-void SetFlicker(GameObject_s *, float) {
-}
-
 void ResetLights(nuvec_s *position, rtldata_s *data, void *set) {
     rtlResetEx(data, 1);
     if (position != NULL) {

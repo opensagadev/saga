@@ -232,7 +232,10 @@ void LoseHelmet(GameObject_s *, i32, i32);
 void DestroySnakeBody(GameObject_s *);
 void InitPlayerAI(GameObject_s *);
 extern "C" void SetAnimTimeRandom(CHARACTERMODEL_s *, ANIMPACKET_s *);
-void SetFlicker(GameObject_s *, f32);
+void SetFlicker(GameObject_s *object, f32 duration) {
+    object->flicker_timer = duration;
+    object->flicker_flags &= ~7u;
+}
 void ResetCoinPacket(COINPACKET_s *);
 
 void ResetPlayerMoves(GameObject_s *object) {
