@@ -8,6 +8,8 @@
 struct GameObject_s;
 struct WORLDINFO_s;
 
+i32 ObjInTube(GameObject_s *object);
+
 enum TUBE_FLAGS {
     TUBE_FLAG_ACTIVE = 1 << 0,
     TUBE_FLAG_VISIBLE = 1 << 1,

@@ -1,6 +1,7 @@
 #include "legoapi/gizmos/transport/tubes.h"
 
 #include "decomp.h"
+
 #include "gameapi/edtools/edfile.h"
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
@@ -13,6 +14,18 @@
 
 extern void GameAudio_PlaySfx(i32 sfx_id, NUVEC *position, i32 flags, i32 volume);
 extern i32 GameAudio_GetPlrSfxBits(void *object);
+
+i32 LEGOCONTEXT_TUBE = -1;
+
+i32 ObjInTube(GameObject_s *object) {
+    if (LEGOCONTEXT_TUBE != -1 && object->character_context == LEGOCONTEXT_TUBE) {
+        return 1;
+    }
+    if (LEGOCONTEXT_GLIDE != -1 && object->character_context == LEGOCONTEXT_GLIDE && object->field_0x788 != NULL) {
+        return 1;
+    }
+    return 0;
+}
 
 static const i32 TUBE_AUDIO_EVENT = 0x2e;
 static const u32 CHARACTER_MODEL_FLAG_TUBE_USER = 0x10;

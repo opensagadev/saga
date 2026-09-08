@@ -5,6 +5,7 @@
 #include "gameapi/ai/aisys/aisys.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/gizmos/transport/tubes.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nucore/nustring.h"
@@ -71,6 +72,51 @@ static void StarWars_PreparingForSpecialMove(AIPACKET_s *, APIOBJECT_s *, i32) {
 extern void ReleaseTakeOver(GameObject_s *, i32);
 extern void SetSpecialMove(GameObject_s *, AIPATHNODE_s *, AIPATHNODE_s *, char);
 extern i32 TryToTeleportToNextNode(GameObject_s *, AIPATHNODE_s *, i32);
+
+static __used__ i32 StarWars_PrepareHoverTube(AIPACKET_s *packet, APIOBJECT_s *apiobject, i32) {
+    GameObject_s *object = apiobject->objptr;
+    AIPATH_s *path = packet->path_info.path;
+    AIPATHCNX_s *connection = packet->path_info.connection;
+    i32 from = connection->node_indices[packet->path_info.direction];
+    i32 to = connection->node_indices[packet->path_info.direction == 0];
+    AIPATHNODE_s *target = &path->nodes[to];
+    packet->movement_destination = path->nodes[from].position;
+    packet->movement_stopping_distance = 0.0f;
+    if ((connection->traversal_flags[packet->path_info.direction] & 0x200) == 0 &&
+        ((path->updated_node_bits[0x20 + (to >> 3)] >> (to & 7)) & 1) != 0) {
+        if (TryToTeleportToNextNode(object, target, 0) != 0) {
+            return 1;
+        }
+        packet->path_connection_state = 0;
+    } else {
+        if (packet->path_connection_state != 0 && TryToTeleportToNextNode(object, target, 0) != 0) {
+            return 1;
+        }
+        switch (packet->path_connection_state) {
+            case 0:
+                if (ObjInTube(object) == 0) {
+                    break;
+                }
+                packet->path_connection_state = 1;
+                // Fall through.
+            case 1:
+                if (ObjInTube(object) != 0 &&
+                    !(object->apiobj.collision_min.y > static_cast<TUBE *>(object->field_0x788)->top &&
+                      object->apiobj.velocity.y > 0.0f)) {
+                    break;
+                }
+                // Fall through.
+            case 2:
+                packet->path_connection_state = 0;
+                SetSpecialMove(object, target, NULL, 0);
+                packet->movement_destination = target->position;
+                packet->movement_stopping_distance = 0.0f;
+                break;
+        }
+    }
+    apiobject->movement_request_flags |= 0x2000;
+    return 1;
+}
 
 static __used__ i32 StarWars_PrepareBigJump(AIPACKET_s *packet, APIOBJECT_s *apiobject, i32) {
     GameObject_s *object = apiobject->objptr;

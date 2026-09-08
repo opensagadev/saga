@@ -19,9 +19,6 @@ static __used__ void StarWars_PrepareHatch(AIPACKET_s *, APIOBJECT_s *, i32) {
 static __used__ void StarWars_PrepareObstacle(AIPACKET_s *, APIOBJECT_s *, i32) {
 }
 
-static __used__ void StarWars_PrepareHoverTube(AIPACKET_s *, APIOBJECT_s *, i32) {
-}
-
 static __used__ void StarWars_PreparingForSpecialMove(AIPACKET_s *, APIOBJECT_s *, i32) {
 }
 
