@@ -1,6 +1,7 @@
 #include "legoapi/gizmo/base/gizmo.h"
 #include "decomp.h"
 #include "globals.h"
+#include "MechInputTouch/MechInputTouch_types.h"
 
 #include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
 #include "legoapi/gizmo/base/GizBuildItObjectInterface.h"
@@ -496,6 +497,10 @@ void GizForceObjectInterface::TargetedFlash() {
 }
 
 GizForceObjectInterface::~GizForceObjectInterface() {
+}
+
+void MechObjectInterface::GetFloorTargetPos(VuVec &position, i32 mode) const {
+    GetPos(position, mode);
 }
 
 void GizLeverObjectInterface::GetPos(VuVec &position, i32) const {
