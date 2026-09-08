@@ -336,7 +336,6 @@ void InitGameBeforeConfig(void) {
     Game_CharacterSave = Game.character_save;
     Game_CompletionSave = &Game.completion;
     Game_MissionSave = &Game.mission_save;
-    StatusCollectList.ptr = reinterpret_cast<STATUSCOLLECT_s *>(&Game.completion);
 
     ResetSeeds();
     ResetTimer(&GlobalTimer, 0.0f);
@@ -605,8 +604,9 @@ void InitGameAfterConfig(void) {
     Hub_UsePlayerList = 1;
     //  BoltSys_Init((BOLTSYS *)BoltSys_LSW);
     GameAudio_Init(&GameAudio_LSW);
-    //  KITPOSX = 0;
-    //  KITPOS2X = 0;
+    extern f32 KITPOSX, KITPOS2X;
+    KITPOSX = 0;
+    KITPOS2X = 0;
     //  CONVERTOLDPICKUPS = 1;
     //  GrabScreenWhenFading = 1;
     //  troopers_gdeb._0_4_ = 0x83;
@@ -791,13 +791,15 @@ void InitGameAfterConfig(void) {
     //  LEGOMENU_RESTORE_NEWGAME = 0x1d;
     //  LEGOCAMMODE_DOORCUT = 4;
     //  LEGOCAMMODE_OBSTACLE = 2;
-    //  LEGOOBJ_ICON_FRAME_NEUTRAL = 0xa7;
-    //  LEGOOBJ_ICON_FRAME_GREEN = 0xa5;
-    //  LEGOOBJ_ICON_FRAME_BLUE = 0xa6;
+    extern i32 LEGOOBJ_ICON_FRAME_NEUTRAL, LEGOOBJ_ICON_FRAME_GREEN, LEGOOBJ_ICON_FRAME_BLUE;
+    LEGOOBJ_ICON_FRAME_NEUTRAL = 0xa7;
+    LEGOOBJ_ICON_FRAME_GREEN = 0xa5;
+    LEGOOBJ_ICON_FRAME_BLUE = 0xa6;
     //  LEGOOBJ_ICON_QUESTION = 0xa1;
     //  LEGOOBJ_ICON_WEIRDO = 0xa3;
-    //  LEGOOBJ_CHARKIT = 0xcf;
-    //  LEGOOBJ_MINIKIT = 0xce;
+    extern i32 LEGOOBJ_CHARKIT, LEGOOBJ_MINIKIT;
+    LEGOOBJ_CHARKIT = 0xcf;
+    LEGOOBJ_MINIKIT = 0xce;
     LEGOSPL_SPLIT = 5;
     LEGOSPL_START = 0;
     //  LEGOGDEB_SPLASH = 0xd;

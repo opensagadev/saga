@@ -146,6 +146,53 @@ Ghidra. Both gate group selection on the original loaded-sample state.
 `PickupCoin` and `LegoSingle` are groups in the shipped configuration;
 their missing playback still needs loaded-state/runtime tracing.
 
+## Flow-loader checkpoint (in progress)
+
+The two-pass `LoadGizFlow` parser and its box, collapse, condition, action,
+and gizmo callbacks are reconstructed from the original binary. Timer,
+random, and special constructors now return the registered gizmo, as the
+loader expects. Runtime allocations use the recovered structure sizes.
+
+This remains unfinished: `ResetGizFlow`, `ResetGizFlowPointers`, and
+`ProcessGizFlow` still need reconstruction before level-object visibility
+and progression can be considered fixed. No successful gameplay result is
+claimed for this checkpoint. Initial target comparison gives `LoadGizFlow`
+79.453%, `createGizSpecial` 87.879%, `createGizRandom` 13.991%, and
+`createGizTimer` 0%. The latter two retain their current default optimization
+settings; their original optimized instruction shapes remain unresolved.
+
+## End-level results reconstruction (in progress)
+
+The original results-stage table at ELF `0x6236c0` contains 34 records of
+`0x20` bytes, including its sentinel. Registration, coin counting/drawing,
+prompt menu drawing/input, save-stage control, packet finishing, and
+exit/fade updates have been reconstructed from the original functions.
+`STATUSPACKET_s` remains `0x14c` bytes; callback and result fields now have
+types matching their original offsets.
+
+This is **not yet a fix for the black screen**. `InitStatusScreen` remains
+unimplemented, as do several award draw/update callbacks. Its original
+`0x18ab`-byte implementation creates the mode-specific stage sequence and
+performs completion/reward bookkeeping. Do not bypass these stages or
+substitute unconditional rewards to make the screen advance. Original
+pseudocode alone is insufficient to call the reconstruction matched.
+
+One dependency had conflated `StatusCollectList` with `Game_CompletionSave`.
+The former is eight character IDs, terminated by `-1`; the latter points
+at completion points, gold-brick count, and completion flags. The original
+`newCharactersCollected` returns the number of IDs. Its list and return
+value are now recovered, and completion queries use the original save
+pointer instead of interpreting those IDs as a pointer.
+
+`AddGoldBrickMessage` belongs with the results-screen-local
+`goldbrickmsgcount`, returns `1`, and resets through the results initializer.
+Its reconstructed instruction sequence matches apart from address/layout
+operands (objdiff **99.824%**, original size 68 bytes).
+`LevelComplete_LSW_Update` is only **51.968%** matched; its control flow has
+been reconstructed, but it is not an instruction match. Target and native
+builds pass. No end-level runtime success or Cantina return has been
+verified for this work yet.
+
 ## Pickup mode filtering and priority sound dispatch
 
 `GizmoPickups_SetOnOff` was empty. Its original mode-dependent pickup-type

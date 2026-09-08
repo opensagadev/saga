@@ -184,7 +184,7 @@ extern "C" {
     void instNuGCutSceneSetRepeat(void) {
     }
 
-    void instNuGCutSceneStop(void) {
+    void instNuGCutSceneStop(instNUGCUTSCENE_s *) {
     }
 
     void instNuGCutSceneTimeLeft(void) {
