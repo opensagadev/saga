@@ -503,6 +503,25 @@ void MechObjectInterface::GetFloorTargetPos(VuVec &position, i32 mode) const {
     GetPos(position, mode);
 }
 
+void MechTempPosInterface::GetFloorTargetPos(VuVec &result, i32 mode) const {
+    GetPos(result, mode);
+}
+
+MechTempPosInterface::MechTempPosInterface(VuVec const &value) {
+    position.x = value.x;
+    position.y = value.y;
+    position.z = value.z;
+    position.w = value.w;
+    radius = 0.2f;
+}
+
+MechTempPosInterface::MechTempPosInterface(nuvec_s const &value) {
+    position.x = value.x;
+    position.y = value.y;
+    position.z = value.z;
+    radius = 0.2f;
+}
+
 void GizLeverObjectInterface::GetPos(VuVec &position, i32) const {
     position = VuVec(lever.position.x, lever.position.y, lever.position.z, 1.0f);
 }
