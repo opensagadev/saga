@@ -546,6 +546,21 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+static f32 Condition_GotLocatorInSet(AISYS_s *system, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *, void *argument) {
+    AILOCATORSET *set = static_cast<AILOCATORSET *>(argument);
+    if (set != NULL && process->unknown_a4 != NULL) {
+        u8 locator = static_cast<u8>(process->unknown_a4 - system->locators);
+        for (i32 index = 0; index < set->locator_count; ++index) {
+            if (set->locator_entries[index] == locator) return 1.0f;
+        }
+    }
+    return 0.0f;
+}
+
+static void *Condition_GotLocatorInSetInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    return AIPathFindLocatorSet(system, name);
+}
+
 i32 CanFightLikeAJedi(GameObject_s *object) {
     return CharCategory_IsCategory(object, 0) != 0 || object->id == id_GRIEVOUS ||
         object->id == id_BODYGUARD || object->id == id_IMPERIALGUARD;
@@ -1017,7 +1032,7 @@ extern "C" {
         {"UnderPlayerControl", Condition_UnderPlayerControl, Condition_UnderPlayerControlInit},
         {"CharacterExists", NULL, NULL},
         {"CharacterTypeExists", NULL, NULL},
-        {"GotLocatorInSet", NULL, NULL},
+        {"GotLocatorInSet", Condition_GotLocatorInSet, Condition_GotLocatorInSetInit},
         {"GotOpponentLOS", NULL, NULL},
         {"EmptyTakeOver", Condition_EmptyTakeOver, NULL},
         {"HasTakeOverTarget", NULL, NULL},
