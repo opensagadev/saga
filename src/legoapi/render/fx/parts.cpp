@@ -494,15 +494,6 @@ static __used__ void SpeederPart_Kill(PART_s *, i32) {
 static __used__ void SpeederPart_Update(PART_s *) {
 }
 
-static __used__ void SuperCarry_PartKill(PART_s *, i32) {
-}
-
-static __used__ void SuperCarry_PartImpact(PART_s *) {
-}
-
-static __used__ void SuperCarry_TurnBlowupBackOn(GIZMOBLOWUP_s *, nuvec_s *, u16, i32) {
-}
-
 extern WORLDINFO_s *WORLD;
 extern AREADATA_s *PODRACE_ADATA;
 extern AREADATA_s *BONUS_GUNSHIP_ADATA;

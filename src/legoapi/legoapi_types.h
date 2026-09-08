@@ -4445,7 +4445,10 @@ struct PART_s {
     i8 field_20b;
     u32 field_20c;
     f32 field_210, field_214;
-    u32 force_flags;
+    union {
+        u32 force_flags;
+        GIZMOBLOWUP_s *carried_blowup; // 0x218, thrown-object callback data
+    };
     u32 field_21c, field_220;
     void ClearMechObjectInterface();
     void GetMechObjectInterface();
@@ -4462,6 +4465,7 @@ DECOMP_ASSERT(offsetof(PART_s, gravity) == 0xe8, "PART gravity offset");
 DECOMP_ASSERT(offsetof(PART_s, move_callback) == 0x1b0, "PART move callback offset");
 DECOMP_ASSERT(offsetof(PART_s, force_player_mask) == 0x206, "PART Force player mask offset");
 DECOMP_ASSERT(offsetof(PART_s, force_flags) == 0x218, "PART Force flags offset");
+DECOMP_ASSERT(offsetof(PART_s, carried_blowup) == 0x218, "PART carried blowup offset");
 struct PartObjectInterface {
     void GetPos(VuVec &, i32) const;
     void GetRadius() const;

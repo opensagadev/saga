@@ -633,6 +633,10 @@ typedef struct GameObject_s {
     u8 pad_6b1[0x6b4 - 0x6b1]; // 0x06b1 .. 0x06b4
     union {
         u8 player_packet[0x780 - 0x6b4]; // 0x06b4, PLAYERPACKET_s begins here
+        struct {
+            u8 carry_prefix[0x738 - 0x6b4];
+            NUVEC carried_object_basis[3]; // 0x738: rotation rows, or offsets for aligned carrying
+        };
         CHARACTER_SHADOW_s character_shadows[5];
         struct {
             u8 suspension_prefix[0x718 - 0x6b4];
@@ -678,9 +682,12 @@ typedef struct GameObject_s {
     GIZMOBLOWUP_s *blowup_target; // 0x0784
     void *field_0x788;            // 0x0788
     u8 pad_78c[0x790 - 0x78c];
-    void *big_jump_data;          // 0x0790
-    u16 magnet_surface_angle;     // 0x794
-    u16 takeover_start_angle;     // 0x796
+    void *big_jump_data;      // 0x0790
+    u16 magnet_surface_angle; // 0x794
+    union {
+        u16 takeover_start_angle;
+        u16 carried_object_angle;
+    }; // 0x796
     u16 grapple_swing_phase;      // 0x798
     i16 context_animation;        // 0x079a, action-owned animation index
     i16 queued_context_animation; // 0x079c, base action used by combo branches
@@ -1271,6 +1278,8 @@ DECOMP_ASSERT(offsetof(GameObject_s, build_context) == 0x7a5, "GameObject Build-
 DECOMP_ASSERT(offsetof(GameObject_s, character_context) == 0x7a5, "GameObject character context offset");
 DECOMP_ASSERT(offsetof(GameObject_s, action_movement_state) == 0x7a8, "GameObject action movement state offset");
 DECOMP_ASSERT(offsetof(GameObject_s, external_force) == 0x738, "GameObject external force offset");
+DECOMP_ASSERT(offsetof(GameObject_s, carried_object_basis) == 0x738, "GameObject carried basis offset");
+DECOMP_ASSERT(offsetof(GameObject_s, carried_object_angle) == 0x796, "GameObject carried angle offset");
 DECOMP_ASSERT(offsetof(GameObject_s, hit_variant) == 0x7ab, "GameObject hit variant offset");
 DECOMP_ASSERT(offsetof(GameObject_s, context_flags) == 0x7ac, "GameObject context flags offset");
 DECOMP_ASSERT(offsetof(GameObject_s, context_variant_flags) == 0x7ad, "GameObject context variant flags offset");
