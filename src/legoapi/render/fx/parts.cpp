@@ -942,8 +942,6 @@ void Asteroid_PartKill(PART_s *, i32) {
 void PartDraw_Flickerer(PART_s *) {
 }
 
-void PartKill_ForceThrow(PART_s *, i32) {
-}
 
 void PartImpact_Basketball(PART_s *) {
 }

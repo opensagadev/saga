@@ -2396,6 +2396,40 @@ static void ForcePushCode(GameObject_s *object, i32 held, i32) {
     }
 }
 
+void NewRumbleAllPlayers(f32, f32, i32, i32);
+void AddPartDebris(PARTDEBSYS_s *, i32, NUVEC *);
+
+void PartKill_ForceThrow(PART_s *part, i32) {
+    LEVELDATA *level = WorldInfo_CurrentlyActive()->current_level;
+    i32 effect = -1;
+    i32 debris = -1;
+    if (level == CLOUDCITYTRAPB_LDATA) {
+        effect = 0x75;
+        debris = 8;
+    } else if (level == MAULA_LDATA) {
+        effect = 0x2d;
+        debris = 9;
+    } else if (level == MAULF_LDATA) {
+        debris = 11;
+        if (NuSpecialExistsFn(&LevHSpecial[0]) && NuSpecialCompare(&LevHSpecial[0], &part->special)) {
+            debris = 11;
+        } else if (NuSpecialExistsFn(&LevHSpecial[1]) && NuSpecialCompare(&LevHSpecial[1], &part->special)) {
+            debris = 12;
+        } else if (NuSpecialExistsFn(&LevHSpecial[2]) && NuSpecialCompare(&LevHSpecial[2], &part->special)) {
+            debris = 13;
+        }
+    } else if (level == DOOKUC_LDATA) {
+        effect = 0x34;
+        debris = 10;
+    }
+    if (effect != -1) AddGameDebris(WORLD->debris_sys, effect, &part->position);
+    if (debris != -1) AddPartDebris(WORLD->part_debris_sys, debris, &part->position);
+    NewRumbleAllPlayers(0.7f, 0.0f, 0, 0);
+    GameCam_Judder(GameCam, qrand() < 0x8000 ? 0.4f : -0.4f, 2, NULL);
+    GameCam_NewShake(GameCam, 0.6f, 0.6f, 1.0f);
+    PlaySfx("Explode1", &part->position);
+}
+
 static void ForceThrowCode(GameObject_s *object, i32 pressed, i32) {
     if (object->character_context == 0x12) {
         AlertSurroundingCreatures(object, &object->apiobj.collision_position);
