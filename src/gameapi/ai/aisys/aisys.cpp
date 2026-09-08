@@ -6278,13 +6278,12 @@ static f32 Condition_GotOpponent(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKE
     return packet != NULL && packet->opponent != NULL ? 1.0f : 0.0f;
 }
 
-__used__ static f32 Condition_HasTakeOver(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                          void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
+static f32 Condition_HasTakeOver(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *) {
+    if (packet != NULL && packet->owner != NULL) {
+        GameObject *object = packet->owner->apiobj.objptr;
+        if (object != NULL && object->takeover_target != NULL)
+            return 1.0f;
+    }
     return 0.0f;
 }
 
@@ -8129,6 +8128,7 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_Z_POS].eval_fn = Condition_ZPos;
             lego_aiconditiondefs[LEGO_AI_CONDITION_Z_POS].init_fn = Condition_XYZPosInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_TAKE_OVER_RANGE].eval_fn = Condition_TakeOverRange;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_HAS_TAKE_OVER].eval_fn = Condition_HasTakeOver;
             lego_aiconditiondefs[LEGO_AI_CONDITION_ANIM_SPEED_MUL].eval_fn = Condition_AnimSpeedMul;
             lego_aiconditiondefs[LEGO_AI_CONDITION_TURRET_ALIVE].init_fn = Condition_TurretAliveInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_OUTPUT_0].eval_fn = Condition_GizmoOutput0;
