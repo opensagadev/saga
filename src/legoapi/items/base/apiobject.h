@@ -12,6 +12,7 @@ struct BOLT_s;
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/nuhgobj.h"
 #include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nuhspecial.h"
 #include "nu2api/numath/numtx.h"
 
 struct GameObject_s;
@@ -444,7 +445,10 @@ typedef struct APIOBJECT_s {
         };
         NUVEC movement_direction; // 0x1fc
     };
-    undefined field_0x208[0x214 - 0x208];
+    union {
+        undefined field_0x208[0x214 - 0x208];
+        nuhspecial_s collision_special;
+    };
     f32 field_0x214;
     f32 field_0x218;                                  // 0x218
     f32 water_height;                                 // 0x21c
@@ -1037,6 +1041,7 @@ DECOMP_ASSERT(offsetof(APIOBJECT, previous_blend_target_root_info) == 0x264,
               "APIOBJECT previous blend-target root-info offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, animation_root_delta) == 0x268, "APIOBJECT animation root delta offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, movement_direction) == 0x1fc, "APIOBJECT movement direction offset");
+DECOMP_ASSERT(offsetof(APIOBJECT, collision_special) == 0x208, "APIOBJECT collision special offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, field_0x1fa) == 0x1fa, "APIOBJECT antinode flags offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, collision_position) == 0x80, "APIOBJECT collision position offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, pitch_angle) == 0x274, "APIOBJECT pitch angle offset");

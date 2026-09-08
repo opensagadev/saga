@@ -81,10 +81,6 @@ static __used__ unsigned int AISysCharacterTestPathCnx(AISYS_s *, APIOBJECT_s *,
     return {};
 }
 
-static __used__ unsigned int AISysCheckAntinode_Rectangle(APIOBJECT_s *, AIANTINODE_s *, nuvec_s *, float) {
-    return {};
-}
-
 static __used__ void FormationMove(AIGROUP_s *, int (*)(AIGROUP_s *, AIROW_s *, AIROW_s *, APIOBJECT_s *)) {
 }
 

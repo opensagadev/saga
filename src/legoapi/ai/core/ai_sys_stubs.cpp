@@ -22,7 +22,104 @@ static const u32 iAISysPathColoursG[5] = {
     0xffff0000, 0xff00ff00, 0xff00ffff, 0xffff00ff, 0xffffff00
 };
 
-static __used__ void AISysCheckAntinode_Ellipse(APIOBJECT *object, AIANTINODE *antinode, NUVEC *difference,
+static void AISysCheckAntinode_Rectangle(APIOBJECT *object, AIANTINODE *antinode, NUVEC *difference,
+                                                f32 radius) {
+    difference->x = object->ai->movement_position.x - antinode->position.x;
+    if (difference->x > radius || difference->x < -radius) {
+        return;
+    }
+    difference->z = object->ai->movement_position.z - antinode->position.z;
+    if (difference->z > radius || difference->z < -radius ||
+        object->collision_min.y > antinode->max_y || !(antinode->min_y <= object->collision_max.y)) {
+        return;
+    }
+    NuVecRotateY(difference, difference, -antinode->flags);
+    if (fabsf(difference->x) < antinode->base_radius + object->ai->mover_height &&
+        fabsf(difference->z) < antinode->base_height + object->ai->mover_height) {
+        NUVEC local_object;
+        NUVEC local_destination;
+        difference->x = object->position.x - antinode->position.x;
+        difference->y = 0.0f;
+        difference->z = object->position.z - antinode->position.z;
+        NuVecRotateY(&local_object, difference, -antinode->flags);
+        i32 object_angle = NuAtan2D(local_object.x, local_object.z);
+        difference->x = object->ai->movement_destination.x - antinode->position.x;
+        difference->y = 0.0f;
+        difference->z = object->ai->movement_destination.z - antinode->position.z;
+        NuVecRotateY(&local_destination, difference, -antinode->flags);
+        i32 turn = NuAngSub(NuAtan2D(local_destination.x, local_destination.z), object_angle);
+        i32 turn_offset = 0;
+        if (object->ai->antinode_timer > 0.0f) {
+            if (((object->ai->path_info.flags & 3) == 2 || object->respawn_timer > 1.0f) &&
+                object->ai->antinode_timer < antinode_time) {
+                object->ai->antinode_clockwise = !object->ai->antinode_clockwise;
+                object->ai->antinode_timer = antinode_time + antinode_reverse_time;
+            }
+            if (object->ai->antinode_clockwise) {
+                if (turn < 0) {
+                    turn_offset = 0x10000;
+                }
+            } else if (turn > 0) {
+                turn_offset = -0x10000;
+            }
+        } else if (turn > 0) {
+            object->ai->antinode_clockwise = 1;
+        } else {
+            object->ai->antinode_clockwise = 0;
+        }
+        if ((antinode->game_flags & 2) == 0 && object->ai->antinode_timer < antinode_time) {
+            object->ai->antinode_timer = antinode_time;
+        }
+        i32 corner_angle = NuAtan2D(antinode->base_radius, antinode->base_height);
+        i32 angle = NuAngAdd(object_angle, 0);
+        f32 tangent_x;
+        f32 tangent_z;
+        if (angle > 0x8000 - corner_angle) {
+            object->ai->movement_position.x = (antinode->base_radius + object->ai->mover_height) * NU_SIN_LUT(angle);
+            object->ai->movement_position.z = -(object->ai->mover_height + antinode->base_height);
+            tangent_x = -1.0f;
+            tangent_z = 0.0f;
+        } else if (angle > corner_angle) {
+            object->ai->movement_position.x = antinode->base_radius + object->ai->mover_height;
+            object->ai->movement_position.z = (object->ai->mover_height + antinode->base_height) * NU_COS_LUT(angle);
+            tangent_x = 0.0f;
+            tangent_z = -1.0f;
+        } else if (angle > -corner_angle) {
+            object->ai->movement_position.x = (antinode->base_radius + object->ai->mover_height) * NU_SIN_LUT(angle);
+            object->ai->movement_position.z = object->ai->mover_height + antinode->base_height;
+            tangent_x = 1.0f;
+            tangent_z = 0.0f;
+        } else if (angle >= corner_angle - 0x7fff) {
+            object->ai->movement_position.x = -(antinode->base_radius + object->ai->mover_height);
+            object->ai->movement_position.z = (object->ai->mover_height + antinode->base_height) * NU_COS_LUT(angle);
+            tangent_x = 0.0f;
+            tangent_z = 1.0f;
+        } else {
+            object->ai->movement_position.x = (antinode->base_radius + object->ai->mover_height) * NU_SIN_LUT(angle);
+            object->ai->movement_position.z = -(object->ai->mover_height + antinode->base_height);
+            tangent_x = -1.0f;
+            tangent_z = 0.0f;
+        }
+        if (turn + turn_offset < 0) {
+            tangent_x = -tangent_x;
+            tangent_z = -tangent_z;
+        }
+        i32 absolute_turn = turn < 0 ? -turn : turn;
+        if (absolute_turn < 1820) {
+            f32 scale = static_cast<f32>(absolute_turn) / 1820.0f;
+            tangent_x *= scale;
+            tangent_z *= scale;
+        }
+        object->ai->movement_position.y = 0.0f;
+        object->ai->movement_position.x += tangent_x;
+        object->ai->movement_position.z += tangent_z;
+        NuVecRotateY(&object->ai->movement_position, &object->ai->movement_position, antinode->flags);
+        NuVecAdd(&object->ai->movement_position, &object->ai->movement_position, &antinode->position);
+        object->field_0x1fa |= 4;
+    }
+}
+
+static void AISysCheckAntinode_Ellipse(APIOBJECT *object, AIANTINODE *antinode, NUVEC *difference,
                                               f32 radius) {
     f32 distance_squared = difference->x * difference->x + difference->z * difference->z;
     if (distance_squared < radius * radius) {
@@ -101,7 +198,7 @@ static __used__ void AISysCheckAntinode_Ellipse(APIOBJECT *object, AIANTINODE *a
     }
 }
 
-static __used__ void AISysCheckAntinode_Circle(APIOBJECT *object, AIANTINODE *antinode, NUVEC *difference,
+static void AISysCheckAntinode_Circle(APIOBJECT *object, AIANTINODE *antinode, NUVEC *difference,
                                              f32 radius) {
     if (difference->x * difference->x + difference->z * difference->z < radius * radius) {
         difference->x = object->position.x - antinode->position.x;
@@ -152,6 +249,9 @@ static __used__ void AISysCheckAntinode_Circle(APIOBJECT *object, AIANTINODE *an
 }
 
 extern "C" {
+    void (*checkantinodefns[3])(APIOBJECT *, AIANTINODE *, NUVEC *, f32) = {
+        AISysCheckAntinode_Circle, AISysCheckAntinode_Ellipse, AISysCheckAntinode_Rectangle
+    };
     char *AiLevelPathName = "";
     AISCRIPTPROCESS *pSetStateDebugee;
     SCRIPTPROCESSFIRSTTIMEACTION *ScriptProcessFirstTimeActionFn;
@@ -1341,7 +1441,58 @@ extern "C" {
 
 
 
-    void AISysCreatureAntinodeInteraction(void) {
+    void AISysCreatureAntinodeInteraction(AISYS *system, i32 object_count, APIOBJECT **objects) {
+        if (system != NULL) {
+            AIANTINODE *active[192];
+            i32 count = 0;
+            AIANTINODE *antinode = system->antinodes;
+            for (i32 index = 0; index < system->antinode_count && count < 192; ++index, ++antinode) {
+                if (antinode->enabled &&
+                    (!antinode->has_special || NuSpecialGetVisibilityFn(&antinode->special_handle))) {
+                    active[count++] = antinode;
+                }
+            }
+            antinode = dynamic_antinodes;
+            for (i32 index = 0; count < 192 && index < 64; ++index, ++antinode) {
+                if (antinode->enabled &&
+                    (!antinode->has_special || NuSpecialGetVisibilityFn(&antinode->special_handle))) {
+                    active[count++] = antinode;
+                }
+            }
+            if (count != 0) {
+                for (i32 index = 0; index < object_count; ++index) {
+                    APIOBJECT *object = objects[index];
+                    if ((object->flags_low & 0x80) != 0 || object->ignore_antinodes) {
+                        continue;
+                    }
+                    for (i32 obstacle = 0; obstacle < count; ++obstacle) {
+                        antinode = active[obstacle];
+                        if (NuSpecialExistsFn(&object->collision_special) &&
+                            NuSpecialCompare(&object->collision_special, &antinode->special_handle)) {
+                            continue;
+                        }
+                        if ((antinode->excluded_character_types >> object->field_0x289) & 1) {
+                            continue;
+                        }
+                        NUVEC difference;
+                        f32 radius = object->ai->mover_height + antinode->radius;
+                        difference.x = object->ai->movement_position.x - antinode->position.x;
+                        if (difference.x > radius || difference.x < -radius) {
+                            continue;
+                        }
+                        difference.z = object->ai->movement_position.z - antinode->position.z;
+                        if (difference.z > radius || difference.z < -radius ||
+                            object->collision_min.y > antinode->max_y) {
+                            continue;
+                        }
+                        if (antinode->min_y <= object->collision_max.y) {
+                            checkantinodefns[antinode->type](object, antinode, &difference, radius);
+                        }
+                    }
+                }
+            }
+        }
+        AIAntinodeCullSingleFrame();
     }
 
     void AISysCreatureInteraction2D(void) {

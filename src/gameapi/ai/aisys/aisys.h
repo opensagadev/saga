@@ -725,6 +725,8 @@ extern "C" {
     AIANTINODE *AIAntinodeCreateSingleFrame(NUVEC *position, f32 radius);
     void AIAntinodeDestroy(AIANTINODE *antinode);
     void AIAntinodeCullSingleFrame(void);
+    void AISysCreatureAntinodeInteraction(AISYS *system, i32 object_count, APIOBJECT **objects);
+    extern void (*checkantinodefns[3])(APIOBJECT *, AIANTINODE *, NUVEC *, f32);
     void AISetPathHeightTol(f32 tolerance);
     void AISysSetPathCylinderCheck(i32 enabled);
     AIPATHCNX *AIPathFindPathCnxFromIX(AISYS *system, AIPATH *path, u8 from_index, u8 to_index);
