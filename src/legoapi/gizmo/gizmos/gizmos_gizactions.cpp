@@ -103,9 +103,6 @@ void Action_UseTriggerSet(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **,
 void Action_BoulderSection(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
 }
 
-void Action_CircleOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
-}
-
 i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
                           i32 first_time, float) {
     if (first_time == 0) {
