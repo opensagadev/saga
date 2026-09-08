@@ -5707,15 +5707,6 @@ __used__ static f32 Condition_BlowupBlownup(AISYS *sys, AISCRIPTPROCESS *process
     return 0.0f;
 }
 
-__used__ static f32 Condition_ChallengeMode(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                            void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
-}
 
 __used__ static f32 Condition_CheatProgress(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
                                             void *void_arg) {

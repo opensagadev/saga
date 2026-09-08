@@ -486,6 +486,10 @@ static f32 Condition_IsVisible(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, cha
     return result;
 }
 
+static f32 Condition_ChallengeMode(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return ChallengeMode != 0 ? 1.0f : 0.0f;
+}
+
 static f32 Condition_Freeplay(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return static_cast<f32>(FreePlay);
 }
@@ -810,7 +814,7 @@ extern "C" {
         {"Indy", NULL, NULL},
         {"MissionMode", Condition_MissionMode, NULL},
         {"MissionWon", Condition_MissionWon, NULL},
-        {"ChallengeMode", NULL, NULL},
+        {"ChallengeMode", Condition_ChallengeMode, NULL},
         {"PSP", NULL, NULL},
         {"AIOverrideControl", NULL, NULL},
         {"BoltsDontGetDeflectedBack", NULL, NULL},
