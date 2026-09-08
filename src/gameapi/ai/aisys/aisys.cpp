@@ -6011,13 +6011,12 @@ static f32 Condition_Random(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void
     return NuRandFloat();
 }
 
-__used__ static f32 Condition_BeenHit(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                      void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
+static f32 Condition_BeenHit(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *argument) {
+    GameObject_s *object = static_cast<GameObject_s *>(argument);
+    if (object == NULL)
+        object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+    if (object != NULL)
+        return object->flicker_timer > 0.0f || (object->field_0xef8 & 1) != 0 ? 1.0f : 0.0f;
     return 0.0f;
 }
 
@@ -6590,11 +6589,8 @@ static void *Condition_XYZPosInit(AISYS *sys, char *arg, AISCRIPT *) {
     return arg != NULL && sys != NULL ? GetNamedGameObject(sys, arg) : NULL;
 }
 
-__used__ static void *Condition_BeenHitInit(AISYS *sys, char *arg, AISCRIPT *script) {
-    (void)sys;
-    (void)arg;
-    (void)script;
-    return NULL;
+static void *Condition_BeenHitInit(AISYS *sys, char *arg, AISCRIPT *) {
+    return arg != NULL ? GetNamedGameObject(sys, arg) : NULL;
 }
 
 __used__ static void *Condition_IsAliveInit(AISYS *sys, char *arg, AISCRIPT *script) {
@@ -8128,6 +8124,8 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_GOT_VICTIM].eval_fn = Condition_GotVictim;
             lego_aiconditiondefs[LEGO_AI_CONDITION_MY_SET].eval_fn = Condition_MySet;
             lego_aiconditiondefs[LEGO_AI_CONDITION_BEING_TOWED].eval_fn = Condition_BeingTowed;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_HIT].eval_fn = Condition_BeenHit;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_HIT].init_fn = Condition_BeenHitInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_ON_OBJECT].eval_fn = Condition_OnObject;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CONTEXT].eval_fn = Condition_Context;
             lego_aiconditiondefs[LEGO_AI_CONDITION_IN_SWAMP].eval_fn = Condition_InSwamp;
