@@ -1102,6 +1102,25 @@ extern i16 id_BATTLEDROID, id_BATTLEDROIDSECURITY, id_BATTLEDROIDGEONOSIAN;
 extern i16 id_BATTLEDROIDCOMMANDER, id_CLONEEP3, id_CLONEEP3SAND;
 }
 
+static i32 Action_SetZeroAcceleration(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
+                                      i32 param_count, i32 first_time, f32) {
+    if (first_time) {
+        GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+        i32 enabled = 1;
+        for (i32 index = 0; index < param_count; ++index) {
+            if (NuStrIStr(params[index], "player1") != NULL || NuStrIStr(params[index], "player") != NULL)
+                object = player;
+            else if (NuStrIStr(params[index], "player2") != NULL)
+                object = player2;
+            else if (NuStrIStr(params[index], "FALSE") != NULL)
+                enabled = 0;
+        }
+        if (object != NULL)
+            object->ai.runtime_flags = (object->ai.runtime_flags & ~4u) | ((enabled & 1) << 2);
+    }
+    return 1;
+}
+
 static i32 Action_SetDoomedEscapeLocator(AISYS *system, AISCRIPTPROCESS *processor, AIPACKET *packet,
                                        char **params, i32 param_count, i32 first_time, f32) {
     if (first_time) {
@@ -4811,7 +4830,7 @@ extern "C" {
         {"AddToSet", Action_AddToSet, 0, 0, 0},
         {"SetSpline", Action_SetSpline, 0, 0, 0},
         {"SetControlSystem", Action_SetControlSystem, 0, 0, 0},
-        {"SetZeroAcceleration", NULL, 0, 0, 0},
+        {"SetZeroAcceleration", Action_SetZeroAcceleration, 0, 0, 0},
         {"FollowDirection", Action_FollowDirection, 0, 0, 0},
         {"BreakFormation", Action_BreakFormation, 0, 0, 0},
         {"FormationMove", Action_FormationMove, 0, 0, 0},

@@ -512,25 +512,6 @@ static __used__ i32 Action_LaunchGuidedMissile(AISYS_s *, AISCRIPTPROCESS_s *, A
 
 
 
-static __used__ i32 Action_SetZeroAcceleration(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params,
-                                               i32 param_count, i32 first_time, f32) {
-    if (first_time == 0) {
-        return 1;
-    }
-    GameObject_s *object = ActionOwner(packet);
-    for (i32 index = 0; index < param_count; ++index) {
-        if (NuStrICmp(params[index], "player") == 0 || NuStrICmp(params[index], "player1") == 0) {
-            object = player;
-        } else if (NuStrICmp(params[index], "player2") == 0) {
-            object = player2;
-        }
-    }
-    if (object != NULL) {
-        object->ai.runtime_flags =
-            (object->ai.runtime_flags & ~4u) | (ActionToggleEnabled(params, param_count) ? 4u : 0u);
-    }
-    return 1;
-}
 
 
 static __used__ void *Condition_AreaCompleteInit(AISYS_s *, char *, AISCRIPT_s *) {
@@ -1026,7 +1007,6 @@ namespace {
             lego_aiactiondefs[LEGO_AI_ACTION_PRESS_SPECIAL_BUTTON].eval_fn = Action_PressSpecialButton;
             lego_aiactiondefs[LEGO_AI_ACTION_PRESS_ACTION_BUTTON].eval_fn = Action_PressActionButton;
             lego_aiactiondefs[LEGO_AI_ACTION_DONT_AVOID_CHARACTER].eval_fn = Action_DontAvoidCharacter;
-            lego_aiactiondefs[LEGO_AI_ACTION_SET_ZERO_ACCELERATION].eval_fn = Action_SetZeroAcceleration;
             lego_aiactiondefs[LEGO_AI_ACTION_CREATE_SPLINE_CREATURES].eval_fn = Action_CreateSplineCreatures;
             lego_aiactiondefs[LEGO_AI_ACTION_FOLLOW_CHARACTER].eval_fn = Action_FollowCharacter;
             lego_aiactiondefs[LEGO_AI_ACTION_MOVE_FORWARD].eval_fn = Action_MoveForward;
