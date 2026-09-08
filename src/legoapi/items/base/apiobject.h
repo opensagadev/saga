@@ -204,16 +204,16 @@ typedef struct AIPACKET_s {
         GameObject_s **primary_target_ref;
     };
     f32 nearest_opponent_metric; // 0xd8
-    u32 field_0xdc;
-    u32 field_0xe0;
+    union { u32 field_0xdc; APIOBJECT_s *pending_nearest_opponent; };
+    union { u32 field_0xe0; f32 pending_nearest_metric; };
     union {
         void *opponent;
         APIOBJECT_s *opponent_object;
         GameObject_s **action_target_ref;
     };
     f32 opponent_metric; // 0xe8
-    u32 field_0xec;
-    u32 field_0xf0;
+    union { u32 field_0xec; APIOBJECT_s *pending_opponent; };
+    union { u32 field_0xf0; f32 pending_opponent_metric; };
     GameObject_s *dont_avoid_character; // 0xf4
     u8 pad_f8[0x104 - 0xf8];
     union {
@@ -471,7 +471,7 @@ typedef struct APIOBJECT_s {
     f32 heardistance;                                 // 0x230
     f32 maxviewheight;                                // 0x234
     f32 minviewheight;                                // 0x238
-    undefined field_0x23c[0x240 - 0x23c];             // 0x23c .. 0x240
+    union { undefined field_0x23c[4]; f32 visibility_range_extension; }; // 0x23c
     NUVEC previous_animation_root;                    // 0x240
     NUVEC previous_blend_target_root;                 // 0x24c
     f32 previous_animation_root_time;                 // 0x258
@@ -535,6 +535,7 @@ typedef struct APIOBJECT_s {
 
 DECOMP_ASSERT(sizeof(APIOBJECT) == 0x2b0, "APIOBJECT size");
 DECOMP_ASSERT(offsetof(APIOBJECT, ai_awareness_mask) == 0x2a0, "APIOBJECT AI awareness mask offset");
+DECOMP_ASSERT(offsetof(APIOBJECT, visibility_range_extension) == 0x23c, "APIOBJECT visibility range extension offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, packed_contact_state) == 0x27c, "APIOBJECT packed contact state offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, collision_identity_mask) == 0x1e4, "APIOBJECT collision identity offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, colliding_objects_mask) == 0x1ec, "APIOBJECT colliding objects offset");
@@ -901,8 +902,8 @@ typedef struct GameObject_s {
             u32 field_0xec8;
         };
     };
-    u32 field_0xecc;                            // 0x0ecc
-    u32 field_0xed0;                            // 0x0ed0
+    union { u32 field_0xecc; APIOBJECT_s *alert_target; }; // 0x0ecc
+    union { u32 field_0xed0; f32 alert_target_timer; }; // 0x0ed0
     union {
         u32 field_0xed4;
         f32 current_speed_multiplier; // 0x0ed4
@@ -1062,6 +1063,8 @@ typedef struct GameObject_s {
 DECOMP_ASSERT(sizeof(GameObject_s) == 0x10e4, "GameObject size");
 DECOMP_ASSERT(offsetof(GameObject_s, ai_seen_mask) == 0xebc, "GameObject AI seen mask offset");
 DECOMP_ASSERT(offsetof(GameObject_s, ai_opponent_exclusion_mask) == 0xec4, "GameObject opponent exclusion mask offset");
+DECOMP_ASSERT(offsetof(GameObject_s, alert_target) == 0xecc, "GameObject alert target offset");
+DECOMP_ASSERT(offsetof(GameObject_s, alert_target_timer) == 0xed0, "GameObject alert timer offset");
 DECOMP_ASSERT(offsetof(GameObject_s, last_attacker) == 0x10b4, "Last attacker offset");
 DECOMP_ASSERT(offsetof(GameObject_s, use_target) == 0xf08, "GameObject use target offset");
 DECOMP_ASSERT(offsetof(GameObject_s, use_attach_frames) == 0xf0d, "GameObject use attachment frames offset");
@@ -1088,6 +1091,10 @@ static_assert(sizeof(void *) != 4 || offsetof(AIPACKET, character_type_mask_low)
 DECOMP_ASSERT(offsetof(AIPACKET, alternate_script_process) == 0xcc, "AIPACKET alternate script processor offset");
 DECOMP_ASSERT(offsetof(AIPACKET, opponent_object) == 0xe4, "AIPACKET opponent offset");
 DECOMP_ASSERT(offsetof(AIPACKET, opponent_metric) == 0xe8, "AIPACKET opponent range offset");
+DECOMP_ASSERT(offsetof(AIPACKET, pending_nearest_opponent) == 0xdc, "AIPACKET pending nearest opponent offset");
+DECOMP_ASSERT(offsetof(AIPACKET, pending_nearest_metric) == 0xe0, "AIPACKET pending nearest range offset");
+DECOMP_ASSERT(offsetof(AIPACKET, pending_opponent) == 0xec, "AIPACKET pending opponent offset");
+DECOMP_ASSERT(offsetof(AIPACKET, pending_opponent_metric) == 0xf0, "AIPACKET pending opponent range offset");
 DECOMP_ASSERT(offsetof(AIPACKET, movement_destination) == 0x104, "AIPACKET destination offset");
 DECOMP_ASSERT(offsetof(AIPACKET, animation_override_from) == 0x126, "AIPACKET animation override source offset");
 DECOMP_ASSERT(offsetof(AIPACKET, animation_override_to) == 0x128, "AIPACKET animation override target offset");

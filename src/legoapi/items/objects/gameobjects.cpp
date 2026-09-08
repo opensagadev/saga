@@ -58,6 +58,9 @@ extern "C" {
     extern i16 id_GRIEVOUS;
     extern i16 id_BODYGUARD;
     extern i16 id_IMPERIALGUARD;
+    extern i16 id_JAWA;
+    extern i16 id_UGNAUGHT;
+    extern i16 id_ATAT;
 }
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
@@ -2855,8 +2858,272 @@ void GameObjectToCameraDistances() {
     }
 }
 
-void GameCreatureOpponentSelection(AISYS_s *, i32, APIOBJECT_s **, i32, APIOBJECT_s **, i32, APIOBJECT_s **, u64,
-                                   float) {
+extern GameObject_s *alert_obj;
+extern NUVEC alert_pos;
+extern f32 alert_timer;
+extern "C" { i32 party_under_cover; }
+i32 ZapTarget(GameObject_s *object);
+
+void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **objects,
+                                   i32 goody_count, APIOBJECT_s **goodies, i32 baddy_count,
+                                   APIOBJECT_s **baddies, u64 awareness, float) {
+    NUVEC difference = {0.0f, 0.0f, 0.0f};
+    if (system == NULL)
+        return;
+    if (goody_count == 0)
+        return;
+    i32 complete = baddy_count == 0;
+    if (alert_obj != NULL && (alert_obj->apiobj.flags_high & 0x10) != 0 &&
+        (alert_obj->apiobj.field_0x1f4 & 5) == 0 &&
+        (static_cast<GAMECHARACTERDATA *>(alert_obj->apiobj.character_data->field11_0x24)->flags_090 & 0x8000) == 0) {
+        const u64 alert_mask = (u64)1 << alert_obj->apiobj.field_0x289;
+        for (i32 i = 0; i < baddy_count; ++i) {
+            APIOBJECT_s *object = baddies[i];
+            if ((object->ai_awareness_mask & alert_mask) != 0) {
+                object->objptr->alert_target_timer = 5.0f;
+                object->objptr->alert_target = &alert_obj->apiobj;
+            } else if (WORLD->rooms_visible_ptr[object->objptr->room_id] != 0) {
+                difference.x = alert_pos.x - object->collision_position.x;
+                if (object->heardistance > difference.x) {
+                    difference.z = alert_pos.z - object->collision_position.z;
+                    if (object->heardistance > difference.z) {
+                        difference.y = alert_pos.y - object->collision_position.y;
+                        if (object->maxviewheight > difference.y && difference.y > object->minviewheight &&
+                            object->heardistance * object->heardistance >
+                                difference.x * difference.x + difference.z * difference.z) {
+                            const f32 dx = alert_obj->apiobj.collision_position.x - object->collision_position.x;
+                            const f32 dz = alert_obj->apiobj.collision_position.z - object->collision_position.z;
+                            if ((WORLD->api_object_sys->line_of_sight[object->field_0x289] & alert_mask) != 0 ||
+                                dx * dx + dz * dz > object->viewdistance * object->viewdistance) {
+                                object->objptr->alert_target = &alert_obj->apiobj;
+                                object->ai_awareness_mask |= alert_mask;
+                                awareness |= object->ai_awareness_mask;
+                                object->objptr->alert_target_timer = 5.0f;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        alert_timer -= FRAMETIME;
+        if (!(alert_timer > 0.0f))
+            alert_obj = NULL;
+    }
+    if (system->goody_idx >= goody_count)
+        system->goody_idx = 0;
+    i32 budget = 32;
+    // Pending choices survive budget exhaustion. Publish only after a pass
+    // finishes without changing the baddies' assignments.
+    while (!complete && budget > 0) {
+        complete = 0;
+        while (system->goody_idx < goody_count && budget > 0) {
+            APIOBJECT_s *goody = goodies[system->goody_idx];
+            f32 best_distance = 1.0e9f;
+            APIOBJECT_s *best_baddy = NULL;
+            for (i32 i = 0; i < baddy_count; ++i) {
+                APIOBJECT_s *baddy = baddies[i];
+                if (baddy == goody || baddy->ai->pending_opponent == goody)
+                    continue;
+                i32 have_distance = 0;
+                f32 distance = 0.0f;
+                if (baddy->objptr->field_0xefc & 2) {
+                    goody->ai_awareness_mask &= ~((u64)1 << baddy->field_0x289);
+                } else if ((goody->ai_awareness_mask >> baddy->field_0x289) & 1) {
+                    distance = NuVecDist(&baddy->position, &goody->position, &difference);
+                    have_distance = 1;
+                    if (distance >= goody->viewdistance + baddy->visibility_range_extension)
+                        goody->ai_awareness_mask &= ~((u64)1 << baddy->field_0x289);
+                } else if ((WORLD->api_object_sys->line_of_sight[goody->field_0x289] >> baddy->field_0x289) & 1) {
+                    distance = NuVecDist(&baddy->position, &goody->position, &difference);
+                    have_distance = 1;
+                    if ((!party_under_cover || ((goody->field_0x1f4 & 0x400) && (baddy->field_0x1f4 & 0x400))) &&
+                        (((awareness >> baddy->field_0x289) & 1) ||
+                         (((WORLD->api_object_sys->line_of_sight[goody->field_0x289] >> baddy->field_0x289) & 1) &&
+                          ((goody->flags_high & 8) ||
+                           difference.x * goody->objptr->facing_direction.x +
+                                   difference.z * goody->objptr->facing_direction.z >= 0.0f ||
+                           (goody->heardistance > distance && (baddy->objptr->field_0xef9 & 8)))))) {
+                        goody->ai_awareness_mask |= (u64)1 << baddy->field_0x289;
+                        awareness |= goody->ai_awareness_mask;
+                    }
+                }
+                if (goody->objptr->field_0xefc & 2) {
+                    baddy->ai_awareness_mask &= ~((u64)1 << goody->field_0x289);
+                } else if (baddy->objptr->alert_target == goody) {
+                    baddy->ai_awareness_mask |= (u64)1 << goody->field_0x289;
+                    awareness |= baddy->ai_awareness_mask;
+                } else if ((baddy->ai_awareness_mask >> goody->field_0x289) & 1) {
+                    if (!have_distance)
+                        distance = NuVecDist(&baddy->position, &goody->position, &difference);
+                    have_distance = 1;
+                    if (distance >= baddy->viewdistance + goody->visibility_range_extension)
+                        baddy->ai_awareness_mask &= ~((u64)1 << goody->field_0x289);
+                } else if ((WORLD->api_object_sys->line_of_sight[baddy->field_0x289] >> goody->field_0x289) & 1) {
+                    if (!have_distance)
+                        distance = NuVecDist(&baddy->position, &goody->position, &difference);
+                    have_distance = 1;
+                    if ((!party_under_cover || ((baddy->field_0x1f4 & 0x400) && (goody->field_0x1f4 & 0x400))) &&
+                        (((awareness >> goody->field_0x289) & 1) ||
+                         (((WORLD->api_object_sys->line_of_sight[baddy->field_0x289] >> goody->field_0x289) & 1) &&
+                          ((baddy->flags_high & 8) ||
+                           -difference.z * baddy->objptr->facing_direction.z -
+                                   difference.x * baddy->objptr->facing_direction.x >= 0.0f ||
+                           (baddy->heardistance > distance && (goody->objptr->field_0xef9 & 8)))))) {
+                        baddy->ai_awareness_mask |= (u64)1 << goody->field_0x289;
+                        awareness |= baddy->ai_awareness_mask;
+                    }
+                }
+                if (!((goody->ai_awareness_mask >> baddy->field_0x289) & 1) &&
+                    !((baddy->ai_awareness_mask >> goody->field_0x289) & 1))
+                    continue;
+                if (!have_distance)
+                    distance = NuVecDist(&baddy->position, &goody->position, &difference);
+                GameObject_s *baddy_object = baddy->objptr;
+                if (baddy_object->id == id_JAWA || baddy_object->id == id_UGNAUGHT) {
+                    if (!ZapTarget(goody->objptr))
+                        baddy->objptr->ai_opponent_exclusion_mask |= (u64)1 << goody->field_0x289;
+                } else if ((goody->character_data->model_flags & 0x80000) ||
+                           ((baddy_object->field_0xefb & 1) && goody->objptr != player && goody->objptr != player2) ||
+                           (goody->objptr->id == id_DRAGBOMB && baddy_object->id != id_ATAT)) {
+                    baddy_object->ai_opponent_exclusion_mask |= (u64)1 << goody->field_0x289;
+                }
+                if (!((baddy->objptr->ai_opponent_exclusion_mask >> goody->field_0x289) & 1)) {
+                    AIPACKET *packet = baddy->ai;
+                    if (packet->pending_nearest_metric > distance) {
+                        packet->pending_nearest_metric = distance;
+                        packet->pending_nearest_opponent = goody;
+                    }
+                    f32 metric = distance;
+                    if (packet->opponent_object == goody)
+                        metric -= 0.5f;
+                    if ((baddy->ai_awareness_mask >> goody->field_0x289) & 1) {
+                        if (packet->pending_opponent != NULL) {
+                            if ((goody->flags_low & 0x80) && (baddy->objptr->field_0xefb & 0x40) &&
+                                (!(packet->pending_opponent->flags_low & 0x80) || packet->pending_opponent_metric > metric)) {
+                                best_distance = distance;
+                                best_baddy = baddy;
+                            }
+                        } else if (!(packet->runtime_flags & 2) ||
+                                   ((WORLD->api_object_sys->line_of_sight[baddy->field_0x289] >> goody->field_0x289) & 1) ||
+                                   baddy->objptr->alert_target == goody) {
+                            if (best_distance > metric) {
+                                best_distance = distance;
+                                best_baddy = baddy;
+                            }
+                        }
+                    }
+                }
+                if (baddy->objptr->id == id_JAWA || baddy->objptr->id == id_UGNAUGHT ||
+                    (baddy->character_data->model_flags & 0x80000))
+                    goody->objptr->ai_opponent_exclusion_mask |= (u64)1 << baddy->field_0x289;
+                if (!((goody->objptr->ai_opponent_exclusion_mask >> baddy->field_0x289) & 1)) {
+                    AIPACKET *packet = goody->ai;
+                    if (packet->pending_nearest_metric > distance) {
+                        packet->pending_nearest_metric = distance;
+                        packet->pending_nearest_opponent = baddy;
+                    }
+                    f32 metric = distance;
+                    if (packet->opponent_object == baddy)
+                        metric -= 0.5f;
+                    if (((goody->ai_awareness_mask >> baddy->field_0x289) & 1) &&
+                        (!(packet->runtime_flags & 2) ||
+                         ((WORLD->api_object_sys->line_of_sight[goody->field_0x289] >> baddy->field_0x289) & 1))) {
+                        if (packet->pending_opponent_metric > metric ||
+                            (packet->pending_opponent != NULL && packet->pending_opponent->objptr != NULL &&
+                             packet->pending_opponent->objptr->character_context == 0x5a && baddy->objptr->character_context != 0x5a)) {
+                            packet->pending_opponent_metric = distance;
+                            packet->pending_opponent = baddy;
+                        }
+                    }
+                }
+            }
+            if (baddy_count > 0) {
+                budget -= baddy_count;
+                if (best_baddy != NULL && best_baddy->ai->pending_opponent != goody) {
+                    best_baddy->ai->pending_opponent = goody;
+                    best_baddy->ai->pending_opponent_metric = best_distance;
+                    system->unknown_flag_2 = 1;
+                    if (!((goody->objptr->ai_opponent_exclusion_mask >> best_baddy->field_0x289) & 1) &&
+                        ((goody->ai_awareness_mask >> best_baddy->field_0x289) & 1)) {
+                        AIPACKET *packet = goody->ai;
+                        if (!(packet->field_0x1e5 & 0x10) || packet->pending_opponent_metric > best_distance) {
+                            packet->pending_opponent = best_baddy;
+                            packet->pending_opponent_metric = best_distance;
+                            packet->field_0x1e5 |= 0x10;
+                        }
+                    }
+                }
+            }
+            ++system->goody_idx;
+            if (system->goody_idx >= goody_count) {
+                system->goody_idx = 0;
+                if (system->unknown_flag_2) {
+                    system->unknown_flag_2 = 0;
+                    complete = 0;
+                } else {
+                    complete = 1;
+                }
+            }
+        }
+    }
+    if (!complete)
+        return;
+    system->goody_idx = 0;
+    nbaddies_can_see_players = 0;
+    // Losing LOS alone does not erase the seen history; losing awareness does.
+    for (i32 i = 0; i < goody_count; ++i) {
+        APIOBJECT_s *goody = goodies[i];
+        for (i32 j = 0; j < baddy_count; ++j) {
+            APIOBJECT_s *baddy = baddies[j];
+            if ((goody->ai_awareness_mask >> baddy->field_0x289) & 1) {
+                if ((WORLD->api_object_sys->line_of_sight[goody->field_0x289] >> baddy->field_0x289) & 1)
+                    goody->objptr->ai_seen_mask |= (u64)1 << baddy->field_0x289;
+            } else if ((goody->objptr->ai_seen_mask >> baddy->field_0x289) & 1) {
+                goody->objptr->ai_seen_mask &= ~((u64)1 << baddy->field_0x289);
+            }
+            if ((baddy->ai_awareness_mask >> goody->field_0x289) & 1) {
+                if ((WORLD->api_object_sys->line_of_sight[baddy->field_0x289] >> goody->field_0x289) & 1)
+                    baddy->objptr->ai_seen_mask |= (u64)1 << goody->field_0x289;
+            } else if ((baddy->objptr->ai_seen_mask >> goody->field_0x289) & 1) {
+                baddy->objptr->ai_seen_mask &= ~((u64)1 << goody->field_0x289);
+            }
+        }
+    }
+    for (i32 i = 0; i < count; ++i) {
+        APIOBJECT_s *object = objects[i];
+        AIPACKET *packet = object->ai;
+        packet->opponent_metric = packet->pending_opponent_metric;
+        packet->opponent_object = packet->pending_opponent;
+        packet->field_0x1e5 = (packet->field_0x1e5 & ~8) | ((packet->field_0x1e5 >> 1) & 8);
+        packet = object->ai;
+        packet->nearest_opponent_metric = packet->pending_nearest_metric;
+        packet->nearest_opponent_object = packet->pending_nearest_opponent;
+        packet->pending_opponent_metric = 1.0e9f;
+        packet->pending_nearest_metric = 1.0e9f;
+        packet->field_0x1e5 &= ~0x10;
+        packet->pending_nearest_opponent = NULL;
+        packet->pending_opponent = NULL;
+        if ((awareness >> object->field_0x289) & 1)
+            object->ai->field_0x1e5 |= 0x40;
+        else
+            object->ai->field_0x1e5 &= ~0x40;
+        object->objptr->field_0xef9 &= ~8;
+        GameObject_s *game_object = object->objptr;
+        game_object->ai_opponent_exclusion_mask = 0;
+        if ((player != NULL && ((game_object->ai_seen_mask >> player->apiobj.field_0x289) & 1)) ||
+            (player2 != NULL && ((game_object->ai_seen_mask >> player2->apiobj.field_0x289) & 1)))
+            ++nbaddies_can_see_players;
+        if (game_object->opponent != NULL) {
+            packet = object->ai;
+            packet->opponent_object = static_cast<APIOBJECT_s *>(game_object->opponent);
+            packet->opponent_metric = NuVecDist(&packet->opponent_object->position, &object->position, &difference);
+            packet = object->ai;
+            if (packet->opponent_object->ai->opponent_object == object)
+                packet->field_0x1e5 |= 8;
+            else
+                packet->field_0x1e5 &= ~8;
+        }
+    }
 }
 
 void GameObjectDimensionsExtra_LSW(GameObject_s *) {
