@@ -1083,9 +1083,14 @@ typedef struct GameObject_s {
     void (*move_override)(GameObject_s *); // 0x10bc
     u8 pad_10c0[0x10c4 - 0x10c0];
     f32 ai_elapsed_time;                   // 0x10c4, accumulated until the next AI update
-    f32 field_0x10c8;                      // 0x10c8
-    f32 field_0x10cc;                      // 0x10cc
-    f32 field_0x10d0;                      // 0x10d0
+    union {
+        NUVEC ai_update_position;         // 0x10c8
+        struct {
+            f32 field_0x10c8;
+            f32 field_0x10cc;
+            f32 field_0x10d0;
+        };
+    };
     f32 vertical_velocity;                 // 0x10d4
     GIZFORCE_s *gizforce_target;           // 0x10d8
     GAMEANIMOBJ_s *gizforce_target_object; // 0x10dc
@@ -1107,6 +1112,7 @@ DECOMP_ASSERT(offsetof(GameObject_s, animation_speed_multiplier) == 0x1040, "Gam
 DECOMP_ASSERT(offsetof(GameObject_s, ai_seen_mask) == 0xebc, "GameObject AI seen mask offset");
 DECOMP_ASSERT(offsetof(GameObject_s, ai_opponent_exclusion_mask) == 0xec4, "GameObject opponent exclusion mask offset");
 DECOMP_ASSERT(offsetof(GameObject_s, alert_target) == 0xecc, "GameObject alert target offset");
+DECOMP_ASSERT(offsetof(GameObject_s, ai_update_position) == 0x10c8, "GameObject AI update position offset");
 DECOMP_ASSERT(offsetof(GameObject_s, alert_target_timer) == 0xed0, "GameObject alert timer offset");
 DECOMP_ASSERT(offsetof(GameObject_s, last_attacker) == 0x10b4, "Last attacker offset");
 DECOMP_ASSERT(offsetof(GameObject_s, use_target) == 0xf08, "GameObject use target offset");

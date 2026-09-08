@@ -5085,9 +5085,7 @@ static i32 Action_SnapToSockPosition(AISYS *, AISCRIPTPROCESS *processor, AIPACK
             object->apiobj.start_position = position;
             object->apiobj.respawn_position = position;
             object->apiobj.last_safe_position = position;
-            object->field_0x10c8 = position.x;
-            object->field_0x10cc = position.y;
-            object->field_0x10d0 = position.z;
+            object->ai_update_position = position;
             object->apiobj.velocity = v000;
             extern void InitSurfaceInfo(GameObject *);
             extern i32 SetObjOnSurface(GameObject *, i32);
