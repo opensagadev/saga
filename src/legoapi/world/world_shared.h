@@ -126,7 +126,7 @@ extern "C" {
 }
 void *AIPathCnxControlSysCreate(VARIPTR *buf, VARIPTR *buf_end, i32 count);
 void *AIPathCnxHelperSysCreate(VARIPTR *buf, VARIPTR *buf_end, i32 count);
-void *AITriggerSetSysCreate(VARIPTR *buf, VARIPTR *buf_end);
+AITRIGGERSETSYS_s *AITriggerSetSysCreate(VARIPTR *buf, VARIPTR *buf_end);
 void GameAIScriptAddLevelSfx(WORLDINFO *world, NULISTHDR *scripts);
 void *CreateClimbObjectSys(VARIPTR *buf, VARIPTR *buf_end, i32 count);
 

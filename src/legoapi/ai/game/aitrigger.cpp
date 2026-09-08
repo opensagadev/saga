@@ -36,6 +36,15 @@ void AITriggerSetSysReset(AITRIGGERSETSYS_s *system) {
     }
 }
 
+extern "C" void *AISysBufferAlloc(VARIPTR *, VARIPTR *, u32);
+
+AITRIGGERSETSYS_s *AITriggerSetSysCreate(VARIPTR *buffer, VARIPTR *buffer_end) {
+    AITRIGGERSETSYS_s *system = static_cast<AITRIGGERSETSYS_s *>(
+        AISysBufferAlloc(buffer, buffer_end, sizeof(AITRIGGERSETSYS_s)));
+    AITriggerSetSysReset(system);
+    return system;
+}
+
 AITRIGGERSET_s *AITriggerSetCreate(AITRIGGERSETSYS_s *system, FLOWBOX_s *box) {
     if (system != NULL) {
         for (i32 index = 0; index < 32; ++index) {
@@ -155,6 +164,12 @@ i32 AITriggerSetAddTrigger(AISYS_s *system, AITRIGGERSET_s *set, GIZMO_s *gizmo)
         return 0;
     ++set->trigger_count;
     return 1;
+}
+
+i32 GameObjectUsingLever(GameObject_s *object, LEVER_s *lever) {
+    if (object->character_context == 0x4a)
+        return object->field_0x788 == lever;
+    return 0;
 }
 
 void AITriggerSetSysProcess(AITRIGGERSETSYS_s *) {

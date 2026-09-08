@@ -44,11 +44,6 @@ void *AIPathCnxHelperSysCreate(VARIPTR *buf, VARIPTR *buf_end, i32 count) {
     }
     return system;
 }
-void *AITriggerSetSysCreate(VARIPTR *buf, VARIPTR *buf_end) {
-    (void)buf;
-    (void)buf_end;
-    return NULL;
-}
 void GameAIScriptAddLevelSfx(WORLDINFO *world, NULISTHDR *scripts) {
     (void)world;
     (void)scripts;

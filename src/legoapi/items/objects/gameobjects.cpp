@@ -2715,9 +2715,6 @@ void GameObjectDimensions(GameObject_s *object) {
     GameObjectDimensionsExtra_LSW(object);
 }
 
-void GameObjectUsingLever(GameObject_s *, LEVER_s *) {
-}
-
 void GameAntiNodeData_Init(GAMEANTINODEDATA_s *data, nuhspecial_s *) {
     if (data != NULL) {
         memset(data, 0, sizeof(*data));
