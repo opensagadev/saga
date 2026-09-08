@@ -162,12 +162,6 @@ void GizObstacle_EvalAveragePosAndRadius(GIZOBSTACLE_s *obstacle, i32 state) {
                                    1);
 }
 
-void GIZOBSTACLE_s::ClearMechObjectInterface() {
-}
-
-void GIZOBSTACLE_s::GetMechObjectInterface() {
-}
-
 // Obstacle modes dispatch through this exact eight-entry target table.
 
 static void GizObstacleUpdate_PushOnly(GIZOBSTACLE_s *) {

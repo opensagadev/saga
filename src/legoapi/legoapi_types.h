@@ -3210,7 +3210,8 @@ struct GIZOBSTACLE_s {
     u8 state;         // 0x90
     u8 mode;          // 0x91
     u8 trigger_mode;  // 0x92
-    u8 field_0x93[5];
+    u8 field_0x93;
+    MechObjectInterface *mech_object_interface; // 0x94
     u8 progress_flags; // 0x98, persisted by GizObstacles progress data
     u8 control_flags;  // 0x99, GIZOBSTACLE_CONTROL_FLAGS
     u8 field_0x9a[2];
@@ -3219,8 +3220,11 @@ struct GIZOBSTACLE_s {
     u8 field_a1_0xa1;
     u8 field_0xa2[2];
     void ClearMechObjectInterface();
-    void GetMechObjectInterface();
+    MechObjectInterface *GetMechObjectInterface();
 };
+DECOMP_ASSERT(offsetof(GIZOBSTACLE_s, mech_object_interface) == 0x94, "Obstacle interface offset");
+DECOMP_ASSERT(offsetof(GIZOBSTACLE_s, evaluated_position) == 0x28, "Obstacle evaluated position offset");
+DECOMP_ASSERT(offsetof(GIZOBSTACLE_s, field_0x58) == 0x58, "Obstacle evaluated radius offset");
 
 enum GIZOBSTACLE_CONFIG_FLAGS : u32 {
     GIZOBSTACLE_CONFIG_INVERT_PROXIMITY = 0x0001,

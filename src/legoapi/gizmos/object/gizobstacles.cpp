@@ -104,6 +104,17 @@ i32 ngizobstacletriggers;
 
 i32 obstacle_gizmotype_id = -1;
 
+void GIZOBSTACLE_s::ClearMechObjectInterface() {
+    if (mech_object_interface != NULL)
+        delete mech_object_interface;
+}
+
+MechObjectInterface *GIZOBSTACLE_s::GetMechObjectInterface() {
+    if (mech_object_interface == NULL)
+        new GizObstacleObjectInterface(*this);
+    return mech_object_interface;
+}
+
 static i32 GizObstacles_GetMaxGizmos(void *obstacle) {
     WORLDINFO *world = static_cast<WORLDINFO *>(obstacle);
     if (world == NULL) {

@@ -704,25 +704,33 @@ void HatMachineObjectInterface::TargetedFlash() {
 HatMachineObjectInterface::~HatMachineObjectInterface() {
 }
 
-void GizObstacleObjectInterface::GetPos(VuVec &, i32) const {
+void GizObstacleObjectInterface::GetPos(VuVec &result, i32) const {
+    result = VuVec(obstacle.evaluated_position.x, obstacle.evaluated_position.y, obstacle.evaluated_position.z, 1.0f);
 }
 
-void GizObstacleObjectInterface::GetRadius() const {
+f32 GizObstacleObjectInterface::GetRadius() const {
+    return obstacle.field_0x58;
 }
 
-void GizObstacleObjectInterface::GetTargetName() const {
+const char *GizObstacleObjectInterface::GetTargetName() const {
+    return obstacle.name;
 }
 
-GizObstacleObjectInterface::GizObstacleObjectInterface(GIZOBSTACLE_s &) {
+GizObstacleObjectInterface::GizObstacleObjectInterface(GIZOBSTACLE_s &value) : obstacle(value) {
+    obstacle.mech_object_interface = this;
 }
 
-void GizObstacleObjectInterface::IsDead() {
+i32 GizObstacleObjectInterface::IsDead() {
+    return !(obstacle.progress_flags & 1);
 }
 
 void GizObstacleObjectInterface::TargetedFlash() {
+    hackFlashTimer = 1.0f;
+    hackFlashingGameAnimSet = obstacle.anim_set;
 }
 
 GizObstacleObjectInterface::~GizObstacleObjectInterface() {
+    obstacle.mech_object_interface = NULL;
 }
 
 static __used__ void ProcessFlowBox(GIZFLOW_s *, FLOWBOX_s *, u8) {
