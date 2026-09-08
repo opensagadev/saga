@@ -652,6 +652,13 @@ extern "C" f32 NuAnimEndFrameOld(void *animation);
 
 extern i32 Hub_GetRandomCharType();
 extern u8 hub_custodians_finished_loading;
+extern "C" {
+    i32 nbaddies_can_see_players;
+}
+
+static f32 Condition_NumBaddiesThatCanSeePlayers(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return (f32)nbaddies_can_see_players;
+}
 
 static f32 Condition_OnSameObjectAsPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
     if (packet != NULL && packet->owner != NULL && player != NULL) {
@@ -1354,7 +1361,7 @@ extern "C" {
         {"EitherPlayerUsingPanel", Condition_EitherPlayerUsingPanel, NULL},
         {"EitherPlayerWearingHelmet", Condition_EitherPlayerWearingHelmet, NULL},
         {"PartyUnderCover", NULL, NULL},
-        {"NumBaddiesThatCanSeePlayers", NULL, NULL},
+        {"NumBaddiesThatCanSeePlayers", Condition_NumBaddiesThatCanSeePlayers, NULL},
         {"PlayerUsingForce", Condition_PlayerUsingForce, Condition_UsingForceInit},
         {"EitherPlayerUsingForce", Condition_EitherPlayerUsingForce, Condition_UsingForceInit},
         {"UsingForce", Condition_UsingForce, Condition_UsingForceInit},
