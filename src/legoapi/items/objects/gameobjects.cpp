@@ -186,6 +186,20 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 
 static const f32 AI_RESPAWN_DELAY = 2.0f;
 
+static void *Condition_IsVisibleInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    return name;
+}
+
+static f32 Condition_IsVisible(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    nuhspecial_s special = {};
+    NuSpecialFind(WORLD->current_gscn, &special, static_cast<char *>(argument), 1);
+    f32 result = 0.0f;
+    if (NuSpecialExistsFn(&special) != 0) {
+        result = NuSpecialGetVisibilityFn(&special);
+    }
+    return result;
+}
+
 static void *Condition_InContextInit(AISYS_s *, char *name, AISCRIPT_s *) {
     i32 context;
     if (NuStrICmp(name, "DEACTIVATED") == 0) context = 0x17;
@@ -419,7 +433,7 @@ extern "C" {
         {"AreaContainsGoodies", NULL, NULL},
         {"AreaContainsPartyMember", NULL, NULL},
         {"GotVictim", NULL, NULL},
-        {"IsVisible", NULL, NULL},
+        {"IsVisible", Condition_IsVisible, Condition_IsVisibleInit},
         {"MySet", NULL, NULL},
         {"ScreenWipe", NULL, NULL},
         {"IAmPlayer2", NULL, NULL},

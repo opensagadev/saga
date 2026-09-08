@@ -85,10 +85,6 @@ static f32 Condition_ForceFinished(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *,
 
 
 
-static __used__ void *Condition_IsVisibleInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
-}
-
 static __used__ void *Condition_LastLevelInit(AISYS_s *, char *, AISCRIPT_s *) {
     return nullptr;
 }
