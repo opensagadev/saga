@@ -455,13 +455,13 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
     object->suit = Suit_GetDefault(id);
     u32 saved_f14 = object->field_0xf14;
     u32 saved_f20 = object->field_0xf20;
-    u8 saved_efe = object->field_0xefe & 0x20;
+    u8 saved_efe = (object->field_0xefe >> 5) & 1;
     u8 route = object->ai.current_route;
     u8 next_route = object->ai.next_route;
     AIPATHINFO path = object->ai.path_info;
     u32 frame_state = object->ai.frame_state;
     InitPlayerAI(object);
-    object->field_0xefe = (object->field_0xefe & ~0x20) | saved_efe;
+    object->field_0xefe = (object->field_0xefe & ~0x20) | (saved_efe << 5);
     object->field_0xf20 = saved_f20;
     object->ai.next_route = next_route;
     object->ai.path_info = path;
