@@ -2156,20 +2156,20 @@ __used__ static i32 Action_FaceOpponent(AISYS *sys, AISCRIPTPROCESS *processor, 
     if (packet == NULL) {
         return 1;
     }
-    if (first_time != 0 && param_count > 0) {
+    if (first_time != 0) {
         f32 min_time = 0.0f;
         f32 max_time = 0.0f;
         for (i32 index = 0; index < param_count; ++index) {
             if (AIActionParseSpeedFn != NULL && AIActionParseSpeedFn(params[index], &packet->goal_speed_mode) != 0) {
                 continue;
             }
-            char *value = ActionParamValue(params[index], "mintime");
+            char *value = NuStrIStr(params[index], "mintime=");
             if (value != NULL) {
-                min_time = AIParamToFloatEx(packet, processor, value);
-            } else if ((value = ActionParamValue(params[index], "maxtime")) != NULL) {
-                max_time = AIParamToFloatEx(packet, processor, value);
-            } else if ((value = ActionParamValue(params[index], "faceoffset")) != NULL) {
-                processor->action_data_4 = AIParamToFloatEx(packet, processor, value);
+                min_time = AIParamToFloatEx(packet, processor, value + 8);
+            } else if ((value = NuStrIStr(params[index], "maxtime=")) != NULL) {
+                max_time = AIParamToFloatEx(packet, processor, value + 8);
+            } else if ((value = NuStrIStr(params[index], "faceoffset=")) != NULL) {
+                processor->action_data_4 = AIParamToFloatEx(packet, processor, value + 11);
             } else if (NuStrICmp(params[index], "nearest_opponent") == 0) {
                 processor->action_data_1 = 1;
             } else {
@@ -2182,13 +2182,13 @@ __used__ static i32 Action_FaceOpponent(AISYS *sys, AISCRIPTPROCESS *processor, 
     }
 
     APIOBJECT *opponent =
-        static_cast<APIOBJECT *>(processor->action_data_1 == 0 ? packet->opponent : packet->nearest_opponent);
-    if (opponent != NULL && opponent->objptr != NULL) {
-        if (processor->action_data_4 == 0.0f || packet->owner == NULL) {
+        processor->action_data_1 != 0 ? packet->nearest_opponent_object : packet->opponent_object;
+    if (opponent != NULL && opponent->ai != NULL) {
+        if (processor->action_data_4 == 0.0f) {
             packet->movement_look_target = &opponent->position;
         } else {
-            NUVEC direction = {opponent->position.x - packet->owner->apiobj.position.x, 0.0f,
-                               packet->owner->apiobj.position.z - opponent->position.z};
+            NUVEC direction = {opponent->position.z - packet->owner->apiobj.position.z, 0.0f,
+                               packet->owner->apiobj.position.x - opponent->position.x};
             NuVecNorm(&direction, &direction);
             processor->action_pos.x = opponent->position.x + direction.x * processor->action_data_4;
             processor->action_pos.y = opponent->position.y;
