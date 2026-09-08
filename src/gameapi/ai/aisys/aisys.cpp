@@ -7305,15 +7305,15 @@ static f32 Condition_OpponentToLocatorXZ(AISYS *sys, AISCRIPTPROCESS *processor,
 
 static f32 Condition_OpponentToLocatorY(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg) {
     if (packet != NULL && packet->opponent_object != NULL) {
-        if (void_arg == NULL) {
-            void_arg = processor->unknown_a4;
+        AILOCATOR *locator = static_cast<AILOCATOR *>(void_arg);
+        if (locator == NULL) {
+            locator = processor->locator;
         }
-        if (void_arg != NULL) {
-            AILOCATOR *locator = static_cast<AILOCATOR *>(void_arg);
+        if (locator != NULL) {
             return packet->opponent_object->position.y - locator->position.y;
         }
     }
-    return 3.402823466e+38f;
+    return FLT_MAX;
 }
 
 static f32 Condition_PlayerToLocator(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg) {
