@@ -959,6 +959,67 @@ void LevelScriptReStoreProgress(WORLDINFO_s *, LEVELSCRIPTPROCESS_s *);
 
 #include "legoapi/gizmos/object/technos.h"
 
+static i32 Action_SetTakeOverTarget(AISYS *system, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
+                                  i32 param_count, i32 first_time, f32) {
+    if (!first_time)
+        return 1;
+    GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+    char *type_name = NULL;
+    GameObject_s *target = NULL;
+    f32 nearest = 1000000000.0f;
+    i32 check_takeover = 0;
+    for (i32 index = 0; index < param_count; ++index) {
+        char *value = NuStrIStr(params[index], "type=");
+        if (value != NULL)
+            type_name = value + 5;
+        else if ((value = NuStrIStr(params[index], "opponent=")) != NULL)
+            target = GetNamedGameObject(system, value + 9);
+        else if ((value = NuStrIStr(params[index], "maxrange=")) != NULL) {
+            nearest = AIParamToFloat(processor, value + 9);
+            nearest *= nearest;
+        } else if (NuStrICmp(params[index], "ifCanTakeover") != 0)
+            check_takeover = 1;
+    }
+    if (target == NULL && type_name == NULL)
+        return 1;
+    i32 type = -1;
+    for (i32 index = 0; index < CHARCOUNT && type == -1; ++index) {
+        if (NuStrICmp(CDataList[index].file, type_name) == 0)
+            type = index;
+    }
+    for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
+        GameObject_s *candidate = &Obj[index];
+        if ((candidate->apiobj.field_0x1f8 & 0x1001) != 0x1001 || candidate->id != type)
+            continue;
+        if (candidate->takeover_target != NULL && candidate->takeover_target != object)
+            continue;
+        if (candidate->field_0xcc0 != NULL &&
+            (candidate->field_0xcc0->character_context == 0x3b || candidate->character_context != 0x3b))
+            continue;
+        NUVEC difference;
+        NuVecSub(&difference, &candidate->apiobj.collision_position, &packet->owner->apiobj.collision_position);
+        f32 distance = NuVecMagSqr(&difference);
+        if (distance < nearest) {
+            nearest = distance;
+            target = candidate;
+        }
+    }
+    if (target == NULL) {
+        object->takeover_target = NULL;
+        return 1;
+    }
+    if (check_takeover && (target->field_0xcc0 != NULL ||
+        !(target->apiobj.character_data->game_character->flags_090 & 0x40) ||
+        (object->apiobj.character_data->model_flags & 0x10)))
+        return 1;
+    GameObject_s *previous = object->takeover_target;
+    if (previous != NULL && previous->takeover_target != NULL && previous->takeover_target == object)
+        previous->takeover_target = NULL;
+    object->takeover_target = target;
+    target->takeover_target = object;
+    return 1;
+}
+
 static i32 Action_SetTechnoComplete(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
                                   i32 param_count, i32 first_time, f32) {
     GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
@@ -4613,7 +4674,7 @@ extern "C" {
         {"TakeOver", Action_TakeOver, 1, 0, 0},
         {"ReleaseTakeOver", NULL, 1, 0, 0},
         {"RegisterTakeOverObject", NULL, 0, 0, 0},
-        {"SetTakeOverTarget", NULL, 0, 0, 0},
+        {"SetTakeOverTarget", Action_SetTakeOverTarget, 0, 0, 0},
         {"ClearTakeOverTarget", NULL, 0, 0, 0},
         {"AddGameMsgCount", Action_AddGameMsgCount, 1, 0, 0},
         {"AddMiscPickups", Action_AddMiscPickups, 0, 0, 0},

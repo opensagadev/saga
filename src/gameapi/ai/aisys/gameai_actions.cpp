@@ -220,9 +220,6 @@ static __used__ i32 Action_PressActionButton(AISYS_s *, AISCRIPTPROCESS_s *, AIP
 
 
 
-static __used__ i32 Action_SetTakeOverTarget(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
-    return 0;
-}
 
 
 static __used__ void *Condition_CategoryIsInit(AISYS_s *system, char *arg, AISCRIPT_s *) {
