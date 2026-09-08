@@ -1154,6 +1154,23 @@ static i32 Action_CanHelpWithTriggers(AISYS *, AISCRIPTPROCESS *, AIPACKET *pack
     return 1;
 }
 
+static i32 Action_ImmuneToKillTerrain(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
+                                     i32 param_count, i32 first_time, f32) {
+    if (packet == NULL || packet->owner == NULL)
+        return 1;
+    GameObject_s *object = packet->owner->apiobj.objptr;
+    if (object == NULL)
+        return 1;
+    if (first_time) {
+        object->field_0xefa |= 4;
+        for (i32 index = 0; index < param_count; ++index) {
+            if (NuStrICmp(params[index], "false") == 0)
+                object->field_0xefa &= ~4;
+        }
+    }
+    return 1;
+}
+
 static i32 Action_SetDoomedEscapeLocator(AISYS *system, AISCRIPTPROCESS *processor, AIPACKET *packet,
                                        char **params, i32 param_count, i32 first_time, f32) {
     if (first_time) {
@@ -4901,7 +4918,7 @@ extern "C" {
         {"ResetGameCamera", NULL, 1, 0, 0},
         {"PlayCutScene", NULL, 1, 0, 0},
         {"SetLevelPath", Action_SetLevelPath, 0, 0, 0},
-        {"ImmuneToKillTerrain", NULL, 0, 0, 0},
+        {"ImmuneToKillTerrain", Action_ImmuneToKillTerrain, 0, 0, 0},
         {"ImmuneToBolts", Action_ImmuneToBolts, 0, 0, 0},
         {"Respawnable", Action_Respawnable, 0, 0, 0},
         {"SetPathCnxFlag", Action_SetPathCnxFlag, 1, 0, 0},
