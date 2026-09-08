@@ -5850,7 +5850,22 @@ static void *Condition_CurrentLocatorIsInit(AISYS *sys, char *arg, AISCRIPT *) {
     return arg != NULL ? AIPathFindLocator(sys, arg) : NULL;
 }
 
-static __used__ f32 Condition_InTriggerArea(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+static f32 Condition_InTriggerArea(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char *, void *void_arg) {
+    if (packet != NULL && packet->owner != NULL) {
+        GameObject *object = packet->owner;
+        AIAREA *area = static_cast<AIAREA *>(void_arg);
+        if (area == NULL) {
+            area = processor->unknown_a0;
+        }
+        if (area != NULL && area->system != NULL) {
+            i32 index = area - area->system->areas;
+            i64 mask = 1 << index;
+            u64 membership = (static_cast<u64>(object->ai_area_mask_high) << 32) | object->ai_area_mask_low;
+            if ((membership & mask) != 0) {
+                return 1.0f;
+            }
+        }
+    }
     return 0;
 }
 
@@ -5903,7 +5918,22 @@ static f32 Condition_GotTriggerArea(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
     return processor->unknown_a0 != NULL ? 1.0f : 0.0f;
 }
 
-static __used__ f32 Condition_PlayerInTriggerArea(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+static f32 Condition_PlayerInTriggerArea(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char *, void *void_arg) {
+    if (sys != NULL && sys->player_1 != NULL && sys->areas != NULL) {
+        GameObject *object = reinterpret_cast<GameObject *>(sys->player_1);
+        AIAREA *area = static_cast<AIAREA *>(void_arg);
+        if (area == NULL) {
+            area = processor->unknown_a0;
+        }
+        if (area != NULL && area->system != NULL) {
+            i32 index = area - area->system->areas;
+            i64 mask = 1 << index;
+            u64 membership = (static_cast<u64>(object->ai_area_mask_high) << 32) | object->ai_area_mask_low;
+            if ((membership & mask) != 0) {
+                return 1.0f;
+            }
+        }
+    }
     return 0;
 }
 
@@ -5911,7 +5941,22 @@ static void *Condition_PlayerInTriggerAreaInit(AISYS *sys, char *arg, AISCRIPT *
     return arg != NULL ? AISysFindArea(sys, arg) : NULL;
 }
 
-static __used__ f32 Condition_Player2InTriggerArea(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+static f32 Condition_Player2InTriggerArea(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char *, void *void_arg) {
+    if (sys != NULL && sys->player_2 != NULL) {
+        GameObject *object = reinterpret_cast<GameObject *>(sys->player_2);
+        AIAREA *area = static_cast<AIAREA *>(void_arg);
+        if (area == NULL) {
+            area = processor->unknown_a0;
+        }
+        if (area != NULL && area->system != NULL) {
+            i32 index = area - area->system->areas;
+            i64 mask = 1 << index;
+            u64 membership = (static_cast<u64>(object->ai_area_mask_high) << 32) | object->ai_area_mask_low;
+            if ((membership & mask) != 0) {
+                return 1.0f;
+            }
+        }
+    }
     return 0;
 }
 
@@ -5919,23 +5964,46 @@ static __used__ f32 Condition_EitherPlayerInTriggerArea(AISYS_s *, AISCRIPTPROCE
     return 0;
 }
 
-static __used__ f32 Condition_BaddyInTriggerArea(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
+static f32 Condition_BaddyInTriggerArea(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *, char *, void *void_arg) {
+    AIAREA *area = static_cast<AIAREA *>(void_arg);
+    if (area == NULL) {
+        area = processor->unknown_a0;
+    }
+    return area != NULL && (area->runtime_flags & AIAREA_RUNTIME_OBJECT_STATE_SET) != 0 ? 1.0f : 0.0f;
 }
 
 static void *Condition_BaddyInTriggerAreaInit(AISYS *sys, char *arg, AISCRIPT *) {
     return arg != NULL ? AISysFindArea(sys, arg) : NULL;
 }
 
-static __used__ f32 Condition_GoodyInTriggerArea(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
+static f32 Condition_GoodyInTriggerArea(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *, char *, void *void_arg) {
+    AIAREA *area = static_cast<AIAREA *>(void_arg);
+    if (area == NULL) {
+        area = processor->unknown_a0;
+    }
+    return area != NULL && (area->runtime_flags & AIAREA_RUNTIME_OBJECT_STATE_CLEAR) != 0 ? 1.0f : 0.0f;
 }
 
 static void *Condition_GoodyInTriggerAreaInit(AISYS *sys, char *arg, AISCRIPT *) {
     return arg != NULL ? AISysFindArea(sys, arg) : NULL;
 }
 
-static __used__ f32 Condition_OpponentInTriggerArea(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+static f32 Condition_OpponentInTriggerArea(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char *, void *void_arg) {
+    if (packet != NULL && packet->opponent != NULL && packet->owner != NULL) {
+        GameObject *object = static_cast<GameObject *>(packet->opponent);
+        AIAREA *area = static_cast<AIAREA *>(void_arg);
+        if (area == NULL) {
+            area = processor->unknown_a0;
+        }
+        if (area != NULL && area->system != NULL) {
+            i32 index = area - area->system->areas;
+            i64 mask = 1 << index;
+            u64 membership = (static_cast<u64>(object->ai_area_mask_high) << 32) | object->ai_area_mask_low;
+            if ((membership & mask) != 0) {
+                return 1.0f;
+            }
+        }
+    }
     return 0;
 }
 
