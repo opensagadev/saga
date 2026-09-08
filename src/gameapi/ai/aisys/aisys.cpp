@@ -4144,6 +4144,7 @@ static i32 Action_MoveAwayFromLastAttacker(AISYS *, AISCRIPTPROCESS *processor, 
     if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL) {
         return 1;
     }
+    GameObject_s *object = packet->owner->apiobj.objptr;
 
     if (first_time != 0) {
         for (i32 index = 0; index < param_count; ++index) {
@@ -4158,13 +4159,12 @@ static i32 Action_MoveAwayFromLastAttacker(AISYS *, AISCRIPTPROCESS *processor, 
         }
     }
 
-    GameObject_s *object = packet->owner->apiobj.objptr;
-    GameObject_s *attacker = static_cast<GameObject_s *>(object->last_attacker);
+    GameObject_s *attacker = object->last_attacker;
     if (attacker != NULL) {
-        AIMoveInstruction(packet, &attacker->ai.last_path_position, attacker->ai.movement_stopping_distance,
+        AIMoveInstruction(packet, &attacker->ai.last_path_position, attacker->ai.mover_height,
                           &attacker->ai.path_info, AIPACKET_MOVEMENT_RETREAT, packet->movement_instruction_parameter);
         if (processor->action_data_1 != 0) {
-            packet->movement_look_target = &attacker->apiobj.position;
+            packet->movement_look_target = &object->last_attacker->apiobj.position;
         }
     }
     return 0;
