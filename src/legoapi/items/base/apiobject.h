@@ -854,7 +854,14 @@ typedef struct GameObject_s {
     GAMEOBJECTADDONS_s *addons;                 // 0x0e54
     u8 pad_e58[0xe70 - 0xe58];                  // 0x0e58 .. 0x0e70
     nugspline_s *movement_spline;               // 0x0e70
-    u8 pad_e74[0xeb0 - 0xe74];                  // 0x0e74 .. 0x0eb0
+    union {
+        u8 pad_e74[0xeb0 - 0xe74];
+        struct {
+            u8 padding_e74[3];
+            u8 movement_spline_finished; // 0x0e77
+            u8 padding_e78[0xeb0 - 0xe78];
+        };
+    };
     GameObject_s *takeover_target;              // 0x0eb0
     u32 field_0xeb4;                            // 0x0eb4, cleared on hub room changes
     NUVEC *context_target_position;             // 0x0eb8

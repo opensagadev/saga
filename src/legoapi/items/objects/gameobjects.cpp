@@ -550,6 +550,14 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
 
 extern "C" i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *cutscene);
 
+static f32 Condition_FinishedSpline(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL) {
+        GameObject *object = packet->owner->apiobj.objptr;
+        return object->movement_spline != NULL && object->movement_spline_finished == 0 ? 0.0f : 1.0f;
+    }
+    return -1.0f;
+}
+
 static f32 Condition_CutSceneFinished(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     CUTINFO *cut = static_cast<CUTINFO *>(argument);
     return cut != NULL && cut->instance != NULL &&
@@ -1092,7 +1100,7 @@ extern "C" {
         {"SockXDistanceToPlayer", NULL, NULL},
         {"PlayerDistanceAlongSock", NULL, NULL},
         {"FurthestPlayerDistanceAlongSock", NULL, NULL},
-        {"FinishedSpline", NULL, NULL},
+        {"FinishedSpline", Condition_FinishedSpline, NULL},
         {"CurrentHintId", Condition_CurrentHintId, NULL},
         {"HintAvailable", Condition_HintAvailable, Condition_HintAvailableInit},
         {"HintComplete", Condition_HintComplete, Condition_HintAvailableInit},

@@ -248,15 +248,6 @@ static __used__ f32 Condition_EitherPlayerIs(AISYS_s *, AISCRIPTPROCESS_s *, AIP
     return 0;
 }
 
-static __used__ f32 Condition_FinishedSpline(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
-    GameObject_s *object = ActionOwner(packet);
-    if (object == NULL) {
-        return -1.0f;
-    }
-    const u8 finished = object->pad_e74[3];
-    return object->movement_spline != NULL && finished == 0 ? 0.0f : 1.0f;
-}
-
 
 static __used__ f32 Condition_IsLowEndDevice(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return g_lowEndLevelBehaviour != 0 ? 1.0f : 0.0f;
@@ -1263,7 +1254,6 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_OFF_SCREEN_TIMER].init_fn = Condition_OffScreenTimerInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CATEGORY_IS].init_fn = Condition_CategoryIsInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_TO_LEVEL].init_fn = Condition_BeenToLevelInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_FINISHED_SPLINE].eval_fn = Condition_FinishedSpline;
             lego_aiconditiondefs[LEGO_AI_CONDITION_IS_LOW_END_DEVICE].eval_fn = Condition_IsLowEndDevice;
             lego_aiconditiondefs[LEGO_AI_CONDITION_RANDOM_MAP_CHARS_AVAILABLE].eval_fn =
                 Condition_RandomMapCharsAvailable;
