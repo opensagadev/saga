@@ -545,7 +545,9 @@ static void AISysLoadAntinodes(AISYS *system, i32 version, NUGSCN *scene) {
     for (i32 index = 0; index < system->antinode_count; ++index) {
         AIANTINODE *antinode = &system->antinodes[index];
         antinode->enabled = 1;
-        EdFileReadNuVec(&antinode->position);
+        antinode->position.x = EdFileReadFloat();
+        antinode->position.y = EdFileReadFloat();
+        antinode->position.z = EdFileReadFloat();
         antinode->radius = EdFileReadFloat();
         antinode->base_radius = antinode->radius;
         antinode->base_height = antinode->radius;
@@ -561,16 +563,24 @@ static void AISysLoadAntinodes(AISYS *system, i32 version, NUGSCN *scene) {
             antinode->type = static_cast<u8>(EdFileReadChar());
             EdFileReadChar();
             EdFileReadChar();
-            antinode->game_flags = static_cast<u8>(EdFileReadChar());
+        } else {
+            EdFileReadChar();
+            EdFileReadChar();
+            EdFileReadChar();
+        }
+        antinode->game_flags = static_cast<u8>(EdFileReadChar());
 
-            char special_name[256] = {};
-            i32 special_name_length = EdFileReadChar();
-            if (special_name_length != 0) {
-                EdFileRead(special_name, special_name_length);
-                antinode->has_special =
-                    static_cast<u8>(NuSpecialFind(scene, &antinode->special_handle, special_name, 1) != 0);
-                EdFileReadNuVec(&antinode->special_position);
-                antinode->special_type = static_cast<u8>(EdFileReadInt());
+        char special_name[256];
+        i32 special_name_length = EdFileReadChar();
+        if (special_name_length != 0) {
+            EdFileRead(special_name, special_name_length);
+            antinode->has_special =
+                static_cast<u8>(NuSpecialFind(scene, &antinode->special_handle, special_name, 1) != 0);
+            antinode->special_position.x = EdFileReadFloat();
+            antinode->special_position.y = EdFileReadFloat();
+            antinode->special_position.z = EdFileReadFloat();
+            if (version > 14) {
+                antinode->rotation_offset = EdFileReadInt();
             }
         }
     }

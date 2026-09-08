@@ -350,8 +350,7 @@ struct AIANTINODE_s {
     u8 game_flags;
     u8 type;
     u8 has_special;
-    u8 special_type;
-    u8 padding_0x4d[7];
+    u64 excluded_character_types;
 };
 
 enum AIPATHNODE_RUNTIME_FLAGS : u8 {
@@ -440,6 +439,7 @@ DECOMP_ASSERT(offsetof(AIANTINODE, min_y) == 0x10, "AIANTINODE lower bound offse
 DECOMP_ASSERT(offsetof(AIANTINODE, max_y) == 0x18, "AIANTINODE upper bound offset");
 DECOMP_ASSERT(offsetof(AIANTINODE, special_handle) == 0x20, "AIANTINODE special handle offset");
 DECOMP_ASSERT(offsetof(AIANTINODE, rotation_offset) == 0x3c, "AIANTINODE rotation offset");
+DECOMP_ASSERT(offsetof(AIANTINODE, excluded_character_types) == 0x4c, "AIANTINODE exclusion mask offset");
 DECOMP_ASSERT(offsetof(AICREATURE, type) == 0x4e, "AICREATURE type offset");
 DECOMP_ASSERT(offsetof(AICREATURE, count) == 0x50, "AICREATURE count offset");
 DECOMP_ASSERT(offsetof(AICREATURE, active_mask) == 0x58, "AICREATURE active-mask offset");
