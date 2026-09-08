@@ -199,6 +199,11 @@ static f32 Condition_HintAvailable(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *,
                ? 1.0f : 0.0f;
 }
 
+static f32 Condition_HintComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    return argument != NULL && Hint_isComplete(static_cast<i32>(reinterpret_cast<isize>(argument))) != 0
+               ? 1.0f : 0.0f;
+}
+
 static f32 Condition_EmptyTakeOver(AISYS_s *system, AISCRIPTPROCESS_s *, AIPACKET_s *, char *name, void *) {
     if (name == NULL || system == NULL) {
         return 0.0f;
@@ -326,7 +331,7 @@ extern "C" {
         {"FinishedSpline", NULL, NULL},
         {"CurrentHintId", Condition_CurrentHintId, NULL},
         {"HintAvailable", Condition_HintAvailable, Condition_HintAvailableInit},
-        {"HintComplete", NULL, NULL},
+        {"HintComplete", Condition_HintComplete, Condition_HintAvailableInit},
         {"Freeplay", NULL, NULL},
         {"Indy", NULL, NULL},
         {"MissionMode", NULL, NULL},

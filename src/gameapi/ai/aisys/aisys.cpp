@@ -5797,16 +5797,6 @@ __used__ static f32 Condition_GizmoOutput3(AISYS *sys, AISCRIPTPROCESS *processo
     return 0.0f;
 }
 
-__used__ static f32 Condition_HintComplete(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                           void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
-}
-
 static f32 Condition_LocatorRange(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg) {
     NUVEC difference;
     if (packet != NULL && packet->owner != NULL) {
