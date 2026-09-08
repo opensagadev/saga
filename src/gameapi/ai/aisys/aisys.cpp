@@ -979,8 +979,8 @@ static i32 Action_SelectRandomSpline(AISYS *, AISCRIPTPROCESS *, AIPACKET *, cha
         }
         if (count != 0) {
             if (unused) {
-                GameObject_s *object = Obj;
-                for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
+                for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
+                    GameObject_s *object = &Obj[index];
                     if ((object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->apiobj.field_0x287 == 0 &&
                         object->movement_spline != NULL)
                         object->movement_spline->length |= 0x8000;
@@ -990,8 +990,8 @@ static i32 Action_SelectRandomSpline(AISYS *, AISCRIPTPROCESS *, AIPACKET *, cha
                     if (splines[index]->length >= 0)
                         unused_splines[unused_count++] = splines[index];
                 }
-                object = Obj;
-                for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
+                for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
+                    GameObject_s *object = &Obj[index];
                     if ((object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->apiobj.field_0x287 == 0 &&
                         object->movement_spline != NULL)
                         object->movement_spline->length &= 0x7fff;
