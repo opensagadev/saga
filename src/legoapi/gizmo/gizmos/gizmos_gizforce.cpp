@@ -2,6 +2,7 @@
 #include "globals.h"
 #include "legoapi/audio/sfx.h"
 #include "nu2api/numath/numtx.h"
+#include "legoapi/core/config/cheat.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/gizmos/traps/gizforce.h"
@@ -214,63 +215,154 @@ i32 GizForce_GameObjUsingForce(GameObject_s *object, GIZFORCE_s *force) {
            object->gizforce_target == force;
 }
 
-void GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object) {
-    if (force_sys == NULL || object == NULL) {
-        return;
-    }
+i32 SuperWeirdo(GameObject_s *);
+i32 GameRayCast(NUVEC *, NUVEC *, f32, i32);
+extern "C" i32 TerrainPlatId();
 
+i32 GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object) {
+    struct ForceTarget {
+        GIZFORCE_s *force;
+        GAMEANIMOBJ_s *animation;
+        f32 distance;
+        i32 index;
+    };
+    static ForceTarget possible_forcetargets[384];
+    if (object == NULL || force_sys == NULL) {
+        return 0;
+    }
+    i32 super_force = SuperWeirdo(object) || ((object->apiobj.flags_low & 0x80) != 0 && Cheat_IsOn(25));
     object->gizforce_target = NULL;
     object->gizforce_target_object = NULL;
     const f32 facing_x = NU_SIN_LUT(object->apiobj.movement_facing_angle);
     const f32 facing_z = NU_COS_LUT(object->apiobj.movement_facing_angle);
-    f32 best_distance = 1.0e9f;
-
-    for (u32 index = 0; index < force_sys->visible_force_count; ++index) {
+    i32 count = 0;
+    for (i32 index = 0; index < force_sys->visible_force_count; ++index) {
         GIZFORCE_s *force = force_sys->visible_forces[index];
-        if (force == NULL || force->using_object != NULL || force->field_0x3c != 0.0f) {
+        if (force->using_object != NULL || force->field_0x3c_bits != 0) {
             continue;
         }
+        if ((force->config_flags & 0x10) != 0 && (object->apiobj.character_data->model_flags & 4) == 0 && !super_force)
+            continue;
         if (force->group == NULL) {
             if (GizForce_Complete(force) != 0) {
                 continue;
             }
-        } else if (force->group->count != 0 && force->group->forces[force->group->count - 1] != force &&
-                   (force->group->field_0x24 & GIZFORCE_GROUP_ACTIVE) != 0) {
-            continue;
+        } else if (force->group->count != 0) {
+            GIZFORCE_s *last = force->group->forces[force->group->count - 1];
+            if (last != force) {
+                if ((force->group->field_0x24 & 1) != 0 || force->anim_set->state == GAMEANIMSET_STATE_AT_END)
+                    continue;
+                if (last != NULL && ((last->anim_set->flags & 7) != 0 || last->using_object != NULL))
+                    continue;
+            }
         }
         if (GizForce_StoodOnForce(force, object) != 0) {
             continue;
         }
 
-        NUVEC object_position = {object->apiobj.pos_x, object->apiobj.pos_y, object->apiobj.pos_z};
+        NUVEC delta __attribute__((aligned(16)));
+        f32 distance = NuVecDistSqr(&force->position, &object->apiobj.collision_position, &delta);
+        if (distance > force->interaction_radius * force->interaction_radius)
+            continue;
         if ((force->config_flags & GIZFORCE_CONFIG_TARGET_ANIMATION_OBJECTS) != 0) {
             for (GAMEANIMOBJ_s *anim_object = force->anim_set->objects; anim_object != NULL;
                  anim_object = anim_object->next) {
-                NUVEC *target_position = NuSpecialGetDrawPos(&anim_object->special);
-                if (target_position == NULL) {
+                if ((anim_object->flags & 1) != 0 ||
+                    (object->force_glow_previous != NULL && object->force_glow_previous != anim_object)) {
                     continue;
                 }
-                NUVEC delta;
-                const f32 distance = NuVecDistSqr(target_position, &object_position, &delta);
-                if (distance <= force->interaction_radius * force->interaction_radius &&
-                    delta.x * facing_x + delta.z * facing_z >= 0.0f && distance < best_distance) {
-                    best_distance = distance;
-                    object->gizforce_target = force;
-                    object->gizforce_target_object = anim_object;
-                }
+                distance = NuVecDistSqr(NuSpecialGetDrawPos(&anim_object->special), &object->apiobj.collision_position,
+                                        &delta);
+                if (delta.x * facing_x + delta.z * facing_z < 0.0f)
+                    continue;
+                possible_forcetargets[count].force = force;
+                possible_forcetargets[count].animation = anim_object;
+                possible_forcetargets[count].distance = distance;
+                possible_forcetargets[count].index = anim_object - force_sys->anim_pool->objects;
+                ++count;
             }
             continue;
         }
-
-        NUVEC delta;
-        const f32 distance = NuVecDistSqr(&force->position, &object_position, &delta);
-        if (distance <= force->interaction_radius * force->interaction_radius &&
-            delta.x * facing_x + delta.z * facing_z >= 0.0f && distance < best_distance) {
-            best_distance = distance;
-            object->gizforce_target = force;
-            object->gizforce_target_object = NULL;
+        if (delta.x * facing_x + delta.z * facing_z < 0.0f ||
+            (object->force_glow_previous != NULL && object->force_glow_previous != force))
+            continue;
+        possible_forcetargets[count].force = force;
+        possible_forcetargets[count].animation = NULL;
+        possible_forcetargets[count].distance = distance;
+        possible_forcetargets[count].index =
+            force->anim_set->objects != NULL ? force->anim_set->objects - force_sys->anim_pool->objects : -1;
+        ++count;
+    }
+    if (count == 0)
+        return 0;
+    GizForceLOSState_s *los = object->gizforce_los_info;
+    if (los != NULL) {
+        ForceTarget *oldest = NULL;
+        f32 oldest_time = 1.0e9f;
+        for (i32 i = 0; i < count; ++i) {
+            f32 time = static_cast<f32>(los->words[possible_forcetargets[i].index + 12]);
+            if (time < oldest_time) {
+                oldest_time = time;
+                oldest = &possible_forcetargets[i];
+            }
+        }
+        if (oldest != NULL) {
+            i32 index = oldest->index;
+            los->words[index + 12] = LevelTimer.update_count;
+            if ((oldest->force->config_flags & 0x800) == 0) {
+                los->words[index >> 5] |= 1u << (index & 31);
+            } else {
+                los->words[index >> 5] &= ~(1u << (index & 31));
+                NUVEC direction;
+                i32 clear = 0;
+                if (oldest->animation != NULL) {
+                    NuVecSub(&direction, NuSpecialGetDrawPos(&oldest->animation->special),
+                             &object->apiobj.collision_position);
+                    clear = GameRayCast(&object->apiobj.collision_position, &direction, 0.0f, 0) == 0;
+                    if (!clear && TerrainPlatId() != -1)
+                        clear = static_cast<GIZFORCEANIMDATA_s *>(oldest->animation->object_data)->platform_id ==
+                                TerrainPlatId();
+                } else if ((oldest->force->field_0xaa & 0x80) == 0) {
+                    NuVecSub(&direction, &oldest->force->position, &object->apiobj.collision_position);
+                    clear = GameRayCast(&object->apiobj.collision_position, &direction, 0.0f, 0) == 0;
+                    if (!clear && (oldest->force->runtime_flags & 1) != 0 && TerrainPlatId() != -1) {
+                        for (GAMEANIMOBJ_s *animation = oldest->force->anim_set->objects; animation != NULL;
+                             animation = animation->next) {
+                            if (static_cast<GIZFORCEANIMDATA_s *>(animation->object_data)->platform_id ==
+                                TerrainPlatId()) {
+                                clear = 1;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (clear)
+                    object->gizforce_los_info->words[index >> 5] |= 1u << (index & 31);
+            }
         }
     }
+    ForceTarget *best = NULL;
+    f32 best_distance = 1.0e9f;
+    los = object->gizforce_los_info;
+    for (i32 i = 0; i < count; ++i) {
+        ForceTarget *target = &possible_forcetargets[i];
+        if (los != NULL && (target->force == NULL || (target->force->field_0xaa & 0x80) == 0) && target->index != -1 &&
+            (los->words[target->index >> 5] & (1u << (target->index & 31))) == 0)
+            continue;
+        f32 distance = target->distance;
+        if (object->force_glow_previous != NULL &&
+            (object->force_glow_previous == target->force || object->force_glow_previous == target->animation))
+            distance = -1.0f;
+        if (distance < best_distance) {
+            best_distance = distance;
+            best = target;
+        }
+    }
+    if (best != NULL) {
+        object->gizforce_target = best->force;
+        object->gizforce_target_object = best->animation;
+    }
+    return 0;
 }
 
 void GIZFORCE_s::ClearMechObjectInterface() {

@@ -3513,7 +3513,10 @@ struct GIZFORCE_s {
     GAMEANIMSET_s *anim_set;    // 0x28
     nuhspecial_s along_socket;  // 0x2c
     GameObject_s *using_object; // 0x38, cleared after every Force update
-    f32 field_0x3c;
+    union {
+        f32 field_0x3c;
+        u32 field_0x3c_bits;
+    };
     GIZFORCEGROUP_s *group; // 0x40
     f32 force_strength;     // 0x44
     f32 field_0x48;

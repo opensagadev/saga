@@ -17,8 +17,9 @@ struct BOLT_s;
 
 struct GameObject_s;
 struct GizForceLOSState_s {
-    u8 state[0x630];
+    u32 words[396]; // 12 visibility bitset words followed by 384 update counters
 };
+DECOMP_ASSERT(sizeof(GizForceLOSState_s) == 0x630, "Force LOS cache ABI");
 struct MechObjectInterface;
 struct MechAddonCollection;
 struct GAMEANIMOBJ_s;

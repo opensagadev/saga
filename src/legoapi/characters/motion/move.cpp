@@ -157,7 +157,7 @@ i32 (*FindSlamOrigin_UseCPosFn)(GameObject_s *) = NULL;
 void (*Jump_EndOfLandContextFn)(GameObject_s *) = NULL;
 void ConstantRumble(GameObject_s *object, f32 strength, f32 duration);
 extern "C" void PlaySfxAndSetVolume(char *name, NUVEC *position, f32 volume);
-void GizForce_FindBestForceTarget(GIZFORCESYS_s *, GameObject_s *);
+i32 GizForce_FindBestForceTarget(GIZFORCESYS_s *, GameObject_s *);
 i32 GizForce_StoodOnForce(GIZFORCE_s *, GameObject_s *);
 u16 GizForces_AngleToForce(NUVEC *, GIZFORCE_s *);
 void SetHeadTarget(GameObject_s *, NUVEC *, i8, f32, f32, f32);
