@@ -705,6 +705,18 @@ static void *Condition_CharacterTypeExistsInit(AISYS_s *system, char *name, AISC
     return (void *)(intptr_t)-1;
 }
 
+static f32 Condition_EitherPlayerUsingHatMachine(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *name, void *) {
+    if (player != NULL && player->character_context == 0x61) {
+        HATMACHINE_s *machine = static_cast<HATMACHINE_s *>(player->field_0x788);
+        if (machine != NULL && (name == NULL || NuStrICmp(machine->name, name) == 0)) return 1.0f;
+    }
+    if (player2 != NULL && player2->character_context == 0x61) {
+        HATMACHINE_s *machine = static_cast<HATMACHINE_s *>(player2->field_0x788);
+        if (machine != NULL && (name == NULL || NuStrICmp(machine->name, name) == 0)) return 1.0f;
+    }
+    return 0.0f;
+}
+
 static f32 Condition_EitherPlayerPullingLever(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *name, void *) {
     if (player != NULL && player->character_context == 0x4a) {
         LEVER_s *lever = static_cast<LEVER_s *>(player->field_0x788);
@@ -1281,7 +1293,7 @@ extern "C" {
         {"ObstacleOpenedByEitherPlayer", Condition_ObstacleOpenedByEitherPlayer, Condition_ObstacleOpenedByPlayerInit},
         {"AnimationFinished", Condition_AnimationFinished, Condition_AnimationFinishedInit},
         {"EitherPlayerPullingLever", Condition_EitherPlayerPullingLever, NULL},
-        {"EitherPlayerUsingHatMachine", NULL, NULL},
+        {"EitherPlayerUsingHatMachine", Condition_EitherPlayerUsingHatMachine, NULL},
         {"EitherPlayerUsingPanel", Condition_EitherPlayerUsingPanel, NULL},
         {"EitherPlayerWearingHelmet", Condition_EitherPlayerWearingHelmet, NULL},
         {"PartyUnderCover", NULL, NULL},

@@ -1089,10 +1089,6 @@ static __used__ f32 Condition_EitherPlayerInMyTriggerArea(AISYS_s *, AISCRIPTPRO
 }
 
 
-static __used__ f32 Condition_EitherPlayerUsingHatMachine(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *,
-                                                          void *) {
-    return 0;
-}
 
 static __used__ f32 Condition_NumBaddiesThatCanSeePlayers(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *,
                                                           void *) {
