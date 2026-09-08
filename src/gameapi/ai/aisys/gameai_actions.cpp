@@ -94,9 +94,6 @@ static __used__ i32 Action_CanShootOffScreen(AISYS_s *, AISCRIPTPROCESS_s *, AIP
     return 1;
 }
 
-static __used__ i32 Action_DrawBossHitPoints(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
-    return 0;
-}
 
 
 static i32 Action_FollowCharacter(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,

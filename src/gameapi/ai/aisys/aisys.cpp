@@ -957,6 +957,15 @@ __used__ static i32 Action_GoToNode(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
 
 void LevelScriptReStoreProgress(WORLDINFO_s *, LEVELSCRIPTPROCESS_s *);
 
+extern void DrawBossHitPoints(GameObject_s *);
+
+static i32 Action_DrawBossHitPoints(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **,
+                                  i32, i32, f32) {
+    if (packet != NULL && packet->owner != NULL)
+        DrawBossHitPoints(packet->owner->apiobj.objptr);
+    return 1;
+}
+
 static i32 Action_IgnoreShoveSystem(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
                                   i32 param_count, i32 first_time, f32) {
     GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
@@ -4533,7 +4542,7 @@ extern "C" {
         {"SetAO_InitRowDist", Action_InitRowDist, 0, 0, 0},
         {"SetTechnoComplete", NULL, 0, 0, 0},
         {"LetGoOfBalloon", Action_LetGoOfBalloon, 0, 0, 0},
-        {"DrawBossHitPoints", NULL, 1, 0, 0},
+        {"DrawBossHitPoints", Action_DrawBossHitPoints, 1, 0, 0},
         {"CompleteLevel", Action_CompleteLevel, 1, 0, 0},
         {"GoToNewLevel", Action_GoToNewLevel, 0, 0, 0},
         {"CircleLocator", Action_CircleLocator, 0, 0, 0},

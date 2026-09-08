@@ -1811,7 +1811,12 @@ void Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, 
     }
 }
 
-void DrawBossHitPoints(GameObject_s *) {
+extern "C" {
+GameObject_s *drawbosshitpoints = NULL;
+}
+
+void DrawBossHitPoints(GameObject_s *object) {
+    drawbosshitpoints = object;
 }
 
 void DrawCameraTarget2(nuvec_s *) {
