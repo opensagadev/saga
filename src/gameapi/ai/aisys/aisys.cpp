@@ -5284,6 +5284,30 @@ static i32 Action_PlayerSpeederHack(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *
     return 1;
 }
 
+static i32 Action_LinkTurretToController(AISYS *system, AISCRIPTPROCESS *, AIPACKET *, char **params,
+                                        i32 param_count, i32 first_time, f32) {
+    if (first_time == 0) {
+        return 1;
+    }
+    GIZTURRET *turret = NULL;
+    GameObject *controller = NULL;
+    for (i32 index = 0; index < param_count; ++index) {
+        char *value = NuStrIStr(params[index], "turret=");
+        if (value != NULL) {
+            GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, turret_gizmotype_id, value + 7);
+            if (gizmo != NULL && gizmo->object != NULL) {
+                turret = static_cast<GIZTURRET *>(gizmo->object);
+            }
+        } else if ((value = NuStrIStr(params[index], "controller=")) != NULL) {
+            controller = GetNamedGameObject(system, value + 11);
+        }
+    }
+    if (turret != NULL) {
+        turret->controller = controller;
+    }
+    return 1;
+}
+
 extern "C" {
     // Keep this registry in the exact order used by the shipped script parser.
     AIACTIONDEF lego_aiactiondefs[] = {
@@ -5441,7 +5465,7 @@ extern "C" {
         {"ProbeDroid", Action_ProbeDroid, 0, 0, 0},
         {"AlertCreatures", Action_AlertCreatures, 0, 0, 0},
         {"SetLastAttacker", NULL, 0, 0, 0},
-        {"LinkTurretToController", NULL, 0, 0, 0},
+        {"LinkTurretToController", Action_LinkTurretToController, 0, 0, 0},
         {"TakeOver", Action_TakeOver, 1, 0, 0},
         {"ReleaseTakeOver", NULL, 1, 0, 0},
         {"RegisterTakeOverObject", NULL, 0, 0, 0},

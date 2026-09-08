@@ -3464,7 +3464,13 @@ struct GIZTURRET_s {
     i32 field_0x70;
     NUVEC field_0x74[4];
     NUMTX field_0xa4;
-    u8 field_0xe4[0xec - 0xe4];
+    union {
+        u8 field_0xe4[0xec - 0xe4];
+        struct {
+            u8 reserved_e4[4];
+            GameObject_s *controller; // 0xe8
+        };
+    };
     f32 field_0xec;
     f32 field_0xf0;
     f32 reflection_alpha; // 0xf4
@@ -3508,6 +3514,7 @@ struct GIZTURRET_s {
     void GetMechObjectInterface();
 };
 DECOMP_ASSERT(sizeof(GIZTURRET_s) == 0x144, "GIZTURRET_s ABI");
+DECOMP_ASSERT(offsetof(GIZTURRET_s, controller) == 0xe8, "GIZTURRET controller offset");
 DECOMP_ASSERT(offsetof(GIZTURRET_s, completion_score) == 0x10c, "GIZTURRET completion score offset");
 DECOMP_ASSERT(offsetof(GIZTURRET_s, position) == 0x24, "GIZTURRET position offset");
 DECOMP_ASSERT(offsetof(GIZTURRET_s, pitch) == 0x54, "GIZTURRET pitch offset");
