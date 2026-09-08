@@ -546,6 +546,10 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+static f32 Condition_MusicOn(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return SuperOptions.music_enabled != 0 ? 1.0f : 0.0f;
+}
+
 static f32 Condition_GotOpponentLOS(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
     if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL) {
         GameObject *object = packet->owner->apiobj.objptr;
@@ -1077,7 +1081,7 @@ extern "C" {
         {"CanHearRadio", NULL, NULL},
         {"BeingTowed", NULL, NULL},
         {"RaceLap", NULL, NULL},
-        {"MusicOn", NULL, NULL},
+        {"MusicOn", Condition_MusicOn, NULL},
         {"CharacterLoaded", NULL, NULL},
         {"AreaComplete", NULL, NULL},
         {"ShouldAttackOpponent", Condition_ShouldAttackOpponent, NULL},
