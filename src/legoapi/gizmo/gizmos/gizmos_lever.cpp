@@ -52,18 +52,6 @@ void Levers_InitTerrain(WORLDINFO_s *world) {
     }
 }
 
-void Lever_GetAbsTargetPos(LEVER_s *lever, nuvec_s *target_position) {
-    if (lever == NULL || target_position == NULL) {
-        return;
-    }
-
-    NUVEC offset = lever->target_offset;
-    NuVecRotateY(&offset, &offset, lever->y_rotation);
-    target_position->x = offset.x + lever->position.x;
-    target_position->y = offset.y;
-    target_position->z = offset.z + lever->position.z;
-}
-
 void LEVER_s::ClearMechObjectInterface() {
 }
 

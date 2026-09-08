@@ -45,6 +45,16 @@ LEVER_CONFIG LeverSys = {0x55, 0};
 
 i32 lever_gizmotype_id = -1;
 
+void Lever_GetAbsTargetPos(LEVER_s *lever, nuvec_s *target_position) {
+    if (target_position != NULL && lever != NULL) {
+        NUVEC offset = lever->target_offset;
+        NuVecRotateY(&offset, &offset, lever->y_rotation);
+        offset.x += lever->position.x;
+        offset.z += lever->position.z;
+        *target_position = offset;
+    }
+}
+
 i32 Lever_FullyPulledDown(LEVER_s *lever) {
     return lever->visible && lever->being_pulled && lever->pull_progress >= 1.0f;
 }
