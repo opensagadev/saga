@@ -6526,7 +6526,78 @@ static f32 Condition_OpponentOnPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
 }
 
 i32 Action_SetState(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
-i32 Action_Circle(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
+i32 Action_Circle(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
+                  i32 param_count, i32 first_time, f32) {
+    NUVEC difference;
+    if (packet == NULL || sys == NULL || sys->player_1 == NULL) {
+        return 1;
+    }
+    if (first_time != 0) {
+        for (i32 i = 0; i < param_count; i++) {
+            if (AIActionParseSpeedFn != NULL && AIActionParseSpeedFn(params[i], &packet->goal_speed_mode) != 0) {
+                continue;
+            }
+            char *value;
+            if (NuStrICmp(params[i], "ANTICLOCKWISE") == 0) {
+                packet->circle_clockwise = 0;
+            } else if (NuStrICmp(params[i], "CLOCKWISE") == 0) {
+                packet->circle_clockwise = 1;
+            } else if (NuStrICmp(params[i], "REVERSE") == 0) {
+                packet->circle_clockwise = !packet->circle_clockwise;
+            } else if (NuStrICmp(params[i], "facing") == 0) {
+                processor->action_data_1 |= 1;
+            } else if (NuStrICmp(params[i], "currentdist") == 0) {
+                processor->action_data_1 |= 4;
+            } else if ((value = NuStrIStr(params[i], "locator=")) != NULL) {
+                processor->action_data_3 = AIPathFindLocator(sys, value + 8);
+                if (processor->action_data_3 != NULL) {
+                    processor->action_data_1 |= 0x10;
+                }
+            } else if (NuStrIStr(params[i], "current_position") != NULL) {
+                processor->action_data_1 |= 8;
+                processor->action_pos = packet->terrain_origin;
+            } else if (NuStrICmp(params[i], "origin") == 0) {
+                if (packet->field_0x134 != 0xff) {
+                    processor->action_data_1 |= 0x20;
+                }
+            } else {
+                packet->movement_instruction_parameter = AIParamToFloatEx(packet, processor, params[i]);
+            }
+        }
+        if ((processor->action_data_1 & 0x38) == 0) {
+            processor->action_data_1 |= 8;
+            processor->action_pos = packet->terrain_origin;
+        }
+    }
+    NUVEC *position = NULL;
+    AIPATHINFO *path = NULL;
+    if ((processor->action_data_1 & 8) != 0) {
+        position = &processor->action_pos;
+        path = &packet->path_info;
+    } else if ((processor->action_data_1 & 0x10) != 0) {
+        AILOCATOR *locator = static_cast<AILOCATOR *>(processor->action_data_3);
+        position = &locator->position;
+        path = reinterpret_cast<AIPATHINFO *>(&locator->path);
+    } else if ((processor->action_data_1 & 0x20) != 0) {
+        AICREATURE *creature = &sys->creatures[packet->field_0x134];
+        path = &creature->path_info;
+        position = GetAICreatureOriginFn != NULL ? GetAICreatureOriginFn(sys, packet) : NULL;
+        if (position == NULL) {
+            position = &creature->pos;
+        }
+    }
+    if (position != NULL && path != NULL) {
+        if ((processor->action_data_1 & 4) != 0) {
+            packet->movement_instruction_parameter = NuVecXZDist(&packet->terrain_origin, position, &difference);
+        }
+        AIMoveInstruction(packet, position, 0.0f, path, AIPACKET_MOVEMENT_CIRCLE,
+                          packet->movement_instruction_parameter);
+        if ((processor->action_data_1 & 1) != 0) {
+            packet->movement_look_target = position;
+        }
+    }
+    return 0;
+}
 i32 Action_CircleOpponent(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                           i32 param_count, i32 first_time, f32) {
     NUVEC difference;

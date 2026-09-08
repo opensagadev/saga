@@ -11,9 +11,6 @@
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/numath/nurand.h"
 
-void Action_Circle(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
-}
-
 void Action_Sebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
 }
 
