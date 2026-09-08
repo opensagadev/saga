@@ -1031,7 +1031,8 @@ typedef struct GameObject_s {
     union {
         u8 field_0xefd;
         struct {
-            u8 : 2;
+            u8 : 1;
+            u8 random_layer_variant : 1;
             u8 snap_facing : 1;
             u8 : 5;
         };

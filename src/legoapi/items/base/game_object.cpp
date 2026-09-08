@@ -21,13 +21,6 @@ struct WORLDINFO_s;
 struct BOLT_s;
 struct debinftype;
 
-static __used__ void SetLayers_BOB(GameObject_s *obj);
-static void SetLayers_MOSEISLEYCITIZEN(u32 *layers);
-
-static u32 LayerBit(u8 layer) {
-    return 1u << (layer & 31);
-}
-
 extern void SetGameObjectCharacterData(GameObject_s *obj);
 extern void GetTopBot(GameObject_s *obj);
 extern void GameObjectDimensions(GameObject_s *obj);
@@ -103,118 +96,6 @@ GameObject_s *AddGameObject(i32 id) {
     (void)id;
     return object;
 }
-i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
-    addcreature_override_id_check = 0;
-    if (id < 0 || id > 0x153 || apicharsys->playermodelids[id] == -1) {
-        return 0;
-    }
-
-    CHARACTERDATA *character_data = &apicharsys->char_data[id];
-    GAMECHARACTERDATA *game_character_data = static_cast<GAMECHARACTERDATA *>(character_data->field11_0x24);
-    obj->apiobj.character_data = character_data;
-    obj->field_0x1054 = game_character_data->layer_mask;
-    obj->apiobj.field_0x1f4 = 0;
-    obj->field_0x107c = -1;
-    memset(obj->player_packet, 0, 0x798);
-    obj->apiobj.field_0x27c = -1;
-
-    NUVEC *start_position = Player_StartPos(obj);
-    if (param == 0) {
-        obj->apiobj.field_0x1f4 |= 2;
-    } else {
-        obj->apiobj.field_0x1f4 |= 0x4002;
-    }
-    if ((WORLD->current_level->flags & 0x40000) == 0) {
-        obj->apiobj.field_0x1f4 |= 0x40;
-    }
-
-    obj->pad_gamepad = GamePad_Allocate();
-    obj->pad_gamepad->unknown_24 |= 0x100;
-    obj->hitpoints = game_character_data->hitpoints;
-    obj->current_hp = game_character_data->hitpoints;
-    ResetPlayerPacket(reinterpret_cast<PLAYERPACKET_s *>(obj->player_packet),
-                      reinterpret_cast<CHARACTERDATA_s *>(character_data));
-
-    obj->apiobj.field_0x1fc = v000.x;
-    obj->apiobj.field_0x200 = v000.y;
-    obj->apiobj.field_0x204 = v000.z;
-    obj->field_0xe38 = 4;
-    obj->field_0xe37 = game_character_data->field_0xf5;
-    obj->id = static_cast<i16>(id);
-    obj->apiobj.character_model = &apicharsys->models[apicharsys->playermodelids[id]];
-    obj->suit = Suit_GetDefault(id);
-    obj->ai.field_0x134 = 0xff;
-    SetGameObjectCharacterData(obj);
-
-    obj->apiobj.start_position = *start_position;
-    obj->apiobj.initial_position = *start_position;
-    obj->apiobj.position = *start_position;
-    obj->apiobj.pos_x = start_position->x;
-    obj->apiobj.pos_y = start_position->y;
-    obj->apiobj.pos_z = start_position->z;
-    obj->field_0x1018 = 0.5f;
-
-    GetTopBot(obj);
-    GameObjectDimensions(obj);
-    obj->apiobj.anim_packet.animation_index = 1;
-
-    i32 reset_animation = 1;
-    if (obj->apiobj.character_model != NULL) {
-        void **animation_table = *reinterpret_cast<void ***>(reinterpret_cast<u8 *>(obj->apiobj.character_model) + 0xc);
-        if (animation_table != NULL && animation_table[1] == NULL) {
-            reset_animation = 0;
-            for (i32 i = 0; i < 0xe9; i++) {
-                if (animation_table[i] != NULL) {
-                    obj->apiobj.anim_packet.animation_index = static_cast<u16>(i);
-                    reset_animation = i;
-                    break;
-                }
-            }
-        }
-    }
-    ResetAnimPacket(&obj->apiobj.anim_packet, reset_animation);
-    ResetCharacterIdle(obj, 2, GetDefaultIdle(obj));
-    ResetLights(&obj->apiobj.position, &obj->light_data, WORLD->rtl_set);
-
-    obj->ai.mover_height = obj->apiobj.field_0x1dc + default_mover_extra;
-    GameObjectOrigin(obj);
-    obj->apiobj.previous_position[0] = obj->apiobj.position.x;
-    obj->apiobj.previous_position[1] = obj->apiobj.position.y;
-    obj->apiobj.previous_position[2] = obj->apiobj.position.z;
-    obj->field_0x10c8 = obj->apiobj.position.x;
-    obj->field_0x10cc = obj->apiobj.position.y;
-    obj->field_0x10d0 = obj->apiobj.position.z;
-
-    obj->field_0xf01 = static_cast<u8>((obj->field_0xf01 & ~8u) | (((game_character_data->flags_090 >> 17) & 1) << 3));
-    if (id == id_MOSEISLEYCITIZEN) {
-        SetLayers_MOSEISLEYCITIZEN(&obj->field_0x1054);
-    } else if (id == id_CANTINAALIEN) {
-        static const u8 head_layers[3] = {0, 3, 6};
-        static const u8 body_layers[3] = {1, 4, 7};
-        static const u8 leg_layers[3] = {2, 5, 8};
-        obj->field_0x1054 = LayerBit(head_layers[qrand() / 0x5556]) | LayerBit(body_layers[qrand() / 0x5556]) |
-                            LayerBit(leg_layers[qrand() / 0x5556]);
-    } else if (id == id_CLOUDCITYCITIZEN) {
-        static const u8 head_layers[3] = {1, 5, 7};
-        static const u8 body_layers[3] = {2, 3, 6};
-        static const u8 leg_layers[3] = {0, 4, 8};
-        obj->field_0x1054 = LayerBit(head_layers[qrand() / 0x5556]) | LayerBit(body_layers[qrand() / 0x5556]) |
-                            LayerBit(leg_layers[qrand() / 0x5556]);
-        obj->field_0xf01 = static_cast<u8>((obj->field_0xf01 & ~8u) | (((obj->field_0x1054 >> 7) & 1) << 3));
-    } else if (id == id_BOB) {
-        SetLayers_BOB(obj);
-    } else if (id == id_GEONOSIAN) {
-        obj->field_0xefd = static_cast<u8>((obj->field_0xefd & ~2u) | ((qrand() <= 0x7fff) ? 2 : 0));
-    }
-
-    if ((game_character_data->flags_090 & 0x8000u) != 0) {
-        obj->apiobj.field_0x1f4 |= 0x20000;
-    } else {
-        obj->apiobj.field_0x1f4 &= ~0x20000u;
-    }
-    return 1;
-}
-
 void InitGameObjectLights(void) {
     for (i32 i = 0; i < 64; ++i)
         Obj[i].dynamic_light_id = -1;
@@ -253,24 +134,6 @@ static __used__ void Punch_HitExtraCode_LSW(GameObject_s *, nuvec_s *) {
 }
 
 static __used__ void TrenchKilledCallback(GameObject_s *) {
-}
-
-static __used__ void SetLayers_BOB(GameObject_s *) {
-}
-
-static void SetLayers_MOSEISLEYCITIZEN(u32 *layers) {
-    static const u8 hat_layers[5] = {0, 0, 0, 7, 14};
-    static const u8 head_layers[5] = {20, 20, 8, 8, 4};
-    static const u8 body_layers[3] = {3, 9, 19};
-    static const u8 arm_layers[3] = {1, 12, 15};
-    static const u8 hand_layers[3] = {2, 13, 16};
-    static const u8 waist_layers[3] = {6, 10, 17};
-    static const u8 leg_layers[3] = {5, 11, 18};
-
-    *layers = LayerBit(hat_layers[qrand() / 0x3334]) | LayerBit(head_layers[qrand() / 0x3334]) |
-              LayerBit(body_layers[qrand() / 0x5556]) | LayerBit(arm_layers[qrand() / 0x5556]) |
-              LayerBit(hand_layers[qrand() / 0x5556]) | LayerBit(waist_layers[qrand() / 0x5556]) |
-              LayerBit(leg_layers[qrand() / 0x5556]);
 }
 
 static __used__ void TightRope_Attach(GameObject_s *, WORLDINFO_s *) {

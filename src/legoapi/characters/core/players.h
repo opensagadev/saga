@@ -110,6 +110,7 @@ extern "C" void APICharacterSysInit(VARIPTR *buf, VARIPTR buf_end, i32 char_coun
 GameObject_s *AddCreature(i32 id, i32 param);
 GameObject_s *AddGameObject(i32 id);
 i32 InitCreature(GameObject_s *obj, i32 id, i32 param);
+i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32 mode);
 void PreResetCode(GameObject_s *obj);
 void PostResetCode(GameObject_s *obj);
 NUVEC *Player_StartPos(GameObject_s *obj);

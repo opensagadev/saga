@@ -138,7 +138,8 @@ The native sanitizer fixture `/tmp/saga-resetmoves-runtime.log` reached an
 active Cantina at game time 3.015376 after 22 normal reset calls. The player
 had flicker time zero and flicker flags zero; no sanitizer error was reported.
 This is initialization coverage, not proof of free-play switching:
-`Player_ToggleCharacter` and its `NewPlayerCharacter` dependency remain empty.
+`Player_ToggleCharacter` remains empty. Its `NewPlayerCharacter` dependency
+was subsequently recovered as documented below.
 Target/native builds and all four repository checks pass for the recovery.
 
 `ResetPlayerAI` (`0x0fc5a0`, 384 bytes) is also recovered, at **96.507%**.
@@ -607,6 +608,36 @@ exercise formation-leader updates. The missing static callbacks are
 The pre-existing `Player_CopyEssentials` reconstruction was checked against
 Ghidra and objdiff: `_Z21Player_CopyEssentialsP12GameObject_sS0_` matches 100%.
 This only verifies the copied state fields.
+
+`NewPlayerCharacter` (`0x0ff530`, 1760 original bytes) now reconstructs the
+original model replacement, AI/path-state preservation, movement and surface
+reset, health restoration, slide/velocity handling, and special-character
+layer selection. It compares at **71.300%** (1737 bytes), so full matching
+remains unfinished. `InitCreature` moved with their shared private layer
+helpers from `game_object.cpp` to `characters.cpp`; the original shared helper
+calls support this ownership. The existing source optimization settings stay
+unchanged (`characters.cpp` at `-O2`, `game_object.cpp` at default `-O0`),
+verified with Bazel aquery. `InitCreature` improves from **0% to 53.571%**.
+
+`SetLayers_BOB` (`0x0fb540`) compares at **99.989%**, with the original
+415-byte size and only the relocated GOT-base operand differing. It retains
+all seven random draws, including the unused second draw. The Mos Eisley
+helper (`0x0fb890`) compares at **99.908%**, with the original 266-byte size;
+only relocated operands differ. For this comparison only, a temporary target
+copy normalizes the compiler's `.isra.1` suffix to the original `.isra.2`.
+The reference binary is unchanged. Sequential layer writes and unmasked
+shifts follow the original instructions; all layer-table entries are below 32.
+
+The native sanitizer swap fixture directly replaced Qui-Gon with Obi-Wan,
+preserved health, path/AI state, player slot and pad pointer, and reached the
+ordinary character draw path. Invalid and unchanged IDs left the object
+unchanged (`/tmp/saga-new-player-runtime.log`). Separate deterministic fixtures
+check both layer helpers at seeds 0, 1, 12345 and 65535, including the final
+RNG state and BOB's unrelated flag preservation
+(`/tmp/saga-bob-layers-runtime.log`, `/tmp/saga-mos-layers-runtime.log`).
+These fixtures passed without sanitizer diagnostics. Target/native builds
+and all four repository checks pass. This is direct swap/helper coverage;
+input-driven cycling is not yet verified or complete.
 
 `Player_ToggleCharacter` is still an empty stub. Its original implementation
 returns in the hub and when Free Play is off. It is separate from ordinary
