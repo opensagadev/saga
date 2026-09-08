@@ -22,6 +22,9 @@ extern i32 GizmoBlowUpOpponent_Behind;
 GameObject_s *ObjOpponent(GameObject_s *, f32, f32, i32, i32, i32);
 GIZMOBLOWUP_s *GizmoBlowUpOpponent(GameObject_s *, f32, f32, f32, i32, u32, u32, u32);
 
+i32 CanObjSlide(GameObject_s *object, i32 surface);
+i32 StartSlide(GameObject_s *object, i32 check_contact);
+
 #ifdef __cplusplus
 extern "C" {
 #endif

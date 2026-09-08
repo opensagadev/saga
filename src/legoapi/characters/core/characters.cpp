@@ -9,6 +9,7 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/charconfig.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion.h"
 #include "legoapi/items/base/collection.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/menus/screens/store.h"
@@ -267,7 +268,6 @@ void Player_ResetContexts(PLAYERPACKET_s *);
 void InitSurfaceInfo(GameObject_s *);
 i32 SetObjOnSurface(GameObject_s *, i32);
 void GizForce_ResetLOS(GameObject_s *);
-i32 StartSlide(GameObject_s *, i32);
 
 static u32 LayerBit(u8 layer) {
     return 1u << (layer & 31);
