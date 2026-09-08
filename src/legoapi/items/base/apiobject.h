@@ -1118,6 +1118,7 @@ DECOMP_ASSERT(offsetof(GameObject_s, special_move_look_position) == 0x10a4, "Spe
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x107f) == 0x107f, "Special-move reset byte offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x1080) == 0x1080, "Special-move reset word offset");
 DECOMP_ASSERT(sizeof(AIPACKET) == 0x208, "AIPACKET size");
+DECOMP_ASSERT(offsetof(APIOBJECT, field_0x27f) == 0x27f, "APIOBJECT swamp-state byte offset");
 DECOMP_ASSERT(offsetof(AIPACKET, reset_mode) == 0x13a, "AIPACKET activation state offset");
 DECOMP_ASSERT(offsetof(AIPACKET, script_process) == 0, "AIPACKET primary script processor offset");
 static_assert(sizeof(void *) != 4 || sizeof(AIPACKET) == 0x208, "AIPACKET 32-bit size");
