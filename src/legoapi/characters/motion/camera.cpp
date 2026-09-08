@@ -29,6 +29,19 @@ void Hint_CancelCurrent(void);
 extern AREADATA_s *PODSPRINT_ADATA;
 extern AREADATA_s *BATTLEOVERCORUSCANT_ADATA;
 
+struct VIEWCAM_s {
+    i32 mode;
+    NUVEC target;
+    // Original initializer words; their field types remain unresolved.
+    u32 field_0x10[5];
+    GAMEPAD_s *gamepad;
+};
+
+DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "ViewCam size");
+DECOMP_ASSERT(offsetof(VIEWCAM_s, gamepad) == 0x24, "ViewCam gamepad offset");
+
+VIEWCAM_s ViewCam = {0, {1000000000.0f, 0.0f, 0.0f}, {2361712640u, 1076510065u, 0, 1123024896u, 1128792064u}, NULL};
+
 void GameCam_Blend(GAMECAMERA_s *camera, f32 duration, f32 curve, i32 mode) {
     if (camera == NULL) {
         camera = GameCam;
@@ -440,21 +453,6 @@ void KeepOnScreen(GameObject_s *object) {
     }
 }
 
-struct VIEWCAM_s {
-    i32 mode;
-    NUVEC target;
-    u32 angles;
-    f32 distance;
-    f32 field_18;
-    f32 field_1c;
-    f32 field_20;
-    GAMEPAD_s *pad;
-};
-DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "View camera ABI");
-DECOMP_ASSERT(offsetof(VIEWCAM_s, target) == 4, "View camera target offset");
-DECOMP_ASSERT(offsetof(VIEWCAM_s, pad) == 0x24, "View camera pad offset");
-VIEWCAM_s ViewCam = {0, {1.0e9f, 0.0f, 0.0f}, 0x8cc4e000, 2.66f, 0.0f, 120.0f, 200.0f, NULL};
-
 NUVEC *ViewCamGetTgt() {
     return &ViewCam.target;
 }
@@ -472,7 +470,16 @@ void SpeedBlur_Apply(WORLDINFO_s *) {
 void SpeedBlur_Update() {
 }
 
-void ViewCamSetActive(i32, GAMEPAD_s *) {
+void ViewCamSetActive(i32 mode, GAMEPAD_s *gamepad) {
+    if (player != NULL) {
+        ViewCam.mode = mode;
+        if (mode != 0) {
+            ViewCam.gamepad = gamepad;
+            ViewCam.target = player->apiobj.collision_position;
+        } else {
+            ViewCam.gamepad = NULL;
+        }
+    }
 }
 
 void KeepPointOnScreen(NUVEC *position, NUVEC *velocity) {
@@ -516,7 +523,7 @@ void SetCameraMatrices() {
 }
 
 GAMEPAD_s *ViewCamGetGamePad() {
-    return ViewCam.pad;
+    return ViewCam.gamepad;
 }
 
 // Original: 784 bytes.

@@ -644,6 +644,19 @@ returns in the hub and when Free Play is off. It is separate from ordinary
 tagging. There were already uncommitted changes in `Tag_Check`, `TagCode`,
 and deferred player-tag handling when this audit began.
 
+The toggle routine's `ViewCamGetGamePad` dependency now returns the original
+camera-owned input pointer at `ViewCam + 0x24`. `ViewCamSetActive` preserves
+the original null-player early return, activation target copy and pad binding,
+and deactivation pad clearing. Its comparison is **99.885%** (92 bytes);
+`ViewCamGetGamePad`, `ViewCamGetTgt` and `ViewCamGetMode` compare at
+**99.714%**, all at their original sizes, with only relocated operands
+differing. The 40-byte `ViewCam` initializer matches the reference bytes
+exactly; unresolved middle fields retain their original words. No source
+optimization setting changed. Target/native builds and all four checks pass.
+The native sanitizer fixture `/tmp/saga-viewcam-runtime.log` checks the
+null-player path, activation, all accessors and deactivation successfully.
+This establishes the input-ownership dependency, not character cycling.
+
 A hidden native run confirmed `Tag_Mode == 2` in the cantina, with only
 `Player[0]` assigned. The original `CheckResetBits` (ELF `0x11f360`) selects
 mode 3 in `HUB_ADATA`, otherwise mode 1. That missing selection is restored,
