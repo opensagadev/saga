@@ -6214,13 +6214,9 @@ static f32 Condition_PlayerCategoryIs(AISYS *, AISCRIPTPROCESS *, AIPACKET *, ch
                ? 1.0f : 0.0f;
 }
 
-__used__ static f32 Condition_HoverPhase(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                         void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
+static f32 Condition_HoverPhase(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *) {
+    if (packet != NULL && packet->owner != NULL)
+        return static_cast<f32>(packet->owner->apiobj.objptr->field_0xe31);
     return 0.0f;
 }
 
@@ -8117,6 +8113,7 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_ACTIVE].eval_fn = Condition_Active;
             lego_aiconditiondefs[LEGO_AI_CONDITION_DEBUG].eval_fn = Condition_Debug;
             lego_aiconditiondefs[LEGO_AI_CONDITION_GLYN_TEST].eval_fn = Condition_GlynTest;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_HOVER_PHASE].eval_fn = Condition_HoverPhase;
             lego_aiconditiondefs[LEGO_AI_CONDITION_ON_GROUND].eval_fn = Condition_OnGround;
             lego_aiconditiondefs[LEGO_AI_CONDITION_COLLIDING].eval_fn = Condition_Colliding;
             lego_aiconditiondefs[LEGO_AI_CONDITION_GOT_VICTIM].eval_fn = Condition_GotVictim;
