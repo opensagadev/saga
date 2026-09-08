@@ -957,6 +957,19 @@ __used__ static i32 Action_GoToNode(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
 
 void LevelScriptReStoreProgress(WORLDINFO_s *, LEVELSCRIPTPROCESS_s *);
 
+static i32 Action_SetShootOpponents(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
+                                   i32 param_count, i32 first_time, f32) {
+    GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+    if (object != NULL && first_time) {
+        object->field_0xef8 |= 0x80;
+        for (i32 index = 0; index < param_count; ++index) {
+            if (NuStrICmp(params[index], "false") == 0)
+                object->field_0xef8 &= ~0x80;
+        }
+    }
+    return 1;
+}
+
 static i32 Action_IgnoreSlideTerrain(AISYS *system, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
                                     i32 param_count, i32 first_time, f32) {
     if (first_time) {
@@ -4595,7 +4608,7 @@ extern "C" {
         {"TurnOnPickup", Action_TurnOnPickup, 0, 0, 0},
         {"CanHelpWithTriggers", NULL, 0, 0, 0},
         {"CanCollideWithObjects", NULL, 0, 0, 0},
-        {"SetShootOpponents", NULL, 0, 0, 0},
+        {"SetShootOpponents", Action_SetShootOpponents, 0, 0, 0},
         {"PartyCanBeUnderCover", NULL, 0, 0, 0},
         {"SetLapTime", NULL, 0, 0, 0},
         {"CreatePod", NULL, 0, 0, 0},
