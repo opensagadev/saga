@@ -73,10 +73,6 @@ static GIZOBSTACLE *ActionFindObstacle(char *name) {
     return gizmo != NULL ? static_cast<GIZOBSTACLE *>(gizmo->object) : NULL;
 }
 
-static __used__ f32 Condition_CurrentHintId(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
-
 static __used__ f32 Condition_EmptyTakeOver(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return 0;
 }

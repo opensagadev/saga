@@ -18,6 +18,7 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/menus/screens/shop.h"
+#include "legoapi/menus/core/gamehint.h"
 #include "legoapi/props/doors/door.h"
 #include "legoapi/world/area.h"
 #include "legoapi/core/input/qrand.h"
@@ -185,6 +186,10 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 
 static const f32 AI_RESPAWN_DELAY = 2.0f;
 
+static f32 Condition_CurrentHintId(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return Hint_CurrentId();
+}
+
 extern "C" {
     AICONDITIONDEF lego_aiconditiondefs[] = {
         {"GlynTest", NULL, NULL},
@@ -287,7 +292,7 @@ extern "C" {
         {"PlayerDistanceAlongSock", NULL, NULL},
         {"FurthestPlayerDistanceAlongSock", NULL, NULL},
         {"FinishedSpline", NULL, NULL},
-        {"CurrentHintId", NULL, NULL},
+        {"CurrentHintId", Condition_CurrentHintId, NULL},
         {"HintAvailable", NULL, NULL},
         {"HintComplete", NULL, NULL},
         {"Freeplay", NULL, NULL},
