@@ -176,10 +176,11 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
         gizhopsfxwait -= FRAMETIME;
     }
 
-    for (i32 index = 0; index < buildit_sys->count; ++index) {
-        GIZBUILDIT_s &buildit = buildit_sys->buildits[index];
-        if ((buildit.availability_flags & GIZBUILDIT_AVAILABILITY_LINKED) != GIZBUILDIT_AVAILABILITY_LINKED ||
-            buildit.anim_set == NULL || buildit.anim_object_count == 0 || buildit.anim_objects == NULL) {
+    GIZBUILDIT_s *current = buildit_sys->buildits;
+    for (i32 index = 0; index < buildit_sys->count; ++index, ++current) {
+        GIZBUILDIT_s &buildit = *current;
+        if ((buildit.availability_flags & 2) == 0 || (buildit.availability_flags & 1) == 0 ||
+            buildit.anim_set == NULL || buildit.anim_object_count == 0) {
             continue;
         }
 
@@ -241,7 +242,7 @@ static void GizBuildIts_LateUpdate(void *world_ptr, void *data, float) {
             }
             continue;
         }
-        if (buildit.build_state != GIZBUILDIT_BUILD_IDLE || buildit.built_object_count >= buildit.anim_object_count) {
+        if (buildit.build_state != GIZBUILDIT_BUILD_IDLE) {
             continue;
         }
 
