@@ -657,10 +657,6 @@ static __used__ f32 Condition_EitherPlayerLocatorRangeXZ(AISYS_s *, AISCRIPTPROC
 
 
 
-static __used__ f32 Condition_InSameTriggerAreaAsNearestPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *,
-                                                               void *) {
-    return 0;
-}
 
 namespace {
     struct GameAIRegistryCallbacks {

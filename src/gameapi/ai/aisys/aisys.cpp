@@ -6561,6 +6561,28 @@ static void *Condition_TakeOverTargetInTriggerAreaInit(AISYS *sys, char *arg, AI
     return arg != NULL ? AISysFindArea(sys, arg) : NULL;
 }
 
+static f32 Condition_InSameTriggerAreaAsNearestPlayer(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet,
+                                                     char *, void *) {
+    if (packet != NULL && packet->owner != NULL) {
+        GameObject *nearest = NULL;
+        f32 distance = 1.0e9f;
+        if (player != NULL) {
+            distance = NuVecXZDistSqr(&player->apiobj.position, &packet->owner->apiobj.position, NULL);
+            nearest = player;
+        }
+        if (player2 != NULL) {
+            f32 other_distance = NuVecXZDistSqr(&player2->apiobj.position, &packet->owner->apiobj.position, NULL);
+            if (distance > other_distance) {
+                nearest = player2;
+            }
+        }
+        if (nearest != NULL && (packet->owner->apiobj.ai_area_mask & nearest->apiobj.ai_area_mask) != 0) {
+            return 1.0f;
+        }
+    }
+    return 0.0f;
+}
+
 static f32 Condition_HasTakeOver(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *) {
     if (packet != NULL && packet->owner != NULL) {
         GameObject *object = packet->owner->apiobj.objptr;
@@ -8393,6 +8415,7 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_Z_POS].init_fn = Condition_XYZPosInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_TAKE_OVER_RANGE].eval_fn = Condition_TakeOverRange;
             lego_aiconditiondefs[LEGO_AI_CONDITION_HAS_TAKE_OVER].eval_fn = Condition_HasTakeOver;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_IN_SAME_TRIGGER_AREA_AS_NEAREST_PLAYER].eval_fn = Condition_InSameTriggerAreaAsNearestPlayer;
             lego_aiconditiondefs[LEGO_AI_CONDITION_TAKE_OVER_TARGET_IN_TRIGGER_AREA].eval_fn = Condition_TakeOverTargetInTriggerArea;
             lego_aiconditiondefs[LEGO_AI_CONDITION_TAKE_OVER_TARGET_IN_TRIGGER_AREA].init_fn = Condition_TakeOverTargetInTriggerAreaInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_SHOP_ACTIVE].eval_fn = Condition_ShopActive;
