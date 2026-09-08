@@ -691,6 +691,8 @@ extern "C" {
     void AISysCharacterSetPath(AIPACKET *packet, AIPATH *path);
     void AISysFindRoute(AIPACKET *packet);
     void AISysCharacterSetPathCnx(AIPACKET *packet, NUVEC *position, AIPATHCNX *connection, i32 direction);
+    u32 AISysGetPathColour(i32 index);
+    i32 AISysGetPathColourCount(void);
     void AISysGetPathPos(AISYS *system, NUVEC *position, AIPATHINFO *info, AIPATH *path, i32 checks);
     void AISysGetPathPosEx(AISYS *system, NUVEC *position, AIPATHINFO *info, AIPATH *path, i32 checks,
                           i32 search_all_paths, f32 *nearest_distance_squared);
