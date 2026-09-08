@@ -3371,14 +3371,14 @@ static i32 Action_SetMaxMovementRange(AISYS *, AISCRIPTPROCESS *processor, AIPAC
     }
 
     f32 range = 0.0f;
-    u8 range_type = 1;
-    bool all_non_party = false;
+    i32 range_type = 1;
+    i32 all_non_party = 0;
     for (i32 index = 0; index < param_count; ++index) {
-        if (NuStrICmp(params[index], "Default") == 0) {
+        if (NuStrICmp("Default", params[index]) == 0) {
             range = DEFAULT_MOVE_RANGE;
-        } else if (NuStrICmp(params[index], "All_Non_Party") == 0) {
-            all_non_party = true;
-        } else if (NuStrICmp(params[index], "Locator") == 0) {
+        } else if (NuStrICmp("All_Non_Party", params[index]) == 0) {
+            all_non_party = 1;
+        } else if (NuStrICmp("Locator", params[index]) == 0) {
             range_type = 2;
         } else {
             range = AIParamToFloat(processor, params[index]);
@@ -3402,8 +3402,10 @@ static i32 Action_SetMaxMovementRange(AISYS *, AISCRIPTPROCESS *processor, AIPAC
     GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
     if (object != NULL) {
         object->ai.movement_target_radius = range;
-        object->ai.movement_event_flags =
-            (object->ai.movement_event_flags & 0xf3u) | (range > 0.0f ? static_cast<u8>(range_type << 2) : 0u);
+        if (range > 0.0f)
+            object->ai.movement_event_flags = (object->ai.movement_event_flags & 0xf3u) | (static_cast<u8>(range_type) << 2);
+        else
+            object->ai.movement_event_flags &= 0xf3u;
     }
     return 1;
 }
