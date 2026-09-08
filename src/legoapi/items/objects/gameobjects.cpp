@@ -2872,6 +2872,7 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
         return;
     if (goody_count == 0)
         return;
+    f32 distance = 0.0f;
     i32 complete = baddy_count == 0;
     if (alert_obj != NULL && (alert_obj->apiobj.flags_high & 0x10) != 0 &&
         (alert_obj->apiobj.field_0x1f4 & 5) == 0 &&
@@ -2888,9 +2889,10 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                     difference.z = alert_pos.z - object->collision_position.z;
                     if (object->heardistance > difference.z) {
                         difference.y = alert_pos.y - object->collision_position.y;
-                        if (object->maxviewheight > difference.y && difference.y > object->minviewheight &&
-                            object->heardistance * object->heardistance >
-                                difference.x * difference.x + difference.z * difference.z) {
+                        if (object->maxviewheight > difference.y && difference.y > object->minviewheight) {
+                            distance = difference.x * difference.x + difference.z * difference.z;
+                            if (!(object->heardistance * object->heardistance > distance))
+                                continue;
                             const f32 dx = alert_obj->apiobj.collision_position.x - object->collision_position.x;
                             const f32 dz = alert_obj->apiobj.collision_position.z - object->collision_position.z;
                             if ((WORLD->api_object_sys->line_of_sight[object->field_0x289] & alert_mask) != 0 ||
@@ -2925,7 +2927,6 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                 if (baddy == goody || baddy->ai->pending_opponent == goody)
                     continue;
                 i32 have_distance = 0;
-                f32 distance = 0.0f;
                 if (baddy->objptr->field_0xefc & 2) {
                     goody->ai_awareness_mask &= ~((u64)1 << baddy->field_0x289);
                 } else if ((goody->ai_awareness_mask >> baddy->field_0x289) & 1) {
@@ -2979,15 +2980,21 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                 if (!have_distance)
                     distance = NuVecDist(&baddy->position, &goody->position, &difference);
                 GameObject_s *baddy_object = baddy->objptr;
-                if (baddy_object->id == id_JAWA || baddy_object->id == id_UGNAUGHT) {
+                i16 baddy_id = baddy_object->id;
+                if (baddy_id == id_JAWA || baddy_id == id_UGNAUGHT) {
                     if (!ZapTarget(goody->objptr))
                         baddy->objptr->ai_opponent_exclusion_mask |= (u64)1 << goody->field_0x289;
-                } else if ((goody->character_data->model_flags & 0x80000) ||
-                           ((baddy_object->field_0xefb & 1) && goody->objptr != player && goody->objptr != player2) ||
-                           (goody->objptr->id == id_DRAGBOMB && baddy_object->id != id_ATAT)) {
+                    baddy_object = baddy->objptr;
+                    baddy_id = baddy_object->id;
+                } else if (goody->character_data->model_flags & 0x80000) {
+                    baddy_object->ai_opponent_exclusion_mask |= (u64)1 << goody->field_0x289;
+                } else if ((baddy_object->field_0xefb & 1) && goody->objptr != player && goody->objptr != player2) {
+                    baddy_object->ai_opponent_exclusion_mask |= (u64)1 << goody->field_0x289;
+                } else if (goody->objptr->id == id_DRAGBOMB && baddy_id != id_ATAT) {
                     baddy_object->ai_opponent_exclusion_mask |= (u64)1 << goody->field_0x289;
                 }
-                if (!((baddy->objptr->ai_opponent_exclusion_mask >> goody->field_0x289) & 1)) {
+                GameObject_s *goody_object = goody->objptr;
+                if (!((baddy_object->ai_opponent_exclusion_mask >> goody->field_0x289) & 1)) {
                     AIPACKET *packet = baddy->ai;
                     if (packet->pending_nearest_metric > distance) {
                         packet->pending_nearest_metric = distance;
@@ -2997,26 +3004,27 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                     if (packet->opponent_object == goody)
                         metric -= 0.5f;
                     if ((baddy->ai_awareness_mask >> goody->field_0x289) & 1) {
-                        if (packet->pending_opponent != NULL) {
-                            if ((goody->flags_low & 0x80) && (baddy->objptr->field_0xefb & 0x40) &&
-                                (!(packet->pending_opponent->flags_low & 0x80) || packet->pending_opponent_metric > metric)) {
-                                best_distance = distance;
-                                best_baddy = baddy;
-                            }
-                        } else if (!(packet->runtime_flags & 2) ||
+                        if (packet->pending_opponent == NULL) {
+                            if (!(packet->runtime_flags & 2) ||
                                    ((WORLD->api_object_sys->line_of_sight[baddy->field_0x289] >> goody->field_0x289) & 1) ||
-                                   baddy->objptr->alert_target == goody) {
-                            if (best_distance > metric) {
+                                   baddy_object->alert_target == goody) {
+                                if (best_distance > metric) {
+                                    best_distance = distance;
+                                    best_baddy = baddy;
+                                }
+                            }
+                        } else if ((goody->flags_low & 0x80) && (baddy_object->field_0xefb & 0x40)) {
+                            if (!(packet->pending_opponent->flags_low & 0x80) || packet->pending_opponent_metric > metric) {
                                 best_distance = distance;
                                 best_baddy = baddy;
                             }
                         }
                     }
                 }
-                if (baddy->objptr->id == id_JAWA || baddy->objptr->id == id_UGNAUGHT ||
+                if (baddy_id == id_JAWA || baddy_id == id_UGNAUGHT ||
                     (baddy->character_data->model_flags & 0x80000))
-                    goody->objptr->ai_opponent_exclusion_mask |= (u64)1 << baddy->field_0x289;
-                if (!((goody->objptr->ai_opponent_exclusion_mask >> baddy->field_0x289) & 1)) {
+                    goody_object->ai_opponent_exclusion_mask |= (u64)1 << baddy->field_0x289;
+                if (!((goody_object->ai_opponent_exclusion_mask >> baddy->field_0x289) & 1)) {
                     AIPACKET *packet = goody->ai;
                     if (packet->pending_nearest_metric > distance) {
                         packet->pending_nearest_metric = distance;
@@ -3030,7 +3038,7 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
                          ((WORLD->api_object_sys->line_of_sight[goody->field_0x289] >> baddy->field_0x289) & 1))) {
                         if (packet->pending_opponent_metric > metric ||
                             (packet->pending_opponent != NULL && packet->pending_opponent->objptr != NULL &&
-                             packet->pending_opponent->objptr->character_context == 0x5a && baddy->objptr->character_context != 0x5a)) {
+                             packet->pending_opponent->objptr->character_context == 0x5a && baddy_object->character_context != 0x5a)) {
                             packet->pending_opponent_metric = distance;
                             packet->pending_opponent = baddy;
                         }
