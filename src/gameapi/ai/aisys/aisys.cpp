@@ -6600,6 +6600,20 @@ static f32 Condition_InSameTriggerAreaAsNearestPlayer(AISYS *, AISCRIPTPROCESS *
     return 0.0f;
 }
 
+static void *Condition_CharacterLoadedInit(AISYS *, char *argument, AISCRIPT *) {
+    if (argument == NULL) {
+        return NULL;
+    }
+    return reinterpret_cast<void *>(static_cast<isize>(CharIDFromName(argument)));
+}
+
+static f32 Condition_CharacterLoaded(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *argument) {
+    if (argument != NULL && APICharacterLoaded(static_cast<i32>(reinterpret_cast<isize>(argument))) != NULL) {
+        return 1.0f;
+    }
+    return 0.0f;
+}
+
 static void *Condition_CategoryIsInit(AISYS *system, char *arg, AISCRIPT *) {
     isize category = -1;
     if (arg != NULL && system != NULL && CharCategory != NULL) {
@@ -8463,6 +8477,8 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_Z_POS].init_fn = Condition_XYZPosInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_TAKE_OVER_RANGE].eval_fn = Condition_TakeOverRange;
             lego_aiconditiondefs[LEGO_AI_CONDITION_HAS_TAKE_OVER].eval_fn = Condition_HasTakeOver;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_CHARACTER_LOADED].eval_fn = Condition_CharacterLoaded;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_CHARACTER_LOADED].init_fn = Condition_CharacterLoadedInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CATEGORY_IS].init_fn = Condition_CategoryIsInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_PLAYER_CATEGORY_IS].init_fn = Condition_CategoryIsInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_EITHER_PLAYER_LOCATOR_RANGE_XZ].eval_fn = Condition_EitherPlayerLocatorRangeXZ;

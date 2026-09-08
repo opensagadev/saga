@@ -41,16 +41,6 @@ enum AI_CREATURE_SET : isize {
     AI_CREATURE_SET_LAST = 16,
 };
 
-union AI_CONDITION_SET_ARGUMENT {
-    void *pointer;
-    isize value;
-};
-
-static isize AIConditionArgumentValue(void *argument) {
-    AI_CONDITION_SET_ARGUMENT condition_argument = {};
-    condition_argument.pointer = argument;
-    return condition_argument.value;
-}
 
 static GameObject_s *ActionOwner(AIPACKET_s *packet) {
     return packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
@@ -241,10 +231,6 @@ static __used__ f32 Condition_CharacterExists(AISYS_s *, AISCRIPTPROCESS_s *, AI
     return 0;
 }
 
-static f32 Condition_CharacterLoaded(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *character_argument) {
-    const i32 character = static_cast<i32>(AIConditionArgumentValue(character_argument));
-    return APICharacterLoaded(character) != NULL ? 1.0f : 0.0f;
-}
 
 
 
@@ -563,12 +549,6 @@ static __used__ void *Condition_CharacterExistsInit(AISYS_s *, char *, AISCRIPT_
     return nullptr;
 }
 
-static void *Condition_CharacterLoadedInit(AISYS_s *, char *argument, AISCRIPT_s *) {
-    if (argument == NULL) {
-        return NULL;
-    }
-    return reinterpret_cast<void *>(static_cast<isize>(CharIDFromName(argument)));
-}
 
 
 
@@ -649,8 +629,6 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_OFF_SCREEN_TIMER].init_fn = Condition_OffScreenTimerInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_TO_LEVEL].init_fn = Condition_BeenToLevelInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_IS_LOW_END_DEVICE].eval_fn = Condition_IsLowEndDevice;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_CHARACTER_LOADED].eval_fn = Condition_CharacterLoaded;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_CHARACTER_LOADED].init_fn = Condition_CharacterLoadedInit;
         }
     };
 
