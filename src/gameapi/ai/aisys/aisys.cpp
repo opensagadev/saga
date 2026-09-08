@@ -5514,15 +5514,6 @@ __used__ static f32 Condition_InterruptID(AISYS *, AISCRIPTPROCESS *processor, A
     return -1.0f;
 }
 
-__used__ static f32 Condition_MissionMode(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                          void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
-}
 
 __used__ static f32 Condition_OpponentIsA(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
                                           void *void_arg) {

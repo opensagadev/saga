@@ -486,6 +486,10 @@ static f32 Condition_IsVisible(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, cha
     return result;
 }
 
+static f32 Condition_MissionMode(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return Mission_Active(NULL) != NULL ? 1.0f : 0.0f;
+}
+
 static f32 Condition_MissionWon(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return MissionSys != NULL && MissionSys->field8_0x1d == 2 ? 1.0f : 0.0f;
 }
@@ -800,7 +804,7 @@ extern "C" {
         {"HintComplete", Condition_HintComplete, Condition_HintAvailableInit},
         {"Freeplay", NULL, NULL},
         {"Indy", NULL, NULL},
-        {"MissionMode", NULL, NULL},
+        {"MissionMode", Condition_MissionMode, NULL},
         {"MissionWon", Condition_MissionWon, NULL},
         {"ChallengeMode", NULL, NULL},
         {"PSP", NULL, NULL},
