@@ -4648,16 +4648,48 @@ __used__ static i32 Action_JudderGameCamera(AISYS *sys, AISCRIPTPROCESS *process
     return 0;
 }
 
-__used__ static i32 Action_MoveAwayFromNode(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
-                                            i32 param_4, i32 param_5, f32 param_6) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
-    (void)param_6;
-    return 0;
+static i32 Action_MoveAwayFromNode(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
+                                    i32 param_count, i32 first_time, f32) {
+    NUVEC difference;
+    if (packet == NULL || packet->owner == NULL || packet->path_info.path == NULL ||
+        packet->path_info.connection == NULL) {
+        return 1;
+    }
+    if (first_time != 0) {
+        if (param_count == 0) {
+            return 0;
+        }
+        for (i32 i = 1; i < param_count; i++) {
+            if (AIActionParseSpeedFn == NULL || AIActionParseSpeedFn(params[i], &packet->goal_speed_mode) == 0) {
+                packet->movement_instruction_parameter = AIParamToFloatEx(packet, processor, params[i]);
+            }
+        }
+        AIPATHNODE *node = AIPathFindNode(sys, packet->path_info.path, params[0]);
+        processor->action_data_3 = node;
+        if (node == NULL || node->connection_count == 0) {
+            return 1;
+        }
+        i32 index = node - packet->path_info.path->nodes;
+        AISysCharacterSetPath(packet, packet->path_info.path);
+        processor->path_info.connection = node->connections[0];
+        processor->path_info.dist = index == processor->path_info.connection->node_indices[0] ? 0.0f : 1.0f;
+        processor->path_info.width = 0.0f;
+        processor->path_info.direction = 0;
+        processor->path_info.on_path = 1;
+        AIMoveInstruction(packet, &node->position, 0.0f, &processor->path_info,
+                          AIPACKET_MOVEMENT_RETREAT, packet->movement_instruction_parameter);
+        return 0;
+    }
+    AIPATHNODE *node = static_cast<AIPATHNODE *>(processor->action_data_3);
+    if (node != NULL) {
+        f32 distance = NuVecXZDistSqr(&packet->terrain_origin, &node->position, &difference);
+        if (!(node->radius_squared > distance)) {
+            AIMoveInstruction(packet, &node->position, 0.0f, &processor->path_info,
+                              AIPACKET_MOVEMENT_RETREAT, packet->movement_instruction_parameter);
+            return 0;
+        }
+    }
+    return 1;
 }
 
 __used__ static i32 Action_SetControlSystem(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
