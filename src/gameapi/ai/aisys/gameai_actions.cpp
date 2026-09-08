@@ -115,10 +115,6 @@ static __used__ f32 Condition_TakeOverRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPA
     return 0;
 }
 
-static __used__ void *Condition_TakenOverInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
-}
-
 
 static __used__ i32 Action_CanShootOffScreen(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params,
                                              i32 param_count, i32 first_time, f32) {

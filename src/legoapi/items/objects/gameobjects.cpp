@@ -186,6 +186,28 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 
 static const f32 AI_RESPAWN_DELAY = 2.0f;
 
+static void *Condition_TakenOverInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    return name != NULL && system != NULL ? GetNamedGameObject(system, name) : NULL;
+}
+
+static f32 Condition_TakenOver(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *name, void *argument) {
+    GameObject_s *object = static_cast<GameObject_s *>(argument);
+    if (object == NULL) {
+        if (name != NULL) {
+            if (NuStrICmp(name, "Opponent") == 0) {
+                APIOBJECT_s *opponent = packet->owner->apiobj.objptr->ai.opponent_object;
+                if (opponent != NULL) object = opponent->objptr;
+            } else if (NuStrICmp(name, "TakeoverTarget") == 0) {
+                object = packet->owner->apiobj.objptr;
+                if (object != NULL) object = object->takeover_target;
+            }
+        } else if (packet != NULL && packet->owner != NULL) {
+            object = packet->owner->apiobj.objptr;
+        }
+    }
+    return object != NULL && object->field_0xcc0 != NULL && object->character_context != 0x3b ? 1.0f : 0.0f;
+}
+
 static void *Condition_LastLevelInit(AISYS_s *system, char *name, AISCRIPT_s *) {
     if (name != NULL && system != NULL && WORLD->area != NULL) {
         for (i32 index = 0; index < LEVELCOUNT; ++index) {
@@ -432,7 +454,7 @@ extern "C" {
         {"LastAttackerIsActivePlayer", NULL, NULL},
         {"PartyContainsDroids", NULL, NULL},
         {"CannotReachDestination", NULL, NULL},
-        {"TakenOver", NULL, NULL},
+        {"TakenOver", Condition_TakenOver, Condition_TakenOverInit},
         {"PlayerTakenOver", NULL, NULL},
         {"EitherPlayerTakenOver", NULL, NULL},
         {"BeenTakenOver", NULL, NULL},

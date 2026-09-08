@@ -5360,16 +5360,6 @@ static f32 Condition_StuckTime(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET 
     return packet != NULL && packet->owner != NULL ? packet->owner->apiobj.respawn_timer : 0.0f;
 }
 
-__used__ static f32 Condition_TakenOver(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                        void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
-}
-
 __used__ static f32 Condition_BeingTowed(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
                                          void *void_arg) {
     (void)sys;
