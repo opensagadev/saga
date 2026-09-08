@@ -546,6 +546,10 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+static f32 Condition_RaceLap(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return static_cast<f32>(Lap);
+}
+
 static f32 Condition_MusicOn(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return SuperOptions.music_enabled != 0 ? 1.0f : 0.0f;
 }
@@ -1080,7 +1084,7 @@ extern "C" {
         {"FlowBoxComplete", NULL, NULL},
         {"CanHearRadio", NULL, NULL},
         {"BeingTowed", NULL, NULL},
-        {"RaceLap", NULL, NULL},
+        {"RaceLap", Condition_RaceLap, NULL},
         {"MusicOn", Condition_MusicOn, NULL},
         {"CharacterLoaded", NULL, NULL},
         {"AreaComplete", NULL, NULL},

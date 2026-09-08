@@ -5205,16 +5205,6 @@ static f32 Condition_Message(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, voi
     return message != NULL ? message->value : 0.0f;
 }
 
-__used__ static f32 Condition_RaceLap(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                      void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
-}
-
 __used__ static f32 Condition_Blocking(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
                                        void *void_arg) {
     (void)sys;
