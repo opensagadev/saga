@@ -1462,3 +1462,45 @@ do not establish working AI traversal or verify `TightRope_SnapTo` end to end.
 Current instruction matches remain partial: range 44.022%, attachment 82.472%,
 and snap 86.392%. The attachment helper's private calling convention is still
 different from the original.
+
+### Player-follow path position, 2026-09-08
+
+The controlled Cantina follow trace identified a missing producer of the
+destination consumed by `FollowAPIObject`: the player's `last_path_position`
+remained `(0, 0, 0)` while its actual position and `terrain_origin` moved.
+`AISysCharacterTestPathCnx` (original `0x3f0290`, 4,697 bytes) was a simplified
+projection test that never wrote the saved position. An additional unused
+same-named local stub in `ai_sys.cpp` obscured the instruction comparison.
+
+The replacement recovers the original capability and route gates, node-position
+refresh checks, radius reduction and narrow-path flag, enclosing-circle case,
+rounded connection ends, varying-width side projection, vertical limits,
+nearest-candidate state updates, and occupied-node bits. The unused stub is
+removed. The original private argument convention is naturally reproduced by
+GCC without a calling-convention attribute or optimization change. Instruction
+matching is **38.917%**, with 4,955 reconstructed bytes; this remains partial.
+
+An isolated original/native comparison covers 144 geometric cases and 64
+capability/route combinations. All 208 agree on return values, flags, connection
+selection, occupied nodes and saved path state. Float comparisons use relative
+tolerance `2e-6` and absolute tolerance `2e-5` for native arithmetic. These cases
+do not exercise a moving special node's scene update. The fixture sources are
+`/tmp/saga-original-path.c` and `/tmp/saga-path-cases.inc`; native invocation is
+`/tmp/saga-path-runtime.gdb`.
+
+The subsequent live trace shows the player's saved position tracking its actual
+position at all three samples (follow calls 1, 30 and 60). The fixture assigns
+the Cantina companion a party slot and restarts its party script; it does not
+prove natural party assignment or complete story-level following. The existing
+`NuAtan2D` sanitizer report still occurs and remains unresolved. Target and
+native builds and the four repository checks pass for this recovery.
+
+The same 208 cases also run directly through the reconstructed Android binary,
+using a fixed snapshot to prevent concurrent builds from changing addresses.
+All printed target results are identical to the original, without a tolerance.
+
+A 180-call movement trace with the same controlled party fixture reduces the
+companion's distance from approximately 2.7 to 0.69 units and holds that distance.
+Its destination remains the player's saved position throughout the later
+samples. The movement scalar remains about 0.10 near the stopping position;
+this trace does not establish that the reported animation wiggle is resolved.

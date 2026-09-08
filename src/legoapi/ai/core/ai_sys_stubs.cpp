@@ -9,6 +9,7 @@
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nufile/nufilepak.h"
 #include "nu2api/numath/nuang.h"
+#include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nurand.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
@@ -41,6 +42,8 @@ extern "C" i32 AISysSetLevelPath(AISYS *system, char *path_name);
 extern "C" void AISysFindRoute(AIPACKET *packet);
 extern "C" void AISysCharacterSetPath(AIPACKET *packet, AIPATH *path);
 extern "C" void AISysCharacterSetPathCnx(AIPACKET *packet, NUVEC *position, AIPATHCNX *connection, i32 direction);
+
+extern "C" void AIPathNodeUpdatePos(AISYS *system, AIPATH *path, AIPATHNODE *node);
 
 static void *AISysLoadAlloc(AISYS *system, u32 size) {
     return AISysBufferAlloc(&system->storage_cursor, &system->storage_end, size);
@@ -243,70 +246,293 @@ static AIAREA *AISysLoadFindArea(AISYS *system, char *name) {
     return NULL;
 }
 
-// Test the geometric core of a path connection. The original routine also
-// handles platform-specific connection rules; this keeps the shared path
-// projection and node-volume test explicit while those rules are recovered.
-static i32 AISysCharacterTestPathCnx(AISYS *system, APIOBJECT *object, AIPACKET *packet, AIPATHCNX *connection,
-                                     i32 requested_direction, f32 *nearest_distance_squared) {
-    (void)system;
-    AIPATH *path = packet->path_info.path;
-    if (object == NULL || path == NULL || path->nodes == NULL || connection == NULL) {
-        return 0;
-    }
+static i16 AISysPathIntersectionAngle(f32 value) {
+    f32 absolute = NuFabs(value);
+    f32 root = NuFsqrt(1.0f - value * value);
+    f32 small = root < absolute ? root : absolute;
+    f32 side = (absolute - 0.70710677f) * 3.40282e+38f;
+    side = side < 1.0f ? (side > -1.0f ? side : -1.0f) : 1.0f;
+    f32 sign = value * 3.40282e+38f;
+    sign = sign < 1.0f ? (sign > -1.0f ? sign : -1.0f) : 1.0f;
+    f32 product = side * sign;
+    f32 x = small * product;
+    f32 x2 = x * x;
+    f32 x3 = x * x2;
+    f32 x4 = x2 * x2;
+    f32 x5 = x2 * x3;
+    return static_cast<i16>(static_cast<i32>(((sign + product) * 0.785398f - x + (x * -0.166667f) * x2 +
+                                              (-0.075f * x2) * x3 + (-0.0446429f * x3) * x4 + (x4 * -0.0303819f) * x5) *
+                                             10430.4f));
+}
 
-    if (connection->last_search_checksum == path->search_checksum) {
+static u32 AISysCharacterTestPathCnx(AISYS *system, APIOBJECT *object, AIPACKET *packet, AIPATHCNX *connection,
+                                     i32 direction, f32 *nearest_distance) {
+    AIPATH *path = packet->path_info.path;
+    if (connection->last_search_checksum == path->search_checksum || path->nodes == NULL) {
         return 0;
     }
     connection->last_search_checksum = path->search_checksum;
-
-    const i32 first_direction = requested_direction < 0 ? 0 : requested_direction;
-    const i32 last_direction = requested_direction < 0 ? 1 : requested_direction;
-    for (i32 direction = first_direction; direction <= last_direction; ++direction) {
-        const u8 from_index = connection->node_indices[direction];
-        const u8 to_index = connection->node_indices[direction ^ 1];
-        if (from_index >= path->node_count || to_index >= path->node_count) {
-            continue;
+    if (object->character_data != NULL) {
+        u32 flags = connection->traversal_flags[0] | connection->traversal_flags[1];
+        if (flags != 0) {
+            if (direction != -1) {
+                flags = connection->traversal_flags[direction];
+            }
+            if (flags != 0 && ((packet->capabilities & flags) == 0 || (flags & 0x98000000) != 0)) {
+                return 0;
+            }
         }
-
-        const AIPATHNODE &from = path->nodes[from_index];
-        const AIPATHNODE &to = path->nodes[to_index];
-        const f32 segment_x = to.position.x - from.position.x;
-        const f32 segment_z = to.position.z - from.position.z;
-        const f32 segment_length_squared = segment_x * segment_x + segment_z * segment_z;
-        if (segment_length_squared <= 0.0f) {
-            continue;
+    }
+    if ((object->flags_low & 0x80) == 0 && packet->current_route != 0xff &&
+        ((static_cast<u64>(connection->route_mask) >> packet->current_route) & 1) == 0) {
+        AIPATHCNX *current = packet->path_info.connection;
+        if (current == NULL || current == connection) {
+            return 0;
         }
-
-        const f32 object_x = object->position.x - from.position.x;
-        const f32 object_z = object->position.z - from.position.z;
-        f32 along = (object_x * segment_x + object_z * segment_z) / segment_length_squared;
-        if (along < 0.0f) {
-            along = 0.0f;
-        } else if (along > 1.0f) {
-            along = 1.0f;
+        AIPATHNODE *shared = NULL;
+        if (current->node_indices[0] == connection->node_indices[0]) {
+            shared = &path->nodes[connection->node_indices[0]];
+        } else if (current->node_indices[0] == connection->node_indices[1]) {
+            shared = &path->nodes[current->node_indices[0]];
+        } else if (current->node_indices[1] == connection->node_indices[0]) {
+            shared = &path->nodes[connection->node_indices[0]];
+        } else if (current->node_indices[1] == connection->node_indices[1]) {
+            shared = &path->nodes[connection->node_indices[1]];
         }
-
-        const f32 nearest_x = from.position.x + segment_x * along;
-        const f32 nearest_z = from.position.z + segment_z * along;
-        const f32 distance_x = object->position.x - nearest_x;
-        const f32 distance_z = object->position.z - nearest_z;
-        const f32 distance_squared = distance_x * distance_x + distance_z * distance_z;
-        const f32 path_radius = from.radius + (to.radius - from.radius) * along + object->collision_radius;
-        if (distance_squared > path_radius * path_radius || distance_squared >= *nearest_distance_squared) {
-            continue;
+        if (shared == NULL || ((static_cast<u64>(shared->value_0x5a) >> packet->current_route) & 1) == 0) {
+            return 0;
         }
-
-        const f32 min_height = from.min_height + (to.min_height - from.min_height) * along;
-        const f32 max_height = from.max_height + (to.max_height - from.max_height) * along;
-        if (object->position.y + object->collision_height < min_height || object->position.y > max_height) {
-            continue;
+    }
+    if (direction == -1) {
+        direction = 0;
+    }
+    AIPATHNODE *first = &path->nodes[connection->node_indices[0]];
+    AIPATHNODE *second = &path->nodes[connection->node_indices[1]];
+    f32 first_radius = first->radius;
+    bool narrow = false;
+    if (first_radius > object->collision_radius + 0.05f) {
+        first_radius -= object->collision_radius;
+    } else {
+        narrow = true;
+    }
+    f32 second_radius = second->radius;
+    if (second_radius > object->collision_radius + 0.05f) {
+        second_radius -= object->collision_radius;
+    } else {
+        narrow = true;
+    }
+    if (first->has_special != 0 &&
+        (path->updated_node_bits[connection->node_indices[0] >> 3] & (1 << (connection->node_indices[0] & 7))) == 0) {
+        AIPathNodeUpdatePos(system, path, first);
+    }
+    if (second->has_special != 0 &&
+        (path->updated_node_bits[connection->node_indices[1] >> 3] & (1 << (connection->node_indices[1] & 7))) == 0) {
+        AIPathNodeUpdatePos(system, path, second);
+    }
+    NUVEC delta;
+    delta.x = object->position.x - first->position.x;
+    delta.z = object->position.z - first->position.z;
+    NUVEC local;
+    NuVecRotateY(&local, &delta, -connection->rotation);
+    NUVEC radial;
+    if (NuFabs(second_radius - first_radius) > connection->horizontal_distance) {
+        if (second_radius > first_radius) {
+            first_radius = second_radius;
+            first = second;
         }
+        f32 height_distance = NuFabs(first->position.y - packet->terrain_origin.y);
+        f32 distance = NuVecXZDist(&object->position, &first->position, &radial);
+        f32 clearance;
+        if (first->min_height > packet->terrain_origin.y || packet->terrain_origin.y > first->max_height) {
+            clearance = distance - first_radius;
+            clearance = height_distance > clearance ? height_distance : clearance;
+        } else if (first_radius >= distance) {
+            packet->path_info.flags = ((packet->path_info.flags | 1) & ~8) | (narrow << 3);
+            AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
+            packet->last_path_position = object->position;
+            packet->path_info.dist = local.z / connection->horizontal_distance;
+            packet->path_info.width = local.x;
+            i32 node_index = first - path->nodes;
+            path->inside_node_bits[node_index / 8] |= 1 << (node_index % 8);
+            packet->inside_path_node = node_index;
+            if (second_radius * second_radius >= NuVecXZDistSqr(&object->position, &second->position, &radial)) {
+                node_index = second - path->nodes;
+                path->inside_node_bits[node_index / 8] |= 1 << (node_index % 8);
+                packet->inside_path_node = node_index;
+            }
+            return 1;
+        } else {
+            clearance = distance - first_radius;
+        }
+        if (*nearest_distance > clearance) {
+            *nearest_distance = clearance;
+            AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
+            packet->path_info.dist = local.z / connection->horizontal_distance;
+            packet->path_info.width = local.x;
+            if (first_radius < distance) {
+                packet->last_path_position.x = first_radius * radial.x / distance + first->position.x;
+                packet->last_path_position.z = first_radius * radial.z / distance + first->position.z;
+            } else {
+                packet->last_path_position.x = object->position.x;
+                packet->last_path_position.z = object->position.z;
+            }
+            packet->last_path_position.y = first->position.y;
+            packet->inside_path_node = -1;
+        }
+        return 0;
+    }
 
-        *nearest_distance_squared = distance_squared;
-        packet->path_info.flags |= AIPATHINFO_FLAG_ON_PATH;
-        packet->path_info.next_check = from_index;
-        AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
-        return 1;
+    const i32 angle = AISysPathIntersectionAngle((second_radius - first_radius) / connection->horizontal_distance);
+    NUVEC wall = local;
+    if (wall.x < 0.0f) {
+        wall.x = -wall.x;
+    }
+    NuVecRotateY(&wall, &wall, -angle);
+    const f32 length = NU_COS_LUT(angle) * connection->horizontal_distance;
+    if (wall.z < 0.0f) {
+        f32 height_distance = NuFabs(first->position.y - packet->terrain_origin.y);
+        f32 distance = NuVecXZDist(&object->position, &first->position, &radial);
+        f32 clearance;
+        if (first->min_height > packet->terrain_origin.y || packet->terrain_origin.y > first->max_height) {
+            clearance = distance - first_radius;
+            clearance = height_distance > clearance ? height_distance : clearance;
+        } else if (first_radius >= distance) {
+            packet->path_info.flags = ((packet->path_info.flags | 1) & ~8) | (narrow << 3);
+            AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
+            packet->last_path_position = object->position;
+            packet->path_info.dist = local.z / connection->horizontal_distance;
+            packet->path_info.width = local.x;
+            u8 node_index = connection->node_indices[0];
+            path->inside_node_bits[node_index >> 3] |= 1 << (node_index & 7);
+            packet->inside_path_node = connection->node_indices[0];
+            return 1;
+        } else {
+            clearance = distance - first_radius;
+        }
+        if (*nearest_distance > clearance) {
+            *nearest_distance = clearance;
+            AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
+            packet->path_info.dist = local.z / connection->horizontal_distance;
+            packet->path_info.width = local.x;
+            if (first_radius < distance) {
+                packet->last_path_position.x = first_radius * radial.x / distance + first->position.x;
+                packet->last_path_position.z = first_radius * radial.z / distance + first->position.z;
+            } else {
+                packet->last_path_position.x = object->position.x;
+                packet->last_path_position.z = object->position.z;
+            }
+            packet->last_path_position.y = first->position.y;
+            packet->inside_path_node = -1;
+        }
+    }
+    if (wall.z > length) {
+        f32 height_distance = NuFabs(second->position.y - packet->terrain_origin.y);
+        f32 distance = NuVecXZDist(&object->position, &second->position, &radial);
+        f32 clearance;
+        if (second->min_height > packet->terrain_origin.y || packet->terrain_origin.y > second->max_height) {
+            clearance = distance - second_radius;
+            clearance = height_distance > clearance ? height_distance : clearance;
+        } else if (second_radius >= distance) {
+            packet->path_info.flags = ((packet->path_info.flags | 1) & ~8) | (narrow << 3);
+            AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
+            packet->last_path_position = object->position;
+            packet->path_info.dist = local.z / connection->horizontal_distance;
+            packet->path_info.width = local.x;
+            u8 node_index = connection->node_indices[1];
+            path->inside_node_bits[node_index >> 3] |= 1 << (node_index & 7);
+            packet->inside_path_node = connection->node_indices[1];
+            return 1;
+        } else {
+            clearance = distance - second_radius;
+        }
+        if (*nearest_distance > clearance) {
+            *nearest_distance = clearance;
+            AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
+            packet->path_info.dist = local.z / connection->horizontal_distance;
+            packet->path_info.width = local.x;
+            if (second_radius < distance) {
+                packet->last_path_position.x = second_radius * radial.x / distance + second->position.x;
+                packet->last_path_position.z = second_radius * radial.z / distance + second->position.z;
+            } else {
+                packet->last_path_position.x = object->position.x;
+                packet->last_path_position.z = object->position.z;
+            }
+            packet->last_path_position.y = second->position.y;
+            packet->inside_path_node = -1;
+        }
+    } else if (!(wall.z < 0.0f)) {
+        f32 height, minimum, maximum;
+        if (first_radius > local.z) {
+            height = first->position.y;
+            minimum = first->min_height;
+            maximum = first->max_height;
+            if (local.z > connection->horizontal_distance - second_radius) {
+                minimum = second->min_height < minimum ? second->min_height : minimum;
+                maximum = second->max_height > maximum ? second->max_height : maximum;
+            }
+        } else if (local.z > connection->horizontal_distance - second_radius) {
+            height = second->position.y;
+            minimum = second->min_height;
+            maximum = second->max_height;
+        } else {
+            f32 denominator = connection->horizontal_distance - (first_radius + second_radius);
+            f32 numerator = local.z - first_radius;
+            f32 fraction = denominator == 0.0f || numerator == 0.0f ? 0.0f : numerator / denominator;
+            f32 inverse = 1.0f - fraction;
+            height = fraction * second->position.y + first->position.y * inverse;
+            minimum = second->min_height * fraction + first->min_height * inverse;
+            maximum = fraction * second->max_height + first->max_height * inverse;
+        }
+        const f32 height_distance = NuFabs(height - packet->terrain_origin.y);
+        f32 clearance;
+        if (height_distance > 0.0f && (minimum > packet->terrain_origin.y || packet->terrain_origin.y > maximum)) {
+            clearance = wall.x - first_radius;
+            clearance = height_distance > clearance ? height_distance : clearance;
+        } else if (first_radius > wall.x) {
+            packet->path_info.flags = ((packet->path_info.flags | 1) & ~8) | (narrow << 3);
+            AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
+            packet->path_info.dist = local.z / connection->horizontal_distance;
+            packet->path_info.width = local.x;
+            packet->last_path_position = object->position;
+            packet->inside_path_node = -1;
+            if (first_radius > local.z) {
+                if (first_radius * first_radius >= NuVecXZDistSqr(&object->position, &first->position, &radial)) {
+                    u8 node_index = connection->node_indices[0];
+                    path->inside_node_bits[node_index >> 3] |= 1 << (node_index & 7);
+                    packet->inside_path_node = connection->node_indices[0];
+                }
+            } else if (local.z > length - second_radius) {
+                if (second_radius * second_radius >= NuVecXZDistSqr(&object->position, &second->position, &radial)) {
+                    u8 node_index = connection->node_indices[1];
+                    path->inside_node_bits[node_index >> 3] |= 1 << (node_index & 7);
+                    packet->inside_path_node = connection->node_indices[1];
+                }
+            }
+            return 1;
+        } else {
+            clearance = wall.x - first_radius;
+        }
+        if (*nearest_distance > clearance) {
+            *nearest_distance = clearance;
+            AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
+            packet->path_info.dist = local.z / connection->horizontal_distance;
+            packet->path_info.width = local.x;
+            if (first_radius > wall.x) {
+                packet->last_path_position.x = object->position.x;
+                packet->last_path_position.z = object->position.z;
+            } else {
+                wall.x = first_radius;
+                NuVecRotateY(&wall, &wall, angle);
+                if (local.x < 0.0f) {
+                    wall.x = -wall.x;
+                }
+                NuVecRotateY(&wall, &wall, connection->rotation);
+                packet->last_path_position.x = first->position.x + wall.x;
+                packet->last_path_position.z = first->position.z + wall.z;
+            }
+            packet->last_path_position.y = first->position.y;
+            packet->inside_path_node = -1;
+        }
     }
     return 0;
 }
@@ -1645,7 +1871,7 @@ extern "C" {
             return;
         }
 
-        const u16 valid_routes = packet->available_routes & packet->path_info.connection->route_mask;
+        const u16 valid_routes = packet->path_info.connection->route_mask & packet->available_routes;
         if (valid_routes == 0) {
             return;
         }

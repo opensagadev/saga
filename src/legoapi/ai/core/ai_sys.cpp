@@ -79,11 +79,6 @@ extern "C" APIOBJECTSYS_s *APIObjectSysInit(i32 size, VARIPTR *buf, VARIPTR *buf
     return system;
 }
 
-static __used__ unsigned int AISysCharacterTestPathCnx(AISYS_s *, APIOBJECT_s *, AIPACKET_s *, AIPATHCNX_s *, int,
-                                                       float *) {
-    return {};
-}
-
 extern "C" {
     f32 antinode_time = 1.0f;
     f32 antinode_reverse_time = 1.0f;
