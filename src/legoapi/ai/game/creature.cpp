@@ -259,7 +259,30 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
     object->field_0x10d0 = object->apiobj.position.z;
 }
 
-void SnapCreaturePos(GameObject_s *, nuvec_s *, i32, AIPATHINFO_s *, i32) {
+void SnapCreaturePos(GameObject_s *object, nuvec_s *position, i32 angle, AIPATHINFO_s *path_info,
+                     i32 set_on_surface) {
+    object->apiobj.position = *position;
+    object->apiobj.field_0x276 = angle;
+    object->apiobj.facing_angle = angle;
+    object->apiobj.movement_facing_angle = angle;
+    object->apiobj.initial_position = object->apiobj.position;
+    object->apiobj.collision_position = object->apiobj.position;
+    plr_lastpos = object->apiobj.position;
+    object->apiobj.start_position = object->apiobj.position;
+    object->apiobj.respawn_position = object->apiobj.position;
+    object->apiobj.last_safe_position = object->apiobj.position;
+    object->ai_update_position = object->apiobj.position;
+    object->reset_velocity = v000;
+    object->apiobj.velocity = v000;
+    InitSurfaceInfo(object);
+    if (set_on_surface != 0) {
+        SetObjOnSurface(object, 0);
+    }
+    if (path_info != NULL) {
+        object->ai.path_info = *path_info;
+    } else {
+        AISysGetCharacterPathPos(WORLD->ai_sys, &object->apiobj, &object->ai, 0xff, 1);
+    }
 }
 
 void ResetAICreatures(AISYS_s *system) {
