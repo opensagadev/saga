@@ -1958,8 +1958,6 @@ extern "C" {
         packet->field_0x1e7 = movement_source_flags & static_cast<u8>(~AIPACKET_MOVEMENT_FORCE_PATH_REFRESH);
     }
 
-    void AddLocalAIMessage(void) {
-    }
 
     void AddToAIGroup(AIGROUP *group, APIOBJECT *object) {
         if (group == NULL || object == NULL || group->member_count >= 16 || group->count_across == 0) {
@@ -2047,8 +2045,6 @@ extern "C" {
     void FindAIDirectionedRandomPointOnNetwork2D(void) {
     }
 
-    void FindLocalAIMessage(void) {
-    }
 
     void FollowAPIObject(APIOBJECT *object, APIOBJECT *target, i32 flags, f32 movement_parameter) {
         AIPACKET *packet = object->ai;

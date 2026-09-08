@@ -1257,7 +1257,7 @@ void AIScriptProcessorInit(AISYS *sys, AIPACKET *packet, AISCRIPTPROCESS *proces
     if (script == NULL) {
         script = AIScriptFind(sys, script_name, can_use_default, 1, 1);
 
-        processor->unknown_c4 = 0;
+        processor->local_messages = NULL;
     }
 
     if (script != NULL) {

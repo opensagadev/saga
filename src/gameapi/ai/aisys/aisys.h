@@ -696,6 +696,8 @@ extern "C" {
     void SetAIMessage(AIMESSAGESYS_s *system, char *name, f32 value, AIMESSAGE_s *message);
     AIMESSAGE_s *QueryAIMessage(AIMESSAGESYS_s *system, AIMESSAGE_s *message);
     void RemoveAIMessage(AIMESSAGESYS_s *system, char *name, AIMESSAGE_s *message);
+    AILOCALMESSAGE_s *FindLocalAIMessage(AISCRIPTPROCESS *processor, char *name);
+    void AddLocalAIMessage(AISCRIPTPROCESS *processor, AILOCALMESSAGE_s *message, char *name);
     void AIAntinodeMove(AIANTINODE *antinode, NUVEC *position, f32 radius, f32 below, f32 above);
     AIANTINODE *AIAntinodeCreate(NUVEC *position, f32 radius);
     AIANTINODE *AIAntinodeCreateSingleFrame(NUVEC *position, f32 radius);

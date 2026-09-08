@@ -6921,6 +6921,26 @@ extern "C" void RemoveAIMessage(AIMESSAGESYS_s *system, char *name, AIMESSAGE_s 
     }
 }
 
+extern "C" AILOCALMESSAGE_s *FindLocalAIMessage(AISCRIPTPROCESS *processor, char *name) {
+    for (AILOCALMESSAGE_s *message = processor->local_messages; message != NULL; message = message->next) {
+        if (NuStrICmp(message->message.name, name) == 0) {
+            return message;
+        }
+    }
+    return NULL;
+}
+
+extern "C" void AddLocalAIMessage(AISCRIPTPROCESS *processor, AILOCALMESSAGE_s *message, char *name) {
+    NuStrNCpy(message->message.name, name, 32);
+    if (processor->local_messages != NULL) {
+        message->next = processor->local_messages;
+        processor->local_messages = message;
+    } else {
+        processor->local_messages = message;
+        message->next = NULL;
+    }
+}
+
 AIANTINODE dynamic_antinodes[64] = {};
 extern "C" f32 default_path_heighttol;
 

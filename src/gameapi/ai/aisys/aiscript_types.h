@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gameapi/ai/aisys/aipath.h"
+#include "gameapi/ai/aisys/aimessage_types.h"
 #include "nu2api/nucore/nulist.h"
 #include "nu2api/nu3d/nuspline.h"
 #include "nu2api/numath/nuvec.h"
@@ -164,8 +165,7 @@ typedef struct AISCRIPTPROCESS_s {
     AISTATE *interrupt_state;
     AISTATE *return_to_state;
 
-    // Type uncertain.
-    u32 unknown_c4;
+    AILOCALMESSAGE_s *local_messages;
 } AISCRIPTPROCESS;
 
 // Android x86 script records: allocation sizes and member accesses in
@@ -217,3 +217,4 @@ DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, action_timer) == 0x9c, "Script processor
 DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, interrupt_timer) == 0xb8, "Script processor interrupt timer offset");
 DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, interrupt_state) == 0xbc, "Script processor interrupt state offset");
 DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, return_to_state) == 0xc0, "Script processor return state offset");
+DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, local_messages) == 0xc4, "Script processor local-message head offset");

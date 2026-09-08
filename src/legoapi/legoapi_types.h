@@ -1,6 +1,7 @@
 #ifndef LEGOAPI_TYPES_H
 #define LEGOAPI_TYPES_H
 #pragma once
+#include "gameapi/ai/aisys/aimessage_types.h"
 
 #include "decomp_assert.h"
 #include "nu2api/nucore/fixed_width.h"
@@ -1069,23 +1070,6 @@ struct GIZACTIONDEFN_s {
 };
 DECOMP_ASSERT(sizeof(GIZACTIONDEFN_s) == 8, "GIZACTIONDEFN_s ABI");
 
-struct AIMESSAGESYS_s {
-    i32 count;
-    AIMESSAGE_s *messages;
-    NULISTHDR free_list;
-    NULISTHDR active_list;
-};
-
-struct AIMESSAGE_s {
-    NULISTLNK links;
-    char name[0x20];
-    f32 value;
-};
-
-DECOMP_ASSERT(sizeof(AIMESSAGE_s) == 0x2c, "AIMESSAGE_s size");
-DECOMP_ASSERT(offsetof(AIMESSAGE_s, name) == 0x8, "AIMESSAGE name offset");
-DECOMP_ASSERT(offsetof(AIMESSAGE_s, value) == 0x28, "AIMESSAGE value offset");
-DECOMP_ASSERT(sizeof(AIMESSAGESYS_s) == 0x18, "AIMESSAGESYS_s size");
 
 // The AI message system: a fixed pool of 0x38-byte messages; the free list
 // and the active list live in the header (ResetGizAIMessageSys fills the
