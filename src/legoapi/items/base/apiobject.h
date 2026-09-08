@@ -3,6 +3,7 @@
 #include "decomp.h"
 
 struct GIZMOBLOWUP_s;
+struct SNAKEBODY_s;
 struct PART_s;
 struct BOLT_s;
 #include "gameapi/ai/aisys/aipath.h"
@@ -1073,7 +1074,10 @@ typedef struct GameObject_s {
     };
     void *opponent;                        // 0x10b0
     GameObject_s *last_attacker;           // 0x10b4
-    void *field_0x10b8;                    // 0x10b8
+    union {
+        SNAKEBODY_s *snake_body; // 0x10b8
+        void *field_0x10b8;
+    };
     void (*move_override)(GameObject_s *); // 0x10bc
     u8 pad_10c0[0x10c4 - 0x10c0];
     f32 ai_elapsed_time;                   // 0x10c4, accumulated until the next AI update

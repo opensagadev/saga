@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "legoapi/actions/character/snake.h"
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/world_shared.h"
@@ -230,7 +231,6 @@ extern i16 id_MOSEISLEYCITIZEN, id_CANTINAALIEN, id_CLOUDCITYCITIZEN, id_GEONOSI
 }
 void Shards_HandleLostObj(WORLDINFO_s *, GameObject_s *);
 void LoseHelmet(GameObject_s *, i32, i32);
-void DestroySnakeBody(GameObject_s *);
 void InitPlayerAI(GameObject_s *);
 extern "C" void SetAnimTimeRandom(CHARACTERMODEL_s *, ANIMPACKET_s *);
 void SetFlicker(GameObject_s *object, f32 duration) {

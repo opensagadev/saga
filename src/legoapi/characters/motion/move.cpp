@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "legoapi/actions/character/snake.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "globals.h"
 #include "gamelib/util/gamelib_util_types.h"
@@ -198,7 +199,6 @@ void TorpedoCode(GameObject_s *, i32, f32);
 void PeriscodeCode(GameObject_s *);
 i32 PodLevel(AREADATA_s *);
 void KeepOnScreen(GameObject_s *);
-void CreateSnakeBody(GameObject_s *, i32);
 void UpdateSnakeBody(GameObject_s *);
 void Teleport_NetMoveCode(GameObject_s *);
 void TractorBeamCode(GameObject_s *);
