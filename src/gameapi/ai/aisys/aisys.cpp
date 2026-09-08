@@ -5931,13 +5931,16 @@ static f32 Condition_IAmA(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, 
 }
 
 
-__used__ static f32 Condition_Side(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                   void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
+static f32 Condition_Side(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *argument) {
+    if (packet != NULL && packet->owner != NULL) {
+        u32 flags = packet->owner->apiobj.field_0x1f4;
+        switch (reinterpret_cast<isize>(argument)) {
+        case 2: return (flags & 0x10000) != 0 ? 1.0f : 0.0f;
+        case 1: return (flags & 5) == 0 ? 1.0f : 0.0f;
+        case -1: return (flags & 1) != 0 ? 1.0f : 0.0f;
+        case 0: return (flags & 4) != 0 ? 1.0f : 0.0f;
+        }
+    }
     return 0.0f;
 }
 
@@ -6579,10 +6582,15 @@ static void *Condition_OpponentIsAInit(AISYS *sys, char *arg, AISCRIPT *) {
     return reinterpret_cast<void *>(static_cast<isize>(-1));
 }
 
-__used__ static void *Condition_SideInit(AISYS *sys, char *arg, AISCRIPT *script) {
-    (void)sys;
-    (void)arg;
-    (void)script;
+static void *Condition_SideInit(AISYS *, char *arg, AISCRIPT *) {
+    if (arg != NULL) {
+        if (NuStrICmp(arg, "baddy") == 0 || NuStrICmp(arg, "baddie") == 0)
+            return reinterpret_cast<void *>(static_cast<isize>(-1));
+        if (NuStrICmp(arg, "goody") == 0 || NuStrICmp(arg, "goodie") == 0)
+            return reinterpret_cast<void *>(static_cast<isize>(1));
+        if (NuStrICmp(arg, "goodybaddy") == 0 || NuStrICmp(arg, "goodiebaddie") == 0)
+            return reinterpret_cast<void *>(static_cast<isize>(2));
+    }
     return NULL;
 }
 
@@ -8129,6 +8137,8 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_PARTY_CHARACTER].eval_fn = Condition_IAmAPartyCharacter;
             lego_aiconditiondefs[LEGO_AI_CONDITION_LOCATOR_ON_SCREEN].eval_fn = Condition_LocatorOnScreen;
             lego_aiconditiondefs[LEGO_AI_CONDITION_TURRET_ALIVE].eval_fn = Condition_TurretAlive;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_SIDE].eval_fn = Condition_Side;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_SIDE].init_fn = Condition_SideInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_X_POS].eval_fn = Condition_XPos;
             lego_aiconditiondefs[LEGO_AI_CONDITION_X_POS].init_fn = Condition_XYZPosInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_Y_POS].eval_fn = Condition_YPos;
