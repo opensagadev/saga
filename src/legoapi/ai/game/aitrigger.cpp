@@ -182,8 +182,8 @@ void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system) {
         return;
     // The original accumulates route membership across all sets in this pass.
     u64 character_mask = 0;
-    for (i32 set_index = 0; set_index < 32; ++set_index) {
-        AITRIGGERSET_s *set = &system->sets[set_index];
+    AITRIGGERSET_s *set = system->sets;
+    for (i32 set_index = 0; set_index < 32; ++set_index, ++set) {
         if (!(set->flags & 1))
             continue;
         i32 complete = set->flowbox != NULL ? (set->flowbox->state_flags_low >> 1) & 1 : 0;
