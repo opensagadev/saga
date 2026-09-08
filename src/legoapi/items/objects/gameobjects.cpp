@@ -705,6 +705,28 @@ static void *Condition_CharacterTypeExistsInit(AISYS_s *system, char *name, AISC
     return (void *)(intptr_t)-1;
 }
 
+static f32 Condition_AngleAboutMyLocatorToPlayer(AISYS_s *, AISCRIPTPROCESS_s *process, AIPACKET_s *packet, char *, void *argument) {
+    f32 result = 0.0f;
+    if (argument != NULL && process->unknown_a4 != NULL && packet != NULL && packet->owner != NULL) {
+        GameObject *object = packet->owner;
+        GameObject *target = NULL;
+        if ((intptr_t)argument == -1) target = player;
+        else if ((intptr_t)argument == 1) target = Player[1];
+        if (target != NULL) {
+            i32 object_angle = NuAtan2D(object->apiobj.position.x - process->unknown_a4->position.x,
+                                       object->apiobj.position.z - process->unknown_a4->position.z);
+            i32 player_angle = NuAtan2D(target->apiobj.position.x - process->unknown_a4->position.x,
+                                       target->apiobj.position.z - process->unknown_a4->position.z);
+            result = (f32)NuAngSub(player_angle, object_angle);
+        }
+    }
+    return result;
+}
+
+static void *Condition_AngleAboutMyLocatorToPlayerInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    return (void *)(intptr_t)(name != NULL && NuStrICmp(name, "player1") == 0 ? 1 : -1);
+}
+
 static f32 Condition_EitherPlayerUsingHatMachine(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *name, void *) {
     if (player != NULL && player->character_context == 0x61) {
         HATMACHINE_s *machine = static_cast<HATMACHINE_s *>(player->field_0x788);
@@ -1412,7 +1434,7 @@ extern "C" {
         {"GizmoOutput2", NULL, NULL},
         {"GizmoOutput3", NULL, NULL},
         {"GizmoVisibility", NULL, NULL},
-        {"AngleAboutMyLocatorToPlayer", NULL, NULL},
+        {"AngleAboutMyLocatorToPlayer", Condition_AngleAboutMyLocatorToPlayer, Condition_AngleAboutMyLocatorToPlayerInit},
         {"AnimSpeedMul", NULL, NULL},
         {"PickupBeenTurnedOn", Condition_PickupBeenTurnedOn, Condition_PickupBeenTurnedOnInit},
         {"FlowBoxComplete", NULL, NULL},

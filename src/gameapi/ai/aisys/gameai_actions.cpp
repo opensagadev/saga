@@ -1077,10 +1077,6 @@ static __used__ f32 Condition_EitherPlayerLocatorRangeXZ(AISYS_s *, AISCRIPTPROC
     return 0;
 }
 
-static __used__ f32 Condition_AngleAboutMyLocatorToPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *,
-                                                          void *) {
-    return 0;
-}
 
 
 static __used__ f32 Condition_EitherPlayerInMyTriggerArea(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *,
@@ -1100,9 +1096,6 @@ static __used__ f32 Condition_TakeOverTargetInTriggerArea(AISYS_s *, AISCRIPTPRO
     return 0;
 }
 
-static __used__ void *Condition_AngleAboutMyLocatorToPlayerInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
-}
 
 static __used__ void *Condition_TakeOverTargetInTriggerAreaInit(AISYS_s *, char *, AISCRIPT_s *) {
     return nullptr;
