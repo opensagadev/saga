@@ -1,5 +1,6 @@
 #include "legoapi/legoapi_types.h"
 #include "legoapi/render/fx.h"
+#include "legoapi/render/core/rtl.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "nu2api/numath/numtx.h"
@@ -12,6 +13,7 @@
 #include <string.h>
 
 extern "C" {
+    void DebFreeInstantly(i32 *handle);
     // Shared suspend flag consulted by all timed debris emitters.
     i32 debris_suspended = 0;
 
@@ -389,7 +391,12 @@ extern "C" {
     void AddRotatedDebrisEffect(void) {
     }
 
-    void AddScaledFiniteShotDebrisEffect(i32 *, i32, NUVEC *, i32, i32, i32, f32) {
+    void AddScaledFiniteShotDebrisEffect(i32 *handle, i32 effect, NUVEC *position,
+                                        NUVEC *emitter_momentum, NUVEC *particle_momentum, i32 count, f32 scale) {
+        i32 scaled_effect = CreateScaledEffect(effect, scale);
+        if (scaled_effect != -1) {
+            AddFiniteShotDebrisEffect2(handle, scaled_effect, position, emitter_momentum, particle_momentum, count);
+        }
     }
 
     void AddScaledFiniteShotPART(void) {
@@ -755,7 +762,23 @@ extern "C" {
     void KillAllParts(void) {
     }
 
-    void KillPart(void) {
+    void KillPart(PART_s *part, i32 reason) {
+        if ((part->active & 1) != 0) {
+            part->active &= ~1;
+            if ((part->flags & 0x20000) != 0 && part->debris_handle != NULL) {
+                DebFreeInstantly(part->debris_handle);
+            }
+            if (part->dynamic_handle != NULL) {
+                rtlDynamicFree(*part->dynamic_handle);
+                *part->dynamic_handle = -1;
+            }
+            if (part->kill_callback != NULL) part->kill_callback(part, reason);
+            if (reason != 6 && part->death_effect != -1) {
+                i32 handle = -1;
+                AddScaledFiniteShotDebrisEffect(&handle, part->death_effect, &part->position,
+                                                0, 0, 1, part->death_effect_scale);
+            }
+        }
     }
 
     void KillPartsByScene(void) {

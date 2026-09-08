@@ -3793,7 +3793,16 @@ struct PART_s {
     u8 pad_154[0x1b0 - 0x154];
     void (*move_callback)(PART_s *, f32);
     void (*update_callback)(PART_s *);
-    u8 pad_1b8[0x206 - 0x1b8];
+    u8 pad_1b8[8];
+    void (*kill_callback)(PART_s *, i32); // 0x1c0
+    u8 pad_1c4[0x1d8 - 0x1c4];
+    i32 *debris_handle; // 0x1d8
+    i32 *dynamic_handle; // 0x1dc
+    u8 pad_1e0[0x1f4 - 0x1e0];
+    i32 death_effect; // 0x1f4
+    u32 field_1f8;
+    f32 death_effect_scale; // 0x1fc
+    u8 pad_200[6];
     i8 force_player_mask;
     u8 pad_207[0x218 - 0x207];
     u32 force_flags;
@@ -3802,6 +3811,11 @@ struct PART_s {
     void GetMechObjectInterface();
 };
 DECOMP_ASSERT(sizeof(PART_s) == 0x224, "PART size");
+DECOMP_ASSERT(offsetof(PART_s, kill_callback) == 0x1c0, "PART kill callback offset");
+DECOMP_ASSERT(offsetof(PART_s, debris_handle) == 0x1d8, "PART debris handle offset");
+DECOMP_ASSERT(offsetof(PART_s, dynamic_handle) == 0x1dc, "PART dynamic handle offset");
+DECOMP_ASSERT(offsetof(PART_s, death_effect) == 0x1f4, "PART death effect offset");
+DECOMP_ASSERT(offsetof(PART_s, death_effect_scale) == 0x1fc, "PART death effect scale offset");
 DECOMP_ASSERT(offsetof(PART_s, position) == 0x30, "PART position offset");
 DECOMP_ASSERT(offsetof(PART_s, velocity) == 0x80, "PART velocity offset");
 DECOMP_ASSERT(offsetof(PART_s, owner) == 0xd4, "PART owner offset");

@@ -25,6 +25,7 @@ extern "C" {
     void *AddGameDebris(APIDEBRISSYS_s *debris_sys, i32 type, void *pos);
     APIDEBRISSYS_s *InitGameDebris(VARIPTR *cursor, VARIPTR end, i32 count, i32 named_count, char **names, char page);
     i32 PARTLookupType(char *name);
+    void KillPart(PART_s *part, i32 reason);
     i32 ParticlesPerFrame(f32 particles_per_frame, f32 frame_time);
     i32 ParticlesPerSecond(f32 particles_per_second, f32 frame_time);
     void AddFiniteShotPART(i32 part_type, void *pos, i32 unknown);
