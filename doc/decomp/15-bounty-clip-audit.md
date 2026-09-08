@@ -302,3 +302,28 @@ the pulse threshold and cycle, both icon draws, both text draws, and a hash
 of all menu bytes after each call. Rendering and input detection remain
 instrumented; this is confirmation-layout evidence, not native purchasing
 or end-to-end gameplay verification.
+
+## Shelf and character-icon comparison (2026-09-08)
+
+The hint shelf's 180 stable-state cases agree with the original on drawing
+order, positions, scale, spin, hit regions, and selection-bounce state. The
+original deliberately maps loop indices to slots `0,1,2,2,3,4,3`; this was
+verified at `0x24a7a0` and retained. Another 180 diagnostic cases mutate
+`SubNormCharPush` during drawing: 120 expose a remaining difference because
+the original captures this offset before the loop. A candidate fixed all
+360 cases but reduced `DrawSubItems` matching, so it was rejected. The live
+function retains its 25.314% baseline; this discrepancy is not fixed.
+
+`Shop_DrawCharacter` now uses the original integer availability offset for
+icon selection and explicit initial opacity. A comparison-only copy of the
+target ELF renamed GCC's `.part.3` clone to the original `.part.0` with
+`objcopy --redefine-sym`; no source ABI, symbol, or production binary was
+changed to force that compiler-generated name. The aligned comparison
+improves from 91.603% to 92.300% (1328 original / 1326 current bytes).
+
+All 512 mapped-code icon cases agree on selected icon, all matrix elements,
+opacity, and collection queries. Cases include category preview versus shelf
+item, ownership, availability, active/missing icons, four rotation triples,
+and four preview-cycle times. Matrix setup/translation, collection lookup,
+and final drawing were instrumented identically on both sides. This verifies
+the helper's behavior under those inputs, not full native shop operation.

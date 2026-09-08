@@ -1301,7 +1301,9 @@ static void Shop_DrawCharacter(shopitem_s *item, NUVEC *position, f32 scale_valu
     const i32 character_id = static_cast<u16>(item->item_id);
     const bool unlocked = CollectIDUnlocked(character_id) != NULL;
     const i32 unavailable = !unlocked || item->unlocked != 1;
-    const f32 alpha = CollectIDUnlocked(character_id) ? 1.0f : 0.5f;
+    f32 alpha = 1.0f;
+    if (!CollectIDUnlocked(character_id))
+        alpha = 0.5f;
 
     NUVEC scale;
     scale.x = scale.y = scale.z = scale_value;
@@ -1317,9 +1319,7 @@ static void Shop_DrawCharacter(shopitem_s *item, NUVEC *position, f32 scale_valu
 
     i32 icon_object_id = CDataList[character_id].field20_0x42;
     if (icon_object_id != -1) {
-        if (unavailable) {
-            ++icon_object_id;
-        }
+        icon_object_id += unavailable;
         WORLDINFO_s *world = WORLD;
         LEVEL_OBJECT_RUNTIME_s *icon = &world->lev_objs[icon_object_id];
         if (icon->active != 0) {
