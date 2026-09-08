@@ -15,6 +15,7 @@ struct HINT_s;
 #include "legoapi/world/levels/episode.h"
 #include "legoapi/world/level.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/props/doors/door.h"
 #include "legoapi/core/input/qrand.h"
@@ -1182,29 +1183,28 @@ void InitPlayerAI(GameObject_s *object) {
 }
 
 void ResetPlayerAI(GameObject_s *object) {
-    u8 *b = reinterpret_cast<u8 *>(object);
     object->field_0x109c = 0;
-    b[0x4a4] &= 0x9f;
-    b[0xefe] &= 0xdf;
-    b[0x4a5] &= 0xfd;
-    *reinterpret_cast<u32 *>(b + 0x44c) = 0;
-    *reinterpret_cast<u32 *>(b + 0x450) = 0;
-    *reinterpret_cast<i16 *>(b + 0x3e6) = -1;
-    *reinterpret_cast<i16 *>(b + 0x3e8) = -1;
-    *reinterpret_cast<u32 *>(b + 0x440) = 0;
-    b[0x1092] = 0;
-    b[0x1093] = 0;
-    *reinterpret_cast<u32 *>(b + 0x1098) = 0;
-    b[0x1094] = 0;
-    *reinterpret_cast<u32 *>(b + 0xf08) = 0;
-    *reinterpret_cast<u32 *>(b + 0xf0c) = 0;
-    *reinterpret_cast<u32 *>(b + 0xf10) = 0;
-    *reinterpret_cast<u32 *>(b + 0x4b4) = 0;
-    *reinterpret_cast<u32 *>(b + 0xf14) = 0;
-    memset(b + 0x414, 0, 0x18);
-    b[0x3f8] = 0xff;
-    b[0x3f9] = 0;
-    *reinterpret_cast<i16 *>(b + 0x3e4) = -1;
+    object->ai.movement_flags &= 0x9f;
+    object->field_0xefe &= 0xdf;
+    object->ai.field_0x1e5 &= 0xfd;
+    object->ai.intersection_connection = NULL;
+    object->ai.intersection_target_connection = NULL;
+    object->ai.animation_override_from = -1;
+    object->ai.animation_override_to = -1;
+    object->ai.field_0x180 = NULL;
+    object->field_0x1092 = 0;
+    object->field_0x1093 = 0;
+    object->field_0x1098 = 0;
+    object->field_0x1094 = 0;
+    object->field_0xf08 = 0;
+    object->field_0xf0c = 0;
+    object->field_0xf10 = 0;
+    object->ai.frame_state = 0;
+    object->field_0xf14 = 0;
+    memset(&object->ai.path_info, 0, sizeof(object->ai.path_info));
+    object->ai.current_route = 0xff;
+    object->ai.next_route = 0;
+    object->ai.inside_path_node = -1;
     AISysGetCharacterPathPos(WORLD->ai_sys, &object->apiobj, &object->ai, 0xff, 1);
 }
 
@@ -1314,7 +1314,37 @@ i32 DeactivatePlayer(GameObject_s *object, f32 duration, GameObject_s *source) {
     return 1;
 }
 
-void ResetPlayerMoves(GameObject_s *) {
+void ResetPlayerPacket(PLAYERPACKET_s *, CHARACTERDATA_s *);
+i32 GetDefaultIdle(GameObject_s *);
+void ResetCharacterIdle(GameObject_s *, i32, i32);
+void SetGameObjectCharacterData(GameObject_s *);
+void SetFlicker(GameObject_s *, f32);
+void ResetCoinPacket(COINPACKET_s *);
+
+void ResetPlayerMoves(GameObject_s *object) {
+    ResetPlayerPacket(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet),
+                      reinterpret_cast<CHARACTERDATA_s *>(object->apiobj.character_data));
+    object->fall_acceleration_timer = 0.0f;
+    object->pause_input_state = 0;
+    object->apiobj.movement_direction = v000;
+    object->input_toggle_hold_time = TOGGLEHOLDTIME;
+    object->field_0xefc |= 0x80;
+    ResetCharacterIdle(object, 2, GetDefaultIdle(object));
+    if (object->apiobj.character_model->model_data_b[1] != NULL) {
+        ResetAnimPacket(&object->apiobj.anim_packet, 1);
+        SetAnimTimeRandom(object->apiobj.character_model, &object->apiobj.anim_packet);
+    } else {
+        ResetAnimPacket(&object->apiobj.anim_packet, -1);
+    }
+    object->apiobj.field_0x27e = 0;
+    object->apiobj.field_0x27d = 0;
+    SetGameObjectCharacterData(object);
+    object->spawn_protection_timer = 0.0f;
+    SetFlicker(object, 0.0f);
+    ResetCoinPacket(object->coinpacket);
+    object->apiobj.respawn_timer = 0.0f;
+    object->apiobj.flags_high &= 0xdf;
+    DrawOffsetCode(object, 1);
 }
 
 void SetToLastSafePos(GameObject_s *) {

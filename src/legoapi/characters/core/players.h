@@ -122,6 +122,7 @@ void SetHitPoints(GameObject_s *obj, i32 hp);
 void RememberPlayerIDs(i32 a, i32 b, i32 c);
 void Player_CopyEssentials(GameObject_s *source, GameObject_s *destination);
 void Player_ToggleCharacter(GameObject_s *object, i32 mode, i32 allow_repeat);
+i32 CanPullLevers(i32 character_id);
 
 struct WORLDINFO_s;
 void Players_InitPositions(struct WORLDINFO_s *world);

@@ -33,6 +33,45 @@ threshold. No visual gameplay validation has been performed.
 
 ## Character switching
 
+`CanPullLevers` (`0x46b150`, 59 bytes) now returns the original model-flag
+capability result, at **99.882%** matching (relocated operands differ). Its
+integer-return declaration and definition replace the void stub; the definition
+lives with the player capability helpers at the original optimization level.
+This supplies another dependency of the still-incomplete `InitPlayerAI`.
+
+### Shared character reset recovery
+
+`ResetPlayerMoves` (original `0x0fe940`, 328 bytes) was empty. Its recovered
+sequence resets the player packet, movement vector and toggle hold time,
+selects the idle animation, resets animation/character data, clears flicker
+and coin state, and resets draw offset. It compares at **71.592%**; remaining
+differences are instruction ordering, register allocation and relocated
+operands. Its `SetFlicker` dependency (`0x0fc580`, 26 bytes) now matches **100%**,
+writing the recovered timer at `+0x1024` and clearing three bits at `+0xe26`.
+Both field offsets have ABI assertions. These were recovered with binutils
+and `objdiff-cli.py`, without Ghidra or added gameplay guards.
+
+The native sanitizer fixture `/tmp/saga-resetmoves-runtime.log` reached an
+active Cantina at game time 3.015376 after 22 normal reset calls. The player
+had flicker time zero and flicker flags zero; no sanitizer error was reported.
+This is initialization coverage, not proof of free-play switching:
+`Player_ToggleCharacter` and its `NewPlayerCharacter` dependency remain empty.
+Target/native builds and all four repository checks pass for the recovery.
+
+`ResetPlayerAI` (`0x0fc5a0`, 384 bytes) is also recovered, at **96.507%**.
+It clears the original navigation/action fields and 24-byte path cursor,
+resets route and animation-override sentinels, and calls
+`AISysGetCharacterPathPos(WORLD->ai_sys, object, packet, 0xff, 1)`. Remaining
+differences are relocated operands and the placement of the `+0x109c` zero
+store. Newly exposed fields retain the original byte/dword write widths.
+Target/native builds and the four checks passed. The sanitizer trace
+`/tmp/saga-resetai-runtime.log` observed one normal reset and reached active
+Cantina gameplay at time 3.015691 without a sanitizer error. This does not
+establish that all AI movement is correct: `InitPlayerAI` still contains only
+its first original operation, `StarWars_AutoSetAICapabilities`, while the
+original also initializes masks, capabilities, movement and action state and
+calls the recovered reset.
+
 The pre-existing `Player_CopyEssentials` reconstruction was checked against
 Ghidra and objdiff: `_Z21Player_CopyEssentialsP12GameObject_sS0_` matches 100%.
 This only verifies the copied state fields.

@@ -1052,12 +1052,10 @@ typedef struct GameObject_s {
     };
     u8 edge_stop_requests; // 0xf05
     u8 pad_f06[2];
-    void *can_use_object; // 0xf08
-    u8 use_action;
-    u8 use_action_frames;
-    u8 pad_f0e[2];
-    f32 use_action_parameter; // 0xf10
-    u8 pad_f14[4];
+    union { void *can_use_object; u32 field_0xf08; }; // 0xf08
+    union { u32 field_0xf0c; struct { u8 use_action; u8 use_action_frames; u8 pad_f0e[2]; }; };
+    union { f32 use_action_parameter; u32 field_0xf10; }; // 0xf10
+    union { u8 pad_f14[4]; u32 field_0xf14; };
     f32 big_jump_height;                // 0xf18, nonnegative arc height set on entering big jump
     f32 field_0xf1c;                    // 0x0f1c
     AILOCATOR_s *doomed_escape_locator; // 0xf20
@@ -1088,7 +1086,7 @@ typedef struct GameObject_s {
     f32 field_0x1018; // 0x1018
     f32 field_0x101c; // 0x101c
     f32 field_0x1020; // 0x1020
-    f32 field_0x1024;
+    union { f32 field_0x1024; f32 flicker_time; };
     f32 ai_update_distance;    // 0x1028, distance used to select the staggered AI cadence
     f32 shadow_opacity;        // 0x102c
     f32 shadow_radius;         // 0x1030
@@ -1137,11 +1135,13 @@ typedef struct GameObject_s {
     u8 pad_108d;
     u8 field_0x108e; // 0x108e
     u8 pad_108f;
-    u8 one_at_once_player;                 // 0x1090 (0xff when no attack slot is assigned)
-    u8 attack_override;                    // 0x1091
-    u8 field_0x1092;                       // 0x1092
-    u8 field_0x1093;                       // 0x1093
-    u8 pad_1094[0x109c - 0x1094];          // 0x1094 .. 0x109c
+    u8 one_at_once_player; // 0x1090 (0xff when no attack slot is assigned)
+    u8 attack_override;    // 0x1091
+    u8 field_0x1092;       // 0x1092
+    u8 field_0x1093;       // 0x1093
+    u8 field_0x1094;
+    u8 pad_1095[3];
+    u32 field_0x1098;
     u32 field_0x109c;                      // 0x109c
     u8 pad_10a0[0x10b0 - 0x10a0];          // 0x10a0 .. 0x10b0
     void *opponent;                        // 0x10b0
@@ -1330,6 +1330,8 @@ DECOMP_ASSERT(offsetof(GameObject_s, post_terrain_speed) == 0xdf4, "GameObject p
 DECOMP_ASSERT(offsetof(GameObject_s, delayed_turn_timer) == 0xd40, "GameObject delayed turn timer offset");
 DECOMP_ASSERT(offsetof(GameObject_s, pause_input_state) == 0xd5c, "GameObject pause input state offset");
 DECOMP_ASSERT(offsetof(GameObject_s, input_toggle_hold_time) == 0xda4, "GameObject toggle hold time offset");
+DECOMP_ASSERT(offsetof(GameObject_s, flicker_flags) == 0xe26, "GameObject flicker flags offset");
+DECOMP_ASSERT(offsetof(GameObject_s, flicker_time) == 0x1024, "GameObject flicker time offset");
 DECOMP_ASSERT(offsetof(GameObject_s, nearby_floor_distance) == 0xda0, "GameObject nearby-floor offset");
 DECOMP_ASSERT(offsetof(GameObject_s, fall_animation_timer) == 0xdac, "GameObject fall animation timer offset");
 DECOMP_ASSERT(offsetof(GameObject_s, movement_animation_hold_timer) == 0xd70,
