@@ -2585,7 +2585,7 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
         AISysGetCharacterPathPos(WORLD->ai_sys, &object->apiobj, &object->ai, 0xff,
                                  static_cast<i8>(object->apiobj.field_0x27d));
     }
-    AIScriptProcessorInit(WORLD->ai_sys, &object->ai, reinterpret_cast<AISCRIPTPROCESS *>(&object->ai), NULL,
+    AIScriptProcessorInit(WORLD->ai_sys, &object->ai, &object->ai.script_process, NULL,
                           script_name, NULL, 1, NULL, NULL);
     object->apiobj.field_0x214 = 2000000.0f;
     PreResetCode(object);

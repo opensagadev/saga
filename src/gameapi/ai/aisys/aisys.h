@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gameapi/ai/aisys/aipath.h"
+#include "gameapi/ai/aisys/aiscript_types.h"
 #include "legoapi/items/base/apiobject.h"
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nu3d/nuhspecial.h"
@@ -10,98 +11,6 @@
 #include "nu2api/numath/nuang.h"
 #include "nu2api/numath/nuvec.h"
 
-struct AISCRIPTACTIONDEF_s;
-struct AISCRIPTCONDITIONDEF_s;
-
-typedef struct AIREFSCRIPT_s {
-    NULISTLNK list_node;
-    char *name;
-    struct AISCRIPT_s *script;
-    char *return_state_name;
-    struct AISTATE_s *return_state;
-    u32 check_global_scripts : 1;
-    u32 check_level_scripts : 1;
-    NULISTHDR conditions;
-} AIREFSCRIPT;
-
-typedef struct AISTATE_s {
-    NULISTLNK list_node;
-    NULISTHDR conditions;
-    NULISTHDR actions;
-    char *name;
-    NULISTHDR ref_scripts;
-} AISTATE;
-
-typedef struct AIACTION_s {
-    NULISTLNK list_node;
-    char **params;
-    i32 param_count;
-    struct AISCRIPTACTIONDEF_s *def;
-} AIACTION;
-
-typedef struct AICONDITION_s {
-    NULISTLNK list_node;
-    f32 param_val;
-    char type;
-    i8 param_idx;
-    u16 bool_and : 1;
-    u16 keep_blocked : 1;
-    u16 is_param_idx_valid : 1;
-    u16 is_complex : 1;
-    char *complex_arg;
-    char *arg;
-    void *void_arg;
-    struct AISCRIPTCONDITIONDEF_s *def;
-    char *next_state_name;
-    AISTATE *next_state;
-    struct AICONDITION_s *param_cond;
-} AICONDITION;
-
-enum AICONDITION_COMPARISON {
-    AICONDITION_EQUAL = 0,
-    AICONDITION_LESS_THAN = 1,
-    AICONDITION_GREATER_THAN = 2,
-    AICONDITION_LESS_THAN_OR_EQUAL = 3,
-    AICONDITION_GREATER_THAN_OR_EQUAL = 4,
-    AICONDITION_NOT_EQUAL = 5,
-};
-
-typedef struct AIACTIONMACRO_s {
-    NULISTLNK list_node;
-    char *name;
-    NULISTHDR actions;
-} AIACTIONMACRO;
-
-typedef struct AICONDITIONMACRO_s {
-    NULISTLNK list_node;
-    char *name;
-    NULISTHDR conditions;
-} AICONDITIONMACRO;
-
-typedef struct AISCRIPTPARAMS_s {
-    char *name;
-    f32 default_val;
-} AISCRIPTPARAMS;
-
-typedef struct AICONSTPARAMS_s {
-    char name[32];
-    f32 default_val;
-} AICONSTPARAMS;
-
-typedef struct AISCRIPT_s {
-    NULISTLNK list_node;
-    char *name;
-    char *derived_from;
-    NULISTHDR states;
-    AISCRIPTPARAMS params[4];
-    AISTATE *base_state;
-    u32 is_level_script : 1;
-    u32 is_derived : 1;
-    u32 is_derived_from_level_script : 1;
-    NULISTHDR ref_scripts;
-    NULISTHDR condition_macros;
-    NULISTHDR action_macros;
-} AISCRIPT;
 
 typedef struct AIPATHCNX_s {
     union {
@@ -318,65 +227,6 @@ enum AIAREA_RUNTIME_FLAGS : u8 {
     AIAREA_RUNTIME_CHARACTER_SLOT_SEEN = 0x08,
 };
 
-typedef struct AISCRIPTPROCESSSTACK_s {
-    f32 complex_params[4];
-    u8 is_first_time_state;
-    u8 force_complex_eval;
-} AISCRIPTPROCESSSTACK;
-
-typedef struct AISCRIPTPROCESS_s {
-    AISCRIPT *base_script;
-    AISCRIPT *script;
-
-    AISTATE *state;
-    NULISTLNK *action_node;
-    AISTATE *next_state;
-    f32 params[4];
-    f32 script_timer;
-
-    AISCRIPTPROCESSSTACK param_stack[2];
-
-    u32 is_first_time_action : 1;
-    u32 is_disabled : 1;
-    u32 unknown_flag_4 : 1;
-
-    AIREFSCRIPT *active_refs[4];
-    i32 active_ref_count;
-
-    u8 action_data_1;
-    u8 action_data_2;
-    u16 action_data_6;
-    void *action_data_3;
-    f32 action_data_4;
-    f32 action_data_5;
-
-    NUVEC action_pos;
-
-    AIPATHINFO path_info;
-
-    f32 action_timer;
-
-    AIAREA *unknown_a0;
-    AILOCATOR *unknown_a4;
-    AILOCATORSET *unknown_a8;
-    NUGSPLINE *unknown_ac;
-
-    // Types uncertain.
-    u8 unknown_b0;
-    u16 unknown_b2;
-
-    u8 interrupt_priority;
-    u8 interrupt_id;
-
-    u16 action_data_7;
-
-    f32 interrupt_timer;
-    AISTATE *interrupt_state;
-    AISTATE *return_to_state;
-
-    // Type uncertain.
-    u32 unknown_c4;
-} AISCRIPTPROCESS;
 
 typedef struct AICREATURE_s {
     char name[0x10];
@@ -610,8 +460,8 @@ enum AISCRIPT_REGISTRY_INDEX {
     API_AI_ACTION_RESET_TIMER = 2,
     API_AI_ACTION_GO_TO_LOCATOR = 35,
     API_AI_ACTION_FOLLOW_PATH = 38,
-    API_AI_CONDITION_TIMER = 2,
-    API_AI_CONDITION_RANDOM = 3,
+    API_AI_CONDITION_TIMER = 5,
+    API_AI_CONDITION_RANDOM = 6,
 
     LEGO_AI_ACTION_SET_DOOMED_ESCAPE_LOCATOR = 11,
     LEGO_AI_ACTION_SNAP_TO_SOCK_POSITION = 13,
@@ -675,6 +525,7 @@ extern "C" {
     extern NULISTHDR global_aiscripts;
 
     extern i32 ai_usepackfile;
+    extern i32 ai_onlyusepackfile;
 
     extern GAMEPARAMTOFLOAT *GameParamToFloatFn;
     extern AICHARACTERTYPEID *GlobalCharacterTypeIDFn;
@@ -694,6 +545,12 @@ extern "C" {
     extern AIGETNAMEDAPIOBJECT *GetNamedAPIObjectFn;
     extern AIGETCREATUREORIGIN *GetAICreatureOriginFn;
     extern char *AiLevelPathName;
+    extern AISCRIPTPROCESS *pSetStateDebugee;
+
+    void AiSysSetStateDebugee(AISCRIPTPROCESS *processor);
+    void AiSysUsePackFile(i32 enabled);
+    void AiSysOnlyUsePakFile(i32 enabled);
+    void InitFn_GameParamToFloat(GAMEPARAMTOFLOAT *function);
 
     void InitFn_AIActionParseSpeed(AIACTIONPARSESPEED *function);
     void InitFn_AIBigJumpToDestination(AIBIGJUMPTODESTINATION *function);
@@ -710,6 +567,9 @@ extern "C" {
     void AIScriptLoadAllPakFile(void *pak, char *path, VARIPTR *buf, VARIPTR *buf_end, AISYS *sys);
 
     void AIScriptInitConditions(AISYS *sys);
+    void AIScriptForceParamReEval(AISCRIPTPROCESS *processor);
+    char *AIScriptNameFromIx(AISYS *system, i32 index);
+    void AIScriptSetLevelPath(char *path);
 
     void AIScriptProcessorInit(AISYS *sys, AIPACKET *packet, AISCRIPTPROCESS *processor, AICREATURE *creature,
                                char *script_name, char *start_state_name, i32 can_use_default, AISCRIPT *script,

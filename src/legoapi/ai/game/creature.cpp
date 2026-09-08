@@ -186,7 +186,7 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
     AISysCharacterSetPathCnx(packet, &object->apiobj.position, path_info->connection, path_info->direction);
     object->apiobj.field_0x287 = 0;
 
-    AISCRIPTPROCESS *processor = reinterpret_cast<AISCRIPTPROCESS *>(&object->ai);
+    AISCRIPTPROCESS *processor = &object->ai.script_process;
     AIScriptProcessorInit(WORLD->ai_sys, packet, processor, &creature, creature.script_name, NULL, 1, NULL, NULL);
     object->ai.field_0x138 = 0xff;
     object->ai.field_0x139 = 0;
@@ -268,7 +268,7 @@ void ResetAICreatures(AISYS_s *system) {
         object.ai.reset_mode = AI_CREATURE_RESET_READY;
 
         AIPACKET *packet = reinterpret_cast<AIPACKET *>(&object.ai);
-        AISCRIPTPROCESS *processor = reinterpret_cast<AISCRIPTPROCESS *>(&object.ai);
+        AISCRIPTPROCESS *processor = &object.ai.script_process;
         AIScriptProcessorInit(WORLD->ai_sys, packet, processor, &creature, creature.script_name, "", 1, NULL, NULL);
         if (processor->state != NULL && processor->state->name != NULL && NuStrICmp(processor->state->name, "") == 0) {
             creature.activate_type = 2;

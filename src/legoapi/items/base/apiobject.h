@@ -6,6 +6,7 @@ struct GIZMOBLOWUP_s;
 struct PART_s;
 struct BOLT_s;
 #include "gameapi/ai/aisys/aipath.h"
+#include "gameapi/ai/aisys/aiscript_types.h"
 #include "legoapi/items/base/animpacket.h"
 #include "legoapi/props/system/socksys.h"
 #include "nu2api/nucore/common.h"
@@ -30,6 +31,7 @@ struct AILOCATORSET_s;
 struct AIGROUP_s;
 struct AIPATHNODE_s;
 struct AISCRIPTPROCESS_s;
+struct APIOBJECT_s;
 
 enum CHARACTER_CONTEXT : i8 {
     CHARACTER_CONTEXT_JUMP = 0,
@@ -178,9 +180,7 @@ typedef struct TORPEDOPACKET_s {
 // Player/enemy bookkeeping block, base 0x2c0 within a GameObject.
 typedef struct AIPACKET_s {
     union {
-        // The packet begins with its primary script processor.  Keeping a raw
-        // view avoids a circular include while preserving the processor ABI.
-        u8 script_process[0xc8];
+        AISCRIPTPROCESS script_process;
         struct {
             u8 pad0[0xa0];
             AIAREA_s *area; // 0xa0
@@ -199,6 +199,7 @@ typedef struct AIPACKET_s {
     GameObject_s *owner; // 0xd0
     union {
         void *nearest_opponent;
+        APIOBJECT_s *nearest_opponent_object;
         GameObject_s **primary_target_ref;
     };
     f32 nearest_opponent_metric; // 0xd8
@@ -206,9 +207,10 @@ typedef struct AIPACKET_s {
     u32 field_0xe0;
     union {
         void *opponent;
+        APIOBJECT_s *opponent_object;
         GameObject_s **action_target_ref;
     };
-    u8 pad_e8[0xec - 0xe8];
+    f32 opponent_distance; // 0xe8, cached range used by script conditions
     u32 field_0xec;
     u32 field_0xf0;
     u8 pad_f4[0x104 - 0xf4];
@@ -914,6 +916,7 @@ typedef struct GameObject_s {
 
 DECOMP_ASSERT(sizeof(GameObject_s) == 0x10e4, "GameObject size");
 DECOMP_ASSERT(sizeof(AIPACKET) == 0x208, "AIPACKET size");
+DECOMP_ASSERT(offsetof(AIPACKET, script_process) == 0, "AIPACKET primary script processor offset");
 static_assert(sizeof(void *) != 4 || sizeof(AIPACKET) == 0x208, "AIPACKET 32-bit size");
 static_assert(sizeof(void *) != 4 || sizeof(GameObject_s) == 0x10e4, "GameObject 32-bit size");
 static_assert(sizeof(void *) != 4 || offsetof(GameObject_s, hold_timer) == 0xde4, "GameObject hold timer offset");
@@ -922,6 +925,8 @@ static_assert(sizeof(void *) != 4 || offsetof(GameObject_s, previous_block_anima
 static_assert(sizeof(void *) != 4 || offsetof(AIPACKET, character_type_mask_low) == 0x12c,
               "AIPACKET character mask 32-bit offset");
 DECOMP_ASSERT(offsetof(AIPACKET, alternate_script_process) == 0xcc, "AIPACKET alternate script processor offset");
+DECOMP_ASSERT(offsetof(AIPACKET, opponent_object) == 0xe4, "AIPACKET opponent offset");
+DECOMP_ASSERT(offsetof(AIPACKET, opponent_distance) == 0xe8, "AIPACKET opponent range offset");
 DECOMP_ASSERT(offsetof(AIPACKET, movement_destination) == 0x104, "AIPACKET destination offset");
 DECOMP_ASSERT(offsetof(AIPACKET, movement_target_direction) == 0x147, "AIPACKET target direction offset");
 DECOMP_ASSERT(offsetof(AIPACKET, movement_target) == 0x184, "AIPACKET movement target offset");

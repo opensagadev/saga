@@ -16,6 +16,7 @@
 
 extern "C" {
     char *AiLevelPathName = "";
+    AISCRIPTPROCESS *pSetStateDebugee;
     SCRIPTPROCESSFIRSTTIMEACTION *ScriptProcessFirstTimeActionFn;
 }
 
@@ -867,13 +868,71 @@ extern "C" {
     void AISYSRebuildFromEditorData(void) {
     }
 
-    void AIScriptForceParamReEval(void) {
+    void AIScriptForceParamReEval(AISCRIPTPROCESS *processor) {
+        if (processor != NULL) {
+            processor->param_stack[0].is_first_time_state = 1;
+            processor->param_stack[1].is_first_time_state = 1;
+        }
     }
 
-    void AIScriptNameFromIx(void) {
+    char *AIScriptNameFromIx(AISYS *system, i32 index) {
+        i32 current_index = 0;
+        if (system != NULL) {
+            AISCRIPT *script = reinterpret_cast<AISCRIPT *>(NuLinkedListGetHead(&system->scripts));
+            while (script != NULL) {
+                if (current_index == index) {
+                    return script->name;
+                }
+                script = reinterpret_cast<AISCRIPT *>(NuLinkedListGetNext(&system->scripts, &script->list_node));
+                ++current_index;
+            }
+        }
+
+        AISCRIPT *script = reinterpret_cast<AISCRIPT *>(NuLinkedListGetHead(&global_aiscripts));
+        while (script != NULL) {
+            AISCRIPT *level_script = NULL;
+            if (system != NULL) {
+                level_script = reinterpret_cast<AISCRIPT *>(NuLinkedListGetHead(&system->scripts));
+                while (level_script != NULL) {
+                    if (NuStrICmp(script->name, level_script->name) == 0) {
+                        break;
+                    }
+                    level_script = reinterpret_cast<AISCRIPT *>(
+                        NuLinkedListGetNext(&system->scripts, &level_script->list_node));
+                }
+            }
+            if (level_script == NULL) {
+                if (current_index == index) {
+                    return script->name;
+                }
+                ++current_index;
+            }
+            script = reinterpret_cast<AISCRIPT *>(NuLinkedListGetNext(&global_aiscripts, &script->list_node));
+        }
+        return NULL;
     }
 
 } // extern "C"
+
+static AICONDITION *AIScriptFinishStateConditions(NULISTHDR *conditions, AIPACKET *packet,
+                                                  AISCRIPTPROCESS *processor, AICONDITION *condition, i32 stack_index) {
+    if (processor->param_stack[stack_index].force_complex_eval) {
+        if (processor->param_stack[stack_index].is_first_time_state) {
+            AICONDITION *remaining = reinterpret_cast<AICONDITION *>(
+                NuLinkedListGetNext(conditions, reinterpret_cast<NULISTLNK *>(condition)));
+            while (remaining != NULL) {
+                if (remaining->is_complex) {
+                    processor->param_stack[stack_index].complex_params[remaining->param_idx] =
+                        AIParamToFloatEx(packet, processor, remaining->complex_arg);
+                }
+                remaining = reinterpret_cast<AICONDITION *>(NuLinkedListGetNext(conditions, &remaining->list_node));
+            }
+        }
+        processor->param_stack[stack_index].force_complex_eval = 0;
+    }
+    processor->param_stack[stack_index].is_first_time_state = 0;
+    return condition;
+}
 
 static AICONDITION *AIScriptProcessStateConditions(AISYS *system, NULISTHDR *conditions, APIOBJECT *, AIPACKET *packet,
                                                    AISCRIPTPROCESS *processor, f32, i32 stack_index) {
@@ -881,62 +940,70 @@ static AICONDITION *AIScriptProcessStateConditions(AISYS *system, NULISTHDR *con
         return NULL;
     }
 
-    AISCRIPTPROCESSSTACK *stack = &processor->param_stack[stack_index];
     AICONDITION *condition = reinterpret_cast<AICONDITION *>(NuLinkedListGetHead(conditions));
-    AICONDITION *matched_condition = NULL;
     f32 condition_value = 0.0f;
 
     while (condition != NULL) {
-        if (condition->def != NULL && condition->def->eval_fn != NULL) {
-            condition_value = condition->def->eval_fn(system, processor, packet, condition->arg, condition->void_arg);
-        }
-
-        f32 comparison_value;
-        if (condition->param_cond != NULL && condition->param_cond->def != NULL) {
-            AICONDITIONFN *comparison_fn = condition->param_cond->def->eval_fn;
-            comparison_value = comparison_fn != NULL
-                                   ? comparison_fn(system, processor, packet, condition->arg, condition->void_arg)
-                                   : condition_value;
-        } else if (condition->is_complex) {
-            if (stack->is_first_time_state) {
-                stack->complex_params[condition->param_idx] =
-                    AIParamToFloatEx(packet, processor, condition->complex_arg);
+        i32 comparison_passed = 0;
+        if (condition->def != NULL) {
+            if (condition->def->eval_fn != NULL) {
+                condition_value = condition->def->eval_fn(system, processor, packet, condition->arg, condition->void_arg);
             }
-            comparison_value = stack->complex_params[condition->param_idx];
-        } else if (condition->is_param_idx_valid) {
-            comparison_value = processor->params[condition->param_idx];
-        } else {
-            comparison_value = condition->param_val;
-        }
 
-        bool comparison_passed = false;
-        switch (condition->type) {
-            case AICONDITION_EQUAL:
-                comparison_passed = condition_value == comparison_value;
-                break;
-            case AICONDITION_LESS_THAN:
-                comparison_passed = condition_value < comparison_value;
-                break;
-            case AICONDITION_GREATER_THAN:
-                comparison_passed = condition_value > comparison_value;
-                break;
-            case AICONDITION_LESS_THAN_OR_EQUAL:
-                comparison_passed = condition_value <= comparison_value;
-                break;
-            case AICONDITION_GREATER_THAN_OR_EQUAL:
-                comparison_passed = condition_value >= comparison_value;
-                break;
-            case AICONDITION_NOT_EQUAL:
-                comparison_passed = condition_value != comparison_value;
-                break;
-        }
-
-        if (comparison_passed) {
-            if (!condition->bool_and) {
-                matched_condition = condition;
-                break;
+            f32 comparison_value;
+            if (condition->param_cond != NULL && condition->param_cond->def != NULL) {
+                AICONDITIONFN *comparison_fn = condition->param_cond->def->eval_fn;
+                comparison_value = comparison_fn != NULL
+                                       ? comparison_fn(system, processor, packet, condition->arg, condition->void_arg)
+                                       : condition_value;
+            } else if (condition->is_complex) {
+                if (processor->param_stack[stack_index].is_first_time_state) {
+                    processor->param_stack[stack_index].complex_params[condition->param_idx] =
+                        AIParamToFloatEx(packet, processor, condition->complex_arg);
+                }
+                comparison_value = processor->param_stack[stack_index].complex_params[condition->param_idx];
+            } else if (condition->is_param_idx_valid) {
+                comparison_value = processor->params[condition->param_idx];
+            } else {
+                comparison_value = condition->param_val;
             }
-        } else {
+
+            switch (condition->type) {
+                case AICONDITION_EQUAL:
+                    if (condition_value == comparison_value) {
+                        comparison_passed = 1;
+                    }
+                    break;
+                case AICONDITION_LESS_THAN:
+                    if (condition_value < comparison_value) {
+                        comparison_passed = 1;
+                    }
+                    break;
+                case AICONDITION_GREATER_THAN:
+                    if (condition_value > comparison_value) {
+                        comparison_passed = 1;
+                    }
+                    break;
+                case AICONDITION_LESS_THAN_OR_EQUAL:
+                    if (condition_value <= comparison_value) {
+                        comparison_passed = 1;
+                    }
+                    break;
+                case AICONDITION_GREATER_THAN_OR_EQUAL:
+                    if (condition_value >= comparison_value) {
+                        comparison_passed = 1;
+                    }
+                    break;
+                case AICONDITION_NOT_EQUAL:
+                    if (condition_value != comparison_value) {
+                        comparison_passed = 1;
+                    }
+                    break;
+            }
+
+        }
+
+        if (!comparison_passed) {
             // A failed member invalidates the rest of its AND group.  The
             // first-state pass still snapshots complex operands so later
             // frames compare against the same values as the target.
@@ -945,12 +1012,14 @@ static AICONDITION *AIScriptProcessStateConditions(AISYS *system, NULISTHDR *con
                 if (condition == NULL) {
                     break;
                 }
-                if (stack->is_first_time_state && condition->is_complex) {
-                    stack->complex_params[condition->param_idx] =
+                if (processor->param_stack[stack_index].is_first_time_state && condition->is_complex) {
+                    processor->param_stack[stack_index].complex_params[condition->param_idx] =
                         AIParamToFloatEx(packet, processor, condition->complex_arg);
-                    condition->param_val = stack->complex_params[condition->param_idx];
+                    condition->param_val = processor->param_stack[stack_index].complex_params[condition->param_idx];
                 }
             }
+        } else if (!condition->bool_and) {
+            return AIScriptFinishStateConditions(conditions, packet, processor, condition, stack_index);
         }
 
         if (condition != NULL) {
@@ -958,22 +1027,7 @@ static AICONDITION *AIScriptProcessStateConditions(AISYS *system, NULISTHDR *con
         }
     }
 
-    if (stack->force_complex_eval) {
-        if (stack->is_first_time_state) {
-            AICONDITION *remaining = reinterpret_cast<AICONDITION *>(
-                NuLinkedListGetNext(conditions, condition != NULL ? &condition->list_node : NULL));
-            while (remaining != NULL) {
-                if (remaining->is_complex) {
-                    stack->complex_params[remaining->param_idx] =
-                        AIParamToFloatEx(packet, processor, remaining->complex_arg);
-                }
-                remaining = reinterpret_cast<AICONDITION *>(NuLinkedListGetNext(conditions, &remaining->list_node));
-            }
-        }
-        stack->force_complex_eval = 0;
-    }
-    stack->is_first_time_state = 0;
-    return matched_condition;
+    return AIScriptFinishStateConditions(conditions, packet, processor, NULL, stack_index);
 }
 
 extern "C" {
@@ -1003,13 +1057,8 @@ extern "C" {
             }
         }
 
-        for (;;) {
-            if (processor->next_state != NULL) {
-                AIScriptSetState(processor, processor->next_state);
-                processor->next_state = NULL;
-            }
-
-            if (processor->active_ref_count > 0 && processor->state == processor->script->base_state) {
+        if (processor->next_state == NULL) {
+            if (processor->active_ref_count != 0 && processor->state == processor->script->base_state) {
                 const i32 completed_index = processor->active_ref_count - 1;
                 AIREFSCRIPT *completed_reference = processor->active_refs[completed_index];
                 processor->active_ref_count = completed_index;
@@ -1022,75 +1071,80 @@ extern "C" {
                                           processor->active_refs[completed_index - 1]->script,
                                           completed_reference->return_state);
                 }
-                continue;
             }
-            break;
+        }
+        if (processor->next_state != NULL) {
+            AIScriptSetState(processor, processor->next_state);
+            processor->next_state = NULL;
         }
 
         if (processor->state == NULL) {
             AIScriptSetState(processor, reinterpret_cast<AISTATE *>(NuLinkedListGetHead(&processor->script->states)));
         }
 
-        while (processor->action_node != NULL) {
-            AIACTION *action = reinterpret_cast<AIACTION *>(processor->action_node);
-            bool action_completed = true;
-            if (action->def != NULL && action->def->eval_fn != NULL) {
-                i32 first_time = 0;
-                if (processor->is_first_time_action) {
-                    processor->action_data_1 = 0;
-                    processor->action_data_2 = 0;
-                    processor->action_data_6 = 0;
-                    processor->action_data_3 = NULL;
-                    processor->action_data_4 = 0.0f;
-                    processor->action_data_5 = 0.0f;
-                    memset(&processor->action_pos, 0, sizeof(processor->action_pos));
-                    memset(&processor->path_info, 0, sizeof(processor->path_info));
-                    processor->action_timer = 0.0f;
-                    processor->action_data_7 = 0;
+        if (processor->state != NULL) {
+            while (processor->action_node != NULL) {
+                AIACTION *action = reinterpret_cast<AIACTION *>(processor->action_node);
+                bool action_completed = true;
+                if (action->def != NULL && action->def->eval_fn != NULL) {
+                    i32 first_time = 0;
+                    if (processor->is_first_time_action) {
+                        processor->action_data_1 = 0;
+                        processor->action_data_2 = 0;
+                        processor->action_data_3 = NULL;
+                        processor->action_data_6 = 0;
+                        processor->action_data_4 = 0.0f;
+                        processor->action_data_5 = 0.0f;
+                        processor->action_data_7 = 0;
+                        processor->action_timer = 0.0f;
+                        processor->action_pos.x = processor->action_pos.y = processor->action_pos.z = 0.0f;
+                        memset(&processor->path_info, 0, sizeof(processor->path_info));
 
-                    if (packet != NULL) {
-                        packet->goal_speed_mode = 0;
-                        packet->goal_path_node = NULL;
-                        packet->movement_instruction_parameter = 0.0f;
-                        packet->frame_flags = 0;
-                        if (ScriptProcessFirstTimeActionFn != NULL) {
-                            ScriptProcessFirstTimeActionFn(system, packet, processor);
+                        if (packet != NULL) {
+                            packet->goal_path_node = NULL;
+                            packet->goal_speed_mode = 0;
+                            packet->movement_instruction_parameter = 0.0f;
+                            packet->frame_flags = 0;
+                            if (ScriptProcessFirstTimeActionFn != NULL) {
+                                ScriptProcessFirstTimeActionFn(system, packet, processor);
+                            }
                         }
+
+                        processor->is_first_time_action = 0;
+                        first_time = 1;
                     }
 
+                    action_completed = action->def->eval_fn(system, processor, packet, action->params, action->param_count,
+                                                            first_time, elapsed) != 0;
+                    if (!action_completed) {
+                        break;
+                    }
+                } else {
                     processor->is_first_time_action = 0;
-                    first_time = 1;
                 }
 
-                action_completed = action->def->eval_fn(system, processor, packet, action->params, action->param_count,
-                                                        first_time, elapsed) != 0;
-                if (!action_completed) {
-                    break;
+                NULISTLNK *action_node = processor->action_node;
+                if (processor->is_first_time_action) {
+                    continue;
                 }
-            } else {
-                processor->is_first_time_action = 0;
+                if (action_node != NULL) {
+                    action_node = NuLinkedListGetNext(&processor->state->actions, action_node);
+                } else {
+                    action_node = NuLinkedListGetHead(&processor->state->actions);
+                }
+                if (action_node != NULL) {
+                    processor->is_first_time_action = 1;
+                }
+                processor->action_node = action_node;
             }
-
-            NULISTLNK *action_node = processor->action_node;
-            if (processor->is_first_time_action) {
-                continue;
             }
-            if (action_node != NULL) {
-                action_node = NuLinkedListGetNext(&processor->state->actions, action_node);
-            } else {
-                action_node = NuLinkedListGetHead(&processor->state->actions);
-            }
-            if (action_node != NULL) {
-                processor->is_first_time_action = 1;
-            }
-            processor->action_node = action_node;
-        }
 
         if (system != NULL && processor->script != NULL && processor->active_ref_count < 4) {
             NULISTHDR *references = &processor->script->ref_scripts;
             for (AIREFSCRIPT *reference = reinterpret_cast<AIREFSCRIPT *>(NuLinkedListGetHead(references));
                  reference != NULL;
-                 reference = reinterpret_cast<AIREFSCRIPT *>(NuLinkedListGetNext(references, &reference->list_node))) {
+                 reference = reinterpret_cast<AIREFSCRIPT *>(
+                     NuLinkedListGetNext(&processor->script->ref_scripts, &reference->list_node))) {
                 processor->param_stack[1].is_first_time_state = 1;
                 processor->param_stack[1].force_complex_eval = 1;
 
@@ -1170,7 +1224,8 @@ extern "C" {
         }
     }
 
-    void AIScriptSetLevelPath(void) {
+    void AIScriptSetLevelPath(char *path) {
+        AiLevelPathName = path;
     }
 
     void AISetPathHeightTol(void) {
@@ -1708,7 +1763,7 @@ extern "C" {
 
     void AISysProcessCharacter(AISYS *system, APIOBJECT *object, AIPACKET *packet, i32 checks, f32 elapsed,
                                i32 use_three_dimensions, i32 process_ai) {
-        AISCRIPTPROCESS *primary_processor = reinterpret_cast<AISCRIPTPROCESS *>(packet);
+        AISCRIPTPROCESS *primary_processor = &packet->script_process;
         AISCRIPTPROCESS *processor = packet->alternate_script_process;
         if (processor == NULL) {
             processor = primary_processor;
@@ -1955,13 +2010,16 @@ extern "C" {
     void AiRndrLine3dDbg(void) {
     }
 
-    void AiSysOnlyUsePakFile(void) {
+    void AiSysOnlyUsePakFile(i32 enabled) {
+        ai_onlyusepackfile = enabled;
     }
 
-    void AiSysSetStateDebugee(void) {
+    void AiSysSetStateDebugee(AISCRIPTPROCESS *processor) {
+        pSetStateDebugee = processor;
     }
 
-    void AiSysUsePackFile(void) {
+    void AiSysUsePackFile(i32 enabled) {
+        ai_usepackfile = enabled;
     }
 
     void CalculateLocatorDirection(void) {
@@ -2028,7 +2086,8 @@ extern "C" {
     void InitFn_GameAISave(void) {
     }
 
-    void InitFn_GameParamToFloat(void) {
+    void InitFn_GameParamToFloat(GAMEPARAMTOFLOAT *function) {
+        GameParamToFloatFn = function;
     }
 
     void InitFn_ScriptProcessFirstTimeAction(SCRIPTPROCESSFIRSTTIMEACTION *function) {

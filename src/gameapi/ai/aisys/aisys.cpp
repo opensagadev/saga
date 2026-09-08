@@ -1,6 +1,7 @@
 #include "decomp.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "globals.h"
+#include "legoapi/ai/core/ai_sys_stubs.h"
 
 #include <stdio.h>
 #include "globals.h"
@@ -76,16 +77,44 @@ static void ActionCopyParam(char *destination, i32 capacity, const char *source)
 // satisfy the symbol baseline; the action/condition logic itself is not
 // decompiled. Each stub matches the mangled symbol of the original binary.
 
-__used__ static i32 Action_Idle(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params, i32 param_4,
-                                i32 param_5, f32 param_6) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
-    (void)param_6;
-    return 0;
+static i32 Action_Idle(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params, i32 param_count,
+                       i32 is_first_time, f32 elapsed) {
+    f32 minimum = 0.0f;
+    f32 maximum = 0.0f;
+    i32 frames = 0;
+    i32 result = 0;
+    char *value;
+
+    if (is_first_time) {
+        for (i32 i = 0; i < param_count; i++) {
+            value = NuStrIStr(params[i], "mintime");
+            if (value != NULL) {
+                minimum = AIParamToFloatEx(packet, processor, value + NuStrLen("mintime") + 1);
+            } else if ((value = NuStrIStr(params[i], "maxtime")) != NULL) {
+                maximum = AIParamToFloatEx(packet, processor, value + NuStrLen("maxtime") + 1);
+            } else if ((value = NuStrIStr(params[i], "frames")) != NULL) {
+                frames = AIParamToFloatEx(packet, processor, value + NuStrLen("frames") + 1);
+            } else {
+                processor->action_timer = AIParamToFloatEx(packet, processor, params[i]);
+            }
+        }
+
+        if (frames != 0) {
+            processor->action_data_1 = frames < 0 ? 0 : (frames > 255 ? 255 : frames);
+        } else if (processor->action_timer == 0.0f && maximum > minimum) {
+            processor->action_timer = NuRandFloat() * (maximum - minimum) + minimum;
+        }
+    } else if (processor->action_data_1 != 0) {
+        processor->action_data_1--;
+        result = processor->action_data_1 == 0;
+    } else if (processor->action_timer > 0.0f) {
+        processor->action_timer -= elapsed;
+        if (processor->action_timer <= 0.0f) {
+            processor->action_timer = 0.0f;
+            result = 1;
+        }
+    }
+    return result;
 }
 
 __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params, i32 param_4,
@@ -281,15 +310,47 @@ __used__ static i32 Action_SetLayer(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
 }
 
 __used__ static i32 Action_SetParam(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
-                                    i32 param_4, i32 param_5, f32 param_6) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
-    (void)param_6;
-    return 0;
+                                    i32 param_count, i32, f32) {
+    i32 index;
+    i32 i;
+    char *value;
+    i64 flag;
+    AICREATURE *creature;
+
+    if (packet != NULL && processor != NULL && processor->script != NULL) {
+        creature = NULL;
+        if (packet->field_0x134 != 0xff) {
+            creature = &sys->creatures[packet->field_0x134];
+        }
+        for (i = 0; i < param_count - 1; i++) {
+            for (index = 0; index < 4; index++) {
+                if (NuStrICmp(params[i], processor->script->params[index].name) == 0) {
+                    break;
+                }
+            }
+            if (index < 4) {
+                flag = 1LL << (index + 1);
+                i++;
+                if (NuStrICmp(params[i], "default") == 0) {
+                    if (creature != NULL && (creature->flags & flag) != 0) {
+                        processor->params[index] = creature->script_params[index];
+                    } else {
+                        processor->params[index] = processor->script->params[index].default_val;
+                    }
+                } else {
+                    // Expressions use the packet's primary processor, even for a secondary action processor.
+                    if ((value = NuStrIStr(params[i], "inc=")) != NULL) {
+                        processor->params[index] += AIParamToFloatEx(packet, &packet->script_process, value + NuStrLen("inc="));
+                    } else if ((value = NuStrIStr(params[i], "dec=")) != NULL) {
+                        processor->params[index] -= AIParamToFloatEx(packet, &packet->script_process, value + NuStrLen("dec="));
+                    } else {
+                        processor->params[index] = AIParamToFloatEx(packet, &packet->script_process, params[i]);
+                    }
+                }
+            }
+        }
+    }
+    return 1;
 }
 
 __used__ static i32 Action_TakeOver(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
@@ -642,28 +703,26 @@ static i32 Action_ResetTimer(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *pack
     f32 maximum = 0.0f;
     f32 exact = 0.0f;
     for (i32 param_index = 0; param_index < param_count; ++param_index) {
-        char *value = NuStrIStr(params[param_index], "mintime=");
+        char *value = NuStrIStr(params[param_index], "mintime");
         if (value != NULL) {
             minimum = AIParamToFloatEx(packet, processor, value + 8);
             continue;
         }
 
-        value = NuStrIStr(params[param_index], "maxtime=");
+        value = NuStrIStr(params[param_index], "maxtime");
         if (value != NULL) {
             maximum = AIParamToFloatEx(packet, processor, value + 8);
             continue;
         }
 
-        value = NuStrIStr(params[param_index], "time=");
+        value = NuStrIStr(params[param_index], "time");
         if (value != NULL) {
             exact = AIParamToFloatEx(packet, processor, value + 5);
         }
     }
 
     if (minimum != 0.0f || maximum != 0.0f) {
-        const f32 maximum_random = NuRandFloat();
-        const f32 minimum_random = NuRandFloat();
-        processor->script_timer = maximum_random * maximum + (1.0f - minimum_random) * minimum;
+        processor->script_timer = NuRandFloat() * maximum + (1.0f - NuRandFloat()) * minimum;
     } else {
         processor->script_timer = exact;
     }
@@ -1275,16 +1334,30 @@ __used__ static i32 Action_SetHitPoints(AISYS *sys, AISCRIPTPROCESS *processor, 
     return 0;
 }
 
-__used__ static i32 Action_SetInterrupt(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
-                                        i32 param_4, i32 param_5, f32 param_6) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
-    (void)param_6;
-    return 0;
+__used__ static i32 Action_SetInterrupt(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
+                                        i32 param_count, i32 is_first_time, f32) {
+    if (is_first_time && processor != NULL && param_count > 0) {
+        u8 priority = 0;
+        u8 id = 0;
+        char *state_name = NULL;
+        f32 time = 0.0f;
+        char *value;
+        for (i32 i = 0; i < param_count; i++) {
+            if ((value = NuStrIStr(params[i], "priority")) != NULL) {
+                priority = static_cast<i32>(AIParamToFloatEx(packet, processor, value + 9));
+            } else if ((value = NuStrIStr(params[i], "id")) != NULL) {
+                id = static_cast<i32>(AIParamToFloatEx(packet, processor, value + 3));
+            } else if ((value = NuStrIStr(params[i], "state")) != NULL) {
+                state_name = value + 6;
+            } else if ((value = NuStrIStr(params[i], "time")) != NULL) {
+                time = AIParamToFloatEx(packet, processor, value + 5);
+            }
+        }
+        if (state_name != NULL) {
+            AIScriptSetInterrupt(processor, priority, id, state_name, time);
+        }
+    }
+    return 1;
 }
 
 __used__ static i32 Action_SetLevelPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
@@ -1515,16 +1588,13 @@ __used__ static i32 Action_ResetToOrigin(AISYS *sys, AISCRIPTPROCESS *processor,
     return 0;
 }
 
-__used__ static i32 Action_ReturnToState(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
-                                         i32 param_4, i32 param_5, f32 param_6) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
-    (void)param_6;
-    return 0;
+__used__ static i32 Action_ReturnToState(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *, char **,
+                                          i32, i32, f32) {
+    if (processor != NULL && processor->return_to_state != NULL) {
+        processor->next_state = processor->return_to_state;
+        processor->return_to_state = NULL;
+    }
+    return 1;
 }
 
 __used__ static i32 Action_SetHoverPhase(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
@@ -1707,16 +1777,21 @@ __used__ static i32 Action_BreakFormation(AISYS *sys, AISCRIPTPROCESS *processor
     return 0;
 }
 
-__used__ static i32 Action_ClearInterrupt(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
-                                          i32 param_4, i32 param_5, f32 param_6) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
-    (void)param_6;
-    return 0;
+__used__ static i32 Action_ClearInterrupt(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *, char **params,
+                                          i32 param_count, i32 is_first_time, f32) {
+    if (is_first_time && processor != NULL && param_count > 0) {
+        char *state_name = NULL;
+        for (i32 i = 0; i < param_count; i++) {
+            char *value = NuStrIStr(params[i], "state");
+            if (value != NULL) {
+                state_name = value + 6;
+            }
+        }
+        if (state_name != NULL) {
+            AIScriptClearInterrupt(processor, state_name);
+        }
+    }
+    return 1;
 }
 
 __used__ static i32 Action_CycleCharacter(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
@@ -2065,7 +2140,7 @@ __used__ static i32 Action_CreateCreatures(AISYS *sys, AISCRIPTPROCESS *processo
     }
 
     if (state_name[0] != '\0') {
-        AIScriptSetBaseScriptStateByName(reinterpret_cast<AISCRIPTPROCESS *>(&object->ai), state_name);
+        AIScriptSetBaseScriptStateByName(&object->ai.script_process, state_name);
     }
     object->ai.locator = locator;
     object->ai.locator_set = locator_set;
@@ -2504,16 +2579,19 @@ __used__ static i32 Action_SetObstacleToEnd(AISYS *sys, AISCRIPTPROCESS *process
     return 0;
 }
 
-__used__ static i32 Action_SetReturnToState(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
-                                            i32 param_4, i32 param_5, f32 param_6) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
-    (void)param_6;
-    return 0;
+__used__ static i32 Action_SetReturnToState(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *, char **params,
+                                             i32 param_count, i32 is_first_time, f32) {
+    if (is_first_time && processor != NULL) {
+        AISTATE *state = processor->state;
+        for (i32 i = 0; i < param_count; i++) {
+            char *value = NuStrIStr(params[i], "state");
+            if (value != NULL) {
+                state = AIStateFind(value + 6, processor->script);
+            }
+        }
+        processor->return_to_state = state;
+    }
+    return 1;
 }
 
 __used__ static i32 Action_SetScaleOverride(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
@@ -2540,12 +2618,16 @@ __used__ static i32 Action_UseBigJumpToJump(AISYS *sys, AISCRIPTPROCESS *process
     return 0;
 }
 
-__used__ static f32 Condition_IAm(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg, void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
+static f32 Condition_IAm(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *arg, void *void_arg) {
+    if (packet != NULL && packet->owner != NULL) {
+        if (packet->owner == void_arg) {
+            return 1.0f;
+        }
+        characterdata_s *character = packet->owner->apiobj.character_data;
+        if (character != NULL && character->file != NULL && NuStrICmp(character->file, arg) == 0) {
+            return 1.0f;
+        }
+    }
     return 0.0f;
 }
 
@@ -2638,14 +2720,8 @@ __used__ static f32 Condition_MySet(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
     return 0.0f;
 }
 
-__used__ static f32 Condition_Param(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                    void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
+__used__ static f32 Condition_Param(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg, void *) {
+    return AIParamToFloatEx(packet, processor, arg);
 }
 
 static f32 Condition_Timer(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *, char *, void *) {
@@ -2672,14 +2748,8 @@ __used__ static f32 Condition_GotGun(AISYS *sys, AISCRIPTPROCESS *processor, AIP
     return 0.0f;
 }
 
-__used__ static f32 Condition_OnPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                     void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
+static f32 Condition_OnPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *) {
+    return packet != NULL && packet->path_info.on_path ? 1.0f : 0.0f;
 }
 
 static f32 Condition_Random(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *) {
@@ -2905,14 +2975,8 @@ __used__ static f32 Condition_Player2Is(AISYS *sys, AISCRIPTPROCESS *processor, 
     return 0.0f;
 }
 
-__used__ static f32 Condition_StuckTime(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                        void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
+static f32 Condition_StuckTime(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *) {
+    return packet != NULL && packet->owner != NULL ? packet->owner->apiobj.respawn_timer : 0.0f;
 }
 
 __used__ static f32 Condition_TakenOver(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
@@ -2955,14 +3019,8 @@ __used__ static f32 Condition_ForceAtEnd(AISYS *sys, AISCRIPTPROCESS *processor,
     return 0.0f;
 }
 
-__used__ static f32 Condition_GotLocator(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                         void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
+static f32 Condition_GotLocator(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *) {
+    return processor->unknown_a4 != NULL ? 1.0f : 0.0f;
 }
 
 __used__ static f32 Condition_HoverPhase(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
@@ -3094,14 +3152,8 @@ static f32 Condition_BeenToLevel(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *,
     return (progress[LEVEL_PROGRESS_COMPLETION_FLAGS_OFFSET] & LEVEL_PROGRESS_STORY_COMPLETE) != 0 ? 1.0f : 0.0f;
 }
 
-__used__ static f32 Condition_GotOpponent(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                          void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
+static f32 Condition_GotOpponent(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *) {
+    return packet != NULL && packet->opponent != NULL ? 1.0f : 0.0f;
 }
 
 __used__ static f32 Condition_HasTakeOver(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
@@ -3134,14 +3186,11 @@ __used__ static f32 Condition_InLevelNode(AISYS *sys, AISCRIPTPROCESS *processor
     return 0.0f;
 }
 
-__used__ static f32 Condition_InterruptID(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                          void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
+__used__ static f32 Condition_InterruptID(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *, char *, void *) {
+    if (processor != NULL) {
+        return static_cast<u32>(processor->interrupt_id);
+    }
+    return -1.0f;
 }
 
 __used__ static f32 Condition_MissionMode(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
@@ -3174,14 +3223,9 @@ __used__ static f32 Condition_OriginRange(AISYS *sys, AISCRIPTPROCESS *processor
     return 0.0f;
 }
 
-__used__ static f32 Condition_PathBlocked(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                          void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
+static f32 Condition_PathBlocked(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *) {
+    // The script condition tests the waypoint bit (0x40), not the route-failure bit (0x20).
+    return packet != NULL && (packet->runtime_flags & AIPACKET_RUNTIME_USING_PATH_WAYPOINT) != 0 ? 1.0f : 0.0f;
 }
 
 __used__ static f32 Condition_PlayerRange(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
@@ -3204,14 +3248,8 @@ __used__ static f32 Condition_ScriptParam(AISYS *sys, AISCRIPTPROCESS *processor
     return 0.0f;
 }
 
-__used__ static f32 Condition_TimeOffPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                          void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
+static f32 Condition_TimeOffPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *) {
+    return packet != NULL ? packet->time_off_path : 0.0f;
 }
 
 __used__ static f32 Condition_TurretAlive(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
@@ -3334,14 +3372,18 @@ __used__ static f32 Condition_HintComplete(AISYS *sys, AISCRIPTPROCESS *processo
     return 0.0f;
 }
 
-__used__ static f32 Condition_LocatorRange(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                           void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
+static f32 Condition_LocatorRange(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg) {
+    NUVEC difference;
+    if (packet != NULL && packet->owner != NULL) {
+        if (void_arg == NULL) {
+            void_arg = processor->unknown_a4;
+        }
+        if (void_arg != NULL) {
+            AILOCATOR *locator = static_cast<AILOCATOR *>(void_arg);
+            return NuVecDist(&packet->terrain_origin, &locator->position, &difference);
+        }
+    }
+    return 3.402823466e+38f;
 }
 
 __used__ static f32 Condition_PlayerInSock(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
@@ -3354,14 +3396,8 @@ __used__ static f32 Condition_PlayerInSock(AISYS *sys, AISCRIPTPROCESS *processo
     return 0.0f;
 }
 
-__used__ static f32 Condition_PlayerOnPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                           void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
+static f32 Condition_PlayerOnPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *) {
+    return sys->player_1 != NULL && sys->player_1->ai->path_info.on_path ? 1.0f : 0.0f;
 }
 
 __used__ static f32 Condition_BeenTakenOver(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
@@ -3404,11 +3440,8 @@ __used__ static f32 Condition_CheatProgress(AISYS *sys, AISCRIPTPROCESS *process
     return 0.0f;
 }
 
-__used__ static void *Condition_IAmInit(AISYS *sys, char *arg, AISCRIPT *script) {
-    (void)sys;
-    (void)arg;
-    (void)script;
-    return NULL;
+static void *Condition_IAmInit(AISYS *sys, char *arg, AISCRIPT *) {
+    return arg != NULL && GetNamedAPIObjectFn != NULL ? GetNamedAPIObjectFn(sys, arg) : NULL;
 }
 
 __used__ static void *Condition_IAmAInit(AISYS *sys, char *arg, AISCRIPT *script) {
@@ -3481,15 +3514,473 @@ __used__ static void *Condition_OnObjectInit(AISYS *sys, char *arg, AISCRIPT *sc
     return NULL;
 }
 
+// API script callbacks and their constant registry share internal linkage.
+static f32 Condition_AlwaysTrue(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg, void *void_arg) {
+    return *(f32 *)&void_arg;
+}
+
+static void *Condition_AlwaysTrueInit(AISYS *sys, char *arg, AISCRIPT *script) {
+    f32 value;
+
+    if (arg != NULL && NuStrLen(arg) != 0) {
+        value = NuAToF(arg);
+
+        return *(void **)&value;
+    }
+
+    value = 1.0f;
+    return *(void **)&value;
+}
+
+
+static __used__ i32 Action_RetreatFromNearestOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32,
+                                                      f32) {
+    return 0;
+}
+
+static __used__ i32 Action_RetreatFromOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
+    return 0;
+}
+
+static __used__ i32 Action_MoveAwayFromPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
+    return 0;
+}
+
+static __used__ i32 Action_MoveAwayFromPlayer2(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
+    return 0;
+}
+
+static __used__ i32 Action_SetCircleDirection(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
+    return 0;
+}
+
+static __used__ i32 Action_MoveAwayFromOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
+    return 0;
+}
+
+static __used__ i32 Action_IgnoreWallSplines(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
+    return 0;
+}
+
+static __used__ i32 Action_DontUseShadowTerrain(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
+    return 0;
+}
+
+static __used__ i32 Action_SetFullPathSearch(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
+    return 0;
+}
+
+static __used__ i32 Action_SetRespawnLocator(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
+    return 0;
+}
+
+static __used__ i32 Action_OverrideAnimation(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
+    return 0;
+}
+
+static __used__ i32 Action_PathConnectionObstacle(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32,
+                                                  f32) {
+    return 0;
+}
+
+static __used__ i32 Action_PathConnectionMaxLength(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32,
+                                                   f32) {
+    return 0;
+}
+
+static __used__ i32 Action_SetIgnoreAntinodes(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
+    return 0;
+}
+
+static __used__ i32 Action_NotifyStateChange(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *, char **params,
+                                           i32 param_count, i32, f32) {
+    i32 enabled = 1;
+    for (i32 i = 0; i < param_count; i++) {
+        if (NuStrICmp(params[i], "false") == 0) {
+            enabled = 0;
+        }
+    }
+    if (enabled) {
+        AiSysSetStateDebugee(processor);
+    } else {
+        AiSysSetStateDebugee(NULL);
+    }
+    return 1;
+}
+
+static void *Condition_LocatorRangeInit(AISYS *sys, char *arg, AISCRIPT *) {
+    return arg != NULL ? AIPathFindLocator(sys, arg) : NULL;
+}
+
+static f32 Condition_LocatorRangeXZ(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg) {
+    NUVEC difference;
+    if (packet != NULL && packet->owner != NULL) {
+        if (void_arg == NULL) {
+            void_arg = processor->unknown_a4;
+        }
+        if (void_arg != NULL) {
+            AILOCATOR *locator = static_cast<AILOCATOR *>(void_arg);
+            return NuVecXZDist(&packet->terrain_origin, &locator->position, &difference);
+        }
+    }
+    return 3.402823466e+38f;
+}
+
+static f32 Condition_LocatorRangeY(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg) {
+    if (packet != NULL && packet->owner != NULL) {
+        if (void_arg == NULL) {
+            void_arg = processor->unknown_a4;
+        }
+        if (void_arg != NULL) {
+            AILOCATOR *locator = static_cast<AILOCATOR *>(void_arg);
+            return packet->owner->apiobj.position.y - locator->position.y;
+        }
+    }
+    return 0.0f;
+}
+
+static f32 Condition_GotLocatorSet(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *) {
+    return processor->unknown_a8 != NULL ? 1.0f : 0.0f;
+}
+
+static f32 Condition_CurrentLocatorIs(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg) {
+    return void_arg != NULL && processor->unknown_a4 == void_arg ? 1.0f : 0.0f;
+}
+
+static void *Condition_CurrentLocatorIsInit(AISYS *sys, char *arg, AISCRIPT *) {
+    return arg != NULL ? AIPathFindLocator(sys, arg) : NULL;
+}
+
+static __used__ f32 Condition_InTriggerArea(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return 0;
+}
+
+static void *Condition_InTriggerAreaInit(AISYS *sys, char *arg, AISCRIPT *) {
+    return arg != NULL ? AISysFindArea(sys, arg) : NULL;
+}
+
+static __used__ f32 Condition_NearestPlayerRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return 0;
+}
+
+static __used__ f32 Condition_NearestPlayerXZRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return 0;
+}
+
+static void *Condition_InLevelNodeInit(AISYS *sys, char *arg, AISCRIPT *) {
+    if (sys != NULL && sys->path_sys != NULL && sys->path_sys->path_count != 0) {
+        return AIPathFindNode(sys, sys->path_sys->active_path, arg);
+    }
+    return NULL;
+}
+
+static __used__ f32 Condition_PlayerInLevelNode(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return 0;
+}
+
+static void *Condition_PlayerInLevelNodeInit(AISYS *sys, char *arg, AISCRIPT *) {
+    if (sys != NULL && sys->path_sys != NULL && sys->path_sys->path_count != 0) {
+        return AIPathFindNode(sys, sys->path_sys->active_path, arg);
+    }
+    return NULL;
+}
+
+static __used__ f32 Condition_EitherPlayerInLevelNode(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return 0;
+}
+
+static __used__ f32 Condition_LevelNodeRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return 0;
+}
+
+static void *Condition_LevelNodeRangeInit(AISYS *sys, char *arg, AISCRIPT *) {
+    if (sys != NULL && sys->path_sys != NULL && sys->path_sys->path_count != 0) {
+        return AIPathFindNode(sys, sys->path_sys->active_path, arg);
+    }
+    return NULL;
+}
+
+static f32 Condition_GotTriggerArea(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *) {
+    return processor->unknown_a0 != NULL ? 1.0f : 0.0f;
+}
+
+static __used__ f32 Condition_PlayerInTriggerArea(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return 0;
+}
+
+static void *Condition_PlayerInTriggerAreaInit(AISYS *sys, char *arg, AISCRIPT *) {
+    return arg != NULL ? AISysFindArea(sys, arg) : NULL;
+}
+
+static __used__ f32 Condition_Player2InTriggerArea(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return 0;
+}
+
+static __used__ f32 Condition_EitherPlayerInTriggerArea(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return 0;
+}
+
+static __used__ f32 Condition_BaddyInTriggerArea(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return 0;
+}
+
+static void *Condition_BaddyInTriggerAreaInit(AISYS *sys, char *arg, AISCRIPT *) {
+    return arg != NULL ? AISysFindArea(sys, arg) : NULL;
+}
+
+static __used__ f32 Condition_GoodyInTriggerArea(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return 0;
+}
+
+static void *Condition_GoodyInTriggerAreaInit(AISYS *sys, char *arg, AISCRIPT *) {
+    return arg != NULL ? AISysFindArea(sys, arg) : NULL;
+}
+
+static __used__ f32 Condition_OpponentInTriggerArea(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return 0;
+}
+
+static void *Condition_OpponentInTriggerAreaInit(AISYS *sys, char *arg, AISCRIPT *) {
+    return arg != NULL ? AISysFindArea(sys, arg) : NULL;
+}
+
+static f32 Condition_OpponentIsAThreat(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg) {
+    return packet != NULL && packet->opponent_object != NULL && (packet->field_0x1e5 & 8) != 0 ? 1.0f : 0.0f;
+}
+
+static f32 Condition_OpponentOnSamePath(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg) {
+    if (packet != NULL && packet->opponent_object != NULL && packet->path_info.path != NULL) {
+        AIPACKET *opponent = packet->opponent_object->ai;
+        if (opponent != NULL && opponent->path_info.path == packet->path_info.path) {
+            return 1.0f;
+        }
+    }
+    return 0.0f;
+}
+
+static f32 Condition_OpponentRange(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg) {
+    return packet != NULL && packet->opponent_object != NULL ? packet->opponent_distance : 3.402823466e+38f;
+}
+
+static f32 Condition_NearestOpponentRange(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg) {
+    return packet != NULL && packet->nearest_opponent_object != NULL ? packet->nearest_opponent_metric : 3.402823466e+38f;
+}
+
+static __used__ f32 Condition_YawToOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return 0;
+}
+
+static f32 Condition_OpponentBelow(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg) {
+    return packet != NULL && packet->opponent_object != NULL &&
+                   packet->opponent_object->position.y < packet->owner->apiobj.position.y - 0.1f
+               ? 1.0f : 0.0f;
+}
+
+static __used__ f32 Condition_OpponentToOrigin(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return 0;
+}
+
+static __used__ f32 Condition_PlayerToOrigin(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return 0;
+}
+
+static f32 Condition_OpponentToLocator(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg) {
+    NUVEC difference;
+    if (packet != NULL && packet->opponent_object != NULL) {
+        if (void_arg == NULL) {
+            void_arg = processor->unknown_a4;
+        }
+        if (void_arg != NULL) {
+            AILOCATOR *locator = static_cast<AILOCATOR *>(void_arg);
+            return NuVecDist(&packet->opponent_object->position, &locator->position, &difference);
+        }
+    }
+    return 3.402823466e+38f;
+}
+
+static void *Condition_OpponentToLocatorInit(AISYS *sys, char *arg, AISCRIPT *) {
+    return arg != NULL ? AIPathFindLocator(sys, arg) : NULL;
+}
+
+static f32 Condition_OpponentToLocatorXZ(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg) {
+    NUVEC difference;
+    if (packet != NULL && packet->opponent_object != NULL) {
+        if (void_arg == NULL) {
+            void_arg = processor->unknown_a4;
+        }
+        if (void_arg != NULL) {
+            AILOCATOR *locator = static_cast<AILOCATOR *>(void_arg);
+            return NuVecXZDist(&packet->opponent_object->position, &locator->position, &difference);
+        }
+    }
+    return 3.402823466e+38f;
+}
+
+static f32 Condition_OpponentToLocatorY(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg) {
+    if (packet != NULL && packet->opponent_object != NULL) {
+        if (void_arg == NULL) {
+            void_arg = processor->unknown_a4;
+        }
+        if (void_arg != NULL) {
+            AILOCATOR *locator = static_cast<AILOCATOR *>(void_arg);
+            return packet->opponent_object->position.y - locator->position.y;
+        }
+    }
+    return 3.402823466e+38f;
+}
+
+static f32 Condition_PlayerToLocator(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg) {
+    NUVEC difference;
+    if (packet != NULL && sys != NULL && sys->player_1 != NULL) {
+        if (void_arg == NULL) {
+            void_arg = processor->unknown_a4;
+        }
+        if (void_arg != NULL) {
+            AILOCATOR *locator = static_cast<AILOCATOR *>(void_arg);
+            return NuVecDist(&sys->player_1->position, &locator->position, &difference);
+        }
+    }
+    return 3.402823466e+38f;
+}
+
+static void *Condition_PlayerToLocatorInit(AISYS *sys, char *arg, AISCRIPT *) {
+    return arg != NULL ? AIPathFindLocator(sys, arg) : NULL;
+}
+
+static __used__ f32 Condition_NearestPlayerToLocator(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return 0;
+}
+
+static f32 Condition_OpponentOnPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *) {
+    return packet != NULL && packet->opponent != NULL &&
+                   static_cast<APIOBJECT *>(packet->opponent)->ai->path_info.on_path
+               ? 1.0f : 0.0f;
+}
+
+i32 Action_SetState(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
+i32 Action_Circle(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
+i32 Action_CircleOpponent(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
+i32 Action_CirclePlayer(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
+i32 Action_FollowPlayer(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
+
+AIACTIONDEF api_aiactiondefs[] = {
+    {"Idle", Action_Idle, 0, 0, 0},
+    {"SetState", Action_SetState, 0, 0, 0},
+    {"ResetTimer", Action_ResetTimer, 0, 0, 0},
+    {"RetreatFromNearestOpponent", Action_RetreatFromNearestOpponent, 0, 0, 0},
+    {"RetreatFromOpponent", Action_RetreatFromOpponent, 0, 0, 0},
+    {"MoveAwayFromPlayer", Action_MoveAwayFromPlayer, 0, 0, 0},
+    {"MoveAwayFromPlayer2", Action_MoveAwayFromPlayer2, 0, 0, 0},
+    {"SetCircleDirection", Action_SetCircleDirection, 0, 0, 0},
+    {"Circle", Action_Circle, 0, 0, 0},
+    {"CircleOpponent", Action_CircleOpponent, 0, 0, 0},
+    {"CirclePlayer", Action_CirclePlayer, 0, 0, 0},
+    {"FollowPlayer", Action_FollowPlayer, 0, 0, 0},
+    {"MoveAwayFromOpponent", Action_MoveAwayFromOpponent, 0, 0, 0},
+    {"FollowOpponent", Action_FollowOpponent, 0, 0, 0},
+    {"FacePlayer", Action_FacePlayer, 0, 0, 0},
+    {"FaceOpponent", Action_FaceOpponent, 0, 0, 0},
+    {"FaceLocator", Action_FaceLocator, 0, 0, 0},
+    {"IgnoreWallSplines", Action_IgnoreWallSplines, 0, 0, 0},
+    {"CheckWallSplines", Action_CheckWallSplines, 0, 0, 0},
+    {"NoTerrain", Action_NoTerrain, 0, 0, 0},
+    {"FlatTerrain", Action_FlatTerrain, 0, 0, 0},
+    {"ShadowTerrain", Action_ShadowTerrain, 0, 0, 0},
+    {"DontUseShadowTerrain", Action_DontUseShadowTerrain, 0, 0, 0},
+    {"DontPush", Action_DontPush, 0, 0, 0},
+    {"CanSeeBehind", Action_CanSeeBehind, 0, 0, 0},
+    {"RequiresLOS", Action_RequiresLOS, 0, 0, 0},
+    {"SetFullPathSearch", Action_SetFullPathSearch, 0, 0, 0},
+    {"SetViewDistance", Action_SetViewDistance, 0, 0, 0},
+    {"SetMaxViewHeight", Action_SetMaxViewHeight, 0, 0, 0},
+    {"SetMinViewHeight", Action_SetMinViewHeight, 0, 0, 0},
+    {"SetHearDistance", Action_SetHearDistance, 0, 0, 0},
+    {"SetMoveRadius", Action_SetMoveRadius, 0, 0, 0},
+    {"GoToNode", Action_GoToNode, 0, 0, 0},
+    {"GoToNodeRandom", Action_GoToNodeRandom, 0, 0, 0},
+    {"GoToOrigin", Action_GoToOrigin, 0, 0, 0},
+    {"GoToLocator", Action_GoToLocator, 0, 0, 0},
+    {"SetLocator", Action_SetLocator, 0, 0, 0},
+    {"SetRespawnLocator", Action_SetRespawnLocator, 0, 0, 0},
+    {"FollowPath", Action_FollowPath, 0, 0, 0},
+    {"MoveAwayFromNode", Action_MoveAwayFromNode, 0, 0, 0},
+    {"OverrideAnimation", Action_OverrideAnimation, 0, 0, 0},
+    {"BlockPath", Action_BlockPath, 0, 0, 0},
+    {"PathConnectionObstacle", Action_PathConnectionObstacle, 0, 0, 0},
+    {"PathConnectionMaxLength", Action_PathConnectionMaxLength, 0, 0, 0},
+    {"NoLosCheck", Action_NoLosCheck, 0, 0, 0},
+    {"ResetToOrigin", Action_ResetToOrigin, 0, 0, 0},
+    {"SetInterrupt", Action_SetInterrupt, 0, 0, 0},
+    {"ClearInterrupt", Action_ClearInterrupt, 0, 0, 0},
+    {"SetIgnoreAntinodes", Action_SetIgnoreAntinodes, 0, 0, 0},
+    {"NoShadows", Action_NoShadows, 0, 0, 0},
+    {"SetParam", Action_SetParam, 0, 0, 0},
+    {"SetReturnToState", Action_SetReturnToState, 0, 0, 0},
+    {"ReturnToState", Action_ReturnToState, 0, 0, 0},
+    {"NotifyStateChange", Action_NotifyStateChange, 0, 0, 0},
+    {NULL, NULL, 0, 0, 0},
+};
+
+AICONDITIONDEF api_aiconditiondefs[] = {
+    {"PreviousResult", NULL, NULL},
+    {"AlwaysTrue", Condition_AlwaysTrue, Condition_AlwaysTrueInit},
+    {"LocatorRange", Condition_LocatorRange, Condition_LocatorRangeInit},
+    {"LocatorRangeXZ", Condition_LocatorRangeXZ, Condition_LocatorRangeInit},
+    {"LocatorRangeY", Condition_LocatorRangeY, Condition_LocatorRangeInit},
+    {"Timer", Condition_Timer, NULL},
+    {"Random", Condition_Random, NULL},
+    {"GotLocator", Condition_GotLocator, NULL},
+    {"GotLocatorSet", Condition_GotLocatorSet, NULL},
+    {"CurrentLocatorIs", Condition_CurrentLocatorIs, Condition_CurrentLocatorIsInit},
+    {"InTriggerArea", Condition_InTriggerArea, Condition_InTriggerAreaInit},
+    {"PlayerRange", Condition_PlayerRange, NULL},
+    {"NearestPlayerRange", Condition_NearestPlayerRange, NULL},
+    {"NearestPlayerXZRange", Condition_NearestPlayerXZRange, NULL},
+    {"InLevelNode", Condition_InLevelNode, Condition_InLevelNodeInit},
+    {"PlayerInLevelNode", Condition_PlayerInLevelNode, Condition_PlayerInLevelNodeInit},
+    {"EitherPlayerInLevelNode", Condition_EitherPlayerInLevelNode, Condition_PlayerInLevelNodeInit},
+    {"NodeRange", Condition_LevelNodeRange, Condition_LevelNodeRangeInit},
+    {"GotTriggerArea", Condition_GotTriggerArea, NULL},
+    {"PlayerInTriggerArea", Condition_PlayerInTriggerArea, Condition_PlayerInTriggerAreaInit},
+    {"Player2InTriggerArea", Condition_Player2InTriggerArea, Condition_PlayerInTriggerAreaInit},
+    {"EitherPlayerInTriggerArea", Condition_EitherPlayerInTriggerArea, Condition_PlayerInTriggerAreaInit},
+    {"BaddyInTriggerArea", Condition_BaddyInTriggerArea, Condition_BaddyInTriggerAreaInit},
+    {"GoodyInTriggerArea", Condition_GoodyInTriggerArea, Condition_GoodyInTriggerAreaInit},
+    {"OpponentInTriggerArea", Condition_OpponentInTriggerArea, Condition_OpponentInTriggerAreaInit},
+    {"GotOpponent", Condition_GotOpponent, NULL},
+    {"OpponentIsAThreat", Condition_OpponentIsAThreat, NULL},
+    {"OpponentOnSamePath", Condition_OpponentOnSamePath, NULL},
+    {"OpponentRange", Condition_OpponentRange, NULL},
+    {"NearestOpponentRange", Condition_NearestOpponentRange, NULL},
+    {"YawToOpponent", Condition_YawToOpponent, NULL},
+    {"OpponentBelow", Condition_OpponentBelow, NULL},
+    {"OriginRange", Condition_OriginRange, NULL},
+    {"OpponentToOrigin", Condition_OpponentToOrigin, NULL},
+    {"PlayerToOrigin", Condition_PlayerToOrigin, NULL},
+    {"OpponentToLocator", Condition_OpponentToLocator, Condition_OpponentToLocatorInit},
+    {"OpponentToLocatorXZ", Condition_OpponentToLocatorXZ, Condition_OpponentToLocatorInit},
+    {"OpponentToLocatorY", Condition_OpponentToLocatorY, Condition_OpponentToLocatorInit},
+    {"PlayerToLocator", Condition_PlayerToLocator, Condition_PlayerToLocatorInit},
+    {"NearestPlayerToLocator", Condition_NearestPlayerToLocator, Condition_PlayerToLocatorInit},
+    {"OnPath", Condition_OnPath, NULL},
+    {"PlayerOnPath", Condition_PlayerOnPath, NULL},
+    {"OpponentOnPath", Condition_OpponentOnPath, NULL},
+    {"TimeOffPath", Condition_TimeOffPath, NULL},
+    {"PathBlocked", Condition_PathBlocked, NULL},
+    {"InterruptID", Condition_InterruptID, NULL},
+    {"IAm", Condition_IAm, Condition_IAmInit},
+    {"StuckTime", Condition_StuckTime, NULL},
+    {"Param", Condition_Param, NULL},
+    {NULL, NULL, NULL},
+};
+
+DECOMP_ASSERT(sizeof(api_aiactiondefs) == 0x294, "API action registry size");
+DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size");
+
+
 namespace {
     struct AISysRegistryCallbacks {
         AISysRegistryCallbacks() {
-            api_aiactiondefs[API_AI_ACTION_IDLE].eval_fn = Action_Idle;
-            api_aiactiondefs[API_AI_ACTION_RESET_TIMER].eval_fn = Action_ResetTimer;
-            api_aiactiondefs[API_AI_ACTION_GO_TO_LOCATOR].eval_fn = Action_GoToLocator;
-            api_aiactiondefs[API_AI_ACTION_FOLLOW_PATH].eval_fn = Action_FollowPath;
-            api_aiconditiondefs[API_AI_CONDITION_TIMER].eval_fn = Condition_Timer;
-            api_aiconditiondefs[API_AI_CONDITION_RANDOM].eval_fn = Condition_Random;
 
             lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_TO_LEVEL].eval_fn = Condition_BeenToLevel;
             lego_aiconditiondefs[LEGO_AI_CONDITION_MESSAGE].eval_fn = Condition_Message;

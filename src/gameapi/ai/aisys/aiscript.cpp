@@ -35,88 +35,6 @@ static AICONDITIONDEF *game_aiconditiondefs;
 
 NULISTHDR global_aiscripts;
 
-static f32 Condition_AlwaysTrue(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg, void *void_arg) {
-    return *(f32 *)&void_arg;
-}
-
-static void *Condition_AlwaysTrueInit(AISYS *sys, char *arg, AISCRIPT *script) {
-    f32 value;
-
-    if (arg != NULL && NuStrLen(arg) != 0) {
-        value = NuAToF(arg);
-
-        return *(void **)&value;
-    }
-
-    value = 1.0f;
-    return *(void **)&value;
-}
-
-i32 Action_SetState(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
-
-AIACTIONDEF api_aiactiondefs[] = {
-    {"Idle", NULL, 0, 0, 0},
-    {"SetState", &Action_SetState, 0, 0, 0},
-    {"ResetTimer", NULL, 0, 0, 0},
-    {"RetreatFromNearestOpponent", NULL, 0, 0, 0},
-    {"RetreatFromOpponent", NULL, 0, 0, 0},
-    {"MoveAwayFromPlayer", NULL, 0, 0, 0},
-    {"MoveAwayFromPlayer2", NULL, 0, 0, 0},
-    {"SetCircleDirection", NULL, 0, 0, 0},
-    {"Circle", NULL, 0, 0, 0},
-    {"CircleOpponent", NULL, 0, 0, 0},
-    {"CirclePlayer", NULL, 0, 0, 0},
-    {"FollowPlayer", NULL, 0, 0, 0},
-    {"MoveAwayFromOpponent", NULL, 0, 0, 0},
-    {"FollowOpponent", NULL, 0, 0, 0},
-    {"FacePlayer", NULL, 0, 0, 0},
-    {"FaceOpponent", NULL, 0, 0, 0},
-    {"FaceLocator", NULL, 0, 0, 0},
-    {"IgnoreWallSplines", NULL, 0, 0, 0},
-    {"CheckWallSplines", NULL, 0, 0, 0},
-    {"NoTerrain", NULL, 0, 0, 0},
-    {"FlatTerrain", NULL, 0, 0, 0},
-    {"ShadowTerrain", NULL, 0, 0, 0},
-    {"DontUseShadowTerrain", NULL, 0, 0, 0},
-    {"DontPush", NULL, 0, 0, 0},
-    {"CanSeeBehind", NULL, 0, 0, 0},
-    {"RequiresLOS", NULL, 0, 0, 0},
-    {"SetFullPathSearch", NULL, 0, 0, 0},
-    {"SetViewDistance", NULL, 0, 0, 0},
-    {"SetMaxViewHeight", NULL, 0, 0, 0},
-    {"SetMinViewHeight", NULL, 0, 0, 0},
-    {"SetHearDistance", NULL, 0, 0, 0},
-    {"SetMoveRadius", NULL, 0, 0, 0},
-    {"GoToNode", NULL, 0, 0, 0},
-    {"GoToNodeRandom", NULL, 0, 0, 0},
-    {"GoToOrigin", NULL, 0, 0, 0},
-    {"GoToLocator", NULL, 0, 0, 0},
-    {"SetLocator", NULL, 0, 0, 0},
-    {"SetRespawnLocator", NULL, 0, 0, 0},
-    {"FollowPath", NULL, 0, 0, 0},
-    {"MoveAwayFromNode", NULL, 0, 0, 0},
-    {"OverrideAnimation", NULL, 0, 0, 0},
-    {"BlockPath", NULL, 0, 0, 0},
-    {"PathConnectionObstacle", NULL, 0, 0, 0},
-    {"PathConnectionMaxLength", NULL, 0, 0, 0},
-    {"NoLosCheck", NULL, 0, 0, 0},
-    {"ResetToOrigin", NULL, 0, 0, 0},
-    {"SetInterrupt", NULL, 0, 0, 0},
-    {"ClearInterrupt", NULL, 0, 0, 0},
-    {"SetIgnoreAntinodes", NULL, 0, 0, 0},
-    {"NoShadows", NULL, 0, 0, 0},
-    {"SetParam", NULL, 0, 0, 0},
-    {"SetReturnToState", NULL, 0, 0, 0},
-    {"ReturnToState", NULL, 0, 0, 0},
-    {"NotifyStateChange", NULL, 0, 0, 0},
-    {NULL, NULL, 0, 0, 0},
-};
-
-AICONDITIONDEF api_aiconditiondefs[] = {{"PreviousResult", NULL, NULL},
-                                        {"AlwaysTrue", &Condition_AlwaysTrue, &Condition_AlwaysTrueInit},
-                                        {"Timer", NULL, NULL},
-                                        {"Random", NULL, NULL},
-                                        {NULL, NULL, NULL}};
 
 static i32 ExpressionRequiredNameLookup;
 static i32 ExpressionNameLookupFailed;
@@ -169,9 +87,7 @@ static void *AIScriptBufferAlloc(VARIPTR *buf, VARIPTR *buf_end, usize size) {
     void *ret;
 
     ret = NULL;
-    if (buf == NULL || buf_end == NULL) {
-        // Debug logging goes here.
-    } else {
+    if (buf != NULL && buf_end != NULL) {
         if (buf_end->addr > buf->addr + size) {
             ret = (void *)ALIGN(buf->addr, 0x10);
             buf->addr = (usize)ret + size;
@@ -179,6 +95,8 @@ static void *AIScriptBufferAlloc(VARIPTR *buf, VARIPTR *buf_end, usize size) {
         } else {
             // Debug logging goes here.
         }
+    } else {
+        // Debug logging goes here.
     }
 
     return ret;
@@ -952,6 +870,7 @@ static NUFPCOMJMP cfgtab_Script[] = {
 };
 
 i32 ai_usepackfile = 1;
+i32 ai_onlyusepackfile;
 
 void AIScriptLoadAll(char *path, VARIPTR *buf, VARIPTR *buf_end, AISYS *sys) {
     void *pak;
@@ -1023,6 +942,9 @@ static AISTATE *AIScriptCopyState(AISTATE *src, VARIPTR *buf, VARIPTR *buf_end) 
     AIREFSCRIPT *dst_ref;
 
     dst = (AISTATE *)AIScriptBufferAlloc(buf, buf_end, sizeof(AISTATE));
+    if (dst == NULL) {
+        return NULL;
+    }
 
     dst->name = AIScriptCopyString(src->name, buf, buf_end);
 
@@ -1232,6 +1154,10 @@ void AIScriptOpenPakFileParse(AISCRIPT **script_ref, void *pak, char *filename, 
     char str_buf[128];
     NUFPAR *parser;
     AISCRIPT *script;
+    i32 item_handle;
+    void *item_buf;
+    i32 size;
+    NUFILE file;
 
     NuStrCpy(script_name, filename);
 
@@ -1245,16 +1171,10 @@ void AIScriptOpenPakFileParse(AISCRIPT **script_ref, void *pak, char *filename, 
     sprintf(str_buf, "%s\\%s", path, filename);
 
     if (pak != NULL) {
-        i32 item_handle;
-
         item_handle = NuFilePakGetItem(pak, filename);
         if (item_handle == 0) {
             goto no_pak;
         } else {
-            void *item_buf;
-            i32 size;
-            NUFILE file;
-
             NuFilePakGetItemInfo(pak, item_handle, &item_buf, &size);
             file = NuMemFileOpen(item_buf, size, NUFILE_READ);
 
@@ -1276,7 +1196,6 @@ void AIScriptOpenPakFileParse(AISCRIPT **script_ref, void *pak, char *filename, 
 
     if (*script_ref == NULL) {
         *script_ref = (AISCRIPT *)AIScriptBufferAlloc(buf, buf_end, sizeof(AISCRIPT));
-        ;
         if (*script_ref == NULL) {
             goto done;
         }
@@ -1630,19 +1549,21 @@ static i32 AiEvalExpressionNameLoopup(char *expr, f32 *float_out, i32 *int_out) 
 }
 
 f32 AIParamToFloatEx(AIPACKET *packet, AISCRIPTPROCESS *processor, char *param) {
-    u8 *cursor;
+    char *cursor;
     f32 result;
     i32 is_number;
 
     is_number = 1;
-    cursor = (u8 *)param;
+    cursor = param;
 
     do {
         if (*cursor == '\0') {
             break;
         }
 
-        if (*cursor == '/' || *cursor - '0' > 9) {
+        // The original accepts signed character values from -45 through '9',
+        // except '/'; this is its numeric fast path, not a digit-only test.
+        if (*cursor < -45 || *cursor > '9' || *cursor == '/') {
             is_number = 0;
             break;
         }
