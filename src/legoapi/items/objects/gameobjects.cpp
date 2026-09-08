@@ -190,6 +190,29 @@ static f32 Condition_CurrentHintId(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *,
     return Hint_CurrentId();
 }
 
+static f32 Condition_EmptyTakeOver(AISYS_s *system, AISCRIPTPROCESS_s *, AIPACKET_s *, char *name, void *) {
+    if (name == NULL || system == NULL) {
+        return 0.0f;
+    }
+    i32 character = -1;
+    for (i32 index = 0; index < CHARCOUNT && character == -1; ++index) {
+        if (NuStrICmp(CDataList[index].file, name) == 0) {
+            character = index;
+        }
+    }
+    GameObject_s *object = Obj;
+    for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
+        if ((object->apiobj.field_0x1f8 & 0x1001) == 0x1001 &&
+            (object->apiobj.field_0x1f4 & 0x400) != 0 && object->id == character) {
+            if (object->takeover_target == NULL || object->field_0xcc0 == NULL ||
+                object->field_0xcc0->character_context != 0x3b) {
+                return 1.0f;
+            }
+        }
+    }
+    return 0.0f;
+}
+
 extern "C" {
     AICONDITIONDEF lego_aiconditiondefs[] = {
         {"GlynTest", NULL, NULL},
@@ -327,7 +350,7 @@ extern "C" {
         {"CharacterTypeExists", NULL, NULL},
         {"GotLocatorInSet", NULL, NULL},
         {"GotOpponentLOS", NULL, NULL},
-        {"EmptyTakeOver", NULL, NULL},
+        {"EmptyTakeOver", Condition_EmptyTakeOver, NULL},
         {"HasTakeOverTarget", NULL, NULL},
         {"TakeOverRange", NULL, NULL},
         {"TakeOverTargetInTriggerArea", NULL, NULL},

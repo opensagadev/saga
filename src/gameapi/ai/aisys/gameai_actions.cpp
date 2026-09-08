@@ -73,10 +73,6 @@ static GIZOBSTACLE *ActionFindObstacle(char *name) {
     return gizmo != NULL ? static_cast<GIZOBSTACLE *>(gizmo->object) : NULL;
 }
 
-static __used__ f32 Condition_EmptyTakeOver(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
-
 static f32 Condition_ForceComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
     return force != NULL && GizForce_Complete(force) != 0 ? 1.0f : 0.0f;
