@@ -6944,7 +6944,7 @@ static void *Condition_OpponentInTriggerAreaInit(AISYS *sys, char *arg, AISCRIPT
 }
 
 static f32 Condition_OpponentIsAThreat(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg) {
-    return packet != NULL && packet->opponent_object != NULL && (packet->field_0x1e5 & 8) != 0 ? 1.0f : 0.0f;
+    return packet != NULL ? static_cast<f32>(packet->opponent_is_threat) : 0.0f;
 }
 
 static f32 Condition_OpponentOnSamePath(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg) {
