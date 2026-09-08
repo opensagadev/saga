@@ -415,10 +415,14 @@ typedef struct APIOBJECT_s {
     f32 respawn_timer;      // 0x1d8
     f32 field_0x1dc;        // 0x1dc
     f32 field_0x1e0;        // 0x1e0
-    u32 field_0x1e4;        // 0x1e4  mission kill-mask lo
-    u32 field_0x1e8;        // 0x1e8  mission kill-mask hi
-    u32 field_0x1ec;        // 0x1ec  player mission-complete mask lo
-    u32 field_0x1f0;        // 0x1f0  player mission-complete mask hi
+    union {
+        u64 collision_identity_mask; // 0x1e4
+        struct { u32 field_0x1e4; u32 field_0x1e8; };
+    };
+    union {
+        u64 colliding_objects_mask; // 0x1ec
+        struct { u32 field_0x1ec; u32 field_0x1f0; };
+    };
     u32 field_0x1f4;        // 0x1f4
     union {
         u32 object_flags; // 0x1f8, complete flag word
@@ -518,6 +522,8 @@ typedef struct APIOBJECT_s {
 } APIOBJECT;
 
 DECOMP_ASSERT(sizeof(APIOBJECT) == 0x2b0, "APIOBJECT size");
+DECOMP_ASSERT(offsetof(APIOBJECT, collision_identity_mask) == 0x1e4, "APIOBJECT collision identity offset");
+DECOMP_ASSERT(offsetof(APIOBJECT, colliding_objects_mask) == 0x1ec, "APIOBJECT colliding objects offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, ai_area_mask_low) == 0x2a8, "APIOBJECT area mask low offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, ai_area_mask_high) == 0x2ac, "APIOBJECT area mask high offset");
 

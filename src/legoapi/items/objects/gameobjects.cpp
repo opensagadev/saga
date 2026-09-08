@@ -568,6 +568,23 @@ static f32 Condition_SockXDistanceToPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPAC
     return result;
 }
 
+static f32 Condition_CollidingWithOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    if (packet != NULL && packet->opponent_object != NULL && packet->owner != NULL &&
+        (packet->owner->apiobj.colliding_objects_mask & packet->opponent_object->collision_identity_mask) != 0) {
+        return 1.0f;
+    }
+    return 0.0f;
+}
+
+static f32 Condition_OpponentToPlayerRange(AISYS_s *system, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    if (packet != NULL && packet->owner != NULL && packet->opponent_object != NULL &&
+        system != NULL && system->player_1 != NULL) {
+        NUVEC difference;
+        return NuVecDist(&system->player_1->position, &packet->opponent_object->position, &difference);
+    }
+    return 1.0e9f;
+}
+
 static f32 Condition_SockDistanceToPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
     f32 result = 0.0f;
     if (packet != NULL && packet->owner != NULL && player != NULL) {
@@ -1105,7 +1122,7 @@ extern "C" {
         {"XPos", NULL, NULL},
         {"YPos", NULL, NULL},
         {"ZPos", NULL, NULL},
-        {"CollidingWithOpponent", NULL, NULL},
+        {"CollidingWithOpponent", Condition_CollidingWithOpponent, NULL},
         {"Colliding", NULL, NULL},
         {"ObstacleAtStart", Condition_ObstacleAtStart, Condition_ObstacleInit},
         {"ObstacleAtEnd", Condition_ObstacleAtEnd, Condition_ObstacleInit},
@@ -1231,7 +1248,7 @@ extern "C" {
         {"Side", NULL, NULL},
         {"NearestPartyRange", NULL, NULL},
         {"NearestPartyXZRange", NULL, NULL},
-        {"OpponentToPlayerRange", NULL, NULL},
+        {"OpponentToPlayerRange", Condition_OpponentToPlayerRange, NULL},
         {"OpponentPathPosRange", NULL, NULL},
         {"GizmoOutput0", NULL, NULL},
         {"GizmoOutput1", NULL, NULL},
