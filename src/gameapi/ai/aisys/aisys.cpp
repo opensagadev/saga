@@ -6850,6 +6850,96 @@ extern "C" void AILocatorSet_CheckLocatorsStillAssigned(AISYS *system, AILOCATOR
     }
 }
 
+extern "C" void AILocatorSet_AssignNearestLocator(AISYS *system, AILOCATORSET *locator_set, APIOBJECT *object, f32 max_range,
+                                       NUVEC *position, NUVEC *second_position, f32 off_screen_radius,
+                                       i32 ignore_assigned) {
+    if (object != NULL && locator_set != NULL && object->ai != NULL && position != NULL) {
+        f32 nearest_distance = max_range > 0.0f ? max_range * max_range : FLT_MAX;
+        NUVEC difference;
+        if (ignore_assigned != 0) {
+            AILocatorSet_CheckLocatorsStillAssigned(system, locator_set);
+        }
+
+        i32 nearest_index = -1;
+        for (i32 index = 0; index < locator_set->locator_count; ++index) {
+            if (ignore_assigned != 0 && locator_set->assigned[index] != 0xff) {
+                continue;
+            }
+
+            AILOCATOR *locator = &system->locators[locator_set->locator_entries[index]];
+            if (off_screen_radius != 0.0f &&
+                NuCameraClipTestSphere(&locator->position, off_screen_radius, &numtx_identity) == 0) {
+                continue;
+            }
+
+            const f32 first_distance = NuVecDistSqr(position, &locator->position, &difference);
+            if (first_distance < nearest_distance) {
+                nearest_distance = first_distance;
+                nearest_index = index;
+            }
+            if (second_position != NULL) {
+                const f32 second_distance = NuVecDistSqr(second_position, &locator->position, &difference);
+                if (second_distance < nearest_distance) {
+                    nearest_distance = second_distance;
+                    nearest_index = index;
+                }
+            }
+        }
+
+        if (nearest_index != -1) {
+            object->ai->locator = &system->locators[locator_set->locator_entries[nearest_index]];
+            locator_set->assigned[nearest_index] = object->field_0x289;
+        }
+    }
+}
+
+extern "C" void AILocatorSet_AssignFurthestLocator(AISYS *system, AILOCATORSET *locator_set, APIOBJECT *object, f32 max_range,
+                                        NUVEC *position, NUVEC *second_position, f32 off_screen_radius,
+                                        i32 ignore_assigned) {
+    if (object != NULL && locator_set != NULL && object->ai != NULL) {
+        if (ignore_assigned != 0) {
+            AILocatorSet_CheckLocatorsStillAssigned(system, locator_set);
+        }
+
+        NUVEC difference;
+        f32 furthest_distance = 0.0f;
+        i32 furthest_index = -1;
+        for (i32 index = 0; index < locator_set->locator_count; ++index) {
+            if (ignore_assigned != 0 && locator_set->assigned[index] != 0xff) {
+                continue;
+            }
+
+            AILOCATOR *locator = &system->locators[locator_set->locator_entries[index]];
+            if (off_screen_radius != 0.0f &&
+                NuCameraClipTestSphere(&locator->position, off_screen_radius, &numtx_identity) == 0) {
+                continue;
+            }
+
+            f32 distance = NuVecDistSqr(position, &locator->position, &difference);
+            if (distance > furthest_distance) {
+                if (second_position != NULL) {
+                    const f32 second_distance = NuVecDistSqr(second_position, &locator->position, &difference);
+                    if (!(second_distance > furthest_distance)) {
+                        continue;
+                    }
+                    if (second_distance < distance) {
+                        distance = second_distance;
+                    }
+                }
+                if (max_range == 0.0f || max_range * max_range > distance) {
+                    furthest_distance = distance;
+                    furthest_index = index;
+                }
+            }
+        }
+
+        if (furthest_index != -1) {
+            object->ai->locator = &system->locators[locator_set->locator_entries[furthest_index]];
+            locator_set->assigned[furthest_index] = object->field_0x289;
+        }
+    }
+}
+
 extern "C" void AILocatorSet_AssignRandomLocator(AISYS *system, AILOCATORSET *locator_set, APIOBJECT *object, f32 max_range,
                                       NUVEC *position, f32 off_screen_radius, i32 ignore_assigned) {
     if (object == NULL || locator_set == NULL || object->ai == NULL) {
