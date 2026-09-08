@@ -814,68 +814,96 @@ void NuIOSDLGeom2DCallback(void *arg) {
 // original 0x2a430d — 3D geometry callback
 void NuIOSDLGeomCallback(void *arg) {
     auto *geom = static_cast<NUDISPLAYLISTGEOM *>(arg);
-    const isize immediate_vertices = reinterpret_cast<isize>(geom + 1);
-    NUSHADEROBJECT *shader = NuShaderManagerGetCurrentShader();
+    i32 primitive_count = geom->index_count;
+    i32 vertex_count = 0;
+    NUSHADEROBJECT *shader;
+    usize vertex_format;
+    isize immediate_vertices = reinterpret_cast<isize>(arg);
+    immediate_vertices += sizeof(NUDISPLAYLISTGEOM);
+    shader = NuShaderManagerGetCurrentShader();
     if (shader == NULL || shader->glsl.program == 0) {
         return;
     }
 
     NuShaderObjectGLSLSetupMaterial(shader, g_LastMtl);
     switch (geom->primitive_type) {
-        case 0:
-            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, immediate_vertices,
-                                                                  (const u32 *)g_nuPrimVertexFormat);
-            glDrawArrays(GL_TRIANGLES, 0, geom->vertex_count);
-            break;
-        case 1:
-            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, immediate_vertices,
-                                                                  (const u32 *)g_nuPrimVertexFormat);
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, geom->vertex_count);
-            break;
-        case 2:
-            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, immediate_vertices,
-                                                                  (const u32 *)g_nuPrimVertexFormat);
-            glDrawArrays(GL_LINES, 0, geom->vertex_count);
-            break;
-        case 3:
-            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, immediate_vertices,
-                                                                  (const u32 *)g_nuPrimVertexFormat);
-            glDrawArrays(GL_LINE_STRIP, 0, geom->vertex_count);
-            break;
-        case 5:
-            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, immediate_vertices,
-                                                                  (const u32 *)g_nuPrimVertexFormat);
-            glDrawArrays(GL_TRIANGLE_FAN, 0, geom->vertex_count);
-            break;
-        case 6: {
-            i32 index_count = geom->index_count + 2;
-            if (geom->immediate == 0) {
-                NuIOS_SetVertexFormat(geom->vertex_format);
+        case 6:
+            vertex_count = primitive_count + 2;
+            if (geom->immediate != 0) {
+                if (geom->dynamic_vertex_data != nullptr) {
+                    NuIOSBindVAO(0);
+                    glBindBuffer(GL_ARRAY_BUFFER, geom->vertex_format);
+                    glBufferData(GL_ARRAY_BUFFER, geom->vertex_count * geom->vertex_stride, nullptr, GL_DYNAMIC_DRAW);
+                    glBufferData(GL_ARRAY_BUFFER, geom->vertex_count * geom->vertex_stride, geom->dynamic_vertex_data,
+                                 GL_DYNAMIC_DRAW);
+                    NuIOS_BindVertexAttributes(0, 0);
+                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geom->index_buffer);
+                    glDrawElements(GL_TRIANGLE_STRIP, vertex_count, GL_UNSIGNED_SHORT,
+                                   (const void *)(usize)(geom->first_index * 2));
+                } else {
+                    NuIOSBindVAO(0);
+#ifdef __EMSCRIPTEN__
+                    // WebGL requires buffer-backed attributes instead of client arrays.
+                    NuIOS_BindVertexAttributes(NuIOS_PlatformPrepareImmediateVertexData(
+                                                   geom->vertex_buffer + geom->base_vertex * geom->vertex_stride,
+                                                   geom->vertex_count * geom->vertex_stride),
+                                               0);
+#else
+                    NuIOS_BindVertexAttributesImmediate(0,
+                                                        geom->base_vertex * geom->vertex_stride + geom->vertex_buffer);
+#endif
+                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geom->index_buffer);
+                    glDrawElements(GL_TRIANGLE_STRIP, vertex_count, GL_UNSIGNED_SHORT,
+                                   (const void *)(usize)(geom->first_index * 2));
+                }
+            } else {
+                vertex_format = geom->vertex_format;
+                NuIOS_SetVertexFormat(vertex_format);
                 NuIOSBindVAO(0);
                 glBindBuffer(GL_ARRAY_BUFFER, geom->vertex_buffer);
                 NuIOS_BindVertexAttributes(0, geom->base_vertex);
-            } else if (geom->dynamic_vertex_data == nullptr) {
-                NuIOSBindVAO(0);
-                const isize data_address = geom->vertex_buffer + geom->vertex_stride * geom->base_vertex;
-                const usize data_size = geom->vertex_stride * geom->vertex_count;
-                NuIOS_BindVertexAttributes(NuIOS_PlatformPrepareImmediateVertexData(data_address, data_size), 0);
-            } else {
-                NuIOSBindVAO(0);
-                glBindBuffer(GL_ARRAY_BUFFER, geom->vertex_format);
-                glBufferData(GL_ARRAY_BUFFER, geom->vertex_stride * geom->vertex_count, nullptr, GL_DYNAMIC_DRAW);
-                glBufferData(GL_ARRAY_BUFFER, geom->vertex_stride * geom->vertex_count, geom->dynamic_vertex_data,
-                             GL_DYNAMIC_DRAW);
-                NuIOS_BindVertexAttributes(0, 0);
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geom->index_buffer);
+                glDrawElements(GL_TRIANGLE_STRIP, vertex_count, GL_UNSIGNED_SHORT,
+                               (const void *)(usize)(geom->first_index * 2));
             }
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geom->index_buffer);
-            glDrawElements(GL_TRIANGLE_STRIP, index_count, GL_UNSIGNED_SHORT,
-                           (const void *)(usize)(geom->first_index * 2));
             break;
-        }
-        case 0x32:
+        case 0:
+            vertex_count = geom->vertex_count;
             NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, immediate_vertices,
                                                                   (const u32 *)g_nuPrimVertexFormat);
-            glDrawArrays(GL_POINTS, 0, geom->vertex_count);
+            glDrawArrays(GL_TRIANGLES, 0, vertex_count);
+            break;
+        case 1:
+            vertex_count = geom->vertex_count;
+            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, immediate_vertices,
+                                                                  (const u32 *)g_nuPrimVertexFormat);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, vertex_count);
+            break;
+        case 2:
+            vertex_count = geom->vertex_count;
+            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, immediate_vertices,
+                                                                  (const u32 *)g_nuPrimVertexFormat);
+            glDrawArrays(GL_LINES, 0, vertex_count);
+            break;
+        case 3:
+            vertex_count = geom->vertex_count;
+            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, immediate_vertices,
+                                                                  (const u32 *)g_nuPrimVertexFormat);
+            glDrawArrays(GL_LINE_STRIP, 0, vertex_count);
+            break;
+        case 5:
+            vertex_count = geom->vertex_count;
+            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, immediate_vertices,
+                                                                  (const u32 *)g_nuPrimVertexFormat);
+            glDrawArrays(GL_TRIANGLE_FAN, 0, vertex_count);
+            break;
+        case 0x32:
+            vertex_count = geom->vertex_count;
+            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, immediate_vertices,
+                                                                  (const u32 *)g_nuPrimVertexFormat);
+            glDrawArrays(GL_POINTS, 0, vertex_count);
+            break;
+        default:
             break;
     }
     NuIOSBindVAO(0);
