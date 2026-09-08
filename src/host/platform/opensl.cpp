@@ -192,7 +192,7 @@ namespace hostsl {
 
             // underrun tracking (the HEADATEND condition: playing, queue empty)
             bool underrunning;
-            u64 underrun_start_ms;
+            u64 underrun_frames;
         };
 
         // ---------------------------------------------------------------------------
@@ -561,6 +561,7 @@ namespace hostsl {
             player->play_state = state;
             if (state != 3) {
                 player->underrunning = false;
+                player->underrun_frames = 0;
             }
             return HOST_SL_RESULT_SUCCESS;
         }
@@ -656,6 +657,7 @@ namespace hostsl {
             }
             host_queue_release_all(player);
             player->underrunning = false;
+            player->underrun_frames = 0;
             pthread_mutex_unlock(&host_lock);
             return HOST_SL_RESULT_SUCCESS;
         }
@@ -775,13 +777,17 @@ namespace hostsl {
                     const u32 available = (u32)SDL_GetAudioStreamAvailable(player->stream);
                     const u32 take = (available < chunk ? available : chunk) & ~3u;
                     if (take == 0) {
+                        // An idle or muted voice contributes silence intentionally.
+                        // Count missing output samples, not time between callbacks.
+                        if (player->queue_played_device_frames != 0 && player->volume_millibels > -32768) {
+                            player->underrun_frames += frames;
+                        }
                         // Reaching the end is normal for one-shot sounds. Real SL
                         // raises SL_PLAYEVENT_HEADATEND here; only call it an
                         // underrun if this same playing voice later resumes with
                         // another buffer.
                         if (!player->underrunning) {
                             player->underrunning = true;
-                            player->underrun_start_ms = SDL_GetTicks();
                             if (fired_count < HOST_FIRED_MAX) {
                                 fired[fired_count++] = player;
                             }
@@ -792,10 +798,16 @@ namespace hostsl {
                     if (got < 4) {
                         continue;
                     }
-                    if (player->underrunning) {
-                        player->underrunning = false;
-                        LOG_WARN("audio: streaming starvation on player %p recovered after %.1f ms", (void *)player,
-                                 (double)(SDL_GetTicks() - player->underrun_start_ms));
+                    player->underrunning = false;
+                    if (player->underrun_frames != 0) {
+                        LOG_WARN("audio: underrun on player %p: %llu missing frames (%.1f ms)", (void *)player,
+                                 (unsigned long long)player->underrun_frames,
+                                 (double)player->underrun_frames * 1000.0 / host_device_spec.freq);
+                        player->underrun_frames = 0;
+                    }
+                    if ((u32)got < chunk && player->queue_played_device_frames != 0 &&
+                        player->volume_millibels > -32768) {
+                        player->underrun_frames += frames - (u32)got / 4;
                     }
 
                     const f32 gain = powf(10.0f, (f32)player->volume_millibels / 2000.0f);
