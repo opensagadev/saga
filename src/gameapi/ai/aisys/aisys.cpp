@@ -6040,13 +6040,20 @@ static f32 Condition_InSwamp(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char 
     return 0.0f;
 }
 
-__used__ static f32 Condition_IsAlive(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                      void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
+static f32 Condition_IsAlive(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *argument) {
+    APIOBJECT *object = static_cast<APIOBJECT *>(argument);
+    if (object != NULL) {
+        AIGROUP *group = object->ai->group;
+        if (group != NULL) {
+            for (i32 index = 0; index < group->member_count; ++index) {
+                APIOBJECT *member = group->members[index];
+                if (member != NULL && (member->object_flags & 0x1001) == 0x1001 && member->field_0x287 == 0)
+                    return 1.0f;
+            }
+        } else if ((object->flags_high & 0x10) != 0 && object->field_0x287 == 0) {
+            return 1.0f;
+        }
+    }
     return 0.0f;
 }
 
@@ -6593,11 +6600,8 @@ static void *Condition_BeenHitInit(AISYS *sys, char *arg, AISCRIPT *) {
     return arg != NULL ? GetNamedGameObject(sys, arg) : NULL;
 }
 
-__used__ static void *Condition_IsAliveInit(AISYS *sys, char *arg, AISCRIPT *script) {
-    (void)sys;
-    (void)arg;
-    (void)script;
-    return NULL;
+static void *Condition_IsAliveInit(AISYS *sys, char *arg, AISCRIPT *) {
+    return arg != NULL && GetNamedAPIObjectFn != NULL ? GetNamedAPIObjectFn(sys, arg) : NULL;
 }
 
 
@@ -8125,6 +8129,8 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_MY_SET].eval_fn = Condition_MySet;
             lego_aiconditiondefs[LEGO_AI_CONDITION_BEING_TOWED].eval_fn = Condition_BeingTowed;
             lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_HIT].eval_fn = Condition_BeenHit;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_IS_ALIVE].eval_fn = Condition_IsAlive;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_IS_ALIVE].init_fn = Condition_IsAliveInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_HIT].init_fn = Condition_BeenHitInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_ON_OBJECT].eval_fn = Condition_OnObject;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CONTEXT].eval_fn = Condition_Context;
