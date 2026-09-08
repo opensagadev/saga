@@ -71,7 +71,22 @@ void TouchHacks::CanTagVehicle(GameObject_s &, GameObject_s &) {
 void TouchHacks::CanThrowBountyBomb(GameObject_s &) {
 }
 
-void TouchHacks::CanToggleTo(GameObject_s &, i32) {
+void Move_DEFAULT(GameObject_s *);
+
+bool TouchHacks::CanToggleTo(GameObject_s &object, i32 id) {
+    if (object.id == id)
+        return false;
+    if ((CInfo[object.character_context].flags & 0x100) != 0)
+        return false;
+    if (object.apiobj.field_0x27f <= 16 && (TerLayer[static_cast<i8>(object.apiobj.field_0x27f)].flags & 1) != 0 &&
+        GCDataList[id].field_0x28 <= 0.0f)
+        return false;
+    if (object.apiobj.field_0x218 != 2000000.0f && object.apiobj.field_0x220 != 2000000.0f &&
+        object.apiobj.character_data->move_fn != Move_DEFAULT &&
+        CDataList[id].bounds_max_y - CDataList[id].bounds_min_y >=
+            object.apiobj.field_0x220 - object.apiobj.field_0x218)
+        return false;
+    return true;
 }
 
 void TouchHacks::CanUseBuildIt(GameObject_s &) {
