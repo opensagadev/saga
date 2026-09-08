@@ -511,6 +511,21 @@ this run (`/tmp/saga-retry-cantina.log`); earlier NPC angle failures remain
 unresolved. Special-move callbacks, shared-node corner targeting and other
 remaining solver branches still require recovery and runtime verification.
 
+The preparation-callback dependency audit recovers
+`StarWars_PrepareTakeOverJump` at **91.294%**, with the original 238-byte size.
+It belongs in the existing O3 game-AI unit; its unused O0 placeholder was
+removed. The original model-flag rejection returns zero, while a qualifying
+model with no linked character returns one; both original/native cases agree
+(`/tmp/saga-original-prepare-takeover.log`,
+`/tmp/saga-prepare-takeover-runtime.log`). The linked-character branch calls
+`ReleaseTakeOver`, `StartBigJump` and `SetSpecialMove` with the original
+arguments but has not been runtime-verified. The preparation callback remains
+unwired: its current void ABI is wrong, and six other preparation handlers
+remain stubs. Big-jump preparation also requires the integer-returning
+`TryToTeleportToNextNode`, whose current void stub depends in turn on the
+unrecovered integer-returning `TightRope_SnapTo` path. Do not supply synthetic
+return values to connect these incomplete paths.
+
 The corner-decision fixture exposed missing signed wrapping in `NuAngSub`:
 plain subtraction gives the wrong turn sign across the 16-bit angle boundary.
 Original `NuAngAdd` (`0x28fdf0`) and `NuAngSub` (`0x28fe1d`) mask to 16 bits

@@ -1,5 +1,7 @@
 #include "decomp.h"
+#include "gameapi/ai/aisys/aisys.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/motion.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nucore/nustring.h"
@@ -61,6 +63,27 @@ enum STARWARS_AI_CAPABILITY : u32 {
 };
 
 static void StarWars_PreparingForSpecialMove(AIPACKET_s *, APIOBJECT_s *, i32) {
+}
+
+extern void ReleaseTakeOver(GameObject_s *, i32);
+extern void SetSpecialMove(GameObject_s *, AIPATHNODE_s *, AIPATHNODE_s *, char);
+
+static __used__ i32 StarWars_PrepareTakeOverJump(AIPACKET_s *packet, APIOBJECT_s *apiobject, i32) {
+    GameObject_s *object = apiobject->objptr;
+    i16 result = 0;
+    if ((static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->flags_090 & 0x40) != 0) {
+        GameObject_s *linked_object = object->field_0xcc0;
+        result = 1;
+        if (linked_object != NULL) {
+            AIPATHNODE_s *node =
+                &packet->path_info.path
+                     ->nodes[packet->path_info.connection->node_indices[packet->path_info.direction == 0]];
+            ReleaseTakeOver(linked_object, 1);
+            StartBigJump(linked_object, &node->position, 0, 0.5f, 1.0f, 0, 0);
+            SetSpecialMove(linked_object, node, NULL, 3);
+        }
+    }
+    return result;
 }
 
 static i32 StarWars_MidSpecialMove(AISYS_s *, AIPACKET_s *, APIOBJECT_s *) {
