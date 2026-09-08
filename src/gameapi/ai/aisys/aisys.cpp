@@ -5230,6 +5230,25 @@ static i32 Action_GizmoSetVisibility(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s 
     return 1;
 }
 
+static i32 Action_CanShootOffScreen(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params,
+                                   i32 param_count, i32 first_time, f32) {
+    GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+    if (object == NULL) {
+        return 1;
+    }
+    if (first_time != 0) {
+        object->field_0x1050 |= 4u;
+        for (i32 index = 0; index < param_count; ++index) {
+            if (NuStrICmp(params[index], "TRUE") == 0) {
+                object->field_0x1050 |= 4u;
+            } else if (NuStrICmp(params[index], "FALSE") == 0) {
+                object->field_0x1050 &= ~4u;
+            }
+        }
+    }
+    return 1;
+}
+
 extern "C" {
     // Keep this registry in the exact order used by the shipped script parser.
     AIACTIONDEF lego_aiactiondefs[] = {
@@ -5250,7 +5269,7 @@ extern "C" {
         {"SetAnimation", Action_SetAnimation, 0, 0, 0},
         {"AnimTimeRandom", Action_AnimTimeRandom, 0, 0, 0},
         {"CanOpenDoors", Action_CanOpenDoors, 0, 0, 0},
-        {"CanShootOffScreen", NULL, 0, 0, 0},
+        {"CanShootOffScreen", Action_CanShootOffScreen, 0, 0, 0},
         {"KeepWeaponOut", Action_KeepWeaponOut, 0, 0, 0},
         {"SnapWeaponOut", Action_SnapWeaponOut, 1, 0, 0},
         {"ResetContext", Action_ResetContext, 0, 0, 0},
