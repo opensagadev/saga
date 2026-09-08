@@ -398,12 +398,12 @@ static void AISysLoadLocators(AISYS *system, i32 version) {
         EdFileReadNuVec(&locator->position);
         locator->flags = EdFileReadShort();
         u8 path_index = static_cast<u8>(EdFileReadChar());
-        locator->path = system->path_sys->paths[path_index];
-        locator->game_flags = static_cast<u8>(EdFileReadChar());
+        locator->path_info.path = system->path_sys->paths[path_index];
+        locator->path_info.direction = static_cast<u8>(EdFileReadChar());
         u16 connection_index = static_cast<u16>(EdFileReadShort());
-        locator->connection = &locator->path->connections[connection_index];
-        locator->min_distance = EdFileReadFloat();
-        locator->max_distance = EdFileReadFloat();
+        locator->path_info.connection = &locator->path_info.path->connections[connection_index];
+        locator->path_info.dist = EdFileReadFloat();
+        locator->path_info.width = EdFileReadFloat();
         if (version > 14) {
             locator->locator_flags = EdFileReadInt();
         }
@@ -1895,12 +1895,12 @@ extern "C" {
 
         for (i32 index = 0; index < system->locator_count; ++index) {
             AILOCATOR *locator = &system->locators[index];
-            if (locator->path == NULL || locator->connection == NULL) {
+            if (locator->path_info.path == NULL || locator->path_info.connection == NULL) {
                 continue;
             }
 
-            AIPATHNODE *start = &locator->path->nodes[locator->connection->node_indices[0]];
-            AIPATHNODE *end = &locator->path->nodes[locator->connection->node_indices[1]];
+            AIPATHNODE *start = &locator->path_info.path->nodes[locator->path_info.connection->node_indices[0]];
+            AIPATHNODE *end = &locator->path_info.path->nodes[locator->path_info.connection->node_indices[1]];
             if ((start->runtime_flags & AIPATHNODE_RUNTIME_POSITION_CHANGED) == 0 &&
                 (end->runtime_flags & AIPATHNODE_RUNTIME_POSITION_CHANGED) == 0) {
                 continue;
@@ -1911,7 +1911,7 @@ extern "C" {
             NuVecSub(&delta, &end->position, &start->position);
             NuVecNorm(&direction, &delta);
 
-            const f32 position_on_connection = locator->min_distance;
+            const f32 position_on_connection = locator->path_info.dist;
             f32 radius;
             if (position_on_connection < 0.0f) {
                 radius = start->radius;
@@ -1927,7 +1927,7 @@ extern "C" {
             NUVEC offset;
             NuVecScale(&offset, &delta, position_on_connection);
             NuVecAdd(&locator->position, &locator->position, &offset);
-            NuVecScale(&offset, &perpendicular, locator->max_distance);
+            NuVecScale(&offset, &perpendicular, locator->path_info.width);
             NuVecAdd(&locator->position, &locator->position, &offset);
 
             const i32 path_angle = static_cast<i32>(NuAtan2(delta.x, delta.z) * 10430.378f);
@@ -1992,7 +1992,7 @@ extern "C" {
                         AIMoveInstruction(packet, &creature->pos, 0.0f, &creature->path_info,
                                           AIPACKET_MOVEMENT_TO_DESTINATION, 0.0f);
                     } else if (source == 2 && packet->locator != NULL) {
-                        AIPATHINFO *locator_path = reinterpret_cast<AIPATHINFO *>(&packet->locator->path);
+                        AIPATHINFO *locator_path = &packet->locator->path_info;
                         AIMoveInstruction(packet, &packet->locator->position, 0.0f, locator_path,
                                           AIPACKET_MOVEMENT_TO_DESTINATION, 0.0f);
                     } else {

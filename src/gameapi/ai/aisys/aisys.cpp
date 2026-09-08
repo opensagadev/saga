@@ -1643,10 +1643,10 @@ __used__ static i32 Action_GoToLocator(AISYS *sys, AISCRIPTPROCESS *processor, A
         }
 
         if ((processor->action_data_1 & GO_TO_LOCATOR_IGNORE_PATH) != 0) {
-            AIMoveInstruction(packet, &locator->position, 0.0f, reinterpret_cast<AIPATHINFO *>(&locator->path),
+            AIMoveInstruction(packet, &locator->position, 0.0f, &locator->path_info,
                               AIPACKET_MOVEMENT_DIRECT, packet->movement_instruction_parameter);
         } else {
-            AIMoveInstruction(packet, &locator->position, 0.0f, reinterpret_cast<AIPATHINFO *>(&locator->path),
+            AIMoveInstruction(packet, &locator->position, 0.0f, &locator->path_info,
                               AIPACKET_MOVEMENT_TO_DESTINATION, packet->movement_instruction_parameter);
         }
 
@@ -1793,10 +1793,10 @@ __used__ static i32 Action_GoToLocator(AISYS *sys, AISCRIPTPROCESS *processor, A
     }
 
     if ((processor->action_data_1 & GO_TO_LOCATOR_IGNORE_PATH) != 0) {
-        AIMoveInstruction(packet, &locator->position, 0.0f, reinterpret_cast<AIPATHINFO *>(&locator->path),
+        AIMoveInstruction(packet, &locator->position, 0.0f, &locator->path_info,
                           AIPACKET_MOVEMENT_DIRECT, packet->movement_instruction_parameter);
     } else {
-        AIMoveInstruction(packet, &locator->position, 0.0f, reinterpret_cast<AIPATHINFO *>(&locator->path),
+        AIMoveInstruction(packet, &locator->position, 0.0f, &locator->path_info,
                           AIPACKET_MOVEMENT_TO_DESTINATION, packet->movement_instruction_parameter);
     }
 
@@ -2528,7 +2528,7 @@ __used__ static i32 Action_CircleLocator(AISYS *sys, AISCRIPTPROCESS *processor,
     AILOCATOR *locator = static_cast<AILOCATOR *>(processor->action_data_3);
     if (locator != NULL) {
         AIMoveInstruction(packet, &locator->position, packet->movement_instruction_parameter,
-                          reinterpret_cast<AIPATHINFO *>(&locator->path), AIPACKET_MOVEMENT_CIRCLE,
+                          &locator->path_info, AIPACKET_MOVEMENT_CIRCLE,
                           packet->movement_instruction_parameter);
     }
     return locator == NULL;
@@ -3900,7 +3900,7 @@ __used__ static i32 Action_CreateCreatures(AISYS *sys, AISCRIPTPROCESS *processo
     position.z += z_offset;
 
     GameObject_s *object = AddDynamicCreature(models[model_choice], &position, locator->flags, script_name,
-                                              reinterpret_cast<AIPATHINFO *>(&locator->path), NULL, set_on_surface,
+                                              &locator->path_info, NULL, set_on_surface,
                                               NULL, NULL, 0, creature_set);
     if (object == NULL) {
         return 1;
@@ -6598,7 +6598,7 @@ i32 Action_Circle(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char
     } else if ((processor->action_data_1 & 0x10) != 0) {
         AILOCATOR *locator = static_cast<AILOCATOR *>(processor->action_data_3);
         position = &locator->position;
-        path = reinterpret_cast<AIPATHINFO *>(&locator->path);
+        path = &locator->path_info;
     } else if ((processor->action_data_1 & 0x20) != 0) {
         AICREATURE *creature = &sys->creatures[packet->field_0x134];
         path = &creature->path_info;

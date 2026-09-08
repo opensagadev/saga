@@ -156,7 +156,7 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
         angle = locator->flags;
         NuVecRotateY(&offset, &offset, angle);
         NuVecAdd(&object->apiobj.position, &offset, &locator->position);
-        path_info = reinterpret_cast<AIPATHINFO *>(&locator->path);
+        path_info = &locator->path_info;
         object->ai.respawn_locator = NULL;
     } else {
         angle = creature.y_rot;

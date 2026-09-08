@@ -167,12 +167,7 @@ typedef struct AILOCATOR_s {
     char name[0x10];
     NUVEC position;
     i32 flags;
-    AIPATH *path;
-    AIPATHCNX *connection;
-    u8 game_flags;
-    u8 padding_0x29[7];
-    f32 min_distance;
-    f32 max_distance;
+    AIPATHINFO path_info;
     i32 locator_flags;
 } AILOCATOR;
 
@@ -405,6 +400,13 @@ DECOMP_ASSERT(sizeof(AICREATURE) == 0xa4, "AICREATURE size");
 DECOMP_ASSERT(sizeof(AIAREA) == 0x3c, "AIAREA size");
 DECOMP_ASSERT(offsetof(AIAREA, runtime_flags) == 0x2a, "AIAREA runtime flags offset");
 DECOMP_ASSERT(sizeof(AILOCATOR) == 0x3c, "AILOCATOR size");
+DECOMP_ASSERT(offsetof(AILOCATOR, position) == 0x10, "AILOCATOR position offset");
+DECOMP_ASSERT(offsetof(AILOCATOR, flags) == 0x1c, "AILOCATOR rotation offset");
+DECOMP_ASSERT(offsetof(AILOCATOR, path_info) == 0x20, "AILOCATOR path cursor offset");
+DECOMP_ASSERT(offsetof(AILOCATOR, path_info.direction) == 0x28, "AILOCATOR path direction offset");
+DECOMP_ASSERT(offsetof(AILOCATOR, path_info.dist) == 0x30, "AILOCATOR path distance offset");
+DECOMP_ASSERT(offsetof(AILOCATOR, path_info.width) == 0x34, "AILOCATOR path width offset");
+DECOMP_ASSERT(offsetof(AILOCATOR, locator_flags) == 0x38, "AILOCATOR flags offset");
 DECOMP_ASSERT(sizeof(AILOCATORSET) == 0x1c, "AILOCATORSET size");
 DECOMP_ASSERT(sizeof(AIPATHCNX) == 0x24, "AIPATHCNX size");
 DECOMP_ASSERT(sizeof(AIPATHNODE) == 0x5c, "AIPATHNODE size");
