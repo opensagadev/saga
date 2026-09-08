@@ -5998,8 +5998,8 @@ static f32 Condition_Timer(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *, char
 
 static f32 Condition_Active(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *) {
     f32 active = 0.0f;
-    if (packet != NULL && packet->reset_mode == 2)
-        active = 1.0f;
+    if (packet != NULL)
+        active = packet->reset_mode == 2 ? 1.0f : 0.0f;
     return active;
 }
 
