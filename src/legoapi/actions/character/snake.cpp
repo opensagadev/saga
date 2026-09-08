@@ -42,8 +42,8 @@ SNAKEBODY_s *CreateSnakeBody(GameObject_s *object, i32 segment_count) {
         body->segment_count = static_cast<u16>(segment_count);
         body->scale = 1.0f;
         for (i32 segment = 0; segment < body->segment_count; ++segment) {
-            body->segments[segment].rotation = object->apiobj.field_0x276;
-            body->segments[segment].state = 0;
+            body->segments[segment].yaw = object->apiobj.field_0x276;
+            body->segments[segment].pitch = 0;
             body->segments[segment].ground_height = 1000000000.0f;
         }
         return body;
