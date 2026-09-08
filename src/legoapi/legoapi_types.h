@@ -749,12 +749,19 @@ struct FADETYPE {
 };
 DECOMP_ASSERT(sizeof(FADETYPE) == 4, "FADETYPE ABI");
 struct FLOWBOXACTIONDATA_s;
+struct FLOWBOXGIZMOREF_s {
+    GIZMO_s *gizmo;
+    char *name;
+};
+DECOMP_ASSERT(sizeof(FLOWBOXGIZMOREF_s) == 8, "FLOWBOXGIZMOREF size");
+DECOMP_ASSERT(offsetof(FLOWBOXGIZMOREF_s, name) == 4, "FLOWBOXGIZMOREF name offset");
 struct FLOWBOXGIZMODATA_s {
     i32 gizmo_count;
     u8 pad_0x04[4];
-    GIZMO_s ***gizmos;
+    FLOWBOXGIZMOREF_s **gizmos;
 };
 DECOMP_ASSERT(sizeof(FLOWBOXGIZMODATA_s) == 0xc, "FLOWBOXGIZMODATA_s ABI");
+DECOMP_ASSERT(offsetof(FLOWBOXGIZMODATA_s, gizmos) == 8, "FLOWBOXGIZMODATA references offset");
 struct FLOWBOX_s {
     u8 parent_count;
     u8 loop_parent_count;

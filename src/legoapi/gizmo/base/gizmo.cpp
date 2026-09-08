@@ -678,7 +678,7 @@ static __used__ void ResetGizmoFlowBox(GIZFLOW_s *giz_flow, FLOWBOX_s *flow_box)
         return;
     }
     for (i32 i = 0; i < data.gizmo_count; ++i) {
-        GizmoActivate(giz_flow->gizmo_sys, *data.gizmos[i], 0, 1);
+        GizmoActivate(giz_flow->gizmo_sys, data.gizmos[i]->gizmo, 0, 1);
     }
 }
 

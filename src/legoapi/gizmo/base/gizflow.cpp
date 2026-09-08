@@ -99,9 +99,9 @@ void SetGizFlowVisible(GIZFLOW_s *flow) {
             if (box->type == 0 && box->data != NULL) {
                 FLOWBOXGIZMODATA_s *data = box->data;
                 for (i32 gizmo_index = 0; gizmo_index < data->gizmo_count; ++gizmo_index) {
-                    GIZMO_s **gizmo = data->gizmos[gizmo_index];
-                    if (gizmo != NULL && *gizmo != NULL) {
-                        GizmoSetVisibility(flow->gizmo_sys, *gizmo, 1, 1);
+                    FLOWBOXGIZMOREF_s *reference = data->gizmos[gizmo_index];
+                    if (reference != NULL && reference->gizmo != NULL) {
+                        GizmoSetVisibility(flow->gizmo_sys, reference->gizmo, 1, 1);
                     }
                 }
             }
