@@ -498,22 +498,28 @@ void GizForceObjectInterface::TargetedFlash() {
 GizForceObjectInterface::~GizForceObjectInterface() {
 }
 
-void GizLeverObjectInterface::GetPos(VuVec &, i32) const {
+void GizLeverObjectInterface::GetPos(VuVec &position, i32) const {
+    position = VuVec(lever.position.x, lever.position.y, lever.position.z, 1.0f);
 }
 
-void GizLeverObjectInterface::GetRadius() const {
+f32 GizLeverObjectInterface::GetRadius() const {
+    return 0.1f;
 }
 
-void GizLeverObjectInterface::GetTargetName() const {
+const char *GizLeverObjectInterface::GetTargetName() const {
+    return lever.name;
 }
 
-GizLeverObjectInterface::GizLeverObjectInterface(LEVER_s &) {
+GizLeverObjectInterface::GizLeverObjectInterface(LEVER_s &value) : lever(value) {
+    lever.mech_object = this;
 }
 
 void GizLeverObjectInterface::TargetedFlash() {
+    lever.flash_timer = 1.0f;
 }
 
 GizLeverObjectInterface::~GizLeverObjectInterface() {
+    lever.mech_object = NULL;
 }
 
 void GizPanelObjectInterface::GetFloorTargetPos(VuVec &, i32) const {

@@ -3653,7 +3653,7 @@ enum LEVER_FLAGS : u16 {
 
 struct LEVER_s {
     NUMTX transform;            // 0x00
-    void *mech_object;          // 0x40
+    MechObjectInterface *mech_object; // 0x40
     NUVEC floor_position;       // 0x44
     NUVEC target_offset;        // 0x50
     char name[0x10];            // 0x5c
@@ -3688,9 +3688,10 @@ struct LEVER_s {
     u8 field_0x9f[9];
 
     void ClearMechObjectInterface();
-    void GetMechObjectInterface();
+    MechObjectInterface *GetMechObjectInterface();
 };
 DECOMP_ASSERT(sizeof(LEVER_s) == 0xa8, "LEVER_s ABI");
+DECOMP_ASSERT(offsetof(LEVER_s, mech_object) == 0x40, "Lever interface pointer offset");
 DECOMP_ASSERT(offsetof(LEVER_s, target_offset) == 0x50, "LEVER target offset");
 DECOMP_ASSERT(offsetof(LEVER_s, name) == 0x5c, "LEVER name offset");
 DECOMP_ASSERT(offsetof(LEVER_s, position) == 0x6c, "LEVER position offset");

@@ -1,4 +1,5 @@
 #include "legoapi/gizmos/object/lever.h"
+#include "legoapi/gizmo/base/GizLeverObjectInterface.h"
 
 #include "batman.h"
 #include "decomp.h"
@@ -48,6 +49,17 @@ DECOMP_ASSERT(sizeof(LEVERPROGRESS) == 0xc, "LEVER progress ABI");
 LEVER_CONFIG LeverSys = {0x55, 0};
 
 i32 lever_gizmotype_id = -1;
+
+void LEVER_s::ClearMechObjectInterface() {
+    if (mech_object != NULL)
+        delete mech_object;
+}
+
+MechObjectInterface *LEVER_s::GetMechObjectInterface() {
+    if (mech_object == NULL)
+        new GizLeverObjectInterface(*this);
+    return mech_object;
+}
 extern "C" {
     u8 show_lever_hint = 0;
 }
