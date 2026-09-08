@@ -4608,14 +4608,18 @@ __used__ static i32 Action_CatchUpForbidden(AISYS *sys, AISCRIPTPROCESS *process
 
 __used__ static i32 Action_CheckWallSplines(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                             i32 param_4, i32 param_5, f32 param_6) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
-    (void)param_6;
-    return 0;
+    if (packet != NULL && param_5 != 0) {
+        packet->check_wall_splines = 1;
+        for (i32 i = 0; i < param_4; i++) {
+            if (NuStrICmp(params[i], "false") == 0) {
+                packet->check_wall_splines = 0;
+            }
+        }
+        if (packet->check_wall_splines) {
+            packet->movement_flags |= 0x80;
+        }
+    }
+    return 1;
 }
 
 __used__ static i32 Action_GoToOriginalPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,

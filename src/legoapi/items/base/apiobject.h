@@ -283,7 +283,7 @@ typedef struct AIPACKET_s {
     union {
         u8 field_0x1e5;
         struct {
-            u8 packet_flag_1e5_0 : 1;
+            u8 check_wall_splines : 1;
             u8 circle_clockwise : 1;
             u8 packet_flags_1e5_2_7 : 6;
         };
