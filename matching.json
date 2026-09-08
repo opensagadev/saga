@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 29.696438,
+    "fuzzy_match_percent": 29.729654,
     "total_code": "4722419",
     "matched_code": "59808",
     "matched_code_percent": 1.2664696,
@@ -71154,14 +71154,6 @@
           "match_percent": 0.3125
         },
         {
-          "name": "_Z10NewScanRotP7nuvec_si",
-          "demangled_name": "NewScanRot(nuvec_s*, int)",
-          "address": 3641264,
-          "offset": 2751296,
-          "size": 6787,
-          "match_percent": 0.0
-        },
-        {
           "name": "_Z17NewScanHandelFullP7nuvec_sS0_fii",
           "demangled_name": "NewScanHandelFull(nuvec_s*, nuvec_s*, float, int, int)",
           "address": 3710864,
@@ -76157,6 +76149,14 @@
       "object": "bazel-out/x64_windows-fastbuild/bin/src/_objs/saga_target_legoapi/terrain.o",
       "functions": [
         {
+          "name": "_ZL17TerrainKillPlayerP12GameObject_siP7nuvec_s.isra.4",
+          "demangled_name": "TerrainKillPlayer(GameObject_s*, int, nuvec_s*) [clone .isra.4]",
+          "address": 1030560,
+          "offset": 140592,
+          "size": 339,
+          "match_percent": 19.905882
+        },
+        {
           "name": "_Z13TerrainPlayerP12GameObject_s",
           "demangled_name": "TerrainPlayer(GameObject_s*)",
           "address": 1058464,
@@ -76299,6 +76299,14 @@
           "offset": 2745760,
           "size": 73,
           "match_percent": 64.25
+        },
+        {
+          "name": "_Z10NewScanRotP7nuvec_si",
+          "demangled_name": "NewScanRot(nuvec_s*, int)",
+          "address": 3641264,
+          "offset": 2751296,
+          "size": 6787,
+          "match_percent": 22.11843
         },
         {
           "name": "_Z7NewCastP7nuvec_sff",
@@ -124015,14 +124023,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZL17TerrainKillPlayerP12GameObject_siP7nuvec_s.isra.4",
-      "demangled_name": "TerrainKillPlayer(GameObject_s*, int, nuvec_s*) [clone .isra.4]",
-      "address": 1030560,
-      "offset": 140592,
-      "size": 339,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZL12PlayerCamPosP12GameObject_sP7nuvec_sS2_",
       "demangled_name": "PlayerCamPos(GameObject_s*, nuvec_s*, nuvec_s*)",
       "address": 1108416,
@@ -131130,8 +131130,8 @@
   "summary": {
     "bazel_units": 505,
     "functions": 13454,
-    "assigned_functions": 12198,
+    "assigned_functions": 12199,
     "ambiguous_functions": 237,
-    "unassigned_functions": 1019
+    "unassigned_functions": 1018
   }
 }
