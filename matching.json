@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 29.778288,
+    "fuzzy_match_percent": 29.786488,
     "total_code": "4722419",
     "matched_code": "59808",
     "matched_code_percent": 1.2664696,
@@ -57920,6 +57920,22 @@
           "match_percent": 75.08772
         },
         {
+          "name": "_Z16Plug_FindNearestP9PLUGSYS_sP7nuvec_sPfi",
+          "demangled_name": "Plug_FindNearest(PLUGSYS_s*, nuvec_s*, float*, int)",
+          "address": 5243120,
+          "offset": 4353152,
+          "size": 342,
+          "match_percent": 85.89888
+        },
+        {
+          "name": "_Z16Plug_MakeDrawMtxP6PLUG_sP7numtx_s",
+          "demangled_name": "Plug_MakeDrawMtx(PLUG_s*, numtx_s*)",
+          "address": 5243472,
+          "offset": 4353504,
+          "size": 115,
+          "match_percent": 99.965515
+        },
+        {
           "name": "_Z19Plugs_RegisterGizmoi",
           "demangled_name": "Plugs_RegisterGizmo(int)",
           "address": 5243600,
@@ -67051,24 +67067,7 @@
       "name": "legoapi/items/objects/plugs.cpp.o",
       "source": "src/legoapi/items/objects/plugs.cpp",
       "object": "bazel-out/x64_windows-fastbuild/bin/src/_objs/saga_target_legoapi/1/plugs.o",
-      "functions": [
-        {
-          "name": "_Z16Plug_FindNearestP9PLUGSYS_sP7nuvec_sPfi",
-          "demangled_name": "Plug_FindNearest(PLUGSYS_s*, nuvec_s*, float*, int)",
-          "address": 5243120,
-          "offset": 4353152,
-          "size": 342,
-          "match_percent": 3.820225
-        },
-        {
-          "name": "_Z16Plug_MakeDrawMtxP6PLUG_sP7numtx_s",
-          "demangled_name": "Plug_MakeDrawMtx(PLUG_s*, numtx_s*)",
-          "address": 5243472,
-          "offset": 4353504,
-          "size": 115,
-          "match_percent": 7.586207
-        }
-      ]
+      "functions": []
     },
     {
       "name": "legoapi/items/objects/things.cpp.o",
