@@ -946,7 +946,13 @@ typedef struct GameObject_s {
     }; // 0x0efd
     u8 field_0xefe; // 0x0efe
     u8 field_0xeff; // 0x0eff
-    u8 field_0xf00; // 0x0f00
+    union {
+        u8 field_0xf00; // 0x0f00
+        struct {
+            u8 : 7;
+            u8 awkward_shape_override : 1;
+        };
+    };
     union {
         u8 field_0xf01; // 0x0f01
         struct {

@@ -1116,7 +1116,7 @@ static i32 Action_AwkwardShapeOverride(AISYS *system, AISCRIPTPROCESS *, AIPACKE
         if (object != NULL) {
             if (object->character_context == 0x3c || object->field_0xcc0 != NULL)
                 Player_ClearContext(object, 1);
-            object->field_0xf00 = (object->field_0xf00 & 0x7f) | ((u8)enabled << 7);
+            object->awkward_shape_override = enabled;
         }
     }
     return 1;
