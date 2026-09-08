@@ -959,8 +959,12 @@ void LevelScriptReStoreProgress(WORLDINFO_s *, LEVELSCRIPTPROCESS_s *);
 
 static i32 Action_SetShootOpponents(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
                                    i32 param_count, i32 first_time, f32) {
-    GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
-    if (object != NULL && first_time) {
+    if (packet == NULL || packet->owner == NULL)
+        return 1;
+    GameObject_s *object = packet->owner->apiobj.objptr;
+    if (object == NULL)
+        return 1;
+    if (first_time) {
         object->field_0xef8 |= 0x80;
         for (i32 index = 0; index < param_count; ++index) {
             if (NuStrICmp(params[index], "false") == 0)
@@ -994,8 +998,12 @@ static i32 Action_IgnoreSlideTerrain(AISYS *system, AISCRIPTPROCESS *, AIPACKET 
 
 static i32 Action_CannotBeForcedBack(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
                                    i32 param_count, i32 first_time, f32) {
-    GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
-    if (object != NULL && first_time) {
+    if (packet == NULL || packet->owner == NULL)
+        return 1;
+    GameObject_s *object = packet->owner->apiobj.objptr;
+    if (object == NULL)
+        return 1;
+    if (first_time) {
         object->field_0xeff |= 0x10;
         for (i32 index = 0; index < param_count; ++index) {
             if (NuStrICmp(params[index], "FALSE") == 0)
@@ -1025,8 +1033,12 @@ static i32 Action_DrawBossHitPoints(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet
 
 static i32 Action_IgnoreShoveSystem(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
                                   i32 param_count, i32 first_time, f32) {
-    GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
-    if (object != NULL && first_time) {
+    if (packet == NULL || packet->owner == NULL)
+        return 1;
+    GameObject_s *object = packet->owner->apiobj.objptr;
+    if (object == NULL)
+        return 1;
+    if (first_time) {
         object->field_0xefc |= 1;
         for (i32 index = 0; index < param_count; ++index) {
             if (NuStrICmp(params[index], "FALSE") == 0)
