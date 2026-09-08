@@ -272,3 +272,23 @@ leaf functions, including `Hub_DrawAreaStats`, `Hub_DrawImportantBrick`,
 `Hub_DrawArcadeStats`, and `Hub_DrawSuperBonusStats`, remain stubs. The larger
 panel function and shop submenu routines still need matching improvements
 and broader runtime verification. No gizmo implementation was changed.
+
+## Shop submenu state reloads (2026-09-08)
+
+`DrawSubItemMenu2D` (`0x2436f0`, original 3747 bytes) now follows the
+original category selection and item-type price selection, reloads shelf
+selection and opacity across helper calls, and retains the original
+power-brick locked-label scale across the preceding title draw. Its opacity
+and gold-brick time comparisons also preserve the original unordered-float
+branch behavior. Matching improves from 23.843% to 34.734% (3786 current
+bytes); this remains a partial reconstruction, not a fully matched function.
+
+A temporary mapped-machine-code fixture compared 960 original/current cases:
+five categories, owned/unowned, available/unavailable, three opacities,
+selection inactive/active, sufficient/insufficient coins, and two item IDs.
+Half also changed opacity and locked-label scale from the instrumented text
+callback to check reload timing. All text arguments, price calls, rejection
+sounds, and resulting selection/scales agreed exactly. Rendering, availability,
+and audio callees were instrumented; this does not validate purchasing,
+confirmation-button rendering, or a complete native shop session. The native
+submenu capture limitation described above remains outstanding.
