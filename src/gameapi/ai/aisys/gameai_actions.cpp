@@ -56,14 +56,6 @@ static GameObject_s *ActionOwner(AIPACKET_s *packet) {
     return packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
 }
 
-static bool ActionToggleEnabled(char **params, i32 param_count) {
-    for (i32 index = 0; index < param_count; ++index) {
-        if (NuStrICmp(params[index], "FALSE") == 0) {
-            return false;
-        }
-    }
-    return true;
-}
 
 
 
@@ -646,14 +638,6 @@ static __used__ f32 Condition_EitherPlayerOnObject(AISYS_s *, AISCRIPTPROCESS_s 
 
 
 
-static i32 Action_SetBoltsDontGetDeflectedBack(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params,
-                                               i32 param_count, i32 first_time, f32) {
-    GameObject_s *object = ActionOwner(packet);
-    if (first_time != 0 && object != NULL) {
-        object->field_0xefc = (object->field_0xefc & ~8u) | (ActionToggleEnabled(params, param_count) ? 8u : 0u);
-    }
-    return 1;
-}
 
 
 
@@ -688,8 +672,6 @@ static __used__ f32 Condition_InSameTriggerAreaAsNearestPlayer(AISYS_s *, AISCRI
 namespace {
     struct GameAIRegistryCallbacks {
         GameAIRegistryCallbacks() {
-            lego_aiactiondefs[LEGO_AI_ACTION_SET_BOLTS_DONT_GET_DEFLECTED_BACK].eval_fn =
-                Action_SetBoltsDontGetDeflectedBack;
             lego_aiactiondefs[LEGO_AI_ACTION_PLAYER_SPEEDER_HACK].eval_fn = Action_PlayerSpeederHack;
             lego_aiactiondefs[LEGO_AI_ACTION_CREATE_SPLINE_CREATURES].eval_fn = Action_CreateSplineCreatures;
             lego_aiactiondefs[LEGO_AI_ACTION_FOLLOW_CHARACTER].eval_fn = Action_FollowCharacter;

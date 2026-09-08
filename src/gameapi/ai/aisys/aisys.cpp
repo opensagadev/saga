@@ -5249,6 +5249,23 @@ static i32 Action_CanShootOffScreen(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *
     return 1;
 }
 
+static i32 Action_SetBoltsDontGetDeflectedBack(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet,
+                                              char **params, i32 param_count, i32, f32) {
+    GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+    if (object == NULL) {
+        return 1;
+    }
+    object->field_0xefc |= 8u;
+    if (param_count != 0) {
+        for (i32 index = 0; index < param_count; ++index) {
+            if (NuStrICmp(params[index], "FALSE") == 0) {
+                object->field_0xefc &= ~8u;
+            }
+        }
+    }
+    return 1;
+}
+
 extern "C" {
     // Keep this registry in the exact order used by the shipped script parser.
     AIACTIONDEF lego_aiactiondefs[] = {
@@ -5274,7 +5291,7 @@ extern "C" {
         {"SnapWeaponOut", Action_SnapWeaponOut, 1, 0, 0},
         {"ResetContext", Action_ResetContext, 0, 0, 0},
         {"PrefersPlayers", Action_PrefersPlayers, 0, 0, 0},
-        {"SetBoltsDontGetDeflectedBack", NULL, 0, 0, 0},
+        {"SetBoltsDontGetDeflectedBack", Action_SetBoltsDontGetDeflectedBack, 0, 0, 0},
         {"CanShootObstructions", Action_CanShootObstructions, 0, 0, 0},
         {"UseBigJumpToJump", Action_UseBigJumpToJump, 0, 0, 0},
         {"SetTaggable", Action_SetTaggable, 1, 0, 0},
