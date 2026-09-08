@@ -190,6 +190,7 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 static const f32 AI_RESPAWN_DELAY = 2.0f;
 
 extern TERRSET *CurTerr;
+extern "C" i32 FindPlatInst(i32 instance);
 
 static f32 Condition_OnForcePlatform(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
     GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
@@ -484,6 +485,29 @@ static f32 Condition_IsVisible(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, cha
     return result;
 }
 
+static f32 Condition_PlayerOnObject(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    i32 platform = reinterpret_cast<intptr_t>(argument);
+    f32 result = 0.0f;
+    if (player != NULL && platform != -1 &&
+        (player->apiobj.field_0x27d != 0 || player->apiobj.field_0x27e != 0)) {
+        if (player->apiobj.supporting_platform_id == platform) {
+            NUMTX *transform = static_cast<NUMTX *>(CurTerr->platforms[platform].scene_object);
+            result = player->apiobj.position.y >= transform->m31 ? 1.0f : 0.0f;
+        }
+    }
+    return result;
+}
+
+static void *Condition_OnObjectInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    if (CurTerr != NULL) {
+        nuhspecial_s special;
+        if (NuSpecialFind(WORLD->current_gscn, &special, name, 1) != 0) {
+            return reinterpret_cast<void *>(static_cast<intptr_t>(FindPlatInst(NuSpecialGetInstanceix(&special))));
+        }
+    }
+    return reinterpret_cast<void *>(static_cast<intptr_t>(-1));
+}
+
 static f32 Condition_PlayerOnGround(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return player != NULL && (player->apiobj.field_0x27d != 0 || player->apiobj.field_0x27e != 0) ? 1.0f : 0.0f;
 }
@@ -628,7 +652,7 @@ extern "C" {
         {"OffScreenTimer", NULL, NULL},
         {"OnObject", NULL, NULL},
         {"OnSameObjectAsPlayer", NULL, NULL},
-        {"PlayerOnObject", NULL, NULL},
+        {"PlayerOnObject", Condition_PlayerOnObject, Condition_OnObjectInit},
         {"EitherPlayerOnObject", NULL, NULL},
         {"EitherPlayerLocatorRangeXZ", NULL, NULL},
         {"OnGround", NULL, NULL},

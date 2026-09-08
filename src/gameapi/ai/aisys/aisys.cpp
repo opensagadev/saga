@@ -5828,12 +5828,6 @@ static void *Condition_MessageInit(AISYS *system, char *arg, AISCRIPT *) {
     return CheckGizAIMessage(gizaimessagesys, arg, NULL);
 }
 
-__used__ static void *Condition_OnObjectInit(AISYS *sys, char *arg, AISCRIPT *script) {
-    (void)sys;
-    (void)arg;
-    (void)script;
-    return NULL;
-}
 
 // API script callbacks and their constant registry share internal linkage.
 static f32 Condition_AlwaysTrue(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg, void *void_arg) {
