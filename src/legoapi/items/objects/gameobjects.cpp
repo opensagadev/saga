@@ -24,6 +24,7 @@
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/gizmo/base/gizactions.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numusic/sfx.h"
@@ -185,6 +186,15 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 }
 
 static const f32 AI_RESPAWN_DELAY = 2.0f;
+
+static void *Condition_ObstacleInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    return GizmoFindByName(WORLD->gizmo_sys, obstacle_gizmotype_id, name);
+}
+
+static f32 Condition_ObstacleAtEnd(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    return argument != NULL && GizmoGetOutput(WORLD->gizmo_sys, static_cast<GIZMO_s *>(argument), 0, 1) != 0
+               ? 1.0f : 0.0f;
+}
 
 static void *Condition_OnSpeederBikeInit(AISYS_s *system, char *name, AISCRIPT_s *) {
     return name != NULL && system != NULL ? GetNamedGameObject(system, name) : NULL;
@@ -381,7 +391,7 @@ extern "C" {
         {"CollidingWithOpponent", NULL, NULL},
         {"Colliding", NULL, NULL},
         {"ObstacleAtStart", NULL, NULL},
-        {"ObstacleAtEnd", NULL, NULL},
+        {"ObstacleAtEnd", Condition_ObstacleAtEnd, Condition_ObstacleInit},
         {"SpecialAtStart", NULL, NULL},
         {"SpecialAtEnd", NULL, NULL},
         {"ObstacleLockedOpen", NULL, NULL},

@@ -5875,13 +5875,6 @@ static void *Condition_MessageInit(AISYS *system, char *arg, AISCRIPT *) {
     return CheckGizAIMessage(gizaimessagesys, arg, NULL);
 }
 
-__used__ static void *Condition_ObstacleInit(AISYS *sys, char *arg, AISCRIPT *script) {
-    (void)sys;
-    (void)arg;
-    (void)script;
-    return NULL;
-}
-
 __used__ static void *Condition_OnObjectInit(AISYS *sys, char *arg, AISCRIPT *script) {
     (void)sys;
     (void)arg;

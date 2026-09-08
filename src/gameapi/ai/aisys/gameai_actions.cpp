@@ -97,10 +97,6 @@ static f32 Condition_NumInSetAlive(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *p
     return static_cast<f32>(aicreature_sets_alive[creature_set - AI_CREATURE_SET_FIRST]);
 }
 
-static __used__ f32 Condition_ObstacleAtEnd(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
-
 
 
 static __used__ f32 Condition_TakeOverRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
