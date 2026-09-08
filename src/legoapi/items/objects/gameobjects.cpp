@@ -484,6 +484,16 @@ static f32 Condition_IsVisible(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, cha
     return result;
 }
 
+static f32 Condition_PlayerTakenOver(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return player != NULL && player->field_0xcc0 != NULL && player->character_context != 0x3b ? 1.0f : 0.0f;
+}
+
+static f32 Condition_EitherPlayerTakenOver(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    if (player != NULL && player->field_0xcc0 != NULL && player->character_context != 0x3b) return 1.0f;
+    if (player2 != NULL && player2->field_0xcc0 != NULL && player2->character_context != 0x3b) return 1.0f;
+    return 0.0f;
+}
+
 static f32 Condition_PartyContainsDroids(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     for (i32 index = 0; index < 8; ++index) {
         GameObject_s *object = Player[index];
@@ -716,8 +726,8 @@ extern "C" {
         {"PartyContainsDroids", Condition_PartyContainsDroids, NULL},
         {"CannotReachDestination", NULL, NULL},
         {"TakenOver", Condition_TakenOver, Condition_TakenOverInit},
-        {"PlayerTakenOver", NULL, NULL},
-        {"EitherPlayerTakenOver", NULL, NULL},
+        {"PlayerTakenOver", Condition_PlayerTakenOver, NULL},
+        {"EitherPlayerTakenOver", Condition_EitherPlayerTakenOver, NULL},
         {"BeenTakenOver", NULL, NULL},
         {"OnSpeederBike", Condition_OnSpeederBike, Condition_OnSpeederBikeInit},
         {"UnderPlayerControl", NULL, NULL},
