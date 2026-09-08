@@ -3086,7 +3086,10 @@ struct GIZFORCE_s {
         f32 activation_radius;
         f32 pickup_scatter_height; // 0xa0
     };
-    u32 field_0xa4;
+    union {
+        u32 field_0xa4;
+        MechObjectInterface *mech_object_interface;
+    };
     union {
         struct {
             u8 progress_flags; // 0xa8, GIZFORCE_PROGRESS_FLAGS

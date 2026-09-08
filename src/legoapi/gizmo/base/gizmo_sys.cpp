@@ -444,7 +444,7 @@ static void xGizmo(NUFPAR *parser) {
         load_flowbox->data = reinterpret_cast<FLOWBOXGIZMODATA_s *>(GizmoBufferAlloc(load_buff, load_endbuff, sizeof(FLOWBOXGIZMODATA_s)));
         data = load_flowbox->data;
         *reinterpret_cast<i32 *>(data->pad_0x04) = load_numgizmos;
-        data->gizmos = reinterpret_cast<GIZMO_s ***>(GizmoBufferAlloc(load_buff, load_endbuff, load_numgizmos * sizeof(GIZMO_s **)));
+        data->gizmos = reinterpret_cast<FLOWBOXGIZMOREF_s **>(GizmoBufferAlloc(load_buff, load_endbuff, load_numgizmos * sizeof(FLOWBOXGIZMOREF_s *)));
         data->gizmo_count = 0;
     }
     NuStrCpy(load_gizmoname, "");
@@ -458,7 +458,7 @@ static void xGizmo(NUFPAR *parser) {
     if (load_gizmotype < 0 || NuStrLen(load_gizmoname) == 0) return;
     const i32 name_length = NuStrLen(load_gizmoname);
     const i32 prefix_length = NuStrLen(gizmotypes->types[load_gizmotype].prefix);
-    data->gizmos[data->gizmo_count] = reinterpret_cast<GIZMO_s **>(GizmoBufferAlloc(load_buff, load_endbuff, sizeof(FLOWGIZREF_s)));
+    data->gizmos[data->gizmo_count] = reinterpret_cast<FLOWBOXGIZMOREF_s *>(GizmoBufferAlloc(load_buff, load_endbuff, sizeof(FLOWGIZREF_s)));
     FLOWGIZREF_s *ref = reinterpret_cast<FLOWGIZREF_s *>(data->gizmos[data->gizmo_count]);
     ref->name = reinterpret_cast<char *>(GizmoBufferAlloc(load_buff, load_endbuff, name_length + prefix_length + 1));
     NuStrCpy(ref->name, load_gizmoname);
