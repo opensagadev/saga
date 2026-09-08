@@ -550,6 +550,17 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
 
 extern "C" i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *cutscene);
 
+static f32 Condition_RigidAnimFrame(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    nuinstanim_s *animation = static_cast<nuinstanim_s *>(argument);
+    return animation != NULL ? animation->ltime : 1.0f;
+}
+
+static void *Condition_RigidAnimFrameInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    nuhspecial_s special;
+    NuSpecialFind(WORLD->current_gscn, &special, name, 1);
+    return NuSpecialExistsFn(&special) != 0 ? NuSpecialGetInstAnim(&special) : NULL;
+}
+
 static f32 Condition_FinishedSpline(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
     if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL) {
         GameObject *object = packet->owner->apiobj.objptr;
@@ -1094,7 +1105,7 @@ extern "C" {
         {"CutSceneExists", Condition_CutSceneExists, Condition_CutSceneExistsInit},
         {"PlayerInSock", NULL, NULL},
         {"CutScenePlaying", Condition_CutScenePlaying, Condition_CutScenePlayingInit},
-        {"RigidAnimFrame", NULL, NULL},
+        {"RigidAnimFrame", Condition_RigidAnimFrame, Condition_RigidAnimFrameInit},
         {"SockDistanceToPlayer", NULL, NULL},
         {"SockDistanceToOpponent", NULL, NULL},
         {"SockXDistanceToPlayer", NULL, NULL},

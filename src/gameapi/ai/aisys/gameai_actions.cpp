@@ -274,10 +274,6 @@ static __used__ f32 Condition_OffScreenTimer(AISYS_s *, AISCRIPTPROCESS_s *, AIP
 
 
 
-static __used__ f32 Condition_RigidAnimFrame(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
-
 static __used__ i32 Action_AddScriptProcessor(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
     return 0;
 }
@@ -956,10 +952,6 @@ static __used__ void *Condition_OffScreenTimerInit(AISYS_s *system, char *arg, A
 
 static __used__ f32 Condition_PickupBeenTurnedOn(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return 0;
-}
-
-static __used__ void *Condition_RigidAnimFrameInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
 }
 
 
