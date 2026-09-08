@@ -284,9 +284,6 @@ static __used__ f32 Condition_IsLowEndDevice(AISYS_s *, AISCRIPTPROCESS_s *, AIP
     return g_lowEndLevelBehaviour != 0 ? 1.0f : 0.0f;
 }
 
-static __used__ void *Condition_IsOnScreenInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
-}
 
 static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     isize creature_set = AI_CREATURE_SET_NONE;

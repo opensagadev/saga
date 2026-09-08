@@ -485,6 +485,19 @@ static f32 Condition_IsVisible(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, cha
     return result;
 }
 
+static f32 Condition_IsOnScreen(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    APIOBJECT *object = static_cast<APIOBJECT *>(argument);
+    if (object == NULL) {
+        if (packet != NULL) object = reinterpret_cast<APIOBJECT *>(packet->owner);
+    }
+    return object != NULL && object->model_draw_result != 0 ? 1.0f : 0.0f;
+}
+
+static void *Condition_IsOnScreenInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    if (name != NULL && GetNamedAPIObjectFn != NULL) return GetNamedAPIObjectFn(system, name);
+    return NULL;
+}
+
 static f32 Condition_IAmPlayer2(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
     f32 result = 0.0f;
     if (packet != NULL && packet->owner != NULL) {
@@ -661,7 +674,7 @@ extern "C" {
         {"GotGun", NULL, NULL},
         {"PrefersBrawling", NULL, NULL},
         {"IsAlive", NULL, NULL},
-        {"IsOnScreen", NULL, NULL},
+        {"IsOnScreen", Condition_IsOnScreen, Condition_IsOnScreenInit},
         {"OffScreenTimer", NULL, NULL},
         {"OnObject", NULL, NULL},
         {"OnSameObjectAsPlayer", NULL, NULL},
