@@ -5252,9 +5252,6 @@ __used__ static f32 Condition_Blocking(AISYS *sys, AISCRIPTPROCESS *processor, A
     return 0.0f;
 }
 
-static f32 Condition_Freeplay(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *) {
-    return FreePlay != 0 ? 1.0f : 0.0f;
-}
 
 __used__ static f32 Condition_GlynTest(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
                                        void *void_arg) {
@@ -7296,7 +7293,6 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_TO_LEVEL].eval_fn = Condition_BeenToLevel;
             lego_aiconditiondefs[LEGO_AI_CONDITION_MESSAGE].eval_fn = Condition_Message;
             lego_aiconditiondefs[LEGO_AI_CONDITION_MESSAGE].init_fn = Condition_MessageInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_FREEPLAY].eval_fn = Condition_Freeplay;
             lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_SPAWNED].eval_fn = Condition_BeenSpawned;
             lego_aiconditiondefs[LEGO_AI_CONDITION_MUSIC_ON].eval_fn = Condition_MusicOn;
 

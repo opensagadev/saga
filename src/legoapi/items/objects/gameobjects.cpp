@@ -486,6 +486,10 @@ static f32 Condition_IsVisible(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, cha
     return result;
 }
 
+static f32 Condition_Freeplay(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return static_cast<f32>(FreePlay);
+}
+
 static f32 Condition_MissionMode(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return Mission_Active(NULL) != NULL ? 1.0f : 0.0f;
 }
@@ -802,7 +806,7 @@ extern "C" {
         {"CurrentHintId", Condition_CurrentHintId, NULL},
         {"HintAvailable", Condition_HintAvailable, Condition_HintAvailableInit},
         {"HintComplete", Condition_HintComplete, Condition_HintAvailableInit},
-        {"Freeplay", NULL, NULL},
+        {"Freeplay", Condition_Freeplay, NULL},
         {"Indy", NULL, NULL},
         {"MissionMode", Condition_MissionMode, NULL},
         {"MissionWon", Condition_MissionWon, NULL},
