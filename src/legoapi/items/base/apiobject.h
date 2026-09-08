@@ -533,12 +533,17 @@ typedef struct APIOBJECT_s {
         };
     };
     union {
-        u32 ai_area_mask_low;    // 0x2a8
-        u32 field_0x2a8;
-    };
-    union {
-        u32 ai_area_mask_high;   // 0x2ac
-        u32 field_0x2ac;
+        u64 ai_area_mask;       // 0x2a8, trigger-area membership
+        struct {
+            union {
+                u32 ai_area_mask_low;
+                u32 field_0x2a8;
+            };
+            union {
+                u32 ai_area_mask_high;
+                u32 field_0x2ac;
+            };
+        };
     };
 } APIOBJECT;
 
@@ -549,6 +554,7 @@ DECOMP_ASSERT(offsetof(APIOBJECT, packed_contact_state) == 0x27c, "APIOBJECT pac
 DECOMP_ASSERT(offsetof(APIOBJECT, collision_identity_mask) == 0x1e4, "APIOBJECT collision identity offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, colliding_objects_mask) == 0x1ec, "APIOBJECT colliding objects offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, ai_area_mask_low) == 0x2a8, "APIOBJECT area mask low offset");
+DECOMP_ASSERT(offsetof(APIOBJECT, ai_area_mask) == 0x2a8, "APIOBJECT area membership mask offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, ai_area_mask_high) == 0x2ac, "APIOBJECT area mask high offset");
 
 struct APIOBJECTSYS_s {

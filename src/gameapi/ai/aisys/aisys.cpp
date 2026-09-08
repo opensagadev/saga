@@ -6542,14 +6542,12 @@ static f32 Condition_TakeOverTargetInTriggerArea(AISYS *sys, AISCRIPTPROCESS *pr
         if (area == NULL) {
             area = processor->unknown_a0;
         }
-        AIAREA *areas = WORLD->ai_sys->areas;
+        i32 index = area - WORLD->ai_sys->areas;
         GameObject *object = packet->owner->apiobj.objptr;
         if (object != NULL) {
             GameObject *target = object->takeover_target;
             if (sys->player_1 != NULL && target != NULL) {
-                i32 index = area - areas;
-                u64 membership = (static_cast<u64>(target->apiobj.ai_area_mask_high) << 32) |
-                                 target->apiobj.ai_area_mask_low;
+                u64 membership = target->apiobj.ai_area_mask;
                 if (((membership >> (index & 63)) & 1) != 0) {
                     return 1.0f;
                 }
