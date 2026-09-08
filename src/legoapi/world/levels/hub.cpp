@@ -1,4 +1,6 @@
 #include "globals.h"
+
+extern GAMESAVE_s TempGame;
 #include "batman.h"
 #include "gameapi/gui/apimenu.h"
 #include "legoapi/characters/core/character.h"
