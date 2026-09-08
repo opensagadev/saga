@@ -551,6 +551,21 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
 
 extern "C" i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *cutscene);
 
+static f32 Condition_SockXDistanceToPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    if (packet != NULL && packet->owner != NULL && player != NULL) {
+        GameObject *object = packet->owner->apiobj.objptr;
+        if (player->field_0x661 != 0xff && player->field_0x661 == object->field_0x661) {
+            NUVEC player_offset, object_offset;
+            NuVecSub(&player_offset, &player->apiobj.position, &player->sock_position.midpoint);
+            NuVecRotateY(&player_offset, &player_offset, -player->sock_position.midpoint_rotation.y);
+            NuVecSub(&object_offset, &object->apiobj.position, &object->sock_position.midpoint);
+            NuVecRotateY(&object_offset, &object_offset, -object->sock_position.midpoint_rotation.y);
+            return player_offset.x - object_offset.x;
+        }
+    }
+    return 0.0f;
+}
+
 static f32 Condition_FurthestPlayerDistanceAlongSock(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     f32 distance = 0.0f;
     if (player != NULL) {
@@ -1132,7 +1147,7 @@ extern "C" {
         {"RigidAnimFrame", Condition_RigidAnimFrame, Condition_RigidAnimFrameInit},
         {"SockDistanceToPlayer", NULL, NULL},
         {"SockDistanceToOpponent", NULL, NULL},
-        {"SockXDistanceToPlayer", NULL, NULL},
+        {"SockXDistanceToPlayer", Condition_SockXDistanceToPlayer, NULL},
         {"PlayerDistanceAlongSock", Condition_PlayerDistanceAlongSock, NULL},
         {"FurthestPlayerDistanceAlongSock", Condition_FurthestPlayerDistanceAlongSock, NULL},
         {"FinishedSpline", Condition_FinishedSpline, NULL},

@@ -1087,10 +1087,6 @@ static __used__ f32 Condition_OpponentToPlayerRange(AISYS_s *, AISCRIPTPROCESS_s
 
 
 
-static __used__ f32 Condition_SockXDistanceToPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
-
 
 static __used__ f32 Condition_EitherPlayerUsingPanel(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return 0;
