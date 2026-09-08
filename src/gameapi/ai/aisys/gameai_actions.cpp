@@ -511,9 +511,6 @@ static __used__ i32 Action_LaunchGuidedMissile(AISYS_s *, AISCRIPTPROCESS_s *, A
 
 
 
-static __used__ i32 Action_SetMaxMovementRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
-    return 0;
-}
 
 static __used__ i32 Action_SetZeroAcceleration(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params,
                                                i32 param_count, i32 first_time, f32) {

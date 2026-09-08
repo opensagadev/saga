@@ -3390,7 +3390,7 @@ static i32 Action_SetMaxMovementRange(AISYS *, AISCRIPTPROCESS *processor, AIPAC
             GameObject_s *object = &Obj[index];
             if ((object->apiobj.field_0x1f8 & (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER)) !=
                     (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER) ||
-                (object->apiobj.field_0x1f4 & 4) == 0) {
+                (object->apiobj.field_0x1f4 & 0x400) == 0) {
                 continue;
             }
             object->ai.movement_target_radius = range;
