@@ -1641,7 +1641,7 @@ extern "C" {
 
     void AISysFindRoute(AIPACKET *packet) {
         AIPATH *path = packet->path_info.path;
-        if (path == NULL || path->route_count == 0 || packet->path_info.connection == NULL) {
+        if (path->route_count == 0 || packet->path_info.connection == NULL) {
             return;
         }
 
@@ -1656,7 +1656,7 @@ extern "C" {
         }
         const i32 first_route = route;
         do {
-            if ((valid_routes & (1u << route)) != 0) {
+            if (((static_cast<u64>(valid_routes) >> route) & 1) != 0) {
                 packet->current_route = static_cast<u8>(route);
                 packet->next_route = static_cast<u8>(route + 1);
                 return;

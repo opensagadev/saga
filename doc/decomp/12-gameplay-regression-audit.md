@@ -488,6 +488,29 @@ retains player control for 180 frames but reproduces the known NPC angle-table
 UBSan error (`/tmp/saga-arrival-integration.log`); it is not sanitizer-clean
 and does not close the AI movement regression.
 
+The subsequent stopping/route-flow recovery raises `AIMoveToDestination` to
+**23.150%** (5154 bytes). It restores the supporting-platform endpoint flags,
+same-connection stopping offset and second exit-selection call, the current
+connection distance clamp, ordered endpoint comparisons, route exclusions,
+and attempted-route retry loop. Connection adoption now shares the final
+stopping path; it preserves `GetNextConnection`'s direction output and the
+original null-result destination-corridor attempt. `GetNextConnection`
+retains **35.790%**. `AISysFindRoute`'s original entry conditions and 64-bit
+route test raise that helper from **50.580%** to **99.464%** (197 bytes).
+
+Nineteen full-original/native cases agree for stopping and special-connection
+outputs (`/tmp/saga-original-special-connection.log`,
+`/tmp/saga-retry-cases.log`), including all four special flag bits in both
+directions, platform endpoint flags, strict radius boundaries and signed
+stopping parameters. Eighty route-cycling cases agree for current/next route
+(`/tmp/saga-original-findroute.log`, `/tmp/saga-retry-findroute.log`). These
+fixtures do not exercise the full route-retry/adoption flow. Target/native
+builds and all four repository checks pass. The Cantina transfer diagnostic
+retains player/pad control for 180 frames without sanitizer diagnostics in
+this run (`/tmp/saga-retry-cantina.log`); earlier NPC angle failures remain
+unresolved. Special-move callbacks, shared-node corner targeting and other
+remaining solver branches still require recovery and runtime verification.
+
 A native build-sound inventory confirms event 0x3a resolves to `MK-Pickup`
 (SFX 50, sample 357, 22050 Hz, enabled) and event 0x3b to `LegoForm` (SFX 128,
 sample 434, 11025 Hz, enabled and looping). Both have volume 16383. The
