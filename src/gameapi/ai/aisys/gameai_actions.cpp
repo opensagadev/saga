@@ -363,9 +363,6 @@ static __used__ void *Condition_GizmoOutputInit(AISYS_s *, char *, AISCRIPT_s *)
     return nullptr;
 }
 
-static __used__ f32 Condition_GizmoVisibility(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
 
 
 static __used__ f32 Condition_LocatorOnScreen(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
@@ -715,9 +712,6 @@ static void *Condition_CharacterLoadedInit(AISYS_s *, char *argument, AISCRIPT_s
 
 
 
-static __used__ void *Condition_GizmoVisibilityInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
-}
 
 static __used__ void *Condition_LocatorOnScreenInit(AISYS_s *, char *, AISCRIPT_s *) {
     return nullptr;
