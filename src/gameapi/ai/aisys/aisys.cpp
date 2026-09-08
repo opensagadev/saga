@@ -5702,11 +5702,59 @@ static __used__ i32 Action_RetreatFromOpponent(AISYS_s *, AISCRIPTPROCESS_s *, A
     return 0;
 }
 
-static __used__ i32 Action_MoveAwayFromPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
+static i32 Action_MoveAwayFromPlayer(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet,
+                                       char **params, i32 param_count, i32 first_time, f32) {
+    if (packet == NULL) {
+        return 1;
+    }
+    if (first_time != 0) {
+        for (i32 i = 0; i < param_count; i++) {
+            if (AIActionParseSpeedFn != NULL && AIActionParseSpeedFn(params[i], &packet->goal_speed_mode) != 0) {
+                continue;
+            }
+            if (NuStrICmp(params[i], "face") == 0) {
+                processor->action_data_1 = 1;
+            } else {
+                packet->movement_instruction_parameter = AIParamToFloatEx(packet, processor, params[i]);
+            }
+        }
+    }
+    if (sys->player_1 != NULL) {
+        AIPACKET *target = sys->player_1->ai;
+        AIMoveInstruction(packet, &target->last_path_position, target->mover_height, &target->path_info,
+                          AIPACKET_MOVEMENT_RETREAT, packet->movement_instruction_parameter);
+        if (processor->action_data_1 != 0) {
+            packet->movement_look_target = &sys->player_1->position;
+        }
+    }
     return 0;
 }
 
-static __used__ i32 Action_MoveAwayFromPlayer2(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
+static i32 Action_MoveAwayFromPlayer2(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet,
+                                       char **params, i32 param_count, i32 first_time, f32) {
+    if (packet == NULL) {
+        return 1;
+    }
+    if (first_time != 0) {
+        for (i32 i = 0; i < param_count; i++) {
+            if (AIActionParseSpeedFn != NULL && AIActionParseSpeedFn(params[i], &packet->goal_speed_mode) != 0) {
+                continue;
+            }
+            if (NuStrICmp(params[i], "face") == 0) {
+                processor->action_data_1 = 1;
+            } else {
+                packet->movement_instruction_parameter = AIParamToFloatEx(packet, processor, params[i]);
+            }
+        }
+    }
+    if (sys->player_2 != NULL) {
+        AIPACKET *target = sys->player_2->ai;
+        AIMoveInstruction(packet, &target->last_path_position, target->mover_height, &target->path_info,
+                          AIPACKET_MOVEMENT_RETREAT, packet->movement_instruction_parameter);
+        if (processor->action_data_1 != 0) {
+            packet->movement_look_target = &sys->player_2->position;
+        }
+    }
     return 0;
 }
 
@@ -5732,7 +5780,31 @@ static i32 Action_SetCircleDirection(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s 
     return 1;
 }
 
-static __used__ i32 Action_MoveAwayFromOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
+static i32 Action_MoveAwayFromOpponent(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet,
+                                       char **params, i32 param_count, i32 first_time, f32) {
+    if (packet == NULL) {
+        return 1;
+    }
+    if (first_time != 0) {
+        for (i32 i = 0; i < param_count; i++) {
+            if (AIActionParseSpeedFn != NULL && AIActionParseSpeedFn(params[i], &packet->goal_speed_mode) != 0) {
+                continue;
+            }
+            if (NuStrICmp(params[i], "face") == 0) {
+                processor->action_data_1 = 1;
+            } else {
+                packet->movement_instruction_parameter = AIParamToFloatEx(packet, processor, params[i]);
+            }
+        }
+    }
+    if (packet->opponent_object != NULL && packet->opponent_object->ai != NULL) {
+        AIPACKET *target = packet->opponent_object->ai;
+        AIMoveInstruction(packet, &target->last_path_position, target->mover_height, &target->path_info,
+                          AIPACKET_MOVEMENT_RETREAT, packet->movement_instruction_parameter);
+        if (processor->action_data_1 != 0) {
+            packet->movement_look_target = &packet->opponent_object->position;
+        }
+    }
     return 0;
 }
 
