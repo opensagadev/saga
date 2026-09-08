@@ -5996,14 +5996,11 @@ static f32 Condition_Timer(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *, char
     return processor->script_timer;
 }
 
-__used__ static f32 Condition_Active(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                     void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
+static f32 Condition_Active(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *) {
+    f32 active = 0.0f;
+    if (packet != NULL && packet->reset_mode == 2)
+        active = 1.0f;
+    return active;
 }
 
 __used__ static f32 Condition_GotGun(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
@@ -8140,6 +8137,7 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_PARTY_CHARACTER].eval_fn = Condition_IAmAPartyCharacter;
             lego_aiconditiondefs[LEGO_AI_CONDITION_LOCATOR_ON_SCREEN].eval_fn = Condition_LocatorOnScreen;
             lego_aiconditiondefs[LEGO_AI_CONDITION_TURRET_ALIVE].eval_fn = Condition_TurretAlive;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_ACTIVE].eval_fn = Condition_Active;
             lego_aiconditiondefs[LEGO_AI_CONDITION_SIDE].eval_fn = Condition_Side;
             lego_aiconditiondefs[LEGO_AI_CONDITION_SIDE].init_fn = Condition_SideInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_X_POS].eval_fn = Condition_XPos;
