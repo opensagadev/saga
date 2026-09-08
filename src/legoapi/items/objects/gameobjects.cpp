@@ -186,6 +186,24 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 
 static const f32 AI_RESPAWN_DELAY = 2.0f;
 
+static void *Condition_HitPointsInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    return name != NULL && system != NULL ? GetNamedGameObject(system, name) : NULL;
+}
+
+static f32 Condition_HitPoints(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    GameObject_s *object = static_cast<GameObject_s *>(argument);
+    if (object == NULL) {
+        if (packet == NULL || packet->owner == NULL) {
+            return 0.0f;
+        }
+        object = packet->owner->apiobj.objptr;
+        if (object == NULL) {
+            return 0.0f;
+        }
+    }
+    return static_cast<f32>(static_cast<i8>(object->current_hp));
+}
+
 static f32 Condition_CurrentHintId(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return Hint_CurrentId();
 }
@@ -251,7 +269,7 @@ extern "C" {
         {"Blocking", NULL, NULL},
         {"BeenHit", NULL, NULL},
         {"HoverPhase", NULL, NULL},
-        {"HitPoints", NULL, NULL},
+        {"HitPoints", Condition_HitPoints, Condition_HitPointsInit},
         {"OnDynamicGrapple", NULL, NULL},
         {"XPos", NULL, NULL},
         {"YPos", NULL, NULL},
