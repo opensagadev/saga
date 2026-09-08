@@ -379,6 +379,30 @@ already updated (`/tmp/saga-original-nextconnection.log`,
 nearest-exit distance calls or prove ordinary NPC movement. Target/native
 builds and all four repository checks pass.
 
+`AIPathNodeDistanceToPathNode` now follows the original cache eligibility
+(`route == 0xff` and no excluded mask), mapped-route traversal and recursive
+exit search. Its previous general-matrix traversal incorrectly reused cached
+distances with exclusions and omitted the route matrix. The original terminates
+on a repeated connection and returns the distance accumulated so far; it does
+not impose the former node-count iteration limit. Null connections return
+without filling the newly selected cache slot, whereas unavailable matrix
+entries cache `FLT_MAX`. These distinctions are preserved rather than adding
+fallback guards. The function improves from **8.377%** to **46.753%** (1252
+bytes versus 1358 original), with its C ABI and source optimization unchanged.
+
+The same isolated 32-bit fixture runs against original machine code at
+`0x3ecf50` and the native reconstruction. All 13 return values and both cache
+slots agree: normal traversal, two cache hits, exclusion bypass, mapped route,
+recursive exit, repeated connection, null connection, missing route matrix,
+membership rejection, invalid mapped index, no exits and unavailable entry
+(`/tmp/saga-original-distance.log`, `/tmp/saga-distance-runtime.log`). The
+fixture does not establish complete byte equivalence or full NPC correctness.
+Target/native builds and all four checks pass. The sustained Cantina tagging
+fixture retains player/pad ownership through 180 rendered frames and movement
+input (`/tmp/saga-distance-integration.log`). The earlier NPC angle-table
+sanitizer error does not recur in this run; this bounded, timing-dependent
+observation does not close the movement regression.
+
 A native build-sound inventory confirms event 0x3a resolves to `MK-Pickup`
 (SFX 50, sample 357, 22050 Hz, enabled) and event 0x3b to `LegoForm` (SFX 128,
 sample 434, 11025 Hz, enabled and looping). Both have volume 16383. The

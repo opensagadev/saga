@@ -920,81 +920,100 @@ extern "C" {
 
     f32 AIPathNodeDistanceToPathNode(AIPATH *path, i32 start_node, i32 destination_node, i32 route,
                                      u32 excluded_route_mask) {
-        if (path == NULL || path->nodes == NULL || path->route_matrix == NULL || start_node < 0 ||
-            destination_node < 0 || start_node >= path->node_count || destination_node >= path->node_count) {
+        if (path->route_matrix == NULL) {
             return FLT_MAX;
         }
         if (start_node == destination_node) {
             return 0.0f;
         }
-
-        AIPATHNODE &start = path->nodes[start_node];
+        AIPATHNODE *node = &path->nodes[start_node];
         f32 *cached_distance = NULL;
-        if (route == 0xff) {
-            if (start.distance_cache_nodes[0] == destination_node) {
-                return start.distance_cache[0];
+        if (excluded_route_mask == 0 && route == 0xff) {
+            if (node->distance_cache_nodes[0] == destination_node) {
+                return node->distance_cache[0];
             }
-            if (start.distance_cache_nodes[1] == destination_node) {
-                return start.distance_cache[1];
+            if (node->distance_cache_nodes[1] == destination_node) {
+                return node->distance_cache[1];
             }
-            start.distance_cache_nodes[1] = start.distance_cache_nodes[0];
-            start.distance_cache[1] = start.distance_cache[0];
-            start.distance_cache_nodes[0] = static_cast<u8>(destination_node);
-            cached_distance = &start.distance_cache[0];
+            node->distance_cache_nodes[1] = node->distance_cache_nodes[0];
+            node->distance_cache[1] = node->distance_cache[0];
+            node->distance_cache_nodes[0] = static_cast<u8>(destination_node);
+            node->distance_cache[0] = 0.0f;
+            cached_distance = &node->distance_cache[0];
         }
-
+        i32 current = node - path->nodes;
+        AIPATHROUTE *route_info = NULL;
+        if (route != 0xff) {
+            route_info = &path->routes[route];
+            if (((static_cast<u64>(static_cast<u16>(node->value_0x58)) >> static_cast<u8>(route)) & 1) == 0) {
+                return FLT_MAX;
+            }
+        }
+        AIPATHNODE *goal = &path->nodes[destination_node];
+        AIPATHCNX *previous = NULL;
         f32 distance = 0.0f;
-        i32 node_index = start_node;
-        for (i32 step = 0; step < path->node_count; ++step) {
-            AIPATHNODE &node = path->nodes[node_index];
-            if (path->route_matrix[node_index] == NULL || node.connections == NULL) {
-                distance = FLT_MAX;
-                break;
-            }
-
-            const u8 connection_index = path->route_matrix[node_index][destination_node];
-            if (connection_index == 0xff || connection_index >= node.connection_count) {
-                distance = FLT_MAX;
-                break;
-            }
-
-            AIPATHCNX *connection = node.connections[connection_index];
-            if (connection == NULL || (connection->route_mask & excluded_route_mask) != 0) {
-                distance = FLT_MAX;
-                break;
-            }
-            if (route != 0xff) {
-                if (route < 0 || route >= 16) {
+        while (node != goal) {
+            i32 next;
+            if (route_info != NULL) {
+                if ((static_cast<u64>(static_cast<u16>(goal->value_0x58)) & (u64(1) << static_cast<u8>(route))) == 0) {
+                    f32 best = FLT_MAX;
+                    for (i32 i = 0; i < route_info->character_count; ++i) {
+                        f32 first =
+                            route_info->characters[i] == start_node
+                                ? 0.0f
+                                : AIPathNodeDistanceToPathNode(path, start_node, route_info->characters[i], route, 0);
+                        f32 second =
+                            route_info->characters[i] == destination_node
+                                ? 0.0f
+                                : AIPathNodeDistanceToPathNode(path, route_info->characters[i], destination_node, 0xff,
+                                                               static_cast<u32>(u64(1) << static_cast<u8>(route)));
+                        f32 candidate = first != FLT_MAX && second != FLT_MAX ? first + second : FLT_MAX;
+                        best = candidate < best ? candidate : best;
+                    }
+                    if (best == FLT_MAX) {
+                        distance = FLT_MAX;
+                    } else {
+                        distance += best;
+                    }
+                    break;
+                }
+                u8 from = route_info->node_routes[current];
+                if (from >= route_info->route_count) {
                     distance = FLT_MAX;
                     break;
                 }
-                const u16 route_bit = static_cast<u16>(1u << route);
-                if ((connection->route_mask & route_bit) == 0 && (node.value_0x5a & route_bit) == 0) {
+                u8 to = route_info->node_routes[destination_node];
+                if (to >= route_info->route_count) {
                     distance = FLT_MAX;
                     break;
                 }
-            }
-
-            if (connection->node_indices[0] == node_index) {
-                node_index = connection->node_indices[1];
-            } else if (connection->node_indices[1] == node_index) {
-                node_index = connection->node_indices[0];
+                next = route_info->route_nodes[from][to];
             } else {
+                next = path->route_matrix[current][destination_node];
+            }
+            if (next == 0xff) {
                 distance = FLT_MAX;
                 break;
             }
-            if (node_index >= path->node_count) {
+            AIPATHCNX *connection = node->connections[next];
+            if (connection == NULL) {
+                return FLT_MAX;
+            }
+            if ((connection->route_mask & excluded_route_mask) != 0) {
                 distance = FLT_MAX;
                 break;
             }
-
+            if (connection == previous) {
+                break;
+            }
+            if (connection->node_indices[0] == current) {
+                current = connection->node_indices[1];
+            } else {
+                current = connection->node_indices[0];
+            }
+            node = &path->nodes[current];
             distance += connection->distance;
-            if (node_index == destination_node) {
-                break;
-            }
-        }
-        if (node_index != destination_node) {
-            distance = FLT_MAX;
+            previous = connection;
         }
         if (cached_distance != NULL) {
             *cached_distance = distance;
