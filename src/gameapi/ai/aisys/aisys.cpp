@@ -5870,24 +5870,17 @@ __used__ static f32 Condition_GotVictim(AISYS *sys, AISCRIPTPROCESS *processor, 
     return 0.0f;
 }
 
-__used__ static f32 Condition_IAmABaddy(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                        void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
+static f32 Condition_IAmABaddy(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *) {
+    return packet != NULL && packet->owner != NULL && (packet->owner->apiobj.field_0x1f4 & 0x10001) != 0
+               ? 1.0f : 0.0f;
 }
 
-__used__ static f32 Condition_IAmAGoody(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                        void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
+static f32 Condition_IAmAGoody(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *) {
+    if (packet == NULL || packet->owner == NULL)
+        return 0.0f;
+    if (packet->owner->apiobj.field_0x1f4 & 5)
+        return 0.0f;
+    return 1.0f;
 }
 
 
@@ -6038,14 +6031,14 @@ __used__ static f32 Condition_HasTakeOver(AISYS *sys, AISCRIPTPROCESS *processor
     return 0.0f;
 }
 
-__used__ static f32 Condition_IAmANeutral(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                          void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
+static f32 Condition_IAmANeutral(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *) {
+    return packet != NULL && packet->owner != NULL && (packet->owner->apiobj.field_0x1f4 & 4) != 0
+               ? 1.0f : 0.0f;
+}
+
+static f32 Condition_IAmAPartyCharacter(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *) {
+    return packet != NULL && packet->owner != NULL && static_cast<i8>(packet->owner->apiobj.field_0x27c) != -1
+               ? 1.0f : 0.0f;
 }
 
 __used__ static f32 Condition_InLevelNode(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
@@ -7794,6 +7787,10 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_CATEGORY_IS].eval_fn = Condition_CategoryIs;
             lego_aiconditiondefs[LEGO_AI_CONDITION_PLAYER_CATEGORY_IS].eval_fn = Condition_PlayerCategoryIs;
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_GOODIE_BADDIE].eval_fn = Condition_IAmAGoodieBaddie;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_GOODY].eval_fn = Condition_IAmAGoody;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_BADDY].eval_fn = Condition_IAmABaddy;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_NEUTRAL].eval_fn = Condition_IAmANeutral;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_PARTY_CHARACTER].eval_fn = Condition_IAmAPartyCharacter;
             lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_TO_LEVEL].eval_fn = Condition_BeenToLevel;
 
             lego_aiactiondefs[LEGO_AI_ACTION_SET_CURRENT_SPEED].eval_fn = Action_SetCurrentSpeed;
