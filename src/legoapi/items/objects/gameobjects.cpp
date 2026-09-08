@@ -189,6 +189,11 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 
 static const f32 AI_RESPAWN_DELAY = 2.0f;
 
+static f32 Condition_UsingForce(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    return GizForce_GameObjUsingForce(packet->owner->apiobj.objptr, static_cast<GIZFORCE_s *>(argument)) != 0
+               ? 1.0f : 0.0f;
+}
+
 static void *Condition_UsingForceInit(AISYS_s *, char *name, AISCRIPT_s *) {
     GIZMO_s *gizmo = GizmoFindByName(WORLD->gizmo_sys, force_gizmotype_id, name);
     return gizmo != NULL ? gizmo->object : NULL;
@@ -490,7 +495,7 @@ extern "C" {
         {"NumBaddiesThatCanSeePlayers", NULL, NULL},
         {"PlayerUsingForce", NULL, NULL},
         {"EitherPlayerUsingForce", NULL, NULL},
-        {"UsingForce", NULL, NULL},
+        {"UsingForce", Condition_UsingForce, Condition_UsingForceInit},
         {"OnForcePlatform", NULL, NULL},
         {"PlayerOnForcePlatform", NULL, NULL},
         {"EitherPlayerOnForcePlatform", NULL, NULL},

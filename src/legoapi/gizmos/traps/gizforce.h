@@ -7,6 +7,8 @@ extern i32 force_gizmotype_id;
 #ifdef __cplusplus
 
 typedef struct GIZFORCE_s GIZFORCE;
+struct GameObject_s;
+i32 GizForce_GameObjUsingForce(GameObject_s *object, GIZFORCE_s *force);
 
 void GizForce_PlayForwards(GIZFORCE_s *force);
 void GizForce_PlayBackwards(GIZFORCE_s *force);
