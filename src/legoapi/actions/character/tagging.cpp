@@ -15,6 +15,7 @@
 #include "legoapi/items/base/collection.h"
 #include "legoapi/menus/screens/store.h"
 #include "legoapi/world/world.h"
+#include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/levels/levels.h"
 #include "nu2api/numath/nufloat.h"
@@ -107,7 +108,148 @@ i32 TagCharacter(GameObject_s *source, GameObject_s *target, i32 mode) {
     return 1;
 }
 
-void Tag_UpdateHint(HINT_s *) {
+extern i16 id_TC14;
+extern i16 id_GRABCONTROL;
+extern i16 id_GRABR2CONTROL;
+void Move_BEAST(GameObject_s *);
+HINT_s *Hint_FindHint(i32);
+i32 Hint_isComplete(HINT_s *);
+void Hint_SetComplete(HINT_s *);
+
+i32 Tag_UpdateHint(HINT_s *hint) {
+    if (WORLD->area != NULL && WORLD->area == HUB_ADATA)
+        return 0;
+    u8 conditions = static_cast<u8>(LSW_HintConditions);
+    i32 tc14 = (conditions >> 1) & 1;
+    auto check_tc14 = [&](GameObject_s *object) {
+        if (object != NULL && (object->apiobj.field_0x1f8 & 0x1080) == 0x1080 && object->id == id_TC14)
+            tc14 = 1;
+    };
+    check_tc14(Player[0]);
+    check_tc14(Player[1]);
+    check_tc14(Player[2]);
+    check_tc14(Player[3]);
+    check_tc14(Player[4]);
+    check_tc14(Player[5]);
+    check_tc14(Player[6]);
+    check_tc14(Player[7]);
+    reinterpret_cast<u8 *>(&LSW_HintConditions)[0] = (conditions & ~2) | (tc14 << 1);
+    switch (hint->control_mode_ids[0]) {
+        case 600:
+            if (FreePlay == 0)
+                return 0;
+            if (player != NULL && static_cast<i8>(player->apiobj.flags_low) < 0 && player->field_0xcc0 != NULL)
+                return 0;
+            return player2 == NULL || static_cast<i8>(player2->apiobj.flags_low) >= 0 || player2->field_0xcc0 == NULL;
+        case 602: {
+            if (Tag_DoneFirst != 0) {
+                Hint_SetComplete(hint);
+                return 0;
+            }
+            if (VehicleArea != 0 || WORLD->current_level == HUB_LDATA)
+                return 0;
+            GameObject_s *first = player;
+            GameObject_s *second = player2;
+            if (first != NULL && static_cast<i8>(first->apiobj.flags_low) < 0 && first->field_0xcc0 != NULL)
+                return 0;
+            if (second != NULL && static_cast<i8>(second->apiobj.flags_low) < 0 && second->field_0xcc0 != NULL)
+                return 0;
+            i32 count = 0;
+            i32 active = 0;
+            auto count_player = [&](GameObject_s *object) {
+                if (object != NULL) {
+                    ++count;
+                    active += (object->apiobj.field_0x1f8 & 0x1080) == 0x1080;
+                }
+            };
+            count_player(Player[0]);
+            count_player(Player[1]);
+            count_player(Player[2]);
+            count_player(Player[3]);
+            count_player(Player[4]);
+            count_player(Player[5]);
+            count_player(Player[6]);
+            count_player(Player[7]);
+            if (active == 2 && count == 2)
+                return 0;
+            return (first != NULL && first->field_0xcc0 == NULL) || (second != NULL && second->field_0xcc0 == NULL);
+        }
+        case 603: {
+            if ((LSW_HintConditions & 4) == 0) {
+                if (Tag_DoneFirst > 1)
+                    Tag_DoneFirst = 1;
+                return 0;
+            }
+            HINT_s *previous = Hint_FindHint(602);
+            if (Tag_DoneFirst == 2) {
+                Hint_SetComplete(hint);
+                return 0;
+            }
+            if (Tag_DoneFirst != 1 || (previous != NULL && Hint_isComplete(previous) == 0))
+                return 0;
+            if (VehicleArea != 0 || WORLD->current_level == HUB_LDATA)
+                return 0;
+            return (player != NULL && player->field_0xcc0 == NULL) || (player2 != NULL && player2->field_0xcc0 == NULL);
+        }
+        case 605:
+        case 611:
+        case 650:
+            for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
+                GameObject_s *object = &Obj[i];
+                if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || object->apiobj.field_0x287 != 0 ||
+                    static_cast<i8>(object->field_0xe23) >= 0)
+                    continue;
+                const bool grab = object->id == id_GRABCONTROL || object->id == id_GRABR2CONTROL;
+                if (hint->control_mode_ids[0] == 650) {
+                    if (grab)
+                        return 1;
+                } else if (!grab) {
+                    const bool beast = object->apiobj.character_data->move_fn == Move_BEAST;
+                    if (beast == (hint->control_mode_ids[0] == 611))
+                        return 1;
+                }
+            }
+            return 0;
+        case 606:
+            for (i32 i = 0; i < 2; ++i) {
+                GameObject_s *object = Player[i];
+                if (object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0 && object->field_0xcc0 != NULL &&
+                    object->id != id_LUKESKYWALKERDAGOBAH)
+                    return WORLD->current_level != SPEEDERCHASEA_LDATA || disable_narrow_socks != 0;
+            }
+            return 0;
+        case 647:
+            return WORLD->current_level == SPEEDERCHASEA_LDATA &&
+                   ((Player[0] != NULL && Player[0]->id == id_SPEEDERBIKE) ||
+                    (Player[1] != NULL && Player[1]->id == id_SPEEDERBIKE));
+        case 649:
+            if (VehicleArea == 0)
+                return 0;
+            for (i32 i = 0; i < 2; ++i) {
+                if (Player[i] != NULL && Player[i]->torpedo != NULL && Player[i]->torpedo->count != 0 &&
+                    Player[i]->torpedo->target != 0)
+                    return 1;
+            }
+            return 0;
+        case 651:
+            for (i32 i = 0; i < 2; ++i) {
+                if (Player[i] != NULL && static_cast<i8>(Player[i]->apiobj.flags_low) < 0 &&
+                    (Player[i]->id == id_GRABCONTROL || Player[i]->id == id_GRABR2CONTROL))
+                    return 1;
+            }
+            return 0;
+        case 654:
+            if (VehicleArea == 0)
+                return 0;
+            for (i32 i = 0; i < 2; ++i) {
+                if (Player[i] != NULL && static_cast<i8>(Player[i]->apiobj.flags_low) < 0 &&
+                    Player[i]->apiobj.field_0x287 == 0 && (Player[i]->field_0xe24 & 0x10) != 0)
+                    return 1;
+            }
+            return 0;
+        default:
+            return 0;
+    }
 }
 
 void Tag_NewTransfer(GameObject_s *source, GameObject_s *target) {
