@@ -174,12 +174,6 @@ static i32 Action_MoveForward(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
 
 
 
-static __used__ void *Condition_CategoryIsInit(AISYS_s *system, char *arg, AISCRIPT_s *) {
-    if (system == NULL || arg == NULL || CharCategory == NULL) {
-        return reinterpret_cast<void *>(static_cast<isize>(-1));
-    }
-    return reinterpret_cast<void *>(static_cast<isize>(CharCategory_FindByName(arg)));
-}
 
 
 
@@ -653,8 +647,6 @@ namespace {
 
             lego_aiconditiondefs[LEGO_AI_CONDITION_OFF_SCREEN_TIMER].eval_fn = Condition_OffScreenTimer;
             lego_aiconditiondefs[LEGO_AI_CONDITION_OFF_SCREEN_TIMER].init_fn = Condition_OffScreenTimerInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_CATEGORY_IS].init_fn = Condition_CategoryIsInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_PLAYER_CATEGORY_IS].init_fn = Condition_CategoryIsInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_TO_LEVEL].init_fn = Condition_BeenToLevelInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_IS_LOW_END_DEVICE].eval_fn = Condition_IsLowEndDevice;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CHARACTER_LOADED].eval_fn = Condition_CharacterLoaded;
