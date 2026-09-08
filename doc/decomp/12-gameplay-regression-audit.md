@@ -1427,3 +1427,38 @@ python3 scripts/objdiff-cli.py _ZN14NuVoiceAndroid11UpdateQueueEv
 If another build changes `bazel-bin`, pass `-t` with the target-config
 artifact reported by Bazel rather than accidentally comparing a native or
 debug configuration.
+
+### Animation duration dependency, 2026-09-08
+
+The tightrope attachment audit exposed a timing discrepancy in `AnimDuration`
+(original `0x3cd2ed`). The final integer argument subtracts the animation record's
+blend-out time at offset `0x14`, not `FRAMETIME`. The original also evaluates
+`(1 / (playback_rate / 30)) * (1 / 30)` before multiplying the frame interval.
+Both operations have been restored without changing the source optimization.
+The function remains at 0% instruction matching; this is a behavioral correction,
+not a completed matching reconstruction.
+
+Twelve isolated valid-record cases cover rates 30, 24, and 1.3, start/end frame
+selection, and both values of the subtraction flag, with blend-out time 0.25.
+The original and reconstructed Android target produce identical printed float
+results for every case. The native build differs by small rounding amounts in
+two cases: its x87 intermediate arithmetic differs from the original and target
+SSE instructions. No source workaround was added for that diagnostic difference.
+Fixture sources and logs are `/tmp/saga-original-duration.c`,
+`/tmp/saga-target-duration.c`, and `/tmp/saga-{original,target,duration-runtime}*.log`.
+Target/native builds and all four repository checks pass. These fixtures do not
+verify animation timing during a complete level playthrough.
+
+The pending tightrope dependency recovery has separate original/native fixtures:
+12 `TightRope_InRange` cases, 16 attachment cases without an entry animation,
+and 16 attachment cases with valid animation records. All paired outputs agree.
+The latter cases cover the strict quarter-height threshold: equality chooses
+`0x88` and preserves the existing timer; a point above the threshold chooses
+`0x8f` and stores the recovered animation duration. Facing reversal, model flag
+variants, slope rotations, offsets, and disabled-rope rejection are also covered.
+The animation fixture is `/tmp/saga-original-attach-animation.c`, with native
+invocation `/tmp/saga-attach-animation-runtime.gdb`. These controlled fixtures
+do not establish working AI traversal or verify `TightRope_SnapTo` end to end.
+Current instruction matches remain partial: range 44.022%, attachment 82.472%,
+and snap 86.392%. The attachment helper's private calling convention is still
+different from the original.

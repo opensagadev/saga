@@ -2736,10 +2736,10 @@ extern "C" {
         }
 
         CHARACTERANIM_s *animation_info = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation]);
-        duration *= 1.0f / animation_info->playback_rate;
+        duration *= (1.0f / (animation_info->playback_rate / 30.0f)) * (1.0f / 30.0f);
         animduration_blendouttime = animation_info->blend_out_time;
         if (subtract_frame_time != 0) {
-            duration -= FRAMETIME;
+            duration -= animduration_blendouttime;
         }
         return duration;
     }
