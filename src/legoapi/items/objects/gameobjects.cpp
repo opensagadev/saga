@@ -499,13 +499,14 @@ static f32 Condition_PlayerOnObject(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *
 }
 
 static void *Condition_OnObjectInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    nuhspecial_s special;
+    i32 platform = -1;
     if (CurTerr != NULL) {
-        nuhspecial_s special;
         if (NuSpecialFind(WORLD->current_gscn, &special, name, 1) != 0) {
-            return reinterpret_cast<void *>(static_cast<intptr_t>(FindPlatInst(NuSpecialGetInstanceix(&special))));
+            platform = FindPlatInst(NuSpecialGetInstanceix(&special));
         }
     }
-    return reinterpret_cast<void *>(static_cast<intptr_t>(-1));
+    return reinterpret_cast<void *>(static_cast<intptr_t>(platform));
 }
 
 static f32 Condition_PlayerOnGround(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
