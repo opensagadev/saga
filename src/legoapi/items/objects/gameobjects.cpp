@@ -484,6 +484,13 @@ static f32 Condition_IsVisible(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, cha
     return result;
 }
 
+static f32 Condition_OpponentContext(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    if (packet != NULL && packet->opponent_object != NULL) {
+        return packet->opponent_object->objptr->character_context == reinterpret_cast<intptr_t>(argument) ? 1.0f : 0.0f;
+    }
+    return 0.0f;
+}
+
 static void *Condition_InContextInit(AISYS_s *, char *name, AISCRIPT_s *) {
     i32 context;
     if (NuStrICmp(name, "DEACTIVATED") == 0) context = 0x17;
@@ -653,7 +660,7 @@ extern "C" {
         {"NumInSetAlive", NULL, NULL},
         {"Context", NULL, NULL},
         {"InContext", Condition_InContext, Condition_InContextInit},
-        {"OpponentContext", NULL, NULL},
+        {"OpponentContext", Condition_OpponentContext, Condition_InContextInit},
         {"Player2Active", Condition_Player2Active, NULL},
         {"NumBaddies", NULL, NULL},
         {"NumForceObjects", Condition_NumForceObjects, Condition_NumForceObjectsInit},
