@@ -44,7 +44,7 @@ LEVELDATA_s *CanSaveAndExit(WORLDINFO_s *world) {
     extern i32 SuperStory;
     extern i32 ChallengeMode;
     extern i32 Arcade;
-    extern CUTSCENEPLAYERCLIP_s *CutScenePlayer_Active(void);
+    extern CUTSCENEPLAYERCLIP *CutScenePlayer_Active(void);
 
     if (GAMEDEMO != 0 || SuperStory != 0 || world->area == NULL || world->area == HUB_ADATA ||
         (world->area->flags & 0x146) != 0 || Mission_Active(NULL) != NULL || ChallengeMode != 0 || Arcade != 0 ||

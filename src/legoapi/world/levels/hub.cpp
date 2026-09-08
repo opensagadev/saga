@@ -159,9 +159,7 @@ u8 leftrepeatcount[2] = {};
 u8 hub_makefreeplaylist_addotherid = 0;
 
 static i32 buildits_reset = 0;
-static __attribute__((used)) i32 TJTYPEA = 96;
 static GIZMO *hub_minikitviewer_gizmo = NULL;
-static i32 hub_minikitviewer_area = 0;
 static NUGSPLINE *hub_minikitviewer_camspl = NULL;
 static f32 freeplaytime = 0.0f;
 static f32 freeplayduration = 0.0f;

@@ -6,14 +6,13 @@
 
 // Cutscene API (module legoapi/cutscenes, cutscenes.cpp).
 enum CUTSCENEPLAYER_CLIP_TYPE { CLIP_INTRO, CLIP_MIDTRO, CLIP_OUTRO, CLIP_ENDING };
-struct CUTSCENEPLAYERCLIP_s {
+struct CUTSCENEPLAYERCLIP {
     i16 level_id;
     u8 type;
     i8 guest_episode;
     char name[64];
 };
-typedef CUTSCENEPLAYERCLIP_s CUTSCENEPLAYERCLIP;
-CUTSCENEPLAYERCLIP_s *CutScenePlayer_Active();
+CUTSCENEPLAYERCLIP *CutScenePlayer_Active();
 struct CUTSCENEPLAYER_s {
     CUTSCENEPLAYERCLIP *clips;
     CUTSCENEPLAYERCLIP *active;

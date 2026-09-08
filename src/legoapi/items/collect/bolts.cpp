@@ -9,6 +9,7 @@
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "decomp.h"
+#include "nu2api/nucore/nustring.h"
 #include "legoapi/core/input/qrand.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/nu3d/nuspecial.h"
@@ -1152,3 +1153,19 @@ extern "C" {
     }
 
 } // extern "C"
+
+i8 BoltType_FindIDByName(char *name, WORLDINFO *world) {
+    if (NuStrLen(name) == 0)
+        return -1;
+    for (i32 i = 7; i >= 0; --i) {
+        if (NuStrICmp(name, world->bolt_types[i].name) == 0)
+            return BoltSys->count + i;
+    }
+    // Local records were checked above. The original's count + 7 here reads
+    // eight records beyond GlobalBoltType; search only the allocated globals.
+    for (i32 i = BoltSys->count - 1; i >= 0; --i) {
+        if (NuStrICmp(name, BoltSys->types[i].name) == 0)
+            return i;
+    }
+    return -1;
+}

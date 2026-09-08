@@ -45,7 +45,7 @@ void CutScenePlayer_Start(i32 clip_id, i32 door) {
     }
 }
 
-CUTSCENEPLAYERCLIP_s *CutScenePlayer_Active() {
+CUTSCENEPLAYERCLIP *CutScenePlayer_Active() {
     return CutScenePlayer != NULL ? CutScenePlayer->active : 0;
 }
 

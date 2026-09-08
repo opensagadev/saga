@@ -264,7 +264,7 @@ i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s 
     } else if (gizmo->type_id == grapple_gizmotype_id) {
         GRAPPLE *grapple = static_cast<GRAPPLE *>(gizmo->object);
         if (object->character_context == LEGOCONTEXT_GRAPPLE && object->field_0x788 == grapple) {
-            object->pad_1094[0] = 5;
+            object->field_0x1094 = 5;
             GameObjectSetCanUse(object, grapple, 1, 50, 0.0f);
             ClearSpecialMove(object);
             for (i32 i = 0; i < 2; ++i) {
@@ -274,9 +274,9 @@ i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s 
                 for (i32 j = 0; j < set->trigger_count; ++j) {
                     if (set->triggers[j] != NULL && set->triggers[j]->object == other->field_0x788) {
                         if (player->apiobj.position.y > object->apiobj.position.y + 0.05f)
-                            object->pad_107e[0] = 1;
+                            object->field_0x107e = 1;
                         else if (object->apiobj.position.y - 0.05f > player->apiobj.position.y)
-                            object->pad_107e[0] = 2;
+                            object->field_0x107e = 2;
                         return 0;
                     }
                 }

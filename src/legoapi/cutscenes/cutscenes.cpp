@@ -97,7 +97,7 @@ extern "C" TERRAIN_SURFACE_s TerSurface[32];
 extern "C" void APITransparentCharDraw(nuhgobj_s *, NUMTX *, i32, i16 *, NUMTX *, void **, i32);
 extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
                                         NUGCUTLOCATOR_s *, f32, NUMTX *, i32);
-CUTSCENEPLAYERCLIP_s *CutScenePlayer_Active(void);
+CUTSCENEPLAYERCLIP *CutScenePlayer_Active(void);
 void CutScenePlayer_SetObjects(CUTINFO *);
 void AddPartDebris(PARTDEBSYS_s *, i32, nuvec_s *);
 extern "C" void DebrisSetRenderGroup(i32);
@@ -351,7 +351,7 @@ void CutScenes_Reset(WORLDINFO_s *world) {
         ((world->current_level->flags & 0xe0) != 0 || world->level_progress == NULL ||
          (world->level_progress->flags & 2) == 0)) {
         CUTINFO *cut = NULL;
-        CUTSCENEPLAYERCLIP_s *clip = CutScenePlayer_Active();
+        CUTSCENEPLAYERCLIP *clip = CutScenePlayer_Active();
         if (clip != NULL && world->cutscene_sys->count > 0) {
             if (clip->name[0] != '\0')
                 cut = CutScene_Find(world->cutscene_sys, clip->name);

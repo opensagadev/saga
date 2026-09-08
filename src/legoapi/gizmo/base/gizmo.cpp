@@ -748,19 +748,19 @@ static __used__ void CheckIfParentsFinished(GIZFLOW_s *system, FLOWBOX_s *box) {
 
 static void ProcessFlowBox(GIZFLOW_s *, FLOWBOX_s *, u8);
 
-static __used__ void ResetForLoopEx(GIZFLOW_s *system, FLOWBOX_s *loop, FLOWBOX_s *box, i32 checksum) {
-    if (box == loop || box->loop_checksum == checksum)
-        return;
-    box->loop_checksum = checksum;
-    if (box->type == 0 && (box->state_flags_high & 0x10) == 0) {
-        FLOWBOXGIZMODATA_s *data = box->data;
-        if (data != NULL) {
-            for (i32 i = 0; i < data->gizmo_count; ++i)
-                GizmoActivate(system->gizmo_sys, data->gizmos[i]->gizmo, 0, 1);
+static void ResetForLoopEx(GIZFLOW_s *flow, FLOWBOX_s *root, FLOWBOX_s *box, i32 checksum) {
+    if (box != root && box->loop_checksum != checksum) {
+        box->loop_checksum = checksum;
+        if (box->type == 0 && (box->state_flags_high & 0x10) == 0 && box->data != NULL) {
+            FLOWBOXGIZMODATA_s *data = box->data;
+            for (i32 i = 0; i < data->gizmo_count; ++i) {
+                GizmoActivate(flow->gizmo_sys, data->gizmos[i]->gizmo, 0, 1);
+            }
+        }
+        for (i32 i = 0; i < box->child_count; ++i) {
+            ResetForLoopEx(flow, root, box->children[i], checksum);
         }
     }
-    for (i32 i = 0; i < box->child_count; ++i)
-        ResetForLoopEx(system, loop, box->children[i], checksum);
 }
 
 static __used__ void ResetGizmoFlowBox(GIZFLOW_s *giz_flow, FLOWBOX_s *flow_box) {
@@ -906,15 +906,16 @@ static i32 ProcessActionFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8) {
     return 1;
 }
 
-static i32 ProcessConditionFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8) {
-    u8 *condition = box->condition_data;
+static i32 ProcessConditionFlowBox(GIZFLOW_s *flow, FLOWBOX_s *box, u8) {
+    u8 *condition = reinterpret_cast<u8 *>(box->data);
     if (condition == NULL) {
         FLOWBOX_s **parents = box->parents;
         u8 *outputs = box->output_indices;
         for (i32 i = 0; i < box->parent_count; ++i) {
             FLOWBOX_s *parent = parents[i];
-            if (!flowboxtypes[parent->type].check_output(system, parent, outputs[i]))
+            if (flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) == 0) {
                 return 0;
+            }
         }
         return 1;
     }
@@ -924,8 +925,9 @@ static i32 ProcessConditionFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8) {
             u8 *outputs = box->output_indices;
             for (i32 i = 0; i < box->parent_count; ++i) {
                 FLOWBOX_s *parent = parents[i];
-                if (!flowboxtypes[parent->type].check_output(system, parent, outputs[i]))
+                if (flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) == 0) {
                     return 0;
+                }
             }
             break;
         }
@@ -934,56 +936,56 @@ static i32 ProcessConditionFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8) {
             u8 *outputs = box->output_indices;
             for (i32 i = 0; i < box->parent_count; ++i) {
                 FLOWBOX_s *parent = parents[i];
-                if (flowboxtypes[parent->type].check_output(system, parent, outputs[i]))
+                if (flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) != 0) {
                     return 0;
+                }
             }
             break;
         }
         case 1:
         case 3:
         case 5: {
-            i32 required = condition[0] == 1 ? 1 : condition[1];
-            if (box->parent_count == 0) {
-                if (required != 0)
-                    return 0;
-                break;
-            }
+            const i32 required = condition[0] == 1 ? 1 : condition[1];
             FLOWBOX_s **parents = box->parents;
             u8 *outputs = box->output_indices;
             i32 count = 0;
             for (i32 i = 0; i < box->parent_count; ++i) {
                 FLOWBOX_s *parent = parents[i];
-                if (flowboxtypes[parent->type].check_output(system, parent, outputs[i]))
-                    ++count;
+                count += flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) != 0;
             }
-            if (condition[0] == 5)
+            if (condition[0] == 5) {
                 return count == required;
-            if (count < required)
+            }
+            if (count < required) {
                 return 0;
+            }
             break;
         }
         case 4: {
             i32 required = box->parent_count;
-            if (box->state_flags_high & 4)
+            if ((box->state_flags_high & 4) != 0) {
                 required -= box->loop_parent_count;
-            if (box->parent_count == 0)
-                break;
-            FLOWBOX_s **parents = box->parents;
-            u8 *outputs = box->output_indices;
-            i32 count = 0;
-            for (i32 i = 0; i < box->parent_count; ++i) {
-                FLOWBOX_s *parent = parents[i];
-                if (flowboxtypes[parent->type].check_output(system, parent, outputs[i]))
-                    ++count;
             }
-            if (count < required)
-                return 0;
+            if (box->parent_count != 0) {
+                FLOWBOX_s **parents = box->parents;
+                u8 *outputs = box->output_indices;
+                i32 count = 0;
+                for (i32 i = 0; i < box->parent_count; ++i) {
+                    FLOWBOX_s *parent = parents[i];
+                    count += flowboxtypes[parent->type].check_output(flow, parent, outputs[i]) != 0;
+                }
+                if (count < required) {
+                    return 0;
+                }
+            }
             break;
         }
     }
     if (condition[0] == 4) {
-        for (i32 i = 0; i < box->child_count; ++i)
-            ResetForLoopEx(system, box, box->children[i], getNextLoopChecksum());
+        for (i32 i = 0; i < box->child_count; ++i) {
+            const u8 checksum = getNextLoopChecksum();
+            ResetForLoopEx(flow, box, box->children[i], checksum);
+        }
     }
     return 1;
 }
@@ -1351,16 +1353,18 @@ i32 GizmoNameUsesPrefix(char *name, char *prefix) {
     return 1;
 }
 
-void GizmoActivateReverse(GIZMOSYS_s *system, GIZMO_s *gizmo, i32 active, i32 visibility, i32) {
-    i32 operation = visibility != 0 ? 6 : 2;
-    i32 query = visibility != 0 ? 7 : 3;
-    if (gizmo != NULL && gizmotypes != NULL) {
-        GIZMOACTIVATEREVFN callback = gizmotypes->types[gizmo->type_id].fns.activate_rev_fn;
-        if (callback != NULL && callback(gizmo, active, query)) {
-            gizmotypes->types[gizmo->type_id].fns.activate_rev_fn(gizmo, active, operation);
-            if (visibility != 0)
-                GizmoSetVisibility(system, gizmo, active == 0, 1);
-        }
+void GizmoActivateReverse(GIZMOSYS_s *system, GIZMO_s *gizmo, i32 reverse, i32 visibility, i32) {
+    const i32 command = visibility == 0 ? 2 : 6;
+    const i32 query = visibility == 0 ? 3 : 7;
+    if (gizmo == NULL || gizmotypes == NULL || gizmotypes->types[gizmo->type_id].fns.activate_rev_fn == NULL) {
+        return;
+    }
+    if (gizmotypes->types[gizmo->type_id].fns.activate_rev_fn(gizmo, reverse, query) == 0) {
+        return;
+    }
+    gizmotypes->types[gizmo->type_id].fns.activate_rev_fn(gizmo, reverse, command);
+    if (visibility != 0) {
+        GizmoSetVisibility(system, gizmo, reverse == 0, 1);
     }
 }
 

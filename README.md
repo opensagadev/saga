@@ -1,6 +1,6 @@
 # _saga_
 
-![Progress](https://img.shields.io/badge/matching-29.78%25-red)
+![Progress](https://img.shields.io/badge/matching-30.46%25-orange)
 [![Bazel build](https://github.com/ttdecomp/saga/actions/workflows/build-bazel.yaml/badge.svg)](https://github.com/ttdecomp/saga/actions/workflows/build-bazel.yaml)
 [![Discord](https://img.shields.io/discord/1467775700894224555?color=%235865F2&logo=discord&logoColor=%23FFFFFF)](https://discord.gg/2HJuMtzA7q)
 [![status & wasm build](https://img.shields.io/badge/status%20%26%20wasm%20build-click%20here-orange?style=flat)](https://opensaga.dev/)
@@ -58,30 +58,30 @@ See https://ttdecomp.github.io/saga/
 
 | Directory | Fuzzy % | Funcs % |
 |---|---:|---:|
-| `(root)` | 62.0% | 0.0% |
+| `(root)` | 61.8% | 0.0% |
 | `MechInputTouch` | 10.1% | 6.1% |
 | `editor` | 3.2% | 1.7% |
 | `gameapi` | 15.9% | 1.8% |
 | `gameframework` | 99.9% | 5.9% |
 | `gamelib` | 16.5% | 5.3% |
 | `java` | 96.0% | 0.0% |
-| `legoapi` | 27.7% | 9.1% |
-| `legoapi/actions` | 13.2% | 1.4% |
-| `legoapi/ai` | 17.6% | 0.0% |
-| `legoapi/audio` | 54.1% | 10.2% |
-| `legoapi/characters` | 26.0% | 7.2% |
+| `legoapi` | 28.6% | 9.1% |
+| `legoapi/actions` | 14.8% | 1.4% |
+| `legoapi/ai` | 21.9% | 0.5% |
+| `legoapi/audio` | 53.4% | 10.2% |
+| `legoapi/characters` | 26.2% | 6.8% |
 | `legoapi/core` | 26.2% | 6.6% |
-| `legoapi/cutscenes` | 32.4% | 3.9% |
-| `legoapi/gizmo` | 31.4% | 7.3% |
-| `legoapi/gizmos` | 47.5% | 32.7% |
-| `legoapi/items` | 26.9% | 5.8% |
-| `legoapi/menus` | 20.7% | 6.5% |
+| `legoapi/cutscenes` | 34.6% | 3.9% |
+| `legoapi/gizmo` | 32.4% | 7.3% |
+| `legoapi/gizmos` | 47.6% | 32.7% |
+| `legoapi/items` | 26.5% | 6.3% |
+| `legoapi/menus` | 24.2% | 6.6% |
 | `legoapi/misc` | 22.4% | 4.2% |
-| `legoapi/props` | 37.1% | 2.3% |
-| `legoapi/render` | 28.1% | 7.6% |
-| `legoapi/world` | 25.6% | 6.4% |
-| `legogame` | 62.6% | 8.8% |
-| `nu2api` | 43.4% | 19.5% |
+| `legoapi/props` | 36.9% | 2.4% |
+| `legoapi/render` | 28.5% | 7.6% |
+| `legoapi/world` | 26.7% | 6.4% |
+| `legogame` | 49.5% | 11.1% |
+| `nu2api` | 44.7% | 19.8% |
 
 <!-- matching-table-end -->
 

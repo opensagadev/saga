@@ -218,17 +218,6 @@ extern "C" void NuSpecialSetNoVisiTest(nuhspecial_s *special, i32 enabled) {
     }
 }
 
-extern "C" i32 NuSpecialGetOnScreenFn(nuhspecial_s *special) {
-    if (special->scene != NULL) {
-        NuSpecialLegacyLayout *legacy = static_cast<NuSpecialLegacyLayout *>(special->special);
-        if (legacy != NULL) {
-            NuLegacyInstanceLayout *instance = static_cast<NuLegacyInstanceLayout *>(legacy->instance);
-            return instance->on_screen;
-        }
-    }
-    return 1;
-}
-
 extern "C" i32 NuSpecialGetVisibilityFn(void *special_ptr) {
     nuhspecial_s *special = static_cast<nuhspecial_s *>(special_ptr);
     if (special->scene == NULL) {

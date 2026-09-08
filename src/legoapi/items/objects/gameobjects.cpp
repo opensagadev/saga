@@ -799,8 +799,8 @@ extern void BackDrop_UpdateColours(i32 instant);
 extern i32 Paused;
 extern f32 PauseMenus_X;
 extern i32 PauseMenus_Align;
-struct CUTSCENEPLAYERCLIP_s;
-extern CUTSCENEPLAYERCLIP_s *CutScenePlayer_Active();
+struct CUTSCENEPLAYERCLIP;
+extern CUTSCENEPLAYERCLIP *CutScenePlayer_Active();
 
 void UpdateGameMessages();
 extern i32 DoubleScore;
@@ -989,7 +989,7 @@ extern "C" {
     }
 }
 
-f32 OFFSCREEN_CATCHUP_TIME = 1.0f;
+extern f32 OFFSCREEN_CATCHUP_TIME;
 f32 drop_back_in_timer;
 
 i32 TryToTeleportToNextNode(GameObject_s *object, AIPATHNODE_s *node, i32 tightrope) {

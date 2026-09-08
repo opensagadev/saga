@@ -498,7 +498,14 @@ typedef struct APIOBJECT_s {
     u8 field_0x287; // 0x287  owner/controller player index
     u8 field_0x288; // 0x288
     u8 field_0x289; // 0x289
-    union { undefined field_0x28a[0x0a]; struct { u8 pad_28a[4]; u16 movement_request_flags; u8 pad_290[4]; }; };
+    union {
+        undefined field_0x28a[0x0a];
+        struct {
+            u8 pad_28a[4];
+            u16 movement_request_flags;
+            u8 pad_290[4];
+        };
+    };
     union {
         APIOBJECT_s *collision_link;
         APIOBJECT_s *collision_excluded_object;
@@ -663,6 +670,10 @@ typedef struct GameObject_s {
                 u8 pad_744[0x768 - 0x744];
                 NUVEC launch_origin; // 0x744, saved on entering launch context
                 struct {
+                    NUVEC tightrope_position;
+                    NUVEC tightrope_offset;
+                };
+                struct {
                     NUVEC zipup_start_position;   // 0x744, selected endpoint
                     NUVEC zipup_swing_position;   // 0x750, end of the swing animation
                     NUVEC zipup_landing_position; // 0x75c, opposite endpoint with ground height
@@ -690,10 +701,16 @@ typedef struct GameObject_s {
     GIZMOBLOWUP_s *blowup_target; // 0x0784
     void *field_0x788;            // 0x0788
     u8 pad_78c[0x790 - 0x78c];
-    void *big_jump_data;          // 0x0790
-    u16 magnet_surface_angle;     // 0x794
-    u16 takeover_start_angle;     // 0x796
-    u16 grapple_swing_phase;      // 0x798
+    void *big_jump_data; // 0x0790
+    union {
+        u16 magnet_surface_angle;
+        u16 tightrope_x_rotation;
+    }; // 0x794
+    u16 takeover_start_angle; // 0x796
+    union {
+        u16 grapple_swing_phase;
+        u16 tightrope_z_rotation;
+    }; // 0x798
     i16 context_animation;        // 0x079a, action-owned animation index
     i16 queued_context_animation; // 0x079c, base action used by combo branches
     u8 combo_branch;              // 0x079e, selected offset from the base combo action
@@ -1065,17 +1082,42 @@ typedef struct GameObject_s {
     };
     u8 edge_stop_requests; // 0xf05
     u8 pad_f06[2];
-    union { void *can_use_object; u32 field_0xf08; }; // 0xf08
-    union { u32 field_0xf0c; struct { u8 use_action; u8 use_action_frames; u8 pad_f0e[2]; }; };
-    union { f32 use_action_parameter; u32 field_0xf10; }; // 0xf10
-    union { u8 pad_f14[4]; u32 field_0xf14; };
-    f32 big_jump_height;                // 0xf18, nonnegative arc height set on entering big jump
-    f32 field_0xf1c;                    // 0x0f1c
-    union { AILOCATOR_s *doomed_escape_locator; u32 field_0xf20; }; // 0xf20
-    NUVEC target_velocity;              // 0x0f24
-    NUVEC surface_normal;               // 0x0f30
-    NUVEC facing_direction;             // 0x0f3c
-    union { u8 pad_f48[0xfe4 - 0xf48]; struct { u8 field_0xf48[0x68]; u8 pad_fb0[0xfe4 - 0xfb0]; }; };
+    union {
+        void *can_use_object;
+        u32 field_0xf08;
+    }; // 0xf08
+    union {
+        u32 field_0xf0c;
+        struct {
+            u8 use_action;
+            u8 use_action_frames;
+            u8 pad_f0e[2];
+        };
+    };
+    union {
+        f32 use_action_parameter;
+        u32 field_0xf10;
+    }; // 0xf10
+    union {
+        u8 pad_f14[4];
+        u32 field_0xf14;
+    };
+    f32 big_jump_height; // 0xf18, nonnegative arc height set on entering big jump
+    f32 field_0xf1c;     // 0x0f1c
+    union {
+        AILOCATOR_s *doomed_escape_locator;
+        u32 field_0xf20;
+    }; // 0xf20
+    NUVEC target_velocity;  // 0x0f24
+    NUVEC surface_normal;   // 0x0f30
+    NUVEC facing_direction; // 0x0f3c
+    union {
+        u8 pad_f48[0xfe4 - 0xf48];
+        struct {
+            u8 field_0xf48[0x68];
+            u8 pad_fb0[0xfe4 - 0xfb0];
+        };
+    };
     NUVEC *head_target;
     NUVEC head_target_position;
     f32 head_target_timer;
@@ -1099,7 +1141,10 @@ typedef struct GameObject_s {
     f32 field_0x1018; // 0x1018
     f32 field_0x101c; // 0x101c
     f32 field_0x1020; // 0x1020
-    union { f32 field_0x1024; f32 flicker_time; };
+    union {
+        f32 field_0x1024;
+        f32 flicker_time;
+    };
     f32 ai_update_distance;    // 0x1028, distance used to select the staggered AI cadence
     f32 shadow_opacity;        // 0x102c
     f32 shadow_radius;         // 0x1030
@@ -1110,7 +1155,10 @@ typedef struct GameObject_s {
         f32 terrain_impact_speed; // 0x103c, negative incoming velocity dot contact normal
     };
     f32 animation_speed_multiplier; // 0x1040
-    union { u8 pad_1044[0x1048 - 0x1044]; u32 field_0x1044; };
+    union {
+        u8 pad_1044[0x1048 - 0x1044];
+        u32 field_0x1044;
+    };
     f32 fall_acceleration_timer; // 0x1048
     CABLE_s *cable;              // 0x104c
     u32 field_0x1050;            // 0x1050
@@ -1168,7 +1216,10 @@ typedef struct GameObject_s {
     void *last_attacker;                   // 0x10b4
     void *field_0x10b8;                    // 0x10b8
     void (*move_override)(GameObject_s *); // 0x10bc
-    union { u8 pad_10c0[0x10c4 - 0x10c0]; u32 field_0x10c0; };
+    union {
+        u8 pad_10c0[0x10c4 - 0x10c0];
+        u32 field_0x10c0;
+    };
     f32 ai_elapsed_time; // 0x10c4, accumulated until the next AI update
     union {
         NUVEC saved_position; // 0x10c8

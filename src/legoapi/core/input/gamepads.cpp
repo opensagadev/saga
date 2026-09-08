@@ -33,7 +33,6 @@ GAMEPAD_s GamePad[64];
 // Original bss @0x127a4e0.
 i32 readpads_always = 0;
 
-u32 GAMEPAD_LIFT = 8;
 u32 GAMEPAD_DRIGHT = 0x2000;
 u32 GAMEPAD_DLEFT = 0x8000;
 u32 GAMEPAD_DDOWN = 0x4000;

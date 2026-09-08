@@ -260,7 +260,10 @@ struct GAMESAVE_s {
     EPISODESAVE_s episode_save[6];
     u32 shop_hint_purchased_bits[3];
     u32 shop_character_purchased_bits[4];
-    union { u32 extra_unlocked_bits[2]; u32 unlocked_extra_bits[2]; };
+    union {
+        u32 extra_unlocked_bits[2];
+        u32 unlocked_extra_bits[2];
+    };
     union {
         u32 field_0x7bf8;
         u32 shop_gold_brick_purchased_bits;

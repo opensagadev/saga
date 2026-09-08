@@ -297,7 +297,7 @@ void MovePlayer_ROLLING(GameObject_s *object);
 extern f32 Hub_PadSpeed[2];
 extern u16 Hub_PadAngle[2];
 extern f32 drop_back_in_timer;
-i32 LIFTPLAYER;
+extern i32 LIFTPLAYER;
 f32 OFFSCREEN_CATCHUP_TIME = 1.0f;
 
 void MoveBlocks(WORLDINFO_s *, pushblock_s *, i32, nuvec_s *) {

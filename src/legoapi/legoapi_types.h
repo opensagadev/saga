@@ -732,9 +732,12 @@ struct __attribute__((packed)) CUSTOMISESAVE_s {
         u8 primary_name_unlocked;
         u8 primary_use_saved_name;
     }; // 0x34
-    u8 field_0x35[3];          // 0x35
-    i16 secondary_pieces[9];   // 0x38
-    union { u8 field_0x4a[2]; u8 secondary_piece_flags[2]; };          // 0x4a
+    u8 field_0x35[3];        // 0x35
+    i16 secondary_pieces[9]; // 0x38
+    union {
+        u8 field_0x4a[2];
+        u8 secondary_piece_flags[2];
+    }; // 0x4a
     char secondary_name[0x20]; // 0x4c
     union {
         u8 secondary_name_unlocked;
@@ -1395,10 +1398,22 @@ DECOMP_ASSERT(offsetof(GIZAIMESSAGE_s, flags) == 0x36, "GIZAIMESSAGE_s flags off
 struct GIZFLOWPROGRESS_s {
     i32 valid;
     u32 active[16];
-    union { u32 triggered[16]; u32 reversing[16]; };
-    union { u32 completed[16]; u32 finished[16]; };
-    union { u32 latched[16]; u32 waiting_for_children[16]; };
-    union { u32 output_state[16]; u32 loop_pending[16]; };
+    union {
+        u32 triggered[16];
+        u32 reversing[16];
+    };
+    union {
+        u32 completed[16];
+        u32 finished[16];
+    };
+    union {
+        u32 latched[16];
+        u32 waiting_for_children[16];
+    };
+    union {
+        u32 output_state[16];
+        u32 loop_pending[16];
+    };
 };
 DECOMP_ASSERT(sizeof(GIZFLOWPROGRESS_s) == 0x144, "GIZFLOWPROGRESS ABI");
 DECOMP_ASSERT(offsetof(GIZFLOWPROGRESS_s, triggered) == 0x44, "GIZFLOWPROGRESS triggered offset");

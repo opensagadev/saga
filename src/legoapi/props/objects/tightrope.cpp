@@ -70,60 +70,6 @@ static i32 TightRope_Attach(GameObject_s *object, WORLDINFO_s *world) {
     return 1;
 }
 
-i32 TightRope_SnapTo(GameObject_s *object, nuvec_s *position) {
-    const f32 height = object->apiobj.field_0x1e0;
-    object->apiobj.lower_position = *position;
-    object->apiobj.upper_position = object->apiobj.lower_position;
-    object->apiobj.collision_position = object->apiobj.upper_position;
-    object->apiobj.upper_position.y += height;
-    object->apiobj.lower_position.y -= height;
-    if (TightRope_Attach(object, WORLD) == 0)
-        return 0;
-    object->apiobj.position.x = object->apiobj.collision_position.x;
-    object->apiobj.position.z = object->apiobj.collision_position.z;
-    const f32 bound = (object->apiobj.character_data->game_character->flags_090 & 0x80000) != 0
-                          ? object->character_bottom
-                          : object->character_top;
-    object->apiobj.position.y = object->launch_origin.y - bound * object->apiobj.field_0xa8;
-    const u8 saved_flag = object->field_0xe24 & 8;
-    object->field_0xe24 &= ~8;
-    GameObjectOrigin(object);
-    object->field_0xe24 = (object->field_0xe24 & ~8) | saved_flag;
-    return 1;
-}
-
-TIGHTROPE *TightRope_InRange(GameObject_s *object, WORLDINFO_s *world, nuvec_s *target) {
-    const f32 range = 3.0f * object->apiobj.field_0x1dc;
-    const NUVEC position = object->apiobj.collision_position;
-    TIGHTROPE *rope = world->tightropes;
-    for (i32 index = 0; index < world->tightrope_count; ++index, ++rope) {
-        if (rope->visible == 0 || rope->active == 0)
-            continue;
-        NUVEC local = {position.x - rope->start_position.x, 0.0f, position.z - rope->start_position.z};
-        NuVecRotateY(&local, &local, -static_cast<i32>(rope->y_rotation));
-        if (!(local.z >= 0.0f && local.z <= rope->length && local.x >= -range && local.x <= range))
-            continue;
-        local.x = 0.0f;
-        local.y = (rope->end_position.y - rope->start_position.y) * (local.z / rope->length) + rope->start_position.y;
-        if (!(fabsf(local.y - position.y) < object->apiobj.field_0x1e0))
-            continue;
-        if (target != NULL) {
-            const f32 inset = (object->apiobj.character_data->game_character->flags_090 & 0x10000000) != 0
-                                  ? object->apiobj.field_0x1e0
-                                  : object->apiobj.field_0x1dc;
-            if (local.z > rope->length - inset)
-                local.z = rope->length - inset;
-            else if (local.z < inset)
-                local.z = inset;
-            NuVecRotateY(target, &local, rope->y_rotation);
-            target->x += rope->start_position.x;
-            target->z += rope->start_position.z;
-        }
-        return rope;
-    }
-    return NULL;
-}
-
 static i32 TightRope_MoveUpdate(GameObject_s *object, i32 airborne) {
     if (!(object->pad_gamepad->input_magnitude > 0.0f) || object->context_animation == 0x8f) {
         if (airborne == 0)
