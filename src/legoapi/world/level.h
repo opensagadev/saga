@@ -29,10 +29,13 @@ struct LEVEL_PROGRESS_s {
     u32 disabled_ai_object_mask[2];
     u8 pad_280c[0x281c - 0x280c];
     u32 played_cutscene_mask;
-    u8 pad_2820[0x2e24 - 0x2820];
+    u8 pad_2820[0x2c20 - 0x2820];
+    GIZFLOWPROGRESS_s giz_flow_progress;
+    u8 pad_2d64[0x2e24 - 0x2d64];
 };
 
 DECOMP_ASSERT(offsetof(LEVEL_PROGRESS_s, played_cutscene_mask) == 0x281c, "LEVEL_PROGRESS cutscene mask offset");
+DECOMP_ASSERT(offsetof(LEVEL_PROGRESS_s, giz_flow_progress) == 0x2c20, "LEVEL_PROGRESS flow progress offset");
 DECOMP_ASSERT(sizeof(LEVEL_PROGRESS_s) == 0x2e24, "LEVEL_PROGRESS size");
 
 typedef struct LEVELDATADISPLAY {

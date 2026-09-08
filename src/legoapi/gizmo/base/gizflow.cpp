@@ -109,7 +109,31 @@ void SetGizFlowVisible(GIZFLOW_s *flow) {
     }
 }
 
-void GizFlowStoreProgress(GIZFLOW_s *, GIZFLOWPROGRESS_s *) {
+void GizFlowStoreProgress(GIZFLOW_s *flow, GIZFLOWPROGRESS_s *progress) {
+    if (progress != NULL && flow != NULL) {
+        memset(progress, 0, sizeof(*progress));
+        FLOWBOX_s *box = flow->flowboxes;
+        progress->valid = 1;
+        for (i32 index = 0; index < flow->flowbox_count; ++index, ++box) {
+            i32 word = index >> 5;
+            u32 bit = 1u << (index & 31);
+            if (box->state_flags_low & 1) {
+                progress->state_bit_0[word] |= bit;
+            }
+            if (box->state_flags_high & 1) {
+                progress->state_bit_8[word] |= bit;
+            }
+            if (box->state_flags_low & 2) {
+                progress->state_bit_1[word] |= bit;
+            }
+            if (box->state_flags_low & 0x20) {
+                progress->state_bit_5[word] |= bit;
+            }
+            if (box->state_flags_high & 4) {
+                progress->state_bit_10[word] |= bit;
+            }
+        }
+    }
 }
 
 void GizmoTypeGetProgress(GIZMOSYS_s *, void *, i32, i32, char *, void **) {

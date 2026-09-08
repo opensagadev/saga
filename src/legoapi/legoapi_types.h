@@ -762,7 +762,13 @@ struct FLOWBOX_s {
     u32 runtime_id;
     u8 last_process_frame;
     u8 loop_checksum;
-    u16 state_flags;
+    union {
+        u16 state_flags;
+        struct {
+            u8 state_flags_low;
+            u8 state_flags_high;
+        };
+    };
     FLOWBOXGIZMODATA_s *data;
     FLOWBOX_s **parents;
     FLOWBOX_s **children;
@@ -1104,7 +1110,20 @@ DECOMP_ASSERT(offsetof(GIZAIMESSAGE_s, output_values) == 0x2c, "GIZAIMESSAGE_s o
 DECOMP_ASSERT(offsetof(GIZAIMESSAGE_s, output_count) == 0x34, "GIZAIMESSAGE_s output count offset");
 DECOMP_ASSERT(offsetof(GIZAIMESSAGE_s, flags) == 0x36, "GIZAIMESSAGE_s flags offset");
 // Defined by gizmos/traps/gizbombgen.h.
-struct GIZFLOWPROGRESS_s {};
+struct GIZFLOWPROGRESS_s {
+    i32 valid;
+    u32 state_bit_0[16];
+    u32 state_bit_8[16];
+    u32 state_bit_1[16];
+    u32 state_bit_5[16];
+    u32 state_bit_10[16];
+};
+DECOMP_ASSERT(sizeof(GIZFLOWPROGRESS_s) == 0x144, "GIZFLOWPROGRESS size");
+DECOMP_ASSERT(offsetof(GIZFLOWPROGRESS_s, state_bit_0) == 0x4, "GIZFLOWPROGRESS bit 0 offset");
+DECOMP_ASSERT(offsetof(GIZFLOWPROGRESS_s, state_bit_8) == 0x44, "GIZFLOWPROGRESS bit 8 offset");
+DECOMP_ASSERT(offsetof(GIZFLOWPROGRESS_s, state_bit_1) == 0x84, "GIZFLOWPROGRESS bit 1 offset");
+DECOMP_ASSERT(offsetof(GIZFLOWPROGRESS_s, state_bit_5) == 0xc4, "GIZFLOWPROGRESS bit 5 offset");
+DECOMP_ASSERT(offsetof(GIZFLOWPROGRESS_s, state_bit_10) == 0x104, "GIZFLOWPROGRESS bit 10 offset");
 struct GIZFLOW_s {
     GIZMOSYS_s *gizmo_sys;
     i32 flowbox_count;
