@@ -229,6 +229,31 @@ static f32 Condition_PlayerOnForcePlatform(AISYS_s *, AISCRIPTPROCESS_s *, AIPAC
     return 0.0f;
 }
 
+static f32 Condition_EitherPlayerOnForcePlatform(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
+    if (force != NULL && player != NULL) {
+        i32 players = 0;
+        if ((player->apiobj.field_0x27d != 0 || player->apiobj.field_0x27e != 0) &&
+            player->apiobj.supporting_platform_id != -1) {
+            NUMTX *transform = static_cast<NUMTX *>(CurTerr->platforms[player->apiobj.supporting_platform_id].scene_object);
+            if (player->apiobj.position.y >= transform->m31) players |= 1;
+        }
+        if (player2 != NULL && (player2->apiobj.field_0x27d != 0 || player2->apiobj.field_0x27e != 0) &&
+            player2->apiobj.supporting_platform_id != -1) {
+            NUMTX *transform = static_cast<NUMTX *>(CurTerr->platforms[player2->apiobj.supporting_platform_id].scene_object);
+            if (player2->apiobj.position.y >= transform->m31) players |= 2;
+        }
+        if (players != 0) {
+            for (GAMEANIMOBJ_s *animation = force->anim_set->objects; animation != NULL; animation = animation->next) {
+                GIZFORCEANIMDATA_s *data = static_cast<GIZFORCEANIMDATA_s *>(animation->object_data);
+                if ((players & 1) && player->apiobj.supporting_platform_id == data->platform_id) return 1.0f;
+                if ((players & 2) && player2->apiobj.supporting_platform_id == data->platform_id) return 1.0f;
+            }
+        }
+    }
+    return 0.0f;
+}
+
 static void *Condition_OnForcePlatformInit(AISYS_s *, char *name, AISCRIPT_s *) {
     GIZMO_s *gizmo = GizmoFindByName(WORLD->gizmo_sys, force_gizmotype_id, name);
     if (gizmo != NULL) {
@@ -575,7 +600,7 @@ extern "C" {
         {"UsingForce", Condition_UsingForce, Condition_UsingForceInit},
         {"OnForcePlatform", Condition_OnForcePlatform, Condition_OnForcePlatformInit},
         {"PlayerOnForcePlatform", Condition_PlayerOnForcePlatform, Condition_OnForcePlatformInit},
-        {"EitherPlayerOnForcePlatform", NULL, NULL},
+        {"EitherPlayerOnForcePlatform", Condition_EitherPlayerOnForcePlatform, Condition_OnForcePlatformInit},
         {"ForceBeingUsed", Condition_ForceBeingUsed, Condition_UsingForceInit},
         {"ForcePushing", Condition_ForcePushing, Condition_ForcePushingInit},
         {"TurretAlive", NULL, NULL},
