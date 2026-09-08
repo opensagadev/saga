@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 30.489414,
+    "fuzzy_match_percent": 30.49926,
     "total_code": "4722419",
     "matched_code": "60480",
     "matched_code_percent": 1.2806996,
@@ -17872,7 +17872,7 @@
           "address": 4546256,
           "offset": 3656288,
           "size": 489,
-          "match_percent": 4.848485
+          "match_percent": 99.93939
         },
         {
           "name": "_ZN22MechTouchUIPauseButton7ProcessEf",

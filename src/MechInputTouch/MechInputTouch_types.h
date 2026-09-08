@@ -833,7 +833,13 @@ struct MechTouchUICharIcon : MechTouchUIElement {
     void Process(float) override;
     void Render() override;
     void SetupDisabled();
-    u8 field_0x3c[0x80 - 0x3c];
+    i32 character_id;
+    f32 icon_scale;
+    u8 selected;
+    u8 field_0x45[0x60 - 0x45];
+    f32 icon_alpha;
+    MechTouchUIPartySelector *selector;
+    u8 field_0x68[0x80 - 0x68];
 };
 struct MechTouchUIPartySelector {
     void BlendOut();
@@ -841,6 +847,10 @@ struct MechTouchUIPartySelector {
     void Cleanup();
     MechTouchUIPartySelector(MechTouchUIPlayerButton &, i32 *);
     ~MechTouchUIPartySelector();
+    i32 icon_count;
+    MechTouchUICharIcon *icons[32];
+    MechTouchUIPlayerButton *player_button;
+    u8 field_0x88;
 };
 struct MechTouchUIPauseButton : MechTouchUIElement {
     MechTouchUIPauseButton();
@@ -879,6 +889,9 @@ DECOMP_ASSERT(sizeof(MechInputTouchGestureTracker) == 0x4, "MechInputTouchGestur
 DECOMP_ASSERT(sizeof(MechTouchUIElement) == 0x3c, "MechTouchUIElement size");
 DECOMP_ASSERT(sizeof(MechTouchUI) == 0x84, "MechTouchUI size");
 DECOMP_ASSERT(sizeof(MechTouchUIPlayerButton) == 0x164, "MechTouchUIPlayerButton size");
+DECOMP_ASSERT(sizeof(MechTouchUICharIcon) == 0x80, "MechTouchUICharIcon size");
+DECOMP_ASSERT(sizeof(MechTouchUIPartySelector) == 0x8c, "MechTouchUIPartySelector size");
+DECOMP_ASSERT(offsetof(MechTouchUIPartySelector, player_button) == 0x84, "party selector player button offset");
 DECOMP_ASSERT(sizeof(MechTouchUIPauseButton) == 0x44, "MechTouchUIPauseButton size");
 DECOMP_ASSERT(sizeof(MechTouchUITagButton) == 0xe4, "MechTouchUITagButton size");
 DECOMP_ASSERT(sizeof(MechInputTouchSystem) == 0x8, "MechInputTouchSystem size");

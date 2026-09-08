@@ -6,6 +6,7 @@
 #include "legoapi/core/input/timer.h"
 #include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/menus/core/text.h"
 #include "legoapi/world/level.h"
 
 extern i32 CutSceneWaiting;
@@ -225,6 +226,18 @@ void MechTouchUICharIcon::Process(float) {
 }
 
 void MechTouchUICharIcon::Render() {
+    f32 scale = icon_scale;
+    if ((hovered != 0 || selected != 0) && disabled == 0)
+        scale *= 1.15f;
+    const f32 alpha = icon_alpha;
+    const i32 frame = hovered != 0 || selected != 0 ? 0xa6 : 0xa7;
+    DrawCharIcon(character_id, position.x, position.y, position.z, scale, frame, alpha, alpha, 1, NULL);
+    if (hovered != 0 || selected != 0) {
+        f32 width = radius_y * GetAspectRatio();
+        f32 x = selector->player_button->position.x + static_cast<f32>(selector->icon_count) * width + width * 0.5f;
+        SmartTextEx(TTab[CDataList[character_id].name_id], x, position.y, position.z, 0.4f, 0.4f, 0.4f, 2, 255, 255,
+                    255, 0.7f, 1, NULL, 0, static_cast<i32>(alpha * 255.0f));
+    }
 }
 
 void MechTouchUICharIcon::SetupDisabled() {
