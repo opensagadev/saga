@@ -280,7 +280,14 @@ typedef struct AIPACKET_s {
         u8 movement_flags; // 0x1e4
         u8 field_0x1e4;
     };
-    u8 field_0x1e5;
+    union {
+        u8 field_0x1e5;
+        struct {
+            u8 packet_flag_1e5_0 : 1;
+            u8 circle_clockwise : 1;
+            u8 packet_flags_1e5_2_7 : 6;
+        };
+    };
     union {
         u8 runtime_flags;
         u8 field_0x1e6;
