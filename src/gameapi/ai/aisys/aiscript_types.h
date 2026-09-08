@@ -7,6 +7,7 @@
 #include "nu2api/numath/nuvec.h"
 
 struct AIAREA_s;
+struct APIOBJECT_s;
 struct AILOCATOR_s;
 struct AILOCATORSET_s;
 
@@ -131,7 +132,10 @@ typedef struct AISCRIPTPROCESS_s {
     u8 action_data_1;
     u8 action_data_2;
     u16 action_data_6;
-    void *action_data_3;
+    union {
+        void *action_data_3;
+        APIOBJECT_s *override_control_object;
+    };
     union { f32 action_data_4; f32 follow_direction_fire_range; };
     union { f32 action_data_5; f32 follow_direction_fire_interval; };
 
@@ -212,6 +216,7 @@ DECOMP_ASSERT(sizeof(AISCRIPTPROCESSSTACK) == 0x14, "AISCRIPTPROCESSSTACK stride
 DECOMP_ASSERT(offsetof(AISCRIPTPROCESSSTACK, is_first_time_state) == 0x10, "Script operand cache validity offset");
 DECOMP_ASSERT(offsetof(AISCRIPTPROCESSSTACK, force_complex_eval) == 0x11, "Script operand cache fill flag offset");
 DECOMP_ASSERT(sizeof(AISCRIPTPROCESS) == 0xc8, "AISCRIPTPROCESS size");
+DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, override_control_object) == 0x6c, "AI override saved object offset");
 DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, params) == 0x14, "Script processor parameters offset");
 DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, param_stack) == 0x28, "Script processor operand caches offset");
 DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, active_refs) == 0x54, "Script processor reference stack offset");

@@ -1257,7 +1257,7 @@ static i32 Action_SetAIOverrideControl(AISYS *system, AISCRIPTPROCESS *processor
     APIOBJECT *object;
     i32 enabled = 1;
     if (!first_time) {
-        object = static_cast<APIOBJECT *>(processor->action_data_3);
+        object = processor->override_control_object;
     } else {
         object = packet != NULL ? reinterpret_cast<APIOBJECT *>(packet->owner) : NULL;
         for (i32 index = 0; index < param_count; ++index) {
@@ -1269,7 +1269,7 @@ static i32 Action_SetAIOverrideControl(AISYS *system, AISCRIPTPROCESS *processor
                 enabled = 0;
             }
         }
-        processor->action_data_3 = object;
+        processor->override_control_object = object;
     }
     if (object != NULL) {
         if (enabled) {
