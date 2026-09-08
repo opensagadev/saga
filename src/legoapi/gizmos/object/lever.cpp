@@ -78,13 +78,15 @@ void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 return;
             }
         }
-        if (object->apiobj.character_data->model_flags & 4)
+        if (!(object->apiobj.character_data->model_flags & 4)) {
+            if (!(object->apiobj.character_data->model_flags & 0x200))
+                static_cast<LEVER_s *>(object->field_0x788)->goodie = 1;
+        } else {
             static_cast<LEVER_s *>(object->field_0x788)->baddie = 1;
-        else if (!(object->apiobj.character_data->model_flags & 0x200))
-            static_cast<LEVER_s *>(object->field_0x788)->goodie = 1;
+        }
         static_cast<LEVER_s *>(object->field_0x788)->flags_high |= 8;
         object->context_flags |= 0x40;
-        if (object->apiobj.object_flags & 0x80)
+        if ((i8)object->apiobj.object_flags < 0)
             Hint_SetComplete(0x60c);
         return;
     }
@@ -102,8 +104,11 @@ void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     }
     if (lever == NULL)
         return;
-    if (object == player)
-        show_lever_hint = distance < 1.0f;
+    if (object == player) {
+        show_lever_hint = 0;
+        if (distance < 1.0f)
+            show_lever_hint = 1;
+    }
     f32 range = (object->apiobj.field_0x1dc + 0.25f) * lever->target_indicator_scale;
     if (!(distance < range * range))
         return;
@@ -115,7 +120,9 @@ void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     object->field_0x768 = 0.0f;
     object->context_animation = 0x5d;
     f32 duration = AnimDuration(object->id, 0x5d, 0.0f, 0.0f, 1);
-    object->airborne_action_duration = duration <= 0.0f ? 1.0f : duration;
+    if (duration <= 0.0f)
+        duration = 1.0f;
+    object->airborne_action_duration = duration;
     object->context_flags &= ~0x40;
     object->apiobj.movement_facing_angle = static_cast<LEVER_s *>(object->field_0x788)->y_rotation;
     static_cast<LEVER_s *>(object->field_0x788)->interacting = 1;
