@@ -310,6 +310,11 @@ typedef struct AIPACKET_s {
     union {
         u8 movement_event_flags;
         u8 field_0x1e7;
+        struct {
+            u8 movement_event_low : 2;
+            u8 movement_range_mode : 2;
+            u8 movement_event_high : 4;
+        };
     };
     u8 navigation_flags; // 0x1e8
     u8 pad_1e9[0x1ec - 0x1e9];
