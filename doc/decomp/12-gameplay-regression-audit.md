@@ -9,6 +9,88 @@ not establish that a reported gameplay issue is fixed.
 
 ## Force availability rendering
 
+### Current selection-path audit
+
+The 2026-09-08 native diagnostic `/tmp/saga-glow-natural.gdb` observed
+127 `ForceGlowCode` calls for player zero, zero candidates and zero positive
+opacity samples. `DrawForceGlowSprite` was not reached. This used the ordinary
+scripted route without injecting game state; it hit the 30-second harness
+timeout at stage 7 and exited 1. No sanitizer diagnostic was reported. This
+is limited route coverage, not a successful gameplay test or proof that a
+nearby eligible lamp was rejected.
+
+The original compiler names the glow update
+`_ZL13ForceGlowCodeP12GameObject_si.part.34`; the current compiler emits the
+unsuffixed local name. For comparison only, `objcopy --redefine-sym` on a
+copy of the reference in `/tmp/saga-force-glow-reference.so` gives **98.934%**
+with equal 1,428-byte bodies. The original repository binary is untouched.
+Remaining differences include relocated operands, a saved special pointer,
+a radius reload and instruction ordering; this is not an exact match.
+
+The upstream `GizForce_FindBestForceTarget` compares at **15.635%**, with a
+711-byte current body versus the original 2,121 bytes at `0x1ca5a0`.
+Its current simplified nearest-target loop needs original-binary recovery
+before changing selection behavior. Evidence is in
+`/tmp/saga-force-target-current.diff` and
+`/tmp/saga-force-glow-normalized.diff`.
+
+The subsequent recovery replaces that loop with the original capability and
+group filters, animation-object candidate list, previous-target restriction,
+oldest-check selection, LOS ray/platform tests and cached visibility filtering.
+The original local `possible_forcetargets` array contains 384 16-byte records.
+The player LOS cache is 396 words: 12 visibility words and 384 update counters.
+The function returns zero in EAX; both its definition and caller declaration
+now return `i32`. The busy field at Force offset `0x3c` is tested as raw 32-bit
+bits, matching the original integer test. No optimization changes or Ghidra
+were used.
+
+This recovery compares at **33.007%**, 1,974 current bytes versus 2,121 original
+bytes (`/tmp/saga-force-selection-loop.diff`). Substantial instruction and
+control-flow layout differences remain; this is not a fully matched function.
+Target and native builds succeed and all four repository checks pass
+(`/tmp/saga-force-selection-{target,native,checks}.log`).
+
+The native GDB fixture `/tmp/saga-force-selection-runtime.gdb` moves only the
+diagnostic player collision position/facing near each of the seven visible
+Cantina objects and invokes selection. All seven select successfully:
+`Light_5`, `Light_6`, `Light_8`, `cup0`, `cup15`, `cup17`, `cup21`.
+The player's real LOS cache is present; each call returns zero, and no
+sanitizer diagnostic occurs. This controlled test does not prove natural
+acquisition or visible glow.
+
+The follow-up placement fixture did not reach `DrawForceGlowSprite`; the
+longer run encountered the previously recorded AI angle sanitizer diagnostic.
+Ten early samples in `/tmp/saga-force-selection-glow-state.log` show active
+glow model 221, zero target/opacity and zero terrain-contact flags while the
+player falls after placement. No glow state was injected. A grounded,
+appropriately facing runtime test is still required before claiming a visual
+fix; the early airborne samples are not evidence of a rendering failure.
+
+The grounded follow-up `/tmp/saga-force-glow-grounded.gdb` preserves the
+player's ground height during placement near `Light_5` and holds the diagnostic
+facing angle at zero on entry to `ForceCode`. It does not inject contact flags,
+targets, glow opacity or Force input. The ordinary game update selects the
+lamp, sets contact flags and calls `DrawForceGlowSprite` through
+`DrawParaphernalia` while character context is `-1`. Model 221 is active,
+radius is 0.208661 and initial draw alpha is 0.169857. This fixture exits zero
+without sanitizer diagnostics.
+
+The corrected capture fixture `/tmp/saga-force-glow-capture.gdb` completes
+120 update samples with exit zero and no sanitizer diagnostics
+(`/tmp/saga-force-glow-capture-clean.log`). It reaches alpha 1. The inspected
+capture `.work/capture/run_576131569/window_1746.ppm` visibly shows the green
+availability glow around the wall lamp. This establishes rendering in the
+controlled grounded/facing setup, not a complete unassisted gameplay test.
+The first capture attempt also showed the glow but stopped on a debugger
+printf dereferencing a cleared target; that was a fixture error, not a game
+crash, and is superseded by the clean run.
+
+An explicit split of cached and uncached final-selection loops reduced
+matching to 31.312% (1,992 bytes). It was reverted. The restored target build
+succeeds and the function remains **33.007%**, 1,974 bytes
+(`/tmp/saga-force-selection-restored-target.log` and
+`/tmp/saga-force-selection-restored.diff`). No behavior workaround was retained.
+
 The original `DrawForceGlowSprite` is at ELF address `0x1602f0`
 (`0x1702f0` in the Ghidra program rebased by `0x10000`). Its symbol is
 `_Z19DrawForceGlowSpriteP7nuvec_sfifP12GameObject_s`.
@@ -29,7 +111,8 @@ The latest measured sprite routine match is **92.658%**, not 100%.
 Remaining differences include register allocation, instruction ordering,
 the first rotation's table loads, and stack-address reuse. Continue comparing
 the actual binary; this percentage is a snapshot rather than an acceptance
-threshold. No visual gameplay validation has been performed.
+threshold. The initial sprite recovery had no visual validation; the later
+controlled lamp capture is recorded above.
 
 ## Character switching
 
@@ -37,7 +120,7 @@ threshold. No visual gameplay validation has been performed.
 capability result, at **99.882%** matching (relocated operands differ). Its
 integer-return declaration and definition replace the void stub; the definition
 lives with the player capability helpers at the original optimization level.
-This supplies another dependency of the still-incomplete `InitPlayerAI`.
+This supplies another dependency of `InitPlayerAI`.
 
 ### Shared character reset recovery
 
@@ -67,10 +150,459 @@ store. Newly exposed fields retain the original byte/dword write widths.
 Target/native builds and the four checks passed. The sanitizer trace
 `/tmp/saga-resetai-runtime.log` observed one normal reset and reached active
 Cantina gameplay at time 3.015691 without a sanitizer error. This does not
-establish that all AI movement is correct: `InitPlayerAI` still contains only
-its first original operation, `StarWars_AutoSetAICapabilities`, while the
-original also initializes masks, capabilities, movement and action state and
-calls the recovered reset.
+establish that all AI movement is correct.
+
+`InitPlayerAI` (`0x0fc720`, 1416 bytes) now includes the original route-mask,
+capability, movement/action-state and collision-state initialization before
+calling `ResetPlayerAI`. It is a **42.085% partial match**, with instruction
+ordering, branch layout and constant-loading differences still under review.
+The definition moved from the unoptimized placeholder `legoai.cpp` to the
+`-O2` player helpers beside the reset; effective compile commands were checked
+with Bazel aquery. No optimization overrides were changed. Newly exposed
+padding fields have ABI offset assertions, and existing integer aliases for
+float sentinels remain available to their current callers.
+
+The original eight-byte writable data symbol `_0xffffffffffffffff`
+(`0x667e18`, all bits set) is restored and used for the unrestricted route
+mask, instead of embedding two immediate constants. Restoring this load and
+the original valid-route branch order improves the initializer from 36.636%
+to 42.085%; `nm` verifies the symbol's eight-byte `.data` definition. This
+does not establish a fix for the destination-processing runtime failure.
+
+Target/native builds and four repository checks pass. The native fixture
+`/tmp/saga-initai-runtime.log` observed 22 initializer calls and active Cantina
+at time 3.012280, but also reported an invalid lookup index in `nutrig.cpp`.
+That run is **not a sanitizer pass**; the angle-calculation failure is being
+traced before claiming gameplay improvement. No character-switching or NPC
+movement fix is established by this initializer recovery alone.
+
+The longer fixture `/tmp/saga-initai-ubsan-long.log` reproduces the failure in
+`MovePlayer`'s AI input normalization (`move.cpp:352`). A read-only breakpoint
+trace (`/tmp/saga-initai-infinite.log`) captured deltas 0.00057220459 and
+0.000133514404, `NuFsqrt` returning zero, and both normalized inputs becoming
+infinite. The original `NuFsqrt` also uses the 1e-6 cutoff (rodata `0x57b7e0`),
+and original `MovePlayer` at `0x102100` performs the same reciprocal-distance
+normalization. Therefore changing the cutoff or adding an angle guard would
+not recover the original behavior. The upstream AI destination/stop handling
+needs investigation; the initializer is not yet validated for gameplay.
+
+Follow-up comparison of `AISysProcessCharacter` found its radius constraint
+checks packet `+0x180` (`0x3f8df1`), not the adjacent movement-target pointer
+at `+0x184`. That access and the original left-to-right addition of mover
+height, clearance and stopping distance are restored. Matching improves from
+**44.885% to 51.040%**. Target/native builds and all four checks pass.
+The read-only fixture `/tmp/saga-ai-radius-runtime.log` still captures infinite
+angle inputs for NPC character 170, with movement mode 0, stop byte 0, mover
+height 0.15, stopping distance 0 and no movement target. These corrections do
+not establish a fix for the NPC failure; path/arrival processing remains under
+investigation.
+
+The next arrival trace (`/tmp/saga-ai-arrival-all.log`) identifies movement
+mode **1** (`AIMoveToDestination`), not wander. The residual is already present
+at `AISysProcessCharacter` return with `process_ai=1`. The current path node
+has a nonzero radius (2.44486) and four connections; the failing destination
+differs from that node's position. Both character IDs 170 and 202 have failed.
+This directs further recovery toward destination/goal-range handling, rather
+than assuming an empty node or a character-specific movement fault.
+
+Original `AIMoveToDestination` at `0x3f6010..0x3f607c` checks the requested
+range and a strict (-0.5, 0.5) vertical interval before the position-reset branch
+at `0x3f6def`. Its current same-connection shortcut bypasses this handling.
+An isolated source candidate adding that branch still reproduced the angle
+failure (`/tmp/saga-arrival-candidate-runtime.log`) and lowered the partial
+match from 11.209% to 10.181%. It was removed, along with an unsuccessful
+store-order experiment; the original 11.209% score and target/native builds
+were restored. The candidate is not a retained fix. The surrounding original
+destination adjustment and goal-range logic still require recovery.
+
+A lighter breakpoint fixture now captures the failing character 170 request
+with `movement_parameter=0`, `fallback_stopping_distance=0`, and identical
+current/destination connection pointers (`/tmp/saga-ai-range-light.log`). The
+original range-arrival branch at `0x3f601b..0x3f6024` skips a zero range, so
+restoring that branch alone cannot resolve this captured case. The fixture
+stopped at infinite `NuAtan2D` inputs; its subsequent position-print command
+failed because `GameObject_s` has no member named `api`. It is diagnostic
+evidence, not a successful gameplay run. The preceding per-call trace timed
+out without capturing an arrival and supplies no additional result.
+
+Original `MovePlayer` at `0x101de8..0x101e34` gates this path on the same stop
+byte, context and exact-zero horizontal deltas. Its normalization at
+`0x10214f` uses a direct reciprocal. Original `fxyd` also uses `cvttss2si`
+followed by a scaled table read (`0x28f4cf..0x28f4d3`), with no finite-input
+guard. Consequently the sanitizer observation alone does not establish that
+the arithmetic differs from the original. Continue tracing movement request
+and stop-state production; do not add a cutoff or angle-table workaround.
+
+The stop-byte write audit identifies a control-system selector, not an arrival
+flag: original `Action_SetControlSystem` clears GameObject offset `0x3fc` on
+activation, sets it for a case-insensitive `rotational` parameter, and returns
+1 even when inactive or the object is absent. Its empty return-0 stub is now
+reconstructed in full from `0x184940..0x1849d4`, matching **96.872%** at the
+original 149-byte size. Target/native builds and all four checks pass. An
+isolated native fixture confirms inactive state 7 remains 7, `RoTaTiOnAl`
+sets state 1, zero parameters clear it to 0, and a null packet returns 1;
+all calls return 1 and the fixture exits without sanitizer errors
+(`/tmp/saga-control-system-runtime.log`). Natural Cantina usage and the
+movement regression remain unverified by this isolated action test.
+
+Natural follow-up tracing reaches the same invalid-angle inputs without any
+`SetControlSystem` call beforehand. The failing NPC runs script `party`, state
+`GoToIdleLocator`, action `GoToLocator` with parameters `WALK`, `mintime=5`,
+`maxtime=15`. It is holding on that action with roughly 12 seconds left, zero
+range/stopping distance and identical current/destination connections. The
+requested locator is at y=0.01 while the actual character is on y≈0; the tiny
+horizontal residual is preserved in `movement_position`. Both read-only
+fixtures exit at the breakpoint (`/tmp/saga-ai-control-natural.log` and
+`/tmp/saga-ai-active-action.log`), not after a successful gameplay interval.
+
+Original `GoToLocator` reads global `ai_moveradius` in its reach calculation
+at `0x3f3086..0x3f3095`; replacing the hard-coded 0.1 restores that load and
+improves the partial match **38.577% to 39.207%**, retaining 2196 current bytes.
+Target/native builds and all four checks pass. The global defaults to 0.1, so
+this correction is not evidence of fixing the captured failure. Further
+recovery should follow this identified action and its timed locator hold.
+
+The full tail disassembly confirms the original keeps issuing movement while
+the locator timer counts down (`0x3f2fda..0x3f3013`, then
+`0x3f30e1..0x3f3116`); stopping requests during that interval would not match.
+Its timer setup uses the same random interval and 0.01 fallback currently
+implemented. A separate parser discrepancy remains: `name` and `teleport`
+both consume the following locator token (`0x3f3249..0x3f3273`), whereas the
+current parser skips standalone `teleport`. A candidate restoring that branch
+and the original personal-name guard reduced matching to 19.312%; it was
+removed. Rebuilding restores **39.207%**, 2196 bytes. No parser candidate is
+retained, and this discrepancy does not affect the captured WALK/mintime/
+maxtime parameter list. The original timed hold is not itself evidence of
+the Cantina regression's cause.
+
+`AIMoveDirectlyToDestination` was checked in full: **99.978%**, with only the
+GOT-base relocation differing. It needs no behavior change. An isolated
+teleport-parser candidate also lowered `GoToLocator` to 17.621% and was
+removed; the restored target builds successfully.
+
+An isolated 32-bit harness now executes the original `NuAtan2D` bytes at
+`0x28f936` directly from mapped ELF load segments. The audited call chain
+uses only internal PIC calls and GOTOFF data, with no imports or constructors.
+Finite controls return 8192 for (1,1), 16384 for (1,0), 0 for (0,1), and
+40960 for (-1,-1). The captured (inf,inf) input returns **0** without crashing;
+(-inf,inf) returns 0 and either negative-y infinite pair returns 32768.
+Harness/source: `/tmp/saga-original-angle.c`; results:
+`/tmp/saga-original-angle.log`, exit 0. This confirms that the sanitizer
+failure differs from the original machine-code behavior: its NaN-to-integer
+conversion and scaled 32-bit table addressing wrap to the first entry.
+It does not prove the original game naturally produces these inputs or that
+Cantina movement is correct. No source angle guard or cutoff was added.
+
+A native build-sound inventory confirms event 0x3a resolves to `MK-Pickup`
+(SFX 50, sample 357, 22050 Hz, enabled) and event 0x3b to `LegoForm` (SFX 128,
+sample 434, 11025 Hz, enabled and looping). Both have volume 16383. The
+read-only fixture exits successfully (`/tmp/saga-build-sound-inventory.log`);
+loaded metadata alone does not establish audible playback. Original
+`GizBuildIts_LateUpdate` confirms those event numbers at `0x4cfd60` and
+`0x4d0908`; do not replace them based on their names. It also has an event
+0x3c call at `0x4d0389`, guarded by buildit offset 0x82 bit 2, whose surrounding
+update branch still needs comparison with the reconstructed build logic.
+`GameAudio_PlaySfx` matches 99.900%; `GameAudio_PlaySfxById` matches 99.446%
+with equivalent two-position dispatch. These checks direct the next build
+sound investigation toward update-call coverage and actual voice playback.
+
+The event-0x3c branch is part of loose-piece hopping, not the step-completion
+call. Original `GizBuildIts_LateUpdate` subtracts FRAMETIME from a positive
+shared `gizhopsfxwait` (`0x12a2e20`) at entry, and from per-piece animation-data
+offset 0xc0 when processing that piece. When the piece timer reaches zero and
+the shared cooldown has expired, interaction bit 0x04 at buildit offset 0x82
+causes playback; otherwise `qrand() <= 0x7fff` selects playback. The call uses
+event 0x3c and buildit position at offset 0x2c. The cooldown resets to
+`qrand() * (1/65535) * 0.2 + 0.1` in the original instruction order.
+Before recovery, the late-update routine omitted this entire per-piece
+transform/hopping path and matched **5.600%** (1795 current bytes versus
+6532 original). The current reconstruction restores this animation path
+together with its sound branch and shared cooldown.
+Assembly evidence: `/tmp/saga-build-update-original.asm`, especially
+`0x4cf5e6..0x4cf607`, `0x4cfea8..0x4cfebd`, `0x4d0358..0x4d03ce`, and
+`0x4d0775..0x4d078d`.
+
+The hopping path also requires `NuSpecialGetOnScreenFn` (`0x2c8d30`, 38
+bytes), previously an empty void stub. Its complete body and integer-return
+declaration are restored in the existing O3 special-query module, removing
+the stub from nucore. It matches **100%**. With a valid handle, absent scene
+or absent legacy special returns 1; otherwise it reads legacy-instance
+offset 0x44 bit 1. It does not consult the display-special visibility flags.
+Target/native builds and all four checks pass.
+The isolated native fixture confirms both absent cases return 1 and all
+flag values 0 through 15 return exactly bit 1. It exits successfully without
+sanitizer errors (`/tmp/saga-onscreen-runtime.log`).
+
+Recovered hopping details: linked pieces begin from
+`start_mtx` and skip already built indices; unlinked pieces begin from
+`NuSpecialGetMtx`. New hops require the linked `was_drawn` byte or the
+unlinked on-screen query. A selected hop sets `wobble_time=0.2` and chooses
+one of six axis/sign values using `qrand()/0x2aab`. The phase is
+`wobble_time/0.2`, with base angle
+`int(3640 * NU_SIN_LUT((1-phase)*65536))`, negated for odd axis values.
+The selected normalized matrix axis is dotted with `v010`; its absolute
+alignment attenuates rotation by
+`1-(1-NU_SIN_LUT(alignment*16384+16384))*alignment` before the matching
+X/Y/Z pre-rotation. Lift is `NU_SIN_LUT(phase*32768)` times original global
+`GIZBUILDITWOBBLEJUMPHEIGHT` (0.05 at `0x6686e0`) times buildit offset 0x50.
+Linked results update `draw_mtx`; unlinked results call `NuSpecialSetDrawMtx`
+and `NuSpecialUpdate`. These operations are now integrated through
+`AnimateLooseBuildItPieces`. The enclosing late-update function matches
+**15.628%** (1919 bytes, with the helper emitted separately); its original
+6532-byte body remains substantially incomplete. This score does not establish
+a full match or a gameplay fix.
+
+Target and native builds and all four repository checks pass
+(`/tmp/saga-build-hop-{target,native,checks}.log`). A native Cantina run
+naturally reaches event 0x3c for idle, unbuilt `frame_2` (30 pieces), at
+`(-51.0323, 0.0609311, -54.6899)`, through the restored helper and
+`GizBuildIts_LateUpdate`. The debugger exits successfully with no sanitizer
+errors (`/tmp/saga-build-hop-runtime.log`). Its 1206 observed draw-matrix
+updates include other callers and do not independently verify this object's
+transforms. The breakpoint stops before playback and the run is muted;
+audibility and visual correctness remain unverified.
+
+The next recovered branch is the build-step start debris emission
+(`0x4cf7d0`, `0x4d0b5c..0x4d0bc4`). If the decremented timer remains
+positive and its previous value equals `step_duration`, the original obtains
+the current piece's draw position and emits `GizBuilditGDeb[qrand()/0x2aab]`
+before hiding an unlinked piece. This branch is now restored. Late-update
+matching increases to **16.145%** (2078 bytes, helper still separate).
+Target/native builds, all four checks, and `git diff --check` pass
+(`/tmp/saga-build-start-{target,native,checks}.log`). A controlled native
+fixture now sets the loaded Cantina `frame_2` object's builders-active byte
+and resets its timer to the existing 0.3-second duration. The update reaches
+the breakpoint after debris emission and piece processing, with previous
+timer 0.3 and current timer 0.283018. The debugger exits successfully with no
+sanitizer errors (`/tmp/saga-build-start-runtime.log`). This verifies execution
+of the recovered branch with a loaded object, not natural player activation,
+visual correctness, or completion of building.
+
+Remaining automatic-build path: original `0x4cf9f8` calls
+`GizBuildit_AutoBuildPosFn(world, &buildit->start_position, &position, &angle)`
+when available. A successful callback drives a reverse loop over unbuilt
+pieces, seeking each draw position toward a circular arrangement at speed
+6 (`0x4cfb60..0x4cfcff`); linked pieces update draw-matrix translation and
+unlinked pieces call `NuSpecialSetDrawPos`/`NuSpecialUpdate`. Regardless of
+callback success, the original then decrements the step timer. Its positive
+timer branch calls `GizMoveAttractoBuildItPiece` (`0x4d052e`), whereas the
+current shared manual/automatic branch hides unlinked pieces. The attraction
+function itself remains an empty stub in `gizmo/object/gizbuildit.cpp`;
+original address `0x4cda80`, size 1040 bytes, disassembly
+`/tmp/saga-build-attract-original.asm`. Reconstruct this body and its caller
+together before claiming automatic building matches.
+
+The original also distinguishes unlinked placement branches: manual placement
+requires an instance animation (`0x4d0ea2`), while automatic placement checks
+for one (`0x4d0dff`) and restores draw position from `NuSpecialGetPos` after
+event 0x3b. The current shared placement helper does not preserve that
+distinction. These are assembly findings, not additional runtime fixes.
+
+Attraction reconstruction exposed a prerequisite ABI error: original
+`NuMtxToQuat` takes `(NUMTX *, NUQUAT *)`, confirmed by matrix reads from
+argument one at `0x284a67..0x284a8c` and both calls at
+`0x4cdc40..0x4cdc6a`. The declaration, definition, and two cutscene callers
+now use that order. Its current body matches **23.08%**, 1239 bytes;
+the body itself remains incomplete. Target/native builds and all four checks
+pass (`/tmp/saga-quat-abi-{target,native,checks}.log`). No runtime or full-match
+claim follows from this ABI correction. `GizMoveAttractoBuildItPiece` remains
+to be implemented: progress is `1-step_timer/step_duration`; for positive
+progress it converts translation-cleared current/end matrices to quaternions,
+slerps orientation, interpolates translation and adds a 0.1-scaled half-sine
+vertical arc. It writes the current draw matrix, then copies to linked
+animation data or calls `NuSpecialSetDrawMtx` for an unlinked piece.
+
+The attraction stub has now been replaced with that recovered body in its
+existing O3 source file. It matches **92.788%** (1032 current bytes versus
+1040 original); target/native builds and all four checks pass
+(`/tmp/saga-attract-{target,native,checks}.log`). The caller's missing
+automatic-build path is still not wired up. The first controlled runtime
+fixture selected `Vehicle` without validating its timer state and reported
+different expected/actual midpoint positions, so it is not a pass. A corrected
+fixture selects an idle object with positive step duration and succeeds:
+`frame_2` expected and actual midpoint positions are
+`(-51.1182, 0.1, -54.6936)`; the zero-progress linked copy preserves that
+position. The debugger exits successfully with no sanitizer errors
+(`/tmp/saga-attract-runtime-valid.log`). This does not verify orientation,
+visual correctness, or natural automatic-build activation.
+
+Aligning matrix/quaternion declaration order with the original stack layout
+and expressing translation as subtract, scale, then add raises attraction
+matching to **93.319%** (1032 bytes). The target build passes
+(`/tmp/saga-attract-vector-target.log`); the remaining instruction differences
+include translation scheduling/register allocation and relocation operands.
+Native compilation and all four checks also pass for this retained version
+(`/tmp/saga-attract-vector-{native,checks}.log`). A direct-result-matrix
+translation experiment lowered matching to 88.004% (1052 bytes), so it was
+rejected and the 93.319% version restored and rebuilt
+(`/tmp/saga-attract-restored-target.log`, `/tmp/saga-attract-restored.diff`).
+
+An automatic-positioning caller candidate compiled but reduced late-update
+matching from 16.145% to 4.729% (3033 bytes); it was removed and the previous
+version rebuilt (`/tmp/saga-auto-restored-target.log`). Preserve the original
+control-flow structure when reintegrating this path. The recovered constants
+are 4.5 seconds, initial radius 0.5, radius reduction `blend*0.3`, and angle
+increment `5*blend*360*65536/360`, where
+`blend=1+sin(((4.5-timer)/4.5)*16384+32768+16384)` in LUT angle units.
+Original angle conversion truncates to signed integer before narrowing to
+16 bits; preserve that sequence. The rejected patch is recorded only as an
+experiment in `/tmp/saga-auto-position-candidate.patch` and is not active code.
+
+Quaternion dependency: the original `NuMtxToQuat` positive-trace branch uses
+`m12-m21`, `m20-m02`, and `m01-m10`, opposite the previous reconstruction's
+rotation signs. It computes the square root before storing `w=s*0.5` and
+inverting `s`. Its other branch chooses the largest diagonal using cyclic
+indices `{1,2,0}`, computes `sqrt(mii-(mjj+mkk)+1)`, and inverts only when
+that result is nonzero. The full indexed algorithm is now restored, improving
+matching from 23.08% to **78.789%** (928 current bytes versus 1000 original).
+Target/native builds and all four checks pass
+(`/tmp/saga-quat-body-{target,native,checks}.log`). Known-rotation runtime
+verification is still required; earlier attraction translation checks do not
+verify this corrected orientation behavior.
+
+Known-rotation native checks now pass: identity gives `(0,0,0,1)`, positive
+90-degree X gives `(0.707107,0,0,0.707107)`, and the three 180-degree axis
+rotations give the corresponding unit-axis quaternion with w=0. The debugger
+exits successfully without sanitizer errors (`/tmp/saga-quat-runtime.log`).
+Restoring flat matrix indexing and local declaration order further improves
+matching to **83.622%** (1006 bytes), with a successful target build
+(`/tmp/saga-quat-flat-target.log`). Full byte matching remains unfinished.
+Native compilation and all four repository checks pass for the retained flat
+indexing version (`/tmp/saga-quat-flat-{native,checks}.log`). Mixed flat and
+row/column indexing was tested and rejected at 82.890%; restoring flat indexing
+and rebuilding confirms **83.622%** (`/tmp/saga-quat-restored.diff`).
+
+Character-switch routing audit: original `Player_ToggleCharacter` at
+`0x46c730` rejects an active world whose area equals non-null `HUB_ADATA`
+(`0x46c775..0x46c787`) and returns when `FreePlay` is zero
+(`0x46c7d8..0x46c7e2`). It also rejects fades, CInfo context flag 0x100,
+and object offset 0xcc0 before cycling. Therefore this remaining stub is a
+Free Play cycling gap; restoring it must not bypass hub restrictions to
+address Cantina tagging. Current `MovePlayer` calls `Tag_Check`, which is
+the separate path to inspect for Cantina switching. Original GOT resolution
+also identifies `Player_ToggleSubCharacterFn`, `TOGGLEHOLDTIME`,
+`TOGGLEREPEATTIME`, `GAMEPAD_TOGGLELEFT/RIGHT`, and
+`Player_ToggledCharacterFn`; the reference disassembly is
+`/tmp/saga-toggle-original.asm`.
+
+Current tagging revalidation: `Tag_FindGameObject_TRANSFER` matches **99.773%**,
+461 bytes, with distance/facing/context eligibility checks consistent with the
+original (`/tmp/saga-tag-find-current.diff`). The existing controlled Cantina
+fixture was rerun after the AI initialization and quaternion changes. It places
+an eligible NPC near the player and injects `GAMEPAD_TAG`; `Tag_NewTransfer`
+observes Player[0] changed to the target, source slot -1, target slot 0, and
+the target's gamepad equal to GamePad[0]. The debugger exits successfully
+without sanitizer errors (`/tmp/saga-tag-current-runtime.log`). This confirms
+current transfer execution under controlled positioning/input, not natural
+target acquisition or the user's complete switching experience.
+
+A follow-up observation preserves NPC positions and injects the tag button
+only when the original target finder returns a candidate. The first run ends
+normally without a transfer event (`/tmp/saga-tag-natural-position.log`).
+Because that fixture did not report its search count, the absence of an event
+does not establish whether eligible targeting checks ran. A second fixture
+adds a final count and exits normally after **619 searches with no candidate**
+(`/tmp/saga-tag-natural-count.log`). This scripted route does not exercise
+natural target acquisition and is not evidence that character switching is
+fixed.
+
+Tag indicator gap: `Tag_DrawIcon_LSW` remains a stub (original `0x145220`,
+532 bytes; `/tmp/saga-tag-icon-original.asm`). Original gates include
+VehicleArea, FadeSys.fade, player-active bit, LEVEL_HIDE_ICONS, and optional
+`Tag_NoHiddenIconFn`. It draws when object byte 0xefe bit 0x10 is set or the
+0xd5c timer permits blinking (below 2 seconds, `fmod(timer,0.4)>=0.2`). It
+copies `AddGameMsg_Default`, sets byte 0x4f to 1, scale 3, text `LEGOASCII_UP`,
+position.y += object[0xffc]*object[0xa8], PlayerRGB, flags 0x87, and alpha
+`int(48*sin(fmod(GameTimer.time,0.5)*2*65536)+80)`. The callback and text
+registration remain commented in game.cpp, so recovering the draw body alone
+would not establish visible functionality. Restore the data and registration
+from original evidence together with the body.
+
+The tag-indicator body is now restored at **94.266%** matching (540 current
+bytes versus 532 original), along with original `PlayerRGB` bytes
+`00 7f ff 00 ff 00`, null `LEGOASCII_UP`, and null `Tag_NoHiddenIconFn`.
+Target/native builds and all four checks pass
+(`/tmp/saga-tag-icon-{target,native,checks}.log`). Registration and runtime
+verification remain outstanding, so the indicator is not claimed visible.
+The original hidden-icon callback is a 96-byte static function at `0x11a530`;
+it compares the active world's level against a specific level pointer and,
+only for that level, tests GameCam byte 1 against 5. The current callback stub
+also has the wrong void return type; its integer result must be recovered
+before registration.
+
+Registration is now restored in `InitGameAfterConfig`: `Tag_DrawIconFn`,
+`LEGOASCII_UP=ASCII_UP`, and `Tag_NoHiddenIconFn`. The original glyph bytes
+are c2 ac; `ASCII_UP` is restored as an initialized pointer. The hidden-icon
+callback is recovered beside its registration, retaining static linkage and
+removing the old void stub. It returns whether camera sock is 5 only in
+DEATHSTARESCAPEB; otherwise 0. It matches **99.889%**, 96 bytes, with only
+relocation differences (`/tmp/saga-tag-hidden.diff`). Target build passes
+(`/tmp/saga-tag-register-target.log`); runtime visibility remains unverified.
+
+Native registration fixture: the callback runs through `Tag_Check` in
+Cantina, with `LEGOASCII_UP` containing original bytes c2 ac 00 and the hidden
+callback non-null. After explicitly setting indicator bit 0x10, the fixture
+observes `AddGameMsg` arguments scale=3, flags=0x87, RGB=(0,127,255),
+alpha=72, byte 0x4f=1, and position=(-26.418,0.690804,-50.6508).
+The debugger exits successfully without sanitizer errors
+(`/tmp/saga-tag-icon-runtime.log`). This verifies controlled message submission
+only: the breakpoint precedes message processing, so neither rendering nor
+natural indicator activation is established. Native build and all four checks
+also pass (`/tmp/saga-tag-register-{native,checks}.log`).
+
+The follow-up controlled fixture reaches `Text3DEx` through DrawGameMessages,
+DrawPanel, and PanelRender with the glyph copied into GameMessage storage.
+Observed screen position is `(0.000779929,0.248,1)`, x/y scale 1.30428,
+RGB=(0,127,255), alpha=72, alignment=1. The debugger exits successfully without
+sanitizer errors (`/tmp/saga-tag-icon-draw.log`). Thus submission, lifetime,
+projection, and dispatch to the text function execute for the indicator.
+The breakpoint still precedes text decoding/font rendering, so visible glyph
+output and natural indicator activation remain unverified.
+
+Visual capture now confirms an arrow glyph is rendered in the controlled
+indicator-state run. The debugger completes 698 indicator calls and exits
+normally without sanitizer errors (`/tmp/saga-tag-icon-capture.log`). Inspected
+frame `.work/capture/run_569156497/window_2147.ppm` (PNG copy
+`/tmp/saga-tag-icon-capture.png`) shows the arrow near the player's feet.
+This establishes visible glyph output; it does not establish correct placement
+relative to the original game or natural activation, because the debugger
+holds indicator bit 0x10 on throughout the capture.
+
+Height follow-up confirms the near-feet position is consistent with the
+original calculation: object offset 0xffc is the unscaled lower character
+bound, populated from CHARACTERDATA offset 0x34, while object offset 0xa8 is
+character scale. `SetGameObjectCharacterData` matches **99.947%** (89 bytes);
+original `GetTopBot` at `0x46dc90` also copies character-data 0x34 to object
+0xffc and 0x38 to 0x1000. Current GetTopBot matches 78.150% with the same
+bound stores. No visual height adjustment was made. Evidence:
+`/tmp/saga-tag-height-init.diff`, `/tmp/saga-tag-height-update.diff`.
+
+`AIFormationFollow` (`0x3f2750`, 491 original bytes) now replaces its empty
+body with the original row/column offset, reversal, movement instruction and
+forward look-target sequence. It matches **81.944%** (440 current bytes).
+Target/native builds and all four repository checks pass. An isolated native
+debugger fixture with row position `(10,0,20)`, yaw zero, column one and spacing
+two observes destination `(8,0,20)`, look target `(10,0,120)` and movement flags
+9; reversal produces `(12,0,20)`. Centering produces x=10 for three columns
+and x=9 for four columns. An invalid row leaves a sentinel destination x=123
+unchanged. The expanded fixture exits successfully without sanitizer errors
+(`/tmp/saga-formation-follow-runtime-expanded.log`). This verifies these
+helper branches, not natural formation playback or resolution of the Cantina
+movement regression. `AIMoveInstruction` still lacks the original formation
+leader update through `FormationMove`; that dispatch remains incomplete.
+
+The next original-binary dispatch correction restricts formation following
+to modes 1 and 4; mode 5 remaps to direct mode 1, and other modes retain their
+requested instruction. Previously every mode except 5 entered formation
+following. `AIMoveInstruction` improves from **61.519% to 67.766%**. Target and
+native builds and all four checks pass. The native isolated fixture tests
+requests 0 through 7: resulting modes are `0,1,2,3,1,1,6,7`. Requested stopping
+distance 2 and range 3 survive for the direct modes; formation-follow modes
+use the original zero arguments. The fixture exits successfully without
+sanitizer errors (`/tmp/saga-formation-dispatch-runtime.log`). This does not
+exercise formation-leader updates. The missing static callbacks are
+`RowMoveWander` (`0x3d7530`, 1736 bytes) and `RowMoveTowards` (`0x3d7c00`,
+1851 bytes), called through `FormationMove` (`0x3d2d00`, 307 bytes).
 
 The pre-existing `Player_CopyEssentials` reconstruction was checked against
 Ghidra and objdiff: `_Z21Player_CopyEssentialsP12GameObject_sS0_` matches 100%.
@@ -539,6 +1071,35 @@ loader and graph execution remain unimplemented; these helpers alone do not
 resolve the level-object regression.
 
 ## Verification
+
+### 2026-09-08 commit checkpoint
+
+The following units were checked in isolation, with other pending changes
+temporarily saved and then restored. No temporary stash remains from this
+checkpoint.
+
+| Commit | Recovery | Aggregate fuzzy match |
+| --- | --- | --- |
+| `7236662` | Previous checkpoint | 26.092190% |
+| `82ea2f1` | Matrix-to-quaternion ABI and rotation branches | 26.105015% |
+| `b08e9eb` | Build-piece motion, hop effects and visibility query | 26.140535% |
+| `d36a6a1` | Force target filtering and cached LOS selection | 26.148338% |
+| `abb7db4` | Player AI initialization and formation control state | 26.174232% |
+| `88923c2` | Character tag indicator and registration | 26.189165% |
+
+The report's exact-function count remains 1,281 at each checkpoint. Every
+code commit passed its normal pre-commit hook: repository checks, target,
+native and WASM static analysis, target build, symbol checks and matching
+report generation. The complete native executable also builds successfully
+(`/tmp/saga-final-units-native.log`).
+
+Direct final comparisons against the target artifact retain the measured
+results: `NuMtxToQuat` 83.622%, `NuSpecialGetOnScreenFn` 100%,
+`GizMoveAttractoBuildItPiece` 93.319%, `InitPlayerAI` 42.085%,
+`Tag_DrawIcon_LSW` 94.266%, and `GizForce_FindBestForceTarget` 33.007%
+(`/tmp/saga-final-unit-matches.txt`). These are partial reconstructions except
+for the exact visibility query. The documented controlled runtime tests do
+not close the remaining gameplay/audio regressions or establish full matches.
 
 Target and native builds and the four tests in `//scripts/checks:checks`
 passed during this investigation. These are build/structural checks, not
