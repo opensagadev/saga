@@ -1252,6 +1252,18 @@ static void ResetAIOverrideCharacter(GameObject_s *object) {
     }
 }
 
+static i32 Action_PressActionButton(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **, i32, i32, f32) {
+    if (packet != NULL && packet->owner != NULL) {
+        GameObject_s *object = packet->owner->apiobj.objptr;
+        if (object != NULL) {
+            object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
+            object->field_0xef9 |= 4;
+            object->field_0xef8 |= 0x20;
+        }
+    }
+    return 1;
+}
+
 static i32 Action_SetAIOverrideControl(AISYS *system, AISCRIPTPROCESS *processor, AIPACKET *packet,
                                        char **params, i32 param_count, i32 first_time, f32) {
     APIOBJECT *object;
@@ -4985,7 +4997,7 @@ extern "C" {
         {"DontSetStoppedFlag", NULL, 0, 0, 0},
         {"PressSpecialButton", NULL, 0, 0, 0},
         {"PressTagButton", Action_PressTagButton, 0, 0, 0},
-        {"PressActionButton", NULL, 0, 0, 0},
+        {"PressActionButton", Action_PressActionButton, 0, 0, 0},
         {"UseWeapon", Action_UseWeapon, 0, 0, 0},
         {"SetInvulnerable", Action_SetInvulnerable, 0, 0, 0},
         {"DontPush", Action_DontPush, 0, 0, 0},
