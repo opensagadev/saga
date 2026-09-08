@@ -45,6 +45,14 @@ LEVER_CONFIG LeverSys = {0x55, 0};
 
 i32 lever_gizmotype_id = -1;
 
+i32 Lever_FullyPulledDown(LEVER_s *lever) {
+    return lever->visible && lever->being_pulled && lever->pull_progress >= 1.0f;
+}
+
+i32 Lever_BeingPulled(LEVER_s *lever) {
+    return lever->being_pulled;
+}
+
 static i32 Levers_GetMaxGizmos(void *lever) {
     WORLDINFO *world = static_cast<WORLDINFO *>(lever);
     if (world == NULL) {

@@ -12,10 +12,6 @@ extern "C" {
 void Lever_MoveCode(WORLDINFO_s *, GameObject_s *) {
 }
 
-bool Lever_BeingPulled(LEVER_s *lever) {
-    return lever != NULL && (lever->flags & LEVER_FLAG_BEING_PULLED) != 0;
-}
-
 LEVER_s *Lever_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObject_s *object, f32 *distance_squared) {
     LEVER_s *nearest = NULL;
     f32 nearest_distance = 1.0f;
@@ -54,13 +50,6 @@ void Levers_InitTerrain(WORLDINFO_s *world) {
         lever.platform_id = NewPlatPickupInst(&lever, 3);
         PlatInstRotate(lever.platform_id, 1);
     }
-}
-
-bool Lever_FullyPulledDown(LEVER_s *lever) {
-    return lever != NULL &&
-           (lever->flags & (LEVER_FLAG_VISIBLE | LEVER_FLAG_BEING_PULLED)) ==
-               (LEVER_FLAG_VISIBLE | LEVER_FLAG_BEING_PULLED) &&
-           lever->pull_progress >= 1.0f;
 }
 
 void Lever_GetAbsTargetPos(LEVER_s *lever, nuvec_s *target_position) {
