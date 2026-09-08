@@ -37,6 +37,7 @@
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/nugcutscene.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -545,6 +546,16 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     i32 set = NuAToI(arg);
     if (set < 1 || set > 16) set = 0;
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
+}
+
+static f32 Condition_CutSceneStarted(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    CUTINFO *cut = static_cast<CUTINFO *>(argument);
+    return cut != NULL && cut->instance != NULL &&
+        (static_cast<instNUGCUTSCENE_s *>(cut->instance)->flags_88 & 2) != 0 ? 1.0f : 0.0f;
+}
+
+static void *Condition_CutSceneStartedInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    return CutScene_Find(WORLD->cutscene_sys, name);
 }
 
 static f32 Condition_CutSceneExists(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
@@ -1058,7 +1069,7 @@ extern "C" {
         {"LastLevel", Condition_LastLevel, Condition_LastLevelInit},
         {"Message", Condition_Message, Condition_MessageInit},
         {"ScriptParam", Condition_ScriptParam, Condition_ScriptParamInit},
-        {"CutSceneStarted", NULL, NULL},
+        {"CutSceneStarted", Condition_CutSceneStarted, Condition_CutSceneStartedInit},
         {"CutSceneFinished", NULL, NULL},
         {"CutSceneExists", Condition_CutSceneExists, Condition_CutSceneExistsInit},
         {"PlayerInSock", NULL, NULL},
