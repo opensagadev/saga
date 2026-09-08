@@ -269,7 +269,9 @@ typedef struct AIPACKET_s {
     u8 reset_mode;       // 0x3fa overall: AI reset/activation state
     u8 goal_speed_mode;  // 0x3fb overall: walk/run/tiptoe speed selector
     u8 movement_stopped; // 0x13c, suppresses synthesized AI movement input
-    u8 pad1c_end[0x400 - 0x3fd];
+    u8 field_0x13d;
+    u8 divert_search_cursor;            // 0x13e
+    u8 divert_node;                     // 0x13f
     AIGROUP_s *group;                   // 0x400 overall
     u8 group_row;                       // 0x404 overall
     u8 group_column;                    // 0x405 overall

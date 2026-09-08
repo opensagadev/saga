@@ -9,6 +9,7 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numath/nutrig.h"
+#include <string.h>
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -213,10 +214,85 @@ static __attribute__((noinline)) AIPATHCNX *GetNextConnection(const AIPACKET *pa
     return connection;
 }
 
+static __attribute__((noinline)) void AIMoveFindDivertNode(AISYS_s *, AIPATH *path, AIPACKET *packet,
+                                                           NUVEC *destination) {
+    if (path->special_route_count != 0 && (packet->navigation_flags & 4) != 0) {
+        if (packet->divert_node >= path->node_count) {
+            packet->divert_node = 0xff;
+        }
+        AIPATHNODELINK *links = path->special_routes;
+        if (packet->divert_search_cursor >= path->special_route_count) {
+            packet->divert_search_cursor = 0;
+        }
+        f32 best = 3.4028234663852886e+38f;
+        if (packet->divert_node < path->node_count) {
+            best = NuVecDistSqr(&path->nodes[packet->divert_node].position, destination, NULL);
+        }
+        u8 start = packet->divert_search_cursor;
+        for (i32 i = 0; i < 4; ++i) {
+            if (packet->divert_search_cursor != packet->divert_node) {
+                f32 distance =
+                    NuVecDistSqr(&path->nodes[links[packet->divert_search_cursor].type].position, destination, NULL);
+                if (distance < best) {
+                    best = distance;
+                    packet->divert_node = links[packet->divert_search_cursor].type;
+                }
+            }
+            ++packet->divert_search_cursor;
+            if (packet->divert_search_cursor > path->special_route_count) {
+                packet->divert_search_cursor = 0;
+            }
+            if (packet->divert_search_cursor == start) {
+                break;
+            }
+        }
+    } else {
+        if (packet->divert_node >= path->node_count) {
+            packet->divert_node = 0xff;
+        }
+        if (packet->divert_search_cursor >= path->node_count) {
+            packet->divert_search_cursor = 0;
+        }
+        f32 best = 3.4028234663852886e+38f;
+        if (packet->divert_node < path->node_count) {
+            best = NuVecDistSqr(&path->nodes[packet->divert_node].position, destination, NULL);
+        }
+        for (i32 i = 0; i < 4; ++i) {
+            f32 distance = NuVecDistSqr(&path->nodes[packet->divert_search_cursor].position, destination, NULL);
+            if (distance < best) {
+                best = distance;
+                packet->divert_node = packet->divert_search_cursor;
+            }
+            ++packet->divert_search_cursor;
+            if (packet->divert_search_cursor > path->node_count) {
+                packet->divert_search_cursor = 0;
+            }
+        }
+    }
+}
+
 void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
     AIPATH *path = packet->path_info.path;
     AIPATHCNX *connection = packet->path_info.connection;
     AIPATHINFO &destination_path_info = packet->fallback_path_info;
+
+    if (path != NULL && path != destination_path_info.path) {
+        AIMoveFindDivertNode(system, path, packet, &packet->fallback_destination);
+        if (packet->divert_node >= path->node_count || path->nodes[packet->divert_node].connection_count == 0) {
+            packet->movement_destination = packet->owner->apiobj.position;
+            packet->movement_stopping_distance = 0.0f;
+            return;
+        }
+        AIPATHNODE *node = &path->nodes[packet->divert_node];
+        packet->fallback_destination = node->position;
+        packet->fallback_stopping_distance = 0.0f;
+        packet->movement_parameter = NuFmax(node->radius - 1.0f, 1.0f);
+        memset(&packet->fallback_path_info, 0, sizeof(packet->fallback_path_info));
+        packet->fallback_path_info.path = packet->path_info.path;
+        packet->fallback_path_info.connection = node->connections[0];
+        packet->fallback_path_info.direction = node->connections[0]->node_indices[0] == packet->divert_node;
+        packet->fallback_path_info.dist = node->connections[0]->node_indices[0] == packet->divert_node ? 0.0f : 1.0f;
+    }
 
     // The target asks AIMoveFindDivertNode for a cross-path transition and
     // stops at the current position when none is available. Never substitute a
@@ -264,12 +340,6 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
     const u8 current_node_b = connection->node_indices[1];
     const u8 destination_node_a = destination_connection->node_indices[0];
     const u8 destination_node_b = destination_connection->node_indices[1];
-    if (current_node_a >= path->node_count || current_node_b >= path->node_count ||
-        destination_node_a >= path->node_count || destination_node_b >= path->node_count) {
-        packet->runtime_flags |= AIPACKET_RUNTIME_PATH_BLOCKED;
-        return;
-    }
-
     // Match the target's ordinary endpoint solver: compare all four graph
     // routes between the current and destination connection endpoints, adding
     // the partial distance along each connection. This also permits a clean

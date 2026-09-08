@@ -403,6 +403,53 @@ input (`/tmp/saga-distance-integration.log`). The earlier NPC angle-table
 sanitizer error does not recur in this run; this bounded, timing-dependent
 observation does not close the movement regression.
 
+The next cross-graph recovery exposes the original packet bytes at `0x13e`
+and `0x13f` as diversion search cursor and selected node. `AIMoveFindDivertNode`
+checks four candidates per call, retaining a closer previously selected node.
+The special-route branch uses the link table and can stop when its cursor
+returns to the starting entry. Entry validation uses `>= count`, while the
+original increment wrap uses `> count`; neither condition is silently changed.
+An isolated fixture allocates the extra indexed entries and compares eight
+cases over three calls each. All 24 cursor/selected-node states agree with
+original machine code (`/tmp/saga-original-divert.log`,
+`/tmp/saga-divert-runtime.log`). This does not verify allocation assumptions
+for every loaded path.
+
+The destination solver now prepares the selected node's position and first
+connection when its goal is on another graph. It clears the fallback path
+info, selects the original endpoint direction/distance, sets zero stopping
+distance, and computes `NuFmax(node.radius - 1, 1)`. Four controlled snapshots
+agree with the equivalent original `AIMoveAdjustDestinationPath` preparation
+for both endpoint directions, the radius floor and an isolated node
+(`/tmp/saga-original-prep.log`, `/tmp/saga-prep-runtime.log`). The native
+fixture stops at the existing missing-current-connection guard after
+preparation; it does not exercise the complete solver.
+
+`AIMoveToDestination` improves from **12.588%** to **15.483%**. The new private
+search helper has the expected scalar-replaced calling convention and 1267
+bytes versus 1299 original, but still reports **0%** under objdiff's alignment
+score. A temporary target copy normalizes `.isra.1` to original `.isra.26`;
+the reference remains unchanged. Behavioral fixture agreement is not a claim
+of matching assembly. Later exit-path selection and restoration of the saved
+goal remain incomplete, so cross-graph movement is not considered fixed.
+Target/native builds and all four checks pass. The Cantina fixture retains
+tagged-player control for 180 rendered frames without an ASan/UBSan report
+in this run (`/tmp/saga-divert-entry-integration.log`); it does not establish
+that cross-graph transition code executed.
+
+The first local commit exposed a code-generation regression: the extra
+endpoint-count rejection in the incomplete caller caused GCC to classify
+`GetNextConnection` as cold and emit it in `.text.unlikely` at 763 bytes.
+The original solver directly indexes its connection endpoints without that
+rejection branch. Removing the unsupported branch restores the helper's
+905-byte `.text` implementation and **35.790%** match, while improving the
+caller to the score above. No hot/cold attributes or optimization overrides
+are used to force this result.
+After this correction, all four preparation snapshots still agree with the
+original, the four checks pass, and the 180-frame Cantina fixture completes
+without an ASan/UBSan report (`/tmp/saga-divert-flow-prep.log`,
+`/tmp/saga-divert-flow-integration.log`).
+
 A native build-sound inventory confirms event 0x3a resolves to `MK-Pickup`
 (SFX 50, sample 357, 22050 Hz, enabled) and event 0x3b to `LegoForm` (SFX 128,
 sample 434, 11025 Hz, enabled and looping). Both have volume 16383. The
