@@ -5963,6 +5963,24 @@ static f32 Condition_NearestPartyRange(AISYS *sys, AISCRIPTPROCESS *, AIPACKET *
     return nearest;
 }
 
+static f32 Condition_NearestPartyXZRange(AISYS *sys, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *) {
+    f32 nearest = 1.0e9f;
+    if (packet != NULL && packet->owner != NULL && sys != NULL) {
+        NUVEC difference;
+        for (i32 index = 0; index < 8; ++index) {
+            GameObject_s *object = Player[index];
+            if (object != NULL && (static_cast<u16>(object->apiobj.object_flags) & 0x1001) == 0x1001) {
+                f32 distance = NuVecXZDistSqr(&object->apiobj.position, &packet->owner->apiobj.position, &difference);
+                if (distance < nearest)
+                    nearest = distance;
+            }
+        }
+        if (nearest != 1.0e9f)
+            nearest = NuFsqrt(nearest);
+    }
+    return nearest;
+}
+
 static f32 Condition_PlayerCategoryIs(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *argument) {
     const isize category = reinterpret_cast<isize>(argument);
     return category != -1 && player != NULL && CharCategory_IsCategory(player, static_cast<i32>(category)) != 0
@@ -7836,6 +7854,7 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A].eval_fn = Condition_IAmA;
             lego_aiconditiondefs[LEGO_AI_CONDITION_PARTY_UNDER_COVER].eval_fn = Condition_PartyUnderCover;
             lego_aiconditiondefs[LEGO_AI_CONDITION_NEAREST_PARTY_RANGE].eval_fn = Condition_NearestPartyRange;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_NEAREST_PARTY_XZ_RANGE].eval_fn = Condition_NearestPartyXZRange;
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A].init_fn = Condition_IAmAInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_OPPONENT_IS_A].eval_fn = Condition_OpponentIsA;
             lego_aiconditiondefs[LEGO_AI_CONDITION_OPPONENT_IS_A].init_fn = Condition_OpponentIsAInit;

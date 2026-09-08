@@ -874,9 +874,6 @@ static __used__ void *Condition_LocatorOnScreenInit(AISYS_s *, char *, AISCRIPT_
     return nullptr;
 }
 
-static __used__ f32 Condition_NearestPartyXZRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
 
 
 
