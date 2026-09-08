@@ -492,15 +492,11 @@ static f32 Condition_IsSetAlive(AISYS_s *, AISCRIPTPROCESS_s *process, AIPACKET_
 }
 
 static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
-    isize set = 0;
-    if (arg != NULL) {
-        if (NuStrICmp(arg, "myset") == 0) set = -1;
-        else {
-            i32 parsed = NuAToI(arg);
-            if (parsed >= 1 && parsed <= 16) set = parsed;
-        }
-    }
-    return reinterpret_cast<void *>(set);
+    if (arg == NULL) return NULL;
+    if (NuStrICmp(arg, "myset") == 0) return reinterpret_cast<void *>(static_cast<intptr_t>(-1));
+    i32 set = NuAToI(arg);
+    if (set < 1 || set > 16) set = 0;
+    return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
 static f32 Condition_IsOnScreen(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
