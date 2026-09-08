@@ -5693,12 +5693,45 @@ static void *Condition_AlwaysTrueInit(AISYS *sys, char *arg, AISCRIPT *script) {
 }
 
 
-static __used__ i32 Action_RetreatFromNearestOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32,
-                                                      f32) {
+static i32 Action_RetreatFromNearestOpponent(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet,
+                                      char **params, i32 param_count, i32 first_time, f32) {
+    if (packet == NULL) {
+        return 1;
+    }
+    if (first_time != 0) {
+        packet->movement_instruction_parameter = 1.0f;
+        for (i32 i = 0; i < param_count; i++) {
+            if (AIActionParseSpeedFn == NULL || AIActionParseSpeedFn(params[i], &packet->goal_speed_mode) == 0) {
+                packet->movement_instruction_parameter = AIParamToFloatEx(packet, processor, params[i]);
+            }
+        }
+    }
+    if (packet->nearest_opponent_object != NULL) {
+        AIPACKET *target = packet->nearest_opponent_object->ai;
+        AIMoveInstruction(packet, &target->last_path_position, target->mover_height, &target->path_info,
+                          AIPACKET_MOVEMENT_RETREAT, packet->movement_instruction_parameter);
+    }
     return 0;
 }
 
-static __used__ i32 Action_RetreatFromOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
+static i32 Action_RetreatFromOpponent(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet,
+                                      char **params, i32 param_count, i32 first_time, f32) {
+    if (packet == NULL) {
+        return 1;
+    }
+    if (first_time != 0) {
+        packet->movement_instruction_parameter = 1.0f;
+        for (i32 i = 0; i < param_count; i++) {
+            if (AIActionParseSpeedFn == NULL || AIActionParseSpeedFn(params[i], &packet->goal_speed_mode) == 0) {
+                packet->movement_instruction_parameter = AIParamToFloatEx(packet, processor, params[i]);
+            }
+        }
+    }
+    if (packet->opponent_object != NULL && packet->opponent_object->ai != NULL) {
+        AIPACKET *target = packet->opponent_object->ai;
+        AIMoveInstruction(packet, &target->last_path_position, target->mover_height, &target->path_info,
+                          AIPACKET_MOVEMENT_RETREAT, packet->movement_instruction_parameter);
+    }
     return 0;
 }
 
