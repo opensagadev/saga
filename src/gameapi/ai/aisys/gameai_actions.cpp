@@ -167,18 +167,6 @@ static i32 Action_MoveForward(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_
 
 
 
-static __used__ i32 Action_PlayerSpeederHack(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params,
-                                             i32 param_count, i32, f32) {
-    GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
-    if (object != NULL) {
-        object->jump_input_flags |= 8;
-        for (i32 index = 0; index < param_count; ++index) {
-            if (NuStrICmp(params[index], "FALSE") == 0)
-                object->jump_input_flags &= static_cast<u8>(~8u);
-        }
-    }
-    return 1;
-}
 
 
 
@@ -658,7 +646,6 @@ static __used__ f32 Condition_EitherPlayerOnObject(AISYS_s *, AISCRIPTPROCESS_s 
 namespace {
     struct GameAIRegistryCallbacks {
         GameAIRegistryCallbacks() {
-            lego_aiactiondefs[LEGO_AI_ACTION_PLAYER_SPEEDER_HACK].eval_fn = Action_PlayerSpeederHack;
             lego_aiactiondefs[LEGO_AI_ACTION_CREATE_SPLINE_CREATURES].eval_fn = Action_CreateSplineCreatures;
             lego_aiactiondefs[LEGO_AI_ACTION_FOLLOW_CHARACTER].eval_fn = Action_FollowCharacter;
             lego_aiactiondefs[LEGO_AI_ACTION_MOVE_FORWARD].eval_fn = Action_MoveForward;

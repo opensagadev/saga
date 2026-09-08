@@ -5266,6 +5266,23 @@ static i32 Action_SetBoltsDontGetDeflectedBack(AISYS_s *, AISCRIPTPROCESS_s *, A
     return 1;
 }
 
+static i32 Action_PlayerSpeederHack(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params,
+                                    i32 param_count, i32, f32) {
+    GameObject *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+    if (object == NULL) {
+        return 1;
+    }
+    object->jump_input_flags |= 8u;
+    if (param_count != 0) {
+        for (i32 index = 0; index < param_count; ++index) {
+            if (NuStrICmp(params[index], "FALSE") == 0) {
+                object->jump_input_flags &= static_cast<u8>(~8u);
+            }
+        }
+    }
+    return 1;
+}
+
 extern "C" {
     // Keep this registry in the exact order used by the shipped script parser.
     AIACTIONDEF lego_aiactiondefs[] = {
@@ -5303,7 +5320,7 @@ extern "C" {
         {"TagCharacter", Action_TagCharacter, 1, 0, 0},
         {"CanHitForceObjects", Action_CanHitForceObjects, 0, 0, 0},
         {"AlwaysBackFlip", Action_AlwaysBackFlip, 0, 0, 0},
-        {"PlayerSpeederHack", NULL, 0, 0, 0},
+        {"PlayerSpeederHack", Action_PlayerSpeederHack, 0, 0, 0},
         {"SetAnimSpeedMul", Action_SetAnimSpeedMul, 0, 0, 0},
         {"SetSide", Action_SetSide, 1, 0, 0},
         {"SetStateArea", Action_SetStateArea, 0, 0, 0},
