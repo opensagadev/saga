@@ -192,15 +192,16 @@ static void *Condition_OnSpeederBikeInit(AISYS_s *system, char *name, AISCRIPT_s
 
 static f32 Condition_OnSpeederBike(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
     GameObject_s *object = static_cast<GameObject_s *>(argument);
-    if (object == NULL && packet->owner != NULL) {
-        object = packet->owner->apiobj.objptr;
+    if (object == NULL) {
+        if (packet->owner != NULL) {
+            object = packet->owner->apiobj.objptr;
+        }
     }
-    f32 result = 0.0f;
-    if (object != NULL && object->field_0xcc0 != NULL && object->character_context == 0x3b &&
-        object->field_0xcc0->id == id_SPEEDERBIKE) {
-        result = 1.0f;
+    if (object != NULL) {
+        return object->field_0xcc0 != NULL && object->character_context == 0x3b &&
+                       object->field_0xcc0->id == id_SPEEDERBIKE ? 1.0f : 0.0f;
     }
-    return result;
+    return 0.0f;
 }
 
 static f32 Condition_Player2Active(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
