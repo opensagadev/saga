@@ -1252,6 +1252,24 @@ static void ResetAIOverrideCharacter(GameObject_s *object) {
     }
 }
 
+static i32 Action_DontSetStoppedFlag(AISYS *system, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
+                                     i32 param_count, i32 first_time, f32) {
+    if (first_time) {
+        GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+        i32 enabled = 1;
+        for (i32 index = 0; index < param_count; ++index) {
+            char *value = NuStrIStr(params[index], "character");
+            if (value != NULL)
+                object = GetNamedGameObject(system, value + 10);
+            else if (NuStrICmp("FALSE", params[0]) == 0)
+                enabled = 0;
+        }
+        if (object != NULL)
+            object->field_0xefc = (object->field_0xefc & ~0x20u) | ((enabled & 1) << 5);
+    }
+    return 1;
+}
+
 static i32 Action_PressActionButton(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **, i32, i32, f32) {
     if (packet != NULL && packet->owner != NULL) {
         GameObject_s *object = packet->owner->apiobj.objptr;
@@ -5016,7 +5034,7 @@ extern "C" {
         {"SetAIOverrideControl", Action_SetAIOverrideControl, 0, 0, 0},
         {"SetLastSafePathPos", NULL, 0, 0, 0},
         {"SetDontMove", Action_SetDontMove, 0, 0, 0},
-        {"DontSetStoppedFlag", NULL, 0, 0, 0},
+        {"DontSetStoppedFlag", Action_DontSetStoppedFlag, 0, 0, 0},
         {"PressSpecialButton", Action_PressSpecialButton, 0, 0, 0},
         {"PressTagButton", Action_PressTagButton, 0, 0, 0},
         {"PressActionButton", Action_PressActionButton, 0, 0, 0},

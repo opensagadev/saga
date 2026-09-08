@@ -301,23 +301,6 @@ static __used__ i32 Action_DontAvoidCharacter(AISYS_s *system, AISCRIPTPROCESS_s
     return 1;
 }
 
-static __used__ i32 Action_DontSetStoppedFlag(AISYS_s *system, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params,
-                                              i32 param_count, i32 first_time, f32) {
-    if (first_time == 0) {
-        return 1;
-    }
-    GameObject_s *object = ActionOwner(packet);
-    for (i32 index = 0; index < param_count; ++index) {
-        char *value = NuStrIStr(params[index], "character=");
-        if (value != NULL) {
-            object = GetNamedGameObject(system, value + 10);
-        }
-    }
-    if (object != NULL) {
-        object->field_0xefc = (object->field_0xefc & ~0x20u) | (ActionToggleEnabled(params, param_count) ? 0x20u : 0u);
-    }
-    return 1;
-}
 
 static __used__ i32 Action_GizmoSetVisibility(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **params,
                                               i32 param_count, i32 first_time, f32) {
@@ -869,7 +852,6 @@ namespace {
                 Action_SetBoltsDontGetDeflectedBack;
             lego_aiactiondefs[LEGO_AI_ACTION_PLAYER_SPEEDER_HACK].eval_fn = Action_PlayerSpeederHack;
             lego_aiactiondefs[LEGO_AI_ACTION_SET_LAST_SAFE_PATH_POS].eval_fn = Action_SetLastSafePathPos;
-            lego_aiactiondefs[LEGO_AI_ACTION_DONT_SET_STOPPED_FLAG].eval_fn = Action_DontSetStoppedFlag;
             lego_aiactiondefs[LEGO_AI_ACTION_DONT_AVOID_CHARACTER].eval_fn = Action_DontAvoidCharacter;
             lego_aiactiondefs[LEGO_AI_ACTION_CREATE_SPLINE_CREATURES].eval_fn = Action_CreateSplineCreatures;
             lego_aiactiondefs[LEGO_AI_ACTION_FOLLOW_CHARACTER].eval_fn = Action_FollowCharacter;
