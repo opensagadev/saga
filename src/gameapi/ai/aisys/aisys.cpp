@@ -5161,6 +5161,30 @@ static i32 Action_SetLastSafePathPos(AISYS_s *system, AISCRIPTPROCESS_s *, AIPAC
     return 1;
 }
 
+static i32 Action_CanTriggerObstacle(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **params,
+                                     i32 param_count, i32 first_time, f32) {
+    if (first_time == 0 || param_count == 0) {
+        return 1;
+    }
+    GIZOBSTACLE *obstacle = NULL;
+    i32 blocked = 0;
+    for (i32 index = 0; index < param_count; ++index) {
+        char *value = NuStrIStr(params[index], "name=");
+        if (value != NULL) {
+            GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, obstacle_gizmotype_id, value + 5);
+            if (gizmo != NULL) {
+                obstacle = static_cast<GIZOBSTACLE *>(gizmo->object);
+            }
+        } else if (NuStrICmp(params[index], "FALSE") == 0) {
+            blocked = 1;
+        }
+    }
+    if (obstacle != NULL) {
+        obstacle->runtime_flags = static_cast<u8>((obstacle->runtime_flags & ~8u) | ((blocked & 1) << 3));
+    }
+    return 1;
+}
+
 extern "C" {
     // Keep this registry in the exact order used by the shipped script parser.
     AIACTIONDEF lego_aiactiondefs[] = {
@@ -5301,7 +5325,7 @@ extern "C" {
         {"SetFormationCommander", Action_SetFormationCommander, 0, 0, 0},
         {"RemoveThrownForceObjects", Action_RemoveThrownForceObjects, 0, 0, 0},
         {"AlwaysTriggerObstacle", NULL, 0, 0, 0},
-        {"CanTriggerObstacle", NULL, 0, 0, 0},
+        {"CanTriggerObstacle", Action_CanTriggerObstacle, 0, 0, 0},
         {"PlayGizObstacle", NULL, 1, 0, 0},
         {"PlayObstacle", NULL, 1, 0, 0},
         {"PlayGizSpecial", Action_PlayGizSpecial, 1, 0, 0},

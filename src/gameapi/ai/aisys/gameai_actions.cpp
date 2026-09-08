@@ -244,26 +244,6 @@ static __used__ f32 Condition_OffScreenTimer(AISYS_s *, AISCRIPTPROCESS_s *, AIP
 
 
 
-static __used__ i32 Action_CanTriggerObstacle(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **params,
-                                              i32 param_count, i32 first_time, f32) {
-    if (first_time == 0 || param_count == 0) {
-        return 1;
-    }
-    GIZOBSTACLE *obstacle = NULL;
-    bool blocked = false;
-    for (i32 index = 0; index < param_count; ++index) {
-        char *value = NuStrIStr(params[index], "name=");
-        if (value != NULL) {
-            obstacle = ActionFindObstacle(value + NuStrLen("name="));
-        } else if (NuStrICmp(params[index], "FALSE") == 0) {
-            blocked = true;
-        }
-    }
-    if (obstacle != NULL) {
-        obstacle->runtime_flags = static_cast<u8>((obstacle->runtime_flags & ~8u) | (blocked ? 8u : 0u));
-    }
-    return 1;
-}
 
 
 
@@ -771,7 +751,6 @@ namespace {
             lego_aiactiondefs[LEGO_AI_ACTION_FOLLOW_CHARACTER].eval_fn = Action_FollowCharacter;
             lego_aiactiondefs[LEGO_AI_ACTION_MOVE_FORWARD].eval_fn = Action_MoveForward;
             lego_aiactiondefs[LEGO_AI_ACTION_ALWAYS_TRIGGER_OBSTACLE].eval_fn = Action_AlwaysTriggerObstacle;
-            lego_aiactiondefs[LEGO_AI_ACTION_CAN_TRIGGER_OBSTACLE].eval_fn = Action_CanTriggerObstacle;
             lego_aiactiondefs[LEGO_AI_ACTION_GIZMO_SET_VISIBILITY].eval_fn = Action_GizmoSetVisibility;
 
 
