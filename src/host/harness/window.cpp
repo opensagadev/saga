@@ -712,7 +712,7 @@ i32 host_run_window(const HostWindowOptions &options) {
     HostFreeCameraConfigure(options.camera_free);
     NuPortalEnabled(options.portals ? 1 : 0);
     host_sdl_init(options.offscreen, options.mute, options.msaa);
-    const char *documents_path = ".work/host-documents/";
+    const char *documents_path = "res/";
     char scripted_documents_path[256];
     if (options.script_input) {
         SDL_CreateDirectory(".work/host-documents-scripted");

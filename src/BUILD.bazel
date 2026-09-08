@@ -58,6 +58,7 @@ _HOST_COMMON_SRCS = [source for source in _ENGINE_SRCS if source not in _HOST_EX
     "host/harness/audio.cpp",
     "host/harness/load.cpp",
     "host/harness/main.cpp",
+    "host/harness/save.cpp",
     "host/harness/window.cpp",
     "host/platform/compressed_texture.cpp",
     "host/platform/android_assets.cpp",

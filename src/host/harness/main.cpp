@@ -1,5 +1,6 @@
 #include "host/harness/audio.hpp"
 #include "host/harness/load.hpp"
+#include "host/harness/save.hpp"
 #include "host/harness/window.hpp"
 #include "host/platform/runtime.hpp"
 
@@ -31,6 +32,7 @@ namespace {
         printf("\nHost utilities:\n");
         printf("  audio                  Verify audio playback through the host device\n");
         printf("  load [list|extract]    Inspect or extract game data\n");
+        printf("  save [list|schema|edit|create] Inspect, explain, edit, or create a save file\n");
         printf("  window [options]       Run the game in an SDL window\n");
         printf("\nRun '%s <utility> --help' for utility-specific options.\n", program);
     }
@@ -266,6 +268,10 @@ namespace {
 
 i32 main(i32 argc, char **argv) {
     HostPlatformPrepareArguments(&argc, &argv);
+
+    if (argc >= 2 && strcmp(argv[1], "save") == 0) {
+        return host_run_save(argc - 2, argv + 2);
+    }
 
     HostHarnessOptions options;
     const HostParseResult result = host_parse_arguments(argc, argv, options);

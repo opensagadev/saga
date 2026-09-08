@@ -40,6 +40,7 @@ is generated from the local reference ELF alongside the Pages report.
 | `check_host_boundary.py` | automatic `py_test` | Shared source does not include host-only code or add unapproved `HOST_BUILD` forks. |
 | `check_duplicate_definitions.py` | automatic `py_test` | Duplicate C/C++ type definitions, plus optional duplicate object symbols. |
 | `check_symbols.py` | post-build `py_binary` | Missing and unexpected text symbols relative to the original symbol surface; calls an NDK-compatible `nm`. |
+| `check_save_utility.py` | manual native integration check | Run with the native executable path; checks original save offsets, enum flags, schema byte coverage, creation/editing, lossless export/import, checksum maintenance, and rejected-input preservation. |
 | `BUILD.bazel` lint tools | support targets | Exposes Bazel-downloaded `clang-format` and `clang-tidy` executables without wrapper scripts. |
 | `linters.bzl` | three manual lint targets in `src/BUILD.bazel` | Defines the Bazel clang-tidy aspect used by the target, native, and WASM builds. |
 | `symbols_ignore.txt`, `symbols_extra_baseline.txt` | support data | Documented symbol exceptions and the exact allowed extra-symbol set. |

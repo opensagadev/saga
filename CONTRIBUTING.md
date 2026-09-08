@@ -144,7 +144,20 @@ On Windows, include its required configuration:
 bazel run --config=native --config=windows-mingw //src:run_native -- window
 ```
 
-Useful Linux diagnostic modes include:
+Save files can be inspected and edited without an OBB or window:
+
+```sh
+bazel run --config=native //src:run_native -- save list
+bazel run --config=native //src:run_native -- save schema --filter area_save
+bazel run --config=native //src:run_native -- save edit '/path/to/save' coins=50000
+bazel run --config=native //src:run_native -- save create '/path/to/new-save' --from '/path/to/template' coins=1000
+```
+
+Without a path, saves default to slot 0 under `res/SavedGames`. See
+[host utilities](doc/host-utilities.md#save-file-inspection-and-editing) for the
+property schema, parameter files, raw byte access, and fresh-creation defaults.
+
+Window diagnostic modes:
 
 ```sh
 # Rotate the camera automatically.
