@@ -1207,6 +1207,10 @@ struct GIZMOPICKUP_s {
             u8 state_visible : 1;
             u8 other_state_flags : 5;
         };
+        struct {
+            u8 activation_state_padding : 7;
+            u8 state_activated : 1;
+        };
     }; // 0x17
     union {
         u8 activation_group;

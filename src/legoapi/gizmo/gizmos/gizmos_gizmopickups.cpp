@@ -96,8 +96,6 @@ void GizmoPickups_SetOnOff() {
     }
 }
 
-void GizmoPickup_FindByName(WORLDINFO_s *, char *) {
-}
 
 extern ADDGAMEMSG AddGameMsg_Default;
 extern i32 DoubleScore;
@@ -198,8 +196,6 @@ void GizmoPickup_FindNearest(WORLDINFO_s *, nuvec_s *, float *) {
 void GizmoPickups_TotalScore(void *) {
 }
 
-void GizmoPickup_BeenTurnedOn(GIZMOPICKUP_s *) {
-}
 
 void GizmoPickup_NumberOfType(WORLDINFO_s *, i32, char) {
 }

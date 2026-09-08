@@ -1,4 +1,5 @@
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
 #include "decomp.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "gameapi/edtools/edfile.h"
@@ -648,6 +649,14 @@ static void *Condition_PlayerInSockInit(AISYS_s *, char *name, AISCRIPT_s *) {
 
 extern "C" f32 NuAnimEndFrameOld(void *animation);
 
+static f32 Condition_PickupBeenTurnedOn(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    return argument != NULL ? (f32)GizmoPickup_BeenTurnedOn(static_cast<GIZMOPICKUP_s *>(argument)) : 0.0f;
+}
+
+static void *Condition_PickupBeenTurnedOnInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    return name != NULL ? GizmoPickup_FindByName(WORLD, name) : NULL;
+}
+
 static f32 Condition_AnimationFinished(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     nuinstanim_s *animation = static_cast<nuinstanim_s *>(argument);
     if (animation != NULL && !animation->playing) {
@@ -1287,7 +1296,7 @@ extern "C" {
         {"GizmoVisibility", NULL, NULL},
         {"AngleAboutMyLocatorToPlayer", NULL, NULL},
         {"AnimSpeedMul", NULL, NULL},
-        {"PickupBeenTurnedOn", NULL, NULL},
+        {"PickupBeenTurnedOn", Condition_PickupBeenTurnedOn, Condition_PickupBeenTurnedOnInit},
         {"FlowBoxComplete", NULL, NULL},
         {"CanHearRadio", NULL, NULL},
         {"BeingTowed", NULL, NULL},

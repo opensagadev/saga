@@ -943,9 +943,6 @@ static __used__ void *Condition_OffScreenTimerInit(AISYS_s *system, char *arg, A
 
 
 
-static __used__ f32 Condition_PickupBeenTurnedOn(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
 
 
 static __used__ i32 Action_CanMoveWhenDeactivated(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32,
@@ -1065,9 +1062,6 @@ static __used__ f32 Condition_EitherPlayerUsingPanel(AISYS_s *, AISCRIPTPROCESS_
 
 
 
-static __used__ void *Condition_PickupBeenTurnedOnInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
-}
 
 
 
