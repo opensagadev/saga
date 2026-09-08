@@ -370,9 +370,6 @@ static f32 Condition_CharacterLoaded(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s 
 
 
 
-static __used__ void *Condition_TurretAliveInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
-}
 
 
 
