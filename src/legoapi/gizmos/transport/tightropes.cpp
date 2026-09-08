@@ -182,24 +182,32 @@ static i32 TightRope_MoveUpdate(GameObject_s *object, i32 jumping) {
     u16 rotation = rope->rotation;
     f32 input = PushingTowardsAngle(GamePad_InputAngle(object, object->pad_gamepad), rotation);
     f32 direction;
+    f32 speed;
     if (input > NuTrigTable[0x3000]) {
+        if (jumping != 0) {
+            speed = 0.6f;
+        } else {
+            rope = static_cast<TIGHTROPE *>(object->field_0x788);
+            object->context_animation = 0x89;
+            object->apiobj.movement_facing_angle = rope->rotation;
+            speed = AnimSpeed(object->apiobj.character_model, 0x89);
+        }
         direction = 1.0f;
     } else if (-NuTrigTable[0x3000] > input) {
+        if (jumping != 0) {
+            speed = 0.6f;
+        } else {
+            rope = static_cast<TIGHTROPE *>(object->field_0x788);
+            object->context_animation = 0x89;
+            object->apiobj.movement_facing_angle = rope->rotation + 0x8000;
+            speed = AnimSpeed(object->apiobj.character_model, 0x89);
+        }
         direction = -1.0f;
     } else {
         if (jumping == 0) {
             object->context_animation = 0x88;
         }
         return 1;
-    }
-    f32 speed;
-    if (jumping != 0) {
-        speed = 0.6f;
-    } else {
-        rope = static_cast<TIGHTROPE *>(object->field_0x788);
-        object->context_animation = 0x89;
-        object->apiobj.movement_facing_angle = rope->rotation + (direction < 0.0f ? 0x8000 : 0);
-        speed = AnimSpeed(object->apiobj.character_model, 0x89);
     }
     NUVEC movement;
     rope = static_cast<TIGHTROPE *>(object->field_0x788);
