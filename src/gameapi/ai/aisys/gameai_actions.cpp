@@ -1048,9 +1048,6 @@ static __used__ f32 Condition_OnSameObjectAsPlayer(AISYS_s *, AISCRIPTPROCESS_s 
 
 
 
-static __used__ f32 Condition_PlayerDeflectingPart(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
 
 
 static __used__ i32 Action_MoveAwayFromLastAttacker(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32,

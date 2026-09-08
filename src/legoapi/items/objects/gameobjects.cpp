@@ -568,6 +568,10 @@ static f32 Condition_SockXDistanceToPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPAC
     return result;
 }
 
+static f32 Condition_PlayerDeflectingPart(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return player != NULL && player->force_part != NULL ? 1.0f : 0.0f;
+}
+
 static f32 Condition_CollidingWithOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
     if (packet != NULL && packet->opponent_object != NULL && packet->owner != NULL &&
         (packet->owner->apiobj.colliding_objects_mask & packet->opponent_object->collision_identity_mask) != 0) {
@@ -1159,7 +1163,7 @@ extern "C" {
         {"ForceBeingUsed", Condition_ForceBeingUsed, Condition_UsingForceInit},
         {"ForcePushing", Condition_ForcePushing, Condition_ForcePushingInit},
         {"TurretAlive", NULL, NULL},
-        {"PlayerDeflectingPart", NULL, NULL},
+        {"PlayerDeflectingPart", Condition_PlayerDeflectingPart, NULL},
         {"ForceComplete", Condition_ForceComplete, Condition_ForceCompleteInit},
         {"ForceFinished", Condition_ForceFinished, Condition_ForceCompleteInit},
         {"ForceStackComplete", Condition_ForceStackComplete, Condition_ForceCompleteInit},
