@@ -1102,6 +1102,46 @@ extern i16 id_BATTLEDROID, id_BATTLEDROIDSECURITY, id_BATTLEDROIDGEONOSIAN;
 extern i16 id_BATTLEDROIDCOMMANDER, id_CLONEEP3, id_CLONEEP3SAND;
 }
 
+static i32 Action_SetDoomedEscapeLocator(AISYS *system, AISCRIPTPROCESS *processor, AIPACKET *packet,
+                                       char **params, i32 param_count, i32 first_time, f32) {
+    if (first_time) {
+        GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+        if (param_count != 0) {
+            char *name = NULL;
+            i32 personal = 0, indexed = 0, random_count = 0, take_damage = 0;
+            for (i32 index = 0; index < param_count; ++index) {
+                char *value = NuStrIStr(params[index], "character=");
+                if (value != NULL) object = GetNamedGameObject(system, value + 10);
+                else if ((value = NuStrIStr(params[index], "name")) != NULL) name = value + 5;
+                else if (NuStrIStr(params[index], "personal") != NULL) personal = 1;
+                else if (NuStrIStr(params[index], "indexed") != NULL) indexed = 1;
+                else if (NuStrIStr(params[index], "take_damage") != NULL) take_damage = 1;
+                else if ((value = NuStrIStr(params[index], "random")) != NULL)
+                    random_count = static_cast<i32>(AIParamToFloat(processor, value + 9));
+            }
+            if (object != NULL) {
+                object->field_0xefd &= ~8u;
+                object->doomed_escape_locator = NULL;
+                if (name != NULL) {
+                    char locator_name[64];
+                    if (indexed && static_cast<i8>(object->apiobj.field_0x27c) != -1)
+                        sprintf(locator_name, "%s_%d", name, static_cast<i8>(object->apiobj.field_0x27c));
+                    else if (personal && object->apiobj.character_data != NULL)
+                        sprintf(locator_name, "%s_%s", name, object->apiobj.character_data->file);
+                    else if (random_count != 0)
+                        sprintf(locator_name, "%s_%d", name, NuRand(NULL) % random_count);
+                    else
+                        sprintf(locator_name, name);
+                    object->doomed_escape_locator = AIPathFindLocator(system, locator_name);
+                    if (object->doomed_escape_locator != NULL)
+                        object->field_0xefd = (object->field_0xefd & ~8u) | (take_damage << 3);
+                }
+            }
+        }
+    }
+    return 1;
+}
+
 static i32 Action_SetFormationCommander(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **,
                                        i32, i32, f32) {
     if (packet == NULL || packet->owner == NULL) return 1;
@@ -4708,7 +4748,7 @@ extern "C" {
         {"SnapToOrigin", Action_SnapToOrigin, 1, 0, 0},
         {"BigJumpToLocator", Action_BigJumpToLocator, 0, 0, 0},
         {"BigJump", Action_BigJump, 0, 0, 0},
-        {"SetDoomedEscapeLocator", NULL, 0, 0, 0},
+        {"SetDoomedEscapeLocator", Action_SetDoomedEscapeLocator, 0, 0, 0},
         {"SnapToPosition", Action_SnapToPosition, 1, 0, 0},
         {"SnapToSockPosition", NULL, 1, 0, 0},
         {"SetAnimation", Action_SetAnimation, 0, 0, 0},

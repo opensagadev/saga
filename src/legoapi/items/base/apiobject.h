@@ -988,7 +988,7 @@ typedef struct GameObject_s {
     u32 field_0xf14;
     u8 pad_f18[4];
     f32 field_0xf1c; // 0x0f1c
-    u32 field_0xf20;
+    union { u32 field_0xf20; AILOCATOR_s *doomed_escape_locator; };
     NUVEC target_velocity;  // 0x0f24
     NUVEC surface_normal;   // 0x0f30
     NUVEC facing_direction; // 0x0f3c

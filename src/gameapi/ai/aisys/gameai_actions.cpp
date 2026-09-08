@@ -889,10 +889,6 @@ static __used__ i32 Action_RegisterTakeOverObject(AISYS_s *, AISCRIPTPROCESS_s *
     return 0;
 }
 
-static __used__ i32 Action_SetDoomedEscapeLocator(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32,
-                                                  f32) {
-    return 0;
-}
 
 
 
@@ -1015,7 +1011,6 @@ static __used__ f32 Condition_InSameTriggerAreaAsNearestPlayer(AISYS_s *, AISCRI
 namespace {
     struct GameAIRegistryCallbacks {
         GameAIRegistryCallbacks() {
-            lego_aiactiondefs[LEGO_AI_ACTION_SET_DOOMED_ESCAPE_LOCATOR].eval_fn = Action_SetDoomedEscapeLocator;
             lego_aiactiondefs[LEGO_AI_ACTION_SNAP_TO_SOCK_POSITION].eval_fn = Action_SnapToSockPosition;
             lego_aiactiondefs[LEGO_AI_ACTION_CAN_SHOOT_OFF_SCREEN].eval_fn = Action_CanShootOffScreen;
             lego_aiactiondefs[LEGO_AI_ACTION_SET_BOLTS_DONT_GET_DEFLECTED_BACK].eval_fn =

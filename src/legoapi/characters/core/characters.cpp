@@ -440,7 +440,7 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 new_id, i32 old_id, i32) {
     object->takeover_source = NULL;
     object->suit = Suit_GetDefault(new_id);
     const u32 saved_f14 = object->field_0xf14;
-    const u32 saved_f20 = object->field_0xf20;
+    AILOCATOR_s *saved_escape_locator = object->doomed_escape_locator;
     const u8 current_route = object->ai.current_route;
     const u8 next_route = object->ai.next_route;
     const u8 saved_efe = object->field_0xefe & 0x20;
@@ -448,7 +448,7 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 new_id, i32 old_id, i32) {
     const u32 frame_state = object->ai.frame_state;
     InitPlayerAI(object);
     object->field_0xefe = (object->field_0xefe & ~0x20u) | saved_efe;
-    object->field_0xf20 = saved_f20;
+    object->doomed_escape_locator = saved_escape_locator;
     object->ai.next_route = next_route;
     object->ai.path_info = path_info;
     object->field_0xf14 = saved_f14;
