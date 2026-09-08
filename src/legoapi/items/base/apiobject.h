@@ -409,7 +409,14 @@ typedef struct APIOBJECT_s {
             u16 other_object_flags : 15;
         };
     };
-    u8 field_0x1fa; // 0x1fa
+    union {
+        u8 field_0x1fa; // 0x1fa
+        struct {
+            u8 object_flag_1fa_0 : 1;
+            u8 ignore_antinodes : 1;
+            u8 object_flags_1fa_2_7 : 6;
+        };
+    };
     u8 field_0x1fb;
     union {
         struct {
@@ -1002,6 +1009,7 @@ DECOMP_ASSERT(offsetof(APIOBJECT, previous_blend_target_root_info) == 0x264,
               "APIOBJECT previous blend-target root-info offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, animation_root_delta) == 0x268, "APIOBJECT animation root delta offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, movement_direction) == 0x1fc, "APIOBJECT movement direction offset");
+DECOMP_ASSERT(offsetof(APIOBJECT, field_0x1fa) == 0x1fa, "APIOBJECT antinode flags offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, collision_position) == 0x80, "APIOBJECT collision position offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, pitch_angle) == 0x274, "APIOBJECT pitch angle offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, supporting_platform_id) == 0x27a, "APIOBJECT supporting platform id offset");

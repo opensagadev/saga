@@ -5806,8 +5806,27 @@ static __used__ i32 Action_PathConnectionMaxLength(AISYS_s *, AISCRIPTPROCESS_s 
     return 0;
 }
 
-static __used__ i32 Action_SetIgnoreAntinodes(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
-    return 0;
+static i32 Action_SetIgnoreAntinodes(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params,
+                                    i32 param_count, i32 first_time, f32) {
+    if (first_time != 0) {
+        APIOBJECT *object = packet != NULL ? reinterpret_cast<APIOBJECT *>(packet->owner) : NULL;
+        i32 ignore = 1;
+        for (i32 i = 0; i < param_count; i++) {
+            char *value = NuStrIStr(params[i], "character");
+            if (value != NULL) {
+                if (GetNamedAPIObjectFn != NULL) {
+                    object = GetNamedAPIObjectFn(sys, value + 10);
+                }
+            } else if (NuStrICmp("FALSE", params[0]) == 0) {
+                // The original tests the first parameter, even on later iterations.
+                ignore = 0;
+            }
+        }
+        if (object != NULL) {
+            object->ignore_antinodes = ignore;
+        }
+    }
+    return 1;
 }
 
 static __used__ i32 Action_NotifyStateChange(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *, char **params,
