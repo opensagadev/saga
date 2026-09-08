@@ -1178,9 +1178,6 @@ i32 DeactivatePlayer(GameObject_s *object, f32 duration, GameObject_s *source) {
     return 1;
 }
 
-void ResetPlayerMoves(GameObject_s *) {
-}
-
 void SetToLastSafePos(GameObject_s *) {
 }
 

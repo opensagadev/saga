@@ -231,7 +231,37 @@ void Shards_HandleLostObj(WORLDINFO_s *, GameObject_s *);
 void LoseHelmet(GameObject_s *, i32, i32);
 void DestroySnakeBody(GameObject_s *);
 void InitPlayerAI(GameObject_s *);
-void ResetPlayerMoves(GameObject_s *);
+extern "C" void SetAnimTimeRandom(CHARACTERMODEL_s *, ANIMPACKET_s *);
+void SetFlicker(GameObject_s *, f32);
+void ResetCoinPacket(COINPACKET_s *);
+
+void ResetPlayerMoves(GameObject_s *object) {
+    ResetPlayerPacket(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet),
+                      reinterpret_cast<CHARACTERDATA_s *>(object->apiobj.character_data));
+    object->fall_acceleration_timer = 0.0f;
+    object->tag_state = 0.0f;
+    object->apiobj.field_0x1fc = v000.x;
+    object->apiobj.field_0x200 = v000.y;
+    object->apiobj.field_0x204 = v000.z;
+    object->field_0xefc |= 0x80;
+    object->input_toggle_hold_time = TOGGLEHOLDTIME;
+    ResetCharacterIdle(object, 2, GetDefaultIdle(object));
+    if (object->apiobj.character_model->model_data_b[1] != NULL) {
+        ResetAnimPacket(&object->apiobj.anim_packet, 1);
+        SetAnimTimeRandom(object->apiobj.character_model, &object->apiobj.anim_packet);
+    } else {
+        ResetAnimPacket(&object->apiobj.anim_packet, -1);
+    }
+    object->apiobj.field_0x27e = 0;
+    object->apiobj.field_0x27d = 0;
+    SetGameObjectCharacterData(object);
+    object->spawn_protection_timer = 0.0f;
+    SetFlicker(object, 0.0f);
+    ResetCoinPacket(object->coinpacket);
+    object->apiobj.respawn_timer = 0.0f;
+    object->apiobj.object_flags &= ~0x2000u;
+    DrawOffsetCode(object, 1);
+}
 void Player_ResetContexts(PLAYERPACKET_s *);
 void InitSurfaceInfo(GameObject_s *);
 i32 SetObjOnSurface(GameObject_s *, i32);
