@@ -6405,6 +6405,15 @@ static f32 Condition_TimeOffPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKE
     return packet != NULL ? packet->time_off_path : 0.0f;
 }
 
+static f32 Condition_TakeOverRange(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *) {
+    if (packet != NULL && packet->owner != NULL) {
+        GameObject_s *object = packet->owner->apiobj.objptr;
+        if (object != NULL && object->takeover_target != NULL)
+            return NuVecDist(&object->takeover_target->apiobj.position, &packet->owner->apiobj.position, NULL);
+    }
+    return 1.0e9f;
+}
+
 static f32 Condition_TurretAlive(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *argument) {
     GIZTURRET *turret = static_cast<GIZTURRET *>(argument);
     return turret != NULL && (turret->flags & 0x30) == 0 ? 1.0f : 0.0f;
@@ -8132,6 +8141,7 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_PARTY_CHARACTER].eval_fn = Condition_IAmAPartyCharacter;
             lego_aiconditiondefs[LEGO_AI_CONDITION_LOCATOR_ON_SCREEN].eval_fn = Condition_LocatorOnScreen;
             lego_aiconditiondefs[LEGO_AI_CONDITION_TURRET_ALIVE].eval_fn = Condition_TurretAlive;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_TAKE_OVER_RANGE].eval_fn = Condition_TakeOverRange;
             lego_aiconditiondefs[LEGO_AI_CONDITION_ANIM_SPEED_MUL].eval_fn = Condition_AnimSpeedMul;
             lego_aiconditiondefs[LEGO_AI_CONDITION_TURRET_ALIVE].init_fn = Condition_TurretAliveInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_OUTPUT_0].eval_fn = Condition_GizmoOutput0;
