@@ -368,7 +368,6 @@ struct ADDGAMEMSG {
     u8 field_0x4f;
 };
 DECOMP_ASSERT(sizeof(ADDGAMEMSG) == 0x50, "ADDGAMEMSG size");
-struct ADDPART_s {};
 struct AIANTINODE_s;
 struct AIAREA_s;
 struct AIGROUP_s;

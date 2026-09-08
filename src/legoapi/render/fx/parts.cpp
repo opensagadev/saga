@@ -1,4 +1,5 @@
 #include "legoapi/legoapi_types.h"
+#include "legoapi/render/fx/parts.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/core/rtl.h"
 #include "legoapi/core/input/qrand.h"
@@ -13,6 +14,12 @@
 #include <string.h>
 
 extern "C" {
+    ADDPART_s Default_ADDPART = {
+        NULL, 0, NULL, {0, 0}, 0.1f, 0.1f, -5.0f, 0.75f, NULL, -1, 0,
+        {0, 0, 0}, NULL, {0, 0, 0}, NULL, 0, NULL, -1, 0, -1, -1,
+        60.0f, 60.0f, -1, -1, -1, 1.0f, 0, -1, 2000000.0f, 1.0f / 60.0f,
+        -1, NULL, {1.0f, 1.0f, 1.0f}, {0, 0, 0, 0, 0, 0, 0}, 1.0f, 0
+    };
     void DebFreeInstantly(i32 *handle);
     // Shared suspend flag consulted by all timed debris emitters.
     i32 debris_suspended = 0;
@@ -379,7 +386,7 @@ extern "C" {
     void AddPARTEffect(void) {
     }
 
-    void AddPart(void) {
+    void AddPart(ADDPART_s *) {
     }
 
     void AddPickupTerr(void) {

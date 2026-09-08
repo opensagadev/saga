@@ -2,6 +2,8 @@
 #include "legoapi/actions/character/snake.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nuspecial.h"
+#include "legoapi/render/fx/parts.h"
+#include "globals.h"
 #include <string.h>
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
@@ -26,10 +28,58 @@ void InitSnakes(WORLDINFO_s *world) {
     NuSpecialFind(world->current_gscn, &snake_hspecials[2], (char *)"Snake_bit_3", 1);
 }
 
-void SnakeBeenHit(GameObject_s *) {
+extern "C" void NuMtxSetRotationXYVU0(NUMTX *, NUANGVEC *);
+
+static void AddSnakeSegmentDebris(GameObject_s *object, i32 segment_index) {
+    NUMTX matrix;
+    NUANGVEC angles;
+    angles.y = NuAngAdd(object->snake_body->segments[segment_index].yaw, 0x8000);
+    angles.x = object->snake_body->segments[segment_index].pitch;
+    NuMtxSetRotationXYVU0(&matrix, &angles);
+    if (object->snake_body->scale != 1.0f) {
+        NUVEC scale = {object->snake_body->scale, object->snake_body->scale, object->snake_body->scale};
+        NuMtxPreScale(&matrix, &scale);
+    }
+    matrix.m30 += object->snake_body->segments[segment_index].position.x;
+    matrix.m31 += object->snake_body->segments[segment_index].position.y + object->snake_body->scale * 0.02f;
+    matrix.m32 += object->snake_body->segments[segment_index].position.z;
+    i32 special_index = segment_index == object->snake_body->segment_count - 1 ? 2 : segment_index % 2;
+    nuhspecial_s *special = &snake_hspecials[special_index];
+    if (NuSpecialExistsFn(special)) {
+        NUVEC momentum;
+        SetKillPartMom(&momentum);
+        momentum.y += 1.0f;
+        ADDPART_s part = Default_ADDPART;
+        part.matrix = &matrix;
+        part.momentum = &momentum;
+        part.field_14 = 0.1f;
+        part.field_18 = 0.1f;
+        part.gravity = -5.0f;
+        part.special = special;
+        part.flags = 0x90;
+        part.stop = PartStop_Flickerer;
+        part.draw = PartDraw_Flickerer;
+        part.impact = PartImpact_Brick;
+        part.frame_step = FRAMETIME;
+        part.light_data = &object->light_data;
+        AddPart(&part);
+    }
 }
 
-void BlowUpSnakeBody(GameObject_s *) {
+void SnakeBeenHit(GameObject_s *object) {
+    if (object != NULL && object->snake_body != NULL && object->snake_body->segment_count > 2) {
+        AddSnakeSegmentDebris(object, object->snake_body->segment_count - 1);
+        AddSnakeSegmentDebris(object, object->snake_body->segment_count - 2);
+        object->snake_body->segment_count -= 2;
+    }
+}
+
+void BlowUpSnakeBody(GameObject_s *object) {
+    if (object != NULL && object->snake_body != NULL) {
+        for (i32 index = 0; index < object->snake_body->segment_count; ++index)
+            AddSnakeSegmentDebris(object, index);
+        DestroySnakeBody(object);
+    }
 }
 
 SNAKEBODY_s *CreateSnakeBody(GameObject_s *object, i32 segment_count) {
