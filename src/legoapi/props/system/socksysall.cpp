@@ -618,7 +618,12 @@ extern "C" {
         return NULL;
     }
 
-    void MidDistanceFromSockStart(void) {
+    f32 MidDistanceFromSockStart(SOCKSYS *system, SOCKPOSITION *position) {
+        if (system != NULL && position->location.sock != -1) {
+            SOCKSEGMENT *segment = &system->sock[position->location.sock].segments[position->location.segment];
+            return segment->distance_from_start + segment->length * position->ratio;
+        }
+        return 0.0f;
     }
 
     void MoveSockPosition(void) {

@@ -568,6 +568,31 @@ static f32 Condition_SockXDistanceToPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPAC
     return result;
 }
 
+static f32 Condition_SockDistanceToPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    f32 result = 0.0f;
+    if (packet != NULL && packet->owner != NULL && player != NULL) {
+        GameObject *object = packet->owner->apiobj.objptr;
+        if (player->field_0x661 != 0xff && player->field_0x661 == object->field_0x661) {
+            f32 distance = MidDistanceFromSockStart(WORLD->sock_sys, &player->sock_position);
+            result = distance - MidDistanceFromSockStart(WORLD->sock_sys, &object->sock_position);
+        }
+    }
+    return result;
+}
+
+static f32 Condition_SockDistanceToOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    f32 result = 0.0f;
+    if (packet != NULL && packet->owner != NULL && packet->opponent_object != NULL) {
+        GameObject *object = packet->owner->apiobj.objptr;
+        GameObject *opponent = packet->opponent_object->objptr;
+        if (opponent->field_0x661 != 0xff && opponent->field_0x661 == object->field_0x661) {
+            f32 distance = MidDistanceFromSockStart(WORLD->sock_sys, &opponent->sock_position);
+            result = distance - MidDistanceFromSockStart(WORLD->sock_sys, &object->sock_position);
+        }
+    }
+    return result;
+}
+
 static f32 Condition_FurthestPlayerDistanceAlongSock(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     f32 distance = 0.0f;
     if (player != NULL) {
@@ -1147,8 +1172,8 @@ extern "C" {
         {"PlayerInSock", Condition_PlayerInSock, Condition_PlayerInSockInit},
         {"CutScenePlaying", Condition_CutScenePlaying, Condition_CutScenePlayingInit},
         {"RigidAnimFrame", Condition_RigidAnimFrame, Condition_RigidAnimFrameInit},
-        {"SockDistanceToPlayer", NULL, NULL},
-        {"SockDistanceToOpponent", NULL, NULL},
+        {"SockDistanceToPlayer", Condition_SockDistanceToPlayer, NULL},
+        {"SockDistanceToOpponent", Condition_SockDistanceToOpponent, NULL},
         {"SockXDistanceToPlayer", Condition_SockXDistanceToPlayer, NULL},
         {"PlayerDistanceAlongSock", Condition_PlayerDistanceAlongSock, NULL},
         {"FurthestPlayerDistanceAlongSock", Condition_FurthestPlayerDistanceAlongSock, NULL},
