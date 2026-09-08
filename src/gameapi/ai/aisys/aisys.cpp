@@ -1204,15 +1204,15 @@ __used__ static i32 Action_FacePlayer(AISYS *sys, AISCRIPTPROCESS *processor, AI
     if (packet == NULL) {
         return 1;
     }
-    if (first_time != 0 && param_count > 0) {
+    if (first_time != 0) {
         f32 min_time = 0.0f;
         f32 max_time = 0.0f;
         for (i32 index = 0; index < param_count; ++index) {
-            char *value = ActionParamValue(params[index], "mintime");
+            char *value = NuStrIStr(params[index], "mintime=");
             if (value != NULL) {
-                min_time = AIParamToFloatEx(packet, processor, value);
-            } else if ((value = ActionParamValue(params[index], "maxtime")) != NULL) {
-                max_time = AIParamToFloatEx(packet, processor, value);
+                min_time = AIParamToFloatEx(packet, processor, value + 8);
+            } else if ((value = NuStrIStr(params[index], "maxtime=")) != NULL) {
+                max_time = AIParamToFloatEx(packet, processor, value + 8);
             } else {
                 processor->action_timer = AIParamToFloatEx(packet, processor, params[index]);
             }
@@ -1221,12 +1221,14 @@ __used__ static i32 Action_FacePlayer(AISYS *sys, AISCRIPTPROCESS *processor, AI
             processor->action_timer = NuRandFloat() * (max_time - min_time) + min_time;
         }
     }
-    if (sys != NULL && sys->player_1 != NULL) {
+    f32 remaining_time = processor->action_timer;
+    if (sys->player_1 != NULL) {
         packet->movement_look_target = &sys->player_1->position;
     }
-    if (processor->action_timer > 0.0f) {
-        processor->action_timer -= elapsed;
-        if (processor->action_timer <= 0.0f) {
+    if (remaining_time > 0.0f) {
+        remaining_time -= elapsed;
+        processor->action_timer = remaining_time;
+        if (remaining_time <= 0.0f) {
             processor->action_timer = 0.0f;
             return 1;
         }
