@@ -999,7 +999,13 @@ typedef struct GameObject_s {
     NUVEC target_velocity;  // 0x0f24
     NUVEC surface_normal;   // 0x0f30
     NUVEC facing_direction; // 0x0f3c
-    u8 pad_f48[0xfe4 - 0xf48];
+    union {
+        u8 pad_f48[0xfe4 - 0xf48];
+        struct {
+            u8 player_ai_reset_data[0x68]; // 0xf48, cleared by InitPlayerAI
+            u8 reserved_fb0[0xfe4 - 0xfb0];
+        };
+    };
     NUVEC *head_target;
     NUVEC head_target_position;
     f32 head_target_timer;
@@ -1113,6 +1119,9 @@ DECOMP_ASSERT(offsetof(GameObject_s, movement_spline) == 0xe70, "GameObject move
 DECOMP_ASSERT(offsetof(GameObject_s, movement_spline_position) == 0xe70, "GameObject spline position offset");
 DECOMP_ASSERT(offsetof(GameObject_s, takeover_target) == 0xeb0, "GameObject reciprocal takeover target offset");
 DECOMP_ASSERT(sizeof(GameObject_s) == 0x10e4, "GameObject size");
+DECOMP_ASSERT(offsetof(GameObject_s, player_ai_reset_data) == 0xf48, "Player AI reset data offset");
+DECOMP_ASSERT(sizeof(((GameObject_s *)0)->player_ai_reset_data) == 0x68, "Player AI reset data size");
+DECOMP_ASSERT(offsetof(GameObject_s, reserved_fb0) == 0xfb0, "Player AI reset data end");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0xe24) == 0xe24, "GameObject victim-state flags offset");
 DECOMP_ASSERT(offsetof(GameObject_s, animation_speed_multiplier) == 0x1040, "GameObject animation speed multiplier offset");
 DECOMP_ASSERT(offsetof(GameObject_s, ai_seen_mask) == 0xebc, "GameObject AI seen mask offset");
