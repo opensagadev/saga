@@ -1252,6 +1252,34 @@ static void ResetAIOverrideCharacter(GameObject_s *object) {
     }
 }
 
+static i32 Action_DontAvoidCharacter(AISYS *system, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
+                                    i32 param_count, i32 first_time, f32) {
+    if (first_time) {
+        GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+        if (param_count > 0) {
+            GameObject_s *dont_avoid = NULL;
+            i32 enabled = 1;
+            for (i32 index = 0; index < param_count; ++index) {
+                char *value = NuStrIStr(params[index], "character=");
+                if (value != NULL) {
+                    object = GetNamedGameObject(system, value + 10);
+                    continue;
+                }
+                value = NuStrIStr(params[index], "dont_avoid=");
+                if (value != NULL) {
+                    dont_avoid = GetNamedGameObject(system, value + 11);
+                    continue;
+                }
+                if (NuStrICmp(params[index], "FALSE") == 0)
+                    enabled = 0;
+            }
+            if (dont_avoid != NULL && object != NULL)
+                object->ai.dont_avoid_character = enabled ? dont_avoid : NULL;
+        }
+    }
+    return 1;
+}
+
 static i32 Action_DontSetStoppedFlag(AISYS *system, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
                                      i32 param_count, i32 first_time, f32) {
     if (first_time) {
@@ -5041,7 +5069,7 @@ extern "C" {
         {"UseWeapon", Action_UseWeapon, 0, 0, 0},
         {"SetInvulnerable", Action_SetInvulnerable, 0, 0, 0},
         {"DontPush", Action_DontPush, 0, 0, 0},
-        {"DontAvoidCharacter", NULL, 0, 0, 0},
+        {"DontAvoidCharacter", Action_DontAvoidCharacter, 0, 0, 0},
         {"PressJumpButton", Action_PressJumpButton, 0, 0, 0},
         {"AddToSet", Action_AddToSet, 0, 0, 0},
         {"SetSpline", Action_SetSpline, 0, 0, 0},
