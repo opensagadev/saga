@@ -279,14 +279,6 @@ static __used__ i32 Action_CanTriggerObstacle(AISYS_s *, AISCRIPTPROCESS_s *, AI
 }
 
 
-static __used__ i32 Action_DeflectPlayersPart(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params,
-                                              i32 param_count, i32 first_time, f32) {
-    GameObject_s *object = ActionOwner(packet);
-    if (first_time != 0 && object != NULL) {
-        object->field_0xefd = (object->field_0xefd & ~1u) | (ActionToggleEnabled(params, param_count) ? 1u : 0u);
-    }
-    return 1;
-}
 
 
 static __used__ i32 Action_DontAvoidCharacter(AISYS_s *system, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params,
@@ -930,7 +922,6 @@ namespace {
             lego_aiactiondefs[LEGO_AI_ACTION_SET_BOLTS_DONT_GET_DEFLECTED_BACK].eval_fn =
                 Action_SetBoltsDontGetDeflectedBack;
             lego_aiactiondefs[LEGO_AI_ACTION_PLAYER_SPEEDER_HACK].eval_fn = Action_PlayerSpeederHack;
-            lego_aiactiondefs[LEGO_AI_ACTION_DEFLECT_PLAYERS_PART].eval_fn = Action_DeflectPlayersPart;
             lego_aiactiondefs[LEGO_AI_ACTION_SET_AI_OVERRIDE_CONTROL].eval_fn = Action_SetAIOverrideControl;
             lego_aiactiondefs[LEGO_AI_ACTION_SET_LAST_SAFE_PATH_POS].eval_fn = Action_SetLastSafePathPos;
             lego_aiactiondefs[LEGO_AI_ACTION_DONT_SET_STOPPED_FLAG].eval_fn = Action_DontSetStoppedFlag;

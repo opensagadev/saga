@@ -1222,6 +1222,25 @@ static i32 Action_CharClipToBlobShadows(AISYS *, AISCRIPTPROCESS *, AIPACKET *pa
     return 1;
 }
 
+static i32 Action_DeflectPlayersPart(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
+                                     i32 param_count, i32 first_time, f32) {
+    if (packet == NULL || packet->owner == NULL)
+        return 1;
+    GameObject_s *object = packet->owner->apiobj.objptr;
+    if (object == NULL)
+        return 1;
+    if (first_time) {
+        object->field_0xefd |= 1;
+        if (param_count != 0) {
+            for (i32 index = 0; index < param_count; ++index) {
+                if (NuStrICmp(params[index], "FALSE") == 0)
+                    object->field_0xefd &= ~1;
+            }
+        }
+    }
+    return 1;
+}
+
 static i32 Action_SetDoomedEscapeLocator(AISYS *system, AISCRIPTPROCESS *processor, AIPACKET *packet,
                                        char **params, i32 param_count, i32 first_time, f32) {
     if (first_time) {
@@ -4912,7 +4931,7 @@ extern "C" {
         {"UseForce", Action_UseForce, 0, 0, 0},
         {"TriggerBlowUp", Action_TriggerBlowUp, 0, 0, 0},
         {"ForcePush", Action_ForcePush, 0, 0, 0},
-        {"DeflectPlayersPart", NULL, 0, 0, 0},
+        {"DeflectPlayersPart", Action_DeflectPlayersPart, 0, 0, 0},
         {"Kill", Action_Kill, 1, 0, 0},
         {"Explode", Action_Explode, 0, 0, 0},
         {"SetScriptState", Action_SetScriptState, 0, 0, 0},
