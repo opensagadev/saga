@@ -6404,17 +6404,14 @@ static f32 Condition_NearestOpponentRange(AISYS *, AISCRIPTPROCESS *processor, A
 }
 
 static __used__ f32 Condition_YawToOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
-    GameObject_s *owner = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
-    GameObject_s *opponent = packet != NULL ? static_cast<GameObject_s *>(packet->opponent) : NULL;
-    if (owner == NULL || opponent == NULL) {
+    if (packet == NULL || packet->opponent_object == NULL) {
         return 1.0e9f;
     }
-    NUVEC relative = {
-        opponent->apiobj.position.x - owner->apiobj.position.x,
-        opponent->apiobj.position.y - owner->apiobj.position.y,
-        opponent->apiobj.position.z - owner->apiobj.position.z,
-    };
-    NuVecRotateY(&relative, &relative, -owner->apiobj.field_0x276);
+    NUVEC relative;
+    // Only the horizontal components participate in this angle calculation.
+    relative.x = packet->opponent_object->position.x - packet->owner->apiobj.position.x;
+    relative.z = packet->opponent_object->position.z - packet->owner->apiobj.position.z;
+    NuVecRotateY(&relative, &relative, -packet->owner->apiobj.field_0x276);
     return static_cast<f32>(NuAtan2D(relative.x, relative.z)) * (360.0f / 65536.0f);
 }
 
