@@ -5951,19 +5951,18 @@ static __used__ i32 Action_OverrideAnimation(AISYS_s *, AISCRIPTPROCESS_s *proce
     i16 from = -1;
     i16 to = -1;
     for (i32 index = 0; index < param_count; ++index) {
-        char *param = params[index];
-        if (NuStrICmp(param, "from=All") == 0) {
-            from = 0xe9;
+        if (NuStrICmp(params[index], "from=All") == 0) {
+            from = static_cast<i16>(apicharsys->model_id_capacity);
             continue;
         }
 
-        char *value = NuStrIStr(param, "from=");
+        char *value = NuStrIStr(params[index], "from=");
         if (value != NULL) {
             from = static_cast<i16>(FindAnimIX(packet->owner->apiobj.character_data, value + 5));
             continue;
         }
 
-        value = NuStrIStr(param, "to=");
+        value = NuStrIStr(params[index], "to=");
         if (value != NULL) {
             to = static_cast<i16>(FindAnimIX(packet->owner->apiobj.character_data, value + 3));
             continue;
@@ -5974,7 +5973,10 @@ static __used__ i32 Action_OverrideAnimation(AISYS_s *, AISCRIPTPROCESS_s *proce
         }
     }
 
-    packet->animation_override_from = to != -1 ? from : -1;
+    if (to == -1) {
+        from = -1;
+    }
+    packet->animation_override_from = from;
     packet->animation_override_to = to;
     return 1;
 }
