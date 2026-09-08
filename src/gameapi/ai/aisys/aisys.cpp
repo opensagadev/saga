@@ -1097,6 +1097,34 @@ static i32 Action_CanCollideWithObjects(AISYS *, AISCRIPTPROCESS *, AIPACKET *pa
     return 1;
 }
 
+extern "C" {
+extern i16 id_BATTLEDROID, id_BATTLEDROIDSECURITY, id_BATTLEDROIDGEONOSIAN;
+extern i16 id_BATTLEDROIDCOMMANDER, id_CLONEEP3, id_CLONEEP3SAND;
+}
+extern void NewPlayerCharacter(GameObject *, i32, i32, i32);
+
+static i32 Action_SetFormationCommander(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **,
+                                       i32, i32, f32) {
+    if (packet == NULL || packet->owner == NULL) return 1;
+    GameObject *object = packet->owner->apiobj.objptr;
+    if (object == NULL || packet->group == NULL) return 1;
+    AIGROUP *group = packet->group;
+    if (packet->group_member_index != group->member_count - 1) return 1;
+    if (group->count_across != 1 && group->member_count % group->count_across != 1) return 1;
+    packet->movement_event_flags |= 1;
+    if (object->id == id_BATTLEDROID || object->id == id_BATTLEDROIDSECURITY ||
+        object->id == id_BATTLEDROIDGEONOSIAN) {
+        NewPlayerCharacter(object, id_BATTLEDROIDCOMMANDER, object->id, 1);
+    } else if (object->id == id_CLONEEP3) {
+        NewPlayerCharacter(object, id_CLONEEP3SAND, object->id, 1);
+    } else {
+        return 1;
+    }
+    object->current_hp = object->apiobj.character_data->game_character->hitpoints;
+    object->hitpoints = object->apiobj.character_data->game_character->hitpoints;
+    return 1;
+}
+
 static i32 Action_AwkwardShapeOverride(AISYS *system, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
                                      i32 param_count, i32 first_time, f32) {
     if (first_time) {
@@ -4802,7 +4830,7 @@ extern "C" {
         {"FollowCharacter", NULL, 0, 0, 0},
         {"FollowPlayer", NULL, 0, 0, 0},
         {"MoveForward", NULL, 0, 0, 0},
-        {"SetFormationCommander", NULL, 0, 0, 0},
+        {"SetFormationCommander", Action_SetFormationCommander, 0, 0, 0},
         {"RemoveThrownForceObjects", Action_RemoveThrownForceObjects, 0, 0, 0},
         {"AlwaysTriggerObstacle", NULL, 0, 0, 0},
         {"CanTriggerObstacle", NULL, 0, 0, 0},
