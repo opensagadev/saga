@@ -1441,7 +1441,7 @@ extern "C" {
 
 
 
-    void AISysCreatureAntinodeInteraction(AISYS *system, i32 object_count, APIOBJECT **objects) {
+    void AISysCreatureAntinodeInteraction(AISYS *system, i32 object_count, APIOBJECT **objects, i32 *) {
         if (system != NULL) {
             AIANTINODE *active[192];
             i32 count = 0;
@@ -1498,7 +1498,69 @@ extern "C" {
     void AISysCreatureInteraction2D(void) {
     }
 
-    void AISysCreatureInteraction3D(void) {
+    void AISysCreatureInteraction3D(AISYS *system, i32 object_count, APIOBJECT **objects, i32 *immovable,
+                                   f32 delta_time) {
+        for (i32 index = 0; index < object_count; ++index) {
+            f32 timer = objects[index]->ai->antinode_timer - delta_time;
+            objects[index]->ai->antinode_timer = timer < 0.0f ? 0.0f : timer;
+        }
+        for (i32 first_index = 0; first_index < object_count - 1; ++first_index) {
+            APIOBJECT *first = objects[first_index];
+            for (i32 second_index = first_index + 1; second_index < object_count; ++second_index) {
+                APIOBJECT *second = objects[second_index];
+                AIPACKET *first_packet = first->ai;
+                AIPACKET *second_packet = second->ai;
+                f32 first_radius = first_packet->mover_height;
+                f32 second_radius = second_packet->mover_height;
+                i32 first_fixed;
+                i32 second_fixed;
+                if (first->collision_link == second || second->collision_link == first) {
+                    first_fixed = second_fixed = 1;
+                } else {
+                    first_fixed = immovable[first_index];
+                    second_fixed = immovable[second_index];
+                }
+                bool fixed_first = (first->flags_low & 0x80) != 0 || first_fixed != 0;
+                bool fixed_second = (second->flags_low & 0x80) != 0 || second_fixed != 0;
+                if (fixed_first && fixed_second) {
+                    continue;
+                }
+                f32 radius = first_radius + second_radius;
+                NUVEC difference;
+                difference.x = first_packet->movement_position.x - second_packet->movement_position.x;
+                if (difference.x > radius || difference.x < -radius) {
+                    continue;
+                }
+                difference.z = first_packet->movement_position.z - second_packet->movement_position.z;
+                if (difference.z > radius || difference.z < -radius) {
+                    continue;
+                }
+                difference.y = first_packet->movement_position.y - second_packet->movement_position.y;
+                if (difference.y > radius || difference.y < -radius) {
+                    continue;
+                }
+                f32 distance = NuFsqrt(difference.x * difference.x + difference.y * difference.y +
+                                      difference.z * difference.z);
+                if (distance < radius) {
+                    f32 scale = (radius - distance) / distance;
+                    if (fixed_first) {
+                        NuVecScale(&difference, &difference, scale);
+                        NuVecSub(&second->ai->movement_position, &second->ai->movement_position, &difference);
+                    } else if (fixed_second) {
+                        NuVecScale(&difference, &difference, scale);
+                        NuVecAdd(&first->ai->movement_position, &first->ai->movement_position, &difference);
+                    } else {
+                        NuVecScale(&difference, &difference, scale);
+                        NuVecSub(&second->ai->movement_position, &second->ai->movement_position, &difference);
+                    }
+                    if (((first->field_0x1f4 ^ second->field_0x1f4) & 1) != 0) {
+                        first->ai->field_0x1e5 |= 0x40;
+                        second->ai->field_0x1e5 |= 0x40;
+                    }
+                }
+            }
+        }
+        AISysCreatureAntinodeInteraction(system, object_count, objects, immovable);
     }
 
     AIAREA *AISysFindArea(AISYS *sys, char *name) {
