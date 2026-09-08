@@ -597,9 +597,6 @@ static __used__ i32 Action_SetAIOverrideControl(AISYS_s *system, AISCRIPTPROCESS
     return 1;
 }
 
-static __used__ i32 Action_SetAtOnceRowDistance(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
-    return 0;
-}
 
 
 

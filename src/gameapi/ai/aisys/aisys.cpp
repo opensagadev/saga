@@ -959,6 +959,20 @@ void LevelScriptReStoreProgress(WORLDINFO_s *, LEVELSCRIPTPROCESS_s *);
 
 #include "legoapi/gizmos/object/technos.h"
 
+extern void oneAtOnce_SetDistPerRow(f32);
+
+static i32 Action_SetAtOnceRowDistance(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *, char **params,
+                                     i32 param_count, i32 first_time, f32) {
+    if (first_time) {
+        for (i32 index = 0; index < param_count; ++index) {
+            char *value = NuStrIStr(params[index], "Dist");
+            if (value != NULL)
+                oneAtOnce_SetDistPerRow(AIParamToFloat(processor, value + 5));
+        }
+    }
+    return 1;
+}
+
 static i32 Action_SetTakeOverTarget(AISYS *system, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                   i32 param_count, i32 first_time, f32) {
     if (!first_time)
@@ -4698,7 +4712,7 @@ extern "C" {
         {"SetUseOneAtOnce", NULL, 0, 0, 0},
         {"SetAO_MaxAttackers", Action_SetAttackersAtOnce, 0, 0, 0},
         {"SetAO_AttackersPerRow", Action_SetAttackersPerRow, 0, 0, 0},
-        {"SetAO_RowDist", NULL, 0, 0, 0},
+        {"SetAO_RowDist", Action_SetAtOnceRowDistance, 0, 0, 0},
         {"SetAO_InitRowDist", Action_InitRowDist, 0, 0, 0},
         {"SetTechnoComplete", Action_SetTechnoComplete, 0, 0, 0},
         {"LetGoOfBalloon", Action_LetGoOfBalloon, 0, 0, 0},
