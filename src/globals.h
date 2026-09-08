@@ -686,6 +686,7 @@ extern f32 *fakeanimframe;
 extern "C" f32 ai_moveradius;
 extern f32 aitol;
 extern f32 DEFAULT_MOVE_RANGE;
+extern u64 _0xffffffffffffffff;
 extern f32 engagefiretime;
 extern f32 idealgoalrange;
 extern i32 LEGOCONTEXT_DROPIN;

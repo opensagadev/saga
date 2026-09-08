@@ -221,6 +221,7 @@ typedef struct AIPACKET_s {
     union {
         u32 field_0xe0;
         f32 target_metric_e0;
+        f32 primary_target_limit;
     };
     union {
         void *opponent;
@@ -231,6 +232,7 @@ typedef struct AIPACKET_s {
     union {
         u32 field_0xf0;
         f32 target_metric_f0;
+        f32 action_target_limit;
     };
     GameObject_s *dont_avoid_character; // 0xf4
     u8 pad_f8[0x104 - 0xf8];
@@ -999,13 +1001,13 @@ typedef struct GameObject_s {
     u32 field_0xec4;                     // 0x0ec4
     u32 field_0xec8;                     // 0x0ec8
     u32 field_0xecc;                     // 0x0ecc
-    u32 field_0xed0;                     // 0x0ed0
+    f32 field_0xed0;                     // 0x0ed0
     union {
         u32 field_0xed4;
         f32 current_speed_multiplier;
     }; // 0x0ed4
     union {
-        u32 field_0xed8;
+        f32 field_0xed8;
         f32 timer_ed8;
     }; // 0x0ed8
     u8 pad_edc[0xee0 - 0xedc]; // 0x0edc .. 0x0ee0
@@ -1059,11 +1061,11 @@ typedef struct GameObject_s {
     union { u8 pad_f14[4]; u32 field_0xf14; };
     f32 big_jump_height;                // 0xf18, nonnegative arc height set on entering big jump
     f32 field_0xf1c;                    // 0x0f1c
-    AILOCATOR_s *doomed_escape_locator; // 0xf20
+    union { AILOCATOR_s *doomed_escape_locator; u32 field_0xf20; }; // 0xf20
     NUVEC target_velocity;              // 0x0f24
     NUVEC surface_normal;               // 0x0f30
     NUVEC facing_direction;             // 0x0f3c
-    u8 pad_f48[0xfe4 - 0xf48];
+    union { u8 pad_f48[0xfe4 - 0xf48]; struct { u8 field_0xf48[0x68]; u8 pad_fb0[0xfe4 - 0xfb0]; }; };
     NUVEC *head_target;
     NUVEC head_target_position;
     f32 head_target_timer;
@@ -1098,7 +1100,7 @@ typedef struct GameObject_s {
         f32 terrain_impact_speed; // 0x103c, negative incoming velocity dot contact normal
     };
     f32 animation_speed_multiplier; // 0x1040
-    u8 pad_1044[0x1048 - 0x1044];
+    union { u8 pad_1044[0x1048 - 0x1044]; u32 field_0x1044; };
     f32 fall_acceleration_timer; // 0x1048
     CABLE_s *cable;              // 0x104c
     u32 field_0x1050;            // 0x1050
@@ -1106,6 +1108,7 @@ typedef struct GameObject_s {
     union {
         u8 pad_1058[4];
         u32 extra_layer_mask;
+        u32 field_0x1058;
     }; // 0x1058
     u16 field_0x105c;            // 0x105c terrain query flags
     u16 field_0x105e;            // 0x105e surface x rotation
@@ -1135,7 +1138,7 @@ typedef struct GameObject_s {
     i8 head_target_priority;
     u8 pad_108d;
     u8 field_0x108e; // 0x108e
-    u8 pad_108f;
+    u8 field_0x108f;
     u8 one_at_once_player; // 0x1090 (0xff when no attack slot is assigned)
     u8 attack_override;    // 0x1091
     u8 field_0x1092;       // 0x1092
@@ -1149,7 +1152,7 @@ typedef struct GameObject_s {
     void *last_attacker;                   // 0x10b4
     void *field_0x10b8;                    // 0x10b8
     void (*move_override)(GameObject_s *); // 0x10bc
-    u8 pad_10c0[0x10c4 - 0x10c0];
+    union { u8 pad_10c0[0x10c4 - 0x10c0]; u32 field_0x10c0; };
     f32 ai_elapsed_time; // 0x10c4, accumulated until the next AI update
     union {
         NUVEC saved_position; // 0x10c8

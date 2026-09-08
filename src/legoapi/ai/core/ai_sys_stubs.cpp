@@ -610,7 +610,38 @@ extern "C" {
     void AIAntinodeMove(void) {
     }
 
-    void AIFormationFollow(AIPACKET *) {
+    void AIFormationFollow(AIPACKET *packet) {
+        AIGROUP *group = packet->group;
+        if (packet->group_member >= group->row_count) {
+            return;
+        }
+
+        AIROW *row = &group->rows[packet->group_member];
+        NUVEC offset;
+        if ((packet->movement_event_flags & 1) != 0) {
+            offset.x = (group->count_across & 1) != 0 ? 0.0f : -(0.5f * group->x_spacing);
+        } else {
+            offset.x = ((packet->group_column + 1) / 2) * group->x_spacing;
+            if ((packet->group_column & 1) != 0) {
+                offset.x = -offset.x;
+            }
+        }
+        if (group->is_reversed) {
+            offset.x = -offset.x;
+        }
+        offset.y = 0.0f;
+        offset.z = 0.0f;
+        NuVecRotateY(&offset, &offset, row->y_rot);
+        NUVEC destination;
+        NuVecAdd(&destination, &offset, &row->pos);
+        packet->movement_flags |= 8;
+        AIMoveInstruction(packet, &destination, 0.0f, &row->path_info, 5, 0.0f);
+
+        AISCRIPTPROCESS *processor = reinterpret_cast<AISCRIPTPROCESS *>(packet);
+        processor->action_pos = {0.0f, 0.0f, 100.0f};
+        NuVecRotateY(&processor->action_pos, &processor->action_pos, row->y_rot);
+        NuVecAdd(&processor->action_pos, &processor->action_pos, &row->pos);
+        packet->movement_look_target = &processor->action_pos;
     }
 
     void AILocatorSet_AssignNearestLocator(AISYS *system, AILOCATORSET *locator_set, APIOBJECT *object, f32 max_range,
@@ -789,14 +820,14 @@ extern "C" {
                            f32 movement_parameter) {
         AIGROUP *group = packet->group;
         if (group != NULL && group->is_in_formation) {
-            // Formation leaders update their rows through FormationMove; the
-            // remaining members derive their instruction from the group.
-            // Mode five is the direct single-character form used by scripts.
-            if (mode != 5) {
+            // FormationMove's leader-row update remains to be recovered.
+            if (mode == 4 || mode == AIPACKET_MOVEMENT_TO_DESTINATION) {
                 AIFormationFollow(packet);
                 return;
             }
-            mode = AIPACKET_MOVEMENT_TO_DESTINATION;
+            if (mode == 5) {
+                mode = AIPACKET_MOVEMENT_TO_DESTINATION;
+            }
         }
 
         if (destination != NULL) {
@@ -2013,7 +2044,7 @@ extern "C" {
 
                 AISysCharacterMovement(system, packet, object, checks);
 
-                if ((packet->field_0x1e7 & AIPACKET_MOVEMENT_SOURCE_MASK) != 0 && packet->movement_target == NULL &&
+                if ((packet->field_0x1e7 & AIPACKET_MOVEMENT_SOURCE_MASK) != 0 && packet->field_0x180 == NULL &&
                     packet->movement_target_radius > 0.0f &&
                     (object->field_0x1f4 & APIOBJECT_MOTION_FLAG_AI_CONTROLLED) != 0) {
                     NUVEC *source_position = NULL;
@@ -2069,7 +2100,7 @@ extern "C" {
         }
 
         const f32 stopping_clearance = clearance + packet->movement_stopping_distance;
-        if (distance <= packet->mover_height + stopping_clearance) {
+        if (distance <= packet->mover_height + clearance + packet->movement_stopping_distance) {
             const f32 scale = distance != 0.0f && stopping_clearance != 0.0f ? stopping_clearance / distance : 0.0f;
             NuVecScale(&delta, &delta, scale);
             NuVecSub(&packet->movement_position, &packet->movement_destination, &delta);

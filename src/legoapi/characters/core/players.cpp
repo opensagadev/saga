@@ -680,7 +680,7 @@ void *CutScenePlayer_Available(void) {
 
 void ChatterSfx(GameObject_s *g, i32 a, float b) {
     if (chattersfxwait <= 0.0f && ParticlesPerSecond(2.0f, FRAMETIME) > 0 && g->apiobj.field_0x287 == 0 &&
-        static_cast<i8>(g->player_packet[0xf1]) == -1) {
+        g->character_context == -1) {
         if (a != last_chatter_sfx || b <= 0.0f) {
             GameAudio_PlaySfxById(a, &g->apiobj.collision_position, 0, 0);
             const i32 random = qrand();
@@ -1206,6 +1206,115 @@ void ResetPlayerAI(GameObject_s *object) {
     object->ai.next_route = 0;
     object->ai.inside_path_node = -1;
     AISysGetCharacterPathPos(WORLD->ai_sys, &object->apiobj, &object->ai, 0xff, 1);
+}
+
+void StarWars_AutoSetAICapabilities(GameObject_s *object);
+
+void InitPlayerAI(GameObject_s *object) {
+    StarWars_AutoSetAICapabilities(object);
+    i32 can_pull_levers = CanPullLevers(object->id);
+    object->field_0xefe = (object->field_0xefe & 0x7f) | (can_pull_levers << 7);
+    object->ai.runtime_flags &= 0xfe;
+    object->ai.character_type_mask_low = 0;
+    object->ai.character_type_mask_high = 0;
+    if (FreePlay && (object->apiobj.field_0x1f4 & 0x400) == 0) {
+        u64 mask = _0xffffffffffffffff;
+        object->ai.character_type_mask_low = static_cast<u32>(mask);
+        object->ai.character_type_mask_high = static_cast<u32>(mask >> 32);
+    } else if (SpecialRouteCharacterTypeIDFn != NULL) {
+        char *name = object->suit != NULL ? static_cast<SUIT_s *>(object->suit)->suit_character_name
+                                          : object->apiobj.character_data->file;
+        u8 type = SpecialRouteCharacterTypeIDFn(name);
+        if (type != 0xff) {
+            if (type <= 63) {
+                u64 mask = static_cast<u64>(1) << type;
+                object->ai.character_type_mask_low = static_cast<u32>(mask);
+                object->ai.character_type_mask_high = static_cast<u32>(mask >> 32);
+            } else {
+                u64 mask = _0xffffffffffffffff;
+                object->ai.character_type_mask_low = static_cast<u32>(mask);
+                object->ai.character_type_mask_high = static_cast<u32>(mask >> 32);
+            }
+        }
+    }
+    object->ai.creature_set = 0;
+    object->field_0xef8 |= 2;
+    object->field_0xef8 = (object->field_0xef8 & 0xfb) | (((object->apiobj.character_data->model_flags >> 7) & 1) << 2);
+    object->field_0xf20 = 0;
+    object->field_0xef8 |= 8;
+    object->field_0xef8 &= 0x2f;
+    object->field_0xeff &= 0xc7;
+    object->field_0xefc &= 0xc0;
+    object->field_0xefd &= 0xe6;
+    object->field_0xef9 &= 0xfc;
+    object->field_0xf01 &= 0xe9;
+    object->field_0xefb &= 0x25;
+    object->field_0xf00 &= 0x5c;
+    object->field_0xf03 &= 0x31;
+    object->field_0xee0 = 1.0e9f;
+    object->walk_speed_override = 1.0e9f;
+    object->hover_height_override = 1.0e9f;
+    object->field_0x1038 = 1.0e9f;
+    object->field_0xf04 &= 0xfc;
+    object->field_0xf02 = (object->field_0xf02 & 0xf3) | (((object->apiobj.field_0x1f4 & 0x400) == 0) << 2);
+    object->field_0x1058 = 0;
+    object->ai.movement_target_radius = DEFAULT_MOVE_RANGE;
+    object->ai.movement_event_flags = (object->ai.movement_event_flags & 0xe3) | ((DEFAULT_MOVE_RANGE > 0.0f) << 2);
+    object->field_0xf02 &= 0x5f;
+    object->field_0xf03 &= 0xfe;
+    object->field_0xefa &= 0xf3;
+    object->field_0xefa =
+        (object->field_0xefa & 0xcf) | (((object->apiobj.character_data->model_flags >> 27) & 1) << 4);
+    object->tag_context_flags &= 0xfd;
+    object->field_0xecc = 0;
+    object->ai.primary_target_ref = NULL;
+    object->ai.field_0xdc = 0;
+    object->field_0xefb &= 0xfa;
+    object->field_0xeff &= 0xfe;
+    object->current_speed_multiplier = 1.0f;
+    object->field_0xed0 = 0.0f;
+    object->ai.primary_target_limit = 1.0e9f;
+    object->ai.action_target_ref = NULL;
+    object->ai.field_0xec = 0;
+    object->ai.field_0x1e5 &= 0xaf;
+    object->apiobj.field387_0x2a0 = 0;
+    object->apiobj.field388_0x2a4 = 0;
+    object->field_0xef9 &= 0xf7;
+    object->field_0xebc = 0;
+    object->ai.action_target_limit = 1.0e9f;
+    object->field_0xec0 = 0;
+    object->opponent = NULL;
+    object->last_attacker = NULL;
+    object->field_0xec4 = 0;
+    object->ai.antinode_timer = 0.0f;
+    object->field_0xec8 = 0;
+    object->field_0xed8 = 0.0f;
+    object->field_0xef8 &= 0xfe;
+    memset(object->field_0xf48, 0, sizeof(object->field_0xf48));
+    object->field_0x1089 = 0;
+    object->head_target = NULL;
+    object->ai.dont_avoid_character = NULL;
+    object->apiobj.collision_link = NULL;
+    object->apiobj.collision_mask_low = 0;
+    object->apiobj.collision_mask_high = 0;
+    i32 collision_flag = (object->apiobj.character_data->model_flags & 0x4000) != 0 &&
+                         (object->apiobj.field_0x27c == -1 || object->field_0xcc0 != NULL);
+    object->apiobj.flags_low = (object->apiobj.flags_low & 0xfd) | (collision_flag << 1);
+    object->field_0xeff =
+        (object->field_0xeff & 0x7b) | ((object->apiobj.character_data->game_character->flags_090 >> 13) << 7);
+    object->apiobj.flags_high &= 0xf7;
+    object->apiobj.field_0x1fa &= 0xe7;
+    object->field_0xf00 &= 0xfb;
+    object->field_0xefe &= 0xbf;
+    object->field_0x108f = 0;
+    object->field_0x10c0 = 0;
+    object->gizforce_target = NULL;
+    object->animation_speed_multiplier = 1.0f;
+    object->field_0x1044 = 0;
+    object->field_0xf04 &= 0xf3;
+    object->field_0xf04 =
+        (object->field_0xf04 & 0x7f) | (object->apiobj.character_data->game_character->flags_098[0] & 0x80);
+    ResetPlayerAI(object);
 }
 
 void ActivatePlayer(GameObject_s *object) {

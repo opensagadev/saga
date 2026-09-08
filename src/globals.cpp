@@ -1891,6 +1891,7 @@ i32 mechAutoJumpCantReachFlags = 0;
 i32 ai_fighting = 0;
 f32 aitol = 0.5f;
 f32 DEFAULT_MOVE_RANGE = 0.0f;
+u64 _0xffffffffffffffff = ~static_cast<u64>(0);
 f32 engagefiretime = 2.0f;
 f32 idealgoalrange = 1.5f;
 

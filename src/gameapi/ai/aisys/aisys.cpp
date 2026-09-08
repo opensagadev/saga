@@ -1880,7 +1880,7 @@ __used__ static i32 Action_GoToLocator(AISYS *sys, AISCRIPTPROCESS *processor, A
         const f32 distance_squared = (processor->action_data_1 & GO_TO_LOCATOR_XZ_RANGE_CHECK) != 0
                                          ? NuVecXZDistSqr(&packet->terrain_origin, &locator->position, &distance_vector)
                                          : NuVecDistSqr(&packet->terrain_origin, &locator->position, &distance_vector);
-        const f32 reach_distance = packet->movement_instruction_parameter + 0.1f +
+        const f32 reach_distance = packet->movement_instruction_parameter + ai_moveradius +
                                    elapsed * packet->owner->apiobj.horizontal_velocity_magnitude;
         if (reach_distance * reach_distance <= distance_squared) {
             if ((packet->field_0x1e6 & 0x40) != 0 &&
@@ -4910,12 +4910,17 @@ __used__ static i32 Action_SetControlSystem(AISYS *sys, AISCRIPTPROCESS *process
                                             i32 param_4, i32 param_5, f32 param_6) {
     (void)sys;
     (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
     (void)param_6;
-    return 0;
+    if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL && param_5 != 0) {
+        GameObject_s *object = packet->owner->apiobj.objptr;
+        object->ai.movement_stopped = 0;
+        for (i32 index = 0; index < param_4; ++index) {
+            if (NuStrICmp(params[index], "rotational") == 0) {
+                object->ai.movement_stopped = 1;
+            }
+        }
+    }
+    return 1;
 }
 
 __used__ static i32 Action_SetMaxViewHeight(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
