@@ -999,10 +999,10 @@ static i32 Action_SetTakeOverTarget(AISYS *system, AISCRIPTPROCESS *processor, A
         NUVEC difference;
         NuVecSub(&difference, &candidate->apiobj.collision_position, &packet->owner->apiobj.collision_position);
         f32 distance = NuVecMagSqr(&difference);
-        if (distance < nearest) {
-            nearest = distance;
-            target = candidate;
-        }
+        if (!(distance < nearest))
+            continue;
+        nearest = distance;
+        target = candidate;
     }
     if (target == NULL) {
         object->takeover_target = NULL;
