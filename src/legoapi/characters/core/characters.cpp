@@ -448,7 +448,7 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
     NUVEC velocity = object->apiobj.velocity;
     u8 health = object->current_hp;
     u8 hitpoints = object->hitpoints;
-    u32 saved_flags = object->apiobj.flags_low & 0x2000;
+    u8 saved_flags = (object->apiobj.flags_high >> 5) & 1;
     object->apiobj.character_model = &apicharsys->models[apicharsys->playermodelids[id]];
     object->apiobj.character_data = &apicharsys->char_data[id];
     object->takeover_source = NULL;
@@ -491,7 +491,7 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
     object->hitpoints = hitpoints;
     object->field_0xef0 = 0;
     object->pause_context_state = 0;
-    object->apiobj.flags_low = (object->apiobj.flags_low & ~0x2000) | saved_flags;
+    object->apiobj.flags_high = (object->apiobj.flags_high & ~0x20) | (saved_flags << 5);
     ResetMiniAnimPacket(&object->mini_animation, -1);
     object->weapon_scale = (object->field_0xe22 & 1) != 0 ? 1.0f : 0.0f;
     object->field_0xe32 = 0;
