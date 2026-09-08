@@ -982,9 +982,10 @@ typedef struct GameObject_s {
     u8 use_attach_frames; // 0xf0d
     u8 pad_f0e[2];
     f32 use_distance; // 0xf10
-    u8 pad_f14[8];
+    u32 field_0xf14;
+    u8 pad_f18[4];
     f32 field_0xf1c; // 0x0f1c
-    u8 pad_f20[0xf24 - 0xf20];
+    u32 field_0xf20;
     NUVEC target_velocity;  // 0x0f24
     NUVEC surface_normal;   // 0x0f30
     NUVEC facing_direction; // 0x0f3c
@@ -1190,6 +1191,8 @@ DECOMP_ASSERT(offsetof(GameObject_s, contact_normal) == 0x6a4, "GameObject conta
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x6b0) == 0x6b0, "GameObject terrain contact state offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x780) == 0x780, "GameObject field_0x780 offset");
 DECOMP_ASSERT(offsetof(GameObject_s, takeover_source) == 0xcc4, "GameObject takeover source offset");
+DECOMP_ASSERT(offsetof(GameObject_s, field_0xf14) == 0xf14, "GameObject character-switch preserved state offset");
+DECOMP_ASSERT(offsetof(GameObject_s, field_0xf20) == 0xf20, "GameObject character-switch preserved state offset");
 DECOMP_ASSERT(offsetof(GameObject_s, spawn_protection_timer) == 0x100c, "GameObject spawn protection offset");
 DECOMP_ASSERT(offsetof(AIPACKET, primary_target_ref) == 0xd4, "AI primary target reference offset");
 DECOMP_ASSERT(offsetof(AIPACKET, action_target_ref) == 0xe4, "AI action target reference offset");

@@ -1101,7 +1101,6 @@ extern "C" {
 extern i16 id_BATTLEDROID, id_BATTLEDROIDSECURITY, id_BATTLEDROIDGEONOSIAN;
 extern i16 id_BATTLEDROIDCOMMANDER, id_CLONEEP3, id_CLONEEP3SAND;
 }
-extern void NewPlayerCharacter(GameObject *, i32, i32, i32);
 
 static i32 Action_SetFormationCommander(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **,
                                        i32, i32, f32) {

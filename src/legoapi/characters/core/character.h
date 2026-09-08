@@ -616,3 +616,4 @@ extern "C" {
 
 void LoadSingleCharacter(bgprocinfo_s *info);
 void UpdateCharacterLoad(void);
+i32 NewPlayerCharacter(GameObject_s *object, i32 new_id, i32 old_id, i32 mode);

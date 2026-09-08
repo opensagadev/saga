@@ -207,7 +207,291 @@ void ActivateCharacter(char *, nuvec_s *, i32) {
 void FinishWeirdoNames(i32) {
 }
 
-void NewPlayerCharacter(GameObject_s *, i32, i32, i32) {
+
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/render/core/rtl.h"
+#include "nu2api/numath/nuvec.h"
+extern i32 addcreature_override_id_check;
+extern f32 default_mover_extra;
+extern void SetGameObjectCharacterData(GameObject_s *);
+extern void GetTopBot(GameObject_s *);
+extern void GameObjectDimensions(GameObject_s *);
+extern void GameObjectOrigin(GameObject_s *);
+extern i32 GetDefaultIdle(GameObject_s *);
+extern void ResetCharacterIdle(GameObject_s *, i32, i32);
+extern void *Suit_GetDefault(i32);
+extern void ResetLights(NUVEC *, rtldata_s *, void *);
+extern "C" void ResetAnimPacket(void *, i32);
+extern void ResetPlayerPacket(PLAYERPACKET_s *, CHARACTERDATA_s *);
+extern void Player_ClearContext(GameObject_s *, i32);
+extern "C" {
+extern i16 id_MOSEISLEYCITIZEN, id_CANTINAALIEN, id_CLOUDCITYCITIZEN, id_GEONOSIAN, id_BOB;
+}
+void Shards_HandleLostObj(WORLDINFO_s *, GameObject_s *);
+void LoseHelmet(GameObject_s *, i32, i32);
+void DestroySnakeBody(GameObject_s *);
+void InitPlayerAI(GameObject_s *);
+void ResetPlayerMoves(GameObject_s *);
+void Player_ResetContexts(PLAYERPACKET_s *);
+void InitSurfaceInfo(GameObject_s *);
+i32 SetObjOnSurface(GameObject_s *, i32);
+void GizForce_ResetLOS(GameObject_s *);
+i32 StartSlide(GameObject_s *, i32);
+
+static u32 LayerBit(u8 layer) {
+    return 1u << (layer & 31);
+}
+
+static void SetLayers_BOB(GameObject_s *object) {
+    const i32 first_layers[6] = {1, 2, 3, 21, 22, 23};
+    const i32 second_layers[8] = {5, 6, 7, 8, 9, 10, 16, 17};
+    const i32 third_layers[3] = {11, 12, 15};
+    const i32 fourth_layers[2] = {13, 14};
+    const i32 fifth_layers[2] = {19, 20};
+
+    const i32 random = qrand();
+    object->field_0xefd = (object->field_0xefd & ~2u) | (random <= 0x7fff ? 2 : 0);
+    // The original consumes this draw even though layer zero is always selected.
+    qrand();
+    object->field_0x1054 = 1;
+    object->field_0x1054 |= 1u << first_layers[qrand() / 0x2aab];
+    object->field_0x1054 |= 1u << second_layers[qrand() / 0x2000];
+    object->field_0x1054 |= 1u << third_layers[qrand() / 0x5556];
+    object->field_0x1054 |= 1u << fourth_layers[qrand() / 0x8000];
+    object->field_0x1054 |= 1u << fifth_layers[qrand() / 0x8000];
+}
+
+static void SetLayers_MOSEISLEYCITIZEN(u32 *layers) {
+    static const u8 hat_layers[5] = {0, 0, 0, 7, 14};
+    static const u8 head_layers[5] = {20, 20, 8, 8, 4};
+    static const u8 body_layers[3] = {3, 9, 19};
+    static const u8 arm_layers[3] = {1, 12, 15};
+    static const u8 hand_layers[3] = {2, 13, 16};
+    static const u8 waist_layers[3] = {6, 10, 17};
+    static const u8 leg_layers[3] = {5, 11, 18};
+
+    *layers = LayerBit(hat_layers[qrand() / 0x3334]) | LayerBit(head_layers[qrand() / 0x3334]) |
+              LayerBit(body_layers[qrand() / 0x5556]) | LayerBit(arm_layers[qrand() / 0x5556]) |
+              LayerBit(hand_layers[qrand() / 0x5556]) | LayerBit(waist_layers[qrand() / 0x5556]) |
+              LayerBit(leg_layers[qrand() / 0x5556]);
+}
+
+i32 InitCreature(GameObject_s *obj, i32 id, i32 param) {
+    addcreature_override_id_check = 0;
+    if (id < 0 || id > 0x153 || apicharsys->playermodelids[id] == -1) {
+        return 0;
+    }
+
+    CHARACTERDATA *character_data = &apicharsys->char_data[id];
+    GAMECHARACTERDATA *game_character_data = static_cast<GAMECHARACTERDATA *>(character_data->field11_0x24);
+    obj->apiobj.character_data = character_data;
+    obj->field_0x1054 = game_character_data->layer_mask;
+    obj->apiobj.field_0x1f4 = 0;
+    obj->field_0x107c = -1;
+    memset(obj->player_packet, 0, 0x798);
+    obj->apiobj.field_0x27c = -1;
+
+    NUVEC *start_position = Player_StartPos(obj);
+    if (param == 0) {
+        obj->apiobj.field_0x1f4 |= 2;
+    } else {
+        obj->apiobj.field_0x1f4 |= 0x4002;
+    }
+    if ((WORLD->current_level->flags & 0x40000) == 0) {
+        obj->apiobj.field_0x1f4 |= 0x40;
+    }
+
+    obj->pad_gamepad = GamePad_Allocate();
+    obj->pad_gamepad->unknown_24 |= 0x100;
+    obj->hitpoints = game_character_data->hitpoints;
+    obj->current_hp = game_character_data->hitpoints;
+    ResetPlayerPacket(reinterpret_cast<PLAYERPACKET_s *>(obj->player_packet),
+                      reinterpret_cast<CHARACTERDATA_s *>(character_data));
+
+    obj->apiobj.field_0x1fc = v000.x;
+    obj->apiobj.field_0x200 = v000.y;
+    obj->apiobj.field_0x204 = v000.z;
+    obj->field_0xe38 = 4;
+    obj->field_0xe37 = game_character_data->field_0xf5;
+    obj->id = static_cast<i16>(id);
+    obj->apiobj.character_model = &apicharsys->models[apicharsys->playermodelids[id]];
+    obj->suit = Suit_GetDefault(id);
+    obj->ai.field_0x134 = 0xff;
+    SetGameObjectCharacterData(obj);
+
+    obj->apiobj.start_position = *start_position;
+    obj->apiobj.initial_position = *start_position;
+    obj->apiobj.position = *start_position;
+    obj->apiobj.pos_x = start_position->x;
+    obj->apiobj.pos_y = start_position->y;
+    obj->apiobj.pos_z = start_position->z;
+    obj->field_0x1018 = 0.5f;
+
+    GetTopBot(obj);
+    GameObjectDimensions(obj);
+    obj->apiobj.anim_packet.animation_index = 1;
+
+    i32 reset_animation = 1;
+    if (obj->apiobj.character_model != NULL) {
+        void **animation_table = *reinterpret_cast<void ***>(reinterpret_cast<u8 *>(obj->apiobj.character_model) + 0xc);
+        if (animation_table != NULL && animation_table[1] == NULL) {
+            reset_animation = 0;
+            for (i32 i = 0; i < 0xe9; i++) {
+                if (animation_table[i] != NULL) {
+                    obj->apiobj.anim_packet.animation_index = static_cast<u16>(i);
+                    reset_animation = i;
+                    break;
+                }
+            }
+        }
+    }
+    ResetAnimPacket(&obj->apiobj.anim_packet, reset_animation);
+    ResetCharacterIdle(obj, 2, GetDefaultIdle(obj));
+    ResetLights(&obj->apiobj.position, &obj->light_data, WORLD->rtl_set);
+
+    obj->ai.mover_height = obj->apiobj.field_0x1dc + default_mover_extra;
+    GameObjectOrigin(obj);
+    obj->apiobj.previous_position[0] = obj->apiobj.position.x;
+    obj->apiobj.previous_position[1] = obj->apiobj.position.y;
+    obj->apiobj.previous_position[2] = obj->apiobj.position.z;
+    obj->field_0x10c8 = obj->apiobj.position.x;
+    obj->field_0x10cc = obj->apiobj.position.y;
+    obj->field_0x10d0 = obj->apiobj.position.z;
+
+    obj->field_0xf01 = static_cast<u8>((obj->field_0xf01 & ~8u) | (((game_character_data->flags_090 >> 17) & 1) << 3));
+    if (id == id_MOSEISLEYCITIZEN) {
+        SetLayers_MOSEISLEYCITIZEN(&obj->field_0x1054);
+    } else if (id == id_CANTINAALIEN) {
+        static const u8 head_layers[3] = {0, 3, 6};
+        static const u8 body_layers[3] = {1, 4, 7};
+        static const u8 leg_layers[3] = {2, 5, 8};
+        obj->field_0x1054 = LayerBit(head_layers[qrand() / 0x5556]) | LayerBit(body_layers[qrand() / 0x5556]) |
+                            LayerBit(leg_layers[qrand() / 0x5556]);
+    } else if (id == id_CLOUDCITYCITIZEN) {
+        static const u8 head_layers[3] = {1, 5, 7};
+        static const u8 body_layers[3] = {2, 3, 6};
+        static const u8 leg_layers[3] = {0, 4, 8};
+        obj->field_0x1054 = LayerBit(head_layers[qrand() / 0x5556]) | LayerBit(body_layers[qrand() / 0x5556]) |
+                            LayerBit(leg_layers[qrand() / 0x5556]);
+        obj->field_0xf01 = static_cast<u8>((obj->field_0xf01 & ~8u) | (((obj->field_0x1054 >> 7) & 1) << 3));
+    } else if (id == id_BOB) {
+        SetLayers_BOB(obj);
+    } else if (id == id_GEONOSIAN) {
+        obj->field_0xefd = static_cast<u8>((obj->field_0xefd & ~2u) | ((qrand() <= 0x7fff) ? 2 : 0));
+    }
+
+    if ((game_character_data->flags_090 & 0x8000u) != 0) {
+        obj->apiobj.field_0x1f4 |= 0x20000;
+    } else {
+        obj->apiobj.field_0x1f4 &= ~0x20000u;
+    }
+    return 1;
+}
+
+i32 NewPlayerCharacter(GameObject_s *object, i32 new_id, i32 old_id, i32) {
+    if (new_id == old_id || new_id < 0 || new_id >= CHARCOUNT || apicharsys->playermodelids[new_id] == -1)
+        return 0;
+    Shards_HandleLostObj(WORLD, object);
+    if (VehicleArea == 0)
+        AddGameDebris(WORLD->debris_sys, 0x5c, &object->apiobj.collision_position);
+    const u8 context = object->field_0x7a5;
+    const i16 lean = object->movement_lean_angle;
+    const u32 old_model_flag = object->apiobj.character_data->model_flags & 0x2000;
+    LoseHelmet(object, 0, 1);
+    DestroySnakeBody(object);
+    object->id = new_id;
+    const NUVEC velocity = object->apiobj.velocity;
+    const u8 current_hp = object->current_hp;
+    const u8 hitpoints = object->hitpoints;
+    const u32 saved_object_flag = object->apiobj.object_flags & 0x2000;
+    object->apiobj.character_model = &apicharsys->models[apicharsys->playermodelids[new_id]];
+    object->apiobj.character_data = &apicharsys->char_data[new_id];
+    object->takeover_source = NULL;
+    object->suit = Suit_GetDefault(new_id);
+    const u32 saved_f14 = object->field_0xf14;
+    const u32 saved_f20 = object->field_0xf20;
+    const u8 current_route = object->ai.current_route;
+    const u8 next_route = object->ai.next_route;
+    const u8 saved_efe = object->field_0xefe & 0x20;
+    const AIPATHINFO path_info = object->ai.path_info;
+    const u32 frame_state = object->ai.frame_state;
+    InitPlayerAI(object);
+    object->field_0xefe = (object->field_0xefe & ~0x20u) | saved_efe;
+    object->field_0xf20 = saved_f20;
+    object->ai.next_route = next_route;
+    object->ai.path_info = path_info;
+    object->field_0xf14 = saved_f14;
+    object->field_0x1004 = 1.0f;
+    object->ai.current_route = current_route;
+    object->ai.frame_state = frame_state;
+    object->field_0x1054 = object->apiobj.character_data->game_character->layer_mask;
+    object->field_0xe37 = object->apiobj.character_data->game_character->field_0xf5;
+    object->field_0xe38 = 4;
+    Player_ClearContext(object, 1);
+    ResetPlayerMoves(object);
+    SetGameObjectCharacterData(object);
+    ResetAnimPacket(&object->apiobj.anim_packet, -1);
+    Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
+    GetTopBot(object);
+    GameObjectDimensions(object);
+    object->tag_state = 2.0f;
+    object->field_0xefc |= 0x80;
+    object->input_toggle_hold_time = TOGGLEHOLDTIME;
+    InitSurfaceInfo(object);
+    const i32 on_surface = SetObjOnSurface(object, 1);
+    GizForce_ResetLOS(object);
+    object->field_0xefe &= ~8u;
+    object->current_hp = current_hp;
+    object->hitpoints = hitpoints;
+    object->field_0xef0 = 0;
+    object->pause_context_state = 0;
+    object->apiobj.object_flags = (object->apiobj.object_flags & ~0x2000u) | saved_object_flag;
+    ResetMiniAnimPacket(&object->mini_animation, -1);
+    object->weapon_scale = (object->field_0xe22 & 1) ? 1.0f : 0.0f;
+    object->field_0xe32 = 0;
+    if (on_surface)
+        object->ground_contact_grace_timer = 0.2f;
+    else
+        object->apiobj.velocity.y = velocity.y;
+    if (context == 0x33 && StartSlide(object, 0)) {
+        object->apiobj.velocity.x = velocity.x;
+        object->apiobj.velocity.z = velocity.z;
+    }
+    if (object->apiobj.velocity.y == 0.0f) object->apiobj.velocity.y = -0.1f;
+    if (old_model_flag && (object->apiobj.character_data->model_flags & 0x2000))
+        object->movement_lean_angle = lean;
+    GAMECHARACTERDATA *data = apicharsys->char_data[object->id].game_character;
+    object->apiobj.viewdistance = data->viewdistance;
+    object->apiobj.heardistance = data->heardistance;
+    object->apiobj.maxviewheight = data->maxviewheight;
+    object->apiobj.minviewheight = data->minviewheight;
+    object->field_0xf01 = (object->field_0xf01 & ~8u) |
+                        (((object->apiobj.character_data->game_character->flags_090 >> 17) & 1) << 3);
+    if (object->id == id_MOSEISLEYCITIZEN) {
+        SetLayers_MOSEISLEYCITIZEN(&object->field_0x1054);
+    } else if (object->id == id_CANTINAALIEN) {
+        static const u8 head[3] = {0, 3, 6}, body[3] = {1, 4, 7}, legs[3] = {2, 5, 8};
+        object->field_0x1054 = 0;
+        object->field_0x1054 |= 1u << head[qrand() / 0x5556];
+        object->field_0x1054 |= 1u << body[qrand() / 0x5556];
+        object->field_0x1054 |= 1u << legs[qrand() / 0x5556];
+    } else if (object->id == id_CLOUDCITYCITIZEN) {
+        static const u8 head[3] = {1, 5, 7}, body[3] = {2, 3, 6}, legs[3] = {0, 4, 8};
+        object->field_0x1054 = 0;
+        object->field_0x1054 |= 1u << head[qrand() / 0x5556];
+        object->field_0x1054 |= 1u << body[qrand() / 0x5556];
+        object->field_0x1054 |= 1u << legs[qrand() / 0x5556];
+        object->field_0xf01 = (object->field_0xf01 & ~8u) | (((object->field_0x1054 >> 7) & 1) << 3);
+    } else if (object->id == id_BOB) {
+        SetLayers_BOB(object);
+    } else if (object->id == id_GEONOSIAN) {
+        object->field_0xefd = (object->field_0xefd & ~2u) | (qrand() <= 0x7fff ? 2 : 0);
+    }
+    if (object->apiobj.character_data->game_character->flags_090 & 0x8000)
+        object->apiobj.field_0x1f4 |= 0x20000;
+    else
+        object->apiobj.field_0x1f4 &= ~0x20000u;
+    return 1;
 }
 
 extern "C" f32 AnimDuration(i32 character_id, i32 animation, f32 start_frame, f32 end_frame, i32 subtract_frame_time);
