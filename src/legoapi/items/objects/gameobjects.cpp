@@ -25,6 +25,7 @@
 #include "legoapi/core/input/timer.h"
 #include "legoapi/gizmo/base/gizactions.h"
 #include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmos/trigger/gizspecial.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numusic/sfx.h"
@@ -186,6 +187,10 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 }
 
 static const f32 AI_RESPAWN_DELAY = 2.0f;
+
+static void *Condition_GizSpecialInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    return GizmoFindByName(WORLD->gizmo_sys, gizspecial_gizmotype_id, name);
+}
 
 static void *Condition_ObstacleInit(AISYS_s *, char *name, AISCRIPT_s *) {
     return GizmoFindByName(WORLD->gizmo_sys, obstacle_gizmotype_id, name);
@@ -397,8 +402,8 @@ extern "C" {
         {"Colliding", NULL, NULL},
         {"ObstacleAtStart", Condition_ObstacleAtStart, Condition_ObstacleInit},
         {"ObstacleAtEnd", Condition_ObstacleAtEnd, Condition_ObstacleInit},
-        {"SpecialAtStart", Condition_ObstacleAtStart, NULL},
-        {"SpecialAtEnd", NULL, NULL},
+        {"SpecialAtStart", Condition_ObstacleAtStart, Condition_GizSpecialInit},
+        {"SpecialAtEnd", Condition_ObstacleAtEnd, Condition_GizSpecialInit},
         {"ObstacleLockedOpen", NULL, NULL},
         {"ObstacleLockedShut", NULL, NULL},
         {"ForceAtStart", NULL, NULL},

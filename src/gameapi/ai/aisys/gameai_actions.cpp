@@ -288,13 +288,6 @@ static __used__ f32 Condition_ForceBeingUsed(AISYS_s *, AISCRIPTPROCESS_s *, AIP
     return 0;
 }
 
-static void *Condition_GizSpecialInit(AISYS_s *, char *arg, AISCRIPT_s *) {
-    if (WORLD == NULL) {
-        return NULL;
-    }
-    return GizmoFindByName(WORLD->gizmo_sys, gizspecial_gizmotype_id, arg);
-}
-
 static __used__ f32 Condition_GotOpponentLOS(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return 0;
 }
@@ -1531,7 +1524,6 @@ namespace {
 
             lego_aiconditiondefs[LEGO_AI_CONDITION_OFF_SCREEN_TIMER].eval_fn = Condition_OffScreenTimer;
             lego_aiconditiondefs[LEGO_AI_CONDITION_OFF_SCREEN_TIMER].init_fn = Condition_OffScreenTimerInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_SPECIAL_AT_START].init_fn = Condition_GizSpecialInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_FORCE_COMPLETE].eval_fn = Condition_ForceComplete;
             lego_aiconditiondefs[LEGO_AI_CONDITION_FORCE_COMPLETE].init_fn = Condition_ForceCompleteInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_FORCE_FINISHED].eval_fn = Condition_ForceFinished;
