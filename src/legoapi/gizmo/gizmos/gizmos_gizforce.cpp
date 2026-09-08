@@ -53,8 +53,6 @@ GIZFORCE_s *GizForce_FindByName(GIZFORCESYS_s *force_sys, char *name) {
     return force;
 }
 
-void GizForce_TotalScore(void *) {
-}
 
 void GizForce_UpdateHint(HINT_s *) {
 }

@@ -1,4 +1,19 @@
 #include "legoapi/gizmos/traps/gizturrets.h"
+#include "legoapi/world/world.h"
+#include "legoapi/legoapi_types.h"
+
+u32 GizTurrets_TotalScore(void *world) {
+    GIZTURRETSYS_s *system = static_cast<WORLDINFO_s *>(world)->giz_turret_sys;
+    u32 total = 0;
+    if (system != NULL) {
+        GIZTURRET_s *item = system->turrets;
+        if (item != NULL) {
+            for (i32 i = 0; i < system->count; ++i, ++item)
+                total += item->completion_score;
+        }
+    }
+    return total;
+}
 
 #include "decomp.h"
 #include "gameapi/edtools/edfile.h"

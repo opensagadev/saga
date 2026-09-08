@@ -1,5 +1,8 @@
 #pragma once
 
+#include "nu2api/nucore/fixed_width.h"
+u32 GizForce_TotalScore(void *world);
+
 #include "legoapi/gizmo/base/gizmo.h"
 
 extern i32 force_gizmotype_id;

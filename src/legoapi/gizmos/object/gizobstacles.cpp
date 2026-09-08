@@ -1,4 +1,19 @@
 #include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/world/world.h"
+#include "legoapi/legoapi_types.h"
+
+u32 GizObstacles_TotalScore(void *world) {
+    GIZOBSTACLESYS_s *system = static_cast<WORLDINFO_s *>(world)->giz_obstacle_sys;
+    u32 total = 0;
+    if (system != NULL) {
+        GIZOBSTACLE_s *item = system->obstacles;
+        if (item != NULL) {
+            for (i32 i = 0; i < system->count; ++i, ++item)
+                total += item->completion_score;
+        }
+    }
+    return total;
+}
 
 #include "decomp.h"
 #include "gameapi/edtools/edfile.h"

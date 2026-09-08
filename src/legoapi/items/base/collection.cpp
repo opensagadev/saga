@@ -1,4 +1,12 @@
 #include "legoapi/items/base/collection.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmos/traps/gizforce.h"
+#include "legoapi/gizmos/traps/gizturrets.h"
+
+u32 GizmoBlowups_TotalScore(void *world);
 
 #include "decomp.h"
 #include "globals.h"
@@ -406,7 +414,32 @@ void ResetCoinPacket(COINPACKET_s *packet) {
 void UpdateCoinPacket(COINPACKET_s *, i32, i32) {
 }
 
-void TotalLevelCoinTally(WORLDINFO_s *, u32 *, u32 *, u32 *, u32 *, u32 *, u32 *, u32 *) {
+u32 TotalLevelCoinTally(WORLDINFO_s *world, u32 *pickups, u32 *blowups, u32 *buildits,
+                        u32 *forces, u32 *obstacles, u32 *turrets, u32 *characters) {
+    u32 score = GizmoPickups_TotalScore(world);
+    u32 total = score;
+    if (pickups != NULL) *pickups = score;
+    score = GizmoBlowups_TotalScore(world);
+    total += score;
+    if (blowups != NULL) *blowups = score;
+    score = GizBuildIts_TotalScore(world);
+    total += score;
+    if (buildits != NULL) *buildits = score;
+    score = GizForce_TotalScore(world);
+    total += score;
+    if (forces != NULL) *forces = score;
+    score = GizObstacles_TotalScore(world);
+    total += score;
+    if (obstacles != NULL) *obstacles = score;
+    score = GizTurrets_TotalScore(world);
+    total += score;
+    if (turrets != NULL) *turrets = score;
+    score = 0;
+    if (world->area != NULL && (world->area->flags & 0x100))
+        score = GameAI_TotalScore();
+    total += score;
+    if (characters != NULL) *characters = score;
+    return total;
 }
 
 void AddToCompletionPoints(u32) {

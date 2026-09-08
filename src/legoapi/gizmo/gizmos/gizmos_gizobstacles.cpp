@@ -110,8 +110,6 @@ void GizObstacles_AddTrigger(nuvec_s *position) {
     gizobstacletriggers[ngizobstacletriggers++] = position;
 }
 
-void GizObstacles_TotalScore(void *) {
-}
 
 void GizObstacle_PlayForwards(GIZOBSTACLE_s *obstacle) {
     if (obstacle != NULL) {

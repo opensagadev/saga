@@ -195,8 +195,6 @@ void GizBuildIt_SetStepTime(GIZBUILDIT_s *buildit, GameObject_s *player) {
     buildit->step_timer = buildit->step_duration;
 }
 
-void GizBuildIts_TotalScore(void *) {
-}
 
 void GizBuildIts_UpdateHint(HINT_s *) {
 }

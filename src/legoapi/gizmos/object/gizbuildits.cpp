@@ -1,4 +1,19 @@
 #include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/world/world.h"
+#include "legoapi/legoapi_types.h"
+
+u32 GizBuildIts_TotalScore(void *world) {
+    GIZBUILDITSYS_s *system = static_cast<WORLDINFO_s *>(world)->giz_buildit_sys;
+    u32 total = 0;
+    if (system != NULL) {
+        GIZBUILDIT_s *item = system->buildits;
+        if (item != NULL) {
+            for (i32 i = 0; i < system->count; ++i, ++item)
+                total += item->completion_score;
+        }
+    }
+    return total;
+}
 
 #include "batman.h"
 #include "decomp.h"

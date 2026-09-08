@@ -2817,7 +2817,7 @@ struct GIZBUILDIT_s {
     f32 field_0x54;
     f32 radius_scale; // 0x58
     i16 field_0x5c;
-    i16 field_0x5e;
+    union { i16 field_0x5e; u16 completion_score; };
     i16 field_0x60;
     i16 field_0x62;
     NUVEC effect_position; // 0x64
@@ -2839,6 +2839,7 @@ struct GIZBUILDIT_s {
     MechObjectInterface *GetMechObjectInterface();
 };
 DECOMP_ASSERT(sizeof(GIZBUILDIT_s) == 0x84, "GIZBUILDIT_s ABI");
+DECOMP_ASSERT(offsetof(GIZBUILDIT_s, completion_score) == 0x5e, "GIZBUILDIT completion score offset");
 DECOMP_ASSERT(offsetof(GIZBUILDIT_s, mech_object_interface) == 0x1c, "GIZBUILDIT interface offset");
 DECOMP_ASSERT(offsetof(GIZBUILDIT_s, radius_scale) == 0x58, "GIZBUILDIT radius scale offset");
 DECOMP_ASSERT(offsetof(GIZBUILDIT_s, start_position) == 0x2c, "GIZBUILDIT start position offset");
@@ -2952,7 +2953,7 @@ struct GIZFORCE_s {
     i16 loop_sfx_id;       // 0x88
     i16 stop_sfx_id;       // 0x8a
     i16 blowup_type;       // 0x8c
-    i16 debris_type;       // 0x8e
+    union { i16 debris_type; u16 completion_score; }; // 0x8e
     i16 hit_points;        // 0x90
     i16 score;             // 0x92
     NUVEC effect_position; // 0x94
@@ -2966,6 +2967,7 @@ struct GIZFORCE_s {
     void GetMechObjectInterface();
 };
 DECOMP_ASSERT(sizeof(GIZFORCE_s) == 0xac, "GIZFORCE_s ABI");
+DECOMP_ASSERT(offsetof(GIZFORCE_s, completion_score) == 0x8e, "GIZFORCE completion score offset");
 DECOMP_ASSERT(offsetof(GIZFORCE_s, anim_set) == 0x28, "GIZFORCE animation set offset");
 DECOMP_ASSERT(offsetof(GIZFORCE_s, config_flags) == 0x78, "GIZFORCE config flags offset");
 DECOMP_ASSERT(offsetof(GIZFORCE_s, progress_flags) == 0xa8, "GIZFORCE progress flags offset");
@@ -3089,6 +3091,8 @@ DECOMP_ASSERT(offsetof(GIZMOBLOWUP_s, draw_flags) == 0xa0, "GIZMOBLOWUP draw fla
 DECOMP_ASSERT(offsetof(GIZMOBLOWUP_s, type) == 0xac, "GIZMOBLOWUP type offset");
 DECOMP_ASSERT(offsetof(GIZMOBLOWUP_s, target_scale) == 0xb0, "GIZMOBLOWUP target scale offset");
 DECOMP_ASSERT(offsetof(GIZMOBLOWUP_s, reflection_height) == 0xdc, "GIZMOBLOWUP reflection height offset");
+DECOMP_ASSERT(offsetof(GIZMOBLOWUP_s, field_0xa8) == 0xa8, "GIZMOBLOWUP base score offset");
+DECOMP_ASSERT(offsetof(GIZMOBLOWUP_s, field_0x115) == 0x115, "GIZMOBLOWUP score multiplier offset");
 DECOMP_ASSERT(offsetof(GIZMOBLOWUP_s, name) == 0xfa, "GIZMOBLOWUP name offset");
 DECOMP_ASSERT(offsetof(GIZMOBLOWUP_s, platform_id) == 0x10a, "GIZMOBLOWUP platform id offset");
 DECOMP_ASSERT(offsetof(GIZMOBLOWUP_s, override_special) == 0x11c, "GIZMOBLOWUP override special offset");
@@ -3134,7 +3138,7 @@ struct GIZOBSTACLE_s {
     i16 trigger_box_yaw;
     i16 room_id;     // 0x86
     i16 blowup_type; // 0x88, name-table id until PostLoad
-    i16 pickup_count;
+    union { i16 pickup_count; u16 completion_score; };
     i16 start_sfx_id; // 0x8c
     i16 stop_sfx_id;  // 0x8e
     u8 state;         // 0x90
@@ -3202,6 +3206,7 @@ enum GIZOBSTACLE_RUNTIME_FLAGS : u8 {
 };
 
 DECOMP_ASSERT(sizeof(GIZOBSTACLE_s) == 0xa4, "GIZOBSTACLE_s ABI");
+DECOMP_ASSERT(offsetof(GIZOBSTACLE_s, completion_score) == 0x8a, "GIZOBSTACLE completion score offset");
 DECOMP_ASSERT(offsetof(GIZOBSTACLE_s, anim_set) == 0x34, "GIZOBSTACLE anim set offset");
 DECOMP_ASSERT(offsetof(GIZOBSTACLE_s, config_flags) == 0x68, "GIZOBSTACLE config flags offset");
 DECOMP_ASSERT(offsetof(GIZOBSTACLE_s, progress_flags) == 0x98, "GIZOBSTACLE progress flags offset");
@@ -3404,7 +3409,7 @@ struct GIZTURRET_s {
             u16 behavior_flags_high;
         };
     };
-    i16 field_0x10c;
+    union { i16 field_0x10c; u16 completion_score; };
     i16 room_id; // 0x10e
     i16 field_0x110;
     i16 field_0x112;
@@ -3432,6 +3437,7 @@ struct GIZTURRET_s {
     void GetMechObjectInterface();
 };
 DECOMP_ASSERT(sizeof(GIZTURRET_s) == 0x144, "GIZTURRET_s ABI");
+DECOMP_ASSERT(offsetof(GIZTURRET_s, completion_score) == 0x10c, "GIZTURRET completion score offset");
 DECOMP_ASSERT(offsetof(GIZTURRET_s, position) == 0x24, "GIZTURRET position offset");
 DECOMP_ASSERT(offsetof(GIZTURRET_s, pitch) == 0x54, "GIZTURRET pitch offset");
 DECOMP_ASSERT(offsetof(GIZTURRET_s, yaw) == 0x60, "GIZTURRET yaw offset");

@@ -416,7 +416,15 @@ void GizmoBlowupUpdateMatrix(GIZMOBLOWUP_s *blowup) {
     NuMtxTranslate(&blowup->transform, &position);
 }
 
-void GizmoBlowups_TotalScore(void *) {
+u32 GizmoBlowups_TotalScore(void *world) {
+    WORLDINFO_s *info = static_cast<WORLDINFO_s *>(world);
+    GIZMOBLOWUP_s *blowup = info->gizmo_blowups;
+    u32 total = 0;
+    if (blowup != NULL) {
+        for (i32 i = 0; i < info->gizmo_blowup_count; ++i, ++blowup)
+            total += (i8)blowup->field_0x115 * blowup->field_0xa8;
+    }
+    return total;
 }
 
 void GizmoBlowupTypeNameBlank(char *) {
