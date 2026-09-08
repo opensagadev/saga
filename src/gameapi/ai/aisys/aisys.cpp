@@ -87,6 +87,77 @@ static __used__ void AIMoveFindDivertNode(AISYS *, AIPATH *path, AIPACKET *packe
     }
 }
 
+static __used__ i32 AIMoveAdjustDestinationPath(AISYS *system, AIPACKET *packet) {
+    if (packet->path_info.path == packet->fallback_path_info.path &&
+        packet->fallback_path_info.connection != NULL) {
+        return 0;
+    }
+    AIMoveFindDivertNode(system, packet->path_info.path, packet, &packet->fallback_destination);
+    if (packet->divert_node_index >= packet->path_info.path->node_count) {
+        return -1;
+    }
+    AIPATHNODE *node = &packet->path_info.path->nodes[packet->divert_node_index];
+    if (node->connection_count == 0) {
+        return -1;
+    }
+    packet->fallback_destination = node->position;
+    packet->fallback_stopping_distance = 0.0f;
+    packet->movement_parameter = NuFmax(node->radius - 1.0f, 1.0f);
+    memset(&packet->fallback_path_info, 0, sizeof(packet->fallback_path_info));
+    packet->fallback_path_info.path = packet->path_info.path;
+    packet->fallback_path_info.connection = node->connections[0];
+    packet->fallback_path_info.direction = node->connections[0]->node_indices[0] == packet->divert_node_index;
+    packet->fallback_path_info.dist = node->connections[0]->node_indices[0] == packet->divert_node_index ? 0.0f : 1.0f;
+    return 1;
+}
+
+static __used__ i32 AIMoveChooseExitNodePath(AISYS *system, AIPACKET *packet) {
+    AIPATHNODE *first = &packet->path_info.path->nodes[packet->path_info.connection->node_indices[0]];
+    AIPATHNODE *second = &packet->path_info.path->nodes[packet->path_info.connection->node_indices[1]];
+    f32 distance = NuVecDistSqr(&packet->owner->apiobj.position, &first->position, NULL) - first->radius_squared;
+    f32 second_distance = NuVecDistSqr(&packet->owner->apiobj.position, &second->position, NULL) - second->radius_squared;
+    AIPATHNODE *node = distance < second_distance ? first : second;
+    if (node->special_route_index >= packet->path_info.path->special_route_count) {
+        return 0;
+    }
+    AIPATHSPECIALROUTE *route = &system->path_sys->special_routes[
+        packet->path_info.path->special_routes[node->special_route_index].special_route_index];
+    for (i32 index = 0; index < route->path_count; ++index) {
+        if (route->paths[index] == packet->fallback_path_info.path) {
+            AISysCharacterSetPath(packet, packet->fallback_path_info.path);
+            return 1;
+        }
+    }
+    f32 nearest = FLT_MAX;
+    AIPATH *selected = NULL;
+    for (i32 index = 0; index < route->path_count; ++index) {
+        AIPATH *path = route->paths[index];
+        AIPATHNODELINK *links = path->special_routes;
+        i32 nearest_node = -1;
+        f32 nearest_node_distance = FLT_MAX;
+        for (i32 link = 0; link < path->special_route_count; ++link) {
+            f32 candidate = NuVecDistSqr(&path->nodes[links[link].node_index].position,
+                                        &packet->fallback_destination, NULL);
+            if (candidate < nearest_node_distance) {
+                nearest_node_distance = candidate;
+                nearest_node = links[link].node_index;
+            }
+        }
+        if (nearest_node != -1) {
+            distance = nearest_node_distance;
+        }
+        if (distance < nearest) {
+            nearest = distance;
+            selected = route->paths[index];
+        }
+    }
+    if (selected != NULL) {
+        AISysCharacterSetPath(packet, selected);
+        return 1;
+    }
+    return 0;
+}
+
 extern "C" f32 AIPathNodeDistanceToPathNode(AIPATH *path, i32 start_node, i32 destination_node, i32 route_index,
                                            u32 excluded_route_mask) {
     if (path->route_matrix == NULL) {

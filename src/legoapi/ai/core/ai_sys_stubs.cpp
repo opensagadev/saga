@@ -124,7 +124,7 @@ static void AISysLoadPathRoutes(AISYS *system, AIPATH *path) {
             static_cast<AIPATHNODELINK *>(AISysLoadAlloc(system, path->special_route_count * sizeof(AIPATHNODELINK)));
         for (i32 i = 0; i < path->special_route_count; ++i) {
             path->special_routes[i].node_index = EdFileReadUnsignedChar();
-            path->special_routes[i].node = EdFileReadShort();
+            path->special_routes[i].special_route_index = EdFileReadShort();
         }
     }
 }
@@ -185,7 +185,7 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene) {
                 node->path_flags = EdFileReadShort();
                 node->distance_cache_nodes[0] = 0xff;
                 node->distance_cache_nodes[1] = 0xff;
-                node->special_type = static_cast<u8>(EdFileReadChar());
+                node->special_route_index = static_cast<u8>(EdFileReadChar());
 
                 char special_name[256] = {};
                 i32 special_name_length = EdFileReadChar();

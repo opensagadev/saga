@@ -78,7 +78,7 @@ typedef struct AIPATHNODE_s {
     u8 runtime_flags;
     i16 path_flags;
     u8 distance_cache_nodes[2];
-    u8 special_type;
+    u8 special_route_index;
     u8 padding_0x31[3];
     AIPATHCNX **connections;
     f32 distance_cache[2];
@@ -116,7 +116,7 @@ typedef struct AIPATHSPECIALROUTE_s {
 typedef struct AIPATHNODELINK_s {
     u8 node_index;
     u8 padding_0x01;
-    i16 node;
+    i16 special_route_index;
 } AIPATHNODELINK;
 
 typedef struct AIPATH_s {
@@ -418,6 +418,8 @@ DECOMP_ASSERT(offsetof(AIPATHNODE, special_handle) == 0x40, "AIPATHNODE special 
 DECOMP_ASSERT(sizeof(AIPATHROUTE) == 0x28, "AIPATHROUTE size");
 DECOMP_ASSERT(sizeof(AIPATHNODELINK) == 0x04, "AIPATHNODELINK size");
 DECOMP_ASSERT(offsetof(AIPATHNODELINK, node_index) == 0x00, "AIPATHNODELINK node index offset");
+DECOMP_ASSERT(offsetof(AIPATHNODELINK, special_route_index) == 0x02, "AIPATHNODELINK route index offset");
+DECOMP_ASSERT(offsetof(AIPATHNODE, special_route_index) == 0x30, "AIPATHNODE special route index offset");
 DECOMP_ASSERT(offsetof(AIPATHNODE, route_membership_mask) == 0x58, "AIPATHNODE route membership offset");
 DECOMP_ASSERT(offsetof(AIPATHNODE, route_boundary_mask) == 0x5a, "AIPATHNODE route boundary offset");
 DECOMP_ASSERT(offsetof(AIPATHROUTE, node_routes) == 0x04, "AIPATHROUTE node mapping offset");
