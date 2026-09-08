@@ -232,8 +232,13 @@ typedef struct AIPACKET_s {
     i16 animation_override_from; // 0x126 (0xe9 means every ordinary animation)
     i16 animation_override_to;   // 0x128
     u8 pad1b[0x12c - 0x12a];
-    u32 character_type_mask_low;  // 0x3ec overall
-    u32 character_type_mask_high; // 0x3f0 overall
+    union {
+        u64 character_type_mask; // 0x12c, character classes accepted by path routes
+        struct {
+            u32 character_type_mask_low;
+            u32 character_type_mask_high;
+        };
+    };
     u8 field_0x134;               // 0x3f4 overall: source creature index
     u8 path_connection_state;     // 0x3f5 overall
     u16 available_routes;         // 0x3f6 overall

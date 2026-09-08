@@ -30,6 +30,35 @@
 #include "nu2api/numath/nurand.h"
 
 extern i32 Hub_GetRandomCharType();
+extern "C" void AISysCharacterSetPath(AIPACKET *packet, AIPATH *path) {
+    if (packet->path_info.path == path) {
+        return;
+    }
+
+    memset(&packet->path_info, 0, sizeof(packet->path_info));
+    packet->path_info.path = path;
+    packet->path_info.path_index = 0xff;
+    packet->available_routes = 0;
+    packet->inside_path_node = -1;
+    packet->current_route = 0xff;
+    packet->next_route = 0;
+    packet->goal_path_node = NULL;
+
+    if (path == NULL || path->route_count == 0) {
+        return;
+    }
+
+    const u64 character_mask = packet->character_type_mask;
+    i32 route_index = 0;
+    do {
+        AIPATHROUTE &route = path->routes[route_index];
+        if ((route.character_masks[0] & character_mask) != 0) {
+            packet->available_routes |= static_cast<u16>(static_cast<u64>(1) << route_index);
+        }
+        ++route_index;
+    } while (path->route_count > route_index);
+}
+
 static __used__ void AIMoveFindDivertNode(AISYS *, AIPATH *path, AIPACKET *packet, NUVEC *destination) {
     if (path->special_route_count != 0 &&
         (packet->navigation_flags & AIPACKET_NAVIGATION_FLAG_USE_SPECIAL_ROUTES) != 0) {

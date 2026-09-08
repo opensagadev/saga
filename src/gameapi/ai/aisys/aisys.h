@@ -104,7 +104,10 @@ typedef struct AIPATHROUTE_s {
     u8 exit_node_count;
     u8 padding_0x12[2];
     u8 **route_nodes;
-    u32 character_mask[4];
+    union {
+        u32 character_mask[4];
+        u64 character_masks[2];
+    };
 } AIPATHROUTE;
 
 typedef struct AIPATHSPECIALROUTE_s {
@@ -416,6 +419,7 @@ DECOMP_ASSERT(sizeof(AIPATHNODE) == 0x5c, "AIPATHNODE size");
 DECOMP_ASSERT(offsetof(AIPATHNODE, runtime_flags) == 0x2b, "AIPATHNODE runtime flags offset");
 DECOMP_ASSERT(offsetof(AIPATHNODE, special_handle) == 0x40, "AIPATHNODE special handle offset");
 DECOMP_ASSERT(sizeof(AIPATHROUTE) == 0x28, "AIPATHROUTE size");
+DECOMP_ASSERT(offsetof(AIPATHROUTE, character_masks) == 0x18, "AIPATHROUTE character masks offset");
 DECOMP_ASSERT(sizeof(AIPATHNODELINK) == 0x04, "AIPATHNODELINK size");
 DECOMP_ASSERT(offsetof(AIPATHNODELINK, node_index) == 0x00, "AIPATHNODELINK node index offset");
 DECOMP_ASSERT(offsetof(AIPATHNODELINK, special_route_index) == 0x02, "AIPATHNODELINK route index offset");

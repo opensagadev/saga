@@ -1195,34 +1195,6 @@ extern "C" {
         packet->movement_flags = movement_flags & static_cast<u8>(~AIPACKET_MOVEMENT_MODE_MASK);
     }
 
-    void AISysCharacterSetPath(AIPACKET *packet, AIPATH *path) {
-        if (packet->path_info.path == path) {
-            return;
-        }
-
-        memset(&packet->path_info, 0, sizeof(packet->path_info));
-        packet->path_info.path = path;
-        packet->path_info.path_index = 0xff;
-        packet->available_routes = 0;
-        packet->inside_path_node = -1;
-        packet->current_route = 0xff;
-        packet->next_route = 0;
-        packet->goal_path_node = NULL;
-
-        if (path == NULL || path->route_count == 0) {
-            return;
-        }
-
-        const u32 character_mask_low = packet->character_type_mask_low;
-        const u32 character_mask_high = packet->character_type_mask_high;
-        for (i32 route_index = 0; route_index < path->route_count; ++route_index) {
-            AIPATHROUTE &route = path->routes[route_index];
-            if ((route.character_mask[0] & character_mask_low) != 0 ||
-                (route.character_mask[1] & character_mask_high) != 0) {
-                packet->available_routes |= static_cast<u16>(1u << route_index);
-            }
-        }
-    }
 
     void AISysCharacterSetPathCnx(AIPACKET *packet, NUVEC *position, AIPATHCNX *connection, i32 direction) {
         if (connection == NULL || packet->owner == NULL) {
