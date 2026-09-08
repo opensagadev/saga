@@ -655,9 +655,12 @@ typedef struct GameObject_s {
                 u8 pad_744[0x768 - 0x744];
                 NUVEC launch_origin; // 0x744, saved on entering launch context
                 struct {
-                    NUVEC zipup_start_position;   // 0x744, selected endpoint
-                    NUVEC zipup_swing_position;   // 0x750, end of the swing animation
-                    NUVEC zipup_landing_position; // 0x75c, opposite endpoint with ground height
+                    NUVEC zipup_start_position; // 0x744, selected endpoint
+                    NUVEC zipup_swing_position; // 0x750, end of the swing animation
+                    union {
+                        NUVEC zipup_landing_position;       // 0x75c, opposite endpoint with ground height
+                        NUVEC carried_object_drop_position; // 0x75c, carry put-down position
+                    };
                 };
             };
             f32 field_0x768; // 0x0768
@@ -1419,3 +1422,5 @@ DECOMP_ASSERT(offsetof(GameObject_s, saved_position) == 0x10c8, "GameObject save
 
 DECOMP_ASSERT(offsetof(GameObject_s, run_speed_override) == 0xee0, "GameObject run speed override offset");
 DECOMP_ASSERT(offsetof(GameObject_s, walk_speed_override) == 0xee4, "GameObject walk speed override offset");
+
+DECOMP_ASSERT(offsetof(GameObject_s, carried_object_drop_position) == 0x75c, "GameObject carry drop position offset");

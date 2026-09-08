@@ -9,18 +9,6 @@
 
 i16 LEGOACT_SUPERCARRY_WALK = -1;
 
-void SuperCarry_Start(GameObject_s *, GIZMOBLOWUP_s *, i32) {
-}
-
-void SuperCarry_Release(GameObject_s *) {
-}
-
-void SuperCarry_MoveCode(WORLDINFO_s *, GameObject_s *) {
-}
-
-void SuperCarry_Possible(GameObject_s *, i32) {
-}
-
 // Original 0x4fd340, 390 bytes.
 i32 SuperCarry_YRotation(GameObject_s *object, u16 input_angle) {
     if (object->field_0x7a3 == 0) {

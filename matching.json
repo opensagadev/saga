@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 29.852629,
+    "fuzzy_match_percent": 29.898443,
     "total_code": "4722419",
     "matched_code": "59808",
     "matched_code_percent": 1.2664696,
@@ -42002,7 +42002,7 @@
           "address": 5189200,
           "offset": 4299232,
           "size": 258,
-          "match_percent": 6.666666
+          "match_percent": 76.85714
         }
       ]
     },
@@ -42881,30 +42881,6 @@
           "match_percent": 13.214286
         },
         {
-          "name": "_Z19SuperCarry_PossibleP12GameObject_si",
-          "demangled_name": "SuperCarry_Possible(GameObject_s*, int)",
-          "address": 5225040,
-          "offset": 4335072,
-          "size": 130,
-          "match_percent": 5.789473
-        },
-        {
-          "name": "_Z16SuperCarry_StartP12GameObject_sP13GIZMOBLOWUP_si",
-          "demangled_name": "SuperCarry_Start(GameObject_s*, GIZMOBLOWUP_s*, int)",
-          "address": 5225184,
-          "offset": 4335216,
-          "size": 1204,
-          "match_percent": 1.659751
-        },
-        {
-          "name": "_Z19SuperCarry_MoveCodeP11WORLDINFO_sP12GameObject_s",
-          "demangled_name": "SuperCarry_MoveCode(WORLDINFO_s*, GameObject_s*)",
-          "address": 5226400,
-          "offset": 4336432,
-          "size": 4691,
-          "match_percent": 0.412371
-        },
-        {
           "name": "_Z23SuperCarry_SetTargetMomP12GameObject_sf",
           "demangled_name": "SuperCarry_SetTargetMom(GameObject_s*, float)",
           "address": 5231104,
@@ -42919,14 +42895,6 @@
           "offset": 4341456,
           "size": 390,
           "match_percent": 0.0
-        },
-        {
-          "name": "_Z18SuperCarry_ReleaseP12GameObject_s",
-          "demangled_name": "SuperCarry_Release(GameObject_s*)",
-          "address": 5231920,
-          "offset": 4341952,
-          "size": 75,
-          "match_percent": 12.222222
         }
       ]
     },
@@ -43417,6 +43385,38 @@
           "offset": 4332912,
           "size": 2147,
           "match_percent": 85.18673
+        },
+        {
+          "name": "_Z19SuperCarry_PossibleP12GameObject_si",
+          "demangled_name": "SuperCarry_Possible(GameObject_s*, int)",
+          "address": 5225040,
+          "offset": 4335072,
+          "size": 130,
+          "match_percent": 95.47369
+        },
+        {
+          "name": "_Z16SuperCarry_StartP12GameObject_sP13GIZMOBLOWUP_si",
+          "demangled_name": "SuperCarry_Start(GameObject_s*, GIZMOBLOWUP_s*, int)",
+          "address": 5225184,
+          "offset": 4335216,
+          "size": 1204,
+          "match_percent": 79.435684
+        },
+        {
+          "name": "_Z19SuperCarry_MoveCodeP11WORLDINFO_sP12GameObject_s",
+          "demangled_name": "SuperCarry_MoveCode(WORLDINFO_s*, GameObject_s*)",
+          "address": 5226400,
+          "offset": 4336432,
+          "size": 4691,
+          "match_percent": 18.825773
+        },
+        {
+          "name": "_Z18SuperCarry_ReleaseP12GameObject_s",
+          "demangled_name": "SuperCarry_Release(GameObject_s*)",
+          "address": 5231920,
+          "offset": 4341952,
+          "size": 75,
+          "match_percent": 99.94444
         }
       ]
     },
