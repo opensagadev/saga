@@ -5308,6 +5308,26 @@ static i32 Action_LinkTurretToController(AISYS *system, AISCRIPTPROCESS *, AIPAC
     return 1;
 }
 
+void RegisterTakeOverObject(GameObject *object);
+
+static i32 Action_RegisterTakeOverObject(AISYS *system, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
+                                        i32 param_count, i32 first_time, f32) {
+    if (first_time == 0) {
+        return 1;
+    }
+    GameObject *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+    for (i32 index = 0; index < param_count; ++index) {
+        char *value = NuStrIStr(params[index], "character=");
+        if (value != NULL) {
+            object = GetNamedGameObject(system, value + 10);
+        }
+    }
+    if (object != NULL) {
+        RegisterTakeOverObject(object);
+    }
+    return 1;
+}
+
 extern "C" {
     // Keep this registry in the exact order used by the shipped script parser.
     AIACTIONDEF lego_aiactiondefs[] = {
@@ -5468,7 +5488,7 @@ extern "C" {
         {"LinkTurretToController", Action_LinkTurretToController, 0, 0, 0},
         {"TakeOver", Action_TakeOver, 1, 0, 0},
         {"ReleaseTakeOver", NULL, 1, 0, 0},
-        {"RegisterTakeOverObject", NULL, 0, 0, 0},
+        {"RegisterTakeOverObject", Action_RegisterTakeOverObject, 0, 0, 0},
         {"SetTakeOverTarget", Action_SetTakeOverTarget, 0, 0, 0},
         {"ClearTakeOverTarget", Action_ClearTakeOverTarget, 0, 0, 0},
         {"AddGameMsgCount", Action_AddGameMsgCount, 1, 0, 0},

@@ -497,10 +497,6 @@ static __used__ f32 Condition_NetworkGameOnGoing(AISYS_s *, AISCRIPTPROCESS_s *,
 
 
 
-static __used__ i32 Action_RegisterTakeOverObject(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32,
-                                                  f32) {
-    return 0;
-}
 
 
 
