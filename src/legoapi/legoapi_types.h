@@ -462,6 +462,7 @@ struct AREASAVE_s {
     f32 challenge_trial_time;
 };
 DECOMP_ASSERT(sizeof(AREASAVE_s) == 0xc, "AREASAVE_s size");
+DECOMP_ASSERT(offsetof(AREASAVE_s, area_complete) == 0x1, "AREASAVE area completion offset");
 DECOMP_ASSERT(offsetof(AREASAVE_s, challenge_trial_time) == 0x8, "AREASAVE challenge time offset");
 struct ATTRACTO_s;
 struct BATARANG_s {

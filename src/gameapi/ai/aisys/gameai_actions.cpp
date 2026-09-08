@@ -514,9 +514,6 @@ static __used__ i32 Action_LaunchGuidedMissile(AISYS_s *, AISCRIPTPROCESS_s *, A
 
 
 
-static __used__ void *Condition_AreaCompleteInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
-}
 
 
 

@@ -22,6 +22,7 @@
 #include "legoapi/legoapi_types.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/world/level.h"
+#include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
 #include "legoapi/world/world_shared.h"
 #include "nu2api/nucore/nustring.h"
@@ -6129,14 +6130,13 @@ __used__ static f32 Condition_AnimSpeedMul(AISYS *sys, AISCRIPTPROCESS *processo
     return 0.0f;
 }
 
-__used__ static f32 Condition_AreaComplete(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                           void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
+static f32 Condition_AreaComplete(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *argument) {
+    AREADATA *area = static_cast<AREADATA *>(argument);
+    return area != NULL && Game.area_save[area->index].area_complete == 1 ? 1.0f : 0.0f;
+}
+
+static void *Condition_AreaCompleteInit(AISYS *, char *name, AISCRIPT *) {
+    return name != NULL ? Area_FindByName(name, NULL) : NULL;
 }
 
 __used__ static f32 Condition_BehindCamera(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
@@ -7791,6 +7791,8 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_BADDY].eval_fn = Condition_IAmABaddy;
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_NEUTRAL].eval_fn = Condition_IAmANeutral;
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_PARTY_CHARACTER].eval_fn = Condition_IAmAPartyCharacter;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_AREA_COMPLETE].eval_fn = Condition_AreaComplete;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_AREA_COMPLETE].init_fn = Condition_AreaCompleteInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_TO_LEVEL].eval_fn = Condition_BeenToLevel;
 
             lego_aiactiondefs[LEGO_AI_ACTION_SET_CURRENT_SPEED].eval_fn = Action_SetCurrentSpeed;
