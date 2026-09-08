@@ -539,6 +539,11 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+static f32 Condition_BoltsDontGetDeflectedBack(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    return packet != NULL && packet->owner != NULL &&
+        (packet->owner->apiobj.objptr->field_0xefc & 8) != 0 ? 1.0f : 0.0f;
+}
+
 static f32 Condition_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
     AITRIGGERSETSYS_s *system = WORLD->ai_trigger_set_sys;
     if (system == NULL) return 0.0f;
@@ -870,7 +875,7 @@ extern "C" {
         {"ChallengeMode", Condition_ChallengeMode, NULL},
         {"PSP", Condition_PSP, NULL},
         {"AIOverrideControl", Condition_AIOverrideControl, Condition_AIOverrideControlInit},
-        {"BoltsDontGetDeflectedBack", NULL, NULL},
+        {"BoltsDontGetDeflectedBack", Condition_BoltsDontGetDeflectedBack, NULL},
         {"CheatProgress", Condition_CheatProgress, NULL},
         {"BigJumpComplete", Condition_BigJumpComplete, NULL},
         {"RespawnLocatorIs", NULL, NULL},
