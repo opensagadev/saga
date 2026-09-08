@@ -706,6 +706,23 @@ static void *Condition_CharacterTypeExistsInit(AISYS_s *system, char *name, AISC
     return (void *)(intptr_t)-1;
 }
 
+static f32 Condition_EitherPlayerInMyTriggerArea(AISYS_s *system, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *, void *) {
+    if (system != NULL && process->unknown_a0 != NULL) {
+        AIAREA *area = process->unknown_a0;
+        if (system->player_1 != NULL && area->system != NULL) {
+            i64 mask = 1 << (area - area->system->areas);
+            u64 membership = ((u64)system->player_1->ai_area_mask_high << 32) | system->player_1->ai_area_mask_low;
+            if ((membership & mask) != 0) return 1.0f;
+        }
+        if (system->player_2 != NULL && area->system != NULL) {
+            i64 mask = 1 << (area - area->system->areas);
+            u64 membership = ((u64)system->player_2->ai_area_mask_high << 32) | system->player_2->ai_area_mask_low;
+            if ((membership & mask) != 0) return 1.0f;
+        }
+    }
+    return 0.0f;
+}
+
 static f32 Condition_OnDynamicGrapple(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
     GameObject *object = static_cast<GameObject *>(argument);
     if (object == NULL) {
@@ -1431,7 +1448,7 @@ extern "C" {
         {"HasTakeOverTarget", NULL, NULL},
         {"TakeOverRange", NULL, NULL},
         {"TakeOverTargetInTriggerArea", NULL, NULL},
-        {"EitherPlayerInMyTriggerArea", NULL, NULL},
+        {"EitherPlayerInMyTriggerArea", Condition_EitherPlayerInMyTriggerArea, NULL},
         {"AreaContainsBaddies", Condition_AreaContainsBaddies, Condition_AreaContainsBaddiesInit},
         {"AreaContainsGoodies", Condition_AreaContainsGoodies, Condition_AreaContainsGoodiesInit},
         {"AreaContainsPartyMember", Condition_AreaContainsPartyMember, Condition_AreaContainsPartyMemberInit},
