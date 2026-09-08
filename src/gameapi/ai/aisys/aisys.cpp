@@ -5708,15 +5708,6 @@ __used__ static f32 Condition_BlowupBlownup(AISYS *sys, AISCRIPTPROCESS *process
 }
 
 
-__used__ static f32 Condition_CheatProgress(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                            void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
-}
 
 static void *Condition_IAmInit(AISYS *sys, char *arg, AISCRIPT *) {
     return arg != NULL && GetNamedAPIObjectFn != NULL ? GetNamedAPIObjectFn(sys, arg) : NULL;

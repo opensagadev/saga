@@ -486,6 +486,11 @@ static f32 Condition_IsVisible(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, cha
     return result;
 }
 
+// The reference executable exposes this condition as an unconditional zero.
+static f32 Condition_CheatProgress(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return 0.0f;
+}
+
 static f32 Condition_ChallengeMode(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return ChallengeMode != 0 ? 1.0f : 0.0f;
 }
@@ -818,7 +823,7 @@ extern "C" {
         {"PSP", NULL, NULL},
         {"AIOverrideControl", NULL, NULL},
         {"BoltsDontGetDeflectedBack", NULL, NULL},
-        {"CheatProgress", NULL, NULL},
+        {"CheatProgress", Condition_CheatProgress, NULL},
         {"BigJumpComplete", NULL, NULL},
         {"RespawnLocatorIs", NULL, NULL},
         {"InMiniCut", NULL, NULL},
