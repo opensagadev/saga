@@ -29,7 +29,6 @@ void Hint_CancelCurrent(void);
 extern AREADATA_s *PODSPRINT_ADATA;
 extern AREADATA_s *BATTLEOVERCORUSCANT_ADATA;
 
-
 void GameCam_Blend(GAMECAMERA_s *camera, f32 duration, f32 curve, i32 mode) {
     if (camera == NULL) {
         camera = GameCam;
@@ -254,9 +253,10 @@ void GameCam_UpdateLookRot(GAMECAMERA_s *camera) {
     camera->field_0x218 = SeekValF(camera->field_0x218, camera->field_0x210, 3.0f);
 }
 
-void GameCameraMakeMiniCut(nugspline_s *spline, f32 start, f32 end, f32 blend_in, f32 blend_out,
-                           i32 borders, i32 hold_until_players_move) {
-    if (spline == NULL) return;
+void GameCameraMakeMiniCut(nugspline_s *spline, f32 start, f32 end, f32 blend_in, f32 blend_out, i32 borders,
+                           i32 hold_until_players_move) {
+    if (spline == NULL)
+        return;
     ObstacleCamSpl = spline;
     ObstacleCamStart = start;
     ObstacleCamEnd = end;
@@ -267,10 +267,12 @@ void GameCameraMakeMiniCut(nugspline_s *spline, f32 start, f32 end, f32 blend_in
     ObstacleCamCutTgtPtr = NULL;
     ObstacleCamCutCamPtr = NULL;
     ObstacleCamBorders = borders;
-    if (VehicleArea != 0) hold_until_players_move = 0;
+    if (VehicleArea != 0)
+        hold_until_players_move = 0;
     ObstacleCamHoldUntilPlayersMove = hold_until_players_move;
     if (borders != 0) {
-        if (start == 0.0f && blend_in <= 0.0f) CutBorderScale = 1.0f;
+        if (start == 0.0f && blend_in <= 0.0f)
+            CutBorderScale = 1.0f;
     }
     if (start <= 0.0f && blend_in <= 0.0f) {
         GameCam->blend_time = GameCam->blend_duration;
@@ -322,9 +324,8 @@ void KeepOnScreen(GameObject_s *object) {
             static_cast<TECHNO *>(player->field_0x788)->controlled_object == object)
             controlled = true;
     }
-    if ((static_cast<i8>(object->apiobj.flags_low) >= 0 && !controlled) ||
-        object->apiobj.field_0x287 != 0 || (object->field_0xefe & 4) == 0 || MiniCutCam != 0 || GetMenuID() != -1 ||
-        object->character_context == 0x2b) {
+    if ((static_cast<i8>(object->apiobj.flags_low) >= 0 && !controlled) || object->apiobj.field_0x287 != 0 ||
+        (object->field_0xefe & 4) == 0 || MiniCutCam != 0 || GetMenuID() != -1 || object->character_context == 0x2b) {
         return;
     }
 
@@ -348,8 +349,8 @@ void KeepOnScreen(GameObject_s *object) {
         const i32 rotations[4] = {0x6000, 0xa000, 0x2000, 0xe000};
         for (i32 index = 0; index < 4; ++index) {
             PLAYPLANE_s *plane = &PlayPlane[planes[index]];
-            if (OnOrInsidePlane(&object->apiobj.collision_position, &plane->point, &plane->normal,
-                                NULL, 0.0f, NULL) != 0) {
+            if (OnOrInsidePlane(&object->apiobj.collision_position, &plane->point, &plane->normal, NULL, 0.0f, NULL) !=
+                0) {
                 NUVEC normal;
                 NuVecRotateY(&normal, &GunshipANorm, rotations[index]);
                 Surface_Deflect(&normal, &object->apiobj.velocity, &response, 0);
@@ -369,10 +370,9 @@ void KeepOnScreen(GameObject_s *object) {
     }
 
     if (VehicleArea == 0) {
-        GameObject_s *other_player = object == Player[0] ? Player[1] :
-                                    object == Player[1] ? Player[0] : NULL;
-        if (other_player != NULL && (static_cast<i8>(other_player->apiobj.flags_low) >= 0 ||
-                                    other_player->character_context == 0x2b))
+        GameObject_s *other_player = object == Player[0] ? Player[1] : object == Player[1] ? Player[0] : NULL;
+        if (other_player != NULL &&
+            (static_cast<i8>(other_player->apiobj.flags_low) >= 0 || other_player->character_context == 0x2b))
             return;
     }
     const bool two_players = Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.flags_low) < 0 &&
@@ -408,8 +408,8 @@ void KeepOnScreen(GameObject_s *object) {
         constrained = true;
     }
 
-    if ((VehicleArea != 0 && (WORLD->area == NULL || WORLD->area != PODSPRINT_ADATA)) ||
-        KEEPONSCREEN_SIDESONLY == 0 || (two_players && abs(RotDiff(0, GameCam->pitch)) > 0x2000)) {
+    if ((VehicleArea != 0 && (WORLD->area == NULL || WORLD->area != PODSPRINT_ADATA)) || KEEPONSCREEN_SIDESONLY == 0 ||
+        (two_players && abs(RotDiff(0, GameCam->pitch)) > 0x2000)) {
         PLAYPLANE_s *depth_plane = NULL;
         if (OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[4].point, &PlayPlane[4].normal, NULL,
                             -object->apiobj.field_0x1e0, NULL) != 0) {
@@ -478,17 +478,21 @@ void ViewCamSetActive(i32, GAMEPAD_s *) {
 void KeepPointOnScreen(NUVEC *position, NUVEC *velocity) {
     if (position->x < -0.85f) {
         position->x = -0.85f;
-        if (velocity != NULL) velocity->x = 0.0f;
+        if (velocity != NULL)
+            velocity->x = 0.0f;
     } else if (position->x > 0.85f) {
         position->x = 0.85f;
-        if (velocity != NULL) velocity->x = 0.0f;
+        if (velocity != NULL)
+            velocity->x = 0.0f;
     }
     if (position->y < -0.85f) {
         position->y = -0.85f;
-        if (velocity != NULL) velocity->y = 0.0f;
+        if (velocity != NULL)
+            velocity->y = 0.0f;
     } else if (position->y > 0.85f) {
         position->y = 0.85f;
-        if (velocity != NULL) velocity->y = 0.0f;
+        if (velocity != NULL)
+            velocity->y = 0.0f;
     }
 }
 
@@ -518,19 +522,20 @@ GAMEPAD_s *ViewCamGetGamePad() {
 // Original: 784 bytes.
 void KeepVehicleOnScreen(GameObject_s *object, i32 sides, i32 top, i32 bottom) {
     object->field_0xf03 |= 0x10;
-    if (GamePlayTimer.time_elapsed < 1.0f) return;
+    if (GamePlayTimer.time_elapsed < 1.0f)
+        return;
     f32 margin = WORLD->area == BATTLEOVERCORUSCANT_ADATA ? 0.5f : 1.0f;
     f32 distance;
     if (sides != 0) {
-        OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[1].point, &PlayPlane[1].normal,
-                        NULL, 0.0f, &distance);
+        OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[1].point, &PlayPlane[1].normal, NULL, 0.0f,
+                        &distance);
         if (distance < margin) {
             f32 correction = -((distance - margin) / margin);
             f32 speed = object->apiobj.character_data->game_character->run_speed;
             object->target_velocity.x += (speed + speed) * (correction + correction);
         } else {
-            OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[2].point, &PlayPlane[2].normal,
-                            NULL, 0.0f, &distance);
+            OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[2].point, &PlayPlane[2].normal, NULL, 0.0f,
+                            &distance);
             if (distance < margin) {
                 f32 correction = -((distance - margin) / margin);
                 f32 speed = -object->apiobj.character_data->game_character->run_speed;
@@ -539,8 +544,8 @@ void KeepVehicleOnScreen(GameObject_s *object, i32 sides, i32 top, i32 bottom) {
         }
     }
     if (top != 0) {
-        OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[3].point, &PlayPlane[3].normal,
-                        NULL, 0.0f, &distance);
+        OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[3].point, &PlayPlane[3].normal, NULL, 0.0f,
+                        &distance);
         if (distance != 1000000000.0f && distance < margin) {
             f32 correction = -((distance - margin) / margin);
             f32 speed = -object->apiobj.character_data->game_character->run_speed;
@@ -551,8 +556,8 @@ void KeepVehicleOnScreen(GameObject_s *object, i32 sides, i32 top, i32 bottom) {
         distance = 1000000000.0f;
     }
     if (bottom != 0) {
-        OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[4].point, &PlayPlane[4].normal,
-                        NULL, 0.0f, &distance);
+        OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[4].point, &PlayPlane[4].normal, NULL, 0.0f,
+                        &distance);
         if (distance < margin) {
             f32 correction = -((distance - margin) / margin);
             f32 speed = object->apiobj.character_data->game_character->run_speed;

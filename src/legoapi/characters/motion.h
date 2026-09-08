@@ -106,8 +106,8 @@ extern i16 LEGOACT_COMBOJUMP;
 extern void (*BigJump_EndOfLandFn)(GameObject_s *);
 extern i32 (*BigJump_JumpActionFn)(GameObject_s *);
 extern i32 (*BigJump_LandActionFn)(GameObject_s *);
-i32 StartBigJump(GameObject_s *object, nuvec_s *destination, i32 mode, f32 height_scale, f32 speed_scale,
-                  i32 animation, i8 flags);
+i32 StartBigJump(GameObject_s *object, nuvec_s *destination, i32 mode, f32 height_scale, f32 speed_scale, i32 animation,
+                 i8 flags);
 GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *script_name, AIPATHINFO_s *path_info,
                                  AIGROUP_s *group, i32 set_on_surface, nugspline_s *spline, nuvec_s *spline_offset,
                                  i32 spline_mode, i32 creature_set);

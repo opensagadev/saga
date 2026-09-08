@@ -155,8 +155,7 @@ void BigJumpCode(GameObject_s *object) {
                 return;
             }
             if (object->field_0x7aa != 0 &&
-                (object->pad_gamepad->input_magnitude > 0.0f ||
-                 object->IsRunningTaskType(MechTouchTaskGoTo::HashId))) {
+                (object->pad_gamepad->input_magnitude > 0.0f || object->IsRunningTaskType(MechTouchTaskGoTo::HashId))) {
                 object->character_context = -1;
                 return;
             }
@@ -216,12 +215,12 @@ void BigJumpCode(GameObject_s *object) {
                 }
             }
             f32 sine = NU_SIN_LUT(static_cast<i32>(fraction * 32768.0f));
-            object->apiobj.position.x = object->external_force.x +
-                (object->launch_origin.x - object->external_force.x) * horizontal;
-            object->apiobj.position.y = object->external_force.y +
-                (object->launch_origin.y - object->external_force.y) * fraction + arc * sine;
-            object->apiobj.position.z = object->external_force.z +
-                (object->launch_origin.z - object->external_force.z) * horizontal;
+            object->apiobj.position.x =
+                object->external_force.x + (object->launch_origin.x - object->external_force.x) * horizontal;
+            object->apiobj.position.y =
+                object->external_force.y + (object->launch_origin.y - object->external_force.y) * fraction + arc * sine;
+            object->apiobj.position.z =
+                object->external_force.z + (object->launch_origin.z - object->external_force.z) * horizontal;
             f32 height = sine * object->apiobj.character_data->game_character->second_jump_height;
             object->apiobj.position.y += (height + height) * object->big_jump_height;
             NuVecSub(&object->apiobj.velocity, &object->apiobj.position, &object->apiobj.start_position);
@@ -232,7 +231,8 @@ void BigJumpCode(GameObject_s *object) {
                     if (static_cast<u8>(object->field_0x7aa - 2) <= 1) {
                         if (LEGOACT_JUMP3 != -1 && object->apiobj.character_model->model_data_b[LEGOACT_JUMP3] != NULL)
                             object->context_animation = LEGOACT_JUMP3;
-                        else if (LEGOACT_JUMP2 != -1 && object->apiobj.character_model->model_data_b[LEGOACT_JUMP2] != NULL)
+                        else if (LEGOACT_JUMP2 != -1 &&
+                                 object->apiobj.character_model->model_data_b[LEGOACT_JUMP2] != NULL)
                             object->context_animation = LEGOACT_JUMP2;
                     }
                     object->jump_flags |= 4;
@@ -257,8 +257,8 @@ extern i16 id_YODA;
 void Player_ClearContext(GameObject_s *, i32);
 void Player_ResetContexts(PLAYERPACKET_s *);
 
-i32 StartBigJump(GameObject_s *object, NUVEC *destination, i32 mode, f32 height,
-                 f32 duration_scale, i32 animation, i8 variant) {
+i32 StartBigJump(GameObject_s *object, NUVEC *destination, i32 mode, f32 height, f32 duration_scale, i32 animation,
+                 i8 variant) {
     if (LEGOCONTEXT_BIGJUMP == -1 || (object->apiobj.character_data->model_flags & 0x200000) != 0)
         return 0;
     Player_ClearContext(object, 0);

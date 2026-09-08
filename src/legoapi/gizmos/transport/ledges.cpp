@@ -44,7 +44,8 @@ DECOMP_ASSERT(sizeof(LEDGEPIECE) == 0x20, "LEDGEPIECE ABI");
 
 static LEDGE *Ledge_AttachPoint(WORLDINFO_s *world, NUVEC *position, NUVEC *bounds_min, NUVEC *bounds_max, u16 *angle) {
     LEDGE *ledge = static_cast<LEDGE *>(world->ledges);
-    if (ledge == NULL) return NULL;
+    if (ledge == NULL)
+        return NULL;
     LEDGE *nearest_segment = NULL;
     LEDGE *nearest_endpoint = NULL;
     f32 segment_distance = 100000.0f;
@@ -52,10 +53,12 @@ static LEDGE *Ledge_AttachPoint(WORLDINFO_s *world, NUVEC *position, NUVEC *boun
     NUVEC segment_position, endpoint_position;
     u16 segment_angle = 0, endpoint_angle = 0;
     for (i32 i = 0; i < world->ledge_count; ++i, ++ledge) {
-        if ((ledge->state_flags & 3) != 3 || ((ledge->flags & 1) && ShadowMode == 0)) continue;
+        if ((ledge->state_flags & 3) != 3 || ((ledge->flags & 1) && ShadowMode == 0))
+            continue;
         if (bounds_min->x > ledge->bounds_max.x || ledge->bounds_min.x > bounds_max->x ||
             bounds_min->z > ledge->bounds_max.z || ledge->bounds_min.z > bounds_max->z ||
-            bounds_min->y > ledge->bounds_max.y || ledge->bounds_min.y > bounds_max->y) continue;
+            bounds_min->y > ledge->bounds_max.y || ledge->bounds_min.y > bounds_max->y)
+            continue;
         LEDGEPIECE *piece = &LedgePiece[ledge->type_index];
         NUVEC local = {position->x - ledge->position.x, 0.0f, position->z - ledge->position.z};
         NuVecRotateY(&local, &local, -ledge->y_rotation);
@@ -81,7 +84,7 @@ static LEDGE *Ledge_AttachPoint(WORLDINFO_s *world, NUVEC *position, NUVEC *boun
             if (static_cast<u32>(RotDiff(piece->field_0x1e, local_angle) + 0x2000) <= 0x4000) {
                 f32 radius = fabsf(piece->start.x);
                 NUVEC point = {radius * NU_SIN_LUT(local_angle) + piece->start.x, 0.0f,
-                    radius * NU_COS_LUT(local_angle) + piece->end.z};
+                               radius * NU_COS_LUT(local_angle) + piece->end.z};
                 f32 distance = NuVecDist(&local, &point, NULL);
                 if (distance < segment_distance) {
                     NuVecRotateY(&local, &point, ledge->y_rotation);
@@ -89,7 +92,8 @@ static LEDGE *Ledge_AttachPoint(WORLDINFO_s *world, NUVEC *position, NUVEC *boun
                     nearest_segment = ledge;
                     segment_distance = distance;
                     segment_angle = local_angle + ledge->y_rotation;
-                    if (piece->field_0x1c > 0x8000) segment_angle += 0x8000;
+                    if (piece->field_0x1c > 0x8000)
+                        segment_angle += 0x8000;
                 }
                 continue;
             }
@@ -113,7 +117,8 @@ static LEDGE *Ledge_AttachPoint(WORLDINFO_s *world, NUVEC *position, NUVEC *boun
                 nearest_endpoint = ledge;
                 endpoint_distance = distance;
                 endpoint_angle = ledge->y_rotation;
-                if (piece->field_0x3 == 0) endpoint_angle += piece->field_0x1c;
+                if (piece->field_0x3 == 0)
+                    endpoint_angle += piece->field_0x1c;
             }
         }
     }
@@ -151,10 +156,13 @@ static void Ledges_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_info,
 static void Ledges_Draw(void *world_info, void *, float) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_info);
     LEDGE *ledge = static_cast<LEDGE *>(world->ledges);
-    if (ledge == NULL) return;
+    if (ledge == NULL)
+        return;
     for (i32 i = 0; i < world->ledge_count; ++i, ++ledge) {
-        if (!(ledge->state_flags & 2)) continue;
-        if (world->lev_objs[LedgePiece[ledge->type_index].field_0x0].active == 0) continue;
+        if (!(ledge->state_flags & 2))
+            continue;
+        if (world->lev_objs[LedgePiece[ledge->type_index].field_0x0].active == 0)
+            continue;
         NUMTX matrix;
         NuMtxSetRotationY(&matrix, ledge->y_rotation);
         NuMtxTranslate(&matrix, &ledge->position);
@@ -209,27 +217,34 @@ static void Ledges_ClearProgress(void *, void *progress_data) {
 
 static void Ledges_StoreProgress(void *world_info, void *, void *progress_data) {
     LEDGEPROGRESS *progress = static_cast<LEDGEPROGRESS *>(progress_data);
-    if (progress == NULL) return;
-    for (i32 i = 0; i < 8; ++i) progress->state[i] = -1;
+    if (progress == NULL)
+        return;
+    for (i32 i = 0; i < 8; ++i)
+        progress->state[i] = -1;
     WORLDINFO *world = static_cast<WORLDINFO *>(world_info);
-    if (world == NULL || world->ledges == NULL) return;
+    if (world == NULL || world->ledges == NULL)
+        return;
     LEDGE *ledge = static_cast<LEDGE *>(world->ledges);
     for (i32 i = 0; i < world->ledge_count && i < 128; ++i, ++ledge) {
         u32 mask = 1u << (i & 31);
-        if (!(ledge->state_flags & 2)) progress->state[4 + (i >> 5)] &= ~mask;
-        if (!(ledge->state_flags & 1)) progress->state[i >> 5] &= ~mask;
+        if (!(ledge->state_flags & 2))
+            progress->state[4 + (i >> 5)] &= ~mask;
+        if (!(ledge->state_flags & 1))
+            progress->state[i >> 5] &= ~mask;
     }
 }
 
 static void Ledges_Reset(void *world_info, void *, void *progress_data) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_info);
-    if (world == NULL || world->ledges == NULL) return;
+    if (world == NULL || world->ledges == NULL)
+        return;
     LEDGEPROGRESS *progress = static_cast<LEDGEPROGRESS *>(progress_data);
     LEDGE *ledge = static_cast<LEDGE *>(world->ledges);
     for (i32 i = 0; i < world->ledge_count; ++i, ++ledge) {
         i32 type;
         for (type = 0; type < 6; ++type) {
-            if (ledge->type_code == LedgePiece[type].type_code) break;
+            if (ledge->type_code == LedgePiece[type].type_code)
+                break;
         }
         if (type == 6) {
             type = 2;
@@ -240,19 +255,31 @@ static void Ledges_Reset(void *world_info, void *, void *progress_data) {
         ledge->bounds_max.x = ledge->bounds_max.y = ledge->bounds_max.z = -999.0f;
         NUVEC point;
         NuVecRotateY(&point, &LedgePiece[ledge->type_index].start, ledge->y_rotation);
-        if (point.x < ledge->bounds_min.x) ledge->bounds_min.x = point.x;
-        if (point.x > ledge->bounds_max.x) ledge->bounds_max.x = point.x;
-        if (point.y < ledge->bounds_min.y) ledge->bounds_min.y = point.y;
-        if (point.y > ledge->bounds_max.y) ledge->bounds_max.y = point.y;
-        if (point.z < ledge->bounds_min.z) ledge->bounds_min.z = point.z;
-        if (point.z > ledge->bounds_max.z) ledge->bounds_max.z = point.z;
+        if (point.x < ledge->bounds_min.x)
+            ledge->bounds_min.x = point.x;
+        if (point.x > ledge->bounds_max.x)
+            ledge->bounds_max.x = point.x;
+        if (point.y < ledge->bounds_min.y)
+            ledge->bounds_min.y = point.y;
+        if (point.y > ledge->bounds_max.y)
+            ledge->bounds_max.y = point.y;
+        if (point.z < ledge->bounds_min.z)
+            ledge->bounds_min.z = point.z;
+        if (point.z > ledge->bounds_max.z)
+            ledge->bounds_max.z = point.z;
         NuVecRotateY(&point, &LedgePiece[ledge->type_index].end, ledge->y_rotation);
-        if (point.x < ledge->bounds_min.x) ledge->bounds_min.x = point.x;
-        if (point.x > ledge->bounds_max.x) ledge->bounds_max.x = point.x;
-        if (point.y < ledge->bounds_min.y) ledge->bounds_min.y = point.y;
-        if (point.y > ledge->bounds_max.y) ledge->bounds_max.y = point.y;
-        if (point.z < ledge->bounds_min.z) ledge->bounds_min.z = point.z;
-        if (point.z > ledge->bounds_max.z) ledge->bounds_max.z = point.z;
+        if (point.x < ledge->bounds_min.x)
+            ledge->bounds_min.x = point.x;
+        if (point.x > ledge->bounds_max.x)
+            ledge->bounds_max.x = point.x;
+        if (point.y < ledge->bounds_min.y)
+            ledge->bounds_min.y = point.y;
+        if (point.y > ledge->bounds_max.y)
+            ledge->bounds_max.y = point.y;
+        if (point.z < ledge->bounds_min.z)
+            ledge->bounds_min.z = point.z;
+        if (point.z > ledge->bounds_max.z)
+            ledge->bounds_max.z = point.z;
         ledge->bounds_min.x -= 0.05f;
         ledge->bounds_min.y -= 0.05f;
         ledge->bounds_min.z -= 0.05f;
@@ -284,7 +311,8 @@ static void *Ledges_ReserveBufferSpace(void *world_info) {
 
 static i32 Ledges_Load(void *world_info, void *) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_info);
-    if (world->ledge_count != 0) return 0;
+    if (world->ledge_count != 0)
+        return 0;
     i32 version = EdFileReadInt();
     world->ledge_count = EdFileReadInt();
     for (i32 i = 0; i < world->ledge_count; ++i) {
@@ -346,30 +374,34 @@ ADDGIZMOTYPE *Ledges_RegisterGizmo(i32 type_id) {
 
 void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     if (object->character_context != 0x5b) {
-        if (object->apiobj.field_0x27d != 0 || !(object->apiobj.velocity.y <= 0.0f)) return;
+        if (object->apiobj.field_0x27d != 0 || !(object->apiobj.velocity.y <= 0.0f))
+            return;
         if (object->character_context != 0x43 && object->character_context != -1) {
-            if (object->character_context != 0 || !(object->context_animation_timer >= 0.1f)) return;
+            if (object->character_context != 0 || !(object->context_animation_timer >= 0.1f))
+                return;
         }
-        if (!(object->apiobj.field_0x1f8 & 0x80) && !(object->field_0xf01 & 0x80)) return;
+        if (!(object->apiobj.field_0x1f8 & 0x80) && !(object->field_0xf01 & 0x80))
+            return;
         f32 radius = 3.0f * object->apiobj.field_0x1dc;
         NUVEC minimum = {object->apiobj.collision_position.x - radius, object->apiobj.collision_position.y,
-            object->apiobj.collision_position.z - radius};
+                         object->apiobj.collision_position.z - radius};
         NUVEC maximum = {object->apiobj.collision_position.x + radius, object->apiobj.upper_position.y,
-            object->apiobj.collision_position.z + radius};
+                         object->apiobj.collision_position.z + radius};
         NUVEC position = {(maximum.x + minimum.x) * 0.5f, (maximum.y + minimum.y) * 0.5f,
-            (maximum.z + minimum.z) * 0.5f};
+                          (maximum.z + minimum.z) * 0.5f};
         u16 angle;
-        if (Ledge_AttachPoint(world, &position, &minimum, &maximum, &angle) == NULL) return;
+        if (Ledge_AttachPoint(world, &position, &minimum, &maximum, &angle) == NULL)
+            return;
         object->character_context = 0x5b;
         object->context_animation = 0x9d;
         object->apiobj.velocity = v000;
         object->external_force = position;
         object->apiobj.movement_facing_angle = angle + 0x8000;
-        object->launch_origin.x = object->external_force.x -
-            NU_SIN_LUT(object->apiobj.movement_facing_angle) * object->apiobj.field_0x1dc;
+        object->launch_origin.x =
+            object->external_force.x - NU_SIN_LUT(object->apiobj.movement_facing_angle) * object->apiobj.field_0x1dc;
         object->launch_origin.y = object->external_force.y;
-        object->launch_origin.z = object->external_force.z -
-            NU_COS_LUT(object->apiobj.movement_facing_angle) * object->apiobj.field_0x1dc;
+        object->launch_origin.z =
+            object->external_force.z - NU_COS_LUT(object->apiobj.movement_facing_angle) * object->apiobj.field_0x1dc;
         return;
     }
     if (object->pad_gamepad->buttons_pressed & GAMEPAD_JUMP) {
@@ -377,7 +409,8 @@ void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         object->movement_runtime_flags |= 0x10;
         f32 height = 0.2f + object->external_force.y - object->jump_start_height;
         if (height > 0.0f) {
-            object->apiobj.velocity.y = NuFsqrt(-2.0f * object->apiobj.character_data->game_character->gravity * height);
+            object->apiobj.velocity.y =
+                NuFsqrt(-2.0f * object->apiobj.character_data->game_character->gravity * height);
         }
         return;
     }
@@ -397,14 +430,18 @@ void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         if (object->apiobj.character_model->model_data_b[0x9f] != NULL) {
             object->context_animation = 0x9f;
             speed = AnimSpeed(object->apiobj.character_model, 0x9f);
-            if (speed == 0.0f) return;
-        } else speed = 0.5f;
+            if (speed == 0.0f)
+                return;
+        } else
+            speed = 0.5f;
     } else if (push < -NuTrigTable[0x3555]) {
         if (object->apiobj.character_model->model_data_b[0x9e] != NULL) {
             object->context_animation = 0x9e;
             speed = -AnimSpeed(object->apiobj.character_model, 0x9e);
-            if (speed == 0.0f) return;
-        } else speed = -0.5f;
+            if (speed == 0.0f)
+                return;
+        } else
+            speed = -0.5f;
     } else {
         object->context_animation = 0x9d;
         return;
@@ -412,9 +449,9 @@ void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     NUVEC previous = object->external_force;
     f32 radius = object->apiobj.field_0x1dc;
     NUVEC minimum = {object->apiobj.collision_position.x - radius, object->apiobj.collision_position.y,
-        object->apiobj.collision_position.z - radius};
+                     object->apiobj.collision_position.z - radius};
     NUVEC maximum = {object->apiobj.collision_position.x + radius, object->apiobj.upper_position.y,
-        object->apiobj.collision_position.z + radius};
+                     object->apiobj.collision_position.z + radius};
     f32 distance = speed * FRAMETIME;
     NUVEC offset = {NU_SIN_LUT(angle) * distance, 0.0f, NU_COS_LUT(angle) * distance};
     NUVEC position;
@@ -425,11 +462,12 @@ void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     }
     object->external_force = position;
     object->apiobj.movement_facing_angle = angle + 0x8000;
-    object->launch_origin.x = object->external_force.x -
-        NU_SIN_LUT(object->apiobj.movement_facing_angle) * object->apiobj.field_0x1dc;
+    object->launch_origin.x =
+        object->external_force.x - NU_SIN_LUT(object->apiobj.movement_facing_angle) * object->apiobj.field_0x1dc;
     object->launch_origin.y = object->external_force.y;
-    object->launch_origin.z = object->external_force.z -
-        NU_COS_LUT(object->apiobj.movement_facing_angle) * object->apiobj.field_0x1dc;
+    object->launch_origin.z =
+        object->external_force.z - NU_COS_LUT(object->apiobj.movement_facing_angle) * object->apiobj.field_0x1dc;
     if (previous.x == object->external_force.x && previous.y == object->external_force.y &&
-        previous.z == object->external_force.z) object->context_animation = 0x9d;
+        previous.z == object->external_force.z)
+        object->context_animation = 0x9d;
 }

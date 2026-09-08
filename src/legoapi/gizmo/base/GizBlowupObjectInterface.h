@@ -10,11 +10,17 @@ struct GizBlowupObjectInterface : MechObjectInterface {
     void GetPos(VuVec &, i32) const override;
     f32 GetRadius() const override;
     const char *GetTargetName() const override;
-    i32 GetObjectType() const override { return 4; }
+    i32 GetObjectType() const override {
+        return 4;
+    }
     bool IsDead() override;
     void TargetedFlash() override;
-    void *GetTgtVoidPtr() override { return blowup; }
-    GIZMOBLOWUP_s *GetGizBlowup() override { return blowup; }
+    void *GetTgtVoidPtr() override {
+        return blowup;
+    }
+    GIZMOBLOWUP_s *GetGizBlowup() override {
+        return blowup;
+    }
     virtual ~GizBlowupObjectInterface();
     GIZMOBLOWUP_s *blowup;
 };

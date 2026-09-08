@@ -66,13 +66,17 @@ void ResetForceGlow(PLAYERPACKET_s *packet) {
 
 void ForceLightning_Origin(GameObject_s *object, NUVEC *primary, NUVEC *secondary) {
     *primary = object->apiobj.collision_position;
-    if (secondary != NULL) secondary->y = 1000000000.0f;
-    if (object->apiobj.field_0x288 == 0) return;
+    if (secondary != NULL)
+        secondary->y = 1000000000.0f;
+    if (object->apiobj.field_0x288 == 0)
+        return;
     PLAYERCHARACTERCONFIG_s *config = object->apiobj.character_data->player_config;
     i32 joint = config->hand_joints[0];
-    if (joint == -1 || object->apiobj.character_model->points_of_interest[joint] == NULL) return;
+    if (joint == -1 || object->apiobj.character_model->points_of_interest[joint] == NULL)
+        return;
     *primary = *reinterpret_cast<NUVEC *>(&object->joint_matrices[joint].m30);
-    if (secondary == NULL || (object->weapon_scale != 0.0f && object->weapon_scale_state != 2)) return;
+    if (secondary == NULL || (object->weapon_scale != 0.0f && object->weapon_scale_state != 2))
+        return;
     joint = config->hand_joints[1];
     if (joint != -1 && object->apiobj.character_model->points_of_interest[joint] != NULL) {
         *secondary = *reinterpret_cast<NUVEC *>(&object->joint_matrices[joint].m30);

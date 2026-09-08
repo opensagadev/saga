@@ -92,11 +92,11 @@ struct BOLTTYPE_s {
     u8 field_3d;
     u16 field_3e;
     u32 field_40;
-    void (*init_callback)(BOLT_s *); // 0x44
-    void (*update_callback)(BOLT_s *); // 0x48
-    void (*end_callback)(BOLT_s *); // 0x4c
+    void (*init_callback)(BOLT_s *);              // 0x44
+    void (*update_callback)(BOLT_s *);            // 0x48
+    void (*end_callback)(BOLT_s *);               // 0x4c
     void (*ricochet_callback)(BOLT_s *, NUVEC *); // 0x50
-    f32 (*scale_callback)(BOLT_s *); // 0x54
+    f32 (*scale_callback)(BOLT_s *);              // 0x54
     char *shoot_sfx;
     char *hit_sfx;
     u32 field_60;
@@ -277,9 +277,15 @@ typedef struct WORLDINFO_s {
                 struct {
                     u32 field_46f4;
                     RIPPLEEFFECT_s *ripple_effects;
-                    union { u32 field_46fc; i32 ripple_effect_count; };
                     union {
-                        struct { i32 water_ripple_effect; i32 sabre_ripple_effect; };
+                        u32 field_46fc;
+                        i32 ripple_effect_count;
+                    };
+                    union {
+                        struct {
+                            i32 water_ripple_effect;
+                            i32 sabre_ripple_effect;
+                        };
                         i32 ripple_effect_indices[2];
                     };
                     u8 reserved_4708[0xc];
@@ -307,7 +313,7 @@ typedef struct WORLDINFO_s {
 
     SPECIALMINIKITSYS_s *special_minikits; // 0x5058
     TIGHTROPE_s *tightropes;               // 0x505c
-    i32 tightrope_count;                  // 0x5060
+    i32 tightrope_count;                   // 0x5060
     SIGNAL_s *signals;                     // 0x5064
     i32 signal_count;                      // 0x5068
 

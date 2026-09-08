@@ -85,7 +85,8 @@ void CharCategories_Init(CHARCATEGORY *categories) {
     CharCategory = categories;
     CHARCATEGORYCOUNT = 0;
     if (categories != NULL) {
-        for (; categories->name != NULL; categories++) CHARCATEGORYCOUNT++;
+        for (; categories->name != NULL; categories++)
+            CHARCATEGORYCOUNT++;
     }
 }
 
@@ -95,21 +96,24 @@ void CanWearHatsInFreePlay(i32) {
 i32 CharCategory_FindByName(char *name) {
     if (CharCategory != NULL) {
         for (i32 i = 0; i < CHARCATEGORYCOUNT; i++) {
-            if (NuStrICmp(CharCategory[i].name, name) == 0) return i;
+            if (NuStrICmp(CharCategory[i].name, name) == 0)
+                return i;
         }
     }
     return -1;
 }
 
 i32 CharCategory_IsCategory(GameObject_s *object, i32 index) {
-    if (index < 0 || index >= CHARCATEGORYCOUNT) return 0;
+    if (index < 0 || index >= CHARCATEGORYCOUNT)
+        return 0;
     CHARCAT_s *category = &CharCategory[index];
     const u32 model_flags = category->field1_0x4;
     if (model_flags != 0) {
         if ((model_flags & 8) != 0 &&
             (((GAMECHARACTERDATA *)object->apiobj.character_data->field11_0x24)->flags_094[1] & 0x80) != 0)
             return 0;
-        if ((object->apiobj.character_data->model_flags & model_flags) != model_flags) return 0;
+        if ((object->apiobj.character_data->model_flags & model_flags) != model_flags)
+            return 0;
     }
     const u32 game_flags = category->field2_0x8;
     if (game_flags != 0 &&
@@ -384,38 +388,37 @@ void CharConfig_CalculateJumpStats(float jump_speed, float gravity, float *durat
 }
 
 void ExtraCharacterFixUpAfterConfig() {
-    SetMoveAndAnimateFunctions(8, 8, 0, 0, -1,
-        reinterpret_cast<void *>(Move_JEDI), reinterpret_cast<void *>(Animate_JEDI), NULL);
-    SetMoveAndAnimateFunctions(0x1000010, 0x10, 0, 0, -1,
-        reinterpret_cast<void *>(Move_DROIDGENERIC), NULL, NULL);
-    SetMoveAndAnimateFunctions(0x30, 0x30, 0, 0, -1,
-        reinterpret_cast<void *>(Move_DROIDGENERIC), reinterpret_cast<void *>(Animate_PROTOCOL), NULL);
-    SetMoveAndAnimateFunctions(0x50, 0x50, 0, 0, -1,
-        reinterpret_cast<void *>(Move_DROIDGENERIC), reinterpret_cast<void *>(Animate_ASTROMECH), reinterpret_cast<void *>(PostAnimate_ASTROMECH));
-    SetMoveAndAnimateFunctions(0, 0, 0x800, 0x800, -1,
-        reinterpret_cast<void *>(Move_CANNON), reinterpret_cast<void *>(Animate_CANNON), NULL);
-    SetMoveAndAnimateFunctions(0x2000, 0x2000, 0, 0, -1,
-        reinterpret_cast<void *>(Move_VEHICLE), reinterpret_cast<void *>(Animate_VEHICLE), NULL);
-    SetMoveAndAnimateFunctions(0x40000000, 0x40000000, 0, 0, -1,
-        reinterpret_cast<void *>(Move_BEAST), reinterpret_cast<void *>(Animate_BEAST), NULL);
-    SetMoveAndAnimateFunctions(0, 0, 0, 0, 4,
-        reinterpret_cast<void *>(Move_DROIDGENERIC), reinterpret_cast<void *>(Animate_BATTLEDROID), NULL);
-    SetMoveAndAnimateFunctions(0, 0, 0, 0, 17,
-        reinterpret_cast<void *>(Move_HOVERDROID), reinterpret_cast<void *>(Animate_HOVERDROID), NULL);
-    SetMoveAndAnimateFunctions(0, 0, 0, 0, 15,
-        reinterpret_cast<void *>(Move_WALKER), reinterpret_cast<void *>(Animate_WALKER), NULL);
-    SetMoveAndAnimateFunctions(0, 0, 0, 0, 16,
-        reinterpret_cast<void *>(Move_ATAT), reinterpret_cast<void *>(Animate_ATAT), NULL);
-    SetMoveAndAnimateFunctions(0, 0, 0, 0, 18,
-        reinterpret_cast<void *>(Move_CRITTER), reinterpret_cast<void *>(Animate_CRITTER), NULL);
-    SetMoveAndAnimateFunctions(0, 0, 0, 0, 18,
-        reinterpret_cast<void *>(Move_CRITTER), reinterpret_cast<void *>(Animate_CRITTER), NULL);
-    SetMoveAndAnimateFunctions(0, 0, 0, 0, 20,
-        reinterpret_cast<void *>(Move_POD), reinterpret_cast<void *>(Animate_POD), NULL);
-    SetMoveAndAnimateFunctions(0, 0, 0, 0, 2,
-        NULL, NULL, reinterpret_cast<void *>(PostAnimate_FETT));
-    SetMoveAndAnimateFunctions(0, 0, 0, 0, 0,
-        reinterpret_cast<void *>(Move_WEIRDO), reinterpret_cast<void *>(Animate_WEIRDO), NULL);
+    SetMoveAndAnimateFunctions(8, 8, 0, 0, -1, reinterpret_cast<void *>(Move_JEDI),
+                               reinterpret_cast<void *>(Animate_JEDI), NULL);
+    SetMoveAndAnimateFunctions(0x1000010, 0x10, 0, 0, -1, reinterpret_cast<void *>(Move_DROIDGENERIC), NULL, NULL);
+    SetMoveAndAnimateFunctions(0x30, 0x30, 0, 0, -1, reinterpret_cast<void *>(Move_DROIDGENERIC),
+                               reinterpret_cast<void *>(Animate_PROTOCOL), NULL);
+    SetMoveAndAnimateFunctions(0x50, 0x50, 0, 0, -1, reinterpret_cast<void *>(Move_DROIDGENERIC),
+                               reinterpret_cast<void *>(Animate_ASTROMECH),
+                               reinterpret_cast<void *>(PostAnimate_ASTROMECH));
+    SetMoveAndAnimateFunctions(0, 0, 0x800, 0x800, -1, reinterpret_cast<void *>(Move_CANNON),
+                               reinterpret_cast<void *>(Animate_CANNON), NULL);
+    SetMoveAndAnimateFunctions(0x2000, 0x2000, 0, 0, -1, reinterpret_cast<void *>(Move_VEHICLE),
+                               reinterpret_cast<void *>(Animate_VEHICLE), NULL);
+    SetMoveAndAnimateFunctions(0x40000000, 0x40000000, 0, 0, -1, reinterpret_cast<void *>(Move_BEAST),
+                               reinterpret_cast<void *>(Animate_BEAST), NULL);
+    SetMoveAndAnimateFunctions(0, 0, 0, 0, 4, reinterpret_cast<void *>(Move_DROIDGENERIC),
+                               reinterpret_cast<void *>(Animate_BATTLEDROID), NULL);
+    SetMoveAndAnimateFunctions(0, 0, 0, 0, 17, reinterpret_cast<void *>(Move_HOVERDROID),
+                               reinterpret_cast<void *>(Animate_HOVERDROID), NULL);
+    SetMoveAndAnimateFunctions(0, 0, 0, 0, 15, reinterpret_cast<void *>(Move_WALKER),
+                               reinterpret_cast<void *>(Animate_WALKER), NULL);
+    SetMoveAndAnimateFunctions(0, 0, 0, 0, 16, reinterpret_cast<void *>(Move_ATAT),
+                               reinterpret_cast<void *>(Animate_ATAT), NULL);
+    SetMoveAndAnimateFunctions(0, 0, 0, 0, 18, reinterpret_cast<void *>(Move_CRITTER),
+                               reinterpret_cast<void *>(Animate_CRITTER), NULL);
+    SetMoveAndAnimateFunctions(0, 0, 0, 0, 18, reinterpret_cast<void *>(Move_CRITTER),
+                               reinterpret_cast<void *>(Animate_CRITTER), NULL);
+    SetMoveAndAnimateFunctions(0, 0, 0, 0, 20, reinterpret_cast<void *>(Move_POD),
+                               reinterpret_cast<void *>(Animate_POD), NULL);
+    SetMoveAndAnimateFunctions(0, 0, 0, 0, 2, NULL, NULL, reinterpret_cast<void *>(PostAnimate_FETT));
+    SetMoveAndAnimateFunctions(0, 0, 0, 0, 0, reinterpret_cast<void *>(Move_WEIRDO),
+                               reinterpret_cast<void *>(Animate_WEIRDO), NULL);
     for (i32 i = 0; i < CHARCOUNT; ++i) {
         if ((GCDataList[i].flags_094[3] & 0x10) != 0) {
             CDataList[i].move_fn = Move_GEONOSIAN;

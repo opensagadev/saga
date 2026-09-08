@@ -830,7 +830,8 @@ void AnimatePlayer(GameObject_s *object) {
     if (object->character_context == 0x2d && object->field_0x788 != NULL)
         time_multiplier = GizBuildItMul(object);
     UpdateAnimPacket(model, &packet, (FRAMETIME * 30.0f) * time_multiplier, movement_speed * direction,
-                     time_multiplier * FRAMETIME, object->apiobj.character_data->game_character->backwards_speed_multiplier);
+                     time_multiplier * FRAMETIME,
+                     object->apiobj.character_data->game_character->backwards_speed_multiplier);
     if ((packet.flags & ANIMPACKET_FLAG_ANIMATION_CHANGED) != 0 &&
         (packet.blending != 0 ? packet.blend_animation_b : packet.animation_index) == 0x5f) {
         f32 *time = packet.blending != 0 ? &packet.blend_target_time : &packet.current_time;
@@ -840,8 +841,10 @@ void AnimatePlayer(GameObject_s *object) {
             ++count;
         const i32 phase = qrand() / (0xffff / count + 1);
         CHARACTERMODEL_s *current_model = object->apiobj.character_model;
-        const f32 start = static_cast<f32>(phase) *
-            (0.3f * static_cast<CHARACTERANIM_s *>(current_model->model_data_a[0x5f])->playback_rate) + 1.0f;
+        const f32 start =
+            static_cast<f32>(phase) *
+                (0.3f * static_cast<CHARACTERANIM_s *>(current_model->model_data_a[0x5f])->playback_rate) +
+            1.0f;
         if (NuAnimEndFrame(current_model->model_data_b[0x5f]) > start)
             *time = start;
         object->field_0xe21 = (object->field_0xe21 & ~0x40) | ((phase & 1) << 6);
@@ -1707,7 +1710,8 @@ void Animate_SUPERBATTLEDROID(GameObject_s *object) {
 }
 
 void GameAnimSet_RemoveObject(GAMEANIMSET_s *set, GAMEANIMOBJ_s *object) {
-    if (object == NULL || set == NULL) return;
+    if (object == NULL || set == NULL)
+        return;
     if (set->objects == object) {
         set->objects = object->next;
     } else {
@@ -1715,7 +1719,8 @@ void GameAnimSet_RemoveObject(GAMEANIMSET_s *set, GAMEANIMOBJ_s *object) {
         while (previous != NULL && previous->next != object) {
             previous = previous->next;
         }
-        if (previous != NULL) previous->next = object->next;
+        if (previous != NULL)
+            previous->next = object->next;
     }
     object->next = NULL;
     --set->object_count;
@@ -1862,12 +1867,14 @@ void GameAnimSet_JumpToAnimPos(GAMEANIMSET_s *set, float position) {
 }
 
 void GameAnimSet_RemoveSpecial(GAMEANIMSET_s *set, nuhspecial_s *special) {
-    if (special == NULL || set == NULL) return;
+    if (special == NULL || set == NULL)
+        return;
     GAMEANIMOBJ_s *object = set->objects;
     while (object != NULL && NuSpecialCompare(&object->special, special) == 0) {
         object = object->next;
     }
-    if (object != NULL) GameAnimSet_RemoveObject(set, object);
+    if (object != NULL)
+        GameAnimSet_RemoveObject(set, object);
 }
 
 void GameAnimSet_SetVisibility(GAMEANIMSET_s *set, i32 visibility) {
@@ -1892,8 +1899,7 @@ void GameAnimSet_DrawReflection(GAMEANIMSET_s *set, i32 axis, float offset, numt
             NUMTX reflection __attribute__((aligned(16)));
             extern i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
             NUMTX *draw_matrix = NuSpecialGetDrawMtx(&object->special);
-            if (MatrixReflection(draw_matrix, axis, plane,
-                                 WORLD->current_level->unknown_0cc, &reflection) != 0) {
+            if (MatrixReflection(draw_matrix, axis, plane, WORLD->current_level->unknown_0cc, &reflection) != 0) {
                 NuSpecialDrawAt(&object->special, &reflection);
             }
         }
@@ -2008,7 +2014,8 @@ i32 GameAnimSet_IsAnimationReset(GAMEANIMSET_s *set) {
 
 void GameAnimSet_RemoveAllObjects(GAMEANIMSET_s *set) {
     if (set != NULL) {
-        while (set->objects != NULL) GameAnimSet_RemoveObject(set, set->objects);
+        while (set->objects != NULL)
+            GameAnimSet_RemoveObject(set, set->objects);
     }
 }
 
@@ -3292,18 +3299,23 @@ extern "C" {
 } // extern "C"
 
 void SetAnimFrame(nuhspecial_s *special, float frame) {
-    if (NuSpecialExistsFn(special) == 0) return;
+    if (NuSpecialExistsFn(special) == 0)
+        return;
     NUMTX matrix __attribute__((aligned(16)));
     NuMtxSetIdentity(&matrix);
     nuinstanim_s *instance_animation = NuSpecialGetInstAnim(special);
-    if (instance_animation == NULL) return;
+    if (instance_animation == NULL)
+        return;
     nuanimdata_s *animation = special->scene->instance_animation_data[instance_animation->anim_ix];
-    if (animation == NULL) return;
+    if (animation == NULL)
+        return;
     // The animation header begins with its final frame; the remaining header is opaque here.
     f32 end_frame;
     memcpy(&end_frame, animation, sizeof(end_frame));
-    if (frame == 1.0e9f) frame = end_frame;
-    if (!(frame >= 1.0f && frame <= end_frame)) return;
+    if (frame == 1.0e9f)
+        frame = end_frame;
+    if (!(frame >= 1.0f && frame <= end_frame))
+        return;
     NuAnimData2CalcMatrix(animation, 0, frame, &matrix);
     instance_animation->mtx = matrix;
     NUMTX *instance_matrix = NuSpecialGetInstanceMtx(special);
@@ -3650,7 +3662,8 @@ void EvalAnim2(nuhspecial_s *special, float frame) {
 }
 
 void GameAnimSys_AllocateLevelProgressData(variptr_u *buf, variptr_u *buf_end, i32 capacity, i32 level_count) {
-    if (buf_end == NULL || buf == NULL) return;
+    if (buf_end == NULL || buf == NULL)
+        return;
     gameanimsysprogress.count = level_count;
     gameanimsysprogress.entry_size = capacity;
     gameanimsysprogress.entries = static_cast<u8 **>(GameBufferAlloc(buf, buf_end, level_count * sizeof(u8 *)));
@@ -3661,26 +3674,31 @@ void GameAnimSys_AllocateLevelProgressData(variptr_u *buf, variptr_u *buf_end, i
 }
 
 u8 *GameAnimSys_GetProgressData(i32 index) {
-    if (index < 0 || index >= gameanimsysprogress.count) return NULL;
+    if (index < 0 || index >= gameanimsysprogress.count)
+        return NULL;
     return gameanimsysprogress.entries[index];
 }
 
 void GameAnimSys_StoreProgress(GAMEANIMSYS_s *system, i32 index) {
-    if (system == NULL || system->sets == NULL || index < 0 || index >= gameanimsysprogress.count) return;
+    if (system == NULL || system->sets == NULL || index < 0 || index >= gameanimsysprogress.count)
+        return;
     u8 *progress = gameanimsysprogress.entries[index];
     for (i32 i = 0; i < gameanimsysprogress.entry_size && system->sets[i] != NULL; ++i)
         progress[i] = system->sets[i]->state;
 }
 
 void GameAnimSys_ReStoreProgress(GAMEANIMSYS_s *system, i32 index) {
-    if (system == NULL || system->sets == NULL || index < 0 || index >= gameanimsysprogress.count) return;
+    if (system == NULL || system->sets == NULL || index < 0 || index >= gameanimsysprogress.count)
+        return;
     u8 *progress = gameanimsysprogress.entries[index];
     for (i32 i = 0; i < gameanimsysprogress.entry_size && system->sets[i] != NULL; ++i) {
         GAMEANIMSET_s *set = system->sets[i];
         set->state = static_cast<GAMEANIMSET_STATE>(static_cast<i8>(progress[i]));
         if (set->state == GAMEANIMSET_STATE_ACTIVE_FORWARD || set->state == GAMEANIMSET_STATE_ACTIVE_BACKWARD) {
-            if ((set->flags & GAMEANIMSET_FLAG_IN_SYSTEM_LIST) == 0) GameAnimSet_AddToSystemList(set);
-        } else if ((set->flags & GAMEANIMSET_FLAG_IN_SYSTEM_LIST) != 0) GameAnimSet_RemoveFromSystemList(set);
+            if ((set->flags & GAMEANIMSET_FLAG_IN_SYSTEM_LIST) == 0)
+                GameAnimSet_AddToSystemList(set);
+        } else if ((set->flags & GAMEANIMSET_FLAG_IN_SYSTEM_LIST) != 0)
+            GameAnimSet_RemoveFromSystemList(set);
     }
 }
 

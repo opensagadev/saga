@@ -129,8 +129,7 @@ namespace {
             }
 
             GIZMO_PICKUP_TYPE *type = GetPickupType(pickup);
-            if (type->field_0x0f != 0 &&
-                pickups != WorldInfo_CurrentlyActive()->gizmo_pickup_sys->temporary_pickups) {
+            if (type->field_0x0f != 0 && pickups != WorldInfo_CurrentlyActive()->gizmo_pickup_sys->temporary_pickups) {
                 continue;
             }
             const i32 model_index = type->first_model_id + pickup.model_variant;

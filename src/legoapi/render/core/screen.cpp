@@ -233,7 +233,6 @@ void HandleStillRender() {
     grab_screen_image = 0;
 }
 
-
 void PreRenderFlashHack() {
 }
 

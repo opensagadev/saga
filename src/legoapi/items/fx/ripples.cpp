@@ -141,10 +141,12 @@ void ResetRippleSet(ripple_set_s *set) {
 }
 
 void UpdateRippleSet(ripple_set_s *set) {
-    if (set == NULL) return;
+    if (set == NULL)
+        return;
     ripple_node_s *node = set->newest;
     for (i32 i = 0; i < set->active_count; ++i) {
-        if (node == NULL) continue;
+        if (node == NULL)
+            continue;
         ripple_node_s *next = node->next;
         if (!(node->lifetime >= node->age)) {
             eraselist[erasecount++] = node;
@@ -156,14 +158,18 @@ void UpdateRippleSet(ripple_set_s *set) {
                 if ((node->flags & 1) != 0)
                     node->size = node->initial_size + (node->growth - node->initial_size) * ratio;
                 if ((node->flags & 2) != 0)
-                    node->color.a = static_cast<u8>(static_cast<i32>(static_cast<f32>(node->start_color.a) +
+                    node->color.a = static_cast<u8>(static_cast<i32>(
+                        static_cast<f32>(node->start_color.a) +
                         static_cast<f32>(static_cast<i32>(node->end_color.a) - node->start_color.a) * ratio));
                 if ((node->flags & 4) != 0) {
-                    node->color.r = static_cast<u8>(static_cast<i32>(static_cast<f32>(node->start_color.r) +
+                    node->color.r = static_cast<u8>(static_cast<i32>(
+                        static_cast<f32>(node->start_color.r) +
                         static_cast<f32>(static_cast<i32>(node->end_color.r) - node->start_color.r) * ratio));
-                    node->color.g = static_cast<u8>(static_cast<i32>(static_cast<f32>(node->start_color.g) +
+                    node->color.g = static_cast<u8>(static_cast<i32>(
+                        static_cast<f32>(node->start_color.g) +
                         static_cast<f32>(static_cast<i32>(node->end_color.g) - node->start_color.g) * ratio));
-                    node->color.b = static_cast<u8>(static_cast<i32>(static_cast<f32>(node->start_color.b) +
+                    node->color.b = static_cast<u8>(static_cast<i32>(
+                        static_cast<f32>(node->start_color.b) +
                         static_cast<f32>(static_cast<i32>(node->end_color.b) - node->start_color.b) * ratio));
                 }
                 if ((node->flags & 8) != 0) {
@@ -179,13 +185,17 @@ void UpdateRippleSet(ripple_set_s *set) {
     for (i32 i = 0; i < erasecount; ++i) {
         node = eraselist[i];
         if (node != NULL) {
-            if (node == set->oldest) set->oldest = node->next;
+            if (node == set->oldest)
+                set->oldest = node->next;
             if (set->active_count != 0) {
                 ripple_node_s *newest = set->newest;
                 ripple_node_s *free_head = set->free_head;
-                if (node->previous != NULL) node->previous->next = node->next;
-                else newest = node->next;
-                if (node->next != NULL) node->next->previous = node->previous;
+                if (node->previous != NULL)
+                    node->previous->next = node->next;
+                else
+                    newest = node->next;
+                if (node->next != NULL)
+                    node->next->previous = node->previous;
                 if (free_head != NULL) {
                     node->previous = free_head;
                     node->next = free_head->next;
@@ -214,14 +224,18 @@ void VecRotateAxis(NUVEC *, u16, NUVEC *);
 void AddRipple(ripple_set_s *, NUMTX *, float, float, float, float, RGBA, RGBA, i32, numtl_s *, NUVEC *);
 
 void AddSurfaceRipples(GameObject_s *object) {
-    if (WORLD->ripple_effects == NULL || object->apiobj.field_0x287 != 0) return;
+    if (WORLD->ripple_effects == NULL || object->apiobj.field_0x287 != 0)
+        return;
     if (object->field_0x1084 != 1) {
-        if (!object->apiobj.intersects_water || !object->apiobj.model_draw_result) return;
+        if (!object->apiobj.intersects_water || !object->apiobj.model_draw_result)
+            return;
         GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
         f32 rate = (object->pad_gamepad->input_magnitude / data->run_speed) * 20.0f;
-        if (rate < 1.0f) rate = 1.0f;
+        if (rate < 1.0f)
+            rate = 1.0f;
         i32 count = ParticlesPerSecond(rate, FRAMETIME);
-        if (count <= 0) return;
+        if (count <= 0)
+            return;
         NUVEC position = {0.0f, 0.0f, 0.0f};
         NUMTX matrix;
         BuildRippleMtx(&matrix, &v010, &position, 0, 0);
@@ -233,18 +247,20 @@ void AddSurfaceRipples(GameObject_s *object) {
             matrix.m32 = object->apiobj.collision_position.z + (qrand() * (1.0f / 65535.0f) - 0.5f) * 0.15f;
             RIPPLEEFFECT_s *effect = &WORLD->ripple_effects[WORLD->water_ripple_effect];
             randrad = object->apiobj.field_0x1dc + object->apiobj.field_0x1dc + object->apiobj.field_0x1dc;
-            AddRipple(ripples, &matrix, size, randrad, effect->lifetime, 0.0f,
-                      effect->start_color, effect->end_color, 7, effect->material, NULL);
+            AddRipple(ripples, &matrix, size, randrad, effect->lifetime, 0.0f, effect->start_color, effect->end_color,
+                      7, effect->material, NULL);
         }
         return;
     }
     if (static_cast<u8>(object->field_0x6b0 - 12) > 1) {
-        if (object->sabre_contact_sfx_timer > 0.0f) object->sabre_contact_sfx_timer -= FRAMETIME;
+        if (object->sabre_contact_sfx_timer > 0.0f)
+            object->sabre_contact_sfx_timer -= FRAMETIME;
         return;
     }
     GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
     f32 rate = (object->pad_gamepad->input_magnitude / data->run_speed) * 100.0f;
-    if (rate < 0.5f) rate = 0.5f;
+    if (rate < 0.5f)
+        rate = 0.5f;
     i32 count = ParticlesPerSecond(rate, FRAMETIME);
     NUVEC position;
     if (count > 0) {
@@ -283,13 +299,15 @@ void DestroyRippleMtls(WORLDINFO_s *world) {
 }
 
 i32 LookupRippleEffectIndex(char *name) {
-    if (NuStrICmp("water", name) == 0) return 0;
+    if (NuStrICmp("water", name) == 0)
+        return 0;
     return NuStrICmp("forcefield", name) == 0 ? 1 : -1;
 }
 
 void AddRipple(ripple_set_s *set, numtx_s *matrix, float size, float growth, float lifetime, float delay,
                RGBA start_color, RGBA end_color, i32 flags, numtl_s *material, nuvec_s *velocity) {
-    if (material == NULL || set == NULL) return;
+    if (material == NULL || set == NULL)
+        return;
     u16 active_count = set->active_count;
     u16 capacity = set->count;
     ripple_node_s *newest = set->newest;
@@ -317,8 +335,10 @@ void AddRipple(ripple_set_s *set, numtx_s *matrix, float size, float growth, flo
         ++active_count;
         set->active_count = active_count;
         set->newest = node;
-        if (active_count == capacity) set->free_head = NULL;
-        if (set->oldest == NULL) set->oldest = node;
+        if (active_count == capacity)
+            set->free_head = NULL;
+        if (set->oldest == NULL)
+            set->oldest = node;
     } else {
         node = set->oldest;
         set->newest = node;
@@ -339,9 +359,15 @@ void AddRipple(ripple_set_s *set, numtx_s *matrix, float size, float growth, flo
     node->velocity = velocity != NULL ? *velocity : v000;
 }
 
-static void RE_end_radius(NUFPAR *parser) { RE_rippleeffect->end_size = NuFParGetFloat(parser); }
-static void RE_start_radius(NUFPAR *parser) { RE_rippleeffect->initial_size = NuFParGetFloat(parser); }
-static void RE_life(NUFPAR *parser) { RE_rippleeffect->lifetime = NuFParGetFloat(parser); }
+static void RE_end_radius(NUFPAR *parser) {
+    RE_rippleeffect->end_size = NuFParGetFloat(parser);
+}
+static void RE_start_radius(NUFPAR *parser) {
+    RE_rippleeffect->initial_size = NuFParGetFloat(parser);
+}
+static void RE_life(NUFPAR *parser) {
+    RE_rippleeffect->lifetime = NuFParGetFloat(parser);
+}
 static void RE_start_colour(NUFPAR *parser) {
     RE_rippleeffect->start_color.r = NuFParGetInt(parser);
     RE_rippleeffect->start_color.g = NuFParGetInt(parser);
@@ -361,20 +387,25 @@ static void RE_texture_name(NUFPAR *parser) {
 static void RE_effect_type(NUFPAR *parser) {
     if (NuFParGetWord(parser)) {
         i32 index = LookupRippleEffectIndex(parser->word_buf);
-        if (index != -1) RE_worldinfo->ripple_effect_indices[index] = RE_worldinfo->ripple_effect_count;
+        if (index != -1)
+            RE_worldinfo->ripple_effect_indices[index] = RE_worldinfo->ripple_effect_count;
     }
 }
-static NUFPCOMJMP RippleEffect_ConfigKeywords[] = {
-    {"texture_name", RE_texture_name}, {"effect_type", RE_effect_type},
-    {"start_colour", RE_start_colour}, {"end_colour", RE_end_colour},
-    {"life", RE_life}, {"start_radius", RE_start_radius}, {"end_radius", RE_end_radius}, {NULL, NULL}
-};
+static NUFPCOMJMP RippleEffect_ConfigKeywords[] = {{"texture_name", RE_texture_name},
+                                                   {"effect_type", RE_effect_type},
+                                                   {"start_colour", RE_start_colour},
+                                                   {"end_colour", RE_end_colour},
+                                                   {"life", RE_life},
+                                                   {"start_radius", RE_start_radius},
+                                                   {"end_radius", RE_end_radius},
+                                                   {NULL, NULL}};
 
 void RippleEffects_Configure(WORLDINFO_s *world, char *config) {
     world->ripple_effects = NULL;
     world->ripple_effect_count = 0;
     NUFPAR *parser = NuFParCreateMem("rippleeffects", config, 0xffff);
-    if (parser == NULL) return;
+    if (parser == NULL)
+        return;
     world->giz_buffer.addr = (world->giz_buffer.addr + 3) & ~static_cast<usize>(3);
     world->ripple_effects = reinterpret_cast<RIPPLEEFFECT_s *>(world->giz_buffer.addr);
     RIPPLEEFFECT_s *effect = world->ripple_effects;
@@ -382,9 +413,11 @@ void RippleEffects_Configure(WORLDINFO_s *world, char *config) {
     NuFParPushCom(parser, RippleEffect_ConfigKeywords);
     while (NuFParGetLine(parser)) {
         NuFParGetWord(parser);
-        if (parser->word_buf[0] == 0) continue;
+        if (parser->word_buf[0] == 0)
+            continue;
         if (!active) {
-            if (world->ripple_effect_count > 1 || NuStrICmp(parser->word_buf, "rippleeffects_start") != 0) continue;
+            if (world->ripple_effect_count > 1 || NuStrICmp(parser->word_buf, "rippleeffects_start") != 0)
+                continue;
             RE_worldinfo = world;
             effect->lifetime = 2.0f;
             effect->initial_size = 0.0f;
@@ -411,8 +444,9 @@ void RippleEffects_Configure(WORLDINFO_s *world, char *config) {
         world->ripple_effects = NULL;
         return;
     }
-    world->giz_buffer.addr = (reinterpret_cast<usize>(world->ripple_effects + world->ripple_effect_count) + 15) & ~static_cast<usize>(15);
+    world->giz_buffer.addr =
+        (reinterpret_cast<usize>(world->ripple_effects + world->ripple_effect_count) + 15) & ~static_cast<usize>(15);
     for (i32 i = 0; i < world->ripple_effect_count; ++i)
-        InitRippleMtl(world->ripple_effects[i].texture_name, &world->ripple_effects[i].material,
-                      &world->giz_buffer, &world->unknown_0108);
+        InitRippleMtl(world->ripple_effects[i].texture_name, &world->ripple_effects[i].material, &world->giz_buffer,
+                      &world->unknown_0108);
 }

@@ -6,6 +6,7 @@
 #include "legoapi/characters/motion.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/characters/motion/animlist.h"
+#include "legoapi/core/input/qrand.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/legoapi_types.h"
@@ -24,6 +25,10 @@ i32 GetDefaultIdle(GameObject_s *object);
 void ResetCharacterIdle(GameObject_s *object, i32 mode, i32 animation);
 i32 (*Fighting_WeaponInActionFn)(GameObject_s *) = NULL;
 i32 (*Fighting_WeaponOutActionFn)(GameObject_s *) = NULL;
+
+extern i32 adaptivedifficulty[3];
+
+extern i8 (*adtab)[4];
 
 void LoseHelmet(GameObject_s *, i32, i32) {
 }
@@ -187,34 +192,53 @@ void KeepWeaponOut(GameObject_s *object) {
 }
 
 i32 ReleaseHearts() {
-    extern i32 adaptivedifficulty[3];
-    extern i8 (*adtab)[4];
-    i32 maximum = 0;
-    i32 missing = 0;
-    for (i32 i = 0; i < 2; ++i) {
-        GameObject_s *player = Player[i];
-        if (player != NULL && player->apiobj.field_0x287 == 0 && player->hitpoints != 0) {
-            maximum += player->hitpoints;
-            missing += player->hitpoints - static_cast<i8>(player->current_hp);
-        }
+    i32 total_hitpoints = 0;
+    i32 missing_hitpoints = 0;
+
+    GameObject_s *player = Player[0];
+    if (player != NULL && player->apiobj.field_0x287 == 0 && player->hitpoints != 0) {
+        total_hitpoints = player->hitpoints;
+        missing_hitpoints = player->hitpoints - static_cast<i8>(player->current_hp);
     }
-    if (maximum == 0) return 0;
-    if (missing > 0) {
-        for (i32 i = 0; i < MAXPARTS; ++i) {
-            if ((Part[i].active & 1) != 0 && Part[i].pickup_type == 0xcb) {
-                --missing;
+
+    player = Player[1];
+    if (player != NULL && player->apiobj.field_0x287 == 0 && player->hitpoints != 0) {
+        total_hitpoints += player->hitpoints;
+        missing_hitpoints += player->hitpoints - static_cast<i8>(player->current_hp);
+    }
+
+    if (total_hitpoints == 0) {
+        return 0;
+    }
+
+    if (missing_hitpoints > 0 && MAXPARTS > 0) {
+        for (i32 index = 0; index < MAXPARTS; ++index) {
+            if ((Part[index].active & 1) != 0 && Part[index].type_id == 0xcb) {
+                --missing_hitpoints;
             }
         }
     }
-    missing -= Game.save_version;
-    missing += Game.save_version <= 5 ? 8 : 9;
-    if (missing > maximum) missing = maximum;
-    else if (missing < 0) missing = 0;
-    i32 chance = (missing << 16) / maximum;
-    i32 adjustment = adtab[adaptivedifficulty[0]][1];
-    if (adjustment == 1) chance >>= 1;
-    else if (adjustment == -1) chance *= 2;
-    return chance > qrand();
+
+    missing_hitpoints -= Game.save_version;
+    if (Game.save_version <= 5) {
+        missing_hitpoints += 8;
+    } else {
+        missing_hitpoints += 9;
+    }
+
+    i32 release_threshold = total_hitpoints;
+    if (missing_hitpoints <= total_hitpoints) {
+        release_threshold = missing_hitpoints < 0 ? 0 : missing_hitpoints;
+    }
+
+    i32 release_chance = (release_threshold << 16) / total_hitpoints;
+    const i32 difficulty_adjustment = static_cast<i8>(adtab[adaptivedifficulty[0]][1]);
+    if (difficulty_adjustment == 1) {
+        release_chance >>= 1;
+    } else if (difficulty_adjustment == -1) {
+        release_chance += release_chance;
+    }
+    return qrand() < release_chance;
 }
 
 void SlowWeaponOut(GameObject_s *object) {

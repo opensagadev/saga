@@ -83,6 +83,7 @@ _NATIVE_PLATFORM_SRCS = ["host/platform/native_render_device.cpp"] + select({
         "host/platform/posix/egl.cpp",
     ],
     "//bazel/platforms:windows": [
+        "host/platform/windows/posix_random.cpp",
         "host/platform/windows/runtime.cpp",
     ],
     "//conditions:default": [],
@@ -177,6 +178,7 @@ alias(
 )
 
 _HOST_PLATFORM_COPTS = select({
+    "//bazel/platforms:windows": ["-include", "src/host/platform/windows/posix_random.h"],
     "//bazel/platforms:linux": [
         "-m32",
         "-march=i686",

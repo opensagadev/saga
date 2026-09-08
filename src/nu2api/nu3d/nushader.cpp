@@ -97,15 +97,24 @@ namespace {
 } // namespace
 
 extern "C" const GLSLTypeInfo *GetGLSLTypeInfo(GLenum type) {
-    if (type == GL_FLOAT) return &kGLSLTypeInfo[0];
-    if (type == GL_FLOAT_VEC2) return &kGLSLTypeInfo[1];
-    if (type == GL_FLOAT_VEC3) return &kGLSLTypeInfo[2];
-    if (type == GL_FLOAT_VEC4) return &kGLSLTypeInfo[3];
-    if (type == GL_FLOAT_MAT2) return &kGLSLTypeInfo[4];
-    if (type == GL_FLOAT_MAT3) return &kGLSLTypeInfo[5];
-    if (type == GL_FLOAT_MAT4) return &kGLSLTypeInfo[6];
-    if (type == GL_SAMPLER_2D) return &kGLSLTypeInfo[7];
-    if (type == GL_SAMPLER_CUBE) return &kGLSLTypeInfo[8];
+    if (type == GL_FLOAT)
+        return &kGLSLTypeInfo[0];
+    if (type == GL_FLOAT_VEC2)
+        return &kGLSLTypeInfo[1];
+    if (type == GL_FLOAT_VEC3)
+        return &kGLSLTypeInfo[2];
+    if (type == GL_FLOAT_VEC4)
+        return &kGLSLTypeInfo[3];
+    if (type == GL_FLOAT_MAT2)
+        return &kGLSLTypeInfo[4];
+    if (type == GL_FLOAT_MAT3)
+        return &kGLSLTypeInfo[5];
+    if (type == GL_FLOAT_MAT4)
+        return &kGLSLTypeInfo[6];
+    if (type == GL_SAMPLER_2D)
+        return &kGLSLTypeInfo[7];
+    if (type == GL_SAMPLER_CUBE)
+        return &kGLSLTypeInfo[8];
     return NULL;
 }
 
@@ -286,7 +295,7 @@ bool NuShaderObjectCombineGLSLShadersIntoProgram(GLuint *program_dest, GLuint ve
 }
 
 bool NuShaderObjectGenerateGLSLShader(GLuint *shader_dest, GLenum shader_type, const GLchar *shader_source,
-                                     GLint shader_source_length) {
+                                      GLint shader_source_length) {
     BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 197);
     GLuint shader = glCreateShader(shader_type);
     *shader_dest = shader;
@@ -328,78 +337,95 @@ void NuShaderObjectInitGLSL(nushaderobjectglsl_s *obj, nushaderobjectkey_s const
                                298);
         NuShaderObjectGLSLDestroy(obj);
         EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 300);
-        if (bgProcIsBgThread()) NuIOS_YieldThread();
+        if (bgProcIsBgThread())
+            NuIOS_YieldThread();
     }
 }
 
-void NuShaderObjectInitGLSL(nushaderobjectglsl_s *obj, nushaderobjectkey_s const *key, i32 param,
-                            char const *vsource, i32 vsize, char const *psource, i32 psize) {
+void NuShaderObjectInitGLSL(nushaderobjectglsl_s *obj, nushaderobjectkey_s const *key, i32 param, char const *vsource,
+                            i32 vsize, char const *psource, i32 psize) {
     NuShaderObjectBaseInit(&obj->base, (NUSHADEROBJECTKEY *)key, param);
     if (!NuShaderObjectGenerateGLSLShader(&obj->vertex_shader, GL_VERTEX_SHADER, vsource, vsize)) {
-        BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 256);
+        BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp",
+                               256);
         NuShaderObjectGLSLDestroy(obj);
         EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 258);
-        if (bgProcIsBgThread()) NuIOS_YieldThread();
+        if (bgProcIsBgThread())
+            NuIOS_YieldThread();
         return;
     }
     if (psource) {
         if (!NuShaderObjectGenerateGLSLShader(&obj->fragment_shader, GL_FRAGMENT_SHADER, psource, psize)) {
-            BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 266);
+            BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp",
+                                   266);
             NuShaderObjectGLSLDestroy(obj);
-            EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 268);
-            if (bgProcIsBgThread()) NuIOS_YieldThread();
+            EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp",
+                                 268);
+            if (bgProcIsBgThread())
+                NuIOS_YieldThread();
             return;
         }
     } else {
         obj->fragment_shader = 0;
     }
     if (!NuShaderObjectCombineGLSLShadersIntoProgram(&obj->program, obj->vertex_shader, obj->fragment_shader)) {
-        BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 279);
+        BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp",
+                               279);
         NuShaderObjectGLSLDestroy(obj);
         EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 281);
-        if (bgProcIsBgThread()) NuIOS_YieldThread();
+        if (bgProcIsBgThread())
+            NuIOS_YieldThread();
     }
 }
 
-void NuShaderObjectInitGLSL(nushaderobjectglsl_s *obj, nushaderobjectkey_s const *key, i32 param,
-                            char const *vsource, i32 vsize, u32 pshader) {
+void NuShaderObjectInitGLSL(nushaderobjectglsl_s *obj, nushaderobjectkey_s const *key, i32 param, char const *vsource,
+                            i32 vsize, u32 pshader) {
     NuShaderObjectBaseInit(&obj->base, (NUSHADEROBJECTKEY *)key, param);
     obj->fragment_shader = pshader;
     if (!NuShaderObjectGenerateGLSLShader(&obj->vertex_shader, GL_VERTEX_SHADER, vsource, vsize)) {
-        BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 317);
+        BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp",
+                               317);
         NuShaderObjectGLSLDestroy(obj);
         EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 319);
-        if (bgProcIsBgThread()) NuIOS_YieldThread();
+        if (bgProcIsBgThread())
+            NuIOS_YieldThread();
         return;
     }
     if (!NuShaderObjectCombineGLSLShadersIntoProgram(&obj->program, obj->vertex_shader, obj->fragment_shader)) {
-        BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 325);
+        BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp",
+                               325);
         NuShaderObjectGLSLDestroy(obj);
         EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 327);
-        if (bgProcIsBgThread()) NuIOS_YieldThread();
+        if (bgProcIsBgThread())
+            NuIOS_YieldThread();
     }
 }
 
-void NuShaderObjectInitGLSL(nushaderobjectglsl_s *obj, nushaderobjectkey_s const *key, i32 param,
-                            u32 vshader, char const *psource, i32 psize) {
+void NuShaderObjectInitGLSL(nushaderobjectglsl_s *obj, nushaderobjectkey_s const *key, i32 param, u32 vshader,
+                            char const *psource, i32 psize) {
     NuShaderObjectBaseInit(&obj->base, (NUSHADEROBJECTKEY *)key, param);
     obj->vertex_shader = vshader;
     if (psource) {
         if (!NuShaderObjectGenerateGLSLShader(&obj->fragment_shader, GL_FRAGMENT_SHADER, psource, psize)) {
-            BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 346);
+            BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp",
+                                   346);
             NuShaderObjectGLSLDestroy(obj);
-            EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 348);
-            if (bgProcIsBgThread()) NuIOS_YieldThread();
+            EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp",
+                                 348);
+            if (bgProcIsBgThread())
+                NuIOS_YieldThread();
             return;
         }
     } else {
         obj->fragment_shader = 0;
     }
     if (!NuShaderObjectCombineGLSLShadersIntoProgram(&obj->program, obj->vertex_shader, obj->fragment_shader)) {
-        BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 359);
+        BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp",
+                               359);
         NuShaderObjectGLSLDestroy(obj);
         EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 361);
-        if (bgProcIsBgThread()) NuIOS_YieldThread();
+        if (bgProcIsBgThread())
+            NuIOS_YieldThread();
     }
 }
 
@@ -664,7 +690,7 @@ void NuShaderObjectInit(nushaderobject_s *obj, nushaderobjectkey_s const *key, i
 }
 
 extern "C" void NuShaderObjectInit(nushaderobject_s *obj, nushaderobjectkey_s const *key, i32 param,
-                                    const char *vsource, i32 vsize) {
+                                   const char *vsource, i32 vsize) {
     const char *psource = "precision lowp float;\nvoid main() { gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0); }";
     NuShaderObjectInitGLSL((nushaderobjectglsl_s *)obj, key, param, vsource, vsize, psource, NuStrLen(psource));
     NuShaderObjectGLSLProbeSemantics(obj);
@@ -691,7 +717,8 @@ extern "C" void NuShaderObjectBaseUpdateWaterTable(NUSHADEROBJECT *shader, numtl
     i32 frame;
     memcpy(&frame, &nuapi.frame_count, sizeof(frame));
     const f32 *material = reinterpret_cast<const f32 *>(mtl);
-    if (frame != lastintsame) theta = material[0x60 / 4] * water_theta_step + theta;
+    if (frame != lastintsame)
+        theta = material[0x60 / 4] * water_theta_step + theta;
     if (frame != lastintsame || mtl != prev_mtl) {
         NUMTX inverse;
         NUVEC scale = {0.5f, 0.5f, 0.5f};
@@ -726,8 +753,8 @@ extern "C" void NuShaderObjectBaseUpdateWaterTable(NUSHADEROBJECT *shader, numtl
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
 #include "nu2api/nu3d/nutex.h"
 
-static void NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *glsl,
-                                                       NuShaderUsageMask_s &mask, numtl_s *mtl) {
+static void NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *glsl, NuShaderUsageMask_s &mask,
+                                                        numtl_s *mtl) {
     NUSHADEROBJECT *shader = reinterpret_cast<NUSHADEROBJECT *>(glsl);
     const NUSHADERUSAGEMASK *usage = &mask;
     auto unpackColour = [](u32 packed, f32 *colour) {
@@ -737,192 +764,191 @@ static void NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *gl
         colour[3] = static_cast<f32>(packed >> 24) / 255.0f;
     };
 
-        const u8 *material = reinterpret_cast<const u8 *>(mtl);
-        auto materialFloat = [material](usize offset) { return *reinterpret_cast<const f32 *>(material + offset); };
-        auto materialU32 = [material](usize offset) { return *reinterpret_cast<const u32 *>(material + offset); };
+    const u8 *material = reinterpret_cast<const u8 *>(mtl);
+    auto materialFloat = [material](usize offset) { return *reinterpret_cast<const f32 *>(material + offset); };
+    auto materialU32 = [material](usize offset) { return *reinterpret_cast<const u32 *>(material + offset); };
 
-        // Original 0x309da0.  Material semantics are not part of the global
-        // uniform table: every active one is rebuilt from NUMTL immediately
-        // before drawing.  In particular the four layer colours/opacities and
-        // the surface parameters must not be left at OpenGL's zero defaults.
-        for (i32 semantic = 52; semantic >= 21; --semantic) {
-            if ((usage->semantics[semantic >> 5] & (1u << (semantic & 31))) == 0) {
+    // Original 0x309da0.  Material semantics are not part of the global
+    // uniform table: every active one is rebuilt from NUMTL immediately
+    // before drawing.  In particular the four layer colours/opacities and
+    // the surface parameters must not be left at OpenGL's zero defaults.
+    for (i32 semantic = 52; semantic >= 21; --semantic) {
+        if ((usage->semantics[semantic >> 5] & (1u << (semantic & 31))) == 0) {
+            continue;
+        }
+
+        const GLint location = shader->parameters[semantic].location;
+        if (location < 0) {
+            continue;
+        }
+
+        f32 values[16] = {};
+        i32 components = 4;
+        i32 count = 1;
+        switch (semantic) {
+            case 21:
+                unpackColour(materialU32(0x11c), values);
+                break;
+            case 22:
+                unpackColour(materialU32(0x120), values);
+                values[3] = materialFloat(0x1b4);
+                break;
+            case 23:
+                values[0] = material[0xfb] == 0 ? 1.0f : -1.0f;
+                components = (shader->parameters[semantic].element_count_and_setter & 3) + 1;
+                break;
+            case 24:
+                values[0] = materialFloat(0x134);
+                values[1] = 1.0f;
+                values[2] = 0.035f * materialFloat(0x138);
+                values[3] = materialFloat(0x14c);
+                break;
+            case 25:
+                values[0] = materialFloat(0xf0);
+                values[1] = materialFloat(0x284) / materialFloat(0x274);
+                break;
+            case 26:
+                values[0] = materialFloat(0x130);
+                values[1] = materialFloat(0x12c);
+                values[2] = materialFloat(0x144);
+                values[3] = materialFloat(0x148);
+                break;
+            case 27:
+                values[0] = materialFloat(0x140);
+                values[1] = materialFloat(0x13c);
+                values[2] = materialFloat(0x248);
+                break;
+            case 28:
+                values[0] = materialFloat(0x114);
+                components = (shader->parameters[semantic].element_count_and_setter & 3) + 1;
+                break;
+            case 29:
+                values[0] = materialFloat(0x118);
+                components = (shader->parameters[semantic].element_count_and_setter & 3) + 1;
+                break;
+            case 30:
+                values[0] = materialFloat(0x1b8);
+                values[1] = materialFloat(0x1bc);
+                break;
+            case 31:
+                NuShaderObjectBaseUpdateWaterTable(shader, mtl);
                 continue;
-            }
-
-            const GLint location = shader->parameters[semantic].location;
-            if (location < 0) {
-                continue;
-            }
-
-            f32 values[16] = {};
-            i32 components = 4;
-            i32 count = 1;
-            switch (semantic) {
-                case 21:
-                    unpackColour(materialU32(0x11c), values);
-                    break;
-                case 22:
-                    unpackColour(materialU32(0x120), values);
-                    values[3] = materialFloat(0x1b4);
-                    break;
-                case 23:
-                    values[0] = material[0xfb] == 0 ? 1.0f : -1.0f;
-                    components = (shader->parameters[semantic].element_count_and_setter & 3) + 1;
-                    break;
-                case 24:
-                    values[0] = materialFloat(0x134);
-                    values[1] = 1.0f;
-                    values[2] = 0.035f * materialFloat(0x138);
-                    values[3] = materialFloat(0x14c);
-                    break;
-                case 25:
-                    values[0] = materialFloat(0xf0);
-                    values[1] = materialFloat(0x284) / materialFloat(0x274);
-                    break;
-                case 26:
-                    values[0] = materialFloat(0x130);
-                    values[1] = materialFloat(0x12c);
-                    values[2] = materialFloat(0x144);
-                    values[3] = materialFloat(0x148);
-                    break;
-                case 27:
-                    values[0] = materialFloat(0x140);
-                    values[1] = materialFloat(0x13c);
-                    values[2] = materialFloat(0x248);
-                    break;
-                case 28:
-                    values[0] = materialFloat(0x114);
-                    components = (shader->parameters[semantic].element_count_and_setter & 3) + 1;
-                    break;
-                case 29:
-                    values[0] = materialFloat(0x118);
-                    components = (shader->parameters[semantic].element_count_and_setter & 3) + 1;
-                    break;
-                case 30:
-                    values[0] = materialFloat(0x1b8);
-                    values[1] = materialFloat(0x1bc);
-                    break;
-                case 31:
-                    NuShaderObjectBaseUpdateWaterTable(shader, mtl);
-                    continue;
-                case 32:
-                case 33:
-                case 34:
-                case 35:
-                    unpackColour(materialU32(0xc8 + (semantic - 32) * 4), values);
-                    break;
-                case 36:
-                    values[0] = materialFloat(0xd8);
-                    values[1] = materialFloat(0xdc);
-                    values[2] = materialFloat(0xe0);
-                    values[3] = materialFloat(0xe4);
-                    break;
-                case 37:
-                    unpackColour(materialU32(0x128), values);
-                    components = 3;
-                    break;
-                case 38:
-                    unpackColour(materialU32(0xf4), values);
-                    components = 3;
-                    break;
-                case 39:
-                    unpackColour(materialU32(0x124), values);
-                    values[3] = materialFloat(0x158);
-                    break;
-                case 40:
-                    values[0] = (materialFloat(0x150) - 1.0f) * 0.1f;
-                    components = (shader->parameters[semantic].element_count_and_setter & 3) + 1;
-                    break;
-                case 41:
-                case 42:
-                case 43:
-                case 44:
-                    values[0] = materialFloat(0x1d0 + (semantic - 41) * 8);
-                    values[1] = materialFloat(0x1d4 + (semantic - 41) * 8);
-                    components = 2;
-                    break;
-                case 45:
-                    values[0] = 0.05f;
-                    values[1] = 0.32f * materialFloat(0x60);
-                    values[2] = 0.2f;
-                    values[3] = 0.8f;
-                    break;
-                case 46:
-                    values[0] = materialFloat(0x60);
-                    values[1] = materialFloat(0x64);
-                    values[2] = materialFloat(0x68);
-                    values[3] = (values[2] * values[1]) * 0.2f;
-                    break;
-                case 47:
-                    values[0] = materialFloat(0x154);
-                    components = (shader->parameters[semantic].element_count_and_setter & 3) + 1;
-                    break;
-                case 48:
-                    values[0] = materialFloat(0x260);
-                    values[1] = materialFloat(0x264);
-                    break;
-                case 49:
-                    for (i32 colour = 0; colour < 4; ++colour) {
-                        unpackColour(materialU32(0x250 + colour * 4), values + colour * 4);
-                    }
-                    count = 4;
-                    break;
-                case 50:
-                    values[0] = 1.0f / materialFloat(0x290);
-                    values[1] = materialFloat(0x288);
-                    values[2] = materialFloat(0x28c);
-                    values[3] = materialFloat(0x294);
-                    break;
-                case 51:
-                    values[0] = 0.1f * materialFloat(0x274);
-                    values[1] = materialFloat(0x27c);
-                    values[2] = materialFloat(0x280);
-                    values[3] = materialFloat(0x278);
-                    break;
-                case 52: {
-                    // Original .L35 at 0x30a8d8.  GLES has no fixed-function
-                    // alpha test, so generated shaders consume the current
-                    // render-state comparison as (sign, adjusted reference).
-                    const f32 alpha_ref = static_cast<f32>(g_alphaRef) * (1.0f / 255.0f);
-                    components = 2;
-                    if (g_alphaTestEnabled == 0) {
-                        values[0] = 0.0f;
-                        values[1] = -1.0f;
-                    } else if (g_alphaFunc == 2) {
-                        values[0] = -1.0f;
-                        values[1] = static_cast<f32>(0u - g_alphaRef) * (1.0f / 255.0f) - (1.0f / 255.0f);
-                        if (values[1] <= 0.0f) {
-                            values[1] = 0.0f;
-                        }
-                    } else if (g_alphaFunc == 3) {
-                        values[0] = -1.0f;
-                        values[1] = static_cast<f32>(0u - g_alphaRef) * (1.0f / 255.0f);
-                    } else if (g_alphaFunc == 5) {
-                        values[0] = 1.0f;
-                        values[1] = alpha_ref;
-                    } else if (g_alphaFunc == 6) {
-                        values[0] = 1.0f;
-                        values[1] = alpha_ref + (1.0f / 255.0f);
-                    } else {
-                        values[0] = 0.0f;
-                        values[1] = -1.0f;
-                    }
-                    break;
+            case 32:
+            case 33:
+            case 34:
+            case 35:
+                unpackColour(materialU32(0xc8 + (semantic - 32) * 4), values);
+                break;
+            case 36:
+                values[0] = materialFloat(0xd8);
+                values[1] = materialFloat(0xdc);
+                values[2] = materialFloat(0xe0);
+                values[3] = materialFloat(0xe4);
+                break;
+            case 37:
+                unpackColour(materialU32(0x128), values);
+                components = 3;
+                break;
+            case 38:
+                unpackColour(materialU32(0xf4), values);
+                components = 3;
+                break;
+            case 39:
+                unpackColour(materialU32(0x124), values);
+                values[3] = materialFloat(0x158);
+                break;
+            case 40:
+                values[0] = (materialFloat(0x150) - 1.0f) * 0.1f;
+                components = (shader->parameters[semantic].element_count_and_setter & 3) + 1;
+                break;
+            case 41:
+            case 42:
+            case 43:
+            case 44:
+                values[0] = materialFloat(0x1d0 + (semantic - 41) * 8);
+                values[1] = materialFloat(0x1d4 + (semantic - 41) * 8);
+                components = 2;
+                break;
+            case 45:
+                values[0] = 0.05f;
+                values[1] = 0.32f * materialFloat(0x60);
+                values[2] = 0.2f;
+                values[3] = 0.8f;
+                break;
+            case 46:
+                values[0] = materialFloat(0x60);
+                values[1] = materialFloat(0x64);
+                values[2] = materialFloat(0x68);
+                values[3] = (values[2] * values[1]) * 0.2f;
+                break;
+            case 47:
+                values[0] = materialFloat(0x154);
+                components = (shader->parameters[semantic].element_count_and_setter & 3) + 1;
+                break;
+            case 48:
+                values[0] = materialFloat(0x260);
+                values[1] = materialFloat(0x264);
+                break;
+            case 49:
+                for (i32 colour = 0; colour < 4; ++colour) {
+                    unpackColour(materialU32(0x250 + colour * 4), values + colour * 4);
                 }
-            }
-
-            if (components == 1) {
-                glUniform1fv(location, count, values);
-            } else if (components == 2) {
-                glUniform2fv(location, count, values);
-            } else if (components == 3) {
-                glUniform3fv(location, count, values);
-            } else {
-                glUniform4fv(location, count, values);
+                count = 4;
+                break;
+            case 50:
+                values[0] = 1.0f / materialFloat(0x290);
+                values[1] = materialFloat(0x288);
+                values[2] = materialFloat(0x28c);
+                values[3] = materialFloat(0x294);
+                break;
+            case 51:
+                values[0] = 0.1f * materialFloat(0x274);
+                values[1] = materialFloat(0x27c);
+                values[2] = materialFloat(0x280);
+                values[3] = materialFloat(0x278);
+                break;
+            case 52: {
+                // Original .L35 at 0x30a8d8.  GLES has no fixed-function
+                // alpha test, so generated shaders consume the current
+                // render-state comparison as (sign, adjusted reference).
+                const f32 alpha_ref = static_cast<f32>(g_alphaRef) * (1.0f / 255.0f);
+                components = 2;
+                if (g_alphaTestEnabled == 0) {
+                    values[0] = 0.0f;
+                    values[1] = -1.0f;
+                } else if (g_alphaFunc == 2) {
+                    values[0] = -1.0f;
+                    values[1] = static_cast<f32>(0u - g_alphaRef) * (1.0f / 255.0f) - (1.0f / 255.0f);
+                    if (values[1] <= 0.0f) {
+                        values[1] = 0.0f;
+                    }
+                } else if (g_alphaFunc == 3) {
+                    values[0] = -1.0f;
+                    values[1] = static_cast<f32>(0u - g_alphaRef) * (1.0f / 255.0f);
+                } else if (g_alphaFunc == 5) {
+                    values[0] = 1.0f;
+                    values[1] = alpha_ref;
+                } else if (g_alphaFunc == 6) {
+                    values[0] = 1.0f;
+                    values[1] = alpha_ref + (1.0f / 255.0f);
+                } else {
+                    values[0] = 0.0f;
+                    values[1] = -1.0f;
+                }
+                break;
             }
         }
 
+        if (components == 1) {
+            glUniform1fv(location, count, values);
+        } else if (components == 2) {
+            glUniform2fv(location, count, values);
+        } else if (components == 3) {
+            glUniform3fv(location, count, values);
+        } else {
+            glUniform4fv(location, count, values);
+        }
+    }
 }
 
 extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader, struct numtl_s *mtl) {
@@ -937,93 +963,93 @@ extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader, struct n
     NuShaderGetDirtyMask(&dirty, shader);
     const NUSHADERUSAGEMASK *usage = &dirty;
     {
-      if (lastMtl != mtl || lastObject != shader || lastFrame != 0) {
-        for (i32 semantic = 19; semantic >= 0; --semantic) {
-            if ((usage->semantics[semantic >> 5] & (1u << (semantic & 31))) == 0) {
-                continue;
-            }
+        if (lastMtl != mtl || lastObject != shader || lastFrame != 0) {
+            for (i32 semantic = 19; semantic >= 0; --semantic) {
+                if ((usage->semantics[semantic >> 5] & (1u << (semantic & 31))) == 0) {
+                    continue;
+                }
 
-            const i32 texture_unit = static_cast<u16>(shader->parameters[semantic].location) & 0x7ff;
-            i32 texture_id = 0;
-            bool bind_2d = true;
-            switch (semantic) {
-                case 0:
-                case 1:
-                case 2:
-                case 3:
-                    texture_id = mtl->shader_desc.diffuse_map_tex_id[semantic];
-                    break;
-                case 4:
-                    texture_id = mtl->shader_desc.specular_map_tid;
-                    break;
-                case 5:
-                    texture_id = mtl->shader_desc.lightmap_tex_id[0];
-                    break;
-                case 6:
-                    texture_id = mtl->shader_desc.normal_map_tid;
-                    break;
-                case 7:
-                    texture_id = mtl->shader_desc.lightmap_tex_id[1];
-                    break;
-                case 9:
-                    texture_id = mtl->shader_desc.vtf_height_map_tid;
-                    break;
-                case 12:
-                    texture_id = mtl->shader_desc.vtf_normal_map_tid;
-                    break;
-                case 13:
-                    texture_id = mtl->shader_desc.unknown_198;
-                    bind_2d = false;
-                    break;
-                case 14:
-                    texture_id = mtl->shader_desc.envmap_cubic_tid;
-                    bind_2d = false;
-                    break;
-                case 16:
-                    texture_id = mtl->shader_desc.shine_map_ps2_tid;
-                    break;
-                case 18:
-                    if (NuWindCurrent(nuapi.wind) >= 0) {
-                        NuTexSetTextureWithStagePS(NuTexGetNative(NuWindCurrent(nuapi.wind)), texture_unit);
+                const i32 texture_unit = static_cast<u16>(shader->parameters[semantic].location) & 0x7ff;
+                i32 texture_id = 0;
+                bool bind_2d = true;
+                switch (semantic) {
+                    case 0:
+                    case 1:
+                    case 2:
+                    case 3:
+                        texture_id = mtl->shader_desc.diffuse_map_tex_id[semantic];
+                        break;
+                    case 4:
+                        texture_id = mtl->shader_desc.specular_map_tid;
+                        break;
+                    case 5:
+                        texture_id = mtl->shader_desc.lightmap_tex_id[0];
+                        break;
+                    case 6:
+                        texture_id = mtl->shader_desc.normal_map_tid;
+                        break;
+                    case 7:
+                        texture_id = mtl->shader_desc.lightmap_tex_id[1];
+                        break;
+                    case 9:
+                        texture_id = mtl->shader_desc.vtf_height_map_tid;
+                        break;
+                    case 12:
+                        texture_id = mtl->shader_desc.vtf_normal_map_tid;
+                        break;
+                    case 13:
+                        texture_id = mtl->shader_desc.unknown_198;
+                        bind_2d = false;
+                        break;
+                    case 14:
+                        texture_id = mtl->shader_desc.envmap_cubic_tid;
+                        bind_2d = false;
+                        break;
+                    case 16:
+                        texture_id = mtl->shader_desc.shine_map_ps2_tid;
+                        break;
+                    case 18:
+                        if (NuWindCurrent(nuapi.wind) >= 0) {
+                            NuTexSetTextureWithStagePS(NuTexGetNative(NuWindCurrent(nuapi.wind)), texture_unit);
+                        }
+                        continue;
+                    case 19:
+                        texture_id = mtl->shader_desc.field_1e4;
+                        break;
+                    case 20:
+                        texture_id = mtl->shader_desc.field_1e8;
+                        break;
+                    default:
+                        continue;
+                }
+
+                if (bind_2d || g_currentTexUnit != texture_unit) {
+                    glActiveTexture(GL_TEXTURE0 + texture_unit);
+                    g_currentTexUnit = texture_unit;
+                }
+                GLuint gl_texture = 0;
+                if (semantic == 14 && (mtl->shader_desc.flags & 0x50000) != 0) {
+                    gl_texture = g_LegoEnvTexture;
+                } else if (semantic == 14 ? texture_id > 0 : texture_id != 0) {
+                    NUNATIVETEX *native = NuTexGetNative(texture_id);
+                    if (native != NULL) {
+                        gl_texture = native->platform.gl_tex;
                     }
+                }
+                if (!bind_2d && g_lastBoundCubeTexIds[texture_unit] == gl_texture) {
                     continue;
-                case 19:
-                    texture_id = mtl->shader_desc.field_1e4;
-                    break;
-                case 20:
-                    texture_id = mtl->shader_desc.field_1e8;
-                    break;
-                default:
-                    continue;
-            }
-
-            if (bind_2d || g_currentTexUnit != texture_unit) {
-                glActiveTexture(GL_TEXTURE0 + texture_unit);
-                g_currentTexUnit = texture_unit;
-            }
-            GLuint gl_texture = 0;
-            if (semantic == 14 && (mtl->shader_desc.flags & 0x50000) != 0) {
-                gl_texture = g_LegoEnvTexture;
-            } else if (semantic == 14 ? texture_id > 0 : texture_id != 0) {
-                NUNATIVETEX *native = NuTexGetNative(texture_id);
-                if (native != NULL) {
-                    gl_texture = native->platform.gl_tex;
+                }
+                glBindTexture(bind_2d ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP, gl_texture);
+                if (!bind_2d && texture_unit < 16) {
+                    g_lastBoundCubeTexIds[texture_unit] = gl_texture;
                 }
             }
-            if (!bind_2d && g_lastBoundCubeTexIds[texture_unit] == gl_texture) {
-                continue;
-            }
-            glBindTexture(bind_2d ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP, gl_texture);
-            if (!bind_2d && texture_unit < 16) {
-                g_lastBoundCubeTexIds[texture_unit] = gl_texture;
-            }
-        }
 
-        NuShaderObjectGLSLSetCustomSetterParameters(&shader->glsl, dirty, mtl);
-        lastMtl = mtl;
-        lastObject = shader;
-        lastFrame = 0;
-      }
+            NuShaderObjectGLSLSetCustomSetterParameters(&shader->glsl, dirty, mtl);
+            lastMtl = mtl;
+            lastObject = shader;
+            lastFrame = 0;
+        }
 
         // The original continues through the non-material shader semantics
         // (0x35..0x59) and uploads the values accumulated by

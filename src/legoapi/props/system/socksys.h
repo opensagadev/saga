@@ -84,44 +84,56 @@ DECOMP_ASSERT(sizeof(SOCKPOSITION) == 0x38, "SOCKPOSITION size");
 // `sock_lateral_`, `sock_trackin_`, `sock_limit_`) and are resolved against
 // the scene splines by SockSysFindInScene.
 typedef struct SOCK {
-    NUGSPLINE *cam;                 // 0x00 — sock_cam_ rail; NULL until found in scene
-    NUGSPLINE *a;                   // 0x04 — sock_a_ rail spline
-    NUGSPLINE *b;                   // 0x08 — sock_b_ rail spline
-    NUGSPLINE *c;                   // 0x0c — sock_c_ rail spline (optional)
-    NUGSPLINE *d;                   // 0x10 — sock_d_ rail spline (optional)
-    NUGSPLINE *mid;                 // 0x14 — sock_mid_ centre spline (optional)
-    NUGSPLINE *left;                // 0x18 — sock_left_ rail spline (optional)
-    NUGSPLINE *right;               // 0x1c — sock_right_ rail spline (optional)
-    NUGSPLINE *look;                // 0x20 — sock_look_ spline (optional)
-    NUGSPLINE *lateral;             // 0x24 — sock_lateral_ spline (optional)
-    NUGSPLINE *trackin;             // 0x28 — sock_trackin_ spline (optional)
-    NUGSPLINE *limit;               // 0x2c — sock_limit_ spline (optional)
-    u16 length;                     // 0x30 — rail point count - 1
-    u8 valid;                       // 0x32 — 1 once the socket has been populated
-    u8 unknown_33;                  // 0x33
-    SOCKSEGMENT *segments;          // 0x34 — generated data for each rail segment
-    SOCKROT *cam_rotations;         // 0x38 — generated camera-rail rotations
-    SOCKROT *mid_rotations;         // 0x3c — generated midpoint-rail rotations
-    NUVEC min;                      // 0x40 — min of the A/B(/C/D) rail points
-    NUVEC max;                      // 0x4c — max of the A/B(/C/D) rail points
-    NUVEC center;                   // 0x58 — midpoint of min and max
-    f32 extent;                     // 0x64 — half of the smaller of the x/z extents
-    u16 flags;                      // 0x68 — SOCK_FLAGS
-    u8 unknown_6a;                  // 0x6a
-    u8 unknown_6b;                  // 0x6b
-    u8 unknown_6c;                  // 0x6c
-    u8 look_ahead_segments;         // 0x6d
-    u16 input_yaw;                  // 0x6e — controller angle offset on camera-relative sockets
+    NUGSPLINE *cam;         // 0x00 — sock_cam_ rail; NULL until found in scene
+    NUGSPLINE *a;           // 0x04 — sock_a_ rail spline
+    NUGSPLINE *b;           // 0x08 — sock_b_ rail spline
+    NUGSPLINE *c;           // 0x0c — sock_c_ rail spline (optional)
+    NUGSPLINE *d;           // 0x10 — sock_d_ rail spline (optional)
+    NUGSPLINE *mid;         // 0x14 — sock_mid_ centre spline (optional)
+    NUGSPLINE *left;        // 0x18 — sock_left_ rail spline (optional)
+    NUGSPLINE *right;       // 0x1c — sock_right_ rail spline (optional)
+    NUGSPLINE *look;        // 0x20 — sock_look_ spline (optional)
+    NUGSPLINE *lateral;     // 0x24 — sock_lateral_ spline (optional)
+    NUGSPLINE *trackin;     // 0x28 — sock_trackin_ spline (optional)
+    NUGSPLINE *limit;       // 0x2c — sock_limit_ spline (optional)
+    u16 length;             // 0x30 — rail point count - 1
+    u8 valid;               // 0x32 — 1 once the socket has been populated
+    u8 unknown_33;          // 0x33
+    SOCKSEGMENT *segments;  // 0x34 — generated data for each rail segment
+    SOCKROT *cam_rotations; // 0x38 — generated camera-rail rotations
+    SOCKROT *mid_rotations; // 0x3c — generated midpoint-rail rotations
+    NUVEC min;              // 0x40 — min of the A/B(/C/D) rail points
+    NUVEC max;              // 0x4c — max of the A/B(/C/D) rail points
+    NUVEC center;           // 0x58 — midpoint of min and max
+    f32 extent;             // 0x64 — half of the smaller of the x/z extents
+    u16 flags;              // 0x68 — SOCK_FLAGS
+    u8 unknown_6a;          // 0x6a
+    u8 unknown_6b;          // 0x6b
+    u8 unknown_6c;          // 0x6c
+    u8 look_ahead_segments; // 0x6d
+    u16 input_yaw;          // 0x6e — controller angle offset on camera-relative sockets
     union {
-        struct { u8 unknown_70, unknown_71, unknown_72, unknown_73; };
+        struct {
+            u8 unknown_70, unknown_71, unknown_72, unknown_73;
+        };
         f32 current_speed; // 0x70
     };
     union {
-        struct { u8 unknown_74; u8 unknown_75; u8 unknown_76; u8 unknown_77; };
+        struct {
+            u8 unknown_74;
+            u8 unknown_75;
+            u8 unknown_76;
+            u8 unknown_77;
+        };
         f32 mid_force_inner_radius; // 0x74
     };
     union {
-        struct { u8 unknown_78; u8 unknown_79; u8 unknown_7a; u8 unknown_7b; };
+        struct {
+            u8 unknown_78;
+            u8 unknown_79;
+            u8 unknown_7a;
+            u8 unknown_7b;
+        };
         f32 mid_force_outer_radius; // 0x78
     };
     f32 unknown_7c;                 // 0x7c — default 1.0

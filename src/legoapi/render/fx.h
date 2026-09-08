@@ -24,7 +24,8 @@ extern "C" {
     i32 FindGameDebris(APIDEBRISSYS_s *debris_sys, char *name);
     i32 AddGameDebris(APIDEBRISSYS_s *debris_sys, i32 type, NUVEC *pos);
     i32 AddGameDebrisMom(APIDEBRISSYS_s *debris_sys, i32 type, NUVEC *pos, i32 count, NUVEC *momentum);
-    i32 AddGameDebrisMomentum(APIDEBRISSYS_s *system, i32 type, NUVEC *position, NUVEC *emitter_momentum, NUVEC *particle_momentum);
+    i32 AddGameDebrisMomentum(APIDEBRISSYS_s *system, i32 type, NUVEC *position, NUVEC *emitter_momentum,
+                              NUVEC *particle_momentum);
     i32 AddGameDebrisXYZ(APIDEBRISSYS_s *system, i32 type, f32 x, f32 y, f32 z);
     i32 AddGameDebrisRot(APIDEBRISSYS_s *system, i32 type, NUVEC *position, i32 count, i16 z_rotation, i16 y_rotation);
     i32 AddGameDebrisMtx(APIDEBRISSYS_s *system, i32 type, NUVEC *position, i32 count, NUMTX *matrix);

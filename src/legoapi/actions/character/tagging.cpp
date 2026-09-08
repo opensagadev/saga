@@ -43,24 +43,24 @@ void Tag_NewTransfer(GameObject_s *source, GameObject_s *target) {
         TAGTRANSFER_s &first = Tag_Transfer[target->apiobj.field_0x27c];
         first.position[0].x = source->apiobj.collision_position.x;
         first.position[0].z = source->apiobj.collision_position.z;
-        first.position[0].y = first.height[0] *
-            (source->apiobj.collision_max.y - source->apiobj.collision_min.y) + source->apiobj.collision_min.y;
+        first.position[0].y = first.height[0] * (source->apiobj.collision_max.y - source->apiobj.collision_min.y) +
+                              source->apiobj.collision_min.y;
 
         const i8 second_index = target->apiobj.field_0x27c;
         Tag_Transfer[second_index].height[1] = static_cast<f32>(qrand()) * 1.5259022e-05f * 0.4f + 0.4f;
         TAGTRANSFER_s &second = Tag_Transfer[target->apiobj.field_0x27c];
         second.position[1].x = source->apiobj.collision_position.x;
         second.position[1].z = source->apiobj.collision_position.z;
-        second.position[1].y = second.height[1] *
-            (source->apiobj.collision_max.y - source->apiobj.collision_min.y) + source->apiobj.collision_min.y;
+        second.position[1].y = second.height[1] * (source->apiobj.collision_max.y - source->apiobj.collision_min.y) +
+                               source->apiobj.collision_min.y;
 
         const i8 third_index = target->apiobj.field_0x27c;
         Tag_Transfer[third_index].height[2] = static_cast<f32>(qrand()) * 1.5259022e-05f * 0.4f + 0.4f;
         TAGTRANSFER_s &third = Tag_Transfer[target->apiobj.field_0x27c];
         third.position[2].x = source->apiobj.collision_position.x;
         third.position[2].z = source->apiobj.collision_position.z;
-        third.position[2].y = third.height[2] *
-            (source->apiobj.collision_max.y - source->apiobj.collision_min.y) + source->apiobj.collision_min.y;
+        third.position[2].y = third.height[2] * (source->apiobj.collision_max.y - source->apiobj.collision_min.y) +
+                              source->apiobj.collision_min.y;
     }
     if (static_cast<i8>(target->apiobj.flags_low) < 0) {
         if (Tag_DoneFirst == 0) {

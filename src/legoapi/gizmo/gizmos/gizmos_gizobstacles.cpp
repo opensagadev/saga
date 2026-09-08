@@ -67,12 +67,14 @@ void GizObstacle_Stop(GIZOBSTACLE_s *obstacle) {
 
 i32 GizObstacles_Hit(void *context, GIZOBSTACLE_s *obstacle, nuvec_s *, i32 player, i32) {
     if ((obstacle->progress_flags & 2) == 0 || (obstacle->progress_flags & 1) == 0 ||
-        (obstacle->runtime_flags & 0x80) != 0) return 0;
+        (obstacle->runtime_flags & 0x80) != 0)
+        return 0;
 
     if ((obstacle->config_flags & 0x800) != 0) {
         obstacle->runtime_flags |= 0x40;
     } else {
-        if ((obstacle->config_flags & 0x1000) == 0) return 0;
+        if ((obstacle->config_flags & 0x1000) == 0)
+            return 0;
         if (obstacle->blowup_type != -1) {
             if ((obstacle->config_flags & 0x200) != 0) {
                 if (obstacle->anim_set != NULL) {
@@ -85,7 +87,7 @@ i32 GizObstacles_Hit(void *context, GIZOBSTACLE_s *obstacle, nuvec_s *, i32 play
                 }
             } else {
                 GizmoBlowUpTypeBlowUp(static_cast<WORLDINFO_s *>(context), obstacle->blowup_type,
-                                     &obstacle->evaluated_position);
+                                      &obstacle->evaluated_position);
             }
         }
         GameAnimSet_JumpToEnd(obstacle->anim_set);

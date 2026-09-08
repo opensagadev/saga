@@ -29,7 +29,8 @@ static NUVEC SpeederChaseATATExitLandPos = {-159.0f, 6.869999885559082f, -17.600
 
 void ReleaseTakeOver(GameObject_s *object, i32) {
     GameObject_s *rider = object->field_0xcc0;
-    if (rider == NULL) return;
+    if (rider == NULL)
+        return;
     if (object->character_context == 0x3b) {
         GameObject_s *vehicle = rider;
         rider = object;
@@ -48,7 +49,8 @@ void ReleaseTakeOver(GameObject_s *object, i32) {
     u8 object_set = object->ai.creature_set;
     u16 rider_flag = rider->apiobj.field_0x1f8 & 0x100;
     u16 object_flag = object->apiobj.field_0x1f8 & 0x100;
-    if ((rider->field_0xf00 & 2) == 0 && TagCode(rider, object, 1, 0, 0) == 0) return;
+    if ((rider->field_0xf00 & 2) == 0 && TagCode(rider, object, 1, 0, 0) == 0)
+        return;
     memcpy(rider->ai.script_process, &object_script.process, sizeof(object_script.process));
     rider->ai.field_0xc8 = object_script.field_c8;
     memcpy(object->ai.script_process, &rider_script.process, sizeof(rider_script.process));
@@ -133,8 +135,7 @@ i32 num_takeoverobjects;
 
 void RegisterTakeOverObject(GameObject_s *object) {
     if ((object->apiobj.character_data->game_character->flags_090 & 0x80) != 0 ||
-        (object->apiobj.field_0x1f4 & 0x4000) == 0 ||
-        (WORLD->current_level->flags & LEVEL_FORGET_TAKEOVERS) != 0) {
+        (object->apiobj.field_0x1f4 & 0x4000) == 0 || (WORLD->current_level->flags & LEVEL_FORGET_TAKEOVERS) != 0) {
         return;
     }
     const u8 level = static_cast<u8>(WORLD->current_level->area_level_index);
@@ -143,7 +144,8 @@ void RegisterTakeOverObject(GameObject_s *object) {
     }
     i32 index = 0;
     while (index < num_takeoverobjects) {
-        if (takeoverobjects[index].object == object) return;
+        if (takeoverobjects[index].object == object)
+            return;
         ++index;
     }
     TAKEOVER_OBJECT_RECORD &record = takeoverobjects[index];

@@ -250,7 +250,8 @@ void BuyAllShopExtras() {
     shopitem_s *item = ExtraItems;
     for (i32 i = 0; i < 44; ++i, ++item) {
         Game.purchased_extra_bits[i >> 5] |= 1u << (i & 31);
-        if (world->current_level == HUB_LDATA) item->unlocked = 1;
+        if (world->current_level == HUB_LDATA)
+            item->unlocked = 1;
         i32 area = static_cast<i8>(Cheat[i].area);
         if (area != -1 && Game.area_save[area].field_0x5[1] == 0)
             Game.area_save[area].field_0x5[1] = 1;

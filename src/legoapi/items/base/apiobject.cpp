@@ -62,10 +62,9 @@ extern "C" {
         NUVEC first_component;
         NUVEC second_component;
         NUVEC average;
-        already_touching = ((first->field_0x1ec & second->field_0x1e4) |
-                            (first->field_0x1f0 & second->field_0x1e8) |
-                            (second->field_0x1ec & first->field_0x1e4) |
-                            (second->field_0x1f0 & first->field_0x1e8)) != 0;
+        already_touching =
+            ((first->field_0x1ec & second->field_0x1e4) | (first->field_0x1f0 & second->field_0x1e8) |
+             (second->field_0x1ec & first->field_0x1e4) | (second->field_0x1f0 & first->field_0x1e8)) != 0;
         first->field_0x1ec |= second->field_0x1e4;
         first->field_0x1f0 |= second->field_0x1e8;
         second->field_0x1ec |= first->field_0x1e4;
@@ -78,18 +77,20 @@ extern "C" {
             first_weight = second_weight = 1.0f;
         }
         if (already_touching == 0) {
-            if ((first->field_0x1f4 & 0x80) != 0) return 2;
-            if ((second->field_0x1f4 & 0x80) != 0) return 2;
+            if ((first->field_0x1f4 & 0x80) != 0)
+                return 2;
+            if ((second->field_0x1f4 & 0x80) != 0)
+                return 2;
             NuVecSub(&normal, second_position, first_position);
             NuVecNorm(&normal, &normal);
             first_speed = NuFsqrt(first->velocity.x * first->velocity.x + first->velocity.y * first->velocity.y +
-                                 first->velocity.z * first->velocity.z);
+                                  first->velocity.z * first->velocity.z);
             value = first_speed == 0.0f ? 0.0f : 1.0f / first_speed;
             first_component.x = first->velocity.x * value;
             first_component.y = first->velocity.y * value;
             first_component.z = first->velocity.z * value;
             second_speed = NuFsqrt(second->velocity.x * second->velocity.x + second->velocity.y * second->velocity.y +
-                                  second->velocity.z * second->velocity.z);
+                                   second->velocity.z * second->velocity.z);
             value = second_speed == 0.0f ? 0.0f : 1.0f / second_speed;
             second_component.x = second->velocity.x * value;
             second_component.y = second->velocity.y * value;
@@ -122,8 +123,10 @@ extern "C" {
             }
             return 2;
         }
-        if ((first->field_0x1f4 & 0x80) != 0) return 1;
-        if ((second->field_0x1f4 & 0x80) != 0) return 1;
+        if ((first->field_0x1f4 & 0x80) != 0)
+            return 1;
+        if ((second->field_0x1f4 & 0x80) != 0)
+            return 1;
         average.x = 0.5f * (first->velocity.x + second->velocity.x);
         average.y = 0.5f * (first->velocity.y + second->velocity.y);
         average.z = 0.5f * (first->velocity.z + second->velocity.z);
@@ -132,8 +135,10 @@ extern "C" {
             NuVecSub(&normal, second_position, first_position);
             NuVecNorm(&normal, &normal);
             value = NuFsqrt(average.x * average.x + average.y * average.y + average.z * average.z);
-            if (value < MINFORCEAPART) value = MINFORCEAPART;
-            else if (value > MAXFORCEAPART) value = MAXFORCEAPART;
+            if (value < MINFORCEAPART)
+                value = MINFORCEAPART;
+            else if (value > MAXFORCEAPART)
+                value = MAXFORCEAPART;
             force = 3.0f;
             value *= force / 2.1f;
             NuVecScale(&normal, &normal, value);
@@ -183,8 +188,10 @@ extern "C" {
             first_weight = second_weight = 1.0f;
         }
         if (already_touching == 0) {
-            if ((first->field_0x1f4 & 0x80) != 0) return 2;
-            if ((second->field_0x1f4 & 0x80) != 0) return 2;
+            if ((first->field_0x1f4 & 0x80) != 0)
+                return 2;
+            if ((second->field_0x1f4 & 0x80) != 0)
+                return 2;
             if (NuFabs(second_position->x - first_position->x) < 0.0001f &&
                 NuFabs(second_position->z - first_position->z) < 0.0001f &&
                 NuFabs(first->previous_velocity.x) < 0.0001f && NuFabs(first->previous_velocity.z) < 0.0001f &&
@@ -202,7 +209,7 @@ extern "C" {
             normal.x *= value;
             normal.z *= value;
             first_speed = NuFsqrt(first->previous_velocity.x * first->previous_velocity.x +
-                                 first->previous_velocity.z * first->previous_velocity.z);
+                                  first->previous_velocity.z * first->previous_velocity.z);
             if (first_speed == 0.0f)
                 value = 0.0f;
             else
@@ -210,7 +217,7 @@ extern "C" {
             first_component.x = first->previous_velocity.x * value;
             first_component.z = first->previous_velocity.z * value;
             second_speed = NuFsqrt(second->previous_velocity.x * second->previous_velocity.x +
-                                  second->previous_velocity.z * second->previous_velocity.z);
+                                   second->previous_velocity.z * second->previous_velocity.z);
             if (second_speed == 0.0f)
                 value = 0.0f;
             else
@@ -243,12 +250,14 @@ extern "C" {
             second->movement_direction.z = second->velocity.z;
             return 2;
         }
-        if ((first->field_0x1f4 & 0x80) != 0) return 1;
-        if ((second->field_0x1f4 & 0x80) != 0) return 1;
+        if ((first->field_0x1f4 & 0x80) != 0)
+            return 1;
+        if ((second->field_0x1f4 & 0x80) != 0)
+            return 1;
         if (NuFabs(second_position->x - first_position->x) < 0.0001f &&
-            NuFabs(second_position->z - first_position->z) < 0.0001f &&
-            NuFabs(first->previous_velocity.x) < 0.0001f && NuFabs(first->previous_velocity.z) < 0.0001f &&
-            NuFabs(second->previous_velocity.x) < 0.0001f && NuFabs(second->previous_velocity.z) < 0.0001f) {
+            NuFabs(second_position->z - first_position->z) < 0.0001f && NuFabs(first->previous_velocity.x) < 0.0001f &&
+            NuFabs(first->previous_velocity.z) < 0.0001f && NuFabs(second->previous_velocity.x) < 0.0001f &&
+            NuFabs(second->previous_velocity.z) < 0.0001f) {
             GameObjectForceApart2D(first, second);
             return 1;
         }
@@ -265,8 +274,10 @@ extern "C" {
                 return 1;
             }
             value = NuFsqrt(average.x * average.x + average.z * average.z);
-            if (value < MINFORCEAPART) value = MINFORCEAPART;
-            else if (value > MAXFORCEAPART) value = MAXFORCEAPART;
+            if (value < MINFORCEAPART)
+                value = MINFORCEAPART;
+            else if (value > MAXFORCEAPART)
+                value = MAXFORCEAPART;
             force = 3.0f;
             value *= force / 2.1f;
             normal.x *= value;
@@ -293,7 +304,8 @@ extern "C" {
 
     void APIObjectCollisions(i32 count, APIOBJECT **objects, NUVEC *minimums, NUVEC *maximums,
                              i32 (*collide)(APIOBJECT *, APIOBJECT *)) {
-        if (collide == NULL) return;
+        if (collide == NULL)
+            return;
         i32 outer = 1;
         APIOBJECT **second = objects + outer;
         NUVEC *second_min = minimums + outer;
@@ -305,15 +317,23 @@ extern "C" {
             NUVEC *first_min = minimums + inner;
             NUVEC *first_max = maximums + inner;
             for (; inner < outer; ++inner, ++first, ++first_min, ++first_max) {
-                if ((*first)->collision_excluded_object == *second) goto no_collision;
-                if ((*second)->collision_excluded_object == *first) goto no_collision;
+                if ((*first)->collision_excluded_object == *second)
+                    goto no_collision;
+                if ((*second)->collision_excluded_object == *first)
+                    goto no_collision;
                 if ((((static_cast<u64>((*first)->collision_exclusion_mask_high) << 32) |
-                      (*first)->collision_exclusion_mask_low) >> (*second)->field_0x289) & 1) goto no_collision;
+                      (*first)->collision_exclusion_mask_low) >>
+                     (*second)->field_0x289) &
+                    1)
+                    goto no_collision;
                 if ((((static_cast<u64>((*second)->collision_exclusion_mask_high) << 32) |
-                      (*second)->collision_exclusion_mask_low) >> (*first)->field_0x289) & 1) goto no_collision;
-                if (first_min->x > second_max->x || second_min->x > first_max->x ||
-                    first_min->z > second_max->z || second_min->z > first_max->z ||
-                    first_min->y > second_max->y || second_min->y > first_max->y) goto no_collision;
+                      (*second)->collision_exclusion_mask_low) >>
+                     (*first)->field_0x289) &
+                    1)
+                    goto no_collision;
+                if (first_min->x > second_max->x || second_min->x > first_max->x || first_min->z > second_max->z ||
+                    second_min->z > first_max->z || first_min->y > second_max->y || second_min->y > first_max->y)
+                    goto no_collision;
                 {
                     NUVEC *first_position = &(*first)->collision_position;
                     f32 dx = second_position->x - first_position->x;
@@ -355,7 +375,7 @@ extern "C" {
         if (system != NULL && system->object_size != 0) {
             object = system->objects;
             for (index = 0; index < 64; ++index,
-                 object = reinterpret_cast<APIOBJECT *>(reinterpret_cast<u8 *>(object) + system->object_size)) {
+                object = reinterpret_cast<APIOBJECT *>(reinterpret_cast<u8 *>(object) + system->object_size)) {
                 if ((object->flags_low & 1) == 0) {
                     memset(object, 0, system->object_size);
                     APIObjectSetUsed(object, index, 1);

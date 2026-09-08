@@ -315,7 +315,8 @@ i32 HitTerrPoly(tertype *surface, i32 group_index) {
     f32 radius = TerI->collision_radius;
     TerI->hit_type = 0;
     TerI->hit_time = 999.9f;
-    TerI->horizontal_movement_length = NuFsqrt(TerI->movement.x * TerI->movement.x + TerI->movement.z * TerI->movement.z);
+    TerI->horizontal_movement_length =
+        NuFsqrt(TerI->movement.x * TerI->movement.x + TerI->movement.z * TerI->movement.z);
     NUVEC *origin = &CurTerr->groups[group_index].origin;
     TerI->local_start.x = TerI->position.x - origin->x;
     TerI->local_start.y = TerI->position.y - origin->y;
@@ -325,13 +326,14 @@ i32 HitTerrPoly(tertype *surface, i32 group_index) {
     TerI->local_end.z = (TerI->position.z + TerI->movement.z) - origin->z;
     f32 primary_end = (((TerI->local_end.x - surface->vectors[0].x) * surface->normals[0].x +
                         (TerI->local_end.y - surface->vectors[0].y) * surface->normals[0].y) +
-                        (TerI->local_end.z - surface->vectors[0].z) * surface->normals[0].z) - radius - TerI->compare_epsilon;
+                       (TerI->local_end.z - surface->vectors[0].z) * surface->normals[0].z) -
+                      radius - TerI->compare_epsilon;
     f32 primary_start = 0.0f;
     bool test = false;
     if (primary_end < 0.0f) {
         primary_start = ((TerI->local_start.x - surface->vectors[0].x) * surface->normals[0].x +
                          (TerI->local_start.y - surface->vectors[0].y) * surface->normals[0].y) +
-                         (TerI->local_start.z - surface->vectors[0].z) * surface->normals[0].z - radius;
+                        (TerI->local_start.z - surface->vectors[0].z) * surface->normals[0].z - radius;
         test = primary_start > -radius;
     }
     f32 secondary_start = 0.0f;
@@ -339,12 +341,14 @@ i32 HitTerrPoly(tertype *surface, i32 group_index) {
     if (surface->normals[1].y < 65536.0f) {
         secondary_end = (((TerI->local_end.x - surface->vectors[3].x) * surface->normals[1].x +
                           (TerI->local_end.y - surface->vectors[3].y) * surface->normals[1].y) +
-                          (TerI->local_end.z - surface->vectors[3].z) * surface->normals[1].z) - radius - TerI->compare_epsilon;
+                         (TerI->local_end.z - surface->vectors[3].z) * surface->normals[1].z) -
+                        radius - TerI->compare_epsilon;
         if (secondary_end < 0.0f) {
             secondary_start = ((TerI->local_start.x - surface->vectors[3].x) * surface->normals[1].x +
                                (TerI->local_start.y - surface->vectors[3].y) * surface->normals[1].y) +
-                               (TerI->local_start.z - surface->vectors[3].z) * surface->normals[1].z - radius;
-            if (secondary_start > -radius) test = true;
+                              (TerI->local_start.z - surface->vectors[3].z) * surface->normals[1].z - radius;
+            if (secondary_start > -radius)
+                test = true;
         }
     }
     if (test && HitPoly(primary_start, primary_end, secondary_start, secondary_end, surface)) {
@@ -834,14 +838,14 @@ void CollideGameObjects(WORLDINFO_s *world) {
             WORLD->current_level != DOGFIGHTA_LDATA) {
             data = object->apiobj.character_data->game_character;
             if (object->apiobj.field_0x27c == -1 && data->field_0x28 != 0.0f) {
-                object->apiobj.collision_exclusion_mask |= (vertical_movement_mask & player_slot_mask) | no_vertical_movement_mask;
+                object->apiobj.collision_exclusion_mask |=
+                    (vertical_movement_mask & player_slot_mask) | no_vertical_movement_mask;
             } else if (data->field_0x28 == 0.0f) {
                 object->apiobj.collision_exclusion_mask |= (~player_slot_mask) & vertical_movement_mask;
             } else {
                 object->apiobj.collision_exclusion_mask |= vertical_movement_mask;
             }
         }
-
     }
 
     APIObjectCollisions(collision_count, collision_objects, collision_minimums, collision_maximums, Collide2Objects);
@@ -1052,7 +1056,8 @@ void RayImpact(NUVEC *movement) {
         case 3:
         case 4: {
             TerI->hit_time -= TerI->separation_epsilon;
-            if (TerI->hit_time < 0.0f) TerI->hit_time = 0.0f;
+            if (TerI->hit_time < 0.0f)
+                TerI->hit_time = 0.0f;
             f32 time = TerI->hit_time;
             movement->x = TerI->movement.x * time;
             movement->y = TerI->movement.y * time;

@@ -258,7 +258,7 @@ class NuVoiceAndroid : public NuSoundVoice {
     i32 field12_0x178; // playback position in samples (high)
 
     i16 last_volume_level; // +0x17c centibels cache (-32768 = mute)
-    union {               // +0x17e
+    union {                // +0x17e
         u8 hardware_flags;
         struct {
             u8 start : 1;

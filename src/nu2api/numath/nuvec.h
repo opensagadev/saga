@@ -303,8 +303,8 @@ extern "C" {
     void NuClipXPlane(NUVEC *out, NUVEC *point, NUVEC *direction, f32 *plane);
     void NuClipYPlane(NUVEC *out, NUVEC *point, NUVEC *direction, f32 *plane);
     void NuClipZPlane(NUVEC *out, NUVEC *point, NUVEC *direction, f32 *plane);
-    i32 BoundingBoxToLine(NUVEC *minimum, NUVEC *maximum, struct numtx_s *matrix,
-                         NUVEC *start, NUVEC *end, f32 expansion, NUVEC *intersection);
+    i32 BoundingBoxToLine(NUVEC *minimum, NUVEC *maximum, struct numtx_s *matrix, NUVEC *start, NUVEC *end,
+                          f32 expansion, NUVEC *intersection);
 #ifdef __cplusplus
 }
 

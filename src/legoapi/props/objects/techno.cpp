@@ -36,7 +36,8 @@ TECHNO *Technos_FindControllingTechno(GameObject_s *object) {
     if (object != NULL) {
         for (i32 i = 0; i < WORLD->ntechnos; ++i) {
             TECHNO *techno = &WORLD->technos[i];
-            if (techno->target_mode == 1 && techno->controlled_object == object) return techno;
+            if (techno->target_mode == 1 && techno->controlled_object == object)
+                return techno;
         }
     }
     return NULL;

@@ -607,8 +607,8 @@ extern "C" {
                     NUVEC direction;
                     NUVEC offset;
                     NuVecSub(&direction, &to, &from);
-                    f32 distance = NuFsqrt(direction.x * direction.x + direction.y * direction.y +
-                                           direction.z * direction.z);
+                    f32 distance =
+                        NuFsqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
                     f32 ratio = NuFdiv(1.0f, distance);
                     direction.x *= ratio;
                     direction.y *= ratio;
@@ -678,7 +678,8 @@ extern "C" {
 
     void SockRotationMatrix(SOCKSYS *system, SOCKPOSITION *position, NUMTX *out, i32 stride, i32 mode) {
         NuMtxSetIdentity(out);
-        if (position->location.sock == -1) return;
+        if (position->location.sock == -1)
+            return;
         i32 first = (mode == 4 || mode == 5) ? 0 : 1;
         i32 last = (mode == 4 || mode == 5) ? 3 : 2;
         SOCK *sock = &system->sock[position->location.sock];
@@ -688,9 +689,12 @@ extern "C" {
         samples[2] = samples[1] + stride;
         samples[3] = samples[2] + stride;
         samples[0] = samples[1] - stride;
-        if (samples[0] < 0) samples[0] = 0;
-        if (samples[2] > sock->length) samples[2] = sock->length;
-        if (samples[3] > sock->length) samples[3] = sock->length;
+        if (samples[0] < 0)
+            samples[0] = 0;
+        if (samples[2] > sock->length)
+            samples[2] = sock->length;
+        if (samples[3] > sock->length)
+            samples[3] = sock->length;
         NUMTX matrices[4];
         NUQUAT quats[4], result;
         f32 widths[4], heights[4];
@@ -741,13 +745,21 @@ extern "C" {
         ratio /= (f32)stride;
         if (sock->flags & 0x200) {
             f32 width = (1.0f - ratio) * (widths[1] / base_width) + (widths[2] / base_width) * ratio;
-            if (1.0f >= width) sock->camera_local_x_ratio = sock->camera_lateral_ratio * width;
-            else sock->camera_local_x_ratio = sock->camera_lateral_ratio + (1.0f - 1.0f / width) * (1.0f - sock->camera_lateral_ratio);
+            if (1.0f >= width)
+                sock->camera_local_x_ratio = sock->camera_lateral_ratio * width;
+            else
+                sock->camera_local_x_ratio =
+                    sock->camera_lateral_ratio + (1.0f - 1.0f / width) * (1.0f - sock->camera_lateral_ratio);
             f32 height = (1.0f - ratio) * (heights[1] / base_height) + (heights[2] / base_height) * ratio;
-            if (1.0f >= height) sock->camera_vertical_ratio = sock->camera_lateral_ratio * height;
-            else sock->camera_vertical_ratio = sock->camera_lateral_ratio + (1.0f - 1.0f / height) * (1.0f - sock->camera_lateral_ratio);
-            if (width > 1.0f) sock->look_ratio_xz = sock->unknown_80 / width;
-            if (height > 1.0f) sock->look_ratio_y = sock->unknown_84 / height;
+            if (1.0f >= height)
+                sock->camera_vertical_ratio = sock->camera_lateral_ratio * height;
+            else
+                sock->camera_vertical_ratio =
+                    sock->camera_lateral_ratio + (1.0f - 1.0f / height) * (1.0f - sock->camera_lateral_ratio);
+            if (width > 1.0f)
+                sock->look_ratio_xz = sock->unknown_80 / width;
+            if (height > 1.0f)
+                sock->look_ratio_y = sock->unknown_84 / height;
         } else {
             sock->camera_vertical_ratio = sock->camera_lateral_ratio;
             sock->camera_local_x_ratio = sock->camera_vertical_ratio;
@@ -1343,7 +1355,8 @@ extern f32 avg_currentspeed_mul;
 
 // Original: 237 bytes.
 f32 ForceAlongSock(GameObject_s *object) {
-    if (object->sock_position.location.sock == -1 || CurrentSpeed == 0.0f) return 0.0f;
+    if (object->sock_position.location.sock == -1 || CurrentSpeed == 0.0f)
+        return 0.0f;
     f32 speed = (1.0f + object->field_0xc38) * (CurrentSpeed * avg_currentspeed_mul);
     NUVEC force = {0.0f, 0.0f, speed};
     NuVecRotateX(&force, &force, object->sock_position.midpoint_rotation.x);

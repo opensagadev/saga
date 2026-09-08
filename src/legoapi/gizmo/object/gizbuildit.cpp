@@ -270,8 +270,8 @@ void GizDrawBuildItPiece(GameObject_s *player, i32 draw_reflection) {
         if (draw_reflection != 0) {
             extern i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
             NUMTX reflection __attribute__((aligned(16)));
-            if (MatrixReflection(&matrix, player->field_0x1087, player->field_0x1020,
-                                 WORLD->current_level->unknown_0cc, &reflection) != 0) {
+            if (MatrixReflection(&matrix, player->field_0x1087, player->field_0x1020, WORLD->current_level->unknown_0cc,
+                                 &reflection) != 0) {
                 NuRndrStartReflectionRender(0);
                 NuSpecialDrawAt(&object->special, &reflection);
                 NuRndrEndReflectionRender();
@@ -307,8 +307,7 @@ void GizGetBuildItPlayerPos(GameObject_s *player, nuvec_s *position, nuvec_s *ta
         i32 end = index + batch_count;
         for (; index < end; ++index) {
             buildit = static_cast<GIZBUILDIT_s *>(player->field_0x788);
-            GIZBUILDITANIMDATA_s *data =
-                static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[index]->object_data);
+            GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[index]->object_data);
             NuVecAdd(&total, &total, NUMTX_GET_ROW_VEC(&data->start_mtx, 3));
         }
         if (batch_count > 1) {
@@ -324,8 +323,7 @@ void GizGetBuildItPlayerPos(GameObject_s *player, nuvec_s *position, nuvec_s *ta
             index = count - 1;
         }
         buildit = static_cast<GIZBUILDIT_s *>(player->field_0x788);
-        GIZBUILDITANIMDATA_s *data =
-            static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[index]->object_data);
+        GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[index]->object_data);
         f32 dx = position->x - data->end_mtx.m30;
         f32 dz = position->z - data->end_mtx.m32;
         f32 inverse_distance = 1.0f / NuFsqrt(dx * dx + dz * dz);
@@ -334,8 +332,7 @@ void GizGetBuildItPlayerPos(GameObject_s *player, nuvec_s *position, nuvec_s *ta
     }
     if (target != NULL) {
         buildit = static_cast<GIZBUILDIT_s *>(player->field_0x788);
-        GIZBUILDITANIMDATA_s *data =
-            static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[index]->object_data);
+        GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[index]->object_data);
         *target = *NUMTX_GET_ROW_VEC(&data->end_mtx, 3);
     }
 }

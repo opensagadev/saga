@@ -469,14 +469,17 @@ f32 SeekValF(f32 current, f32 target, f32 rate);
 
 // Original: 1,436 bytes.
 void GunShip_DragBombSeekBlowUp(GameObject_s *object) {
-    if (object->character_context != 0x34) return;
+    if (object->character_context != 0x34)
+        return;
     f32 nearest_distance = gunshipb_seekrange * gunshipb_seekrange;
     GIZMOBLOWUP_s *nearest = NULL;
     NUVEC offset, nearest_offset, direction;
     for (i32 i = 0; i < 8; ++i) {
-        if (LevGizmo[i] == NULL) continue;
+        if (LevGizmo[i] == NULL)
+            continue;
         GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(LevGizmo[i]->object);
-        if (blowup == NULL || (blowup->status_flags & 0x800001) != 0x800000) continue;
+        if (blowup == NULL || (blowup->status_flags & 0x800001) != 0x800000)
+            continue;
         f32 distance = NuVecDistSqr(&blowup->mid_position, &object->apiobj.collision_position, &offset);
         if (nearest_distance > distance) {
             nearest_distance = distance;
@@ -484,7 +487,8 @@ void GunShip_DragBombSeekBlowUp(GameObject_s *object) {
             nearest = blowup;
         }
     }
-    if (nearest == NULL) return;
+    if (nearest == NULL)
+        return;
     NuVecNorm(&direction, &nearest_offset);
     f32 momentum = (1.0f - NuFsqrt(nearest_distance) / gunshipb_seekrange) * gunshipb_seekmom;
     direction.x *= momentum;

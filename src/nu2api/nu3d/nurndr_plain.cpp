@@ -709,20 +709,21 @@ extern "C" void NuRndrParticleGroup(uv1debdata *chunks, PartHeader *header, NUMT
         i32 command = static_cast<i8>(chunk->command);
         dma_particle_chunk_s *next = chunk->next;
         switch (command) {
-        case 0x4e:
-            if (next != NULL) {
-                BuildDebrisVerts(header, reinterpret_cast<uv1debdata *>(chunk), material, time, matrix,
-                                 particle_type, a, b, c, near_clip);
-                chunk = next;
-            }
-            break;
-        case 0x52:
-            BuildDebrisVerts(header, reinterpret_cast<uv1debdata *>(chunk), material, time, matrix,
-                             particle_type, a, b, c, near_clip);
-            done = 1;
-            break;
+            case 0x4e:
+                if (next != NULL) {
+                    BuildDebrisVerts(header, reinterpret_cast<uv1debdata *>(chunk), material, time, matrix,
+                                     particle_type, a, b, c, near_clip);
+                    chunk = next;
+                }
+                break;
+            case 0x52:
+                BuildDebrisVerts(header, reinterpret_cast<uv1debdata *>(chunk), material, time, matrix, particle_type,
+                                 a, b, c, near_clip);
+                done = 1;
+                break;
         }
-        if (++count > 0x100) break;
+        if (++count > 0x100)
+            break;
     }
 }
 
@@ -810,46 +811,30 @@ extern "C" void NuRndrSetDebBox(NUVEC *range) {
     const NUVEC right = {size.x * cammtx.m00, size.x * cammtx.m01, size.x * cammtx.m02};
     const NUVEC up = {size.y * cammtx.m10, size.y * cammtx.m11, size.y * cammtx.m12};
     const NUVEC forward = {size.z * cammtx.m20, size.z * cammtx.m21, size.z * cammtx.m22};
-    NUVEC corner0 = {
-        ((right.x * -0.2f + cammtx.m30) + up.x * -0.2f) + forward.x * -0.05f,
-        ((right.y * -0.2f + cammtx.m31) + up.y * -0.2f) + forward.y * -0.05f,
-        ((right.z * -0.2f + cammtx.m32) + up.z * -0.2f) + forward.z * -0.05f
-    };
-    NUVEC corner1 = {
-        ((right.x * 0.2f + cammtx.m30) + up.x * -0.2f) + forward.x * -0.05f,
-        ((right.y * 0.2f + cammtx.m31) + up.y * -0.2f) + forward.y * -0.05f,
-        ((right.z * 0.2f + cammtx.m32) + up.z * -0.2f) + forward.z * -0.05f
-    };
-    NUVEC corner2 = {
-        ((right.x * -0.2f + cammtx.m30) + up.x * 0.2f) + forward.x * -0.05f,
-        ((right.y * -0.2f + cammtx.m31) + up.y * 0.2f) + forward.y * -0.05f,
-        ((right.z * -0.2f + cammtx.m32) + up.z * 0.2f) + forward.z * -0.05f
-    };
-    NUVEC corner3 = {
-        ((right.x * 0.2f + cammtx.m30) + up.x * 0.2f) + forward.x * -0.05f,
-        ((right.y * 0.2f + cammtx.m31) + up.y * 0.2f) + forward.y * -0.05f,
-        ((right.z * 0.2f + cammtx.m32) + up.z * 0.2f) + forward.z * -0.05f
-    };
-    NUVEC corner4 = {
-        ((right.x * -0.5f + cammtx.m30) + up.x * -0.5f) + forward.x * 0.8f,
-        ((right.y * -0.5f + cammtx.m31) + up.y * -0.5f) + forward.y * 0.8f,
-        ((right.z * -0.5f + cammtx.m32) + up.z * -0.5f) + forward.z * 0.8f
-    };
-    NUVEC corner5 = {
-        ((right.x * 0.5f + cammtx.m30) + up.x * -0.5f) + forward.x * 0.8f,
-        ((right.y * 0.5f + cammtx.m31) + up.y * -0.5f) + forward.y * 0.8f,
-        ((right.z * 0.5f + cammtx.m32) + up.z * -0.5f) + forward.z * 0.8f
-    };
-    NUVEC corner6 = {
-        ((right.x * -0.5f + cammtx.m30) + up.x * 0.5f) + forward.x * 0.8f,
-        ((right.y * -0.5f + cammtx.m31) + up.y * 0.5f) + forward.y * 0.8f,
-        ((right.z * -0.5f + cammtx.m32) + up.z * 0.5f) + forward.z * 0.8f
-    };
-    NUVEC corner7 = {
-        ((right.x * 0.5f + cammtx.m30) + up.x * 0.5f) + forward.x * 0.8f,
-        ((right.y * 0.5f + cammtx.m31) + up.y * 0.5f) + forward.y * 0.8f,
-        ((right.z * 0.5f + cammtx.m32) + up.z * 0.5f) + forward.z * 0.8f
-    };
+    NUVEC corner0 = {((right.x * -0.2f + cammtx.m30) + up.x * -0.2f) + forward.x * -0.05f,
+                     ((right.y * -0.2f + cammtx.m31) + up.y * -0.2f) + forward.y * -0.05f,
+                     ((right.z * -0.2f + cammtx.m32) + up.z * -0.2f) + forward.z * -0.05f};
+    NUVEC corner1 = {((right.x * 0.2f + cammtx.m30) + up.x * -0.2f) + forward.x * -0.05f,
+                     ((right.y * 0.2f + cammtx.m31) + up.y * -0.2f) + forward.y * -0.05f,
+                     ((right.z * 0.2f + cammtx.m32) + up.z * -0.2f) + forward.z * -0.05f};
+    NUVEC corner2 = {((right.x * -0.2f + cammtx.m30) + up.x * 0.2f) + forward.x * -0.05f,
+                     ((right.y * -0.2f + cammtx.m31) + up.y * 0.2f) + forward.y * -0.05f,
+                     ((right.z * -0.2f + cammtx.m32) + up.z * 0.2f) + forward.z * -0.05f};
+    NUVEC corner3 = {((right.x * 0.2f + cammtx.m30) + up.x * 0.2f) + forward.x * -0.05f,
+                     ((right.y * 0.2f + cammtx.m31) + up.y * 0.2f) + forward.y * -0.05f,
+                     ((right.z * 0.2f + cammtx.m32) + up.z * 0.2f) + forward.z * -0.05f};
+    NUVEC corner4 = {((right.x * -0.5f + cammtx.m30) + up.x * -0.5f) + forward.x * 0.8f,
+                     ((right.y * -0.5f + cammtx.m31) + up.y * -0.5f) + forward.y * 0.8f,
+                     ((right.z * -0.5f + cammtx.m32) + up.z * -0.5f) + forward.z * 0.8f};
+    NUVEC corner5 = {((right.x * 0.5f + cammtx.m30) + up.x * -0.5f) + forward.x * 0.8f,
+                     ((right.y * 0.5f + cammtx.m31) + up.y * -0.5f) + forward.y * 0.8f,
+                     ((right.z * 0.5f + cammtx.m32) + up.z * -0.5f) + forward.z * 0.8f};
+    NUVEC corner6 = {((right.x * -0.5f + cammtx.m30) + up.x * 0.5f) + forward.x * 0.8f,
+                     ((right.y * -0.5f + cammtx.m31) + up.y * 0.5f) + forward.y * 0.8f,
+                     ((right.z * -0.5f + cammtx.m32) + up.z * 0.5f) + forward.z * 0.8f};
+    NUVEC corner7 = {((right.x * 0.5f + cammtx.m30) + up.x * 0.5f) + forward.x * 0.8f,
+                     ((right.y * 0.5f + cammtx.m31) + up.y * 0.5f) + forward.y * 0.8f,
+                     ((right.z * 0.5f + cammtx.m32) + up.z * 0.5f) + forward.z * 0.8f};
     NUVEC minimum = corner0;
     NUVEC maximum = corner0;
     minimum.x = corner1.x < minimum.x ? corner1.x : minimum.x;
@@ -1087,7 +1072,8 @@ extern "C" void DisplayListUpdateRenderState(void *display_list, void *state) {
     dl->state->global_id = global->state.global_id;
 }
 extern "C" i32 NuRndrStrip3d(NURND_VERTEX3D *vertices, numtl_s *material, NUMTX *matrix, i32 count) {
-    if (count == 0) return 1;
+    if (count == 0)
+        return 1;
     NuPrim3DBegin(1, 7, material, matrix);
     for (i32 i = 0; i < count; ++i) {
         NURND_VERTEX3D *source = &vertices[i];
@@ -1103,7 +1089,8 @@ extern "C" i32 NuRndrStrip3d(NURND_VERTEX3D *vertices, numtl_s *material, NUMTX 
         *reinterpret_cast<NUVEC *>(vertex) = source->position;
         g_NuPrim_StreamBufferPtr->addr += 0x18;
     }
-    if (count > 0) g_NuPrim_VertexCount += count;
+    if (count > 0)
+        g_NuPrim_VertexCount += count;
     NuPrim3DEnd();
     return 1;
 }

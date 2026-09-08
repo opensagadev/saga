@@ -41,12 +41,12 @@ extern "C" {
         return 0;
     }
 
-    i32 AddGameDebrisMomentum(APIDEBRISSYS_s *system, i32 type, NUVEC *position,
-                            NUVEC *emitter_momentum, NUVEC *particle_momentum) {
+    i32 AddGameDebrisMomentum(APIDEBRISSYS_s *system, i32 type, NUVEC *position, NUVEC *emitter_momentum,
+                              NUVEC *particle_momentum) {
         if (type >= 0 && type < system->capacity && system->entries[type].effect != -1) {
             i32 handle = -1;
-            AddFiniteShotDebrisEffect2(&handle, system->entries[type].effect, position,
-                                      emitter_momentum, particle_momentum, 1);
+            AddFiniteShotDebrisEffect2(&handle, system->entries[type].effect, position, emitter_momentum,
+                                       particle_momentum, 1);
             return 1;
         }
         return 0;
@@ -62,8 +62,7 @@ extern "C" {
         return 0;
     }
 
-    i32 AddGameDebrisRot(APIDEBRISSYS_s *system, i32 type, NUVEC *position, i32 count,
-                        i16 z_rotation, i16 y_rotation) {
+    i32 AddGameDebrisRot(APIDEBRISSYS_s *system, i32 type, NUVEC *position, i32 count, i16 z_rotation, i16 y_rotation) {
         if (type >= 0 && type < system->capacity && system->entries[type].effect != -1 && count > 0) {
             AddVariableShotDebrisEffect(system->entries[type].effect, position, count, z_rotation, y_rotation);
             return 1;
@@ -76,8 +75,8 @@ extern "C" {
             NUMTX orientation __attribute__((aligned(16)));
             NuMtxSetRotationX(&orientation, 0x4000);
             NuMtxMulR(&orientation, &orientation, matrix);
-            AddVariableShotDebrisEffectMtx3(system->entries[type].effect, position, &nuvec_zero, count,
-                                           &orientation, &numtx_identity);
+            AddVariableShotDebrisEffectMtx3(system->entries[type].effect, position, &nuvec_zero, count, &orientation,
+                                            &numtx_identity);
             return 1;
         }
         return 0;
@@ -86,7 +85,8 @@ extern "C" {
     i32 AddGameDebrisMom(APIDEBRISSYS_s *system, i32 type, NUVEC *position, i32 count, NUVEC *momentum) {
         if (type >= 0 && type < system->capacity && system->entries[type].effect != -1 && count > 0) {
             NUVEC zero = {0.0f, 0.0f, 0.0f};
-            if (momentum == NULL) momentum = &zero;
+            if (momentum == NULL)
+                momentum = &zero;
             AddVariableShotDebrisEffectMtx3(system->entries[type].effect, position, momentum, count, NULL, NULL);
             return 1;
         }
@@ -163,8 +163,10 @@ uv1deb *GenDebIndex(debkeydatatype_s *key, debinftype *effect, float time) {
 }
 
 uv1deb *GenDebIndexRadial(debkeydatatype_s *key, debinftype *effect, float time) {
-    if (key->field_18a >= key->particle_count) key->field_18a = 0;
-    if (effect->particle_type == 7) return NULL;
+    if (key->field_18a >= key->particle_count)
+        key->field_18a = 0;
+    if (effect->particle_type == 7)
+        return NULL;
     dma_particle_s *particle = DebrisParticleAt(key, key->field_18a++, effect->particle_type);
     particle->start_time = time;
     key->emission_epoch = time;
@@ -176,7 +178,8 @@ uv1deb *GenDebIndexRadial(debkeydatatype_s *key, debinftype *effect, float time)
     f32 radius;
     if (effect->scale_in_time != 0.0f && effect->scale_in_time > globaltime - key->last_update_time)
         radius = (globaltime - key->last_update_time) / effect->scale_in_time * effect->field_058;
-    else radius = effect->field_058;
+    else
+        radius = effect->field_058;
     NUVEC vector = {0.0f, radius, 0.0f};
     NuVecRotateZ(&vector, &vector, angle_z);
     NuVecRotateY(&vector, &vector, angle_y);
@@ -199,12 +202,14 @@ uv1deb *GenDebIndexRadial(debkeydatatype_s *key, debinftype *effect, float time)
     particle->momentum.y += key->momentum.y;
     particle->momentum.z += key->momentum.z;
     for (i32 trail = 0; trail < static_cast<i8>(effect->trail_count); ++trail) {
-        if (key->field_18a >= key->particle_count) key->field_18a = 0;
+        if (key->field_18a >= key->particle_count)
+            key->field_18a = 0;
         dma_particle_s *copy = DebrisParticleAt(key, key->field_18a++, 0);
         *copy = *particle;
         copy->start_time += static_cast<f32>(trail + 1) * effect->trail_time;
     }
-    if (effect->native_data == NULL) GenericDebinfoDmaTypeUpdate(effect);
+    if (effect->native_data == NULL)
+        GenericDebinfoDmaTypeUpdate(effect);
     return reinterpret_cast<uv1deb *>(particle);
 }
 
@@ -219,8 +224,10 @@ extern "C" {
 }
 
 uv1deb *GenDebIndexBounceY(debkeydatatype_s *key, debinftype *effect, float time) {
-    if (key->field_18a >= key->particle_count) key->field_18a = 0;
-    if (effect->particle_type == 7) return NULL;
+    if (key->field_18a >= key->particle_count)
+        key->field_18a = 0;
+    if (effect->particle_type == 7)
+        return NULL;
     dma_particle_chunk_s *chunk = key->particle_chunks[key->field_18a / 32];
     dma_particle_s *particle = &chunk->particles[key->field_18a % 32];
     particle->start_time = time;
@@ -246,8 +253,8 @@ uv1deb *GenDebIndexBounceY(debkeydatatype_s *key, debinftype *effect, float time
     particle->momentum = vector;
 
     f32 first, second;
-    if (SolveQuadratic(effect->field_0a0, particle->momentum.y,
-                       particle->position.y - key->collision_plane, &first, &second)) {
+    if (SolveQuadratic(effect->field_0a0, particle->momentum.y, particle->position.y - key->collision_plane, &first,
+                       &second)) {
         f32 collision_time = first > second ? first : second;
         if (collision_time > 0.0f && effect->particle_lifetime > collision_time) {
             DebrisGetControlStackLock();
@@ -279,14 +286,17 @@ uv1deb *GenDebIndexBounceY(debkeydatatype_s *key, debinftype *effect, float time
     particle->momentum.x += key->momentum.x;
     particle->momentum.y += key->momentum.y;
     particle->momentum.z += key->momentum.z;
-    if (effect->native_data == NULL) GenericDebinfoDmaTypeUpdate(effect);
+    if (effect->native_data == NULL)
+        GenericDebinfoDmaTypeUpdate(effect);
     return reinterpret_cast<uv1deb *>(particle);
 }
 
 uv1deb *GenDebIndexBounceXZ(debkeydatatype_s *key, debinftype *effect, float time) {
     NUVEC normal = {1.0f, 0.0f, 0.0f};
-    if (key->field_18a >= key->particle_count) key->field_18a = 0;
-    if (effect->particle_type == 7) return NULL;
+    if (key->field_18a >= key->particle_count)
+        key->field_18a = 0;
+    if (effect->particle_type == 7)
+        return NULL;
     dma_particle_chunk_s *chunk = key->particle_chunks[key->field_18a / 32];
     dma_particle_s *particle = &chunk->particles[key->field_18a % 32];
     particle->start_time = time;
@@ -314,18 +324,14 @@ uv1deb *GenDebIndexBounceXZ(debkeydatatype_s *key, debinftype *effect, float tim
     NuVecRotateY(&normal, &normal, key->reflection_y);
     NUVEC plane_position;
     NuVecScale(&plane_position, &normal, key->collision_plane);
-    NUVEC end_position = {
-        particle->momentum.x * effect->particle_lifetime + particle->position.x,
-        0.0f,
-        effect->particle_lifetime * particle->momentum.z + particle->position.z
-    };
+    NUVEC end_position = {particle->momentum.x * effect->particle_lifetime + particle->position.x, 0.0f,
+                          effect->particle_lifetime * particle->momentum.z + particle->position.z};
     NUVEC start_delta, end_delta;
     NuVecSub(&start_delta, &plane_position, &particle->position);
     NuVecSub(&end_delta, &plane_position, &end_position);
     f32 start_distance = start_delta.x * normal.x + start_delta.z * normal.z;
     f32 end_distance = normal.x * end_delta.x + normal.z * end_delta.z;
-    if ((start_distance < 0.0f && end_distance > 0.0f) ||
-        (start_distance > 0.0f && end_distance < 0.0f)) {
+    if ((start_distance < 0.0f && end_distance > 0.0f) || (start_distance > 0.0f && end_distance < 0.0f)) {
         f32 lifetime = effect->particle_lifetime;
         DebrisGetControlStackLock();
         if (freechunkcontrolsptr < debrischunks + debrischunksglass) {
@@ -356,7 +362,8 @@ uv1deb *GenDebIndexBounceXZ(debkeydatatype_s *key, debinftype *effect, float tim
     particle->momentum.x += key->momentum.x;
     particle->momentum.y += key->momentum.y;
     particle->momentum.z += key->momentum.z;
-    if (effect->native_data == NULL) GenericDebinfoDmaTypeUpdate(effect);
+    if (effect->native_data == NULL)
+        GenericDebinfoDmaTypeUpdate(effect);
     return reinterpret_cast<uv1deb *>(particle);
 }
 
@@ -447,8 +454,10 @@ void GenDebMomAdjFromPos(debkeydatatype_s *, debinftype *, uv1deb *data) {
 }
 
 uv1deb *GenDebIndexRadialStar(debkeydatatype_s *key, debinftype *effect, float time) {
-    if (key->field_18a >= key->particle_count) key->field_18a = 0;
-    if (effect->particle_type == 7) return NULL;
+    if (key->field_18a >= key->particle_count)
+        key->field_18a = 0;
+    if (effect->particle_type == 7)
+        return NULL;
     dma_particle_s *particle = DebrisParticleAt(key, key->field_18a++, effect->particle_type);
     particle->start_time = time;
     key->emission_epoch = time;
@@ -460,12 +469,15 @@ uv1deb *GenDebIndexRadialStar(debkeydatatype_s *key, debinftype *effect, float t
     f32 radius;
     if (effect->scale_in_time != 0.0f && effect->scale_in_time > globaltime - key->last_update_time)
         radius = (globaltime - key->last_update_time) / effect->scale_in_time * effect->field_058;
-    else radius = effect->field_058;
+    else
+        radius = effect->field_058;
     i32 segment_angle = 0x10000 / static_cast<i8>(effect->radial_segments);
     i32 phase = static_cast<i32>(static_cast<f32>((angle_y + 0x10000) % segment_angle) /
                                  static_cast<f32>(segment_angle) * 32768.0f);
-    NUVEC vector = {0.0f, ((1.0f - effect->radial_floor) *
-        (1.0f - NuTrigTable[(phase >> 1) & 0x7fff]) + effect->radial_floor) * radius, 0.0f};
+    NUVEC vector = {
+        0.0f,
+        ((1.0f - effect->radial_floor) * (1.0f - NuTrigTable[(phase >> 1) & 0x7fff]) + effect->radial_floor) * radius,
+        0.0f};
     NuVecRotateZ(&vector, &vector, angle_z);
     NuVecRotateY(&vector, &vector, angle_y);
     NuVecMtxTransformVU0(&vector, &vector, &key->emitter_orientation);
@@ -487,18 +499,22 @@ uv1deb *GenDebIndexRadialStar(debkeydatatype_s *key, debinftype *effect, float t
     particle->momentum.y += key->momentum.y;
     particle->momentum.z += key->momentum.z;
     for (i32 trail = 0; trail < static_cast<i8>(effect->trail_count); ++trail) {
-        if (key->field_18a >= key->particle_count) key->field_18a = 0;
+        if (key->field_18a >= key->particle_count)
+            key->field_18a = 0;
         dma_particle_s *copy = DebrisParticleAt(key, key->field_18a++, 0);
         *copy = *particle;
         copy->start_time += static_cast<f32>(trail + 1) * effect->trail_time;
     }
-    if (effect->native_data == NULL) GenericDebinfoDmaTypeUpdate(effect);
+    if (effect->native_data == NULL)
+        GenericDebinfoDmaTypeUpdate(effect);
     return reinterpret_cast<uv1deb *>(particle);
 }
 
 uv1deb *GenDebIndexRadialRotor(debkeydatatype_s *key, debinftype *effect, float time) {
-    if (key->field_18a >= key->particle_count) key->field_18a = 0;
-    if (effect->particle_type == 7) return NULL;
+    if (key->field_18a >= key->particle_count)
+        key->field_18a = 0;
+    if (effect->particle_type == 7)
+        return NULL;
     dma_particle_s *particle = DebrisParticleAt(key, key->field_18a++, effect->particle_type);
     particle->start_time = time;
     key->emission_epoch = time;
@@ -530,18 +546,22 @@ uv1deb *GenDebIndexRadialRotor(debkeydatatype_s *key, debinftype *effect, float 
     particle->momentum.y += key->momentum.y;
     particle->momentum.z += key->momentum.z;
     for (i32 trail = 0; trail < static_cast<i8>(effect->trail_count); ++trail) {
-        if (key->field_18a >= key->particle_count) key->field_18a = 0;
+        if (key->field_18a >= key->particle_count)
+            key->field_18a = 0;
         dma_particle_s *copy = DebrisParticleAt(key, key->field_18a++, 0);
         *copy = *particle;
         copy->start_time += static_cast<f32>(trail + 1) * effect->trail_time;
     }
-    if (effect->native_data == NULL) GenericDebinfoDmaTypeUpdate(effect);
+    if (effect->native_data == NULL)
+        GenericDebinfoDmaTypeUpdate(effect);
     if (effect->field_050 != 0.0f)
         key->emitter_rotation_x += static_cast<i16>(static_cast<i32>(effect->field_050));
-    else key->emitter_rotation_x = 0;
+    else
+        key->emitter_rotation_x = 0;
     if (effect->field_054 != 0.0f)
         key->emitter_rotation_y += static_cast<i16>(static_cast<i32>(effect->field_054));
-    else key->emitter_rotation_y = 0;
+    else
+        key->emitter_rotation_y = 0;
     return reinterpret_cast<uv1deb *>(particle);
 }
 
@@ -571,8 +591,10 @@ void GenDebMomAdjFromAshRock(debkeydatatype_s *, debinftype *, uv1deb *data) {
 }
 
 uv1deb *GenDebIndexImprovedRadial(debkeydatatype_s *key, debinftype *effect, float time) {
-    if (key->field_18a >= key->particle_count) key->field_18a = 0;
-    if (effect->particle_type == 7) return NULL;
+    if (key->field_18a >= key->particle_count)
+        key->field_18a = 0;
+    if (effect->particle_type == 7)
+        return NULL;
     dma_particle_s *particle = DebrisParticleAt(key, key->field_18a++, effect->particle_type);
     particle->start_time = time;
     key->emission_epoch = time;
@@ -605,7 +627,7 @@ uv1deb *GenDebIndexImprovedRadial(debkeydatatype_s *key, debinftype *effect, flo
     radians += (-0.0303819f * fourth) * fifth;
     i16 angle_z = static_cast<i16>(static_cast<i32>(radians * 10430.4f));
     i32 angle_y = static_cast<i32>(displacement.y) +
-        static_cast<i32>(static_cast<f32>(random_angle) * effect->field_050 * 0.000030517578125f);
+                  static_cast<i32>(static_cast<f32>(random_angle) * effect->field_050 * 0.000030517578125f);
     NUVEC vector = {displacement.x, 0.0f, 0.0f};
     NuVecRotateZ(&vector, &vector, angle_z);
     NuVecRotateY(&vector, &vector, angle_y);
@@ -628,12 +650,14 @@ uv1deb *GenDebIndexImprovedRadial(debkeydatatype_s *key, debinftype *effect, flo
     particle->momentum.y += key->momentum.y;
     particle->momentum.z += key->momentum.z;
     for (i32 trail = 0; trail < static_cast<i8>(effect->trail_count); ++trail) {
-        if (key->field_18a >= key->particle_count) key->field_18a = 0;
+        if (key->field_18a >= key->particle_count)
+            key->field_18a = 0;
         dma_particle_s *copy = DebrisParticleAt(key, key->field_18a++, 0);
         *copy = *particle;
         copy->start_time += static_cast<f32>(trail + 1) * effect->trail_time;
     }
-    if (effect->native_data == NULL) GenericDebinfoDmaTypeUpdate(effect);
+    if (effect->native_data == NULL)
+        GenericDebinfoDmaTypeUpdate(effect);
     return reinterpret_cast<uv1deb *>(particle);
 }
 
@@ -641,8 +665,8 @@ void GenDebMomAdjFromPosRevTree(debkeydatatype_s *, debinftype *effect, uv1deb *
     dma_particle_s *particle = reinterpret_cast<dma_particle_s *>(data);
     particle->momentum.x += particle->position.x * -0.6f;
     particle->momentum.z += particle->position.z * -0.6f;
-    particle->position.y -= NuFsqrt(particle->position.x * particle->position.x +
-                                   particle->position.z * particle->position.z) * 0.4f;
+    particle->position.y -=
+        NuFsqrt(particle->position.x * particle->position.x + particle->position.z * particle->position.z) * 0.4f;
     f32 lifetime = effect->particle_lifetime;
     particle->inverse_lifetime = 64.0f / (static_cast<f32>(lrand48()) * lifetime / 1503238528.0f + lifetime);
 }
@@ -725,104 +749,103 @@ extern "C" {
     i32 numtoruscolldata;
     NUMTX xzfacingmtx;
     debinftype nulleffecttype = {
-        "null", // name
-        0, // category
-        0, // page
-        0, // cutscene_only
-        0, // disabled
-        100, // max_particles
-        60, // frequency
-        0, // emission_period
-        1.0f, // emission_period_random
-        0, // emission_pause
-        0, // emission_pause_random
-        0, // start_offset_random
-        0, // generator_type
-        0, // momentum_adjustment_type
-        0, // particle_type
-        0, // status
-        {0x0, 0x40, 0x1c, 0x47}, // fields_030
-        25.0f, // clip_extent
-        0, // sound_range
-        0, // sound_range_override
-        0.5f, // field_044
-        1.0f, // field_048
-        0, // field_04c
-        0, // field_050
-        0, // field_054
-        0, // field_058
-        0, // field_05c
-        0, // field_060
-        {}, // emitter_velocity
-        {}, // fields_070
-        0, // field_0a0
-        1.0f, // particle_lifetime
-        0, // field_0a8
-        0, // field_0aa
-        0, // field_0ab
-        0, // field_0ac
-        0, // field_0b0
-        0, // field_0b4
-        0, // field_0b8
-        0, // field_0bc
-        {{0.0f, 64, 64, 64, 0}, {1.0f, 0, 0, 0, 0}}, // colour_keys
-        {{0.0f, 64.0f}, {1.0f, 0.0f}}, // alpha_keys
-        0.125f, // field_140
-        0.125f, // field_144
-        0, // field_148
-        500.0f, // field_14c
-        {{0.0f, 500.0f}, {1.0f, 500.0f}}, // width_keys
-        {{0.0f, 500.0f}, {1.0f, 500.0f}}, // height_keys
+        "null",                                       // name
+        0,                                            // category
+        0,                                            // page
+        0,                                            // cutscene_only
+        0,                                            // disabled
+        100,                                          // max_particles
+        60,                                           // frequency
+        0,                                            // emission_period
+        1.0f,                                         // emission_period_random
+        0,                                            // emission_pause
+        0,                                            // emission_pause_random
+        0,                                            // start_offset_random
+        0,                                            // generator_type
+        0,                                            // momentum_adjustment_type
+        0,                                            // particle_type
+        0,                                            // status
+        {0x0, 0x40, 0x1c, 0x47},                      // fields_030
+        25.0f,                                        // clip_extent
+        0,                                            // sound_range
+        0,                                            // sound_range_override
+        0.5f,                                         // field_044
+        1.0f,                                         // field_048
+        0,                                            // field_04c
+        0,                                            // field_050
+        0,                                            // field_054
+        0,                                            // field_058
+        0,                                            // field_05c
+        0,                                            // field_060
+        {},                                           // emitter_velocity
+        {},                                           // fields_070
+        0,                                            // field_0a0
+        1.0f,                                         // particle_lifetime
+        0,                                            // field_0a8
+        0,                                            // field_0aa
+        0,                                            // field_0ab
+        0,                                            // field_0ac
+        0,                                            // field_0b0
+        0,                                            // field_0b4
+        0,                                            // field_0b8
+        0,                                            // field_0bc
+        {{0.0f, 64, 64, 64, 0}, {1.0f, 0, 0, 0, 0}},  // colour_keys
+        {{0.0f, 64.0f}, {1.0f, 0.0f}},                // alpha_keys
+        0.125f,                                       // field_140
+        0.125f,                                       // field_144
+        0,                                            // field_148
+        500.0f,                                       // field_14c
+        {{0.0f, 500.0f}, {1.0f, 500.0f}},             // width_keys
+        {{0.0f, 500.0f}, {1.0f, 500.0f}},             // height_keys
         {0x0, 0x0, 0xb4, 0xc3, 0x0, 0x0, 0xb4, 0x43}, // fields_1d0
-        {{0.0f, 0.0f}, {1.0f, 0.0f}}, // rotation_keys
-        { // fields_218
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x80, 0x3f, 0x0, 0x0, 0x0, 0x0,
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x80, 0x3f,
+        {{0.0f, 0.0f}, {1.0f, 0.0f}},                 // rotation_keys
+        {
+            // fields_218
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x80, 0x3f, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,  0x0,
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0,  0x0,
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x0,  0x0,
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,  0x0,  0x0, 0x0, 0x0, 0x0, 0x0, 0x80, 0x3f,
         },
-        0, // texture_u0
-        0, // texture_v0
-        256.0f, // texture_u1
-        256.0f, // texture_v1
-        0, // native_data
-        0, // last_render_time
+        0,                                                              // texture_u0
+        0,                                                              // texture_v0
+        256.0f,                                                         // texture_u1
+        256.0f,                                                         // texture_v1
+        0,                                                              // native_data
+        0,                                                              // last_render_time
         {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x80, 0x3f}, // fields_2b0
-        0, // process_spheres
-        0, // time_group
-        3, // field_2f2
-        0, // use_explicit_clip_box
-        4.0f, // thinning
-        { // fields_2f8
-            0x0, 0x0, 0x80, 0x3f, 0x0, 0x0, 0x80, 0x3f, 0x0, 0x0, 0x80, 0x3f, 0x0, 0x0, 0x80, 0x3f,
-            0xcd, 0xcc, 0xcc, 0x3d, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, 0x0, 0x80, 0x3f, 0x0, 0x0, 0x80, 0x3f, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, 0x0, 0x80, 0x3f, 0x0, 0x0, 0x80, 0x3f, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, 0x0, 0x80, 0x3f, 0x0, 0x0, 0x80, 0x3f,
+        0,                                                              // process_spheres
+        0,                                                              // time_group
+        3,                                                              // field_2f2
+        0,                                                              // use_explicit_clip_box
+        4.0f,                                                           // thinning
+        {
+            // fields_2f8
+            0x0,  0x0,  0x80, 0x3f, 0x0,  0x0,  0x80, 0x3f, 0x0, 0x0,  0x80, 0x3f, 0x0, 0x0,  0x80, 0x3f, 0xcd,
+            0xcc, 0xcc, 0x3d, 0x0,  0x0,  0x0,  0x0,  0x0,  0x0, 0x0,  0x0,  0x0,  0x0, 0x0,  0x0,  0x0,  0x0,
+            0x80, 0x3f, 0x0,  0x0,  0x80, 0x3f, 0x0,  0x0,  0x0, 0x0,  0x0,  0x0,  0x0, 0x0,  0x0,  0x0,  0x0,
+            0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0, 0x0,  0x0,  0x0,  0x0, 0x0,  0x0,  0x0,  0x0,
+            0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0, 0x0,  0x0,  0x0,  0x0, 0x0,  0x0,  0x0,  0x0,
+            0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0, 0x0,  0x0,  0x0,  0x0, 0x80, 0x3f, 0x0,  0x0,
+            0x80, 0x3f, 0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0, 0x0,  0x0,  0x0,  0x0, 0x0,  0x0,  0x0,  0x0,
+            0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0, 0x0,  0x0,  0x0,  0x0, 0x0,  0x0,  0x0,  0x0,
+            0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0, 0x0,  0x0,  0x0,  0x0, 0x0,  0x0,  0x0,  0x0,
+            0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0,  0x0, 0x80, 0x3f, 0x0,  0x0, 0x80, 0x3f,
         },
-        {-1, -1, -1, -1, -1, -1, -1, -1}, // particle_keys
+        {-1, -1, -1, -1, -1, -1, -1, -1},         // particle_keys
         {-1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0}, // sound_data
-        0, // trail_count
-        0, // radial_segments
-        0, // camera_facing
-        0, // field_413
-        0, // trail_time
-        0, // scale_in_time
-        0.5f, // radial_floor
-        1.0f, // scale
-        0, // unscaled_effect_index
+        0,                                        // trail_count
+        0,                                        // radial_segments
+        0,                                        // camera_facing
+        0,                                        // field_413
+        0,                                        // trail_time
+        0,                                        // scale_in_time
+        0.5f,                                     // radial_floor
+        1.0f,                                     // scale
+        0,                                        // unscaled_effect_index
     };
     void NuRegisterEndFrameCallBackFn(void (*callback)(void));
     void DebrisProcessTimeSlip(void);
     extern i32 debris_suspended;
-
 
     dma_particle_chunk_s *CreateDmaParticleSet(void *, i32 *);
     dma_particle_chunk_s *CreateDmaParticleSetGlass(void *, i32 *);
@@ -831,8 +854,8 @@ extern "C" {
 
     void DebrisSetup2(VARIPTR *, VARIPTR, VARIPTR *, VARIPTR, char *, i32, i32, i32, i32);
 
-    void DebrisSetup2(VARIPTR *buffer, VARIPTR buffer_end, VARIPTR *trash_buffer, VARIPTR trash_end, char *texture_name, i32 chunk_count,
-                      i32 glass_chunk_count, i32 key_count, i32 effect_count) {
+    void DebrisSetup2(VARIPTR *buffer, VARIPTR buffer_end, VARIPTR *trash_buffer, VARIPTR trash_end, char *texture_name,
+                      i32 chunk_count, i32 glass_chunk_count, i32 key_count, i32 effect_count) {
         if (debris_trash_space == 0) {
             debrischunks = chunk_count;
             debrischunksglass = glass_chunk_count;
@@ -934,7 +957,8 @@ extern "C" {
 
         for (debinftype **entry = debtab; *entry != NULL; ++entry) {
             debinftype *effect = *entry;
-            if (effect->field_0ab == 0) effect->field_0ab = 1;
+            if (effect->field_0ab == 0)
+                effect->field_0ab = 1;
             f32 frame_rate = static_cast<f32>((effect->field_0a8 * 60) / static_cast<i8>(effect->field_0ab));
             u32 packed;
             memcpy(&packed, &frame_rate, sizeof(packed));
@@ -946,13 +970,17 @@ extern "C" {
             effect->texture_v0 += 524288.0f;
             effect->texture_v1 += 524288.0f;
         }
-        for (i32 i = 0; i < EDPP_MAX_TYPES; ++i) effecttypes[i].native_data = NULL;
+        for (i32 i = 0; i < EDPP_MAX_TYPES; ++i)
+            effecttypes[i].native_data = NULL;
         freeDmaDebType = 0;
         if (debris_suspended == 0) {
-            if (trash_buffer != NULL) DebrisTrashableSetup(trash_buffer, &trash_end);
-            else DebrisTrashableSetup(buffer, &buffer_end);
+            if (trash_buffer != NULL)
+                DebrisTrashableSetup(trash_buffer, &trash_end);
+            else
+                DebrisTrashableSetup(buffer, &buffer_end);
         }
-        for (i32 i = 0; i < maxdebkeys; ++i) freedebkeys[i] = static_cast<i16>(i);
+        for (i32 i = 0; i < maxdebkeys; ++i)
+            freedebkeys[i] = static_cast<i16>(i);
         for (i32 i = 0; i < maxdebkeys; ++i) {
             debkeydatatype_s *key = &debkeydata[i];
             key->field_184 = 0;

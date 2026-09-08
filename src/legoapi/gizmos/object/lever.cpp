@@ -54,15 +54,18 @@ extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 void ReleaseLever(GameObject_s *object) {
     if (object->character_context == 0x4a) {
         LEVER_s *lever = static_cast<LEVER_s *>(object->field_0x788);
-        if (lever != NULL && !lever->being_pulled) lever->interacting = 0;
+        if (lever != NULL && !lever->being_pulled)
+            lever->interacting = 0;
     }
 }
 
 void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     f32 distance_squared = 1.0e9f;
     if (object->character_context != 0x4a) {
-        if (object->apiobj.character_model->model_data_b[0x5d] == NULL || object->apiobj.field_0x27d == 0) return;
-        if (ObjLandReady(object) == 0 && objInNetWaitContext(object, 0x4a) == 0) return;
+        if (object->apiobj.character_model->model_data_b[0x5d] == NULL || object->apiobj.field_0x27d == 0)
+            return;
+        if (ObjLandReady(object) == 0 && objInNetWaitContext(object, 0x4a) == 0)
+            return;
         LEVER_s *lever = Lever_FindNearest(world, &object->apiobj.lower_position, object, &distance_squared);
         if (objInNetWaitContext(object, 0x4a) != 0) {
             object->context_animation_timer -= FRAMETIME;
@@ -71,18 +74,23 @@ void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 object->big_jump_data = NULL;
             }
         }
-        if (lever == NULL) return;
-        if (object == player) show_lever_hint = distance_squared < 1.0f;
+        if (lever == NULL)
+            return;
+        if (object == player)
+            show_lever_hint = distance_squared < 1.0f;
         f32 radius = (object->apiobj.field_0x1dc + 0.25f) * lever->target_indicator_scale;
-        if (!(radius * radius > distance_squared)) return;
-        if ((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) == 0 && objInNetWaitContext(object, 0x4a) == 0) return;
+        if (!(radius * radius > distance_squared))
+            return;
+        if ((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) == 0 && objInNetWaitContext(object, 0x4a) == 0)
+            return;
         object->field_0x788 = lever;
         object->context_animation_timer = 0.0f;
         object->character_context = 0x4a;
         object->field_0x768 = 0.0f;
         object->context_animation = 0x5d;
         f32 duration = AnimDuration(object->id, 0x5d, 0.0f, 0.0f, 1);
-        if (duration <= 0.0f) duration = 1.0f;
+        if (duration <= 0.0f)
+            duration = 1.0f;
         object->airborne_action_duration = duration;
         object->context_flags &= ~0x40;
         object->apiobj.movement_facing_angle = static_cast<LEVER_s *>(object->field_0x788)->y_rotation;
@@ -92,19 +100,25 @@ void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         return;
     }
     object->field_0x768 += FRAMETIME;
-    if (object->field_0x768 > 1.0f) object->field_0x768 = 1.0f;
+    if (object->field_0x768 > 1.0f)
+        object->field_0x768 = 1.0f;
     object->context_animation_timer += FRAMETIME;
     if (object->context_animation_timer >= object->airborne_action_duration) {
         object->character_context = -1;
-        if ((object->context_flags & 0x40) != 0) return;
+        if ((object->context_flags & 0x40) != 0)
+            return;
     } else {
-        if ((object->context_flags & 0x40) != 0) return;
+        if ((object->context_flags & 0x40) != 0)
+            return;
         if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL) {
             f32 *frame = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0);
-            if (frame == NULL) return;
+            if (frame == NULL)
+                return;
             f32 current_frame = *frame;
-            if (!(current_frame >= AnimListFrame(object->apiobj.character_model, object->context_animation, 0))) return;
-        } else if (!(object->context_animation_timer >= 0.25f)) return;
+            if (!(current_frame >= AnimListFrame(object->apiobj.character_model, object->context_animation, 0)))
+                return;
+        } else if (!(object->context_animation_timer >= 0.25f))
+            return;
     }
     if ((object->apiobj.character_data->model_flags & 4) != 0)
         static_cast<LEVER_s *>(object->field_0x788)->baddie = 1;
@@ -112,7 +126,8 @@ void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         static_cast<LEVER_s *>(object->field_0x788)->goodie = 1;
     static_cast<LEVER_s *>(object->field_0x788)->flags_high |= 8;
     object->context_flags |= 0x40;
-    if (static_cast<i8>(object->apiobj.flags_low) < 0) Hint_SetComplete(0x60c);
+    if (static_cast<i8>(object->apiobj.flags_low) < 0)
+        Hint_SetComplete(0x60c);
 }
 
 i32 lever_gizmotype_id = -1;

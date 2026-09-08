@@ -28,20 +28,20 @@ enum ZIPUP_RUNTIME_FLAGS {
 };
 
 typedef struct ZIPUP_s {
-    char name[16];          // 0x00
-    NUVEC lower_position;   // 0x10
-    NUVEC hook_origin;      // 0x1c
-    NUVEC upper_position;   // 0x28
-    u16 hook_x_rotation;    // 0x34
-    u16 hook_y_rotation;    // 0x36
-    NUVEC hook_position;    // 0x38
-    NUVEC rider_start_offset; // 0x44, selected endpoint relative to hook, adjusted for rider height
+    char name[16];               // 0x00
+    NUVEC lower_position;        // 0x10
+    NUVEC hook_origin;           // 0x1c
+    NUVEC upper_position;        // 0x28
+    u16 hook_x_rotation;         // 0x34
+    u16 hook_y_rotation;         // 0x36
+    NUVEC hook_position;         // 0x38
+    NUVEC rider_start_offset;    // 0x44, selected endpoint relative to hook, adjusted for rider height
     NUVEC rider_target_position; // 0x50
-    GameObject_s *occupant; // 0x5c
-    u16 pitch_adjustment;  // 0x60, scaled by the rider transition time
-    u16 direction;          // 0x62
-    u16 facing_angle;       // 0x64
-    u8 reserved_0x66[2];    // 0x66 .. 0x68
+    GameObject_s *occupant;      // 0x5c
+    u16 pitch_adjustment;        // 0x60, scaled by the rider transition time
+    u16 direction;               // 0x62
+    u16 facing_angle;            // 0x64
+    u8 reserved_0x66[2];         // 0x66 .. 0x68
     union {
         u8 flags;
         struct {
@@ -70,8 +70,8 @@ DECOMP_ASSERT(offsetof(ZIPUP, flags) == 0x68, "ZIPUP flags offset");
 DECOMP_ASSERT(offsetof(ZIPUP, lower_ground_height) == 0x6c, "ZIPUP lower ground height offset");
 
 ADDGIZMOTYPE *ZipUps_RegisterGizmo(i32 type_id);
-ZIPUP *ZipUp_FindNearest(WORLDINFO_s *world, NUVEC *position, f32 radius,
-                        f32 *distance, i32 *endpoint, GameObject_s *object, bool touch);
+ZIPUP *ZipUp_FindNearest(WORLDINFO_s *world, NUVEC *position, f32 radius, f32 *distance, i32 *endpoint,
+                         GameObject_s *object, bool touch);
 
 extern "C" {
 #endif

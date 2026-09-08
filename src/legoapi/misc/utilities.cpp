@@ -25,14 +25,6 @@ extern "C" void NuPartSetSeed(i32);
 void HashString(unsigned char *) {
 }
 
-#ifdef _WIN32
-// MinGW lacks the POSIX srand48 family; nothing in the tree reads drand48
-// state, so seed the C RNG instead.
-static void srand48(i32 seed) {
-    srand(static_cast<u32>(seed));
-}
-#endif
-
 void ResetSeeds() {
     srand48(0);
     qseed = 0x3039;
@@ -50,10 +42,12 @@ i32 i_temp_xrot;
 
 void FindAnglesXY(nuvec_s *direction, u16 *x_rotation, u16 *y_rotation) {
     temp_yrot = NuAtan2D(direction->x, direction->z);
-    if (y_rotation != NULL) *y_rotation = temp_yrot;
+    if (y_rotation != NULL)
+        *y_rotation = temp_yrot;
     i_temp_xrot = -NuAtan2D(direction->y, NuFsqrt(direction->x * direction->x + direction->z * direction->z));
     temp_xrot = i_temp_xrot;
-    if (x_rotation != NULL) *x_rotation = temp_xrot;
+    if (x_rotation != NULL)
+        *x_rotation = temp_xrot;
 }
 
 void FindAnglesZX(nuvec_s *normal, u16 *x_rotation, u16 *z_rotation) {
@@ -107,13 +101,15 @@ void VecRotateAxis(nuvec_s *vector, u16 angle, nuvec_s *axis) {
 
 i32 SolveQuadratic(f32 a, f32 b, f32 c, f32 *first, f32 *second) {
     if (a == 0.0f) {
-        if (b == 0.0f) return 0;
+        if (b == 0.0f)
+            return 0;
         *first = *second = -c / b;
         return 1;
     }
     const f32 four_ac = 4.0f * a * c;
     const f32 b_squared = b * b;
-    if (four_ac > b_squared) return 0;
+    if (four_ac > b_squared)
+        return 0;
     if (four_ac == b_squared) {
         *first = *second = -b / (a + a);
         return 1;
@@ -132,7 +128,8 @@ i32 LineIntersectXY(nuvec_s *a, nuvec_s *b, nuvec_s *c, nuvec_s *d, nuvec_s *fir
     const f32 dx = b->x - ax, dy = b->y - ay;
     const f32 ex = d->x - c->x, ey = d->y - c->y;
     const f32 denominator = ey * dx - ex * dy;
-    if (denominator == 0.0f) return 0;
+    if (denominator == 0.0f)
+        return 0;
     const f32 ox = ax - c->x, oy = ay - c->y;
     const f32 t = (ex * oy - ey * ox) / denominator;
     const f32 u = (oy * dx - ox * dy) / denominator;

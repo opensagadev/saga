@@ -18,8 +18,6 @@ extern "C" void TerrainSetWallDeflectYScale(f32 scale) {
     TerrWallDeflectYScale = scale;
 }
 
-
-
 i32 LineIntersectSphere(NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
 bool LineIntersectCircle(NUVEC *, NUVEC *, NUVEC *, f32);
 
@@ -80,15 +78,18 @@ void GuidedMissile_Deflect(PART_s *) {
 
 extern "C" i16 id_SPEEDERBIKE;
 i32 InitBolt_AddMomentumType_LSW(BOLT_s *bolt, GameObject_s *object, NUVEC *momentum) {
-    if (object == NULL) return 0;
+    if (object == NULL)
+        return 0;
     if (LSW1 != 0 && momentum != NULL) {
         f32 scale = WORLD->current_level == BONUS_GUNSHIPB_LDATA ? 0.25f : 0.5f;
         NuVecScale(momentum, &object->target_velocity, scale);
         bolt->speed += NuVecMag(momentum);
         return 0;
     }
-    if (WORLD->current_level == SPEEDERCHASEA_LDATA && object->id == id_SPEEDERBIKE) return 1;
-    if (WORLD->current_level == DEATHSTARBATTLED_LDATA) return 1;
+    if (WORLD->current_level == SPEEDERCHASEA_LDATA && object->id == id_SPEEDERBIKE)
+        return 1;
+    if (WORLD->current_level == DEATHSTARBATTLED_LDATA)
+        return 1;
     return 0;
 }
 

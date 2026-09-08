@@ -64,3 +64,5 @@ build:wasm_release --copt=-O2
 build:wasm_release --host_copt=-O2
 
 test --test_output=errors
+
+try-import %workspace%/.bazelrc.local

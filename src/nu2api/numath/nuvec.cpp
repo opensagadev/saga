@@ -397,12 +397,18 @@ i32 NuLineLineIntersect(NUVEC *pnt0, NUVEC *v0, NUVEC *pnt1, NUVEC *v1, f32 *s, 
 // Original: 196 bytes.
 i32 NuPointRelToBoundingBox(NUVEC *point, NUVEC *maximum, NUVEC *minimum) {
     i32 result = 0;
-    if (point->x >= maximum->x) result |= 1;
-    else if (point->x <= minimum->x) result |= 8;
-    if (point->y >= maximum->y) result |= 2;
-    else if (point->y <= minimum->y) result |= 16;
-    if (point->z >= maximum->z) result |= 4;
-    else if (point->z <= minimum->z) result |= 32;
+    if (point->x >= maximum->x)
+        result |= 1;
+    else if (point->x <= minimum->x)
+        result |= 8;
+    if (point->y >= maximum->y)
+        result |= 2;
+    else if (point->y <= minimum->y)
+        result |= 16;
+    if (point->z >= maximum->z)
+        result |= 4;
+    else if (point->z <= minimum->z)
+        result |= 32;
     return result;
 }
 
@@ -444,17 +450,19 @@ void NuClipZPlane(NUVEC *out, NUVEC *point, NUVEC *direction, f32 *plane) {
 
 // Original: 1,446 bytes. The strict face boundaries and start-point outcode
 // are intentional: these are the original clipping rules.
-i32 BoundingBoxToLine(NUVEC *minimum, NUVEC *maximum, NUMTX *matrix,
-                     NUVEC *start, NUVEC *end, f32 expansion, NUVEC *intersection) {
+i32 BoundingBoxToLine(NUVEC *minimum, NUVEC *maximum, NUMTX *matrix, NUVEC *start, NUVEC *end, f32 expansion,
+                      NUVEC *intersection) {
     NUVEC a, b, direction, hit;
     NUVEC lo = {minimum->x - expansion, minimum->y - expansion, minimum->z - expansion};
     NUVEC hi = {maximum->x + expansion, maximum->y + expansion, maximum->z + expansion};
     NuVecInvMtxTransform(&a, start, matrix);
     i32 ca = NuPointRelToBoundingBox(&a, &hi, &lo);
-    if (ca == 0 && intersection == NULL) return 1;
+    if (ca == 0 && intersection == NULL)
+        return 1;
     NuVecInvMtxTransform(&b, end, matrix);
     i32 cb = NuPointRelToBoundingBox(&b, &hi, &lo);
-    if (cb == 0 && intersection == NULL) return 1;
+    if (cb == 0 && intersection == NULL)
+        return 1;
     if (ca == 0 && cb == 0) {
         if (intersection != NULL) {
             intersection->x = 0.0f;
@@ -463,48 +471,52 @@ i32 BoundingBoxToLine(NUVEC *minimum, NUVEC *maximum, NUMTX *matrix,
         }
         return 1;
     }
-    if (ca & cb) return 0;
+    if (ca & cb)
+        return 0;
     NuVecSub(&direction, &b, &a);
     NuVecNorm(&direction, &direction);
     if (ca & 1) {
         NuClipXPlane(&hit, &a, &direction, &hi.x);
         if (hit.y < hi.y && hit.y > lo.y && hit.z < hi.z && hit.z > lo.z) {
-            if (intersection != NULL) *intersection = hit;
+            if (intersection != NULL)
+                *intersection = hit;
             return 1;
         }
-    }
-    else if (ca & 8) {
+    } else if (ca & 8) {
         NuClipXPlane(&hit, &a, &direction, &lo.x);
         if (hit.y < hi.y && hit.y > lo.y && hit.z < hi.z && hit.z > lo.z) {
-            if (intersection != NULL) *intersection = hit;
+            if (intersection != NULL)
+                *intersection = hit;
             return 1;
         }
     }
     if (ca & 2) {
         NuClipYPlane(&hit, &a, &direction, &hi.y);
         if (hit.x < hi.x && hit.x > lo.x && hit.z < hi.z && hit.z > lo.z) {
-            if (intersection != NULL) *intersection = hit;
+            if (intersection != NULL)
+                *intersection = hit;
             return 1;
         }
-    }
-    else if (ca & 16) {
+    } else if (ca & 16) {
         NuClipYPlane(&hit, &a, &direction, &lo.y);
         if (hit.x < hi.x && hit.x > lo.x && hit.z < hi.z && hit.z > lo.z) {
-            if (intersection != NULL) *intersection = hit;
+            if (intersection != NULL)
+                *intersection = hit;
             return 1;
         }
     }
     if (ca & 4) {
         NuClipZPlane(&hit, &a, &direction, &hi.z);
         if (hit.x < hi.x && hit.x > lo.x && hit.y < hi.y && hit.y > lo.y) {
-            if (intersection != NULL) *intersection = hit;
+            if (intersection != NULL)
+                *intersection = hit;
             return 1;
         }
-    }
-    else if (ca & 32) {
+    } else if (ca & 32) {
         NuClipZPlane(&hit, &a, &direction, &lo.z);
         if (hit.x < hi.x && hit.x > lo.x && hit.y < hi.y && hit.y > lo.y) {
-            if (intersection != NULL) *intersection = hit;
+            if (intersection != NULL)
+                *intersection = hit;
             return 1;
         }
     }

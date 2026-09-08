@@ -17,10 +17,8 @@ struct ADAPTIVEDIFFICULTY_s {
 
 extern i32 adaptivedifficulty[3];
 
-i8 adtabentries[9][4] = {
-    {-1, -1, -1, -1}, {-1, -1, -1, 0}, {-1, -1, 0, 0}, {-1, 0, 0, 0},
-    {0, 0, 0, 0}, {1, 0, 0, 0}, {1, 1, 0, 0}, {1, 1, 1, 0}, {1, 1, 1, 1}
-};
+i8 adtabentries[9][4] = {{-1, -1, -1, -1}, {-1, -1, -1, 0}, {-1, -1, 0, 0}, {-1, 0, 0, 0}, {0, 0, 0, 0},
+                         {1, 0, 0, 0},     {1, 1, 0, 0},    {1, 1, 1, 0},   {1, 1, 1, 1}};
 i8 (*adtab)[4] = &adtabentries[4];
 
 i32 CheckPosAIArea(AIAREA_s *area, nuvec_s *position, float tolerance) {
@@ -36,7 +34,6 @@ i32 CheckPosAIArea(AIAREA_s *area, nuvec_s *position, float tolerance) {
            local_position.z + tolerance >= -area->half_depth && local_position.x - tolerance <= area->half_width &&
            local_position.y - tolerance <= area->height && local_position.z - tolerance <= area->half_depth;
 }
-
 
 void ResetAdaptiveDifficulty() {
     ADAPTIVEDIFFICULTY_s *difficulty = (ADAPTIVEDIFFICULTY_s *)adaptivedifficulty;

@@ -293,8 +293,7 @@ void AICreatureResumeScript(GameObject_s *object) {
     AISCRIPT *script = reinterpret_cast<AISCRIPTPROCESS *>(&object->ai)->base_script;
     if (script != NULL) {
         AISCRIPTPROCESS *processor = reinterpret_cast<AISCRIPTPROCESS *>(&object->ai);
-        AIScriptProcessorInit(WORLD->ai_sys, &object->ai, processor, NULL, NULL, NULL, 0,
-                              script, script->base_state);
+        AIScriptProcessorInit(WORLD->ai_sys, &object->ai, processor, NULL, NULL, NULL, 0, script, script->base_state);
         processor->active_ref_count = 0;
     }
 }

@@ -375,10 +375,10 @@ struct PARTLIGHTSOURCE_s {
 };
 
 struct ADDPART_s {
-    NUMTX *matrix; // 0x00
-    NUVEC *position; // 0x04, used when no matrix is supplied
-    NUVEC *velocity; // 0x08
-    GameObject_s *owner; // 0x0c
+    NUMTX *matrix;           // 0x00
+    NUVEC *position;         // 0x04, used when no matrix is supplied
+    NUVEC *velocity;         // 0x08
+    GameObject_s *owner;     // 0x0c
     GameObject_s *recipient; // 0x10
     f32 field_14, field_18;
     f32 gravity; // 0x1c
@@ -388,14 +388,14 @@ struct ADDPART_s {
     u32 flags; // 0x2c
     void (*field_30)(PART_s *);
     void (*move_fn)(PART_s *, f32); // 0x34
-    void (*update_fn)(PART_s *); // 0x38
+    void (*update_fn)(PART_s *);    // 0x38
     void (*field_3c)(PART_s *);
     void (*field_40)(PART_s *);
     void (*field_44)(PART_s *, i32);
     void (*field_48)(PART_s *);
-    void (*stop_fn)(PART_s *); // 0x4c
+    void (*stop_fn)(PART_s *);    // 0x4c
     void (*replace_fn)(PART_s *); // 0x50
-    i32 (*draw_fn)(PART_s *); // 0x54
+    i32 (*draw_fn)(PART_s *);     // 0x54
     i32 field_58;
     i32 *debris_key; // 0x5c
     i32 field_60, field_64;
@@ -563,42 +563,42 @@ DECOMP_ASSERT(offsetof(BOLTSYS, stop_targeting) == 8, "BOLTSYS targeting callbac
 extern BOLTSYS *BoltSys;
 struct BOLT_s {
     BOLTTYPE_s *type;
-    GameObject_s *owner; // 0x04
-    NUMTX orientation; // 0x08, decoded shot matrix
+    GameObject_s *owner;      // 0x04
+    NUMTX orientation;        // 0x08, decoded shot matrix
     NUMTX effect_orientation; // 0x48, quarter-turn X composed with shot rotation
-    NUVEC position; // 0x88
-    NUVEC previous_position; // 0x94
-    NUVEC velocity; // 0xa0
+    NUVEC position;           // 0x88
+    NUVEC previous_position;  // 0x94
+    NUVEC velocity;           // 0xa0
     NUVEC field_0xac;
     NUVEC ray_end; // 0xb8, unclipped ray endpoint
-    f32 scale; // 0xc4
-    f32 time; // 0xc8
+    f32 scale;     // 0xc4
+    f32 time;      // 0xc8
     f32 speed;
-    f32 lifetime; // 0xd0
-    f32 radius; // 0xd4
+    f32 lifetime;         // 0xd0
+    f32 radius;           // 0xd4
     f32 collision_radius; // 0xd8
-    f32 ray_time; // 0xdc
-    f32 ray_radius; // 0xe0
+    f32 ray_time;         // 0xdc
+    f32 ray_radius;       // 0xe0
     f32 field_0xe4;
     f32 field_0xe8;
     f32 acceleration_y; // 0xec
-    u32 flags; // 0xf0
+    u32 flags;          // 0xf0
     u16 surface_x_rotation;
     u16 surface_z_rotation;
-    u16 hit_flags; // 0xf8, passed to ObjHitObj
-    i16 hit_platform; // 0xfa
-    i16 hit_debris; // 0xfc
+    u16 hit_flags;       // 0xf8, passed to ObjHitObj
+    i16 hit_platform;    // 0xfa
+    i16 hit_debris;      // 0xfc
     i16 hit_part_debris; // 0xfe
-    u8 active;  // 0x100
-    u8 type_id; // 0x101
+    u8 active;           // 0x100
+    u8 type_id;          // 0x101
     u8 field_0x102;
     u8 index; // 0x103
     i8 field_0x104;
     i8 field_0x105;
     u8 pad_0x106[2];
-    NUVEC bounds_min; // 0x108, position minus collision radius
-    NUVEC bounds_max; // 0x114, position plus collision radius
-    NUVEC hit_normal; // 0x120, platform deflection normal
+    NUVEC bounds_min;            // 0x108, position minus collision radius
+    NUVEC bounds_max;            // 0x114, position plus collision radius
+    NUVEC hit_normal;            // 0x120, platform deflection normal
     NUVEC dogfight_hit_position; // 0x12c
 };
 DECOMP_ASSERT(sizeof(BOLT_s) == 0x138, "BOLT_s ABI");
@@ -643,9 +643,18 @@ DECOMP_ASSERT(offsetof(CABLE_s, flags_1e9) == 0x1e9, "CABLE_s tied flags offset"
 DECOMP_ASSERT(sizeof(CABLE_s) == 0x1ec, "CABLE_s ABI");
 struct CHARACTERDATA_s {};
 struct CHARCATEGORY {
-    union { char *name; u8 field0_0x0[4]; };
-    union { u32 model_flags; u32 field1_0x4; };
-    union { u32 game_flags; i32 field2_0x8; };
+    union {
+        char *name;
+        u8 field0_0x0[4];
+    };
+    union {
+        u32 model_flags;
+        u32 field1_0x4;
+    };
+    union {
+        u32 game_flags;
+        i32 field2_0x8;
+    };
 };
 DECOMP_ASSERT(sizeof(CHARCATEGORY) == 0x0c, "CHARCATEGORY ABI");
 DECOMP_ASSERT(offsetof(CHARCATEGORY, model_flags) == 4, "CHARCATEGORY model flags offset");
@@ -707,10 +716,10 @@ DECOMP_ASSERT(offsetof(CUSTOMISER, animation_packets) == 0x178, "CUSTOMISER anim
 DECOMP_ASSERT(offsetof(CUSTOMISER, model_texture_ids) == 0x208, "CUSTOMISER model texture IDs offset");
 DECOMP_ASSERT(offsetof(CUSTOMISER, animation_active) == 0xa6c, "CUSTOMISER animation active offset");
 struct __attribute__((packed)) CUSTOMISESAVE_s {
-    i16 pieces[9];              // 0x00
-    u8 field_0x12[2];           // 0x12
-    char primary_name[0x20];    // 0x14
-    u8 primary_name_unlocked;   // 0x34
+    i16 pieces[9];            // 0x00
+    u8 field_0x12[2];         // 0x12
+    char primary_name[0x20];  // 0x14
+    u8 primary_name_unlocked; // 0x34
     union {
         u8 field_0x35[0x17];
         struct __attribute__((packed)) {
@@ -803,7 +812,10 @@ struct CUTINFO {
     u16 camera_far_clip;  // 0xe8, zero keeps the level display setting
     i16 legacy_music_index;
     i16 skip_level; // 0xec, optional level selected when a stopped cutscene is skipped
-    union { u8 linked_audio; u8 linked_music_mode; };
+    union {
+        u8 linked_audio;
+        u8 linked_music_mode;
+    };
     u8 blob_shadow_alpha;
     u8 blob_shadow_fade_near;
     u8 blob_shadow_fade_far;
@@ -815,9 +827,15 @@ struct CUTINFO {
     CUTSCENEFADEFOG fade_fog[2];
     CUTSCENESUBTITLE *subtitle_data;
     u16 subtitle_count;
-    union { u8 end_flags; u8 playback_flags; };
+    union {
+        u8 end_flags;
+        u8 playback_flags;
+    };
     u8 pad_18b;
-    union { i32 music_handle; i32 music_track_handle; };
+    union {
+        i32 music_handle;
+        i32 music_track_handle;
+    };
     f32 low_end_distance;
     f32 field_194;
 };
@@ -836,7 +854,8 @@ DECOMP_ASSERT(offsetof(CUTINFO, end_flags) == 0x18a, "CUTINFO end-flags offset")
 DECOMP_ASSERT(offsetof(CUTINFO, music_handle) == 0x18c, "CUTINFO music-handle offset");
 DECOMP_ASSERT(sizeof(CUTINFO) == 0x198, "CUTINFO size");
 DECOMP_ASSERT(offsetof(CUTINFO, music_track_handle) == 0x18c, "CUTINFO music offset");
-DECOMP_ASSERT(offsetof(CUTINFO, texture_animations) + offsetof(CUTSCENETEXANIM, index) == 0x148, "CUTINFO texture signals offset");
+DECOMP_ASSERT(offsetof(CUTINFO, texture_animations) + offsetof(CUTSCENETEXANIM, index) == 0x148,
+              "CUTINFO texture signals offset");
 struct CUTSCENESYS {
     i16 blaster_object_0;
     i16 blaster_object_1;
@@ -1744,7 +1763,6 @@ struct NetMessage;
 struct NetPeer;
 struct NuBloomParameters {};
 
-
 struct OPTIONSSAVE_s;
 struct PARTDEBENTRY_s {
     i32 type_id;
@@ -1762,7 +1780,10 @@ struct PLATSKININFO {
     f32 scale;
     void *terrain_data;
     i16 terrain_group;
-    union { u8 reserved_16[2]; i16 cache_slot; };
+    union {
+        u8 reserved_16[2];
+        i16 cache_slot;
+    };
     i16 flags;
     i16 mirrored;
 };
@@ -1912,11 +1933,21 @@ DECOMP_ASSERT(sizeof(PULSESYS_s) == 0x8, "PULSESYS_s size");
 DECOMP_ASSERT(offsetof(PULSESYS_s, pulse_count) == 0x4, "PULSESYS pulse count offset");
 struct PartHeader;
 struct PropertyMenuList {};
-struct REGISTERSTATUSPACKET_s {};
+struct REGISTERSTATUSPACKET_s {
+    STATUSPACKET_LSW_s *lsw_packet;
+    i32 (*init_callback)(WORLDINFO_s *, STATUSPACKET_s *);
+    i32 (*finish_callback)(WORLDINFO_s *, STATUSPACKET_s *, i32);
+    void (*reset_callback)(STATUSPACKET_s *);
+    void (*draw_background_callback)(STATUSPACKET_s *);
+    f32 stage_delay;
+};
+DECOMP_ASSERT(sizeof(REGISTERSTATUSPACKET_s) == 0x18, "REGISTERSTATUSPACKET_s size");
 struct RGBA {
     union {
         u32 value;
-        struct { u8 r, g, b, a; };
+        struct {
+            u8 r, g, b, a;
+        };
     };
 };
 DECOMP_ASSERT(sizeof(RGBA) == 4, "RGBA value ABI");
@@ -1945,41 +1976,77 @@ enum STATUS_FLAGS {
 // Status / achievements screen packet (332 bytes; fields used by NuMain:
 // model ids at 0x9c/0x9e, per-player bytes at 0xa4/0xa5, flags at 0xb1/0xb2).
 struct STATUSPACKET_s {
-    STATUSPACKET_LSW_s *lsw_packet; // 0x00
-    i32 field_0x04;
-    i32 field_0x08;
-    void (*reset_callback)(STATUSPACKET_s *);           // 0x0c
-    void (*draw_background_callback)(STATUSPACKET_s *); // 0x10
-    undefined field_0x14[0x24 - 0x14];
-    f32 player0_rumble_amount;   // 0x24
-    f32 player0_rumble_time;     // 0x28
-    f32 player0_rumble_duration; // 0x2c
-    f32 player0_buzz_amount;     // 0x30
-    u8 player0_rumble_priority;  // 0x34
+    STATUSPACKET_LSW_s *lsw_packet;                               // 0x00
+    i32 (*init_callback)(WORLDINFO_s *, STATUSPACKET_s *);        // 0x04
+    i32 (*finish_callback)(WORLDINFO_s *, STATUSPACKET_s *, i32); // 0x08
+    void (*reset_callback)(STATUSPACKET_s *);                     // 0x0c
+    void (*draw_background_callback)(STATUSPACKET_s *);           // 0x10
+    AREADATA_s *area;                                             // 0x14
+    EPISODEDATA *episode;                                         // 0x18
+    u32 *score;                                                   // 0x1c
+    struct MISSIONDATA_s *mission;                                // 0x20
+    f32 player0_rumble_amount;                                    // 0x24
+    f32 player0_rumble_time;                                      // 0x28
+    f32 player0_rumble_duration;                                  // 0x2c
+    f32 player0_buzz_amount;                                      // 0x30
+    u8 player0_rumble_priority;                                   // 0x34
     undefined field_0x35[0x38 - 0x35];
     f32 player1_rumble_amount;   // 0x38
     f32 player1_rumble_time;     // 0x3c
     f32 player1_rumble_duration; // 0x40
     f32 player1_buzz_amount;     // 0x44
     u8 player1_rumble_priority;  // 0x48
-    undefined field_0x49[0x68 - 0x49];
+    u8 field_0x49[3];
+    f32 area_time;          // 0x4c
+    f32 collected_score;    // 0x50
+    f32 true_hero_target;   // 0x54
+    f32 true_hero_percent;  // 0x58
+    f32 previous_best_time; // 0x5c
+    f32 new_best_time;      // 0x60
+    f32 elapsed_time;       // 0x64
     f32 field_0x68;
-    undefined field_0x6c[0x9c - 0x6c];
+    u32 previous_best_score; // 0x6c
+    u32 new_best_score;      // 0x70
+    u32 original_score;      // 0x74
+    u32 reward_score;        // 0x78
+    u32 time_reward_score;   // 0x7c
+    u32 final_reward_score;  // 0x80
+    u32 coins_remaining[2];  // 0x84
+    u32 coins_collected[2];  // 0x8c
+    i32 new_minikits;        // 0x94
+    u32 field_0x98;
     u16 player0_model; // 0x9c
     u16 player1_model; // 0x9e
-    undefined field_0xa0[0xa4 - 0xa0];
-    u8 player0_active; // 0xa4
-    u8 player1_active; // 0xa5
-    undefined field_0xa6[0xb0 - 0xa6];
+    i16 area_id;       // 0xa0
+    i8 episode_id;     // 0xa2
+    u8 field_0xa3;
+    u8 player0_active;    // 0xa4
+    u8 player1_active;    // 0xa5
+    u8 challenge_state;   // 0xa6
+    u8 mission_state;     // 0xa7
+    f32 superstory_time;  // 0xa8
+    u32 superstory_score; // 0xac
     u8 field_0xb0;
-    u8 mode_flags;   // 0xb1
-    u8 status_flags; // 0xb2
-    undefined field_0xb3[0xb5 - 0xb3];
-    u8 stage_count;        // 0xb5
-    i8 current_gold_brick; // 0xb6
-    undefined field_0xb7[0xc6 - 0xb7];
-    i8 stage_types[0xee - 0xc6];             // 0xc6
-    u8 gold_brick_enabled[0x11c - 0xee];     // 0xee
+    u8 mode_flags;            // 0xb1
+    u8 status_flags;          // 0xb2
+    u8 minikit_count;         // 0xb3
+    u8 minikit_max;           // 0xb4
+    u8 stage_count;           // 0xb5
+    i8 current_gold_brick;    // 0xb6
+    u8 save_state;            // 0xb7
+    u8 prompt_choice;         // 0xb8
+    u8 newly_completed;       // 0xb9
+    u8 previous_completion;   // 0xba
+    u8 previous_gold_bricks;  // 0xbb
+    u8 displayed_gold_bricks; // 0xbc
+    u8 field_0xbd;
+    i8 field_0xbe;
+    u8 field_0xbf[7];
+    i8 stage_types[0xee - 0xc6]; // 0xc6
+    u8 gold_brick_enabled[40];   // 0xee
+    i16 next_area;               // 0x116
+    i8 chapter;                  // 0x118
+    u8 field_0x119[3];
     struct STATUS_STAGE_s *previous_stage_2; // 0x11c
     struct STATUS_STAGE_s *previous_stage;   // 0x120
     struct STATUS_STAGE_s *stage;            // 0x124
@@ -2663,7 +2730,7 @@ struct debkeydatatype_s {
     u8 field_2f9;
     u8 field_2fa;
     u8 field_2fb;
-    nugscn_s *gscene;      // 0x2fc (target)
+    nugscn_s *gscene; // 0x2fc (target)
     union {
         f32 orientation_dirty; // zero invalidates the cached clip bounds
         f32 clip_radius;       // 0x300
@@ -2959,7 +3026,10 @@ struct RIPPLEEFFECT_s {
     f32 lifetime;
     f32 initial_size;
     f32 end_size;
-    union { u8 reserved_14[0x10]; char texture_name[16]; };
+    union {
+        u8 reserved_14[0x10];
+        char texture_name[16];
+    };
     numtl_s *material;
 };
 DECOMP_ASSERT(sizeof(RIPPLEEFFECT_s) == 0x28, "Ripple effect ABI");
@@ -2998,13 +3068,25 @@ struct ripple_set_s {
         u32 reset_state;
         struct {
             u16 count;
-            union { u16 free_count; u16 active_count; };
+            union {
+                u16 free_count;
+                u16 active_count;
+            };
         };
     };
     ripple_node_s *nodes;
-    union { ripple_node_s *current; ripple_node_s *free_head; };
-    union { void *field_0x0c; ripple_node_s *newest; };
-    union { void *field_0x10; ripple_node_s *oldest; };
+    union {
+        ripple_node_s *current;
+        ripple_node_s *free_head;
+    };
+    union {
+        void *field_0x0c;
+        ripple_node_s *newest;
+    };
+    union {
+        void *field_0x10;
+        ripple_node_s *oldest;
+    };
 };
 DECOMP_ASSERT(sizeof(ripple_set_s) == 0x14, "ripple_set_s ABI");
 struct rtlset;
@@ -3038,7 +3120,9 @@ struct CantPickupBombTimerAddon : MechAddon {
     CantPickupBombTimerAddon(MechObjectInterface &, float);
     bool OnProcess(MechAddon::ProcessStage, float) override;
     ~CantPickupBombTimerAddon() override;
-    static void operator delete(void *allocation) { NU_FREE(allocation); }
+    static void operator delete(void *allocation) {
+        NU_FREE(allocation);
+    }
     static HashedKey s_hashId;
     f32 remaining_time;
 };
@@ -3349,6 +3433,8 @@ enum GIZFORCE_CONFIG_FLAGS : u32 {
     GIZFORCE_CONFIG_WAIT_FOR_FORCE_RANGE = 0x00000002,
     GIZFORCE_CONFIG_DRAW_REFLECTION = 0x00000004,
     GIZFORCE_CONFIG_RESET_STATE_ON_ACTIVATE = 0x00000008,
+    GIZFORCE_CONFIG_JEDI_BADDIE_ONLY = 0x00000010,
+    GIZFORCE_CONFIG_BLOWUP_AT_ANIM_OBJECTS = 0x00000020,
     GIZFORCE_CONFIG_ALONG_SOCKET = 0x00000040,
     GIZFORCE_CONFIG_HIT_TEST_TYPE_0 = 0x00000100,
     GIZFORCE_CONFIG_HIT_TEST_TYPE_1 = 0x00000200,
@@ -3431,21 +3517,49 @@ struct GIZFORCE_s {
     u8 collision_mask;  // 0x81
     u8 activation_mode; // 0x82
     u8 field_0x83;
-    i16 room_id;           // 0x84
-    i16 start_sfx_id;      // 0x86
-    i16 loop_sfx_id;       // 0x88
-    i16 stop_sfx_id;       // 0x8a
-    i16 blowup_type;       // 0x8c
-    u16 pickup_count;      // 0x8e
-    u16 pickup_rotation_x; // 0x90
-    u16 pickup_rotation_y; // 0x92
-    NUVEC effect_position; // 0x94
-    f32 activation_radius; // 0xa0
-    union { u32 field_0xa4; MechObjectInterface *mech_object_interface; }; // 0xa4
-    u8 progress_flags; // 0xa8
-    u8 runtime_flags;  // 0xa9, GIZFORCE_RUNTIME_FLAGS
-    u8 field_0xaa;
-    u8 field_0xab;
+    i16 room_id;      // 0x84
+    i16 start_sfx_id; // 0x86
+    i16 loop_sfx_id;  // 0x88
+    i16 stop_sfx_id;  // 0x8a
+    i16 blowup_type;  // 0x8c
+    union {
+        i16 debris_type;
+        u16 pickup_count; // 0x8e
+    };
+    union {
+        i16 hit_points;
+        u16 pickup_direction_x;
+        u16 pickup_rotation_x; // 0x90
+    };
+    union {
+        i16 score;
+        u16 pickup_direction_y;
+        u16 pickup_rotation_y; // 0x92
+    };
+    union {
+        NUVEC effect_position;
+        NUVEC pickup_offset; // 0x94
+    };
+    union {
+        f32 activation_radius;
+        f32 pickup_scatter_height; // 0xa0
+    };
+    union {
+        u32 field_0xa4;
+        MechObjectInterface *mech_object_interface;
+    };
+    union {
+        struct {
+            u8 progress_flags; // 0xa8, GIZFORCE_PROGRESS_FLAGS
+            u8 runtime_flags;  // 0xa9, GIZFORCE_RUNTIME_FLAGS
+            union {
+                u8 field_0xaa;
+                u8 state_flags; // GIZFORCE_STATE_FLAGS
+            };
+            u8 field_0xab;
+        };
+        u32 packed_state;
+    };
     void ClearMechObjectInterface();
     MechObjectInterface *GetMechObjectInterface();
 };
@@ -3489,7 +3603,10 @@ struct GIZMOBLOWUP_s {
             undefined field_0x3c[4];
         };
     };
-    union { undefined field_0x40[4]; MechObjectInterface *mech_object_interface; };
+    union {
+        undefined field_0x40[4];
+        MechObjectInterface *mech_object_interface;
+    };
     NUVEC screen_position; // 0x44, projected by the draw pass
     union {
         char field_0x50[0x50]; // compatibility view used by level-specific links
@@ -4291,7 +4408,10 @@ struct PART_s {
     i32 field_124[5]; // ordered angular velocities, then two random spin rates
     u16 rotation_x, rotation_y;
     u16 field_13c;
-    i16 pickup_type; // 0x13e
+    union {
+        i16 pickup_type;
+        i16 type_id;
+    }; // 0x13e
     u16 field_140;
     u8 rotation_axis_1, rotation_axis_2;
     u8 active;

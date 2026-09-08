@@ -10,7 +10,6 @@ void edSetPadDisabled(i32) {
 void eduiSetPinnedMenu(eduimenu_s *) {
 }
 
-
 void EdRegistry::Flush() {
 }
 

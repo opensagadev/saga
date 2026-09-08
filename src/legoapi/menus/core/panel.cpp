@@ -127,13 +127,18 @@ i32 CoinsGoToMainTotal();
 
 void AddCoinsToPanel(i32 coins, nuvec_s *position, i32 player, float, GameObject_s *, i32 random_types) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    if (coins == 0) return;
-    if (ChallengeMode || Mission_Active(NULL) != NULL) coins = 0;
+    if (coins == 0)
+        return;
+    if (ChallengeMode || Mission_Active(NULL) != NULL)
+        coins = 0;
     u8 counts[10] = {};
     i32 remainder = coins % 10;
-    if (remainder > 0) coins -= remainder;
-    if (coins > 512000) coins = 512000;
-    if (coins > 0) PlaySfx("CoinsLand", position);
+    if (remainder > 0)
+        coins -= remainder;
+    if (coins > 512000)
+        coins = 512000;
+    if (coins > 0)
+        PlaySfx("CoinsLand", position);
     if (random_types) {
         while (coins > 0) {
             i32 type = GetRandomCoinType();
@@ -152,7 +157,8 @@ void AddCoinsToPanel(i32 coins, nuvec_s *position, i32 player, float, GameObject
             }
         }
     }
-    if (static_cast<u32>(player) > 1) player = -1;
+    if (static_cast<u32>(player) > 1)
+        player = -1;
     NUVEC target;
     target.x = player == 1 ? PANEL_COINX : -PANEL_COINX;
     bool main_total = CoinsGoToMainTotal() != 0;
@@ -173,7 +179,8 @@ void AddCoinsToPanel(i32 coins, nuvec_s *position, i32 player, float, GameObject
             i32 model = base_model;
             if (type->random_model_count != 0)
                 model += qrand() / (65535 / type->random_model_count + 1);
-            if (world->lev_objs[model].active == 0 || player == -1) continue;
+            if (world->lev_objs[model].active == 0 || player == -1)
+                continue;
             ADDGAMEMSG message __attribute__((aligned(16))) = AddGameMsg_Default;
             message.position = position;
             message.target_position = &target;

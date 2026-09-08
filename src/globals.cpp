@@ -1293,16 +1293,16 @@ LEVELSPLINE SplTab[26] = {
     {NULL, NULL, 0, 0, 0, 0},
 };
 CHARCATEGORY LSW_CharCategory[10] = {
-    { {"Jedi"}, {0x8}, {0} },
-    { {"JediBaddie"}, {0xc}, {0} },
-    { {"BountyHunter"}, {0x1100080}, {0} },
-    { {"Teleport"}, {0x40000}, {0} },
-    { {"HighJump"}, {0}, {0x400000} },
-    { {"Astromech"}, {0x40}, {0} },
-    { {"Protocol"}, {0x20}, {0} },
-    { {"ZipUp"}, {0x100080}, {0} },
-    { {"Blaster"}, {0x80}, {0} },
-    { {NULL}, {0}, {0} },
+    {{"Jedi"}, {0x8}, {0}},
+    {{"JediBaddie"}, {0xc}, {0}},
+    {{"BountyHunter"}, {0x1100080}, {0}},
+    {{"Teleport"}, {0x40000}, {0}},
+    {{"HighJump"}, {0}, {0x400000}},
+    {{"Astromech"}, {0x40}, {0}},
+    {{"Protocol"}, {0x20}, {0}},
+    {{"ZipUp"}, {0x100080}, {0}},
+    {{"Blaster"}, {0x80}, {0}},
+    {{NULL}, {0}, {0}},
 };
 extern i16 tCHEAT_EXTRATOGGLE;
 extern i16 tCHEAT_POO;

@@ -104,7 +104,7 @@ bool TouchHacks::CanUseZipup(GameObject_s &object) {
     if ((object.apiobj.character_data->model_flags & 0x100000) != 0 || SuperWeirdo(&object))
         return true;
     return (object.apiobj.character_data->model_flags & 8) != 0 &&
-        (object.apiobj.character_data->game_character->flags_094[1] & 0x80) == 0 && Cheat_IsOn(13) != 0;
+           (object.apiobj.character_data->game_character->flags_094[1] & 0x80) == 0 && Cheat_IsOn(13) != 0;
 }
 
 bool TouchHacks::CheckForAboutToRunIntoKillTerrain(GameObject_s &object, float time) {
@@ -186,11 +186,15 @@ bool TouchHacks::ShouldBlock(GameObject_s &object) {
 CABLE_s *GameObjIsCableTied(GameObject_s *);
 extern "C" i16 id_ATST, id_ATST_LOWRES;
 i32 TouchHacks::ShouldDeflectBolt(GameObject_s &object, BOLT_s &bolt) {
-    if (!TouchControlsActive || VehicleArea == 0) return 0;
-    if (object.id != id_ATST && object.id != id_ATST_LOWRES) return 0;
-    if (bolt.owner == NULL || (bolt.owner->apiobj.flags_low & 0x80) == 0) return 0;
+    if (!TouchControlsActive || VehicleArea == 0)
+        return 0;
+    if (object.id != id_ATST && object.id != id_ATST_LOWRES)
+        return 0;
+    if (bolt.owner == NULL || (bolt.owner->apiobj.flags_low & 0x80) == 0)
+        return 0;
     CABLE_s *cable = GameObjIsCableTied(&object);
-    if (cable == NULL) return 0;
+    if (cable == NULL)
+        return 0;
     return cable->source == bolt.owner;
 }
 

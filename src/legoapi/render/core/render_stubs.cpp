@@ -200,7 +200,6 @@ extern "C" {
     void AddColourPick(void) {
     }
 
-
     void BuildCamSpaceClipPlanes(void) {
     }
 

@@ -219,7 +219,10 @@ struct GAMESAVE_s {
     };
     u32 field_0x7bf8;
     u32 initial_store_pack_flags;
-    union { u8 field_0x7c00[8]; u32 purchased_extra_bits[2]; };
+    union {
+        u8 field_0x7c00[8];
+        u32 purchased_extra_bits[2];
+    };
     u32 hint_completion_bits[6]; // 0x7c08
     u32 coins;
     u16 completion;
@@ -249,8 +252,7 @@ struct STATUSCOLLECT_s {
 DECOMP_ASSERT(sizeof(STATUSCOLLECT_s) == 4, "STATUSCOLLECT size");
 
 struct STATUSCOLLECTLIST_s {
-    STATUSCOLLECT_s *ptr;
-    u8 pad_0x04[0x0c];
+    i16 ids[8];
 };
 DECOMP_ASSERT(sizeof(STATUSCOLLECTLIST_s) == 0x10, "STATUSCOLLECTLIST size");
 

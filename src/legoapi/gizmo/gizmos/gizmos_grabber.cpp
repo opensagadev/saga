@@ -17,10 +17,12 @@ void Grabber_Update(WORLDINFO_s *) {
 NUVEC *Grabber_GetGrabPos(GRABBER_s *grabber, numtx_s *matrix) {
     if (grabber->character_model != NULL && (grabber->flags_559 & 1) != 0 &&
         grabber->character_model->points_of_interest[0] != NULL) {
-        if (matrix != NULL) *matrix = grabber->grab_matrix;
+        if (matrix != NULL)
+            *matrix = grabber->grab_matrix;
         return reinterpret_cast<NUVEC *>(&grabber->grab_matrix.m30);
     }
-    if (matrix != NULL) *matrix = numtx_identity;
+    if (matrix != NULL)
+        *matrix = numtx_identity;
     return &grabber->grab_position;
 }
 

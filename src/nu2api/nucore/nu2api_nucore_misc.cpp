@@ -984,7 +984,9 @@ f32 NuATan2f(f32 y, f32 x) {
 void NuFntSave(nufnt_s *, i32, char *) {
 }
 
-extern "C" { u32 NuLgtSeed = 12345; }
+extern "C" {
+    u32 NuLgtSeed = 12345;
+}
 
 i32 NuLgtRand() {
     NuLgtSeed = (NuLgtSeed * 0x24cd + 1) & 0xffff;

@@ -73,7 +73,8 @@ namespace {
 } // namespace
 
 extern "C" i32 NuGScnNumSpecials(NUGSCN *scene) {
-    if (scene->display_list != NULL) return scene->display_list->nspecials;
+    if (scene->display_list != NULL)
+        return scene->display_list->nspecials;
     return scene->numspecial;
 }
 

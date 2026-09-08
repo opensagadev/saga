@@ -25,7 +25,8 @@ void Grapple_FindNearest(WORLDINFO_s *, nuvec_s *, GameObject_s *, float *) {
 
 // Original 0x4d7090, 23 bytes.
 void Grapple_SetRotOrder(GameObject_s *object) {
-    if (object->field_0x7a3 != 1) object->field_0x1086 = 2;
+    if (object->field_0x7a3 != 1)
+        object->field_0x1086 = 2;
 }
 
 // Original 0x4d6f90, 248 bytes.
@@ -56,9 +57,8 @@ void Grapple_SetPlayerTargetPoint(GameObject_s *object, nuvec_s *target) {
     target->z = 0.0f;
     target->y = -object->field_0x768;
     i32 amplitude = (static_cast<i32>(object->grapple_swing_degrees) << 16) / 360;
-    i32 angle = static_cast<i32>(static_cast<f32>(amplitude) *
-        NuTrigTable[object->grapple_swing_phase >> 1] *
-        static_cast<GRAPPLE *>(object->field_0x788)->field_0x4c);
+    i32 angle = static_cast<i32>(static_cast<f32>(amplitude) * NuTrigTable[object->grapple_swing_phase >> 1] *
+                                 static_cast<GRAPPLE *>(object->field_0x788)->field_0x4c);
     NuVecRotateX(target, target, angle);
     NuVecRotateY(target, target, object->takeover_start_angle);
     NuVecAdd(target, target, &static_cast<GRAPPLE *>(object->field_0x788)->shadow_probe_position);

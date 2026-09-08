@@ -70,23 +70,27 @@ void StartQuickShoot(GameObject_s *object, i32 action) {
     f32 speed = BoltType_FindByID(bolt_id, WORLD)->field_10;
     f32 range = speed * BoltType_FindByID(bolt_id, WORLD)->field_14;
     f32 range_squared = range * range;
-    GameObject_s *target = TargetGameObject(object, &object->apiobj.collision_position, &direction,
-                                           range, range_squared, 0, 1, 0, bolt_id);
-    if (target != NULL) SetObjTarget(object, target);
+    GameObject_s *target = TargetGameObject(object, &object->apiobj.collision_position, &direction, range,
+                                            range_squared, 0, 1, 0, bolt_id);
+    if (target != NULL)
+        SetObjTarget(object, target);
     else if ((object->apiobj.flags_low & 0x80) != 0 &&
-             GizmoSys_SetBestBoltTarget(WORLD->gizmo_sys, WORLD, object, &object->apiobj.collision_position,
-                                        &direction, range, range_squared, 1, 0, bolt_id) == 0) {
-        GIZMOBLOWUP_s *blowup = GizmoBlowUp_Target(object, &object->apiobj.collision_position, &direction,
-                                                 range, range_squared, 1, 0, bolt_id);
-        if (blowup != NULL) SetGizmoBlowUpTarget(object, blowup);
+             GizmoSys_SetBestBoltTarget(WORLD->gizmo_sys, WORLD, object, &object->apiobj.collision_position, &direction,
+                                        range, range_squared, 1, 0, bolt_id) == 0) {
+        GIZMOBLOWUP_s *blowup = GizmoBlowUp_Target(object, &object->apiobj.collision_position, &direction, range,
+                                                   range_squared, 1, 0, bolt_id);
+        if (blowup != NULL)
+            SetGizmoBlowUpTarget(object, blowup);
         else {
-            PART_s *part = TargetPart(object, &object->apiobj.collision_position, &direction,
-                                      range, range_squared, 1, bolt_id);
-            if (part != NULL) SetPartTarget(object, part);
+            PART_s *part =
+                TargetPart(object, &object->apiobj.collision_position, &direction, range, range_squared, 1, bolt_id);
+            if (part != NULL)
+                SetPartTarget(object, part);
             else {
-                target = TargetGameObject(object, &object->apiobj.collision_position, &direction,
-                                          range, range_squared, 0x200, 1, 0, bolt_id);
-                if (target != NULL) SetObjTarget(object, target);
+                target = TargetGameObject(object, &object->apiobj.collision_position, &direction, range, range_squared,
+                                          0x200, 1, 0, bolt_id);
+                if (target != NULL)
+                    SetObjTarget(object, target);
             }
         }
     }
@@ -105,7 +109,8 @@ void StartQuickShoot(GameObject_s *object, i32 action) {
         object->quick_shoot_bolt_id = bolt_id;
         object->quick_shoot_flags = flags;
         object->field_0xef9 |= 8;
-        if ((object->apiobj.character_data->game_character->flags_098[0] & 2) != 0) SetWeaponIn(object);
+        if ((object->apiobj.character_data->game_character->flags_098[0] & 2) != 0)
+            SetWeaponIn(object);
         if (object->field_0x7e4 != NULL && object->field_0x7e4[8] == 2 && object->field_0x7e8 != 0)
             --object->field_0x7e8;
     }

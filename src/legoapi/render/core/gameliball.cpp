@@ -151,7 +151,8 @@ i32 ReadTerrainPickup(unsigned char *base_path, i16 **buffer, TERRPICKUPSET *ter
     NuFileLoadBuffer(path, *buffer, 0x7fffffff);
     crashdata = NULL;
     u8 *file_start = reinterpret_cast<u8 *>(*buffer);
-    TERRAIN_FILE_CHUNK *chunk = reinterpret_cast<TERRAIN_FILE_CHUNK *>(file_start + 2 * *reinterpret_cast<u32 *>(file_start));
+    TERRAIN_FILE_CHUNK *chunk =
+        reinterpret_cast<TERRAIN_FILE_CHUNK *>(file_start + 2 * *reinterpret_cast<u32 *>(file_start));
     i16 count = chunk->chunk_count;
     *buffer = reinterpret_cast<i16 *>(file_start + 4);
     i32 group_count = 0;
@@ -164,17 +165,18 @@ i32 ReadTerrainPickup(unsigned char *base_path, i16 **buffer, TERRPICKUPSET *ter
                 --terrain->spatial_nodes->point_count;
             }
         } else if (chunk->chunk_type <= TERRAIN_CHUNK_SPATIAL_INDEX) {
-          if (chunk->chunk_type >= TERRAIN_CHUNK_GROUP_PRIMARY) {
-            TERRAIN_GROUP *group = &terrain->groups[group_count];
-            group->field_0x32 = chunk->field_0x32;
-            if (group->field_0x32 < 128) terrain->group_for_type[group->field_0x32] = group_count;
-            group->chunk_type = chunk->chunk_type;
-            group->origin = chunk->origin;
-            group->scene_index = chunk->field_0x16;
-            group->platform_flags = chunk->field_0x2c;
-            group->data = chunk_data;
-            ++group_count;
-          }
+            if (chunk->chunk_type >= TERRAIN_CHUNK_GROUP_PRIMARY) {
+                TERRAIN_GROUP *group = &terrain->groups[group_count];
+                group->field_0x32 = chunk->field_0x32;
+                if (group->field_0x32 < 128)
+                    terrain->group_for_type[group->field_0x32] = group_count;
+                group->chunk_type = chunk->chunk_type;
+                group->origin = chunk->origin;
+                group->scene_index = chunk->field_0x16;
+                group->platform_flags = chunk->field_0x2c;
+                group->data = chunk_data;
+                ++group_count;
+            }
         } else if (chunk->chunk_type == TERRAIN_CHUNK_CRASH_DATA) {
             crashdata = chunk_data;
         }

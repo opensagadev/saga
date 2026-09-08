@@ -81,21 +81,26 @@ static void TightRopes_ClearProgress(void *, void *progress_data) {
 
 static void TightRopes_StoreProgress(void *world_info, void *, void *progress_data) {
     TIGHTROPEPROGRESS *progress = static_cast<TIGHTROPEPROGRESS *>(progress_data);
-    if (progress == NULL) return;
+    if (progress == NULL)
+        return;
     progress->state[0] = -1;
     progress->state[1] = -1;
     WORLDINFO *world = static_cast<WORLDINFO *>(world_info);
-    if (world == NULL || world->tightropes == NULL) return;
+    if (world == NULL || world->tightropes == NULL)
+        return;
     for (i32 i = 0; i < world->tightrope_count && i < 32; ++i) {
         u32 mask = 1u << i;
-        if (!world->tightropes[i].visible) progress->state[1] &= ~mask;
-        if (!world->tightropes[i].active) progress->state[0] &= ~mask;
+        if (!world->tightropes[i].visible)
+            progress->state[1] &= ~mask;
+        if (!world->tightropes[i].active)
+            progress->state[0] &= ~mask;
     }
 }
 
 static void TightRopes_Reset(void *world_info, void *, void *progress_data) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_info);
-    if (world == NULL || world->tightropes == NULL) return;
+    if (world == NULL || world->tightropes == NULL)
+        return;
     TIGHTROPEPROGRESS *progress = static_cast<TIGHTROPEPROGRESS *>(progress_data);
     TIGHTROPE *rope = world->tightropes;
     for (i32 i = 0; i < world->tightrope_count; ++i, ++rope) {
@@ -127,7 +132,8 @@ static void *TightRopes_ReserveBufferSpace(void *world_info) {
 
 static i32 TightRopes_Load(void *world_info, void *) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_info);
-    if (world->tightrope_count != 0) return 0;
+    if (world->tightrope_count != 0)
+        return 0;
     i32 version = EdFileReadInt();
     world->tightrope_count = EdFileReadInt();
     for (i32 i = 0; i < world->tightrope_count; ++i) {
@@ -141,7 +147,8 @@ static i32 TightRopes_Load(void *world_info, void *) {
             world->tightropes[i].field_0x2e = EdFileReadUnsignedShort();
             world->tightropes[i].field_0x30 = EdFileReadUnsignedChar();
             world->tightropes[i].field_0x31 = EdFileReadUnsignedChar();
-            if (version != 2) world->tightropes[i].field_0x32 = EdFileReadChar();
+            if (version != 2)
+                world->tightropes[i].field_0x32 = EdFileReadChar();
         }
     }
     return 1;

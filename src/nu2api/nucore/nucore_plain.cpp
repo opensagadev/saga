@@ -2010,7 +2010,8 @@ extern "C" {
     }
     i32 NuPower2(i32 value) {
         i32 power = value > 127 ? 128 : 1;
-        while (power < value) power += power;
+        while (power < value)
+            power += power;
         return power;
     }
     void NuEulerXYZFromQuat(void) {
@@ -2298,9 +2299,10 @@ extern "C" {
     i32 NuLgtArcLaserFrame;
     NULGTLASER NuLgtLaserData[64];
 
-    void NuLgtLaser(i32 type, f32 width, f32 segment_length, f32 width_wobble,
-                    NUVEC *start, NUVEC *delta, u32 colour, f32 end_width, f32 length) {
-        if (NuLgtLaserCnt > 63) return;
+    void NuLgtLaser(i32 type, f32 width, f32 segment_length, f32 width_wobble, NUVEC *start, NUVEC *delta, u32 colour,
+                    f32 end_width, f32 length) {
+        if (NuLgtLaserCnt > 63)
+            return;
         NULGTLASER *laser = &NuLgtLaserData[NuLgtLaserCnt];
         laser->width_wobble = width_wobble;
         laser->segment_length = segment_length;
@@ -2792,8 +2794,6 @@ extern "C" {
     }
     extern "C++" NuWindGType *NuWindAllocateGrp();
     extern "C++" void NuWindFreeGrp(NuWindGType *group);
-
-
 
     i32 NuWindLoad(NUWIND *wind, i32 index, char *name, VARIPTR *buffer, VARIPTR *buffer_end) {
         if (wind != NULL && (u32)index < 8) {

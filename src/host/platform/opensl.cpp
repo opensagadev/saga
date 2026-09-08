@@ -95,8 +95,8 @@ namespace hostsl {
         };
 
         struct QueueVTable {
-            u32 (*enqueue)(void *, void *, u32); // 0x00
-            u32 (*clear)(void *);                // 0x04
+            u32 (*enqueue)(void *, void *, u32);                          // 0x00
+            u32 (*clear)(void *);                                         // 0x04
             u32 (*get_state)(void *, SLAndroidSimpleBufferQueueState_ *); // 0x08
         };
 
@@ -510,6 +510,12 @@ namespace hostsl {
                     return HOST_SL_RESULT_PARAMETER_INVALID;
                 }
                 SDL_ResumeAudioStreamDevice(host_device_stream);
+                SDL_AudioSpec actual = {};
+                int sample_frames = 0;
+                if (SDL_GetAudioDeviceFormat(SDL_GetAudioStreamDevice(host_device_stream), &actual, &sample_frames)) {
+                    LOG_INFO("audio: driver=%s rate=%d Hz buffer=%d frames (%.1f ms)", SDL_GetCurrentAudioDriver(),
+                             actual.freq, sample_frames, 1000.0 * sample_frames / actual.freq);
+                }
             }
 
             MixObject *mix = (MixObject *)calloc(1, sizeof(MixObject));

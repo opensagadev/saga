@@ -23,11 +23,11 @@ DECOMP_ASSERT(offsetof(NULGTLASER, seed) == 0x34, "Lightning seed offset");
 
 i32 NuLgtRand();
 extern "C" {
-extern u32 NuLgtSeed;
-extern i32 NuLgtLaserCnt;
-extern i32 NuLgtArcLaserCnt;
-extern i32 NuLgtArcLaserFrame;
-extern NULGTLASER NuLgtLaserData[64];
-void NuLgtLaser(i32 type, f32 width, f32 segment_length, f32 width_wobble,
-                NUVEC *start, NUVEC *delta, u32 colour, f32 end_width, f32 length);
+    extern u32 NuLgtSeed;
+    extern i32 NuLgtLaserCnt;
+    extern i32 NuLgtArcLaserCnt;
+    extern i32 NuLgtArcLaserFrame;
+    extern NULGTLASER NuLgtLaserData[64];
+    void NuLgtLaser(i32 type, f32 width, f32 segment_length, f32 width_wobble, NUVEC *start, NUVEC *delta, u32 colour,
+                    f32 end_width, f32 length);
 }

@@ -147,7 +147,7 @@ GAMEMESSAGE_s *AddGameMsg(ADDGAMEMSG *message) {
         if (length <= 0) {
             return NULL;
         }
-        if ((message->flags & 0x20) != 0) {
+        if ((message->flags & 0x2000) != 0) {
             slot->text = message->text;
         } else {
             for (; text_index < length && text_index <= 0x76; ++text_index) {
@@ -470,16 +470,6 @@ void UpdateGameMessages() {
             callback(reinterpret_cast<GAMEMESSAGE_s *>(message));
         }
     }
-}
-
-static i32 GoldBrickMessageCount;
-
-void AddGoldBrickMessage(STATUSPACKET_s *packet, i16 brick) {
-    if (GoldBrickMessageCount <= 15) {
-        *reinterpret_cast<i16 *>(reinterpret_cast<unsigned char *>(packet) + 0x12c + GoldBrickMessageCount * 2) = brick;
-        ++GoldBrickMessageCount;
-    }
-    AddToGoldBricks();
 }
 
 void TransformGameMessages(nuvec_s *camera_position, nuvec_s *camera_scale, nuvec_s *camera_direction) {

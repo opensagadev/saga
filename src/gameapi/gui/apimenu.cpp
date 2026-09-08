@@ -1008,15 +1008,14 @@ static __used__ void MenuDrawPauseExit(MENU *menu) {
             } else if (SuperStory != 0) {
                 warning = TTab[tALLSUPERSTORYPROGRESSWILLBELOST];
             } else {
-                warning = WORLD->area != NULL && WORLD->area == VEHICLES_ADATA
-                              ? NULL : TTab[tALLLEVELPROGRESSWILLBELOST];
+                warning =
+                    WORLD->area != NULL && WORLD->area == VEHICLES_ADATA ? NULL : TTab[tALLLEVELPROGRESSWILLBELOST];
             }
         }
     }
     if (MenuStopDraw == 0) {
-        SmartTextEx(title, PauseMenus_X, menu->draw_y - spacing * MENUDY, 1.0f,
-                    MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, PauseMenus_Align,
-                    MENUEXITR, MENUEXITG, MENUEXITB, 1.7f, 1, NULL, 0, MenuA);
+        SmartTextEx(title, PauseMenus_X, menu->draw_y - spacing * MENUDY, 1.0f, MENUTEXTSCALE, MENUTEXTSCALE,
+                    MENUTEXTSCALE, PauseMenus_Align, MENUEXITR, MENUEXITG, MENUEXITB, 1.7f, 1, NULL, 0, MenuA);
         if (warning != NULL) {
             const u16 angle = static_cast<u16>(NuFmod(GlobalTimer.time_elapsed_mod_seconds, 0.5f) * 2.0f * 65536.0f);
             const f32 blend = NuTrigTable[angle >> 1] * 0.5f + 0.5f;
@@ -1026,9 +1025,8 @@ static __used__ void MenuDrawPauseExit(MENU *menu) {
             const i32 a = static_cast<i32>(static_cast<i32>(MENULOSTA1 + (MENULOSTA2 - MENULOSTA1) * blend) *
                                            (static_cast<f32>(MenuA) * 0.0078125f));
             SmartTextEx(warning, PauseMenus_X,
-                        menu->draw_y + (save_level != NULL ? 2.0f : 1.0f) * MENUDY + spacing * MENUDY,
-                        1.0f, MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, PauseMenus_Align,
-                        r, g, b, 1.7f, 1, NULL, 0, a);
+                        menu->draw_y + (save_level != NULL ? 2.0f : 1.0f) * MENUDY + spacing * MENUDY, 1.0f,
+                        MENUTEXTSCALE, MENUTEXTSCALE, MENUTEXTSCALE, PauseMenus_Align, r, g, b, 1.7f, 1, NULL, 0, a);
         }
     }
     if (save_level != NULL) {

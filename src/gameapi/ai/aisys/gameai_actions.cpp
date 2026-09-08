@@ -89,7 +89,8 @@ static __used__ f32 Condition_EmptyTakeOver(AISYS_s *, AISCRIPTPROCESS_s *, AIPA
 }
 
 static __used__ f32 Condition_ForceComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
-    if (argument != NULL && GizForce_Complete((GIZFORCE_s *)argument) != 0) return 1.0f;
+    if (argument != NULL && GizForce_Complete((GIZFORCE_s *)argument) != 0)
+        return 1.0f;
     return 0.0f;
 }
 
@@ -407,7 +408,8 @@ static __used__ i32 Action_SetTechnoComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIP
 
 static __used__ void *Condition_CategoryIsInit(AISYS_s *sys, char *name, AISCRIPT_s *) {
     i32 index = -1;
-    if (name != NULL && sys != NULL && CharCategory != NULL) index = CharCategory_FindByName(name);
+    if (name != NULL && sys != NULL && CharCategory != NULL)
+        index = CharCategory_FindByName(name);
     return (void *)(isize)index;
 }
 
@@ -680,8 +682,9 @@ static __used__ i32 Action_PressSpecialButton(AISYS_s *, AISCRIPTPROCESS_s *proc
 }
 
 static __used__ i32 Action_SelectRandomSpline(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **params,
-                                             i32 num_params, i32 first_time, f32) {
-    if (!first_time) return 1;
+                                              i32 num_params, i32 first_time, f32) {
+    if (!first_time)
+        return 1;
     script_spline_selected = NULL;
     NUGSPLINE *candidates[32];
     NUGSPLINE *unused_candidates[32];
@@ -693,28 +696,34 @@ static __used__ i32 Action_SelectRandomSpline(AISYS_s *, AISCRIPTPROCESS_s *, AI
             count += NuSplineFindAllBeg(WORLD->current_gscn, value + 8, &candidates[count], 32 - count);
         } else if ((value = NuStrIStr(params[i], "spline=")) != NULL) {
             NUGSPLINE *spline = NuSplineFind(WORLD->current_gscn, value + 7);
-            if (spline != NULL && count < 32) candidates[count++] = spline;
+            if (spline != NULL && count < 32)
+                candidates[count++] = spline;
         } else if (NuStrIStr(params[i], "unused") != NULL) {
             unused_only = 1;
         }
     }
-    if (count == 0) return 1;
+    if (count == 0)
+        return 1;
     if (unused_only) {
         for (i32 i = 0; i < HIGHGAMEOBJECT; i++) {
             GameObject *object = &Obj[i];
             if ((object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->apiobj.field_0x287 == 0 &&
-                object->movement_spline != NULL) object->movement_spline->length |= 0x8000;
+                object->movement_spline != NULL)
+                object->movement_spline->length |= 0x8000;
         }
         i32 unused_count = 0;
         for (i32 i = 0; i < count; i++) {
-            if (candidates[i]->length >= 0) unused_candidates[unused_count++] = candidates[i];
+            if (candidates[i]->length >= 0)
+                unused_candidates[unused_count++] = candidates[i];
         }
         for (i32 i = 0; i < HIGHGAMEOBJECT; i++) {
             GameObject *object = &Obj[i];
             if ((object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->apiobj.field_0x287 == 0 &&
-                object->movement_spline != NULL) object->movement_spline->length &= 0x7fff;
+                object->movement_spline != NULL)
+                object->movement_spline->length &= 0x7fff;
         }
-        if (unused_count != 0) script_spline_selected = unused_candidates[qrand() / (65535 / unused_count + 1)];
+        if (unused_count != 0)
+            script_spline_selected = unused_candidates[qrand() / (65535 / unused_count + 1)];
     } else {
         script_spline_selected = candidates[qrand() / (65535 / count + 1)];
     }
@@ -757,15 +766,19 @@ static __used__ i32 Action_SetLastSafePathPos(AISYS_s *system, AISCRIPTPROCESS_s
 }
 
 static __used__ i32 Action_SetShieldHitPoints(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet,
-                                               char **params, i32 num_params, i32 first_time, f32) {
-    if (!first_time) return 1;
+                                              char **params, i32 num_params, i32 first_time, f32) {
+    if (!first_time)
+        return 1;
     GameObject *object = NULL;
-    if (packet != NULL && packet->owner != NULL) object = packet->owner->apiobj.objptr;
+    if (packet != NULL && packet->owner != NULL)
+        object = packet->owner->apiobj.objptr;
     i32 hitpoints = -1;
     for (i32 i = 0; i < num_params; i++) {
         char *value = NuStrIStr(params[i], "character=");
-        if (value != NULL) object = GetNamedGameObject(sys, value + 10);
-        else hitpoints = (i32)AIParamToFloat(processor, params[i]);
+        if (value != NULL)
+            object = GetNamedGameObject(sys, value + 10);
+        else
+            hitpoints = (i32)AIParamToFloat(processor, params[i]);
     }
     if (object != NULL) {
         if (hitpoints == -1)
@@ -802,7 +815,8 @@ static __used__ f32 Condition_BigJumpComplete(AISYS_s *, AISCRIPTPROCESS_s *, AI
 
 static __used__ f32 Condition_BuildItComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     GIZMO *gizmo = (GIZMO *)argument;
-    if (gizmo != NULL && gizmo->object != NULL && ((GIZBUILDIT_s *)gizmo->object)->build_state == 2) return 1.0f;
+    if (gizmo != NULL && gizmo->object != NULL && ((GIZBUILDIT_s *)gizmo->object)->build_state == 2)
+        return 1.0f;
     return 0.0f;
 }
 
@@ -994,7 +1008,8 @@ static __used__ f32 Condition_OpponentToOrigin(AISYS_s *, AISCRIPTPROCESS_s *, A
 
 static __used__ f32 Condition_PlayerCategoryIs(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     const i32 category = (i32)(isize)argument;
-    if (category != -1 && player != NULL && CharCategory_IsCategory(player, category)) return 1.0f;
+    if (category != -1 && player != NULL && CharCategory_IsCategory(player, category))
+        return 1.0f;
     return 0.0f;
 }
 
@@ -1159,10 +1174,11 @@ static i32 Action_CharClipToBlobShadows(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET
 }
 
 static __used__ i32 Action_CreateSplineCreatures(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet,
-                                               char **params, i32 num_params, i32 first_time, f32) {
+                                                 char **params, i32 num_params, i32 first_time, f32) {
     char script_name[64] = "default";
     NUVEC spline_offset = {0.0f, 0.0f, 0.0f};
-    if (!first_time || num_params <= 0) return 1;
+    if (!first_time || num_params <= 0)
+        return 1;
     i16 models[10];
     NUGSPLINE *splines[32];
     i32 model_count = 0, spline_count = 0, use_selected = 0;
@@ -1173,7 +1189,8 @@ static __used__ i32 Action_CreateSplineCreatures(AISYS_s *system, AISCRIPTPROCES
     GameObject_s *rider = NULL;
     for (i32 i = 0; i < num_params; i++) {
         char *value = NuStrIStr(params[i], "mingroupsize");
-        if (value != NULL) min_group_size = (i32)AIParamToFloat(processor, value + 13);
+        if (value != NULL)
+            min_group_size = (i32)AIParamToFloat(processor, value + 13);
         else if ((value = NuStrIStr(params[i], "maxgroupsize")) != NULL)
             max_group_size = (i32)AIParamToFloat(processor, value + 13);
         else if ((value = NuStrIStr(params[i], "groupsize")) != NULL)
@@ -1183,10 +1200,12 @@ static __used__ i32 Action_CreateSplineCreatures(AISYS_s *system, AISCRIPTPROCES
                 u8 type = LevelCharacterTypeIDFn(value + 5);
                 if (type != 0xff) {
                     i16 model = LevelCharacterGlobalIDFn(type);
-                    if (model != -1 && model_count < 10) models[model_count++] = model;
+                    if (model != -1 && model_count < 10)
+                        models[model_count++] = model;
                 }
             }
-        } else if ((value = NuStrIStr(params[i], "script")) != NULL) NuStrCpy(script_name, value + 7);
+        } else if ((value = NuStrIStr(params[i], "script")) != NULL)
+            NuStrCpy(script_name, value + 7);
         else if ((value = NuStrIStr(params[i], "mindistance")) != NULL)
             min_distance = AIParamToFloat(processor, value + 12);
         else if ((value = NuStrIStr(params[i], "maxdistance")) != NULL)
@@ -1196,27 +1215,34 @@ static __used__ i32 Action_CreateSplineCreatures(AISYS_s *system, AISCRIPTPROCES
         else if (script_spline_selected != NULL && NuStrICmp("use_selected_spline", params[i]) == 0)
             use_selected = 1;
         else if ((value = NuStrIStr(params[i], "splines=")) != NULL)
-            spline_count += NuSplineFindAllBeg(WORLD->current_gscn, value + 8, &splines[spline_count], 32 - spline_count);
+            spline_count +=
+                NuSplineFindAllBeg(WORLD->current_gscn, value + 8, &splines[spline_count], 32 - spline_count);
         else if (NuStrIStr(params[i], "spline=myspline") != NULL) {
-            if (processor->unknown_ac != NULL) splines[spline_count++] = processor->unknown_ac;
+            if (processor->unknown_ac != NULL)
+                splines[spline_count++] = processor->unknown_ac;
         } else if ((value = NuStrIStr(params[i], "spline=")) != NULL) {
             NUGSPLINE *spline = NuSplineFind(WORLD->current_gscn, value + 7);
-            if (spline != NULL && spline_count < 32) splines[spline_count++] = spline;
+            if (spline != NULL && spline_count < 32)
+                splines[spline_count++] = spline;
         } else if ((value = NuStrIStr(params[i], "x_offset=")) != NULL)
             spline_offset.x = AIParamToFloat(processor, value + 9);
         else if ((value = NuStrIStr(params[i], "y_offset=")) != NULL)
             spline_offset.y = AIParamToFloat(processor, value + 9);
         else if ((value = NuStrIStr(params[i], "z_offset=")) != NULL)
             spline_offset.z = AIParamToFloat(processor, value + 9);
-        else if (NuStrICmp(params[i], "looping") == 0) looping = 1;
-        else if (NuStrIStr(params[i], "addtoset=myset") != NULL) creature_set = processor->unknown_b0;
+        else if (NuStrICmp(params[i], "looping") == 0)
+            looping = 1;
+        else if (NuStrIStr(params[i], "addtoset=myset") != NULL)
+            creature_set = processor->unknown_b0;
         else if ((value = NuStrIStr(params[i], "addtoset=")) != NULL)
             creature_set = (i32)AIParamToFloat(processor, value + 9);
-        else if (NuStrICmp(params[i], "relative_to_player") == 0) relative_to_player = 1;
+        else if (NuStrICmp(params[i], "relative_to_player") == 0)
+            relative_to_player = 1;
         else if ((value = NuStrIStr(params[i], "relative_to_locator=")) != NULL)
             relative_locator = AIPathFindLocator(system, value + 20);
         else if (NuStrIStr(params[i], "ridden_by=myself") != NULL) {
-            if (packet != NULL && packet->owner != NULL) rider = packet->owner->apiobj.objptr;
+            if (packet != NULL && packet->owner != NULL)
+                rider = packet->owner->apiobj.objptr;
         } else if ((value = NuStrIStr(params[i], "ridden_by=")) != NULL)
             rider = GetNamedGameObject(system, value + 10);
     }
@@ -1226,16 +1252,19 @@ static __used__ i32 Action_CreateSplineCreatures(AISYS_s *system, AISCRIPTPROCES
         f32 fraction = NuRandFloat();
         distance = max_distance * fraction + min_distance * (1.0f - fraction);
     }
-    if ((spline_count | use_selected) == 0 || group_size <= 0 || model_count == 0) return 1;
+    if ((spline_count | use_selected) == 0 || group_size <= 0 || model_count == 0)
+        return 1;
     NUGSPLINE *spline = use_selected ? script_spline_selected : splines[qrand() / (65535 / spline_count + 1)];
     i32 model = models[NuRand(NULL) % model_count];
     for (i32 i = 0; i < group_size; i++) {
-        GameObject_s *object = AddDynamicCreature(model, NULL, 0, script_name, NULL, NULL, 0, spline,
-                                                 &spline_offset, looping, creature_set);
-        if (object == NULL) continue;
+        GameObject_s *object = AddDynamicCreature(model, NULL, 0, script_name, NULL, NULL, 0, spline, &spline_offset,
+                                                  looping, creature_set);
+        if (object == NULL)
+            continue;
         if (relative_to_player || relative_locator != NULL) {
             i16 start = -1, end = -1;
-            if (WORLD->current_level == PODSPRINTA_LDATA) PodSprint_GetIAlongVals(spline, &start, &end);
+            if (WORLD->current_level == PODSPRINTA_LDATA)
+                PodSprint_GetIAlongVals(spline, &start, &end);
             SPLINEPOS_s position;
             if (relative_to_player)
                 GetNearestSplinePos(&player->apiobj.collision_position, &position, spline, looping, start, end);
@@ -1247,8 +1276,8 @@ static __used__ i32 Action_CreateSplineCreatures(AISYS_s *system, AISCRIPTPROCES
             MoveSplinePosition(&object->movement_spline_position, distance);
             NUVEC position, offset;
             u16 angle, pitch;
-            PointAlongSpline(object->movement_spline, object->movement_spline_position.along, &position,
-                             &angle, &pitch, object->movement_spline_position.looping);
+            PointAlongSpline(object->movement_spline, object->movement_spline_position.along, &position, &angle, &pitch,
+                             object->movement_spline_position.looping);
             object->apiobj.facing_angle = angle;
             object->apiobj.movement_facing_angle = angle;
             object->apiobj.field_0x276 = angle;
@@ -1270,7 +1299,8 @@ static __used__ i32 Action_CreateSplineCreatures(AISYS_s *system, AISCRIPTPROCES
             object->field_0x10cc = object->apiobj.position.y;
             object->field_0x10d0 = object->apiobj.position.z;
         }
-        if (rider != NULL) TakeOverGameObject(rider, object, 0, 1);
+        if (rider != NULL)
+            TakeOverGameObject(rider, object, 0, 1);
     }
     return 1;
 }

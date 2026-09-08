@@ -46,11 +46,13 @@ static void Attractos_AddGizmos(GIZMOSYS *gizmo_sys, i32 type, void *context, vo
 void *AddGameMessage(char *, NUVEC *, f32, NUVEC *, f32, u8, u8, u8, u32, f32);
 static void Attractos_Update(void *context, void *, float) {
     WORLDINFO_s *world = static_cast<WORLDINFO_s *>(context);
-    if (world == NULL || world->attractos == NULL) return;
+    if (world == NULL || world->attractos == NULL)
+        return;
     i32 alpha = (0.2f * game_pulse + 0.6f) * 128.0f;
     ATTRACTO *attracto = static_cast<ATTRACTO *>(world->attractos);
     for (i32 i = 0; i < world->attracto_count; ++i, ++attracto) {
-        if ((attracto->state_flags & 7) != 3) continue;
+        if ((attracto->state_flags & 7) != 3)
+            continue;
         char text[32];
         sprintf(text, "%i/%i", attracto->collected_count, attracto->capacity);
         NUVEC position;
@@ -59,28 +61,34 @@ static void Attractos_Update(void *context, void *, float) {
         position.z = attracto->position.z;
         GAMEMESSAGE_s *message = static_cast<GAMEMESSAGE_s *>(
             AddGameMessage(text, &position, 2.3f, NULL, 0.0f, 255, 255, 255, 0x1087, 0.0f));
-        if (message != NULL) message->alpha = alpha;
+        if (message != NULL)
+            message->alpha = alpha;
     }
 }
 
 static void Attractos_Draw(void *context, void *, float) {
     WORLDINFO_s *world = static_cast<WORLDINFO_s *>(context);
     GameObject_s *nearest_player = NULL;
-    if (world->lev_objs[72].active == 0 || world->attractos == NULL) return;
+    if (world->lev_objs[72].active == 0 || world->attractos == NULL)
+        return;
     u16 spin = static_cast<i32>(NuFmod(GameTimer.time_elapsed, 5.0f) / 5.0f * 65536.0f);
     f32 phase = NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f) * 2.0f * 65536.0f;
     f32 pulse = 0.2f * NU_SIN_LUT(phase) + 0.8f;
     ATTRACTO *attracto = static_cast<ATTRACTO *>(world->attractos);
     for (i32 i = 0; i < world->attracto_count; ++i, ++attracto) {
         attracto->state_flags &= ~8;
-        if ((attracto->state_flags & 2) == 0) continue;
+        if ((attracto->state_flags & 2) == 0)
+            continue;
         NUMTX matrix = attracto->transform;
         i32 drawn = NuSpecialDrawAt(&world->lev_objs[72].special, &matrix);
         attracto->state_flags = (attracto->state_flags & ~8) | ((drawn & 1) << 3);
-        if ((attracto->state_flags & 5) != 1 || world->lev_objs[85].active == 0) continue;
+        if ((attracto->state_flags & 5) != 1 || world->lev_objs[85].active == 0)
+            continue;
         NuMtxSetRotationY(&matrix, spin);
-        if (attracto->ground_angle_x != 0) NuMtxRotateZ(&matrix, attracto->ground_angle_x);
-        if (attracto->ground_angle_z != 0) NuMtxRotateX(&matrix, attracto->ground_angle_z);
+        if (attracto->ground_angle_x != 0)
+            NuMtxRotateZ(&matrix, attracto->ground_angle_x);
+        if (attracto->ground_angle_z != 0)
+            NuMtxRotateX(&matrix, attracto->ground_angle_z);
         NuMtxTranslate(&matrix, &attracto->active_position);
         f32 distance;
         if (FindNearestPlayerToVec(&attracto->position, &nearest_player, distance, false, 0)) {
@@ -115,7 +123,8 @@ static void Attracto_Activate(GIZMO *gizmo, i32 active) {
 }
 
 static void Attracto_SetVisibility(GIZMO *gizmo, i32 visible) {
-    if (gizmo == NULL || gizmo->object == NULL) return;
+    if (gizmo == NULL || gizmo->object == NULL)
+        return;
     ATTRACTO *attracto = static_cast<ATTRACTO *>(gizmo->object);
     attracto->state_flags = (attracto->state_flags & ~2) | (visible != 0 ? 2 : 0);
     if ((attracto->state_flags & 2) != 0 && attracto->platform_id == -1) {
@@ -152,7 +161,8 @@ static void Attractos_ClearProgress(void *, void *data) {
 }
 
 static void Attractos_StoreProgress(void *context, void *, void *data) {
-    if (data == NULL) return;
+    if (data == NULL)
+        return;
     ATTRACTOPROGRESS_s *progress = static_cast<ATTRACTOPROGRESS_s *>(data);
     Attractos_ClearProgress(NULL, progress);
     WORLDINFO_s *world = static_cast<WORLDINFO_s *>(context);
@@ -161,9 +171,12 @@ static void Attractos_StoreProgress(void *context, void *, void *data) {
         for (i32 i = 0; i < world->attracto_count && i < 32; ++i, ++attracto) {
             progress->counts[i] = attracto->collected_count;
             u32 mask = 1u << i;
-            if ((attracto->state_flags & 2) == 0) progress->visible &= ~mask;
-            if ((attracto->state_flags & 1) == 0) progress->active &= ~mask;
-            if ((attracto->state_flags & 4) != 0) progress->filled |= mask;
+            if ((attracto->state_flags & 2) == 0)
+                progress->visible &= ~mask;
+            if ((attracto->state_flags & 1) == 0)
+                progress->active &= ~mask;
+            if ((attracto->state_flags & 4) != 0)
+                progress->filled |= mask;
         }
     }
 }
@@ -171,7 +184,8 @@ static void Attractos_StoreProgress(void *context, void *, void *data) {
 static void Attractos_Reset(void *context, void *, void *data) {
     WORLDINFO_s *world = static_cast<WORLDINFO_s *>(context);
     ATTRACTOPROGRESS_s *progress = static_cast<ATTRACTOPROGRESS_s *>(data);
-    if (world == NULL || world->attractos == NULL) return;
+    if (world == NULL || world->attractos == NULL)
+        return;
     ATTRACTO *attracto = static_cast<ATTRACTO *>(world->attractos);
     for (i32 i = 0; i < world->attracto_count; ++i, ++attracto) {
         attracto->active_position.y = 0.0f;
@@ -184,7 +198,8 @@ static void Attractos_Reset(void *context, void *, void *data) {
         if (ground != 2000000.0f) {
             attracto->active_position.y = ground + 0.005f;
             FindAnglesZX(&ShadNorm, &attracto->ground_angle_z, &attracto->ground_angle_x);
-        } else attracto->active_position.y = 2000000.0f;
+        } else
+            attracto->active_position.y = 2000000.0f;
         attracto->state_flags = (attracto->state_flags | 3) & ~12;
         NuMtxSetRotationY(&attracto->transform, attracto->angle);
         NuMtxTranslate(&attracto->transform, &attracto->position);
@@ -212,7 +227,8 @@ static void *Attractos_ReserveBufferSpace(void *context) {
 
 static i32 Attractos_Load(void *context, void *) {
     WORLDINFO_s *world = static_cast<WORLDINFO_s *>(context);
-    if (world->attracto_count != 0) return 0;
+    if (world->attracto_count != 0)
+        return 0;
     i32 version = EdFileReadInt();
     world->attracto_count = EdFileReadInt();
     ATTRACTO *attracto = static_cast<ATTRACTO *>(world->attractos);

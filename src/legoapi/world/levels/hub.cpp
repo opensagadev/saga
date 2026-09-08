@@ -459,8 +459,7 @@ void Hub_Update(WORLDINFO_s *world) {
             continue;
         }
         const i32 id = *store_pack.id;
-        if ((store_pack.field44_0x32 != 0xff &&
-             store_pack.field44_0x32 != GameCam->sock_position.location.sock) ||
+        if ((store_pack.field44_0x32 != 0xff && store_pack.field44_0x32 != GameCam->sock_position.location.sock) ||
             APICharacterLoaded(id) == NULL || FindGameObject(id, 0, 0, 0, 0) != NULL) {
             continue;
         }
@@ -477,7 +476,7 @@ void Hub_Update(WORLDINFO_s *world) {
             }
             if (count != 0) {
                 AILOCATOR *locator = LocalGetNearestLocator(locators, count, 0.0f, &player->apiobj.position,
-                                                           1000000000.0f, 0, 1000000000.0f, 1000000000.0f);
+                                                            1000000000.0f, 0, 1000000000.0f, 1000000000.0f);
                 if (locator != NULL) {
                     path_info = reinterpret_cast<AIPATHINFO_s *>(&locator->path);
                 }
@@ -544,9 +543,8 @@ void Hub_Update(WORLDINFO_s *world) {
     } else if (GetMenuID() != 12) {
         for (i32 player_index = 0; player_index < 2; ++player_index) {
             GameObject_s *player = Player[player_index];
-            if (player != NULL && static_cast<i8>(player->apiobj.flags_low) < 0 &&
-                player->apiobj.field_0x27d != 0 && player->pad_gamepad->input_magnitude == 0.0f &&
-                player->pad_gamepad->previous_input_magnitude == 0.0f &&
+            if (player != NULL && static_cast<i8>(player->apiobj.flags_low) < 0 && player->apiobj.field_0x27d != 0 &&
+                player->pad_gamepad->input_magnitude == 0.0f && player->pad_gamepad->previous_input_magnitude == 0.0f &&
                 (player->field_0x7a5 == 0x31 || player->field_0x7a5 == 0xff || player->field_0x7a5 == 0x32) &&
                 player->apiobj.field_0x281 == 0x0e) {
                 shop_available = true;
@@ -586,9 +584,8 @@ void Hub_Update(WORLDINFO_s *world) {
     if (Customiser_MenuAvailable(CharacterCustomiser) != 0) {
         for (i32 player_index = 0; player_index < 2; ++player_index) {
             GameObject_s *player = Player[player_index];
-            if (player != NULL && static_cast<i8>(player->apiobj.flags_low) < 0 &&
-                player->apiobj.field_0x27d != 0 && player->pad_gamepad->input_magnitude == 0.0f &&
-                player->pad_gamepad->previous_input_magnitude == 0.0f &&
+            if (player != NULL && static_cast<i8>(player->apiobj.flags_low) < 0 && player->apiobj.field_0x27d != 0 &&
+                player->pad_gamepad->input_magnitude == 0.0f && player->pad_gamepad->previous_input_magnitude == 0.0f &&
                 (player->field_0x7a5 == 0x31 || player->field_0x7a5 == 0xff || player->field_0x7a5 == 0x32) &&
                 player->apiobj.field_0x281 == 0x0f) {
                 customiser_available = true;
@@ -627,9 +624,8 @@ void Hub_Update(WORLDINFO_s *world) {
     if (missions_available != 0) {
         for (i32 player_index = 0; player_index < 2; ++player_index) {
             GameObject_s *player = Player[player_index];
-            if (player != NULL && static_cast<i8>(player->apiobj.flags_low) < 0 &&
-                player->apiobj.field_0x27d != 0 && player->pad_gamepad->input_magnitude == 0.0f &&
-                player->pad_gamepad->previous_input_magnitude == 0.0f &&
+            if (player != NULL && static_cast<i8>(player->apiobj.flags_low) < 0 && player->apiobj.field_0x27d != 0 &&
+                player->pad_gamepad->input_magnitude == 0.0f && player->pad_gamepad->previous_input_magnitude == 0.0f &&
                 (player->field_0x7a5 == 0x31 || player->field_0x7a5 == 0xff || player->field_0x7a5 == 0x32) &&
                 player->apiobj.field_0x281 == 0x14) {
                 mission_menu_available = true;
@@ -785,7 +781,8 @@ void Hub_Update(WORLDINFO_s *world) {
             if (area.door == NULL) {
                 continue;
             }
-            if (Episode_CountOpenAreas(static_cast<i8>(area.area->episode_index), area.area->index, Game_AreaSave) != 0 ||
+            if (Episode_CountOpenAreas(static_cast<i8>(area.area->episode_index), area.area->index, Game_AreaSave) !=
+                    0 ||
                 (area.bonus_gizmo != NULL && GizmoGetOutput(world->gizmo_sys, area.bonus_gizmo, 0, 0) != 0) ||
                 ((area.flags >> 8) & 0xff) == 1) {
                 static_cast<GIZOBSTACLE_s *>(area.door->object)->runtime_flags &= static_cast<u8>(~8);
@@ -864,7 +861,8 @@ void Hub_Update(WORLDINFO_s *world) {
         i32 selected_minikit = -1;
         if (!(hub_episode != -1 && hub_episode_time > 0.0f) &&
             !(hub_area != -1 && hub_area_time > 0.0f &&
-              (E1VEHICLE_ADATA == NULL || hub_area != E1VEHICLE_ADATA->index)) && minikit_candidate != -1) {
+              (E1VEHICLE_ADATA == NULL || hub_area != E1VEHICLE_ADATA->index)) &&
+            minikit_candidate != -1) {
             for (i32 i = 0; i < 2; ++i) {
                 if (Player[i] != NULL && static_cast<i8>(Player[i]->apiobj.flags_low) < 0 &&
                     Player[i]->pad_gamepad->input_magnitude == 0.0f) {
@@ -899,8 +897,8 @@ void Hub_Update(WORLDINFO_s *world) {
     GIZBUILDIT_s *nearest_buildit = GizBuildIt_FindNearest(WORLD, Player[0], BUILDIT_FIND_ANY, ShadowMode);
     if (FadeSys.fade == 0.0f) {
         i32 selected_buildit = -1;
-        const bool player_can_build = Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.flags_low) < 0 &&
-                                      Player[0]->field_0x7a5 != 0x2d;
+        const bool player_can_build =
+            Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.flags_low) < 0 && Player[0]->field_0x7a5 != 0x2d;
         for (i32 i = 0; HubAreaInfo[i].area_name != NULL && selected_buildit == -1; ++i) {
             GIZMO *gizmo = HubAreaInfo[i].bonus_gizmo;
             if (gizmo != NULL && GizmoGetOutput(world->gizmo_sys, gizmo, 0, 0) == 0 && player_can_build) {

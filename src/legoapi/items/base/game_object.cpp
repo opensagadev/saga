@@ -282,7 +282,6 @@ static __used__ void TightRope_Attach(GameObject_s *, WORLDINFO_s *) {
 static __used__ void TightRope_MoveUpdate(GameObject_s *, i32) {
 }
 
-
 static __used__ void SurfaceInfo_ExtraReflect(GameObject_s *) {
 }
 

@@ -20,8 +20,14 @@ void GetShootOrigin_LSW(GameObject_s *, NUVEC *);
 i32 Bolt_HitPart_LSW(BOLT_s *, PART_s *);
 i32 Bolt_AlternateFire_LSW(GameObject_s *, i32);
 void BoltSys_Init(BOLTSYS *);
-static BOLTSYS BoltSys_LSW = {GlobalBoltType, 44, AlertSurroundingCreatures, Bolt_Debris_LSW,
-                              GetShootOrigin_LSW, GetShootDirection_LSW, Bolt_HitPart_LSW, Bolt_AlternateFire_LSW};
+static BOLTSYS BoltSys_LSW = {GlobalBoltType,
+                              44,
+                              AlertSurroundingCreatures,
+                              Bolt_Debris_LSW,
+                              GetShootOrigin_LSW,
+                              GetShootDirection_LSW,
+                              Bolt_HitPart_LSW,
+                              Bolt_AlternateFire_LSW};
 extern void (*GizBuildIt_FinishFn)(GIZBUILDIT_s *);
 extern i16 tALLEXTRASUNLOCKED;
 extern i32 LEGOCONTEXT_BUCK;
@@ -36,11 +42,14 @@ void AddPartDebris(PARTDEBSYS_s *, i32, NUVEC *);
 extern i32 (*GizBuildit_AutoBuildPosFn)(void *, NUVEC *, NUVEC *, u16 *);
 static i32 GizBuildit_AutoBuildPos_Game(void *context, NUVEC *position, NUVEC *result, u16 *angle) {
     WORLDINFO_s *world = static_cast<WORLDINFO_s *>(context);
-    if (world == NULL) world = WorldInfo_CurrentlyActive();
+    if (world == NULL)
+        world = WorldInfo_CurrentlyActive();
     ATTRACTO_s *attracto = Attracto_FindNearest(world, position, NULL, NULL);
-    if (attracto == NULL) return 0;
+    if (attracto == NULL)
+        return 0;
     Attracto_GetPos_Top(attracto, result);
-    if (angle != NULL) *angle = attracto->angle;
+    if (angle != NULL)
+        *angle = attracto->angle;
     return 1;
 }
 
@@ -89,8 +98,7 @@ static i32 CanStartHold_Game(GameObject_s *) {
 #include "legoapi/characters/motion/gameanim.h"
 extern i16 id_THEEMPEROR;
 static void BigJump_EndOfLand(GameObject_s *object) {
-    if (object->id == id_THEEMPEROR && LEGOACT_COMBOLAND != -1 &&
-        object->context_animation == LEGOACT_COMBOLAND &&
+    if (object->id == id_THEEMPEROR && LEGOACT_COMBOLAND != -1 && object->context_animation == LEGOACT_COMBOLAND &&
         ((object->field_0xe22 & 1) == 0 || object->field_0xe32 == 2))
         ResetAnimPacket(&object->apiobj.anim_packet, -1);
 }
@@ -107,8 +115,7 @@ extern "C" void PlaySfx(char *, NUVEC *);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
 void GizmoBlowUp_Sfx(GIZMOBLOWUP_s *, NUVEC *position) {
-    if (WORLD->current_level == PODSPRINTA_LDATA &&
-        static_cast<u8>(GameCam->sock_position.location.sock - 10) <= 2 &&
+    if (WORLD->current_level == PODSPRINTA_LDATA && static_cast<u8>(GameCam->sock_position.location.sock - 10) <= 2 &&
         GameCam->sock_position.distance > 145.0f && GameCam->sock_position.distance < 195.0f) {
         PlaySfx("PodX_PurpCrysHit", position);
     } else if (WORLD->current_level == PODRACEB_LDATA && GameCam->sock_position.location.sock == 0 &&
@@ -421,7 +428,6 @@ void InitGameBeforeConfig(void) {
     Game_CharacterSave = Game.character_save;
     Game_CompletionSave = &Game.completion;
     Game_MissionSave = &Game.mission_save;
-    StatusCollectList.ptr = reinterpret_cast<STATUSCOLLECT_s *>(&Game.completion);
 
     ResetSeeds();
     ResetTimer(&GlobalTimer, 0.0f);
@@ -690,8 +696,9 @@ void InitGameAfterConfig(void) {
     Hub_UsePlayerList = 1;
     BoltSys_Init(&BoltSys_LSW);
     GameAudio_Init(&GameAudio_LSW);
-    //  KITPOSX = 0;
-    //  KITPOS2X = 0;
+    extern f32 KITPOSX, KITPOS2X;
+    KITPOSX = 0;
+    KITPOS2X = 0;
     //  CONVERTOLDPICKUPS = 1;
     //  GrabScreenWhenFading = 1;
     //  troopers_gdeb._0_4_ = 0x83;
@@ -876,13 +883,15 @@ void InitGameAfterConfig(void) {
     //  LEGOMENU_RESTORE_NEWGAME = 0x1d;
     //  LEGOCAMMODE_DOORCUT = 4;
     //  LEGOCAMMODE_OBSTACLE = 2;
-    //  LEGOOBJ_ICON_FRAME_NEUTRAL = 0xa7;
-    //  LEGOOBJ_ICON_FRAME_GREEN = 0xa5;
-    //  LEGOOBJ_ICON_FRAME_BLUE = 0xa6;
+    extern i32 LEGOOBJ_ICON_FRAME_NEUTRAL, LEGOOBJ_ICON_FRAME_GREEN, LEGOOBJ_ICON_FRAME_BLUE;
+    LEGOOBJ_ICON_FRAME_NEUTRAL = 0xa7;
+    LEGOOBJ_ICON_FRAME_GREEN = 0xa5;
+    LEGOOBJ_ICON_FRAME_BLUE = 0xa6;
     //  LEGOOBJ_ICON_QUESTION = 0xa1;
     //  LEGOOBJ_ICON_WEIRDO = 0xa3;
-    //  LEGOOBJ_CHARKIT = 0xcf;
-    //  LEGOOBJ_MINIKIT = 0xce;
+    extern i32 LEGOOBJ_CHARKIT, LEGOOBJ_MINIKIT;
+    LEGOOBJ_CHARKIT = 0xcf;
+    LEGOOBJ_MINIKIT = 0xce;
     LEGOSPL_SPLIT = 5;
     LEGOSPL_START = 0;
     //  LEGOGDEB_SPLASH = 0xd;

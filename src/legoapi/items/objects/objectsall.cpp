@@ -32,12 +32,15 @@ extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 
 void Buck_Start(GameObject_s *object, GameObject_s *rider) {
     if (LEGOCONTEXT_BUCK == -1 || LEGOACT_BUCK == -1 ||
-        object->apiobj.character_model->model_data_b[LEGOACT_BUCK] == NULL) return;
-    if (rider != NULL) NewRumble(rider->pad_gamepad->pad, 0.6f, 0);
+        object->apiobj.character_model->model_data_b[LEGOACT_BUCK] == NULL)
+        return;
+    if (rider != NULL)
+        NewRumble(rider->pad_gamepad->pad, 0.6f, 0);
     object->context_animation = LEGOACT_BUCK;
     object->character_context = LEGOCONTEXT_BUCK;
     object->context_animation_timer = AnimDuration(object->id, LEGOACT_BUCK, 0.0f, 0.0f, 1);
-    if (BuckStartExtraFn != NULL) BuckStartExtraFn(object);
+    if (BuckStartExtraFn != NULL)
+        BuckStartExtraFn(object);
 }
 
 extern i16 id_SNOWMOB;
@@ -46,13 +49,15 @@ void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 
 i32 DoBuckStart(GameObject_s *object) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
-    if (world->current_level != HOTHESCAPEB_LDATA || object->id != id_SNOWMOB) return 0;
+    if (world->current_level != HOTHESCAPEB_LDATA || object->id != id_SNOWMOB)
+        return 0;
     i32 jumped = 0;
     NUVEC forward = {0.0f, 0.0f, 1.0f};
     for (i32 i = 0; i < 8; ++i) {
         GameObject_s *player = Player[i];
-        if (player == NULL || (player->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
-            player->apiobj.field_0x287 != 0 || player->field_0xcc0 != NULL) continue;
+        if (player == NULL || (player->apiobj.field_0x1f8 & 0x1001) != 0x1001 || player->apiobj.field_0x287 != 0 ||
+            player->field_0xcc0 != NULL)
+            continue;
         NUVEC delta;
         NuVecSub(&delta, &player->apiobj.lower_position, reinterpret_cast<NUVEC *>(&object->joint_matrices[1].m30));
         if (delta.y > -0.01f && delta.y < 0.1f && delta.x * delta.x + delta.z * delta.z < 0.04000000283122063f) {
@@ -60,7 +65,8 @@ i32 DoBuckStart(GameObject_s *object) {
             NuVecRotateY(&destination, &forward, object->apiobj.field_0x276);
             NuVecAdd(&destination, &destination, &Player[i]->apiobj.collision_position);
             f32 height = GameShadow(NULL, &destination, 5.0f, -1);
-            if (height != 2000000.0f) destination.y = height;
+            if (height != 2000000.0f)
+                destination.y = height;
             StartBigJump(Player[i], &destination, 0, 1.0f, 1.0f, 1, 0);
             jumped = 1;
         }
@@ -81,7 +87,8 @@ void Boulder_Move(PART_s *, float) {
 void Buck_MoveCode(GameObject_s *object, i32 start) {
     if (LEGOCONTEXT_BUCK != -1 && object->character_context == LEGOCONTEXT_BUCK) {
         object->context_animation_timer -= FRAMETIME;
-        if (object->context_animation_timer <= 0.0f) object->character_context = -1;
+        if (object->context_animation_timer <= 0.0f)
+            object->character_context = -1;
     } else if (object->character_context == -1 && start != 0) {
         Buck_Start(object, object->field_0xcc0);
     }
@@ -123,8 +130,10 @@ void Buck_StartRiderJump(GameObject_s *rider, GameObject_s *mount) {
 void SetEffectVisibility(char *name, i32 visible) {
     i32 type = LookupDebrisEffectPageOnly(name, static_cast<char>(WorldInfo_CurrentlyActive()->page_pp));
     if (type != -1) {
-        if (visible != 0) DebrisTypeStatusAlwaysOn(type);
-        else DebrisTypeStatusAlwaysOff(type);
+        if (visible != 0)
+            DebrisTypeStatusAlwaysOn(type);
+        else
+            DebrisTypeStatusAlwaysOff(type);
     }
 }
 

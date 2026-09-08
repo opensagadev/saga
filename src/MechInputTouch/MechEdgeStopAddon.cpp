@@ -13,7 +13,8 @@ MechEdgeStopAddon::MechEdgeStopAddon(MechObjectInterface &object)
 
 // Original: 262 bytes, 0x5007a0.
 bool MechEdgeStopAddon::OnProcess(MechAddon::ProcessStage stage, float delta_time) {
-    if (character == NULL) return false;
+    if (character == NULL)
+        return false;
     if (character->apiobj.field_0x27c == 0 && TouchHacks::TouchControlsActive && stage == PROCESS_STAGE_0) {
         stop_timer -= delta_time;
         const bool jumping = character->character_context == LEGOCONTEXT_JUMP;
@@ -31,7 +32,8 @@ bool MechEdgeStopAddon::OnProcess(MechAddon::ProcessStage stage, float delta_tim
             }
         }
         was_jumping = jumping;
-        if (stopped || stop_timer >= 0.0f) ++character->edge_stop_requests;
+        if (stopped || stop_timer >= 0.0f)
+            ++character->edge_stop_requests;
     }
     return true;
 }

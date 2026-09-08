@@ -11,17 +11,17 @@ typedef struct ATTRACTO_s {
     union {
         char reserved_10[0x64];
         struct {
-            NUVEC position; // 0x10
-            NUMTX transform; // 0x1c
-            u16 angle; // 0x5c
-            u8 capacity; // 0x5e
+            NUVEC position;     // 0x10
+            NUMTX transform;    // 0x1c
+            u16 angle;          // 0x5c
+            u8 capacity;        // 0x5e
             u8 collected_count; // 0x5f
-            i16 platform_id; // 0x60
-            u8 state_flags; // 0x62
+            i16 platform_id;    // 0x60
+            u8 state_flags;     // 0x62
             u8 reserved_63;
             NUVEC active_position; // 0x64
-            u16 ground_angle_z; // 0x70
-            u16 ground_angle_x; // 0x72
+            u16 ground_angle_z;    // 0x70
+            u16 ground_angle_x;    // 0x72
         };
     };
 } ATTRACTO;

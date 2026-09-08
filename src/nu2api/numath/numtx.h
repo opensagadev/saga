@@ -27,7 +27,6 @@ typedef struct numtx_s {
 extern NUMTX numtx_zero;
 extern NUMTX numtx_identity;
 
-
 #define NUMTX_GET_ROW_VEC(mtx, row) ((NUVEC *)&((mtx)[0].m##row##0))
 
 #ifdef __cplusplus

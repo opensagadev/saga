@@ -215,7 +215,8 @@ void PodSeekTuskanCutSound() {
 
 f32 SpeederChaseATATInOutMul(nuvec_s *start, nuvec_s *end) {
     f32 distance = NuVecXZDist(start, end, NULL) * 0.125f;
-    if (distance > 1.0f) return 1.0f;
+    if (distance > 1.0f)
+        return 1.0f;
     return MAX(0.1f, distance);
 }
 
@@ -261,24 +262,30 @@ extern "C" void DebrisPosOrientationMtx(i32, NUMTX *);
 extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 
 void PodDust(WORLDINFO_s *world, GameObject_s *object) {
-    if (object->apiobj.field_0x218 == 2000000.0f) return;
-    if (world->debris_sys->entries[25].effect == -1) return;
+    if (object->apiobj.field_0x218 == 2000000.0f)
+        return;
+    if (world->debris_sys->entries[25].effect == -1)
+        return;
     NUVEC positions[2];
     NUVEC previous[2];
     i32 count = 0;
     for (i32 locator = 1; locator <= 2; ++locator) {
-        if (object->apiobj.field_0x288 == 0 ||
-            object->apiobj.character_model->points_of_interest[locator] == NULL) continue;
+        if (object->apiobj.field_0x288 == 0 || object->apiobj.character_model->points_of_interest[locator] == NULL)
+            continue;
         NUMTX *joint = &object->joint_matrices[locator];
         positions[count].x = joint->m30;
         positions[count].y = object->apiobj.field_0x218 + 0.1f;
         positions[count].z = joint->m32;
         ++count;
-        if ((object->apiobj.flags_low & 0x80) == 0) continue;
+        if ((object->apiobj.flags_low & 0x80) == 0)
+            continue;
         i32 key;
-        if (object == Player[0]) key = locator - 1;
-        else if (object == Player[1]) key = locator + 3;
-        else continue;
+        if (object == Player[0])
+            key = locator - 1;
+        else if (object == Player[1])
+            key = locator + 3;
+        else
+            continue;
         NUMTX matrix;
         matrix.m00 = joint->m00;
         matrix.m01 = joint->m01;

@@ -16,7 +16,10 @@ struct storepack_s {
     u8 field3_0x6;
     u8 field4_0x7;
     union {
-        struct { u8 field5_0x8; u8 field6_0x9; };
+        struct {
+            u8 field5_0x8;
+            u8 field6_0x9;
+        };
         i16 message_text_index;
     };
     u8 field7_0xa;

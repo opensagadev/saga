@@ -56,8 +56,8 @@ DECOMP_ASSERT(offsetof(GLSLParameter, semantic) == 4, "GLSL parameter semantic o
 struct nushaderobject_s {
     NUSHADEROBJECTGLSL glsl;
     NUSHADERUSAGEMASK *usage_mask;
-    i32 last_uniform_frame; // 0x20
-    void *last_light_packet; // 0x24
+    i32 last_uniform_frame;   // 0x20
+    void *last_light_packet;  // 0x24
     void *last_camera_packet; // 0x28
     GLSLParameter parameters[NUSHADEROBJECT_PARAMETERS_COUNT];
     // Present in both serialized objects and the original manager slot stride.
@@ -83,7 +83,6 @@ extern "C" {
     extern ShaderPacketStateMapping g_packetToShaderStateMappings[2];
     void NuShaderGetDirtyMask(NUSHADERUSAGEMASK *mask, NUSHADEROBJECT *shader);
 }
-
 
 struct nushaderprogramparameter_s {
     u16 register_index;
@@ -114,7 +113,7 @@ typedef nushaderprogram_s NUSHADERPROGRAM;
 i32 NuShaderObjectBindAttributeLocationsGLSL(GLuint program);
 bool NuShaderObjectCombineGLSLShadersIntoProgram(GLuint *program_dest, GLuint vertex_shader, GLuint fragment_shader);
 bool NuShaderObjectGenerateGLSLShader(GLuint *shader_dest, GLenum shader_type, const GLchar *shader_source,
-                                     GLint shader_source_length);
+                                      GLint shader_source_length);
 
 extern "C" {
 #endif
@@ -164,10 +163,10 @@ namespace nu2api {
         u8 raw[0x5c];
     };
     extern "C" ShaderUniformRecord g_shaderUniforms[101];
-}
+} // namespace nu2api
 
-using nu2api::ShaderUniformRecord;
 using nu2api::g_shaderUniforms;
+using nu2api::ShaderUniformRecord;
 
 DECOMP_ASSERT(sizeof(nu2api::ShaderUniformRecord) == 0x5c, "Shader uniform record size");
 DECOMP_ASSERT(offsetof(nu2api::ShaderUniformRecord, data.metadata) == 8, "Shader uniform metadata offset");

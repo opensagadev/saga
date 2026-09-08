@@ -12,9 +12,15 @@ struct CharacterObjectInterface : MechObjectInterface {
     const char *GetTargetName() const override;
     bool IsDead() override;
     void TargetedFlash() override;
-    i32 GetObjectType() const override { return 2; }
-    GameObject_s *GetCharacterObject() override { return object; }
-    void *GetTgtVoidPtr() override { return object; }
+    i32 GetObjectType() const override {
+        return 2;
+    }
+    GameObject_s *GetCharacterObject() override {
+        return object;
+    }
+    void *GetTgtVoidPtr() override {
+        return object;
+    }
     ~CharacterObjectInterface() override;
     GameObject_s *object;
 };

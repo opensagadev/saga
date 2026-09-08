@@ -214,13 +214,17 @@ void ResetRumble(RUMBLEPACKET *packet) {
 }
 
 void UpdateRumble(RUMBLEPACKET *packet) {
-    if (packet->rumble_time > 0.0f) packet->rumble_time -= FRAMETIME;
-    if (packet->rumble_amount > 0.0f) packet->rumble_amount -= FRAMETIME;
-    if (packet->active != 0) --packet->active;
+    if (packet->rumble_time > 0.0f)
+        packet->rumble_time -= FRAMETIME;
+    if (packet->rumble_amount > 0.0f)
+        packet->rumble_amount -= FRAMETIME;
+    if (packet->active != 0)
+        --packet->active;
 }
 
 void NewBuzzFrames(nupad_s *pad, i32 frames, i32) {
-    if (pad != NULL) NuSound3AddRumble(pad, static_cast<f32>(frames) / DEFAULTFPS, 0, 0, 0.0f);
+    if (pad != NULL)
+        NuSound3AddRumble(pad, static_cast<f32>(frames) / DEFAULTFPS, 0, 0, 0.0f);
 }
 
 void TakeHitRumble(GameObject_s *, float) {
@@ -232,13 +236,15 @@ void SpaceRumbleProcess() {
 void NewRumbleAllPlayers(float strength, float duration, i32 frames, i32) {
     if (frames > 0) {
         f32 frame_duration = static_cast<f32>(frames) / DEFAULTFPS;
-        if (frame_duration > duration) duration = frame_duration;
+        if (frame_duration > duration)
+            duration = frame_duration;
     }
     for (i32 i = 0; i < 8; ++i) {
         GameObject_s *object = Player[i];
         if (object != NULL && (object->apiobj.flags_low & 0x80) != 0) {
             nupad_s *pad = object->pad_gamepad->pad;
-            if (pad != NULL) NuSound3AddRumble(pad, duration, static_cast<i32>(strength * 255.0f), 0, strength);
+            if (pad != NULL)
+                NuSound3AddRumble(pad, duration, static_cast<i32>(strength * 255.0f), 0, strength);
         }
     }
 }
@@ -280,7 +286,8 @@ i32 NoPad(i32 port, i32 require_game_input) {
 }
 
 void NewBuzz(nupad_s *pad, float duration, i32) {
-    if (pad != NULL) NuSound3AddRumble(pad, duration, 0, 0, 0.0f);
+    if (pad != NULL)
+        NuSound3AddRumble(pad, duration, 0, 0, 0.0f);
 }
 
 i32 ReadPad(i32 port) {
@@ -379,7 +386,8 @@ void ReadPads() {
 void NewRumble(nupad_s *pad, float strength, i32) {
     if (pad != NULL) {
         i32 amount = static_cast<i32>(strength * 255.0f);
-        if (amount > 255) amount = 255;
+        if (amount > 255)
+            amount = 255;
         NuSound3AddRumble(pad, 0.0f, amount, 0, strength);
     }
 }

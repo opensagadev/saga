@@ -95,7 +95,6 @@ void AddParticleGroupToDisplayList(nunativedebrisdata_s *group) {
     list->items++;
 }
 
-
 void NoRender() {
     pNuCam->mtx = numtx_identity;
     NuCameraSet(pNuCam);

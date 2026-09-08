@@ -583,7 +583,8 @@ extern "C" {
         AIANTINODE *nodes = reinterpret_cast<AIANTINODE *>(dynamic_antinodes);
         for (i32 i = 0; i < 64; ++i) {
             AIANTINODE *node = &nodes[i];
-            if (node->enabled != 0) continue;
+            if (node->enabled != 0)
+                continue;
             memset(node, 0, sizeof(*node));
             node->enabled = 1;
             node->game_flags |= 5;
@@ -1531,21 +1532,26 @@ extern "C" {
             if (count != 0) {
                 for (i32 i = 0; i < object_count; ++i) {
                     APIOBJECT *object = objects[i];
-                    if ((object->flags_low & 0x80) != 0 || (object->field_0x1fa & 2) != 0) continue;
+                    if ((object->flags_low & 0x80) != 0 || (object->field_0x1fa & 2) != 0)
+                        continue;
                     for (i32 j = 0; j < count; ++j) {
                         AIANTINODE *node = nodes[j];
                         if (NuSpecialExistsFn(&object->antinode_special) != 0 &&
-                            NuSpecialCompare(&object->antinode_special, &node->special_handle) != 0) continue;
-                        u64 excluded = static_cast<u64>(node->user_data[0]) |
-                                       (static_cast<u64>(node->user_data[1]) << 32);
-                        if (((excluded >> object->field_0x289) & 1) != 0) continue;
+                            NuSpecialCompare(&object->antinode_special, &node->special_handle) != 0)
+                            continue;
+                        u64 excluded =
+                            static_cast<u64>(node->user_data[0]) | (static_cast<u64>(node->user_data[1]) << 32);
+                        if (((excluded >> object->field_0x289) & 1) != 0)
+                            continue;
                         f32 radius = object->ai->mover_height + node->radius;
                         NUVEC offset;
                         offset.x = object->ai->movement_position.x - node->position.x;
-                        if (offset.x > radius || -radius > offset.x) continue;
+                        if (offset.x > radius || -radius > offset.x)
+                            continue;
                         offset.z = object->ai->movement_position.z - node->position.z;
                         if (offset.z > radius || -radius > offset.z || object->collision_min.y > node->max_height ||
-                            node->height > object->collision_max.y) continue;
+                            node->height > object->collision_max.y)
+                            continue;
                         checkantinodefns[node->type](object, node, &offset, radius);
                     }
                 }

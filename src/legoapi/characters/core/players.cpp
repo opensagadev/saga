@@ -53,7 +53,6 @@ extern i32 SetObjOnSurface(GameObject_s *obj, i32 mode);
 extern void GizForce_ResetLOS(GameObject_s *obj);
 extern void PortalGameObject(GameObject_s *obj, i32 enable, i32 immediate, i16 portal, nugscn_s *scene);
 
-
 void ResetPlayerAI(GameObject_s *obj);
 void ResetPlayerMoves(GameObject_s *obj);
 void SetProtocolDroidDeactivatedAction(GameObject_s *);
@@ -857,7 +856,8 @@ void Player_CopyEssentials(GameObject_s *source, GameObject_s *destination) {
 }
 
 i32 Player_HasDeflectBolts(GameObject_s *object) {
-    if (Cheats_CheckFlags(0x80000) != 0 || (object != NULL && object->field_0xdec > 0.0f)) return 1;
+    if (Cheats_CheckFlags(0x80000) != 0 || (object != NULL && object->field_0xdec > 0.0f))
+        return 1;
     return 0;
 }
 
@@ -865,12 +865,14 @@ void Player_ToggleCharacter(GameObject_s *, i32, i32) {
 }
 
 i32 Player_HasInvincibility(GameObject_s *object) {
-    if (Cheats_CheckFlags(0x80) != 0 || (object != NULL && object->field_0xdec > 0.0f)) return 1;
+    if (Cheats_CheckFlags(0x80) != 0 || (object != NULL && object->field_0xdec > 0.0f))
+        return 1;
     return 0;
 }
 
 i32 Player_HasDoubleBoltDamage(GameObject_s *object) {
-    if (Cheats_CheckFlags(2) != 0 || (object != NULL && object->field_0xdec > 0.0f)) return 1;
+    if (Cheats_CheckFlags(2) != 0 || (object != NULL && object->field_0xdec > 0.0f))
+        return 1;
     return 0;
 }
 
@@ -889,9 +891,12 @@ void PlayerButton_OnLeave_Callback(MechTouchUIElement &, TouchHolder &) {
 
 i32 Player_HasDoubleBoltDamage_FromBolt(BOLT_s *bolt) {
     i32 player;
-    if (bolt->flags & 1) player = 0;
-    else if (bolt->flags & 2) player = 1;
-    else return 0;
+    if (bolt->flags & 1)
+        player = 0;
+    else if (bolt->flags & 2)
+        player = 1;
+    else
+        return 0;
     return Player_HasDoubleBoltDamage(Player[player]);
 }
 
@@ -1082,7 +1087,8 @@ extern f32 DEFAULT_MOVE_RANGE;
 
 i32 CanPullLevers(i32 id) {
     u32 flags = CDataList[id].model_flags;
-    if ((flags & 0x1000010) == 0x1000010) return 0;
+    if ((flags & 0x1000010) == 0x1000010)
+        return 0;
     return (flags & 0x40088) != 0;
 }
 
@@ -1108,8 +1114,7 @@ void InitPlayerAI(GameObject_s *object) {
         }
     }
     b[0x370] = 0;
-    b[0xef8] = ((b[0xef8] | 0xa) & 0x2a) |
-               ((object->apiobj.character_data->model_flags >> 5) & 4);
+    b[0xef8] = ((b[0xef8] | 0xa) & 0x2a) | ((object->apiobj.character_data->model_flags >> 5) & 4);
     b[0xef9] &= 0xf4;
     b[0xefa] = (b[0xefa] & 0xc3) | ((object->apiobj.character_data->model_flags >> 23) & 0x10);
     b[0xefb] &= 0x20;
@@ -1387,7 +1392,8 @@ void AveragePlayerCurrentSpeedMul() {
         ++count;
     }
     avg_currentspeed_mul = total;
-    if (count == 2) avg_currentspeed_mul *= 0.5f;
+    if (count == 2)
+        avg_currentspeed_mul *= 0.5f;
 }
 
 void SetPlayer() {

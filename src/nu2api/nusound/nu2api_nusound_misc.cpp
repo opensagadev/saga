@@ -18,8 +18,6 @@ void legoSetCutVolume(f32 volume);
 f32 GameSetMusicVolume(OPTIONSSAVE_s *options);
 f32 GameSetSoundVolume(OPTIONSSAVE_s *options);
 
-
-
 void edanimSoundPlace(i32 sound_index, nuvec_s *position) {
     nuhspecial_s special;
     NuGScnGetSpecial(&special, edbits_base_scene, edanim_nearest);

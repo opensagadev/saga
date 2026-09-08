@@ -25,7 +25,9 @@ DECOMP_ASSERT(offsetof(ShaderMtlDescFilter, texture_id_threshold) == 0x20,
               "ShaderMtlDescFilter texture threshold offset");
 
 extern "C" void NuShaderObjectKeyGenerate3(u32 *, const ShaderMtlDescFilter *, i32);
-struct ShaderObjectKey { u32 key; };
+struct ShaderObjectKey {
+    u32 key;
+};
 struct nushadermtldesc_s;
 enum SHADERSEMANTIC_enum : i32;
 struct NuShaderObject : NUSHADEROBJECT {};
@@ -36,17 +38,24 @@ template <typename T> struct ShaderManagerTemplate {
     NUSHADEROBJECT *bound_slot;
 
     ShaderManagerTemplate() {
-        for (i32 i = 0; i < 400; ++i) NuShaderObjectCreate(&slots[i]);
+        for (i32 i = 0; i < 400; ++i)
+            NuShaderObjectCreate(&slots[i]);
         ++slots[0].glsl.base.field1;
         bound_slot = nullptr;
         last_allocated = -1;
     }
     virtual ~ShaderManagerTemplate() {
-        for (i32 i = 400; i != 0;) NuShaderObjectDestroy(&slots[--i]);
+        for (i32 i = 400; i != 0;)
+            NuShaderObjectDestroy(&slots[--i]);
     }
-    virtual bool createShader(ShaderMtlDescFilter &, bool, T *, i32) { return false; }
-    virtual bool createShader(ShaderObjectKey const &, T *, i32) { return false; }
-    virtual void adaptShaderMaterialForShaderVersion(nushadermtldesc_s *) {}
+    virtual bool createShader(ShaderMtlDescFilter &, bool, T *, i32) {
+        return false;
+    }
+    virtual bool createShader(ShaderObjectKey const &, T *, i32) {
+        return false;
+    }
+    virtual void adaptShaderMaterialForShaderVersion(nushadermtldesc_s *) {
+    }
 };
 struct ShaderManagerOpenGL : ShaderManagerTemplate<NuShaderObject> {
     ShaderManagerOpenGL(VirtualStackAllocator &);

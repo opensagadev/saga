@@ -31,16 +31,16 @@ i32 SuperCarry_YRotation(GameObject_s *object, u16 input_angle) {
         object->apiobj.field_0x276 = object->apiobj.facing_angle;
     } else if (object->field_0x7a3 == 5) {
         if (object->force_target != NULL) {
-            object->apiobj.movement_facing_angle = NuAtan2D(
-                object->force_target->apiobj.collision_position.x - object->apiobj.collision_position.x,
-                object->force_target->apiobj.collision_position.z - object->apiobj.collision_position.z);
+            object->apiobj.movement_facing_angle =
+                NuAtan2D(object->force_target->apiobj.collision_position.x - object->apiobj.collision_position.x,
+                         object->force_target->apiobj.collision_position.z - object->apiobj.collision_position.z);
         }
         object->apiobj.facing_angle = SeekRot(object->apiobj.facing_angle, object->apiobj.movement_facing_angle, 8.0f);
         object->apiobj.field_0x276 = object->apiobj.facing_angle;
     } else if (object->field_0x7a3 == 2 || object->field_0x7a3 == 3 || object->field_0x7a3 == 6) {
         if (object->pad_gamepad->input_magnitude > 0.0f) {
             object->apiobj.facing_angle = TurnRot(object->apiobj.facing_angle, input_angle,
-                static_cast<i32>(16384.0f * object->field_0x768 * 8.0f), NULL);
+                                                  static_cast<i32>(16384.0f * object->field_0x768 * 8.0f), NULL);
         }
         object->apiobj.field_0x276 = SeekRot(object->apiobj.field_0x276, object->apiobj.facing_angle, 10.0f);
         object->apiobj.movement_facing_angle = object->apiobj.facing_angle;
@@ -60,8 +60,7 @@ i32 SuperCarry_SetTargetMom(GameObject_s *object, float input_speed) {
     object->target_velocity.z = 0.0f;
     if (input_speed > 0.0f) {
         f32 speed;
-        if ((object->field_0x7a3 == 1 || object->field_0x7a3 == 3) &&
-            object->context_animation != -1 &&
+        if ((object->field_0x7a3 == 1 || object->field_0x7a3 == 3) && object->context_animation != -1 &&
             object->apiobj.character_model->model_data_b[object->context_animation] != NULL) {
             speed = AnimSpeed(object->apiobj.character_model, object->context_animation);
         } else if (object->field_0x7a3 == 3 || object->field_0x7a3 == 6) {

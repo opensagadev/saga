@@ -69,7 +69,8 @@ void BuildDebrisVerts(PartHeader *header, uv1debdata *chunk_data, NUMTL *materia
             NuRndrParticleSetRepeat(reinterpret_cast<NUVEC *>(&NuRndr_DebrisMtx.m30));
         }
 
-        const f32 plane_distance = NuRndr_DebrisPlane.w +
+        const f32 plane_distance =
+            NuRndr_DebrisPlane.w +
             (NuRndr_DebrisMtx.m32 * NuRndr_DebrisPlane.z +
              (NuRndr_DebrisMtx.m30 * NuRndr_DebrisPlane.x + NuRndr_DebrisMtx.m31 * NuRndr_DebrisPlane.y));
         if (plane_distance < near_clip) {

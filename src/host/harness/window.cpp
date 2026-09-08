@@ -873,8 +873,7 @@ i32 host_run_window(const HostWindowOptions &options) {
         if (options.trace_movement && elapsed_ticks - movement_trace_ticks >= 500) {
             movement_trace_ticks = elapsed_ticks;
             const GameObject_s *player = Player[0];
-            if (player != nullptr && (player->apiobj.field_0x1f8 & 0x1001) == 0x1001 &&
-                host_menu_id() == -1) {
+            if (player != nullptr && (player->apiobj.field_0x1f8 & 0x1001) == 0x1001 && host_menu_id() == -1) {
                 const GAMEPAD_s *pad = player->pad_gamepad;
                 const APIOBJECT &api = player->apiobj;
                 LOG_INFO("movement trace: t=%llu dt=%.4f context=%d action=%d anim=%d "
@@ -882,12 +881,11 @@ i32 host_run_window(const HostWindowOptions &options) {
                          "pos=(%.3f,%.3f,%.3f) velocity=(%.3f,%.3f,%.3f) "
                          "target=(%.3f,%.3f,%.3f) external=(%.3f,%.3f) "
                          "ground=%u surface=%d facing=%u input-angle=%u flags=(%x,%x)",
-                         static_cast<unsigned long long>(elapsed_ticks), FRAMETIME,
-                         player->character_context, player->action_movement_state, player->context_animation,
+                         static_cast<unsigned long long>(elapsed_ticks), FRAMETIME, player->character_context,
+                         player->action_movement_state, player->context_animation,
                          pad != nullptr ? pad->input_magnitude : 0.0f, keyboard_buttons,
-                         pad != nullptr ? pad->buttons_held : 0, pad != nullptr ? pad->allocated_5a : 0,
-                         api.position.x, api.position.y, api.position.z,
-                         api.velocity.x, api.velocity.y, api.velocity.z,
+                         pad != nullptr ? pad->buttons_held : 0, pad != nullptr ? pad->allocated_5a : 0, api.position.x,
+                         api.position.y, api.position.z, api.velocity.x, api.velocity.y, api.velocity.z,
                          player->target_velocity.x, player->target_velocity.y, player->target_velocity.z,
                          api.movement_direction.x, api.movement_direction.z, api.field_0x27d,
                          static_cast<i8>(api.field_0x281), api.facing_angle, player->current_input_angle,

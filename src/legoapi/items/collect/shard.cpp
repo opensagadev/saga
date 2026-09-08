@@ -28,14 +28,16 @@ SHARD *Shard_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObject_s *ob
     f32 best_distance = 1000000000.0f;
     SHARD *shard = static_cast<SHARD *>(world->shards);
     for (i32 i = 0; i < world->shard_count; ++i, ++shard) {
-        if (object != NULL && (shard->state_flags & 0x0f) != 3) continue;
+        if (object != NULL && (shard->state_flags & 0x0f) != 3)
+            continue;
         f32 distance = NuVecDistSqr(position, &shard->current_position, NULL);
         if (distance < best_distance) {
             best_distance = distance;
             nearest = shard;
         }
     }
-    if (distance_squared != NULL) *distance_squared = best_distance;
+    if (distance_squared != NULL)
+        *distance_squared = best_distance;
     return nearest;
 }
 

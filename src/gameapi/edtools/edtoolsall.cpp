@@ -3,9 +3,9 @@
 #include "nu2api/numath/nuvec.h"
 
 extern "C" {
-extern edpp_particle_s edpp_ptls[512];
-extern i32 edpp_nearest;
-extern NUVEC edpp_cam_pos;
+    extern edpp_particle_s edpp_ptls[512];
+    extern i32 edpp_nearest;
+    extern NUVEC edpp_cam_pos;
 }
 
 void EdTerrInit(void *, void *) {
@@ -85,7 +85,8 @@ extern "C" {
 
 void edppPtlDestroy(i32 index) {
     if (edpp_ptls[index].instance_id != -1) {
-        if (edpp_ptls[index].instance_id != 99999) DebFreeInstantly(&edpp_ptls[index].instance_id);
+        if (edpp_ptls[index].instance_id != 99999)
+            DebFreeInstantly(&edpp_ptls[index].instance_id);
         --edpp_instances_used;
         edpp_ptls[index].instance_id = -1;
     }
@@ -266,7 +267,6 @@ void edanimParticleCreate(nuvec_s *) {
 void edgraInstanceDestroy(i32) {
 }
 
-
 void edppDetermineNearest(float max_distance_squared) {
     NUVEC delta;
     if (edpp_nearest != -1) {
@@ -316,7 +316,6 @@ void edppMultipleCopyPaste() {
 void edppStartSingleEffect(i32) {
 }
 
-
 void edpartHighlightNearest() {
 }
 
@@ -334,7 +333,6 @@ void edanimRenderSoundEmitters(i32) {
 
 void edbobs_DrawCoordinateInfo(nuvec_s *, i32, i32) {
 }
-
 
 void edrtlDetermineNearestBurn(float, burnset_s *) {
 }

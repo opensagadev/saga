@@ -291,7 +291,6 @@ static void ShiftPadDirectionHistory(GameObject_s *object, GAMEPAD_s *pad) {
     PadOldAngle[player_index] = pad->input_angle;
 }
 
-
 GAMEPAD_s *ViewCamGetGamePad();
 void MovePlayer_ROLLING(GameObject_s *object);
 extern f32 Hub_PadSpeed[2];
@@ -321,13 +320,15 @@ void MovePlayer(GameObject_s *object) {
     object->field_0xefd &= ~GAMEOBJECT_MOVEMENT_FLAG_BACKWARDS;
     object->previous_movement_angle = api.field_0x276;
     object->field_0xf1c = api.model_draw_result == 0 ? object->field_0xf1c + FRAMETIME : 0.0f;
-    if (object->character_context == 0x2b) object->turn_braking += FRAMETIME;
+    if (object->character_context == 0x2b)
+        object->turn_braking += FRAMETIME;
     if (object->field_0xf03 & 4) {
         APIObjectVelocities(object);
         GameObjectOrigin(object);
         return;
     }
-    if (api.field_0x287 != 0) return;
+    if (api.field_0x287 != 0)
+        return;
     pad->allocated_5a &= ~GAMEPAD_RUNTIME_WAGGLED;
     pad->waggle_magnitude = 0.0f;
     object->field_0x107a = -1;
@@ -335,8 +336,7 @@ void MovePlayer(GameObject_s *object) {
     const i32 menu_id = GetMenuID();
     if ((api.field_0x1f8 & APIOBJECT_FLAG_AI_PLAYER_MASK) == APIOBJECT_FLAG_PLAYER_ACTIVE) {
         if (FadeSys.fade > 0.0f || newgamecam != 0 ||
-            (static_cast<i8>(api.flags_low) < 0 &&
-             (MiniCutCam == 2 || (menu_id != 0x0e && menu_id != -1)))) {
+            (static_cast<i8>(api.flags_low) < 0 && (MiniCutCam == 2 || (menu_id != 0x0e && menu_id != -1)))) {
             pad->input_magnitude = 0.0f;
             pad->input_direction_z = 0.0f;
             pad->input_direction_x = 0.0f;
@@ -349,11 +349,13 @@ void MovePlayer(GameObject_s *object) {
             if (buttons & (GAMEPAD_DLEFT | GAMEPAD_DRIGHT | GAMEPAD_DUP | GAMEPAD_DDOWN)) {
                 x = buttons & GAMEPAD_DLEFT ? -127.5f : buttons & GAMEPAD_DRIGHT ? 127.5f : 0.0f;
                 z = buttons & GAMEPAD_DDOWN ? -127.5f : buttons & GAMEPAD_DUP ? 127.5f : 0.0f;
-                if (x != 0.0f || z != 0.0f) pad->input_mode = 1;
+                if (x != 0.0f || z != 0.0f)
+                    pad->input_mode = 1;
             } else {
                 x = static_cast<f32>(analog_x) - 127.5f;
                 z = static_cast<f32>(analog_y) - 127.5f;
-                if (WORLD->current_level != DOGFIGHTA_LDATA) z = -z;
+                if (WORLD->current_level != DOGFIGHTA_LDATA)
+                    z = -z;
                 if (x * x + z * z < 1806.25f) {
                     x = z = 0.0f;
                 } else if (x != 0.0f || z != 0.0f) {
@@ -386,10 +388,10 @@ void MovePlayer(GameObject_s *object) {
             // the AI path below uses the opposite component convention.
             pad->input_direction_z = input.x;
             pad->input_direction_x = input.z;
-            if (pad->input_magnitude > 0.0f) pad->input_angle = NuAtan2D(input.x, input.z);
+            if (pad->input_magnitude > 0.0f)
+                pad->input_angle = NuAtan2D(input.x, input.z);
             i32 waggle = GamePad_Waggle(object->pad_gamepad);
-            pad->allocated_5a = static_cast<u8>((pad->allocated_5a & ~GAMEPAD_RUNTIME_WAGGLED) |
-                                               ((waggle & 1) << 3));
+            pad->allocated_5a = static_cast<u8>((pad->allocated_5a & ~GAMEPAD_RUNTIME_WAGGLED) | ((waggle & 1) << 3));
             pad->waggle_magnitude = (Player[0] == object || Player[1] == object) ? GamePad_Rotate(object) : 0.0f;
         }
     } else {
@@ -416,7 +418,8 @@ void MovePlayer(GameObject_s *object) {
                 pad->input_direction_x = x * inverse;
                 pad->input_direction_z = z * inverse;
                 pad->input_magnitude = distance / ai_moveradius;
-                if (pad->input_magnitude > 1.0f) pad->input_magnitude = 1.0f;
+                if (pad->input_magnitude > 1.0f)
+                    pad->input_magnitude = 1.0f;
                 pad->input_angle = NuAtan2D(pad->input_direction_x, pad->input_direction_z);
                 pad->input_angle = NuAngSub(pad->input_angle, GameCam->input_yaw);
             }
@@ -427,7 +430,8 @@ void MovePlayer(GameObject_s *object) {
         } else {
             GAMECHARACTERDATA *data = api.character_data->game_character;
             f32 run_speed = object->field_0xee0 == 1000000000.0f ? data->run_speed : object->field_0xee0;
-            f32 walk_speed = object->walk_speed_override == 1000000000.0f ? data->walk_speed : object->walk_speed_override;
+            f32 walk_speed =
+                object->walk_speed_override == 1000000000.0f ? data->walk_speed : object->walk_speed_override;
             pad->input_magnitude = (object->ai.runtime_flags & 4) ? 0.0f : pad->input_magnitude * run_speed;
             if ((object->ai.runtime_flags & 8) == 0 && pad->input_magnitude < data->tiptoe_speed * 0.5f)
                 pad->input_magnitude = 0.0f;
@@ -446,8 +450,7 @@ void MovePlayer(GameObject_s *object) {
         }
         object->pad_gamepad->operator_data = object->ai.movement_look_target;
     }
-    if (static_cast<i8>(api.flags_low) < 0 && menu_id == 0x0e &&
-        (object == Player[0] || object == Player[1])) {
+    if (static_cast<i8>(api.flags_low) < 0 && menu_id == 0x0e && (object == Player[0] || object == Player[1])) {
         i32 index = object == Player[0] ? 0 : 1;
         Hub_PadSpeed[index] = pad->input_magnitude;
         Hub_PadAngle[index] = pad->input_angle;
@@ -457,15 +460,18 @@ void MovePlayer(GameObject_s *object) {
     } else if (pad->input_magnitude > 0.0f) {
         pad->animation_input_magnitude = pad->input_magnitude;
     }
-    if (object->character_context == 0x3b || object->character_context == 0x39) return;
+    if (object->character_context == 0x3b || object->character_context == 0x39)
+        return;
     object->field_0x1086 = 2;
     ShoveSystemCheckGameObject(object);
     if (object->id == id_DRAGBOMB) {
         MovePlayer_ROLLING(object);
-    } else if (MovePlayer_TWIST(object) == 0 && MovePlayer_CIRCLE(object) == 0 &&
-               MovePlayer_GUNSHIPIN(object) == 0 && MovePlayer_POD(object) == 0) {
-        if ((api.character_data->model_flags & 0x2000) == 0) MovePlayer_DIRECTIONAL(object);
-        else MovePlayer_VEHICLEDIRECTIONAL(object);
+    } else if (MovePlayer_TWIST(object) == 0 && MovePlayer_CIRCLE(object) == 0 && MovePlayer_GUNSHIPIN(object) == 0 &&
+               MovePlayer_POD(object) == 0) {
+        if ((api.character_data->model_flags & 0x2000) == 0)
+            MovePlayer_DIRECTIONAL(object);
+        else
+            MovePlayer_VEHICLEDIRECTIONAL(object);
     }
     if (LIFTPLAYER != 0 && menu_id == -1 && api.field_0x287 == 0 && object->character_context != 0x2b &&
         (api.character_data->game_character->flags_090 & 0x80) == 0 && static_cast<i8>(api.flags_low) < 0 &&
@@ -480,7 +486,8 @@ void MovePlayer(GameObject_s *object) {
         lift->apiobj.velocity.y = 0.0f;
         lift->apiobj.field_0x27d = 0;
         lift->field_0x105c = 0;
-        if (lift->character_context == 0x33) lift->character_context = -1;
+        if (lift->character_context == 0x33)
+            lift->character_context = -1;
     }
     api.field_0x1fa |= 1;
     api.previous_velocity = api.velocity;
@@ -674,8 +681,7 @@ void MoveGameCamera(GAMECAMERA_s *camera) {
     for (i32 i = 0; i < 2; ++i) {
         // Original rail-camera eligibility (0x11138b..0x1113dc): an AI
         // companion contributes to the focus only when LookAtBoth is set.
-        if (Player[i] == NULL ||
-            (static_cast<i8>(Player[i]->apiobj.flags_low) >= 0 && LookAtBoth == 0) ||
+        if (Player[i] == NULL || (static_cast<i8>(Player[i]->apiobj.flags_low) >= 0 && LookAtBoth == 0) ||
             (netcamera != 0 && (Player[i]->apiobj.field_0x1f4 & 0x40000) != 0) ||
             (BonusWinner != -1 && i != BonusWinner)) {
             continue;
@@ -728,19 +734,25 @@ void MoveGameCamera(GAMECAMERA_s *camera) {
 i32 PodLevel(AREADATA_s *area);
 f32 ForceAlongSock(GameObject_s *object);
 extern LEVELDATA_s *PODRACEB_LDATA;
-extern "C" { extern f32 pod_roll[2], pod_roll_target[2]; extern i32 podrace_section; }
+extern "C" {
+    extern f32 pod_roll[2], pod_roll_target[2];
+    extern i32 podrace_section;
+}
 
 // Original: 1,376 bytes.
 i32 MovePlayer_POD(GameObject_s *object) {
     WORLDINFO *world = WorldInfo_CurrentlyActive();
     GAMEPAD_s *pad = object->pad_gamepad;
     f32 input = pad->input_direction_z;
-    if (object->apiobj.field_0x27c == -1 || !PodLevel(world->area)) return 0;
-    if (object->current_speed_mul == 0.0f) return 1;
+    if (object->apiobj.field_0x27c == -1 || !PodLevel(world->area))
+        return 0;
+    if (object->current_speed_mul == 0.0f)
+        return 1;
     i32 index = object->apiobj.field_0x27c;
     if (index != -1 && WORLD->current_level == PODRACEB_LDATA && podrace_section != 1 &&
         (FadeSys.fade != 0.0f || MiniCutCam != 0) && object->sock_position.location.sock != -1 &&
-        object->sock_position.distance < 20.0f) input = -0.625f;
+        object->sock_position.distance < 20.0f)
+        input = -0.625f;
     if (index <= 1) {
         pod_roll_target[index] = SeekLinearF(pod_roll_target[index], input, (6.0f * FRAMETIME) * fabsf(input));
         pod_roll_target[index] = SeekLinearF(pod_roll_target[index], 0.0f, 3.0f * FRAMETIME);
@@ -752,9 +764,12 @@ i32 MovePlayer_POD(GameObject_s *object) {
     if (object->apiobj.field_0x218 != 2000000.0f) {
         f32 height = object->apiobj.collision_min.y - object->apiobj.field_0x218;
         f32 blend;
-        if (height < 0.5f) blend = 1.0f;
-        else if (height < 1.5f) blend = 1.0f - (height - 0.5f);
-        else blend = 0.0f;
+        if (height < 0.5f)
+            blend = 1.0f;
+        else if (height < 1.5f)
+            blend = 1.0f - (height - 0.5f);
+        else
+            blend = 0.0f;
         FindAnglesZX(&object->surface_normal, NULL, NULL);
         i32 x = RotDiff(0, temp_xrot);
         i32 z = RotDiff(0, temp_zrot);
@@ -768,13 +783,15 @@ i32 MovePlayer_POD(GameObject_s *object) {
     } else {
         object->target_velocity = {0.0f, 0.0f, 0.0f};
         if (object->sock_position.location.sock != -1) {
-            object->target_velocity.x = index <= 1 ?
-                pod_roll[index] * object->apiobj.character_data->game_character->run_speed : input * pad->input_magnitude;
+            object->target_velocity.x = index <= 1
+                                            ? pod_roll[index] * object->apiobj.character_data->game_character->run_speed
+                                            : input * pad->input_magnitude;
         }
         KeepVehicleOnScreen(object, 1, 1, 1);
         if (object->target_velocity.x != 0.0f || object->target_velocity.y != 0.0f || object->target_velocity.z != 0.0f)
             NuVecRotateY(&object->target_velocity, &object->target_velocity, heading);
-        if (object->sock_position.location.sock != -1) ForceAlongSock(object);
+        if (object->sock_position.location.sock != -1)
+            ForceAlongSock(object);
         f32 seek_rate = object->apiobj.character_data->game_character->velocity_seek_rate;
         object->apiobj.velocity.x = SeekValF(object->apiobj.velocity.x, object->target_velocity.x, seek_rate);
         object->apiobj.velocity.z = SeekValF(object->apiobj.velocity.z, object->target_velocity.z, seek_rate);
@@ -803,11 +820,12 @@ f32 ForceAlongSock(GameObject_s *object);
 i32 MovePlayer_TWIST(GameObject_s *object) {
     WORLDINFO *world = WorldInfo_CurrentlyActive();
     GAMEPAD_s *pad = object->pad_gamepad;
-    if (object->apiobj.field_0x27c == -1 || !TwistLevel(world->current_level) ||
-        world->sock_sys == NULL) return 0;
+    if (object->apiobj.field_0x27c == -1 || !TwistLevel(world->current_level) || world->sock_sys == NULL)
+        return 0;
     object->field_0x1086 = 4;
     if (object->sock_position.location.sock == -1 ||
-        (world->sock_sys->sock[object->sock_position.location.sock].flags & 1)) return 0;
+        (world->sock_sys->sock[object->sock_position.location.sock].flags & 1))
+        return 0;
     i32 yaw_lean = static_cast<i32>(2730.0f * pad->input_direction_z);
     i32 pitch_lean = static_cast<i32>(-pad->input_direction_x * 2730.0f);
     NUMTX orientation;
@@ -865,8 +883,9 @@ void Move_SPEEDERBIKE(GameObject_s *) {
 i32 MovePlayer_CIRCLE(GameObject_s *object) {
     WORLDINFO *world = WorldInfo_CurrentlyActive();
     GAMEPAD_s *pad = object->pad_gamepad;
-    if (object->apiobj.field_0x27c == -1 || !CircleLevel(world->current_level) ||
-        world->sock_sys == NULL || object->sock_position.location.sock == -1) return 0;
+    if (object->apiobj.field_0x27c == -1 || !CircleLevel(world->current_level) || world->sock_sys == NULL ||
+        object->sock_position.location.sock == -1)
+        return 0;
     object->field_0x1086 = 3;
     u16 heading = world->sock_sys->sock[object->sock_position.location.sock].input_yaw +
                   object->sock_position.midpoint_rotation.y;
@@ -876,7 +895,7 @@ i32 MovePlayer_CIRCLE(GameObject_s *object) {
     object->apiobj.facing_angle = SeekRot(object->apiobj.facing_angle, heading, 8.0f);
     object->apiobj.field_0x276 = object->apiobj.facing_angle;
     object->movement_lean_angle = SeekRot(object->movement_lean_angle,
-        static_cast<u16>(static_cast<i32>(5461.0f * pad->input_direction_z)), 8.0f);
+                                          static_cast<u16>(static_cast<i32>(5461.0f * pad->input_direction_z)), 8.0f);
     GAMECHARACTERDATA *data = object->apiobj.character_data->game_character;
     f32 seek_rate = data->velocity_seek_rate;
     if (object->character_context == 0x23 || object->character_context == 0x24) {
@@ -905,14 +924,16 @@ i32 MovePlayer_CIRCLE(GameObject_s *object) {
             object->apiobj.movement_direction.x = 0.0f;
             object->apiobj.movement_direction.z = 0.0f;
         } else {
-            object->target_velocity.x = pad->input_magnitude > 0.0f ? pad->input_magnitude * pad->input_direction_z : 0.0f;
+            object->target_velocity.x =
+                pad->input_magnitude > 0.0f ? pad->input_magnitude * pad->input_direction_z : 0.0f;
             object->target_velocity.z = 0.0f;
             if (object->field_0x1024 > 0.0f && (object->flicker_flags & 7) != 0) {
                 f32 maximum = 1.5f * data->run_speed;
                 f32 impulse = (object->field_0x1024 / 0.4f) * maximum;
                 if ((object->flicker_flags & 7) == 3) {
                     object->target_velocity.x = object->target_velocity.x * 0.5f - impulse;
-                    if (-maximum > object->target_velocity.x) object->target_velocity.x = -maximum;
+                    if (-maximum > object->target_velocity.x)
+                        object->target_velocity.x = -maximum;
                 } else {
                     f32 speed = object->target_velocity.x * 0.5f + impulse;
                     object->target_velocity.x = maximum < speed ? maximum : speed;
@@ -940,8 +961,9 @@ void GunShip_DragBombSeekBlowUp(GameObject_s *object);
 void MovePlayer_ROLLING(GameObject_s *object) {
     object->field_0xe23 &= ~0x10;
     object->target_velocity.y = ObjInTube(object) ? 1.25f : 0.0f;
-    f32 seek_rate = object->id == id_DRAGBOMB && (object->field_0xf01 & 2) ?
-        1.0f : object->apiobj.character_data->game_character->velocity_seek_rate;
+    f32 seek_rate = object->id == id_DRAGBOMB && (object->field_0xf01 & 2)
+                        ? 1.0f
+                        : object->apiobj.character_data->game_character->velocity_seek_rate;
     object->target_velocity.x = 0.0f;
     object->target_velocity.z = 0.0f;
     if (object->character_context == 0x2b) {
@@ -966,7 +988,8 @@ void MovePlayer_ROLLING(GameObject_s *object) {
     }
     object->apiobj.velocity.x = SeekValF(object->apiobj.velocity.x, object->target_velocity.x, seek_rate);
     object->apiobj.velocity.z = SeekValF(object->apiobj.velocity.z, object->target_velocity.z, seek_rate);
-    if (WORLD->area != NULL && WORLD->area == GUNSHIP_ADATA) GunShip_DragBombSeekBlowUp(object);
+    if (WORLD->area != NULL && WORLD->area == GUNSHIP_ADATA)
+        GunShip_DragBombSeekBlowUp(object);
     object->field_0x1086 = 0;
     NUMTX matrix = object->apiobj.field_0xb8;
     matrix.m30 = matrix.m31 = matrix.m32 = 0.0f;
@@ -974,8 +997,8 @@ void MovePlayer_ROLLING(GameObject_s *object) {
     NUVEC local_velocity;
     NuVecRotateY(&local_velocity, &object->apiobj.velocity, -heading);
     NuMtxRotateY(&matrix, -heading);
-    NuMtxRotateX(&matrix, static_cast<i32>(((local_velocity.z * FRAMETIME) /
-                       object->apiobj.collision_radius) * 10430.3779296875f));
+    NuMtxRotateX(&matrix, static_cast<i32>(((local_velocity.z * FRAMETIME) / object->apiobj.collision_radius) *
+                                           10430.3779296875f));
     NuMtxRotateY(&matrix, heading);
     i32 pitch, yaw, roll;
     NuMtxGetEulerXYZ(&matrix, &pitch, &yaw, &roll);
@@ -986,15 +1009,18 @@ void MovePlayer_ROLLING(GameObject_s *object) {
 }
 
 void MoveSplinePosition(SPLINEPOS_s *position, f32 distance) {
-    if (position == NULL || position->spline == NULL || position->spline->length <= 1) return;
+    if (position == NULL || position->spline == NULL || position->spline->length <= 1)
+        return;
     NUGSPLINE *spline = position->spline;
     i32 segments = spline->length - 1 + (position->looping != 0);
-    if (position->segment >= segments) return;
+    if (position->segment >= segments)
+        return;
     NUVEC offset;
     if (distance > 0.0f) {
         while (distance > 0.0f) {
             position->segment_distance += distance;
-            if (!(position->segment_distance >= position->segment_length)) break;
+            if (!(position->segment_distance >= position->segment_length))
+                break;
             distance = position->segment_distance - position->segment_length;
             i16 previous = position->segment;
             position->segment++;
@@ -1010,17 +1036,21 @@ void MoveSplinePosition(SPLINEPOS_s *position, f32 distance) {
                 position->segment = 0;
             }
             NUVEC *current = (NUVEC *)((u8 *)spline->pts + position->segment * (i16)spline->pt_size);
-            NUVEC *next = (NUVEC *)((u8 *)spline->pts + ((position->segment + 1) % spline->length) * (i16)spline->pt_size);
+            NUVEC *next =
+                (NUVEC *)((u8 *)spline->pts + ((position->segment + 1) % spline->length) * (i16)spline->pt_size);
             position->segment_distance = 0.0f;
             position->segment_length = NuVecDist(next, current, &offset);
-            if (distance == 0.0f) position->position = *current;
+            if (distance == 0.0f)
+                position->position = *current;
             spline = position->spline;
         }
-        if (!(distance > 0.0f)) goto update_along;
+        if (!(distance > 0.0f))
+            goto update_along;
     } else if (distance < 0.0f && position->segment >= 0) {
         for (;;) {
             position->segment_distance += distance;
-            if (!(position->segment_distance < 0.0f)) break;
+            if (!(position->segment_distance < 0.0f))
+                break;
             distance = position->segment_distance;
             i16 previous = position->segment;
             position->segment--;
@@ -1036,19 +1066,23 @@ void MoveSplinePosition(SPLINEPOS_s *position, f32 distance) {
                 position->segment = segments - 1;
             }
             NUVEC *current = (NUVEC *)((u8 *)spline->pts + position->segment * (i16)spline->pt_size);
-            NUVEC *next = (NUVEC *)((u8 *)spline->pts + ((position->segment + 1) % spline->length) * (i16)spline->pt_size);
+            NUVEC *next =
+                (NUVEC *)((u8 *)spline->pts + ((position->segment + 1) % spline->length) * (i16)spline->pt_size);
             position->segment_length = NuVecDist(next, current, &offset);
             position->segment_distance = position->segment_length;
-            if (distance == 0.0f) position->position = *next;
+            if (distance == 0.0f)
+                position->position = *next;
             spline = position->spline;
         }
-    } else goto update_along;
+    } else
+        goto update_along;
     {
         NUVEC *current = (NUVEC *)((u8 *)spline->pts + position->segment * (i16)spline->pt_size);
         NUVEC *next = (NUVEC *)((u8 *)spline->pts + ((position->segment + 1) % spline->length) * (i16)spline->pt_size);
         NuVecSub(&offset, next, current);
         f32 fraction = 0.0f;
-        if (position->segment_length != 0.0f) fraction = position->segment_distance / position->segment_length;
+        if (position->segment_length != 0.0f)
+            fraction = position->segment_distance / position->segment_length;
         NuVecScale(&offset, &offset, fraction);
         NuVecAdd(&position->position, current, &offset);
     }
@@ -1106,8 +1140,9 @@ i32 MovePlayer_GUNSHIPIN(GameObject_s *object) {
     f32 input_x = pad->input_direction_z;
     f32 input_z = pad->input_direction_x;
     f32 magnitude = pad->input_magnitude;
-    if (object->apiobj.field_0x27c == -1 || !GunshipInLevel(world->current_level) ||
-        world->sock_sys == NULL || object->sock_position.location.sock == -1) return 0;
+    if (object->apiobj.field_0x27c == -1 || !GunshipInLevel(world->current_level) || world->sock_sys == NULL ||
+        object->sock_position.location.sock == -1)
+        return 0;
     object->field_0x1086 = 3;
     u16 heading = object->sock_angles.y;
     if (object->character_context == 0x23 || object->character_context == 0x24) {
@@ -1140,15 +1175,15 @@ i32 MovePlayer_GUNSHIPIN(GameObject_s *object) {
             object->apiobj.movement_direction.z = 0.0f;
         } else {
             if (((u8 *)LevFlag)[1] != 0) {
-                input_x = object->apiobj.position.x < -1.0f ? 1.0f :
-                          object->apiobj.position.x > 1.0f ? -1.0f : 0.0f;
+                input_x = object->apiobj.position.x < -1.0f ? 1.0f : object->apiobj.position.x > 1.0f ? -1.0f : 0.0f;
                 magnitude = data->run_speed;
                 input_z = 0.0f;
             }
             object->target_velocity.z = 0.0f;
             if (magnitude > 0.0f) {
                 object->target_velocity.x = input_x * magnitude;
-                if (GUNSHIPAHACK != 0) object->target_velocity.z = input_z * magnitude;
+                if (GUNSHIPAHACK != 0)
+                    object->target_velocity.z = input_z * magnitude;
             } else {
                 object->target_velocity.x = 0.0f;
             }
@@ -1160,7 +1195,8 @@ i32 MovePlayer_GUNSHIPIN(GameObject_s *object) {
                     object->target_velocity.z = maximum < speed ? maximum : speed;
                 } else {
                     object->target_velocity.z = object->target_velocity.z * 0.5f - impulse;
-                    if (-maximum > object->target_velocity.z) object->target_velocity.z = -maximum;
+                    if (-maximum > object->target_velocity.z)
+                        object->target_velocity.z = -maximum;
                 }
             }
             NuVecRotateY(&object->target_velocity, &object->target_velocity, heading);
@@ -1173,8 +1209,9 @@ i32 MovePlayer_GUNSHIPIN(GameObject_s *object) {
     object->apiobj.facing_angle = SeekRot(object->apiobj.facing_angle, heading, 8.0f);
     object->apiobj.field_0x276 = object->apiobj.facing_angle;
     object->apiobj.pitch_angle = SeekRot(object->apiobj.pitch_angle, 0, 8.0f);
-    u16 lean = (object->character_context == 0x23 || object->character_context == 0x24) ? 0 :
-               static_cast<u16>(static_cast<i32>(input_x * 5461.0f));
+    u16 lean = (object->character_context == 0x23 || object->character_context == 0x24)
+                   ? 0
+                   : static_cast<u16>(static_cast<i32>(input_x * 5461.0f));
     object->movement_lean_angle = SeekRot(object->movement_lean_angle, lean, 8.0f);
     return 1;
 }
@@ -1197,8 +1234,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
     APIOBJECT &api = object->apiobj;
 
     // Original entry path, 0x16716f..0x16722a: attached inactive vehicles own movement.
-    if ((object->field_0xe20 & 0x20) != 0 && object->character_context != 0x23 &&
-        object->character_context != 0x24) {
+    if ((object->field_0xe20 & 0x20) != 0 && object->character_context != 0x23 && object->character_context != 0x24) {
         GameObject_s *vehicle;
         MoveInactiveVehicle(object, 0, &vehicle);
         if (vehicle != NULL) {
@@ -1239,9 +1275,8 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
             api.movement_facing_angle = object->delayed_turn_target_angle;
         }
     } else {
-        const bool has_turn_animation =
-            api.character_model != NULL &&
-            (api.character_model->model_data_b[12] != NULL || api.character_model->model_data_b[119] != NULL);
+        const bool has_turn_animation = api.character_model != NULL && (api.character_model->model_data_b[12] != NULL ||
+                                                                        api.character_model->model_data_b[119] != NULL);
         if (has_turn_animation && (object->character_context == 1 || object->character_context == -1) &&
             pad->input_magnitude > 0.0f) {
             i32 difference = RotDiff(api.movement_facing_angle, input_angle);
@@ -1271,7 +1306,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
                 ZIPUP *zipup = static_cast<ZIPUP *>(object->field_0x788);
                 if (zipup != NULL && (zipup->flags & 1) != 0) {
                     pitch -= static_cast<i32>(static_cast<f32>(zipup->pitch_adjustment) *
-                        (object->context_animation_timer / 1.5f));
+                                              (object->context_animation_timer / 1.5f));
                 }
             }
             api.pitch_angle = SeekRot(api.pitch_angle, pitch, 8.0f);
@@ -1284,7 +1319,7 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
         if (pad->input_magnitude > 0.0f) {
             NUVEC direction;
             NuVecRotateX(&direction, &v010,
-                static_cast<i32>((desired_speed / api.character_data->game_character->run_speed) * 2730.0f));
+                         static_cast<i32>((desired_speed / api.character_data->game_character->run_speed) * 2730.0f));
             NuVecRotateY(&direction, &direction, input_angle);
             FindAnglesZX(&direction, &pitch, &roll);
         }
@@ -1302,189 +1337,190 @@ void MovePlayer_DIRECTIONAL(GameObject_s *object) {
     } else if (object->id == id_GRABCONTROL || object->id == id_GRABR2CONTROL) {
         if (WORLD->grabber != NULL) {
             NUVEC *position = Grabber_GetGrabPos(WORLD->grabber, NULL);
-            api.movement_facing_angle = NuAtan2D(position->x - api.collision_position.x,
-                                                position->z - api.collision_position.z);
+            api.movement_facing_angle =
+                NuAtan2D(position->x - api.collision_position.x, position->z - api.collision_position.z);
         }
-    } else if ((api.character_data->game_character->flags_094[0] & 2) == 0 &&
-               object->character_context != 0x3d && object->character_context != 0x15 &&
-               object->character_context != 0x5a && object->character_context != 0x0f &&
-               object->character_context != 0x1f && object->character_context != 0x3c &&
+    } else if ((api.character_data->game_character->flags_094[0] & 2) == 0 && object->character_context != 0x3d &&
+               object->character_context != 0x15 && object->character_context != 0x5a &&
+               object->character_context != 0x0f && object->character_context != 0x1f &&
+               object->character_context != 0x3c &&
                (object->character_context != 0x17 || (object->field_0xf04 & 1) != 0) &&
                object->character_context != 0x41 && object->character_context != 0x0b &&
                (object->character_context != 0 ||
-                 ((object->action_movement_state != 6 && object->action_movement_state != 7 &&
-                   object->action_movement_state != 9) || object->context_variant_flags < 0)) &&
+                ((object->action_movement_state != 6 && object->action_movement_state != 7 &&
+                  object->action_movement_state != 9) ||
+                 object->context_variant_flags < 0)) &&
                object->character_context != 0x47 &&
-               (object->character_context != 0x29 ||
-                api.character_model->model_data_b[0x57] != NULL || (api.character_data->game_character->flags_094[2] & 0x10) != 0) &&
+               (object->character_context != 0x29 || api.character_model->model_data_b[0x57] != NULL ||
+                (api.character_data->game_character->flags_094[2] & 0x10) != 0) &&
                ((object->field_0xeff & 2) != 0 || CurrentAnim(&api.anim_packet) != 5) &&
                object->character_context != 0x35) {
         switch (object->character_context) {
-        case 0:
-            if ((context_flags & 0x2000) == 0 && object->action_movement_state == 3) {
-                FaceOpponent(object, NULL);
-                break;
-            }
-            goto directional_common_heading;
-        case 0x46:
-            if (object->field_0x7a3 == 1 || GrappleSwingMode == 1)
-                break;
-            goto directional_common_heading;
-        case 0x0a:
-            if ((context_flags & 0x2000) != 0 ||
-                static_cast<u16>(object->context_animation - 0x5a) > 2)
-                goto directional_common_heading;
-            api.movement_facing_angle = NuAtan2D(object->attack_target_position.x - api.position.x,
-                                                object->attack_target_position.z - api.position.z);
-            if (object->context_animation == 0x5a)
-                api.movement_facing_angle += 0x4000;
-            else if (object->context_animation == 0x5b)
-                api.movement_facing_angle -= 0x4000;
-            else
-                api.movement_facing_angle += 0x8000;
-            break;
-        case 0x18: {
-            if ((context_flags & 0x2000) != 0)
-                goto directional_common_heading;
-            NUVEC *position = NULL;
-            if (object->incoming_bolt != NULL) {
-                if (object->incoming_bolt->active != 0)
-                    position = &object->incoming_bolt->position;
-            } else if (object->incoming_melee != NULL) {
-                if ((object->incoming_melee->apiobj.field_0x1f8 & 0x1000) != 0 &&
-                    object->incoming_melee->apiobj.field_0x287 == 0)
-                    position = &object->incoming_melee->apiobj.position;
-            } else if (object->incoming_part != NULL && (object->incoming_part->active & 1) != 0) {
-                position = &object->incoming_part->position;
-            }
-            if (position != NULL)
-                api.movement_facing_angle = NuAtan2D(position->x - api.position.x,
-                                                    position->z - api.position.z);
-            break;
-        }
-        case 0x0c: {
-            if ((context_flags & 0x2000) != 0)
-                goto directional_common_heading;
-            if (object->block_latch != 0)
-                break;
-            NUVEC *position = NULL;
-            if (object->blocked_bolt != NULL) {
-                if (object->blocked_bolt->active != 0)
-                    position = &object->blocked_bolt->position;
-            } else if (object->block_attacker != NULL) {
-                if ((object->block_attacker->apiobj.field_0x1f8 & 0x1000) != 0 &&
-                    object->block_attacker->apiobj.field_0x287 == 0)
-                    position = &object->block_attacker->apiobj.position;
-            } else if (object->blocked_part != NULL && (object->blocked_part->active & 1) != 0) {
-                position = &object->blocked_part->position;
-            }
-            if (position != NULL)
-                api.movement_facing_angle = NuAtan2D(position->x - api.position.x,
-                                                    position->z - api.position.z);
-            break;
-        }
-        case 0x10:
-            if ((object->context_flags & 0x40) != 0)
-                goto directional_common_heading;
-            if (FaceOpponent(object, NULL) != 0)
-                api.movement_facing_angle += 0x8000;
-            break;
-        case 0x25:
-            if ((context_flags & 0x2000) == 0 && object->context_animation != 0x58) {
-                FaceOpponent(object, NULL);
-                break;
-            }
-            // The original falls through to the shared push/input heading path.
-            goto directional_common_heading;
-        case 0x22:
-            if (ForceBackPos != NULL)
-                FaceOpponent(object, ForceBackPos);
-            break;
-        case 0x1d:
-            if (object->force_part != NULL && (object->force_part->active & 1) != 0)
-                api.movement_facing_angle = NuAtan2D(
-                    object->force_part->position.x - api.collision_position.x,
-                    object->force_part->position.z - api.collision_position.z);
-            break;
-        case -1: case 1: case 0x13: case 0x17: case 0x29:
-directional_common_heading:
-            if ((context_flags & 0x2000) != 0) {
-                SetPushAngle(object);
-            } else if (object->context_target_position != NULL) {
-                FaceOpponent(object, object->context_target_position);
-                api.movement_facing_angle += 0x8000;
-            } else if (pad->operator_data != NULL && (context_flags & 1) == 0) {
-                NUVEC *position = static_cast<NUVEC *>(pad->operator_data);
-                api.movement_facing_angle = NuAtan2D(position->x - api.position.x, position->z - api.position.z);
-            } else if (api.field_0x27c != -1 && api.field_0x27c == BonusWinner) {
-                api.movement_facing_angle = NuAtan2D(GameCam->pos.x - api.position.x, GameCam->pos.z - api.position.z);
-            } else if (pad->input_magnitude > 0.0f &&
-                       ((context_flags & 1) == 0 || SuperCarry_Carrying(object) ||
-                        (object->character_context == 0x20 && (object->field_0xef9 & 1) != 0)) &&
-                       object->delayed_turn_timer <= 0.0f && object->character_context != 0x13 &&
-                       (object->field_0xf01 & 2) == 0 &&
-                       (object->character_context != 0 || object->context_variant_flags < 0 ||
-                        object->action_movement_state == 0 ||
-                        object->action_movement_state == 5 || object->action_movement_state == 8)) {
-                if ((api.flags_low & 0x80) != 0 || object->character_context != -1 ||
-                    api.field_0x27d != 0 || IsAFallAnim(CurrentAnim(&api.anim_packet)) == 0)
-                    api.movement_facing_angle = input_angle;
-                if (object->character_context == 0x20 && (object->field_0xef9 & 1) != 0)
-                    api.movement_facing_angle += 0x8000;
-            }
-            break;
-        case 5:
-            if ((object->context_flags & 0x0c) == 0)
-                FaceOpponent(object, NULL);
-            break;
-        case 0x26:
-            if (object->field_0x7a7 == -1 && FaceOpponent(object, NULL) != 0 &&
-                (object->context_flags & 0x80) != 0)
-                api.movement_facing_angle += 0x8000;
-            break;
-        case 0x33:
-            if (api.velocity.x != 0.0f || api.velocity.z != 0.0f)
-                api.movement_facing_angle = NuAtan2D(api.velocity.x, api.velocity.z);
-            break;
-        case 0x1c:
-            heading_handled = ForcePushed_YRotation(object);
-            break;
-        case 0x58:
-            heading_handled = SuperCarry_YRotation(object, input_angle);
-            break;
-        case 0x1b:
-            if ((api.flags_low & 0x80) != 0 && (object->field_0xe21 & 2) == 0) {
-                if (object->field_0x7a3 == 1)
-                    api.movement_facing_angle = input_angle;
-                else
+            case 0:
+                if ((context_flags & 0x2000) == 0 && object->action_movement_state == 3) {
                     FaceOpponent(object, NULL);
-                turn_override = 0.333f;
+                    break;
+                }
+                goto directional_common_heading;
+            case 0x46:
+                if (object->field_0x7a3 == 1 || GrappleSwingMode == 1)
+                    break;
+                goto directional_common_heading;
+            case 0x0a:
+                if ((context_flags & 0x2000) != 0 || static_cast<u16>(object->context_animation - 0x5a) > 2)
+                    goto directional_common_heading;
+                api.movement_facing_angle = NuAtan2D(object->attack_target_position.x - api.position.x,
+                                                     object->attack_target_position.z - api.position.z);
+                if (object->context_animation == 0x5a)
+                    api.movement_facing_angle += 0x4000;
+                else if (object->context_animation == 0x5b)
+                    api.movement_facing_angle -= 0x4000;
+                else
+                    api.movement_facing_angle += 0x8000;
+                break;
+            case 0x18: {
+                if ((context_flags & 0x2000) != 0)
+                    goto directional_common_heading;
+                NUVEC *position = NULL;
+                if (object->incoming_bolt != NULL) {
+                    if (object->incoming_bolt->active != 0)
+                        position = &object->incoming_bolt->position;
+                } else if (object->incoming_melee != NULL) {
+                    if ((object->incoming_melee->apiobj.field_0x1f8 & 0x1000) != 0 &&
+                        object->incoming_melee->apiobj.field_0x287 == 0)
+                        position = &object->incoming_melee->apiobj.position;
+                } else if (object->incoming_part != NULL && (object->incoming_part->active & 1) != 0) {
+                    position = &object->incoming_part->position;
+                }
+                if (position != NULL)
+                    api.movement_facing_angle = NuAtan2D(position->x - api.position.x, position->z - api.position.z);
                 break;
             }
-            // Other actors and the alternate state use ordinary opponent-facing speed.
-        case 0x16:
-            FaceOpponent(object, NULL);
-            break;
-        case 8: case 0x12:
-            if ((api.field_0x1f4 & 0x40000) == 0)
-                api.movement_facing_angle = object->force_heading;
-            break;
-        case 0x2d:
-            if ((api.field_0x1f4 & 0x40000) == 0) {
-                NUVEC centre;
-                GizGetBuildItPlayerPos(object, NULL, &centre);
-                GIZBUILDIT_s *buildit = static_cast<GIZBUILDIT_s *>(object->field_0x788);
-                if ((buildit->state_flags & 0x20) != 0)
-                    GizBuildItPushAwayFromStart(object, buildit);
-                api.movement_facing_angle = NuAtan2D(centre.x - api.position.x, centre.z - api.position.z);
+            case 0x0c: {
+                if ((context_flags & 0x2000) != 0)
+                    goto directional_common_heading;
+                if (object->block_latch != 0)
+                    break;
+                NUVEC *position = NULL;
+                if (object->blocked_bolt != NULL) {
+                    if (object->blocked_bolt->active != 0)
+                        position = &object->blocked_bolt->position;
+                } else if (object->block_attacker != NULL) {
+                    if ((object->block_attacker->apiobj.field_0x1f8 & 0x1000) != 0 &&
+                        object->block_attacker->apiobj.field_0x287 == 0)
+                        position = &object->block_attacker->apiobj.position;
+                } else if (object->blocked_part != NULL && (object->blocked_part->active & 1) != 0) {
+                    position = &object->blocked_part->position;
+                }
+                if (position != NULL)
+                    api.movement_facing_angle = NuAtan2D(position->x - api.position.x, position->z - api.position.z);
+                break;
             }
-            break;
-        default:
-            goto directional_common_heading;
+            case 0x10:
+                if ((object->context_flags & 0x40) != 0)
+                    goto directional_common_heading;
+                if (FaceOpponent(object, NULL) != 0)
+                    api.movement_facing_angle += 0x8000;
+                break;
+            case 0x25:
+                if ((context_flags & 0x2000) == 0 && object->context_animation != 0x58) {
+                    FaceOpponent(object, NULL);
+                    break;
+                }
+                // The original falls through to the shared push/input heading path.
+                goto directional_common_heading;
+            case 0x22:
+                if (ForceBackPos != NULL)
+                    FaceOpponent(object, ForceBackPos);
+                break;
+            case 0x1d:
+                if (object->force_part != NULL && (object->force_part->active & 1) != 0)
+                    api.movement_facing_angle = NuAtan2D(object->force_part->position.x - api.collision_position.x,
+                                                         object->force_part->position.z - api.collision_position.z);
+                break;
+            case -1:
+            case 1:
+            case 0x13:
+            case 0x17:
+            case 0x29:
+            directional_common_heading:
+                if ((context_flags & 0x2000) != 0) {
+                    SetPushAngle(object);
+                } else if (object->context_target_position != NULL) {
+                    FaceOpponent(object, object->context_target_position);
+                    api.movement_facing_angle += 0x8000;
+                } else if (pad->operator_data != NULL && (context_flags & 1) == 0) {
+                    NUVEC *position = static_cast<NUVEC *>(pad->operator_data);
+                    api.movement_facing_angle = NuAtan2D(position->x - api.position.x, position->z - api.position.z);
+                } else if (api.field_0x27c != -1 && api.field_0x27c == BonusWinner) {
+                    api.movement_facing_angle =
+                        NuAtan2D(GameCam->pos.x - api.position.x, GameCam->pos.z - api.position.z);
+                } else if (pad->input_magnitude > 0.0f &&
+                           ((context_flags & 1) == 0 || SuperCarry_Carrying(object) ||
+                            (object->character_context == 0x20 && (object->field_0xef9 & 1) != 0)) &&
+                           object->delayed_turn_timer <= 0.0f && object->character_context != 0x13 &&
+                           (object->field_0xf01 & 2) == 0 &&
+                           (object->character_context != 0 || object->context_variant_flags < 0 ||
+                            object->action_movement_state == 0 || object->action_movement_state == 5 ||
+                            object->action_movement_state == 8)) {
+                    if ((api.flags_low & 0x80) != 0 || object->character_context != -1 || api.field_0x27d != 0 ||
+                        IsAFallAnim(CurrentAnim(&api.anim_packet)) == 0)
+                        api.movement_facing_angle = input_angle;
+                    if (object->character_context == 0x20 && (object->field_0xef9 & 1) != 0)
+                        api.movement_facing_angle += 0x8000;
+                }
+                break;
+            case 5:
+                if ((object->context_flags & 0x0c) == 0)
+                    FaceOpponent(object, NULL);
+                break;
+            case 0x26:
+                if (object->field_0x7a7 == -1 && FaceOpponent(object, NULL) != 0 && (object->context_flags & 0x80) != 0)
+                    api.movement_facing_angle += 0x8000;
+                break;
+            case 0x33:
+                if (api.velocity.x != 0.0f || api.velocity.z != 0.0f)
+                    api.movement_facing_angle = NuAtan2D(api.velocity.x, api.velocity.z);
+                break;
+            case 0x1c:
+                heading_handled = ForcePushed_YRotation(object);
+                break;
+            case 0x58:
+                heading_handled = SuperCarry_YRotation(object, input_angle);
+                break;
+            case 0x1b:
+                if ((api.flags_low & 0x80) != 0 && (object->field_0xe21 & 2) == 0) {
+                    if (object->field_0x7a3 == 1)
+                        api.movement_facing_angle = input_angle;
+                    else
+                        FaceOpponent(object, NULL);
+                    turn_override = 0.333f;
+                    break;
+                }
+                // Other actors and the alternate state use ordinary opponent-facing speed.
+            case 0x16:
+                FaceOpponent(object, NULL);
+                break;
+            case 8:
+            case 0x12:
+                if ((api.field_0x1f4 & 0x40000) == 0)
+                    api.movement_facing_angle = object->force_heading;
+                break;
+            case 0x2d:
+                if ((api.field_0x1f4 & 0x40000) == 0) {
+                    NUVEC centre;
+                    GizGetBuildItPlayerPos(object, NULL, &centre);
+                    GIZBUILDIT_s *buildit = static_cast<GIZBUILDIT_s *>(object->field_0x788);
+                    if ((buildit->state_flags & 0x20) != 0)
+                        GizBuildItPushAwayFromStart(object, buildit);
+                    api.movement_facing_angle = NuAtan2D(centre.x - api.position.x, centre.z - api.position.z);
+                }
+                break;
+            default:
+                goto directional_common_heading;
         }
     }
-    const i32 direct_turn = heading_handled != 0 ? 0 :
-        (object->character_context == 0x33 ? 1 : object->snap_facing);
+    const i32 direct_turn = heading_handled != 0 ? 0 : (object->character_context == 0x33 ? 1 : object->snap_facing);
     if (heading_handled == 0) {
         f32 turn_rate;
         if (SuperCarry_Carrying(object))
@@ -1508,15 +1544,14 @@ directional_common_heading:
                     (api.character_data->game_character->flags_090 & 0x100) != 0 || SuperCarry_Carrying(object))) {
             if (object->character_context == 0x4b && (api.character_data->game_character->flags_090 & 0x100) == 0)
                 turn_rate *= 0.333f;
-            api.facing_angle = TurnRot(api.facing_angle, api.movement_facing_angle,
-                static_cast<i32>(turn_rate * 16384.0f), NULL);
+            api.facing_angle =
+                TurnRot(api.facing_angle, api.movement_facing_angle, static_cast<i32>(turn_rate * 16384.0f), NULL);
             api.field_0x276 = SeekRot(api.field_0x276, api.facing_angle, 10.0f);
             api.movement_facing_angle = api.facing_angle;
         } else {
             api.facing_angle = SeekRot(api.facing_angle, api.movement_facing_angle, turn_rate);
             api.field_0x276 = api.facing_angle;
         }
-
     }
     if (ObjInTube(object)) {
         object->target_velocity.y = static_cast<TUBE *>(object->field_0x788)->field_0x24;
@@ -1542,23 +1577,20 @@ directional_common_heading:
                 api.collision_position = api.initial_position;
                 api.velocity = v000;
                 break;
-            }
-            else if (object->character_context == 0x45) {
+            } else if (object->character_context == 0x45) {
                 move_vertical = WallShuffle_SetTargetMom(object, input_angle);
                 break;
-            }
-            else if (object->character_context == 0x55) {
+            } else if (object->character_context == 0x55) {
                 move_vertical = LedgeTerrain_SetTargetMom(object);
                 break;
-            }
-            else if (object->character_context == 0x5b) {
+            } else if (object->character_context == 0x5b) {
                 object->target_velocity.x = (object->launch_origin.x - api.upper_position.x) * 20.0f;
                 object->target_velocity.y = (object->launch_origin.y - api.upper_position.y) * 20.0f;
                 object->target_velocity.z = (object->launch_origin.z - api.upper_position.z) * 20.0f;
                 move_vertical = 1;
                 break;
-            }
-            else if (object->character_context == 0x27 || object->character_context == 0x28 || object->character_context == 0x59) {
+            } else if (object->character_context == 0x27 || object->character_context == 0x28 ||
+                       object->character_context == 0x59) {
                 {
                     const u16 angle = api.movement_facing_angle;
                     object->target_velocity.x = NuTrigTable[angle >> 1];
@@ -1567,21 +1599,17 @@ directional_common_heading:
                     api.velocity.z = object->target_velocity.z;
                     break;
                 }
-            }
-            else if (object->character_context == 0x4e) {
+            } else if (object->character_context == 0x4e) {
                 move_vertical = Hang_SetTargetMom(object);
                 break;
-            }
-            else if (object->character_context == 0x43) {
+            } else if (object->character_context == 0x43) {
                 move_vertical = Climb_SetTargetMom(object, input_angle);
                 break;
-            }
-            else if (object->character_context == 0x46) {
+            } else if (object->character_context == 0x46) {
                 Grapple_SetRotOrder(object);
                 move_vertical = Grapple_SetTargetMom(object);
                 break;
-            }
-            else if (object->character_context == 0x4a) {
+            } else if (object->character_context == 0x4a) {
                 if ((api.field_0x1f4 & 0x40000) == 0) {
                     const NUVEC position = static_cast<LEVER_s *>(object->field_0x788)->floor_position;
                     const f32 rate = 10.0f * object->field_0x768 + 5.0f;
@@ -1589,8 +1617,7 @@ directional_common_heading:
                     object->target_velocity.z = (position.z - api.position.z) * rate;
                 }
                 break;
-            }
-            else if (object->character_context == 0x0b) {
+            } else if (object->character_context == 0x0b) {
                 if ((api.field_0x1f4 & 0x40000) == 0) {
                     NUVEC position;
                     GizPanel_GetAbsTargetPos(static_cast<GIZPANEL_s *>(object->field_0x788), &position, 1);
@@ -1599,32 +1626,28 @@ directional_common_heading:
                     object->target_velocity.z = (position.z - api.position.z) * rate;
                 }
                 break;
-            }
-            else if (object->character_context == 0x51) {
+            } else if (object->character_context == 0x51) {
                 {
                     TECHNO_s *techno = static_cast<TECHNO_s *>(object->field_0x788);
                     object->target_velocity.x = (techno->ground_position.x - api.position.x) * 5.0f;
                     object->target_velocity.z = (techno->ground_position.z - api.position.z) * 5.0f;
                     break;
                 }
-            }
-            else if (object->character_context == 0x53) {
+            } else if (object->character_context == 0x53) {
                 {
                     ATTRACTO_s *attracto = static_cast<ATTRACTO_s *>(object->field_0x788);
                     object->target_velocity.x = (attracto->active_position.x - api.position.x) * 5.0f;
                     object->target_velocity.z = (attracto->active_position.z - api.position.z) * 5.0f;
                     break;
                 }
-            }
-            else if (object->character_context == 0x5c) {
+            } else if (object->character_context == 0x5c) {
                 {
                     SECURITYDOOR *door = static_cast<SECURITYDOOR *>(object->field_0x788);
                     object->target_velocity.x = (door->player_position.x - api.position.x) * 5.0f;
                     object->target_velocity.z = (door->player_position.z - api.position.z) * 5.0f;
                     break;
                 }
-            }
-            else if (object->character_context == 0x4c) {
+            } else if (object->character_context == 0x4c) {
                 {
                     SIGNAL_s *signal = static_cast<SIGNAL_s *>(object->field_0x788);
                     object->target_velocity.x = (signal->target_position.x - api.collision_position.x) * 5.0f;
@@ -1633,19 +1656,16 @@ directional_common_heading:
                     move_vertical = 1;
                     break;
                 }
-            }
-            else if (object->character_context == 0x44) {
+            } else if (object->character_context == 0x44) {
                 move_vertical = TightRope_SetTargetMom(object);
                 break;
-            }
-            else if (object->character_context == 0x4f) {
+            } else if (object->character_context == 0x4f) {
                 move_vertical = Glide_SetTargetMom(object);
                 seek_rates.y = seek_rates.x;
                 seek_rates.x = seek_rates.z = 2.0f;
                 separate_seek_rates = true;
                 break;
-            }
-            else {
+            } else {
                 {
                     if (object->character_context == 0x61 && (api.field_0x1f4 & 0x40000) == 0) {
                         const NUVEC position = static_cast<HATMACHINE_s *>(object->field_0x788)->player_position;
@@ -1666,7 +1686,9 @@ directional_common_heading:
                             bool stopped = stop_frame > 1.0f && frame != NULL && *frame >= stop_frame;
                             if (!stopped && frame != NULL && api.field_0x27d != 0 &&
                                 api.character_model->model_data_b[current_animation] != NULL &&
-                                (static_cast<CHARACTERANIM_s *>(api.character_model->model_data_a[current_animation])->flags & 2) == 0 &&
+                                (static_cast<CHARACTERANIM_s *>(api.character_model->model_data_a[current_animation])
+                                     ->flags &
+                                 2) == 0 &&
                                 (api.anim_packet.flags & ANIMPACKET_FLAG_FINISHED) != 0)
                                 stopped = true;
                             if (stopped) {
@@ -1679,8 +1701,10 @@ directional_common_heading:
                                     api.velocity.z = 0.0f;
                                 }
                             } else {
-                                const u16 angle = (api.character_data->game_character->flags_090 & 0x100) != 0 && direct_turn == 0
-                                    ? api.facing_angle : api.movement_facing_angle;
+                                const u16 angle =
+                                    (api.character_data->game_character->flags_090 & 0x100) != 0 && direct_turn == 0
+                                        ? api.facing_angle
+                                        : api.movement_facing_angle;
                                 const f32 speed = animation_speed * speed_multiplier;
                                 object->target_velocity.x = NuTrigTable[angle >> 1] * speed;
                                 object->target_velocity.z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * speed;
@@ -1707,7 +1731,8 @@ directional_common_heading:
                             if (object->field_0x7a3 == 0 && (api.field_0x1f8 & 2) == 0) {
                                 const u16 angle = api.movement_facing_angle;
                                 object->target_velocity.x = -NuTrigTable[angle >> 1] * object->external_force.z;
-                                object->target_velocity.z = -NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * object->external_force.z;
+                                object->target_velocity.z =
+                                    -NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * object->external_force.z;
                             } else {
                                 object->target_velocity.x = 0.0f;
                                 object->target_velocity.z = 0.0f;
@@ -1727,176 +1752,189 @@ directional_common_heading:
                             break;
                         }
                         switch (object->character_context) {
-                        case 0x21: case 0x22: {
-                            const u16 angle = api.movement_facing_angle;
-                            object->target_velocity.x = -NuTrigTable[angle >> 1] * 1.2f;
-                            object->target_velocity.z = -NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * 1.2f;
-                            break;
-                        }
-                        case 0x18: case 0x0c:
-                            if (object->incoming_bolt != NULL && desired_speed > 0.0f &&
-                                (pad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
-                                (object->character_context == 0x18 || object->block_latch == 0)) {
-                                object->target_velocity.x = NuTrigTable[input_angle >> 1] * api.character_data->game_character->run_speed;
-                                object->target_velocity.z = NuTrigTable[((input_angle + 0x4000) >> 1) & 0x7fff] * api.character_data->game_character->run_speed;
-                            } else {
-                                object->target_velocity.x = 0.0f;
-                                object->target_velocity.z = 0.0f;
+                            case 0x21:
+                            case 0x22: {
+                                const u16 angle = api.movement_facing_angle;
+                                object->target_velocity.x = -NuTrigTable[angle >> 1] * 1.2f;
+                                object->target_velocity.z = -NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * 1.2f;
+                                break;
                             }
-                            break;
-                        case 0x41: case 0x17: case 0x1f: case 0x3c: case 0x35:
-                            object->target_velocity.x = 0.0f;
-                            object->target_velocity.z = 0.0f;
-                            break;
-                        case 0x29:
-                            // Original 0x169c21: walking is allowed only when this
-                            // model supplies animation 0x57.
-                            if (api.character_model->model_data_b[0x57] != NULL)
-                                goto directional_walking;
-                            object->target_velocity.x = 0.0f;
-                            object->target_velocity.z = 0.0f;
-                            break;
-                        case 0x2d: {
-                            NUVEC position = api.position;
-                            GizGetBuildItPlayerPos(object, &position, NULL);
-                            object->target_velocity.x = (position.x - api.position.x) * 3.0f;
-                            object->target_velocity.z = (position.z - api.position.z) * 3.0f;
-                            break;
-                        }
-                        case 0x1c:
-                            move_vertical = ForcePushed_SetTargetMom(object, &seek_rates.x);
-                            break;
-                        case 0x0f:
-                            break;
-                        case 0x49:
-                            object->target_velocity.x = (object->launch_origin.x - api.position.x) * 8.0f;
-                            object->target_velocity.z = (object->launch_origin.z - api.position.z) * 8.0f;
-                            break;
-                        case 0x47: {
-                            if (object->action_movement_state == 1) {
-                                object->target_velocity = v000;
-                                api.velocity = object->target_velocity;
-                            } else {
-                                ZIPUP *zipup = static_cast<ZIPUP *>(object->field_0x788);
-                                if ((zipup->flags & 1) != 0) {
-                                    SeekVec(&api.position, &api.position, &zipup->rider_target_position, 8.0f);
+                            case 0x18:
+                            case 0x0c:
+                                if (object->incoming_bolt != NULL && desired_speed > 0.0f &&
+                                    (pad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
+                                    (object->character_context == 0x18 || object->block_latch == 0)) {
+                                    object->target_velocity.x =
+                                        NuTrigTable[input_angle >> 1] * api.character_data->game_character->run_speed;
+                                    object->target_velocity.z = NuTrigTable[((input_angle + 0x4000) >> 1) & 0x7fff] *
+                                                                api.character_data->game_character->run_speed;
                                 } else {
-                                    NuVecSub(&object->target_velocity, &zipup->hook_origin, &api.position);
-                                    NuVecNorm(&object->target_velocity, &object->target_velocity);
-                                    NuVecScale(&object->target_velocity, &object->target_velocity, 2.0f);
-                                }
-                            }
-                            move_vertical = 1;
-                            break;
-                        }
-                        case 5:
-                            if ((object->context_flags & 0x1c) != 0) {
-                                object->target_velocity.x = 0.0f;
-                                api.velocity.x = 0.0f;
-                                object->target_velocity.z = 0.0f;
-                                api.velocity.z = 0.0f;
-                            } else if (StepBackFromTarget(object) == 0) {
-                                const f32 speed = AnimSpeed(api.character_model, object->context_animation);
-                                const u16 angle = api.movement_facing_angle;
-                                object->target_velocity.x = NuTrigTable[angle >> 1] * speed;
-                                object->target_velocity.z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * speed;
-                            }
-                            break;
-                        case 0x15: {
-                            const f32 speed = AnimSpeed(api.character_model, object->context_animation);
-                            const u16 angle = api.movement_facing_angle;
-                            object->target_velocity.x = NuTrigTable[angle >> 1] * speed;
-                            object->target_velocity.z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * speed;
-                            break;
-                        }
-                        case 0x10: {
-                            const f32 speed = object->context_animation == 0x29
-                                ? AnimSpeed(api.character_model, 0x29) : api.character_data->game_character->run_speed;
-                            const u16 angle = api.movement_facing_angle;
-                            object->target_velocity.x = NuTrigTable[angle >> 1] * speed;
-                            object->target_velocity.z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * speed;
-                            break;
-                        }
-                        case 0x31: {
-                            if ((api.field_0x1f8 & 0x80) == 0)
-                                goto directional_walking;
-                            const u16 angle = api.movement_facing_angle;
-                            object->target_velocity.x = NuTrigTable[angle >> 1] * api.character_data->game_character->run_speed;
-                            object->target_velocity.z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * api.character_data->game_character->run_speed;
-                            break;
-                        }
-                        case 1:
-                        case 0x19:
-                        case 2:
-                        case 3:
-                        case 4:
-                        case 0x0d:
-                        case 0x0e:
-                        case 9:
-                        case 0x0a:
-                        case 0x16:
-                        case 0x1d:
-                        case 0x1b:
-                        case 0x12:
-                        case 8:
-                        case 0x13:
-                        case 0x14: {
-        directional_action_momentum:
-                            // Original 0x169a49: these contexts only move through
-                            // their animation when CInfo permits animation momentum.
-                            if ((CInfo[object->character_context].flags & 0x10) != 0) {
-                                const f32 speed = AnimSpeed(api.character_model, object->context_animation);
-                                const u16 angle = api.movement_facing_angle;
-                                object->target_velocity.x = NuTrigTable[angle >> 1] * speed;
-                                object->target_velocity.z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * speed;
-                            } else {
-                                object->target_velocity.x = 0.0f;
-                                object->target_velocity.z = 0.0f;
-                            }
-                            break;
-                        }
-                        case 0:
-                            if (object->action_movement_state == 3) {
-                                if (StepBackFromTarget(object) == 0) {
-                                    const u16 angle = api.movement_facing_angle;
-                                    object->target_velocity.x = NuTrigTable[angle >> 1] * object->field_0x768;
-                                    object->target_velocity.z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * object->field_0x768;
+                                    object->target_velocity.x = 0.0f;
+                                    object->target_velocity.z = 0.0f;
                                 }
                                 break;
-                            }
-                            if (object->action_movement_state == 4)
-                                goto directional_action_momentum;
-                            if (object->action_movement_state == 2) {
-                                f32 speed = api.character_data->game_character->run_speed;
-                                if ((object->context_variant_flags & 0x20) != 0)
-                                    speed = -speed;
-                                const u16 angle = api.movement_facing_angle;
-                                object->target_velocity.x = NuTrigTable[angle >> 1] * speed;
-                                object->target_velocity.z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * speed;
+                            case 0x41:
+                            case 0x17:
+                            case 0x1f:
+                            case 0x3c:
+                            case 0x35:
+                                object->target_velocity.x = 0.0f;
+                                object->target_velocity.z = 0.0f;
+                                break;
+                            case 0x29:
+                                // Original 0x169c21: walking is allowed only when this
+                                // model supplies animation 0x57.
+                                if (api.character_model->model_data_b[0x57] != NULL)
+                                    goto directional_walking;
+                                object->target_velocity.x = 0.0f;
+                                object->target_velocity.z = 0.0f;
+                                break;
+                            case 0x2d: {
+                                NUVEC position = api.position;
+                                GizGetBuildItPlayerPos(object, &position, NULL);
+                                object->target_velocity.x = (position.x - api.position.x) * 3.0f;
+                                object->target_velocity.z = (position.z - api.position.z) * 3.0f;
                                 break;
                             }
-                            if (object->context_variant_flags >= 0 &&
-                                (object->action_movement_state == 6 || object->action_movement_state == 7 ||
-                                 object->action_movement_state == 9)) {
-                                f32 speed = object->airborne_action_timer;
-                                if (object->action_movement_state == 6 &&
-                                    object->context_animation_timer >= api.character_data->game_character->jump_duration) {
+                            case 0x1c:
+                                move_vertical = ForcePushed_SetTargetMom(object, &seek_rates.x);
+                                break;
+                            case 0x0f:
+                                break;
+                            case 0x49:
+                                object->target_velocity.x = (object->launch_origin.x - api.position.x) * 8.0f;
+                                object->target_velocity.z = (object->launch_origin.z - api.position.z) * 8.0f;
+                                break;
+                            case 0x47: {
+                                if (object->action_movement_state == 1) {
+                                    object->target_velocity = v000;
+                                    api.velocity = object->target_velocity;
+                                } else {
+                                    ZIPUP *zipup = static_cast<ZIPUP *>(object->field_0x788);
+                                    if ((zipup->flags & 1) != 0) {
+                                        SeekVec(&api.position, &api.position, &zipup->rider_target_position, 8.0f);
+                                    } else {
+                                        NuVecSub(&object->target_velocity, &zipup->hook_origin, &api.position);
+                                        NuVecNorm(&object->target_velocity, &object->target_velocity);
+                                        NuVecScale(&object->target_velocity, &object->target_velocity, 2.0f);
+                                    }
+                                }
+                                move_vertical = 1;
+                                break;
+                            }
+                            case 5:
+                                if ((object->context_flags & 0x1c) != 0) {
+                                    object->target_velocity.x = 0.0f;
                                     api.velocity.x = 0.0f;
+                                    object->target_velocity.z = 0.0f;
                                     api.velocity.z = 0.0f;
-                                    speed = 0.0f;
+                                } else if (StepBackFromTarget(object) == 0) {
+                                    const f32 speed = AnimSpeed(api.character_model, object->context_animation);
+                                    const u16 angle = api.movement_facing_angle;
+                                    object->target_velocity.x = NuTrigTable[angle >> 1] * speed;
+                                    object->target_velocity.z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * speed;
                                 }
+                                break;
+                            case 0x15: {
+                                const f32 speed = AnimSpeed(api.character_model, object->context_animation);
                                 const u16 angle = api.movement_facing_angle;
                                 object->target_velocity.x = NuTrigTable[angle >> 1] * speed;
                                 object->target_velocity.z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * speed;
                                 break;
                             }
-                            goto directional_walking;
-                        default:
-                            goto directional_walking;
+                            case 0x10: {
+                                const f32 speed = object->context_animation == 0x29
+                                                      ? AnimSpeed(api.character_model, 0x29)
+                                                      : api.character_data->game_character->run_speed;
+                                const u16 angle = api.movement_facing_angle;
+                                object->target_velocity.x = NuTrigTable[angle >> 1] * speed;
+                                object->target_velocity.z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * speed;
+                                break;
+                            }
+                            case 0x31: {
+                                if ((api.field_0x1f8 & 0x80) == 0)
+                                    goto directional_walking;
+                                const u16 angle = api.movement_facing_angle;
+                                object->target_velocity.x =
+                                    NuTrigTable[angle >> 1] * api.character_data->game_character->run_speed;
+                                object->target_velocity.z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] *
+                                                            api.character_data->game_character->run_speed;
+                                break;
+                            }
+                            case 1:
+                            case 0x19:
+                            case 2:
+                            case 3:
+                            case 4:
+                            case 0x0d:
+                            case 0x0e:
+                            case 9:
+                            case 0x0a:
+                            case 0x16:
+                            case 0x1d:
+                            case 0x1b:
+                            case 0x12:
+                            case 8:
+                            case 0x13:
+                            case 0x14: {
+                            directional_action_momentum:
+                                // Original 0x169a49: these contexts only move through
+                                // their animation when CInfo permits animation momentum.
+                                if ((CInfo[object->character_context].flags & 0x10) != 0) {
+                                    const f32 speed = AnimSpeed(api.character_model, object->context_animation);
+                                    const u16 angle = api.movement_facing_angle;
+                                    object->target_velocity.x = NuTrigTable[angle >> 1] * speed;
+                                    object->target_velocity.z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * speed;
+                                } else {
+                                    object->target_velocity.x = 0.0f;
+                                    object->target_velocity.z = 0.0f;
+                                }
+                                break;
+                            }
+                            case 0:
+                                if (object->action_movement_state == 3) {
+                                    if (StepBackFromTarget(object) == 0) {
+                                        const u16 angle = api.movement_facing_angle;
+                                        object->target_velocity.x = NuTrigTable[angle >> 1] * object->field_0x768;
+                                        object->target_velocity.z =
+                                            NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * object->field_0x768;
+                                    }
+                                    break;
+                                }
+                                if (object->action_movement_state == 4)
+                                    goto directional_action_momentum;
+                                if (object->action_movement_state == 2) {
+                                    f32 speed = api.character_data->game_character->run_speed;
+                                    if ((object->context_variant_flags & 0x20) != 0)
+                                        speed = -speed;
+                                    const u16 angle = api.movement_facing_angle;
+                                    object->target_velocity.x = NuTrigTable[angle >> 1] * speed;
+                                    object->target_velocity.z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * speed;
+                                    break;
+                                }
+                                if (object->context_variant_flags >= 0 &&
+                                    (object->action_movement_state == 6 || object->action_movement_state == 7 ||
+                                     object->action_movement_state == 9)) {
+                                    f32 speed = object->airborne_action_timer;
+                                    if (object->action_movement_state == 6 &&
+                                        object->context_animation_timer >=
+                                            api.character_data->game_character->jump_duration) {
+                                        api.velocity.x = 0.0f;
+                                        api.velocity.z = 0.0f;
+                                        speed = 0.0f;
+                                    }
+                                    const u16 angle = api.movement_facing_angle;
+                                    object->target_velocity.x = NuTrigTable[angle >> 1] * speed;
+                                    object->target_velocity.z = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff] * speed;
+                                    break;
+                                }
+                                goto directional_walking;
+                            default:
+                                goto directional_walking;
                         }
                         break;
                     }
-        directional_walking:
+                directional_walking:
                     if ((pad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) != 0) {
                         object->target_velocity.x = 0.0f;
                         object->target_velocity.z = 0.0f;
@@ -1909,7 +1947,8 @@ directional_common_heading:
                             object->id == id_ATAT || object->id == id_MINIATAT || object->id == id_MINIATTE)
                             walking_without_input = CurrentAnim(&api.anim_packet) == 0;
                         if (!walking_without_input && object->id == id_RANCOR)
-                            walking_without_input = CurrentAnim(&api.anim_packet) == 0 || CurrentAnim(&api.anim_packet) == 0x40;
+                            walking_without_input =
+                                CurrentAnim(&api.anim_packet) == 0 || CurrentAnim(&api.anim_packet) == 0x40;
                     }
                     const bool calculate_walking_speed = walking_input || walking_without_input;
                     if (!calculate_walking_speed && api.anim_packet.blending != 0) {
@@ -1917,11 +1956,13 @@ directional_common_heading:
                         const f32 speed = AnimSpeed(api.character_model, animation);
                         if (speed != 0.0f) {
                             animation = api.anim_packet.blend_animation_a;
-                            CHARACTERANIM_s *info = static_cast<CHARACTERANIM_s *>(api.character_model->model_data_a[animation]);
+                            CHARACTERANIM_s *info =
+                                static_cast<CHARACTERANIM_s *>(api.character_model->model_data_a[animation]);
                             bool animation_active = (info->flags & 2) != 0;
                             if (!animation_active) {
                                 const f32 source_time = api.anim_packet.blend_source_time;
-                                animation_active = NuAnimEndFrame(api.character_model->model_data_b[animation]) > source_time;
+                                animation_active =
+                                    NuAnimEndFrame(api.character_model->model_data_b[animation]) > source_time;
                             }
                             if (animation_active) {
                                 animation = api.anim_packet.blend_animation_a;
@@ -1940,13 +1981,16 @@ directional_common_heading:
                                         api.velocity.z = 0.0f;
                                     }
                                 } else {
-                                    const u16 angle = direct_turn == 0 &&
-                                        ((CInfo[object->character_context].parameter & 2) != 0 ||
-                                         (api.character_data->game_character->flags_090 & 0x100) != 0)
-                                        ? api.facing_angle : api.movement_facing_angle;
+                                    const u16 angle =
+                                        direct_turn == 0 &&
+                                                ((CInfo[object->character_context].parameter & 2) != 0 ||
+                                                 (api.character_data->game_character->flags_090 & 0x100) != 0)
+                                            ? api.facing_angle
+                                            : api.movement_facing_angle;
                                     object->target_velocity.x = speed * NuTrigTable[angle >> 1];
                                     object->target_velocity.z = speed * NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff];
-                                    if (api.anim_packet.blend_animation_a == 0x4f || api.anim_packet.blend_animation_a == 0x26)
+                                    if (api.anim_packet.blend_animation_a == 0x4f ||
+                                        api.anim_packet.blend_animation_a == 0x26)
                                         NuVecRotateY(&object->target_velocity, &object->target_velocity, 0x4000);
                                 }
                                 break;
@@ -2000,8 +2044,10 @@ directional_common_heading:
                             if (object->field_0xe31 == 1) {
                                 walking_speed = walking_character->run_speed / 3.0f;
                                 const f32 magnitude = object->pad_gamepad->input_magnitude;
-                                if (!((walking_character->tiptoe_speed + walking_character->walk_speed) * 0.5f >= magnitude)) {
-                                    if (!((walking_character->walk_speed + walking_character->run_speed) * 0.5f >= magnitude))
+                                if (!((walking_character->tiptoe_speed + walking_character->walk_speed) * 0.5f >=
+                                      magnitude)) {
+                                    if (!((walking_character->walk_speed + walking_character->run_speed) * 0.5f >=
+                                          magnitude))
                                         walking_speed *= 3.0f;
                                     else
                                         walking_speed += walking_speed;
@@ -2013,14 +2059,16 @@ directional_common_heading:
                             if (object->id == id_GONKDROID) {
                                 if (Cheat_IsOn(8) == 0)
                                     walking_speed = CurrentAnim(&api.anim_packet) == 5
-                                        ? 0.5f * api.character_data->game_character->run_speed
-                                        : api.character_data->game_character->walk_speed;
+                                                        ? 0.5f * api.character_data->game_character->run_speed
+                                                        : api.character_data->game_character->walk_speed;
                             } else if (object->id == id_C3PO || object->id == id_TC14) {
                                 if (object->character_context == -1 && object->field_0xdb0 > 0.0f) {
                                     walking_speed = (0.6f * walking_character->run_speed) / 3.0f;
                                     const f32 magnitude = object->pad_gamepad->input_magnitude;
-                                    if (!((walking_character->tiptoe_speed + walking_character->walk_speed) * 0.5f >= magnitude)) {
-                                        if (!((walking_character->walk_speed + walking_character->run_speed) * 0.5f >= magnitude))
+                                    if (!((walking_character->tiptoe_speed + walking_character->walk_speed) * 0.5f >=
+                                          magnitude)) {
+                                        if (!((walking_character->walk_speed + walking_character->run_speed) * 0.5f >=
+                                              magnitude))
                                             walking_speed *= 3.0f;
                                         else
                                             walking_speed += walking_speed;
@@ -2029,8 +2077,9 @@ directional_common_heading:
                             } else if (object->id == id_DROIDEKA) {
                                 if (api.anim_packet.field_0x3a == 5)
                                     walking_speed *= 0.5f;
-                            } else if (object->id == id_ATST || object->id == id_MINIATST || object->id == id_ATST_LOWRES ||
-                                       object->id == id_ATAT || object->id == id_MINIATAT || object->id == id_MINIATTE ||
+                            } else if (object->id == id_ATST || object->id == id_MINIATST ||
+                                       object->id == id_ATST_LOWRES || object->id == id_ATAT ||
+                                       object->id == id_MINIATAT || object->id == id_MINIATTE ||
                                        object->id == id_RANCOR) {
                                 walking_speed = walking_character->run_speed;
                             }
@@ -2042,13 +2091,15 @@ directional_common_heading:
                         walking_speed *= api.character_data->game_character->backwards_speed_multiplier;
                     u16 walking_angle = input_angle;
                     if (direct_turn == 0 && ((CInfo[object->character_context].parameter & 2) != 0 ||
-                                            (api.character_data->game_character->flags_090 & 0x100) != 0))
+                                             (api.character_data->game_character->flags_090 & 0x100) != 0))
                         walking_angle = api.facing_angle;
                     if (WORLD->current_level == VADERA_LDATA && (api.field_0x1f8 & 0x80) == 0 &&
                         GameCam->sock_position.location.sock == 0)
                         walking_speed *= 1.0416666269302368f;
-                    object->target_velocity.x = NuTrigTable[walking_angle >> 1] * walking_speed * water_speed_multiplier;
-                    object->target_velocity.z = NuTrigTable[((walking_angle + 0x4000) >> 1) & 0x7fff] * walking_speed * water_speed_multiplier;
+                    object->target_velocity.x =
+                        NuTrigTable[walking_angle >> 1] * walking_speed * water_speed_multiplier;
+                    object->target_velocity.z =
+                        NuTrigTable[((walking_angle + 0x4000) >> 1) & 0x7fff] * walking_speed * water_speed_multiplier;
                     break;
                 }
             }
@@ -2056,13 +2107,11 @@ directional_common_heading:
     }
     if ((object->field_0xefd & GAMEOBJECT_MOVEMENT_FLAG_REVERSE_VELOCITY) != 0) {
         NuVecRotateY(&object->target_velocity, &object->target_velocity, 0x8000);
-    } else if ((api.field_0x1f8 & 0x80) != 0 &&
-               (api.character_data->game_character->flags_090 & 0x100) != 0)
+    } else if ((api.field_0x1f8 & 0x80) != 0 && (api.character_data->game_character->flags_090 & 0x100) != 0)
         CharPivot_Check(object, &object->target_velocity);
 
     if (object->character_context == 0x4b) {
-        const f32 float_height = api.collision_min.y +
-            (api.collision_max.y - api.collision_min.y) * 0.625f;
+        const f32 float_height = api.collision_min.y + (api.collision_max.y - api.collision_min.y) * 0.625f;
         object->target_velocity.y = (api.water_height - float_height) * 3.0f;
         if (object->suit != NULL && (static_cast<SUIT_s *>(object->suit)->store_flag & 0x10) != 0) {
             if ((object->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) == 0) {
@@ -2078,8 +2127,8 @@ directional_common_heading:
         seek_rates.x = seek_rates.z = 1.0f;
         seek_rates.y = api.character_data->game_character->velocity_seek_rate;
     } else if (!separate_seek_rates) {
-        seek_rates.y = move_vertical != 0 ? seek_rates.x :
-            object->apiobj.character_data->game_character->velocity_seek_rate;
+        seek_rates.y =
+            move_vertical != 0 ? seek_rates.x : object->apiobj.character_data->game_character->velocity_seek_rate;
         seek_rates.z = seek_rates.x;
     }
 
@@ -2115,8 +2164,7 @@ directional_common_heading:
             }
         }
     }
-    if ((object->field_0xe23 & 0x10) == 0 &&
-        api.field_0x27d != 0 && static_cast<i8>(api.field_0x281) != -1 &&
+    if ((object->field_0xe23 & 0x10) == 0 && api.field_0x27d != 0 && static_cast<i8>(api.field_0x281) != -1 &&
         (TerSurface[static_cast<i8>(api.field_0x281)].flags & 0x100) != 0)
         Conveyor_AdjustSpeed(&object->target_velocity);
     if (WORLD->current_level == CRUISERB_LDATA && Mission_Active(NULL) != NULL) {
@@ -2134,8 +2182,7 @@ directional_common_heading:
     const bool seek_vertical = move_vertical != 0 || ObjInTube(object);
     // Original 0x167ac2: the context payload is shared by several gizmo
     // types; the vertical path tests its byte at +0x68 without a type gate.
-    if (seek_vertical && object->field_0x788 != NULL &&
-        (static_cast<const u8 *>(object->field_0x788)[0x68] & 1) != 0) {
+    if (seek_vertical && object->field_0x788 != NULL && (static_cast<const u8 *>(object->field_0x788)[0x68] & 1) != 0) {
         seek_rates.x *= 0.5f;
         seek_rates.y *= 0.5f;
         seek_rates.z *= 0.5f;
@@ -2180,7 +2227,8 @@ directional_common_heading:
     }
     game_character = api.character_data->game_character;
     if ((game_character->flags_090 & 1) != 0) {
-        i32 rate = static_cast<i32>(static_cast<f32>(RotDiff(object->previous_movement_angle, api.field_0x276)) / FRAMETIME);
+        i32 rate =
+            static_cast<i32>(static_cast<f32>(RotDiff(object->previous_movement_angle, api.field_0x276)) / FRAMETIME);
         i32 lean;
         if (rate < -0x10000)
             lean = -0x2000;
@@ -2188,16 +2236,22 @@ directional_common_heading:
             lean = 0x2000;
         else {
             lean = rate / 4;
-            if (lean < -0x2000) lean = -0x2000;
-            if (lean > 0x2000) lean = 0x2000;
+            if (lean < -0x2000)
+                lean = -0x2000;
+            if (lean > 0x2000)
+                lean = 0x2000;
         }
         object->movement_lean_angle = SeekRot(object->movement_lean_angle, static_cast<u16>(lean), 8.0f);
     } else if (object->character_context == 0x4b) {
         i32 lean = 0;
         if (object->pad_gamepad->input_magnitude > 0.0f) {
-            lean = static_cast<i32>(static_cast<f32>(RotDiff(object->previous_movement_angle, api.field_0x276)) / FRAMETIME) / 15;
-            if (lean > 0x2000) lean = 0x2000;
-            if (lean < -0x2000) lean = -0x2000;
+            lean = static_cast<i32>(static_cast<f32>(RotDiff(object->previous_movement_angle, api.field_0x276)) /
+                                    FRAMETIME) /
+                   15;
+            if (lean > 0x2000)
+                lean = 0x2000;
+            if (lean < -0x2000)
+                lean = -0x2000;
         }
         object->movement_lean_angle = SeekRot(object->movement_lean_angle, static_cast<u16>(lean), 8.0f);
     } else {
@@ -4324,22 +4378,22 @@ i32 (*BigJump_JumpActionFn)(GameObject_s *) = BigJump_JumpAction_Default;
 
 static i32 BigJump_LandAction_Default(GameObject_s *object) {
     switch (object->field_0x7aa) {
-    case 0:
-        if (LEGOACT_COMBOLAND != -1 && object->apiobj.character_model->model_data_b[LEGOACT_COMBOLAND] != NULL)
-            return LEGOACT_COMBOLAND;
-        break;
-    case 2:
-    case 3:
-        if (LEGOACT_LAND3 != -1 && object->apiobj.character_model->model_data_b[LEGOACT_LAND3] != NULL)
-            return LEGOACT_LAND3;
-        break;
-    case 4:
-        if (LEGOACT_FLIPLAND != -1 && object->apiobj.character_model->model_data_b[LEGOACT_FLIPLAND] != NULL)
-            return LEGOACT_FLIPLAND;
-        return LEGOACT_LAND;
-    case 1:
-    default:
-        return LEGOACT_LAND;
+        case 0:
+            if (LEGOACT_COMBOLAND != -1 && object->apiobj.character_model->model_data_b[LEGOACT_COMBOLAND] != NULL)
+                return LEGOACT_COMBOLAND;
+            break;
+        case 2:
+        case 3:
+            if (LEGOACT_LAND3 != -1 && object->apiobj.character_model->model_data_b[LEGOACT_LAND3] != NULL)
+                return LEGOACT_LAND3;
+            break;
+        case 4:
+            if (LEGOACT_FLIPLAND != -1 && object->apiobj.character_model->model_data_b[LEGOACT_FLIPLAND] != NULL)
+                return LEGOACT_FLIPLAND;
+            return LEGOACT_LAND;
+        case 1:
+        default:
+            return LEGOACT_LAND;
     }
     if (LEGOACT_LAND2 != -1 && object->apiobj.character_model->model_data_b[LEGOACT_LAND2] != NULL)
         return LEGOACT_LAND2;
@@ -4446,7 +4500,8 @@ float SeekLinearF(float current, float target, float step) {
 }
 
 void StartLaunch(GameObject_s *object) {
-    if (object->field_0x7a5 == 0x2c) return;
+    if (object->field_0x7a5 == 0x2c)
+        return;
     Player_ClearContext(object, 1);
     Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
     object->field_0x7a5 = 0x2c;
@@ -4795,8 +4850,7 @@ void ApplyGravity(GameObject_s *object, float *gravity, float hover_height, floa
 
 i32 SetObjTarget(GameObject_s *object, GameObject_s *target) {
     object->attack_target_position = target->apiobj.collision_position;
-    if ((object->apiobj.character_data->model_flags & 0x2000) == 0 &&
-        (object->apiobj.field_0x1f4 & 1) != 0)
+    if ((object->apiobj.character_data->model_flags & 0x2000) == 0 && (object->apiobj.field_0x1f4 & 1) != 0)
         object->attack_target_position.y += Bolt_ObjTargetPosYAdjust(target);
     object->attack_target_velocity = v000;
     object->field_0xe21 |= 8;
@@ -5747,7 +5801,8 @@ i32 Hang_SetTargetMom(GameObject_s *object) {
         f32 speed;
         if (LEGOACT_HANG_MOVE != -1 && object->apiobj.character_model->model_data_b[LEGOACT_HANG_MOVE] != NULL) {
             speed = AnimSpeed(object->apiobj.character_model, LEGOACT_HANG_MOVE);
-            if (speed < 0.25f) speed = 0.25f;
+            if (speed < 0.25f)
+                speed = 0.25f;
         } else {
             speed = 0.5f;
         }

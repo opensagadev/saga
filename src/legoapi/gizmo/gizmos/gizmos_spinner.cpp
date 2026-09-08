@@ -31,7 +31,8 @@ void GizSpinner_GetSpinnerPos(GIZSPINNER_s *, nuvec_s *) {
 }
 
 i32 GizSpinner_GetTargetPoints(GIZSPINNER_s *spinner, nuvec_s *positions, nuvec_s *directions) {
-    if (spinner == NULL || spinner->type == 0) return 0;
+    if (spinner == NULL || spinner->type == 0)
+        return 0;
     u16 step = static_cast<u16>(65536 / spinner->type);
     u16 base = spinner->rotation + spinner->initial_rotation + spinner->field_0x08c;
     u16 position_angle = base - 0x8000;
@@ -48,7 +49,8 @@ i32 GizSpinner_GetTargetPoints(GIZSPINNER_s *spinner, nuvec_s *positions, nuvec_
         if (positions != NULL) {
             positions[count].x = spinner->field_0x094 * NuTrigTable[position_angle >> 1] + spinner->position.x;
             positions[count].y = y;
-            positions[count].z = spinner->field_0x094 * NuTrigTable[((position_angle + 0x4000) >> 1) & 0x7fff] + spinner->position.z;
+            positions[count].z =
+                spinner->field_0x094 * NuTrigTable[((position_angle + 0x4000) >> 1) & 0x7fff] + spinner->position.z;
         }
         position_angle += step;
         direction_angle += step;
@@ -59,11 +61,12 @@ i32 GizSpinner_GetTargetPoints(GIZSPINNER_s *spinner, nuvec_s *positions, nuvec_
 void GizSpinner_FindBySpecialName(void *, char *) {
 }
 
-f32 GizSpinner_GetNearestTargetPoint(GIZSPINNER_s *spinner, nuvec_s *origin, nuvec_s *position,
-                                    nuvec_s *direction, i32 check_direction) {
+f32 GizSpinner_GetNearestTargetPoint(GIZSPINNER_s *spinner, nuvec_s *origin, nuvec_s *position, nuvec_s *direction,
+                                     i32 check_direction) {
     NUVEC positions[8], directions[8];
     i32 count = GizSpinner_GetTargetPoints(spinner, positions, directions);
-    if (count == 0 || origin == NULL) return -1.0f;
+    if (count == 0 || origin == NULL)
+        return -1.0f;
     f32 nearest_distance = 1000000000.0f;
     NUVEC *nearest_position = NULL;
     NUVEC *nearest_direction = NULL;
@@ -75,7 +78,8 @@ f32 GizSpinner_GetNearestTargetPoint(GIZSPINNER_s *spinner, nuvec_s *origin, nuv
             NUVEC offset;
             NuVecSub(&offset, origin, &spinner->position);
             NuVecRotateY(&offset, &offset, angle);
-            if (!(distance < nearest_distance && offset.z >= 0.0f)) continue;
+            if (!(distance < nearest_distance && offset.z >= 0.0f))
+                continue;
         } else if (!(distance < nearest_distance)) {
             continue;
         }
@@ -83,7 +87,8 @@ f32 GizSpinner_GetNearestTargetPoint(GIZSPINNER_s *spinner, nuvec_s *origin, nuv
         nearest_position = &positions[i];
         nearest_direction = &directions[i];
     }
-    if (nearest_position == NULL) return -1.0f;
+    if (nearest_position == NULL)
+        return -1.0f;
     *position = *nearest_position;
     *direction = *nearest_direction;
     return nearest_distance;

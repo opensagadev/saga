@@ -27,8 +27,8 @@ void ResetLevel(WORLDINFO_s *world, char *cutscene, i32) {
         reset_restart = 1;
         grab_screen_image = 1;
         ResetBits |= 0x17;
-        GizmoTypeStoreProgress(WORLD->gizmo_sys, WORLD, (i8)WORLD->current_level->area_level_index,
-                              gizmopickup_typeid, NULL);
+        GizmoTypeStoreProgress(WORLD->gizmo_sys, WORLD, (i8)WORLD->current_level->area_level_index, gizmopickup_typeid,
+                               NULL);
     }
 }
 

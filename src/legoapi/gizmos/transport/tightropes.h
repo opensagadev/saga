@@ -8,7 +8,7 @@
 typedef struct TIGHTROPE_s {
     char name[16];
     NUVEC start_position; // 0x10
-    NUVEC end_position; // 0x1c
+    NUVEC end_position;   // 0x1c
     u16 field_0x28;
     u16 field_0x2a;
     u16 field_0x2c;
@@ -18,8 +18,8 @@ typedef struct TIGHTROPE_s {
     i8 field_0x32;
     u8 pad_33;
     NUVEC direction; // 0x34, normalized end minus start
-    f32 length; // 0x40
-    u16 y_rotation; // 0x44
+    f32 length;      // 0x40
+    u16 y_rotation;  // 0x44
     u8 visible;
     u8 active;
 } TIGHTROPE;

@@ -74,6 +74,14 @@ def _compiler_args(ctx, compilation_context, source):
         rule_flags += list(getattr(ctx.rule.attr, "cxxopts", []))
 
     result = _safe_flags(toolchain_flags + rule_flags)
+    if cc_toolchain.compiler == "mingw-gcc":
+        # The Windows LLVM distribution defaults to MSVC. Parse with the same
+        # ABI and system headers as the selected MinGW compiler instead.
+        compiler = cc_common.get_tool_for_action(
+            feature_configuration = feature_configuration,
+            action_name = action_name,
+        ).replace("\\", "/")
+        result += ["--target=x86_64-w64-windows-gnu", "--sysroot=" + compiler.rsplit("/", 2)[0]]
     result.append("-xc" if action_name == ACTION_NAMES.c_compile else "-xc++")
 
     for define in compilation_context.defines.to_list():
@@ -104,7 +112,7 @@ def _clang_tidy_aspect(extra_args = []):
         compilation_context = target[CcInfo].compilation_context
         inputs = depset(
             direct = [ctx.file._config],
-            transitive = [compilation_context.headers],
+            transitive = [compilation_context.headers, ctx.attr._clang_headers[DefaultInfo].files],
         )
         cc_toolchain = find_cpp_toolchain(ctx)
         outputs = []
@@ -131,6 +139,12 @@ def _clang_tidy_aspect(extra_args = []):
             arguments = ctx.actions.args()
             arguments.add("--config-file=" + ctx.file._config.path)
             arguments.add_all(ctx.attr._extra_args)
+            # native_binary relocates clang-tidy away from its LLVM installation.
+            # Supply its builtin headers explicitly, including in sandboxed actions.
+            for header in ctx.attr._clang_headers[DefaultInfo].files.to_list():
+                if header.path.endswith("/include/stddef.h") and "/lib/clang/" in header.path:
+                    arguments.add("--extra-arg=-resource-dir=" + header.dirname.removesuffix("/include"))
+                    break
             arguments.add(source.path)
             arguments.add("--")
             arguments.add_all(compiler_args)
@@ -167,6 +181,10 @@ def _clang_tidy_aspect(extra_args = []):
                 default = "//scripts/checks:clang_tidy",
                 cfg = "exec",
                 executable = True,
+            ),
+            "_clang_headers": attr.label(
+                default = "@llvm_tools_llvm//:include",
+                cfg = "exec",
             ),
             "_config": attr.label(
                 default = "//:.clang-tidy",

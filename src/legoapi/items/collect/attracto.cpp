@@ -38,16 +38,19 @@ void Attracto_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         NuVecAdd(&position, &position, &object->apiobj.position);
         GAMEMESSAGE_s *message = static_cast<GAMEMESSAGE_s *>(
             AddGameMessage(text, &position, 1.3f, NULL, 0.0f, 255, 255, 255, 0x1087, 0.0f));
-        if (message != NULL) message->alpha = static_cast<i32>((0.2f * game_pulse + 0.6f) * 128.0f);
+        if (message != NULL)
+            message->alpha = static_cast<i32>((0.2f * game_pulse + 0.6f) * 128.0f);
         available = true;
     }
     if (object->character_context == 0x53) {
         if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL &&
-            AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) == NULL) return;
+            AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) == NULL)
+            return;
         if ((object->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) != 0) {
             object->context_animation_timer += FRAMETIME;
             object->airborne_action_duration -= FRAMETIME;
-            if (!(object->airborne_action_duration <= 0.0f)) return;
+            if (!(object->airborne_action_duration <= 0.0f))
+                return;
             if (object->field_0x106e != 0) {
                 ATTRACTO_s *attracto = static_cast<ATTRACTO_s *>(object->field_0x788);
                 if (attracto->collected_count < attracto->capacity) {
@@ -55,19 +58,21 @@ void Attracto_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                     ++attracto->collected_count;
                     object->airborne_action_duration = 0.2f;
                     attracto = static_cast<ATTRACTO_s *>(object->field_0x788);
-                    if (attracto->collected_count == attracto->capacity) attracto->state_flags |= 4;
-                    else if (object->field_0x106e != 0 && object->character_context != -1) return;
+                    if (attracto->collected_count == attracto->capacity)
+                        attracto->state_flags |= 4;
+                    else if (object->field_0x106e != 0 && object->character_context != -1)
+                        return;
                 }
             }
             goto begin_suction;
         }
         object->airborne_action_duration -= FRAMETIME;
-        if (object->airborne_action_duration <= 0.0f) object->character_context = -1;
+        if (object->airborne_action_duration <= 0.0f)
+            object->character_context = -1;
         return;
     }
     if (object->character_context == 0x52) {
-        if ((object->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) == 0 &&
-            !(object->context_animation_timer < 0.3f)) {
+        if ((object->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) == 0 && !(object->context_animation_timer < 0.3f)) {
             object->character_context = -1;
             return;
         }
@@ -92,25 +97,32 @@ void Attracto_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
                 for (i32 i = 0; i < world->shard_count; ++i, ++shard) {
                     if ((shard->state_flags & 0x1f) != 0x13 ||
                         !(fabsf(shard->screen_position.x - object->external_force.x) < 0.2f) ||
-                        !(fabsf(shard->screen_position.y - object->external_force.y) < 0.2f)) continue;
+                        !(fabsf(shard->screen_position.y - object->external_force.y) < 0.2f))
+                        continue;
                     NUVEC delta;
                     f32 distance = NuVecDistSqr(&shard->position, &object->apiobj.collision_position, &delta);
-                    if (distance < best) { best = distance; nearest = shard; }
+                    if (distance < best) {
+                        best = distance;
+                        nearest = shard;
+                    }
                 }
             }
             if (nearest != NULL) {
-                NUVEC origin = {object->apiobj.pos_x,
-                    (object->apiobj.pos_y + object->apiobj.field_0x194) * 0.5f, object->apiobj.pos_z};
+                NUVEC origin = {object->apiobj.pos_x, (object->apiobj.pos_y + object->apiobj.field_0x194) * 0.5f,
+                                object->apiobj.pos_z};
                 NUVEC target = {0.0f, 0.05f, 0.0f};
-                if (nearest->angle_z != 0) NuVecRotateZ(&target, &target, nearest->angle_z);
-                if (nearest->angle_x != 0) NuVecRotateX(&target, &target, nearest->angle_x);
+                if (nearest->angle_z != 0)
+                    NuVecRotateZ(&target, &target, nearest->angle_z);
+                if (nearest->angle_x != 0)
+                    NuVecRotateX(&target, &target, nearest->angle_x);
                 NuVecAdd(&target, &target, &nearest->position);
                 NUVEC delta;
                 NuVecSub(&delta, &target, &origin);
                 if (GameRayCast(&origin, &delta, 0.0f, 0x1f) == 0) {
                     object->apiobj.movement_facing_angle = NuAtan2D(nearest->position.x - object->apiobj.pos_x,
-                                                                   nearest->position.z - object->apiobj.pos_z);
-                    if (ParticlesPerSecond(3.0f, FRAMETIME) > 0) Shard_Collect(nearest, object);
+                                                                    nearest->position.z - object->apiobj.pos_z);
+                    if (ParticlesPerSecond(3.0f, FRAMETIME) > 0)
+                        Shard_Collect(nearest, object);
                     else {
                         nearest->state_flags |= 0x20;
                         NewRumble(object->pad_gamepad->pad, static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 0.4f, 0);
@@ -124,7 +136,8 @@ void Attracto_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         AddGameMessage("[  ]", &object->external_force, 1.0f, NULL, 0.0f, red, green, blue, 0x1080, 0.0f);
         return;
     }
-    if (!available || object->apiobj.field_0x27d == 0 || !ObjLandReady(object)) return;
+    if (!available || object->apiobj.field_0x27d == 0 || !ObjLandReady(object))
+        return;
     {
         f32 radius = object->apiobj.field_0x1dc + 0.25f;
         f32 distance;
@@ -140,7 +153,8 @@ void Attracto_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
         }
     }
     if (object->apiobj.model_draw_result == 0 || !(object->camera_screen_position.z > 0.0f) ||
-        (object->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) == 0) return;
+        (object->pad_gamepad->buttons_held & GAMEPAD_SPECIAL) == 0)
+        return;
 begin_suction:
     object->character_context = 0x52;
     object->context_animation = 0x9a;
@@ -166,7 +180,8 @@ ATTRACTO_s *Attracto_FindNearest(WORLDINFO_s *world, NUVEC *position, GameObject
     for (i32 i = 0; i < world->attracto_count; ++i, ++attracto) {
         f32 candidate;
         if (object != NULL) {
-            if ((attracto->state_flags & 7) != 3) continue;
+            if ((attracto->state_flags & 7) != 3)
+                continue;
             candidate = NuVecDistSqr(position, &attracto->active_position, NULL);
         } else {
             candidate = NuVecDistSqr(position, &attracto->position, NULL);
@@ -176,7 +191,8 @@ ATTRACTO_s *Attracto_FindNearest(WORLDINFO_s *world, NUVEC *position, GameObject
             nearest = attracto;
         }
     }
-    if (distance != NULL) *distance = best;
+    if (distance != NULL)
+        *distance = best;
     return nearest;
 }
 

@@ -34,7 +34,8 @@ extern "C" TERRAIN_SURFACE_s TerSurface[32];
 
 void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO *info) {
     TERRAIN_GROUP *group = reinterpret_cast<TERRAIN_GROUP *>(terrain_group);
-    if (CurTerr == NULL || static_cast<u32>(group->chunk_type) > 1) return;
+    if (CurTerr == NULL || static_cast<u32>(group->chunk_type) > 1)
+        return;
     TERRAIN_SHAPE_BATCH *input = static_cast<TERRAIN_SHAPE_BATCH *>(group->data);
     TERRAIN_SHAPE_BATCH *output = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(buffer);
     while (input->marker >= 0) {
@@ -115,7 +116,6 @@ void Platform_Init(WORLDINFO_s *world) {
     NuSpecialFind(world->current_gscn, &LevHSpecial[0], const_cast<char *>("slave1_level"), 0);
 }
 
-
 void Platform_Reset(WORLDINFO_s *) {
     NuSpecialSetVisibility(&LevHSpecial[0], 0);
 }
@@ -141,7 +141,8 @@ void PlatformConnect(char *track_id, nuvec_s *position_delta, nuvec_s *movement_
 }
 
 void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info) {
-    if (CurTerr == NULL || group_index < 0) return;
+    if (CurTerr == NULL || group_index < 0)
+        return;
     TERRAIN_GROUP *group = &CurTerr->groups[group_index];
     NUVEC minimum = {123456792.0f, 123456792.0f, 123456792.0f};
     NUVEC maximum = {-123456792.0f, -123456792.0f, -123456792.0f};
@@ -160,8 +161,8 @@ void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info
                 memcpy(destination, source, sizeof(TERRAIN_SHAPE));
                 for (i32 vertex = last_vertex; vertex >= 0; --vertex) {
                     NUVEC &v = destination->vectors[vertex];
-                    v = TerrainSkin(info, &source->vectors[SkinFlipTab[vertex + info->mirrored * 4]],
-                                    -1.0f, info->flags);
+                    v = TerrainSkin(info, &source->vectors[SkinFlipTab[vertex + info->mirrored * 4]], -1.0f,
+                                    info->flags);
                     v.x -= info->matrix->m30;
                     v.y -= info->matrix->m31;
                     v.z -= info->matrix->m32;
@@ -210,7 +211,8 @@ void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info
     group->bounds_max.y = (maximum.y + 0.1f) + info->matrix->m31;
     group->bounds_max.z = (maximum.z + 0.1f) + info->matrix->m32;
     group->radius = NuFsqrt(radius_squared);
-    if (bytes > PlatSkinMaxSize) PlatSkinMaxSize = bytes;
+    if (bytes > PlatSkinMaxSize)
+        PlatSkinMaxSize = bytes;
 }
 
 void CharPlatforms_Reset(CHARPLATFORMSYS_s *system) {
@@ -240,15 +242,18 @@ void CharPlatforms_Reset(CHARPLATFORMSYS_s *system) {
 }
 
 void CharPlatforms_Update(CHARPLATFORMSYS_s *system) {
-    if (system == NULL) return;
+    if (system == NULL)
+        return;
     CHARPLATFORM_s *platform = system->platforms;
     for (i32 i = 0; i < system->platform_count; ++i, ++platform) {
-        if (platform->object_id == -1) continue;
+        if (platform->object_id == -1)
+            continue;
         i32 visible = 0;
         GameObject_s *object = Obj;
         for (i32 j = 0; j < HIGHGAMEOBJECT; ++j, ++object) {
             if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || object->apiobj.field_0x287 != 0 ||
-                object->field_0x107c != platform->platform_id) continue;
+                object->field_0x107c != platform->platform_id)
+                continue;
             nuhspecial_s *special = &system->platforms[i].special;
             NUMTX *matrix = NuSpecialGetDrawMtx(special);
             if (matrix != NULL) {
@@ -281,7 +286,8 @@ GameObject_s *CharPlatform_FindObjFromPlatID(CHARPLATFORMSYS_s *system, i32 plat
     if (system != NULL) {
         CHARPLATFORM_s *platform = system->platforms;
         for (i32 i = 0; i < system->platform_count; ++i, ++platform) {
-            if (platform->object != NULL && platform->platform_id == platform_id) return platform->object;
+            if (platform->object != NULL && platform->platform_id == platform_id)
+                return platform->object;
         }
     }
     return NULL;

@@ -1544,15 +1544,18 @@ void NuMtxToQuat(NUMTX *m, struct nuquat_s *out) {
         out->z = (m->m01 - m->m10) * s;
     } else {
         i32 i = 0;
-        if (m->m11 > m->m00) i = 1;
-        if (m->m22 > reinterpret_cast<f32 *>(m)[i * 4 + i]) i = 2;
+        if (m->m11 > m->m00)
+            i = 1;
+        if (m->m22 > reinterpret_cast<f32 *>(m)[i * 4 + i])
+            i = 2;
         i32 j = next[i];
         i32 k = next[j];
         f32 q[4];
         s = NuFsqrt(reinterpret_cast<f32 *>(m)[i * 4 + i] -
                     (reinterpret_cast<f32 *>(m)[j * 4 + j] + reinterpret_cast<f32 *>(m)[k * 4 + k]) + 1.0f);
         q[i] = s * 0.5f;
-        if (s != 0.0f) s = 0.5f / s;
+        if (s != 0.0f)
+            s = 0.5f / s;
         q[3] = (reinterpret_cast<f32 *>(m)[j * 4 + k] - reinterpret_cast<f32 *>(m)[k * 4 + j]) * s;
         q[j] = (reinterpret_cast<f32 *>(m)[i * 4 + j] + reinterpret_cast<f32 *>(m)[j * 4 + i]) * s;
         q[k] = (reinterpret_cast<f32 *>(m)[i * 4 + k] + reinterpret_cast<f32 *>(m)[k * 4 + i]) * s;

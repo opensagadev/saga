@@ -32,7 +32,8 @@ void TorpedoCode(GameObject_s *, i32, float) {
 }
 
 f32 Torpedo_Scale(BOLT_s *bolt) {
-    if (bolt != NULL && bolt->owner != NULL) return 2.0f * bolt->owner->apiobj.field_0x1dc;
+    if (bolt != NULL && bolt->owner != NULL)
+        return 2.0f * bolt->owner->apiobj.field_0x1dc;
     return 3.0f;
 }
 
@@ -85,31 +86,32 @@ i32 Tube_InCylinder(GameObject_s *object, TUBE *tube, f32 *horizontal_distance_s
 }
 
 void TorpedoHitTarget(BOLT_s *bolt) {
-    if (bolt == NULL || bolt->owner == NULL || bolt->owner->torpedo == NULL) return;
+    if (bolt == NULL || bolt->owner == NULL || bolt->owner->torpedo == NULL)
+        return;
 
     TORPEDOPACKET *packet = bolt->owner->torpedo;
     if (packet->target != NULL) {
         NUVEC *position = NULL;
         f32 radius;
         switch (packet->target_type) {
-        case 2: {
-            GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(packet->target);
-            radius = obstacle->field_0x58;
-            position = &obstacle->evaluated_position;
-            break;
-        }
-        case 0: {
-            GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(packet->target);
-            radius = blowup->target_scale;
-            position = &blowup->mid_position;
-            break;
-        }
-        case 1: {
-            GIZTURRET_s *turret = static_cast<GIZTURRET_s *>(packet->target);
-            radius = NuSpecialGetOriginRadius(&turret->primary_anim_obj->special);
-            position = NuSpecialGetDrawPos(&turret->primary_anim_obj->special);
-            break;
-        }
+            case 2: {
+                GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(packet->target);
+                radius = obstacle->field_0x58;
+                position = &obstacle->evaluated_position;
+                break;
+            }
+            case 0: {
+                GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(packet->target);
+                radius = blowup->target_scale;
+                position = &blowup->mid_position;
+                break;
+            }
+            case 1: {
+                GIZTURRET_s *turret = static_cast<GIZTURRET_s *>(packet->target);
+                radius = NuSpecialGetOriginRadius(&turret->primary_anim_obj->special);
+                position = NuSpecialGetDrawPos(&turret->primary_anim_obj->special);
+                break;
+            }
         }
         if (position != NULL) {
             NUVEC delta;
@@ -121,15 +123,15 @@ void TorpedoHitTarget(BOLT_s *bolt) {
                 void *target = hit_packet->target;
                 if (target != NULL) {
                     switch (target_type) {
-                    case 0:
-                        GizmoBlowupBlowup(static_cast<GIZMOBLOWUP_s *>(target), 1, 11, 1, NULL, 1);
-                        break;
-                    case 1:
-                        GizTurrets_Hit(WORLD, static_cast<GIZTURRET_s *>(target), &bolt->position, player, -1);
-                        break;
-                    case 2:
-                        GizObstacles_Hit(WORLD, static_cast<GIZOBSTACLE_s *>(target), &bolt->position, player, -1);
-                        break;
+                        case 0:
+                            GizmoBlowupBlowup(static_cast<GIZMOBLOWUP_s *>(target), 1, 11, 1, NULL, 1);
+                            break;
+                        case 1:
+                            GizTurrets_Hit(WORLD, static_cast<GIZTURRET_s *>(target), &bolt->position, player, -1);
+                            break;
+                        case 2:
+                            GizObstacles_Hit(WORLD, static_cast<GIZOBSTACLE_s *>(target), &bolt->position, player, -1);
+                            break;
                     }
                 }
             }
@@ -146,7 +148,8 @@ void Torpedo_InitBolt(BOLT_s *bolt) {
 }
 
 void *FindNearestTorpTarget(WORLDINFO_s *world, NUVEC *position, f32 distance_squared, u8 *target_type) {
-    if (world->gizmo_blowup_count == 0) return NULL;
+    if (world->gizmo_blowup_count == 0)
+        return NULL;
     void *nearest = NULL;
     u8 type = 0;
     NUVEC delta;
@@ -183,7 +186,8 @@ void *FindNearestTorpTarget(WORLDINFO_s *world, NUVEC *position, f32 distance_sq
     if (WORLD->area != NULL && WORLD->area == BOUNTYHUNTERPURSUIT_ADATA) {
         if (world->giz_obstacle_sys != NULL) {
             for (i32 i = 0; i < world->giz_obstacle_sys->active_gizmo_count; ++i) {
-                GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(world->giz_obstacle_sys->active_gizmos[i]->object);
+                GIZOBSTACLE_s *obstacle =
+                    static_cast<GIZOBSTACLE_s *>(world->giz_obstacle_sys->active_gizmos[i]->object);
                 if ((obstacle->progress_flags & 2) != 0 && (obstacle->progress_flags & 1) != 0 &&
                     (obstacle->runtime_flags & 0x80) == 0) {
                     f32 distance = NuVecDistSqr(&obstacle->evaluated_position, position, &delta);
@@ -196,20 +200,23 @@ void *FindNearestTorpTarget(WORLDINFO_s *world, NUVEC *position, f32 distance_sq
             }
         }
     }
-    if (nearest != NULL && target_type != NULL) *target_type = type;
+    if (nearest != NULL && target_type != NULL)
+        *target_type = type;
     return nearest;
 }
 
 void HomeNearestTorpTarget(BOLT_s *bolt, TORPEDOPACKET_s *packet) {
     BOLTTYPE_s *type = BoltType_FindByID(15, WORLD);
-    if (packet == NULL || bolt == NULL || (packet->field_0x1 & 8) != 0) return;
+    if (packet == NULL || bolt == NULL || (packet->field_0x1 & 8) != 0)
+        return;
     f32 range = (bolt->lifetime - bolt->time) * bolt->speed;
     void *target = packet->target;
     u8 target_type;
     if (target == NULL) {
         target = FindNearestTorpTarget(WORLD, &bolt->position, range * range, &target_type);
         if (target == NULL) {
-            if (bolt->time == 0.0f) bolt->velocity.y += 6.0f;
+            if (bolt->time == 0.0f)
+                bolt->velocity.y += 6.0f;
             return;
         }
     } else {
@@ -219,18 +226,19 @@ void HomeNearestTorpTarget(BOLT_s *bolt, TORPEDOPACKET_s *packet) {
     NUVEC delta;
     NUVEC *target_position = NULL;
     switch (target_type) {
-    case 0:
-        target_position = &static_cast<GIZMOBLOWUP_s *>(target)->mid_position;
-        break;
-    case 1: {
-        target_position = NuSpecialGetDrawPos(&static_cast<GIZTURRET_s *>(target)->primary_anim_obj->special);
-        break;
+        case 0:
+            target_position = &static_cast<GIZMOBLOWUP_s *>(target)->mid_position;
+            break;
+        case 1: {
+            target_position = NuSpecialGetDrawPos(&static_cast<GIZTURRET_s *>(target)->primary_anim_obj->special);
+            break;
+        }
+        case 2:
+            target_position = &static_cast<GIZOBSTACLE_s *>(target)->evaluated_position;
+            break;
     }
-    case 2:
-        target_position = &static_cast<GIZOBSTACLE_s *>(target)->evaluated_position;
-        break;
-    }
-    if (target_position != NULL) NuVecSub(&delta, target_position, &bolt->position);
+    if (target_position != NULL)
+        NuVecSub(&delta, target_position, &bolt->position);
     f32 height = delta.y;
     delta.y = 0.0f;
     f32 distance = NuVecMag(&delta);
@@ -258,14 +266,16 @@ void HomeNearestTorpTarget(BOLT_s *bolt, TORPEDOPACKET_s *packet) {
         NuVecMtxRotate(&bolt->velocity, &bolt->velocity, &matrix);
         NuVecNorm(&bolt->field_0xac, &bolt->velocity);
         f32 lifetime = distance / speed + 0.05f + bolt->time;
-        if (lifetime > bolt->lifetime && (packet->field_0x1 & 8) == 0) bolt->lifetime = lifetime;
+        if (lifetime > bolt->lifetime && (packet->field_0x1 & 8) == 0)
+            bolt->lifetime = lifetime;
     }
     packet->field_0x1 |= 4;
     packet->target = target;
 }
 
 void Torpedo_Ricochet(BOLT_s *bolt, TORPEDOPACKET_s *packet) {
-    if (packet == NULL || bolt == NULL) return;
+    if (packet == NULL || bolt == NULL)
+        return;
     if ((packet->field_0x1 & 8) != 0) {
         if (packet->ricochet_time == 0.0f) {
             NUVEC axis;
@@ -297,8 +307,8 @@ void Torpedo_Ricochet(BOLT_s *bolt, TORPEDOPACKET_s *packet) {
             NuVecMtxRotate(&bolt->velocity, &bolt->velocity, &matrix);
             NuVecScale(&bolt->velocity, &bolt->velocity, 0.8f);
             bolt->speed *= 0.8f;
-            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[71].effect,
-                                            &bolt->position, 60, FRAMETIME, 0, 0, NULL);
+            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[71].effect, &bolt->position, 60, FRAMETIME, 0,
+                                              0, NULL);
             packet->ricochet_time += FRAMETIME;
             packet->field_0x1 |= 0x10;
         } else if (packet->ricochet_time < 0.2f) {

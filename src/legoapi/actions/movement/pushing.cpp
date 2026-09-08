@@ -42,14 +42,17 @@ void SetPushAngle(GameObject_s *object) {
 f32 ForceTowardsMid(GameObject_s *object) {
     SOCKSYS *system = WorldInfo_CurrentlyActive()->sock_sys;
     if (system == NULL || object->sock_position.location.sock == -1 ||
-        static_cast<u8>(object->sock_position.candidate_count) > 1) return 0.0f;
+        static_cast<u8>(object->sock_position.candidate_count) > 1)
+        return 0.0f;
     SOCK *sock = &system->sock[object->sock_position.location.sock];
     f32 inner = sock->mid_force_inner_radius;
     f32 outer = sock->mid_force_outer_radius;
     if (sock->flags & 2) {
-        if (object->field_0x1086 == 4 || !(inner > 0.0f) || !(outer > 0.0f)) return 0.0f;
+        if (object->field_0x1086 == 4 || !(inner > 0.0f) || !(outer > 0.0f))
+            return 0.0f;
         f32 dy = object->sock_position.midpoint.y - object->apiobj.position.y;
-        if (!(dy * dy >= inner * inner)) return 0.0f;
+        if (!(dy * dy >= inner * inner))
+            return 0.0f;
         f32 amount = (fabsf(dy) - inner) / (outer - inner);
         object->target_velocity.y += (dy * object->apiobj.character_data->game_character->run_speed) * amount;
         return amount;
@@ -70,7 +73,8 @@ f32 ForceTowardsMid(GameObject_s *object) {
         }
         if (distance_squared >= inner * inner) {
             f32 ratio = (NuFsqrt(distance_squared) - inner) / (outer - inner);
-            if (ratio > 3.0f) ratio = 3.0f;
+            if (ratio > 3.0f)
+                ratio = 3.0f;
             if (ratio >= 0.0f) {
                 amount = ratio;
                 if (planar == 0 && sock->unknown_7c != 1.0f) {
@@ -91,21 +95,24 @@ f32 ForceTowardsMid(GameObject_s *object) {
                 f32 inverse = 1.0f / NuFsqrt(distance_squared);
                 f32 speed = object->apiobj.character_data->game_character->run_speed * amount;
                 delta.x *= inverse;
-                if (planar == 0) delta.y *= inverse;
+                if (planar == 0)
+                    delta.y *= inverse;
                 delta.z *= inverse;
                 object->target_velocity.x += delta.x * speed;
-                if (planar == 0) object->target_velocity.y += delta.y * speed;
+                if (planar == 0)
+                    object->target_velocity.y += delta.y * speed;
                 object->target_velocity.z += delta.z * speed;
             }
         }
-        if (planar == 0) return amount;
+        if (planar == 0)
+            return amount;
     }
     if ((sock->flags & 8) != 0 && object->apiobj.position.y >= object->sock_position.midpoint.y) {
         CHARACTERDATA *data = object->apiobj.character_data;
         f32 ceiling = object->sock_position.midpoint.y + data->field14_0x30 * data->field17_0x3c * 3.0f;
         f32 vertical = ceiling > object->apiobj.position.y
                            ? (object->apiobj.position.y - object->sock_position.midpoint.y) /
-                             (ceiling - object->sock_position.midpoint.y)
+                                 (ceiling - object->sock_position.midpoint.y)
                            : 1.0f;
         object->target_velocity.y -= vertical * data->game_character->run_speed;
     }
@@ -128,8 +135,6 @@ f32 PushingTowardsAngle(u16 input_angle, u16 direction) {
 i32 CannotKill(GameObject_s *object);
 extern i16 id_GONKDROID;
 
-
-
 i32 Pushing(GameObject_s *object, u16 *normal_angle, i32 *surface, i32 *angle_difference) {
     i32 pushing_obstacle = 0;
     if (LEGOCONTEXT_PUSHOBSTACLE != -1 && LEGOCONTEXT_PUSHOBSTACLE == object->character_context)
@@ -139,30 +144,34 @@ i32 Pushing(GameObject_s *object, u16 *normal_angle, i32 *surface, i32 *angle_di
         pushing_obstacle = 1;
 
     if ((static_cast<i8>(object->apiobj.flags_low) < 0 || (object->field_0xf02 & 3) != 0) &&
-        (object->pad_gamepad->input_magnitude > 0.0f || pushing_obstacle != 0) &&
-        object->field_0x1084 != 0 && CanClimbSurface(object, static_cast<i8>(object->field_0x6b0)) == 0 &&
+        (object->pad_gamepad->input_magnitude > 0.0f || pushing_obstacle != 0) && object->field_0x1084 != 0 &&
+        CanClimbSurface(object, static_cast<i8>(object->field_0x6b0)) == 0 &&
         fabsf(object->contact_normal.y) < NuTrigTable[0x3c71]) {
-        u16 input_angle = pushing_obstacle != 0 ? object->apiobj.movement_facing_angle :
-            GamePad_InputAngle(object, object->pad_gamepad);
+        u16 input_angle = pushing_obstacle != 0 ? object->apiobj.movement_facing_angle
+                                                : GamePad_InputAngle(object, object->pad_gamepad);
         u16 angle = NuAtan2D(object->contact_normal.x, object->contact_normal.z);
         i32 difference = RotDiff(input_angle, angle);
-        if (angle_difference != NULL) *angle_difference = difference;
-        if (difference < 0) difference = -difference;
-        if (difference > 0x4e38 ||
-            (difference > 0x1555 && object->context_animation != -1 &&
-             (object->context_animation == LEGOACT_WALLSHUFFLE_RIGHT ||
-              object->context_animation == LEGOACT_WALLSHUFFLE_LEFT))) {
-            if (normal_angle != NULL) *normal_angle = angle;
-            if (surface != NULL) *surface = static_cast<i8>(object->field_0x6b0);
+        if (angle_difference != NULL)
+            *angle_difference = difference;
+        if (difference < 0)
+            difference = -difference;
+        if (difference > 0x4e38 || (difference > 0x1555 && object->context_animation != -1 &&
+                                    (object->context_animation == LEGOACT_WALLSHUFFLE_RIGHT ||
+                                     object->context_animation == LEGOACT_WALLSHUFFLE_LEFT))) {
+            if (normal_angle != NULL)
+                *normal_angle = angle;
+            if (surface != NULL)
+                *surface = static_cast<i8>(object->field_0x6b0);
             return 1;
         }
     }
-    if (surface != NULL) *surface = -1;
+    if (surface != NULL)
+        *surface = -1;
     return 0;
 }
 
-void PushAway(NUVEC *position, f32 radius, NUVEC *minimum, NUVEC *maximum, GameObject_s *object,
-              GameObject_s *excluded, f32 speed_multiplier, u32 flags) {
+void PushAway(NUVEC *position, f32 radius, NUVEC *minimum, NUVEC *maximum, GameObject_s *object, GameObject_s *excluded,
+              f32 speed_multiplier, u32 flags) {
     i32 count = 1;
     if (object == NULL) {
         object = Obj;
@@ -180,13 +189,16 @@ void PushAway(NUVEC *position, f32 radius, NUVEC *minimum, NUVEC *maximum, GameO
         maximum = &bounds_max;
     }
     for (i32 i = 0; i < count; ++i, ++object) {
-        if (object == excluded || (object->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
-            object->apiobj.field_0x287 != 0 || (object->field_0xe20 & 0x20) != 0) continue;
-        if ((flags & 2) != 0 && object->apiobj.field_0x27d == 0) continue;
-        if ((CInfo[object->character_context].flags & 0x40000000) != 0) continue;
-        GAMECHARACTERDATA *character =
-            static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-        if ((character->flags_090 & 0x8000) != 0) continue;
+        if (object == excluded || (object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || object->apiobj.field_0x287 != 0 ||
+            (object->field_0xe20 & 0x20) != 0)
+            continue;
+        if ((flags & 2) != 0 && object->apiobj.field_0x27d == 0)
+            continue;
+        if ((CInfo[object->character_context].flags & 0x40000000) != 0)
+            continue;
+        GAMECHARACTERDATA *character = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+        if ((character->flags_090 & 0x8000) != 0)
+            continue;
         if (minimum->x > object->apiobj.collision_max.x || object->apiobj.collision_min.x > maximum->x ||
             minimum->z > object->apiobj.collision_max.z || object->apiobj.collision_min.z > maximum->z)
             continue;
@@ -198,12 +210,16 @@ void PushAway(NUVEC *position, f32 radius, NUVEC *minimum, NUVEC *maximum, GameO
         f32 combined_radius = radius + object->apiobj.field_0x1dc;
         if (dx * dx + dz * dz < combined_radius * combined_radius) {
             u16 angle;
-            if (dz == 0.0f && dx == 0.0f) angle = qrand();
-            else angle = NuAtan2D(dx, dz);
+            if (dz == 0.0f && dx == 0.0f)
+                angle = qrand();
+            else
+                angle = NuAtan2D(dx, dz);
             f32 speed = speed_multiplier *
-                static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->run_speed;
-            if (speed < 1.0f) speed = 1.0f;
-            else if (speed > 3.0f) speed = 3.0f;
+                        static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->run_speed;
+            if (speed < 1.0f)
+                speed = 1.0f;
+            else if (speed > 3.0f)
+                speed = 3.0f;
             f32 target_x = speed * NU_SIN_LUT(angle);
             f32 target_z = speed * NU_COS_LUT(angle);
             object->apiobj.velocity.x = SeekValF(object->apiobj.velocity.x, target_x, 10.0f);

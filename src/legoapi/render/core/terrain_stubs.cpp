@@ -184,7 +184,8 @@ void DebrisFreeOldestDmaDebTypeTable() {
     f32 oldest_age = 0.0f;
     for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
         debinftype *effect = debtab[i];
-        if (effect == NULL || effect->native_data == NULL) continue;
+        if (effect == NULL || effect->native_data == NULL)
+            continue;
         f32 age = (effect->time_group == 4 ? panelglobaltime : globaltime) - effect->last_render_time;
         if (age > oldest_age) {
             oldest_age = age;
@@ -485,12 +486,14 @@ extern "C" i32 PARTLookupTypePageOnly(char *, i32);
 extern "C" part_type_s part_types[128];
 void *InitPartDebris(VARIPTR *buf, VARIPTR *, i32 capacity, i32 named_count, char **names, i32 page) {
     PARTDEBSYS_s *system = static_cast<PARTDEBSYS_s *>(BUFFER_ALLOC(buf, sizeof(PARTDEBSYS_s), 16));
-    if (system == NULL) return system;
+    if (system == NULL)
+        return system;
     system->entries = NULL;
     system->capacity = capacity;
     system->named_count = named_count;
     system->entries = static_cast<PARTDEBENTRY_s *>(BUFFER_ALLOC(buf, capacity * sizeof(PARTDEBENTRY_s), 16));
-    if (system->entries == NULL) return NULL;
+    if (system->entries == NULL)
+        return NULL;
     memset(system->entries, -1, capacity * sizeof(PARTDEBENTRY_s));
     i32 i = 0;
     if (names != NULL) {
@@ -508,7 +511,8 @@ void *InitPartDebris(VARIPTR *buf, VARIPTR *, i32 capacity, i32 named_count, cha
             ++i;
         }
     }
-    for (; i < system->capacity; ++i) system->entries[i].type_id = -1;
+    for (; i < system->capacity; ++i)
+        system->entries[i].type_id = -1;
     return system;
 }
 
@@ -730,14 +734,16 @@ void DebrisTimeSlip(i32 group) {
     for (i32 i = 0; i < maxdebkeys; ++i) {
         debkeydatatype_s *key = &debkeydata[i];
         debinftype *effect = debtab[key->effect_index];
-        if (effect->time_group == 4 ? group != 1 : group != 0) continue;
+        if (effect->time_group == 4 ? group != 1 : group != 0)
+            continue;
         key->last_update_time -= 800.0f;
         key->emission_epoch -= 800.0f;
         key->emission_time -= 800.0f;
         key->previous_emission_time -= 800.0f;
         key->field_1e4 -= 800.0f;
         for (i32 chunk = 0; chunk < 32; ++chunk) {
-            if (key->particle_chunks[chunk] == NULL) continue;
+            if (key->particle_chunks[chunk] == NULL)
+                continue;
             dma_particle_chunk_s *particles = key->particle_chunks[chunk];
             i32 count = effect->particle_type == 7 ? 12 : 32;
             for (i32 particle = 0; particle < count; ++particle)
@@ -746,10 +752,13 @@ void DebrisTimeSlip(i32 group) {
     }
     for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
         debinftype *effect = debtab[i];
-        if (effect == NULL) continue;
-        if (effect->time_group == 4 ? group != 1 : group != 0) continue;
+        if (effect == NULL)
+            continue;
+        if (effect->time_group == 4 ? group != 1 : group != 0)
+            continue;
         effect->last_render_time -= 800.0f;
-        if (effect->native_data != NULL) effect->native_data->last_render_time -= 800.0f;
+        if (effect->native_data != NULL)
+            effect->native_data->last_render_time -= 800.0f;
     }
 }
 
@@ -760,13 +769,17 @@ void DebrisDrawCalculateClipBoxes(debinftype *effect, debkeydatatype_s *key) {
     f32 lifetime = effect->particle_lifetime;
     NUVEC extent = {
         (fabsf(effect->emitter_velocity.x) * emission_time + effect->field_04c * lifetime) + effect->field_058,
-        (fabsf(effect->emitter_velocity.y) * emission_time + (fabsf(effect->field_048) + effect->field_050) * lifetime) + effect->field_05c,
-        (fabsf(effect->emitter_velocity.z) * emission_time + effect->field_054 * lifetime) + effect->field_060
-    };
+        (fabsf(effect->emitter_velocity.y) * emission_time +
+         (fabsf(effect->field_048) + effect->field_050) * lifetime) +
+            effect->field_05c,
+        (fabsf(effect->emitter_velocity.z) * emission_time + effect->field_054 * lifetime) + effect->field_060};
     NuVecMtxRotate(&extent, &extent, &key->emitter_orientation);
-    if (extent.x < 0.0f) extent.x = -extent.x;
-    if (extent.y < 0.0f) extent.y = -extent.y;
-    if (extent.z < 0.0f) extent.z = -extent.z;
+    if (extent.x < 0.0f)
+        extent.x = -extent.x;
+    if (extent.y < 0.0f)
+        extent.y = -extent.y;
+    if (extent.z < 0.0f)
+        extent.z = -extent.z;
     f32 padding = 0.0001f * effect->field_14c;
     extent.x = (extent.x + padding) + 0.2f;
     extent.y = (extent.y + padding) + 0.2f;
@@ -807,54 +820,64 @@ extern "C" {
     f32 CameraEmitterDistance(NUVEC *position);
 
     void DebrisDraw(i32, i32 pass) {
-        if (debris_suspended != 0) return;
+        if (debris_suspended != 0)
+            return;
         _NuTimeBarSlotBegin(0, 12, "deb");
         DebMat[7]->tex_id = static_cast<i16>(debris_rt);
         i32 drawn = 0;
         for (particlechunkrendertype_s *chunk = ParticleChunkRenderStack[pass]; chunk != NULL; chunk = chunk->next) {
-            if (chunk->particle_chunk == NULL) continue;
+            if (chunk->particle_chunk == NULL)
+                continue;
             debinftype *effect = chunk->effect;
             debkeydatatype_s *key = chunk->key;
-            if (DebrisCutSceneMode != 0 && effect->cutscene_only != 0) continue;
+            if (DebrisCutSceneMode != 0 && effect->cutscene_only != 0)
+                continue;
             if (DebrisSuspendDrawObjectSwitch != -1 && key != NULL &&
-                key->trigger_second == DebrisSuspendDrawObjectSwitch) continue;
+                key->trigger_second == DebrisSuspendDrawObjectSwitch)
+                continue;
             if (effect->native_data == NULL) {
-                if (freeDmaDebType == EDPP_MAX_DMADEBTYPES) DebrisFreeOldestDmaDebTypeTable();
+                if (freeDmaDebType == EDPP_MAX_DMADEBTYPES)
+                    DebrisFreeOldestDmaDebTypeTable();
                 GenericDebinfoDmaTypeUpdate(effect);
-                if (effect->native_data == NULL) continue;
+                if (effect->native_data == NULL)
+                    continue;
             }
             NUMTX matrix;
             NUVEC position;
             if (key != NULL) {
-                bool assigned =
-                    (effect->particle_keys[0] != -1 && &debkeydata[effect->particle_keys[0]] == key) ||
-                    (effect->particle_keys[1] != -1 && &debkeydata[effect->particle_keys[1]] == key) ||
-                    (effect->particle_keys[2] != -1 && &debkeydata[effect->particle_keys[2]] == key) ||
-                    (effect->particle_keys[3] != -1 && &debkeydata[effect->particle_keys[3]] == key) ||
-                    (effect->particle_keys[4] != -1 && &debkeydata[effect->particle_keys[4]] == key) ||
-                    (effect->particle_keys[5] != -1 && &debkeydata[effect->particle_keys[5]] == key) ||
-                    (effect->particle_keys[6] != -1 && &debkeydata[effect->particle_keys[6]] == key) ||
-                    (effect->particle_keys[7] != -1 && &debkeydata[effect->particle_keys[7]] == key);
+                bool assigned = (effect->particle_keys[0] != -1 && &debkeydata[effect->particle_keys[0]] == key) ||
+                                (effect->particle_keys[1] != -1 && &debkeydata[effect->particle_keys[1]] == key) ||
+                                (effect->particle_keys[2] != -1 && &debkeydata[effect->particle_keys[2]] == key) ||
+                                (effect->particle_keys[3] != -1 && &debkeydata[effect->particle_keys[3]] == key) ||
+                                (effect->particle_keys[4] != -1 && &debkeydata[effect->particle_keys[4]] == key) ||
+                                (effect->particle_keys[5] != -1 && &debkeydata[effect->particle_keys[5]] == key) ||
+                                (effect->particle_keys[6] != -1 && &debkeydata[effect->particle_keys[6]] == key) ||
+                                (effect->particle_keys[7] != -1 && &debkeydata[effect->particle_keys[7]] == key);
                 bool visible = true;
                 if (!assigned && effect->sound_range > 0.0f && effect->use_explicit_clip_box == 0 &&
-                    key->cutoff_distance > effect->sound_range) visible = false;
-                if (key->field_2f7 == 0) continue;
-                if (visible && pass != 4 && effect->generator_type == 0 &&
-                    effect->use_explicit_clip_box == 0 && !assigned) {
+                    key->cutoff_distance > effect->sound_range)
+                    visible = false;
+                if (key->field_2f7 == 0)
+                    continue;
+                if (visible && pass != 4 && effect->generator_type == 0 && effect->use_explicit_clip_box == 0 &&
+                    !assigned) {
                     if (key->clip_radius == 0.0f || *edbits_editor_enabled != 0)
                         DebrisDrawCalculateClipBoxes(effect, key);
                     if (edbits_editmode == 0 && key->gscene != NULL && key->field_2f2 != -1)
                         visible = NuPortalClipTest(key->gscene, &key->position, key->clip_radius, key->field_2f2) != 0;
                     NUVEC minimum = key->clip_min;
                     NUVEC maximum = key->clip_max;
-                    if (NuCameraClipTestExtents(&minimum, &maximum, &key->clip_matrix, 0.0f, 0) == 0) continue;
+                    if (NuCameraClipTestExtents(&minimum, &maximum, &key->clip_matrix, 0.0f, 0) == 0)
+                        continue;
                 }
-                if (!visible) continue;
+                if (!visible)
+                    continue;
                 matrix = key->effect_orientation;
                 position = key->position;
             } else {
                 if (effect->sound_range > 0.0f && effect->use_explicit_clip_box == 0 &&
-                    CameraEmitterDistance(&chunk->position) > effect->sound_range) continue;
+                    CameraEmitterDistance(&chunk->position) > effect->sound_range)
+                    continue;
                 matrix = chunk->effect_orientation;
                 position = chunk->position;
             }
@@ -868,22 +891,28 @@ extern "C" {
                 render_time = renderglobaltime;
                 effect->last_render_time = globaltime;
             }
-            if (key != NULL && key->field_2fa != 0) NuRndrSetParticleRotation(&key->particle_orientation);
-            else if (effect->camera_facing != 0) NuRndrSetParticleRotation(&xzfacingmtx);
-            else NuRndrSetParticleRotation(NULL);
+            if (key != NULL && key->field_2fa != 0)
+                NuRndrSetParticleRotation(&key->particle_orientation);
+            else if (effect->camera_facing != 0)
+                NuRndrSetParticleRotation(&xzfacingmtx);
+            else
+                NuRndrSetParticleRotation(NULL);
             NuMtxPreScaleX(&matrix, 1.0f);
             i32 mode;
-            if (effect->particle_type == 7) mode = 4;
+            if (effect->particle_type == 7)
+                mode = 4;
             else if (effect->use_explicit_clip_box != 0) {
                 NuRndrSetDebBox(reinterpret_cast<NUVEC *>(effect->fields_2f8));
                 mode = 6;
-            } else mode = 0;
+            } else
+                mode = 0;
             NuRndrParticleGroup(reinterpret_cast<uv1debdata *>(chunk->particle_chunk), chunk->effect->native_data,
                                 DebMat[static_cast<i8>(chunk->effect->particle_type)], render_time, &matrix, mode,
                                 effect->field_140, effect->field_144, effect->clip_extent, effect->field_044);
             drawn = 1;
         }
-        if (drawn != 0) g_renderingDebris = g_renderingDebris == 0;
+        if (drawn != 0)
+            g_renderingDebris = g_renderingDebris == 0;
         _NuTimeBarSlotEnd(0, 12);
     }
 
@@ -899,14 +928,19 @@ extern "C" {
     void NuRainDraw(i32);
 
     void DebrisDrawGlassEx(i32 flicker) {
-        if (debris_initialised == 0) return;
+        if (debris_initialised == 0)
+            return;
         i32 reserved = NuTexReserve(NuTexGetReqSize(debris_rt, 0));
         DebrisGlassParticlesActive();
-        if (flicker == 0) NuRndrBeginSceneEx(-1, -2, 1);
-        else NuRndrFlickerBeginScene();
-        if (DebrisGlassParticlesActive() != 0) DebrisDraw(0, 2);
+        if (flicker == 0)
+            NuRndrBeginSceneEx(-1, -2, 1);
+        else
+            NuRndrFlickerBeginScene();
+        if (DebrisGlassParticlesActive() != 0)
+            DebrisDraw(0, 2);
         NuRainDraw(reserved);
-        if (flicker != 0) NuRndrFlickerEnd();
+        if (flicker != 0)
+            NuRndrFlickerEnd();
         NuRndrEndScene();
         NuTexUnReserve();
     }
@@ -991,7 +1025,8 @@ extern "C" {
     }
 
     void DebrisGlassInit(void) {
-        if (debris_initialised != 0) return;
+        if (debris_initialised != 0)
+            return;
         if (debris_rt == 0) {
             NUTEX texture = {NUTEX_RTT24, PS2_REZ_W, PS2_REZ_H};
             debris_rt = NuTexCreate(&texture);
@@ -1190,7 +1225,6 @@ extern "C" {
         globalframes = 0;
     }
 
-
     void DebrisSetCutSceneMode(i32 enabled) {
         DebrisCutSceneMode = enabled;
     }
@@ -1202,7 +1236,8 @@ extern "C" {
     }
 
     void DebrisSetFacing(i32 handle, u8 enabled, i16 x_angle, i16 y_angle) {
-        if (handle == -1) return;
+        if (handle == -1)
+            return;
         debkeydata[handle].field_2fa = enabled;
         NuMtxSetIdentity(&debkeydata[handle].particle_orientation);
         NUMTX *matrix = &debkeydata[handle].particle_orientation;
@@ -1316,7 +1351,8 @@ extern "C" {
     }
 
     void DebrisStatusAlwaysOff(i32 *handle) {
-        if (*handle != -1) debkeydata[*handle].field_2f4 = 0;
+        if (*handle != -1)
+            debkeydata[*handle].field_2f4 = 0;
     }
 
     void DebrisStatusAlwaysOn(void) {
@@ -1404,15 +1440,18 @@ extern "C" {
     }
 
     void DebrisTypeStatusAlwaysOff(i32 type) {
-        if (type != -1) debtab[type]->status = 0;
+        if (type != -1)
+            debtab[type]->status = 0;
     }
 
     void DebrisTypeStatusAlwaysOn(i32 type) {
-        if (type != -1) debtab[type]->status = 2;
+        if (type != -1)
+            debtab[type]->status = 2;
     }
 
     void DebrisTypeStatusNormal(i32 type) {
-        if (type != -1) debtab[type]->status = 1;
+        if (type != -1)
+            debtab[type]->status = 1;
     }
 
     i32 DeletePlatinst(i32 index) {
@@ -1502,9 +1541,11 @@ extern "C" {
     }
 
     void AddPickupTerr(i32 type, NUVEC *position) {
-        if (CurTerr == NULL) return;
+        if (CurTerr == NULL)
+            return;
         i16 source = PickupTerr->group_for_type[type];
-        if (source == -1 || curPickInst >= 128) return;
+        if (source == -1 || curPickInst >= 128)
+            return;
         TERRAIN_GROUP *group = &CurTerr->groups[CurTerr->max_groups + curPickInst];
         *group = PickupTerr->groups[source];
         group->origin = *position;
@@ -1513,19 +1554,22 @@ extern "C" {
 
     i32 AddPickupTerrRot(i32 type, NUMTX *matrix, NUMTX *previous, i32 rotating) {
         TERRSET *terrain = CurTerr;
-        if (terrain == NULL) return -1;
+        if (terrain == NULL)
+            return -1;
         if (rotating == 0 && previous == NULL) {
             AddPickupTerr(type, reinterpret_cast<NUVEC *>(&matrix->m30));
             return -1;
         }
-        if (terrain->group_index_count >= terrain->max_group_indices ||
-            terrain->group_count >= terrain->max_groups || matrix == NULL ||
-            (rotating != 0 && previous == NULL)) return -1;
+        if (terrain->group_index_count >= terrain->max_group_indices || terrain->group_count >= terrain->max_groups ||
+            matrix == NULL || (rotating != 0 && previous == NULL))
+            return -1;
         i16 source = PickupTerr->group_for_type[type];
-        if (source == -1 || terrain->removed_platform_count >= 32 || terrain->max_platforms <= 0) return -1;
+        if (source == -1 || terrain->removed_platform_count >= 32 || terrain->max_platforms <= 0)
+            return -1;
         i32 index = 0;
         while (terrain->platforms[index].scene_object != NULL) {
-            if (++index == terrain->max_platforms) return -1;
+            if (++index == terrain->max_platforms)
+                return -1;
         }
         i16 group_index = terrain->group_count;
         TERRAIN_GROUP &group = terrain->groups[group_index];
@@ -1571,10 +1615,12 @@ extern "C" {
             terrain->group_count >= terrain->max_groups || object == NULL)
             return -1;
         i16 source = PickupTerr->group_for_type[type];
-        if (source == -1 || terrain->max_platforms <= 0) return -1;
+        if (source == -1 || terrain->max_platforms <= 0)
+            return -1;
         i32 index = 0;
         while (terrain->platforms[index].scene_object != NULL) {
-            if (++index == terrain->max_platforms) return -1;
+            if (++index == terrain->max_platforms)
+                return -1;
         }
         i16 group_index = terrain->group_count;
         TERRAIN_GROUP &group = terrain->groups[group_index];
@@ -1609,7 +1655,8 @@ extern "C" {
         TerrPoly = NULL;
         TerrWallInfo = 0;
         castnum = -1;
-        if (CurTerr == NULL) return 0;
+        if (CurTerr == NULL)
+            return 0;
         TerI = static_cast<TerrainQuery_s *>(NuScratchAlloc32(0x948));
         TerrOverRideScan = NULL;
         TerrainQuery_s *query = TerI;
@@ -1650,7 +1697,8 @@ extern "C" {
     }
 
     void NewRayCastGetImpactNormal(NUVEC *normal) {
-        if (TerI != NULL) *normal = TerI->movement_normal;
+        if (TerI != NULL)
+            *normal = TerI->movement_normal;
     }
 
     i32 NewRayCastGetImpactTerrainType(void) {
@@ -1780,7 +1828,8 @@ extern "C" {
     i32 NewTerrainOnAPlatform(void *id) {
         if (CurTerr != NULL) {
             CurTrackInfo = ScanTerrId(id);
-            if (CurTrackInfo != NULL) return CurTrackInfo->platform_contact_state;
+            if (CurTrackInfo != NULL)
+                return CurTrackInfo->platform_contact_state;
         }
         return 0;
     }
@@ -2054,20 +2103,26 @@ extern "C" {
         }
     }
 
-    i32 PlatInstSkinRegisterEx(NUMTX *matrix, void *skin_data, void *matrix_data, f32 scale,
-                               i32 instance, i32 flags, TERRSET *source) {
+    i32 PlatInstSkinRegisterEx(NUMTX *matrix, void *skin_data, void *matrix_data, f32 scale, i32 instance, i32 flags,
+                               TERRSET *source) {
         TERRSET *terrain = CurTerr;
-        if (terrain == NULL || source == NULL) return -1;
+        if (terrain == NULL || source == NULL)
+            return -1;
         i32 group_index = terrain->group_count;
-        if (group_index >= terrain->max_groups) return -3;
-        if (skin_data == NULL || matrix == NULL) return -4;
-        if (PlatSkinCnt >= PlatSkinMax) return -5;
+        if (group_index >= terrain->max_groups)
+            return -3;
+        if (skin_data == NULL || matrix == NULL)
+            return -4;
+        if (PlatSkinCnt >= PlatSkinMax)
+            return -5;
         TERRAIN_PLATFORM *platform = source->platforms;
         i32 i;
         for (i = 0; i < source->max_platforms; ++i, ++platform) {
-            if (platform->scene_object != NULL && static_cast<i16>(platform->scene_object_index) == instance) break;
+            if (platform->scene_object != NULL && static_cast<i16>(platform->scene_object_index) == instance)
+                break;
         }
-        if (i == source->max_platforms || source->max_platforms <= 0) return -6;
+        if (i == source->max_platforms || source->max_platforms <= 0)
+            return -6;
         TERRAIN_GROUP &group = terrain->groups[group_index];
         group = source->groups[platform->terrain_group_index];
         group.chunk_type = 0;
@@ -2090,8 +2145,7 @@ extern "C" {
         return CurTerr->group_count - 1;
     }
 
-    i32 PlatInstSkinRegister(NUMTX *matrix, void *skin_data, void *matrix_data, f32 scale,
-                             i32 instance, i32 flags) {
+    i32 PlatInstSkinRegister(NUMTX *matrix, void *skin_data, void *matrix_data, f32 scale, i32 instance, i32 flags) {
         return PlatInstSkinRegisterEx(matrix, skin_data, matrix_data, scale, instance, flags, CurTerr);
     }
 
@@ -2126,31 +2180,41 @@ extern "C" {
                 maximum_x = MAX(group.bounds_max.x, maximum_x);
                 maximum_z = MAX(group.bounds_max.z, maximum_z);
             } else if (group.chunk_type == 1) {
-                if (minimum_x > group.bounds_min.x) minimum_x = group.origin.x + group.bounds_min.x;
-                if (minimum_z > group.bounds_min.z) minimum_z = group.origin.z + group.bounds_min.z;
-                if (maximum_x < group.bounds_max.x) maximum_x = group.origin.x + group.bounds_max.x;
-                if (maximum_z < group.bounds_max.z) maximum_z = group.origin.z + group.bounds_max.z;
+                if (minimum_x > group.bounds_min.x)
+                    minimum_x = group.origin.x + group.bounds_min.x;
+                if (minimum_z > group.bounds_min.z)
+                    minimum_z = group.origin.z + group.bounds_min.z;
+                if (maximum_x < group.bounds_max.x)
+                    maximum_x = group.origin.x + group.bounds_max.x;
+                if (maximum_z < group.bounds_max.z)
+                    maximum_z = group.origin.z + group.bounds_max.z;
             }
         }
         terrain->group_index_count = 0;
         for (i32 i = 0; i < terrain->group_count; ++i) {
             TERRAIN_GROUP &group = groups[i];
-            if (group.chunk_type != 0) continue;
+            if (group.chunk_type != 0)
+                continue;
             group_min_x[i] = MIN(group.bounds_min.x, 200000000.0f);
             group_min_z[i] = MIN(group.bounds_min.z, 200000000.0f);
             group_max_x[i] = MAX(group.bounds_max.x, -200000000.0f);
             group_max_z[i] = MAX(group.bounds_max.z, -200000000.0f);
             i32 x_distance = static_cast<i32>((group_min_x[i] + group_max_x[i]) * 0.5f - minimum_x);
             i32 x_cell = static_cast<i32>(static_cast<f32>(x_distance * 7) / (maximum_x - minimum_x));
-            if (x_cell < 0) x_cell = 0;
-            else if (x_cell > 6) x_cell = 6;
+            if (x_cell < 0)
+                x_cell = 0;
+            else if (x_cell > 6)
+                x_cell = 6;
             i32 z_distance = static_cast<i32>((group_min_z[i] + group_max_z[i]) * 0.5f - minimum_z);
             i32 z_cell = static_cast<i32>(static_cast<f32>(z_distance * 7) / (maximum_z - minimum_z));
-            if (z_cell < 0) z_cell = 0;
-            else if (z_cell > 6) z_cell = 6;
+            if (z_cell < 0)
+                z_cell = 0;
+            else if (z_cell > 6)
+                z_cell = 6;
             group_cells[i] = x_cell + z_cell * 7;
         }
-        for (i32 i = 0; i < TERRAIN_CELL_RECORD_COUNT; ++i) terrain->cells[i].group_count = 0;
+        for (i32 i = 0; i < TERRAIN_CELL_RECORD_COUNT; ++i)
+            terrain->cells[i].group_count = 0;
         terrain->used_cell_count = 0;
         for (i32 cell_index = 0; cell_index < TERRAIN_GRID_CELL_COUNT; ++cell_index) {
             TERRAIN_CELL &cell = terrain->cells[terrain->used_cell_count];
@@ -2158,7 +2222,8 @@ extern "C" {
             f32 min_x = 200000000.0f, min_z = 200000000.0f;
             f32 max_x = -200000000.0f, max_z = -200000000.0f;
             for (i32 i = 0; i < terrain->group_count; ++i) {
-                if (group_cells[i] != cell_index || groups[i].chunk_type != 0) continue;
+                if (group_cells[i] != cell_index || groups[i].chunk_type != 0)
+                    continue;
                 min_x = MIN(group_min_x[i], min_x);
                 min_z = MIN(group_min_z[i], min_z);
                 max_x = MAX(group_max_x[i], max_x);
@@ -2179,7 +2244,8 @@ extern "C" {
         TERRAIN_GROUP *group = groups;
         for (i32 i = 0; i < terrain->group_count; ++i) {
             // The original advances this pointer only for a secondary group.
-            if (group->chunk_type != 1) continue;
+            if (group->chunk_type != 1)
+                continue;
             terrain->group_indices[terrain->group_index_count++] = i;
             ++platform_cell.group_count;
             terrain->platforms[group->scene_index].terrain_group_index = i;
@@ -2197,7 +2263,8 @@ extern "C" {
     void PlatSkinMemReset(void) {
         if (PlatSkinResetTotal >= 0) {
             CurTerr->group_count = PlatSkinResetTotal;
-            for (i32 i = 0; i < 16; ++i) CurTerr->index_levels[i].entry_count = 0;
+            for (i32 i = 0; i < 16; ++i)
+                CurTerr->index_levels[i].entry_count = 0;
         }
     }
 
@@ -2244,15 +2311,13 @@ extern "C" {
     }
 
     const char *TerrErrorString(i32 error) {
-        static const char *const errors[] = {
-            "ERR_UNKNOWN", "ERR_NOTERR", "ERR_MAXTERLIST", "ERR_MAXTERR",
-            "ERR_INOUT", "ERR_PLATSKINMAX", "ERR_NOINSTANCE"
-        };
+        static const char *const errors[] = {"ERR_UNKNOWN", "ERR_NOTERR",      "ERR_MAXTERLIST", "ERR_MAXTERR",
+                                             "ERR_INOUT",   "ERR_PLATSKINMAX", "ERR_NOINSTANCE"};
         i32 index = -error;
-        if (index >= 7) index = 0;
+        if (index >= 7)
+            index = 0;
         return errors[index];
     }
-
 
     void TerrainAddWallSpline(TERRAIN_SPATIAL_NODE *node, TERRSET *terrain) {
         reinterpret_cast<TERRAIN_SPATIAL_NODE **>(node)[-1] = terrain->spatial_nodes;
@@ -2286,9 +2351,6 @@ extern "C" {
         return NULL;
     }
 
-
-
-
     void TerrainPlatGetMtx(i32 index, NUMTX **previous, NUMTX **current) {
         if (index >= 0) {
             *previous = &CurTerr->platforms[index].previous_matrix;
@@ -2301,7 +2363,8 @@ extern "C" {
     }
 
     void TerrainPolyEdge(NUVEC *first, NUVEC *second) {
-        if ((TerI->hit_type & 0xf) != TERRAIN_HIT_TYPE_CYLINDER) return;
+        if ((TerI->hit_type & 0xf) != TERRAIN_HIT_TYPE_CYLINDER)
+            return;
         switch (TerI->hit_edge) {
             case 1: {
                 NUVEC *origin = &CurTerr->groups[TerI->terrain_group_index].origin;
@@ -2358,14 +2421,17 @@ extern "C" {
                 second->z = origin->z + surface->vectors[2].z;
                 break;
             }
-            default: break;
+            default:
+                break;
         }
     }
 
     void TerrainRemoveWallSpline(TERRAIN_SPATIAL_NODE *node, TERRSET *terrain) {
-        if (terrain == NULL) return;
+        if (terrain == NULL)
+            return;
         TERRAIN_SPATIAL_NODE *previous = terrain->spatial_nodes;
-        if (previous == NULL) return;
+        if (previous == NULL)
+            return;
         if (previous == node) {
             terrain->spatial_nodes = reinterpret_cast<TERRAIN_SPATIAL_NODE **>(previous)[-1];
             return;
@@ -2376,7 +2442,8 @@ extern "C" {
             next = reinterpret_cast<TERRAIN_SPATIAL_NODE **>(previous)[-1];
         }
         if (next == node)
-            reinterpret_cast<TERRAIN_SPATIAL_NODE **>(previous)[-1] = reinterpret_cast<TERRAIN_SPATIAL_NODE **>(node)[-1];
+            reinterpret_cast<TERRAIN_SPATIAL_NODE **>(previous)[-1] =
+                reinterpret_cast<TERRAIN_SPATIAL_NODE **>(node)[-1];
     }
 
     void TerrainScanWallSpline(TERRAIN_SPATIAL_NODE *node) {
@@ -2416,10 +2483,6 @@ extern "C" {
         TerImpactDataMax = maximum_impacts;
     }
 
-
-
-
-
     void UpdateDebrisRenderStackPriority(void) {
     }
 
@@ -2434,7 +2497,8 @@ extern "C" {
         terrain->shape_data = *buffer;
         *buffer = static_cast<u8 *>(*buffer) + 0x1c00;
         memset(terrain->groups, 0, 32 * sizeof(TERRAIN_GROUP));
-        for (i32 i = 0; i < 32; ++i) terrain->groups[i].chunk_type = -1;
+        for (i32 i = 0; i < 32; ++i)
+            terrain->groups[i].chunk_type = -1;
         for (i32 i = 0; i < 32; ++i) {
             TERRAIN_PLATFORM &platform = terrain->platforms[i];
             platform.scene_object = NULL;
@@ -2453,10 +2517,12 @@ extern "C" {
         TerrPoly = NULL;
         TerrWallInfo = 0;
         PlatImpactId = -1;
-        terrain->group_count = ReadTerrainPickup(reinterpret_cast<unsigned char *>(path), reinterpret_cast<i16 **>(buffer), terrain);
+        terrain->group_count =
+            ReadTerrainPickup(reinterpret_cast<unsigned char *>(path), reinterpret_cast<i16 **>(buffer), terrain);
         for (i32 i = 0; i < 32; ++i) {
             TERRAIN_GROUP &group = terrain->groups[i];
-            if (static_cast<u32>(group.chunk_type) > 1) continue;
+            if (static_cast<u32>(group.chunk_type) > 1)
+                continue;
             NUVEC minimum = {200000000.0f, 200000000.0f, 200000000.0f};
             NUVEC maximum = {-200000000.0f, -200000000.0f, -200000000.0f};
             f32 radius_squared = 0.0f;
@@ -2481,7 +2547,8 @@ extern "C" {
                         radius_squared = MAX(length_squared, radius_squared);
                     }
                 }
-                batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(reinterpret_cast<TERRAIN_SHAPE *>(batch + 1) + batch->shape_count);
+                batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(reinterpret_cast<TERRAIN_SHAPE *>(batch + 1) +
+                                                                batch->shape_count);
             }
             group.radius = NuFsqrt(radius_squared);
             group.chunk_type = 0;

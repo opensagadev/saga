@@ -622,8 +622,8 @@ extern "C" void NuSound3Play3d(nuvec_s *position, i32 sample_index, f32 falloff_
     NuSound3CreateVoice(position, sample_index, falloff_near, falloff_far, volume_left, volume_right, pitch, false);
 }
 
-extern "C" void NuSound3Play3dPri(nuvec_s *position, i32 sample_index, f32, f32,
-                                  i32 volume_left, i32 volume_right, f32 pitch, f32, i32, f32, f32, i32) {
+extern "C" void NuSound3Play3dPri(nuvec_s *position, i32 sample_index, f32, f32, i32 volume_left, i32 volume_right,
+                                  f32 pitch, f32, i32, f32, f32, i32) {
     NuSound3CreateVoice(position, sample_index, 0.0f, 0.0f, volume_left, volume_right, pitch, false);
 }
 

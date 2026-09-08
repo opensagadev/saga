@@ -104,10 +104,11 @@ void Action_SetVisibility(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **,
 
 i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float);
 
-i32 Action_UseTriggerSet(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet,
-                         char **params, i32 param_count, i32 first_time, f32 elapsed) {
-    if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL ||
-        system == NULL || system->player_1 == NULL) return 1;
+i32 Action_UseTriggerSet(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
+                         i32 param_count, i32 first_time, f32 elapsed) {
+    if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL || system == NULL ||
+        system->player_1 == NULL)
+        return 1;
     GameObject_s *object = packet->owner->apiobj.objptr;
     if (first_time != 0 && WORLD->ai_trigger_set_sys != NULL) {
         for (i32 i = 0; i < param_count; ++i) {
@@ -169,14 +170,16 @@ extern i32 LEGOCONTEXT_GRAPPLE;
 extern u32 GAMEPAD_SPECIAL, GAMEPAD_JUMP, GAMEPAD_TOGGLERIGHT;
 extern f32 ai_moveradius;
 
-i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet,
-                            char **, i32, i32, f32 elapsed) {
+i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **, i32, i32,
+                            f32 elapsed) {
     AITRIGGERSETSYS_s *system = WORLD->ai_trigger_set_sys;
-    if (system == NULL || packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL) return 0;
+    if (system == NULL || packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL)
+        return 0;
     GameObject_s *object = packet->owner->apiobj.objptr;
     u8 object_index = packet->owner->apiobj.field_0x289;
     i32 trigger_index = system->field_0x42c0[object_index];
-    if (trigger_index == -1) return 0;
+    if (trigger_index == -1)
+        return 0;
     AITRIGGERSET_s *set = &system->sets[system->field_0x4280[object_index]];
     AITRIGGERSET_TARGET *target = &set->targets[trigger_index];
     GIZMO_s *gizmo = set->triggers[trigger_index];
@@ -185,9 +188,11 @@ i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s 
     if (gizmo->type_id == spinner_gizmotype_id) {
         spinner_origin = &packet->owner->apiobj.collision_position;
         GIZSPINNER_s *spinner = static_cast<GIZSPINNER_s *>(gizmo->object);
-        f32 result = GizSpinner_GetNearestTargetPoint(spinner, spinner_origin, &spinner_position, &spinner_direction, 1);
+        f32 result =
+            GizSpinner_GetNearestTargetPoint(spinner, spinner_origin, &spinner_position, &spinner_direction, 1);
         if (result == -1.0f)
-            result = GizSpinner_GetNearestTargetPoint(spinner, spinner_origin, &spinner_position, &spinner_direction, 0);
+            result =
+                GizSpinner_GetNearestTargetPoint(spinner, spinner_origin, &spinner_position, &spinner_direction, 0);
         if (result != -1.0f) {
             NuVecAddScale(&spinner_position, &spinner_position, &spinner_direction, 0.5f);
             AIMoveInstruction(packet, &spinner_position, 0.0f, &target->path, 1, 0.0f);
@@ -200,11 +205,14 @@ i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s 
             ClearSpecialMove(object);
             for (i32 i = 0; i < 2; ++i) {
                 GameObject_s *other = Player[i];
-                if (other == NULL || other->character_context != 0x46) continue;
+                if (other == NULL || other->character_context != 0x46)
+                    continue;
                 for (i32 j = 0; j < set->trigger_count; ++j) {
                     if (set->triggers[j] != NULL && set->triggers[j]->object == other->field_0x788) {
-                        if (player->apiobj.position.y > object->apiobj.position.y + 0.05f) object->pad_107e[0] = 1;
-                        else if (object->apiobj.position.y - 0.05f > player->apiobj.position.y) object->pad_107e[0] = 2;
+                        if (player->apiobj.position.y > object->apiobj.position.y + 0.05f)
+                            object->pad_107e[0] = 1;
+                        else if (object->apiobj.position.y - 0.05f > player->apiobj.position.y)
+                            object->pad_107e[0] = 2;
                         return 0;
                     }
                 }
@@ -217,10 +225,12 @@ i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s 
         AIMoveInstruction(packet, &target->position, 0.0f, &target->path, 1, 0.0f);
     }
     gizmo = set->triggers[trigger_index];
-    if (gizmo == NULL) return 0;
+    if (gizmo == NULL)
+        return 0;
     NUVEC offset;
     if (gizmo->type_id == lever_gizmotype_id) {
-        if (object->apiobj.character_model->model_data_b[0x5d] == NULL) goto change_character;
+        if (object->apiobj.character_model->model_data_b[0x5d] == NULL)
+            goto change_character;
         LEVER_s *lever = static_cast<LEVER_s *>(gizmo->object);
         if (NuVecXZDistSqr(&packet->terrain_origin, &target->position, &offset) < ai_moveradius * ai_moveradius) {
             packet->movement_look_target = &lever->position;
@@ -236,7 +246,8 @@ i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s 
         }
     } else if (gizmo->type_id == force_gizmotype_id) {
         GIZFORCE_s *force = static_cast<GIZFORCE_s *>(gizmo->object);
-        if (CharCategory_IsCategory(object, (force->config_flags & 0x10) != 0 ? 1 : 0) == 0) goto change_character;
+        if (CharCategory_IsCategory(object, (force->config_flags & 0x10) != 0 ? 1 : 0) == 0)
+            goto change_character;
         if (NuVecXZDistSqr(&packet->terrain_origin, &target->position, &offset) < ai_moveradius * ai_moveradius) {
             packet->movement_look_target = &force->position;
             object->pad_gamepad->allocated_5a |= 4;
@@ -252,7 +263,8 @@ i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s 
             GameObjectSetCanUse(object, grapple, 1, 50, 0.0f);
             AIMoveInstruction(packet, &grapple->ground_position, 0.0f, &target->path, 7,
                               packet->movement_instruction_parameter);
-            if (processor->action_data_1 != 0) return 0;
+            if (processor->action_data_1 != 0)
+                return 0;
         }
         if (NuVecXZDistSqr(&packet->terrain_origin, &target->position, &offset) < ai_moveradius * ai_moveradius) {
             processor->action_data_1 = 1;
@@ -569,16 +581,18 @@ static __used__ void GizAction_ActivateChar(GIZFLOW_s *flow, FLOWBOX_s *, char *
             ActivateCharacter(name, NULL, 0);
         }
     } else if (activate == 0 && name != NULL) {
-        if (Player[0] != NULL && (Player[0]->apiobj.field_0x1f8 & 0x1000) != 0 &&
-            Player[0]->apiobj.field_0x287 == 0 && Player[0]->ai.field_0x134 != 0xff) {
+        if (Player[0] != NULL && (Player[0]->apiobj.field_0x1f8 & 0x1000) != 0 && Player[0]->apiobj.field_0x287 == 0 &&
+            Player[0]->ai.field_0x134 != 0xff) {
             AICREATURE *creature = &world->ai_sys->creatures[Player[0]->ai.field_0x134];
-            if (creature != NULL && NuStrICmp(creature->name, name) == 0) ReleaseTakeOver(Player[0], 0);
+            if (creature != NULL && NuStrICmp(creature->name, name) == 0)
+                ReleaseTakeOver(Player[0], 0);
         }
-        if (Player[1] != NULL && (Player[1]->apiobj.field_0x1f8 & 0x1000) != 0 &&
-            Player[1]->apiobj.field_0x287 == 0 && Player[1]->ai.field_0x134 != 0xff) {
+        if (Player[1] != NULL && (Player[1]->apiobj.field_0x1f8 & 0x1000) != 0 && Player[1]->apiobj.field_0x287 == 0 &&
+            Player[1]->ai.field_0x134 != 0xff) {
             // The original second-player branch also reads player zero's creature index.
             AICREATURE *creature = &world->ai_sys->creatures[Player[0]->ai.field_0x134];
-            if (creature != NULL && NuStrICmp(creature->name, name) == 0) ReleaseTakeOver(Player[1], 0);
+            if (creature != NULL && NuStrICmp(creature->name, name) == 0)
+                ReleaseTakeOver(Player[1], 0);
         }
         DeactivateCharacter(name);
     }

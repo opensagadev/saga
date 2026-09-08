@@ -34,11 +34,13 @@ void Batarang_GetSightInfo(i32 character, i32 *red, i32 *green, i32 *blue, char 
     if (character == id_ROBIN) {
         *green = 0;
         *blue = 31;
-        if (text != NULL) NuStrCpy(text, "\xc2\xb1");
+        if (text != NULL)
+            NuStrCpy(text, "\xc2\xb1");
     } else {
         *green = 223;
         *blue = 0;
-        if (text != NULL) NuStrCpy(text, "\xc2\xa7");
+        if (text != NULL)
+            NuStrCpy(text, "\xc2\xa7");
     }
 }
 

@@ -35,11 +35,13 @@ PART_s *GizForce_Throw(GameObject_s *object, GIZFORCE_s *force, float speed, flo
     if (WORLD->current_level == MAULF_LDATA) {
         NuMtxSetTranslation(&local_matrix, &darth_centre);
         matrix = &local_matrix;
-    } else matrix = NuSpecialGetMtx(special);
-    if (object == NULL || object->force_throw_target == NULL) return NULL;
+    } else
+        matrix = NuSpecialGetMtx(special);
+    if (object == NULL || object->force_throw_target == NULL)
+        return NULL;
     NUVEC velocity;
-    MakeThrowVector(&velocity, (NUVEC *)&matrix->m30, &object->force_throw_target->apiobj.collision_position,
-                    &v000, speed, gravity);
+    MakeThrowVector(&velocity, (NUVEC *)&matrix->m30, &object->force_throw_target->apiobj.collision_position, &v000,
+                    speed, gravity);
     ADDPART_s params = Default_ADDPART;
     params.matrix = matrix;
     params.velocity = &velocity;
@@ -107,9 +109,9 @@ u32 GizForce_TotalScore(void *context) {
 i32 GizForce_UpdateHint(HINT_s *) {
     for (i32 i = 0; i < 2; ++i) {
         GameObject_s *object = Player[i];
-        if (object != NULL && (object->apiobj.flags_low & 0x80) != 0 &&
-            object->field_0xd80 > 0.0f && object->force_glow_object != NULL &&
-            object->force_glow_kind == 0) return 1;
+        if (object != NULL && (object->apiobj.flags_low & 0x80) != 0 && object->field_0xd80 > 0.0f &&
+            object->force_glow_object != NULL && object->force_glow_kind == 0)
+            return 1;
     }
     return 0;
 }
@@ -272,11 +274,13 @@ void GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object
 }
 
 void GIZFORCE_s::ClearMechObjectInterface() {
-    if (mech_object_interface != NULL) delete mech_object_interface;
+    if (mech_object_interface != NULL)
+        delete mech_object_interface;
 }
 
 MechObjectInterface *GIZFORCE_s::GetMechObjectInterface() {
-    if (mech_object_interface != NULL) return mech_object_interface;
+    if (mech_object_interface != NULL)
+        return mech_object_interface;
     new GizForceObjectInterface(*this);
     return mech_object_interface;
 }

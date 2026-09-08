@@ -40,36 +40,67 @@ static void xGizmoType(nufpar_s *parser) {
 }
 static void xGizmoName(nufpar_s *parser) {
     NuFParGetWord(parser);
-    if (parser->word_buf != NULL) NuStrNCpy(load_gizmoname, parser->word_buf, 32);
+    if (parser->word_buf != NULL)
+        NuStrNCpy(load_gizmoname, parser->word_buf, 32);
 }
-static void xStartInvis(nufpar_s *) { load_g_flags |= 1; }
-static void xEndInvis(nufpar_s *) { load_g_flags |= 2; }
-static void xReverse(nufpar_s *) { load_g_flags |= 4; }
-static void xEndDeact(nufpar_s *) { load_g_flags |= 8; }
-static void xOutputOnly(nufpar_s *) { load_g_flags = 0x10; }
-static void xNotStoryMode(nufpar_s *) { load_g_flags |= 0x20; }
-static void xNotFreeplay(nufpar_s *) { load_g_flags |= 0x40; }
-static void xReverseInvis(nufpar_s *) { load_g_flags |= 0x80; }
-static void xGizRandomTime(nufpar_s *) { load_t_randomTime = 1; }
-static void xGizTimer(nufpar_s *parser) { load_t_time = NuFParGetFloat(parser); }
-static void xRand_NumOutputs(nufpar_s *parser) { load_r_noutputs = NuFParGetInt(parser); }
+static void xStartInvis(nufpar_s *) {
+    load_g_flags |= 1;
+}
+static void xEndInvis(nufpar_s *) {
+    load_g_flags |= 2;
+}
+static void xReverse(nufpar_s *) {
+    load_g_flags |= 4;
+}
+static void xEndDeact(nufpar_s *) {
+    load_g_flags |= 8;
+}
+static void xOutputOnly(nufpar_s *) {
+    load_g_flags = 0x10;
+}
+static void xNotStoryMode(nufpar_s *) {
+    load_g_flags |= 0x20;
+}
+static void xNotFreeplay(nufpar_s *) {
+    load_g_flags |= 0x40;
+}
+static void xReverseInvis(nufpar_s *) {
+    load_g_flags |= 0x80;
+}
+static void xGizRandomTime(nufpar_s *) {
+    load_t_randomTime = 1;
+}
+static void xGizTimer(nufpar_s *parser) {
+    load_t_time = NuFParGetFloat(parser);
+}
+static void xRand_NumOutputs(nufpar_s *parser) {
+    load_r_noutputs = NuFParGetInt(parser);
+}
 static void xRand_OutputChance(nufpar_s *parser) {
     i32 index = NuFParGetInt(parser);
     load_r_outputChance[index] = NuFParGetInt(parser);
 }
 static NUFPCOMJMP cfgtab_Gizmo[] = {
-    {"Type", xGizmoType}, {"Name", xGizmoName},
-    {"StartInvisible", xStartInvis}, {"FinishedInvisible", xEndInvis},
-    {"FinishedDeactive", xEndDeact}, {"Reverse", xReverse},
-    {"RevInvis", xReverseInvis}, {"NotStoryMode", xNotStoryMode},
-    {"NotFreeplay", xNotFreeplay}, {"OutputOnly", xOutputOnly},
-    {"Timer", xGizTimer}, {"RandomTime", xGizRandomTime},
-    {"NumRandomOutputs", xRand_NumOutputs}, {"RandomOutputChance", xRand_OutputChance},
+    {"Type", xGizmoType},
+    {"Name", xGizmoName},
+    {"StartInvisible", xStartInvis},
+    {"FinishedInvisible", xEndInvis},
+    {"FinishedDeactive", xEndDeact},
+    {"Reverse", xReverse},
+    {"RevInvis", xReverseInvis},
+    {"NotStoryMode", xNotStoryMode},
+    {"NotFreeplay", xNotFreeplay},
+    {"OutputOnly", xOutputOnly},
+    {"Timer", xGizTimer},
+    {"RandomTime", xGizRandomTime},
+    {"NumRandomOutputs", xRand_NumOutputs},
+    {"RandomOutputChance", xRand_OutputChance},
     {NULL, NULL},
 };
 
 static __used__ void xGizmo(nufpar_s *parser) {
-    if (load_flowbox == NULL) return;
+    if (load_flowbox == NULL)
+        return;
     FLOWBOXGIZMODATA_s *data = load_flowbox->data;
     load_flowbox->type = 0;
     load_gizmotype = -1;
@@ -88,39 +119,43 @@ static __used__ void xGizmo(nufpar_s *parser) {
     NuFParPushCom(parser, cfgtab_Gizmo);
     while (NuFParGetLine(parser)) {
         NuFParGetWord(parser);
-        if (NuStrICmp(parser->word_buf, "}") == 0) break;
+        if (NuStrICmp(parser->word_buf, "}") == 0)
+            break;
         NuFParInterpretWord(parser);
     }
     NuFParPopCom(parser);
-    if (load_gizmotype < 0 || NuStrLen(load_gizmoname) == 0) return;
+    if (load_gizmotype < 0 || NuStrLen(load_gizmoname) == 0)
+        return;
     i32 name_size = NuStrLen(load_gizmoname) + NuStrLen(gizmotypes->types[load_gizmotype].prefix) + 1;
-    data->gizmos[data->gizmo_count] = reinterpret_cast<FLOWBOXGIZMOREF_s *>(
-        GizmoBufferAlloc(load_buff, load_endbuff, sizeof(FLOWBOXGIZMOREF_s)));
-    data->gizmos[data->gizmo_count]->name = reinterpret_cast<char *>(
-        GizmoBufferAlloc(load_buff, load_endbuff, name_size));
+    data->gizmos[data->gizmo_count] =
+        reinterpret_cast<FLOWBOXGIZMOREF_s *>(GizmoBufferAlloc(load_buff, load_endbuff, sizeof(FLOWBOXGIZMOREF_s)));
+    data->gizmos[data->gizmo_count]->name =
+        reinterpret_cast<char *>(GizmoBufferAlloc(load_buff, load_endbuff, name_size));
     NuStrCpy(data->gizmos[data->gizmo_count]->name, load_gizmoname);
     if (load_gizmotype == giztimer_gizmotype_id) {
         data->gizmos[data->gizmo_count]->gizmo = createGizTimer(NULL, load_t_time, load_t_randomTime, load_gizmoname);
     } else if (load_gizmotype == gizrandom_gizmotype_id) {
-        data->gizmos[data->gizmo_count]->gizmo = createGizRandom(NULL, load_r_noutputs, load_r_outputChance, load_gizmoname);
+        data->gizmos[data->gizmo_count]->gizmo =
+            createGizRandom(NULL, load_r_noutputs, load_r_outputChance, load_gizmoname);
     } else if (load_gizmotype == gizspecial_gizmotype_id) {
         data->gizmos[data->gizmo_count]->gizmo = createGizSpecial(NULL, load_gizmoname);
         if (data->gizmos[data->gizmo_count]->gizmo != NULL) {
             NuStrCpy(data->gizmos[data->gizmo_count]->name, gizmotypes->types[load_gizmotype].prefix);
             NuStrNCat(data->gizmos[data->gizmo_count]->name, load_gizmoname,
                       32 - NuStrLen(gizmotypes->types[load_gizmotype].prefix));
-        } else goto set_flags;
+        } else
+            goto set_flags;
     } else {
-        data->gizmos[data->gizmo_count]->gizmo = GizmoFindByName(load_gizflow->gizmo_sys, load_gizmotype, load_gizmoname);
+        data->gizmos[data->gizmo_count]->gizmo =
+            GizmoFindByName(load_gizflow->gizmo_sys, load_gizmotype, load_gizmoname);
     }
     ++data->gizmo_count;
 set_flags:
-    load_flowbox->state_flags_low = (load_flowbox->state_flags_low & ~0xdc) |
-        ((load_g_flags & 1) << 2) | ((load_g_flags & 2) << 2) |
-        ((load_g_flags & 8) << 1) | ((load_g_flags & 4) << 4) | (load_g_flags & 0x80);
-    load_flowbox->state_flags_high = (load_flowbox->state_flags_high & ~0x70) |
-        (load_g_flags & 0x10) | (((load_g_flags >> 5) ^ 1) & 1) << 6 |
-        (((load_g_flags >> 6) ^ 1) & 1) << 5;
+    load_flowbox->state_flags_low = (load_flowbox->state_flags_low & ~0xdc) | ((load_g_flags & 1) << 2) |
+                                    ((load_g_flags & 2) << 2) | ((load_g_flags & 8) << 1) | ((load_g_flags & 4) << 4) |
+                                    (load_g_flags & 0x80);
+    load_flowbox->state_flags_high = (load_flowbox->state_flags_high & ~0x70) | (load_g_flags & 0x10) |
+                                     (((load_g_flags >> 5) ^ 1) & 1) << 6 | (((load_g_flags >> 6) ^ 1) & 1) << 5;
 }
 
 struct FLOWREMAP {
@@ -142,15 +177,18 @@ static u8 load_parent_output_ix[16];
 static __used__ void remapChildren(i32 id) {
     for (i32 i = 0; load_nchildren < 32 && remap[~id].children[i] != id; ++i) {
         i32 child = remap[~id].children[i];
-        if (child < 0) remapChildren(child);
-        else load_children[load_nchildren++] = child;
+        if (child < 0)
+            remapChildren(child);
+        else
+            load_children[load_nchildren++] = child;
     }
 }
 
 static __used__ void remapParent(i32 id) {
     for (i32 i = 0; load_nparents < 16 && remap[~id].parents[i] != id; ++i) {
         i32 parent = remap[~id].parents[i];
-        if (parent < 0) remapParent(parent);
+        if (parent < 0)
+            remapParent(parent);
         else {
             load_parents[load_nparents] = parent;
             load_parent_output_ix[load_nparents] = remap[~id].parent_outputs[i];
@@ -162,8 +200,10 @@ static __used__ void remapParent(i32 id) {
 static __used__ void xChild(nufpar_s *parser) {
     if (load_nchildren < 32) {
         i32 child = NuFParGetInt(parser);
-        if (child < 0) remapChildren(child);
-        else load_children[load_nchildren++] = child;
+        if (child < 0)
+            remapChildren(child);
+        else
+            load_children[load_nchildren++] = child;
     }
 }
 
@@ -215,7 +255,8 @@ static __used__ void xCollapse(nufpar_s *parser) {
     NuFParPushCom(parser, cfgtab_Collapse);
     while (NuFParGetLine(parser)) {
         NuFParGetWord(parser);
-        if (NuStrICmp(parser->word_buf, "}") == 0) break;
+        if (NuStrICmp(parser->word_buf, "}") == 0)
+            break;
         NuFParInterpretWord(parser);
     }
     NuFParPopCom(parser);
@@ -236,13 +277,8 @@ struct FLOWCONDITIONTYPE {
     nufpcomfn *load;
 };
 static FLOWCONDITIONTYPE ConditionTypes[] = {
-    {0, "All", NULL},
-    {1, "Any", NULL},
-    {2, "None", NULL},
-    {3, "Sum", loadSumBox},
-    {4, "loop", NULL},
-    {5, "exactly", loadSumBox},
-    {-1, NULL, NULL},
+    {0, "All", NULL},  {1, "Any", NULL},           {2, "None", NULL}, {3, "Sum", loadSumBox},
+    {4, "loop", NULL}, {5, "exactly", loadSumBox}, {-1, NULL, NULL},
 };
 DECOMP_ASSERT(sizeof(FLOWCONDITIONTYPE) == 12, "Flow condition type ABI");
 
@@ -253,11 +289,13 @@ static void xConditionType(nufpar_s *parser) {
     while (load_conditiontype == -1) {
         if (NuStrICmp(type->name, parser->word_buf) == 0) {
             load_conditiontype = index;
-            if (type->load != NULL) type->load(parser);
+            if (type->load != NULL)
+                type->load(parser);
         }
         ++index;
         ++type;
-        if (type->type == -1) break;
+        if (type->type == -1)
+            break;
     }
 }
 
@@ -272,7 +310,8 @@ static NUFPCOMJMP cfgtab_Condition[] = {
 };
 
 static __used__ void xCondition(nufpar_s *parser) {
-    if (load_flowbox == NULL) return;
+    if (load_flowbox == NULL)
+        return;
     load_flowbox->type = 1;
     load_conditiontype = -1;
     load_conditionParam = 0xff;
@@ -280,7 +319,8 @@ static __used__ void xCondition(nufpar_s *parser) {
     NuFParPushCom(parser, cfgtab_Condition);
     while (NuFParGetLine(parser)) {
         NuFParGetWord(parser);
-        if (NuStrICmp(parser->word_buf, "}") == 0) break;
+        if (NuStrICmp(parser->word_buf, "}") == 0)
+            break;
         NuFParInterpretWord(parser);
     }
     NuFParPopCom(parser);
@@ -296,39 +336,48 @@ static __used__ void xCondition(nufpar_s *parser) {
 }
 
 static void xAction(nufpar_s *parser) {
-    if (load_flowbox == NULL) return;
+    if (load_flowbox == NULL)
+        return;
     load_flowbox->type = 2;
     FLOWBOXACTION_s *previous = NULL;
     char parameters[16][64];
     while (NuFParGetLine(parser)) {
         NuFParGetWord(parser);
-        if (NuStrICmp(parser->word_buf, "}") == 0) break;
+        if (NuStrICmp(parser->word_buf, "}") == 0)
+            break;
         GIZACTIONDEFN_s *definition = gizactiondefs;
-        if (definition == NULL) continue;
-        while (definition->name != NULL && NuStrICmp(parser->word_buf, definition->name) != 0) ++definition;
-        if (definition->name == NULL) continue;
-        FLOWBOXACTION_s *action = reinterpret_cast<FLOWBOXACTION_s *>(
-            GizmoBufferAlloc(load_buff, load_endbuff, sizeof(FLOWBOXACTION_s)));
-        if (action == NULL) continue;
+        if (definition == NULL)
+            continue;
+        while (definition->name != NULL && NuStrICmp(parser->word_buf, definition->name) != 0)
+            ++definition;
+        if (definition->name == NULL)
+            continue;
+        FLOWBOXACTION_s *action =
+            reinterpret_cast<FLOWBOXACTION_s *>(GizmoBufferAlloc(load_buff, load_endbuff, sizeof(FLOWBOXACTION_s)));
+        if (action == NULL)
+            continue;
         action->next = NULL;
         action->parameters = NULL;
         action->parameter_count = 0;
         action->definition = NULL;
-        if (previous != NULL) previous->next = action;
-        else load_flowbox->actions = action;
+        if (previous != NULL)
+            previous->next = action;
+        else
+            load_flowbox->actions = action;
         action->definition = definition;
         i32 count = 0;
         while (NuFParGetWord(parser)) {
             while (NuStrCmp(parser->word_buf, "\\") == 0) {
                 NuFParGetLine(parser);
-                if (!NuFParGetWord(parser)) goto parameters_done;
+                if (!NuFParGetWord(parser))
+                    goto parameters_done;
             }
             NuStrCpy(parameters[count++], parser->word_buf);
         }
-parameters_done:
+    parameters_done:
         if (count != 0) {
-            action->parameters = reinterpret_cast<char **>(
-                GizmoBufferAlloc(load_buff, load_endbuff, count * sizeof(char *)));
+            action->parameters =
+                reinterpret_cast<char **>(GizmoBufferAlloc(load_buff, load_endbuff, count * sizeof(char *)));
             if (action->parameters != NULL) {
                 action->parameter_count = count;
                 for (i32 i = 0; i < count; ++i) {
@@ -351,17 +400,22 @@ parameters_done:
 
 static void xName(nufpar_s *parser) {
     NuFParGetWord(parser);
-    if (parser->word_buf != NULL) NuStrNCpy(load_name, parser->word_buf, 32);
+    if (parser->word_buf != NULL)
+        NuStrNCpy(load_name, parser->word_buf, 32);
 }
-static void xNumGizmos(nufpar_s *parser) { load_numgizmos = NuFParGetInt(parser); }
+static void xNumGizmos(nufpar_s *parser) {
+    load_numgizmos = NuFParGetInt(parser);
+}
 static void xAIAssistID(nufpar_s *parser) {
     FLOWBOX_s *box = load_flowbox;
     reinterpret_cast<u8 *>(&box->runtime_id)[0] = NuFParGetInt(parser);
 }
-static void xFlowBoxCount(nufpar_s *) { ++load_nflowboxes; }
+static void xFlowBoxCount(nufpar_s *) {
+    ++load_nflowboxes;
+}
 static NUFPCOMJMP cfgtab_FlowBox[] = {
-    {"Parent", xParent}, {"Child", xChild}, {"Gizmo", xGizmo},
-    {"Condition", xCondition}, {"Action", xAction}, {"Name", xName},
+    {"Parent", xParent},        {"Child", xChild},           {"Gizmo", xGizmo},
+    {"Condition", xCondition},  {"Action", xAction},         {"Name", xName},
     {"Num_Gizmos", xNumGizmos}, {"AIAssistId", xAIAssistID}, {NULL, NULL},
 };
 
@@ -372,7 +426,8 @@ static void xFlowBox(nufpar_s *parser) {
     NuFParPushCom(parser, cfgtab_FlowBox);
     while (NuFParGetLine(parser)) {
         NuFParGetWord(parser);
-        if (NuStrICmp(parser->word_buf, "}") == 0) break;
+        if (NuStrICmp(parser->word_buf, "}") == 0)
+            break;
         NuFParInterpretWord(parser);
     }
     NuFParPopCom(parser);
@@ -381,8 +436,8 @@ static void xFlowBox(nufpar_s *parser) {
             load_flowbox->parent_count = load_nparents;
             load_flowbox->parents = reinterpret_cast<FLOWBOX_s **>(
                 GizmoBufferAlloc(load_buff, load_endbuff, load_nparents * sizeof(FLOWBOX_s *)));
-            load_flowbox->output_indices = reinterpret_cast<u8 *>(
-                GizmoBufferAlloc(load_buff, load_endbuff, load_nparents));
+            load_flowbox->output_indices =
+                reinterpret_cast<u8 *>(GizmoBufferAlloc(load_buff, load_endbuff, load_nparents));
             for (i32 i = 0; i < load_flowbox->parent_count; ++i) {
                 load_flowbox->parents[i] = &load_gizflow->flowboxes[load_parents[i]];
                 load_flowbox->output_indices[i] = load_parent_output_ix[i];
@@ -445,7 +500,8 @@ void *LoadGizFlow(void *, GIZMOSYS_s *system, char *path, VARIPTR *buffer, VARIP
             }
         }
         NuFileClose(file);
-        if (flow != NULL) flow->pointers_need_reset = 1;
+        if (flow != NULL)
+            flow->pointers_need_reset = 1;
     }
     load_buff = NULL;
     load_endbuff = NULL;
@@ -495,62 +551,87 @@ u32 AdjustLayerBits(u32 mask, GameObject_s *object) {
     GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
     u32 cape = data->cape_layer == -1 ? 0 : 1u << (static_cast<u32>(data->cape_layer) & 31);
     u32 hair = data->hair_layer == -1 ? 0 : 1u << (static_cast<u32>(data->hair_layer) & 31);
-    if (object->field_0x108e != 0) mask &= ~hair;
+    if (object->field_0x108e != 0)
+        mask &= ~hair;
     SUIT_s *suit = static_cast<SUIT_s *>(object->suit);
     if (suit != NULL && object->id == id_BATMAN) {
         if ((suit->flags & 4) != 0) {
             mask = (mask & ~cape) | SpecialLayer[0].mask;
             mask = (mask & ~SpecialLayer[3].mask) | SpecialLayer[5].mask;
-            if ((mask & SpecialLayer[20].mask) != 0) mask = (mask & ~SpecialLayer[20].mask) | SpecialLayer[24].mask;
-            else if ((mask & SpecialLayer[21].mask) != 0) mask = (mask & ~SpecialLayer[21].mask) | SpecialLayer[25].mask;
+            if ((mask & SpecialLayer[20].mask) != 0)
+                mask = (mask & ~SpecialLayer[20].mask) | SpecialLayer[24].mask;
+            else if ((mask & SpecialLayer[21].mask) != 0)
+                mask = (mask & ~SpecialLayer[21].mask) | SpecialLayer[25].mask;
             mask = (mask & ~SpecialLayer[17].mask) | SpecialLayer[19].mask;
         } else if ((suit->flags & 2) != 0) {
             mask &= ~cape;
         } else if ((suit->flags & 8) != 0) {
             mask = (mask & ~cape) | SpecialLayer[1].mask | SpecialLayer[7].mask;
             mask = (mask & ~SpecialLayer[3].mask) | SpecialLayer[4].mask;
-            if ((mask & SpecialLayer[20].mask) != 0) mask = (mask & ~SpecialLayer[20].mask) | SpecialLayer[22].mask;
-            else if ((mask & SpecialLayer[21].mask) != 0) mask = (mask & ~SpecialLayer[21].mask) | SpecialLayer[23].mask;
+            if ((mask & SpecialLayer[20].mask) != 0)
+                mask = (mask & ~SpecialLayer[20].mask) | SpecialLayer[22].mask;
+            else if ((mask & SpecialLayer[21].mask) != 0)
+                mask = (mask & ~SpecialLayer[21].mask) | SpecialLayer[23].mask;
             mask = (mask & ~SpecialLayer[17].mask) | SpecialLayer[18].mask;
-            if ((mask & SpecialLayer[8].mask) != 0) mask = (mask & ~SpecialLayer[8].mask) | SpecialLayer[14].mask;
-            else if ((mask & SpecialLayer[9].mask) != 0) mask = (mask & ~SpecialLayer[9].mask) | SpecialLayer[15].mask;
-            else if ((mask & SpecialLayer[10].mask) != 0) mask = (mask & ~SpecialLayer[10].mask) | SpecialLayer[16].mask;
+            if ((mask & SpecialLayer[8].mask) != 0)
+                mask = (mask & ~SpecialLayer[8].mask) | SpecialLayer[14].mask;
+            else if ((mask & SpecialLayer[9].mask) != 0)
+                mask = (mask & ~SpecialLayer[9].mask) | SpecialLayer[15].mask;
+            else if ((mask & SpecialLayer[10].mask) != 0)
+                mask = (mask & ~SpecialLayer[10].mask) | SpecialLayer[16].mask;
         } else if ((suit->flags & 1) != 0) {
             mask |= SpecialLayer[2].mask;
-            if ((mask & SpecialLayer[8].mask) != 0) mask = (mask & ~SpecialLayer[8].mask) | SpecialLayer[11].mask;
-            else if ((mask & SpecialLayer[9].mask) != 0) mask = (mask & ~SpecialLayer[9].mask) | SpecialLayer[12].mask;
-            else if ((mask & SpecialLayer[10].mask) != 0) mask = (mask & ~SpecialLayer[10].mask) | SpecialLayer[13].mask;
+            if ((mask & SpecialLayer[8].mask) != 0)
+                mask = (mask & ~SpecialLayer[8].mask) | SpecialLayer[11].mask;
+            else if ((mask & SpecialLayer[9].mask) != 0)
+                mask = (mask & ~SpecialLayer[9].mask) | SpecialLayer[12].mask;
+            else if ((mask & SpecialLayer[10].mask) != 0)
+                mask = (mask & ~SpecialLayer[10].mask) | SpecialLayer[13].mask;
         }
     } else if (suit != NULL && object->id == id_ROBIN) {
         if ((suit->flags & 0x10) != 0) {
             mask = (mask & ~(hair | cape)) | SpecialLayer[27].mask;
-            if ((mask & SpecialLayer[30].mask) != 0) mask = (mask & ~SpecialLayer[30].mask) | SpecialLayer[39].mask;
-            else if ((mask & SpecialLayer[31].mask) != 0) mask = (mask & ~SpecialLayer[31].mask) | SpecialLayer[40].mask;
-            else if ((mask & SpecialLayer[32].mask) != 0) mask = (mask & ~SpecialLayer[32].mask) | SpecialLayer[41].mask;
+            if ((mask & SpecialLayer[30].mask) != 0)
+                mask = (mask & ~SpecialLayer[30].mask) | SpecialLayer[39].mask;
+            else if ((mask & SpecialLayer[31].mask) != 0)
+                mask = (mask & ~SpecialLayer[31].mask) | SpecialLayer[40].mask;
+            else if ((mask & SpecialLayer[32].mask) != 0)
+                mask = (mask & ~SpecialLayer[32].mask) | SpecialLayer[41].mask;
         } else if ((suit->flags & 0x40) != 0) {
             mask = (mask & ~cape) | SpecialLayer[26].mask;
-            if ((mask & SpecialLayer[30].mask) != 0) mask = (mask & ~SpecialLayer[30].mask) | SpecialLayer[36].mask;
-            else if ((mask & SpecialLayer[31].mask) != 0) mask = (mask & ~SpecialLayer[31].mask) | SpecialLayer[37].mask;
-            else if ((mask & SpecialLayer[32].mask) != 0) mask = (mask & ~SpecialLayer[32].mask) | SpecialLayer[38].mask;
+            if ((mask & SpecialLayer[30].mask) != 0)
+                mask = (mask & ~SpecialLayer[30].mask) | SpecialLayer[36].mask;
+            else if ((mask & SpecialLayer[31].mask) != 0)
+                mask = (mask & ~SpecialLayer[31].mask) | SpecialLayer[37].mask;
+            else if ((mask & SpecialLayer[32].mask) != 0)
+                mask = (mask & ~SpecialLayer[32].mask) | SpecialLayer[38].mask;
         } else if ((suit->flags & 0x20) != 0) {
             mask = (mask & ~cape) | SpecialLayer[28].mask;
-            if ((mask & SpecialLayer[30].mask) != 0) mask = (mask & ~SpecialLayer[30].mask) | SpecialLayer[33].mask;
-            else if ((mask & SpecialLayer[31].mask) != 0) mask = (mask & ~SpecialLayer[31].mask) | SpecialLayer[34].mask;
-            else if ((mask & SpecialLayer[32].mask) != 0) mask = (mask & ~SpecialLayer[32].mask) | SpecialLayer[35].mask;
+            if ((mask & SpecialLayer[30].mask) != 0)
+                mask = (mask & ~SpecialLayer[30].mask) | SpecialLayer[33].mask;
+            else if ((mask & SpecialLayer[31].mask) != 0)
+                mask = (mask & ~SpecialLayer[31].mask) | SpecialLayer[34].mask;
+            else if ((mask & SpecialLayer[32].mask) != 0)
+                mask = (mask & ~SpecialLayer[32].mask) | SpecialLayer[35].mask;
         } else if ((suit->flags & 0x80) != 0) {
             mask = (mask & ~cape) | SpecialLayer[29].mask;
         }
     }
     if (object->id == id_BODYGUARD) {
-        if (object->current_hp <= 1) mask &= ~0x10u;
+        if (object->current_hp <= 1)
+            mask &= ~0x10u;
     } else if (object->id == id_GEONOSIAN) {
         mask |= (object->field_0xefd & 2) != 0 ? 0x20 : 0x40;
     } else if (CharacterCustomiser != NULL && object->id == CharacterCustomiser->character_ids[0]) {
-        if ((CharacterCustomiser->pieces[static_cast<u16>(Game.customizer.pieces[5])].layer_flags & 0x40) == 0) mask |= cape;
+        if ((CharacterCustomiser->pieces[static_cast<u16>(Game.customizer.pieces[5])].layer_flags & 0x40) == 0)
+            mask |= cape;
     } else if (CharacterCustomiser != NULL && object->id == CharacterCustomiser->character_ids[1]) {
-        if ((CharacterCustomiser->pieces[static_cast<u16>(Game.customizer.secondary_pieces[5])].layer_flags & 0x40) == 0) mask |= cape;
+        if ((CharacterCustomiser->pieces[static_cast<u16>(Game.customizer.secondary_pieces[5])].layer_flags & 0x40) ==
+            0)
+            mask |= cape;
     } else if (object->id == id_CHEWBACCA) {
-        if (Cheat_IsOn(4) != 0) mask |= 0xc0;
+        if (Cheat_IsOn(4) != 0)
+            mask |= 0xc0;
         data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
     }
     if (data->ride_layers_off != 0 && object->field_0xcc0 != NULL && object->field_0x7a5 == 0x3b)
@@ -590,18 +671,19 @@ i32 LayerFromName(GAMECHARACTERDATA_s *character, char *name) {
     return -1;
 }
 
-
 FLOWBOX_s *FlowBoxFindByName(GIZFLOW_s *system, char *name) {
     if (name != NULL && system != NULL) {
         for (i32 i = 0; i < system->flowbox_count; ++i) {
-            if (NuStrICmp(system->flowboxes[i].name, name) == 0) return &system->flowboxes[i];
+            if (NuStrICmp(system->flowboxes[i].name, name) == 0)
+                return &system->flowboxes[i];
         }
     }
     return NULL;
 }
 
 void SetGizFlowVisible(GIZFLOW_s *system) {
-    if (system == NULL) return;
+    if (system == NULL)
+        return;
     FLOWBOX_s *box = system->flowboxes;
     for (i32 i = 0; i < system->flowbox_count; ++i, ++box) {
         if (box->type == 0 && box->data != NULL) {
@@ -616,7 +698,8 @@ void SetGizFlowVisible(GIZFLOW_s *system) {
 }
 
 void GizFlowStoreProgress(GIZFLOW_s *system, GIZFLOWPROGRESS_s *progress) {
-    if (progress == NULL || system == NULL) return;
+    if (progress == NULL || system == NULL)
+        return;
     memset(progress, 0, sizeof(*progress));
     FLOWBOX_s *box = system->flowboxes;
     i32 count = system->flowbox_count;
@@ -624,17 +707,24 @@ void GizFlowStoreProgress(GIZFLOW_s *system, GIZFLOWPROGRESS_s *progress) {
     for (i32 i = 0; i < count; ++i, ++box) {
         i32 word = i >> 5;
         u32 bit = 1u << (i & 31);
-        if ((box->state_flags_low & 1) != 0) progress->active[word] |= bit;
-        if ((box->state_flags_high & 1) != 0) progress->triggered[word] |= bit;
-        if ((box->state_flags_low & 2) != 0) progress->completed[word] |= bit;
-        if ((box->state_flags_low & 0x20) != 0) progress->latched[word] |= bit;
-        if ((box->state_flags_high & 4) != 0) progress->output_state[word] |= bit;
+        if ((box->state_flags_low & 1) != 0)
+            progress->active[word] |= bit;
+        if ((box->state_flags_high & 1) != 0)
+            progress->triggered[word] |= bit;
+        if ((box->state_flags_low & 2) != 0)
+            progress->completed[word] |= bit;
+        if ((box->state_flags_low & 0x20) != 0)
+            progress->latched[word] |= bit;
+        if ((box->state_flags_high & 4) != 0)
+            progress->output_state[word] |= bit;
     }
 }
 
 i32 GizmoTypeGetProgress(GIZMOSYS_s *system, void *, i32 progress_index, i32 type_id, char *name, void **result) {
-    if (name != NULL && type_id == -1) type_id = GizmoGetTypeIDByName(system, name);
-    if (type_id == -1) return 0;
+    if (name != NULL && type_id == -1)
+        type_id = GizmoGetTypeIDByName(system, name);
+    if (type_id == -1)
+        return 0;
     GIZMOTYPE *type = &gizmotypes->types[type_id];
     void *progress = NULL;
     if (type->buffer != NULL && progress_index >= 0 && progress_index < gizmotypes->unknown)
@@ -655,7 +745,8 @@ void PerformActionFlowBox(GIZFLOW_s *system, FLOWBOX_s *box) {
 
 void GizmoSysStoreProgress(GIZMOSYS_s *system, void *world, i32 progress_index) {
     GizmoSysClearLevelProgress(world, progress_index);
-    if (gizmotypes == NULL || system == NULL) return;
+    if (gizmotypes == NULL || system == NULL)
+        return;
     GIZMOTYPE *type = gizmotypes->types;
     GIZMOSET *set = system->sets;
     if (progress_index < 0) {
@@ -676,13 +767,17 @@ void GizmoSysStoreProgress(GIZMOSYS_s *system, void *world, i32 progress_index) 
 }
 
 void GizmoTypeStoreProgress(GIZMOSYS_s *system, void *world, i32 progress_index, i32 type_id, char *name) {
-    if (name != NULL && type_id == -1) type_id = GizmoGetTypeIDByName(system, name);
-    if (type_id == -1) return;
+    if (name != NULL && type_id == -1)
+        type_id = GizmoGetTypeIDByName(system, name);
+    if (type_id == -1)
+        return;
     GIZMOTYPE *type = &gizmotypes->types[type_id];
     GIZMOSET *set = &system->sets[type_id];
     void *progress = NULL;
     if (type->buffer != NULL && progress_index >= 0 && progress_index < gizmotypes->unknown)
         progress = type->buffer[progress_index].void_ptr;
-    if (type->fns.clear_progress_fn != NULL) type->fns.clear_progress_fn(world, progress);
-    if (type->fns.store_progress_fn != NULL) type->fns.store_progress_fn(world, set->unknown, progress);
+    if (type->fns.clear_progress_fn != NULL)
+        type->fns.clear_progress_fn(world, progress);
+    if (type->fns.store_progress_fn != NULL)
+        type->fns.store_progress_fn(world, set->unknown, progress);
 }

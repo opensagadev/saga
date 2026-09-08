@@ -4,14 +4,14 @@
 #include "nu2api/nu3d/nuspline.h"
 
 struct SPLINEPOS_s {
-    NUGSPLINE *spline;       // 0x00
-    i16 segment;            // 0x04
-    i8 looping;             // 0x06
-    u8 reached_end;         // 0x07
-    f32 segment_distance;   // 0x08
-    f32 segment_length;     // 0x0c
-    NUVEC position;         // 0x10
-    f32 along;              // 0x1c
+    NUGSPLINE *spline;    // 0x00
+    i16 segment;          // 0x04
+    i8 looping;           // 0x06
+    u8 reached_end;       // 0x07
+    f32 segment_distance; // 0x08
+    f32 segment_length;   // 0x0c
+    NUVEC position;       // 0x10
+    f32 along;            // 0x1c
 };
 DECOMP_ASSERT(sizeof(SPLINEPOS_s) == 0x20, "SPLINEPOS size");
 DECOMP_ASSERT(offsetof(SPLINEPOS_s, segment) == 4, "SPLINEPOS segment offset");

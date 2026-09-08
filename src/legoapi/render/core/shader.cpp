@@ -20,14 +20,11 @@ ShaderManagerOpenGL::ShaderManagerOpenGL(VirtualStackAllocator &) {
     g_shaderBufferCriticalSection = NuThreadCreateCriticalSection();
 }
 
-
 bool ShaderManagerOpenGL::createShader(ShaderMtlDescFilter &filter, bool pixelStage, NuShaderObject *object, i32 id) {
     ShaderObjectKey key = {0};
     NuShaderObjectKeyGenerate3(&key.key, &filter, pixelStage);
     return createShader(key, object, id);
 }
-
-
 
 void ShaderManagerOpenGL::setElementfv(SHADERSEMANTIC_enum semantic, i32, float const *values) {
     // The original Android implementation ignores the element range.
@@ -171,25 +168,26 @@ void ShaderMtlDescFilter::internalInit(nushadermtldesc_s const *material_desc, n
     }
 }
 
-
-namespace nu2api { extern void *g_shaderManager; }
+namespace nu2api {
+    extern void *g_shaderManager;
+}
 
 extern "C" void NuShaderManagerSetfv(i32 semantic, const f32 *values) {
-    static_cast<ShaderManagerOpenGL *>(nu2api::g_shaderManager)->setfv(
-        static_cast<SHADERSEMANTIC_enum>(semantic), values);
+    static_cast<ShaderManagerOpenGL *>(nu2api::g_shaderManager)
+        ->setfv(static_cast<SHADERSEMANTIC_enum>(semantic), values);
 }
 
 extern "C" void NuShaderManagerSetElementfv(i32 semantic, i32 element, const f32 *values) {
-    static_cast<ShaderManagerOpenGL *>(nu2api::g_shaderManager)->setElementfv(
-        static_cast<SHADERSEMANTIC_enum>(semantic), element, values);
+    static_cast<ShaderManagerOpenGL *>(nu2api::g_shaderManager)
+        ->setElementfv(static_cast<SHADERSEMANTIC_enum>(semantic), element, values);
 }
 
 extern "C" void NuShaderManagerSetElementsfv(i32 semantic, i32 first_element, i32 count, const f32 *values) {
-    static_cast<ShaderManagerOpenGL *>(nu2api::g_shaderManager)->setElementsfv(
-        static_cast<SHADERSEMANTIC_enum>(semantic), first_element, count, values);
+    static_cast<ShaderManagerOpenGL *>(nu2api::g_shaderManager)
+        ->setElementsfv(static_cast<SHADERSEMANTIC_enum>(semantic), first_element, count, values);
 }
 
 extern "C" void NuShaderManagerSetElementsfv_transpose(i32 semantic, i32 first_element, i32 count, const f32 *values) {
-    static_cast<ShaderManagerOpenGL *>(nu2api::g_shaderManager)->setElementsfv_transpose(
-        static_cast<SHADERSEMANTIC_enum>(semantic), first_element, count, values);
+    static_cast<ShaderManagerOpenGL *>(nu2api::g_shaderManager)
+        ->setElementsfv_transpose(static_cast<SHADERSEMANTIC_enum>(semantic), first_element, count, values);
 }

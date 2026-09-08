@@ -96,8 +96,10 @@ static void SplinePointAngles(NUGSPLINE *spline, i32 index, i32 looping, u16 *pi
     NUVEC *current = &spline->pts[index];
     i32 previous_index = index - 1;
     NUVEC *previous = NULL;
-    if (looping && previous_index < 0) previous = &spline->pts[spline->length - 1];
-    else if (previous_index >= 0) previous = &spline->pts[previous_index];
+    if (looping && previous_index < 0)
+        previous = &spline->pts[spline->length - 1];
+    else if (previous_index >= 0)
+        previous = &spline->pts[previous_index];
     NUVEC direction = {0.0f, 0.0f, 0.0f};
     if (previous != NULL) {
         direction.x += current->x - previous->x;
@@ -105,36 +107,48 @@ static void SplinePointAngles(NUGSPLINE *spline, i32 index, i32 looping, u16 *pi
         direction.z += current->z - previous->z;
     }
     NUVEC *next = NULL;
-    if (index + 1 < spline->length) next = &spline->pts[index + 1];
-    else if (looping) next = spline->pts;
+    if (index + 1 < spline->length)
+        next = &spline->pts[index + 1];
+    else if (looping)
+        next = spline->pts;
     if (next != NULL) {
         direction.x += next->x - current->x;
         direction.y += next->y - current->y;
         direction.z += next->z - current->z;
     }
-    if (pitch != NULL) *pitch = NuAtan2D(direction.y, NuFsqrt(direction.x * direction.x + direction.z * direction.z));
-    if (angle != NULL) *angle = NuAtan2D(direction.x, direction.z);
+    if (pitch != NULL)
+        *pitch = NuAtan2D(direction.y, NuFsqrt(direction.x * direction.x + direction.z * direction.z));
+    if (angle != NULL)
+        *angle = NuAtan2D(direction.x, direction.z);
 }
 
 void PointAlongSpline(NUGSPLINE *spline, f32 along, NUVEC *position, u16 *angle, u16 *pitch, i32 looping) {
-    if (angle != NULL) *angle = 0;
-    if (pitch != NULL) *pitch = 0;
-    if (spline == NULL) return;
-    if (along > 1.0f) along = 1.0f;
-    else if (along < 0.0f) along = 0.0f;
+    if (angle != NULL)
+        *angle = 0;
+    if (pitch != NULL)
+        *pitch = 0;
+    if (spline == NULL)
+        return;
+    if (along > 1.0f)
+        along = 1.0f;
+    else if (along < 0.0f)
+        along = 0.0f;
     u32 extent = (u32)(looping ? spline->length : spline->length - 1) << 16;
     u32 fixed = (i32)((f32)extent * along);
     i32 index = fixed >> 16;
     NUVEC *current = &spline->pts[index];
     *position = *current;
-    if (pitch != NULL || angle != NULL) SplinePointAngles(spline, index, looping, pitch, angle);
+    if (pitch != NULL || angle != NULL)
+        SplinePointAngles(spline, index, looping, pitch, angle);
     index++;
     if (index >= spline->length) {
-        if (!looping) return;
+        if (!looping)
+            return;
         index = 0;
     }
     fixed &= 0xffff;
-    if (fixed == 0) return;
+    if (fixed == 0)
+        return;
     f32 fraction = fixed * (1.0f / 65536.0f);
     NUVEC *next = &spline->pts[index];
     position->x += (next->x - current->x) * fraction;
@@ -144,8 +158,10 @@ void PointAlongSpline(NUGSPLINE *spline, f32 along, NUVEC *position, u16 *angle,
         u16 next_angle, next_pitch;
         SplinePointAngles(spline, index, looping, pitch != NULL ? &next_pitch : NULL,
                           angle != NULL ? &next_angle : NULL);
-        if (angle != NULL) *angle += (i32)(RotDiff(*angle, next_angle) * fraction);
-        if (pitch != NULL) *pitch += (i32)(RotDiff(*pitch, next_pitch) * fraction);
+        if (angle != NULL)
+            *angle += (i32)(RotDiff(*angle, next_angle) * fraction);
+        if (pitch != NULL)
+            *pitch += (i32)(RotDiff(*pitch, next_pitch) * fraction);
     }
 }
 
@@ -158,7 +174,8 @@ void FlightSpline_Init(WORLDINFO_s *, flightspline_s *, i32) {
 i32 LineIntersectXY(NUVEC *, NUVEC *, NUVEC *, NUVEC *, NUVEC *, NUVEC *);
 
 i32 OutSideSplineArea(nuvec_s *position, nugspline_s *spline, nuvec_s *edge_end, nuvec_s *edge_start, i32 inside) {
-    if (spline == NULL || position == NULL) return 0;
+    if (spline == NULL || position == NULL)
+        return 0;
     NUVEC ray_start = {position->x, -position->z, position->y};
     NUVEC ray_end = {position->x, 100000.0f, position->y};
     NUVEC end = {spline->pts[0].x, -spline->pts[0].z, spline->pts[0].y};
@@ -170,7 +187,8 @@ i32 OutSideSplineArea(nuvec_s *position, nugspline_s *spline, nuvec_s *edge_end,
         end.z = spline->pts[i].y;
         intersections += LineIntersectXY(&ray_start, &ray_end, &start, &end, NULL, NULL);
     }
-    if ((intersections & 1) != 0 ? inside == 0 : inside != 0) return 0;
+    if ((intersections & 1) != 0 ? inside == 0 : inside != 0)
+        return 0;
     i32 closest_index = 0;
     NUVEC closest = spline->pts[0];
     f32 best = 1000000000.0f;
@@ -193,11 +211,15 @@ i32 OutSideSplineArea(nuvec_s *position, nugspline_s *spline, nuvec_s *edge_end,
     f32 bx = before.x - position->x;
     f32 bz = before.z - position->z;
     if (bx * bx + bz * bz > ax * ax + az * az) {
-        if (edge_end != NULL) *edge_end = after;
-        if (edge_start != NULL) *edge_start = closest;
+        if (edge_end != NULL)
+            *edge_end = after;
+        if (edge_start != NULL)
+            *edge_start = closest;
     } else {
-        if (edge_end != NULL) *edge_end = closest;
-        if (edge_start != NULL) *edge_start = before;
+        if (edge_end != NULL)
+            *edge_end = closest;
+        if (edge_start != NULL)
+            *edge_start = before;
     }
     return 1;
 }
@@ -235,20 +257,25 @@ void nugraphGetYatIndex(nugraph_s *, i32) {
 void nugraph_catmullrom(i32, nuvec_s *, nuvec_s *, i32) {
 }
 
-void GetNearestSplinePos(NUVEC *origin, SPLINEPOS_s *result, NUGSPLINE *spline, i32 looping,
-                         i16 first_point, i16 last_point) {
-    if (result == NULL) return;
+void GetNearestSplinePos(NUVEC *origin, SPLINEPOS_s *result, NUGSPLINE *spline, i32 looping, i16 first_point,
+                         i16 last_point) {
+    if (result == NULL)
+        return;
     memset(result, 0, sizeof(*result));
-    if (spline == NULL || origin == NULL || spline->length <= 1) return;
+    if (spline == NULL || origin == NULL || spline->length <= 1)
+        return;
     result->spline = spline;
     result->looping = (i8)looping;
     i32 point_count = spline->length;
     i32 logical_count = result->looping != 0 ? point_count + 1 : point_count;
     i32 index = first_point;
-    if (index < 0) index = 0;
-    else if (index >= logical_count) return;
+    if (index < 0)
+        index = 0;
+    else if (index >= logical_count)
+        return;
     i32 end = point_count;
-    if (last_point >= 0 && last_point < end) end = last_point;
+    if (last_point >= 0 && last_point < end)
+        end = last_point;
     NUVEC *point = (NUVEC *)((u8 *)spline->pts + index * (i16)spline->pt_size);
     f32 nearest = 1000000000.0f;
     NUVEC offset;

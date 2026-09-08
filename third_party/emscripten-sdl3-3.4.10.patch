@@ -15,7 +15,7 @@ index dce32b5..81391a0 100644
 +SUBDIR = f'SDL3-{VERSION}'
  
  variants = {'sdl3-mt': {'PTHREADS': 1}}
-@@ -29,7 +29,7 @@ def get(ports, settings, shared):
+@@ -29,11 +29,26 @@ def get(ports, settings, shared):
    diagnostics.warning('experimental', 'sdl3 port is still experimental')
  
    # get the port
@@ -24,3 +24,22 @@ index dce32b5..81391a0 100644
  
    def create(final):
      root_dir = ports.get_dir('sdl3', SUBDIR)
+ 
++    # The game mixes at 48 kHz. SDL's browser backend otherwise chooses the
++    # OS device rate (192 kHz on some hosts), resamples every mix, and turns
++    # its fixed 2048-frame ScriptProcessor buffer into a 10.7 ms deadline.
++    # Pin only the Web Audio context; native SDL and target code are unchanged.
++    audio_path = os.path.join(root_dir, 'src/audio/emscripten/SDL_emscriptenaudio.c')
++    with open(audio_path) as audio_file:
++      audio_source = audio_file.read()
++    for constructor in ('AudioContext', 'webkitAudioContext'):
++      original = f'new {constructor}()'
++      replacement = f'new {constructor}({{sampleRate: 48000}})'
++      assert original in audio_source or replacement in audio_source
++      audio_source = audio_source.replace(original, replacement)
++    with open(audio_path, 'w') as audio_file:
++      audio_file.write(audio_source)
++
+     # In addition copy our pre-generated SDL_build_config.h file.
+     sdl_build_config_h = os.path.join(os.path.dirname(__file__), 'sdl3/SDL_build_config.h')
+     shutil.copyfile(sdl_build_config_h, os.path.join(root_dir, 'include/SDL3/SDL_build_config.h'))

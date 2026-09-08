@@ -19,8 +19,9 @@ void PartDraw_Torp(PART_s *) {
 extern i16 id_YWING, id_MINIYWING, id_TIEBOMBER, id_MINITIEBOMBER, id_MINISTARDESTROYER;
 
 i32 getMaxTorpedos(GameObject_s *object) {
-    if (object != NULL && (object->id == id_YWING || object->id == id_MINIYWING ||
-        object->id == id_TIEBOMBER || object->id == id_MINITIEBOMBER || object->id == id_MINISTARDESTROYER)) return 5;
+    if (object != NULL && (object->id == id_YWING || object->id == id_MINIYWING || object->id == id_TIEBOMBER ||
+                           object->id == id_MINITIEBOMBER || object->id == id_MINISTARDESTROYER))
+        return 5;
     return 3;
 }
 
@@ -47,11 +48,11 @@ void GetShootOrigin_LSW(GameObject_s *object, nuvec_s *position) {
 void InitTorpedoPackets() {
 }
 
-
 extern i16 id_ATAT, id_CLONEWALKER, id_ATST, id_ATST_LOWRES;
 i32 GetShootDirection_LSW(GameObject_s *object, nuvec_s *direction) {
     NUVEC temporary;
-    if (direction == NULL) direction = &temporary;
+    if (direction == NULL)
+        direction = &temporary;
     if (object->field_0x1086 == 4) {
         NUMTX matrix = object->apiobj.field_0xb8;
         NuMtxPreRotateY(&matrix, 0x8000);
@@ -61,8 +62,8 @@ i32 GetShootDirection_LSW(GameObject_s *object, nuvec_s *direction) {
     characterdata_s *model = object->apiobj.character_data;
     GAMECHARACTERDATA *data = model->game_character;
     if (data->weapon_shoot_joints[0] != -1 &&
-        ((object->id == id_ATAT && (object->apiobj.flags_low & 0x80) == 0) ||
-         object->id == id_CLONEWALKER || object->id == id_ATST || object->id == id_ATST_LOWRES)) {
+        ((object->id == id_ATAT && (object->apiobj.flags_low & 0x80) == 0) || object->id == id_CLONEWALKER ||
+         object->id == id_ATST || object->id == id_ATST_LOWRES)) {
         direction->x = direction->y = 0.0f;
         direction->z = object->id == id_ATAT ? 1.0f : -1.0f;
         NuVecMtxRotate(direction, direction, &object->joint_matrices[data->weapon_shoot_joints[0]]);
@@ -74,7 +75,8 @@ i32 GetShootDirection_LSW(GameObject_s *object, nuvec_s *direction) {
         if (object->character_context == 0x2a &&
             1.0f - object->context_animation_timer / object->airborne_action_duration >= 0.25f)
             angle -= 0x8000;
-    } else angle = object->apiobj.movement_facing_angle;
+    } else
+        angle = object->apiobj.movement_facing_angle;
     direction->x = NuTrigTable[static_cast<u16>(angle) >> 1];
     direction->y = 0.0f;
     direction->z = NuTrigTable[((static_cast<u16>(angle) + 0x4000) >> 1) & 0x7fff];

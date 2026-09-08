@@ -111,9 +111,11 @@ i32 PartDraw_Flickerer(PART_s *);
 void PartImpact_Brick(PART_s *);
 
 void GizBuildIt_KillParts(GIZBUILDIT_s *buildit) {
-    if (buildit == NULL) return;
+    if (buildit == NULL)
+        return;
     NUVEC velocity = v000;
-    if (buildit->anim_set == NULL) return;
+    if (buildit->anim_set == NULL)
+        return;
     for (GAMEANIMOBJ_s *object = buildit->anim_set->objects; object != NULL; object = object->next) {
         ADDPART_s params = Default_ADDPART;
         NUMTX matrix __attribute__((aligned(16))) = static_cast<GIZBUILDITANIMDATA_s *>(object->object_data)->end_mtx;
@@ -180,10 +182,10 @@ GIZBUILDIT_s *GizBuildIt_AnyReacting(WORLDINFO_s *world) {
     if (system != NULL) {
         GIZBUILDIT_s *buildit = system->buildits;
         for (i32 i = 0; i < system->count; ++i, ++buildit) {
-            if ((buildit->availability_flags & (GIZBUILDIT_AVAILABILITY_VISIBLE | GIZBUILDIT_AVAILABILITY_INTERACTING)) ==
+            if ((buildit->availability_flags &
+                 (GIZBUILDIT_AVAILABILITY_VISIBLE | GIZBUILDIT_AVAILABILITY_INTERACTING)) ==
                     (GIZBUILDIT_AVAILABILITY_VISIBLE | GIZBUILDIT_AVAILABILITY_INTERACTING) &&
-                buildit->builders_active == 0 &&
-                (buildit->availability_flags & GIZBUILDIT_AVAILABILITY_ACTIVE) != 0) {
+                buildit->builders_active == 0 && (buildit->availability_flags & GIZBUILDIT_AVAILABILITY_ACTIVE) != 0) {
                 return buildit;
             }
         }
@@ -270,7 +272,8 @@ void GizBuildIt_SetHeadTarget(GIZBUILDIT_s *buildit, GameObject_s *player) {
 void PushAway(NUVEC *, f32, NUVEC *, NUVEC *, GameObject_s *, GameObject_s *, f32, u32);
 
 void GizBuildItPushAwayFromEnd(GameObject_s *player) {
-    if (WORLD->giz_buildit_sys == NULL) return;
+    if (WORLD->giz_buildit_sys == NULL)
+        return;
     GIZBUILDIT_s *buildit = WORLD->giz_buildit_sys->buildits;
     f32 player_x = player->apiobj.collision_position.x;
     f32 player_z = player->apiobj.collision_position.z;
@@ -278,8 +281,8 @@ void GizBuildItPushAwayFromEnd(GameObject_s *player) {
     i32 nearest = 0;
     for (i32 i = 0; i < WORLD->giz_buildit_sys->count; ++i, ++buildit) {
         NUVEC centre = v000;
-        if (!(buildit->state_flags & 8) || !(buildit->availability_flags & 2) ||
-            buildit->built_object_count == 0) continue;
+        if (!(buildit->state_flags & 8) || !(buildit->availability_flags & 2) || buildit->built_object_count == 0)
+            continue;
         NUVEC end_position = buildit->position;
         NUVEC minimum, maximum;
         minimum.x = minimum.z = 1000000000.0f;
@@ -288,8 +291,7 @@ void GizBuildItPushAwayFromEnd(GameObject_s *player) {
         if (buildit->state_flags & 0x10) {
             f32 nearest_distance = 1000000000.0f;
             for (i32 j = 0; j < buildit->built_object_count; ++j) {
-                GIZBUILDITANIMDATA_s *data =
-                    static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[j]->object_data);
+                GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[j]->object_data);
                 f32 dx = data->end_mtx.m30 - player_x;
                 f32 dz = data->end_mtx.m32 - player_z;
                 f32 distance = dx * dx + dz * dz;
@@ -305,8 +307,7 @@ void GizBuildItPushAwayFromEnd(GameObject_s *player) {
         } else {
             centre.y = end_position.y;
             for (i32 j = 0; j < buildit->built_object_count; ++j) {
-                GIZBUILDITANIMDATA_s *data =
-                    static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[j]->object_data);
+                GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[j]->object_data);
                 centre.x += data->end_mtx.m30;
                 centre.z += data->end_mtx.m32;
                 f32 dx = data->end_mtx.m30 - end_position.x;
@@ -316,7 +317,8 @@ void GizBuildItPushAwayFromEnd(GameObject_s *player) {
                 minimum.x = NuFmin(minimum.x, dx);
                 minimum.z = NuFmin(minimum.z, dz);
                 f32 distance = dx * dx + dz * dz;
-                if (distance > radius_squared) radius_squared = distance;
+                if (distance > radius_squared)
+                    radius_squared = distance;
             }
             centre.x /= buildit->built_object_count;
             centre.z /= buildit->built_object_count;
@@ -348,8 +350,7 @@ void GizBuildItPushAwayFromStart(GameObject_s *player, GIZBUILDIT_s *buildit) {
         f32 nearest_distance = 1000000000.0f;
         i32 nearest = 0;
         for (i32 i = 0; i < count; ++i) {
-            GIZBUILDITANIMDATA_s *data =
-                static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[i]->object_data);
+            GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[i]->object_data);
             f32 dx = data->start_mtx.m30 - player_x;
             f32 dz = data->start_mtx.m32 - player_z;
             f32 distance = dx * dx + dz * dz;
@@ -365,8 +366,7 @@ void GizBuildItPushAwayFromStart(GameObject_s *player, GIZBUILDIT_s *buildit) {
     } else {
         centre = start_position;
         for (i32 i = 0; i < count; ++i) {
-            GIZBUILDITANIMDATA_s *data =
-                static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[i]->object_data);
+            GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[i]->object_data);
             f32 dx = data->start_mtx.m30 - start_position.x;
             f32 dz = data->start_mtx.m32 - start_position.z;
             maximum.x = NuFmax(maximum.x, dx);

@@ -713,7 +713,8 @@ const char *CharacterObjectInterface::GetTargetName() const {
 }
 
 bool CharacterObjectInterface::IsDead() {
-    if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001) return 1;
+    if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001)
+        return 1;
     return object->apiobj.field_0x287 != 0;
 }
 

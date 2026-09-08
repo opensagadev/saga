@@ -62,20 +62,22 @@ void AddTorpedoAsPart(NUVEC *, NUVEC *, f32, f32);
 void PowerUp_AddPart(NUVEC *, NUVEC *, f32, f32);
 void AddCoinsToPanel(i32, NUVEC *, i32, f32, GameObject_s *, i32);
 
-void AddPickups(i32 coins, i32 hearts, i32 torpedoes, i32 powerups, nuvec_s *position, nuvec_s *direction,
-                float, i32 player_id, float speed, float lifetime, GameObject_s *owner, i32, i32 panel,
-                bool consolidate) {
+void AddPickups(i32 coins, i32 hearts, i32 torpedoes, i32 powerups, nuvec_s *position, nuvec_s *direction, float,
+                i32 player_id, float speed, float lifetime, GameObject_s *owner, i32, i32 panel, bool consolidate) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
     const f32 scale = AreaPickupScale;
     u32 arcade_flags;
     Arcade_GetMode(&arcade_flags);
-    if ((arcade_flags & 0x40) != 0) coins = torpedoes = 0;
+    if ((arcade_flags & 0x40) != 0)
+        coins = torpedoes = 0;
     i32 to_panel;
     if ((world->current_level->flags & LEVEL_PICKUPS_TO_PANEL) != 0) {
         to_panel = 1;
         if (player_id == -1) {
-            if (player2 != NULL) player_id = qrand() / 32768;
-            else player_id = Player[0] != NULL && (Player[0]->apiobj.flags_low & 0x80) != 0 ? 0 : 1;
+            if (player2 != NULL)
+                player_id = qrand() / 32768;
+            else
+                player_id = Player[0] != NULL && (Player[0]->apiobj.flags_low & 0x80) != 0 ? 0 : 1;
         }
     } else if (world->area != NULL && (world->area->flags & 0x100) != 0) {
         player_id = qrand() / 32768;
@@ -83,13 +85,18 @@ void AddPickups(i32 coins, i32 hearts, i32 torpedoes, i32 powerups, nuvec_s *pos
     } else {
         to_panel = player_id == -1 ? 0 : panel;
     }
-    if (ChallengeMode != 0 || Mission_Active(NULL) != NULL) coins = 0;
-    if (speed == 1.0f) speed = scale;
+    if (ChallengeMode != 0 || Mission_Active(NULL) != NULL)
+        coins = 0;
+    if (speed == 1.0f)
+        speed = scale;
     u8 counts[10] = {};
-    if (netclient != 0) return;
+    if (netclient != 0)
+        return;
     i32 remainder = coins % 10;
-    if (remainder > 0) coins -= remainder;
-    if (coins > 512000) coins = 512000;
+    if (remainder > 0)
+        coins -= remainder;
+    if (coins > 512000)
+        coins = 512000;
     bool has_coins = false;
     if (coins > 0) {
         PlaySfx("CoinsLand", position);
@@ -111,24 +118,35 @@ void AddPickups(i32 coins, i32 hearts, i32 torpedoes, i32 powerups, nuvec_s *pos
             if (gold > 9) {
                 gold %= 10;
                 ++blue;
-                if (blue > 9) { blue %= 10; ++purple; }
+                if (blue > 9) {
+                    blue %= 10;
+                    ++purple;
+                }
             }
         }
         if (gold > 4) {
             gold = qrand() / 32768;
             ++blue;
-            if (blue > 9) { blue %= 10; ++purple; }
+            if (blue > 9) {
+                blue %= 10;
+                ++purple;
+            }
         }
-        if (blue > 5) { blue = qrand() / 65536; ++purple; }
+        if (blue > 5) {
+            blue = qrand() / 65536;
+            ++purple;
+        }
         counts[0] = silver;
         counts[1] = gold;
         counts[2] = blue;
         counts[3] = purple;
     }
-    if (static_cast<u32>(player_id) >= 2) player_id = -1;
+    if (static_cast<u32>(player_id) >= 2)
+        player_id = -1;
     NUVEC velocity;
     if (to_panel != 0) {
-        if (has_coins) DrawBuildUpTime = COINMSGTIME + 1.0f;
+        if (has_coins)
+            DrawBuildUpTime = COINMSGTIME + 1.0f;
         AddCoinsToPanel(coins, position, player_id, speed, owner, 0);
     } else {
         for (i32 i = 0; i < 4; ++i) {
@@ -141,29 +159,38 @@ void AddPickups(i32 coins, i32 hearts, i32 torpedoes, i32 powerups, nuvec_s *pos
     }
     if (hearts > 0) {
         bool both_players = false;
-        if (VehicleArea != 0 && Player[0] != NULL && (Player[0]->apiobj.flags_low & 0x80) != 0 &&
-            Player[1] != NULL && (Player[1]->apiobj.flags_low & 0x80) != 0) {
+        if (VehicleArea != 0 && Player[0] != NULL && (Player[0]->apiobj.flags_low & 0x80) != 0 && Player[1] != NULL &&
+            (Player[1]->apiobj.flags_low & 0x80) != 0) {
             both_players = true;
             hearts = 2;
         }
         for (i32 i = 0; i < hearts; ++i) {
-            if (to_panel != 0) velocity = v000;
+            if (to_panel != 0)
+                velocity = v000;
             else if (TouchHacks::TouchControlsActive && player != NULL) {
                 NUVEC toward_player = {player->apiobj.position.x - position->x, 0.0f,
                                        player->apiobj.position.z - position->z};
                 if (toward_player.x * toward_player.x + toward_player.y * toward_player.y +
-                    toward_player.z * toward_player.z > 1.0f) NuVecNorm(&toward_player, &toward_player);
-                toward_player.y = AreaPickupGravity == 0.0f ? 0.0f : static_cast<f32>(qrand()) * (1.0f / 65535.0f) + 1.0f;
+                        toward_player.z * toward_player.z >
+                    1.0f)
+                    NuVecNorm(&toward_player, &toward_player);
+                toward_player.y =
+                    AreaPickupGravity == 0.0f ? 0.0f : static_cast<f32>(qrand()) * (1.0f / 65535.0f) + 1.0f;
                 velocity = toward_player;
-            } else MakePartVector(&velocity, direction, speed);
+            } else
+                MakePartVector(&velocity, direction, speed);
             GameObject_s *recipient = owner;
-            if (both_players) recipient = i == 0 ? Player[0] : Player[1];
+            if (both_players)
+                recipient = i == 0 ? Player[0] : Player[1];
             else if (recipient == NULL) {
                 GameObject_s *eligible[2];
                 i32 count = 0;
-                if (Player[0] != NULL && (Player[0]->apiobj.flags_low & 0x80) != 0) eligible[count++] = Player[0];
-                if (Player[1] != NULL && (Player[1]->apiobj.flags_low & 0x80) != 0) eligible[count++] = Player[1];
-                if (count != 0) recipient = eligible[count == 1 ? 0 : qrand() / 32768];
+                if (Player[0] != NULL && (Player[0]->apiobj.flags_low & 0x80) != 0)
+                    eligible[count++] = Player[0];
+                if (Player[1] != NULL && (Player[1]->apiobj.flags_low & 0x80) != 0)
+                    eligible[count++] = Player[1];
+                if (count != 0)
+                    recipient = eligible[count == 1 ? 0 : qrand() / 32768];
             }
             AddHeartAsPart(recipient, position, &velocity, scale, lifetime);
         }
@@ -197,8 +224,10 @@ i32 GetRandomCoinType() {
 i32 OutSideSplineArea(NUVEC *, nugspline_s *, NUVEC *, NUVEC *, i32);
 
 i32 InDoubleScoreZone(GameObject_s *object) {
-    if (Mission_Active(NULL) != NULL) return 0;
-    if ((WORLD->current_level->flags & LEVEL_DOUBLE_SCORE) != 0) return 1;
+    if (Mission_Active(NULL) != NULL)
+        return 0;
+    if ((WORLD->current_level->flags & LEVEL_DOUBLE_SCORE) != 0)
+        return 1;
     for (i32 i = 19; i < 24; ++i) {
         nugspline_s *spline = reinterpret_cast<nugspline_s *>(WORLD->portal_places[i]);
         if (spline != NULL && OutSideSplineArea(&object->apiobj.collision_position, spline, NULL, NULL, 0) == 0)

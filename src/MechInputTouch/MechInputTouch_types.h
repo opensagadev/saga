@@ -144,12 +144,19 @@ struct nuvec_s;
 struct MechAddon {
     enum ProcessStage : i32 { PROCESS_STAGE_0 = 0 };
     enum RenderStage : i32 { RENDER_STAGE_0 = 0 };
-    MechAddon(MechObjectInterface &object, u32 id) : target(&object), hash_id(id), next(NULL) {}
-    virtual ~MechAddon() {}
-    virtual void OnAdded() {}
-    virtual void OnRemoved() {}
-    virtual bool OnProcess(ProcessStage, f32) { return true; }
-    virtual void OnRender(RenderStage) {}
+    MechAddon(MechObjectInterface &object, u32 id) : target(&object), hash_id(id), next(NULL) {
+    }
+    virtual ~MechAddon() {
+    }
+    virtual void OnAdded() {
+    }
+    virtual void OnRemoved() {
+    }
+    virtual bool OnProcess(ProcessStage, f32) {
+        return true;
+    }
+    virtual void OnRender(RenderStage) {
+    }
     NuMechPtr<MechObjectInterface, 4> target;
     u32 hash_id;
     MechAddon *next;
@@ -447,30 +454,67 @@ struct MechObjectInterface : NuMechPtr<MechObjectInterface, 4>::ManagedBase {
     virtual void GetPos(VuVec &, i32) const {
     }
     virtual void GetFloorTargetPos(VuVec &, i32) const;
-    virtual f32 GetRadius() const { return 0.0f; }
-    virtual f32 GetHeight() const { const f32 radius = GetRadius(); return radius + radius; }
-    virtual const char *GetTargetName() const { return ""; }
-    virtual i32 GetObjectType() const { return 0; }
-    virtual void TargetedFlash() {}
-    virtual bool IsDead() { return 1; }
-    virtual void *GetTgtVoidPtr() { return NULL; }
-    virtual GameObject_s *GetCharacterObject() { return NULL; }
-    virtual GIZOBSTACLE_s *GetGizObstacle() { return NULL; }
-    virtual GIZMOBLOWUP_s *GetGizBlowup() { return NULL; }
-    virtual GIZFORCE_s *GetGizForce() { return NULL; }
-    virtual GIZBUILDIT_s *GetGizBuildit() { return NULL; }
-    virtual LEVER_s *GetGizLever() { return NULL; }
-    virtual TELEPORT_s *GetTeleport() { return NULL; }
-    virtual HATMACHINE_s *GetHatMachine() { return NULL; }
-    virtual GIZPANEL_s *GetPanel() { return NULL; }
-    virtual GIZTURRET_s *GetGizTurret() { return NULL; }
-    virtual PART_s *GetPart() { return NULL; }
+    virtual f32 GetRadius() const {
+        return 0.0f;
+    }
+    virtual f32 GetHeight() const {
+        const f32 radius = GetRadius();
+        return radius + radius;
+    }
+    virtual const char *GetTargetName() const {
+        return "";
+    }
+    virtual i32 GetObjectType() const {
+        return 0;
+    }
+    virtual void TargetedFlash() {
+    }
+    virtual bool IsDead() {
+        return 1;
+    }
+    virtual void *GetTgtVoidPtr() {
+        return NULL;
+    }
+    virtual GameObject_s *GetCharacterObject() {
+        return NULL;
+    }
+    virtual GIZOBSTACLE_s *GetGizObstacle() {
+        return NULL;
+    }
+    virtual GIZMOBLOWUP_s *GetGizBlowup() {
+        return NULL;
+    }
+    virtual GIZFORCE_s *GetGizForce() {
+        return NULL;
+    }
+    virtual GIZBUILDIT_s *GetGizBuildit() {
+        return NULL;
+    }
+    virtual LEVER_s *GetGizLever() {
+        return NULL;
+    }
+    virtual TELEPORT_s *GetTeleport() {
+        return NULL;
+    }
+    virtual HATMACHINE_s *GetHatMachine() {
+        return NULL;
+    }
+    virtual GIZPANEL_s *GetPanel() {
+        return NULL;
+    }
+    virtual GIZTURRET_s *GetGizTurret() {
+        return NULL;
+    }
+    virtual PART_s *GetPart() {
+        return NULL;
+    }
 };
 DECOMP_ASSERT(sizeof(MechObjectInterface) == 8, "MechObjectInterface ABI");
 DECOMP_ASSERT(sizeof(NuMechPtr<MechObjectInterface, 4>) == 12, "Mech object reference ABI");
 
 struct MechAddonCollection {
-    explicit MechAddonCollection(MechObjectInterface &object) : target(&object), first(NULL) {}
+    explicit MechAddonCollection(MechObjectInterface &object) : target(&object), first(NULL) {
+    }
     ~MechAddonCollection() {
         MechAddon *addon = first;
         while (addon != NULL) {
@@ -481,13 +525,16 @@ struct MechAddonCollection {
         }
     }
     virtual void Add(MechAddon &addon) {
-        if (target.Get() != addon.target.Get()) return;
+        if (target.Get() != addon.target.Get())
+            return;
         if (first != NULL) {
             for (MechAddon *current = first; current != NULL; current = current->next) {
-                if (current == &addon) return;
+                if (current == &addon)
+                    return;
             }
             MechAddon *last = first;
-            while (last->next != NULL) last = last->next;
+            while (last->next != NULL)
+                last = last->next;
             last->next = &addon;
         } else {
             first = &addon;
@@ -502,8 +549,10 @@ struct MechAddonCollection {
             current = current->next;
         }
         if (current != NULL) {
-            if (previous != NULL) previous->next = current->next;
-            else first = current->next;
+            if (previous != NULL)
+                previous->next = current->next;
+            else
+                first = current->next;
             current->OnRemoved();
             delete current;
         }
@@ -512,14 +561,16 @@ struct MechAddonCollection {
         MechAddon *addon = first;
         while (addon != NULL) {
             MechAddon *next = addon->next;
-            if (!addon->OnProcess(stage, elapsed)) Remove(*addon);
+            if (!addon->OnProcess(stage, elapsed))
+                Remove(*addon);
             addon = next;
         }
     }
     virtual void Render(MechAddon::RenderStage stage) {
         // The original loop at 0x46f780 does not advance its current pointer.
         MechAddon *addon = first;
-        while (addon != NULL) addon->OnRender(stage);
+        while (addon != NULL)
+            addon->OnRender(stage);
     }
     NuMechPtr<MechObjectInterface, 4> target;
     MechAddon *first;

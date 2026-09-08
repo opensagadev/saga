@@ -554,7 +554,8 @@ extern AREADATA_s *PODSPRINT_ADATA;
 static void Blowups_Reset(void *world_ptr, void *, void *progress_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     BLOWUPPROGRESS_s *progress = static_cast<BLOWUPPROGRESS_s *>(progress_ptr);
-    if (world == NULL) return;
+    if (world == NULL)
+        return;
     if (world->gizmo_blowups != NULL) {
         GIZMOBLOWUP_s *blowup = world->gizmo_blowups;
         for (i32 index = 0; index < world->gizmo_blowup_count; ++index, ++blowup) {
@@ -583,19 +584,21 @@ static void Blowups_Reset(void *world_ptr, void *, void *progress_ptr) {
                 const i32 word = index >> 5;
                 blowup->output_flags = (blowup->output_flags & ~1) | ((progress->blown_up[word] & bit) != 0);
                 const u8 old_visibility = blowup->visibility_flags;
-                blowup->visibility_flags = (old_visibility & ~GIZMOBLOWUP_VISIBLE) |
-                    (((progress->visible[word] & bit) != 0) << 6);
+                blowup->visibility_flags =
+                    (old_visibility & ~GIZMOBLOWUP_VISIBLE) | (((progress->visible[word] & bit) != 0) << 6);
                 if ((old_visibility & GIZMOBLOWUP_VISIBLE) == 0) {
-                    if ((blowup->visibility_flags & GIZMOBLOWUP_VISIBLE) != 0) GizBlowup_InitSingleTerrain(blowup);
+                    if ((blowup->visibility_flags & GIZMOBLOWUP_VISIBLE) != 0)
+                        GizBlowup_InitSingleTerrain(blowup);
                 } else if ((blowup->visibility_flags & GIZMOBLOWUP_VISIBLE) == 0) {
                     GizBlowup_DeleteSingleTerrain(blowup);
                 }
                 blowup->state_flags = (blowup->state_flags & ~GIZMOBLOWUP_STATE_ACTIVATED) |
-                    (((progress->activated[word] & bit) != 0) << 7);
-                blowup->field_0x9f = (blowup->field_0x9f & ~0x10) |
-                    (((progress->secondary_output[word] & bit) != 0) << 4);
+                                      (((progress->activated[word] & bit) != 0) << 7);
+                blowup->field_0x9f =
+                    (blowup->field_0x9f & ~0x10) | (((progress->secondary_output[word] & bit) != 0) << 4);
             }
-            if ((blowup->output_flags & GIZMOBLOWUP_OUTPUT_BLOWN_UP) != 0) blowup->animation_time = 0.0f;
+            if ((blowup->output_flags & GIZMOBLOWUP_OUTPUT_BLOWN_UP) != 0)
+                blowup->animation_time = 0.0f;
         }
     }
     GizBlowup_DeleteTerrain();

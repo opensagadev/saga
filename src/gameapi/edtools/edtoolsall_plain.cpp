@@ -429,22 +429,26 @@ extern "C" {
     void edppClearPage(void) {
     }
     void edppDeleteEffect(i32 index) {
-        if (edpp_ptls[edpp_nearest].effect_index == index) edpp_nearest = -1;
+        if (edpp_ptls[edpp_nearest].effect_index == index)
+            edpp_nearest = -1;
         DebFreeOrphansInstantly(debtab[index]);
         i32 replacement = LookupDebrisEffectPageIgnore(debtab[index]->name, 1, index);
         if (replacement != -1) {
             for (i32 i = 0; i < 512; ++i) {
                 if (edpp_ptls[i].effect_index == index) {
                     i32 handle = edpp_ptls[i].instance_id;
-                    if (handle != 99999 && handle != -1) debkeydata[handle].effect_index = replacement;
+                    if (handle != 99999 && handle != -1)
+                        debkeydata[handle].effect_index = replacement;
                     edpp_ptls[i].effect_index = replacement;
                 }
             }
             for (i32 i = 0; i < maxdebkeys; ++i)
-                if (debkeydata[i].effect_index == index) debkeydata[i].effect_index = replacement;
+                if (debkeydata[i].effect_index == index)
+                    debkeydata[i].effect_index = replacement;
         } else {
             for (i32 i = 0; i < 512; ++i)
-                if (edpp_ptls[i].effect_index == index) edppPtlDestroy(i);
+                if (edpp_ptls[i].effect_index == index)
+                    edppPtlDestroy(i);
             for (i32 i = 0; i < maxdebkeys; ++i) {
                 if (debkeydata[i].effect_index == index) {
                     i32 handle = i;

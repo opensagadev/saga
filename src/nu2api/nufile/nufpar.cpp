@@ -768,35 +768,6 @@ NUWCHAR NuGetWChar(NUFPAR *parser) {
     return c;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 static __used__ void SockCamATSTDIST(nufpar_s *, void *) {
 }
 

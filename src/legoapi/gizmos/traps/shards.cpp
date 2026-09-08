@@ -63,10 +63,12 @@ static void Shards_UpdateAfterCharacters(void *context, void *, float) {
             NuVecScale(&velocity, &velocity, 3.0f);
             shard->collection_time += FRAMETIME;
             f32 acceleration;
-            if (shard->collection_time < 1.0f) acceleration = 5.0f;
+            if (shard->collection_time < 1.0f)
+                acceleration = 5.0f;
             else if (shard->collection_time < 2.0f)
                 acceleration = (shard->collection_time - 1.0f) * 5.0f + 5.0f;
-            else acceleration = 10.0f;
+            else
+                acceleration = 10.0f;
             shard->collection_velocity.x = SeekValF(shard->collection_velocity.x, velocity.x, acceleration);
             shard->collection_velocity.y = SeekValF(shard->collection_velocity.y, velocity.y, acceleration);
             shard->collection_velocity.z = SeekValF(shard->collection_velocity.z, velocity.z, acceleration);
@@ -93,25 +95,33 @@ static void Shards_UpdateAfterCharacters(void *context, void *, float) {
 static void Shards_Draw(void *context, void *, float) {
     WORLDINFO *world = static_cast<WORLDINFO *>(context);
     SHARD *shard = static_cast<SHARD *>(world->shards);
-    if (shard == NULL) return;
+    if (shard == NULL)
+        return;
     for (i32 i = 0; i < world->shard_count; ++i, ++shard) {
         shard->state_flags &= ~0x10;
-        if ((shard->state_flags & 0x0a) != 2) continue;
+        if ((shard->state_flags & 0x0a) != 2)
+            continue;
         NUMTX matrix __attribute__((aligned(16)));
         if (shard->state_flags & 4) {
             u16 spin = (u16)(i32)((f32)(i32)shard->spin_angle + 98304.0f * shard->collection_time);
             NuMtxSetRotationY(&matrix, spin);
             u16 tumble = (u16)(i32)(60620.0f * shard->collection_time);
             u16 angle_z = shard->angle_z;
-            if ((shard->state_flags & 0x40) == 0) angle_z += tumble;
-            if (angle_z != 0) NuMtxRotateZ(&matrix, angle_z);
+            if ((shard->state_flags & 0x40) == 0)
+                angle_z += tumble;
+            if (angle_z != 0)
+                NuMtxRotateZ(&matrix, angle_z);
             u16 angle_x = shard->angle_x;
-            if (shard->state_flags & 0x40) angle_x += tumble;
-            if (angle_x != 0) NuMtxRotateX(&matrix, angle_x);
+            if (shard->state_flags & 0x40)
+                angle_x += tumble;
+            if (angle_x != 0)
+                NuMtxRotateX(&matrix, angle_x);
         } else {
             NuMtxSetRotationY(&matrix, shard->spin_angle);
-            if (shard->angle_z != 0) NuMtxRotateZ(&matrix, shard->angle_z);
-            if (shard->angle_x != 0) NuMtxRotateX(&matrix, shard->angle_x);
+            if (shard->angle_z != 0)
+                NuMtxRotateZ(&matrix, shard->angle_z);
+            if (shard->angle_x != 0)
+                NuMtxRotateX(&matrix, shard->angle_x);
         }
         NuMtxTranslate(&matrix, &shard->current_position);
         LEVEL_OBJECT_RUNTIME_s *model = &world->lev_objs[shard->model_index];
@@ -166,7 +176,8 @@ static void Shards_ClearProgress(void *, void *data) {
 }
 
 static void Shards_StoreProgress(void *context, void *, void *data) {
-    if (data == NULL) return;
+    if (data == NULL)
+        return;
     SHARDPROGRESS_s *progress = static_cast<SHARDPROGRESS_s *>(data);
     Shards_ClearProgress(NULL, progress);
     WORLDINFO *world = static_cast<WORLDINFO *>(context);
@@ -175,16 +186,20 @@ static void Shards_StoreProgress(void *context, void *, void *data) {
         for (i32 i = 0; i < world->shard_count && i < 128; ++i, ++shard) {
             i32 word = i >> 5;
             u32 mask = 1u << (i & 31);
-            if (shard->state_flags & 8) progress->collected[word] |= mask;
-            if (!(shard->state_flags & 2)) progress->visible[word] &= ~mask;
-            if (!(shard->state_flags & 1)) progress->active[word] &= ~mask;
+            if (shard->state_flags & 8)
+                progress->collected[word] |= mask;
+            if (!(shard->state_flags & 2))
+                progress->visible[word] &= ~mask;
+            if (!(shard->state_flags & 1))
+                progress->active[word] &= ~mask;
         }
     }
 }
 
 static void Shards_Reset(void *context, void *, void *data) {
     WORLDINFO *world = static_cast<WORLDINFO *>(context);
-    if (world == NULL || world->shards == NULL) return;
+    if (world == NULL || world->shards == NULL)
+        return;
     SHARDPROGRESS_s *progress = static_cast<SHARDPROGRESS_s *>(data);
     SHARD *shard = static_cast<SHARD *>(world->shards);
     for (i32 i = 0; i < world->shard_count; ++i, ++shard) {
@@ -194,7 +209,8 @@ static void Shards_Reset(void *context, void *, void *data) {
         LEVEL_OBJECT_RUNTIME_s *models = world->lev_objs;
         for (i32 attempt = 0; attempt < 7 && models[current->model_index + 65].active == 0; ++attempt) {
             current->model_index++;
-            if (current->model_index == 7) current->model_index = 0;
+            if (current->model_index == 7)
+                current->model_index = 0;
         }
         current->model_index += 65;
         current->spin_angle = qrand();

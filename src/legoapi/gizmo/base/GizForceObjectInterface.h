@@ -11,9 +11,13 @@ struct GizForceObjectInterface : MechObjectInterface {
     void GetPos(VuVec &, i32) const override;
     f32 GetRadius() const override;
     const char *GetTargetName() const override;
-    i32 GetObjectType() const override { return 5; }
+    i32 GetObjectType() const override {
+        return 5;
+    }
     void *GetTgtVoidPtr() override;
-    GIZFORCE_s *GetGizForce() override { return force; }
+    GIZFORCE_s *GetGizForce() override {
+        return force;
+    }
     void TargetedFlash() override;
     virtual ~GizForceObjectInterface();
     GIZFORCE_s *force;

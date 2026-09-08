@@ -55,7 +55,6 @@ extern "C" {
         return -1;
     }
 
-
 } // extern "C"
 
 i8 BoltType_FindIDByName(char *name, WORLDINFO *world) {
