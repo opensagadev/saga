@@ -32,10 +32,13 @@ void HostPlatformPrepareArguments(i32 *argc, char ***argv) {
     host_wasm_arguments[2] = nullptr;
     *argc = 2;
     *argv = host_wasm_arguments;
+    // This macro contains JavaScript, whose strict equality operator is not C++ syntax.
+    // clang-format off
     if (MAIN_THREAD_EM_ASM_INT({
-            return (location.hostname == = '127.0.0.1' || location.hostname == = 'localhost') &&
-                       new URLSearchParams(location.search).get('movement-trace') == = '1';
+            return (location.hostname === '127.0.0.1' || location.hostname === 'localhost') &&
+                   new URLSearchParams(location.search).get('movement-trace') === '1';
         })) {
+        // clang-format on
         host_wasm_arguments[(*argc)++] = const_cast<char *>("--trace-movement");
         host_wasm_arguments[*argc] = nullptr;
     }
