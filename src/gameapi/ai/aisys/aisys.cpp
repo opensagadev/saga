@@ -4,6 +4,7 @@
 #include "legoapi/ai/core/ai_sys_stubs.h"
 
 #include <stdio.h>
+#include <float.h>
 #include <string.h>
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
@@ -29,6 +30,85 @@
 #include "nu2api/numath/nurand.h"
 
 extern i32 Hub_GetRandomCharType();
+static __used__ AIPATHCNX *GetNextConnection(const AIPACKET *packet, i32 *direction) {
+    if (packet->goal_path_node == NULL || packet->path_info.connection == NULL) {
+        return NULL;
+    }
+    AIPATH *path = packet->path_info.path;
+    i32 node_index = packet->path_info.connection->node_indices[packet->path_info.direction == 0];
+    AIPATHNODE *node = &path->nodes[node_index];
+    u32 destination = packet->goal_path_node - path->nodes;
+    if (destination > 0xff) {
+        return NULL;
+    }
+    AIPATHCNX *connection = NULL;
+    i32 connection_index = path->route_matrix[node_index][destination];
+    if (connection_index < node->connection_count) {
+        connection = node->connections[connection_index];
+        *direction = connection->node_indices[0] != node_index;
+    }
+    u8 route_index = packet->current_route;
+    if (route_index == 0xff) {
+        return connection;
+    }
+    if ((static_cast<u64>(static_cast<u16>(node->route_membership_mask)) >> route_index & 1) == 0) {
+        return NULL;
+    }
+    if ((static_cast<u64>(static_cast<u16>(node->route_boundary_mask)) >> route_index & 1) != 0) {
+        if (connection == NULL) {
+            return NULL;
+        }
+        if ((static_cast<u64>(connection->route_mask) >> route_index & 1) == 0) {
+            return connection;
+        }
+    }
+    AIPATHROUTE *route = &path->routes[route_index];
+    i32 next_node = destination;
+    if ((static_cast<u64>(static_cast<u16>(path->nodes[destination].route_membership_mask)) >> route_index & 1) == 0) {
+        if (route->exit_node_count == 0) {
+            return NULL;
+        }
+        f32 nearest = FLT_MAX;
+        next_node = 0;
+        for (i32 index = 0; index < route->exit_node_count; ++index) {
+            f32 first = AIPathNodeDistanceToPathNode(packet->path_info.path, node_index,
+                                                    route->exit_nodes[index], packet->current_route, 0);
+            f32 second = AIPathNodeDistanceToPathNode(packet->path_info.path, route->exit_nodes[index],
+                                                     destination, 0xff,
+                                                     static_cast<u32>(static_cast<u64>(1) << packet->current_route));
+            f32 distance = first != FLT_MAX && second != FLT_MAX ? first + second : FLT_MAX;
+            if (distance < nearest) {
+                nearest = distance;
+                next_node = route->exit_nodes[index];
+            }
+        }
+        if (nearest == FLT_MAX) {
+            return NULL;
+        }
+    }
+    connection_index = route->route_nodes[route->node_routes[node_index]][route->node_routes[next_node]];
+    if (connection_index >= node->connection_count) {
+        return NULL;
+    }
+    connection = node->connections[connection_index];
+    *direction = connection->node_indices[0] != node_index;
+    return connection;
+}
+
+extern "C" i32 AISysGetCharacterWaypoint(const AIPACKET *packet, NUVEC *position) {
+    if (packet->path_info.connection != packet->fallback_path_info.connection) {
+        i32 direction;
+        AIPATHCNX *connection = GetNextConnection(packet, &direction);
+        if (connection != NULL) {
+            if (position != NULL) {
+                *position = packet->path_info.path->nodes[connection->node_indices[direction == 0]].position;
+            }
+            return 1;
+        }
+    }
+    return 0;
+}
+
 extern void CurrentStart(GameObject_s *object, i32 mode, i32 start);
 extern "C" void ComplexSockAngles(SOCKPOSITION *position);
 extern void oneAtOnce_SetInitDistPerRow(f32 distance);

@@ -101,9 +101,5 @@ static __used__ unsigned int AISysCheckAntinode_Rectangle(APIOBJECT_s *, AIANTIN
 static __used__ void FormationMove(AIGROUP_s *, int (*)(AIGROUP_s *, AIROW_s *, AIROW_s *, APIOBJECT_s *)) {
 }
 
-static __used__ void *GetNextConnection(AIPACKET_s const *, int *) {
-    return nullptr;
-}
-
 static __used__ void GenerateTrooperTeamShape(minitrooperteam_s *, int) {
 }

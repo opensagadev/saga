@@ -91,17 +91,17 @@ typedef struct AIPATHNODE_s {
         };
     };
     NUVEC special_position;
-    i16 value_0x58;
-    i16 value_0x5a;
+    u16 route_membership_mask;
+    u16 route_boundary_mask;
 } AIPATHNODE;
 
 typedef struct AIPATHROUTE_s {
     char *name;
     u8 *node_routes;
     u8 *node_directions;
-    u8 *characters;
+    u8 *exit_nodes;
     u8 route_count;
-    u8 character_count;
+    u8 exit_node_count;
     u8 padding_0x12[2];
     u8 **route_nodes;
     u32 character_mask[4];
@@ -416,6 +416,12 @@ DECOMP_ASSERT(sizeof(AIPATHNODE) == 0x5c, "AIPATHNODE size");
 DECOMP_ASSERT(offsetof(AIPATHNODE, runtime_flags) == 0x2b, "AIPATHNODE runtime flags offset");
 DECOMP_ASSERT(offsetof(AIPATHNODE, special_handle) == 0x40, "AIPATHNODE special handle offset");
 DECOMP_ASSERT(sizeof(AIPATHROUTE) == 0x28, "AIPATHROUTE size");
+DECOMP_ASSERT(offsetof(AIPATHNODE, route_membership_mask) == 0x58, "AIPATHNODE route membership offset");
+DECOMP_ASSERT(offsetof(AIPATHNODE, route_boundary_mask) == 0x5a, "AIPATHNODE route boundary offset");
+DECOMP_ASSERT(offsetof(AIPATHROUTE, node_routes) == 0x04, "AIPATHROUTE node mapping offset");
+DECOMP_ASSERT(offsetof(AIPATHROUTE, exit_nodes) == 0x0c, "AIPATHROUTE exit nodes offset");
+DECOMP_ASSERT(offsetof(AIPATHROUTE, exit_node_count) == 0x11, "AIPATHROUTE exit count offset");
+DECOMP_ASSERT(offsetof(AIPATHROUTE, route_nodes) == 0x14, "AIPATHROUTE connection matrix offset");
 DECOMP_ASSERT(sizeof(AIPATH) == 0xa8, "AIPATH size");
 DECOMP_ASSERT(offsetof(AIPATH, updated_node_bits) == 0x18, "AIPATH updated-node bits offset");
 DECOMP_ASSERT(offsetof(AIPATH, inside_node_bits) == 0x58, "AIPATH occupied-node bits offset");
@@ -681,6 +687,7 @@ extern "C" {
                          i32 update_once);
     f32 AIPathNodeDistanceToPathNode(AIPATH *path, i32 start_node, i32 destination_node, i32 route,
                                      u32 excluded_route_mask);
+    i32 AISysGetCharacterWaypoint(const AIPACKET *packet, NUVEC *position);
     void AISysGetCharacterPathPos(AISYS *system, APIOBJECT *object, AIPACKET *packet, i32 checks, i32 ground);
     void AISysUpdateCharacterPathPos(AISYS *system, APIOBJECT *object, AIPACKET *packet, i32 checks, f32 elapsed);
     void AISysCharacterMovement(AISYS *system, AIPACKET *packet, APIOBJECT *object, i32 checks);

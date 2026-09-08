@@ -230,7 +230,7 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
             return;
         }
         const u16 route_bit = static_cast<u16>(1u << packet->current_route);
-        if ((next_connection->route_mask & route_bit) == 0 && (waypoint->value_0x5a & route_bit) == 0) {
+        if ((next_connection->route_mask & route_bit) == 0 && (waypoint->route_boundary_mask & route_bit) == 0) {
             packet->runtime_flags |= AIPACKET_RUNTIME_PATH_BLOCKED | AIPACKET_RUNTIME_USING_PATH_WAYPOINT;
             return;
         }
@@ -375,7 +375,7 @@ void AIWander(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *object, i32 chec
 
                 if (packet->current_route != 0xff &&
                     ((static_cast<u64>(candidate->route_mask) >> packet->current_route) & 1) == 0 &&
-                    ((static_cast<u64>(static_cast<u16>(current_node->value_0x5a)) >> packet->current_route) & 1) ==
+                    ((static_cast<u64>(static_cast<u16>(current_node->route_boundary_mask)) >> packet->current_route) & 1) ==
                         0) {
                     packet->movement_target = NULL;
                     target_connection = NULL;

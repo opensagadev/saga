@@ -73,7 +73,7 @@ static void AISysLoadPathRoutes(AISYS *system, AIPATH *path) {
             route->name = AISysLoadString(system, name_length);
             if (name_length != 0) {
                 route->route_count = static_cast<u8>(EdFileReadChar());
-                route->character_count = static_cast<u8>(EdFileReadChar());
+                route->exit_node_count = static_cast<u8>(EdFileReadChar());
                 EdFileReadChar();
                 EdFileReadChar();
 
@@ -87,9 +87,9 @@ static void AISysLoadPathRoutes(AISYS *system, AIPATH *path) {
                         route->route_nodes[route_index] = static_cast<u8 *>(AISysLoadAlloc(system, path->node_count));
                         EdFileRead(route->route_nodes[route_index], path->node_count);
                     }
-                    if (route->character_count != 0) {
-                        route->characters = static_cast<u8 *>(AISysLoadAlloc(system, route->character_count));
-                        EdFileRead(route->characters, route->character_count);
+                    if (route->exit_node_count != 0) {
+                        route->exit_nodes = static_cast<u8 *>(AISysLoadAlloc(system, route->exit_node_count));
+                        EdFileRead(route->exit_nodes, route->exit_node_count);
                     }
                 }
             }
@@ -208,8 +208,8 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene) {
                     }
                 }
 
-                node->value_0x58 = EdFileReadShort();
-                node->value_0x5a = EdFileReadShort();
+                node->route_membership_mask = EdFileReadShort();
+                node->route_boundary_mask = EdFileReadShort();
             }
             AIPathCalcExtents(path);
         }
@@ -733,7 +733,7 @@ extern "C" {
                     break;
                 }
                 const u16 route_bit = static_cast<u16>(1u << route);
-                if ((connection->route_mask & route_bit) == 0 && (node.value_0x5a & route_bit) == 0) {
+                if ((connection->route_mask & route_bit) == 0 && (node.route_boundary_mask & route_bit) == 0) {
                     distance = FLT_MAX;
                     break;
                 }
@@ -1571,9 +1571,6 @@ extern "C" {
         packet->path_info.path = original_path;
         packet->path_info.connection = original_connection;
         packet->path_info.direction = original_direction;
-    }
-
-    void AISysGetCharacterWaypoint(void) {
     }
 
     void AISysGetPathColour(void) {
