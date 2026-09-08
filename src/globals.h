@@ -626,6 +626,7 @@ extern TIMER GamePlayTimer;
 extern TIMER JoinInTimer;
 extern TIMER PauseTimer;
 extern f32 TOGGLEHOLDTIME;
+extern i32 LEGOHINT_FREEPLAYTOGGLE;
 extern TIMER OverallGamePlayTimer;
 extern AREA_GLOBALS AreaGlobals;
 extern i32 HIGHGAMEOBJECT;

@@ -720,7 +720,7 @@ void InitGameAfterConfig(void) {
     //  LEGOHINT_SHOOTCAMERAS = 0x266;
     //  LEGOHINT_PUSHBLOCKS = 0x267;
     LEGOHINT_BUILD = 0x25c;
-    //  LEGOHINT_FREEPLAYTOGGLE = 600;
+    LEGOHINT_FREEPLAYTOGGLE = 600;
     //  PUNCHGAP = 0.3;
     //  PUNCHCHARGAP = 0.3;
     //  f64Jump_AlwaysReachJump2Height = 1;

@@ -138,8 +138,8 @@ The native sanitizer fixture `/tmp/saga-resetmoves-runtime.log` reached an
 active Cantina at game time 3.015376 after 22 normal reset calls. The player
 had flicker time zero and flicker flags zero; no sanitizer error was reported.
 This is initialization coverage, not proof of free-play switching:
-`Player_ToggleCharacter` remains empty. Its `NewPlayerCharacter` dependency
-was subsequently recovered as documented below.
+`Player_ToggleCharacter` and its `NewPlayerCharacter` dependency were
+subsequently recovered as documented below; complete matching remains open.
 Target/native builds and all four repository checks pass for the recovery.
 
 `ResetPlayerAI` (`0x0fc5a0`, 384 bytes) is also recovered, at **96.507%**.
@@ -477,8 +477,8 @@ Character-switch routing audit: original `Player_ToggleCharacter` at
 `0x46c730` rejects an active world whose area equals non-null `HUB_ADATA`
 (`0x46c775..0x46c787`) and returns when `FreePlay` is zero
 (`0x46c7d8..0x46c7e2`). It also rejects fades, CInfo context flag 0x100,
-and object offset 0xcc0 before cycling. Therefore this remaining stub is a
-Free Play cycling gap; restoring it must not bypass hub restrictions to
+and object offset 0xcc0 before cycling. This identified the former stub as a
+Free Play cycling gap; its recovery preserves hub restrictions rather than
 address Cantina tagging. Current `MovePlayer` calls `Tag_Check`, which is
 the separate path to inspect for Cantina switching. Original GOT resolution
 also identifies `Player_ToggleSubCharacterFn`, `TOGGLEHOLDTIME`,
@@ -637,9 +637,9 @@ RNG state and BOB's unrelated flag preservation
 (`/tmp/saga-bob-layers-runtime.log`, `/tmp/saga-mos-layers-runtime.log`).
 These fixtures passed without sanitizer diagnostics. Target/native builds
 and all four repository checks pass. This is direct swap/helper coverage;
-input-driven cycling is not yet verified or complete.
+input-driven cycling was tested separately in the following recovery.
 
-`Player_ToggleCharacter` is still an empty stub. Its original implementation
+`Player_ToggleCharacter` was an empty stub. Its original implementation
 returns in the hub and when Free Play is off. It is separate from ordinary
 tagging. There were already uncommitted changes in `Tag_Check`, `TagCode`,
 and deferred player-tag handling when this audit began.
@@ -656,6 +656,28 @@ optimization setting changed. Target/native builds and all four checks pass.
 The native sanitizer fixture `/tmp/saga-viewcam-runtime.log` checks the
 null-player path, activation, all accessors and deactivation successfully.
 This establishes the input-ownership dependency, not character cycling.
+
+`Player_ToggleCharacter` (`0x46c730`, 2391 original bytes) now reconstructs
+the original input press/held-repeat paths, context and hub/story gates,
+loaded-model iteration, collection/vehicle/bonus/terrain eligibility,
+height-clearance rejection, swap callbacks, hint/camera update and directional
+sound calls. It compares at **34.366%** (2399 bytes), so the reconstruction
+is still far from a complete match. The original globals include a 0.25-second
+repeat time and lift-button mask 8. `InitGameAfterConfig` at `0x11ce76`
+loads the Free Play hint global and assigns 600 at `0x11ce7c`; this missing
+registration is restored. All evidence came from binutils and objdiff.
+
+Target/native builds and all four repository checks pass. The controlled
+native sanitizer fixture `/tmp/saga-toggle-branches.log` retains loaded
+Cantina assets but temporarily enables Free Play and removes the hub-area
+gate to exercise cycling. It verifies that the unmodified hub and Story
+gates reject cycling, both held directions reset the timer, a held direction
+waits for the timer, a pressed right direction changes Qui-Gon (104) to
+Obi-Wan (1), and the next expired held-button repeat selects character 168
+and restores the original 0.25-second interval. The resulting character
+reaches ordinary rendering. The fixture exits successfully without sanitizer
+diagnostics. This does not verify a full Free Play level, every eligibility
+branch, audible sounds, or ordinary Cantina tagging; those remain open.
 
 A hidden native run confirmed `Tag_Mode == 2` in the cantina, with only
 `Player[0]` assigned. The original `CheckResetBits` (ELF `0x11f360`) selects
