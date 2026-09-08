@@ -476,9 +476,6 @@ static __used__ f32 Condition_LocatorOnScreen(AISYS_s *, AISCRIPTPROCESS_s *, AI
 
 
 
-static __used__ f32 Condition_PrefersBrawling(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
 
 static __used__ void *Condition_TurretAliveInit(AISYS_s *, char *, AISCRIPT_s *) {
     return nullptr;
