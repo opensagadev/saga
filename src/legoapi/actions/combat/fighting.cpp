@@ -47,9 +47,6 @@ void ComboRotateCode(GameObject_s *, i32) {
 void StartQuickShoot(GameObject_s *, i32) {
 }
 
-void CanFightLikeAJedi(GameObject_s *) {
-}
-
 void ForceNextLungeTarget(MechObjectInterface *) {
 }
 

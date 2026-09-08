@@ -17,6 +17,7 @@
 #include "legoapi/characters/motion.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/charconfig.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/menus/screens/shop.h"
 #include "legoapi/menus/core/gamehint.h"
@@ -49,6 +50,9 @@ extern "C" {
     extern NUVEC plr_lastpos;
     extern i16 id_BAT;
     extern i16 id_SNAKE;
+    extern i16 id_GRIEVOUS;
+    extern i16 id_BODYGUARD;
+    extern i16 id_IMPERIALGUARD;
 }
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
@@ -542,6 +546,16 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+i32 CanFightLikeAJedi(GameObject_s *object) {
+    return CharCategory_IsCategory(object, 0) != 0 || object->id == id_GRIEVOUS ||
+        object->id == id_BODYGUARD || object->id == id_IMPERIALGUARD;
+}
+
+static f32 Condition_CanFightLikeAJedi(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    return packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL &&
+        CanFightLikeAJedi(packet->owner) != 0 ? 1.0f : 0.0f;
+}
+
 static f32 Condition_EitherPlayerPushingSpinner(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     if (argument != NULL) {
         if (player != NULL && player->character_context == 0x28 && player->field_0x788 == argument) return 1.0f;
@@ -935,7 +949,7 @@ extern "C" {
         {"IAmA", NULL, NULL},
         {"OpponentIsA", NULL, NULL},
         {"OpponentIsAThreat", NULL, NULL},
-        {"CanFightLikeAJedi", NULL, NULL},
+        {"CanFightLikeAJedi", Condition_CanFightLikeAJedi, NULL},
         {"IAmAGoody", NULL, NULL},
         {"IAmABaddy", NULL, NULL},
         {"IAmANeutral", NULL, NULL},

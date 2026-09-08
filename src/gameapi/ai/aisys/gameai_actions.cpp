@@ -698,10 +698,6 @@ static __used__ f32 Condition_AnimationFinished(AISYS_s *, AISCRIPTPROCESS_s *, 
     return 0;
 }
 
-static __used__ f32 Condition_CanFightLikeAJedi(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
-
 
 
 
