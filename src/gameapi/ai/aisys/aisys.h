@@ -728,6 +728,8 @@ extern "C" {
     void AISysCreatureAntinodeInteraction(AISYS *system, i32 object_count, APIOBJECT **objects, i32 *immovable);
     void AISysCreatureInteraction3D(AISYS *system, i32 object_count, APIOBJECT **objects, i32 *immovable,
                                    f32 delta_time);
+    void AISysCreatureInteraction2D(AISYS *system, i32 object_count, APIOBJECT **objects, i32 *immovable,
+                                   f32 delta_time);
     extern void (*checkantinodefns[3])(APIOBJECT *, AIANTINODE *, NUVEC *, f32);
     void AISetPathHeightTol(f32 tolerance);
     void AISysSetPathCylinderCheck(i32 enabled);
