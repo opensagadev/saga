@@ -554,9 +554,6 @@ static __used__ i32 Action_SetAIOverrideControl(AISYS_s *system, AISCRIPTPROCESS
 
 
 
-static __used__ f32 Condition_NearestPartyRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
 
 
 
