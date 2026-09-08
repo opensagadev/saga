@@ -419,10 +419,6 @@ static __used__ i32 Action_PressSpecialButton(AISYS_s *, AISCRIPTPROCESS_s *proc
     return processor->action_data_1 == 0 ? 1 : 0;
 }
 
-static __used__ i32 Action_SelectRandomSpline(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
-    return 0;
-}
-
 
 
 static __used__ i32 Action_SetLastSafePathPos(AISYS_s *system, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params,

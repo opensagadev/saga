@@ -957,6 +957,55 @@ __used__ static i32 Action_GoToNode(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
 
 void LevelScriptReStoreProgress(WORLDINFO_s *, LEVELSCRIPTPROCESS_s *);
 
+static i32 Action_SelectRandomSpline(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **params,
+                                    i32 param_count, i32 first_time, f32) {
+    if (first_time) {
+        NUGSPLINE *splines[32];
+        NUGSPLINE *unused_splines[32];
+        i32 count = 0;
+        i32 unused = 0;
+        script_spline_selected = NULL;
+        for (i32 index = 0; index < param_count; ++index) {
+            char *value = NuStrIStr(params[index], "splines=");
+            if (value != NULL) {
+                count += NuSplineFindAllBeg(WORLD->scene, value + 8, &splines[count], 32 - count);
+            } else if ((value = NuStrIStr(params[index], "spline=")) != NULL) {
+                NUGSPLINE *spline = NuSplineFind(WORLD->scene, value + 7);
+                if (spline != NULL && count < 32)
+                    splines[count++] = spline;
+            } else if (NuStrIStr(params[index], "unused") != NULL) {
+                unused = 1;
+            }
+        }
+        if (count != 0) {
+            if (unused) {
+                GameObject_s *object = Obj;
+                for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
+                    if ((object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->apiobj.field_0x287 == 0 &&
+                        object->movement_spline != NULL)
+                        object->movement_spline->length |= 0x8000;
+                }
+                i32 unused_count = 0;
+                for (i32 index = 0; index < count; ++index) {
+                    if (splines[index]->length >= 0)
+                        unused_splines[unused_count++] = splines[index];
+                }
+                object = Obj;
+                for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
+                    if ((object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && object->apiobj.field_0x287 == 0 &&
+                        object->movement_spline != NULL)
+                        object->movement_spline->length &= 0x7fff;
+                }
+                if (unused_count != 0)
+                    script_spline_selected = unused_splines[qrand() / (0xffff / unused_count + 1)];
+            } else {
+                script_spline_selected = splines[qrand() / (0xffff / count + 1)];
+            }
+        }
+    }
+    return 1;
+}
+
 extern void oneAtOnce_SetNumAttackers(i32);
 extern void oneAtOnce_SetAttackersPerRow(i32);
 
@@ -4366,7 +4415,7 @@ extern "C" {
         {"BreakFormation", Action_BreakFormation, 0, 0, 0},
         {"FormationMove", Action_FormationMove, 0, 0, 0},
         {"CreateCreatures", Action_CreateCreatures, 0, 0, 0},
-        {"SelectRandomSpline", NULL, 0, 0, 0},
+        {"SelectRandomSpline", Action_SelectRandomSpline, 0, 0, 0},
         {"CreateSplineCreatures", NULL, 0, 0, 0},
         {"Launch", Action_Launch, 0, 0, 0},
         {"SetCurrentSpeed", NULL, 0, 0, 0},
