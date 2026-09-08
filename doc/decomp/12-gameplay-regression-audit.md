@@ -511,6 +511,17 @@ this run (`/tmp/saga-retry-cantina.log`); earlier NPC angle failures remain
 unresolved. Special-move callbacks, shared-node corner targeting and other
 remaining solver branches still require recovery and runtime verification.
 
+The corner-decision fixture exposed missing signed wrapping in `NuAngSub`:
+plain subtraction gives the wrong turn sign across the 16-bit angle boundary.
+Original `NuAngAdd` (`0x28fdf0`) and `NuAngSub` (`0x28fe1d`) mask to 16 bits
+and subtract 65536 above 32767. Both recovered functions match **100%**
+(45 and 49 bytes). All 288 original/native addition/subtraction boundary
+results agree (`/tmp/saga-original-angle-pair.log`,
+`/tmp/saga-angle-pair-runtime.log`). Restoring subtraction also makes all four
+cached-corner outcomes agree in the pending solver fixture; full Cantina AI
+behavior remains unverified. The corner-flow reconstruction is a separate,
+unfinished change and is not included in the angle-arithmetic commit.
+
 A native build-sound inventory confirms event 0x3a resolves to `MK-Pickup`
 (SFX 50, sample 357, 22050 Hz, enabled) and event 0x3b to `LegoForm` (SFX 128,
 sample 434, 11025 Hz, enabled and looping). Both have volume 16383. The

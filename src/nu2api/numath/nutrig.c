@@ -48,11 +48,19 @@ short NuACos(f32 cos) {
 }
 
 NUANG NuAngAdd(NUANG a, NUANG b) {
-    return a + b;
+    NUANG sum = (a + b) & 0xffff;
+    if (sum > 0x7fff) {
+        sum -= 0x10000;
+    }
+    return sum;
 }
 
 NUANG NuAngSub(NUANG a, NUANG b) {
-    return a - b;
+    NUANG difference = (a - b) & 0xffff;
+    if (difference > 0x7fff) {
+        difference -= 0x10000;
+    }
+    return difference;
 }
 
 NUANG NuAng2AltSol(NUANG theta) {
