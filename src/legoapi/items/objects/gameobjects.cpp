@@ -541,6 +541,19 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+static f32 Condition_CharacterRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    GameObject *object = static_cast<GameObject *>(argument);
+    if (packet != NULL && packet->owner != NULL && object != NULL) {
+        NUVEC difference;
+        return NuVecDist(&object->apiobj.position, &packet->owner->apiobj.position, &difference);
+    }
+    return 1000000000.0f;
+}
+
+static void *Condition_CharacterRangeInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    return name != NULL && system != NULL ? GetNamedGameObject(system, name) : NULL;
+}
+
 static f32 Condition_MaulShouldRunAway(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
     if (packet->owner != NULL) {
         i32 angle = NuAtan2D(packet->owner->apiobj.collision_position.x - 5.5f,
@@ -963,7 +976,7 @@ extern "C" {
         {"DropBackInTimer", Condition_DropBackInTimer, NULL},
         {"HelpWithTriggers", Condition_HelpWithTriggers, NULL},
         {"EitherPlayerPushingSpinner", NULL, NULL},
-        {"CharacterRange", NULL, NULL},
+        {"CharacterRange", Condition_CharacterRange, Condition_CharacterRangeInit},
         {"BeenSpawned", Condition_BeenSpawned, NULL},
         {"LastAttackerRange", Condition_LastAttackerRange, NULL},
         {"LastAttackerIsActivePlayer", Condition_LastAttackerIsActivePlayer, NULL},
