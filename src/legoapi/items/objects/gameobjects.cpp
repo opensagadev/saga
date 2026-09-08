@@ -198,9 +198,13 @@ static f32 Condition_ForcePushing(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *pa
     if (object == NULL && packet != NULL) {
         if (packet->owner == NULL) return 0.0f;
         object = packet->owner->apiobj.objptr;
+        if (object == NULL) return 0.0f;
     }
-    if (object != NULL) return object->character_context == 0x1b ? 1.0f : 0.0f;
-    return 0.0f;
+    f32 result = 0.0f;
+    if (object != NULL) {
+        result = object->character_context == 0x1b ? 1.0f : 0.0f;
+    }
+    return result;
 }
 
 static f32 Condition_EitherPlayerUsingForce(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
