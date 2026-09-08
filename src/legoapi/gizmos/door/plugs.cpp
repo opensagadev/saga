@@ -5,6 +5,7 @@
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/numath/numtx.h"
 
 struct PLUGPROGRESS {
     i32 visible_mask;
@@ -13,6 +14,36 @@ struct PLUGPROGRESS {
 };
 
 i32 plug_gizmotype_id = -1;
+
+// Original 0x5000f0, 342 bytes; part of the optimized plug module.
+PLUG *Plug_FindNearest(PLUGSYS *system, NUVEC *position, f32 *distance_squared, i32 only_unplugged) {
+    PLUG *nearest = NULL;
+    f32 nearest_distance = 1000000000.0f;
+    if (system != NULL) {
+        PLUG *plug = system->plugs;
+        for (i32 index = 0; index < system->count; ++index, ++plug) {
+            if (only_unplugged == 0 || (plug->flags & PLUG_FLAG_PLUGGED) == 0) {
+                const f32 distance = NuVecDistSqr(position, &plug->position, NULL);
+                if (distance < nearest_distance) {
+                    nearest_distance = distance;
+                    nearest = plug;
+                }
+            }
+        }
+    }
+    if (distance_squared != NULL) {
+        *distance_squared = nearest_distance;
+    }
+    return nearest;
+}
+
+// Original 0x500250, 115 bytes.
+void Plug_MakeDrawMtx(PLUG *plug, NUMTX *matrix) {
+    NuMtxSetRotationY(matrix, plug->y_rotation);
+    NuMtxRotateZ(matrix, plug->z_rotation);
+    NuMtxRotateX(matrix, plug->x_rotation);
+    NuMtxTranslate(matrix, &plug->position);
+}
 
 static i32 Plugs_GetMaxGizmos(void *world_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
@@ -185,7 +216,7 @@ static i32 Plugs_Load(void *world_ptr, void *) {
         plug.x_rotation = EdFileReadUnsignedShort();
         plug.y_rotation = EdFileReadUnsignedShort();
         plug.enabled = EdFileReadUnsignedChar();
-        plug.target_id = version <= 1 ? 0 : EdFileReadUnsignedShort();
+        plug.z_rotation = version <= 1 ? 0 : EdFileReadUnsignedShort();
     }
     return 1;
 }

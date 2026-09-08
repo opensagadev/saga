@@ -741,6 +741,10 @@ typedef struct GameObject_s {
     u8 pad_6b1[0x6b4 - 0x6b1]; // 0x06b1 .. 0x06b4
     union {
         u8 player_packet[0x780 - 0x6b4]; // 0x06b4, PLAYERPACKET_s begins here
+        struct {
+            u8 carry_prefix[0x738 - 0x6b4];
+            NUVEC carried_object_basis[3]; // 0x738: rotation rows, or offsets for aligned carrying
+        };
         CHARACTER_SHADOW_s character_shadows[5];
         struct {
             u8 suspension_prefix[0x718 - 0x6b4];
@@ -769,9 +773,12 @@ typedef struct GameObject_s {
                     };
                 };
                 struct {
-                    NUVEC zipup_start_position;   // 0x744, selected endpoint
-                    NUVEC zipup_swing_position;   // 0x750, end of the swing animation
-                    NUVEC zipup_landing_position; // 0x75c, opposite endpoint with ground height
+                    NUVEC zipup_start_position; // 0x744, selected endpoint
+                    NUVEC zipup_swing_position; // 0x750, end of the swing animation
+                    union {
+                        NUVEC zipup_landing_position;
+                        NUVEC carried_object_drop_position;
+                    }; // 0x75c
                 };
             };
             f32 field_0x768; // 0x0768
@@ -802,7 +809,10 @@ typedef struct GameObject_s {
         u16 magnet_surface_angle;
         u16 tightrope_x_rotation;
     }; // 0x794
-    u16 takeover_start_angle; // 0x796
+    union {
+        u16 takeover_start_angle;
+        u16 carried_object_angle;
+    }; // 0x796
     union {
         u16 context_z_rotation;
         u16 grapple_swing_phase;
@@ -1545,6 +1555,8 @@ DECOMP_ASSERT(offsetof(GameObject_s, context_destination) == 0x744, "GameObject 
 DECOMP_ASSERT(offsetof(GameObject_s, context_position_offset) == 0x750, "GameObject context position offset");
 DECOMP_ASSERT(offsetof(GameObject_s, context_x_rotation) == 0x794, "GameObject context X rotation offset");
 DECOMP_ASSERT(offsetof(GameObject_s, context_z_rotation) == 0x798, "GameObject context Z rotation offset");
+DECOMP_ASSERT(offsetof(GameObject_s, carried_object_basis) == 0x738, "GameObject carried basis offset");
+DECOMP_ASSERT(offsetof(GameObject_s, carried_object_angle) == 0x796, "GameObject carried angle offset");
 DECOMP_ASSERT(offsetof(GameObject_s, hit_variant) == 0x7ab, "GameObject hit variant offset");
 DECOMP_ASSERT(offsetof(GameObject_s, context_flags) == 0x7ac, "GameObject context flags offset");
 DECOMP_ASSERT(offsetof(GameObject_s, context_variant_flags) == 0x7ad, "GameObject context variant flags offset");
@@ -1689,3 +1701,5 @@ DECOMP_ASSERT(offsetof(GameObject_s, saved_position) == 0x10c8, "GameObject save
 
 DECOMP_ASSERT(offsetof(GameObject_s, run_speed_override) == 0xee0, "GameObject run speed override offset");
 DECOMP_ASSERT(offsetof(GameObject_s, walk_speed_override) == 0xee4, "GameObject walk speed override offset");
+
+DECOMP_ASSERT(offsetof(GameObject_s, carried_object_drop_position) == 0x75c, "GameObject carry drop position offset");

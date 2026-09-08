@@ -304,3 +304,6 @@ build:target --per_file_copt=^src/gamelib/util/TouchHacks\.cpp$@-O2
 # rotation and unrolls setup loops; its game_deb initializer also matches -O3.
 # The unoptimized game API wrappers remain in game_debris_api.cpp.
 build:target --per_file_copt=^src/legoapi/render/fx/game_deb\.cpp$@-O3
+
+# Original carry module uses optimized private calls and matrix operations (0x4fab00 onward).
+build:target --per_file_copt=^src/legoapi/actions/movement/supercarry\.cpp$@-O3

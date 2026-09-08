@@ -207,7 +207,20 @@ void SpeederChaseA_Update(WORLDINFO_s *) {
 void KillParts_SpeederBike(ADDPART_s *, i32, i32, GameObject_s *) {
 }
 
-void ObjOpponentStillThere(GameObject_s *, GameObject_s *, float) {
+// Original 0x4f2e50, 258 bytes. The original returns an integer.
+i32 ObjOpponentStillThere(GameObject_s *object, GameObject_s *opponent, f32 gap) {
+    i32 result = 0;
+    if (object->force_target != NULL) {
+        NUVEC forward, difference;
+        NuVecRotateY(&forward, &v001, object->apiobj.field_0x276);
+        f32 distance = NuVecDistSqr(&opponent->apiobj.position, &object->apiobj.position, &difference);
+        f32 dot = forward.x * difference.x + forward.z * difference.z;
+        if (static_cast<i8>(object->context_flags) < 0 ? dot <= 0.0f : dot >= 0.0f) {
+            f32 radius = object->apiobj.field_0x1dc + opponent->apiobj.field_0x1dc + gap;
+            result = distance < radius * radius;
+        }
+    }
+    return result;
 }
 
 void PodSeekTuskanCutSound() {
