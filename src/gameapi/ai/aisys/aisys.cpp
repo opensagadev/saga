@@ -6056,14 +6056,8 @@ static f32 Condition_IsAlive(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, voi
 }
 
 
-__used__ static f32 Condition_GlynTest(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                       void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
+static f32 Condition_GlynTest(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *) {
+    return 1.0f;
 }
 
 static f32 Condition_OnGround(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *) {
@@ -8122,6 +8116,7 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_TURRET_ALIVE].eval_fn = Condition_TurretAlive;
             lego_aiconditiondefs[LEGO_AI_CONDITION_ACTIVE].eval_fn = Condition_Active;
             lego_aiconditiondefs[LEGO_AI_CONDITION_DEBUG].eval_fn = Condition_Debug;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_GLYN_TEST].eval_fn = Condition_GlynTest;
             lego_aiconditiondefs[LEGO_AI_CONDITION_ON_GROUND].eval_fn = Condition_OnGround;
             lego_aiconditiondefs[LEGO_AI_CONDITION_COLLIDING].eval_fn = Condition_Colliding;
             lego_aiconditiondefs[LEGO_AI_CONDITION_GOT_VICTIM].eval_fn = Condition_GotVictim;
