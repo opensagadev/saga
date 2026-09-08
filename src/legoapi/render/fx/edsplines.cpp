@@ -198,7 +198,7 @@ void InitSplinePosition(SPLINEPOS_s *position, nugspline_s *spline, float distan
         return;
     }
 
-    SPLINEPOSITION_RUNTIME_s *runtime = reinterpret_cast<SPLINEPOSITION_RUNTIME_s *>(position);
+    SPLINEPOS_s *runtime = position;
     memset(runtime, 0, sizeof(*runtime));
     if (spline == NULL || spline->length < 2) {
         return;
@@ -231,7 +231,7 @@ void GetNearestSplinePos(nuvec_s *point, SPLINEPOS_s *position, nugspline_s *spl
     if (position == NULL) {
         return;
     }
-    SPLINEPOSITION_RUNTIME_s *runtime = reinterpret_cast<SPLINEPOSITION_RUNTIME_s *>(position);
+    SPLINEPOS_s *runtime = position;
     memset(runtime, 0, sizeof(*runtime));
     if (spline == NULL || point == NULL || spline->length <= 1) {
         return;

@@ -8,6 +8,7 @@ struct BOLT_s;
 #include "gameapi/ai/aisys/aipath.h"
 #include "gameapi/ai/aisys/aiscript_types.h"
 #include "legoapi/items/base/animpacket.h"
+#include "legoapi/render/fx/spline_position.h"
 #include "legoapi/props/system/socksys.h"
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/nuhgobj.h"
@@ -883,10 +884,10 @@ typedef struct GameObject_s {
     MechObjectInterface *mech_object_interface; // 0x0e50
     GAMEOBJECTADDONS_s *addons;                 // 0x0e54
     u8 pad_e58[0xe70 - 0xe58];                  // 0x0e58 .. 0x0e70
-    nugspline_s *movement_spline;               // 0x0e70
     union {
-        u8 pad_e74[0xeb0 - 0xe74];
+        SPLINEPOS_s movement_spline_position; // 0x0e70
         struct {
+            nugspline_s *movement_spline;
             u8 padding_e74[3];
             u8 movement_spline_finished; // 0x0e77
             u8 padding_e78[0xeb0 - 0xe78];
@@ -1070,6 +1071,7 @@ typedef struct GameObject_s {
 } GameObject;
 
 DECOMP_ASSERT(offsetof(GameObject_s, movement_spline) == 0xe70, "GameObject movement spline offset");
+DECOMP_ASSERT(offsetof(GameObject_s, movement_spline_position) == 0xe70, "GameObject spline position offset");
 DECOMP_ASSERT(sizeof(GameObject_s) == 0x10e4, "GameObject size");
 DECOMP_ASSERT(offsetof(GameObject_s, ai_seen_mask) == 0xebc, "GameObject AI seen mask offset");
 DECOMP_ASSERT(offsetof(GameObject_s, ai_opponent_exclusion_mask) == 0xec4, "GameObject opponent exclusion mask offset");

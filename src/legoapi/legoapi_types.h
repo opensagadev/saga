@@ -1674,7 +1674,6 @@ struct SCENEPROGRESS_s {};
 struct SHADERSEMANTIC_enum {};
 struct SHARD_s;
 struct SOCKPOSITION_s;
-struct SPLINEPOS_s {};
 enum STATUS_FLAGS {
     STATUS_FLAG_DRAW_BACKDROP = 0x04,
 };

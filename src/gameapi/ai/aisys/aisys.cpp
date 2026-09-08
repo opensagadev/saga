@@ -1429,7 +1429,7 @@ __used__ static i32 Action_NoTerrain(AISYS *sys, AISCRIPTPROCESS *processor, AIP
     return 1;
 }
 
-__used__ static i32 Action_SetSpline(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
+static i32 Action_SetSpline(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                      i32 param_4, i32 param_5, f32 param_6) {
     (void)sys;
     (void)processor;
@@ -1444,16 +1444,14 @@ __used__ static i32 Action_SetSpline(AISYS *sys, AISCRIPTPROCESS *processor, AIP
     for (i32 index = 0; index < param_4; ++index) {
         char *value = NuStrIStr(params[index], "spline=");
         if (value != NULL) {
-            if (WORLD != NULL && WORLD->scene != NULL) {
-                spline = NuSplineFind(WORLD->scene, value + 7);
-            }
+            spline = NuSplineFind(WORLD->current_gscn, value + 7);
         } else if (NuStrICmp(params[index], "looping") == 0) {
             looping = 1;
         }
     }
 
-    SPLINEPOS_s *position = reinterpret_cast<SPLINEPOS_s *>(&object->movement_spline);
-    memset(position, 0, 0x20);
+    SPLINEPOS_s *position = &object->movement_spline_position;
+    memset(position, 0, sizeof(*position));
     if (spline != NULL) {
         InitSplinePosition(position, spline, 0.0f, looping);
     }
