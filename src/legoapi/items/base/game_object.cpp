@@ -21,7 +21,7 @@ struct WORLDINFO_s;
 struct BOLT_s;
 struct debinftype;
 
-static __used__ void SetLayers_BOB(GameObject_s *obj);
+static void SetLayers_BOB(GameObject_s *obj);
 static void SetLayers_MOSEISLEYCITIZEN(u32 *layers);
 
 static u32 LayerBit(u8 layer) {
@@ -255,7 +255,22 @@ static __used__ void Punch_HitExtraCode_LSW(GameObject_s *, nuvec_s *) {
 static __used__ void TrenchKilledCallback(GameObject_s *) {
 }
 
-static __used__ void SetLayers_BOB(GameObject_s *) {
+static void SetLayers_BOB(GameObject_s *object) {
+    const i32 first_layers[6] = {1, 2, 3, 21, 22, 23};
+    const i32 second_layers[8] = {5, 6, 7, 8, 9, 10, 16, 17};
+    const i32 third_layers[3] = {11, 12, 15};
+    const i32 fourth_layers[2] = {13, 14};
+    const i32 fifth_layers[2] = {19, 20};
+
+    object->field_0xefd = (object->field_0xefd & ~2u) | (qrand() <= 0x7fff ? 2 : 0);
+    // The original consumes this draw even though layer zero is always selected.
+    qrand();
+    object->field_0x1054 = 1;
+    object->field_0x1054 |= 1u << first_layers[qrand() / 0x2aab];
+    object->field_0x1054 |= 1u << second_layers[qrand() / 0x2000];
+    object->field_0x1054 |= 1u << third_layers[qrand() / 0x5556];
+    object->field_0x1054 |= 1u << fourth_layers[qrand() / 0x8000];
+    object->field_0x1054 |= 1u << fifth_layers[qrand() / 0x8000];
 }
 
 static void SetLayers_MOSEISLEYCITIZEN(u32 *layers) {
