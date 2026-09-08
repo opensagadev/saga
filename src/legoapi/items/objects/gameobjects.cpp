@@ -46,6 +46,8 @@ extern "C" {
     u32 _NuTimeBarSlotEnd(void *, i32);
     void AddToAIGroup(AIGROUP_s *group, APIOBJECT_s *object);
     extern NUVEC plr_lastpos;
+    extern i16 id_BAT;
+    extern i16 id_SNAKE;
 }
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
@@ -539,6 +541,19 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+static f32 Condition_ShouldAttackOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    if (packet != NULL && packet->owner != NULL) {
+        GameObject *object = packet->owner->apiobj.objptr;
+        if (object != NULL && object->ai.opponent_object != NULL) {
+            GameObject *opponent = object->ai.opponent_object->objptr;
+            if (opponent != NULL && (object->ai.field_0x1e5 & 8) != 0 && object->ai.opponent_metric < 1.0f) {
+                if (opponent->id == id_BAT || opponent->id == id_SNAKE) return 1.0f;
+            }
+        }
+    }
+    return 0.0f;
+}
+
 static f32 Condition_RespawnLocatorIs(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
     return argument != NULL && packet != NULL && packet->respawn_locator == argument ? 1.0f : 0.0f;
 }
@@ -943,7 +958,7 @@ extern "C" {
         {"MusicOn", NULL, NULL},
         {"CharacterLoaded", NULL, NULL},
         {"AreaComplete", NULL, NULL},
-        {"ShouldAttackOpponent", NULL, NULL},
+        {"ShouldAttackOpponent", Condition_ShouldAttackOpponent, NULL},
         {"InSwamp", NULL, NULL},
         {"InSameTriggerAreaAsNearestPlayer", NULL, NULL},
         {"NetworkGameOnGoing", NULL, NULL},

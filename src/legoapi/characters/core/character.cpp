@@ -91,6 +91,7 @@ extern "C" {
     i16 id_PROBEDROID = -1;
     i16 id_PKDROID = -1;
     i16 id_SNAKE = -1;
+    i16 id_BAT = -1;
     i16 id_WOMPRAT = -1;
     i16 id_WAMPA = -1;
     i16 id_HANINCARBONITE = -1;
@@ -304,6 +305,7 @@ extern "C" {
         {"probedroid", &id_PROBEDROID},
         {"pkdroid", &id_PKDROID},
         {"snake", &id_SNAKE},
+        {"bat", &id_BAT},
         {"womprat", &id_WOMPRAT},
         {"wampa", &id_WAMPA},
         {"hanincarbonite", &id_HANINCARBONITE},
