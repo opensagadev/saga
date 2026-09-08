@@ -422,13 +422,17 @@ struct AIPATHNODE_s;
 struct AISCRIPTPROCESS_s;
 struct AISCRIPT_s;
 struct AITRIGGERSET_s {
-    u8 pad_0x000[0x204];
+    FLOWBOX_s *flowbox;
+    u8 pad_0x004[0x204 - 4];
     i8 trigger_indices[8];
     u8 pad_0x20c[2];
     u16 field_0x20e; // Tested by Condition_HelpWithTriggers.
-    u8 pad_0x210[4];
+    u8 flags;
+    u8 pad_0x211[3];
 };
 DECOMP_ASSERT(sizeof(AITRIGGERSET_s) == 0x214, "AITRIGGERSET_s size");
+DECOMP_ASSERT(offsetof(AITRIGGERSET_s, flowbox) == 0, "AITRIGGERSET flowbox offset");
+DECOMP_ASSERT(offsetof(AITRIGGERSET_s, flags) == 0x210, "AITRIGGERSET flags offset");
 DECOMP_ASSERT(offsetof(AITRIGGERSET_s, field_0x20e) == 0x20e, "AITRIGGERSET help field offset");
 struct AITRIGGERSETSYS_s {
     AITRIGGERSET_s sets[32];
@@ -767,7 +771,13 @@ struct FLOWBOX_s {
     u8 loop_parent_count;
     u8 child_count;
     u8 type;
-    u32 runtime_id;
+    union {
+        u32 runtime_id;
+        struct {
+            u8 ai_trigger_group;
+            u8 runtime_id_upper[3];
+        };
+    };
     u8 last_process_frame;
     u8 loop_checksum;
     union {
@@ -787,6 +797,7 @@ struct FLOWBOX_s {
     char *name;
 };
 DECOMP_ASSERT(sizeof(FLOWBOX_s) == 0x20, "FLOWBOX_s ABI");
+DECOMP_ASSERT(offsetof(FLOWBOX_s, ai_trigger_group) == 4, "FLOWBOX AI trigger group offset");
 struct FS_FILEENTRYHDR {};
 struct FadeBase {
     virtual ~FadeBase() = default;
