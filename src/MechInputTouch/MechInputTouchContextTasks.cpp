@@ -2,8 +2,21 @@
 
 HashedKey MechTouchTask::HashId("UNKNOWN");
 HashedKey MechTouchTaskGoTo::HashId("Goto");
+HashedKey MechTouchTaskPlannedGoTo::HashId("PlannedGoTo");
+HashedKey MechTouchTaskAttack::HashId("Attack");
+HashedKey MechTouchTaskBlock::HashId("Block");
+HashedKey MechTouchTaskUseForce::HashId("Force");
+HashedKey MechTouchTaskUseTeleport::HashId("Teleport");
 HashedKey MechTouchTaskBuildIt::HashId("Build It");
+HashedKey MechTouchTaskTag::HashId("Tag");
 HashedKey MechTouchTaskJump::HashId("Jump");
+HashedKey MechTouchTaskAstroJetPack::HashId("Astro Jet Pack");
+HashedKey MechTouchTaskBigJump::HashId("Big Jump");
+HashedKey MechTouchTaskPullLever::HashId("Pull Lever");
+HashedKey MechTouchTaskHatMachine::HashId("Hat Machine");
+HashedKey MechTouchTaskUseZipUp::HashId("Zip Up");
+HashedKey MechTouchTaskPanel::HashId("Panel");
+HashedKey MechTouchTaskPlannedDoubleClickGoTo::HashId("DblClickGoTo");
 
 MechTouchTask::MechTouchTask(MechInputTouchGestureBasedController &owner)
     : controller(&owner), elapsed(0.0f), flags(0) {

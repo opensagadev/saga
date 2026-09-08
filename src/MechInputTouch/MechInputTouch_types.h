@@ -675,10 +675,12 @@ struct MechTouchTask {
 };
 DECOMP_ASSERT(sizeof(MechTouchTask) == 0x18, "MechTouchTask ABI");
 struct MechTouchTaskAstroJetPack {
+    static HashedKey HashId;
     MechTouchTaskAstroJetPack(MechInputTouchGestureBasedController &);
     void Update();
 };
 struct MechTouchTaskAttack {
+    static HashedKey HashId;
     MechTouchTaskAttack(MechInputTouchGestureBasedController &, MechObjectInterface *, VuVec const &);
     void OnStart();
     void OnStop();
@@ -686,11 +688,13 @@ struct MechTouchTaskAttack {
     void Update();
 };
 struct MechTouchTaskBigJump {
+    static HashedKey HashId;
     MechTouchTaskBigJump(MechInputTouchGestureBasedController &, MechObjectInterface &, signed char);
     MechTouchTaskBigJump(MechInputTouchGestureBasedController &, nuvec_s &, signed char);
     void Update();
 };
 struct MechTouchTaskBlock {
+    static HashedKey HashId;
     MechTouchTaskBlock(MechInputTouchGestureBasedController &);
     void Update();
 };
@@ -741,6 +745,7 @@ struct MechTouchTaskBuildIt : MechTouchTaskGoTo {
     static HashedKey HashId;
 };
 struct MechTouchTaskHatMachine {
+    static HashedKey HashId;
     MechTouchTaskHatMachine(MechInputTouchGestureBasedController &, MechObjectInterface *, VuVec const &);
     void Update();
 };
@@ -751,10 +756,12 @@ struct MechTouchTaskJump {
     void Update();
 };
 struct MechTouchTaskPanel {
+    static HashedKey HashId;
     MechTouchTaskPanel(MechInputTouchGestureBasedController &, MechObjectInterface *, VuVec const &);
     void Update();
 };
 struct MechTouchTaskPlannedDoubleClickGoTo {
+    static HashedKey HashId;
     void BackgroundProcess();
     MechTouchTaskPlannedDoubleClickGoTo(MechInputTouchGestureBasedController &, MechObjectInterface *);
     void OnResume();
@@ -764,6 +771,7 @@ struct MechTouchTaskPlannedDoubleClickGoTo {
     virtual ~MechTouchTaskPlannedDoubleClickGoTo();
 };
 struct MechTouchTaskPlannedGoTo {
+    static HashedKey HashId;
     void AnalysePath();
     void BackgroundProcess();
     void GenerateWaypoints();
@@ -776,24 +784,29 @@ struct MechTouchTaskPlannedGoTo {
     virtual ~MechTouchTaskPlannedGoTo();
 };
 struct MechTouchTaskPullLever {
+    static HashedKey HashId;
     MechTouchTaskPullLever(MechInputTouchGestureBasedController &, MechObjectInterface *, VuVec const &);
     void Update();
 };
 struct MechTouchTaskTag {
+    static HashedKey HashId;
     MechTouchTaskTag(MechInputTouchGestureBasedController &, GameObject_s &);
     void Update();
 };
 struct MechTouchTaskUseForce {
+    static HashedKey HashId;
     MechTouchTaskUseForce(MechInputTouchGestureBasedController &, MechObjectInterface *, VuVec const &);
     void OnStart();
     void OnStop();
     void Update();
 };
 struct MechTouchTaskUseTeleport {
+    static HashedKey HashId;
     MechTouchTaskUseTeleport(MechInputTouchGestureBasedController &, MechObjectInterface *, VuVec const &);
     void Update();
 };
 struct MechTouchTaskUseZipUp {
+    static HashedKey HashId;
     MechTouchTaskUseZipUp(MechInputTouchGestureBasedController &);
     void OnStart();
     void Update();

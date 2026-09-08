@@ -15,11 +15,12 @@ class VuVec {
     }
 };
 
-static const VuVec VuVec_X{1, 0, 0, 0};
-static const VuVec VuVec_Y{0, 1, 0, 0};
-static const VuVec VuVec_Z{0, 0, 1, 0};
+// The original static initializers set the homogeneous component to one.
+static const VuVec VuVec_X{1, 0, 0, 1};
+static const VuVec VuVec_Y{0, 1, 0, 1};
+static const VuVec VuVec_Z{0, 0, 1, 1};
 
-static const VuVec VuVec_Up{0, 1, 0, 0};
-static const VuVec VuVec_Down{0, -1, 0, 0};
+static const VuVec VuVec_Up{0, 1, 0, 1};
+static const VuVec VuVec_Down{0, -1, 0, 1};
 
-static const VuVec VuVec_Zero{0, 0, 0, 0};
+static const VuVec VuVec_Zero{0, 0, 0, 1};
