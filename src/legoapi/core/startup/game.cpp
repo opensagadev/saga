@@ -315,7 +315,7 @@ void PauseGame(i32 pad_index) {
 
     for (i32 i = 0; i < 8; ++i) {
         if (Player[i] != NULL) {
-            Player[i]->pause_input_state = 0;
+            Player[i]->hud_icon_timer = 0.0f;
             Player[i]->pause_context_state = 0;
             Player[i]->input_toggle_hold_time = TOGGLEHOLDTIME;
         }

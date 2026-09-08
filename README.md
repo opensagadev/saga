@@ -65,12 +65,12 @@ See https://ttdecomp.github.io/saga/
 | `gameframework` | 99.9% | 5.9% |
 | `gamelib` | 16.5% | 5.3% |
 | `java` | 96.0% | 0.0% |
-| `legoapi` | 26.9% | 9.0% |
+| `legoapi` | 27.0% | 9.0% |
 | `legoapi/actions` | 11.4% | 1.4% |
 | `legoapi/ai` | 17.6% | 0.0% |
 | `legoapi/audio` | 54.1% | 10.2% |
 | `legoapi/characters` | 25.9% | 7.2% |
-| `legoapi/core` | 25.9% | 6.6% |
+| `legoapi/core` | 26.2% | 6.6% |
 | `legoapi/cutscenes` | 32.4% | 3.9% |
 | `legoapi/gizmo` | 31.4% | 7.3% |
 | `legoapi/gizmos` | 47.0% | 32.7% |
