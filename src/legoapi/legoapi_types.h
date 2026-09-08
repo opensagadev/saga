@@ -425,10 +425,10 @@ struct AITRIGGERSET_s {
     FLOWBOX_s *flowbox;
     GIZMO_s *gizmos[8];
     AILOCATOR locators[8];
-    i8 trigger_indices[8];
+    i8 trigger_indices[8]; // Assigned Obj[] index for each trigger; -1 means unassigned.
     u8 trigger_count;
     u8 field_20d;
-    u16 field_0x20e; // Tested by Condition_HelpWithTriggers.
+    u16 field_0x20e; // Player-use mask, also tested by Condition_HelpWithTriggers.
     u8 flags;
     u8 pad_0x211[3];
 };
@@ -441,8 +441,8 @@ DECOMP_ASSERT(offsetof(AITRIGGERSET_s, trigger_count) == 0x20c, "AITRIGGERSET tr
 DECOMP_ASSERT(offsetof(AITRIGGERSET_s, field_0x20e) == 0x20e, "AITRIGGERSET help field offset");
 struct AITRIGGERSETSYS_s {
     AITRIGGERSET_s sets[32];
-    i8 field_0x4280[64];
-    i8 field_0x42c0[64];
+    i8 field_0x4280[64]; // Trigger-set index assigned to each Obj[] slot, or -1.
+    i8 field_0x42c0[64]; // Trigger index within that set, or -1.
     i32 field_0x4300;
 };
 DECOMP_ASSERT(sizeof(AITRIGGERSETSYS_s) == 0x4304, "AITRIGGERSETSYS_s size");
@@ -1410,7 +1410,13 @@ struct GIZSPINNER_s {
     NUVEC position;                  // 0x05c
     GAMEANIMSET_s *anim_set;         // 0x068
     GAMEANIMOBJ_s *primary_anim_obj; // 0x06c
-    u8 field_0x070[8];
+    union {
+        u8 field_0x070[8];
+        struct {
+            f32 field_70;
+            u32 field_74;
+        };
+    };
     f32 animation_speed; // 0x078
     u16 rotation;        // 0x07c
     u16 previous_rotation;
@@ -1438,6 +1444,7 @@ struct GIZSPINNER_s {
 DECOMP_ASSERT(sizeof(GIZSPINNER_s) == 0x304, "GIZSPINNER_s ABI");
 DECOMP_ASSERT(offsetof(GIZSPINNER_s, name) == 0x40, "GIZSPINNER name offset");
 DECOMP_ASSERT(offsetof(GIZSPINNER_s, position) == 0x5c, "GIZSPINNER position offset");
+DECOMP_ASSERT(offsetof(GIZSPINNER_s, field_70) == 0x70, "GIZSPINNER trigger progress offset");
 DECOMP_ASSERT(offsetof(GIZSPINNER_s, anim_set) == 0x68, "GIZSPINNER anim-set offset");
 DECOMP_ASSERT(offsetof(GIZSPINNER_s, flags) == 0xac, "GIZSPINNER flags offset");
 DECOMP_ASSERT(offsetof(GIZSPINNER_s, animation_points) == 0x2dc, "GIZSPINNER animation-points offset");
