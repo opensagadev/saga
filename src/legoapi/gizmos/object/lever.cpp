@@ -60,17 +60,18 @@ LEVER_s *Lever_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObject_s *
     f32 nearest_distance = 1.0e9f;
     LEVER_s *lever = world->levers;
     for (i32 index = 0; index < world->nlevers; ++index, ++lever) {
-        NUVEC target_position;
-        NUVEC *candidate_position = &lever->position;
+        f32 candidate_distance;
         if (object != NULL) {
             if ((lever->flags & (LEVER_FLAG_INTERACTING | LEVER_FLAG_BEING_PULLED | LEVER_FLAG_VISIBLE |
                                  LEVER_FLAG_ENABLED)) != (LEVER_FLAG_VISIBLE | LEVER_FLAG_ENABLED) ||
                 lever->pull_progress != 0.0f || lever->floor_position.y == 2000000.0f)
                 continue;
+            NUVEC target_position;
             Lever_GetAbsTargetPos(lever, &target_position);
-            candidate_position = &target_position;
+            candidate_distance = NuVecDistSqr(position, &target_position, NULL);
+        } else {
+            candidate_distance = NuVecDistSqr(position, &lever->position, NULL);
         }
-        f32 candidate_distance = NuVecDistSqr(position, candidate_position, NULL);
         if (candidate_distance < nearest_distance) {
             nearest = lever;
             nearest_distance = candidate_distance;
