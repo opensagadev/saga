@@ -188,6 +188,19 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 
 static const f32 AI_RESPAWN_DELAY = 2.0f;
 
+static void *Condition_ObstacleOpenedByPlayerInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    GIZMO_s *gizmo = GizmoFindByName(WORLD->gizmo_sys, obstacle_gizmotype_id, name);
+    return gizmo != NULL ? gizmo->object : NULL;
+}
+
+static f32 Condition_ObstacleLockedOpen(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    return (static_cast<GIZOBSTACLE_s *>(argument)->runtime_flags & 4) != 0 ? 1.0f : 0.0f;
+}
+
+static f32 Condition_ObstacleLockedShut(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    return (static_cast<GIZOBSTACLE_s *>(argument)->runtime_flags & 8) != 0 ? 1.0f : 0.0f;
+}
+
 static void *Condition_GizSpecialInit(AISYS_s *, char *name, AISCRIPT_s *) {
     return GizmoFindByName(WORLD->gizmo_sys, gizspecial_gizmotype_id, name);
 }
@@ -404,8 +417,8 @@ extern "C" {
         {"ObstacleAtEnd", Condition_ObstacleAtEnd, Condition_ObstacleInit},
         {"SpecialAtStart", Condition_ObstacleAtStart, Condition_GizSpecialInit},
         {"SpecialAtEnd", Condition_ObstacleAtEnd, Condition_GizSpecialInit},
-        {"ObstacleLockedOpen", NULL, NULL},
-        {"ObstacleLockedShut", NULL, NULL},
+        {"ObstacleLockedOpen", Condition_ObstacleLockedOpen, Condition_ObstacleOpenedByPlayerInit},
+        {"ObstacleLockedShut", Condition_ObstacleLockedShut, Condition_ObstacleOpenedByPlayerInit},
         {"ForceAtStart", NULL, NULL},
         {"ForceAtEnd", NULL, NULL},
         {"ObstacleOpenedByPlayer", NULL, NULL},

@@ -1116,14 +1116,6 @@ static __used__ f32 Condition_NetworkGameOnGoing(AISYS_s *, AISCRIPTPROCESS_s *,
     return 0;
 }
 
-static __used__ f32 Condition_ObstacleLockedOpen(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
-
-static __used__ f32 Condition_ObstacleLockedShut(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
-
 static __used__ void *Condition_OffScreenTimerInit(AISYS_s *system, char *arg, AISCRIPT_s *) {
     return arg != NULL ? GetNamedGameObject(system, arg) : NULL;
 }
@@ -1427,10 +1419,6 @@ static __used__ f32 Condition_EitherPlayerPushingSpinner(AISYS_s *, AISCRIPTPROC
 
 static __used__ f32 Condition_LastAttackerIsActivePlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return 0;
-}
-
-static __used__ void *Condition_ObstacleOpenedByPlayerInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
 }
 
 static __used__ f32 Condition_AngleAboutMyLocatorToPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *,
