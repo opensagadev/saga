@@ -950,9 +950,6 @@ void CollectCharcters_Update(STATUS_STAGE_s *, STATUSPACKET_s *, float) {
 void RegisterGizmoTypes_Indy(variptr_u *, variptr_u *) {
 }
 
-void Area_CharIDInCurrentList(i32) {
-}
-
 void SetProtocolDroidFallAnim(GameObject_s *object) {
     static const i16 fall_animations[] = {76, 75, 40};
     const u8 variant = object->field_0xe38;
