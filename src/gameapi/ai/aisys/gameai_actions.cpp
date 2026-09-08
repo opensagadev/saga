@@ -898,10 +898,6 @@ static __used__ i32 Action_CanMoveWhenDeactivated(AISYS_s *, AISCRIPTPROCESS_s *
     return 0;
 }
 
-static __used__ i32 Action_IgnoreTurnAroundSpline(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32,
-                                                  f32) {
-    return 0;
-}
 
 static __used__ i32 Action_LinkTurretToController(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32,
                                                   f32) {

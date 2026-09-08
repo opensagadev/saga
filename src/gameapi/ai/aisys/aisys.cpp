@@ -1079,6 +1079,23 @@ static i32 Action_SetShootOpponents(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet
     return 1;
 }
 
+static i32 Action_IgnoreTurnAroundSpline(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
+                                       i32 param_count, i32, f32) {
+    if (packet == NULL || packet->owner == NULL)
+        return 1;
+    GameObject_s *object = packet->owner->apiobj.objptr;
+    if (object != NULL) {
+        object->field_0xf03 |= 0x80;
+        if (param_count != 0) {
+            for (i32 index = 0; index < param_count; ++index) {
+                if (NuStrICmp(params[index], "FALSE") == 0)
+                    object->field_0xf03 &= ~0x80;
+            }
+        }
+    }
+    return 1;
+}
+
 static i32 Action_SplineFollowTerrain(AISYS *system, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
                                     i32 param_count, i32 first_time, f32) {
     if (first_time) {
@@ -4757,7 +4774,7 @@ extern "C" {
         {"BoulderSection", NULL, 0, 0, 0},
         {"RaceOpponent", Action_RaceOpponent, 0, 0, 0},
         {"Sebulba", NULL, 0, 0, 0},
-        {"IgnoreTurnAroundSpline", NULL, 0, 0, 0},
+        {"IgnoreTurnAroundSpline", Action_IgnoreTurnAroundSpline, 0, 0, 0},
         {"CanMoveWhenDeactivated", NULL, 0, 0, 0},
         {"DontAttack", Action_DontAttack, 0, 0, 0},
         {"CanPullLevers", Action_CanPullLevers, 0, 0, 0},
