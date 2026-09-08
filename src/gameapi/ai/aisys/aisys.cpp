@@ -6036,13 +6036,14 @@ static f32 Condition_Context(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char 
     return -1.0f;
 }
 
-__used__ static f32 Condition_InSwamp(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                      void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
+static f32 Condition_InSwamp(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *) {
+    if (packet != NULL && packet->owner != NULL) {
+        GameObject_s *object = packet->owner->apiobj.objptr;
+        f32 in_swamp = 0.0f;
+        if (object != NULL)
+            in_swamp = object->apiobj.field_0x27f == 9 ? 1.0f : 0.0f;
+        return in_swamp;
+    }
     return 0.0f;
 }
 
@@ -8134,6 +8135,7 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_TURRET_ALIVE].eval_fn = Condition_TurretAlive;
             lego_aiconditiondefs[LEGO_AI_CONDITION_ACTIVE].eval_fn = Condition_Active;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CONTEXT].eval_fn = Condition_Context;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_IN_SWAMP].eval_fn = Condition_InSwamp;
             lego_aiconditiondefs[LEGO_AI_CONDITION_GOT_GUN].eval_fn = Condition_GotGun;
             lego_aiconditiondefs[LEGO_AI_CONDITION_SIDE].eval_fn = Condition_Side;
             lego_aiconditiondefs[LEGO_AI_CONDITION_SIDE].init_fn = Condition_SideInit;
