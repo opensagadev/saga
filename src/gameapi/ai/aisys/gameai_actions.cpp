@@ -490,27 +490,6 @@ static __used__ i32 Action_LaunchGuidedMissile(AISYS_s *, AISCRIPTPROCESS_s *, A
 
 
 
-static __used__ i32 Action_SetAIOverrideControl(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet,
-                                                char **params, i32 param_count, i32 first_time, f32) {
-    if (processor == NULL) {
-        return 1;
-    }
-    if (first_time != 0) {
-        APIOBJECT_s *object = packet != NULL && packet->owner != NULL ? &packet->owner->apiobj : NULL;
-        for (i32 index = 0; index < param_count; ++index) {
-            char *value = NuStrIStr(params[index], "character=");
-            if (value != NULL && GetNamedAPIObjectFn != NULL) {
-                object = GetNamedAPIObjectFn(system, value + 10);
-            }
-        }
-        processor->action_data_3 = object;
-    }
-    APIOBJECT_s *object = static_cast<APIOBJECT_s *>(processor->action_data_3);
-    if (object != NULL) {
-        object->flags_high = (object->flags_high & ~1u) | (ActionToggleEnabled(params, param_count) ? 1u : 0u);
-    }
-    return 1;
-}
 
 
 
@@ -922,7 +901,6 @@ namespace {
             lego_aiactiondefs[LEGO_AI_ACTION_SET_BOLTS_DONT_GET_DEFLECTED_BACK].eval_fn =
                 Action_SetBoltsDontGetDeflectedBack;
             lego_aiactiondefs[LEGO_AI_ACTION_PLAYER_SPEEDER_HACK].eval_fn = Action_PlayerSpeederHack;
-            lego_aiactiondefs[LEGO_AI_ACTION_SET_AI_OVERRIDE_CONTROL].eval_fn = Action_SetAIOverrideControl;
             lego_aiactiondefs[LEGO_AI_ACTION_SET_LAST_SAFE_PATH_POS].eval_fn = Action_SetLastSafePathPos;
             lego_aiactiondefs[LEGO_AI_ACTION_DONT_SET_STOPPED_FLAG].eval_fn = Action_DontSetStoppedFlag;
             lego_aiactiondefs[LEGO_AI_ACTION_PRESS_SPECIAL_BUTTON].eval_fn = Action_PressSpecialButton;

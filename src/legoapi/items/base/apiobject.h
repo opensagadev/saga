@@ -1010,7 +1010,7 @@ typedef struct GameObject_s {
     f32 field_0x1008; // 0x1008
     f32 spawn_protection_timer;
     f32 collision_y_scale; // 0x1010
-    u8 pad_1014[0x1018 - 0x1014];
+    u32 field_0x1014;
     f32 field_0x1018; // 0x1018
     f32 field_0x101c; // 0x101c
     f32 field_0x1020; // 0x1020
@@ -1235,6 +1235,7 @@ DECOMP_ASSERT(offsetof(GameObject_s, context_variant_flags) == 0x7ad, "GameObjec
 DECOMP_ASSERT(offsetof(GameObject_s, mini_anim_packet) == 0x7c0, "GameObject mini animation packet offset");
 DECOMP_ASSERT(offsetof(GameObject_s, joint_matrices) == 0x7f4, "GameObject joint-matrix offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0xcc0) == 0xcc0, "GameObject linked object offset");
+DECOMP_ASSERT(offsetof(GameObject_s, field_0x1014) == 0x1014, "GameObject AI override reset field offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0xca8) == 0xca8, "GameObject field_0xca8 offset");
 DECOMP_ASSERT(offsetof(GameObject_s, force_throw_target) == 0xd00, "GameObject Force throw target offset");
 DECOMP_ASSERT(offsetof(GameObject_s, airborne_collision_target) == 0xd10,

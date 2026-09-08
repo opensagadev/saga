@@ -1241,6 +1241,50 @@ static i32 Action_DeflectPlayersPart(AISYS *, AISCRIPTPROCESS *, AIPACKET *packe
     return 1;
 }
 
+static void ResetAIOverrideCharacter(GameObject_s *object) {
+    object->field_0x101c = 0.0f;
+    object->field_0x1014 = 0;
+    if (object->apiobj.field_0x287 != 0) {
+        object->apiobj.field_0x287 = 0;
+        object->current_hp = object->hitpoints;
+        object->field_0xe37 = object->apiobj.character_data->game_character->field_0xf5;
+        object->field_0xe38 = 4;
+    }
+}
+
+static i32 Action_SetAIOverrideControl(AISYS *system, AISCRIPTPROCESS *processor, AIPACKET *packet,
+                                       char **params, i32 param_count, i32 first_time, f32) {
+    APIOBJECT *object;
+    i32 enabled = 1;
+    if (first_time) {
+        object = packet != NULL ? reinterpret_cast<APIOBJECT *>(packet->owner) : NULL;
+        for (i32 index = 0; index < param_count; ++index) {
+            char *value = NuStrIStr(params[index], "character");
+            if (value != NULL) {
+                if (GetNamedAPIObjectFn != NULL)
+                    object = GetNamedAPIObjectFn(system, value + 10);
+            } else if (NuStrICmp("FALSE", params[index]) == 0) {
+                enabled = 0;
+            }
+        }
+        processor->action_data_3 = object;
+    } else {
+        object = static_cast<APIOBJECT *>(processor->action_data_3);
+    }
+    if (object != NULL) {
+        if (enabled) {
+            GameObject_s *character = object->objptr;
+            if (character != NULL) {
+                ResetAIOverrideCharacter(character);
+                if (character->field_0xcc0 != NULL)
+                    ResetAIOverrideCharacter(character->field_0xcc0);
+            }
+        }
+        object->flags_high = (object->flags_high & ~1u) | (enabled & 1);
+    }
+    return 1;
+}
+
 static i32 Action_SetDoomedEscapeLocator(AISYS *system, AISCRIPTPROCESS *processor, AIPACKET *packet,
                                        char **params, i32 param_count, i32 first_time, f32) {
     if (first_time) {
@@ -4935,7 +4979,7 @@ extern "C" {
         {"Kill", Action_Kill, 1, 0, 0},
         {"Explode", Action_Explode, 0, 0, 0},
         {"SetScriptState", Action_SetScriptState, 0, 0, 0},
-        {"SetAIOverrideControl", NULL, 0, 0, 0},
+        {"SetAIOverrideControl", Action_SetAIOverrideControl, 0, 0, 0},
         {"SetLastSafePathPos", NULL, 0, 0, 0},
         {"SetDontMove", Action_SetDontMove, 0, 0, 0},
         {"DontSetStoppedFlag", NULL, 0, 0, 0},
