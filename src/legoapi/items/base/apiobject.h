@@ -1102,6 +1102,7 @@ DECOMP_ASSERT(offsetof(GameObject_s, movement_spline) == 0xe70, "GameObject move
 DECOMP_ASSERT(offsetof(GameObject_s, movement_spline_position) == 0xe70, "GameObject spline position offset");
 DECOMP_ASSERT(offsetof(GameObject_s, takeover_target) == 0xeb0, "GameObject reciprocal takeover target offset");
 DECOMP_ASSERT(sizeof(GameObject_s) == 0x10e4, "GameObject size");
+DECOMP_ASSERT(offsetof(GameObject_s, animation_speed_multiplier) == 0x1040, "GameObject animation speed multiplier offset");
 DECOMP_ASSERT(offsetof(GameObject_s, ai_seen_mask) == 0xebc, "GameObject AI seen mask offset");
 DECOMP_ASSERT(offsetof(GameObject_s, ai_opponent_exclusion_mask) == 0xec4, "GameObject opponent exclusion mask offset");
 DECOMP_ASSERT(offsetof(GameObject_s, alert_target) == 0xecc, "GameObject alert target offset");
