@@ -2951,13 +2951,14 @@ __used__ static i32 Action_ResetToOrigin(AISYS *sys, AISCRIPTPROCESS *processor,
     (void)param_4;
     (void)param_5;
     (void)param_6;
-    if (packet == NULL || sys == NULL || packet->owner == NULL) {
+    if (packet == NULL || sys == NULL) {
         return 1;
     }
     NUVEC *origin = GetAICreatureOriginFn != NULL ? GetAICreatureOriginFn(sys, packet) : NULL;
     if (origin != NULL) {
         packet->owner->apiobj.position = *origin;
-    } else if (packet->field_0x134 != 0xff && packet->field_0x134 < sys->creature_count) {
+    } else if (packet->owner != NULL && (packet->owner->apiobj.field_0x1f4 & 0x400) != 0 &&
+               packet->field_0x134 != 0xff) {
         packet->owner->apiobj.position = sys->creatures[packet->field_0x134].pos;
     }
     return 1;
