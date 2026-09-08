@@ -649,6 +649,15 @@ static void *Condition_PlayerInSockInit(AISYS_s *, char *name, AISCRIPT_s *) {
 
 extern "C" f32 NuAnimEndFrameOld(void *animation);
 
+extern i32 Hub_GetRandomCharType();
+extern u8 hub_custodians_finished_loading;
+
+static f32 Condition_RandomMapCharsAvailable(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    if (hub_custodians_finished_loading == 0) return 0.0f;
+    i16 character = Hub_GetRandomCharType();
+    return character != -1 ? 1.0f : 0.0f;
+}
+
 static f32 Condition_EitherPlayerWearingHelmet(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     // The shipped condition only checks the active player despite its name.
     return player->field_0x108e == 5 ? 1.0f : 0.0f;
@@ -1384,7 +1393,7 @@ extern "C" {
         {"NetworkGameOnGoing", NULL, NULL},
         {"InHubArea", &Condition_InHubArea, &Condition_InHubAreaInit},
         {"IsLowEndDevice", NULL, NULL},
-        {"RandomMapCharsAvailable", NULL, NULL},
+        {"RandomMapCharsAvailable", Condition_RandomMapCharsAvailable, NULL},
         {NULL, NULL, NULL},
     };
 
