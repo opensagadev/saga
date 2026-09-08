@@ -622,9 +622,6 @@ static __used__ i32 Action_AlwaysTriggerObstacle(AISYS_s *, AISCRIPTPROCESS_s *,
     return 1;
 }
 
-static __used__ i32 Action_CanCollideWithObjects(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
-    return 0;
-}
 
 static i32 Action_CharClipToBlobShadows(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params,
                                         i32 param_count, i32 first_time, f32) {
