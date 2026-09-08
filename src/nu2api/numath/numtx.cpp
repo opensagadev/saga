@@ -1532,27 +1532,32 @@ void NuMtxLookAtInverseD3D(NUMTX *mtx, NUVEC *eye, NUVEC *center, NUVEC *up) {
 }
 
 void NuMtxToQuat(NUMTX *m, struct nuquat_s *out) {
-    i32 next[3] = {1, 2, 0};
-    f32 trace = m->m00 + m->m11 + m->m22;
     f32 s;
+    i32 i;
+    f32 trace;
+    i32 j, k;
+    i32 next[3] = {1, 2, 0};
+    f32 q[4];
+    trace = reinterpret_cast<f32 *>(m)[0] + reinterpret_cast<f32 *>(m)[5] + reinterpret_cast<f32 *>(m)[10];
+
     if (trace > 0.0f) {
         s = NuFsqrt(trace + 1.0f);
         out->w = s * 0.5f;
         s = 0.5f / s;
-        out->x = (m->m12 - m->m21) * s;
-        out->y = (m->m20 - m->m02) * s;
-        out->z = (m->m01 - m->m10) * s;
+        out->x = (reinterpret_cast<f32 *>(m)[6] - reinterpret_cast<f32 *>(m)[9]) * s;
+        out->y = (reinterpret_cast<f32 *>(m)[8] - reinterpret_cast<f32 *>(m)[2]) * s;
+        out->z = (reinterpret_cast<f32 *>(m)[1] - reinterpret_cast<f32 *>(m)[4]) * s;
     } else {
-        i32 i = 0;
-        if (m->m11 > m->m00)
+        i = 0;
+        if (reinterpret_cast<f32 *>(m)[5] > reinterpret_cast<f32 *>(m)[0])
             i = 1;
-        if (m->m22 > reinterpret_cast<f32 *>(m)[i * 4 + i])
+        if (reinterpret_cast<f32 *>(m)[10] > reinterpret_cast<f32 *>(m)[i * 4 + i])
             i = 2;
-        i32 j = next[i];
-        i32 k = next[j];
-        f32 q[4];
-        s = NuFsqrt(reinterpret_cast<f32 *>(m)[i * 4 + i] -
-                    (reinterpret_cast<f32 *>(m)[j * 4 + j] + reinterpret_cast<f32 *>(m)[k * 4 + k]) + 1.0f);
+        j = next[i];
+        k = next[j];
+        s = NuFsqrt((reinterpret_cast<f32 *>(m)[i * 4 + i] -
+                     (reinterpret_cast<f32 *>(m)[j * 4 + j] + reinterpret_cast<f32 *>(m)[k * 4 + k])) +
+                    1.0f);
         q[i] = s * 0.5f;
         if (s != 0.0f)
             s = 0.5f / s;
