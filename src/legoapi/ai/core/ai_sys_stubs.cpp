@@ -590,8 +590,6 @@ extern "C" {
     void AIAntinodeMove(void) {
     }
 
-    void AIFormationFollow(AIPACKET *) {
-    }
 
 
 
@@ -2003,8 +2001,8 @@ extern "C" {
 
         group->row_count = static_cast<u8>(row_count);
         object->ai->group = group;
-        object->ai->group_row = member_index;
-        object->ai->group_member = member_index / group->count_across;
+        object->ai->group_member_index = member_index;
+        object->ai->group_row = member_index / group->count_across;
         object->ai->group_column = member_index % group->count_across;
         group->members[member_index] = object;
         group->member_count = member_index + 1;

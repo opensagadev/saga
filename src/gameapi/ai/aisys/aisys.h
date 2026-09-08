@@ -426,6 +426,11 @@ DECOMP_ASSERT(offsetof(AICREATURE, active_mask) == 0x58, "AICREATURE active-mask
 DECOMP_ASSERT(offsetof(AICREATURE, area) == 0x78, "AICREATURE area offset");
 DECOMP_ASSERT(offsetof(AICREATURE, start_stagger) == 0x90, "AICREATURE stagger offset");
 DECOMP_ASSERT(sizeof(AIGROUP) == 0x134, "AIGROUP size");
+DECOMP_ASSERT(sizeof(AIROW) == 0x34, "AIROW size");
+DECOMP_ASSERT(offsetof(AIROW, pos) == 0x18, "AIROW position offset");
+DECOMP_ASSERT(offsetof(AIROW, y_rot) == 0x24, "AIROW rotation offset");
+DECOMP_ASSERT(offsetof(AIGROUP, row_count) == 0x6, "AIGROUP row count offset");
+DECOMP_ASSERT(offsetof(AIGROUP, rows) == 0x54, "AIGROUP rows offset");
 DECOMP_ASSERT(offsetof(AIGROUP, count_across) == 0x8, "AIGROUP count-across offset");
 DECOMP_ASSERT(offsetof(AIGROUP, x_spacing) == 0x128, "AIGROUP spacing offset");
 DECOMP_ASSERT(sizeof(AISYS) == 0x1398, "AISYS size");
@@ -676,6 +681,7 @@ extern "C" {
     void AISysProcessCharacter(AISYS *system, APIOBJECT *object, AIPACKET *packet, i32 checks, f32 elapsed,
                                i32 use_three_dimensions, i32 process_ai);
     void AISysProcess(AISYS *system, APIOBJECT *player_1, APIOBJECT *player_2);
+    void AIFormationFollow(AIPACKET *packet);
     void AIMoveInstruction(AIPACKET *packet, NUVEC *destination, f32 stopping_distance, AIPATHINFO *path_info, i32 mode,
                            f32 movement_parameter);
     void FollowAPIObject(APIOBJECT *object, APIOBJECT *target, i32 flags, f32 movement_parameter);

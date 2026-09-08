@@ -250,9 +250,9 @@ typedef struct AIPACKET_s {
     u8 movement_stopped; // 0x13c, suppresses synthesized AI movement input
     u8 pad1c_end[0x400 - 0x3fd];
     AIGROUP_s *group;                   // 0x400 overall
-    u8 group_row;                       // 0x404 overall
+    u8 group_member_index;                       // 0x404 overall
     u8 group_column;                    // 0x405 overall
-    u8 group_member;                    // 0x406 overall
+    u8 group_row;                    // 0x406 overall
     u8 movement_target_direction;       // 0x147
     NUVEC terrain_origin;               // 0x148
     AIPATHINFO path_info;               // 0x154
@@ -321,6 +321,7 @@ enum AIPACKET_MOVEMENT_MODE : u8 {
     AIPACKET_MOVEMENT_RETREAT = 2,
     AIPACKET_MOVEMENT_CIRCLE = 3,
     AIPACKET_MOVEMENT_WANDER = 4,
+    AIPACKET_MOVEMENT_FORMATION = 5,
     AIPACKET_MOVEMENT_AVOIDING_CAMERA = 6,
     AIPACKET_MOVEMENT_DIRECT = 7,
     AIPACKET_MOVEMENT_MODE_MASK = 7,
@@ -993,6 +994,10 @@ DECOMP_ASSERT(offsetof(AIPACKET, navigation_flags) == 0x1e8, "AIPACKET navigatio
 DECOMP_ASSERT(offsetof(AIPACKET, movement_stopped) == 0x13c, "AIPACKET movement stop offset");
 DECOMP_ASSERT(offsetof(AIPACKET, movement_target_radius) == 0x1ec, "AIPACKET target-radius offset");
 DECOMP_ASSERT(offsetof(AIPACKET, capabilities) == 0x1f0, "AIPACKET capabilities offset");
+DECOMP_ASSERT(offsetof(AIPACKET, group) == 0x140, "AIPACKET formation group offset");
+DECOMP_ASSERT(offsetof(AIPACKET, group_member_index) == 0x144, "AIPACKET formation member index offset");
+DECOMP_ASSERT(offsetof(AIPACKET, group_column) == 0x145, "AIPACKET formation column offset");
+DECOMP_ASSERT(offsetof(AIPACKET, group_row) == 0x146, "AIPACKET formation row offset");
 DECOMP_ASSERT(offsetof(AIPACKET, fallback_path_info) == 0x1c8, "AIPACKET fallback path-info offset");
 DECOMP_ASSERT(offsetof(AIPACKET, time_off_path) == 0x204, "AIPACKET off-path timer offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, anim_packet) == 0x08, "APIOBJECT animation packet offset");

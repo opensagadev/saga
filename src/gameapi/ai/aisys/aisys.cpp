@@ -6828,6 +6828,42 @@ DECOMP_ASSERT(sizeof(api_aiactiondefs) == 0x294, "API action registry size");
 DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size");
 
 
+extern "C" void AIFormationFollow(AIPACKET *packet) {
+    AIGROUP *group = packet->group;
+    if (packet->group_row < group->row_count) {
+        AIROW *row = &group->rows[packet->group_row];
+        u8 column = packet->group_column;
+        NUVEC offset;
+        if ((packet->movement_event_flags & 1) != 0) {
+            offset.x = 0.0f;
+            if ((group->count_across & 1) == 0) {
+                offset.x = -(0.5f * group->x_spacing);
+            }
+        } else {
+            offset.x = ((column + 1) / 2) * group->x_spacing;
+            if ((column & 1) != 0) {
+                offset.x = -offset.x;
+            }
+        }
+        if (group->is_reversed) {
+            offset.x = -offset.x;
+        }
+        offset.y = 0.0f;
+        offset.z = 0.0f;
+        NuVecRotateY(&offset, &offset, row->y_rot);
+        NUVEC destination;
+        NuVecAdd(&destination, &offset, &row->pos);
+        packet->movement_flags |= 8;
+        AIMoveInstruction(packet, &destination, 0.0f, &row->path_info, AIPACKET_MOVEMENT_FORMATION, 0.0f);
+        packet->script_process.action_pos.x = 0.0f;
+        packet->script_process.action_pos.y = 0.0f;
+        packet->script_process.action_pos.z = 100.0f;
+        NuVecRotateY(&packet->script_process.action_pos, &packet->script_process.action_pos, row->y_rot);
+        NuVecAdd(&packet->script_process.action_pos, &packet->script_process.action_pos, &row->pos);
+        packet->movement_look_target = &packet->script_process.action_pos;
+    }
+}
+
 extern "C" void AILocatorSet_CheckLocatorsStillAssigned(AISYS *system, AILOCATORSET *locator_set) {
     if (locator_set == NULL || APIOBJECTFromObjIDFn == NULL) {
         return;

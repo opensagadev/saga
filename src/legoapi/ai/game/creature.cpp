@@ -142,7 +142,7 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
     object->apiobj.minviewheight = creature.min_view_height;
 
     const u8 column = object->ai.group_column;
-    const u8 row = object->ai.group_member;
+    const u8 row = object->ai.group_row;
     NUVEC offset = {
         static_cast<f32>((column + 1) / 2) * creature.x_spacing * ((column & 1) != 0 ? -1.0f : 1.0f),
         0.0f,
@@ -210,12 +210,12 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
 
     if (object->ai.group != NULL) {
         AIGROUP *group = object->ai.group;
-        if (object->ai.group_row < 32) {
-            group->member_is_alive |= 1u << object->ai.group_row;
+        if (object->ai.group_member_index < 32) {
+            group->member_is_alive |= 1u << object->ai.group_member_index;
         }
 
-        AIROW &group_row = group->rows[object->ai.group_member];
-        const i32 member_column = object->ai.group_row - creature.count_across * object->ai.group_member;
+        AIROW &group_row = group->rows[object->ai.group_row];
+        const i32 member_column = object->ai.group_member_index - creature.count_across * object->ai.group_row;
         if (static_cast<u32>(member_column) < 8) {
             group_row.is_alive |= static_cast<u8>(1u << member_column);
         }
@@ -281,9 +281,9 @@ void ResetAICreatures(AISYS_s *system) {
             object.ai.reset_mode = AI_CREATURE_RESET_DISABLED;
             continue;
         }
-        if (creature.count > 1 && creature.start_stagger > 0.0f && object.ai.group_row != 0) {
+        if (creature.count > 1 && creature.start_stagger > 0.0f && object.ai.group_member_index != 0) {
             object.ai.reset_mode = AI_CREATURE_RESET_STAGGERED;
-            object.ai_spawn_delay = static_cast<f32>(object.ai.group_row) * creature.start_stagger;
+            object.ai_spawn_delay = static_cast<f32>(object.ai.group_member_index) * creature.start_stagger;
             continue;
         }
 
