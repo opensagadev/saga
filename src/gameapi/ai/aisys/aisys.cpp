@@ -6618,6 +6618,25 @@ static f32 Condition_IsLowEndDevice(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char
     return g_lowEndLevelBehaviour != 0 ? 1.0f : 0.0f;
 }
 
+static f32 Condition_EitherPlayerOnObject(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *argument) {
+    i32 platform = static_cast<i32>(reinterpret_cast<isize>(argument));
+    if (player != NULL && platform != -1 && (player->apiobj.packed_contact_state & 0xffff00u) != 0 &&
+        player->apiobj.supporting_platform_id == platform) {
+        NUMTX *transform = static_cast<NUMTX *>(CurTerr->platforms[platform].scene_object);
+        if (player->apiobj.position.y >= transform->m31) {
+            return 1.0f;
+        }
+    }
+    if (player2 != NULL && platform != -1 && (player2->apiobj.packed_contact_state & 0xffff00u) != 0 &&
+        player2->apiobj.supporting_platform_id == platform) {
+        NUMTX *transform = static_cast<NUMTX *>(CurTerr->platforms[platform].scene_object);
+        if (player2->apiobj.position.y >= transform->m31) {
+            return 1.0f;
+        }
+    }
+    return 0.0f;
+}
+
 static void *Condition_CategoryIsInit(AISYS *system, char *arg, AISCRIPT *) {
     isize category = -1;
     if (arg != NULL && system != NULL && CharCategory != NULL) {
@@ -8481,6 +8500,7 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_Z_POS].init_fn = Condition_XYZPosInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_TAKE_OVER_RANGE].eval_fn = Condition_TakeOverRange;
             lego_aiconditiondefs[LEGO_AI_CONDITION_HAS_TAKE_OVER].eval_fn = Condition_HasTakeOver;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_EITHER_PLAYER_ON_OBJECT].eval_fn = Condition_EitherPlayerOnObject;
             lego_aiconditiondefs[LEGO_AI_CONDITION_IS_LOW_END_DEVICE].eval_fn = Condition_IsLowEndDevice;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CHARACTER_LOADED].eval_fn = Condition_CharacterLoaded;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CHARACTER_LOADED].init_fn = Condition_CharacterLoadedInit;

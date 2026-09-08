@@ -1331,7 +1331,7 @@ extern "C" {
         {"OnObject", NULL, Condition_OnObjectInit},
         {"OnSameObjectAsPlayer", Condition_OnSameObjectAsPlayer, NULL},
         {"PlayerOnObject", Condition_PlayerOnObject, Condition_OnObjectInit},
-        {"EitherPlayerOnObject", NULL, NULL},
+        {"EitherPlayerOnObject", NULL, Condition_OnObjectInit},
         {"EitherPlayerLocatorRangeXZ", NULL, NULL},
         {"OnGround", NULL, NULL},
         {"BeenAlerted", NULL, NULL},
