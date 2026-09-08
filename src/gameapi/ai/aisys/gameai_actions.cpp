@@ -1050,9 +1050,6 @@ static __used__ f32 Condition_OnSameObjectAsPlayer(AISYS_s *, AISCRIPTPROCESS_s 
 
 
 
-static __used__ f32 Condition_EitherPlayerUsingPanel(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
 
 
 

@@ -649,6 +649,18 @@ static void *Condition_PlayerInSockInit(AISYS_s *, char *name, AISCRIPT_s *) {
 
 extern "C" f32 NuAnimEndFrameOld(void *animation);
 
+static f32 Condition_EitherPlayerUsingPanel(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *name, void *) {
+    if (player != NULL && player->character_context == 0x0b) {
+        GIZPANEL_s *panel = static_cast<GIZPANEL_s *>(player->field_0x788);
+        if (panel != NULL && (name == NULL || NuStrICmp(panel->name, name) == 0)) return 1.0f;
+    }
+    if (player2 != NULL && player2->character_context == 0x0b) {
+        GIZPANEL_s *panel = static_cast<GIZPANEL_s *>(player2->field_0x788);
+        if (panel != NULL && (name == NULL || NuStrICmp(panel->name, name) == 0)) return 1.0f;
+    }
+    return 0.0f;
+}
+
 static f32 Condition_AreaContainsBaddies(AISYS_s *system, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *, void *argument) {
     if (system != NULL) {
         AIAREA *area = static_cast<AIAREA *>(argument);
@@ -1202,7 +1214,7 @@ extern "C" {
         {"AnimationFinished", Condition_AnimationFinished, Condition_AnimationFinishedInit},
         {"EitherPlayerPullingLever", NULL, NULL},
         {"EitherPlayerUsingHatMachine", NULL, NULL},
-        {"EitherPlayerUsingPanel", NULL, NULL},
+        {"EitherPlayerUsingPanel", Condition_EitherPlayerUsingPanel, NULL},
         {"EitherPlayerWearingHelmet", NULL, NULL},
         {"PartyUnderCover", NULL, NULL},
         {"NumBaddiesThatCanSeePlayers", NULL, NULL},
