@@ -296,27 +296,6 @@ static __used__ i32 Action_GizmoSetVisibility(AISYS_s *, AISCRIPTPROCESS_s *, AI
 
 
 
-static __used__ i32 Action_SetLastSafePathPos(AISYS_s *system, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params,
-                                              i32 param_count, i32 first_time, f32) {
-    if (first_time == 0) {
-        return 1;
-    }
-    APIOBJECT_s *object = packet != NULL && packet->owner != NULL ? &packet->owner->apiobj : NULL;
-    for (i32 index = 0; index < param_count; ++index) {
-        char *value = NuStrIStr(params[index], "character");
-        if (value != NULL) {
-            if (GetNamedAPIObjectFn != NULL)
-                object = GetNamedAPIObjectFn(system, value + 10);
-        } else {
-            NuStrICmp("FALSE", params[index]);
-        }
-    }
-    if (object != NULL) {
-        object->respawn_position = object->position;
-        object->last_safe_position = object->position;
-    }
-    return 1;
-}
 
 static __used__ i32 Action_SetShieldHitPoints(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
     return 0;
@@ -798,7 +777,6 @@ namespace {
             lego_aiactiondefs[LEGO_AI_ACTION_SET_BOLTS_DONT_GET_DEFLECTED_BACK].eval_fn =
                 Action_SetBoltsDontGetDeflectedBack;
             lego_aiactiondefs[LEGO_AI_ACTION_PLAYER_SPEEDER_HACK].eval_fn = Action_PlayerSpeederHack;
-            lego_aiactiondefs[LEGO_AI_ACTION_SET_LAST_SAFE_PATH_POS].eval_fn = Action_SetLastSafePathPos;
             lego_aiactiondefs[LEGO_AI_ACTION_CREATE_SPLINE_CREATURES].eval_fn = Action_CreateSplineCreatures;
             lego_aiactiondefs[LEGO_AI_ACTION_FOLLOW_CHARACTER].eval_fn = Action_FollowCharacter;
             lego_aiactiondefs[LEGO_AI_ACTION_MOVE_FORWARD].eval_fn = Action_MoveForward;

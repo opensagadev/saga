@@ -4999,6 +4999,28 @@ static i32 Action_MoveAwayFromLastAttacker(AISYS *, AISCRIPTPROCESS *processor, 
     return 0;
 }
 
+static i32 Action_SetLastSafePathPos(AISYS_s *system, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params,
+                                              i32 param_count, i32 first_time, f32) {
+    if (first_time == 0) {
+        return 1;
+    }
+    APIOBJECT_s *object = packet != NULL && packet->owner != NULL ? &packet->owner->apiobj : NULL;
+    for (i32 index = 0; index < param_count; ++index) {
+        char *value = NuStrIStr(params[index], "character");
+        if (value != NULL) {
+            if (GetNamedAPIObjectFn != NULL)
+                object = GetNamedAPIObjectFn(system, value + 10);
+        } else {
+            NuStrICmp("FALSE", params[index]);
+        }
+    }
+    if (object != NULL) {
+        object->respawn_position = object->position;
+        object->last_safe_position = object->position;
+    }
+    return 1;
+}
+
 extern "C" {
     // Keep this registry in the exact order used by the shipped script parser.
     AIACTIONDEF lego_aiactiondefs[] = {
@@ -5062,7 +5084,7 @@ extern "C" {
         {"Explode", Action_Explode, 0, 0, 0},
         {"SetScriptState", Action_SetScriptState, 0, 0, 0},
         {"SetAIOverrideControl", Action_SetAIOverrideControl, 0, 0, 0},
-        {"SetLastSafePathPos", NULL, 0, 0, 0},
+        {"SetLastSafePathPos", Action_SetLastSafePathPos, 0, 0, 0},
         {"SetDontMove", Action_SetDontMove, 0, 0, 0},
         {"DontSetStoppedFlag", Action_DontSetStoppedFlag, 0, 0, 0},
         {"PressSpecialButton", Action_PressSpecialButton, 0, 0, 0},
