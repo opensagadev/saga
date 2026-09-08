@@ -244,10 +244,6 @@ static __used__ void *Condition_CategoryIsInit(AISYS_s *system, char *arg, AISCR
     return reinterpret_cast<void *>(static_cast<isize>(CharCategory_FindByName(arg)));
 }
 
-static __used__ f32 Condition_CutSceneExists(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
-
 static __used__ f32 Condition_EitherPlayerIs(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return 0;
 }
@@ -952,10 +948,6 @@ static __used__ i32 Action_SetFormationCommander(AISYS_s *, AISCRIPTPROCESS_s *,
     return 0;
 }
 
-
-static __used__ void *Condition_CutSceneExistsInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
-}
 
 static __used__ void *Condition_EitherPlayerIsInit(AISYS_s *, char *, AISCRIPT_s *) {
     return nullptr;

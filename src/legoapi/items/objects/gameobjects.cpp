@@ -547,6 +547,14 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+static f32 Condition_CutSceneExists(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    return argument != NULL ? 1.0f : 0.0f;
+}
+
+static void *Condition_CutSceneExistsInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    return CutScene_Find(WORLD->cutscene_sys, name);
+}
+
 static f32 Condition_CutScenePlaying(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     // The reference target returns zero unconditionally for this condition.
     return 0.0f;
@@ -1052,7 +1060,7 @@ extern "C" {
         {"ScriptParam", Condition_ScriptParam, Condition_ScriptParamInit},
         {"CutSceneStarted", NULL, NULL},
         {"CutSceneFinished", NULL, NULL},
-        {"CutSceneExists", NULL, NULL},
+        {"CutSceneExists", Condition_CutSceneExists, Condition_CutSceneExistsInit},
         {"PlayerInSock", NULL, NULL},
         {"CutScenePlaying", Condition_CutScenePlaying, Condition_CutScenePlayingInit},
         {"RigidAnimFrame", NULL, NULL},
