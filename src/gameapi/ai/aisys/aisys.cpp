@@ -6186,7 +6186,7 @@ static f32 Condition_NearestPartyRange(AISYS *sys, AISCRIPTPROCESS *, AIPACKET *
         NUVEC difference;
         for (i32 index = 0; index < 8; ++index) {
             GameObject_s *object = Player[index];
-            if (object != NULL && (static_cast<u16>(object->apiobj.object_flags) & 0x1001) == 0x1001) {
+            if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001) {
                 f32 distance = NuVecDistSqr(&object->apiobj.position, &packet->owner->apiobj.position, &difference);
                 if (distance < nearest)
                     nearest = distance;
@@ -6204,7 +6204,7 @@ static f32 Condition_NearestPartyXZRange(AISYS *sys, AISCRIPTPROCESS *, AIPACKET
         NUVEC difference;
         for (i32 index = 0; index < 8; ++index) {
             GameObject_s *object = Player[index];
-            if (object != NULL && (static_cast<u16>(object->apiobj.object_flags) & 0x1001) == 0x1001) {
+            if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001) {
                 f32 distance = NuVecXZDistSqr(&object->apiobj.position, &packet->owner->apiobj.position, &difference);
                 if (distance < nearest)
                     nearest = distance;
