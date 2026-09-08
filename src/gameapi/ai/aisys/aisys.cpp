@@ -6535,6 +6535,34 @@ static f32 Condition_GotOpponent(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKE
     return packet != NULL && packet->opponent != NULL ? 1.0f : 0.0f;
 }
 
+static f32 Condition_TakeOverTargetInTriggerArea(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet,
+                                                char *, void *argument) {
+    if (packet != NULL && packet->owner != NULL) {
+        AIAREA *area = static_cast<AIAREA *>(argument);
+        if (area == NULL) {
+            area = processor->unknown_a0;
+        }
+        AIAREA *areas = WORLD->ai_sys->areas;
+        GameObject *object = packet->owner->apiobj.objptr;
+        if (object != NULL) {
+            GameObject *target = object->takeover_target;
+            if (sys->player_1 != NULL && target != NULL) {
+                i32 index = area - areas;
+                u64 membership = (static_cast<u64>(target->apiobj.ai_area_mask_high) << 32) |
+                                 target->apiobj.ai_area_mask_low;
+                if (((membership >> (index & 63)) & 1) != 0) {
+                    return 1.0f;
+                }
+            }
+        }
+    }
+    return 0.0f;
+}
+
+static void *Condition_TakeOverTargetInTriggerAreaInit(AISYS *sys, char *arg, AISCRIPT *) {
+    return arg != NULL ? AISysFindArea(sys, arg) : NULL;
+}
+
 static f32 Condition_HasTakeOver(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *) {
     if (packet != NULL && packet->owner != NULL) {
         GameObject *object = packet->owner->apiobj.objptr;
@@ -8367,6 +8395,8 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_Z_POS].init_fn = Condition_XYZPosInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_TAKE_OVER_RANGE].eval_fn = Condition_TakeOverRange;
             lego_aiconditiondefs[LEGO_AI_CONDITION_HAS_TAKE_OVER].eval_fn = Condition_HasTakeOver;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_TAKE_OVER_TARGET_IN_TRIGGER_AREA].eval_fn = Condition_TakeOverTargetInTriggerArea;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_TAKE_OVER_TARGET_IN_TRIGGER_AREA].init_fn = Condition_TakeOverTargetInTriggerAreaInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_SHOP_ACTIVE].eval_fn = Condition_ShopActive;
             lego_aiconditiondefs[LEGO_AI_CONDITION_SCREEN_WIPE].eval_fn = Condition_ScreenWipe;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CAN_HEAR_RADIO].eval_fn = Condition_CanHearRadio;
