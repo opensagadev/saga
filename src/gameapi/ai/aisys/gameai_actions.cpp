@@ -710,14 +710,6 @@ static __used__ i32 Action_SetAtOnceRowDistance(AISYS_s *, AISCRIPTPROCESS_s *, 
     return 0;
 }
 
-static __used__ f32 Condition_AIOverrideControl(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *,
-                                                void *void_arg) {
-    APIOBJECT_s *object = static_cast<APIOBJECT_s *>(void_arg);
-    if (object == NULL && packet != NULL && packet->owner != NULL) {
-        object = &packet->owner->apiobj;
-    }
-    return object != NULL && (object->flags_high & 1) != 0 ? 1.0f : 0.0f;
-}
 
 static __used__ f32 Condition_AnimationFinished(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return 0;
@@ -1198,9 +1190,6 @@ static __used__ i32 Action_RemoveThrownForceObjects(AISYS_s *, AISCRIPTPROCESS_s
     return 0;
 }
 
-static __used__ void *Condition_AIOverrideControlInit(AISYS_s *system, char *arg, AISCRIPT_s *) {
-    return arg != NULL && GetNamedAPIObjectFn != NULL ? GetNamedAPIObjectFn(system, arg) : NULL;
-}
 
 static __used__ void *Condition_AnimationFinishedInit(AISYS_s *, char *, AISCRIPT_s *) {
     return nullptr;
@@ -1396,8 +1385,6 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_TO_LEVEL].init_fn = Condition_BeenToLevelInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CUT_SCENE_FINISHED].eval_fn = Condition_CutSceneFinished;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CUT_SCENE_FINISHED].init_fn = Condition_CutSceneFinishedInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_AI_OVERRIDE_CONTROL].eval_fn = Condition_AIOverrideControl;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_AI_OVERRIDE_CONTROL].init_fn = Condition_AIOverrideControlInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_FINISHED_SPLINE].eval_fn = Condition_FinishedSpline;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CANNOT_REACH_DESTINATION].eval_fn = Condition_CannotReachDestination;
             lego_aiconditiondefs[LEGO_AI_CONDITION_IS_LOW_END_DEVICE].eval_fn = Condition_IsLowEndDevice;

@@ -539,6 +539,19 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+static f32 Condition_AIOverrideControl(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    APIOBJECT *object = static_cast<APIOBJECT *>(argument);
+    if (object == NULL) {
+        if (packet != NULL) object = reinterpret_cast<APIOBJECT *>(packet->owner);
+    }
+    return object != NULL && (object->flags_high & 1) != 0 ? 1.0f : 0.0f;
+}
+
+static void *Condition_AIOverrideControlInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    if (name != NULL && GetNamedAPIObjectFn != NULL) return GetNamedAPIObjectFn(system, name);
+    return NULL;
+}
+
 static f32 Condition_IsOnScreen(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
     APIOBJECT *object = static_cast<APIOBJECT *>(argument);
     if (object == NULL) {
@@ -831,7 +844,7 @@ extern "C" {
         {"MissionWon", Condition_MissionWon, NULL},
         {"ChallengeMode", Condition_ChallengeMode, NULL},
         {"PSP", Condition_PSP, NULL},
-        {"AIOverrideControl", NULL, NULL},
+        {"AIOverrideControl", Condition_AIOverrideControl, Condition_AIOverrideControlInit},
         {"BoltsDontGetDeflectedBack", NULL, NULL},
         {"CheatProgress", Condition_CheatProgress, NULL},
         {"BigJumpComplete", NULL, NULL},
