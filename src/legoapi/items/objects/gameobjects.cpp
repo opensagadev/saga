@@ -204,13 +204,14 @@ static void *Condition_InContextInit(AISYS_s *, char *name, AISCRIPT_s *) {
 }
 
 static f32 Condition_InContext(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    f32 result = 0.0f;
     if (packet != NULL && packet->owner != NULL) {
         GameObject_s *object = packet->owner->apiobj.objptr;
-        if (object != NULL) {
-            return object->character_context == static_cast<i32>(reinterpret_cast<isize>(argument)) ? 1.0f : 0.0f;
+        if (object != NULL && object->character_context == static_cast<i32>(reinterpret_cast<isize>(argument))) {
+            result = 1.0f;
         }
     }
-    return 0.0f;
+    return result;
 }
 
 static void *Condition_HitPointsInit(AISYS_s *system, char *name, AISCRIPT_s *) {
