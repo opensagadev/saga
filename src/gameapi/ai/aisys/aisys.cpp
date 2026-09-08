@@ -18,6 +18,7 @@
 #include "legoapi/gizmos/traps/gizturrets.h"
 #include "legoapi/gizmos/object/gizobstacles.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmo/object/takeoverobjects.h"
 #include "legoapi/gizmos/object/newblowup.h"
 #include "legoapi/gizmos/transport/grapples.h"
 #include "legoapi/items/objects/gameobjects.h"
@@ -5307,8 +5308,6 @@ static i32 Action_LinkTurretToController(AISYS *system, AISCRIPTPROCESS *, AIPAC
     }
     return 1;
 }
-
-void RegisterTakeOverObject(GameObject *object);
 
 static i32 Action_RegisterTakeOverObject(AISYS *system, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
                                         i32 param_count, i32 first_time, f32) {

@@ -131,9 +131,6 @@ COLLECTID *CollectIDUnlocked(i32 id) {
 void ClearLastSafeTakeOver(GameObject_s *) {
 }
 
-void ClearTakeOverObjectSys() {
-}
-
 void CalcValue1648Get2Values(char *data, i32 quarter, i32 stride, ani3_scalemin_s *scale_min, float *first,
                              float *second) {
     *first = CalcValue1648(data, quarter, stride, 0.0f, scale_min);
