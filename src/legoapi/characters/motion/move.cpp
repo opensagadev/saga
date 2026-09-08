@@ -204,7 +204,7 @@ void Teleport_NetMoveCode(GameObject_s *);
 void TractorBeamCode(GameObject_s *);
 void AddSurfaceRipples(GameObject_s *);
 extern i16 id_SNAKE;
-extern i16 id_ATAT;
+extern "C" i16 id_ATAT;
 void Attracto_MoveCode(WORLDINFO_s *, GameObject_s *);
 void SecurityDoor_MoveCode(WORLDINFO_s *, GameObject_s *);
 void Batarang_MoveCode(GameObject_s *);
@@ -3109,10 +3109,39 @@ void StartLunge(GameObject_s *object, f32 speed, f32 height) {
         SetWeaponOut(object);
 }
 
-void StartSlide(GameObject_s *, i32) {
+extern "C" {
+extern i16 id_ATST, id_MINIATST, id_ATST_LOWRES, id_ATAT, id_MINIATAT, id_MINIATTE;
 }
 
-void CanObjSlide(GameObject_s *, i32) {
+i32 CanObjSlide(GameObject_s *object, i32) {
+    const u8 surface = object->apiobj.field_0x281;
+    if (surface > 31 || (TerSurface[surface].flags & 0x400) == 0)
+        return 0;
+    if (surface == 5 && CanMagnetClimbFn != NULL && CanMagnetClimbFn(object))
+        return 0;
+    return 1;
+}
+
+i32 StartSlide(GameObject_s *object, i32 check_contact) {
+    if (VehicleArea || object->ignore_slide_terrain || object->field_0x7a5 == 0x2b ||
+        object->field_0x7a5 == 0x1f || object->id == id_ATST || object->id == id_MINIATST ||
+        object->id == id_ATST_LOWRES || object->id == id_ATAT || object->id == id_MINIATAT ||
+        object->id == id_MINIATTE)
+        return 0;
+    i32 can_slide = CanObjSlide(object, static_cast<i8>(object->apiobj.field_0x281));
+    if (check_contact && object->apiobj.field_0x27d == 0) {
+        if (object->field_0x1084 == 0 || can_slide == 0 ||
+            !(object->apiobj.collision_position.y > object->contact_position.y))
+            return 0;
+        can_slide = CanObjSlide(object, static_cast<i8>(object->field_0x6b0));
+    }
+    if (can_slide == 0)
+        return 0;
+    object->field_0x7a5 = 0x33;
+    object->field_0xe31 = 0;
+    object->context_animation = object->apiobj.character_model->model_data_b[106] != NULL ? 106 : 5;
+    object->airborne_action_duration = 0.25f;
+    return 1;
 }
 
 i32 CanStepBack(GameObject_s *object) {

@@ -105,6 +105,7 @@ extern "C" {
     i16 id_WATTO = -1;
     i16 id_CHEWBACCA = -1;
     i16 id_WOOKIEE = -1;
+    i16 id_ATST = -1;
     i16 id_ATST_LOWRES = -1;
     i16 id_BARMAN = -1;
     i16 id_DROIDEKA = -1;
@@ -320,6 +321,7 @@ extern "C" {
         {"weirdo2", &id_WEIRDO2},
         {"chewbacca", &id_CHEWBACCA},
         {"wookie", &id_WOOKIEE},
+        {"atst", &id_ATST},
         {"atst_lowres", &id_ATST_LOWRES},
         {"barman", &id_BARMAN},
         {"destroyer", &id_DROIDEKA},
