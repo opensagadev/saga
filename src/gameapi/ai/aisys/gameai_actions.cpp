@@ -1085,9 +1085,6 @@ static __used__ void *Condition_RigidAnimFrameInit(AISYS_s *, char *, AISCRIPT_s
     return nullptr;
 }
 
-static __used__ f32 Condition_UnderPlayerControl(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
 
 static __used__ i32 Action_CanMoveWhenDeactivated(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32,
                                                   f32) {
@@ -1279,9 +1276,6 @@ static __used__ f32 Condition_SockDistanceToOpponent(AISYS_s *, AISCRIPTPROCESS_
     return 0;
 }
 
-static __used__ void *Condition_UnderPlayerControlInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
-}
 
 
 static __used__ void *Condition_AreaContainsBaddiesInit(AISYS_s *, char *, AISCRIPT_s *) {

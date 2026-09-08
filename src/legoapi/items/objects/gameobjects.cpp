@@ -484,6 +484,17 @@ static f32 Condition_IsVisible(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, cha
     return result;
 }
 
+static f32 Condition_UnderPlayerControl(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GameObject_s *object = static_cast<GameObject_s *>(argument);
+    if (object != NULL && (object->apiobj.flags_low & 0x80) != 0) return 1.0f;
+    return 0.0f;
+}
+
+static void *Condition_UnderPlayerControlInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    if (name != NULL && system != NULL) return GetNamedGameObject(system, name);
+    return NULL;
+}
+
 static f32 Condition_PlayerTakenOver(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return player != NULL && player->field_0xcc0 != NULL && player->character_context != 0x3b ? 1.0f : 0.0f;
 }
@@ -730,7 +741,7 @@ extern "C" {
         {"EitherPlayerTakenOver", Condition_EitherPlayerTakenOver, NULL},
         {"BeenTakenOver", NULL, NULL},
         {"OnSpeederBike", Condition_OnSpeederBike, Condition_OnSpeederBikeInit},
-        {"UnderPlayerControl", NULL, NULL},
+        {"UnderPlayerControl", Condition_UnderPlayerControl, Condition_UnderPlayerControlInit},
         {"CharacterExists", NULL, NULL},
         {"CharacterTypeExists", NULL, NULL},
         {"GotLocatorInSet", NULL, NULL},
