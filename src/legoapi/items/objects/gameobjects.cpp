@@ -484,6 +484,10 @@ static f32 Condition_IsVisible(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, cha
     return result;
 }
 
+static f32 Condition_PlayerOnGround(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return player != NULL && (player->apiobj.field_0x27d != 0 || player->apiobj.field_0x27e != 0) ? 1.0f : 0.0f;
+}
+
 static f32 Condition_UnderPlayerControl(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     GameObject_s *object = static_cast<GameObject_s *>(argument);
     f32 result = 0.0f;
@@ -629,7 +633,7 @@ extern "C" {
         {"EitherPlayerLocatorRangeXZ", NULL, NULL},
         {"OnGround", NULL, NULL},
         {"BeenAlerted", NULL, NULL},
-        {"PlayerOnGround", NULL, NULL},
+        {"PlayerOnGround", Condition_PlayerOnGround, NULL},
         {"SpawnCount", NULL, NULL},
         {"BehindCamera", NULL, NULL},
         {"LocatorOnScreen", NULL, NULL},
