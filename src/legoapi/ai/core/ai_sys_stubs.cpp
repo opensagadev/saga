@@ -2524,8 +2524,135 @@ extern "C" {
         ScriptProcessFirstTimeActionFn = function;
     }
 
-    void LEGO_AISysCreatureInteraction2D(void) {
+    void LEGO_AISysCreatureInteraction2D(AISYS *system, i32 object_count, APIOBJECT **objects, i32 *immovable,
+                                        f32 delta_time) {
+        for (i32 index = 0; index < object_count; ++index) {
+            f32 timer = objects[index]->ai->antinode_timer - delta_time;
+            if (timer < 0.0f) {
+                timer = 0.0f;
+            }
+            objects[index]->ai->antinode_timer = timer;
+        }
+        for (i32 first_index = 0; first_index < object_count - 1; ++first_index) {
+            APIOBJECT *first = objects[first_index];
+            for (i32 second_index = first_index + 1; second_index < object_count; ++second_index) {
+                APIOBJECT *second = objects[second_index];
+                AIPACKET *first_packet = first->ai;
+                AIPACKET *second_packet = second->ai;
+                f32 first_radius = first_packet->mover_height;
+                f32 second_radius = second_packet->mover_height;
+                f32 radius = first_radius + second_radius;
+                NUVEC difference;
+                difference.x = first_packet->movement_position.x - second_packet->movement_position.x;
+                if (difference.x > radius || difference.x < -radius) {
+                    continue;
+                }
+                difference.z = first_packet->movement_position.z - second_packet->movement_position.z;
+                if (difference.z > radius || difference.z < -radius) {
+                    continue;
+                }
+                if (first->collision_min.y > second->collision_max.y ||
+                    second->collision_min.y > first->collision_max.y) {
+                    continue;
+                }
+                if (first->collision_link == second || second->collision_link == first) {
+                    continue;
+                }
+                i32 first_fixed = immovable != NULL ? immovable[first_index] : 0;
+                i32 second_fixed = immovable != NULL ? immovable[second_index] : 0;
+                if (first_packet->dont_avoid_character == reinterpret_cast<GameObject_s *>(second)) {
+                    first_fixed = 1;
+                }
+                if (second_packet->dont_avoid_character == reinterpret_cast<GameObject_s *>(first)) {
+                    second_fixed = 1;
+                }
+                if ((first->flags_low & 0x80) != 0) {
+                    first_fixed = 1;
+                }
+                if ((second->flags_low & 0x80) != 0) {
+                    second_fixed = 1;
+                }
+                bool fixed_first;
+                bool fixed_second;
+                if (first->collision_priority > second->collision_priority) {
+                    fixed_first = true;
+                    fixed_second = second_fixed != 0;
+                } else if (first->collision_priority < second->collision_priority) {
+                    fixed_first = first_fixed != 0;
+                    fixed_second = true;
+                } else {
+                    continue;
+                }
+                if (fixed_first && fixed_second) {
+                    continue;
+                }
+                f32 distance = NuFsqrt(difference.x * difference.x + difference.z * difference.z);
+                if (distance < radius) {
+                    difference.y = 0.0f;
+                    f32 overlap = radius - distance;
+                    if (fixed_first) {
+                        if (first->collision_priority > second->resolved_collision_priority) {
+                            f32 scale = overlap;
+                            if (scale == 0.0f || distance == 0.0f) {
+                                scale = 0.0f;
+                            } else {
+                                scale /= distance;
+                            }
+                            NuVecScale(&difference, &difference, scale);
+                            NuVecSub(&second->ai->movement_position, &second->ai->movement_position, &difference);
+                            second->resolved_collision_priority = first->collision_priority;
+                        }
+                    } else if (fixed_second) {
+                        if (second->collision_priority > first->resolved_collision_priority) {
+                            f32 scale = overlap;
+                            if (scale == 0.0f || distance == 0.0f) {
+                                scale = 0.0f;
+                            } else {
+                                scale /= distance;
+                            }
+                            NuVecScale(&difference, &difference, scale);
+                            NuVecAdd(&first->ai->movement_position, &first->ai->movement_position, &difference);
+                            first->resolved_collision_priority = second->collision_priority;
+                        }
+                    } else {
+                        f32 scale = overlap;
+                        if (scale == 0.0f || distance == 0.0f) {
+                            scale = 0.0f;
+                        } else {
+                            scale /= distance;
+                        }
+                        NuVecScale(&difference, &difference, scale);
+                        NuVecSub(&second->ai->movement_position, &second->ai->movement_position, &difference);
+                    }
+                    AIPACKET *first_ai = first->ai;
+                    AIPACKET *second_ai = second->ai;
+                    f32 first_timer = first_ai->antinode_timer;
+                    f32 second_timer = second_ai->antinode_timer;
+                    if (first_timer > antinode_time && second_timer > antinode_time) {
+                        if (first_timer > second_timer) {
+                            second_ai->antinode_timer = first_timer;
+                            second_ai->antinode_clockwise = first_ai->antinode_clockwise;
+                        } else {
+                            first_ai->antinode_timer = second_timer;
+                            first_ai->antinode_clockwise = second_ai->antinode_clockwise;
+                        }
+                    } else if (second_timer > antinode_time) {
+                        first_ai->antinode_timer = second_timer;
+                        first_ai->antinode_clockwise = second_ai->antinode_clockwise;
+                    } else if (first_timer > 0.0f) {
+                        second_ai->antinode_timer = first_timer;
+                        second_ai->antinode_clockwise = first_ai->antinode_clockwise;
+                    }
+                    if (((first->field_0x1f4 ^ second->field_0x1f4) & 1) != 0) {
+                        first->ai->field_0x1e5 |= 0x40;
+                        second->ai->field_0x1e5 |= 0x40;
+                    }
+                }
+            }
+        }
+        AISysCreatureAntinodeInteraction(system, object_count, objects, immovable);
     }
+
 
 
     void QueryLocalMessage(void) {

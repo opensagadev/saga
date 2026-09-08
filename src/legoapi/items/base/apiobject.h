@@ -490,7 +490,15 @@ typedef struct APIOBJECT_s {
     u8 field_0x287; // 0x287  owner/controller player index
     u8 field_0x288; // 0x288
     u8 field_0x289; // 0x289
-    undefined field_0x28a[0x0a];
+    union {
+        undefined field_0x28a[0x0a];
+        struct {
+            u8 reserved_0x28a[4];
+            u16 collision_priority;
+            u16 resolved_collision_priority;
+            u16 reserved_0x292;
+        };
+    };
     APIOBJECT_s *collision_link; // 0x294, paired objects do not collide with each other
     u32 collision_mask_low;      // 0x298
     u32 collision_mask_high;     // 0x29c
@@ -1049,6 +1057,8 @@ DECOMP_ASSERT(offsetof(APIOBJECT, movement_direction) == 0x1fc, "APIOBJECT movem
 DECOMP_ASSERT(offsetof(APIOBJECT, collision_special) == 0x208, "APIOBJECT collision special offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, field_0x1fa) == 0x1fa, "APIOBJECT antinode flags offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, object_flags) == 0x1f8, "APIOBJECT complete flag word offset");
+DECOMP_ASSERT(offsetof(APIOBJECT, collision_priority) == 0x28e, "APIOBJECT collision priority offset");
+DECOMP_ASSERT(offsetof(APIOBJECT, resolved_collision_priority) == 0x290, "APIOBJECT resolved collision priority offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, collision_position) == 0x80, "APIOBJECT collision position offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, pitch_angle) == 0x274, "APIOBJECT pitch angle offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, supporting_platform_id) == 0x27a, "APIOBJECT supporting platform id offset");
