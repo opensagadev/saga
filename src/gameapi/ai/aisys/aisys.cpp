@@ -7244,6 +7244,29 @@ static void *Condition_LocatorRangeInit(AISYS *sys, char *arg, AISCRIPT *) {
     return arg != NULL ? AIPathFindLocator(sys, arg) : NULL;
 }
 
+static f32 Condition_EitherPlayerLocatorRangeXZ(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet,
+                                               char *, void *argument) {
+    NUVEC difference;
+    if (packet != NULL && packet->owner != NULL) {
+        AILOCATOR *locator = static_cast<AILOCATOR *>(argument);
+        if (locator == NULL) {
+            locator = processor->locator;
+        }
+        if (locator != NULL) {
+            f32 first_distance = 1.0e9f;
+            f32 second_distance = 1.0e9f;
+            if (player != NULL) {
+                first_distance = NuVecXZDist(&player->apiobj.position, &locator->position, &difference);
+            }
+            if (player2 != NULL) {
+                second_distance = NuVecXZDist(&player2->apiobj.position, &locator->position, &difference);
+            }
+            return NuFmin(first_distance, second_distance);
+        }
+    }
+    return 1.0e9f;
+}
+
 static f32 Condition_LocatorRangeXZ(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *void_arg) {
     NUVEC difference;
     if (packet != NULL && packet->owner != NULL) {
@@ -8415,6 +8438,8 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_Z_POS].init_fn = Condition_XYZPosInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_TAKE_OVER_RANGE].eval_fn = Condition_TakeOverRange;
             lego_aiconditiondefs[LEGO_AI_CONDITION_HAS_TAKE_OVER].eval_fn = Condition_HasTakeOver;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_EITHER_PLAYER_LOCATOR_RANGE_XZ].eval_fn = Condition_EitherPlayerLocatorRangeXZ;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_EITHER_PLAYER_LOCATOR_RANGE_XZ].init_fn = Condition_LocatorRangeInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_IN_SAME_TRIGGER_AREA_AS_NEAREST_PLAYER].eval_fn = Condition_InSameTriggerAreaAsNearestPlayer;
             lego_aiconditiondefs[LEGO_AI_CONDITION_TAKE_OVER_TARGET_IN_TRIGGER_AREA].eval_fn = Condition_TakeOverTargetInTriggerArea;
             lego_aiconditiondefs[LEGO_AI_CONDITION_TAKE_OVER_TARGET_IN_TRIGGER_AREA].init_fn = Condition_TakeOverTargetInTriggerAreaInit;
