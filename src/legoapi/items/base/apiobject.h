@@ -498,7 +498,7 @@ typedef struct APIOBJECT_s {
     u8 field_0x287; // 0x287  owner/controller player index
     u8 field_0x288; // 0x288
     u8 field_0x289; // 0x289
-    undefined field_0x28a[0x0a];
+    union { undefined field_0x28a[0x0a]; struct { u8 pad_28a[4]; u16 movement_request_flags; u8 pad_290[4]; }; };
     union {
         APIOBJECT_s *collision_link;
         APIOBJECT_s *collision_excluded_object;
@@ -518,6 +518,8 @@ typedef struct APIOBJECT_s {
     };
     u32 field387_0x2a0; // 0x2a0
     u32 field388_0x2a4; // 0x2a4
+    u32 ai_area_mask_low;
+    u32 ai_area_mask_high;
 } APIOBJECT;
 
 DECOMP_ASSERT(offsetof(APIOBJECT, collision_identity_mask) == 0x1e4, "APIOBJECT collision identity mask offset");
@@ -589,14 +591,19 @@ struct OBJECTLIGHTINGSTATE_s {
 DECOMP_ASSERT(sizeof(OBJECTLIGHTINGSTATE_s) == 0x54, "OBJECTLIGHTINGSTATE_s size");
 
 typedef struct GameObject_s {
-    APIOBJECT apiobj; // 0x0000 .. 0x02a8
     union {
-        u32 field_0x2a8;
-        u32 ai_area_mask_low;
-    };
-    union {
-        u32 field_0x2ac;
-        u32 ai_area_mask_high;
+        APIOBJECT apiobj; // 0x0000 .. 0x02b0
+        struct {
+            u8 apiobject_prefix[offsetof(APIOBJECT, ai_area_mask_low)];
+            union {
+                u32 field_0x2a8;
+                u32 ai_area_mask_low;
+            };
+            union {
+                u32 field_0x2ac;
+                u32 ai_area_mask_high;
+            };
+        };
     };
     union {
         u8 pad_2b0[0x10]; // 0x02b0 .. 0x02c0

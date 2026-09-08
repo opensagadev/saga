@@ -139,7 +139,22 @@ static i32 CalculateIntersection(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_
     return (left | (packet->movement_flags >> 5)) & 1;
 }
 
-void AISysGetPathPos2(AISYS_s *, nuvec_s *, AIPATHINFO_s *, nuvec_s *, AIPATH_s *, i32) {
+void AISysGetPathPos2(AISYS_s *system, nuvec_s *position, AIPATHINFO_s *path_info, nuvec_s *path_position, AIPATH_s *,
+                      i32) {
+    if (position != NULL && system != NULL && path_info != NULL) {
+        APIOBJECT_s object;
+        AIPACKET_s packet;
+        memset(&object, 0, sizeof(object));
+        memset(&packet, 0, sizeof(packet));
+        object.position = *position;
+        object.ai = &packet;
+        packet.terrain_origin = *position;
+        AISysGetCharacterPathPos(system, &object, &packet, 0xff, 1);
+        *path_info = packet.path_info;
+        if (path_position != NULL) {
+            *path_position = packet.last_path_position;
+        }
+    }
 }
 
 void FreeTorpedoPacket(TORPEDOPACKET **packet);
