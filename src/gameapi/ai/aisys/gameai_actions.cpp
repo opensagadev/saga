@@ -73,15 +73,6 @@ static GIZOBSTACLE *ActionFindObstacle(char *name) {
     return gizmo != NULL ? static_cast<GIZOBSTACLE *>(gizmo->object) : NULL;
 }
 
-static f32 Condition_ForceComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
-    GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
-    return force != NULL && GizForce_Complete(force) != 0 ? 1.0f : 0.0f;
-}
-
-static f32 Condition_ForceFinished(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
-    GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
-    return force != NULL && GizForce_AnimComplete(force) != 0 ? 1.0f : 0.0f;
-}
 
 
 
@@ -802,10 +793,6 @@ static __used__ f32 Condition_CanFightLikeAJedi(AISYS_s *, AISCRIPTPROCESS_s *, 
     return 0;
 }
 
-static void *Condition_ForceCompleteInit(AISYS_s *, char *name, AISCRIPT_s *) {
-    GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, force_gizmotype_id, name);
-    return gizmo != NULL ? gizmo->object : NULL;
-}
 
 
 
@@ -1503,10 +1490,6 @@ namespace {
 
             lego_aiconditiondefs[LEGO_AI_CONDITION_OFF_SCREEN_TIMER].eval_fn = Condition_OffScreenTimer;
             lego_aiconditiondefs[LEGO_AI_CONDITION_OFF_SCREEN_TIMER].init_fn = Condition_OffScreenTimerInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_FORCE_COMPLETE].eval_fn = Condition_ForceComplete;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_FORCE_COMPLETE].init_fn = Condition_ForceCompleteInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_FORCE_FINISHED].eval_fn = Condition_ForceFinished;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_FORCE_FINISHED].init_fn = Condition_ForceCompleteInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CATEGORY_IS].init_fn = Condition_CategoryIsInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_NUM_IN_SET_ALIVE].eval_fn = Condition_NumInSetAlive;
             lego_aiconditiondefs[LEGO_AI_CONDITION_NUM_IN_SET_ALIVE].init_fn = Condition_IsSetAliveInit;

@@ -26,6 +26,7 @@
 #include "legoapi/gizmo/base/gizactions.h"
 #include "legoapi/gizmos/object/gizobstacles.h"
 #include "legoapi/gizmos/trigger/gizspecial.h"
+#include "legoapi/gizmos/traps/gizforce.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numusic/sfx.h"
@@ -187,6 +188,21 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 }
 
 static const f32 AI_RESPAWN_DELAY = 2.0f;
+
+static f32 Condition_ForceComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
+    return force != NULL && GizForce_Complete(force) != 0 ? 1.0f : 0.0f;
+}
+
+static f32 Condition_ForceFinished(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
+    return force != NULL && GizForce_AnimComplete(force) != 0 ? 1.0f : 0.0f;
+}
+
+static void *Condition_ForceCompleteInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, force_gizmotype_id, name);
+    return gizmo != NULL ? gizmo->object : NULL;
+}
 
 static f32 Condition_ObstacleOpenedByPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(argument);
@@ -454,8 +470,8 @@ extern "C" {
         {"ForcePushing", NULL, NULL},
         {"TurretAlive", NULL, NULL},
         {"PlayerDeflectingPart", NULL, NULL},
-        {"ForceComplete", NULL, NULL},
-        {"ForceFinished", NULL, NULL},
+        {"ForceComplete", Condition_ForceComplete, Condition_ForceCompleteInit},
+        {"ForceFinished", Condition_ForceFinished, Condition_ForceCompleteInit},
         {"ForceStackComplete", NULL, NULL},
         {"ForceStackCompleteInOrder", NULL, NULL},
         {"BuildItComplete", NULL, NULL},
