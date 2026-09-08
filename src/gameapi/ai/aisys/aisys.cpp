@@ -5834,9 +5834,32 @@ static __used__ i32 Action_OverrideAnimation(AISYS_s *, AISCRIPTPROCESS_s *proce
     return 1;
 }
 
-static __used__ i32 Action_PathConnectionObstacle(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32,
-                                                  f32) {
-    return 0;
+static i32 Action_PathConnectionObstacle(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *, char **params,
+                                         i32 param_count, i32 first_time, f32) {
+    i32 direction = 0;
+    if (sys != NULL && first_time != 0) {
+        char *from = NULL;
+        char *to = NULL;
+        i32 open = 0;
+        for (i32 i = 0; i < param_count; i++) {
+            char *value = NuStrIStr(params[i], "from");
+            if (value != NULL) {
+                from = value + 5;
+            } else if ((value = NuStrIStr(params[i], "to")) != NULL) {
+                to = value + 3;
+            } else if (NuStrICmp(params[i], "open") == 0) {
+                open = 1;
+            }
+        }
+        if (to != NULL && from != NULL) {
+            AIPATHCNX *connection =
+                static_cast<AIPATHCNX *>(AIPAthFindPathCnx(sys, NULL, from, to, &direction));
+            if (connection != NULL && (connection->traversal_flags[0] & 0x20000000) != 0) {
+                connection->open = open;
+            }
+        }
+    }
+    return 1;
 }
 
 static i32 Action_PathConnectionMaxLength(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet,
