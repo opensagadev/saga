@@ -4491,9 +4491,6 @@ void RemoveDebrisEffectFromStack(debkeydatatype_s *key) {
     key->previous = NULL;
 }
 
-void ReStoreStatusTakeOverObjectSys(i32) {
-}
-
 extern "C" {
 
     i32 InModelList(APICHARACTERMODELLIST_s *list, i32 id, i32 *out_index) {

@@ -12,8 +12,13 @@
 #include <string.h>
 #include "legoapi/characters/core/players.h"
 #include "legoapi/props/doors/door.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/items/objects/gameobjects.h"
 
 extern i32 Area_CharIDInCurrentList(i32 character_id);
+void SnapCreaturePos(GameObject_s *, NUVEC *, i32, AIPATHINFO_s *, i32);
+void InitPlayerAI(GameObject_s *);
+void TakeOverGameObject(GameObject_s *, GameObject_s *, i32, i32);
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -109,6 +114,62 @@ void StoreStatusTakeOverObjectSys() {
             record->hitpoints = object->hitpoints;
         }
         record->current_level = level;
+    }
+}
+
+void ReStoreStatusTakeOverObjectSys(i32 restore_progress) {
+    if (netclient != 0) {
+        return;
+    }
+    i32 level = static_cast<i8>(WORLD->current_level->area_level_index);
+    for (i32 index = 0; index < num_takeoverobjects; ++index) {
+        TAKEOVEROBJECT_s *record = &takeoverobjects[index];
+        if (restore_progress != 0 || record->current_level != level) {
+            record->object = NULL;
+        }
+        if (record->contact_index != 0xff) {
+            record->current_level = static_cast<u8>(level);
+        }
+        if (record->registered_level == level) {
+            if (record->object == NULL) {
+                if (record->source_creature != 0xff) {
+                    for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index) {
+                        if (Obj[object_index].ai.field_0x134 == record->source_creature) {
+                            record->object = &Obj[object_index];
+                            break;
+                        }
+                    }
+                } else if (record->current_level == level) {
+                    record->object = AddDynamicCreature(record->character_id, &record->last_safe_position,
+                        record->heading, record->script_name, NULL, NULL, 1, NULL, NULL, 0, 0);
+                }
+            }
+            if (record->object != NULL && record->current_level != level) {
+                KillGameObject(record->object, 5, 0);
+                record->object = NULL;
+                continue;
+            }
+        } else if (record->current_level == level && record->object == NULL) {
+            record->object = AddDynamicCreature(record->character_id, &record->last_safe_position,
+                record->heading, record->script_name, NULL, NULL, 1, NULL, NULL, 0, 0);
+        }
+        GameObject_s *object = record->object;
+        if (object != NULL) {
+            object->current_hp = record->hitpoints;
+            GameObject_s *controller;
+            if (record->contact_index != 0xff && (controller = Player[record->contact_index]) != NULL) {
+                object->apiobj.flags_high |= 0x10;
+                object->apiobj.flags_low |= 1;
+                object->apiobj.field_0x287 = 0;
+                object->ai.reset_mode = 2;
+                SnapCreaturePos(object, &controller->apiobj.position, controller->apiobj.field_0x276,
+                    &controller->ai.path_info, 1);
+                InitPlayerAI(controller);
+                TakeOverGameObject(controller, record->object, 0, 1);
+            } else {
+                SnapCreaturePos(record->object, &record->last_safe_position, record->heading, NULL, 1);
+            }
+        }
     }
 }
 
