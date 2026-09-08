@@ -28,6 +28,3 @@ void Technos_MoveTarget(TECHNO_s *, GameObject_s *) {
 
 void GizTechno_CanUseTechno(GameObject_s *, TECHNO_s *) {
 }
-
-void Technos_FindControllingTechno(GameObject_s *) {
-}
