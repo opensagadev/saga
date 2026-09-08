@@ -189,6 +189,12 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 
 static const f32 AI_RESPAWN_DELAY = 2.0f;
 
+static f32 Condition_EitherPlayerUsingForce(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
+    return GizForce_GameObjUsingForce(player, force) != 0 || GizForce_GameObjUsingForce(player2, force) != 0
+               ? 1.0f : 0.0f;
+}
+
 static f32 Condition_PlayerUsingForce(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     return GizForce_GameObjUsingForce(player, static_cast<GIZFORCE_s *>(argument)) != 0 ? 1.0f : 0.0f;
 }
@@ -498,7 +504,7 @@ extern "C" {
         {"PartyUnderCover", NULL, NULL},
         {"NumBaddiesThatCanSeePlayers", NULL, NULL},
         {"PlayerUsingForce", Condition_PlayerUsingForce, Condition_UsingForceInit},
-        {"EitherPlayerUsingForce", NULL, NULL},
+        {"EitherPlayerUsingForce", Condition_EitherPlayerUsingForce, Condition_UsingForceInit},
         {"UsingForce", Condition_UsingForce, Condition_UsingForceInit},
         {"OnForcePlatform", NULL, NULL},
         {"PlayerOnForcePlatform", NULL, NULL},

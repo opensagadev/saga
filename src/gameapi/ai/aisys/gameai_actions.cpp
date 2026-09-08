@@ -1301,10 +1301,6 @@ static __used__ f32 Condition_CannotReachDestination(AISYS_s *, AISCRIPTPROCESS_
     return packet != NULL && (packet->runtime_flags & 0x40) != 0 ? 1.0f : 0.0f;
 }
 
-static __used__ f32 Condition_EitherPlayerUsingForce(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
-
 static __used__ f32 Condition_EitherPlayerUsingPanel(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return 0;
 }
