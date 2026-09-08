@@ -42,6 +42,27 @@ Verification:
   successful run still showed loading portraits, so visible in-game HUD
   recovery is not claimed from that image.
 
+## Transfer effects recovery (2026-09-08)
+
+`Tag_UpdateTransfers` (`0x4fdeb0`, 2111 original bytes) now recovers both
+players' three particle trails. It preserves the original half-second timer,
+the chained sine phases, collision-bound interpolation, and copying each
+position after the particle callback. A missing player resets its timer;
+landing exactly on 0.5 still emits the final particles. NaN timers are skipped.
+
+The instruction match improves from the empty body's 1.014% to 45.572%
+(2089 current bytes). Shared position storage and source/destination vectors
+reproduce the original 0x50-byte stack frame. Branch placement and register
+allocation still differ, so this is recovered behavior, not a complete match.
+The source optimization settings are unchanged.
+
+All 2,048 mapped original/current comparisons agree exactly on emitted
+positions, effect arguments, timers, and stored trail positions. Cases cover
+both player-presence masks, timer boundaries including NaN, four frame steps,
+and particle callbacks that modify the supplied position. The target and
+native builds pass. These comparisons instrument particle submission and do
+not establish visible effects in an ordinary playthrough.
+
 ## Remaining scope
 
 Recover and compare the original bodies and callers in this area, rather than
@@ -51,7 +72,7 @@ stopping at the two visible symptoms:
 |---|---|
 | `TagCharacter`, `Action_TagCharacter` | Improve the recovered body; recover the empty script action and its registration/caller path |
 | `TagCode`, `Tag_Check`, `Player_ToggleCharacter` | Audit and match complete transition/input logic and state writes |
-| `Tag_NewTransfer`, `Tag_ResetTransfers`, `Tag_UpdateTransfers` | Complete transfer lifecycle; update function is still empty |
+| `Tag_NewTransfer`, `Tag_ResetTransfers`, `Tag_UpdateTransfers` | Improve lifecycle matching; recovered update is 45.572% |
 | `Tag_DrawIcon_LSW`, `Tag_DrawIcon_Batman`, `Tag_NoHiddenIcon` | Finish renderer matching and verify actual mode dispatch |
 | `Tag_UpdateHint`, `HoldTag_UpdateHint`, hint cancellation | Recover hint lifecycle dependencies without unrelated hint work |
 | `DrawPanel`, `DrawCharIcon`, icon-scene lookup/loading | Match portrait selection, visibility and icon-resource dependencies |
