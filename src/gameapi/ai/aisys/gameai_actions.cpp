@@ -506,9 +506,6 @@ static void *Condition_BeenToLevelInit(AISYS_s *system, char *arg, AISCRIPT_s *)
     return reinterpret_cast<void *>(static_cast<isize>(-1));
 }
 
-static __used__ f32 Condition_BigJumpComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
 
 static __used__ f32 Condition_BuildItComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return 0;
