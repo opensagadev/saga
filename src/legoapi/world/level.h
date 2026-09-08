@@ -21,6 +21,15 @@ struct TORPEDOPACKET_s;
 struct SOCKPOSITION_s;
 struct AREADATA_s;
 
+struct LEVELSCRIPT_PROGRESS_s {
+    char name[16];
+    f32 params[4];
+};
+DECOMP_ASSERT(sizeof(LEVELSCRIPT_PROGRESS_s) == 0x20, "Saved level script record size");
+DECOMP_ASSERT(offsetof(LEVELSCRIPT_PROGRESS_s, params) == 0x10, "Saved script parameters offset");
+
+void LevelScriptReStoreProgress(WORLDINFO_s *, LEVELSCRIPTPROCESS_s *);
+
 struct LEVEL_PROGRESS_s {
     char data[0x2800];
     union {
@@ -35,7 +44,7 @@ struct LEVEL_PROGRESS_s {
     u32 disabled_ai_object_mask[2];
     u8 pad_280c[0x281c - 0x280c];
     u32 played_cutscene_mask;
-    u8 pad_2820[0x2c20 - 0x2820];
+    LEVELSCRIPT_PROGRESS_s scripts[32];
     GIZFLOWPROGRESS_s giz_flow_progress;
     u8 pad_2d64[0x2e24 - 0x2d64];
 };
@@ -43,6 +52,7 @@ struct LEVEL_PROGRESS_s {
 DECOMP_ASSERT(offsetof(LEVEL_PROGRESS_s, played_cutscene_mask) == 0x281c, "LEVEL_PROGRESS cutscene mask offset");
 DECOMP_ASSERT(offsetof(LEVEL_PROGRESS_s, flags_low) == 0x2800, "LEVEL_PROGRESS low flags offset");
 DECOMP_ASSERT(offsetof(LEVEL_PROGRESS_s, giz_flow_progress) == 0x2c20, "LEVEL_PROGRESS flow progress offset");
+DECOMP_ASSERT(offsetof(LEVEL_PROGRESS_s, scripts) == 0x2820, "Saved level scripts offset");
 DECOMP_ASSERT(sizeof(LEVEL_PROGRESS_s) == 0x2e24, "LEVEL_PROGRESS size");
 
 typedef struct LEVELDATADISPLAY {
