@@ -12,38 +12,6 @@ extern "C" {
 void Lever_MoveCode(WORLDINFO_s *, GameObject_s *) {
 }
 
-LEVER_s *Lever_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObject_s *object, f32 *distance_squared) {
-    LEVER_s *nearest = NULL;
-    f32 nearest_distance = 1.0f;
-
-    for (i32 index = 0; index < world->nlevers; ++index) {
-        LEVER_s *lever = &world->levers[index];
-        NUVEC target_position;
-        NUVEC *candidate_position = &lever->position;
-
-        if (object != NULL) {
-            if ((lever->flags & (LEVER_FLAG_INTERACTING | LEVER_FLAG_BEING_PULLED | LEVER_FLAG_VISIBLE |
-                                 LEVER_FLAG_ENABLED)) != (LEVER_FLAG_VISIBLE | LEVER_FLAG_ENABLED) ||
-                lever->pull_progress != 0.0f || lever->floor_position.y == -1.0f) {
-                continue;
-            }
-            Lever_GetAbsTargetPos(lever, &target_position);
-            candidate_position = &target_position;
-        }
-
-        const f32 candidate_distance = NuVecDistSqr(position, candidate_position, NULL);
-        if (candidate_distance < nearest_distance) {
-            nearest = lever;
-            nearest_distance = candidate_distance;
-        }
-    }
-
-    if (distance_squared != NULL) {
-        *distance_squared = nearest_distance;
-    }
-    return nearest;
-}
-
 void Levers_InitTerrain(WORLDINFO_s *world) {
     for (i32 index = 0; index < world->nlevers; ++index) {
         LEVER_s &lever = world->levers[index];

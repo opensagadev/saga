@@ -55,6 +55,32 @@ void Lever_GetAbsTargetPos(LEVER_s *lever, nuvec_s *target_position) {
     }
 }
 
+LEVER_s *Lever_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObject_s *object, f32 *distance_squared) {
+    LEVER_s *nearest = NULL;
+    f32 nearest_distance = 1.0e9f;
+    LEVER_s *lever = world->levers;
+    for (i32 index = 0; index < world->nlevers; ++index, ++lever) {
+        NUVEC target_position;
+        NUVEC *candidate_position = &lever->position;
+        if (object != NULL) {
+            if ((lever->flags & (LEVER_FLAG_INTERACTING | LEVER_FLAG_BEING_PULLED | LEVER_FLAG_VISIBLE |
+                                 LEVER_FLAG_ENABLED)) != (LEVER_FLAG_VISIBLE | LEVER_FLAG_ENABLED) ||
+                lever->pull_progress != 0.0f || lever->floor_position.y == 2000000.0f)
+                continue;
+            Lever_GetAbsTargetPos(lever, &target_position);
+            candidate_position = &target_position;
+        }
+        f32 candidate_distance = NuVecDistSqr(position, candidate_position, NULL);
+        if (candidate_distance < nearest_distance) {
+            nearest = lever;
+            nearest_distance = candidate_distance;
+        }
+    }
+    if (distance_squared != NULL)
+        *distance_squared = nearest_distance;
+    return nearest;
+}
+
 i32 Lever_FullyPulledDown(LEVER_s *lever) {
     return lever->visible && lever->being_pulled && lever->pull_progress >= 1.0f;
 }
