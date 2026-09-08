@@ -2,6 +2,14 @@
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
 
+i32 CanPullLevers(i32 character_id) {
+    u32 flags = CDataList[character_id].model_flags;
+    if ((flags & 0x01000010) == 0x01000010) {
+        return 0;
+    }
+    return (flags & 0x00040088) != 0;
+}
+
 #include "legoapi/characters/core/CharacterObjectInterface.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/world/area.h"
