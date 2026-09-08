@@ -608,7 +608,14 @@ extern "C" {
         return y;
     }
 
-    void FindSock(void) {
+    SOCK *FindSock(SOCKSYS *system, char *name) {
+        if (system != NULL) {
+            SOCK *sock = system->sock;
+            for (i32 index = 0; index < 64; ++index, ++sock) {
+                if (sock->valid != 0 && NuStrICmp(name, sock->name) == 0) return sock;
+            }
+        }
+        return NULL;
     }
 
     void MidDistanceFromSockStart(void) {

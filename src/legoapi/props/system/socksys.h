@@ -162,6 +162,7 @@ typedef struct SOCKSYS {
 
 #ifdef __cplusplus
 extern "C" {
+SOCK *FindSock(SOCKSYS *system, char *name);
 #endif
 
     void SockSysFindInScene(SOCKSYS *sock_sys, NUGSCN *gscn);

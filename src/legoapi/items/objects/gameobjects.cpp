@@ -23,6 +23,7 @@
 #include "legoapi/menus/screens/shop.h"
 #include "legoapi/menus/core/gamehint.h"
 #include "legoapi/props/doors/door.h"
+#include "legoapi/props/system/socksys.h"
 #include "legoapi/world/area.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/core/input/timer.h"
@@ -549,6 +550,15 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
 }
 
 extern "C" i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *cutscene);
+
+static f32 Condition_PlayerInSock(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    return argument != NULL && WORLD->sock_sys != NULL &&
+        argument == &WORLD->sock_sys->sock[static_cast<i8>(player->field_0x661)] ? 1.0f : 0.0f;
+}
+
+static void *Condition_PlayerInSockInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    return FindSock(WORLD->sock_sys, name);
+}
 
 static f32 Condition_RigidAnimFrame(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     nuinstanim_s *animation = static_cast<nuinstanim_s *>(argument);
@@ -1103,7 +1113,7 @@ extern "C" {
         {"CutSceneStarted", Condition_CutSceneStarted, Condition_CutSceneStartedInit},
         {"CutSceneFinished", Condition_CutSceneFinished, Condition_CutSceneFinishedInit},
         {"CutSceneExists", Condition_CutSceneExists, Condition_CutSceneExistsInit},
-        {"PlayerInSock", NULL, NULL},
+        {"PlayerInSock", Condition_PlayerInSock, Condition_PlayerInSockInit},
         {"CutScenePlaying", Condition_CutScenePlaying, Condition_CutScenePlayingInit},
         {"RigidAnimFrame", Condition_RigidAnimFrame, Condition_RigidAnimFrameInit},
         {"SockDistanceToPlayer", NULL, NULL},
