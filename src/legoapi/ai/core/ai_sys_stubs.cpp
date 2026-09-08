@@ -1577,7 +1577,7 @@ extern "C" {
 
             const u8 runtime_flags = packet->field_0x1e6;
             packet->movement_flags &= static_cast<u8>(~AIPACKET_MOVEMENT_OPTION_TRANSIENT);
-            packet->field_0x1e5 &= static_cast<u8>(~4u);
+            packet->circle_active = 0;
             packet->frame_flags = 0;
             packet->field_0x1e6 = runtime_flags & static_cast<u8>(~AIPACKET_RUNTIME_SPECIAL_MOVE);
 

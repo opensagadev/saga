@@ -292,7 +292,8 @@ typedef struct AIPACKET_s {
         struct {
             u8 check_wall_splines : 1;
             u8 circle_clockwise : 1;
-            u8 packet_flags_1e5_2_7 : 6;
+            u8 circle_active : 1;
+            u8 packet_flags_1e5_3_7 : 5;
         };
     };
     union {

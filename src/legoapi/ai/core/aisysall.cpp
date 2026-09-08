@@ -591,152 +591,107 @@ void AISysNodeCanReachThisJumpConnection(GameObject_s &, AIPATH_s &, unsigned ch
 void AISysCharacterCanReachThisJumpConnection(GameObject_s &, AIPATH_s &, AIPATHCNX_s &, i32) {
 }
 
-void AICircle(AISYS_s *, AIPACKET_s *, APIOBJECT_s *, i32) {
+void AICircle(AISYS_s *, AIPACKET_s *packet, APIOBJECT_s *object, i32) {
+    f32 radius = MAX(packet->fallback_stopping_distance, packet->movement_parameter);
+    NUVEC difference;
+    NuVecSub(&difference, &object->position, &packet->fallback_destination);
+    i32 angle = NuAtan2D(difference.x, difference.z);
+    difference.x = 0.0f;
+    difference.z = radius;
+    NuVecRotateY(&difference, &difference, angle);
+    NUVEC circle_position;
+    NuVecAdd(&circle_position, &packet->fallback_destination, &difference);
+    if (packet->circle_clockwise != 0) {
+        angle = NuAngSub(angle, NUANG_90DEG);
+    } else {
+        angle = NuAngAdd(angle, NUANG_90DEG);
+    }
+    difference.x = 0.0f;
+    difference.y = 0.0f;
+    difference.z = 0.5f;
+    NuVecRotateY(&difference, &difference, angle);
+    NuVecAdd(&packet->movement_destination, &circle_position, &difference);
+    packet->circle_active = 1;
+    packet->movement_stopping_distance = 0.0f;
 }
 
 void AIWander(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
-    if (packet == NULL || object == NULL || packet->path_info.path == NULL || packet->path_info.path->nodes == NULL ||
-        packet->path_info.connection == NULL) {
-        if (packet != NULL && object != NULL) {
-            packet->movement_destination = object->position;
-            packet->movement_stopping_distance = 0.0f;
+    NUVEC difference;
+    if (packet->movement_target != NULL) {
+        i32 node_index = packet->path_info.connection->node_indices[packet->path_info.direction == 0];
+        if (packet->movement_target->node_indices[0] != node_index &&
+            packet->movement_target->node_indices[1] != node_index) {
             packet->movement_target = NULL;
-            packet->runtime_flags |= AIPACKET_RUNTIME_PATH_BLOCKED;
-        }
-        return;
-    }
-
-    AIPATHCNX *target_connection = packet->movement_target;
-    AIPATHCNX *current_connection = packet->path_info.connection;
-    const u8 current_node_index = current_connection->node_indices[packet->path_info.direction == 0];
-    if (current_node_index >= packet->path_info.path->node_count) {
-        packet->movement_destination = object->position;
-        packet->movement_stopping_distance = 0.0f;
-        packet->movement_target = NULL;
-        packet->runtime_flags |= AIPACKET_RUNTIME_PATH_BLOCKED;
-        return;
-    }
-
-    if (target_connection != NULL && target_connection->direction_a != current_node_index &&
-        target_connection->direction_b != current_node_index) {
-        packet->movement_target = NULL;
-        target_connection = NULL;
-    }
-
-    if (target_connection == NULL) {
-        AIPATH *path = packet->path_info.path;
-        AIPATHNODE *current_node = &path->nodes[current_node_index];
-        const i32 connection_count = current_node->connection_count;
-
-        if (connection_count != 0 && current_node->connections != NULL) {
-            const i32 first_connection = static_cast<i32>(NuRandInt() % connection_count);
-            for (i32 offset = 0; offset < connection_count; ++offset) {
-                AIPATHCNX *candidate = current_node->connections[(first_connection + offset) % connection_count];
-                if (candidate == NULL ||
-                    (candidate->direction_a != current_node_index && candidate->direction_b != current_node_index)) {
-                    continue;
-                }
-                packet->movement_target = candidate;
-                target_connection = candidate;
-
-                if (candidate == current_connection) {
-                    packet->movement_target = NULL;
-                    target_connection = NULL;
-                    continue;
-                }
-
-                if (packet->current_route != 0xff &&
-                    ((static_cast<u64>(candidate->route_mask) >> packet->current_route) & 1) == 0 &&
-                    ((static_cast<u64>(static_cast<u16>(current_node->route_boundary_mask)) >> packet->current_route) & 1) ==
-                        0) {
-                    packet->movement_target = NULL;
-                    target_connection = NULL;
-                    continue;
-                }
-
-                const u8 direction = current_node_index != candidate->direction_a;
-                packet->movement_target_direction = direction;
-                const u32 traversal_flags = candidate->traversal_flags[direction];
-                if (traversal_flags == 0) {
-                    break;
-                }
-
-                packet->movement_target = NULL;
-                target_connection = NULL;
-            }
-        }
-
-        if (target_connection == NULL) {
-            current_connection = packet->path_info.connection;
-            const u8 node_index = current_connection->node_indices[packet->path_info.direction == 0];
-            AIPATHNODE *node = &packet->path_info.path->nodes[node_index];
-            NUVEC delta;
-            const f32 distance_squared = NuVecXZDistSqr(&object->position, &node->position, &delta);
-
-            if (distance_squared < node->radius_squared) {
-                AISysCharacterSetPathCnx(packet, &object->position, current_connection,
-                                         packet->path_info.direction == 0);
-                current_connection = packet->path_info.connection;
-                const u8 updated_node_index = current_connection->node_indices[packet->path_info.direction == 0];
-                node = &packet->path_info.path->nodes[updated_node_index];
-                packet->goal_path_node = node;
-            }
-
-            packet->movement_destination = node->position;
-            packet->movement_stopping_distance = 0.0f;
-            return;
         }
     }
-
-    packet->field_0x1e6 |= AIPACKET_RUNTIME_SPECIAL_MOVE;
-    if (WithinConnection(system, &packet->terrain_origin, packet->path_info.path, target_connection, checks,
-                         current_connection, packet->current_route, object->field_0x289, NULL, object->collision_radius,
-                         0) != 0) {
-        AISysCharacterSetPathCnx(packet, &object->position, target_connection, packet->movement_target_direction);
-
-        current_connection = packet->path_info.connection;
-        const u8 node_index = current_connection->node_indices[packet->path_info.direction == 0];
+    if (packet->movement_target == NULL) {
+        u8 node_index = packet->path_info.connection->node_indices[packet->path_info.direction == 0];
         AIPATHNODE *node = &packet->path_info.path->nodes[node_index];
-        packet->goal_path_node = node;
+        i32 start = NuRandInt() % node->connection_count;
+        for (i32 index = 0; index < node->connection_count; ++index) {
+            packet->movement_target = node->connections[(index + start) % node->connection_count];
+            AIPATHCNX *target = packet->movement_target;
+            if (target != packet->path_info.connection) {
+                if (packet->current_route == 0xff ||
+                    ((static_cast<u64>(target->route_mask) >> packet->current_route) & 1) != 0 ||
+                    ((static_cast<u64>(node->route_boundary_mask) >> packet->current_route) & 1) != 0) {
+                    packet->movement_target_direction = node_index != target->node_indices[0];
+                    if (target->traversal_flags[packet->movement_target_direction] == 0) {
+                        break;
+                    }
+                }
+            }
+            packet->movement_target = NULL;
+        }
+    }
+    if (packet->movement_target == NULL) {
+        AIPATHNODE *node = &packet->path_info.path->nodes[
+            packet->path_info.connection->node_indices[packet->path_info.direction == 0]];
+        f32 distance = NuVecXZDistSqr(&object->position, &node->position, &difference);
+        if (distance < node->radius_squared) {
+            AISysCharacterSetPathCnx(packet, &object->position, packet->path_info.connection,
+                                     packet->path_info.direction == 0);
+            node = &packet->path_info.path->nodes[
+                packet->path_info.connection->node_indices[packet->path_info.direction == 0]];
+            packet->goal_path_node = node;
+        }
         packet->movement_destination = node->position;
         packet->movement_stopping_distance = 0.0f;
-        packet->movement_target = NULL;
         return;
     }
 
-    const u8 destination_node_index = target_connection->node_indices[packet->movement_target_direction == 0];
-    if (destination_node_index >= packet->path_info.path->node_count) {
-        packet->movement_destination = object->position;
+    packet->runtime_flags |= AIPACKET_RUNTIME_SPECIAL_MOVE;
+    if (WithinConnection(system, &packet->terrain_origin, packet->path_info.path, packet->movement_target,
+                         checks, packet->path_info.connection, packet->current_route, object->field_0x289,
+                         NULL, object->collision_radius, 0) == 0) {
+        packet->movement_destination = packet->path_info.path->nodes[
+            packet->movement_target->node_indices[packet->movement_target_direction == 0]].position;
+        packet->movement_stopping_distance = 0.0f;
+        if (CalculateIntersection(system, packet, object, packet->path_info.connection, packet->movement_target) != 0) {
+            if ((packet->movement_flags & AIPACKET_MOVEMENT_DIVERSION_LEFT) != 0) {
+                NuVecSub(&difference, &packet->left_diversion, &object->position);
+                i32 angle = NuAtan2D(difference.x, difference.z);
+                NuVecSub(&difference, &packet->movement_destination, &object->position);
+                if (NuAngSub(NuAtan2D(difference.x, difference.z), angle) < 0) {
+                    packet->movement_destination = packet->left_diversion;
+                    return;
+                }
+            }
+            if ((packet->movement_flags & AIPACKET_MOVEMENT_DIVERSION_RIGHT) != 0) {
+                NuVecSub(&difference, &packet->right_diversion, &object->position);
+                i32 angle = NuAtan2D(difference.x, difference.z);
+                NuVecSub(&difference, &packet->movement_destination, &object->position);
+                if (NuAngSub(NuAtan2D(difference.x, difference.z), angle) > 0) {
+                    packet->movement_destination = packet->right_diversion;
+                }
+            }
+        }
+    } else {
+        AISysCharacterSetPathCnx(packet, &object->position, packet->movement_target, packet->movement_target_direction);
+        packet->goal_path_node = &packet->path_info.path->nodes[
+            packet->path_info.connection->node_indices[packet->path_info.direction == 0]];
+        packet->movement_destination = packet->goal_path_node->position;
         packet->movement_stopping_distance = 0.0f;
         packet->movement_target = NULL;
-        packet->runtime_flags |= AIPACKET_RUNTIME_PATH_BLOCKED;
-        return;
-    }
-    packet->movement_destination = packet->path_info.path->nodes[destination_node_index].position;
-    packet->movement_stopping_distance = 0.0f;
-
-    if (CalculateIntersection(system, packet, object, current_connection, target_connection) != 0) {
-        NUVEC delta;
-
-        if ((packet->movement_flags & AIPACKET_MOVEMENT_DIVERSION_LEFT) != 0) {
-            NuVecSub(&delta, &packet->left_diversion, &object->position);
-            const NUANG diversion_angle = NuAtan2D(delta.x, delta.z);
-            NuVecSub(&delta, &packet->movement_destination, &object->position);
-            const NUANG destination_angle = NuAtan2D(delta.x, delta.z);
-            if (NuAngSub(destination_angle, diversion_angle) < 0) {
-                packet->movement_destination = packet->left_diversion;
-                return;
-            }
-        }
-
-        if ((packet->movement_flags & AIPACKET_MOVEMENT_DIVERSION_RIGHT) != 0) {
-            NuVecSub(&delta, &packet->right_diversion, &object->position);
-            const NUANG diversion_angle = NuAtan2D(delta.x, delta.z);
-            NuVecSub(&delta, &packet->movement_destination, &object->position);
-            const NUANG destination_angle = NuAtan2D(delta.x, delta.z);
-            if (NuAngSub(destination_angle, diversion_angle) > 0) {
-                packet->movement_destination = packet->right_diversion;
-            }
-        }
     }
 }
