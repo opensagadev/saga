@@ -705,6 +705,18 @@ static void *Condition_CharacterTypeExistsInit(AISYS_s *system, char *name, AISC
     return (void *)(intptr_t)-1;
 }
 
+static f32 Condition_EitherPlayerPullingLever(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *name, void *) {
+    if (player != NULL && player->character_context == 0x4a) {
+        LEVER_s *lever = static_cast<LEVER_s *>(player->field_0x788);
+        if (lever != NULL && (name == NULL || NuStrICmp(lever->name, name) == 0)) return 1.0f;
+    }
+    if (player2 != NULL && player2->character_context == 0x4a) {
+        LEVER_s *lever = static_cast<LEVER_s *>(player2->field_0x788);
+        if (lever != NULL && (name == NULL || NuStrICmp(lever->name, name) == 0)) return 1.0f;
+    }
+    return 0.0f;
+}
+
 static f32 Condition_EitherPlayerUsingPanel(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *name, void *) {
     if (player != NULL && player->character_context == 0x0b) {
         GIZPANEL_s *panel = static_cast<GIZPANEL_s *>(player->field_0x788);
@@ -1268,7 +1280,7 @@ extern "C" {
         {"ObstacleOpenedByPlayer", Condition_ObstacleOpenedByPlayer, Condition_ObstacleOpenedByPlayerInit},
         {"ObstacleOpenedByEitherPlayer", Condition_ObstacleOpenedByEitherPlayer, Condition_ObstacleOpenedByPlayerInit},
         {"AnimationFinished", Condition_AnimationFinished, Condition_AnimationFinishedInit},
-        {"EitherPlayerPullingLever", NULL, NULL},
+        {"EitherPlayerPullingLever", Condition_EitherPlayerPullingLever, NULL},
         {"EitherPlayerUsingHatMachine", NULL, NULL},
         {"EitherPlayerUsingPanel", Condition_EitherPlayerUsingPanel, NULL},
         {"EitherPlayerWearingHelmet", Condition_EitherPlayerWearingHelmet, NULL},

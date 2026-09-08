@@ -1058,9 +1058,6 @@ static __used__ void *Condition_OnDynamicGrappleInit(AISYS_s *, char *, AISCRIPT
 
 
 
-static __used__ f32 Condition_EitherPlayerPullingLever(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
 
 static i32 Action_SetBoltsDontGetDeflectedBack(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params,
                                                i32 param_count, i32 first_time, f32) {
