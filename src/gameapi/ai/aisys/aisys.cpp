@@ -17,6 +17,7 @@
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/gizmos/traps/gizturrets.h"
 #include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmos/object/newblowup.h"
 #include "legoapi/gizmos/transport/grapples.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/ai/core/ai_sys_stubs.h"
@@ -6498,13 +6499,9 @@ static f32 Condition_PlayerOnPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPACK
     return sys->player_1 != NULL && sys->player_1->ai->path_info.on_path ? 1.0f : 0.0f;
 }
 
-__used__ static f32 Condition_BlowupBlownup(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                            void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
+static f32 Condition_BlowupBlownup(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *argument) {
+    if (argument != NULL && GizmoGetOutput(WORLD->gizmo_sys, static_cast<GIZMO *>(argument), 0, 1) != 0)
+        return 1.0f;
     return 0.0f;
 }
 
@@ -6546,11 +6543,8 @@ static void *Condition_SideInit(AISYS *, char *arg, AISCRIPT *) {
     return NULL;
 }
 
-__used__ static void *Condition_BlowupInit(AISYS *sys, char *arg, AISCRIPT *script) {
-    (void)sys;
-    (void)arg;
-    (void)script;
-    return NULL;
+static void *Condition_BlowupInit(AISYS *, char *arg, AISCRIPT *) {
+    return GizmoFindByName(WORLD->gizmo_sys, blowup_gizmotype_id, arg);
 }
 
 static void *Condition_XYZPosInit(AISYS *sys, char *arg, AISCRIPT *) {
@@ -8115,6 +8109,8 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_SHOP_ACTIVE].eval_fn = Condition_ShopActive;
             lego_aiconditiondefs[LEGO_AI_CONDITION_SCREEN_WIPE].eval_fn = Condition_ScreenWipe;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CAN_HEAR_RADIO].eval_fn = Condition_CanHearRadio;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_BLOWUP_BLOWNUP].eval_fn = Condition_BlowupBlownup;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_BLOWUP_BLOWNUP].init_fn = Condition_BlowupInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_ANIM_SPEED_MUL].eval_fn = Condition_AnimSpeedMul;
             lego_aiconditiondefs[LEGO_AI_CONDITION_TURRET_ALIVE].init_fn = Condition_TurretAliveInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_OUTPUT_0].eval_fn = Condition_GizmoOutput0;
