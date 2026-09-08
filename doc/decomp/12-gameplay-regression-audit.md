@@ -1504,3 +1504,29 @@ companion's distance from approximately 2.7 to 0.69 units and holds that distanc
 Its destination remains the player's saved position throughout the later
 samples. The movement scalar remains about 0.10 near the stopping position;
 this trace does not establish that the reported animation wiggle is resolved.
+
+## Story party script initialization and following (2026-09-08)
+
+Read-only native Negotiations tracing found party slots 0, 1 and 2 with null
+AI scripts. `CheckResetBits` omitted the original party-script selection and
+processor initialization at ELF `0x11f7fa` and its out-of-line branches.
+Recovered Freeplay/Mission, character-name, Jedi/Blaster/NoWeapon and
+party/GeneralParty selection, then the original InActive-state handling.
+The complete function remains partial: matching improves from 15.614% to
+27.353%; no optimization setting was changed.
+
+Recovered the game `FollowPlayer` action at ELF `0x1882c0` and registered
+game action slot 132. It preserves original parameter parsing, party distance
+offsets, drop-back behavior, path options and special-button writes. The
+original stores a nearest-player selection but still passes the global player
+to FollowAPIObject; that behavior is preserved. Instruction matching is
+85.050%. The party-character condition at ELF `0x181a20` matches 100%.
+
+104 mapped-original/target execution cases produced identical outputs,
+covering distance and party flags, script parameters, guards and NaN operand
+ordering. The speed-parser callback branch was not exercised by this fixture.
+Native Negotiations tracing now observes Obi-Wan in party slot 1 naturally
+executing FollowPlayer for 180 calls, with the player's saved path position
+tracking the player. No script or party-slot override was used. This stationary
+trace does not establish following through an entire level or resolve the
+reported animation wiggle. Android and native smoke-runner builds pass.

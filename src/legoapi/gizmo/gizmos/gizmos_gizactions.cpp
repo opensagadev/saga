@@ -1,6 +1,8 @@
 #include "decomp.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "globals.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/core/input/gamepads.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/core/charconfig.h"
 #include "legoapi/gizmo/base/gizactions.h"
@@ -15,6 +17,7 @@
 #include "legoapi/gizmos/traps/gizforce.h"
 #include "legoapi/gizmos/object/lever.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
+#include "nu2api/numath/nuvec.h"
 
 void Action_Circle(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
 }
@@ -158,7 +161,68 @@ i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet,
 void Action_DynamicCameraCut(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
 }
 
-void Action_GameFollowPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+f32 party_follow_offsets[8];
+i32 party_under_cover;
+extern f32 drop_back_in_timer;
+
+i32 Action_GameFollowPlayer(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
+                            i32 param_count, i32 first_time, float) {
+    if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL || sys == NULL ||
+        sys->player_1 == NULL) {
+        return 1;
+    }
+    GameObject_s *object = packet->owner->apiobj.objptr;
+    if (first_time != 0) {
+        for (i32 i = 0; i < param_count; ++i) {
+            if (AIActionParseSpeedFn != NULL && AIActionParseSpeedFn(params[i], &packet->goal_speed_mode) != 0) {
+                continue;
+            }
+            if (NuStrICmp(params[i], "ignore_radius") == 0) {
+                processor->action_data_1 |= 2;
+            } else if (NuStrICmp(params[i], "can_go_off_path") == 0) {
+                processor->action_data_1 |= 1;
+            } else if (NuStrICmp(params[i], "hold_special_button") == 0) {
+                processor->action_data_2 = 1;
+            } else if (NuStrICmp(params[i], "nearest") == 0) {
+                if (player != NULL && player2 != NULL) {
+                    f32 first = NuVecDist(&packet->owner->apiobj.position, &player->apiobj.position, NULL);
+                    f32 second = NuVecDist(&packet->owner->apiobj.position, &player2->apiobj.position, NULL);
+                    if (second < first) {
+                        processor->action_data_3 = player2;
+                    } else {
+                        processor->action_data_3 = player;
+                    }
+                } else {
+                    processor->action_data_3 = player;
+                }
+            } else if (packet->movement_instruction_parameter == 0.0f) {
+                packet->movement_instruction_parameter = AIParamToFloat(processor, params[i]);
+            }
+        }
+    }
+    if (processor->action_data_3 == NULL && player == NULL) {
+        return 0;
+    }
+    APIOBJECT_s *owner = &packet->owner->apiobj;
+    f32 distance;
+    if (owner->field_0x27c != -1) {
+        distance = drop_back_in_timer > 0.0f
+                       ? 0.01f
+                       : packet->movement_instruction_parameter + party_follow_offsets[owner->field_0x27c];
+    } else {
+        distance = packet->movement_instruction_parameter;
+        if ((owner->field_0x1f4 & 0x10001) != 0 &&
+            (party_under_cover != 0 || (player->apiobj.character_data->model_flags & 0x80000) != 0)) {
+            distance = 1.5f > distance ? 1.5f : distance;
+        }
+    }
+    FollowAPIObject(owner, &player->apiobj, processor->action_data_1, distance);
+    if (processor->action_data_2 != 0) {
+        GAMEPAD_s *pad = object->pad_gamepad;
+        pad->buttons_pressed |= GAMEPAD_SPECIAL;
+        pad->buttons_held |= GAMEPAD_SPECIAL;
+    }
+    return 0;
 }
 
 struct GIZSPINNER_s;

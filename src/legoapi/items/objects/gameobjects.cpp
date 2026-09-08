@@ -43,6 +43,13 @@
 #include <stdio.h>
 #include <string.h>
 
+static f32 Condition_IAmAPartyCharacter(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.field_0x27c != -1) {
+        return 1.0f;
+    }
+    return 0.0f;
+}
+
 // NuCore profiling timebars (nucore_plain.cpp): NuTimeBarCreateSet returns a
 // deferred-subsystem stub handle; the slot functions are no-op stubs.
 extern "C" {
@@ -268,7 +275,7 @@ extern "C" {
         {"IAmABaddy", NULL, NULL},
         {"IAmANeutral", NULL, NULL},
         {"IAmAGoodyBaddy", NULL, NULL},
-        {"IAmAPartyCharacter", NULL, NULL},
+        {"IAmAPartyCharacter", Condition_IAmAPartyCharacter, NULL},
         {"CategoryIs", NULL, NULL},
         {"PlayerCategoryIs", NULL, NULL},
         {"EitherPlayerIs", NULL, NULL},
@@ -976,6 +983,8 @@ extern "C" {
         }
     }
 }
+
+f32 drop_back_in_timer;
 
 void SetSpecialMove(GameObject_s *object, AIPATHNODE_s *target, AIPATHNODE_s *node, char move) {
     object->ai.field_0x180 = target;

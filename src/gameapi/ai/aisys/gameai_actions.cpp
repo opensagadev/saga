@@ -1341,10 +1341,6 @@ static __used__ f32 Condition_HeadTurnRestricted(AISYS_s *, AISCRIPTPROCESS_s *,
     return 0;
 }
 
-static __used__ f32 Condition_IAmAPartyCharacter(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
-
 static __used__ void *Condition_LevelNodeRangeInit(AISYS_s *, char *, AISCRIPT_s *) {
     return nullptr;
 }
@@ -1804,6 +1800,8 @@ static __used__ f32 Condition_InSameTriggerAreaAsNearestPlayer(AISYS_s *, AISCRI
     return 0;
 }
 
+i32 Action_GameFollowPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32);
+
 namespace {
     struct GameAIRegistryCallbacks {
         GameAIRegistryCallbacks() {
@@ -1828,6 +1826,7 @@ namespace {
             lego_aiactiondefs[LEGO_AI_ACTION_SET_ZERO_ACCELERATION].eval_fn = Action_SetZeroAcceleration;
             lego_aiactiondefs[LEGO_AI_ACTION_CREATE_SPLINE_CREATURES].eval_fn = Action_CreateSplineCreatures;
             lego_aiactiondefs[LEGO_AI_ACTION_FOLLOW_CHARACTER].eval_fn = Action_FollowCharacter;
+            lego_aiactiondefs[LEGO_AI_ACTION_FOLLOW_PLAYER].eval_fn = Action_GameFollowPlayer;
             lego_aiactiondefs[LEGO_AI_ACTION_MOVE_FORWARD].eval_fn = Action_MoveForward;
             lego_aiactiondefs[LEGO_AI_ACTION_ALWAYS_TRIGGER_OBSTACLE].eval_fn = Action_AlwaysTriggerObstacle;
             lego_aiactiondefs[LEGO_AI_ACTION_CAN_TRIGGER_OBSTACLE].eval_fn = Action_CanTriggerObstacle;
