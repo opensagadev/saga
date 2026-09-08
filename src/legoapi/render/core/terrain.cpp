@@ -1415,146 +1415,152 @@ void TerrainImpact(NUVEC *position, NUVEC *movement, u8 *hit_flags) {
             walkable_normal_y = wallover;
         }
 
-        const bool second_normal = (hit_type & TERRAIN_HIT_TYPE_SECOND_NORMAL) != 0;
-        const u8 base_hit_type = hit_type & TERRAIN_HIT_TYPE_CLASS_MASK;
-        const bool supported_hit_type = hit_type <= (TERRAIN_HIT_TYPE_SECOND_NORMAL | TERRAIN_HIT_TYPE_SPHERE) &&
-                                        base_hit_type >= TERRAIN_HIT_TYPE_FACE &&
-                                        base_hit_type <= TERRAIN_HIT_TYPE_SPHERE;
+        switch (hit_type) {
+            case TERRAIN_HIT_TYPE_CYLINDER:
+            case TERRAIN_HIT_TYPE_VERTEX:
+            case TERRAIN_HIT_TYPE_SPHERE:
+                if (!wall_override_surface)
+                    walkable_normal_y = 0.707f;
+                // Fall through to the shared first-normal response.
+            case TERRAIN_HIT_TYPE_FACE: {
 
-        if (supported_hit_type && !second_normal) {
-            if (base_hit_type != TERRAIN_HIT_TYPE_FACE && !wall_override_surface) {
-                walkable_normal_y = 0.707f;
-            }
-
-            query->hit_time -= query->separation_epsilon;
-            if (query->hit_time < 0.0f) {
-                query->hit_time = 0.0f;
-            }
-
-            const f32 advance = query->hit_time;
-            const NUVEC travelled = {
-                query->movement.x * advance,
-                query->movement.y * advance,
-                query->movement.z * advance,
-            };
-            query->position.x += travelled.x;
-            query->position.y += travelled.y;
-            query->position.z += travelled.z;
-            query->movement.x -= travelled.x;
-            query->movement.y -= travelled.y;
-            query->movement.z -= travelled.z;
-
-            if (walkable_normal_y > query->impact_normal.y) {
-                hit_flags[0] = 0;
-                terrhitflags |= TERRAIN_IMPACT_RESULT_WALL;
-                if (!platform_group) {
-                    terrhitflags |= TERRAIN_IMPACT_RESULT_STATIC_WALL;
+                query->hit_time -= query->separation_epsilon;
+                if (query->hit_time < 0.0f) {
+                    query->hit_time = 0.0f;
                 }
 
-                query->position.x += query->movement_normal.x * 0.0006f;
-                query->position.z += query->movement_normal.z * 0.0006f;
-                query->movement.x += query->movement_normal.x * 0.0006f;
-                query->movement.z += query->movement_normal.z * 0.0006f;
-                movement->x += query->movement_normal.x * 0.0009f;
-                movement->z += query->movement_normal.z * 0.0009f;
+                const f32 advance = query->hit_time;
+                const NUVEC travelled = {
+                    query->movement.x * advance,
+                    query->movement.y * advance,
+                    query->movement.z * advance,
+                };
+                query->position.x += travelled.x;
+                query->position.y += travelled.y;
+                query->position.z += travelled.z;
+                query->movement.x -= travelled.x;
+                query->movement.y -= travelled.y;
+                query->movement.z -= travelled.z;
 
-                FullDeflect(&query->movement_normal, &query->movement, &query->movement);
-                FullDeflectSmallY(&query->impact_normal, movement, movement);
+                if (walkable_normal_y > query->impact_normal.y) {
+                    hit_flags[0] = 0;
+                    terrhitflags |= TERRAIN_IMPACT_RESULT_WALL;
+                    if (!platform_group) {
+                        terrhitflags |= TERRAIN_IMPACT_RESULT_STATIC_WALL;
+                    }
 
-                query = TerI;
-                if (CurTrackInfo == NULL) {
-                    CurTrackInfo = AllocTerrId();
-                    CurTrackInfo->flags = TERRAIN_TRACK_FLAG_NONE;
-                    CurTrackInfo->id = query->hit_flags;
-                    CurTrackInfo->platform_index = 0;
-                    CurTrackInfo->platform_contact_state = TERRAIN_TRACK_CONTACT_NONE;
-                }
-                CurTrackInfo->wall_contact_state = TERRAIN_TRACK_CONTACT_ACTIVE;
-                CurTrackInfo->impact_normal = query->impact_normal;
-                TerrWallNorm = query->impact_normal;
-            } else {
-                FullDeflect(&query->movement_normal, &query->movement, &query->movement);
-                FullDeflect(&query->impact_normal, movement, movement);
+                    query->position.x += query->movement_normal.x * 0.0006f;
+                    query->position.z += query->movement_normal.z * 0.0006f;
+                    query->movement.x += query->movement_normal.x * 0.0006f;
+                    query->movement.z += query->movement_normal.z * 0.0006f;
+                    movement->x += query->movement_normal.x * 0.0009f;
+                    movement->z += query->movement_normal.z * 0.0009f;
 
-                terrhitflags |= TERRAIN_IMPACT_RESULT_GROUND;
-                hit_flags[0] = 1;
-                hit_flags[1] = 1;
-                query->position.y += query->movement_normal.y * 0.0003f;
+                    FullDeflect(&query->movement_normal, &query->movement, &query->movement);
+                    FullDeflectSmallY(&query->impact_normal, movement, movement);
 
-                query = TerI;
-                if (query->terrain_group_index != -1) {
-                    group = &CurTerr->groups[query->terrain_group_index];
-                    if (group->chunk_type == TERRAIN_CHUNK_GROUP_SECONDARY) {
-                        CurTerr->platforms[group->scene_index].flags |= TERRAIN_PLATFORM_FLAG_COLLIDED;
+                    query = TerI;
+                    if (CurTrackInfo == NULL) {
+                        CurTrackInfo = AllocTerrId();
+                        CurTrackInfo->flags = TERRAIN_TRACK_FLAG_NONE;
+                        CurTrackInfo->id = query->hit_flags;
+                        CurTrackInfo->platform_index = 0;
+                        CurTrackInfo->platform_contact_state = TERRAIN_TRACK_CONTACT_NONE;
+                    }
+                    CurTrackInfo->wall_contact_state = TERRAIN_TRACK_CONTACT_ACTIVE;
+                    CurTrackInfo->impact_normal = query->impact_normal;
+                    TerrWallNorm = query->impact_normal;
+                } else {
+                    FullDeflect(&query->movement_normal, &query->movement, &query->movement);
+                    FullDeflect(&query->impact_normal, movement, movement);
+
+                    terrhitflags |= TERRAIN_IMPACT_RESULT_GROUND;
+                    hit_flags[0] = 1;
+                    hit_flags[1] = 1;
+                    query->position.y += query->movement_normal.y * 0.0003f;
+
+                    query = TerI;
+                    if (query->terrain_group_index != -1) {
+                        group = &CurTerr->groups[query->terrain_group_index];
+                        if (group->chunk_type == TERRAIN_CHUNK_GROUP_SECONDARY) {
+                            CurTerr->platforms[group->scene_index].flags |= TERRAIN_PLATFORM_FLAG_COLLIDED;
+                        }
                     }
                 }
-            }
-
-            query = TerI;
-            query->flags &= static_cast<u8>(~TERRAIN_QUERY_FLAG_PREVIOUS_NORMAL);
-        } else if (supported_hit_type) {
-            if (base_hit_type != TERRAIN_HIT_TYPE_FACE) {
-                walkable_normal_y = 0.707f;
-            }
-
-            NUVEC response_normal = query->movement_normal;
-            if ((query->flags & TERRAIN_QUERY_FLAG_PREVIOUS_NORMAL) != 0) {
-                const f32 previous_alignment = response_normal.x * query->previous_movement_normal.x +
-                                               response_normal.y * query->previous_movement_normal.y +
-                                               response_normal.z * query->previous_movement_normal.z;
-                if (previous_alignment < 0.0f) {
-                    NUVEC corrected_normal;
-                    FullDeflect(&response_normal, &query->previous_movement_normal, &corrected_normal);
-                    const f32 correction_alignment = corrected_normal.x * response_normal.x +
-                                                     corrected_normal.y * response_normal.y +
-                                                     corrected_normal.z * response_normal.z;
-                    if (correction_alignment > 0.25f) {
-                        response_normal.x = corrected_normal.x / correction_alignment;
-                        response_normal.y = corrected_normal.y / correction_alignment;
-                        response_normal.z = corrected_normal.z / correction_alignment;
-                    }
-                }
-            }
-
-            query = TerI;
-            const f32 contact_push = 0.0035f - query->unclamped_hit_time * 1.05f;
-            if (walkable_normal_y > query->impact_normal.y) {
-                const f32 movement_push = 0.0035f - query->unclamped_hit_time * 0.35f;
-                query->position.x += response_normal.x * contact_push;
-                query->position.y += response_normal.y * contact_push;
-                query->position.z += response_normal.z * contact_push;
-                query->movement.x += response_normal.x * movement_push;
-                query->movement.y += response_normal.y * movement_push;
-                query->movement.z += response_normal.z * movement_push;
-                hit_flags[0] = 1;
-
-                FullDeflect(&response_normal, &query->movement, &query->movement);
-                FullDeflectSmallY(&query->impact_normal, movement, movement);
 
                 query = TerI;
-                if (CurTrackInfo == NULL) {
-                    CurTrackInfo = AllocTerrId();
-                    CurTrackInfo->flags = TERRAIN_TRACK_FLAG_NONE;
-                    CurTrackInfo->id = query->hit_flags;
-                    CurTrackInfo->platform_index = 0;
-                    CurTrackInfo->platform_contact_state = TERRAIN_TRACK_CONTACT_NONE;
-                }
-                CurTrackInfo->wall_contact_state = TERRAIN_TRACK_CONTACT_ACTIVE;
-                CurTrackInfo->impact_normal = query->impact_normal;
-            } else {
-                query->position.x += response_normal.x * contact_push;
-                query->position.y += response_normal.y * contact_push;
-                query->position.y += response_normal.y * 0.01f;
-                query->position.z += response_normal.z * contact_push;
-                query->movement.y += response_normal.y * 0.01f;
+                query->flags &= static_cast<u8>(~TERRAIN_QUERY_FLAG_PREVIOUS_NORMAL);
 
-                FullDeflect(&response_normal, &query->movement, &query->movement);
-                FullDeflect(&query->impact_normal, movement, movement);
+                break;
             }
+            case TERRAIN_HIT_TYPE_SECOND_NORMAL | TERRAIN_HIT_TYPE_CYLINDER:
+            case TERRAIN_HIT_TYPE_SECOND_NORMAL | TERRAIN_HIT_TYPE_VERTEX:
+            case TERRAIN_HIT_TYPE_SECOND_NORMAL | TERRAIN_HIT_TYPE_SPHERE:
+                walkable_normal_y = 0.707f;
+                // Fall through to the shared second-normal response.
+            case TERRAIN_HIT_TYPE_SECOND_NORMAL | TERRAIN_HIT_TYPE_FACE: {
 
-            query = TerI;
-            query->flags |= TERRAIN_QUERY_FLAG_PREVIOUS_NORMAL;
-            query->previous_movement_normal = query->movement_normal;
+                NUVEC response_normal = query->movement_normal;
+                if ((query->flags & TERRAIN_QUERY_FLAG_PREVIOUS_NORMAL) != 0) {
+                    const f32 previous_alignment = response_normal.x * query->previous_movement_normal.x +
+                                                   response_normal.y * query->previous_movement_normal.y +
+                                                   response_normal.z * query->previous_movement_normal.z;
+                    if (previous_alignment < 0.0f) {
+                        NUVEC corrected_normal;
+                        FullDeflect(&response_normal, &query->previous_movement_normal, &corrected_normal);
+                        const f32 correction_alignment = corrected_normal.x * response_normal.x +
+                                                         corrected_normal.y * response_normal.y +
+                                                         corrected_normal.z * response_normal.z;
+                        if (correction_alignment > 0.25f) {
+                            response_normal.x = corrected_normal.x / correction_alignment;
+                            response_normal.y = corrected_normal.y / correction_alignment;
+                            response_normal.z = corrected_normal.z / correction_alignment;
+                        }
+                    }
+                }
+
+                query = TerI;
+                const f32 contact_push = 0.0035f - query->unclamped_hit_time * 1.05f;
+                if (walkable_normal_y > query->impact_normal.y) {
+                    const f32 movement_push = 0.0035f - query->unclamped_hit_time * 0.35f;
+                    query->position.x += response_normal.x * contact_push;
+                    query->position.y += response_normal.y * contact_push;
+                    query->position.z += response_normal.z * contact_push;
+                    query->movement.x += response_normal.x * movement_push;
+                    query->movement.y += response_normal.y * movement_push;
+                    query->movement.z += response_normal.z * movement_push;
+                    hit_flags[0] = 1;
+
+                    FullDeflect(&response_normal, &query->movement, &query->movement);
+                    FullDeflectSmallY(&query->impact_normal, movement, movement);
+
+                    query = TerI;
+                    if (CurTrackInfo == NULL) {
+                        CurTrackInfo = AllocTerrId();
+                        CurTrackInfo->flags = TERRAIN_TRACK_FLAG_NONE;
+                        CurTrackInfo->id = query->hit_flags;
+                        CurTrackInfo->platform_index = 0;
+                        CurTrackInfo->platform_contact_state = TERRAIN_TRACK_CONTACT_NONE;
+                    }
+                    CurTrackInfo->wall_contact_state = TERRAIN_TRACK_CONTACT_ACTIVE;
+                    CurTrackInfo->impact_normal = query->impact_normal;
+                } else {
+                    query->position.x += response_normal.x * contact_push;
+                    query->position.y += response_normal.y * contact_push;
+                    query->position.y += response_normal.y * 0.01f;
+                    query->position.z += response_normal.z * contact_push;
+                    query->movement.y += response_normal.y * 0.01f;
+
+                    FullDeflect(&response_normal, &query->movement, &query->movement);
+                    FullDeflect(&query->impact_normal, movement, movement);
+                }
+
+                query = TerI;
+                query->flags |= TERRAIN_QUERY_FLAG_PREVIOUS_NORMAL;
+                query->previous_movement_normal = query->movement_normal;
+
+                break;
+            }
         }
     }
 

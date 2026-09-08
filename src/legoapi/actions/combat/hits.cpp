@@ -735,10 +735,11 @@ void CollideGameObjects(WORLDINFO_s *world) {
     u32 vertical_movement_mask = 0;
     u32 player_slot_mask = 0;
 
+    i32 object_count = HIGHGAMEOBJECT;
     GameObject_s *objects = Obj;
     GameObject_s *object = objects;
-    for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
-        const u8 flags = object->apiobj.flags_low;
+    for (i32 index = 0; index < object_count; ++index, ++object) {
+        const i32 flags = object->apiobj.flags_low;
         if ((flags & APIOBJECT_FLAG_IN_USE) == 0) {
             continue;
         }
@@ -771,7 +772,7 @@ void CollideGameObjects(WORLDINFO_s *world) {
     NUVEC collision_maximums[64];
     i32 collision_count = 0;
     object = objects;
-    for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
+    for (i32 index = 0; index < object_count; ++index, ++object) {
         if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || object->apiobj.field_0x287 != 0 ||
             object->apiobj.model_draw_result == 0 || object->use_model_origin <= 1) {
             continue;
@@ -804,11 +805,11 @@ void CollideGameObjects(WORLDINFO_s *world) {
         object->apiobj.collision_mask_low = 0;
         object->apiobj.collision_mask_high = 0;
         if ((data->flags_090 & 0x1000) != 0) {
-            object->apiobj.collision_exclusion_mask = flattened_mask;
+            object->apiobj.collision_mask_low = flattened_mask;
         }
 
         if (object->field_0x107c != -1) {
-            object->apiobj.collision_exclusion_mask |= player_collision_mask;
+            object->apiobj.collision_mask_low |= player_collision_mask;
             for (i32 player_index = 0; player_index < 8; ++player_index) {
                 GameObject_s *player = Player[player_index];
                 if (player == NULL || (player->apiobj.field_0x1f8 & 0x1001) != 0x1001 || player == object ||
@@ -831,19 +832,19 @@ void CollideGameObjects(WORLDINFO_s *world) {
         }
         if (WORLD->current_level == SPEEDERCHASEA_LDATA && disable_narrow_socks == 0 && object->id == id_SPEEDERBIKE &&
             object->apiobj.field_0x27c != -1) {
-            object->apiobj.collision_exclusion_mask |= narrow_speeder_mask;
+            object->apiobj.collision_mask_low |= narrow_speeder_mask;
         }
 
         if (VehicleArea != 0 && WORLD->current_level != BOUNTYHUNTERPURSUITA_LDATA &&
             WORLD->current_level != DOGFIGHTA_LDATA) {
             data = object->apiobj.character_data->game_character;
             if (object->apiobj.field_0x27c == -1 && data->field_0x28 != 0.0f) {
-                object->apiobj.collision_exclusion_mask |=
+                object->apiobj.collision_mask_low |=
                     (vertical_movement_mask & player_slot_mask) | no_vertical_movement_mask;
             } else if (data->field_0x28 == 0.0f) {
-                object->apiobj.collision_exclusion_mask |= (~player_slot_mask) & vertical_movement_mask;
+                object->apiobj.collision_mask_low |= (~player_slot_mask) & vertical_movement_mask;
             } else {
-                object->apiobj.collision_exclusion_mask |= vertical_movement_mask;
+                object->apiobj.collision_mask_low |= vertical_movement_mask;
             }
         }
     }
