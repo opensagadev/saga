@@ -1027,9 +1027,6 @@ static __used__ void *Condition_OnDynamicGrappleInit(AISYS_s *, char *, AISCRIPT
     return nullptr;
 }
 
-static __used__ f32 Condition_OnSameObjectAsPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
 
 
 

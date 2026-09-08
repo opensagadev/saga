@@ -483,10 +483,15 @@ typedef struct APIOBJECT_s {
     u16 field_0x276;                                  // 0x276
     u16 roll_angle;                                   // 0x278
     i16 supporting_platform_id;                       // 0x27a (-1 = no supporting character platform)
-    char field_0x27c;                                 // 0x27c  player/character slot (0xff = none)
-    u8 field_0x27d;                                   // 0x27d  terrain/contact flags
-    u8 field_0x27e;                                   // 0x27e  previous terrain/contact flags
-    u8 field_0x27f;                                   // 0x27f
+    union {
+        u32 packed_contact_state; // 0x27c
+        struct {
+            char field_0x27c; // player/character slot (0xff = none)
+            u8 field_0x27d; // terrain/contact flags
+            u8 field_0x27e; // previous terrain/contact flags
+            u8 field_0x27f;
+        };
+    };
     u8 field_0x280;                                   // 0x280
     u8 field_0x281;                                   // 0x281
     u8 is_underwater;                                 // 0x282
@@ -522,6 +527,7 @@ typedef struct APIOBJECT_s {
 } APIOBJECT;
 
 DECOMP_ASSERT(sizeof(APIOBJECT) == 0x2b0, "APIOBJECT size");
+DECOMP_ASSERT(offsetof(APIOBJECT, packed_contact_state) == 0x27c, "APIOBJECT packed contact state offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, collision_identity_mask) == 0x1e4, "APIOBJECT collision identity offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, colliding_objects_mask) == 0x1ec, "APIOBJECT colliding objects offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, ai_area_mask_low) == 0x2a8, "APIOBJECT area mask low offset");

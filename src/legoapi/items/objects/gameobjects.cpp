@@ -652,6 +652,17 @@ extern "C" f32 NuAnimEndFrameOld(void *animation);
 extern i32 Hub_GetRandomCharType();
 extern u8 hub_custodians_finished_loading;
 
+static f32 Condition_OnSameObjectAsPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    if (packet != NULL && packet->owner != NULL && player != NULL) {
+        GameObject *object = packet->owner->apiobj.objptr;
+        if ((object->apiobj.packed_contact_state & 0xffff00) != 0 &&
+            (player->apiobj.packed_contact_state & 0xffff00) != 0 &&
+            object->apiobj.supporting_platform_id != -1 &&
+            object->apiobj.supporting_platform_id == player->apiobj.supporting_platform_id) return 1.0f;
+    }
+    return 0.0f;
+}
+
 static f32 Condition_RandomMapCharsAvailable(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     if (hub_custodians_finished_loading == 0) return 0.0f;
     i16 character = Hub_GetRandomCharType();
@@ -1226,7 +1237,7 @@ extern "C" {
         {"IsOnScreen", Condition_IsOnScreen, Condition_IsOnScreenInit},
         {"OffScreenTimer", NULL, NULL},
         {"OnObject", NULL, NULL},
-        {"OnSameObjectAsPlayer", NULL, NULL},
+        {"OnSameObjectAsPlayer", Condition_OnSameObjectAsPlayer, NULL},
         {"PlayerOnObject", Condition_PlayerOnObject, Condition_OnObjectInit},
         {"EitherPlayerOnObject", NULL, NULL},
         {"EitherPlayerLocatorRangeXZ", NULL, NULL},
