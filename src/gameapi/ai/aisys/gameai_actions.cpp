@@ -1242,10 +1242,6 @@ static __used__ f32 Condition_EitherPlayerLocatorRangeXZ(AISYS_s *, AISCRIPTPROC
     return 0;
 }
 
-static __used__ f32 Condition_EitherPlayerPushingSpinner(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
-
 static __used__ f32 Condition_AngleAboutMyLocatorToPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *,
                                                           void *) {
     return 0;
@@ -1274,10 +1270,6 @@ static __used__ f32 Condition_NumBaddiesThatCanSeePlayers(AISYS_s *, AISCRIPTPRO
 static __used__ f32 Condition_TakeOverTargetInTriggerArea(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *,
                                                           void *) {
     return 0;
-}
-
-static __used__ void *Condition_EitherPlayerPushingSpinnerInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
 }
 
 static __used__ void *Condition_AngleAboutMyLocatorToPlayerInit(AISYS_s *, char *, AISCRIPT_s *) {

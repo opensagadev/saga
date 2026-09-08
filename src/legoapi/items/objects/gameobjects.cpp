@@ -28,6 +28,7 @@
 #include "legoapi/gizmos/object/gizobstacles.h"
 #include "legoapi/gizmos/trigger/gizspecial.h"
 #include "legoapi/gizmos/traps/gizforce.h"
+#include "legoapi/gizmos/door/spinner.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numusic/sfx.h"
@@ -541,6 +542,18 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+static f32 Condition_EitherPlayerPushingSpinner(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    if (argument != NULL) {
+        if (player != NULL && player->character_context == 0x28 && player->field_0x788 == argument) return 1.0f;
+        if (player2 != NULL && player2->character_context == 0x28 && player2->field_0x788 == argument) return 1.0f;
+    }
+    return 0.0f;
+}
+
+static void *Condition_EitherPlayerPushingSpinnerInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    return GizSpinner_FindBySpecialName(WORLD, name);
+}
+
 static f32 Condition_CharacterRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
     GameObject *object = static_cast<GameObject *>(argument);
     if (packet != NULL && packet->owner != NULL && object != NULL) {
@@ -975,7 +988,7 @@ extern "C" {
         {"MaulShouldRunAway", Condition_MaulShouldRunAway, NULL},
         {"DropBackInTimer", Condition_DropBackInTimer, NULL},
         {"HelpWithTriggers", Condition_HelpWithTriggers, NULL},
-        {"EitherPlayerPushingSpinner", NULL, NULL},
+        {"EitherPlayerPushingSpinner", Condition_EitherPlayerPushingSpinner, Condition_EitherPlayerPushingSpinnerInit},
         {"CharacterRange", Condition_CharacterRange, Condition_CharacterRangeInit},
         {"BeenSpawned", Condition_BeenSpawned, NULL},
         {"LastAttackerRange", Condition_LastAttackerRange, NULL},

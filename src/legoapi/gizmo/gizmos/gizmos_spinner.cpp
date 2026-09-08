@@ -32,8 +32,5 @@ void GizSpinner_GetSpinnerPos(GIZSPINNER_s *, nuvec_s *) {
 void GizSpinner_GetTargetPoints(GIZSPINNER_s *, nuvec_s *, nuvec_s *) {
 }
 
-void GizSpinner_FindBySpecialName(void *, char *) {
-}
-
 void GizSpinner_GetNearestTargetPoint(GIZSPINNER_s *, nuvec_s *, nuvec_s *, nuvec_s *, i32) {
 }
