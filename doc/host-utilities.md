@@ -255,3 +255,16 @@ The command implementations belong under `src/host/harness/`. Actual platform
 adapters belong under `src/host/platform/` and are limited to imported APIs,
 filesystem/environment access, or a build-selected platform interface. Host
 code must not replace portable game or engine functions.
+
+Windows supplies the imported `lrand48` and `srand48` APIs in
+`src/host/platform/windows/posix_random.cpp`. They share the 48-bit generator state
+and do not change `rand()` state. The multiplier, increment and initial state
+agree with Android Bionic's
+[`rand48.h`](https://github.com/aosp-mirror/platform_bionic/blob/android-4.0.4_r2.1/libc/private/rand48.h).
+This replaces an older Windows seed-only substitute after post-processing
+recovery introduced the original `lrand48` calls. Six explicit seeds agree
+with Linux libc for 10,000 draws each; the Bionic default agrees with libc
+seeded with `0x1234abcd` for another 10,000 draws. An initial comparison to
+unseeded Linux libc differed because its default state differs from Bionic.
+The adapter compiles with MinGW; target/Linux native builds and repository
+checks pass. Full Windows linkage still requires the CI graphics dependencies.

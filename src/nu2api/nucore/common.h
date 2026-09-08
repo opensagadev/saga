@@ -4,6 +4,17 @@
 #include <stdint.h>
 #ifdef HOST_BUILD
 #include <sys/types.h>
+#ifdef _WIN32
+// POSIX libc entry points supplied by the Windows platform layer.
+#ifdef __cplusplus
+extern "C" {
+#endif
+    long lrand48(void);
+    void srand48(long seed);
+#ifdef __cplusplus
+}
+#endif
+#endif
 #endif
 
 // Define fixed-width types for convenience.
