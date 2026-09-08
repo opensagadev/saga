@@ -1328,7 +1328,7 @@ extern "C" {
         {"IsAlive", NULL, NULL},
         {"IsOnScreen", Condition_IsOnScreen, Condition_IsOnScreenInit},
         {"OffScreenTimer", NULL, NULL},
-        {"OnObject", NULL, NULL},
+        {"OnObject", NULL, Condition_OnObjectInit},
         {"OnSameObjectAsPlayer", Condition_OnSameObjectAsPlayer, NULL},
         {"PlayerOnObject", Condition_PlayerOnObject, Condition_OnObjectInit},
         {"EitherPlayerOnObject", NULL, NULL},
