@@ -35,12 +35,8 @@ Native and WASM builds define `HOST_BUILD` and use the host harness.
 | [09-objdiff-cli.md](09-objdiff-cli.md) | compact per-symbol objdiff helper |
 | [10-animation-regression-audit.md](10-animation-regression-audit.md) | historical animation-related regression audit |
 | [11-animation-runtime-inventory.md](11-animation-runtime-inventory.md) | animation runtime coverage, active paths, and remaining gaps |
-| [12-gameplay-regression-audit.md](12-gameplay-regression-audit.md) | gameplay regression evidence, matching status, and unresolved paths |
 | [13-post-processing-audit.md](13-post-processing-audit.md) | directional-light intensity, retained Android post-effects, and runtime limitations |
 | [14-save-format-audit.md](14-save-format-audit.md) | save layout, serialized enums, original-binary evidence, and unresolved fields |
-| [15-bounty-clip-audit.md](15-bounty-clip-audit.md) | bounty, clip-player and shop reconstruction, matching checkpoint, and shared hint UI dependencies |
-| [16-codegen-override-audit.md](16-codegen-override-audit.md) | removal of forced calling conventions, optimization attributes and the shader entry-point alias |
-| [17-character-switching-audit.md](17-character-switching-audit.md) | switching, portrait timers, tag arrows, original-binary comparisons and remaining scope |
 
 ## Non-negotiable matching facts
 
