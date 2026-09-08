@@ -5327,11 +5327,10 @@ __used__ static f32 Condition_IAmANeutral(AISYS *sys, AISCRIPTPROCESS *processor
 
 __used__ static f32 Condition_InLevelNode(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
                                           void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
+    if (void_arg != NULL && packet != NULL && sys != NULL) {
+        AIPATHNODE *node = static_cast<AIPATHNODE *>(void_arg);
+        return packet->inside_path_node == node - sys->path_sys->active_path->nodes ? 1.0f : 0.0f;
+    }
     return 0.0f;
 }
 
@@ -5888,7 +5887,11 @@ static void *Condition_InLevelNodeInit(AISYS *sys, char *arg, AISCRIPT *) {
     return NULL;
 }
 
-static __used__ f32 Condition_PlayerInLevelNode(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+static f32 Condition_PlayerInLevelNode(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *void_arg) {
+    if (sys != NULL && sys->player_1 != NULL && void_arg != NULL) {
+        AIPATHNODE *node = static_cast<AIPATHNODE *>(void_arg);
+        return sys->player_1->ai->inside_path_node == node - sys->path_sys->active_path->nodes ? 1.0f : 0.0f;
+    }
     return 0;
 }
 
@@ -5960,7 +5963,33 @@ static f32 Condition_Player2InTriggerArea(AISYS_s *sys, AISCRIPTPROCESS_s *proce
     return 0;
 }
 
-static __used__ f32 Condition_EitherPlayerInTriggerArea(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+static f32 Condition_EitherPlayerInTriggerArea(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *, char *, void *void_arg) {
+    if (sys != NULL) {
+        AIAREA *area = static_cast<AIAREA *>(void_arg);
+        if (area == NULL) {
+            area = processor->unknown_a0;
+        }
+        if (area != NULL) {
+            if (sys->player_1 != NULL && area->system != NULL) {
+                GameObject *object = reinterpret_cast<GameObject *>(sys->player_1);
+                i32 index = area - area->system->areas;
+                i64 mask = 1 << index;
+                u64 membership = (static_cast<u64>(object->ai_area_mask_high) << 32) | object->ai_area_mask_low;
+                if ((membership & mask) != 0) {
+                    return 1.0f;
+                }
+            }
+            if (sys->player_2 != NULL && area->system != NULL) {
+                GameObject *object = reinterpret_cast<GameObject *>(sys->player_2);
+                i32 index = area - area->system->areas;
+                i64 mask = 1 << index;
+                u64 membership = (static_cast<u64>(object->ai_area_mask_high) << 32) | object->ai_area_mask_low;
+                if ((membership & mask) != 0) {
+                    return 1.0f;
+                }
+            }
+        }
+    }
     return 0;
 }
 
