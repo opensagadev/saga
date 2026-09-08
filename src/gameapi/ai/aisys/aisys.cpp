@@ -1273,7 +1273,7 @@ static i32 Action_DontAvoidCharacter(AISYS *system, AISCRIPTPROCESS *, AIPACKET 
                 if (NuStrICmp(params[index], "FALSE") == 0)
                     enabled = 0;
             }
-            if (dont_avoid != NULL && object != NULL)
+            if (object != NULL && dont_avoid != NULL)
                 object->ai.dont_avoid_character = enabled ? dont_avoid : NULL;
         }
     }

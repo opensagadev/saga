@@ -1136,6 +1136,9 @@ DECOMP_ASSERT(offsetof(AIPACKET, pending_nearest_opponent) == 0xdc, "AIPACKET pe
 DECOMP_ASSERT(offsetof(AIPACKET, pending_nearest_metric) == 0xe0, "AIPACKET pending nearest range offset");
 DECOMP_ASSERT(offsetof(AIPACKET, pending_opponent) == 0xec, "AIPACKET pending opponent offset");
 DECOMP_ASSERT(offsetof(AIPACKET, pending_opponent_metric) == 0xf0, "AIPACKET pending opponent range offset");
+DECOMP_ASSERT(offsetof(AIPACKET, dont_avoid_character) == 0xf4, "AIPACKET character avoidance exception offset");
+DECOMP_ASSERT(offsetof(GameObject_s, ai) + offsetof(AIPACKET, dont_avoid_character) == 0x3b4,
+              "GameObject character avoidance exception offset");
 DECOMP_ASSERT(offsetof(AIPACKET, movement_destination) == 0x104, "AIPACKET destination offset");
 DECOMP_ASSERT(offsetof(AIPACKET, animation_override_from) == 0x126, "AIPACKET animation override source offset");
 DECOMP_ASSERT(offsetof(AIPACKET, animation_override_to) == 0x128, "AIPACKET animation override target offset");
