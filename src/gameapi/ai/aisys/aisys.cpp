@@ -6828,6 +6828,58 @@ DECOMP_ASSERT(sizeof(api_aiactiondefs) == 0x294, "API action registry size");
 DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size");
 
 
+AIANTINODE dynamic_antinodes[64] = {};
+extern "C" f32 default_path_heighttol;
+
+extern "C" AIANTINODE *AIAntinodeCreate(NUVEC *position, f32 radius) {
+    for (i32 index = 0; index < 64; ++index) {
+        AIANTINODE *antinode = &dynamic_antinodes[index];
+        if (antinode->enabled == 0) {
+            memset(antinode, 0, sizeof(*antinode));
+            antinode->enabled = 1;
+            antinode->game_flags |= 1;
+            antinode->position = *position;
+            antinode->radius = radius;
+            antinode->min_y = antinode->position.y - default_path_heighttol;
+            antinode->max_y = antinode->position.y + default_path_heighttol;
+            return antinode;
+        }
+    }
+    return NULL;
+}
+
+extern "C" AIANTINODE *AIAntinodeCreateSingleFrame(NUVEC *position, f32 radius) {
+    for (i32 index = 0; index < 64; ++index) {
+        AIANTINODE *antinode = &dynamic_antinodes[index];
+        if (antinode->enabled == 0) {
+            memset(antinode, 0, sizeof(*antinode));
+            antinode->enabled = 1;
+            antinode->game_flags |= 5;
+            antinode->position = *position;
+            antinode->radius = radius;
+            antinode->min_y = antinode->position.y - default_path_heighttol;
+            antinode->max_y = antinode->position.y + default_path_heighttol;
+            return antinode;
+        }
+    }
+    return NULL;
+}
+
+extern "C" void AIAntinodeDestroy(AIANTINODE *antinode) {
+    if ((antinode->game_flags & 1) != 0) {
+        memset(antinode, 0, sizeof(*antinode));
+    }
+}
+
+extern "C" void AIAntinodeCullSingleFrame(void) {
+    for (i32 index = 0; index < 64; ++index) {
+        AIANTINODE *antinode = &dynamic_antinodes[index];
+        if (antinode->enabled != 0 && (antinode->game_flags & 4) != 0) {
+            memset(antinode, 0, sizeof(*antinode));
+        }
+    }
+}
+
 extern "C" void AIAntinodeMove(AIANTINODE *antinode, NUVEC *position, f32 radius, f32 below, f32 above) {
     if (antinode != NULL) {
         antinode->position = *position;

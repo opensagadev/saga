@@ -575,17 +575,6 @@ extern "C" {
 
     AIPATHNODE *AIPathFindNode(AISYS *system, AIPATH *path, char *name);
 
-    void AIAntinodeCreate(void) {
-    }
-
-    void AIAntinodeCreateSingleFrame(void) {
-    }
-
-    void AIAntinodeCullSingleFrame(void) {
-    }
-
-    void AIAntinodeDestroy(void) {
-    }
 
 
 
@@ -1684,7 +1673,7 @@ extern "C" {
         system->player_1 = player_1;
         system->player_2 = player_2;
 
-        AIANTINODE *dynamic = reinterpret_cast<AIANTINODE *>(dynamic_antinodes);
+        AIANTINODE *dynamic = dynamic_antinodes;
         const i32 antinode_count = system->antinode_count;
         for (i32 index = 0; index < antinode_count + 64; ++index) {
             AIANTINODE *antinode =

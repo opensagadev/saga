@@ -976,7 +976,7 @@ extern i32 MenuSaveOccurred;
 extern i32 Tag_DoneFirst;
 extern i32 Tag_DoneAny;
 extern i32 LevSfxFlag[4];
-extern u8 dynamic_antinodes[0x1500]; // AI anti-node spawn data (cleared per level)
+extern struct AIANTINODE_s dynamic_antinodes[64]; // Dynamic AI obstacle pool, cleared per level.
 extern i32 LevInstAnim[12];
 extern AIAREA_s *LevArea[4];
 extern i32 LevPathNodes[8];

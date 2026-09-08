@@ -834,7 +834,6 @@ i32 MenuSaveOccurred = 0;
 i32 Tag_DoneFirst = 0;
 i32 Tag_DoneAny = 0;
 i32 LevSfxFlag[4] = {0};
-u8 dynamic_antinodes[0x1500] = {0};
 i32 LevInstAnim[12] = {0};
 AIAREA_s *LevArea[4] = {0};
 i32 LevPathNodes[8] = {0};

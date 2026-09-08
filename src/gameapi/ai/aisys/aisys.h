@@ -686,6 +686,10 @@ extern "C" {
     void AISysProcess(AISYS *system, APIOBJECT *player_1, APIOBJECT *player_2);
     void AIFormationFollow(AIPACKET *packet);
     void AIAntinodeMove(AIANTINODE *antinode, NUVEC *position, f32 radius, f32 below, f32 above);
+    AIANTINODE *AIAntinodeCreate(NUVEC *position, f32 radius);
+    AIANTINODE *AIAntinodeCreateSingleFrame(NUVEC *position, f32 radius);
+    void AIAntinodeDestroy(AIANTINODE *antinode);
+    void AIAntinodeCullSingleFrame(void);
     void AIMoveInstruction(AIPACKET *packet, NUVEC *destination, f32 stopping_distance, AIPATHINFO *path_info, i32 mode,
                            f32 movement_parameter);
     void FollowAPIObject(APIOBJECT *object, APIOBJECT *target, i32 flags, f32 movement_parameter);
