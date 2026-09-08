@@ -287,17 +287,6 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
     }
 }
 
-void AICreatureResumeScript(GameObject_s *object) {
-    DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, active_ref_count) == 0x64, "AI active reference count ABI");
-    DECOMP_ASSERT(offsetof(AISCRIPT, base_state) == 0x38, "AI base state ABI");
-    AISCRIPT *script = reinterpret_cast<AISCRIPTPROCESS *>(&object->ai)->base_script;
-    if (script != NULL) {
-        AISCRIPTPROCESS *processor = reinterpret_cast<AISCRIPTPROCESS *>(&object->ai);
-        AIScriptProcessorInit(WORLD->ai_sys, &object->ai, processor, NULL, NULL, NULL, 0, script, script->base_state);
-        processor->active_ref_count = 0;
-    }
-}
-
 void AIRetreatFromDestination(AISYS_s *, AIPACKET_s *, APIOBJECT_s *, i32) {
 }
 

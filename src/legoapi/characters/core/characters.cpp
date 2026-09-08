@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "gameapi/ai/aisys/aisys.h"
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/world_shared.h"
@@ -248,6 +249,15 @@ void FinishWeirdoNames(i32) {
 }
 
 extern i32 addcreature_override_id_check;
+void AICreatureResumeScript(GameObject_s *object) {
+    AISCRIPT *script = reinterpret_cast<AISCRIPTPROCESS *>(&object->ai)->base_script;
+    if (script != NULL) {
+        AISCRIPTPROCESS *processor = reinterpret_cast<AISCRIPTPROCESS *>(&object->ai);
+        AIScriptProcessorInit(WORLD->ai_sys, &object->ai, processor, NULL, NULL, NULL, 0, script, script->base_state);
+        processor->active_ref_count = 0;
+    }
+}
+
 extern f32 default_mover_extra;
 extern void SetGameObjectCharacterData(GameObject_s *obj);
 extern void GetTopBot(GameObject_s *obj);

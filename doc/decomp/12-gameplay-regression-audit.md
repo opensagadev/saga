@@ -309,6 +309,25 @@ observations establish sustained control after the controlled tag transfer
 and keep the separate AI normalization investigation open; they do not prove
 natural target acquisition or correct Cantina movement.
 
+`AICreatureResumeScript` (`0x0fd3f0`, 139 bytes) was another empty handoff
+dependency. It now calls `AIScriptProcessorInit` with the existing base script
+and that script's base state, then clears the active-reference count at
+processor offset `0x64`. A null base script leaves the object alone. The
+function now lives with creature initialization in `characters.cpp`, retaining
+that source's existing `-O2` setting; no optimization override was added.
+It compares at **84.172%**, at the original 139-byte size, with register and
+argument-store ordering differences still present. Target/native builds and
+all four repository checks pass.
+
+The first runtime fixture incorrectly assumed the initial player had a base
+script and stopped on a debugger null dereference, not a game crash. The
+corrected controlled fixture resumes the scripted Obi-Wan object after tag
+transfer: the base script is preserved, its active state returns from
+`0xd0ef4f70` to the script's base state `0xd0ef47b0`, and active-reference
+count is zero (`/tmp/saga-resume-runtime-fixed.log`, exit 0, no sanitizer
+diagnostic before fixture completion). This checks script resumption, not
+resolution of the separate movement normalization issue.
+
 A native build-sound inventory confirms event 0x3a resolves to `MK-Pickup`
 (SFX 50, sample 357, 22050 Hz, enabled) and event 0x3b to `LegoForm` (SFX 128,
 sample 434, 11025 Hz, enabled and looping). Both have volume 16383. The
