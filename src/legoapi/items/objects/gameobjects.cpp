@@ -191,6 +191,11 @@ static void *Condition_ObstacleInit(AISYS_s *, char *name, AISCRIPT_s *) {
     return GizmoFindByName(WORLD->gizmo_sys, obstacle_gizmotype_id, name);
 }
 
+static f32 Condition_ObstacleAtStart(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    return argument != NULL && GizmoGetOutput(WORLD->gizmo_sys, static_cast<GIZMO_s *>(argument), 1, 1) == 0
+               ? 1.0f : 0.0f;
+}
+
 static f32 Condition_ObstacleAtEnd(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     return argument != NULL && GizmoGetOutput(WORLD->gizmo_sys, static_cast<GIZMO_s *>(argument), 0, 1) != 0
                ? 1.0f : 0.0f;
@@ -390,9 +395,9 @@ extern "C" {
         {"ZPos", NULL, NULL},
         {"CollidingWithOpponent", NULL, NULL},
         {"Colliding", NULL, NULL},
-        {"ObstacleAtStart", NULL, NULL},
+        {"ObstacleAtStart", Condition_ObstacleAtStart, Condition_ObstacleInit},
         {"ObstacleAtEnd", Condition_ObstacleAtEnd, Condition_ObstacleInit},
-        {"SpecialAtStart", NULL, NULL},
+        {"SpecialAtStart", Condition_ObstacleAtStart, NULL},
         {"SpecialAtEnd", NULL, NULL},
         {"ObstacleLockedOpen", NULL, NULL},
         {"ObstacleLockedShut", NULL, NULL},

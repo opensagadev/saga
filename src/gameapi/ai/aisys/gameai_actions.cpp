@@ -617,14 +617,6 @@ static __used__ f32 Condition_NumForceObjects(AISYS_s *, AISCRIPTPROCESS_s *, AI
     return 0;
 }
 
-static f32 Condition_ObstacleAtStart(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *void_arg) {
-    GIZMO_s *special = static_cast<GIZMO_s *>(void_arg);
-    if (special == NULL) {
-        return 0.0f;
-    }
-    return GizmoGetOutput(WORLD->gizmo_sys, special, 1, 1) == 0 ? 1.0f : 0.0f;
-}
-
 static __used__ f32 Condition_OnForcePlatform(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return 0;
 }
@@ -1539,7 +1531,6 @@ namespace {
 
             lego_aiconditiondefs[LEGO_AI_CONDITION_OFF_SCREEN_TIMER].eval_fn = Condition_OffScreenTimer;
             lego_aiconditiondefs[LEGO_AI_CONDITION_OFF_SCREEN_TIMER].init_fn = Condition_OffScreenTimerInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_SPECIAL_AT_START].eval_fn = Condition_ObstacleAtStart;
             lego_aiconditiondefs[LEGO_AI_CONDITION_SPECIAL_AT_START].init_fn = Condition_GizSpecialInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_FORCE_COMPLETE].eval_fn = Condition_ForceComplete;
             lego_aiconditiondefs[LEGO_AI_CONDITION_FORCE_COMPLETE].init_fn = Condition_ForceCompleteInit;
