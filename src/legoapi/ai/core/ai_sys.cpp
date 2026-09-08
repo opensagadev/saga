@@ -81,10 +81,6 @@ static __used__ unsigned int AISysCharacterTestPathCnx(AISYS_s *, APIOBJECT_s *,
     return {};
 }
 
-static __used__ unsigned int AISysCheckAntinode_Circle(APIOBJECT_s *, AIANTINODE_s *, nuvec_s *, float) {
-    return {};
-}
-
 static __used__ unsigned int AISysCheckAntinode_Ellipse(APIOBJECT_s *, AIANTINODE_s *, nuvec_s *, float) {
     return {};
 }

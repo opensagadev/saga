@@ -22,6 +22,56 @@ static const u32 iAISysPathColoursG[5] = {
     0xffff0000, 0xff00ff00, 0xff00ffff, 0xffff00ff, 0xffffff00
 };
 
+static __used__ void AISysCheckAntinode_Circle(APIOBJECT *object, AIANTINODE *antinode, NUVEC *difference,
+                                             f32 radius) {
+    if (difference->x * difference->x + difference->z * difference->z < radius * radius) {
+        difference->x = object->position.x - antinode->position.x;
+        difference->z = object->position.z - antinode->position.z;
+        i32 angle = NuAtan2D(difference->x, difference->z);
+        difference->x = object->ai->movement_destination.x - antinode->position.x;
+        difference->z = object->ai->movement_destination.z - antinode->position.z;
+        i32 turn = NuAngSub(NuAtan2D(difference->x, difference->z), angle);
+        if (object->ai->antinode_timer > 0.0f) {
+            if (((object->ai->path_info.flags & 3) == 2 || object->respawn_timer > 1.0f) &&
+                object->ai->antinode_timer < antinode_time) {
+                object->ai->antinode_clockwise = !object->ai->antinode_clockwise;
+                object->ai->antinode_timer = antinode_time + antinode_reverse_time;
+            }
+            if (object->ai->antinode_clockwise) {
+                if (turn < 0) {
+                    turn += 0x10000;
+                }
+            } else if (turn > 0) {
+                turn -= 0x10000;
+            }
+        } else {
+            if (turn > 0) {
+                object->ai->antinode_clockwise = 1;
+            } else {
+                object->ai->antinode_clockwise = 0;
+            }
+        }
+        if ((antinode->game_flags & 2) == 0 && object->ai->antinode_timer < antinode_time) {
+            object->ai->antinode_timer = antinode_time;
+        }
+        i32 max_turn = static_cast<i32>((ai_moveradius / radius) * 10430.3779296875f);
+        if (turn > max_turn) {
+            turn = max_turn;
+        } else if (turn < -max_turn) {
+            turn = -max_turn;
+        }
+        angle = NuAngAdd(angle, turn);
+        difference->x = 0.0f;
+        difference->y = 0.0f;
+        difference->z = radius;
+        NuVecRotateY(difference, difference, angle);
+        object->ai->movement_position.x = difference->x + antinode->position.x;
+        object->ai->movement_position.y = object->ai->movement_destination.y;
+        object->ai->movement_position.z = difference->z + antinode->position.z;
+        object->field_0x1fa |= 4;
+    }
+}
+
 extern "C" {
     char *AiLevelPathName = "";
     AISCRIPTPROCESS *pSetStateDebugee;
