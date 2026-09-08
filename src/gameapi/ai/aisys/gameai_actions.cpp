@@ -303,9 +303,12 @@ static __used__ i32 Action_SetLastSafePathPos(AISYS_s *system, AISCRIPTPROCESS_s
     }
     APIOBJECT_s *object = packet != NULL && packet->owner != NULL ? &packet->owner->apiobj : NULL;
     for (i32 index = 0; index < param_count; ++index) {
-        char *value = NuStrIStr(params[index], "character=");
-        if (value != NULL && GetNamedAPIObjectFn != NULL) {
-            object = GetNamedAPIObjectFn(system, value + 10);
+        char *value = NuStrIStr(params[index], "character");
+        if (value != NULL) {
+            if (GetNamedAPIObjectFn != NULL)
+                object = GetNamedAPIObjectFn(system, value + 10);
+        } else {
+            NuStrICmp("FALSE", params[index]);
         }
     }
     if (object != NULL) {
