@@ -40,9 +40,6 @@ void CircleLevel(LEVELDATA_s *) {
 void CurrentStart(GameObject_s *, i32, i32) {
 }
 
-void DoSomeChecks(GameObject_s &, AIPATH_s &, AIPATHCNX_s &, i32) {
-}
-
 void CDataFromName(char *) {
 }
 

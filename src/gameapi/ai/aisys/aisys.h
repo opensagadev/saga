@@ -734,3 +734,11 @@ f32 AiParseExpression(char *expr);
 
 void AIScriptOpenPakFileParse(AISCRIPT **script_ref, void *pak, char *filename, char *path, VARIPTR *buf,
                               VARIPTR *buf_end);
+
+#ifdef __cplusplus
+bool AISysNodeCanReachThisJumpConnection(GameObject_s &object, AIPATH_s &path, unsigned char node_index,
+                                        AIPATHCNX_s &connection, i32 direction);
+bool AISysCharacterCanReachThisJumpConnection(GameObject_s &object, AIPATH_s &path,
+                                             AIPATHCNX_s &connection, i32 direction);
+u32 DoSomeChecks(GameObject_s &object, AIPATH_s &path, AIPATHCNX_s &connection, i32 direction);
+#endif
