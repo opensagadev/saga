@@ -15,14 +15,14 @@ static u32 CalculateRightIntersection(APIOBJECT *object, AIPATHCNX *first_connec
                                       AIPATHNODE *before, AIPATHNODE *shared, AIPATHNODE *after, NUVEC *result) {
     f32 clearance = object->collision_radius + 0.05f;
     f32 before_radius = before->radius - clearance;
-    f32 shared_radius = shared->radius - clearance;
-    f32 after_radius = after->radius - clearance;
     if (before_radius < 0.0f) {
         before_radius = 0.0f;
     }
+    f32 shared_radius = shared->radius - clearance;
     if (shared_radius < 0.0f) {
         shared_radius = 0.0f;
     }
+    f32 after_radius = after->radius - clearance;
     if (after_radius < 0.0f) {
         after_radius = 0.0f;
     }
