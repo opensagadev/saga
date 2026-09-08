@@ -487,6 +487,16 @@ static f32 Condition_IsVisible(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, cha
 }
 
 // The reference executable exposes this condition as an unconditional zero.
+static f32 Condition_Indy(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return 0.0f;
+}
+
+// The Android reference executable reports false for the PSP platform.
+static f32 Condition_PSP(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return 0.0f;
+}
+
+// The reference executable exposes this condition as an unconditional zero.
 static f32 Condition_CheatProgress(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return 0.0f;
 }
@@ -816,11 +826,11 @@ extern "C" {
         {"HintAvailable", Condition_HintAvailable, Condition_HintAvailableInit},
         {"HintComplete", Condition_HintComplete, Condition_HintAvailableInit},
         {"Freeplay", Condition_Freeplay, NULL},
-        {"Indy", NULL, NULL},
+        {"Indy", Condition_Indy, NULL},
         {"MissionMode", Condition_MissionMode, NULL},
         {"MissionWon", Condition_MissionWon, NULL},
         {"ChallengeMode", Condition_ChallengeMode, NULL},
-        {"PSP", NULL, NULL},
+        {"PSP", Condition_PSP, NULL},
         {"AIOverrideControl", NULL, NULL},
         {"BoltsDontGetDeflectedBack", NULL, NULL},
         {"CheatProgress", Condition_CheatProgress, NULL},
