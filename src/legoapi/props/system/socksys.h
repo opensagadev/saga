@@ -97,7 +97,7 @@ typedef struct SOCK {
     NUGSPLINE *limit;               // 0x2c — sock_limit_ spline (optional)
     u16 length;                     // 0x30 — rail point count - 1
     u8 valid;                       // 0x32 — 1 once the socket has been populated
-    u8 unknown_33;                  // 0x33
+    union { u8 unknown_33; u8 looping; }; // 0x33 — nonzero joins the last rail point to the first
     SOCKSEGMENT *segments;          // 0x34 — generated data for each rail segment
     SOCKROT *cam_rotations;         // 0x38 — generated camera-rail rotations
     SOCKROT *mid_rotations;         // 0x3c — generated midpoint-rail rotations
@@ -154,6 +154,10 @@ typedef struct SOCK {
     u32 unknown_110;                // 0x110 — exception entry count
     u8 unknown_114[40];             // 0x114
 } SOCK;
+
+DECOMP_ASSERT(offsetof(SOCK, looping) == 0x33, "SOCK loop flag offset");
+DECOMP_ASSERT(offsetof(SOCK, length) == 0x30, "SOCK rail length offset");
+DECOMP_ASSERT(offsetof(SOCKPOSITION, midpoint_rotation) == 0x24, "SOCKPOSITION midpoint rotation offset");
 
 typedef struct SOCKSYS {
     SOCK *sock; // 0x0 — array of 64 SOCK entries
