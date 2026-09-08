@@ -143,7 +143,17 @@ static __attribute__((noinline)) i32 CalculateIntersection(AISYS_s *system, AIPA
 void AISysGetPathPos2(AISYS_s *, nuvec_s *, AIPATHINFO_s *, nuvec_s *, AIPATH_s *, i32) {
 }
 
+void FreeTorpedoPacket(TORPEDOPACKET **packet);
+void RemoveGameObject(GameObject_s *object, i32 mode);
+
 void ClearAICreatures() {
+    GameObject_s *object = Obj;
+    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
+        if ((object->apiobj.flags_low & 1) != 0 && (object->apiobj.field_0x1f4 & 0x400) != 0) {
+            FreeTorpedoPacket(&object->torpedo);
+            RemoveGameObject(object, 1);
+        }
+    }
 }
 
 void AIMoveCanReachPath(AISYS_s *, AIPATH_s *, AIPATH_s *) {

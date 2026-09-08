@@ -1530,3 +1530,20 @@ executing FollowPlayer for 180 calls, with the player's saved path position
 tracking the player. No script or party-slot override was used. This stationary
 trace does not establish following through an entire level or resolve the
 reported animation wiggle. Android and native smoke-runner builds pass.
+
+## AI creature cleanup on reset (2026-09-08)
+
+Recovered the empty `ClearAICreatures` loop from original ELF `0xfd2b0`.
+It visits the live `HIGHGAMEOBJECT` range, selects active objects with flag
+`0x400` at `0x1f4`, and calls `FreeTorpedoPacket` before `RemoveGameObject`
+with mode 1. It reloads the live count after those calls. The rebuilt function
+is 137 bytes and matches 99.929%; the only differences are three relocated
+GOT address operands, with identical remaining instructions.
+
+18 original/target machine-code cases with instrumented callees agree on
+flag filtering, call order, removal mode, empty/negative counts, and a callee
+that shrinks the live count. These isolate the cleanup loop; they do not
+validate the still-empty torpedo cleanup implementation or full level-reset
+behavior. The shared native build encountered an undeclared `TempGame` in
+concurrently edited `hub.cpp`; that unrelated source was preserved.
+The isolated native build passes with only this recovery applied.
