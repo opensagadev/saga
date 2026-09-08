@@ -5900,6 +5900,11 @@ static void *Condition_EitherPlayerIsInit(AISYS *sys, char *arg, AISCRIPT *) {
     return arg != NULL && GetNamedAPIObjectFn != NULL ? GetNamedAPIObjectFn(sys, arg) : NULL;
 }
 
+static f32 Condition_EitherPlayerIs(AISYS *sys, AISCRIPTPROCESS *, AIPACKET *, char *, void *argument) {
+    return argument != NULL && sys != NULL && (sys->player_1 == argument || sys->player_2 == argument)
+               ? 1.0f : 0.0f;
+}
+
 static f32 Condition_StuckTime(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *) {
     return packet != NULL && packet->owner != NULL ? packet->owner->apiobj.respawn_timer : 0.0f;
 }
@@ -7797,6 +7802,8 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_PLAYER_1_IS].init_fn = Condition_EitherPlayerIsInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_PLAYER_2_IS].eval_fn = Condition_Player2Is;
             lego_aiconditiondefs[LEGO_AI_CONDITION_PLAYER_2_IS].init_fn = Condition_EitherPlayerIsInit;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_EITHER_PLAYER_IS].eval_fn = Condition_EitherPlayerIs;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_EITHER_PLAYER_IS].init_fn = Condition_EitherPlayerIsInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_TO_LEVEL].eval_fn = Condition_BeenToLevel;
 
             lego_aiactiondefs[LEGO_AI_ACTION_SET_CURRENT_SPEED].eval_fn = Action_SetCurrentSpeed;

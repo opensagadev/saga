@@ -229,9 +229,6 @@ static __used__ void *Condition_CategoryIsInit(AISYS_s *system, char *arg, AISCR
     return reinterpret_cast<void *>(static_cast<isize>(CharCategory_FindByName(arg)));
 }
 
-static __used__ f32 Condition_EitherPlayerIs(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
 
 
 static __used__ f32 Condition_IsLowEndDevice(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
