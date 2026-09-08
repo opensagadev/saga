@@ -65,13 +65,6 @@ static bool ActionToggleEnabled(char **params, i32 param_count) {
     return true;
 }
 
-static GIZOBSTACLE *ActionFindObstacle(char *name) {
-    if (WORLD == NULL || WORLD->gizmo_sys == NULL) {
-        return NULL;
-    }
-    GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, obstacle_gizmotype_id, name);
-    return gizmo != NULL ? static_cast<GIZOBSTACLE *>(gizmo->object) : NULL;
-}
 
 
 
@@ -357,26 +350,6 @@ static __used__ i32 Action_LaunchGuidedMissile(AISYS_s *, AISCRIPTPROCESS_s *, A
 
 
 
-static __used__ i32 Action_AlwaysTriggerObstacle(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **params,
-                                                 i32 param_count, i32 first_time, f32) {
-    if (first_time == 0 || param_count == 0) {
-        return 1;
-    }
-    GIZOBSTACLE *obstacle = NULL;
-    bool enabled = true;
-    for (i32 index = 0; index < param_count; ++index) {
-        char *value = NuStrIStr(params[index], "name=");
-        if (value != NULL) {
-            obstacle = ActionFindObstacle(value + NuStrLen("name="));
-        } else if (NuStrICmp(params[index], "FALSE") == 0) {
-            enabled = false;
-        }
-    }
-    if (obstacle != NULL) {
-        obstacle->runtime_flags = static_cast<u8>((obstacle->runtime_flags & ~4u) | (enabled ? 4u : 0u));
-    }
-    return 1;
-}
 
 
 
@@ -750,7 +723,6 @@ namespace {
             lego_aiactiondefs[LEGO_AI_ACTION_CREATE_SPLINE_CREATURES].eval_fn = Action_CreateSplineCreatures;
             lego_aiactiondefs[LEGO_AI_ACTION_FOLLOW_CHARACTER].eval_fn = Action_FollowCharacter;
             lego_aiactiondefs[LEGO_AI_ACTION_MOVE_FORWARD].eval_fn = Action_MoveForward;
-            lego_aiactiondefs[LEGO_AI_ACTION_ALWAYS_TRIGGER_OBSTACLE].eval_fn = Action_AlwaysTriggerObstacle;
             lego_aiactiondefs[LEGO_AI_ACTION_GIZMO_SET_VISIBILITY].eval_fn = Action_GizmoSetVisibility;
 
 
