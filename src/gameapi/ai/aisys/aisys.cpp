@@ -6614,6 +6614,10 @@ static f32 Condition_CharacterLoaded(AISYS *, AISCRIPTPROCESS *, AIPACKET *, cha
     return 0.0f;
 }
 
+static f32 Condition_IsLowEndDevice(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *) {
+    return g_lowEndLevelBehaviour != 0 ? 1.0f : 0.0f;
+}
+
 static void *Condition_CategoryIsInit(AISYS *system, char *arg, AISCRIPT *) {
     isize category = -1;
     if (arg != NULL && system != NULL && CharCategory != NULL) {
@@ -8477,6 +8481,7 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_Z_POS].init_fn = Condition_XYZPosInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_TAKE_OVER_RANGE].eval_fn = Condition_TakeOverRange;
             lego_aiconditiondefs[LEGO_AI_CONDITION_HAS_TAKE_OVER].eval_fn = Condition_HasTakeOver;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_IS_LOW_END_DEVICE].eval_fn = Condition_IsLowEndDevice;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CHARACTER_LOADED].eval_fn = Condition_CharacterLoaded;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CHARACTER_LOADED].init_fn = Condition_CharacterLoadedInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CATEGORY_IS].init_fn = Condition_CategoryIsInit;
