@@ -189,6 +189,18 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 
 static const f32 AI_RESPAWN_DELAY = 2.0f;
 
+static void *Condition_ForceInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    return GizmoFindByName(WORLD->gizmo_sys, force_gizmotype_id, name);
+}
+
+static f32 Condition_ForceAtStart(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    return argument != NULL && GizmoGetOutput(WORLD->gizmo_sys, static_cast<GIZMO_s *>(argument), 1, 1) == 0 ? 1.0f : 0.0f;
+}
+
+static f32 Condition_ForceAtEnd(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    return argument != NULL && GizmoGetOutput(WORLD->gizmo_sys, static_cast<GIZMO_s *>(argument), 0, 1) != 0 ? 1.0f : 0.0f;
+}
+
 static f32 Condition_ForceComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
     return force != NULL && GizForce_Complete(force) != 0 ? 1.0f : 0.0f;
@@ -449,8 +461,8 @@ extern "C" {
         {"SpecialAtEnd", Condition_ObstacleAtEnd, Condition_GizSpecialInit},
         {"ObstacleLockedOpen", Condition_ObstacleLockedOpen, Condition_ObstacleOpenedByPlayerInit},
         {"ObstacleLockedShut", Condition_ObstacleLockedShut, Condition_ObstacleOpenedByPlayerInit},
-        {"ForceAtStart", NULL, NULL},
-        {"ForceAtEnd", NULL, NULL},
+        {"ForceAtStart", Condition_ForceAtStart, Condition_ForceInit},
+        {"ForceAtEnd", Condition_ForceAtEnd, Condition_ForceInit},
         {"ObstacleOpenedByPlayer", Condition_ObstacleOpenedByPlayer, Condition_ObstacleOpenedByPlayerInit},
         {"ObstacleOpenedByEitherPlayer", Condition_ObstacleOpenedByEitherPlayer, Condition_ObstacleOpenedByPlayerInit},
         {"AnimationFinished", NULL, NULL},

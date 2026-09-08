@@ -5381,16 +5381,6 @@ __used__ static f32 Condition_CategoryIs(AISYS *sys, AISCRIPTPROCESS *processor,
                                                                                                                 : 0.0f;
 }
 
-__used__ static f32 Condition_ForceAtEnd(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                         void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
-}
-
 static f32 Condition_GotLocator(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *) {
     return processor->unknown_a4 != NULL ? 1.0f : 0.0f;
 }
@@ -5687,16 +5677,6 @@ __used__ static f32 Condition_CanHearRadio(AISYS *sys, AISCRIPTPROCESS *processo
     return 0.0f;
 }
 
-__used__ static f32 Condition_ForceAtStart(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                           void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
-}
-
 __used__ static f32 Condition_ForcePushing(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
                                            void *void_arg) {
     (void)sys;
@@ -5827,13 +5807,6 @@ __used__ static void *Condition_IAmAInit(AISYS *sys, char *arg, AISCRIPT *script
 }
 
 __used__ static void *Condition_SideInit(AISYS *sys, char *arg, AISCRIPT *script) {
-    (void)sys;
-    (void)arg;
-    (void)script;
-    return NULL;
-}
-
-__used__ static void *Condition_ForceInit(AISYS *sys, char *arg, AISCRIPT *script) {
     (void)sys;
     (void)arg;
     (void)script;
