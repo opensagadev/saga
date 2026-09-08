@@ -5731,12 +5731,28 @@ static __used__ i32 Action_IgnoreWallSplines(AISYS_s *, AISCRIPTPROCESS_s *, AIP
     return 1;
 }
 
-static __used__ i32 Action_DontUseShadowTerrain(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
-    return 0;
+static i32 Action_DontUseShadowTerrain(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count, i32 first_time, f32) {
+    if (packet != NULL && packet->owner != NULL && first_time != 0) {
+        packet->owner->apiobj.flags_low |= 0x40;
+        for (i32 i = 0; i < param_count; i++) {
+            if (NuStrICmp(params[i], "false") == 0) {
+                packet->owner->apiobj.flags_low &= ~0x40;
+            }
+        }
+    }
+    return 1;
 }
 
-static __used__ i32 Action_SetFullPathSearch(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
-    return 0;
+static i32 Action_SetFullPathSearch(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count, i32 first_time, f32) {
+    if (packet != NULL && packet->owner != NULL && first_time != 0) {
+        packet->owner->apiobj.field_0x1fa &= ~8;
+        for (i32 i = 0; i < param_count; i++) {
+            if (NuStrICmp(params[i], "false") == 0) {
+                packet->owner->apiobj.field_0x1fa |= 8;
+            }
+        }
+    }
+    return 1;
 }
 
 static __used__ i32 Action_SetRespawnLocator(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
@@ -6224,13 +6240,14 @@ static void *Condition_PlayerToLocatorInit(AISYS *sys, char *arg, AISCRIPT *) {
 
 static f32 Condition_NearestPlayerToLocator(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char *, void *void_arg) {
     NUVEC difference;
-    f32 distance = 3.402823466e+38f;
+    f32 distance;
     if (packet != NULL && sys != NULL) {
         AILOCATOR *locator = static_cast<AILOCATOR *>(void_arg);
         if (locator == NULL) {
             locator = processor->unknown_a4;
         }
         if (locator != NULL) {
+            distance = 3.402823466e+38f;
             if (sys->player_1 != NULL) {
                 distance = NuVecDistSqr(&sys->player_1->position, &locator->position, &difference);
             }
@@ -6241,9 +6258,10 @@ static f32 Condition_NearestPlayerToLocator(AISYS_s *sys, AISCRIPTPROCESS_s *pro
             if (distance != 3.402823466e+38f) {
                 distance = NuFsqrt(distance);
             }
+            return distance;
         }
     }
-    return distance;
+    return 3.402823466e+38f;
 }
 
 static f32 Condition_OpponentOnPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *) {
