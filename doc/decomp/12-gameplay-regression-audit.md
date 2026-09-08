@@ -450,6 +450,44 @@ original, the four checks pass, and the 180-frame Cantina fixture completes
 without an ASan/UBSan report (`/tmp/saga-divert-flow-prep.log`,
 `/tmp/saga-divert-flow-integration.log`).
 
+The subsequent recovery adds `AIMoveChooseExitNodePath` and
+`AIMoveAdjustDestinationPath`. The selector chooses the closer connection
+endpoint using distance squared minus node radius squared (ties select the
+second endpoint), prefers the requested graph when it belongs to the linked
+group, and otherwise compares that group's exit nodes. It preserves the
+original retained distance when a candidate graph has no exit nodes.
+Seven isolated cases agree with the original machine code on return value
+and selected graph (`/tmp/saga-original-exit.log`,
+`/tmp/saga-exit-runtime.log`). The adjustment helper's four destination-state
+snapshots also agree (`/tmp/saga-adjust-runtime.log`). These helpers compare
+at **51.962%** (615/690 bytes) and **25.845%** (332/460 bytes), respectively,
+after normalizing compiler `.isra` suffixes in a temporary target copy.
+
+The caller now handles a missing destination connection on the current graph
+as the original does: it prepares a diversion. Arrival with a nonzero movement
+parameter, no supporting platform, vertical difference strictly between
+`-0.5` and `0.5`, and distance squared below the parameter squared stops at
+the object's position for an ordinary destination. For a diversion with
+navigation bit 2 set, it restores the saved goal, chooses an exit graph and
+adjusts the destination there. Four early-return cases agree with the
+original full solver (`/tmp/saga-original-arrival.log`,
+`/tmp/saga-arrival-runtime.log`), including a tiny residual and the original
+squared negative-parameter behavior. The zero-parameter NPC case is not
+covered by that arrival condition and remains open.
+
+Removing unsupported post-preparation path-equality/node-array rejection and
+its extra blocked-flag write restores the original three null checks and
+owner-position return. `AIMoveToDestination` now compares at **17.761%**;
+`GetNextConnection` retains **35.790%**. These remain partial reconstructions:
+the second exit-selection branch, supporting-platform arrival alternative,
+and final stopping-distance adjustment still need recovery. Controlled
+helper agreement does not establish complete cross-graph gameplay.
+Target/native builds and all four repository checks pass. Repeated arrival
+and exit fixtures retain all eleven expected results. The Cantina test
+retains player control for 180 frames but reproduces the known NPC angle-table
+UBSan error (`/tmp/saga-arrival-integration.log`); it is not sanitizer-clean
+and does not close the AI movement regression.
+
 A native build-sound inventory confirms event 0x3a resolves to `MK-Pickup`
 (SFX 50, sample 357, 22050 Hz, enabled) and event 0x3b to `LegoForm` (SFX 128,
 sample 434, 11025 Hz, enabled and looping). Both have volume 16383. The

@@ -271,12 +271,93 @@ static __attribute__((noinline)) void AIMoveFindDivertNode(AISYS_s *, AIPATH *pa
     }
 }
 
+static __attribute__((noinline)) i32 AIMoveChooseExitNodePath(AISYS *system, AIPACKET *packet) {
+    AIPATH *path = packet->path_info.path;
+    AIPATHCNX *connection = packet->path_info.connection;
+    AIPATHNODE *first = &path->nodes[connection->node_indices[0]];
+    AIPATHNODE *second = &path->nodes[connection->node_indices[1]];
+    f32 candidate_distance =
+        NuVecDistSqr(&packet->owner->apiobj.position, &first->position, NULL) - first->radius_squared;
+    f32 second_distance =
+        NuVecDistSqr(&packet->owner->apiobj.position, &second->position, NULL) - second->radius_squared;
+    AIPATHNODE *node = candidate_distance < second_distance ? first : second;
+    if (node->special_type >= packet->path_info.path->special_route_count) {
+        return 0;
+    }
+    AIPATHSPECIALROUTE *route =
+        &system->path_sys->special_routes[packet->path_info.path->special_routes[node->special_type].node];
+    if (route->path_count == 0) {
+        return 0;
+    }
+    for (i32 i = 0; i < route->path_count; ++i) {
+        if (route->paths[i] == packet->fallback_path_info.path) {
+            AISysCharacterSetPath(packet, packet->fallback_path_info.path);
+            return 1;
+        }
+    }
+    AIPATH *best_path = NULL;
+    f32 best_distance = 3.4028234663852886e+38f;
+    for (i32 i = 0; i < route->path_count; ++i) {
+        AIPATH *candidate = route->paths[i];
+        f32 nearest_distance = 3.4028234663852886e+38f;
+        i32 nearest_node = -1;
+        for (i32 j = 0; j < candidate->special_route_count; ++j) {
+            f32 distance = NuVecDistSqr(&candidate->nodes[candidate->special_routes[j].type].position,
+                                        &packet->fallback_destination, NULL);
+            if (distance < nearest_distance) {
+                nearest_distance = distance;
+                nearest_node = candidate->special_routes[j].type;
+            }
+        }
+        if (nearest_node != -1) {
+            candidate_distance = nearest_distance;
+        }
+        if (candidate_distance < best_distance) {
+            best_distance = candidate_distance;
+            best_path = route->paths[i];
+        }
+    }
+    if (best_path == NULL) {
+        return 0;
+    }
+    AISysCharacterSetPath(packet, best_path);
+    return 1;
+}
+
+static __attribute__((noinline)) i32 AIMoveAdjustDestinationPath(AISYS *system, AIPACKET *packet) {
+    if (packet->path_info.path == packet->fallback_path_info.path && packet->fallback_path_info.connection != NULL) {
+        return 0;
+    }
+    AIMoveFindDivertNode(system, packet->path_info.path, packet, &packet->fallback_destination);
+    if (packet->divert_node >= packet->path_info.path->node_count) {
+        return -1;
+    }
+    AIPATHNODE *node = &packet->path_info.path->nodes[packet->divert_node];
+    if (node->connection_count == 0) {
+        return -1;
+    }
+    packet->fallback_destination = node->position;
+    packet->fallback_stopping_distance = 0.0f;
+    packet->movement_parameter = NuFmax(node->radius - 1.0f, 1.0f);
+    memset(&packet->fallback_path_info, 0, sizeof(packet->fallback_path_info));
+    packet->fallback_path_info.path = packet->path_info.path;
+    packet->fallback_path_info.connection = node->connections[0];
+    packet->fallback_path_info.direction = node->connections[0]->node_indices[0] == packet->divert_node;
+    packet->fallback_path_info.dist = node->connections[0]->node_indices[0] == packet->divert_node ? 0.0f : 1.0f;
+    return 1;
+}
+
 void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
     AIPATH *path = packet->path_info.path;
     AIPATHCNX *connection = packet->path_info.connection;
     AIPATHINFO &destination_path_info = packet->fallback_path_info;
+    NUVEC saved_destination = packet->fallback_destination;
+    f32 saved_stopping_distance = packet->fallback_stopping_distance;
+    f32 saved_parameter = packet->movement_parameter;
+    AIPATHINFO saved_path_info = packet->fallback_path_info;
+    i32 diverted = 0;
 
-    if (path != NULL && path != destination_path_info.path) {
+    if (path != destination_path_info.path || destination_path_info.connection == NULL) {
         AIMoveFindDivertNode(system, path, packet, &packet->fallback_destination);
         if (packet->divert_node >= path->node_count || path->nodes[packet->divert_node].connection_count == 0) {
             packet->movement_destination = packet->owner->apiobj.position;
@@ -292,16 +373,34 @@ void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *objec
         packet->fallback_path_info.connection = node->connections[0];
         packet->fallback_path_info.direction = node->connections[0]->node_indices[0] == packet->divert_node;
         packet->fallback_path_info.dist = node->connections[0]->node_indices[0] == packet->divert_node ? 0.0f : 1.0f;
+        diverted = 1;
+    }
+    NUVEC destination_delta;
+    f32 destination_distance_squared =
+        NuVecDistSqr(&packet->fallback_destination, &object->position, &destination_delta);
+    if (object->supporting_platform_id == -1 && packet->movement_parameter != 0.0f && destination_delta.y < 0.5f &&
+        destination_delta.y > -0.5f &&
+        destination_distance_squared < packet->movement_parameter * packet->movement_parameter) {
+        if (diverted == 0) {
+            packet->movement_destination = object->position;
+            packet->movement_stopping_distance = 0.0f;
+            return;
+        }
+        if ((packet->navigation_flags & 4) != 0) {
+            packet->fallback_destination = saved_destination;
+            packet->fallback_stopping_distance = saved_stopping_distance;
+            packet->movement_parameter = saved_parameter;
+            packet->fallback_path_info = saved_path_info;
+            AIMoveChooseExitNodePath(system, packet);
+            AIMoveAdjustDestinationPath(system, packet);
+            path = packet->path_info.path;
+            connection = packet->path_info.connection;
+        }
     }
 
-    // The target asks AIMoveFindDivertNode for a cross-path transition and
-    // stops at the current position when none is available. Never substitute a
-    // straight line to a destination on an unrelated path graph.
-    packet->movement_destination = object->position;
-    packet->movement_stopping_distance = 0.0f;
-    if (path == NULL || path != destination_path_info.path || connection == NULL ||
-        destination_path_info.connection == NULL || path->nodes == NULL) {
-        packet->runtime_flags |= AIPACKET_RUNTIME_PATH_BLOCKED;
+    if (connection == NULL || path == NULL || destination_path_info.connection == NULL) {
+        packet->movement_destination = packet->owner->apiobj.position;
+        packet->movement_stopping_distance = 0.0f;
         return;
     }
 
