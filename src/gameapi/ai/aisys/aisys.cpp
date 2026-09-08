@@ -5939,6 +5939,12 @@ static f32 Condition_IAmAGoodieBaddie(AISYS *, AISCRIPTPROCESS *, AIPACKET *pack
                ? 1.0f : 0.0f;
 }
 
+extern "C" i32 party_under_cover;
+
+static f32 Condition_PartyUnderCover(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *) {
+    return party_under_cover != 0 ? 1.0f : 0.0f;
+}
+
 static f32 Condition_PlayerCategoryIs(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *argument) {
     const isize category = reinterpret_cast<isize>(argument);
     return category != -1 && player != NULL && CharCategory_IsCategory(player, static_cast<i32>(category)) != 0
@@ -7810,6 +7816,7 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_AREA_COMPLETE].eval_fn = Condition_AreaComplete;
             lego_aiconditiondefs[LEGO_AI_CONDITION_AREA_COMPLETE].init_fn = Condition_AreaCompleteInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A].eval_fn = Condition_IAmA;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_PARTY_UNDER_COVER].eval_fn = Condition_PartyUnderCover;
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A].init_fn = Condition_IAmAInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_OPPONENT_IS_A].eval_fn = Condition_OpponentIsA;
             lego_aiconditiondefs[LEGO_AI_CONDITION_OPPONENT_IS_A].init_fn = Condition_OpponentIsAInit;

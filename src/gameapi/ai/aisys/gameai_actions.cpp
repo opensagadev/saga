@@ -473,9 +473,6 @@ static __used__ f32 Condition_LocatorOnScreen(AISYS_s *, AISCRIPTPROCESS_s *, AI
 
 
 
-static __used__ f32 Condition_PartyUnderCover(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
 
 
 
