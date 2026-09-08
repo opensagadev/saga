@@ -290,13 +290,15 @@ void TightRope_MoveCode(GameObject_s *object, i32 jump_pressed) {
                 return;
             }
             TightRope_MoveUpdate(object, 1);
-        } else if (jump_pressed != 0) {
+        } else if (jump_pressed == 0) {
+            if (TightRope_MoveUpdate(object, 0) == 0 && object->context_animation != 0x8f &&
+                object->external_force.y >= 0.5f) {
+                StartJump(object, 0);
+                object->apiobj.velocity.y = (object->apiobj.character_data->game_character->flags_090 & 0x80000) != 0
+                    ? 1.2f : 1.8f;
+            }
+        } else {
             goto jump;
-        } else if (TightRope_MoveUpdate(object, 0) == 0 && object->context_animation != 0x8f &&
-                   object->external_force.y >= 0.5f) {
-            StartJump(object, 0);
-            object->apiobj.velocity.y = (object->apiobj.character_data->game_character->flags_090 & 0x80000) != 0
-                ? 1.2f : 1.8f;
         }
     } else {
         if (jump_pressed != 0) {
