@@ -5933,12 +5933,15 @@ static f32 Condition_IAmA(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, 
 
 static f32 Condition_Side(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *argument) {
     if (packet != NULL && packet->owner != NULL) {
-        u32 flags = packet->owner->apiobj.field_0x1f4;
-        switch (reinterpret_cast<isize>(argument)) {
-        case 2: return (flags & 0x10000) != 0 ? 1.0f : 0.0f;
-        case 1: return (flags & 5) == 0 ? 1.0f : 0.0f;
-        case -1: return (flags & 1) != 0 ? 1.0f : 0.0f;
-        case 0: return (flags & 4) != 0 ? 1.0f : 0.0f;
+        isize side = reinterpret_cast<isize>(argument);
+        if (side == 2) {
+            if (packet->owner->apiobj.field_0x1f4 & 0x10000) return 1.0f;
+        } else if (side == 1) {
+            if ((packet->owner->apiobj.field_0x1f4 & 5) == 0) return 1.0f;
+        } else if (side == -1) {
+            if (packet->owner->apiobj.field_0x1f4 & 1) return 1.0f;
+        } else if (side == 0) {
+            if (packet->owner->apiobj.field_0x1f4 & 4) return 1.0f;
         }
     }
     return 0.0f;
