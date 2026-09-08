@@ -5410,16 +5410,16 @@ __used__ static f32 Condition_OriginRange(AISYS *sys, AISCRIPTPROCESS *processor
     (void)processor;
     (void)arg;
     (void)void_arg;
+    f32 distance = 0.0f;
     if (packet != NULL) {
         NUVEC *origin = GetAICreatureOriginFn != NULL ? GetAICreatureOriginFn(sys, packet) : NULL;
-        if (origin == NULL && sys != NULL && packet->field_0x134 != 0xff && packet->field_0x134 < sys->creature_count) {
-            origin = &sys->creatures[packet->field_0x134].pos;
-        }
         if (origin != NULL) {
-            return NuVecDist(&packet->terrain_origin, origin, NULL);
+            distance = NuVecDist(&packet->terrain_origin, origin, NULL);
+        } else if (sys != NULL && packet->field_0x134 != 0xff) {
+            distance = NuVecDist(&packet->terrain_origin, &sys->creatures[packet->field_0x134].pos, NULL);
         }
     }
-    return 0.0f;
+    return distance;
 }
 
 static f32 Condition_PathBlocked(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *) {
