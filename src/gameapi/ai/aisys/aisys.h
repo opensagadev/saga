@@ -689,6 +689,7 @@ extern "C" {
                                           NUVEC *position, f32 off_screen_radius, i32 ignore_assigned);
     void AILocatorSet_CheckLocatorsStillAssigned(AISYS *system, AILOCATORSET *locator_set);
     void AISysCharacterSetPath(AIPACKET *packet, AIPATH *path);
+    void AISysFindRoute(AIPACKET *packet);
     void AISysCharacterSetPathCnx(AIPACKET *packet, NUVEC *position, AIPATHCNX *connection, i32 direction);
     i32 WithinConnection(AISYS *system, NUVEC *position, AIPATH *path, AIPATHCNX *connection, i32 checks,
                          AIPATHCNX *previous_connection, i32 route, i32 ground, AIPATHINFO *path_info, f32 radius,

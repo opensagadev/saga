@@ -30,6 +30,89 @@
 #include "nu2api/numath/nurand.h"
 
 extern i32 Hub_GetRandomCharType();
+extern "C" void AISysFindRoute(AIPACKET *packet) {
+    AIPATH *path = packet->path_info.path;
+    if (path->route_count == 0 || packet->path_info.connection == NULL) {
+        return;
+    }
+
+    const u16 valid_routes = packet->available_routes & packet->path_info.connection->route_mask;
+    if (valid_routes == 0) {
+        return;
+    }
+
+    i32 route = packet->next_route;
+    if (route >= path->route_count) {
+        route = 0;
+    }
+    const i32 first_route = route;
+    do {
+        if (((static_cast<u64>(valid_routes) >> route) & 1) != 0) {
+            packet->current_route = static_cast<u8>(route);
+            packet->next_route = static_cast<u8>(route + 1);
+            return;
+        }
+        ++route;
+        if (route >= path->route_count) {
+            route = 0;
+        }
+    } while (route != first_route);
+}
+
+extern "C" void AISysCharacterSetPathCnx(AIPACKET *packet, NUVEC *position, AIPATHCNX *connection, i32 direction) {
+    if (connection == NULL || packet->owner == NULL) {
+        packet->path_info.connection = connection;
+        packet->current_route = 0xff;
+        packet->next_route = 0;
+        return;
+    }
+
+    if (packet->path_info.connection == connection && packet->path_info.direction == direction &&
+        (packet->path_info.flags & (AIPATHINFO_FLAG_ON_PATH | AIPATHINFO_FLAG_ROUTE_CHECKED)) !=
+            AIPATHINFO_FLAG_ON_PATH) {
+        return;
+    }
+
+    const u32 connection_flags = connection->traversal_flags[direction];
+    if (connection_flags != 0) {
+        if ((connection_flags & AIPATH_CONNECTION_FLAG_RESELECT_ROUTE) != 0) {
+            AISysFindRoute(packet);
+            return;
+        }
+        if ((packet->capabilities & connection_flags) == 0) {
+            return;
+        }
+    }
+
+    if (packet->path_info.connection != connection || packet->path_info.direction != direction) {
+        packet->path_info.direction = static_cast<u8>(direction);
+        packet->path_connection_state = 0;
+        packet->path_info.connection = connection;
+
+        AIPATHNODE &node = packet->path_info.path->nodes[connection->node_indices[0]];
+        NUVEC rotated;
+        NUVEC delta;
+        delta.x = position->x - node.position.x;
+        delta.z = position->z - node.position.z;
+        NuVecRotateY(&rotated, &delta, -connection->rotation);
+        packet->path_info.dist = rotated.z / connection->horizontal_distance;
+        packet->path_info.width = rotated.x;
+        packet->path_info.flags &= static_cast<u8>(~AIPATHINFO_FLAG_ROUTE_CHECKED);
+    }
+
+    const u8 route_state = packet->path_info.flags & (AIPATHINFO_FLAG_ON_PATH | AIPATHINFO_FLAG_ROUTE_CHECKED);
+    if (route_state == AIPATHINFO_FLAG_ON_PATH) {
+        if (packet->current_route != 0xff &&
+            ((static_cast<u64>(packet->path_info.connection->route_mask) >> packet->current_route) & 1) == 0) {
+            packet->current_route = 0xff;
+        }
+        if (packet->current_route == 0xff) {
+            AISysFindRoute(packet);
+        }
+        packet->path_info.flags |= AIPATHINFO_FLAG_ROUTE_CHECKED;
+    }
+}
+
 extern "C" void AISysCharacterSetPath(AIPACKET *packet, AIPATH *path) {
     if (packet->path_info.path == path) {
         return;
