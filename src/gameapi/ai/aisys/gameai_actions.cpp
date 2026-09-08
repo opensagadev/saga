@@ -685,10 +685,6 @@ static f32 Condition_CutSceneFinished(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s
     return instNuGCutSceneIsFinished(static_cast<instNUGCUTSCENE_s *>(cutscene->instance)) != 0 ? 1.0f : 0.0f;
 }
 
-static __used__ void *Condition_ForcePushingInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
-}
-
 static __used__ f32 Condition_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return 0;
 }

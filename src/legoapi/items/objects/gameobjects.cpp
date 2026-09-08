@@ -189,6 +189,20 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 
 static const f32 AI_RESPAWN_DELAY = 2.0f;
 
+static void *Condition_ForcePushingInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    return name != NULL && GetNamedAPIObjectFn != NULL ? GetNamedAPIObjectFn(system, name) : NULL;
+}
+
+static f32 Condition_ForcePushing(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    GameObject_s *object = static_cast<GameObject_s *>(argument);
+    if (object == NULL && packet != NULL) {
+        if (packet->owner == NULL) return 0.0f;
+        object = packet->owner->apiobj.objptr;
+    }
+    if (object != NULL) return object->character_context == 0x1b ? 1.0f : 0.0f;
+    return 0.0f;
+}
+
 static f32 Condition_EitherPlayerUsingForce(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
     return GizForce_GameObjUsingForce(player, force) != 0 || GizForce_GameObjUsingForce(player2, force) != 0
@@ -510,7 +524,7 @@ extern "C" {
         {"PlayerOnForcePlatform", NULL, NULL},
         {"EitherPlayerOnForcePlatform", NULL, NULL},
         {"ForceBeingUsed", Condition_ForceBeingUsed, Condition_UsingForceInit},
-        {"ForcePushing", NULL, NULL},
+        {"ForcePushing", Condition_ForcePushing, Condition_ForcePushingInit},
         {"TurretAlive", NULL, NULL},
         {"PlayerDeflectingPart", NULL, NULL},
         {"ForceComplete", Condition_ForceComplete, Condition_ForceCompleteInit},
