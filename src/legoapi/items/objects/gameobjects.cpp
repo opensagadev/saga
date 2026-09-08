@@ -186,6 +186,10 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 
 static const f32 AI_RESPAWN_DELAY = 2.0f;
 
+static f32 Condition_Player2Active(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return player2 != NULL ? 1.0f : 0.0f;
+}
+
 static void *Condition_TakenOverInit(AISYS_s *system, char *name, AISCRIPT_s *) {
     return name != NULL && system != NULL ? GetNamedGameObject(system, name) : NULL;
 }
@@ -410,7 +414,7 @@ extern "C" {
         {"Context", NULL, NULL},
         {"InContext", Condition_InContext, Condition_InContextInit},
         {"OpponentContext", NULL, NULL},
-        {"Player2Active", NULL, NULL},
+        {"Player2Active", Condition_Player2Active, NULL},
         {"NumBaddies", NULL, NULL},
         {"NumForceObjects", NULL, NULL},
         {"BeenToLevel", NULL, NULL},
