@@ -947,7 +947,16 @@ typedef struct GameObject_s {
     u8 field_0xefe; // 0x0efe
     u8 field_0xeff; // 0x0eff
     u8 field_0xf00; // 0x0f00
-    u8 field_0xf01; // 0x0f01
+    union {
+        u8 field_0xf01; // 0x0f01
+        struct {
+            u8 : 2;
+            u8 ignore_slide_terrain : 1;
+            u8 : 1;
+            u8 spline_follow_terrain : 1;
+            u8 : 3;
+        };
+    };
     union {
         u8 field_0xf02;
         struct {

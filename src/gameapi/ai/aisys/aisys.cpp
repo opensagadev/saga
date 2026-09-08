@@ -1096,7 +1096,7 @@ static i32 Action_SplineFollowTerrain(AISYS *system, AISCRIPTPROCESS *, AIPACKET
             }
         }
         if (object != NULL)
-            object->field_0xf01 = (object->field_0xf01 & ~0x10) | ((u8)follow << 4);
+            object->spline_follow_terrain = follow;
     }
     return 1;
 }
@@ -1118,7 +1118,7 @@ static i32 Action_IgnoreSlideTerrain(AISYS *system, AISCRIPTPROCESS *, AIPACKET 
             }
         }
         if (object != NULL)
-            object->field_0xf01 = (object->field_0xf01 & ~4) | ((u8)ignore << 2);
+            object->ignore_slide_terrain = ignore;
     }
     return 1;
 }
