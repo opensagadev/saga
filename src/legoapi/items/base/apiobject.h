@@ -248,7 +248,9 @@ typedef struct AIPACKET_s {
     u8 reset_mode;      // 0x3fa overall: AI reset/activation state
     u8 goal_speed_mode; // 0x3fb overall: walk/run/tiptoe speed selector
     u8 movement_stopped; // 0x13c, suppresses synthesized AI movement input
-    u8 pad1c_end[0x400 - 0x3fd];
+    u8 reserved_0x13d;
+    u8 divert_search_index; // 0x13e, next candidate in the incremental diversion search
+    u8 divert_node_index;   // 0x13f, selected path node (0xff when unset)
     AIGROUP_s *group;                   // 0x400 overall
     u8 group_member_index;                       // 0x404 overall
     u8 group_column;                    // 0x405 overall
@@ -313,6 +315,7 @@ enum AIPACKET_NAVIGATION_FLAGS : u8 {
     AIPACKET_NAVIGATION_FLAG_TRANSIENT = 0x01,
     // Search every loaded path instead of only the active level path.
     AIPACKET_NAVIGATION_FLAG_SEARCH_ALL_PATHS = 0x02,
+    AIPACKET_NAVIGATION_FLAG_USE_SPECIAL_ROUTES = 0x04,
 };
 
 enum AIPACKET_MOVEMENT_MODE : u8 {
@@ -992,6 +995,8 @@ DECOMP_ASSERT(offsetof(AIPACKET, last_path_position) == 0x16c, "AIPACKET last pa
 DECOMP_ASSERT(offsetof(AIPACKET, goal_path_node) == 0x178, "AIPACKET goal-node offset");
 DECOMP_ASSERT(offsetof(AIPACKET, navigation_flags) == 0x1e8, "AIPACKET navigation flags offset");
 DECOMP_ASSERT(offsetof(AIPACKET, movement_stopped) == 0x13c, "AIPACKET movement stop offset");
+DECOMP_ASSERT(offsetof(AIPACKET, divert_search_index) == 0x13e, "AIPACKET diversion search offset");
+DECOMP_ASSERT(offsetof(AIPACKET, divert_node_index) == 0x13f, "AIPACKET diversion node offset");
 DECOMP_ASSERT(offsetof(AIPACKET, movement_target_radius) == 0x1ec, "AIPACKET target-radius offset");
 DECOMP_ASSERT(offsetof(AIPACKET, capabilities) == 0x1f0, "AIPACKET capabilities offset");
 DECOMP_ASSERT(offsetof(AIPACKET, group) == 0x140, "AIPACKET formation group offset");

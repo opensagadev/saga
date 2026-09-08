@@ -30,6 +30,63 @@
 #include "nu2api/numath/nurand.h"
 
 extern i32 Hub_GetRandomCharType();
+static __used__ void AIMoveFindDivertNode(AISYS *, AIPATH *path, AIPACKET *packet, NUVEC *destination) {
+    if (path->special_route_count != 0 &&
+        (packet->navigation_flags & AIPACKET_NAVIGATION_FLAG_USE_SPECIAL_ROUTES) != 0) {
+        AIPATHNODELINK *links = path->special_routes;
+        if (packet->divert_node_index >= path->node_count) {
+            packet->divert_node_index = 0xff;
+        }
+        if (packet->divert_search_index >= path->special_route_count) {
+            packet->divert_search_index = 0;
+        }
+        f32 nearest = FLT_MAX;
+        if (packet->divert_node_index < path->node_count) {
+            nearest = NuVecDistSqr(&path->nodes[packet->divert_node_index].position, destination, NULL);
+        }
+        u8 initial_index = packet->divert_search_index;
+        for (i32 index = 0; index < 4; ++index) {
+            if (packet->divert_search_index != packet->divert_node_index) {
+                f32 distance = NuVecDistSqr(&path->nodes[links[packet->divert_search_index].node_index].position,
+                                            destination, NULL);
+                if (distance < nearest) {
+                    nearest = distance;
+                    packet->divert_node_index = links[packet->divert_search_index].node_index;
+                }
+            }
+            ++packet->divert_search_index;
+            if (packet->divert_search_index > path->special_route_count) {
+                packet->divert_search_index = 0;
+            }
+            if (packet->divert_search_index == initial_index) {
+                break;
+            }
+        }
+    } else {
+        if (packet->divert_node_index >= path->node_count) {
+            packet->divert_node_index = 0xff;
+        }
+        if (packet->divert_search_index >= path->node_count) {
+            packet->divert_search_index = 0;
+        }
+        f32 nearest = FLT_MAX;
+        if (packet->divert_node_index < path->node_count) {
+            nearest = NuVecDistSqr(&path->nodes[packet->divert_node_index].position, destination, NULL);
+        }
+        for (i32 index = 0; index < 4; ++index) {
+            f32 distance = NuVecDistSqr(&path->nodes[packet->divert_search_index].position, destination, NULL);
+            if (distance < nearest) {
+                nearest = distance;
+                packet->divert_node_index = packet->divert_search_index;
+            }
+            ++packet->divert_search_index;
+            if (packet->divert_search_index > path->node_count) {
+                packet->divert_search_index = 0;
+            }
+        }
+    }
+}
+
 extern "C" f32 AIPathNodeDistanceToPathNode(AIPATH *path, i32 start_node, i32 destination_node, i32 route_index,
                                            u32 excluded_route_mask) {
     if (path->route_matrix == NULL) {
