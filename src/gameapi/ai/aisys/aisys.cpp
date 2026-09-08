@@ -20,6 +20,7 @@
 #include "legoapi/gizmos/object/newblowup.h"
 #include "legoapi/gizmos/transport/grapples.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/props/system/socksys.h"
 #include "legoapi/ai/core/ai_sys_stubs.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/render/fx.h"
@@ -4999,6 +5000,106 @@ static i32 Action_MoveAwayFromLastAttacker(AISYS *, AISCRIPTPROCESS *processor, 
     return 0;
 }
 
+static i32 Action_SnapToSockPosition(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
+                                     i32 param_count, i32 first_time, f32) {
+    NUVEC position = {0.0f, 0.0f, 0.0f};
+    if (first_time == 0)
+        return 1;
+    GameObject *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+    i32 from_end = 0;
+    i32 party = 0;
+    i32 sock_index = 0;
+    f32 distance = 0.0f;
+    f32 offset_scale = 0.0f;
+    for (i32 index = 0; index < param_count; ++index) {
+        char *value;
+        if (NuStrIStr(params[index], "player1") != NULL || NuStrIStr(params[index], "player") != NULL)
+            object = player;
+        else if (NuStrIStr(params[index], "player2") != NULL)
+            object = player2;
+        else if (NuStrIStr(params[index], "party") != NULL)
+            party = 1;
+        else if ((value = NuStrIStr(params[index], "roty")) != NULL)
+            AIParamToFloat(processor, value + 5);
+        else if ((value = NuStrIStr(params[index], "distance_from_end")) != NULL) {
+            distance = AIParamToFloat(processor, value + 18);
+            from_end = 1;
+        } else if ((value = NuStrIStr(params[index], "distance")) != NULL)
+            distance = AIParamToFloat(processor, value + 9);
+        else if ((value = NuStrIStr(params[index], "sock")) != NULL)
+            sock_index = static_cast<i32>(AIParamToFloat(processor, value + 5));
+        else if ((value = NuStrIStr(params[index], "dx")) != NULL)
+            AIParamToFloat(processor, value + 3);
+        else if ((value = NuStrIStr(params[index], "dy")) != NULL)
+            AIParamToFloat(processor, value + 3);
+    }
+    SOCKPOSITION sock_position;
+    if (from_end != 0) {
+        sock_position.location.sock = -1;
+        if (WORLD->sock_sys == NULL || static_cast<u32>(sock_index) > 63)
+            return 1;
+        SetSockPostion(WORLD->sock_sys, &sock_position, sock_index, WORLD->sock_sys->sock[sock_index].length - 1, 1.0f);
+    } else {
+        SetSockPostion(WORLD->sock_sys, &sock_position, sock_index, 0, 0.0f);
+    }
+    if (sock_position.location.sock == -1)
+        return 1;
+    MoveSockPosition(WORLD->sock_sys, &sock_position, distance, &sock_position);
+    f32 random_x = NuRandFloat();
+    f32 random_x2 = NuRandFloat();
+    random_x = random_x * offset_scale + (1.0f - random_x2) * offset_scale;
+    f32 random_y = NuRandFloat();
+    f32 random_y2 = NuRandFloat();
+    random_y = random_y * offset_scale + (1.0f - random_y2) * offset_scale;
+    u16 yaw = sock_position.midpoint_rotation.y;
+    i32 random_angle = NuRand(NULL) % 65536;
+    for (i32 index = 0; index < 8; ++index) {
+        if (party != 0)
+            object = Player[index];
+        if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001) {
+            f32 x = random_x;
+            f32 y = random_y;
+            if (index > 1) {
+                NUVEC spread = {1.0f, 0.0f, 0.0f};
+                NuVecRotateZ(&spread, &spread, NuAngAdd(random_angle, (index << 16) / 3));
+                x += spread.x;
+                y += spread.y;
+            }
+            if (y != offset_scale || x != offset_scale) {
+                position.x = x;
+                position.y = y;
+                position.z = 0.0f;
+                NuVecRotateX(&position, &position, sock_position.midpoint_rotation.x);
+                NuVecRotateY(&position, &position, NuAngAdd(yaw, 0x8000));
+            } else {
+                position.x = position.y = position.z = offset_scale;
+            }
+            NuVecAdd(&position, &position, &sock_position.midpoint);
+            object->apiobj.field_0x276 = yaw;
+            object->apiobj.facing_angle = yaw;
+            object->apiobj.movement_facing_angle = yaw;
+            object->apiobj.position = position;
+            object->apiobj.initial_position = position;
+            object->apiobj.collision_position = position;
+            plr_lastpos = position;
+            object->apiobj.start_position = position;
+            object->apiobj.respawn_position = position;
+            object->apiobj.last_safe_position = position;
+            object->field_0x10c8 = position.x;
+            object->field_0x10cc = position.y;
+            object->field_0x10d0 = position.z;
+            object->apiobj.velocity = v000;
+            extern void InitSurfaceInfo(GameObject *);
+            extern i32 SetObjOnSurface(GameObject *, i32);
+            InitSurfaceInfo(object);
+            SetObjOnSurface(object, 0);
+        }
+        if (party == 0)
+            break;
+    }
+    return 1;
+}
+
 static i32 Action_UseTimeBasedUpdate(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
                                     i32 param_count, i32 first_time, f32) {
     if (packet != NULL && packet->owner != NULL) {
@@ -5078,7 +5179,7 @@ extern "C" {
         {"BigJump", Action_BigJump, 0, 0, 0},
         {"SetDoomedEscapeLocator", Action_SetDoomedEscapeLocator, 0, 0, 0},
         {"SnapToPosition", Action_SnapToPosition, 1, 0, 0},
-        {"SnapToSockPosition", NULL, 1, 0, 0},
+        {"SnapToSockPosition", Action_SnapToSockPosition, 1, 0, 0},
         {"SetAnimation", Action_SetAnimation, 0, 0, 0},
         {"AnimTimeRandom", Action_AnimTimeRandom, 0, 0, 0},
         {"CanOpenDoors", Action_CanOpenDoors, 0, 0, 0},

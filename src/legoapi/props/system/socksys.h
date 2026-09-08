@@ -163,6 +163,8 @@ typedef struct SOCKSYS {
 #ifdef __cplusplus
 extern "C" {
 SOCK *FindSock(SOCKSYS *system, char *name);
+void SetSockPostion(SOCKSYS *system, SOCKPOSITION *position, i32 index, i32 segment, f32 ratio);
+void MoveSockPosition(SOCKSYS *system, SOCKPOSITION *source, f32 distance, SOCKPOSITION *result);
 f32 MidDistanceFromSockStart(SOCKSYS *system, SOCKPOSITION *position);
 #endif
 
