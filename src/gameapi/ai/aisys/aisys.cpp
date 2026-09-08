@@ -1583,17 +1583,19 @@ __used__ static i32 Action_FaceLocator(AISYS *sys, AISCRIPTPROCESS *processor, A
             if (AIActionParseSpeedFn != NULL && AIActionParseSpeedFn(params[index], &packet->goal_speed_mode) != 0) {
                 continue;
             }
-            char *value = ActionParamValue(params[index], "name");
+            char *value = NuStrIStr(params[index], "name");
             if (value != NULL) {
-                processor->action_data_3 = AIPathFindLocator(sys, value);
+                processor->action_data_3 = AIPathFindLocator(sys, value + NuStrLen("name") + 1);
+                ++index;
             }
         }
     }
     AILOCATOR *locator = static_cast<AILOCATOR *>(processor->action_data_3);
     if (locator != NULL) {
         packet->movement_look_target = &locator->position;
+        return 1;
     }
-    return locator != NULL;
+    return 0;
 }
 
 static i32 Action_FlatTerrain(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
