@@ -784,8 +784,8 @@ __used__ static i32 Action_Kill(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET
             }
             if (area != NULL && sys != NULL) {
                 const isize area_index = area - sys->areas;
-                const u64 mask = static_cast<u64>(candidate->ai_area_mask_low) |
-                                 (static_cast<u64>(candidate->ai_area_mask_high) << 32);
+                const u64 mask = static_cast<u64>(candidate->apiobj.ai_area_mask_low) |
+                                 (static_cast<u64>(candidate->apiobj.ai_area_mask_high) << 32);
                 if (area_index < 0 || area_index >= 64 || (mask & (1ull << area_index)) == 0) {
                     continue;
                 }
@@ -6578,7 +6578,7 @@ static f32 Condition_InTriggerArea(AISYS_s *sys, AISCRIPTPROCESS_s *processor, A
         if (area != NULL && area->system != NULL) {
             i32 index = area - area->system->areas;
             i64 mask = 1 << index;
-            u64 membership = (static_cast<u64>(object->ai_area_mask_high) << 32) | object->ai_area_mask_low;
+            u64 membership = (static_cast<u64>(object->apiobj.ai_area_mask_high) << 32) | object->apiobj.ai_area_mask_low;
             if ((membership & mask) != 0) {
                 return 1.0f;
             }
@@ -6696,7 +6696,7 @@ static f32 Condition_PlayerInTriggerArea(AISYS_s *sys, AISCRIPTPROCESS_s *proces
         if (area != NULL && area->system != NULL) {
             i32 index = area - area->system->areas;
             i64 mask = 1 << index;
-            u64 membership = (static_cast<u64>(object->ai_area_mask_high) << 32) | object->ai_area_mask_low;
+            u64 membership = (static_cast<u64>(object->apiobj.ai_area_mask_high) << 32) | object->apiobj.ai_area_mask_low;
             if ((membership & mask) != 0) {
                 return 1.0f;
             }
@@ -6719,7 +6719,7 @@ static f32 Condition_Player2InTriggerArea(AISYS_s *sys, AISCRIPTPROCESS_s *proce
         if (area != NULL && area->system != NULL) {
             i32 index = area - area->system->areas;
             i64 mask = 1 << index;
-            u64 membership = (static_cast<u64>(object->ai_area_mask_high) << 32) | object->ai_area_mask_low;
+            u64 membership = (static_cast<u64>(object->apiobj.ai_area_mask_high) << 32) | object->apiobj.ai_area_mask_low;
             if ((membership & mask) != 0) {
                 return 1.0f;
             }
@@ -6739,7 +6739,7 @@ static f32 Condition_EitherPlayerInTriggerArea(AISYS_s *sys, AISCRIPTPROCESS_s *
                 GameObject *object = reinterpret_cast<GameObject *>(sys->player_1);
                 i32 index = area - area->system->areas;
                 i64 mask = 1 << index;
-                u64 membership = (static_cast<u64>(object->ai_area_mask_high) << 32) | object->ai_area_mask_low;
+                u64 membership = (static_cast<u64>(object->apiobj.ai_area_mask_high) << 32) | object->apiobj.ai_area_mask_low;
                 if ((membership & mask) != 0) {
                     return 1.0f;
                 }
@@ -6748,7 +6748,7 @@ static f32 Condition_EitherPlayerInTriggerArea(AISYS_s *sys, AISCRIPTPROCESS_s *
                 GameObject *object = reinterpret_cast<GameObject *>(sys->player_2);
                 i32 index = area - area->system->areas;
                 i64 mask = 1 << index;
-                u64 membership = (static_cast<u64>(object->ai_area_mask_high) << 32) | object->ai_area_mask_low;
+                u64 membership = (static_cast<u64>(object->apiobj.ai_area_mask_high) << 32) | object->apiobj.ai_area_mask_low;
                 if ((membership & mask) != 0) {
                     return 1.0f;
                 }
@@ -6792,7 +6792,7 @@ static f32 Condition_OpponentInTriggerArea(AISYS_s *sys, AISCRIPTPROCESS_s *proc
         if (area != NULL && area->system != NULL) {
             i32 index = area - area->system->areas;
             i64 mask = 1 << index;
-            u64 membership = (static_cast<u64>(object->ai_area_mask_high) << 32) | object->ai_area_mask_low;
+            u64 membership = (static_cast<u64>(object->apiobj.ai_area_mask_high) << 32) | object->apiobj.ai_area_mask_low;
             if ((membership & mask) != 0) {
                 return 1.0f;
             }

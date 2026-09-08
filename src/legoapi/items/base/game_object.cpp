@@ -92,8 +92,8 @@ GameObject_s *AddGameObject(i32 id) {
     }
 
     object->ai.owner = object;
-    object->field_0x2a8 = 0;
-    object->field_0x2ac = 0;
+    object->apiobj.field_0x2a8 = 0;
+    object->apiobj.field_0x2ac = 0;
     object->apiobj.objptr = object;
     object->apiobj.ai = &object->ai;
 

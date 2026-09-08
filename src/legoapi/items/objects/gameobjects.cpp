@@ -1448,13 +1448,13 @@ void GameAISysStartFrame(AISYS_s *system) {
                                    local_position.z >= -area->half_depth && local_position.x <= area->half_width &&
                                    local_position.y <= area->height && local_position.z <= area->half_depth;
             if (!is_inside) {
-                object->ai_area_mask_low &= ~static_cast<u32>(area_bit);
-                object->ai_area_mask_high &= ~static_cast<u32>(area_bit >> 32);
+                object->apiobj.ai_area_mask_low &= ~static_cast<u32>(area_bit);
+                object->apiobj.ai_area_mask_high &= ~static_cast<u32>(area_bit >> 32);
                 continue;
             }
 
-            object->ai_area_mask_low |= static_cast<u32>(area_bit);
-            object->ai_area_mask_high |= static_cast<u32>(area_bit >> 32);
+            object->apiobj.ai_area_mask_low |= static_cast<u32>(area_bit);
+            object->apiobj.ai_area_mask_high |= static_cast<u32>(area_bit >> 32);
             if ((object->apiobj.flags_low & APIOBJECT_FLAG_PLAYER_ACTIVE) != 0) {
                 area->runtime_flags |= AIAREA_RUNTIME_PLAYER_PRESENT;
             }

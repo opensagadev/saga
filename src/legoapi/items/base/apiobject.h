@@ -486,7 +486,19 @@ typedef struct APIOBJECT_s {
     u32 collision_mask_high;     // 0x29c
     u32 field387_0x2a0;          // 0x2a0
     u32 field388_0x2a4;          // 0x2a4
+    union {
+        u32 ai_area_mask_low;    // 0x2a8
+        u32 field_0x2a8;
+    };
+    union {
+        u32 ai_area_mask_high;   // 0x2ac
+        u32 field_0x2ac;
+    };
 } APIOBJECT;
+
+DECOMP_ASSERT(sizeof(APIOBJECT) == 0x2b0, "APIOBJECT size");
+DECOMP_ASSERT(offsetof(APIOBJECT, ai_area_mask_low) == 0x2a8, "APIOBJECT area mask low offset");
+DECOMP_ASSERT(offsetof(APIOBJECT, ai_area_mask_high) == 0x2ac, "APIOBJECT area mask high offset");
 
 struct APIOBJECTSYS_s {
     u32 object_size;
@@ -533,15 +545,7 @@ struct OBJECTLIGHTINGSTATE_s {
 DECOMP_ASSERT(sizeof(OBJECTLIGHTINGSTATE_s) == 0x54, "OBJECTLIGHTINGSTATE_s size");
 
 typedef struct GameObject_s {
-    APIOBJECT apiobj; // 0x0000 .. 0x02a8
-    union {
-        u32 field_0x2a8;
-        u32 ai_area_mask_low;
-    };
-    union {
-        u32 field_0x2ac;
-        u32 ai_area_mask_high;
-    };
+    APIOBJECT apiobj; // 0x0000 .. 0x02b0
     union {
         u8 pad_2b0[0x10]; // 0x02b0 .. 0x02c0
         struct {
@@ -1037,7 +1041,7 @@ DECOMP_ASSERT(offsetof(APIOBJECT, collision_position) == 0x80, "APIOBJECT collis
 DECOMP_ASSERT(offsetof(APIOBJECT, pitch_angle) == 0x274, "APIOBJECT pitch angle offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, supporting_platform_id) == 0x27a, "APIOBJECT supporting platform id offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, model_draw_result) == 0x284, "APIOBJECT model draw result offset");
-DECOMP_ASSERT(offsetof(GameObject_s, ai_area_mask_low) == 0x2a8, "GameObject AI area mask offset");
+DECOMP_ASSERT(offsetof(GameObject_s, apiobj.ai_area_mask_low) == 0x2a8, "GameObject AI area mask offset");
 DECOMP_ASSERT(offsetof(GameObject_s, sock_position) == 0x660, "GameObject socket position offset");
 DECOMP_ASSERT(offsetof(GameObject_s, contact_position) == 0x698, "GameObject contact position offset");
 DECOMP_ASSERT(offsetof(GameObject_s, contact_normal) == 0x6a4, "GameObject contact normal offset");

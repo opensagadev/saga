@@ -9,6 +9,7 @@
 
 #include <float.h>
 #include <math.h>
+#include <string.h>
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -128,7 +129,22 @@ static u32 CalculateIntersection(AISYS *system, AIPACKET *packet, APIOBJECT *obj
            ((packet->movement_flags & AIPACKET_MOVEMENT_DIVERSION_LEFT) != 0);
 }
 
-void AISysGetPathPos2(AISYS_s *, nuvec_s *, AIPATHINFO_s *, nuvec_s *, AIPATH_s *, i32) {
+void AISysGetPathPos2(AISYS_s *system, nuvec_s *position, AIPATHINFO_s *path_info,
+                      nuvec_s *path_position, AIPATH_s *, i32) {
+    if (position != NULL && system != NULL && path_info != NULL) {
+        APIOBJECT object;
+        AIPACKET packet;
+        memset(&object, 0, sizeof(object));
+        memset(&packet, 0, sizeof(packet));
+        object.ai = &packet;
+        object.position = *position;
+        packet.terrain_origin = *position;
+        AISysGetCharacterPathPos(system, &object, &packet, 0xff, 1);
+        *path_info = packet.path_info;
+        if (path_position != NULL) {
+            *path_position = packet.last_path_position;
+        }
+    }
 }
 
 i32 AIMoveCanReachPath(AISYS_s *system, AIPATH_s *path, AIPATH_s *destination) {
