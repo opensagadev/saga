@@ -7227,9 +7227,9 @@ static f32 Condition_NearestOpponentRange(AISYS *, AISCRIPTPROCESS *processor, A
     return packet != NULL && packet->nearest_opponent_object != NULL ? packet->nearest_opponent_metric : 3.402823466e+38f;
 }
 
-static __used__ f32 Condition_YawToOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+static f32 Condition_YawToOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
     if (packet == NULL || packet->opponent_object == NULL) {
-        return 1.0e9f;
+        return -180.0f;
     }
     NUVEC relative;
     // Only the horizontal components participate in this angle calculation.
