@@ -324,6 +324,16 @@ static f32 Condition_ForceAtEnd(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, ch
     return argument != NULL && GizmoGetOutput(WORLD->gizmo_sys, static_cast<GIZMO_s *>(argument), 0, 1) != 0 ? 1.0f : 0.0f;
 }
 
+static f32 Condition_ForceStackComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
+    return force != NULL && force->group != NULL && (force->group->field_0x24 & 2) ? 1.0f : 0.0f;
+}
+
+static f32 Condition_ForceStackCompleteInOrder(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
+    return force != NULL && force->group != NULL && (force->group->field_0x24 & 4) ? 1.0f : 0.0f;
+}
+
 static f32 Condition_ForceComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
     return force != NULL && GizForce_Complete(force) != 0 ? 1.0f : 0.0f;
@@ -607,8 +617,8 @@ extern "C" {
         {"PlayerDeflectingPart", NULL, NULL},
         {"ForceComplete", Condition_ForceComplete, Condition_ForceCompleteInit},
         {"ForceFinished", Condition_ForceFinished, Condition_ForceCompleteInit},
-        {"ForceStackComplete", NULL, NULL},
-        {"ForceStackCompleteInOrder", NULL, NULL},
+        {"ForceStackComplete", Condition_ForceStackComplete, Condition_ForceCompleteInit},
+        {"ForceStackCompleteInOrder", Condition_ForceStackCompleteInOrder, Condition_ForceCompleteInit},
         {"BuildItComplete", NULL, NULL},
         {"BlowupBlownup", NULL, NULL},
         {"IAmA", NULL, NULL},

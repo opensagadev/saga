@@ -1064,9 +1064,6 @@ static __used__ void *Condition_EitherPlayerIsInit(AISYS_s *, char *, AISCRIPT_s
     return nullptr;
 }
 
-static __used__ f32 Condition_ForceStackComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
 
 
 static __used__ f32 Condition_HeadTurnRestricted(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
@@ -1356,9 +1353,6 @@ static __used__ f32 Condition_EitherPlayerWearingHelmet(AISYS_s *, AISCRIPTPROCE
     return 0;
 }
 
-static __used__ f32 Condition_ForceStackCompleteInOrder(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
 
 
 static __used__ f32 Condition_EitherPlayerLocatorRangeXZ(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
