@@ -2016,11 +2016,7 @@ extern "C" {
     void CalculateLocatorDirection(void) {
     }
 
-    void CheckAIMessage(void) {
-    }
 
-    void ClearAIMessageSys(void) {
-    }
 
     AIGROUP *CreateAIGroup(AISYS *system, u8 count_across, f32 x_spacing, f32 z_spacing, f32 max_speed) {
         if (system == NULL || count_across == 0) {
@@ -2044,8 +2040,6 @@ extern "C" {
         return NULL;
     }
 
-    void CreateAIMessageSys(void) {
-    }
 
     void DestroyAIGroup(void) {
     }
@@ -2095,8 +2089,6 @@ extern "C" {
                           movement_parameter);
     }
 
-    void GetAIMessage(void) {
-    }
 
     void InitFn_AIPathDeleted(void) {
     }
@@ -2124,14 +2116,10 @@ extern "C" {
     void LEGO_AISysCreatureInteraction2D(void) {
     }
 
-    void QueryAIMessage(void) {
-    }
 
     void QueryLocalMessage(void) {
     }
 
-    void RemoveAIMessage(void) {
-    }
 
     void ResetAIMessageSys(AIMESSAGESYS_s *sys) {
         if (sys == NULL) {
@@ -2148,7 +2136,5 @@ extern "C" {
         }
     }
 
-    void SetAIMessage(void) {
-    }
 
 } // extern "C"

@@ -12,6 +12,9 @@
 #include "nu2api/numath/nuvec.h"
 
 
+struct AIMESSAGESYS_s;
+struct AIMESSAGE_s;
+
 typedef struct AIPATHCNX_s {
     union {
         u32 traversal_flags[2];
@@ -685,6 +688,14 @@ extern "C" {
                                i32 use_three_dimensions, i32 process_ai);
     void AISysProcess(AISYS *system, APIOBJECT *player_1, APIOBJECT *player_2);
     void AIFormationFollow(AIPACKET *packet);
+    AIMESSAGESYS_s *CreateAIMessageSys(VARIPTR *cursor, VARIPTR *end, i32 count);
+    void ResetAIMessageSys(AIMESSAGESYS_s *system);
+    void ClearAIMessageSys(AIMESSAGESYS_s *system);
+    AIMESSAGE_s *CheckAIMessage(AIMESSAGESYS_s *system, char *name, AIMESSAGE_s *message);
+    f32 GetAIMessage(AIMESSAGESYS_s *system, char *name, AIMESSAGE_s *message);
+    void SetAIMessage(AIMESSAGESYS_s *system, char *name, f32 value, AIMESSAGE_s *message);
+    AIMESSAGE_s *QueryAIMessage(AIMESSAGESYS_s *system, AIMESSAGE_s *message);
+    void RemoveAIMessage(AIMESSAGESYS_s *system, char *name, AIMESSAGE_s *message);
     void AIAntinodeMove(AIANTINODE *antinode, NUVEC *position, f32 radius, f32 below, f32 above);
     AIANTINODE *AIAntinodeCreate(NUVEC *position, f32 radius);
     AIANTINODE *AIAntinodeCreateSingleFrame(NUVEC *position, f32 radius);

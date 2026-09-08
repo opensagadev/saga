@@ -6828,6 +6828,99 @@ DECOMP_ASSERT(sizeof(api_aiactiondefs) == 0x294, "API action registry size");
 DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size");
 
 
+extern "C" void *AISysBufferAlloc(VARIPTR *cursor, VARIPTR *end, u32 size);
+extern "C" void ResetAIMessageSys(AIMESSAGESYS_s *system);
+
+extern "C" AIMESSAGESYS_s *CreateAIMessageSys(VARIPTR *cursor, VARIPTR *end, i32 count) {
+    AIMESSAGESYS_s *system = static_cast<AIMESSAGESYS_s *>(AISysBufferAlloc(cursor, end, sizeof(AIMESSAGESYS_s)));
+    if (system != NULL) {
+        memset(system, 0, sizeof(*system));
+        system->messages = static_cast<AIMESSAGE_s *>(AISysBufferAlloc(cursor, end, count * sizeof(AIMESSAGE_s)));
+        if (system->messages != NULL) {
+            system->count = count;
+            ResetAIMessageSys(system);
+        }
+    }
+    return system;
+}
+
+extern "C" void ClearAIMessageSys(AIMESSAGESYS_s *system) {
+    if (system != NULL) {
+        for (NULISTLNK *link = NuLinkedListGetHead(&system->active_list); link != NULL;
+             link = NuLinkedListGetNext(&system->active_list, link)) {
+            reinterpret_cast<AIMESSAGE_s *>(link)->value = 0.0f;
+        }
+    }
+}
+
+extern "C" AIMESSAGE_s *CheckAIMessage(AIMESSAGESYS_s *system, char *name, AIMESSAGE_s *message) {
+    if (system == NULL) {
+        return NULL;
+    }
+    if (message != NULL) {
+        return message;
+    }
+    if (name != NULL) {
+        for (NULISTLNK *link = NuLinkedListGetHead(&system->active_list); link != NULL;
+             link = NuLinkedListGetNext(&system->active_list, link)) {
+            AIMESSAGE_s *candidate = reinterpret_cast<AIMESSAGE_s *>(link);
+            if (NuStrNICmp(name, candidate->name, 32) == 0) {
+                return candidate;
+            }
+        }
+    }
+    message = reinterpret_cast<AIMESSAGE_s *>(NuLinkedListGetHead(&system->free_list));
+    if (message != NULL) {
+        NuLinkedListRemove(&system->free_list, &message->links);
+        NuLinkedListAppend(&system->active_list, &message->links);
+        NuStrNCpy(message->name, name, 32);
+    }
+    return message;
+}
+
+extern "C" f32 GetAIMessage(AIMESSAGESYS_s *system, char *name, AIMESSAGE_s *message) {
+    message = CheckAIMessage(system, name, message);
+    if (message != NULL) {
+        return message->value;
+    }
+    return 0.0f;
+}
+
+extern "C" void SetAIMessage(AIMESSAGESYS_s *system, char *name, f32 value, AIMESSAGE_s *message) {
+    message = CheckAIMessage(system, name, message);
+    if (message != NULL) {
+        message->value = value;
+    }
+}
+
+extern "C" AIMESSAGE_s *QueryAIMessage(AIMESSAGESYS_s *system, AIMESSAGE_s *message) {
+    if (message != NULL) {
+        return reinterpret_cast<AIMESSAGE_s *>(NuLinkedListGetNext(&system->active_list, &message->links));
+    }
+    return reinterpret_cast<AIMESSAGE_s *>(NuLinkedListGetHead(&system->active_list));
+}
+
+extern "C" void RemoveAIMessage(AIMESSAGESYS_s *system, char *name, AIMESSAGE_s *message) {
+    if (system != NULL) {
+        if (message == NULL) {
+            if (name != NULL) {
+                message = reinterpret_cast<AIMESSAGE_s *>(NuLinkedListGetHead(&system->active_list));
+                while (message != NULL) {
+                    if (NuStrNICmp(name, message->name, 32) == 0) {
+                        break;
+                    }
+                    message = reinterpret_cast<AIMESSAGE_s *>(NuLinkedListGetNext(&system->active_list, &message->links));
+                }
+            }
+        }
+        if (message != NULL) {
+            NuLinkedListRemove(&system->active_list, &message->links);
+            memset(message, 0, sizeof(*message));
+            NuLinkedListAppend(&system->free_list, &message->links);
+        }
+    }
+}
+
 AIANTINODE dynamic_antinodes[64] = {};
 extern "C" f32 default_path_heighttol;
 

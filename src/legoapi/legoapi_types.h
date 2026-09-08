@@ -1078,10 +1078,13 @@ struct AIMESSAGESYS_s {
 
 struct AIMESSAGE_s {
     NULISTLNK links;
-    u8 payload[0x24];
+    char name[0x20];
+    f32 value;
 };
 
 DECOMP_ASSERT(sizeof(AIMESSAGE_s) == 0x2c, "AIMESSAGE_s size");
+DECOMP_ASSERT(offsetof(AIMESSAGE_s, name) == 0x8, "AIMESSAGE name offset");
+DECOMP_ASSERT(offsetof(AIMESSAGE_s, value) == 0x28, "AIMESSAGE value offset");
 DECOMP_ASSERT(sizeof(AIMESSAGESYS_s) == 0x18, "AIMESSAGESYS_s size");
 
 // The AI message system: a fixed pool of 0x38-byte messages; the free list
