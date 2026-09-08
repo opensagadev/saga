@@ -1056,9 +1056,6 @@ static __used__ f32 Condition_OnSameObjectAsPlayer(AISYS_s *, AISCRIPTPROCESS_s 
 
 
 
-static __used__ f32 Condition_AreaContainsPartyMember(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
 
 
 
@@ -1085,9 +1082,6 @@ static i32 Action_SetBoltsDontGetDeflectedBack(AISYS_s *, AISCRIPTPROCESS_s *, A
 
 
 
-static __used__ f32 Condition_EitherPlayerWearingHelmet(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
 
 
 
@@ -1100,9 +1094,6 @@ static __used__ f32 Condition_AngleAboutMyLocatorToPlayer(AISYS_s *, AISCRIPTPRO
     return 0;
 }
 
-static __used__ void *Condition_AreaContainsPartyMemberInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
-}
 
 static __used__ f32 Condition_EitherPlayerInMyTriggerArea(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *,
                                                           void *) {

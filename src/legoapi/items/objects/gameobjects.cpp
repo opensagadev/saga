@@ -649,6 +649,24 @@ static void *Condition_PlayerInSockInit(AISYS_s *, char *name, AISCRIPT_s *) {
 
 extern "C" f32 NuAnimEndFrameOld(void *animation);
 
+static f32 Condition_EitherPlayerWearingHelmet(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    // The shipped condition only checks the active player despite its name.
+    return player->field_0x108e == 5 ? 1.0f : 0.0f;
+}
+
+static f32 Condition_AreaContainsPartyMember(AISYS_s *system, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *, void *argument) {
+    if (system != NULL) {
+        AIAREA *area = static_cast<AIAREA *>(argument);
+        if (area == NULL) area = process->unknown_a0;
+        if (area != NULL && (area->runtime_flags & 8) != 0) return 1.0f;
+    }
+    return 0.0f;
+}
+
+static void *Condition_AreaContainsPartyMemberInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    return name != NULL ? AISysFindArea(system, name) : NULL;
+}
+
 static f32 Condition_CharacterTypeExists(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     if (argument != NULL) {
         for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
@@ -1233,7 +1251,7 @@ extern "C" {
         {"EitherPlayerPullingLever", NULL, NULL},
         {"EitherPlayerUsingHatMachine", NULL, NULL},
         {"EitherPlayerUsingPanel", Condition_EitherPlayerUsingPanel, NULL},
-        {"EitherPlayerWearingHelmet", NULL, NULL},
+        {"EitherPlayerWearingHelmet", Condition_EitherPlayerWearingHelmet, NULL},
         {"PartyUnderCover", NULL, NULL},
         {"NumBaddiesThatCanSeePlayers", NULL, NULL},
         {"PlayerUsingForce", Condition_PlayerUsingForce, Condition_UsingForceInit},
@@ -1332,7 +1350,7 @@ extern "C" {
         {"EitherPlayerInMyTriggerArea", NULL, NULL},
         {"AreaContainsBaddies", Condition_AreaContainsBaddies, Condition_AreaContainsBaddiesInit},
         {"AreaContainsGoodies", Condition_AreaContainsGoodies, Condition_AreaContainsGoodiesInit},
-        {"AreaContainsPartyMember", NULL, NULL},
+        {"AreaContainsPartyMember", Condition_AreaContainsPartyMember, Condition_AreaContainsPartyMemberInit},
         {"GotVictim", NULL, NULL},
         {"IsVisible", Condition_IsVisible, Condition_IsVisibleInit},
         {"MySet", NULL, NULL},
