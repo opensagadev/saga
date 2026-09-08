@@ -637,15 +637,19 @@ extern "C" {
             direction = 2;
             distance = -distance;
         }
+        i32 length;
+        NUVEC *from;
+        NUVEC *to;
         SOCK *sock = &system->sock[result->location.sock];
         NUVEC *point = &result->midpoint;
-        i32 length = sock->unknown_33 != 0 ? sock->length + 1 : sock->length;
+        if (sock->unknown_33 != 0)
+            length = sock->length + 1;
+        else
+            length = sock->length;
         for (;;) {
             result->next_segment = static_cast<i16>(result->location.segment + 1);
             if (result->next_segment == length && sock->unknown_33 != 0)
                 result->next_segment = 0;
-            NUVEC *from;
-            NUVEC *to;
             if (sock->mid != NULL) {
                 from = &sock->mid->pts[result->location.segment];
                 to = &sock->mid->pts[result->next_segment];
@@ -694,8 +698,7 @@ extern "C" {
                     from = &sock->segments[result->location.segment].midpoint;
                     to = &sock->segments[result->location.segment].next_midpoint;
                 }
-                f32 travelled = NuVecDist(from, point, NULL);
-                result->ratio = travelled / NuVecDist(from, to, NULL);
+                result->ratio = NuVecDist(from, point, NULL) / NuVecDist(from, to, NULL);
             } else {
                 result->ratio = 0.0f;
             }
