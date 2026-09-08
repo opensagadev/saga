@@ -6225,14 +6225,14 @@ static f32 Condition_HoverPhase(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, ch
 
 
 
-__used__ static f32 Condition_NumBaddies(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                         void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
+static f32 Condition_NumBaddies(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *) {
+    i32 count = 0;
+    GameObject *object = Obj;
+    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
+        if ((object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && (object->apiobj.field_0x1f4 & 1) != 0)
+            ++count;
+    }
+    return static_cast<f32>(count);
 }
 
 static f32 Condition_ScreenWipe(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *) {
@@ -8108,6 +8108,7 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_SCREEN_WIPE].eval_fn = Condition_ScreenWipe;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CAN_HEAR_RADIO].eval_fn = Condition_CanHearRadio;
             lego_aiconditiondefs[LEGO_AI_CONDITION_BEHIND_CAMERA].eval_fn = Condition_BehindCamera;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_NUM_BADDIES].eval_fn = Condition_NumBaddies;
             lego_aiconditiondefs[LEGO_AI_CONDITION_BLOWUP_BLOWNUP].eval_fn = Condition_BlowupBlownup;
             lego_aiconditiondefs[LEGO_AI_CONDITION_BLOWUP_BLOWNUP].init_fn = Condition_BlowupInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_ANIM_SPEED_MUL].eval_fn = Condition_AnimSpeedMul;
