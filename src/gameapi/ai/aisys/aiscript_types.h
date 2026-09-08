@@ -132,8 +132,8 @@ typedef struct AISCRIPTPROCESS_s {
     u8 action_data_2;
     u16 action_data_6;
     void *action_data_3;
-    f32 action_data_4;
-    f32 action_data_5;
+    union { f32 action_data_4; f32 follow_direction_fire_range; };
+    union { f32 action_data_5; f32 follow_direction_fire_interval; };
 
     NUVEC action_pos;
 
@@ -217,6 +217,8 @@ DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, param_stack) == 0x28, "Script processor 
 DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, active_refs) == 0x54, "Script processor reference stack offset");
 DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, active_ref_count) == 0x64, "Script processor reference depth offset");
 DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, action_pos) == 0x78, "Script processor action position offset");
+DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, follow_direction_fire_range) == 0x70, "Follow-direction fire range offset");
+DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, follow_direction_fire_interval) == 0x74, "Follow-direction fire interval offset");
 DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, path_info) == 0x84, "Script processor action path offset");
 DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, action_timer) == 0x9c, "Script processor action timer offset");
 DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, interrupt_timer) == 0xb8, "Script processor interrupt timer offset");

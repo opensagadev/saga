@@ -4937,32 +4937,32 @@ static i32 Action_FollowDirection(AISYS *sys, AISCRIPTPROCESS *processor, AIPACK
             } else if ((value = NuStrIStr(params[index], "end=")) != NULL) {
                 end = AIPathFindLocator(sys, value + 4);
             } else if ((value = NuStrIStr(params[index], "firerange")) != NULL) {
-                processor->action_data_4 = AIParamToFloat(processor, value + 10);
+                processor->follow_direction_fire_range = AIParamToFloat(processor, value + 10);
             } else if ((value = NuStrIStr(params[index], "fireinterval")) != NULL) {
-                processor->action_data_5 = AIParamToFloat(processor, value + 13);
+                processor->follow_direction_fire_interval = AIParamToFloat(processor, value + 13);
             }
         }
         if (end != NULL && start != NULL) {
             NuVecSub(&processor->action_pos, &end->position, &start->position);
             NuVecNorm(&processor->action_pos, &processor->action_pos);
         }
-        processor->action_timer = random * processor->action_data_5;
+        processor->action_timer = random * processor->follow_direction_fire_interval;
         NuVecScale(&processor->action_pos, &processor->action_pos, direction_scale);
     }
     NUVEC destination;
     NuVecAdd(&destination, &object->apiobj.position, &processor->action_pos);
     AIMoveInstruction(packet, &destination, 0.0f, NULL, AIPACKET_MOVEMENT_TO_DESTINATION, 0.0f);
     APIOBJECT *opponent = packet->opponent_object;
-    if (processor->action_data_4 > 0.0f && opponent != NULL && opponent->ai != NULL) {
+    if (processor->follow_direction_fire_range > 0.0f && opponent != NULL && opponent->ai != NULL) {
         NUVEC difference;
         f32 distance_squared = NuVecDistSqr(&packet->owner->apiobj.position, &opponent->position, &difference);
         if (((WORLD->api_object_sys->line_of_sight[object->apiobj.field_0x289] >> opponent->field_0x289) & 1) &&
             object->apiobj.model_draw_result != 0 &&
-            processor->action_data_4 * processor->action_data_4 > distance_squared) {
+            processor->follow_direction_fire_range * processor->follow_direction_fire_range > distance_squared) {
             if (opponent->field_0x287 == 0 || opponent->objptr->field_0x101c > 0.0f)
                 processor->action_timer -= delta_time;
             if (opponent->field_0x287 == 0 && processor->action_timer <= 0.0f) {
-                const f32 interval = processor->action_data_5;
+                const f32 interval = processor->follow_direction_fire_interval;
                 processor->action_timer = interval * 0.5f + NuRandFloat() * interval;
                 object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
                 object->script_fire_target = packet->opponent_object->objptr;
