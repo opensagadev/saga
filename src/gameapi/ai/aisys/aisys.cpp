@@ -22,6 +22,7 @@
 #include "legoapi/render/fx.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
+#include "legoapi/world/world_shared.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nuspline.h"
 #include "nu2api/nu3d/nuspecial.h"
@@ -952,6 +953,79 @@ __used__ static i32 Action_GoToNode(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
     AIMoveInstruction(packet, &node->position, 0.0f, &processor->path_info, AIPACKET_MOVEMENT_TO_DESTINATION,
                       packet->movement_instruction_parameter);
     return distance_squared < node->radius_squared;
+}
+
+void LevelScriptReStoreProgress(WORLDINFO_s *, LEVELSCRIPTPROCESS_s *);
+
+static i32 Action_AddScriptProcessor(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *, char **params,
+                                    i32 param_count, i32 first_time, f32) {
+    if (first_time && param_count > 0) {
+        char *script_name = NULL;
+        char *name = NULL;
+        AIAREA_s *area = NULL;
+        AILOCATORSET_s *locator_set = NULL;
+        AILOCATOR_s *locator = NULL;
+        i32 set = 0;
+        NUGSPLINE *spline = NULL;
+        i32 override_count = 0;
+        char override_names[4][32];
+        f32 override_values[4];
+        for (i32 index = 0; index < param_count; ++index) {
+            char *value;
+            if ((value = NuStrIStr(params[index], "script=")) != NULL) {
+                value += 7;
+                if (AIScriptFind(WORLD->ai_sys, value, 0, 1, 1) != NULL)
+                    script_name = value;
+            } else if ((value = NuStrIStr(params[index], "name=")) != NULL) {
+                name = value + 5;
+            } else if ((value = NuStrIStr(params[index], "area=")) != NULL) {
+                area = AISysFindArea(sys, value + 5);
+            } else if ((value = NuStrIStr(params[index], "locator_set=")) != NULL) {
+                locator_set = AIPathFindLocatorSet(sys, value + 12);
+            } else if ((value = NuStrIStr(params[index], "locator=")) != NULL) {
+                locator = AIPathFindLocator(sys, value + 8);
+            } else if ((value = NuStrIStr(params[index], "set=")) != NULL) {
+                set = (i32)AIParamToFloat(processor, value + 4);
+                if ((u32)set >= 17)
+                    set = 0;
+            } else if ((value = NuStrIStr(params[index], "spline=")) != NULL) {
+                spline = NuSplineFind(WORLD->scene, value + 7);
+            } else if ((value = NuStrIStr(params[index], "param")) != NULL && override_count < 4) {
+                NuStrNCpy(override_names[override_count], value + 6, 32);
+                char *separator = NuStrIStr(override_names[override_count], "=");
+                if (separator != NULL) {
+                    override_values[override_count] = AIParamToFloat(processor, separator + 1);
+                    *separator = '\0';
+                    ++override_count;
+                }
+            }
+        }
+        if (script_name != NULL && WORLD->processor_count < 32) {
+            AISCRIPTPROCESS *created = &WORLD->processors[WORLD->processor_count].processor;
+            AIScriptProcessorInit(sys, NULL, created, NULL, script_name, NULL, 0, NULL, NULL);
+            created->locator_set = locator_set;
+            created->locator = locator;
+            created->unknown_a0 = area;
+            created->unknown_b0 = set;
+            created->unknown_ac = spline;
+            if (name != NULL)
+                NuStrCpy(WORLD->processors[WORLD->processor_count].name, name);
+            LevelScriptReStoreProgress(WORLD, &WORLD->processors[WORLD->processor_count]);
+            if (override_count != 0 && created->script != NULL) {
+                for (i32 index = 0; index < override_count; ++index) {
+                    for (i32 slot = 0; slot < 4; ++slot) {
+                        if (NuStrICmp(override_names[index], created->script->params[slot].name) == 0) {
+                            created->params[slot] = override_values[index];
+                            break;
+                        }
+                    }
+                }
+            }
+            ++WORLD->processor_count;
+            GizmoSysAddGizmos(WORLD->gizmo_sys, WORLD->giz_flow, WORLD);
+        }
+    }
+    return 1;
 }
 
 __used__ static i32 Action_SetLayer(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
@@ -4364,7 +4438,7 @@ extern "C" {
         {"UseTimeBasedUpdate", NULL, 0, 0, 0},
         {"ForceLightning", Action_ForceLightning, 0, 0, 0},
         {"WalkBackwards", Action_WalkBackwards, 0, 0, 0},
-        {"AddScriptProcessor", NULL, 0, 0, 0},
+        {"AddScriptProcessor", Action_AddScriptProcessor, 0, 0, 0},
         {"SetUseOneAtOnce", NULL, 0, 0, 0},
         {"SetAO_MaxAttackers", NULL, 0, 0, 0},
         {"SetAO_AttackersPerRow", NULL, 0, 0, 0},

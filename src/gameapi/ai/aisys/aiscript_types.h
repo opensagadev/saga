@@ -167,6 +167,11 @@ typedef struct AISCRIPTPROCESS_s {
 
     AILOCALMESSAGE_s *local_messages;
 } AISCRIPTPROCESS;
+DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, unknown_a0) == 0xa0, "Script processor area offset");
+DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, locator) == 0xa4, "Script processor locator offset");
+DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, locator_set) == 0xa8, "Script processor locator set offset");
+DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, unknown_ac) == 0xac, "Script processor spline offset");
+DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, unknown_b0) == 0xb0, "Script processor creature set offset");
 
 // Android x86 script records: allocation sizes and member accesses in
 // AIScriptOpenPakFileParse, AIScriptProcessorInit and AIScriptProcess.

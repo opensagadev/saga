@@ -274,10 +274,6 @@ static __used__ f32 Condition_OffScreenTimer(AISYS_s *, AISCRIPTPROCESS_s *, AIP
 
 
 
-static __used__ i32 Action_AddScriptProcessor(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
-    return 0;
-}
-
 static __used__ i32 Action_CanHitForceObjects(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params,
                                               i32 param_count, i32 first_time, f32) {
     GameObject_s *object = ActionOwner(packet);
