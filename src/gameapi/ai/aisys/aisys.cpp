@@ -6676,6 +6676,18 @@ static void *Condition_BuildItCompleteInit(AISYS *, char *name, AISCRIPT *) {
     return GizmoFindByName(WORLD->gizmo_sys, gizbuildit_gizmotype_id, name);
 }
 
+static f32 Condition_OffScreenTimer(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *argument) {
+    GameObject *object = static_cast<GameObject *>(argument);
+    if (object == NULL) {
+        object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+    }
+    return object != NULL ? object->field_0xf1c : 0.0f;
+}
+
+static void *Condition_OffScreenTimerInit(AISYS *system, char *name, AISCRIPT *) {
+    return name != NULL ? GetNamedGameObject(system, name) : NULL;
+}
+
 static void *Condition_CategoryIsInit(AISYS *system, char *arg, AISCRIPT *) {
     isize category = -1;
     if (arg != NULL && system != NULL && CharCategory != NULL) {
@@ -8539,6 +8551,8 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_Z_POS].init_fn = Condition_XYZPosInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_TAKE_OVER_RANGE].eval_fn = Condition_TakeOverRange;
             lego_aiconditiondefs[LEGO_AI_CONDITION_HAS_TAKE_OVER].eval_fn = Condition_HasTakeOver;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_OFF_SCREEN_TIMER].eval_fn = Condition_OffScreenTimer;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_OFF_SCREEN_TIMER].init_fn = Condition_OffScreenTimerInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_BUILD_IT_COMPLETE].eval_fn = Condition_BuildItComplete;
             lego_aiconditiondefs[LEGO_AI_CONDITION_BUILD_IT_COMPLETE].init_fn = Condition_BuildItCompleteInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CHARACTER_EXISTS].eval_fn = Condition_CharacterExists;

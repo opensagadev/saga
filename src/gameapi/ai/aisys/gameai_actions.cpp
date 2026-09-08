@@ -176,14 +176,6 @@ static __used__ void *Condition_NumBaddiesInit(AISYS_s *, char *, AISCRIPT_s *) 
     return nullptr;
 }
 
-static __used__ f32 Condition_OffScreenTimer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *,
-                                             void *void_arg) {
-    GameObject_s *object = static_cast<GameObject_s *>(void_arg);
-    if (object == NULL) {
-        object = ActionOwner(packet);
-    }
-    return object != NULL ? object->field_0xf1c : 0.0f;
-}
 
 
 
@@ -496,9 +488,6 @@ static __used__ f32 Condition_NetworkGameOnGoing(AISYS_s *, AISCRIPTPROCESS_s *,
     return 0;
 }
 
-static __used__ void *Condition_OffScreenTimerInit(AISYS_s *system, char *arg, AISCRIPT_s *) {
-    return arg != NULL ? GetNamedGameObject(system, arg) : NULL;
-}
 
 
 
@@ -595,8 +584,6 @@ namespace {
             lego_aiactiondefs[LEGO_AI_ACTION_MOVE_FORWARD].eval_fn = Action_MoveForward;
 
 
-            lego_aiconditiondefs[LEGO_AI_CONDITION_OFF_SCREEN_TIMER].eval_fn = Condition_OffScreenTimer;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_OFF_SCREEN_TIMER].init_fn = Condition_OffScreenTimerInit;
         }
     };
 
