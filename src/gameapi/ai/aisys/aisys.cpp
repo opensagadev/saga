@@ -6426,6 +6426,19 @@ __used__ static f32 Condition_AnimSpeedMul(AISYS *sys, AISCRIPTPROCESS *processo
 
 extern FLOWBOX_s *FlowBoxFindByName(GIZFLOW_s *, char *);
 
+static f32 Condition_LocatorOnScreen(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *, char *, void *argument) {
+    AILOCATOR *locator = static_cast<AILOCATOR *>(argument);
+    if (locator == NULL)
+        locator = processor->locator;
+    if (locator != NULL && NuCameraClipTestSphere(&locator->position, 0.0f, &numtx_identity) == 0)
+        return 1.0f;
+    return 0.0f;
+}
+
+static void *Condition_LocatorOnScreenInit(AISYS *system, char *name, AISCRIPT *) {
+    return AIPathFindLocator(system, name);
+}
+
 static f32 Condition_GizmoVisibility(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *, void *argument) {
     f32 visibility = 0.0f;
     if (argument != NULL)
@@ -8125,6 +8138,8 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_BADDY].eval_fn = Condition_IAmABaddy;
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_NEUTRAL].eval_fn = Condition_IAmANeutral;
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_PARTY_CHARACTER].eval_fn = Condition_IAmAPartyCharacter;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_LOCATOR_ON_SCREEN].eval_fn = Condition_LocatorOnScreen;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_LOCATOR_ON_SCREEN].init_fn = Condition_LocatorOnScreenInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_VISIBILITY].eval_fn = Condition_GizmoVisibility;
             lego_aiconditiondefs[LEGO_AI_CONDITION_GIZMO_VISIBILITY].init_fn = Condition_GizmoVisibilityInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_FLOW_BOX_COMPLETE].eval_fn = Condition_FlowBoxComplete;
