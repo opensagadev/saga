@@ -2634,10 +2634,6 @@ bool CantPickupBombTimerAddon::OnProcess(MechAddon::ProcessStage, float elapsed)
 CantPickupBombTimerAddon::~CantPickupBombTimerAddon() {
 }
 
-void CantPickupBombTimerAddon::operator delete(void *allocation) {
-    NU_FREE(allocation);
-}
-
 // BaseThing::BaseThing @0x425840 zeroes the data fields after the vptr.
 BaseThing::BaseThing() {
     this->field_0x4 = 0;

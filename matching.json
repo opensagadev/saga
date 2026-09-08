@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 28.866327,
+    "fuzzy_match_percent": 28.88318,
     "total_code": "4722419",
     "matched_code": "59767",
     "matched_code_percent": 1.2656014,
@@ -60527,6 +60527,14 @@
           "match_percent": 99.61905
         },
         {
+          "name": "_ZL17Ledge_AttachPointP11WORLDINFO_sP7nuvec_sS2_S2_Pt.isra.0",
+          "demangled_name": "Ledge_AttachPoint(WORLDINFO_s*, nuvec_s*, nuvec_s*, nuvec_s*, unsigned short*) [clone .isra.0]",
+          "address": 1962608,
+          "offset": 1072640,
+          "size": 1749,
+          "match_percent": 44.128464
+        },
+        {
           "name": "_ZL11Ledges_LoadPvS_",
           "demangled_name": "Ledges_Load(void*, void*)",
           "address": 1964368,
@@ -60549,6 +60557,14 @@
           "offset": 1075312,
           "size": 372,
           "match_percent": 99.18033
+        },
+        {
+          "name": "_Z14Ledge_MoveCodeP11WORLDINFO_sP12GameObject_s",
+          "demangled_name": "Ledge_MoveCode(WORLDINFO_s*, GameObject_s*)",
+          "address": 1965664,
+          "offset": 1075696,
+          "size": 1578,
+          "match_percent": 0.0
         }
       ]
     },
@@ -66062,7 +66078,7 @@
           "address": 4580400,
           "offset": 3690432,
           "size": 81,
-          "match_percent": 70.47369
+          "match_percent": 99.947365
         },
         {
           "name": "_ZN24CantPickupBombTimerAddonC1ER19MechObjectInterfacef",
@@ -72949,14 +72965,6 @@
           "offset": 1074928,
           "size": 373,
           "match_percent": 8.172728
-        },
-        {
-          "name": "_Z14Ledge_MoveCodeP11WORLDINFO_sP12GameObject_s",
-          "demangled_name": "Ledge_MoveCode(WORLDINFO_s*, GameObject_s*)",
-          "address": 1965664,
-          "offset": 1075696,
-          "size": 1578,
-          "match_percent": 0.0
         },
         {
           "name": "_Z21LedgeTerrain_MoveCodeP12GameObject_s",
@@ -124173,14 +124181,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZL17Ledge_AttachPointP11WORLDINFO_sP7nuvec_sS2_S2_Pt.isra.0",
-      "demangled_name": "Ledge_AttachPoint(WORLDINFO_s*, nuvec_s*, nuvec_s*, nuvec_s*, unsigned short*) [clone .isra.0]",
-      "address": 1962608,
-      "offset": 1072640,
-      "size": 1749,
-      "match_percent": 0.0
-    },
-    {
       "name": "_Z24SuperStoryScore_LSW_DrawP14STATUS_STAGE_sP14STATUSPACKET_si.part.8",
       "demangled_name": "SuperStoryScore_LSW_Draw(STATUS_STAGE_s*, STATUSPACKET_s*, int) [clone .part.8]",
       "address": 2028752,
@@ -131112,8 +131112,8 @@
   "summary": {
     "bazel_units": 503,
     "functions": 13454,
-    "assigned_functions": 12196,
+    "assigned_functions": 12197,
     "ambiguous_functions": 237,
-    "unassigned_functions": 1021
+    "unassigned_functions": 1020
   }
 }

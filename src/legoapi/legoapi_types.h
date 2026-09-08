@@ -5,6 +5,7 @@
 #include "nu2api/nu3d/ShaderManagerOpenGL.h"
 #include "decomp_assert.h"
 #include "nu2api/nucore/fixed_width.h"
+#include "nu2api/nucore/numemory.h"
 #include "decomp_assert.h"
 #include "nu2api/nucore/nulist.h"
 #include "nu2api/nucore/nuanim3.h"
@@ -3037,7 +3038,7 @@ struct CantPickupBombTimerAddon : MechAddon {
     CantPickupBombTimerAddon(MechObjectInterface &, float);
     bool OnProcess(MechAddon::ProcessStage, float) override;
     ~CantPickupBombTimerAddon() override;
-    static void operator delete(void *);
+    static void operator delete(void *allocation) { NU_FREE(allocation); }
     static HashedKey s_hashId;
     f32 remaining_time;
 };

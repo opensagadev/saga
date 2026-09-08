@@ -27,7 +27,6 @@ DECOMP_ASSERT(offsetof(LEDGE, bounds_min) == 0x20, "LEDGE bounds offset");
 struct WORLDINFO_s;
 struct GameObject_s;
 LEDGE *Ledge_FindNearest(WORLDINFO_s *, NUVEC *, GameObject_s *, f32 *);
-LEDGE *Ledge_AttachPoint(WORLDINFO_s *, NUVEC *, NUVEC *, NUVEC *, u16 *);
 
 ADDGIZMOTYPE *Ledges_RegisterGizmo(i32 type_id);
 
