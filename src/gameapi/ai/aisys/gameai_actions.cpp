@@ -481,9 +481,6 @@ static __used__ void *Condition_TurretAliveInit(AISYS_s *, char *, AISCRIPT_s *)
     return nullptr;
 }
 
-static __used__ i32 Action_CanHelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {
-    return 0;
-}
 
 
 static __used__ i32 Action_ImmuneToKillTerrain(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, f32) {

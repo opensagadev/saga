@@ -1137,6 +1137,23 @@ static i32 Action_ClearTakeOverTarget(AISYS *, AISCRIPTPROCESS *, AIPACKET *pack
     return 1;
 }
 
+static i32 Action_CanHelpWithTriggers(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
+                                     i32 param_count, i32 first_time, f32) {
+    if (packet == NULL || packet->owner == NULL)
+        return 1;
+    GameObject_s *object = packet->owner->apiobj.objptr;
+    if (object == NULL)
+        return 1;
+    if (first_time) {
+        object->field_0xf02 |= 4;
+        for (i32 index = 0; index < param_count; ++index) {
+            if (NuStrICmp(params[index], "FALSE") == 0)
+                object->field_0xf02 &= ~4;
+        }
+    }
+    return 1;
+}
+
 static i32 Action_SetDoomedEscapeLocator(AISYS *system, AISCRIPTPROCESS *processor, AIPACKET *packet,
                                        char **params, i32 param_count, i32 first_time, f32) {
     if (first_time) {
@@ -4965,7 +4982,7 @@ extern "C" {
         {"GizmoActivate", Action_GizmoActivate, 0, 0, 0},
         {"GizmoSetVisibility", NULL, 0, 0, 0},
         {"TurnOnPickup", Action_TurnOnPickup, 0, 0, 0},
-        {"CanHelpWithTriggers", NULL, 0, 0, 0},
+        {"CanHelpWithTriggers", Action_CanHelpWithTriggers, 0, 0, 0},
         {"CanCollideWithObjects", Action_CanCollideWithObjects, 0, 0, 0},
         {"SetShootOpponents", Action_SetShootOpponents, 0, 0, 0},
         {"PartyCanBeUnderCover", Action_PartyCanBeUnderCover, 0, 0, 0},
