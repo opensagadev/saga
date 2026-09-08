@@ -73,7 +73,14 @@ typedef struct COLLECTID {
     u8 can_buy;
     u8 field5_0x9;
     u16 field6_0xa;
-    char cheat_code[16];
+    union {
+        char cheat_code[16];
+        struct {
+            u8 grid_reserved[8];
+            f32 grid_x;
+            f32 grid_y;
+        };
+    };
 } COLLECTID;
 
 i32 Store_FindPack(i32 id, char *name);

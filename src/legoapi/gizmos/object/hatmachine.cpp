@@ -302,7 +302,7 @@ static void HatMachine_Draw(void *world_ptr, void *, float) {
         if ((machine->flags & HATMACHINE_FLAG_ANIMATING) != 0 && machine->displayed_hat != 0) {
             const i32 hat_index = machine->displayed_hat + 249;
             if (machine->animation_time < 2.35f && world->lev_objs[hat_index].active != 0) {
-                const NUVEC *volatile hat_offset = &HatMachine_HatOffset;
+                const NUVEC *hat_offset = &HatMachine_HatOffset;
                 NUVEC hat_position = *hat_offset;
                 const f32 hat_phase = machine->hat_delay * 32768.0f + 16384.0f;
                 const f32 hat_sine = NuTrigTable[(static_cast<i32>(hat_phase) >> 1) & 0x7fff];

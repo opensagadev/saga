@@ -1,4 +1,7 @@
 #include "decomp.h"
+#include "globals.h"
+#include "legoapi/ai/core/ai_sys_stubs.h"
+#include "legoapi/world/world.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion.h"
@@ -67,6 +70,38 @@ static void StarWars_PreparingForSpecialMove(AIPACKET_s *, APIOBJECT_s *, i32) {
 
 extern void ReleaseTakeOver(GameObject_s *, i32);
 extern void SetSpecialMove(GameObject_s *, AIPATHNODE_s *, AIPATHNODE_s *, char);
+extern i32 TryToTeleportToNextNode(GameObject_s *, AIPATHNODE_s *, i32);
+
+static __used__ i32 StarWars_PrepareBigJump(AIPACKET_s *packet, APIOBJECT_s *apiobject, i32) {
+    GameObject_s *object = apiobject->objptr;
+    AIPATHNODE_s *nodes = packet->path_info.path->nodes;
+    AIPATHCNX_s *connection = packet->path_info.connection;
+    u8 from = connection->node_indices[packet->path_info.direction];
+    u8 to = connection->node_indices[packet->path_info.direction == 0];
+    if (object->ai.inside_path_node == to || object->character_context == 0x2b) {
+        return 0;
+    }
+    if ((connection->traversal_flags[packet->path_info.direction] & 0x800) != 0) {
+        packet->movement_destination = nodes[from].position;
+        packet->runtime_flags |= 0x80;
+        packet->movement_stopping_distance = 0.0f;
+        apiobject->movement_request_flags |= 0x2000;
+        return 1;
+    }
+    AIPATHNODE_s *target = &nodes[to];
+    if (TryToTeleportToNextNode(object, target, 0) != 0) {
+        return 1;
+    }
+    if (WORLD->current_level == TEMPLEB_LDATA && target->name != NULL && NuStrICmp(target->name, "stairs_top") == 0) {
+        AIPATHNODE_s *alternate = AIPathFindNode(WORLD->ai_sys, NULL, "stairs_top2");
+        if (alternate != NULL) {
+            target = alternate;
+        }
+    }
+    StartBigJump(object, &target->position, 0, 0.5f, 1.0f, 0, 0);
+    SetSpecialMove(object, target, NULL, 3);
+    return 0;
+}
 
 static __used__ i32 StarWars_PrepareTakeOverJump(AIPACKET_s *packet, APIOBJECT_s *apiobject, i32) {
     GameObject_s *object = apiobject->objptr;

@@ -1053,6 +1053,17 @@ namespace {
     }
 } // namespace
 
+bool host_read_game_fixture(const char *path, GAMESAVE_s &game) {
+    Save save;
+    if (!read_save(path, save) || !validate(save) || save.payload_size != sizeof(game) ||
+        read_word(save, save.payload + save.payload_size) != checksum(save)) {
+        fprintf(stderr, "smoke: invalid game save or checksum: %s\n", path);
+        return false;
+    }
+    memcpy(&game, save.bytes.data() + save.payload, sizeof(game));
+    return true;
+}
+
 int host_run_save(int argc, char **argv) {
     const u32 endian = 1;
     if (*reinterpret_cast<const u8 *>(&endian) != 1)

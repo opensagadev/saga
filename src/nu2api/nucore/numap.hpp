@@ -204,7 +204,7 @@ template <typename K, typename V> class NuMap {
         return erased;
     }
 
-    __attribute__((noinline)) void DeleteNodeLinks(Node *node) {
+    void DeleteNodeLinks(Node *node) {
         if (node->links[0] != NULL) {
             Node *left = node->links[0];
             DeleteNodeLinks(left);

@@ -167,7 +167,7 @@ static void bgLoadStreamCutScene(bgprocinfo_s *) {
     }
 }
 
-__attribute__((noinline)) static i32 CutScene_Start(WORLDINFO_s *world, CUTINFO *cut, i32) {
+static i32 CutScene_Start(WORLDINFO_s *world, CUTINFO *cut, i32) {
     instNUGCUTSCENE_s *instance = static_cast<instNUGCUTSCENE_s *>(cut->instance);
     if (cut->music_handle != -1) {
         g_lastCutsceneTime = 0.0f;
@@ -1251,7 +1251,7 @@ static void CutScene_RigidPostRender(NUGCUTRIGID_s *rigid, instNUGCUTRIGID_s *in
         return;
     }
 
-    volatile f32 ground = GameShadow(NULL, position, 5.0f, -1);
+    f32 ground = GameShadow(NULL, position, 5.0f, -1);
     if (ground == 2000000.0f) {
         return;
     }

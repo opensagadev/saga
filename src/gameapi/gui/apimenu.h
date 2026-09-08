@@ -77,13 +77,14 @@ typedef struct MENU_s {
     u8 move_down;          // 0x00ef
     u8 close_requested;    // 0x00f0
     u8 input_activity;     // 0x00f1
-    u8 filler_f2[6];
-    f32 item_x[400];      // 0x00f8
-    f32 item_y[400];      // 0x0738
-    f32 item_width[400];  // 0x0d78
-    f32 item_height[400]; // 0x13b8
-    i32 item_column[400]; // 0x19f8
-    i32 item_row[400];    // 0x2038
+    u8 filler_f2[2];
+    f32 horizontal_scroll_distance; // 0x00f4, touch navigation distance
+    f32 item_x[400];                // 0x00f8
+    f32 item_y[400];                // 0x0738
+    f32 item_width[400];            // 0x0d78
+    f32 item_height[400];           // 0x13b8
+    i32 item_column[400];           // 0x19f8
+    i32 item_row[400];              // 0x2038
 } MENU;
 
 DECOMP_ASSERT(sizeof(MENU) == 0x2678, "MENU size");

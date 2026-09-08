@@ -64,5 +64,8 @@ NUFPCOMJMP *CharConfig_GetKeywords();
 i32 CharCategory_IsCategory(GameObject_s *object, i32 index);
 
 struct CHARCATEGORY;
+// Original table shared across the reconstructed source split; retain its
+// original ELF name without adding a synthetic accessor function.
+extern NUFPCOMJMP ConfigChar_Keywords[] __asm__("_ZL19ConfigChar_Keywords") __attribute__((visibility("hidden")));
 void CharCategories_Init(CHARCATEGORY *categories);
 i32 CharCategory_FindByName(char *name);

@@ -362,7 +362,7 @@ extern "C" {
     extern i32 PS2_REZ_H;
     i32 PS2_SREZ_W = 4096;
     i32 PS2_SREZ_H = 4096;
-    static volatile i32 current_clip_scissor_to_viewport;
+    static i32 current_clip_scissor_to_viewport;
     void NuCameraSetEx(NUCAMERA *cam, i32 fast) {
         global_camera = *cam;
         FaceYDirStream(NuAtan2D(-global_camera.mtx.m20, -global_camera.mtx.m22));
@@ -769,10 +769,10 @@ extern "C" {
     // Original local helper cloned as DisplayListProcessSkin.isra.36 by GCC.
     // It appends the world transform, skin palette, and geometry calls as one
     // contiguous run in the material display list.
-    static __attribute__((optimize("O3"))) void
-    DisplayListProcessSkin(NUMTL *, NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
-                           NUDISPLAYLISTITEM **first_and_last, NUMTX *world_matrix, void **transform_packet,
-                           NUMTX *skin_matrices, DEFORMERWEIGHTSARRAY *deformer_weights, i32 shadow_caster) {
+    static void DisplayListProcessSkin(NUMTL *, NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
+                                       NUDISPLAYLISTITEM **first_and_last, NUMTX *world_matrix, void **transform_packet,
+                                       NUMTX *skin_matrices, DEFORMERWEIGHTSARRAY *deformer_weights,
+                                       i32 shadow_caster) {
         display_list_buffer->addr = ALIGN(display_list_buffer->addr, 0x10);
         VARIPTR *buffer = NuDisplayListLinkItems(list, 3);
 
@@ -810,11 +810,9 @@ extern "C" {
     // Lightmapped geometry carries an AE/AF/B0 setup command two entries before
     // its geometry command. Keep that setup command adjacent to the dynamic
     // transform and geometry entries when the special is submitted.
-    static __attribute__((optimize("O3"))) void DisplayListProcessLightmapped(NUMTL *, NUDISPLAYLIST *list,
-                                                                              NUDISPLAYLISTITEM *geometry,
-                                                                              NUDISPLAYLISTITEM **first_and_last,
-                                                                              NUMTX *world_matrix,
-                                                                              void **transform_packet, f32 alpha) {
+    static void DisplayListProcessLightmapped(NUMTL *, NUDISPLAYLIST *list, NUDISPLAYLISTITEM *geometry,
+                                              NUDISPLAYLISTITEM **first_and_last, NUMTX *world_matrix,
+                                              void **transform_packet, f32 alpha) {
         display_list_buffer->addr = ALIGN(display_list_buffer->addr, 0x10);
         VARIPTR *buffer = NuDisplayListLinkItems(list, 3);
 
@@ -844,9 +842,8 @@ extern "C" {
         DisplayListSetAlphaPS(first_and_last[1], first_and_last[2], alpha);
     }
 
-    __attribute__((optimize("O3"))) i32 NuDisplayListRndrSpecial(nuhspecial_s *special_handle, NUMTX *mtx, i32 skinned,
-                                                                 NUMTX *skin_matrices,
-                                                                 DEFORMERWEIGHTSARRAY *blend_values) {
+    i32 NuDisplayListRndrSpecial(nuhspecial_s *special_handle, NUMTX *mtx, i32 skinned, NUMTX *skin_matrices,
+                                 DEFORMERWEIGHTSARRAY *blend_values) {
         (void)skinned;
 
         if (special_handle == NULL || mtx == NULL) {
@@ -2581,9 +2578,8 @@ extern "C" {
     }
     void NuSpecialDrawSmoothSkin(void) {
     }
-    __attribute__((optimize("O3"))) i32 NuSpecialDrawSmoothSkinDwa(void *special, NUMTX *skin_matrices,
-                                                                   NUMTX *world_matrix,
-                                                                   DEFORMERWEIGHTSARRAY *blend_values) {
+    i32 NuSpecialDrawSmoothSkinDwa(void *special, NUMTX *skin_matrices, NUMTX *world_matrix,
+                                   DEFORMERWEIGHTSARRAY *blend_values) {
         NuPlainSpecialHandleLayout *handle = static_cast<NuPlainSpecialHandleLayout *>(special);
         if (handle == NULL || handle->scene == NULL || handle->display_special == NULL) {
             return 0;
@@ -3190,9 +3186,8 @@ extern "C" {
     }
     // Original @0x2f56a0. Draw rigid hierarchy pieces at their evaluated joint
     // matrices, then build skin matrices for the smooth hierarchy pieces.
-    __attribute__((optimize("O3"))) i32 NuHGobjRndrMtxDwa(nuhgobj_s *object, NUMTX *world_matrix, i32 render_count,
-                                                          i16 *render_indices, NUMTX *joint_matrices,
-                                                          void **blend_values, i32) {
+    i32 NuHGobjRndrMtxDwa(nuhgobj_s *object, NUMTX *world_matrix, i32 render_count, i16 *render_indices,
+                          NUMTX *joint_matrices, void **blend_values, i32) {
         i32 clip_state = nuspecial_clip_state;
         if (clip_state == -1) {
             clip_state = NuCameraClipHGobj(reinterpret_cast<nugscn_s *>(object), world_matrix, joint_matrices);

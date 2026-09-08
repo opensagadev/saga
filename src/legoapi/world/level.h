@@ -127,7 +127,10 @@ typedef struct LEVELDATA_s {
     char mipmap_mode;
 
     char blob_shadow_alpha;
-    char unknown_0ae;
+    union {
+        char unknown_0ae;
+        i8 episode_index;
+    };
     i8 area_index;
 
     f32 cam_tilt;

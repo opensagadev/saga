@@ -1,5 +1,6 @@
 #pragma once
 
+#include "decomp_assert.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "decomp_assert.h"
 

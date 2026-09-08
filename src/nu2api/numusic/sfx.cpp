@@ -222,9 +222,6 @@ static NUFPCOMJMP audioCom[] = {
 
 void LoadSfx(const char *file, variptr_u *buffer_start, variptr_u buffer_end);
 
-#if defined(__i386__)
-__attribute__((force_align_arg_pointer))
-#endif
 void InitSfx(variptr_u *buffer_start, variptr_u buffer_end, const char *file) {
     // bVar15 = 0;
     // g_soundMap = (short *)((i32)buffer_start->voidptr + 3U & 0xfffffffc);

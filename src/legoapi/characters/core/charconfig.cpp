@@ -225,7 +225,7 @@ static i32 CharConfig(i32 character_id, char *directory, char *filename, VARIPTR
     }
     NUFPAR *parser = NuFParCreateMem("character", text, 0xffff);
     if (parser != NULL) {
-        NuFParPushCom2(parser, CharConfig_GetKeywords(), game_keywords);
+        NuFParPushCom2(parser, ConfigChar_Keywords, game_keywords);
         while (NuFParGetLine(parser) != 0) {
             if (NuFParGetWord(parser) != 0)
                 NuFParInterpretWord(parser);

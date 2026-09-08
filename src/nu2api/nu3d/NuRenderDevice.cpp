@@ -44,7 +44,7 @@ i32 g_nextGLContextIndex;
 NuRenderDeviceGen::NuRenderDeviceGen() : value(false) {
 }
 
-static inline __attribute__((always_inline)) void InitRecursiveMutex(pthread_mutex_t *mutex) {
+static inline void InitRecursiveMutex(pthread_mutex_t *mutex) {
     pthread_mutexattr_t attrs;
     pthread_mutexattr_init(&attrs);
     pthread_mutexattr_settype(&attrs, PTHREAD_MUTEX_RECURSIVE);

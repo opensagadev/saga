@@ -99,6 +99,12 @@ static i32 CanStartHold_Game(GameObject_s *) {
 #include "legoapi/items/base/collection.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/menus/core/text.h"
+#include "legoapi/cutscenes/cutscenes.h"
+extern i16 tCLIPi, tINTRO, tMIDTRO, tOUTRO, tENDING;
+extern i32 CutScenePlayCount;
+static i32 CutScenePlayer_Accept(CUTSCENEPLAYERCLIP *) {
+    return 1;
+}
 #include "legoapi/world/level.h"
 #include "legoapi/world/levels/episode.h"
 #include "nu2api/nucore/nustring.h"
@@ -925,10 +931,9 @@ void InitGameAfterConfig(void) {
     //  LEGOASCII_RIGHT = ASCII_RIGHT;
     //  LEGOASCII_BIGARROW = ASCII_BIGARROW;
     //  KEEPONSCREEN_SIDESONLY = 1;
-    //  CutScenePlayer_AcceptFn = CutScenePlayer_Accept;
-    //  CutScenePlayer_Configure("cut\\clips.txt", &permbuffer_ptr, &permbuffer_end, &tCLIPi, &tINTRO, &tMIDTRO,
-    //  &tOUTRO,
-    //                           &tENDING);
+    CutScenePlayer_AcceptFn = CutScenePlayer_Accept;
+    CutScenePlayer_Configure("cut\\clips.txt", &permbuffer_ptr, &permbuffer_end, &tCLIPi, &tINTRO, &tMIDTRO, &tOUTRO,
+                             &tENDING);
     CanMagnetClimbFn = CanMagnetClimb_Game;
     //  CanPushObstaclesFn = CanPushObstacles_Game;
     //  CanSuperCarryFn = CanSuperCarry_Game;
@@ -987,11 +992,8 @@ void InitGameAfterConfig(void) {
         GOLDBRICKPOINTS = SHOPGOLDBRICKS + -1 + GOLDBRICKPOINTS + 1;
     }
 
-    //  iVar9 = CutScenePlayer_Available();
-    //  CutScenePlayCount = 0;
-    //  if (iVar9 != 0) {
-    //      CutScenePlayCount = (u32) * (ushort *)(iVar9 + 8);
-    //  }
+    CUTSCENEPLAYER_s *clip_player = static_cast<CUTSCENEPLAYER_s *>(CutScenePlayer_Available());
+    CutScenePlayCount = clip_player != NULL ? clip_player->clip_count : 0;
     //  if (g_lowEndLevelBehaviour != 0) {
     //      Reflections_On = 0;
     //      CharClipToBlobShadows = 1;

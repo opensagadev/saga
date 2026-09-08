@@ -126,7 +126,7 @@ template <> class NuEList<NuSound3Voice, DefaultElist> {
     NuSound3Voice *end;
     i32 length;
 
-    __attribute__((noinline)) NuEList() {
+    NuEList() {
         begin_sentinel.prev = NULL;
         end_sentinel.next = NULL;
         begin = reinterpret_cast<NuSound3Voice *>(&begin_sentinel);

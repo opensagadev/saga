@@ -1,4 +1,5 @@
 #include "legoapi/render/core/render.h"
+#include "legoapi/cutscenes/cutscenes.h"
 #include <stdio.h>
 
 #include "gameapi/gui/apimenu.h"
@@ -972,6 +973,13 @@ void DrawCharIcon(i32 character_id, float x, float y, float z, float scale, i32 
 }
 
 void DrawCodeMenu() {
+    if (cheattimer > 0.0f) {
+        if (cheatname && cheattimer < 3.1499998569488525f && NuFmod(cheattimer, 0.35f) < 0.175f) {
+            SmartTextEx(cheatname, 0.0f, (HUB_EPISODETITLEY + HUB_EPISODESUBTITLEY) * 0.5f, 1.0f, 0.8f, 0.8f, 0.8f, 0,
+                        0, 255, 0, 1.7f, 1, NULL, 0, 128);
+        }
+        cheattimer -= FRAMETIME;
+    }
 }
 
 void DrawHint_LSW(HINT_s *, i32) {
@@ -983,7 +991,17 @@ void DrawLine_Now(_vuv_s *, _vuv_s *, i32, i32) {
 void DrawParallax(nuhspecial_s *) {
 }
 
-void DrawQuestion(nuvec_s *, float, float) {
+void DrawQuestion(nuvec_s *position, float scale_value, float y_push) {
+    if (position && NuSpecialExistsFn(&question)) {
+        NUMTX matrix __attribute__((aligned(16)));
+        NuMtxSetIdentity(&matrix);
+        NUVEC scale;
+        scale.x = scale.y = scale.z = scale_value;
+        NuMtxSetScale(&matrix, &scale);
+        *reinterpret_cast<NUVEC *>(&matrix.m30) = *position;
+        matrix.m31 += y_push;
+        NuSpecialDrawAt(&question, &matrix);
+    }
 }
 
 void DrawRectRGBA(float, float, float, float, u32, numtl_s *, i32, float) {
@@ -991,16 +1009,69 @@ void DrawRectRGBA(float, float, float, float, u32, numtl_s *, i32, float) {
 
 void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value, float unused, float y_push, u16 x_rot,
               u16 y_rot, u16 z_rot);
+// The original shop inlines these NuMtx rotations (0x244679 onward).
+// Keep the arithmetic in sync with the canonical numtx.cpp implementations.
+static inline void ShopRotateX(NUMTX *m, NUANG a) {
+    f32 cosx = NU_COS_LUT(a);
+    f32 sinx = NU_SIN_LUT(a);
+    f32 m01 = m->m01;
+    f32 m11 = m->m11;
+    f32 m21 = m->m21;
+    f32 m31 = m->m31;
+
+    m->m01 = m01 * cosx - m->m02 * sinx;
+    m->m02 = m01 * sinx + m->m02 * cosx;
+    m->m11 = m11 * cosx - m->m12 * sinx;
+    m->m12 = m11 * sinx + m->m12 * cosx;
+    m->m21 = m21 * cosx - m->m22 * sinx;
+    m->m22 = m21 * sinx + m->m22 * cosx;
+    m->m31 = m31 * cosx - m->m32 * sinx;
+    m->m32 = m31 * sinx + m->m32 * cosx;
+}
+
+static inline void ShopRotateY(NUMTX *m, NUANG a) {
+    f32 cosx = NU_COS_LUT(a);
+    f32 sinx = NU_SIN_LUT(a);
+    f32 m00 = m->m00;
+    f32 m10 = m->m10;
+    f32 m20 = m->m20;
+    f32 m30 = m->m30;
+
+    m->m00 = m00 * cosx + m->m02 * sinx;
+    m->m02 = m->m02 * cosx - m00 * sinx;
+    m->m10 = m10 * cosx + m->m12 * sinx;
+    m->m12 = m->m12 * cosx - m10 * sinx;
+    m->m20 = m20 * cosx + m->m22 * sinx;
+    m->m22 = m->m22 * cosx - m20 * sinx;
+    m->m30 = m30 * cosx + m->m32 * sinx;
+    m->m32 = m->m32 * cosx - m30 * sinx;
+}
+
+static inline void ShopRotateZ(NUMTX *m, NUANG a) {
+    f32 cosx = NU_COS_LUT(a);
+    f32 sinx = NU_SIN_LUT(a);
+    f32 m00 = m->m00;
+    f32 m10 = m->m10;
+    f32 m20 = m->m20;
+    f32 m30 = m->m30;
+
+    m->m00 = m00 * cosx - m->m01 * sinx;
+    m->m01 = m00 * sinx + m->m01 * cosx;
+    m->m10 = m10 * cosx - m->m11 * sinx;
+    m->m11 = m10 * sinx + m->m11 * cosx;
+    m->m20 = m20 * cosx - m->m21 * sinx;
+    m->m21 = m20 * sinx + m->m21 * cosx;
+    m->m30 = m30 * cosx - m->m31 * sinx;
+    m->m31 = m30 * sinx + m->m31 * cosx;
+}
 static void Shop_DrawCharacter(shopitem_s *item, NUVEC *position, f32 scale_value, f32 ypush, u16 xrot, u16 yrot,
                                u16 zrot);
+extern AREADATA *ANEWHOPE_ADATA;
 
 void DrawSubItems() {
-    /* The sub-shelf is laid out as seven positions, with the centre position
-       (3) used by both the entering and leaving item.  Keep the slightly odd
-       indexing here: it is observable through the menu hit rectangles. */
-    f32 alpha = iconalphaoverride;
+    f32 alpha = 1.0f;
     if (GetMenuID() == 13 && !TestForController()) {
-        const f32 since_touch = GlobalTimer.time_elapsed - (LastTouchTime + 1.32f);
+        const f32 since_touch = GlobalTimer.time_elapsed - (LastTouchTime + 2.64f);
         if (since_touch > 4.0f) {
             const f32 phase = NuFmod(since_touch, 4.0f);
             const i32 angle = static_cast<i32>(phase * 0.25f * 65536.0f);
@@ -1011,19 +1082,16 @@ void DrawSubItems() {
         }
     }
 
-    /* statstime is the fade used when an item/status icon is being replaced. */
-    f32 phase = statstime;
+    f32 bing = 0.0f;
     i32 phase_angle = 0x2000;
-    if (phase > 0.0f) {
-        phase -= FRAMETIME;
-        const f32 cycle = phase / 2.64f;
-        phase_angle = (static_cast<i32>(cycle * 0.25f + 1.75f) >> 1) & 0x7fff;
-        statstime = phase;
+    if (pickedbing > 0.0f) {
+        bing = pickedbing / 0.35f;
+        pickedbing -= FRAMETIME;
+        phase_angle = (static_cast<i32>(pickedbing * 32768.0f + 16384.0f) >> 1) & 0x7fff;
     } else {
-        phase = 0.0f;
-        statstime = 0.0f;
+        pickedbing = 0.0f;
     }
-    alpha -= 0.5f * (NuTrigTable[phase_angle] + alpha);
+    f32 bing_scale = 1.0f - 0.5f * (NuTrigTable[phase_angle] + 1.0f);
 
     shopitem_s *items = NULL;
     i32 *shelf_ids = NULL;
@@ -1061,13 +1129,9 @@ void DrawSubItems() {
         default:
             return;
     }
-    if (items == NULL || shelf_ids == NULL || positions == NULL || GameMenuLevel < 0) {
-        return;
-    }
-
     const f32 item_scale = picked == 1 ? 0.28f : (picked == 4 ? 0.8f : base_scale);
     MENU *menu = &GameMenu[GameMenuLevel];
-    for (i32 index = 1; index < 7; ++index) {
+    for (i32 index = 0; index < 7; ++index) {
         i32 slot = index;
         if (index == 6) {
             slot = 3;
@@ -1075,84 +1139,145 @@ void DrawSubItems() {
             slot = index - 1;
         }
 
+        if (moveitems > 0 && slot == 0)
+            continue;
         const i32 item_id = shelf_ids[slot];
         shopitem_s *item = &items[item_id];
         NUVEC position = positions[slot];
         f32 scale = item_scale * inoutscale;
-        if (slot == 1) {
-            scale = item_scale * inoutscale * scaleoverride[1];
+        f32 ypush = SubNormCharPush;
+        u16 rotation = 0;
+        if (slot == 0 || (slot == 1 && moveitems > 0)) {
+            scale = item_scale * inoutscale * scaleoverride[0];
+            ypush *= scaleoverride[0];
         } else if (slot == 2) {
             scale = item_scale * scale2 * inoutscale;
+            ypush = subpush[0];
         } else if (slot == 3) {
-            scale = 0.5f * alpha + item_scale * scale3 * inoutscale;
+            scale = item_scale * scale3 * inoutscale + 0.5f * bing_scale;
+            ypush = subpush[1];
+            if (pickedbing >= 0.0f)
+                rotation = static_cast<i32>(-bing * 65536.0f);
         } else if (slot == 4) {
             scale = item_scale * scale4 * inoutscale;
+            ypush = subpush[2];
         }
-        if (moveitems == 2 && slot == 3) {
+        if (!subitemselected)
+            scale *= alpha;
+        if (subitemselected == 2 && slot == 3) {
             NuVecAdd(&position, &position, &selectedoff);
             scale *= 1.25f;
         }
-        const f32 ypush = subpush[slot < 3 ? slot : 2];
-
         NUVEC screen;
-        NuCameraTransformScreenClip(&screen, &position, 1, NULL);
+        NUVEC hit_position = position;
+        hit_position.y += ypush;
+        f32 aspect = GetAspectRatio();
+        NuCameraTransformScreenClip(&screen, &hit_position, 1, NULL);
         menu->item_x[slot + 4] = screen.x;
         menu->item_y[slot + 4] = screen.y;
         f32 hit_size = 0.0f;
         f32 hit_width = 0.0f;
-        if (moveitems < 1) {
+        if (subitemselected < 1) {
             hit_size = (scale / item_scale) * 0.15f;
-            hit_width = hit_size / GetAspectRatio();
+            hit_width = hit_size / aspect;
         }
-        menu->item_width[slot + 4] = hit_width;
-        menu->item_height[slot + 4] = hit_size;
+        menu->item_width[slot + 4] = hit_size;
+        menu->item_height[slot + 4] = hit_width;
         menu->item_column[slot + 4] = slot;
         menu->item_row[slot + 4] = 1;
 
-        const u16 angle = static_cast<u16>(shelfang);
+        u16 angle = shelfang;
         switch (picked) {
             case 0: {
                 if (item->unlocked == 1) {
-                    DrawItem(&TopShelf[0].special, &position, scale * alpha, 0.0f, ypush, 0, angle, 0);
+                    u16 spin = static_cast<i32>(NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f);
+                    if (pickedbing > 0.0f && slot == 3)
+                        spin += rotation;
+                    angle += spin;
+                    DrawItem(&TopShelf[0].special, &position, scale, 1.0f, ypush, 0, angle, 0);
                 } else {
-                    DrawItem(&infoblank, &position, scale * alpha, 0.0f, ypush, 0, angle, 0);
+                    DrawItem(&infoblank, &position, scale, 1.0f, ypush, 0, angle, 0);
                     /* This is intentionally the original's odd TopShelf offset. */
                     DrawItem(reinterpret_cast<nuhspecial_s *>(reinterpret_cast<u8 *>(TopShelf) + 0x1c4), &position,
-                             scale * alpha, 0.0f, ypush, 0, angle, 0);
+                             scale, 1.0f, ypush, 0, angle, 0);
                 }
                 break;
             }
-            case 1:
-                if (NuSpecialExistsFn(&iconback) != 0) {
-                    Shop_DrawCharacter(item, &position, scale * alpha, ypush, 0, angle, 0);
-                }
+            case 1: {
+                u16 phase = static_cast<i32>(NuFmod(GameTimer.time_elapsed, 1.75f) / 1.75f * 65536.0f);
+                f32 oscillation = NuTrigTable[((phase + 0x4000) >> 1) & 0x7fff];
+                if (item->unlocked == 1)
+                    angle += static_cast<i32>(oscillation * 4369.0f);
+                Shop_DrawCharacter(item, &position, scale, ypush, 0, angle, 0);
                 break;
+            }
             case 2: {
-                const bool unlocked = item->unlocked == 1;
-                if (!unlocked) {
-                    DrawItem(&toolblank, &position, scale * alpha, 0.0f, ypush, 0, angle, 0);
+                if (item->unlocked == 1) {
+                    u16 spin = static_cast<i32>(NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f);
+                    if (pickedbing > 0.0f && slot == 3)
+                        spin += rotation;
+                    angle += spin;
                 }
-                if (NuSpecialExistsFn(&item->special) != 0) {
-                    DrawItem(&item->special, &position, scale * alpha, 0.0f, ypush, 0, angle, 0);
+                DrawItem(&toolblank, &position, scale, 1.0f, ypush, 0, angle, 0);
+                u16 id = item->item_id;
+                i8 area = static_cast<i8>(Cheat[id].area);
+                nuhspecial_s *special = &item->special;
+                if (!(Game.extra_purchased_bits[id >> 5] >> (id & 31) & 1) && id > 7 && area != -1 &&
+                    !Game.area_save[area].red_brick_collected)
+                    special = &extrasils[item_id];
+                if (NuSpecialExistsFn(special) != 0) {
+                    NUMTX matrix __attribute__((aligned(16)));
+                    NUANGVEC angles = {0, angle, 0};
+                    NuMtxSetRotateXYZVU0(&matrix, &angles);
+                    NUVEC size;
+                    size.x = size.y = size.z = scale;
+                    NuMtxScaleVU0(&matrix, &size);
+                    *reinterpret_cast<NUVEC *>(&matrix.m30) = position;
+                    matrix.m31 += ypush;
+                    NuSpecialDrawAt(special, &matrix);
                 }
                 break;
             }
-            case 4:
+            case 4: {
+                if (item->unlocked == 1) {
+                    u16 spin = static_cast<i32>(NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f);
+                    if (pickedbing > 0.0f && slot == 3)
+                        spin += rotation;
+                    angle += spin + static_cast<u16>(item->item_id * 0x1249) - 0x2000;
+                }
                 if (NuSpecialExistsFn(&item->special) != 0) {
-                    DrawItem(&item->special, &position, scale * alpha, 0.0f, ypush, 0, angle, 0);
+                    NUMTX matrix __attribute__((aligned(16)));
+                    NUVEC size = {scale, scale, scale};
+                    NuMtxSetScale(&matrix, &size);
+                    ShopRotateX(&matrix, 0);
+                    ShopRotateY(&matrix, angle);
+                    ShopRotateZ(&matrix, 0);
+                    NuMtxTranslate(&matrix, &position);
+                    matrix.m31 += ypush;
+                    NuSpecialDrawAt(&item->special, &matrix);
                 }
                 break;
+            }
             case 5: {
                 nuhspecial_s *blank = &cutblank;
                 nuhspecial_s *film = &cutfilm_locked;
                 if (shopcutsceneplayer != NULL && CutScenePlayer_CanStart(item->item_id) != 0) {
                     blank = &toolblank;
+                    CUTSCENEPLAYER_s *clips = static_cast<CUTSCENEPLAYER_s *>(shopcutsceneplayer);
+                    LEVELDATA *level = &LDataList[clips->clips[item->item_id].level_id];
+                    if (level->episode_index != -1) {
+                        if (level->episode_index & 1)
+                            blank = &codeblank;
+                    } else if (level->area_index != -1 && ANEWHOPE_ADATA && level->area_index == ANEWHOPE_ADATA->index)
+                        blank = &codeblank;
+                    rotation = static_cast<i32>(NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f) +
+                               static_cast<u16>(item->item_id * 0x1555);
                     film = &cutfilm_unlocked;
                 }
-                DrawItem(blank, &position, scale * alpha, 0.0f, ypush, 0,
-                         static_cast<u16>(angle + item->item_id * 0x1555), 0);
-                DrawItem(film, &position, scale * alpha, 0.0f, ypush, 0,
-                         static_cast<u16>(angle + item->item_id * 0x1555), 0);
+                if (item->unlocked == 1)
+                    angle += rotation;
+                DrawItem(blank, &position, scale, 1.0f, ypush, 0, angle, 0);
+                DrawItem(film, &position, scale, 1.0f, ypush, 0, angle, 0);
                 break;
             }
             default:
@@ -1163,24 +1288,28 @@ void DrawSubItems() {
 
 static void Shop_DrawCharacter(shopitem_s *item, NUVEC *position, f32 scale_value, f32 ypush, u16 xrot, u16 yrot,
                                u16 zrot) {
-    const bool top_shelf_character = item == &TopShelf[1];
-    if (top_shelf_character) {
+    if (!NuSpecialExistsFn(&iconback))
+        return;
+    i32 top_shelf_character = 0;
+    if (item == &TopShelf[1]) {
+        top_shelf_character = 1;
         const f32 cycle_length = static_cast<f32>(SHOPCHARCOUNT) * 0.2f;
         const i32 character_index = static_cast<i32>(NuFmod(GameTimer.time_elapsed, cycle_length) / 0.2f);
         item = &CharItems[character_index];
     }
 
-    const i32 character_id = item->item_id;
+    const i32 character_id = static_cast<u16>(item->item_id);
     const bool unlocked = CollectIDUnlocked(character_id) != NULL;
-    const bool unavailable = !unlocked || item->unlocked != 1;
-    const f32 alpha = unlocked ? 1.0f : 0.5f;
+    const i32 unavailable = !unlocked || item->unlocked != 1;
+    const f32 alpha = CollectIDUnlocked(character_id) ? 1.0f : 0.5f;
 
-    NUVEC scale = {scale_value, scale_value, scale_value};
-    NUMTX matrix;
+    NUVEC scale;
+    scale.x = scale.y = scale.z = scale_value;
+    NUMTX matrix __attribute__((aligned(16)));
     NuMtxSetScale(&matrix, &scale);
-    NuMtxRotateX(&matrix, xrot);
-    NuMtxRotateY(&matrix, yrot);
-    NuMtxRotateZ(&matrix, zrot);
+    ShopRotateX(&matrix, xrot);
+    ShopRotateY(&matrix, yrot);
+    ShopRotateZ(&matrix, zrot);
     NuMtxTranslate(&matrix, position);
     matrix.m31 += ypush;
 
@@ -1191,7 +1320,7 @@ static void Shop_DrawCharacter(shopitem_s *item, NUVEC *position, f32 scale_valu
         if (unavailable) {
             ++icon_object_id;
         }
-        WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+        WORLDINFO_s *world = WORLD;
         LEVEL_OBJECT_RUNTIME_s *icon = &world->lev_objs[icon_object_id];
         if (icon->active != 0) {
             NuSpecialDrawAtAlpha(&icon->special, &matrix, alpha);
@@ -1213,13 +1342,11 @@ void DrawTopShelf(i32) {
         }
     }
 
-    if (NuSpecialExistsFn(&iconback) != 0) {
-        Shop_DrawCharacter(&TopShelf[1], &ShelfPos[1], topscale[1] * alpha_scale, toppush[1], 0, shelfang, 0);
-    }
+    Shop_DrawCharacter(&TopShelf[1], &ShelfPos[1], topscale[1], toppush[1], 0, shelfang, 0);
 
     if (NuSpecialExistsFn(&TopShelf[2].special) != 0) {
         NUANGVEC rotation = {0, shelfang, 0};
-        NUMTX matrix;
+        NUMTX matrix __attribute__((aligned(16)));
         NuMtxSetRotateXYZVU0(&matrix, &rotation);
         const f32 scale_value = topscale[2] * alpha_scale;
         NUVEC scale = {scale_value, scale_value, scale_value};
@@ -1232,9 +1359,11 @@ void DrawTopShelf(i32) {
 
     if (SHOPGOLDBRICKS > 0 && NuSpecialExistsFn(&TopShelf[4].special) != 0) {
         NUVEC scale = {topscale[4] * alpha_scale, topscale[4] * alpha_scale, topscale[4] * alpha_scale};
-        NUMTX matrix;
+        NUMTX matrix __attribute__((aligned(16)));
         NuMtxSetScale(&matrix, &scale);
-        NuMtxRotateY(&matrix, static_cast<u16>(shelfang + 0x2000));
+        ShopRotateX(&matrix, 0);
+        ShopRotateY(&matrix, static_cast<u16>(shelfang + 0x2000));
+        ShopRotateZ(&matrix, 0);
         NuMtxTranslate(&matrix, &ShelfPos[4]);
         matrix.m31 += toppush[4] - 0.0325f;
         NuSpecialDrawAt(&TopShelf[4].special, &matrix);
@@ -1402,6 +1531,8 @@ void DrawSaveSlots(MENU_s *menu, float y) {
 }
 
 void DrawShopPanel() {
+    if (SHOPACTIVE && drawpanelptr)
+        drawpanelptr();
 }
 
 void DrawSnakeBody(GameObject_s *) {
@@ -1447,7 +1578,43 @@ void DrawBuildUpBar(float x, float y, i32 amount, i32 maximum, float scale, floa
     }
 }
 
+void *AddGameMessage(char *, NUVEC *, f32, NUVEC *, f32, u8, u8, u8, u32, f32);
+
 void DrawCodeMenu3D() {
+    i32 letters[6];
+    u16 angle = shelfang;
+    for (i32 i = 0; i < 6; ++i) {
+        if (usercode[i] >= 'A' && usercode[i] <= 'Z')
+            letters[i] = usercode[i] - 'A';
+        else if (usercode[i] >= '0' && usercode[i] <= '9')
+            letters[i] = usercode[i] - '0' + 26;
+    }
+    f32 bing = 0.0f;
+    if (pickedbing > 0.0f) {
+        bing = pickedbing / 0.35f * 0.5f;
+        pickedbing -= FRAMETIME;
+    } else
+        pickedbing = 0.0f;
+    for (i32 i = 0; i < 6; ++i) {
+        f32 scale = 0.95f * codemenuscale[i] * inoutscale;
+        f32 push = SubNormCharPush;
+        if (col == i) {
+            scale += bing * 0.5f;
+            push = subpush[1];
+        } else if (lastitem == i) {
+            scale += bing * 0.5f;
+            push = subpush[2];
+        }
+        DrawItem(&codeblank, &CodePos[i], scale, 1.0f, push, 0, angle, 0);
+        DrawItem(&atoz0to9icon[letters[i]], &CodePos[i], scale, 1.0f, push, 0, angle, 0);
+    }
+    static f32 arrowbing;
+    arrowbing = 0.5f * NuTrigTable[(static_cast<i32>(inoutscale * 32768.0f) >> 1) & 0x7fff];
+    f32 scale = inoutscale * 0.76f;
+    Draw3DObject(WORLD, 317, &CodePos[6], 0, shelfang, 0, scale, scale, scale, 2);
+    enum { SHOP_CODE_ARROW_MESSAGE_FLAGS = 0x83 };
+    AddGameMessage(">", &CodePos[6], 0.65f * inoutscale, NULL, 0.0f, 255, 255, 255, SHOP_CODE_ARROW_MESSAGE_FLAGS,
+                   0.0f);
 }
 
 void DrawCutBorders(i32) {
@@ -1624,9 +1791,6 @@ void DrawGameObjects() {
 }
 
 void DrawPaintLights() {
-}
-
-void DrawShopPrompts() {
 }
 
 void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha) {
@@ -2015,7 +2179,163 @@ void DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, 
 void DrawStatusMiniKit(float, float, float, float, float, i32, STATUSPACKET_s *, float) {
 }
 
+extern i16 tUNKNOWN, tPOWERBRICK, tLOCKED, tGOLDBRICK;
+extern "C" void PlaySfx(char *, NUVEC *);
+void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
+
 void DrawSubItemMenu2D() {
+    shopitem_s *items;
+    i32 *ids;
+    switch (picked) {
+        case 0:
+            items = HintItems;
+            ids = HintShelfIds;
+            break;
+        case 1:
+            items = CharItems;
+            ids = CharShelfIds;
+            break;
+        case 2:
+            items = ExtraItems;
+            ids = ExtraShelfIds;
+            break;
+        case 4:
+            items = BrickItems;
+            ids = BrickShelfIds;
+            break;
+        case 5:
+            items = CutItems;
+            ids = CutShelfIds;
+            break;
+        default:
+            return;
+    }
+    if (!items)
+        return;
+    shopitem_s *item = &items[ids[3]];
+    char title[128], subtitle[128];
+    char *name = item->name;
+    i32 buyable = 0;
+    i32 show_name = 0;
+    const u16 id = item->item_id;
+    const u32 alpha = static_cast<i32>(128.0f * ShopNameAlpha);
+    switch (item->type) {
+        case 0:
+            buyable = item->unlocked != 1 && item->price != 0;
+            break;
+        case 1:
+            if (item->unlocked == 1)
+                show_name = 1;
+            else if (CollectIDUnlocked(id))
+                buyable = show_name = 1;
+            else {
+                f32 scale = 0.7f * ShopLockedScale;
+                SmartTextEx(TTab[tLOCKED], 0.0f, (HUB_EPISODETITLEY + HUB_EPISODESUBTITLEY) * 0.5f, 1.0f, scale, scale,
+                            scale, 0, 255, 0, 0, 1.7f, 1, NULL, 0, alpha);
+            }
+            break;
+        case 2: {
+            NuStrCpy(subtitle, TTab[Cheat[id].text_id ? *Cheat[id].text_id : tUNKNOWN]);
+            name = subtitle;
+            i8 area = static_cast<i8>(Cheat[id].area);
+            if (item->unlocked == 1)
+                show_name = 1;
+            else if (id <= 7 || area == -1 || Game.area_save[area].red_brick_collected)
+                buyable = show_name = 1;
+            else {
+                sprintf(title, "%s %i", TTab[tPOWERBRICK], id - 7);
+                SmartTextEx(title, 0.0f, HUB_EPISODETITLEY, 1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 255, 255, 1.7f, 1, NULL, 0,
+                            alpha);
+                f32 scale = 0.6f * ShopLockedScale;
+                SmartTextEx(TTab[tLOCKED], 0.0f, HUB_EPISODESUBTITLEY, 1.0f, scale, scale, scale, 0, 255, 0, 0, 1.7f, 1,
+                            NULL, 0, alpha);
+            }
+            break;
+        }
+        case 4:
+            sprintf(title, "%s %i", TTab[tGOLDBRICK], id + 1);
+            name = title;
+            if (item->unlocked == 1)
+                show_name = 1;
+            else if (static_cast<f32>(id * 3600) <= Game.field30_0x7c2c)
+                buyable = show_name = 1;
+            else {
+                SmartTextEx(title, 0.0f, HUB_EPISODETITLEY, 1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 255, 255, 1.7f, 1, NULL, 0,
+                            alpha);
+                f32 scale = 0.6f * ShopLockedScale;
+                SmartTextEx(TTab[tLOCKED], 0.0f, HUB_EPISODESUBTITLEY, 1.0f, scale, scale, scale, 0, 255, 0, 0, 1.7f, 1,
+                            NULL, 0, alpha);
+            }
+            break;
+        case 5: {
+            i32 available = CutScenePlayer_CanStart(id);
+            CutScenePlayer_GetText(id, title, subtitle, available);
+            SmartTextEx(title, 0.0f, HUB_EPISODETITLEY, 1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 255, 255, 1.7f, 1, NULL, 0,
+                        alpha);
+            if (available && shopcutsceneplayer)
+                SmartTextEx(subtitle, 0.0f, HUB_EPISODESUBTITLEY, 1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 191, 0, 1.7f, 1, NULL,
+                            0, alpha);
+            else {
+                f32 scale = 0.6f * ShopLockedScale;
+                SmartTextEx(TTab[tLOCKED], 0.0f, HUB_EPISODESUBTITLEY, 1.0f, scale, scale, scale, 0, 255, 0, 0, 1.7f, 1,
+                            NULL, 0, alpha);
+            }
+            return;
+        }
+    }
+    u32 price = item->price;
+    if (subitemselected > 0) {
+        if (!buyable) {
+            ShopLockedScale = 1.5f;
+            GameAudio_PlaySfx(0x32, NULL, 0, 0);
+            subitemselected = 0;
+        } else if (Game.coins < price) {
+            CoinTotalScale = 1.5f;
+            PlaySfx("Shop_NotEnufMuny", &SubShelfPos[3]);
+            subitemselected = 0;
+        }
+    }
+    if (ShopNameAlpha <= 0.0f)
+        return;
+    if (show_name) {
+        f32 y = buyable ? HUB_EPISODETITLEY : (HUB_EPISODETITLEY + HUB_EPISODESUBTITLEY) * 0.5f;
+        f32 scale = buyable ? 0.6f : 0.8f;
+        SmartTextEx(name, 0.0f, y, 1.0f, scale, scale, scale, 0, 255, 255, 255, 1.7f, 1, NULL, 0,
+                    static_cast<i32>(128.0f * ShopNameAlpha));
+    }
+    if (buyable)
+        CoinTotal_Draw(price, HUB_EPISODESUBTITLEY, 1.2f, 0, ShopNameAlpha, 255, 191, 0);
+    if (subitemselected == 2) {
+        f32 pulse = 1.0f;
+        if (!TestForController()) {
+            f32 since_touch = GlobalTimer.time_elapsed - (LastTouchTime + 2.0f);
+            if (since_touch > 4.0f) {
+                i32 angle = static_cast<i32>(NuFmod(since_touch, 4.0f) * 0.25f * 65536.0f);
+                f32 value = NuTrigTable[(angle >> 1) & 0x7fff] - 0.8f;
+                if (value >= 0.0f)
+                    pulse = value + 1.0f;
+            }
+        }
+        f32 size = ICONSIZE * pulse;
+        DrawPanel3DObject(-0.3f, -0.3f, 1.0f, size, size, size, 0, 0, 0, &WORLD->lev_objs[165].special, 0,
+                          ShopNameAlpha);
+        DrawPanel3DObject(0.3f, -0.3f, 1.0f, size, size, size, 0, 0, 0, &WORLD->lev_objs[165].special, 0,
+                          ShopNameAlpha);
+        f32 text_size = pulse * 0.6f;
+        u8 text_alpha = static_cast<i32>(128.0f * ShopNameAlpha);
+        Text3DEx("$", -0.3f, -0.3f, 1.0f, 1.3f * text_size, text_size, text_size, 0, 0, 255, 0, text_alpha);
+        Text3DEx("X", 0.3f, -0.31f, 1.0f, 1.3f * text_size, text_size, text_size, 0, 255, 0, 0, text_alpha);
+        MENU_s *menu = &GameMenu[GameMenuLevel];
+        menu->item_x[11] = -0.3f;
+        menu->item_y[11] = -0.3f;
+        menu->item_x[12] = 0.3f;
+        menu->item_y[12] = -0.3f;
+        menu->item_width[11] = menu->item_width[12] = size;
+        menu->item_column[11] = 0;
+        menu->item_row[11] = 2;
+        menu->item_column[12] = 1;
+        menu->item_row[12] = 2;
+    }
 }
 
 void DrawSubItemMenu3D() {
@@ -2562,13 +2882,17 @@ void Draw_OK(MENU_s *) {
 
 void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value, float, float y_push, u16 x_rot, u16 y_rot,
               u16 z_rot) {
+    NUVEC scale;
+    NUANGVEC rotation;
+    NUMTX matrix __attribute__((aligned(16)));
     if (position != NULL) {
         if (NuSpecialExistsFn(special) != 0) {
-            NUANGVEC rotation = {x_rot, y_rot, z_rot};
-            NUMTX matrix;
+            rotation.x = x_rot;
+            rotation.y = y_rot;
+            rotation.z = z_rot;
             NuMtxSetRotateXYZVU0(&matrix, &rotation);
 
-            NUVEC scale = {scale_value, scale_value, scale_value};
+            scale.x = scale.y = scale.z = scale_value;
             NuMtxScaleVU0(&matrix, &scale);
             *reinterpret_cast<NUVEC *>(&matrix.m30) = *position;
             matrix.m31 += y_push;
@@ -2580,7 +2904,13 @@ void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value, float
 void DrawAABox(_vuv_s *, _vuv_s *, i32) {
 }
 
-void DrawArrow(nuhspecial_s *, float) {
+void DrawArrow(nuhspecial_s *special, float scale_value) {
+    if (NuSpecialExistsFn(special)) {
+        NUVEC scale = {scale_value, scale_value, scale_value};
+        NUMTX matrix = *NuSpecialGetDrawMtx(special);
+        NuMtxPreScale(&matrix, &scale);
+        NuSpecialDrawAt(special, &matrix);
+    }
 }
 
 void DrawCross(nuvec_s *, float, numtl_s *, i32) {

@@ -16,9 +16,6 @@ MIDSPECIALMOVEFN MidSpecialMoveFn = NULL;
 static __used__ void StarWars_PrepareHatch(AIPACKET_s *, APIOBJECT_s *, i32) {
 }
 
-static __used__ void StarWars_PrepareBigJump(AIPACKET_s *, APIOBJECT_s *, i32) {
-}
-
 static __used__ void StarWars_PrepareObstacle(AIPACKET_s *, APIOBJECT_s *, i32) {
 }
 

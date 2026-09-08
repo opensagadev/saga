@@ -38,6 +38,8 @@
 #include "legoapi/audio/sfx.h"
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/numath/numtx.h"
 #include "nu2api/nucore/nustring.h"
 
 #include <stdio.h>
@@ -80,6 +82,9 @@ void ResetRumble(RUMBLEPACKET *packet);
 void ResetLights(NUVEC *position, rtldata_s *data, void *set);
 void LightGameObject(GameObject_s *object, void *set);
 void InitSurfaceInfo(GameObject_s *object);
+i32 TightRope_SnapTo(GameObject_s *object, NUVEC *position);
+void Player_ClearContext(GameObject_s *object, i32 mode);
+void Player_ResetContexts(PLAYERPACKET_s *packet);
 i32 SetObjOnSurface(GameObject_s *object, i32 mode);
 void PortalGameObject(GameObject_s *object, i32 enable, i32 immediate, i16 portal, nugscn_s *scene);
 i32 Arcade_GetMode(u32 *mode);
@@ -984,7 +989,51 @@ extern "C" {
     }
 }
 
+f32 OFFSCREEN_CATCHUP_TIME = 1.0f;
 f32 drop_back_in_timer;
+
+i32 TryToTeleportToNextNode(GameObject_s *object, AIPATHNODE_s *node, i32 tightrope) {
+    if ((object->apiobj.field_0x1f4 & 0x400) != 0 || !object->ai.path_info.on_path) {
+        return 0;
+    }
+    if (!(object->field_0xf1c >= OFFSCREEN_CATCHUP_TIME) &&
+        (object->apiobj.model_draw_result != 0 || (object->tag_context_flags & 2) != 0 ||
+         !(drop_back_in_timer > 0.0f))) {
+        return 0;
+    }
+    NUVEC position = node->position;
+    position.y += object->apiobj.field_0x1e0;
+    if (NuCameraClipTestSphere(&position, object->apiobj.field_0x1e0, &numtx_identity) == 0) {
+        return 0;
+    }
+    if (tightrope != 0) {
+        if (TightRope_SnapTo(object, &node->position) == 0) {
+            return 0;
+        }
+        object->field_0x109c = 0;
+        object->field_0x1092 = 0;
+        object->field_0x1093 = 0;
+        object->ai.path_connection_state = 0;
+        return 1;
+    }
+    object->apiobj.initial_position = node->position;
+    object->apiobj.collision_position = object->apiobj.initial_position;
+    object->apiobj.start_position = object->apiobj.initial_position;
+    object->ai.owner->apiobj.position = object->apiobj.initial_position;
+    plr_lastpos = object->apiobj.initial_position;
+    object->apiobj.velocity = v000;
+    InitSurfaceInfo(object);
+    SetObjOnSurface(object, 0);
+    object->field_0x1092 = 0;
+    object->field_0x1093 = 0;
+    object->field_0x109c = 0;
+    object->ai.path_connection_state = 0;
+    if (object->field_0xcc0 == NULL) {
+        Player_ClearContext(object, 0);
+        Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
+    }
+    return 1;
+}
 
 void SetSpecialMove(GameObject_s *object, AIPATHNODE_s *target, AIPATHNODE_s *node, char move) {
     object->ai.field_0x180 = target;

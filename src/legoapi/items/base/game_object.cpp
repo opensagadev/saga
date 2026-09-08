@@ -136,9 +136,6 @@ static __used__ void Punch_HitExtraCode_LSW(GameObject_s *, nuvec_s *) {
 static __used__ void TrenchKilledCallback(GameObject_s *) {
 }
 
-static __used__ void TightRope_Attach(GameObject_s *, WORLDINFO_s *) {
-}
-
 static __used__ void TightRope_MoveUpdate(GameObject_s *, i32) {
 }
 

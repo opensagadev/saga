@@ -114,7 +114,7 @@ void NuDebugMsgPrint(char *message) {
 // original 0x2955ee -- lightmap display-list packet.  Mode 1 installs one
 // lightmap; mode 2 walks the packet's three lightmap ids.  The latter really
 // does select texture unit zero for each entry in the target binary.
-__attribute__((optimize("O0"))) void NuIOSDLLightmap(void *arg) {
+void NuIOSDLLightmap(void *arg) {
     i32 *packet = static_cast<i32 *>(arg);
     const i32 mode = packet[0];
 
@@ -281,7 +281,7 @@ void NuIOSDLFogCallback(void *arg) {
 }
 
 // original 0x295420 -- legacy packet containing three texture ids.
-__attribute__((optimize("O0"))) void NuIOSDLLightmapOld(void *arg) {
+void NuIOSDLLightmapOld(void *arg) {
     const i32 *texture_ids = static_cast<const i32 *>(arg);
     for (i32 index = 0; index < 3; ++index) {
         const i32 texture_id = texture_ids[index] > 0 ? texture_ids[index] : 1;
@@ -649,7 +649,7 @@ void NuTimeGetMicrosecondsPS(u32 *, u32 *) {
 }
 
 // original 0x2954f0 -- legacy three-lightmap packet followed by a UV offset.
-__attribute__((optimize("O0"))) void NuIOSDLLightmapOffsetOld(void *arg) {
+void NuIOSDLLightmapOffsetOld(void *arg) {
     const i32 *texture_ids = static_cast<const i32 *>(arg);
     for (i32 index = 0; index < 3; ++index) {
         const i32 texture_id = texture_ids[index] > 0 ? texture_ids[index] : 1;

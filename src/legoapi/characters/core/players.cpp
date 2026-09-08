@@ -11,6 +11,7 @@ struct HINT_s;
 #include "legoapi/world/area.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/core/config/cheat.h"
+#include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/items/base/collection.h"
 #include "legoapi/world/levels/episode.h"
 #include "legoapi/world/level.h"
@@ -43,7 +44,6 @@ struct TouchHolder;
 void CheckForPlayersTurnedOff();
 
 extern NUVEC plr_lastpos;
-extern void *CutScenePlayer;
 
 extern void GetTopBot(GameObject_s *obj);
 extern void GameObjectDimensions(GameObject_s *obj);
@@ -225,7 +225,6 @@ static char sArcadeStartDoor[] = "ArcadeStartDoor";
 static NUVEC HubVehiclesDoorPos[2] = {{-24.21f, 0.0f, -25.36f}, {-23.63f, 0.0f, -25.68f}};
 static NUVEC HubMinikitDoorPos[2] = {{-27.14f, 0.0f, -24.92f}, {-26.77f, 0.0f, -24.94f}};
 
-void Players_InitPositions(WORLDINFO *world) __attribute__((optimize("unroll-loops")));
 void Players_InitPositions(WORLDINFO *world) {
     i32 bonus = 0;
     if (world->area != NULL) {
@@ -358,9 +357,9 @@ void Players_InitPositions(WORLDINFO *world) {
         hub_from_arcade = -1;
         if (hub_from_cutsceneplayer != 0) {
             void *av = CutScenePlayer_Available();
-            if (av != NULL && (i16)(*(i16 *)((char *)CutScenePlayer_Available() + 0xa)) != -1) {
-                void *door =
-                    Door_FindByIndex(world, -1, (i32)(*(i16 *)((char *)CutScenePlayer_Available() + 0xa)), NULL);
+            if (av != NULL && static_cast<CUTSCENEPLAYER_s *>(CutScenePlayer_Available())->return_door != -1) {
+                void *door = Door_FindByIndex(
+                    world, -1, static_cast<CUTSCENEPLAYER_s *>(CutScenePlayer_Available())->return_door, NULL);
                 HubStartDoor = door;
                 if (door != NULL) {
                     f32 *vps = *(f32 **)((char *)(*(void **)((char *)door + 0xa0)) + 0x8);
@@ -629,7 +628,6 @@ void PostResetCode(GameObject_s *obj) {
 
 static TORPEDOPACKET TorpedoPackets[16];
 
-TORPEDOPACKET *GetTorpedoPacket(void) __attribute__((optimize("unroll-loops")));
 TORPEDOPACKET *GetTorpedoPacket(void) {
     for (i32 i = 0; i < 16; i++) {
         if ((TorpedoPackets[i].field_0x1 & 1) == 0) {
@@ -647,7 +645,6 @@ void SetHitPoints(GameObject_s *obj, i32 hp) {
     }
 }
 
-void RememberPlayerIDs(i32 a, i32 b, i32 c) __attribute__((force_align_arg_pointer));
 void RememberPlayerIDs(i32 a, i32 b, i32 c) {
     if (VehicleArea != 0 || GAMEDEMO != 0) {
         return;

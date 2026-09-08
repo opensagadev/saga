@@ -591,7 +591,7 @@ void ResetCharacterIdle(GameObject_s *object, i32 mode, i32 animation) {
     }
 }
 
-static __attribute__((used, noinline)) void NewCharacterIdle(GameObject_s *object, i32 default_idle) {
+static void NewCharacterIdle(GameObject_s *object, i32 default_idle) {
     CHARACTERDATA *character = object->apiobj.character_data;
     GAMECHARACTERDATA *game_character = static_cast<GAMECHARACTERDATA *>(character->field11_0x24);
     const i32 alternate_idle = game_character->field275_0x116 == 0 && (character->model_flags & 0x80) != 0 ? 118 : 25;
@@ -711,11 +711,14 @@ void UpdateCharacterIdle(GameObject_s *object) {
 }
 
 void UpdateCharacterIDs() {
-    shopitem_s *item = CharItems;
-    COLLECTID *collect = ShopCollection.list;
-    for (i32 i = 0; i < ShopCollection.count_y; ++i, ++item, ++collect) {
-        item->item_id = collect->id;
-        item->price = collect->field3_0x4;
+    const u16 count = ShopCollection.count_y;
+    if (count) {
+        COLLECTID *collect = ShopCollection.list;
+        shopitem_s *item = CharItems;
+        for (i32 i = 0; i < count; ++i, ++item, ++collect) {
+            item->item_id = collect->id;
+            item->price = collect->field3_0x4;
+        }
     }
 }
 

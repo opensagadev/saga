@@ -2,6 +2,7 @@
 #include "decomp.h"
 #include "nu2api/nu3d/nu2api_nu3d_types.h"
 #include "nu2api/nu3d/nushader.h"
+#include "nu2api/nucore/nustring.h"
 
 #include "nu2api/numath/numtx.h"
 

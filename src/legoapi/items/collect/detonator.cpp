@@ -30,7 +30,6 @@ void Detonators_Reset() {
     memset(Detonator, 0, sizeof(Detonator));
 }
 
-void Detonators_Update(void) __attribute__((optimize("O3")));
 void Detonators_Update() {
     for (i32 i = 0; i < 10; ++i) {
         DETONATOR_s *detonator = &Detonator[i];

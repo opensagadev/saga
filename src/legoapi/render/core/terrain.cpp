@@ -164,6 +164,7 @@ void TerrainImpactNorm();
 void Tag_Check(GameObject_s *object);
 void BigJumpCode(GameObject_s *object);
 f32 GameShadow(GameObject_s *object, NUVEC *position, f32 probe_height, i32 terrain_mask);
+void GetSurfaceInfo(GameObject_s *object, i32 update_surface, f32 shadow_height);
 extern "C" i32 NewShadowOnPlatform();
 extern NUVEC ShadNorm;
 

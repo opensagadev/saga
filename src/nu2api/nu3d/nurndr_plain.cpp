@@ -381,7 +381,7 @@ extern "C" i32 NuRndrSwapScreenEx(i32 mode, void (*callback)(void)) {
 // Scene / GScn
 // Original 0x2fe1a1. Display-list lightmap packets retain scene-local texture
 // indices after loading, so fix them alongside the material texture ids.
-extern "C" __attribute__((optimize("O0"))) void NuGScnFixupTIDsPS(NUGSCN *scene) {
+extern "C" void NuGScnFixupTIDsPS(NUGSCN *scene) {
     if (scene->display_list == NULL) {
         return;
     }

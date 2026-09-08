@@ -239,6 +239,10 @@ cc_library(
     ],
     includes = ["."],
     linkstatic = True,
+    linkopts = select({
+        "//bazel/platforms:linux": ["-Wl,--wrap=MenuInMemoryCard"],
+        "//conditions:default": [],
+    }),
     local_defines = ["__FILENAME__=__FILE__"],
     textual_hdrs = _TEXTUAL_HEADERS,
     deps = _HOST_PLATFORM_DEPS,
@@ -286,6 +290,36 @@ sh_binary(
     srcs = ["host/harness/run_native.sh"],
     args = ["$(location :saga_native)"],
     data = [":saga_native"],
+)
+
+# Reuses the native engine archives; only the startup/test boundary differs.
+cc_binary(
+    name = "saga_smoke",
+    srcs = ["host/harness/smoke.cpp"],
+    copts = _HOST_PLATFORM_COPTS,
+    defines = ["ANDROID", "HOST_BUILD"],
+    local_defines = ["__FILENAME__=__FILE__"],
+    linkopts = [
+        "-m32",
+        "-Wl,--wrap=main",
+        "-Wl,--wrap=_Z7EndPermv",
+        "-Wl,--wrap=_Z8LoadPermv",
+        "-Wl,--wrap=NuFrameBegin",
+        "-Wl,--wrap=NuFrameEnd",
+    ] + select({
+        ":native_linux_debug": ["-fsanitize=address,undefined"],
+        "//conditions:default": [],
+    }),
+    linkstatic = False,
+    target_compatible_with = ["@platforms//os:linux"],
+    deps = [":saga_native_objects"],
+)
+
+sh_binary(
+    name = "run_smoke",
+    srcs = ["host/harness/run_native.sh"],
+    args = ["$(location :saga_smoke)"],
+    data = [":saga_smoke"],
 )
 
 cc_library(

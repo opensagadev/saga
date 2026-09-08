@@ -1,6 +1,18 @@
 #include "host/platform/runtime.hpp"
+#include "gameapi/gui/apimenu.h"
 
 #include <SDL3/SDL.h>
+
+extern "C" i32 __real_MenuInMemoryCard();
+
+extern "C" i32 __wrap_MenuInMemoryCard() {
+    // After MenuReset, the reference reads MenuInfo[-1].id from zero padding
+    // at 0x665a24. Reproduce its false result without an invalid host read.
+    if (GameMenuLevel != -1 && GameMenu[GameMenuLevel].menu == -1) {
+        return 0;
+    }
+    return __real_MenuInMemoryCard();
+}
 
 const char *HostPlatformVideoDriver() {
     return "x11";

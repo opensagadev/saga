@@ -181,7 +181,7 @@ template <typename T> class NuSoundWeakPtr : public NuSoundWeakPtrListNode {
         this->obj = NULL;
     }
 
-    __attribute__((noinline)) void Set(T *ptr) {
+    void Set(T *ptr) {
         NuSoundWeakPtrListNode::sPtrListLock.Lock();
 
         if (this->obj != (void *)ptr) {

@@ -352,15 +352,15 @@ static void CS_cutsceneplayerobj(NUFPAR *fp) {
     if (NuSpecialFind(CS_worldinfo->current_gscn, &object->special, fp->word_buf, 1) == 0) {
         return;
     }
-    object->flags &= ~3U;
+    object->flags &= ~(CLIP_OBJECT_SHOW | CLIP_OBJECT_HIDE);
     while (NuFParGetWord(fp) != 0) {
         if (NuStrICmp(fp->word_buf, "on") == 0) {
-            object->flags = (object->flags | 1) & ~2U;
+            object->flags = (object->flags | CLIP_OBJECT_SHOW) & ~CLIP_OBJECT_HIDE;
         } else if (NuStrICmp(fp->word_buf, "off") == 0) {
-            object->flags = (object->flags & ~1U) | 2;
+            object->flags = (object->flags & ~CLIP_OBJECT_SHOW) | CLIP_OBJECT_HIDE;
         } else if (NuStrICmp(fp->word_buf, "end_anim") == 0 || NuStrICmp(fp->word_buf, "endanim") == 0 ||
                    NuStrICmp(fp->word_buf, "anim_end") == 0 || NuStrICmp(fp->word_buf, "animend") == 0) {
-            object->flags = (object->flags & ~3U) | 4;
+            object->flags = (object->flags & ~(CLIP_OBJECT_SHOW | CLIP_OBJECT_HIDE)) | CLIP_OBJECT_ANIM_END;
         }
     }
     ++CS_CutInfo->state_count;
@@ -529,7 +529,7 @@ static NUFPCOMJMP CutScene_ConfigKeywords[] = {
     {NULL, NULL},
 };
 
-__attribute__((noinline)) static void CutScene_Configure(CUTINFO *cut, char *name, VARIPTR *buf, VARIPTR *buf_end) {
+static __attribute__((noinline)) void CutScene_Configure(CUTINFO *cut, char *name, VARIPTR *buf, VARIPTR *buf_end) {
     CUTSCENEPLAYEROBJ state_entries[32];
 
     CS_CutInfo = cut;
@@ -1525,8 +1525,7 @@ static __used__ void instNuGCutRigidSysEnd(instNUGCUTSCENE_s *instance, float fr
     }
 }
 
-static __attribute__((noinline)) void instNuGCutLocatorSysEnd(instNUGCUTLOCATORSYS_s *instance,
-                                                              NUGCUTLOCATORSYS_s *system, float) {
+static void instNuGCutLocatorSysEnd(instNUGCUTLOCATORSYS_s *instance, NUGCUTLOCATORSYS_s *system, float) {
     for (u32 i = 0; i < system->locator_count; ++i) {
         instNUGCUTLOCATOR_s *inst_locator = &instance->locators[i];
         inst_locator->field_00 = 0;
@@ -1657,7 +1656,7 @@ extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance) {
 
 static void instNuGCutRigidSysUpdate(instNUGCUTSCENE_s *, float, int);
 static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *, float);
-static SAGA_REGPARM(1) SAGA_SSEREGPARM void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *, float);
+static void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *, float);
 static void instNuGCutSceneClipTest(instNUGCUTSCENE_s *);
 extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
 
@@ -1689,8 +1688,7 @@ static inline void instNuGCutSceneCopyStreamAnimations(instNUGCUTSCENE_s *instan
     }
 }
 
-static __used__ SAGA_REGPARM(3) SAGA_SSEREGPARM
-    void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paused, int skip, float elapsed) {
+static __used__ void instNuGCutSceneUpdate(instNUGCUTSCENE_s *instance, int paused, int skip, float elapsed) {
     NUGCUTSCENE_s *cutscene = instance->cutscene;
     instance->flags_8d &= ~0x10U;
     u16 *sync_flags = reinterpret_cast<u16 *>(&instance->flags_8a);
@@ -2220,8 +2218,7 @@ static __used__ void instNuGCutRigidSysUpdate(instNUGCUTSCENE_s *instance, float
     }
 }
 
-static __used__ SAGA_REGPARM(1) SAGA_SSEREGPARM
-    void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
+static __used__ void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *instance, float frame) {
     instNUGCUTTRIGGERSYS_s *trigger_instance = instance->trigger_instance;
     NUGCUTTRIGGERSYS_s *system = instance->cutscene->trigger_system;
     for (i32 i = 0; i < system->event_count; ++i) {
@@ -2307,10 +2304,6 @@ extern "C" void NuGCutSceneSysRender(i32 paused) {
             }
         }
     }
-}
-
-static __used__ unsigned int CutScenePlayer_Accept(CUTSCENEPLAYERCLIP *) {
-    return {};
 }
 
 static __used__ void CutScene_OverrideConfigFileName_LSW(char *, int, int) {

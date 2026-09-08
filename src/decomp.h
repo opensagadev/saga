@@ -52,15 +52,6 @@ enum AREA_FLAGS {
 
 #define __used__ __attribute__((used)) // NOLINT(readability-identifier-naming)
 
-// regparm only exists on 32-bit x86; 64-bit host builds compile it out.
-#if defined(__i386__)
-#define SAGA_REGPARM(n) __attribute__((regparm(n)))
-#define SAGA_SSEREGPARM __attribute__((sseregparm))
-#else
-#define SAGA_REGPARM(n)
-#define SAGA_SSEREGPARM
-#endif
-
 #ifdef HOST_BUILD
 #define SAGA_HOST_STATIC static
 #define SAGA_HOST_SAFE_MEMSET(dest, value, size)                                                                       \

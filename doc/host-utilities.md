@@ -221,6 +221,63 @@ bazel run --config=native //src:run_native -- save schema
 bazel run --config=native //src:run_native -- save schema --options
 ```
 
+## Direct gameplay smoke tests (Linux)
+
+`saga_smoke` is a separate host executable linked against the native engine.
+It loads a validated mobile game-save payload after permanent assets initialize,
+selects the requested destination and runs the normal level-loading/game loop.
+Test-only link wrappers use the existing synchronous permanent-data loader to
+skip startup screens. They are absent from `saga_native`, WASM and Android.
+
+```sh
+bazel build --config=native //src:saga_smoke
+bazel run --config=native //src:run_smoke -- --list
+bazel run --config=native //src:run_smoke -- --area Negotiations --frames 300
+bazel run --config=native //src:run_smoke -- --level Negotiations_b --save '/path/to/fixture'
+bazel run --config=native //src:run_smoke -- --level Map --visible
+```
+
+Names are case-insensitive internal asset names; `Map` is the Cantina. `--list`
+prints area/level pairs. `--area` selects its first gameplay level, excluding
+intro/midtro/outro/status entries. Asset loading still takes time; “direct” means
+there is no menu interaction or startup-screen wait.
+
+The default fixture is the same slot-0 path used by the save utility above.
+For reproducible tests, supply a fixed fixture with `--save`. The input is read
+only and its envelope, payload size and checksum are validated. Autosave is
+disabled and any incidental writes go to a unique `.work/smoke/<run>/` directory.
+Rendering uses a hidden SDL window with dummy audio and no MSAA; an X display
+and working GLES driver are still required. `--visible` shows the window.
+
+A pass requires the requested world, a gameplay socket system, an active player
+with a controller, finite player position/time, and 300 advancing simulation
+frames by default (`--frames`). `--frames 0` disables the frame limit; watchdog
+timeouts, including the overall deadline, remain active. It does not prove visual correctness, successful
+movement, or level completion. A separate watchdog thread detects stopped frame
+completion and stalled gameplay after readiness (`--stall-ms`, default 10000).
+An overall deadline also catches loading loops that keep drawing frames but
+never reach gameplay (`--timeout-ms`, default 90000). Do not set sanitizer
+environment overrides that disable error halting: debug smoke builds default
+to halting on UBSan errors as well as ASan errors.
+
+Exit statuses: **0** pass, **1** failure, **2** invalid input/destination/save,
+**124** watchdog timeout. Crashes retain their abnormal process exit status.
+The watchdog terminates the process without waiting for potentially hung engine
+workers. Diagnostics go to stderr with a `smoke:` prefix.
+
+```sh
+python3 scripts/checks/check_smoke_utility.py "$(realpath bazel-bin/src/saga_smoke)"
+```
+
+This checks malformed saves, missing/invalid arguments and destinations, both
+watchdog deadlines, 120 frames in Negotiations, 300 frames in Anakin's Flight,
+and unchanged fixture bytes.
+
+The audio utility is retained: it checks the real game's sound pipeline through
+OpenSL emulation and SDL, requiring a player, non-silent mixed PCM and at least
+three seconds of audio consumed. This checks audio output that gameplay frame
+progress alone cannot establish.
+
 ## Non-interactive visual captures
 
 Use the window utility in hidden, muted mode when running alongside other desktop

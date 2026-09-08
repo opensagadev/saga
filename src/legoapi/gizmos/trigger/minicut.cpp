@@ -7,9 +7,15 @@
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/numath/nuvec.h"
 
 #include <stdio.h>
 #include <string.h>
+
+extern i32 editor_active;
+extern i32 MiniCutCam;
+void GameCameraMakeMiniCut3(u32, float, i32, i32, i32, void *, i32, NUVEC *, float, float, float, float, float, float,
+                            float, i32, nugspline_s *, char, char);
 
 static i32 GizMiniCut_GetMaxGizmos(void *world_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
@@ -28,27 +34,60 @@ static void GizMiniCut_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_p
 }
 
 static char *GizMiniCut_GetGizmoName(GIZMO *gizmo) {
-    UNIMPLEMENTED();
-    return {};
+    return gizmo != NULL ? static_cast<char *>(gizmo->object) : NULL;
 }
 
-static i32 GizMiniCut_GetOutput(GIZMO *gizmo, i32, i32) {
-    UNIMPLEMENTED();
-    return {};
+static i32 GizMiniCut_GetOutput(GIZMO *gizmo, i32 output_index, i32) {
+    if (gizmo == NULL || gizmo->object == NULL)
+        return 0;
+    MINICUT *minicut = static_cast<MINICUT *>(gizmo->object);
+    if (output_index == 0)
+        return MiniCutCam == 0 ? minicut->played : 0;
+    if (output_index == 1)
+        return minicut->played;
+    return 0;
 }
 
 static char *GizMiniCut_GetOutputName(GIZMO *gizmo, i32 output_index) {
-    UNIMPLEMENTED();
-    return {};
+    if (output_index == 0)
+        return "Played";
+    if (output_index == 1)
+        return "Playing";
+    return "Unknown!";
 }
 
 static i32 GizMiniCut_GetNumOutputs(GIZMO *gizmo) {
-    UNIMPLEMENTED();
-    return {};
+    return 2;
 }
 
-void GizMiniCut_Activate(GIZMO *gizmo, i32) {
-    UNIMPLEMENTED();
+void GizMiniCut_Activate(GIZMO *gizmo, i32 active) {
+    if (active == 0)
+        return;
+    MINICUT *minicut = static_cast<MINICUT *>(gizmo->object);
+    for (i32 index = 0; index < minicut->part_count; ++index) {
+        MINICUTPART *part = &minicut->parts[index];
+        NUVEC position;
+        position.z = part->field_0x30;
+        position.x = 0.0f;
+        position.y = 0.0f;
+        NuVecRotateX(&position, &position, static_cast<u16>(part->field_0x34));
+        NuVecRotateY(&position, &position, static_cast<u16>(part->field_0x36));
+        NuVecAdd(&position, &position, part->resolved_position);
+        u32 flags = index == 0 ? 0x28f : 0x8f;
+        if (index == minicut->part_count - 1)
+            flags |= 0x400;
+        if (part->field_0x3c >= 0.0f)
+            flags |= 0x800;
+        if (part->field_0x40 > 0.0f)
+            flags |= 0x1000;
+        GameCameraMakeMiniCut3(flags, part->field_0x30, static_cast<u16>(part->field_0x34),
+                               static_cast<u16>(part->field_0x36), static_cast<u16>(part->field_0x38),
+                               part->resolved_position, 0, &position, minicut->field_0x1c, minicut->field_0x24,
+                               minicut->field_0x20, minicut->field_0x28, part->field_0x3c, part->field_0x40,
+                               minicut->field_0x2c, 0, NULL, -1, 2);
+        if (editor_active == 0)
+            minicut->played = 1;
+    }
 }
 
 static NUVEC *GizMiniCut_GetPos(GIZMO *gizmo) {

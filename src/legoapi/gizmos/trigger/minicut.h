@@ -25,7 +25,8 @@ typedef struct MINICUT_s {
     char name[0x10];
     MINICUTPART *parts; // 0x10
     i32 part_count;     // 0x14
-    u8 reserved_18[4];
+    u8 played;          // 0x18
+    u8 reserved_19[3];
     f32 field_0x1c;
     f32 field_0x20;
     f32 field_0x24;

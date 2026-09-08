@@ -1987,7 +1987,7 @@ static void CC_wall_jump(NUFPAR *parser) {
     }
 }
 
-static NUFPCOMJMP ConfigChar_Keywords[] = {
+NUFPCOMJMP ConfigChar_Keywords[] = {
     {"name_id", CC_name_id},
     {"name", CC_name_id},
     {"mass", CC_mass},
@@ -2203,7 +2203,3 @@ NUFPCOMJMP ConfigChar_GameKeywords[] = {
     {"variant", CC_variant},
     {NULL, NULL},
 };
-
-NUFPCOMJMP *CharConfig_GetKeywords() {
-    return ConfigChar_Keywords;
-}

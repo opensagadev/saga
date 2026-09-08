@@ -765,9 +765,15 @@ struct CUTSCENESFX {
 };
 DECOMP_ASSERT(sizeof(CUTSCENESFX) == 0x14, "CUTSCENESFX size");
 
+enum CUTSCENEPLAYEROBJ_FLAGS {
+    CLIP_OBJECT_SHOW = 1,
+    CLIP_OBJECT_HIDE = 2,
+    CLIP_OBJECT_ANIM_END = 4,
+};
 struct CUTSCENEPLAYEROBJ {
     nuhspecial_s special;
-    u32 flags;
+    u8 flags;
+    u8 padding[3];
 };
 DECOMP_ASSERT(sizeof(CUTSCENEPLAYEROBJ) == 0x10, "CUTSCENEPLAYEROBJ size");
 
@@ -1127,26 +1133,26 @@ DECOMP_ASSERT(offsetof(GAMEAUDIO, sfx_ids) == 0x15c, "GAMEAUDIO sfx_ids offset")
 // 0x230-byte block; matrix and mode offsets are verified against
 // MoveGameCamera and InitGameBeforeConfig.
 struct GAMECAMERA_s {
-    SOCKPOSITION sock_position; // 0x000; camera begins with its rail position state
-    NUMTX mtx;                  // 0x038
-    NUMTX target_mtx;           // 0x078
-    NUMTX render_mtx;           // 0x0b8
-    NUVEC shaken_right;         // 0x0f8
-    NUVEC shaken_up;            // 0x104
-    NUVEC dir;                  // 0x110
-    NUVEC pos;                  // 0x11c
-    NUVEC target;               // 0x128
-    NUVEC blend_start_position; // 0x134
-    NUVEC desired_position;     // 0x140
-    NUVEC blend_end_position;   // 0x14c
-    u8 pad_158[0x164 - 0x158];
-    NUVEC blend_start_target; // 0x164
+    SOCKPOSITION sock_position;       // 0x000; camera begins with its rail position state
+    NUMTX mtx;                        // 0x038
+    NUMTX target_mtx;                 // 0x078
+    NUMTX render_mtx;                 // 0x0b8
+    NUVEC shaken_right;               // 0x0f8
+    NUVEC shaken_up;                  // 0x104
+    NUVEC dir;                        // 0x110
+    NUVEC pos;                        // 0x11c
+    NUVEC target;                     // 0x128
+    NUVEC blend_start_position;       // 0x134
+    NUVEC desired_position;           // 0x140
+    NUVEC blend_end_position;         // 0x14c
+    NUVEC blend_destination_position; // 0x158; captured on the first blend frame
+    NUVEC blend_start_target;         // 0x164
     u8 pad_170[0x17c - 0x170];
-    NUVEC blend_end_target; // 0x17c
-    u8 pad_188[0x194 - 0x188];
-    NUVEC shake_offset;    // 0x194; filtered camera shake applied to render_mtx
-    NUVEC shake_direction; // 0x1a0; current random shake direction
-    NUVEC shake_target;    // 0x1ac; next random shake direction
+    NUVEC blend_end_target;         // 0x17c
+    NUVEC blend_destination_target; // 0x188; captured on the first blend frame
+    NUVEC shake_offset;             // 0x194; filtered camera shake applied to render_mtx
+    NUVEC shake_direction;          // 0x1a0; current random shake direction
+    NUVEC shake_target;             // 0x1ac; next random shake direction
     f32 field_0x1b8;
     f32 blend_time;          // 0x1bc
     f32 blend_duration;      // 0x1c0
@@ -1706,14 +1712,26 @@ DECOMP_ASSERT(offsetof(GRABBER_s, field_0x484) == 0x484, "GRABBER saved field of
 DECOMP_ASSERT(offsetof(GRABBER_s, field_0x48c) == 0x48c, "GRABBER saved field offset");
 DECOMP_ASSERT(offsetof(GRABBER_s, field_0x494) == 0x494, "GRABBER saved field offset");
 struct GRAPPLE_s;
+enum HINT_FLAGS {
+    HINT_COMPLETE_ON_DISPLAY = 0x01,
+    HINT_SHOP_PURCHASED = 0x02,
+    HINT_DIRECT_DISPLAY = 0x08,
+};
 struct HINT_s {
     i16 control_mode_ids[2]; // 0x00
     u8 flags;                // 0x04
-    u8 pad_0x05[0x1c - 0x05];
-    u8 completion_flags[4]; // 0x1c
+    u8 pad_0x05[3];
+    i32 shop_price;       // 0x08: consumed by InitShop
+    f32 display_duration; // 0x0c; zero has no timed cancellation
+    f32 repeat_delay;     // 0x10
+    u8 pad_0x14[4];
+    void (*on_display)(HINT_s *); // 0x18
+    u8 completion_flags[4];       // 0x1c
     f32 field_0x20;
 };
 DECOMP_ASSERT(sizeof(HINT_s) == 0x24, "HINT_s size");
+DECOMP_ASSERT(offsetof(HINT_s, shop_price) == 0x08, "HINT_s shop price offset");
+DECOMP_ASSERT(offsetof(HINT_s, on_display) == 0x18, "HINT_s display callback offset");
 struct HINTSYS_s {
     void (*update_fn)(HINT_s *, i32); // 0x00
     HINT_s *hints;                    // 0x04
@@ -1723,7 +1741,10 @@ struct HINTSYS_s {
     u8 pad_0x0e[0x10 - 0x0e];
     u32 *save_bits;     // 0x10
     i32 save_bit_count; // 0x14
-    i32 current_hint;   // 0x18
+    union {
+        i32 current_hint;
+        f32 display_elapsed; // 0x18
+    };
     i32 field_0x1c;
 };
 DECOMP_ASSERT(sizeof(HINTSYS_s) == 0x20, "HINTSYS_s size");
@@ -1737,7 +1758,7 @@ struct HINTUIBUTTON_s {
     f32 field_0x54;
     u8 pad_0x58[0x78 - 0x58];
     void *field_0x78;
-    i32 field_0x7c;
+    HINT_s *field_0x7c;
     u8 pad_0x80[0x84 - 0x80];
     f32 *field_0x84;
     f32 field_0x88;
@@ -1749,6 +1770,7 @@ struct HINTUIBUTTON_s {
     u8 field_0xa0;
 };
 DECOMP_ASSERT(sizeof(HINTUIBUTTON_s) == 0xa4, "HINTUIBUTTON_s size");
+DECOMP_ASSERT(offsetof(HINTUIBUTTON_s, field_0x7c) == 0x7c, "HINTUIBUTTON_s pending hint offset");
 struct HOTHBATTLE_MELEE_s {};
 struct HashRedirect;
 struct LANGUAGEDATA {

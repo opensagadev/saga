@@ -92,10 +92,6 @@ static __used__ void DrawEpisodesMenu(int, float) {
 static __used__ void InitUI() {
 }
 
-static __used__ i32 SubItemMenu(MENU_s *) {
-    return 0;
-}
-
 namespace {
     void _NuTimeBarSlotBegin(void) {
     }

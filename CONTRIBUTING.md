@@ -122,6 +122,20 @@ bazel build --config=native //src:saga_native
 bazel build --config=native_release //src:saga_native
 ```
 
+For direct gameplay regression checks on Linux, use the separate smoke build:
+
+```sh
+bazel run --config=native //src:run_smoke -- --area Negotiations --frames 300
+bazel run --config=native //src:run_smoke -- --level Map --save '/path/to/fixture'
+bazel run --config=native //src:run_smoke -- --list
+```
+
+It bypasses startup menus, validates and loads a save without modifying it, and
+fails on crashes, sanitizer errors, stalled gameplay or an overall deadline.
+It uses hidden graphics and dummy audio by default; an X display is required.
+See [host utilities](doc/host-utilities.md#direct-gameplay-smoke-tests-linux) for
+fixture selection, readiness checks, timeouts and exit statuses.
+
 On Windows, from MSYS2 MINGW64:
 
 ```sh

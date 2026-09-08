@@ -364,7 +364,7 @@ static void xActions(NUFPAR *parser) {
     }
 }
 
-__attribute__((noinline)) static void ConditionsParseFinalise(AICONDITION *cond, NUFPAR *parser) {
+static void ConditionsParseFinalise(AICONDITION *cond, NUFPAR *parser) {
     cond->keep_blocked = 0;
 
     NuFParGetWord(parser);

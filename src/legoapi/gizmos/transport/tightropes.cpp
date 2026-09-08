@@ -3,15 +3,136 @@
 #include "decomp.h"
 #include "gameapi/edtools/edfile.h"
 #include "nu2api/nucore/nustring.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/legoapi_types.h"
+#include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
 
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
 
+extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
+void FindAnglesZX(NUVEC *, u16 *, u16 *);
+void GameObjectOrigin(GameObject_s *);
+
 struct TIGHTROPEPROGRESS {
     i32 state[2];
 };
+
+TIGHTROPE *TightRope_InRange(GameObject_s *object, WORLDINFO_s *world, NUVEC *result) {
+    TIGHTROPE *rope = world->tightropes;
+    const f32 width = 3.0f * object->apiobj.field_0x1dc;
+    const NUVEC position = object->apiobj.collision_position;
+    for (i32 i = 0; i < world->tightrope_count; ++i, ++rope) {
+        if (rope->enabled == 0 || rope->active == 0) {
+            continue;
+        }
+        NUVEC local;
+        local.x = position.x - rope->start.x;
+        local.z = position.z - rope->start.z;
+        NuVecRotateY(&local, &local, -rope->angle);
+        if (local.z >= 0.0f && local.z <= rope->horizontal_length && local.x >= -width && local.x <= width) {
+            local.x = 0.0f;
+            local.y = rope->start.y + (rope->end.y - rope->start.y) * (local.z / rope->horizontal_length);
+            f32 margin = object->apiobj.field_0x1e0;
+            if (NuFabs(local.y - position.y) < margin) {
+                if (result != NULL) {
+                    if ((static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->flags_090 &
+                         0x10000000) == 0) {
+                        margin = object->apiobj.field_0x1dc;
+                    }
+                    if (local.z > rope->horizontal_length - margin) {
+                        local.z = rope->horizontal_length - margin;
+                    } else if (local.z < margin) {
+                        local.z = margin;
+                    }
+                    NuVecRotateY(result, &local, rope->angle);
+                    result->x += rope->start.x;
+                    result->z += rope->start.z;
+                }
+                return rope;
+            }
+        }
+    }
+    return NULL;
+}
+
+static __used__ i32 TightRope_Attach(GameObject_s *object, WORLDINFO_s *world) {
+    NUVEC point;
+    TIGHTROPE *rope = TightRope_InRange(object, world, &point);
+    if (rope == NULL) {
+        return 0;
+    }
+    object->character_context = 0x44;
+    object->field_0x788 = rope;
+    object->context_variant_flags =
+        (object->context_variant_flags & ~8) |
+        (((static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->flags_090 & 0x80000) == 0)
+         << 3);
+    if (object->apiobj.character_model->model_data_b[0x8f] != NULL &&
+        ((static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->flags_090 & 0x80000) == 0 ||
+         point.y > (object->apiobj.upper_position.y - object->apiobj.lower_position.y) * 0.25f +
+                       object->apiobj.lower_position.y)) {
+        object->context_animation = 0x8f;
+        object->context_animation_timer = AnimDuration(object->id, 0x8f, 0.0f, 0.0f, 1);
+    } else {
+        object->context_animation = 0x88;
+    }
+    object->tightrope_position = point;
+    i32 difference =
+        RotDiff(static_cast<TIGHTROPE *>(object->field_0x788)->angle, object->apiobj.movement_facing_angle);
+    if (difference < 0) {
+        difference = -difference;
+    }
+    u16 angle = static_cast<TIGHTROPE *>(object->field_0x788)->angle;
+    if (difference > 0x4000) {
+        angle += 0x8000;
+    }
+    object->apiobj.movement_facing_angle = angle;
+    object->field_0x768 =
+        NuVecXZDist(&object->apiobj.collision_position, &static_cast<TIGHTROPE *>(object->field_0x788)->start, NULL);
+    rope = static_cast<TIGHTROPE *>(object->field_0x788);
+    f32 horizontal = NuFsqrt(rope->direction.x * rope->direction.x + rope->direction.z * rope->direction.z);
+    NuVecRotateX(&point, &v010, -NuAtan2D(static_cast<TIGHTROPE *>(object->field_0x788)->direction.y, horizontal));
+    NuVecRotateY(&point, &point, static_cast<TIGHTROPE *>(object->field_0x788)->angle);
+    FindAnglesZX(&point, &object->tightrope_x_rotation, &object->tightrope_z_rotation);
+    if ((static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->flags_090 & 0x10000000) != 0) {
+        point.x = 0.0f;
+        point.y = object->apiobj.upper_position.y - object->apiobj.lower_position.y;
+        point.z = 0.0f;
+        NuVecRotateZ(&object->tightrope_offset, &point, object->tightrope_z_rotation);
+        NuVecRotateX(&object->tightrope_offset, &object->tightrope_offset, object->tightrope_x_rotation);
+        NuVecSub(&object->tightrope_offset, &point, &object->tightrope_offset);
+    } else {
+        object->tightrope_offset = v000;
+    }
+    return 1;
+}
+
+i32 TightRope_SnapTo(GameObject_s *object, NUVEC *position) {
+    object->apiobj.lower_position = *position;
+    object->apiobj.upper_position = object->apiobj.lower_position;
+    object->apiobj.upper_position.y += object->apiobj.field_0x1e0;
+    object->apiobj.collision_position = object->apiobj.lower_position;
+    object->apiobj.lower_position.y -= object->apiobj.field_0x1e0;
+    if (TightRope_Attach(object, WORLD) == 0) {
+        return 0;
+    }
+    object->apiobj.position.x = object->apiobj.collision_position.x;
+    object->apiobj.position.z = object->apiobj.collision_position.z;
+    if ((static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->flags_090 & 0x80000) != 0) {
+        object->apiobj.position.y = object->tightrope_position.y - object->field_0xffc * object->apiobj.field_0xa8;
+    } else {
+        object->apiobj.position.y = object->tightrope_position.y - object->field_0x1000 * object->apiobj.field_0xa8;
+    }
+    u8 origin_flag = (object->field_0xe24 >> 3) & 1;
+    object->field_0xe24 &= ~8;
+    GameObjectOrigin(object);
+    object->field_0xe24 = (object->field_0xe24 & ~8) | (origin_flag << 3);
+    return 1;
+}
 
 static i32 TightRopes_GetMaxGizmos(void *world_info) {
     WORLDINFO *world = (WORLDINFO *)world_info;

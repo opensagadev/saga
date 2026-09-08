@@ -3,6 +3,7 @@
 #include "decomp.h"
 
 struct HostWindowOptions {
+    const char *documents_path = nullptr;
     bool capture = false;
     bool trace_movement = false;
     bool script_input = false;
