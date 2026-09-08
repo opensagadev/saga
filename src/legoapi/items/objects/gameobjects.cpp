@@ -5,6 +5,7 @@
 #include "gameapi/gui/apimenu.h"
 #include "globals.h"
 #include "legoapi/world/mission.h"
+#include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/fx/spline_position.h"
@@ -546,6 +547,15 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+static f32 Condition_CutScenePlaying(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    // The reference target returns zero unconditionally for this condition.
+    return 0.0f;
+}
+
+static void *Condition_CutScenePlayingInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    return CutScene_Find(WORLD->cutscene_sys, name);
+}
+
 static f32 Condition_Message(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     GIZAIMESSAGE_s *message = static_cast<GIZAIMESSAGE_s *>(argument);
     return message != NULL ? message->value : 0.0f;
@@ -1044,7 +1054,7 @@ extern "C" {
         {"CutSceneFinished", NULL, NULL},
         {"CutSceneExists", NULL, NULL},
         {"PlayerInSock", NULL, NULL},
-        {"CutScenePlaying", NULL, NULL},
+        {"CutScenePlaying", Condition_CutScenePlaying, Condition_CutScenePlayingInit},
         {"RigidAnimFrame", NULL, NULL},
         {"SockDistanceToPlayer", NULL, NULL},
         {"SockDistanceToOpponent", NULL, NULL},
