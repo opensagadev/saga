@@ -1333,6 +1333,14 @@ struct GIZACTIONDEFN_s {
 };
 DECOMP_ASSERT(sizeof(GIZACTIONDEFN_s) == 8, "GIZACTIONDEFN_s ABI");
 
+struct FLOWACTION_s {
+    FLOWACTION_s *next;
+    char **arguments;
+    i32 argument_count;
+    GIZACTIONDEFN_s *definition;
+};
+DECOMP_ASSERT(sizeof(FLOWACTION_s) == 0x10, "flow action ABI");
+
 struct AIMESSAGESYS_s {
     i32 count;
     AIMESSAGE_s *messages;
@@ -1381,10 +1389,10 @@ DECOMP_ASSERT(offsetof(GIZAIMESSAGE_s, flags) == 0x36, "GIZAIMESSAGE_s flags off
 struct GIZFLOWPROGRESS_s {
     i32 valid;
     u32 active[16];
-    u32 triggered[16];
-    u32 completed[16];
-    u32 latched[16];
-    u32 output_state[16];
+    union { u32 triggered[16]; u32 reversing[16]; };
+    union { u32 completed[16]; u32 finished[16]; };
+    union { u32 latched[16]; u32 waiting_for_children[16]; };
+    union { u32 output_state[16]; u32 loop_pending[16]; };
 };
 DECOMP_ASSERT(sizeof(GIZFLOWPROGRESS_s) == 0x144, "GIZFLOWPROGRESS ABI");
 DECOMP_ASSERT(offsetof(GIZFLOWPROGRESS_s, triggered) == 0x44, "GIZFLOWPROGRESS triggered offset");

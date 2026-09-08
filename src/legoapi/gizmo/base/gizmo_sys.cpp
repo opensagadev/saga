@@ -1,5 +1,6 @@
 #include "legoapi/world/world_shared.h"
 #include "decomp.h"
+#include "globals.h"
 #include "gameapi/edtools/edfile.h"
 #include "legoapi/gizmo/base/gizmo.h"
 
@@ -7,6 +8,7 @@
 #include <string.h>
 struct FLOWBOX_s;
 void ResetGizFlowPointers(GIZFLOW_s *giz_flow);
+void GizmoActivateReverse(GIZMOSYS_s *, GIZMO_s *, i32, i32, i32);
 
 i32 gizmoerrorlogsize = 0x800;
 

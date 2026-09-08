@@ -378,7 +378,7 @@ typedef struct WORLDINFO_s {
     TRAFFICANIMSYS_s *trafficanim_sys; // 0x516c
     PLUGSYS_s *plug_sys;               // 0x5170
 
-    i32 field_0x5174;
+    union { i32 field_0x5174; u32 progress_flag_5174; };
     char filler15[0x51b0 - 0x5178];
 } WORLDINFO;
 DECOMP_ASSERT(offsetof(WORLDINFO, field_0x5174) == 0x5174, "WORLDINFO saved level state offset");
