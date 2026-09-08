@@ -4999,6 +4999,27 @@ static i32 Action_MoveAwayFromLastAttacker(AISYS *, AISCRIPTPROCESS *processor, 
     return 0;
 }
 
+static i32 Action_SetShieldHitPoints(AISYS *system, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
+                                     i32 param_count, i32 first_time, f32) {
+    if (first_time != 0) {
+        GameObject *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+        i32 hit_points = -1;
+        for (i32 index = 0; index < param_count; ++index) {
+            char *value = NuStrIStr(params[index], "character=");
+            if (value != NULL)
+                object = GetNamedGameObject(system, value + 10);
+            else
+                hit_points = static_cast<i32>(AIParamToFloat(processor, params[index]));
+        }
+        if (object != NULL) {
+            if (hit_points == -1)
+                hit_points = object->apiobj.character_data->game_character->field_0xf5;
+            object->field_0xe37 = static_cast<u8>(hit_points);
+        }
+    }
+    return 1;
+}
+
 static i32 Action_SetLastSafePathPos(AISYS_s *system, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params,
                                               i32 param_count, i32 first_time, f32) {
     if (first_time == 0) {
@@ -5110,7 +5131,7 @@ extern "C" {
         {"SetRunSpeed", Action_SetRunSpeed, 0, 0, 0},
         {"SetWalkSpeed", Action_SetWalkSpeed, 0, 0, 0},
         {"SetHitPoints", Action_SetHitPoints, 1, 0, 0},
-        {"SetShieldHitPoints", NULL, 1, 0, 0},
+        {"SetShieldHitPoints", Action_SetShieldHitPoints, 1, 0, 0},
         {"SetMessage", Action_SetMessage, 1, 0, 0},
         {"CopyMessage", Action_CopyMessage, 0, 0, 0},
         {"SetScriptParam", Action_SetScriptParam, 0, 0, 0},
