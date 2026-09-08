@@ -42,6 +42,10 @@ const char *NuSoundSource::GetName() const {
     return this->name;
 }
 
+NuSoundSource *NuSoundSource::GetEncodedSource() {
+    return this;
+}
+
 void NuSoundSource::SetStreamDesc(NuSoundStreamDesc *desc) {
     if (desc != NULL && this->source_type != SourceType::ZERO) {
         // (*(code *)desc->vtable->get_decoded_data_format)(desc);
@@ -52,6 +56,12 @@ void NuSoundSource::SetStreamDesc(NuSoundStreamDesc *desc) {
 }
 
 NuSoundSource::~NuSoundSource() {
+    if (this->name != theEmptyString) {
+        NuMemoryGet()->GetThreadMem()->BlockFree(const_cast<char *>(this->name), 4);
+    }
+    this->name = NULL;
+    this->name_length = 0;
+    this->name_capacity = 0;
 }
 
 void NuSoundSource::VoiceReference() {

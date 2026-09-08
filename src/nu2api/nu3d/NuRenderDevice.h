@@ -93,9 +93,9 @@ class NuRenderDevice : NuRenderDeviceGen {
     void PreInitialize();
     void ResizeDevice(i32 width, i32 height, i32 _a, bool _b, bool _c, bool _d, bool _e);
 
-    void IsContextValid() const;
-    void MultiThreadRender() const;
-    void DetermineNominalAspectRatio(u32 width, u32 height) const;
+    bool IsContextValid() const;
+    bool MultiThreadRender() const;
+    i32 DetermineNominalAspectRatio(u32 width, u32 height) const;
     void OpenglErrorCallback(u32 source, u32 type, u32 id, u32 severity, i32 len, char const *msg, void *user_param);
 };
 
@@ -107,6 +107,7 @@ extern "C" {
     void BeginCriticalSectionGL(const char *file, i32 line);
     void EndCriticalSectionGL(const char *file, i32 line);
     void NuRenderDeviceSwapBuffers(void);
+    i32 NuRenderDeviceIsContextValid(void);
 #ifdef __cplusplus
 }
 #endif

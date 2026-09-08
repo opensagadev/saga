@@ -4,6 +4,29 @@ package(default_visibility = ["//visibility:public"])
 
 licenses(["notice"])
 
+# The original Android library compiles the C sources with C++ linkage.
+# -fpermissive allows their ordinary C void-pointer conversions without
+# rewriting upstream allocation expressions. Host libraries keep C linkage.
+ANDROID_COPTS = select({
+    "@platforms//os:android": [
+        "-x",
+        "c++",
+        "-std=gnu++11",
+        "-fno-rtti",
+        "-fpermissive",
+        "-O3",
+        "-DNDEBUG",
+        "-include",
+        "saga_vorbis.h",
+    ],
+    "//conditions:default": [],
+})
+
+ANDROID_DEFINES = select({
+    "@platforms//os:android": ["SAGA_VORBIS_CPP"],
+    "//conditions:default": [],
+})
+
 VORBIS_HEADERS = [
     "include/vorbis/codec.h",
     "include/vorbis/vorbisfile.h",
@@ -48,6 +71,7 @@ VORBIS_PRIVATE_HEADERS = [
     "lib/scales.h",
     "lib/smallft.h",
     "lib/window.h",
+    "lib/saga_vorbis.h",
     "lib/books/coupled/res_books_51.h",
     "lib/books/coupled/res_books_stereo.h",
     "lib/books/floor/floor_books.h",
@@ -71,18 +95,21 @@ cc_library(
         "lib/mapping0.c",
         "lib/mdct.c",
         "lib/psy.c",
-        "lib/registry.c",
         "lib/res0.c",
         "lib/sharedbook.c",
         "lib/smallft.c",
         "lib/synthesis.c",
         "lib/window.c",
-    ],
+    ] + select({
+        "@platforms//os:android": [],
+        "//conditions:default": ["lib/registry.c"],
+    }),
     hdrs = VORBIS_HEADERS + VORBIS_PRIVATE_HEADERS,
     copts = [
         "-DHAVE_ALLOCA_H",
         "-DUSE_MEMORY_H",
-    ],
+    ] + ANDROID_COPTS,
+    defines = ANDROID_DEFINES,
     includes = [
         "include",
         "lib",
@@ -95,6 +122,8 @@ cc_library(
     name = "vorbisfile",
     srcs = ["lib/vorbisfile.c"],
     hdrs = ["include/vorbis/vorbisfile.h"],
+    copts = ANDROID_COPTS,
+    defines = ANDROID_DEFINES,
     includes = [
         "include",
         "lib",

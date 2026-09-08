@@ -79,6 +79,8 @@ http_archive(
 http_archive(
     name = "libvorbis",
     build_file = "//third_party:vorbis.BUILD.bazel",
+    patch_args = ["-p1"],
+    patches = ["//third_party:vorbis-android-cpp.patch"],
     sha256 = "43242e7c10253c0697da52dd0799bbad3ee1c392b99568f6c56a610712f1b916",
     strip_prefix = "libvorbis-1.3.2",
     urls = ["https://ftp.osuosl.org/pub/xiph/releases/vorbis/libvorbis-1.3.2.tar.xz"],

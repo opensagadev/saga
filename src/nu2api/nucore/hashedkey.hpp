@@ -7,7 +7,9 @@
 struct HashedKey {
     u32 value;
 
-    explicit HashedKey(const char *name = NULL) { Set(name); }
+    explicit HashedKey(const char *name = NULL) {
+        Set(name);
+    }
     void Set(const char *name) {
         if (name == NULL) {
             value = 0;
@@ -16,7 +18,8 @@ struct HashedKey {
         u32 hash = 0x811c9dc5;
         for (; *name != '\0'; ++name) {
             u32 character = static_cast<i8>(*name);
-            if (character - 'a' < 26) character -= 'a' - 'A';
+            if (character - 'a' < 26)
+                character -= 'a' - 'A';
             hash = character ^ hash * 0x1000193;
         }
         value = hash;

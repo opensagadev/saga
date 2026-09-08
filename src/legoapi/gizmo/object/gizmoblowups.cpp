@@ -64,7 +64,8 @@ i32 InitGizmoBlowups(WORLDINFO_s *world) {
 extern "C" void AddFiniteShotDebrisEffect(i32 *, i32, NUVEC *, i32);
 
 void GizBlowup_Respawn(GIZMOBLOWUP_s *blowup) {
-    if (blowup == NULL) return;
+    if (blowup == NULL)
+        return;
     blowup->state_flags |= 0x80;
     blowup->output_flags &= ~1;
     blowup->field_0x9f &= ~1;
@@ -74,7 +75,8 @@ void GizBlowup_Respawn(GIZMOBLOWUP_s *blowup) {
     nuinstanim_s *animation = NuSpecialGetInstAnim(&blowup->type->animated_special);
     if (animation != NULL && animation->playing != 0) {
         blowup->state_flags |= 0x10;
-        if (animation->repeating != 0) blowup->state_flags |= 0x48;
+        if (animation->repeating != 0)
+            blowup->state_flags |= 0x48;
     }
     blowup->state_flags |= 1;
     if (BonusArea != 0 && VehicleArea != 0 && (blowup->draw_flags & 0x1000000) != 0) {
@@ -100,9 +102,11 @@ void GizBlowup_Respawn(GIZMOBLOWUP_s *blowup) {
             (blowup->state_flags & 0x10) != 0) {
             animation->playing = 1;
         }
-        if (animation->playing != 0 && animation->repeating != 0) blowup->state_flags |= 0x48;
+        if (animation->playing != 0 && animation->repeating != 0)
+            blowup->state_flags |= 0x48;
     }
-    if (blowup->platform_id != -1) PlatOnOff(blowup->platform_id, 1);
+    if (blowup->platform_id != -1)
+        PlatOnOff(blowup->platform_id, 1);
     if (blowup->type->particle_types[2] != -1) {
         i32 handle = -1;
         AddFiniteShotDebrisEffect(&handle, blowup->type->particle_types[2], &blowup->mid_position, 1);
@@ -114,9 +118,8 @@ void GizBlowup_Respawn(GIZMOBLOWUP_s *blowup) {
 }
 
 i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *blowup, i32 effects, i32 hit_type, i32 damage, GameObject_s *object,
-                     i32 hit_context) {
-    if (blowup == NULL || (blowup->state_flags & 0x80) == 0 ||
-        ((blowup->draw_flags & 0x20) && ShadowMode == 0) ||
+                      i32 hit_context) {
+    if (blowup == NULL || (blowup->state_flags & 0x80) == 0 || ((blowup->draw_flags & 0x20) && ShadowMode == 0) ||
         !TouchHacks::CanBlowupBeBlownUp(*blowup, hit_type)) {
         return 0;
     }
@@ -139,19 +142,45 @@ i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *blowup, i32 effects, i32 hit_type, i32 dama
         }
     }
     switch (hit_type) {
-    case 1: blowup->output_flags |= 2; break;
-    case 2: blowup->output_flags |= 4; break;
-    case 3: blowup->output_flags |= 8; break;
-    case 4: blowup->output_flags |= 0x20; break;
-    case 5: blowup->output_flags |= 0x10; break;
-    case 6: blowup->output_flags |= 0x40; break;
-    case 7: blowup->output_flags |= 0x80; break;
-    case 8: blowup->visibility_flags |= 1; break;
-    case 9: blowup->visibility_flags |= 2; break;
-    case 10: blowup->visibility_flags |= 4; break;
-    case 11: blowup->visibility_flags |= 8; break;
-    case 12: blowup->visibility_flags |= 0x10; break;
-    case 13: blowup->visibility_flags |= 0x20; break;
+        case 1:
+            blowup->output_flags |= 2;
+            break;
+        case 2:
+            blowup->output_flags |= 4;
+            break;
+        case 3:
+            blowup->output_flags |= 8;
+            break;
+        case 4:
+            blowup->output_flags |= 0x20;
+            break;
+        case 5:
+            blowup->output_flags |= 0x10;
+            break;
+        case 6:
+            blowup->output_flags |= 0x40;
+            break;
+        case 7:
+            blowup->output_flags |= 0x80;
+            break;
+        case 8:
+            blowup->visibility_flags |= 1;
+            break;
+        case 9:
+            blowup->visibility_flags |= 2;
+            break;
+        case 10:
+            blowup->visibility_flags |= 4;
+            break;
+        case 11:
+            blowup->visibility_flags |= 8;
+            break;
+        case 12:
+            blowup->visibility_flags |= 0x10;
+            break;
+        case 13:
+            blowup->visibility_flags |= 0x20;
+            break;
     }
     const i32 has_burst = NuSpecialExistsFn(&type->burst_special);
     if (has_burst) {
@@ -279,7 +308,8 @@ void GizBlowup_InitTerrain() {
             GIZMOBLOWUP_s *blowup = &WORLD->gizmo_blowups[i];
             blowup->platform_id = -1;
             blowup->field_0x10c = -1;
-            if ((blowup->draw_flags & 4) != 0) GizBlowup_InitSingleTerrain(blowup);
+            if ((blowup->draw_flags & 4) != 0)
+                GizBlowup_InitSingleTerrain(blowup);
         }
     }
 }
@@ -428,7 +458,8 @@ void GizmoBlowupGenShadowMatrix(GIZMOBLOWUP_s *, numtx_s *) {
 }
 
 i32 GizBlowup_InitSingleTerrain(GIZMOBLOWUP_s *blowup) {
-    if (blowup == NULL || (blowup->output_flags & 1) != 0 || (blowup->draw_flags & 4) == 0) return 0;
+    if (blowup == NULL || (blowup->output_flags & 1) != 0 || (blowup->draw_flags & 4) == 0)
+        return 0;
     if (blowup->platform_id == -1) {
         i32 instance = NuSpecialGetInstanceix(&blowup->type->animated_special);
         if (blowup->override_special != NULL && NuSpecialExistsFn(blowup->override_special)) {
@@ -439,21 +470,26 @@ i32 GizBlowup_InitSingleTerrain(GIZMOBLOWUP_s *blowup) {
         } else {
             blowup->platform_id = FindPlatInst(instance);
         }
-        if (blowup->platform_id == -1) return 0;
-        if ((blowup->visibility_flags & 0x40) == 0) PlatOnOff(blowup->platform_id, 0);
+        if (blowup->platform_id == -1)
+            return 0;
+        if ((blowup->visibility_flags & 0x40) == 0)
+            PlatOnOff(blowup->platform_id, 0);
     }
     PlatInstRotate(blowup->platform_id, 1);
     if (blowup->field_0x10c == -1 && NuSpecialExistsFn(&blowup->type->burst_special)) {
         blowup->field_0x10c = NewPlatInst(blowup, NuSpecialGetInstanceix(&blowup->type->burst_special));
-        if (blowup->field_0x10c == -1) return -1;
+        if (blowup->field_0x10c == -1)
+            return -1;
     }
     PlatInstRotate(blowup->field_0x10c, 1);
     return 1;
 }
 
 void GizBlowup_DeleteSingleTerrain(GIZMOBLOWUP_s *blowup) {
-    if (blowup == NULL) return;
-    if ((blowup->override_special == NULL || !NuSpecialExistsFn(blowup->override_special)) && blowup->platform_id != -1) {
+    if (blowup == NULL)
+        return;
+    if ((blowup->override_special == NULL || !NuSpecialExistsFn(blowup->override_special)) &&
+        blowup->platform_id != -1) {
         DeletePlatinst(blowup->platform_id);
         blowup->platform_id = -1;
     }

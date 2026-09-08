@@ -193,8 +193,7 @@ void HandleStillRender() {
         NuRndrEndScene();
     }
 
-    if (grab_screen_image != 2 && pause_rndr_on != 0 && pause_rt != 0 &&
-        FadeSys.pending_type == FADE_TYPE_NONE) {
+    if (grab_screen_image != 2 && pause_rndr_on != 0 && pause_rt != 0 && FadeSys.pending_type == FADE_TYPE_NONE) {
         DrawStillScreen(clear_screen_onstill);
     }
 

@@ -44,6 +44,7 @@ struct rtlidata_s;
 #include "nu2api/nucore/nuhgobj.h"
 #include "nu2api/nucore/nuptrblock.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/nuthread.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/numath/numath.h"
 #include "nu2api/numath/numtx.h"
@@ -54,6 +55,7 @@ struct rtlidata_s;
 
 extern NuVertexFormatPS *g_nuFaceOnVertexFormat;
 extern NuVertexFormatPS *g_nuDebrisVertexFormat;
+void NuIOS_ResetVAODuplicateFinder();
 extern i32 VehicleArea;
 extern i32 GAMEDEMO;
 extern STATUSPACKET_s StatusPacket;
@@ -61,6 +63,7 @@ extern STATUS_STAGE_s *StatusStages;
 extern f32 iconalphaoverride;
 extern f32 icon_y;
 extern i32 draw_player_icons;
+extern f32 FORCEGLOWTIME;
 extern i16 tHINTS;
 extern i16 tCHARACTERS;
 extern i16 tHELPANDOPTIONS;
@@ -741,7 +744,8 @@ static NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path, NU
         u32 animation_texture_count = 0;
         for (i32 i = 0; i < fixed_scene->num_texture_anims; ++i) {
             u32 end = reinterpret_cast<usize>(animations[i].texture_ids) + animations[i].texture_count;
-            if (animation_texture_count < end) animation_texture_count = end;
+            if (animation_texture_count < end)
+                animation_texture_count = end;
         }
         for (u32 i = 0; i < animation_texture_count; ++i) {
             fixed_scene->texture_anim_ids[i] = fixed_scene->texture_ids[fixed_scene->texture_anim_ids[i]];
@@ -864,10 +868,8 @@ void DrawStreaks() {
 void Draw_LOADED() {
 }
 
-void Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position,
-                                                           u16 x_rotation, u16 y_rotation, u16 z_rotation,
-                                                           float scale_x, float scale_y, float scale_z,
-                                                           i32 rotate_order) {
+void Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
+                  u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order) {
     if (object_index == -1) {
         return;
     }
@@ -965,10 +967,10 @@ void DrawQuestion(nuvec_s *, float, float) {
 void DrawRectRGBA(float, float, float, float, u32, numtl_s *, i32, float) {
 }
 
-void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value,
-                                                       float unused, float y_push, u16 x_rot, u16 y_rot, u16 z_rot);
-static void Shop_DrawCharacter(shopitem_s *item, NUVEC *position, f32 scale_value, f32 ypush,
-                                                         u16 xrot, u16 yrot, u16 zrot);
+void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value, float unused, float y_push, u16 x_rot,
+              u16 y_rot, u16 z_rot);
+static void Shop_DrawCharacter(shopitem_s *item, NUVEC *position, f32 scale_value, f32 ypush, u16 xrot, u16 yrot,
+                               u16 zrot);
 
 void DrawSubItems() {
     /* The sub-shelf is laid out as seven positions, with the centre position
@@ -1137,8 +1139,8 @@ void DrawSubItems() {
     }
 }
 
-static void Shop_DrawCharacter(shopitem_s *item, NUVEC *position, f32 scale_value, f32 ypush,
-                                                         u16 xrot, u16 yrot, u16 zrot) {
+static void Shop_DrawCharacter(shopitem_s *item, NUVEC *position, f32 scale_value, f32 ypush, u16 xrot, u16 yrot,
+                               u16 zrot) {
     const bool top_shelf_character = item == &TopShelf[1];
     if (top_shelf_character) {
         const f32 cycle_length = static_cast<f32>(SHOPCHARCOUNT) * 0.2f;
@@ -1688,12 +1690,9 @@ void DrawGameMessages() {
             if (message->update_fn != NULL) {
                 message->update_fn(reinterpret_cast<GAMEMESSAGE_s *>(message));
             }
-            position.x =
-                position.x + (message->target_position.x - position.x) * progress;
-            position.y =
-                position.y + (message->target_position.y - position.y) * progress;
-            position.z =
-                position.z + (message->target_position.z - position.z) * progress;
+            position.x = position.x + (message->target_position.x - position.x) * progress;
+            position.y = position.y + (message->target_position.y - position.y) * progress;
+            position.z = position.z + (message->target_position.z - position.z) * progress;
         }
         if ((message->flags & 0x20) != 0) {
             scale += (message->target_scale - scale) * progress;
@@ -1792,10 +1791,8 @@ void DrawStatusScreen(WORLDINFO_s *) {
 void Draw_LOADCORRUPT() {
 }
 
-void Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position,
-                                                                u16 x_rotation, u16 y_rotation, u16 z_rotation,
-                                                                float scale_x, float scale_y, float scale_z,
-                                                                i32 rotate_order, float alpha) {
+void Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
+                       u16 z_rotation, float scale_x, float scale_y, float scale_z, i32 rotate_order, float alpha) {
     if (object_index == -1) {
         return;
     }
@@ -1930,7 +1927,65 @@ void DrawSuperStoryTime(float, float, float, i32, i32) {
 void DrawForceBackEffect(nuhspecial_s *) {
 }
 
-void DrawForceGlowSprite(nuvec_s *, float, i32, float, GameObject_s *) {
+static inline void RotateForceGlowMatrix(NUMTX *matrix, i32 angle) {
+    const f32 cosine = NU_COS_LUT(angle);
+    const f32 sine = NU_SIN_LUT(angle);
+    const f32 x0 = matrix->m00;
+    const f32 x1 = matrix->m10;
+    const f32 x2 = matrix->m20;
+    const f32 x3 = matrix->m30;
+    matrix->m00 = x0 * cosine - matrix->m01 * sine;
+    matrix->m01 = x0 * sine + matrix->m01 * cosine;
+    matrix->m10 = x1 * cosine - matrix->m11 * sine;
+    matrix->m11 = x1 * sine + matrix->m11 * cosine;
+    matrix->m20 = x2 * cosine - matrix->m21 * sine;
+    matrix->m21 = x2 * sine + matrix->m21 * cosine;
+    matrix->m30 = x3 * cosine - matrix->m31 * sine;
+    matrix->m31 = x3 * sine + matrix->m31 * cosine;
+}
+
+void DrawForceGlowSprite(nuvec_s *position, float radius, i32 model, float alpha, GameObject_s *) {
+    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+    if (model == -1 || world->lev_objs[model].active == 0) {
+        return;
+    }
+    ResetShadowMapRendering();
+    NUVEC scale __attribute__((aligned(16)));
+    NUVEC direction;
+    NUVEC draw_position;
+    NuVecSub(&direction, position, reinterpret_cast<NUVEC *>(&pNuCam->mtx.m30));
+    const f32 distance = NuFsqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
+    NuVecNorm(&direction, &direction);
+    f32 offset = radius;
+    if (radius < distance - 0.2f || (offset = distance - 0.2f, !(distance < 0.2f))) {
+        NuVecScale(&direction, &direction, offset);
+        NuVecSub(&draw_position, position, &direction);
+        if (offset != 0.0f) {
+            scale.x = scale.y = scale.z = radius * (distance - offset) / distance;
+            goto draw_glow;
+        }
+    } else {
+        NuVecScale(&direction, &direction, 0.0f);
+        NuVecSub(&draw_position, position, &direction);
+    }
+    scale.x = scale.y = scale.z = radius;
+draw_glow:
+    NUMTX matrix __attribute__((aligned(16)));
+    NuMtxSetScale(&matrix, &scale);
+    u16 angle = static_cast<i32>(NuFmod(GameTimer.time_elapsed, 20.0f) / 20.0f * 65536.0f);
+    RotateForceGlowMatrix(&matrix, -angle);
+    NuMtxMulR(&matrix, &matrix, &GameCam->render_mtx);
+    NuMtxTranslate(&matrix, &draw_position);
+    NuSpecialDrawAtAlpha(&WORLD->lev_objs[model].special, &matrix, alpha);
+    if (WORLD->lev_objs[model + 1].active != 0) {
+        NuMtxSetScale(&matrix, &scale);
+        angle = static_cast<i32>(NuFmod(GameTimer.time_elapsed, 16.777f) / 16.777f * 65536.0f);
+        RotateForceGlowMatrix(&matrix, angle);
+        NuMtxMulR(&matrix, &matrix, &GameCam->render_mtx);
+        NuMtxTranslate(&matrix, &draw_position);
+        NuSpecialDrawAtAlpha(&WORLD->lev_objs[model + 1].special, &matrix, alpha);
+    }
+    EnableShadowMapRendering(0);
 }
 
 void DrawGameObjectsDraw(i32) {
@@ -1958,11 +2013,14 @@ void DrawGameObjectsDraw(i32) {
 
         if (drawn != 0) {
             DrawParaphernalia(object);
+        } else if (((object->field_0xe21 & 4) != 0 || object->character_context == 8) &&
+                   object->field_0xd80 > 0.0f && object->field_0xd8c > 0.0f &&
+                   WORLD->lev_objs[object->field_0xe1e].active != 0 &&
+                   (object->apiobj.character_data->game_character->flags_090 & 0x400) == 0) {
+            DrawForceGlowSprite(&object->force_glow_position, object->field_0xd8c, object->field_0xe1e,
+                                object->field_0xd80 / FORCEGLOWTIME, object);
         }
 
-        // The force-glow branch rejoins here after its level-character and
-        // character-variant visibility tests. Those structures are not typed
-        // yet; keep the ordinary original path intact while they are recovered.
         if (object->field_0x10b8 != NULL) {
             DrawSnakeBody(object);
         }
@@ -2163,10 +2221,12 @@ void DrawGameMessage_Targets(GAMEMESSAGE_s *, nuvec_s *, float) {
 void DrawTorpedoTargetSprite(void *, unsigned char, float) {
 }
 
-i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float scale_y, float scale_z,
-                            u16 rotate_x, u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order) {
-    if (special == NULL || NuSpecialExistsFn(special) == 0) return 0;
-    if (scale_y == 0.0f && scale_x == 0.0f && scale_z == 0.0f) return 0;
+i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
+                             u16 rotate_y, u16 rotate_z, nuhspecial_s *special, i32 rotate_order) {
+    if (special == NULL || NuSpecialExistsFn(special) == 0)
+        return 0;
+    if (scale_y == 0.0f && scale_x == 0.0f && scale_z == 0.0f)
+        return 0;
     NUVEC scale = {scale_x / CameraZoom, scale_y / CameraZoom, scale_z / CameraZoom};
     NUMTX matrix;
     NuMtxSetScale(&matrix, &scale);
@@ -2185,8 +2245,8 @@ void DrawPanel3DObjectMtxNoAlpha(nuhspecial_s *, numtx_s *) {
 void Draw_OK(MENU_s *) {
 }
 
-void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value,
-                                                       float, float y_push, u16 x_rot, u16 y_rot, u16 z_rot) {
+void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value, float, float y_push, u16 x_rot, u16 y_rot,
+              u16 z_rot) {
     if (position != NULL) {
         if (NuSpecialExistsFn(special) != 0) {
             NUANGVEC rotation = {x_rot, y_rot, z_rot};
@@ -2391,8 +2451,8 @@ static __used__ bool MatrixReflection_CanOverride() {
 static __used__ void DrawStarFighter(starfighter_s *) {
 }
 
-static void DrawWeapon_SetSabreObjects(GameObject_s *object, i32 red, i32 green, i32 blue, i32 purple,
-                                      i32 *models, i32 *hilt) {
+static void DrawWeapon_SetSabreObjects(GameObject_s *object, i32 red, i32 green, i32 blue, i32 purple, i32 *models,
+                                       i32 *hilt) {
     if (red || green || blue || purple) {
         if (object->id == id_DARTHMAUL) {
             *hilt = models[0] = 0x12;
@@ -2487,8 +2547,8 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                             } else if (color == 1 && object->id == id_GRIEVOUS && (hand == 0 || hand == 3)) {
                                 color = 2;
                             }
-                            DrawWeapon_SetSabreObjects(object, color == 0, color == 1, color == 2, color == 3,
-                                                       models, &hilt);
+                            DrawWeapon_SetSabreObjects(object, color == 0, color == 1, color == 2, color == 3, models,
+                                                       &hilt);
                             sabre = true;
                         }
                     }
@@ -2535,7 +2595,7 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
                 }
                 NuMtxPreScale(&blade_matrix, &scale);
                 const NUMTX saved_matrix = blade_matrix;
-                for (i32 side = 0; ; ++side) {
+                for (i32 side = 0;; ++side) {
                     for (i32 part = 0; part < 4; ++part) {
                         if (models[part] == -1 || (side && models[part] == hilt)) {
                             continue;
@@ -2582,6 +2642,12 @@ static void DrawParaphernalia(GameObject_s *object) {
         return;
     }
     DrawWeapons(object, object->field_0x1088, object->weapon_scale);
+    if (object->character_context != 0x22 && object->field_0xd80 > 0.0f && object->field_0xd8c > 0.0f &&
+        WORLD->lev_objs[object->field_0xe1e].active != 0 &&
+        (object->apiobj.character_data->game_character->flags_090 & 0x400) == 0) {
+        DrawForceGlowSprite(&object->force_glow_position, object->field_0xd8c, object->field_0xe1e,
+                            object->field_0xd80 / FORCEGLOWTIME, object);
+    }
 }
 
 static __used__ void DrawFalconSpotLights(GameObject_s *) {
@@ -2662,11 +2728,27 @@ extern "C" void NuGScnFixupPS(NUGSCN *scene) {
             geometry->index_count = 0;
             geometry->vertex_count = 0;
         }
-        if (geometry->immediate == 0) {
-            geometry->vertex_format = 0;
-        } else {
+        if (geometry->immediate != 0) {
+            BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nugscn_android.c", 0x25b);
+            NuIOSBindVAO(0);
+            glGenBuffers(1, reinterpret_cast<GLuint *>(&geometry->vertex_format));
+            glBindBuffer(GL_ARRAY_BUFFER, geometry->vertex_format);
+            glBufferData(GL_ARRAY_BUFFER, geometry->vertex_stride * geometry->vertex_count, NULL, GL_DYNAMIC_DRAW);
+            EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nugscn_android.c", 0x262);
+            if (bgProcIsBgThread()) {
+                NuIOS_YieldThread();
+            }
             dynamic_indices[ndynamic++] = index_index;
+        } else {
+            geometry->vertex_format = 0;
         }
+    }
+    if (scene != NULL && scene->display_list != NULL && scene->display_list->name != NULL &&
+        NuStrIStr(scene->display_list->name, "cloudcityescape_c") != NULL && native_scene != NULL &&
+        native_scene->ngeometries > 0 && native_scene->geometries[native_scene->ngeometries - 1] != NULL) {
+        NUDISPLAYLISTGEOM *geometry = native_scene->geometries[native_scene->ngeometries - 1];
+        geometry->index_count = 0;
+        geometry->vertex_count = 0;
     }
     for (i32 i = 0; i < ndynamic; ++i) {
         g_VideoResHeader.vertex_buffers[dynamic_indices[i]] = 0;
@@ -2687,7 +2769,10 @@ extern "C" void NuGScnFixupPS(NUGSCN *scene) {
         NuMtlUpdate(scene->mtls[i]);
     }
     NuPortalMaxDepth(scene, scene->max_portals);
+    NuThreadCriticalSectionBegin(g_vaoLifetimeMutex);
+    NuIOS_ResetVAODuplicateFinder();
     PreWarmGeomsAndBakeVAOs(reinterpret_cast<nudisplayscene_s *>(scene->display_list), scene->field437_0x1d0);
+    NuThreadCriticalSectionEnd(g_vaoLifetimeMutex);
 }
 
 #include "legoapi/legoapi_types.h"
@@ -2818,7 +2903,6 @@ void BackDrop_Draw(float alpha, i32 flags) {
         f32 y = mtx.m31;
         f32 z = mtx.m32;
         u16 angle = (u16)qrand();
-        NuSpecialDrawAtAlpha(special, &mtx, alpha);
         for (i32 i = 0; i < 3; ++i) {
             mtx.m30 = NuTrigTable[angle >> 1] * 0.01f + x;
             mtx.m31 = NuTrigTable[((i32)angle + 0x4000) >> 1 & 0x7fff] * 0.01f + y;

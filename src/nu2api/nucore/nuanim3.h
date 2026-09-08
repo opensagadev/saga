@@ -8,7 +8,9 @@
 struct ani3_animheader_s;
 struct nuanimbuff_s;
 struct nuanimdata_s;
+struct nuanimtime_s;
 struct numtx_s;
+using NUANIMBUFFEVALUATECB = void (*)(struct numtx_s *, void *, i32);
 
 enum ANI3_MAGIC : u32 {
     ANI3_MAGIC_VERSION_4 = 0x414e4934,
@@ -67,6 +69,14 @@ extern "C" {
     void *NuAnimData2LoadBuffFromPAK(void *data, i32 file_size);
     f32 *NuAnimCurveExtractAllNodeCurves_3(ani3_animheader_s *animation, i32 node, f32 frame, char *curve_mask);
     void NuAnimData2CalcMatrix(struct nuanimdata_s *animation, i32 node, f32 frame, struct numtx_s *matrix);
+    void NuAnimBuffEvaluateCallback(NUANIMBUFFEVALUATECB callback, void **data, i32 *joints);
+    i32 NuAnimSetUseQuatsFlag(i32 enabled);
+    i32 NuAnimGetUseQuatsFlag(void);
+    i32 NuAnimPushSetUseQuatsFlag(i32 enabled);
+    i32 NuAnimPopUseQuatsFlag(void);
+    void *NuAnimGetAnimLOD(void *animation, i32 lod);
+    i32 NuAnimNumNodes(void *animation);
+    f32 NuAnimCurve2CalcValEx(nuanimcurve2_s *curve, nuanimtime_s *time, u32 type);
     f32 NuAnimEndFrame(void *animation);
     f32 NuAnimEndFrameOld(void *animation);
     void ANI_Ani3ExtractAllNodeCurves(ani3_animheader_s *anim, f32 frame, f32 *values, i32 node, char *curve_mask);

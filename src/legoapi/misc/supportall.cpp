@@ -11,6 +11,7 @@
 #include "legoapi/legoapi_types.h"
 #include "legoapi/render/core/render.h"
 #include "legoapi/world/level.h"
+#include "legoapi/world/area.h"
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nurndrstat.h"
@@ -35,6 +36,7 @@ void ShoveObjectSysReset(void);
 void Panel_Clear(void);
 void ResetGameMessages(void);
 void Tag_ResetTransfers(void);
+void Tag_SetMode(i32 mode);
 void Hint_Reset(void);
 void Hint_CancelCurrent(void);
 void Teleports_Reset(WORLDINFO_s *);
@@ -73,10 +75,8 @@ void RndrTexQuad(float, float, float, float, i32, numtl_s *, i32) {
 }
 
 i32 SuperWeirdo(GameObject_s *object) {
-    if ((object->apiobj.flags_low & 0x80) != 0 && (Game.field_0x7c26[1] & 1) != 0 &&
-        CharacterCustomiser != NULL &&
-        (object->id == CharacterCustomiser->character_ids[0] ||
-         object->id == CharacterCustomiser->character_ids[1])) {
+    if ((object->apiobj.flags_low & 0x80) != 0 && (Game.field_0x7c26[1] & 1) != 0 && CharacterCustomiser != NULL &&
+        (object->id == CharacterCustomiser->character_ids[0] || object->id == CharacterCustomiser->character_ids[1])) {
         return 1;
     }
     return 0;
@@ -183,6 +183,7 @@ void CheckResetBits() {
     // Reset requests are edge-triggered. Leaving the bits set would rebuild the
     // level's AI and gizmo state again on every frame through Batman().
     ResetBits = 0;
+    Tag_SetMode(HUB_ADATA != NULL && HUB_ADATA == WORLD->area ? 3 : 1);
 }
 
 void DebrisTimeSlip(i32) {

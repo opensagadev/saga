@@ -3,12 +3,15 @@
 #include "gameapi/ai/aisys/aisys.h"
 #include "globals.h"
 #include "gameapi/edtools/edfile.h"
+#include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nufile/nufilepak.h"
 #include "nu2api/numath/nuang.h"
+#include "nu2api/numath/nurand.h"
 #include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nuvec.h"
 
 #include <stdio.h>
 #include <float.h>
@@ -570,6 +573,8 @@ static void AISysLoadAntinodes(AISYS *system, i32 version, NUGSCN *scene) {
 
 extern "C" {
 
+    AIPATHNODE *AIPathFindNode(AISYS *system, AIPATH *path, char *name);
+
     void AIAntinodeCreate(void) {
     }
 
@@ -588,13 +593,154 @@ extern "C" {
     void AIFormationFollow(AIPACKET *) {
     }
 
-    void AILocatorSet_AssignFurthestLocator(void) {
+    void AILocatorSet_AssignNearestLocator(AISYS *system, AILOCATORSET *locator_set, APIOBJECT *object, f32 max_range,
+                                           NUVEC *position, NUVEC *second_position, f32 off_screen_radius,
+                                           i32 ignore_assigned) {
+        if (system == NULL || locator_set == NULL || object == NULL || object->ai == NULL || position == NULL) {
+            return;
+        }
+
+        if (ignore_assigned != 0) {
+            AILocatorSet_CheckLocatorsStillAssigned(system, locator_set);
+        }
+
+        f32 nearest_distance = max_range <= 0.0f ? FLT_MAX : max_range * max_range;
+        i32 nearest_index = -1;
+        for (i32 index = 0; index < locator_set->locator_count; ++index) {
+            if (ignore_assigned != 0 && locator_set->assigned[index] != 0xff) {
+                continue;
+            }
+
+            AILOCATOR *locator = &system->locators[locator_set->locator_entries[index]];
+            if (off_screen_radius != 0.0f &&
+                NuCameraClipTestSphere(&locator->position, off_screen_radius, &numtx_identity) == 0) {
+                continue;
+            }
+
+            const f32 first_distance = NuVecDistSqr(position, &locator->position, NULL);
+            if (first_distance < nearest_distance) {
+                nearest_distance = first_distance;
+                nearest_index = index;
+            }
+            if (second_position != NULL) {
+                const f32 second_distance = NuVecDistSqr(second_position, &locator->position, NULL);
+                if (second_distance < nearest_distance) {
+                    nearest_distance = second_distance;
+                    nearest_index = index;
+                }
+            }
+        }
+
+        if (nearest_index != -1) {
+            object->ai->locator = &system->locators[locator_set->locator_entries[nearest_index]];
+            locator_set->assigned[nearest_index] = object->field_0x289;
+        }
     }
 
-    void AILocatorSet_AssignNearestLocator(void) {
+    void AILocatorSet_AssignFurthestLocator(AISYS *system, AILOCATORSET *locator_set, APIOBJECT *object, f32 max_range,
+                                            NUVEC *position, NUVEC *second_position, f32 off_screen_radius,
+                                            i32 ignore_assigned) {
+        if (system == NULL || locator_set == NULL || object == NULL || object->ai == NULL || position == NULL) {
+            return;
+        }
+
+        if (ignore_assigned != 0) {
+            AILocatorSet_CheckLocatorsStillAssigned(system, locator_set);
+        }
+
+        const f32 max_distance = max_range * max_range;
+        f32 furthest_distance = 0.0f;
+        i32 furthest_index = -1;
+        for (i32 index = 0; index < locator_set->locator_count; ++index) {
+            if (ignore_assigned != 0 && locator_set->assigned[index] != 0xff) {
+                continue;
+            }
+
+            AILOCATOR *locator = &system->locators[locator_set->locator_entries[index]];
+            if (off_screen_radius != 0.0f &&
+                NuCameraClipTestSphere(&locator->position, off_screen_radius, &numtx_identity) == 0) {
+                continue;
+            }
+
+            f32 distance = NuVecDistSqr(position, &locator->position, NULL);
+            if (distance <= furthest_distance) {
+                continue;
+            }
+            if (second_position != NULL) {
+                const f32 second_distance = NuVecDistSqr(second_position, &locator->position, NULL);
+                if (second_distance <= furthest_distance) {
+                    continue;
+                }
+                if (second_distance < distance) {
+                    distance = second_distance;
+                }
+            }
+            if (max_range != 0.0f && max_distance <= distance) {
+                continue;
+            }
+
+            furthest_distance = distance;
+            furthest_index = index;
+        }
+
+        if (furthest_index != -1) {
+            object->ai->locator = &system->locators[locator_set->locator_entries[furthest_index]];
+            locator_set->assigned[furthest_index] = object->field_0x289;
+        }
     }
 
-    void AILocatorSet_AssignRandomLocator(void) {
+    void AILocatorSet_AssignRandomLocator(AISYS *system, AILOCATORSET *locator_set, APIOBJECT *object, f32 max_range,
+                                          NUVEC *position, f32 off_screen_radius, i32 ignore_assigned) {
+        if (system == NULL || locator_set == NULL || object == NULL || object->ai == NULL || position == NULL) {
+            return;
+        }
+
+        if (ignore_assigned != 0) {
+            AILocatorSet_CheckLocatorsStillAssigned(system, locator_set);
+        }
+
+        const f32 max_distance = max_range <= 0.0f ? FLT_MAX : max_range * max_range;
+        i32 candidate_count = 0;
+        for (i32 index = 0; index < locator_set->locator_count; ++index) {
+            if (ignore_assigned != 0 && locator_set->assigned[index] != 0xff) {
+                continue;
+            }
+
+            AILOCATOR *locator = &system->locators[locator_set->locator_entries[index]];
+            if (off_screen_radius != 0.0f &&
+                NuCameraClipTestSphere(&locator->position, off_screen_radius, &numtx_identity) == 0) {
+                continue;
+            }
+            if (NuVecDistSqr(position, &locator->position, NULL) <= max_distance) {
+                ++candidate_count;
+            }
+        }
+
+        if (candidate_count == 0) {
+            return;
+        }
+
+        const i32 selected_candidate = NuRandInt() % candidate_count;
+        i32 candidate_index = 0;
+        for (i32 index = 0; index < locator_set->locator_count; ++index) {
+            if (ignore_assigned != 0 && locator_set->assigned[index] != 0xff) {
+                continue;
+            }
+
+            AILOCATOR *locator = &system->locators[locator_set->locator_entries[index]];
+            if (off_screen_radius != 0.0f &&
+                NuCameraClipTestSphere(&locator->position, off_screen_radius, &numtx_identity) == 0) {
+                continue;
+            }
+            if (NuVecDistSqr(&object->position, &locator->position, NULL) > max_distance) {
+                continue;
+            }
+            if (candidate_index++ == selected_candidate) {
+                object->ai->locator = locator;
+                locator_set->assigned[index] = object->field_0x289;
+                return;
+            }
+        }
     }
 
     void AILocatorSet_CheckLocatorsStillAssigned(AISYS *system, AILOCATORSET *locator_set) {
@@ -645,7 +791,35 @@ extern "C" {
         packet->movement_parameter = movement_parameter;
     }
 
-    void *AIPAthFindPathCnx(AISYS_s *, i32, char *, void *, void *) {
+    void *AIPAthFindPathCnx(AISYS_s *system, AIPATH_s *path, char *from_name, char *to_name, i32 *direction) {
+        if (path == NULL) {
+            if (system == NULL || system->path_sys == NULL || system->path_sys->path_count == 0) {
+                return NULL;
+            }
+            path = system->path_sys->active_path;
+        }
+        if (path == NULL) {
+            return NULL;
+        }
+
+        AIPATHNODE *from = AIPathFindNode(system, path, from_name);
+        AIPATHNODE *to = AIPathFindNode(system, path, to_name);
+        if (from == NULL || to == NULL || from == to || from->connections == NULL) {
+            return NULL;
+        }
+
+        const u8 to_index = static_cast<u8>(to - path->nodes);
+        for (i32 index = 0; index < from->connection_count; ++index) {
+            AIPATHCNX *connection = from->connections[index];
+            if (connection->node_indices[0] == to_index) {
+                *direction = 1;
+                return connection;
+            }
+            if (connection->node_indices[1] == to_index) {
+                *direction = 0;
+                return connection;
+            }
+        }
         return NULL;
     }
 
@@ -2065,7 +2239,43 @@ extern "C" {
     void FindLocalAIMessage(void) {
     }
 
-    void FollowAPIObject(void) {
+    void FollowAPIObject(APIOBJECT *object, APIOBJECT *target, i32 flags, f32 movement_parameter) {
+        AIPACKET *packet = object->ai;
+        AIPACKET *target_packet = target->ai;
+
+        NUVEC *destination;
+        i32 movement_mode;
+        if ((flags & 1) == 0) {
+            destination = &target_packet->last_path_position;
+            movement_mode = AIPACKET_MOVEMENT_TO_DESTINATION;
+        } else {
+            bool use_target_path_position = false;
+            AIPATH *path = packet->path_info.path;
+            if (path != NULL && path == target_packet->path_info.path) {
+                if ((target_packet->path_info.flags & AIPATHINFO_FLAG_ON_PATH) != 0 &&
+                    packet->path_info.connection != NULL && target_packet->path_info.connection != NULL &&
+                    (packet->runtime_flags & AIPACKET_RUNTIME_ROUTE_SELECTED) == 0) {
+                    const u8 object_direction = packet->path_info.connection->direction_a;
+                    const u8 target_direction = target_packet->path_info.connection->direction_a;
+                    if (path->route_matrix[object_direction][target_direction] != 0xff ||
+                        object_direction == target_direction) {
+                        use_target_path_position = true;
+                    }
+                }
+            }
+
+            if (use_target_path_position) {
+                destination = &target_packet->last_path_position;
+                movement_mode = AIPACKET_MOVEMENT_TO_DESTINATION;
+            } else {
+                destination = &target_packet->terrain_origin;
+                movement_mode = AIPACKET_MOVEMENT_DIRECT;
+            }
+        }
+
+        const f32 stopping_distance = (flags & 2) != 0 ? 0.0f : target_packet->mover_height;
+        AIMoveInstruction(packet, destination, stopping_distance, &target_packet->path_info, movement_mode,
+                          movement_parameter);
     }
 
     void GetAIMessage(void) {

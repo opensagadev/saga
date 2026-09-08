@@ -276,9 +276,6 @@ static void SetLayers_MOSEISLEYCITIZEN(u32 *layers) {
 static __used__ void Tag_NoHiddenIcon(GameObject_s *) {
 }
 
-static __used__ void Tag_FindGameObject_TRANSFER(GameObject_s *) {
-}
-
 static __used__ void TightRope_Attach(GameObject_s *, WORLDINFO_s *) {
 }
 

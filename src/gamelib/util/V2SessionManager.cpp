@@ -13,10 +13,8 @@ void V2SessionManager::RemovePeer(NetPeer *, ePeerLeftReason) {
 
 void V2SessionManager::Reset() {
     if (field_90 != 0) {
-        puts("mHostList");
     }
     if (field_9c != 0) {
-        puts("mPeerList");
     }
 
     field_6c = 0;

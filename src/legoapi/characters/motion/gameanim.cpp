@@ -5,17 +5,21 @@
 #include "legoapi/legoapi_types.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/gizmo/base/gizactions.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nucore/nugcutscene.h"
 #include "nu2api/nucore/nuanim3.h"
 #include "nu2api/nucore/nuhgobj.h"
 #include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nurndr.h"
 #include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nuquat.h"
 #include "nu2api/numath/nurand.h"
 #include "nu2api/numusic/sfx.h"
 
@@ -35,9 +39,12 @@ i32 SuperCarry_Carrying(GameObject_s *object) {
 }
 
 float CalcValue1648(char *, i32, i32, float, ani3_scalemin_s *);
+void CalcValue1648Get2Values(char *, i32, i32, ani3_scalemin_s *, float *, float *);
+extern "C" void VuQuatSlerpFast(NUQUAT *out, NUQUAT *from, NUQUAT *to, f32 t);
 void EvalAnim(nuhspecial_s *special, f32 frame, numtx_s *matrix, i32 include_instance_translation);
 bool UseFallAnim(GameObject_s *object);
 i32 GetDefaultIdle(GameObject_s *object);
+void SetProtocolDroidFallAnim(GameObject_s *object);
 // TODO: Restore target-local linkage once the four remaining animation-mode
 // callers are decompiled; their references naturally prevent inlining.
 static void MoveAnim_Manage(GameObject_s *object, f32 movement_speed, i32 allow_tiptoe, i32 weapon_variant);
@@ -51,6 +58,7 @@ void AddFootSteps(GameObject_s *object);
 void RootFnEx(NUMTX *matrix, void *data, NUVEC *source_root, NUVEC *target_root, NUVEC *root_delta, f32 blend,
               i32 include_y);
 extern "C" void PlaySfxByIdAndSetVolume(i32 sfx_id, NUVEC *position, f32 volume);
+i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 
 extern i16 id_BODYGUARD;
 extern i16 id_IMPERIALGUARD;
@@ -95,24 +103,104 @@ static bool HasAnimation(const CHARACTERMODEL_s *model, i32 animation) {
     return model != NULL && animation >= 0 && model->model_data_b != NULL && model->model_data_b[animation] != NULL;
 }
 
-static bool HasCharacterAnimation(const GameObject_s *object, i32 animation) {
-    return object != NULL && HasAnimation(object->apiobj.character_model, animation);
-}
-
 static void MoveAnim_Check(GameObject_s *object) {
-    if (object == NULL || HasCharacterAnimation(object, object->apiobj.anim_packet.requested_animation)) {
+    if (GetAnimBlendMode() == 1) {
         return;
     }
 
-    // Alternate between the standard walk and run when a model omits one of
-    // them, then fall back to its ordinary idle animation.
-    const i16 requested = object->apiobj.anim_packet.requested_animation;
-    if (requested == CHARACTER_ANIMATION_WALK && HasCharacterAnimation(object, CHARACTER_ANIMATION_RUN)) {
-        object->apiobj.anim_packet.requested_animation = CHARACTER_ANIMATION_RUN;
-    } else if (requested == CHARACTER_ANIMATION_RUN && HasCharacterAnimation(object, CHARACTER_ANIMATION_WALK)) {
-        object->apiobj.anim_packet.requested_animation = CHARACTER_ANIMATION_WALK;
-    } else if (HasCharacterAnimation(object, CHARACTER_ANIMATION_IDLE)) {
-        object->apiobj.anim_packet.requested_animation = CHARACTER_ANIMATION_IDLE;
+    ANIMPACKET_s &packet = object->apiobj.anim_packet;
+    i16 requested = packet.requested_animation;
+    const i16 previous = packet.previous_animation;
+
+    if (object->released_movement_animation != -1) {
+        object->movement_animation_hold_timer = 0.1f;
+        object->held_movement_animation = -1;
+    } else {
+        if (requested == previous) {
+            object->movement_animation_hold_timer = 0.1f;
+            object->held_movement_animation = -1;
+            object->movement_animation_release_timer = 0.1f;
+            object->released_movement_animation = -1;
+            return;
+        }
+
+        const u32 requested_flags = ActionInfo[requested].flags;
+        if (((requested_flags & 7) == 0 && requested != CHARACTER_ANIMATION_ALT_IDLE &&
+             requested != CHARACTER_ANIMATION_IDLE) ||
+            (ActionInfo[previous].flags & 7) == 0 || (requested_flags & 4) != 0) {
+            object->movement_animation_hold_timer = 0.1f;
+            object->held_movement_animation = -1;
+            object->movement_animation_release_timer = 0.1f;
+            object->released_movement_animation = -1;
+            return;
+        }
+
+        if (object->held_movement_animation != -1) {
+            object->movement_animation_hold_timer -= FRAMETIME;
+            if (object->movement_animation_hold_timer > 0.0f) {
+                packet.requested_animation = object->held_movement_animation;
+                object->movement_animation_release_timer = 0.1f;
+                object->released_movement_animation = -1;
+                return;
+            }
+            object->held_movement_animation = -1;
+        } else {
+            object->movement_animation_hold_timer = 0.1f;
+            if (packet.blending == 0) {
+                bool retain_previous = false;
+                if (previous == CHARACTER_ANIMATION_RUN) {
+                    retain_previous = requested == CHARACTER_ANIMATION_WALK ||
+                                      requested == CHARACTER_ANIMATION_TIPTOE || requested == CHARACTER_ANIMATION_IDLE;
+                } else if (previous == CHARACTER_ANIMATION_SABER_RUN) {
+                    const GAMECHARACTERDATA *game_character =
+                        static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+                    const i16 alternate_idle =
+                        game_character->field275_0x116 != 0
+                            ? CHARACTER_ANIMATION_ALT_IDLE
+                            : static_cast<i16>((object->apiobj.character_data->model_flags & 0x80) != 0 ? 118 : 25);
+                    retain_previous = requested == CHARACTER_ANIMATION_SABER_TIPTOE ||
+                                      requested == CHARACTER_ANIMATION_SABER_WALK || requested == alternate_idle;
+                }
+
+                if (retain_previous) {
+                    packet.requested_animation = previous;
+                    object->held_movement_animation = previous;
+                    object->movement_animation_release_timer = 0.1f;
+                    object->released_movement_animation = -1;
+                    return;
+                }
+            }
+
+            object->movement_animation_release_timer = 0.1f;
+            object->released_movement_animation = -1;
+            return;
+        }
+    }
+
+    requested = packet.requested_animation;
+    const u32 requested_flags = ActionInfo[requested].flags;
+    if (requested == previous || (requested_flags & 7) == 0 ||
+        (previous != CHARACTER_ANIMATION_ALT_IDLE && previous != CHARACTER_ANIMATION_IDLE) ||
+        (requested_flags & 4) != 0) {
+        object->movement_animation_release_timer = 0.1f;
+        object->released_movement_animation = -1;
+        return;
+    }
+
+    if (object->released_movement_animation != -1) {
+        object->movement_animation_release_timer -= FRAMETIME;
+        if (object->movement_animation_release_timer <= 0.0f) {
+            object->movement_animation_release_timer = -1.0f;
+        } else {
+            packet.requested_animation = object->released_movement_animation;
+        }
+        return;
+    }
+
+    object->movement_animation_hold_timer = 0.1f;
+    if (packet.blending == 0 && (requested_flags & 3) != 0) {
+        packet.requested_animation = previous;
+        object->released_movement_animation = previous;
     }
 }
 
@@ -311,10 +399,157 @@ static inline void SkipAni4V4Curve(u16 type, u8 *&keys, ani3_scalemin_s *&scale_
     }
 }
 
+static inline void GetAni4SamplePosition(const ani3_animheader_s *anim, f32 frame, u32 &quarter, f32 &fraction,
+                                         i32 &key_offset) {
+    if (anim->key_count == 1) {
+        quarter = 0;
+        fraction = 0.0f;
+        key_offset = 0;
+        return;
+    }
+
+    const f32 last_key = static_cast<f32>(anim->key_count - 1);
+    f32 key = (frame - anim->first_frame) * last_key / static_cast<f32>(anim->frame_count - 1);
+    if (key < 0.0f) {
+        key = 0.0f;
+    }
+    if (last_key <= key) {
+        key = last_key;
+    }
+
+    const i32 whole_key = static_cast<i32>(key);
+    quarter = static_cast<u32>(whole_key) & 3;
+    fraction = key - static_cast<f32>(whole_key);
+    key_offset = (whole_key >> 2) * anim->key_stride;
+}
+
+static inline f32 DecodeAni4QuaternionScalar(const ani3_animheader_s *anim, u16 type, u32 quarter, f32 fraction,
+                                             u8 *&keys, ani3_scalemin_s *&scale_min) {
+    if (type == 7) {
+        const f32 value = CalcValue1648(reinterpret_cast<char *>(keys), quarter, anim->key_stride, fraction, scale_min);
+        keys += 8;
+        ++scale_min;
+        return value;
+    }
+    if (type == 9) {
+        const u16 *samples = reinterpret_cast<const u16 *>(keys);
+        const f32 first = static_cast<f32>(samples[quarter]);
+        const f32 second = quarter == 3 ? static_cast<f32>(*reinterpret_cast<const u16 *>(keys + anim->key_stride))
+                                        : static_cast<f32>(samples[quarter + 1]);
+        const f32 value = ((second - first) * fraction + first) * scale_min->scale + scale_min->minimum;
+        keys += 8;
+        ++scale_min;
+        return value;
+    }
+    return DecodeAni4V4Curve(anim, type, quarter, fraction, keys, scale_min);
+}
+
+static inline void DecodeAni4QuaternionPair(const ani3_animheader_s *anim, u16 type, u32 quarter, u8 *&keys,
+                                            ani3_scalemin_s *&scale_min, f32 &first, f32 &second) {
+    if (type == 7) {
+        CalcValue1648Get2Values(reinterpret_cast<char *>(keys), quarter, anim->key_stride, scale_min, &first, &second);
+        keys += 8;
+        ++scale_min;
+        return;
+    }
+    if (type == 9) {
+        const u16 *samples = reinterpret_cast<const u16 *>(keys);
+        first = static_cast<f32>(samples[quarter]) * scale_min->scale + scale_min->minimum;
+        const u16 next = quarter == 3 ? *reinterpret_cast<const u16 *>(keys + anim->key_stride) : samples[quarter + 1];
+        second = static_cast<f32>(next) * scale_min->scale + scale_min->minimum;
+        keys += 8;
+        ++scale_min;
+        return;
+    }
+    if (type == 6) {
+        u8 *pair_keys = keys;
+        ani3_scalemin_s *pair_scale_min = scale_min;
+        first = DecodeAni4V4Curve(anim, type, quarter, 0.0f, pair_keys, pair_scale_min);
+        pair_keys = keys;
+        pair_scale_min = scale_min;
+        second = DecodeAni4V4Curve(anim, type, quarter, 1.0f, pair_keys, pair_scale_min);
+        keys += 4;
+        ++scale_min;
+        return;
+    }
+
+    first = second =
+        static_cast<f32>(reinterpret_cast<const u16 *>(anim->constants)[type - 16]) * anim->scale + anim->minimum;
+}
+
+static inline NUQUAT DecodeAni4Quaternion(const ani3_animheader_s *anim, i32 component_count, const u16 *types,
+                                          u32 quarter, f32 fraction, u8 *&keys, ani3_scalemin_s *&scale_min) {
+    NUQUAT first = {0.0f, 0.0f, 0.0f, 0.0f};
+    NUQUAT second = {0.0f, 0.0f, 0.0f, 0.0f};
+    f32 *first_values = &first.x;
+    f32 *second_values = &second.x;
+    for (i32 component = 0; component < component_count; ++component) {
+        DecodeAni4QuaternionPair(anim, types[component], quarter, keys, scale_min, first_values[component],
+                                 second_values[component]);
+    }
+
+    if (component_count == 3) {
+        first.w = NuFsqrt(1.0f - first.x * first.x - first.y * first.y - first.z * first.z);
+        second.w = NuFsqrt(1.0f - second.x * second.x - second.y * second.y - second.z * second.z);
+    }
+
+    NuQuatHarmonize(&first, &second);
+    NUQUAT result;
+    NuQuatLerp2(&result, &first, &second, fraction);
+    NuQuatNormalise(&result, &result);
+    return result;
+}
+
+static inline void SkipAni4QuaternionJoint(const ani3_animheader_s *anim, i32 quaternion_components, i32 joint,
+                                           const u16 *types, u8 *&keys, ani3_scalemin_s *&scale_min) {
+    const u8 flags = anim->node_flags[joint];
+    if ((flags & NUANIMBUFF_JOINT_TRANSLATION) != 0) {
+        for (i32 component = 0; component < 3; ++component) {
+            SkipAni4V4Curve(types[component], keys, scale_min);
+        }
+    }
+    if ((flags & NUANIMBUFF_JOINT_ROTATION) != 0) {
+        for (i32 component = 0; component < quaternion_components; ++component) {
+            SkipAni4V4Curve(types[3 + component], keys, scale_min);
+        }
+    }
+    if ((flags & NUANIMBUFF_JOINT_SCALE) != 0) {
+        const i32 scale_offset = 3 + quaternion_components;
+        for (i32 component = 0; component < 3; ++component) {
+            SkipAni4V4Curve(types[scale_offset + component], keys, scale_min);
+        }
+    }
+}
+
 void Animate_POD(GameObject_s *) {
 }
 
-void Animate_ATAT(GameObject_s *) {
+void Animate_ATAT(GameObject_s *object) {
+    ANIMPACKET_s &packet = object->apiobj.anim_packet;
+    if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
+        packet.requested_animation = object->context_animation;
+    } else {
+        packet.requested_animation = CHARACTER_ANIMATION_IDLE;
+        if (static_cast<i16>(object->apiobj.field_0x1f8) < 0 &&
+            object->apiobj.character_model->model_data_b[15] != NULL) {
+            packet.requested_animation = 15;
+        }
+        if ((object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
+            object->pad_gamepad->input_magnitude > 0.0f) {
+            packet.requested_animation = CHARACTER_ANIMATION_WALK;
+        }
+    }
+
+    if (packet.requested_animation != CHARACTER_ANIMATION_IDLE) {
+        return;
+    }
+
+    const i32 turn = RotDiff(object->previous_movement_angle, object->apiobj.field_0x276);
+    if (turn > 0 && object->apiobj.character_model->model_data_b[79] != NULL) {
+        packet.requested_animation = 79;
+    } else if (turn < 0 && object->apiobj.character_model->model_data_b[38] != NULL) {
+        packet.requested_animation = 38;
+    }
 }
 
 void Animate_JEDI(GameObject_s *object) {
@@ -553,6 +788,11 @@ void AnimatePlayer(GameObject_s *object) {
         object->apiobj.character_data->animate_fn(object);
     }
 
+    const i16 override_from = object->ai.animation_override_from;
+    if ((override_from == 0xe9 && object->character_context != 0x1c) || override_from == packet.requested_animation) {
+        packet.requested_animation = object->ai.animation_override_to;
+    }
+
     CHARACTERMODEL_s *model = object->apiobj.character_model;
     GAMECHARACTERDATA *game_character = GetGameCharacterData(object);
     if (model == NULL || game_character == NULL ||
@@ -570,6 +810,14 @@ void AnimatePlayer(GameObject_s *object) {
         movement_speed = forward_speed > 0.0f ? forward_speed : 0.0f;
     }
 
+    // The original passes signed movement into UpdateAnimPacket.  Clips with
+    // CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT (including the acrobatic
+    // jump clips) start at their end frame and play backwards while the
+    // character is travelling backwards.
+    if ((object->field_0xefd & GAMEOBJECT_MOVEMENT_FLAG_BACKWARDS) != 0) {
+        movement_speed = -movement_speed;
+    }
+
     UpdateAnimPacket(model, &packet, FRAMETIME * 30.0f, movement_speed, FRAMETIME,
                      game_character->backwards_speed_multiplier);
     AutoWeaponOnOff(object);
@@ -579,34 +827,227 @@ void AnimatePlayer(GameObject_s *object) {
 void Animate_BEAST(GameObject_s *) {
 }
 
-void Animate_BARMAN(GameObject_s *) {
+void Animate_BARMAN(GameObject_s *object) {
+    object->apiobj.anim_packet.requested_animation = CHARACTER_ANIMATION_IDLE;
+    if ((object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
+        object->pad_gamepad->input_magnitude > 0.0f) {
+        object->apiobj.anim_packet.requested_animation = CHARACTER_ANIMATION_WALK;
+    }
+    UpdateCharacterIdle(object);
 }
 
-void Animate_CANNON(GameObject_s *) {
+void Animate_CANNON(GameObject_s *object) {
+    object->apiobj.anim_packet.requested_animation =
+        (CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0
+            ? object->context_animation
+            : CHARACTER_ANIMATION_IDLE;
 }
 
-void Animate_WALKER(GameObject_s *) {
+void Animate_WALKER(GameObject_s *object) {
+    if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
+        object->apiobj.anim_packet.requested_animation = object->context_animation;
+        return;
+    }
+
+    object->apiobj.anim_packet.requested_animation = CHARACTER_ANIMATION_IDLE;
+    if ((object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
+        object->pad_gamepad->input_magnitude > 0.0f) {
+        object->apiobj.anim_packet.requested_animation = CHARACTER_ANIMATION_WALK;
+    }
 }
 
 void Animate_WEIRDO(GameObject_s *) {
 }
 
-void Animate_CRITTER(GameObject_s *) {
+void Animate_CRITTER(GameObject_s *object) {
+    ANIMPACKET_s &packet = object->apiobj.anim_packet;
+    if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
+        packet.requested_animation = object->context_animation;
+        return;
+    }
+
+    packet.requested_animation = CHARACTER_ANIMATION_FALL;
+    if (object->character_context == 30 &&
+        object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] != NULL) {
+        return;
+    }
+
+    if (object->character_context != CHARACTER_CONTEXT_JUMP) {
+        bool use_default_idle = object->apiobj.field_0x27d != 0;
+        if (!use_default_idle) {
+            const bool has_fall = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] != NULL;
+            if (object->ground_contact_grace_timer > 0.0f) {
+                const GAMECHARACTERDATA *game_character = GetGameCharacterData(object);
+                use_default_idle = game_character->field_0x28 <= 0.0f || !has_fall;
+            } else if (!has_fall) {
+                use_default_idle = true;
+            } else if (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
+                       object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f) {
+                use_default_idle = true;
+            }
+        }
+        if (use_default_idle) {
+            packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
+        }
+    }
+
+    if (UseFallAnim(object)) {
+        packet.requested_animation = CHARACTER_ANIMATION_FALL;
+    } else if (packet.requested_animation != CHARACTER_ANIMATION_FALL &&
+               (object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
+               object->pad_gamepad->input_magnitude > 0.0f) {
+        const bool has_walk = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_WALK] != NULL;
+        const bool has_run = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_RUN] != NULL;
+        if (has_run && has_walk) {
+            const GAMECHARACTERDATA *game_character = GetGameCharacterData(object);
+            const f32 run_threshold = (game_character->walk_speed + game_character->run_speed) * 0.5f;
+            packet.requested_animation = object->pad_gamepad->input_magnitude > run_threshold
+                                             ? CHARACTER_ANIMATION_RUN
+                                             : CHARACTER_ANIMATION_WALK;
+        } else if (has_run) {
+            packet.requested_animation = CHARACTER_ANIMATION_RUN;
+        } else if (has_walk) {
+            packet.requested_animation = CHARACTER_ANIMATION_WALK;
+        }
+    }
+    MoveAnim_Check(object);
 }
 
-void Animate_DEFAULT(GameObject_s *) {
+void Animate_DEFAULT(GameObject_s *object) {
+    object->apiobj.anim_packet.requested_animation = CHARACTER_ANIMATION_IDLE;
 }
 
 void Animate_VEHICLE(GameObject_s *) {
 }
 
-void Animate_DROIDEKA(GameObject_s *) {
+void Animate_DROIDEKA(GameObject_s *object) {
+    ANIMPACKET_s &packet = object->apiobj.anim_packet;
+    if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
+        packet.requested_animation = object->context_animation;
+    } else {
+        packet.requested_animation = CHARACTER_ANIMATION_FALL;
+        if (object->character_context != CHARACTER_CONTEXT_DOOMED &&
+            object->character_context != CHARACTER_CONTEXT_JUMP) {
+            bool use_default_idle = object->apiobj.field_0x27d != 0;
+            if (!use_default_idle) {
+                const bool has_fall = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] != NULL;
+                if (object->ground_contact_grace_timer > 0.0f) {
+                    const GAMECHARACTERDATA *game_character = GetGameCharacterData(object);
+                    use_default_idle = game_character->field_0x28 <= 0.0f || !has_fall;
+                } else if (!has_fall) {
+                    use_default_idle = true;
+                } else if (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
+                           object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f) {
+                    use_default_idle = true;
+                }
+            }
+            if (use_default_idle) {
+                packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
+            }
+        }
+
+        if (UseFallAnim(object) || (object->character_context == -1 && object->apiobj.field_0x27d == 0)) {
+            packet.requested_animation = CHARACTER_ANIMATION_FALL;
+        } else if ((object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
+                   object->pad_gamepad->input_magnitude > 0.0f) {
+            const GAMECHARACTERDATA *game_character = GetGameCharacterData(object);
+            const f32 walk_threshold = (game_character->tiptoe_speed + game_character->walk_speed) * 0.5f;
+            packet.requested_animation = object->pad_gamepad->input_magnitude > walk_threshold
+                                             ? CHARACTER_ANIMATION_WALK
+                                             : CHARACTER_ANIMATION_TIPTOE;
+        }
+        MoveAnim_Check(object);
+    }
+
+    const i16 animation = packet.requested_animation;
+    if (animation == CHARACTER_ANIMATION_FALL ||
+        ((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
+         (animation == CHARACTER_ANIMATION_FALL_VARIANT_75 || animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
+          animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
+        object->fall_animation_timer += FRAMETIME;
+    } else {
+        object->fall_animation_timer = 0.0f;
+    }
 }
 
-void Animate_PROTOCOL(GameObject_s *) {
+void Animate_PROTOCOL(GameObject_s *object) {
+    ANIMPACKET_s &packet = object->apiobj.anim_packet;
+    if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
+        packet.requested_animation = object->context_animation;
+    } else if (object->context_target_position != NULL) {
+        SetProtocolDroidFallAnim(object);
+    } else {
+        packet.requested_animation = CHARACTER_ANIMATION_FALL;
+        if (object->character_context != CHARACTER_CONTEXT_DOOMED &&
+            object->character_context != CHARACTER_CONTEXT_JUMP) {
+            bool use_default_idle = object->apiobj.field_0x27d != 0;
+            if (!use_default_idle) {
+                const bool has_fall = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] != NULL;
+                if (object->ground_contact_grace_timer > 0.0f) {
+                    const GAMECHARACTERDATA *game_character = GetGameCharacterData(object);
+                    use_default_idle = game_character->field_0x28 <= 0.0f || !has_fall;
+                } else if (!has_fall) {
+                    use_default_idle = true;
+                } else if (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
+                           object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f) {
+                    use_default_idle = true;
+                }
+            }
+            if (use_default_idle) {
+                packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
+                if (packet.requested_animation != CHARACTER_ANIMATION_FALL) {
+                    switch (object->field_0xe38) {
+                        case 1:
+                            packet.requested_animation = 8;
+                            break;
+                        case 2:
+                            packet.requested_animation = 20;
+                            break;
+                        case 3:
+                            packet.requested_animation = 15;
+                            break;
+                        default:
+                            packet.requested_animation = CHARACTER_ANIMATION_IDLE;
+                            break;
+                    }
+                }
+            }
+        }
+
+        if (object->character_context == CHARACTER_CONTEXT_JUMP) {
+            SetProtocolDroidFallAnim(object);
+        }
+        if (UseFallAnim(object)) {
+            SetProtocolDroidFallAnim(object);
+        } else if (packet.requested_animation != CHARACTER_ANIMATION_FALL &&
+                   (object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
+                   object->pad_gamepad->input_magnitude > 0.0f) {
+            packet.requested_animation = CHARACTER_ANIMATION_WALK;
+        }
+    }
+
+    if (packet.requested_animation == CHARACTER_ANIMATION_FALL) {
+        SetProtocolDroidFallAnim(object);
+    }
+    UpdateCharacterIdle(object);
+    const i16 animation = packet.requested_animation;
+    if (animation == CHARACTER_ANIMATION_FALL ||
+        ((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
+         (animation == CHARACTER_ANIMATION_FALL_VARIANT_75 || animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
+          animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
+        object->fall_animation_timer += FRAMETIME;
+    } else {
+        object->fall_animation_timer = 0.0f;
+    }
 }
 
-void GameAnimSet_Draw(GAMEANIMSET_s &) {
+// Original @0x4a9900.
+void GameAnimSet_Draw(GAMEANIMSET_s &set) {
+    for (GAMEANIMOBJ_s *object = set.objects; object != NULL; object = object->next) {
+        if ((object->flags & 2) == 0 && NuSpecialGetVisibilityFn(&object->special) != 0) {
+            NuSpecialDrawAt(&object->special, NuSpecialGetDrawMtx(&object->special));
+        }
+    }
 }
 
 i32 GameAnimSet_Play(GAMEANIMSET_s *set, float speed, i32 evaluate_state) {
@@ -683,7 +1124,61 @@ i32 GameAnimSet_Stop(GAMEANIMSET_s *set) {
     return 1;
 }
 
-void Animate_ASTROMECH(GameObject_s *) {
+void Animate_ASTROMECH(GameObject_s *object) {
+    ANIMPACKET_s &packet = object->apiobj.anim_packet;
+    if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
+        packet.requested_animation = object->context_animation;
+    } else if (object->context_target_position != NULL) {
+        if (object->apiobj.character_model->model_data_b[43] != NULL) {
+            packet.requested_animation = 43;
+        } else {
+            const i32 target_state =
+                *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(object->context_target_position) + 0x14);
+            packet.requested_animation = target_state == 0 ? CHARACTER_ANIMATION_IDLE : CHARACTER_ANIMATION_FALL;
+        }
+    } else {
+        packet.requested_animation = CHARACTER_ANIMATION_FALL;
+        if (object->character_context != CHARACTER_CONTEXT_DOOMED &&
+            object->character_context != CHARACTER_CONTEXT_JUMP) {
+            bool use_default_idle = object->apiobj.field_0x27d != 0;
+            if (!use_default_idle) {
+                const bool has_fall = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] != NULL;
+                if (object->ground_contact_grace_timer > 0.0f) {
+                    const GAMECHARACTERDATA *game_character = GetGameCharacterData(object);
+                    use_default_idle = game_character->field_0x28 <= 0.0f || !has_fall;
+                } else if (!has_fall) {
+                    use_default_idle = true;
+                } else if (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
+                           object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f) {
+                    use_default_idle = true;
+                }
+            }
+            if (use_default_idle) {
+                packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
+            }
+        }
+
+        if (object->character_context == 0) {
+            packet.requested_animation = object->pad_gamepad->input_magnitude > 0.0f ? 37 : 36;
+        } else if (UseFallAnim(object)) {
+            packet.requested_animation = CHARACTER_ANIMATION_FALL;
+        } else if (packet.requested_animation != CHARACTER_ANIMATION_FALL &&
+                   (object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
+                   object->pad_gamepad->input_magnitude > 0.0f) {
+            packet.requested_animation = CHARACTER_ANIMATION_WALK;
+        }
+    }
+
+    UpdateCharacterIdle(object);
+    const i16 animation = packet.requested_animation;
+    if (animation == CHARACTER_ANIMATION_FALL ||
+        ((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
+         (animation == CHARACTER_ANIMATION_FALL_VARIANT_75 || animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
+          animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
+        object->fall_animation_timer += FRAMETIME;
+    } else {
+        object->fall_animation_timer = 0.0f;
+    }
 }
 
 void Animate_CHARACTER(GameObject_s *object) {
@@ -698,7 +1193,7 @@ void Animate_CHARACTER(GameObject_s *object) {
         } else {
             const i32 target_state =
                 *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(object->context_target_position) + 0x14);
-            packet.requested_animation = target_state == 1 ? CHARACTER_ANIMATION_IDLE : CHARACTER_ANIMATION_FALL;
+            packet.requested_animation = target_state == 0 ? CHARACTER_ANIMATION_IDLE : CHARACTER_ANIMATION_FALL;
         }
     } else if (object->character_context == CHARACTER_CONTEXT_FORCE) {
         packet.requested_animation = CHARACTER_ANIMATION_WEAPON_IDLE;
@@ -770,7 +1265,53 @@ void Animate_CHARACTER(GameObject_s *object) {
     }
 }
 
-void Animate_GEONOSIAN(GameObject_s *) {
+void Animate_GEONOSIAN(GameObject_s *object) {
+    ANIMPACKET_s &packet = object->apiobj.anim_packet;
+    if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
+        packet.requested_animation = object->context_animation;
+    } else {
+        packet.requested_animation = CHARACTER_ANIMATION_FALL;
+        if (object->character_context != CHARACTER_CONTEXT_JUMP) {
+            bool use_default_idle = object->apiobj.field_0x27d != 0;
+            if (!use_default_idle) {
+                const bool has_fall = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] != NULL;
+                if (object->ground_contact_grace_timer > 0.0f) {
+                    const GAMECHARACTERDATA *game_character = GetGameCharacterData(object);
+                    use_default_idle = game_character->field_0x28 <= 0.0f || !has_fall;
+                } else if (!has_fall) {
+                    use_default_idle = true;
+                } else if (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
+                           object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f) {
+                    use_default_idle = true;
+                }
+            }
+            if (use_default_idle) {
+                packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
+            }
+        }
+
+        if (UseFallAnim(object)) {
+            packet.requested_animation = CHARACTER_ANIMATION_FALL;
+        } else if (object->character_context == -1 && object->field_0xe31 == 1) {
+            packet.requested_animation = object->pad_gamepad->input_magnitude > 0.0f ? 37 : 15;
+        } else if (packet.requested_animation != CHARACTER_ANIMATION_FALL &&
+                   (object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
+                   object->pad_gamepad->input_magnitude > 0.0f) {
+            packet.requested_animation = CHARACTER_ANIMATION_WALK;
+        }
+        MoveAnim_Check(object);
+    }
+
+    UpdateCharacterIdle(object);
+    const i16 animation = packet.requested_animation;
+    if (animation == CHARACTER_ANIMATION_FALL ||
+        ((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
+         (animation == CHARACTER_ANIMATION_FALL_VARIANT_75 || animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
+          animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
+        object->fall_animation_timer += FRAMETIME;
+    } else {
+        object->fall_animation_timer = 0.0f;
+    }
 }
 
 i32 GameAnimSet_Reset(GAMEANIMSET_s *set) {
@@ -789,7 +1330,15 @@ i32 GameAnimSet_Reset(GAMEANIMSET_s *set) {
     return 1;
 }
 
-void Animate_HOVERDROID(GameObject_s *) {
+void Animate_HOVERDROID(GameObject_s *object) {
+    if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
+        object->apiobj.anim_packet.requested_animation = object->context_animation;
+    } else if (object->character_context == 0x1e &&
+               object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] != NULL) {
+        object->apiobj.anim_packet.requested_animation = CHARACTER_ANIMATION_FALL;
+    } else {
+        object->apiobj.anim_packet.requested_animation = CHARACTER_ANIMATION_IDLE;
+    }
 }
 
 GAMEANIMSET_s *GameAnimSet_Create(variptr_u *buf, variptr_u *buf_end, GAMEANIMOBJPOOL_s *object_pool,
@@ -810,10 +1359,67 @@ GAMEANIMSET_s *GameAnimSet_Create(variptr_u *buf, variptr_u *buf_end, GAMEANIMOB
     return set;
 }
 
-void Animate_BATTLEDROID(GameObject_s *) {
+void Animate_BATTLEDROID(GameObject_s *object) {
+    ANIMPACKET_s &packet = object->apiobj.anim_packet;
+    if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
+        packet.requested_animation = object->context_animation;
+    } else if (object->context_target_position != NULL) {
+        if (object->apiobj.character_model->model_data_b[43] != NULL) {
+            packet.requested_animation = 43;
+        } else {
+            const i32 target_state =
+                *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(object->context_target_position) + 0x14);
+            packet.requested_animation = target_state == 0 ? CHARACTER_ANIMATION_IDLE : CHARACTER_ANIMATION_FALL;
+        }
+    } else {
+        packet.requested_animation = CHARACTER_ANIMATION_FALL;
+        if (object->character_context != CHARACTER_CONTEXT_DOOMED &&
+            object->character_context != CHARACTER_CONTEXT_JUMP) {
+            bool use_default_idle = object->apiobj.field_0x27d != 0;
+            if (!use_default_idle) {
+                const bool has_fall = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] != NULL;
+                if (object->ground_contact_grace_timer > 0.0f) {
+                    const GAMECHARACTERDATA *game_character = GetGameCharacterData(object);
+                    use_default_idle = game_character->field_0x28 <= 0.0f || !has_fall;
+                } else if (!has_fall) {
+                    use_default_idle = true;
+                } else if (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
+                           object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f) {
+                    use_default_idle = true;
+                }
+            }
+            if (use_default_idle) {
+                packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
+            }
+        }
+
+        if (UseFallAnim(object)) {
+            packet.requested_animation = CHARACTER_ANIMATION_FALL;
+        } else if ((object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
+                   object->pad_gamepad->input_magnitude > 0.0f) {
+            const GAMECHARACTERDATA *game_character = GetGameCharacterData(object);
+            MoveAnim_Manage(object, object->pad_gamepad->input_magnitude,
+                            (game_character->flags_090 & GAMECHARACTER_FLAG_DISABLE_TIPTOE) == 0 ? 1 : 0, 0);
+        }
+        MoveAnim_Check(object);
+    }
+
+    const i16 animation = packet.requested_animation;
+    if (animation == CHARACTER_ANIMATION_FALL ||
+        ((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
+         (animation == CHARACTER_ANIMATION_FALL_VARIANT_75 || animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
+          animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
+        object->fall_animation_timer += FRAMETIME;
+    } else {
+        object->fall_animation_timer = 0.0f;
+    }
 }
 
-void Animate_SPEEDERBIKE(GameObject_s *) {
+void Animate_SPEEDERBIKE(GameObject_s *object) {
+    object->apiobj.anim_packet.requested_animation =
+        (CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0
+            ? object->context_animation
+            : CHARACTER_ANIMATION_IDLE;
 }
 
 i32 GameAnimSet_Playing(GAMEANIMSET_s *set) {
@@ -984,7 +1590,14 @@ void GameAnimSet_SetTFactor(GAMEANIMSET_s *set, float factor) {
     }
 }
 
-void Animate_REPUBLICGUNSHIP(GameObject_s *) {
+void Animate_REPUBLICGUNSHIP(GameObject_s *object) {
+    object->apiobj.anim_packet.requested_animation = CHARACTER_ANIMATION_IDLE;
+    if (object->character_context == 0x23) {
+        object->apiobj.anim_packet.requested_animation = 0x2c;
+    } else if (object->character_context == 0x24) {
+        object->apiobj.anim_packet.requested_animation = 0x2d;
+    }
+    UpdateCharacterIdle(object);
 }
 
 i32 GameAnimSet_JumpToStart(GAMEANIMSET_s *set) {
@@ -999,10 +1612,96 @@ i32 GameAnimSet_JumpToStart(GAMEANIMSET_s *set) {
     return 1;
 }
 
-void Animate_SUPERBATTLEDROID(GameObject_s *) {
+void Animate_SUPERBATTLEDROID(GameObject_s *object) {
+    ANIMPACKET_s &packet = object->apiobj.anim_packet;
+    if ((CInfo[object->character_context].flags & CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION) != 0) {
+        packet.requested_animation = object->context_animation;
+    } else if (object->context_target_position != NULL) {
+        if (object->apiobj.character_model->model_data_b[43] != NULL) {
+            packet.requested_animation = 43;
+        } else {
+            const i32 target_state =
+                *reinterpret_cast<i32 *>(reinterpret_cast<u8 *>(object->context_target_position) + 0x14);
+            packet.requested_animation = target_state == 0 ? CHARACTER_ANIMATION_IDLE : CHARACTER_ANIMATION_FALL;
+        }
+    } else {
+        packet.requested_animation = CHARACTER_ANIMATION_FALL;
+        if (object->character_context != CHARACTER_CONTEXT_DOOMED &&
+            object->character_context != CHARACTER_CONTEXT_JUMP) {
+            bool use_default_idle = object->apiobj.field_0x27d != 0;
+            if (!use_default_idle) {
+                const bool has_fall = object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] != NULL;
+                if (object->ground_contact_grace_timer > 0.0f) {
+                    const GAMECHARACTERDATA *game_character = GetGameCharacterData(object);
+                    use_default_idle = game_character->field_0x28 <= 0.0f || !has_fall;
+                } else if (!has_fall) {
+                    use_default_idle = true;
+                } else if (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
+                           object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f) {
+                    use_default_idle = true;
+                }
+            }
+            if (use_default_idle) {
+                packet.requested_animation = static_cast<i16>(GetDefaultIdle(object));
+            }
+        }
+
+        if (UseFallAnim(object)) {
+            packet.requested_animation = CHARACTER_ANIMATION_FALL;
+        } else if (packet.requested_animation != CHARACTER_ANIMATION_FALL) {
+            const GAMECHARACTERDATA *game_character = GetGameCharacterData(object);
+            const bool weapon_out =
+                (object->field_0xe22 & GAMEOBJECT_E22_FLAG_WEAPON_ANIMATION) != 0 || object->weapon_scale > 0.0f;
+            if ((object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
+                object->pad_gamepad->input_magnitude > 0.0f) {
+                const f32 run_threshold = (game_character->walk_speed + game_character->run_speed) * 0.5f;
+                if (object->pad_gamepad->input_magnitude > run_threshold) {
+                    packet.requested_animation = weapon_out ? CHARACTER_ANIMATION_SABER_RUN : CHARACTER_ANIMATION_RUN;
+                } else {
+                    packet.requested_animation = weapon_out ? CHARACTER_ANIMATION_SABER_WALK : CHARACTER_ANIMATION_WALK;
+                }
+            } else if (object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_ALT_IDLE] != NULL &&
+                       object->weapon_scale >= 0.5f) {
+                packet.requested_animation = CHARACTER_ANIMATION_ALT_IDLE;
+            }
+        }
+        MoveAnim_Check(object);
+    }
+
+    UpdateCharacterIdle(object);
+    const i16 animation = packet.requested_animation;
+    if (animation == CHARACTER_ANIMATION_FALL ||
+        ((object->apiobj.character_data->model_flags & CHARACTER_MODEL_FLAG_HIGH_JUMP) != 0 &&
+         (animation == CHARACTER_ANIMATION_FALL_VARIANT_75 || animation == CHARACTER_ANIMATION_FALL_VARIANT_40 ||
+          animation == CHARACTER_ANIMATION_FALL_VARIANT_76))) {
+        object->fall_animation_timer += FRAMETIME;
+    } else {
+        object->fall_animation_timer = 0.0f;
+    }
 }
 
-void GameAnimSet_RemoveObject(GAMEANIMSET_s *, GAMEANIMOBJ_s *) {
+void GameAnimSet_RemoveObject(GAMEANIMSET_s *set, GAMEANIMOBJ_s *object) {
+    if (object == NULL || set == NULL) {
+        return;
+    }
+
+    if (set->objects == object) {
+        set->objects = object->next;
+    } else {
+        GAMEANIMOBJ_s *previous = set->objects;
+        while (previous != NULL && previous->next != object) {
+            previous = previous->next;
+        }
+        if (previous != NULL) {
+            previous->next = object->next;
+        }
+    }
+
+    object->next = NULL;
+    --set->object_count;
+    --set->object_pool->active_count;
+    object->next = set->object_pool->free_objects;
+    set->object_pool->free_objects = object;
 }
 
 void GameAnimSet_ScaleFParam1(GAMEANIMSET_s *set, float scale) {
@@ -1141,7 +1840,17 @@ void GameAnimSet_JumpToAnimPos(GAMEANIMSET_s *set, float position) {
     }
 }
 
-void GameAnimSet_RemoveSpecial(GAMEANIMSET_s *, nuhspecial_s *) {
+void GameAnimSet_RemoveSpecial(GAMEANIMSET_s *set, nuhspecial_s *special) {
+    if (special == NULL || set == NULL) {
+        return;
+    }
+
+    for (GAMEANIMOBJ_s *object = set->objects; object != NULL; object = object->next) {
+        if (NuSpecialCompare(&object->special, special) != 0) {
+            GameAnimSet_RemoveObject(set, object);
+            return;
+        }
+    }
 }
 
 void GameAnimSet_SetVisibility(GAMEANIMSET_s *set, i32 visibility) {
@@ -1152,7 +1861,26 @@ void GameAnimSet_SetVisibility(GAMEANIMSET_s *set, i32 visibility) {
     }
 }
 
-void GameAnimSet_DrawReflection(GAMEANIMSET_s *, i32, float, numtx_s *) {
+void GameAnimSet_DrawReflection(GAMEANIMSET_s *set, i32 axis, float offset, numtx_s *matrix) {
+    if (set == NULL || set->objects == NULL) {
+        return;
+    }
+    if (matrix == NULL) {
+        matrix = NuSpecialGetMtx(&set->objects->special);
+    }
+
+    const f32 plane = reinterpret_cast<f32 *>(matrix)[axis + 11] + offset;
+    NuRndrStartReflectionRender(0);
+    for (GAMEANIMOBJ_s *object = set->objects; object != NULL; object = object->next) {
+        if ((object->flags & 2) == 0 && NuSpecialGetVisibilityFn(&object->special) != 0) {
+            NUMTX reflection;
+            NUMTX *draw_matrix = NuSpecialGetDrawMtx(&object->special);
+            if (MatrixReflection(draw_matrix, axis, plane, WORLD->current_level->unknown_0cc, &reflection) != 0) {
+                NuSpecialDrawAt(&object->special, &reflection);
+            }
+        }
+    }
+    NuRndrEndReflectionRender();
 }
 
 GAMEANIMOBJ_s *GameAnimSet_AddObjectByName(GAMEANIMSET_s *set, nugscn_s *scene, char *name, float start_frame,
@@ -1176,7 +1904,20 @@ void GameAnimSet_AddToSystemList(GAMEANIMSET_s *set) {
     }
 }
 
-void GameAnimSet_AutoSetReflectY(GAMEANIMSET_s *, nuvec_s *, numtx_s *) {
+f32 GameAnimSet_AutoSetReflectY(GAMEANIMSET_s *set, nuvec_s *position, numtx_s *matrix) {
+    if (set == NULL || set->objects == NULL) {
+        return 0.0f;
+    }
+    if (matrix == NULL) {
+        matrix = NuSpecialGetMtx(&set->objects->special);
+    }
+
+    const f32 matrix_y = matrix->m31;
+    const f32 ground_y = GameShadow(NULL, position, 5.0f, -1);
+    if (ground_y == 2000000.0f) {
+        return 0.0f;
+    }
+    return ground_y - matrix_y;
 }
 
 f32 GameAnimSet_GetCurrentFrame(GAMEANIMSET_s *set) {
@@ -1249,7 +1990,13 @@ i32 GameAnimSet_IsAnimationReset(GAMEANIMSET_s *set) {
     return animated_count != repeating_count;
 }
 
-void GameAnimSet_RemoveAllObjects(GAMEANIMSET_s *) {
+void GameAnimSet_RemoveAllObjects(GAMEANIMSET_s *set) {
+    if (set == NULL) {
+        return;
+    }
+    while (set->objects != NULL) {
+        GameAnimSet_RemoveObject(set, set->objects);
+    }
 }
 
 i32 GameAnimSet_GetCentreAndRadius(GAMEANIMSET_s *set, NUVEC *centre, f32 *radius, i32 frame_selection,
@@ -1484,8 +2231,9 @@ extern "C" {
                 keys += 4;
             } else if (type == 10) {
                 u32 index = keys[quarter];
-                i32 packed = static_cast<i32>(constants[index + 1]) | (static_cast<i32>(constants[index]) << 16);
-                *values = static_cast<float>(packed);
+                const u32 packed = static_cast<u32>(static_cast<i32>(constants[index + 1])) |
+                                   (static_cast<u32>(static_cast<i32>(constants[index])) << 16);
+                memcpy(values, &packed, sizeof(packed));
                 keys += 4;
             } else if (type == 6) {
                 u32 first = *reinterpret_cast<u32 *>(keys);
@@ -1756,17 +2504,183 @@ extern "C" {
         }
     }
 
-    void ANI_SimpleAni3PlayerV4Joint_Blend_EulerQuat(ani3_animheader_s *, f32, nuanimbuff_s *, f32, i32, i32, NUVEC *) {
+    void ANI_SimpleAni3PlayerV4Joint_Blend_EulerQuat(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer,
+                                                     f32 blend, i32 joint_count, i32 first_joint,
+                                                     NUVEC *root_translation) {
+        u32 quarter;
+        f32 fraction;
+        i32 key_offset;
+        GetAni4SamplePosition(anim, frame, quarter, fraction, key_offset);
+
+        u8 *keys = anim->keys + key_offset;
+        ani3_scalemin_s *scale_min = anim->scale_min;
+        const u16 *curve_types = anim->curve_types;
+        for (i32 joint = 0; joint < first_joint; ++joint) {
+            const u8 flags = anim->node_flags[joint];
+            for (i32 group = 0; group < 3; ++group) {
+                if ((flags & CurveGroupMasks[group]) != 0) {
+                    for (i32 component = 0; component < 3; ++component) {
+                        SkipAni4V4Curve(curve_types[group * 3 + component], keys, scale_min);
+                    }
+                }
+            }
+            curve_types += 9;
+        }
+
+        i32 end_joint = first_joint + joint_count;
+        if (end_joint > anim->node_count) {
+            end_joint = anim->node_count;
+        }
+        const f32 inverse_blend = 1.0f - blend;
+        NUVEC *root = first_joint == 0 ? root_translation : NULL;
+        for (i32 joint_index = first_joint; joint_index < end_joint; ++joint_index) {
+            const u8 flags = anim->node_flags[joint_index];
+            buffer->joint_flags[joint_index] |= flags;
+            nuanimbuffjoint_s &joint = buffer->joints[joint_index];
+
+            if ((flags & NUANIMBUFF_JOINT_TRANSLATION) != 0) {
+                f32 sampled[3];
+                f32 *translation = &joint.translation.x;
+                for (i32 component = 0; component < 3; ++component) {
+                    sampled[component] =
+                        DecodeAni4V4Curve(anim, curve_types[component], quarter, fraction, keys, scale_min);
+                    translation[component] += (sampled[component] - translation[component]) * blend;
+                }
+                if (root != NULL) {
+                    root->x = sampled[0];
+                    root->y = sampled[1];
+                    root->z = -sampled[2];
+                }
+            } else {
+                joint.translation.x *= inverse_blend;
+                joint.translation.y *= inverse_blend;
+                joint.translation.z *= inverse_blend;
+                if (root != NULL) {
+                    root->x = 0.0f;
+                    root->y = 0.0f;
+                    root->z = 0.0f;
+                }
+            }
+
+            NUQUAT sampled_rotation = {0.0f, 0.0f, 0.0f, 1.0f};
+            if ((flags & NUANIMBUFF_JOINT_ROTATION) != 0) {
+                f32 euler[3];
+                for (i32 component = 0; component < 3; ++component) {
+                    euler[component] =
+                        DecodeAni4V4Curve(anim, curve_types[3 + component], quarter, fraction, keys, scale_min);
+                }
+                NuQuatFromEulerXYZ(&sampled_rotation, static_cast<NUANG>(euler[0] * 10430.378f),
+                                   static_cast<NUANG>(euler[1] * 10430.378f),
+                                   static_cast<NUANG>(euler[2] * 10430.378f));
+            }
+            NUQUAT *rotation = reinterpret_cast<NUQUAT *>(&joint.rotation);
+            VuQuatSlerpFast(rotation, rotation, &sampled_rotation, blend);
+
+            if ((flags & NUANIMBUFF_JOINT_SCALE) != 0) {
+                f32 *scale = &joint.scale.x;
+                for (i32 component = 0; component < 3; ++component) {
+                    const f32 sampled =
+                        DecodeAni4V4Curve(anim, curve_types[6 + component], quarter, fraction, keys, scale_min);
+                    scale[component] += (sampled - scale[component]) * blend;
+                }
+            } else {
+                joint.scale.x = joint.scale.x * inverse_blend + blend;
+                joint.scale.y = joint.scale.y * inverse_blend + blend;
+                joint.scale.z = joint.scale.z * inverse_blend + blend;
+            }
+
+            root = NULL;
+            curve_types += 9;
+        }
     }
 
-    i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *, f32, nuanimbuff_s *, i32, i32) {
+    i32 ANI_SimpleAni3PlayerV4Joint_EulerQuat(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, i32 joint_count,
+                                              i32 first_joint) {
+        buffer->use_quaternions = 1;
+
+        u32 quarter;
+        f32 fraction;
+        i32 key_offset;
+        GetAni4SamplePosition(anim, frame, quarter, fraction, key_offset);
+
+        u8 *keys = anim->keys + key_offset;
+        ani3_scalemin_s *scale_min = anim->scale_min;
+        const u16 *curve_types = anim->curve_types;
+        for (i32 joint = 0; joint < first_joint; ++joint) {
+            const u8 flags = anim->node_flags[joint];
+            for (i32 group = 0; group < 3; ++group) {
+                if ((flags & CurveGroupMasks[group]) != 0) {
+                    for (i32 component = 0; component < 3; ++component) {
+                        SkipAni4V4Curve(curve_types[group * 3 + component], keys, scale_min);
+                    }
+                }
+            }
+            curve_types += 9;
+        }
+
+        i32 end_joint = first_joint + joint_count;
+        if (end_joint > anim->node_count) {
+            end_joint = anim->node_count;
+        }
+        for (i32 joint_index = first_joint; joint_index < end_joint; ++joint_index) {
+            const u8 flags = anim->node_flags[joint_index];
+            buffer->joint_flags[joint_index] = flags;
+            nuanimbuffjoint_s &joint = buffer->joints[joint_index];
+
+            if ((flags & NUANIMBUFF_JOINT_TRANSLATION) != 0) {
+                f32 *translation = &joint.translation.x;
+                for (i32 component = 0; component < 3; ++component) {
+                    translation[component] =
+                        DecodeAni4V4Curve(anim, curve_types[component], quarter, fraction, keys, scale_min);
+                }
+            } else {
+                joint.translation = {0.0f, 0.0f, 0.0f};
+            }
+
+            NUQUAT *rotation = reinterpret_cast<NUQUAT *>(&joint.rotation);
+            if ((flags & NUANIMBUFF_JOINT_ROTATION) != 0) {
+                f32 euler[3];
+                for (i32 component = 0; component < 3; ++component) {
+                    euler[component] =
+                        DecodeAni4V4Curve(anim, curve_types[3 + component], quarter, fraction, keys, scale_min);
+                }
+                NuQuatFromEulerXYZ(rotation, static_cast<NUANG>(euler[0] * 10430.378f),
+                                   static_cast<NUANG>(euler[1] * 10430.378f),
+                                   static_cast<NUANG>(euler[2] * 10430.378f));
+            } else {
+                *rotation = {0.0f, 0.0f, 0.0f, 1.0f};
+            }
+
+            if ((flags & NUANIMBUFF_JOINT_SCALE) != 0) {
+                f32 *scale = &joint.scale.x;
+                for (i32 component = 0; component < 3; ++component) {
+                    scale[component] =
+                        DecodeAni4V4Curve(anim, curve_types[6 + component], quarter, fraction, keys, scale_min);
+                }
+            } else {
+                joint.scale = {1.0f, 1.0f, 1.0f};
+            }
+
+            curve_types += 9;
+        }
         return 0;
     }
 
     void AddAnimEffects(void) {
     }
 
-    void AnimBlendingFromTo(void) {
+    i32 AnimBlendingFromTo(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, i32 source_animation, i32 target_animation) {
+        if (packet->blending == 0 || source_animation == -1 || packet->blend_animation_a != source_animation ||
+            target_animation == -1 || packet->blend_animation_b != target_animation) {
+            return 0;
+        }
+        if (model == NULL) {
+            return 1;
+        }
+        if (!HasAnimation(model, source_animation) || !HasAnimation(model, target_animation)) {
+            return 0;
+        }
+        return 1;
     }
 
     f32 animduration_blendouttime;
@@ -1810,8 +2724,12 @@ extern "C" {
         return duration;
     }
 
-    float AnimEndFrame(void *, i32) {
-        return 0.0f;
+    float AnimEndFrame(void *model_ptr, i32 animation) {
+        CHARACTERMODEL_s *model = static_cast<CHARACTERMODEL_s *>(model_ptr);
+        if (animation == -1 || model->model_data_b[animation] == NULL) {
+            return 0.0f;
+        }
+        return NuAnimEndFrame(model->model_data_b[animation]);
     }
 
     f32 AnimListFrame(CHARACTERMODEL_s *model, i32 animation, i32 frame) {
@@ -1839,13 +2757,47 @@ extern "C" {
     void AnimList_RequestAnimGroups(void) {
     }
 
-    void AnimMiscFlags(void) {
+    i32 AnimMiscFlags(CHARACTERMODEL_s *model, i32 animation) {
+        if (!HasAnimation(model, animation)) {
+            return 0;
+        }
+        return static_cast<CHARACTERANIM_s *>(model->model_data_a[animation])->misc_flags;
     }
 
-    void AnimPacket_FullToMini(void) {
+    void AnimPacket_FullToMini(ANIMPACKET_s *packet, MINIANIMPACKET_s *mini_packet) {
+        mini_packet->current_time = packet->current_time;
+        mini_packet->previous_time = packet->previous_time;
+        mini_packet->blend_elapsed = packet->blend_elapsed;
+        mini_packet->blend_duration = packet->blend_duration;
+        mini_packet->blend_source_time = packet->blend_source_time;
+        mini_packet->blend_target_time = packet->blend_target_time;
+        mini_packet->flags = packet->flags;
+        mini_packet->blending = packet->blending;
+        mini_packet->blend_animation_a = packet->blend_animation_a;
+        mini_packet->blend_animation_b = packet->blend_animation_b;
+        mini_packet->animation_index = packet->animation_index;
+        mini_packet->previous_animation = packet->previous_animation;
+        mini_packet->requested_animation_id = packet->requested_animation;
     }
 
-    void AnimPacket_MiniToFull(void) {
+    void AnimPacket_MiniToFull(MINIANIMPACKET_s *mini_packet, ANIMPACKET_s *packet) {
+        packet->current_time = mini_packet->current_time;
+        packet->previous_time = mini_packet->previous_time;
+        packet->blend_elapsed = mini_packet->blend_elapsed;
+        packet->blend_duration = mini_packet->blend_duration;
+        packet->blend_source_time = mini_packet->blend_source_time;
+        packet->blend_target_time = mini_packet->blend_target_time;
+        packet->flags = mini_packet->flags;
+        packet->blending = mini_packet->blending;
+        packet->blend_animation_a = mini_packet->blend_animation_a;
+        packet->blend_animation_b = mini_packet->blend_animation_b;
+        packet->animation_index = mini_packet->animation_index;
+        packet->previous_animation = mini_packet->previous_animation;
+        packet->requested_animation = mini_packet->requested_animation_id;
+        packet->blend_source_reversed = 0;
+        packet->blend_target_reversed = 0;
+        packet->current_reversed = 0;
+        packet->overlay_animation = -1;
     }
 
     f32 *AnimPlaying(ANIMPACKET_s *packet, i32 animation, i32 target, i32 source) {
@@ -1978,13 +2930,41 @@ extern "C" {
     void EvalModelAnim(void) {
     }
 
-    void FindAnimIX(void) {
+    i32 FindAnimIX(CHARACTERDATA *character, char *name) {
+        if (character != NULL) {
+            CHARACTERANIM_s *animation = character->animations;
+            while (animation != NULL && animation->name != NULL) {
+                if (NuStrICmp(name, animation->name) == 0) {
+                    return animation->animation_id;
+                }
+                ++animation;
+            }
+        }
+        return -1;
     }
 
-    void GetAnimTimeRandom(void) {
+    f32 GetAnimTimeRandom(CHARACTERMODEL_s *model, i32 animation) {
+        if (!HasAnimation(model, animation)) {
+            return 0.0f;
+        }
+        return 1.0f + NuRandFloat() * (NuAnimEndFrame(model->model_data_b[animation]) - 1.0f);
     }
 
-    void GetInstAnimEndFrame(void) {
+    f32 GetInstAnimEndFrame(nugscn_s *scene, nuinstanim_s *instance_animation) {
+        if (instance_animation == NULL) {
+            return 0.0f;
+        }
+
+        void *animation = scene->instance_animation_data[instance_animation->anim_ix];
+        if (animation != NULL) {
+            return NuAnimEndFrameOld(animation);
+        }
+        if ((instance_animation->end_frame_lookup_bits & NUINSTANIM_END_FRAME_LOOKUP_MASK) == 0 ||
+            scene->animation_end_frames == NULL) {
+            return 0.0f;
+        }
+
+        return static_cast<f32>(scene->animation_end_frames[instance_animation->end_frame_lookup_index - 1].end_frame);
     }
 
     void ResetAnimPacket(ANIMPACKET_s *packet, i16 animation) {
@@ -2289,12 +3269,46 @@ extern "C" {
         }
     }
 
-    void UpdateMiniAnimPacket(void) {
+    void UpdateMiniAnimPacket(CHARACTERMODEL_s *model, MINIANIMPACKET_s *mini_packet, f32 frame_step,
+                              f32 movement_speed, f32 blend_step) {
+        ANIMPACKET_s packet;
+        AnimPacket_MiniToFull(mini_packet, &packet);
+        UpdateAnimPacket(model, &packet, frame_step, movement_speed, blend_step, 0.0f);
+        AnimPacket_FullToMini(&packet, mini_packet);
     }
 
 } // extern "C"
 
-void SetAnimFrame(nuhspecial_s *, float) {
+void SetAnimFrame(nuhspecial_s *special, float frame) {
+    if (NuSpecialExistsFn(special) == 0) {
+        return;
+    }
+
+    NUMTX matrix;
+    NuMtxSetIdentity(&matrix);
+    nuinstanim_s *instance_animation = NuSpecialGetInstAnim(special);
+    if (instance_animation == NULL) {
+        return;
+    }
+
+    nuanimdata_s *animation = special->scene->instance_animation_data[instance_animation->anim_ix];
+    if (animation == NULL) {
+        return;
+    }
+    if (frame == 1000000000.0f) {
+        frame = *reinterpret_cast<f32 *>(animation);
+    }
+    if (frame < 1.0f || frame > *reinterpret_cast<f32 *>(animation)) {
+        return;
+    }
+
+    NuAnimData2CalcMatrix(animation, 0, frame, &matrix);
+    instance_animation->mtx = matrix;
+    NUMTX *instance_matrix = NuSpecialGetInstanceMtx(special);
+    instance_animation->mtx.m30 = instance_matrix->m30;
+    instance_animation->mtx.m31 = instance_matrix->m31;
+    instance_animation->mtx.m32 = instance_matrix->m32;
+    instance_animation->ltime = frame;
 }
 
 struct DefaultIdleCharacterData {
@@ -2325,10 +3339,21 @@ i32 GetDefaultIdle(GameObject_s *obj) {
     return 1;
 }
 
-void GetAnimDirection(nuinstanim_s *) {
+i32 GetAnimDirection(nuinstanim_s *animation) {
+    if (animation == NULL || animation->tfactor == 0.0f) {
+        return -1;
+    }
+    return animation->tfactor < 0.0f ? 1 : 0;
 }
 
-void FindTexAnimFromMtl(nugscn_s *, numtl_s *) {
+i32 FindTexAnimFromMtl(nugscn_s *scene, numtl_s *material) {
+    nutexanim_s *animations = static_cast<nutexanim_s *>(scene->texture_anims);
+    for (i32 animation_index = 0; animation_index < scene->num_texture_anims; ++animation_index) {
+        if (animations[animation_index].material == material) {
+            return animation_index + 1;
+        }
+    }
+    return 0;
 }
 
 static char **TexAnimList;
@@ -2398,18 +3423,165 @@ i32 GizmoFileReadGameAnimSet(GAMEANIMSET_s *set, void *world_ptr,
     return success;
 }
 
-i32 ANI_SimpleAni3PlayerV4Joint_Quat3(ani3_animheader_s *, float, nuanimbuff_s *, i32, i32) {
+static i32 PlayAni4Quaternion(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, i32 joint_count,
+                              i32 first_joint, i32 quaternion_components) {
+    buffer->use_quaternions = 1;
+
+    u32 quarter;
+    f32 fraction;
+    i32 key_offset;
+    GetAni4SamplePosition(anim, frame, quarter, fraction, key_offset);
+
+    u8 *keys = anim->keys + key_offset;
+    ani3_scalemin_s *scale_min = anim->scale_min;
+    const u16 *curve_types = anim->curve_types;
+    const i32 curves_per_joint = quaternion_components + 6;
+
+    for (i32 joint = 0; joint < first_joint; ++joint) {
+        SkipAni4QuaternionJoint(anim, quaternion_components, joint, curve_types, keys, scale_min);
+        curve_types += curves_per_joint;
+    }
+
+    i32 end_joint = first_joint + joint_count;
+    if (end_joint > anim->node_count) {
+        end_joint = anim->node_count;
+    }
+    for (i32 joint_index = first_joint; joint_index < end_joint; ++joint_index) {
+        const u8 flags = anim->node_flags[joint_index];
+        buffer->joint_flags[joint_index] = flags;
+        nuanimbuffjoint_s &joint = buffer->joints[joint_index];
+
+        if ((flags & NUANIMBUFF_JOINT_TRANSLATION) != 0) {
+            f32 *translation = &joint.translation.x;
+            for (i32 component = 0; component < 3; ++component) {
+                translation[component] =
+                    DecodeAni4QuaternionScalar(anim, curve_types[component], quarter, fraction, keys, scale_min);
+            }
+        } else {
+            joint.translation = {0.0f, 0.0f, 0.0f};
+        }
+
+        NUQUAT *rotation = reinterpret_cast<NUQUAT *>(&joint.rotation);
+        if ((flags & NUANIMBUFF_JOINT_ROTATION) != 0) {
+            *rotation =
+                DecodeAni4Quaternion(anim, quaternion_components, curve_types + 3, quarter, fraction, keys, scale_min);
+        } else {
+            *rotation = {0.0f, 0.0f, 0.0f, 1.0f};
+        }
+
+        const i32 scale_offset = quaternion_components + 3;
+        if ((flags & NUANIMBUFF_JOINT_SCALE) != 0) {
+            f32 *scale = &joint.scale.x;
+            for (i32 component = 0; component < 3; ++component) {
+                scale[component] = DecodeAni4QuaternionScalar(anim, curve_types[scale_offset + component], quarter,
+                                                              fraction, keys, scale_min);
+            }
+        } else {
+            joint.scale = {1.0f, 1.0f, 1.0f};
+        }
+
+        curve_types += curves_per_joint;
+    }
     return 0;
 }
 
-i32 ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_animheader_s *, float, nuanimbuff_s *, i32, i32) {
-    return 0;
+static void BlendAni4Quaternion(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, f32 blend, i32 joint_count,
+                                i32 first_joint, NUVEC *root_translation, i32 quaternion_components) {
+    u32 quarter;
+    f32 fraction;
+    i32 key_offset;
+    GetAni4SamplePosition(anim, frame, quarter, fraction, key_offset);
+
+    u8 *keys = anim->keys + key_offset;
+    ani3_scalemin_s *scale_min = anim->scale_min;
+    const u16 *curve_types = anim->curve_types;
+    const i32 curves_per_joint = quaternion_components + 6;
+    const f32 inverse_blend = 1.0f - blend;
+
+    for (i32 joint = 0; joint < first_joint; ++joint) {
+        SkipAni4QuaternionJoint(anim, quaternion_components, joint, curve_types, keys, scale_min);
+        curve_types += curves_per_joint;
+    }
+
+    i32 end_joint = first_joint + joint_count;
+    if (end_joint > anim->node_count) {
+        end_joint = anim->node_count;
+    }
+    NUVEC *root = first_joint == 0 ? root_translation : NULL;
+    for (i32 joint_index = first_joint; joint_index < end_joint; ++joint_index) {
+        const u8 flags = anim->node_flags[joint_index];
+        buffer->joint_flags[joint_index] |= flags;
+        nuanimbuffjoint_s &joint = buffer->joints[joint_index];
+
+        if ((flags & NUANIMBUFF_JOINT_TRANSLATION) != 0) {
+            f32 sampled[3];
+            f32 *translation = &joint.translation.x;
+            for (i32 component = 0; component < 3; ++component) {
+                sampled[component] =
+                    DecodeAni4QuaternionScalar(anim, curve_types[component], quarter, fraction, keys, scale_min);
+                translation[component] += (sampled[component] - translation[component]) * blend;
+            }
+            if (root != NULL) {
+                root->x = sampled[0];
+                root->y = sampled[1];
+                root->z = -sampled[2];
+            }
+        } else {
+            joint.translation.x *= inverse_blend;
+            joint.translation.y *= inverse_blend;
+            joint.translation.z *= inverse_blend;
+            if (root != NULL) {
+                root->x = 0.0f;
+                root->y = 0.0f;
+                root->z = 0.0f;
+            }
+        }
+
+        NUQUAT sampled_rotation = {0.0f, 0.0f, 0.0f, 1.0f};
+        if ((flags & NUANIMBUFF_JOINT_ROTATION) != 0) {
+            sampled_rotation =
+                DecodeAni4Quaternion(anim, quaternion_components, curve_types + 3, quarter, fraction, keys, scale_min);
+        }
+        NUQUAT *rotation = reinterpret_cast<NUQUAT *>(&joint.rotation);
+        VuQuatSlerpFast(rotation, rotation, &sampled_rotation, blend);
+
+        const i32 scale_offset = quaternion_components + 3;
+        if ((flags & NUANIMBUFF_JOINT_SCALE) != 0) {
+            f32 *scale = &joint.scale.x;
+            for (i32 component = 0; component < 3; ++component) {
+                const f32 sampled = DecodeAni4QuaternionScalar(anim, curve_types[scale_offset + component], quarter,
+                                                               fraction, keys, scale_min);
+                scale[component] += (sampled - scale[component]) * blend;
+            }
+        } else {
+            joint.scale.x = joint.scale.x * inverse_blend + blend;
+            joint.scale.y = joint.scale.y * inverse_blend + blend;
+            joint.scale.z = joint.scale.z * inverse_blend + blend;
+        }
+
+        root = NULL;
+        curve_types += curves_per_joint;
+    }
 }
 
-void ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3_animheader_s *, float, nuanimbuff_s *, float, i32, i32, nuvec_s *) {
+i32 ANI_SimpleAni3PlayerV4Joint_Quat3(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, i32 joint_count,
+                                      i32 first_joint) {
+    return PlayAni4Quaternion(anim, frame, buffer, joint_count, first_joint, 3);
 }
 
-void ANI_SimpleAni3PlayerV4Joint_Blend_Quat3W(ani3_animheader_s *, float, nuanimbuff_s *, float, i32, i32, nuvec_s *) {
+i32 ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, i32 joint_count,
+                                       i32 first_joint) {
+    return PlayAni4Quaternion(anim, frame, buffer, joint_count, first_joint, 4);
+}
+
+void ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, f32 blend,
+                                             i32 joint_count, i32 first_joint, NUVEC *root_translation) {
+    BlendAni4Quaternion(anim, frame, buffer, blend, joint_count, first_joint, root_translation, 3);
+}
+
+void ANI_SimpleAni3PlayerV4Joint_Blend_Quat3W(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, f32 blend,
+                                              i32 joint_count, i32 first_joint, NUVEC *root_translation) {
+    BlendAni4Quaternion(anim, frame, buffer, blend, joint_count, first_joint, root_translation, 4);
 }
 
 void EvalAnim(nuhspecial_s *special, float frame, numtx_s *matrix, i32 include_instance_translation) {

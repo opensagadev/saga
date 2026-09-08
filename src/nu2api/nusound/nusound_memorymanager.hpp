@@ -6,6 +6,8 @@
 #include <pthread.h>
 
 class NuSoundMemoryBuffer {
+    friend class NuSoundMemoryManager;
+
     void *address;
     u32 size : 30;
     bool alloced : 1;
@@ -82,19 +84,19 @@ class NuSoundMemoryManager {
     u32 GetUsed(); // 0x322590: GetSize() minus the free counter
 
     // Debug/diagnostic helpers (device addresses in nusound_memorymanager.cpp).
-    void AllocAddress(u32 address);
-    void CheckList();
-    void CountAdjacentFreeBuffers(NuSoundMemoryBuffer *buffer);
+    void *AllocAddress(u32 size);
+    bool CheckList();
+    u32 CountAdjacentFreeBuffers(NuSoundMemoryBuffer *buffer);
     void EnableDebug(bool enable);
     void EnableDefragOnFree(bool enable);
     void FreeAddress(void *address);
-    void MoveLargestTrailingBufferIntoBuffer(NuSoundMemoryBuffer *buffer, NuSoundMemoryBuffer **out_a,
-                                             NuSoundMemoryBuffer **out_b);
+    NuSoundMemoryBuffer *MoveLargestTrailingBufferIntoBuffer(NuSoundMemoryBuffer *buffer, NuSoundMemoryBuffer **out_a,
+                                                             NuSoundMemoryBuffer **out_b);
     void OutputList();
     void OutputMap();
     void RenderMap(f32 x, f32 y, f32 scale);
-    void SwapOrMergeAdjacentBuffers(NuSoundMemoryBuffer *buffer);
-    void SwapSimilarBuffers(NuSoundMemoryBuffer *a, NuSoundMemoryBuffer *b);
+    NuSoundMemoryBuffer *SwapOrMergeAdjacentBuffers(NuSoundMemoryBuffer *buffer);
+    bool SwapSimilarBuffers(NuSoundMemoryBuffer *a, NuSoundMemoryBuffer *b);
 
   private:
     NuSoundMemoryBuffer *CheckAndMergeFreeBufferNext(NuSoundMemoryBuffer *buffer);

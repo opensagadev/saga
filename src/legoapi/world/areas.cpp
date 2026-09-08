@@ -2,6 +2,8 @@
 #include <string.h>
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/areas.h"
@@ -12,6 +14,36 @@
 #include "nu2api/nufile/nufpar.h"
 
 i32 openlevels = 0;
+
+static void AddToModelList(APICHARACTERMODELLIST_s *list, i32 *count, i32 capacity, i32 character_id, i32 load_model,
+                           EXTRAMODEL *extra_models) {
+    if (*count < capacity && InModelList(list, character_id, NULL) == 0) {
+        list[*count].model_id = static_cast<i16>(character_id);
+        list[*count].count = static_cast<i16>(load_model);
+        ++*count;
+        list[*count].model_id = -1;
+    }
+
+    if (extra_models == NULL || list == reinterpret_cast<APICHARACTERMODELLIST_s *>(Area_PlayerModelList) ||
+        load_model == 0) {
+        return;
+    }
+    for (; extra_models->model_list != NULL; ++extra_models) {
+        for (i16 *model_id = extra_models->model_list; *model_id != -1; ++model_id) {
+            if (*model_id != character_id) {
+                continue;
+            }
+            const i16 extra_id = *static_cast<i16 *>(extra_models->field_04);
+            if (extra_id != -1 && *count < capacity && InModelList(list, extra_id, NULL) == 0) {
+                list[*count].model_id = extra_id;
+                list[*count].count = static_cast<i16>(load_model);
+                ++*count;
+                list[*count].model_id = -1;
+            }
+            return;
+        }
+    }
+}
 
 // Cross-module entry points used by this file (declared locally since they have
 // no single shared header in the reconstructed source).  The NuFPar* helpers are
@@ -77,8 +109,6 @@ void Areas_OpenAll(i32 mode) {
 }
 
 void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
-    i16 area_music = -1;
-
     Area_PlayerModelCount = 0;
     Area_StoryModelCount = 0;
     Area_PlayerModelList[0] = -1;
@@ -89,61 +119,101 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
     Area_MissionModelList[0].model_id = -1;
     LevelLoad[0] = -1;
     LevelLoadCount = 0;
+
+    AreaMusic = -1;
     if (area != -1) {
-        u8 *ad = *(u8 **)&ADataList + area * 0x9c;
-        area_music = *(i16 *)(ad + 0x88);
-        *(i32 *)(ad + 0x80) = 0;
-        *(u8 *)(ad + 0x7f) = 0;
+        AreaMusic = ADataList[area].area_music;
+        ADataList[area].super_counters = NULL;
+        ADataList[area].super_counter_count = 0;
     }
-    AreaMusic = area_music;
-    if (Mission_Active((struct MISSIONSYS_s *)MissionSys) != 0) {
-        if (*(u8 *)((char *)MissionSys + 0x1f) != 0) {
-            return;
-        }
-    }
-    if (area != -1) {
-        char path[256];
-        NUFPAR *fp;
-        i32 count = 0;
-        i32 in_area = 0;
-        char area_buf[0x1e8];
-        NuStrCpy(path, "levels\\");
-        NuStrCat(path, *(char **)&ADataList + area * 0x9c);
+
+    char path[0x100];
+    NuStrCpy(path, "levels\\");
+    if (area == -1) {
+        NuStrCat(path, LDataList[param].dir);
         NuStrCat(path, "\\");
-        NuStrCat(path, *(char **)&ADataList + area * 0x9c + 0x40);
-        NuStrCat(path, ".txt");
-        fp = NuFParCreate(path);
-        if (fp != NULL) {
-            while (NuFParGetLine(fp) != 0) {
-                NuFParGetWord(fp);
-                if (fp->word_buf[0] == '\0') {
-                    continue;
-                }
-                if (in_area) {
-                    if (NuStrICmp(fp->word_buf, "area_end") == 0) {
-                        in_area = 0;
-                        if (*(i16 *)(area_buf + 0x1e0) != 0) {
-                            count++;
-                        }
-                        continue;
-                    }
-                } else {
-                    if (NuStrICmp(fp->word_buf, "area_start") == 0) {
-                        if (count <= 9) {
-                            *(i16 *)(area_buf + 0x1e0) = 0;
-                            *(u8 *)(area_buf + 0x1e7) &= 0xfe;
-                            *(u8 *)(area_buf + 0x1e4) = 0xff;
-                            *(u8 *)(area_buf + 0x1e5) = 0xff;
-                            *(u8 *)(area_buf + 0x1e6) = 0xff;
-                            in_area = 1;
-                        }
-                        continue;
-                    }
-                }
+        NuStrCat(path, LDataList[param].name);
+    } else {
+        NuStrCat(path, ADataList[area].dir);
+        NuStrCat(path, "\\");
+        NuStrCat(path, ADataList[area].file);
+    }
+    NuStrCat(path, ".txt");
+
+    NUFPAR *fp = NuFParCreate(path);
+    if (fp == NULL) {
+        Area_PlayerModelList[0] = s[0];
+        Area_PlayerModelList[1] = 1;
+        Area_PlayerModelList[2] = s[1];
+        Area_PlayerModelList[3] = 1;
+        Area_PlayerModelList[4] = -1;
+        Area_PlayerIDList[0] = s[0];
+        Area_PlayerIDList[1] = s[1];
+        Area_PlayerIDList[2] = -1;
+        Area_PlayerModelCount = 2;
+        Area_StoryModelList[0] = {s[0], 1};
+        Area_StoryModelList[1] = {s[1], 1};
+        Area_StoryModelList[2].model_id = -1;
+        Area_StoryModelCount = 2;
+        return;
+    }
+
+    while (NuFParGetLine(fp) != 0) {
+        if (NuFParGetWord(fp) == 0 || fp->word_buf[0] == '\0') {
+            continue;
+        }
+        if (NuStrICmp(fp->word_buf, "character") != 0 || NuFParGetWord(fp) == 0) {
+            continue;
+        }
+        const i32 character_id = CharIDFromName(fp->word_buf);
+        if (character_id == -1 || NuFParGetWord(fp) == 0) {
+            continue;
+        }
+
+        if (NuStrICmp(fp->word_buf, "player") == 0) {
+            if (Area_MissionModelCount == 0) {
+                AddToModelList(reinterpret_cast<APICHARACTERMODELLIST_s *>(Area_PlayerModelList),
+                               &Area_PlayerModelCount, 8, character_id, 1, models);
             }
-            NuFParDestroy(fp);
+            AddToModelList(Area_StoryModelList, &Area_StoryModelCount, 0x30, character_id, 1, models);
+        } else if (NuStrICmp(fp->word_buf, "resident") == 0) {
+            AddToModelList(Area_StoryModelList, &Area_StoryModelCount, 0x30, character_id, 1, models);
+            AddToModelList(reinterpret_cast<APICHARACTERMODELLIST_s *>(Area_FreePlayModelList),
+                           &Area_FreePlayModelCount, 0x30, character_id, 1, models);
+            AddToModelList(Area_MissionModelList, &Area_MissionModelCount, 0x30, character_id, 1, models);
+        } else if (NuStrICmp(fp->word_buf, "cutscene") == 0) {
+            AddToModelList(Area_StoryModelList, &Area_StoryModelCount, 0x30, character_id, 0, models);
         }
     }
+    NuFParDestroy(fp);
+
+    APICHARACTERMODELLIST_s *player_models = reinterpret_cast<APICHARACTERMODELLIST_s *>(Area_PlayerModelList);
+    if (Area_PlayerModelCount == 0) {
+        i16 player_id = Area_StoryModelList[0].model_id;
+        if (player_id == -1) {
+            player_id = reinterpret_cast<APICHARACTERMODELLIST_s *>(Area_FreePlayModelList)[0].model_id;
+        }
+        if (player_id == -1) {
+            player_id = s[0];
+        }
+        if (player_id != -1) {
+            player_models[0] = {player_id, 0};
+            player_models[1] = {player_id, 0};
+            Area_PlayerModelCount = 2;
+        }
+    } else if (Area_PlayerModelCount == 1) {
+        player_models[1] = {player_models[0].model_id, 1};
+        Area_PlayerModelCount = 2;
+    }
+
+    player_models[Area_PlayerModelCount].model_id = -1;
+    Area_StoryModelList[Area_StoryModelCount].model_id = -1;
+    reinterpret_cast<APICHARACTERMODELLIST_s *>(Area_FreePlayModelList)[Area_FreePlayModelCount].model_id = -1;
+    Area_MissionModelList[Area_MissionModelCount].model_id = -1;
+    for (i32 i = 0; i < Area_PlayerModelCount; ++i) {
+        Area_PlayerIDList[i] = player_models[i].model_id;
+    }
+    Area_PlayerIDList[Area_PlayerModelCount] = -1;
 }
 
 void ClearUpAreaData() {
@@ -350,7 +420,7 @@ have_jump:
         ((u8 *)PlayerProgress)[i * 0x10 + 0x8] = DEFAULT_PLAYERHITPOINTS;
     }
     ResetTimer(&AreaTimer, 0.0f);
-    memcpy(&BackupGame, (char *)WORLD + 0x15c, 0x7e58);
+    memcpy(&BackupGame, &Game, sizeof(GAMESAVE_s));
     NewAreaMusicChanges();
     VehicleAreaRememberSpeed = 0.0f;
     ClearTakeOverObjectSys();

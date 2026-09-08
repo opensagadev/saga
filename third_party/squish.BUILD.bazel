@@ -41,6 +41,9 @@ cc_library(
         "-fno-exceptions",
         "-fno-rtti",
     ] + select({
+        "@platforms//os:android": ["-O3"],
+        "//conditions:default": [],
+    }) + select({
         "@saga//bazel/platforms:linux": [
             "-m32",
             "-march=i686",

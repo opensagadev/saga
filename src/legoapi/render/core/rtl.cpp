@@ -223,9 +223,11 @@ extern "C" {
     }
 
     i32 rtlDynamicAlloc(void) {
-        if (rtl_dynamic_pool == NULL) return -1;
+        if (rtl_dynamic_pool == NULL)
+            return -1;
         rtl_s *light = reinterpret_cast<rtl_s *>(NuLstAllocTail(rtl_dynamic_pool));
-        if (light == NULL) return -1;
+        if (light == NULL)
+            return -1;
         light->type = 4;
         NuVecClear(&light->position);
         light->inner_radius = 1.0f;
@@ -259,7 +261,8 @@ extern "C" {
         NuVecRotateX(&light->direction, &light->direction, light->pitch);
         NuVecRotateY(&light->direction, &light->direction, light->yaw);
         light->uid = rtl_uid;
-        if (++rtl_uid == 0) ++rtl_uid;
+        if (++rtl_uid == 0)
+            ++rtl_uid;
         ++rtl_dynamic_cnt;
         return (reinterpret_cast<NULNKHDR *>(light) - 1)->id;
     }
@@ -281,20 +284,26 @@ extern "C" {
     }
 
     bool rtlDynamicEnable(i32 id, i32 enabled) {
-        if (rtl_dynamic_pool == NULL || id < 0 || id >= rtl_dynamic_max) return false;
+        if (rtl_dynamic_pool == NULL || id < 0 || id >= rtl_dynamic_max)
+            return false;
         rtl_s *light = reinterpret_cast<rtl_s *>(NuLstGetByIdx(rtl_dynamic_pool, id));
-        if (light == NULL) return false;
+        if (light == NULL)
+            return false;
         bool previous = (light->flags & 1) == 0;
         light->flags = (light->flags & ~1) | (enabled == 0);
         return previous;
     }
 
     i32 rtlDynamicSetColours(i32 id, NUVEC *colour, NUVEC *secondary) {
-        if (rtl_dynamic_pool == NULL || id < 0 || id >= rtl_dynamic_max) return 0;
+        if (rtl_dynamic_pool == NULL || id < 0 || id >= rtl_dynamic_max)
+            return 0;
         rtl_s *light = reinterpret_cast<rtl_s *>(NuLstGetByIdx(rtl_dynamic_pool, id));
-        if (light == NULL || (colour == NULL && secondary == NULL)) return 0;
-        if (colour != NULL) light->colour = *colour;
-        if (secondary != NULL) light->secondary_colour = *secondary;
+        if (light == NULL || (colour == NULL && secondary == NULL))
+            return 0;
+        if (colour != NULL)
+            light->colour = *colour;
+        if (secondary != NULL)
+            light->secondary_colour = *secondary;
         return 1;
     }
 
@@ -302,27 +311,34 @@ extern "C" {
     }
 
     i32 rtlDynamicSetPos(i32 id, NUVEC *position) {
-        if (rtl_dynamic_pool == NULL || id < 0 || id >= rtl_dynamic_max) return 0;
+        if (rtl_dynamic_pool == NULL || id < 0 || id >= rtl_dynamic_max)
+            return 0;
         rtl_s *light = reinterpret_cast<rtl_s *>(NuLstGetByIdx(rtl_dynamic_pool, id));
-        if (light == NULL || position == NULL) return 0;
+        if (light == NULL || position == NULL)
+            return 0;
         light->position = *position;
         return 1;
     }
 
     i32 rtlDynamicSetRadii(i32 id, f32 inner, f32 outer) {
-        if (rtl_dynamic_pool == NULL || id < 0 || id >= rtl_dynamic_max) return 0;
+        if (rtl_dynamic_pool == NULL || id < 0 || id >= rtl_dynamic_max)
+            return 0;
         rtl_s *light = reinterpret_cast<rtl_s *>(NuLstGetByIdx(rtl_dynamic_pool, id));
-        if (light == NULL) return 0;
+        if (light == NULL)
+            return 0;
         light->inner_radius = inner;
-        if (outer < inner) outer = inner;
+        if (outer < inner)
+            outer = inner;
         light->outer_radius = outer;
         return 1;
     }
 
     i32 rtlDynamicSetType(i32 id, i32 type) {
-        if (rtl_dynamic_pool == NULL || id < 0 || id >= rtl_dynamic_max || type <= 0 || type >= 9) return 0;
+        if (rtl_dynamic_pool == NULL || id < 0 || id >= rtl_dynamic_max || type <= 0 || type >= 9)
+            return 0;
         rtl_s *light = reinterpret_cast<rtl_s *>(NuLstGetByIdx(rtl_dynamic_pool, id));
-        if (light == NULL) return 0;
+        if (light == NULL)
+            return 0;
         light->type = type;
         return 1;
     }

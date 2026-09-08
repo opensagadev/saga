@@ -7,8 +7,11 @@
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/motion.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/core/config/cheat.h"
 #include "legoapi/menus/screens/gamemenuall.h"
+#include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
 #include "legoapi/menus/core/text.h"
 #include "legoapi/render/core/render.h"
@@ -75,11 +78,21 @@ extern i16 tACCEPT;
 extern i16 tBACK;
 extern i16 tCONTINUE;
 extern i16 tCANCEL;
+extern i16 tSTORY;
+extern i16 tFREEPLAY;
+extern i16 tREPLAYSTORY;
+extern i16 tLOCKED;
+extern i16 tAVAILABLETOBUY;
+extern i16 tPOWERBRICK;
+extern i16 tHOWTOPLAY;
 extern OPTIONSSAVE TempOptions;
 extern i32 GAMEDEMO;
 extern i32 menu_flash;
 extern f32 text3d_height;
 extern f32 text3d_width;
+extern i32 Paused;
+extern f32 PauseMenus_X;
+extern i32 PauseMenus_Align;
 void GameDrawMenuEntry(MENU *menu, char *text);
 i32 GetParentMenuID(void);
 void RestoreOptions(void);
@@ -148,6 +161,37 @@ u8 RAP_WARNING_R = 0xff;
 
 static i32 g_enableButtonPrompts = 1;
 
+extern i32 hub_new_level;
+extern i32 hub_selectmode;
+extern f32 selectmodetime;
+extern i32 selectmodemode;
+extern i32 FinishLoop_On;
+extern FadeSystem FadeSys;
+bool FreePlayUnlocked();
+void Hub_DrawFreePlaySelect();
+void Hub_InitFreePlaySelect(i32 area, i32 first_model, i32 second_model);
+void Hub_UpdateFreePlaySelect();
+void WipeBackToHub();
+void NewLevelFromMenu(LEVELDATA_s *level, i32 menu_id, i32 menu_y, i32 remember_hub);
+
+static bool MenuAreaAllowsFreePlay(i32 area) {
+    return area >= 0 && area < AREACOUNT && (LOSTTEMPLE_ADATA == NULL || area != LOSTTEMPLE_ADATA->index) &&
+           FreePlayUnlocked() && (ADataList[area].flags & AREAFLAG_NO_FREEPLAY) == 0 && Game_AreaSave != NULL &&
+           Game_AreaSave[area].area_complete != 0;
+}
+
+extern CHEATSYSTEM CheatSystem;
+void Cheat_SetOn(i32 cheat, i32 enabled, i32 update_save);
+static f32 updateextras_current_y = 0.0f;
+
+static bool MenuCheatUnlocked(i32 cheat) {
+    if (cheat < 0 || cheat >= CheatSystem.cheats_count || cheat >= 64) {
+        return false;
+    }
+    const u32 *unlocked = reinterpret_cast<const u32 *>(Game.field_0x7c00);
+    return (unlocked[cheat >> 5] & (1u << (cheat & 31))) != 0;
+}
+
 void MenuDrawLoad(MENU_s *menu) {
     NuStrCpy(MenuHeader, apitxt_LOADGAME);
     header_r = MENUHEADERR;
@@ -188,7 +232,9 @@ void MenuExitSave(MENU_s *) {
 void MenuDrawClips(MENU_s *) {
 }
 
-void MenuDrawHints(MENU_s *) {
+void MenuDrawHints(MENU_s *menu) {
+    NuStrCpy(MenuHeader, TTab[tHOWTOPLAY]);
+    GameDrawMenuEntry(menu, TTab[tBACK]);
 }
 
 void MenuDrawStore(MENU_s *) {
@@ -301,7 +347,48 @@ void MakeMenuPacket() {
     }
 }
 
-void MenuDrawExtras(MENU_s *) {
+void MenuDrawExtras(MENU_s *menu) {
+    char text[256];
+    menu->draw_y = -updateextras_current_y * MENUDY * menu->item_scale;
+    for (i32 cheat = 0; cheat < CheatSystem.cheats_count; ++cheat) {
+        CHEAT &entry = CheatSystem.cheats[cheat];
+        const char *value;
+        f32 alpha = 0.5f;
+        bool locked_power_brick = false;
+
+        if (MenuCheatUnlocked(cheat)) {
+            value = TTab[Cheat_IsOn(cheat) != 0 ? tON : tOFF];
+            if (BonusArea == 0 || Cheat_CheckFlags(cheat, 0x200000) == 0) {
+                alpha = 1.0f;
+            }
+        } else if (cheat < 8 || entry.area == 0xff || Game.area_save[entry.area].field_0x5[1] != 0) {
+            value = TTab[tAVAILABLETOBUY];
+        } else {
+            snprintf(text, sizeof(text), "%s %i: %s", TTab[tPOWERBRICK], cheat - 7, TTab[tLOCKED]);
+            locked_power_brick = true;
+        }
+
+        if (!locked_power_brick) {
+            const i16 text_id = entry.text_id != NULL ? *entry.text_id : -1;
+            const char *name = text_id >= 0 && TTab[text_id] != NULL ? TTab[text_id] : entry.name;
+            snprintf(text, sizeof(text), "%s: %s", name != NULL ? name : "", value);
+        } else {
+            dme_rgb = 1;
+            dme_r = 0xdf;
+            dme_g = 0x3f;
+            dme_b = 0;
+        }
+
+        if (menu->draw_y > 0.6f) {
+            alpha = menu->draw_y > 0.9f ? 0.0f : alpha * (1.0f - (menu->draw_y - 0.6f) / 0.3f);
+        }
+        if (Paused != 0) {
+            dme_align = PauseMenus_Align;
+            menu->draw_x = PauseMenus_X;
+        }
+        dme_sy = menu->item_scale;
+        DrawMenuEntryEx(menu, text, static_cast<i32>(static_cast<f32>(MenuA) * alpha));
+    }
 }
 
 void MenuDrawNoData(MENU_s *menu) {
@@ -500,7 +587,11 @@ void MenuIsAvailable() {
 void MenuUpdateClips(MENU_s *) {
 }
 
-void MenuUpdateHints(MENU_s *) {
+void MenuUpdateHints(MENU_s *menu) {
+    if (menu->cancel_pressed != 0 || menu->confirm_pressed != 0) {
+        BackupMenu();
+        MenuSFX = GameAudio_GetSfxId(0x31);
+    }
 }
 
 void MenuUpdateStore(MENU_s *) {
@@ -516,6 +607,9 @@ void MenuDrawEpisodes(MENU_s *) {
 }
 
 void MenuDrawFreePlay(MENU_s *) {
+    if (MenuStopDraw == 0) {
+        Hub_DrawFreePlaySelect();
+    }
 }
 
 void MenuDrawMissions(MENU_s *) {
@@ -531,13 +625,31 @@ void MenuEnterOptions(MENU_s *) {
 void MenuInitEpisodes(MENU_s *) {
 }
 
-void MenuInitFreePlay(MENU_s *) {
+void MenuInitFreePlay(MENU_s *menu) {
+    menu->first_row = 0;
+    menu->last_row = 2;
+    menu->selected_row = 0;
+    menu->selected_item = 0;
 }
 
 void MenuInitMissions(MENU_s *) {
 }
 
-void MenuUpdateExtras(MENU_s *) {
+void MenuUpdateExtras(MENU_s *menu) {
+    if (menu->cancel_pressed != 0) {
+        BackupMenu();
+        MenuSFX = GameAudio_GetSfxId(0x31);
+    }
+    if (menu->confirm_pressed != 0) {
+        const i32 cheat = menu->selected_item;
+        if (!MenuCheatUnlocked(cheat) || (BonusArea != 0 && Cheat_CheckFlags(cheat, 0x200000) != 0)) {
+            MenuSFX = GameAudio_GetSfxId(0x32);
+        } else {
+            Cheat_SetOn(cheat, Cheat_IsOn(cheat) == 0, 1);
+            MenuSFX = GameAudio_GetSfxId(0x30);
+        }
+    }
+    updateextras_current_y = SeekValF(updateextras_current_y, static_cast<f32>(menu->selected_item), 5.0f);
 }
 
 void MenuUpdateNoData(MENU_s *menu) {
@@ -711,10 +823,28 @@ void MenuDrawSaveCancel(MENU_s *menu) {
     DrawMenuEntry(menu, apitxt_NO);
 }
 
-void MenuDrawSelectMode(MENU_s *) {
+void MenuDrawSelectMode(MENU_s *menu) {
+    const i32 area = LDataList[hub_new_level].area_index;
+    const bool free_play_available = MenuAreaAllowsFreePlay(area);
+
+    if (area >= 0 && area < AREACOUNT && ADataList[area].name_id >= 0) {
+        NuStrCpy(MenuHeader, TTab[ADataList[area].name_id]);
+    }
+
+    GameDrawMenuEntry(menu, TTab[free_play_available ? tREPLAYSTORY : tSTORY]);
+    if (free_play_available) {
+        GameDrawMenuEntry(menu, TTab[tFREEPLAY]);
+    } else {
+        DrawMenuEntryEx(menu, TTab[tFREEPLAY], MenuA / 2);
+    }
 }
 
-void MenuInitSelectMode(MENU_s *) {
+void MenuInitSelectMode(MENU_s *menu) {
+    const i32 area = LDataList[hub_new_level].area_index;
+    hub_selectmode = MenuAreaAllowsFreePlay(area) ? 1 : 0;
+    menu->selected_row = static_cast<i16>(hub_selectmode);
+    menu->selected_item = hub_selectmode;
+    selectmodemode = 0;
 }
 
 void MenuUpdateDeleting(MENU_s *) {
@@ -724,6 +854,7 @@ void MenuUpdateEpisodes(MENU_s *) {
 }
 
 void MenuUpdateFreePlay(MENU_s *) {
+    Hub_UpdateFreePlaySelect();
 }
 
 void MenuUpdateMissions(MENU_s *) {
@@ -854,7 +985,63 @@ void MenuUpdateSaveCancel(MENU_s *menu) {
     }
 }
 
-void MenuUpdateSelectMode(MENU_s *) {
+void MenuUpdateSelectMode(MENU_s *menu) {
+    static f32 selectmodeduration = 0.0f;
+
+    if (selectmodemode == 2 || selectmodemode == 3) {
+        selectmodetime += FRAMETIME;
+        if (selectmodetime < selectmodeduration) {
+            return;
+        }
+
+        if (selectmodemode == 3) {
+            WipeBackToHub();
+            return;
+        }
+
+        if (NewLData != NULL) {
+            return;
+        }
+        NextArea_FreePlay = 0;
+        FreePlay = 0;
+        NewLData = &LDataList[hub_new_level];
+        loadareacharacters_no_backdrop_reset = 1;
+        const FADETYPE fade = {FADE_TYPE_STILL};
+        FadeSys.SetFade(fade, 0);
+        FinishLoop_On = 0;
+        return;
+    }
+
+    if (menu->cancel_pressed != 0) {
+        MenuSFX = GameAudio_GetSfxId(0x31);
+        selectmodetime = 0.0f;
+        selectmodemode = 3;
+        selectmodeduration = 0.6f;
+        return;
+    }
+    if (menu->confirm_pressed == 0) {
+        hub_selectmode = menu->selected_item;
+        return;
+    }
+
+    const i32 area = LDataList[hub_new_level].area_index;
+    hub_selectmode = menu->selected_item;
+    if (hub_selectmode == 0) {
+        MenuSFX = GameAudio_GetSfxId(0x30);
+        selectmodetime = 0.0f;
+        selectmodemode = 2;
+        selectmodeduration = 0.6f;
+        return;
+    }
+    if (hub_selectmode == 1 && MenuAreaAllowsFreePlay(area)) {
+        MenuSFX = GameAudio_GetSfxId(0x30);
+        hub_freeplaysource = 0;
+        Hub_InitFreePlaySelect(area, -1, -1);
+        NewMenu(17, -1, -1);
+        return;
+    }
+
+    MenuSFX = GameAudio_GetSfxId(0x32);
 }
 
 void MenuDrawDeleteConfirm(MENU_s *) {

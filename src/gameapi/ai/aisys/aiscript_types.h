@@ -141,8 +141,14 @@ typedef struct AISCRIPTPROCESS_s {
     f32 action_timer;
 
     AIAREA_s *unknown_a0;
-    AILOCATOR_s *unknown_a4;
-    AILOCATORSET_s *unknown_a8;
+    union {
+        AILOCATOR_s *unknown_a4;
+        AILOCATOR_s *locator;
+    };
+    union {
+        AILOCATORSET_s *unknown_a8;
+        AILOCATORSET_s *locator_set;
+    };
     NUGSPLINE *unknown_ac;
 
     // Types uncertain.

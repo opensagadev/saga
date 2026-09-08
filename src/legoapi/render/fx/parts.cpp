@@ -55,6 +55,8 @@ extern "C" {
     extern i32 MAXPARTS;
     extern i32 i_part;
 
+    void ResetParts(void);
+
     i32 DebAlloc(void);
     void DebrisStartOffset(i32, f32);
     void DebrisEmitterPos(i32, f32, f32, f32);
@@ -287,11 +289,13 @@ extern "C" {
         AddFiniteShotDebrisEffect2(handle, effect, position, NULL, NULL, count);
     }
 
-    void AddFiniteShotDebrisEffect2(i32 *handle, i32 effect, NUVEC *position,
-                                  NUVEC *emitter_momentum, NUVEC *particle_momentum, i32 count) {
-        if (debris_suspended != 0) return;
+    void AddFiniteShotDebrisEffect2(i32 *handle, i32 effect, NUVEC *position, NUVEC *emitter_momentum,
+                                    NUVEC *particle_momentum, i32 count) {
+        if (debris_suspended != 0)
+            return;
         AddDebrisEffect(handle, effect, position->x, position->y, position->z);
-        if (*handle == -1) return;
+        if (*handle == -1)
+            return;
         debkeydatatype_s &key = debkeydata[*handle];
         key.field_1d4 = count;
         const f32 now = debtab[effect]->time_group == 4 ? panelglobaltime : globaltime;
@@ -304,13 +308,16 @@ extern "C" {
         key.cutoff_distance = CameraEmitterDistance(position);
         if (key.process_collision_sound != 0) {
             f32 range = debtab[effect]->sound_range_override;
-            if (range == 0.0f) range = debtab[effect]->sound_range;
-            if (range == 0.0f) range = debtab[effect]->clip_extent;
+            if (range == 0.0f)
+                range = debtab[effect]->sound_range;
+            if (range == 0.0f)
+                range = debtab[effect]->clip_extent;
             f32 volume = 0.0f;
             if (key.cutoff_distance < range) {
                 for (i32 i = 0; i < 4; ++i) {
                     const i32 sound = debtab[effect]->sound_data[i * 3];
-                    if (sound != -1) SetSfxBit_On(sound);
+                    if (sound != -1)
+                        SetSfxBit_On(sound);
                 }
                 volume = (range - key.cutoff_distance) / range;
             }
@@ -352,8 +359,8 @@ extern "C" {
 
     void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 
-    i32 AddGameDebrisRot(APIDEBRISSYS_s *system, i32 effect, NUVEC *position, i32 count,
-                         i16 z_rotation, i16 y_rotation) {
+    i32 AddGameDebrisRot(APIDEBRISSYS_s *system, i32 effect, NUVEC *position, i32 count, i16 z_rotation,
+                         i16 y_rotation) {
         if (effect < 0 || effect >= system->capacity || system->entries[effect].effect == -1 || count < 1) {
             return 0;
         }
@@ -422,8 +429,8 @@ extern "C" {
         AddVariableShotDebrisEffectMtx(effect, position, count, z_rotation, y_rotation, NULL);
     }
 
-    void AddVariableShotDebrisEffectMtx(i32 effect, NUVEC *position, i32 count, i16 z_rotation,
-                                      i16 y_rotation, NUMTX *particle_orientation) {
+    void AddVariableShotDebrisEffectMtx(i32 effect, NUVEC *position, i32 count, i16 z_rotation, i16 y_rotation,
+                                        NUMTX *particle_orientation) {
         NUMTX orientation;
         NuMtxSetIdentity(&orientation);
         NuMtxRotateZ(&orientation, z_rotation);
@@ -432,35 +439,42 @@ extern "C" {
     }
 
     void AddVariableShotDebrisEffectMtx3(i32 effect, NUVEC *position, NUVEC *momentum, i32 count,
-                                       NUMTX *emitter_orientation, NUMTX *particle_orientation) {
-        if (effect < 0 || debtab[effect] == NULL) return;
+                                         NUMTX *emitter_orientation, NUMTX *particle_orientation) {
+        if (effect < 0 || debtab[effect] == NULL)
+            return;
         i16 priority = 20000;
         switch (debtab[effect]->particle_type) {
-            case 2: priority = static_cast<i16>(40000); break;
-            case 3: priority = 30000; break;
-            case 7: priority = 10000; break;
+            case 2:
+                priority = static_cast<i16>(40000);
+                break;
+            case 3:
+                priority = 30000;
+                break;
+            case 7:
+                priority = 10000;
+                break;
         }
-        AddVariableShotDebrisEffectMtx4(effect, position, momentum, count, emitter_orientation,
-                                       particle_orientation, priority, 0);
+        AddVariableShotDebrisEffectMtx4(effect, position, momentum, count, emitter_orientation, particle_orientation,
+                                        priority, 0);
     }
 
     void AddVariableShotDebrisEffectMtx4(i32 effect, NUVEC *position, NUVEC *momentum, i32 count,
-                                       NUMTX *emitter_orientation, NUMTX *particle_orientation,
-                                       i16 priority, u8 flags) {
+                                         NUMTX *emitter_orientation, NUMTX *particle_orientation, i16 priority,
+                                         u8 flags) {
         AddVariableShotDebrisEffectTimed5(effect, position, momentum, NULL, count * 30, timeincrement,
-                                         emitter_orientation, particle_orientation, priority, flags);
+                                          emitter_orientation, particle_orientation, priority, flags);
     }
 
     void AddVariableShotDebrisEffectTimed3(i32, NUVEC *, NUVEC *, i32, f32, NUMTX *, NUMTX *);
 
-    void AddVariableShotDebrisEffectTimed1(i32 effect, NUVEC *position, i32 count, f32 time,
-                                         i16 z_rotation, i16 y_rotation, NUMTX *particle_orientation) {
+    void AddVariableShotDebrisEffectTimed1(i32 effect, NUVEC *position, i32 count, f32 time, i16 z_rotation,
+                                           i16 y_rotation, NUMTX *particle_orientation) {
         NUMTX orientation;
         NuMtxSetIdentity(&orientation);
         NuMtxRotateZ(&orientation, z_rotation);
         NuMtxRotateY(&orientation, y_rotation);
-        AddVariableShotDebrisEffectTimed3(effect, position, &nuvec_zero, count, time,
-                                         &orientation, particle_orientation);
+        AddVariableShotDebrisEffectTimed3(effect, position, &nuvec_zero, count, time, &orientation,
+                                          particle_orientation);
     }
 
     void AddVariableShotDebrisEffectTimed3(i32 effect_index, NUVEC *position, NUVEC *momentum, i32 count, f32 time,
@@ -726,7 +740,16 @@ extern "C" {
     void GetPartName(void) {
     }
 
-    void InitParts(i32, VARIPTR *, VARIPTR) {
+    // libTTapp.so 0x41d640: reserve the permanent PART array directly from
+    // the caller's arena, then clear it through the normal reset path.
+    void InitParts(i32 max_parts, VARIPTR *buffer, VARIPTR buffer_end) {
+        (void)buffer_end;
+
+        MAXPARTS = max_parts;
+        buffer->addr = (buffer->addr + 0xf) & ~static_cast<usize>(0xf);
+        Part = reinterpret_cast<PART_s *>(buffer->void_ptr);
+        buffer->addr += static_cast<usize>(MAXPARTS) * sizeof(PART_s);
+        ResetParts();
     }
 
     void KillAllParts(void) {
@@ -853,7 +876,8 @@ PART_s *FindIncomingPart(void *owner, NUVEC *position, f32 radius, u32 flags, f3
     f32 nearest_distance = range > 0.0f ? range : 100.0f;
     for (i32 i = 0; i < MAXPARTS; ++i) {
         PART_s *part = &Part[i];
-        if ((part->active & 1) == 0 || part->owner == owner || (part->flags & flags) != flags) continue;
+        if ((part->active & 1) == 0 || part->owner == owner || (part->flags & flags) != flags)
+            continue;
         if (range <= 0.0f) {
             f32 speed = NuVecMag(&part->velocity);
             if (speed != 0.0f) {
@@ -907,7 +931,8 @@ void PartUpdate_Basketball(PART_s *) {
 PART_s *Part_FindFromHSpecial(nuhspecial_s *special) {
     if (special != NULL) {
         for (i32 i = 0; i < MAXPARTS; ++i) {
-            if ((Part[i].active & 1) != 0 && NuSpecialCompare(&Part[i].special, special)) return &Part[i];
+            if ((Part[i].active & 1) != 0 && NuSpecialCompare(&Part[i].special, special))
+                return &Part[i];
         }
     }
     return NULL;

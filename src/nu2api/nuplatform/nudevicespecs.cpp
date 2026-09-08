@@ -9,6 +9,10 @@
 
 NuDeviceSpecs *NuDeviceSpecs::ms_instance = NULL;
 
+NuDeviceSpecs::NuDeviceSpecs() : specs(-2) {
+    DetermineDeviceSpecs();
+}
+
 void NuDeviceSpecs::Create() {
     if (ms_instance != NULL) {
         return;

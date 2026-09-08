@@ -23,10 +23,7 @@ typedef struct nuapi_s {
     NUTIME time;
     NUTIME time2;
     f32 frametime;
-    char field19_0x3c;
-    char field20_0x3d;
-    char field21_0x3e;
-    char field22_0x3f;
+    i32 frame_count;
 
     f32 forced_frame_time;
     i32 max_fps;

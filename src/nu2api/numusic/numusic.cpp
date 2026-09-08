@@ -29,6 +29,37 @@ static NuMusic *the_music_player = NULL;
 
 NuMusic music_man;
 
+NUFPCOMJMPCTX NuMusic::top_jmp_tab[11] = {
+    {"ALBUM", NuMusic::xsAlbum},
+    {"ACTION", NuMusic::xsAction},
+    {"QUIET", NuMusic::xsQuiet},
+    {"OVERLAY", NuMusic::xsOverlay},
+    {"SIGNATURE", NuMusic::xsSignature},
+    {"CUTSCENE", NuMusic::xsCutscene},
+    {"NOMUSIC", NuMusic::xsNoMusicC},
+    {"GLOBALATTENUATION", NuMusic::xsGlobalAttenuation},
+    {"PATH", NuMusic::xsPath},
+    {"STRICT", NuMusic::xsStrict},
+    {NULL, NULL},
+};
+
+NUFPCOMJMPCTX NuMusic::track_jmp_tab[15] = {
+    {"IDENT", NuMusic::xsIdent},
+    {"ID", NuMusic::xsIdent},
+    {"INDEX", NuMusic::xsIndex},
+    {"IX", NuMusic::xsIndex},
+    {"NOMUSIC", NuMusic::xsNoMusic},
+    {"STARTPOINT", NuMusic::xsIndex},
+    {"NODUCK", NuMusic::xsNoDuck},
+    {"DUCK", NuMusic::xsDuck},
+    {"LOOPING", NuMusic::xsLooping},
+    {"LOOP", NuMusic::xsLooping},
+    {"NONLOOPING", NuMusic::xsNonLooping},
+    {"NOLOOP", NuMusic::xsNonLooping},
+    {"ATTENUATION", NuMusic::xsAttenuation},
+    {NULL, NULL},
+};
+
 // Globals driving GamePlayMusic. The original keeps these in the batman TU.
 i32 NOMUSIC = 0;
 i32 MusicOther = 0;
@@ -97,40 +128,20 @@ i32 NuMusic::Album::GetTracks(u32 class_mask, Track **out_tracks) {
 }
 
 void NuMusic::Album::Initialise() {
-    LOG_DEBUG("this=%p, this->tracks_source=%p", this, this->tracks_source);
-
-    i32 j;
-    TRACK_CLASS clazz;
-    Track *track;
-    i32 count;
-
-    i32 i = 0;
-    count = this->tracks_count;
-    do {
-        while (this->tracks[i] = NULL, count < 1) {
-        LAB_0031f139:
-            i = i + 1;
-            if (i == 6) {
-                return;
+    i32 count = tracks_count;
+    for (i32 i = 0; i < 6; i++) {
+        tracks[i] = NULL;
+        if (count > 0) {
+            Track *track = tracks_source;
+            TRACK_CLASS clazz = 1 << i;
+            for (i32 j = 0; j < count; j++, track++) {
+                if (track->clazz == clazz) {
+                    tracks[i] = track;
+                    break;
+                }
             }
         }
-
-        j = 0;
-        clazz = this->tracks_source->clazz;
-        track = this->tracks_source;
-        while ((i32)clazz != 1 << ((u8)i & 0x1f)) {
-            j = j + 1;
-            if (j == count)
-                goto LAB_0031f139;
-            clazz = track[1].clazz;
-            track = track + 1;
-        }
-        this->tracks[i] = track;
-        i = i + 1;
-        if (i == 6) {
-            return;
-        }
-    } while (true);
+    }
 }
 
 i32 NuMusic::Initialise(const char *file, char *null, VARIPTR *buffer_start, VARIPTR buffer_end) {
@@ -327,20 +338,17 @@ void NuMusic::BuildSoundTable(variptr_u *buffer_start, variptr_u buffer_end) {
 
         // Track flags bit1 (looping) decides whether the file registers as a
         // streaming sample; the pitch rides along for the loader.
-        track->file_indexes[0] =
-            FindOrCreateSoundFile(finfo, &count, track->path, (i32)((track->flags << 6) >> 7), track->pitch);
-        track->file_indexes[1] =
-            FindOrCreateSoundFile(this->fileinfo, &count, track->name, (i32)((track->flags << 6) >> 7), track->pitch);
+        const i32 streaming = static_cast<i8>(static_cast<u8>(track->flags) << 6) >> 7;
+        track->file_indexes[0] = FindOrCreateSoundFile(finfo, &count, track->path, streaming, track->pitch);
+        track->file_indexes[1] = FindOrCreateSoundFile(this->fileinfo, &count, track->name, streaming, track->pitch);
     }
 
-    i += count;
-
-    nusound_filename_info_s *puVar1 = &finfo[i];
+    nusound_filename_info_s *puVar1 = &finfo[count];
     puVar1->filename = NULL;
-    puVar1->field1_0x4 = 0;
+    puVar1->field4_0x4 = NULL;
     puVar1->index = -1;
 
-    buffer_start->void_ptr = &finfo[i + 1];
+    buffer_start->void_ptr = &finfo[count + 1];
 }
 
 i32 NuMusic::FindOrCreateSoundFile(nusound_filename_info_s *files, i32 *count, const char *filename, i32 param_4,
@@ -362,7 +370,7 @@ i32 NuMusic::FindOrCreateSoundFile(nusound_filename_info_s *files, i32 *count, c
     puVar1->filename = filename;
     puVar1->index = index;
     puVar1->field3_0xc = 0;
-    puVar1->field1_0x4 = (param_4 == 0);
+    puVar1->field4_0x4 = reinterpret_cast<void *>(static_cast<usize>(param_4 == 0));
 
     (*count)++;
 
@@ -700,8 +708,8 @@ i32 NuMusic::PlayTrack(TRACK_CLASS track) {
     return PlayTrackI(track, 0);
 }
 
-void NuMusic::PlayTrack(u32 track, u32 unused) {
-    PlayTrackI((TRACK_CLASS)track, unused);
+i32 NuMusic::PlayTrack(u32 track, u32 unused) {
+    return PlayTrackI((TRACK_CLASS)track, unused);
 }
 
 i32 NuMusic::StopAll(i32 toggle) {
@@ -897,11 +905,18 @@ void NuMusic::SetClassVolume(u32 class_mask, f32 volume) {
         volume = 1.0f;
     }
 
-    for (i32 i = 0; i < 6; i++) {
-        if ((class_mask & (1u << i)) != 0) {
-            this->class_volumes[i] = volume;
-        }
-    }
+    if ((class_mask & TRACK_CLASS_QUIET) != 0)
+        this->class_volumes[0] = volume;
+    if ((class_mask & TRACK_CLASS_ACTION) != 0)
+        this->class_volumes[1] = volume;
+    if ((class_mask & TRACK_CLASS_4) != 0)
+        this->class_volumes[2] = volume;
+    if ((class_mask & TRACK_CLASS_8) != 0)
+        this->class_volumes[3] = volume;
+    if ((class_mask & TRACK_CLASS_CUTSCENE) != 0)
+        this->class_volumes[4] = volume;
+    if ((class_mask & TRACK_CLASS_NOMUSIC) != 0)
+        this->class_volumes[5] = volume;
 }
 
 void NuMusic::SetMasterVolume(f32 volume) {
@@ -1052,11 +1067,11 @@ void NuMusic::Process(f32 delta) {
         i32 key_status = NuSound3StreamKeyStatus(voice->stream_index);
         if (key_status == NUSOUND_STEREO_STREAM_INACTIVE) {
             NuSound3StopStereoStream(voice->stream_index);
-            voice->SetStatusFn(VOICE_STATUS_READY, 0x1e0);
+            voice->SetStatusFn(VOICE_STATUS_READY, 0x246);
         } else if (key_status == NUSOUND_STEREO_STREAM_FINISHED) {
-            voice->SetStatusFn(VOICE_STATUS_ENDED, 0x1e1);
+            voice->SetStatusFn(VOICE_STATUS_ENDED, 0x24a);
         } else if (key_status == NUSOUND_STEREO_STREAM_PLAYING) {
-            voice->SetStatusFn(VOICE_STATUS_PLAYING_LOADED, 0x1e2);
+            voice->SetStatusFn(VOICE_STATUS_PLAYING_LOADED, 0x24e);
         }
 
         // Fade gain; a fade that reaches zero (or below) stops the stream.
@@ -1075,12 +1090,10 @@ void NuMusic::Process(f32 delta) {
                 // having played (so its next Play fades in instead of snapping).
                 voice->fade_rate = 0.0f;
                 NuSound3StopStereoStream(voice->stream_index);
-                voice->SetStatusFn(VOICE_STATUS_READY, 0x1e4);
+                voice->SetStatusFn(VOICE_STATUS_READY, 0x25e);
                 voice->fade_rate = 1.0f;
                 Track *cur = this->voices[vi].tracks[this->voices[vi].track_index];
-                if (cur != NULL) {
-                    ((u8 *)&cur->flags)[1] = 1;
-                }
+                ((u8 *)&cur->flags)[1] = 1;
             } else {
                 voice->gain = 1.0f;
             }
@@ -1191,31 +1204,143 @@ i32 GamePlayMusic(LEVELDATA_s *level, i32 check, OPTIONSSAVE_s *options) {
     }
 }
 
-void NuMusic::ClassToName(u32) {
+const char *NuMusic::ClassToName(u32) {
+    return "UNKNOWN";
 }
 
 void NuMusic::Debug(i32, i32) {
 }
 
-void NuMusic::GetAlbumHandle(char const *) {
+i32 NuMusic::GetAlbumHandle(char const *name) {
+    if (this != NULL && the_music_player != NULL && this->album_count > 0) {
+        for (i32 i = 0; i < this->album_count; i++) {
+            if (NuStrICmp(this->albums[i].name, name) == 0) {
+                return i + 0x12345678;
+            }
+        }
+    }
+    return 0;
 }
 
-void NuMusic::GetPlaybackTime(u32) {
+f32 NuMusic::GetPlaybackTime(u32 clazz) {
+    Voice *voice = &voices[0];
+    Track *track = voice->tracks[voice->track_index];
+    if (track == NULL || (track->clazz & clazz) == 0 || voice->status != VOICE_STATUS_PLAYING_LOADED) {
+        voice = &voices[1];
+        track = voice->tracks[voice->track_index];
+        if (track == NULL) {
+            return 0.0f;
+        }
+        if ((track->clazz & clazz) == 0) {
+            return 0.0f;
+        }
+        if (voice->status != VOICE_STATUS_PLAYING_LOADED) {
+            return 0.0f;
+        }
+    }
+    return NuSound3GetStreamPlaybackTime(voice->stream_index);
 }
 
-void NuMusic::GetPlayer() {
+NuMusic *NuMusic::GetPlayer() {
+    return the_music_player;
 }
 
-void NuMusic::GetStatus(u32, i32 *) {
+int NuMusic::GetStatus(u32 clazz, i32 *class_status) {
+    if (this == NULL || the_music_player == NULL) {
+        return 0;
+    }
+
+    if (class_status != NULL) {
+        class_status[0] = 0;
+        class_status[1] = 0;
+        class_status[2] = 0;
+        class_status[3] = 0;
+        class_status[4] = 0;
+        class_status[5] = 0;
+    }
+
+    i32 result = 0;
+    Track *track = voices[0].tracks[voices[0].track_index];
+    if (track != NULL && (track->clazz & clazz) != 0) {
+        if (voices[0].status <= VOICE_STATUS_PLAYING_LOADED) {
+            u32 status_bit = 1u << voices[0].status;
+            if ((status_bit & 0x75) != 0) {
+                result = 1;
+            } else if ((status_bit & 0x80) != 0) {
+                result = 4;
+            } else if ((status_bit & 8) != 0) {
+                result = 2;
+            } else {
+                result = 0;
+            }
+        }
+        i32 class_index = ClassToIX(track->clazz);
+        if (class_status != NULL && class_index != -1) {
+            class_status[class_index] |= result;
+        }
+    }
+
+    track = voices[1].tracks[voices[1].track_index];
+    if (track != NULL && (track->clazz & clazz) != 0) {
+        i32 status = result;
+        switch (voices[1].status) {
+            case VOICE_STATUS_NONE:
+            case VOICE_STATUS_STOPPING:
+            case VOICE_STATUS_CUED:
+            case VOICE_STATUS_ENDED:
+            case VOICE_STATUS_PLAYING:
+                status = 1;
+                break;
+            case VOICE_STATUS_READY:
+                status = 0;
+                break;
+            case VOICE_STATUS_STOPPED:
+                status = 2;
+                break;
+            case VOICE_STATUS_PLAYING_LOADED:
+                status = 4;
+                break;
+        }
+        result |= status;
+        i32 class_index = ClassToIX(track->clazz);
+        if (class_status != NULL && class_index != -1) {
+            class_status[class_index] |= status;
+        }
+    }
+    return result;
 }
 
-void NuMusic::NoMusic(i32) {
+void NuMusic::NoMusic(i32 no_music) {
+    if (this != NULL && the_music_player != NULL) {
+        this->track_index = no_music != 0;
+    }
 }
 
-void NuMusic::SetAlbum(char const *) {
+i32 NuMusic::SetAlbum(char const *name) {
+    if (this == NULL || the_music_player == NULL) {
+        return 0;
+    }
+
+    i32 handle = GetAlbumHandle(name);
+    if (handle == 0) {
+        return 0;
+    }
+    SetAlbum(handle);
+    return handle;
 }
 
-void NuMusic::SetAlbum(i32) {
+i32 NuMusic::SetAlbum(i32 handle) {
+    if (this == NULL || the_music_player == NULL || handle < 0x12345678) {
+        return 0;
+    }
+
+    i32 index = handle - 0x12345678;
+    if (index >= this->album_count) {
+        return 0;
+    }
+
+    this->album = &this->albums[index];
+    return 1;
 }
 
 void NuMusic::ParseTrack(u32 category, nufpar_s *fpar) {

@@ -59,12 +59,15 @@ extern "C" {
     i32 NuRndrSetDirectionalLightsPS(const NUVEC *dir0, const NUCOLOUR3 *colour0, const NUVEC *dir1,
                                      const NUCOLOUR3 *colour1, const NUVEC *dir2, const NUCOLOUR3 *colour2);
     i32 NuRndrSetFxMtx(NUMTX *matrix);
-    void NuRndrSetSpecularLightPS(const NUVEC *direction, const NUCOLOUR4 *intensity);
+    i32 NuRndrSetSpecularLightPS(const NUVEC *direction, const NUCOLOUR4 *intensity);
     void NuRndrStartReflectionRender(i32 clear_depth);
     void NuRndrEndReflectionRender(void);
 
     void FaceYDirStream(i32 y_angle);
     void NuRndrAddShadow(NUVEC *position, f32 radius, i32 opacity, i32 x_rotation, i32 y_rotation, i32 z_rotation);
+    f32 *NuRndrCreateBlendShapeDeformerWeightsArray(i32 count);
 #ifdef __cplusplus
 }
+
+f32 **NuRndrCreateBlendShapeDWAPointers(i32 count);
 #endif

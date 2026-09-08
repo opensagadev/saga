@@ -21,9 +21,9 @@ void *g_DebriSysMemVB[2][64];
 void *g_debrisUploadBuffer;
 u32 g_VBMaxVertexCount;
 u32 g_writeBufferIndex;
-u32 g_readBufferIndex;
+u32 g_readBufferIndex = 1;
 u32 g_CurrentDebriVBIndex;
-u32 g_VBSize = 0x10000;
+u32 g_VBSize;
 u32 g_CurrentVBVertexCount;
 u32 g_FrameVertexCount;
 void *g_lastPartEffect;
@@ -32,8 +32,17 @@ NUMTX *NuRndr_DebrisRotMtxPtr;
 NUVEC4 NuRndr_DebrisPlane;
 nunativedebrisdata_s *g_ParticleGroup;
 
-extern "C" void NuInitDebrisRenderer(VARIPTR *buffer) {
-    const u32 ideal_dynamic_vb_size = 0x10000;
+extern u32 g_lastBoundVAO;
+static u32 g_IdealDynamicVBSize = 0xc800;
+
+static void NuIOSBindVAO(u32 vao) {
+    if (vao != g_lastBoundVAO) {
+        g_lastBoundVAO = vao;
+    }
+}
+
+extern "C" void NuInitDebrisRenderer(VARIPTR *buffer, VARIPTR buffer_end) {
+    u32 ideal_dynamic_vb_size = g_IdealDynamicVBSize;
     g_VBMaxVertexCount = ideal_dynamic_vb_size / 0x18;
     if (NuIOS_IsLowEndDevice() != 0) {
         g_VBMaxVertexCount >>= 1;
@@ -45,18 +54,21 @@ extern "C" void NuInitDebrisRenderer(VARIPTR *buffer) {
             g_DebriSysMemVB[frame][index] = buffer->void_ptr;
             buffer->addr += g_VBSize;
         }
+        BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nuptl_android.c", 0x8c);
+        NuIOSBindVAO(0);
         glGenBuffers(4, &g_DebriVB[frame * 4]);
         for (i32 index = 0; index < 4; ++index) {
             glBindBuffer(GL_ARRAY_BUFFER, g_DebriVB[frame * 4 + index]);
             glBufferData(GL_ARRAY_BUFFER, g_VBSize, NULL, GL_STREAM_DRAW);
         }
+        EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nuptl_android.c", 0x96);
     }
     g_debrisUploadBuffer = buffer->void_ptr;
     buffer->addr += g_VBSize;
     g_pVBData = g_debrisUploadBuffer;
 }
 
-extern i32 g_forceSysMemVbs; // src/globals.h
+extern bool g_forceSysMemVbs; // src/globals.h
 
 i32 NuDebrisRendererNextBuffer() {
     if (g_UseSysMemVB == 0 && g_pVBData != NULL && g_CurrentVBVertexCount != 0) {
@@ -68,22 +80,26 @@ i32 NuDebrisRendererNextBuffer() {
         EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nuptl_android.c", 0xc9);
     }
 
-    if (g_UseSysMemVB == 0) {
-        if (g_CurrentDebriVBIndex + 1 < 4) {
-            g_CurrentDebriVBIndex = (g_CurrentDebriVBIndex + 1) & 3;
-        } else {
-            g_CurrentDebriVBIndex = 0;
-            g_UseSysMemVB = 1;
-        }
-    } else {
+    if (g_UseSysMemVB != 0) {
         if (g_CurrentDebriVBIndex + 1 >= 64) {
             return 0;
         }
         g_CurrentDebriVBIndex = (g_CurrentDebriVBIndex + 1) & 63;
+    } else {
+        if (g_CurrentDebriVBIndex + 1 >= 4) {
+            g_CurrentDebriVBIndex = 0;
+            g_UseSysMemVB = 1;
+        } else {
+            g_CurrentDebriVBIndex = (g_CurrentDebriVBIndex + 1) & 3;
+        }
     }
 
-    g_pVBData = g_UseSysMemVB == 0 ? g_debrisUploadBuffer : g_DebriSysMemVB[g_writeBufferIndex][g_CurrentDebriVBIndex];
     g_CurrentVBVertexCount = 0;
+    if (g_UseSysMemVB != 0) {
+        g_pVBData = g_DebriSysMemVB[g_writeBufferIndex][g_CurrentDebriVBIndex];
+    } else {
+        g_pVBData = g_debrisUploadBuffer;
+    }
     return 1;
 }
 
@@ -91,14 +107,17 @@ i32 NuDebrisRendererNextBuffer() {
 void NuDebrisRendererFlushBuffers(void) {
     if ((g_UseSysMemVB == 0) && (g_pVBData != NULL) && (g_CurrentVBVertexCount != 0)) {
         BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nuptl_android.c", 0xa4);
-        glBindBuffer(GL_ARRAY_BUFFER, g_DebriVB[(g_writeBufferIndex * 4 + g_CurrentDebriVBIndex) % 8]);
-        glBufferData(GL_ARRAY_BUFFER, g_VBSize, NULL, GL_DYNAMIC_DRAW); // 0x88e0
+        glBindBuffer(GL_ARRAY_BUFFER, g_DebriVB[g_writeBufferIndex * 4 + g_CurrentDebriVBIndex]);
+        glBufferData(GL_ARRAY_BUFFER, g_VBSize, NULL, GL_STREAM_DRAW);
         glBufferSubData(GL_ARRAY_BUFFER, 0, g_CurrentVBVertexCount * 0x18, g_pVBData);
         EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nuptl_android.c", 0xab);
     }
     g_pVBData = NULL;
     g_CurrentDebriVBIndex = 0;
-    g_UseSysMemVB = (g_forceSysMemVbs != 0);
+    g_UseSysMemVB = 0;
+    if (g_forceSysMemVbs) {
+        g_UseSysMemVB = 1;
+    }
     g_CurrentVBVertexCount = 0;
     g_lastPartEffect = NULL;
     g_FrameVertexCount = 0;

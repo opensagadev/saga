@@ -61,12 +61,10 @@ void ClearPause() {
 }
 
 void ResumeGame(i32 play_sound, i32 resume_music) {
-    puts("Resume Game");
     Paused = 0;
     NetPaused = 0;
     MenuRememberCursor(&GameMenu[GameMenuLevel]);
     MenuReset();
-    puts("Resume game fades audio to 1.0f");
     music_man.SetFader(1.0f, 0.5f);
     if (resume_music != 0) {
         music_man.ResumeTrack(0x10);
@@ -296,9 +294,7 @@ void NewGame() {
 }
 
 void PauseGame(i32 pad_index) {
-    puts("Pause Game");
     Paused = 1;
-    puts("Pause game fades audio to 0.0f");
     music_man.SetFader(0.0f, 0.5f);
     music_man.PauseTrack(0x10);
     NuSound3StopRumble();

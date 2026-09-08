@@ -4,6 +4,7 @@
 
 #include "legoapi/characters/core/CharacterObjectInterface.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/world/area.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nucore/nuanim3.h"
 #include "nu2api/nucore/nuhgobj.h"
@@ -12,6 +13,7 @@
 #include "nu2api/nufile/nufilepak.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/numtl.h"
+#include "nu2api/numusic/sfx.h"
 
 #include <string.h>
 struct numtx_s;
@@ -33,6 +35,7 @@ struct APIOBJECT_s;
 
 extern "C" {
     NUMTL *APITrans_Mtl[2];
+    i32 notransparentchardraw;
 
     i16 id_WEIRDO1 = -1;
     i16 id_WEIRDO2 = -1;
@@ -713,25 +716,65 @@ static __used__ void ExtraDieSfx_LSW(GameObject_s *) {
 static __used__ void ExtraHurtSfx_LSW(GameObject_s *) {
 }
 
-static __used__ int GameAudio_CheckReverb_LSW() {
+extern __attribute__((visibility("hidden"))) i32 GameAudio_CheckReverb_LSW() asm("_ZL25GameAudio_CheckReverb_LSWv");
+
+i32 GameAudio_CheckReverb_LSW() {
+    LEVELDATA *level = WorldInfo_CurrentlyActive()->current_level;
+    if (level == HOTHBATTLEB_LDATA || level == TATOOINED_LDATA) {
+        return 1;
+    }
+    if (level == ASTEROIDCHASEB_LDATA && GameCam->sock_position.location.sock == 4) {
+        return 1;
+    }
     return 0;
 }
 
-static __used__ int GameAudio_OverrideFootStep_LSW(GameObject_s *, int) {
-    return 0;
+extern AREADATA *DAGOBAH_ADATA;
+extern AREADATA *DEATHSTARESCAPE_ADATA;
+extern AREADATA *DEATHSTARRESCUE_ADATA;
+extern AREADATA *HOTHESCAPE_ADATA;
+extern AREADATA *JABBASPALACE_ADATA;
+
+extern __attribute__((visibility("hidden"))) i32
+GameAudio_OverrideFootStep_LSW(GameObject_s *, i32) asm("_ZL30GameAudio_OverrideFootStep_LSWP12GameObject_si");
+
+i32 GameAudio_OverrideFootStep_LSW(GameObject_s *object, i32 alternate) {
+    WORLDINFO *world = WorldInfo_CurrentlyActive();
+    AREADATA *area = world->area;
+    LEVELDATA *level = world->current_level;
+
+    if ((area == HOTHESCAPE_ADATA || level == JABBASPALACEE_LDATA) && alternate == 0) {
+        return GetSfxId("fs_ice");
+    }
+
+    if (area == DAGOBAH_ADATA && alternate == 0) {
+        if (level != DAGOBAHA_LDATA || object->apiobj.field_0x281 != 0x14) {
+            if (level != DAGOBAHD_LDATA) {
+                if (level != DAGOBAHE_LDATA ||
+                    (GameCam->sock_position.location.sock != 4 && GameCam->sock_position.location.sock != 1)) {
+                    return GetSfxId("fs_swamp");
+                }
+            }
+        }
+    }
+
+    if (level == JABBASPALACEA_LDATA && (object->apiobj.field_0x281 == 9 || object->apiobj.field_0x281 == 0x18)) {
+        return GetSfxId("fs_ice");
+    }
+
+    if ((area == DEATHSTARRESCUE_ADATA || area == DEATHSTARESCAPE_ADATA || WORLD->area == JABBASPALACE_ADATA) &&
+        object->apiobj.field_0x281 == 0x14) {
+        return GetSfxId("FS_JWalkM");
+    }
+
+    return -1;
 }
 
 static __used__ int IsGrabbable(GameObject_s *) {
     return 0;
 }
 
-static __used__ void GameObjectForceApart2D(APIOBJECT_s *, APIOBJECT_s *) {
-}
-
 static __used__ void DrawCharacterAttachments(GameObject_s *, numtx_s *) {
-}
-
-static __used__ void AddToModelList(APICHARACTERMODELLIST_s *, int *, int, int, int, EXTRAMODEL *) {
 }
 
 static void NormalizeAnimPath(char *path) {
@@ -1037,7 +1080,19 @@ extern "C" {
         return result;
     }
 
-    void APIDumpCharacterModels(i32) {
+    // Original @0x3cd1ea. Destroy either the area-loaded hierarchy tail
+    // (mode 0) or every loaded hierarchy (non-zero mode). The model slots are
+    // reset by APILoadCharacterModels after their display scenes have been
+    // unregistered here.
+    void APIDumpCharacterModels(i32 mode) {
+        i32 model_index = mode == 0 ? apicharsys->permanent_model_count : 0;
+        while (model_index < apicharsys->loaded_model_count) {
+            APICHARACTERMODEL &model = apicharsys->models[model_index];
+            if (model.hierarchy != NULL) {
+                NuHGobjDestroy(model.hierarchy);
+            }
+            ++model_index;
+        }
     }
 
     void APILoadCharacterModels(APICHARACTERMODELLIST_s *list, i32 area_animation, VARIPTR *buf, VARIPTR buf_end,
@@ -1229,7 +1284,41 @@ extern "C" {
         }
     }
 
-    void APITransparentCharDraw(void) {
+    void APITransparentCharDraw(nuhgobj_s *object, NUMTX *world_matrix, i32 render_count, i16 *render_indices,
+                                NUMTX *joint_matrices, void **dwa, i32 render_flags) {
+        i32 layer_six = 0;
+        i32 layer_zero = 0;
+        if (notransparentchardraw == 1 || APITrans_Mtl[0] == NULL) {
+            return;
+        }
+
+        if (render_count > 1) {
+            for (i32 i = 0; i < render_count; ++i) {
+                if (render_indices[i] == 6) {
+                    render_indices[i] = render_indices[render_count - 1];
+                    layer_six = render_count - 1;
+                    --render_count;
+                }
+                if (render_indices[i] == 0) {
+                    render_indices[i] = render_indices[render_count - 1];
+                    layer_zero = render_count - 1;
+                    --render_count;
+                }
+            }
+        }
+
+        u8 previous_alpha_mode = object->data_0x198[8];
+        object->data_0x198[8] = 1;
+        NuSpecialConstAlpha(1, 0.0f);
+        NuHGobjRndrMtxDwa(object, world_matrix, render_count, render_indices, joint_matrices, dwa, render_flags);
+        NuSpecialConstAlpha(0, 0.0f);
+        object->data_0x198[8] = previous_alpha_mode;
+        if (layer_six != 0) {
+            render_indices[layer_six] = 6;
+        }
+        if (layer_zero != 0) {
+            render_indices[layer_zero] = 0;
+        }
     }
 
     void APITransparentInit(void) {

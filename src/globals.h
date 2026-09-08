@@ -247,20 +247,34 @@ struct STATUSCOLLECTLIST_s {
 DECOMP_ASSERT(sizeof(STATUSCOLLECTLIST_s) == 0x10, "STATUSCOLLECTLIST size");
 
 struct CHARCAT_s {
-    undefined field0_0x0[4];
-    u32 field1_0x4;
-    i32 field2_0x8;
+    char *name;
+    u32 model_flags;
+    u32 game_flags;
 };
 
 struct ARCADEITEM_s {
-    undefined field0_0x0[0xc];
+    i16 *level_text;
+    i8 level;
+    u8 level_count;
+    u16 pad_06;
+    i16 *mode_text;
     char field_c_0xc;
+    u8 mode_count;
+    u16 pad_0e;
+    i16 *play_text;
+    i8 play;
+    u8 play_count;
+    u16 pad_16;
 };
+DECOMP_ASSERT(sizeof(ARCADEITEM_s) == 0x18, "ArcadeItem ABI");
+DECOMP_ASSERT(offsetof(ARCADEITEM_s, field_c_0xc) == 0xc, "ArcadeItem mode offset");
 
 struct ARCADE_MODE_s {
-    undefined field0_0x0[8];
+    i16 *text;
+    i32 target;
     i32 field8_0x8;
 };
+DECOMP_ASSERT(sizeof(ARCADE_MODE_s) == 0xc, "Arcade mode ABI");
 
 struct GAME_CUSTOMISER_s {
     undefined field0_0x0[0x6c];
@@ -288,6 +302,8 @@ extern void *globalbuffer;
 extern i32 MaxAnimJoints;
 extern u8 ForcePlayEndFrame;
 extern u8 ForceEulerToQuat;
+extern u8 QuatPushes[4];
+extern i32 NumQuatPushes;
 extern u8 BitCountTable[256];
 extern i32 isBitCountTable;
 extern f32 MAXFRAMETIME;
@@ -432,6 +448,8 @@ extern f32 COINTOTAL_COINSIZE;
 extern f32 COINTOTAL_SCORESIZE;
 extern f32 PANEL_COINADJUSTDY;
 extern f32 PANEL_COINSCALE_END;
+extern f32 PANEL_SCORESCALE;
+extern f32 PANEL_SCOREX;
 extern f32 PANEL_COINSCALE_START;
 extern f32 PANEL_COINY;
 extern f32 PANEL_COINX;
@@ -464,7 +482,7 @@ extern f32 DrawCoinTotalTime;
 struct nusound_filename_info_s;
 extern struct nusound_filename_info_s *MusicInfo;
 extern struct nusound_filename_info_s *g_music;
-extern u32 SFX_MUSIC_COUNT;
+extern i32 SFX_MUSIC_COUNT;
 extern u8 g_BackgroundUsedFogColour;
 extern i32 g_BackgroundColour;
 extern i32 NOSOUND;
@@ -473,7 +491,8 @@ extern i32 LevMusicAmbient;
 extern i32 LevMusicOtherAction;
 extern i32 LevMusicOtherAmbient;
 extern i16 AreaMusic;
-extern i32 *radios_playing;
+extern i32 radios_playing;
+extern i32 last_chatter_sfx;
 extern u16 rtltimer1;
 extern f32 rtltimer1adv;
 
@@ -487,6 +506,7 @@ extern NUCAMERA *pNuCam;
 // ------------------------------------------------------------------------
 struct ANativeWindow;
 extern ANativeWindow *g_appWindow;
+extern volatile bool g_isBlockedInSwapScreen;
 extern char g_deviceManufacturer[256];
 extern char g_deviceModel[256];
 extern i32 g_isLowestEndDevice;
@@ -500,12 +520,12 @@ extern i32 finishloop_backdroponly;
 // ------------------------------------------------------------------------
 // Render / compatibility options
 // ------------------------------------------------------------------------
-extern i32 g_forceSysMemVbs;
+extern bool g_forceSysMemVbs;
 extern i32 g_forceETC1;
 extern i32 texanimbits;
 extern i32 Reflections_On;
 extern i32 disable_narrow_socks;
-extern i32 script_spline_selected;
+extern nugspline_s *script_spline_selected;
 extern f32 character_farclip;
 extern f32 CutBorderScale;
 extern i32 LEGOCAMMODE_DOORCUT;
@@ -566,6 +586,28 @@ enum GAMEPAD_BUTTON_FLAGS {
 };
 extern u32 GAMEPAD_SKIP;
 extern i32 MiniCutCam;
+extern i32 ai_fighting;
+extern i32 LEGO_AIPATHCNX_FORGOODIES;
+extern i32 LEGO_AIPATHCNX_FORBADDIES;
+extern i32 LEGO_AIPATHCNX_JUMP;
+extern i32 LEGO_AIPATHCNX_DOUBLE_JUMP;
+extern i32 LEGO_AIPATHCNX_HIGH_JUMP;
+extern i32 LEGO_AIPATHCNX_R2D2GLIDE;
+extern i32 LEGO_AIPATHCNX_BLOCKAGE;
+extern i32 LEGO_AIPATHCNX_DONTTOGGLE;
+extern i32 LEGO_AIPATHCNX_FULLTERRAIN;
+extern i32 LEGO_AIPATHCNX_BIGJUMP;
+extern i32 LEGO_AIPATHCNX_REQUIRESPERMISSION;
+extern i32 LEGO_AIPATHCNX_NO_DESTINATION_CHECK;
+extern i32 LEGO_AIPATHCNX_JUMP_NOW;
+extern i32 LEGO_AIPATHCNX_DONT_JUMP_NOW;
+extern f32 *fakeanimendframe;
+extern f32 *fakeanimframe;
+extern f32 ai_moveradius;
+extern f32 aitol;
+extern f32 DEFAULT_MOVE_RANGE;
+extern f32 engagefiretime;
+extern f32 idealgoalrange;
 extern i32 LEGOCONTEXT_DROPIN;
 extern i32 LEGOCONTEXT_COMBO;
 extern i32 LEGOCONTEXT_JUMP;
@@ -620,6 +662,7 @@ extern i16 temp_zrot;
 extern i32 avg_currentspeed_mul;
 extern GameObject_s *player2;
 extern GameObject_s *player;
+extern GameObject_s *CutDeadVehiclePlayer;
 extern GameObject_s *Player[8];
 extern struct playerprogress_s PlayerProgress[8];
 extern i32 DEFAULT_PLAYERHITPOINTS;
@@ -741,6 +784,7 @@ extern LEVELDATA *DAGOBAHA_LDATA;
 extern LEVELDATA *DAGOBAHB_LDATA;
 extern LEVELDATA *DAGOBAHC_LDATA;
 extern LEVELDATA *DAGOBAHD_LDATA;
+extern LEVELDATA *DAGOBAHE_LDATA;
 extern LEVELDATA *DEATHSTAR2BATTLEA_LDATA;
 extern LEVELDATA *DEATHSTAR2BATTLEB_LDATA;
 extern LEVELDATA *DEATHSTAR2BATTLED_LDATA;
@@ -854,6 +898,7 @@ extern LEVELDATA *SENATEA_LDATA;
 extern LEVELDATA *SPEEDERCHASEA_LDATA;
 extern LEVELDATA *STATUS_LDATA;
 extern LEVELDATA *TATOOINEA_LDATA;
+extern LEVELDATA *TATOOINEB_LDATA;
 extern LEVELDATA *TATOOINEC_LDATA;
 extern LEVELDATA *TATOOINED_LDATA;
 extern LEVELDATA *TATOOINEE_LDATA;
@@ -987,7 +1032,7 @@ extern void (*AIPathCnxHelperSysInitFn)(WORLDINFO_s *);
 // ------------------------------------------------------------------------
 extern LEVELOBJECT ObjTab[0x2ee]; // level-object type table (.data @0x618240, 0xff-terminated)
 extern struct LEVELSPLINE SplTab[26];
-extern u8 LSW_CharCategory[0x78];
+extern CHARCAT_s LSW_CharCategory[10];
 extern CHEAT Cheat[45];
 extern u8 CharVariants_Game[0x5c];
 extern MemoryManager theMemoryManager;
@@ -1004,11 +1049,11 @@ extern NUGSCN *button_scene;
 extern FadeSystem *pFadeInfo;
 
 // Cut-scene / gameplay hook wiring (original .data function pointers).
-extern void (*CutScene_StartFn)(CUTINFO *);
+extern i32 (*CutScene_StartFn)(CUTINFO *);
 extern void (*CutScene_PreUpdateFn)(CUTINFO *);
 extern void (*CutScene_PostUpdateFn)(void);
 extern void (*CutScene_StoppedFn)(CUTINFO *);
-extern void (*CutScene_ReplaceCharacterModelFn)(CUTINFO *, NUGCUTCHAR_s *);
+extern i32 (*CutScene_ReplaceCharacterModelFn)(CUTINFO *, NUGCUTCHAR_s *);
 extern void (*InitBolt_AddMomentumType)(BOLT_s *, GameObject_s *, nuvec_s *);
 extern void (*Bolt_HitPlatFn)(BOLT_s *);
 extern void (*Bolt_HitCustomFn)(BOLT_s *, nuvec_s *);
@@ -1043,7 +1088,7 @@ extern vufnt_s *QFont3D;
 extern vufnt_s *QFont2DZ;
 extern vufnt_s *QFont2DLower;
 extern vufnt_s *QFont3DZ;
-extern vufnt_s *QFont3DTime;
+extern f32 QFont3DTime;
 extern vufnt_s *SmartTextFont;
 extern i32 create_qfont3d;
 extern i32 create_qfont2dz;

@@ -68,6 +68,11 @@ class NuSoundSample : public NuSoundSource {
 
     // NuSoundSource overrides (the original dispatched through the source
     // vtable; Play() calls RequestBuffer to obtain its initial buffers).
+    bool OpenStream(bool) override {
+        return true;
+    }
+    void CloseStream() override {
+    }
     bool IsStreamOpen() const override;
     u32 GetMaxBufferSize() override {
         return 0;

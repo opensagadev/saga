@@ -29,6 +29,7 @@ void AddPickups(i32 count, i32 pickup_type, i32 param3, i32 param4, NUVEC *posit
                 i32 source, f32 scatter_height, f32 lifetime, GameObject_s *owner, i32 param12, i32 param13,
                 bool param14);
 void GameAudio_PlaySfxById(i32 sfx_id, NUVEC *position, i32 flags, i32 volume);
+void AddLevelSfxFromId(i32 sfx_id, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx);
 void GameAnimSet_DrawReflection(GAMEANIMSET_s *set, i32 flags, f32 alpha, numtx_s *matrix);
 
 namespace {
@@ -731,8 +732,26 @@ static void GizObstacles_PostLoad(void *world_ptr, void *data) {
     }
 }
 
-static void GizObstacles_AddLevelSfx(void *, void *, i32 *, i32 *, i32) {
-    UNIMPLEMENTED();
+static void GizObstacles_AddLevelSfx(void *, void *data, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx) {
+    GIZOBSTACLESYS_s *obstacle_sys = static_cast<GIZOBSTACLESYS_s *>(data);
+    if (obstacle_sys == NULL) {
+        return;
+    }
+    GIZOBSTACLE_s *obstacle = obstacle_sys->obstacles;
+    if (obstacle_sys->count == 0) {
+        return;
+    }
+    i32 index = 0;
+    do {
+        if (obstacle->start_sfx_id != -1) {
+            AddLevelSfxFromId(obstacle->start_sfx_id, sfx_ids, sfx_count, max_sfx);
+        }
+        if (obstacle->stop_sfx_id != -1) {
+            AddLevelSfxFromId(obstacle->stop_sfx_id, sfx_ids, sfx_count, max_sfx);
+        }
+        ++index;
+        ++obstacle;
+    } while (obstacle_sys->count > index);
 }
 
 ADDGIZMOTYPE *GizObstacles_RegisterGizmo(i32 type_id) {

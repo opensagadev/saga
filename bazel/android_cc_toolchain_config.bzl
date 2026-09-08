@@ -1,4 +1,4 @@
-"""C++ toolchain configuration for the matching Android x86 build."""
+"""NDK r8e: x86 assembly matching and ARMv7 hardware runtime testing only."""
 
 load("@rules_cc//cc:action_names.bzl", "ACTION_NAMES")
 load("@rules_cc//cc:cc_toolchain_config_lib.bzl", "feature", "flag_group", "flag_set", "tool_path")
@@ -7,9 +7,14 @@ load("@rules_cc//cc/toolchains:cc_toolchain_config_info.bzl", "CcToolchainConfig
 
 def _android_cc_toolchain_config_impl(ctx):
     ndk_root = ctx.file.ndk_marker.dirname
-    toolchain = ndk_root + "/toolchains/x86-4.7/prebuilt/" + ctx.attr.host_system_name
-    real_toolchain = ctx.attr.real_ndk_root + "/toolchains/x86-4.7/prebuilt/" + ctx.attr.host_system_name
-    prefix = "ndk/toolchains/x86-4.7/prebuilt/" + ctx.attr.host_system_name + "/bin/i686-linux-android-"
+    arm = ctx.attr.arch == "armv7"
+    arch = "arm" if arm else "x86"
+    abi = "armeabi-v7a" if arm else "x86"
+    triple = "arm-linux-androideabi" if arm else "i686-linux-android"
+    toolchain_dir = "arm-linux-androideabi-4.7" if arm else "x86-4.7"
+    toolchain = ndk_root + "/toolchains/" + toolchain_dir + "/prebuilt/" + ctx.attr.host_system_name
+    real_toolchain = ctx.attr.real_ndk_root + "/toolchains/" + toolchain_dir + "/prebuilt/" + ctx.attr.host_system_name
+    prefix = "ndk/toolchains/" + toolchain_dir + "/prebuilt/" + ctx.attr.host_system_name + "/bin/" + triple + "-"
     suffix = ctx.attr.tool_suffix
     compile_actions = [
         ACTION_NAMES.c_compile,
@@ -64,13 +69,25 @@ def _android_cc_toolchain_config_impl(ctx):
                             "-isystem",
                             ndk_root + "/sources/cxx-stl/gnu-libstdc++/4.7/include",
                             "-isystem",
-                            ndk_root + "/sources/cxx-stl/gnu-libstdc++/4.7/libs/x86/include",
+                            ndk_root + "/sources/cxx-stl/gnu-libstdc++/4.7/libs/" + abi + "/include",
                         ]),
                     ],
                 ),
             ],
         ),
     ]
+    if arm:
+        features.append(feature(
+            name = "armv7_android_abi",
+            enabled = True,
+            flag_sets = [flag_set(
+                actions = compile_actions + link_actions,
+                flag_groups = [flag_group(flags = [
+                    "-march=armv7-a", "-mfloat-abi=softfp", "-mfpu=vfpv3-d16",
+                    "-B" + real_toolchain + "/" + triple + "/bin/",
+                ])],
+            )],
+        ))
     if ctx.attr.host_system_name == "windows-x86_64":
         # Preserve the flags applied by the former CMake build when driving
         # the Android NDK from Windows.
@@ -114,35 +131,36 @@ def _android_cc_toolchain_config_impl(ctx):
     return cc_common.create_cc_toolchain_config_info(
         ctx = ctx,
         abi_libc_version = "bionic-api-9",
-        abi_version = "x86",
-        builtin_sysroot = ndk_root + "/platforms/android-9/arch-x86",
+        abi_version = abi,
+        builtin_sysroot = ndk_root + "/platforms/android-9/arch-" + arch,
         compiler = "gcc-4.7",
         cxx_builtin_include_directories = [
-            ndk_root + "/platforms/android-9/arch-x86/usr/include",
-            toolchain + "/lib/gcc/i686-linux-android/4.7/include",
-            toolchain + "/lib/gcc/i686-linux-android/4.7/include-fixed",
+            ndk_root + "/platforms/android-9/arch-" + arch + "/usr/include",
+            toolchain + "/lib/gcc/" + triple + "/4.7/include",
+            toolchain + "/lib/gcc/" + triple + "/4.7/include-fixed",
             ndk_root + "/sources/cxx-stl/system/include",
             ndk_root + "/sources/cxx-stl/gnu-libstdc++/4.7/include",
-            ndk_root + "/sources/cxx-stl/gnu-libstdc++/4.7/libs/x86/include",
-            ctx.attr.real_ndk_root + "/platforms/android-9/arch-x86/usr/include",
-            real_toolchain + "/lib/gcc/i686-linux-android/4.7/include",
-            real_toolchain + "/lib/gcc/i686-linux-android/4.7/include-fixed",
+            ndk_root + "/sources/cxx-stl/gnu-libstdc++/4.7/libs/" + abi + "/include",
+            ctx.attr.real_ndk_root + "/platforms/android-9/arch-" + arch + "/usr/include",
+            real_toolchain + "/lib/gcc/" + triple + "/4.7/include",
+            real_toolchain + "/lib/gcc/" + triple + "/4.7/include-fixed",
             ctx.attr.real_ndk_root + "/sources/cxx-stl/system/include",
             ctx.attr.real_ndk_root + "/sources/cxx-stl/gnu-libstdc++/4.7/include",
-            ctx.attr.real_ndk_root + "/sources/cxx-stl/gnu-libstdc++/4.7/libs/x86/include",
+            ctx.attr.real_ndk_root + "/sources/cxx-stl/gnu-libstdc++/4.7/libs/" + abi + "/include",
         ],
         features = features,
         host_system_name = ctx.attr.host_system_name,
-        target_cpu = "x86_32",
+        target_cpu = "armv7" if arm else "x86_32",
         target_libc = "bionic",
         target_system_name = "android",
         tool_paths = paths,
-        toolchain_identifier = "android-ndk-r8e-x86-api9-" + ctx.attr.host_system_name,
+        toolchain_identifier = "android-ndk-r8e-" + abi + "-api9-" + ctx.attr.host_system_name,
     )
 
 android_cc_toolchain_config = rule(
     implementation = _android_cc_toolchain_config_impl,
     attrs = {
+        "arch": attr.string(default = "x86", values = ["x86", "armv7"]),
         "host_system_name": attr.string(mandatory = True),
         "ndk_marker": attr.label(allow_single_file = True, mandatory = True),
         "real_ndk_root": attr.string(mandatory = True),

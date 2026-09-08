@@ -270,7 +270,8 @@ extern "C" {
     extern NUVEC *CutoffCameraVec;
 
     f32 CameraEmitterDistance(NUVEC *position) {
-        if (CutoffCameraVec != NULL) return NuVecDist(position, CutoffCameraVec, NULL);
+        if (CutoffCameraVec != NULL)
+            return NuVecDist(position, CutoffCameraVec, NULL);
         return 0.0f;
     }
 

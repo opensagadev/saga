@@ -29,6 +29,8 @@ struct GIZMOSYS_s;
 struct GameObject_s;
 struct CHARACTERMODEL_s;
 struct ANIMPACKET_s;
+struct MINIANIMPACKET_s;
+struct characterdata_s;
 struct nugscn_s;
 struct nuhspecial_s;
 struct numtx_s;
@@ -66,6 +68,7 @@ f32 GameAnimSet_GetCurrentFrame(GAMEANIMSET_s *set);
 void GameAnimSet_AddToSystemList(GAMEANIMSET_s *set);
 void GameAnimSet_RemoveFromSystemList(GAMEANIMSET_s *set);
 void GameAnimSet_DrawReflection(GAMEANIMSET_s *set, i32 flags, f32 alpha, struct numtx_s *matrix);
+f32 GameAnimSet_AutoSetReflectY(GAMEANIMSET_s *set, NUVEC *position, struct numtx_s *matrix);
 GAMEANIMOBJ_s *GameAnimSet_AddObject(GAMEANIMSET_s *set, nuhspecial_s *special, f32 start_frame, f32 end_frame,
                                      i32 append);
 GAMEANIMOBJ_s *GameAnimSet_AddObjectByName(GAMEANIMSET_s *set, nugscn_s *scene, char *name, f32 start_frame,
@@ -80,10 +83,17 @@ extern "C" {
 #endif
     i32 CurrentAnim(ANIMPACKET_s *packet);
     f32 AnimSpeed(CHARACTERMODEL_s *model, i32 animation);
+    void AnimPacket_MiniToFull(MINIANIMPACKET_s *mini_packet, ANIMPACKET_s *packet);
+    void AnimPacket_FullToMini(ANIMPACKET_s *packet, MINIANIMPACKET_s *mini_packet);
+    i32 FindAnimIX(characterdata_s *character, char *name);
+    f32 GetAnimTimeRandom(CHARACTERMODEL_s *model, i32 animation);
+    void SetAnimTimeRandom(CHARACTERMODEL_s *model, ANIMPACKET_s *packet);
     void ResetAnimPacket(ANIMPACKET_s *packet, i16 animation);
     f32 AnimStopFrame(CHARACTERMODEL_s *model, i32 animation);
     void UpdateAnimPacket(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, f32 frame_step, f32 movement_speed,
                           f32 blend_step, f32 backwards_multiplier);
+    void UpdateMiniAnimPacket(CHARACTERMODEL_s *model, MINIANIMPACKET_s *packet, f32 frame_step, f32 movement_speed,
+                              f32 blend_step);
 #ifdef __cplusplus
 }
 #endif

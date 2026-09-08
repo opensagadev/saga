@@ -87,7 +87,8 @@ void SlowWeaponIn(GameObject_s *object) {
         if (action != -1 && object->apiobj.character_model->model_data_b[action] != NULL) {
             const f32 end = NuAnimEndFrame(object->apiobj.character_model->model_data_b[action]);
             f32 start = AnimListFrame(object->apiobj.character_model, action, 0);
-            if (start < 1.0f) start = 1.0f;
+            if (start < 1.0f)
+                start = 1.0f;
             if (start >= 1.0f && start < end) {
                 const f32 finish = AnimListFrame(object->apiobj.character_model, action, 1);
                 if (finish > end || finish > start) {
@@ -104,7 +105,8 @@ void SlowWeaponIn(GameObject_s *object) {
 }
 
 void WeaponInCode(GameObject_s *object) {
-    if (LEGOCONTEXT_WEAPONIN == -1 || object->character_context != LEGOCONTEXT_WEAPONIN) return;
+    if (LEGOCONTEXT_WEAPONIN == -1 || object->character_context != LEGOCONTEXT_WEAPONIN)
+        return;
     GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
     if (object->pad_gamepad->input_magnitude > 0.0f && (data->field_0x94 & 0x1000) == 0) {
         if (object->weapon_scale == 1.0f && object->weapon_scale_state != WEAPON_SCALE_RETRACTING) {
@@ -123,12 +125,15 @@ void WeaponInCode(GameObject_s *object) {
     object->context_animation_timer -= FRAMETIME;
     if (object->context_animation_timer <= 0.0f) {
         object->character_context = -1;
-        if (object->weapon_scale != 1.0f) return;
+        if (object->weapon_scale != 1.0f)
+            return;
     } else {
         if (object->weapon_scale != 1.0f || object->weapon_scale_state == WEAPON_SCALE_RETRACTING ||
-            packet.requested_animation != object->context_animation) return;
+            packet.requested_animation != object->context_animation)
+            return;
         const f32 time = packet.blending ? packet.blend_target_time : packet.current_time;
-        if (time < start) return;
+        if (time < start)
+            return;
     }
     const f32 end = AnimListFrame(object->apiobj.character_model, object->context_animation, 1);
     object->weapon_scale_state = WEAPON_SCALE_RETRACTING;
@@ -189,7 +194,8 @@ void SlowWeaponOut(GameObject_s *object) {
         if (action != -1 && object->apiobj.character_model->model_data_b[action] != NULL) {
             const f32 end = NuAnimEndFrame(object->apiobj.character_model->model_data_b[action]);
             f32 start = AnimListFrame(object->apiobj.character_model, action, 0);
-            if (start < 1.0f) start = 1.0f;
+            if (start < 1.0f)
+                start = 1.0f;
             if (start >= 1.0f && start < end) {
                 const f32 finish = AnimListFrame(object->apiobj.character_model, action, 1);
                 if (finish > end || finish > start) {
@@ -213,7 +219,8 @@ void WeaponOutCode(GameObject_s *object) {
         object->weapon_out_timer = 0.0f;
         if ((object->field_0xe22 & GAMEOBJECT_E22_FLAG_WEAPON_ANIMATION) == 0 && object->character_context != 7) {
             i32 action = 17;
-            if (data->field275_0x116 == 0 && (object->apiobj.character_data->model_flags & 0x80) != 0) action = 127;
+            if (data->field275_0x116 == 0 && (object->apiobj.character_data->model_flags & 0x80) != 0)
+                action = 127;
             if (object->weapon_scale_state == WEAPON_SCALE_IDLE && object->apiobj.field_0x27d != 0 &&
                 object->pad_gamepad->input_magnitude == 0.0f &&
                 object->apiobj.character_model->model_data_b[action] != NULL &&
@@ -227,7 +234,8 @@ void WeaponOutCode(GameObject_s *object) {
                (object->field_0xe22 & GAMEOBJECT_E22_FLAG_WEAPON_ANIMATION) != 0 && object->character_context != 6) {
         SlowWeaponIn(object);
     }
-    if (LEGOCONTEXT_WEAPONOUT == -1 || object->character_context != LEGOCONTEXT_WEAPONOUT) return;
+    if (LEGOCONTEXT_WEAPONOUT == -1 || object->character_context != LEGOCONTEXT_WEAPONOUT)
+        return;
     if (object->pad_gamepad->input_magnitude > 0.0f && (data->field_0x94 & 0x1000) == 0) {
         if (object->weapon_scale == 0.0f && object->weapon_scale_state != WEAPON_SCALE_EXTENDING) {
             FastWeaponOut(object, 0);
@@ -245,12 +253,15 @@ void WeaponOutCode(GameObject_s *object) {
     object->context_animation_timer -= FRAMETIME;
     if (object->context_animation_timer <= 0.0f) {
         object->character_context = -1;
-        if (object->weapon_scale != 0.0f) return;
+        if (object->weapon_scale != 0.0f)
+            return;
     } else {
         if (object->weapon_scale != 0.0f || object->weapon_scale_state == WEAPON_SCALE_EXTENDING ||
-            packet.requested_animation != object->context_animation) return;
+            packet.requested_animation != object->context_animation)
+            return;
         const f32 time = packet.blending ? packet.blend_target_time : packet.current_time;
-        if (time < start) return;
+        if (time < start)
+            return;
     }
     const f32 end = AnimListFrame(object->apiobj.character_model, object->context_animation, 1);
     object->weapon_scale_state = WEAPON_SCALE_EXTENDING;
@@ -267,9 +278,11 @@ void WeaponOutCode(GameObject_s *object) {
 
 void AutoWeaponOnOff(GameObject_s *object) {
     const i8 context = object->character_context;
-    if (context != -1 && (context == LEGOCONTEXT_WEAPONOUT || context == LEGOCONTEXT_WEAPONIN)) return;
+    if (context != -1 && (context == LEGOCONTEXT_WEAPONOUT || context == LEGOCONTEXT_WEAPONIN))
+        return;
     const i32 index = CurrentAnim(&object->apiobj.anim_packet);
-    if (index == -1) return;
+    if (index == -1)
+        return;
     CHARACTERANIM_s *animation = static_cast<CHARACTERANIM_s *>(object->apiobj.character_model->model_data_a[index]);
     const u32 flags = animation->flags;
     const ANIMPACKET_s &packet = object->apiobj.anim_packet;

@@ -76,10 +76,9 @@ template <typename T> class NuList {
         NuListNodeBase *last = tail->GetPrev();
         tail->SetPrev(node);
 
-        node->SetNext(tail);
         node->SetPrev(last);
-
         last->SetNext(node);
+        node->SetNext(tail);
 
         length++;
     }
@@ -90,6 +89,10 @@ template <typename T> class NuList {
 
     NuListNodeBase *Tail() const {
         return this->tail;
+    }
+
+    i32 Length() const {
+        return this->length;
     }
 
     void Remove(NuListNodeBase *node) {

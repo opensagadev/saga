@@ -10,6 +10,7 @@
 #include "nu2api/nu3d/nuhspecial.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/numath/nuvec4.h"
 
 #include "legoapi/items/base/apiobject.h"
 #include "MechInputTouch/MechInputTouch_types.h"
@@ -373,20 +374,40 @@ struct AIGROUP_s;
 struct AILOCATOR_s;
 struct AIPACKET_s;
 struct AIPATHCNXCONTROLLER_s {
-    NULISTLNK links;
-    u8 pad_0x08[0xa8 - 0x08];
+    NULISTLNK links;         // 0x00
+    AIPATHCNX_s *connection; // 0x08
+    union {
+        void *target;          // 0x0c, gizmo/cutscene/fake-animation target
+        nuhspecial_s special;  // 0x0c, target_type == 0
+        i32 fake_animation_id; // 0x0c, target_type == 5
+    };
+    i32 gizmo_output;  // 0x18
+    u32 on_flags;      // 0x1c
+    u32 off_flags;     // 0x20
+    u32 on_frames[32]; // 0x24, one bit per frame (maximum 1024)
+    u8 target_type;    // 0xa4
+    u8 path_index;     // 0xa5
+    u8 flags;          // 0xa6
+    u8 padding_0xa7;
 };
 DECOMP_ASSERT(sizeof(AIPATHCNXCONTROLLER_s) == 0xa8, "AIPATHCNXCONTROLLER_s size");
+DECOMP_ASSERT(offsetof(AIPATHCNXCONTROLLER_s, connection) == 0x08, "AI path controller connection offset");
+DECOMP_ASSERT(offsetof(AIPATHCNXCONTROLLER_s, on_frames) == 0x24, "AI path controller frame mask offset");
+DECOMP_ASSERT(offsetof(AIPATHCNXCONTROLLER_s, flags) == 0xa6, "AI path controller flags offset");
 struct AIPATHCNXCONTROLSYS_s {
     i32 controller_count;
     AIPATHCNXCONTROLLER_s *controllers;
     NULISTHDR available_controllers;
-    i32 field_0x10;
-    i32 field_0x14;
+    NULISTHDR active_controllers;
 };
 DECOMP_ASSERT(sizeof(AIPATHCNXCONTROLSYS_s) == 0x18, "AIPATHCNXCONTROLSYS_s size");
 struct AIPATHCNXHELPER_s {
-    u8 data[0x10];
+    AIPATHCNX_s *connection;
+    void *target;
+    u8 direction;
+    u8 type;
+    u8 padding_0x0a[2];
+    f32 jump_off_dy;
 };
 DECOMP_ASSERT(sizeof(AIPATHCNXHELPER_s) == 0x10, "AIPATHCNXHELPER_s size");
 struct AIPATHCNXHELPERSYS_s {
@@ -412,7 +433,12 @@ struct AITRIGGERSETSYS_s {
     i32 field_0x4300;
 };
 DECOMP_ASSERT(sizeof(AITRIGGERSETSYS_s) == 0x4304, "AITRIGGERSETSYS_s size");
-struct ANIMREDIRECT {};
+struct ANIMREDIRECT {
+    char *name;
+    i16 animation_id;
+    u8 pad_06[2];
+};
+DECOMP_ASSERT(sizeof(ANIMREDIRECT) == 0x8, "ANIMREDIRECT ABI");
 struct AREADATA_s;
 struct AREASAVE_s {
     u8 complete;
@@ -539,26 +565,104 @@ DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, primary_name_unlocked) == 0x34, "CUSTOMI
 DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, secondary_name) == 0x4c, "CUSTOMISESAVE secondary name offset");
 DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, secondary_name_unlocked) == 0x6c, "CUSTOMISESAVE secondary flag offset");
 struct CUSTOMPIECE {};
+struct CUTSCENESFX {
+    i16 id;
+    u8 flags;
+    u8 pad_03;
+    f32 frame;
+    NUVEC position;
+};
+DECOMP_ASSERT(sizeof(CUTSCENESFX) == 0x14, "CUTSCENESFX size");
+
+struct CUTSCENEPLAYEROBJ {
+    nuhspecial_s special;
+    u32 flags;
+};
+DECOMP_ASSERT(sizeof(CUTSCENEPLAYEROBJ) == 0x10, "CUTSCENEPLAYEROBJ size");
+
+struct CUTSCENETEXANIM {
+    f32 frame;
+    i32 index;
+};
+DECOMP_ASSERT(sizeof(CUTSCENETEXANIM) == 8, "CUTSCENETEXANIM size");
+
+struct CUTSCENEFADEFOG {
+    f32 frame;
+    f32 near_distance;
+    f32 far_distance;
+    f32 value;
+};
+DECOMP_ASSERT(sizeof(CUTSCENEFADEFOG) == 0x10, "CUTSCENEFADEFOG size");
+
+struct CUTSCENESUBTITLE {
+    i16 text_id;
+    u8 red;
+    u8 green;
+    u8 blue;
+    u8 alpha;
+    u8 alignment;
+    u8 pad_07;
+    f32 start_frame;
+    f32 end_frame;
+    f32 x;
+    f32 y;
+    f32 x_scale;
+    f32 y_scale;
+    f32 max_width;
+    f32 fade_time;
+};
+DECOMP_ASSERT(sizeof(CUTSCENESUBTITLE) == 0x28, "CUTSCENESUBTITLE size");
+
 struct CUTINFO {
     void *scene;
     void *instance;
     char name[0x40];
-    void *state_entries;
+    CUTSCENEPLAYEROBJ *state_entries;
     u8 state_count;
     u8 pad_4d[3];
     u32 flags;
     f32 previous_frame;
-    i32 field_58;
+    f32 field_58;
     f32 frames_per_second;
-    f32 field_60;
-    u8 pad_64[0x6c - 0x64];
+    f32 burnout_threshold;
+    f32 burnout_intensity;
+    f32 burnout_flare;
     f32 camera_near_clip; // 0x6c, zero keeps the level display setting
-    u8 pad_70[0xe8 - 0x70];
-    u16 camera_far_clip; // 0xe8, zero keeps the level display setting
-    u8 pad_ea[0x198 - 0xea];
+    CUTSCENESFX sfx[6];   // 0x70
+    u16 camera_far_clip;  // 0xe8, zero keeps the level display setting
+    i16 legacy_music_index;
+    i16 skip_level; // 0xec, optional level selected when a stopped cutscene is skipped
+    u8 linked_audio;
+    u8 blob_shadow_alpha;
+    u8 blob_shadow_fade_near;
+    u8 blob_shadow_fade_far;
+    u8 reflection_range;
+    i8 debris_render_group;
+    char door_name[0x10];
+    char next_cutscene[0x40];
+    CUTSCENETEXANIM texture_animations[4];
+    CUTSCENEFADEFOG fade_fog[2];
+    CUTSCENESUBTITLE *subtitle_data;
+    u16 subtitle_count;
+    u8 end_flags;
+    u8 pad_18b;
+    i32 music_handle;
+    f32 low_end_distance;
+    f32 field_194;
 };
+DECOMP_ASSERT(offsetof(CUTINFO, burnout_threshold) == 0x60, "CUTINFO burnout threshold offset");
+DECOMP_ASSERT(offsetof(CUTINFO, texture_animations) == 0x144, "CUTINFO texture animations offset");
+DECOMP_ASSERT(offsetof(CUTINFO, fade_fog) == 0x164, "CUTINFO fade-fog offset");
+DECOMP_ASSERT(offsetof(CUTINFO, subtitle_data) == 0x184, "CUTINFO subtitle data offset");
 DECOMP_ASSERT(offsetof(CUTINFO, camera_near_clip) == 0x6c, "CUTINFO near-clip offset");
+DECOMP_ASSERT(offsetof(CUTINFO, sfx) == 0x70, "CUTINFO SFX offset");
 DECOMP_ASSERT(offsetof(CUTINFO, camera_far_clip) == 0xe8, "CUTINFO far-clip offset");
+DECOMP_ASSERT(offsetof(CUTINFO, legacy_music_index) == 0xea, "CUTINFO legacy music-index offset");
+DECOMP_ASSERT(offsetof(CUTINFO, skip_level) == 0xec, "CUTINFO skip-level offset");
+DECOMP_ASSERT(offsetof(CUTINFO, debris_render_group) == 0xf3, "CUTINFO debris render-group offset");
+DECOMP_ASSERT(offsetof(CUTINFO, next_cutscene) == 0x104, "CUTINFO chained-cutscene offset");
+DECOMP_ASSERT(offsetof(CUTINFO, end_flags) == 0x18a, "CUTINFO end-flags offset");
+DECOMP_ASSERT(offsetof(CUTINFO, music_handle) == 0x18c, "CUTINFO music-handle offset");
 DECOMP_ASSERT(sizeof(CUTINFO) == 0x198, "CUTINFO size");
 struct CUTSCENESYS {
     i16 blaster_object_0;
@@ -750,8 +854,8 @@ DECOMP_ASSERT(sizeof(GAMEANTINODEDATA_s) == 0x24, "GAMEANTINODEDATA_s ABI");
 struct GAMEANTINODESYS_s {};
 struct GAMEANTINODE_s {};
 struct GAMEAUDIO {
-    void (*action_music_fn)(void);
-    void (*reset_music_fn)(void);
+    i32 (*override_footstep_fn)(GameObject_s *, i32);
+    i32 (*check_reverb_fn)(void);
     const char *sfx_names[0x55];
     i16 sfx_ids[0x55];
 };
@@ -1615,7 +1719,11 @@ struct SUPERCOUNTER {
 DECOMP_ASSERT(sizeof(SUPERCOUNTER) == 0x1e8, "SUPERCOUNTER size");
 struct SUPERCOUNTERPICKUP {};
 struct ShaderObjectKey;
-struct SoundTable {};
+struct SoundTable {
+    u16 bits[100];
+    const char **names;
+};
+DECOMP_ASSERT(sizeof(SoundTable) == 0xcc, "SoundTable size");
 struct TECHNO_s;
 struct TERRPICKUPSET {};
 
@@ -2502,7 +2610,7 @@ struct shopitem_s {
 DECOMP_ASSERT(sizeof(shopitem_s) == 0x74, "shopitem_s size");
 DECOMP_ASSERT(offsetof(shopitem_s, item_id) == 0x60, "shopitem_s item-id offset");
 DECOMP_ASSERT(offsetof(shopitem_s, special) == 0x68, "shopitem_s special offset");
-struct specialsfx_s {};
+struct specialsfx_s;
 struct speedup_s {};
 struct starfighter_s {};
 struct terrsitu_s {};
@@ -3606,28 +3714,58 @@ struct MoveToMarker {
     void Process(float);
     void Render();
 };
+struct OccluderRecord {
+    NUVEC4 vertices[4];
+    NUVEC4 transformed[4];
+    f32 min_x, max_x, min_y, max_y, min_depth;
+    f32 depth;
+};
+DECOMP_ASSERT(sizeof(OccluderRecord) == 0x98, "occluder record size");
+DECOMP_ASSERT(offsetof(OccluderRecord, depth) == 0x94, "occluder depth offset");
 struct OccluderSet {
+    OccluderRecord *occluders;
+    u32 *indices;
+    u32 capacity;
+    u32 count;
+    bool queries_prepared;
+    u8 unknown_11[0x0f];
+    NUMTX projection_matrix;
+    NUMTX query_matrix;
+    static numtl_s *ms_pZOnlyMtl3D;
+    static numtl_s *ms_pZOnlyMtl2D;
+    static numtl_s *ms_pAlphaMtl2D;
     void AddOccluder(nuvec_s const *, nuvec_s const *, nuvec_s const *, nuvec_s const *);
     void Clear();
     void Init(u32, variptr_u *, variptr_u);
-    void IsOccludedOBB(nuvec_s const *, nuvec_s const *, numtx_s const *);
-    void IsOccludedSphere(nuvec_s const *, float);
+    bool IsOccludedOBB(nuvec_s const *, nuvec_s const *, numtx_s const *);
+    bool IsOccludedSphere(nuvec_s const *, float);
     OccluderSet();
     void OnCameraSet();
     void PrepareForQueries(numtx_s const *, numtx_s const *);
     void RenderOccluders(bool) const;
-    void SortByDepth(void const *, void const *);
+    static i32 SortByDepth(void const *, void const *);
     ~OccluderSet();
 };
 struct OcclusionManager {
+    bool initialized;
+    bool enabled;
+    u8 unknown_02[0x0e];
+    OccluderSet sets[2];
+    OccluderSet *building_set;
+    OccluderSet *current_set;
+    f32 unknown_158;
+    f32 unknown_15c;
+    u32 unknown_160;
+    u32 unknown_164;
+    u8 unknown_168[8];
     void AddOccluder(nuvec_s const *, float);
     void AddOccluder(nuvec_s const *, nuvec_s const *, numtx_s const *);
     void AddOccluder(nuvec_s const *, nuvec_s const *, nuvec_s const *, nuvec_s const *);
     void BeginFrame();
     void EndFrame();
     void Init(u32, variptr_u *, variptr_u);
-    void IsOccludedOBB(nuvec_s const *, nuvec_s const *, numtx_s const *);
-    void IsOccludedSphere(nuvec_s const *, float);
+    bool IsOccludedOBB(nuvec_s const *, nuvec_s const *, numtx_s const *);
+    bool IsOccludedSphere(nuvec_s const *, float);
     OcclusionManager();
     void OnCameraSet();
     void RenderStats() const;
@@ -3635,6 +3773,10 @@ struct OcclusionManager {
     void SetEnabled(bool);
     ~OcclusionManager();
 };
+DECOMP_ASSERT(sizeof(OccluderSet) == 0xa0, "occluder set size");
+DECOMP_ASSERT(sizeof(OcclusionManager) == 0x170, "occlusion manager size");
+DECOMP_ASSERT(offsetof(OcclusionManager, current_set) == 0x154, "current occluder set offset");
+extern OcclusionManager g_OcclusionManager;
 struct PART_s {
     union {
         NUMTX transform;

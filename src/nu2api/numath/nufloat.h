@@ -69,4 +69,7 @@ extern "C" {
     f32 NuPowFast(f32 base, f32 exponent);
 #ifdef __cplusplus
 }
+
+f32 NuATanf(f32 value);
+f32 NuATan2f(f32 y, f32 x);
 #endif

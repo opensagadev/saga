@@ -306,14 +306,18 @@ static void CC_jump_move_speed_scale(NUFPAR *parser) {
 
 static void CC_layer(NUFPAR *parser) {
     GAMECHARACTERDATA_s *data = charconfig.runtime;
-    if ((charconfig.flags & 2) == 0 || data->layer_count >= 32) return;
-    if (NuFParGetWord(parser) == 0 || NuStrLen(parser->word_buf) >= 24) return;
+    if ((charconfig.flags & 2) == 0 || data->layer_count >= 32)
+        return;
+    if (NuFParGetWord(parser) == 0 || NuStrLen(parser->word_buf) >= 24)
+        return;
     GAMECHARACTERLAYER_s *layer = &data->layers[data->layer_count];
     NuStrCpy(layer->name, parser->word_buf);
     const u32 bit = NuFParGetInt(parser);
-    if (bit >= 32) return;
+    if (bit >= 32)
+        return;
     for (i32 i = 0; i < data->layer_count; ++i) {
-        if (data->layers[i].mask_bit == static_cast<i32>(bit)) return;
+        if (data->layers[i].mask_bit == static_cast<i32>(bit))
+            return;
     }
     charconfig.named_layers = 1;
     layer->mask_bit = static_cast<i16>(bit);
@@ -388,8 +392,8 @@ static void CC_minikit_with_scene(NUFPAR *parser) {
     if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) {
         charconfig.character->model_flags &= ~0x4000000u;
     }
-    charconfig.runtime->flags_094[0] = (charconfig.runtime->flags_094[0] & 0xfe) |
-                                      ((charconfig.character->model_flags >> 26) & 1);
+    charconfig.runtime->flags_094[0] =
+        (charconfig.runtime->flags_094[0] & 0xfe) | ((charconfig.character->model_flags >> 26) & 1);
 }
 
 static void CC_miny(NUFPAR *parser) {
@@ -878,11 +882,13 @@ static void CC_SetAnimMiscFlags(NUFPAR *parser, CHARACTERANIM_s *animation, u16 
 static void CC_anim_start(NUFPAR *parser) {
     if (charconfig.animation_count >= 100) {
         while (NuFParGetLine(parser) != 0) {
-            if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "anim_end") == 0) break;
+            if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "anim_end") == 0)
+                break;
         }
         return;
     }
-    if (NuFParGetWord(parser) == 0 || NuStrLen(parser->word_buf) >= 40) return;
+    if (NuFParGetWord(parser) == 0 || NuStrLen(parser->word_buf) >= 40)
+        return;
     char name[40];
     NuStrCpy(name, parser->word_buf);
     CHARACTERANIM_s animation;
@@ -894,24 +900,33 @@ static void CC_anim_start(NUFPAR *parser) {
     animation.playback_rate = 30.0f;
     animation.locator = 0xff;
     while (NuFParGetLine(parser) != 0) {
-        if (NuFParGetWord(parser) == 0) continue;
+        if (NuFParGetWord(parser) == 0)
+            continue;
         if (NuStrICmp(parser->word_buf, "action") == 0) {
-            if (NuFParGetWord(parser) != 0) animation.action_id = static_cast<i16>(ActionFromName(parser->word_buf));
-            if (animation.action_id == -1) return;
+            if (NuFParGetWord(parser) != 0)
+                animation.action_id = static_cast<i16>(ActionFromName(parser->word_buf));
+            if (animation.action_id == -1)
+                return;
         } else if (NuStrICmp(parser->word_buf, "bsa") == 0) {
             if (NuFParGetWord(parser) != 0) {
-                if (NuStrICmp(parser->word_buf, "on") == 0) animation.flags |= 8;
-                else if (NuStrICmp(parser->word_buf, "off") == 0) animation.flags &= ~8u;
+                if (NuStrICmp(parser->word_buf, "on") == 0)
+                    animation.flags |= 8;
+                else if (NuStrICmp(parser->word_buf, "off") == 0)
+                    animation.flags &= ~8u;
             }
         } else if (NuStrICmp(parser->word_buf, "cycle") == 0) {
             if (NuFParGetWord(parser) != 0) {
-                if (NuStrICmp(parser->word_buf, "on") == 0) animation.flags |= 2;
-                else if (NuStrICmp(parser->word_buf, "off") == 0) animation.flags &= ~2u;
+                if (NuStrICmp(parser->word_buf, "on") == 0)
+                    animation.flags |= 2;
+                else if (NuStrICmp(parser->word_buf, "off") == 0)
+                    animation.flags &= ~2u;
             }
         } else if (NuStrICmp(parser->word_buf, "type") == 0) {
             if (NuFParGetWord(parser) != 0) {
-                if (NuStrICmp(parser->word_buf, "idle") == 0) animation.flags |= 0x10;
-                else animation.flags &= ~0x10u;
+                if (NuStrICmp(parser->word_buf, "idle") == 0)
+                    animation.flags |= 0x10;
+                else
+                    animation.flags &= ~0x10u;
             }
         } else if (NuStrICmp(parser->word_buf, "fpsec") == 0) {
             animation.playback_rate = NuFParGetFloat(parser);
@@ -933,15 +948,21 @@ static void CC_anim_start(NUFPAR *parser) {
                 if (NuStrICmp(parser->word_buf, "off") == 0) {
                     animation.flags &= ~0x70100u;
                     break;
-                } else if (NuStrICmp(parser->word_buf, "4frames") == 0) animation.flags |= 0x10000;
-                else if (NuStrICmp(parser->word_buf, "judder") == 0) animation.flags |= 0x20000;
-                else if (NuStrICmp(parser->word_buf, "shake") == 0) animation.flags |= 0x40000;
+                } else if (NuStrICmp(parser->word_buf, "4frames") == 0)
+                    animation.flags |= 0x10000;
+                else if (NuStrICmp(parser->word_buf, "judder") == 0)
+                    animation.flags |= 0x20000;
+                else if (NuStrICmp(parser->word_buf, "shake") == 0)
+                    animation.flags |= 0x40000;
             }
-        } else if (NuStrICmp(parser->word_buf, "no_headturn") == 0 || NuStrICmp(parser->word_buf, "headturn_off") == 0) {
+        } else if (NuStrICmp(parser->word_buf, "no_headturn") == 0 ||
+                   NuStrICmp(parser->word_buf, "headturn_off") == 0) {
             animation.flags |= 0x40;
         } else if (NuStrICmp(parser->word_buf, "headturn") == 0) {
-            if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0) animation.flags |= 0x40;
-            else animation.flags &= ~0x40u;
+            if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "off") == 0)
+                animation.flags |= 0x40;
+            else
+                animation.flags &= ~0x40u;
         } else if (NuStrICmp(parser->word_buf, "minreps") == 0) {
             animation.minimum_repetitions = static_cast<i8>(abs(NuFParGetInt(parser)));
         } else if (NuStrICmp(parser->word_buf, "maxreps") == 0) {
@@ -967,13 +988,16 @@ static void CC_anim_start(NUFPAR *parser) {
             animation.flags |= 0x800;
         } else if (NuStrICmp(parser->word_buf, "gun") == 0) {
             if (NuFParGetWord(parser) != 0) {
-                if (NuStrICmp(parser->word_buf, "on") == 0) animation.flags |= 0x800;
-                else if (NuStrICmp(parser->word_buf, "off") == 0) animation.flags |= 0x400;
+                if (NuStrICmp(parser->word_buf, "on") == 0)
+                    animation.flags |= 0x800;
+                else if (NuStrICmp(parser->word_buf, "off") == 0)
+                    animation.flags |= 0x400;
             }
         } else if (NuStrICmp(parser->word_buf, "locator") == 0) {
             if (NuFParGetWord(parser) != 0) {
                 const u32 locator = NuAToI(parser->word_buf);
-                if (locator < 16) animation.locator = static_cast<u8>(locator);
+                if (locator < 16)
+                    animation.locator = static_cast<u8>(locator);
             }
         } else if (NuStrICmp(parser->word_buf, "is_punch") == 0) {
             CC_SetAnimMiscFlags(parser, &animation, 1);
@@ -986,7 +1010,8 @@ static void CC_anim_start(NUFPAR *parser) {
         } else if (NuStrICmp(parser->word_buf, "effect_start") == 0) {
             if ((charconfig.flags & 0x60) != 0x60) {
                 while (NuFParGetLine(parser) != 0) {
-                    if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "effect_end") == 0) break;
+                    if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "effect_end") == 0)
+                        break;
                 }
             } else if (charconfig.effect_count < 32 && animation.action_id != -1) {
                 CHARACTER_EFFECT_s *effect = &charconfig.effect_scratch[charconfig.effect_count];
@@ -1009,39 +1034,58 @@ static void CC_anim_start(NUFPAR *parser) {
                 effect->bits_on = 0;
                 effect->bits_off = 0;
                 while (NuFParGetLine(parser) != 0) {
-                    if (NuFParGetWord(parser) == 0) continue;
+                    if (NuFParGetWord(parser) == 0)
+                        continue;
                     if (NuStrICmp(parser->word_buf, "deb_name") == 0) {
                         if (NuFParGetWord(parser) != 0) {
-                            effect->debris_id = perm_debrissys == NULL ? -1 : static_cast<i16>(FindGameDebris(
-                                static_cast<APIDEBRISSYS_s *>(perm_debrissys), parser->word_buf));
+                            effect->debris_id =
+                                perm_debrissys == NULL
+                                    ? -1
+                                    : static_cast<i16>(FindGameDebris(static_cast<APIDEBRISSYS_s *>(perm_debrissys),
+                                                                      parser->word_buf));
                         }
                     } else if (NuStrICmp(parser->word_buf, "condition") == 0) {
                         if (NuFParGetWord(parser) != 0) {
-                            if (NuStrICmp(parser->word_buf, "on_ground") == 0) effect->flags |= 0x10;
-                            else if (NuStrICmp(parser->word_buf, "under_water") == 0) effect->flags |= 0x20;
-                            else if (NuStrICmp(parser->word_buf, "above_water") == 0) effect->flags |= 0x40;
-                            else if (NuStrICmp(parser->word_buf, "intersect_water") == 0) effect->flags |= 0x80;
+                            if (NuStrICmp(parser->word_buf, "on_ground") == 0)
+                                effect->flags |= 0x10;
+                            else if (NuStrICmp(parser->word_buf, "under_water") == 0)
+                                effect->flags |= 0x20;
+                            else if (NuStrICmp(parser->word_buf, "above_water") == 0)
+                                effect->flags |= 0x40;
+                            else if (NuStrICmp(parser->word_buf, "intersect_water") == 0)
+                                effect->flags |= 0x80;
                         }
-                    } else if (NuStrICmp(parser->word_buf, "in_only") == 0) effect->flags |= 0x100;
-                    else if (NuStrICmp(parser->word_buf, "not_in") == 0) effect->flags |= 0x200;
-                    else if (NuStrICmp(parser->word_buf, "player_only") == 0) effect->flags |= 0x400;
+                    } else if (NuStrICmp(parser->word_buf, "in_only") == 0)
+                        effect->flags |= 0x100;
+                    else if (NuStrICmp(parser->word_buf, "not_in") == 0)
+                        effect->flags |= 0x200;
+                    else if (NuStrICmp(parser->word_buf, "player_only") == 0)
+                        effect->flags |= 0x400;
                     else if (NuStrICmp(parser->word_buf, "num_particles") == 0) {
                         const i32 count = NuFParGetInt(parser);
                         if (count > 0) {
                             effect->particle_count = static_cast<u8>(count);
                             effect->flags |= 1;
                         }
-                    } else if (NuStrICmp(parser->word_buf, "frame") == 0 || NuStrICmp(parser->word_buf, "frame1") == 0) {
+                    } else if (NuStrICmp(parser->word_buf, "frame") == 0 ||
+                               NuStrICmp(parser->word_buf, "frame1") == 0) {
                         effect->frame_1 = NuFParGetFloat(parser);
-                    } else if (NuStrICmp(parser->word_buf, "frame2") == 0) effect->frame_2 = NuFParGetFloat(parser);
-                    else if (NuStrICmp(parser->word_buf, "random") == 0) effect->random = static_cast<u8>(static_cast<i32>(NuFParGetFloat(parser) * 255.0f));
-                    else if (NuStrICmp(parser->word_buf, "rumble") == 0) effect->rumble = fabsf(NuFParGetFloat(parser));
-                    else if (NuStrICmp(parser->word_buf, "buzz") == 0) effect->shake = fabsf(NuFParGetFloat(parser));
-                    else if (NuStrICmp(parser->word_buf, "judder") == 0) effect->judder = NuFParGetFloat(parser);
+                    } else if (NuStrICmp(parser->word_buf, "frame2") == 0)
+                        effect->frame_2 = NuFParGetFloat(parser);
+                    else if (NuStrICmp(parser->word_buf, "random") == 0)
+                        effect->random = static_cast<u8>(static_cast<i32>(NuFParGetFloat(parser) * 255.0f));
+                    else if (NuStrICmp(parser->word_buf, "rumble") == 0)
+                        effect->rumble = fabsf(NuFParGetFloat(parser));
+                    else if (NuStrICmp(parser->word_buf, "buzz") == 0)
+                        effect->shake = fabsf(NuFParGetFloat(parser));
+                    else if (NuStrICmp(parser->word_buf, "judder") == 0)
+                        effect->judder = NuFParGetFloat(parser);
                     else if (NuStrICmp(parser->word_buf, "timing") == 0) {
                         if (NuFParGetWord(parser) != 0) {
-                            if (NuStrICmp(parser->word_buf, "constant") == 0) effect->flags |= 4;
-                            else if (NuStrICmp(parser->word_buf, "between") == 0) effect->flags |= 8;
+                            if (NuStrICmp(parser->word_buf, "constant") == 0)
+                                effect->flags |= 4;
+                            else if (NuStrICmp(parser->word_buf, "between") == 0)
+                                effect->flags |= 8;
                         }
                     } else if (NuStrICmp(parser->word_buf, "particles_per_frame") == 0) {
                         effect->particle_rate = fabsf(NuFParGetFloat(parser));
@@ -1052,45 +1096,65 @@ static void CC_anim_start(NUFPAR *parser) {
                     } else if (NuStrICmp(parser->word_buf, "locators") == 0) {
                         while (NuFParGetWord(parser) != 0) {
                             const u32 locator = NuAToI(parser->word_buf);
-                            if (locator < 16) effect->locators |= 1u << locator;
+                            if (locator < 16)
+                                effect->locators |= 1u << locator;
                         }
                     } else if (NuStrICmp(parser->word_buf, "sfx") == 0) {
-                        if (NuFParGetWord(parser) != 0) effect->sound_id = static_cast<i16>(GetSfxId(parser->word_buf));
-                    } else if (NuStrICmp(parser->word_buf, "sfx_2d") == 0) effect->flags &= ~0x8000u;
+                        if (NuFParGetWord(parser) != 0)
+                            effect->sound_id = static_cast<i16>(GetSfxId(parser->word_buf));
+                    } else if (NuStrICmp(parser->word_buf, "sfx_2d") == 0)
+                        effect->flags &= ~0x8000u;
                     else if (NuStrICmp(parser->word_buf, "volume") == 0) {
                         effect->minimum = fabsf(NuFParGetFloat(parser));
                         effect->flags |= 0x10000;
                     } else if (NuStrICmp(parser->word_buf, "surfaces") == 0) {
-                        if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "non_solid") == 0) effect->surfaces = ~SURFACEBITS_DUST;
-                    } else if (NuStrICmp(parser->word_buf, "at_ter_surface") == 0) effect->flags |= 0x2000;
-                    else if (NuStrICmp(parser->word_buf, "at_obj_bottom") == 0) effect->flags |= 0x1000;
-                    else if (NuStrICmp(parser->word_buf, "at_locator_average") == 0) effect->flags |= 0x800;
-                    else if (NuStrICmp(parser->word_buf, "at_ter_layer") == 0) effect->flags |= 0x4000;
+                        if (NuFParGetWord(parser) != 0 && NuStrICmp(parser->word_buf, "non_solid") == 0)
+                            effect->surfaces = ~SURFACEBITS_DUST;
+                    } else if (NuStrICmp(parser->word_buf, "at_ter_surface") == 0)
+                        effect->flags |= 0x2000;
+                    else if (NuStrICmp(parser->word_buf, "at_obj_bottom") == 0)
+                        effect->flags |= 0x1000;
+                    else if (NuStrICmp(parser->word_buf, "at_locator_average") == 0)
+                        effect->flags |= 0x800;
+                    else if (NuStrICmp(parser->word_buf, "at_ter_layer") == 0)
+                        effect->flags |= 0x4000;
                     else if (NuStrICmp(parser->word_buf, "min_mode") == 0) {
                         if (NuFParGetWord(parser) != 0) {
-                            if (NuStrICmp(parser->word_buf, "xz_speed") == 0) effect->flags |= 0x40000;
-                            else if (NuStrICmp(parser->word_buf, "xyz_speed") == 0) effect->flags |= 0x100000;
+                            if (NuStrICmp(parser->word_buf, "xz_speed") == 0)
+                                effect->flags |= 0x40000;
+                            else if (NuStrICmp(parser->word_buf, "xyz_speed") == 0)
+                                effect->flags |= 0x100000;
                         }
                     } else if (NuStrICmp(parser->word_buf, "max_mode") == 0) {
                         if (NuFParGetWord(parser) != 0) {
-                            if (NuStrICmp(parser->word_buf, "xz_speed") == 0) effect->flags |= 0x80000;
-                            else if (NuStrICmp(parser->word_buf, "xyz_speed") == 0) effect->flags |= 0x200000;
+                            if (NuStrICmp(parser->word_buf, "xz_speed") == 0)
+                                effect->flags |= 0x80000;
+                            else if (NuStrICmp(parser->word_buf, "xyz_speed") == 0)
+                                effect->flags |= 0x200000;
                         }
-                    } else if (NuStrICmp(parser->word_buf, "min_val") == 0) effect->minimum = NuFParGetFloat(parser);
-                    else if (NuStrICmp(parser->word_buf, "max_val") == 0) effect->maximum = NuFParGetFloat(parser);
-                    else if (NuStrICmp(parser->word_buf, "at_obj_speed") == 0) effect->flags |= 0x400000;
-                    else if (NuStrICmp(parser->word_buf, "left_footprint") == 0) effect->flags |= 0x1000000;
-                    else if (NuStrICmp(parser->word_buf, "right_footprint") == 0) effect->flags |= 0x2000000;
-                    else if (NuStrICmp(parser->word_buf, "use_locator_matrix") == 0) effect->flags |= 0x4000000;
+                    } else if (NuStrICmp(parser->word_buf, "min_val") == 0)
+                        effect->minimum = NuFParGetFloat(parser);
+                    else if (NuStrICmp(parser->word_buf, "max_val") == 0)
+                        effect->maximum = NuFParGetFloat(parser);
+                    else if (NuStrICmp(parser->word_buf, "at_obj_speed") == 0)
+                        effect->flags |= 0x400000;
+                    else if (NuStrICmp(parser->word_buf, "left_footprint") == 0)
+                        effect->flags |= 0x1000000;
+                    else if (NuStrICmp(parser->word_buf, "right_footprint") == 0)
+                        effect->flags |= 0x2000000;
+                    else if (NuStrICmp(parser->word_buf, "use_locator_matrix") == 0)
+                        effect->flags |= 0x4000000;
                     else if (NuStrICmp(parser->word_buf, "bits_on") == 0) {
                         while (NuFParGetWord(parser) != 0) {
                             const u32 bit = NuAToI(parser->word_buf);
-                            if (bit < 8) effect->bits_on |= 1u << bit;
+                            if (bit < 8)
+                                effect->bits_on |= 1u << bit;
                         }
                     } else if (NuStrICmp(parser->word_buf, "bits_off") == 0) {
                         while (NuFParGetWord(parser) != 0) {
                             const u32 bit = NuAToI(parser->word_buf);
-                            if (bit < 8) effect->bits_off |= 1u << bit;
+                            if (bit < 8)
+                                effect->bits_off |= 1u << bit;
                         }
                     } else if (NuStrICmp(parser->word_buf, "effect_end") == 0) {
                         ++charconfig.effect_count;
@@ -1099,17 +1163,20 @@ static void CC_anim_start(NUFPAR *parser) {
                 }
             }
         } else if (NuStrICmp(parser->word_buf, "anim_end") == 0) {
-            if (animation.action_id == -1) return;
+            if (animation.action_id == -1)
+                return;
             if ((charconfig.flags & 0x20) != 0) {
                 NuStrCpy(charconfig.animation_names[charconfig.animation_count], name);
                 charconfig.character->animations[charconfig.animation_count++] = animation;
                 charconfig.arena->addr += sizeof(animation);
                 return;
             }
-            if (charconfig.character->animations == NULL) return;
+            if (charconfig.character->animations == NULL)
+                return;
             i32 index = 0;
             while (charconfig.character->animations[index].name != NULL &&
-                   NuStrICmp(charconfig.character->animations[index].name, name) != 0) ++index;
+                   NuStrICmp(charconfig.character->animations[index].name, name) != 0)
+                ++index;
             if (index < charconfig.character->field5_0x14 && charconfig.character->animations[index].name != NULL) {
                 CHARACTERANIM_s *existing = &charconfig.character->animations[index];
                 existing->blend_in_time = animation.blend_in_time;
@@ -1270,8 +1337,10 @@ static void CC_cloak_joint2(NUFPAR *parser) {
 
 static void CC_coin_value(NUFPAR *parser) {
     i32 value = NuFParGetInt(parser);
-    if (value < 0) value = 0;
-    if (value > 10000) value = 10000;
+    if (value < 0)
+        value = 0;
+    if (value > 10000)
+        value = 10000;
     charconfig.runtime->field_0xee = static_cast<i16>(value / 10) * 10;
 }
 
@@ -1773,11 +1842,13 @@ static void CC_sfx_hurt(NUFPAR *parser) {
 
 static void CC_sfx_misc(NUFPAR *parser) {
     i32 index = 0;
-    while (index < 6 && charconfig.runtime->sfx_misc[index] != -1) ++index;
+    while (index < 6 && charconfig.runtime->sfx_misc[index] != -1)
+        ++index;
     if (index < 6 && NuFParGetWord(parser) != 0) {
         charconfig.runtime->sfx_misc[index] = static_cast<i16>(GetSfxId(parser->word_buf));
     }
-    if (index + 1 < 6) charconfig.runtime->sfx_misc[index + 1] = -1;
+    if (index + 1 < 6)
+        charconfig.runtime->sfx_misc[index + 1] = -1;
 }
 
 static void CC_sfx_sabre(NUFPAR *parser) {
@@ -1844,30 +1915,54 @@ static void CC_untargetable(NUFPAR *parser) {
 }
 
 static void CC_variant(NUFPAR *parser) {
-    if (NuFParGetWord(parser) == 0) return;
-    if (NuStrICmp(parser->word_buf, "stormtrooper") == 0) charconfig.runtime->field275_0x116 = 1;
-    else if (NuStrICmp(parser->word_buf, "fett") == 0) charconfig.runtime->field275_0x116 = 2;
-    else if (NuStrICmp(parser->word_buf, "macewindu") == 0) charconfig.runtime->field275_0x116 = 3;
-    else if (NuStrICmp(parser->word_buf, "battledroid") == 0) charconfig.runtime->field275_0x116 = 4;
-    else if (NuStrICmp(parser->word_buf, "hoverdroid") == 0) charconfig.runtime->field275_0x116 = 17;
-    else if (NuStrICmp(parser->word_buf, "walker2legs") == 0) charconfig.runtime->field275_0x116 = 15;
-    else if (NuStrICmp(parser->word_buf, "walker4legs") == 0) charconfig.runtime->field275_0x116 = 16;
-    else if (NuStrICmp(parser->word_buf, "wookiee") == 0) charconfig.runtime->field275_0x116 = 5;
-    else if (NuStrICmp(parser->word_buf, "obiwankenobi") == 0) charconfig.runtime->field275_0x116 = 6;
-    else if (NuStrICmp(parser->word_buf, "leia") == 0) charconfig.runtime->field275_0x116 = 7;
-    else if (NuStrICmp(parser->word_buf, "clone") == 0) charconfig.runtime->field275_0x116 = 8;
-    else if (NuStrICmp(parser->word_buf, "rebel") == 0) charconfig.runtime->field275_0x116 = 9;
-    else if (NuStrICmp(parser->word_buf, "tie") == 0) charconfig.runtime->field275_0x116 = 10;
-    else if (NuStrICmp(parser->word_buf, "lando") == 0) charconfig.runtime->field275_0x116 = 11;
-    else if (NuStrICmp(parser->word_buf, "weirdo") == 0) charconfig.runtime->field275_0x116 = 0;
-    else if (NuStrICmp(parser->word_buf, "luke") == 0) charconfig.runtime->field275_0x116 = 12;
-    else if (NuStrICmp(parser->word_buf, "hansolo") == 0) charconfig.runtime->field275_0x116 = 13;
-    else if (NuStrICmp(parser->word_buf, "padme") == 0) charconfig.runtime->field275_0x116 = 14;
-    else if (NuStrICmp(parser->word_buf, "critter") == 0) charconfig.runtime->field275_0x116 = 18;
-    else if (NuStrICmp(parser->word_buf, "naboostarfighter") == 0) charconfig.runtime->field275_0x116 = 19;
-    else if (NuStrICmp(parser->word_buf, "pod") == 0) charconfig.runtime->field275_0x116 = 20;
-    else if (NuStrICmp(parser->word_buf, "republicgunship") == 0) charconfig.runtime->field275_0x116 = 21;
-    else if (NuStrICmp(parser->word_buf, "henchman") == 0) charconfig.runtime->field275_0x116 = 22;
+    if (NuFParGetWord(parser) == 0)
+        return;
+    if (NuStrICmp(parser->word_buf, "stormtrooper") == 0)
+        charconfig.runtime->field275_0x116 = 1;
+    else if (NuStrICmp(parser->word_buf, "fett") == 0)
+        charconfig.runtime->field275_0x116 = 2;
+    else if (NuStrICmp(parser->word_buf, "macewindu") == 0)
+        charconfig.runtime->field275_0x116 = 3;
+    else if (NuStrICmp(parser->word_buf, "battledroid") == 0)
+        charconfig.runtime->field275_0x116 = 4;
+    else if (NuStrICmp(parser->word_buf, "hoverdroid") == 0)
+        charconfig.runtime->field275_0x116 = 17;
+    else if (NuStrICmp(parser->word_buf, "walker2legs") == 0)
+        charconfig.runtime->field275_0x116 = 15;
+    else if (NuStrICmp(parser->word_buf, "walker4legs") == 0)
+        charconfig.runtime->field275_0x116 = 16;
+    else if (NuStrICmp(parser->word_buf, "wookiee") == 0)
+        charconfig.runtime->field275_0x116 = 5;
+    else if (NuStrICmp(parser->word_buf, "obiwankenobi") == 0)
+        charconfig.runtime->field275_0x116 = 6;
+    else if (NuStrICmp(parser->word_buf, "leia") == 0)
+        charconfig.runtime->field275_0x116 = 7;
+    else if (NuStrICmp(parser->word_buf, "clone") == 0)
+        charconfig.runtime->field275_0x116 = 8;
+    else if (NuStrICmp(parser->word_buf, "rebel") == 0)
+        charconfig.runtime->field275_0x116 = 9;
+    else if (NuStrICmp(parser->word_buf, "tie") == 0)
+        charconfig.runtime->field275_0x116 = 10;
+    else if (NuStrICmp(parser->word_buf, "lando") == 0)
+        charconfig.runtime->field275_0x116 = 11;
+    else if (NuStrICmp(parser->word_buf, "weirdo") == 0)
+        charconfig.runtime->field275_0x116 = 0;
+    else if (NuStrICmp(parser->word_buf, "luke") == 0)
+        charconfig.runtime->field275_0x116 = 12;
+    else if (NuStrICmp(parser->word_buf, "hansolo") == 0)
+        charconfig.runtime->field275_0x116 = 13;
+    else if (NuStrICmp(parser->word_buf, "padme") == 0)
+        charconfig.runtime->field275_0x116 = 14;
+    else if (NuStrICmp(parser->word_buf, "critter") == 0)
+        charconfig.runtime->field275_0x116 = 18;
+    else if (NuStrICmp(parser->word_buf, "naboostarfighter") == 0)
+        charconfig.runtime->field275_0x116 = 19;
+    else if (NuStrICmp(parser->word_buf, "pod") == 0)
+        charconfig.runtime->field275_0x116 = 20;
+    else if (NuStrICmp(parser->word_buf, "republicgunship") == 0)
+        charconfig.runtime->field275_0x116 = 21;
+    else if (NuStrICmp(parser->word_buf, "henchman") == 0)
+        charconfig.runtime->field275_0x116 = 22;
 }
 
 static void CC_vehicle(NUFPAR *parser) {

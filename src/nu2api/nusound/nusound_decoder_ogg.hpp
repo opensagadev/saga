@@ -14,15 +14,15 @@
 class NuSoundDecoderOGG : public NuSoundDecoder, public NuSoundBufferCallback {
   public:
     // Streaming datasource the decoder reads the encoded stream through.
-    class OGGReadCallbacksDecoder {
+    class OGGReadCallbacksDecoder : public NuSoundLoaderOGG::OGGFileCallbacks {
       public:
         OGGReadCallbacksDecoder();
 
         void SetDecoder(NuSoundDecoderOGG *decoder);
-        virtual int Read(void *dest, unsigned int size);
-        virtual void Seek(int origin, unsigned int offset);
-        virtual void Close();
-        virtual int GetPosition() const;
+        int Read(void *dest, unsigned int size) override;
+        i32 Seek(i32 offset, u32 origin) override;
+        void Close() override;
+        int GetPosition() const override;
 
       private:
         NuSoundDecoderOGG *decoder;
@@ -32,25 +32,17 @@ class NuSoundDecoderOGG : public NuSoundDecoder, public NuSoundBufferCallback {
     NuSoundDecoderOGG(char const *name, NuSoundSource *source);
     ~NuSoundDecoderOGG();
 
-    void Reset();
+    void Reset() override;
     void SubmitBuffer(NuSoundBuffer *buffer) override;
     u64 Decode(NuSoundSource &source, NuSoundBuffer &buffer, bool loop) override;
 
     u32 DecodeOggChunk(char *dest, unsigned int size);
 
-    u32 field_0xec;
-    void *field_0xf0;
-    void *field_0xf4;
-    u32 field_0xf8;
-    void *field_0xfc;
-    void *field_0x100;
-    u32 field_0x104;
     u32 field_0x108;
     OGGReadCallbacksDecoder read_callbacks;
-    u32 field_0x118;
     NuSoundBuffer *encoded_buffers[4];
-    u32 ring_read_pos;            // 0x12c
-    u32 ring_write_pos;           // 0x130
+    i32 ring_read_pos;            // 0x12c
+    i32 ring_write_pos;           // 0x130
     NuSoundBuffer *locked_buffer; // 0x134
     bool ogg_loop;                // 0x138
 };

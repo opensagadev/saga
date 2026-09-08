@@ -91,9 +91,6 @@ void NuPostFilter::renderFrustum(numtx_s *) {
 void NuDeviceSpecs::Exists() {
 }
 
-NuDeviceSpecs::NuDeviceSpecs() {
-}
-
 NuDeviceSpecs::~NuDeviceSpecs() {
 }
 
@@ -158,48 +155,6 @@ void NuDynamicLight::testShadowExtrusions(VuVec const &, VuVec const &) {
 }
 
 void NuMotionFilter::initResources() {
-}
-
-void NuRenderDevice::DetermineNominalAspectRatio(u32, u32) const {
-}
-
-void NuRenderDevice::IsContextValid() const {
-}
-
-void NuRenderDevice::MultiThreadRender() const {
-}
-
-void NuRenderDevice::OnAppPaused() {
-}
-
-void NuRenderDevice::OnAppRestarted() {
-}
-
-void NuRenderDevice::OnAppResume() {
-}
-
-void NuRenderDevice::OnAppStarted() {
-}
-
-void NuRenderDevice::OnAppStopped() {
-}
-
-void NuRenderDevice::OnGainedFocus() {
-}
-
-void NuRenderDevice::OnLostFocus() {
-}
-
-void NuRenderDevice::OnWindowDestroy() {
-}
-
-void NuRenderDevice::OpenglErrorCallback(u32, u32, u32, u32, i32, char const *, void *) {
-}
-
-void NuRenderDevice::PreInitialize() {
-}
-
-void NuRenderDevice::ResizeDevice(i32, i32, i32, bool, bool, bool, bool) {
 }
 
 NuMainFilterGen::NuMainFilterGen() {

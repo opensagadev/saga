@@ -6,6 +6,7 @@
 #include "globals.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/render/fx.h"
+#include "legoapi/render/fx/spline_position.h"
 #include "nu2api/nucore/nupad.h"
 #include "nu2api/numath/nuvec.h"
 #include "legoapi/legoapi_types.h"
@@ -44,6 +45,8 @@ extern "C" {
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
 extern void *theThingManager;
+extern void ReleaseTakeOver(GameObject_s *object, i32 immediate);
+extern void oneAtOnce_MaintainArray();
 
 void legoSetMusicVolume(float);
 void MovePlayer(GameObject_s *object);
@@ -62,10 +65,17 @@ void LightGameObject(GameObject_s *object, void *set);
 void InitSurfaceInfo(GameObject_s *object);
 i32 SetObjOnSurface(GameObject_s *object, i32 mode);
 void PortalGameObject(GameObject_s *object, i32 enable, i32 immediate, i16 portal, nugscn_s *scene);
-void Arcade_GetMode(u32 *mode);
+i32 Arcade_GetMode(u32 *mode);
 void StarWars_GameAISysInit();
 void GameAISysSetGame();
 void ClearAICreatures();
+void CollideGameObjects(WORLDINFO_s *world);
+void GameCam_Blend(GAMECAMERA_s *camera, f32 duration, f32 curve, i32 mode);
+i32 TagCode(GameObject_s *source, GameObject_s *target, i32 takeover, i32 blend, i32 mode);
+extern i32 do_player_tag;
+extern f32 player_tag_timer;
+extern GameObject_s *player_tag_from;
+extern GameObject_s *player_tag_to;
 APIOBJECT *GameAPIOBJECTFromObjID(u8 object_id);
 i32 EquivalentObject_Find(WORLDINFO_s *world, nuhspecial_s *special);
 void AIPathCnxControlSysReset(AIPATHCNXCONTROLSYS_s *system);
@@ -96,9 +106,9 @@ static f32 GameFogDuration;
 static f32 GameFogTime;
 
 enum AI_ACTION_SPEED_MODE : u8 {
-    AI_ACTION_SPEED_LEGO = 0,
-    AI_ACTION_SPEED_RUN = 1,
-    AI_ACTION_SPEED_WALK = 2,
+    AI_ACTION_SPEED_RUN = 0,
+    AI_ACTION_SPEED_WALK = 1,
+    AI_ACTION_SPEED_TIPTOE = 2,
 };
 
 enum SCRIPT_ERROR_LEVEL : u32 {
@@ -176,22 +186,189 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 static const f32 AI_RESPAWN_DELAY = 2.0f;
 
 extern "C" {
-    // Game-specific script registries are still populated incrementally as
-    // their action and condition callbacks are reconstructed.  The null
-    // terminators keep registration safe in the meantime.
     AICONDITIONDEF lego_aiconditiondefs[] = {
+        {"GlynTest", NULL, NULL},
+        {"Debug", NULL, NULL},
+        {"Active", NULL, NULL},
+        {"GotGun", NULL, NULL},
+        {"PrefersBrawling", NULL, NULL},
+        {"IsAlive", NULL, NULL},
+        {"IsOnScreen", NULL, NULL},
+        {"OffScreenTimer", NULL, NULL},
+        {"OnObject", NULL, NULL},
+        {"OnSameObjectAsPlayer", NULL, NULL},
+        {"PlayerOnObject", NULL, NULL},
+        {"EitherPlayerOnObject", NULL, NULL},
+        {"EitherPlayerLocatorRangeXZ", NULL, NULL},
+        {"OnGround", NULL, NULL},
+        {"BeenAlerted", NULL, NULL},
+        {"PlayerOnGround", NULL, NULL},
+        {"SpawnCount", NULL, NULL},
+        {"BehindCamera", NULL, NULL},
+        {"LocatorOnScreen", NULL, NULL},
+        {"Blocking", NULL, NULL},
+        {"BeenHit", NULL, NULL},
+        {"HoverPhase", NULL, NULL},
+        {"HitPoints", NULL, NULL},
+        {"OnDynamicGrapple", NULL, NULL},
+        {"XPos", NULL, NULL},
+        {"YPos", NULL, NULL},
+        {"ZPos", NULL, NULL},
+        {"CollidingWithOpponent", NULL, NULL},
+        {"Colliding", NULL, NULL},
+        {"ObstacleAtStart", NULL, NULL},
+        {"ObstacleAtEnd", NULL, NULL},
         {"SpecialAtStart", NULL, NULL},
+        {"SpecialAtEnd", NULL, NULL},
+        {"ObstacleLockedOpen", NULL, NULL},
+        {"ObstacleLockedShut", NULL, NULL},
+        {"ForceAtStart", NULL, NULL},
+        {"ForceAtEnd", NULL, NULL},
+        {"ObstacleOpenedByPlayer", NULL, NULL},
+        {"ObstacleOpenedByEitherPlayer", NULL, NULL},
+        {"AnimationFinished", NULL, NULL},
+        {"EitherPlayerPullingLever", NULL, NULL},
+        {"EitherPlayerUsingHatMachine", NULL, NULL},
+        {"EitherPlayerUsingPanel", NULL, NULL},
+        {"EitherPlayerWearingHelmet", NULL, NULL},
+        {"PartyUnderCover", NULL, NULL},
+        {"NumBaddiesThatCanSeePlayers", NULL, NULL},
+        {"PlayerUsingForce", NULL, NULL},
+        {"EitherPlayerUsingForce", NULL, NULL},
+        {"UsingForce", NULL, NULL},
+        {"OnForcePlatform", NULL, NULL},
+        {"PlayerOnForcePlatform", NULL, NULL},
+        {"EitherPlayerOnForcePlatform", NULL, NULL},
+        {"ForceBeingUsed", NULL, NULL},
+        {"ForcePushing", NULL, NULL},
+        {"TurretAlive", NULL, NULL},
+        {"PlayerDeflectingPart", NULL, NULL},
+        {"ForceComplete", NULL, NULL},
+        {"ForceFinished", NULL, NULL},
+        {"ForceStackComplete", NULL, NULL},
+        {"ForceStackCompleteInOrder", NULL, NULL},
+        {"BuildItComplete", NULL, NULL},
+        {"BlowupBlownup", NULL, NULL},
+        {"IAmA", NULL, NULL},
+        {"OpponentIsA", NULL, NULL},
+        {"OpponentIsAThreat", NULL, NULL},
+        {"CanFightLikeAJedi", NULL, NULL},
+        {"IAmAGoody", NULL, NULL},
+        {"IAmABaddy", NULL, NULL},
+        {"IAmANeutral", NULL, NULL},
+        {"IAmAGoodyBaddy", NULL, NULL},
+        {"IAmAPartyCharacter", NULL, NULL},
+        {"CategoryIs", NULL, NULL},
+        {"PlayerCategoryIs", NULL, NULL},
+        {"EitherPlayerIs", NULL, NULL},
+        {"Player1Is", NULL, NULL},
+        {"Player2Is", NULL, NULL},
+        {"IsSetAlive", NULL, NULL},
         {"NumInSetAlive", NULL, NULL},
+        {"Context", NULL, NULL},
+        {"InContext", NULL, NULL},
+        {"OpponentContext", NULL, NULL},
+        {"Player2Active", NULL, NULL},
+        {"NumBaddies", NULL, NULL},
+        {"NumForceObjects", NULL, NULL},
         {"BeenToLevel", NULL, NULL},
+        {"LastLevel", NULL, NULL},
         {"Message", NULL, NULL},
+        {"ScriptParam", NULL, NULL},
+        {"CutSceneStarted", NULL, NULL},
         {"CutSceneFinished", NULL, NULL},
+        {"CutSceneExists", NULL, NULL},
+        {"PlayerInSock", NULL, NULL},
+        {"CutScenePlaying", NULL, NULL},
+        {"RigidAnimFrame", NULL, NULL},
+        {"SockDistanceToPlayer", NULL, NULL},
+        {"SockDistanceToOpponent", NULL, NULL},
+        {"SockXDistanceToPlayer", NULL, NULL},
+        {"PlayerDistanceAlongSock", NULL, NULL},
+        {"FurthestPlayerDistanceAlongSock", NULL, NULL},
+        {"FinishedSpline", NULL, NULL},
+        {"CurrentHintId", NULL, NULL},
+        {"HintAvailable", NULL, NULL},
+        {"HintComplete", NULL, NULL},
         {"Freeplay", NULL, NULL},
+        {"Indy", NULL, NULL},
+        {"MissionMode", NULL, NULL},
+        {"MissionWon", NULL, NULL},
+        {"ChallengeMode", NULL, NULL},
+        {"PSP", NULL, NULL},
+        {"AIOverrideControl", NULL, NULL},
+        {"BoltsDontGetDeflectedBack", NULL, NULL},
+        {"CheatProgress", NULL, NULL},
+        {"BigJumpComplete", NULL, NULL},
+        {"RespawnLocatorIs", NULL, NULL},
+        {"InMiniCut", NULL, NULL},
+        {"MaulShouldRunAway", NULL, NULL},
+        {"DropBackInTimer", NULL, NULL},
+        {"HelpWithTriggers", NULL, NULL},
+        {"EitherPlayerPushingSpinner", NULL, NULL},
+        {"CharacterRange", NULL, NULL},
+        {"BeenSpawned", NULL, NULL},
+        {"LastAttackerRange", NULL, NULL},
+        {"LastAttackerIsActivePlayer", NULL, NULL},
+        {"PartyContainsDroids", NULL, NULL},
+        {"CannotReachDestination", NULL, NULL},
+        {"TakenOver", NULL, NULL},
+        {"PlayerTakenOver", NULL, NULL},
+        {"EitherPlayerTakenOver", NULL, NULL},
+        {"BeenTakenOver", NULL, NULL},
+        {"OnSpeederBike", NULL, NULL},
+        {"UnderPlayerControl", NULL, NULL},
+        {"CharacterExists", NULL, NULL},
+        {"CharacterTypeExists", NULL, NULL},
+        {"GotLocatorInSet", NULL, NULL},
+        {"GotOpponentLOS", NULL, NULL},
+        {"EmptyTakeOver", NULL, NULL},
+        {"HasTakeOverTarget", NULL, NULL},
+        {"TakeOverRange", NULL, NULL},
+        {"TakeOverTargetInTriggerArea", NULL, NULL},
+        {"EitherPlayerInMyTriggerArea", NULL, NULL},
+        {"AreaContainsBaddies", NULL, NULL},
+        {"AreaContainsGoodies", NULL, NULL},
+        {"AreaContainsPartyMember", NULL, NULL},
+        {"GotVictim", NULL, NULL},
+        {"IsVisible", NULL, NULL},
+        {"MySet", NULL, NULL},
+        {"ScreenWipe", NULL, NULL},
+        {"IAmPlayer2", NULL, NULL},
+        {"HeadTurnRestricted", NULL, NULL},
+        {"ShopActive", NULL, NULL},
+        {"Side", NULL, NULL},
+        {"NearestPartyRange", NULL, NULL},
+        {"NearestPartyXZRange", NULL, NULL},
+        {"OpponentToPlayerRange", NULL, NULL},
+        {"OpponentPathPosRange", NULL, NULL},
+        {"GizmoOutput0", NULL, NULL},
+        {"GizmoOutput1", NULL, NULL},
+        {"GizmoOutput2", NULL, NULL},
+        {"GizmoOutput3", NULL, NULL},
+        {"GizmoVisibility", NULL, NULL},
+        {"AngleAboutMyLocatorToPlayer", NULL, NULL},
+        {"AnimSpeedMul", NULL, NULL},
+        {"PickupBeenTurnedOn", NULL, NULL},
+        {"FlowBoxComplete", NULL, NULL},
+        {"CanHearRadio", NULL, NULL},
+        {"BeingTowed", NULL, NULL},
+        {"RaceLap", NULL, NULL},
+        {"MusicOn", NULL, NULL},
+        {"CharacterLoaded", NULL, NULL},
+        {"AreaComplete", NULL, NULL},
+        {"ShouldAttackOpponent", NULL, NULL},
+        {"InSwamp", NULL, NULL},
+        {"InSameTriggerAreaAsNearestPlayer", NULL, NULL},
+        {"NetworkGameOnGoing", NULL, NULL},
         {"InHubArea", &Condition_InHubArea, &Condition_InHubAreaInit},
         {"IsLowEndDevice", NULL, NULL},
         {"RandomMapCharsAvailable", NULL, NULL},
-        {"CharacterLoaded", NULL, NULL},
         {NULL, NULL, NULL},
     };
+
+    static_assert(sizeof(lego_aiconditiondefs) / sizeof(lego_aiconditiondefs[0]) == 178,
+                  "complete game AI condition registry");
 
     f32 default_path_heighttol = 0.2f;
     u8 default_activate_difficulty = AI_DEFAULT_ACTIVATE_DIFFICULTY;
@@ -303,7 +480,44 @@ static NUVEC *GetAICreatureOrigin(AISYS *, AIPACKET *) {
     return NULL;
 }
 
-static APIOBJECT *GetNamedAPIObject(AISYS *, char *) {
+static APIOBJECT *GetNamedAPIObject(AISYS *system, char *name) {
+    if (system != NULL && Obj != NULL) {
+        for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
+            GameObject_s *object = &Obj[index];
+            if ((object->apiobj.field_0x1f8 & APIOBJECT_FLAG_IN_USE) == 0) {
+                continue;
+            }
+
+            char *object_name = NULL;
+            if ((object->apiobj.field_0x1f4 & 0x400) != 0 && object->ai.field_0x134 != 0xff &&
+                system->creatures != NULL) {
+                object_name = system->creatures[object->ai.field_0x134].name;
+            } else if (object->apiobj.character_data != NULL) {
+                object_name = object->apiobj.character_data->file;
+            }
+            if (object_name != NULL && NuStrICmp(object_name, name) == 0) {
+                return &object->apiobj;
+            }
+        }
+    }
+
+    if (NuStrICmp(name, "player") == 0) {
+        return player != NULL ? &player->apiobj : NULL;
+    }
+    if (NuStrICmp(name, "player_2") == 0) {
+        GameObject_s *second = Player[0] == player ? Player[1] : Player[0];
+        return second != NULL ? &second->apiobj : NULL;
+    }
+    for (i32 index = 0; index < 8; ++index) {
+        if (Player[index] == NULL) {
+            continue;
+        }
+        char player_name[72];
+        sprintf(player_name, "Player%d", index);
+        if (NuStrICmp(player_name, name) == 0) {
+            return &Player[index]->apiobj;
+        }
+    }
     return NULL;
 }
 
@@ -332,11 +546,11 @@ static f32 GetCharacterGoalSpeed(APIOBJECT *object) {
     }
 
     switch (object->ai->goal_speed_mode) {
-        case AI_ACTION_SPEED_LEGO:
-            return static_cast<GAMECHARACTERDATA *>(object->character_data->field11_0x24)->movement_speed * FRAMETIME;
         case AI_ACTION_SPEED_RUN:
-            return static_cast<GAMECHARACTERDATA *>(object->character_data->field11_0x24)->field_0x18 * FRAMETIME;
+            return static_cast<GAMECHARACTERDATA *>(object->character_data->field11_0x24)->movement_speed * FRAMETIME;
         case AI_ACTION_SPEED_WALK:
+            return static_cast<GAMECHARACTERDATA *>(object->character_data->field11_0x24)->field_0x18 * FRAMETIME;
+        case AI_ACTION_SPEED_TIPTOE:
             return static_cast<GAMECHARACTERDATA *>(object->character_data->field11_0x24)->field_0x14 * FRAMETIME;
         default:
             return 0.0f;
@@ -344,16 +558,16 @@ static f32 GetCharacterGoalSpeed(APIOBJECT *object) {
 }
 
 static i32 GameAIActionParseSpeed(char *name, u8 *speed) {
-    if (NuStrICmp(name, "LEGO") == 0) {
-        *speed = AI_ACTION_SPEED_LEGO;
-        return 1;
-    }
     if (NuStrICmp(name, "RUN") == 0) {
         *speed = AI_ACTION_SPEED_RUN;
         return 1;
     }
     if (NuStrICmp(name, "WALK") == 0) {
         *speed = AI_ACTION_SPEED_WALK;
+        return 1;
+    }
+    if (NuStrICmp(name, "TIPTOE") == 0) {
+        *speed = AI_ACTION_SPEED_TIPTOE;
         return 1;
     }
     return 0;
@@ -562,7 +776,7 @@ extern void BackDrop_UpdateColours(i32 instant);
 extern i32 Paused;
 extern f32 PauseMenus_X;
 extern i32 PauseMenus_Align;
-extern i32 CutScenePlayer_Active();
+extern void *CutScenePlayer_Active();
 
 void UpdateGameMessages();
 extern i32 DoubleScore;
@@ -644,6 +858,7 @@ void GameAIProcess() {
         AISysProcessCharacter(WORLD->ai_sys, &object->apiobj, &object->ai, ground_checks, object->ai_elapsed_time, 0,
                               process_ai);
     }
+    oneAtOnce_MaintainArray();
 }
 
 extern "C" {
@@ -859,7 +1074,7 @@ i32 GameAudio_GetSfxId(i32 sfx);
 void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
 
 static GAMEAUDIO GameAudio_Default;
-static GAMEAUDIO *GameAudio;
+__attribute__((visibility("hidden"))) GAMEAUDIO *GameAudio asm("_ZL9GameAudio");
 
 void GameAudio_Init(GAMEAUDIO *audio) {
     GameAudio = audio;
@@ -902,7 +1117,22 @@ void GameAISysSetGame() {
     StarWars_GameAISysInit();
 }
 
-void GameAudio_AddSfx(i32, i32 *, i32 *, i32) {
+void GameAudio_AddSfx(i32 sfx, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx) {
+    if (sfx_count == NULL || sfx_ids == NULL || *sfx_count >= max_sfx) {
+        return;
+    }
+
+    i32 sfx_id = GameAudio_GetSfxId(sfx);
+    if (sfx_id == -1) {
+        return;
+    }
+    for (i32 i = 0; i < *sfx_count; ++i) {
+        if (sfx_ids[i] == sfx_id) {
+            return;
+        }
+    }
+    sfx_ids[*sfx_count] = sfx_id;
+    ++*sfx_count;
 }
 
 void GameObjectOrigin(GameObject_s *object) {
@@ -1359,7 +1589,25 @@ void GameAntiNodeData_Read(GAMEANTINODEDATA_s *data) {
     data->mode = static_cast<u8>(EdFileReadChar());
 }
 
-void GameAudio_PlaySfxById(i32, nuvec_s *, i32, i32) {
+extern "C" {
+    NUVEC nusound_special_positions[4];
+    void PlaySfxById(i32 sfx_id, nuvec_s *position);
+}
+
+void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32) {
+    if (flags == 0) {
+        PlaySfxById(sfx_id, position);
+        return;
+    }
+    if ((flags & ~2) == 1) {
+        nusound_special_positions[1] = *position;
+        PlaySfxById(sfx_id, &nusound_special_positions[1]);
+    }
+    flags -= 2;
+    if (static_cast<u32>(flags) <= 1) {
+        nusound_special_positions[2] = *position;
+        PlaySfxById(sfx_id, &nusound_special_positions[2]);
+    }
 }
 
 void Game_GotAllGoldBricks() {
@@ -1470,12 +1718,6 @@ void GameObjectToCameraDistances() {
         const f32 dz = camera_position.z - object->apiobj.position.z;
         object->ai_update_distance = NuFsqrt(dx * dx + dy * dy + dz * dz);
     }
-}
-
-void GameAudio_PlaySfxAndSetVolume(i32, nuvec_s *, float) {
-}
-
-void GameAudio_SetActionMusicTimes(float, float) {
 }
 
 void GameCreatureOpponentSelection(AISYS_s *, i32, APIOBJECT_s **, i32, APIOBJECT_s **, i32, APIOBJECT_s **, u64,
@@ -2158,7 +2400,65 @@ GameObject_s *FindGameObject(i32 character_id, u32 required_flags, i32 alive_onl
     return NULL;
 }
 
-void KillGameObject(GameObject_s *, i32, i32) {
+void KillGameObject(GameObject_s *object, i32 reason, i32) {
+    if (object == NULL || (object->apiobj.field_0x1f8 & APIOBJECT_FLAG_IN_USE) == 0) {
+        return;
+    }
+
+    const i32 requested_reason = reason;
+    if (reason == 5) {
+        reason = 4;
+    }
+
+    object->KillTasks();
+    object->current_hp = 0;
+    object->apiobj.velocity.x = 0.0f;
+    object->apiobj.velocity.z = 0.0f;
+
+    // The shipped function converts the ordinary scripted kill (reason 4)
+    // into the terminal death state 2 after its effects have been emitted.
+    const bool terminal_kill = reason == 4;
+    if (terminal_kill) {
+        reason = 2;
+    }
+    object->apiobj.field_0x287 = static_cast<u8>(reason == 3 ? 2 : reason);
+    if (object->apiobj.field_0x287 == 2) {
+        object->movement_lean_angle = 0;
+        object->field_0x1018 = 0.0f;
+    } else {
+        object->apiobj.field_0x287 = 1;
+        object->apiobj.start_position = object->apiobj.position;
+        object->field_0x1018 = 0.5f;
+    }
+
+    object->ai.opponent = NULL;
+    object->ai.nearest_opponent = NULL;
+    object->ai.dont_avoid_character = NULL;
+    object->last_attacker = NULL;
+    object->force_target = NULL;
+    object->airborne_collision_target = NULL;
+    object->field_0xecc = 0;
+    object->field_0xed0 = 0;
+
+    if (!terminal_kill) {
+        AISCRIPTPROCESS *processor = reinterpret_cast<AISCRIPTPROCESS *>(&object->ai);
+        if (AIScriptSetBaseScriptStateByName(processor, const_cast<char *>("BeenKilled")) != 0 && WORLD != NULL &&
+            WORLD->ai_sys != NULL) {
+            AIScriptProcess(WORLD->ai_sys, &object->apiobj, &object->ai, processor, FRAMETIME);
+        }
+    }
+
+    if (terminal_kill && object->apiobj.field_0x27c == -1) {
+        const u8 respawn_flags = object->field_0xefa >> 4;
+        if (requested_reason == 5 || (respawn_flags & 1) == 0) {
+            object->ai.reset_mode = 4;
+        } else if ((respawn_flags & 2) != 0) {
+            object->field_0x101c = 1.0f;
+        } else {
+            object->ai.reset_mode = 1;
+            object->ai_spawn_delay = 1.0f;
+        }
+    }
 }
 
 void PowerUp_Update(GameObject_s *) {
@@ -2453,6 +2753,56 @@ void UpdateGameObjects(WORLDINFO_s *world) {
             LightGameObject(object, world->rtl_set);
         }
     }
+
+    CollideGameObjects(world);
+
+    if (do_player_tag == 0) {
+        bool pending_tag_valid = false;
+        if (player_tag_timer > 0.0f) {
+            player_tag_timer -= FRAMETIME;
+            const u16 required_flags = APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_PLAYER_CHARACTER;
+            pending_tag_valid = player_tag_timer >= 0.0f && player_tag_to != NULL && player_tag_from != NULL &&
+                                (player_tag_to->apiobj.field_0x1f8 & required_flags) == required_flags &&
+                                player_tag_to->apiobj.field_0x287 == 0 &&
+                                (player_tag_to->tag_context_flags & 2) == 0 &&
+                                (player_tag_from->apiobj.field_0x1f8 & required_flags) == required_flags &&
+                                player_tag_from->apiobj.field_0x287 == 0 &&
+                                (player_tag_from->tag_context_flags & 2) == 0;
+        }
+        if (!pending_tag_valid) {
+            player_tag_to = NULL;
+            player_tag_timer = 0.0f;
+            player_tag_from = NULL;
+            do_player_tag = 0;
+        }
+    } else {
+        const u16 required_flags = APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_PLAYER_CHARACTER;
+        bool clear_pending_tag = true;
+        if (player_tag_to != NULL && player_tag_from != NULL && player_tag_to != player_tag_from &&
+            (player_tag_to->apiobj.field_0x1f8 & required_flags) == required_flags &&
+            player_tag_to->apiobj.field_0x287 == 0 && (player_tag_to->tag_context_flags & 2) == 0 &&
+            (player_tag_from->apiobj.field_0x1f8 & required_flags) == required_flags &&
+            player_tag_from->apiobj.field_0x287 == 0 && (player_tag_from->tag_context_flags & 2) == 0) {
+            const i32 tag_result = TagCode(player_tag_to, player_tag_from, 0, 0, 1);
+            if (tag_result == 1) {
+                GameAudio_PlaySfx(0x22, &player_tag_to->apiobj.collision_position, 0, 0);
+                GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
+                const i32 player_1_id = Player[1] == NULL ? -1 : Player[1]->id;
+                const i32 player_0_id = Player[0] == NULL ? -1 : Player[0]->id;
+                RememberPlayerIDs(0, player_0_id, player_1_id);
+                player_tag_to->tag_state = 2.0f;
+                player_tag_from->tag_state = 2.0f;
+            } else if (tag_result == 2) {
+                clear_pending_tag = false;
+            }
+        }
+        if (clear_pending_tag) {
+            player_tag_to = NULL;
+            player_tag_timer = 0.0f;
+            player_tag_from = NULL;
+            do_player_tag = 0;
+        }
+    }
 }
 
 GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *script_name, AIPATHINFO_s *path_info,
@@ -2516,7 +2866,7 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
     object->ai.antinode_timer = 0.0f;
     InitPlayerAI(object);
 
-    if (position != NULL) {
+    if (spline == NULL) {
         object->apiobj.position = *position;
         object->apiobj.facing_angle = static_cast<u16>(angle);
         object->apiobj.movement_facing_angle = static_cast<u16>(angle);
@@ -2524,14 +2874,31 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
         if (group != NULL) {
             AddToAIGroup(group, &object->apiobj);
         }
-    }
+    } else {
+        SPLINEPOS_s *spline_position = reinterpret_cast<SPLINEPOS_s *>(&object->movement_spline);
+        InitSplinePosition(spline_position, spline, 0.0f, spline_mode);
+        SPLINEPOSITION_RUNTIME_s *runtime = reinterpret_cast<SPLINEPOSITION_RUNTIME_s *>(spline_position);
+        NUVEC spline_point;
+        u16 yaw = 0;
+        u16 pitch = 0;
+        PointAlongSpline(runtime->spline, runtime->normalized_position, &spline_point, &yaw, &pitch, runtime->looping);
+        object->apiobj.facing_angle = yaw;
+        object->apiobj.movement_facing_angle = yaw;
+        object->apiobj.field_0x276 = yaw;
+        object->apiobj.pitch_angle = static_cast<u16>(-pitch);
 
-    // The spline-position branch continues through InitSplinePosition and
-    // PointAlongSpline in the original. Keep the recovered parameters named
-    // until that complete path is reconstructed rather than inventing a host
-    // approximation here.
-    (void)spline_offset;
-    (void)spline_mode;
+        if (spline_offset != NULL) {
+            NUVEC *stored_offset = reinterpret_cast<NUVEC *>(reinterpret_cast<u8 *>(spline_position) + 0x20);
+            *stored_offset = *spline_offset;
+            if (spline_offset->x != 0.0f || spline_offset->y != 0.0f || spline_offset->z != 0.0f) {
+                NUVEC rotated;
+                NuVecRotateX(&rotated, spline_offset, static_cast<u16>(-pitch));
+                NuVecRotateY(&rotated, &rotated, yaw);
+                NuVecAdd(&spline_point, &spline_point, &rotated);
+            }
+        }
+        object->apiobj.position = spline_point;
+    }
 
     ResetPlayerMoves(object);
     object->apiobj.pos_x = object->apiobj.position.x;
@@ -2604,7 +2971,13 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
     return object;
 }
 
-GameObject_s *GetNamedGameObject(AISYS_s *, char *) {
+GameObject_s *GetNamedGameObject(AISYS_s *system, char *name) {
+    if (GetNamedAPIObjectFn != NULL) {
+        APIOBJECT *object = GetNamedAPIObjectFn(system, name);
+        if (object != NULL) {
+            return object->objptr;
+        }
+    }
     return NULL;
 }
 
@@ -2614,7 +2987,31 @@ void TakeOverGameObject(GameObject_s *, GameObject_s *, i32, i32) {
 void TakeOverGameObject2(GameObject_s *, GameObject_s *, i32) {
 }
 
-void DeactivateGameObject(GameObject_s *) {
+void DeactivateGameObject(GameObject_s *object) {
+    if (object == NULL) {
+        return;
+    }
+
+    if (object->field_0xcc0 != NULL) {
+        if ((object->apiobj.flags_high & 0x40) == 0) {
+            KillGameObject(object->field_0xcc0, 4, 0);
+            object->apiobj.flags_high &= static_cast<u8>(~0x10u);
+        } else {
+            ReleaseTakeOver(object, 1);
+        }
+    }
+    object->apiobj.flags_high &= static_cast<u8>(~0x10u);
+
+    if (object->ai.field_0x134 != 0xff &&
+        AIScriptSetBaseScriptStateByName(reinterpret_cast<AISCRIPTPROCESS *>(&object->ai),
+                                         const_cast<char *>("InActive")) != 0) {
+        object->ai.reset_mode = 0;
+        if (WORLD != NULL && WORLD->ai_sys != NULL && object->ai.field_0x134 < WORLD->ai_sys->creature_count) {
+            WORLD->ai_sys->creatures[object->ai.field_0x134].activate_type = 2;
+        }
+    } else {
+        object->ai.reset_mode = 4;
+    }
 }
 
 i32 EquivalentObject_Find(WORLDINFO_s *, nuhspecial_s *) {

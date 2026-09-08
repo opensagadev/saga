@@ -160,8 +160,8 @@ i32 GizObstacle_CheckExcludeFlagsFn_LSW(GIZOBSTACLE_s *obstacle, GameObject_s *o
 void GizObstacle_EvalAveragePosAndRadius(GIZOBSTACLE_s *obstacle, i32 state) {
     obstacle->field_0x58 = 1.0f;
     obstacle->evaluated_position = obstacle->position;
-    GameAnimSet_GetCentreAndRadius(obstacle->anim_set, &obstacle->evaluated_position, &obstacle->field_0x58,
-                                    state, 1, 1);
+    GameAnimSet_GetCentreAndRadius(obstacle->anim_set, &obstacle->evaluated_position, &obstacle->field_0x58, state, 1,
+                                   1);
 }
 
 void GIZOBSTACLE_s::ClearMechObjectInterface() {

@@ -70,12 +70,24 @@ extern "C" f32 *AnimPlaying(ANIMPACKET_s *packet, i32 animation, i32 target, i32
 
 struct MINIANIMPACKET_s {
     f32 current_time; // 0x00
-    f32 target_time;  // 0x04
-    u8 data_0x08[0x14 - 0x08];
-    f32 previous_time; // 0x14
-    u8 reset_state;    // 0x18
-    u8 field_0x19;     // 0x19
-    u8 data_0x1a[0x1e - 0x1a];
+    union {
+        f32 previous_time;
+        f32 target_time;
+    }; // 0x04
+    f32 blend_elapsed;     // 0x08
+    f32 blend_duration;    // 0x0c
+    f32 blend_source_time; // 0x10
+    f32 blend_target_time; // 0x14
+    union {
+        u8 flags;
+        u8 reset_state;
+    }; // 0x18
+    union {
+        u8 blending;
+        u8 field_0x19;
+    }; // 0x19
+    i16 blend_animation_a; // 0x1a
+    i16 blend_animation_b; // 0x1c
     union {
         i16 animation_index;
         i16 current_animation_id;
@@ -89,7 +101,7 @@ struct MINIANIMPACKET_s {
 
 DECOMP_ASSERT(sizeof(MINIANIMPACKET_s) == 0x24, "MINIANIMPACKET_s size");
 extern "C" void ResetMiniAnimPacket(MINIANIMPACKET_s *, i32);
-DECOMP_ASSERT(offsetof(MINIANIMPACKET_s, previous_time) == 0x14, "MINIANIMPACKET_s previous time offset");
+DECOMP_ASSERT(offsetof(MINIANIMPACKET_s, blend_target_time) == 0x14, "MINIANIMPACKET_s blend target time offset");
 DECOMP_ASSERT(offsetof(MINIANIMPACKET_s, animation_index) == 0x1e, "MINIANIMPACKET_s animation offset");
 DECOMP_ASSERT(offsetof(MINIANIMPACKET_s, requested_animation_id) == 0x22,
               "MINIANIMPACKET_s requested animation offset");

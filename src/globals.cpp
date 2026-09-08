@@ -35,6 +35,8 @@ void *globalbuffer = NULL;
 i32 MaxAnimJoints = 0;
 u8 ForcePlayEndFrame = 0;
 u8 ForceEulerToQuat = 0;
+u8 QuatPushes[4] = {};
+i32 NumQuatPushes = 0;
 extern const u8 CurveGroupMasks[3] = {
     NUANIMBUFF_JOINT_TRANSLATION,
     NUANIMBUFF_JOINT_ROTATION,
@@ -51,7 +53,8 @@ extern "C" {
     i32 g_signedinUser = -1;
 }
 MAIN_FRAME_COUNTERS_s MainFrameCounters = {};
-i32 *radios_playing = NULL;
+i32 radios_playing = 0;
+i32 last_chatter_sfx = -1;
 i32 GAMERAND = 0x1f3ad27f;
 BOLT_s Bolt[32] = {};
 i32 i_bolt = 0;
@@ -61,7 +64,15 @@ u8 CutSceneCameraCTRL = 0;
 f32 nusound_fade_start = 2.0f;
 f32 nusound_fade_end = 15.0f;
 i32 (*SetSoundFadeDistCallBackFn)(WORLDINFO_s *world) = NULL;
+NUGCUTSCENECHARACTERCREATEDATAFN NuCutSceneCharacterCreateData = NULL;
+NUGCUTSCENECHARACTEREVALFN NuCutSceneCharacterEval = NULL;
+NUGCUTSCENECHARACTERRELEASEFN NuCutSceneCharacterRelease = NULL;
+NUGCUTSCENECHARACTERPROCESSFN NuCutSceneCharacterProcess = NULL;
+NUGCUTSCENECHARACTERRENDERFN NuCutSceneCharacterRender = NULL;
+NUGCUTSCENEFINDCHARACTERSFN NuCutSceneFindCharacters = NULL;
 NUGCUTSCENERESETCHARACTERSFN NuCutSceneResetCharactersFn = NULL;
+NUGCUTSCENERIGIDPOSTRENDERFN NuCutSceneRigidPostRender = NULL;
+NUGCUTSCENEREQUESTSFXFN NuCutSceneRequestSFX = NULL;
 __attribute__((visibility("hidden"))) GameObject_s *ForceBackObj asm("_ZL12ForceBackObj") = NULL;
 __attribute__((visibility("hidden"))) NUVEC *ForceBackPos asm("_ZL12ForceBackPos") = NULL;
 
@@ -254,7 +265,9 @@ f32 COINTOTAL_COINDX = 0.05f;
 f32 COINTOTAL_COINSIZE = 0.5f;
 f32 COINTOTAL_SCORESIZE = 0.5f;
 f32 PANEL_COINADJUSTDY = -0.006f;
+f32 PANEL_SCORESCALE = 0.375f;
 f32 PANEL_COINSCALE_END = 0.35f;
+f32 PANEL_SCOREX = 0.61f;
 f32 PANEL_COINSCALE_START = 1.0f;
 f32 PANEL_COINY = 0.045f;
 f32 PANEL_COINX = 0.65f;
@@ -281,7 +294,7 @@ NUSOUND_FILENAME_INFO *MusicInfo = NULL;
 NUSOUND_FILENAME_INFO *g_music = NULL;
 u8 g_BackgroundUsedFogColour = 0;
 i32 g_BackgroundColour = 0;
-u32 SFX_MUSIC_COUNT = 0;
+i32 SFX_MUSIC_COUNT = 0;
 i32 NOSOUND = 0;
 i32 NUSOUND_STREAM_3 = 0;
 i16 AreaMusic = 0;
@@ -349,11 +362,11 @@ u8 aicreature_sets_alive[16] = {};
 // ------------------------------------------------------------------------
 // Render / compatibility options
 // ------------------------------------------------------------------------
-i32 g_forceSysMemVbs = 0;
+bool g_forceSysMemVbs = false;
 i32 g_forceETC1 = 0;
 i32 Reflections_On = 1;
 i32 disable_narrow_socks = 0;
-i32 script_spline_selected = 0;
+nugspline_s *script_spline_selected = NULL;
 f32 character_farclip = 0.0f;
 f32 CutBorderScale = 0.0f;
 i32 LEGOCAMMODE_DOORCUT = -1;
@@ -427,6 +440,7 @@ TERRAIN_LAYER_s TerLayer[17] = {
 };
 GameObject_s *player = NULL;
 GameObject_s *player2 = NULL;
+GameObject_s *CutDeadVehiclePlayer = NULL;
 i32 avg_currentspeed_mul = 0;
 i32 pause_rndr_on = 0;
 i32 pause_fade = 0;
@@ -479,8 +493,14 @@ COLLECTION_s JediCollection = {};
 COLLECTION_s BlasterCollection = {};
 COLLECTION_s BountyHunterCollection = {};
 f32 COLLECTION_DEFAULTSCALE = 0.6f;
-ARCADEITEM_s ArcadeItem = {0};
-ARCADE_MODE_s Arcade_Mode[1] = {{0}};
+extern i16 tLEVEL, tMODE, tPLAY;
+extern i16 tARCADEMODE_BATTLE, tARCADEMODE_COLLECT, tARCADEMODE_HUNT;
+ARCADEITEM_s ArcadeItem = {&tLEVEL, 0, 12, 0, &tMODE, 0, 3, 0, &tPLAY, 0, 1, 0};
+ARCADE_MODE_s Arcade_Mode[3] = {
+    {&tARCADEMODE_BATTLE, 50, 0x62},
+    {&tARCADEMODE_COLLECT, 500000, 0x24},
+    {&tARCADEMODE_HUNT, 0, 0x58},
+};
 GAME_CUSTOMISER_s *Game_Customiser = NULL;
 AREASAVE_s *Game_AreaSave = NULL;
 u8 *Game_CharacterSave = NULL;
@@ -621,6 +641,7 @@ LEVELDATA *DAGOBAHA_LDATA = NULL;
 LEVELDATA *DAGOBAHB_LDATA = NULL;
 LEVELDATA *DAGOBAHC_LDATA = NULL;
 LEVELDATA *DAGOBAHD_LDATA = NULL;
+LEVELDATA *DAGOBAHE_LDATA = NULL;
 LEVELDATA *DEATHSTAR2BATTLEA_LDATA = NULL;
 LEVELDATA *DEATHSTAR2BATTLEB_LDATA = NULL;
 LEVELDATA *DEATHSTAR2BATTLED_LDATA = NULL;
@@ -738,6 +759,7 @@ AREADATA *SENATE_ADATA = NULL;
 LEVELDATA *SPEEDERCHASEA_LDATA = NULL;
 LEVELDATA *STATUS_LDATA = NULL;
 LEVELDATA *TATOOINEA_LDATA = NULL;
+LEVELDATA *TATOOINEB_LDATA = NULL;
 LEVELDATA *TATOOINEC_LDATA = NULL;
 LEVELDATA *TATOOINED_LDATA = NULL;
 LEVELDATA *TATOOINEE_LDATA = NULL;
@@ -1253,7 +1275,13 @@ LEVELSPLINE SplTab[26] = {
     {NULL, "mission_cam", 2, 2, -1, -1},
     {NULL, NULL, 0, 0, 0, 0},
 };
-u8 LSW_CharCategory[0x78]; // LSW character-category table
+CHARCAT_s LSW_CharCategory[10] = {
+    {"Jedi", 0x00000008, 0},         {"JediBaddie", 0x0000000c, 0},
+    {"BountyHunter", 0x01100080, 0}, {"Teleport", 0x00040000, 0},
+    {"HighJump", 0, 0x00400000},     {"Astromech", 0x00000040, 0},
+    {"Protocol", 0x00000020, 0},     {"ZipUp", 0x00100080, 0},
+    {"Blaster", 0x00000080, 0},      {NULL, 0, 0},
+};
 extern i16 tCHEAT_EXTRATOGGLE;
 extern i16 tCHEAT_POO;
 extern i16 tCHEAT_DISGUISE;
@@ -1638,11 +1666,11 @@ NUGSCN *button_scene = NULL;
 FadeSystem *pFadeInfo = NULL;
 
 // Cut-scene / gameplay hook wiring (original .data function pointers).
-void (*CutScene_StartFn)(CUTINFO *) = NULL;
+i32 (*CutScene_StartFn)(CUTINFO *) = NULL;
 void (*CutScene_PreUpdateFn)(CUTINFO *) = NULL;
 void (*CutScene_PostUpdateFn)(void) = NULL;
 void (*CutScene_StoppedFn)(CUTINFO *) = NULL;
-void (*CutScene_ReplaceCharacterModelFn)(CUTINFO *, NUGCUTCHAR_s *) = NULL;
+i32 (*CutScene_ReplaceCharacterModelFn)(CUTINFO *, NUGCUTCHAR_s *) = NULL;
 void (*InitBolt_AddMomentumType)(BOLT_s *, GameObject_s *, nuvec_s *) = NULL;
 void (*Bolt_HitPlatFn)(BOLT_s *) = NULL;
 void (*Bolt_HitCustomFn)(BOLT_s *, nuvec_s *) = NULL;
@@ -1675,7 +1703,7 @@ vufnt_s *QFont3D = nullptr;
 vufnt_s *QFont2DZ = nullptr;
 vufnt_s *QFont2DLower = nullptr;
 vufnt_s *QFont3DZ = nullptr;
-vufnt_s *QFont3DTime = nullptr;
+f32 QFont3DTime = 0.0f;
 vufnt_s *SmartTextFont = nullptr;
 i32 create_qfont3d = 0;
 i32 create_qfont2dz = 0;
@@ -1823,8 +1851,16 @@ i32 LEGO_AIPATHCNX_REQUIRESPERMISSION = 0;
 i32 LEGO_AIPATHCNX_NO_DESTINATION_CHECK = 0;
 i32 LEGO_AIPATHCNX_JUMP_NOW = 0;
 i32 LEGO_AIPATHCNX_DONT_JUMP_NOW = 0;
+f32 *fakeanimendframe = NULL;
+f32 *fakeanimframe = NULL;
+f32 ai_moveradius = 0.1f;
 i32 mechAutoJumpFlags = 0;
 i32 mechAutoJumpCantReachFlags = 0;
+i32 ai_fighting = 0;
+f32 aitol = 0.5f;
+f32 DEFAULT_MOVE_RANGE = 0.0f;
+f32 engagefiretime = 2.0f;
+f32 idealgoalrange = 1.5f;
 
 // Shared symbols recovered from the original global data surface.
 i32 NetPaused = 0;

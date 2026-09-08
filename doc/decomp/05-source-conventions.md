@@ -11,19 +11,19 @@ of a copied basename map.
 
 The major roots are:
 
-| directory | role |
-|---|---|
-| `src/editor/` | editor implementations |
-| `src/gameapi/` | AI, editor-tool, and GUI APIs |
-| `src/gameframework/` | framework systems such as save/load |
-| `src/gamelib/` | utilities and supporting engine systems |
-| `src/legoapi/` | gameplay, grouped into `actions`, `ai`, `audio`, `characters`, `core`, `cutscenes`, `gizmo`, `gizmos`, `items`, `menus`, `misc`, `props`, `render`, and `world` |
-| `src/legogame/` | startup and platform entry points |
-| `src/MechInputTouch/` | Android touch controls |
-| `src/nu2api/` | core engine modules (`nu3d`, `nucore`, `nufile`, `numath`, `numusic`, `nuplatform`, `nusound`, and platform glue) |
-| `src/java/` | JNI compatibility code |
-| `src/host/harness/` | host command runner and diagnostic commands |
-| `src/host/platform/` | minimal host implementations of external/platform APIs |
+| directory             | role                                                                                                                                                            |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/editor/`         | editor implementations                                                                                                                                          |
+| `src/gameapi/`        | AI, editor-tool, and GUI APIs                                                                                                                                   |
+| `src/gameframework/`  | framework systems such as save/load                                                                                                                             |
+| `src/gamelib/`        | utilities and supporting engine systems                                                                                                                         |
+| `src/legoapi/`        | gameplay, grouped into `actions`, `ai`, `audio`, `characters`, `core`, `cutscenes`, `gizmo`, `gizmos`, `items`, `menus`, `misc`, `props`, `render`, and `world` |
+| `src/legogame/`       | startup and platform entry points                                                                                                                               |
+| `src/MechInputTouch/` | Android touch controls                                                                                                                                          |
+| `src/nu2api/`         | core engine modules (`nu3d`, `nucore`, `nufile`, `numath`, `numusic`, `nuplatform`, `nusound`, and platform glue)                                               |
+| `src/java/`           | JNI compatibility code                                                                                                                                          |
+| `src/host/harness/`   | host command runner and diagnostic commands                                                                                                                     |
+| `src/host/platform/`  | minimal host implementations of external/platform APIs                                                                                                          |
 
 `src/BUILD.bazel` is the source-membership authority. Use `bazel aquery` for the
 current set and effective command lines.
@@ -128,11 +128,6 @@ value. Hand-maintained stubs may name parameters, cast them to `(void)`, and use
 `UNIMPLEMENTED` and `LOG_*` produce host diagnostics and compile away in target
 builds. `__FILENAME__` is currently a correct repository-relative path such as
 `src/legoapi/world/world.cpp`; the former `src/src/` prefix bug is fixed.
-
-`SAGA_NOMATCH` places a function in `.text.nomatch`. It does **not** by itself
-hide the symbol from `nm` or exempt it from `check_symbols.py`; a global symbol
-can still appear in the extra-symbol baseline. Use the attribute only for
-its section-placement purpose, not as a symbol-filtering mechanism.
 
 Host-only diagnostic commands belong under `src/host/harness/`. Keep asset tools
 general: `bazel run --config=native //src:run_native -- load list [filter]`

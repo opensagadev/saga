@@ -47,7 +47,6 @@ bazel aquery --config=target \
 - Plain names normally require `extern "C"`; `_Z...` names use C++ linkage.
 - The target uses GCC 4.7 from NDK r8e, i386 PIC, SSE arithmetic, and disabled
   exceptions/RTTI.
-- `SAGA_NOMATCH` changes section placement; it does not hide a symbol.
 - Definition order, data section, literal first-use order, signedness, field
   offsets, and static initialization can all affect emitted bytes.
 - Native/WASM behavior is diagnostic and must not leak into the target.

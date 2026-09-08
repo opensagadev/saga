@@ -76,6 +76,7 @@ i32 DEFAULT_PLAYERHITPOINTS = 8;
 u32 LEGOOBJ_DEFAULTLASTCOIN = -1;
 
 APICHARACTERSYS *apicharsys;
+void CutScenes_Destroy(CUTSYS *system);
 
 // --- World-module helpers (kept with the WorldInfo API) ---
 
@@ -99,6 +100,7 @@ void WorldInfo_Dump(WORLDINFO *world) {
     // The full routine also tears down the level's gameplay subsystems and
     // editor pages. These scene removals are the original calls at
     // 0x481bcc..0x481d6b and must happen before Reset reuses the bump buffer.
+    CutScenes_Destroy(world->cutscene_sys);
     if (world->icons_gscn != nullptr) {
         NuGScnRemove(world->icons_gscn);
         world->icons_gscn = nullptr;
@@ -921,7 +923,7 @@ i32 RandomIDFromFlags(u32, u32, i32, APICHARACTERMODELLIST_s *, i32);
 void MakeFreePlayModelList(i32 model1, i32 model2, i32 area, i32 level, i32 param5) {
     i32 flags = 0;
     if (WORLD != NULL && WORLD->area != NULL && WORLD->area == HUB_ADATA && bonusmodearcade != 0)
-        flags = Arcade_Mode[ArcadeItem.field_c_0xc * 3].field8_0x8;
+        flags = Arcade_Mode[ArcadeItem.field_c_0xc].field8_0x8;
 
     FreePlayModelCount = 0;
     FreePlayResidentCount = 0;

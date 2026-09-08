@@ -1,4 +1,5 @@
 #include "gameapi/edtools/edgra.h"
+#include "gameapi/edtools/gameapi_edtools_types.h"
 #include "gameapi/edtools/edfile.h"
 #include "gameapi/edtools/edcam.h"
 #include "gameapi/edtools/edstubs.h"
@@ -14,12 +15,6 @@ struct part_emit_s {
     i32 trailing_state_words[8];
 };
 DECOMP_ASSERT(sizeof(part_emit_s) == 0x6c, "part_emit_s size");
-
-struct edanim_param_s {
-    i32 instance_id;
-    u8 reserved_004[0x2d4 - 0x004];
-};
-DECOMP_ASSERT(sizeof(edanim_param_s) == 0x2d4, "edanim_param_s size");
 
 struct edbridge_s {
     i32 instance_id;
@@ -48,6 +43,10 @@ extern "C" {
     i32 edanim_params_used;
     i32 edanim_page_on[8];
     i32 edanim_page_used[8];
+    i32 edanim_nearest;
+    i32 edanim_nearest_param_id;
+    i32 edanim_sound_type;
+    NUGSCN *edbits_base_scene;
     edbridge_s edBridges[64];
     i32 edbri_bridges_used;
     i32 edbri_page_on[8];
@@ -180,7 +179,7 @@ extern "C" {
     }
     void edbitsDrawTorus(void) {
     }
-    void edbitsGetSoundName(void) {
+    char *edbitsGetSoundName(i32) {
     }
     void edbitsLookupInstance(void) {
     }

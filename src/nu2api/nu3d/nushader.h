@@ -48,6 +48,21 @@ typedef struct nushaderusagemask_s {
     u32 semantics[4];
 } NUSHADERUSAGEMASK;
 
+struct ShaderUniformRecord {
+    const char *vertex_name;
+    const char *fragment_name;
+    i32 value_count;
+    i32 field_c;
+    i32 stage_mask;
+    i32 register_index;
+    i32 field_18;
+    f32 values[16];
+};
+
+DECOMP_ASSERT(sizeof(ShaderUniformRecord) == 0x5c, "shader uniform record size");
+
+extern "C" ShaderUniformRecord g_shaderUniforms[0x65];
+
 DECOMP_ASSERT(sizeof(GLSLParameter) == 8, "GLSL parameter metadata size");
 DECOMP_ASSERT(offsetof(GLSLParameter, semantic) == 4, "GLSL parameter semantic offset");
 
@@ -101,6 +116,8 @@ extern "C" {
     void NuShaderObjectBaseSetWaterSpeed(f32 speed);
     void NuShaderObjectSetElementsfv(NUSHADEROBJECT *shader_object, i32 semantic, i32 first_element, i32 count,
                                      const f32 *values);
+    void NuShaderObjectSetElementsfv_transpose(NUSHADEROBJECT *shader_object, i32 semantic, i32 first_element,
+                                               i32 count, const f32 *values);
     NUSHADERPROGRAM *NuShaderProgramCreateIOS(const char *vertex_source, const char *fragment_source);
     void NuShaderProgramSetVertexParamfv(NUSHADERPROGRAM *program, u32 register_index, const f32 *values,
                                          i32 component_count);

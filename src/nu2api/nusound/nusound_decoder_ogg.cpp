@@ -1,5 +1,6 @@
 #include "nusound_decoder_ogg.hpp"
 
+#include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nucore/nucore.hpp"
 #include "nu2api/nucore/numemory.h"
 #include "nu2api/nusound/nusound_buffer.hpp"
@@ -12,13 +13,6 @@
 // libTTapp.so 0x32e630: the OGG decoder extends the base decoder with the
 // streaming reader subobject and a 0x2b000-byte ring buffer size.
 NuSoundDecoderOGG::NuSoundDecoderOGG(char const *name, NuSoundSource *wrapped) : NuSoundDecoder(name, wrapped) {
-    this->field_0xec = 0;
-    this->field_0xf0 = &this->field_0xf0;
-    this->field_0xf4 = static_cast<NuSoundBufferCallback *>(this);
-    this->field_0xf8 = 0;
-    this->field_0xfc = static_cast<NuSoundBufferCallback *>(this);
-    this->field_0x100 = &this->field_0xf0;
-    this->field_0x104 = 0;
     this->field_0x108 = 0;
 
     new (&this->read_callbacks) OGGReadCallbacksDecoder();
@@ -51,7 +45,6 @@ void NuSoundDecoderOGG::SubmitBuffer(NuSoundBuffer *buffer) {
 
 // libTTapp.so 0x32e5f0 / 0x32e620.
 NuSoundDecoderOGG::OGGReadCallbacksDecoder::OGGReadCallbacksDecoder() {
-    this->decoder = NULL;
     this->position = 0;
 }
 
@@ -60,16 +53,18 @@ void NuSoundDecoderOGG::OGGReadCallbacksDecoder::SetDecoder(NuSoundDecoderOGG *d
 }
 
 // libTTapp.so 0x32e1b0 / 0x32e1c0 / 0x32e1d0.
-void NuSoundDecoderOGG::OGGReadCallbacksDecoder::Seek(int origin, unsigned int offset) {
+// The decoder datasource never seeks.  The original callback returns the
+// requested offset unchanged; vorbisfile ignores it on this streaming path.
+i32 NuSoundDecoderOGG::OGGReadCallbacksDecoder::Seek(i32 offset, u32 origin) {
     (void)origin;
-    (void)offset;
+    return offset;
 }
 
 void NuSoundDecoderOGG::OGGReadCallbacksDecoder::Close() {
 }
 
 int NuSoundDecoderOGG::OGGReadCallbacksDecoder::GetPosition() const {
-    return (int)this->position;
+    return 0;
 }
 
 // libTTapp.so 0x32ec10: serves the vorbisfile reader with encoded bytes from
@@ -77,64 +72,64 @@ int NuSoundDecoderOGG::OGGReadCallbacksDecoder::GetPosition() const {
 // runs dry and looping the stream at EOF when requested.
 int NuSoundDecoderOGG::OGGReadCallbacksDecoder::Read(void *dest, unsigned int size) {
     memset(dest, 0, size);
-    if (this->decoder == NULL || size == 0) {
+    this->decoder->GetEncodedSource();
+    if (size == 0) {
         return 0;
     }
 
-    u8 *out = (u8 *)dest;
-    u32 remaining = size;
     u32 copied = 0;
-
-    while (remaining != 0 && this->decoder->locked_buffer != NULL) {
-        NuSoundBuffer *buffer = this->decoder->locked_buffer;
-        buffer->Lock();
-        NuSoundBuffer::Context &context = buffer->GetCurrentContext();
-
-        u64 boundary = context.size3 != 0 ? context.size3 : context.read_size;
-        u32 available = boundary > this->position ? (u32)(boundary - this->position) : 0;
-        u32 take = remaining < available ? remaining : available;
-        if (take != 0) {
-            memmove(out, (u8 *)buffer->GetAddress() + this->position, take);
-            this->position += take;
-            out += take;
-            remaining -= take;
-            copied += take;
+    while (size != 0) {
+        if (this->decoder->locked_buffer == NULL) {
+            memset(dest, 0, size);
+            return (int)size;
         }
 
-        bool at_end = (context.flags & 2) != 0;
-        buffer->Unlock();
+        this->decoder->locked_buffer->Lock();
+        NuSoundBuffer::Context &context = this->decoder->locked_buffer->GetCurrentContext();
 
-        if (remaining == 0 || (at_end && !this->decoder->ogg_loop)) {
+        u32 read_available = (u32)context.read_size - this->position;
+        u32 boundary_available = context.size3 != 0 ? (u32)context.size3 - this->position : read_available;
+        u32 take = size < read_available ? size : read_available;
+        if (boundary_available < take) {
+            take = boundary_available;
+        }
+
+        memmove(dest, (u8 *)this->decoder->locked_buffer->GetAddress() + this->position, take);
+        this->position += take;
+        size -= take;
+        copied += take;
+        dest = (u8 *)dest + take;
+
+        this->decoder->locked_buffer->Unlock();
+        if (size == 0 || ((context.flags & 2) != 0 && !this->decoder->ogg_loop)) {
+            return (int)copied;
+        }
+
+        if (context.size3 != 0 && context.size3 < context.read_size) {
+            context.size3 = 0;
             break;
         }
 
-        if (available == take) {
-            // Decode() keeps the current encoded buffer locked while
-            // vorbisfile reads it.  At a buffer boundary the original drops
-            // that persistent lock before moving to the next ring entry.
-            buffer->Unlock();
+        // Decode holds a persistent lock while vorbisfile consumes the
+        // encoded buffer. The original drops that second lock here.
+        this->decoder->locked_buffer->Unlock();
 
-            if (this->decoder->ring_read_pos == this->decoder->ring_write_pos) {
-                // A refill is still in flight.  The original re-cues the
-                // current buffer from its start and restores the persistent
-                // lock, returning whatever was copied this call rather than
-                // reporting a false end-of-stream to vorbisfile.
-                buffer->Lock();
-                this->position = 0;
-                return (int)copied;
-            }
-            this->decoder->locked_buffer = this->decoder->encoded_buffers[this->decoder->ring_read_pos % 4];
-            __sync_fetch_and_add(&this->decoder->ring_read_pos, 1);
-
-            NuSoundWeakPtr<NuSoundBufferCallback> callback;
-            callback.Set(this->decoder);
-            this->decoder->source->RequestBuffer(this->decoder->ogg_loop, callback);
-
+        if (this->decoder->ring_read_pos == this->decoder->ring_write_pos) {
             this->decoder->locked_buffer->Lock();
             this->position = 0;
+            return (int)copied;
         }
-    }
 
+        this->decoder->locked_buffer = this->decoder->encoded_buffers[this->decoder->ring_read_pos % 4];
+        __sync_fetch_and_add(&this->decoder->ring_read_pos, 1);
+
+        NuSoundWeakPtr<NuSoundBufferCallback> callback;
+        callback.Set(this->decoder);
+        this->decoder->source->RequestBuffer(false, callback);
+
+        this->decoder->locked_buffer->Lock();
+        this->position = 0;
+    }
     return (int)copied;
 }
 
@@ -146,22 +141,16 @@ u64 NuSoundDecoderOGG::Decode(NuSoundSource &source, NuSoundBuffer &buffer, bool
     this->ogg_loop = loop;
 
     if (this->locked_buffer == NULL) {
-        u32 initial = source.GetNumInitialBuffers();
-        for (u32 i = 0; i < initial; i++) {
+        for (i32 i = 0; i < source.GetNumInitialBuffers(); i++) {
             NuSoundWeakPtr<NuSoundBufferCallback> callback;
             callback.Set(this);
             source.RequestBuffer(loop, callback);
         }
-        if (this->ring_read_pos != this->ring_write_pos) {
-            this->locked_buffer = this->encoded_buffers[this->ring_read_pos % 4];
-            this->ring_read_pos++;
-        }
+        this->locked_buffer = this->encoded_buffers[this->ring_read_pos % 4];
+        __sync_fetch_and_add(&this->ring_read_pos, 1);
     }
 
     NuSoundStreamDesc *desc = source.GetStreamDesc();
-    if (this->locked_buffer == NULL || desc == NULL) {
-        return 0;
-    }
     NuSoundBuffer::Context &context = buffer.GetCurrentContext();
 
     if (this->locked_buffer != NULL) {
@@ -171,9 +160,9 @@ u64 NuSoundDecoderOGG::Decode(NuSoundSource &source, NuSoundBuffer &buffer, bool
     buffer.Lock();
 
     context.flags &= ~0x3u;
-    context.read_size = 0;
     context.size2 = 0;
 
+    desc->GetNumChannels();
     memset(buffer.GetAddress(), 0, buffer.GetBufferSize());
 
     char *dest = (char *)buffer.GetAddress();
@@ -183,24 +172,24 @@ u64 NuSoundDecoderOGG::Decode(NuSoundSource &source, NuSoundBuffer &buffer, bool
         context.flags |= 1;
     }
 
-    u32 block_size = desc->GetBlockSize();
-    u32 rounded = buffer_bytes - (buffer_bytes % block_size);
+    i32 block_size = desc->GetBlockSize();
+    i32 rounded = (i32)buffer_bytes / block_size * block_size;
 
     u64 total = desc->GetDecodedLengthBytes();
 
-    u32 chunk = rounded;
+    i32 chunk = rounded;
     if (loop == false) {
-        u64 remaining = total - this->decoded_bytes;
-        if (remaining < (u64)chunk) {
-            chunk = (u32)remaining;
+        i32 remaining = (i32)total - (i32)this->decoded_bytes;
+        if (remaining < chunk) {
+            chunk = remaining;
         }
     }
 
-    u32 got = this->DecodeOggChunk(dest, chunk);
+    u32 got = this->DecodeOggChunk(dest, (u32)chunk);
 
     this->total_decoded_bytes += got;
     this->decoded_bytes += chunk;
-    context.read_size += got;
+    context.size2 += got;
 
     total = desc->GetDecodedLengthBytes();
     if (this->decoded_bytes == total) {
@@ -214,7 +203,7 @@ u64 NuSoundDecoderOGG::Decode(NuSoundSource &source, NuSoundBuffer &buffer, bool
 
     buffer.Unlock();
 
-    return context.read_size;
+    return context.size2;
 }
 
 // libTTapp.so 0x32e310: ov_read() the encoded stream until the destination
@@ -224,59 +213,82 @@ u64 NuSoundDecoderOGG::Decode(NuSoundSource &source, NuSoundBuffer &buffer, bool
 // object as its datasource while this chunk is decoded.
 u32 NuSoundDecoderOGG::DecodeOggChunk(char *dest, unsigned int size) {
     NuSoundStreamDesc *desc = this->GetStreamDesc();
-
-    u32 bits_per_sample = desc->GetBitsPerChannel();
-
+    i32 bits_per_sample = (i32)desc->GetBitsPerChannel();
     NuSoundHeaderOGG *header = (NuSoundHeaderOGG *)desc;
-    OggVorbis_File *ogg = header != NULL ? &header->ogg_file : NULL;
-    void *saved_datasource = ogg != NULL ? ogg->datasource : NULL;
-    if (ogg != NULL) {
-        ogg->datasource = &this->read_callbacks;
-    }
+    OggVorbis_File *ogg = &header->ogg_file;
+    void *saved_datasource = ogg->datasource;
+    ogg->datasource = &this->read_callbacks;
+
     u32 decoded = 0;
-
     u32 block_size = desc->GetBlockSize();
-    u32 bytes_per_sample = (bits_per_sample + 7) / 8;
 
-    if (size != 0 && block_size < size && ogg != NULL) {
+    if (size != 0 && block_size < size && ogg->ready_state != 0) {
+        i32 rounded_bits = bits_per_sample + 7;
+        if (bits_per_sample >= 0) {
+            rounded_bits = bits_per_sample;
+        }
+        i32 bytes_per_sample = rounded_bits >> 3;
         char *cursor = dest;
-        char *end = dest + size;
 
-        while (cursor < end) {
+        do {
             int bitstream = 0;
-            int ret = ov_read(ogg, cursor, (int)(end - cursor), 0, bytes_per_sample, 1, &bitstream);
+            NuIOS_IsLowEndDevice();
+            int ret = ov_read(ogg, cursor, (int)(size - decoded), 0, bytes_per_sample, 1, &bitstream);
 
-            if (ret <= 0) {
-                if (ret < 0) {
-                    // libTTapp.so 0x32e598: negative returns (OV_HOLE and
-                    // friends) just loop around; the next ov_read recovers.
-                    continue;
-                }
-                if (this->ogg_loop) {
-                    // Stream finished and the voice wants a loop: restart it.
+            if (ret < 1) {
+                if (ret == 0) {
+                    if (!this->ogg_loop) {
+                        break;
+                    }
+                    NuIOS_IsLowEndDevice();
                     ov_raw_seek(ogg, 0);
-                    continue;
                 }
-                break;
+            } else {
+                decoded += ret;
+                cursor += ret;
             }
 
-            decoded += ret;
-            cursor += ret;
-        }
+            if (size <= decoded || size - decoded <= block_size || ogg->ready_state == 0) {
+                break;
+            }
+        } while (true);
     }
 
+    ogg->datasource = saved_datasource;
+
     // Channel permutation passes (Vorbis orders multichannel material
-    // differently from WAVE): 3-channel streams rotate the first samples of
-    // each frame, 6-channel streams apply the 5.1 reordering.
-    u32 channels = desc->GetNumChannels();
-    if (channels == 3) {
-        for (u32 i = 0; i < decoded / bytes_per_sample; i++) {
+    // differently from WAVE). The original advances one interleaved frame at
+    // a time, i.e. by the channel count in 16-bit samples.
+    if (desc->GetNumChannels() == 3) {
+        u32 i = 0;
+        while (true) {
+            i32 channel_bits = (i32)desc->GetBitsPerChannel();
+            i32 rounded_bits = channel_bits + 7;
+            if (channel_bits >= 0) {
+                rounded_bits = channel_bits;
+            }
+            if (decoded / (u32)(rounded_bits >> 3) <= i) {
+                break;
+            }
             u16 tmp = *(u16 *)&dest[2 + i * 2];
             *(u16 *)&dest[2 + i * 2] = *(u16 *)&dest[4 + i * 2];
             *(u16 *)&dest[4 + i * 2] = tmp;
+            i += desc->GetNumChannels();
         }
-    } else if (channels == 6) {
-        for (u32 i = 0; i < decoded / bytes_per_sample; i++) {
+        return decoded;
+    }
+
+    if (desc->GetNumChannels() == 6) {
+        u32 i = 0;
+        while (true) {
+            i32 channel_bits = (i32)desc->GetBitsPerChannel();
+            i32 rounded_bits = channel_bits + 7;
+            if (channel_bits >= 0) {
+                rounded_bits = channel_bits;
+            }
+            if (decoded / (u32)(rounded_bits >> 3) <= i) {
+                break;
+            }
             u16 tmp = *(u16 *)&dest[2 + i * 2];
             *(u16 *)&dest[2 + i * 2] = *(u16 *)&dest[4 + i * 2];
             *(u16 *)&dest[4 + i * 2] = tmp;
@@ -288,11 +300,10 @@ u32 NuSoundDecoderOGG::DecodeOggChunk(char *dest, unsigned int size) {
             tmp = *(u16 *)&dest[8 + i * 2];
             *(u16 *)&dest[8 + i * 2] = *(u16 *)&dest[10 + i * 2];
             *(u16 *)&dest[10 + i * 2] = tmp;
+            i += desc->GetNumChannels();
         }
+        return decoded;
     }
 
-    if (ogg != NULL) {
-        ogg->datasource = saved_datasource;
-    }
     return decoded;
 }

@@ -101,6 +101,20 @@ struct nuvec_s;
 struct part_typedesc_s {};
 union variptr_u;
 
+struct edanim_param_s {
+    i32 instance_id;
+    u8 reserved_004[0x8 - 0x4];
+    i32 sound_count;
+    u8 reserved_00c[0x180 - 0x00c];
+    char sound_names[8][0x10];
+    i32 sound_ids[8];
+    i32 sound_flags[8];
+    float sound_values[8];
+    float sound_positions[8][3];
+    u8 reserved_2c0[0x2d4 - 0x2c0];
+};
+static_assert(sizeof(edanim_param_s) == 0x2d4, "edanim_param_s size");
+
 struct EdBitControl {
     void AddMenuItem(eduimenu_s *, EdRef *, void *);
     void Refresh();

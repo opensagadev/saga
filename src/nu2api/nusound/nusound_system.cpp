@@ -2,8 +2,10 @@
 
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nufile/nufile.h"
+#include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/nusound/nusound_bus.hpp"
+#include "nu2api/nusound/nusound_android.hpp"
 #include "nu2api/nusound/nusound_decoder.hpp"
 #include "nu2api/nusound/nusound_decoder_ogg.hpp"
 #include "nu2api/nusound/nusound_streamer.hpp"
@@ -11,6 +13,7 @@
 
 #include "decomp.h"
 
+#include <float.h>
 #include <cstdio>
 #include <cstring>
 #include <new>
@@ -18,6 +21,8 @@
 NuSoundBus *NuSoundSystem::sMasterBus = NULL;
 i32 NuSoundSystem::sAllocdMemory[3] = {0};
 i32 NuSoundSystem::sTotalMemory[3] = {0};
+i32 NuSoundSystem::sPeakAllocdMemory[3] = {0};
+u32 NuSoundSystem::sGfxMemorySize = 0;
 void *NuSoundSystem::sScratchMemory = NULL;
 void *NuSoundSystem::sSampleMemory = NULL;
 void *NuSoundSystem::sDecoderMemory = NULL;
@@ -33,76 +38,124 @@ i32 NuSoundSystem::sOutputConfig = 0;
 
 NuMemoryManager *NuSoundSystem::sScratchMemMgr = NULL;
 
+extern const f32 RoutingTableMonoToMono[1] = {1.0f};
+extern const f32 RoutingTableMonoToStereo[2] = {0.70794576f, 0.70794576f};
+extern const f32 RoutingTableMonoToQuad[4] = {0.7f, 0.7f, 0.5f, 0.5f};
+extern const f32 RoutingTableMonoTo51[6] = {0.5f, 0.5f, 0.7f, 0.3f, 0.5f, 0.5f};
+extern const f32 RoutingTableMonoTo71[8] = {0.5f, 0.5f, 0.7f, 0.3f, 0.5f, 0.5f, 0.3f, 0.3f};
+
+extern const f32 RoutingTableStereoToMono[2] = {0.70794576f, 0.70794576f};
+extern const f32 RoutingTableStereoToStereo[4] = {1.0f, 0.0f, 0.0f, 1.0f};
+extern const f32 RoutingTableStereoToQuad[8] = {1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+extern const f32 RoutingTableStereoTo51[12] = {0.5f, 0.0f, 0.0f, 0.5f, 0.7f, 0.7f, 0.3f, 0.3f, 0.5f, 0.0f, 0.0f, 0.5f};
+extern const f32 RoutingTableStereoTo71[16] = {1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                                               0.7f, 0.0f, 0.0f, 0.7f, 0.3f, 0.0f, 0.0f, 0.3f};
+
+extern const f32 RoutingTableLRCToMono[3] = {0.50119f, 0.50119f, 0.50119f};
+extern const f32 RoutingTableLRCToStereo[6] = {1.0f, 0.0f, 0.68f, 0.0f, 1.0f, 0.68f};
+extern const f32 RoutingTableLRCToQuad[12] = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+extern const f32 RoutingTableLRCTo51[18] = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+                                            0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+extern const f32 RoutingTableLRCTo71[24] = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+                                            0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+
+extern const f32 RoutingTable51ToMono[6] = {0.50119f, 0.50119f, 0.50119f, 0.50119f, 0.50119f, 0.50119f};
+extern const f32 RoutingTable51ToStereo[12] = {1.0f, 0.0f, 0.68f, 0.2f, 0.2f, 0.0f,
+                                               0.0f, 1.0f, 0.68f, 0.2f, 0.0f, 0.2f};
+extern const f32 RoutingTable51ToQuad[24] = {1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                                             0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+extern const f32 RoutingTable51To51[36] = {
+    1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+};
+extern const f32 RoutingTable51To71[48] = {
+    1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.3f,
+};
+
+extern const f32 RoutingTable71ToMono[8] = {0.50119f, 0.50119f, 0.50119f, 0.50119f, 0.50119f, 0.50119f, 0.0f, 0.0f};
+extern const f32 RoutingTable71ToStereo[16] = {1.0f, 0.0f, 0.68f, 0.3f, 0.3f, 0.0f, 0.3f, 0.0f,
+                                               0.0f, 1.0f, 0.68f, 0.3f, 0.0f, 0.3f, 0.0f, 0.3f};
+extern const f32 RoutingTable71ToQuad[32] = {
+    1.0f, 0.0f, 0.5f, 0.3f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.5f, 0.3f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.4f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.4f,
+};
+extern const f32 RoutingTable71To51[48] = {
+    1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.4f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.4f,
+};
+extern const f32 RoutingTable71To71[64] = {
+    1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+};
+
+static NuSoundMixMatrix *CreateRoutingMatrix(u32 from, u32 to, const f32 *values) {
+    NuSoundMixMatrix *matrix =
+        static_cast<NuSoundMixMatrix *>(NU_ALLOC(sizeof(NuSoundMixMatrix), 4, 1, "", NUMEMORY_CATEGORY_NUSOUND));
+    if (matrix != NULL) {
+        new (matrix) NuSoundMixMatrix(static_cast<NuSoundSystem::ChannelConfig>(from),
+                                      static_cast<NuSoundSystem::ChannelConfig>(to), values);
+    }
+    return matrix;
+}
+
 void NuSoundInitDefaultRoutingTables(void) {
-    LOG_WARN("NuSoundInitDefaultRoutingTables is not implemented");
+    NuSoundRoutingTable *table =
+        static_cast<NuSoundRoutingTable *>(NU_ALLOC(sizeof(NuSoundRoutingTable), 4, 1, "", NUMEMORY_CATEGORY_NUSOUND));
+    if (table != NULL) {
+        new (table) NuSoundRoutingTable("default");
+    }
+
+    const NuSoundSystem::ChannelConfig mono = static_cast<NuSoundSystem::ChannelConfig>(1);
+    const NuSoundSystem::ChannelConfig stereo = static_cast<NuSoundSystem::ChannelConfig>(2);
+    const NuSoundSystem::ChannelConfig lrc = static_cast<NuSoundSystem::ChannelConfig>(3);
+    const NuSoundSystem::ChannelConfig quad = static_cast<NuSoundSystem::ChannelConfig>(4);
+    const NuSoundSystem::ChannelConfig surround51 = static_cast<NuSoundSystem::ChannelConfig>(6);
+    const NuSoundSystem::ChannelConfig surround71 = static_cast<NuSoundSystem::ChannelConfig>(8);
+
+    table->SetMatrix(mono, mono, CreateRoutingMatrix(1, 1, RoutingTableMonoToMono));
+    table->SetMatrix(mono, stereo, CreateRoutingMatrix(1, 2, RoutingTableMonoToStereo));
+    table->SetMatrix(mono, quad, CreateRoutingMatrix(1, 4, RoutingTableMonoToQuad));
+    table->SetMatrix(mono, surround51, CreateRoutingMatrix(1, 6, RoutingTableMonoTo51));
+    table->SetMatrix(mono, surround71, CreateRoutingMatrix(1, 8, RoutingTableMonoTo71));
+
+    table->SetMatrix(stereo, mono, CreateRoutingMatrix(2, 1, RoutingTableStereoToMono));
+    table->SetMatrix(stereo, stereo, CreateRoutingMatrix(2, 2, RoutingTableStereoToStereo));
+    table->SetMatrix(stereo, quad, CreateRoutingMatrix(2, 4, RoutingTableStereoToQuad));
+    table->SetMatrix(stereo, surround51, CreateRoutingMatrix(2, 6, RoutingTableStereoTo51));
+    table->SetMatrix(stereo, surround71, CreateRoutingMatrix(2, 8, RoutingTableStereoTo71));
+
+    table->SetMatrix(lrc, mono, CreateRoutingMatrix(3, 1, RoutingTableLRCToMono));
+    table->SetMatrix(lrc, stereo, CreateRoutingMatrix(3, 2, RoutingTableLRCToStereo));
+    table->SetMatrix(lrc, quad, CreateRoutingMatrix(3, 4, RoutingTableLRCToQuad));
+    table->SetMatrix(lrc, surround51, CreateRoutingMatrix(3, 6, RoutingTableLRCTo51));
+    table->SetMatrix(lrc, surround71, CreateRoutingMatrix(3, 8, RoutingTableLRCTo71));
+
+    table->SetMatrix(surround51, mono, CreateRoutingMatrix(6, 1, RoutingTable51ToMono));
+    table->SetMatrix(surround51, stereo, CreateRoutingMatrix(6, 2, RoutingTable51ToStereo));
+    table->SetMatrix(surround51, quad, CreateRoutingMatrix(6, 4, RoutingTable51ToQuad));
+    table->SetMatrix(surround51, surround51, CreateRoutingMatrix(6, 6, RoutingTable51To51));
+    table->SetMatrix(surround51, surround71, CreateRoutingMatrix(6, 8, RoutingTable51To71));
+
+    table->SetMatrix(surround71, mono, CreateRoutingMatrix(8, 1, RoutingTable71ToMono));
+    table->SetMatrix(surround71, stereo, CreateRoutingMatrix(8, 2, RoutingTable71ToStereo));
+    table->SetMatrix(surround71, quad, CreateRoutingMatrix(8, 4, RoutingTable71ToQuad));
+    table->SetMatrix(surround71, surround51, CreateRoutingMatrix(8, 6, RoutingTable71To51));
+    table->SetMatrix(surround71, surround71, CreateRoutingMatrix(8, 8, RoutingTable71To71));
+
+    NuSound.AddRoutingTable(table);
+    NuSound.SetDefaultRoutingTable(table);
 }
 
 NuSoundSystem::NuSoundSystem() {
-
-    pthread_mutexattr_t attr;
-
-    pthread_mutexattr_init(&attr);
-    pthread_mutexattr_settype(&attr, 1);
-    pthread_mutex_init(&this->mutex, &attr);
-    pthread_mutexattr_destroy(&attr);
-
-    // NuSoundClock::NuSoundClock(&this->clock);
-    // clock_callbacks = &(this->clock).callbacks2;
-    // puVar1 = &(this->clock).field3_0xc;
-    // this->clock_callbacks = clock_callbacks;
-    // this->field7_0x44 = puVar1;
-    // this->clock_callbacks2 = clock_callbacks;
-    // this->field5_0x3c = puVar1;
-    // this->field3_0x34 = 0;
-    // this->field6_0x40 = 0;
-    // this->field9_0x4c = 0;
-    // NuSoundVoiceFactoryList::NuSoundVoiceFactoryList(&this->factory_list);
-    // this->field17_0x74 = (undefined1 *)&this->field6_0x40;
-    // this->field18_0x78 = &this->clock_callbacks;
-    // this->field14_0x68 = (undefined1 *)&this->clock_callbacks;
-    // this->field15_0x6c = (undefined1 *)&this->field6_0x40;
-    // this->list_start = (NuEListNode<> *)&this->field22_0x88;
-    // this->list_end = (NuEListNode<> *)&this->field20_0x80;
-    // this->field21_0x84 = &this->field22_0x88;
-    // this->field22_0x88 = &this->field20_0x80;
-    // this->tail_bus = (NuSoundBus *)&this->field29_0xa4;
-    // this->field31_0xac = (NuSoundBus *)&this->field27_0x9c;
-    // this->field28_0xa0 = (i32)&this->field29_0xa4;
-    // this->field29_0xa4 = (NuSoundBus *)&this->field27_0x9c;
-    // this->field39_0xcc = (i32)&this->field36_0xc0;
-    // this->field38_0xc8 = (i32)&this->field34_0xb8;
-    // this->field35_0xbc = (i32)&this->field36_0xc0;
-    // this->field36_0xc0 = (i32)&this->field34_0xb8;
-    // this->field13_0x64 = 0;
-    // this->field45_0xe4 = (undefined1 *)&this->field41_0xd4;
-    // this->field16_0x70 = 0;
-    // this->voice_count = 0;
-    // this->field20_0x80 = 0;
-    // this->field23_0x8c = 0;
-    // this->field26_0x98 = 0;
-    // this->field27_0x9c = 0;
-    // this->field30_0xa8 = 0;
-    // this->field33_0xb4 = 0;
-    // this->field34_0xb8 = 0;
-    // this->field37_0xc4 = 0;
-    // this->field40_0xd0 = 0;
-    // this->field41_0xd4 = 0;
-    // this->field44_0xe0 = 0;
-    // this->field46_0xe8 = (undefined1 *)&this->field43_0xdc;
-    // this->field42_0xd8 = (undefined1 *)&this->field43_0xdc;
-    // this->field43_0xdc = (undefined1 *)&this->field41_0xd4;
-    // this->field47_0xec = 0;
-    // this->field48_0xf0 = 0;
-    // this->field49_0xf4 = 0;
-    this->samples = NULL;
-    // this->field50_0xf8 = 0;
-    this->sample_count = 0x100;
-    this->voice_list_start = NULL;
-    this->voice_list_end = NULL;
-    this->voice_count = 0;
-    // libTTapp.so ctor (0x319552): the update gate field63_0x108 starts at 1.
-    this->initialised = true;
-    // this->field63_0x108 = 1;
+    field_0xf8 = 0;
+    samples = NULL;
+    sample_count = 0x100;
+    initialised = true;
     s_staticInstance = this;
 }
 
@@ -231,9 +284,6 @@ u32 NuSoundSystem::GetDecoderMemorySize() {
 }
 
 NuSoundBus *NuSoundSystem::CreateBus(const char *name, bool is_master) {
-    i32 *piVar1;
-    i32 iVar2;
-
     NuSoundBus *bus = GetBus(name);
 
     if (bus == NULL) {
@@ -242,15 +292,7 @@ NuSoundBus *NuSoundSystem::CreateBus(const char *name, bool is_master) {
 
         if (bus != NULL) {
             new (bus) NuSoundBus(name, is_master);
-
-            // TODO
-            // piVar1 = *(i32 **)&this->field_0xb0;
-            // iVar2 = *piVar1;
-            //*piVar1 = (i32)bus;
-            // bus->field0_0x0 = iVar2;
-            //*(NuSoundBus **)(iVar2 + 4) = bus;
-            // bus->field1_0x4 = piVar1;
-            //*(i32 *)&this->field_0xb4 = *(i32 *)&this->field_0xb4 + 1;
+            bus_list.PushBack(bus);
         }
     }
 
@@ -287,6 +329,14 @@ NuSoundSample *NuSoundSystem::AddSample(const char *name, FileType file_type, Nu
     } else {
         return NULL;
     }
+
+    // NuSoundSample and NuSoundDecoder share the intrusive links at +0x20.
+    // The system's first offset list is the target's global sample/source
+    // list, despite the provisional decoder_list name in this reconstruction.
+    this->decoder_list.PushBack(reinterpret_cast<NuSoundDecoder *>(sample));
+    i32 hash = GenerateHash(buf);
+    sample->next = this->samples[hash];
+    this->samples[hash] = sample;
 
     return sample;
 }
@@ -348,10 +398,11 @@ void NuSoundSystem::ReleaseFileLoader(NuSoundLoader *loader) {
 }
 
 NuSoundSystem::~NuSoundSystem() {
+    s_staticInstance = NULL;
 }
 
-i32 NuSoundStreamDesc::DecodeStreamOnOpen() const {
-    return 0;
+bool NuSoundStreamDesc::DecodeStreamOnOpen() const {
+    return false;
 }
 
 i32 NuSoundStreamDesc::GetLoopStart() const {
@@ -362,19 +413,30 @@ i32 NuSoundStreamDesc::GetLoopEnd() const {
     return 0;
 }
 
-void NuSoundSystem::AddListener(NuSoundListener *) {
+bool NuSoundSystem::AddListener(NuSoundListener *listener) {
+    return this->listener_list.PushBack(listener);
 }
 
-void NuSoundSystem::AddRoutingTable(NuSoundRoutingTable *) {
+void NuSoundSystem::AddRoutingTable(NuSoundRoutingTable *table) {
+    routing_table_list.PushBack(table);
 }
 
-void NuSoundSystem::AmplitudeTodB(float) {
+f32 NuSoundSystem::AmplitudeTodB(f32 amplitude) {
+    if (amplitude <= 0.0f) {
+        return -100.0f;
+    }
+    if (amplitude >= 1.0f) {
+        return 0.0f;
+    }
+    return NuLog10(amplitude) * 20.0f;
 }
 
-void NuSoundSystem::CalculateCrossfadeHeight(NuSoundSystem::CurveData const &, float) const {
+f32 NuSoundSystem::CalculateCrossfadeHeight(NuSoundSystem::CurveData const &, float) const {
+    return 0.0f;
 }
 
-void NuSoundSystem::CreateCrossfadeCurve(u32) {
+NuSoundSystem::CurveData *NuSoundSystem::CreateCrossfadeCurve(u32 id) {
+    return &crossfade_curves.InsertNode(id)->value;
 }
 
 // libTTapp.so 0x31a810: builds the "<name>_decoder" name from the source's
@@ -394,7 +456,7 @@ NuSoundDecoder *NuSoundSystem::CreateDecoder(NuSoundSource *source) {
 
     NuSoundStreamDesc *desc = source->GetStreamDesc();
     if (desc != NULL && desc->GetEncodedDataFormat() == NuSoundStreamDesc::DataFormat::THREE) {
-        NuSoundDecoderOGG *decoder = (NuSoundDecoderOGG *)this->_AllocMemory(
+        NuSoundDecoderOGG *decoder = (NuSoundDecoderOGG *)NuSoundSystem::_AllocMemory(
             NuSoundSystem::MemoryDiscipline::SCRATCH, sizeof(NuSoundDecoderOGG), 4,
             "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound_system.cpp:436");
 
@@ -408,28 +470,111 @@ NuSoundDecoder *NuSoundSystem::CreateDecoder(NuSoundSource *source) {
     return NULL;
 }
 
-void NuSoundSystem::CreateEffect(NuSoundEffect::EffectType) {
+NuSoundEffect *NuSoundSystem::CreateEffect(NuSoundEffect::EffectType type) {
+    NuSoundEffect *effect = NULL;
+
+    switch (type) {
+        case NuSoundEffect::EffectType::ATTENUATION: {
+            void *memory = _AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectAttenuation), 4,
+                                        "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1094");
+            if (memory != NULL)
+                effect = new (memory) NuSoundEffectAttenuation();
+            break;
+        }
+        case NuSoundEffect::EffectType::PITCH: {
+            void *memory = _AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectPitch), 4,
+                                        "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1100");
+            if (memory != NULL)
+                effect = new (memory) NuSoundEffectPitch();
+            break;
+        }
+        case NuSoundEffect::EffectType::FADER: {
+            void *memory = _AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectFader), 4,
+                                        "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1106");
+            if (memory != NULL)
+                effect = new (memory) NuSoundEffectFader();
+            break;
+        }
+        case NuSoundEffect::EffectType::PITCH_RAMP: {
+            void *memory = _AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectPitchRamp), 4,
+                                        "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1112");
+            if (memory != NULL)
+                effect = new (memory) NuSoundEffectPitchRamp();
+            break;
+        }
+        case NuSoundEffect::EffectType::RANDOM_VOLUME: {
+            void *memory = _AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectRandomVolume), 4,
+                                        "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1118");
+            if (memory != NULL)
+                effect = new (memory) NuSoundEffectRandomVolume();
+            break;
+        }
+        case NuSoundEffect::EffectType::RANDOM_PITCH: {
+            void *memory = _AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectRandomPitch), 4,
+                                        "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1124");
+            if (memory != NULL)
+                effect = new (memory) NuSoundEffectRandomPitch();
+            break;
+        }
+        case NuSoundEffect::EffectType::DOPPLER: {
+            void *memory = _AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectDoppler), 4,
+                                        "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1130");
+            if (memory != NULL)
+                effect = new (memory) NuSoundEffectDoppler();
+            break;
+        }
+        case NuSoundEffect::EffectType::REPEAT: {
+            void *memory = _AllocMemory(MemoryDiscipline::SCRATCH, sizeof(NuSoundEffectRepeat), 4,
+                                        "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound.cpp:1136");
+            if (memory != NULL)
+                effect = new (memory) NuSoundEffectRepeat();
+            break;
+        }
+        default:
+            break;
+    }
+
+    if (effect != NULL) {
+        effect->Initialise();
+        NuSoundMemory::PushNuListNode(effect_update_list, effect);
+    }
+    return effect;
 }
 
 void NuSoundSystem::DefragmentSampleMemory() {
+    s_mmSample->Defragment(0);
 }
 
-void NuSoundSystem::DetermineFileType(NUFILETYPE) {
+NuSoundSystem::FileType NuSoundSystem::DetermineFileType(NUFILETYPE type) {
+    char extension[6] = {};
+    NuFileExtGetExt(extension, sizeof(extension), type);
+    return DetermineFileType(extension);
 }
 
 void NuSoundSystem::Disable() {
+    sNumAvailableOutputDevices = 0;
 }
 
-void NuSoundSystem::FileTypeSupported(NuSoundSystem::FileType) {
+bool NuSoundSystem::FileTypeSupported(NuSoundSystem::FileType type) {
+    switch (type) {
+        case FileType::WAV:
+        case FileType::OGG:
+            return true;
+        default:
+            return false;
+    }
 }
 
-void NuSoundSystem::Get() {
+NuSoundSystem *NuSoundSystem::Get() {
+    return s_staticInstance;
 }
 
-void NuSoundSystem::GetAllocdMemory(NuSoundSystem::MemoryDiscipline) {
+u32 NuSoundSystem::GetAllocdMemory(NuSoundSystem::MemoryDiscipline discipline) {
+    return sAllocdMemory[static_cast<u32>(discipline)];
 }
 
-void NuSoundSystem::GetBufferAlignment() {
+u32 NuSoundSystem::GetBufferAlignment() {
+    return 0x20;
 }
 
 i32 NuSoundSystem::GetClosestSupportedConfig(i32 config) {
@@ -440,135 +585,433 @@ i32 NuSoundSystem::GetClosestSupportedConfig(i32 config) {
     return (config >= 6) ? 6 : 2;
 }
 
-void NuSoundSystem::GetCrossfadeCurve(u32) const {
+const NuSoundSystem::CurveData *NuSoundSystem::GetCrossfadeCurve(u32 id) const {
+    const NuMapNode<u32, CurveData> *node = crossfade_curves.FindNode(id);
+    if (node != NULL) {
+        return &node->value;
+    }
+    return NULL;
 }
 
-void NuSoundSystem::GetDefaultFileType(NuSoundSource::FeedType) {
+NuSoundSystem::FileType NuSoundSystem::GetDefaultFileType(NuSoundSource::FeedType feed_type) {
+    if (feed_type == NuSoundSource::FeedType::ZERO) {
+        return DetermineFileType(NUFILETYPE_SFX);
+    }
+    if (feed_type == NuSoundSource::FeedType::STREAMING) {
+        return DetermineFileType(NUFILETYPE_SOUNDSTREAM);
+    }
+    return FileType::INVALID;
 }
 
 NuSoundRoutingTable *NuSoundSystem::GetDefaultRoutingTable() {
     return sDefaultRoutingTable;
 }
 
-void NuSoundSystem::GetGfxMemorySize() {
+u32 NuSoundSystem::GetGfxMemorySize() {
+    if (sGfxMemorySize == 0 || sGfxMemorySize <= GetScratchMemorySize()) {
+        return 0x600000;
+    }
+    return sGfxMemorySize - GetScratchMemorySize();
 }
 
-void NuSoundSystem::GetLanguageString(bool) {
+const char *NuSoundSystem::GetLanguageString(bool) {
+    return "Eng";
 }
 
-void NuSoundSystem::GetLargestMemoryFragment(NuSoundSystem::MemoryDiscipline) {
+u32 NuSoundSystem::GetLargestMemoryFragment(NuSoundSystem::MemoryDiscipline discipline) {
+    if (discipline == MemoryDiscipline::SCRATCH) {
+        return sScratchMemMgr->CalculateLargestFragmentSize();
+    }
+    return 0;
 }
 
-void NuSoundSystem::GetListeners() {
+NuEList<NuSoundListener, DefaultElist> *NuSoundSystem::GetListeners() {
+    return &this->listener_list;
+}
+
+NuSoundListener *NuSoundSystem::GetNearestRealListener(NuEList<NuSoundListener, DefaultElist> const &listeners,
+                                                       VuVec const &position) {
+    f32 nearest_distance = FLT_MAX;
+    NuSoundListener *nearest = NULL;
+    NuSoundListener *listener = static_cast<NuSoundListener *>(listeners.begin->field_0x4);
+
+    while (listener != listeners.end) {
+        if (listener->IsEnabled() && listener->GetSensitivity() > 0.0f) {
+            f32 distance = listener->GetHeadDistance(position) / listener->GetSensitivity();
+            if (nearest_distance > distance || nearest == NULL) {
+                nearest_distance = distance;
+                nearest = listener;
+            }
+        }
+        listener = static_cast<NuSoundListener *>(listener->field_0x4);
+    }
+
+    return nearest;
+}
+
+NuSoundListener *NuSoundSystem::GetNearestFocusListener(NuEList<NuSoundListener, DefaultElist> const &listeners,
+                                                        VuVec const &position, f32 &nearest_distance) {
+    nearest_distance = FLT_MAX;
+    NuSoundListener *nearest = NULL;
+    NuSoundListener *listener = static_cast<NuSoundListener *>(listeners.begin->field_0x4);
+
+    while (listener != listeners.end) {
+        if (listener->IsEnabled() && listener->GetSensitivity() > 0.0f) {
+            f32 distance = listener->GetAttenuationDistance(position) / listener->GetSensitivity();
+            if (nearest_distance > distance || nearest == NULL) {
+                nearest_distance = distance;
+                nearest = listener;
+            }
+        }
+        listener = static_cast<NuSoundListener *>(listener->field_0x4);
+    }
+
+    return nearest;
 }
 
 i32 NuSoundSystem::GetNumAvailableOutputDevices() {
     return sNumAvailableOutputDevices;
 }
 
-void NuSoundSystem::GetOldestVoice(NuSoundSample *, float &) {
+NuSoundVoice *NuSoundSystem::GetOldestVoice(NuSoundSample *sample, float &playback_position) {
+    playback_position = -1.0f;
+    NuSoundVoice *oldest = NULL;
+    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
+        if (voice->GetState() != NuSoundVoice::PLAYSTATE_PLAYING || voice->sound_source != sample) {
+            continue;
+        }
+        f32 position = voice->GetPlaybackPositionSeconds();
+        if (playback_position < 0.0f || playback_position < position) {
+            playback_position = position;
+            oldest = voice;
+        }
+    }
+    return oldest;
 }
 
-void NuSoundSystem::GetOutputChannelConfig() {
+i32 NuSoundSystem::GetOutputChannelConfig() {
+    return sOutputConfig;
 }
 
-void NuSoundSystem::GetPeakAllocdMemory(NuSoundSystem::MemoryDiscipline) {
+u32 NuSoundSystem::GetPeakAllocdMemory(NuSoundSystem::MemoryDiscipline discipline) {
+    return sPeakAllocdMemory[static_cast<u32>(discipline)];
 }
 
-void NuSoundSystem::GetPlatformString() {
+const char *NuSoundSystem::GetPlatformString() {
+    return "ANDROID";
 }
 
-void NuSoundSystem::GetQuietestVoice(NuSoundSample *, float &) {
+NuSoundVoice *NuSoundSystem::GetQuietestVoice(NuSoundSample *sample, float &quietest_volume) {
+    quietest_volume = -1.0f;
+    NuSoundVoice *quietest = NULL;
+
+    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
+        if (voice->GetState() != NuSoundVoice::PLAYSTATE_PLAYING ||
+            voice->sound_source->GetName() != sample->GetName()) {
+            continue;
+        }
+
+        f32 volume = voice->field67_0xa8 * voice->GetVolume();
+        if (quietest_volume < 0.0f || quietest_volume > volume) {
+            quietest_volume = volume;
+            quietest = voice;
+        }
+    }
+
+    return quietest;
 }
 
-void NuSoundSystem::GetRoutingTable(char const *) {
+NuSoundRoutingTable *NuSoundSystem::GetRoutingTable(char const *name) {
+    for (NuSoundRoutingTable *table = routing_table_list.Front(); table != routing_table_list.End();
+         table = reinterpret_cast<NuSoundRoutingTable **>(table)[1]) {
+        if (NuStrICmp(table->GetName(), name) == 0) {
+            return table;
+        }
+    }
+    return NULL;
 }
 
-void NuSoundSystem::GetTotalMemory(NuSoundSystem::MemoryDiscipline) {
+u32 NuSoundSystem::GetTotalMemory(NuSoundSystem::MemoryDiscipline discipline) {
+    return sTotalMemory[static_cast<u32>(discipline)];
 }
 
-void NuSoundSystem::LoadSample(NuSoundSample *, void *, i32, NuSoundOutOfMemCallback *) {
+bool NuSoundSystem::LoadSample(NuSoundSample *sample, void *data, i32 size, NuSoundOutOfMemCallback *callback) {
+    NuSoundSample::LoadState state = sample->GetLoadState();
+    if (state != NuSoundSample::LoadState::NOT_LOADED) {
+        return state == NuSoundSample::LoadState::LOADED;
+    }
+
+    if (sample->Load(data, size, callback) != NuSoundSample::ErrorState::NONE) {
+        return false;
+    }
+
+    this->field_0xf8++;
+    return sample->GetLoadState() == NuSoundSample::LoadState::LOADED;
 }
 
 void NuSoundSystem::PauseAllVoices() {
+    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
+        voice->Pause();
+    }
 }
 
-void NuSoundSystem::PauseVoices(i32) {
+void NuSoundSystem::PauseVoices(i32 mask) {
+    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
+        if ((voice->field131_0x148 & mask) != 0) {
+            voice->Pause();
+        }
+    }
 }
 
-void NuSoundSystem::ReAllocMemory(NuSoundSystem::MemoryDiscipline, u32, u32) {
+void *NuSoundSystem::ReAllocMemory(NuSoundSystem::MemoryDiscipline encoded_address, u32 size, u32 unused) {
+    (void)unused;
+    void *address = reinterpret_cast<void *>(static_cast<usize>(encoded_address));
+    NuMemoryManager *manager = NuMemoryGet()->GetThreadMem();
+    u32 old_size = manager->GetBlockSize(address);
+    u32 alignment = manager->GetBlockAlignment(address);
+    if (old_size < size) {
+        address = manager->_BlockReAlloc(address, size, alignment, 0, NULL, 0);
+    }
+    return address;
 }
 
-void NuSoundSystem::ReleaseBus(NuSoundBus *) {
+void NuSoundSystem::ReleaseBus(NuSoundBus *bus) {
+    this->bus_list.Remove(bus);
+    bus->~NuSoundBus();
+    FreeMemory(MemoryDiscipline::SCRATCH, reinterpret_cast<usize>(bus), 0);
 }
 
-void NuSoundSystem::ReleaseCrossfadeCurve(u32) {
+void NuSoundSystem::ReleaseCrossfadeCurve(u32 id) {
+    crossfade_curves.Erase(id);
 }
 
 void NuSoundSystem::ReleaseDecoder(NuSoundDecoder *decoder) {
-    decoder->~NuSoundDecoder();
+    // libTTapp.so 0x31aafb: invoke vtable slot 0 (the complete-object
+    // destructor) without using the deleting-destructor slot; the scratch
+    // allocator owns the storage release below.
+    typedef void (*CompleteDestructor)(void *);
+    CompleteDestructor *vtable = *(CompleteDestructor **)decoder;
+    vtable[0](decoder);
     FreeMemory(MemoryDiscipline::SCRATCH, reinterpret_cast<usize>(decoder), 0);
 }
 
-void NuSoundSystem::ReleaseEffect(NuSoundEffect *) {
+void NuSoundSystem::ReleaseEffect(NuSoundEffect *effect) {
+    if (effect == NULL) {
+        return;
+    }
+
+    i32 removed = 0;
+    NuListNodeBase *node = effect_update_list.Head();
+    while (node != effect_update_list.Tail()) {
+        NuListNodeBase *next = node->GetNext();
+        if (static_cast<NuListNode<NuSoundEffect *> *>(node)->value == effect) {
+            effect_update_list.Remove(node);
+            removed++;
+        }
+        node = next;
+    }
+    (void)removed;
+    sAllocdMemory[static_cast<i32>(MemoryDiscipline::SCRATCH)] -= sizeof(NuEListNode<NuSoundEffect>);
+
+    effect->Shutdown();
+    typedef void (*CompleteDestructor)(void *);
+    CompleteDestructor *vtable = *reinterpret_cast<CompleteDestructor **>(effect);
+    vtable[4](effect);
+    FreeMemory(MemoryDiscipline::SCRATCH, reinterpret_cast<usize>(effect), 0);
 }
 
-void NuSoundSystem::ReleaseSample(NuSoundSample *) {
+bool NuSoundSystem::IsUserPlayingMusic() {
+    return false;
 }
 
-void NuSoundSystem::RemoveListener(NuSoundListener *) {
+void NuSoundSystem::PauseUserMusic() {
+}
+
+void NuSoundSystem::ResumeUserMusic() {
+}
+
+bool NuSoundSystem::TitleHasUserMusicControl() {
+    return false;
+}
+
+void NuSoundSystem::OnEnterSystemMenu() {
+}
+
+void NuSoundSystem::OnExitSystemMenu() {
+}
+
+void NuSoundSystem::ReleaseSample(NuSoundSample *sample) {
+    this->decoder_list.Remove(reinterpret_cast<NuSoundDecoder *>(sample));
+
+    typedef void (*CompleteDestructor)(void *);
+    CompleteDestructor *vtable = *reinterpret_cast<CompleteDestructor **>(sample);
+    vtable[0](sample);
+    FreeMemory(MemoryDiscipline::SCRATCH, reinterpret_cast<usize>(sample), 0);
+}
+
+void NuSoundSystem::RemoveListener(NuSoundListener *listener) {
+    NuSoundListener *next = static_cast<NuSoundListener *>(listener->field_0x4);
+    NuSoundListener *previous = static_cast<NuSoundListener *>(listener->field_0x0);
+
+    if (next == NULL) {
+        if (previous == NULL) {
+            return;
+        }
+        this->listener_list.length--;
+        previous->field_0x4 = next;
+    } else {
+        this->listener_list.length--;
+        if (previous != NULL) {
+            previous->field_0x4 = next;
+        }
+        next->field_0x0 = previous;
+    }
+
+    listener->field_0x4 = NULL;
+    listener->field_0x0 = NULL;
 }
 
 void NuSoundSystem::ResumeAllVoices() {
+    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
+        voice->Resume();
+    }
 }
 
-void NuSoundSystem::ResumeVoices(i32) {
+void NuSoundSystem::ResumeVoices(i32 mask) {
+    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
+        if ((voice->field131_0x148 & mask) != 0) {
+            voice->Resume();
+        }
+    }
 }
 
-void NuSoundSystem::SetDefaultRoutingTable(NuSoundRoutingTable *) {
+void NuSoundSystem::SetDefaultRoutingTable(NuSoundRoutingTable *table) {
+    sDefaultRoutingTable = table;
 }
 
-void NuSoundSystem::SetGfxMemorySize(u32) {
+void NuSoundSystem::SetGfxMemorySize(u32 size) {
+    sGfxMemorySize = size;
 }
 
 void NuSoundSystem::SetMainThreadID(NuThread *) {
 }
 
 void NuSoundSystem::Shutdown() {
+    NuSoundVoice *voice = this->voice_list.Front();
+    while (voice != this->voice_list.End()) {
+        NuSoundVoice *next = voice->field_0x28;
+        voice->Stop(false);
+        this->ReleaseVoice(voice);
+        voice = next;
+    }
+
+    this->UnloadAllSamples();
+
+    NuSoundDecoder *entry = this->decoder_list.Front();
+    while (entry != this->decoder_list.End()) {
+        NuSoundDecoder *next = *reinterpret_cast<NuSoundDecoder **>(reinterpret_cast<u8 *>(entry) + 0x24);
+        typedef void (*CompleteDestructor)(void *);
+        CompleteDestructor *vtable = *reinterpret_cast<CompleteDestructor **>(entry);
+        vtable[0](entry);
+        FreeMemory(MemoryDiscipline::SCRATCH, reinterpret_cast<usize>(entry), 0);
+        entry = next;
+    }
+
+    NuSoundBus *bus = this->bus_list.Front();
+    while (bus != this->bus_list.End()) {
+        NuSoundBus *next = reinterpret_cast<NuSoundBus **>(bus)[1];
+        this->ReleaseBus(bus);
+        bus = next;
+    }
+
+    FreeMemory(MemoryDiscipline::SCRATCH, reinterpret_cast<usize>(this->samples), 0);
+    this->samples = NULL;
+
+    if (s_mmDecoder != NULL) {
+        s_mmDecoder->~NuSoundMemoryManager();
+        NU_FREE(s_mmDecoder);
+    }
+    if (s_mmSample != NULL) {
+        s_mmSample->~NuSoundMemoryManager();
+        NU_FREE(s_mmSample);
+    }
+
+    NuMemoryGet()->DestroyMemoryManager(sScratchMemMgr);
+    NU_FREE(sDecoderMemory);
+    NU_FREE(sSampleMemory);
+    NU_FREE(sScratchMemory);
+
+    this->ShutdownAudioDevice();
 }
 
 bool NuSoundSystem::SourceRequiresDecoder(NuSoundSource *source) {
-    NuSoundStreamDesc *desc = source->GetStreamDesc();
-    if (desc == NULL) {
-        return false;
-    }
-
-    if (desc->GetEncodedDataFormat() != desc->GetDecodedDataFormat() && desc->DecodeStreamOnOpen() == 0) {
-        // A handful of short effect sounds get their own special case (they
-        // are pre-decoded elsewhere).
-        const char *name = source->GetName();
-        if (strstr(name, "coin") != NULL || strstr(name, "counter") != NULL || strstr(name, "fs_") != NULL ||
-            strstr(name, "saber") != NULL) {
+    if (source->GetStreamDesc()->GetEncodedDataFormat() != source->GetStreamDesc()->GetDecodedDataFormat() &&
+        !source->GetStreamDesc()->DecodeStreamOnOpen()) {
+        if (NuStrIStr(const_cast<char *>(source->GetName()), "coin") != NULL ||
+            NuStrIStr(const_cast<char *>(source->GetName()), "counter") != NULL ||
+            NuStrIStr(const_cast<char *>(source->GetName()), "fs_") != NULL) {
             return false;
         }
-        return true;
+        return NuStrIStr(const_cast<char *>(source->GetName()), "saber") == NULL;
     }
     return false;
 }
 
+template <typename T> void NuSoundMemory::PushNuListNode(NuList<T> &list, T const &value) {
+    NuMemoryManager *previous = NuMemoryGet()->SetThreadMem(NuSoundSystem::sScratchMemMgr);
+    NuListNode<T> *node = static_cast<NuListNode<T> *>(NuMemoryGet()->GetThreadMem()->_BlockAlloc(
+        sizeof(NuListNode<T>), 4, NuMemoryManager::MEM_ALLOC_SET_TO_ZERO, "_new", NUMEMORY_CATEGORY_NONE));
+    if (node != NULL) {
+        node->SetPrev(NULL);
+        node->SetNext(NULL);
+        node->value = value;
+    }
+    list.Append(node);
+    NuMemoryGet()->SetThreadMem(previous);
+    NuSoundSystem::sAllocdMemory[(i32)NuSoundSystem::MemoryDiscipline::SCRATCH] += sizeof(NuListNode<T>);
+}
+
+template void NuSoundMemory::PushNuListNode<NuSoundEffect *>(NuList<NuSoundEffect *> &, NuSoundEffect *const &);
+
 void NuSoundSystem::StopAllVoices() {
+    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
+        voice->Stop(true);
+    }
 }
 
-void NuSoundSystem::StopVoices(NuSoundSource const &) {
+void NuSoundSystem::StopVoices(NuSoundSource const &source) {
+    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
+        if (voice->sound_source == &source) {
+            voice->Stop(false);
+        }
+    }
 }
 
-void NuSoundSystem::StopVoices(i32) {
+void NuSoundSystem::StopVoices(i32 mask) {
+    for (NuSoundVoice *voice = voice_list.Front(); voice != voice_list.End(); voice = voice->field_0x28) {
+        if ((voice->field131_0x148 & mask) != 0) {
+            voice->Stop(false);
+        }
+    }
 }
 
 void NuSoundSystem::UnloadAllSamples() {
+    NuSoundDecoder *entry = decoder_list.Front();
+    while (entry != decoder_list.End()) {
+        NuSoundSample *sample = reinterpret_cast<NuSoundSample *>(entry);
+        entry = *reinterpret_cast<NuSoundDecoder **>(reinterpret_cast<u8 *>(entry) + 0x24);
+        if (sample->GetLoadState() == NuSoundSample::LoadState::LOADED) {
+            UnloadSample(sample);
+        }
+    }
 }
 
-void NuSoundSystem::UnloadSample(NuSoundSample *) {
+bool NuSoundSystem::UnloadSample(NuSoundSample *sample) {
+    if (sample == NULL || sample->field_0x18 != 0 || sample->GetLoadState() == NuSoundSample::LoadState::NOT_LOADED) {
+        return false;
+    }
+    sample->Unload();
+    return true;
 }
 
 void NuSoundSystem::Update(f32 frametime) {
@@ -579,17 +1022,17 @@ void NuSoundSystem::Update(f32 frametime) {
     // Platform hook (on Android this only polls the application state).
     this->UpdateAudioDevice();
 
-    pthread_mutex_lock(&this->mutex);
+    this->mutex.Lock();
 
     // Pass 1: drive every platform voice's device state.
-    for (NuSoundVoice *voice = this->voice_list_end; voice != NULL; voice = voice->field_0x24) {
-        voice->UpdateHardwareVoice(frametime);
+    for (NuListNodeBase *node = effect_update_list.Head(); node != effect_update_list.Tail(); node = node->GetNext()) {
+        static_cast<NuListNode<NuSoundEffect *> *>(node)->value->Process(frametime);
     }
 
     // Pass 2: update the engine-side mix of every playing voice; stopped
     // auto-delete voices are released.
-    NuSoundVoice *voice = this->voice_list_start;
-    while (voice != NULL) {
+    NuSoundVoice *voice = voice_list.Front();
+    while (voice != voice_list.End()) {
         NuSoundVoice *next = voice->field_0x28;
 
         NuSoundVoice::PlayState state = voice->GetState();
@@ -604,18 +1047,33 @@ void NuSoundSystem::Update(f32 frametime) {
         voice = next;
     }
 
-    pthread_mutex_unlock(&this->mutex);
+    this->mutex.Unlock();
 }
 
-void NuSoundSystem::dBToAmplitude(float) {
+f32 NuSoundSystem::dBToAmplitude(f32 db) {
+    if (db <= -100.0f) {
+        return 0.0f;
+    }
+    if (db >= 0.0f) {
+        return 1.0f;
+    }
+    return NuExp10(db / 20.0f);
 }
 
 NuSoundVoice *NuSoundSystem::CreateVoice(NuSoundSource *source, bool loop) {
     NuSoundVoice *voice;
 
-    if (this->SourceRequiresDecoder(source)) {
-        // Encoded sources (OGG) play through a decoder that owns a decode
-        // thread; the decoder becomes the voice's source.
+    if (!this->SourceRequiresDecoder(source)) {
+        if (source->IsStreamOpen() == false) {
+            return NULL;
+        }
+        NuSoundStreamDesc *desc = source->GetStreamDesc();
+        NuSoundVoiceFactory *factory = this->factory_list.GetFactory(desc->GetDecodedDataFormat());
+        voice = factory->CreateVoice(source, loop);
+        if (voice == NULL) {
+            return NULL;
+        }
+    } else {
         NuSoundDecoder *decoder = this->CreateDecoder(source);
         decoder->OpenStream(loop);
         if (decoder->IsStreamOpen() == false) {
@@ -630,44 +1088,28 @@ NuSoundVoice *NuSoundSystem::CreateVoice(NuSoundSource *source, bool loop) {
             this->ReleaseDecoder(decoder);
             return NULL;
         }
-    } else {
-        if (source->IsStreamOpen() == false) {
-            return NULL;
-        }
-        NuSoundStreamDesc *desc = source->GetStreamDesc();
-        NuSoundVoiceFactory *factory = this->factory_list.GetFactory(desc->GetDecodedDataFormat());
-        voice = factory->CreateVoice(source, loop);
-        if (voice == NULL) {
-            return NULL;
-        }
     }
 
-    // Append the voice to the system's voice list.
-    pthread_mutex_lock(&this->mutex);
-    voice->field_0x24 = this->voice_list_end;
-    voice->field_0x28 = NULL;
-    if (this->voice_list_end != NULL) {
-        this->voice_list_end->field_0x28 = voice;
-    } else {
-        this->voice_list_start = voice;
-    }
-    this->voice_list_end = voice;
-    this->voice_count++;
-    pthread_mutex_unlock(&this->mutex);
+    this->mutex.Lock();
+    NuSoundWeakPtrListNode::sPtrAccessLock.Lock();
+    voice_list.PushBack(voice);
+    NuSoundWeakPtrListNode::sPtrAccessLock.Unlock();
+    this->mutex.Unlock();
 
     return voice;
 }
 
 void NuSoundSystem::ReleaseVoice(NuSoundVoice *voice) {
-    pthread_mutex_lock(&this->mutex);
+    this->mutex.Lock();
 
     // Detach effects (releasing the ones the system owns).
-    for (NuEListNode<NuSoundEffect> *node = voice->effects_start; node != NULL;) {
-        NuSoundEffect *effect = node->data;
-        NuEListNode<NuSoundEffect> *next = node->next;
+    for (NuListNodeBase *node = voice->effects.Head(), *end = voice->effects.Tail(); node != end;) {
+        NuSoundEffect *effect = static_cast<NuListNode<NuSoundEffect *> *>(node)->value;
+        NuListNodeBase *next = node->GetNext();
         voice->RemoveEffect(effect);
-        // effect->field_0x24 marks system-owned effects; release them.
-        this->ReleaseEffect(effect);
+        if (effect->keep_attached) {
+            this->ReleaseEffect(effect);
+        }
         node = next;
     }
 
@@ -677,38 +1119,33 @@ void NuSoundSystem::ReleaseVoice(NuSoundVoice *voice) {
         decoder = (NuSoundDecoder *)voice->sound_source;
     }
 
-    // Unlink from the voice list.
-    if (voice->field_0x24 != NULL) {
-        voice->field_0x24->field_0x28 = voice->field_0x28;
-    } else {
-        this->voice_list_start = voice->field_0x28;
-    }
-    if (voice->field_0x28 != NULL) {
-        voice->field_0x28->field_0x24 = voice->field_0x24;
-    } else {
-        this->voice_list_end = voice->field_0x24;
-    }
-    voice->field_0x24 = NULL;
-    voice->field_0x28 = NULL;
-    if (this->voice_count > 0) {
-        this->voice_count--;
-    }
+    // libTTapp.so 0x31b348: keep the voice's callback vtable and weak-pointer
+    // head alive while it is detached and destroyed. The streaming worker
+    // holds this same lock across SubmitBuffer.
+    NuSoundWeakPtrListNode::sPtrAccessLock.Lock();
+
+    voice_list.Remove(voice);
 
     // libTTapp.so 0x31b394: run the voice's complete destructor (vtable slot
     // 0, no free), then hand the block back through FreeMemory(SCRATCH).
-    voice->~NuSoundVoice();
+    typedef void (*CompleteDestructor)(void *);
+    CompleteDestructor *vtable = *(CompleteDestructor **)voice;
+    vtable[0](voice);
     NuSoundSystem::FreeMemory(NuSoundSystem::MemoryDiscipline::SCRATCH, (usize)voice, 0);
+
+    NuSoundWeakPtrListNode::sPtrAccessLock.Unlock();
 
     if (decoder != NULL) {
         decoder->CloseStream();
         this->ReleaseDecoder(decoder);
     }
 
-    pthread_mutex_unlock(&this->mutex);
+    this->mutex.Unlock();
 }
 
 void NuSound3ExitThreads() {
 }
 
-void NuSound_GetAllocdSampleMemory() {
+u32 NuSound_GetAllocdSampleMemory() {
+    return NuSoundSystem::GetAllocdMemory(NuSoundSystem::MemoryDiscipline::SAMPLE);
 }

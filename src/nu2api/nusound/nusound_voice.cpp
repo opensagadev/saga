@@ -8,12 +8,62 @@
 #include "decomp.h"
 
 #include "nu2api/nucore/nuthread.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/numath/nuvec.h"
 #include "nu2api/nusound/nusound_bus.hpp"
 #include "nu2api/nusound/nusound_source.hpp"
 
 #include <string.h>
 
 pthread_mutex_t NuSoundVoice::sStateCriticalSection = PTHREAD_MUTEX_INITIALIZER;
+
+namespace {
+    struct VoiceListenerLink {
+        NuSoundListener *listener;
+        VoiceListenerLink *previous;
+        VoiceListenerLink *next;
+    };
+
+    static inline void DetachVoiceListener(VoiceListenerLink *link) {
+        NuSoundListener *listener = link->listener;
+        if (listener == NULL) {
+            return;
+        }
+
+        if (link->previous == link) {
+            listener->field_0x8 = NULL;
+        } else {
+            link->previous->next = link->next;
+            link->next->previous = link->previous;
+            if (listener->field_0x8 == link) {
+                listener->field_0x8 = link->previous;
+            }
+        }
+
+        link->listener = NULL;
+        link->previous = NULL;
+        link->next = NULL;
+    }
+
+    static inline void AttachVoiceListener(VoiceListenerLink *link, NuSoundListener *listener) {
+        DetachVoiceListener(link);
+
+        VoiceListenerLink *head = static_cast<VoiceListenerLink *>(listener->field_0x8);
+        if (head == NULL) {
+            listener->field_0x8 = link;
+            link->previous = link;
+            link->next = link;
+        } else {
+            VoiceListenerLink *previous = head->previous;
+            link->previous = previous;
+            link->next = head;
+            head->previous = link;
+            previous->next = link;
+        }
+        link->listener = listener;
+    }
+} // namespace
 
 // ---------------------------------------------------------------------------
 // construction / destruction
@@ -22,27 +72,12 @@ pthread_mutex_t NuSoundVoice::sStateCriticalSection = PTHREAD_MUTEX_INITIALIZER;
 NuSoundVoice::NuSoundVoice(NuSoundSource *sound_source, bool loop) {
     this->field_0x24 = NULL;
     this->field_0x28 = NULL;
-    this->effects_start = NULL;
-    this->effects_end = NULL;
-    this->effects_tail = NULL;
-    this->field20_0x4c = 0;
-    this->field23_0x58 = 0;
     this->field57_0x80 = NULL;
     this->field58_0x84 = NULL;
     this->field59_0x88 = NULL;
     this->field60_0x8c = NULL;
     this->field61_0x90 = NULL;
     this->field62_0x94 = NULL;
-    this->field121_0x120 = NULL;
-    this->field122_0x124 = NULL;
-    this->field123_0x128 = NULL;
-    this->field124_0x12c = NULL;
-    this->field125_0x130 = NULL;
-    this->field126_0x134 = NULL;
-    this->field127_0x138 = 0;
-    this->weak_ptr_obj.head = NULL;
-    this->weak_ptr_obj.tail = NULL;
-    this->weak_ptr_obj.weak_count = 0;
     this->queued_buffers = 0;
 
     // The source is locked for the lifetime of the voice and keeps the stream
@@ -60,8 +95,8 @@ NuSoundVoice::NuSoundVoice(NuSoundSource *sound_source, bool loop) {
     this->field66_0xa4 = 0.0f;
     this->field67_0xa8 = 1.0f; // final mix scalar
     this->field68_0xac = 1.0f; // pitch scale
-    this->volume = 1.0f;
     this->pitch = 1.0f;
+    this->volume = 1.0f;
     this->falloff_a = 1.0f;
     this->falloff_b = 6.0f;
     this->field69_0xb0 = 20.0f;
@@ -70,19 +105,19 @@ NuSoundVoice::NuSoundVoice(NuSoundSource *sound_source, bool loop) {
     this->field72_0xbc = 0.0f;
     this->field73_0xc0 = 0.0f;
     this->field74_0xc4 = 1.0f;
-    this->field_0x104 = 0;
-    this->field_0x108 = 0;
-    this->field113_0x10c = 1.0f; // LFE gain
-    this->field114_0x110 = 0;
-    this->field115_0x114 = 1;
-    this->field116_0x118 = 0;
-    this->output_bus = NuSoundSystem::sMasterBus;
-    this->field15_0x38 = NULL;
-    this->field16_0x3c = NuSoundSystem::sDefaultRoutingTable;
-    this->surround_mode = 2; // 2D omni
     this->falloff_type = 0;
+    this->field113_0x10c = 1.0f; // LFE gain
+    this->start_offset = 0.0f;
+    this->output_devices = 1;
+    this->controller_bits = 0;
+    this->output_bus = NuSoundSystem::sMasterBus;
+    this->downmixer_type = 0;
+    this->routing_table = NuSoundSystem::sDefaultRoutingTable;
+    this->surround_mode = 2; // 2D omni
+    this->listeners = NULL;
     this->field130_0x144 = 1.0f;
     this->field131_0x148 = -1;
+    this->custom_surround_mix = NULL;
 
     this->flags2 = (u8)(this->flags2 & 0xf6 | loop << 3);
     this->flags2 &= 0xf9;
@@ -92,8 +127,23 @@ NuSoundVoice::NuSoundVoice(NuSoundSource *sound_source, bool loop) {
 }
 
 NuSoundVoice::~NuSoundVoice() {
+    // Handles are owned by their callers.  The target invalidates them and
+    // then empties the intrusive list without destroying the handle objects.
+    for (NuSoundHandle *handle = this->handles.Front(); handle != this->handles.End();
+         handle = handle->intrusive_next) {
+        handle->SetVoice(NULL);
+    }
+    while (this->handles.length != 0) {
+        this->handles.Remove(this->handles.Front());
+    }
+
     this->sound_source->VoiceRelease();
     this->sound_source->Unlock();
+
+    // The target destructor unlinks both embedded listener memberships before
+    // the voice storage is returned to the scratch allocator.
+    DetachVoiceListener(reinterpret_cast<VoiceListenerLink *>(&this->field60_0x8c));
+    DetachVoiceListener(reinterpret_cast<VoiceListenerLink *>(&this->field57_0x80));
 }
 
 // ---------------------------------------------------------------------------
@@ -236,8 +286,8 @@ void NuSoundVoice::Update(f32 frametime) {
 
     this->UpdateEffects(frametime, NuSoundEffect::EffectProcessStage::ONE);
 
-    this->UpdateHardwareVoice(frametime);
     this->ApplyHardwareVoiceMix();
+    this->UpdateHardwareVoice(frametime);
 }
 
 void NuSoundVoice::UpdateMix(f32 frametime) {
@@ -262,214 +312,613 @@ void NuSoundVoice::UpdateMix(f32 frametime) {
 }
 
 void NuSoundVoice::CalculatePositionalMix() {
+    memset(this->mix_gains, 0, sizeof(this->mix_gains));
+
+    this->field67_0xa8 = 0.0f;
+    this->field65_0xa0 = 1.0f;
+    this->field63_0x98 = 0.0f;
+    this->field64_0x9c = 0.0f;
+    this->field66_0xa4 = this->field69_0xb0;
+
+    VoiceListenerLink *real_link = reinterpret_cast<VoiceListenerLink *>(&this->field57_0x80);
+    VoiceListenerLink *focus_link = reinterpret_cast<VoiceListenerLink *>(&this->field60_0x8c);
+    DetachVoiceListener(real_link);
+    DetachVoiceListener(focus_link);
+
+    if (this->surround_mode == 0) {
+        NuSoundListener *real_listener = NuSoundSystem::GetNearestRealListener(*this->listeners, this->position);
+        f32 focus_distance = 0.0f;
+        NuSoundListener *focus_listener =
+            NuSoundSystem::GetNearestFocusListener(*this->listeners, this->position, focus_distance);
+
+        if (real_listener == NULL || focus_listener->GetSensitivity() <= 0.0f || this->falloff_b <= focus_distance) {
+            return;
+        }
+
+        f32 attenuation = this->CalculateFalloffAttenuation(focus_distance);
+        if (attenuation <= 0.0f) {
+            return;
+        }
+
+        f32 real_distance = real_listener->GetHeadDistance(this->position);
+        NuSoundListener *second_real_listener = NULL;
+        f32 second_real_distance = 0.0f;
+        NuSoundListener *listener = static_cast<NuSoundListener *>(this->listeners->begin->field_0x4);
+        while (listener != this->listeners->end) {
+            if (listener != real_listener && listener->IsEnabled()) {
+                f32 distance = listener->GetHeadDistance(this->position);
+                if (distance - real_distance < 6.0f) {
+                    second_real_listener = listener;
+                    second_real_distance = distance;
+                    break;
+                }
+            }
+            listener = static_cast<NuSoundListener *>(listener->field_0x4);
+        }
+
+        f32 field_angle = 0.0f;
+        if (real_listener->Get2DScreenPosition() != NULL) {
+            NUMTX identity;
+            NuMtxSetIdentity(&identity);
+            const VuVec *screen = real_listener->Get2DScreenPosition();
+            VuVec screen_position(screen->x, 0.0f, 1.0f - screen->y, 1.0f);
+            f32 outer_angle = this->field69_0xb0 + this->field71_0xb8;
+            if (outer_angle > 360.0f) {
+                outer_angle = 360.0f;
+            }
+            this->CalculatePositionalCoefficients(this->mix_gains, screen_position,
+                                                  *reinterpret_cast<VuMtx *>(&identity), this->field69_0xb0,
+                                                  outer_angle);
+            second_real_listener = NULL;
+        } else {
+            f32 first_mix[8] = {};
+            f32 second_mix[8] = {};
+            field_angle = this->CalculateFieldAngle(real_distance);
+            f32 outer_angle = field_angle + this->field71_0xb8;
+            if (outer_angle > 360.0f) {
+                outer_angle = 360.0f;
+            }
+            this->CalculatePositionalCoefficients(first_mix, this->position, *real_listener->GetHeadMatrix(),
+                                                  field_angle, outer_angle);
+
+            if (second_real_listener == NULL) {
+                memmove(this->mix_gains, first_mix, sizeof(first_mix));
+            } else {
+                f32 second_field_angle = this->CalculateFieldAngle(second_real_distance);
+                f32 second_outer_angle = field_angle + this->field71_0xb8;
+                if (second_outer_angle > 360.0f) {
+                    second_outer_angle = 360.0f;
+                }
+                this->CalculatePositionalCoefficients(second_mix, this->position,
+                                                      *second_real_listener->GetHeadMatrix(), second_field_angle,
+                                                      second_outer_angle);
+                for (u32 i = 0; i < 8; ++i) {
+                    this->mix_gains[i] = first_mix[i] > second_mix[i] ? first_mix[i] : second_mix[i];
+                }
+            }
+        }
+
+        for (u32 i = 0; i < 8; ++i) {
+            this->mix_gains[i] *= attenuation * focus_listener->GetSensitivity();
+        }
+        if (NuSoundSystem::GetOutputChannelConfig() > 5) {
+            this->mix_gains[3] = attenuation * this->field113_0x10c * focus_listener->GetSensitivity();
+        }
+        this->field67_0xa8 = attenuation * focus_listener->GetSensitivity();
+
+        AttachVoiceListener(real_link, real_listener);
+        if (focus_listener != NULL) {
+            AttachVoiceListener(focus_link, focus_listener);
+        }
+
+        this->field65_0xa0 = attenuation;
+        this->field63_0x98 = real_distance;
+        this->field64_0x9c = focus_distance;
+        this->field66_0xa4 = field_angle;
+        return;
+    }
+
+    if (this->surround_mode == 1) {
+        f32 focus_distance = 0.0f;
+        NuSoundListener *focus_listener =
+            NuSoundSystem::GetNearestFocusListener(*this->listeners, this->position, focus_distance);
+        if (focus_listener == NULL || this->falloff_b <= focus_distance) {
+            return;
+        }
+
+        NuSoundListener *real_listener = NuSoundSystem::GetNearestRealListener(*this->listeners, this->position);
+        if (real_listener == NULL) {
+            return;
+        }
+
+        const NUMTX *head_matrix = reinterpret_cast<const NUMTX *>(real_listener->GetHeadMatrix());
+        VuVec relative_direction(head_matrix->m30 - this->direction.x, head_matrix->m31 - this->direction.y,
+                                 head_matrix->m32 - this->direction.z, 0.0f);
+        f32 coefficients[8] = {};
+        f32 outer_angle = this->field69_0xb0 + this->field71_0xb8;
+        if (outer_angle > 360.0f) {
+            outer_angle = 360.0f;
+        }
+        this->CalculatePositionalCoefficients(coefficients, relative_direction, *real_listener->GetHeadMatrix(),
+                                              this->field69_0xb0, outer_angle);
+
+        f32 attenuation = this->CalculateFalloffAttenuation(focus_distance);
+        for (u32 i = 0; i < 8; ++i) {
+            this->mix_gains[i] = coefficients[i] * attenuation * focus_listener->GetSensitivity();
+        }
+        if (NuSoundSystem::GetOutputChannelConfig() > 5) {
+            this->mix_gains[3] = attenuation * this->field113_0x10c * focus_listener->GetSensitivity();
+        }
+        this->field67_0xa8 = attenuation * focus_listener->GetSensitivity();
+
+        AttachVoiceListener(real_link, real_listener);
+        AttachVoiceListener(focus_link, focus_listener);
+        this->field65_0xa0 = attenuation;
+        this->field64_0x9c = focus_distance;
+        return;
+    }
+
     if (this->surround_mode == 2) {
-        // 2D omni: every channel at full gain except the LFE channel, which
-        // keeps the voice's low-frequency mix.
         this->mix_gains[0] = 1.0f;
         this->mix_gains[1] = 1.0f;
         this->mix_gains[2] = 1.0f;
-        this->mix_gains[3] = (f32)this->field113_0x10c;
         this->mix_gains[4] = 1.0f;
         this->mix_gains[5] = 1.0f;
         this->mix_gains[6] = 1.0f;
         this->mix_gains[7] = 1.0f;
         this->field67_0xa8 = 1.0f;
+        this->mix_gains[3] = this->field113_0x10c;
         return;
     }
 
-    // The 3D positional paths (surround modes 0/1/3/4 with listener matrices)
-    // are not exercised by the title music; left unimplemented on purpose.
+    if (this->surround_mode == 3) {
+        f32 focus_distance = 0.0f;
+        NuSoundListener *focus_listener =
+            NuSoundSystem::GetNearestFocusListener(*this->listeners, this->position, focus_distance);
+        if (focus_listener == NULL || this->falloff_b <= focus_distance) {
+            return;
+        }
+
+        f32 attenuation = this->CalculateFalloffAttenuation(focus_distance);
+        this->field67_0xa8 = attenuation;
+        for (u32 i = 0; i < 8; ++i) {
+            this->mix_gains[i] = attenuation * focus_listener->GetSensitivity();
+        }
+        this->mix_gains[3] = attenuation * this->field113_0x10c * focus_listener->GetSensitivity();
+        this->field67_0xa8 = attenuation * focus_listener->GetSensitivity();
+
+        AttachVoiceListener(focus_link, focus_listener);
+        this->field65_0xa0 = attenuation;
+        this->field64_0x9c = focus_distance;
+        return;
+    }
+
+    if (this->surround_mode == 4) {
+        memmove(this->mix_gains, this->custom_surround_mix, sizeof(this->mix_gains));
+    }
 }
 
 bool NuSoundVoice::AreStopEffectsRunning() const {
-    return (this->flags2 & 4) != 0;
+    if ((this->flags2 & 4) != 0) {
+        for (NuListNodeBase *node = this->effects.Head(); node != this->effects.Tail(); node = node->GetNext()) {
+            NuSoundEffect *effect = static_cast<NuListNode<NuSoundEffect *> *>(node)->value;
+            if (effect->stop_effect == 1 && effect->state == 1) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 bool NuSoundVoice::CheckStopEffects() {
-    // Stop effects only exist while the effects list is non-empty.
+    if ((this->flags2 & 4) != 0) {
+        for (NuListNodeBase *node = this->effects.Head(); node != this->effects.Tail(); node = node->GetNext()) {
+            NuSoundEffect *effect = static_cast<NuListNode<NuSoundEffect *> *>(node)->value;
+            u32 effect_type = *reinterpret_cast<u32 *>(reinterpret_cast<u8 *>(effect) + 0xc);
+            u32 effect_state = *reinterpret_cast<u32 *>(reinterpret_cast<u8 *>(effect) + 0x10);
+            if (effect_type == 1 && effect_state == 1) {
+                return false;
+            }
+        }
+    }
     return true;
 }
 
 void NuSoundVoice::UpdateEffects(f32 frametime, NuSoundEffect::EffectProcessStage stage) {
-    (void)frametime;
-    (void)stage;
+    NuListNodeBase *node = this->effects.Head();
+    while (node != this->effects.Tail()) {
+        NuSoundEffect *effect = static_cast<NuListNode<NuSoundEffect *> *>(node)->value;
+        node = node->GetNext();
+
+        if (effect->process_stage == stage && effect->enabled) {
+            effect->ProcessVoice(this, frametime);
+        }
+
+        if (effect->state == 2 && !effect->keep_attached) {
+            this->RemoveEffect(effect);
+        }
+    }
 }
 
 void NuSoundVoice::CheckStarvedBuffers() {
+}
+
+void NuSoundVoice::UpdateHardwareVoice(f32) {
 }
 
 // ---------------------------------------------------------------------------
 // remaining original surface (off the title music path; kept as stubs)
 // ---------------------------------------------------------------------------
 
-void NuSoundVoice::AddEffect(NuSoundEffect *) {
+bool NuSoundVoice::AddEffect(NuSoundEffect *effect) {
+    if (effects.Length() != 0) {
+        NuListNodeBase *node = effects.Head();
+        NuListNodeBase *last = effects.Tail()->GetPrev();
+        if (static_cast<NuListNode<NuSoundEffect *> *>(node)->value == effect) {
+            return false;
+        }
+        while (node != last) {
+            node = node->GetNext();
+            if (static_cast<NuListNode<NuSoundEffect *> *>(node)->value == effect) {
+                return false;
+            }
+        }
+    }
+    bool attached = effect->AttachVoice(this);
+    if (!attached) {
+        return false;
+    }
+    NuSoundMemory::PushNuListNode(effects, effect);
+    return attached;
 }
 
 bool NuSoundVoice::BeginStopEffects() {
-    return false;
+    if ((this->flags2 & 4) == 0) {
+        for (NuListNodeBase *node = this->effects.Head(); node != this->effects.Tail(); node = node->GetNext()) {
+            NuSoundEffect *effect = static_cast<NuListNode<NuSoundEffect *> *>(node)->value;
+            if (effect->stop_effect == 1) {
+                effect->Enable();
+                this->flags2 |= 4;
+            }
+        }
+    }
+    return (this->flags2 & 4) != 0;
 }
 
 f32 NuSoundVoice::CalculateEffectAttenuation() {
-    return 1.0f;
+    f32 attenuation = 1.0f;
+    for (NuListNodeBase *node = this->effects.Head(); node != this->effects.Tail(); node = node->GetNext()) {
+        NuSoundEffect *effect = static_cast<NuListNode<NuSoundEffect *> *>(node)->value;
+        attenuation *= effect->output_mix;
+    }
+    return attenuation;
 }
 
 f32 NuSoundVoice::CalculateEffectPitchScale() {
+    f32 scale = 1.0f;
+    for (NuListNodeBase *node = this->effects.Head(); node != this->effects.Tail(); node = node->GetNext()) {
+        NuSoundEffect *effect = static_cast<NuListNode<NuSoundEffect *> *>(node)->value;
+        scale *= effect->pitch_mix;
+    }
+    return scale;
+}
+
+f32 NuSoundVoice::CalculateFalloffAttenuation(f32 distance) {
+    if (distance > this->falloff_a) {
+        if (this->falloff_type == 0) {
+            return (this->falloff_b - distance) / (this->falloff_b - this->falloff_a);
+        }
+        if (this->falloff_type == 1) {
+            f32 ratio = (this->falloff_b - distance) / (this->falloff_b - this->falloff_a);
+            f32 scale = (1.0f - ratio) * 10.0f + 1.0f;
+            return 1.0f / (scale * scale);
+        }
+    }
     return 1.0f;
 }
 
-void NuSoundVoice::CalculateFalloffAttenuation(f32) {
+f32 NuSoundVoice::CalculateFieldAngle(f32 distance) {
+    f32 result = this->field69_0xb0;
+    if (this->field73_0xc0 > distance) {
+        if (this->field72_0xbc > distance) {
+            return this->field70_0xb4;
+        }
+        result += ((this->field73_0xc0 - distance) / (this->field73_0xc0 - this->field72_0xbc)) *
+                  (this->field70_0xb4 - result);
+    }
+    return result;
 }
 
-void NuSoundVoice::CalculateFieldAngle(f32) {
+static inline void CalculateSpeakerCoefficient(f32 &coefficient, f32 speaker_angle, f32 bearing, f32 outer_start,
+                                               f32 outer_end, f32 inner_start, f32 inner_end) {
+    if (coefficient == 0.0f && speaker_angle > outer_start && speaker_angle < outer_end) {
+        if (speaker_angle > inner_start && speaker_angle < inner_end) {
+            coefficient = 1.0f;
+        } else {
+            f32 outer;
+            f32 inner;
+            if (speaker_angle - bearing < 0.0f) {
+                outer = outer_start;
+                inner = inner_start;
+            } else {
+                outer = outer_end;
+                inner = inner_end;
+            }
+
+            f32 value = NuFabs((outer - speaker_angle) / (outer - inner));
+            coefficient = value < 1.0f ? value : 1.0f;
+        }
+    }
 }
 
-void NuSoundVoice::CalculatePositionalCoefficients(f32 *, VuVec const &, VuMtx const &, f32, f32) {
+void NuSoundVoice::CalculatePositionalCoefficients(f32 *gains, VuVec const &position, VuMtx const &mtx,
+                                                   f32 speaker_field_angle_min, f32 speaker_field_angle_max) {
+    NUVEC listener_space;
+    NuVecInvMtxTransform(&listener_space, reinterpret_cast<NUVEC *>(const_cast<VuVec *>(&position)),
+                         reinterpret_cast<NUMTX *>(const_cast<VuMtx *>(&mtx)));
+
+    f32 bearing = NuFmod(NuATan2f(listener_space.x, listener_space.z) * 180.0f / 3.1415927f, 360.0f);
+    f32 outer_half_angle = speaker_field_angle_max * 0.5f;
+    f32 outer_start = NuFmod(bearing - outer_half_angle, 360.0f);
+    f32 outer_end = NuFmod(bearing + outer_half_angle, 360.0f);
+    f32 inner_half_angle = speaker_field_angle_min * 0.5f;
+    f32 inner_start = NuFmod(bearing - inner_half_angle, 360.0f);
+    f32 inner_end = NuFmod(bearing + inner_half_angle, 360.0f);
+
+    CalculateSpeakerCoefficient(gains[2], -360.0f, bearing, outer_start, outer_end, inner_start, inner_end);
+    CalculateSpeakerCoefficient(gains[1], -330.0f, bearing, outer_start, outer_end, inner_start, inner_end);
+    CalculateSpeakerCoefficient(gains[5], -270.0f, bearing, outer_start, outer_end, inner_start, inner_end);
+    CalculateSpeakerCoefficient(gains[7], -210.0f, bearing, outer_start, outer_end, inner_start, inner_end);
+    CalculateSpeakerCoefficient(gains[6], -150.0f, bearing, outer_start, outer_end, inner_start, inner_end);
+    CalculateSpeakerCoefficient(gains[4], -90.0f, bearing, outer_start, outer_end, inner_start, inner_end);
+    CalculateSpeakerCoefficient(gains[0], -30.0f, bearing, outer_start, outer_end, inner_start, inner_end);
+
+    CalculateSpeakerCoefficient(gains[2], 0.0f, bearing, outer_start, outer_end, inner_start, inner_end);
+    CalculateSpeakerCoefficient(gains[1], 30.0f, bearing, outer_start, outer_end, inner_start, inner_end);
+    CalculateSpeakerCoefficient(gains[5], 90.0f, bearing, outer_start, outer_end, inner_start, inner_end);
+    CalculateSpeakerCoefficient(gains[7], 150.0f, bearing, outer_start, outer_end, inner_start, inner_end);
+    CalculateSpeakerCoefficient(gains[6], 210.0f, bearing, outer_start, outer_end, inner_start, inner_end);
+    CalculateSpeakerCoefficient(gains[4], 270.0f, bearing, outer_start, outer_end, inner_start, inner_end);
+    CalculateSpeakerCoefficient(gains[0], 330.0f, bearing, outer_start, outer_end, inner_start, inner_end);
+    CalculateSpeakerCoefficient(gains[2], 360.0f, bearing, outer_start, outer_end, inner_start, inner_end);
 }
 
-void NuSoundVoice::GetControllerBits() const {
+u8 NuSoundVoice::GetControllerBits() const {
+    return controller_bits;
 }
 
-void NuSoundVoice::GetDirection() const {
+const VuVec *NuSoundVoice::GetDirection() const {
+    return &direction;
 }
 
-void NuSoundVoice::GetDownmixerType() const {
+NuSoundSystem::DownmixType NuSoundVoice::GetDownmixerType() const {
+    return static_cast<NuSoundSystem::DownmixType>(downmixer_type);
 }
 
-void NuSoundVoice::GetEffect(NuSoundEffect::EffectType) {
+NuSoundEffect *NuSoundVoice::GetEffect(NuSoundEffect::EffectType type) {
+    NuListNodeBase *node = effects.Head();
+    NuListNodeBase *end = effects.Tail();
+    for (; node != end; node = node->GetNext()) {
+        NuSoundEffect *effect = static_cast<NuListNode<NuSoundEffect *> *>(node)->value;
+        if (effect->type == type) {
+            return effect;
+        }
+    }
+    return NULL;
 }
 
-void NuSoundVoice::GetFalloffType() const {
+NuSoundSystem::FalloffType NuSoundVoice::GetFalloffType() const {
+    return static_cast<NuSoundSystem::FalloffType>(falloff_type);
 }
 
-void NuSoundVoice::GetFar() const {
+f32 NuSoundVoice::GetFar() const {
+    return falloff_b;
 }
 
-void NuSoundVoice::GetLowFrequencyMix() const {
+f32 NuSoundVoice::GetLowFrequencyMix() const {
+    return field113_0x10c;
 }
 
-void NuSoundVoice::GetNear() const {
+f32 NuSoundVoice::GetNear() const {
+    return falloff_a;
 }
 
-void NuSoundVoice::GetNumEffects() const {
+i32 NuSoundVoice::GetNumEffects() const {
+    return effects.Length();
 }
 
-void NuSoundVoice::GetOutputBus() const {
+NuSoundBus *NuSoundVoice::GetOutputBus() const {
+    return output_bus;
 }
 
-void NuSoundVoice::GetPenetration() const {
+f32 NuSoundVoice::GetPenetration() const {
+    return field74_0xc4;
 }
 
-void NuSoundVoice::GetPitch() const {
+f32 NuSoundVoice::GetPitch() const {
+    return pitch;
 }
 
-void NuSoundVoice::GetPlaybackPositionSeconds() {
+f32 NuSoundVoice::GetPlaybackPositionSeconds() {
+    u64 position = GetPlaybackPositionSamples();
+    u32 sample_rate = sound_source->GetStreamDesc()->GetSampleRate();
+    return static_cast<f32>(position) / static_cast<f32>(sample_rate);
 }
 
-void NuSoundVoice::GetPosition() const {
+const VuVec *NuSoundVoice::GetPosition() const {
+    return &position;
 }
 
-void NuSoundVoice::GetReverbWetMix() const {
+f32 NuSoundVoice::GetReverbWetMix() const {
+    return field130_0x144;
 }
 
-void NuSoundVoice::GetRoutingTable() const {
+NuSoundRoutingTable *NuSoundVoice::GetRoutingTable() const {
+    return routing_table;
 }
 
-void NuSoundVoice::GetSpeakerBleedAngle() const {
+f32 NuSoundVoice::GetSpeakerBleedAngle() const {
+    return field71_0xb8;
 }
 
-void NuSoundVoice::GetSpeakerBleedFar() const {
+f32 NuSoundVoice::GetSpeakerBleedFar() const {
+    return field73_0xc0;
 }
 
-void NuSoundVoice::GetSpeakerBleedNear() const {
+f32 NuSoundVoice::GetSpeakerBleedNear() const {
+    return field72_0xbc;
 }
 
-void NuSoundVoice::GetSpeakerFieldAngleMax() const {
+f32 NuSoundVoice::GetSpeakerFieldAngleMax() const {
+    return field70_0xb4;
 }
 
-void NuSoundVoice::GetSpeakerFieldAngleMin() const {
+f32 NuSoundVoice::GetSpeakerFieldAngleMin() const {
+    return field69_0xb0;
 }
 
-void NuSoundVoice::GetStartOffset() const {
+f32 NuSoundVoice::GetStartOffset() const {
+    return start_offset;
 }
 
-void NuSoundVoice::GetSurroundMode() const {
+NuSoundSystem::SurroundMode NuSoundVoice::GetSurroundMode() const {
+    return static_cast<NuSoundSystem::SurroundMode>(surround_mode);
 }
 
-void NuSoundVoice::GetVelocity() const {
+const VuVec *NuSoundVoice::GetVelocity() const {
+    return &velocity;
 }
 
-void NuSoundVoice::GetVolume() const {
+f32 NuSoundVoice::GetVolume() const {
+    return volume;
 }
 
-void NuSoundVoice::IsLooping() const {
+bool NuSoundVoice::IsLooping() const {
+    return (flags2 & 8) != 0;
 }
 
-void NuSoundVoice::RegisterHandle(NuSoundHandle *) {
+void NuSoundVoice::RegisterHandle(NuSoundHandle *handle) {
+    if (handle != NULL) {
+        handle->InvalidateVoice();
+        handle->SetVoice(this);
+        handles.PushBack(handle);
+    }
 }
 
-void NuSoundVoice::RemoveEffect(NuSoundEffect *) {
+void NuSoundVoice::RemoveEffect(NuSoundEffect *effect) {
+    NuListNodeBase *node = effects.Head();
+    NuListNodeBase *end = effects.Tail();
+    while (node != end) {
+        if (static_cast<NuListNode<NuSoundEffect *> *>(node)->value == effect) {
+            effect->DetachVoice(this);
+            do {
+                NuListNodeBase *next = node->GetNext();
+                effects.Remove(node);
+                node = next;
+                while (node != end && static_cast<NuListNode<NuSoundEffect *> *>(node)->value != effect) {
+                    node = node->GetNext();
+                }
+            } while (node != end);
+            return;
+        }
+        node = node->GetNext();
+    }
 }
 
-void NuSoundVoice::SetControllerBits(i32) {
+void NuSoundVoice::SetControllerBits(i32 bits) {
+    this->controller_bits = (u8)bits;
 }
 
-void NuSoundVoice::SetCustomSurroundMix(f32 *) {
+void NuSoundVoice::SetCustomSurroundMix(f32 *mix) {
+    this->custom_surround_mix = mix;
 }
 
-void NuSoundVoice::SetDirection(VuVec *) {
+void NuSoundVoice::SetDirection(VuVec *value) {
+    if (value != NULL) {
+        this->direction.x = value->x;
+        this->direction.y = value->y;
+        this->direction.z = value->z;
+        this->direction.w = value->w;
+        NuVecNorm(reinterpret_cast<NUVEC *>(&this->direction), reinterpret_cast<NUVEC *>(&this->direction));
+    }
 }
 
-void NuSoundVoice::SetDownmixerType(NuSoundSystem::DownmixType) {
+void NuSoundVoice::SetDownmixerType(NuSoundSystem::DownmixType type) {
+    this->downmixer_type = (u32)type;
 }
 
-void NuSoundVoice::SetFalloff(f32, f32, NuSoundSystem::FalloffType) {
+void NuSoundVoice::SetFalloff(f32 near_distance, f32 far_distance, NuSoundSystem::FalloffType type) {
+    if (near_distance >= 0.0f && far_distance > near_distance) {
+        this->falloff_a = near_distance;
+        this->falloff_b = far_distance;
+        this->falloff_type = (u32)type;
+    }
 }
 
-void NuSoundVoice::SetLowFrequencyMix(f32) {
+void NuSoundVoice::SetLowFrequencyMix(f32 mix) {
+    this->field113_0x10c = mix;
 }
 
-void NuSoundVoice::SetOutputBus(NuSoundBus *) {
+void NuSoundVoice::SetOutputBus(NuSoundBus *bus) {
+    this->output_bus = bus != NULL ? bus : NuSoundSystem::sMasterBus;
 }
 
-void NuSoundVoice::SetOutputDevices(i32) {
+void NuSoundVoice::SetOutputDevices(i32 devices) {
+    this->output_devices = (u32)devices;
 }
 
-void NuSoundVoice::SetPenetration(f32) {
+void NuSoundVoice::SetPenetration(f32 penetration) {
+    this->field74_0xc4 = penetration;
 }
 
-void NuSoundVoice::SetPosition(VuVec *) {
+void NuSoundVoice::SetPosition(VuVec *value) {
+    if (value != NULL) {
+        memcpy(&this->position, value, sizeof(this->position));
+    }
 }
 
 void NuSoundVoice::SetReverbWetMix(f32 mix) {
     this->field130_0x144 = mix;
 }
 
-void NuSoundVoice::SetRoutingTable(NuSoundRoutingTable *) {
+void NuSoundVoice::SetRoutingTable(NuSoundRoutingTable *table) {
+    this->routing_table = table;
 }
 
-void NuSoundVoice::SetSpeakerBleedAngle(f32) {
+void NuSoundVoice::SetSpeakerBleedAngle(f32 angle) {
+    this->field71_0xb8 = angle;
 }
 
-void NuSoundVoice::SetSpeakerBleedFar(f32) {
+void NuSoundVoice::SetSpeakerBleedFar(f32 distance) {
+    this->field73_0xc0 = distance;
 }
 
-void NuSoundVoice::SetSpeakerBleedNear(f32) {
+void NuSoundVoice::SetSpeakerBleedNear(f32 distance) {
+    this->field72_0xbc = distance;
 }
 
-void NuSoundVoice::SetSpeakerFieldAngle(f32, f32) {
+void NuSoundVoice::SetSpeakerFieldAngle(f32 minimum, f32 maximum) {
+    this->field69_0xb0 = minimum;
+    this->field70_0xb4 = maximum;
 }
 
-void NuSoundVoice::SetStartOffset(f32) {
+void NuSoundVoice::SetStartOffset(f32 offset) {
+    this->start_offset = offset;
 }
 
-void NuSoundVoice::SetListeners(NuEList<NuSoundListener, DefaultElist> const *) {
+void NuSoundVoice::SetListeners(NuEList<NuSoundListener, DefaultElist> const *value) {
+    this->listeners = value;
 }
 
-void NuSoundVoice::SetSurroundMode(NuSoundSystem::SurroundMode) {
+void NuSoundVoice::SetSurroundMode(NuSoundSystem::SurroundMode mode) {
+    this->surround_mode = (u32)mode;
 }
 
-void NuSoundVoice::SetVelocity(VuVec const &) {
+void NuSoundVoice::SetVelocity(VuVec const &value) {
+    memcpy(&this->velocity, &value, sizeof(this->velocity));
 }
 
-void NuSoundVoice::UnregisterHandle(NuSoundHandle *) {
+void NuSoundVoice::UnregisterHandle(NuSoundHandle *handle) {
+    handle->SetVoice(NULL);
+    handles.Remove(handle);
 }

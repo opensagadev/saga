@@ -52,6 +52,7 @@ extern AREADATA *ANEWHOPE_ADATA;
 extern AREADATA *PODSPRINT_ADATA;
 extern AREADATA *PODRACE_ADATA;
 extern AREADATA *BONUS_GUNSHIP_ADATA;
+extern AREADATA *VEHICLES_ADATA;
 extern AREADATA *NEGOTIATIONS_ADATA;
 extern AREADATA *GUNGAN_ADATA;
 extern AREADATA *RESCUE_ADATA;
@@ -769,15 +770,29 @@ load_type_done:
 
     i32 icon_stage = HUB_ADATA != NULL && HUB_ADATA->index == Area ? 0 : 2;
     f32 icon_time = 0.0f;
-    // The loader starts in the character-load phase on every route.  The first
-    // loop pass clears it immediately for non-hub areas; hub loads keep it set
-    // until UpdateCharacterLoad has drained the pending request.
     bool character_load_active = true;
+    bool fade_scene_active = false;
     i32 skip_text_scroll = 0;
     i32 draw_touch_prompt = 0;
     f32 touch_prompt_time = 0.0f;
 
     while (true) {
+        if (AreaDataLoaded != 0 && LoadWait <= 0.0f && !character_load_active) {
+            CutBorderScale = 0.0f;
+            MainRenderTime = 1.0f;
+            music_man.StopAll(0);
+            MusicClearAll();
+            SoundKillAll();
+            legoSetMusicVolume(music_volume);
+            textcrawlactive = 0;
+            MechSystems::Get()->UnhookClickToPressStart();
+            if (loadareadata_loadlevel != 0) {
+                loadareadata_loadlevel = 0;
+                loadareacharacters_loadedlevel = 1;
+            }
+            return;
+        }
+
         if (HUB_ADATA != NULL && HUB_ADATA->index == Area && character_load_active && AreaDataLoaded != 0 &&
             waiting_for_character == -1) {
             static i32 lastLoadedCharacter = -1;
@@ -789,11 +804,6 @@ load_type_done:
             if (waiting_for_character == -1) {
                 hub_character_ready = lastLoadedCharacter;
                 character_load_active = false;
-                if (load_type == 2) {
-                    skip_text_scroll = 1;
-                    draw_touch_prompt = 0;
-                    MechSystems::SkipTextScroll = 0;
-                }
             }
         } else if (HUB_ADATA == NULL || HUB_ADATA->index != Area) {
             character_load_active = false;
@@ -803,14 +813,12 @@ load_type_done:
         NuCameraSet(&global_camera);
         readpads_always = 1;
         ReadPads();
-        UpdateTimer(&GlobalTimer);
-        Game.field30_0x7c2c += FRAMETIME;
-        LoadTime += FRAMETIME;
 
-        if (load_type == 2 && LoadWait == LOADWAITTIME && LoadTime < 45.0f && !skip_text_scroll) {
-            if (NuSound3LoadingSfx() == 0 || LoadTime >= 20.0f) {
+        if (load_type == 2) {
+            if (AreaDataLoaded != 0 && !character_load_active && LoadWait == LOADWAITTIME && LoadTime < 45.0f &&
+                !skip_text_scroll && (NuSound3LoadingSfx() == 0 || LoadTime >= 20.0f)) {
                 const u32 skip_buttons = GAMEPAD_JUMP | GAMEPAD_START | GAMEPAD_SPECIAL | GAMEPAD_ACTION | GAMEPAD_TAG;
-                if (HUB_ADATA != NULL && HUB_ADATA->index == Area) {
+                if (VEHICLES_ADATA != NULL && VEHICLES_ADATA->index == Area) {
                     skip_text_scroll = true;
                     draw_touch_prompt = false;
                 } else if (((GamePad[0].buttons_pressed | GamePad[1].buttons_pressed) & skip_buttons) != 0 ||
@@ -820,10 +828,18 @@ load_type_done:
                     MechSystems::SkipTextScroll = 0;
                 } else {
                     draw_touch_prompt = true;
-                    touch_prompt_time += FRAMETIME;
                 }
+                touch_prompt_time += FRAMETIME;
             }
+        } else if (AreaDataLoaded != 0 && !character_load_active) {
+            skip_text_scroll = true;
+            draw_touch_prompt = false;
         }
+        MechSystems::SkipTextScroll = 0;
+
+        UpdateTimer(&GlobalTimer);
+        Game.field30_0x7c2c += FRAMETIME;
+        LoadTime += FRAMETIME;
 
         if (icon_stage == 0 &&
             (CharacterDataLoad == 2 || (CharacterDataLoad != 0 && APICharacterLoaded(PlayerID[0]) != NULL &&
@@ -843,19 +859,34 @@ load_type_done:
         }
         if (load_type == 2) {
             icon_stage = 2;
+            f32 backdrop_dt_scale = 1.0f;
+            if (AreaDataLoaded != 0 && !character_load_active) {
+                if (LoadWait > 0.0f && (LoadTime >= 45.0f || skip_text_scroll)) {
+                    LoadWait -= FRAMETIME;
+                    if (LoadWait < 0.0f) {
+                        LoadWait = 0.0f;
+                    }
+                }
+                backdrop_dt_scale = LoadWait / LOADWAITTIME;
+            }
+            legoSetMusicVolume((LoadWait / LOADWAITTIME) * music_volume);
+            BackDrop_Update(backdrop_dt_scale * FRAMETIME);
+            BackDrop_UpdateColours(1);
+        } else if (AreaDataLoaded != 0 && !character_load_active && icon_stage == 2 && LoadWait > 0.0f) {
+            LoadWait -= FRAMETIME;
+            if (LoadWait < 0.0f) {
+                LoadWait = 0.0f;
+            }
         }
 
-        BackDrop_Update(FRAMETIME);
-        BackDrop_UpdateColours(1);
-
-        legoSetMusicVolume((LoadWait / LOADWAITTIME) * music_volume);
         if (NOSOUND == 0) {
             NuSound3Update();
             music_man.Process(FRAMETIME);
         }
+        music_man.Process(FRAMETIME);
 
         NuRndrBeginScene(-1);
-        if (HUB_ADATA != NULL && HUB_ADATA->index == Area) {
+        if (load_type == 2) {
             const u32 top_colour = 0x80000000u | (static_cast<u32>(backdrop_top_b) & 0xff) << 16 |
                                    (static_cast<u32>(backdrop_top_g) & 0xff) << 8 |
                                    (static_cast<u32>(backdrop_top_r) & 0xff);
@@ -866,28 +897,28 @@ load_type_done:
         } else {
             NuRndrGradClear(0xf00, static_cast<i32>(0x80000000u), static_cast<i32>(0x80000000u), 1.0f);
         }
-        const f32 backdrop_alpha =
-            loadareacharacters_no_backdrop_reset == 0 && LoadTime < 0.5f ? LoadTime * 2.0f : 1.0f;
-        BackDrop_Draw(backdrop_alpha, 1);
-
         if (load_type == 2) {
+            const f32 backdrop_alpha =
+                loadareacharacters_no_backdrop_reset == 0 && LoadTime < 0.5f ? LoadTime * 2.0f : 1.0f;
+            BackDrop_Draw(backdrop_alpha, 1);
+
             f32 crawl_alpha = 1.0f;
-            if (AreaDataLoaded != 0 && !character_load_active && LoadWait >= 0.1f) {
-                crawl_alpha = (LoadWait - 0.1f) / (LOADWAITTIME - 0.1f);
+            if (AreaDataLoaded == 0 || character_load_active ||
+                (LoadWait >= 0.1f && (crawl_alpha = (LoadWait - 0.1f) / (LOADWAITTIME - 0.1f)) > 0.0f)) {
+                TextCrawl_Draw(FRAMETIME, 0, crawl_alpha, NULL);
+                SetQFont2D();
             }
-            if (crawl_alpha < 0.0f) {
-                crawl_alpha = 0.0f;
-            }
-            TextCrawl_Draw(FRAMETIME, 0, crawl_alpha, NULL);
-            SetQFont2D();
 
             if (draw_touch_prompt) {
                 const f32 prompt_wave =
                     NuTrigTable[((static_cast<i32>(NuFmod(touch_prompt_time, 1.0f) * 65536.0f) + 0x4000) >> 1) &
                                 0x7fff];
                 const i32 prompt_alpha = static_cast<i32>(32.0f - prompt_wave * 32.0f);
+                SetQFont2D();
                 Text3DEx(TTab[tTOUCHTOSTART], 0.0f, 0.745f, 1.0f, 0.4f, 0.4f, 0.4f, 0, 255, 255, 255, prompt_alpha);
             }
+        } else if (load_type == 1) {
+            BackDrop_Draw(1.0f, 1);
         }
 
         if (LoadWait == LOADWAITTIME && HUB_ADATA != NULL && HUB_ADATA->index == Area && CharacterDataLoad != 0 &&
@@ -929,50 +960,27 @@ load_type_done:
             }
         }
 
-        if (HUB_ADATA == NULL || HUB_ADATA->index != Area) {
+        if (load_type != 2 && (HUB_ADATA == NULL || HUB_ADATA->index != Area || fade_scene_active)) {
             NuRndrEndScene();
             FadeSys.Update();
             FadeSys.Draw();
             NuRndrBeginScene(-1);
+            fade_scene_active = true;
         }
 
-        if (theGameThings != NULL) {
-            static_cast<ThingManager *>(theGameThings)->RenderThings(NULL);
-        }
+        static_cast<ThingManager *>(theGameThings)->RenderThings(NULL);
         NuRndrEndScene();
+
+        if (AreaDataLoaded != 0 && !character_load_active && LoadWait < 0.1f &&
+            (FadeSys.pending_type == FADE_TYPE_NONE || FadeSys.pending_type == FADE_TYPE_STILL)) {
+            FADETYPE wipe = {FADE_TYPE_STILL_WIPE};
+            FadeSys.SetFade(wipe, 0);
+            NeedScreenGrab(1);
+            GrabStillScreen();
+        }
 
         edGraEnableTerrainSwap();
         FRAMETIME = NuFrameEnd();
         edGraDisableTerrainSwap();
-
-        if (AreaDataLoaded != 0 && !character_load_active &&
-            ((HUB_ADATA == NULL || HUB_ADATA->index != Area) || icon_stage == 2)) {
-            const bool hold_text_crawl = load_type == 2 && LoadTime < 45.0f && !skip_text_scroll;
-            if (LoadWait > 0.0f && !hold_text_crawl) {
-                LoadWait -= FRAMETIME;
-                if (LoadWait < 0.0f) {
-                    LoadWait = 0.0f;
-                }
-            } else if (LoadWait <= 0.0f) {
-                FADETYPE wipe = {FADE_TYPE_STILL_WIPE};
-                FadeSys.SetFade(wipe, 0);
-                NeedScreenGrab(1);
-                GrabStillScreen();
-                break;
-            }
-        }
-    }
-
-    CutBorderScale = 0.0f;
-    MainRenderTime = 1.0f;
-    music_man.StopAll(0);
-    MusicClearAll();
-    SoundKillAll();
-    legoSetMusicVolume(music_volume);
-    textcrawlactive = 0;
-    MechSystems::Get()->UnhookClickToPressStart();
-    if (loadareadata_loadlevel != 0) {
-        loadareadata_loadlevel = 0;
-        loadareacharacters_loadedlevel = 1;
     }
 }

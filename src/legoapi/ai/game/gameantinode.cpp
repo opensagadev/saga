@@ -22,7 +22,8 @@ void GameAntinode_UpdateAntiNodeUsingData(GAMEANTINODESYS_s *, GAMEANTINODE_s *,
                                           float, i32) {
 }
 
-GAMEANTINODE_s *GameAntinode_RegisterAntiNodeUsingData(GAMEANTINODESYS_s *, nuvec_s *, u16, GAMEANTINODEDATA_s *, float, i32) {
+GAMEANTINODE_s *GameAntinode_RegisterAntiNodeUsingData(GAMEANTINODESYS_s *, nuvec_s *, u16, GAMEANTINODEDATA_s *, float,
+                                                       i32) {
     return NULL;
 }
 

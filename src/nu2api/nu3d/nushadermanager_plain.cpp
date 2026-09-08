@@ -229,13 +229,6 @@ namespace nu2api {
     // Uniform table
     // ---------------------------------------------------------------------------
 
-    struct ShaderUniformRecord {
-        u8 raw[0x5c];
-    };
-
-    // 155 semantic records (0x244c bytes total in the original .data).
-    ShaderUniformRecord g_shaderUniforms[155];
-
     // Uber-shader identity used by key generation (first 8 bytes of the MD5).
     static const u8 kUberShaderHash[16] = {
         0x38, 0x2a, 0x9d, 0x15, 0xf8, 0xfa, 0xbf, 0x09, 0xcb, 0xcc, 0x9b, 0xec, 0x5e, 0xb7, 0x62, 0x40,
@@ -247,6 +240,122 @@ namespace nu2api {
     extern "C" void glUniform4fv(GLint, GLsizei, const GLfloat *);
 
 } // namespace nu2api
+
+#define SHADER_UNIFORM(vs, fs, count, field_c, stages, reg, field_18)                                                  \
+    {                                                                                                                  \
+        vs, fs, count, field_c, stages, reg, field_18, {                                                               \
+        }                                                                                                              \
+    }
+
+// Original 0x6349c0. This metadata determines how much of each cached
+// semantic value is copied and later uploaded to generated shaders.
+extern "C" {
+    ShaderUniformRecord g_shaderUniforms[0x65] = {
+        SHADER_UNIFORM(NULL, "layer0_sampler", 0, 0, 2, -1, 0),
+        SHADER_UNIFORM(NULL, "layer1_sampler", 0, 0, 2, -1, 0),
+        SHADER_UNIFORM(NULL, "layer2_sampler", 0, 0, 2, -1, 0),
+        SHADER_UNIFORM(NULL, "layer3_sampler", 0, 0, 2, -1, 0),
+        SHADER_UNIFORM(NULL, "specular_sampler", 0, 0, 2, -1, 0),
+        SHADER_UNIFORM(NULL, "specular2_sampler", 0, 0, 2, -1, 0),
+        SHADER_UNIFORM(NULL, "surface_sampler", 0, 0, 2, -1, 0),
+        SHADER_UNIFORM(NULL, "surface2_sampler", 0, 0, 2, -1, 0),
+        SHADER_UNIFORM(NULL, "detailSurface_sampler", 0, 0, 2, -1, 0),
+        SHADER_UNIFORM("vertexFetch_sampler", NULL, 0, 0, 1, -1, 0),
+        SHADER_UNIFORM(NULL, "perm_sampler", 0, 0, 2, -1, 0),
+        SHADER_UNIFORM(NULL, "permgrad_sampler", 0, 0, 2, -1, 0),
+        SHADER_UNIFORM(NULL, "vtfNormal_sampler", 0, 0, 2, -1, 0),
+        SHADER_UNIFORM(NULL, "diffenvmap_samplerCube", 0, 0, 2, -1, 0),
+        SHADER_UNIFORM(NULL, "envmap_samplerCube", 0, 0, 2, -1, 0),
+        SHADER_UNIFORM(NULL, "envmap_samplerSphere", 0, 0, 2, -1, 0),
+        SHADER_UNIFORM(NULL, "ps2_shinemap_sampler", 0, 0, 2, -1, 0),
+        SHADER_UNIFORM(NULL, "backBuffer_sampler", 0, 0, 2, -1, 0),
+        SHADER_UNIFORM("wind_sampler", NULL, 0, 0, 1, -1, 0),
+        SHADER_UNIFORM(NULL, "texAnimMap_sampler", 0, 0, 2, -1, 0),
+        SHADER_UNIFORM(NULL, "texAnimCurves_sampler", 0, 0, 2, -1, 0),
+        SHADER_UNIFORM("ambientColor", "ambientColor", 1, 1, 7, -1, 0),
+        SHADER_UNIFORM("incandescentGlow", "incandescentGlow", 1, 1, 7, -1, 0),
+        SHADER_UNIFORM("bitangentFlip", NULL, 1, 1, 1, -1, 0),
+        SHADER_UNIFORM(NULL, "surface_params", 1, 1, 6, -1, 0),
+        SHADER_UNIFORM(NULL, "surface_params2", 1, 1, 6, -1, 0),
+        SHADER_UNIFORM(NULL, "specular_params", 1, 1, 2, -1, 0),
+        SHADER_UNIFORM(NULL, "envmap_params", 1, 1, 6, -1, 0),
+        SHADER_UNIFORM("vtf_kHeight", NULL, 1, 1, 5, -1, 0),
+        SHADER_UNIFORM(NULL, "vtf_kNormal", 1, 1, 6, -1, 0),
+        SHADER_UNIFORM(NULL, "gooch_params", 1, 1, 2, -1, 0),
+        SHADER_UNIFORM("waterTable", NULL, 0x20, 1, 1, -1, 0),
+        SHADER_UNIFORM(NULL, "layer0_diffuse", 1, 1, 6, -1, 0),
+        SHADER_UNIFORM(NULL, "layer1_diffuse", 1, 1, 6, -1, 0),
+        SHADER_UNIFORM(NULL, "layer2_diffuse", 1, 1, 6, -1, 0),
+        SHADER_UNIFORM(NULL, "layer3_diffuse", 1, 1, 6, -1, 0),
+        SHADER_UNIFORM(NULL, "layer_kOpacities", 1, 1, 6, -1, 0),
+        SHADER_UNIFORM(NULL, "specular_specular", 1, 1, 6, -1, 0),
+        SHADER_UNIFORM(NULL, "specular2_specular", 1, 1, 6, -1, 0),
+        SHADER_UNIFORM(NULL, "refraction_color", 1, 1, 6, -1, 0),
+        SHADER_UNIFORM(NULL, "refraction_kIndex", 1, 1, 6, -1, 0),
+        SHADER_UNIFORM("uvOffset0", NULL, 1, 1, 1, -1, 0),
+        SHADER_UNIFORM("uvOffset1", NULL, 1, 1, 1, -1, 0),
+        SHADER_UNIFORM("uvOffset2", NULL, 1, 1, 1, -1, 0),
+        SHADER_UNIFORM("uvOffset3", NULL, 1, 1, 1, -1, 0),
+        SHADER_UNIFORM(NULL, "lego_params", 1, 1, 2, -1, 0),
+        SHADER_UNIFORM("fxAttributes", NULL, 1, 1, 1, -1, 0),
+        SHADER_UNIFORM("dappleLimit", NULL, 1, 1, 1, -1, 0),
+        SHADER_UNIFORM(NULL, "carpaint_params", 1, 1, 2, -1, 0),
+        SHADER_UNIFORM(NULL, "carpaint_tints", 4, 1, 2, -1, 0),
+        SHADER_UNIFORM(NULL, "edgelit_params", 1, 1, 2, -1, 0),
+        SHADER_UNIFORM(NULL, "fractal_params", 1, 1, 2, -1, 0),
+        SHADER_UNIFORM(NULL, "alphaTestParameters", 1, 1, 2, -1, 0),
+        SHADER_UNIFORM("vs_sceneAmbientColor", "sceneAmbientColor", 1, 1, 3, 0x1c, 2),
+        SHADER_UNIFORM("vs_lightColor0", "lightColor0", 1, 1, 3, 0x1d, 2),
+        SHADER_UNIFORM("vs_lightColor1", "lightColor1", 1, 1, 3, 0x1e, 2),
+        SHADER_UNIFORM("vs_lightColor2", "lightColor2", 1, 1, 3, 0x1f, 2),
+        SHADER_UNIFORM("vs_lightPosition0", "lightPosition0", 1, 1, 3, 0x20, 2),
+        SHADER_UNIFORM("vs_lightPosition1", "lightPosition1", 1, 1, 3, 0x21, 2),
+        SHADER_UNIFORM("vs_lightPosition2", "lightPosition2", 1, 1, 3, 0x22, 2),
+        SHADER_UNIFORM("world", NULL, 4, 4, 1, 0x10, 0),
+        SHADER_UNIFORM("vs_view", "view", 4, 4, 3, 0x0c, 1),
+        SHADER_UNIFORM("viewProj", NULL, 4, 4, 1, 0, 2),
+        SHADER_UNIFORM("worldViewProj", NULL, 4, 4, 1, 0x14, 0),
+        SHADER_UNIFORM("worldView", NULL, 4, 4, 1, 0x18, 0),
+        SHADER_UNIFORM("motion", NULL, 4, 4, 1, 0x29, 0),
+        SHADER_UNIFORM("vs_lightParams", "fs_lightParams", 0x0b, 1, 3, 0x1c, 1),
+        SHADER_UNIFORM(NULL, "fragmentUniforms_sampler", 0, 0, 2, -1, 0),
+        SHADER_UNIFORM("kTint", NULL, 1, 1, 1, 0x28, 2),
+        SHADER_UNIFORM("vs_screenSize", "fs_screenSize", 1, 1, 3, 0x2d, 1),
+        SHADER_UNIFORM(NULL, "time", 1, 1, 2, 0x2e, 1),
+        SHADER_UNIFORM(NULL, "fog_color", 1, 1, 2, 0x2f, 1),
+        SHADER_UNIFORM("fog_params", NULL, 1, 1, 1, 0x30, 1),
+        SHADER_UNIFORM("vs_projection_params", "fs_projection_params", 1, 1, 3, 0x31, 1),
+        SHADER_UNIFORM("vs_frustum_params", "fs_frustum_params", 1, 1, 3, 0x32, 1),
+        SHADER_UNIFORM("ps2ShineMtx", NULL, 4, 4, 1, 0x23, 1),
+        SHADER_UNIFORM(NULL, "noiseTexSize", 1, 1, 2, 0x40, 1),
+        SHADER_UNIFORM("averageLightColor", NULL, 1, 1, 1, 0x41, 1),
+        SHADER_UNIFORM("averageLightDir", NULL, 1, 1, 1, 0x42, 1),
+        SHADER_UNIFORM("lightRotationMtx", NULL, 4, 4, 1, 0x43, 1),
+        SHADER_UNIFORM("offsetTable", NULL, 8, 1, 1, 0x47, 0),
+        SHADER_UNIFORM("vertexGroupStates", NULL, 0x20, 1, 1, 0x4f, 0),
+        SHADER_UNIFORM("worldParams", NULL, 0x0c, 4, 1, 0x10, 0),
+        SHADER_UNIFORM("wind_params", NULL, 1, 1, 1, -1, 0),
+        SHADER_UNIFORM("worldViewInverseTranspose", NULL, 4, 4, 1, 0x18, 1),
+        SHADER_UNIFORM("vs_viewInverseTranspose", "fs_viewInverseTranspose", 4, 4, 3, 0x0c, 1),
+        SHADER_UNIFORM("worldCamPos", NULL, 1, 1, 1, 0x27, 0),
+        SHADER_UNIFORM(NULL, "specularDirection", 1, 1, 2, 0x33, 2),
+        SHADER_UNIFORM("lightmapOffset", NULL, 1, 1, 1, 0x34, 1),
+        SHADER_UNIFORM("shadowCastingObject", NULL, 1, 1, 1, 0x6f, 0),
+        SHADER_UNIFORM("skinMatrix", NULL, 0x20, 4, 1, -1, 0),
+        SHADER_UNIFORM("blendShapesCount", NULL, 1, 1, 1, 0x37, 0),
+        SHADER_UNIFORM("blendShapes", NULL, 0x10, 1, 1, -1, 0),
+        SHADER_UNIFORM("blendShapes[0]", NULL, 1, 1, 1, 0x38, 0),
+        SHADER_UNIFORM("blendShapes[1]", NULL, 1, 1, 1, 0x39, 0),
+        SHADER_UNIFORM("blendShapes[2]", NULL, 1, 1, 1, 0x3a, 0),
+        SHADER_UNIFORM("blendShapes[3]", NULL, 1, 1, 1, 0x45, 0),
+        SHADER_UNIFORM("blendShapes[4]", NULL, 1, 1, 1, 0x3c, 0),
+        SHADER_UNIFORM("blendShapes[5]", NULL, 1, 1, 1, 0x3d, 0),
+        SHADER_UNIFORM("blendShapes[6]", NULL, 1, 1, 1, 0x3e, 0),
+        SHADER_UNIFORM("blendShapes[7]", NULL, 1, 1, 1, 0x3f, 0),
+    };
+}
+
+#undef SHADER_UNIFORM
 
 // ---------------------------------------------------------------------------
 // Public C API
@@ -316,32 +425,34 @@ extern "C" void NuShaderManagerBindShader(NUSHADEROBJECT *slot) {
 }
 
 extern "C" void NuShaderManagerSetfv(i32 semantic, const f32 *values) {
-    using namespace nu2api;
-    i32 vec4Count = *reinterpret_cast<const i32 *>(g_shaderUniforms[semantic].raw + 8);
-    if (vec4Count == 0) {
-        switch (semantic) {
-            case 0x3c:
-            case 0x3d:
-            case 0x3e:
-            case 0x4b:
-                vec4Count = 4;
-                break;
-            default:
-                vec4Count = 1;
-                break;
-        }
-        *reinterpret_cast<i32 *>(g_shaderUniforms[semantic].raw + 8) = vec4Count;
-    }
-    if (vec4Count < 5) {
-        std::memcpy(g_shaderUniforms[semantic].raw + 0x1c, values, static_cast<size_t>(vec4Count) << 4);
+    const i32 value_count = g_shaderUniforms[semantic].value_count;
+    if (value_count < 5) {
+        std::memcpy(g_shaderUniforms[semantic].values, values, static_cast<size_t>(value_count) << 4);
     }
 }
 
-// Original 0x308ec0. Array-valued constants are applied immediately to the
-// shader which is active while the display-list callback is being consumed.
+// Original 0x308ec0 / ShaderManagerOpenGL::setElementsfv @0x30e050. The
+// manager records the complete semantic payload; material setup publishes it
+// to whichever generated program consumes that semantic later in the list.
 extern "C" void NuShaderManagerSetElementsfv(i32 semantic, i32 first_element, i32 count, const f32 *values) {
-    NUSHADEROBJECT *shader = NuShaderManagerGetCurrentShader();
-    NuShaderObjectSetElementsfv(shader, semantic, first_element, count, values);
+    (void)first_element;
+    (void)count;
+    const i32 value_count = g_shaderUniforms[semantic].value_count;
+    if (value_count < 5) {
+        std::memcpy(g_shaderUniforms[semantic].values, values, static_cast<size_t>(value_count) << 4);
+    }
+}
+
+// Original 0x308f10 / ShaderManagerOpenGL::setElementsfv_transpose
+// @0x30e0a0. The Android manager stores this payload identically to the
+// ordinary element setter; transposition is handled by the caller/callback.
+extern "C" void NuShaderManagerSetElementsfv_transpose(i32 semantic, i32 first_element, i32 count, const f32 *values) {
+    (void)first_element;
+    (void)count;
+    const i32 value_count = g_shaderUniforms[semantic].value_count;
+    if (value_count < 5) {
+        std::memcpy(g_shaderUniforms[semantic].values, values, static_cast<size_t>(value_count) << 4);
+    }
 }
 
 namespace nu2api {
@@ -465,7 +576,7 @@ namespace nu2api {
         const bool flag10Path = baseVariant && (flagsIn & 0x10) != 0 && !specialVertexPath;
 
         filter->field4_0x10 = flag10Path;
-        filter->field6_0x18 = ((filter->variant != 0) || ((flagsIn & 0x10) != 0)) && !specialVertexPath;
+        filter->field6_0x18 = !specialVertexPath;
 
         const bool deferredPath = baseVariant && (flagsIn & 0x20) != 0 && !specialVertexPath;
         filter->field5_0x14 = deferredPath;
@@ -1125,12 +1236,12 @@ extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader, struct n
                 continue;
             }
 
-            const nu2api::ShaderUniformRecord &uniform = nu2api::g_shaderUniforms[semantic];
-            const i32 count = *reinterpret_cast<const i32 *>(uniform.raw + 8);
+            const ShaderUniformRecord &uniform = g_shaderUniforms[semantic];
+            const i32 count = uniform.value_count;
             if (count <= 0) {
                 continue;
             }
-            const f32 *values = reinterpret_cast<const f32 *>(uniform.raw + 0x1c);
+            const f32 *values = uniform.values;
 
             switch (parameter.type_and_flags & 0x0f) {
                 case 1:

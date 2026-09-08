@@ -211,10 +211,13 @@ SUPEROPTIONS_s SuperOptions = {};
 static CUTSCENESYS CutSceneSys_LSW = {0x5b, 0x5c, 0xe7, 2};
 void CutScenes_InitSystem(CUTSCENESYS *);
 void GameAudio_Init(GAMEAUDIO *);
+extern __attribute__((visibility("hidden"))) i32 GameAudio_CheckReverb_LSW() asm("_ZL25GameAudio_CheckReverb_LSWv");
+extern __attribute__((visibility("hidden"))) i32
+GameAudio_OverrideFootStep_LSW(GameObject_s *, i32) asm("_ZL30GameAudio_OverrideFootStep_LSWP12GameObject_si");
 
 static GAMEAUDIO GameAudio_LSW = {
-    NULL,
-    NULL,
+    GameAudio_OverrideFootStep_LSW,
+    GameAudio_CheckReverb_LSW,
     {
         "Jp_Ami_Jump",
         NULL,
@@ -665,6 +668,7 @@ void InitGameAfterConfig(void) {
     LEGOACT_FALL = 5;
     LEGOACT_FALLLAND = 0x59;
     LEGOACT_BACKPACKFALLLAND = 0xb3;
+    LEGOACT_BACKFLIP = 0x77;
     //  LEGOACT_DEACTIVATED = 0x41;
     //  LEGOACT_PUNCH_BEHIND = 0x94;
     //  LEGOACT_SHOOTRIGHT = 0x5b;

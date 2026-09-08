@@ -95,7 +95,7 @@ NULSTHDR *NuLstCreateBuff(i32 count, i32 size, VARIPTR *buffer, VARIPTR end, i32
 
 NULNKHDR *NuLstGetByIdx(NULSTHDR *list, i32 index) {
     NULNKHDR *node = reinterpret_cast<NULNKHDR *>(reinterpret_cast<u8 *>(list + 1) +
-        static_cast<i16>(list->element_size_total) * index);
+                                                  static_cast<i16>(list->element_size_total) * index);
     return node->is_used ? node + 1 : NULL;
 }
 

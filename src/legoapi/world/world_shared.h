@@ -104,7 +104,7 @@ void SetLevelSfxBits(WORLDINFO *world);
 void ResetLevSfx(WORLDINFO *world);
 i32 ActionFromQuiet(i32 idx);
 i32 AmbientFromQuiet(i32 idx);
-void InitSpecialSfx(WORLDINFO *world);
+bool InitSpecialSfx(WORLDINFO *world);
 void LoadSpecialSfxFile(WORLDINFO *world);
 
 // --- gizmo_sys.cpp — gizmo / minikit / collection ---

@@ -293,10 +293,24 @@ void AIRetreatFromDestination(AISYS_s *, AIPACKET_s *, APIOBJECT_s *, i32) {
 void AIRetreatFromDestination2(AISYS_s *, AIPACKET_s *, APIOBJECT_s *, i32) {
 }
 
-void AIMoveDirectlyToDestination(AISYS_s *, AIPACKET_s *, APIOBJECT_s *, i32) {
+void AIMoveDirectlyToDestination(AISYS_s *, AIPACKET_s *packet, APIOBJECT_s *object, i32) {
+    if (packet->movement_parameter > 0.0f) {
+        NUVEC delta;
+        const f32 distance_squared = NuVecDistSqr(&packet->fallback_destination, &object->position, &delta);
+        if (packet->movement_parameter * packet->movement_parameter > distance_squared) {
+            packet->movement_destination = object->position;
+            packet->movement_stopping_distance = 0.0f;
+            return;
+        }
+    }
+    packet->movement_destination = packet->fallback_destination;
+    packet->movement_stopping_distance = 0.0f;
 }
 
-void AIMoveToDestinationAvoidingCamera(AISYS_s *, AIPACKET_s *, APIOBJECT_s *, i32) {
+void AIMoveToDestinationAvoidingCamera(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
+    const NUVEC destination = packet->fallback_destination;
+    AIMoveToDestination(system, packet, object, checks);
+    packet->fallback_destination = destination;
 }
 
 void AISysNodeCanReachThisJumpConnection(GameObject_s &, AIPATH_s &, unsigned char, AIPATHCNX_s &, i32) {

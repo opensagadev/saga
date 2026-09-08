@@ -3,67 +3,144 @@
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nusound/nusound_system.hpp"
 
+#include <string.h>
+
 const char *NuSoundBus::GetName() {
     return this->name;
 }
 
 NuSoundBus *NuSoundSystem::GetBus(const char *name) {
-    LOG_WARN("NuSoundSystem::GetBus is not implemented");
+    for (NuSoundBus *bus = bus_list.Front(); bus != bus_list.End(); bus = reinterpret_cast<NuSoundBus **>(bus)[1]) {
+        if (NuStrICmp(bus->GetName(), name) == 0) {
+            return bus;
+        }
+    }
     return NULL;
 }
 
 NuSoundBus::NuSoundBus(const char *name, bool is_master) {
-    // this->field15_0x3c = (undefined *)&this->field11_0x2c;
-    // this->field13_0x34 = (undefined *)&this->field11_0x2c;
-    // this->field1_0x4 = (i32 *)0x0;
-    // this->field0_0x0 = 0;
-    // this->field11_0x2c = 0;
-    // this->field14_0x38 = 0;
-    // this->field17_0x44 = 0;
-    // this->field16_0x40 = &this->field13_0x34;
-    // this->field12_0x30 = &this->field13_0x34;
-
-    this->parent_bus = NULL;
+    effect_begin = &effect_begin_prev;
+    effect_end_prev = &effect_begin_prev;
+    intrusive_next = NULL;
+    intrusive_prev = NULL;
+    effect_begin_prev = NULL;
+    effect_end_next = NULL;
+    effect_count = 0;
+    effect_end = &effect_end_prev;
+    effect_begin_next = &effect_end_prev;
+    parent_bus = NULL;
 
     NuStrCpy(this->name, name);
-    // this->field2_0x8 = 0x3f800000;
-    // this->field3_0xc = 0x3f800000;
-    // this->field4_0x10 = 0x3f800000;
-    // this->field5_0x14 = 0x3f800000;
-    // this->field6_0x18 = 0x3f800000;
-    // this->field7_0x1c = 0x3f800000;
-    // this->field8_0x20 = 0x3f800000;
-    // this->field9_0x24 = 0x3f800000;
+    for (i32 i = 0; i < 8; i++) {
+        output_mix[i] = 1.0f;
+    }
 
     if (!is_master) {
-        this->parent_bus = NuSoundSystem::sMasterBus;
+        parent_bus = NuSoundSystem::sMasterBus;
     }
 }
 
 NuSoundBus::NuSoundBus(const char *name, NuSoundBus *parent) {
-    this->parent_bus = parent;
+    effect_begin = &effect_begin_prev;
+    effect_end_prev = &effect_begin_prev;
+    intrusive_next = NULL;
+    intrusive_prev = NULL;
+    effect_begin_prev = NULL;
+    effect_end_next = NULL;
+    effect_count = 0;
+    effect_end = &effect_end_prev;
+    effect_begin_next = &effect_end_prev;
+    parent_bus = parent;
+
+    NuStrCpy(this->name, name);
+    for (i32 i = 0; i < 8; i++) {
+        output_mix[i] = 1.0f;
+    }
+
+    if (parent == NULL) {
+        parent_bus = NuSoundSystem::sMasterBus;
+    }
 }
 
 NuSoundBus::~NuSoundBus() {
+    NuList<NuSoundEffect *> &effects = *reinterpret_cast<NuList<NuSoundEffect *> *>(&this->effect_begin_prev);
+    effects.~NuList<NuSoundEffect *>();
 }
 
-void NuSoundBus::AddEffect(NuSoundEffect *) {
+bool NuSoundBus::AddEffect(NuSoundEffect *effect) {
+    NuList<NuSoundEffect *> &effects = *reinterpret_cast<NuList<NuSoundEffect *> *>(&this->effect_begin_prev);
+
+    for (NuListNodeBase *node = effects.Head(); node != effects.Tail(); node = node->GetNext()) {
+        if (static_cast<NuListNode<NuSoundEffect *> *>(node)->value == effect) {
+            return false;
+        }
+    }
+
+    bool attached = effect->AttachBus(this);
+    if (attached) {
+        NuSoundMemory::PushNuListNode(effects, effect);
+    }
+    return attached;
 }
 
-void NuSoundBus::RemoveEffect(NuSoundEffect *) {
+void NuSoundBus::RemoveEffect(NuSoundEffect *effect) {
+    NuList<NuSoundEffect *> &effects = *reinterpret_cast<NuList<NuSoundEffect *> *>(&this->effect_begin_prev);
+
+    bool found = false;
+    for (NuListNodeBase *node = effects.Head(); node != effects.Tail(); node = node->GetNext()) {
+        if (static_cast<NuListNode<NuSoundEffect *> *>(node)->value == effect) {
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        return;
+    }
+
+    effect->DetachBus(this);
+    NuListNodeBase *node = effects.Head();
+    while (node != effects.Tail()) {
+        NuListNodeBase *next = node->GetNext();
+        if (static_cast<NuListNode<NuSoundEffect *> *>(node)->value == effect) {
+            effects.Remove(node);
+        }
+        node = next;
+    }
 }
 
-void NuSoundBus::ApplyFinalMix(float *) {
+void NuSoundBus::ApplyFinalMix(float *mix) {
+    NuSoundBus *bus = this;
+    do {
+        f32 effect_mix = 1.0f;
+        NuListNodeBase *node = reinterpret_cast<NuList<NuSoundEffect *> *>(&bus->effect_begin_prev)->Head();
+        NuListNodeBase *end = reinterpret_cast<NuList<NuSoundEffect *> *>(&bus->effect_begin_prev)->Tail();
+        while (node != end) {
+            NuSoundEffect *effect = static_cast<NuListNode<NuSoundEffect *> *>(node)->value;
+            effect_mix *= effect->output_mix;
+            node = node->GetNext();
+        }
+
+        for (i32 i = 0; i < 8; i++) {
+            mix[i] *= bus->output_mix[i] * effect_mix;
+        }
+        bus = bus->parent_bus;
+    } while (bus != NULL);
 }
 
-void NuSoundBus::GetOutputMix(float *) {
+void NuSoundBus::GetOutputMix(float *mix) {
+    memmove(mix, this->output_mix, sizeof(this->output_mix));
 }
 
-void NuSoundBus::SetOutputMix(float) {
+void NuSoundBus::SetOutputMix(float mix) {
+    for (i32 i = 0; i < 8; i++) {
+        this->output_mix[i] = mix;
+    }
 }
 
-void NuSoundBus::SetOutputMix(float *) {
+void NuSoundBus::SetOutputMix(float *mix) {
+    memmove(this->output_mix, mix, sizeof(this->output_mix));
 }
 
-void NuSoundBus::SetOutputBus(NuSoundBus *) {
+void NuSoundBus::SetOutputBus(NuSoundBus *bus) {
+    this->parent_bus = bus != NULL ? bus : NuSoundSystem::sMasterBus;
 }

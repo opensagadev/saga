@@ -9,6 +9,8 @@
 struct NuSymbolQuery;
 
 class NuMemoryManager {
+    friend class NuSoundSystem;
+
   public:
     enum Flags {
         MEM_MANAGER_DEBUG = 1 << 0x2,
@@ -209,7 +211,7 @@ class NuMemoryManager {
     void DumpBlocksForContext(u32 _a, NuSymbolQuery *query, Context *context, u32 _d);
     void FindAndTouchMatchingBlocks(DebugHeader *header, u32 *a, u32 b);
     void GetAllocatedBytes();
-    void GetBlockAlignment(void *ptr);
+    u32 GetBlockAlignment(void *ptr);
     void GetBlockDebugBackTrace(void *ptr, void **out);
     void GetBlockDebugContext(void *ptr);
     u32 GetBlockSize(void *ptr);
@@ -274,7 +276,10 @@ class NuMemoryManager {
     void StatsAddFragment(FreeHeader *header);
     void StatsRemoveFragment(FreeHeader *header);
 
+  public:
     u32 CalculateLargestFragmentSize();
+
+  private:
     u32 CalculateFreeBytes();
 
     FreeHeader *FindLargestFragment();

@@ -147,7 +147,18 @@ void TakeOverYoda(GameObject_s *, GameObject_s *, i32, i32) {
 void fullcodename(i32) {
 }
 
-void CharScene_Draw(WORLDINFO_s *, i32, numtx_s *, numtx_s *) {
+nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id);
+
+void CharScene_Draw(WORLDINFO_s *world, i32 character_id, numtx_s *matrix, numtx_s *reflection_matrix) {
+    nuhspecial_s *special = CharScene_FindHSpecial(world, character_id);
+    if (special != NULL) {
+        if (matrix != NULL) {
+            NuSpecialDrawAt(special, matrix);
+        }
+        if (reflection_matrix != NULL) {
+            NuSpecialDrawAt(special, reflection_matrix);
+        }
+    }
 }
 
 void CharScenes_Init(variptr_u *buf, variptr_u *) {
@@ -596,7 +607,20 @@ void LocalGetRandomLocator(AILOCATOR_s **, i32, float, nuvec_s *, float, i32, fl
 void PostAnimate_ASTROMECH(GameObject_s *) {
 }
 
-void CharScene_FindHSpecial(WORLDINFO_s *, i32) {
+nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id) {
+    CHARSCENE_s *scene;
+    if (CharScene_Area != NULL && CharScene_Area[character_id].scene != NULL) {
+        scene = &CharScene_Area[character_id];
+    } else {
+        scene = &world->minikit.character_scenes[character_id];
+        if (scene->scene == NULL) {
+            scene = NULL;
+        }
+    }
+    if (scene != NULL && NuSpecialExistsFn(&scene->special_scene) == 0) {
+        scene = NULL;
+    }
+    return scene == NULL ? NULL : &scene->special_scene;
 }
 
 void LocalGetNearestLocator(AILOCATOR_s **, i32, float, nuvec_s *, float, i32, float, float) {
@@ -614,7 +638,10 @@ void RegisterGizmoTypes_Indy(variptr_u *, variptr_u *) {
 void Area_CharIDInCurrentList(i32) {
 }
 
-void SetProtocolDroidFallAnim(GameObject_s *) {
+void SetProtocolDroidFallAnim(GameObject_s *object) {
+    static const i16 fall_animations[] = {76, 75, 40};
+    const u8 variant = object->field_0xe38;
+    object->apiobj.anim_packet.requested_animation = variant >= 1 && variant <= 3 ? fall_animations[variant - 1] : 5;
 }
 
 void CollectCharactersOff_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32) {
@@ -640,13 +667,22 @@ void CollectCharactersOff_Update(STATUS_STAGE_s *, STATUSPACKET_s *, float) {
 void TakeOverYodaSeekDistanceHack(GameObject_s *, GameObject_s *, nuvec_s *) {
 }
 
-void SetProtocolDroidInterfaceAction(GameObject_s *) {
+void SetProtocolDroidInterfaceAction(GameObject_s *object) {
+    if (object->field_0xe38 == 3)
+        object->context_animation = 0x45;
+    else if (object->field_0xe38 == 2)
+        object->context_animation = 0x46;
+    else if (object->field_0xe38 == 1)
+        object->context_animation = 0x47;
 }
 
 void SetProtocolDroidDeactivatedAction(GameObject_s *object) {
-    if (object->field_0xe38 == 3) object->context_animation = 0x42;
-    else if (object->field_0xe38 == 2) object->context_animation = 0x43;
-    else if (object->field_0xe38 == 1) object->context_animation = 0x44;
+    if (object->field_0xe38 == 3)
+        object->context_animation = 0x42;
+    else if (object->field_0xe38 == 2)
+        object->context_animation = 0x43;
+    else if (object->field_0xe38 == 1)
+        object->context_animation = 0x44;
 }
 
 void LoadPerm1() {

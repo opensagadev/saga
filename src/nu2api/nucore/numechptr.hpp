@@ -5,7 +5,8 @@
 #include <stddef.h>
 
 struct NuMechPtr_ManagedObject {
-    virtual ~NuMechPtr_ManagedObject() {}
+    virtual ~NuMechPtr_ManagedObject() {
+    }
 };
 
 template <class T, i32 Tag> class NuMechPtr {
@@ -13,7 +14,8 @@ template <class T, i32 Tag> class NuMechPtr {
     struct ManagedBase : NuMechPtr_ManagedObject {
         NuMechPtr *managed_links;
 
-        ManagedBase() : managed_links(NULL) {}
+        ManagedBase() : managed_links(NULL) {
+        }
         virtual ~ManagedBase() {
             NuMechPtr *head = managed_links;
             if (head != NULL) {
@@ -32,9 +34,15 @@ template <class T, i32 Tag> class NuMechPtr {
         }
     };
 
-    NuMechPtr(T *value = NULL) : object(NULL), next(NULL), previous(NULL) { Attach(value); }
-    NuMechPtr(const NuMechPtr &other) : object(NULL), next(NULL), previous(NULL) { Attach(other.object); }
-    ~NuMechPtr() { Reset(); }
+    NuMechPtr(T *value = NULL) : object(NULL), next(NULL), previous(NULL) {
+        Attach(value);
+    }
+    NuMechPtr(const NuMechPtr &other) : object(NULL), next(NULL), previous(NULL) {
+        Attach(other.object);
+    }
+    ~NuMechPtr() {
+        Reset();
+    }
 
     NuMechPtr &operator=(const NuMechPtr &other) {
         T *value = other.object;
@@ -42,8 +50,12 @@ template <class T, i32 Tag> class NuMechPtr {
         Attach(value);
         return *this;
     }
-    T *Get() const { return object; }
-    T *operator->() const { return object; }
+    T *Get() const {
+        return object;
+    }
+    T *operator->() const {
+        return object;
+    }
 
     void Reset() {
         if (object != NULL) {
@@ -52,7 +64,8 @@ template <class T, i32 Tag> class NuMechPtr {
             } else {
                 next->previous = previous;
                 previous->next = next;
-                if (object->managed_links == this) object->managed_links = next;
+                if (object->managed_links == this)
+                    object->managed_links = next;
             }
             object = NULL;
             next = NULL;

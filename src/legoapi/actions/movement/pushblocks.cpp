@@ -30,7 +30,8 @@ i32 NewBlockAction(GameObject_s *object) {
             actions[count++] = action;
         }
     }
-    if (count == 0) return 0;
+    if (count == 0)
+        return 0;
     i32 action = actions[0];
     if (count != 1) {
         do {

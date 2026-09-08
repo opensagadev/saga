@@ -23,6 +23,7 @@ void (*memcard_drawasiconfn)(void) = NULL;
 i32 memcard_autosave = 0;
 i32 memcard_autosaveneeded = 0;
 i32 memcard_autosavestarted = 0;
+i32 memcard_autosaveinprogress = 0;
 f32 memcard_autosavepredelay = 0.0f;
 f32 memcard_autosavepostdelay = 0.0f;
 
@@ -58,13 +59,13 @@ void SaveSystemInitialise(i32 slots, void *makeSaveHash, void *save, i32 saveSiz
 i32 ChecksumSaveData(void *buffer, i32 size) {
     i32 n = size / 4;
 
-    i32 sum = 0x5c0999;
+    u32 sum = 0x5c0999;
 
     for (i32 i = 0; i < n; i++) {
-        sum += ((i32 *)buffer)[i];
+        sum += reinterpret_cast<u32 *>(buffer)[i];
     }
 
-    return sum;
+    return static_cast<i32>(sum);
 }
 
 bool TriggerExtraDataSave(void) {

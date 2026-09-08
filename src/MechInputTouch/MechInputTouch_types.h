@@ -420,27 +420,65 @@ struct GIZTURRET_s;
 struct PART_s;
 
 struct MechObjectInterface : NuMechPtr<MechObjectInterface, 4>::ManagedBase {
-    virtual ~MechObjectInterface() {}
-    virtual void GetPos(VuVec &, i32) const {}
+    virtual ~MechObjectInterface() {
+    }
+    virtual void GetPos(VuVec &, i32) const {
+    }
     virtual void GetFloorTargetPos(VuVec &, i32) const;
-    virtual f32 GetRadius() const { return 0.0f; }
-    virtual f32 GetHeight() const { const f32 radius = GetRadius(); return radius + radius; }
-    virtual const char *GetTargetName() const { return ""; }
-    virtual i32 GetObjectType() const { return 0; }
-    virtual void TargetedFlash() {}
-    virtual i32 IsDead() { return 1; }
-    virtual void *GetTgtVoidPtr() { return NULL; }
-    virtual GameObject_s *GetCharacterObject() { return NULL; }
-    virtual GIZOBSTACLE_s *GetGizObstacle() { return NULL; }
-    virtual GIZMOBLOWUP_s *GetGizBlowup() { return NULL; }
-    virtual GIZFORCE_s *GetGizForce() { return NULL; }
-    virtual GIZBUILDIT_s *GetGizBuildit() { return NULL; }
-    virtual LEVER_s *GetGizLever() { return NULL; }
-    virtual TELEPORT_s *GetTeleport() { return NULL; }
-    virtual HATMACHINE_s *GetHatMachine() { return NULL; }
-    virtual GIZPANEL_s *GetPanel() { return NULL; }
-    virtual GIZTURRET_s *GetGizTurret() { return NULL; }
-    virtual PART_s *GetPart() { return NULL; }
+    virtual f32 GetRadius() const {
+        return 0.0f;
+    }
+    virtual f32 GetHeight() const {
+        const f32 radius = GetRadius();
+        return radius + radius;
+    }
+    virtual const char *GetTargetName() const {
+        return "";
+    }
+    virtual i32 GetObjectType() const {
+        return 0;
+    }
+    virtual void TargetedFlash() {
+    }
+    virtual i32 IsDead() {
+        return 1;
+    }
+    virtual void *GetTgtVoidPtr() {
+        return NULL;
+    }
+    virtual GameObject_s *GetCharacterObject() {
+        return NULL;
+    }
+    virtual GIZOBSTACLE_s *GetGizObstacle() {
+        return NULL;
+    }
+    virtual GIZMOBLOWUP_s *GetGizBlowup() {
+        return NULL;
+    }
+    virtual GIZFORCE_s *GetGizForce() {
+        return NULL;
+    }
+    virtual GIZBUILDIT_s *GetGizBuildit() {
+        return NULL;
+    }
+    virtual LEVER_s *GetGizLever() {
+        return NULL;
+    }
+    virtual TELEPORT_s *GetTeleport() {
+        return NULL;
+    }
+    virtual HATMACHINE_s *GetHatMachine() {
+        return NULL;
+    }
+    virtual GIZPANEL_s *GetPanel() {
+        return NULL;
+    }
+    virtual GIZTURRET_s *GetGizTurret() {
+        return NULL;
+    }
+    virtual PART_s *GetPart() {
+        return NULL;
+    }
 };
 DECOMP_ASSERT(sizeof(MechObjectInterface) == 8, "MechObjectInterface ABI");
 DECOMP_ASSERT(sizeof(NuMechPtr<MechObjectInterface, 4>) == 12, "Mech object reference ABI");
@@ -507,17 +545,31 @@ struct MechTempPosInterface {
 struct MechTouchTask {
     MechTouchTask(MechInputTouchGestureBasedController &);
     virtual ~MechTouchTask();
-    virtual const HashedKey &GetHashId() { return HashId; }
-    virtual void OnStart() {}
-    virtual void OnStop() {}
-    virtual void OnSuspend() {}
-    virtual void OnResume() {}
-    virtual void Update() {}
-    virtual void BackgroundProcess() {}
-    virtual void Render() {}
-    virtual void UpdateTarget(MechObjectInterface &) {}
-    virtual i32 IsGoToTask() { return 0; }
-    virtual i32 IsBigJumpTask() { return 0; }
+    virtual const HashedKey &GetHashId() {
+        return HashId;
+    }
+    virtual void OnStart() {
+    }
+    virtual void OnStop() {
+    }
+    virtual void OnSuspend() {
+    }
+    virtual void OnResume() {
+    }
+    virtual void Update() {
+    }
+    virtual void BackgroundProcess() {
+    }
+    virtual void Render() {
+    }
+    virtual void UpdateTarget(MechObjectInterface &) {
+    }
+    virtual i32 IsGoToTask() {
+        return 0;
+    }
+    virtual i32 IsBigJumpTask() {
+        return 0;
+    }
     static HashedKey HashId;
     MechTouchTask *next;
     MechInputTouchGestureBasedController *controller;
@@ -549,14 +601,18 @@ struct MechTouchTaskBlock {
 };
 struct MechTouchTaskGoTo : MechTouchTask {
     MechTouchTaskGoTo(MechInputTouchGestureBasedController &, MechObjectInterface *);
-    const HashedKey &GetHashId() override { return HashId; }
+    const HashedKey &GetHashId() override {
+        return HashId;
+    }
     void OnStart() override;
     void OnStop() override;
     void Render() override;
     void Update() override;
     void UpdateStuck();
     void UpdateTarget(MechObjectInterface &) override;
-    i32 IsGoToTask() override { return 1; }
+    i32 IsGoToTask() override {
+        return 1;
+    }
     virtual ~MechTouchTaskGoTo();
     static HashedKey HashId;
     NuMechPtr<MechObjectInterface, 4> target;
@@ -583,7 +639,9 @@ struct MechTouchTaskGoTo : MechTouchTask {
 DECOMP_ASSERT(sizeof(MechTouchTaskGoTo) == 0x60, "MechTouchTaskGoTo ABI");
 struct MechTouchTaskBuildIt : MechTouchTaskGoTo {
     MechTouchTaskBuildIt(MechInputTouchGestureBasedController &, MechObjectInterface *, VuVec const &);
-    const HashedKey &GetHashId() override { return HashId; }
+    const HashedKey &GetHashId() override {
+        return HashId;
+    }
     void Update() override;
     static HashedKey HashId;
 };

@@ -3,11 +3,13 @@
 #include "globals.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/gizmo/base/gizactions.h"
+#include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/props/doors/door.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/numath/nurand.h"
 
 void Action_Circle(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
 }
@@ -61,7 +63,32 @@ void Action_CirclePlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, 
 void Action_EndCameraCut(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
 }
 
-void Action_FollowPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+i32 Action_FollowPlayer(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params, i32 param_count,
+                        i32 first_time, float) {
+    if (packet == NULL) {
+        return 1;
+    }
+
+    if (first_time != 0) {
+        for (i32 index = 0; index < param_count; ++index) {
+            if (AIActionParseSpeedFn != NULL && AIActionParseSpeedFn(params[index], &packet->goal_speed_mode) != 0) {
+                continue;
+            }
+            if (NuStrICmp(params[index], "ignore_radius") == 0) {
+                processor->action_data_1 |= 2;
+            } else if (NuStrICmp(params[index], "can_go_off_path") == 0) {
+                processor->action_data_1 |= 1;
+            } else {
+                packet->movement_instruction_parameter = AIParamToFloatEx(packet, processor, params[index]);
+            }
+        }
+    }
+
+    if (sys != NULL && sys->player_1 != NULL && sys->player_1->ai != NULL) {
+        FollowAPIObject(&packet->owner->apiobj, sys->player_1, processor->action_data_1,
+                        packet->movement_instruction_parameter);
+    }
+    return 0;
 }
 
 void Action_PlayCutScene(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
@@ -79,7 +106,23 @@ void Action_BoulderSection(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **
 void Action_CircleOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
 }
 
-void Action_ReleaseLocator(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
+                          i32 first_time, float) {
+    if (first_time == 0) {
+        return 1;
+    }
+
+    GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+    for (i32 index = 0; index < param_count; ++index) {
+        char *value = NuStrIStr(params[index], "character=");
+        if (value != NULL) {
+            object = GetNamedGameObject(sys, value + NuStrLen("character="));
+        }
+    }
+    if (object != NULL) {
+        object->ai.locator = NULL;
+    }
+    return 1;
 }
 
 void Action_DynamicCameraCut(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
@@ -94,14 +137,250 @@ void Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char 
 void Action_MushroomCollapse(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
 }
 
-void Action_GetLocatorFromSet(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
+                             i32 param_count, i32 first_time, float) {
+    if (first_time == 0) {
+        return 1;
+    }
+
+    GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+    AILOCATORSET *locator_set = processor->unknown_a8;
+    f32 max_range = 0.0f;
+    f32 off_screen_radius = 0.0f;
+    bool random = false;
+    bool next = false;
+    bool first = false;
+    bool looping = false;
+    bool finish_at_end = false;
+    bool use_player = false;
+    bool use_opponent = false;
+    bool use_second_player = false;
+    bool furthest = false;
+    i32 ignore_assigned = -1;
+
+    for (i32 index = 0; index < param_count; ++index) {
+        char *param = params[index];
+        char *value = NuStrIStr(param, "character=");
+        if (value != NULL) {
+            object = GetNamedGameObject(sys, value + NuStrLen("character="));
+            continue;
+        }
+        value = NuStrIStr(param, "max_range=");
+        if (value != NULL) {
+            max_range = AIParamToFloat(processor, value + NuStrLen("max_range="));
+            continue;
+        }
+        value = NuStrIStr(param, "max_player_range=");
+        if (value != NULL) {
+            max_range = AIParamToFloat(processor, value + NuStrLen("max_player_range="));
+            use_player = true;
+            continue;
+        }
+        value = NuStrIStr(param, "max_opponent_range=");
+        if (value != NULL) {
+            max_range = AIParamToFloat(processor, value + NuStrLen("max_opponent_range="));
+            use_opponent = true;
+            continue;
+        }
+        value = NuStrIStr(param, "off_screen_radius=");
+        if (value != NULL) {
+            off_screen_radius = AIParamToFloat(processor, value + NuStrLen("off_screen_radius="));
+            continue;
+        }
+        value = NuStrIStr(param, "name=");
+        if (value != NULL) {
+            locator_set = AIPathFindLocatorSet(sys, value + NuStrLen("name="));
+            continue;
+        }
+
+        if (NuStrICmp(param, "random") == 0) {
+            random = true;
+        } else if (NuStrICmp(param, "next") == 0) {
+            next = true;
+        } else if (NuStrICmp(param, "first") == 0) {
+            first = true;
+        } else if (NuStrICmp(param, "looping") == 0) {
+            looping = true;
+        } else if (NuStrICmp(param, "finish_at_end") == 0) {
+            finish_at_end = true;
+        } else if (NuStrICmp(param, "ignore_assigned=TRUE") == 0) {
+            ignore_assigned = 1;
+        } else if (NuStrICmp(param, "ignore_assigned=FALSE") == 0) {
+            ignore_assigned = 0;
+        } else if (NuStrICmp(param, "furthest_from_opponent") == 0) {
+            furthest = true;
+            use_opponent = true;
+        } else if (NuStrICmp(param, "furthest_from_either_player") == 0) {
+            furthest = true;
+            use_player = true;
+            use_second_player = true;
+        } else if (NuStrICmp(param, "nearest_either_player") == 0) {
+            use_player = true;
+            use_second_player = true;
+        }
+    }
+
+    if (ignore_assigned == -1) {
+        ignore_assigned = next ? 0 : 1;
+    }
+    if (object == NULL || locator_set == NULL) {
+        return 1;
+    }
+
+    APIOBJECT *target = &object->apiobj;
+    NUVEC *reference_position = &target->position;
+    if (use_player && player != NULL) {
+        reference_position = &player->apiobj.position;
+    } else if (use_opponent && object->ai.opponent != NULL) {
+        reference_position = &static_cast<APIOBJECT *>(object->ai.opponent)->position;
+    }
+    NUVEC *second_position =
+        use_second_player && player2 != NULL ? &player2->apiobj.position : static_cast<NUVEC *>(NULL);
+
+    if (first) {
+        if (locator_set->locator_count > 0) {
+            object->ai.locator = &sys->locators[locator_set->locator_entries[0]];
+            locator_set->assigned[0] = target->field_0x289;
+        }
+        return 1;
+    }
+
+    if (!next) {
+        if (random) {
+            AILocatorSet_AssignRandomLocator(sys, locator_set, target, max_range, reference_position, off_screen_radius,
+                                             ignore_assigned);
+        } else if (furthest) {
+            AILocatorSet_AssignFurthestLocator(sys, locator_set, target, max_range, reference_position, second_position,
+                                               off_screen_radius, ignore_assigned);
+        } else {
+            AILocatorSet_AssignNearestLocator(sys, locator_set, target, max_range, reference_position, second_position,
+                                              off_screen_radius, ignore_assigned);
+        }
+        return 1;
+    }
+
+    const i32 locator_count = locator_set->locator_count;
+    if (locator_count < 2) {
+        return 1;
+    }
+    if (ignore_assigned != 0) {
+        AILocatorSet_CheckLocatorsStillAssigned(sys, locator_set);
+    }
+
+    i32 current_index = -1;
+    for (i32 index = 0; index < locator_count; ++index) {
+        if (object->ai.locator == &sys->locators[locator_set->locator_entries[index]]) {
+            current_index = index;
+            locator_set->assigned[index] = 0xff;
+            break;
+        }
+    }
+    if (current_index == -1) {
+        current_index = NuRandInt() % locator_count;
+    }
+
+    i32 direction = (target->field_0x1fa & 0x10) == 0 ? 1 : -1;
+    for (i32 checked = 0; checked < locator_count; ++checked) {
+        i32 candidate = current_index + direction;
+        if (candidate < 0 || candidate >= locator_count) {
+            if (looping) {
+                if (finish_at_end) {
+                    object->ai.locator = NULL;
+                    return 1;
+                }
+                candidate = candidate < 0 ? locator_count - 1 : 0;
+            } else {
+                direction = -direction;
+                if (direction < 0) {
+                    target->field_0x1fa |= 0x10;
+                    candidate = locator_count - 2;
+                } else {
+                    target->field_0x1fa &= static_cast<u8>(~0x10);
+                    candidate = 1;
+                }
+                if (finish_at_end && checked != 0) {
+                    object->ai.locator = NULL;
+                    return 1;
+                }
+            }
+        }
+        current_index = candidate;
+        if (ignore_assigned == 0 || locator_set->assigned[current_index] == 0xff) {
+            object->ai.locator = &sys->locators[locator_set->locator_entries[current_index]];
+            locator_set->assigned[current_index] = target->field_0x289;
+            return 1;
+        }
+    }
+
+    object->ai.locator = NULL;
+    return 1;
 }
 
-void Action_AssignLocatorInSet(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
+                              i32 first_time, float) {
+    if (first_time == 0) {
+        return 1;
+    }
+
+    GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+    AILOCATOR *locator = NULL;
+    AILOCATORSET *locator_set = NULL;
+    u8 assignment = object != NULL ? object->apiobj.field_0x289 : 0xff;
+
+    for (i32 index = 0; index < param_count; ++index) {
+        char *param = params[index];
+        if (NuStrICmp(param, "locator=mylocator") == 0) {
+            locator = object != NULL ? object->ai.locator : NULL;
+            continue;
+        }
+        char *value = NuStrIStr(param, "locator");
+        if (value != NULL) {
+            locator = AIPathFindLocator(sys, value + NuStrLen("locator") + 1);
+            continue;
+        }
+        value = NuStrIStr(param, "character");
+        if (value != NULL) {
+            object = GetNamedGameObject(sys, value + NuStrLen("character") + 1);
+            assignment = object != NULL ? object->apiobj.field_0x289 : 0xff;
+            continue;
+        }
+        value = NuStrIStr(param, "set");
+        if (value != NULL) {
+            locator_set = AIPathFindLocatorSet(sys, value + NuStrLen("set") + 1);
+            continue;
+        }
+        if (NuStrICmp(param, "reserve") == 0) {
+            assignment = 0x80;
+        }
+    }
+
+    if (locator == NULL || locator_set == NULL) {
+        return 1;
+    }
+    const i32 locator_index = locator - sys->locators;
+    for (i32 index = 0; index < locator_set->locator_count; ++index) {
+        if (locator_set->locator_entries[index] == locator_index) {
+            locator_set->assigned[index] = assignment;
+            break;
+        }
+    }
+    return 1;
 }
 
 void Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
 }
+
+namespace {
+    struct GizmosAIRegistryCallbacks {
+        GizmosAIRegistryCallbacks() {
+            lego_aiactiondefs[LEGO_AI_ACTION_RELEASE_LOCATOR].eval_fn = Action_ReleaseLocator;
+            lego_aiactiondefs[LEGO_AI_ACTION_ASSIGN_LOCATOR].eval_fn = Action_AssignLocatorInSet;
+            lego_aiactiondefs[LEGO_AI_ACTION_GET_LOCATOR_FROM_SET].eval_fn = Action_GetLocatorFromSet;
+        }
+    };
+
+    GizmosAIRegistryCallbacks gizmos_ai_registry_callbacks;
+} // namespace
 
 // Static GIZFLOW/FLOWBOX action callbacks (GizAction*/GizActions*). Moved from
 // gizactions_stubs.cpp to satisfy the symbol baseline.

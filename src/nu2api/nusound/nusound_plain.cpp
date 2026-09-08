@@ -1,5 +1,7 @@
 #include "nu2api/nusound/nusound.h"
 
+#include "nu2api/nusound/nusound_system.hpp"
+
 extern __attribute__((visibility("hidden"))) u16 *g_NuSoundLoadBits asm("_ZL17g_NuSoundLoadBits");
 extern __attribute__((visibility("hidden"))) u16 *g_NuSoundLoadBitsCache asm("_ZL22g_NuSoundLoadBitsCache");
 extern __attribute__((visibility("hidden"))) i32 g_NuSoundNumLoadBitShorts asm("_ZL25g_NuSoundNumLoadBitShorts");
@@ -22,7 +24,8 @@ extern "C" {
     }
     void NuSound3AddStreamEx(void) {
     }
-    void NuSound3AmplitudeTodB(void) {
+    f32 NuSound3AmplitudeTodB(f32 amplitude) {
+        return NuSoundSystem::AmplitudeTodB(amplitude);
     }
     void NuSound3BeginWaitUpdate(void) {
     }
@@ -35,8 +38,6 @@ extern "C" {
     void NuSound3ClearLoopHold(void) {
     }
     void NuSound3Close(void) {
-    }
-    void NuSound3CountVoices(void) {
     }
     void NuSound3DisplayVoiceInfo(void) {
     }
@@ -54,33 +55,25 @@ extern "C" {
     }
     void NuSound3FindFree(void) {
     }
-    void NuSound3FindOldestVoice(void) {
-    }
-    void NuSound3FindQuietestVoice(void) {
-    }
     void NuSound3FlushBG(void) {
     }
     void NuSound3FlushFG(void) {
     }
     void NuSound3FlushLoops(void) {
     }
-    void NuSound3GetListener(void) {
-    }
     void NuSound3GetSize(void) {
     }
     void NuSound3GetStreamInfo(void) {
     }
-    void NuSound3GetStreamPlaybackTime(void) {
-    }
     void NuSound3HoldOffMusic(void) {
     }
-    void NuSound3InitEx(void) {
+    i32 NuSound3InitEx(void) {
+        NuSound3Init(0);
+        return 1;
     }
     void NuSound3InitLoopInfo(void) {
     }
     void NuSound3InitThreadSafeHackyMess(void) {
-    }
-    void NuSound3IsSampleLoaded(void) {
     }
     void NuSound3KillAllAudio(void) {
     }
@@ -88,26 +81,14 @@ extern "C" {
     }
     void NuSound3KillAllAudioWaitEx(void) {
     }
-    void NuSound3Listener(void) {
-    }
     void NuSound3LoadAllSpotFX(void) {
     }
     i32 NuSound3LoadingSfx(void) {
         return 0;
     }
-    void NuSound3Play(void) {
-    }
-    void NuSound3Play3d(void) {
-    }
-    void NuSound3Play3dLoopSfx(void) {
-    }
-    void NuSound3Play3dPri(void) {
-    }
     void NuSound3PlayChan(void) {
     }
     void NuSound3PlayInterleavedStereo(void) {
-    }
-    void NuSound3PlayPri(void) {
     }
     void NuSound3PlayStream(void) {
     }
@@ -141,7 +122,7 @@ extern "C" {
     }
     void NuSound3SetRumblePads(void *, void *) {
     }
-    void NuSound3SetSFXPitch(void) {
+    void NuSound3SetSFXPitch(i32) {
     }
     void NuSound3SetSampleTableFromPakFile(void) {
     }
@@ -149,15 +130,15 @@ extern "C" {
     }
     void NuSound3SetStreamPitch(void) {
     }
-    void NuSound3SetStreamVolume(void) {
+    i32 NuSound3SetStreamVolume(i32 stream_index, i32 volume) {
+        NuSound3SetStereoStreamVolume(stream_index, volume);
+        return 1;
     }
     void NuSound3StopRumble(void) {
     }
     void NuSound3StopSFX(void) {
     }
     void NuSound3StopStream(void) {
-    }
-    void NuSound3StopVoice(void) {
     }
     void NuSound3StreamClose(void) {
     }

@@ -13,11 +13,11 @@ static float g_audioVersion;
 NUSOUNDINFO *g_soundInfo;
 NUSOUNDINFO *g_revertSoundInfo;
 
-u16 *g_soundMap;
+i16 *g_soundMap;
 nusound_filename_info_s *SfxInfo = NULL;
 
-static i32 NumSfx = 0;
-static i32 NumSfxInst = 0;
+extern "C" i32 NumSfx __asm__("_ZL6NumSfx") __attribute__((visibility("hidden"))) = 0;
+extern "C" i32 NumSfxInst __asm__("_ZL10NumSfxInst") __attribute__((visibility("hidden"))) = 0;
 static u32 NumSfxNames = 0;
 
 static char sfx_name[1600][32] = {0};
@@ -25,6 +25,9 @@ static char sfx_filename[1600][64];
 static i32 sfx_refcount[1600] = {0};
 
 static char cfgfile_name[256] = "Audio/audio.cfg";
+
+i32 GroupBuffer_MakeGroup(i32 sample_id);
+void GroupBuffer_AddToGroup(i32 group_id, i32 sample_id);
 
 void InitSoundInfo(i32 index) {
     NUSOUNDINFO *info = &g_soundInfo[index];
@@ -89,7 +92,7 @@ static void fnAudioSample(nufpar_s *fpar) {
             g_soundInfo[NumSfxInst].sfx_name = str;
             u32 hash = CRC_ProcessStringIgnoreCase(str);
 
-            u16 *id = &g_soundMap[hash & 0xff];
+            i16 *id = &g_soundMap[hash & 0xff];
             if (*id == -1) {
                 *id = NumSfxInst;
                 g_soundInfo[NumSfxInst].next = -1;
@@ -190,32 +193,24 @@ static void fnAudioSample(nufpar_s *fpar) {
 }
 
 static void fnAudioGroup(nufpar_s *fpar) {
-    bool bVar1;
-    i32 iVar2;
-    i32 iVar3;
+    i32 group_id = -1;
+    i32 first = 1;
 
-    iVar3 = -1;
-    bVar1 = true;
-    iVar2 = NuFParGetWord(fpar);
-    do {
-        if (iVar2 == 0) {
-            return;
-        }
-        iVar2 = GetSfxId(fpar->word_buf);
-        if (bVar1) {
-            if (iVar2 == -1) {
+    while (NuFParGetWord(fpar) != 0) {
+        i32 sfx_id = GetSfxId(fpar->word_buf);
+        if (first) {
+            if (sfx_id == -1) {
                 return;
             }
-            // iVar3 = GroupBuffer_MakeGroup(iVar2);
+            group_id = GroupBuffer_MakeGroup(sfx_id);
         } else {
-            iVar2 = GetSfxId(fpar->word_buf);
-            if (iVar2 != -1) {
-                // GroupBuffer_AddToGroup(iVar3, iVar2);
+            sfx_id = GetSfxId(fpar->word_buf);
+            if (sfx_id != -1) {
+                GroupBuffer_AddToGroup(group_id, sfx_id);
             }
         }
-        bVar1 = false;
-        iVar2 = NuFParGetWord(fpar);
-    } while (true);
+        first = 0;
+    }
 }
 
 static NUFPCOMJMP audioCom[] = {
@@ -234,7 +229,7 @@ void InitSfx(variptr_u *buffer_start, variptr_u buffer_end, const char *file) {
     // bVar15 = 0;
     // g_soundMap = (short *)((i32)buffer_start->voidptr + 3U & 0xfffffffc);
     usize allocation = ALIGN(buffer_start->addr, 4);
-    g_soundMap = reinterpret_cast<u16 *>(allocation);
+    g_soundMap = reinterpret_cast<i16 *>(allocation);
 
     // sfx_info = (nusound_filename_info_s *)(g_soundMap + 0x100);
     // SfxInfo = sfx_info;
@@ -262,21 +257,21 @@ void InitSfx(variptr_u *buffer_start, variptr_u buffer_end, const char *file) {
 
     // psVar5 = g_soundMap;
     // uVar10 = -(((u32)g_soundMap & 0xf) >> 1) & 7;
-    memset(g_soundMap, -1, 0x100 * sizeof(u16));
+    memset(g_soundMap, -1, 0x100 * sizeof(i16));
 
     NumSfx = 0;
-    // NumSfxInst = 0;
+    NumSfxInst = 0;
 
     for (i32 i = 0; i < SFX_MUSIC_COUNT; i++) {
-        SfxInfo[i].index = i;
         SfxInfo[i].filename = g_music[i].filename;
+        SfxInfo[i].field4_0x4 = g_music[i].field4_0x4;
         SfxInfo[i].index = g_music[i].index;
-        SfxInfo[i].sample = g_music[i].sample;
-        SfxInfo[i].field1_0x4 = g_music[i].field1_0x4;
         SfxInfo[i].field3_0xc = g_music[i].field3_0xc;
-        // SfxInfo[i].field4_0x10 = g_music[i].field4_0x10;
-        // SfxInfo[i].field5_0x14 = g_music[i].field5_0x14;
-        // SfxInfo[i].field7_0x1c = g_music[i].field7_0x1c;
+        SfxInfo[i].field1_0x4 = g_music[i].field1_0x4;
+        SfxInfo[i].field5_0x14 = g_music[i].field5_0x14;
+        SfxInfo[i].sample = g_music[i].sample;
+        SfxInfo[i].field7_0x1c = g_music[i].field7_0x1c;
+        SfxInfo[i].index = i;
 
         NuStrCpy(sfx_filename[i], SfxInfo[i].filename);
         SfxInfo[i].filename = sfx_filename[i];
@@ -287,10 +282,9 @@ void InitSfx(variptr_u *buffer_start, variptr_u buffer_end, const char *file) {
         LOG_DEBUG("SfxInfo[%d]: name=%s", i, SfxInfo[i].filename);
     }
 
-    // puVar1 = (undefined4 *)((i32)&sfx_info->name + iVar12);
-    //*puVar1 = 0;
-    // puVar1[1] = 0;
-    // puVar1[2] = 0xffffffff;
+    SfxInfo[SFX_MUSIC_COUNT].filename = NULL;
+    SfxInfo[SFX_MUSIC_COUNT].field4_0x4 = NULL;
+    SfxInfo[SFX_MUSIC_COUNT].index = -1;
 
     NuStrCpy(cfgfile_name, file);
 
@@ -327,7 +321,7 @@ void LoadSfx(const char *file, variptr_u *buffer_start, variptr_u buffer_end) {
 
     nusound_filename_info_s *last = &SfxInfo[NumSfx];
     last->filename = NULL;
-    last->field1_0x4 = 0;
+    last->field4_0x4 = NULL;
     last->index = -1;
 
     NuSound3SetSampleTable(SfxInfo, buffer_start, buffer_end);

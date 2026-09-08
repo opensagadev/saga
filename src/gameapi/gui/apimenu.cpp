@@ -8,20 +8,25 @@
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "gameframework/saveload.h"
 #include "legoapi/core/input/timer.h"
+#include "legoapi/core/startup/game.h"
 #include "legoapi/core/startup/main.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/characters/motion.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/menus/core/text.h"
 #include "legoapi/menus/screens/gamemenuall.h"
 #include "legoapi/menus/screens/movies.h"
 #include "legoapi/menus/screens/shop.h"
+#include "legoapi/props/doors/door.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/mission.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/nugcutscene.h"
 #include "nu2api/nucore/nupad.h"
 #include "nu2api/nucore/nuvideo.h"
 #include "nu2api/numusic/numusic.h"
@@ -138,7 +143,14 @@ void MusicClearAll(void);
 extern "C" void SoundKillAll(void);
 void GameDrawMenuEntry(MENU *menu, char *text);
 void DropOut(i32 player, i32 show_effect, i32 silent, i32 force);
-i32 CanSaveAndExit(WORLDINFO_s *world);
+LEVELDATA_s *CanSaveAndExit(WORLDINFO_s *world);
+void NewLevelFromMenu(LEVELDATA_s *level, i32 menu_id, i32 menu_y, i32 remember_hub);
+extern void *CutScenePlayer_Active(void);
+extern i32 saveload_autosave;
+extern FadeSystem FadeSys;
+extern i32 level_already_loaded;
+extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
+extern "C" i32 NewMode;
 extern i32 SuperStory;
 extern GAMEPAD_s GamePad[64];
 extern i32 pause_i_pad;
@@ -152,6 +164,22 @@ extern i16 tQUIT;
 extern i16 tRESTARTLEVEL;
 extern i16 tYES;
 extern i16 tNO;
+extern i16 tCANCEL;
+extern i16 tRESUME;
+extern i16 tSKIP;
+extern i16 tEXITTOMAP;
+extern i16 tALLLEVELPROGRESSWILLBELOST;
+extern i16 tALLSUPERSTORYPROGRESSWILLBELOST;
+extern i16 tEXITWITHOUTSAVING;
+extern i16 tSAVEANDEXIT;
+extern i16 tRESTARTDEMO2;
+extern i16 tGAMEPROGRESSWILLBELOST;
+extern i16 tQUITGAME;
+extern i16 tMUSIC;
+extern i16 tHOWTOPLAY;
+extern i16 tON;
+extern i16 tOFF;
+extern i16 tCONTROLLER;
 extern f32 PauseMenus_X;
 extern i32 PauseMenus_Align;
 extern u8 MENUEXITR;
@@ -231,6 +259,9 @@ i32 GameMenuLevel = -1;
 i32 MenuValidated;
 i32 MenuResult;
 i32 CurrentMenuId;
+i32 from_save_and_exit;
+i32 pausecut_skip_to_level = -1;
+u8 pausecut_skip_to_gameplay;
 i32 startnewgame;
 i32 startnewgame_initiated;
 f32 newgamecamtime;
@@ -897,11 +928,91 @@ static __used__ void MenuUpdateMiniKit(MENU *) {
 }
 static __used__ void MenuDrawBonusWin(MENU *) {
 }
-static __used__ void MenuDrawPauseCut(MENU *) {
+static void MenuRefreshPauseCutTarget() {
+    pausecut_skip_to_level = -1;
+    pausecut_skip_to_gameplay = 0;
+    if (CutScenePlayer_Active() != 0 || CutStopInfo == NULL || WORLD == NULL || WORLD->current_level == NULL) {
+        return;
+    }
+
+    CUTINFO *cut = static_cast<CUTINFO *>(CutStopInfo);
+    if ((cut->flags & 0x40000) != 0) {
+        return;
+    }
+    if (cut->skip_level >= 0 && cut->skip_level != WORLD->level_idx) {
+        pausecut_skip_to_level = cut->skip_level;
+    } else if ((WORLD->current_level->flags & LEVEL_GAMEPLAY) != 0) {
+        pausecut_skip_to_gameplay = 1;
+    }
 }
-static __used__ void MenuDrawHowToPlay(MENU *) {
+
+static __used__ void MenuDrawPauseCut(MENU *menu) {
+    MenuRefreshPauseCutTarget();
+    GameDrawMenuEntry(menu, TTab[tRESUME]);
+    const bool can_skip =
+        CutScenePlayer_Active() != 0 || pausecut_skip_to_level != -1 || pausecut_skip_to_gameplay != 0;
+    DrawMenuEntryEx(menu, TTab[tSKIP], can_skip ? MenuA : MenuA / 2);
 }
-static __used__ void MenuDrawPauseExit(MENU *) {
+static __used__ void MenuDrawHowToPlay(MENU *menu) {
+    char text[128];
+    menu->draw_y = 0.5f;
+
+    NuStrCpy(text, TTab[tMUSIC]);
+    NuStrCat(text, ": ");
+    NuStrCat(text, TTab[SuperOptions.music_enabled != 0 ? tON : tOFF]);
+    GameDrawMenuEntry(menu, text);
+
+    NuStrCpy(text, TTab[tHOWTOPLAY]);
+    NuStrCat(text, " (");
+    if (TestForController() != 0 && TTab[tCONTROLLER] != NULL) {
+        NuStrCat(text, TTab[tCONTROLLER]);
+    } else {
+        NuStrCat(text, TTab[MechInputTouchSystem::s_baseControlMode == 0 ? tCONSOLE : tTOUCH]);
+    }
+    NuStrCat(text, ")");
+    GameDrawMenuEntry(menu, text);
+}
+static __used__ void MenuDrawPauseExit(MENU *menu) {
+    const bool can_save = CanSaveAndExit(WORLD) != NULL;
+    const char *title;
+    const char *warning = NULL;
+
+    if (can_save) {
+        title = TTab[tEXITTOMAP];
+        warning = TTab[tALLLEVELPROGRESSWILLBELOST];
+    } else if (SuperStory != 0) {
+        title = TTab[tEXITTOMAP];
+        warning = TTab[tALLSUPERSTORYPROGRESSWILLBELOST];
+    } else if (GAMEDEMO != 0) {
+        title = TTab[tRESTARTDEMO2];
+        warning = TTab[tGAMEPROGRESSWILLBELOST];
+    } else if (WORLD->current_level == HUB_LDATA) {
+        title = TTab[tQUITGAME];
+        warning = TTab[tGAMEPROGRESSWILLBELOST];
+    } else {
+        title = TTab[tEXITTOMAP];
+        warning = TTab[tGAMEPROGRESSWILLBELOST];
+    }
+
+    if (MenuStopDraw == 0) {
+        SmartTextEx(const_cast<char *>(title), PauseMenus_X, menu->draw_y - MENUDY * 0.25f, 1.0f, MENUTEXTSCALE,
+                    MENUTEXTSCALE, MENUTEXTSCALE, PauseMenus_Align, MENUEXITR, MENUEXITG, MENUEXITB, 1.7f, 2, NULL, 0,
+                    MenuA);
+        if (warning != NULL) {
+            SmartTextEx(const_cast<char *>(warning), PauseMenus_X, menu->draw_y - MENUDY * 1.25f, 1.0f,
+                        MENUTEXTSCALE * 0.75f, MENUTEXTSCALE * 0.75f, MENUTEXTSCALE * 0.75f, PauseMenus_Align,
+                        MENUEXITR, MENUEXITG, MENUEXITB, 1.7f, 3, NULL, 0, MenuA);
+        }
+    }
+
+    if (can_save) {
+        GameDrawMenuEntry(menu, TTab[tEXITWITHOUTSAVING]);
+        GameDrawMenuEntry(menu, TTab[tSAVEANDEXIT]);
+        GameDrawMenuEntry(menu, TTab[tCANCEL]);
+    } else {
+        GameDrawMenuEntry(menu, TTab[tYES]);
+        GameDrawMenuEntry(menu, TTab[tNO]);
+    }
 }
 static __used__ void MenuDrawPauseMain(MENU *menu) {
     const i32 both_players_active = Players_BothActive();
@@ -940,18 +1051,121 @@ static __used__ void MenuDrawPauseMain(MENU *menu) {
     }
 }
 static __used__ void MenuExitHowToPlay(MENU *) {
+    GameAudio_PlaySfx(0x31, NULL, 0, 0);
+    TriggerExtraDataSave();
 }
 static __used__ void MenuInitHowToPlay(MENU *) {
 }
 static __used__ void MenuUpdateBonusWin(MENU *) {
 }
-static __used__ void MenuUpdatePauseCut(MENU *) {
+static __used__ void MenuUpdatePauseCut(MENU *menu) {
+    MenuRefreshPauseCutTarget();
+    if (menu->confirm_pressed != 0 && menu->selected_item == 0) {
+        ResumeGame(1, 1);
+        return;
+    }
+    if (menu->confirm_pressed != 0 && menu->selected_item == 1) {
+        if (CutScenePlayer_Active() != 0) {
+            MenuSFX = GameAudio_GetSfxId(0x30);
+            NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
+            hub_from_cutsceneplayer = 1;
+        } else if (pausecut_skip_to_level != -1) {
+            NewLData = &LDataList[pausecut_skip_to_level];
+            music_man.StopTrack(0x10, 0);
+        } else if (pausecut_skip_to_gameplay != 0) {
+            CUTINFO *cut = static_cast<CUTINFO *>(CutStopInfo);
+            instNuGCutSceneEnd(static_cast<instNUGCUTSCENE_s *>(cut->instance));
+            if ((cut->flags & 0x400) != 0) {
+                NewMode = 1;
+            }
+            CutStopInfo = NULL;
+            CUTSTOPGAME = 0;
+            GameCam_Reset(GameCam);
+            const FADETYPE fade = {FADE_TYPE_STILL_WIPE};
+            FadeSys.SetFade(fade, 0);
+            FadeSys.SetStage(1);
+            GameAudio_PlaySfx(0x2d, NULL, 0, 0);
+            ResumeGame(0, 0);
+            music_man.StopTrack(0x10, 0);
+        } else {
+            MenuSFX = GameAudio_GetSfxId(0x32);
+        }
+    }
 }
-static __used__ void MenuUpdateHowToPlay(MENU *) {
+static __used__ void MenuUpdateHowToPlay(MENU *menu) {
+    if (menu->cancel_pressed != 0) {
+        BackupMenu();
+        return;
+    }
+    if (menu->confirm_pressed == 0) {
+        return;
+    }
+
+    if (menu->selected_item == 0) {
+        SuperOptions.music_enabled = SuperOptions.music_enabled == 0;
+        MenuSFX = GameAudio_GetSfxId(0x30);
+    } else if (menu->selected_item == 1) {
+        NewMenu(26, -1, -1);
+        MenuSFX = GameAudio_GetSfxId(0x30);
+        NuIOS_RecordFlurryEvent("menu_howtoplay");
+    }
 }
-static __used__ void MenuUpdatePauseExit(MENU *) {
+static __used__ void MenuUpdatePauseExit(MENU *menu) {
+    if (menu->cancel_pressed != 0) {
+        BackupMenu();
+        MenuSFX = GameAudio_GetSfxId(0x31);
+        return;
+    }
+    if (menu->confirm_pressed == 0) {
+        return;
+    }
+
+    LEVELDATA_s *save_exit_level = CanSaveAndExit(WORLD);
+    if (save_exit_level != NULL) {
+        if (menu->selected_item == 0) {
+            level_already_loaded = -1;
+            NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
+            MenuSFX = GameAudio_GetSfxId(0x30);
+            return;
+        }
+        if (menu->selected_item == 1) {
+            NewLData = save_exit_level;
+            from_save_and_exit = 1;
+            level_already_loaded = -1;
+            const FADETYPE fade = {FADE_TYPE_WIPE};
+            FadeSys.SetFade(fade, 0);
+            MenuSFX = GameAudio_GetSfxId(0x30);
+            return;
+        }
+
+        BackupMenu();
+        MenuSFX = GameAudio_GetSfxId(0x31);
+        return;
+    }
+
+    if (menu->selected_item != 0) {
+        BackupMenu();
+        MenuSFX = GameAudio_GetSfxId(0x31);
+        return;
+    }
+
+    if (GAMEDEMO != 0) {
+        NewLevelFromMenu(TITLES_LDATA, -1, -1, 1);
+    } else if (WORLD->current_level == HUB_LDATA) {
+        NuPadSetStatus(0, NUPAD_STATUS_INACTIVE);
+        NuPadSetStatus(1, NUPAD_STATUS_INACTIVE);
+        NewLevelFromMenu(TITLES_LDATA, -1, -1, 0);
+    } else {
+        g_BackgroundUsedFogColour = 0;
+        NewLevelFromMenu(HUB_LDATA, -1, -1, 1);
+    }
+    MenuSFX = GameAudio_GetSfxId(0x30);
 }
 static __used__ void MenuUpdatePauseMain(MENU *menu) {
+    if (menu->cancel_pressed != 0) {
+        ResumeGame(1, 1);
+        return;
+    }
     if (menu->confirm_pressed == 0) {
         return;
     }
@@ -1001,7 +1215,7 @@ static __used__ void MenuUpdatePauseMain(MENU *menu) {
     }
 
     if (menu->selected_item == next_item) {
-        const i32 selected_row = CanSaveAndExit(WORLD) == 1 ? 2 : 1;
+        const i32 selected_row = CanSaveAndExit(WORLD) != NULL ? 2 : 1;
         NewMenu(6, selected_row, -1);
     }
 }

@@ -25,19 +25,19 @@ enum ZIPUP_RUNTIME_FLAGS {
 };
 
 typedef struct ZIPUP_s {
-    char name[16];               // 0x00
-    NUVEC lower_position;        // 0x10
-    NUVEC hook_origin;           // 0x1c
-    NUVEC upper_position;        // 0x28
-    u16 hook_x_rotation;         // 0x34
-    u16 hook_y_rotation;         // 0x36
-    NUVEC hook_position;         // 0x38
-    u8 reserved_0x44[0x18];      // 0x44 .. 0x5c
-    GameObject_s *occupant;      // 0x5c
-    u8 reserved_0x60[2];         // 0x60 .. 0x62
-    u16 direction;               // 0x62
-    u16 facing_angle;            // 0x64
-    u8 reserved_0x66[2];         // 0x66 .. 0x68
+    char name[16];          // 0x00
+    NUVEC lower_position;   // 0x10
+    NUVEC hook_origin;      // 0x1c
+    NUVEC upper_position;   // 0x28
+    u16 hook_x_rotation;    // 0x34
+    u16 hook_y_rotation;    // 0x36
+    NUVEC hook_position;    // 0x38
+    u8 reserved_0x44[0x18]; // 0x44 .. 0x5c
+    GameObject_s *occupant; // 0x5c
+    u8 reserved_0x60[2];    // 0x60 .. 0x62
+    u16 direction;          // 0x62
+    u16 facing_angle;       // 0x64
+    u8 reserved_0x66[2];    // 0x66 .. 0x68
     union {
         u8 flags;
         struct {

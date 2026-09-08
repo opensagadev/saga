@@ -204,59 +204,33 @@ class NuMusic {
     static void GlobalParseErrorFn(nufpar_s *param_1);
     static void TrackParseErrorFn(nufpar_s *param_1);
 
-    NUFPCOMJMPCTX top_jmp_tab[11] = {
-        {"ALBUM", NuMusic::xsAlbum},
-        {"ACTION", NuMusic::xsAction},
-        {"QUIET", NuMusic::xsQuiet},
-        {"OVERLAY", NuMusic::xsOverlay},
-        {"SIGNATURE", NuMusic::xsSignature},
-        {"CUTSCENE", NuMusic::xsCutscene},
-        {"NOMUSIC", NuMusic::xsNoMusicC},
-        {"GLOBALATTENUATION", NuMusic::xsGlobalAttenuation},
-        {"PATH", NuMusic::xsPath},
-        {"STRICT", NuMusic::xsStrict},
-        {NULL, NULL},
-    };
-
-    NUFPCOMJMPCTX track_jmp_tab[15] = {
-        {"IDENT", NuMusic::xsIdent},
-        {"ID", NuMusic::xsIdent},
-        {"INDEX", NuMusic::xsIndex},
-        {"IX", NuMusic::xsIndex},
-        {"NOMUSIC", NuMusic::xsNoMusic},
-        {"STARTPOINT", NuMusic::xsIndex},
-        {"NODUCK", NuMusic::xsNoDuck},
-        {"DUCK", NuMusic::xsDuck},
-        {"LOOPING", NuMusic::xsLooping},
-        {"LOOP", NuMusic::xsLooping},
-        {"NONLOOPING", NuMusic::xsNonLooping},
-        {"NOLOOP", NuMusic::xsNonLooping},
-        {"ATTENUATION", NuMusic::xsAttenuation},
-        {NULL, NULL},
-    };
+    static NUFPCOMJMPCTX top_jmp_tab[11];
+    static NUFPCOMJMPCTX track_jmp_tab[15];
 
     // Gameplay control API — the game TU drives these directly (legoSetMusicVolume,
     // NuMain's per-frame update, level flow).
   public:
-    void ClassToName(u32);
+    const char *ClassToName(u32);
     i32 CueTrack(u32);
     void Debug(i32, i32);
-    void GetAlbumHandle(char const *);
-    void GetPlaybackTime(u32);
-    void GetPlayer();
-    void GetStatus(u32, i32 *);
+    i32 GetAlbumHandle(char const *);
+    f32 GetPlaybackTime(u32);
+    static NuMusic *GetPlayer();
+    i32 GetStatus(u32, i32 *);
     void NoMusic(i32);
     i32 PauseTrack(u32);
-    void PlayTrack(u32, u32);
+    i32 PlayTrack(u32, u32);
     void Process(float);
     bool SelectTrack(u32, char const *);
-    void SetAlbum(char const *);
-    void SetAlbum(i32);
+    i32 SetAlbum(char const *);
+    i32 SetAlbum(i32);
     void SetClassVolume(u32, float);
     void SetMasterVolume(float);
     i32 SetTrackEntryTimeByClass(u32, float);
     i32 StopTrack(u32, i32);
 };
+
+DECOMP_ASSERT(sizeof(NuMusic) == 0x1e4, "NuMusic size");
 
 extern "C" {
 #endif

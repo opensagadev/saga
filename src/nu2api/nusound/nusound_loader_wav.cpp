@@ -32,40 +32,31 @@ u32 NuSoundLoaderWAV::MakeFourCC(char *cc) {
 }
 
 void NuSoundLoaderWAV::EndianFlipWAVHeader(FileHeaderWAV *header) {
-    // Big-endian targets only; a no-op on little endian.
-    (void)header;
+    header->format = (header->format << 8) | (header->format >> 8);
+    header->num_channels = (header->num_channels << 8) | (header->num_channels >> 8);
+    header->sample_rate = __builtin_bswap32(header->sample_rate);
+    header->byte_rate = __builtin_bswap32(header->byte_rate);
+    header->block_size = (header->block_size << 8) | (header->block_size >> 8);
+    header->bits_per_channel = (header->bits_per_channel << 8) | (header->bits_per_channel >> 8);
+    header->extended_size = (header->extended_size << 8) | (header->extended_size >> 8);
 }
 
-void NuSoundLoaderWAV::ReadRIFFHeaderChunk(i32 file, NuSoundStreamDesc *desc, const ChunkInfo &info,
-                                           NuSoundLoaderWAV *loader) {
+u32 NuSoundLoaderWAV::ReadRIFFHeaderChunk(i32 file, NuSoundStreamDesc *desc, const ChunkInfo &info,
+                                          NuSoundLoaderWAV *loader) {
     (void)info;
     (void)loader;
-
-    FileHeaderWAV header;
-    memset(&header, 0, sizeof(header));
-    if (NuFileRead(file, &header, 0x12) != 0x12) {
-        return;
-    }
-    EndianFlipWAVHeader(&header);
-
-    // The fmt chunk overlays the head of the stream desc.
-    NuSoundHeaderWAV *wav = (NuSoundHeaderWAV *)desc;
-    wav->format_id = header.format;
-    wav->num_channels = header.num_channels;
-    wav->sample_rate = header.sample_rate;
-    wav->samples_per_second = header.sample_rate;
-    wav->block_size = header.block_size;
-    wav->bits_per_channel = header.bits_per_channel;
-    wav->extended_data_size = header.extended_size;
+    NuFileRead(file, reinterpret_cast<u8 *>(desc) + 4, sizeof(FileHeaderWAV));
+    return 1;
 }
 
-void NuSoundLoaderWAV::ReadDataChunk(i32 file, NuSoundStreamDesc *desc, const ChunkInfo &info,
-                                     NuSoundLoaderWAV *loader) {
+u32 NuSoundLoaderWAV::ReadDataChunk(i32 file, NuSoundStreamDesc *desc, const ChunkInfo &info,
+                                    NuSoundLoaderWAV *loader) {
     (void)loader;
 
     NuSoundHeaderWAV *header = (NuSoundHeaderWAV *)desc;
-    header->encoded_length_bytes = (u64)info.size;
+    header->encoded_length_bytes = static_cast<i64>(static_cast<i32>(info.size));
     header->data_position = (u64)NuFilePos(file);
+    return 1;
 }
 
 u32 NuSoundLoaderWAV::FindChunks(i32 file, NuSoundStreamDesc *desc, ChunkReadRequest *requests, u32 count) {
@@ -73,49 +64,63 @@ u32 NuSoundLoaderWAV::FindChunks(i32 file, NuSoundStreamDesc *desc, ChunkReadReq
         return 0;
     }
 
+    u32 end_mask = 1u << (count & 0x1f);
+    if (end_mask == 1) {
+        return 0;
+    }
+
     u32 found_mask = 0;
-    u32 wanted_mask = (count >= 32) ? 0xffffffffu : (1u << count) - 1;
     u64 file_offset = 0xc;
+    u32 scratch_index = 0;
 
     for (;;) {
-        ChunkInfo read_info;
-        if (NuFileRead(file, &read_info, 8) != 8) {
+        ChunkInfo *read_info = &requests[scratch_index].chunk_info;
+        if (NuFileRead(file, read_info, sizeof(*read_info)) == 0) {
             return found_mask;
         }
-        file_offset += (u64)read_info.size + 8;
+        file_offset += (u64)read_info->size + 8;
 
         for (u32 i = 0; i < count; i++) {
-            u32 expected_id = requests[i].chunk_id;
-            if (((found_mask & (1u << i)) == 0) && read_info.id == expected_id) {
-                requests[i].chunk_info = read_info;
+            u32 bit = 1u << (i & 0x1f);
+            if ((found_mask & bit) == 0 && read_info->id == requests[i].chunk_id) {
+                if (&requests[i].chunk_info != read_info) {
+                    memmove(&requests[i].chunk_info, read_info, sizeof(*read_info));
+                }
 
                 if (requests[i].reader != NULL) {
-                    requests[i].reader(file, desc, requests[i].chunk_info, this);
+                    requests[i].state = requests[i].reader(file, desc, requests[i].chunk_info, this);
+                } else {
+                    requests[i].state = 1;
                 }
-                requests[i].state = 1;
-                found_mask |= 1u << i;
+                found_mask |= bit;
                 break;
             }
         }
 
-        if (found_mask == wanted_mask) {
+        if (found_mask == end_mask - 1) {
             return found_mask;
         }
 
         if (NuFileSeek(file, (i64)file_offset, NUFILE_SEEK_START) == 0) {
             return found_mask;
         }
+
+        while ((found_mask & (1u << (scratch_index & 0x1f))) != 0) {
+            scratch_index++;
+        }
     }
 }
 
 u32 NuSoundLoaderWAV::FindChunk(i32 file, u32 id, ChunkInfo &info) {
-    ChunkReadRequest request;
-    memset(&request, 0, sizeof(request));
-    request.chunk_id = id;
-    u32 found = this->FindChunks(file, NULL, &request, 1);
-    if (found != 0) {
-        info = request.chunk_info;
-        return request.state;
+    if (file != 0 && NuFileSeek(file, 0xc, NUFILE_SEEK_START) != 0) {
+        while (NuFileRead(file, &info, sizeof(info)) != 0) {
+            if (info.id == id) {
+                return 1;
+            }
+            if (NuFileSeek(file, info.size, NUFILE_SEEK_CURRENT) == 0) {
+                break;
+            }
+        }
     }
     return 0;
 }

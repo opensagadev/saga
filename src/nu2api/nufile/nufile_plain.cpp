@@ -37,8 +37,6 @@ extern "C" {
     }
     void NuFileExistQuiet(void) {
     }
-    void NuFileExtGetExt(void) {
-    }
     void NuFileExtGetType(void) {
     }
     void NuFileExtRemove(void) {

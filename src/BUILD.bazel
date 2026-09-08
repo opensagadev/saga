@@ -36,7 +36,8 @@ _ENGINE_DIRS = [
 _ENGINE_ROOT_SRCS = [
     "batman.cpp",
     "globals.cpp",
-    "java/jni_stub.cpp",
+    "java/android.cpp",
+    "java/android_state.cpp",
 ]
 
 _ENGINE_SRCS = _ENGINE_ROOT_SRCS + glob(
@@ -46,18 +47,23 @@ _ENGINE_SRCS = _ENGINE_ROOT_SRCS + glob(
 )
 
 _HOST_EXCLUDES = [
+    "java/android.cpp",
+    "nu2api/nu3d/android/gles_extensions.cpp",
     "nu2api/nucore/android/NuInputDevice_android.cpp",
     "nu2api/nucore/nunew.cpp",
 ]
 
 _HOST_COMMON_SRCS = [source for source in _ENGINE_SRCS if source not in _HOST_EXCLUDES] + [
+    "java/jni_stub.cpp",
     "host/harness/audio.cpp",
     "host/harness/load.cpp",
     "host/harness/main.cpp",
     "host/harness/window.cpp",
     "host/platform/compressed_texture.cpp",
+    "host/platform/android_assets.cpp",
     "host/platform/documents.cpp",
     "host/platform/egl.cpp",
+    "host/platform/gles_extensions.cpp",
     "host/platform/free_camera.cpp",
     "host/platform/free_camera_culling.cpp",
     "host/platform/input.cpp",
@@ -150,9 +156,12 @@ clang_tidy_android_check(
 cc_binary(
     name = "libTTapp.so",
     linkopts = [
-        "-lGLESv2",
-        "-lEGL",
+        "-Wl,--no-undefined",
+        "-llog",
+        "-landroid",
         "-lOpenSLES",
+        "-lEGL",
+        "-lGLESv2",
         "-lstdc++",
     ],
     linkshared = True,
@@ -209,7 +218,7 @@ _NATIVE_COMPONENTS = saga_component_libraries(
     engine_dirs = _ENGINE_DIRS,
     headers = _PUBLIC_HEADERS,
     name_prefix = "saga_native",
-    root_sources = _ENGINE_ROOT_SRCS,
+    root_sources = [source for source in _ENGINE_ROOT_SRCS if source not in _HOST_EXCLUDES] + ["java/jni_stub.cpp"],
     sources = _HOST_COMMON_SRCS,
     textual_headers = _TEXTUAL_HEADERS,
     deps = _HOST_PLATFORM_DEPS,

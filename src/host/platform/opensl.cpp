@@ -3,7 +3,7 @@
 // The vtables mirror the SLOT OFFSETS the decompiled code calls (documented
 // in nusound_voice_android.cpp): ObjectItf {Realize 0x0, GetInterface 0xc,
 // Destroy 0x18}, EngineItf {CreateAudioPlayer 0x8, CreateOutputMix 0x1c},
-// PlayItf {SetPlayState 0x4, GetPlayState 0x8, GetPosition 0xc,
+// PlayItf {SetPlayState 0x0, GetPlayState 0x4, GetPosition 0xc,
 // RegisterCallback 0x10, SetCallbackEventsMask 0x14},
 // AndroidSimpleBufferQueueItf {Enqueue 0x0, Clear 0x4, GetState 0x8},
 // VolumeItf {SetVolumeLevel 0xc, EnableStereoPosition 0x14,
@@ -61,7 +61,7 @@ namespace hostsl {
 
         struct ObjectVTable {
             u32 (*realize)(void *, u32);                         // 0x00
-            u32 (*resume)(void *);                               // 0x04
+            u32 (*resume)(void *, u32);                          // 0x04
             u32 (*get_state)(void *, u32 *);                     // 0x08
             u32 (*get_interface)(void *, const void *, void **); // 0x0c
             void *pad_0x10[2];
@@ -77,7 +77,7 @@ namespace hostsl {
 
         struct EngineCapsVTable {
             u32 (*query_supported_profiles)(void *, u16 *);                   // 0x00
-            u32 (*query_available_outputs)(void *, u32, u32 *, u32 *, u32 *); // 0x04
+            u32 (*query_available_outputs)(void *, u32, i16 *, u32 *, i16 *); // 0x04
             u32 (*query_realtime)(void *, u32 *);                             // 0x08
         };
 
@@ -86,9 +86,9 @@ namespace hostsl {
         typedef void (*PlayCallbackFn)(const SLPlayItf_ *const *, void *, u32);
 
         struct PlayVTable {
-            void *pad_0x00;
-            u32 (*set_play_state)(void *, u32);                       // 0x04
-            u32 (*get_play_state)(void *, u32 *);                     // 0x08
+            u32 (*set_play_state)(void *, u32);   // 0x00
+            u32 (*get_play_state)(void *, u32 *); // 0x04
+            void *pad_0x08;
             u32 (*get_position)(void *, u32 *);                       // 0x0c
             u32 (*register_callback)(void *, PlayCallbackFn, void *); // 0x10
             u32 (*set_callback_events_mask)(void *, u32);             // 0x14
@@ -97,13 +97,12 @@ namespace hostsl {
         struct QueueVTable {
             u32 (*enqueue)(void *, void *, u32); // 0x00
             u32 (*clear)(void *);                // 0x04
-            u32 (*get_state)(void *, u32 *);     // 0x08
+            u32 (*get_state)(void *, SLAndroidSimpleBufferQueueState_ *); // 0x08
         };
 
         struct VolumeVTable {
-            void *pad_0x00[3];
-            u32 (*set_volume_level)(void *, i32); // 0x0c
-            void *pad_0x10;
+            u32 (*set_volume_level)(void *, i32); // 0x00
+            void *pad_0x04[4];
             u32 (*enable_stereo_position)(void *, u32); // 0x14
             void *pad_0x18;
             u32 (*set_stereo_position)(void *, i32); // 0x1c
@@ -139,10 +138,11 @@ namespace hostsl {
         // to Enqueue (the decoder ring reuses it for the next chunk), so the
         // device keeps its own copy until the entry is consumed.
         struct QueueEntry {
-            u8 *data;        // the device copy (stream source format)
-            u32 stream_size; // the copy size in the stream source format
-            u32 fed;         // bytes already handed to the device-side buffer
-            u32 sl_size;     // the size the game enqueued (SL accounting)
+            u8 *data;             // the device copy (stream source format)
+            u32 stream_size;      // the copy size in the stream source format
+            u32 fed;              // bytes already handed to the device-side buffer
+            u32 sl_size;          // the size the game enqueued (SL accounting)
+            u64 end_device_frame; // playhead position at which SL consumes this entry
         };
 
         struct Player {
@@ -186,6 +186,9 @@ namespace hostsl {
             QueueEntry queue[HOST_PLAYER_MAX_QUEUE];
             u32 queue_head;
             u32 queue_count;
+            u32 queue_index;
+            u64 queue_source_frames;
+            u64 queue_played_device_frames;
 
             // underrun tracking (the HEADATEND condition: playing, queue empty)
             bool underrunning;
@@ -198,7 +201,7 @@ namespace hostsl {
 
         // ObjectItf (shared by engine / mix / player)
         u32 host_object_realize(void *self, u32 async);
-        u32 host_object_resume(void *self);
+        u32 host_object_resume(void *self, u32 async);
         u32 host_object_get_state(void *self, u32 *out);
         u32 host_object_get_interface(void *self, const void *iid, void **out);
         u32 host_object_destroy(void *self);
@@ -209,8 +212,8 @@ namespace hostsl {
         u32 host_engine_create_output_mix(void *self, void **mix_object, u32 num_interfaces, const void **interface_ids,
                                           const u32 *required);
         u32 host_engine_query_supported_profiles(void *self, u16 *profiles);
-        u32 host_engine_query_available_outputs(void *self, u32 max_outputs, u32 *output_ids, u32 *output_details,
-                                                u32 *num_outputs);
+        u32 host_engine_query_available_outputs(void *self, u32 voice_type, i16 *max_voices, u32 *absolute_max,
+                                                i16 *free_voices);
         u32 host_engine_query_realtime(void *self, u32 *config);
 
         // PlayItf
@@ -223,7 +226,7 @@ namespace hostsl {
         // AndroidSimpleBufferQueueItf
         u32 host_queue_enqueue(void *self, void *data, u32 size);
         u32 host_queue_clear(void *self);
-        u32 host_queue_get_state(void *self, u32 *count);
+        u32 host_queue_get_state(void *self, SLAndroidSimpleBufferQueueState_ *state);
 
         // VolumeItf
         u32 host_volume_set_volume_level(void *self, i32 level);
@@ -246,12 +249,8 @@ namespace hostsl {
             host_engine_query_realtime,
         };
         const PlayVTable host_play_vt = {
-            NULL,
-            host_play_set_play_state,
-            host_play_get_play_state,
-            host_play_get_position,
-            host_play_register_callback,
-            host_play_set_callback_events_mask,
+            host_play_set_play_state, host_play_get_play_state,    NULL,
+            host_play_get_position,   host_play_register_callback, host_play_set_callback_events_mask,
         };
         const QueueVTable host_queue_vt = {
             host_queue_enqueue,
@@ -259,31 +258,27 @@ namespace hostsl {
             host_queue_get_state,
         };
         const VolumeVTable host_volume_vt = {
-            NULL, NULL,
-            NULL, host_volume_set_volume_level,
-            NULL, host_volume_enable_stereo_position,
-            NULL, host_volume_set_stereo_position,
+            host_volume_set_volume_level,    NULL, NULL, NULL, NULL, host_volume_enable_stereo_position, NULL,
+            host_volume_set_stereo_position,
         };
 
         // ---------------------------------------------------------------------------
         // shared registry (device callback thread vs NuMain thread)
         // ---------------------------------------------------------------------------
 
-        // Keep one SDL callback period between the OpenSL queue and the device.
-        // Feeding four periods here removed both of the game's initial stream
-        // buffers from GetState() in one callback, before its original two-buffer
-        // low-watermark logic could observe and refill the queue.
-        const u32 HOST_TRACK_CAP_BYTES = 4096;
-
         // Frees and drops every queued entry.
         void host_queue_release_all(Player *player) {
             while (player->queue_count > 0) {
                 QueueEntry *entry = &player->queue[player->queue_head];
                 free(entry->data);
-                entry->data = NULL;
+                memset(entry, 0, sizeof(*entry));
                 player->queue_head = (player->queue_head + 1) % HOST_PLAYER_MAX_QUEUE;
                 player->queue_count--;
             }
+            player->queue_head = 0;
+            player->queue_index = 0;
+            player->queue_source_frames = 0;
+            player->queue_played_device_frames = 0;
         }
 
         pthread_mutex_t host_lock = PTHREAD_MUTEX_INITIALIZER;
@@ -338,8 +333,9 @@ namespace hostsl {
 
         // SLObjectItf::Resume (object vtable slot 0x4). The engine's state poll uses
         // it to resume a suspended player object.
-        u32 host_object_resume(void *self) {
+        u32 host_object_resume(void *self, u32 async) {
             (void)self;
+            (void)async;
             return HOST_SL_RESULT_SUCCESS;
         }
 
@@ -534,13 +530,13 @@ namespace hostsl {
             return HOST_SL_RESULT_SUCCESS;
         }
 
-        u32 host_engine_query_available_outputs(void *self, u32 max_outputs, u32 *output_ids, u32 *output_details,
-                                                u32 *num_outputs) {
+        u32 host_engine_query_available_outputs(void *self, u32 voice_type, i16 *max_voices, u32 *absolute_max,
+                                                i16 *free_voices) {
             (void)self;
-            (void)max_outputs;
-            (void)output_ids;
-            (void)output_details;
-            *num_outputs = 0;
+            (void)voice_type;
+            *max_voices = 0;
+            *absolute_max = 0;
+            *free_voices = 0;
             return HOST_SL_RESULT_SUCCESS;
         }
 
@@ -636,6 +632,10 @@ namespace hostsl {
                 entry->stream_size = size;
             }
 
+            const u32 source_frame_bytes = player->channels * (player->bits / 8);
+            player->queue_source_frames += size / source_frame_bytes;
+            entry->end_device_frame =
+                (player->queue_source_frames * (u64)host_device_spec.freq + player->rate - 1) / player->rate;
             player->queue_count++;
             host_stats.bytes_enqueued += size;
             pthread_mutex_unlock(&host_lock);
@@ -649,33 +649,34 @@ namespace hostsl {
                 SDL_ClearAudioStream(player->stream);
             }
             host_queue_release_all(player);
+            player->underrunning = false;
             pthread_mutex_unlock(&host_lock);
             return HOST_SL_RESULT_SUCCESS;
         }
 
-        // Drops queue entries that have been handed completely to the
-        // device-side buffer; returns the hand-off count for queue accounting.
-        u32 host_queue_count_handed_off(Player *player) {
-            u32 done = 0;
+        // OpenSL removes an entry from BufferQueueState only when the playhead
+        // passes it. SDL keeps an internal converted copy, so merely handing an
+        // entry to SDL must not make the game observe that entry as consumed.
+        void host_queue_release_played(Player *player) {
             while (player->queue_count > 0) {
                 QueueEntry *entry = &player->queue[player->queue_head];
-                if (entry->fed != entry->stream_size) {
+                if (entry->fed != entry->stream_size || player->queue_played_device_frames < entry->end_device_frame) {
                     break;
                 }
                 free(entry->data);
-                entry->data = NULL;
+                memset(entry, 0, sizeof(*entry));
                 player->queue_head = (player->queue_head + 1) % HOST_PLAYER_MAX_QUEUE;
                 player->queue_count--;
-                done++;
+                player->queue_index++;
             }
-            return done;
         }
 
-        u32 host_queue_get_state(void *self, u32 *count) {
+        u32 host_queue_get_state(void *self, SLAndroidSimpleBufferQueueState_ *state) {
             Player *player = (Player *)HOSTSL_CONTAINER_OF(self, Player, queue_itf);
             pthread_mutex_lock(&host_lock);
-            host_queue_count_handed_off(player);
-            *count = player->queue_count;
+            host_queue_release_played(player);
+            state->count = player->queue_count;
+            state->index = player->queue_index;
             pthread_mutex_unlock(&host_lock);
             return HOST_SL_RESULT_SUCCESS;
         }
@@ -710,26 +711,22 @@ namespace hostsl {
         const u32 HOST_MIX_CHUNK_BYTES = 4096; // one pull per player per pass
         enum { HOST_FIRED_MAX = 64 };
 
-        // Hands queue data to the device-side buffer while it has room (the
-        // AudioTrack analog). Finishing an SL queue entry is not a play-interface
-        // event: SL_PLAYEVENT_HEADATEND fires only when the play head itself
-        // reaches the end of all queued audio.
+        // Hand every not-yet-fed queue entry to SDL's device-side conversion
+        // stream. The entries themselves remain in the OpenSL queue until the
+        // playhead reaches their end_device_frame above.
         void host_top_up_player_stream(Player *player) {
-            host_queue_count_handed_off(player);
+            host_queue_release_played(player);
 
-            const u32 available = (u32)SDL_GetAudioStreamAvailable(player->stream);
-            u32 space = HOST_TRACK_CAP_BYTES > available ? HOST_TRACK_CAP_BYTES - available : 0;
-            space &= ~3u; // whole s16 stereo frames in the device format
-            while (space > 0 && player->queue_count > 0) {
-                QueueEntry *entry = &player->queue[player->queue_head];
+            for (u32 i = 0; i < player->queue_count; i++) {
+                QueueEntry *entry = &player->queue[(player->queue_head + i) % HOST_PLAYER_MAX_QUEUE];
                 const u32 remaining = entry->stream_size - entry->fed;
-                const u32 take = remaining < space ? remaining : space;
-                if (!SDL_PutAudioStreamData(player->stream, entry->data + entry->fed, (int)take)) {
+                if (remaining == 0) {
+                    continue;
+                }
+                if (!SDL_PutAudioStreamData(player->stream, entry->data + entry->fed, (int)remaining)) {
                     break;
                 }
-                entry->fed += take;
-                space -= take;
-                host_queue_count_handed_off(player);
+                entry->fed = entry->stream_size;
             }
         }
 
@@ -812,6 +809,7 @@ namespace hostsl {
                     }
 
                     player->consumed_device_frames += (u32)got / 4;
+                    player->queue_played_device_frames += (u32)got / 4;
                     host_stats.bytes_consumed += (u32)got;
                 }
 

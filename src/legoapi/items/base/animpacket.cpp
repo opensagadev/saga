@@ -20,10 +20,10 @@ extern "C" void ResetMiniAnimPacket(MINIANIMPACKET_s *packet, i32 animation) {
         packet->requested_animation_id = animation;
         packet->previous_animation_id = packet->requested_animation_id;
         packet->current_animation_id = packet->previous_animation_id;
-        packet->target_time = 1.0f;
-        packet->previous_time = packet->target_time;
-        packet->current_time = packet->previous_time;
-        packet->field_0x19 = 0;
-        packet->reset_state = 4;
+        packet->previous_time = 1.0f;
+        packet->blend_target_time = packet->previous_time;
+        packet->current_time = packet->blend_target_time;
+        packet->blending = 0;
+        packet->flags = ANIMPACKET_FLAG_ANIMATION_CHANGED;
     }
 }

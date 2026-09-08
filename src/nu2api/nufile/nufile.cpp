@@ -1484,6 +1484,25 @@ static FILEEXTINFO *NuFileExtGetInfo(char *path, i32 path_len) {
     return NULL;
 }
 
+i32 NuFileExtGetExt(char *dest, i32 dest_size, NUFILETYPE type) {
+    for (FILEEXTINFO *info = extensions; info->extension[0] != '\0'; ++info) {
+        if (info->platform != PC_PLATFORM || info->type != type) {
+            continue;
+        }
+        if (info->len > dest_size) {
+            return 0;
+        }
+
+        const char *source = info->extension + info->len;
+        for (i32 i = 0; i < info->len; ++i) {
+            dest[i] = *--source;
+        }
+        dest[info->len] = '\0';
+        return 1;
+    }
+    return 0;
+}
+
 i32 NuFileExtConvert(char *dest, char *path) {
     i32 path_len = NuStrCpy(dest, path);
     FILEEXTINFO *source = NuFileExtGetInfo(path, path_len);

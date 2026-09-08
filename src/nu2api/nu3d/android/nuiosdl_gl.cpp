@@ -53,9 +53,8 @@ u32 g_lastAlphaRef = 0;
 u32 g_lastAlphaBlend = 0;
 i32 g_renderingReflection = 0; // original bss @0x99b360 — flips cull when reflecting.
 
-// GLES2 has no VAOs; the original file-static at 0x2a3168 only cached the
-// last-bound handle to avoid redundant binds.
-static u32 g_lastBoundVAO = 0;
+// The original helper at 0x293168 updates the shared renderer cache.
+extern u32 g_lastBoundVAO;
 static void NuIOSBindVAO(u32 vao) {
     if (vao != g_lastBoundVAO) {
         g_lastBoundVAO = vao;
@@ -79,7 +78,7 @@ extern u32 g_readBufferIndex;
 // Refraction texture used by glass debris — lazily allocated.
 static i32 NuIOSDLMtlCallback_refractionRT = 0;                 // @0x99b480
 static NUNATIVETEX NuIOSDLMtlCallback_nativeRefractionTex = {}; // @0x99b4a0
-static i32 NuIOSDLMtlCallback_lastFrameCount = 0;
+static i32 NuIOSDLMtlCallback_lastFrameCount = -1;
 
 // ---------------------------------------------------------------------------
 // Cross-TU imports.
@@ -102,8 +101,8 @@ static inline isize PtrToArgInt(const void *p) {
 }
 
 static inline i32 NuApiFrameCount() {
-    // Original reads *(i32*)(&nuapi + 0x60) directly.
-    return *(i32 *)((u8 *)&nuapi + 0x60);
+    // Original 0x29c90e reads the counter at nuapi + 0x3c.
+    return nuapi.frame_count;
 }
 
 static inline usize ptrToUsize(const void *p) {
@@ -139,6 +138,8 @@ extern "C" f32 g_renderContext_world[16];
 extern "C" f32 g_renderContext_kTint[4];
 extern void (*g_glConstantSetterTable[4])(u32 loc, i32 count, const void *vals);
 extern "C" void NuShaderManagerSetfv(i32 semantic, const f32 *values);
+extern "C" void NuShaderManagerSetElementsfv(i32 semantic, i32 first_element, i32 count, const f32 *values);
+extern "C" void NuShaderManagerSetElementsfv_transpose(i32 semantic, i32 first_element, i32 count, const f32 *values);
 extern "C" void NuRenderContextSetViewProj(NUMTX *view, NUMTX *projection);
 
 // ---------------------------------------------------------------------------
@@ -322,6 +323,64 @@ extern "C" void NuRenderContextSetZFunc(i32 zfunc) {
     g_renderContext_zFunc = zfunc;
 }
 
+extern "C" {
+    static f32 *NuRenderContextGetKTint(void) {
+        return g_renderContext_kTint;
+    }
+
+    static numtl_s *NuRenderContextGetMaterialInUse(void) {
+        return g_renderContext_materialInUse;
+    }
+
+    static void NuRenderContextSetZFunc_inline(i32 zfunc) {
+        if (zfunc != g_renderContext_zFunc) {
+            switch (zfunc) {
+                case 0:
+                    glEnable(GL_DEPTH_TEST);
+                    glDepthMask(GL_TRUE);
+                    glDepthFunc(GL_LEQUAL);
+                    break;
+                case 1:
+                    glEnable(GL_DEPTH_TEST);
+                    glDepthMask(GL_FALSE);
+                    glDepthFunc(GL_LEQUAL);
+                    break;
+                case 2:
+                    glDisable(GL_DEPTH_TEST);
+                    glDepthMask(GL_TRUE);
+                    break;
+                case 3:
+                    glDisable(GL_DEPTH_TEST);
+                    glDepthMask(GL_FALSE);
+                    break;
+            }
+        }
+        g_renderContext_zFunc = zfunc;
+    }
+
+    static void NuRenderContextSetWorld(NUMTX *world) {
+        struct WorldMatrices {
+            NUMTX world;
+            NUMTX world_view_projection;
+            NUMTX world_view;
+        } matrices;
+
+        matrices.world = *world;
+        NuMtxMulH(&matrices.world_view_projection, world, reinterpret_cast<NUMTX *>(g_renderContext_viewProj));
+        NuMtxMul(&matrices.world_view, world, reinterpret_cast<NUMTX *>(g_renderContext_view));
+        NuShaderManagerSetElementsfv(0x52, 0, 3, reinterpret_cast<const f32 *>(&matrices));
+        NuShaderManagerSetfv(0x3c, reinterpret_cast<const f32 *>(world));
+    }
+
+    static __used__ void NuRenderContextSetWorld_transpose(NUMTX *world) {
+        NuMtxTranspose(world, world);
+        NuShaderManagerSetElementsfv_transpose(0x3c, 0, 1, reinterpret_cast<const f32 *>(world));
+    }
+}
+
+static void Nu360SetObjectShadowFactor(f32) {
+}
+
 // ---------------------------------------------------------------------------
 // Vertex attribute binding — original 0x293841 / 0x2939fe / 0x293a65.
 // ---------------------------------------------------------------------------
@@ -412,11 +471,14 @@ static void NuIOS_BindVertexAttributes(isize dataAddr, usize baseVertex) {
     NuIOS_BindVertexAttributesInternal(dataAddr, baseVertex, fmt, fmt[0]);
 }
 
-// original 0x293a65 — bind with an explicit format override (2D path).
-static void NuIOS_BindVertexAttributesImmediateOverrideDataLayout(isize dataAddr, usize baseVertex, const u32 *fmt) {
+// original 0x293a65 — bind immediate data with an explicit record layout.
+// The first argument is unused; the active mask still comes from the current
+// bound vertex format, while `fmt` supplies the attribute records.
+static void NuIOS_BindVertexAttributesImmediateOverrideDataLayout(isize, isize dataAddr, const u32 *fmt) {
     NuIOSBindVAO(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    NuIOS_BindVertexAttributesInternal(dataAddr, baseVertex, fmt, fmt[0]);
+    const u32 *bound_format = static_cast<const u32 *>(usizeToPtr(g_boundVertexFormat));
+    NuIOS_BindVertexAttributesInternal(dataAddr, 0, fmt, bound_format[0]);
 }
 
 // ---------------------------------------------------------------------------
@@ -715,7 +777,7 @@ void NuIOSDLGeom2DCallback(void *arg) {
 
     u32 pt = geom->prim_type;
     if (pt < 5) {
-        NuIOS_BindVertexAttributesImmediateOverrideDataLayout(PtrToArgInt(geom->vertices), 0,
+        NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, PtrToArgInt(geom->vertices),
                                                               (const u32 *)g_nuPrimVertexFormat);
         glDrawArrays((GLenum)kPrimModes[pt], 0, (GLsizei)geom->vertex_count);
     }
@@ -733,27 +795,27 @@ void NuIOSDLGeomCallback(void *arg) {
     NuShaderObjectGLSLSetupMaterial(shader, g_LastMtl);
     switch (geom->primitive_type) {
         case 0:
-            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(immediate_vertices, 0,
+            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, immediate_vertices,
                                                                   (const u32 *)g_nuPrimVertexFormat);
             glDrawArrays(GL_TRIANGLES, 0, geom->vertex_count);
             break;
         case 1:
-            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(immediate_vertices, 0,
+            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, immediate_vertices,
                                                                   (const u32 *)g_nuPrimVertexFormat);
             glDrawArrays(GL_TRIANGLE_STRIP, 0, geom->vertex_count);
             break;
         case 2:
-            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(immediate_vertices, 0,
+            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, immediate_vertices,
                                                                   (const u32 *)g_nuPrimVertexFormat);
             glDrawArrays(GL_LINES, 0, geom->vertex_count);
             break;
         case 3:
-            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(immediate_vertices, 0,
+            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, immediate_vertices,
                                                                   (const u32 *)g_nuPrimVertexFormat);
             glDrawArrays(GL_LINE_STRIP, 0, geom->vertex_count);
             break;
         case 5:
-            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(immediate_vertices, 0,
+            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, immediate_vertices,
                                                                   (const u32 *)g_nuPrimVertexFormat);
             glDrawArrays(GL_TRIANGLE_FAN, 0, geom->vertex_count);
             break;
@@ -783,7 +845,7 @@ void NuIOSDLGeomCallback(void *arg) {
             break;
         }
         case 0x32:
-            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(immediate_vertices, 0,
+            NuIOS_BindVertexAttributesImmediateOverrideDataLayout(0, immediate_vertices,
                                                                   (const u32 *)g_nuPrimVertexFormat);
             glDrawArrays(GL_POINTS, 0, geom->vertex_count);
             break;
@@ -795,27 +857,24 @@ void NuIOSDLGeomCallback(void *arg) {
 // the per-instance opacity to the current tint.
 void NuIOSDLTransformCallback(void *arg) {
     auto *world = static_cast<NUMTX *>(arg);
+    NUVEC4 tint = *reinterpret_cast<NUVEC4 *>(NuRenderContextGetKTint());
     const f32 opacity = world->m33;
     const f32 shadow_factor = world->m23;
-    f32 tint[4] = {
-        g_renderContext_kTint[0],
-        g_renderContext_kTint[1],
-        g_renderContext_kTint[2],
-        g_renderContext_kTint[3],
-    };
 
     if (opacity < 1.0f) {
-        tint[3] *= opacity;
-        NuRenderContextSetZFunc(1);
-    } else if (g_renderContext_materialInUse != nullptr) {
-        NuRenderContextSetZFunc(g_renderContext_materialInUse->attribs.z_mode);
+        tint.w *= opacity;
+        NuRenderContextSetZFunc_inline(1);
+        NuShaderManagerSetfv(0x44, &tint.x);
+    } else {
+        numtl_s *material = NuRenderContextGetMaterialInUse();
+        NuRenderContextSetZFunc_inline(material->attribs.z_mode);
+        NuShaderManagerSetfv(0x44, &tint.x);
     }
-    NuShaderManagerSetfv(0x44, tint);
 
+    Nu360SetObjectShadowFactor(shadow_factor);
     world->m33 = 1.0f;
     world->m23 = 0.0f;
-    memcpy(g_renderContext_world, world, sizeof(NUMTX));
-    NuShaderManagerSetfv(0x3c, reinterpret_cast<const f32 *>(world));
+    NuRenderContextSetWorld(world);
     world->m33 = opacity;
     world->m23 = shadow_factor;
 }
@@ -825,27 +884,24 @@ void NuIOSDLTransformCallback(void *arg) {
 // to the shader state.
 void NuIOSDLTransformParamsCallback(void *arg) {
     auto *stream_matrix = static_cast<NUMTX *>(arg);
+    NUVEC4 tint = *reinterpret_cast<NUVEC4 *>(NuRenderContextGetKTint());
     const f32 opacity = stream_matrix->m33;
     const f32 shadow_factor = stream_matrix->m32;
-    f32 tint[4] = {
-        g_renderContext_kTint[0],
-        g_renderContext_kTint[1],
-        g_renderContext_kTint[2],
-        g_renderContext_kTint[3],
-    };
+    numtl_s *material = NuRenderContextGetMaterialInUse();
 
     if (opacity < 1.0f) {
-        tint[3] *= opacity;
-        NuRenderContextSetZFunc(1);
-    } else if (g_renderContext_materialInUse != nullptr) {
-        NuRenderContextSetZFunc(g_renderContext_materialInUse->attribs.z_mode);
+        tint.w *= opacity;
+        NuRenderContextSetZFunc_inline(1);
+        NuShaderManagerSetfv(0x44, &tint.x);
+    } else {
+        NuRenderContextSetZFunc_inline(material->attribs.z_mode);
+        NuShaderManagerSetfv(0x44, &tint.x);
     }
-    NuShaderManagerSetfv(0x44, tint);
 
+    Nu360SetObjectShadowFactor(shadow_factor);
     stream_matrix->m33 = 1.0f;
     stream_matrix->m32 = 0.0f;
-    NuMtxTranspose(reinterpret_cast<NUMTX *>(g_renderContext_world), stream_matrix);
-    NuShaderManagerSetfv(0x3c, g_renderContext_world);
+    NuRenderContextSetWorld_transpose(stream_matrix);
     stream_matrix->m33 = opacity;
     stream_matrix->m32 = shadow_factor;
 }

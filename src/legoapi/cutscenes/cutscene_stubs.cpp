@@ -9,6 +9,7 @@
 
 extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *, f32, nuanimtime_s *, f32 *, f32 *);
 extern "C" i32 NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *, f32, NUMTX *, nuanimtime_s *);
+void instNuGCutSceneEndButNotSystems(instNUGCUTSCENE_s *instance);
 
 extern "C" {
     extern debinftype **debtab;
@@ -44,7 +45,10 @@ extern "C" {
     void CheckStreamFileID(void) {
     }
 
-    void ClearLinkedCutSceneMusic(void) {
+    void ClearLinkedCutSceneMusic(void *context) {
+        if (context == NULL || Music.track_data == context) {
+            Music.track_data = NULL;
+        }
     }
 
     void DisplayCutSceneMemory(void) {
@@ -84,7 +88,18 @@ extern "C" {
     void instCutSceneTimeElapsed(void) {
     }
 
-    void instNuGCutSceneAddCamTgt(void) {
+    i32 instNuGCutSceneAddCamTgt(instNUGCUTSCENE_s *instance, NUVEC *target, f32 start_frame, f32 duration,
+                                 i8 target_index) {
+        instNUGCUTSCENECAMERA_s *camera = instance->camera_instance;
+        if (camera == NULL || camera->target_count >= camera->target_capacity) {
+            return 0;
+        }
+        instNUGCUTCAMTGT_s *entry = &camera->targets[camera->target_count++];
+        entry->target = target;
+        entry->start_frame = start_frame;
+        entry->duration = duration;
+        entry->target_index = target_index;
+        return 1;
     }
 
     void instNuGCutSceneAddCleanUpItem(void) {
@@ -102,10 +117,16 @@ extern "C" {
     void instNuGCutSceneCleanUp(void) {
     }
 
-    void instNuGCutSceneCreateCamTgtArray(void) {
-    }
-
-    void instNuGCutSceneDestroy(void) {
+    void instNuGCutSceneCreateCamTgtArray(instNUGCUTSCENE_s *instance, i32 count, VARIPTR *buf) {
+        if (count == 0 || instance->camera_instance == NULL) {
+            return;
+        }
+        instNUGCUTSCENECAMERA_s *camera = instance->camera_instance;
+        camera->target_capacity = static_cast<u8>(count);
+        buf->addr = ALIGN(buf->addr, 0x10);
+        camera->targets = reinterpret_cast<instNUGCUTCAMTGT_s *>(buf->void_ptr);
+        buf->void_ptr = camera->targets + count;
+        memset(camera->targets, 0, count * sizeof(instNUGCUTCAMTGT_s));
     }
 
     void instNuGCutSceneDisable(void) {
@@ -114,14 +135,11 @@ extern "C" {
     void instNuGCutSceneEnable(void) {
     }
 
-    void instNuGCutSceneEnd(instNUGCUTSCENE_s *) {
-    }
-
     void instNuGCutSceneFind(void) {
     }
 
-    i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *) {
-        return 0;
+    i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *instance) {
+        return (instance->flags_89 & 0x10) != 0 ? -1 : 0;
     }
 
     void instNuGCutSceneJumpToEnd(void) {
@@ -133,22 +151,31 @@ extern "C" {
     void instNuGCutScenePlay(void) {
     }
 
-    void instNuGCutScenePreload(void) {
-    }
-
     void instNuGCutSceneResetCleanUp(void) {
     }
 
     void instNuGCutSceneRotateY(void) {
     }
 
-    void instNuGCutSceneServiceLoad(void) {
-    }
-
     void instNuGCutSceneSetEndCallback(void) {
     }
 
-    void instNuGCutSceneSetMtx(void) {
+    void instNuGCutSceneSetMtx(instNUGCUTSCENE_s *instance, NUMTX *matrix) {
+        instance->flags_88 |= 0x80;
+        instance->matrix = *matrix;
+
+        NUMTX *instance_matrix = &instance->matrix;
+        NUVEC *bounds = static_cast<NUVEC *>(instance->cutscene->bounds);
+        if (bounds != NULL) {
+            instance->transformed_bounds_center.x = (bounds[1].x + bounds[0].x) * 0.5f;
+            instance->transformed_bounds_center.y = (bounds[1].y + bounds[0].y) * 0.5f;
+            instance->transformed_bounds_center.z = (bounds[1].z + bounds[0].z) * 0.5f;
+        } else {
+            instance->transformed_bounds_center.x = 0.0f;
+            instance->transformed_bounds_center.y = 0.0f;
+            instance->transformed_bounds_center.z = 0.0f;
+        }
+        NuVecMtxTransform(&instance->transformed_bounds_center, &instance->transformed_bounds_center, instance_matrix);
     }
 
     void instNuGCutSceneSetPos(void) {

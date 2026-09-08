@@ -26,6 +26,7 @@ DECOMP_ASSERT(sizeof(BLADE_s) == 16, "BLADE size");
 DECOMP_ASSERT(offsetof(BLADE_s, colour) == 10, "BLADE colour offset");
 extern BLADE_s BladeTab[4];
 struct nugscn_s;
+struct nuhgobj_s;
 struct CHARACTERMODEL_s;
 struct ANIMPACKET_s;
 struct NUJOINTANIM_s;
@@ -104,7 +105,7 @@ struct CHARSCENE_s {
 
 DECOMP_ASSERT(sizeof(CHARSCENE_s) == 0x10, "CHARSCENE_s size");
 
-extern CHARSCENE_s *CharScene_Area;
+extern __attribute__((visibility("hidden"))) CHARSCENE_s *CharScene_Area;
 
 struct GAMECHARACTERLAYER_s {
     char name[0x18];
@@ -466,6 +467,7 @@ struct characterdata_s { /* PlaceHolder Structure */
     union {
         void *field11_0x24;
         PLAYERCHARACTERCONFIG_s *player_config;
+        GAMECHARACTERDATA_s *game_character;
     };
     union {
         undefined4 field12_0x28;
@@ -508,6 +510,8 @@ DECOMP_ASSERT(offsetof(CHARACTERDATA, model_scale) == 0x3c, "CHARACTERDATA model
 extern "C" i32 MakeLayerList_Index(CHARACTERMODEL_s *model, i16 *layers, u32 mask);
 extern "C" void StoreLocatorCoordinates(CHARACTERMODEL_s *model, NUMTX *world_matrix, NUMTX *joint_matrices,
                                         NUVEC *positions, NUMTX *matrices);
+extern "C" void APITransparentCharDraw(nuhgobj_s *object, NUMTX *world_matrix, i32 render_count, i16 *render_indices,
+                                       NUMTX *joint_matrices, void **dwa, i32 render_flags);
 extern "C" i32 APIDrawCharacterModel(CHARACTERMODEL_s *model, CHARACTERDATA *character_data, ANIMPACKET_s *animation,
                                      numtx_s *matrix, numtx_s *secondary_matrix, numtx_s *reflection_matrix,
                                      NUVEC *locator_positions, numtx_s *auxiliary_matrix, GameObject_s *object,

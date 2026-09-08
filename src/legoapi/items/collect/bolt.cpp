@@ -31,20 +31,23 @@ bool LineIntersectCircle(NUVEC *, NUVEC *, NUVEC *, f32);
 
 BOLT_s *FindIncomingBolt(GameObject_s *object, i32 exclude_players, i32 mark_direct_hit) {
     BOLT_s *nearest = NULL;
-    f32 radius = object->apiobj.field_0x1e0 > object->apiobj.field_0x1dc ?
-                 object->apiobj.field_0x1e0 : object->apiobj.field_0x1dc;
+    f32 radius = object->apiobj.field_0x1e0 > object->apiobj.field_0x1dc ? object->apiobj.field_0x1e0
+                                                                         : object->apiobj.field_0x1dc;
     f32 nearest_distance = 1.0e8f;
     for (i32 i = 0; i < 32; ++i) {
         BOLT_s *bolt = &Bolt[i];
-        if (bolt->active == 0) continue;
+        if (bolt->active == 0)
+            continue;
         GameObject_s *owner = bolt->owner;
         if (exclude_players != 0 && owner != NULL && (owner->apiobj.field_0x1f8 & 0x1001) == 0x1001 &&
-            owner->apiobj.field_0x287 == 0 && owner->apiobj.field_0x27c != -1) continue;
+            owner->apiobj.field_0x287 == 0 && owner->apiobj.field_0x27c != -1)
+            continue;
         f32 time = TouchHacks::TouchControlsActive ? 1.5f : 0.5f;
         f32 distance = NuVecDistSqr(&bolt->position, &object->apiobj.collision_position, NULL);
         if (distance < time * bolt->speed * time * bolt->speed &&
-            LineIntersectSphere(&bolt->position, &bolt->field_0xac, &object->apiobj.collision_position,
-                                radius * radius, NULL) && distance < nearest_distance) {
+            LineIntersectSphere(&bolt->position, &bolt->field_0xac, &object->apiobj.collision_position, radius * radius,
+                                NULL) &&
+            distance < nearest_distance) {
             nearest = bolt;
             nearest_distance = distance;
         }
@@ -52,7 +55,8 @@ BOLT_s *FindIncomingBolt(GameObject_s *object, i32 exclude_players, i32 mark_dir
     if (nearest != NULL && mark_direct_hit != 0) {
         radius = object->apiobj.field_0x1dc * 0.75f;
         if (LineIntersectCircle(&nearest->position, &nearest->field_0xac, &object->apiobj.collision_position,
-                                radius * radius)) object->field_0xe21 |= 0x20;
+                                radius * radius))
+            object->field_0xe21 |= 0x20;
     }
     return nearest;
 }

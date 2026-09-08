@@ -210,10 +210,11 @@ typedef struct AIPACKET_s {
         APIOBJECT_s *opponent_object;
         GameObject_s **action_target_ref;
     };
-    f32 opponent_distance; // 0xe8, cached range used by script conditions
+    f32 opponent_metric; // 0xe8
     u32 field_0xec;
     u32 field_0xf0;
-    u8 pad_f4[0x104 - 0xf4];
+    GameObject_s *dont_avoid_character; // 0xf4
+    u8 pad_f8[0x104 - 0xf8];
     union {
         NUVEC movement_destination; // 0x104
         NUVEC reset_position;
@@ -228,7 +229,9 @@ typedef struct AIPACKET_s {
         i16 inside_path_node; // 0x3e4 overall (-1 when not inside a node)
         i16 field_0x124;
     };
-    u8 pad1b[0x3ec - 0x3e6];
+    i16 animation_override_from; // 0x126 (0xe9 means every ordinary animation)
+    i16 animation_override_to;   // 0x128
+    u8 pad1b[0x12c - 0x12a];
     u32 character_type_mask_low;  // 0x3ec overall
     u32 character_type_mask_high; // 0x3f0 overall
     u8 field_0x134;               // 0x3f4 overall: source creature index
@@ -244,7 +247,8 @@ typedef struct AIPACKET_s {
     };
     u8 reset_mode;      // 0x3fa overall: AI reset/activation state
     u8 goal_speed_mode; // 0x3fb overall: walk/run/tiptoe speed selector
-    u8 pad1c_end[0x400 - 0x3fc];
+    u8 movement_stopped; // 0x13c, suppresses synthesized AI movement input
+    u8 pad1c_end[0x400 - 0x3fd];
     AIGROUP_s *group;                   // 0x400 overall
     u8 group_row;                       // 0x404 overall
     u8 group_column;                    // 0x405 overall
@@ -452,9 +456,12 @@ typedef struct APIOBJECT_s {
     u8 field_0x287; // 0x287  owner/controller player index
     u8 field_0x288; // 0x288
     u8 field_0x289; // 0x289
-    undefined field_0x28a[0x16];
-    u32 field387_0x2a0; // 0x2a0
-    u32 field388_0x2a4; // 0x2a4
+    undefined field_0x28a[0x0a];
+    APIOBJECT_s *collision_link; // 0x294, paired objects do not collide with each other
+    u32 collision_mask_low;      // 0x298
+    u32 collision_mask_high;     // 0x29c
+    u32 field387_0x2a0;          // 0x2a0
+    u32 field388_0x2a4;          // 0x2a4
 } APIOBJECT;
 
 struct APIOBJECTSYS_s {
@@ -470,6 +477,10 @@ extern "C" void APIObjectDestroy(APIOBJECTSYS_s *system, APIOBJECT *object);
 extern "C" void APIObjectDestroyAll(APIOBJECTSYS_s *system);
 extern "C" void APIObjectSetUsed(APIOBJECT *object, i32 index, i32 used);
 extern "C" void APIObjectVelocities(GameObject_s *object);
+extern "C" i32 APIObjectCollision(APIOBJECT *first, APIOBJECT *second);
+extern "C" i32 APIObjectCollision2D(APIOBJECT *first, APIOBJECT *second);
+extern "C" void APIObjectCollisions(i32 count, APIOBJECT **objects, NUVEC *minimums, NUVEC *maximums,
+                                    i32 (*collision_callback)(APIOBJECT *, APIOBJECT *));
 
 struct rtldata_s {
     union {
@@ -597,7 +608,8 @@ typedef struct GameObject_s {
                 i8 character_context;  // 0x07a5, current action owner (-1 when unowned)
                 i8 build_context;      // Build-It alias retained for its existing callers
             };
-            u8 pad_7a6[0x7a8 - 0x7a6]; // 0x07a6 .. 0x07a8
+            u8 field_0x7a6;
+            i8 field_0x7a7;
         };
         u32 movement_context_state; // 0x07a4, packed action context and variant state
     };
@@ -608,7 +620,13 @@ typedef struct GameObject_s {
     u8 context_flags;          // 0x07ac
     i8 context_variant_flags;  // 0x07ad
     u8 jump_flags;             // 0x07ae
-    u8 pad_7af[0x7c0 - 0x7af]; // 0x07af .. 0x07c0
+    u8 pad_7af;                 // 0x07af
+    f32 tag_context_timer;      // 0x07b0, PLAYERPACKET_s + 0xfc
+    i8 tag_target_player;       // 0x07b4, PLAYERPACKET_s + 0x100
+    u8 tag_context_flags;       // 0x07b5, PLAYERPACKET_s + 0x101
+    u8 pad_7b6[2];              // 0x07b6 .. 0x07b8
+    GameObject_s *tag_target;   // 0x07b8, PLAYERPACKET_s + 0x104
+    u8 pad_7bc[4];              // 0x07bc .. 0x07c0
     union {
         u8 mini_anim_packet[0x24]; // 0x07c0 .. 0x07e4
         MINIANIMPACKET_s mini_animation;
@@ -682,15 +700,17 @@ typedef struct GameObject_s {
     union {
         i32 pause_input_state; // 0x0d5c, cleared when entering pause
         f32 hud_icon_timer;    // countdown controlling the portrait blink during death/drop transitions
+        f32 tag_state;         // PLAYERPACKET_s + 0x6a8, tag/input transition state
     };
-    u8 pad_d60[0xd64 - 0xd60];       // 0x0d60 .. 0x0d64
-    f32 jump_variant_timer;          // 0x0d64
-    f32 jump_chain_timer;            // 0x0d68
-    f32 field_0xd6c;                 // 0x0d6c  surface/contact state
-    u8 pad_d70[0xd78 - 0xd70];       // 0x0d70 .. 0x0d78
-    f32 field_0xd78;                 // 0x0d78
-    f32 terrain_origin_floor_offset; // 0x0d7c
-    f32 field_0xd80;                 // 0x0d80
+    u8 pad_d60[0xd64 - 0xd60];            // 0x0d60 .. 0x0d64
+    f32 jump_variant_timer;               // 0x0d64
+    f32 jump_chain_timer;                 // 0x0d68
+    f32 field_0xd6c;                      // 0x0d6c  surface/contact state
+    f32 movement_animation_hold_timer;    // 0x0d70
+    f32 movement_animation_release_timer; // 0x0d74
+    f32 field_0xd78;                      // 0x0d78
+    f32 terrain_origin_floor_offset;      // 0x0d7c
+    f32 field_0xd80;                      // 0x0d80
     f32 force_glow_target;
     f32 force_glow_step;
     f32 field_0xd8c; // 0x0d8c
@@ -705,9 +725,10 @@ typedef struct GameObject_s {
     u8 pad_db0[4];
     f32 fall_hover_height; // 0x0db4
     u8 pad_db8[4];
-    f32 field_0xdbc;           // 0x0dbc
-    u8 pad_dc0[0xdc8 - 0xdc0]; // 0x0dc0 .. 0x0dc8
-    f32 field_0xdc8;           // 0x0dc8
+    f32 field_0xdbc; // 0x0dbc
+    u8 pad_dc0[4];   // 0x0dc0 .. 0x0dc4
+    f32 field_0xdc4; // 0x0dc4
+    f32 field_0xdc8; // 0x0dc8
     u8 pad_dcc[0xdd8 - 0xdcc];
     f32 block_cooldown;
     f32 field_0xddc;
@@ -723,11 +744,13 @@ typedef struct GameObject_s {
     u16 current_input_angle; // 0x0e0c
     u8 pad_e0e[2];
     i16 previous_block_animation; // 0x0e10
-    u8 pad_e12[0xe18 - 0xe12];
-    i16 movement_lean_angle;  // 0x0e18
-    i16 secondary_lean_angle; // 0x0e1a
-    i16 tertiary_lean_angle;  // 0x0e1c
-    i16 field_0xe1e;          // 0x0e1e
+    u8 pad_e12[2];
+    i16 held_movement_animation;     // 0x0e14
+    i16 released_movement_animation; // 0x0e16
+    i16 movement_lean_angle;         // 0x0e18
+    i16 secondary_lean_angle;        // 0x0e1a
+    i16 tertiary_lean_angle;         // 0x0e1c
+    i16 field_0xe1e;                 // 0x0e1e
     union {
         struct {
             u8 field_0xe20;
@@ -771,7 +794,8 @@ typedef struct GameObject_s {
     GAMEOBJECTADDONS_s *addons;                 // 0x0e54
     u8 pad_e58[0xe70 - 0xe58];                  // 0x0e58 .. 0x0e70
     nugspline_s *movement_spline;               // 0x0e70
-    u8 pad_e74[0xeb4 - 0xe74];                  // 0x0e74 .. 0x0eb4
+    u8 pad_e74[0xeb0 - 0xe74];                  // 0x0e74 .. 0x0eb0
+    GameObject_s *takeover_target;              // 0x0eb0
     u32 field_0xeb4;                            // 0x0eb4, cleared on hub room changes
     NUVEC *context_target_position;             // 0x0eb8
     u32 field_0xebc;                            // 0x0ebc
@@ -780,20 +804,23 @@ typedef struct GameObject_s {
     u32 field_0xec8;                            // 0x0ec8
     u32 field_0xecc;                            // 0x0ecc
     u32 field_0xed0;                            // 0x0ed0
-    u32 field_0xed4;                            // 0x0ed4
-    u32 field_0xed8;                            // 0x0ed8
-    u8 pad_edc[0xee0 - 0xedc];                  // 0x0edc .. 0x0ee0
-    f32 field_0xee0;                            // 0x0ee0
-    u8 pad_ee4[0xee8 - 0xee4];                  // 0x0ee4 .. 0x0ee8
-    f32 field_0xee8;                            // 0x0ee8
-    f32 field_0xeec;                            // 0x0eec
-    u8 pad_ef0[0xef4 - 0xef0];                  // 0x0ef0 .. 0x0ef4
-    i32 pause_context_state;                    // 0x0ef4, cleared when entering pause
-    u8 field_0xef8;                             // 0x0ef8
-    u8 field_0xef9;                             // 0x0ef9
-    u8 field_0xefa;                             // 0x0efa
-    u8 field_0xefb;                             // 0x0efb, bit 3 requests the two-row hit-point layout
-    u8 field_0xefc;                             // 0x0efc
+    union {
+        u32 field_0xed4;
+        f32 current_speed_multiplier; // 0x0ed4
+    };
+    u32 field_0xed8;           // 0x0ed8
+    u8 pad_edc[0xee0 - 0xedc]; // 0x0edc .. 0x0ee0
+    f32 field_0xee0;           // 0x0ee0
+    f32 walk_speed_override;   // 0x0ee4
+    f32 field_0xee8;           // 0x0ee8
+    f32 field_0xeec;           // 0x0eec
+    u32 field_0xef0;           // 0x0ef0
+    i32 pause_context_state;   // 0x0ef4, cleared when entering pause
+    u8 field_0xef8;            // 0x0ef8
+    u8 field_0xef9;            // 0x0ef9
+    u8 field_0xefa;            // 0x0efa
+    u8 field_0xefb;            // 0x0efb, bit 3 requests the two-row hit-point layout
+    u8 field_0xefc;            // 0x0efc
     union {
         u8 field_0xefd;
         struct {
@@ -853,7 +880,9 @@ typedef struct GameObject_s {
     f32 shadow_opacity;        // 0x102c
     f32 shadow_radius;         // 0x1030
     f32 hover_height_override; // 0x1034
-    u8 pad_1038[0x1048 - 0x1038];
+    u8 pad_1038[0x1040 - 0x1038];
+    f32 animation_speed_multiplier; // 0x1040
+    u8 pad_1044[0x1048 - 0x1044];
     f32 fall_acceleration_timer;  // 0x1048
     CABLE_s *cable;               // 0x104c
     u32 field_0x1050;             // 0x1050
@@ -886,8 +915,10 @@ typedef struct GameObject_s {
     u8 current_hp;       // 0x108b
     i8 head_target_priority;
     u8 pad_108d;
-    u8 field_0x108e;                       // 0x108e
-    u8 pad_108f[0x1092 - 0x108f];          // 0x108f .. 0x1092
+    u8 field_0x108e; // 0x108e
+    u8 pad_108f;
+    u8 one_at_once_player;                 // 0x1090 (0xff when no attack slot is assigned)
+    u8 attack_override;                    // 0x1091
     u8 field_0x1092;                       // 0x1092
     u8 field_0x1093;                       // 0x1093
     u8 pad_1094[0x109c - 0x1094];          // 0x1094 .. 0x109c
@@ -922,12 +953,18 @@ static_assert(sizeof(void *) != 4 || sizeof(GameObject_s) == 0x10e4, "GameObject
 static_assert(sizeof(void *) != 4 || offsetof(GameObject_s, hold_timer) == 0xde4, "GameObject hold timer offset");
 static_assert(sizeof(void *) != 4 || offsetof(GameObject_s, previous_block_animation) == 0xe10,
               "GameObject previous block animation offset");
+static_assert(sizeof(void *) != 4 || offsetof(GameObject_s, held_movement_animation) == 0xe14,
+              "GameObject held movement animation offset");
+static_assert(sizeof(void *) != 4 || offsetof(GameObject_s, released_movement_animation) == 0xe16,
+              "GameObject released movement animation offset");
 static_assert(sizeof(void *) != 4 || offsetof(AIPACKET, character_type_mask_low) == 0x12c,
               "AIPACKET character mask 32-bit offset");
 DECOMP_ASSERT(offsetof(AIPACKET, alternate_script_process) == 0xcc, "AIPACKET alternate script processor offset");
 DECOMP_ASSERT(offsetof(AIPACKET, opponent_object) == 0xe4, "AIPACKET opponent offset");
-DECOMP_ASSERT(offsetof(AIPACKET, opponent_distance) == 0xe8, "AIPACKET opponent range offset");
+DECOMP_ASSERT(offsetof(AIPACKET, opponent_metric) == 0xe8, "AIPACKET opponent range offset");
 DECOMP_ASSERT(offsetof(AIPACKET, movement_destination) == 0x104, "AIPACKET destination offset");
+DECOMP_ASSERT(offsetof(AIPACKET, animation_override_from) == 0x126, "AIPACKET animation override source offset");
+DECOMP_ASSERT(offsetof(AIPACKET, animation_override_to) == 0x128, "AIPACKET animation override target offset");
 DECOMP_ASSERT(offsetof(AIPACKET, movement_target_direction) == 0x147, "AIPACKET target direction offset");
 DECOMP_ASSERT(offsetof(AIPACKET, movement_target) == 0x184, "AIPACKET movement target offset");
 DECOMP_ASSERT(offsetof(AIPACKET, intersection_connection) == 0x18c, "AIPACKET intersection connection offset");
@@ -939,6 +976,7 @@ DECOMP_ASSERT(offsetof(AIPACKET, path_info) == 0x154, "AIPACKET path-info offset
 DECOMP_ASSERT(offsetof(AIPACKET, last_path_position) == 0x16c, "AIPACKET last path position offset");
 DECOMP_ASSERT(offsetof(AIPACKET, goal_path_node) == 0x178, "AIPACKET goal-node offset");
 DECOMP_ASSERT(offsetof(AIPACKET, navigation_flags) == 0x1e8, "AIPACKET navigation flags offset");
+DECOMP_ASSERT(offsetof(AIPACKET, movement_stopped) == 0x13c, "AIPACKET movement stop offset");
 DECOMP_ASSERT(offsetof(AIPACKET, movement_target_radius) == 0x1ec, "AIPACKET target-radius offset");
 DECOMP_ASSERT(offsetof(AIPACKET, capabilities) == 0x1f0, "AIPACKET capabilities offset");
 DECOMP_ASSERT(offsetof(AIPACKET, fallback_path_info) == 0x1c8, "AIPACKET fallback path-info offset");
@@ -1044,6 +1082,10 @@ DECOMP_ASSERT(offsetof(GameObject_s, pause_input_state) == 0xd5c, "GameObject pa
 DECOMP_ASSERT(offsetof(GameObject_s, input_toggle_hold_time) == 0xda4, "GameObject toggle hold time offset");
 DECOMP_ASSERT(offsetof(GameObject_s, nearby_floor_distance) == 0xda0, "GameObject nearby-floor offset");
 DECOMP_ASSERT(offsetof(GameObject_s, fall_animation_timer) == 0xdac, "GameObject fall animation timer offset");
+DECOMP_ASSERT(offsetof(GameObject_s, movement_animation_hold_timer) == 0xd70,
+              "GameObject movement animation hold timer offset");
+DECOMP_ASSERT(offsetof(GameObject_s, movement_animation_release_timer) == 0xd74,
+              "GameObject movement animation release timer offset");
 DECOMP_ASSERT(offsetof(GameObject_s, pause_context_state) == 0xef4, "GameObject pause context state offset");
 DECOMP_ASSERT(offsetof(GameObject_s, delayed_turn_target_angle) == 0xe08, "GameObject delayed turn target offset");
 DECOMP_ASSERT(offsetof(GameObject_s, current_input_angle) == 0xe0c, "GameObject input angle offset");

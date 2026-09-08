@@ -9,6 +9,9 @@ class NuDeviceSpecs {
 
     static void Create();
     static void Destroy();
+    void Exists();
+    NuDeviceSpecs();
+    ~NuDeviceSpecs();
 
   private:
     void DetermineDeviceSpecs();

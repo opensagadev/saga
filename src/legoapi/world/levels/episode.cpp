@@ -252,7 +252,8 @@ i32 Episode_CountOpenAreas(i32 episode_index, i32 area_index, AREASAVE_s *saves)
     EpFreePlayBuildUpTotal = EpFreePlayBuildUpCount = 0;
     EpRedBrickTotal = EpRedBrickCount = 0;
     EpGoldBrickTotal = EpGoldBrickCount = 0;
-    if (episode_index == -1) return 0;
+    if (episode_index == -1)
+        return 0;
     if (GOLDBRICKFORSUPERSTORY != 0 && area_index == -1) {
         EpGoldBrickTotal = 1;
         if (Game_EpisodeSave != NULL && (Game_EpisodeSave[episode_index].flags & 0xff) != 0)
@@ -261,28 +262,35 @@ i32 Episode_CountOpenAreas(i32 episode_index, i32 area_index, AREASAVE_s *saves)
     i32 open = 0;
     for (i32 i = 0; i < EDataList[episode_index].area_count; ++i) {
         const i32 id = EDataList[episode_index].area_ids[i];
-        if (id != area_index && area_index != -1) continue;
+        if (id != area_index && area_index != -1)
+            continue;
         AREADATA *area = &ADataList[id];
-        if (area == HUB_ADATA || (area->flags & 0x22) != 0) continue;
+        if (area == HUB_ADATA || (area->flags & 0x22) != 0)
+            continue;
         if ((area->flags & 0x100) != 0) {
             if (GOLDBRICKFORSUPERBONUS != 0) {
                 ++EpGoldBrickTotal;
-                if (saves[i].area_complete != 0) ++EpGoldBrickCount;
+                if (saves[i].area_complete != 0)
+                    ++EpGoldBrickCount;
             }
             continue;
         }
-        if ((area->flags & 4) != 0) continue;
+        if ((area->flags & 4) != 0)
+            continue;
         AREASAVE_s *save = &saves[id];
         ++EpCompleteTotal;
         EpMiniKitTotal += 10;
-        if (save->complete != 0) ++open;
+        if (save->complete != 0)
+            ++open;
         if (save->area_complete != 0) {
             ++EpCompleteCount;
             ++EpGoldBrickCount;
         }
         ++EpGoldBrickTotal;
-        if ((area->flags & 0x10) == 0) continue;
-        if (save->minikit_count != 0) ++EpGoldBrickCount;
+        if ((area->flags & 0x10) == 0)
+            continue;
+        if (save->minikit_count != 0)
+            ++EpGoldBrickCount;
         EpMiniKitCount += save->field_0x5[0];
         if (BOTHTRUEJEDIGOLDBRICKS == 0) {
             ++EpBuildUpTotal;
@@ -306,13 +314,16 @@ i32 Episode_CountOpenAreas(i32 episode_index, i32 area_index, AREASAVE_s *saves)
             }
         }
         ++EpRedBrickTotal;
-        if (save->field_0x5[1] != 0) ++EpRedBrickCount;
+        if (save->field_0x5[1] != 0)
+            ++EpRedBrickCount;
         if (Store_IsPackUnlocked(8)) {
             ++EpCharKitTotal;
-            if (GOLDBRICKFORCHALLENGE != 0) ++EpGoldBrickTotal;
+            if (GOLDBRICKFORCHALLENGE != 0)
+                ++EpGoldBrickTotal;
             if (save->field_0x5[2] != 0) {
                 ++EpCharKitCount;
-                if (GOLDBRICKFORCHALLENGE != 0) ++EpGoldBrickCount;
+                if (GOLDBRICKFORCHALLENGE != 0)
+                    ++EpGoldBrickCount;
             }
         }
     }

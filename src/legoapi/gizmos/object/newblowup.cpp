@@ -140,8 +140,8 @@ void GizmoBlowupEarlyUpdate(void *world_ptr, void *, float) {
                 UpdateMidPos(blowup);
             }
             if (animation != NULL) {
-                const f32 end_frame = NuAnimEndFrameOld(
-                    type->animated_special.scene->instance_animation_data[animation->anim_ix]);
+                const f32 end_frame =
+                    NuAnimEndFrameOld(type->animated_special.scene->instance_animation_data[animation->anim_ix]);
                 if ((blowup->state_flags & GIZMOBLOWUP_STATE_REPEAT_ANIMATION) != 0) {
                     if ((type->animation_runtime_flags & GIZMOBLOWUPTYPE_ANIMATION_UPDATED) == 0 &&
                         ((type->animation_flags & GIZMOBLOWUPTYPE_ANIMATION_INCLUDES_INSTANCE_TRANSFORM) != 0 ||
@@ -197,12 +197,12 @@ void GizmoBlowupEarlyUpdate(void *world_ptr, void *, float) {
                 GizmoBlowupBlowup(blowup, 1, -1, 1, NULL, 1);
             }
             if (type->particle_types[7] != -1) {
-                AddVariableShotDebrisEffectTimed1(type->particle_types[7], &blowup->mid_position, 60,
-                                                 FRAMETIME, 0, 0, NULL);
+                AddVariableShotDebrisEffectTimed1(type->particle_types[7], &blowup->mid_position, 60, FRAMETIME, 0, 0,
+                                                  NULL);
             }
             if (type->particle_types[8] != -1) {
-                AddVariableShotDebrisEffectTimed1(type->particle_types[8], &blowup->mid_position, 60,
-                                                 FRAMETIME, 0, 0, NULL);
+                AddVariableShotDebrisEffectTimed1(type->particle_types[8], &blowup->mid_position, 60, FRAMETIME, 0, 0,
+                                                  NULL);
             }
         } else if ((blowup->state_flags & GIZMOBLOWUP_STATE_ACTIVATED) == 0 && animation != NULL &&
                    animation->playing != 0) {

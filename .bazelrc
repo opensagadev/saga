@@ -6,6 +6,11 @@ common --repo_contents_cache=
 # to refresh it explicitly after dependency changes.
 common --lockfile_mode=error
 
+# Don't use the system `python3` for the Python bootstrap.
+# (doing so on macOS in particular introduces unwanted environment variables)
+# NOTE: this setting will be ignored on Windows.
+common --@rules_python//python/config_settings:bootstrap_impl=script
+
 build --show_timestamps
 build --verbose_failures
 build --incompatible_strict_action_env
@@ -21,6 +26,12 @@ build:target --platforms=//bazel/platforms:android_x86
 build:target --extra_toolchains=@android_ndk_r8e//:toolchain
 build:target --define=SAGA_BUILD=target
 try-import %workspace%/bazel/android_per_file_copts.bazelrc
+
+# Runtime testing on real Android hardware only; not an assembly-matching target.
+# Android x86 (--config=target) remains the reference matching configuration.
+build:android-armv7 --config=target
+build:android-armv7 --platforms=//bazel/platforms:android_armv7
+build:android-armv7 --extra_toolchains=@android_ndk_r8e//:toolchain_armv7
 
 build:native --config=saga-common
 build:native --define=SAGA_BUILD=native

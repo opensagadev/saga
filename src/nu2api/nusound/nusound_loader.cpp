@@ -17,15 +17,34 @@ NuSoundLoader::NuSoundLoader() {
 NuSoundLoader::~NuSoundLoader() {
 }
 
-i32 NuSoundLoader::CloseStream() {
-    return 0;
+void NuSoundLoader::CloseStream() {
+    this->Close();
 }
 
-u64 NuSoundLoader::Deinterleave(char *data, i32 length, char **dest, i32 count, NuSoundSystem::ChannelConfig config) {
-    return 0;
+u64 NuSoundLoader::Deinterleave(char *data, i32 length, char **dest, i32 sample_size,
+                                NuSoundSystem::ChannelConfig config) {
+    i32 channels = (i32)config;
+    i32 frames = length / (sample_size * channels);
+    u64 copied = 0;
+
+    for (i32 frame = 0; frame < frames; frame++) {
+        for (i32 channel = 0; channel < channels; channel++) {
+            for (i32 byte = 0; byte < sample_size; byte++) {
+                *dest[channel] = *data;
+                data++;
+                dest[channel]++;
+            }
+            copied += sample_size;
+        }
+    }
+    return copied;
 }
 
-void NuSoundLoader::GetChannelAddress(NuSoundBuffer *, NuSoundStreamDesc *, NuSoundSystem::AudioChannel) {
+void *NuSoundLoader::GetChannelAddress(NuSoundBuffer *buffer, NuSoundStreamDesc *desc,
+                                       NuSoundSystem::AudioChannel channel) {
+    i32 channels = (i32)desc->GetNumChannels();
+    u64 channel_size = buffer->GetBufferSize() / (i64)channels;
+    return (char *)buffer->GetAddress() + (u32)channel_size * (i32)channel;
 }
 
 void NuSoundLoader::ReleaseHeader(NuSoundStreamDesc *desc) {
@@ -117,11 +136,13 @@ i32 NuSoundLoader::OpenForStreaming(const char *path, f64 length, NuSoundStreamD
     return 1;
 }
 
-void NuSoundLoader::FillStreamBuffer(NuSoundBuffer *buffer, bool param3) {
+NuSoundBuffer::Context NuSoundLoader::FillStreamBuffer(NuSoundBuffer *buffer, bool param3) {
     NuSoundBuffer::Context context;
 
+    memset(&context, 0, sizeof(context));
+
     if (this->file == 0) {
-        return;
+        return context;
     }
 
     buffer->Lock();
@@ -138,7 +159,7 @@ void NuSoundLoader::FillStreamBuffer(NuSoundBuffer *buffer, bool param3) {
             LAB_0033fce8:
                 buffer->SetCurrentContext(context);
                 buffer->Unlock();
-                return;
+                return context;
             }
             read_size = buffer_size - uVar3iVar2;
             size = ReadData(data, read_size);

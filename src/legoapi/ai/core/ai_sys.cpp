@@ -7,6 +7,8 @@ struct nuhspecial_s;
 struct minitrooperteam_s;
 struct nuvec_s;
 
+extern "C" void *AISysBufferAlloc(VARIPTR *cursor, VARIPTR *buf_end, u32 size);
+void AIPathCnxControlSysReset(AIPATHCNXCONTROLSYS_s *system);
 extern "C" void *AISysLoadEx(void *buf, void *buf_end, i32 size, void *gscn, char *dir, char *name, char *param,
                              char *load_dir);
 
@@ -14,16 +16,33 @@ extern "C" void *AISysLoad(void *buf, void *buf_end, i32 size, void *gscn, char 
     return AISysLoadEx(buf, buf_end, size, gscn, dir, name, param, dir);
 }
 void *AIPathCnxControlSysCreate(VARIPTR *buf, VARIPTR *buf_end, i32 count) {
-    (void)buf;
-    (void)buf_end;
-    (void)count;
-    return NULL;
+    AIPATHCNXCONTROLSYS_s *system =
+        static_cast<AIPATHCNXCONTROLSYS_s *>(AISysBufferAlloc(buf, buf_end, sizeof(AIPATHCNXCONTROLSYS_s)));
+    if (system != NULL) {
+        memset(system, 0, sizeof(*system));
+        system->controllers = static_cast<AIPATHCNXCONTROLLER_s *>(
+            AISysBufferAlloc(buf, buf_end, static_cast<u32>(count) * sizeof(AIPATHCNXCONTROLLER_s)));
+        if (system->controllers != NULL) {
+            system->controller_count = count;
+            AIPathCnxControlSysReset(system);
+        }
+    }
+    return system;
 }
 void *AIPathCnxHelperSysCreate(VARIPTR *buf, VARIPTR *buf_end, i32 count) {
-    (void)buf;
-    (void)buf_end;
-    (void)count;
-    return NULL;
+    if (count == 0) {
+        return NULL;
+    }
+    AIPATHCNXHELPERSYS_s *system =
+        static_cast<AIPATHCNXHELPERSYS_s *>(AISysBufferAlloc(buf, buf_end, sizeof(AIPATHCNXHELPERSYS_s)));
+    if (system != NULL) {
+        system->helpers = static_cast<AIPATHCNXHELPER_s *>(
+            AISysBufferAlloc(buf, buf_end, static_cast<u32>(count) * sizeof(AIPATHCNXHELPER_s)));
+        if (system->helpers != NULL) {
+            system->field_0x00 = static_cast<i16>(count);
+        }
+    }
+    return system;
 }
 void *AITriggerSetSysCreate(VARIPTR *buf, VARIPTR *buf_end) {
     (void)buf;
@@ -40,8 +59,6 @@ void *CreateClimbObjectSys(VARIPTR *buf, VARIPTR *buf_end, i32 count) {
     (void)count;
     return NULL;
 }
-extern "C" void *AISysBufferAlloc(VARIPTR *cursor, VARIPTR *buf_end, u32 size);
-
 extern "C" APIOBJECTSYS_s *APIObjectSysInit(i32 size, VARIPTR *buf, VARIPTR *buf_end) {
     APIOBJECTSYS_s *system = static_cast<APIOBJECTSYS_s *>(AISysBufferAlloc(buf, buf_end, sizeof(APIOBJECTSYS_s)));
     if (system == NULL) {
@@ -57,10 +74,6 @@ extern "C" APIOBJECTSYS_s *APIObjectSysInit(i32 size, VARIPTR *buf, VARIPTR *buf
         }
     }
     return system;
-}
-
-static __used__ int Collide2Objects(APIOBJECT_s *, APIOBJECT_s *) {
-    return {};
 }
 
 static __used__ unsigned int CalculateIntersection(AISYS_s *, AIPACKET_s *, APIOBJECT_s *, AIPATHCNX_s *,

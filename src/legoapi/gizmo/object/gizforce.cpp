@@ -28,14 +28,17 @@ void ReleaseForce(GameObject_s *object, i32 mode) {
     } else if (object->character_context == 0x1d) {
         if (object->force_part != NULL) {
             object->force_part->force_player_mask &= ~(1u << (object->apiobj.field_0x27c & 31));
-            if (object->force_part->force_player_mask == 0) object->force_part->force_player_mask = -1;
+            if (object->force_part->force_player_mask == 0)
+                object->force_part->force_player_mask = -1;
             object->force_part->gravity = ForceThrowGravity;
             object->force_part = NULL;
         }
         object->character_context = -1;
     } else if (object->character_context == 8) {
-        if ((object->apiobj.flags_low & 0x80) != 0) GameCam_Blend(GameCam, 1.0f, 0.0f, 1);
-    } else return;
+        if ((object->apiobj.flags_low & 0x80) != 0)
+            GameCam_Blend(GameCam, 1.0f, 0.0f, 1);
+    } else
+        return;
     EndForce(object, mode);
 }
 

@@ -14,10 +14,11 @@ struct quickboltinfo;
 static void Bolt_Debris_Default(BOLT_s *, NUVEC *, i32, NUVEC *, i32);
 static void Bolt_GetShootOrigin_Default(GameObject_s *, NUVEC *);
 static void Bolt_GetShootDirection_Default(GameObject_s *, NUVEC *);
-BOLTTYPE_s GlobalBoltType_Default = {"null", 4.0f, 2.0f, 0.0f, 0.125f, 1.0f, 0.1f,
-    -1, -1, -1, 0, -1, 0, 1, 255, 0, {}, NULL, NULL, 0, -1, -1, {}};
-static BOLTSYS BoltSys_Default = {&GlobalBoltType_Default, 1, NULL, Bolt_Debris_Default,
-    Bolt_GetShootOrigin_Default, Bolt_GetShootDirection_Default, NULL, NULL};
+BOLTTYPE_s GlobalBoltType_Default = {"null", 4.0f, 2.0f, 0.0f, 0.125f, 1.0f, 0.1f, -1, -1, -1, 0, -1,
+                                     0,      1,    255,  0,    {},     NULL, NULL, 0,  -1, -1, {}};
+static BOLTSYS BoltSys_Default = {
+    &GlobalBoltType_Default,        1,    NULL, Bolt_Debris_Default, Bolt_GetShootOrigin_Default,
+    Bolt_GetShootDirection_Default, NULL, NULL};
 BOLTSYS *BoltSys = &BoltSys_Default;
 
 void Bolt_Alloc() {
@@ -40,14 +41,19 @@ void BoltSys_Init(BOLTSYS *system) {
     for (i32 i = 0; i < system->count; ++i) {
         BOLTTYPE_s *type = &system->types[i];
         type->hit_sfx_id = -1;
-        if (type->hit_sfx != NULL) type->hit_sfx_id = GetSfxId(type->hit_sfx);
+        if (type->hit_sfx != NULL)
+            type->hit_sfx_id = GetSfxId(type->hit_sfx);
         type->shoot_sfx_id = -1;
-        if (type->shoot_sfx != NULL) type->shoot_sfx_id = GetSfxId(type->shoot_sfx);
+        if (type->shoot_sfx != NULL)
+            type->shoot_sfx_id = GetSfxId(type->shoot_sfx);
     }
     BoltSys = system;
-    if (system->debris == NULL) system->debris = Bolt_Debris_Default;
-    if (system->shoot_origin == NULL) system->shoot_origin = Bolt_GetShootOrigin_Default;
-    if (system->shoot_direction == NULL) system->shoot_direction = Bolt_GetShootDirection_Default;
+    if (system->debris == NULL)
+        system->debris = Bolt_Debris_Default;
+    if (system->shoot_origin == NULL)
+        system->shoot_origin = Bolt_GetShootOrigin_Default;
+    if (system->shoot_direction == NULL)
+        system->shoot_direction = Bolt_GetShootDirection_Default;
 }
 
 void Bolt_Reflect(nuvec_s *, nuvec_s *, nuvec_s *) {

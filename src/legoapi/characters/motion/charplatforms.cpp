@@ -11,9 +11,13 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 extern "C" i16 FindPlatInst(i32);
+extern "C" void NewTerrPlatformsOff(void);
+extern "C" i32 ShadowInfo(void);
 extern TERRSET *CurTerr;
 extern TERRAIN_TRACK_SLOT *CurTrackInfo;
 extern i16 castnum;
+extern TERRAIN_SURFACE_s TerSurface[32];
+f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 
 TERRAIN_TRACK_SLOT *AllocTerrId();
 
@@ -84,7 +88,16 @@ void CharPlatforms_Reset(CHARPLATFORMSYS_s *system) {
 void CharPlatforms_Update(CHARPLATFORMSYS_s *) {
 }
 
-void FindReflectionNoPlatforms(nuvec_s *) {
+f32 FindReflectionNoPlatforms(nuvec_s *position) {
+    NewTerrPlatformsOff();
+    f32 height = GameShadow(NULL, position, 5.0f, -1);
+    if (height != 2000000.0f) {
+        u32 surface = static_cast<u32>(ShadowInfo());
+        if (surface < 32 && (TerSurface[surface].flags & 2) != 0) {
+            return height;
+        }
+    }
+    return 2000000.0f;
 }
 
 void CharPlatform_FindObjFromPlatID(CHARPLATFORMSYS_s *, i32) {

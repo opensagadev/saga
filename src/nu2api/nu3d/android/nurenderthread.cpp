@@ -24,6 +24,7 @@
 #include "nu2api/nucore/nuthread.h"
 
 static volatile i32 renderThreadCS;
+i64 getCurrentTime();
 static i32 renderThreadIsLocked;
 pthread_t g_renderThread;
 

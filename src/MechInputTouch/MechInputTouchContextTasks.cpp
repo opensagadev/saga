@@ -19,9 +19,9 @@ void MechTouchTaskTag::Update() {
 }
 
 MechTouchTaskGoTo::MechTouchTaskGoTo(MechInputTouchGestureBasedController &owner, MechObjectInterface *object)
-    : MechTouchTask(owner), target(object), room(-1), field_30(0), field_34(0), field_38(0), field_3c(0),
-      field_40(0), field_44(0), field_4c(0), field_4d(1), field_4e(0), field_4f(0), field_50(0), field_51(0),
-      field_54(0), field_58(0), field_5c(0) {
+    : MechTouchTask(owner), target(object), room(-1), field_30(0), field_34(0), field_38(0), field_3c(0), field_40(0),
+      field_44(0), field_4c(0), field_4d(1), field_4e(0), field_4f(0), field_50(0), field_51(0), field_54(0),
+      field_58(0), field_5c(0) {
 }
 
 void MechTouchTaskGoTo::OnStart() {
@@ -93,7 +93,8 @@ void MechTouchTaskBigJump::Update() {
 void ForceBuildItToUseNext(GIZBUILDIT_s &);
 
 MechTouchTaskBuildIt::MechTouchTaskBuildIt(MechInputTouchGestureBasedController &owner, MechObjectInterface *object,
-                                         VuVec const &) : MechTouchTaskGoTo(owner, object) {
+                                           VuVec const &)
+    : MechTouchTaskGoTo(owner, object) {
     if (object->GetGizBuildit() != NULL) {
         ForceBuildItToUseNext(*object->GetGizBuildit());
     }

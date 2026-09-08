@@ -60,6 +60,9 @@ void NuRenderDevice::InitialiseOpenGLContext(ANativeWindow *window) {
         SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 0);
 
         SDL_GL_MakeCurrent(host_window, host_main_context);
+        if (!SDL_GL_SetSwapInterval(0)) {
+            LOG_WARN("SDL_GL_SetSwapInterval(0) failed: %s", SDL_GetError());
+        }
         i32 drawable_width = 0;
         i32 drawable_height = 0;
         SDL_GetWindowSizeInPixels(host_window, &drawable_width, &drawable_height);

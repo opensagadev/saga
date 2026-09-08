@@ -35,9 +35,11 @@ extern "C" void NuTexAnimSetSignals(u32 signals) {
 }
 
 static i32 NuTexAnimLabelIndex(char *name, char (*table)[21], i32 *count) {
-    if (strlen(name) > 20) name[20] = '\0';
+    if (strlen(name) > 20)
+        name[20] = '\0';
     for (i32 i = 0; i < *count; ++i) {
-        if (NuStrICmp(table[i], name) == 0) return i;
+        if (NuStrICmp(table[i], name) == 0)
+            return i;
     }
     NuStrCpy(table[(*count)++], name);
     return *count - 1;
@@ -46,7 +48,8 @@ static i32 NuTexAnimLabelIndex(char *name, char (*table)[21], i32 *count) {
 static void pftaRepeat(nufpar_s *parser) {
     i32 value0 = NuFParGetInt(parser);
     i32 value1 = NuFParGetInt(parser);
-    if (value0 == 0) value0 = -1;
+    if (value0 == 0)
+        value0 = -1;
     i16 index = parprog->instruction_count;
     parprog->instructions[index] = 13;
     parprog->instructions[static_cast<i16>(index + 1)] = static_cast<i16>(value0);
@@ -198,8 +201,10 @@ static void pftaRate(nufpar_s *parser) {
     i32 value1 = NuFParGetInt(parser);
     i16 index = parprog->instruction_count;
     parprog->instructions[index] = 7;
-    parprog->instructions[static_cast<i16>(index + 1)] = static_cast<i16>(static_cast<i32>(value0 * (1.0f / 60.0f) * 4096.0f));
-    parprog->instructions[static_cast<i16>(index + 2)] = static_cast<i16>(static_cast<i32>(value1 * (1.0f / 60.0f) * 4096.0f));
+    parprog->instructions[static_cast<i16>(index + 1)] =
+        static_cast<i16>(static_cast<i32>(value0 * (1.0f / 60.0f) * 4096.0f));
+    parprog->instructions[static_cast<i16>(index + 2)] =
+        static_cast<i16>(static_cast<i32>(value1 * (1.0f / 60.0f) * 4096.0f));
     parprog->instruction_count = index + 3;
 }
 
@@ -216,8 +221,10 @@ static void pftaWait(nufpar_s *parser) {
     i32 value1 = NuFParGetInt(parser);
     i16 index = parprog->instruction_count;
     parprog->instructions[index] = 4;
-    parprog->instructions[static_cast<i16>(index + 1)] = static_cast<i16>(static_cast<i32>(value0 * (1.0f / 60.0f) * 4096.0f));
-    parprog->instructions[static_cast<i16>(index + 2)] = static_cast<i16>(static_cast<i32>(value1 * (1.0f / 60.0f) * 4096.0f));
+    parprog->instructions[static_cast<i16>(index + 1)] =
+        static_cast<i16>(static_cast<i32>(value0 * (1.0f / 60.0f) * 4096.0f));
+    parprog->instructions[static_cast<i16>(index + 2)] =
+        static_cast<i16>(static_cast<i32>(value1 * (1.0f / 60.0f) * 4096.0f));
     parprog->instruction_count = index + 3;
 }
 
@@ -265,7 +272,8 @@ static NUFPCOMJMP nutexanimcomtab[] = {
 };
 
 void NuTexAnimProgInit(nutexanimprog_s *program) {
-    if (program == NULL) return;
+    if (program == NULL)
+        return;
     for (i32 i = 0; i < 32; ++i) {
         program->off_signal[i] = -1;
         program->on_signal[i] = -1;
@@ -297,7 +305,8 @@ nutexanimprog_s *NuTexAnimProgParseFile(i32 file, VARIPTR *buffer, VARIPTR, i32)
     labtabcnt = 0;
     memset(labtab, 0, sizeof(labtab));
     NUFPAR *parser = NuFParOpen(file);
-    if (parser == NULL) return NULL;
+    if (parser == NULL)
+        return NULL;
     NuFParPushCom(parser, nutexanimcomtab);
     NuTexAnimProgInit(program);
     parprog = program;
@@ -316,7 +325,8 @@ nutexanimprog_s *NuTexAnimProgParseFile(i32 file, VARIPTR *buffer, VARIPTR, i32)
     NuFParClose(parser);
     NuTexAnimProgAssembleEnd(program);
     program->next = sys_progs;
-    if (sys_progs != NULL) sys_progs->previous = program;
+    if (sys_progs != NULL)
+        sys_progs->previous = program;
     program->previous = NULL;
     sys_progs = program;
     return program;
@@ -328,27 +338,37 @@ void NuTexAnimResetList(nutexanim_s *anim);
 
 static bool TextureCondition(i32 condition, i32 texture, i32 value) {
     switch (condition) {
-    case 0: return texture == value;
-    case 1: return texture < value;
-    case 2: return texture > value;
-    case 3: return texture <= value;
-    case 4: return texture >= value;
-    case 5: return texture != value;
-    default: return false;
+        case 0:
+            return texture == value;
+        case 1:
+            return texture < value;
+        case 2:
+            return texture > value;
+        case 3:
+            return texture <= value;
+        case 4:
+            return texture >= value;
+        case 5:
+            return texture != value;
+        default:
+            return false;
     }
 }
 
 extern "C" void NuTexAnimAddList(nutexanim_s *anim) {
-    if (anim == NULL) return;
+    if (anim == NULL)
+        return;
     NuThreadCriticalSectionBegin(g_texAnimCriticalSection);
     nutexanimlist_s *node = ntal_free;
     if (node != NULL) {
-        if (node->next == NULL) NuSevereWarning("Ran out of texture anim slots!");
+        if (node->next == NULL)
+            NuSevereWarning("Ran out of texture anim slots!");
         ntal_free = node->next;
         node->previous = NULL;
         node->first = anim;
         node->next = ntal_first;
-        if (ntal_first != NULL) ntal_first->previous = node;
+        if (ntal_first != NULL)
+            ntal_first->previous = node;
         ntal_first = node;
     }
     NuThreadCriticalSectionEnd(g_texAnimCriticalSection);
@@ -360,8 +380,7 @@ extern "C" void NuTexAnimCreate(void) {
 extern "C" void NuTexAnimDestroy(void) {
 }
 
-extern "C" nutexanimenv_s *NuTexAnimEnvCreate(VARIPTR *buffer, numtl_s *material, u16 *ids,
-                                             nutexanimprog_s *program) {
+extern "C" nutexanimenv_s *NuTexAnimEnvCreate(VARIPTR *buffer, numtl_s *material, u16 *ids, nutexanimprog_s *program) {
     nutexanimenv_s *env;
     if (buffer == NULL) {
         env = static_cast<nutexanimenv_s *>(NU_ALLOC(sizeof(*env), alignof(nutexanimenv_s), 1, "", 0));
@@ -374,8 +393,10 @@ extern "C" nutexanimenv_s *NuTexAnimEnvCreate(VARIPTR *buffer, numtl_s *material
         env->material = material;
         NuTexAnimEnvReset(env);
         env->texture_ids = ids;
-        if (buffer == NULL) env->flags |= 1;
-        else env->flags &= ~1;
+        if (buffer == NULL)
+            env->flags |= 1;
+        else
+            env->flags &= ~1;
     }
     return env;
 }
@@ -385,7 +406,8 @@ extern "C" void NuTexAnimEnvDestroy(void) {
 
 extern "C" void NuTexAnimEnvProc(nutexanimenv_s *env) {
     nutexanimprog_s *program = env->program;
-    if (program == NULL || (program->mask & nta_script_mask) == 0) return;
+    if (program == NULL || (program->mask & nta_script_mask) == 0)
+        return;
     numtl_s *material = env->material;
     u32 signals = nta_sig_off & program->off_mask;
     if (signals != 0) {
@@ -413,120 +435,132 @@ extern "C" void NuTexAnimEnvProc(nutexanimenv_s *env) {
     }
     if (env->wait_remaining != 0) {
         env->wait_remaining -= nta_iframetime;
-        if (env->wait_remaining > 0) return;
+        if (env->wait_remaining > 0)
+            return;
     }
     for (;;) {
         i16 *instruction = program->instructions + env->instruction_index;
         i32 next_instruction;
         switch (static_cast<u16>(instruction[0])) {
-        case 0:
-            env->texture_index = instruction[1];
-            next_instruction = env->instruction_index + 2;
-            break;
-        case 1:
-            env->texture_index = NuRand(&texanim_rand) % instruction[1];
-            next_instruction = env->instruction_index + 2;
-            break;
-        case 2: {
-            i32 texture = env->texture_index + instruction[1];
-            if (texture < instruction[2]) texture = instruction[2];
-            if (texture > instruction[3]) texture = instruction[3];
-            env->texture_index = texture;
-            next_instruction = env->instruction_index + 4;
-            break;
-        }
-        case 3: {
-            i32 texture = NuRand(&texanim_rand) % (instruction[2] - instruction[1] + 1);
-            texture += instruction[1] + env->texture_index;
-            if (texture < instruction[3]) texture = instruction[3];
-            if (texture > instruction[4]) texture = instruction[4];
-            env->texture_index = texture;
-            next_instruction = env->instruction_index + 5;
-            break;
-        }
-        case 4:
-            env->wait_remaining += instruction[1];
-            if (instruction[2] != 0) env->wait_remaining += NuRand(&texanim_rand) % instruction[2];
-            env->instruction_index += 3;
-            if (env->wait_remaining < 0) env->wait_remaining = 0;
-            return;
-        case 7:
-            env->wait_base = instruction[1];
-            env->wait_random = instruction[2];
-            env->instruction_index += 3;
-            continue;
-        case 9:
-            env->instruction_index = instruction[1];
-            continue;
-        case 10:
-            env->return_stack[env->call_depth++] = env->instruction_index + 2;
-            env->instruction_index = instruction[1];
-            continue;
-        case 11:
-            if (TextureCondition(instruction[1], env->texture_index, instruction[2]))
-                env->instruction_index = instruction[3];
-            else env->instruction_index += 4;
-            continue;
-        case 12:
-            env->instruction_index = env->return_stack[--env->call_depth];
-            continue;
-        case 13:
-            env->loop_counts[env->loop_depth] = instruction[1];
-            if (instruction[2] != 0)
-                env->loop_counts[env->loop_depth] += NuRand(&texanim_rand) % instruction[2];
-            env->instruction_index += 3;
-            env->loop_starts[env->loop_depth++] = env->instruction_index;
-            continue;
-        case 14:
-            if (env->loop_counts[env->loop_depth - 1] == 0) {
-                --env->loop_depth;
-                ++env->instruction_index;
-            } else {
-                env->instruction_index = env->loop_starts[env->loop_depth - 1];
-                --env->loop_counts[env->loop_depth - 1];
+            case 0:
+                env->texture_index = instruction[1];
+                next_instruction = env->instruction_index + 2;
+                break;
+            case 1:
+                env->texture_index = NuRand(&texanim_rand) % instruction[1];
+                next_instruction = env->instruction_index + 2;
+                break;
+            case 2: {
+                i32 texture = env->texture_index + instruction[1];
+                if (texture < instruction[2])
+                    texture = instruction[2];
+                if (texture > instruction[3])
+                    texture = instruction[3];
+                env->texture_index = texture;
+                next_instruction = env->instruction_index + 4;
+                break;
             }
-            continue;
-        case 15:
-            if (TextureCondition(instruction[1], env->texture_index, instruction[2]) ||
-                env->loop_counts[env->loop_depth - 1] == 0) {
-                --env->loop_depth;
+            case 3: {
+                i32 texture = NuRand(&texanim_rand) % (instruction[2] - instruction[1] + 1);
+                texture += instruction[1] + env->texture_index;
+                if (texture < instruction[3])
+                    texture = instruction[3];
+                if (texture > instruction[4])
+                    texture = instruction[4];
+                env->texture_index = texture;
+                next_instruction = env->instruction_index + 5;
+                break;
+            }
+            case 4:
+                env->wait_remaining += instruction[1];
+                if (instruction[2] != 0)
+                    env->wait_remaining += NuRand(&texanim_rand) % instruction[2];
                 env->instruction_index += 3;
-            } else {
-                --env->loop_counts[env->loop_depth - 1];
-                env->instruction_index = env->loop_starts[env->loop_depth - 1];
-            }
-            continue;
-        case 16:
-            if (env->wait_remaining < 0) env->wait_remaining = 0;
-            return;
-        case 17:
-            for (nutexanimlist_s *list = ntal_first; list != NULL; list = list->next) {
-                for (nutexanim_s *anim = list->first; anim != NULL; anim = anim->next) {
-                    nutexanimenv_s *other = anim->env;
-                    if (other == NULL || other == env || other->program == NULL) continue;
-                    for (i32 i = 0; i < other->program->label_count; ++i) {
-                        if (other->program->label_ids[i] == instruction[1]) {
-                            other->instruction_index = other->program->label_offsets[i];
-                            other->wait_remaining = 0;
-                            other->call_depth = 0;
-                            other->loop_depth = 0;
-                            break;
+                if (env->wait_remaining < 0)
+                    env->wait_remaining = 0;
+                return;
+            case 7:
+                env->wait_base = instruction[1];
+                env->wait_random = instruction[2];
+                env->instruction_index += 3;
+                continue;
+            case 9:
+                env->instruction_index = instruction[1];
+                continue;
+            case 10:
+                env->return_stack[env->call_depth++] = env->instruction_index + 2;
+                env->instruction_index = instruction[1];
+                continue;
+            case 11:
+                if (TextureCondition(instruction[1], env->texture_index, instruction[2]))
+                    env->instruction_index = instruction[3];
+                else
+                    env->instruction_index += 4;
+                continue;
+            case 12:
+                env->instruction_index = env->return_stack[--env->call_depth];
+                continue;
+            case 13:
+                env->loop_counts[env->loop_depth] = instruction[1];
+                if (instruction[2] != 0)
+                    env->loop_counts[env->loop_depth] += NuRand(&texanim_rand) % instruction[2];
+                env->instruction_index += 3;
+                env->loop_starts[env->loop_depth++] = env->instruction_index;
+                continue;
+            case 14:
+                if (env->loop_counts[env->loop_depth - 1] == 0) {
+                    --env->loop_depth;
+                    ++env->instruction_index;
+                } else {
+                    env->instruction_index = env->loop_starts[env->loop_depth - 1];
+                    --env->loop_counts[env->loop_depth - 1];
+                }
+                continue;
+            case 15:
+                if (TextureCondition(instruction[1], env->texture_index, instruction[2]) ||
+                    env->loop_counts[env->loop_depth - 1] == 0) {
+                    --env->loop_depth;
+                    env->instruction_index += 3;
+                } else {
+                    --env->loop_counts[env->loop_depth - 1];
+                    env->instruction_index = env->loop_starts[env->loop_depth - 1];
+                }
+                continue;
+            case 16:
+                if (env->wait_remaining < 0)
+                    env->wait_remaining = 0;
+                return;
+            case 17:
+                for (nutexanimlist_s *list = ntal_first; list != NULL; list = list->next) {
+                    for (nutexanim_s *anim = list->first; anim != NULL; anim = anim->next) {
+                        nutexanimenv_s *other = anim->env;
+                        if (other == NULL || other == env || other->program == NULL)
+                            continue;
+                        for (i32 i = 0; i < other->program->label_count; ++i) {
+                            if (other->program->label_ids[i] == instruction[1]) {
+                                other->instruction_index = other->program->label_offsets[i];
+                                other->wait_remaining = 0;
+                                other->call_depth = 0;
+                                other->loop_depth = 0;
+                                break;
+                            }
                         }
                     }
                 }
-            }
-            env->instruction_index += 2;
-            continue;
-        default:
-            continue;
+                env->instruction_index += 2;
+                continue;
+            default:
+                continue;
         }
         u16 texture = env->texture_ids[env->texture_index];
         material->tex_id = texture;
         material->shader_desc.diffuse_map_tex_id[0] = texture & 0x7fff;
         env->instruction_index = next_instruction;
         env->wait_remaining += env->wait_base;
-        if (env->wait_random != 0) env->wait_remaining += NuRand(&texanim_rand) % env->wait_random;
-        if (env->wait_remaining < 0) env->wait_remaining = 0;
+        if (env->wait_random != 0)
+            env->wait_remaining += NuRand(&texanim_rand) % env->wait_random;
+        if (env->wait_remaining < 0)
+            env->wait_remaining = 0;
         return;
     }
 }
@@ -552,19 +586,37 @@ extern "C" void NuTexAnimProgAssembleEnd(nutexanimprog_s *program) {
     i16 index = 0;
     while (index < program->instruction_count) {
         switch (program->instructions[index]) {
-        case 0: case 1: case 17: index += 2; break;
-        case 3: index += 5; break;
-        case 4: case 7: case 13: case 15: index += 3; break;
-        case 9: case 10:
-            program->instructions[index + 1] = nta_labels[program->instructions[index + 1]];
-            index += 2;
-            break;
-        case 11:
-            program->instructions[index + 3] = nta_labels[program->instructions[index + 3]];
-            index += 4;
-            break;
-        case 2: index += 4; break;
-        case 12: case 14: case 16: ++index; break;
+            case 0:
+            case 1:
+            case 17:
+                index += 2;
+                break;
+            case 3:
+                index += 5;
+                break;
+            case 4:
+            case 7:
+            case 13:
+            case 15:
+                index += 3;
+                break;
+            case 9:
+            case 10:
+                program->instructions[index + 1] = nta_labels[program->instructions[index + 1]];
+                index += 2;
+                break;
+            case 11:
+                program->instructions[index + 3] = nta_labels[program->instructions[index + 3]];
+                index += 4;
+                break;
+            case 2:
+                index += 4;
+                break;
+            case 12:
+            case 14:
+            case 16:
+                ++index;
+                break;
         }
     }
 }
@@ -577,7 +629,8 @@ extern "C" void NuTexAnimProgDestroy(void) {
 
 extern "C" nutexanimprog_s *NuTexAnimProgFind(char *name) {
     for (nutexanimprog_s *program = sys_progs; program != NULL; program = program->next) {
-        if (NuStrICmp(name, program->name) == 0) return program;
+        if (NuStrICmp(name, program->name) == 0)
+            return program;
     }
     return NULL;
 }
@@ -605,7 +658,8 @@ extern "C" void NuTexAnimProgRelease(void) {
 
 extern "C" void NuTexAnimProgSysInit(void) {
     sys_progs = NULL;
-    for (i32 i = 0; i < 63; ++i) ntalsysbuff[i].next = &ntalsysbuff[i + 1];
+    for (i32 i = 0; i < 63; ++i)
+        ntalsysbuff[i].next = &ntalsysbuff[i + 1];
     ntalsysbuff[63].next = NULL;
     xdeflabtabcnt = 0;
     nta_sig_old = 0;
@@ -622,10 +676,14 @@ extern "C" void NuTexAnimProgWrite(void) {
 extern "C" void NuTexAnimRemoveList(void *anim) {
     NuThreadCriticalSectionBegin(g_texAnimCriticalSection);
     for (nutexanimlist_s *node = ntal_first; node != NULL; node = node->next) {
-        if (node->first != anim) continue;
-        if (node->next != NULL) node->next->previous = node->previous;
-        if (node->previous != NULL) node->previous->next = node->next;
-        else ntal_first = node->next;
+        if (node->first != anim)
+            continue;
+        if (node->next != NULL)
+            node->next->previous = node->previous;
+        if (node->previous != NULL)
+            node->previous->next = node->next;
+        else
+            ntal_first = node->next;
         node->next = ntal_free;
         ntal_free = node;
         break;
@@ -635,7 +693,8 @@ extern "C" void NuTexAnimRemoveList(void *anim) {
 
 extern "C" void NuTexAnimRestart(void) {
     NuThreadCriticalSectionBegin(g_texAnimCriticalSection);
-    for (nutexanimlist_s *node = ntal_first; node != NULL; node = node->next) NuTexAnimResetList(node->first);
+    for (nutexanimlist_s *node = ntal_first; node != NULL; node = node->next)
+        NuTexAnimResetList(node->first);
     NuThreadCriticalSectionEnd(g_texAnimCriticalSection);
 }
 
@@ -643,18 +702,21 @@ extern "C" void NuTexAnimProcess(f32 frame_time) {
     nta_iframetime = static_cast<i32>(frame_time * 4096.0f);
     nta_script_mask = script_mask;
     NuThreadCriticalSectionBegin(g_texAnimCriticalSection);
-    for (nutexanimlist_s *node = ntal_first; node != NULL; node = node->next) NuTexAnimProcessList(node->first);
+    for (nutexanimlist_s *node = ntal_first; node != NULL; node = node->next)
+        NuTexAnimProcessList(node->first);
     NuThreadCriticalSectionEnd(g_texAnimCriticalSection);
 }
 extern "C" void NuTexAnimProcessEx(f32 frame_time, u16 mask) {
     nta_iframetime = static_cast<i32>(frame_time * 4096.0f);
     nta_script_mask = mask;
     NuThreadCriticalSectionBegin(g_texAnimCriticalSection);
-    for (nutexanimlist_s *node = ntal_first; node != NULL; node = node->next) NuTexAnimProcessList(node->first);
+    for (nutexanimlist_s *node = ntal_first; node != NULL; node = node->next)
+        NuTexAnimProcessList(node->first);
     NuThreadCriticalSectionEnd(g_texAnimCriticalSection);
 }
 extern "C" void NuTexAnimProcessList(nutexanim_s *anim) {
     for (; anim != NULL; anim = anim->next) {
-        if (anim->env != NULL) NuTexAnimEnvProc(anim->env);
+        if (anim->env != NULL)
+            NuTexAnimEnvProc(anim->env);
     }
 }

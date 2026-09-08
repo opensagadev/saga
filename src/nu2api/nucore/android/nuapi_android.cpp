@@ -11,7 +11,7 @@
 #include "nu2api/nusound/nusound.h"
 
 extern "C" void NuRenderContextInit(void);
-extern "C" void NuInitDebrisRenderer(VARIPTR *buffer);
+extern "C" void NuInitDebrisRenderer(VARIPTR *buffer, VARIPTR buffer_end);
 extern "C" void NuIOSMtlInit(void);
 
 void InitializeGLMutex(void) {
@@ -30,7 +30,7 @@ i32 NuInitHardwarePS(VARIPTR *buf, VARIPTR *buf_end, i32 heap_size) {
 
     BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nucore/android/nuapi_android.c", 0xf9);
     NuIOSMtlInit();
-    NuInitDebrisRenderer(buf);
+    NuInitDebrisRenderer(buf, *buf_end);
     EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nucore/android/nuapi_android.c", 0xfe);
 
     NuRenderThreadCreate();

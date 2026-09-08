@@ -1,6 +1,10 @@
 #include "legoapi/menus/core/text.h"
 #include "legoapi/legoapi_types.h"
 #include "globals.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/levels/episode.h"
+#include "legoapi/world/mission.h"
+#include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nuqfnt.h"
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/nucore/nustring.h"
@@ -90,74 +94,188 @@ void Text_MakeTime(float time, i32 show_hours, i32 show_minutes, i32 show_centis
 
 static TEXTCRAWL_s *s_crawlPtr = nullptr;
 static NUMTX s_textcrawl_mtx;
-static f32 s_textcrawl_offset = 0.0f;
+static NUVEC s_textcrawl_offset = {0.0f, -1.0f, 10.0f};
+f32 APITEXTSCALEX = 1.0f;
+f32 APITEXTSCALEY = 1.0f;
 i32 textcrawlactive = 0;
 i32 Arcade_TextCrawlID = 0x1f1;
 i32 Arcade_TextCrawlParagraphs = 2;
-static const char *kCrawlFallback =
-    "Episode IV\nA NEW HOPE\n\nIt is a period of civil war.\nRebel spaceships, striking\nfrom a hidden base, have "
-    "won\ntheir first victory against\nthe evil Galactic Empire.\n\nDuring the battle, Rebel\nspies managed to steal "
-    "secret\nplans to the Empire's\nultimate weapon, the DEATH\nSTAR, an armored space\nstation with enough power\nto "
-    "destroy an entire planet.\n\nPursued by the Empire's\nsinister agents, Princess\nLeia races home aboard "
-    "her\nstarship, custodian of the\nstolen plans that can save\nher people and restore\nfreedom to the galaxy....";
+extern i32 g_bgloadAsFastAsPossibleHack;
+
 void TextCrawl_Init(TEXTCRAWL_s *crawl, i32 id, i32 unk) {
-    if (crawl == nullptr)
+    if (crawl == nullptr || QFont3DZ == nullptr) {
         return;
-    if (QFont2D == nullptr)
-        return;
-    i32 clamped = id;
-    if (clamped < 0)
-        clamped = 0;
+    }
     s_crawlPtr = crawl;
-    *(u8 *)((u8 *)crawl + 0x0d) = (u8)(clamped & 0xff);
+    reinterpret_cast<i8 *>(crawl)[0x0d] = id >= 0 && id < AREACOUNT ? static_cast<i8>(id) : -1;
     NuMtxSetRotationX(&s_textcrawl_mtx, 0x3333);
     NuMtxRotateY(&s_textcrawl_mtx, 0);
     NuMtxRotateZ(&s_textcrawl_mtx, 0);
-    NUVEC tr{0.0f, -1.0f, 10.0f};
-    NuMtxTranslate(&s_textcrawl_mtx, &tr);
-    if (unk != 0)
-        s_textcrawl_offset = 0.0f;
-    textcrawlactive = 1;
-}
-void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
-    if (s_crawlPtr == nullptr)
-        return;
-    if (!textcrawlactive)
-        return;
-    if (alpha <= 0.001f)
-        return;
-    s_textcrawl_offset += dt * 15.0f;
-    if (s_textcrawl_offset > 800.0f)
-        s_textcrawl_offset = 800.0f;
-    const char *crawlText = text;
-    if (crawlText == nullptr)
-        crawlText = kCrawlFallback;
-    NuQFntSetJustifiedTolerances(0.75f, 0.75f);
-    // Host: actually draw the fallback crawl text so the PPM shows yellow
-    // on starfield and the test can detect it. Use the same QFont path as
-    // IntroText_Draw, but scrolling vertically.
-    if (QFont2D != nullptr) {
-        u16 enc[1024]{};
-        // Take first paragraph for host preview — full crawl would scroll.
-        char tmp[512]{};
-        // Copy up to first blank line or 200 chars for host preview
-        int n = 0;
-        for (int i = 0; i < 200 && crawlText[i] && n < 511; i++) {
-            tmp[n++] = crawlText[i];
-            if (crawlText[i] == '\n' && crawlText[i + 1] == '\n')
-                break;
-        }
-        tmp[n] = '\0';
-        Text3DStringEncode(tmp, enc);
-        // Draw at a scrolling Y based on offset, with crawl yellow
-        float y = 0.5f - s_textcrawl_offset * 0.0015f;
-        u32 colour = 0xffd700; // gold/yellow for crawl
-        // Alpha-scaled
-        u32 a = static_cast<u32>(alpha * 255.0f);
-        colour = (a << 24) | (colour & 0x00ffffff);
-        NuQFntPrintJustifiedW(QFont2D, enc, -0.6f, y, 0.5f, 0.5f, 0.5f, 0.3f, 1.0f, colour, 0);
+    NuMtxTranslate(&s_textcrawl_mtx, &s_textcrawl_offset);
+    if (unk != 0) {
+        QFont3DTime = 0.0f;
     }
-    (void)paragraphs;
+}
+
+void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
+    if (s_crawlPtr == nullptr || QFont3DZ == nullptr) {
+        return;
+    }
+    NuQFntSetJustifiedTolerances(1.2f, 1.2f);
+    if (paragraphs == 0 && QFont3DTime >= 60.0f) {
+        return;
+    }
+
+    AREADATA *area = NULL;
+    i32 body_text_id = -1;
+    i32 episode_index = -1;
+    i32 area_index = -1;
+    const i8 crawl_area = reinterpret_cast<i8 *>(s_crawlPtr)[0x0d];
+    if (crawl_area != -1) {
+        area = &ADataList[crawl_area];
+        body_text_id = area->text_id;
+        episode_index = static_cast<i8>(area->episode_index);
+        area_index = static_cast<i8>(area->area_index);
+    }
+
+    char *episode_name = NULL;
+    char *episode_text = NULL;
+    char *chapter_text = NULL;
+    char *area_name = NULL;
+    i32 paragraph_count = 0;
+    char chapter_buffer[0x40];
+
+    if (text != NULL) {
+        episode_name = text;
+        body_text_id = -1;
+    } else {
+        MISSIONDATA *mission = Mission_Active(NULL);
+        if (mission != NULL) {
+            if (mission->name_id != -1) {
+                area_name = TTab[mission->name_id];
+            }
+            body_text_id = mission->text_id;
+            paragraph_count = 3;
+        } else if (Arcade != 0) {
+            if (area != NULL && area->name_id != -1) {
+                area_name = TTab[area->name_id];
+            }
+            body_text_id = Arcade_TextCrawlID;
+            paragraph_count = Arcade_TextCrawlParagraphs;
+        } else if (episode_index == -1) {
+            if (area != NULL && area->name_id != -1) {
+                area_name = TTab[area->name_id];
+            }
+        } else {
+            if (EDataList[episode_index].name_id != -1) {
+                episode_name = TTab[EDataList[episode_index].name_id];
+            }
+            if (EDataList[episode_index].text_id != -1) {
+                episode_text = TTab[EDataList[episode_index].text_id];
+            }
+            if (area_index != -1) {
+                if ((area->flags & AREAFLAG_BONUS_AREA) == 0) {
+                    if (s_crawlPtr->heading_text != NULL) {
+                        sprintf(chapter_buffer, "%s %i", TTab[*s_crawlPtr->heading_text], area_index + 1);
+                        chapter_text = chapter_buffer;
+                    }
+                } else {
+                    i16 *bonus_text = (area->flags & AREAFLAG_VEHICLE_AREA) != 0 ? s_crawlPtr->vehicle_bonus_text
+                                                                                 : s_crawlPtr->character_bonus_text;
+                    if (bonus_text != NULL) {
+                        chapter_text = TTab[*bonus_text];
+                    }
+                }
+            }
+            if (area->name_id != -1) {
+                area_name = TTab[area->name_id];
+            }
+            paragraph_count = 0;
+        }
+    }
+
+    g_bgloadAsFastAsPossibleHack = alpha > 0.75f;
+    QFont3DTime += dt;
+    if (QFont3DTime >= 60.0f) {
+        if (paragraphs == 0) {
+            return;
+        }
+        QFont3DTime = 0.0f;
+    }
+
+    NUMTX matrix;
+    NuMtxMul(&matrix, &s_textcrawl_mtx, NuCameraGetMtx());
+    NuQFntSet(QFont3DZ);
+    NuQFntSetMtx(QFont3DZ, &matrix);
+    NuQFntPushPrintMode(4);
+    NuQFntSetCoordinateSystem(NUQFNT_CSMODE_ABSOLUTE);
+
+    f32 colour_scale = 1.0f;
+    if (paragraphs == 0 && QFont3DTime >= 55.0f) {
+        colour_scale = 1.0f - (QFont3DTime - 55.0f) / 5.0f;
+    }
+    const u32 colour =
+        (static_cast<u32>(128.0f * colour_scale * alpha) << 24) | (static_cast<u32>(111.0f * colour_scale) << 8) | 0xff;
+    NuQFntSetColour(QFont3DZ, colour);
+
+    f32 y = QFont3DTime * 0.4f - 4.5f;
+    const f32 x_scale = APITEXTSCALEX * 0.01f;
+    const f32 y_scale = APITEXTSCALEY * 0.01f;
+    u16 encoded[1024];
+
+    if (episode_name != NULL) {
+        if (text != NULL && NuStrCmp(text, "?") == 0) {
+            NuQFntSetScale(QFont3DZ, x_scale * 2.0f, y_scale * 3.0f);
+        } else {
+            NuQFntSetScale(QFont3DZ, x_scale, y_scale);
+        }
+        Text3DStringEncode(episode_name, encoded);
+        NuQFntMove(QFont3DZ, NuQFntPrintLenW(QFont3DZ, encoded) * -0.5f, y, 0.0f);
+        NuQFntPrintW(QFont3DZ, encoded);
+        y += NuQFntHeight(QFont3DZ) * 1.5f;
+    }
+
+    if (episode_text != NULL) {
+        NuQFntSetScale(QFont3DZ, x_scale, y_scale * 2.0f);
+        Text3DStringEncode(episode_text, encoded);
+        NuQFntMove(QFont3DZ, NuQFntPrintLenW(QFont3DZ, encoded) * -0.5f, y, 0.0f);
+        NuQFntPrintW(QFont3DZ, encoded);
+        y += NuQFntHeight(QFont3DZ) * 1.5f;
+    }
+
+    if (chapter_text != NULL) {
+        NuQFntSetScale(QFont3DZ, x_scale, y_scale);
+        Text3DStringEncode(chapter_text, encoded);
+        NuQFntMove(QFont3DZ, NuQFntPrintLenW(QFont3DZ, encoded) * -0.5f, y, 0.0f);
+        NuQFntPrintW(QFont3DZ, encoded);
+        y += NuQFntHeight(QFont3DZ) * 1.5f;
+    }
+
+    if (area_name != NULL) {
+        NuQFntSetScale(QFont3DZ, x_scale, y_scale * 2.0f);
+        Text3DStringEncode(area_name, encoded);
+        NuQFntMove(QFont3DZ, NuQFntPrintLenW(QFont3DZ, encoded) * -0.5f, y, 0.0f);
+        NuQFntPrintW(QFont3DZ, encoded);
+        y += NuQFntHeight(QFont3DZ) * 1.5f;
+    }
+
+    if (body_text_id != -1) {
+        NuQFntSetScale(QFont3DZ, x_scale, y_scale);
+        if (paragraph_count == 0) {
+            paragraph_count = area == NULL ? s_crawlPtr->paragraph_count : area->text_id_value;
+        }
+        for (i32 i = 0; i < paragraph_count; ++i) {
+            char *paragraph = TTab[body_text_id + i];
+            if (paragraph == NULL || *paragraph == '\0') {
+                break;
+            }
+            Text3DStringEncode(paragraph, encoded);
+            y += NuQFntPrintJustifiedW(QFont3DZ, encoded, -3.5f, y, 0.0f, x_scale, y_scale, 7.0f, 1.3f, colour,
+                                       &matrix) +
+                 NuQFntHeight(QFont3DZ);
+        }
+    }
+    NuQFntPopPrintMode();
 }
 void TextPulseTimer(float) {
 }
@@ -238,8 +356,6 @@ void TextDecodeCodeword(char *, char *) {
 }
 static f32 QFONTSCALEX = 1.0f;
 static f32 QFONTSCALEY = 1.0f;
-static f32 APITEXTSCALEX = 1.0f;
-static f32 APITEXTSCALEY = 1.0f;
 static f32 STCOORDSCALE = 1.0f;
 static f32 g_buttonFontScalePulse = 1.0f;
 i32 MenuStopDraw;
@@ -780,28 +896,31 @@ extern "C" {
 }
 void LookupHash(u32, u32 *, HashRedirect *, u32) {
 }
-void _make_words(abi_long *, abi_long, abi_long) {
-}
 void MultilineDump(char const *) {
 }
 void GetMatchLength(unsigned char *, unsigned char *, abi_ulong) {
 }
 i32 MakeLayerList_Name(CHARACTERMODEL_s *model, i16 *output, u32 mask) {
-    if (output == NULL || model == NULL) return 0;
+    if (output == NULL || model == NULL)
+        return 0;
     GAMECHARACTERDATA_s *data = &GCDataList[model->model_id];
     i32 count = 0;
     u32 flag = 1;
     for (i32 bit = 0; bit < 32; ++bit, flag <<= 1) {
-        if ((mask & flag) == 0 || bit >= data->layer_count) continue;
+        if ((mask & flag) == 0 || bit >= data->layer_count)
+            continue;
         i32 layer;
         if (data->layer_lookup == NULL) {
             for (layer = 0; layer < data->layer_count; ++layer) {
-                if (data->layers[layer].mask_bit == bit) break;
+                if (data->layers[layer].mask_bit == bit)
+                    break;
             }
-            if (layer == data->layer_count) continue;
+            if (layer == data->layer_count)
+                continue;
         } else {
             layer = data->layer_lookup[bit];
-            if (layer == -1) continue;
+            if (layer == -1)
+                continue;
         }
         const i16 hierarchy_layer = data->layers[layer].hierarchy_layer_index;
         if (hierarchy_layer != -1) {

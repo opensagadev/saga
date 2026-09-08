@@ -1473,7 +1473,8 @@ void FixUpLevels(LEVELFIXUP *fixup) {
     }
 
     {
-        LEVELDATA *level = Level_FindByName("BlockadeRunner_D", NULL);
+        LEVELDATA *level = Level_FindByName("tatooine_b", NULL);
+        TATOOINEB_LDATA = level;
         if (level != NULL) {
             level->init_fn = TatooineB_Init;
         }
@@ -1831,13 +1832,15 @@ void FixUpLevels(LEVELFIXUP *fixup) {
     }
 
     {
-        LEVELDATA *level = Level_FindByName("dagobah_d", NULL);
+        LEVELDATA *level = Level_FindByName("dagobah_e", NULL);
+        DAGOBAHE_LDATA = level;
         if (level != NULL) {
         }
     }
 
     {
-        LEVELDATA *level = Level_FindByName("dagobah_d", NULL);
+        LEVELDATA *level = Level_FindByName("dagobah_e", NULL);
+        DAGOBAHE_LDATA = level;
         if (level != NULL) {
             level->init_fn = DagobahE_Init;
         }

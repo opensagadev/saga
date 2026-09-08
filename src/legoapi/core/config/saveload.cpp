@@ -38,21 +38,21 @@ void FS_GetDirList(char *, char *, char *) {
 void SerialiseChar(EdStream &, void *, i32) {
 }
 
-i32 CanSaveAndExit(WORLDINFO_s *world) {
+LEVELDATA_s *CanSaveAndExit(WORLDINFO_s *world) {
     extern i32 GAMEDEMO;
     extern i32 SuperStory;
     extern i32 ChallengeMode;
     extern i32 Arcade;
-    extern i32 CutScenePlayer_Active(void);
+    extern void *CutScenePlayer_Active(void);
 
     if (GAMEDEMO != 0 || SuperStory != 0 || world->area == NULL || world->area == HUB_ADATA ||
         (world->area->flags & 0x146) != 0 || Mission_Active(NULL) != NULL || ChallengeMode != 0 || Arcade != 0 ||
         CutScenePlayer_Active() != 0 || Game_AreaSave == NULL ||
         Game_AreaSave[world->level_sub_id].area_complete == 0 || AreaGlobals.values.field_0x18 <= 0) {
-        return 0;
+        return NULL;
     }
 
-    return Area_FindStatusLevel(world->area, NULL) != NULL;
+    return Area_FindStatusLevel(world->area, NULL);
 }
 
 void FS_PrevNameLen(char *) {

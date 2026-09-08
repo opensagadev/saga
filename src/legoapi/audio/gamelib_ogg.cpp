@@ -1,5 +1,7 @@
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
+#include <stdlib.h>
+#include <string.h>
 struct nuqthdr_s;
 struct nuqtdim_s;
 
@@ -17,13 +19,18 @@ static __used__ void RemoveData(nuqthdr_s *, char *, i32) {
 
 extern "C" {
 
-    void OggAllocMem(void) {
+    void *OggAllocMem(u32 bytes) {
+        void *memory = malloc(bytes);
+        memset(memory, 0, bytes);
+        return memory;
     }
 
-    void OggFreeMem(void) {
+    void OggFreeMem(void *memory) {
+        free(memory);
     }
 
-    void OggReAllocMem(void) {
+    void *OggReAllocMem(void *memory, u32 bytes) {
+        return realloc(memory, bytes);
     }
 
 } // extern "C"

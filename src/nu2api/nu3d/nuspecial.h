@@ -81,6 +81,7 @@ extern "C" {
     void NuSpecialSetDrawPos(void *special, void *pos);
     i32 NuSpecialClipTestExtents(void *special, void *mtx);
     i32 NuSpecialSetClipping(i32 enabled, i32 state);
+    void NuSpecialConstAlpha(i32 enabled, f32 alpha);
     void NuSpecialConstTint(i32 enabled, NUVEC *tint);
     float NuSpecialGetOriginRadius(void *special);
     i32 NuSpecialDrawAtAlpha(void *special, NUMTX *mtx, f32 alpha);

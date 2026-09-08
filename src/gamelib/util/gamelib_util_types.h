@@ -64,12 +64,15 @@ struct WORLDINFO_s;
 struct ePeerLeftReason {};
 
 struct NuFileDeviceAndroidOBBType {
-    struct T {};
+    enum T { NONE = 0, MAIN = 1, PATCH = 2 };
 };
 struct AndroidOBBUtils {
-    void InitPackagePaths();
-    void LookupPackagePath(char *, NuFileDeviceAndroidOBBType::T);
-    void OpenFile(char const *);
+    static char ms_packageName[3][512];
+    static bool ms_initializedPackage[3];
+    static bool ms_initializedPackageIsAsset[3];
+    static void InitPackagePaths();
+    static i32 LookupPackagePath(char *, NuFileDeviceAndroidOBBType::T);
+    static i32 OpenFile(char const *);
 };
 struct CRC16 {
     CRC16();

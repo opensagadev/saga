@@ -103,6 +103,14 @@ void NuSoundSample::SetLoadState(LoadState state) {
 }
 
 NuSoundSample::~NuSoundSample() {
+    if (this->stream_desc != NULL) {
+        NuSoundSystem::FreeMemory(NuSoundSystem::MemoryDiscipline::SCRATCH, reinterpret_cast<usize>(this->stream_desc),
+                                  0);
+        this->SetStreamDesc(NULL);
+    }
+    if (this->buffer.IsAllocated()) {
+        this->Unload();
+    }
 }
 
 void NuSoundSample::SetLastErrorState(ErrorState state) {

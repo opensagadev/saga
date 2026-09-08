@@ -22,7 +22,9 @@
 // until their subsystems are transcribed.  Their signatures are not yet
 // recovered, so they are left as `void(void)`.
 
+#include <float.h>
 #include <string.h>
+#include "nu2api/numath/nufloat.h"
 
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
@@ -31,6 +33,7 @@
 #include "nu2api/nu3d/nutexanm.h"
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/nucore/common.h"
+#include "nu2api/numath/nufloat.h"
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/numtl.h"
@@ -67,9 +70,11 @@ extern "C" {
 } // extern "C"
 
 // Swap/present pacing flags (original BSS).
-i32 g_isBlockedInSwapScreen = 0;
-i32 rndr_blend_shape_deformer_wt_cnt = 0;
-i32 rndr_blend_shape_deformer_wt_ptrs_cnt = 0;
+volatile bool g_isBlockedInSwapScreen = false;
+i32 rndr_blend_shape_deformer_wt_cnt = 0x3f00;
+i32 rndr_blend_shape_deformer_wt_ptrs_cnt = 0x800;
+static f32 rndr_blend_shape_deformer_wts[0x84000];
+static f32 *rndr_blend_shape_deformer_wt_ptrs[0x800];
 
 // ---------------------------------------------------------------------------
 // Immediate-mode 2D stream state
@@ -324,7 +329,7 @@ extern "C" void NuRndrEndSceneEx(i32) {
 
 // Original 0x2967db — swap display-list and stream buffers, kick the render
 // thread, then pace the game thread until the app leaves the running state.
-extern "C" __attribute__((weak)) i32 NuRndrSwapScreen(void) {
+extern "C" __attribute__((weak)) i32 NuRndrSwapScreen(i32 /*mode*/) {
     NuRenderThreadLock();
     rndr_blend_shape_deformer_wt_cnt = 0x3f00;
     rndr_blend_shape_deformer_wt_ptrs_cnt = 0x800;
@@ -339,7 +344,7 @@ extern "C" __attribute__((weak)) i32 NuRndrSwapScreen(void) {
     NuRenderThreadUnlock();
     NuRenderThreadStartRender();
 
-    // Spin until the application status is no longer "running" (1).
+    // Status 1 suspends presentation until the lifecycle makes the app active.
     // On Android this is released by the activity lifecycle
     // (nativeSetSurface / nativeOnPause flip NUAPPLICATIONSTATUS).
     for (;;) {
@@ -356,11 +361,11 @@ extern "C" __attribute__((weak)) i32 NuRndrSwapScreen(void) {
 }
 
 // Original 0x296888
-extern "C" void NuRndrSwapScreenEx(i32 /*mode*/, void (*callback)(void)) {
+extern "C" i32 NuRndrSwapScreenEx(i32 mode, void (*callback)(void)) {
     if (callback != nullptr) {
         callback();
     }
-    NuRndrSwapScreen();
+    return NuRndrSwapScreen(mode);
 }
 
 // ---------------------------------------------------------------------------
@@ -496,7 +501,23 @@ extern "C" void NuRndrBurstObjEnd(void) {
 }
 extern "C" void NuRndrCircle(void) {
 }
-extern "C" void NuRndrCreateBlendShapeDeformerWeightsArray(void) {
+extern "C" f32 *NuRndrCreateBlendShapeDeformerWeightsArray(i32 count) {
+    i32 size = (count + 0x20) * sizeof(f32);
+    rndr_blend_shape_deformer_wt_cnt -= size;
+    if (rndr_blend_shape_deformer_wt_cnt < 0) {
+        return NULL;
+    }
+    f32 *weights = rndr_blend_shape_deformer_wts + rndr_blend_shape_deformer_wt_cnt * 0x21;
+    memset(weights, 0, size);
+    return weights;
+}
+
+f32 **NuRndrCreateBlendShapeDWAPointers(i32 count) {
+    rndr_blend_shape_deformer_wt_ptrs_cnt -= count;
+    if (rndr_blend_shape_deformer_wt_cnt < 0) {
+        return NULL;
+    }
+    return rndr_blend_shape_deformer_wt_ptrs + rndr_blend_shape_deformer_wt_ptrs_cnt;
 }
 extern "C" void NuRndrDither(void) {
 }
@@ -746,7 +767,10 @@ extern "C" i32 NuRndrSetAmbientLightPS(const NUCOLOUR3 *colour) {
     render_state.state.lights_id++;
     return 1;
 }
-extern "C" void NuRndrSetAmbientLightSpecular(void) {
+extern "C" i32 NuRndrSetAmbientLightSpecular(const NUCOLOUR4 *colour) {
+    render_state.global_specular = colour->a;
+    NuRndrSetAmbientLightPS(reinterpret_cast<const NUCOLOUR3 *>(colour));
+    return 0;
 }
 extern "C" void NuRndrSetBlendData(void) {
 }
@@ -781,8 +805,27 @@ extern "C" void NuRndrSetGlobalMipMapBias(void) {
 extern "C" void NuRndrSetParticleRotation(NUMTX *rotation) {
     NuRndr_DebrisRotMtxPtr = rotation;
 }
-extern "C" void NuRndrSetSpecularLightPS(const NUVEC *, const NUCOLOUR4 *) {
+extern "C" void NuRndrStateSetSpecularLight(const NUMTX *matrix, const NUCOLOUR3 *colour) {
+    if (matrix != nullptr) {
+        render_state.specular_mtx = *matrix;
+    }
+    if (colour != nullptr) {
+        render_state.specular_colour = *colour;
+    }
+    render_state.light_state = nullptr;
+    render_state.state.global_id++;
+    render_state.state.lights_id++;
 }
+
+extern "C" void NuRndrStateSetSpecularLightEx(const NUVEC *direction, const NUMTX *matrix, const NUCOLOUR3 *colour) {
+    render_state.specular_mtx = *matrix;
+    render_state.specular_colour = *colour;
+    render_state.specular_intensity = *direction;
+    render_state.light_state = nullptr;
+    render_state.state.global_id++;
+    render_state.state.lights_id++;
+}
+
 extern "C" void NuRndrSetWind(void) {
 }
 extern "C" void NuRndrShadPolys(void *) {
@@ -808,10 +851,6 @@ extern "C" void NuRndrStartShadowReceiveRender(void) {
 extern "C" void NuRndrStateGetFogEnabled(void) {
 }
 extern "C" void NuRndrStateInit(void) {
-}
-extern "C" void NuRndrStateSetSpecularLight(void) {
-}
-extern "C" void NuRndrStateSetSpecularLightEx(void) {
 }
 extern "C" void NuRndrStateUpdateCameraState(void) {
     NUMTX *projection = NuCameraGetProjectionMtx();
@@ -839,6 +878,7 @@ extern "C" void NuRndrStateUpdateCameraState(void) {
 }
 
 void *RndrStateBuildKonstState(NUGLOBALRNDRSTATE *state);
+extern "C" void *RndrStateBuildFogState(NUGLOBALRNDRSTATE *state);
 
 static void *RndrStateBuildLightState(NUGLOBALRNDRSTATE *state) {
     VARIPTR *buffer = NuDisplayListGetBuffer();
@@ -889,8 +929,7 @@ extern "C" void DisplayListUpdateRenderState(void *display_list, void *state) {
             VARIPTR *buffer = NuDisplayListGetBuffer();
             auto *packet = static_cast<CameraPacket *>(buffer->void_ptr);
             global->camera_state = packet;
-            packet->id = *reinterpret_cast<i32 *>(&nuapi.field19_0x3c) +
-                         (global->state.camera_id + 5) * (global->state.global_id + 13);
+            packet->id = nuapi.frame_count + (global->state.camera_id + 5) * (global->state.global_id + 13);
             packet->view = global->view;
             memset(&packet->projection, 0, sizeof(packet->projection));
             packet->projection.m00 = global->proj_00;
@@ -908,6 +947,13 @@ extern "C" void DisplayListUpdateRenderState(void *display_list, void *state) {
         }
         NuDisplayListLinkItem(dl, 0x9a, global->camera_state);
         dl->state->camera_id = global->state.camera_id;
+    }
+    if (dl->state->fog_id != global->state.fog_id) {
+        if (global->fog_state == nullptr) {
+            global->fog_state = RndrStateBuildFogState(global);
+        }
+        NuDisplayListLinkItem(dl, 0xa6, global->fog_state);
+        dl->state->fog_id = global->state.fog_id;
     }
     if (dl->state->konst_id != global->state.konst_id) {
         if (global->konst_state == nullptr) {

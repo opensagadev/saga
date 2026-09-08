@@ -192,6 +192,10 @@ clang_tidy_android = _clang_tidy_aspect(
     extra_args = ["--extra-arg=--target=i686-linux-android"],
 )
 
+clang_tidy_wasm = _clang_tidy_aspect(
+    extra_args = ["--extra-arg=--target=wasm32-unknown-emscripten"],
+)
+
 def _clang_tidy_check_impl(_ctx):
     return DefaultInfo()
 
@@ -230,7 +234,7 @@ clang_tidy_wasm_check = rule(
     implementation = _clang_tidy_check_impl,
     attrs = {
         "srcs": attr.label_list(
-            aspects = [clang_tidy],
+            aspects = [clang_tidy_wasm],
             cfg = _wasm_transition,
         ),
         "_allowlist_function_transition": attr.label(

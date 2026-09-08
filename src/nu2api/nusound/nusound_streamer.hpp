@@ -16,6 +16,9 @@
 
 #include "nu2api/nucore/nuvuvec.hpp"
 
+#include <new>
+#include <string.h>
+
 class NuSoundStreamer;
 class NuSoundBufferCallback;
 class NuSoundLoader;
@@ -46,6 +49,7 @@ class NuSoundStreamingSample : public NuSoundSample {
     i32 ReCue(f32 start_offset, bool loop);
 
     bool IsLocked() const override;
+    bool IsStreamOpen() const override;
     void Lock();
     void Unlock();
 
@@ -74,14 +78,44 @@ class NuSoundStreamer {
         bool weak_flag;
 
         QueueElement() = default;
+        ~QueueElement() = default;
+    };
 
-        ~QueueElement() {
-            NuSoundWeakPtrListNode::sPtrListLock.Lock();
-            if (this->weak_ptr.obj != NULL) {
-                this->weak_ptr.obj->Unlink(&this->weak_ptr);
-                this->weak_ptr.obj = NULL;
-            }
-            NuSoundWeakPtrListNode::sPtrListLock.Unlock();
+    // libTTapp's queue is raw storage. Push copy-constructs an element in the
+    // producer slot and Pop copy-constructs the result before destroying the
+    // consumed slot. This is required for the weak-pointer node to have one
+    // owner at each stage of the hand-off.
+    struct RingQueue {
+        union Slot {
+            u32 alignment;
+            u8 storage[sizeof(QueueElement)];
+        } slots[32];
+        i32 length;
+        i32 index;
+        NuThreadSemaphore semaphore;
+
+        RingQueue() : semaphore(32) {
+            memset(this->slots, 0, sizeof(this->slots));
+            this->length = 0;
+            this->index = 0;
+        }
+
+        bool Empty() const {
+            return this->index == this->length;
+        }
+
+        void Push(const QueueElement &element) {
+            QueueElement *slot = reinterpret_cast<QueueElement *>(&this->slots[this->length % 32]);
+            new (slot) QueueElement(element);
+            __sync_fetch_and_add(&this->length, 1);
+        }
+
+        QueueElement Pop() {
+            QueueElement *slot = reinterpret_cast<QueueElement *>(&this->slots[this->index % 32]);
+            QueueElement element(*slot);
+            slot->~QueueElement();
+            __sync_fetch_and_add(&this->index, 1);
+            return element;
         }
     };
 
@@ -96,15 +130,8 @@ class NuSoundStreamer {
     NuThread *thread;
     bool running;
 
-    QueueElement queue1[32]; // control queue (open / close / recue / shutdown)
-    i32 queue1_length;
-    i32 queue1_index;
-    NuThreadSemaphore queue1_semaphore;
-
-    QueueElement queue2[32]; // fill queue — always drained first
-    i32 queue2_length;
-    i32 queue2_index;
-    NuThreadSemaphore queue2_semaphore;
+    RingQueue queue1; // control queue (open / close / recue / shutdown)
+    RingQueue queue2; // fill queue — always drained first
 
     NuThreadSemaphore semaphore;
 
@@ -126,3 +153,4 @@ class NuSoundStreamer {
 };
 
 DECOMP_ASSERT(sizeof(NuSoundStreamer::QueueElement) == 0x28, "NuSoundStreamer queue element size");
+DECOMP_ASSERT(sizeof(NuSoundStreamer::RingQueue) == 0x518, "NuSoundStreamer ring queue size");

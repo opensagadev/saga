@@ -1,4 +1,4 @@
-"""Repository rule provisioning the legacy Android NDK r8e x86 toolchain."""
+"""Repository rule provisioning legacy Android NDK r8e toolchains."""
 
 _NDK_ARCHIVES = {
     "linux": (
@@ -61,6 +61,37 @@ toolchain(
         "@platforms//os:android",
     ],
     toolchain = ":cc_toolchain",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
+android_cc_toolchain_config(
+    name = "config_armv7",
+    arch = "armv7",
+    host_system_name = "{host_tag}",
+    ndk_marker = "ndk/RELEASE.TXT",
+    real_ndk_root = {real_ndk_root},
+    tool_suffix = "{tool_suffix}",
+)
+
+cc_toolchain(
+    name = "cc_toolchain_armv7",
+    all_files = ":toolchain_files",
+    ar_files = ":toolchain_files",
+    compiler_files = ":toolchain_files",
+    dwp_files = ":toolchain_files",
+    linker_files = ":toolchain_files",
+    objcopy_files = ":toolchain_files",
+    strip_files = ":toolchain_files",
+    supports_param_files = 1,
+    toolchain_config = ":config_armv7",
+)
+
+toolchain(
+    name = "toolchain_armv7",
+    target_compatible_with = [
+        "@platforms//cpu:armv7",
+        "@platforms//os:android",
+    ],
+    toolchain = ":cc_toolchain_armv7",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
 """.format(
