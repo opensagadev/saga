@@ -820,9 +820,6 @@ static __used__ i32 Action_CreateSplineCreatures(AISYS_s *system, AISCRIPTPROCES
 }
 
 
-static __used__ void *Condition_EitherPlayerIsInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
-}
 
 
 

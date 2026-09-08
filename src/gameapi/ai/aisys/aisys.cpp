@@ -5676,8 +5676,12 @@ static f32 Condition_IAm(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *arg
 static f32 Condition_IAmA(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *argument) {
     if (packet != NULL && packet->owner != NULL) {
         GameObject_s *object = packet->owner->apiobj.objptr;
-        if (object != NULL)
-            return reinterpret_cast<isize>(argument) == object->id ? 1.0f : 0.0f;
+        if (object != NULL) {
+            f32 result = 0.0f;
+            if (reinterpret_cast<isize>(argument) == object->id)
+                result = 1.0f;
+            return result;
+        }
     }
     return 0.0f;
 }
@@ -5884,24 +5888,16 @@ static f32 Condition_IAmAGoody(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, cha
 }
 
 
-__used__ static f32 Condition_Player1Is(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                        void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
+static f32 Condition_Player1Is(AISYS *sys, AISCRIPTPROCESS *, AIPACKET *, char *, void *argument) {
+    return argument != NULL && sys != NULL && sys->player_1 == argument ? 1.0f : 0.0f;
 }
 
-__used__ static f32 Condition_Player2Is(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                        void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
+static f32 Condition_Player2Is(AISYS *sys, AISCRIPTPROCESS *, AIPACKET *, char *, void *argument) {
+    return argument != NULL && sys != NULL && sys->player_2 == argument ? 1.0f : 0.0f;
+}
+
+static void *Condition_EitherPlayerIsInit(AISYS *sys, char *arg, AISCRIPT *) {
+    return arg != NULL && GetNamedAPIObjectFn != NULL ? GetNamedAPIObjectFn(sys, arg) : NULL;
 }
 
 static f32 Condition_StuckTime(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *) {
@@ -7797,6 +7793,10 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_AREA_COMPLETE].init_fn = Condition_AreaCompleteInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A].eval_fn = Condition_IAmA;
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A].init_fn = Condition_IAmAInit;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_PLAYER_1_IS].eval_fn = Condition_Player1Is;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_PLAYER_1_IS].init_fn = Condition_EitherPlayerIsInit;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_PLAYER_2_IS].eval_fn = Condition_Player2Is;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_PLAYER_2_IS].init_fn = Condition_EitherPlayerIsInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_TO_LEVEL].eval_fn = Condition_BeenToLevel;
 
             lego_aiactiondefs[LEGO_AI_ACTION_SET_CURRENT_SPEED].eval_fn = Action_SetCurrentSpeed;
