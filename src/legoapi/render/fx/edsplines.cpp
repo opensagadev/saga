@@ -1,6 +1,7 @@
 #include "decomp.h"
 #include "globals.h"
 #include "legoapi/characters/motion.h"
+#include "nu2api/numath/nufloat.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/render/fx/spline_position.h"
 #include "legoapi/menus/screens/shop.h"
@@ -91,96 +92,60 @@ void LoadShelfSplines() {
     shelfang = static_cast<u16>(NuAtan2D(direction.x, direction.z));
 }
 
-static const NUVEC *SplinePoint(const NUGSPLINE *spline, i32 index) {
-    return reinterpret_cast<const NUVEC *>(reinterpret_cast<const u8 *>(spline->pts) + index * spline->pt_size);
+static void SplinePointAngles(NUGSPLINE *spline, i32 index, i32 looping, u16 *pitch, u16 *angle) {
+    NUVEC *current = &spline->pts[index];
+    i32 previous_index = index - 1;
+    NUVEC *previous = NULL;
+    if (looping && previous_index < 0) previous = &spline->pts[spline->length - 1];
+    else if (previous_index >= 0) previous = &spline->pts[previous_index];
+    NUVEC direction = {0.0f, 0.0f, 0.0f};
+    if (previous != NULL) {
+        direction.x += current->x - previous->x;
+        direction.y += current->y - previous->y;
+        direction.z += current->z - previous->z;
+    }
+    NUVEC *next = NULL;
+    if (index + 1 < spline->length) next = &spline->pts[index + 1];
+    else if (looping) next = spline->pts;
+    if (next != NULL) {
+        direction.x += next->x - current->x;
+        direction.y += next->y - current->y;
+        direction.z += next->z - current->z;
+    }
+    if (pitch != NULL) *pitch = NuAtan2D(direction.y, NuFsqrt(direction.x * direction.x + direction.z * direction.z));
+    if (angle != NULL) *angle = NuAtan2D(direction.x, direction.z);
 }
 
-static void SplinePointAngles(NUGSPLINE *spline, i32 point, i32 looping, u16 *yaw, u16 *pitch) {
-    const NUVEC *current = SplinePoint(spline, point);
-    NUVEC direction = {};
-
-    i32 previous = point - 1;
-    if (previous < 0 && looping != 0) {
-        previous = spline->length - 1;
+void PointAlongSpline(NUGSPLINE *spline, f32 along, NUVEC *position, u16 *angle, u16 *pitch, i32 looping) {
+    if (angle != NULL) *angle = 0;
+    if (pitch != NULL) *pitch = 0;
+    if (spline == NULL) return;
+    if (along > 1.0f) along = 1.0f;
+    else if (along < 0.0f) along = 0.0f;
+    u32 extent = (u32)(looping ? spline->length : spline->length - 1) << 16;
+    u32 fixed = (i32)((f32)extent * along);
+    i32 index = fixed >> 16;
+    NUVEC *current = &spline->pts[index];
+    *position = *current;
+    if (pitch != NULL || angle != NULL) SplinePointAngles(spline, index, looping, pitch, angle);
+    index++;
+    if (index >= spline->length) {
+        if (!looping) return;
+        index = 0;
     }
-    if (previous >= 0) {
-        const NUVEC *value = SplinePoint(spline, previous);
-        direction.x += current->x - value->x;
-        direction.y += current->y - value->y;
-        direction.z += current->z - value->z;
-    }
-
-    i32 next = point + 1;
-    if (next >= spline->length && looping != 0) {
-        next = 0;
-    }
-    if (next < spline->length) {
-        const NUVEC *value = SplinePoint(spline, next);
-        direction.x += value->x - current->x;
-        direction.y += value->y - current->y;
-        direction.z += value->z - current->z;
-    }
-
-    if (pitch != NULL) {
-        *pitch = NuAtan2D(direction.y, NuFsqrt(direction.x * direction.x + direction.z * direction.z));
-    }
-    if (yaw != NULL) {
-        *yaw = NuAtan2D(direction.x, direction.z);
-    }
-}
-
-void PointAlongSpline(nugspline_s *spline, float position, nuvec_s *result, u16 *yaw, u16 *pitch, i32 looping) {
-    if (yaw != NULL) {
-        *yaw = 0;
-    }
-    if (pitch != NULL) {
-        *pitch = 0;
-    }
-    if (spline == NULL || result == NULL || spline->length <= 0) {
-        return;
-    }
-
-    if (position < 0.0f) {
-        position = 0.0f;
-    } else if (position > 1.0f) {
-        position = 1.0f;
-    }
-
-    const i32 span_count = looping != 0 ? spline->length : spline->length - 1;
-    const f32 point_position = static_cast<f32>(span_count) * position;
-    i32 point = static_cast<i32>(point_position);
-    if (point >= spline->length) {
-        point = spline->length - 1;
-    }
-    const NUVEC *from = SplinePoint(spline, point);
-    *result = *from;
-    SplinePointAngles(spline, point, looping, yaw, pitch);
-
-    i32 next = point + 1;
-    if (next >= spline->length) {
-        if (looping == 0) {
-            return;
-        }
-        next = 0;
-    }
-
-    const f32 ratio = point_position - static_cast<f32>(point);
-    if (ratio == 0.0f) {
-        return;
-    }
-    const NUVEC *to = SplinePoint(spline, next);
-    result->x += (to->x - from->x) * ratio;
-    result->y += (to->y - from->y) * ratio;
-    result->z += (to->z - from->z) * ratio;
-
-    u16 next_yaw = 0;
-    u16 next_pitch = 0;
-    SplinePointAngles(spline, next, looping, yaw != NULL ? &next_yaw : NULL, pitch != NULL ? &next_pitch : NULL);
-    if (yaw != NULL) {
-        *yaw = static_cast<u16>(*yaw + static_cast<i32>(static_cast<f32>(RotDiff(*yaw, next_yaw)) * ratio));
-    }
-    if (pitch != NULL) {
-        *pitch = static_cast<u16>(*pitch + static_cast<i32>(static_cast<f32>(RotDiff(*pitch, next_pitch)) * ratio));
+    fixed &= 0xffff;
+    if (fixed == 0) return;
+    f32 fraction = fixed * (1.0f / 65536.0f);
+    NUVEC *next = &spline->pts[index];
+    position->x += (next->x - current->x) * fraction;
+    position->y += (next->y - current->y) * fraction;
+    position->z += (next->z - current->z) * fraction;
+    if (angle != NULL || pitch != NULL) {
+        u16 next_angle, next_pitch;
+        SplinePointAngles(spline, index, looping, pitch != NULL ? &next_pitch : NULL,
+                          angle != NULL ? &next_angle : NULL);
+        if (angle != NULL) *angle += (i32)(RotDiff(*angle, next_angle) * fraction);
+        if (pitch != NULL) *pitch += (i32)(RotDiff(*pitch, next_pitch) * fraction);
     }
 }
 
@@ -190,7 +155,51 @@ void getnextdatapoint(float *, i32 *) {
 void FlightSpline_Init(WORLDINFO_s *, flightspline_s *, i32) {
 }
 
-void OutSideSplineArea(nuvec_s *, nugspline_s *, nuvec_s *, nuvec_s *, i32) {
+i32 LineIntersectXY(NUVEC *, NUVEC *, NUVEC *, NUVEC *, NUVEC *, NUVEC *);
+
+i32 OutSideSplineArea(nuvec_s *position, nugspline_s *spline, nuvec_s *edge_end, nuvec_s *edge_start, i32 inside) {
+    if (spline == NULL || position == NULL) return 0;
+    NUVEC ray_start = {position->x, -position->z, position->y};
+    NUVEC ray_end = {position->x, 100000.0f, position->y};
+    NUVEC end = {spline->pts[0].x, -spline->pts[0].z, spline->pts[0].y};
+    i32 intersections = 0;
+    for (i32 i = 1; i < spline->length; ++i) {
+        NUVEC start = end;
+        end.x = spline->pts[i].x;
+        end.y = -spline->pts[i].z;
+        end.z = spline->pts[i].y;
+        intersections += LineIntersectXY(&ray_start, &ray_end, &start, &end, NULL, NULL);
+    }
+    if ((intersections & 1) != 0 ? inside == 0 : inside != 0) return 0;
+    i32 closest_index = 0;
+    NUVEC closest = spline->pts[0];
+    f32 best = 1000000000.0f;
+    for (i32 i = 0; i < spline->length - 1; ++i) {
+        f32 dx = spline->pts[i].x - position->x;
+        f32 dz = spline->pts[i].z - position->z;
+        f32 distance = dx * dx + dz * dz;
+        if (distance < best) {
+            closest_index = i;
+            closest = spline->pts[i];
+            best = distance;
+        }
+    }
+    i32 previous = closest_index == 0 ? spline->length - 2 : closest_index - 1;
+    i32 next = closest_index == spline->length - 2 ? 0 : closest_index + 1;
+    NUVEC before = spline->pts[previous];
+    NUVEC after = spline->pts[next];
+    f32 ax = after.x - position->x;
+    f32 az = after.z - position->z;
+    f32 bx = before.x - position->x;
+    f32 bz = before.z - position->z;
+    if (bx * bx + bz * bz > ax * ax + az * az) {
+        if (edge_end != NULL) *edge_end = after;
+        if (edge_start != NULL) *edge_start = closest;
+    } else {
+        if (edge_end != NULL) *edge_end = closest;
+        if (edge_start != NULL) *edge_start = before;
+    }
+    return 1;
 }
 
 void InitSplinePosition(SPLINEPOS_s *position, nugspline_s *spline, float distance, i32 looping) {
@@ -198,7 +207,7 @@ void InitSplinePosition(SPLINEPOS_s *position, nugspline_s *spline, float distan
         return;
     }
 
-    SPLINEPOSITION_RUNTIME_s *runtime = reinterpret_cast<SPLINEPOSITION_RUNTIME_s *>(position);
+    SPLINEPOS_s *runtime = position;
     memset(runtime, 0, sizeof(*runtime));
     if (spline == NULL || spline->length < 2) {
         return;
@@ -213,7 +222,7 @@ void InitSplinePosition(SPLINEPOS_s *position, nugspline_s *spline, float distan
         MoveSplinePosition(position, distance);
     } else {
         runtime->position = *first;
-        runtime->normalized_position = 0.0f;
+        runtime->along = 0.0f;
     }
 }
 
@@ -226,45 +235,40 @@ void nugraphGetYatIndex(nugraph_s *, i32) {
 void nugraph_catmullrom(i32, nuvec_s *, nuvec_s *, i32) {
 }
 
-void GetNearestSplinePos(nuvec_s *point, SPLINEPOS_s *position, nugspline_s *spline, i32 looping, i16 first_point,
-                         i16 last_point) {
-    if (position == NULL) {
-        return;
-    }
-    SPLINEPOSITION_RUNTIME_s *runtime = reinterpret_cast<SPLINEPOSITION_RUNTIME_s *>(position);
-    memset(runtime, 0, sizeof(*runtime));
-    if (spline == NULL || point == NULL || spline->length <= 1) {
-        return;
-    }
-
-    runtime->spline = spline;
-    runtime->looping = static_cast<u8>(looping);
-    const i32 segment_count = spline->length + (looping != 0 ? 1 : 0);
-    i32 begin = first_point < 0 ? 0 : first_point;
-    if (begin >= segment_count) {
-        return;
-    }
-    i32 end = last_point < 0 ? spline->length : last_point;
-    if (end > spline->length) {
-        end = spline->length;
-    }
-
-    f32 nearest_distance = 1.0e9f;
-    for (i32 index = begin; index < end; ++index) {
-        const f32 distance = NuVecDistSqr(point, const_cast<NUVEC *>(SplinePoint(spline, index)), NULL);
-        if (distance < nearest_distance) {
-            runtime->segment = static_cast<i16>(index);
-            nearest_distance = distance;
+void GetNearestSplinePos(NUVEC *origin, SPLINEPOS_s *result, NUGSPLINE *spline, i32 looping,
+                         i16 first_point, i16 last_point) {
+    if (result == NULL) return;
+    memset(result, 0, sizeof(*result));
+    if (spline == NULL || origin == NULL || spline->length <= 1) return;
+    result->spline = spline;
+    result->looping = (i8)looping;
+    i32 point_count = spline->length;
+    i32 logical_count = result->looping != 0 ? point_count + 1 : point_count;
+    i32 index = first_point;
+    if (index < 0) index = 0;
+    else if (index >= logical_count) return;
+    i32 end = point_count;
+    if (last_point >= 0 && last_point < end) end = last_point;
+    NUVEC *point = (NUVEC *)((u8 *)spline->pts + index * (i16)spline->pt_size);
+    f32 nearest = 1000000000.0f;
+    NUVEC offset;
+    do {
+        f32 distance = NuVecDistSqr(origin, point, &offset);
+        if (distance < nearest) {
+            nearest = distance;
+            result->segment = index;
         }
-    }
-
-    const i32 next = (runtime->segment + 1) % spline->length;
-    const NUVEC *current_point = SplinePoint(spline, runtime->segment);
-    runtime->distance = 0.0f;
-    runtime->segment_length =
-        NuVecDist(const_cast<NUVEC *>(SplinePoint(spline, next)), const_cast<NUVEC *>(current_point), NULL);
-    runtime->position = *current_point;
-    runtime->normalized_position = static_cast<f32>(runtime->segment) / static_cast<f32>(segment_count - 1);
+        point = (NUVEC *)((u8 *)point + (i16)result->spline->pt_size);
+        index++;
+    } while (index < end);
+    spline = result->spline;
+    i32 stride = (i16)spline->pt_size;
+    NUVEC *current = (NUVEC *)((u8 *)spline->pts + result->segment * stride);
+    NUVEC *next = (NUVEC *)((u8 *)spline->pts + ((result->segment + 1) % spline->length) * stride);
+    result->segment_distance = 0.0f;
+    result->segment_length = NuVecDist(next, current, &offset);
+    result->position = *current;
+    result->along = (result->segment_distance / result->segment_length + result->segment) / (logical_count - 1);
 }
 
 void nugraph_compute_point(i32 *, i32, i32, float, nuvec_s *, nuvec_s *) {

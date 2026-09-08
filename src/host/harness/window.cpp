@@ -31,6 +31,24 @@
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nuplatform/nuplatform.h"
 
+#if defined(__EMSCRIPTEN__)
+// These movement fields must retain the original 32-bit layout in WASM.
+static_assert(sizeof(GameObject_s) == 0x10e4, "WASM GameObject movement ABI");
+static_assert(offsetof(GAMEPAD_s, input_mode) == 0x25, "WASM input mode offset");
+static_assert(offsetof(GAMEPAD_s, input_direction_z) == 0x2c, "WASM first direction component offset");
+static_assert(offsetof(GAMEPAD_s, input_direction_x) == 0x30, "WASM second direction component offset");
+static_assert(offsetof(APIOBJECT, velocity) == 0x68, "WASM velocity offset");
+static_assert(offsetof(APIOBJECT, collision_position) == 0x80, "WASM collision position offset");
+static_assert(offsetof(APIOBJECT, collision_contact_mask) == 0x1ec, "WASM collision mask offset");
+static_assert(offsetof(APIOBJECT, collision_exclusion_mask) == 0x298, "WASM exclusion mask offset");
+static_assert(offsetof(APIOBJECT, collision_mask_high) == 0x29c, "WASM exclusion mask high offset");
+static_assert(alignof(APIOBJECT) == 4, "WASM API object alignment");
+static_assert(offsetof(GameObject_s, character_context) == 0x7a5, "WASM movement context offset");
+static_assert(offsetof(GameObject_s, pad_gamepad) == 0xc94, "WASM movement controller offset");
+static_assert(offsetof(GameObject_s, delayed_turn_timer) == 0xd40, "WASM turn timer offset");
+static_assert(offsetof(GameObject_s, target_velocity) == 0xf24, "WASM target velocity offset");
+#endif
+
 extern "C" i32 NuMain(i32 argc, char **argv);
 extern i32 GetMenuID();
 extern i32 memcard_loadneeded;
@@ -791,6 +809,7 @@ i32 host_run_window(const HostWindowOptions &options) {
     i32 capture_height = 0;
 
     bool quit_requested = false;
+    Uint64 movement_trace_ticks = 0;
     while (!quit_requested) {
         SDL_Event event{};
         while (SDL_PollEvent(&event)) {
@@ -851,6 +870,30 @@ i32 host_run_window(const HostWindowOptions &options) {
         frame_count++;
 
         const Uint64 elapsed_ticks = SDL_GetTicks() - start_ticks;
+        if (options.trace_movement && elapsed_ticks - movement_trace_ticks >= 500) {
+            movement_trace_ticks = elapsed_ticks;
+            const GameObject_s *player = Player[0];
+            if (player != nullptr && (player->apiobj.field_0x1f8 & 0x1001) == 0x1001 &&
+                host_menu_id() == -1) {
+                const GAMEPAD_s *pad = player->pad_gamepad;
+                const APIOBJECT &api = player->apiobj;
+                LOG_INFO("movement trace: t=%llu dt=%.4f context=%d action=%d anim=%d "
+                         "input=%.3f keys=0x%x buttons=0x%x pad-flags=0x%x "
+                         "pos=(%.3f,%.3f,%.3f) velocity=(%.3f,%.3f,%.3f) "
+                         "target=(%.3f,%.3f,%.3f) external=(%.3f,%.3f) "
+                         "ground=%u surface=%d facing=%u input-angle=%u flags=(%x,%x)",
+                         static_cast<unsigned long long>(elapsed_ticks), FRAMETIME,
+                         player->character_context, player->action_movement_state, player->context_animation,
+                         pad != nullptr ? pad->input_magnitude : 0.0f, keyboard_buttons,
+                         pad != nullptr ? pad->buttons_held : 0, pad != nullptr ? pad->allocated_5a : 0,
+                         api.position.x, api.position.y, api.position.z,
+                         api.velocity.x, api.velocity.y, api.velocity.z,
+                         player->target_velocity.x, player->target_velocity.y, player->target_velocity.z,
+                         api.movement_direction.x, api.movement_direction.z, api.field_0x27d,
+                         static_cast<i8>(api.field_0x281), api.facing_angle, player->current_input_angle,
+                         player->field_0xe20, player->field_0xefd);
+            }
+        }
         if (options.script_input) {
             const i32 menu_id = host_menu_id();
             if (menu_id != scripted_last_menu) {

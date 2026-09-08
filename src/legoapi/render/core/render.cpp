@@ -29,6 +29,7 @@ struct rtlidata_s;
 #include "nu2api/nu3d/nuqfnt.h"
 #include "nu2api/nu3d/nurndrstat.h"
 #include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nuvport.h"
 #include "nu2api/nu3d/NuRenderDevice.h"
 #include "nu2api/nu3d/nuspecial.h"
@@ -842,7 +843,26 @@ i32 NuSpecialFind(NUGSCN *scene, nuhspecial_s *dest, char *name, i32 flags) {
 void DrawCables() {
 }
 
-void DrawRipple(ripple_node_s *) {
+void DrawRipple(ripple_node_s *node) {
+    NURND_VERTEX3D vertices[4];
+    vertices[0].position = {0.0f, node->size, 0.0f};
+    vertices[1].position = {-node->size, 0.0f, 0.0f};
+    vertices[2].position = {node->size, -0.0f, 0.0f};
+    vertices[3].position = {-0.0f, -node->size, 0.0f};
+    vertices[0].u = 1.0f;
+    vertices[0].v = 0.0f;
+    vertices[1].u = 0.0f;
+    vertices[1].v = 0.0f;
+    vertices[2].u = 1.0f;
+    vertices[2].v = 1.0f;
+    vertices[3].u = 1.0f;
+    vertices[3].v = 0.0f;
+    vertices[0].colour = node->color.value;
+    vertices[1].colour = node->color.value;
+    vertices[2].colour = node->color.value;
+    vertices[3].colour = node->color.value;
+    NUMTX matrix = node->matrix;
+    NuRndrTriStrip3dClip(vertices, 4, &matrix, node->material);
 }
 
 void DrawShop3D(WORLDINFO_s *world) {
@@ -1314,7 +1334,15 @@ void DrawGameState(float x, float y, i32 highlight, i32 slot) {
 void DrawPauseFade() {
 }
 
-void DrawRippleSet(ripple_set_s *) {
+void DrawRippleSet(ripple_set_s *set) {
+    if (set == NULL) return;
+    ripple_node_s *node = set->newest;
+    for (i32 i = 0; i < set->active_count; ++i) {
+        if (node != NULL) {
+            DrawRipple(node);
+            node = node->next;
+        }
+    }
 }
 
 void DrawSaveSlots(MENU_s *menu, float y) {
@@ -1403,7 +1431,65 @@ void DrawMessageBox(i32, float, float, float, float) {
 void DrawRopeCurved(nuvec_s *, nuvec_s *, i32, i32, numtl_s *) {
 }
 
-void DrawRopeSingle(nuvec_s *, nuvec_s *, float, numtl_s *, float, float, float, float) {
+numtl_s *ropemtl;
+static f32 ROPELEN;
+static u32 ropedif = 0xff505050;
+void FindAnglesZX(NUVEC *, u16 *, u16 *);
+
+void DrawRopeSingle(nuvec_s *start, nuvec_s *end, float amount, numtl_s *material,
+                    float time, float grow_time, float spacing, float scale) {
+    ROPELEN = 0.04f;
+    ropedif = Cheat_IsOn(3) ? 0xff103f10 : 0xff505050;
+    if (material == NULL) material = ropemtl;
+    if (end == NULL || start == NULL) return;
+    amount = NuFmax(0.0f, NuFmin(1.0f, amount));
+    NUVEC direction = {end->x - start->x, end->y - start->y, end->z - start->z};
+    f32 length = NuVecMag(&direction) * amount;
+    f32 repeats = length / ROPELEN;
+    NURND_VERTEX3D vertices[10] = {
+        {{-0.01f, 0.0f, 0.01f}, {-0.7071068286895752f, 0.0f, 0.7071068286895752f}, ropedif, 0.0f, 0.0f},
+        {{-0.01f, length, 0.01f}, {-0.7071068286895752f, 0.0f, 0.7071068286895752f}, ropedif, repeats, 0.0f},
+        {{0.01f, 0.0f, 0.01f}, {0.7071068286895752f, 0.0f, 0.7071068286895752f}, ropedif, 0.0f, 1.0f},
+        {{0.01f, length, 0.01f}, {0.7071068286895752f, 0.0f, 0.7071068286895752f}, ropedif, repeats, 1.0f},
+        {{0.01f, 0.0f, -0.01f}, {0.7071068286895752f, 0.0f, -0.7071068286895752f}, ropedif, 0.0f, 2.0f},
+        {{0.01f, length, -0.01f}, {0.7071068286895752f, 0.0f, -0.7071068286895752f}, ropedif, repeats, 2.0f},
+        {{-0.01f, 0.0f, -0.01f}, {-0.7071068286895752f, 0.0f, -0.7071068286895752f}, ropedif, 0.0f, 3.0f},
+        {{-0.01f, length, -0.01f}, {-0.7071068286895752f, 0.0f, -0.7071068286895752f}, ropedif, repeats, 3.0f},
+        {{-0.01f, 0.0f, 0.01f}, {-0.7071068286895752f, 0.0f, 0.7071068286895752f}, ropedif, 0.0f, 4.0f},
+        {{-0.01f, length, 0.01f}, {-0.7071068286895752f, 0.0f, 0.7071068286895752f}, ropedif, repeats, 4.0f}
+    };
+    u16 x_rotation, z_rotation;
+    FindAnglesZX(&direction, &x_rotation, &z_rotation);
+    NUMTX matrix;
+    NuMtxSetRotationZ(&matrix, z_rotation);
+    NuMtxRotateX(&matrix, x_rotation);
+    NuMtxTranslate(&matrix, start);
+    NuRndrTriStrip3dClip(vertices, 10, &matrix, material);
+    if (Cheat_IsOn(3) == 0 || VehicleArea != 0) return;
+    NUVEC position = v000;
+    NUVEC size = v000;
+    position.y = 0.0f;
+    f32 step = spacing * ROPELEN;
+    u16 rotation = 0;
+    while (position.y < length) {
+        f32 magnitude = scale;
+        if (grow_time >= time) {
+            i32 angle = (i32)((1.0f / grow_time * time) * 16384.0f + 32768.0f + 16384.0f);
+            magnitude = (1.0f + NuTrigTable[(angle >> 1) & 0x7fff]) * scale;
+        }
+        size.x = size.y = size.z = magnitude;
+        rotation = (u16)(rotation + 0x5555);
+        NuMtxSetScale(&matrix, &size);
+        NuMtxTranslate(&matrix, &position);
+        NuMtxRotateY(&matrix, rotation);
+        NuMtxRotateZ(&matrix, z_rotation);
+        NuMtxRotateX(&matrix, x_rotation);
+        NuMtxTranslate(&matrix, start);
+        NuSpecialDrawAt(&WORLD->lev_objs[0x124].special, &matrix);
+        NuSpecialDrawAt(&WORLD->lev_objs[0x125].special, &matrix);
+        NuSpecialDrawAt(&WORLD->lev_objs[0x126].special, &matrix);
+        position.y += step;
+    }
 }
 
 void DrawStatusText(char *text, u16 angle, float x, float y, float scale, u32 colour, i32 alignment) {
@@ -1924,7 +2010,39 @@ void DrawMessageBoxRGBA(float, float, float, float, u32, u32, u32, u32, numtl_s 
 void DrawSuperStoryTime(float, float, float, i32, i32) {
 }
 
-void DrawForceBackEffect(nuhspecial_s *) {
+void ResetForceBack() {
+    ForceBackObj = NULL;
+    ForceBackPos = NULL;
+}
+
+void SetForceBack(GameObject_s *object, nuvec_s *position, float radius, i32 type) {
+    ForceBackRadius = radius;
+    ForceBackObj = object;
+    ForceBackPos = object != NULL ? &object->apiobj.collision_position : position;
+    ForceBackRadius2 = radius * radius;
+    ForceBackType = type;
+}
+
+void DrawForceBackEffect(nuhspecial_s *special) {
+    if (special == NULL || !NuSpecialExistsFn(special)) {
+        return;
+    }
+    if (ForceBackObj != NULL && ForceBackType != 3) {
+        NuSpecialSetVisibility(special, 1);
+        NUMTX matrix = *NuSpecialGetDrawMtx(special);
+        NUVEC position;
+        position.x = ForceBackObj->apiobj.lower_position.x;
+        position.y = 0.005f + ForceBackObj->apiobj.field_0x218;
+        position.z = ForceBackObj->apiobj.lower_position.z;
+        NUVEC scale;
+        scale.x = scale.y = scale.z = ForceBackRadius;
+        NuMtxSetTranslation(&matrix, &position);
+        NuMtxPreScale(&matrix, &scale);
+        NuSpecialSetDrawMtx(special, &matrix);
+        NuSpecialUpdate(special);
+    } else {
+        NuSpecialSetVisibility(special, 0);
+    }
 }
 
 static inline void RotateForceGlowMatrix(NUMTX *matrix, i32 angle) {
@@ -1989,6 +2107,7 @@ draw_glow:
 }
 
 void DrawGameObjectsDraw(i32) {
+    extern f32 FORCEGLOWTIME;
     EnableShadowMapRendering(0);
 
     for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
@@ -2638,15 +2757,36 @@ static void DrawWeapons(GameObject_s *object, i32 reflection, f32 weapon_scale) 
 }
 
 static void DrawParaphernalia(GameObject_s *object) {
+    extern f32 FORCEGLOWTIME;
     if (draw_para == 0) {
         return;
     }
     DrawWeapons(object, object->field_0x1088, object->weapon_scale);
-    if (object->character_context != 0x22 && object->field_0xd80 > 0.0f && object->field_0xd8c > 0.0f &&
-        WORLD->lev_objs[object->field_0xe1e].active != 0 &&
-        (object->apiobj.character_data->game_character->flags_090 & 0x400) == 0) {
-        DrawForceGlowSprite(&object->force_glow_position, object->field_0xd8c, object->field_0xe1e,
-                            object->field_0xd80 / FORCEGLOWTIME, object);
+
+    if (object->field_0x7a5 == 0x22) {
+        if ((WORLD->area != NULL && WORLD->area == HUB_ADATA) ||
+            WORLD->current_level == BLOCKADERUNNERB_LDATA || WORLD->current_level == DOOKUC_LDATA) {
+            NUVEC position;
+            position.x = object->apiobj.collision_position.x;
+            position.y = object->character_bottom * object->apiobj.field_0xa8 + object->apiobj.position.y +
+                         (object->character_top - object->character_bottom) * 0.5f * object->apiobj.field_0xa8;
+            position.z = object->apiobj.collision_position.z;
+            f32 radius = NuFmax(object->apiobj.field_0x1dc, object->apiobj.field_0x1e0) * 1.75f;
+            f32 alpha;
+            if (object->field_0x768 < 0.2f) {
+                alpha = object->field_0x768 / 0.2f;
+            } else if (object->context_animation_timer < 0.2f) {
+                alpha = object->context_animation_timer / 0.2f;
+            } else {
+                alpha = 1.0f;
+            }
+            DrawForceGlowSprite(&position, radius, 0xdf, alpha, object);
+        }
+    } else if (object->field_0xd80 > 0.0f && object->field_0xd8c > 0.0f &&
+               WORLD->lev_objs[object->field_0xe1e].active != 0 &&
+               (object->apiobj.character_data->player_config->flags_090 & 0x400) == 0) {
+        DrawForceGlowSprite(&object->force_glow_position, object->field_0xd8c,
+                            object->field_0xe1e, object->field_0xd80 / FORCEGLOWTIME, object);
     }
 }
 

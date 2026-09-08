@@ -2,6 +2,7 @@
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/items/base/apiobject.h"
+#include "legoapi/characters/core/character.h"
 #include "nu2api/nu3d/nutex.h"
 
 struct AIROW_s;
@@ -9,7 +10,19 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-void GetZapOrigin(GameObject_s *) {
+NUVEC *GetZapOrigin(GameObject_s *object) {
+    NUVEC *origin = &object->apiobj.collision_position;
+    if (object->apiobj.field_0x288 != 0) {
+        PLAYERCHARACTERCONFIG_s *config = object->apiobj.character_data->player_config;
+        i32 joint = config->weapon_shoot_joints[0];
+        if (joint == -1 || object->apiobj.character_model->points_of_interest[joint] == NULL) {
+            joint = config->weapon_joints[0];
+        }
+        if (joint != -1 && object->apiobj.character_model->points_of_interest[joint] != NULL) {
+            origin = reinterpret_cast<NUVEC *>(&object->joint_matrices[joint].m30);
+        }
+    }
+    return origin;
 }
 
 extern f32 ForceThrowGravity;
@@ -42,14 +55,6 @@ void ReleaseForce(GameObject_s *object, i32 mode) {
     EndForce(object, mode);
 }
 
-void SetForceBack(GameObject_s *, nuvec_s *, float, i32) {
-}
-
-void ResetForceBack() {
-    ForceBackObj = NULL;
-    ForceBackPos = NULL;
-}
-
 void ResetForceGlow(PLAYERPACKET_s *packet) {
     packet->force_glow_x = 0.0f;
     packet->force_glow_y = 0.0f;
@@ -59,7 +64,19 @@ void ResetForceGlow(PLAYERPACKET_s *packet) {
     packet->force_glow_intensity = 0.2f;
 }
 
-void ForceLightning_Origin(GameObject_s *, nuvec_s *, nuvec_s *) {
+void ForceLightning_Origin(GameObject_s *object, NUVEC *primary, NUVEC *secondary) {
+    *primary = object->apiobj.collision_position;
+    if (secondary != NULL) secondary->y = 1000000000.0f;
+    if (object->apiobj.field_0x288 == 0) return;
+    PLAYERCHARACTERCONFIG_s *config = object->apiobj.character_data->player_config;
+    i32 joint = config->hand_joints[0];
+    if (joint == -1 || object->apiobj.character_model->points_of_interest[joint] == NULL) return;
+    *primary = *reinterpret_cast<NUVEC *>(&object->joint_matrices[joint].m30);
+    if (secondary == NULL || (object->weapon_scale != 0.0f && object->weapon_scale_state != 2)) return;
+    joint = config->hand_joints[1];
+    if (joint != -1 && object->apiobj.character_model->points_of_interest[joint] != NULL) {
+        *secondary = *reinterpret_cast<NUVEC *>(&object->joint_matrices[joint].m30);
+    }
 }
 
 void GameCam_Blend(GAMECAMERA_s *, f32, f32, i32);
@@ -72,9 +89,4 @@ void EndForce(GameObject_s *object, i32) {
         object->character_context = -1;
     }
     GameCam_Blend(GameCam, 0.5f, 0.0f, 1);
-}
-
-void GizForceSFX_Configure(WORLDINFO_s *world, char *config) {
-    (void)world;
-    (void)config;
 }

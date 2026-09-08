@@ -3,6 +3,7 @@
 HashedKey MechTouchTask::HashId("UNKNOWN");
 HashedKey MechTouchTaskGoTo::HashId("Goto");
 HashedKey MechTouchTaskBuildIt::HashId("Build It");
+HashedKey MechTouchTaskJump::HashId("Jump");
 
 MechTouchTask::MechTouchTask(MechInputTouchGestureBasedController &owner)
     : controller(&owner), elapsed(0.0f), flags(0) {

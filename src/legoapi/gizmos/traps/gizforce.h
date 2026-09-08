@@ -13,6 +13,8 @@ void GizForce_PlayBackwards(GIZFORCE_s *force);
 void GizForce_SetVisibility(GIZFORCE_s *force, i32 visibility);
 i32 GizForce_AnimComplete(GIZFORCE_s *force);
 i32 GizForce_Complete(GIZFORCE_s *force);
+struct HINT_s;
+i32 GizForce_UpdateHint(HINT_s *hint);
 
 ADDGIZMOTYPE *GizForce_RegisterGizmo(i32 type_id);
 

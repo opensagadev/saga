@@ -2107,8 +2107,8 @@ static __used__ void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *instance, float f
     NUQUAT look_at_rotation;
     NUQUAT camera_rotation;
     NUQUAT blended_rotation;
-    NuMtxToQuat(&look_at_rotation, &look_at_matrix);
-    NuMtxToQuat(&camera_rotation, &cutscenecammtx);
+    NuMtxToQuat(&look_at_matrix, &look_at_rotation);
+    NuMtxToQuat(&cutscenecammtx, &camera_rotation);
     NuQuatSlerp(&blended_rotation, &camera_rotation, &look_at_rotation, blend);
     NuQuatToMtx(&blended_rotation, &cutscenecammtx);
     *NUMTX_GET_ROW_VEC(&cutscenecammtx, 3) = translation;

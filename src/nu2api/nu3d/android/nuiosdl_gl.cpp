@@ -25,6 +25,7 @@
 
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
+#include "nu2api/nu3d/NuRenderDevice.h"
 #include "nu2api/nu3d/android/nutex_android.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nushader.h"
@@ -323,64 +324,6 @@ extern "C" void NuRenderContextSetZFunc(i32 zfunc) {
     g_renderContext_zFunc = zfunc;
 }
 
-extern "C" {
-    static f32 *NuRenderContextGetKTint(void) {
-        return g_renderContext_kTint;
-    }
-
-    static numtl_s *NuRenderContextGetMaterialInUse(void) {
-        return g_renderContext_materialInUse;
-    }
-
-    static void NuRenderContextSetZFunc_inline(i32 zfunc) {
-        if (zfunc != g_renderContext_zFunc) {
-            switch (zfunc) {
-                case 0:
-                    glEnable(GL_DEPTH_TEST);
-                    glDepthMask(GL_TRUE);
-                    glDepthFunc(GL_LEQUAL);
-                    break;
-                case 1:
-                    glEnable(GL_DEPTH_TEST);
-                    glDepthMask(GL_FALSE);
-                    glDepthFunc(GL_LEQUAL);
-                    break;
-                case 2:
-                    glDisable(GL_DEPTH_TEST);
-                    glDepthMask(GL_TRUE);
-                    break;
-                case 3:
-                    glDisable(GL_DEPTH_TEST);
-                    glDepthMask(GL_FALSE);
-                    break;
-            }
-        }
-        g_renderContext_zFunc = zfunc;
-    }
-
-    static void NuRenderContextSetWorld(NUMTX *world) {
-        struct WorldMatrices {
-            NUMTX world;
-            NUMTX world_view_projection;
-            NUMTX world_view;
-        } matrices;
-
-        matrices.world = *world;
-        NuMtxMulH(&matrices.world_view_projection, world, reinterpret_cast<NUMTX *>(g_renderContext_viewProj));
-        NuMtxMul(&matrices.world_view, world, reinterpret_cast<NUMTX *>(g_renderContext_view));
-        NuShaderManagerSetElementsfv(0x52, 0, 3, reinterpret_cast<const f32 *>(&matrices));
-        NuShaderManagerSetfv(0x3c, reinterpret_cast<const f32 *>(world));
-    }
-
-    static __used__ void NuRenderContextSetWorld_transpose(NUMTX *world) {
-        NuMtxTranspose(world, world);
-        NuShaderManagerSetElementsfv_transpose(0x3c, 0, 1, reinterpret_cast<const f32 *>(world));
-    }
-}
-
-static void Nu360SetObjectShadowFactor(f32) {
-}
-
 // ---------------------------------------------------------------------------
 // Vertex attribute binding — original 0x293841 / 0x2939fe / 0x293a65.
 // ---------------------------------------------------------------------------
@@ -397,57 +340,54 @@ static void Nu360SetObjectShadowFactor(f32) {
 struct VertexAttribRecord {
     u32 gl_type;
     u32 comp_count;
-    u32 normalized;
+    u8 normalized;
+    u8 reserved[3];
     u32 pad;
     u32 byte_offset;
     u32 stride;
 };
 
+extern "C" {
+// Original 0x293841, 307 bytes.
 static void NuIOS_BindVertexAttributesInternal(isize dataAddr, usize baseVertex, const u32 *fmtWords, u32 mask) {
-    u32 wanted = mask & fmtWords[0];
-    u32 toDisable = g_activeAttributes & ~wanted;
-    u32 toEnable = ~g_activeAttributes & wanted;
-    g_activeAttributes = wanted;
-
-    const u32 *recordsBase = fmtWords + 1; // skip mask
-
     i32 loc = 0;
-    // Walk bit-by-bit so enable/disable is delta-driven like the original.
+    mask &= fmtWords[0];
+    u32 toDisable = g_activeAttributes & ~mask;
+    u32 toEnable = ~g_activeAttributes & mask;
+    g_activeAttributes = mask;
     do {
-        bool wantThis = (wanted & 1) != 0;
-        bool needDisable = (toDisable & 1) != 0;
-        bool needEnable = (toEnable & 1) != 0;
-
-        if (!wantThis) {
-            if (needDisable) {
-                glDisableVertexAttribArray(loc);
-            }
-        } else {
-            if (needEnable) {
+        if (mask & 1) {
+            const VertexAttribRecord *rec = reinterpret_cast<const VertexAttribRecord *>(fmtWords + loc * 6 + 1);
+            if (toEnable & 1) {
                 glEnableVertexAttribArray(loc);
             }
-            const VertexAttribRecord *rec = reinterpret_cast<const VertexAttribRecord *>(recordsBase + loc * 6);
+            const void *address = reinterpret_cast<const void *>(dataAddr + rec->byte_offset + baseVertex * rec->stride);
             const GLenum type = NuIOS_PlatformVertexAttributeType(static_cast<GLenum>(rec->gl_type));
             glVertexAttribPointer(loc, (GLint)rec->comp_count, type, (GLboolean)rec->normalized, (GLsizei)rec->stride,
-                                  (const void *)(dataAddr + rec->byte_offset + baseVertex * rec->stride));
+                                  address);
+        } else if (toDisable & 1) {
+            glDisableVertexAttribArray(loc);
         }
 
         ++loc;
-        wanted >>= 1;
+        mask >>= 1;
         toEnable >>= 1;
         toDisable >>= 1;
-    } while (wanted != 0 || toEnable != 0 || toDisable != 0);
+    } while ((mask | toEnable | toDisable) != 0);
+}
 }
 
 // original 0x2939fe — bind using the currently bound vertex format.
+extern "C" {
 static void NuIOS_BindVertexAttributesImmediate(isize, isize dataAddr) {
     NuIOSBindVAO(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    const u32 *fmt = static_cast<const u32 *>(usizeToPtr(g_boundVertexFormat));
-    NuIOS_BindVertexAttributesInternal(dataAddr, 0, fmt, fmt[0]);
+    NuIOS_BindVertexAttributesInternal(dataAddr, 0, reinterpret_cast<const u32 *>(g_boundVertexFormat),
+                                      *reinterpret_cast<const u32 *>(g_boundVertexFormat));
 }
 
 static void NuIOS_BindVertexAttributes(isize dataAddr, usize baseVertex);
+}
 
 void NuIOSDLDebrisCallback(void *data) {
     nunativedebrisdata_s *packet = static_cast<nunativedebrisdata_s *>(data);
@@ -466,9 +406,10 @@ void NuIOSDLDebrisCallback(void *data) {
     glDrawArrays(GL_TRIANGLES, packet->first_vertex, packet->vertex_count);
 }
 
-static void NuIOS_BindVertexAttributes(isize dataAddr, usize baseVertex) {
-    const u32 *fmt = static_cast<const u32 *>(usizeToPtr(g_boundVertexFormat));
-    NuIOS_BindVertexAttributesInternal(dataAddr, baseVertex, fmt, fmt[0]);
+extern "C" {
+static void NuIOS_BindVertexAttributes(isize, usize baseVertex) {
+    NuIOS_BindVertexAttributesInternal(0, baseVertex, reinterpret_cast<const u32 *>(g_boundVertexFormat),
+                                      *reinterpret_cast<const u32 *>(g_boundVertexFormat));
 }
 
 // original 0x293a65 — bind immediate data with an explicit record layout.
@@ -479,6 +420,7 @@ static void NuIOS_BindVertexAttributesImmediateOverrideDataLayout(isize, isize d
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     const u32 *bound_format = static_cast<const u32 *>(usizeToPtr(g_boundVertexFormat));
     NuIOS_BindVertexAttributesInternal(dataAddr, 0, fmt, bound_format[0]);
+}
 }
 
 // ---------------------------------------------------------------------------
@@ -498,55 +440,26 @@ namespace {
     constexpr i16 kParamKonstColourA = 0x30; // semantic 48
     constexpr i16 kParamTerminator = (i16)-0x8000;
 
-    // Zero-initialized shader constants at original BSS addresses 0x6463bc
-    // and 0x646360. They are only read by NuIOSDLMtlCallback.
-    NUVEC4 g_debrisShaderConstantA = {};
-    NUVEC4 g_debrisShaderConstantB = {};
-
-    const NUSHADERPROGRAMPARAMETER *FindParam(const NUSHADERPROGRAMPARAMETER *params, i32 count, u16 semantic) {
-        if (count <= 0 || params == nullptr) {
-            return nullptr;
-        }
-        for (i32 i = 0; i < count; ++i) {
-            if (params[i].register_index == semantic) {
-                return &params[i];
-            }
-        }
-        // Original falls through to the last entry when not found — mimic that
-        // by returning the last pair so the caller still indexes [1].
-        return &params[count - 1];
-    }
-
-    void UploadDebrisConstants(NUSHADERPROGRAM *program) {
-        if (program == nullptr) {
-            return;
-        }
-        i32 count = program->parameter_count;
-        const NUSHADERPROGRAMPARAMETER *params = program->parameters;
-        if (count < 1 || params == nullptr) {
-            return;
-        }
-
-        auto upload = [&](i16 semantic, i32 vec4Count, const void *src) {
-            const NUSHADERPROGRAMPARAMETER *parameter = FindParam(params, count, semantic);
-            // Encoding of params[][1]: low 12 bits = uniform location,
-            // high nibble (bits 12..15) encodes the setter-table class.
-            u32 loc = parameter->location_and_setter & 0x0fff;
-            u32 klass = parameter->location_and_setter >> 12;
-            (*g_glConstantSetterTable[klass])(loc, vec4Count, src);
-        };
-
-        upload(kParamViewProj, 4, g_renderContext_viewProj);
-        upload(kParamView, 4, g_renderContext_view);
-        upload(kParamKonstColourA, 1, &g_debrisShaderConstantA);
-        upload(kParamTerminator, 1, &g_debrisShaderConstantB);
-    }
 
 } // namespace
 
-// original 0x29c000 — the four special-material programs are built from
+extern "C" {
+    NUSHADERPROGRAM *g_ps3default_2d_t0xc0;
+}
+
+// original 0x29bf60, 265 bytes — the four special-material programs are built from
 // shader strings compiled into libTTapp.so rather than from scene resources.
 extern "C" void NuIOSMtlInit(void) {
+    g_packetToShaderStateMappings[0].mask.semantics[0] = 0;
+    g_packetToShaderStateMappings[0].mask.semantics[1] = 0x0fe00000;
+    g_packetToShaderStateMappings[0].mask.semantics[2] = 0x00806800;
+    g_packetToShaderStateMappings[0].mask.semantics[3] = 0;
+    g_packetToShaderStateMappings[1].mask.semantics[0] = 0;
+    g_packetToShaderStateMappings[1].mask.semantics[1] = 0x60000000;
+    g_packetToShaderStateMappings[1].mask.semantics[2] = 0x00400600;
+    g_packetToShaderStateMappings[1].mask.semantics[3] = 0;
+    BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/numtl_android.cpp", 0x1d0);
+    g_ps3default_2d_t0xc0 = nullptr;
     g_faceonProgram = NuShaderProgramCreateIOS(reinterpret_cast<const char *>(FaceOn_vx),
                                                reinterpret_cast<const char *>(FaceOn_Hi_px));
     g_faceonDecalProgram = NuShaderProgramCreateIOS(reinterpret_cast<const char *>(FaceOn_vx),
@@ -555,94 +468,177 @@ extern "C" void NuIOSMtlInit(void) {
         NuShaderProgramCreateIOS(reinterpret_cast<const char *>(debris_vx), reinterpret_cast<const char *>(debris_px));
     g_debrisGlassProgram = NuShaderProgramCreateIOS(reinterpret_cast<const char *>(debris_vx),
                                                     reinterpret_cast<const char *>(debris_glass_px));
+    EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/numtl_android.cpp", 0x1f3);
 }
 
-static void NuIOS_GetAlphaTestParameters(f32 parameters[2]) {
-    const f32 alpha_ref = static_cast<f32>(g_alphaRef) * (1.0f / 255.0f);
+extern "C" {
+// Original 0x293337, 76 bytes.
+static void NuRenderContextSetKTint(f32 *values) {
+    *reinterpret_cast<NUVEC4 *>(g_renderContext_kTint) = *reinterpret_cast<NUVEC4 *>(values);
+    NuShaderManagerSetfv(0x44, values);
+}
 
-    if (g_alphaTestEnabled == 0) {
-        parameters[0] = 0.0f;
-        parameters[1] = -1.0f;
-        return;
+// Original 0x293383, 22 bytes.
+static NUVEC4 *NuRenderContextGetKTint(void) {
+    return reinterpret_cast<NUVEC4 *>(g_renderContext_kTint);
+}
+
+// Original 0x293399, 24 bytes.
+static numtl_s *NuRenderContextGetMaterialInUse(void) {
+    return g_renderContext_materialInUse;
+}
+
+// Original 0x2933b1, 215 bytes.
+static void NuRenderContextSetZFunc_inline(i32 mode) {
+    if (g_renderContext_zFunc != mode) {
+        switch (mode) {
+            case 0:
+                glEnable(GL_DEPTH_TEST);
+                glDepthMask(GL_TRUE);
+                glDepthFunc(GL_LEQUAL);
+                break;
+            case 1:
+                glEnable(GL_DEPTH_TEST);
+                glDepthMask(GL_FALSE);
+                glDepthFunc(GL_LEQUAL);
+                break;
+            case 2:
+                glDisable(GL_DEPTH_TEST);
+                glDepthMask(GL_TRUE);
+                break;
+            case 3:
+                glDisable(GL_DEPTH_TEST);
+                glDepthMask(GL_FALSE);
+                break;
+        }
     }
+    g_renderContext_zFunc = mode;
+}
 
-    switch (g_alphaFunc) {
-        case 2:
-            parameters[0] = -1.0f;
-            parameters[1] = -alpha_ref - (1.0f / 255.0f);
-            if (parameters[1] <= 0.0f) {
-                parameters[1] = 0.0f;
-            }
+// Original 0x293488, 620 bytes. Negation precedes unsigned-to-float conversion.
+static void NuIOS_GetAlphaTestParameters(f32 parameters[2]) {
+    if (g_alphaTestEnabled != 0) {
+      switch (g_alphaFunc) {
+        case 5:
+            parameters[0] = 1.0f;
+            parameters[1] = static_cast<f32>(g_alphaRef) * (1.0f / 255.0f);
             break;
         case 3:
             parameters[0] = -1.0f;
-            parameters[1] = -alpha_ref;
-            break;
-        case 5:
-            parameters[0] = 1.0f;
-            parameters[1] = alpha_ref;
+            parameters[1] = static_cast<f32>(-g_alphaRef) * (1.0f / 255.0f);
             break;
         case 6:
             parameters[0] = 1.0f;
-            parameters[1] = alpha_ref + (1.0f / 255.0f);
+            parameters[1] = static_cast<f32>(g_alphaRef) * (1.0f / 255.0f) + (1.0f / 255.0f);
+            break;
+        case 2:
+            parameters[0] = -1.0f;
+            parameters[1] = static_cast<f32>(-g_alphaRef) * (1.0f / 255.0f) - (1.0f / 255.0f) > 0.0f
+                ? static_cast<f32>(-g_alphaRef) * (1.0f / 255.0f) - (1.0f / 255.0f) : 0.0f;
             break;
         default:
             parameters[0] = 0.0f;
             parameters[1] = -1.0f;
             break;
+      }
+    } else {
+        parameters[0] = 0.0f;
+        parameters[1] = -1.0f;
+    }
+}
+}
+
+// Original 0x2936f4, 163 bytes.
+extern "C" void NuShaderProgramSetVertexParamfv(NUSHADERPROGRAM *program, u32 register_index,
+                                               const f32 *values, i32 component_count) {
+    for (i32 i = 0; i < program->parameter_count; ++i) {
+        NUSHADERPROGRAMPARAMETER *parameter = &program->parameters[i];
+        if (parameter->register_index == register_index) {
+            g_glConstantSetterTable[parameter->setter](
+                parameter->location, (component_count + 3) / 4, values);
+            break;
+        }
     }
 }
 
-// original 0x29bf20 — install the matrices and constants consumed by FaceOn_vx.
+// Original 0x293797, 170 bytes.
+extern "C" void NuShaderProgramSetFragmentParamfv(NUSHADERPROGRAM *program, u32 register_index,
+                                                 const f32 *values, i32 component_count) {
+    register_index |= 0x8000;
+    for (i32 i = 0; i < program->parameter_count; ++i) {
+        NUSHADERPROGRAMPARAMETER *parameter = &program->parameters[i];
+        if (parameter->register_index == register_index) {
+            g_glConstantSetterTable[parameter->setter](
+                parameter->location, (component_count + 3) / 4, values);
+            break;
+        }
+    }
+}
+
+// Original 0x294a9e, 628 bytes — matrices and constants consumed by FaceOn_vx.
 void NuIOSDLFaceOnTransformCallback(void *arg) {
-    auto *packet = static_cast<NuFaceOnTransformPacket *>(arg);
-    NUMTX world = packet->world;
-    const f32 opacity = world.m33;
-    const f32 translation[4] = {world.m30, world.m31, world.m32, 1.0f};
-    const f32 scale[4] = {packet->magnitude, 1.0f, 0.0f, 0.0f};
-    f32 tint[4] = {
-        g_renderContext_kTint[0],
-        g_renderContext_kTint[1],
-        g_renderContext_kTint[2],
-        g_renderContext_kTint[3] * opacity,
-    };
+    f32 opacity = 1.0f;
+    VARIPTR packet;
+    packet.void_ptr = arg;
+    f32 values[4];
+    values[0] = static_cast<NUMTX *>(packet.void_ptr)->m30;
+    values[1] = static_cast<NUMTX *>(packet.void_ptr)->m31;
+    values[2] = static_cast<NUMTX *>(packet.void_ptr)->m32;
+    values[3] = 1.0f;
+    static_cast<NUMTX *>(packet.void_ptr)->m30 = 0.0f;
+    static_cast<NUMTX *>(packet.void_ptr)->m31 = 0.0f;
+    static_cast<NUMTX *>(packet.void_ptr)->m32 = 0.0f;
+    NUSHADERPROGRAM *program = g_currentShaderProgram;
+    if (program != nullptr) {
+    opacity = static_cast<NUMTX *>(packet.void_ptr)->m33;
+    static_cast<NUMTX *>(packet.void_ptr)->m33 = 1.0f;
+
+    NuShaderProgramSetVertexParamfv(program, 0x50, static_cast<const f32 *>(packet.void_ptr), 16);
+    packet.char_ptr += sizeof(NUMTX);
+    NuShaderProgramSetVertexParamfv(program, 0x59, values, 4);
+    values[0] = *packet.f32_ptr++;
+    values[1] = 1.0f;
+    values[2] = values[3] = 0.0f;
+    NuShaderProgramSetVertexParamfv(program, 0x54, values, 4);
+    NuShaderProgramSetVertexParamfv(program, 0x55, static_cast<const f32 *>(packet.void_ptr), 16);
+    NuShaderProgramSetVertexParamfv(program, 0, g_renderContext_viewProj, 16);
+    NuShaderProgramSetVertexParamfv(program, 0xc, static_cast<const f32 *>(packet.void_ptr), 16);
     f32 alpha_test[2];
-
-    world.m30 = 0.0f;
-    world.m31 = 0.0f;
-    world.m32 = 0.0f;
-    world.m33 = 1.0f;
-
-    NuShaderProgramSetVertexParamfv(g_currentShaderProgram, 0x50, reinterpret_cast<const f32 *>(&world), 16);
-    NuShaderProgramSetVertexParamfv(g_currentShaderProgram, 0x59, translation, 4);
-    NuShaderProgramSetVertexParamfv(g_currentShaderProgram, 0x54, scale, 4);
-    NuShaderProgramSetVertexParamfv(g_currentShaderProgram, 0x55, reinterpret_cast<const f32 *>(&packet->face_on), 16);
-    NuShaderProgramSetVertexParamfv(g_currentShaderProgram, 0, g_renderContext_viewProj, 16);
-    NuShaderProgramSetVertexParamfv(g_currentShaderProgram, 0xc, reinterpret_cast<const f32 *>(&packet->face_on), 16);
     NuIOS_GetAlphaTestParameters(alpha_test);
-    NuShaderProgramSetFragmentParamfv(g_currentShaderProgram, 0x70, alpha_test, 2);
-    NuShaderProgramSetVertexParamfv(g_currentShaderProgram, 0x28, tint, 4);
-
+    NuShaderProgramSetFragmentParamfv(program, 0x70, alpha_test, 2);
+    NUVEC4 tint = *NuRenderContextGetKTint();
     if (opacity < 1.0f) {
-        NuRenderContextSetZFunc(1);
-    } else if (g_renderContext_materialInUse != nullptr) {
-        NuRenderContextSetZFunc(g_renderContext_materialInUse->attribs.z_mode);
+        tint.w *= opacity;
+        NuRenderContextSetZFunc_inline(1);
+        NuShaderProgramSetVertexParamfv(program, 0x28, &tint.x, 4);
+    } else {
+        numtl_s *material = NuRenderContextGetMaterialInUse();
+        NuRenderContextSetZFunc_inline(material->attribs.z_mode);
+        NuShaderProgramSetVertexParamfv(program, 0x28, &tint.x, 4);
+    }
     }
 }
 
-// original 0x29bec0 — every face-on entry is expanded to two triangles in
+extern "C" {
+// Original 0x2939bb, 67 bytes. Override layout, retaining the bound attribute mask.
+static void NuIOS_BindVertexAttributesOverrideDataLayout(usize, const u32 *format) {
+    NuIOS_BindVertexAttributesInternal(0, 0, format,
+        *reinterpret_cast<const u32 *>(g_boundVertexFormat));
+}
+}
+
+// original 0x295393, 141 bytes — every face-on entry is expanded to two triangles in
 // the scene vertex buffer.
 void NuIOSDLFaceOnCallback(void *arg) {
+    if (arg != nullptr) {
     auto *packet = static_cast<NuFaceOnDrawPacket *>(arg);
-    if (packet == nullptr) {
-        return;
-    }
-
     NuIOSBindVAO(0);
     glBindBuffer(GL_ARRAY_BUFFER, packet->vertex_buffer);
-    g_boundVertexFormat = ptrToUsize(g_nuFaceOnVertexFormat);
-    NuIOS_BindVertexAttributes(0, 0);
+    NuIOS_BindVertexAttributesOverrideDataLayout(0, static_cast<const u32 *>(g_nuFaceOnVertexFormat));
     glDrawArrays(GL_TRIANGLES, packet->first_vertex, packet->face_count * 6);
+    } else {
+        return;
+    }
 }
 
 // original 0x29c480 — per-material display-list callback.  Selects the GL
@@ -660,11 +656,11 @@ void NuIOSDLMtlCallback(void *arg) {
     auto *mtl = (numtl_s *)arg;
 
     g_boundMaterial = mtl;
+    NUSHADEROBJECT *shaderId = NuShaderManagerGetShaderById(mtl->shader_desc.shader_id);
     g_LastMtl = mtl;
     g_renderContext_materialInUse = mtl;
     NuIOS_SetVertexFormat(ptrToUsize(mtl->vertex_decl));
 
-    NUSHADEROBJECT *shaderId = NuShaderManagerGetShaderById(mtl->shader_desc.shader_id);
     u8 variantFlags = MaterialVariantFlags(mtl);
 
     const bool isDebris = (variantFlags & 0x10) != 0;
@@ -700,9 +696,7 @@ void NuIOSDLMtlCallback(void *arg) {
         }
     } else {
         // ---- Debris ----
-        bool isGlass = (DebrisGlassSelector(mtl) == kGlassDebrisMarker);
-
-        if (isGlass) {
+        if (DebrisGlassSelector(mtl) == kGlassDebrisMarker) {
             if (NuIOSDLMtlCallback_refractionRT == 0) {
                 NuIOSDLMtlCallback_refractionRT = NuTexGenTexture(&NuIOSDLMtlCallback_nativeRefractionTex);
                 memset(&NuIOSDLMtlCallback_nativeRefractionTex, 0, 8);
@@ -713,7 +707,8 @@ void NuIOSDLMtlCallback(void *arg) {
             }
         }
 
-        NUSHADERPROGRAM *program = isGlass ? g_debrisGlassProgram : g_debrisProgram;
+        NUSHADERPROGRAM *program = DebrisGlassSelector(mtl) == kGlassDebrisMarker
+            ? g_debrisGlassProgram : g_debrisProgram;
 
         g_boundVertexFormat = ptrToUsize(g_nuDebrisVertexFormat);
         NuShaderManagerBindShader(0);
@@ -722,16 +717,51 @@ void NuIOSDLMtlCallback(void *arg) {
         glUseProgram(g_boundShader);
         g_currentShaderProgram = program;
 
-        UploadDebrisConstants(program);
+        for (i32 index = 0; index < program->parameter_count; ++index) {
+            const NUSHADERPROGRAMPARAMETER *parameter = &program->parameters[index];
+            if (parameter->register_index == static_cast<u16>(kParamViewProj)) {
+                const u32 location = parameter->location_and_setter & 0x0fff;
+                const u32 setter = parameter->location_and_setter >> 12;
+                g_glConstantSetterTable[setter](location, 4, g_renderContext_viewProj);
+                break;
+            }
+        }
+        for (i32 index = 0; index < program->parameter_count; ++index) {
+            const NUSHADERPROGRAMPARAMETER *parameter = &program->parameters[index];
+            if (parameter->register_index == static_cast<u16>(kParamView)) {
+                const u32 location = parameter->location_and_setter & 0x0fff;
+                const u32 setter = parameter->location_and_setter >> 12;
+                g_glConstantSetterTable[setter](location, 4, g_renderContext_view);
+                break;
+            }
+        }
+        for (i32 index = 0; index < program->parameter_count; ++index) {
+            const NUSHADERPROGRAMPARAMETER *parameter = &program->parameters[index];
+            if (parameter->register_index == static_cast<u16>(kParamKonstColourA)) {
+                const u32 location = parameter->location_and_setter & 0x0fff;
+                const u32 setter = parameter->location_and_setter >> 12;
+                g_glConstantSetterTable[setter](location, 1, nu2api::g_shaderUniforms[72].data.values);
+                break;
+            }
+        }
+        for (i32 index = 0; index < program->parameter_count; ++index) {
+            const NUSHADERPROGRAMPARAMETER *parameter = &program->parameters[index];
+            if (parameter->register_index == static_cast<u16>(kParamTerminator)) {
+                const u32 location = parameter->location_and_setter & 0x0fff;
+                const u32 setter = parameter->location_and_setter >> 12;
+                g_glConstantSetterTable[setter](location, 1, nu2api::g_shaderUniforms[71].data.values);
+                break;
+            }
+        }
 
-        if (isGlass) {
+        if (DebrisGlassSelector(mtl) == kGlassDebrisMarker) {
             glActiveTexture(GL_TEXTURE0);
             g_currentTexUnit = 0;
             glBindTexture(GL_TEXTURE_2D, NuIOSDLMtlCallback_nativeRefractionTex.platform.gl_tex);
             NUNATIVETEX *distort = NuTexGetNative(g_DebrisGlassDistortTID);
             NuTexSetTextureWithStagePS(distort, 1);
         } else {
-            NUNATIVETEX *tex = NuTexGetNative(*(i16 *)((u8 *)mtl + 0x74)); // mtl->tex_id
+            NUNATIVETEX *tex = NuTexGetNative(mtl->tex_id);
             NuTexSetTextureWithStagePS(tex, 0);
         }
     }
@@ -853,11 +883,33 @@ void NuIOSDLGeomCallback(void *arg) {
     NuIOSBindVAO(0);
 }
 
-// original 0x2a3c20 — installs a display-list world transform and applies
+extern "C" {
+// original 0x2931b9, 303 bytes.
+static void NuRenderContextSetWorld(NUMTX *world) {
+    NUMTX transforms[3];
+    transforms[0] = *world;
+    NuMtxMulH(&transforms[1], world, reinterpret_cast<NUMTX *>(g_renderContext_viewProj));
+    NuMtxMul(&transforms[2], world, reinterpret_cast<NUMTX *>(g_renderContext_view));
+    NuShaderManagerSetElementsfv(0x52, 0, 3, reinterpret_cast<const f32 *>(transforms));
+    NuShaderManagerSetfv(0x3c, reinterpret_cast<const f32 *>(world));
+}
+
+// original 0x2932e8, 79 bytes. The render-stream matrix is transposed in place.
+static void NuRenderContextSetWorld_transpose(NUMTX *world) {
+    NuMtxTranspose(world, world);
+    NuShaderManagerSetElementsfv_transpose(0x3c, 0, 1, reinterpret_cast<const f32 *>(world));
+}
+}
+
+// original 0x2947cc, 258 bytes — installs a display-list world transform and applies
 // the per-instance opacity to the current tint.
+// Original 0x293ad1, 5 bytes: deliberately empty on this platform.
+static void Nu360SetObjectShadowFactor(f32) {
+}
+
 void NuIOSDLTransformCallback(void *arg) {
     auto *world = static_cast<NUMTX *>(arg);
-    NUVEC4 tint = *reinterpret_cast<NUVEC4 *>(NuRenderContextGetKTint());
+    NUVEC4 tint = *NuRenderContextGetKTint();
     const f32 opacity = world->m33;
     const f32 shadow_factor = world->m23;
 
@@ -870,6 +922,7 @@ void NuIOSDLTransformCallback(void *arg) {
         NuRenderContextSetZFunc_inline(material->attribs.z_mode);
         NuShaderManagerSetfv(0x44, &tint.x);
     }
+    Nu360SetObjectShadowFactor(shadow_factor);
 
     Nu360SetObjectShadowFactor(shadow_factor);
     world->m33 = 1.0f;
@@ -879,12 +932,12 @@ void NuIOSDLTransformCallback(void *arg) {
     world->m23 = shadow_factor;
 }
 
-// original 0x2a3e20 — dynamic special transforms are stored transposed in
+// original 0x294935, 258 bytes — dynamic special transforms are stored transposed in
 // the render stream. Restore the ordinary world matrix before publishing it
 // to the shader state.
 void NuIOSDLTransformParamsCallback(void *arg) {
     auto *stream_matrix = static_cast<NUMTX *>(arg);
-    NUVEC4 tint = *reinterpret_cast<NUVEC4 *>(NuRenderContextGetKTint());
+    NUVEC4 tint = *NuRenderContextGetKTint();
     const f32 opacity = stream_matrix->m33;
     const f32 shadow_factor = stream_matrix->m32;
     numtl_s *material = NuRenderContextGetMaterialInUse();
@@ -897,6 +950,7 @@ void NuIOSDLTransformParamsCallback(void *arg) {
         NuRenderContextSetZFunc_inline(material->attribs.z_mode);
         NuShaderManagerSetfv(0x44, &tint.x);
     }
+    Nu360SetObjectShadowFactor(shadow_factor);
 
     Nu360SetObjectShadowFactor(shadow_factor);
     stream_matrix->m33 = 1.0f;
@@ -907,14 +961,25 @@ void NuIOSDLTransformParamsCallback(void *arg) {
 }
 
 void NuIOSDLKonstCallback(void *arg) {
-    const f32 *tint = static_cast<const f32 *>(arg);
-    memcpy(g_renderContext_kTint, tint, sizeof(g_renderContext_kTint));
-    NuShaderManagerSetfv(0x44, tint);
+    NuRenderContextSetKTint(static_cast<f32 *>(arg));
 }
 
-// original 0x2a4dfe — installs the light packet produced by
+// Original 0x294d12, 129 bytes. Two header words precede the group data.
+void NuIOSDLVertexGroupsCallback(void *arg) {
+    const i32 max_groups = 32;
+    VARIPTR packet;
+    packet.void_ptr = arg;
+    i32 group_count = *packet.u32_ptr++;
+    i32 flags = *packet.u32_ptr++;
+    const f32 *values = static_cast<const f32 *>(packet.void_ptr);
+    i32 vector_count = (group_count + 3) / 4;
+    NuShaderManagerSetElementsfv(0x51, 0, vector_count, values);
+}
+
+// original 0x294dfe, 692 bytes — installs the light packet produced by
 // RndrStateBuildLightState into the shader semantic state.
 void NuIOSDLLightsCallback(void *arg) {
+    g_boundLightPacket = arg;
     auto *lights = static_cast<NULIGHTSTATE *>(arg);
     NuShaderManagerSetfv(0x35, reinterpret_cast<const f32 *>(&lights->ambient_intensity));
     NuShaderManagerSetfv(0x39, reinterpret_cast<const f32 *>(&lights->light_direction[0]));
@@ -956,7 +1021,9 @@ void NuIOSDLLightsCallback(void *arg) {
     NuShaderManagerSetfv(0x57, specular_intensity);
 }
 
-// original 0x2a4030 — camera packets carry view/projection matrices at +4
+extern "C" void NuRenderContextSetViewport(i32 x, i32 y, i32 width, i32 height);
+
+// original 0x2a5128, 204 bytes — camera packets carry view/projection matrices at +4
 // and +0x44 respectively. The viewport tail is deliberately a no-op on this
 // platform, matching NuRenderContextSetViewport in the original.
 void NuIOSDLCameraCallback(void *arg) {
@@ -967,10 +1034,20 @@ void NuIOSDLCameraCallback(void *arg) {
         f32 viewport[4];
     };
     static i32 last_id = -1;
+    g_boundCameraPacket = arg;
     auto *packet = static_cast<NuIOSCameraPacket *>(arg);
     if (packet->id != last_id) {
+        NUMTX *view = &packet->view;
+        NUMTX *projection = view + 1;
+        f32 *viewport = reinterpret_cast<f32 *>(projection + 1);
         last_id = packet->id;
-        NuRenderContextSetViewProj(&packet->view, &packet->projection);
+        NuRenderContextSetViewProj(view, projection);
+        NuRenderContextSetViewport(static_cast<i32>(viewport[0]),
+                                   static_cast<i32>(viewport[1]),
+                                   static_cast<i32>(viewport[2]),
+                                   static_cast<i32>(viewport[3]));
+    } else {
+        return;
     }
 }
 

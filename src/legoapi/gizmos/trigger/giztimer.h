@@ -1,4 +1,5 @@
 #pragma once
+#include "decomp_assert.h"
 
 #include "legoapi/gizmo/base/gizmo.h"
 
@@ -13,9 +14,14 @@ typedef struct GIZTIMER_s {
     char name[16];
 } GIZTIMER;
 
+DECOMP_ASSERT(sizeof(GIZTIMER) == 0x1c, "GIZTIMER ABI");
+DECOMP_ASSERT(offsetof(GIZTIMER, flags) == 0xa, "GIZTIMER flags offset");
+DECOMP_ASSERT(offsetof(GIZTIMER, name) == 0xc, "GIZTIMER name offset");
+
 #ifdef __cplusplus
 
 ADDGIZMOTYPE *GizTimer_RegisterGizmo(i32 type_id);
+GIZMO *createGizTimer(void *, float time, i32 random_time, char *name);
 i32 GizTimer_GetMaxGizmos(void *world_info);
 void GizTimer_AddGizmos(GIZMOSYS *gizmo_sys, i32 unknown1, void *world_info, void *unknown2);
 void GizTimer_Update(void *world_info, void *, float delta_time);

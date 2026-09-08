@@ -10,6 +10,7 @@
 extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *, f32, nuanimtime_s *, f32 *, f32 *);
 extern "C" i32 NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *, f32, NUMTX *, nuanimtime_s *);
 void instNuGCutSceneEndButNotSystems(instNUGCUTSCENE_s *instance);
+void instNuGCutSceneResetCamLock(instNUGCUTSCENE_s *);
 
 extern "C" {
     extern debinftype **debtab;
@@ -20,6 +21,7 @@ extern "C" {
 
     i32 (*TriggerLocatorVfxFn)(u16, f32 *) = NULL;
     void (*ReleaseLocatorVfxFn)(i32) = NULL;
+    extern void (*NuCutSceneCharacterRelease)(instNUGCUTCHAR_s *, NUGCUTCHAR_s *);
     void (*UpdateLocatorVfxFn)(i32, f32 *) = NULL;
     void (*NuCutSceneSFXUpdate)(NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *, NUGCUTLOCATOR_s *, f32, NUMTX *,
                                 i32) = NULL;
@@ -184,7 +186,31 @@ extern "C" {
     void instNuGCutSceneSetRepeat(void) {
     }
 
-    void instNuGCutSceneStop(void) {
+    void instNuGCutSceneStop(instNUGCUTSCENE_s *instance) {
+        instance->flags_88 &= ~6;
+        instance->flags_89 &= ~0x10;
+        if ((instance->flags_8a & 4) != 0) {
+            instNUGCUTCHARSYS_s *runtime = instance->character_instance;
+            if (runtime != NULL) {
+                NUGCUTCHARSYS_s *system = instance->cutscene->character_system;
+                for (i32 i = 0; i < system->character_count; ++i) {
+                    instNUGCUTCHAR_s *character = &runtime->characters[i];
+                    if (character->character != NULL && NuCutSceneCharacterRelease != NULL)
+                        NuCutSceneCharacterRelease(character, &system->characters[i]);
+                }
+            }
+        } else {
+            instNUGCUTCHARSYS_s *runtime = instance->character_instance;
+            if (runtime != NULL) {
+                NUGCUTCHARSYS_s *system = instance->cutscene->character_system;
+                for (i32 i = 0; i < system->character_count; ++i) {
+                    instNUGCUTCHAR_s *character = &runtime->characters[i];
+                    if (character->character != NULL && NuCutSceneCharacterRelease != NULL)
+                        NuCutSceneCharacterRelease(character, &system->characters[i]);
+                }
+            }
+        }
+        instNuGCutSceneResetCamLock(instance);
     }
 
     void instNuGCutSceneTimeLeft(void) {

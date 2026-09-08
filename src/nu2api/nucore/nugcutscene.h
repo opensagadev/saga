@@ -107,11 +107,11 @@ struct NUGCUTRIGID_s {
 
 struct NUGCUTCHAR_s {
     NUMTX base_matrix;
-    char *name;
+    union { char *name; char *model_file; };
     nuanimdata2_s *animation;
     nuanimdata2_s *face_animation;
     nuanimdata2_s *extra_animation;
-    void *character_model;
+    union { void *character_model; void *character; };
     NUGCUTLOCATOR_s *locator;
     f32 animation_rate;
     u8 flags;
@@ -134,7 +134,7 @@ struct NUGCUTCHARSYS_s {
 };
 
 struct instNUGCUTCHAR_s {
-    void *character_model;
+    union { void *character_model; void *character; };
     i32 field_04;
     u32 field_08;
     f32 animation_frame_a;

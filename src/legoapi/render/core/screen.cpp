@@ -233,8 +233,6 @@ void HandleStillRender() {
     grab_screen_image = 0;
 }
 
-void LinkShaderProgram(u32) {
-}
 
 void PreRenderFlashHack() {
 }

@@ -11,7 +11,9 @@ struct GIZOBSTACLESYS_s;
 struct GIZBUILDITSYS_s;
 struct GIZMOPICKUPRUNTIMESYS_s;
 struct FADER_s;
+struct RIPPLEEFFECT_s;
 struct SPECIALMINIKITSYS_s;
+struct TIGHTROPE_s;
 struct GUIDELINE_s;
 struct SECURITYDOOR_s;
 
@@ -89,17 +91,23 @@ struct BOLTTYPE_s {
     u8 field_3c;
     u8 field_3d;
     u16 field_3e;
-    u8 pad_40[0x18];
-    char *hit_sfx;
+    u32 field_40;
+    void (*init_callback)(BOLT_s *); // 0x44
+    void (*update_callback)(BOLT_s *); // 0x48
+    void (*end_callback)(BOLT_s *); // 0x4c
+    void (*ricochet_callback)(BOLT_s *, NUVEC *); // 0x50
+    f32 (*scale_callback)(BOLT_s *); // 0x54
     char *shoot_sfx;
+    char *hit_sfx;
     u32 field_60;
-    i16 hit_sfx_id;
     i16 shoot_sfx_id;
+    i16 hit_sfx_id;
     u8 pad_68[0x3c];
 };
 DECOMP_ASSERT(sizeof(BOLTTYPE_s) == 0xa4, "BOLTTYPE_s size");
-DECOMP_ASSERT(offsetof(BOLTTYPE_s, hit_sfx) == 0x58, "BOLTTYPE hit sound offset");
-DECOMP_ASSERT(offsetof(BOLTTYPE_s, hit_sfx_id) == 0x64, "BOLTTYPE hit sound id offset");
+DECOMP_ASSERT(offsetof(BOLTTYPE_s, end_callback) == 0x4c, "BOLTTYPE end callback offset");
+DECOMP_ASSERT(offsetof(BOLTTYPE_s, hit_sfx) == 0x5c, "BOLTTYPE hit sound offset");
+DECOMP_ASSERT(offsetof(BOLTTYPE_s, hit_sfx_id) == 0x66, "BOLTTYPE hit sound id offset");
 
 struct LEVELSFXENTRY_s {
     NUVEC position;
@@ -264,7 +272,19 @@ typedef struct WORLDINFO_s {
 
     union {
         struct {
-            u8 reserved_46f4[0x4714 - 0x46f4];
+            union {
+                u8 reserved_46f4[0x4714 - 0x46f4];
+                struct {
+                    u32 field_46f4;
+                    RIPPLEEFFECT_s *ripple_effects;
+                    union { u32 field_46fc; i32 ripple_effect_count; };
+                    union {
+                        struct { i32 water_ripple_effect; i32 sabre_ripple_effect; };
+                        i32 ripple_effect_indices[2];
+                    };
+                    u8 reserved_4708[0xc];
+                };
+            };
             LEVELSFXENTRY_s level_sfx[64]; // 0x4714
             u8 reserved_4b14[0x5038 - 0x4b14];
         };
@@ -286,7 +306,8 @@ typedef struct WORLDINFO_s {
     PULSESYS_s *pulses_sys; // 0x5054
 
     SPECIALMINIKITSYS_s *special_minikits; // 0x5058
-    u8 reserved_505c[0x8];                 // 0x505c .. 0x5064
+    TIGHTROPE_s *tightropes;               // 0x505c
+    i32 tightrope_count;                  // 0x5060
     SIGNAL_s *signals;                     // 0x5064
     i32 signal_count;                      // 0x5068
 
@@ -320,7 +341,8 @@ typedef struct WORLDINFO_s {
     GIZMOBLOWUPTYPE_s *gizmo_blowup_types; // 0x50c8
     GIZMOBLOWUP_s *gizmo_blowups;          // 0x50cc
 
-    char filler11[0x50d8 - 0x50d0];
+    u32 field_0x50d0;
+    GIZMOBLOWUP_s **blowup_target_candidates; // 0x50d4
 
     GIZRANDOMSYS_s *giz_randoms;
 
@@ -350,8 +372,10 @@ typedef struct WORLDINFO_s {
     TRAFFICANIMSYS_s *trafficanim_sys; // 0x516c
     PLUGSYS_s *plug_sys;               // 0x5170
 
-    char filler15[0x51b0 - 0x5174];
+    i32 field_0x5174;
+    char filler15[0x51b0 - 0x5178];
 } WORLDINFO;
+DECOMP_ASSERT(offsetof(WORLDINFO, field_0x5174) == 0x5174, "WORLDINFO saved level state offset");
 
 DECOMP_ASSERT(offsetof(WORLDINFO, gizmo_blowup_type_count) == 0x50c0, "WORLDINFO blowup type count offset");
 DECOMP_ASSERT(offsetof(WORLDINFO, gizmo_blowup_types) == 0x50c8, "WORLDINFO blowup types offset");
@@ -359,6 +383,9 @@ DECOMP_ASSERT(offsetof(WORLDINFO, portal_doors) == 0x504c, "WORLDINFO portal-doo
 DECOMP_ASSERT(offsetof(WORLDINFO, portal_door_count) == 0x5050, "WORLDINFO portal-door count offset");
 DECOMP_ASSERT(offsetof(WORLDINFO, pulses_sys) == 0x5054, "WORLDINFO pulse system offset");
 DECOMP_ASSERT(offsetof(WORLDINFO, level_sfx) == 0x4714, "WORLDINFO level SFX array offset");
+DECOMP_ASSERT(offsetof(WORLDINFO, ripple_effects) == 0x46f8, "WORLDINFO ripple effects offset");
+DECOMP_ASSERT(offsetof(WORLDINFO, water_ripple_effect) == 0x4700, "WORLDINFO water ripple offset");
+DECOMP_ASSERT(offsetof(WORLDINFO, sabre_ripple_effect) == 0x4704, "WORLDINFO sabre ripple offset");
 DECOMP_ASSERT(offsetof(WORLDINFO, level_sfx_count) == 0x4b14, "WORLDINFO level SFX count offset");
 DECOMP_ASSERT(offsetof(WORLDINFO, bolt_types) == 0x4b18, "WORLDINFO bolt types offset");
 DECOMP_ASSERT(offsetof(WORLDINFO, faders) == 0x5038, "WORLDINFO fader array offset");

@@ -10,6 +10,7 @@ struct GameObject_s;
 extern "C" GAMEPAD_s GamePad[64];
 
 // Directional/button mask constants (original .data @0x667bf0-0x667c40).
+extern u32 GAMEPAD_LIFT;
 extern u32 GAMEPAD_DRIGHT;
 extern u32 GAMEPAD_DLEFT;
 extern u32 GAMEPAD_DDOWN;

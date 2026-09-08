@@ -3,9 +3,13 @@
 #include "gameframework/saveload.h"
 #include "legoapi/menus/screens/shop.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/items/base/apiobject.h"
 #include "legoapi/menus/screens/store.h"
 #include "legoapi/world/levels/episode.h"
 #include "legoapi/world/world.h"
+#include "legoapi/world/level.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/levels/levels.h"
 
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
@@ -117,7 +121,58 @@ i32 Store_FindPack(i32 id, char *name) {
 void Store_UnlockPack(i32, bool) {
 }
 
-void StoreLevelProgressFn(WORLDINFO_s *, LEVEL_PROGRESS_s *, i32) {
+extern AREADATA *VADER_ADATA;
+extern AREADATA *BONUS_GUNSHIP_ADATA;
+extern void StoreProgressAICharacter(LEVEL_PROGRESS_s *);
+extern void Grabber_StoreProgress(WORLDINFO_s *, LEVEL_PROGRESS_s *);
+extern void GizmoSysStoreProgress(GIZMOSYS_s *, void *, i32);
+extern void GizFlowStoreProgress(GIZFLOW_s *, GIZFLOWPROGRESS_s *);
+extern void StoreSceneProgress(NUGSCN *, SCENEPROGRESS_s *, i32);
+extern void GameAnimSys_StoreProgress(GAMEANIMSYS_s *, i32);
+
+void StoreLevelProgressFn(WORLDINFO_s *world, LEVEL_PROGRESS_s *progress, i32 area_progress) {
+    i32 index;
+    if (area_progress != 0) {
+        if (world == NULL || world->area == NULL) return;
+        index = world->area->level_count;
+    } else {
+        if (VADER_ADATA != NULL && VADER_ADATA == WORLD->area) return;
+        if (BONUS_GUNSHIP_ADATA != NULL && BONUS_GUNSHIP_ADATA == WORLD->area &&
+            bonus_gunship_store_progress_flag == 0) return;
+        if (world == NULL) return;
+        index = (i8)world->current_level->area_level_index;
+        if (world->area != NULL && (world->area->flags & 4) != 0) goto store_flags;
+    }
+    StoreProgressAICharacter(progress);
+    Grabber_StoreProgress(world, progress);
+    GizmoSysStoreProgress(world->gizmo_sys, world, index);
+    if (progress != NULL) {
+        GizFlowStoreProgress(world->giz_flow, &progress->giz_flow_progress);
+        StoreSceneProgress(world->current_gscn, reinterpret_cast<SCENEPROGRESS_s *>(progress), 0);
+    }
+    GameAnimSys_StoreProgress(world->game_anim_sys, index);
+    for (i32 i = 0; i < world->processor_count; ++i) {
+        if (progress == NULL || NuStrLen(world->processors[i].name) == 0) continue;
+        for (i32 j = 0; j < 32; ++j) {
+            if (NuStrLen(progress->scripts[j].name) == 0) {
+                NuStrCpy(world->level_progress->scripts[j].name, world->processors[i].name);
+                for (i32 k = 0; k < 4; ++k)
+                    progress->scripts[j].params[k] = world->processors[i].processor.params[k];
+                break;
+            }
+            if (NuStrICmp(progress->scripts[j].name, world->processors[i].name) == 0) {
+                memcpy(progress->scripts[j].params, world->processors[i].processor.params, 16);
+                break;
+            }
+        }
+    }
+store_flags:
+    if (progress != NULL) {
+        if (world->level_progress != progress)
+            memmove(progress->disabled_effect_names, world->level_progress->disabled_effect_names, 0xc0);
+        reinterpret_cast<u8 *>(&progress->flags)[0] =
+            (reinterpret_cast<u8 *>(&progress->flags)[0] & ~4) | ((world->field_0x5174 & 1) << 2) | 2;
+    }
 }
 
 bool Store_IsPackUnlocked(i32) {
@@ -143,7 +198,20 @@ void Store_RestorePurchases() {
 void Store_RootPackCustodian(i32, GameObject_s *) {
 }
 
-void StoreProgressAICharacter(LEVEL_PROGRESS_s *) {
+void StoreProgressAICharacter(LEVEL_PROGRESS_s *progress) {
+    if (progress == NULL) return;
+    progress->disabled_ai_object_mask[0] = 0;
+    progress->disabled_ai_object_mask[1] = 0;
+    GameObject_s *object = Obj;
+    i32 count = HIGHGAMEOBJECT;
+    for (i32 i = 0; i < count; ++i, ++object) {
+        if ((object->apiobj.flags_low & 1) != 0 &&
+            (object->apiobj.field_0x1f4 & 0x400) != 0 && object->ai.reset_mode == 4) {
+            u64 bit = (u64)1 << i;
+            progress->disabled_ai_object_mask[0] |= (u32)bit;
+            progress->disabled_ai_object_mask[1] |= (u32)(bit >> 32);
+        }
+    }
 }
 
 void Store_HubDrawFloorTargets(WORLDINFO_s *) {

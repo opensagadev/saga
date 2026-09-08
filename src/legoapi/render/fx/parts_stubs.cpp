@@ -7,6 +7,9 @@
 #include <math.h>
 #include <string.h>
 
+struct rtlset;
+rtlset *PartRTL = NULL;
+
 extern "C" {
     i32 ParticlesPerFrame(f32 particles_per_frame, f32 frame_time) {
         i32 scaled_count = static_cast<i32>(particles_per_frame * 65536.0f * (frame_time * 60.0f));
@@ -27,13 +30,10 @@ extern "C" {
     }
 
     void SetPartRTLSet(usize rtl_set) {
-        (void)rtl_set;
+        PartRTL = reinterpret_cast<rtlset *>(rtl_set);
     }
 
 } // extern "C"
 
 void PartObjectInterface::GetRadius() const {
-}
-
-void PartStop_Flickerer(PART_s *) {
 }

@@ -9,13 +9,6 @@
 
 #include <string.h>
 
-struct part_emit_s {
-    i32 state_words[18];
-    i32 instance_id;
-    i32 trailing_state_words[8];
-};
-DECOMP_ASSERT(sizeof(part_emit_s) == 0x6c, "part_emit_s size");
-
 struct edbridge_s {
     i32 instance_id;
     u8 reserved_04[0x18];
@@ -58,6 +51,16 @@ void FileLoadSingleEffectType(debinftype *, i32, char);
 extern "C" void NuBridgeInit(void);
 
 void edppDetermineNearest(float);
+void edppPtlDestroy(i32);
+extern "C" {
+    extern edpp_particle_s edpp_ptls[512];
+    extern i32 edpp_nearest;
+    extern debkeydatatype_s *debkeydata;
+    extern i32 maxdebkeys;
+    void DebFreeOrphansInstantly(debinftype *);
+    i32 LookupDebrisEffectPageIgnore(char *, i32, i32);
+    void DebFreeInstantly(i32 *);
+}
 
 extern "C" void do_Pad_Standard_camera(edcam_s *camera, f32 delta_time, nupad_s *pad);
 extern "C" void do_maya_mouse_camera(edcam_s *camera);
@@ -191,9 +194,15 @@ extern "C" {
     }
     void edbitsRegisterDataPath(void) {
     }
-    void edbitsRegisterEditMode(void) {
+    i32 edbits_editmode;
+    static i32 edbits_local_editor_enabled;
+    i32 *edbits_editor_enabled = &edbits_local_editor_enabled;
+
+    void edbitsRegisterEditMode(i32 mode) {
+        edbits_editmode = mode;
     }
-    void edbitsRegisterEditorEnabledFlag(void) {
+    void edbitsRegisterEditorEnabledFlag(i32 *enabled) {
+        edbits_editor_enabled = enabled;
     }
     void edbitsRegisterLevel(void) {
     }
@@ -405,8 +414,6 @@ extern "C" {
     }
     void edpartDestroyAllParticles(void) {
     }
-    void edpartLoadPageEx(void) {
-    }
     void edpartParticleReset(void) {
         part_emit_s *emit = part_emits;
         part_emit_s *const emit_end = part_emits + 512;
@@ -419,12 +426,35 @@ extern "C" {
     }
     void edpartRegisterPointerToGameCharLocation(void) {
     }
-    void edpartStopPage(i8 page) {
-        (void)page;
-    }
     void edppClearPage(void) {
     }
-    void edppDeleteEffect(void) {
+    void edppDeleteEffect(i32 index) {
+        if (edpp_ptls[edpp_nearest].effect_index == index) edpp_nearest = -1;
+        DebFreeOrphansInstantly(debtab[index]);
+        i32 replacement = LookupDebrisEffectPageIgnore(debtab[index]->name, 1, index);
+        if (replacement != -1) {
+            for (i32 i = 0; i < 512; ++i) {
+                if (edpp_ptls[i].effect_index == index) {
+                    i32 handle = edpp_ptls[i].instance_id;
+                    if (handle != 99999 && handle != -1) debkeydata[handle].effect_index = replacement;
+                    edpp_ptls[i].effect_index = replacement;
+                }
+            }
+            for (i32 i = 0; i < maxdebkeys; ++i)
+                if (debkeydata[i].effect_index == index) debkeydata[i].effect_index = replacement;
+        } else {
+            for (i32 i = 0; i < 512; ++i)
+                if (edpp_ptls[i].effect_index == index) edppPtlDestroy(i);
+            for (i32 i = 0; i < maxdebkeys; ++i) {
+                if (debkeydata[i].effect_index == index) {
+                    i32 handle = i;
+                    DebFreeInstantly(&handle);
+                }
+            }
+        }
+        debtab[index] = NULL;
+        --edpp_types_used;
+        edppDetermineNearest(1.0f);
     }
     void edppDestroyAllEffects(void) {
     }

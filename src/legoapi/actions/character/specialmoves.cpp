@@ -4,6 +4,9 @@
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/items/base/apiobject.h"
+#include "legoapi/characters/motion.h"
+#include "nu2api/numath/nutrig.h"
+#include <string.h>
 
 struct SPECIALMOVE_s {
     i16 attacker_animation;
@@ -68,13 +71,24 @@ void SpecialMove_ReleaseVictim(GameObject_s *) {
 void SpecialMove_GetVictimAction(i32) {
 }
 
-void SpecialMove_GetDistanceApart(i32) {
+// Original 0x497ee0, 43 bytes.
+f32 SpecialMove_GetDistanceApart(i32 index) {
+    return index == -1 ? 0.0f : SpecialMove[index].distance;
 }
 
 void SpecialMove_GetAttackerAction(i32) {
 }
 
-void SpecialMove_Attacker_SetTargetMom(GameObject_s *) {
+// Original 0x498410, 198 bytes.
+void SpecialMove_Attacker_SetTargetMom(GameObject_s *object) {
+    f32 distance = SpecialMove_GetDistanceApart(object->field_0x7a7);
+    u16 angle = object->apiobj.movement_facing_angle;
+    f32 z = object->force_target->apiobj.position.z - NU_COS_LUT(angle) * distance;
+    f32 x = object->force_target->apiobj.position.x - NU_SIN_LUT(angle) * distance;
+    object->target_velocity.z = (z - object->apiobj.position.z) * 10.0f;
+    object->apiobj.velocity.z = object->target_velocity.z;
+    object->target_velocity.x = (x - object->apiobj.position.x) * 10.0f;
+    object->apiobj.velocity.x = object->target_velocity.x;
 }
 
 static __used__ void JediBKilledCallback(GameObject_s *) {
@@ -112,5 +126,12 @@ void BackFlipCode(GameObject_s *object) {
 void SetSpecialMove(GameObject_s *, AIPATHNODE_s *, AIPATHNODE_s *, char) {
 }
 
-void ClearSpecialMove(GameObject_s *) {
+void ClearSpecialMove(GameObject_s *object) {
+    object->field_0x109c = 0x3f800000;
+    object->ai.field_0x180 = NULL;
+    object->field_0x1092 = 0;
+    object->field_0x1093 = 0;
+    memset(object->pad_10a0, 0, 4);
+    memset(object->pad_107e + 2, 0, 4);
+    object->pad_107e[1] = 0;
 }

@@ -260,7 +260,7 @@ extern "C" {
     //      NuVecMtxTransformBlock
     void NuVecMtxTransform(NUVEC *out, NUVEC *v, struct numtx_s *m);
     void NuVecMtxTransformVU0(NUVEC *out, NUVEC *v, struct numtx_s *m);
-    void NuVecMtxTransformH(NUVEC *out, NUVEC *v, struct numtx_s *m);
+    f32 NuVecMtxTransformH(NUVEC *out, NUVEC *v, struct numtx_s *m);
     void NuVecInvMtxRotate(NUVEC *out, NUVEC *v, struct numtx_s *m);
     void NuVecInvMtxTransform(NUVEC *out, NUVEC *v, struct numtx_s *m);
 
@@ -299,6 +299,12 @@ extern "C" {
     /// @param[out] t The `y` coordinate of the intersection, if any.
     /// @return 1 if the lines intersect, 0 otherwise.
     i32 NuLineLineIntersect(NUVEC *pnt0, NUVEC *v0, NUVEC *pnt1, NUVEC *v1, f32 *s, f32 *t);
+    i32 NuPointRelToBoundingBox(NUVEC *point, NUVEC *maximum, NUVEC *minimum);
+    void NuClipXPlane(NUVEC *out, NUVEC *point, NUVEC *direction, f32 *plane);
+    void NuClipYPlane(NUVEC *out, NUVEC *point, NUVEC *direction, f32 *plane);
+    void NuClipZPlane(NUVEC *out, NUVEC *point, NUVEC *direction, f32 *plane);
+    i32 BoundingBoxToLine(NUVEC *minimum, NUVEC *maximum, struct numtx_s *matrix,
+                         NUVEC *start, NUVEC *end, f32 expansion, NUVEC *intersection);
 #ifdef __cplusplus
 }
 

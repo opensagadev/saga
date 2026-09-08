@@ -12,6 +12,7 @@
 extern "C" {
 #endif
     void PlaySfx(char *name, nuvec_s *pos);
+    i32 IsSfxLooping(i32 sfx_id);
 #ifdef __cplusplus
 }
 #endif

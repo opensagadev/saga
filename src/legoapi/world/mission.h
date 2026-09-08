@@ -37,6 +37,7 @@ typedef struct MISSIONSYS_s MISSIONSYS;
 
 MISSIONSYS *Missions_Configure(char *file, VARIPTR *bufferStart, VARIPTR *bufferEnd, MISSIONSAVE *save);
 MISSIONDATA *Mission_Active(MISSIONSYS *mission_system);
+void CheckMissionEnd(MISSIONSYS *mission_system);
 i32 Missions_PickupsOff(MISSIONSYS *mission_system);
 
 extern MISSIONSYS *MissionSys;

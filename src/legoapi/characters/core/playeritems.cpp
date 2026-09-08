@@ -11,6 +11,7 @@
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nucore/nuanim3.h"
+#include "legoapi/core/input/qrand.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -185,7 +186,35 @@ void KeepWeaponOut(GameObject_s *object) {
     object->field_0xef8 |= GAMEOBJECT_EF8_FLAG_KEEP_WEAPON_OUT;
 }
 
-void ReleaseHearts() {
+i32 ReleaseHearts() {
+    extern i32 adaptivedifficulty[3];
+    extern i8 (*adtab)[4];
+    i32 maximum = 0;
+    i32 missing = 0;
+    for (i32 i = 0; i < 2; ++i) {
+        GameObject_s *player = Player[i];
+        if (player != NULL && player->apiobj.field_0x287 == 0 && player->hitpoints != 0) {
+            maximum += player->hitpoints;
+            missing += player->hitpoints - static_cast<i8>(player->current_hp);
+        }
+    }
+    if (maximum == 0) return 0;
+    if (missing > 0) {
+        for (i32 i = 0; i < MAXPARTS; ++i) {
+            if ((Part[i].active & 1) != 0 && Part[i].pickup_type == 0xcb) {
+                --missing;
+            }
+        }
+    }
+    missing -= Game.save_version;
+    missing += Game.save_version <= 5 ? 8 : 9;
+    if (missing > maximum) missing = maximum;
+    else if (missing < 0) missing = 0;
+    i32 chance = (missing << 16) / maximum;
+    i32 adjustment = adtab[adaptivedifficulty[0]][1];
+    if (adjustment == 1) chance >>= 1;
+    else if (adjustment == -1) chance *= 2;
+    return chance > qrand();
 }
 
 void SlowWeaponOut(GameObject_s *object) {
@@ -305,7 +334,14 @@ void AutoWeaponOnOff(GameObject_s *object) {
     }
 }
 
-void RegenerateHearts(GameObject_s *) {
+extern "C" i32 ParticlesPerSecond(f32 rate, f32 elapsed);
+
+void RegenerateHearts(GameObject_s *object) {
+    if (object->current_hp > 0 && object->current_hp < object->hitpoints && object->field_0x1024 <= 0.0f &&
+        object->spawn_protection_timer <= 0.0f && ParticlesPerSecond(1.0f, FRAMETIME) > 0) {
+        ++object->current_hp;
+        GameAudio_PlaySfx(0x27, &object->apiobj.collision_position, 0, 0);
+    }
 }
 
 void WeaponScalingCode(GameObject_s *object) {

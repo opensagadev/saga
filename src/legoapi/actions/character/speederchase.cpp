@@ -1,3 +1,7 @@
+#include "nu2api/numath/nutrig.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/render/fx.h"
 #include "decomp.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "globals.h"
@@ -23,7 +27,7 @@ u8 troopercannons_beenReset = 0;
 i32 players_going_forward = 0;
 
 MechObjectInterface *forceNextAttackOpponent;
-MechObjectInterface *nextShootTarget;
+NuMechPtr<MechObjectInterface, 4> nextShootTarget;
 i32 objopponent_ignoreaiopponent;
 i32 test_ai_combo;
 i32 CanPunchGirls;
@@ -52,7 +56,7 @@ GameObject_s *ObjOpponent(GameObject_s *object, f32 range, f32 extra_radius, i32
     for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
         GameObject_s *target = &Obj[i];
         if ((object->apiobj.flags_low & 0x80) != 0) {
-            if (nextShootTarget != NULL && nextShootTarget->GetCharacterObject() != target)
+            if (nextShootTarget.Get() != NULL && nextShootTarget->GetCharacterObject() != target)
                 continue;
         } else if (test_ai_combo != 0 && object->ai.action_target_ref != NULL &&
                    *object->ai.action_target_ref != NULL) {
@@ -209,7 +213,10 @@ void ObjOpponentStillThere(GameObject_s *, GameObject_s *, float) {
 void PodSeekTuskanCutSound() {
 }
 
-void SpeederChaseATATInOutMul(nuvec_s *, nuvec_s *) {
+f32 SpeederChaseATATInOutMul(nuvec_s *start, nuvec_s *end) {
+    f32 distance = NuVecXZDist(start, end, NULL) * 0.125f;
+    if (distance > 1.0f) return 1.0f;
+    return MAX(0.1f, distance);
 }
 
 f32 GetVehicleAreaRememberSpeed() {
@@ -248,3 +255,92 @@ extern "C" {
     }
 
 } // extern "C"
+
+extern "C" void AddDebrisEffect(i32 *, i32, f32, f32, f32);
+extern "C" void DebrisPosOrientationMtx(i32, NUMTX *);
+extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
+
+void PodDust(WORLDINFO_s *world, GameObject_s *object) {
+    if (object->apiobj.field_0x218 == 2000000.0f) return;
+    if (world->debris_sys->entries[25].effect == -1) return;
+    NUVEC positions[2];
+    NUVEC previous[2];
+    i32 count = 0;
+    for (i32 locator = 1; locator <= 2; ++locator) {
+        if (object->apiobj.field_0x288 == 0 ||
+            object->apiobj.character_model->points_of_interest[locator] == NULL) continue;
+        NUMTX *joint = &object->joint_matrices[locator];
+        positions[count].x = joint->m30;
+        positions[count].y = object->apiobj.field_0x218 + 0.1f;
+        positions[count].z = joint->m32;
+        ++count;
+        if ((object->apiobj.flags_low & 0x80) == 0) continue;
+        i32 key;
+        if (object == Player[0]) key = locator - 1;
+        else if (object == Player[1]) key = locator + 3;
+        else continue;
+        NUMTX matrix;
+        matrix.m00 = joint->m00;
+        matrix.m01 = joint->m01;
+        matrix.m02 = joint->m02;
+        matrix.m03 = joint->m03;
+        matrix.m10 = joint->m20;
+        matrix.m11 = joint->m21;
+        matrix.m12 = joint->m22;
+        matrix.m13 = joint->m23;
+        matrix.m20 = -joint->m10;
+        matrix.m21 = -joint->m11;
+        matrix.m22 = -joint->m12;
+        matrix.m23 = -joint->m13;
+        matrix.m30 = joint->m30;
+        matrix.m31 = joint->m31;
+        matrix.m32 = joint->m32;
+        matrix.m33 = joint->m33;
+        if (PodRaceKey[key] == -1) {
+            AddDebrisEffect(&PodRaceKey[key], world->debris_sys->entries[53].effect, 0.0f, 0.0f, 0.0f);
+        } else {
+            DebrisPosOrientationMtx(PodRaceKey[key], &matrix);
+        }
+        key += 2;
+        if (PodRaceKey[key] == -1) {
+            AddDebrisEffect(&PodRaceKey[key], world->debris_sys->entries[54].effect, 0.0f, 0.0f, 0.0f);
+        } else {
+            u16 angle = object->apiobj.field_0x276;
+            f32 sine = NuTrigTable[angle >> 1];
+            f32 cosine = NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff];
+            matrix.m00 = -cosine;
+            matrix.m01 = 0.0f;
+            matrix.m02 = sine;
+            matrix.m10 = -sine;
+            matrix.m11 = 0.0f;
+            matrix.m12 = -cosine;
+            matrix.m20 = 0.0f;
+            matrix.m21 = 1.0f;
+            matrix.m22 = 0.0f;
+            matrix.m31 = object->apiobj.field_0x218 + 0.1f;
+            DebrisPosOrientationMtx(PodRaceKey[key], &matrix);
+        }
+    }
+    if (count == 0) {
+        positions[0].x = object->apiobj.collision_position.x;
+        positions[0].y = object->apiobj.field_0x218;
+        positions[0].z = object->apiobj.collision_position.z;
+        count = 1;
+    }
+    NUVEC delta;
+    NuVecSub(&delta, &object->apiobj.start_position, &object->apiobj.position);
+    f32 rate = 100.0f * avg_currentspeed_mul;
+    rate *= 1.0f - (object->apiobj.collision_min.y - object->apiobj.field_0x218) * 0.5f;
+    for (i32 i = 0; i < count; ++i) {
+        NuVecAdd(&previous[i], &positions[i], &delta);
+        i32 particles = ParticlesPerSecond(rate, FRAMETIME);
+        for (i32 j = 0; j < particles; ++j) {
+            f32 fraction = qrand() * (1.0f / 65535.0f);
+            NUVEC position;
+            position.x = previous[i].x + (positions[i].x - previous[i].x) * fraction;
+            position.y = previous[i].y + (positions[i].y - previous[i].y) * fraction;
+            position.z = previous[i].z + (positions[i].z - previous[i].z) * fraction;
+            AddVariableShotDebrisEffect(world->debris_sys->entries[25].effect, &position, 1, 0, 0);
+        }
+    }
+}

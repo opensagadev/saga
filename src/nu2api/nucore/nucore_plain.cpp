@@ -1,4 +1,5 @@
 // Nucore plain — C-linkage surface for the original libTTapp.so nucore TU.
+#include "nu2api/nu3d/nulgtlaser.h"
 struct NUGCUTLOCATORFNENTRY_s;
 extern "C" NUGCUTLOCATORFNENTRY_s *locatorfns;
 //
@@ -171,7 +172,6 @@ extern "C" {
     void NuTexAnimProcess(f32 frame_time);
     void NuWindAnimate(NUWIND *wind, f32 frametime);
     void NuTimeBarSetRender(i32 set);
-    void NuRndrSwapScreenEx(i32 mode, void (*callback)(void));
     void NuShaderManagerSetfv(i32 semantic, const f32 *values);
     void *NuScratchAlloc32(i32 size);
     void NuScratchRelease(void);
@@ -344,8 +344,8 @@ extern "C" {
     }
     void NuCameraSetAxes(void) {
     }
-    i32 PS2_REZ_W = 1280;
-    i32 PS2_REZ_H = 720;
+    extern i32 PS2_REZ_W;
+    extern i32 PS2_REZ_H;
     i32 PS2_SREZ_W = 4096;
     i32 PS2_SREZ_H = 4096;
     static volatile i32 current_clip_scissor_to_viewport;
@@ -606,7 +606,20 @@ extern "C" {
     }
     void NuDisplayListDestroyFx(void) {
     }
-    void NuDisplayListDestroyMtl(void) {
+    void NuDisplayListDestroyMtl(NUMTL *mtl) {
+        NuThreadCriticalSectionBegin(global_dlist_manager.loading_critical_section);
+        if (mtl->display_list != NULL && global_dlist_manager.dyn_mtl_dlist.nmtls != 0) {
+            for (u32 i = 0; i < global_dlist_manager.dyn_mtl_dlist.nmtls; ++i) {
+                if (global_dlist_manager.dyn_mtl_dlist.mtls[i] == mtl) {
+                    if (i != static_cast<u32>(-1) && global_dlist_manager.ndel_materials != 0x80) {
+                        global_dlist_manager.del_materials[global_dlist_manager.ndel_materials] = mtl;
+                        ++global_dlist_manager.ndel_materials;
+                    }
+                    break;
+                }
+            }
+        }
+        NuThreadCriticalSectionEnd(global_dlist_manager.loading_critical_section);
     }
     void NuDisplayListDraw(void) {
     }
@@ -1981,8 +1994,6 @@ extern "C" {
     void NuMtxSetRotateXYZVU0(NUMTX *matrix, NUANGVEC *angles) {
         NuMtxSetRotateXYZ(matrix, angles);
     }
-    void NuMtxSetRotationXYVU0(void) {
-    }
     void NuPlnDist(void) {
     }
     void NuPlnDist2(void) {
@@ -1995,11 +2006,12 @@ extern "C" {
     }
     void NuPlnPlnIntersect(void) {
     }
-    void NuPointRelToBoundingBox(void) {
-    }
     void NuPow(void) {
     }
-    void NuPower2(void) {
+    i32 NuPower2(i32 value) {
+        i32 power = value > 127 ? 128 : 1;
+        while (power < value) power += power;
+        return power;
     }
     void NuEulerXYZFromQuat(void) {
     }
@@ -2281,7 +2293,38 @@ extern "C" {
     }
     void NuLgtArcLaser(void) {
     }
-    void NuLgtLaser(void) {
+    i32 NuLgtLaserCnt;
+    i32 NuLgtArcLaserCnt;
+    i32 NuLgtArcLaserFrame;
+    NULGTLASER NuLgtLaserData[64];
+
+    void NuLgtLaser(i32 type, f32 width, f32 segment_length, f32 width_wobble,
+                    NUVEC *start, NUVEC *delta, u32 colour, f32 end_width, f32 length) {
+        if (NuLgtLaserCnt > 63) return;
+        NULGTLASER *laser = &NuLgtLaserData[NuLgtLaserCnt];
+        laser->width_wobble = width_wobble;
+        laser->segment_length = segment_length;
+        laser->arc = 0;
+        laser->width = width;
+        laser->type = static_cast<u8>(type);
+        laser->start = *start;
+        laser->length = length;
+        laser->end.x = delta->x + start->x;
+        laser->end.y = delta->y + start->y;
+        laser->end.z = delta->z + start->z;
+        laser->colour = colour;
+        laser->end_width_ratio = end_width / width;
+        // The original tests the arc cursor here, even for a straight laser.
+        if ((NuLgtArcLaserFrame & 1) == 0 || NuLgtLaserData[NuLgtArcLaserCnt].seed == 0) {
+            laser->seed = NuLgtRand();
+        }
+        NuLgtRand();
+        NuLgtRand();
+        NuLgtRand();
+        NuLgtRand();
+        NuLgtRand();
+        NuLgtRand();
+        ++NuLgtLaserCnt;
     }
     void NuLgtLaserDraw(i32 paused) {
         (void)paused;
@@ -2322,7 +2365,8 @@ extern "C" {
     }
     void NuPostEffectTiming(void) {
     }
-    void NuRainDraw(void) {
+    // This entry point is empty in the original Android binary.
+    void NuRainDraw(i32) {
     }
     void NuRainProcess(void) {
     }
@@ -2413,7 +2457,8 @@ extern "C" {
         frustum[3] -= frustum[2];
         NuShaderManagerSetfv(0x4a, frustum);
     }
-    void NuRenderContextSetViewport(void) {
+    // Original 0x2a33d0, 9 bytes: this platform deliberately does nothing.
+    void NuRenderContextSetViewport(i32, i32, i32, i32) {
     }
     void NuSpecialAddShadowLight(void) {
     }
@@ -2548,8 +2593,6 @@ extern "C" {
         NUMTX *draw_mtx = *reinterpret_cast<NUMTX **>(legacy->instance + 0x48);
         return NUMTX_GET_ROW_VEC(draw_mtx != NULL ? draw_mtx : instance, 3);
     }
-    void NuSpecialGetFirst(void) {
-    }
     i32 NuSpecialGetInstanceix(nuhspecial_s *special) {
         NuPlainSpecialHandleLayout *handle = reinterpret_cast<NuPlainSpecialHandleLayout *>(special);
         NuPlainLegacySpecialLayout *legacy = static_cast<NuPlainLegacySpecialLayout *>(handle->special);
@@ -2574,12 +2617,6 @@ extern "C" {
             return static_cast<NUMTX *>(handle->display_special);
         }
         return static_cast<NUMTX *>(handle->special);
-    }
-    void NuSpecialGetNext(void) {
-    }
-    void NuSpecialGetNumSpecials(void) {
-    }
-    void NuSpecialGetOnScreenFn(void) {
     }
     f32 NuSpecialGetOriginRadius(void *) {
         return 0.0f;
@@ -2756,9 +2793,7 @@ extern "C" {
     extern "C++" NuWindGType *NuWindAllocateGrp();
     extern "C++" void NuWindFreeGrp(NuWindGType *group);
 
-    i32 NuWindCurrent(NUWIND *wind) {
-        return wind != NULL && wind->unk1 >= 0 ? wind->unk0[wind->unk1] : -1;
-    }
+
 
     i32 NuWindLoad(NUWIND *wind, i32 index, char *name, VARIPTR *buffer, VARIPTR *buffer_end) {
         if (wind != NULL && (u32)index < 8) {
@@ -2806,7 +2841,7 @@ extern "C" {
     }
     void NuPartGetSeed(void) {
     }
-    extern "C" i32 partglobaltime;
+    extern "C" f32 partglobaltime;
     void NuPartResetGlobalTime(void) {
         partglobaltime = 0;
     }
@@ -3373,7 +3408,23 @@ extern "C" {
     // Culling / visibility / portals / occlusion
     // ---------------------------------------------------------------------------
 
-    void NuPortalClipTest(void) {
+    i32 clipTestSphere(NUPORTALSPHERE *sphere, NUFRUSTRUM *frustum);
+
+    i32 NuPortalClipTest(NUGSCN *scene, NUVEC *position, f32 radius, i16 room_id) {
+        if (scene->max_portals == 0 || scene->camera_room == room_id) {
+            return 1;
+        }
+        for (i32 i = 0; i < scene->num_portal_frusta; ++i) {
+            NUFRUSTRUM *frustum = scene->portal_frusta[i];
+            if (frustum != NULL && frustum->room_id == room_id) {
+                NUPORTALSPHERE sphere = {*position, radius};
+                i32 result = clipTestSphere(&sphere, frustum);
+                if (result != 0) {
+                    return result;
+                }
+            }
+        }
+        return 0;
     }
     i32 NuPortalEnabled(i32 enabled) {
         const i32 previous = portals_enabled;
@@ -3584,12 +3635,6 @@ extern "C" {
         g_OcclusionManager.unknown_15c = threshold;
     }
     void NuInvalidateClipRanges(void) {
-    }
-    void NuClipXPlane(void) {
-    }
-    void NuClipYPlane(void) {
-    }
-    void NuClipZPlane(void) {
     }
 
     // ---------------------------------------------------------------------------
@@ -4060,7 +4105,9 @@ extern "C" {
     }
     void NuFmvPlayV(void) {
     }
-    void NuRegisterEndFrameCallBackFn(void) {
+    extern void (*nuapi_endframe_callbackfn)(void);
+    void NuRegisterEndFrameCallBackFn(void (*callback)(void)) {
+        nuapi_endframe_callbackfn = callback;
     }
     void NuRenderThreadDestroy(void) {
     }

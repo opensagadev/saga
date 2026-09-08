@@ -2,8 +2,13 @@
 
 #include "decomp.h"
 #include "globals.h"
+#include "gamelib/util/gamelib_util_types.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/items/base/apiobject.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/area.h"
+#include "legoapi/world/world.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/menus/screens/store.h"
 #include "nu2api/nucore/nustring.h"
@@ -376,12 +381,6 @@ static __used__ void Collection_GetSelectingPlayerIDs(i16 *) {
 void ReleaseEat(GameObject_s *) {
 }
 
-void SetCoinType(i32, GIZMOPICKUP_s *) {
-}
-
-void PartStop_Coin(PART_s *) {
-}
-
 void ShipDropCoins(starfighter_s *) {
 }
 
@@ -406,7 +405,38 @@ void ResetCoinPacket(COINPACKET_s *packet) {
 void UpdateCoinPacket(COINPACKET_s *, i32, i32) {
 }
 
-void TotalLevelCoinTally(WORLDINFO_s *, u32 *, u32 *, u32 *, u32 *, u32 *, u32 *, u32 *) {
+u32 GizmoBlowups_TotalScore(void *);
+u32 GizBuildIts_TotalScore(void *);
+u32 GizForce_TotalScore(void *);
+u32 GizObstacles_TotalScore(void *);
+u32 GizTurrets_TotalScore(void *);
+u32 GameAI_TotalScore();
+
+u32 TotalLevelCoinTally(WORLDINFO_s *world, u32 *pickups, u32 *blowups, u32 *buildits,
+                       u32 *forces, u32 *obstacles, u32 *turrets, u32 *characters) {
+    u32 value = GizmoPickups_TotalScore(world);
+    u32 total = value;
+    if (pickups != NULL) *pickups = value;
+    value = GizmoBlowups_TotalScore(world);
+    total += value;
+    if (blowups != NULL) *blowups = value;
+    value = GizBuildIts_TotalScore(world);
+    total += value;
+    if (buildits != NULL) *buildits = value;
+    value = GizForce_TotalScore(world);
+    total += value;
+    if (forces != NULL) *forces = value;
+    value = GizObstacles_TotalScore(world);
+    total += value;
+    if (obstacles != NULL) *obstacles = value;
+    value = GizTurrets_TotalScore(world);
+    total += value;
+    if (turrets != NULL) *turrets = value;
+    value = 0;
+    if (world->area != NULL && (world->area->flags & 0x100) != 0) value = GameAI_TotalScore();
+    total += value;
+    if (characters != NULL) *characters = value;
+    return total;
 }
 
 void AddToCompletionPoints(u32) {
@@ -426,5 +456,39 @@ COLLECTION_s *GetFreePlayCollection(i32 area) {
 void ReCalculateCompletionPoints() {
 }
 
-void LoseCoins(GameObject_s *, i32) {
+i32 Player_HasInvincibility(GameObject_s *object);
+extern i32 adaptivedifficulty[3];
+extern i8 (*adtab)[4];
+
+i32 LoseCoins(GameObject_s *object, i32 cause) {
+    if (Player_HasInvincibility(object) != 0 ||
+        (object->apiobj.character_data->game_character->flags_090 & 0x8000) != 0 ||
+        object->coinpacket == NULL ||
+        (Arcade != 0 && (Arcade_Mode[static_cast<i8>(ArcadeItem.field_c_0xc)].field8_0x8 & 8) != 0)) {
+        return 0;
+    }
+    u32 lost = 0;
+    if (cause == 1) {
+        lost = static_cast<u32>(TouchHacks::GetLoseStudsDieValue());
+    } else if (cause == 2) {
+        lost = static_cast<u32>(TouchHacks::GetLoseStudsFallValue());
+    }
+    if (lost != 0) {
+        const i32 adjustment = adtab[adaptivedifficulty[0]][0];
+        if (adjustment == 1) {
+            lost *= 2;
+        } else if (adjustment == -1) {
+            lost >>= 1;
+        }
+        if (lost > object->coinpacket->coins) {
+            lost = object->coinpacket->coins;
+            object->coinpacket->coins = 0;
+        } else if (lost != 0) {
+            object->coinpacket->coins -= lost;
+        }
+    }
+    if (Cheats_CheckFlags(0x7c) != 0 || DoubleScoreTime > 0.0f) {
+        return 0;
+    }
+    return static_cast<i32>(lost);
 }

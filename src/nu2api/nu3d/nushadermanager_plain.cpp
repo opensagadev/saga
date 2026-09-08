@@ -1,3 +1,8 @@
+#include "nu2api/nucore/nuapi.h"
+#include "nu2api/nu3d/android/nutex_android.h"
+#include "nu2api/nu3d/ShaderManagerOpenGL.h"
+#include "gamelib/util/gamelib_util_types.h"
+#include <new>
 /*
  * Shader manager.
  *
@@ -25,7 +30,6 @@ void NuShaderObjectInit(nushaderobject_s *, const nushaderobjectkey_s *, i32, u3
 using nu2api::HashRedirect;
 using nu2api::LoadedUniqueShaderRecord;
 using nu2api::ShaderMtlDescFilterPlain;
-using nu2api::ShaderObjectKey;
 
 #include <GLES2/gl2.h>
 #include <cstdio>
@@ -193,13 +197,7 @@ namespace nu2api {
     // Manager storage. Host builds use the typed native layout so pointers and
     // object strides follow the host ABI.
     static constexpr u32 kSlotCount = 0x190;
-    struct ShaderManagerStorage {
-        NUSHADEROBJECT slots[kSlotCount];
-        i32 last_allocated;
-        NUSHADEROBJECT *bound_slot;
-    };
-
-    static ShaderManagerStorage s_managerBlock;
+    typedef ShaderManagerOpenGL ShaderManagerStorage;
 
     inline ShaderManagerStorage *Manager() {
         return static_cast<ShaderManagerStorage *>(g_shaderManager);
@@ -223,11 +221,117 @@ namespace nu2api {
         return Manager()->bound_slot;
     }
 
-    void *g_shaderManager = &s_managerBlock;
+    void *g_shaderManager = nullptr;
 
     // ---------------------------------------------------------------------------
     // Uniform table
     // ---------------------------------------------------------------------------
+
+
+    // Original 101 semantic records, 0x5c bytes each on the target ABI.
+    ShaderUniformRecord g_shaderUniforms[101] = {
+        {{nullptr, "layer0_sampler", {0x0u, 0x0u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "layer1_sampler", {0x0u, 0x0u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "layer2_sampler", {0x0u, 0x0u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "layer3_sampler", {0x0u, 0x0u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "specular_sampler", {0x0u, 0x0u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "specular2_sampler", {0x0u, 0x0u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "surface_sampler", {0x0u, 0x0u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "surface2_sampler", {0x0u, 0x0u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "detailSurface_sampler", {0x0u, 0x0u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"vertexFetch_sampler", nullptr, {0x0u, 0x0u, 0x1u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "perm_sampler", {0x0u, 0x0u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "permgrad_sampler", {0x0u, 0x0u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "vtfNormal_sampler", {0x0u, 0x0u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "diffenvmap_samplerCube", {0x0u, 0x0u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "envmap_samplerCube", {0x0u, 0x0u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "envmap_samplerSphere", {0x0u, 0x0u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "ps2_shinemap_sampler", {0x0u, 0x0u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "backBuffer_sampler", {0x0u, 0x0u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"wind_sampler", nullptr, {0x0u, 0x0u, 0x1u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "texAnimMap_sampler", {0x0u, 0x0u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "texAnimCurves_sampler", {0x0u, 0x0u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"ambientColor", "ambientColor", {0x1u, 0x1u, 0x7u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"incandescentGlow", "incandescentGlow", {0x1u, 0x1u, 0x7u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"bitangentFlip", nullptr, {0x1u, 0x1u, 0x1u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "surface_params", {0x1u, 0x1u, 0x6u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "surface_params2", {0x1u, 0x1u, 0x6u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "specular_params", {0x1u, 0x1u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "envmap_params", {0x1u, 0x1u, 0x6u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"vtf_kHeight", nullptr, {0x1u, 0x1u, 0x5u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "vtf_kNormal", {0x1u, 0x1u, 0x6u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "gooch_params", {0x1u, 0x1u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"waterTable", nullptr, {0x20u, 0x1u, 0x1u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "layer0_diffuse", {0x1u, 0x1u, 0x6u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "layer1_diffuse", {0x1u, 0x1u, 0x6u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "layer2_diffuse", {0x1u, 0x1u, 0x6u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "layer3_diffuse", {0x1u, 0x1u, 0x6u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "layer_kOpacities", {0x1u, 0x1u, 0x6u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "specular_specular", {0x1u, 0x1u, 0x6u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "specular2_specular", {0x1u, 0x1u, 0x6u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "refraction_color", {0x1u, 0x1u, 0x6u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "refraction_kIndex", {0x1u, 0x1u, 0x6u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"uvOffset0", nullptr, {0x1u, 0x1u, 0x1u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"uvOffset1", nullptr, {0x1u, 0x1u, 0x1u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"uvOffset2", nullptr, {0x1u, 0x1u, 0x1u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"uvOffset3", nullptr, {0x1u, 0x1u, 0x1u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "lego_params", {0x1u, 0x1u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"fxAttributes", nullptr, {0x1u, 0x1u, 0x1u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"dappleLimit", nullptr, {0x1u, 0x1u, 0x1u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "carpaint_params", {0x1u, 0x1u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "carpaint_tints", {0x4u, 0x1u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "edgelit_params", {0x1u, 0x1u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "fractal_params", {0x1u, 0x1u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "alphaTestParameters", {0x1u, 0x1u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"vs_sceneAmbientColor", "sceneAmbientColor", {0x1u, 0x1u, 0x3u, 0x1cu, 0x2u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"vs_lightColor0", "lightColor0", {0x1u, 0x1u, 0x3u, 0x1du, 0x2u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"vs_lightColor1", "lightColor1", {0x1u, 0x1u, 0x3u, 0x1eu, 0x2u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"vs_lightColor2", "lightColor2", {0x1u, 0x1u, 0x3u, 0x1fu, 0x2u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"vs_lightPosition0", "lightPosition0", {0x1u, 0x1u, 0x3u, 0x20u, 0x2u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"vs_lightPosition1", "lightPosition1", {0x1u, 0x1u, 0x3u, 0x21u, 0x2u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"vs_lightPosition2", "lightPosition2", {0x1u, 0x1u, 0x3u, 0x22u, 0x2u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"world", nullptr, {0x4u, 0x4u, 0x1u, 0x10u, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"vs_view", "view", {0x4u, 0x4u, 0x3u, 0xcu, 0x1u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"viewProj", nullptr, {0x4u, 0x4u, 0x1u, 0x0u, 0x2u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"worldViewProj", nullptr, {0x4u, 0x4u, 0x1u, 0x14u, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"worldView", nullptr, {0x4u, 0x4u, 0x1u, 0x18u, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"motion", nullptr, {0x4u, 0x4u, 0x1u, 0x29u, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"vs_lightParams", "fs_lightParams", {0xbu, 0x1u, 0x3u, 0x1cu, 0x1u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "fragmentUniforms_sampler", {0x0u, 0x0u, 0x2u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"kTint", nullptr, {0x1u, 0x1u, 0x1u, 0x28u, 0x2u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"vs_screenSize", "fs_screenSize", {0x1u, 0x1u, 0x3u, 0x2du, 0x1u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "time", {0x1u, 0x1u, 0x2u, 0x2eu, 0x1u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "fog_color", {0x1u, 0x1u, 0x2u, 0x2fu, 0x1u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"fog_params", nullptr, {0x1u, 0x1u, 0x1u, 0x30u, 0x1u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"vs_projection_params", "fs_projection_params", {0x1u, 0x1u, 0x3u, 0x31u, 0x1u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"vs_frustum_params", "fs_frustum_params", {0x1u, 0x1u, 0x3u, 0x32u, 0x1u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"ps2ShineMtx", nullptr, {0x4u, 0x4u, 0x1u, 0x23u, 0x1u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "noiseTexSize", {0x1u, 0x1u, 0x2u, 0x40u, 0x1u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"averageLightColor", nullptr, {0x1u, 0x1u, 0x1u, 0x41u, 0x1u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"averageLightDir", nullptr, {0x1u, 0x1u, 0x1u, 0x42u, 0x1u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"lightRotationMtx", nullptr, {0x4u, 0x4u, 0x1u, 0x43u, 0x1u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"offsetTable", nullptr, {0x8u, 0x1u, 0x1u, 0x47u, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"vertexGroupStates", nullptr, {0x20u, 0x1u, 0x1u, 0x4fu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"worldParams", nullptr, {0xcu, 0x4u, 0x1u, 0x10u, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"wind_params", nullptr, {0x1u, 0x1u, 0x1u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"worldViewInverseTranspose", nullptr, {0x4u, 0x4u, 0x1u, 0x18u, 0x1u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"vs_viewInverseTranspose", "fs_viewInverseTranspose", {0x4u, 0x4u, 0x3u, 0xcu, 0x1u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"worldCamPos", nullptr, {0x1u, 0x1u, 0x1u, 0x27u, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{nullptr, "specularDirection", {0x1u, 0x1u, 0x2u, 0x33u, 0x2u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"lightmapOffset", nullptr, {0x1u, 0x1u, 0x1u, 0x34u, 0x1u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"shadowCastingObject", nullptr, {0x1u, 0x1u, 0x1u, 0x6fu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"skinMatrix", nullptr, {0x20u, 0x4u, 0x1u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"blendShapesCount", nullptr, {0x1u, 0x1u, 0x1u, 0x37u, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"blendShapes", nullptr, {0x10u, 0x1u, 0x1u, 0xffffffffu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"blendShapes[0]", nullptr, {0x1u, 0x1u, 0x1u, 0x38u, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"blendShapes[1]", nullptr, {0x1u, 0x1u, 0x1u, 0x39u, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"blendShapes[2]", nullptr, {0x1u, 0x1u, 0x1u, 0x3au, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"blendShapes[3]", nullptr, {0x1u, 0x1u, 0x1u, 0x45u, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"blendShapes[4]", nullptr, {0x1u, 0x1u, 0x1u, 0x3cu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"blendShapes[5]", nullptr, {0x1u, 0x1u, 0x1u, 0x3du, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"blendShapes[6]", nullptr, {0x1u, 0x1u, 0x1u, 0x3eu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+        {{"blendShapes[7]", nullptr, {0x1u, 0x1u, 0x1u, 0x3fu, 0x0u}, {0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u, 0x0u}}},
+    };
 
     // Uber-shader identity used by key generation (first 8 bytes of the MD5).
     static const u8 kUberShaderHash[16] = {
@@ -241,148 +345,19 @@ namespace nu2api {
 
 } // namespace nu2api
 
-#define SHADER_UNIFORM(vs, fs, count, field_c, stages, reg, field_18)                                                  \
-    {                                                                                                                  \
-        vs, fs, count, field_c, stages, reg, field_18, {                                                               \
-        }                                                                                                              \
-    }
 
-// Original 0x6349c0. This metadata determines how much of each cached
-// semantic value is copied and later uploaded to generated shaders.
-extern "C" {
-    ShaderUniformRecord g_shaderUniforms[0x65] = {
-        SHADER_UNIFORM(NULL, "layer0_sampler", 0, 0, 2, -1, 0),
-        SHADER_UNIFORM(NULL, "layer1_sampler", 0, 0, 2, -1, 0),
-        SHADER_UNIFORM(NULL, "layer2_sampler", 0, 0, 2, -1, 0),
-        SHADER_UNIFORM(NULL, "layer3_sampler", 0, 0, 2, -1, 0),
-        SHADER_UNIFORM(NULL, "specular_sampler", 0, 0, 2, -1, 0),
-        SHADER_UNIFORM(NULL, "specular2_sampler", 0, 0, 2, -1, 0),
-        SHADER_UNIFORM(NULL, "surface_sampler", 0, 0, 2, -1, 0),
-        SHADER_UNIFORM(NULL, "surface2_sampler", 0, 0, 2, -1, 0),
-        SHADER_UNIFORM(NULL, "detailSurface_sampler", 0, 0, 2, -1, 0),
-        SHADER_UNIFORM("vertexFetch_sampler", NULL, 0, 0, 1, -1, 0),
-        SHADER_UNIFORM(NULL, "perm_sampler", 0, 0, 2, -1, 0),
-        SHADER_UNIFORM(NULL, "permgrad_sampler", 0, 0, 2, -1, 0),
-        SHADER_UNIFORM(NULL, "vtfNormal_sampler", 0, 0, 2, -1, 0),
-        SHADER_UNIFORM(NULL, "diffenvmap_samplerCube", 0, 0, 2, -1, 0),
-        SHADER_UNIFORM(NULL, "envmap_samplerCube", 0, 0, 2, -1, 0),
-        SHADER_UNIFORM(NULL, "envmap_samplerSphere", 0, 0, 2, -1, 0),
-        SHADER_UNIFORM(NULL, "ps2_shinemap_sampler", 0, 0, 2, -1, 0),
-        SHADER_UNIFORM(NULL, "backBuffer_sampler", 0, 0, 2, -1, 0),
-        SHADER_UNIFORM("wind_sampler", NULL, 0, 0, 1, -1, 0),
-        SHADER_UNIFORM(NULL, "texAnimMap_sampler", 0, 0, 2, -1, 0),
-        SHADER_UNIFORM(NULL, "texAnimCurves_sampler", 0, 0, 2, -1, 0),
-        SHADER_UNIFORM("ambientColor", "ambientColor", 1, 1, 7, -1, 0),
-        SHADER_UNIFORM("incandescentGlow", "incandescentGlow", 1, 1, 7, -1, 0),
-        SHADER_UNIFORM("bitangentFlip", NULL, 1, 1, 1, -1, 0),
-        SHADER_UNIFORM(NULL, "surface_params", 1, 1, 6, -1, 0),
-        SHADER_UNIFORM(NULL, "surface_params2", 1, 1, 6, -1, 0),
-        SHADER_UNIFORM(NULL, "specular_params", 1, 1, 2, -1, 0),
-        SHADER_UNIFORM(NULL, "envmap_params", 1, 1, 6, -1, 0),
-        SHADER_UNIFORM("vtf_kHeight", NULL, 1, 1, 5, -1, 0),
-        SHADER_UNIFORM(NULL, "vtf_kNormal", 1, 1, 6, -1, 0),
-        SHADER_UNIFORM(NULL, "gooch_params", 1, 1, 2, -1, 0),
-        SHADER_UNIFORM("waterTable", NULL, 0x20, 1, 1, -1, 0),
-        SHADER_UNIFORM(NULL, "layer0_diffuse", 1, 1, 6, -1, 0),
-        SHADER_UNIFORM(NULL, "layer1_diffuse", 1, 1, 6, -1, 0),
-        SHADER_UNIFORM(NULL, "layer2_diffuse", 1, 1, 6, -1, 0),
-        SHADER_UNIFORM(NULL, "layer3_diffuse", 1, 1, 6, -1, 0),
-        SHADER_UNIFORM(NULL, "layer_kOpacities", 1, 1, 6, -1, 0),
-        SHADER_UNIFORM(NULL, "specular_specular", 1, 1, 6, -1, 0),
-        SHADER_UNIFORM(NULL, "specular2_specular", 1, 1, 6, -1, 0),
-        SHADER_UNIFORM(NULL, "refraction_color", 1, 1, 6, -1, 0),
-        SHADER_UNIFORM(NULL, "refraction_kIndex", 1, 1, 6, -1, 0),
-        SHADER_UNIFORM("uvOffset0", NULL, 1, 1, 1, -1, 0),
-        SHADER_UNIFORM("uvOffset1", NULL, 1, 1, 1, -1, 0),
-        SHADER_UNIFORM("uvOffset2", NULL, 1, 1, 1, -1, 0),
-        SHADER_UNIFORM("uvOffset3", NULL, 1, 1, 1, -1, 0),
-        SHADER_UNIFORM(NULL, "lego_params", 1, 1, 2, -1, 0),
-        SHADER_UNIFORM("fxAttributes", NULL, 1, 1, 1, -1, 0),
-        SHADER_UNIFORM("dappleLimit", NULL, 1, 1, 1, -1, 0),
-        SHADER_UNIFORM(NULL, "carpaint_params", 1, 1, 2, -1, 0),
-        SHADER_UNIFORM(NULL, "carpaint_tints", 4, 1, 2, -1, 0),
-        SHADER_UNIFORM(NULL, "edgelit_params", 1, 1, 2, -1, 0),
-        SHADER_UNIFORM(NULL, "fractal_params", 1, 1, 2, -1, 0),
-        SHADER_UNIFORM(NULL, "alphaTestParameters", 1, 1, 2, -1, 0),
-        SHADER_UNIFORM("vs_sceneAmbientColor", "sceneAmbientColor", 1, 1, 3, 0x1c, 2),
-        SHADER_UNIFORM("vs_lightColor0", "lightColor0", 1, 1, 3, 0x1d, 2),
-        SHADER_UNIFORM("vs_lightColor1", "lightColor1", 1, 1, 3, 0x1e, 2),
-        SHADER_UNIFORM("vs_lightColor2", "lightColor2", 1, 1, 3, 0x1f, 2),
-        SHADER_UNIFORM("vs_lightPosition0", "lightPosition0", 1, 1, 3, 0x20, 2),
-        SHADER_UNIFORM("vs_lightPosition1", "lightPosition1", 1, 1, 3, 0x21, 2),
-        SHADER_UNIFORM("vs_lightPosition2", "lightPosition2", 1, 1, 3, 0x22, 2),
-        SHADER_UNIFORM("world", NULL, 4, 4, 1, 0x10, 0),
-        SHADER_UNIFORM("vs_view", "view", 4, 4, 3, 0x0c, 1),
-        SHADER_UNIFORM("viewProj", NULL, 4, 4, 1, 0, 2),
-        SHADER_UNIFORM("worldViewProj", NULL, 4, 4, 1, 0x14, 0),
-        SHADER_UNIFORM("worldView", NULL, 4, 4, 1, 0x18, 0),
-        SHADER_UNIFORM("motion", NULL, 4, 4, 1, 0x29, 0),
-        SHADER_UNIFORM("vs_lightParams", "fs_lightParams", 0x0b, 1, 3, 0x1c, 1),
-        SHADER_UNIFORM(NULL, "fragmentUniforms_sampler", 0, 0, 2, -1, 0),
-        SHADER_UNIFORM("kTint", NULL, 1, 1, 1, 0x28, 2),
-        SHADER_UNIFORM("vs_screenSize", "fs_screenSize", 1, 1, 3, 0x2d, 1),
-        SHADER_UNIFORM(NULL, "time", 1, 1, 2, 0x2e, 1),
-        SHADER_UNIFORM(NULL, "fog_color", 1, 1, 2, 0x2f, 1),
-        SHADER_UNIFORM("fog_params", NULL, 1, 1, 1, 0x30, 1),
-        SHADER_UNIFORM("vs_projection_params", "fs_projection_params", 1, 1, 3, 0x31, 1),
-        SHADER_UNIFORM("vs_frustum_params", "fs_frustum_params", 1, 1, 3, 0x32, 1),
-        SHADER_UNIFORM("ps2ShineMtx", NULL, 4, 4, 1, 0x23, 1),
-        SHADER_UNIFORM(NULL, "noiseTexSize", 1, 1, 2, 0x40, 1),
-        SHADER_UNIFORM("averageLightColor", NULL, 1, 1, 1, 0x41, 1),
-        SHADER_UNIFORM("averageLightDir", NULL, 1, 1, 1, 0x42, 1),
-        SHADER_UNIFORM("lightRotationMtx", NULL, 4, 4, 1, 0x43, 1),
-        SHADER_UNIFORM("offsetTable", NULL, 8, 1, 1, 0x47, 0),
-        SHADER_UNIFORM("vertexGroupStates", NULL, 0x20, 1, 1, 0x4f, 0),
-        SHADER_UNIFORM("worldParams", NULL, 0x0c, 4, 1, 0x10, 0),
-        SHADER_UNIFORM("wind_params", NULL, 1, 1, 1, -1, 0),
-        SHADER_UNIFORM("worldViewInverseTranspose", NULL, 4, 4, 1, 0x18, 1),
-        SHADER_UNIFORM("vs_viewInverseTranspose", "fs_viewInverseTranspose", 4, 4, 3, 0x0c, 1),
-        SHADER_UNIFORM("worldCamPos", NULL, 1, 1, 1, 0x27, 0),
-        SHADER_UNIFORM(NULL, "specularDirection", 1, 1, 2, 0x33, 2),
-        SHADER_UNIFORM("lightmapOffset", NULL, 1, 1, 1, 0x34, 1),
-        SHADER_UNIFORM("shadowCastingObject", NULL, 1, 1, 1, 0x6f, 0),
-        SHADER_UNIFORM("skinMatrix", NULL, 0x20, 4, 1, -1, 0),
-        SHADER_UNIFORM("blendShapesCount", NULL, 1, 1, 1, 0x37, 0),
-        SHADER_UNIFORM("blendShapes", NULL, 0x10, 1, 1, -1, 0),
-        SHADER_UNIFORM("blendShapes[0]", NULL, 1, 1, 1, 0x38, 0),
-        SHADER_UNIFORM("blendShapes[1]", NULL, 1, 1, 1, 0x39, 0),
-        SHADER_UNIFORM("blendShapes[2]", NULL, 1, 1, 1, 0x3a, 0),
-        SHADER_UNIFORM("blendShapes[3]", NULL, 1, 1, 1, 0x45, 0),
-        SHADER_UNIFORM("blendShapes[4]", NULL, 1, 1, 1, 0x3c, 0),
-        SHADER_UNIFORM("blendShapes[5]", NULL, 1, 1, 1, 0x3d, 0),
-        SHADER_UNIFORM("blendShapes[6]", NULL, 1, 1, 1, 0x3e, 0),
-        SHADER_UNIFORM("blendShapes[7]", NULL, 1, 1, 1, 0x3f, 0),
-    };
-}
-
-#undef SHADER_UNIFORM
 
 // ---------------------------------------------------------------------------
 // Public C API
 // ---------------------------------------------------------------------------
 
-// original 0x318be0. The original uses a VirtualStackAllocator over this
-// arena; the allocation is contiguous, so advancing the arena cursor is the
-// equivalent operation here.
 extern "C" void NuShaderManagerInit(VARIPTR *arena, VARIPTR arena_end) {
-    using namespace nu2api;
-
-    if (arena->addr + sizeof(ShaderManagerStorage) > arena_end.addr) {
-        return;
-    }
-
-    ShaderManagerStorage *manager = static_cast<ShaderManagerStorage *>(arena->void_ptr);
-    std::memset(manager, 0, sizeof(*manager));
-    g_shaderManager = manager;
-    arena->addr += sizeof(*manager);
-
-    for (u32 id = 0; id < kSlotCount; ++id) {
-        NuShaderObjectCreate(&manager->slots[id]);
-    }
-
-    SlotRefCount(&manager->slots[0])++;
-    ManagerBoundSlot() = NULL;
-    ManagerLastAllocated() = -1;
+    VirtualStackAllocator allocator;
+    allocator.setExternalMemoryPool(arena->void_ptr, static_cast<u32>(arena_end.addr - arena->addr));
+    void *memory = allocator.cursor;
+    allocator.cursor += sizeof(ShaderManagerOpenGL);
+    nu2api::g_shaderManager = new (memory) ShaderManagerOpenGL(allocator);
+    arena->addr += allocator.cursor - allocator.base;
 }
 
 extern "C" NUSHADEROBJECT *NuShaderManagerGetShaderById(i32 id) {
@@ -424,36 +399,9 @@ extern "C" void NuShaderManagerBindShader(NUSHADEROBJECT *slot) {
     }
 }
 
-extern "C" void NuShaderManagerSetfv(i32 semantic, const f32 *values) {
-    const i32 value_count = g_shaderUniforms[semantic].value_count;
-    if (value_count < 5) {
-        std::memcpy(g_shaderUniforms[semantic].values, values, static_cast<size_t>(value_count) << 4);
-    }
-}
 
-// Original 0x308ec0 / ShaderManagerOpenGL::setElementsfv @0x30e050. The
-// manager records the complete semantic payload; material setup publishes it
-// to whichever generated program consumes that semantic later in the list.
-extern "C" void NuShaderManagerSetElementsfv(i32 semantic, i32 first_element, i32 count, const f32 *values) {
-    (void)first_element;
-    (void)count;
-    const i32 value_count = g_shaderUniforms[semantic].value_count;
-    if (value_count < 5) {
-        std::memcpy(g_shaderUniforms[semantic].values, values, static_cast<size_t>(value_count) << 4);
-    }
-}
 
-// Original 0x308f10 / ShaderManagerOpenGL::setElementsfv_transpose
-// @0x30e0a0. The Android manager stores this payload identically to the
-// ordinary element setter; transposition is handled by the caller/callback.
-extern "C" void NuShaderManagerSetElementsfv_transpose(i32 semantic, i32 first_element, i32 count, const f32 *values) {
-    (void)first_element;
-    (void)count;
-    const i32 value_count = g_shaderUniforms[semantic].value_count;
-    if (value_count < 5) {
-        std::memcpy(g_shaderUniforms[semantic].values, values, static_cast<size_t>(value_count) << 4);
-    }
-}
+
 
 namespace nu2api {
 
@@ -606,7 +554,7 @@ namespace nu2api {
     // mirror the Ghidra block layout but are documented by purpose.
     // ---------------------------------------------------------------------------
 
-    static void BuildShaderKey(u32 *outKey, const ShaderMtlDescFilterPlain *filter, bool pixelStage) {
+    extern "C" void NuShaderObjectKeyGenerate3(u32 *outKey, const ::ShaderMtlDescFilter *filter, i32 pixelStage) {
         const NUSHADERMTLDESC *desc = filter->desc;
         const u8 *descBytes = reinterpret_cast<const u8 *>(desc);
 
@@ -656,30 +604,30 @@ namespace nu2api {
         block[0x0b] = block[0x06];
 
         // Vertex flags
-        const u32 vtxFlags = FilterGetVertexFlags(filter);
+        const u32 vtxFlags = filter->getVertexFlags();
         block[0x00] = static_cast<u8>(vtxFlags);
         block[0x01] = static_cast<u8>(vtxFlags >> 8);
         block[0x02] = static_cast<u8>(vtxFlags >> 16);
         block[0x03] = static_cast<u8>(vtxFlags >> 24);
 
         // Filter-derived booleans
-        block[0x21] = filter->field4_0x10 != 0;
-        block[0x22] = filter->field5_0x14 != 0;
-        block[0x23] = filter->field6_0x18 != 0;
+        block[0x21] = filter->field_0x10 != 0;
+        block[0x22] = filter->field_0x14 != 0;
+        block[0x23] = filter->field_0x18 != 0;
 
         // Auxiliary texture ids: selected only when the base flag / threshold says
         // the texture is actually bound.
         if (filter->variant == 0) {
             const u8 baseFlag = descBytes[0x1b8];
             block[0x15] = ((baseFlag & 1) || (baseFlag & 2)) ? descBytes[0xa9] : 0;
-            block[0x16] = filter->param4 < *reinterpret_cast<const i32 *>(descBytes + 0x34) ? descBytes[0xaa] : 0;
+            block[0x16] = filter->texture_id_threshold < *reinterpret_cast<const i32 *>(descBytes + 0x48) ? descBytes[0xaa] : 0;
         }
 
         // Diffuse-map presence + ids
-        block[0x17] = static_cast<u8>(FilterHasDiffuseMap(filter, 0));
-        block[0x18] = FilterHasDiffuseMap(filter, 1) ? descBytes[0xab] : 0;
-        block[0x19] = FilterHasDiffuseMap(filter, 2) ? descBytes[0xac] : 0;
-        block[0x1a] = FilterHasDiffuseMap(filter, 3) ? descBytes[0xad] : 0;
+        block[0x17] = static_cast<u8>(filter->hasDiffuseMap(0));
+        block[0x18] = filter->hasDiffuseMap(1) ? descBytes[0xab] : 0;
+        block[0x19] = filter->hasDiffuseMap(2) ? descBytes[0xac] : 0;
+        block[0x1a] = filter->hasDiffuseMap(3) ? descBytes[0xad] : 0;
 
         // Optional extra map id (0xae)
         if (filter->variant == 0) {
@@ -690,9 +638,9 @@ namespace nu2api {
         }
 
         // Blend ops for layers 1..3
-        block[0x1c] = FilterHasLayer(filter, 1) ? desc->blend_op2 : 0;
-        block[0x1d] = FilterHasLayer(filter, 2) ? desc->blend_op3 : 0;
-        block[0x1e] = FilterHasLayer(filter, 3) ? desc->blend_op4 : 0;
+        block[0x1c] = filter->hasLayer(1) ? desc->blend_op2 : 0;
+        block[0x1d] = filter->hasLayer(2) ? desc->blend_op3 : 0;
+        block[0x1e] = filter->hasLayer(3) ? desc->blend_op4 : 0;
 
         // Constants required by the original hashing contract
         block[0x1f] = 1;
@@ -705,9 +653,9 @@ namespace nu2api {
             const u8 baseFlag = descBytes[0x1b8];
 
             u8 v24 = 0;
-            if ((baseFlag & 1) == 0 || filter->param4 >= thresholdB) {
+            if ((baseFlag & 1) == 0 || filter->texture_id_threshold >= thresholdB) {
                 if ((baseFlag & 2) != 0) {
-                    v24 = filter->param4 < thresholdB;
+                    v24 = filter->texture_id_threshold < thresholdB;
                 }
             } else {
                 v24 = 2;
@@ -715,7 +663,7 @@ namespace nu2api {
             block[0x24] = v24;
 
             const u8 b2 = descBytes[0x1ba];
-            block[0x25] = (b2 & 0x10) ? static_cast<u8>((filter->param4 < thresholdA) + 1) : 0;
+            block[0x25] = (b2 & 0x10) ? static_cast<u8>((filter->texture_id_threshold < thresholdA) + 1) : 0;
         }
 
         block[0x26] = *reinterpret_cast<const i32 *>(descBytes + 0x1e4) > 0;
@@ -740,8 +688,9 @@ namespace nu2api {
         block[0x29] = desc->unknown_a8;
 
         const u32 hi = detail::HashReverse(block, 0x68);
+        outKey[0] = hi << 16;
         const u32 lo = detail::HashForward(block, 0x68);
-        outKey[0] = (hi << 16) | (lo & 0xffff);
+        outKey[0] |= lo & 0xffff;
     }
 
 } // namespace nu2api
@@ -752,11 +701,96 @@ namespace nu2api {
     // Program creation and cache lookup
     // ---------------------------------------------------------------------------
 
-    static bool CreateGlProgramForKey(const ShaderObjectKey &key, void *outObject, i32 param) {
-        using namespace detail;
 
-        u32 vertexKey = key.key[0];
-        u32 pixelKey = key.key[0];
+    // ShaderManagerOpenGL::adaptShaderMaterialForShaderVersion.  Android uses
+    // shader version 5, whose generated programs deliberately discard material
+    // features unsupported by the mobile uber-shader before the key is built.
+
+    static void *RetrieveShader(void *manager, NUSHADERMTLDESC *desc, void *mtl, i32 variant, i32 flagsIn,
+                                bool pixelStage) {
+        static_cast<ShaderManagerOpenGL *>(manager)->adaptShaderMaterialForShaderVersion(desc);
+        ShaderMtlDescFilterPlain filter{};
+        FilterInternalInit(&filter, desc, mtl, variant, flagsIn);
+        filter.variant = 0;
+        filter.field4_0x10 = 0;
+        filter.field5_0x14 = 0;
+        filter.field7_0x1c = 1;
+
+        u32 rawKey[4] = {};
+        const ::ShaderMtlDescFilter keyFilter = {filter.desc, static_cast<const numtl_s *>(filter.mtl),
+            filter.flags_in, filter.variant, filter.field4_0x10, filter.field5_0x14,
+            filter.field6_0x18, filter.field7_0x1c, filter.param4};
+        NuShaderObjectKeyGenerate3(rawKey, &keyFilter, pixelStage ? 1 : 0);
+
+        ShaderObjectKey programKey{};
+        u32 redirected = 0;
+        if (detail::FindRedirect(rawKey[0], &redirected, g_shaderProgramRedirects, 0x1a1)) {
+            programKey.key[0] = redirected;
+        } else {
+            programKey.key[0] = rawKey[0];
+        }
+
+        ShaderManagerStorage *storage = static_cast<ShaderManagerStorage *>(manager);
+
+        // Cache hit: bump refcount and return existing slot.
+        for (u32 id = 0; id < 0x190; ++id) {
+            NUSHADEROBJECT *slot = &storage->slots[id];
+            if (SlotProgramKey(slot) == programKey.key[0]) {
+                SlotRefCount(slot)++;
+                return slot;
+            }
+        }
+
+        // Cache miss: round-robin over the fixed slot pool.
+        const i32 last = ManagerLastAllocated();
+        for (i32 step = 1; step <= 0x190; ++step) {
+            const i32 id = (last + step) % static_cast<i32>(kSlotCount);
+            NUSHADEROBJECT *slot = &storage->slots[id];
+            if (SlotRefCount(slot) > 0) {
+                continue;
+            }
+            ManagerLastAllocated() = id;
+            if (!storage->createShader(*reinterpret_cast<const ::ShaderObjectKey *>(&programKey),
+                                       static_cast<NuShaderObject *>(slot), id)) {
+                return nullptr;
+            }
+            SlotRefCount(slot)++;
+            return slot;
+        }
+        return nullptr;
+    }
+
+} // namespace nu2api
+
+// ---------------------------------------------------------------------------
+// Wrappers used by the engine
+// ---------------------------------------------------------------------------
+
+extern "C" void *NuShaderManagerRetrieveShader(NUSHADERMTLDESC *desc, void *mtl) {
+    return nu2api::RetrieveShader(nu2api::g_shaderManager, desc, mtl, 0, 0, false);
+}
+
+extern "C" void *NuShaderManagerRetrieveShaderVariant(NUSHADERMTLDESC *desc, void *mtl, i32 variant) {
+    return nu2api::RetrieveShader(nu2api::g_shaderManager, desc, mtl, variant, 0, false);
+}
+
+// GL uniform dispatch table — matches the original .data at 0x65e0b8.
+extern "C" {
+    void (*g_glConstantSetterTable[4])(u32 loc, i32 count, const void *vals) = {
+        reinterpret_cast<void (*)(u32, i32, const void *)>(nu2api::glUniform1fv),
+        reinterpret_cast<void (*)(u32, i32, const void *)>(nu2api::glUniform2fv),
+        reinterpret_cast<void (*)(u32, i32, const void *)>(nu2api::glUniform3fv),
+        reinterpret_cast<void (*)(u32, i32, const void *)>(nu2api::glUniform4fv),
+    };
+}
+
+extern i32 g_shaderBufferCriticalSection;
+bool ShaderManagerOpenGL::createShader(const ::ShaderObjectKey &key, NuShaderObject *outObject, i32 param) {
+        using namespace nu2api;
+        using namespace nu2api::detail;
+
+        u32 vertexKey = key.key;
+        u32 pixelKey = key.key;
 
         u32 remapped = 0;
         if (FindRedirect(vertexKey, &remapped, g_vertexShaderRedirects, 0x318)) {
@@ -778,10 +812,12 @@ namespace nu2api {
         // Compile on demand, guarded by the file critical section like the original.
         if (*vertexSlot == 0) {
             NuThreadCriticalSectionBegin(file_criticalsection);
+            NuThreadCriticalSectionBegin(g_shaderBufferCriticalSection);
             char *src = nullptr;
             i32 size = 0;
             const bool loaded = TryLoadShaderSource(&src, &size, vertexKey, false);
             const bool compiled = loaded && NuShaderObjectGenerateGLSLShader(vertexSlot, GL_VERTEX_SHADER, src, size);
+            NuThreadCriticalSectionEnd(g_shaderBufferCriticalSection);
             NuThreadCriticalSectionEnd(file_criticalsection);
             if (!compiled) {
                 return false;
@@ -790,10 +826,12 @@ namespace nu2api {
 
         if (*pixelSlot == 0) {
             NuThreadCriticalSectionBegin(file_criticalsection);
+            NuThreadCriticalSectionBegin(g_shaderBufferCriticalSection);
             char *src = nullptr;
             i32 size = 0;
             const bool loaded = TryLoadShaderSource(&src, &size, pixelKey, true);
             const bool compiled = loaded && NuShaderObjectGenerateGLSLShader(pixelSlot, GL_FRAGMENT_SHADER, src, size);
+            NuThreadCriticalSectionEnd(g_shaderBufferCriticalSection);
             NuThreadCriticalSectionEnd(file_criticalsection);
             if (!compiled) {
                 return false;
@@ -802,14 +840,12 @@ namespace nu2api {
 
         NuShaderObjectInit(reinterpret_cast<nushaderobject_s *>(outObject),
                            reinterpret_cast<const nushaderobjectkey_s *>(&key), param, static_cast<u32>(*vertexSlot),
-                           static_cast<u32>(*pixelSlot), eSHADERVERSION{});
+                           static_cast<u32>(*pixelSlot), static_cast<eSHADERVERSION>(5));
         return true;
     }
 
-    // ShaderManagerOpenGL::adaptShaderMaterialForShaderVersion.  Android uses
-    // shader version 5, whose generated programs deliberately discard material
-    // features unsupported by the mobile uber-shader before the key is built.
-    static void AdaptShaderMaterialForShaderVersion(NUSHADERMTLDESC *desc) {
+
+void ShaderManagerOpenGL::adaptShaderMaterialForShaderVersion(NUSHADERMTLDESC *desc) {
         u8 *vtx_desc = reinterpret_cast<u8 *>(&desc->vtx_desc);
         const u8 original_vtx_flags3 = vtx_desc[3];
         u8 mobile_flags3 = desc->flagsbits_1bb;
@@ -885,385 +921,3 @@ namespace nu2api {
         u8 &mobile_capabilities = reinterpret_cast<u8 *>(&desc->field_1bc)[0];
         mobile_capabilities = (mobile_capabilities & 0xfb) | ((NuIOS_IsLowEndDevice() == 0) << 2);
     }
-
-    static void *RetrieveShader(void *manager, NUSHADERMTLDESC *desc, void *mtl, i32 variant, i32 flagsIn,
-                                bool pixelStage) {
-        AdaptShaderMaterialForShaderVersion(desc);
-        ShaderMtlDescFilterPlain filter{};
-        FilterInternalInit(&filter, desc, mtl, variant, flagsIn);
-        filter.variant = 0;
-        filter.field4_0x10 = 0;
-        filter.field5_0x14 = 0;
-        filter.field7_0x1c = 1;
-
-        u32 rawKey[4] = {};
-        BuildShaderKey(rawKey, &filter, pixelStage ? 1 : 0);
-
-        ShaderObjectKey programKey{};
-        u32 redirected = 0;
-        if (detail::FindRedirect(rawKey[0], &redirected, g_shaderProgramRedirects, 0x1a1)) {
-            programKey.key[0] = redirected;
-        } else {
-            programKey.key[0] = rawKey[0];
-        }
-
-        ShaderManagerStorage *storage = static_cast<ShaderManagerStorage *>(manager);
-
-        // Cache hit: bump refcount and return existing slot.
-        for (u32 id = 0; id < 0x190; ++id) {
-            NUSHADEROBJECT *slot = &storage->slots[id];
-            if (SlotProgramKey(slot) == programKey.key[0]) {
-                SlotRefCount(slot)++;
-                return slot;
-            }
-        }
-
-        // Cache miss: round-robin over the fixed slot pool.
-        const i32 last = ManagerLastAllocated();
-        for (i32 step = 1; step <= 0x190; ++step) {
-            const i32 id = (last + step) % static_cast<i32>(kSlotCount);
-            NUSHADEROBJECT *slot = &storage->slots[id];
-            if (SlotRefCount(slot) > 0) {
-                continue;
-            }
-            ManagerLastAllocated() = id;
-            if (!CreateGlProgramForKey(programKey, slot, id)) {
-                return nullptr;
-            }
-            SlotRefCount(slot)++;
-            return slot;
-        }
-        return nullptr;
-    }
-
-} // namespace nu2api
-
-// ---------------------------------------------------------------------------
-// Wrappers used by the engine
-// ---------------------------------------------------------------------------
-
-extern "C" void *NuShaderManagerRetrieveShader(NUSHADERMTLDESC *desc, void *mtl) {
-    return nu2api::RetrieveShader(nu2api::g_shaderManager, desc, mtl, 0, 0, false);
-}
-
-extern "C" void *NuShaderManagerRetrieveShaderVariant(NUSHADERMTLDESC *desc, void *mtl, i32 variant) {
-    return nu2api::RetrieveShader(nu2api::g_shaderManager, desc, mtl, variant, 0, false);
-}
-
-extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader, struct numtl_s *mtl) {
-    auto unpackColour = [](u32 packed, f32 *colour) {
-        colour[0] = static_cast<f32>(packed & 0xff) / 255.0f;
-        colour[1] = static_cast<f32>((packed >> 8) & 0xff) / 255.0f;
-        colour[2] = static_cast<f32>((packed >> 16) & 0xff) / 255.0f;
-        colour[3] = static_cast<f32>(packed >> 24) / 255.0f;
-    };
-
-    // Target 0x31cba0 walks the active texture semantics and binds each map to
-    // the unit encoded by ProbeSemantics.  Keeping this driven by the usage
-    // mask is important for multi-sampler character materials.
-    const NUSHADERUSAGEMASK *usage = shader->usage_mask;
-    if (usage != NULL) {
-        const u8 *material = reinterpret_cast<const u8 *>(mtl);
-        auto materialFloat = [material](usize offset) { return *reinterpret_cast<const f32 *>(material + offset); };
-        auto materialU32 = [material](usize offset) { return *reinterpret_cast<const u32 *>(material + offset); };
-
-        // Original 0x309da0.  Material semantics are not part of the global
-        // uniform table: every active one is rebuilt from NUMTL immediately
-        // before drawing.  In particular the four layer colours/opacities and
-        // the surface parameters must not be left at OpenGL's zero defaults.
-        for (i32 semantic = 21; semantic <= 52; ++semantic) {
-            if ((usage->semantics[semantic >> 5] & (1u << (semantic & 31))) == 0) {
-                continue;
-            }
-
-            const GLint location = shader->parameters[semantic].location;
-            if (location < 0) {
-                continue;
-            }
-
-            f32 values[16] = {};
-            i32 components = 4;
-            i32 count = 1;
-            switch (semantic) {
-                case 21:
-                    unpackColour(materialU32(0x11c), values);
-                    break;
-                case 22:
-                    unpackColour(materialU32(0x120), values);
-                    values[3] = materialFloat(0x1b4);
-                    break;
-                case 23:
-                    values[0] = material[0xfb] == 0 ? 1.0f : -1.0f;
-                    components = (shader->parameters[semantic].element_count_and_setter & 3) + 1;
-                    break;
-                case 24:
-                    values[0] = materialFloat(0x134);
-                    values[1] = 1.0f;
-                    values[2] = 0.035f * materialFloat(0x138);
-                    values[3] = materialFloat(0x14c);
-                    break;
-                case 25:
-                    values[0] = materialFloat(0xf0);
-                    values[1] = materialFloat(0x284) / materialFloat(0x274);
-                    break;
-                case 26:
-                    values[0] = materialFloat(0x130);
-                    values[1] = materialFloat(0x12c);
-                    values[2] = materialFloat(0x144);
-                    values[3] = materialFloat(0x148);
-                    break;
-                case 27:
-                    values[0] = materialFloat(0x140);
-                    values[1] = materialFloat(0x13c);
-                    values[2] = materialFloat(0x248);
-                    break;
-                case 28:
-                    values[0] = materialFloat(0x114);
-                    components = (shader->parameters[semantic].element_count_and_setter & 3) + 1;
-                    break;
-                case 29:
-                    values[0] = materialFloat(0x118);
-                    components = (shader->parameters[semantic].element_count_and_setter & 3) + 1;
-                    break;
-                case 30:
-                    values[0] = materialFloat(0x1b8);
-                    values[1] = materialFloat(0x1bc);
-                    break;
-                case 31:
-                    // NuShaderObjectBaseUpdateWaterTable owns this upload.
-                    continue;
-                case 32:
-                case 33:
-                case 34:
-                case 35:
-                    unpackColour(materialU32(0xc8 + (semantic - 32) * 4), values);
-                    break;
-                case 36:
-                    values[0] = materialFloat(0xd8);
-                    values[1] = materialFloat(0xdc);
-                    values[2] = materialFloat(0xe0);
-                    values[3] = materialFloat(0xe4);
-                    break;
-                case 37:
-                    unpackColour(materialU32(0x128), values);
-                    components = 3;
-                    break;
-                case 38:
-                    unpackColour(materialU32(0xf4), values);
-                    components = 3;
-                    break;
-                case 39:
-                    unpackColour(materialU32(0x124), values);
-                    values[3] = materialFloat(0x158);
-                    break;
-                case 40:
-                    values[0] = (materialFloat(0x150) - 1.0f) * 0.1f;
-                    components = (shader->parameters[semantic].element_count_and_setter & 3) + 1;
-                    break;
-                case 41:
-                case 42:
-                case 43:
-                case 44:
-                    values[0] = materialFloat(0x1d0 + (semantic - 41) * 8);
-                    values[1] = materialFloat(0x1d4 + (semantic - 41) * 8);
-                    components = 2;
-                    break;
-                case 45:
-                    values[0] = 0.05f;
-                    values[1] = 0.32f * materialFloat(0x60);
-                    values[2] = 0.2f;
-                    values[3] = 0.8f;
-                    break;
-                case 46:
-                    values[0] = materialFloat(0x60);
-                    values[1] = materialFloat(0x64);
-                    values[2] = materialFloat(0x68);
-                    values[3] = 0.2f * values[1] * values[2];
-                    break;
-                case 47:
-                    values[0] = materialFloat(0x154);
-                    components = (shader->parameters[semantic].element_count_and_setter & 3) + 1;
-                    break;
-                case 48:
-                    values[0] = materialFloat(0x260);
-                    values[1] = materialFloat(0x264);
-                    break;
-                case 49:
-                    for (i32 colour = 0; colour < 4; ++colour) {
-                        unpackColour(materialU32(0x250 + colour * 4), values + colour * 4);
-                    }
-                    count = 4;
-                    break;
-                case 50:
-                    values[0] = 1.0f / materialFloat(0x290);
-                    values[1] = materialFloat(0x288);
-                    values[2] = materialFloat(0x28c);
-                    values[3] = materialFloat(0x294);
-                    break;
-                case 51:
-                    values[0] = 0.1f * materialFloat(0x274);
-                    values[1] = materialFloat(0x27c);
-                    values[2] = materialFloat(0x280);
-                    values[3] = materialFloat(0x278);
-                    break;
-                case 52: {
-                    // Original .L35 at 0x30a8d8.  GLES has no fixed-function
-                    // alpha test, so generated shaders consume the current
-                    // render-state comparison as (sign, adjusted reference).
-                    const f32 alpha_ref = static_cast<f32>(g_alphaRef) * (1.0f / 255.0f);
-                    components = 2;
-                    if (g_alphaTestEnabled == 0) {
-                        values[0] = 0.0f;
-                        values[1] = -1.0f;
-                    } else if (g_alphaFunc == 2) {
-                        values[0] = -1.0f;
-                        values[1] = -alpha_ref - (1.0f / 255.0f);
-                        if (values[1] <= 0.0f) {
-                            values[1] = 0.0f;
-                        }
-                    } else if (g_alphaFunc == 3) {
-                        values[0] = -1.0f;
-                        values[1] = -alpha_ref;
-                    } else if (g_alphaFunc == 5) {
-                        values[0] = 1.0f;
-                        values[1] = alpha_ref;
-                    } else if (g_alphaFunc == 6) {
-                        values[0] = 1.0f;
-                        values[1] = alpha_ref + (1.0f / 255.0f);
-                    } else {
-                        values[0] = 0.0f;
-                        values[1] = -1.0f;
-                    }
-                    break;
-                }
-            }
-
-            if (components == 1) {
-                glUniform1fv(location, count, values);
-            } else if (components == 2) {
-                glUniform2fv(location, count, values);
-            } else if (components == 3) {
-                glUniform3fv(location, count, values);
-            } else {
-                glUniform4fv(location, count, values);
-            }
-        }
-
-        for (i32 semantic = 0; semantic <= 20; ++semantic) {
-            if ((usage->semantics[semantic >> 5] & (1u << (semantic & 31))) == 0) {
-                continue;
-            }
-
-            const i32 texture_unit = static_cast<u16>(shader->parameters[semantic].location) & 0x7ff;
-            i32 texture_id = 0;
-            bool bind_2d = true;
-            switch (semantic) {
-                case 0:
-                case 1:
-                case 2:
-                case 3:
-                    texture_id = mtl->shader_desc.diffuse_map_tex_id[semantic];
-                    break;
-                case 4:
-                    texture_id = mtl->shader_desc.specular_map_tid;
-                    break;
-                case 5:
-                    texture_id = mtl->shader_desc.lightmap_tex_id[0];
-                    break;
-                case 6:
-                    texture_id = mtl->shader_desc.normal_map_tid;
-                    break;
-                case 7:
-                    texture_id = mtl->shader_desc.lightmap_tex_id[1];
-                    break;
-                case 9:
-                    texture_id = mtl->shader_desc.vtf_height_map_tid;
-                    break;
-                case 12:
-                    texture_id = mtl->shader_desc.vtf_normal_map_tid;
-                    break;
-                case 13:
-                    texture_id = mtl->shader_desc.unknown_198;
-                    bind_2d = false;
-                    break;
-                case 14:
-                    texture_id = mtl->shader_desc.envmap_cubic_tid;
-                    bind_2d = false;
-                    break;
-                case 16:
-                    texture_id = mtl->shader_desc.shine_map_ps2_tid;
-                    break;
-                case 19:
-                    texture_id = mtl->shader_desc.field_1e4;
-                    break;
-                case 20:
-                    texture_id = mtl->shader_desc.field_1e8;
-                    break;
-                default:
-                    continue;
-            }
-
-            glActiveTexture(GL_TEXTURE0 + texture_unit);
-            g_currentTexUnit = texture_unit;
-            GLuint gl_texture = 0;
-            if (semantic == 14 && (mtl->shader_desc.flags & 0x50000) != 0) {
-                gl_texture = g_LegoEnvTexture;
-            } else if (texture_id != 0) {
-                NUNATIVETEX *native = NuTexGetNative(texture_id);
-                if (native != NULL) {
-                    gl_texture = native->platform.gl_tex;
-                }
-            }
-            glBindTexture(bind_2d ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP, gl_texture);
-            if (!bind_2d && texture_unit < 16) {
-                g_lastBoundCubeTexIds[texture_unit] = gl_texture;
-            }
-        }
-
-        // The original continues through the non-material shader semantics
-        // (0x35..0x59) and uploads the values accumulated by
-        // NuShaderManagerSetfv.  These include the world/view/projection
-        // matrices and the current light state.  Use the locations and setter
-        // classes recorded by NuShaderObjectGLSLProbeSemantics rather than
-        // looking up a hand-picked set of generated GLSL names.
-        for (i32 semantic = 0x35; semantic <= 0x59; ++semantic) {
-            if ((usage->semantics[semantic >> 5] & (1u << (semantic & 31))) == 0) {
-                continue;
-            }
-
-            GLSLParameter &parameter = shader->parameters[semantic];
-            if (parameter.location < 0) {
-                continue;
-            }
-
-            const ShaderUniformRecord &uniform = g_shaderUniforms[semantic];
-            const i32 count = uniform.value_count;
-            if (count <= 0) {
-                continue;
-            }
-            const f32 *values = uniform.values;
-
-            switch (parameter.type_and_flags & 0x0f) {
-                case 1:
-                    g_glConstantSetterTable[parameter.element_count_and_setter & 3](parameter.location, count, values);
-                    break;
-                case 2:
-                    glUniform4fv(parameter.location, count, values);
-                    break;
-                case 3:
-                    parameter.setElementsMatrix(0, count, values);
-                    break;
-            }
-        }
-    }
-}
-
-// GL uniform dispatch table — matches the original .data at 0x65e0b8.
-extern "C" {
-    void (*g_glConstantSetterTable[4])(u32 loc, i32 count, const void *vals) = {
-        reinterpret_cast<void (*)(u32, i32, const void *)>(nu2api::glUniform1fv),
-        reinterpret_cast<void (*)(u32, i32, const void *)>(nu2api::glUniform2fv),
-        reinterpret_cast<void (*)(u32, i32, const void *)>(nu2api::glUniform3fv),
-        reinterpret_cast<void (*)(u32, i32, const void *)>(nu2api::glUniform4fv),
-    };
-}

@@ -79,6 +79,7 @@ extern "C" {
     i32 NuPortalVisibility(struct nugscn_s *scene);
     void NuPortalMaxDepth(struct nugscn_s *scene, i32 depth);
     i32 NuPortalEnabled(i32 enabled);
+    i32 NuPortalClipTest(struct nugscn_s *scene, NUVEC *position, f32 radius, i16 room_id);
     i32 NuPortalNumRooms(struct nugscn_s *scene);
     void NuPortalResetActive(struct nugscn_s *scene);
     i32 NuPortalRoomClipTest(struct nugscn_s *scene, i16 room_id);

@@ -24,20 +24,16 @@ NUGSPLINE *NuSplineFind(NUGSCN *scene, char *name) {
     return NULL;
 }
 
-i32 NuSplineFindAllBeg(NUGSCN *scene, char *prefix, NUGSPLINE **results, i32 max_results) {
-    if (scene == NULL || max_results <= 0) {
-        return 0;
-    }
-
-    i32 result_count = 0;
-    for (i32 i = 0; i < scene->numsplines; ++i) {
-        NUGSPLINE *spline = &scene->splines[i];
-        if (NuStrNICmp(prefix, spline->name, -1) == 0) {
-            results[result_count++] = spline;
-            if (result_count >= max_results) {
-                break;
-            }
+// The -1 length uses NuStrNICmp's prefix-comparison convention.
+i32 NuSplineFindAllBeg(NUGSCN *scene, char *name, NUGSPLINE **results, i32 capacity) {
+    if (capacity <= 0 || scene == NULL) return 0;
+    i32 count = 0;
+    NUGSPLINE *spline = scene->splines;
+    for (i32 i = 0; i < scene->numsplines; i++, spline++) {
+        if (NuStrNICmp(name, spline->name, -1) == 0) {
+            results[count++] = spline;
+            if (count >= capacity) break;
         }
     }
-    return result_count;
+    return count;
 }

@@ -1,12 +1,13 @@
 #include "host/platform/runtime.hpp"
 
 #include <SDL3/SDL.h>
+#include <emscripten.h>
 
 #include "host/platform/input.hpp"
 #include "legoapi/characters/core/players.h"
 
 namespace {
-    char *host_wasm_arguments[3];
+    char *host_wasm_arguments[4];
 }
 
 const char *HostPlatformVideoDriver() {
@@ -31,6 +32,13 @@ void HostPlatformPrepareArguments(i32 *argc, char ***argv) {
     host_wasm_arguments[2] = nullptr;
     *argc = 2;
     *argv = host_wasm_arguments;
+    if (MAIN_THREAD_EM_ASM_INT({
+        return (location.hostname === '127.0.0.1' || location.hostname === 'localhost') &&
+            new URLSearchParams(location.search).get('movement-trace') === '1';
+    })) {
+        host_wasm_arguments[(*argc)++] = const_cast<char *>("--trace-movement");
+        host_wasm_arguments[*argc] = nullptr;
+    }
 }
 
 void HostPlatformHandleInputEvent(const SDL_Event &event, i32 width, i32 height) {

@@ -55,6 +55,8 @@ void NuLgtArcLaserDraw(i32 paused);
 static constexpr i32 kSceneRingCapacity = 16;
 
 extern "C" {
+    i32 PS2_REZ_W = 1280;
+    i32 PS2_REZ_H = 720;
     // Scene currently being built.  Size is 0x218 bytes; original lives in BSS
     // and is referenced as a plain object by all render/present code.
     struct nudisplayscene_s currentScene = {0};
@@ -407,10 +409,6 @@ extern "C" __attribute__((optimize("O0"))) void NuGScnFixupTIDsPS(NUGSCN *scene)
 }
 extern "C" void NuGScnFromVideoMem(void) {
 }
-extern "C" void NuGScnGetSpecial(void) {
-}
-extern "C" void NuGScnNumSpecials(void) {
-}
 extern "C" void NuGScnReadForMultiRender(void) {
 }
 extern "C" void NuGScnRestoreTIDsPS(void) {
@@ -450,18 +448,10 @@ extern "C" void NuMtlCreateBuff(void) {
 }
 extern "C" void NuMtlCreateBuff3D(void) {
 }
-extern "C" void NuMtlCreateEx(void) {
-}
-extern "C" void NuMtlCreateEx3D(void) {
-}
-extern "C" void NuMtlDestroy(NUMTL *mtl) {
-    (void)mtl;
-}
+
 extern "C" void NuMtlFindVariantMtl(void) {
 }
 extern "C" void NuMtlFindVariantMtlFromDesc(void) {
-}
-extern "C" void NuMtlInitOverride(void) {
 }
 extern "C" void NuMtlReadEventSetHandler(void) {
 }
@@ -536,7 +526,9 @@ extern "C" void NuRndrFx(i32 paused, void *) {
 }
 extern "C" void NuRndrGetCullDebug(void) {
 }
-extern "C" void NuRndrGlobalFrameCount(void) {
+extern i32 global_frame_count;
+extern "C" i32 NuRndrGlobalFrameCount(void) {
+    return global_frame_count;
 }
 extern "C" void NuRndrGlobalFrameCountPause(i32 paused) {
     global_frame_count_paused = paused;
@@ -670,11 +662,16 @@ extern "C" void NuRndrParticleGroup(uv1debdata *chunks, PartHeader *header, NUMT
         g_lastPartEffect = NULL;
         return;
     }
-    if (material == NULL) {
+    if (material == NULL || material->particle_type_tag == -105) {
         return;
     }
 
     if (header != g_lastPartEffect) {
+        if (material->attribs.unknown_2_1_2 != 2 || material->attribs.unknown_2_4 == 0) {
+            material->attribs.unknown_2_1_2 = 2;
+            material->attribs.unknown_2_4 = 1;
+            NuMtlUpdate(material);
+        }
         if (NuRndr_DebrisRotMtxPtr == NULL) {
             NuMtxCalcDebrisFaceOn(&NuRndr_DebrisMtx);
         } else {
@@ -706,18 +703,29 @@ extern "C" void NuRndrParticleGroup(uv1debdata *chunks, PartHeader *header, NUMT
     }
 
     dma_particle_chunk_s *chunk = reinterpret_cast<dma_particle_chunk_s *>(chunks);
-    for (i32 count = 0; chunk != NULL && count < 0x101; ++count) {
-        BuildDebrisVerts(header, reinterpret_cast<uv1debdata *>(chunk), material, time, matrix, particle_type, a, b, c,
-                         near_clip);
-        if (chunk->command == 0x52) {
+    i32 done = 0;
+    i32 count = 0;
+    while (done == 0) {
+        i32 command = static_cast<i8>(chunk->command);
+        dma_particle_chunk_s *next = chunk->next;
+        switch (command) {
+        case 0x4e:
+            if (next != NULL) {
+                BuildDebrisVerts(header, reinterpret_cast<uv1debdata *>(chunk), material, time, matrix,
+                                 particle_type, a, b, c, near_clip);
+                chunk = next;
+            }
+            break;
+        case 0x52:
+            BuildDebrisVerts(header, reinterpret_cast<uv1debdata *>(chunk), material, time, matrix,
+                             particle_type, a, b, c, near_clip);
+            done = 1;
             break;
         }
-        if (chunk->command != 0x4e) {
-            break;
-        }
-        chunk = chunk->next;
+        if (++count > 0x100) break;
     }
 }
+
 extern "C" void NuRndrPspDraw(void) {
 }
 extern "C" void NuRndrRect(void) {
@@ -776,9 +784,123 @@ extern "C" void NuRndrSetBlendData(void) {
 }
 extern "C" void NuRndrSetCullDebug(void) {
 }
-extern "C" void NuRndrSetDebBaseRange(void) {
+extern "C" {
+    i32 NuRndrStopUpdate;
+    NUVEC NuRndrDebBase;
+    NUVEC NuRndrDebRange;
+    NUVEC NuRndrDebRangeInv;
 }
-extern "C" void NuRndrSetDebBox(void) {
+
+extern "C" void NuRndrSetDebBaseRange(NUVEC *base, NUVEC *range) {
+    NuRndrDebBase = *base;
+    NuRndrDebRange = *range;
+    NuRndrDebRangeInv.x = 1.0f / NuRndrDebRange.x;
+    NuRndrDebRangeInv.y = 1.0f / NuRndrDebRange.y;
+    NuRndrDebRangeInv.z = 1.0f / NuRndrDebRange.z;
+}
+
+extern "C" void NuRndrSetDebBox(NUVEC *range) {
+    static NUMTX cammtx;
+    if (NuRndrStopUpdate == 0) {
+        cammtx = global_camera.mtx;
+    }
+    const NUVEC size = *range;
+    // The original uses a narrow near rectangle and a wider far rectangle,
+    // transformed by the cached camera before finding their world bounds.
+    const NUVEC right = {size.x * cammtx.m00, size.x * cammtx.m01, size.x * cammtx.m02};
+    const NUVEC up = {size.y * cammtx.m10, size.y * cammtx.m11, size.y * cammtx.m12};
+    const NUVEC forward = {size.z * cammtx.m20, size.z * cammtx.m21, size.z * cammtx.m22};
+    NUVEC corner0 = {
+        ((right.x * -0.2f + cammtx.m30) + up.x * -0.2f) + forward.x * -0.05f,
+        ((right.y * -0.2f + cammtx.m31) + up.y * -0.2f) + forward.y * -0.05f,
+        ((right.z * -0.2f + cammtx.m32) + up.z * -0.2f) + forward.z * -0.05f
+    };
+    NUVEC corner1 = {
+        ((right.x * 0.2f + cammtx.m30) + up.x * -0.2f) + forward.x * -0.05f,
+        ((right.y * 0.2f + cammtx.m31) + up.y * -0.2f) + forward.y * -0.05f,
+        ((right.z * 0.2f + cammtx.m32) + up.z * -0.2f) + forward.z * -0.05f
+    };
+    NUVEC corner2 = {
+        ((right.x * -0.2f + cammtx.m30) + up.x * 0.2f) + forward.x * -0.05f,
+        ((right.y * -0.2f + cammtx.m31) + up.y * 0.2f) + forward.y * -0.05f,
+        ((right.z * -0.2f + cammtx.m32) + up.z * 0.2f) + forward.z * -0.05f
+    };
+    NUVEC corner3 = {
+        ((right.x * 0.2f + cammtx.m30) + up.x * 0.2f) + forward.x * -0.05f,
+        ((right.y * 0.2f + cammtx.m31) + up.y * 0.2f) + forward.y * -0.05f,
+        ((right.z * 0.2f + cammtx.m32) + up.z * 0.2f) + forward.z * -0.05f
+    };
+    NUVEC corner4 = {
+        ((right.x * -0.5f + cammtx.m30) + up.x * -0.5f) + forward.x * 0.8f,
+        ((right.y * -0.5f + cammtx.m31) + up.y * -0.5f) + forward.y * 0.8f,
+        ((right.z * -0.5f + cammtx.m32) + up.z * -0.5f) + forward.z * 0.8f
+    };
+    NUVEC corner5 = {
+        ((right.x * 0.5f + cammtx.m30) + up.x * -0.5f) + forward.x * 0.8f,
+        ((right.y * 0.5f + cammtx.m31) + up.y * -0.5f) + forward.y * 0.8f,
+        ((right.z * 0.5f + cammtx.m32) + up.z * -0.5f) + forward.z * 0.8f
+    };
+    NUVEC corner6 = {
+        ((right.x * -0.5f + cammtx.m30) + up.x * 0.5f) + forward.x * 0.8f,
+        ((right.y * -0.5f + cammtx.m31) + up.y * 0.5f) + forward.y * 0.8f,
+        ((right.z * -0.5f + cammtx.m32) + up.z * 0.5f) + forward.z * 0.8f
+    };
+    NUVEC corner7 = {
+        ((right.x * 0.5f + cammtx.m30) + up.x * 0.5f) + forward.x * 0.8f,
+        ((right.y * 0.5f + cammtx.m31) + up.y * 0.5f) + forward.y * 0.8f,
+        ((right.z * 0.5f + cammtx.m32) + up.z * 0.5f) + forward.z * 0.8f
+    };
+    NUVEC minimum = corner0;
+    NUVEC maximum = corner0;
+    minimum.x = corner1.x < minimum.x ? corner1.x : minimum.x;
+    maximum.x = corner1.x > maximum.x ? corner1.x : maximum.x;
+    minimum.y = corner1.y < minimum.y ? corner1.y : minimum.y;
+    maximum.y = corner1.y > maximum.y ? corner1.y : maximum.y;
+    minimum.z = corner1.z < minimum.z ? corner1.z : minimum.z;
+    maximum.z = corner1.z > maximum.z ? corner1.z : maximum.z;
+    minimum.x = corner2.x < minimum.x ? corner2.x : minimum.x;
+    maximum.x = corner2.x > maximum.x ? corner2.x : maximum.x;
+    minimum.y = corner2.y < minimum.y ? corner2.y : minimum.y;
+    maximum.y = corner2.y > maximum.y ? corner2.y : maximum.y;
+    minimum.z = corner2.z < minimum.z ? corner2.z : minimum.z;
+    maximum.z = corner2.z > maximum.z ? corner2.z : maximum.z;
+    minimum.x = corner3.x < minimum.x ? corner3.x : minimum.x;
+    maximum.x = corner3.x > maximum.x ? corner3.x : maximum.x;
+    minimum.y = corner3.y < minimum.y ? corner3.y : minimum.y;
+    maximum.y = corner3.y > maximum.y ? corner3.y : maximum.y;
+    minimum.z = corner3.z < minimum.z ? corner3.z : minimum.z;
+    maximum.z = corner3.z > maximum.z ? corner3.z : maximum.z;
+    minimum.x = corner4.x < minimum.x ? corner4.x : minimum.x;
+    maximum.x = corner4.x > maximum.x ? corner4.x : maximum.x;
+    minimum.y = corner4.y < minimum.y ? corner4.y : minimum.y;
+    maximum.y = corner4.y > maximum.y ? corner4.y : maximum.y;
+    minimum.z = corner4.z < minimum.z ? corner4.z : minimum.z;
+    maximum.z = corner4.z > maximum.z ? corner4.z : maximum.z;
+    minimum.x = corner5.x < minimum.x ? corner5.x : minimum.x;
+    maximum.x = corner5.x > maximum.x ? corner5.x : maximum.x;
+    minimum.y = corner5.y < minimum.y ? corner5.y : minimum.y;
+    maximum.y = corner5.y > maximum.y ? corner5.y : maximum.y;
+    minimum.z = corner5.z < minimum.z ? corner5.z : minimum.z;
+    maximum.z = corner5.z > maximum.z ? corner5.z : maximum.z;
+    minimum.x = corner6.x < minimum.x ? corner6.x : minimum.x;
+    maximum.x = corner6.x > maximum.x ? corner6.x : maximum.x;
+    minimum.y = corner6.y < minimum.y ? corner6.y : minimum.y;
+    maximum.y = corner6.y > maximum.y ? corner6.y : maximum.y;
+    minimum.z = corner6.z < minimum.z ? corner6.z : minimum.z;
+    maximum.z = corner6.z > maximum.z ? corner6.z : maximum.z;
+    minimum.x = corner7.x < minimum.x ? corner7.x : minimum.x;
+    maximum.x = corner7.x > maximum.x ? corner7.x : maximum.x;
+    minimum.y = corner7.y < minimum.y ? corner7.y : minimum.y;
+    maximum.y = corner7.y > maximum.y ? corner7.y : maximum.y;
+    minimum.z = corner7.z < minimum.z ? corner7.z : minimum.z;
+    maximum.z = corner7.z > maximum.z ? corner7.z : maximum.z;
+    NuRndrDebBase.x = (maximum.x + minimum.x) * 0.5f - size.x * 0.5f;
+    NuRndrDebBase.y = (maximum.y + minimum.y) * 0.5f - size.y * 0.5f;
+    NuRndrDebBase.z = (maximum.z + minimum.z) * 0.5f - size.z * 0.5f;
+    NuRndrDebRange = size;
+    NuRndrDebRangeInv.x = 1.0f / size.x;
+    NuRndrDebRangeInv.y = 1.0f / size.y;
+    NuRndrDebRangeInv.z = 1.0f / size.z;
 }
 extern "C" i32 NuRndrSetDirectionalLightsPS(const NUVEC *dir0, const NUCOLOUR3 *colour0, const NUVEC *dir1,
                                             const NUCOLOUR3 *colour1, const NUVEC *dir2, const NUCOLOUR3 *colour2) {
@@ -964,7 +1086,26 @@ extern "C" void DisplayListUpdateRenderState(void *display_list, void *state) {
     }
     dl->state->global_id = global->state.global_id;
 }
-extern "C" void NuRndrStrip3d(void) {
+extern "C" i32 NuRndrStrip3d(NURND_VERTEX3D *vertices, numtl_s *material, NUMTX *matrix, i32 count) {
+    if (count == 0) return 1;
+    NuPrim3DBegin(1, 7, material, matrix);
+    for (i32 i = 0; i < count; ++i) {
+        NURND_VERTEX3D *source = &vertices[i];
+        u8 *vertex = reinterpret_cast<u8 *>(g_NuPrim_StreamBufferPtr->addr);
+        *reinterpret_cast<u32 *>(vertex + 0xc) = NuRndrPrimColour(source->colour);
+        if (g_NuPrim_NeedsHalfUVs != 0) {
+            *reinterpret_cast<u16 *>(vertex + 0x10) = NuRndrFloatToHalf(source->u);
+            *reinterpret_cast<u16 *>(vertex + 0x12) = NuRndrFloatToHalf(source->v);
+        } else {
+            *reinterpret_cast<f32 *>(vertex + 0x10) = source->u;
+            *reinterpret_cast<f32 *>(vertex + 0x14) = source->v;
+        }
+        *reinterpret_cast<NUVEC *>(vertex) = source->position;
+        g_NuPrim_StreamBufferPtr->addr += 0x18;
+    }
+    if (count > 0) g_NuPrim_VertexCount += count;
+    NuPrim3DEnd();
+    return 1;
 }
 extern "C" void NuRndrTrailEx(void) {
 }
@@ -972,7 +1113,8 @@ extern "C" void NuRndrTri3dClip(void) {
 }
 extern "C" void NuRndrTriStrip2di(void) {
 }
-extern "C" void NuRndrTriStrip3dClip(void) {
+extern "C" i32 NuRndrTriStrip3dClip(NURND_VERTEX3D *vertices, i32 count, NUMTX *matrix, numtl_s *material) {
+    return NuRndrStrip3d(vertices, material, matrix, count);
 }
 extern "C" void NuRndrWasDrawnUnreflectedGobj(void) {
 }
@@ -980,7 +1122,35 @@ extern "C" void NuRndrWireTri(void) {
 }
 
 // Shader / texture / vertex state
-extern "C" void NuShaderGetDirtyMask(void) {
+extern "C" {
+    void *g_boundLightPacket;
+    void *g_boundCameraPacket;
+    ShaderPacketStateMapping g_packetToShaderStateMappings[2] = {
+        {{{0, 0, 0, 0}}, &g_boundLightPacket},
+        {{{0, 0, 0, 0}}, &g_boundCameraPacket},
+    };
+}
+extern "C" void NuShaderGetDirtyMask(NUSHADERUSAGEMASK *mask, NUSHADEROBJECT *shader) {
+    memmove(mask, shader->usage_mask, sizeof(*mask));
+    const i32 frame = NuRndrGlobalFrameCount();
+    if (shader->last_uniform_frame != frame) {
+        shader->last_uniform_frame = frame;
+        return;
+    }
+    void *light_packet = *g_packetToShaderStateMappings[0].packet;
+    if (shader->last_light_packet == light_packet) {
+        for (i32 i = 0; i < 4; ++i)
+            mask->semantics[i] &= ~g_packetToShaderStateMappings[0].mask.semantics[i];
+    } else {
+        shader->last_light_packet = light_packet;
+    }
+    void *camera_packet = *g_packetToShaderStateMappings[1].packet;
+    if (shader->last_camera_packet == camera_packet) {
+        for (i32 i = 0; i < 4; ++i)
+            mask->semantics[i] &= ~g_packetToShaderStateMappings[1].mask.semantics[i];
+    } else {
+        shader->last_camera_packet = camera_packet;
+    }
 }
 extern "C" void NuShaderUniformGetByString(void) {
 }

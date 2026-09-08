@@ -1,6 +1,7 @@
 #include "legoapi/gizmos/door/securitydoors.h"
 
 #include "decomp.h"
+#include "gameapi/edtools/edfile.h"
 #include "legoapi/world/level.h"
 
 struct SECURITYDOORPROGRESS {
@@ -84,9 +85,19 @@ static void *SecurityDoors_ReserveBufferSpace(void *) {
     return {};
 }
 
-static i32 SecurityDoors_Load(void *, void *) {
-    UNIMPLEMENTED();
-    return {};
+static i32 SecurityDoors_Load(void *world_data, void *) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_data);
+    if (world->security_door_count != 0)
+        return 0;
+    EdFileReadInt();
+    world->security_door_count = EdFileReadInt();
+    SECURITYDOOR *door = world->security_doors;
+    for (i32 i = 0; i < world->security_door_count; ++i, ++door) {
+        EdFileRead(door->name, 16);
+        EdFileReadNuVec(&door->position);
+        door->yaw = EdFileReadShort();
+    }
+    return 1;
 }
 
 ADDGIZMOTYPE *SecurityDoors_RegisterGizmo(i32 type_id) {

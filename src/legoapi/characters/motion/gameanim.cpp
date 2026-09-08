@@ -1,6 +1,8 @@
 #include "decomp.h"
 #include "gameapi/edtools/edfile.h"
 #include "globals.h"
+#include "legoapi/core/config/cheat.h"
+#include "legoapi/core/input/qrand.h"
 #include "nu2api/nu3d/nutexanm.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/characters/core/character.h"
@@ -13,6 +15,8 @@
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
+#include "legoapi/world/level.h"
+#include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nucore/nugcutscene.h"
 #include "nu2api/nucore/nuanim3.h"
 #include "nu2api/nucore/nuhgobj.h"
@@ -55,6 +59,8 @@ static GAMECHARACTERDATA *GetGameCharacterData(GameObject_s *object);
 void UpdateCharacterIdle(GameObject_s *object);
 void AutoWeaponOnOff(GameObject_s *object);
 void AddFootSteps(GameObject_s *object);
+f32 GizBuildItMul(GameObject_s *object);
+extern "C" f32 AnimDuration(i32 character_id, i32 animation, f32 start_frame, f32 end_frame, i32 subtract_frame_time);
 void RootFnEx(NUMTX *matrix, void *data, NUVEC *source_root, NUVEC *target_root, NUVEC *root_delta, f32 blend,
               i32 include_y);
 extern "C" void PlaySfxByIdAndSetVolume(i32 sfx_id, NUVEC *position, f32 volume);
@@ -64,6 +70,7 @@ extern i16 id_BODYGUARD;
 extern i16 id_IMPERIALGUARD;
 extern i16 id_YODA;
 extern i16 id_YODAGHOST;
+extern i16 id_GONKDROID;
 extern "C" i32 GetAnimBlendMode(void);
 
 enum CHARACTER_ANIMATION : i16 {
@@ -279,23 +286,26 @@ static f32 UpdateAnimTimer(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, i16 an
     const f32 end_frame = NuAnimEndFrame(model->model_data_b[animation]);
     bool looped = false;
 
-    if (delta >= 0.0f) {
+    // Original 0x3ce29f only enters reverse playback for an ordered negative delta.
+    if (!(delta < 0.0f)) {
         if (time > end_frame) {
             if ((animation_info->flags & CHARACTER_ANIMATION_FLAG_SYNCHRONISED) == 0) {
                 time = end_frame;
                 if (report_events) {
                     packet->flags |= ANIMPACKET_FLAG_FINISHED;
                 }
-            } else if (end_frame > 1.0f) {
-                while (time > end_frame) {
-                    time -= end_frame - 1.0f;
+            } else {
+                if (end_frame > 1.0f) {
+                    while (time > end_frame) {
+                        time -= end_frame - 1.0f;
+                    }
+                } else {
+                    time = 1.0f;
                 }
                 if (report_events) {
                     packet->flags |= ANIMPACKET_FLAG_LOOPED;
                 }
                 looped = true;
-            } else {
-                time = 1.0f;
             }
         }
     } else {
@@ -308,16 +318,18 @@ static f32 UpdateAnimTimer(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, i16 an
                 if (report_events) {
                     packet->flags |= ANIMPACKET_FLAG_FINISHED;
                 }
-            } else if (end_frame > 1.0f) {
-                while (time < 1.0f) {
-                    time += end_frame - 1.0f;
+            } else {
+                if (end_frame > 1.0f) {
+                    while (time < 1.0f) {
+                        time += end_frame - 1.0f;
+                    }
+                } else {
+                    time = 1.0f;
                 }
                 if (report_events) {
                     packet->flags |= ANIMPACKET_FLAG_LOOPED;
                 }
                 looped = true;
-            } else {
-                time = 1.0f;
             }
         }
     }
@@ -573,15 +585,14 @@ void Animate_JEDI(GameObject_s *object) {
             if (!use_default_idle) {
                 const bool has_fall_animation =
                     object->apiobj.character_model->model_data_b[CHARACTER_ANIMATION_FALL] != NULL;
-                if (object->ground_contact_grace_timer > 0.0f) {
+                // Original 0x16c978/0x16c9ce joins the character-data check
+                // at 0x16c7bc even when the ground-contact timer has expired.
+                if (object->ground_contact_grace_timer > 0.0f || !has_fall_animation ||
+                    (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
+                     object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f)) {
                     const GAMECHARACTERDATA *game_character =
                         static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-                    use_default_idle = game_character->field_0x28 <= 0.0f || !has_fall_animation;
-                } else if (!has_fall_animation) {
-                    use_default_idle = true;
-                } else if (object->fall_animation_timer < 0.2f && object->nearby_floor_distance != 2000000.0f &&
-                           object->nearby_floor_distance < 0.25f && object->apiobj.velocity.y < 0.0f) {
-                    use_default_idle = true;
+                    use_default_idle = !(game_character->field_0x28 > 0.0f) || !has_fall_animation;
                 }
             }
             if (use_default_idle) {
@@ -775,51 +786,66 @@ static void MoveAnim_Manage(GameObject_s *object, f32 movement_speed, i32 allow_
 }
 
 void AnimatePlayer(GameObject_s *object) {
-    if (object == NULL || object->apiobj.character_data == NULL) {
-        return;
-    }
-
     ANIMPACKET_s &packet = object->apiobj.anim_packet;
     packet.previous_animation = packet.animation_index;
     object->mini_animation.previous_animation = object->mini_animation.animation_index;
+    GAMEPAD_s *pad = object->pad_gamepad;
+    CHARACTERMODEL_s *model = object->apiobj.character_model;
 
-    if ((object->apiobj.field_0x1f4 & APIOBJECT_STATE_FLAG_IGNORE_DOORS) == 0 &&
-        object->apiobj.character_data->animate_fn != NULL) {
+    if ((object->apiobj.field_0x1f4 & APIOBJECT_STATE_FLAG_IGNORE_DOORS) == 0) {
         object->apiobj.character_data->animate_fn(object);
     }
 
     const i16 override_from = object->ai.animation_override_from;
-    if ((override_from == 0xe9 && object->character_context != 0x1c) || override_from == packet.requested_animation) {
+    if (override_from != -1 &&
+        ((override_from == 0xe9 && object->character_context != 0x1c) || override_from == packet.requested_animation)) {
         packet.requested_animation = object->ai.animation_override_to;
     }
 
-    CHARACTERMODEL_s *model = object->apiobj.character_model;
-    GAMECHARACTERDATA *game_character = GetGameCharacterData(object);
-    if (model == NULL || game_character == NULL ||
+    if (model == NULL ||
         (object->apiobj.field_0x287 != 0 && (object->field_0x1018 == 0.0f || object->apiobj.field_0x287 == 1))) {
         return;
     }
 
-    f32 movement_speed = 0.0f;
-    if (object->pad_gamepad != NULL) {
-        movement_speed = object->pad_gamepad->animation_input_magnitude;
-    }
-    if ((game_character->flags_090 & GAMECHARACTER_FLAG_ANIMATION_SPEED_FROM_VELOCITY) != 0) {
+    const f32 direction = (object->field_0xefd & GAMEOBJECT_MOVEMENT_FLAG_BACKWARDS) != 0 ? -1.0f : 1.0f;
+    f32 movement_speed;
+    if (object->apiobj.character_model->model_data_b[1] != NULL) {
+        movement_speed = pad->animation_input_magnitude;
+        if (movement_speed > 0.0f && object->id == id_GONKDROID && Cheat_IsOn(8) == 0)
+            movement_speed = object->apiobj.character_data->game_character->walk_speed;
+    } else if ((object->apiobj.character_data->game_character->flags_090 &
+                GAMECHARACTER_FLAG_ANIMATION_SPEED_FROM_VELOCITY) != 0) {
         const f32 forward_speed = object->apiobj.velocity.x * object->facing_direction.x +
                                   object->apiobj.velocity.z * object->facing_direction.z;
-        movement_speed = forward_speed > 0.0f ? forward_speed : 0.0f;
+        movement_speed = forward_speed < 0.0f ? 0.0f : forward_speed;
+    } else {
+        movement_speed = pad->input_magnitude;
     }
 
     // The original passes signed movement into UpdateAnimPacket.  Clips with
     // CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT (including the acrobatic
     // jump clips) start at their end frame and play backwards while the
     // character is travelling backwards.
-    if ((object->field_0xefd & GAMEOBJECT_MOVEMENT_FLAG_BACKWARDS) != 0) {
-        movement_speed = -movement_speed;
+    f32 time_multiplier = 1.0f;
+    if (object->character_context == 0x2d && object->field_0x788 != NULL)
+        time_multiplier = GizBuildItMul(object);
+    UpdateAnimPacket(model, &packet, (FRAMETIME * 30.0f) * time_multiplier, movement_speed * direction,
+                     time_multiplier * FRAMETIME, object->apiobj.character_data->game_character->backwards_speed_multiplier);
+    if ((packet.flags & ANIMPACKET_FLAG_ANIMATION_CHANGED) != 0 &&
+        (packet.blending != 0 ? packet.blend_animation_b : packet.animation_index) == 0x5f) {
+        f32 *time = packet.blending != 0 ? &packet.blend_target_time : &packet.current_time;
+        const f32 duration = AnimDuration(object->id, 0x5f, 0.0f, 0.0f, 0);
+        i32 count = static_cast<i32>(duration / 0.3f);
+        if (NuFmod(duration, 3.0f) > 0.15f)
+            ++count;
+        const i32 phase = qrand() / (0xffff / count + 1);
+        CHARACTERMODEL_s *current_model = object->apiobj.character_model;
+        const f32 start = static_cast<f32>(phase) *
+            (0.3f * static_cast<CHARACTERANIM_s *>(current_model->model_data_a[0x5f])->playback_rate) + 1.0f;
+        if (NuAnimEndFrame(current_model->model_data_b[0x5f]) > start)
+            *time = start;
+        object->field_0xe21 = (object->field_0xe21 & ~0x40) | ((phase & 1) << 6);
     }
-
-    UpdateAnimPacket(model, &packet, FRAMETIME * 30.0f, movement_speed, FRAMETIME,
-                     game_character->backwards_speed_multiplier);
     AutoWeaponOnOff(object);
     AddFootSteps(object);
 }
@@ -828,9 +854,9 @@ void Animate_BEAST(GameObject_s *) {
 }
 
 void Animate_BARMAN(GameObject_s *object) {
+    GAMEPAD_s *pad = object->pad_gamepad;
     object->apiobj.anim_packet.requested_animation = CHARACTER_ANIMATION_IDLE;
-    if ((object->pad_gamepad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 &&
-        object->pad_gamepad->input_magnitude > 0.0f) {
+    if ((pad->allocated_5a & GAMEPAD_RUNTIME_SUPPRESS_MOVEMENT) == 0 && pad->input_magnitude > 0.0f) {
         object->apiobj.anim_packet.requested_animation = CHARACTER_ANIMATION_WALK;
     }
     UpdateCharacterIdle(object);
@@ -1681,10 +1707,7 @@ void Animate_SUPERBATTLEDROID(GameObject_s *object) {
 }
 
 void GameAnimSet_RemoveObject(GAMEANIMSET_s *set, GAMEANIMOBJ_s *object) {
-    if (object == NULL || set == NULL) {
-        return;
-    }
-
+    if (object == NULL || set == NULL) return;
     if (set->objects == object) {
         set->objects = object->next;
     } else {
@@ -1692,16 +1715,14 @@ void GameAnimSet_RemoveObject(GAMEANIMSET_s *set, GAMEANIMOBJ_s *object) {
         while (previous != NULL && previous->next != object) {
             previous = previous->next;
         }
-        if (previous != NULL) {
-            previous->next = object->next;
-        }
+        if (previous != NULL) previous->next = object->next;
     }
-
     object->next = NULL;
     --set->object_count;
-    --set->object_pool->active_count;
-    object->next = set->object_pool->free_objects;
-    set->object_pool->free_objects = object;
+    GAMEANIMOBJPOOL_s *pool = set->object_pool;
+    --pool->active_count;
+    object->next = pool->free_objects;
+    pool->free_objects = object;
 }
 
 void GameAnimSet_ScaleFParam1(GAMEANIMSET_s *set, float scale) {
@@ -1841,16 +1862,12 @@ void GameAnimSet_JumpToAnimPos(GAMEANIMSET_s *set, float position) {
 }
 
 void GameAnimSet_RemoveSpecial(GAMEANIMSET_s *set, nuhspecial_s *special) {
-    if (special == NULL || set == NULL) {
-        return;
+    if (special == NULL || set == NULL) return;
+    GAMEANIMOBJ_s *object = set->objects;
+    while (object != NULL && NuSpecialCompare(&object->special, special) == 0) {
+        object = object->next;
     }
-
-    for (GAMEANIMOBJ_s *object = set->objects; object != NULL; object = object->next) {
-        if (NuSpecialCompare(&object->special, special) != 0) {
-            GameAnimSet_RemoveObject(set, object);
-            return;
-        }
-    }
+    if (object != NULL) GameAnimSet_RemoveObject(set, object);
 }
 
 void GameAnimSet_SetVisibility(GAMEANIMSET_s *set, i32 visibility) {
@@ -1868,14 +1885,15 @@ void GameAnimSet_DrawReflection(GAMEANIMSET_s *set, i32 axis, float offset, numt
     if (matrix == NULL) {
         matrix = NuSpecialGetMtx(&set->objects->special);
     }
-
-    const f32 plane = reinterpret_cast<f32 *>(matrix)[axis + 11] + offset;
+    f32 plane = offset + reinterpret_cast<f32 *>(matrix)[11 + axis];
     NuRndrStartReflectionRender(0);
     for (GAMEANIMOBJ_s *object = set->objects; object != NULL; object = object->next) {
         if ((object->flags & 2) == 0 && NuSpecialGetVisibilityFn(&object->special) != 0) {
-            NUMTX reflection;
+            NUMTX reflection __attribute__((aligned(16)));
+            extern i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
             NUMTX *draw_matrix = NuSpecialGetDrawMtx(&object->special);
-            if (MatrixReflection(draw_matrix, axis, plane, WORLD->current_level->unknown_0cc, &reflection) != 0) {
+            if (MatrixReflection(draw_matrix, axis, plane,
+                                 WORLD->current_level->unknown_0cc, &reflection) != 0) {
                 NuSpecialDrawAt(&object->special, &reflection);
             }
         }
@@ -1905,19 +1923,17 @@ void GameAnimSet_AddToSystemList(GAMEANIMSET_s *set) {
 }
 
 f32 GameAnimSet_AutoSetReflectY(GAMEANIMSET_s *set, nuvec_s *position, numtx_s *matrix) {
-    if (set == NULL || set->objects == NULL) {
-        return 0.0f;
+    if (set != NULL && set->objects != NULL) {
+        if (matrix == NULL) {
+            matrix = NuSpecialGetMtx(&set->objects->special);
+        }
+        f32 height = matrix->m31;
+        f32 ground = GameShadow(NULL, position, 5.0f, -1);
+        if (ground != 2000000.0f) {
+            return ground - height;
+        }
     }
-    if (matrix == NULL) {
-        matrix = NuSpecialGetMtx(&set->objects->special);
-    }
-
-    const f32 matrix_y = matrix->m31;
-    const f32 ground_y = GameShadow(NULL, position, 5.0f, -1);
-    if (ground_y == 2000000.0f) {
-        return 0.0f;
-    }
-    return ground_y - matrix_y;
+    return 0.0f;
 }
 
 f32 GameAnimSet_GetCurrentFrame(GAMEANIMSET_s *set) {
@@ -1991,11 +2007,8 @@ i32 GameAnimSet_IsAnimationReset(GAMEANIMSET_s *set) {
 }
 
 void GameAnimSet_RemoveAllObjects(GAMEANIMSET_s *set) {
-    if (set == NULL) {
-        return;
-    }
-    while (set->objects != NULL) {
-        GameAnimSet_RemoveObject(set, set->objects);
+    if (set != NULL) {
+        while (set->objects != NULL) GameAnimSet_RemoveObject(set, set->objects);
     }
 }
 
@@ -2921,9 +2934,6 @@ extern "C" {
     }
 
     i32 CurrentAnim(ANIMPACKET_s *packet) {
-        if (packet == NULL) {
-            return -1;
-        }
         return packet->blending == 0 ? packet->animation_index : packet->blend_animation_b;
     }
 
@@ -3169,7 +3179,9 @@ extern "C" {
                 }
             }
 
-            if (packet->requested_animation == packet->previous_animation) {
+            // Interrupted blends enter the transition directly (original
+            // 0x3ce858/0x3ce88a), even when returning to their source animation.
+            if (interrupted == 0 && packet->requested_animation == packet->previous_animation) {
                 if (force_restart == 0 || packet->requested_animation != packet->animation_index ||
                     !HasAnimation(model, packet->animation_index)) {
                     packet->animation_index = packet->requested_animation;
@@ -3280,28 +3292,18 @@ extern "C" {
 } // extern "C"
 
 void SetAnimFrame(nuhspecial_s *special, float frame) {
-    if (NuSpecialExistsFn(special) == 0) {
-        return;
-    }
-
-    NUMTX matrix;
+    if (NuSpecialExistsFn(special) == 0) return;
+    NUMTX matrix __attribute__((aligned(16)));
     NuMtxSetIdentity(&matrix);
     nuinstanim_s *instance_animation = NuSpecialGetInstAnim(special);
-    if (instance_animation == NULL) {
-        return;
-    }
-
+    if (instance_animation == NULL) return;
     nuanimdata_s *animation = special->scene->instance_animation_data[instance_animation->anim_ix];
-    if (animation == NULL) {
-        return;
-    }
-    if (frame == 1000000000.0f) {
-        frame = *reinterpret_cast<f32 *>(animation);
-    }
-    if (frame < 1.0f || frame > *reinterpret_cast<f32 *>(animation)) {
-        return;
-    }
-
+    if (animation == NULL) return;
+    // The animation header begins with its final frame; the remaining header is opaque here.
+    f32 end_frame;
+    memcpy(&end_frame, animation, sizeof(end_frame));
+    if (frame == 1.0e9f) frame = end_frame;
+    if (!(frame >= 1.0f && frame <= end_frame)) return;
     NuAnimData2CalcMatrix(animation, 0, frame, &matrix);
     instance_animation->mtx = matrix;
     NUMTX *instance_matrix = NuSpecialGetInstanceMtx(special);
@@ -3647,6 +3649,41 @@ void EvalAnim2(nuhspecial_s *special, float frame) {
     NuSpecialUpdate(special);
 }
 
+void GameAnimSys_AllocateLevelProgressData(variptr_u *buf, variptr_u *buf_end, i32 capacity, i32 level_count) {
+    if (buf_end == NULL || buf == NULL) return;
+    gameanimsysprogress.count = level_count;
+    gameanimsysprogress.entry_size = capacity;
+    gameanimsysprogress.entries = static_cast<u8 **>(GameBufferAlloc(buf, buf_end, level_count * sizeof(u8 *)));
+    if (gameanimsysprogress.entries != NULL) {
+        for (i32 i = 0; i < level_count; ++i)
+            gameanimsysprogress.entries[i] = static_cast<u8 *>(GameBufferAlloc(buf, buf_end, capacity));
+    }
+}
+
+u8 *GameAnimSys_GetProgressData(i32 index) {
+    if (index < 0 || index >= gameanimsysprogress.count) return NULL;
+    return gameanimsysprogress.entries[index];
+}
+
+void GameAnimSys_StoreProgress(GAMEANIMSYS_s *system, i32 index) {
+    if (system == NULL || system->sets == NULL || index < 0 || index >= gameanimsysprogress.count) return;
+    u8 *progress = gameanimsysprogress.entries[index];
+    for (i32 i = 0; i < gameanimsysprogress.entry_size && system->sets[i] != NULL; ++i)
+        progress[i] = system->sets[i]->state;
+}
+
+void GameAnimSys_ReStoreProgress(GAMEANIMSYS_s *system, i32 index) {
+    if (system == NULL || system->sets == NULL || index < 0 || index >= gameanimsysprogress.count) return;
+    u8 *progress = gameanimsysprogress.entries[index];
+    for (i32 i = 0; i < gameanimsysprogress.entry_size && system->sets[i] != NULL; ++i) {
+        GAMEANIMSET_s *set = system->sets[i];
+        set->state = static_cast<GAMEANIMSET_STATE>(static_cast<i8>(progress[i]));
+        if (set->state == GAMEANIMSET_STATE_ACTIVE_FORWARD || set->state == GAMEANIMSET_STATE_ACTIVE_BACKWARD) {
+            if ((set->flags & GAMEANIMSET_FLAG_IN_SYSTEM_LIST) == 0) GameAnimSet_AddToSystemList(set);
+        } else if ((set->flags & GAMEANIMSET_FLAG_IN_SYSTEM_LIST) != 0) GameAnimSet_RemoveFromSystemList(set);
+    }
+}
+
 GAMEANIMSYS_s *GameAnimSys_Create(variptr_u *buf, variptr_u *buf_end) {
     GAMEANIMSYS_s *system = static_cast<GAMEANIMSYS_s *>(GameBufferAlloc(buf, buf_end, sizeof(GAMEANIMSYS_s)));
     if (system != NULL && gameanimsysprogress.entry_size != 0) {
@@ -3654,12 +3691,4 @@ GAMEANIMSYS_s *GameAnimSys_Create(variptr_u *buf, variptr_u *buf_end) {
             GameBufferAlloc(buf, buf_end, gameanimsysprogress.entry_size * sizeof(GAMEANIMSET_s *)));
     }
     return system;
-}
-
-void *GameAntnode_CreateSys(WORLDINFO_s *world, variptr_u *buf, variptr_u *buf_end, i32 count) {
-    (void)world;
-    (void)buf;
-    (void)buf_end;
-    (void)count;
-    return NULL;
 }

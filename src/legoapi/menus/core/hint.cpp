@@ -9,6 +9,11 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
+i32 only_process_this_hint_id = -1;
+u8 show_unlock_shop_hint = 0;
+u8 show_unlock_customiser_hint = 0;
+u8 show_unlock_minikitviewer_hint = 0;
+
 void initHintSys() {
 }
 
@@ -69,7 +74,10 @@ void CLEAR_HINT_COMPLETE(i32 hint_id) {
 void DragBomb_UpdateHint(HINT_s *) {
 }
 
-void GetHintFromUIButton() {
+extern HINTUIBUTTON_s *hintUIButton;
+
+void *GetHintFromUIButton() {
+    return hintUIButton != NULL ? hintUIButton->field_0x78 : NULL;
 }
 
 void initGameHintSys_LSW() {

@@ -1531,33 +1531,59 @@ void NuMtxLookAtInverseD3D(NUMTX *mtx, NUVEC *eye, NUVEC *center, NUVEC *up) {
     mtx->m33 = 1.0f;
 }
 
-void NuMtxToQuat(struct nuquat_s *out, NUMTX *m) {
+void NuMtxToQuat(NUMTX *m, struct nuquat_s *out) {
+    i32 next[3] = {1, 2, 0};
     f32 trace = m->m00 + m->m11 + m->m22;
     f32 s;
-
     if (trace > 0.0f) {
-        s = 0.5f / NuFsqrt(trace + 1.0f);
-        out->w = 0.25f / s;
-        out->x = (m->m21 - m->m12) * s;
-        out->y = (m->m02 - m->m20) * s;
-        out->z = (m->m10 - m->m01) * s;
-    } else if ((m->m00 > m->m11) && (m->m00 > m->m22)) {
-        s = 2.0f * NuFsqrt(1.0f + m->m00 - m->m11 - m->m22);
-        out->w = (m->m21 - m->m12) / s;
-        out->x = 0.25f * s;
-        out->y = (m->m01 + m->m10) / s;
-        out->z = (m->m02 + m->m20) / s;
-    } else if (m->m11 > m->m22) {
-        s = 2.0f * NuFsqrt(1.0f + m->m11 - m->m00 - m->m22);
-        out->w = (m->m02 - m->m20) / s;
-        out->x = (m->m01 + m->m10) / s;
-        out->y = 0.25f * s;
-        out->z = (m->m12 + m->m21) / s;
+        s = NuFsqrt(trace + 1.0f);
+        out->w = s * 0.5f;
+        s = 0.5f / s;
+        out->x = (m->m12 - m->m21) * s;
+        out->y = (m->m20 - m->m02) * s;
+        out->z = (m->m01 - m->m10) * s;
     } else {
-        s = 2.0f * NuFsqrt(1.0f + m->m22 - m->m00 - m->m11);
-        out->w = (m->m10 - m->m01) / s;
-        out->x = (m->m02 + m->m20) / s;
-        out->y = (m->m12 + m->m21) / s;
-        out->z = 0.25f * s;
+        i32 i = 0;
+        if (m->m11 > m->m00) i = 1;
+        if (m->m22 > reinterpret_cast<f32 *>(m)[i * 4 + i]) i = 2;
+        i32 j = next[i];
+        i32 k = next[j];
+        f32 q[4];
+        s = NuFsqrt(reinterpret_cast<f32 *>(m)[i * 4 + i] -
+                    (reinterpret_cast<f32 *>(m)[j * 4 + j] + reinterpret_cast<f32 *>(m)[k * 4 + k]) + 1.0f);
+        q[i] = s * 0.5f;
+        if (s != 0.0f) s = 0.5f / s;
+        q[3] = (reinterpret_cast<f32 *>(m)[j * 4 + k] - reinterpret_cast<f32 *>(m)[k * 4 + j]) * s;
+        q[j] = (reinterpret_cast<f32 *>(m)[i * 4 + j] + reinterpret_cast<f32 *>(m)[j * 4 + i]) * s;
+        q[k] = (reinterpret_cast<f32 *>(m)[i * 4 + k] + reinterpret_cast<f32 *>(m)[k * 4 + i]) * s;
+        out->x = q[0];
+        out->y = q[1];
+        out->z = q[2];
+        out->w = q[3];
     }
+}
+
+void NuMtxSetRotationXYVU0(NUMTX *matrix, NUANGVEC *angles) {
+    f32 cx = NU_COS_LUT(angles->x);
+    f32 sx = NU_SIN_LUT(angles->x);
+    f32 cy = NU_COS_LUT(angles->y);
+    f32 sy = NU_SIN_LUT(angles->y);
+    f32 cz = NU_COS_LUT(0);
+    f32 sz = NU_SIN_LUT(0);
+    matrix->m00 = cy * cz;
+    matrix->m01 = cy * sz;
+    matrix->m02 = -sy;
+    matrix->m03 = 0.0f;
+    matrix->m10 = sx * sy * cz - cx * sz;
+    matrix->m11 = sx * sy * sz + cx * cz;
+    matrix->m12 = sx * cy;
+    matrix->m13 = 0.0f;
+    matrix->m20 = cx * sy * cz + sx * sz;
+    matrix->m21 = cx * sy * sz - sx * cz;
+    matrix->m22 = cx * cy;
+    matrix->m23 = 0.0f;
+    matrix->m30 = 0.0f;
+    matrix->m31 = 0.0f;
+    matrix->m32 = 0.0f;
+    matrix->m33 = 1.0f;
 }

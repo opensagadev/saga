@@ -3,6 +3,8 @@
 #pragma once
 
 #include "nu2api/nucore/fixed_width.h"
+#include "decomp_assert.h"
+#include <stddef.h>
 
 struct AIPATHNODE_s;
 struct AndroidOBBUtils;
@@ -128,9 +130,24 @@ struct NetListenerList {
     void Find(NetListenerBinding *);
 };
 struct NetMessage {
+    struct MessageData {
+        u8 bytes[0x4b0];
+        u32 references;
+    };
+    static MessageData sm_poolMessageData[512];
+    i32 swap_endianness;
+    MessageData *data;
+    u32 read_offset;
+    u32 write_offset;
     void DebugPrint() const;
     void RaiseError();
 };
+DECOMP_ASSERT(sizeof(NetMessage) == 0x10, "NetMessage ABI");
+DECOMP_ASSERT(offsetof(NetMessage, data) == 4, "NetMessage data offset");
+DECOMP_ASSERT(offsetof(NetMessage, read_offset) == 8, "NetMessage read cursor offset");
+DECOMP_ASSERT(offsetof(NetMessage, write_offset) == 12, "NetMessage write cursor offset");
+static_assert(sizeof(NetMessage::MessageData) == 0x4b4, "NetMessage pool entry size");
+static_assert(offsetof(NetMessage::MessageData, references) == 0x4b0, "NetMessage pool reference offset");
 struct NetPredictor {
     struct PredictorData {};
     struct PredictorTime {};
@@ -288,7 +305,7 @@ struct TouchHacks {
         TintStack();
         ~TintStack();
     };
-    void AiPlayerTakeDamageOnKillRescue(GameObject_s &);
+    static bool AiPlayerTakeDamageOnKillRescue(GameObject_s &);
     void CalculateJumpVelToHitPoint(GameObject_s &, VuVec const &);
     void CalculateJumpVelToHitPointDblJump(GameObject_s &, VuVec const &);
     void CalculateXZVelForArcToHitPoint(VuVec const &, VuVec const &, float, float);
@@ -312,7 +329,7 @@ struct TouchHacks {
     void CanUseLever(GameObject_s &);
     void CanUseTeleport(GameObject_s &);
     void CanUseVehicleSmartBomb(GameObject_s &);
-    void CanUseZipup(GameObject_s &);
+    static bool CanUseZipup(GameObject_s &);
     static bool CheckForAboutToRunIntoKillTerrain(GameObject_s &, float);
     void CheckForAboutToRunOffAnEdge(GameObject_s &, float);
     void CheckJumpForLandingSpot(GameObject_s &, float);
@@ -320,13 +337,13 @@ struct TouchHacks {
     void FindBombTarget(GameObject_s &);
     static nucolour3_s *GetFlashColour();
     static float GetIncomingPartRange();
-    i32 GetLoseStudsDieValue();
-    i32 GetLoseStudsFallValue();
+    static i32 GetLoseStudsDieValue();
+    static i32 GetLoseStudsFallValue();
     bool InParty(GameObject_s &);
     void PlaySmartBombBuildupEffects(GameObject_s &, float, float);
     void ShouldAutoGrabDragBomb(GameObject_s &);
     static bool ShouldBlock(GameObject_s &);
-    void ShouldDeflectBolt(GameObject_s &, BOLT_s &);
+    static i32 ShouldDeflectBolt(GameObject_s &, BOLT_s &);
     static bool ShouldFlash(float);
     static bool ShouldKeepWeaponOut(GameObject_s &);
     static bool ShouldPutWeaponAway(GameObject_s &);
@@ -360,6 +377,11 @@ struct V2SessionManager {
     void VerifyStrings(char **, char **, i32, char *);
 };
 struct VirtualStackAllocator {
+    u8 owns_memory;
+    u8 *cursor;
+    u8 *end;
+    u8 *base;
+
     VirtualStackAllocator();
     VirtualStackAllocator(VirtualStackAllocator &, u32);
     VirtualStackAllocator(i32);

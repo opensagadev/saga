@@ -18,6 +18,17 @@
 #include <string.h>
 
 i32 GizmoBlowupGetTypeFromNameTableId(WORLDINFO_s *world, i32 name_table_id);
+
+u32 GizTurrets_TotalScore(void *context) {
+    GIZTURRETSYS_s *system = static_cast<WORLDINFO_s *>(context)->giz_turret_sys;
+    u32 total = 0;
+    if (system != NULL && system->turrets != NULL) {
+        GIZTURRET_s *turret = system->turrets;
+        for (i32 i = 0; i < system->count; ++i, ++turret)
+            total += static_cast<u16>(turret->field_0x10c);
+    }
+    return total;
+}
 i32 GizmoBlowupGetNameTableId(char *name);
 void AddLevelSfxFromId(i32 sfx_id, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx);
 extern "C" i16 FindPlatInst(i32 instance_ix);

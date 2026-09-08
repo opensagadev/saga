@@ -50,6 +50,7 @@ namespace {
         printf("Usage: %s window [options]\n", program);
         printf("\nOptions:\n");
         printf("  --capture              Capture changed frames under .work/capture\n");
+        printf("  --trace-movement       Log player movement state twice per second\n");
         printf("  --script-input         Exercise the new-game menu flow\n");
         printf("  --script-load          Exercise the load-game menu flow\n");
         printf("  --script-play          Exercise the new-game flow and player movement\n");
@@ -122,6 +123,8 @@ namespace {
             const char *argument = argv[i];
             if (strcmp(argument, "--capture") == 0) {
                 options.capture = true;
+            } else if (strcmp(argument, "--trace-movement") == 0) {
+                options.trace_movement = true;
             } else if (strcmp(argument, "--script-input") == 0) {
                 options.script_input = true;
             } else if (strcmp(argument, "--script-load") == 0) {

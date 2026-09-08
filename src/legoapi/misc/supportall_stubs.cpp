@@ -34,18 +34,6 @@ void DisplayListCreateInstSurfGeomPS(variptr_u *, numtx_s *) {
 
 // Flag-sensitive moves from supportall.cpp (-O2): these match at the
 // default flag. GetBuffer stays a call and float scheduling matches.
-static nunativedebrisdata_s *BeginDebrisPacket(NUMTL *material) {
-    VARIPTR *buffer = NuDisplayListGetBuffer();
-    nunativedebrisdata_s *packet = static_cast<nunativedebrisdata_s *>(buffer->void_ptr);
-    buffer->addr += sizeof(*packet);
-    packet->vertex_buffer_index = static_cast<u8>(g_CurrentDebriVBIndex);
-    packet->use_system_memory_vb = g_UseSysMemVB;
-    packet->first_vertex = static_cast<i32>(g_CurrentVBVertexCount);
-    packet->vertex_count = 0;
-    packet->material = material;
-    AddParticleGroupToDisplayList(packet);
-    return packet;
-}
 void BuildDebrisVerts(PartHeader *header, uv1debdata *chunk_data, NUMTL *material, f32 time, NUMTX *matrix,
                       i32 particle_type, f32, f32, f32, f32 near_clip) {
     const f32 u0 = material->particle_type_tag == -105 ? 0.0f : header->texture_u0;
@@ -69,16 +57,21 @@ void BuildDebrisVerts(PartHeader *header, uv1debdata *chunk_data, NUMTL *materia
             particle.position.y + particle.momentum.y * age + header->gravity * age * age * 0.945f,
             particle.position.z + particle.momentum.z * age,
         };
-        NuVecMtxTransform(&position, &position, matrix);
-        NuRndr_DebrisMtx.m30 = position.x;
-        NuRndr_DebrisMtx.m31 = position.y;
-        NuRndr_DebrisMtx.m32 = position.z;
+        NUVEC rotated = {
+            position.x * matrix->m00 + position.y * matrix->m10 + position.z * matrix->m20,
+            position.x * matrix->m01 + position.y * matrix->m11 + position.z * matrix->m21,
+            position.x * matrix->m02 + position.y * matrix->m12 + position.z * matrix->m22,
+        };
+        NuRndr_DebrisMtx.m30 = rotated.x + matrix->m30;
+        NuRndr_DebrisMtx.m31 = rotated.y + matrix->m31;
+        NuRndr_DebrisMtx.m32 = rotated.z + matrix->m32;
         if (particle_type == 6 || particle_type == 7) {
-            NuRndrParticleSetRepeat(&position);
+            NuRndrParticleSetRepeat(reinterpret_cast<NUVEC *>(&NuRndr_DebrisMtx.m30));
         }
 
-        const f32 plane_distance = NuRndr_DebrisPlane.x * position.x + NuRndr_DebrisPlane.y * position.y +
-                                   NuRndr_DebrisPlane.z * position.z + NuRndr_DebrisPlane.w;
+        const f32 plane_distance = NuRndr_DebrisPlane.w +
+            (NuRndr_DebrisMtx.m32 * NuRndr_DebrisPlane.z +
+             (NuRndr_DebrisMtx.m30 * NuRndr_DebrisPlane.x + NuRndr_DebrisMtx.m31 * NuRndr_DebrisPlane.y));
         if (plane_distance < near_clip) {
             continue;
         }
@@ -91,7 +84,16 @@ void BuildDebrisVerts(PartHeader *header, uv1debdata *chunk_data, NUMTL *materia
             if (NuDebrisRendererNextBuffer() == 0) {
                 return;
             }
-            g_ParticleGroup = BeginDebrisPacket(material);
+            VARIPTR *buffer = NuDisplayListGetBuffer();
+            nunativedebrisdata_s *packet = static_cast<nunativedebrisdata_s *>(buffer->void_ptr);
+            packet->material = g_ParticleGroup->material;
+            packet->vertex_buffer_index = static_cast<u8>(g_CurrentDebriVBIndex);
+            packet->use_system_memory_vb = g_UseSysMemVB;
+            packet->first_vertex = static_cast<i32>(g_CurrentVBVertexCount);
+            packet->vertex_count = 0;
+            buffer->addr += sizeof(*packet);
+            g_ParticleGroup = packet;
+            AddParticleGroupToDisplayList(g_ParticleGroup);
         }
 
         const f32 fraction = frame_position - static_cast<f32>(frame_index);
@@ -108,9 +110,9 @@ void BuildDebrisVerts(PartHeader *header, uv1debdata *chunk_data, NUMTL *materia
         corners[2] = {first.extent.x * inverse_fraction + second.extent.x * fraction,
                       first.extent.y * inverse_fraction + second.extent.y * fraction,
                       first.extent.z * inverse_fraction + second.extent.z * fraction};
-        corners[3].x = corners[0].x + corners[2].x - corners[1].x;
-        corners[3].y = corners[0].y + corners[2].y - corners[1].y;
-        corners[3].z = corners[0].z + corners[2].z - corners[1].z;
+        corners[3].x = corners[0].x + (corners[2].x - corners[1].x);
+        corners[3].y = corners[0].y + (corners[2].y - corners[1].y);
+        corners[3].z = corners[0].z + (corners[2].z - corners[1].z);
         for (i32 corner = 0; corner < 4; ++corner) {
             NuVecMtxTransform(&corners[corner], &corners[corner], &NuRndr_DebrisMtx);
         }
@@ -183,8 +185,8 @@ void RootFnEx(NUMTX *matrix, void *data, NUVEC *sampled_root, NUVEC *, NUVEC *tr
     }
 
     if (include_y && object->animation_root_delta.y == 0.0f) {
-        object->animation_root_delta.y = 1.0f;
+        object->animation_root_delta.y = 1.0e-11f;
     } else if (object->animation_root_delta.x == 0.0f && object->animation_root_delta.z == 0.0f) {
-        object->animation_root_delta.x = 1.0f;
+        object->animation_root_delta.x = 1.0e-11f;
     }
 }

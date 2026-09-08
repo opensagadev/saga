@@ -1,7 +1,14 @@
 #include "legoapi/legoapi_types.h"
+#include "globals.h"
+#include "batman.h"
 #include "legoapi/items/base/animpacket.h"
+#include "legoapi/characters/core/character.h"
 
 f32 CustomiseMenuTime[2];
+GAMESAVE_s OldCustomiseGame = {};
+i32 customiser_save_done = 0;
+i32 customiser_quit = 0;
+i32 customiser_changed = 0;
 extern "C" void ResetAnimPacket(void *, i32);
 
 void Customiser_Init(CUSTOMISER *) {
@@ -59,7 +66,19 @@ void CustomiserMenu_Update(MENU_s *) {
 void Customiser_PieceConfig(CUSTOMPIECE *, nufpar_s *) {
 }
 
-void Customiser_MenuAvailable(CUSTOMISER *) {
+i32 Customiser_MenuAvailable(CUSTOMISER *customiser) {
+    if (customiser == NULL || APICharacterLoaded(customiser->character_ids[0]) == NULL) {
+        return 0;
+    }
+    const i16 first_animation = customiser->animation_packets[0].requested_animation;
+    if (first_animation != 99 && first_animation != 190) {
+        return 0;
+    }
+    if (APICharacterLoaded(customiser->character_ids[1]) == NULL) {
+        return 0;
+    }
+    const i16 second_animation = customiser->animation_packets[1].requested_animation;
+    return second_animation == 99 || second_animation == 190;
 }
 
 void Customiser_NextPieceLeft(CUSTOMISER *, i32, i32, i32, i32) {

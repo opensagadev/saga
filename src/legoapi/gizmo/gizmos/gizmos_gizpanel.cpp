@@ -111,7 +111,7 @@ void GizPanel_GetAbsPlayerPos(GIZPANEL_s *, nuvec_s *) {
 }
 
 void GizPanel_GetAbsTargetPos(GIZPANEL_s *panel, nuvec_s *target_position, i32 player_position) {
-    if (panel == NULL || target_position == NULL) {
+    if (target_position == NULL || panel == NULL) {
         return;
     }
 
@@ -129,11 +129,9 @@ void GizPanel_GetAbsTargetPos(GIZPANEL_s *panel, nuvec_s *target_position, i32 p
     }
 
     NuVecRotateY(&offset, &offset, panel->y_rotation);
-    *target_position = {
-        offset.x + panel->position.x,
-        offset.y,
-        offset.z + panel->position.z,
-    };
+    offset.x += panel->position.x;
+    offset.z += panel->position.z;
+    *target_position = offset;
 }
 
 void GIZPANEL_s::ClearMechObjectInterface() {

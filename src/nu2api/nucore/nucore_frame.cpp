@@ -1,6 +1,7 @@
 #include "nu2api/nucore/nuapi.h"
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/nu3d/nuocclusion.h"
+#include "nu2api/nu3d/nurndr.h"
 #include "gamelib/nuwind/nuwind.h"
 void bgSuspendMain(i32);
 void NuPadRecordEndFrame();
@@ -13,7 +14,6 @@ extern "C" {
     void NuTimeBarSetRender(i32);
     void NuPad_Interface_Render();
     void NuPadUpdatePads();
-    void NuRndrSwapScreenEx(i32, void (*)());
     extern void (*preRenderFlashingHack)();
     extern void (*postRenderFlashingHack)();
     extern void (*nuapi_endframe_callbackfn)();

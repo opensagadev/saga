@@ -222,7 +222,12 @@ void DefaultMtl(NUMTL *mtl);
 void NuMtlCreatePS(NUMTL *mtl, i32 is_3d);
 void NuMtlSetUVOffsetPS(NUMTL *mtl, u32 layer, f32 u, f32 v);
 extern "C" NUMTL *NuMtlCreate3D(i32 count);
+extern "C" NUMTL *NuMtlCreateEx3D(i32 count, u8 render_plane);
+extern "C" NUMTL *NuMtlCreateEx(i32 count, u8 render_plane);
+extern "C" void NuMtlInitOverride(i32 count, VARIPTR *buffer, VARIPTR *end);
+extern "C" void NuMtlDestroy(NUMTL *mtl);
 extern "C" void NuDisplayListCreateMtl(NUMTL *mtl);
+extern "C" void NuDisplayListDestroyMtl(NUMTL *mtl);
 void NuMtlUpdatePS(NUMTL *mtl);
 
 extern "C" {

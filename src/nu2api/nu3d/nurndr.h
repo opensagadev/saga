@@ -10,6 +10,15 @@ typedef struct rndrstream_s RNDRSTREAM;
 
 typedef i32 NUCOLOUR32;
 
+typedef struct NURND_VERTEX3D {
+    NUVEC position;
+    NUVEC normal;
+    u32 colour;
+    f32 u, v;
+} NURND_VERTEX3D;
+DECOMP_ASSERT(sizeof(NURND_VERTEX3D) == 0x24, "Immediate 3D vertex ABI");
+DECOMP_ASSERT(offsetof(NURND_VERTEX3D, colour) == 0x18, "Immediate 3D colour offset");
+
 #define RGBA_TO_NUCOLOUR32(r, g, b, a) ((u8)(a) << 0x18) | ((u8)(b) << 0x10) | ((u8)(g) << 0x08) | ((u8)(r) << 0x00);
 
 typedef struct nucolour3_s {
@@ -45,12 +54,22 @@ void NuRndrStreamInit(i32 stream_buffer_size, VARIPTR *buffer);
 
 extern "C" {
 #endif
+    extern i32 NuRndrStopUpdate;
+    extern NUVEC NuRndrDebBase;
+    extern NUVEC NuRndrDebRange;
+    extern NUVEC NuRndrDebRangeInv;
+    void NuRndrSetDebBaseRange(NUVEC *base, NUVEC *range);
+    void NuRndrSetDebBox(NUVEC *range);
+
     extern i32 nurndr_pixel_width;
     extern i32 nurndr_pixel_height;
     extern i32 NuRndrShadowCnt;
     extern NURND_SHADOW_s NuRndrShadPolDat[128];
 
     void NuRndrInitEx(i32 stream_buffer_size, VARIPTR *buffer);
+    i32 NuRndrSwapScreenEx(i32 mode, void (*callback)(void));
+    i32 NuRndrStrip3d(NURND_VERTEX3D *vertices, struct numtl_s *material, NUMTX *matrix, i32 count);
+    i32 NuRndrTriStrip3dClip(NURND_VERTEX3D *vertices, i32 count, NUMTX *matrix, struct numtl_s *material);
 
     i32 NuRndrSetViewMtx(NUMTX *vpcs_mtx, NUMTX *viewport_vpc_mtx, NUMTX *scissor_vpc_mtx);
     void NuRndrStateUpdateCameraState(void);

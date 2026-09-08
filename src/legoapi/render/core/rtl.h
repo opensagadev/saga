@@ -38,9 +38,17 @@ DECOMP_ASSERT(offsetof(rtl_s, inner_radius) == 0x3c, "RTL radius offset");
 DECOMP_ASSERT(offsetof(rtl_s, type) == 0x58, "RTL type offset");
 DECOMP_ASSERT(offsetof(rtl_s, uid) == 0x6a, "RTL UID offset");
 
+struct rtlset {
+    u32 header;
+    rtl_s lights[128];
+};
+DECOMP_ASSERT(offsetof(rtlset, lights) == 4, "RTL set light-array offset");
+
 extern "C" {
     i32 rtlInitDynamic(VARIPTR *, VARIPTR, i32);
     i32 rtlDynamicAlloc(void);
+    i32 rtlDynamicAllocTemplate(rtlset *, i32);
+    i32 rtlFindByUserId(usize, i32);
     void rtlDynamicFree(i32);
     bool rtlDynamicEnable(i32, i32);
     i32 rtlDynamicSetType(i32, i32);

@@ -46,7 +46,14 @@ void ResetSeeds() {
 void makenuvec4(float, float, float, float) {
 }
 
-void FindAnglesXY(nuvec_s *, u16 *, u16 *) {
+i32 i_temp_xrot;
+
+void FindAnglesXY(nuvec_s *direction, u16 *x_rotation, u16 *y_rotation) {
+    temp_yrot = NuAtan2D(direction->x, direction->z);
+    if (y_rotation != NULL) *y_rotation = temp_yrot;
+    i_temp_xrot = -NuAtan2D(direction->y, NuFsqrt(direction->x * direction->x + direction->z * direction->z));
+    temp_xrot = i_temp_xrot;
+    if (x_rotation != NULL) *x_rotation = temp_xrot;
 }
 
 void FindAnglesZX(nuvec_s *normal, u16 *x_rotation, u16 *z_rotation) {
@@ -75,19 +82,96 @@ void LineCrossedXZ(float, float, float, float, float, float, float, float) {
 void ScaleAndClamp(i32) {
 }
 
-void VecRotateAxis(nuvec_s *, u16, nuvec_s *) {
+void VecRotateAxis(nuvec_s *vector, u16 angle, nuvec_s *axis) {
+    NuVecNorm(axis, axis);
+    const f32 cosine = NuTrigTable[((static_cast<u32>(angle) + 0x4000) >> 1) & 0x7fff];
+    const f32 sine = NuTrigTable[angle >> 1];
+    const f32 complement = 1.0f - cosine;
+    const f32 x = axis->x;
+    const f32 y = axis->y;
+    const f32 z = axis->z;
+    const NUVEC source = *vector;
+    const f32 tx = complement * x;
+    const f32 ty = complement * y;
+    const f32 tz = complement * z;
+    const f32 xy = tx * y;
+    const f32 xz = tx * z;
+    const f32 yz = ty * z;
+    const f32 sx = sine * x;
+    const f32 sy = sine * y;
+    const f32 sz = z * sine;
+    vector->x = ((tx * x + cosine) * source.x + 0.0f) + (xy - sz) * source.y + (xz + sy) * source.z;
+    vector->y = ((xy + sz) * source.x + 0.0f) + (y * ty + cosine) * source.y + (yz - sx) * source.z;
+    vector->z = ((xz - sy) * source.x + 0.0f) + (sx + yz) * source.y + (tz * z + cosine) * source.z;
 }
 
-void SolveQuadratic(float, float, float, float *, float *) {
+i32 SolveQuadratic(f32 a, f32 b, f32 c, f32 *first, f32 *second) {
+    if (a == 0.0f) {
+        if (b == 0.0f) return 0;
+        *first = *second = -c / b;
+        return 1;
+    }
+    const f32 four_ac = 4.0f * a * c;
+    const f32 b_squared = b * b;
+    if (four_ac > b_squared) return 0;
+    if (four_ac == b_squared) {
+        *first = *second = -b / (a + a);
+        return 1;
+    }
+    const f32 root = NuFsqrt(b_squared - four_ac);
+    *first = (-b - root) / (a + a);
+    *second = (root - b) / (a + a);
+    return 1;
 }
 
 void XZLinesClosest(nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *, float *, float *) {
 }
 
-void LineIntersectXY(nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *) {
+i32 LineIntersectXY(nuvec_s *a, nuvec_s *b, nuvec_s *c, nuvec_s *d, nuvec_s *first, nuvec_s *second) {
+    const f32 ax = a->x, ay = a->y;
+    const f32 dx = b->x - ax, dy = b->y - ay;
+    const f32 ex = d->x - c->x, ey = d->y - c->y;
+    const f32 denominator = ey * dx - ex * dy;
+    if (denominator == 0.0f) return 0;
+    const f32 ox = ax - c->x, oy = ay - c->y;
+    const f32 t = (ex * oy - ey * ox) / denominator;
+    const f32 u = (oy * dx - ox * dy) / denominator;
+    if (first != NULL) {
+        first->x = dx * t + ax;
+        first->y = dy * t + ay;
+    }
+    if (second != NULL) {
+        second->x = (d->x - c->x) * u + c->x;
+        second->y = (d->y - c->y) * u + c->y;
+    }
+    return t >= 0.0f && t <= 1.0f && u >= 0.0f && u <= 1.0f;
 }
 
-void MakeThrowVector(nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *, float, float) {
+void MakeThrowVector(NUVEC *result, NUVEC *origin, NUVEC *target, NUVEC *target_velocity, f32 speed, f32 gravity) {
+    NUVEC predicted = *target;
+    NUVEC delta;
+    NUVEC horizontal_origin;
+    horizontal_origin.x = origin->x;
+    horizontal_origin.y = 0.0f;
+    horizontal_origin.z = origin->z;
+    NuVecSub(&delta, &predicted, &horizontal_origin);
+    NuVecAddScale(&predicted, target, target_velocity, NuVecMag(&delta) / speed);
+    horizontal_origin.x = origin->x;
+    horizontal_origin.y = 0.0f;
+    horizontal_origin.z = origin->z;
+    NuVecSub(&delta, &predicted, &horizontal_origin);
+    NuVecAddScale(&predicted, target, target_velocity, NuVecMag(&delta) / speed);
+    horizontal_origin.x = origin->x;
+    horizontal_origin.y = 0.0f;
+    horizontal_origin.z = origin->z;
+    NuVecSub(&delta, &predicted, &horizontal_origin);
+    NuVecAddScale(&predicted, target, target_velocity, NuVecMag(&delta) / speed);
+    const f32 time = NuVecXZDist(&predicted, origin, NULL) / speed;
+    const f32 vertical_speed = (predicted.y - origin->y) / (FRAMETIME + time) - (gravity * 0.5f) * time;
+    const u16 angle = NuAtan2D(predicted.x - origin->x, predicted.z - origin->z);
+    result->x = speed * NU_SIN_LUT(angle);
+    result->y = vertical_speed;
+    result->z = speed * NU_COS_LUT(angle);
 }
 
 i32 OnOrInsidePlane(nuvec_s *point, nuvec_s *plane_point, nuvec_s *plane_normal, nuvec_s *corrected_point,
@@ -106,7 +190,7 @@ i32 OnOrInsidePlane(nuvec_s *point, nuvec_s *plane_point, nuvec_s *plane_normal,
     if (distance_out != NULL) {
         *distance_out = distance;
     }
-    if (distance > 0.0f) {
+    if (!(distance <= 0.0f)) {
         return 0;
     }
 

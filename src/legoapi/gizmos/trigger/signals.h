@@ -36,6 +36,7 @@ typedef struct SIGNALPROGRESS_s {
 } SIGNALPROGRESS;
 
 DECOMP_ASSERT(sizeof(SIGNAL) == 0x94, "SIGNAL size");
+DECOMP_ASSERT(offsetof(SIGNAL, target_position) == 0x84, "SIGNAL movement target offset");
 DECOMP_ASSERT(sizeof(SIGNALPROGRESS) == 0x28, "SIGNALPROGRESS size");
 
 ADDGIZMOTYPE *Signals_RegisterGizmo(i32 type_id);

@@ -3,10 +3,33 @@
 #include "legoapi/world/level.h"
 #include "legoapi/legoapi_types.h"
 #include "globals.h"
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
 
 extern i32 LevFlag[4]; // shared per-level 16-byte state scratch
 
-void ResetLevel(WORLDINFO_s *, char *, i32) {
+GameObject_s *CutDeadVehiclePlayer;
+extern i32 reset_reimport;
+extern void NewGameMode();
+extern void GizmoTypeStoreProgress(GIZMOSYS_s *, void *, i32, i32, char *);
+
+void ResetLevel(WORLDINFO_s *world, char *cutscene, i32) {
+    CutDeadVehiclePlayer = NULL;
+    if (world != NULL && NewCutScene(NULL, world->cutscene_sys, cutscene, 0) != NULL) {
+        ResetBits |= 7;
+        if (player != NULL && player->apiobj.field_0x287 != 0)
+            CutDeadVehiclePlayer = player;
+        else if (player2 != NULL && player2->apiobj.field_0x287 != 0)
+            CutDeadVehiclePlayer = player2;
+        reset_reimport = 1;
+    } else {
+        NewGameMode();
+        reset_restart = 1;
+        grab_screen_image = 1;
+        ResetBits |= 0x17;
+        GizmoTypeStoreProgress(WORLD->gizmo_sys, WORLD, (i8)WORLD->current_level->area_level_index,
+                              gizmopickup_typeid, NULL);
+    }
 }
 
 void ClearLevData() {

@@ -19,6 +19,8 @@
 struct CUSTOMISER;
 struct GIZAIMESSAGESYS_s;
 NetTransporter theNetwork;
+char *ASCII_DOWN = const_cast<char *>("\xc2\xa3");
+u8 PlayerRGB[2][3] = {{0, 127, 255}, {0, 255, 0}};
 
 // ----------------------------------------------------------------------
 // Shared game globals, grouped by subsystem. See src/globals.h.
@@ -48,8 +50,8 @@ f32 MAXFRAMETIME = 0;
 i32 g_effectsRan asm("_ZL12g_effectsRan") = 0;
 u8 g_lastFrameEffect asm("_ZL17g_lastFrameEffect") = 0;
 extern "C" {
-    i32 partglobaltime = 0;
-    i32 partseed = 0;
+    f32 partglobaltime = 0;
+    u32 partseed = 0;
     i32 g_signedinUser = -1;
 }
 MAIN_FRAME_COUNTERS_s MainFrameCounters = {};
@@ -62,6 +64,7 @@ f32 BOLT_OVERRIDE_PLAYERBOLTSPEED = 0.0f;
 f32 BOLT_OVERRIDE_PLAYERBOLTDURATION = 0.0f;
 u8 CutSceneCameraCTRL = 0;
 f32 nusound_fade_start = 2.0f;
+NUVEC nusound_special_positions[5];
 f32 nusound_fade_end = 15.0f;
 i32 (*SetSoundFadeDistCallBackFn)(WORLDINFO_s *world) = NULL;
 NUGCUTSCENECHARACTERCREATEDATAFN NuCutSceneCharacterCreateData = NULL;
@@ -75,6 +78,9 @@ NUGCUTSCENERIGIDPOSTRENDERFN NuCutSceneRigidPostRender = NULL;
 NUGCUTSCENEREQUESTSFXFN NuCutSceneRequestSFX = NULL;
 __attribute__((visibility("hidden"))) GameObject_s *ForceBackObj asm("_ZL12ForceBackObj") = NULL;
 __attribute__((visibility("hidden"))) NUVEC *ForceBackPos asm("_ZL12ForceBackPos") = NULL;
+__attribute__((visibility("hidden"))) i32 ForceBackType asm("_ZL13ForceBackType") = 0;
+__attribute__((visibility("hidden"))) f32 ForceBackRadius asm("_ZL15ForceBackRadius") = 0.0f;
+__attribute__((visibility("hidden"))) f32 ForceBackRadius2 asm("_ZL16ForceBackRadius2") = 0.0f;
 
 static CHARACTER_CONTEXT_INFO_s CharacterContextInfoTable[] = {
     {"NoContext", -1, 0x00001000, 0},
@@ -362,7 +368,7 @@ u8 aicreature_sets_alive[16] = {};
 // ------------------------------------------------------------------------
 // Render / compatibility options
 // ------------------------------------------------------------------------
-bool g_forceSysMemVbs = false;
+u8 g_forceSysMemVbs = 0;
 i32 g_forceETC1 = 0;
 i32 Reflections_On = 1;
 i32 disable_narrow_socks = 0;
@@ -395,6 +401,16 @@ f32 HIGHJUMPHEIGHT = 0.0f;
 TIMER AreaTimer;
 f32 VehicleAreaRememberSpeed = 0;
 nugspline_s *ObstacleCamSpl = NULL;
+f32 ObstacleCamStart = 0.0f;
+f32 ObstacleCamEnd = 0.0f;
+f32 ObstacleCamTime = 0.0f;
+f32 ObstacleCamBlendInTime = 0.0f;
+f32 ObstacleCamBlendOutTime = 0.0f;
+u16 ObstacleCamRotZ = 0;
+NUVEC *ObstacleCamCutTgtPtr = NULL;
+NUVEC *ObstacleCamCutCamPtr = NULL;
+i32 ObstacleCamHoldUntilPlayersMove = 0;
+u8 ObstacleCamAlwaysSnapAngles = 0;
 f32 LevTime[5] = {0.0f};
 i32 Lap = 0;
 PART_s *Part = NULL;
@@ -440,8 +456,8 @@ TERRAIN_LAYER_s TerLayer[17] = {
 };
 GameObject_s *player = NULL;
 GameObject_s *player2 = NULL;
-GameObject_s *CutDeadVehiclePlayer = NULL;
-i32 avg_currentspeed_mul = 0;
+extern GameObject_s *CutDeadVehiclePlayer;
+f32 avg_currentspeed_mul = 0.0f;
 i32 pause_rndr_on = 0;
 i32 pause_fade = 0;
 i32 wait_till_next_frame = 0;
@@ -801,6 +817,7 @@ i32 no_more_loads = 0;
 i32 other_level = 0;
 i32 other_level_override = 0;
 i32 CUTSTOPGAME = 0;
+i32 CUTSKIPLOCK = 0;
 void *CutStopInfo = NULL;
 f32 WaitingForLevelTime = 0;
 f32 WaitingForCharacterTime = 0;
@@ -1275,12 +1292,17 @@ LEVELSPLINE SplTab[26] = {
     {NULL, "mission_cam", 2, 2, -1, -1},
     {NULL, NULL, 0, 0, 0, 0},
 };
-CHARCAT_s LSW_CharCategory[10] = {
-    {"Jedi", 0x00000008, 0},         {"JediBaddie", 0x0000000c, 0},
-    {"BountyHunter", 0x01100080, 0}, {"Teleport", 0x00040000, 0},
-    {"HighJump", 0, 0x00400000},     {"Astromech", 0x00000040, 0},
-    {"Protocol", 0x00000020, 0},     {"ZipUp", 0x00100080, 0},
-    {"Blaster", 0x00000080, 0},      {NULL, 0, 0},
+CHARCATEGORY LSW_CharCategory[10] = {
+    { {"Jedi"}, {0x8}, {0} },
+    { {"JediBaddie"}, {0xc}, {0} },
+    { {"BountyHunter"}, {0x1100080}, {0} },
+    { {"Teleport"}, {0x40000}, {0} },
+    { {"HighJump"}, {0}, {0x400000} },
+    { {"Astromech"}, {0x40}, {0} },
+    { {"Protocol"}, {0x20}, {0} },
+    { {"ZipUp"}, {0x100080}, {0} },
+    { {"Blaster"}, {0x80}, {0} },
+    { {NULL}, {0}, {0} },
 };
 extern i16 tCHEAT_EXTRATOGGLE;
 extern i16 tCHEAT_POO;
@@ -1671,7 +1693,7 @@ void (*CutScene_PreUpdateFn)(CUTINFO *) = NULL;
 void (*CutScene_PostUpdateFn)(void) = NULL;
 void (*CutScene_StoppedFn)(CUTINFO *) = NULL;
 i32 (*CutScene_ReplaceCharacterModelFn)(CUTINFO *, NUGCUTCHAR_s *) = NULL;
-void (*InitBolt_AddMomentumType)(BOLT_s *, GameObject_s *, nuvec_s *) = NULL;
+i32 (*InitBolt_AddMomentumType)(BOLT_s *, GameObject_s *, nuvec_s *) = NULL;
 void (*Bolt_HitPlatFn)(BOLT_s *) = NULL;
 void (*Bolt_HitCustomFn)(BOLT_s *, nuvec_s *) = NULL;
 void (*GameBlowUpBlownUpFn)(GIZMOBLOWUP_s *) = NULL;
@@ -1724,6 +1746,15 @@ i32 PauseMenus_Align;
 u8 MENUEXITR = 0xff;
 u8 MENUEXITG = 0xbf;
 u8 MENUEXITB;
+extern i32 from_save_and_exit;
+u8 MENULOSTR1 = 0xbf;
+u8 MENULOSTG1 = 0x5f;
+u8 MENULOSTB1;
+u8 MENULOSTA1 = 0x80;
+u8 MENULOSTR2 = 0xff;
+u8 MENULOSTG2 = 0x1f;
+u8 MENULOSTB2;
+u8 MENULOSTA2 = 0x80;
 i32 pause_i_pad = -1;
 i32 LEGOMENU_NEWGAME = -1;
 i32 LEGOMENU_PAUSEMAIN = -1;
@@ -1753,7 +1784,7 @@ i32 Level = 0;
 // Main game loop state (shared via batman.h; read/written by NuMain).
 // Sizes/types match the original binary's .data/.bss layout.
 // ------------------------------------------------------------------------
-i32 AddCoinDelay[2] = {0};
+f32 AddCoinDelay[2] = {0};
 i32 adaptivedifficulty[3] = {0};
 i32 back_rgba[2] = {0};
 TIMER BonusTimer = {0};
@@ -1846,6 +1877,7 @@ i32 LEGO_AIPATHCNX_FORBADDIES = 0;
 i32 LEGO_AIPATHCNX_BLOCKAGE = 0;
 i32 LEGO_AIPATHCNX_DONTTOGGLE = 0;
 i32 LEGO_AIPATHCNX_FULLTERRAIN = 0;
+i32 LEGO_AIPATHCNX_WALLSHUFFLE = 0;
 i32 LEGO_AIPATHCNX_BIGJUMP = 0;
 i32 LEGO_AIPATHCNX_REQUIRESPERMISSION = 0;
 i32 LEGO_AIPATHCNX_NO_DESTINATION_CHECK = 0;
@@ -1853,7 +1885,7 @@ i32 LEGO_AIPATHCNX_JUMP_NOW = 0;
 i32 LEGO_AIPATHCNX_DONT_JUMP_NOW = 0;
 f32 *fakeanimendframe = NULL;
 f32 *fakeanimframe = NULL;
-f32 ai_moveradius = 0.1f;
+extern "C" f32 ai_moveradius;
 i32 mechAutoJumpFlags = 0;
 i32 mechAutoJumpCantReachFlags = 0;
 i32 ai_fighting = 0;

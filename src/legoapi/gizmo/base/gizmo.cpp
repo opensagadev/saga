@@ -41,6 +41,7 @@
 #include "legoapi/gizmos/door/zipups.h"
 #include "gameapi/edtools/edfile.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/nu3d/nuspecial.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -477,25 +478,52 @@ void GizmoSysClearLevelProgress(void *unknown, i32 type_id) {
     }
 }
 
-void GizForceObjectInterface::GetPos(VuVec &, i32) const {
+extern f32 hackFlashTimer;
+extern GAMEANIMSET_s *hackFlashingGameAnimSet;
+nuhspecial_s *hackFlashingSpecial;
+
+void GizForceObjectInterface::GetPos(VuVec &position, i32) const {
+    if (animation_object != NULL) {
+        NUVEC *origin = NuSpecialGetDrawPos(&animation_object->special);
+        position = VuVec(origin->x, origin->y, origin->z, 1.0f);
+    } else {
+        position = VuVec(force->position.x, force->position.y, force->position.z, 1.0f);
+    }
 }
 
-void GizForceObjectInterface::GetRadius() const {
+f32 GizForceObjectInterface::GetRadius() const {
+    if (animation_object != NULL) return NuSpecialGetOriginRadius(&animation_object->special);
+    return force->radius;
 }
 
-void GizForceObjectInterface::GetTargetName() const {
+const char *GizForceObjectInterface::GetTargetName() const {
+    return force->name;
 }
 
-void GizForceObjectInterface::GetTgtVoidPtr() {
+void *GizForceObjectInterface::GetTgtVoidPtr() {
+    if (animation_object != NULL) return animation_object;
+    return force;
 }
 
-GizForceObjectInterface::GizForceObjectInterface(GIZFORCE_s &) {
+GizForceObjectInterface::GizForceObjectInterface(GIZFORCE_s &object) : force(&object) {
+    object.mech_object_interface = this;
 }
 
 void GizForceObjectInterface::TargetedFlash() {
+    if ((force->field_0xaa & 0x40) == 0) {
+        hackFlashTimer = 1.0f;
+        if (animation_object != NULL) {
+            hackFlashingSpecial = &animation_object->special;
+            hackFlashingGameAnimSet = NULL;
+        } else {
+            hackFlashingSpecial = NULL;
+            hackFlashingGameAnimSet = force->anim_set;
+        }
+    }
 }
 
 GizForceObjectInterface::~GizForceObjectInterface() {
+    force->mech_object_interface = NULL;
 }
 
 void GizLeverObjectInterface::GetPos(VuVec &, i32) const {
@@ -555,25 +583,39 @@ TeleportObjectInterface::TeleportObjectInterface(TELEPORT_s &, i32) {
 TeleportObjectInterface::~TeleportObjectInterface() {
 }
 
-void GizBlowupObjectInterface::GetPos(VuVec &, i32) const {
+void GizBlowupObjectInterface::GetPos(VuVec &position, i32) const {
+    if (blowup->field_0x120 != NULL) {
+        NUVEC *origin = static_cast<NUVEC *>(blowup->field_0x120);
+        position = VuVec(origin->x, origin->y, origin->z, 1.0f);
+    } else {
+        position.x = blowup->position.x;
+        position.y = blowup->position.y;
+        position.z = blowup->position.z;
+    }
 }
 
-void GizBlowupObjectInterface::GetRadius() const {
+f32 GizBlowupObjectInterface::GetRadius() const {
+    return blowup->target_scale;
 }
 
-void GizBlowupObjectInterface::GetTargetName() const {
+const char *GizBlowupObjectInterface::GetTargetName() const {
+    return blowup->name;
 }
 
-GizBlowupObjectInterface::GizBlowupObjectInterface(GIZMOBLOWUP_s &) {
+GizBlowupObjectInterface::GizBlowupObjectInterface(GIZMOBLOWUP_s &object) : blowup(&object) {
+    object.mech_object_interface = this;
 }
 
-void GizBlowupObjectInterface::IsDead() {
+bool GizBlowupObjectInterface::IsDead() {
+    return (blowup->state_flags & 0x80) == 0;
 }
 
 void GizBlowupObjectInterface::TargetedFlash() {
+    blowup->flicker_timer = 1.0f;
 }
 
 GizBlowupObjectInterface::~GizBlowupObjectInterface() {
+    blowup->mech_object_interface = NULL;
 }
 
 void GizTurretObjectInterface::GetPos(VuVec &, i32) const {
@@ -666,10 +708,53 @@ void GizObstacleObjectInterface::TargetedFlash() {
 GizObstacleObjectInterface::~GizObstacleObjectInterface() {
 }
 
-static __used__ void ProcessFlowBox(GIZFLOW_s *, FLOWBOX_s *, u8) {
+static __used__ void CheckIfParentsFinished(GIZFLOW_s *system, FLOWBOX_s *box) {
+    for (i32 i = 0; i < box->parent_count; ++i) {
+        FLOWBOX_s *parent = box->parents[i];
+        if ((parent->state_flags_low & 0x20) == 0) continue;
+
+        i32 child_index;
+        for (child_index = 0; child_index < parent->child_count; ++child_index) {
+            FLOWBOX_s *child = parent->children[child_index];
+            if ((child->state_flags_low & 0xc0) != 0) {
+                if ((child->state_flags & 0x102) != 2) break;
+            } else if ((child->state_flags_low & 1) != 0 && child != box) {
+                break;
+            }
+        }
+        if (child_index != parent->child_count) continue;
+
+        if ((parent->state_flags_low & 8) != 0) {
+            FLOWBOXGIZMODATA_s *data = parent->data;
+            for (i32 j = 0; j < data->gizmo_count; ++j)
+                GizmoSetVisibility(system->gizmo_sys, data->gizmos[j]->gizmo, 0, 1);
+        } else if ((parent->state_flags_low & 0x10) != 0) {
+            FLOWBOXGIZMODATA_s *data = parent->data;
+            for (i32 j = 0; j < data->gizmo_count; ++j)
+                GizmoActivate(system->gizmo_sys, data->gizmos[j]->gizmo, 0, 1);
+        }
+        if ((parent->state_flags_low & 0x40) != 0) {
+            parent->state_flags_high &= ~1;
+            CheckIfParentsFinished(system, parent);
+        }
+        parent->state_flags_low &= ~0x20;
+    }
 }
 
-static __used__ void ResetForLoopEx(GIZFLOW_s *, FLOWBOX_s *, FLOWBOX_s *, i32) {
+static void ProcessFlowBox(GIZFLOW_s *, FLOWBOX_s *, u8);
+
+static __used__ void ResetForLoopEx(GIZFLOW_s *system, FLOWBOX_s *loop, FLOWBOX_s *box, i32 checksum) {
+    if (box == loop || box->loop_checksum == checksum) return;
+    box->loop_checksum = checksum;
+    if (box->type == 0 && (box->state_flags_high & 0x10) == 0) {
+        FLOWBOXGIZMODATA_s *data = box->data;
+        if (data != NULL) {
+            for (i32 i = 0; i < data->gizmo_count; ++i)
+                GizmoActivate(system->gizmo_sys, data->gizmos[i]->gizmo, 0, 1);
+        }
+    }
+    for (i32 i = 0; i < box->child_count; ++i)
+        ResetForLoopEx(system, loop, box->children[i], checksum);
 }
 
 static __used__ void ResetGizmoFlowBox(GIZFLOW_s *giz_flow, FLOWBOX_s *flow_box) {
@@ -678,20 +763,360 @@ static __used__ void ResetGizmoFlowBox(GIZFLOW_s *giz_flow, FLOWBOX_s *flow_box)
         return;
     }
     for (i32 i = 0; i < data.gizmo_count; ++i) {
-        GizmoActivate(giz_flow->gizmo_sys, *data.gizmos[i], 0, 1);
+        GizmoActivate(giz_flow->gizmo_sys, data.gizmos[i]->gizmo, 0, 1);
     }
 }
 
-static __used__ void ProcessGizmoFlowBox(GIZFLOW_s *, FLOWBOX_s *, u8) {
+static i32 ProcessGizmoFlowBox(GIZFLOW_s *, FLOWBOX_s *, u8);
+static i32 ProcessActionFlowBox(GIZFLOW_s *, FLOWBOX_s *, u8);
+static i32 ProcessConditionFlowBox(GIZFLOW_s *, FLOWBOX_s *, u8);
+static i32 CheckOutputGizmoFlowBox(GIZFLOW_s *, FLOWBOX_s *, u8);
+static i32 CheckOutputActionFlowBox(GIZFLOW_s *, FLOWBOX_s *, u8);
+static i32 CheckOutputConditionFlowBox(GIZFLOW_s *, FLOWBOX_s *, u8);
+static u8 getNextLoopChecksum();
+void PerformActionFlowBox(GIZFLOW_s *, FLOWBOX_s *);
+void GizmoActivateReverse(GIZMOSYS_s *, GIZMO_s *, i32, i32, i32);
+
+struct FLOWBOXTYPE {
+    void (*reset)(GIZFLOW_s *, FLOWBOX_s *);
+    i32 (*process)(GIZFLOW_s *, FLOWBOX_s *, u8);
+    i32 (*check_output)(GIZFLOW_s *, FLOWBOX_s *, u8);
+};
+static FLOWBOXTYPE flowboxtypes[] = {
+    {ResetGizmoFlowBox, ProcessGizmoFlowBox, CheckOutputGizmoFlowBox},
+    {NULL, ProcessConditionFlowBox, CheckOutputConditionFlowBox},
+    {NULL, ProcessActionFlowBox, CheckOutputActionFlowBox},
+};
+DECOMP_ASSERT(sizeof(flowboxtypes) == 0x24, "Flow-box callback table ABI");
+
+static __used__ void ProcessFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8 frame) {
+    if (box->state_flags_high & 1) {
+        i32 i;
+        for (i = 0; i < box->parent_count; ++i) {
+            FLOWBOX_s *parent = box->parents[i];
+            if (!flowboxtypes[parent->type].check_output(system, parent, box->output_indices[0])) break;
+        }
+        FLOWBOXGIZMODATA_s *data = box->data;
+        if (i == box->parent_count) {
+            for (i32 j = 0; j < data->gizmo_count; ++j)
+                GizmoActivateReverse(system->gizmo_sys, data->gizmos[j]->gizmo, 0,
+                                     box->state_flags_low >> 7, 1);
+        } else {
+            for (i32 j = 0; j < data->gizmo_count; ++j)
+                GizmoActivateReverse(system->gizmo_sys, data->gizmos[j]->gizmo, 1,
+                                     box->state_flags_low >> 7, 1);
+        }
+    }
+    if ((box->state_flags_low & 1) == 0) return;
+    if (!flowboxtypes[box->type].process(system, box, frame)) return;
+
+    if ((box->state_flags_high & 0xc) == 0xc) box->state_flags_high &= ~4;
+    box->state_flags_high |= 8;
+    box->state_flags_low = (box->state_flags_low & ~1) | 2;
+    if (box->type == 0) {
+        if (box->state_flags_low & 0x18) {
+            if (box->child_count != 0) {
+                box->state_flags_low |= 0x20;
+            } else {
+                FLOWBOXGIZMODATA_s *data = box->data;
+                if (box->state_flags_low & 8) {
+                    for (i32 i = 0; i < data->gizmo_count; ++i)
+                        GizmoSetVisibility(system->gizmo_sys, data->gizmos[i]->gizmo, 0, 1);
+                } else if (box->state_flags_low & 0x10) {
+                    for (i32 i = 0; i < data->gizmo_count; ++i)
+                        GizmoActivate(system->gizmo_sys, data->gizmos[i]->gizmo, 0, 1);
+                }
+                box->state_flags_low &= ~0x20;
+            }
+        }
+        if (box->state_flags_low & 0xc0) {
+            box->state_flags_low |= 0x20;
+            box->state_flags_high |= 1;
+            FLOWBOX_s **parents = box->parents;
+            i32 count = box->parent_count;
+            for (i32 i = 0; i < count; ++i) {
+                if (parents[i]->type == 1) parents[i]->state_flags_high |= 2;
+                if (parents[i]->type == 0 && (parents[i]->state_flags_low & 0x40)) {
+                    parents[i]->state_flags_high |= 1;
+                    parents[i]->state_flags_low |= 0x20;
+                }
+            }
+        }
+    }
+    if (box->type != 0) CheckIfParentsFinished(system, box);
+    for (i32 i = 0; i < box->child_count; ++i) {
+        FLOWBOX_s **child = &box->children[i];
+        (*child)->state_flags_low |= 1;
+        if ((*child)->last_process_frame != frame || box->type == 1) {
+            (*child)->last_process_frame = frame;
+            ProcessFlowBox(system, *child, frame);
+        }
+    }
 }
 
-static __used__ void ProcessActionFlowBox(GIZFLOW_s *, FLOWBOX_s *, u8) {
+void ProcessGizFlow(GIZFLOW_s *system, float) {
+    if (system == NULL) return;
+    ++system->field_0x0c;
+    FLOWBOX_s *box = system->flowboxes;
+    for (i32 i = 0; i < system->flowbox_count; ++i, ++box) {
+        if (box->last_process_frame != system->field_0x0c && (box->state_flags & 0x101))
+            ProcessFlowBox(system, box, system->field_0x0c);
+        box->last_process_frame = system->field_0x0c;
+    }
 }
 
-static __used__ void ProcessConditionFlowBox(GIZFLOW_s *, FLOWBOX_s *, u8) {
+static i32 ProcessGizmoFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8) {
+    FLOWBOX_s **parents = box->parents;
+    u8 *outputs = box->output_indices;
+    for (i32 i = 0; i < box->parent_count; ++i) {
+        FLOWBOX_s *parent = parents[i];
+        if (!flowboxtypes[parent->type].check_output(system, parent, outputs[i])) return 0;
+    }
+    CheckIfParentsFinished(system, box);
+    if ((box->state_flags_high & 0x10) != 0 ||
+        ((box->state_flags_high & 0x40) == 0 && FreePlay == 0) ||
+        ((box->state_flags_high & 0x20) == 0 && FreePlay != 0)) return 1;
+    FLOWBOXGIZMODATA_s *data = box->data;
+    for (i32 i = 0; i < data->gizmo_count; ++i)
+        GizmoActivate(system->gizmo_sys, data->gizmos[i]->gizmo, 1, 1);
+    return 1;
 }
 
-void TwistLevel(LEVELDATA_s *) {
+static i32 ProcessActionFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8) {
+    FLOWBOX_s **parents = box->parents;
+    u8 *outputs = box->output_indices;
+    for (i32 i = 0; i < box->parent_count; ++i) {
+        FLOWBOX_s *parent = parents[i];
+        if (!flowboxtypes[parent->type].check_output(system, parent, outputs[i])) return 0;
+    }
+    PerformActionFlowBox(system, box);
+    return 1;
+}
+
+static i32 ProcessConditionFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8) {
+    u8 *condition = box->condition_data;
+    if (condition == NULL) {
+        FLOWBOX_s **parents = box->parents;
+        u8 *outputs = box->output_indices;
+        for (i32 i = 0; i < box->parent_count; ++i) {
+            FLOWBOX_s *parent = parents[i];
+            if (!flowboxtypes[parent->type].check_output(system, parent, outputs[i])) return 0;
+        }
+        return 1;
+    }
+    switch (condition[0]) {
+    case 0: {
+        FLOWBOX_s **parents = box->parents;
+        u8 *outputs = box->output_indices;
+        for (i32 i = 0; i < box->parent_count; ++i) {
+            FLOWBOX_s *parent = parents[i];
+            if (!flowboxtypes[parent->type].check_output(system, parent, outputs[i])) return 0;
+        }
+        break;
+    }
+    case 2: {
+        FLOWBOX_s **parents = box->parents;
+        u8 *outputs = box->output_indices;
+        for (i32 i = 0; i < box->parent_count; ++i) {
+            FLOWBOX_s *parent = parents[i];
+            if (flowboxtypes[parent->type].check_output(system, parent, outputs[i])) return 0;
+        }
+        break;
+    }
+    case 1:
+    case 3:
+    case 5: {
+        i32 required = condition[0] == 1 ? 1 : condition[1];
+        if (box->parent_count == 0) {
+            if (required != 0) return 0;
+            break;
+        }
+        FLOWBOX_s **parents = box->parents;
+        u8 *outputs = box->output_indices;
+        i32 count = 0;
+        for (i32 i = 0; i < box->parent_count; ++i) {
+            FLOWBOX_s *parent = parents[i];
+            if (flowboxtypes[parent->type].check_output(system, parent, outputs[i])) ++count;
+        }
+        if (condition[0] == 5) return count == required;
+        if (count < required) return 0;
+        break;
+    }
+    case 4: {
+        i32 required = box->parent_count;
+        if (box->state_flags_high & 4) required -= box->loop_parent_count;
+        if (box->parent_count == 0) break;
+        FLOWBOX_s **parents = box->parents;
+        u8 *outputs = box->output_indices;
+        i32 count = 0;
+        for (i32 i = 0; i < box->parent_count; ++i) {
+            FLOWBOX_s *parent = parents[i];
+            if (flowboxtypes[parent->type].check_output(system, parent, outputs[i])) ++count;
+        }
+        if (count < required) return 0;
+        break;
+    }
+    }
+    if (condition[0] == 4) {
+        for (i32 i = 0; i < box->child_count; ++i)
+            ResetForLoopEx(system, box, box->children[i], getNextLoopChecksum());
+    }
+    return 1;
+}
+
+static i32 CheckOutputGizmoFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8 output) {
+    if (((box->state_flags_high & 0x40) == 0 && FreePlay == 0) ||
+        ((box->state_flags_high & 0x20) == 0 && FreePlay != 0)) return 1;
+    FLOWBOXGIZMODATA_s *data = box->data;
+    i32 result = 1;
+    for (i32 i = 0; i < data->gizmo_count; ++i) {
+        if (!GizmoGetOutput(system->gizmo_sys, data->gizmos[i]->gizmo, output,
+                            (box->state_flags_high >> 4) & 1)) result = 0;
+    }
+    return result;
+}
+
+static i32 CheckOutputActionFlowBox(GIZFLOW_s *, FLOWBOX_s *box, u8) {
+    return (box->state_flags_low >> 1) & 1;
+}
+
+static i32 CheckOutputConditionFlowBox(GIZFLOW_s *system, FLOWBOX_s *box, u8) {
+    if ((box->state_flags_high & 2) == 0) return (box->state_flags_low >> 1) & 1;
+    u8 saved = box->state_flags_high & 4;
+    box->state_flags_high |= 4;
+    i32 result = flowboxtypes[box->type].process(system, box, 0) != 0;
+    box->state_flags_high = (box->state_flags_high & ~4) | saved;
+    return result;
+}
+
+static i32 Loop_CountLoopingInputsEx(FLOWBOX_s *loop, FLOWBOX_s *box, i32 count, u8 checksum) {
+    if (loop == box) {
+        --box->loop_checksum;
+        return count + 1;
+    }
+    for (i32 i = 0; i < box->child_count; ++i) {
+        if (box->children[i]->loop_checksum != checksum) {
+            box->children[i]->loop_checksum = checksum;
+            count = Loop_CountLoopingInputsEx(loop, box->children[i], count, checksum);
+        }
+    }
+    return count;
+}
+
+static u8 getNextLoopChecksum() {
+    static u8 loop_checksum;
+    return ++loop_checksum;
+}
+
+void DynamicAddGizmoToFlow(GIZFLOW_s *system, GIZMO_s *gizmo) {
+    if (gizmo == NULL || system == NULL || gizmotypes == NULL ||
+        gizmo->type_id >= gizmotypes->count ||
+        gizmotypes->types[gizmo->type_id].fns.get_gizmo_name_fn == NULL) return;
+    FLOWBOX_s *box = system->flowboxes;
+    for (i32 i = 0; i < system->flowbox_count; ++i, ++box) {
+        FLOWBOXGIZMODATA_s *data = box->data;
+        if (data == NULL) continue;
+        for (i32 j = 0; j < data->gizmo_count; ++j) {
+            if (data->gizmos[j]->gizmo != NULL) continue;
+            char *name = gizmotypes->types[gizmo->type_id].fns.get_gizmo_name_fn(gizmo);
+            if (NuStrICmp(data->gizmos[j]->name, name) != 0) continue;
+            data->gizmos[j]->gizmo = gizmo;
+            if ((box->state_flags_low & 1) == 0) {
+                if (flowboxtypes[box->type].reset != NULL)
+                    flowboxtypes[box->type].reset(system, box);
+                if ((box->state_flags_low & 5) == 4 && box->type == 0)
+                    GizmoSetVisibility(system->gizmo_sys, data->gizmos[j]->gizmo, 0, 1);
+            }
+        }
+    }
+}
+
+void ResetGizFlowPointers(GIZFLOW_s *system) {
+    if (system == NULL || system->flowbox_count == 0) return;
+    FLOWBOX_s *box = system->flowboxes;
+    for (i32 i = 0; i < system->flowbox_count; ++i, ++box) {
+        if (box->type != 0) continue;
+        FLOWBOXGIZMODATA_s *data = box->data;
+        for (i32 j = 0; j < data->gizmo_count; ++j) {
+            FLOWBOXGIZMOREF_s *ref = data->gizmos[j];
+            if (ref->gizmo != NULL) {
+                ref->gizmo = GizmoFindByName(system->gizmo_sys, ref->gizmo->type_id, ref->name);
+            } else {
+                ref->gizmo = GizmoFindByName(system->gizmo_sys, -1, ref->name);
+                if (data->gizmos[j]->gizmo != NULL && (box->state_flags_low & 1) == 0) {
+                    if (flowboxtypes[box->type].reset != NULL)
+                        flowboxtypes[box->type].reset(system, box);
+                    if ((box->state_flags_low & 5) == 4 && box->type == 0)
+                        GizmoSetVisibility(system->gizmo_sys, data->gizmos[j]->gizmo, 0, 1);
+                }
+            }
+        }
+    }
+}
+
+void ResetGizFlow(GIZFLOW_s *system, GIZFLOWPROGRESS_s *progress) {
+    if (system == NULL) return;
+    system->field_0x0c = 0;
+    FLOWBOX_s *box = system->flowboxes;
+    ResetGizFlowPointers(system);
+    for (i32 i = 0; i < system->flowbox_count; ++i, ++box) {
+        box->last_process_frame = 0;
+        box->state_flags_low &= ~0x20;
+        if (progress != NULL && progress->valid != 0) {
+            i32 word = i >> 5;
+            u32 bit = 1u << (i & 31);
+            box->state_flags_low = (box->state_flags_low & ~1) | ((progress->active[word] & bit) != 0);
+            box->state_flags_low = (box->state_flags_low & ~2) | (((progress->completed[word] & bit) != 0) << 1);
+            box->state_flags_low |= ((progress->latched[word] & bit) != 0) << 5;
+            box->state_flags_high = (box->state_flags_high & ~4) | (((progress->output_state[word] & bit) != 0) << 2);
+            if (box->type == 1 && box->condition_data[0] == 4) {
+                u8 checksum = getNextLoopChecksum();
+                i32 count = 0;
+                for (i32 child = 0; child < box->child_count; ++child) {
+                    count = Loop_CountLoopingInputsEx(box, box->children[child], count, checksum);
+                }
+                box->loop_parent_count = count;
+            }
+            continue;
+        }
+        box->state_flags_low &= ~2;
+        box->state_flags_high &= ~1;
+        if (box->type == 1 && box->condition_data[0] == 4) {
+            u8 checksum = getNextLoopChecksum();
+            i32 count = 0;
+            for (i32 child = 0; child < box->child_count; ++child) {
+                count = Loop_CountLoopingInputsEx(box, box->children[child], count, checksum);
+            }
+            box->loop_parent_count = count;
+            box->state_flags_high |= 4;
+            if (box->parent_count == box->loop_parent_count) {
+                box->state_flags_high |= 8;
+                box->state_flags_low |= 1;
+            } else box->state_flags_low &= ~1;
+        } else {
+            box->state_flags_low = (box->state_flags_low & ~1) | (box->parent_count == 0);
+        }
+
+        if (flowboxtypes[box->type].reset != NULL && (box->state_flags_high & 0x10) == 0)
+            flowboxtypes[box->type].reset(system, box);
+        if (box->type == 0) {
+            if (((box->state_flags_high & 0x40) == 0 && FreePlay == 0) ||
+                ((box->state_flags_high & 0x20) == 0 && FreePlay != 0)) {
+                FLOWBOXGIZMODATA_s *data = box->data;
+                for (i32 gizmo = 0; gizmo < data->gizmo_count; ++gizmo)
+                    GizmoSetVisibility(system->gizmo_sys, data->gizmos[gizmo]->gizmo, 0, 1);
+            } else if ((box->state_flags_low & 5) == 4) {
+                FLOWBOXGIZMODATA_s *data = box->data;
+                for (i32 gizmo = 0; gizmo < data->gizmo_count; ++gizmo)
+                    GizmoSetVisibility(system->gizmo_sys, data->gizmos[gizmo]->gizmo, 0, 1);
+            }
+        }
+    }
+}
+
+// Original: 43 bytes.
+i32 TwistLevel(LEVELDATA_s *level) {
+    return DOGFIGHTA_LDATA != NULL && level == DOGFIGHTA_LDATA;
 }
 
 NUVEC *GizmoGetPos(GIZMOSYS_s *, GIZMO_s *gizmo) {
@@ -789,7 +1214,8 @@ void GizmoSysSetGame() {
     GizObstacle_CheckExcludeFlagsFn = GizObstacle_CheckExcludeFlagsFn_LSW;
 }
 
-void GizmoSys_BoltHit(GIZMOSYS_s *, void *, BOLT_s *, nuvec_s *, nuvec_s *, nuvec_s *, float, unsigned char *) {
+i32 GizmoSys_BoltHit(GIZMOSYS_s *, void *, BOLT_s *, nuvec_s *, nuvec_s *, nuvec_s *, float, unsigned char *) {
+    return 0;
 }
 
 void ResetPaintPuzzle(WORLDINFO_s *) {
@@ -892,9 +1318,62 @@ i32 GizmoNameUsesPrefix(char *name, char *prefix) {
     return 1;
 }
 
-void GizmoActivateReverse(GIZMOSYS_s *, GIZMO_s *, i32, i32, i32) {
+void GizmoActivateReverse(GIZMOSYS_s *system, GIZMO_s *gizmo, i32 active, i32 visibility, i32) {
+    i32 operation = visibility != 0 ? 6 : 2;
+    i32 query = visibility != 0 ? 7 : 3;
+    if (gizmo != NULL && gizmotypes != NULL) {
+        GIZMOACTIVATEREVFN callback = gizmotypes->types[gizmo->type_id].fns.activate_rev_fn;
+        if (callback != NULL && callback(gizmo, active, query)) {
+            gizmotypes->types[gizmo->type_id].fns.activate_rev_fn(gizmo, active, operation);
+            if (visibility != 0) GizmoSetVisibility(system, gizmo, active == 0, 1);
+        }
+    }
 }
 
-void GizmoSys_SetBestBoltTarget(GIZMOSYS_s *, void *, GameObject_s *, nuvec_s *, nuvec_s *, float, float, i32, i32,
-                                i32) {
+u16 ObjHitObj_Flags(GameObject_s *object);
+i32 GizmoSys_SetBestBoltTarget(GIZMOSYS_s *system, void *, GameObject_s *object,
+                              nuvec_s *position, nuvec_s *direction, f32 radius, f32 range_squared,
+                              i32 directional, i32 planar, i32 bolt_id) {
+    if (gizmotypes == NULL || object == NULL || system == NULL) return 0;
+    if ((ObjHitObj_Flags(object) & 0x800) == 0) return 0;
+    GIZMOTYPE *type = gizmotypes->types;
+    GIZMOSET *set = system->sets;
+    void *best = NULL;
+    void *previous = NULL;
+    f32 best_distance = 1.0e9f;
+    NUVEC best_position, best_velocity, previous_position, previous_velocity;
+    for (i32 i = 0; i < gizmotypes->count; ++i, ++type, ++set) {
+        if (type->fns.get_best_bolt_target_fn == NULL) continue;
+        f32 distance;
+        NUVEC target_position, target_velocity;
+        void *target = type->fns.get_best_bolt_target_fn(set, &distance, &target_position, &target_velocity,
+                                                        object, position, direction, radius, range_squared,
+                                                        directional, planar, bolt_id);
+        if (target == NULL) continue;
+        if (target == object->attack_gizmo_target) {
+            previous = target;
+            previous_position = target_position;
+            previous_velocity = target_velocity;
+        } else if (best_distance > distance) {
+            best = target;
+            best_position = target_position;
+            best_velocity = target_velocity;
+            best_distance = distance;
+        }
+    }
+    if (best != NULL) {
+        object->attack_target_position = best_position;
+        object->attack_target_velocity = best_velocity;
+        object->field_0xe21 |= 8;
+        object->attack_gizmo_target = VehicleArea != 0 ? NULL : best;
+        return 1;
+    }
+    if (previous != NULL) {
+        object->attack_target_position = previous_position;
+        object->attack_target_velocity = previous_velocity;
+        object->field_0xe21 |= 8;
+        object->attack_gizmo_target = VehicleArea != 0 ? NULL : previous;
+        return 1;
+    }
+    return 0;
 }

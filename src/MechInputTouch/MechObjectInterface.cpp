@@ -9,5 +9,6 @@ MechTempPosInterface::MechTempPosInterface(VuVec const &) {
 MechTempPosInterface::MechTempPosInterface(nuvec_s const &) {
 }
 
-void MechObjectInterface::GetFloorTargetPos(VuVec &, i32) const {
+void MechObjectInterface::GetFloorTargetPos(VuVec &position, i32 mode) const {
+    GetPos(position, mode);
 }

@@ -287,21 +287,23 @@ void NuVecMtxTransform(NUVEC *out, NUVEC *v, NUMTX *m) {
     out->z = z;
 }
 
-void NuVecMtxTransformH(NUVEC *out, NUVEC *v, NUMTX *m) {
-    f32 x = v->x * m->m00 + v->y * m->m10 + v->z * m->m20 + m->m30;
-    f32 y = v->x * m->m01 + v->y * m->m11 + v->z * m->m21 + m->m31;
-    f32 z = v->x * m->m02 + v->y * m->m12 + v->z * m->m22 + m->m32;
-    f32 w = v->x * m->m03 + v->y * m->m13 + v->z * m->m23 + m->m33;
-
-    out->x = x / w;
-    out->y = y / w;
-    out->z = z / w;
+f32 NuVecMtxTransformH(NUVEC *out, NUVEC *v, NUMTX *m) {
+    f32 reciprocal_w = NuFdiv(1.0f, v->x * m->m03 + v->y * m->m13 + v->z * m->m23 + m->m33);
+    f32 y = (v->x * m->m01 + v->y * m->m11 + v->z * m->m21 + m->m31) * reciprocal_w;
+    f32 z = (v->x * m->m02 + v->y * m->m12 + v->z * m->m22 + m->m32) * reciprocal_w;
+    out->x = (v->x * m->m00 + v->y * m->m10 + v->z * m->m20 + m->m30) * reciprocal_w;
+    out->y = y;
+    out->z = z;
+    return reciprocal_w;
 }
 
+// Original: 296 bytes. Preserve the input when out == v.
 void NuVecInvMtxRotate(NUVEC *out, NUVEC *v, NUMTX *m) {
+    f32 y = v->x * m->m10 + v->y * m->m11 + v->z * m->m12;
+    f32 z = v->x * m->m20 + v->y * m->m21 + v->z * m->m22;
     out->x = v->x * m->m00 + v->y * m->m01 + v->z * m->m02;
-    out->y = v->x * m->m10 + v->y * m->m11 + v->z * m->m12;
-    out->z = v->x * m->m20 + v->y * m->m21 + v->z * m->m22;
+    out->y = y;
+    out->z = z;
 }
 
 void NuVecInvMtxTransform(NUVEC *out, NUVEC *v, NUMTX *m) {
@@ -389,5 +391,122 @@ i32 NuLineLineIntersect(NUVEC *pnt0, NUVEC *v0, NUVEC *pnt1, NUVEC *v1, f32 *s, 
         return 1;
     }
 
+    return 0;
+}
+
+// Original: 196 bytes.
+i32 NuPointRelToBoundingBox(NUVEC *point, NUVEC *maximum, NUVEC *minimum) {
+    i32 result = 0;
+    if (point->x >= maximum->x) result |= 1;
+    else if (point->x <= minimum->x) result |= 8;
+    if (point->y >= maximum->y) result |= 2;
+    else if (point->y <= minimum->y) result |= 16;
+    if (point->z >= maximum->z) result |= 4;
+    else if (point->z <= minimum->z) result |= 32;
+    return result;
+}
+
+// Original: 204 bytes.
+void NuClipXPlane(NUVEC *out, NUVEC *point, NUVEC *direction, f32 *plane) {
+    if (plane != NULL) {
+        out->x = *plane;
+    } else {
+        out->x = 0.0f;
+    }
+    f32 delta = out->x - point->x;
+    out->y = point->y + (direction->y * delta) / direction->x;
+    out->z = point->z + (direction->z * delta) / direction->x;
+}
+
+// Original: 207 bytes.
+void NuClipYPlane(NUVEC *out, NUVEC *point, NUVEC *direction, f32 *plane) {
+    if (plane != NULL) {
+        out->y = *plane;
+    } else {
+        out->y = 0.0f;
+    }
+    f32 delta = out->y - point->y;
+    out->x = point->x + (direction->x * delta) / direction->y;
+    out->z = point->z + (direction->z * delta) / direction->y;
+}
+
+// Original: 207 bytes.
+void NuClipZPlane(NUVEC *out, NUVEC *point, NUVEC *direction, f32 *plane) {
+    if (plane != NULL) {
+        out->z = *plane;
+    } else {
+        out->z = 0.0f;
+    }
+    f32 delta = out->z - point->z;
+    out->x = point->x + (direction->x * delta) / direction->z;
+    out->y = point->y + (direction->y * delta) / direction->z;
+}
+
+// Original: 1,446 bytes. The strict face boundaries and start-point outcode
+// are intentional: these are the original clipping rules.
+i32 BoundingBoxToLine(NUVEC *minimum, NUVEC *maximum, NUMTX *matrix,
+                     NUVEC *start, NUVEC *end, f32 expansion, NUVEC *intersection) {
+    NUVEC a, b, direction, hit;
+    NUVEC lo = {minimum->x - expansion, minimum->y - expansion, minimum->z - expansion};
+    NUVEC hi = {maximum->x + expansion, maximum->y + expansion, maximum->z + expansion};
+    NuVecInvMtxTransform(&a, start, matrix);
+    i32 ca = NuPointRelToBoundingBox(&a, &hi, &lo);
+    if (ca == 0 && intersection == NULL) return 1;
+    NuVecInvMtxTransform(&b, end, matrix);
+    i32 cb = NuPointRelToBoundingBox(&b, &hi, &lo);
+    if (cb == 0 && intersection == NULL) return 1;
+    if (ca == 0 && cb == 0) {
+        if (intersection != NULL) {
+            intersection->x = 0.0f;
+            intersection->y = 0.0f;
+            intersection->z = 0.0f;
+        }
+        return 1;
+    }
+    if (ca & cb) return 0;
+    NuVecSub(&direction, &b, &a);
+    NuVecNorm(&direction, &direction);
+    if (ca & 1) {
+        NuClipXPlane(&hit, &a, &direction, &hi.x);
+        if (hit.y < hi.y && hit.y > lo.y && hit.z < hi.z && hit.z > lo.z) {
+            if (intersection != NULL) *intersection = hit;
+            return 1;
+        }
+    }
+    else if (ca & 8) {
+        NuClipXPlane(&hit, &a, &direction, &lo.x);
+        if (hit.y < hi.y && hit.y > lo.y && hit.z < hi.z && hit.z > lo.z) {
+            if (intersection != NULL) *intersection = hit;
+            return 1;
+        }
+    }
+    if (ca & 2) {
+        NuClipYPlane(&hit, &a, &direction, &hi.y);
+        if (hit.x < hi.x && hit.x > lo.x && hit.z < hi.z && hit.z > lo.z) {
+            if (intersection != NULL) *intersection = hit;
+            return 1;
+        }
+    }
+    else if (ca & 16) {
+        NuClipYPlane(&hit, &a, &direction, &lo.y);
+        if (hit.x < hi.x && hit.x > lo.x && hit.z < hi.z && hit.z > lo.z) {
+            if (intersection != NULL) *intersection = hit;
+            return 1;
+        }
+    }
+    if (ca & 4) {
+        NuClipZPlane(&hit, &a, &direction, &hi.z);
+        if (hit.x < hi.x && hit.x > lo.x && hit.y < hi.y && hit.y > lo.y) {
+            if (intersection != NULL) *intersection = hit;
+            return 1;
+        }
+    }
+    else if (ca & 32) {
+        NuClipZPlane(&hit, &a, &direction, &lo.z);
+        if (hit.x < hi.x && hit.x > lo.x && hit.y < hi.y && hit.y > lo.y) {
+            if (intersection != NULL) *intersection = hit;
+            return 1;
+        }
+    }
     return 0;
 }

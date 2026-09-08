@@ -5,6 +5,41 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuvec4.h"
 
+extern "C" i32 NuSpecialGetNumSpecials(NUGSCN *scene) {
+    i32 count = scene->numspecial;
+    if (count == 0 && scene->display_list != NULL) {
+        count = scene->display_list->nspecials;
+    }
+    return count;
+}
+
+extern "C" i32 NuSpecialGetFirst(NUGSCN *scene, nuhspecial_s *special, i32 flags) {
+    if (scene->specials != NULL) {
+        special->scene = scene;
+        special->special = scene->specials;
+        special->display_special = NULL;
+        return 1;
+    }
+    if (scene->display_list->nspecials != 0) {
+        special->scene = scene;
+        special->special = NULL;
+        special->display_special = static_cast<NUDISPLAYSPECIAL *>(scene->display_list->specials);
+        return 1;
+    }
+    special->scene = NULL;
+    special->special = NULL;
+    special->display_special = NULL;
+    return 0;
+}
+
+extern "C" void NuSpecialGetNext(nuhspecial_s *special) {
+    if (special->special != NULL) {
+        special->special = static_cast<u8 *>(special->special) + 0x4c;
+    } else if (special->display_special != NULL) {
+        ++special->display_special;
+    }
+}
+
 namespace {
 
     struct NuSpecialLegacyLayout {
@@ -20,7 +55,8 @@ namespace {
             u8 flags;
             struct {
                 u8 visible : 1;
-                u8 unused_flags_1_2 : 2;
+                u8 on_screen : 1;
+                u8 unused_flag_2 : 1;
                 u8 no_visibility_test : 1;
                 u8 unused_flags_4_7 : 4;
             };
@@ -35,6 +71,31 @@ namespace {
     DECOMP_ASSERT(offsetof(NuLegacyInstanceLayout, flags) == 0x44, "legacy instance flags offset");
     DECOMP_ASSERT(offsetof(NuLegacyInstanceLayout, animation) == 0x48, "legacy instance animation offset");
 } // namespace
+
+extern "C" i32 NuGScnNumSpecials(NUGSCN *scene) {
+    if (scene->display_list != NULL) return scene->display_list->nspecials;
+    return scene->numspecial;
+}
+
+extern "C" void NuGScnGetSpecial(nuhspecial_s *special, NUGSCN *scene, i32 index) {
+    if (scene != NULL && special != NULL) {
+        if (scene->display_list != NULL && index < scene->display_list->nspecials) {
+            special->scene = scene;
+            special->special = NULL;
+            special->display_special = &static_cast<NUDISPLAYSPECIAL *>(scene->display_list->specials)[index];
+            return;
+        }
+        if (index < scene->numspecial) {
+            special->scene = scene;
+            special->special = &reinterpret_cast<NuSpecialLegacyLayout *>(scene->specials)[index];
+            special->display_special = NULL;
+            return;
+        }
+    }
+    special->scene = NULL;
+    special->special = NULL;
+    special->display_special = NULL;
+}
 
 extern "C" i32 NuSpecialExistsFn(void *special_ptr) {
     if (special_ptr != NULL) {
@@ -283,4 +344,13 @@ extern "C" void NuSpecialUpdate(nuhspecial_s *special) {
 
     display->flags |= NUDISPLAYSPECIAL_FLAG_MATRIX_UPDATED;
     NuDisplayListUpdateSpecial(special);
+}
+
+extern "C" i32 NuSpecialGetOnScreenFn(nuhspecial_s *special) {
+    if (special->scene != NULL && special->special != NULL) {
+        NuSpecialLegacyLayout *legacy = static_cast<NuSpecialLegacyLayout *>(special->special);
+        NuLegacyInstanceLayout *instance = static_cast<NuLegacyInstanceLayout *>(legacy->instance);
+        return instance->on_screen;
+    }
+    return 1;
 }

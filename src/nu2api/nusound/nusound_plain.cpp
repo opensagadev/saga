@@ -18,7 +18,9 @@ extern "C" {
         g_NuSoundLoadBits = request_bits;
     }
 
-    void NuSound3AddRumble(void) {
+    // The Android original is eight NOPs followed by RET; the callers still
+    // supply the full rumble request ABI.
+    void NuSound3AddRumble(nupad_s *, f32, i32, i32, f32) {
     }
     void NuSound3AddStream(void) {
     }

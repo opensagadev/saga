@@ -1,9 +1,11 @@
 #include "globals.h"
+#include <stdlib.h>
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/core/input/qrand.h"
+#include "legoapi/gizmos/object/technos.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/world.h"
@@ -23,6 +25,10 @@ i32 OnOrInsidePlane(NUVEC *point, NUVEC *plane_point, NUVEC *plane_normal, NUVEC
                     f32 *distance_out);
 void Surface_Deflect(NUVEC *normal, NUVEC *movement, NUVEC *result, i32 mode);
 void SpecialMove_Cancel(GameObject_s *object);
+void Hint_CancelCurrent(void);
+extern AREADATA_s *PODSPRINT_ADATA;
+extern AREADATA_s *BATTLEOVERCORUSCANT_ADATA;
+
 
 void GameCam_Blend(GAMECAMERA_s *camera, f32 duration, f32 curve, i32 mode) {
     if (camera == NULL) {
@@ -248,7 +254,30 @@ void GameCam_UpdateLookRot(GAMECAMERA_s *camera) {
     camera->field_0x218 = SeekValF(camera->field_0x218, camera->field_0x210, 3.0f);
 }
 
-void GameCameraMakeMiniCut(nugspline_s *, float, float, float, float, i32, i32) {
+void GameCameraMakeMiniCut(nugspline_s *spline, f32 start, f32 end, f32 blend_in, f32 blend_out,
+                           i32 borders, i32 hold_until_players_move) {
+    if (spline == NULL) return;
+    ObstacleCamSpl = spline;
+    ObstacleCamStart = start;
+    ObstacleCamEnd = end;
+    ObstacleCamTime = 0.0f;
+    ObstacleCamRotZ = 0;
+    ObstacleCamBlendInTime = blend_in;
+    ObstacleCamBlendOutTime = blend_out;
+    ObstacleCamCutTgtPtr = NULL;
+    ObstacleCamCutCamPtr = NULL;
+    ObstacleCamBorders = borders;
+    if (VehicleArea != 0) hold_until_players_move = 0;
+    ObstacleCamHoldUntilPlayersMove = hold_until_players_move;
+    if (borders != 0) {
+        if (start == 0.0f && blend_in <= 0.0f) CutBorderScale = 1.0f;
+    }
+    if (start <= 0.0f && blend_in <= 0.0f) {
+        GameCam->blend_time = GameCam->blend_duration;
+        GameCam->mode = -1;
+    }
+    Hint_CancelCurrent();
+    ObstacleCamAlwaysSnapAngles = 0;
 }
 
 void GameCameraMakeMiniCut2(nuvec_s *, nuvec_s *, i32, float, float, float, float, i32, i32, i32) {
@@ -284,11 +313,18 @@ void KeepOnScreen(GameObject_s *object) {
     const f32 previous_keep_time = object->field_0xda8;
     object->field_0xda8 = 0.0f;
 
-    // Ordinary on-foot Cantina path.  Vehicle, gunship and special-character
-    // branches in the target deliberately use different plane responses.
-    if (newgamecam != 0 || (object->field_0xf03 & 0x10) != 0 || static_cast<i8>(object->apiobj.flags_low) >= 0 ||
+    if (newgamecam != 0 || (object->field_0xf03 & 0x10) != 0)
+        return;
+    bool controlled = false;
+    for (i32 index = 0; index < 8; ++index) {
+        GameObject_s *player = Player[index];
+        if (player != NULL && player->character_context == 0x51 && player->field_0x788 != NULL &&
+            static_cast<TECHNO *>(player->field_0x788)->controlled_object == object)
+            controlled = true;
+    }
+    if ((static_cast<i8>(object->apiobj.flags_low) >= 0 && !controlled) ||
         object->apiobj.field_0x287 != 0 || (object->field_0xefe & 4) == 0 || MiniCutCam != 0 || GetMenuID() != -1 ||
-        VehicleArea != 0) {
+        object->character_context == 0x2b) {
         return;
     }
 
@@ -304,25 +340,45 @@ void KeepOnScreen(GameObject_s *object) {
             break;
     }
 
-    // In an ordinary area only the two controllable player slots are kept in
-    // the camera frustum.  Other active objects reach KeepOnScreen through the
-    // same update loop but are not constrained by the target.
-    if (object != Player[0] && object != Player[1]) {
+    if (WORLD->current_level == BONUS_GUNSHIPA_LDATA && GameCam->mode == 0x0b) {
+        const f32 push_speed = object->apiobj.character_data->game_character->run_speed * 5.0f;
+        f32 count = 0.0f;
+        NUVEC response;
+        const i32 planes[4] = {3, 2, 1, 4};
+        const i32 rotations[4] = {0x6000, 0xa000, 0x2000, 0xe000};
+        for (i32 index = 0; index < 4; ++index) {
+            PLAYPLANE_s *plane = &PlayPlane[planes[index]];
+            if (OnOrInsidePlane(&object->apiobj.collision_position, &plane->point, &plane->normal,
+                                NULL, 0.0f, NULL) != 0) {
+                NUVEC normal;
+                NuVecRotateY(&normal, &GunshipANorm, rotations[index]);
+                Surface_Deflect(&normal, &object->apiobj.velocity, &response, 0);
+                response.x += normal.x * push_speed;
+                response.z += normal.z * push_speed;
+                count += 1.0f;
+            }
+        }
+        if (count > 0.0f) {
+            const f32 inverse_count = 1.0f / count;
+            // The original retains the last response, then divides by the
+            // number of intersected planes; it does not accumulate responses.
+            object->apiobj.movement_direction.x = response.x * inverse_count;
+            object->apiobj.movement_direction.z = response.z * inverse_count;
+        }
         return;
     }
 
-    // A vehicle paired with this ordinary player owns the camera constraint.
-    GameObject_s *other_player = object == Player[0] ? Player[1] : Player[0];
-    if (other_player != NULL && static_cast<i8>(other_player->apiobj.flags_low) < 0 &&
-        other_player->character_id_0x7a5 == 0x2b) {
-        return;
+    if (VehicleArea == 0) {
+        GameObject_s *other_player = object == Player[0] ? Player[1] :
+                                    object == Player[1] ? Player[0] : NULL;
+        if (other_player != NULL && (static_cast<i8>(other_player->apiobj.flags_low) >= 0 ||
+                                    other_player->character_context == 0x2b))
+            return;
     }
-
-    CHARACTERDATA *character = object->apiobj.character_data;
-    if (character == NULL || character->field11_0x24 == NULL) {
-        return;
-    }
-    const f32 push_distance = static_cast<GAMECHARACTERDATA_s *>(character->field11_0x24)->movement_speed;
+    const bool two_players = Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.flags_low) < 0 &&
+                             Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.flags_low) < 0;
+    GAMECHARACTERDATA *character = object->apiobj.character_data->game_character;
+    const f32 push_distance = VehicleArea != 0 ? character->walk_speed : character->run_speed;
     NUVEC constrained_movement = object->apiobj.velocity;
     bool constrained = false;
 
@@ -352,7 +408,8 @@ void KeepOnScreen(GameObject_s *object) {
         constrained = true;
     }
 
-    if (KEEPONSCREEN_SIDESONLY == 0) {
+    if ((VehicleArea != 0 && (WORLD->area == NULL || WORLD->area != PODSPRINT_ADATA)) ||
+        KEEPONSCREEN_SIDESONLY == 0 || (two_players && abs(RotDiff(0, GameCam->pitch)) > 0x2000)) {
         PLAYPLANE_s *depth_plane = NULL;
         if (OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[4].point, &PlayPlane[4].normal, NULL,
                             -object->apiobj.field_0x1e0, NULL) != 0) {
@@ -383,10 +440,27 @@ void KeepOnScreen(GameObject_s *object) {
     }
 }
 
-void ViewCamGetTgt() {
+struct VIEWCAM_s {
+    i32 mode;
+    NUVEC target;
+    u32 angles;
+    f32 distance;
+    f32 field_18;
+    f32 field_1c;
+    f32 field_20;
+    GAMEPAD_s *pad;
+};
+DECOMP_ASSERT(sizeof(VIEWCAM_s) == 0x28, "View camera ABI");
+DECOMP_ASSERT(offsetof(VIEWCAM_s, target) == 4, "View camera target offset");
+DECOMP_ASSERT(offsetof(VIEWCAM_s, pad) == 0x24, "View camera pad offset");
+VIEWCAM_s ViewCam = {0, {1.0e9f, 0.0f, 0.0f}, 0x8cc4e000, 2.66f, 0.0f, 120.0f, 200.0f, NULL};
+
+NUVEC *ViewCamGetTgt() {
+    return &ViewCam.target;
 }
 
-void ViewCamGetMode() {
+i32 ViewCamGetMode() {
+    return ViewCam.mode;
 }
 
 void SetDepthOfField() {
@@ -401,7 +475,21 @@ void SpeedBlur_Update() {
 void ViewCamSetActive(i32, GAMEPAD_s *) {
 }
 
-void KeepPointOnScreen(nuvec_s *, nuvec_s *) {
+void KeepPointOnScreen(NUVEC *position, NUVEC *velocity) {
+    if (position->x < -0.85f) {
+        position->x = -0.85f;
+        if (velocity != NULL) velocity->x = 0.0f;
+    } else if (position->x > 0.85f) {
+        position->x = 0.85f;
+        if (velocity != NULL) velocity->x = 0.0f;
+    }
+    if (position->y < -0.85f) {
+        position->y = -0.85f;
+        if (velocity != NULL) velocity->y = 0.0f;
+    } else if (position->y > 0.85f) {
+        position->y = 0.85f;
+        if (velocity != NULL) velocity->y = 0.0f;
+    }
 }
 
 void SetCameraMatrices() {
@@ -423,10 +511,54 @@ void SetCameraMatrices() {
     NuRndrSetFxMtx(&effect_matrix);
 }
 
-void ViewCamGetGamePad() {
+GAMEPAD_s *ViewCamGetGamePad() {
+    return ViewCam.pad;
 }
 
-void KeepVehicleOnScreen(GameObject_s *, i32, i32, i32) {
+// Original: 784 bytes.
+void KeepVehicleOnScreen(GameObject_s *object, i32 sides, i32 top, i32 bottom) {
+    object->field_0xf03 |= 0x10;
+    if (GamePlayTimer.time_elapsed < 1.0f) return;
+    f32 margin = WORLD->area == BATTLEOVERCORUSCANT_ADATA ? 0.5f : 1.0f;
+    f32 distance;
+    if (sides != 0) {
+        OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[1].point, &PlayPlane[1].normal,
+                        NULL, 0.0f, &distance);
+        if (distance < margin) {
+            f32 correction = -((distance - margin) / margin);
+            f32 speed = object->apiobj.character_data->game_character->run_speed;
+            object->target_velocity.x += (speed + speed) * (correction + correction);
+        } else {
+            OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[2].point, &PlayPlane[2].normal,
+                            NULL, 0.0f, &distance);
+            if (distance < margin) {
+                f32 correction = -((distance - margin) / margin);
+                f32 speed = -object->apiobj.character_data->game_character->run_speed;
+                object->target_velocity.x += (speed + speed) * (correction + correction);
+            }
+        }
+    }
+    if (top != 0) {
+        OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[3].point, &PlayPlane[3].normal,
+                        NULL, 0.0f, &distance);
+        if (distance != 1000000000.0f && distance < margin) {
+            f32 correction = -((distance - margin) / margin);
+            f32 speed = -object->apiobj.character_data->game_character->run_speed;
+            object->target_velocity.y += (speed + speed) * (correction + correction);
+            return;
+        }
+    } else {
+        distance = 1000000000.0f;
+    }
+    if (bottom != 0) {
+        OnOrInsidePlane(&object->apiobj.collision_position, &PlayPlane[4].point, &PlayPlane[4].normal,
+                        NULL, 0.0f, &distance);
+        if (distance < margin) {
+            f32 correction = -((distance - margin) / margin);
+            f32 speed = object->apiobj.character_data->game_character->run_speed;
+            object->target_velocity.y += (speed + speed) * (correction + correction);
+        }
+    }
 }
 
 void CentreTwoPlayerCamera(nuvec_s *center, nuvec_s *player_a, nuvec_s *player_b, nuvec_s *reference) {

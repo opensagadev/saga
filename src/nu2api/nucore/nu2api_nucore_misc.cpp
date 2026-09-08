@@ -733,9 +733,6 @@ void NuHGobjEvalAnimBlend2Root_3(nugscn_s *scene, ani3_animheader_s *animation_a
     NuAnimPopUseQuatsFlag();
 }
 
-void NuIOSDLVertexGroupsCallback(void *) {
-}
-
 i32 NuIOS_CanMakeInAppPurchases() {
     return 0;
 }
@@ -987,7 +984,11 @@ f32 NuATan2f(f32 y, f32 x) {
 void NuFntSave(nufnt_s *, i32, char *) {
 }
 
-void NuLgtRand() {
+extern "C" { u32 NuLgtSeed = 12345; }
+
+i32 NuLgtRand() {
+    NuLgtSeed = (NuLgtSeed * 0x24cd + 1) & 0xffff;
+    return NuLgtSeed;
 }
 
 void NuMemFree(void *) {

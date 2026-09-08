@@ -1,6 +1,7 @@
 #include "decomp.h"
 #include "globals.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/characters/core/players.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
 
@@ -9,7 +10,23 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-void GetGenericGoon(i32) {
+extern "C" {
+    extern i16 id_PENGUIN_GOON, id_PENGUIN_GOON_GUN;
+    extern i16 id_JOKER_GOON, id_JOKER_GOON_GUN;
+    extern i16 id_RIDDLER_GOON, id_RIDDLER_GOON_GUN;
+}
+
+i16 GetGenericGoon(i32 armed) {
+    if (armed) {
+        if (id_PENGUIN_GOON_GUN != -1 && APICharacterLoaded(id_PENGUIN_GOON_GUN)) return id_PENGUIN_GOON_GUN;
+        if (id_JOKER_GOON_GUN != -1 && APICharacterLoaded(id_JOKER_GOON_GUN)) return id_JOKER_GOON_GUN;
+        if (id_RIDDLER_GOON_GUN != -1 && APICharacterLoaded(id_RIDDLER_GOON_GUN)) return id_RIDDLER_GOON_GUN;
+    } else {
+        if (id_PENGUIN_GOON != -1 && APICharacterLoaded(id_PENGUIN_GOON)) return id_PENGUIN_GOON;
+        if (id_JOKER_GOON != -1 && APICharacterLoaded(id_JOKER_GOON)) return id_JOKER_GOON;
+        if (id_RIDDLER_GOON != -1 && APICharacterLoaded(id_RIDDLER_GOON)) return id_RIDDLER_GOON;
+    }
+    return -1;
 }
 
 i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32) {
@@ -165,9 +182,6 @@ void NarrowSockExceptions_Init(NARROWSOCKEXCEPTION *) {
 
 void oneAtOnce_SetNumAttackers(i32 attackers) {
     AtOnce_maxAttackers = MAX(0, MIN(attackers, 4));
-}
-
-void MakeBaddiesForgetAboutParty(i32) {
 }
 
 void oneAtOnce_SetInitDistPerRow(float distance) {

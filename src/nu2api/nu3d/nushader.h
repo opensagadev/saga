@@ -44,24 +44,9 @@ struct GLSLParameter {
 #endif
 };
 
-typedef struct nushaderusagemask_s {
+typedef struct NuShaderUsageMask_s {
     u32 semantics[4];
 } NUSHADERUSAGEMASK;
-
-struct ShaderUniformRecord {
-    const char *vertex_name;
-    const char *fragment_name;
-    i32 value_count;
-    i32 field_c;
-    i32 stage_mask;
-    i32 register_index;
-    i32 field_18;
-    f32 values[16];
-};
-
-DECOMP_ASSERT(sizeof(ShaderUniformRecord) == 0x5c, "shader uniform record size");
-
-extern "C" ShaderUniformRecord g_shaderUniforms[0x65];
 
 DECOMP_ASSERT(sizeof(GLSLParameter) == 8, "GLSL parameter metadata size");
 DECOMP_ASSERT(offsetof(GLSLParameter, semantic) == 4, "GLSL parameter semantic offset");
@@ -71,16 +56,46 @@ DECOMP_ASSERT(offsetof(GLSLParameter, semantic) == 4, "GLSL parameter semantic o
 struct nushaderobject_s {
     NUSHADEROBJECTGLSL glsl;
     NUSHADERUSAGEMASK *usage_mask;
-    char unk[0x0c];
+    i32 last_uniform_frame; // 0x20
+    void *last_light_packet; // 0x24
+    void *last_camera_packet; // 0x28
     GLSLParameter parameters[NUSHADEROBJECT_PARAMETERS_COUNT];
+    // Present in both serialized objects and the original manager slot stride.
+    u8 unknown_0x304[4];
 };
+DECOMP_ASSERT(offsetof(nushaderobject_s, parameters) == 0x2c, "Shader parameter table offset");
+DECOMP_ASSERT(offsetof(nushaderobject_s, unknown_0x304) == 0x304, "Shader object tail offset");
+DECOMP_ASSERT(sizeof(nushaderobject_s) == 0x308, "Shader object size");
 
 typedef nushaderobject_s NUSHADEROBJECT;
 
+struct ShaderPacketStateMapping {
+    NUSHADERUSAGEMASK mask;
+    void **packet;
+};
+DECOMP_ASSERT(sizeof(ShaderPacketStateMapping) == 0x14, "Shader packet-state mapping ABI");
+DECOMP_ASSERT(offsetof(nushaderobject_s, last_uniform_frame) == 0x20, "Shader frame offset");
+DECOMP_ASSERT(offsetof(nushaderobject_s, last_light_packet) == 0x24, "Shader light packet offset");
+DECOMP_ASSERT(offsetof(nushaderobject_s, last_camera_packet) == 0x28, "Shader camera packet offset");
+extern "C" {
+    extern void *g_boundLightPacket;
+    extern void *g_boundCameraPacket;
+    extern ShaderPacketStateMapping g_packetToShaderStateMappings[2];
+    void NuShaderGetDirtyMask(NUSHADERUSAGEMASK *mask, NUSHADEROBJECT *shader);
+}
+
+
 struct nushaderprogramparameter_s {
     u16 register_index;
-    u16 location_and_setter;
+    union {
+        u16 location_and_setter;
+        struct {
+            u16 location : 12;
+            u16 setter : 4;
+        };
+    };
 };
+DECOMP_ASSERT(sizeof(nushaderprogramparameter_s) == 4, "Shader program parameter ABI");
 
 typedef nushaderprogramparameter_s NUSHADERPROGRAMPARAMETER;
 
@@ -97,8 +112,8 @@ typedef nushaderprogram_s NUSHADERPROGRAM;
 
 #ifdef __cplusplus
 i32 NuShaderObjectBindAttributeLocationsGLSL(GLuint program);
-i32 NuShaderObjectCombineGLSLShadersIntoProgram(GLuint *program_dest, GLuint vertex_shader, GLuint fragment_shader);
-i32 NuShaderObjectGenerateGLSLShader(GLuint *shader_dest, GLenum shader_type, const GLchar *shader_source,
+bool NuShaderObjectCombineGLSLShadersIntoProgram(GLuint *program_dest, GLuint vertex_shader, GLuint fragment_shader);
+bool NuShaderObjectGenerateGLSLShader(GLuint *shader_dest, GLenum shader_type, const GLchar *shader_source,
                                      GLint shader_source_length);
 
 extern "C" {
@@ -110,6 +125,7 @@ extern "C" {
     void NuShaderObjectBaseDestroy(NUSHADEROBJECTBASE *shader);
     void NuShaderObjectGLSLDestroy(NUSHADEROBJECTGLSL *shader);
     void NuShaderObjectDestroy(NUSHADEROBJECT *shader);
+    NUSHADEROBJECT *NuShaderObjectUnserialize(VARIPTR *buffer);
     void NuShaderObjectBaseInit(NUSHADEROBJECTBASE *shader, NUSHADEROBJECTKEY *key, i32 unk);
     void NuShaderObjectUnInit(NUSHADEROBJECT *shader);
     void NuShaderObjectBaseUnInit(NUSHADEROBJECTBASE *shader);
@@ -126,3 +142,36 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+
+namespace nu2api {
+    union ShaderUniformRecord {
+        struct {
+            const char *vertex_name;
+            const char *fragment_name;
+            u32 metadata[5];
+            u32 values[16];
+        } data;
+        struct {
+            const char *vertex_name;
+            const char *fragment_name;
+            i32 value_count;
+            i32 field_c;
+            i32 stage_mask;
+            i32 register_index;
+            i32 field_18;
+            f32 values[16];
+        };
+        u8 raw[0x5c];
+    };
+    extern "C" ShaderUniformRecord g_shaderUniforms[101];
+}
+
+using nu2api::ShaderUniformRecord;
+using nu2api::g_shaderUniforms;
+
+DECOMP_ASSERT(sizeof(nu2api::ShaderUniformRecord) == 0x5c, "Shader uniform record size");
+DECOMP_ASSERT(offsetof(nu2api::ShaderUniformRecord, data.metadata) == 8, "Shader uniform metadata offset");
+DECOMP_ASSERT(offsetof(nu2api::ShaderUniformRecord, data.values) == 0x1c, "Shader uniform values offset");
+
+struct numtl_s;
+extern "C" void NuShaderObjectBaseUpdateWaterTable(NUSHADEROBJECT *shader, numtl_s *mtl);

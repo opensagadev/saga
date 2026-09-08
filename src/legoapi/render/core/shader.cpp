@@ -1,28 +1,67 @@
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/nushader.h"
+#include <cstring>
+#include "nu2api/nucore/nuthread.h"
+
+u32 g_cachedUniformMask[4];
+u32 g_textureSemanticMask[4];
+i32 g_shaderBufferCriticalSection;
 
 ShaderManagerOpenGL::ShaderManagerOpenGL(VirtualStackAllocator &) {
+    g_cachedUniformMask[0] = 0;
+    g_cachedUniformMask[1] = 0xffe00000;
+    g_cachedUniformMask[3] = 0x1f;
+    g_cachedUniformMask[2] = 0xf900eb91;
+    g_textureSemanticMask[1] = 0;
+    g_textureSemanticMask[2] = 0;
+    g_textureSemanticMask[3] = 0;
+    g_textureSemanticMask[0] = 0x1fffff;
+    g_shaderBufferCriticalSection = NuThreadCreateCriticalSection();
 }
 
-void ShaderManagerOpenGL::adaptShaderMaterialForShaderVersion(nushadermtldesc_s *) {
+
+bool ShaderManagerOpenGL::createShader(ShaderMtlDescFilter &filter, bool pixelStage, NuShaderObject *object, i32 id) {
+    ShaderObjectKey key = {0};
+    NuShaderObjectKeyGenerate3(&key.key, &filter, pixelStage);
+    return createShader(key, object, id);
 }
 
-void ShaderManagerOpenGL::createShader(ShaderMtlDescFilter &, bool, NuShaderObject *, i32) {
+
+
+void ShaderManagerOpenGL::setElementfv(SHADERSEMANTIC_enum semantic, i32, float const *values) {
+    // The original Android implementation ignores the element range.
+    nu2api::ShaderUniformRecord &uniform = nu2api::g_shaderUniforms[semantic];
+    const i32 count = static_cast<i32>(uniform.data.metadata[0]);
+    if (count <= 4) {
+        std::memcpy(uniform.data.values, values, static_cast<size_t>(count) << 4);
+    }
 }
 
-void ShaderManagerOpenGL::createShader(ShaderObjectKey const &, NuShaderObject *, i32) {
+void ShaderManagerOpenGL::setElementsfv(SHADERSEMANTIC_enum semantic, i32, i32, float const *values) {
+    // The original Android implementation ignores the element range.
+    nu2api::ShaderUniformRecord &uniform = nu2api::g_shaderUniforms[semantic];
+    const i32 count = static_cast<i32>(uniform.data.metadata[0]);
+    if (count <= 4) {
+        std::memcpy(uniform.data.values, values, static_cast<size_t>(count) << 4);
+    }
 }
 
-void ShaderManagerOpenGL::setElementfv(SHADERSEMANTIC_enum, i32, float const *) {
+void ShaderManagerOpenGL::setElementsfv_transpose(SHADERSEMANTIC_enum semantic, i32, i32, float const *values) {
+    // The original Android implementation ignores the element range.
+    nu2api::ShaderUniformRecord &uniform = nu2api::g_shaderUniforms[semantic];
+    const i32 count = static_cast<i32>(uniform.data.metadata[0]);
+    if (count <= 4) {
+        std::memcpy(uniform.data.values, values, static_cast<size_t>(count) << 4);
+    }
 }
 
-void ShaderManagerOpenGL::setElementsfv(SHADERSEMANTIC_enum, i32, i32, float const *) {
-}
-
-void ShaderManagerOpenGL::setElementsfv_transpose(SHADERSEMANTIC_enum, i32, i32, float const *) {
-}
-
-void ShaderManagerOpenGL::setfv(SHADERSEMANTIC_enum, float const *) {
+void ShaderManagerOpenGL::setfv(SHADERSEMANTIC_enum semantic, float const *values) {
+    nu2api::ShaderUniformRecord &uniform = nu2api::g_shaderUniforms[semantic];
+    const i32 count = static_cast<i32>(uniform.data.metadata[0]);
+    if (count <= 4) {
+        std::memcpy(uniform.data.values, values, static_cast<size_t>(count) << 4);
+    }
 }
 
 ShaderManagerOpenGL::~ShaderManagerOpenGL() {
@@ -132,9 +171,25 @@ void ShaderMtlDescFilter::internalInit(nushadermtldesc_s const *material_desc, n
     }
 }
 
-extern "C" {
 
-    void GetGLSLTypeInfo(void) {
-    }
+namespace nu2api { extern void *g_shaderManager; }
 
-} // extern "C"
+extern "C" void NuShaderManagerSetfv(i32 semantic, const f32 *values) {
+    static_cast<ShaderManagerOpenGL *>(nu2api::g_shaderManager)->setfv(
+        static_cast<SHADERSEMANTIC_enum>(semantic), values);
+}
+
+extern "C" void NuShaderManagerSetElementfv(i32 semantic, i32 element, const f32 *values) {
+    static_cast<ShaderManagerOpenGL *>(nu2api::g_shaderManager)->setElementfv(
+        static_cast<SHADERSEMANTIC_enum>(semantic), element, values);
+}
+
+extern "C" void NuShaderManagerSetElementsfv(i32 semantic, i32 first_element, i32 count, const f32 *values) {
+    static_cast<ShaderManagerOpenGL *>(nu2api::g_shaderManager)->setElementsfv(
+        static_cast<SHADERSEMANTIC_enum>(semantic), first_element, count, values);
+}
+
+extern "C" void NuShaderManagerSetElementsfv_transpose(i32 semantic, i32 first_element, i32 count, const f32 *values) {
+    static_cast<ShaderManagerOpenGL *>(nu2api::g_shaderManager)->setElementsfv_transpose(
+        static_cast<SHADERSEMANTIC_enum>(semantic), first_element, count, values);
+}

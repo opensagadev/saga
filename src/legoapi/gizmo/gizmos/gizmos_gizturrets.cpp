@@ -13,9 +13,6 @@ void GizTurret_FindByName(GIZTURRETSYS_s *, char *) {
 void GizTurret_FindNearest(GIZTURRETSYS_s *, nuvec_s *, GameObject_s *, float *, i32) {
 }
 
-void GizTurrets_TotalScore(void *) {
-}
-
 void GizTurrets_UpdateHint(HINT_s *) {
 }
 

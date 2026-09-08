@@ -10,8 +10,6 @@ void edSetPadDisabled(i32) {
 void eduiSetPinnedMenu(eduimenu_s *) {
 }
 
-void edpartLookupDebrisEffect(char *) {
-}
 
 void EdRegistry::Flush() {
 }

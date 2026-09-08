@@ -418,11 +418,16 @@ struct PLAYERCHARACTERCONFIG_s {
     f32 collision_origin_radius; // 0x4c; animated collision-origin sphere radius
     u8 unknown_50[0x8c - 0x50];
     f32 shadow_radius; // 0x8c; values below 99 override the character radius
-    u8 unknown_90[0xf0 - 0x90];
+    u32 flags_090; // 0x90; bit 0x400 suppresses the offscreen Force glow
+    u8 unknown_94[0xf0 - 0x94];
     u16 shadow_joint_mask; // 0xf0
     u8 unknown_f2[0xf6 - 0xf2];
     u8 blob_shadow_alpha; // 0xf6; 0xff selects the current level's alpha
-    u8 unknown_f7[0x10a - 0xf7];
+    u8 unknown_f7;
+    i8 weapon_joints[4]; // 0xf8
+    i8 weapon_shoot_joints[4]; // 0xfc
+    u8 unknown_100[8];
+    i8 hand_joints[2]; // 0x108; Force-lightning origins
     i8 grapple_joint_a; // 0x10a; primary hand/rope attachment joint
     i8 grapple_joint_b; // 0x10b; optional secondary hand/rope attachment joint
     u8 unknown_10c;
@@ -434,6 +439,10 @@ struct PLAYERCHARACTERCONFIG_s {
 };
 
 DECOMP_ASSERT(offsetof(PLAYERCHARACTERCONFIG_s, shadow_radius) == 0x8c, "PLAYERCHARACTERCONFIG shadow-radius offset");
+DECOMP_ASSERT(offsetof(PLAYERCHARACTERCONFIG_s, weapon_joints) == 0xf8, "PLAYERCHARACTERCONFIG weapon joints offset");
+DECOMP_ASSERT(offsetof(PLAYERCHARACTERCONFIG_s, weapon_shoot_joints) == 0xfc, "PLAYERCHARACTERCONFIG shooting joints offset");
+DECOMP_ASSERT(offsetof(PLAYERCHARACTERCONFIG_s, hand_joints) == 0x108, "PLAYERCHARACTERCONFIG hand joints offset");
+DECOMP_ASSERT(sizeof(PLAYERCHARACTERCONFIG_s) == 0x118, "PLAYERCHARACTERCONFIG size");
 DECOMP_ASSERT(offsetof(PLAYERCHARACTERCONFIG_s, collision_origin_radius) == 0x4c,
               "PLAYERCHARACTERCONFIG collision-origin radius offset");
 DECOMP_ASSERT(offsetof(PLAYERCHARACTERCONFIG_s, shadow_joint_mask) == 0xf0,

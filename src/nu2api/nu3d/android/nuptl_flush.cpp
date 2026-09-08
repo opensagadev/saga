@@ -68,7 +68,7 @@ extern "C" void NuInitDebrisRenderer(VARIPTR *buffer, VARIPTR buffer_end) {
     g_pVBData = g_debrisUploadBuffer;
 }
 
-extern bool g_forceSysMemVbs; // src/globals.h
+extern u8 g_forceSysMemVbs; // src/globals.h
 
 i32 NuDebrisRendererNextBuffer() {
     if (g_UseSysMemVB == 0 && g_pVBData != NULL && g_CurrentVBVertexCount != 0) {
@@ -95,11 +95,7 @@ i32 NuDebrisRendererNextBuffer() {
     }
 
     g_CurrentVBVertexCount = 0;
-    if (g_UseSysMemVB != 0) {
-        g_pVBData = g_DebriSysMemVB[g_writeBufferIndex][g_CurrentDebriVBIndex];
-    } else {
-        g_pVBData = g_debrisUploadBuffer;
-    }
+    g_pVBData = g_UseSysMemVB == 0 ? g_debrisUploadBuffer : g_DebriSysMemVB[g_writeBufferIndex][g_CurrentDebriVBIndex];
     return 1;
 }
 
@@ -115,7 +111,7 @@ void NuDebrisRendererFlushBuffers(void) {
     g_pVBData = NULL;
     g_CurrentDebriVBIndex = 0;
     g_UseSysMemVB = 0;
-    if (g_forceSysMemVbs) {
+    if (g_forceSysMemVbs != 0) {
         g_UseSysMemVB = 1;
     }
     g_CurrentVBVertexCount = 0;

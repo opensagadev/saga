@@ -59,6 +59,11 @@ void MemoryManager::FreePool(void *item, u32 size) {
 
 void DebFreeChunksInstantly(i32 *);
 void RemoveDebrisEffectFromStack(debkeydatatype_s *);
+void RemoveAnyChunkControls(i32 *);
+void AddChunkControlToStack(debris_chunk_control_s *, debris_chunk_control_s **);
+void DebrisGetControlStackLock();
+void DebrisReleaseControlStackLock();
+void RemoveChunkFromRenderStack(particlechunkrendertype_s *, particlechunkrendertype_s **);
 
 extern "C" {
 
@@ -108,7 +113,69 @@ extern "C" {
         return slot;
     }
 
-    void DebFree(void) {
+    extern debris_chunk_control_s **freechunkcontrols;
+    extern i32 freechunkcontrolsptr;
+    extern debris_chunk_control_s *debris_chunk_control_stack[2];
+    extern f32 globaltime, panelglobaltime;
+
+    void DebFree(i32 *handle) {
+        if (*handle == -1) return;
+        debkeydatatype_s *key = &debkeydata[*handle];
+        if (key->allocation_locked != 0) return;
+        key->allocation_locked = 1;
+        for (i32 i = freedebkeyptr; i < maxdebkeys; ++i) {
+            if (freedebkeys[i] == *handle) {
+                key->allocation_locked = 0;
+                *handle = -1;
+                return;
+            }
+        }
+        if (key->effect_index == 0) {
+            key->allocation_locked = 0;
+            return;
+        }
+        debinftype *effect = debtab[key->effect_index];
+        if (key->allocated_chunk_count != 0) {
+            DebrisGetControlStackLock();
+            for (i32 i = 0; i < key->allocated_chunk_count; ++i) {
+                RemoveAnyChunkControls(reinterpret_cast<i32 *>(key->particle_chunks[i]));
+                debris_chunk_control_s *control = freechunkcontrols[freechunkcontrolsptr];
+                control->particle_chunk = key->particle_chunks[i];
+                control->active = effect->particle_type == 7 ? 7 : 0;
+                control->owner = NULL;
+                const i32 panel = effect->time_group == 4;
+                control->expiry_time = effect->particle_lifetime + (panel ? panelglobaltime : globaltime) +
+                    static_cast<i8>(effect->trail_count) * effect->trail_time;
+                AddChunkControlToStack(control, &debris_chunk_control_stack[panel]);
+                ++freechunkcontrolsptr;
+            }
+            DebrisReleaseControlStackLock();
+            for (i32 i = 0; i < debrischunks + debrischunksglass; ++i) {
+                particlechunkrendertype_s *render = &ParticleChunkToRender[i];
+                if (render->particle_chunk == key->particle_chunks[0]) {
+                    render->key = NULL;
+                    render->effect = effect;
+                    render->effect_orientation = key->effect_orientation;
+                    render->position = key->position;
+                    break;
+                }
+            }
+        }
+        i32 linked = 0;
+        for (i32 i = 0; i < 8; ++i) {
+            if (effect->particle_keys[i] == *handle) {
+                effect->particle_keys[i] = -1;
+                linked = 1;
+            }
+        }
+        if (linked == 0) RemoveDebrisEffectFromStack(key);
+        for (i32 i = 0; i < key->allocated_chunk_count; ++i) key->particle_chunks[i] = NULL;
+        key->allocated_chunk_count = 0;
+        key->effect_index = 0;
+        key->allocation_index = -1;
+        freedebkeys[--freedebkeyptr] = static_cast<i16>(*handle);
+        key->allocation_locked = 0;
+        *handle = -1;
     }
 
     void DebFreeAllChunksInstantly(void) {
@@ -170,7 +237,26 @@ extern "C" {
         *handle = -1;
     }
 
-    void DebFreeOrphansInstantly(void) {
+    void DebFreeOrphansInstantly(debinftype *effect) {
+        DebrisGetControlStackLock();
+        for (i32 i = 0; i < debrischunks + debrischunksglass; ++i) {
+            particlechunkrendertype_s *chunk = &ParticleChunkToRender[i];
+            if (chunk->key != NULL || chunk->effect != effect) continue;
+            RemoveAnyChunkControls(reinterpret_cast<i32 *>(chunk->particle_chunk));
+            debris_chunk_control_s *control = freechunkcontrols[freechunkcontrolsptr];
+            control->particle_chunk = ParticleChunkToRender[i].particle_chunk;
+            control->active = effect->particle_type == 7 ? 9 : 2;
+            control->owner = NULL;
+            i32 stack = effect->time_group == 4 ? 1 : 0;
+            control->expiry_time = stack != 0 ? panelglobaltime : globaltime;
+            AddChunkControlToStack(control, &debris_chunk_control_stack[stack]);
+            ++freechunkcontrolsptr;
+            RemoveChunkFromRenderStack(&ParticleChunkToRender[i],
+                                      &ParticleChunkRenderStack[static_cast<i8>(effect->time_group)]);
+            ParticleChunkToRender[i].particle_chunk = NULL;
+            ParticleChunkToRender[i].effect = NULL;
+        }
+        DebrisReleaseControlStackLock();
     }
 
     void DebReAlloc2(debkeydatatype_s *key);

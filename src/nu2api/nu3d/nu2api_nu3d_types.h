@@ -4,7 +4,7 @@
 
 struct NuScreen;
 struct PartHeader;
-struct eSHADERVERSION {};
+enum eSHADERVERSION : i32 {};
 union variptr_u;
 struct nugobj_s;
 struct nugscn_s;

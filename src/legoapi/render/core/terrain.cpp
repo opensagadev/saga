@@ -3,14 +3,21 @@
 #include <stdio.h>
 
 #include "gameapi/edtools/edstubs.h"
+#include "gameapi/gui/apimenu.h"
 #include "globals.h"
+#include "gamelib/util/gamelib_util_types.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/core/input/qrand.h"
+#include "legoapi/gizmos/object/technos.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/level.h"
 #include "nu2api/nucore/numemory.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nuang.h"
+#include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numath/nuvec4.h"
@@ -24,6 +31,45 @@ struct terrsitu_s;
 struct PLATSKININFO;
 struct GAMECAMERA_s;
 struct pushblock_s;
+extern "C" void PlatOnOff(i32 index, i32 enabled);
+extern "C" void TerrainSetImpactData(void *impact_data, i32 *impact_count, i32 maximum_impacts);
+extern "C" void TerrainPlatGetMtx(i32 index, NUMTX **previous, NUMTX **current);
+extern "C" void TerrainSetPlatConnectTol(f32 tolerance);
+void Surface_Deflect(NUVEC *normal, NUVEC *movement, NUVEC *result, i32 mode);
+extern i16 id_ATST;
+extern i16 id_SPEEDERBIKE;
+void GetSurfaceInfo(GameObject_s *object, i32 update_surface, f32 shadow_height);
+f32 FindReflectionNoPlatforms(NUVEC *position);
+i32 NOTERRAINSTOP;
+extern GameObject_s *CarWashHack;
+GameObject_s *CharPlatform_FindObjFromPlatID(CHARPLATFORMSYS_s *system, i32 platform_id);
+void StartFlatten(GameObject_s *source, GameObject_s *target);
+void AddWaterSplash(GameObject_s *object, NUVEC *position);
+i32 LoseCoins(GameObject_s *object, i32 cause);
+i32 CannotKill(GameObject_s *object);
+void AddPickups(i32, i32, i32, i32, NUVEC *, NUVEC *, f32, i32, f32, f32, GameObject_s *, i32, i32, bool);
+extern i32 gone_through_door_to_new_level;
+extern AREADATA_s *PODSPRINT_ADATA;
+extern AREADATA_s *PODRACE_ADATA;
+void NewRumble(nupad_s *pad, f32 strength, i32 mode);
+void NewBuzz(nupad_s *pad, f32 duration, i32 mode);
+void GameCam_Blend(GAMECAMERA_s *camera, f32 duration, f32 delay, i32 mode);
+i32 ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32);
+i32 NoLayerKill(GameObject_s *object);
+void ClearLastSafeTakeOver(GameObject_s *object);
+void Player_ClearContext(GameObject_s *object, i32 mode);
+void PlayDieSfx(GameObject_s *object);
+i32 StartBigJump(GameObject_s *, NUVEC *, i32, f32, f32, i32, i8);
+extern i16 id_SNAKE, id_TRACTOR;
+extern AREADATA_s *DAGOBAH_ADATA;
+extern f32 MiscTime;
+void TakeOverCode(GameObject_s *object, i32 tag_pressed);
+extern "C" TERRAIN_SURFACE_s TerSurface[32];
+void ApplyGravity(GameObject_s *object, f32 *gravity, f32 hover_height, f32 seek_rate, f32 *ground_height);
+void InstantKillParts(GameObject_s *object, i32 mode, f32 delay);
+i32 IntersectWater(GameObject_s *object);
+extern "C" void NewTerrPlatformsOff();
+i32 testshadowfix = 1;
 
 namespace {
     struct TERRAIN_SCENE_OBJECT {
@@ -70,9 +116,9 @@ namespace {
 
 } // namespace
 
-static void *ScaleTerrainT1;
+void *ScaleTerrainT1;
 static void *ScaleTerrainT2;
-static TERRAIN_SHAPE *ScaleTerrain;
+TERRAIN_SHAPE *ScaleTerrain;
 static void *TempScanStack;
 static TERRAIN_WALL_POINT *WallSplList;
 static i32 WallSplCount;
@@ -84,7 +130,7 @@ TERRAIN_SHAPE *TerrPoly;
 u8 TerrWallInfo;
 u8 TerrWallTab[4];
 NUVEC TerrWallNorm;
-static i32 PlatImpactId;
+i32 PlatImpactId;
 static TERRAIN_SHAPE PlatImpactTer;
 static NUVEC PlatImpactNorm;
 i32 TerrPolyObj;
@@ -93,6 +139,7 @@ static TERRAIN_SHAPE TerrPolyInfo;
 extern TERRSET *CurTerr;
 extern TerrainQuery_s *TerI;
 extern i32 WallSplinesOnly;
+extern "C" i32 IgnoreWallSplines;
 extern i32 curPickInst;
 extern i16 castnum;
 extern f32 wallover;
@@ -125,6 +172,7 @@ extern i32 TERRAINMASK_NONWEAPON;
 extern i32 TERRAINMASK_NONDROID;
 extern i32 LEGO_AIPATHCNX_BLOCKAGE;
 extern i32 LEGO_AIPATHCNX_FULLTERRAIN;
+extern i32 LEGO_AIPATHCNX_WALLSHUFFLE;
 NUVEC TerCrossProduct(NUVEC *a, NUVEC *b);
 
 void StorePlatImpact() {
@@ -1214,9 +1262,75 @@ void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags) {
     i16 *terminator = reinterpret_cast<i16 *>(writer.group_header);
     terminator[0] = 0;
     terminator[1] = 0;
-    TerrainCollectWallSplines(bounds, terrain_mask);
+    // Original 0x37ff7b consumes this one-scan suppression flag.
+    WallSplCount = 0;
+    if (IgnoreWallSplines != 0) {
+        IgnoreWallSplines = 0;
+    } else {
+        TerrainCollectWallSplines(bounds, terrain_mask);
+    }
 }
-void TerrainSkin(PLATSKININFO *, nuvec_s *, float, i32) {
+NUVEC TerrainSkin(PLATSKININFO *info, nuvec_s *position, float weight, i32 mode) {
+    NUVEC4 point __attribute__((aligned(16)));
+    NUMTX matrix __attribute__((aligned(16)));
+    if (mode == 1) {
+        point.x = position->x;
+        point.y = position->y;
+        point.z = position->z;
+        point.w = 1.0f;
+        NuVec4MtxTransformVU0(&point, &point, info->matrix);
+    } else {
+        if (weight < 0.0f) weight = position->z / info->scale;
+        if (weight < 0.0f) weight = 0.0f;
+        else weight = MIN(1.0f, weight);
+        point.x = position->x;
+        point.y = position->y;
+        point.w = 1.0f;
+        if (info->matrix_data != NULL) {
+            weight = (f32)(i32)(weight * 8.0f + 0.5f) * 0.125f;
+            point.z = position->z - info->scale * weight;
+            i32 index = (i32)(weight * 8.0f);
+            NUVEC4 *rows = static_cast<NUVEC4 *>(info->matrix_data);
+            NUVEC4 *out = reinterpret_cast<NUVEC4 *>(&matrix);
+            out[0] = rows[index];
+            out[1] = rows[index + 11];
+            out[2] = rows[index + 22];
+            out[3] = rows[index + 33];
+        } else {
+            struct SKIN_BLEND_DATA {
+                NUMTX end_matrix;
+                NUVEC scale_amplitude;
+                f32 reserved_4c;
+                NUVEC translation_amplitude;
+            };
+            SKIN_BLEND_DATA *blend = static_cast<SKIN_BLEND_DATA *>(info->skin_data);
+            weight = (f32)(i32)(weight * 10.0f + 0.5f) / 10.0f;
+            point.z = position->z - info->scale * weight;
+            f32 inverse_weight = 1.0f - weight;
+            f32 wave = NU_SIN_LUT((i32)(weight * 32768.0f));
+            f32 *out = reinterpret_cast<f32 *>(&matrix);
+            f32 *start = reinterpret_cast<f32 *>(info->matrix);
+            f32 *end = reinterpret_cast<f32 *>(&blend->end_matrix);
+            f32 *amplitude = reinterpret_cast<f32 *>(&blend->scale_amplitude);
+            for (i32 row = 0; row < 3; ++row) {
+                f32 scale = amplitude[row] * wave + 1.0f;
+                for (i32 column = 0; column < 4; ++column) {
+                    i32 index = row * 4 + column;
+                    out[index] = (start[index] * inverse_weight + end[index] * weight) * scale;
+                }
+            }
+            matrix.m30 = start[12] * inverse_weight + end[12] * weight + blend->translation_amplitude.x * wave;
+            matrix.m31 = start[13] * inverse_weight + end[13] * weight + blend->translation_amplitude.y * wave;
+            matrix.m32 = start[14] * inverse_weight + end[14] * weight + blend->translation_amplitude.z * wave;
+            matrix.m33 = start[15] * inverse_weight + end[15] * weight;
+        }
+        NuVec4MtxTransformVU0(&point, &point, &matrix);
+    }
+    NUVEC result;
+    result.x = point.x;
+    result.y = point.y;
+    result.z = point.z;
+    return result;
 }
 void TerrDrawPlat(tertype *, i16) {
 }
@@ -1289,8 +1403,9 @@ void TerrainImpact(NUVEC *position, NUVEC *movement, u8 *hit_flags) {
             query->terrain_group_index >= 0 &&
             (surface->normal_flags & TERRAIN_SURFACE_CLASS_MASK) == TERRAIN_SURFACE_CLASS_WALL_OVERRIDE;
         if (wall_override_surface) {
-            query->position.x += query->impact_normal.x * 0.0015f;
-            query->position.z += query->impact_normal.z * 0.0015f;
+            // Original 0x382168 uses the scaled movement normal (+0xa8).
+            query->position.x += query->movement_normal.x * 0.0015f;
+            query->position.z += query->movement_normal.z * 0.0015f;
             walkable_normal_y = 1.1f;
         }
         if (wallover != 0.0f) {
@@ -1326,23 +1441,7 @@ void TerrainImpact(NUVEC *position, NUVEC *movement, u8 *hit_flags) {
             query->movement.y -= travelled.y;
             query->movement.z -= travelled.z;
 
-            if (query->impact_normal.y >= walkable_normal_y) {
-                FullDeflect(&query->movement_normal, &query->movement, &query->movement);
-                FullDeflect(&query->impact_normal, movement, movement);
-
-                terrhitflags |= TERRAIN_IMPACT_RESULT_GROUND;
-                hit_flags[0] = 1;
-                hit_flags[1] = 1;
-                query->position.y += query->movement_normal.y * 0.0003f;
-
-                query = TerI;
-                if (query->terrain_group_index != -1) {
-                    group = &CurTerr->groups[query->terrain_group_index];
-                    if (group->chunk_type == TERRAIN_CHUNK_GROUP_SECONDARY) {
-                        CurTerr->platforms[group->scene_index].flags |= TERRAIN_PLATFORM_FLAG_COLLIDED;
-                    }
-                }
-            } else {
+            if (walkable_normal_y > query->impact_normal.y) {
                 hit_flags[0] = 0;
                 terrhitflags |= TERRAIN_IMPACT_RESULT_WALL;
                 if (!platform_group) {
@@ -1370,6 +1469,22 @@ void TerrainImpact(NUVEC *position, NUVEC *movement, u8 *hit_flags) {
                 CurTrackInfo->wall_contact_state = TERRAIN_TRACK_CONTACT_ACTIVE;
                 CurTrackInfo->impact_normal = query->impact_normal;
                 TerrWallNorm = query->impact_normal;
+            } else {
+                FullDeflect(&query->movement_normal, &query->movement, &query->movement);
+                FullDeflect(&query->impact_normal, movement, movement);
+
+                terrhitflags |= TERRAIN_IMPACT_RESULT_GROUND;
+                hit_flags[0] = 1;
+                hit_flags[1] = 1;
+                query->position.y += query->movement_normal.y * 0.0003f;
+
+                query = TerI;
+                if (query->terrain_group_index != -1) {
+                    group = &CurTerr->groups[query->terrain_group_index];
+                    if (group->chunk_type == TERRAIN_CHUNK_GROUP_SECONDARY) {
+                        CurTerr->platforms[group->scene_index].flags |= TERRAIN_PLATFORM_FLAG_COLLIDED;
+                    }
+                }
             }
 
             query = TerI;
@@ -1400,15 +1515,7 @@ void TerrainImpact(NUVEC *position, NUVEC *movement, u8 *hit_flags) {
 
             query = TerI;
             const f32 contact_push = 0.0035f - query->unclamped_hit_time * 1.05f;
-            if (query->impact_normal.y >= walkable_normal_y) {
-                query->position.x += response_normal.x * contact_push;
-                query->position.y += response_normal.y * contact_push + response_normal.y * 0.01f;
-                query->position.z += response_normal.z * contact_push;
-                query->movement.y += response_normal.y * 0.01f;
-
-                FullDeflect(&response_normal, &query->movement, &query->movement);
-                FullDeflect(&query->impact_normal, movement, movement);
-            } else {
+            if (walkable_normal_y > query->impact_normal.y) {
                 const f32 movement_push = 0.0035f - query->unclamped_hit_time * 0.35f;
                 query->position.x += response_normal.x * contact_push;
                 query->position.y += response_normal.y * contact_push;
@@ -1431,6 +1538,15 @@ void TerrainImpact(NUVEC *position, NUVEC *movement, u8 *hit_flags) {
                 }
                 CurTrackInfo->wall_contact_state = TERRAIN_TRACK_CONTACT_ACTIVE;
                 CurTrackInfo->impact_normal = query->impact_normal;
+            } else {
+                query->position.x += response_normal.x * contact_push;
+                query->position.y += response_normal.y * contact_push;
+                query->position.y += response_normal.y * 0.01f;
+                query->position.z += response_normal.z * contact_push;
+                query->movement.y += response_normal.y * 0.01f;
+
+                FullDeflect(&response_normal, &query->movement, &query->movement);
+                FullDeflect(&query->impact_normal, movement, movement);
             }
 
             query = TerI;
@@ -1478,134 +1594,709 @@ void TerrainImpact(NUVEC *position, NUVEC *movement, u8 *hit_flags) {
     }
     ++*TerImpactDataCount;
 }
+static i32 TerrainKillPlayer(GameObject_s *object, i32 surface, NUVEC *normal) {
+    const u32 flags = TerSurface[surface].flags;
+    if ((flags & 1) == 0 &&
+        ((flags & 0x4000) == 0 || (object->apiobj.character_data->model_flags & 0x10) != 0 ||
+         (object->apiobj.character_data->game_character->flags_090 & 0x8000) != 0) &&
+        ((flags & 0x8000) == 0 || (object->apiobj.field_0x27c != -1 && !(normal->y > 0.0f)))) {
+        return 0;
+    }
+    InstantKillParts(object, 1, 0.0f);
+    if ((object->apiobj.field_0x1f8 & 0x80) != 0 && BonusWinner == -1) {
+        const i32 coins = LoseCoins(object, 1);
+        AddPickups(coins, 0, 0, 0, &object->apiobj.collision_position, NULL, 2.0f, -1,
+                   1.0f, 2000000.0f, object, 1, 0, false);
+    }
+    KillPlayer(object, 2, 1, NULL);
+    return 1;
+}
+
 void TerrainPlayer(GameObject_s *object) {
-    if (object == NULL || object->pad_gamepad == NULL) {
-        return;
-    }
+    GAMEPAD_s *const entry_pad = object->pad_gamepad;
+    const u8 entry_underwater = object->apiobj.is_underwater;
+    const u8 entry_intersects_water = object->apiobj.intersects_water;
+    const i32 entry_menu_id = GetMenuID();
+    const i16 entry_platform = object->apiobj.supporting_platform_id;
+    TERRAIN_IMPACT_RECORD impact_records[8];
+    i32 impact_count = -1;
+    // Original 0x102720 skips integration and callbacks for inactive objects.
+    if (object->apiobj.field_0x287 == 0 && object->field_0xcc0 != NULL && object->character_context == 0x3b) {
+        TakeOverCode(object, object->pad_gamepad->buttons_pressed & GAMEPAD_TAG);
+    } else if (object->apiobj.field_0x287 == 0) {
 
-    APIOBJECT &api = object->apiobj;
-    const AIPATHINFO &path_info = object->ai.path_info;
-    const AIPATHCNX *path_connection = path_info.connection;
-    const bool ordinary_ai_path =
-        (api.field_0x1f4 & APIOBJECT_MOTION_FLAG_AI_CONTROLLED) != 0 && object->movement_spline == NULL &&
-        object->context_target_position == NULL &&
-        (path_info.flags & (AIPATHINFO_FLAG_ON_PATH | AIPATHINFO_FLAG_NARROW_PATH)) == AIPATHINFO_FLAG_ON_PATH &&
-        (api.field_0x1fa & 4) == 0 && path_connection != NULL &&
-        (path_connection->original_traversal_flags[0] & static_cast<u32>(LEGO_AIPATHCNX_BLOCKAGE)) == 0 &&
-        (path_connection->traversal_flags[0] & static_cast<u32>(LEGO_AIPATHCNX_FULLTERRAIN)) == 0;
-
-    // TerrainPlayer selects either the inexpensive shadow-grounding path used
-    // by ordinary AI or the swept capsule resolver required by players and
-    // special traversal connections, then refreshes floor/contact state before
-    // dispatching the character movement callback.
-    const f32 lower_bound = object->character_bottom * api.field_0xa8;
-    const i32 terrain_mask = TERRAINMASK_NONWEAPON | TERRAINMASK_NONDROID;
-
-    if (ordinary_ai_path) {
-        // Ordinary path-following AI uses the target's inexpensive shadow
-        // grounding path.  Full swept collision is reserved for path
-        // connections whose traversal flags require special collision.
-        api.respawn_timer = 0.0f;
-        object->field_0xe20 |= 2;
-        api.supporting_platform_id = -1;
-        api.position.x += api.velocity.x * FRAMETIME;
-        api.position.y += api.velocity.y * FRAMETIME;
-        api.position.z += api.velocity.z * FRAMETIME;
-
-        api.field_0x218 = GameShadow(object, &api.collision_position, 5.0f, terrain_mask | 0x1f);
-        api.supporting_platform_id = static_cast<i16>(NewShadowOnPlatform());
-        if (api.field_0x218 != 2000000.0f && api.position.y + lower_bound < api.field_0x218) {
-            api.velocity.y = 0.0f;
-            api.position.y = api.field_0x218 - lower_bound;
+        APIOBJECT &api = object->apiobj;
+        i32 terrain_mask = TERRAINMASK_NONWEAPON;
+        if ((api.character_data->model_flags & 0x10) == 0 &&
+            (api.character_data->game_character->flags_090 & 0x8000) == 0) {
+            terrain_mask |= TERRAINMASK_NONDROID;
+        }
+        if ((api.field_0x1f4 & APIOBJECT_MOTION_FLAG_AI_CONTROLLED) != 0 && object->id != id_DRAGBOMB &&
+            (WORLD->area != HOTHBATTLE_ADATA || api.character_data->game_character->field_0x28 != 0.0f)) {
+            terrain_mask |= 0x40;
+        }
+        object->field_0xe20 &= static_cast<u8>(~8u);
+        const f32 entry_vertical_velocity = api.velocity.y;
+        const AIPATHINFO &path_info = object->ai.path_info;
+        const AIPATHCNX *path_connection = path_info.connection;
+        bool special_path_endpoints = false;
+        if (path_info.path != NULL && path_connection != NULL) {
+            const AIPATHNODE *nodes = path_info.path->nodes;
+            special_path_endpoints =
+                ((nodes[path_connection->node_indices[path_info.direction]].runtime_flags |
+                  nodes[path_connection->node_indices[path_info.direction == 0]].runtime_flags) & 0x82) != 0;
+        }
+        bool shadow_grounding = false;
+        bool retain_floor = false;
+        if (object == CarWashHack) {
+            shadow_grounding = true;
+        } else if ((api.character_data->game_character->flags_090 & 0x80) != 0) {
+            api.velocity.x = 0.0f;
+            api.velocity.z = 0.0f;
+            shadow_grounding = true;
+        } else if ((api.field_0x1f8 & 0x40) == 0 && (CInfo[object->character_context].flags & 0x8000) == 0) {
+            const bool ai_controlled = (api.field_0x1f4 & APIOBJECT_MOTION_FLAG_AI_CONTROLLED) != 0;
+            const bool ordinary_ai_path = ai_controlled && object->movement_spline == NULL &&
+            object->character_context != 0x1c && object->context_target_position == NULL && !special_path_endpoints &&
+            (path_info.flags & (AIPATHINFO_FLAG_ON_PATH | AIPATHINFO_FLAG_NARROW_PATH)) == AIPATHINFO_FLAG_ON_PATH &&
+            Technos_FindControllingTechno(object) == NULL && (api.field_0x1fa & 4) == 0 &&
+            (path_connection == NULL ||
+             ((path_connection->original_traversal_flags[0] & static_cast<u32>(LEGO_AIPATHCNX_BLOCKAGE)) == 0 &&
+              (path_connection->traversal_flags[0] & static_cast<u32>(LEGO_AIPATHCNX_WALLSHUFFLE)) == 0 &&
+              (path_connection->traversal_flags[0] & static_cast<u32>(LEGO_AIPATHCNX_FULLTERRAIN)) == 0)) &&
+            (object->character_context != 0x5a || object->field_0x7a3 != 0);
+            if (ordinary_ai_path) {
+                shadow_grounding = true;
+                retain_floor = (api.field_0x1f8 & 0x10) != 0;
+            } else {
+                retain_floor = !ai_controlled && (api.field_0x1f8 & 0x10) != 0;
+                if ((object->field_0xf00 & 0x40) != 0) {
+                    object->field_0xf00 &= static_cast<u8>(~0x40u);
+                    shadow_grounding = true;
+                } else {
+                    shadow_grounding = (api.field_0x1f8 & 8) != 0;
+                }
+            }
         }
 
-        api.field_0x27d = 0;
-        if (GameObjectNearFloor(object, 1.0f, NULL) != 0) {
-            api.field_0x27d |= APIOBJECT_TERRAIN_CONTACT_NEAR_FLOOR;
+        // TerrainPlayer selects either the inexpensive shadow-grounding path used
+        // by ordinary AI or the swept capsule resolver required by players and
+        // special traversal connections, then refreshes floor/contact state before
+        // dispatching the character movement callback.
+        const f32 lower_bound = object->character_bottom * api.field_0xa8;
+        // Original 0x102856..0x10316f consumes the previous edge-stop request
+        // and probes the next horizontal position before integrating movement.
+        const bool player_edge_probe = (api.field_0x1f8 & 0x80) != 0 &&
+                                       object->spawn_protection_timer > 1.25f;
+        const bool requested_edge_stop = static_cast<i8>(object->edge_stop_requests) > 0;
+        object->field_0xf04 &= static_cast<u8>(~0x40u);
+        object->edge_stop_requests = 0;
+        if (VehicleArea == 0 && api.field_0x287 == 0 &&
+            (api.field_0x27d != 0 || requested_edge_stop ||
+             (player_edge_probe && object->character_context == -1 && object->field_0xe31 != 1))) {
+            const bool walkable_floor = api.field_0x218 != 2000000.0f &&
+                                        object->surface_normal.y > NuTrigTable[0x238e];
+            const bool probe_edge = walkable_floor
+                ? (player_edge_probe || requested_edge_stop || (CInfo[object->character_context].parameter & 1) != 0)
+                : requested_edge_stop;
+            if (probe_edge && api.movement_direction.x == 0.0f && api.movement_direction.z == 0.0f &&
+                (api.velocity.x != 0.0f || api.velocity.z != 0.0f)) {
+                NUVEC next_position;
+                next_position.x = api.position.x + api.velocity.x * FRAMETIME;
+                next_position.y = api.position.y;
+                next_position.z = api.position.z + api.velocity.z * FRAMETIME;
+                const f32 next_floor = GameShadow(object, &next_position, 5.0f, terrain_mask | 0x1f);
+                if (next_floor != 2000000.0f && ShadNorm.y > NuTrigTable[0x238e] &&
+                    (player_edge_probe ? api.collision_min.y : api.field_0x218) - next_floor > 0.2f) {
+                    object->field_0xf04 |= 0x40;
+                    api.velocity.z = 0.0f;
+                    api.velocity.x = 0.0f;
+                }
+            }
         }
-        if (api.collision_min.y <= api.field_0x218) {
-            api.field_0x27d |= APIOBJECT_TERRAIN_CONTACT_FLOOR;
+        f32 movement_threshold = 0.0f;
+        if (!(object->pad_gamepad->input_magnitude > 0.0f) && object->character_context != 0x33) {
+            const i32 surface = static_cast<i8>(api.field_0x281);
+            const bool slippery = api.field_0x27d != 0 && surface >= 0 && surface <= 31 &&
+                                  1.0f > TerSurface[surface].movement_scale;
+            if (!slippery && AnimSpeed(api.character_model, CurrentAnim(&api.anim_packet)) == 0.0f &&
+                (api.character_data->model_flags & 0x800) == 0) {
+                movement_threshold = api.character_data->game_character->field_0x0c * api.field_0xa8;
+            }
         }
-        if ((api.field_0x27d & APIOBJECT_TERRAIN_CONTACT_FLOOR) != 0) {
-            object->field_0x1084 = 1;
-            object->contact_position.x = api.position.x;
-            object->contact_position.y = api.field_0x218;
-            object->contact_position.z = api.position.z;
-            object->field_0x6b0 = api.field_0x281;
-            object->contact_normal = object->surface_normal;
-        } else {
+
+        const f32 speed_squared = (api.velocity.x * api.velocity.x + api.velocity.y * api.velocity.y) +
+                                  api.velocity.z * api.velocity.z;
+        const bool skip_motion =
+            (object->field_0xefc & 0x20) == 0 && (object->field_0xf02 & 0x40) != 0 && !special_path_endpoints &&
+            object->ai.field_0x180 == NULL && (api.field_0x1f8 & 0x80) == 0 &&
+            (object->field_0xe23 & 0x10) == 0 && object->field_0xe31 == 0 &&
+            object->character_context != 0 && object->character_context != 0x1c && api.field_0x281 != 8 &&
+            (static_cast<u32>(GameTimer.update_count) > 1 || (api.field_0x1f4 & 5) != 0) &&
+            (api.field_0x27d & 3) != 0 && api.supporting_platform_id == -1 &&
+            movement_threshold * movement_threshold >= speed_squared && object->character_context != 0x0f &&
+            object->character_context != 0x0b && object->character_context != 0x1e;
+        api.field_0x1f8 = (api.field_0x1f8 & ~4u) | (skip_motion ? 4u : 0u);
+        object->field_0x1084 = 0;
+        const bool direct_integration =
+            (api.field_0x1f8 & 0x20) != 0 || (object->field_0xe20 & 0x20) != 0 ||
+            object->movement_spline != NULL || object->move_override != NULL ||
+            (object->character_context == 0x0f && object->field_0x7a3 <= 1) ||
+            (object->character_context == 0x2c && object->field_0x7a3 == 0) ||
+            (object->character_context == 0x47 && object->action_movement_state == 1);
+        if (direct_integration) {
+            // Original 0x102940/0x102bf8 selects integration without a terrain
+            // query for these motion owners and action states.
+            api.respawn_timer = 0.0f;
+            object->field_0xe20 |= 2;
+            api.field_0x27d = 0;
+            api.supporting_platform_id = -1;
             object->field_0x6b0 = 0;
-        }
-    } else {
-        NUVEC collision_position = api.position;
-        collision_position.y += lower_bound;
+            api.position.x += api.velocity.x * FRAMETIME;
+            api.position.y += api.velocity.y * FRAMETIME;
+            api.position.z += api.velocity.z * FRAMETIME;
+        } else if (shadow_grounding || retain_floor || (WORLD->current_level->flags & 0x10) != 0) {
+            // Ordinary path-following AI uses the target's inexpensive shadow
+            // grounding path.  Full swept collision is reserved for path
+            // connections whose traversal flags require special collision.
+            api.respawn_timer = 0.0f;
+            if (!skip_motion) {
+            object->field_0xe20 |= 2;
+            api.supporting_platform_id = -1;
+            api.position.x += api.velocity.x * FRAMETIME;
+            api.position.y += api.velocity.y * FRAMETIME;
+            api.position.z += api.velocity.z * FRAMETIME;
 
-        NUVEC movement;
-        NuVecScale(&movement, &api.velocity, FRAMETIME);
+            if (shadow_grounding) {
+                if (object == CarWashHack) {
+                    NewTerrPlatformsOff();
+                }
+                if (testshadowfix != 0) {
+                    NUVEC shadow_position = api.collision_position;
+                    shadow_position.y = api.initial_position.y > api.collision_position.y
+                                            ? api.initial_position.y : api.collision_position.y;
+                    api.field_0x218 = GameShadow(object, &shadow_position, 5.0f, terrain_mask | 0x1f);
+                } else {
+                    api.field_0x218 = GameShadow(object, &api.collision_position, 5.0f, terrain_mask | 0x1f);
+                }
+                api.supporting_platform_id = static_cast<i16>(NewShadowOnPlatform());
+                GetSurfaceInfo(object, api.field_0x218 != 2000000.0f ? 1 : 0, api.field_0x218);
+                if (api.field_0x218 == 2000000.0f) {
+                    api.field_0x281 = 0;
+                    object->field_0xe41 = 0;
+                    object->surface_normal = NUVEC{0.0f, 1.0f, 0.0f};
+                    api.water_height = 2000000.0f;
+                    api.field_0x220 = 2000000.0f;
+                    api.field_0x27f = static_cast<u8>(-1);
+                    api.field_0x280 = static_cast<u8>(-1);
+                    object->field_0x1078 = -1;
+                }
+                api.is_underwater = static_cast<u8>(UnderWater(object));
+                api.intersects_water = static_cast<u8>(IntersectWater(object));
+                if (api.supporting_platform_id == -1 && api.field_0x27d != 0 && object->field_0x1078 != -1) {
+                    api.supporting_platform_id = object->field_0x1078;
+                }
+            }
+            const f32 grounded_lower_bound = object->character_bottom * api.field_0xa8;
+            if (api.field_0x218 != 2000000.0f && api.position.y + grounded_lower_bound < api.field_0x218) {
+                api.velocity.y = 0.0f;
+                api.position.y = api.field_0x218 - grounded_lower_bound;
+            }
 
-        // The full resolver retains the previous contact bits while preparing
-        // its query; they are rebuilt from field_0x105c at the common epilogue.
-        // The clears at 0x10343b/0x104447 belong to the alternate integration
-        // paths, while this path overwrites platform support from its shadow hit.
-        object->field_0x6b0 = 0;
-        const i32 object_index = Obj != NULL ? static_cast<i32>(object - Obj) : -1;
+            api.field_0x27d = 0;
+            if (GameObjectNearFloor(object, 1.0f, NULL) != 0) {
+                api.field_0x27d |= APIOBJECT_TERRAIN_CONTACT_NEAR_FLOOR;
+            }
+            if (api.collision_min.y <= api.field_0x218) {
+                api.field_0x27d |= APIOBJECT_TERRAIN_CONTACT_FLOOR;
+            }
+            if ((api.field_0x27d & APIOBJECT_TERRAIN_CONTACT_FLOOR) != 0) {
+                object->field_0x1084 = 1;
+                object->contact_position.x = api.position.x;
+                object->contact_position.y = api.field_0x218;
+                object->contact_position.z = api.position.z;
+                object->field_0x6b0 = api.field_0x281;
+                object->contact_normal = shadow_grounding ? object->surface_normal : NUVEC{0.0f, 1.0f, 0.0f};
+                object->terrain_impact_speed = -api.velocity.y;
+            } else {
+                object->field_0x6b0 = 0;
+            }
+            }
+        } else {
+            if (skip_motion) {
+                api.velocity.x = 0.0f;
+                api.velocity.y = 0.0f;
+                api.velocity.z = 0.0f;
+            } else {
+            NUVEC incoming_velocity = api.velocity;
+            NUVEC collision_position = api.position;
+            collision_position.y += lower_bound;
 
-        NewTerrainScaleYMask(&collision_position, &movement, reinterpret_cast<u8 *>(&object->field_0x105c),
-                             object_index, 0.0f, api.collision_radius, object->collision_y_scale, 0, 0, terrain_mask);
-        api.supporting_platform_id = static_cast<i16>(NewShadowOnPlatform());
+            NUVEC movement;
+            NuVecScale(&movement, &api.velocity, FRAMETIME);
 
-        api.position.x = collision_position.x;
-        api.position.y = collision_position.y - lower_bound;
-        api.position.z = collision_position.z;
-        if (FRAMETIME != 0.0f) {
+            // Original 0x1048e9 clears the complete contact metadata word.
+            object->field_0x6b0 = 0;
+            memset(object->pad_6b1, 0, sizeof(object->pad_6b1));
+            // Original 0x1048fc..0x10497c and 0x10545f..0x105544.
+            if (object->use_model_origin != 0 && api.field_0x27d != 0 &&
+                (movement.x != 0.0f || movement.z != 0.0f) &&
+                !(WORLD->current_level == ENDORBATTLEC_LDATA && object->id == id_ATST)) {
+                i32 deflection_mode = 0;
+                if (VehicleArea != 0 && (api.character_data->model_flags & 0x2000) != 0 &&
+                    api.character_data->game_character->field_0x28 != 0.0f) {
+                    deflection_mode = 2;
+                } else if (object->character_context == -1 && object->pad_gamepad->input_magnitude > 0.0f) {
+                    deflection_mode = 1;
+                }
+                if (deflection_mode != 0) {
+                    NUVEC deflected;
+                    Surface_Deflect(&object->surface_normal, &movement, &deflected, deflection_mode);
+                    if (deflected.y > movement.y) {
+                        movement = deflected;
+                        if (deflection_mode == 1) {
+                            object->field_0xe20 |= 8;
+                        }
+                    }
+                }
+            }
+            TerrainSetPlatConnectTol((api.character_data->model_flags & 0x800) != 0 ? 0.0f : 0.01f);
+            if ((object->ai.field_0x1e4 & 0x80) != 0) {
+                IgnoreWallSplines = 1;
+            }
+            TerrainSetImpactData(impact_records, &impact_count, 8);
+            f32 movement_scale = 1.0f;
+            if ((object->field_0xefd & 4) != 0) {
+                GAMECHARACTERDATA *character = api.character_data->game_character;
+                if (object->id == id_SPEEDERBIKE) {
+                    if (object->ai.goal_speed_mode == 1) {
+                        movement_scale = 15.0f / character->walk_speed;
+                    } else if (object->ai.goal_speed_mode == 2) {
+                        movement_scale = 15.0f / character->tiptoe_speed;
+                    } else {
+                        movement_scale = 15.0f / character->run_speed;
+                    }
+                } else {
+                    movement_scale = 2.5f / character->run_speed;
+                }
+                movement.x *= movement_scale;
+                movement.z *= movement_scale;
+            }
+            const i32 object_index = Obj != NULL ? static_cast<i32>(object - Obj) : -1;
+
+            // Original 0x104a8f..0x104bdb excludes owned and selected character
+            // platforms for this query, then re-enables the same list.
+            i32 excluded_platforms[32];
+            i32 excluded_count = 0;
+            if (object->field_0x107a != -1) {
+                excluded_platforms[excluded_count++] = object->field_0x107a;
+            }
+            if (object->field_0x107c != -1) {
+                excluded_platforms[excluded_count++] = object->field_0x107c;
+            }
+            if (object->character_context == 0) {
+                GameObject_s *target = object->airborne_collision_target;
+                if (target != NULL && target->field_0x107c != -1) {
+                    excluded_platforms[excluded_count++] = target->field_0x107c;
+                }
+            } else if (object->character_context == 0x58 && object->field_0x7a3 == 1) {
+                GIZMOBLOWUP_s *blowup = static_cast<GIZMOBLOWUP_s *>(object->field_0x788);
+                if (blowup->platform_id != -1) {
+                    excluded_platforms[excluded_count++] = blowup->platform_id;
+                }
+            }
+            CHARPLATFORMSYS_s *platforms = WORLD->char_platform_sys;
+            if (platforms != NULL && VehicleArea == 0) {
+                const bool player = (api.field_0x1f8 & 0x80) != 0;
+                if (!player || object->character_context == 0x3d || object->field_0xcc0 != NULL ||
+                    object->character_context == 0x3b ||
+                    (api.character_data->game_character->flags_090 & 0x8040) != 0) {
+                    for (i32 i = 0; i < platforms->platform_count; ++i) {
+                        GameObject_s *platform_object = platforms->platforms[i].object;
+                        if (platform_object != NULL && ((object->field_0xf02 & 8) == 0 || player)) {
+                            excluded_platforms[excluded_count++] = platform_object->field_0x107c;
+                        }
+                    }
+                }
+            }
+            for (i32 i = 0; i < excluded_count; ++i) {
+                PlatOnOff(excluded_platforms[i], 0);
+            }
+
+            NewTerrainScaleYMask(&collision_position, &movement, reinterpret_cast<u8 *>(&object->field_0x105c),
+                                 object_index, entry_pad->input_magnitude > 0.0f ? 0.0f : movement_threshold * FRAMETIME,
+                                 api.collision_radius, object->collision_y_scale, 0, 0, terrain_mask);
+            IgnoreWallSplines = 0;
+            for (i32 i = 0; i < excluded_count; ++i) {
+                PlatOnOff(excluded_platforms[i], 1);
+            }
+            if ((object->field_0xefd & 4) != 0) {
+                movement.x /= movement_scale;
+                movement.z /= movement_scale;
+            }
+            extern i32 TERRAINCALLS;
+            ++TERRAINCALLS;
+            api.supporting_platform_id = static_cast<i16>(NewShadowOnPlatform());
+
+            object->field_0x1084 = static_cast<u8>(TerrImpact);
+            if (object->field_0x1084 != 0 && impact_count > 0) {
+                // Original copies the last complete 0x1c-byte impact record,
+                // including material and flags, before deriving impact speed.
+                memcpy(&object->contact_position, &impact_records[impact_count - 1], sizeof(TERRAIN_IMPACT_RECORD));
+                object->terrain_impact_speed = -NuVecDot(&object->contact_normal, &incoming_velocity);
+            } else {
+                object->field_0x1084 = 0;
+            }
             NuVecScale(&api.velocity, &movement, 1.0f / FRAMETIME);
+            api.position.x = collision_position.x;
+            api.position.z = collision_position.z;
+            api.position.y = collision_position.y - object->character_bottom * api.field_0xa8;
+            // Original 0x104eb0..0x10501a carries all three headings with the
+            // rotation of the supporting platform.
+            if (api.field_0x287 == 0 && api.supporting_platform_id != -1) {
+                NUMTX *previous = NULL;
+                NUMTX *current = NULL;
+                TerrainPlatGetMtx(api.supporting_platform_id, &previous, &current);
+                if (previous != NULL && current != NULL) {
+                    NUVEC forward = {0.0f, 0.0f, 1.0f};
+                    NUVEC previous_forward, current_forward;
+                    NuVecMtxRotate(&previous_forward, &forward, previous);
+                    const NUANG previous_heading = NuAtan2D(previous_forward.x, previous_forward.z);
+                    NuVecMtxRotate(&current_forward, &forward, current);
+                    const NUANG current_heading = NuAtan2D(current_forward.x, current_forward.z);
+                    const NUANG rotation = NuAngSub(current_heading, previous_heading);
+                    if (rotation != 0) {
+                        api.field_0x276 = NuAngAdd(rotation, api.field_0x276);
+                        api.facing_angle = NuAngAdd(rotation, api.facing_angle);
+                        api.movement_facing_angle = NuAngAdd(rotation, api.movement_facing_angle);
+                    }
+                }
+            }
+            if (api.field_0x287 == 0) {
+                bool wall_impact = false;
+                if (object->field_0x1084 != 0 && (api.field_0x1f8 & 0x84) == 0 &&
+                    object->character_context != 0 && object->character_context != 0x43 &&
+                    object->character_context != 0x45 && (object->field_0xf02 & 1) == 0) {
+                    for (i32 i = 0; i < impact_count; ++i) {
+                        if (impact_records[i].normal.y < 0.707f) {
+                            wall_impact = true;
+                            break;
+                        }
+                    }
+                }
+                if (wall_impact) {
+                    api.respawn_timer += FRAMETIME;
+                } else {
+                    api.respawn_timer -= FRAMETIME;
+                    if (api.respawn_timer < 0.0f) {
+                        api.respawn_timer = 0.0f;
+                    }
+                }
+            }
+            }
+            const f32 floor_height = (api.field_0x1f8 & 4) != 0
+                                         ? api.field_0x218
+                                         : GameShadow(object, &api.position, 5.0f, terrain_mask | 0x1f);
+            bool stopped_without_terrain = false;
+            if (floor_height != 2000000.0f) {
+                object->field_0xe20 |= 2;
+                const f32 bottom_offset = api.field_0xa8 * object->character_bottom;
+                const f32 top = object->character_top * api.field_0xa8 + api.position.y;
+                const f32 bottom = api.position.y + bottom_offset;
+                const f32 height = top - bottom;
+                if (!skip_motion && floor_height > 0.1f * height + bottom &&
+                    height + 0.01f >= (floor_height + height) - top) {
+                    api.position.y = floor_height - bottom_offset;
+                }
+            } else {
+                object->field_0xe20 &= static_cast<u8>(~2u);
+                if (NOTERRAINSTOP != 0) {
+                    api.velocity.x = 0.0f;
+                    api.velocity.z = 0.0f;
+                    api.position.x = api.start_position.x;
+                    api.position.z = api.start_position.z;
+                    stopped_without_terrain = true;
+                }
+            }
+            if (!stopped_without_terrain && (api.field_0x1f8 & 4) == 0) {
+                api.field_0x218 = floor_height;
+                GetSurfaceInfo(object, floor_height != 2000000.0f ? 1 : 0, floor_height);
+                if (api.supporting_platform_id == -1 && api.field_0x27d != 0 && object->field_0x1078 != -1) {
+                    api.supporting_platform_id = object->field_0x1078;
+                }
+                if ((api.character_data->game_character->flags_090 & 0x8000) == 0 &&
+                    object->field_0x1020 == 2000000.0f && object->field_0x1078 != -1) {
+                    const f32 reflection_height = FindReflectionNoPlatforms(&api.position);
+                    if (reflection_height != 2000000.0f) {
+                        object->field_0x1020 = reflection_height;
+                        object->field_0x1087 = 2;
+                    }
+                }
+            }
+            // Contact reconstruction joins the near-floor test at 0x102d26.
+            api.field_0x27d = object->field_0x105c != 0 ? APIOBJECT_TERRAIN_CONTACT_FLOOR : 0;
+            if (GameObjectNearFloor(object, 1.0f, NULL) != 0) {
+                api.field_0x27d |= APIOBJECT_TERRAIN_CONTACT_NEAR_FLOOR;
+            }
+        }
+        if (api.field_0x27d != 0) {
+            // Target 0x103816 marks the object as terrain-supported here; the
+            // collision resolver owns the contact normal fields.
+            object->field_0xeff |= 2;
         }
 
-        object->field_0x1084 = static_cast<u8>(TerrImpact);
-        if (TerrImpact != 0) {
-            object->contact_position = TerrImpactPos;
-            object->contact_normal = TerrImpactNormal;
+        // Original 0x1029e6/0x103cb4 transfers vertical momentum only when
+        // leaving or landing on the object's recorded character platform.
+        const bool left_platform = api.field_0x27d == 0 && entry_platform != -1 &&
+                                   api.supporting_platform_id == -1 && object->field_0x1078 == entry_platform;
+        const bool landed_platform = api.field_0x27d != 0 && entry_platform == -1 &&
+                                     api.supporting_platform_id != -1 &&
+                                     api.supporting_platform_id == object->field_0x1078 && entry_vertical_velocity < 0.0f;
+        if (left_platform || landed_platform) {
+            const i32 platform_id = left_platform ? entry_platform : api.supporting_platform_id;
+            GRABBER_s *grabber = WORLD->grabber;
+            if (grabber != NULL && grabber->platform_id == platform_id) {
+                if (grabber->platform_contact_timer <= 0.0f) {
+                    grabber->platform_contact_timer = 0.25f;
+                }
+            } else {
+                GameObject_s *platform_owner = CharPlatform_FindObjFromPlatID(WORLD->char_platform_sys, platform_id);
+                if (platform_owner != NULL && platform_owner->apiobj.character_data->game_character->field_0x28 > 0.0f) {
+                    if (left_platform) {
+                        platform_owner->apiobj.velocity.y -= entry_vertical_velocity * 0.5f;
+                    } else {
+                        platform_owner->apiobj.velocity.y = entry_vertical_velocity * 0.5f + platform_owner->apiobj.velocity.y;
+                    }
+                }
+            }
         }
-        // The full-resolver path reaches 0x105215 only after the resolved
-        // position and velocity have been copied back (via the backward edge at
-        // 0x105dc6).  This is distinct from the simple-integration shadow probe.
-        api.field_0x218 = GameShadow(object, &api.position, 5.0f, terrain_mask | 0x1f);
-        // Full-resolver epilogue 0x1037b9..0x103806 rebuilds contact from the
-        // resolver result and the common near-floor test.
-        api.field_0x27d = object->field_0x105c != 0 ? APIOBJECT_TERRAIN_CONTACT_FLOOR : 0;
-        if (GameObjectNearFloor(object, 1.0f, NULL) != 0) {
-            api.field_0x27d |= APIOBJECT_TERRAIN_CONTACT_NEAR_FLOOR;
-        }
-    }
-    if (api.field_0x27d != 0) {
-        // Target 0x103816 marks the object as terrain-supported here; the
-        // collision resolver owns the contact normal fields.
-        object->field_0xeff |= 2;
-    }
 
-    // Target 0x102e97..0x102ee3 runs this block after the normal swept-terrain
-    // and contact path.  The model flag controls whether saved pad state is
-    // restored or BigJumpCode consumes the updated contact state.
-    const u32 held_buttons = object->pad_gamepad->buttons_held;
-    const u32 pressed_buttons = object->pad_gamepad->buttons_pressed;
-    Tag_Check(object);
-    PreResetCode(object);
-    if (api.character_data != NULL && api.character_data->move_fn != NULL) {
-        api.character_data->move_fn(object);
-    }
-    PostResetCode(object);
-    if (api.character_data != NULL && (api.character_data->model_flags & 0x00200000) != 0) {
+        // Original 0x102a01..0x102a9a handles a moving character platform
+        // above the player before dispatching the normal movement callback.
+        if (VehicleArea == 0 && (api.field_0x1f8 & 0x80) != 0 && api.supporting_platform_id != -1) {
+            GameObject_s *platform_owner = CharPlatform_FindObjFromPlatID(WORLD->char_platform_sys, api.supporting_platform_id);
+            if (platform_owner != NULL) {
+                const GAMECHARACTERDATA *data = platform_owner->apiobj.character_data->game_character;
+                if ((data->flags_090 & 0x1000) != 0 && platform_owner->apiobj.position.y > api.position.y &&
+                    platform_owner->apiobj.horizontal_velocity_magnitude > 0.5f * data->run_speed) {
+                    StartFlatten(platform_owner, object);
+                }
+            }
+        }
+
+        if (api.field_0x287 != 0) {
+            if (api.field_0x27d != 0) {
+                api.velocity.y = 0.0f;
+                api.field_0x1f8 |= 4;
+            }
+            if ((api.field_0x1f8 & 4) == 0) {
+                ApplyGravity(object, NULL, 0.0f, 0.0f, NULL);
+            }
+        } else {
+        // Original 0x1032a0 checks swept contacts or the standing surface.
+        const bool check_terrain_hazards = object->character_context != 0x2b &&
+                                          (api.field_0x1f8 & 4) == 0 && gone_through_door_to_new_level == 0;
+        // Original 0x1038b0 completes the doomed state on contact, timeout,
+        // or a collision during the falling variant.
+        if (object->character_context == 0x2b &&
+            (api.field_0x27d != 0 || api.model_draw_result == 0 || object->turn_braking >= 5.0f ||
+             (object->field_0xe36 == 3 && object->field_0x1084 != 0))) {
+            if (api.model_draw_result != 0) {
+                InstantKillParts(object, 0, 0.0f);
+            }
+            KillPlayer(object, 3, 1, NULL);
+            if (WORLD->current_level == CRUISERD_LDATA && object->field_0xe36 == 3) {
+                MiscTime = 0.1f;
+            }
+        }
+        if (check_terrain_hazards && CannotKill(object) == 0 && api.field_0x287 == 0 &&
+            (VehicleArea == 0 || (api.field_0x1f8 & 0x80) != 0) && (object->field_0xefe & 4) != 0 &&
+            (object->field_0xefa & 4) == 0 && object->character_context != 0x5d) {
+            if (object->field_0x1084 != 0) {
+                const i32 count = impact_count == -1 ? 1 : impact_count;
+                for (i32 i = 0; i < count; ++i) {
+                    const i32 surface = static_cast<i8>(impact_count == -1 ? object->field_0x6b0 : impact_records[i].material[0]);
+                    NUVEC *normal = impact_count == -1 ? &object->contact_normal : &impact_records[i].normal;
+                    if (static_cast<u32>(surface) > 31) {
+                        continue;
+                    }
+                    if (WORLD->current_level == BONUS_GUNSHIPA_LDATA ||
+                        (PODRACE_ADATA != NULL && WORLD->area == PODRACE_ADATA && GameTimer.time_elapsed >= 1.0f)) {
+                        NewRumble(object->pad_gamepad->pad, (static_cast<f32>(qrand()) * (1.0f / 65535.0f)) * 0.5f, 0);
+                        if (api.model_draw_result == 0 && object->character_context != 0x23) {
+                            if ((api.field_0x1f8 & 0x80) != 0) {
+                                LoseCoins(object, 2);
+                            }
+                            KillPlayer(object, 2, 1, NULL);
+                            break;
+                        }
+                    } else if (((api.character_data->model_flags & 0x2000) != 0 ||
+                                (api.character_data->game_character->flags_090 & 0x04000000) != 0) &&
+                               api.field_0x27f == 6) {
+                        break;
+                    }
+                    if ((WORLD->area == NULL || WORLD->area != PODSPRINT_ADATA) &&
+                        TerrainKillPlayer(object, surface, normal) != 0) {
+                        if (WORLD->current_level == ASTEROIDCHASEC_LDATA) {
+                            GameCam_Blend(GameCam, 1.0f, 0.0f, 1);
+                        }
+                        break;
+                    }
+                    if ((TerSurface[surface].flags & 0x80) != 0 && WORLD->current_level != BONUS_GUNSHIPA_LDATA) {
+                        NewRumble(object->pad_gamepad->pad, 0.6f, 0);
+                        NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
+                        if (object->field_0xd24 != 1.0f && CannotKill(object) == 0) {
+                            ObjHitObj(NULL, object, 1, 0, 0, 1);
+                        }
+                        break;
+                    }
+                }
+            } else if (api.field_0x27d != 0 && (WORLD->area == NULL || WORLD->area != PODSPRINT_ADATA)) {
+                const i32 surface = static_cast<i8>(api.field_0x281);
+                if (static_cast<u32>(surface) <= 31) {
+                    TerrainKillPlayer(object, surface, &object->surface_normal);
+                }
+            }
+        }
+        if (check_terrain_hazards && CannotKill(object) == 0 && (object->field_0xefa & 4) == 0 &&
+            api.field_0x287 == 0 && api.water_height != 2000000.0f) {
+            const i32 layer = static_cast<i8>(api.field_0x27f);
+            const bool tractor_swamp = layer == 9 && object->id == id_TRACTOR &&
+                                       WORLD->area != NULL && WORLD->area == DAGOBAH_ADATA;
+            if ((layer == 3 || tractor_swamp || (TerLayer[layer].flags & 0x20) != 0 ||
+                 ((api.character_data->model_flags & 0x2000) == 0 &&
+                  (api.character_data->game_character->flags_090 & 0x04000000) == 0)) &&
+                NoLayerKill(object) == 0 && object->character_context != 0x5d) {
+                const u32 layer_flags = TerLayer[static_cast<i8>(api.field_0x27f)].flags;
+                const bool exempt_context = (api.field_0x1f8 & 0x80) == 0 &&
+                                            (object->character_context == 0x46 || object->character_context == 0x47);
+                const bool rescue_below = ((layer_flags & 1) != 0 || tractor_swamp) &&
+                                          api.water_height > api.position.y &&
+                                          !(VehicleArea != 0 && BonusArea != 0 &&
+                                            api.character_data->game_character->field_0x28 > 0.0f);
+                const bool rescue_above = (layer_flags & 0x20) != 0 && api.collision_max.y > api.water_height;
+                if ((rescue_below || rescue_above) && !exempt_context) {
+                    if (object->doomed_escape_locator != NULL && (api.field_0x1f8 & 0x80) == 0) {
+                        if ((object->field_0xefd & 8) != 0 || TouchHacks::AiPlayerTakeDamageOnKillRescue(*object)) {
+                            ObjHitObj(NULL, object, 1, 0, 0, 1);
+                        }
+                        if (api.field_0x287 == 0) {
+                            StartBigJump(object, &object->doomed_escape_locator->position, 0, 1.0f, 1.0f, 0, 0);
+                        }
+                    } else {
+                        ClearLastSafeTakeOver(object);
+                        Player_ClearContext(object, 1);
+                        object->context_animation = 5;
+                        if (object->character_context != -1 &&
+                            api.character_model->model_data_b[api.anim_packet.requested_animation] != NULL) {
+                            object->context_animation = api.anim_packet.requested_animation;
+                        }
+                        object->character_context = 0x2b;
+                        object->field_0xe31 = 0;
+                        if ((TerLayer[static_cast<i8>(api.field_0x27f)].flags & 0x20) != 0) {
+                            object->field_0xe36 = 3;
+                        } else if (api.field_0x27f == 6) {
+                            api.velocity.y = -0.25f;
+                            object->field_0xe36 = 2;
+                            NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
+                        } else if (WORLD->current_level == VADERC_LDATA) {
+                            api.velocity.y = -0.5f;
+                            object->field_0xe36 = 4;
+                            NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
+                        } else {
+                            object->field_0xe36 = 1;
+                        }
+                        object->turn_braking = 0.0f;
+                        PlayDieSfx(object);
+                        object->current_hp = 0;
+                        if ((api.field_0x1f8 & 0x80) != 0 && object->coinpacket != NULL &&
+                            object->coinpacket->coins != 0 && BonusWinner == -1) {
+                            const i32 coins = LoseCoins(object, 2);
+                            if (coins > 0) {
+                                f32 height = api.water_height;
+                                if (height != 2000000.0f && (TerLayer[static_cast<i8>(api.field_0x27f)].flags & 1) == 0) {
+                                    height = 2000000.0f;
+                                }
+                                AddPickups(coins, 0, 0, 0, &api.collision_position, NULL, 2.0f,
+                                           static_cast<i8>(api.field_0x27c), 1.0f, height, NULL, 1, 0, false);
+                            }
+                            object->coinpacket->scale = 1.5f;
+                        }
+                    }
+                } else if ((api.character_data->model_flags & 0x40) == 0 && object->id != id_SNAKE &&
+                           api.field_0x27f == 9 && api.water_height > api.collision_max.y) {
+                    if (BonusWinner == -1) {
+                        const i32 coins = LoseCoins(object, 2);
+                        if (coins > 0) {
+                            AddPickups(coins, 0, 0, 0, &api.upper_position, NULL, 2.0f,
+                                       static_cast<i8>(api.field_0x27c), 1.0f, 2000000.0f, NULL, 1, 0, false);
+                        }
+                    }
+                    InstantKillParts(object, 1, 2.0f);
+                    KillPlayer(object, 3, 1, NULL);
+                }
+            }
+        }
+        // Original 0x1036a0 refreshes these even if the hazard handler killed
+        // the object. The bypass and level-transition routes retain old state.
+        if (check_terrain_hazards) {
+            api.is_underwater = static_cast<u8>(UnderWater(object));
+            api.intersects_water = static_cast<u8>(IntersectWater(object));
+        }
+        // Original 0x102ddb emits the splash only on a dry-to-water transition.
+        if (api.intersects_water != 0 && (entry_underwater | entry_intersects_water) == 0) {
+            bool splash = object->character_context == 0x1f || object->character_context == 0 ||
+                          (CInfo[object->character_context].flags & 4) != 0 ||
+                          object->character_context == 0x0e || object->character_context == 0x0d;
+            if (!splash) {
+                const i32 animation = CurrentAnim(&api.anim_packet);
+                splash = animation == 0x28 || animation == 5 || static_cast<u32>(animation - 0x4b) <= 1;
+            }
+            if (splash) {
+                AddWaterSplash(object, &api.collision_position);
+            }
+        }
+        if (api.model_draw_result != 0 && object->character_context != 0x40 && object->character_context != 0x2c) {
+            extern void GameObjectRotation(GameObject_s *, i32);
+            GameObjectRotation(object, 2);
+        }
+        // The jump callback returns to the common saved-button restoration
+        // at 0x102ed4, including when it changes the object's gamepad.
+        const u32 held_buttons = object->pad_gamepad->buttons_held;
+        const u32 pressed_buttons = object->pad_gamepad->buttons_pressed;
+        if ((api.field_0x1f8 & 0x180) == 0x80 && (entry_menu_id != -1 || MiniCutCam == 2)) {
+            object->pad_gamepad->buttons_held = 0;
+            object->pad_gamepad->buttons_pressed = 0;
+        }
+        Tag_Check(object);
+        PreResetCode(object);
+        if (api.character_data != NULL && api.character_data->move_fn != NULL) {
+            api.character_data->move_fn(object);
+        }
+        PostResetCode(object);
+        if ((api.character_data->model_flags & 0x00200000) == 0) {
+            BigJumpCode(object);
+        }
         object->pad_gamepad->buttons_held = held_buttons;
         object->pad_gamepad->buttons_pressed = pressed_buttons;
-    } else {
-        BigJumpCode(object);
+        }
+
+        if ((object->field_0xefa & 4) == 0 && CurTerr != NULL && api.field_0x287 == 0 &&
+            (WORLD->current_level->flags & 0xe0) == 0 &&
+            static_cast<f32>(CurTerr->minimum_height) - 5.0f > api.position.y) {
+            if (api.model_draw_result != 0) {
+                InstantKillParts(object, 0, 0.0f);
+            }
+            KillPlayer(object, 3, 1, NULL);
+        }
+
     }
 
     // Common epilogue at 0x102b60.
-    object->pad_gamepad->allocated_5a &= 0xe9;
+    entry_pad->allocated_5a &= 0xe9;
     object->field_0xd14 = 0;
-    object->pad_gamepad->operator_data = NULL;
-    NuVecRotateYValZ(&object->facing_direction, 1.0f, api.field_0x276);
+    entry_pad->operator_data = NULL;
+    NuVecRotateYValZ(&object->facing_direction, 1.0f, object->apiobj.field_0x276);
 }
 static inline void MakePlayCorner(GAMECAMERA_s *camera, f32 screen_x, f32 screen_y, NUVEC *near_corner,
                                   NUVEC *far_corner) {
@@ -1634,18 +2325,18 @@ static inline void SetPlayPlane(PLAYPLANE_s *plane, NUVEC *a, NUVEC *b, NUVEC *c
 void MakePlayPlanes(GAMECAMERA_s *camera) {
     NUVEC near_corner[4];
     NUVEC far_corner[4];
-    MakePlayCorner(camera, -0.8f * PANEL3DMULX, 0.85f * PANEL3DMULY, &near_corner[0], &far_corner[0]);
+    MakePlayCorner(camera, -0.85f * PANEL3DMULX, 0.85f * PANEL3DMULY, &near_corner[0], &far_corner[0]);
     MakePlayCorner(camera, 0.85f * PANEL3DMULX, 0.85f * PANEL3DMULY, &near_corner[1], &far_corner[1]);
-    MakePlayCorner(camera, -0.8f * PANEL3DMULX, -0.8f * PANEL3DMULY, &near_corner[2], &far_corner[2]);
-    MakePlayCorner(camera, 0.85f * PANEL3DMULX, -0.8f * PANEL3DMULY, &near_corner[3], &far_corner[3]);
+    MakePlayCorner(camera, -0.85f * PANEL3DMULX, -0.85f * PANEL3DMULY, &near_corner[2], &far_corner[2]);
+    MakePlayCorner(camera, 0.85f * PANEL3DMULX, -0.85f * PANEL3DMULY, &near_corner[3], &far_corner[3]);
 
     // Plane order is near, left, right, top, bottom, far.
     SetPlayPlane(&PlayPlane[1], &near_corner[0], &far_corner[0], &far_corner[2], &near_corner[2], &far_corner[0],
-                 &near_corner[0], &far_corner[2], &near_corner[2]);
+                 &near_corner[0], &far_corner[2], &near_corner[0]);
     SetPlayPlane(&PlayPlane[2], &far_corner[1], &near_corner[1], &near_corner[3], &far_corner[3], &near_corner[1],
-                 &far_corner[1], &near_corner[3], &far_corner[3]);
+                 &far_corner[1], &near_corner[3], &far_corner[1]);
     SetPlayPlane(&PlayPlane[3], &near_corner[0], &near_corner[1], &far_corner[1], &far_corner[0], &near_corner[1],
-                 &near_corner[0], &far_corner[1], &far_corner[0]);
+                 &near_corner[0], &far_corner[1], &near_corner[0]);
     SetPlayPlane(&PlayPlane[4], &near_corner[2], &far_corner[2], &far_corner[3], &near_corner[3], &far_corner[2],
                  &near_corner[2], &far_corner[3], &near_corner[2]);
     SetPlayPlane(&PlayPlane[0], &near_corner[0], &near_corner[2], &near_corner[3], &near_corner[1], &near_corner[2],
@@ -1659,7 +2350,18 @@ void TerrShowCamTerr() {
 }
 void GetIndGrassClump(i32, i32) {
 }
-void TerrainStaticMtx(PLATSKININFO *, nuvec_s *, i32) {
+NUVEC TerrainStaticMtx(PLATSKININFO *info, nuvec_s *position, i32) {
+    NUVEC4 point __attribute__((aligned(16)));
+    point.x = position->x;
+    point.y = position->y;
+    point.z = position->z;
+    point.w = 1.0f;
+    NuVec4MtxTransformVU0(&point, &point, static_cast<NUMTX *>(info->matrix_data));
+    NUVEC result;
+    result.x = point.x;
+    result.y = point.y;
+    result.z = point.z;
+    return result;
 }
 void ScanTerrainHandel(i32, i16 *) {
 }
@@ -1761,7 +2463,49 @@ void ScanTerrainPlatform(i32 group_index, i32 terrain_mask) {
 }
 void TerrainBlockOnBlock(WORLDINFO_s *, pushblock_s *, nuvec_s *, float *) {
 }
-void TerrainSkinAllocate(terrsitu_s *) {
+extern PLATSKININFO *PlatSkinInfo;
+extern PLATSKINMEMINFO *SkinMemInfo;
+extern i32 PlatSkinCnt;
+extern i32 PlatSkinMaxStore;
+extern i32 PlatSkinMaxSize;
+extern i32 TerrainUpadteCnt;
+extern u8 *PlatSkinMem;
+void SkinPlatform(terrsitu_s *, unsigned char *, PLATSKININFO *);
+
+void TerrainSkinAllocate(terrsitu_s *terrain_group) {
+    TERRAIN_GROUP *group = reinterpret_cast<TERRAIN_GROUP *>(terrain_group);
+    i32 skin_index = ~static_cast<i32>(group->scene_index);
+    if (skin_index >= PlatSkinCnt) return;
+    ++TerrainUpadteCnt;
+    PLATSKININFO *info = &PlatSkinInfo[skin_index];
+    if (group->data != NULL) {
+        SkinMemInfo[info->cache_slot].last_used = TerrainUpadteCnt;
+        return;
+    }
+    i32 slot = 0;
+    if (SkinMemInfo[0].skin_index != -1) {
+        i32 oldest = SkinMemInfo[0].last_used;
+        for (i32 i = 1; i < PlatSkinMaxStore; ++i) {
+            if (SkinMemInfo[i].skin_index == -1) {
+                slot = i;
+                break;
+            }
+            if (SkinMemInfo[i].last_used < oldest) {
+                oldest = SkinMemInfo[i].last_used;
+                slot = i;
+            }
+        }
+    }
+    PLATSKINMEMINFO *cache = &SkinMemInfo[slot];
+    if (cache->skin_index >= 0) {
+        CurTerr->groups[PlatSkinInfo[cache->skin_index].terrain_group].data = NULL;
+        for (i32 i = 0; i < 16; ++i) CurTerr->index_levels[i].entry_count = 0;
+    }
+    group->data = info->terrain_data;
+    info->cache_slot = slot;
+    cache->skin_index = skin_index;
+    SkinPlatform(terrain_group, PlatSkinMem + slot * PlatSkinMaxSize, info);
+    SkinMemInfo[slot].last_used = TerrainUpadteCnt;
 }
 void ScanTerrIDRemovePlat(i32 platform_index) {
     TERRAIN_TRACK_SLOT *slot = CurTerr->track_slots;
@@ -1954,10 +2698,754 @@ void TerrainMoveImpactData() {
     TerrPoly = &TerrPolyInfo;
     TerrPolyObj = TerI->terrain_group_index;
 }
-i32 TerrainPlatformEmbedded(nuvec_s *) {
+extern "C" void *NuScratchAlloc32(i32 size);
+extern "C" void NuScratchRelease();
+
+static NUMTX tertempmat;
+static NUVEC4 tertempvec4;
+
+i32 TerrainPlatformMoveCheck(nuvec_s *, nuvec_s *, i32, i32, i32);
+
+void FullDeflectSize(nuvec_s *normal, nuvec_s *movement, nuvec_s *result) {
+    f32 deflection = (-movement->y * normal->y - movement->x * normal->x) - movement->z * normal->z;
+    f32 original_length = NuFsqrt(movement->x * movement->x + movement->y * movement->y + movement->z * movement->z);
+    NUVEC output = {normal->x * deflection + movement->x,
+                    normal->y * deflection + movement->y,
+                    normal->z * deflection + movement->z};
+    *result = output;
+    f32 deflected_length = NuFsqrt(output.x * output.x + output.y * output.y + output.z * output.z);
+    if (deflected_length != 0.0f) {
+        f32 scale = (original_length * 0.75f) / deflected_length + 0.25f;
+        result->x *= scale;
+        result->y *= scale;
+        result->z *= scale;
+    }
+}
+
+void FullReflectTest(nuvec_s *normal, nuvec_s *movement, nuvec_s *result) {
+    f32 deflection = (-movement->y * normal->y - movement->x * normal->x) - movement->z * normal->z;
+    f32 original_length = NuFsqrt(movement->x * movement->x + movement->y * movement->y + movement->z * movement->z);
+    NUVEC output = {(normal->x * deflection) * 2.0f + movement->x,
+                    (normal->y * deflection) * 2.0f + movement->y,
+                    (normal->z * deflection) * 2.0f + movement->z};
+    *result = output;
+    f32 deflected_length = NuFsqrt(output.x * output.x + output.y * output.y + output.z * output.z);
+    if (deflected_length != 0.0f) {
+        f32 scale = original_length / deflected_length;
+        result->x *= scale;
+        result->y *= scale;
+        result->z *= scale;
+    }
+}
+
+i32 FullDeflectTest(nuvec_s *normal, nuvec_s *movement, nuvec_s *result) {
+    f32 deflection = ((-movement->y * normal->y - movement->x * normal->x) - movement->z * normal->z) + 0.0003f;
+    NUVEC output = {normal->x * deflection + movement->x,
+                    normal->y * deflection + movement->y,
+                    normal->z * deflection + movement->z};
+    *result = output;
+    return deflection > 0.0f;
+}
+
+static f32 TerConTol = 0.1f;
+
+extern "C" void TerrainSetPlatConnectTol(f32 tolerance) {
+    TerConTol = tolerance;
+}
+
+i32 PlatformChecks(i32 count, nuvec_s *movement) {
+    TerrainQuery_s *old_query = TerI;
+    if (old_query->scan_list == NULL || *static_cast<i16 *>(old_query->scan_list) == 0 ||
+        CurTrackInfo == NULL || CurTrackInfo->platform_contact_state == 0 || TerConTol == 0.0f)
+        return count;
+    TerrainQuery_s *query = static_cast<TerrainQuery_s *>(NuScratchAlloc32(sizeof(TerrainQuery_s)));
+    TerI = query;
+    i16 *input = static_cast<i16 *>(old_query->scan_list);
+    i16 *output = reinterpret_cast<i16 *>(query->scan_list_storage);
+    while (input[0] > 0) {
+        i32 shape_count = input[0];
+        *output++ = *input++;
+        *output++ = *input++;
+        for (i32 i = 0; i < shape_count; ++i) {
+            *output++ = *input++;
+            *output++ = *input++;
+        }
+    }
+    output[0] = 0;
+    output[1] = 0;
+    query->collision_radius = old_query->collision_radius;
+    query->object_scale = old_query->object_scale;
+    query->inverse_object_scale_sq = old_query->inverse_object_scale_sq;
+    query->inverse_collision_radius = old_query->inverse_collision_radius;
+    query->separation_epsilon = old_query->separation_epsilon;
+    query->inverse_object_scale = old_query->inverse_object_scale;
+    query->compare_epsilon = old_query->compare_epsilon;
+    query->collision_radius_sq = old_query->collision_radius_sq;
+    query->object_scale_sq = old_query->object_scale_sq;
+    query->platform_position = old_query->position;
+    if (CurTrackInfo != NULL && (CurTrackInfo->flags & TERRAIN_TRACK_FLAG_CONNECTED)) {
+        TERRAIN_PLATFORM *platform = &CurTerr->platforms[CurTrackInfo->platform_index];
+        NUMTX *matrix = static_cast<NUMTX *>(platform->scene_object);
+        NUMTX *previous = &platform->previous_matrix;
+        if (platform->flags & 1) {
+            NuMtxInvRSS(&tertempmat, previous);
+            tertempvec4.x = old_query->position.x - previous->m30;
+            tertempvec4.y = (old_query->position.y - query->collision_radius) * query->object_scale - previous->m31;
+            tertempvec4.z = old_query->position.z - previous->m32;
+            tertempvec4.w = 1.0f;
+            NuVec4MtxTransformVU0(&tertempvec4, &tertempvec4, &tertempmat);
+            NuVec4MtxTransformVU0(&tertempvec4, &tertempvec4, matrix);
+            query->platform_position.x = tertempvec4.x;
+            query->platform_position.y = tertempvec4.y * query->inverse_object_scale + query->collision_radius;
+            query->platform_position.z = tertempvec4.z;
+        } else {
+            query->platform_position.x += matrix->m30 - previous->m30;
+            query->platform_position.y += (matrix->m31 - previous->m31) * old_query->inverse_object_scale;
+            query->platform_position.z += matrix->m32 - previous->m32;
+        }
+    }
+    query->position = query->platform_position;
+    query->platform_normal = query->platform_position;
+    query->movement.x = 0.0f;
+    query->movement.y = TerConTol * -2.0f;
+    query->movement.z = 0.0f;
+    query->position.y += TerConTol;
+    DerotateMovementVector();
+    f32 saved_epsilon = TerI->separation_epsilon;
+    TerI->separation_epsilon = 0.0f;
+    HitTerrain();
+    StorePlatImpact();
+    TerI->separation_epsilon = saved_epsilon;
+    TerrainImpactNorm();
+    u8 flags[2];
+    TerrainImpactPlatform(flags);
+    if (TerI->hit_type != 0) ShadNorm = TerI->impact_normal;
+    TerI->platform_position.y = TerI->position.y - TerI->collision_radius;
+    TerI = old_query;
+    if (query->hit_type == 0 ||
+        fabsf((query->platform_normal.y - query->platform_position.y) - old_query->collision_radius) > TerConTol * 0.5f ||
+        query->movement_normal.y < 0.707f) {
+        NuScratchRelease();
+        return count;
+    }
+    TERRAIN_GROUP *group = &CurTerr->groups[query->terrain_group_index];
+    i32 platform_index = group->scene_index;
+    if (movement->y > TerConTol * 0.5f) {
+        TERRAIN_PLATFORM *platform = &CurTerr->platforms[platform_index];
+        NUMTX *matrix = static_cast<NUMTX *>(platform->scene_object);
+        if (movement->y > (TerConTol * 0.5f + matrix->m31) - platform->previous_matrix.m31) {
+            NuScratchRelease();
+            return count;
+        }
+    }
+    if (query->movement_normal.y >= 0.707f && query->terrain_group_index >= 0 && group->chunk_type == 1)
+        CurTerr->platforms[platform_index].flags |= 2;
+    old_query->platform_position.x = query->platform_position.x;
+    old_query->platform_position.y = query->platform_position.y + old_query->collision_radius;
+    if (!(CurTerr->platforms[CurTrackInfo->platform_index].flags & 1)) old_query->platform_position.y += 0.0025f;
+    old_query->platform_position.z = query->platform_position.z;
+    NUVEC direction = {old_query->platform_position.x - old_query->position.x,
+                       old_query->platform_position.y - old_query->position.y,
+                       old_query->platform_position.z - old_query->position.z};
+    f32 distance = NuFsqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
+    direction.x = distance == 0.0f || direction.x == 0.0f ? 0.0f : direction.x / distance;
+    direction.y = distance == 0.0f || direction.y == 0.0f ? 0.0f : direction.y / distance;
+    direction.z = distance == 0.0f || direction.z == 0.0f ? 0.0f : direction.z / distance;
+    NUVEC previous_position = TerI->position;
+    i32 clear = TerrainPlatformMoveCheck(&TerI->platform_position, &TerI->platform_normal, platform_index, 1, 0);
+    bool opposing_contact = false;
+    if (TerI->hit_type != 0 && TerI->terrain_group_index >= 0) {
+        TERRAIN_GROUP *hit_group = &CurTerr->groups[TerI->terrain_group_index];
+        if (hit_group->chunk_type == 1) CurTrackInfo->platform_index = hit_group->scene_index;
+        f32 dot = direction.x * TerI->platform_normal.x + direction.y * TerI->platform_normal.y +
+                  direction.z * TerI->platform_normal.z;
+        opposing_contact = dot < -0.7f;
+    }
+    --count;
+    if (opposing_contact || clear != 0) {
+        TerrPoly = query->surface;
+        TerI->position = TerI->platform_position;
+        if (movement->y < 0.0f) {
+            FullDeflect(&ShadNorm, &TerI->movement, &TerI->movement);
+            FullDeflect(&ShadNorm, movement, movement);
+        } else {
+            TerI->movement.y *= 0.75f;
+        }
+        TerI->hit_flags[1] = 1;
+        PlatformConnect(reinterpret_cast<char *>(old_query->hit_flags), &old_query->movement, movement,
+                        CurTerr->groups[query->terrain_group_index].scene_index);
+    } else if (count > 0) {
+        f32 travelled = (TerI->position.x - previous_position.x) * direction.x +
+                        (TerI->position.y - previous_position.y) * direction.y +
+                        (TerI->position.z - previous_position.z) * direction.z;
+        if (distance > travelled && FullDeflectTest(&TerI->platform_normal, &direction, &TerI->platform_position)) {
+            f32 dot = direction.x * TerI->platform_position.x + direction.y * TerI->platform_position.y +
+                      direction.z * TerI->platform_position.z;
+            if (dot > 0.0f) {
+                f32 fraction = (distance - travelled) / dot;
+                if (fraction < 0.8f) {
+                    TerI->platform_position.x = TerI->platform_position.x * fraction + TerI->position.x;
+                    TerI->platform_position.y = TerI->platform_position.y * fraction + TerI->position.y;
+                    TerI->platform_position.z = TerI->platform_position.z * fraction + TerI->position.z;
+                }
+            }
+        }
+    }
+    NuScratchRelease();
+    TerI = old_query;
+    return count;
+}
+
+i32 TerrainPlatformEmbedded(nuvec_s *movement_delta) {
+    TerrainQuery_s *old_query = TerI;
+    i32 platform_index = CurTerr->groups[old_query->terrain_group_index].scene_index;
+    TERRAIN_PLATFORM *platform = &CurTerr->platforms[platform_index];
+    NUMTX *matrix = static_cast<NUMTX *>(platform->scene_object);
+    if (matrix == NULL) return 1;
+    NUMTX *previous = &platform->previous_matrix;
+    if (previous->m30 == matrix->m30 && previous->m31 == matrix->m31 && previous->m32 == matrix->m32) {
+        if (!(platform->flags & 1)) return 1;
+        if (previous->m00 == matrix->m00 && previous->m01 == matrix->m01 && previous->m02 == matrix->m02 &&
+            previous->m10 == matrix->m10 && previous->m11 == matrix->m11 && previous->m12 == matrix->m12 &&
+            previous->m20 == matrix->m20 && previous->m21 == matrix->m21 && previous->m22 == matrix->m22)
+            return 1;
+    }
+    i32 saved_sphere = curSphereter;
+    curSphereter = 0;
+    ScaleTerrain = static_cast<TERRAIN_SHAPE *>(ScaleTerrainT2);
+    TerrainQuery_s *query = static_cast<TerrainQuery_s *>(NuScratchAlloc32(sizeof(TerrainQuery_s)));
+    TerI = query;
+    void *scratch = NuScratchAlloc32(0xd0);
+    NUVEC4 *vertices = reinterpret_cast<NUVEC4 *>((reinterpret_cast<uintptr_t>(scratch) + 31) & ~uintptr_t(15));
+    query->collision_radius = old_query->collision_radius;
+    query->object_index = old_query->object_index;
+    query->inverse_object_scale_sq = old_query->inverse_object_scale_sq;
+    query->hit_flags = old_query->hit_flags;
+    query->inverse_collision_radius = old_query->inverse_collision_radius;
+    query->scan_result = old_query->scan_result;
+    query->separation_epsilon = old_query->separation_epsilon;
+    query->compare_epsilon = old_query->compare_epsilon;
+    query->collision_radius_sq = old_query->collision_radius_sq;
+    query->object_scale_sq = old_query->object_scale_sq;
+    query->inverse_object_scale = old_query->inverse_object_scale;
+    query->radius = old_query->radius;
+    query->object_scale = old_query->object_scale;
+    query->movement.x = (previous->m30 - matrix->m30) * 1.73f;
+    query->movement.y = ((previous->m31 - matrix->m31) * 1.73f) * query->inverse_object_scale;
+    query->movement.z = (previous->m32 - matrix->m32) * 1.73f;
+    if (platform->flags & 1) {
+        NuMtxInvRSS(&tertempmat, previous);
+        tertempvec4.x = old_query->position.x - previous->m30;
+        tertempvec4.y = (old_query->position.y - query->collision_radius) * query->object_scale - previous->m31;
+        tertempvec4.z = old_query->position.z - previous->m32;
+        tertempvec4.w = 1.0f;
+        NuVec4MtxTransformVU0(&tertempvec4, &tertempvec4, &tertempmat);
+        NuVec4MtxTransformVU0(&tertempvec4, &tertempvec4, matrix);
+        query->movement.x = (old_query->position.x - tertempvec4.x) * 1.3f;
+        query->movement.y = (old_query->position.y -
+                              (tertempvec4.y * query->inverse_object_scale + query->collision_radius)) * 1.3f;
+        query->movement.z = (old_query->position.z - tertempvec4.z) * 1.3f;
+    }
+    query->movement.x -= 0.01f * old_query->movement_normal.x;
+    query->movement.y -= 0.01f * old_query->movement_normal.y;
+    query->movement.z -= 0.01f * old_query->movement_normal.z;
+    query->position.x = old_query->position.x - query->movement.x * 0.91f;
+    query->position.y = old_query->position.y - query->movement.y * 0.91f;
+    query->position.z = old_query->position.z - query->movement.z * 0.91f;
+
+    TERRAIN_GROUP *group = &CurTerr->groups[old_query->terrain_group_index];
+    TERRAIN_SHAPE **cursor = reinterpret_cast<TERRAIN_SHAPE **>(query->scan_list_storage + 4);
+    i32 count = 0;
+    i32 transformed_count = 0;
+    TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group->data);
+    while (batch->marker >= 0) {
+        TERRAIN_SHAPE *shapes = reinterpret_cast<TERRAIN_SHAPE *>(batch + 1);
+        for (i32 i = 0; i < batch->shape_count; ++i) {
+            TERRAIN_SHAPE *source = &shapes[i];
+            if (source->material[1] != 0) continue;
+            TERRAIN_SHAPE *surface = source;
+            if ((platform->flags & 1) || query->object_scale != 1.0f) {
+                surface = &ScaleTerrain[transformed_count++];
+                memcpy(surface->material, source->material, 4);
+                bool quad = source->normals[1].y < 65535.0f;
+                if (platform->flags & 1) {
+                    for (i32 v = 0; v < 3; ++v) {
+                        vertices[v].x = source->vectors[v].x;
+                        vertices[v].y = source->vectors[v].y;
+                        vertices[v].z = source->vectors[v].z;
+                        vertices[v].w = 0.0f;
+                    }
+                    NuVec4MtxTransformVU0x3(vertices, vertices, matrix);
+                    if (quad) {
+                        vertices[3].x = source->vectors[3].x;
+                        vertices[3].y = source->vectors[3].y;
+                        vertices[3].z = source->vectors[3].z;
+                        vertices[3].w = 0.0f;
+                        NuVec4MtxTransformVU0(&vertices[3], &vertices[3], matrix);
+                    } else {
+                        vertices[3] = vertices[2];
+                    }
+                }
+                for (i32 v = 0; v < (quad ? 4 : 3); ++v) {
+                    if (platform->flags & 1) {
+                        surface->vectors[v].x = vertices[v].x;
+                        surface->vectors[v].y = vertices[v].y;
+                        surface->vectors[v].z = vertices[v].z;
+                    } else {
+                        surface->vectors[v] = source->vectors[v];
+                    }
+                    if (query->object_scale != 1.0f)
+                        surface->vectors[v].y = (surface->vectors[v].y + group->origin.y) *
+                                               query->inverse_object_scale - group->origin.y;
+                }
+                if (!quad) surface->normals[1].y = 65536.0f;
+                for (i32 n = quad ? 1 : 0; n >= 0; --n) {
+                    if (platform->flags & 1) {
+                        i32 origin = n == 0 ? 0 : 3;
+                        i32 first = n == 0 ? 2 : 1;
+                        i32 second = n == 0 ? 1 : 2;
+                        NUVEC a = {surface->vectors[first].x - surface->vectors[origin].x,
+                                   surface->vectors[first].y - surface->vectors[origin].y,
+                                   surface->vectors[first].z - surface->vectors[origin].z};
+                        NUVEC b = {surface->vectors[second].x - surface->vectors[origin].x,
+                                   surface->vectors[second].y - surface->vectors[origin].y,
+                                   surface->vectors[second].z - surface->vectors[origin].z};
+                        surface->normals[n] = TerCrossProduct(&a, &b);
+                        NUVEC *normal = &surface->normals[n];
+                        f32 length = NuFsqrt(normal->x * normal->x + normal->y * normal->y + normal->z * normal->z);
+                        f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
+                        normal->x *= inverse;
+                        normal->y *= inverse;
+                        normal->z *= inverse;
+                    } else {
+                        NUVEC *normal = &source->normals[n];
+                        f32 length = NuFsqrt(normal->x * normal->x +
+                                             (normal->y * normal->y) * query->object_scale_sq + normal->z * normal->z);
+                        f32 inverse = length == 0.0f ? 0.0f : 1.0f / length;
+                        surface->normals[n].x = normal->x * inverse;
+                        surface->normals[n].y = (normal->y * query->object_scale) * inverse;
+                        surface->normals[n].z = normal->z * inverse;
+                    }
+                }
+            }
+            *cursor++ = surface;
+            ++count;
+        }
+        batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(shapes + batch->shape_count);
+    }
+    i16 *header = reinterpret_cast<i16 *>(query->scan_list_storage);
+    if (count != 0) {
+        header[0] = count;
+        header[1] = old_query->terrain_group_index;
+        header = reinterpret_cast<i16 *>(cursor);
+    }
+    header[0] = 0;
+    header[1] = 0;
+    u8 flags[2] = {0, 0};
+    DerotateMovementVector();
+    HitTerrain();
+    TerrainImpactNorm();
+    if (TerrainImpactPlatform(flags) != 0) {
+        NuScratchRelease();
+        NuScratchRelease();
+        ScaleTerrain = static_cast<TERRAIN_SHAPE *>(ScaleTerrainT1);
+        TerI = old_query;
+        curSphereter = saved_sphere;
+        return 1;
+    }
+    query->start_position = query->position;
+    TerI->movement.x = 0.0f;
+    TerI->movement.y = -0.05f;
+    TerI->movement.z = 0.0f;
+    TerI->position.y = query->start_position.y + 0.025f;
+    DerotateMovementVector();
+    TerrOverRideScan = reinterpret_cast<tertype **>(old_query->scan_list_storage);
+    HitTerrain();
+    TerI->position.y = query->start_position.y;
+    flags[0] = 0;
+    if (TerI->hit_type >= 1 && TerI->hit_type <= 15) {
+        query->start_position.y = ((TerI->movement.y * TerI->hit_time + query->start_position.y) + 0.001f) + 0.025f;
+        TerI = old_query;
+        if (!(query->start_position.y >= 2000000.0f)) {
+            f32 delta = query->start_position.y - query->position.y;
+            if (!(delta < -0.008f) &&
+                (delta < 0.01f || query->movement.x * query->movement.x + query->movement.z * query->movement.z >
+                                    (delta - 0.0025f) * (delta - 0.0025f))) {
+                query->position.y += delta;
+                flags[0] = 1;
+            }
+        } else {
+            query->start_position.y = query->position.y;
+        }
+    } else {
+        TerI = old_query;
+        query->start_position.y = query->position.y;
+    }
+    if (!TerrainPlatformMoveCheck(&query->position, NULL, platform_index, 1, 1)) flags[0] = 0;
+    TerI->position = query->position;
+    if (flags[0] != 0 && CurTerr->groups[castnum].chunk_type == 1) {
+        TerI->hit_flags[1] = 1;
+        PlatformConnect(reinterpret_cast<char *>(old_query->hit_flags), &old_query->movement,
+                        movement_delta, CurTerr->groups[castnum].scene_index);
+    } else if (CurTrackInfo != NULL) {
+        CurTrackInfo->flags &= ~TERRAIN_TRACK_FLAG_CONNECTED;
+    }
+    NuScratchRelease();
+    NuScratchRelease();
+    ScaleTerrain = static_cast<TERRAIN_SHAPE *>(ScaleTerrainT1);
+    curSphereter = saved_sphere;
+    TerI = old_query;
     return 0;
 }
-void TerrainPlatformMoveCheck(nuvec_s *, nuvec_s *, i32, i32, i32) {
+i32 TerrainPlatformMoveCheck(nuvec_s *position, nuvec_s *normal, i32 platform_index,
+                            i32 resolve_impact, i32 keep_embedded_disabled) {
+    i32 group_index = CurTerr->platforms[platform_index].terrain_group_index;
+    u8 *entry = static_cast<u8 *>(TerI->scan_list);
+    while (*reinterpret_cast<i16 *>(entry) > 0) {
+        i16 *header = reinterpret_cast<i16 *>(entry);
+        if (header[1] == group_index) header[0] = -header[0];
+        i32 count = header[0];
+        if (count < 0) count = -count;
+        entry += 4 + count * 4;
+    }
+    if (position->y > TerI->position.y && TerI->position.y + 0.01f > position->y)
+        TerI->position.y = position->y;
+    NUVEC saved_movement = TerI->movement;
+    TERRAIN_SHAPE *saved_surface = TerI->surface;
+    i16 saved_group = TerI->terrain_group_index;
+    i16 saved_scan_group = TerI->scan_group_index;
+    f32 saved_time = TerI->hit_time;
+    f32 saved_unclamped_time = TerI->unclamped_hit_time;
+    NUVEC saved_movement_normal = TerI->movement_normal;
+    NUVEC saved_impact_normal = TerI->impact_normal;
+    u8 saved_hit_type = TerI->hit_type;
+    TerI->movement.x = position->x - TerI->position.x;
+    TerI->movement.y = position->y - TerI->position.y;
+    TerI->movement.z = position->z - TerI->position.z;
+    DerotateMovementVector();
+    HitTerrain();
+    if (resolve_impact != 0 && TerI->hit_type != 0) {
+        TerrainImpactNorm();
+        TerrainImpactPlatform(TerI->hit_flags);
+        if (normal != NULL) *normal = TerI->movement_normal;
+        *position = TerI->position;
+    }
+    u8 hit_type = TerI->hit_type;
+    TerI->movement = saved_movement;
+    TerI->surface = saved_surface;
+    TerI->terrain_group_index = saved_group;
+    TerI->scan_group_index = saved_scan_group;
+    TerI->hit_time = saved_time;
+    TerI->unclamped_hit_time = saved_unclamped_time;
+    TerI->movement_normal = saved_movement_normal;
+    TerI->impact_normal = saved_impact_normal;
+    if (hit_type <= 15 || keep_embedded_disabled == 0) {
+        entry = static_cast<u8 *>(TerI->scan_list);
+        while (*reinterpret_cast<i16 *>(entry) != 0) {
+            i16 *header = reinterpret_cast<i16 *>(entry);
+            i32 count = header[0];
+            if (count < 0) count = -count;
+            if (header[1] == group_index) header[0] = count;
+            entry += 4 + count * 4;
+        }
+    }
+    TerI->hit_type = saved_hit_type;
+    return hit_type == 0;
 }
 void TerrDraw(tertype *, i16) {
+}
+
+extern TERRSET *CurTerr;
+extern TerrainQuery_s *TerI;
+extern NUVEC ShadNorm;
+extern TERRAIN_SHAPE *ShadPoly;
+extern i16 castnum;
+extern NUVEC ShadRoofNorm;
+extern f32 ShadRoofY;
+extern TERRAIN_SHAPE *ShadRoofPoly;
+extern i16 castroofnum;
+extern i16 shadroofhit;
+extern i16 shadhit;
+extern NUVEC EShadNorm;
+extern NUVEC EShadRoofNorm;
+extern f32 EShadY;
+extern f32 EShadRoofY;
+extern TERRAIN_SHAPE *EShadPoly;
+extern TERRAIN_SHAPE *EShadRoofPoly;
+extern i16 ecastnum;
+extern i16 ecastroofnum;
+extern i16 eshadhit;
+extern i16 eshadroofhit;
+i16 InsideLineF(f32, f32, f32, f32, f32, f32);
+
+namespace {
+
+    const f32 NO_TERRAIN_HEIGHT = 2000000.0f;
+
+    struct ShadowSurfaceCandidate {
+        f32 height;
+        TERRAIN_SHAPE *surface;
+        NUVEC normal;
+        i16 terrain_group;
+    };
+
+    static void ConsiderShadowTriangle(const NUVEC &local_position, const TERRAIN_GROUP &group, TERRAIN_SHAPE *surface,
+                                       const NUVEC &origin, const NUVEC &edge_a, const NUVEC &edge_b,
+                                       const NUVEC &normal, f32 winding_y, f32 query_height, i16 terrain_group, ShadowSurfaceCandidate *floor_candidate,
+                                       ShadowSurfaceCandidate *above_candidate) {
+        const f32 point_x = local_position.x, point_z = local_position.z;
+        if (winding_y > 0.0f) {
+            if (InsideLineF(point_x, point_z, edge_a.x, edge_a.z, origin.x, origin.z) == 0 ||
+                InsideLineF(point_x, point_z, edge_b.x, edge_b.z, edge_a.x, edge_a.z) == 0 ||
+                InsideLineF(point_x, point_z, origin.x, origin.z, edge_b.x, edge_b.z) == 0) return;
+        } else if (winding_y < 0.0f) {
+            if (InsideLineF(point_x, point_z, origin.x, origin.z, edge_a.x, edge_a.z) == 0 ||
+                InsideLineF(point_x, point_z, edge_a.x, edge_a.z, edge_b.x, edge_b.z) == 0 ||
+                InsideLineF(point_x, point_z, edge_b.x, edge_b.z, origin.x, origin.z) == 0) return;
+        } else return;
+
+        const f32 plane_height =
+            (origin.y + group.origin.y) +
+            ((local_position.x - origin.x) * normal.x + (local_position.z - origin.z) * normal.z) / -normal.y;
+        if (plane_height <= query_height) {
+            if (winding_y > 0.0f && plane_height > floor_candidate->height) {
+                floor_candidate->height = plane_height;
+                floor_candidate->surface = surface;
+                floor_candidate->normal = normal;
+                floor_candidate->terrain_group = terrain_group;
+            }
+        } else if (plane_height < above_candidate->height ||
+                   (plane_height == above_candidate->height && normal.y < above_candidate->normal.y)) {
+            // The target keeps the nearest ordinary surface above the cast
+            // origin as well as the conventional floor below it.  NewCast's
+            // final range check decides whether this surface is reachable.
+            above_candidate->height = plane_height;
+            above_candidate->surface = surface;
+            above_candidate->normal = normal;
+            above_candidate->terrain_group = terrain_group;
+        }
+    }
+
+} // namespace
+
+f32 NewCast(nuvec_s *position, f32 height_above, f32 roof_range) {
+    ShadowSurfaceCandidate floor_candidate = {
+        -NO_TERRAIN_HEIGHT,
+        NULL,
+        {0.0f, 1.0f, 0.0f},
+        -1,
+    };
+    ShadowSurfaceCandidate above_candidate = {
+        NO_TERRAIN_HEIGHT,
+        NULL,
+        {0.0f, 1.0f, 0.0f},
+        -1,
+    };
+    ShadowSurfaceCandidate extended_floor = floor_candidate;
+    ShadowSurfaceCandidate extended_above = above_candidate;
+    castnum = -1;
+    ecastnum = -1;
+
+    u8 *scan = TerI->scan_list_storage;
+    i16 shape_count = *reinterpret_cast<i16 *>(scan);
+    while (shape_count > 0) {
+        const i16 group_index = *reinterpret_cast<i16 *>(scan + sizeof(i16));
+        TERRAIN_GROUP &group = CurTerr->groups[group_index];
+        TERRAIN_SHAPE **surfaces = reinterpret_cast<TERRAIN_SHAPE **>(scan) + 1;
+        const NUVEC local_position = {
+            position->x - group.origin.x,
+            position->y - group.origin.y,
+            position->z - group.origin.z,
+        };
+
+        for (i32 shape_index = 0; shape_index < shape_count; ++shape_index) {
+            TERRAIN_SHAPE *surface = surfaces[shape_index];
+            bool extended = surface->material[1] != 0;
+            ShadowSurfaceCandidate *floor = extended ? &extended_floor : &floor_candidate;
+            ShadowSurfaceCandidate *above = extended ? &extended_above : &above_candidate;
+            f32 winding_y = surface->normals[0].y;
+            if (!(winding_y > 0.0f || winding_y < 0.0f)) continue;
+            bool second_triangle = false;
+            if (!(surface->normals[1].y > 65535.0f)) {
+                const NUVEC &a = surface->vectors[winding_y > 0.0f ? 2 : 1];
+                const NUVEC &b = surface->vectors[winding_y > 0.0f ? 1 : 2];
+                second_triangle = InsideLineF(local_position.x, local_position.z, a.x, a.z, b.x, b.z) == 0;
+            }
+            if (second_triangle) {
+                ConsiderShadowTriangle(local_position, group, surface, surface->vectors[3], surface->vectors[2],
+                                       surface->vectors[1], surface->normals[1], winding_y, position->y, group_index, floor, above);
+            } else {
+                ConsiderShadowTriangle(local_position, group, surface, surface->vectors[0], surface->vectors[1],
+                                       surface->vectors[2], surface->normals[0], winding_y, position->y, group_index, floor, above);
+            }
+        }
+
+        scan = reinterpret_cast<u8 *>(surfaces + shape_count);
+        shape_count = *reinterpret_cast<i16 *>(scan);
+    }
+
+    castnum = floor_candidate.terrain_group;
+    ecastnum = extended_floor.terrain_group;
+    bool ordinary_roof = above_candidate.height < NO_TERRAIN_HEIGHT && above_candidate.normal.y < 0.0f &&
+                         position->y + roof_range > above_candidate.height;
+    bool extended_blocked = ordinary_roof && extended_above.height > above_candidate.height;
+    EShadRoofY = NO_TERRAIN_HEIGHT;
+    EShadRoofPoly = NULL;
+    if (extended_above.height < NO_TERRAIN_HEIGHT && extended_above.normal.y < 0.0f &&
+        position->y + roof_range > extended_above.height && !extended_blocked) {
+        EShadRoofY = extended_above.height;
+        EShadRoofPoly = extended_above.surface;
+        EShadRoofNorm = extended_above.normal;
+        eshadroofhit = 1;
+        ecastroofnum = extended_above.terrain_group;
+    }
+    const ShadowSurfaceCandidate *extended_result = NULL;
+    if (extended_above.height < NO_TERRAIN_HEIGHT && extended_above.normal.y > 0.0f &&
+        position->y + roof_range > extended_above.height) {
+        if (!extended_blocked) {
+            extended_result = &extended_above;
+            eshadhit = 1;
+            ecastnum = extended_above.terrain_group;
+        }
+    } else if (extended_floor.height > -NO_TERRAIN_HEIGHT &&
+               !(floor_candidate.height > -NO_TERRAIN_HEIGHT && floor_candidate.height > extended_floor.height)) {
+        extended_result = &extended_floor;
+        eshadhit = 2;
+    }
+    if (extended_result != NULL) {
+        EShadY = extended_result->height;
+        EShadPoly = extended_result->surface;
+        EShadNorm = extended_result->normal;
+    } else {
+        EShadY = NO_TERRAIN_HEIGHT;
+        EShadPoly = NULL;
+        EShadNorm.y = 1.0f;
+        eshadhit = 3;
+    }
+    ShadRoofY = NO_TERRAIN_HEIGHT;
+    ShadRoofPoly = NULL;
+    if (ordinary_roof) {
+        ShadRoofY = above_candidate.height;
+        ShadRoofPoly = above_candidate.surface;
+        ShadRoofNorm = above_candidate.normal;
+        shadroofhit = 1;
+        castroofnum = above_candidate.terrain_group;
+    }
+    const ShadowSurfaceCandidate *selected_candidate = NULL;
+    if (above_candidate.surface != NULL && above_candidate.normal.y > 0.0f &&
+        above_candidate.height < position->y + height_above) {
+        selected_candidate = &above_candidate;
+        shadhit = 1;
+    } else if (floor_candidate.surface != NULL) {
+        selected_candidate = &floor_candidate;
+        shadhit = 2;
+    }
+
+    if (selected_candidate == NULL) {
+        position->y = NO_TERRAIN_HEIGHT;
+        ShadPoly = NULL;
+        ShadNorm.y = 1.0f;
+        shadhit = 3;
+        castnum = -1;
+        return 0.0f;
+    }
+
+    position->y = selected_candidate->height;
+    ShadNorm = selected_candidate->normal;
+    ShadPoly = selected_candidate->surface;
+    castnum = selected_candidate->terrain_group;
+    return 0.0f;
+}
+
+
+extern "C" void TerrainWallAng(f32 slope) {
+    wallover = slope;
+}
+
+extern "C" void TerrainWallSideSlide(NUVEC *movement, void *id, f32 speed, f32 upward_scale, NUANG angle) {
+    if (CurTerr == NULL) return;
+    CurTrackInfo = ScanTerrId(id);
+    if (CurTrackInfo == NULL || CurTrackInfo->wall_contact_state == 0) return;
+    if (speed != 0.0f) {
+        NUVEC slide = {0.0f, 0.0f, speed};
+        NuVecRotateY(&slide, &slide, angle);
+        FullDeflect(&CurTrackInfo->impact_normal, &slide, &slide);
+        slide.x += (speed * CurTrackInfo->impact_normal.x) * 0.4f;
+        slide.z += (speed * CurTrackInfo->impact_normal.z) * 0.4f;
+        movement->z += slide.z;
+        movement->x += slide.x;
+    }
+    if (movement->y > 0.0f) movement->y *= upward_scale;
+}
+
+i32 HitTerrPoly(tertype *surface, i32 group_index);
+
+extern "C" i32 TerrainTrackBack(NUVEC *position, NUVEC *direction, f32 radius, f32 backoff, NUVEC *result) {
+    if (CurTerr == NULL || TerrPolyObj == -1) return 0;
+    TerI = static_cast<TerrainQuery_s *>(NuScratchAlloc32(sizeof(TerrainQuery_s)));
+    TerI->object_scale = 1.0f;
+    TerI->object_scale_sq = 1.0f;
+    TerI->inverse_object_scale = 1.0f;
+    TerI->inverse_object_scale_sq = 1.0f;
+    TerI->collision_radius = radius;
+    TerI->inverse_collision_radius = radius == 0.0f ? 0.0f : 1.0f / radius;
+    TerI->collision_radius_sq = radius * radius;
+    TerI->position.x = direction->x * (radius + 0.5f) + position->x;
+    TerI->position.y = direction->y * (radius + 0.5f) + position->y;
+    TerI->position.z = direction->z * (radius + 0.5f) + position->z;
+    TerI->movement.x = -direction->x * (radius + 0.8f);
+    TerI->movement.y = -direction->y * (radius + 0.8f);
+    TerI->movement.z = -direction->z * (radius + 0.8f);
+    TerI->object_index = -1;
+    TerI->hit_flags = NULL;
+    DerotateMovementVector();
+    HitTerrPoly(TerrPoly, TerrPolyObj);
+    switch (TerI->hit_type) {
+        case 0: case 17: case 18: case 19: case 20:
+            *result = TerI->position;
+            break;
+        case 1: case 2: case 3: case 4:
+            TerI->hit_time -= backoff;
+            if (TerI->hit_time < 0.0f) TerI->hit_time = 0.0f;
+            result->x = TerI->movement.x * TerI->hit_time + TerI->position.x;
+            result->y = TerI->movement.y * TerI->hit_time + TerI->position.y;
+            result->z = TerI->movement.z * TerI->hit_time + TerI->position.z;
+            break;
+    }
+    NuScratchRelease();
+    return TerI->hit_type;
+}
+
+extern "C" i32 TerrainInfo() {
+    if (TerrPoly != NULL) return TerrPoly->material[0];
+    if (TerrWallInfo != 0) return TerrWallTab[0];
+    return -1;
+}
+
+extern "C" i32 TerrainInfoExtra() {
+    if (TerrPoly != NULL) return TerrPoly->material[1];
+    if (TerrWallInfo != 0) return TerrWallTab[1];
+    return -1;
+}
+
+extern "C" i32 TerrainIntensityInfo() {
+    if (TerrPoly != NULL) return static_cast<i32>(TerrPoly->normal_flags) - 8;
+    if (TerrWallInfo != 0) return static_cast<i32>(TerrWallTab[3]) - 8;
+    return -1;
+}
+
+extern "C" void TerrTempMemory(void **buffer) {
+    u8 *cursor = static_cast<u8 *>(*buffer);
+    if (ScaleTerrainT1 == NULL) ScaleTerrainT1 = cursor;
+    cursor += 0xc800;
+    *buffer = cursor;
+    if (ScaleTerrainT2 == NULL) ScaleTerrainT2 = cursor;
+    cursor += 0xc800;
+    *buffer = cursor;
+    if (TempScanStack == NULL) TempScanStack = cursor;
+    cursor += 0x2000;
+    *buffer = cursor;
+    if (WallSplList == NULL) WallSplList = reinterpret_cast<TERRAIN_WALL_POINT *>(cursor);
+    cursor += 0x600;
+    *buffer = cursor;
 }

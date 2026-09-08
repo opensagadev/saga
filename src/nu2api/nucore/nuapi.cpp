@@ -175,6 +175,7 @@ i32 NuInitHardware(VARIPTR *buf, VARIPTR *buf_end, i32 heap_size, ...) {
     NuRndrInitGeneric();
     NuAnimInit(0xa0, buf, *buf_end);
     NuTimeInitPS();
+    NuMtlInitOverride(128, buf, buf_end);
     bgProcInit(); // starts the background-loading thread used by bgPostRequest
 
     return 0;

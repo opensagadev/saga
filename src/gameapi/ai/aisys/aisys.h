@@ -505,8 +505,13 @@ struct AIANTINODE_s {
     u8 game_flags;
     u8 type;
     u8 has_special;
-    u8 special_type;
-    u8 padding_0x4d[7];
+    union {
+        struct {
+            u8 special_type;
+            u8 padding_0x4d[7];
+        };
+        u32 user_data[2];
+    };
 };
 
 enum AIPATHNODE_RUNTIME_FLAGS : u8 {
@@ -572,6 +577,7 @@ DECOMP_ASSERT(offsetof(AIPATH, updated_node_bits) == 0x18, "AIPATH updated-node 
 DECOMP_ASSERT(offsetof(AIPATH, inside_node_bits) == 0x58, "AIPATH occupied-node bits offset");
 DECOMP_ASSERT(sizeof(AIPATHSYS) == 0x10, "AIPATHSYS size");
 DECOMP_ASSERT(sizeof(AIANTINODE) == 0x54, "AIANTINODE size");
+DECOMP_ASSERT(offsetof(AIANTINODE, user_data) == 0x4c, "AIANTINODE exclusion mask offset");
 DECOMP_ASSERT(offsetof(AIANTINODE, special_handle) == 0x20, "AIANTINODE special handle offset");
 DECOMP_ASSERT(offsetof(AIANTINODE, rotation_offset) == 0x3c, "AIANTINODE rotation offset");
 DECOMP_ASSERT(offsetof(AICREATURE, type) == 0x4e, "AICREATURE type offset");
@@ -579,7 +585,12 @@ DECOMP_ASSERT(offsetof(AICREATURE, count) == 0x50, "AICREATURE count offset");
 DECOMP_ASSERT(offsetof(AICREATURE, active_mask) == 0x58, "AICREATURE active-mask offset");
 DECOMP_ASSERT(offsetof(AICREATURE, area) == 0x78, "AICREATURE area offset");
 DECOMP_ASSERT(offsetof(AICREATURE, start_stagger) == 0x90, "AICREATURE stagger offset");
+DECOMP_ASSERT(sizeof(AIROW) == 0x34, "AIROW size");
+DECOMP_ASSERT(offsetof(AIROW, pos) == 0x18, "AIROW position offset");
+DECOMP_ASSERT(offsetof(AIROW, is_alive) == 0x2d, "AIROW live-member mask offset");
 DECOMP_ASSERT(sizeof(AIGROUP) == 0x134, "AIGROUP size");
+DECOMP_ASSERT(offsetof(AIGROUP, member_is_alive) == 0x4c, "AIGROUP live-member mask offset");
+DECOMP_ASSERT(offsetof(AIGROUP, rows) == 0x54, "AIGROUP rows offset");
 DECOMP_ASSERT(offsetof(AIGROUP, count_across) == 0x8, "AIGROUP count-across offset");
 DECOMP_ASSERT(offsetof(AIGROUP, x_spacing) == 0x128, "AIGROUP spacing offset");
 DECOMP_ASSERT(sizeof(AISYS) == 0x1398, "AISYS size");
@@ -682,6 +693,17 @@ enum AISCRIPT_REGISTRY_INDEX {
     LEGO_AI_ACTION_SET_USE_ONE_AT_ONCE = 179,
     LEGO_AI_ACTION_GIZMO_SET_VISIBILITY = 191,
     LEGO_AI_ACTION_NEW_SEBULBA = 207,
+    LEGO_AI_ACTION_SELECT_RANDOM_SPLINE = 79,
+    LEGO_AI_ACTION_LAUNCH = 81,
+    LEGO_AI_ACTION_SET_RUN_SPEED = 83,
+    LEGO_AI_ACTION_SET_WALK_SPEED = 84,
+    LEGO_AI_ACTION_SET_HIT_POINTS = 85,
+    LEGO_AI_ACTION_SET_SHIELD_HIT_POINTS = 86,
+    LEGO_AI_ACTION_SET_MESSAGE = 87,
+    LEGO_AI_ACTION_COPY_MESSAGE = 88,
+    LEGO_AI_ACTION_SET_SCRIPT_PARAM = 89,
+    LEGO_AI_ACTION_ADD_PART = 90,
+    LEGO_AI_ACTION_ADD_PART_DEBRIS = 91,
 
     LEGO_AI_CONDITION_OFF_SCREEN_TIMER = 7,
     LEGO_AI_CONDITION_SPECIAL_AT_START = 31,
@@ -703,6 +725,11 @@ enum AISCRIPT_REGISTRY_INDEX {
     LEGO_AI_CONDITION_IN_HUB_AREA = 174,
     LEGO_AI_CONDITION_IS_LOW_END_DEVICE = 175,
     LEGO_AI_CONDITION_RANDOM_MAP_CHARS_AVAILABLE = 176,
+    LEGO_AI_CONDITION_PLAYER_CATEGORY_IS = 72,
+    LEGO_AI_CONDITION_FORCE_AT_END = 36,
+    LEGO_AI_CONDITION_FORCE_AT_START = 35,
+    LEGO_AI_CONDITION_BLOWUP_BLOWNUP = 61,
+    LEGO_AI_CONDITION_BUILDIT_COMPLETE = 60,
 };
 
 typedef i32 GAMEPARAMTOFLOAT(AIPACKET *, AISCRIPTPROCESS *, char *, f32 *);

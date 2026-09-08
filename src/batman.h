@@ -336,7 +336,7 @@ extern "C" {
     extern MENUFNINFO MenuInfo[100];
     extern OPTIONSSAVE TempOptions;
     extern i32 abort_load;
-    extern i32 AddCoinDelay[2];
+    extern f32 AddCoinDelay[2];
     extern i32 adaptivedifficulty[3];
     extern i32 back_rgba[2];
     extern TIMER BonusTimer;

@@ -4,6 +4,7 @@
 
 struct HostWindowOptions {
     bool capture = false;
+    bool trace_movement = false;
     bool script_input = false;
     bool script_load = false;
     bool script_play = false;

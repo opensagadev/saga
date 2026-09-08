@@ -2,10 +2,18 @@
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/area.h"
+#include "legoapi/world/level.h"
 #include "legoapi/world/world_shared.h"
+#include "legoapi/render/fx.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nutex.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/core/input/qrand.h"
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nuvec.h"
+#include "legoapi/characters/motion.h"
 
 #include <string.h>
 
@@ -14,10 +22,51 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-void Buck_Start(GameObject_s *, GameObject_s *) {
+i32 LEGOCONTEXT_BUCK = -1;
+i16 LEGOACT_BUCK = -1;
+f32 BUCK_RIDERJUMPCLEARANCE = 1.0f;
+void (*BuckStartExtraFn)(GameObject_s *) = NULL;
+void NewRumble(nupad_s *, f32, i32);
+void StartJump(GameObject_s *, i32);
+extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
+
+void Buck_Start(GameObject_s *object, GameObject_s *rider) {
+    if (LEGOCONTEXT_BUCK == -1 || LEGOACT_BUCK == -1 ||
+        object->apiobj.character_model->model_data_b[LEGOACT_BUCK] == NULL) return;
+    if (rider != NULL) NewRumble(rider->pad_gamepad->pad, 0.6f, 0);
+    object->context_animation = LEGOACT_BUCK;
+    object->character_context = LEGOCONTEXT_BUCK;
+    object->context_animation_timer = AnimDuration(object->id, LEGOACT_BUCK, 0.0f, 0.0f, 1);
+    if (BuckStartExtraFn != NULL) BuckStartExtraFn(object);
 }
 
-void DoBuckStart(GameObject_s *) {
+extern i16 id_SNOWMOB;
+f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
+void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
+
+i32 DoBuckStart(GameObject_s *object) {
+    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+    if (world->current_level != HOTHESCAPEB_LDATA || object->id != id_SNOWMOB) return 0;
+    i32 jumped = 0;
+    NUVEC forward = {0.0f, 0.0f, 1.0f};
+    for (i32 i = 0; i < 8; ++i) {
+        GameObject_s *player = Player[i];
+        if (player == NULL || (player->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
+            player->apiobj.field_0x287 != 0 || player->field_0xcc0 != NULL) continue;
+        NUVEC delta;
+        NuVecSub(&delta, &player->apiobj.lower_position, reinterpret_cast<NUVEC *>(&object->joint_matrices[1].m30));
+        if (delta.y > -0.01f && delta.y < 0.1f && delta.x * delta.x + delta.z * delta.z < 0.04000000283122063f) {
+            NUVEC destination;
+            NuVecRotateY(&destination, &forward, object->apiobj.field_0x276);
+            NuVecAdd(&destination, &destination, &Player[i]->apiobj.collision_position);
+            f32 height = GameShadow(NULL, &destination, 5.0f, -1);
+            if (height != 2000000.0f) destination.y = height;
+            StartBigJump(Player[i], &destination, 0, 1.0f, 1.0f, 1, 0);
+            jumped = 1;
+        }
+    }
+    GameAudio_PlaySfx(4, &object->apiobj.collision_position, 0, 0);
+    return jumped;
 }
 
 void BlockInBlock(WORLDINFO_s *, pushblock_s *, i32, pushblock_s **) {
@@ -29,7 +78,13 @@ void Boulder_Kill(PART_s *, i32) {
 void Boulder_Move(PART_s *, float) {
 }
 
-void Buck_MoveCode(GameObject_s *, i32) {
+void Buck_MoveCode(GameObject_s *object, i32 start) {
+    if (LEGOCONTEXT_BUCK != -1 && object->character_context == LEGOCONTEXT_BUCK) {
+        object->context_animation_timer -= FRAMETIME;
+        if (object->context_animation_timer <= 0.0f) object->character_context = -1;
+    } else if (object->character_context == -1 && start != 0) {
+        Buck_Start(object, object->field_0xcc0);
+    }
 }
 
 void FindNextBreak(unsigned char *, i32) {
@@ -38,16 +93,48 @@ void FindNextBreak(unsigned char *, i32) {
 void FindNearestBreak(unsigned char *, i32) {
 }
 
-void BuckStartExtra_LSW(GameObject_s *) {
+void BuckStartExtra_LSW(GameObject_s *object) {
+    DoBuckStart(object);
 }
 
-void Buck_StartRiderJump(GameObject_s *, GameObject_s *) {
+void Buck_StartRiderJump(GameObject_s *rider, GameObject_s *mount) {
+    u16 angle = qrand();
+    f32 speed = static_cast<f32>(qrand()) * 1.5259021893143654e-05f * 0.09f + 0.01f;
+    rider->apiobj.velocity.x = NuTrigTable[angle >> 1] * speed;
+    rider->apiobj.velocity.z = speed * NuTrigTable[((i32)angle + 0x4000) >> 1 & 0x7fff];
+    StartJump(rider, 0);
+    rider->tag_flags |= 1;
+    rider->airborne_collision_target = mount;
+    rider->apiobj.velocity.x = 0.0f;
+    rider->apiobj.velocity.z = 0.0f;
+    rider->pad_gamepad->buttons_held = 0;
+    rider->pad_gamepad->buttons_pressed = 0;
+    f32 clearance = mount->apiobj.upper_position.y;
+    if ((mount->apiobj.character_data->game_character->flags_094[2] & 2) != 0) {
+        clearance += BUCK_RIDERJUMPCLEARANCE;
+    }
+    clearance = clearance - rider->apiobj.lower_position.y + 0.1f;
+    GAMECHARACTERDATA *character = rider->apiobj.character_data->game_character;
+    if (clearance > character->jump_height) {
+        rider->apiobj.velocity.y = NuFsqrt(-2.0f * character->gravity * clearance);
+    }
 }
 
-void SetEffectVisibility(char *, i32) {
+void SetEffectVisibility(char *name, i32 visible) {
+    i32 type = LookupDebrisEffectPageOnly(name, static_cast<char>(WorldInfo_CurrentlyActive()->page_pp));
+    if (type != -1) {
+        if (visible != 0) DebrisTypeStatusAlwaysOn(type);
+        else DebrisTypeStatusAlwaysOff(type);
+    }
 }
 
-void Conveyor_AdjustSpeed(nuvec_s *) {
+i32 Conveyor_AdjustSpeed(NUVEC *velocity) {
+    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+    if (world != NULL && world->field_0x5174 != 0) {
+        velocity->x += world->current_level->conveyor_x_speed;
+        velocity->z += world->current_level->conveyor_z_speed;
+    }
+    return 0;
 }
 
 void AddDevice(nufile_device_s *) {

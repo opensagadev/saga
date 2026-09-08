@@ -2,8 +2,11 @@
 #include "batman.h"
 #include "gameapi/gui/apimenu.h"
 #include "legoapi/characters/core/character.h"
+#include "gameapi/ai/aisys/aisys.h"
+#include "legoapi/render/fx.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/core/input/timer.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/gizmo/base/GizObstacleObjectInterface.h"
 #include "legoapi/gizmos/object/gizobstacles.h"
@@ -11,6 +14,7 @@
 #include "legoapi/legoapi_types.h"
 #include "legoapi/menus/core/text.h"
 #include "legoapi/menus/screens/store.h"
+#include "legoapi/menus/screens/shop.h"
 #include "legoapi/menus/screens/gamemenuall.h"
 #include "legoapi/props/doors/door.h"
 #include "legoapi/render/core/render.h"
@@ -23,6 +27,7 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nuvec.h"
 
 #include <stdio.h>
 
@@ -40,6 +45,35 @@ extern void Draw3DObjectMtx(WORLDINFO_s *, i32, NUMTX *);
 extern void CutScenePlayer_Reset();
 extern GIZBUILDIT_s *GizBuildIt_Find(WORLDINFO_s *, char *);
 extern void GizBuildIt_SetToEnd(GIZBUILDIT_s *);
+extern GIZBUILDIT_s *GizBuildIt_FindNearest(WORLDINFO_s *, GameObject_s *, BUILDIT_FIND_ENUM, i32);
+extern FadeSystem FadeSys;
+extern GAMESAVE_s TempGame;
+extern i32 shop_save_done;
+extern i32 shop_quit;
+extern f32 ShopLockedScale;
+extern HINTSYS_s hintsys;
+extern i32 only_process_this_hint_id;
+extern u8 show_unlock_shop_hint;
+extern void *GetHintFromUIButton();
+extern "C" void NuIOS_RecordFlurryEvent(char *);
+bool HubShopUnlocked();
+bool HubCustomiserUnlocked();
+extern i32 Customiser_MenuAvailable(CUSTOMISER *);
+extern GAMESAVE_s OldCustomiseGame;
+extern i32 customiser_save_done;
+extern i32 customiser_quit;
+extern i32 customiser_changed;
+extern u8 show_unlock_customiser_hint;
+extern i32 Missions_PartyAvailable(MISSIONSYS_s *);
+extern "C" i32 TriggerAutoSave();
+extern AREADATA *E1VEHICLE_ADATA;
+extern u8 show_unlock_minikitviewer_hint;
+bool HubMinikitViewerUnlocked();
+void Hub_ResetPanel();
+void Hub_ActivateDoorMenu(LEVELDATA_s **);
+bool FreePlayUnlocked();
+extern "C" void PlaySfxAndSetPitch(char *, NUVEC *, f32);
+AILOCATOR_s *LocalGetNearestLocator(AILOCATOR_s **, i32, f32, NUVEC *, f32, i32, f32, f32);
 extern i32 Episode_CountOpenAreas(i32, i32, AREASAVE_s *);
 extern void UpdateCharacterLoad();
 extern void ResetForceBack();
@@ -114,7 +148,9 @@ u8 leftrepeatcount[2] = {};
 u8 hub_makefreeplaylist_addotherid = 0;
 
 static i32 buildits_reset = 0;
+static __attribute__((used)) i32 TJTYPEA = 96;
 static GIZMO *hub_minikitviewer_gizmo = NULL;
+static i32 hub_minikitviewer_area = 0;
 static NUGSPLINE *hub_minikitviewer_camspl = NULL;
 static f32 freeplaytime = 0.0f;
 static f32 freeplayduration = 0.0f;
@@ -386,8 +422,11 @@ void Hub_Update(WORLDINFO_s *world) {
         HubStartDoor = NULL;
     }
 
-    // With background loading enabled, the hub does not start its live logic
-    // until all locked-pack custodian character models are resident.
+    show_unlock_shop_hint = 0;
+    show_unlock_customiser_hint = 0;
+    show_unlock_minikitviewer_hint = 0;
+
+    // Loading completion is tracked separately from the per-frame spawn pass.
     if (hub_custodians_finished_loading == 0) {
         if (BGLOAD == 0) {
             hub_custodians_finished_loading = 1;
@@ -406,19 +445,6 @@ void Hub_Update(WORLDINFO_s *world) {
                 ++required;
                 if (APICharacterLoaded(id) != NULL) {
                     ++loaded;
-                    const i32 camera_socket = store_pack.field44_0x32;
-                    if ((camera_socket == 0xff || camera_socket == GameCam->sock_position.location.sock) &&
-                        FindGameObject(id, 0, 0, 0, 0) == NULL) {
-                        GameObject_s *custodian =
-                            AddDynamicCreature(id, &store_pack.custodian_position, store_pack.custodian_angle,
-                                               const_cast<char *>("party"), NULL, NULL, 1, NULL, NULL, 0, 1);
-                        if (custodian != NULL) {
-                            custodian->field_0xee8 = store_pack.custodian_position.x;
-                            custodian->field_0xeec = store_pack.custodian_position.z;
-                            custodian->field_0x106e = store_pack.custodian_angle;
-                            Store_RootPackCustodian(pack, custodian);
-                        }
-                    }
                 }
             }
             if (loaded == required) {
@@ -427,48 +453,502 @@ void Hub_Update(WORLDINFO_s *world) {
         }
     }
 
-    if (buildits_reset == 0) {
-        const u8 completed_buildits = Game.field_0x7c26[2];
-        for (i32 i = 0; HubAreaInfo[i].area_name != NULL; ++i) {
-            if (i < 8 && HubAreaInfo[i].bonus_gizmo != NULL && (completed_buildits & (1U << i)) != 0) {
-                GizBuildIt_SetToEnd(static_cast<GIZBUILDIT_s *>(HubAreaInfo[i].bonus_gizmo->object));
+    for (i32 pack = 0; pack < 11; ++pack) {
+        STOREPACK &store_pack = StorePack[pack];
+        if (store_pack.id == NULL || *store_pack.id == -1 || Store_IsPackUnlocked(pack) != 0) {
+            continue;
+        }
+        const i32 id = *store_pack.id;
+        if ((store_pack.field44_0x32 != 0xff &&
+             store_pack.field44_0x32 != GameCam->sock_position.location.sock) ||
+            APICharacterLoaded(id) == NULL || FindGameObject(id, 0, 0, 0, 0) != NULL) {
+            continue;
+        }
+        AIPATHINFO_s *path_info = NULL;
+        AILOCATORSET *locator_set = AIPathFindLocatorSet(world->ai_sys, store_pack.custodian_locator_set);
+        if (locator_set != NULL) {
+            AILOCATOR *locators[64] = {};
+            AILocatorSet_CheckLocatorsStillAssigned(world->ai_sys, locator_set);
+            i32 count = 0;
+            for (i32 i = 0; i < locator_set->locator_count && count < 64; ++i) {
+                if (locator_set->assigned[i] == 0xff) {
+                    locators[count++] = &world->ai_sys->locators[locator_set->locator_entries[i]];
+                }
+            }
+            if (count != 0) {
+                AILOCATOR *locator = LocalGetNearestLocator(locators, count, 0.0f, &player->apiobj.position,
+                                                           1000000000.0f, 0, 1000000000.0f, 1000000000.0f);
+                if (locator != NULL) {
+                    path_info = reinterpret_cast<AIPATHINFO_s *>(&locator->path);
+                }
             }
         }
-        if ((completed_buildits & 0x80) != 0 && LevGizmo[0] != NULL) {
+        GameObject_s *custodian = AddDynamicCreature(id, &store_pack.custodian_position, store_pack.custodian_angle,
+                                                     const_cast<char *>("party"), path_info, NULL, 1, NULL, NULL, 0, 1);
+        if (custodian != NULL) {
+            custodian->field_0xee8 = store_pack.custodian_position.x;
+            custodian->field_0xeec = store_pack.custodian_position.z;
+            custodian->field_0x106e = store_pack.custodian_angle;
+            Store_RootPackCustodian(pack, custodian);
+            AddGameDebris(world->debris_sys, 92, &custodian->apiobj.collision_position);
+        }
+    }
+
+    if (buildits_reset == 0) {
+        i32 buildit_index = 0;
+        for (i32 i = 0; HubAreaInfo[i].area_name != NULL; ++i) {
+            if (HubAreaInfo[i].bonus_gizmo != NULL) {
+                if ((Game.field_0x7c26[2] & (1U << (buildit_index & 31))) != 0) {
+                    GizBuildIt_SetToEnd(static_cast<GIZBUILDIT_s *>(HubAreaInfo[i].bonus_gizmo->object));
+                }
+                ++buildit_index;
+            }
+        }
+        if ((Game.field_0x7c26[2] & 0x80) != 0 && LevGizmo[0] != NULL) {
             GizBuildIt_SetToEnd(static_cast<GIZBUILDIT_s *>(LevGizmo[0]->object));
         }
         ++buildits_reset;
     }
 
-    if (MenuInMemoryCard() != 0) {
+    const bool memory_card_menu = MenuInMemoryCard() != 0;
+    if (memory_card_menu) {
         Hub_ClearStats();
         Hub_PreventDropOutTime = 1.0f;
     } else if (menu >= 12 && menu <= 14) {
         Hub_PreventDropOutTime = 1.0f;
     }
 
-    if (menu == 8) {
+    const f32 pulse_time = NuFmod(GlobalTimer.time_elapsed, 0.5f);
+    TJTYPEA = static_cast<i32>(NU_SIN_LUT((pulse_time + pulse_time) * 65536.0f) * 16.0f + 80.0f);
+    if (menu == 8 && !memory_card_menu) {
         hub_jabbaawake = 1.0f;
     } else if (hub_jabbaawake > 0.0f) {
-        hub_jabbaawake -= FRAMETIME * 0.5f;
+        hub_jabbaawake -= FRAMETIME * 0.333f;
         if (hub_jabbaawake < 0.0f) {
             hub_jabbaawake = 0.0f;
         }
     }
 
-    Hub_HologramAlpha = SeekLinearF(Hub_HologramAlpha, Hub_HologramTargetAlpha, FRAMETIME * 2.0f);
+    Hub_HologramAlpha = SeekLinearF(Hub_HologramAlpha, Hub_HologramTargetAlpha, FRAMETIME * 20.0f);
     if (Hub_HologramAlpha == Hub_HologramTargetAlpha) {
-        Hub_HologramTargetAlpha = static_cast<f32>(qrand()) * (1.0f / 2147483647.0f) * 2.0f - 1.0f;
+        Hub_HologramTargetAlpha = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 2.0f - 1.0f;
     }
     if (Hub_PreventDropOutTime > 0.0f) {
         Hub_PreventDropOutTime -= FRAMETIME;
     }
 
     UpdateCharacterLoad();
+    bool shop_available = false;
+    if (SHOPACTIVE != 0) {
+        DrawCoinTotalTime = 1.0f;
+    } else if (GetMenuID() != 12) {
+        for (i32 player_index = 0; player_index < 2; ++player_index) {
+            GameObject_s *player = Player[player_index];
+            if (player != NULL && static_cast<i8>(player->apiobj.flags_low) < 0 &&
+                player->apiobj.field_0x27d != 0 && player->pad_gamepad->input_magnitude == 0.0f &&
+                player->pad_gamepad->previous_input_magnitude == 0.0f &&
+                (player->field_0x7a5 == 0x31 || player->field_0x7a5 == 0xff || player->field_0x7a5 == 0x32) &&
+                player->apiobj.field_0x281 == 0x0e) {
+                shop_available = true;
+            }
+        }
+        if (shop_available && !HubShopUnlocked()) {
+            if (GetHintFromUIButton() != NULL ||
+                (hintsys.active_hint != NULL && hintsys.active_hint->control_mode_ids[0] != 0x619)) {
+                Hint_CancelCurrent();
+                only_process_this_hint_id = 0x619;
+            }
+            show_unlock_shop_hint = 1;
+            shop_available = false;
+        }
+    }
+    if (LevTime[0] > 0.0f) {
+        if (MenuInMemoryCard() == 0) {
+            LevTime[0] -= FRAMETIME;
+        }
+    } else if (LevLock[0] != 0) {
+        if (!shop_available) {
+            LevLock[0] = 0;
+        }
+    } else if (GetMenuID() == -1 && shop_available) {
+        SHOPACTIVE = 1;
+        TempGame = Game;
+        MakeMenuPacket();
+        Hint_CancelCurrent();
+        NewMenu(13, -1, -1);
+        shop_save_done = 0;
+        shop_quit = 0;
+        ShopNameAlpha = 0.0f;
+        ShopLockedScale = 1.0f;
+        NuIOS_RecordFlurryEvent(const_cast<char *>("hubshop_enter"));
+    }
+    bool customiser_available = false;
+    if (Customiser_MenuAvailable(CharacterCustomiser) != 0) {
+        for (i32 player_index = 0; player_index < 2; ++player_index) {
+            GameObject_s *player = Player[player_index];
+            if (player != NULL && static_cast<i8>(player->apiobj.flags_low) < 0 &&
+                player->apiobj.field_0x27d != 0 && player->pad_gamepad->input_magnitude == 0.0f &&
+                player->pad_gamepad->previous_input_magnitude == 0.0f &&
+                (player->field_0x7a5 == 0x31 || player->field_0x7a5 == 0xff || player->field_0x7a5 == 0x32) &&
+                player->apiobj.field_0x281 == 0x0f) {
+                customiser_available = true;
+            }
+        }
+        if (customiser_available && !HubCustomiserUnlocked()) {
+            if (GetHintFromUIButton() != NULL ||
+                (hintsys.active_hint != NULL && hintsys.active_hint->control_mode_ids[0] != 0x61a)) {
+                Hint_CancelCurrent();
+                only_process_this_hint_id = 0x61a;
+            }
+            show_unlock_customiser_hint = 1;
+            customiser_available = false;
+        }
+    }
+    if (LevTime[1] > 0.0f) {
+        if (MenuInMemoryCard() == 0) {
+            LevTime[1] -= FRAMETIME;
+        }
+    } else if (LevLock[1] != 0) {
+        if (!customiser_available) {
+            LevLock[1] = 0;
+        }
+    } else if (GetMenuID() == -1 && customiser_available) {
+        OldCustomiseGame = Game;
+        MakeMenuPacket();
+        NewMenu(12, -1, -1);
+        Hint_CancelCurrent();
+        customiser_save_done = 0;
+        customiser_quit = 0;
+        customiser_changed = 0;
+    }
+    Customiser_Update(CharacterCustomiser, world);
+    const i32 missions_available = Missions_PartyAvailable(NULL);
+    bool mission_menu_available = false;
+    if (missions_available != 0) {
+        for (i32 player_index = 0; player_index < 2; ++player_index) {
+            GameObject_s *player = Player[player_index];
+            if (player != NULL && static_cast<i8>(player->apiobj.flags_low) < 0 &&
+                player->apiobj.field_0x27d != 0 && player->pad_gamepad->input_magnitude == 0.0f &&
+                player->pad_gamepad->previous_input_magnitude == 0.0f &&
+                (player->field_0x7a5 == 0x31 || player->field_0x7a5 == 0xff || player->field_0x7a5 == 0x32) &&
+                player->apiobj.field_0x281 == 0x14) {
+                mission_menu_available = true;
+            }
+        }
+    }
+    if (LevLock[3] != 0) {
+        if (!mission_menu_available) {
+            LevLock[3] = 0;
+        }
+    } else if (LevTime[3] > 0.0f) {
+        if (MenuInMemoryCard() == 0) {
+            LevTime[3] -= FRAMETIME;
+        }
+    } else if (GetMenuID() == -1 && mission_menu_available) {
+        MakeMenuPacket();
+        NewMenu(8, -1, -1);
+        Hint_CancelCurrent();
+    }
+    for (i32 pack = 5; pack <= 6; ++pack) {
+        GIZOBSTACLE_s *obstacle = LevGizObst[12 - pack];
+        if (obstacle != NULL) {
+            if (Store_IsPackUnlocked(pack) != 0) {
+                obstacle->progress_flags |= 1;
+                obstacle->runtime_flags &= static_cast<u8>(~8);
+            } else {
+                obstacle->progress_flags &= static_cast<u8>(~1);
+                obstacle->runtime_flags |= 8;
+            }
+        }
+    }
+    if (FadeSys.fade == 0.0f) {
+        i32 selected_episode = -1;
+        for (i32 i = 0; static_cast<u16>(HubEpisodeInfo[i].episode) <= 8; ++i) {
+            HUBEPISODEINFO_s &episode = HubEpisodeInfo[i];
+            if (episode.door != NULL &&
+                GizmoGetOutput(world->gizmo_sys, episode.door, static_cast<u16>(episode.flags), 0) != 0) {
+                selected_episode = episode.episode;
+                break;
+            }
+        }
+        for (i32 i = 0; static_cast<u16>(HubEpisodeInfo[i].episode) <= 8; ++i) {
+            HUBEPISODEINFO_s &episode = HubEpisodeInfo[i];
+            if (episode.door == NULL) {
+                continue;
+            }
+            GIZOBSTACLE_s *door = static_cast<GIZOBSTACLE_s *>(episode.door->object);
+            if (selected_episode != -1 && selected_episode != episode.episode) {
+                door->runtime_flags |= 8;
+            } else if (static_cast<u8>(episode.force_open) != 0 ||
+                       Episode_CountOpenAreas(episode.episode, -1, Game_AreaSave) != 0) {
+                door->runtime_flags &= static_cast<u8>(~8);
+            }
+        }
+        if (missions_available != 0) {
+            // Original 0x1b762b writes the low byte of the Jabba entry's override.
+            HubEpisodeInfo[8].force_open = (HubEpisodeInfo[8].force_open & ~0xff) | 1;
+        }
+        const i32 gold_bricks = Game.field_0x7c26[0];
+        i32 buildit_index = 0;
+        for (i32 i = 0; HubAreaInfo[i].area_name != NULL; ++i) {
+            GIZMO *gizmo = HubAreaInfo[i].bonus_gizmo;
+            if (gizmo == NULL) {
+                continue;
+            }
+            if (GizmoGetOutput(world->gizmo_sys, gizmo, 0, 0) == 0) {
+                GIZBUILDIT_s *buildit = static_cast<GIZBUILDIT_s *>(gizmo->object);
+                if (gold_bricks < buildit->anim_object_count) {
+                    GizmoSetVisibility(world->gizmo_sys, gizmo, 0, 0);
+                    if (buildit->linked_buildit != NULL) {
+                        buildit = buildit->linked_buildit;
+                    }
+                    for (i32 piece = 0; piece < buildit->anim_object_count; ++piece) {
+                        if (buildit->anim_objects[piece] != NULL) {
+                            NuSpecialSetVisibility(&buildit->anim_objects[piece]->special, piece < gold_bricks);
+                        }
+                    }
+                } else if ((buildit->availability_flags & GIZBUILDIT_AVAILABILITY_ACTIVE) == 0) {
+                    GizmoActivate(world->gizmo_sys, gizmo, 1, 0);
+                }
+            }
+            if (GizmoGetOutput(world->gizmo_sys, gizmo, 0, 0) != 0) {
+                const u32 bit = 1U << (buildit_index & 31);
+                if ((Game.field_0x7c26[2] & bit) == 0) {
+                    Game.field_0x7c26[2] = static_cast<u8>(Game.field_0x7c26[2] | bit);
+                    TriggerAutoSave();
+                }
+            }
+            ++buildit_index;
+        }
+        if (hub_episode_time == 0.0f) {
+            hub_episode = selected_episode;
+        }
+        const f32 target = hub_episode != -1 && hub_episode == selected_episode ? 1.0f : 0.0f;
+        hub_episode_time = SeekLinearF(hub_episode_time, target, FRAMETIME * 2.0f);
+    } else {
+        hub_episode_time = 0.0f;
+        hub_episode = -1;
+    }
+    if (GameCam->sock_position.location.sock == 0) {
+        NuSpecialSetVisibility(&LevHSpecial[16], Store_IsPackUnlocked(6));
+    } else if (GameCam->sock_position.location.sock == 7) {
+        if (NuSpecialExistsFn(&LevHSpecial[6]) != 0) {
+            NuSpecialSetVisibility(&LevHSpecial[6], missions_available == 0);
+        }
+        if (NuSpecialExistsFn(&LevHSpecial[7]) != 0) {
+            NuSpecialSetVisibility(&LevHSpecial[7], missions_available != 0);
+        }
+    }
+    i32 completed_areas;
+    Episode_IsComplete(HubEpisodeInfo[0].data, &completed_areas);
+    if (completed_areas == 6) {
+        HubAreaInfo[6].flags = (HubAreaInfo[6].flags & ~0xff00) | 0x100;
+    }
+    Episode_IsComplete(HubEpisodeInfo[1].data, &completed_areas);
+    if (completed_areas == 6) {
+        HubAreaInfo[13].flags = (HubAreaInfo[13].flags & ~0xff00) | 0x100;
+    }
+    Episode_IsComplete(HubEpisodeInfo[2].data, &completed_areas);
+    if (completed_areas == 6) {
+        HubAreaInfo[20].flags = (HubAreaInfo[20].flags & ~0xff00) | 0x100;
+    }
+    Episode_IsComplete(HubEpisodeInfo[3].data, &completed_areas);
+    if (completed_areas == 6) {
+        HubAreaInfo[27].flags = (HubAreaInfo[27].flags & ~0xff00) | 0x100;
+    }
+    Episode_IsComplete(HubEpisodeInfo[4].data, &completed_areas);
+    if (completed_areas == 6) {
+        HubAreaInfo[34].flags = (HubAreaInfo[34].flags & ~0xff00) | 0x100;
+    }
+    Episode_IsComplete(HubEpisodeInfo[5].data, &completed_areas);
+    if (completed_areas == 6) {
+        HubAreaInfo[41].flags = (HubAreaInfo[41].flags & ~0xff00) | 0x100;
+    }
+    i32 selected_area = -1;
+    for (i32 i = 0; HubAreaInfo[i].area_name != NULL; ++i) {
+        HUBAREAINFO_s &area = HubAreaInfo[i];
+        if (area.area != NULL && area.door != NULL && GizmoGetOutput(world->gizmo_sys, area.door, 1, 0) != 0) {
+            selected_area = area.area->index;
+            break;
+        }
+    }
+    if (selected_area != -1) {
+        for (i32 i = 0; HubAreaInfo[i].area_name != NULL; ++i) {
+            HUBAREAINFO_s &area = HubAreaInfo[i];
+            if (area.door != NULL && area.area != NULL && area.area->index != selected_area) {
+                static_cast<GIZOBSTACLE_s *>(area.door->object)->runtime_flags |= 8;
+            }
+        }
+    } else {
+        for (i32 i = 0; HubAreaInfo[i].area_name != NULL; ++i) {
+            HUBAREAINFO_s &area = HubAreaInfo[i];
+            if (area.door == NULL) {
+                continue;
+            }
+            if (Episode_CountOpenAreas(static_cast<i8>(area.area->episode_index), area.area->index, Game_AreaSave) != 0 ||
+                (area.bonus_gizmo != NULL && GizmoGetOutput(world->gizmo_sys, area.bonus_gizmo, 0, 0) != 0) ||
+                ((area.flags >> 8) & 0xff) == 1) {
+                static_cast<GIZOBSTACLE_s *>(area.door->object)->runtime_flags &= static_cast<u8>(~8);
+                NuSpecialSetVisibility(&area.lock, 1);
+            }
+        }
+        static NUVEC minikit_hubpos = {-27.0f, 0.0f, -24.6f};
+        if (E1VEHICLE_ADATA != NULL && NuVecXZDistSqr(&player->apiobj.position, &minikit_hubpos, NULL) < 0.25f) {
+            selected_area = E1VEHICLE_ADATA->index;
+            if (!HubMinikitViewerUnlocked()) {
+                if (GetHintFromUIButton() != NULL ||
+                    (hintsys.active_hint != NULL && hintsys.active_hint->control_mode_ids[0] != 0x61b)) {
+                    Hint_CancelCurrent();
+                    only_process_this_hint_id = 0x61b;
+                }
+                show_unlock_minikitviewer_hint = 1;
+                selected_area = -1;
+            }
+        }
+    }
+    const i32 area_menu = GetMenuID();
+    if (FadeSys.fade == 0.0f && area_menu == -1) {
+        if (hub_episode != -1 && hub_episode_time > 0.0f) {
+            selected_area = -1;
+        }
+        if (hub_area_time == 0.0f) {
+            hub_area = selected_area;
+            last_hub_area = selected_area;
+        }
+        const f32 target = hub_area != -1 && hub_area == selected_area ? 1.0f : 0.0f;
+        hub_area_time = SeekLinearF(hub_area_time, target, FRAMETIME * 2.0f);
+        if (hub_area_time == 1.0f && VEHICLES_ADATA != NULL && VEHICLES_ADATA->index == hub_area &&
+            PLATFORM_LDATA != NULL) {
+            NewLData = PLATFORM_LDATA;
+            Hub_ActivateDoorMenu(&NewLData);
+        }
+    } else {
+        Hub_ResetPanel();
+    }
+    for (i32 i = 0; HubAreaInfo[i].area_name != NULL; ++i) {
+        HUBAREAINFO_s &area = HubAreaInfo[i];
+        if (area.area == NULL || area.bonus_gizmo_2 == NULL ||
+            GizmoGetOutput(world->gizmo_sys, area.bonus_gizmo_2, 1, 0) == 0) {
+            continue;
+        }
+        NUVEC *position = GizmoGetPos(world->gizmo_sys, area.bonus_gizmo_2);
+        if (position == NULL) {
+            continue;
+        }
+        if (Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.flags_low) < 0 &&
+            NuVecDistSqr(&Player[0]->apiobj.position, position, NULL) < 0.25f) {
+            break;
+        }
+        if (Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.flags_low) < 0 &&
+            NuVecDistSqr(&Player[1]->apiobj.position, position, NULL) < 0.25f) {
+            break;
+        }
+    }
+    i32 minikit_candidate = -1;
+    if (hub_minikitviewer_gizmo != NULL && GizmoGetOutput(world->gizmo_sys, hub_minikitviewer_gizmo, 1, 0) != 0 &&
+        hub_minikitviewer_area != -1 && FreePlayUnlocked()) {
+        minikit_candidate = hub_minikitviewer_area;
+    }
+    if (LevLock[4] != 0) {
+        if (minikit_candidate == -1) {
+            LevLock[4] = 0;
+        }
+    } else if (LevTime[4] > 0.0f) {
+        LevTime[4] -= FRAMETIME;
+    }
+    if (FadeSys.fade != 0.0f) {
+        hub_minikitarea = -1;
+        hub_minikitarea_time = 0.0f;
+        hub_minikitarea_opentime = 0.0f;
+    } else if (LevLock[4] == 0) {
+        i32 selected_minikit = -1;
+        if (!(hub_episode != -1 && hub_episode_time > 0.0f) &&
+            !(hub_area != -1 && hub_area_time > 0.0f &&
+              (E1VEHICLE_ADATA == NULL || hub_area != E1VEHICLE_ADATA->index)) && minikit_candidate != -1) {
+            for (i32 i = 0; i < 2; ++i) {
+                if (Player[i] != NULL && static_cast<i8>(Player[i]->apiobj.flags_low) < 0 &&
+                    Player[i]->pad_gamepad->input_magnitude == 0.0f) {
+                    selected_minikit = hub_minikitviewer_area;
+                }
+            }
+        }
+        if (hub_minikitarea_time == 0.0f) {
+            if (hub_minikitarea != selected_minikit) {
+                hub_minikitarea_opentime = 0.0f;
+            }
+            hub_minikitarea = selected_minikit;
+        }
+        f32 target = 0.0f;
+        if (hub_minikitarea != -1 && hub_minikitarea == selected_minikit) {
+            hub_minikitarea_opentime += FRAMETIME;
+            target = 1.0f;
+        }
+        if (GetMenuID() == 14) {
+            target = 1.0f;
+        }
+        hub_minikitarea_time = SeekLinearF(hub_minikitarea_time, target, FRAMETIME * 2.0f);
+        if (hub_minikitarea_opentime >= 1.0f) {
+            MakeMenuPacket();
+            Hint_CancelCurrent();
+            NewMenu(14, -1, -1);
+            PlaySfxAndSetPitch(const_cast<char *>("JForcePush"), NULL, 1.5f);
+        }
+    }
     Hub_UpdateMiniKits(world);
 
-    if (hub_buildit_time != 0.0f) {
-        hub_buildit_time = SeekLinearF(hub_buildit_time, 0.0f, FRAMETIME * 2.0f);
+    GIZBUILDIT_s *nearest_buildit = GizBuildIt_FindNearest(WORLD, Player[0], BUILDIT_FIND_ANY, ShadowMode);
+    if (FadeSys.fade == 0.0f) {
+        i32 selected_buildit = -1;
+        const bool player_can_build = Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.flags_low) < 0 &&
+                                      Player[0]->field_0x7a5 != 0x2d;
+        for (i32 i = 0; HubAreaInfo[i].area_name != NULL && selected_buildit == -1; ++i) {
+            GIZMO *gizmo = HubAreaInfo[i].bonus_gizmo;
+            if (gizmo != NULL && GizmoGetOutput(world->gizmo_sys, gizmo, 0, 0) == 0 && player_can_build) {
+                GIZBUILDIT_s *buildit = static_cast<GIZBUILDIT_s *>(gizmo->object);
+                if ((buildit->availability_flags & GIZBUILDIT_AVAILABILITY_INTERACTING) != 0 ||
+                    (nearest_buildit != NULL && nearest_buildit == buildit)) {
+                    selected_buildit = i;
+                }
+            }
+        }
+        if (LevGizmo[0] != NULL) {
+            if (selected_buildit == -1 && GizmoGetOutput(world->gizmo_sys, LevGizmo[0], 0, 0) == 0) {
+                if (player_can_build &&
+                    ((LevBuildIt[0]->availability_flags & GIZBUILDIT_AVAILABILITY_INTERACTING) != 0 ||
+                     (nearest_buildit != NULL && nearest_buildit == LevBuildIt[0]))) {
+                    selected_buildit = 999;
+                }
+                // Original 0x1b7edc / 0x1b8880: the fountain displays one
+                // progress piece per two gold bricks until all 160 are earned.
+                const f32 gold_bricks = static_cast<f32>(Game.field_0x7c26[0]);
+                if (gold_bricks < 160.0f) {
+                    GizmoSetVisibility(world->gizmo_sys, LevGizmo[0], 0, 0);
+                    const i32 visible_pieces = static_cast<i32>(static_cast<f32>(Game.field_0x7c26[0]) * 0.5f);
+                    GIZBUILDIT_s *buildit = static_cast<GIZBUILDIT_s *>(LevGizmo[0]->object);
+                    if (buildit->linked_buildit != NULL) {
+                        buildit = buildit->linked_buildit;
+                    }
+                    for (i32 i = 0; i < buildit->anim_object_count; ++i) {
+                        if (buildit->anim_objects[i] != NULL) {
+                            NuSpecialSetVisibility(&buildit->anim_objects[i]->special, i < visible_pieces ? 1 : 0);
+                        }
+                    }
+                } else if ((static_cast<GIZBUILDIT_s *>(LevGizmo[0]->object)->availability_flags &
+                            GIZBUILDIT_AVAILABILITY_ACTIVE) == 0) {
+                    GizmoActivate(world->gizmo_sys, LevGizmo[0], 1, 0);
+                }
+            } else if (GizmoGetOutput(world->gizmo_sys, LevGizmo[0], 0, 0) != 0) {
+                Game.field_0x7c26[2] |= 0x80;
+            }
+        }
+        if (hub_buildit_time == 0.0f) {
+            hub_buildit = selected_buildit;
+        }
+        const f32 target = hub_buildit != -1 && hub_buildit == selected_buildit ? 1.0f : 0.0f;
+        hub_buildit_time = SeekLinearF(hub_buildit_time, target, FRAMETIME * 2.0f);
+    } else {
+        hub_buildit_time = 0.0f;
+        hub_buildit = -1;
     }
     if (Hub_UpdateAIFn != NULL) {
         Hub_UpdateAIFn(world);

@@ -83,9 +83,6 @@ static __used__ void DrawCoinTotal(i32 source, i32 hide_super_story_target) {
     CoinTotal_Draw(total, y, CoinTotalScale, 1, 1.0f, red, green, blue);
 }
 
-static __used__ void DrawPackButton(GAMEMESSAGE_s *, nuvec_s *, float) {
-}
-
 static __used__ void DrawSpaceLevel(spacelevel_s *) {
 }
 

@@ -789,9 +789,7 @@ void NuSoundSystem::ReleaseDecoder(NuSoundDecoder *decoder) {
     // libTTapp.so 0x31aafb: invoke vtable slot 0 (the complete-object
     // destructor) without using the deleting-destructor slot; the scratch
     // allocator owns the storage release below.
-    typedef void (*CompleteDestructor)(void *);
-    CompleteDestructor *vtable = *(CompleteDestructor **)decoder;
-    vtable[0](decoder);
+    decoder->~NuSoundDecoder();
     FreeMemory(MemoryDiscipline::SCRATCH, reinterpret_cast<usize>(decoder), 0);
 }
 
@@ -814,9 +812,7 @@ void NuSoundSystem::ReleaseEffect(NuSoundEffect *effect) {
     sAllocdMemory[static_cast<i32>(MemoryDiscipline::SCRATCH)] -= sizeof(NuEListNode<NuSoundEffect>);
 
     effect->Shutdown();
-    typedef void (*CompleteDestructor)(void *);
-    CompleteDestructor *vtable = *reinterpret_cast<CompleteDestructor **>(effect);
-    vtable[4](effect);
+    effect->~NuSoundEffect();
     FreeMemory(MemoryDiscipline::SCRATCH, reinterpret_cast<usize>(effect), 0);
 }
 
@@ -843,9 +839,7 @@ void NuSoundSystem::OnExitSystemMenu() {
 void NuSoundSystem::ReleaseSample(NuSoundSample *sample) {
     this->decoder_list.Remove(reinterpret_cast<NuSoundDecoder *>(sample));
 
-    typedef void (*CompleteDestructor)(void *);
-    CompleteDestructor *vtable = *reinterpret_cast<CompleteDestructor **>(sample);
-    vtable[0](sample);
+    sample->~NuSoundSample();
     FreeMemory(MemoryDiscipline::SCRATCH, reinterpret_cast<usize>(sample), 0);
 }
 
@@ -910,9 +904,7 @@ void NuSoundSystem::Shutdown() {
     NuSoundDecoder *entry = this->decoder_list.Front();
     while (entry != this->decoder_list.End()) {
         NuSoundDecoder *next = *reinterpret_cast<NuSoundDecoder **>(reinterpret_cast<u8 *>(entry) + 0x24);
-        typedef void (*CompleteDestructor)(void *);
-        CompleteDestructor *vtable = *reinterpret_cast<CompleteDestructor **>(entry);
-        vtable[0](entry);
+        entry->~NuSoundDecoder();
         FreeMemory(MemoryDiscipline::SCRATCH, reinterpret_cast<usize>(entry), 0);
         entry = next;
     }
@@ -1128,9 +1120,7 @@ void NuSoundSystem::ReleaseVoice(NuSoundVoice *voice) {
 
     // libTTapp.so 0x31b394: run the voice's complete destructor (vtable slot
     // 0, no free), then hand the block back through FreeMemory(SCRATCH).
-    typedef void (*CompleteDestructor)(void *);
-    CompleteDestructor *vtable = *(CompleteDestructor **)voice;
-    vtable[0](voice);
+    voice->~NuSoundVoice();
     NuSoundSystem::FreeMemory(NuSoundSystem::MemoryDiscipline::SCRATCH, (usize)voice, 0);
 
     NuSoundWeakPtrListNode::sPtrAccessLock.Unlock();

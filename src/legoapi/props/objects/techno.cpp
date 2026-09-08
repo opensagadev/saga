@@ -1,6 +1,9 @@
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
+#include "globals.h"
+#include "legoapi/world/world.h"
+#include "legoapi/gizmos/object/technos.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -29,5 +32,12 @@ void Technos_MoveTarget(TECHNO_s *, GameObject_s *) {
 void GizTechno_CanUseTechno(GameObject_s *, TECHNO_s *) {
 }
 
-void Technos_FindControllingTechno(GameObject_s *) {
+TECHNO *Technos_FindControllingTechno(GameObject_s *object) {
+    if (object != NULL) {
+        for (i32 i = 0; i < WORLD->ntechnos; ++i) {
+            TECHNO *techno = &WORLD->technos[i];
+            if (techno->target_mode == 1 && techno->controlled_object == object) return techno;
+        }
+    }
+    return NULL;
 }

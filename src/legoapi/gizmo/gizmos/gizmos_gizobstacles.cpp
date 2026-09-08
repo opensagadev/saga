@@ -10,6 +10,13 @@
 #include "legoapi/world/world.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/characters/core/players.h"
+
+void GizmoBlowUpTypeBlowUp(WORLDINFO_s *, i32, NUVEC *);
+void GizObstacle_EvalAveragePosAndRadius(GIZOBSTACLE_s *, i32);
+void NewBuzz(nupad_s *, f32, i32);
 
 namespace {
 
@@ -18,13 +25,6 @@ namespace {
         u8 flags_0x04;
         u8 flags_0x05;
     };
-
-    static bool ObstacleCharacterInfoAllowsTrigger(const GameObject_s &) {
-        // TODO: Restore the target CInfo table (0x10-byte entries, exclusion bit
-        // at +9) and enforce its bit 0x80 here. Until the real table exists, the
-        // safe normal-code fallback is to avoid rejecting otherwise valid actors.
-        return true;
-    }
 
     static bool ObstacleUsesBoxTrigger(const GIZOBSTACLE_s *obstacle) {
         return obstacle->mode == 5 || obstacle->mode == 6;
@@ -65,7 +65,38 @@ void GizObstacle_Stop(GIZOBSTACLE_s *obstacle) {
     }
 }
 
-void GizObstacles_Hit(void *, GIZOBSTACLE_s *, nuvec_s *, i32, i32) {
+i32 GizObstacles_Hit(void *context, GIZOBSTACLE_s *obstacle, nuvec_s *, i32 player, i32) {
+    if ((obstacle->progress_flags & 2) == 0 || (obstacle->progress_flags & 1) == 0 ||
+        (obstacle->runtime_flags & 0x80) != 0) return 0;
+
+    if ((obstacle->config_flags & 0x800) != 0) {
+        obstacle->runtime_flags |= 0x40;
+    } else {
+        if ((obstacle->config_flags & 0x1000) == 0) return 0;
+        if (obstacle->blowup_type != -1) {
+            if ((obstacle->config_flags & 0x200) != 0) {
+                if (obstacle->anim_set != NULL) {
+                    for (GAMEANIMOBJ_s *object = obstacle->anim_set->objects; object != NULL; object = object->next) {
+                        NUVEC *position = NuSpecialGetDrawPos(&object->special);
+                        if (position != NULL) {
+                            GizmoBlowUpTypeBlowUp(static_cast<WORLDINFO_s *>(context), obstacle->blowup_type, position);
+                        }
+                    }
+                }
+            } else {
+                GizmoBlowUpTypeBlowUp(static_cast<WORLDINFO_s *>(context), obstacle->blowup_type,
+                                     &obstacle->evaluated_position);
+            }
+        }
+        GameAnimSet_JumpToEnd(obstacle->anim_set);
+        GizObstacle_EvalAveragePosAndRadius(obstacle, 2);
+        GameAnimSet_SetVisibility(obstacle->anim_set, 0);
+        obstacle->runtime_flags |= 0x80;
+    }
+    if (player != -1 && static_cast<i8>(Player[player]->apiobj.field_0x1f8) < 0) {
+        NewBuzz(Player[player]->pad_gamepad->pad, 0.1f, 0);
+    }
+    return 1;
 }
 
 void GizObstacle_JumpToEnd(GIZOBSTACLE_s *obstacle) {
@@ -110,7 +141,15 @@ void GizObstacles_AddTrigger(nuvec_s *position) {
     gizobstacletriggers[ngizobstacletriggers++] = position;
 }
 
-void GizObstacles_TotalScore(void *) {
+u32 GizObstacles_TotalScore(void *context) {
+    GIZOBSTACLESYS_s *system = static_cast<WORLDINFO_s *>(context)->giz_obstacle_sys;
+    u32 total = 0;
+    if (system != NULL && system->obstacles != NULL) {
+        GIZOBSTACLE_s *obstacle = system->obstacles;
+        for (i32 i = 0; i < system->count; ++i, ++obstacle)
+            total += static_cast<u16>(obstacle->pickup_count);
+    }
+    return total;
 }
 
 void GizObstacle_PlayForwards(GIZOBSTACLE_s *obstacle) {
@@ -256,7 +295,7 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
 
             if (((obstacle->config_flags & GIZOBSTACLE_CONFIG_REQUIRE_ACTIVE_PLAYER) != 0 &&
                  (object->apiobj.field_0x1f8 & APIOBJECT_FLAG_PLAYER_ACTIVE) == 0) ||
-                !ObstacleCharacterInfoAllowsTrigger(*object) ||
+                (CInfo[object->character_context].flags & 0x8000) != 0 ||
                 ((obstacle->config_flags & GIZOBSTACLE_CONFIG_REQUIRE_LINKED_OBJECT) != 0 &&
                  object->field_0xcc0 == NULL) ||
                 ((obstacle->config_flags & GIZOBSTACLE_CONFIG_REQUIRE_CHARACTER_DATA_FLAG_04) != 0 &&
@@ -290,12 +329,10 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
 
             const f32 distance_squared =
                 NuVecDistSqr(&obstacle->secondary_position, &object->apiobj.lower_position, NULL);
-            NUVEC object_position = {object->apiobj.pos_x, object->apiobj.pos_y, object->apiobj.pos_z};
-            const bool within_box =
-                !ObstacleUsesBoxTrigger(obstacle) || GizObstacle_PosWithinBox(obstacle, &object_position) != 0;
-
             if (distance_squared < closest_distance_squared) {
-                if (within_box && GizObstacle_SatisfyingTerrainChecks(obstacle, object) != 0) {
+                if ((!ObstacleUsesBoxTrigger(obstacle) ||
+                     GizObstacle_PosWithinBox(obstacle, &object->apiobj.collision_position) != 0) &&
+                    GizObstacle_SatisfyingTerrainChecks(obstacle, object) != 0) {
                     if (player_index != -1) {
                         players_not_satisfying_terrain &= ~(1u << (static_cast<u8>(player_index) & 31));
                     }
@@ -304,7 +341,9 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
                     closest_object = object;
                 }
             } else if ((obstacle->config_flags & GIZOBSTACLE_CONFIG_REQUIRE_ALL_PLAYERS) != 0 && player_index != -1 &&
-                       distance_squared < radius_squared && within_box &&
+                       distance_squared < radius_squared &&
+                       (!ObstacleUsesBoxTrigger(obstacle) ||
+                        GizObstacle_PosWithinBox(obstacle, &object->apiobj.collision_position) != 0) &&
                        GizObstacle_SatisfyingTerrainChecks(obstacle, object) != 0) {
                 players_not_satisfying_terrain &= ~(1u << (static_cast<u8>(player_index) & 31));
             }

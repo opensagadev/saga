@@ -53,7 +53,6 @@ extern i32 SetObjOnSurface(GameObject_s *obj, i32 mode);
 extern void GizForce_ResetLOS(GameObject_s *obj);
 extern void PortalGameObject(GameObject_s *obj, i32 enable, i32 immediate, i16 portal, nugscn_s *scene);
 
-extern "C" void ComplexSockAngles(SOCKPOSITION *position);
 
 void ResetPlayerAI(GameObject_s *obj);
 void ResetPlayerMoves(GameObject_s *obj);
@@ -857,16 +856,22 @@ void Player_CopyEssentials(GameObject_s *source, GameObject_s *destination) {
     destination->apiobj.field_0x1f4 = source->apiobj.field_0x1f4;
 }
 
-void Player_HasDeflectBolts(GameObject_s *) {
+i32 Player_HasDeflectBolts(GameObject_s *object) {
+    if (Cheats_CheckFlags(0x80000) != 0 || (object != NULL && object->field_0xdec > 0.0f)) return 1;
+    return 0;
 }
 
 void Player_ToggleCharacter(GameObject_s *, i32, i32) {
 }
 
-void Player_HasInvincibility(GameObject_s *) {
+i32 Player_HasInvincibility(GameObject_s *object) {
+    if (Cheats_CheckFlags(0x80) != 0 || (object != NULL && object->field_0xdec > 0.0f)) return 1;
+    return 0;
 }
 
-void Player_HasDoubleBoltDamage(GameObject_s *) {
+i32 Player_HasDoubleBoltDamage(GameObject_s *object) {
+    if (Cheats_CheckFlags(2) != 0 || (object != NULL && object->field_0xdec > 0.0f)) return 1;
+    return 0;
 }
 
 void PlayerButton_OnHold_Callback(MechTouchUIElement &, TouchHolder &) {
@@ -882,7 +887,12 @@ i32 Player_HasDoubleWeaponDamage(GameObject_s *object) {
 void PlayerButton_OnLeave_Callback(MechTouchUIElement &, TouchHolder &) {
 }
 
-void Player_HasDoubleBoltDamage_FromBolt(BOLT_s *) {
+i32 Player_HasDoubleBoltDamage_FromBolt(BOLT_s *bolt) {
+    i32 player;
+    if (bolt->flags & 1) player = 0;
+    else if (bolt->flags & 2) player = 1;
+    else return 0;
+    return Player_HasDoubleBoltDamage(Player[player]);
 }
 
 void PlayerButton_OnClick_Callback_NextButton(MechTouchUIElement &, TouchHolder &) {
@@ -979,7 +989,7 @@ void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap
         obj->sock_position.location.segment = -1;
         if (WORLD->sock_sys != NULL) {
             ComplexSockPosition(WORLD->sock_sys, &obj->apiobj.position, -1, -1, &obj->sock_position);
-            ComplexSockAngles(&obj->sock_position);
+            ComplexSockAngles(&obj->sock_angles);
         }
 
         u8 player_index = static_cast<u8>(obj->apiobj.field_0x27c);
@@ -1066,7 +1076,131 @@ void ResetPlayer(GameObject_s *obj, i32 reset_moves, nuvec_s *position, i32 snap
     obj->field_0xe21 |= 0x80;
 }
 
-void ResetPlayerAI(GameObject_s *) {
+void StarWars_AutoSetAICapabilities(GameObject_s *object);
+i32 CanPullLevers(i32 id);
+extern f32 DEFAULT_MOVE_RANGE;
+
+i32 CanPullLevers(i32 id) {
+    u32 flags = CDataList[id].model_flags;
+    if ((flags & 0x1000010) == 0x1000010) return 0;
+    return (flags & 0x40088) != 0;
+}
+
+void InitPlayerAI(GameObject_s *object) {
+    StarWars_AutoSetAICapabilities(object);
+    u8 *b = reinterpret_cast<u8 *>(object);
+    i32 can_pull_levers = CanPullLevers(object->id);
+    b[0xefe] = (b[0xefe] & 0x7f) | (can_pull_levers << 7);
+    b[0x4a6] &= 0xfe;
+    object->ai.character_type_mask_low = 0;
+    object->ai.character_type_mask_high = 0;
+    if (FreePlay && !(object->apiobj.field_0x1f4 & 0x400)) {
+        object->ai.character_type_mask_low = ~u32(0);
+        object->ai.character_type_mask_high = ~u32(0);
+    } else if (SpecialRouteCharacterTypeIDFn) {
+        u8 *row = *reinterpret_cast<u8 **>(b + 0xcac);
+        char *name = row ? *reinterpret_cast<char **>(row + 4) : object->apiobj.character_data->file;
+        u8 type = SpecialRouteCharacterTypeIDFn(name);
+        if (type != 0xff) {
+            u64 mask = type <= 63 ? u64(1) << type : ~u64(0);
+            object->ai.character_type_mask_low = static_cast<u32>(mask);
+            object->ai.character_type_mask_high = static_cast<u32>(mask >> 32);
+        }
+    }
+    b[0x370] = 0;
+    b[0xef8] = ((b[0xef8] | 0xa) & 0x2a) |
+               ((object->apiobj.character_data->model_flags >> 5) & 4);
+    b[0xef9] &= 0xf4;
+    b[0xefa] = (b[0xefa] & 0xc3) | ((object->apiobj.character_data->model_flags >> 23) & 0x10);
+    b[0xefb] &= 0x20;
+    b[0xefc] &= 0xc0;
+    b[0xefd] &= 0xe6;
+    b[0xeff] &= 0xc6;
+    b[0xf00] &= 0x58;
+    b[0xf01] &= 0xe9;
+    b[0xf02] = (b[0xf02] & 0x53) | ((object->apiobj.field_0x1f4 & 0x400) ? 0 : 4);
+    b[0xf03] &= 0x30;
+    b[0xf04] &= 0xfc;
+    object->run_speed_override = 1000000000.0f;
+    object->walk_speed_override = 1000000000.0f;
+    object->hover_height_override = 1000000000.0f;
+    // The original scale-override sentinel; zero would hide the character.
+    object->field_0x1038 = 1000000000.0f;
+    *reinterpret_cast<f32 *>(b + 0x4ac) = DEFAULT_MOVE_RANGE;
+    b[0x4a7] = (b[0x4a7] & 0xe3) | ((DEFAULT_MOVE_RANGE > 0.0f) << 2);
+    b[0x7b5] &= 0xfd;
+    b[0x4a5] &= 0xaf;
+    // Scalar stores follow the original AI state layout.
+    *reinterpret_cast<f32 *>(b + 0xed4) = 1.0f;
+    *reinterpret_cast<f32 *>(b + 0x3a0) = 1000000000.0f;
+    *reinterpret_cast<f32 *>(b + 0x3b0) = 1000000000.0f;
+    object->doomed_escape_locator = NULL;
+    *reinterpret_cast<u32 *>(b + 0x1058) = 0;
+    *reinterpret_cast<u32 *>(b + 0xecc) = 0;
+    *reinterpret_cast<u32 *>(b + 0x394) = 0;
+    *reinterpret_cast<u32 *>(b + 0x39c) = 0;
+    *reinterpret_cast<u32 *>(b + 0xed0) = 0;
+    *reinterpret_cast<u32 *>(b + 0x3a4) = 0;
+    *reinterpret_cast<u32 *>(b + 0x3ac) = 0;
+    *reinterpret_cast<u32 *>(b + 0x2a0) = 0;
+    *reinterpret_cast<u32 *>(b + 0x2a4) = 0;
+    *reinterpret_cast<u32 *>(b + 0xebc) = 0;
+    *reinterpret_cast<u32 *>(b + 0xec0) = 0;
+    *reinterpret_cast<u32 *>(b + 0x10b0) = 0;
+    *reinterpret_cast<u32 *>(b + 0x10b4) = 0;
+    *reinterpret_cast<u32 *>(b + 0xec4) = 0;
+    *reinterpret_cast<u32 *>(b + 0x448) = 0;
+    *reinterpret_cast<u32 *>(b + 0xec8) = 0;
+    *reinterpret_cast<u32 *>(b + 0xed8) = 0;
+    memset(b + 0xf48, 0, 0x68);
+    b[0x1089] = 0;
+    *reinterpret_cast<u32 *>(b + 0xfe4) = 0;
+    *reinterpret_cast<u32 *>(b + 0x3b4) = 0;
+    *reinterpret_cast<u32 *>(b + 0x294) = 0;
+    *reinterpret_cast<u32 *>(b + 0x298) = 0;
+    *reinterpret_cast<u32 *>(b + 0x29c) = 0;
+    bool special = (object->apiobj.character_data->model_flags & 0x4000) &&
+                   (b[0x27c] == 0xff || *reinterpret_cast<void **>(b + 0xcc0));
+    b[0x1f8] = (b[0x1f8] & 0xfd) | (special << 1);
+    u8 *config = reinterpret_cast<u8 *>(object->apiobj.character_data->player_config);
+    b[0x1f9] &= 0xf7;
+    b[0x1fa] &= 0xe7;
+    b[0xeff] = (b[0xeff] & 0x7b) | ((*reinterpret_cast<u32 *>(config + 0x90) >> 6) & 0x80);
+    b[0xefe] &= 0xbf;
+    b[0x108f] = 0;
+    *reinterpret_cast<u32 *>(b + 0x10c0) = 0;
+    *reinterpret_cast<u32 *>(b + 0x10d8) = 0;
+    *reinterpret_cast<f32 *>(b + 0x1040) = 1.0f;
+    *reinterpret_cast<u32 *>(b + 0x1044) = 0;
+    b[0xf04] = (b[0xf04] & 0x73) | (config[0x98] & 0x80);
+    ResetPlayerAI(object);
+}
+
+void ResetPlayerAI(GameObject_s *object) {
+    u8 *b = reinterpret_cast<u8 *>(object);
+    object->field_0x109c = 0;
+    b[0x4a4] &= 0x9f;
+    b[0xefe] &= 0xdf;
+    b[0x4a5] &= 0xfd;
+    *reinterpret_cast<u32 *>(b + 0x44c) = 0;
+    *reinterpret_cast<u32 *>(b + 0x450) = 0;
+    *reinterpret_cast<i16 *>(b + 0x3e6) = -1;
+    *reinterpret_cast<i16 *>(b + 0x3e8) = -1;
+    *reinterpret_cast<u32 *>(b + 0x440) = 0;
+    b[0x1092] = 0;
+    b[0x1093] = 0;
+    *reinterpret_cast<u32 *>(b + 0x1098) = 0;
+    b[0x1094] = 0;
+    *reinterpret_cast<u32 *>(b + 0xf08) = 0;
+    *reinterpret_cast<u32 *>(b + 0xf0c) = 0;
+    *reinterpret_cast<u32 *>(b + 0xf10) = 0;
+    *reinterpret_cast<u32 *>(b + 0x4b4) = 0;
+    *reinterpret_cast<u32 *>(b + 0xf14) = 0;
+    memset(b + 0x414, 0, 0x18);
+    b[0x3f8] = 0xff;
+    b[0x3f9] = 0;
+    *reinterpret_cast<i16 *>(b + 0x3e4) = -1;
+    AISysGetCharacterPathPos(WORLD->ai_sys, &object->apiobj, &object->ai, 0xff, 1);
 }
 
 void ActivatePlayer(GameObject_s *object) {
@@ -1136,9 +1270,6 @@ i32 MakePlayerList(i32 count) {
     }
     makeplayerlist_freeplay = 0;
     return player_count;
-}
-
-void CollectHitPoint(GameObject_s *, nuvec_s *, i32) {
 }
 
 i32 DeactivatePlayer(GameObject_s *object, f32 duration, GameObject_s *source) {
@@ -1244,6 +1375,19 @@ void FindFurthestPlayerFromVec(nuvec_s *, GameObject_s **, float &, bool, u32) {
 }
 
 void AveragePlayerCurrentSpeedMul() {
+    avg_currentspeed_mul = 0.0f;
+    f32 total = 0.0f;
+    i32 count = 0;
+    if (Player[0] != NULL && (Player[0]->apiobj.flags_low & 0x80) != 0) {
+        total += Player[0]->current_speed_mul;
+        count = 1;
+    }
+    if (Player[1] != NULL && (Player[1]->apiobj.flags_low & 0x80) != 0) {
+        total += Player[1]->current_speed_mul;
+        ++count;
+    }
+    avg_currentspeed_mul = total;
+    if (count == 2) avg_currentspeed_mul *= 0.5f;
 }
 
 void SetPlayer() {

@@ -210,10 +210,16 @@ struct GAMESAVE_s {
     struct OPTIONSSAVE_s options_save;
     u8 level_save[0x781b];
     AREASAVE_s area_save[72];
-    EPISODESAVE_s episode_save[9];
+    union {
+        EPISODESAVE_s episode_save[9];
+        struct {
+            u8 reserved_episode_data[0x64];
+            u32 unlocked_extra_bits[2]; // 0x7bf0
+        };
+    };
     u32 field_0x7bf8;
     u32 initial_store_pack_flags;
-    u8 field_0x7c00[8];
+    union { u8 field_0x7c00[8]; u32 purchased_extra_bits[2]; };
     u32 hint_completion_bits[6]; // 0x7c08
     u32 coins;
     u16 completion;
@@ -228,6 +234,8 @@ struct GAMESAVE_s {
 DECOMP_ASSERT(sizeof(GAMESAVE_s) == 0x7e58, "GAMESAVE size");
 DECOMP_ASSERT(offsetof(GAMESAVE_s, options_save) == 0x4, "GAMESAVE options offset");
 DECOMP_ASSERT(offsetof(GAMESAVE_s, area_save) == 0x782c, "GAMESAVE area save offset");
+DECOMP_ASSERT(offsetof(GAMESAVE_s, unlocked_extra_bits) == 0x7bf0, "GAMESAVE unlocked extras offset");
+DECOMP_ASSERT(offsetof(GAMESAVE_s, purchased_extra_bits) == 0x7c00, "GAMESAVE purchased extras offset");
 DECOMP_ASSERT(offsetof(GAMESAVE_s, episode_save) == 0x7b8c, "GAMESAVE episode save offset");
 DECOMP_ASSERT(offsetof(GAMESAVE_s, initial_store_pack_flags) == 0x7bfc, "GAMESAVE store flags offset");
 DECOMP_ASSERT(offsetof(GAMESAVE_s, customizer) == 0x7c30, "GAMESAVE customizer offset");
@@ -246,11 +254,7 @@ struct STATUSCOLLECTLIST_s {
 };
 DECOMP_ASSERT(sizeof(STATUSCOLLECTLIST_s) == 0x10, "STATUSCOLLECTLIST size");
 
-struct CHARCAT_s {
-    char *name;
-    u32 model_flags;
-    u32 game_flags;
-};
+typedef CHARCATEGORY CHARCAT_s;
 
 struct ARCADEITEM_s {
     i16 *level_text;
@@ -321,6 +325,9 @@ extern i32 come_from_an_editor;
 
 extern __attribute__((visibility("hidden"))) GameObject_s *ForceBackObj asm("_ZL12ForceBackObj");
 extern __attribute__((visibility("hidden"))) NUVEC *ForceBackPos asm("_ZL12ForceBackPos");
+extern __attribute__((visibility("hidden"))) i32 ForceBackType asm("_ZL13ForceBackType");
+extern __attribute__((visibility("hidden"))) f32 ForceBackRadius asm("_ZL15ForceBackRadius");
+extern __attribute__((visibility("hidden"))) f32 ForceBackRadius2 asm("_ZL16ForceBackRadius2");
 
 // ------------------------------------------------------------------------
 // Super buffer / memory arena
@@ -520,7 +527,7 @@ extern i32 finishloop_backdroponly;
 // ------------------------------------------------------------------------
 // Render / compatibility options
 // ------------------------------------------------------------------------
-extern bool g_forceSysMemVbs;
+extern u8 g_forceSysMemVbs;
 extern i32 g_forceETC1;
 extern i32 texanimbits;
 extern i32 Reflections_On;
@@ -565,6 +572,16 @@ extern f32 HIGHJUMPHEIGHT;
 extern TIMER AreaTimer;
 extern f32 VehicleAreaRememberSpeed;
 extern nugspline_s *ObstacleCamSpl;
+extern f32 ObstacleCamStart;
+extern f32 ObstacleCamEnd;
+extern f32 ObstacleCamTime;
+extern f32 ObstacleCamBlendInTime;
+extern f32 ObstacleCamBlendOutTime;
+extern u16 ObstacleCamRotZ;
+extern NUVEC *ObstacleCamCutTgtPtr;
+extern NUVEC *ObstacleCamCutCamPtr;
+extern i32 ObstacleCamHoldUntilPlayersMove;
+extern u8 ObstacleCamAlwaysSnapAngles;
 extern GAMECAMERA_s *GameCam;
 extern i32 (*GameCam_ObjLookingWithLeftStick)(GameObject_s *object);
 extern i32 LookAtBoth;
@@ -603,7 +620,7 @@ extern i32 LEGO_AIPATHCNX_JUMP_NOW;
 extern i32 LEGO_AIPATHCNX_DONT_JUMP_NOW;
 extern f32 *fakeanimendframe;
 extern f32 *fakeanimframe;
-extern f32 ai_moveradius;
+extern "C" f32 ai_moveradius;
 extern f32 aitol;
 extern f32 DEFAULT_MOVE_RANGE;
 extern f32 engagefiretime;
@@ -659,7 +676,7 @@ extern GameObject_s *BombGenerator_PlayerBomb[2];
 extern i16 temp_yrot;
 extern i16 temp_xrot;
 extern i16 temp_zrot;
-extern i32 avg_currentspeed_mul;
+extern f32 avg_currentspeed_mul;
 extern GameObject_s *player2;
 extern GameObject_s *player;
 extern GameObject_s *CutDeadVehiclePlayer;
@@ -1032,7 +1049,7 @@ extern void (*AIPathCnxHelperSysInitFn)(WORLDINFO_s *);
 // ------------------------------------------------------------------------
 extern LEVELOBJECT ObjTab[0x2ee]; // level-object type table (.data @0x618240, 0xff-terminated)
 extern struct LEVELSPLINE SplTab[26];
-extern CHARCAT_s LSW_CharCategory[10];
+extern CHARCATEGORY LSW_CharCategory[10];
 extern CHEAT Cheat[45];
 extern u8 CharVariants_Game[0x5c];
 extern MemoryManager theMemoryManager;
@@ -1054,7 +1071,7 @@ extern void (*CutScene_PreUpdateFn)(CUTINFO *);
 extern void (*CutScene_PostUpdateFn)(void);
 extern void (*CutScene_StoppedFn)(CUTINFO *);
 extern i32 (*CutScene_ReplaceCharacterModelFn)(CUTINFO *, NUGCUTCHAR_s *);
-extern void (*InitBolt_AddMomentumType)(BOLT_s *, GameObject_s *, nuvec_s *);
+extern i32 (*InitBolt_AddMomentumType)(BOLT_s *, GameObject_s *, nuvec_s *);
 extern void (*Bolt_HitPlatFn)(BOLT_s *);
 extern void (*Bolt_HitCustomFn)(BOLT_s *, nuvec_s *);
 extern void (*GameBlowUpBlownUpFn)(GIZMOBLOWUP_s *);

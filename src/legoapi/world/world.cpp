@@ -19,6 +19,7 @@
 #include "legoapi/core/input/timer.h"
 #include "legogame/game.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nucore/nutime.h"
@@ -115,9 +116,25 @@ void WorldInfo_Dump(WORLDINFO *world) {
     }
 }
 void StoreSceneProgress(NUGSCN *gscn, SCENEPROGRESS_s *progress, i32 param) {
-    (void)gscn;
-    (void)progress;
-    (void)param;
+    if (progress == NULL || gscn == NULL) return;
+    memset(progress, 0, sizeof(*progress));
+    i32 count = NuSpecialGetNumSpecials(gscn);
+    nuhspecial_s special;
+    for (i32 i = 0; i < count; ++i) {
+        if (i != 0) NuSpecialGetNext(&special);
+        else NuSpecialGetFirst(gscn, &special, 1);
+        progress->specials[i].visible = NuSpecialGetVisibilityFn(&special);
+        if (gscn->instance_animation_data == NULL) continue;
+        nuinstanim_s *animation = NuSpecialGetInstAnim(&special);
+        if (animation == NULL || gscn->instance_animation_data[animation->anim_ix] == NULL) continue;
+        progress->specials[i].frame = animation->ltime <= 2048.0f && animation->ltime >= 0.0f
+                           ? static_cast<u32>(animation->ltime) : 1;
+        progress->specials[i].playing = animation->playing;
+        progress->specials[i].waiting = animation->waiting;
+        progress->specials[i].repeating = animation->repeating;
+        progress->specials[i].tfactor = animation->tfactor;
+        if (param != 0) animation->fparam1 = animation->tfactor;
+    }
 }
 void SaveSceneObjectAnimTFactors(NUGSCN *gscn) {
     i32 count;

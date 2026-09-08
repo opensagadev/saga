@@ -161,9 +161,6 @@ void Surfaces_Reset() {
     SURFACEBITS_NODUST = no_dust;
 }
 
-void AdjustLayerBits(u32, GameObject_s *) {
-}
-
 void DeRotateTerrain(tertype *surface) {
     TerrainQuery_s *query = TerI;
 

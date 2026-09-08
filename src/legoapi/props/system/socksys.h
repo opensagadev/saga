@@ -4,6 +4,7 @@
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nu3d/nuspline.h"
 #include "nu2api/nucore/common.h"
+#include "nu2api/numath/numtx.h"
 #include "decomp_assert.h"
 
 typedef struct SOCKROT {
@@ -111,18 +112,18 @@ typedef struct SOCK {
     u8 unknown_6c;                  // 0x6c
     u8 look_ahead_segments;         // 0x6d
     u16 input_yaw;                  // 0x6e — controller angle offset on camera-relative sockets
-    u8 unknown_70;                  // 0x70
-    u8 unknown_71;                  // 0x71
-    u8 unknown_72;                  // 0x72
-    u8 unknown_73;                  // 0x73
-    u8 unknown_74;                  // 0x74
-    u8 unknown_75;                  // 0x75
-    u8 unknown_76;                  // 0x76
-    u8 unknown_77;                  // 0x77
-    u8 unknown_78;                  // 0x78
-    u8 unknown_79;                  // 0x79
-    u8 unknown_7a;                  // 0x7a
-    u8 unknown_7b;                  // 0x7b
+    union {
+        struct { u8 unknown_70, unknown_71, unknown_72, unknown_73; };
+        f32 current_speed; // 0x70
+    };
+    union {
+        struct { u8 unknown_74; u8 unknown_75; u8 unknown_76; u8 unknown_77; };
+        f32 mid_force_inner_radius; // 0x74
+    };
+    union {
+        struct { u8 unknown_78; u8 unknown_79; u8 unknown_7a; u8 unknown_7b; };
+        f32 mid_force_outer_radius; // 0x78
+    };
     f32 unknown_7c;                 // 0x7c — default 1.0
     f32 unknown_80;                 // 0x80 — default 1.0
     f32 unknown_84;                 // 0x84 — default 1.0
@@ -159,6 +160,9 @@ typedef struct SOCKSYS {
     SOCK *sock; // 0x0 — array of 64 SOCK entries
     i32 count;  // 0x4 — number of sockets with a valid rail
 } SOCKSYS;
+DECOMP_ASSERT(sizeof(SOCK) == 0x13c, "SOCK movement ABI");
+DECOMP_ASSERT(offsetof(SOCK, mid_force_inner_radius) == 0x74, "SOCK inner force radius offset");
+DECOMP_ASSERT(offsetof(SOCK, mid_force_outer_radius) == 0x78, "SOCK outer force radius offset");
 
 #ifdef __cplusplus
 extern "C" {
@@ -168,9 +172,11 @@ extern "C" {
     SOCKSYS *SockSysInit(VARIPTR *buf, VARIPTR buf_end, NUGSCN *gscn);
     void SockSys_GenerateData(SOCKSYS *sock_sys, VARIPTR *buf, VARIPTR *buf_end);
     void SockSysPointAlongSpline(NUVEC *result, NUGSPLINE *spline, i32 segment, i32 next_segment, f32 ratio);
+    void SockRotationMatrix(SOCKSYS *system, SOCKPOSITION *position, NUMTX *out, i32 stride, i32 mode);
     void SetSockBit(SOCK *sock, i32 index);
     void ComplexSockPosition(SOCKSYS *sock_sys, NUVEC *position, i32 prior_sock, i32 prior_segment,
                              SOCKPOSITION *result);
+    void ComplexSockAngles(SOCKROT *angles);
     i32 SockSysCamera(SOCKSYS *sock_sys, NUVEC *fallback_camera_position, i32 socket_changed,
                       NUVEC *player_camera_positions, NUVEC *player_positions, i32 player_count,
                       SOCKPOSITION *camera_socket_position, NUVEC *camera_position, NUVEC *camera_target,

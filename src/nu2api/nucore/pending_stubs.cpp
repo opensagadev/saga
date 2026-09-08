@@ -31,8 +31,6 @@ extern "C" void NuShaderManagerLoadCompiledShaders(void) {
 extern "C" void NuShaderManagerSetCurrentShader(void) {
 }
 
-extern "C" void NuShaderManagerSetElementfv(void) {
-}
 
 extern "C" void NuShaderManagerSetShaderSaveFolder(void) {
 }
@@ -40,11 +38,7 @@ extern "C" void NuShaderManagerSetShaderSaveFolder(void) {
 extern "C" void NuShaderManagerSetShininessFactor(void) {
 }
 
-extern "C" void NuShaderObjectBaseUpdateWaterTable(void) {
-}
 
-extern "C" void NuShaderObjectGLSLAllocateParameter(void) {
-}
 
 extern "C" void NuShaderObjectGLSLSetupTextureStates(void) {
 }
@@ -52,8 +46,6 @@ extern "C" void NuShaderObjectGLSLSetupTextureStates(void) {
 extern "C" void NuShaderObjectKeyGenerate2(void) {
 }
 
-extern "C" void NuShaderObjectKeyGenerate3(void) {
-}
 
 extern "C" void NuShaderObjectKeyGenerate4(void) {
 }
@@ -64,8 +56,6 @@ extern "C" void NuShaderObjectKeySetUberShaderHash(void) {
 extern "C" void NuShaderObjectLoadFromFile(void) {
 }
 
-extern "C" void NuShaderObjectUnserialize(void) {
-}
 
 extern "C" void _Z26DisplayListLinkDynamicMtlsv(void) {
 }

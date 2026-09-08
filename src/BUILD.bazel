@@ -105,6 +105,7 @@ _PUBLIC_HEADERS = glob(
 )
 
 _TEXTUAL_HEADERS = [
+    "legoapi/items/collect/bolttypes_lsw.inc",
     "legoapi/menus/core/lsw_text_data.inc",
     "nu2api/nu3d/android/nuios_shader_sources.inc",
     "nu2api/nu3d/nudlist_tables_gen.inc",

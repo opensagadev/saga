@@ -5,14 +5,20 @@
 #include "decomp.h"
 #include "nu2api/numath/nuvec.h"
 
+struct WORLDINFO_s;
+struct LEVEL_PROGRESS_s;
+void StoreLevelProgressFn(WORLDINFO_s *, LEVEL_PROGRESS_s *, i32);
+
 struct storepack_s {
     char *name;
     u8 field1_0x4;
     u8 field2_0x5;
     u8 field3_0x6;
     u8 field4_0x7;
-    u8 field5_0x8;
-    u8 field6_0x9;
+    union {
+        struct { u8 field5_0x8; u8 field6_0x9; };
+        i16 message_text_index;
+    };
     u8 field7_0xa;
     u8 field8_0xb;
     u8 field9_0xc;

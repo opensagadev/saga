@@ -9,9 +9,6 @@ extern "C" {
     void PlatInstRotate(i32 platform_id, i32 enabled);
 }
 
-void Lever_MoveCode(WORLDINFO_s *, GameObject_s *) {
-}
-
 bool Lever_BeingPulled(LEVER_s *lever) {
     return lever != NULL && (lever->flags & LEVER_FLAG_BEING_PULLED) != 0;
 }

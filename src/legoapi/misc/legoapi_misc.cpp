@@ -13,6 +13,9 @@
 #include "legoapi/world/levels/episode.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nutrig.h"
+#include <math.h>
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -34,7 +37,9 @@ extern "C" {
 void ClearStill() {
 }
 
-void CircleLevel(LEVELDATA_s *) {
+// Original: 43 bytes.
+i32 CircleLevel(LEVELDATA_s *level) {
+    return BONUS_GUNSHIPB_LDATA != NULL && level == BONUS_GUNSHIPB_LDATA;
 }
 
 void CurrentStart(GameObject_s *, i32, i32) {
@@ -86,7 +91,22 @@ float CalcValue1648(char *data, i32 quarter, i32 stride, float fraction, ani3_sc
     return value * scale_min->scale + scale_min->minimum;
 }
 
-void ConstantRumble(GameObject_s *, float, float) {
+void NewRumble(nupad_s *, f32, i32);
+void NewRumbleAllPlayers(f32, f32, i32, i32);
+
+void ConstantRumble(GameObject_s *object, float strength, float phase) {
+    phase = NuFmod(phase + GameTimer.time_elapsed, 1.25f);
+    f32 weight = 0.0f;
+    if (phase < 1.0f) {
+        i32 angle = static_cast<i32>(phase * 32768.0f + 16384.0f);
+        weight = 1.0f - fabsf(NuTrigTable[(angle >> 1) & 0x7fff]);
+    }
+    strength = weight * strength;
+    if (object == NULL) {
+        NewRumbleAllPlayers(strength, 0.0f, 0, 0);
+    } else if ((object->apiobj.flags_low & 0x80) != 0) {
+        NewRumble(object->pad_gamepad->pad, strength, 0);
+    }
 }
 
 extern i32 AllMiniKitsDone(AREASAVE_s *save);
@@ -131,7 +151,17 @@ COLLECTID *CollectIDUnlocked(i32 id) {
     }
 }
 
-void ClearLastSafeTakeOver(GameObject_s *) {
+void ClearLastSafeTakeOver(GameObject_s *object) {
+    if (object == NULL || (object->field_0xefa & 0x10) != 0) {
+        return;
+    }
+    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
+        GameObject_s *candidate = &Obj[i];
+        if (candidate != NULL && (candidate->apiobj.field_0x1f8 & 0x1001) == 0x1001 &&
+            candidate->takeover_source == object) {
+            candidate->takeover_source = NULL;
+        }
+    }
 }
 
 void ClearTakeOverObjectSys() {

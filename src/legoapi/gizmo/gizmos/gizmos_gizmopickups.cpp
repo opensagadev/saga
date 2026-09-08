@@ -195,7 +195,16 @@ void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_ind
 void GizmoPickup_FindNearest(WORLDINFO_s *, nuvec_s *, float *) {
 }
 
-void GizmoPickups_TotalScore(void *) {
+u32 GizmoPickups_TotalScore(void *world) {
+    GIZMOPICKUPRUNTIMESYS_s *system = static_cast<WORLDINFO_s *>(world)->gizmo_pickup_sys;
+    GIZMOPICKUP_s *pickup = system->pickups;
+    u32 total = 0;
+    if (pickup != NULL) {
+        for (i32 i = 0; i < system->pickup_count; ++i, ++pickup) {
+            total += GizmoPickupSys_Game.types[pickup->type_index].score;
+        }
+    }
+    return total;
 }
 
 void GizmoPickup_BeenTurnedOn(GIZMOPICKUP_s *) {

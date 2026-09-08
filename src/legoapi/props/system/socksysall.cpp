@@ -1,9 +1,11 @@
 #include "legoapi/props/system/socksys.h"
+#include "legoapi/items/base/apiobject.h"
 
 #include <stdio.h>
 #include <string.h>
 
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/numath/nuquat.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/nucore/nustring.h"
@@ -591,7 +593,47 @@ extern "C" {
         }
     }
 
-    void ComplexSockAngles(SOCKPOSITION *) {
+    void ComplexSockAngles(SOCKROT *angles) {
+        SOCKPOSITION *positions = TempSPosList;
+        i32 count = TempSPosCount;
+        if (count > 0) {
+            angles->x = positions[0].midpoint_rotation.x;
+            angles->y = positions[0].midpoint_rotation.y;
+            if (count > 1) {
+                NUVEC midpoint = positions[0].midpoint;
+                for (i32 i = 1; i < count; ++i) {
+                    NUVEC from = midpoint;
+                    NUVEC to = positions[i].midpoint;
+                    NUVEC direction;
+                    NUVEC offset;
+                    NuVecSub(&direction, &to, &from);
+                    f32 distance = NuFsqrt(direction.x * direction.x + direction.y * direction.y +
+                                           direction.z * direction.z);
+                    f32 ratio = NuFdiv(1.0f, distance);
+                    direction.x *= ratio;
+                    direction.y *= ratio;
+                    direction.z *= ratio;
+                    NuVecSub(&offset, &temp_pos, &from);
+                    f32 projection = offset.x * direction.x + offset.y * direction.y + offset.z * direction.z;
+                    if (projection > 0.0f) {
+                        if (projection >= 1.0f) {
+                            angles->x = positions[i].midpoint_rotation.x;
+                            angles->y = positions[i].midpoint_rotation.y;
+                            midpoint = to;
+                        } else {
+                            ratio = projection / distance;
+                            angles->x += static_cast<u16>(static_cast<i32>(
+                                static_cast<f32>(RotDiff(angles->x, positions[i].midpoint_rotation.x)) * ratio));
+                            angles->y += static_cast<u16>(static_cast<i32>(
+                                static_cast<f32>(RotDiff(angles->y, positions[i].midpoint_rotation.y)) * ratio));
+                            midpoint.x += (to.x - midpoint.x) * ratio;
+                            midpoint.y += (to.y - midpoint.y) * ratio;
+                            midpoint.z += (to.z - midpoint.z) * ratio;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     f32 EnforceSockYLimits(f32 y, SOCKPOSITION *position, SOCKSYS *sock_sys) {
@@ -634,7 +676,110 @@ extern "C" {
     void SockOn(void) {
     }
 
-    void SockRotationMatrix(void) {
+    void SockRotationMatrix(SOCKSYS *system, SOCKPOSITION *position, NUMTX *out, i32 stride, i32 mode) {
+        NuMtxSetIdentity(out);
+        if (position->location.sock == -1) return;
+        i32 first = (mode == 4 || mode == 5) ? 0 : 1;
+        i32 last = (mode == 4 || mode == 5) ? 3 : 2;
+        SOCK *sock = &system->sock[position->location.sock];
+        i32 segment = position->location.segment;
+        i32 samples[4];
+        samples[1] = segment - segment % stride;
+        samples[2] = samples[1] + stride;
+        samples[3] = samples[2] + stride;
+        samples[0] = samples[1] - stride;
+        if (samples[0] < 0) samples[0] = 0;
+        if (samples[2] > sock->length) samples[2] = sock->length;
+        if (samples[3] > sock->length) samples[3] = sock->length;
+        NUMTX matrices[4];
+        NUQUAT quats[4], result;
+        f32 widths[4], heights[4];
+        NUVEC right, up, forward;
+        for (i32 i = first; i <= last; ++i) {
+            NuMtxSetIdentity(&matrices[i]);
+            NUVEC *a = &sock->a->pts[samples[i]];
+            NUVEC *b = &sock->b->pts[samples[i]];
+            NUVEC *c = &sock->c->pts[samples[i]];
+            NUVEC *d = &sock->d->pts[samples[i]];
+            right.x = (b->x - a->x) + (c->x - d->x);
+            right.y = (b->y - a->y) + (c->y - d->y);
+            right.z = (b->z - a->z) + (c->z - d->z);
+            up.x = (b->x - c->x) + (a->x - d->x);
+            up.y = (b->y - c->y) + (a->y - d->y);
+            up.z = (b->z - c->z) + (a->z - d->z);
+            widths[i] = NuVecMag(&right);
+            heights[i] = NuVecMag(&up);
+            NuVecNorm(&right, &right);
+            NuVecNorm(&up, &up);
+            NuVecCross(&forward, &right, &up);
+            NuVecNorm(&forward, &forward);
+            NuVecCross(&up, &forward, &right);
+            NuVecNorm(&up, &up);
+            matrices[i].m00 = right.x;
+            matrices[i].m01 = right.y;
+            matrices[i].m02 = right.z;
+            matrices[i].m10 = up.x;
+            matrices[i].m11 = up.y;
+            matrices[i].m12 = up.z;
+            matrices[i].m20 = forward.x;
+            matrices[i].m21 = forward.y;
+            matrices[i].m22 = forward.z;
+            NuMtxToQuat(&matrices[i], &quats[i]);
+        }
+        NUVEC *a = &sock->a->pts[0], *b = &sock->b->pts[0];
+        NUVEC *c = &sock->c->pts[0], *d = &sock->d->pts[0];
+        right.x = (b->x - a->x) + (c->x - d->x);
+        right.y = (b->y - a->y) + (c->y - d->y);
+        right.z = (b->z - a->z) + (c->z - d->z);
+        up.x = (b->x - c->x) + (a->x - d->x);
+        up.y = (b->y - c->y) + (a->y - d->y);
+        up.z = (b->z - c->z) + (a->z - d->z);
+        f32 base_width = NuVecMag(&right);
+        f32 base_height = NuVecMag(&up);
+        f32 ratio = position->ratio;
+        ratio += (f32)(segment % stride);
+        ratio /= (f32)stride;
+        if (sock->flags & 0x200) {
+            f32 width = (1.0f - ratio) * (widths[1] / base_width) + (widths[2] / base_width) * ratio;
+            if (1.0f >= width) sock->camera_local_x_ratio = sock->camera_lateral_ratio * width;
+            else sock->camera_local_x_ratio = sock->camera_lateral_ratio + (1.0f - 1.0f / width) * (1.0f - sock->camera_lateral_ratio);
+            f32 height = (1.0f - ratio) * (heights[1] / base_height) + (heights[2] / base_height) * ratio;
+            if (1.0f >= height) sock->camera_vertical_ratio = sock->camera_lateral_ratio * height;
+            else sock->camera_vertical_ratio = sock->camera_lateral_ratio + (1.0f - 1.0f / height) * (1.0f - sock->camera_lateral_ratio);
+            if (width > 1.0f) sock->look_ratio_xz = sock->unknown_80 / width;
+            if (height > 1.0f) sock->look_ratio_y = sock->unknown_84 / height;
+        } else {
+            sock->camera_vertical_ratio = sock->camera_lateral_ratio;
+            sock->camera_local_x_ratio = sock->camera_vertical_ratio;
+        }
+        if (mode == 1) {
+            out->m00 = matrices[1].m00 + (matrices[2].m00 - matrices[1].m00) * ratio;
+            out->m01 = matrices[1].m01 + (matrices[2].m01 - matrices[1].m01) * ratio;
+            out->m02 = matrices[1].m02 + (matrices[2].m02 - matrices[1].m02) * ratio;
+            out->m10 = matrices[1].m10 + (matrices[2].m10 - matrices[1].m10) * ratio;
+            out->m11 = matrices[1].m11 + (matrices[2].m11 - matrices[1].m11) * ratio;
+            out->m12 = matrices[1].m12 + (matrices[2].m12 - matrices[1].m12) * ratio;
+            out->m20 = matrices[1].m20 + (matrices[2].m20 - matrices[1].m20) * ratio;
+            out->m21 = matrices[1].m21 + (matrices[2].m21 - matrices[1].m21) * ratio;
+            out->m22 = matrices[1].m22 + (matrices[2].m22 - matrices[1].m22) * ratio;
+            NuVecNorm((NUVEC *)&out->m00, (NUVEC *)&out->m00);
+            NuVecNorm((NUVEC *)&out->m10, (NUVEC *)&out->m10);
+            NuVecNorm((NUVEC *)&out->m20, (NUVEC *)&out->m20);
+        } else if (mode == 2) {
+            NuQuatLerp(&result, &quats[1], &quats[2], ratio);
+            NuQuatToMtx(&result, out);
+        } else if (mode == 3) {
+            NuQuatSlerp(&result, &quats[1], &quats[2], ratio);
+            NuQuatToMtx(&result, out);
+        } else if (mode == 4) {
+            NuQuatCubicInt(&result, &quats[0], &quats[1], &quats[2], &quats[3], ratio);
+            NuQuatToMtx(&result, out);
+        } else if (mode == 5) {
+            NuQuatHermiteInt(&result, &quats[0], &quats[1], &quats[2], &quats[3], ratio);
+            NuQuatToMtx(&result, out);
+        } else {
+            *out = matrices[1];
+        }
     }
 
     i32 SockSegmentsAhead(SOCK *sock, i32 segment, i32 *from_segment, i32 *to_segment) {
@@ -1193,7 +1338,18 @@ extern "C" {
 
 } // extern "C"
 
-void ForceAlongSock(GameObject_s *) {
+extern f32 CurrentSpeed;
+extern f32 avg_currentspeed_mul;
+
+// Original: 237 bytes.
+f32 ForceAlongSock(GameObject_s *object) {
+    if (object->sock_position.location.sock == -1 || CurrentSpeed == 0.0f) return 0.0f;
+    f32 speed = (1.0f + object->field_0xc38) * (CurrentSpeed * avg_currentspeed_mul);
+    NUVEC force = {0.0f, 0.0f, speed};
+    NuVecRotateX(&force, &force, object->sock_position.midpoint_rotation.x);
+    NuVecRotateY(&force, &force, object->sock_position.midpoint_rotation.y);
+    NuVecAdd(&object->target_velocity, &object->target_velocity, &force);
+    return speed;
 }
 
 void GetSockEdgeEnum(char *) {

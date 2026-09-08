@@ -114,7 +114,7 @@ extern "C" {
 }
 extern i16 temp_yrot;
 extern i16 temp_xrot;
-extern i32 avg_currentspeed_mul;
+extern f32 avg_currentspeed_mul;
 extern GameObject_s *player2;
 extern GameObject_s *player;
 

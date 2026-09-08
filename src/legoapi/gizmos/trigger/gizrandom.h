@@ -33,6 +33,7 @@ DECOMP_ASSERT(offsetof(GIZRANDOM, flags) == 0x38, "GIZRANDOM flags offset");
 DECOMP_ASSERT(sizeof(GIZRANDOMSYS) == 0xc, "GIZRANDOMSYS ABI");
 
 ADDGIZMOTYPE *GizRandom_RegisterGizmo(i32 type_id);
+GIZMO *createGizRandom(void *, i32 output_count, i32 *output_weights, char *name);
 
 extern "C" {
 #endif

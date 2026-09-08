@@ -267,7 +267,19 @@ extern "C" {
         return (reinterpret_cast<NULNKHDR *>(light) - 1)->id;
     }
 
-    void rtlDynamicAllocTemplate(void) {
+    i32 rtlDynamicAllocTemplate(rtlset *set, i32 user_id) {
+        i32 id = -1;
+        i32 template_id = rtlFindByUserId(reinterpret_cast<usize>(set), user_id);
+        if (template_id >= 0) {
+            id = rtlDynamicAlloc();
+            if (id >= 0) {
+                rtl_s *light = reinterpret_cast<rtl_s *>(NuLstGetByIdx(rtl_dynamic_pool, id));
+                rtlset *source = set;
+                *light = source->lights[template_id];
+                return id;
+            }
+        }
+        return -1;
     }
 
     void rtlDynamicFree(i32 id) {
@@ -461,8 +473,14 @@ extern "C" {
     }
 
     i32 rtlFindByUserId(usize rtl_set, i32 user_id) {
-        (void)rtl_set;
-        (void)user_id;
+        if (rtl_set != 0) {
+            rtlset *set = reinterpret_cast<rtlset *>(rtl_set);
+            for (i32 i = 0; i < 128; ++i) {
+                if (set->lights[i].type != 0 && set->lights[i].field_68 == user_id) {
+                    return i;
+                }
+            }
+        }
         return -1;
     }
 

@@ -12,7 +12,7 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 void AddPartDebris(PARTDEBSYS_s *, i32, nuvec_s *);
-void AddExplosion(nuvec_s *, f32, f32, GameObject_s *, i32, i32);
+EXPLOSION *AddExplosion(nuvec_s *, f32, f32, GameObject_s *, i32, i32);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 void GameCam_Judder(GAMECAMERA_s *, f32, i32, nuvec_s *);

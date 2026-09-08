@@ -34,6 +34,7 @@ struct characterdata_s;
 struct nugscn_s;
 struct nuhspecial_s;
 struct numtx_s;
+f32 GameAnimSet_AutoSetReflectY(GAMEANIMSET_s *set, nuvec_s *position, numtx_s *matrix);
 enum GAMEANIMSET_VISIBILITY : i32;
 
 GAMEANIMSET_s *GameAnimSet_Create(VARIPTR *buf, VARIPTR *buf_end, GAMEANIMOBJPOOL_s *object_pool,

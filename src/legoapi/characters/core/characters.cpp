@@ -19,6 +19,8 @@
 #include "legoapi/world/level.h"
 #include "legoapi/world/areas.h"
 #include "legoapi/world/world.h"
+#include "legoapi/world/mission.h"
+#include "gameapi/ai/aisys/aisys.h"
 #include "gameapi/edtools/edstubs.h"
 #include "nu2api/nucore/bgproc.h"
 #include "nu2api/nu3d/nudlist.h"
@@ -141,9 +143,6 @@ void HairMovement(GameObject_s *) {
 void HeadMovement(GameObject_s *) {
 }
 
-void TakeOverYoda(GameObject_s *, GameObject_s *, i32, i32) {
-}
-
 void fullcodename(i32) {
 }
 
@@ -201,7 +200,41 @@ void FixUpCharacters(CHARFIXUP *fixup) {
 void PostAnimate_FETT(GameObject_s *) {
 }
 
-void ActivateCharacter(char *, nuvec_s *, i32) {
+void ResetAICreature(GameObject_s *, AISYS_s *);
+void LightGameObject(GameObject_s *, void *);
+void InitSurfaceInfo(GameObject_s *);
+i32 SetObjOnSurface(GameObject_s *, i32);
+extern NUVEC plr_lastpos;
+
+GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle) {
+    if (Mission_Active(NULL) != NULL || name == NULL) return NULL;
+    GameObject_s *object = GetNamedGameObject(WORLD->ai_sys, name);
+    if (object == NULL || (object->apiobj.field_0x1f8 & 0x1000) != 0) return NULL;
+    if (FreePlay != 0 && (object->apiobj.field_0x1f4 & 0x400) == 0) return NULL;
+    if (object->ai.field_0x134 != 0xff) {
+        ResetAICreature(object, WORLD->ai_sys);
+    } else {
+        object->apiobj.field_0x1f8 |= 0x1000;
+        AIScriptSetBaseScriptStateByName(reinterpret_cast<AISCRIPTPROCESS *>(&object->ai), const_cast<char *>("Base"));
+        if (position != NULL) {
+            object->apiobj.position = *position;
+            object->apiobj.field_0x276 = object->apiobj.facing_angle = object->apiobj.movement_facing_angle = angle;
+            AISysGetCharacterPathPos(WORLD->ai_sys, &object->apiobj, &object->ai, 0xff, 1);
+            object->apiobj.initial_position = object->apiobj.position;
+            object->apiobj.collision_position = object->apiobj.position;
+            plr_lastpos = object->apiobj.position;
+            object->apiobj.start_position = object->apiobj.position;
+            object->apiobj.respawn_position = object->apiobj.position;
+            object->apiobj.last_safe_position = object->apiobj.position;
+            object->saved_position = object->apiobj.position;
+            object->reset_velocity = v000;
+            object->apiobj.velocity = v000;
+            InitSurfaceInfo(object);
+            SetObjOnSurface(object, 0);
+        }
+    }
+    LightGameObject(object, WORLD->rtl_set);
+    return object;
 }
 
 void FinishWeirdoNames(i32) {
@@ -423,7 +456,14 @@ void CharScenes_AreaLoad(APICHARACTERMODELLIST_s *list, variptr_u *buf, variptr_
     }
 }
 
-void DeactivateCharacter(char *) {
+void DeactivateGameObject(GameObject_s *);
+
+void DeactivateCharacter(char *name) {
+    if (Mission_Active(NULL) != NULL || name == NULL) return;
+    GameObject_s *object = GetNamedGameObject(WORLD->ai_sys, name);
+    if (object != NULL && (FreePlay == 0 || (object->apiobj.field_0x1f4 & 0x400) != 0)) {
+        DeactivateGameObject(object);
+    }
 }
 
 void LoadSingleCharacter(bgprocinfo_s *) {
@@ -623,7 +663,49 @@ nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id) {
     return scene == NULL ? NULL : &scene->special_scene;
 }
 
-void LocalGetNearestLocator(AILOCATOR_s **, i32, float, nuvec_s *, float, i32, float, float) {
+AILOCATOR_s *LocalGetNearestLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,
+                                    f32 max_distance, i32 outside_camera, f32 max_delta_y, f32 min_delta_y) {
+    f32 nearest_distance = max_distance == 1000000000.0f ? max_distance : max_distance * max_distance;
+    i32 candidates[64];
+    i32 candidate_count = 0;
+    if (count > 64) {
+        count = 64;
+    }
+    for (i32 i = 0; i < count; ++i) {
+        if (locators[i] == NULL) {
+            continue;
+        }
+        if (outside_camera != 0) {
+            if (NuCameraClipTestSphere(&locators[i]->position, 0.0f, &numtx_identity) != 0) {
+                continue;
+            }
+        } else if (clip_radius > 0.0f &&
+                   NuCameraClipTestSphere(&locators[i]->position, clip_radius, &numtx_identity) == 0) {
+            continue;
+        }
+        candidates[candidate_count++] = i;
+    }
+    i32 nearest = -1;
+    for (i32 i = 0; i < candidate_count; ++i) {
+        NUVEC delta;
+        const f32 distance = NuVecDistSqr(position, &locators[candidates[i]]->position, &delta);
+        if (min_delta_y != 1000000000.0f && min_delta_y > delta.y) {
+            continue;
+        }
+        if (max_delta_y != 1000000000.0f && delta.y > max_delta_y) {
+            continue;
+        }
+        if (nearest_distance > distance) {
+            nearest_distance = distance;
+            nearest = i;
+        }
+    }
+    if (nearest == -1) {
+        return NULL;
+    }
+    AILOCATOR_s *result = locators[candidates[nearest]];
+    locators[candidates[nearest]] = NULL;
+    return result;
 }
 
 void newCharactersCollected(STATUSPACKET_s *) {
@@ -664,7 +746,14 @@ void SetGameObjectCharacterData(GameObject_s *obj) {
 void CollectCharactersOff_Update(STATUS_STAGE_s *, STATUSPACKET_s *, float) {
 }
 
-void TakeOverYodaSeekDistanceHack(GameObject_s *, GameObject_s *, nuvec_s *) {
+extern i32 dagobah_training;
+
+i32 TakeOverYodaSeekDistanceHack(GameObject_s *object, GameObject_s *luke, nuvec_s *offset) {
+    if ((object->field_0xf00 & 2) == 0 || dagobah_training == 0 || object->field_0xcc0 != NULL ||
+        luke == NULL || (luke->apiobj.flags_low & 0x80) == 0) return 0;
+    if (!(NuVecDistSqr(&object->apiobj.position, &luke->apiobj.position, offset) < 0.7f * 0.7f)) return 0;
+    NuVecRotateY(offset, offset, -static_cast<i32>(luke->apiobj.field_0x276));
+    return offset->z > 0.0f;
 }
 
 void SetProtocolDroidInterfaceAction(GameObject_s *object) {

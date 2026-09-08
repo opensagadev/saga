@@ -1,3 +1,4 @@
+#include "nu2api/nu3d/numtl.h"
 #include "decomp.h"
 #include "nu2api/nu3d/nu2api_nu3d_types.h"
 #include "nu2api/nu3d/nushader.h"
@@ -6,6 +7,32 @@
 
 #include <ctype.h>
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include "nu2api/nucore/nustring.h"
+
+// Original 0x2a56a0, 81 bytes.
+bool LinkShaderProgram(u32 program) {
+    glLinkProgram(program);
+    GLint linked;
+    glGetProgramiv(program, GL_LINK_STATUS, &linked);
+    return linked != 0;
+}
+
+// Original 0x2a5700, 171 bytes.
+bool ValidateShaderProgram(u32 program) {
+    glValidateProgram(program);
+    GLint log_length;
+    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &log_length);
+    if (log_length > 0) {
+        char *log = static_cast<char *>(malloc(log_length));
+        glGetProgramInfoLog(program, log_length, &log_length, log);
+        free(log);
+    }
+    GLint valid;
+    glGetProgramiv(program, GL_VALIDATE_STATUS, &valid);
+    return valid != 0;
+}
 
 // Weak COMDAT helper emitted by the original shader implementation. Keeping
 // the real C++ tag (`GLSLParameter`) is ABI-significant: the tag, not a typedef
@@ -57,15 +84,6 @@ namespace {
         {GL_FLOAT_MAT4, 3, 3, 4}, {GL_SAMPLER_2D, 4, 0, 1}, {GL_SAMPLER_CUBE, 4, 0, 1},
     };
 
-    static const GLSLTypeInfo *GetGLSLTypeInfo(GLenum type) {
-        for (u32 i = 0; i < sizeof(kGLSLTypeInfo) / sizeof(kGLSLTypeInfo[0]); ++i) {
-            if (kGLSLTypeInfo[i].gl_type == type) {
-                return &kGLSLTypeInfo[i];
-            }
-        }
-        return NULL;
-    }
-
     static NUSHADERUSAGEMASK *GetUsageMask(const NUSHADERUSAGEMASK *mask) {
         for (i32 i = 0; i < g_semanticMaskCount; ++i) {
             if (memcmp(&g_semanticMasks[i], mask, sizeof(*mask)) == 0) {
@@ -77,6 +95,19 @@ namespace {
         return result;
     }
 } // namespace
+
+extern "C" const GLSLTypeInfo *GetGLSLTypeInfo(GLenum type) {
+    if (type == GL_FLOAT) return &kGLSLTypeInfo[0];
+    if (type == GL_FLOAT_VEC2) return &kGLSLTypeInfo[1];
+    if (type == GL_FLOAT_VEC3) return &kGLSLTypeInfo[2];
+    if (type == GL_FLOAT_VEC4) return &kGLSLTypeInfo[3];
+    if (type == GL_FLOAT_MAT2) return &kGLSLTypeInfo[4];
+    if (type == GL_FLOAT_MAT3) return &kGLSLTypeInfo[5];
+    if (type == GL_FLOAT_MAT4) return &kGLSLTypeInfo[6];
+    if (type == GL_SAMPLER_2D) return &kGLSLTypeInfo[7];
+    if (type == GL_SAMPLER_CUBE) return &kGLSLTypeInfo[8];
+    return NULL;
+}
 
 extern "C" {
     i32 g_semanticMaskCount;
@@ -226,7 +257,7 @@ i32 NuShaderObjectBindAttributeLocationsGLSL(GLuint program) {
     return 0;
 }
 
-i32 NuShaderObjectCombineGLSLShadersIntoProgram(GLuint *program_dest, GLuint vertex_shader, GLuint fragment_shader) {
+bool NuShaderObjectCombineGLSLShadersIntoProgram(GLuint *program_dest, GLuint vertex_shader, GLuint fragment_shader) {
     // these were most definitely macros
     BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 228);
     GLuint program = glCreateProgram();
@@ -254,7 +285,7 @@ i32 NuShaderObjectCombineGLSLShadersIntoProgram(GLuint *program_dest, GLuint ver
     return bind_result;
 }
 
-i32 NuShaderObjectGenerateGLSLShader(GLuint *shader_dest, GLenum shader_type, const GLchar *shader_source,
+bool NuShaderObjectGenerateGLSLShader(GLuint *shader_dest, GLenum shader_type, const GLchar *shader_source,
                                      GLint shader_source_length) {
     BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 197);
     GLuint shader = glCreateShader(shader_type);
@@ -290,24 +321,86 @@ void NuShaderObjectInit(nushaderobject_s *obj, nushaderobjectkey_s const *key, i
 void NuShaderObjectInitGLSL(nushaderobjectglsl_s *obj, nushaderobjectkey_s const *key, i32 param, u32 vshader,
                             u32 pshader) {
     NuShaderObjectBaseInit(&obj->base, (NUSHADEROBJECTKEY *)key, param);
-    obj->vertex_shader = vshader;   // +0x14
     obj->fragment_shader = pshader; // +0x18
+    obj->vertex_shader = vshader;   // +0x14
     if (!NuShaderObjectCombineGLSLShadersIntoProgram(&obj->program, vshader, pshader)) {
         BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp",
                                298);
         NuShaderObjectGLSLDestroy(obj);
         EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 300);
+        if (bgProcIsBgThread()) NuIOS_YieldThread();
     }
 }
 
-void NuShaderObjectInitGLSL(nushaderobjectglsl_s *, nushaderobjectkey_s const *, i32, char const *, i32, char const *,
-                            i32) {
+void NuShaderObjectInitGLSL(nushaderobjectglsl_s *obj, nushaderobjectkey_s const *key, i32 param,
+                            char const *vsource, i32 vsize, char const *psource, i32 psize) {
+    NuShaderObjectBaseInit(&obj->base, (NUSHADEROBJECTKEY *)key, param);
+    if (!NuShaderObjectGenerateGLSLShader(&obj->vertex_shader, GL_VERTEX_SHADER, vsource, vsize)) {
+        BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 256);
+        NuShaderObjectGLSLDestroy(obj);
+        EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 258);
+        if (bgProcIsBgThread()) NuIOS_YieldThread();
+        return;
+    }
+    if (psource) {
+        if (!NuShaderObjectGenerateGLSLShader(&obj->fragment_shader, GL_FRAGMENT_SHADER, psource, psize)) {
+            BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 266);
+            NuShaderObjectGLSLDestroy(obj);
+            EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 268);
+            if (bgProcIsBgThread()) NuIOS_YieldThread();
+            return;
+        }
+    } else {
+        obj->fragment_shader = 0;
+    }
+    if (!NuShaderObjectCombineGLSLShadersIntoProgram(&obj->program, obj->vertex_shader, obj->fragment_shader)) {
+        BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 279);
+        NuShaderObjectGLSLDestroy(obj);
+        EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 281);
+        if (bgProcIsBgThread()) NuIOS_YieldThread();
+    }
 }
 
-void NuShaderObjectInitGLSL(nushaderobjectglsl_s *, nushaderobjectkey_s const *, i32, char const *, i32, u32) {
+void NuShaderObjectInitGLSL(nushaderobjectglsl_s *obj, nushaderobjectkey_s const *key, i32 param,
+                            char const *vsource, i32 vsize, u32 pshader) {
+    NuShaderObjectBaseInit(&obj->base, (NUSHADEROBJECTKEY *)key, param);
+    obj->fragment_shader = pshader;
+    if (!NuShaderObjectGenerateGLSLShader(&obj->vertex_shader, GL_VERTEX_SHADER, vsource, vsize)) {
+        BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 317);
+        NuShaderObjectGLSLDestroy(obj);
+        EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 319);
+        if (bgProcIsBgThread()) NuIOS_YieldThread();
+        return;
+    }
+    if (!NuShaderObjectCombineGLSLShadersIntoProgram(&obj->program, obj->vertex_shader, obj->fragment_shader)) {
+        BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 325);
+        NuShaderObjectGLSLDestroy(obj);
+        EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 327);
+        if (bgProcIsBgThread()) NuIOS_YieldThread();
+    }
 }
 
-void NuShaderObjectInitGLSL(nushaderobjectglsl_s *, nushaderobjectkey_s const *, i32, u32, char const *, i32) {
+void NuShaderObjectInitGLSL(nushaderobjectglsl_s *obj, nushaderobjectkey_s const *key, i32 param,
+                            u32 vshader, char const *psource, i32 psize) {
+    NuShaderObjectBaseInit(&obj->base, (NUSHADEROBJECTKEY *)key, param);
+    obj->vertex_shader = vshader;
+    if (psource) {
+        if (!NuShaderObjectGenerateGLSLShader(&obj->fragment_shader, GL_FRAGMENT_SHADER, psource, psize)) {
+            BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 346);
+            NuShaderObjectGLSLDestroy(obj);
+            EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 348);
+            if (bgProcIsBgThread()) NuIOS_YieldThread();
+            return;
+        }
+    } else {
+        obj->fragment_shader = 0;
+    }
+    if (!NuShaderObjectCombineGLSLShadersIntoProgram(&obj->program, obj->vertex_shader, obj->fragment_shader)) {
+        BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 359);
+        NuShaderObjectGLSLDestroy(obj);
+        EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/shaderbuilder/android/nushaderobject.cpp", 361);
+        if (bgProcIsBgThread()) NuIOS_YieldThread();
+    }
 }
 
 i32 NuShaderObjectGLSLGetSemanticIndex(const char *name, nushaderuniform_e &uniform) {
@@ -322,6 +415,10 @@ i32 NuShaderObjectGLSLGetSemanticIndex(const char *name, nushaderuniform_e &unif
         }
     }
     return -1;
+}
+
+extern "C" GLSLParameter *NuShaderObjectGLSLAllocateParameter(NUSHADEROBJECT *shader, i32 semantic) {
+    return &shader->parameters[semantic];
 }
 
 // Original 0x30b560, retaining the complete active-uniform walk, sampler-unit
@@ -372,15 +469,14 @@ extern "C" void NuShaderObjectGLSLProbeSemantics(NUSHADEROBJECT *shader) {
             continue;
         }
 
-        GLSLParameter &parameter = shader->parameters[semantic];
+        GLSLParameter &parameter = *NuShaderObjectGLSLAllocateParameter(shader, semantic);
         parameter.element_count_and_setter = (parameter.element_count_and_setter & 3) | 4;
         usage_mask.semantics[semantic >> 5] |= 1u << (semantic & 31);
 
         const GLSLTypeInfo *type_info = GetGLSLTypeInfo(type);
         if (type_info != NULL) {
             parameter.type_and_flags = (parameter.type_and_flags & 0xf0) | (type_info->parameter_type & 0x0f);
-            parameter.element_count_and_setter = (parameter.element_count_and_setter & 0xfc) |
-                                                 (type_info->setter_class & 3) | (type_info->element_count << 2);
+            parameter.element_count_and_setter = (type_info->setter_class & 3) | (type_info->element_count << 2);
         }
 
         if ((parameter.type_and_flags & 0x0f) == 4) {
@@ -407,181 +503,562 @@ extern "C" void NuShaderObjectGLSLProbeSemantics(NUSHADEROBJECT *shader) {
     }
 }
 
-namespace {
-    static NUSHADERPROGRAM program_pool[64];
-    static NUSHADERPROGRAMPARAMETER parameter_pool[2048];
-    static i32 next_program;
-    static i32 next_parameter;
-
-    static i32 FindShaderRegister(const char *source, const char *uniform_name, const char *section) {
-        const char *header = strstr(source, section);
-        if (header == NULL) {
-            return -1;
-        }
-        const char *header_end = strstr(header, "\n\n");
-        if (header_end == NULL) {
-            header_end = source + strlen(source);
-        }
-
-        const usize name_length = strlen(uniform_name);
-        for (const char *match = strstr(header, uniform_name); match != NULL && match < header_end;
-             match = strstr(match + 1, uniform_name)) {
-            const char before = match == header ? ' ' : match[-1];
-            const char after = match[name_length];
-            if ((isalnum((unsigned char)before) || before == '_') || (isalnum((unsigned char)after) || after == '_')) {
-                continue;
-            }
-            const char *number = match + name_length;
-            while (number < header_end && isspace((unsigned char)*number)) {
-                ++number;
-            }
-            if (number < header_end && isdigit((unsigned char)*number)) {
-                i32 value = 0;
-                while (number < header_end && isdigit((unsigned char)*number)) {
-                    value = value * 10 + (*number++ - '0');
-                }
-                return value;
-            }
-        }
+// Original specialized bodies: 360 bytes at 0x2a5390 and 412 bytes at 0x2a5500.
+static i32 GetHLSLRegisterIndex(const char *source, const char *uniform_name, bool texture) {
+    char search_name[256];
+    sprintf(search_name, "_%s ", uniform_name + 1);
+    const char *constants = strstr(source, "//NU2API CONSTANTS :");
+    const char *match = strstr(source, search_name);
+    const char *attributes = strstr(source, "//NU2API ATTRIBS :");
+    if (constants == NULL || match == NULL || (attributes != NULL && match >= attributes)) {
         return -1;
     }
-
-    static u16 UniformSetterClass(GLenum type) {
-        switch (type) {
-            case GL_FLOAT:
-                return 0;
-            case GL_FLOAT_VEC2:
-                return 1;
-            case GL_FLOAT_VEC3:
-                return 2;
-            default:
-                return 3;
+    const char *number = match + NuStrLen(search_name);
+    if (texture) {
+        if (NuStrNICmp(number, "TEXUNIT", NuStrLen("TEXUNIT")) == 0) {
+            number += NuStrLen("TEXUNIT");
+        }
+    } else if (NuToUpper(static_cast<u8>(*number)) == 'C') {
+        ++number;
+    }
+    if (!isdigit(static_cast<unsigned char>(*number))) {
+        return -1;
+    }
+    i32 index = NuAToI(const_cast<char *>(number));
+    const char *declaration = strstr(number, uniform_name + 1);
+    if (declaration == NULL || declaration <= number) {
+        return -1;
+    }
+    for (const char *cursor = declaration - 1; *cursor != '\n'; --cursor) {
+        if (NuStrNCmp(cursor, "//var ", NuStrLen("//var ")) != 0) {
+            return index;
+        }
+        if (cursor == number) {
+            break;
         }
     }
+    return -1;
+}
 
-    static bool IsSampler(GLenum type) {
-        return type == GL_SAMPLER_2D || type == GL_SAMPLER_CUBE;
-    }
-
-    static void SetProgramParam(NUSHADERPROGRAM *program, u16 wanted_register, const f32 *values, i32 component_count) {
-        for (i32 i = 0; i < program->parameter_count; ++i) {
-            const NUSHADERPROGRAMPARAMETER &parameter = program->parameters[i];
-            if (parameter.register_index != wanted_register) {
-                continue;
-            }
-            const u32 location = parameter.location_and_setter & 0x0fff;
-            const u32 setter = parameter.location_and_setter >> 12;
-            const i32 vector_count = (component_count + 3) / 4;
-            g_glConstantSetterTable[setter](location, vector_count, values);
-            return;
-        }
-    }
-} // namespace
+struct __attribute__((aligned(16))) ShaderProgramPool {
+    NUSHADERPROGRAM programs[64];
+    u8 occupied[8];
+    i32 next;
+};
+DECOMP_ASSERT(sizeof(ShaderProgramPool) == 0x810, "Shader program pool ABI");
+DECOMP_ASSERT(offsetof(ShaderProgramPool, occupied) == 0x800, "Shader program occupancy offset");
+DECOMP_ASSERT(offsetof(ShaderProgramPool, next) == 0x808, "Shader program cursor offset");
+static ShaderProgramPool programPool;
+extern "C" {
+    NUSHADERPROGRAMPARAMETER g_uniformParameterRecordStorage[1024];
+}
+static i32 g_uniformParameterRecordAllocator;
+static char uniformName[256];
 
 extern "C" NUSHADERPROGRAM *NuShaderProgramCreateIOS(const char *vertex_source, const char *fragment_source) {
-    if (next_program >= (i32)(sizeof(program_pool) / sizeof(program_pool[0]))) {
-        return NULL;
-    }
-
     GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    NuStrLen(vertex_source);
+    char *precision = const_cast<char *>(strstr(vertex_source, "precision mediump float;"));
+    if (precision != NULL) {
+        memcpy(precision, "precision highp float;  ", NuStrLen("precision highp float;  "));
+    }
     glShaderSource(vertex_shader, 1, &vertex_source, NULL);
     glCompileShader(vertex_shader);
     GLint compiled = 0;
     glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &compiled);
     if (compiled == 0) {
         glDeleteShader(vertex_shader);
-        return NULL;
     }
 
     GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    NuStrLen(fragment_source);
     glShaderSource(fragment_shader, 1, &fragment_source, NULL);
     glCompileShader(fragment_shader);
+    compiled = 0;
     glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &compiled);
     if (compiled == 0) {
         glDeleteShader(fragment_shader);
-        glDeleteShader(vertex_shader);
         return NULL;
     }
 
-    NUSHADERPROGRAM *result = &program_pool[next_program++];
-    memset(result, 0, sizeof(*result));
+    GLuint program = glCreateProgram();
+    glAttachShader(program, vertex_shader);
+    glAttachShader(program, fragment_shader);
+    LinkShaderProgram(program);
+    NuShaderObjectBindAttributeLocationsGLSL(program);
+    NUSHADERPROGRAM *result = NULL;
+    const i32 start = programPool.next;
+    for (i32 pass = 0; pass < 2 && result == NULL; ++pass) {
+        const i32 end = pass == 0 ? 64 : start;
+        for (i32 slot = pass == 0 ? start : 0; slot < end; ++slot) {
+            if ((programPool.occupied[slot / 8] & (1 << (slot & 7))) == 0) {
+                programPool.occupied[slot / 8] |= 1 << (slot & 7);
+                programPool.next = (slot + 1) % 64;
+                result = &programPool.programs[slot];
+                break;
+            }
+        }
+    }
     result->vertex_shader = vertex_shader;
     result->fragment_shader = fragment_shader;
-    result->program = glCreateProgram();
-    glAttachShader(result->program, vertex_shader);
-    glAttachShader(result->program, fragment_shader);
-    if (!NuShaderObjectBindAttributeLocationsGLSL(result->program)) {
-        return NULL;
+    result->program = program;
+    glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &result->parameter_count);
+    if (result->parameter_count != 0) {
+        result->parameters = &g_uniformParameterRecordStorage[g_uniformParameterRecordAllocator];
+        g_uniformParameterRecordAllocator += result->parameter_count;
+    } else {
+        result->parameters = NULL;
     }
-
-    GLint active_uniforms = 0;
-    glGetProgramiv(result->program, GL_ACTIVE_UNIFORMS, &active_uniforms);
-    result->parameters = &parameter_pool[next_parameter];
-    for (i32 i = 0; i < active_uniforms; ++i) {
-        char uniform_name[256];
-        GLsizei length = 0;
-        GLint count = 0;
-        GLenum type = 0;
-        glGetActiveUniform(result->program, i, sizeof(uniform_name), &length, &count, &type, uniform_name);
-        char *array_suffix = strchr(uniform_name, '[');
+    i32 removed = 0;
+    for (i32 i = 0; i < result->parameter_count; ++i) {
+        GLint count;
+        GLenum type;
+        glGetActiveUniform(result->program, i, sizeof(uniformName), NULL, &count, &type, uniformName);
+        char *array_suffix = strchr(uniformName, '[');
         if (array_suffix != NULL) {
             *array_suffix = '\0';
         }
 
-        const GLint location = glGetUniformLocation(result->program, uniform_name);
-        if (IsSampler(type)) {
-            const i32 texture_unit = FindShaderRegister(fragment_source, uniform_name, "//NU2API TEXTURES");
-            if (texture_unit >= 0) {
+        NUSHADERPROGRAMPARAMETER *parameter = &result->parameters[i - removed];
+        i32 register_index = GetHLSLRegisterIndex(vertex_source, uniformName, false);
+        u16 stage_flag = 0;
+        if (register_index == -1) {
+            register_index = GetHLSLRegisterIndex(fragment_source, uniformName, false);
+            stage_flag = 0x8000;
+        }
+        parameter->register_index = stage_flag | static_cast<u16>(register_index);
+        parameter->location = glGetUniformLocation(result->program, uniformName);
+        const GLSLTypeInfo *type_info = GetGLSLTypeInfo(type);
+        if (type_info == NULL) {
+            ++removed;
+        } else if (type_info->parameter_type == 4) {
+            const i32 texture_unit = GetHLSLRegisterIndex(fragment_source, uniformName, true);
+            if (texture_unit != -1) {
+                const GLint location = glGetUniformLocation(result->program, uniformName);
                 glUseProgram(result->program);
                 glUniform1i(location, texture_unit);
                 glUseProgram(0);
                 g_boundShader = 0;
             }
-            continue;
+            ++removed;
+        } else {
+            parameter->setter = type_info->setter_class;
         }
-
-        i32 register_index = FindShaderRegister(vertex_source, uniform_name, "//NU2API CONSTANTS");
-        u16 stage_flag = 0;
-        if (register_index < 0) {
-            register_index = FindShaderRegister(fragment_source, uniform_name, "//NU2API CONSTANTS");
-            stage_flag = 0x8000;
-        }
-        if (register_index < 0 || next_parameter >= (i32)(sizeof(parameter_pool) / sizeof(parameter_pool[0]))) {
-            continue;
-        }
-
-        NUSHADERPROGRAMPARAMETER &parameter = parameter_pool[next_parameter++];
-        parameter.register_index = stage_flag | (u16)register_index;
-        parameter.location_and_setter = (UniformSetterClass(type) << 12) | (location & 0x0fff);
-        result->parameter_count++;
     }
+    result->parameter_count -= removed;
+    g_uniformParameterRecordAllocator -= removed;
     return result;
-}
-
-extern "C" void NuShaderProgramSetVertexParamfv(NUSHADERPROGRAM *program, u32 register_index, const f32 *values,
-                                                i32 component_count) {
-    SetProgramParam(program, (u16)register_index, values, component_count);
-}
-
-extern "C" void NuShaderProgramSetFragmentParamfv(NUSHADERPROGRAM *program, u32 register_index, const f32 *values,
-                                                  i32 component_count) {
-    SetProgramParam(program, (u16)(register_index | 0x8000), values, component_count);
 }
 
 // Additional overloads present in original (char* shader sources)
 void NuShaderObjectInit(nushaderobject_s *obj, nushaderobjectkey_s const *key, i32 param, const char *vshader,
-                        i32 vsize, u32 pshader, eSHADERVERSION version) {
-    (void)vshader;
-    (void)vsize;
-    NuShaderObjectInit(obj, key, param, 0, pshader, version);
+                        i32 vsize, u32 pshader, eSHADERVERSION) {
+    NuShaderObjectInitGLSL((nushaderobjectglsl_s *)obj, key, param, vshader, vsize, pshader);
+    NuShaderObjectGLSLProbeSemantics(obj);
 }
 
 void NuShaderObjectInit(nushaderobject_s *obj, nushaderobjectkey_s const *key, i32 param, u32 vshader,
-                        const char *pshader, i32 psize, eSHADERVERSION version) {
-    (void)pshader;
-    (void)psize;
-    NuShaderObjectInit(obj, key, param, vshader, 0, version);
+                        const char *pshader, i32 psize, eSHADERVERSION) {
+    NuShaderObjectInitGLSL((nushaderobjectglsl_s *)obj, key, param, vshader, pshader, psize);
+    NuShaderObjectGLSLProbeSemantics(obj);
 }
 
-asm(".globl NuShaderObjectInit\n"
-    ".set NuShaderObjectInit, _Z18NuShaderObjectInitP16nushaderobject_sPK19nushaderobjectkey_sijj14eSHADERVERSION\n");
+extern "C" void NuShaderObjectInit(nushaderobject_s *obj, nushaderobjectkey_s const *key, i32 param,
+                                    const char *vsource, i32 vsize) {
+    const char *psource = "precision lowp float;\nvoid main() { gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0); }";
+    NuShaderObjectInitGLSL((nushaderobjectglsl_s *)obj, key, param, vsource, vsize, psource, NuStrLen(psource));
+    NuShaderObjectGLSLProbeSemantics(obj);
+}
+
+extern "C" NUSHADEROBJECT *NuShaderObjectUnserialize(VARIPTR *buffer) {
+    usize address = (buffer->addr + 3) & ~static_cast<usize>(3);
+    address += *reinterpret_cast<u32 *>(address);
+    address = (address + 7) & ~static_cast<usize>(3);
+    buffer->addr = address + sizeof(NUSHADEROBJECT);
+    return reinterpret_cast<NUSHADEROBJECT *>(address);
+}
+
+#include "nu2api/nucore/nuapi.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/numath/nurand.h"
+#include "nu2api/numath/nutrig.h"
+
+extern "C" void NuShaderObjectBaseUpdateWaterTable(NUSHADEROBJECT *shader, numtl_s *mtl) {
+    static NUVEC4 waterTable[32];
+    static i32 lastintsame = -1;
+    static numtl_s *prev_mtl;
+    static f32 theta = 0.7f;
+    i32 frame;
+    memcpy(&frame, &nuapi.frame_count, sizeof(frame));
+    const f32 *material = reinterpret_cast<const f32 *>(mtl);
+    if (frame != lastintsame) theta = material[0x60 / 4] * water_theta_step + theta;
+    if (frame != lastintsame || mtl != prev_mtl) {
+        NUMTX inverse;
+        NUVEC scale = {0.5f, 0.5f, 0.5f};
+        NuMtxInvR(&inverse, &global_camera.mtx);
+        NuMtxScale(&inverse, &scale);
+        inverse.m03 = inverse.m13 = inverse.m23 = 0.0f;
+        const f32 amplitude = 0.1f * material[0x6c / 4];
+        u32 seed = 17;
+        NuRandFloatSeeded(&seed);
+        for (i32 i = 0; i < 32; ++i) {
+            NUVEC displacement;
+            f32 phase = (NuRandFloatSeeded(&seed) * 0.4f + 0.8f) * theta;
+            i32 angle = static_cast<i32>((NuRandFloatSeeded(&seed) * 6.283f + phase) * 10430.3779296875f);
+            displacement.x = (amplitude * NuTrigTable[(angle >> 1) & 0x7fff]) * 4.0f;
+            phase = (NuRandFloatSeeded(&seed) * 0.8f + 0.6f) * theta;
+            angle = static_cast<i32>((NuRandFloatSeeded(&seed) * 5.717f + phase) * 10430.3779296875f);
+            displacement.y = (amplitude * NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff]) * 4.0f;
+            phase = (NuRandFloatSeeded(&seed) * 0.4f + 0.7f) * theta;
+            angle = static_cast<i32>((NuRandFloatSeeded(&seed) * 6.283f + phase) * 10430.3779296875f);
+            displacement.z = amplitude * NuTrigTable[(angle >> 1) & 0x7fff];
+            waterTable[i].w = 0.25f * displacement.x;
+            NuVecMtxTransformH(reinterpret_cast<NUVEC *>(&waterTable[i]), &displacement, &inverse);
+        }
+    }
+    NuShaderObjectSetElementsfv(shader, 31, 0, 32, reinterpret_cast<const f32 *>(waterTable));
+    prev_mtl = mtl;
+    memcpy(&lastintsame, &nuapi.frame_count, sizeof(lastintsame));
+}
+
+#include "nu2api/nu3d/android/nuiosdl_gl.h"
+#include "nu2api/nu3d/android/nutex_android.h"
+#include "nu2api/nu3d/android/nutex_ios_ex.h"
+#include "nu2api/nu3d/nutex.h"
+
+static void NuShaderObjectGLSLSetCustomSetterParameters(nushaderobjectglsl_s *glsl,
+                                                       NuShaderUsageMask_s &mask, numtl_s *mtl) {
+    NUSHADEROBJECT *shader = reinterpret_cast<NUSHADEROBJECT *>(glsl);
+    const NUSHADERUSAGEMASK *usage = &mask;
+    auto unpackColour = [](u32 packed, f32 *colour) {
+        colour[0] = static_cast<f32>(packed & 0xff) / 255.0f;
+        colour[1] = static_cast<f32>((packed >> 8) & 0xff) / 255.0f;
+        colour[2] = static_cast<f32>((packed >> 16) & 0xff) / 255.0f;
+        colour[3] = static_cast<f32>(packed >> 24) / 255.0f;
+    };
+
+        const u8 *material = reinterpret_cast<const u8 *>(mtl);
+        auto materialFloat = [material](usize offset) { return *reinterpret_cast<const f32 *>(material + offset); };
+        auto materialU32 = [material](usize offset) { return *reinterpret_cast<const u32 *>(material + offset); };
+
+        // Original 0x309da0.  Material semantics are not part of the global
+        // uniform table: every active one is rebuilt from NUMTL immediately
+        // before drawing.  In particular the four layer colours/opacities and
+        // the surface parameters must not be left at OpenGL's zero defaults.
+        for (i32 semantic = 52; semantic >= 21; --semantic) {
+            if ((usage->semantics[semantic >> 5] & (1u << (semantic & 31))) == 0) {
+                continue;
+            }
+
+            const GLint location = shader->parameters[semantic].location;
+            if (location < 0) {
+                continue;
+            }
+
+            f32 values[16] = {};
+            i32 components = 4;
+            i32 count = 1;
+            switch (semantic) {
+                case 21:
+                    unpackColour(materialU32(0x11c), values);
+                    break;
+                case 22:
+                    unpackColour(materialU32(0x120), values);
+                    values[3] = materialFloat(0x1b4);
+                    break;
+                case 23:
+                    values[0] = material[0xfb] == 0 ? 1.0f : -1.0f;
+                    components = (shader->parameters[semantic].element_count_and_setter & 3) + 1;
+                    break;
+                case 24:
+                    values[0] = materialFloat(0x134);
+                    values[1] = 1.0f;
+                    values[2] = 0.035f * materialFloat(0x138);
+                    values[3] = materialFloat(0x14c);
+                    break;
+                case 25:
+                    values[0] = materialFloat(0xf0);
+                    values[1] = materialFloat(0x284) / materialFloat(0x274);
+                    break;
+                case 26:
+                    values[0] = materialFloat(0x130);
+                    values[1] = materialFloat(0x12c);
+                    values[2] = materialFloat(0x144);
+                    values[3] = materialFloat(0x148);
+                    break;
+                case 27:
+                    values[0] = materialFloat(0x140);
+                    values[1] = materialFloat(0x13c);
+                    values[2] = materialFloat(0x248);
+                    break;
+                case 28:
+                    values[0] = materialFloat(0x114);
+                    components = (shader->parameters[semantic].element_count_and_setter & 3) + 1;
+                    break;
+                case 29:
+                    values[0] = materialFloat(0x118);
+                    components = (shader->parameters[semantic].element_count_and_setter & 3) + 1;
+                    break;
+                case 30:
+                    values[0] = materialFloat(0x1b8);
+                    values[1] = materialFloat(0x1bc);
+                    break;
+                case 31:
+                    NuShaderObjectBaseUpdateWaterTable(shader, mtl);
+                    continue;
+                case 32:
+                case 33:
+                case 34:
+                case 35:
+                    unpackColour(materialU32(0xc8 + (semantic - 32) * 4), values);
+                    break;
+                case 36:
+                    values[0] = materialFloat(0xd8);
+                    values[1] = materialFloat(0xdc);
+                    values[2] = materialFloat(0xe0);
+                    values[3] = materialFloat(0xe4);
+                    break;
+                case 37:
+                    unpackColour(materialU32(0x128), values);
+                    components = 3;
+                    break;
+                case 38:
+                    unpackColour(materialU32(0xf4), values);
+                    components = 3;
+                    break;
+                case 39:
+                    unpackColour(materialU32(0x124), values);
+                    values[3] = materialFloat(0x158);
+                    break;
+                case 40:
+                    values[0] = (materialFloat(0x150) - 1.0f) * 0.1f;
+                    components = (shader->parameters[semantic].element_count_and_setter & 3) + 1;
+                    break;
+                case 41:
+                case 42:
+                case 43:
+                case 44:
+                    values[0] = materialFloat(0x1d0 + (semantic - 41) * 8);
+                    values[1] = materialFloat(0x1d4 + (semantic - 41) * 8);
+                    components = 2;
+                    break;
+                case 45:
+                    values[0] = 0.05f;
+                    values[1] = 0.32f * materialFloat(0x60);
+                    values[2] = 0.2f;
+                    values[3] = 0.8f;
+                    break;
+                case 46:
+                    values[0] = materialFloat(0x60);
+                    values[1] = materialFloat(0x64);
+                    values[2] = materialFloat(0x68);
+                    values[3] = (values[2] * values[1]) * 0.2f;
+                    break;
+                case 47:
+                    values[0] = materialFloat(0x154);
+                    components = (shader->parameters[semantic].element_count_and_setter & 3) + 1;
+                    break;
+                case 48:
+                    values[0] = materialFloat(0x260);
+                    values[1] = materialFloat(0x264);
+                    break;
+                case 49:
+                    for (i32 colour = 0; colour < 4; ++colour) {
+                        unpackColour(materialU32(0x250 + colour * 4), values + colour * 4);
+                    }
+                    count = 4;
+                    break;
+                case 50:
+                    values[0] = 1.0f / materialFloat(0x290);
+                    values[1] = materialFloat(0x288);
+                    values[2] = materialFloat(0x28c);
+                    values[3] = materialFloat(0x294);
+                    break;
+                case 51:
+                    values[0] = 0.1f * materialFloat(0x274);
+                    values[1] = materialFloat(0x27c);
+                    values[2] = materialFloat(0x280);
+                    values[3] = materialFloat(0x278);
+                    break;
+                case 52: {
+                    // Original .L35 at 0x30a8d8.  GLES has no fixed-function
+                    // alpha test, so generated shaders consume the current
+                    // render-state comparison as (sign, adjusted reference).
+                    const f32 alpha_ref = static_cast<f32>(g_alphaRef) * (1.0f / 255.0f);
+                    components = 2;
+                    if (g_alphaTestEnabled == 0) {
+                        values[0] = 0.0f;
+                        values[1] = -1.0f;
+                    } else if (g_alphaFunc == 2) {
+                        values[0] = -1.0f;
+                        values[1] = static_cast<f32>(0u - g_alphaRef) * (1.0f / 255.0f) - (1.0f / 255.0f);
+                        if (values[1] <= 0.0f) {
+                            values[1] = 0.0f;
+                        }
+                    } else if (g_alphaFunc == 3) {
+                        values[0] = -1.0f;
+                        values[1] = static_cast<f32>(0u - g_alphaRef) * (1.0f / 255.0f);
+                    } else if (g_alphaFunc == 5) {
+                        values[0] = 1.0f;
+                        values[1] = alpha_ref;
+                    } else if (g_alphaFunc == 6) {
+                        values[0] = 1.0f;
+                        values[1] = alpha_ref + (1.0f / 255.0f);
+                    } else {
+                        values[0] = 0.0f;
+                        values[1] = -1.0f;
+                    }
+                    break;
+                }
+            }
+
+            if (components == 1) {
+                glUniform1fv(location, count, values);
+            } else if (components == 2) {
+                glUniform2fv(location, count, values);
+            } else if (components == 3) {
+                glUniform3fv(location, count, values);
+            } else {
+                glUniform4fv(location, count, values);
+            }
+        }
+
+}
+
+extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader, struct numtl_s *mtl) {
+
+    // Target 0x31cba0 walks the active texture semantics and binds each map to
+    // the unit encoded by ProbeSemantics.  Keeping this driven by the usage
+    // mask is important for multi-sampler character materials.
+    static numtl_s *lastMtl;
+    static NUSHADEROBJECT *lastObject;
+    static i32 lastFrame;
+    NUSHADERUSAGEMASK dirty;
+    NuShaderGetDirtyMask(&dirty, shader);
+    const NUSHADERUSAGEMASK *usage = &dirty;
+    {
+      if (lastMtl != mtl || lastObject != shader || lastFrame != 0) {
+        for (i32 semantic = 19; semantic >= 0; --semantic) {
+            if ((usage->semantics[semantic >> 5] & (1u << (semantic & 31))) == 0) {
+                continue;
+            }
+
+            const i32 texture_unit = static_cast<u16>(shader->parameters[semantic].location) & 0x7ff;
+            i32 texture_id = 0;
+            bool bind_2d = true;
+            switch (semantic) {
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                    texture_id = mtl->shader_desc.diffuse_map_tex_id[semantic];
+                    break;
+                case 4:
+                    texture_id = mtl->shader_desc.specular_map_tid;
+                    break;
+                case 5:
+                    texture_id = mtl->shader_desc.lightmap_tex_id[0];
+                    break;
+                case 6:
+                    texture_id = mtl->shader_desc.normal_map_tid;
+                    break;
+                case 7:
+                    texture_id = mtl->shader_desc.lightmap_tex_id[1];
+                    break;
+                case 9:
+                    texture_id = mtl->shader_desc.vtf_height_map_tid;
+                    break;
+                case 12:
+                    texture_id = mtl->shader_desc.vtf_normal_map_tid;
+                    break;
+                case 13:
+                    texture_id = mtl->shader_desc.unknown_198;
+                    bind_2d = false;
+                    break;
+                case 14:
+                    texture_id = mtl->shader_desc.envmap_cubic_tid;
+                    bind_2d = false;
+                    break;
+                case 16:
+                    texture_id = mtl->shader_desc.shine_map_ps2_tid;
+                    break;
+                case 18:
+                    if (NuWindCurrent(nuapi.wind) >= 0) {
+                        NuTexSetTextureWithStagePS(NuTexGetNative(NuWindCurrent(nuapi.wind)), texture_unit);
+                    }
+                    continue;
+                case 19:
+                    texture_id = mtl->shader_desc.field_1e4;
+                    break;
+                case 20:
+                    texture_id = mtl->shader_desc.field_1e8;
+                    break;
+                default:
+                    continue;
+            }
+
+            if (bind_2d || g_currentTexUnit != texture_unit) {
+                glActiveTexture(GL_TEXTURE0 + texture_unit);
+                g_currentTexUnit = texture_unit;
+            }
+            GLuint gl_texture = 0;
+            if (semantic == 14 && (mtl->shader_desc.flags & 0x50000) != 0) {
+                gl_texture = g_LegoEnvTexture;
+            } else if (semantic == 14 ? texture_id > 0 : texture_id != 0) {
+                NUNATIVETEX *native = NuTexGetNative(texture_id);
+                if (native != NULL) {
+                    gl_texture = native->platform.gl_tex;
+                }
+            }
+            if (!bind_2d && g_lastBoundCubeTexIds[texture_unit] == gl_texture) {
+                continue;
+            }
+            glBindTexture(bind_2d ? GL_TEXTURE_2D : GL_TEXTURE_CUBE_MAP, gl_texture);
+            if (!bind_2d && texture_unit < 16) {
+                g_lastBoundCubeTexIds[texture_unit] = gl_texture;
+            }
+        }
+
+        NuShaderObjectGLSLSetCustomSetterParameters(&shader->glsl, dirty, mtl);
+        lastMtl = mtl;
+        lastObject = shader;
+        lastFrame = 0;
+      }
+
+        // The original continues through the non-material shader semantics
+        // (0x35..0x59) and uploads the values accumulated by
+        // NuShaderManagerSetfv.  These include the world/view/projection
+        // matrices and the current light state.  Use the locations and setter
+        // classes recorded by NuShaderObjectGLSLProbeSemantics rather than
+        // looking up a hand-picked set of generated GLSL names.
+        for (i32 semantic = 0x35; semantic <= 0x59; ++semantic) {
+            if ((usage->semantics[semantic >> 5] & (1u << (semantic & 31))) == 0) {
+                continue;
+            }
+
+            GLSLParameter &parameter = shader->parameters[semantic];
+            if (parameter.location < 0) {
+                continue;
+            }
+
+            const nu2api::ShaderUniformRecord &uniform = nu2api::g_shaderUniforms[semantic];
+            const i32 count = static_cast<i32>(uniform.data.metadata[0]);
+            if (count <= 0) {
+                continue;
+            }
+            const f32 *values = reinterpret_cast<const f32 *>(uniform.data.values);
+
+            switch (parameter.type_and_flags & 0x0f) {
+                case 1:
+                    g_glConstantSetterTable[parameter.element_count_and_setter & 3](parameter.location, count, values);
+                    break;
+                case 2:
+                    glUniform4fv(parameter.location, count, values);
+                    break;
+                case 3:
+                    parameter.setElementsMatrix(0, count, values);
+                    break;
+            }
+        }
+    }
+}

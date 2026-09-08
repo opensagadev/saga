@@ -95,6 +95,8 @@ extern "C" {
     i16 id_WAMPA = -1;
     i16 id_HANINCARBONITE = -1;
     i16 id_YODA = -1;
+    i16 id_C3PO = -1;
+    i16 id_TC14 = -1;
     i16 id_YODAGHOST = -1;
     i16 id_MOSEISLEYCITIZEN = -1;
     i16 id_CANTINAALIEN = -1;
@@ -105,6 +107,7 @@ extern "C" {
     i16 id_CHEWBACCA = -1;
     i16 id_WOOKIEE = -1;
     i16 id_ATST_LOWRES = -1;
+    i16 id_ATST = -1;
     i16 id_BARMAN = -1;
     i16 id_DROIDEKA = -1;
     i16 id_SUPERBATTLEDROID = -1;
@@ -126,6 +129,7 @@ extern "C" {
     i16 id_SPEEDERBIKE = -1;
     i16 id_HEAVYREPEATINGCANNON = -1;
     i16 id_BIGGUN = -1;
+    i16 id_4LOM = -1;
     i16 id_TROOPERCANNON = -1;
     i16 id_MOSCANNON = -1;
     i16 id_CANNON = -1;
@@ -308,6 +312,8 @@ extern "C" {
         {"wampa", &id_WAMPA},
         {"hanincarbonite", &id_HANINCARBONITE},
         {"yoda", &id_YODA},
+        {"c3po", &id_C3PO},
+        {"tc14", &id_TC14},
         {"yoda_ghost", &id_YODAGHOST},
         {"moseisleycitizen", &id_MOSEISLEYCITIZEN},
         {"cantinaaliens", &id_CANTINAALIEN},
@@ -319,6 +325,7 @@ extern "C" {
         {"chewbacca", &id_CHEWBACCA},
         {"wookie", &id_WOOKIEE},
         {"atst_lowres", &id_ATST_LOWRES},
+        {"atst", &id_ATST},
         {"barman", &id_BARMAN},
         {"destroyer", &id_DROIDEKA},
         {"superbattledroid", &id_SUPERBATTLEDROID},
@@ -340,6 +347,7 @@ extern "C" {
         {"speederbike", &id_SPEEDERBIKE},
         {"heavyrepeatingcannon", &id_HEAVYREPEATINGCANNON},
         {"biggun", &id_BIGGUN},
+        {"4lom", &id_4LOM},
         {"troopercannon", &id_TROOPERCANNON},
         {"moscannon", &id_MOSCANNON},
         {"cannon", &id_CANNON},
@@ -683,28 +691,38 @@ CHARACTERDATA *ConfigureCharacterList(char *file, VARIPTR *bufferStart, VARIPTR 
     return characterdata;
 }
 
-CharacterObjectInterface::CharacterObjectInterface(GameObject_s &) {
+CharacterObjectInterface::CharacterObjectInterface(GameObject_s &value) : object(&value) {
+    object->mech_object_interface = this;
 }
 
-void CharacterObjectInterface::GetHeight() const {
+f32 CharacterObjectInterface::GetHeight() const {
+    return object->apiobj.scaled_height;
 }
 
-void CharacterObjectInterface::GetPos(VuVec &, i32) const {
+void CharacterObjectInterface::GetPos(VuVec &position, i32) const {
+    position = VuVec(object->apiobj.collision_position.x, object->apiobj.collision_position.y,
+                     object->apiobj.collision_position.z, 1.0f);
 }
 
-void CharacterObjectInterface::GetRadius() const {
+f32 CharacterObjectInterface::GetRadius() const {
+    return object->field_0x1008;
 }
 
-void CharacterObjectInterface::GetTargetName() const {
+const char *CharacterObjectInterface::GetTargetName() const {
+    return "Character";
 }
 
-void CharacterObjectInterface::IsDead() {
+bool CharacterObjectInterface::IsDead() {
+    if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001) return 1;
+    return object->apiobj.field_0x287 != 0;
 }
 
 void CharacterObjectInterface::TargetedFlash() {
+    object->targeted_flash = 1.0f;
 }
 
 CharacterObjectInterface::~CharacterObjectInterface() {
+    object->mech_object_interface = NULL;
 }
 
 static __used__ void NewCharacterIdle(GameObject_s *, i32) {

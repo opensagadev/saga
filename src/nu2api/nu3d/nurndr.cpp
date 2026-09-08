@@ -114,10 +114,22 @@ void NuRndrBurstObjBegin(nugobj_s *, void (*)(rndrstream_s *, numtx_s *, i32)) {
 void NuRndrRectUV2dNoScale(float, float, float, float, float, float, float, float, i32, numtl_s *) {
 }
 
-void NuRndrFlickerBeginScene() {
+i32 NuRndrFlickerBeginScene() {
+    return 1;
 }
 
-void NuRndrParticleSetRepeat(nuvec_s *) {
+void NuRndrParticleSetRepeat(nuvec_s *position) {
+    NUVEC repeat = {
+        (position->x - NuRndrDebBase.x) / NuRndrDebRange.x,
+        (position->y - NuRndrDebBase.y) / NuRndrDebRange.y,
+        (position->z - NuRndrDebBase.z) / NuRndrDebRange.z,
+    };
+    repeat.x -= static_cast<f32>(static_cast<i32>(repeat.x + 65536.0f) - 65536);
+    repeat.y -= static_cast<f32>(static_cast<i32>(repeat.y + 65536.0f) - 65536);
+    repeat.z -= static_cast<f32>(static_cast<i32>(repeat.z + 65536.0f) - 65536);
+    position->x = NuRndrDebBase.x + repeat.x * NuRndrDebRange.x;
+    position->y = NuRndrDebBase.y + repeat.y * NuRndrDebRange.y;
+    position->z = NuRndrDebBase.z + repeat.z * NuRndrDebRange.z;
 }
 
 void NuRndrCalcRandEllipsePos(nuvec4_s *, numtx_s *, nuvec_s *) {

@@ -1,4 +1,1 @@
-struct BOLT_s;
-
-void Bolt_PlayHitSfx(BOLT_s *) {
-}
+// Reconstructed bolt functions live in bolts.cpp.

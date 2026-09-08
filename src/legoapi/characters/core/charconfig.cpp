@@ -1,6 +1,7 @@
 #include "decomp.h"
 #include "globals.h"
 #include "legoapi/characters/core/charconfig.h"
+#include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
 #include "nu2api/nufile/nufilepak.h"
 #include "legoapi/gizmo/base/gizactions.h"
@@ -18,8 +19,57 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
+extern i16 id_MINIDROIDEKA;
+extern i16 id_SUPERBATTLEDROID;
+extern i16 id_JAWA;
+extern i16 id_UGNAUGHT;
+extern i16 id_REPUBLICGUNSHIP;
+extern i16 id_REPUBLICGUNSHIP_GREEN;
+extern i16 id_PROBEDROID;
+extern i16 id_BODYGUARD;
+extern i16 id_IMPERIALGUARD;
+
 void Move_JEDI(GameObject_s *object);
 void Animate_JEDI(GameObject_s *object);
+void Move_DROIDGENERIC(GameObject_s *object);
+void Animate_PROTOCOL(GameObject_s *object);
+void Animate_ASTROMECH(GameObject_s *object);
+void PostAnimate_ASTROMECH(GameObject_s *object);
+void Move_CANNON(GameObject_s *object);
+void Animate_CANNON(GameObject_s *object);
+void Move_VEHICLE(GameObject_s *object);
+void Animate_VEHICLE(GameObject_s *object);
+void Move_BEAST(GameObject_s *object);
+void Animate_BEAST(GameObject_s *object);
+void Animate_BATTLEDROID(GameObject_s *object);
+void Move_HOVERDROID(GameObject_s *object);
+void Animate_HOVERDROID(GameObject_s *object);
+void Move_WALKER(GameObject_s *object);
+void Animate_WALKER(GameObject_s *object);
+void Move_ATAT(GameObject_s *object);
+void Animate_ATAT(GameObject_s *object);
+void Move_CRITTER(GameObject_s *object);
+void Animate_CRITTER(GameObject_s *object);
+void Move_POD(GameObject_s *object);
+void Animate_POD(GameObject_s *object);
+void PostAnimate_FETT(GameObject_s *object);
+void Move_WEIRDO(GameObject_s *object);
+void Animate_WEIRDO(GameObject_s *object);
+void Move_DROIDEKA(GameObject_s *object);
+void Animate_DROIDEKA(GameObject_s *object);
+void Move_SUPERBATTLEDROID(GameObject_s *object);
+void Animate_SUPERBATTLEDROID(GameObject_s *object);
+void Move_BARMAN(GameObject_s *object);
+void Animate_BARMAN(GameObject_s *object);
+void Move_JAWA(GameObject_s *object);
+void Move_DRAGBOMB(GameObject_s *object);
+void Move_REPUBLICGUNSHIP(GameObject_s *object);
+void Animate_REPUBLICGUNSHIP(GameObject_s *object);
+void Move_SPEEDERBIKE(GameObject_s *object);
+void Animate_SPEEDERBIKE(GameObject_s *object);
+void Animate_DEFAULT(GameObject_s *object);
+void Move_GEONOSIAN(GameObject_s *object);
+void Animate_GEONOSIAN(GameObject_s *object);
 void SetMoveAndAnimateFunctions(u32 model_flag_mask, u32 model_flag_value, u32 game_flag_mask, u32 game_flag_value,
                                 i32 movement_type, void *move_function, void *animate_function, void *draw_function);
 void CharConfig_CalculateJumpStats(f32 jump_speed, f32 gravity, f32 *duration, f32 *height);
@@ -32,12 +82,10 @@ void CharVariants_Init(CHARVARIANT *, i32) {
 }
 
 void CharCategories_Init(CHARCATEGORY *categories) {
-    CharCategory = reinterpret_cast<CHARCAT_s *>(categories);
+    CharCategory = categories;
     CHARCATEGORYCOUNT = 0;
-    if (CharCategory != NULL) {
-        while (CharCategory[CHARCATEGORYCOUNT].name != NULL) {
-            ++CHARCATEGORYCOUNT;
-        }
+    if (categories != NULL) {
+        for (; categories->name != NULL; categories++) CHARCATEGORYCOUNT++;
     }
 }
 
@@ -45,39 +93,28 @@ void CanWearHatsInFreePlay(i32) {
 }
 
 i32 CharCategory_FindByName(char *name) {
-    if (CharCategory != NULL && name != NULL) {
-        for (i32 index = 0; index < CHARCATEGORYCOUNT; ++index) {
-            if (NuStrICmp(CharCategory[index].name, name) == 0) {
-                return index;
-            }
+    if (CharCategory != NULL) {
+        for (i32 i = 0; i < CHARCATEGORYCOUNT; i++) {
+            if (NuStrICmp(CharCategory[i].name, name) == 0) return i;
         }
     }
     return -1;
 }
 
-i32 CharCategory_IsCategory(GameObject_s *object, i32 category) {
-    if (object == NULL || object->apiobj.character_data == NULL || category < 0 || category >= CHARCATEGORYCOUNT) {
+i32 CharCategory_IsCategory(GameObject_s *object, i32 index) {
+    if (index < 0 || index >= CHARCATEGORYCOUNT) return 0;
+    CHARCAT_s *category = &CharCategory[index];
+    const u32 model_flags = category->field1_0x4;
+    if (model_flags != 0) {
+        if ((model_flags & 8) != 0 &&
+            (((GAMECHARACTERDATA *)object->apiobj.character_data->field11_0x24)->flags_094[1] & 0x80) != 0)
+            return 0;
+        if ((object->apiobj.character_data->model_flags & model_flags) != model_flags) return 0;
+    }
+    const u32 game_flags = category->field2_0x8;
+    if (game_flags != 0 &&
+        (((GAMECHARACTERDATA *)object->apiobj.character_data->field11_0x24)->flags_090 & game_flags) != game_flags)
         return 0;
-    }
-
-    const CHARCAT_s &entry = CharCategory[category];
-    characterdata_s *character = object->apiobj.character_data;
-    if (entry.model_flags != 0) {
-        GAMECHARACTERDATA_s *runtime = static_cast<GAMECHARACTERDATA_s *>(character->field11_0x24);
-        if ((entry.model_flags & 8) != 0 && (runtime == NULL || static_cast<i8>(runtime->flags_094[1]) < 0)) {
-            return 0;
-        }
-        if ((character->model_flags & entry.model_flags) != entry.model_flags) {
-            return 0;
-        }
-    }
-
-    if (entry.game_flags != 0) {
-        GAMECHARACTERDATA_s *runtime = static_cast<GAMECHARACTERDATA_s *>(character->field11_0x24);
-        if (runtime == NULL || (runtime->flags_090 & entry.game_flags) != entry.game_flags) {
-            return 0;
-        }
-    }
     return 1;
 }
 
@@ -347,8 +384,90 @@ void CharConfig_CalculateJumpStats(float jump_speed, float gravity, float *durat
 }
 
 void ExtraCharacterFixUpAfterConfig() {
-    // This is the first assignment made by the target fix-up routine and
-    // covers the ordinary playable Jedi characters in the Cantina.
-    SetMoveAndAnimateFunctions(CHARACTER_MODEL_FLAG_JEDI, CHARACTER_MODEL_FLAG_JEDI, 0, 0, -1,
-                               reinterpret_cast<void *>(Move_JEDI), reinterpret_cast<void *>(Animate_JEDI), NULL);
+    SetMoveAndAnimateFunctions(8, 8, 0, 0, -1,
+        reinterpret_cast<void *>(Move_JEDI), reinterpret_cast<void *>(Animate_JEDI), NULL);
+    SetMoveAndAnimateFunctions(0x1000010, 0x10, 0, 0, -1,
+        reinterpret_cast<void *>(Move_DROIDGENERIC), NULL, NULL);
+    SetMoveAndAnimateFunctions(0x30, 0x30, 0, 0, -1,
+        reinterpret_cast<void *>(Move_DROIDGENERIC), reinterpret_cast<void *>(Animate_PROTOCOL), NULL);
+    SetMoveAndAnimateFunctions(0x50, 0x50, 0, 0, -1,
+        reinterpret_cast<void *>(Move_DROIDGENERIC), reinterpret_cast<void *>(Animate_ASTROMECH), reinterpret_cast<void *>(PostAnimate_ASTROMECH));
+    SetMoveAndAnimateFunctions(0, 0, 0x800, 0x800, -1,
+        reinterpret_cast<void *>(Move_CANNON), reinterpret_cast<void *>(Animate_CANNON), NULL);
+    SetMoveAndAnimateFunctions(0x2000, 0x2000, 0, 0, -1,
+        reinterpret_cast<void *>(Move_VEHICLE), reinterpret_cast<void *>(Animate_VEHICLE), NULL);
+    SetMoveAndAnimateFunctions(0x40000000, 0x40000000, 0, 0, -1,
+        reinterpret_cast<void *>(Move_BEAST), reinterpret_cast<void *>(Animate_BEAST), NULL);
+    SetMoveAndAnimateFunctions(0, 0, 0, 0, 4,
+        reinterpret_cast<void *>(Move_DROIDGENERIC), reinterpret_cast<void *>(Animate_BATTLEDROID), NULL);
+    SetMoveAndAnimateFunctions(0, 0, 0, 0, 17,
+        reinterpret_cast<void *>(Move_HOVERDROID), reinterpret_cast<void *>(Animate_HOVERDROID), NULL);
+    SetMoveAndAnimateFunctions(0, 0, 0, 0, 15,
+        reinterpret_cast<void *>(Move_WALKER), reinterpret_cast<void *>(Animate_WALKER), NULL);
+    SetMoveAndAnimateFunctions(0, 0, 0, 0, 16,
+        reinterpret_cast<void *>(Move_ATAT), reinterpret_cast<void *>(Animate_ATAT), NULL);
+    SetMoveAndAnimateFunctions(0, 0, 0, 0, 18,
+        reinterpret_cast<void *>(Move_CRITTER), reinterpret_cast<void *>(Animate_CRITTER), NULL);
+    SetMoveAndAnimateFunctions(0, 0, 0, 0, 18,
+        reinterpret_cast<void *>(Move_CRITTER), reinterpret_cast<void *>(Animate_CRITTER), NULL);
+    SetMoveAndAnimateFunctions(0, 0, 0, 0, 20,
+        reinterpret_cast<void *>(Move_POD), reinterpret_cast<void *>(Animate_POD), NULL);
+    SetMoveAndAnimateFunctions(0, 0, 0, 0, 2,
+        NULL, NULL, reinterpret_cast<void *>(PostAnimate_FETT));
+    SetMoveAndAnimateFunctions(0, 0, 0, 0, 0,
+        reinterpret_cast<void *>(Move_WEIRDO), reinterpret_cast<void *>(Animate_WEIRDO), NULL);
+    for (i32 i = 0; i < CHARCOUNT; ++i) {
+        if ((GCDataList[i].flags_094[3] & 0x10) != 0) {
+            CDataList[i].move_fn = Move_GEONOSIAN;
+            CDataList[i].animate_fn = Animate_GEONOSIAN;
+        }
+    }
+    if (id_DROIDEKA != -1) {
+        CDataList[id_DROIDEKA].move_fn = Move_DROIDEKA;
+        CDataList[id_DROIDEKA].animate_fn = Animate_DROIDEKA;
+    }
+    if (id_MINIDROIDEKA != -1) {
+        CDataList[id_MINIDROIDEKA].move_fn = Move_DROIDEKA;
+        CDataList[id_MINIDROIDEKA].animate_fn = Animate_DROIDEKA;
+    }
+    if (id_SUPERBATTLEDROID != -1) {
+        CDataList[id_SUPERBATTLEDROID].move_fn = Move_SUPERBATTLEDROID;
+        CDataList[id_SUPERBATTLEDROID].animate_fn = Animate_SUPERBATTLEDROID;
+    }
+    if (id_BARMAN != -1) {
+        CDataList[id_BARMAN].move_fn = Move_BARMAN;
+        CDataList[id_BARMAN].animate_fn = Animate_BARMAN;
+    }
+    if (id_JAWA != -1) {
+        CDataList[id_JAWA].move_fn = Move_JAWA;
+    }
+    if (id_UGNAUGHT != -1) {
+        CDataList[id_UGNAUGHT].move_fn = Move_JAWA;
+    }
+    if (id_DRAGBOMB != -1) {
+        CDataList[id_DRAGBOMB].move_fn = Move_DRAGBOMB;
+    }
+    if (id_REPUBLICGUNSHIP != -1) {
+        CDataList[id_REPUBLICGUNSHIP].move_fn = Move_REPUBLICGUNSHIP;
+        CDataList[id_REPUBLICGUNSHIP].animate_fn = Animate_REPUBLICGUNSHIP;
+    }
+    if (id_REPUBLICGUNSHIP_GREEN != -1) {
+        CDataList[id_REPUBLICGUNSHIP_GREEN].move_fn = Move_REPUBLICGUNSHIP;
+        CDataList[id_REPUBLICGUNSHIP_GREEN].animate_fn = Animate_REPUBLICGUNSHIP;
+    }
+    if (id_SPEEDERBIKE != -1) {
+        CDataList[id_SPEEDERBIKE].move_fn = Move_SPEEDERBIKE;
+        CDataList[id_SPEEDERBIKE].animate_fn = Animate_SPEEDERBIKE;
+    }
+    if (id_PROBEDROID != -1) {
+        CDataList[id_PROBEDROID].animate_fn = Animate_DEFAULT;
+    }
+    if (id_BODYGUARD != -1) {
+        CDataList[id_BODYGUARD].move_fn = Move_JEDI;
+        CDataList[id_BODYGUARD].animate_fn = Animate_JEDI;
+    }
+    if (id_IMPERIALGUARD != -1) {
+        CDataList[id_IMPERIALGUARD].move_fn = Move_JEDI;
+        CDataList[id_IMPERIALGUARD].animate_fn = Animate_JEDI;
+    }
 }

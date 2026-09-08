@@ -7,6 +7,10 @@
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/world.h"
+#include "legoapi/world/level.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/numath/nuquat.h"
+#include "nu2api/numath/nufloat.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/numtx.h"
@@ -232,7 +236,48 @@ void GizBuildit_Reset(GIZBUILDIT_s *buildit, void *world_ptr) {
     }
 }
 
-void GizDrawBuildItPiece(GameObject_s *, i32) {
+void GizDrawBuildItPiece(GameObject_s *player, i32 draw_reflection) {
+    GIZBUILDIT_s *buildit = static_cast<GIZBUILDIT_s *>(player->field_0x788);
+    if (buildit == NULL || buildit->builders_active == 0 || buildit->build_state != 0 ||
+        buildit->anim_object_count == 0) {
+        return;
+    }
+    f32 progress = 1.0f - buildit->step_timer / buildit->step_duration;
+    GAMEANIMOBJ_s *object = buildit->anim_objects[buildit->built_object_count];
+    GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(object->object_data);
+    NUMTX matrix __attribute__((aligned(16))) = data->start_mtx;
+    if (progress > 0.0f) {
+        NUMTX start __attribute__((aligned(16))) = data->start_mtx;
+        NUMTX end __attribute__((aligned(16))) = data->end_mtx;
+        start.m30 = start.m31 = start.m32 = 0.0f;
+        end.m30 = end.m31 = end.m32 = 0.0f;
+        NUQUAT from, to, rotation;
+        NuMtxToQuat(&start, &from);
+        NuMtxToQuat(&end, &to);
+        NuQuatSlerp(&rotation, &from, &to, progress);
+        NUMTX interpolated __attribute__((aligned(16)));
+        NuQuatToMtx(&rotation, &interpolated);
+        interpolated.m30 = matrix.m30 + (data->end_mtx.m30 - matrix.m30) * progress;
+        interpolated.m31 = matrix.m31 + (data->end_mtx.m31 - matrix.m31) * progress;
+        interpolated.m32 = matrix.m32 + (data->end_mtx.m32 - matrix.m32) * progress;
+        interpolated.m31 += 0.1f * NU_SIN_LUT(static_cast<i32>(32768.0f * progress));
+        matrix = interpolated;
+    }
+    if (buildit->linked_buildit != NULL) {
+        data->draw_mtx = matrix;
+    } else {
+        NuSpecialDrawAt(&object->special, &matrix);
+        if (draw_reflection != 0) {
+            extern i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);
+            NUMTX reflection __attribute__((aligned(16)));
+            if (MatrixReflection(&matrix, player->field_0x1087, player->field_0x1020,
+                                 WORLD->current_level->unknown_0cc, &reflection) != 0) {
+                NuRndrStartReflectionRender(0);
+                NuSpecialDrawAt(&object->special, &reflection);
+                NuRndrEndReflectionRender();
+            }
+        }
+    }
 }
 
 NuMechPtr<MechObjectInterface, 4> nextBuildit;
@@ -241,7 +286,58 @@ void ForceBuildItToUseNext(GIZBUILDIT_s &buildit) {
     nextBuildit = NuMechPtr<MechObjectInterface, 4>(buildit.GetMechObjectInterface());
 }
 
-void GizGetBuildItPlayerPos(GameObject_s *, nuvec_s *, nuvec_s *) {
+void GizGetBuildItPlayerPos(GameObject_s *player, nuvec_s *position, nuvec_s *target) {
+    GIZBUILDIT_s *buildit = static_cast<GIZBUILDIT_s *>(player->field_0x788);
+    if (buildit == NULL || buildit->anim_set == NULL || buildit->anim_object_count == 0) {
+        return;
+    }
+    i32 count = buildit->anim_object_count;
+    i32 index = buildit->built_object_count;
+    if (index >= count) {
+        index = count - 1;
+    }
+    if (position != NULL) {
+        i32 batch_size = buildit->field_0x78;
+        index = (index / batch_size) * batch_size;
+        i32 batch_count = 0;
+        while (batch_count < batch_size && index + batch_count < count) {
+            ++batch_count;
+        }
+        NUVEC total = v000;
+        i32 end = index + batch_count;
+        for (; index < end; ++index) {
+            buildit = static_cast<GIZBUILDIT_s *>(player->field_0x788);
+            GIZBUILDITANIMDATA_s *data =
+                static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[index]->object_data);
+            NuVecAdd(&total, &total, NUMTX_GET_ROW_VEC(&data->start_mtx, 3));
+        }
+        if (batch_count > 1) {
+            NuVecScale(position, &total, 1.0f / batch_count);
+        } else {
+            *position = total;
+        }
+        buildit = static_cast<GIZBUILDIT_s *>(player->field_0x788);
+        position->x = (position->x + buildit->start_position.x) * 0.5f;
+        buildit = static_cast<GIZBUILDIT_s *>(player->field_0x788);
+        position->z = (position->z + buildit->start_position.z) * 0.5f;
+        if (index >= count) {
+            index = count - 1;
+        }
+        buildit = static_cast<GIZBUILDIT_s *>(player->field_0x788);
+        GIZBUILDITANIMDATA_s *data =
+            static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[index]->object_data);
+        f32 dx = position->x - data->end_mtx.m30;
+        f32 dz = position->z - data->end_mtx.m32;
+        f32 inverse_distance = 1.0f / NuFsqrt(dx * dx + dz * dz);
+        position->x += dx * inverse_distance * player->apiobj.field_0x1dc;
+        position->z += dz * inverse_distance * player->apiobj.field_0x1dc;
+    }
+    if (target != NULL) {
+        buildit = static_cast<GIZBUILDIT_s *>(player->field_0x788);
+        GIZBUILDITANIMDATA_s *data =
+            static_cast<GIZBUILDITANIMDATA_s *>(buildit->anim_objects[index]->object_data);
+        *target = *NUMTX_GET_ROW_VEC(&data->end_mtx, 3);
+    }
 }
 
 void GizBuildit_SetVisibility(GIZBUILDIT_s *buildit, i32 visible) {
@@ -254,5 +350,30 @@ void GizBuildit_SetVisibility(GIZBUILDIT_s *buildit, i32 visible) {
                                                   (visible != 0 ? GIZBUILDIT_AVAILABILITY_VISIBLE : 0));
 }
 
-void GizMoveAttractoBuildItPiece(GIZBUILDIT_s *, GAMEANIMOBJ_s *) {
+void GizMoveAttractoBuildItPiece(GIZBUILDIT_s *buildit, GAMEANIMOBJ_s *object) {
+    f32 progress = 1.0f - buildit->step_timer / buildit->step_duration;
+    GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(object->object_data);
+    NUMTX *matrix = NuSpecialGetDrawMtx(&object->special);
+    if (progress > 0.0f) {
+        NUMTX start = *matrix;
+        start.m30 = start.m31 = start.m32 = 0.0f;
+        NUMTX end = data->end_mtx;
+        end.m30 = end.m31 = end.m32 = 0.0f;
+        NUQUAT from, to, rotation;
+        NuMtxToQuat(&start, &from);
+        NuMtxToQuat(&end, &to);
+        NuQuatSlerp(&rotation, &from, &to, progress);
+        NUMTX interpolated;
+        NuQuatToMtx(&rotation, &interpolated);
+        interpolated.m30 = matrix->m30 + (data->end_mtx.m30 - matrix->m30) * progress;
+        interpolated.m31 = matrix->m31 + (data->end_mtx.m31 - matrix->m31) * progress;
+        interpolated.m32 = matrix->m32 + (data->end_mtx.m32 - matrix->m32) * progress;
+        interpolated.m31 += 0.1f * NU_SIN_LUT(static_cast<i32>(32768.0f * progress));
+        *matrix = interpolated;
+    }
+    if (buildit->linked_buildit != NULL) {
+        data->draw_mtx = *matrix;
+    } else {
+        NuSpecialSetDrawMtx(&object->special, matrix);
+    }
 }

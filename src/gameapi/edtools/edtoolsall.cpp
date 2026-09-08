@@ -1,5 +1,12 @@
 #include "gameapi_edtools_types.h"
 #include "gameapi/edtools/edcam.h"
+#include "nu2api/numath/nuvec.h"
+
+extern "C" {
+extern edpp_particle_s edpp_ptls[512];
+extern i32 edpp_nearest;
+extern NUVEC edpp_cam_pos;
+}
 
 void EdTerrInit(void *, void *) {
 }
@@ -46,9 +53,6 @@ void edbriFileSave(char *) {
 void edgraFileSave(char *) {
 }
 
-void edpartDestroy(i32) {
-}
-
 void edpartDoInput(nupad_s *) {
 }
 
@@ -73,7 +77,18 @@ void edpartInitType(i32) {
 void edppDrawCursor() {
 }
 
-void edppPtlDestroy(i32) {
+extern "C" {
+    extern edpp_particle_s edpp_ptls[512];
+    extern i32 edpp_instances_used;
+    void DebFreeInstantly(i32 *);
+}
+
+void edppPtlDestroy(i32 index) {
+    if (edpp_ptls[index].instance_id != -1) {
+        if (edpp_ptls[index].instance_id != 99999) DebFreeInstantly(&edpp_ptls[index].instance_id);
+        --edpp_instances_used;
+        edpp_ptls[index].instance_id = -1;
+    }
 }
 
 void EdDrawLineArrow(VuMtx const &, float, i32) {
@@ -251,10 +266,30 @@ void edanimParticleCreate(nuvec_s *) {
 void edgraInstanceDestroy(i32) {
 }
 
-void edpartLoadSingleType(part_typedesc_s *, i32, i32) {
-}
 
-void edppDetermineNearest(float) {
+void edppDetermineNearest(float max_distance_squared) {
+    NUVEC delta;
+    if (edpp_nearest != -1) {
+        edpp_particle_s *particle = &edpp_ptls[edpp_nearest];
+        if (particle->instance_id != 99999 && particle->instance_id != -1) {
+            NuVecSub(&delta, &edpp_cam_pos, &particle->position);
+            if (delta.x * delta.x + delta.y * delta.y + delta.z * delta.z == 0.0f) {
+                return;
+            }
+        }
+    }
+    edpp_nearest = -1;
+    for (i32 i = 0; i < 512; ++i) {
+        if (edpp_ptls[i].instance_id == -1 || edpp_ptls[i].instance_id == 99999) {
+            continue;
+        }
+        NuVecSub(&delta, &edpp_cam_pos, &edpp_ptls[i].position);
+        float distance_squared = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
+        if (max_distance_squared < 0.0f || max_distance_squared > distance_squared) {
+            max_distance_squared = distance_squared;
+            edpp_nearest = i;
+        }
+    }
 }
 
 void edppHighlightNearest() {
@@ -281,8 +316,6 @@ void edppMultipleCopyPaste() {
 void edppStartSingleEffect(i32) {
 }
 
-void edpartDetermineNearest(float) {
-}
 
 void edpartHighlightNearest() {
 }
@@ -302,8 +335,6 @@ void edanimRenderSoundEmitters(i32) {
 void edbobs_DrawCoordinateInfo(nuvec_s *, i32, i32) {
 }
 
-void edpartLookupObjectInScene(char *, nugscn_s *) {
-}
 
 void edrtlDetermineNearestBurn(float, burnset_s *) {
 }

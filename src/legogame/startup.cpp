@@ -163,7 +163,7 @@ void CutScene_PreUpdateFn_LSW(CUTINFO *);
 void CutScene_PostUpdateFn_LSW(void);
 void CutScene_StoppedFn_LSW(CUTINFO *);
 i32 CutScene_ReplaceCharacterModelFn_LSW(CUTINFO *, NUGCUTCHAR_s *);
-void InitBolt_AddMomentumType_LSW(BOLT_s *, GameObject_s *, nuvec_s *);
+i32 InitBolt_AddMomentumType_LSW(BOLT_s *, GameObject_s *, nuvec_s *);
 void Bolt_HitPlatFn_LSW(BOLT_s *);
 void Bolt_HitCustomFn_LSW(BOLT_s *, nuvec_s *);
 void GameBlowUpBlownUpFn_LSW(GIZMOBLOWUP_s *);
@@ -343,7 +343,7 @@ static void LoadPermData(BGPROCINFO *proc) {
     id_DEFAULTCHARACTER[0] = id_QUIGONJINN;
     id_DEFAULTCHARACTER[1] = id_OBIWANKENOBI;
 
-    CharCategories_Init(reinterpret_cast<CHARCATEGORY *>(LSW_CharCategory));
+    CharCategories_Init(LSW_CharCategory);
     Cheats_Init(reinterpret_cast<CHEAT *>(Cheat));
     PlayerID[0] = id_DEFAULTCHARACTER[0];
     PlayerID[1] = id_DEFAULTCHARACTER[1];

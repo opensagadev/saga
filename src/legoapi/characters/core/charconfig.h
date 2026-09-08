@@ -4,6 +4,8 @@
 #include "nu2api/nufile/nufpar.h"
 
 struct CHARCATEGORY;
+GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle);
+void DeactivateCharacter(char *name);
 
 struct CHARACTER_EFFECT_s {
     i16 character_id;
@@ -58,6 +60,9 @@ DECOMP_ASSERT(offsetof(CHARCONFIG_s, animation_names) == 0x28, "CHARCONFIG names
 extern CHARCONFIG_s charconfig;
 extern NUFPCOMJMP ConfigChar_GameKeywords[];
 NUFPCOMJMP *CharConfig_GetKeywords();
+
+i32 CharCategory_IsCategory(GameObject_s *object, i32 index);
+
+struct CHARCATEGORY;
 void CharCategories_Init(CHARCATEGORY *categories);
 i32 CharCategory_FindByName(char *name);
-i32 CharCategory_IsCategory(GameObject_s *object, i32 category);

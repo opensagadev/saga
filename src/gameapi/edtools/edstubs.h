@@ -10,6 +10,10 @@
 extern "C" {
 #endif
 
+    extern i32 edbits_editmode;
+    extern i32 *edbits_editor_enabled;
+    void edbitsRegisterEditMode(i32 mode);
+    void edbitsRegisterEditorEnabledFlag(i32 *enabled);
     void edbitsRegisterBaseScene(NUGSCN *scene);
     void edanimRegisterBaseScene(NUGSCN *scene);
     i32 edanimLoadPage(char *path, NUGSCN *scene);

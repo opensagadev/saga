@@ -1,22 +1,31 @@
+#include "legoapi/core/config/cheat.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include "decomp.h"
 #include "globals.h"
+#include "legoapi/core/input/qrand.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/world/mission.h"
 #include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/render/fx.h"
 #include "legoapi/world/level.h"
+#include "legoapi/world/levels/levels.h"
 #include "legoapi/world/area.h"
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nurndrstat.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nufile/nufile.h"
+#include "nu2api/numath/nurand.h"
+#include "nu2api/numath/nuvec.h"
 #include "legoapi/world/world.h"
 
 void CutScenes_Reset(WORLDINFO_s *);
@@ -37,8 +46,22 @@ void Panel_Clear(void);
 void ResetGameMessages(void);
 void Tag_ResetTransfers(void);
 void Tag_SetMode(i32 mode);
+u32 TotalLevelCoinTally(WORLDINFO_s *, u32 *, u32 *, u32 *, u32 *, u32 *, u32 *, u32 *);
+void Cheats_TurnOff(i32);
+void GameCameraMakeMiniCut(nugspline_s *, f32, f32, f32, f32, i32, i32);
+extern i32 bonusmodearcade;
+extern i32 gone_through_door_to_new_level;
+u32 arcade_placed_stud_total = 0;
+extern f32 DEFAULT_MOVE_RANGE;
+f32 drop_back_in_timer = 0.0f;
+extern i32 last_chatter_sfx;
+i32 FalconDebKey[2] = {-1, -1};
+extern f32 LevelNameTime;
+extern f32 LevelNameMul;
+extern rtldata_s lev_rtldata;
 void Hint_Reset(void);
 void Hint_CancelCurrent(void);
+void Hint_SetHintFromId(i32, i32, i32);
 void Teleports_Reset(WORLDINFO_s *);
 void TrafficAnimSys_Reset(TRAFFICANIMSYS_s *);
 void Pulses_Reset(PULSESYS_s *);
@@ -52,10 +75,28 @@ void ResetForceBack(void);
 void ClearAICreatures(void);
 void ReStoreStatusTakeOverObjectSys(i32 restore_progress);
 void InitPlayerAI(GameObject_s *object);
+void ResetPlayer(GameObject_s *, i32, nuvec_s *, i32);
+f32 GetVehicleAreaRememberSpeed();
+void ResetRadios();
+void SpecialMiniKits_Reset(WORLDINFO_s *);
+void SuperCounters_FixUpGizmos(WORLDINFO_s *);
+void AITriggerSetSysReset(AITRIGGERSETSYS_s *);
+void AITriggerSysAutoSetUp(WORLDINFO_s *, AITRIGGERSETSYS_s *);
+void CharPlatforms_Reset(CHARPLATFORMSYS_s *);
+void CutScene_StartAudio();
+void oneAtOnce_SetNumAttackers(i32);
+void SetSoundFadeDist(WORLDINFO_s *, OPTIONSSAVE_s *);
+void ResetGizFlow(GIZFLOW_s *, GIZFLOWPROGRESS_s *);
+void EffectOffProgress_Reset(LEVEL_PROGRESS_s *);
 extern GAMECAMERA_s *GameCam;
 extern ripple_set_s *ripples;
 extern "C" void ResetParts(void);
 extern "C" void NuSound3StopRumble(void);
+extern "C" f32 chattersfxwait;
+extern "C" f32 tieonsfxwait;
+extern "C" f32 tieoffsfxwait;
+extern GameObject_s *alert_obj;
+extern f32 alert_timer;
 void NuDisplayListCreate(nudisplayscene_s *, variptr_u *, variptr_u, i32, i32, i32, i32, i32, i32, i32);
 
 struct AIROW_s;
@@ -67,6 +108,17 @@ static i32 TBGAMECOUNT;
 static i32 TBDRAWCOUNT;
 static i32 TBPLAYERCOUNT;
 static i32 TBAICOUNT;
+
+f32 TargetDist_Near2;
+f32 TargetDist_Mid2;
+u16 TargetDeg_Near;
+u16 TargetDeg_Mid;
+u16 TargetDeg_Far;
+i32 party_under_cover;
+i32 makebaddiesforgetinresetbits;
+void MakeBaddiesForgetAboutParty(i32);
+i32 nbaddies_can_see_players;
+i32 reset_reimport;
 
 void CatchUpCode(GameObject_s *, float, float, i32) {
 }
@@ -91,10 +143,34 @@ void BurnoutApply(i32) {
 void bgprocFreeze() {
 }
 
-void AddPartDebris(PARTDEBSYS_s *, i32, nuvec_s *) {
+extern i32 PDEBCOUNT;
+void AddPartDebris(PARTDEBSYS_s *system, i32 index, nuvec_s *position) {
+    if (index >= 0 && system != NULL && index < PDEBCOUNT) {
+        const i32 type = system->entries[index].type_id;
+        if (type != -1) {
+            AddFiniteShotPART(type, position, 1);
+        }
+    }
 }
 
-void AddSlamDebris(GameObject_s *) {
+void FindSlamOrigin(GameObject_s *, NUVEC *, NUVEC *);
+EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
+
+void AddSlamDebris(GameObject_s *object) {
+    NUVEC position;
+    FindSlamOrigin(object, &position, NULL);
+    f32 radius = 0.6f;
+    f32 strength = 0.3f;
+    i32 flags = 0x17;
+    i32 damage = 1;
+    if ((object->apiobj.flags_low & 0x80) != 0 && Cheat_IsOn(0x16)) {
+        radius = 1.0f;
+        strength = 0.5f;
+        flags = 0x37;
+        damage = 2;
+    }
+    EXPLOSION *explosion = AddExplosion(&position, radius, strength, object, object->slam_debris_effect, flags);
+    if (explosion != NULL) explosion->field_0x32 = damage;
 }
 
 void CloakMovement(GameObject_s *) {
@@ -123,7 +199,8 @@ void CheckResetBits() {
     if (NOSOUND == 0) {
         if ((ResetBits & RESETBIT_USE_CUSTOMISER_SETUP) == 0) {
             InitGameMode();
-        } else {
+        }
+        if (NOSOUND == 0) {
             Customiser_SetUpCharacterData(CharacterCustomiser);
         }
     }
@@ -146,12 +223,62 @@ void CheckResetBits() {
     TrafficAnimSys_Reset(WORLD->trafficanim_sys);
     Pulses_Reset(WORLD->pulses_sys);
     NuSound3StopRumble();
+    ResetTimer(&GameTimer, 0.0f);
+    ResetTimer(&GamePlayTimer, 0.0f);
+    ResetTimer(&PauseTimer, 0.0f);
+    ResetTimer(&JoinInTimer, 0.0f);
+    if ((ResetBits & RESETBIT_CLEAR_LEVEL_PROGRESS) != 0 && MissionSys != NULL) {
+        ResetTimer(&MissionSys->timer, 0.0f);
+    }
+    Hint_SetHintFromId(-1, 0, 0);
     ResetRepeatSfx();
+    DEFAULT_MOVE_RANGE = 0.0f;
+    alert_obj = NULL;
+    alert_timer = 0.0f;
+    drop_back_in_timer = 0.0f;
     ResetRippleSet(ripples);
     Grabber_Reset(WORLD);
     Faders_Reset(WORLD);
+    chattersfxwait = 3.0f;
+    last_chatter_sfx = -1;
+    tieonsfxwait = 1.0f;
+    tieoffsfxwait = 1.0f;
+    FalconDebKey[0] = -1;
+    FalconDebKey[1] = -1;
+    LevelNameMul = 0.0f;
+    LevelNameTime = LevelChange != 0 ? 3.0f : 0.0f;
+    memset(&lev_rtldata, 0, sizeof(lev_rtldata));
+    if (VehicleArea != 0) {
+        if (WORLD->current_level == ASTEROIDCHASED_LDATA || WORLD->current_level == DEATHSTAR2BATTLEA_LDATA) {
+            TargetDist_Near2 = 6.25f;
+            TargetDist_Mid2 = 100.0f;
+            TargetDeg_Near = 0x38e3;
+            TargetDeg_Mid = 0x31c7;
+            TargetDeg_Far = 0x2aaa;
+        } else {
+            TargetDist_Near2 = 6.25f;
+            TargetDist_Mid2 = 100.0f;
+            TargetDeg_Near = 0x2aaa;
+            TargetDeg_Mid = 0x1c71;
+            TargetDeg_Far = 0x0e38;
+        }
+    } else {
+        TargetDist_Near2 = 0.25f;
+        TargetDist_Mid2 = 1.0f;
+        TargetDeg_Near = 0x2aaa;
+        TargetDeg_Mid = 0x2000;
+        TargetDeg_Far = 0x1555;
+    }
+    party_under_cover = 0;
+    nbaddies_can_see_players = 0;
+    if (reset_restart != 0) {
+        LevTime[0] = 0.0f;
+        LevTime[1] = 0.0f;
+        BonusCoinTotal = 0;
+    }
 
     const i32 progress_index = WORLD->current_level->area_level_index;
+    if (WORLD->api_object_sys != NULL) WORLD->api_object_sys->flags_210 &= ~1;
     if ((ResetBits & RESETBIT_CLEAR_LEVEL_PROGRESS) != 0) {
         GizmoSysClearLevelProgress(WORLD, progress_index);
     }
@@ -168,26 +295,142 @@ void CheckResetBits() {
         AIScriptInitConditions(WORLD->ai_sys);
 
         for (i32 player_index = 0; player_index < 8; ++player_index) {
-            if (Player[player_index] != NULL) {
-                InitPlayerAI(Player[player_index]);
+            if (Player[player_index] == NULL) continue;
+            InitPlayerAI(Player[player_index]);
+            char script_name[32];
+            if (FreePlay != 0) {
+                if (AIScriptFind(WORLD->ai_sys, const_cast<char *>("Freeplay"), 0, 1, 0) != NULL)
+                    strcpy(script_name, "Freeplay");
+                else goto party_script;
+            } else if (Mission_Active(NULL) != NULL) {
+                if (AIScriptFind(WORLD->ai_sys, const_cast<char *>("Mission"), 0, 1, 0) != NULL)
+                    strcpy(script_name, "Mission");
+                else goto party_script;
+            } else {
+                if (AIScriptFind(WORLD->ai_sys, Player[player_index]->apiobj.character_data->file, 0, 1, 0) != NULL) {
+                    sprintf(script_name, Player[player_index]->apiobj.character_data->file);
+                } else {
+                    if ((Player[player_index]->apiobj.character_data->model_flags & 8) != 0)
+                        strcpy(script_name, "Jedi");
+                    else if ((Player[player_index]->apiobj.character_data->model_flags & 0x80) != 0)
+                        strcpy(script_name, "Blaster");
+                    else strcpy(script_name, "NoWeapon");
+                    if (AIScriptFind(WORLD->ai_sys, script_name, 0, 1, 0) == NULL) {
+party_script:
+                        if (AIScriptFind(WORLD->ai_sys, const_cast<char *>("party"), 0, 1, 0) != NULL)
+                            strcpy(script_name, "party");
+                        else strcpy(script_name, "GeneralParty");
+                    }
+                }
+            }
+            AIScriptProcessorInit(WORLD->ai_sys, &Player[player_index]->ai,
+                reinterpret_cast<AISCRIPTPROCESS *>(&Player[player_index]->ai),
+                NULL, script_name, NULL, 1, NULL, NULL);
+            if (FreePlay == 0 && Mission_Active(NULL) == NULL && Player[player_index]->field_0xcc0 == NULL &&
+                AIScriptSetBaseScriptStateByName(reinterpret_cast<AISCRIPTPROCESS *>(&Player[player_index]->ai),
+                                               const_cast<char *>("InActive")) != 0) {
+                Player[player_index]->apiobj.flags_high &= ~0x10;
             }
         }
     } else {
         ReStoreStatusTakeOverObjectSys(0);
     }
 
+    if (makebaddiesforgetinresetbits != 0) MakeBaddiesForgetAboutParty(0);
+    if ((ResetBits & 2) != 0) {
+        for (i32 i = 0; i < 8; ++i) {
+            if (Player[i] != NULL) Player[i]->field_0xe38 = 4;
+        }
+    }
+    if ((ResetBits & 4) != 0) {
+        for (i32 i = 0; i < 8; ++i) {
+            if (Player[i] != NULL) {
+                if (Player[i]->apiobj.player_controlled) Player[i]->spawn_protection_timer = 2.5f;
+                else Player[i]->spawn_protection_timer = 0.0f;
+            }
+        }
+    }
+    ResetRadios();
+    SpecialMiniKits_Reset(WORLD);
+    SuperCounters_FixUpGizmos(WORLD);
+    AITriggerSetSysReset(WORLD->ai_trigger_set_sys);
+    AITriggerSysAutoSetUp(WORLD, WORLD->ai_trigger_set_sys);
+    if ((ResetBits & 0x10) != 0) {
+        for (i32 i = 0; i < 8; ++i) {
+            if (Player[i] != NULL) ResetPlayer(Player[i], 1, NULL, 0);
+        }
+        VehicleAreaRememberSpeed = GetVehicleAreaRememberSpeed();
+    }
+
+    LevHSpecialExists = 0;
+    for (i32 i = 0; i < 88; ++i) {
+        if (NuSpecialExistsFn(&LevHSpecial[i]) != 0) {
+            LevHSpecialExists |= static_cast<u64>(1) << (i & 63);
+        }
+    }
+    WORLD->field_0x50d0 = 0;
     if (WORLD->current_level->reset_fn != NULL) {
         WORLD->current_level->reset_fn(WORLD);
     }
+    CharPlatforms_Reset(WORLD->char_platform_sys);
+    SetSoundFadeDist(WORLD, &Game.options_save);
+    TempOptions.field3_0x3 = Game.options_save.field3_0x3;
+    TempOptions.field4_0x4 = Game.options_save.field4_0x4;
+    TempOptions.field5_0x5 = Game.options_save.field5_0x5;
+
+    if (WORLD->level_progress != NULL && (WORLD->level_progress->flags & 2) == 0) {
+        nugspline_s *spline = reinterpret_cast<nugspline_s *>(WORLD->portal_places[1]);
+        if (spline != NULL && gone_through_door_to_new_mode == 0 &&
+            gone_through_door_to_new_level == 0 && come_from_an_editor == 0) {
+            GameCameraMakeMiniCut(spline, 0.0f, 2.0f, 0.0f, 1.0f, 0, 1);
+        }
+    }
+    gone_through_door_to_new_mode = 0;
+    come_from_an_editor = 0;
+    if (newmode_cutinfo != NULL) {
+        NewCutScene(newmode_cutinfo, WORLD->cutscene_sys, NULL, 0);
+        newmode_cutinfo = NULL;
+    }
+
+    if (BonusArea != 0) Cheats_TurnOff(1);
+    BonusCoinTarget = TotalLevelCoinTally(WORLD, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    if (BonusCoinTarget > 1000000u || (BonusArea != 0 && VehicleArea != 0 && BonusCoinTarget != 1000000u))
+        BonusCoinTarget = 1000000u;
+    if (netclient != 0) BonusCoinTarget = 1000000u;
 
     // Reset requests are edge-triggered. Leaving the bits set would rebuild the
     // level's AI and gizmo state again on every frame through Batman().
     ResetBits = 0;
-    Tag_SetMode(HUB_ADATA != NULL && HUB_ADATA == WORLD->area ? 3 : 1);
+    reset_reimport = 0;
+    reset_restart = 0;
+    CutScene_StartAudio();
+    if (NOSOUND == 0) WORLD->reset_flags = 1;
+    LookAtBoth = 0;
+    oneAtOnce_SetNumAttackers(1);
+    if (WORLD->level_progress != NULL) {
+        if ((WORLD->level_progress->flags & 2) != 0)
+            WORLD->field_0x5174 = (WORLD->level_progress->flags >> 2) & 1;
+        ResetGizFlow(WORLD->giz_flow, &WORLD->level_progress->giz_flow_progress);
+    } else {
+        ResetGizFlow(WORLD->giz_flow, NULL);
+    }
+    EffectOffProgress_Reset(WORLD->level_progress);
+    if (HUB_ADATA != NULL && WORLD->area == HUB_ADATA) {
+        Tag_SetMode(3);
+    } else {
+        Tag_SetMode(1);
+    }
+    WeaponInOut_NoAIJediSfx = WORLD->area != NULL && WORLD->area == JEDI_ADATA ? 1 : 0;
+    bonusmodearcade = 0;
+    if (WORLD->area != NULL && (WORLD->area->flags & 0x10) != 0) {
+        if (AreaGlobals.values.field_0x14 < AreaGlobals.values.field_0x0c) {
+            AreaGlobals.values.field_0x14 = AreaGlobals.values.field_0x0c < 11 ? AreaGlobals.values.field_0x0c : 10;
+        }
+    }
+    arcade_placed_stud_total = ((GizmoPickups_TotalScore(WORLD) * 85u) / 100u) / 1000u * 1000u;
 }
 
-void DebrisTimeSlip(i32) {
-}
+
 
 void bgProcAbortAll() {
 }
@@ -195,7 +438,77 @@ void bgProcAbortAll() {
 void bgprocUnFreeze() {
 }
 
-void AddSurfaceDebris(GameObject_s *) {
+extern AREADATA_s *PODRACE_ADATA;
+extern AREADATA_s *BONUS_GUNSHIP_ADATA;
+extern AREADATA_s *GUNSHIP_ADATA;
+extern i16 id_LANDSPEEDER;
+void PodDust(WORLDINFO_s *, GameObject_s *);
+extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
+
+void AddSurfaceDebris(GameObject_s *object) {
+    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+    if (object->field_0x7a5 == 0x2b) return;
+    i32 layer = static_cast<i8>(object->apiobj.field_0x27f);
+    if (layer != -1 && (TerLayer[layer].flags & 1) != 0) return;
+    f32 surface_y = object->apiobj.field_0x218;
+    if (surface_y == 2000000.0f) return;
+    if ((PODRACE_ADATA != NULL && world->area == PODRACE_ADATA) || world->current_level == PODSPRINTA_LDATA) {
+        PodDust(world, object);
+        return;
+    }
+    i32 effect;
+    f32 rate;
+    f32 minimum_rate;
+    f32 height;
+    if (object->id == id_LANDSPEEDER) {
+        effect = 102;
+        rate = 20.0f;
+        minimum_rate = 0.0f;
+        height = 0.0f;
+    } else if (WORLD->area != NULL && WORLD->area == HOTHBATTLE_ADATA) {
+        effect = 86;
+        rate = 100.0f;
+        minimum_rate = 10.0f;
+        height = 3.0f;
+    } else if ((BONUS_GUNSHIP_ADATA != NULL && world->area == BONUS_GUNSHIP_ADATA) ||
+               (GUNSHIP_ADATA != NULL && world->area == GUNSHIP_ADATA)) {
+        effect = 141;
+        rate = 75.0f;
+        minimum_rate = 0.0f;
+        height = 0.0f;
+    } else {
+        return;
+    }
+    f32 speed = object->apiobj.horizontal_velocity_magnitude;
+    f32 run_speed = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->run_speed;
+    if (world->debris_sys->entries[effect].effect == -1 || run_speed <= 0.0f) return;
+    f32 height_scale = 1.0f;
+    if (height > 0.0f) {
+        height_scale = 1.0f - (object->apiobj.collision_min.y - surface_y) * (1.0f / height);
+        if (height_scale <= 0.0f) return;
+        if (height_scale > 1.0f) height_scale = 1.0f;
+    }
+    f32 emission_rate = (speed / run_speed) * rate;
+    if (emission_rate < minimum_rate) emission_rate = minimum_rate;
+    emission_rate *= height_scale;
+    NUVEC current = {object->apiobj.position.x, surface_y, object->apiobj.position.z};
+    NUVEC previous;
+    if (object->apiobj.field_0x214 == 2000000.0f) {
+        previous = current;
+    } else {
+        previous.x = object->apiobj.start_position.x;
+        previous.y = object->apiobj.field_0x214;
+        previous.z = object->apiobj.start_position.z;
+    }
+    i32 count = ParticlesPerSecond(emission_rate, FRAMETIME);
+    if (count <= 0) return;
+    NUVEC delta = {current.x - previous.x, current.y - previous.y, current.z - previous.z};
+    do {
+        f32 fraction = qrand() * (1.0f / 65535.0f);
+        NUVEC position = {previous.x + delta.x * fraction, previous.y + delta.y * fraction,
+                          previous.z + delta.z * fraction};
+        AddVariableShotDebrisEffect(world->debris_sys->entries[effect].effect, &position, 1, 0, 0);
+    } while (--count != 0);
 }
 
 extern NUMTX NuRndr_DebrisMtx;
@@ -214,7 +527,10 @@ void AddParticleGroupToDisplayList(nunativedebrisdata_s *group);
 void bgprocIsFreezing() {
 }
 
-void DebFreeWithoutKey(debkeydatatype_s *) {
+extern "C" void DebFree(i32 *);
+void DebFreeWithoutKey(debkeydatatype_s *key) {
+    i32 handle = key->allocation_index;
+    DebFree(&handle);
 }
 
 void DebrisKillPlayers() {
@@ -223,7 +539,22 @@ void DebrisKillPlayers() {
 void RndrUnfilledCircle(float, float, float, float, float, i32, float, float, numtl_s *) {
 }
 
-void DebrisProcessSpheres(uv1deb *, float, debinftype *, debkeydatatype_s *, i32) {
+void DebrisProcessSpheres(uv1deb *data, float time, debinftype *effect, debkeydatatype_s *key, i32 finite) {
+    if (!(time >= key->sphere_next_time)) return;
+    if (key->sphere_skip_count > 0) {
+        --key->sphere_skip_count;
+        return;
+    }
+    dma_particle_s *particle = reinterpret_cast<dma_particle_s *>(data);
+    i32 index = key->field_2c8;
+    key->process_spheres[index].position.x = particle->position.x + key->position.x;
+    key->process_spheres[index].position.y = particle->position.y + key->position.y;
+    key->process_spheres[index].position.z = particle->position.z + key->position.z;
+    key->process_spheres[index].time = time;
+    key->process_spheres[index].momentum = particle->momentum;
+    if (++key->field_2c8 >= static_cast<i8>(effect->process_spheres)) key->field_2c8 = 0;
+    if (finite != 0) key->sphere_skip_count = key->field_2c8;
+    key->sphere_next_time = time + effect->particle_lifetime / static_cast<f32>(static_cast<i8>(effect->process_spheres));
 }
 
 void DisplayListPrintItem(nudisplaylistitem_s *, i32, i32, i32 *, i32) {
@@ -314,11 +645,6 @@ void AddChunkToRenderStack(particlechunkrendertype_s *chunk, particlechunkrender
     *stack = chunk;
 }
 
-void DebrisProcessTriggers() {
-}
-
-void ValidateShaderProgram(u32) {
-}
 
 void AddChunkControlToStack(debris_chunk_control_s *control, debris_chunk_control_s **stack) {
     debris_chunk_control_s *current = *stack;
@@ -444,45 +770,196 @@ void DebrisProcessAllocation() {
     }
 }
 
-void DebrisProcessGeneration() {
-    for (debkeydatatype_s *key = debris_keystack; key != NULL; key = key->previous) {
-        if (key->field_1d8 != 0) {
-            continue;
-        }
+extern "C" {
+    f32 CameraEmitterDistance(NUVEC *);
+    void SetSfxBit_On(i32);
+    void PlaySfxByIdEx(i32, NUVEC *, f32, f32);
+    extern i32 debris_render_group;
+    extern u32 debrisseed;
+}
+extern i32 debris_detail_level;
 
+static inline void DebrisEmissionSound(debkeydatatype_s *key, debinftype *effect, i32 event, f32 volume) {
+    for (i32 i = 0; i < 4; ++i) {
+        if (effect->sound_data[i * 3] != -1 && effect->sound_data[i * 3 + 1] == event)
+            PlaySfxByIdEx(effect->sound_data[i * 3], &key->position, volume, 1.0f);
+    }
+}
+
+extern u8 object_switches[0x80];
+extern "C" void DebrisStartOffsetEx(debkeydatatype_s *, f32);
+
+void DebrisProcessTriggers() {
+    i32 switch_changes[32][2];
+    i32 last_switch_change = -1;
+    for (debkeydatatype_s *key = debris_keystack; key != NULL;) {
+        debinftype *effect = debtab[key->effect_index];
+        debkeydatatype_s *next = key->previous;
+        if (key->trigger_first == 1 && key->field_184 != 2 && key->trigger_second != -1) {
+            switch (object_switches[key->trigger_second]) {
+            case 0: key->field_184 = 0; break;
+            case 1: key->field_184 = 1; break;
+            case 3:
+                last_switch_change = (last_switch_change + 1) & 31;
+                switch_changes[last_switch_change][0] = key->trigger_second;
+                switch_changes[last_switch_change][1] = 0;
+                break;
+            case 2:
+                last_switch_change = (last_switch_change + 1) & 31;
+                key->field_184 = 2;
+                switch_changes[last_switch_change][0] = key->trigger_second;
+                switch_changes[last_switch_change][1] = 3;
+                goto restart_emission;
+            case 4: {
+                last_switch_change = (last_switch_change + 1) & 31;
+                key->field_184 = 2;
+                switch_changes[last_switch_change][0] = key->trigger_second;
+                switch_changes[last_switch_change][1] = 0;
+restart_emission:
+                DebrisStartOffsetEx(key, 0.0f);
+                f32 shift = key->emission_time - globaltime;
+                key->field_1d8 = 0;
+                key->emission_epoch = globaltime;
+                key->emission_time -= shift;
+                key->field_1e4 -= shift;
+                if (key->process_collision_sound != 0) {
+                    key->cutoff_distance = CameraEmitterDistance(&key->position);
+                    f32 range = effect->sound_range_override;
+                    if (range == 0.0f) range = effect->sound_range;
+                    if (range == 0.0f) range = effect->clip_extent;
+                    f32 volume = 0.0f;
+                    if (range > key->cutoff_distance) {
+                        if (effect->sound_data[0] != -1) SetSfxBit_On(effect->sound_data[0]);
+                        if (effect->sound_data[3] != -1) SetSfxBit_On(effect->sound_data[3]);
+                        if (effect->sound_data[6] != -1) SetSfxBit_On(effect->sound_data[6]);
+                        if (effect->sound_data[9] != -1) SetSfxBit_On(effect->sound_data[9]);
+                        volume = (range - key->cutoff_distance) / range;
+                    }
+                    if (range > key->cutoff_distance) {
+                        if (effect->sound_data[0] != -1 && effect->sound_data[1] == 1)
+                            PlaySfxByIdEx(effect->sound_data[0], &key->position, volume, 1.0f);
+                        if (effect->sound_data[3] != -1 && effect->sound_data[4] == 1)
+                            PlaySfxByIdEx(effect->sound_data[3], &key->position, volume, 1.0f);
+                        if (effect->sound_data[6] != -1 && effect->sound_data[7] == 1)
+                            PlaySfxByIdEx(effect->sound_data[6], &key->position, volume, 1.0f);
+                        if (effect->sound_data[9] != -1 && effect->sound_data[10] == 1)
+                            PlaySfxByIdEx(effect->sound_data[9], &key->position, volume, 1.0f);
+                    }
+                }
+                break;
+            }
+            }
+        }
+        key = next;
+    }
+    for (i32 i = 0; i <= last_switch_change; ++i)
+        object_switches[switch_changes[i][0]] = switch_changes[i][1];
+}
+
+void DebrisProcessGeneration() {
+    for (debkeydatatype_s *key = debris_keystack; key != NULL;) {
+        debkeydatatype_s *next = key->previous;
         debinftype *effect = debtab[key->effect_index];
         const f32 now = effect->time_group == 4 ? panelglobaltime : globaltime;
-        if (key->field_184 == 0 || key->field_2f4 == 0) {
+        if (key->field_1d8 != 0) {
+            key = next;
             continue;
         }
-        if (key->previous_allocated_chunk_count == 0) {
-            const f32 thinning =
-                forced_debris_thinning == 0
-                    ? (debris_thinning_level <= effect->thinning ? debris_thinning_level : effect->thinning)
-                    : debris_thinning_level;
-            DebReAlloc(key, static_cast<i32>(static_cast<f32>(effect->max_particles) / thinning));
-            if (key->previous_allocated_chunk_count == 0 || thinning == 0.0f) {
-                continue;
+        key->cutoff_distance = CameraEmitterDistance(&key->position);
+        const f32 near_distance = *reinterpret_cast<f32 *>(&effect->fields_030[4]);
+        const i16 render_group = *reinterpret_cast<i16 *>(key->fields_2f0);
+        if (key->field_184 != 0) {
+            if (key->cutoff_distance < near_distance ||
+                (effect->clip_extent > 0.0f && key->cutoff_distance > effect->clip_extent)) {
+                if (effect->use_explicit_clip_box == 0 && effect->time_group != 4) key->field_184 = 0;
+            }
+            if (debris_render_group != 0 && render_group != 0 && debris_render_group != render_group)
+                key->field_184 = 0;
+            if ((static_cast<i8>(key->field_1da) & debris_detail_level) == 0) key->field_184 = 0;
+        }
+        f32 sound_range = effect->sound_range_override;
+        if (sound_range == 0.0f) sound_range = effect->sound_range;
+        if (sound_range == 0.0f) sound_range = effect->clip_extent;
+        f32 volume = 1.0f;
+        if (sound_range > key->cutoff_distance) {
+            for (i32 i = 0; i < 4; ++i)
+                if (effect->sound_data[i * 3] != -1) SetSfxBit_On(effect->sound_data[i * 3]);
+            volume = (sound_range - key->cutoff_distance) / sound_range;
+        }
+        if (key->process_collision_sound != 0 && key->field_184 != 0 && sound_range > key->cutoff_distance)
+            DebrisEmissionSound(key, effect, 4, volume);
+        if (effect->status == 0) key->field_184 = 0;
+        if (effect->status == 2) key->field_184 = 1;
+        if (key->field_2f4 == 0) key->field_184 = 0;
+        else {
+            if (key->field_2f4 == 2) key->field_184 = 1;
+            if (key->field_184 != 0 && key->previous_allocated_chunk_count == 0) {
+                DebReAlloc(key, effect->max_particles);
+                const f32 thinning = forced_debris_thinning != 0 ? debris_thinning_level :
+                    (effect->thinning < debris_thinning_level ? effect->thinning : debris_thinning_level);
+                DebReAlloc(key, static_cast<i32>(effect->max_particles / thinning));
             }
         }
-
+        const f32 elapsed = now - key->last_update_time;
+        key->emission_position.x = key->emitter_momentum.x * elapsed;
+        key->emission_position.y = key->emitter_momentum.y * elapsed;
+        key->emission_position.z = key->emitter_momentum.z * elapsed;
         const f32 frequency = static_cast<f32>(effect->frequency);
-        if (frequency <= 0.0f) {
-            continue;
-        }
-        const f32 thinning =
-            forced_debris_thinning == 0
-                ? (debris_thinning_level <= effect->thinning ? debris_thinning_level : effect->thinning)
-                : debris_thinning_level;
-        const f32 emission_interval = 1.0f / (frequency / thinning);
+        const f32 thinning = forced_debris_thinning != 0 ? debris_thinning_level :
+            (effect->thinning < debris_thinning_level ? effect->thinning : debris_thinning_level);
+        const f32 emission_interval = frequency > 0.0f ? 1.0f / (frequency / thinning) : 0.0f;
         f32 emission_time = key->emission_epoch + emission_interval;
-        for (i32 emission = 0; emission != 100 && emission_time < now + timeincrement; ++emission) {
-            uv1deb *particle = key->generator(key, effect, emission_time);
-            if (effect->process_spheres != 0 && particle != NULL && emission == 0) {
-                DebrisProcessSpheres(particle, emission_time, effect, key, 0);
+        for (i32 emission = 1; emission != 100 && emission_time < now + timeincrement; ++emission) {
+            f32 pause = 0.0f;
+            i32 transitions = 100;
+            while (emission_time >= key->field_1e4 && emission_time >= key->emission_time && --transitions != 0) {
+                if (key->emission_time < key->field_1e4) {
+                    key->previous_emission_time = key->emission_time;
+                    pause = effect->emission_pause_random + NuRandFloatSeeded(&debrisseed) * effect->start_offset_random;
+                    key->emission_time = key->field_1e4 + pause;
+                    if (key->field_184 == 2) key->field_184 = 0;
+                    if (key->process_collision_sound != 0 && key->field_184 != 0 && sound_range > key->cutoff_distance)
+                        DebrisEmissionSound(key, effect, 2, volume);
+                } else {
+                    key->field_1e4 = key->emission_time + effect->emission_period_random +
+                        NuRandFloatSeeded(&debrisseed) * effect->emission_pause;
+                    if (key->field_1d4 > 0) {
+                        if (--key->field_1d4 == 0) {
+                            DebFreeWithoutKey(key);
+                            emission_time += 99999.0f;
+                            key->process_collision_sound = 0;
+                        }
+                    }
+                    if (key->field_1d4 < 0 && ++key->field_1d4 == 0) {
+                        key->field_2f4 = 0;
+                        key->field_184 = 0;
+                    }
+                    if (key->process_collision_sound != 0 && key->field_184 != 0 && sound_range > key->cutoff_distance)
+                        DebrisEmissionSound(key, effect, 1, volume);
+                    pause = 0.0f;
+                }
             }
-            emission_time = key->emission_epoch + emission_interval;
+            if (pause > 0.0f) {
+                emission_time = key->emission_time - emission_interval;
+                key->emission_epoch = emission_time;
+            }
+            else if (key->allocated_chunk_count > 0 && key->field_184 != 0) {
+                uv1deb *particle = key->generator(key, effect, emission_time);
+                if (effect->process_spheres != 0 && particle != NULL && emission == 1)
+                    DebrisProcessSpheres(particle, emission_time, effect, key, 0);
+                if (key->process_collision_sound != 0 && sound_range > key->cutoff_distance)
+                    DebrisEmissionSound(key, effect, 3, volume);
+            }
+            emission_time += emission_interval;
         }
+        if (key->field_184 == 0) {
+            if (key->field_2f4 != 0 && key->trigger_second == -1 && key->cutoff_distance >= near_distance &&
+                (effect->clip_extent == 0.0f || key->cutoff_distance <= effect->clip_extent) &&
+                (debris_render_group == 0 || render_group == 0 || debris_render_group == render_group) &&
+                (static_cast<i8>(key->field_1da) & debris_detail_level) != 0) key->field_184 = 1;
+            else if (key->previous_allocated_chunk_count != 0) DebReAlloc(key, 0);
+        }
+        key = next;
     }
 }
 
@@ -508,6 +985,7 @@ static void ReleaseChunkControl(debris_chunk_control_s *control) {
     control->particle_chunk = NULL;
 }
 
+i32 SolveQuadratic(f32, f32, f32, f32 *, f32 *);
 void DebrisProcessControlChunks(i32 panel_time) {
     const f32 now = panel_time != 0 ? panelglobaltime : globaltime;
     debris_chunk_control_s **stack = &debris_chunk_control_stack[panel_time];
@@ -517,6 +995,64 @@ void DebrisProcessControlChunks(i32 panel_time) {
         debris_chunk_control_s *control = *stack;
         *stack = control->next;
         control->next = NULL;
+
+        if (control->active == 5) {
+            debinftype *effect = debtab[control->effect_index];
+            dma_particle_s *particle = &control->particle_chunk->particles[control->particle_index];
+            const f32 time = control->collision_time;
+            const f32 old_y = particle->momentum.y;
+            const f32 gravity_velocity = 2.0f * (time * effect->field_0a0);
+            const f32 new_y = -control->restitution * (old_y + gravity_velocity) - gravity_velocity;
+            particle->momentum.y = new_y;
+            particle->position.y -= time * new_y - time * old_y;
+            f32 first, second;
+            if (SolveQuadratic(effect->field_0a0, new_y, particle->position.y - control->collision_plane,
+                               &first, &second) != 0) {
+                const f32 next_time = first > second ? first : second;
+                if (effect->particle_lifetime > next_time) {
+                    const f32 interval = next_time - control->collision_time;
+                    control->collision_time = next_time;
+                    if (interval > 0.02f) {
+                        control->expiry_time += interval;
+                        AddChunkControlToStack(control, stack);
+                        continue;
+                    }
+                }
+            }
+            ReleaseChunkControl(control);
+            continue;
+        }
+
+        if (control->active == 6) {
+            NUVEC normal = {1.0f, 0.0f, 0.0f};
+            dma_particle_s *particle = &control->particle_chunk->particles[control->particle_index];
+            NuVecRotateY(&normal, &normal, control->rotation_y);
+            const f32 old_x = particle->momentum.x;
+            const f32 old_z = particle->momentum.z;
+            const f32 impulse = -(1.0f + control->restitution) * (old_x * normal.x + old_z * normal.z);
+            const f32 new_x = impulse * normal.x + old_x;
+            const f32 new_z = impulse * normal.z + old_z;
+            particle->momentum.x = new_x;
+            particle->momentum.z = new_z;
+            particle->position.x -= new_x * control->collision_time - old_x * control->collision_time;
+            particle->position.z -= new_z * control->collision_time - old_z * control->collision_time;
+            ReleaseChunkControl(control);
+            continue;
+        }
+
+        if (control->active == 0 || control->active == 7) {
+            particlechunkrendertype_s *render = FindParticleRenderChunk(control->particle_chunk);
+            if (render != NULL) {
+                RemoveChunkFromRenderStack(render, &ParticleChunkRenderStack[render->effect->time_group]);
+                render->particle_chunk = NULL;
+                render->effect = NULL;
+                render->key = NULL;
+            }
+            control->expiry_time += 0.1f;
+            control->active = control->active == 7 ? 9 : 2;
+            AddChunkControlToStack(control, stack);
+            continue;
+        }
 
         if (control->active == 1) {
             debkeydatatype_s *key = control->owner;
@@ -608,8 +1144,7 @@ void DebrisProcessControlChunks(i32 panel_time) {
             continue;
         }
 
-        AddChunkControlToStack(control, stack);
-        break;
+        // Unrecognized control states are removed from the active stack in the original.
     }
     DebrisReleaseControlStackLock();
 }
@@ -658,13 +1193,33 @@ void DisplayListCreateDynMtlList(variptr_u *buffer, variptr_u buffer_end) {
     scene->flags |= NUDL_SCENE_FLAG_NEEDS_BUILD;
 }
 
-void DebrisDrawCalculateClipBoxes(debinftype *, debkeydatatype_s *) {
-}
 
 void CalculateDistanceToNearestEnd(nuvec_s *, SOCKPOSITION_s *, i32, SOCKSYS *) {
 }
 
+extern "C" {
+    extern PartHeader **DmaDebTypes;
+    extern i32 freeDmaDebType;
+    extern i32 EDPP_MAX_TYPES;
+    void edppDeleteEffect(i32);
+}
+
 void DebrisCleanUpDmaDebTypeTables() {
+    static i32 count1;
+    static i32 count2 = 1;
+    if (++count1 > 5) {
+        count1 = 0;
+        debinftype *effect = debtab[count2];
+        if (effect != NULL && effect->native_data != NULL) {
+            f32 now = effect->time_group == 4 ? panelglobaltime : globaltime;
+            if (now > effect->last_render_time + 5.0f) {
+                DmaDebTypes[--freeDmaDebType] = effect->native_data;
+                debtab[count2]->native_data = NULL;
+                if (debtab[count2]->scale != 1.0f) edppDeleteEffect(count2);
+            }
+        }
+        if (++count2 >= EDPP_MAX_TYPES) count2 = 1;
+    }
 }
 
 void DebrisReleaseControlStackLock() {
@@ -677,9 +1232,6 @@ void xxxNuDisplayListUpdateSpecial(nuhspecial_s *) {
 }
 
 void CalculateDistanceToNearestSide(nuvec_s *, SOCKPOSITION_s *, i32, SOCKSYS *) {
-}
-
-void DebrisFreeOldestDmaDebTypeTable() {
 }
 
 void CalculateDistanceToSpecificSideOrEnd(i32, nuvec_s *, SOCKPOSITION_s *, i32, SOCKSYS *) {

@@ -54,6 +54,9 @@ DECOMP_ASSERT(offsetof(GRAPPLE, activation_progress) == 0x58, "GRAPPLE activatio
 DECOMP_ASSERT(offsetof(GRAPPLE, target_rope_points) == 0xa4, "GRAPPLE target-points offset");
 
 ADDGIZMOTYPE *Grapples_RegisterGizmo(i32 type_id);
+i32 Grapple_SetTargetMom(GameObject_s *object);
+void Grapple_SetRotOrder(GameObject_s *object);
+void Grapple_SetPlayerTargetPoint(GameObject_s *object, NUVEC *target);
 
 extern "C" {
 #endif

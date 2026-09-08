@@ -41,6 +41,7 @@ typedef struct nuwind_s {
 extern "C" {
 #endif
     void NuWindInitialise(NUWIND *wind);
+    i32 NuWindCurrent(NUWIND *wind);
 #ifdef __cplusplus
 }
 #endif

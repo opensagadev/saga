@@ -98,7 +98,6 @@ struct nugscn_s;
 struct nugspline_s;
 struct nupad_s;
 struct nuvec_s;
-struct part_typedesc_s {};
 union variptr_u;
 
 struct edanim_param_s {

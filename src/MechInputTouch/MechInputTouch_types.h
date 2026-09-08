@@ -142,8 +142,21 @@ struct WORLDINFO_s;
 struct nuvec_s;
 
 struct MechAddon {
-    struct ProcessStage {};
+    enum ProcessStage : i32 { PROCESS_STAGE_0 = 0 };
+    enum RenderStage : i32 { RENDER_STAGE_0 = 0 };
+    MechAddon(MechObjectInterface &object, u32 id) : target(&object), hash_id(id), next(NULL) {}
+    virtual ~MechAddon() {}
+    virtual void OnAdded() {}
+    virtual void OnRemoved() {}
+    virtual bool OnProcess(ProcessStage, f32) { return true; }
+    virtual void OnRender(RenderStage) {}
+    NuMechPtr<MechObjectInterface, 4> target;
+    u32 hash_id;
+    MechAddon *next;
 };
+DECOMP_ASSERT(sizeof(MechAddon) == 0x18, "MechAddon ABI");
+DECOMP_ASSERT(offsetof(MechAddon, next) == 0x14, "MechAddon next offset");
+DECOMP_ASSERT(sizeof(MechAddon::ProcessStage) == 4, "MechAddon process stage ABI");
 struct MechAutoJumpManager : BaseThing {
     char const *GetName() override {
         return "MechAutoJumpManager";
@@ -170,11 +183,20 @@ struct MechAutofireAddon {
     void OnProcess(MechAddon::ProcessStage, float);
     virtual ~MechAutofireAddon();
 };
-struct MechEdgeStopAddon {
+struct MechEdgeStopAddon : MechAddon {
+    static HashedKey s_hashId;
     MechEdgeStopAddon(MechObjectInterface &);
-    void OnProcess(MechAddon::ProcessStage, float);
-    virtual ~MechEdgeStopAddon();
+    bool OnProcess(MechAddon::ProcessStage, float) override;
+    ~MechEdgeStopAddon() override;
+    GameObject_s *character;
+    f32 stop_timer;
+    f32 jump_start_height;
+    u8 was_jumping : 1;
 };
+DECOMP_ASSERT(sizeof(MechEdgeStopAddon) == 0x28, "MechEdgeStopAddon ABI");
+DECOMP_ASSERT(offsetof(MechEdgeStopAddon, character) == 0x18, "MechEdgeStopAddon character offset");
+DECOMP_ASSERT(offsetof(MechEdgeStopAddon, stop_timer) == 0x1c, "MechEdgeStopAddon timer offset");
+DECOMP_ASSERT(offsetof(MechEdgeStopAddon, jump_start_height) == 0x20, "MechEdgeStopAddon height offset");
 struct MechInputTouchBonusCavalryController {
     void Activate();
     void Deactivate();
@@ -425,63 +447,85 @@ struct MechObjectInterface : NuMechPtr<MechObjectInterface, 4>::ManagedBase {
     virtual void GetPos(VuVec &, i32) const {
     }
     virtual void GetFloorTargetPos(VuVec &, i32) const;
-    virtual f32 GetRadius() const {
-        return 0.0f;
-    }
-    virtual f32 GetHeight() const {
-        const f32 radius = GetRadius();
-        return radius + radius;
-    }
-    virtual const char *GetTargetName() const {
-        return "";
-    }
-    virtual i32 GetObjectType() const {
-        return 0;
-    }
-    virtual void TargetedFlash() {
-    }
-    virtual i32 IsDead() {
-        return 1;
-    }
-    virtual void *GetTgtVoidPtr() {
-        return NULL;
-    }
-    virtual GameObject_s *GetCharacterObject() {
-        return NULL;
-    }
-    virtual GIZOBSTACLE_s *GetGizObstacle() {
-        return NULL;
-    }
-    virtual GIZMOBLOWUP_s *GetGizBlowup() {
-        return NULL;
-    }
-    virtual GIZFORCE_s *GetGizForce() {
-        return NULL;
-    }
-    virtual GIZBUILDIT_s *GetGizBuildit() {
-        return NULL;
-    }
-    virtual LEVER_s *GetGizLever() {
-        return NULL;
-    }
-    virtual TELEPORT_s *GetTeleport() {
-        return NULL;
-    }
-    virtual HATMACHINE_s *GetHatMachine() {
-        return NULL;
-    }
-    virtual GIZPANEL_s *GetPanel() {
-        return NULL;
-    }
-    virtual GIZTURRET_s *GetGizTurret() {
-        return NULL;
-    }
-    virtual PART_s *GetPart() {
-        return NULL;
-    }
+    virtual f32 GetRadius() const { return 0.0f; }
+    virtual f32 GetHeight() const { const f32 radius = GetRadius(); return radius + radius; }
+    virtual const char *GetTargetName() const { return ""; }
+    virtual i32 GetObjectType() const { return 0; }
+    virtual void TargetedFlash() {}
+    virtual bool IsDead() { return 1; }
+    virtual void *GetTgtVoidPtr() { return NULL; }
+    virtual GameObject_s *GetCharacterObject() { return NULL; }
+    virtual GIZOBSTACLE_s *GetGizObstacle() { return NULL; }
+    virtual GIZMOBLOWUP_s *GetGizBlowup() { return NULL; }
+    virtual GIZFORCE_s *GetGizForce() { return NULL; }
+    virtual GIZBUILDIT_s *GetGizBuildit() { return NULL; }
+    virtual LEVER_s *GetGizLever() { return NULL; }
+    virtual TELEPORT_s *GetTeleport() { return NULL; }
+    virtual HATMACHINE_s *GetHatMachine() { return NULL; }
+    virtual GIZPANEL_s *GetPanel() { return NULL; }
+    virtual GIZTURRET_s *GetGizTurret() { return NULL; }
+    virtual PART_s *GetPart() { return NULL; }
 };
 DECOMP_ASSERT(sizeof(MechObjectInterface) == 8, "MechObjectInterface ABI");
 DECOMP_ASSERT(sizeof(NuMechPtr<MechObjectInterface, 4>) == 12, "Mech object reference ABI");
+
+struct MechAddonCollection {
+    explicit MechAddonCollection(MechObjectInterface &object) : target(&object), first(NULL) {}
+    ~MechAddonCollection() {
+        MechAddon *addon = first;
+        while (addon != NULL) {
+            MechAddon *next = addon->next;
+            addon->OnRemoved();
+            delete addon;
+            addon = next;
+        }
+    }
+    virtual void Add(MechAddon &addon) {
+        if (target.Get() != addon.target.Get()) return;
+        if (first != NULL) {
+            for (MechAddon *current = first; current != NULL; current = current->next) {
+                if (current == &addon) return;
+            }
+            MechAddon *last = first;
+            while (last->next != NULL) last = last->next;
+            last->next = &addon;
+        } else {
+            first = &addon;
+        }
+        addon.OnAdded();
+    }
+    virtual void Remove(MechAddon &addon) {
+        MechAddon *current = first;
+        MechAddon *previous = NULL;
+        while (current != NULL && current != &addon) {
+            previous = current;
+            current = current->next;
+        }
+        if (current != NULL) {
+            if (previous != NULL) previous->next = current->next;
+            else first = current->next;
+            current->OnRemoved();
+            delete current;
+        }
+    }
+    virtual void Process(MechAddon::ProcessStage stage, f32 elapsed) {
+        MechAddon *addon = first;
+        while (addon != NULL) {
+            MechAddon *next = addon->next;
+            if (!addon->OnProcess(stage, elapsed)) Remove(*addon);
+            addon = next;
+        }
+    }
+    virtual void Render(MechAddon::RenderStage stage) {
+        // The original loop at 0x46f780 does not advance its current pointer.
+        MechAddon *addon = first;
+        while (addon != NULL) addon->OnRender(stage);
+    }
+    NuMechPtr<MechObjectInterface, 4> target;
+    MechAddon *first;
+};
+DECOMP_ASSERT(sizeof(MechAddonCollection) == 0x14, "MechAddonCollection ABI");
+DECOMP_ASSERT(offsetof(MechAddonCollection, first) == 0x10, "MechAddonCollection head offset");
 // MechSystems is a BaseThing: AddOnceOnlyThings registers it on the
 // GameThingManager and ProcessThings dispatches into it every frame.
 // Virtual order = vtable for MechSystems @0x66b320 (rel slots):
@@ -650,6 +694,7 @@ struct MechTouchTaskHatMachine {
     void Update();
 };
 struct MechTouchTaskJump {
+    static HashedKey HashId;
     MechTouchTaskJump(MechInputTouchGestureBasedController &, JumpTriggerPacket const &, bool, bool);
     void OnStop();
     void Update();

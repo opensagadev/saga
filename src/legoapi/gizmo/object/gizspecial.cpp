@@ -4,13 +4,35 @@
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nutex.h"
+#include "legoapi/world/world.h"
+#include "legoapi/world/level.h"
+#include "legoapi/characters/motion/gameanim.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-void createGizSpecial(void *, char *) {
+GIZMO *createGizSpecial(void *, char *name) {
+    WORLDINFO *world = WorldInfo_CurrentlyLoading();
+    if (world == NULL || name == NULL) return NULL;
+    nuhspecial_s scene_special;
+    char gizmo_name[32];
+    static char prefix[] = "qaz_";
+    NuSpecialFind(world->current_gscn, &scene_special, name, 0);
+    NuStrCpy(gizmo_name, prefix);
+    NuStrNCat(gizmo_name, name, 32 - NuStrLen(prefix));
+    if (!NuSpecialExistsFn(&scene_special)) return NULL;
+    GIZMO *gizmo = GizmoFindByName(world->gizmo_sys, gizspecial_gizmotype_id, gizmo_name);
+    if (gizmo != NULL) return gizmo;
+    GIZSPECIALSYS_s *system = world->giz_special_sys;
+    if (system->count >= world->current_level->max_giz_specials) return NULL;
+    GIZSPECIAL_s *special = &system->specials[system->count];
+    GameAnimSet_AddObject(special->anim_set, &scene_special, 1.0f, 1000000000.0f, 0);
+    ++world->giz_special_sys->count;
+    NuStrCpy(special->name, prefix);
+    NuStrNCat(special->name, name, 32 - NuStrLen(prefix));
+    return AddGizmo(world->gizmo_sys, gizspecial_gizmotype_id, NULL, special);
 }
 
 char *GizSpecial_GetName(GIZSPECIAL_s *special) {

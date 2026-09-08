@@ -118,6 +118,8 @@ typedef struct GIZMOTYPES_s {
 
 extern ADDGIZMOTYPE Default_ADDGIZMOTYPE;
 extern GIZMOTYPES *gizmotypes;
+struct GameObject_s;
+i32 GizmoSys_SetBestBoltTarget(GIZMOSYS *, void *, GameObject_s *, NUVEC *, NUVEC *, f32, f32, i32, i32, i32);
 extern i32 gizmoerrorlogsize;
 
 #ifdef __cplusplus

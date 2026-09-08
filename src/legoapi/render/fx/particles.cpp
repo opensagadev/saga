@@ -95,8 +95,6 @@ void AddParticleGroupToDisplayList(nunativedebrisdata_s *group) {
     list->items++;
 }
 
-void PodDust(WORLDINFO_s *, GameObject_s *) {
-}
 
 void NoRender() {
     pNuCam->mtx = numtx_identity;

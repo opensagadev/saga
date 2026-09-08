@@ -10,6 +10,7 @@
 #include "nu2api/nu3d/nushader.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nucore/common.h"
+#include "nu2api/nucore/nulst.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nufile/nu2api_nufile_types.h"
 
@@ -21,6 +22,32 @@ extern "C" void NuShaderManagerReleaseShader(NUSHADEROBJECT *shader);
 
 static i32 max_materials;
 static NUMTL *material_list;
+static NULSTHDR *g_overrideList;
+struct MTL_OVERRIDE_RECORD {
+    NUMTL *material;
+    NUMTL *original;
+    u32 field_8;
+};
+DECOMP_ASSERT(sizeof(MTL_OVERRIDE_RECORD) == 12, "Material override payload ABI");
+
+extern "C" void NuMtlInitOverride(i32 count, VARIPTR *buffer, VARIPTR *end) {
+    g_overrideList = NuLstCreateBuff(count, sizeof(MTL_OVERRIDE_RECORD), buffer, *end, 16);
+}
+
+extern "C" void NuMtlDestroy(NUMTL *mtl) {
+    mtl->is_used = false;
+    NuDisplayListDestroyMtl(mtl);
+    NULNKHDR *node = NuLstGetNext(g_overrideList, NULL);
+    while (node != NULL) {
+        MTL_OVERRIDE_RECORD *entry = reinterpret_cast<MTL_OVERRIDE_RECORD *>(node);
+        node = NuLstGetNext(g_overrideList, node);
+        if (entry->original == mtl) {
+            entry->material->is_used = false;
+            NuDisplayListDestroyMtl(entry->material);
+            NuLstFree(reinterpret_cast<NULNKHDR *>(entry));
+        }
+    }
+}
 i32 numtl_renderplane;
 
 NUMTL *numtl_defaultmtl2d;
@@ -222,6 +249,54 @@ extern "C" NUMTL *NuMtlCreate3D(i32 count) {
 
     NuMtlCreatePS(mtl, 1);
 
+    return mtl;
+}
+
+extern "C" NUMTL *NuMtlCreateEx(i32 count, u8 render_plane) {
+    NUMTL *mtl;
+    NUMTL *next = NULL;
+    for (i32 i = 0; i < count; ++i) {
+        mtl = NULL;
+        for (i32 j = 0; j < max_materials; ++j) {
+            if (!material_list[j].is_used && material_list[j].display_list == NULL) {
+                mtl = &material_list[j];
+                break;
+            }
+        }
+        memset(mtl, 0, sizeof(NUMTL));
+        DefaultMtl(mtl);
+        mtl->is_used = true;
+        mtl->unknown_0_4 = true;
+        mtl->renderplane = render_plane;
+        mtl->attribs.unknown_6_128 = true;
+        mtl->next = next;
+        next = mtl;
+    }
+    NuMtlCreatePS(mtl, 0);
+    return mtl;
+}
+
+extern "C" NUMTL *NuMtlCreateEx3D(i32 count, u8 render_plane) {
+    NUMTL *mtl;
+    NUMTL *next = NULL;
+    for (i32 i = 0; i < count; ++i) {
+        mtl = NULL;
+        for (i32 j = 0; j < max_materials; ++j) {
+            if (!material_list[j].is_used && material_list[j].display_list == NULL) {
+                mtl = &material_list[j];
+                break;
+            }
+        }
+        memset(mtl, 0, sizeof(NUMTL));
+        DefaultMtl(mtl);
+        mtl->is_used = true;
+        mtl->unknown_0_4 = true;
+        mtl->renderplane = render_plane;
+        NuDisplayListCreateMtl(mtl);
+        mtl->next = next;
+        next = mtl;
+    }
+    NuMtlCreatePS(mtl, 1);
     return mtl;
 }
 

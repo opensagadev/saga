@@ -21,19 +21,33 @@ struct TORPEDOPACKET_s;
 struct SOCKPOSITION_s;
 struct AREADATA_s;
 
+struct LEVELSCRIPTPROGRESS_s {
+    char name[16];
+    f32 params[4];
+};
+DECOMP_ASSERT(sizeof(LEVELSCRIPTPROGRESS_s) == 0x20, "Saved script progress ABI");
+
 struct LEVEL_PROGRESS_s {
     char data[0x2800];
     i32 flags;
     // One bit per object slot. ResetAICreatures uses this saved mask to keep
     // creatures that were permanently removed from being recreated.
     u32 disabled_ai_object_mask[2];
-    u8 pad_280c[0x281c - 0x280c];
+    f32 grabber_field_0x48c;
+    f32 grabber_field_0x484;
+    f32 grabber_field_0x494;
+    u8 pad_2818[4];
     u32 played_cutscene_mask;
-    u8 pad_2820[0x2e24 - 0x2820];
+    LEVELSCRIPTPROGRESS_s scripts[32];
+    GIZFLOWPROGRESS_s giz_flow_progress;
+    char disabled_effect_names[12][16];
 };
 
 DECOMP_ASSERT(offsetof(LEVEL_PROGRESS_s, played_cutscene_mask) == 0x281c, "LEVEL_PROGRESS cutscene mask offset");
 DECOMP_ASSERT(sizeof(LEVEL_PROGRESS_s) == 0x2e24, "LEVEL_PROGRESS size");
+DECOMP_ASSERT(offsetof(LEVEL_PROGRESS_s, scripts) == 0x2820, "Saved script progress offset");
+DECOMP_ASSERT(offsetof(LEVEL_PROGRESS_s, giz_flow_progress) == 0x2c20, "LEVEL_PROGRESS gizmo flow offset");
+DECOMP_ASSERT(offsetof(LEVEL_PROGRESS_s, disabled_effect_names) == 0x2d64, "LEVEL_PROGRESS disabled effects offset");
 
 typedef struct LEVELDATADISPLAY {
     f32 unknown_00;
@@ -325,7 +339,7 @@ void *SetLevelHack(i32);
 void ResetLevel(WORLDINFO_s *, char *, i32);
 extern i8 BoltType_FindIDByName(char *, WORLDINFO_s *);
 extern BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
-extern void Bolt_Add(GameObject_s *, nuvec_s *, numtx_s *, i32, i32);
+extern BOLT_s *Bolt_Add(GameObject_s *, nuvec_s *, numtx_s *, i32, i32);
 void TBOPENFN(char *, i32);
 void TBCLOSEFN(char *, i32);
 void InitMiniSnowTroopers(WORLDINFO_s *, i32, i32, i32);

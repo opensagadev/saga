@@ -8,6 +8,14 @@
 #include "legoapi/legoapi_types.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/numath/nuvec.h"
+#include "nu2api/numath/nutrig.h"
+#include "legoapi/world/world.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "gameapi/ai/aisys/aisys.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -115,7 +123,125 @@ static bool Jump_HasAction(const GameObject_s *object, PLAYER_JUMP_ACTION action
            object->apiobj.character_model->model_data_b[action] != NULL;
 }
 
-void BigJumpCode(GameObject_s *) {
+extern i16 LEGOACT_COMBOJUMP;
+void (*BigJump_EndOfLandFn)(GameObject_s *) = NULL;
+void StartEndOfJump(GameObject_s *);
+void FindSlamOrigin(GameObject_s *, NUVEC *, NUVEC *);
+void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
+void NewRumbleAllPlayers(f32, f32, i32, i32);
+EXPLOSION *AddExplosion(NUVEC *, f32, f32, GameObject_s *, i32, i32);
+
+void BigJumpCode(GameObject_s *object) {
+    if (LEGOCONTEXT_BIGJUMP == -1 || object->character_context != LEGOCONTEXT_BIGJUMP)
+        return;
+    object->apiobj.respawn_timer = 0.0f;
+    if (object->build_button_taps != 0 && object->field_0x1084 != 0) {
+        object->character_context = -1;
+        return;
+    }
+    if (object->field_0x7a3 == 2) {
+        object->context_animation_timer += FRAMETIME;
+        if (object->context_animation_timer >= object->airborne_action_duration) {
+            object->character_context = -1;
+            if (BigJump_EndOfLandFn == NULL)
+                return;
+            BigJump_EndOfLandFn(object);
+        }
+    } else if (object->field_0x7a3 == 1) {
+        object->context_animation_timer += FRAMETIME;
+        if (object->context_animation_timer >= object->airborne_action_duration) {
+            if (LEGOACT_FALL != -1 && object->context_animation == LEGOACT_FALL) {
+                object->character_context = -1;
+                return;
+            }
+            if (object->field_0x7aa != 0 &&
+                (object->pad_gamepad->input_magnitude > 0.0f ||
+                 object->IsRunningTaskType(MechTouchTaskGoTo::HashId))) {
+                object->character_context = -1;
+                return;
+            }
+            WORLDINFO *world = WorldInfo_CurrentlyActive();
+            if (LEGOACT_COMBOJUMP != -1 && object->context_animation == LEGOACT_COMBOJUMP) {
+                object->apiobj.facing_angle += 0x8000;
+                object->apiobj.movement_facing_angle += 0x8000;
+                object->apiobj.field_0x276 += 0x8000;
+                ResetAnimPacket(&object->apiobj.anim_packet, -1);
+            }
+            if ((object->context_variant_flags & 1) != 0 && object->apiobj.field_0x27d == 0) {
+                f32 ground = GameShadow(NULL, &object->launch_origin, 5.0f, -1);
+                if (ground != 2000000.0f && object->launch_origin.y - ground >= 0.1f) {
+                    StartEndOfJump(object);
+                    return;
+                }
+            }
+            ResetAnimPacket(&object->apiobj.anim_packet, -1);
+            object->field_0x7a3 = 2;
+            object->context_animation = BigJump_LandActionFn(object);
+            f32 duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 1);
+            object->airborne_action_duration = duration == 0.0f ? 1.0f : duration;
+            object->context_animation_timer = 0.0f;
+            if ((object->field_0xefb & 8) != 0 || (object->field_0xefd & 0x20) != 0) {
+                GameCam_Judder(GameCam, -0.3f, 0, &object->apiobj.collision_position);
+                PlayLandSfx(object, 3, 0);
+                NewRumbleAllPlayers(0.6f, 0.0f, 0, 0);
+            } else if ((object->apiobj.flags_low & 0x80) != 0 &&
+                       (TestForController() || SuperOptions.touch_controls == 0)) {
+                GameCam_Judder(GameCam, -0.2f, 0, &object->apiobj.collision_position);
+                PlayLandSfx(object, 3, 0);
+            } else {
+                PlayLandSfx(object, 0, 0);
+            }
+            object->external_force = object->apiobj.position;
+            object->apiobj.velocity.x = object->apiobj.velocity.y = object->apiobj.velocity.z = 0.0f;
+            if ((object->field_0xefd & 0x20) != 0) {
+                NUVEC origin;
+                FindSlamOrigin(object, &origin, NULL);
+                AddExplosion(&origin, 2.0f, 0.4f, object, object->slam_debris_effect, 0x19);
+            }
+            AISysGetCharacterPathPos(world->ai_sys, &object->apiobj, &object->ai, 0xff, 1);
+        } else {
+            f32 fraction = object->context_animation_timer / object->airborne_action_duration;
+            f32 horizontal = fraction;
+            f32 arc = 0.0f;
+            if (object->field_0x7aa != 0) {
+                f32 rise = object->launch_origin.y - object->external_force.y;
+                if (rise > 0.21f) {
+                    horizontal = NU_SIN_LUT(static_cast<i32>(fraction * 16384.0f + 32768.0f + 16384.0f)) + 1.0f;
+                    if (rise > 0.42f)
+                        arc = rise / 3.0f + 0.0f;
+                } else if (rise < -0.21f) {
+                    horizontal = NU_SIN_LUT(static_cast<i32>(fraction * 16384.0f + 49152.0f + 16384.0f));
+                    if (rise < -0.42f)
+                        arc = 0.0f - rise / 3.0f;
+                }
+            }
+            f32 sine = NU_SIN_LUT(static_cast<i32>(fraction * 32768.0f));
+            object->apiobj.position.x = object->external_force.x +
+                (object->launch_origin.x - object->external_force.x) * horizontal;
+            object->apiobj.position.y = object->external_force.y +
+                (object->launch_origin.y - object->external_force.y) * fraction + arc * sine;
+            object->apiobj.position.z = object->external_force.z +
+                (object->launch_origin.z - object->external_force.z) * horizontal;
+            f32 height = sine * object->apiobj.character_data->game_character->second_jump_height;
+            object->apiobj.position.y += (height + height) * object->big_jump_height;
+            NuVecSub(&object->apiobj.velocity, &object->apiobj.position, &object->apiobj.start_position);
+            NuVecScale(&object->apiobj.velocity, &object->apiobj.velocity, 1.0f / FRAMETIME);
+            if ((object->jump_flags & 4) == 0) {
+                f32 half_duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 0) * 0.5f;
+                if (object->context_animation_timer >= half_duration) {
+                    if (static_cast<u8>(object->field_0x7aa - 2) <= 1) {
+                        if (LEGOACT_JUMP3 != -1 && object->apiobj.character_model->model_data_b[LEGOACT_JUMP3] != NULL)
+                            object->context_animation = LEGOACT_JUMP3;
+                        else if (LEGOACT_JUMP2 != -1 && object->apiobj.character_model->model_data_b[LEGOACT_JUMP2] != NULL)
+                            object->context_animation = LEGOACT_JUMP2;
+                    }
+                    object->jump_flags |= 4;
+                }
+            }
+        }
+    }
+    if (object->character_context != -1)
+        object->ai.movement_event_flags |= 2;
 }
 
 bool UseFallAnim(GameObject_s *object) {
@@ -124,7 +250,70 @@ bool UseFallAnim(GameObject_s *object) {
            Jump_HasAction(object, PLAYER_JUMP_ACTION_FALL);
 }
 
-void StartBigJump(GameObject_s *, nuvec_s *, i32, float, float, i32, signed char) {
+i32 LEGOCONTEXT_BIGJUMP = -1;
+i16 LEGOACT_COMBOJUMP = -1;
+extern i32 (*BigJump_JumpActionFn)(GameObject_s *);
+extern i16 id_YODA;
+void Player_ClearContext(GameObject_s *, i32);
+void Player_ResetContexts(PLAYERPACKET_s *);
+
+i32 StartBigJump(GameObject_s *object, NUVEC *destination, i32 mode, f32 height,
+                 f32 duration_scale, i32 animation, i8 variant) {
+    if (LEGOCONTEXT_BIGJUMP == -1 || (object->apiobj.character_data->model_flags & 0x200000) != 0)
+        return 0;
+    Player_ClearContext(object, 0);
+    GameObject_s *carried = object->field_0xcc0;
+    if (carried == NULL || carried->id != id_YODA || WORLD->current_level != DAGOBAHE_LDATA)
+        carried = NULL;
+    Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
+    object->field_0xcc0 = carried;
+    object->build_button_taps = animation;
+    object->field_0x7a3 = 1;
+    object->jump_flags &= ~4;
+    object->character_context = LEGOCONTEXT_BIGJUMP;
+    object->field_0x7aa = variant;
+    object->context_animation = BigJump_JumpActionFn(object);
+    object->external_force = object->apiobj.position;
+    object->launch_origin = *destination;
+    object->airborne_action_duration = AnimDuration(object->id, object->context_animation, 0.0f, 0.0f, 0);
+    if (static_cast<u8>(variant - 2) <= 1)
+        object->airborne_action_duration = object->apiobj.character_data->game_character->second_jump_duration;
+    if (object->field_0x7aa != 0) {
+        f32 distance = NuVecXZDist(&object->external_force, &object->launch_origin, NULL);
+        f32 speed = object->apiobj.character_data->game_character->run_speed;
+        f32 duration = distance == 0.0f || speed == 0.0f ? 0.0f : distance / speed;
+        if (!(object->airborne_action_duration > duration))
+            object->airborne_action_duration = duration;
+        if (object->field_0x7aa == 2) {
+            if (LEGOACT_JUMP2 != -1 && object->apiobj.character_model->model_data_b[LEGOACT_JUMP2] != NULL)
+                height *= 1.5f;
+        } else if (object->field_0x7aa == 3) {
+            if (LEGOACT_JUMP3 != -1 && object->apiobj.character_model->model_data_b[LEGOACT_JUMP3] != NULL)
+                height *= 1.8f;
+        }
+    }
+    if (object->airborne_action_duration == 0.0f) {
+        object->airborne_action_duration = 1.0f;
+        object->context_animation = LEGOACT_FALL;
+    } else {
+        ResetAnimPacket(&object->apiobj.anim_packet, -1);
+    }
+    object->airborne_action_duration *= duration_scale;
+    object->context_animation_timer = 0.0f;
+    object->launch_origin.y -= object->character_bottom * object->apiobj.field_0xa8;
+    u16 angle = NuAtan2D(destination->x - object->external_force.x, destination->z - object->external_force.z);
+    if (object->field_0x7aa == 4)
+        angle -= 0x8000;
+    object->apiobj.movement_facing_angle = angle;
+    object->apiobj.facing_angle = angle;
+    object->apiobj.field_0x276 = angle;
+    object->field_0xefd = (object->field_0xefd & ~0x20) | ((mode & 1) << 5);
+    PlayJumpSfx(object, 2);
+    object->ai.movement_event_flags |= 2;
+    object->ai.field_0x180 = NULL;
+    object->context_variant_flags &= ~1;
+    object->big_jump_height = height < 0.0f ? 0.0f : height;
+    return 1;
 }
 
 i32 StartFallLand(GameObject_s *object, i32 action) {
@@ -170,18 +359,16 @@ i32 StartFallLand(GameObject_s *object, i32 action) {
 }
 
 void StartEndOfJump(GameObject_s *object) {
-    if (object == NULL) {
-        return;
+    if (LEGOCONTEXT_JUMP != -1) {
+        object->character_context = LEGOCONTEXT_JUMP;
+        object->action_movement_state = 0;
+        object->jump_sequence = 2;
+        object->jump_flags &= ~PLAYER_JUMP_FLAG_SPECIAL_TAKEOFF;
+        object->context_animation = LEGOACT_FALL;
+        object->context_variant_flags =
+            static_cast<i8>((static_cast<u8>(object->context_variant_flags) | PLAYER_JUMP_VARIANT_FALLING) &
+                            ~PLAYER_JUMP_VARIANT_END_CLEAR);
     }
-
-    object->character_context = CHARACTER_CONTEXT_JUMP;
-    object->action_movement_state = PLAYER_JUMP_MOVEMENT_BASIC;
-    object->jump_sequence = 2;
-    object->jump_flags &= ~PLAYER_JUMP_FLAG_SPECIAL_TAKEOFF;
-    object->context_animation = PLAYER_JUMP_ACTION_FALL;
-    object->context_variant_flags =
-        static_cast<i8>((static_cast<u8>(object->context_variant_flags) | PLAYER_JUMP_VARIANT_FALLING) &
-                        ~PLAYER_JUMP_VARIANT_END_CLEAR);
     object->airborne_collision_target = NULL;
 }
 

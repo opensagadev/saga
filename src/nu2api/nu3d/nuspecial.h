@@ -55,10 +55,15 @@ DECOMP_ASSERT(offsetof(NUDISPLAYSPECIAL, flags) == 0xb8, "display special flags 
 // instead of hand-declaring these C-linkage helpers.
 
 extern "C" {
+    void NuGScnGetSpecial(nuhspecial_s *special, NUGSCN *scene, i32 index);
+    i32 NuSpecialGetNumSpecials(NUGSCN *scene);
+    i32 NuSpecialGetFirst(NUGSCN *scene, nuhspecial_s *special, i32 flags);
+    void NuSpecialGetNext(nuhspecial_s *special);
     i32 NuSpecialFind(NUGSCN *scene, nuhspecial_s *dest, char *name, i32 flags);
     i32 NuSpecialFindMulti(NUGSCN *scene, nuhspecial_s *dest, char *name, i32 capacity, i32 flags);
     i32 NuSpecialCompare(nuhspecial_s *first, nuhspecial_s *second);
     i32 NuSpecialExistsFn(void *special);
+    i32 NuSpecialGetOnScreenFn(nuhspecial_s *special);
     void NuSpecialClear(void *special);
     void NuSpecialGetBounds(void *special, NUVEC *minimum, NUVEC *maximum);
     void NuSpecialGetRadius(void *special, NUVEC *position, f32 *radius);

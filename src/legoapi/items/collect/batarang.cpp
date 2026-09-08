@@ -1,6 +1,9 @@
 #include "legoapi/legoapi_types.h"
+#include "globals.h"
+#include "nu2api/nucore/nustring.h"
 
 extern BATARANG_s Batarang[8];
+extern "C" i16 id_ROBIN;
 
 void Batarangs_Draw() {
 }
@@ -26,7 +29,17 @@ void Batarang_MoveCode(GameObject_s *) {
 void Batarang_Ricochet(BATARANG_s *) {
 }
 
-void Batarang_GetSightInfo(i32, i32 *, i32 *, i32 *, char *) {
+void Batarang_GetSightInfo(i32 character, i32 *red, i32 *green, i32 *blue, char *text) {
+    *red = 255;
+    if (character == id_ROBIN) {
+        *green = 0;
+        *blue = 31;
+        if (text != NULL) NuStrCpy(text, "\xc2\xb1");
+    } else {
+        *green = 223;
+        *blue = 0;
+        if (text != NULL) NuStrCpy(text, "\xc2\xa7");
+    }
 }
 
 void Batarang_InitRicochet(BATARANG_s *, nuvec_s *) {

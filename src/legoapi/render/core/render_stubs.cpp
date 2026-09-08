@@ -5,6 +5,7 @@
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
+#include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/android/nuiosdl_gl.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nudlist.h"
@@ -199,8 +200,6 @@ extern "C" {
     void AddColourPick(void) {
     }
 
-    void BoundingBoxToLine(void) {
-    }
 
     void BuildCamSpaceClipPlanes(void) {
     }
@@ -425,6 +424,20 @@ extern "C" {
             effect->native_data = DmaDebTypes[freeDmaDebType++];
         }
 
+        if (NuStrCmp(effect->name, "FLY") == 0 && static_cast<u32>(effect->texture_u0) == 0x8003c &&
+            static_cast<u32>(effect->texture_v0) == 0x80100 && static_cast<u32>(effect->texture_u1) == 0x8005e &&
+            static_cast<u32>(effect->texture_v1) == 0x80082) {
+            for (u32 i = 0; i < 8; ++i) {
+                effect->width_keys[i].value = effect->height_keys[i].value;
+                effect->height_keys[i].value += effect->height_keys[i].value;
+                effect->alpha_keys[i].value *= 1.5f;
+                effect->rotation_keys[i].value *= 1.5f;
+            }
+            effect->texture_u0 = static_cast<f32>(static_cast<u32>(effect->texture_u0) & ~0x1ffU) + 63.75f;
+            effect->texture_v0 = static_cast<f32>(static_cast<u32>(effect->texture_v0) & ~0x1ffU) + 127.5f;
+            effect->texture_u1 = static_cast<f32>(static_cast<u32>(effect->texture_u1) & ~0x1ffU) + 95.625f;
+            effect->texture_v1 = static_cast<f32>(static_cast<u32>(effect->texture_v1) & ~0x1ffU) + 191.25f;
+        }
         PartHeader *header = effect->native_data;
         header->gravity = effect->field_0a0;
         header->texture_u0 = static_cast<f32>(static_cast<i32>(effect->texture_u0) & 0x1ff) / 255.0f;
@@ -438,7 +451,7 @@ extern "C" {
             const f32 height = EvaluateDebrisCurve(effect->height_keys, time);
             const f32 rotation = EvaluateDebrisCurve(effect->rotation_keys, time);
             const f32 sine = NU_SIN_LUT(rotation);
-            const f32 cosine = NU_COS_LUT(rotation);
+            const f32 cosine = NU_SIN_LUT(rotation + 16384.0f);
             const f32 wave_x = effect->field_0b4 * NU_SIN_LUT(effect->field_0b0 * time * 65536.0f);
             const f32 wave_y = effect->field_0bc * NU_SIN_LUT(effect->field_0b8 * time * 65536.0f);
 
@@ -616,18 +629,12 @@ extern "C" {
         memset(PortalVisiFlags, 0xff, sizeof(PortalVisiFlags));
     }
 
-    void ShadowDir(void) {
-    }
-
     i32 ShadowInfo(void) {
         extern TERRAIN_SHAPE *ShadPoly;
         return ShadPoly != NULL ? ShadPoly->material[0] : -1;
     }
 
     void ShadowIntensityInfo(void) {
-    }
-
-    void ShadowRoofInfo(void) {
     }
 
     void SphereDraw(void) {
