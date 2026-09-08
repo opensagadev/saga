@@ -549,13 +549,21 @@ struct APIOBJECTSYS_s {
         u8 state[0x214 - 8];
         struct {
             u64 line_of_sight[64]; // 0x008, one opponent bit per object slot
-            u8 padding_0x208[0x0c];
+            union {
+                u8 padding_0x208[0x0c];
+                struct {
+                    u8 reserved_0x208[8];
+                    u8 runtime_flags; // 0x210, bit 0 cleared by CheckResetBits
+                    u8 reserved_0x211[3];
+                };
+            };
         };
     };
 };
 
 DECOMP_ASSERT(sizeof(APIOBJECTSYS_s) == 0x214, "APIOBJECTSYS size");
 DECOMP_ASSERT(offsetof(APIOBJECTSYS_s, line_of_sight) == 8, "APIOBJECTSYS line-of-sight offset");
+DECOMP_ASSERT(offsetof(APIOBJECTSYS_s, runtime_flags) == 0x210, "APIOBJECTSYS runtime flags offset");
 
 extern "C" APIOBJECT *APIObjectCreate(APIOBJECTSYS_s *system);
 extern "C" void APIObjectDestroy(APIOBJECTSYS_s *system, APIOBJECT *object);
