@@ -649,6 +649,32 @@ static void *Condition_PlayerInSockInit(AISYS_s *, char *name, AISCRIPT_s *) {
 
 extern "C" f32 NuAnimEndFrameOld(void *animation);
 
+static f32 Condition_AreaContainsBaddies(AISYS_s *system, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *, void *argument) {
+    if (system != NULL) {
+        AIAREA *area = static_cast<AIAREA *>(argument);
+        if (area == NULL) area = process->unknown_a0;
+        if (area != NULL && (area->runtime_flags & 4) != 0) return 1.0f;
+    }
+    return 0.0f;
+}
+
+static void *Condition_AreaContainsBaddiesInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    return name != NULL ? AISysFindArea(system, name) : NULL;
+}
+
+static f32 Condition_AreaContainsGoodies(AISYS_s *system, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *, void *argument) {
+    if (system != NULL) {
+        AIAREA *area = static_cast<AIAREA *>(argument);
+        if (area == NULL) area = process->unknown_a0;
+        if (area != NULL && (area->runtime_flags & 2) != 0) return 1.0f;
+    }
+    return 0.0f;
+}
+
+static void *Condition_AreaContainsGoodiesInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    return name != NULL ? AISysFindArea(system, name) : NULL;
+}
+
 static f32 Condition_PickupBeenTurnedOn(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     return argument != NULL ? (f32)GizmoPickup_BeenTurnedOn(static_cast<GIZMOPICKUP_s *>(argument)) : 0.0f;
 }
@@ -1274,8 +1300,8 @@ extern "C" {
         {"TakeOverRange", NULL, NULL},
         {"TakeOverTargetInTriggerArea", NULL, NULL},
         {"EitherPlayerInMyTriggerArea", NULL, NULL},
-        {"AreaContainsBaddies", NULL, NULL},
-        {"AreaContainsGoodies", NULL, NULL},
+        {"AreaContainsBaddies", Condition_AreaContainsBaddies, Condition_AreaContainsBaddiesInit},
+        {"AreaContainsGoodies", Condition_AreaContainsGoodies, Condition_AreaContainsGoodiesInit},
         {"AreaContainsPartyMember", NULL, NULL},
         {"GotVictim", NULL, NULL},
         {"IsVisible", Condition_IsVisible, Condition_IsVisibleInit},
