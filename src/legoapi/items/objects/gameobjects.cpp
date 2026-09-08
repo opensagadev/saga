@@ -1681,10 +1681,10 @@ void GameLoadCharacterModels(APICHARACTERMODELLIST_s *list, i32 append, VARIPTR 
 }
 
 i32 Game_100PercentComplete() {
-    if (StatusCollectList.ptr == NULL) {
+    if (Game_CompletionSave == NULL) {
         return 0;
     }
-    return StatusCollectList.ptr->flags & 1;
+    return reinterpret_cast<STATUSCOLLECT_s *>(Game_CompletionSave)->flags & 1;
 }
 
 void Game_WorldInfo_InitMenu(WORLDINFO_s *world, i32 *menu_id, i32 *) {
@@ -2608,6 +2608,7 @@ void UpdateGameObjects(WORLDINFO_s *world) {
         if (object->move_override != NULL) {
             object->move_override(object);
         } else {
+            Player_ToggleCharacter(object, 0, 1);
             MovePlayer(object);
         }
     }

@@ -230,7 +230,7 @@
   "moduleExtensions": {
     "@@emsdk+//:emscripten_cache.bzl%emscripten_cache": {
       "general": {
-        "bzlTransitiveDigest": "TxiJJMUJEr/iCqE9Twl5vHvpI8PoR3B7R6bOc67o4C8=",
+        "bzlTransitiveDigest": "wgEOVL/Fy/GcNauGIfYibujPx+UQZdExgMRnYUSm8LE=",
         "usagesDigest": "3FZOrh6cgKSGsvsDdttegirGE5eRTUH7+qTAtZ7PDqE=",
         "recordedInputs": [],
         "generatedRepoSpecs": {

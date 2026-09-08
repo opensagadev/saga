@@ -134,7 +134,9 @@ void DeathStarRescueC_AlwaysUpdate(WORLDINFO_s *) {
 // Death Star escape (DeathStarEscape_A / B / C / D)
 // ===========================================================================
 
-void DeathStarShieldDown() {
+bool DeathStarShieldDown() {
+    // Shield-state behavior remains unreconstructed.
+    return false;
 }
 
 void DeathStarEscapeA_Init(WORLDINFO_s *) {

@@ -407,7 +407,7 @@ extern "C" __attribute__((optimize("O0"))) void NuGScnFixupTIDsPS(NUGSCN *scene)
 }
 extern "C" void NuGScnFromVideoMem(void) {
 }
-extern "C" void NuGScnGetSpecial(void) {
+extern "C" void NuGScnGetSpecial(nuhspecial_s *, NUGSCN *, i32) {
 }
 extern "C" void NuGScnNumSpecials(void) {
 }

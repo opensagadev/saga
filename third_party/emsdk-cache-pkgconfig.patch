@@ -20,10 +20,13 @@ index 3d2f995..463f067 100644
  """
  
  EMBUILDER_CONFIG_TEMPLATE = """
-@@ -91,6 +91,11 @@ def _emscripten_cache_repository_impl(repository_ctx):
+@@ -91,6 +91,14 @@ def _emscripten_cache_repository_impl(repository_ctx):
          root, script_ext = get_root_and_script_ext(repository_ctx)
          llvm_root = root.get_child("bin")
          cache = repository_ctx.path("cache")
++
++        # Rebuild the port cache when our WASM SDL backend patch changes.
++        repository_ctx.read(root.get_child("emscripten/tools/ports/sdl3.py"))
 +
 +        # Emscripten ports write pkg-config metadata but do not create this
 +        # directory when a secondary cache starts with port-only targets.

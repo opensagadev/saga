@@ -118,7 +118,8 @@ COLLECTID *CollectIDUnlocked(i32 id) {
         case 4:
             return AllMiniKitsDone(Game_AreaSave) != 0 ? entry : NULL;
         case 6:
-            if (StatusCollectList.ptr == NULL || StatusCollectList.ptr->gold_bricks < entry->field6_0xa) {
+            if (Game_CompletionSave == NULL ||
+                reinterpret_cast<STATUSCOLLECT_s *>(Game_CompletionSave)->gold_bricks < entry->field6_0xa) {
                 return NULL;
             }
             return entry;

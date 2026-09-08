@@ -1607,7 +1607,15 @@ DECOMP_ASSERT(sizeof(PULSESYS_s) == 0x8, "PULSESYS_s size");
 DECOMP_ASSERT(offsetof(PULSESYS_s, pulse_count) == 0x4, "PULSESYS pulse count offset");
 struct PartHeader;
 struct PropertyMenuList {};
-struct REGISTERSTATUSPACKET_s {};
+struct REGISTERSTATUSPACKET_s {
+    STATUSPACKET_LSW_s *lsw_packet;
+    i32 (*init_callback)(WORLDINFO_s *, STATUSPACKET_s *);
+    i32 (*finish_callback)(WORLDINFO_s *, STATUSPACKET_s *, i32);
+    void (*reset_callback)(STATUSPACKET_s *);
+    void (*draw_background_callback)(STATUSPACKET_s *);
+    f32 stage_delay;
+};
+DECOMP_ASSERT(sizeof(REGISTERSTATUSPACKET_s) == 0x18, "REGISTERSTATUSPACKET_s size");
 struct RGBA {};
 struct SCENEPROGRESS_s {};
 struct SHADERSEMANTIC_enum {};
@@ -1621,11 +1629,14 @@ enum STATUS_FLAGS {
 // model ids at 0x9c/0x9e, per-player bytes at 0xa4/0xa5, flags at 0xb1/0xb2).
 struct STATUSPACKET_s {
     STATUSPACKET_LSW_s *lsw_packet; // 0x00
-    i32 field_0x04;
-    i32 field_0x08;
+    i32 (*init_callback)(WORLDINFO_s *, STATUSPACKET_s *); // 0x04
+    i32 (*finish_callback)(WORLDINFO_s *, STATUSPACKET_s *, i32); // 0x08
     void (*reset_callback)(STATUSPACKET_s *);           // 0x0c
     void (*draw_background_callback)(STATUSPACKET_s *); // 0x10
-    undefined field_0x14[0x24 - 0x14];
+    AREADATA_s *area; // 0x14
+    EPISODEDATA *episode; // 0x18
+    u32 *score; // 0x1c
+    struct MISSIONDATA_s *mission; // 0x20
     f32 player0_rumble_amount;   // 0x24
     f32 player0_rumble_time;     // 0x28
     f32 player0_rumble_duration; // 0x2c
@@ -1637,24 +1648,57 @@ struct STATUSPACKET_s {
     f32 player1_rumble_duration; // 0x40
     f32 player1_buzz_amount;     // 0x44
     u8 player1_rumble_priority;  // 0x48
-    undefined field_0x49[0x68 - 0x49];
+    u8 field_0x49[3];
+    f32 area_time; // 0x4c
+    f32 collected_score; // 0x50
+    f32 true_hero_target; // 0x54
+    f32 true_hero_percent; // 0x58
+    f32 previous_best_time; // 0x5c
+    f32 new_best_time; // 0x60
+    f32 elapsed_time; // 0x64
     f32 field_0x68;
-    undefined field_0x6c[0x9c - 0x6c];
+    u32 previous_best_score; // 0x6c
+    u32 new_best_score; // 0x70
+    u32 original_score; // 0x74
+    u32 reward_score; // 0x78
+    u32 time_reward_score; // 0x7c
+    u32 final_reward_score; // 0x80
+    u32 coins_remaining[2]; // 0x84
+    u32 coins_collected[2]; // 0x8c
+    i32 new_minikits; // 0x94
+    u32 field_0x98;
     u16 player0_model; // 0x9c
     u16 player1_model; // 0x9e
-    undefined field_0xa0[0xa4 - 0xa0];
+    i16 area_id; // 0xa0
+    i8 episode_id; // 0xa2
+    u8 field_0xa3;
     u8 player0_active; // 0xa4
     u8 player1_active; // 0xa5
-    undefined field_0xa6[0xb0 - 0xa6];
+    u8 challenge_state; // 0xa6
+    u8 mission_state; // 0xa7
+    f32 superstory_time; // 0xa8
+    u32 superstory_score; // 0xac
     u8 field_0xb0;
     u8 mode_flags;   // 0xb1
     u8 status_flags; // 0xb2
-    undefined field_0xb3[0xb5 - 0xb3];
+    u8 minikit_count; // 0xb3
+    u8 minikit_max; // 0xb4
     u8 stage_count;        // 0xb5
     i8 current_gold_brick; // 0xb6
-    undefined field_0xb7[0xc6 - 0xb7];
+    u8 save_state; // 0xb7
+    u8 prompt_choice; // 0xb8
+    u8 newly_completed; // 0xb9
+    u8 previous_completion; // 0xba
+    u8 previous_gold_bricks; // 0xbb
+    u8 displayed_gold_bricks; // 0xbc
+    u8 field_0xbd;
+    i8 field_0xbe;
+    u8 field_0xbf[7];
     i8 stage_types[0xee - 0xc6];             // 0xc6
-    u8 gold_brick_enabled[0x11c - 0xee];     // 0xee
+    u8 gold_brick_enabled[40]; // 0xee
+    i16 next_area; // 0x116
+    i8 chapter; // 0x118
+    u8 field_0x119[3];
     struct STATUS_STAGE_s *previous_stage_2; // 0x11c
     struct STATUS_STAGE_s *previous_stage;   // 0x120
     struct STATUS_STAGE_s *stage;            // 0x124
@@ -2869,6 +2913,8 @@ enum GIZFORCE_CONFIG_FLAGS : u32 {
     GIZFORCE_CONFIG_WAIT_FOR_FORCE_RANGE = 0x00000002,
     GIZFORCE_CONFIG_DRAW_REFLECTION = 0x00000004,
     GIZFORCE_CONFIG_RESET_STATE_ON_ACTIVATE = 0x00000008,
+    GIZFORCE_CONFIG_JEDI_BADDIE_ONLY = 0x00000010,
+    GIZFORCE_CONFIG_BLOWUP_AT_ANIM_OBJECTS = 0x00000020,
     GIZFORCE_CONFIG_ALONG_SOCKET = 0x00000040,
     GIZFORCE_CONFIG_HIT_TEST_TYPE_0 = 0x00000100,
     GIZFORCE_CONFIG_HIT_TEST_TYPE_1 = 0x00000200,
@@ -2955,17 +3001,40 @@ struct GIZFORCE_s {
     i16 start_sfx_id;      // 0x86
     i16 loop_sfx_id;       // 0x88
     i16 stop_sfx_id;       // 0x8a
-    i16 blowup_type;       // 0x8c
-    i16 debris_type;       // 0x8e
-    i16 hit_points;        // 0x90
-    i16 score;             // 0x92
-    NUVEC effect_position; // 0x94
-    f32 activation_radius; // 0xa0
+    i16 blowup_type; // 0x8c
+    union {
+        i16 debris_type;
+        u16 pickup_count; // 0x8e
+    };
+    union {
+        i16 hit_points;
+        u16 pickup_direction_x; // 0x90
+    };
+    union {
+        i16 score;
+        u16 pickup_direction_y; // 0x92
+    };
+    union {
+        NUVEC effect_position;
+        NUVEC pickup_offset; // 0x94
+    };
+    union {
+        f32 activation_radius;
+        f32 pickup_scatter_height; // 0xa0
+    };
     u32 field_0xa4;
-    u8 progress_flags; // 0xa8
-    u8 runtime_flags;  // 0xa9, GIZFORCE_RUNTIME_FLAGS
-    u8 field_0xaa;
-    u8 field_0xab;
+    union {
+        struct {
+            u8 progress_flags; // 0xa8, GIZFORCE_PROGRESS_FLAGS
+            u8 runtime_flags;  // 0xa9, GIZFORCE_RUNTIME_FLAGS
+            union {
+                u8 field_0xaa;
+                u8 state_flags; // GIZFORCE_STATE_FLAGS
+            };
+            u8 field_0xab;
+        };
+        u32 packed_state;
+    };
     void ClearMechObjectInterface();
     void GetMechObjectInterface();
 };
@@ -3796,7 +3865,9 @@ struct PART_s {
     f32 gravity;
     u8 pad_0ec[0x108 - 0xec];
     u32 flags;
-    u8 pad_10c[0x144 - 0x10c];
+    u8 pad_10c[0x13e - 0x10c];
+    i16 type_id; // 0x13e
+    u8 pad_140[0x144 - 0x140];
     u8 active;
     u8 pad_145[3];
     nuhspecial_s special;

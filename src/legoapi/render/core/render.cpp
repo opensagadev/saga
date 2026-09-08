@@ -1257,7 +1257,33 @@ void DrawAlphaGrid(i32, i32, NuBloomParameters *) {
 void DrawArrow_Now(_vum_s *, float, i32, i32) {
 }
 
-void DrawBonusTime(STATUSPACKET_s *, float, i32) {
+extern i16 tNONEWBESTTIME, tNEWBESTTIME;
+void Text_MakeTime(f32, i32, i32, i32, char *);
+
+void DrawBonusTime(STATUSPACKET_s *packet, float position, i32 alpha) {
+    const f32 y = -0.5f * position;
+    char *title;
+    i32 red, green;
+    if (packet->new_best_time != 0.0f) {
+        title = TTab[tNEWBESTTIME];
+        red = 0;
+        green = 255;
+    } else {
+        title = TTab[tNONEWBESTTIME];
+        red = 255;
+        green = 0;
+    }
+    SmartTextEx(title, 0.0f, 0.15f + y, 1.0f, 0.7f, 0.7f, 0.7f, 0,
+                red, green, 0, 1.7f, 1, NULL, 0, static_cast<u8>(alpha));
+    char time[256];
+    char previous[256];
+    Text_MakeTime(packet->new_best_time != 0.0f ? packet->new_best_time : packet->elapsed_time, 1, 1, 1, time);
+    Text3DEx(time, 0.0f, 0.0f + y, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255, static_cast<u8>(alpha));
+    Text_MakeTime(packet->previous_best_time, 1, 1, 1, time);
+    NuStrCpy(previous, "(");
+    NuStrCat(previous, time);
+    NuStrCat(previous, ")");
+    Text3DEx(previous, 0.0f, y - 0.15f, 1.0f, 0.7f, 0.7f, 0.7f, 0, 255, 255, 255, static_cast<u8>(static_cast<u8>(alpha) >> 1));
 }
 
 void DrawCross_Now(_vuv_s *, float, i32, i32) {
@@ -1361,7 +1387,28 @@ void DrawBonusScore(float, i32, i32, float, i32 *) {
 void DrawBoxMtx_Now(_vum_s *, _vuv_s *, i32, i32) {
 }
 
-void DrawBuildUpBar(float, float, i32, i32, float, float, float, u16) {
+void DrawBuildUpBar(float x, float y, i32 amount, i32 maximum, float scale, float width, float alpha, u16 angle) {
+    const f32 progress = static_cast<f32>(amount * 10) / maximum;
+    const i32 full = progress;
+    const f32 fraction = NuFmod(progress, 1.0f);
+    const f32 phase = GlobalTimer.time_elapsed_mod_seconds * 10.0f;
+    const f32 size = scale * 0.085f * width;
+    const f32 step = width * 0.02975f * NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff];
+    f32 px = x - step * 9.0f * 0.5f;
+    i32 shimmer = 0xb3 - static_cast<i32>(phase);
+    for (i32 i = 0; i < 10; ++i) {
+        i32 object;
+        if (amount == maximum) {
+            if (shimmer >= 0xb3) shimmer = 0xa9;
+            object = shimmer++;
+        } else if (i < full) object = 0xb2;
+        else if (i == full) object = fraction * 9.0f + 169.0f;
+        else object = 0xa9;
+        const f32 depth[10] = {1.009f, 1.008f, 1.007f, 1.006f, 1.005f, 1.004f, 1.003f, 1.002f, 1.001f, 1.0f};
+        DrawPanel3DObject(px, y, depth[i], size, size, size, 0, 0, 0,
+                          reinterpret_cast<nuhspecial_s *>(&WORLD->lev_objs[object]), 0, alpha);
+        px += step;
+    }
 }
 
 void DrawCodeMenu3D() {
@@ -1726,7 +1773,37 @@ void DrawGameMessages() {
 void DrawMeleeTargets(i16 *, char *, float *, i32) {
 }
 
-void DrawMiniKitCount(float, float, i32, i32) {
+f32 KITPOSX = -0.725f;
+f32 KITPOSY = -0.7f;
+f32 KITPOS2X = -1.275f;
+f32 KITPOS2Y = -1.3f;
+f32 PANEL_MINIKITSCALE = 0.25f;
+f32 PANEL_MINIKITY = 0.03f;
+f32 PANEL_MINIKITCOUNTSCALE = 0.5f;
+f32 PANEL_MINIKITCOUNTY = -0.1f;
+i32 LEGOOBJ_CHARKIT = -1;
+i32 LEGOOBJ_MINIKIT = -1;
+i32 DrawPanel3DObjectNoAlpha(f32, f32, f32, f32, f32, f32, u16, u16, u16, nuhspecial_s *, i32);
+extern "C" void Text3D(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8);
+
+void DrawMiniKitCount(float position, float scale, i32 count, i32 maximum) {
+    const i32 model = ChallengeMode != 0 ? LEGOOBJ_CHARKIT : LEGOOBJ_MINIKIT;
+    if (model == -1 || position <= 0.0f) return;
+    const f32 blend = NuTrigTable[(static_cast<i32>(position * 16384.0f) >> 1) & 0x7fff];
+    const f32 x = (KITPOSX - KITPOS2X) * blend + KITPOS2X;
+    const f32 y = (KITPOSY - KITPOS2Y) * blend + KITPOS2Y;
+    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+    if (world->lev_objs[model].active != 0) {
+        const u16 rotation = static_cast<u16>(static_cast<i32>(NuFmod(GameTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f));
+        const u16 tilt = static_cast<u16>(static_cast<i32>(1820.0f * NuTrigTable[rotation & 0x7fff]));
+        const f32 size = scale * PANEL_MINIKITSCALE;
+        DrawPanel3DObjectNoAlpha(x, PANEL_MINIKITY + y, 1.0f, size, size, size, tilt, rotation, 0,
+                                 &world->lev_objs[model].special, 2);
+    }
+    char text[40];
+    sprintf(text, "%i/%i", count, maximum);
+    const f32 size = scale * PANEL_MINIKITCOUNTSCALE;
+    Text3D(text, x, y + PANEL_MINIKITCOUNTY, 1.0f, size, size, size, 0, 255, 0, 127);
 }
 
 void DrawStatusBG_LSW(STATUSPACKET_s *status) {
@@ -2377,7 +2454,13 @@ void DrawPanel() {
 
     if (editor_active == 0 && PANELOFF == 0 && WORLD != NULL && WORLD->current_level != NULL) {
         LEVELDATA *level = WORLD->current_level;
-        if ((level->flags & LEVEL_GAMEPLAY) != 0) {
+        // DrawPanel 0x141f08: status levels dispatch before the gameplay HUD.
+        if (level == STATUS_LDATA || (level->flags & LEVEL_STATUS) != 0) {
+            if (level->draw_status_fn != NULL) {
+                level->draw_status_fn(WORLD);
+            }
+            DrawGameMessages();
+        } else if ((level->flags & LEVEL_GAMEPLAY) != 0) {
             const f32 status_y =
                 NuTrigTable[(static_cast<i32>(statstime * static_cast<f32>(NUANG_90DEG)) >> 1) & 0x7fff] *
                     (STATSPOSY - STATSPOS2Y) +

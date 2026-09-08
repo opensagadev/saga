@@ -117,7 +117,9 @@ void SarlaccPitC_Reset(WORLDINFO_s *) {
 void SarlaccPitC_Update(WORLDINFO_s *) {
 }
 
-void SarlaccPitDiscoActive(WORLDINFO_s *) {
+bool SarlaccPitDiscoActive(WORLDINFO_s *) {
+    // Disco-state behavior remains unreconstructed.
+    return false;
 }
 
 // ===========================================================================

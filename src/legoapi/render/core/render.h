@@ -16,7 +16,7 @@ void Draw_AUTOSAVEWARNING(void);
 #ifdef __cplusplus
 extern "C" {
 #endif
-    void Text3DEx(char *, f32, f32, f32, f32, f32, f32, u8, u8, u8, u8, i32);
+    void Text3DEx(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8, i32);
 #ifdef __cplusplus
 }
 #endif

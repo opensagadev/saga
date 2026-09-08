@@ -16,6 +16,7 @@
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/numath/nuvec.h"
 #include "nu2api/numusic/sfx.h"
 
 #include <string.h>
@@ -90,6 +91,11 @@ i32 GizmoBlowupGetNameTableId(char *name);
 i32 GizmoBlowupGetTypeFromNameTableId(WORLDINFO_s *world, i32 name_table_id);
 i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 scale, NUMTX *result);
 void GameAnimSet_DrawReflection(GAMEANIMSET_s *set, i32 flags, f32 alpha, NUMTX *matrix);
+void GizmoBlowUpTypeBlowUp(WORLDINFO_s *world, i32 blowup_type, NUVEC *position);
+void AddPickups(i32 count, i32 pickup_type, i32 param3, i32 param4, NUVEC *position, NUVEC *direction, f32 speed,
+                i32 source, f32 scatter_height, f32 lifetime, GameObject_s *owner, i32 param12, i32 param13,
+                bool param14);
+i32 ReleaseHearts();
 void AddLevelSfxFromId(i32 sfx_id, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx);
 void AddShoveObject(nuhspecial_s *special, i16 character_id);
 
@@ -199,6 +205,52 @@ static void GizForce_UpdateGroupState(GIZFORCE_s *force) {
     }
 }
 
+static void GizForce_ReleaseCompletion(WORLDINFO *world, GIZFORCE_s *force) {
+    GAMEANIMSET_s *anim_set = force->anim_set;
+    if ((anim_set->flags &
+         (GAMEANIMSET_FLAG_NO_VISIBILITY_TEST | GAMEANIMSET_FLAG_STOP_REQUESTED | GAMEANIMSET_FLAG_IN_SYSTEM_LIST)) !=
+            0 ||
+        anim_set->state != GAMEANIMSET_STATE_AT_END ||
+        (force->progress_flags & GIZFORCE_PROGRESS_GROUP_MEMBER) != 0 ||
+        (force->force_range > 0.0f &&
+         (force->runtime_flags & GIZFORCE_RUNTIME_FORCE_RANGE_COMPLETE) == 0) ||
+        ((force->config_flags & GIZFORCE_CONFIG_ALONG_SOCKET) != 0 &&
+         (force->runtime_flags & GIZFORCE_RUNTIME_ALONG_SOCKET_HIDDEN) == 0) ||
+        (anim_set->animated_object_count == 0 && force->force_range <= 0.0f &&
+         (force->config_flags & GIZFORCE_CONFIG_ALONG_SOCKET) == 0) ||
+        (force->runtime_flags & GIZFORCE_RUNTIME_COMPLETION_RELEASED) != 0) {
+        return;
+    }
+
+    if (force->blowup_type != -1) {
+        if ((force->config_flags & GIZFORCE_CONFIG_BLOWUP_AT_ANIM_OBJECTS) != 0) {
+            for (GAMEANIMOBJ_s *object = anim_set->objects; object != NULL; object = object->next) {
+                NUVEC *draw_position = NuSpecialGetDrawPos(&object->special);
+                if (draw_position != NULL) {
+                    GizmoBlowUpTypeBlowUp(world, force->blowup_type, draw_position);
+                }
+            }
+        } else {
+            GizmoBlowUpTypeBlowUp(world, force->blowup_type, &force->position);
+        }
+        GameAnimSet_SetVisibility(anim_set, 0);
+        force->state_flags |= GIZFORCE_STATE_DESTROYED_OR_THROWN;
+    }
+
+    if (force->pickup_count != 0 && (force->runtime_flags & GIZFORCE_RUNTIME_REWARD_RELEASED) == 0) {
+        NUVEC pickup_position;
+        NUVEC pickup_direction;
+        NuVecAdd(&pickup_position, &force->position, &force->pickup_offset);
+        NuVecRotateX(&pickup_direction, &v010, force->pickup_direction_x);
+        NuVecRotateY(&pickup_direction, &pickup_direction, force->pickup_direction_y);
+        AddPickups(static_cast<u16>(force->pickup_count), ReleaseHearts(), 0, 0, &pickup_position, &pickup_direction,
+                   2.0f, -1, force->pickup_scatter_height, 2000000.0f, NULL, 1, 0, true);
+        force->runtime_flags |= GIZFORCE_RUNTIME_REWARD_RELEASED;
+    }
+
+    force->runtime_flags |= GIZFORCE_RUNTIME_COMPLETION_RELEASED;
+}
+
 static void GizForces_Update(void *world_ptr, void *data, float) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     GIZFORCESYS_s *force_sys = static_cast<GIZFORCESYS_s *>(data);
@@ -270,19 +322,23 @@ static void GizForces_Update(void *world_ptr, void *data, float) {
             if (GizForce_AnimComplete(force) != 0) {
                 if ((force->config_flags & GIZFORCE_CONFIG_WAIT_FOR_FORCE_RANGE) != 0 || force->field_0x48 > 0.0f) {
                     force->field_0x48 -= FRAMETIME;
-                    if (force->field_0x48 < 0.0f) {
+                    if (force->field_0x48 <= 0.0f) {
                         force->field_0x48 = 0.0f;
+                        if ((force->config_flags & GIZFORCE_CONFIG_ALONG_SOCKET) != 0 &&
+                            (force->runtime_flags & GIZFORCE_RUNTIME_ALONG_SOCKET_HIDDEN) != 0) {
+                            GameAnimSet_SetVisibility(force->anim_set, 1);
+                            force->runtime_flags &= static_cast<u8>(~GIZFORCE_RUNTIME_ALONG_SOCKET_HIDDEN);
+                        }
+                        GizForce_PlayBackwards(force);
+                        force->runtime_flags &= static_cast<u8>(~GIZFORCE_RUNTIME_FORCE_RANGE_COMPLETE);
                     }
-                }
-                if (force->field_0x48 == 0.0f) {
-                    GizForce_PlayBackwards(force);
-                    force->runtime_flags &= static_cast<u8>(~GIZFORCE_RUNTIME_FORCE_RANGE_COMPLETE);
                 }
             } else {
                 GizForce_PlayBackwards(force);
             }
         }
 
+        GizForce_ReleaseCompletion(world, force);
         GizForce_UpdateGroupState(force);
         force->radius = 1.0f;
         force->position = force->file_position;

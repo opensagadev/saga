@@ -241,8 +241,7 @@ struct STATUSCOLLECT_s {
 DECOMP_ASSERT(sizeof(STATUSCOLLECT_s) == 4, "STATUSCOLLECT size");
 
 struct STATUSCOLLECTLIST_s {
-    STATUSCOLLECT_s *ptr;
-    u8 pad_0x04[0x0c];
+    i16 ids[8];
 };
 DECOMP_ASSERT(sizeof(STATUSCOLLECTLIST_s) == 0x10, "STATUSCOLLECTLIST size");
 

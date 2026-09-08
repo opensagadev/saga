@@ -29,6 +29,11 @@
 #include "nu2api/nusound/nusound.h"
 
 #include <string.h>
+#include <stdio.h>
+#include "legoapi/world/mission.h"
+#include "legoapi/world/levels/episode.h"
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nufloat.h"
 
 extern i32 ACTIVECUTCOUNT;
 extern "C" i32 CUTDRAWWORLD;
@@ -1459,31 +1464,276 @@ CUTINFO *NewCutScene(CUTINFO *cut, CUTSYS *system, char *name, i32) {
     return cut;
 }
 
-void Exit_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, float) {
+void NextStatusStage(STATUSPACKET_s *);
+void FinishStatusPacket(i32);
+f32 StatusIconsOnOff(f32);
+extern f32 icon_y;
+
+void Exit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
+    if (stage->field_0x14 >= 0) {
+        stage->field_0x18 += elapsed;
+    }
+    if (stage->field_0x18 >= stage->field_0x1c) {
+        NextStatusStage(packet);
+        if (packet->current_gold_brick < packet->stage_count - 1) {
+            stage->field_0x1c = 0.1f;
+        } else {
+            FinishStatusPacket(packet->prompt_choice);
+        }
+    }
 }
 
-void Fade_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, float) {
+void Fade_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
+    if (stage->field_0x14 == 0) {
+        stage->field_0x18 = 0.0f;
+        stage->field_0x1c = 0.6f;
+        stage->field_0x14 = 1;
+    } else if (stage->field_0x14 == 1) {
+        stage->field_0x18 += elapsed;
+        if (stage->field_0x18 >= stage->field_0x1c) {
+            FinishStatusPacket(packet->prompt_choice);
+        }
+        f32 ratio = 0.0f;
+        if (stage->field_0x1c != 0.0f && stage->field_0x18 != 0.0f) {
+            ratio = stage->field_0x18 / stage->field_0x1c;
+        }
+        icon_y = -StatusIconsOnOff(ratio);
+    }
 }
 
 void RelocateCutScene(NUGCUTSCENE_s *, variptr_u *) {
 }
 
-void GoldBrick_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32) {
+i32 STATUS_R = 255;
+i32 STATUS_G = 191;
+i32 STATUS_B;
+extern f32 iconalphaoverride;
+extern i16 tTRUEJEDI, tSTORY, tFREEPLAY;
+extern i16 tLEVELCOMPLETE, tFREEPLAYUNLOCKED, tSUPERSTORYCOMPLETE, tBONUSUNLOCKED;
+extern i16 tEPISODEVUNLOCKED, tEPISODEVIUNLOCKED, tCHALLENGECOMPLETE, tOUTOFTIME;
+extern i16 tYOUDIDNTCOLLECTALL10CANISTERS, tMISSIONCOMPLETE, tSTORYCLIPSUNLOCKED;
+extern i16 tEPISODEICOMPLETE, tEPISODEIICOMPLETE, tEPISODEIIICOMPLETE;
+extern i16 tEPISODEIVCOMPLETE, tEPISODEVCOMPLETE, tEPISODEVICOMPLETE;
+f32 getFinishedStatusAlpha(STATUSPACKET_s *);
+bool FreePlayUnlocked();
+void IncreaseScore(u32 *, u64, i32);
+void NewStatusRumbleBuzz(i32, f32, f32, i32);
+void Text_MakeScore(u32, char *);
+void AddFancyMessage(char *, f32, f32, f32, f32, i32, i32);
+void *AddGameMessage(char *, nuvec_s *, f32, nuvec_s *, f32, u8, u8, u8, u32, f32);
+extern "C" void PlaySfx(char *, nuvec_s *);
+extern "C" void Text3D(char *, f32, f32, f32, f32, f32, f32, u32, u8, u8, u8);
+i32 DrawPanel3DObjectNoAlpha(f32, f32, f32, f32, f32, f32, u16, u16, u16, nuhspecial_s *, i32);
+
+void GoldBrick_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
+    if (active == 0) return;
+    if (stage->field_0x14 > 0) {
+        const f32 time = stage->field_0x18;
+        if (time >= 1.0f && time < stage->field_0x1c - 1.0f) {
+            f32 blend = 1.0f;
+            i32 count = packet->previous_gold_bricks;
+            if (time >= 2.0f) {
+                const f32 end = stage->field_0x1c - 2.0f;
+                if (time >= end) blend = NuTrigTable[(static_cast<i32>((1.0f - (time - end)) * 16384.0f) >> 1) & 0x7fff];
+                count = Game.field_0x7c26[0];
+                if (time < (Game.field_0x7c26[0] - packet->previous_gold_bricks - 1) * 2.5f + 2.0f) {
+                    count = (packet->previous_gold_bricks + 1) + (time - 2.0f) / 2.5f;
+                }
+            } else blend = NuTrigTable[(static_cast<i32>((time - 1.0f) * 16384.0f) >> 1) & 0x7fff];
+            char text[268];
+            sprintf(text, "%i/%i", count, GOLDBRICKPOINTS);
+            SmartTextEx(text, 0.0f, blend * -0.99999994f + 1.3f, 1.0f, 1.5f, 1.5f, 1.5f, 0, 255, 255, 255, 1.7f, 1, NULL, 0, static_cast<i32>(blend * 128.0f));
+            const u32 angle = NuFmod(GlobalTimer.time_elapsed, 4.0f) * 0.25f * 65536.0f;
+            DrawPanel3DObjectNoAlpha(0.0f, blend * 0.99999994f - 1.3f, 1.0f, 1.0f, 1.0f, 1.0f,
+                static_cast<i32>(NuTrigTable[angle & 0x7fff] * 1820.0f), angle, 0, reinterpret_cast<nuhspecial_s *>(&WORLD->lev_objs[0xd3]), 2);
+            if (Game.field_0x7c26[0] > 60) CoinTotal_Draw(*packet->score, (STATSPOSY - STATSPOS2Y) * blend + STATSPOS2Y, CoinTotalScale, 1, 1.0f, 255, 191, 0);
+        }
+    }
+    if ((stage->field_0x14 == 0 || stage->field_0x18 < 1.0f) && packet->mission_state != 0 && packet->previous_gold_bricks < Game.field_0x7c26[0]) iconalphaoverride = 0.0f;
 }
 
-void GoldBrick_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *) {
+void GoldBrick_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet) {
+    if (Game.field_0x7c26[0] < 61) NextStatusStage(packet);
 }
 
-void GoldBrick_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, float) {
+void GoldBrick_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
+    const i32 count = Game.field_0x7c26[0] - packet->previous_gold_bricks;
+    if (stage->field_0x14 == 0) {
+        stage->field_0x14 = 1;
+        stage->field_0x18 = 0.0f;
+        stage->field_0x1c = (count - 1) * 2.5f + 2.0f + 3.0f + 1.0f + 1.0f;
+    } else if (stage->field_0x14 == 1) {
+        const f32 previous = stage->field_0x18;
+        stage->field_0x18 += elapsed;
+        if (stage->field_0x18 >= stage->field_0x1c) NextStatusStage(packet);
+        else for (i32 i = 0; i < count; ++i) {
+            const f32 at = i * 2.5f + 2.0f;
+            if (previous < at && stage->field_0x18 >= at) {
+                PlaySfx(const_cast<char *>("TrueJedi_100pc"), NULL);
+                NewStatusRumbleBuzz(-1, 0.6f, 0.0f, 0);
+                const i32 points = packet->previous_gold_bricks + i + 1;
+                char text[252];
+                sprintf(text, "%i/%i", points, GOLDBRICKPOINTS);
+                AddFancyMessage(text, 0.0f, 0.3f, 0.75f, 1.25f, 1, 1);
+                nuvec_s position = {0.0f, 0.0375f, 1.0f};
+                const i16 id = reinterpret_cast<i16 *>(packet->field_0x12c)[i];
+                char *label = TTab[id];
+                if (id == tTRUEJEDI) {
+                    NuStrCpy(text, label);
+                    if (BOTHTRUEJEDIGOLDBRICKS != 0) {
+                        NuStrCat(text, " ");
+                        NuStrCat(text, TTab[(packet->field_0xb0 & 0x40) != 0 ? tFREEPLAY : tSTORY]);
+                    }
+                    label = text;
+                }
+                AddGameMessage(label, &position, 0.7f, &position, 0.7f, 255, 0, 127, 0x4020, 2.0f);
+                if (points > 60) {
+                    IncreaseScore(packet->score, 100000, 0);
+                    CoinTotalScale = 1.5f;
+                    PlaySfx(const_cast<char *>("Shop_BuyCheat"), NULL);
+                    Text_MakeScore(100000, text);
+                    AddFancyMessage(text, 0.0f, -STATSPOSY, 0.5f, 1.25f, 0, 0);
+                }
+            }
+        }
+    }
 }
 
-void LevelComplete_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32) {
+void LevelComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
+    if (active == 0) {
+        if (stage->field_0x12 != 0) {
+            const f32 alpha = getFinishedStatusAlpha(packet);
+            if ((stage->type == 26 && packet->mission_state == 2) || (stage->type == 23 && packet->challenge_state == 2)) {
+                CoinTotal_Draw(*packet->score, STATSPOSY, CoinTotalScale, 1, alpha, 255, 191, 0);
+            }
+        }
+        return;
+    }
+    char text[252];
+    if (stage->field_0x14 > 0) {
+        f32 alpha = 1.0f;
+        if (stage->field_0x18 < 0.5f) alpha = stage->field_0x18 + stage->field_0x18;
+        else if (stage->field_0x18 >= 3.5f) alpha = 1.0f - ((stage->field_0x18 - 3.5f) + (stage->field_0x18 - 3.5f));
+        if (alpha > 0.0f) {
+            const i32 opacity = alpha * 128.0f;
+            i16 first = -1, second = -1;
+            f32 y = 0.1f, scale = 0.7f;
+            i32 red = STATUS_R, green = STATUS_G, blue = STATUS_B;
+            switch (stage->type) {
+                case 14:
+                    strcpy(text, TTab[EDataList[packet->episode_id].text_id]);
+                    SmartTextEx(text, 0.0f, 0.1f, 1.0f, 0.525f, 0.525f, 0.525f, 0, red, green, blue, 1.7f, 1, NULL, 0, opacity);
+                    second = tSUPERSTORYCOMPLETE;
+                    break;
+                case 13:
+                    first = tLEVELCOMPLETE;
+                    if ((PODRACE_ADATA != NULL && packet->area == PODRACE_ADATA) || (BONUS_GUNSHIP_ADATA != NULL && packet->area == BONUS_GUNSHIP_ADATA) || !FreePlayUnlocked()) y = 0.0f;
+                    else second = tFREEPLAYUNLOCKED;
+                    break;
+                case 8: first = tEPISODEVUNLOCKED; second = tEPISODEVIUNLOCKED; break;
+                case 28: first = tBONUSUNLOCKED; y = 0.0f; break;
+                case 23:
+                    y = 0.0f;
+                    if (packet->challenge_state == 2) { first = tCHALLENGECOMPLETE; red = green = blue = 255; }
+                    else first = packet->challenge_state == 3 ? tOUTOFTIME : tYOUDIDNTCOLLECTALL10CANISTERS;
+                    break;
+                case 26:
+                    y = 0.0f;
+                    if (packet->mission_state == 2) { first = tMISSIONCOMPLETE; red = green = blue = 255; }
+                    else first = tOUTOFTIME;
+                    break;
+                case 29: first = tEPISODEICOMPLETE; second = tSTORYCLIPSUNLOCKED; break;
+                case 30: first = tEPISODEIICOMPLETE; second = tSTORYCLIPSUNLOCKED; break;
+                case 31: first = tEPISODEIIICOMPLETE; second = tSTORYCLIPSUNLOCKED; break;
+                case 32: first = tEPISODEIVCOMPLETE; second = tSTORYCLIPSUNLOCKED; break;
+                case 33: first = tEPISODEVCOMPLETE; second = tSTORYCLIPSUNLOCKED; break;
+                default: first = tEPISODEVICOMPLETE; second = tSTORYCLIPSUNLOCKED; break;
+            }
+            if (first != -1) SmartTextEx(TTab[first], 0.0f, y, 1.0f, scale, scale, scale, 0, red, green, blue, 1.7f, 1, NULL, 0, opacity);
+            if (second != -1) SmartTextEx(TTab[second], 0.0f, -0.1f, 1.0f, 0.7f, 0.7f, 0.7f, 0, STATUS_R, STATUS_G, STATUS_B, 1.7f, 1, NULL, 0, opacity);
+        }
+    }
+    if (stage->type != 23 && stage->type != 26) return;
+    if (stage->field_0x14 == 0 || stage->field_0x18 < stage->field_0x1c - 0.5f) iconalphaoverride = 0.0f;
+    else iconalphaoverride = (stage->field_0x18 - (stage->field_0x1c - 0.5f)) * 2.0f;
+    if (stage->type == 26) {
+        if (packet->mission_state != 2) return;
+        if (packet->previous_gold_bricks < Game.field_0x7c26[0]) iconalphaoverride = 0.0f;
+    } else if (packet->challenge_state != 2) return;
+    f32 progress, slide;
+    if (stage->field_0x18 < 0.75f) { progress = 0.0f; slide = stage->field_0x18 / 0.7f; }
+    else if (stage->field_0x18 >= stage->field_0x1c - 0.75f) {
+        progress = 1.0f;
+        slide = 1.0f - (stage->field_0x18 - (stage->field_0x1c - 0.75f)) / 0.75f;
+    } else {
+        progress = (stage->field_0x18 - 0.75f) / (stage->field_0x1c - 0.75f - 0.75f);
+        slide = 1.0f;
+    }
+    const f32 coin_slide = stage->field_0x18 < 0.75f ? slide : 1.0f;
+    u32 score = packet->original_score;
+    IncreaseScore(&score, static_cast<i64>(static_cast<i32>(static_cast<f32>(packet->reward_score - score) * progress)), 0);
+    CoinTotal_Draw(score, (STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(coin_slide * 16384.0f) >> 1) & 0x7fff] + STATSPOS2Y, CoinTotalScale, 1, 1.0f, 255, 191, 0);
+    f32 remaining = (stage->type == 26 ? static_cast<u16>(packet->mission->time) : packet->area->challenge_trial_time) - packet->elapsed_time;
+    if (remaining < 0.0f) remaining = 0.0f;
+    Text_MakeTime((1.0f - progress) * remaining, 0, 1, 1, text);
+    Text3D(text, 0.0f, -((STATSPOSY - STATSPOS2Y) * NuTrigTable[(static_cast<i32>(slide * 16384.0f) >> 1) & 0x7fff] + STATSPOS2Y), 1.0f, 0.6f, 0.6f, 0.6f, 0, 255, 191, 0);
 }
 
-void LevelComplete_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *) {
+void LevelComplete_LSW_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet) {
+    if ((stage->type == 26 && packet->mission_state == 2) ||
+        (stage->type == 23 && packet->challenge_state == 2)) {
+        *packet->score = packet->reward_score;
+    }
+    NextStatusStage(packet);
 }
 
-void LevelComplete_LSW_Update(STATUS_STAGE_s *, STATUSPACKET_s *, float) {
+void SetDrawGoldBrick(STATUSPACKET_s *, i32);
+void NewStatusRumbleBuzz(i32, f32, f32, i32);
+extern "C" void PlaySfx(char *, nuvec_s *);
+
+void LevelComplete_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
+    if (stage->field_0x14 == 0) {
+        stage->field_0x18 = 0.0f;
+        stage->field_0x1c = 4.0f;
+        stage->field_0x14 = 1;
+        return;
+    }
+    if (stage->field_0x14 != 1) {
+        return;
+    }
+    SetDrawGoldBrick(packet, packet->current_gold_brick);
+    const f32 previous = stage->field_0x18;
+    stage->field_0x18 += elapsed;
+    if (stage->field_0x18 >= stage->field_0x1c) {
+        if ((stage->type == 26 && packet->mission_state == 2) ||
+            (stage->type == 23 && packet->challenge_state == 2)) {
+            *packet->score = packet->reward_score;
+        }
+        NextStatusStage(packet);
+        return;
+    }
+    if (previous < 0.5f && stage->field_0x18 >= 0.5f) {
+        if ((stage->type == 23 && packet->challenge_state == 3) ||
+            (stage->type == 26 && packet->mission_state == 3)) {
+            GameAudio_PlaySfx(0x32, NULL, 0, 0);
+        } else {
+            PlaySfx(const_cast<char *>("StatusAward"), NULL);
+        }
+        NewStatusRumbleBuzz(-1, 0.6f, 0.0f, 0);
+        return;
+    }
+    if ((stage->type != 26 || packet->mission_state != 2) &&
+        (stage->type != 23 || packet->challenge_state != 2)) {
+        return;
+    }
+    const f32 reward_end = stage->field_0x1c - 0.75f;
+    if (previous < reward_end && stage->field_0x18 >= reward_end) {
+        CoinTotalScale = 1.5f;
+        NewStatusRumbleBuzz(-1, 0.0f, 0.1f, 0);
+        PlaySfx(const_cast<char *>("Shop_BuyCheat"), NULL);
+    } else if (stage->field_0x18 >= 0.75f && stage->field_0x18 < reward_end) {
+        PlaySfx(const_cast<char *>("PickupCoin"), NULL);
+    }
 }
 
 static __used__ void Titles_Draw(WORLDINFO_s *) {

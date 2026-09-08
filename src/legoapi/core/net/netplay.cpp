@@ -3,6 +3,13 @@
 #include "legoapi/core/input/qrand.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/nuvec.h"
+#include "globals.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/world/world.h"
+#include "legoapi/world/area.h"
+#include "legoapi/world/level.h"
+#include "legoapi/world/mission.h"
+#include "nu2api/nusound/nusound.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -88,10 +95,76 @@ void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *) {
 void FinishLoop_Network() {
 }
 
-void FinishStatusPacket(i32) {
+extern STATUSPACKET_s StatusPacket;
+extern FadeSystem FadeSys;
+extern i32 reset_area;
+extern i32 grab_screen_image;
+extern i32 hub_from_mission;
+void NeedScreenGrab(i32);
+void GrabStillScreen();
+void InitChallenge(i32);
+void InitMission(MISSIONSYS_s *, i32);
+
+void FinishStatusPacket(i32 choice) {
+    RememberPlayerIDs(1, static_cast<i16>(StatusPacket.player0_model), static_cast<i16>(StatusPacket.player1_model));
+    if (StatusPacket.finish_callback(WORLD, &StatusPacket, choice) != 0) {
+        return;
+    }
+    NewLData = HUB_LDATA;
+    if (choice == 0) {
+        if ((StatusPacket.mode_flags & 1) != 0 || StatusPacket.challenge_state != 0 || StatusPacket.mission_state != 0) {
+            NewLData = Area_FindNextPlayLevel(ADataList[StatusPacket.area->index].levels[0]);
+            FADETYPE fade = {FADE_TYPE_STILL_WIPE};
+            ResetBits = 0xffffffbf;
+            reset_area = 1;
+            FadeSys.SetFade(fade, 0);
+            NeedScreenGrab(1);
+            GrabStillScreen();
+            if (StatusPacket.challenge_state != 0) {
+                InitChallenge(StatusPacket.area->index);
+            }
+            if (StatusPacket.mission_state != 0) {
+                InitMission(MissionSys, static_cast<i8>(MissionSys->mission->count));
+                NewLData = &LDataList[MissionSys->mission->level];
+            }
+            goto destination_selected;
+        }
+        if (StatusPacket.next_area != -1) {
+            NewLData = &LDataList[ADataList[StatusPacket.next_area].levels[0]];
+            if ((ADataList[StatusPacket.next_area].flags & 2) == 0) {
+                loadareacharacters_no_backdrop_reset = 1;
+                if ((StatusPacket.mode_flags & 4) != 0) {
+                    finishloop_backdroponly = 1;
+                }
+            } else {
+                grab_screen_image = 1;
+            }
+            goto destination_selected;
+        }
+    }
+    if ((StatusPacket.mode_flags & 4) != 0 ||
+        ((StatusPacket.area->flags & 4) != 0 && (StatusPacket.field_0xb0 & 0x40) == 0)) {
+        NewLData = CREDITS_LDATA;
+    }
+destination_selected:
+    if ((StatusPacket.mode_flags & 8) != 0) {
+        NewLData = HUB_LDATA;
+    }
+    if (NewLData->area_index != -1 && (ADataList[NewLData->area_index].flags & 0x40) != 0 &&
+        StatusPacket.mission_state != 0 && MissionSys->mission != NULL) {
+        hub_from_mission = static_cast<i8>(MissionSys->mission->count);
+    }
+    OldBonusScore[0] = BonusScore[0];
+    OldBonusScore[1] = BonusScore[1];
+    if (NewLData == HUB_LDATA) {
+        OldBonusScore[0] = 0;
+        OldBonusScore[1] = 0;
+    }
+    NuSound3StopRumble();
 }
 
-void FinishStatusPacket_LSW(WORLDINFO_s *, STATUSPACKET_s *, i32) {
+i32 FinishStatusPacket_LSW(WORLDINFO_s *, STATUSPACKET_s *, i32) {
+    return 0;
 }
 
 void setObjInNetWaitContext(GameObject_s *, i32) {
