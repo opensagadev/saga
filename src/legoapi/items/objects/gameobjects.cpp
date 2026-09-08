@@ -485,10 +485,11 @@ static f32 Condition_IsVisible(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, cha
 }
 
 static f32 Condition_OpponentContext(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    f32 result = 0.0f;
     if (packet != NULL && packet->opponent_object != NULL) {
-        return packet->opponent_object->objptr->character_context == reinterpret_cast<intptr_t>(argument) ? 1.0f : 0.0f;
+        if (packet->opponent_object->objptr->character_context == reinterpret_cast<intptr_t>(argument)) result = 1.0f;
     }
-    return 0.0f;
+    return result;
 }
 
 static void *Condition_InContextInit(AISYS_s *, char *name, AISCRIPT_s *) {
