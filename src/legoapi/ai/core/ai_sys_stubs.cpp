@@ -12,6 +12,7 @@
 #include "nu2api/numath/nurand.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/numath/nuplane.h"
 
 #include <stdio.h>
 #include <float.h>
@@ -1389,10 +1390,138 @@ extern "C" {
     void AISysGetPathColourCount(void) {
     }
 
-    void AISysGetPathPos(void) {
+    void AISysGetPathPos(AISYS *system, NUVEC *position, AIPATHINFO *info, AIPATH *path, i32 checks) {
+        AISysGetPathPosEx(system, position, info, path, checks, 0, NULL);
     }
 
-    void AISysGetPathPosEx(void) {
+    void AISysGetPathPosEx(AISYS *system, NUVEC *position, AIPATHINFO *info, AIPATH *path, i32 checks,
+                          i32 search_all_paths, f32 *nearest_distance_squared) {
+        info->flags &= static_cast<u8>(~AIPATHINFO_FLAG_ON_PATH);
+        if (system == NULL || system->path_sys == NULL || system->path_sys->path_count == 0) {
+            return;
+        }
+
+        if (search_all_paths != 0) {
+            path = info->path;
+            if (path == NULL) {
+                path = system->path_sys->paths[0];
+                info->connection = NULL;
+                info->path = path;
+                info->next_check = 0;
+            }
+        } else {
+            if (path == NULL) {
+                path = system->path_sys->active_path;
+            }
+            if (info->path != path) {
+                info->connection = NULL;
+                info->path = path;
+                info->next_check = 0;
+            }
+        }
+        AISysResetPathSearchConnectionChecks(path);
+
+        AIPATHCNX *current = info->connection;
+        if (current != NULL) {
+            if (WithinConnection(system, position, path, current, 1, NULL, 0xff, 0xff, info, 0.0f, 1)) {
+                return;
+            }
+            AIPATHNODE *node = &info->path->nodes[current->node_indices[info->direction]];
+            for (i32 index = 0; index < node->connection_count; ++index) {
+                AIPATHCNX *candidate = node->connections[index];
+                if (candidate != current &&
+                    WithinConnection(system, position, path, candidate, 1, NULL, 0xff, 0xff, info, 0.0f, 1)) {
+                    return;
+                }
+            }
+            node = &info->path->nodes[current->node_indices[info->direction == 0]];
+            for (i32 index = 0; index < node->connection_count; ++index) {
+                AIPATHCNX *candidate = node->connections[index];
+                if (candidate != current &&
+                    WithinConnection(system, position, path, candidate, 1, NULL, 0xff, 0xff, info, 0.0f, 1)) {
+                    return;
+                }
+            }
+        }
+
+        if (search_all_paths == 0) {
+            i32 remaining = info->path->node_count < checks ? info->path->node_count : checks;
+            while (remaining != 0) {
+                AIPATHNODE *node = &info->path->nodes[info->next_check];
+                for (i32 index = 0; index < node->connection_count; ++index) {
+                    if (WithinConnection(system, position, path, node->connections[index], 1, NULL,
+                                         0xff, 0xff, info, 0.0f, 1)) {
+                        return;
+                    }
+                }
+                info->next_check = (info->next_check + 1) % info->path->node_count;
+                --remaining;
+            }
+            return;
+        }
+
+        AIPATH *saved_path = info->path;
+        AIPATHCNX *saved_connection = info->connection;
+        u8 saved_direction = info->direction;
+        if (info->path_index == 0xff) {
+            info->path_index = saved_path->index;
+        }
+        if (info->path_index >= system->path_sys->path_count) {
+            info->path_index = 0;
+        }
+        info->path = system->path_sys->paths[info->path_index];
+        if (info->next_check >= info->path->node_count) {
+            info->next_check = 0;
+        }
+        AISysResetPathSearchConnectionChecks(info->path);
+        u8 start_path = info->path_index;
+        u16 start_node = info->next_check;
+        i32 inside_extents = 0;
+        while (checks != 0) {
+            if (inside_extents == 0) {
+                inside_extents = AIPathCheckExtents(info->path, position);
+            }
+            if (inside_extents != 0) {
+                AIPATHNODE *node = &info->path->nodes[info->next_check];
+                for (i32 index = 0; index < node->connection_count; ++index) {
+                    AIPATHCNX *candidate = node->connections[index];
+                    if (WithinConnection(system, position, info->path, candidate, 1, NULL,
+                                         0xff, 0xff, info, 0.0f, 1)) {
+                        return;
+                    }
+                    if (nearest_distance_squared != NULL) {
+                        AIPATHCNX *connection = node->connections[index];
+                        f32 distance = NuLineToPointDistSqrEx(
+                            &info->path->nodes[connection->node_indices[0]].position,
+                            &info->path->nodes[connection->node_indices[1]].position, position, NULL);
+                        if (distance < *nearest_distance_squared) {
+                            *nearest_distance_squared = distance;
+                            saved_connection = candidate;
+                            saved_path = info->path;
+                        }
+                    }
+                }
+                ++info->next_check;
+            }
+            if (inside_extents == 0 || info->next_check >= info->path->node_count) {
+                info->next_check = 0;
+                ++info->path_index;
+                if (info->path_index >= system->path_sys->path_count) {
+                    info->path_index = 0;
+                }
+                info->path = system->path_sys->paths[info->path_index];
+                info->connection = NULL;
+                AISysResetPathSearchConnectionChecks(info->path);
+                inside_extents = 0;
+            }
+            --checks;
+            if (info->path_index == start_path && info->next_check == start_node) {
+                break;
+            }
+        }
+        info->path = saved_path;
+        info->connection = saved_connection;
+        info->direction = saved_direction;
     }
 
     void *AISysLoadEx(void *buffer, void *buffer_end, i32 storage_size, void *scene, char *directory, char *name,
