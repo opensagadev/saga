@@ -385,30 +385,25 @@ bool NuVoiceAndroid::UpdateState() {
 }
 
 bool NuVoiceAndroid::UpdateQueue() {
-    if (this->queue_interface == NULL || *(void **)this->queue_interface == NULL) {
-        return true;
-    }
+    if (this->queue_interface != NULL && *(void **)this->queue_interface != NULL) {
+        SLAndroidSimpleBufferQueueState_ state;
+        u32 error = SL_SLOT(this->queue_interface, QueueGetStateFn, 8)(this->queue_interface, &state);
+        if (NuSoundAndroid::ReportErrorCode(error, "Get queue state") != 0) {
+            return false;
+        }
 
-    SLAndroidSimpleBufferQueueState_ state;
-    u32 error = SL_SLOT(this->queue_interface, QueueGetStateFn, 8)(this->queue_interface, &state);
-    if (NuSoundAndroid::ReportErrorCode(error, "Get queue state") != 0) {
-        return false;
-    }
-
-    if (this->sound_source->feed_type == NuSoundSource::FeedType::STREAMING && !this->source_flags.last_buffer_queued) {
-        // Starvation watchdog: remember whether the queue ever ran ahead, and
-        // request a refill as soon as it runs low.
-        // libTTapp.so 0x32c37e..0x32c3ad reads and writes voice+0x17e,
-        // NuVoiceAndroid::hardware_flags. Using NuSoundVoice::flags (+0x31)
-        // left bit 4 invisible to UpdateHardwareVoice and delayed every refill
-        // until HEADATEND.
-        if (!this->hardware_state.queue_ran_ahead) {
-            if (state.count > 1) {
-                this->hardware_state.queue_ran_ahead = 1;
+        if (this->sound_source->feed_type == NuSoundSource::FeedType::STREAMING &&
+            !this->source_flags.last_buffer_queued) {
+            // Original 0x32c37e..0x32c3ad updates the hardware flags at +0x17e.
+            // Request a refill when the queue drops below two buffered entries.
+            if (!this->hardware_state.queue_ran_ahead) {
+                if (state.count > 1) {
+                    this->hardware_state.queue_ran_ahead = 1;
+                }
+            } else if (state.count < 2) {
+                this->hardware_state.request_buffer = 1;
+                this->hardware_state.queue_ran_ahead = 0;
             }
-        } else if (state.count < 2) {
-            this->hardware_state.queue_ran_ahead = 0;
-            this->hardware_state.request_buffer = 1;
         }
     }
     return true;
@@ -445,7 +440,8 @@ void NuVoiceAndroid::UpdateHardwareVoice(f32 frametime) {
     }
 
     if ((this->hardware_flags & 4) != 0) {
-        this->sound_source->RequestBuffer((this->flags2 >> 3) & 1, this);
+        NuSoundSource *source = this->sound_source;
+        source->RequestBuffer((this->flags2 >> 3) & 1, this);
         this->hardware_flags &= 0xfb;
     }
 
