@@ -37,6 +37,7 @@ extern void Customiser_Reset(CUSTOMISER *);
 extern void Customiser_Draw3D(CUSTOMISER *);
 extern void Customiser_Update(CUSTOMISER *, WORLDINFO_s *);
 extern void Store_RestorePurchases();
+void Hub_ResetPanel();
 extern void Store_HubDrawFloorTargets(WORLDINFO_s *);
 extern void Store_HubInitFloorTargets(WORLDINFO_s *);
 extern void InitShop(WORLDINFO_s *);
