@@ -6953,7 +6953,34 @@ extern "C" void AddLocalAIMessage(AISCRIPTPROCESS *processor, AILOCALMESSAGE_s *
     }
 }
 
+extern "C" AIPATHCNX *AIPathFindPathCnxFromIX(AISYS *system, AIPATH *path, u8 from_index, u8 to_index) {
+    if (path == NULL) {
+        if (system == NULL || system->path_sys == NULL || system->path_sys->path_count == 0) {
+            return NULL;
+        }
+        path = system->path_sys->active_path;
+    }
+    if (path != NULL && from_index < path->node_count) {
+        AIPATHNODE *node = &path->nodes[from_index];
+        if (from_index != to_index) {
+            for (i32 index = 0; index < node->connection_count; ++index) {
+                AIPATHCNX *connection = node->connections[index];
+                if (connection->node_indices[0] == to_index || connection->node_indices[1] == to_index) {
+                    return connection;
+                }
+            }
+        }
+    }
+    return NULL;
+}
+
 AIANTINODE dynamic_antinodes[64] = {};
+static i16 disable_cylinder_check;
+
+extern "C" void AISysSetPathCylinderCheck(i32 enabled) {
+    disable_cylinder_check = enabled == 0;
+}
+
 extern "C" f32 default_path_heighttol;
 
 extern "C" void AISetPathHeightTol(f32 tolerance) {

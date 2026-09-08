@@ -681,8 +681,6 @@ extern "C" {
         return NULL;
     }
 
-    void AIPathFindPathCnxFromIX(void) {
-    }
 
     f32 AIPathNodeDistanceToPathNode(AIPATH *path, i32 start_node, i32 destination_node, i32 route,
                                      u32 excluded_route_mask) {
@@ -1908,8 +1906,6 @@ extern "C" {
         return 1;
     }
 
-    void AISysSetPathCylinderCheck(void) {
-    }
 
     void AISysUpdateCharacterPathPos(AISYS *system, APIOBJECT *object, AIPACKET *packet, i32 checks, f32 elapsed) {
         u8 movement_source_flags = packet->field_0x1e7;
