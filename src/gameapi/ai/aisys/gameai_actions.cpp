@@ -1046,9 +1046,6 @@ static __used__ f32 Condition_OnSameObjectAsPlayer(AISYS_s *, AISCRIPTPROCESS_s 
     return 0;
 }
 
-static __used__ f32 Condition_OpponentPathPosRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
 
 
 static __used__ f32 Condition_PlayerDeflectingPart(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {

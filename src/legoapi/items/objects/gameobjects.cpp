@@ -576,6 +576,15 @@ static f32 Condition_CollidingWithOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPAC
     return 0.0f;
 }
 
+static f32 Condition_OpponentPathPosRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    if (packet != NULL && packet->owner != NULL && packet->opponent_object != NULL &&
+        packet->opponent_object->ai != NULL) {
+        NUVEC difference;
+        return NuVecDist(&packet->owner->apiobj.position, &packet->opponent_object->ai->last_path_position, &difference);
+    }
+    return 1.0e9f;
+}
+
 static f32 Condition_OpponentToPlayerRange(AISYS_s *system, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
     if (packet != NULL && packet->owner != NULL && packet->opponent_object != NULL &&
         system != NULL && system->player_1 != NULL) {
@@ -1249,7 +1258,7 @@ extern "C" {
         {"NearestPartyRange", NULL, NULL},
         {"NearestPartyXZRange", NULL, NULL},
         {"OpponentToPlayerRange", Condition_OpponentToPlayerRange, NULL},
-        {"OpponentPathPosRange", NULL, NULL},
+        {"OpponentPathPosRange", Condition_OpponentPathPosRange, NULL},
         {"GizmoOutput0", NULL, NULL},
         {"GizmoOutput1", NULL, NULL},
         {"GizmoOutput2", NULL, NULL},
