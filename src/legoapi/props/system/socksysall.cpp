@@ -633,7 +633,39 @@ extern "C" {
         SetSockBitValue(sock, index);
     }
 
-    void SetSockPostion(void) {
+    void SetSockPostion(SOCKSYS *system, SOCKPOSITION *position, i32 index, i32 segment, f32 ratio) {
+        position->location.sock = -1;
+        if (system == NULL || index < 0 || index > 63)
+            return;
+        SOCK *sock = &system->sock[index];
+        i32 length;
+        if (sock->unknown_33 != 0) {
+            length = sock->length + 1;
+            if (segment > length)
+                segment = 0;
+        } else {
+            length = sock->length;
+            if (segment > length)
+                segment = length;
+        }
+        if (segment < 0)
+            segment = 0;
+        if (ratio < 0.0f)
+            ratio = 0.0f;
+        else if (ratio > 1.0f)
+            ratio = 1.0f;
+        position->location.sock = static_cast<i8>(index);
+        position->location.segment = static_cast<i16>(segment);
+        position->ratio = ratio;
+        position->next_segment = static_cast<i16>(segment + 1);
+        if (position->next_segment == length && sock->unknown_33 != 0)
+            position->next_segment = 0;
+        position->candidate_count = 1;
+        position->flags = 0;
+        position->candidate_mask = 1u << (index & 31);
+        FillSockPosition(system, position);
+        position->camera_position = temp_sockcampos;
+        SockSysPointAlongMID(sock, position, &position->midpoint);
     }
 
     bool SockBitSet(SOCK *sock, i32 index) {
