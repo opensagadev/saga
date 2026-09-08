@@ -541,6 +541,16 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+static f32 Condition_BeenTakenOver(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    GameObject *object = static_cast<GameObject *>(argument);
+    if (object == NULL && packet->owner != NULL) object = packet->owner->apiobj.objptr;
+    return object != NULL && object->field_0xcc0 != NULL && object->character_context == 0x3b ? 1.0f : 0.0f;
+}
+
+static void *Condition_BeenTakenOverInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    return name != NULL && system != NULL ? GetNamedGameObject(system, name) : NULL;
+}
+
 static f32 Condition_LastAttackerRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
     if (packet != NULL && packet->owner != NULL) {
         GameObject *object = packet->owner->apiobj.objptr;
@@ -946,7 +956,7 @@ extern "C" {
         {"TakenOver", Condition_TakenOver, Condition_TakenOverInit},
         {"PlayerTakenOver", Condition_PlayerTakenOver, NULL},
         {"EitherPlayerTakenOver", Condition_EitherPlayerTakenOver, NULL},
-        {"BeenTakenOver", NULL, NULL},
+        {"BeenTakenOver", Condition_BeenTakenOver, Condition_BeenTakenOverInit},
         {"OnSpeederBike", Condition_OnSpeederBike, Condition_OnSpeederBikeInit},
         {"UnderPlayerControl", Condition_UnderPlayerControl, Condition_UnderPlayerControlInit},
         {"CharacterExists", NULL, NULL},

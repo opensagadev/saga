@@ -5649,16 +5649,6 @@ static f32 Condition_PlayerOnPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPACK
     return sys->player_1 != NULL && sys->player_1->ai->path_info.on_path ? 1.0f : 0.0f;
 }
 
-__used__ static f32 Condition_BeenTakenOver(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                            void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
-    return 0.0f;
-}
-
 __used__ static f32 Condition_BlowupBlownup(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
                                             void *void_arg) {
     (void)sys;
