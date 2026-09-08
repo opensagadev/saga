@@ -539,6 +539,10 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+static f32 Condition_InMiniCut(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *arg, void *) {
+    return MiniCutCam != 0 || (arg != NULL && ObstacleCamSpl != NULL) ? 1.0f : 0.0f;
+}
+
 static f32 Condition_BigJumpComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
     if (packet != NULL && packet->owner != NULL) {
         return packet->owner->apiobj.objptr->character_context != 0x1f ? 1.0f : 0.0f;
@@ -856,7 +860,7 @@ extern "C" {
         {"CheatProgress", Condition_CheatProgress, NULL},
         {"BigJumpComplete", Condition_BigJumpComplete, NULL},
         {"RespawnLocatorIs", NULL, NULL},
-        {"InMiniCut", NULL, NULL},
+        {"InMiniCut", Condition_InMiniCut, NULL},
         {"MaulShouldRunAway", NULL, NULL},
         {"DropBackInTimer", NULL, NULL},
         {"HelpWithTriggers", NULL, NULL},
