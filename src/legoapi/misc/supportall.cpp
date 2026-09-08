@@ -18,6 +18,45 @@
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nufile/nufile.h"
 #include "legoapi/world/world.h"
+#include "legoapi/world/mission.h"
+#include "legoapi/world/levels/levels.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "nu2api/nu3d/nuspecial.h"
+
+void Hint_SetHintFromId(i32, i32, i32);
+void MakeBaddiesForgetAboutParty(i32);
+void ResetRadios();
+void SpecialMiniKits_Reset(WORLDINFO_s *);
+void SuperCounters_FixUpGizmos(WORLDINFO_s *);
+void AITriggerSetSysReset(AITRIGGERSETSYS_s *);
+void AITriggerSysAutoSetUp(WORLDINFO_s *, AITRIGGERSETSYS_s *);
+void ResetPlayer(GameObject_s *, i32, nuvec_s *, i32);
+f32 GetVehicleAreaRememberSpeed();
+void CharPlatforms_Reset(CHARPLATFORMSYS_s *);
+void SetSoundFadeDist(WORLDINFO_s *, OPTIONSSAVE_s *);
+void GameCameraMakeMiniCut(nugspline_s *, f32, f32, f32, f32, i32, i32);
+void Cheats_TurnOff(i32);
+void CutScene_StartAudio();
+void oneAtOnce_SetNumAttackers(i32);
+void ResetGizFlow(GIZFLOW_s *, GIZFLOWPROGRESS_s *);
+void EffectOffProgress_Reset(LEVEL_PROGRESS_s *);
+extern GameObject_s *alert_obj;
+extern f32 alert_timer;
+extern f32 LevelNameMul, LevelNameTime;
+extern rtldata_s lev_rtldata;
+extern "C" {
+    extern f32 chattersfxwait, tieonsfxwait, tieoffsfxwait;
+    extern i32 party_under_cover, nbaddies_can_see_players;
+    extern i32 gone_through_door_to_new_level;
+    i32 FalconDebKey[2] = {-1, -1};
+    f32 TargetDist_Near2, TargetDist_Mid2;
+    u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
+    i32 makebaddiesforgetinresetbits;
+    i32 reset_reimport;
+    u32 arcade_placed_stud_total;
+}
 
 void CutScenes_Reset(WORLDINFO_s *);
 void ClearLevelProgress(i32, WORLDINFO_s *);
@@ -111,7 +150,7 @@ void CheckResetBits() {
     Cheats_Reset();
     if (WORLD->level_progress != NULL) {
         ResetScene(WORLD->current_gscn, reinterpret_cast<SCENEPROGRESS_s *>(WORLD->level_progress));
-        WORLD->level_progress->flags |= 1;
+        WORLD->level_progress->flags_low |= 1;
     }
 
     GizmoBlowupVisibilityOverrides(WORLD);
@@ -123,7 +162,8 @@ void CheckResetBits() {
     if (NOSOUND == 0) {
         if ((ResetBits & RESETBIT_USE_CUSTOMISER_SETUP) == 0) {
             InitGameMode();
-        } else {
+        }
+        if (NOSOUND == 0) {
             Customiser_SetUpCharacterData(CharacterCustomiser);
         }
     }
@@ -146,18 +186,65 @@ void CheckResetBits() {
     TrafficAnimSys_Reset(WORLD->trafficanim_sys);
     Pulses_Reset(WORLD->pulses_sys);
     NuSound3StopRumble();
+    ResetTimer(&GameTimer, 0);
+    ResetTimer(&GamePlayTimer, 0);
+    ResetTimer(&PauseTimer, 0);
+    ResetTimer(&JoinInTimer, 0);
+    if ((ResetBits & 0x20) && MissionSys != NULL) {
+        ResetTimer(&MissionSys->timer, 0);
+    }
+    Hint_SetHintFromId(-1, 0, 0);
     ResetRepeatSfx();
+    DEFAULT_MOVE_RANGE = 0.0f;
+    alert_obj = NULL;
+    alert_timer = 0.0f;
+    drop_back_in_timer = 0.0f;
     ResetRippleSet(ripples);
     Grabber_Reset(WORLD);
     Faders_Reset(WORLD);
 
-    const i32 progress_index = WORLD->current_level->area_level_index;
-    if ((ResetBits & RESETBIT_CLEAR_LEVEL_PROGRESS) != 0) {
-        GizmoSysClearLevelProgress(WORLD, progress_index);
+    chattersfxwait = 3.0f;
+    last_chatter_sfx = -1;
+    tieonsfxwait = tieoffsfxwait = 1.0f;
+    FalconDebKey[0] = FalconDebKey[1] = -1;
+    LevelNameMul = 0.0f;
+    LevelNameTime = LevelChange ? 3.0f : 0.0f;
+    memset(&lev_rtldata, 0, sizeof(lev_rtldata));
+    if (VehicleArea) {
+        TargetDist_Near2 = 6.25f;
+        TargetDist_Mid2 = 100.0f;
+        if (WORLD->current_level == ASTEROIDCHASED_LDATA || WORLD->current_level == DEATHSTAR2BATTLEA_LDATA) {
+            TargetDeg_Near = 0x38e3;
+            TargetDeg_Mid = 0x31c7;
+            TargetDeg_Far = 0x2aaa;
+        } else {
+            TargetDeg_Near = 0x2aaa;
+            TargetDeg_Mid = 0x1c71;
+            TargetDeg_Far = 0xe38;
+        }
+    } else {
+        TargetDist_Near2 = 0.25f;
+        TargetDist_Mid2 = 1.0f;
+        TargetDeg_Near = 0x2aaa;
+        TargetDeg_Mid = 0x2000;
+        TargetDeg_Far = 0x1555;
+    }
+    party_under_cover = 0;
+    nbaddies_can_see_players = 0;
+    if (reset_restart) {
+        LevTime[0] = LevTime[1] = 0.0f;
+        BonusCoinTotal = 0;
+    }
+    if (WORLD->api_object_sys != NULL) {
+        WORLD->api_object_sys->runtime_flags &= ~1;
     }
 
-    GameAnimSys_ReStoreProgress(WORLD->game_anim_sys, progress_index);
-    GizmoSysReset(WORLD->gizmo_sys, WORLD, progress_index);
+    if ((ResetBits & RESETBIT_CLEAR_LEVEL_PROGRESS) != 0) {
+        GizmoSysClearLevelProgress(WORLD, WORLD->current_level->area_level_index);
+    }
+
+    GameAnimSys_ReStoreProgress(WORLD->game_anim_sys, WORLD->current_level->area_level_index);
+    GizmoSysReset(WORLD->gizmo_sys, WORLD, WORLD->current_level->area_level_index);
 
     if ((ResetBits & RESETBIT_REINITIALISE_LEVEL) != 0) {
         DrawBossHitPoints(NULL);
@@ -170,20 +257,122 @@ void CheckResetBits() {
         for (i32 player_index = 0; player_index < 8; ++player_index) {
             if (Player[player_index] != NULL) {
                 InitPlayerAI(Player[player_index]);
+                char script_name[32];
+                if (FreePlay) {
+                    if (!AIScriptFind(WORLD->ai_sys, "Freeplay", 0, 1, 0))
+                        goto party_script;
+                    strcpy(script_name, "Freeplay");
+                } else if (Mission_Active(NULL)) {
+                    if (!AIScriptFind(WORLD->ai_sys, "Mission", 0, 1, 0))
+                        goto party_script;
+                    strcpy(script_name, "Mission");
+                } else {
+                    if (AIScriptFind(WORLD->ai_sys, Player[player_index]->apiobj.character_data->file, 0, 1, 0)) {
+                        sprintf(script_name, Player[player_index]->apiobj.character_data->file);
+                    } else {
+                        if (Player[player_index]->apiobj.character_data->model_flags & 8)
+                            strcpy(script_name, "Jedi");
+                        else if (Player[player_index]->apiobj.character_data->model_flags & 0x80)
+                            strcpy(script_name, "Blaster");
+                        else
+                            strcpy(script_name, "NoWeapon");
+                        if (!AIScriptFind(WORLD->ai_sys, script_name, 0, 1, 0))
+                            goto party_script;
+                    }
+                }
+                goto initialise_script;
+            party_script:
+                if (AIScriptFind(WORLD->ai_sys, "party", 0, 1, 0))
+                    strcpy(script_name, "party");
+                else
+                    strcpy(script_name, "GeneralParty");
+            initialise_script:
+                AIScriptProcessorInit(WORLD->ai_sys, &Player[player_index]->ai,
+                    &Player[player_index]->ai.script_process, NULL, script_name, NULL, 1, NULL, NULL);
+                if (!FreePlay && !Mission_Active(NULL) && Player[player_index]->field_0xcc0 == NULL) {
+                    if (AIScriptSetBaseScriptStateByName(&Player[player_index]->ai.script_process, "InActive"))
+                        Player[player_index]->apiobj.flags_high &= ~0x10;
+                }
             }
         }
     } else {
         ReStoreStatusTakeOverObjectSys(0);
     }
 
+    if (makebaddiesforgetinresetbits)
+        MakeBaddiesForgetAboutParty(0);
+    if (ResetBits & 2) {
+        for (i32 i = 0; i < 8; ++i)
+            if (Player[i]) Player[i]->field_0xe38 = 4;
+    }
+    if (ResetBits & 4) {
+        for (i32 i = 0; i < 8; ++i)
+            if (Player[i]) Player[i]->spawn_protection_timer = (Player[i]->apiobj.flags_low & 0x80) ? 2.5f : 0.0f;
+    }
+    ResetRadios();
+    SpecialMiniKits_Reset(WORLD);
+    SuperCounters_FixUpGizmos(WORLD);
+    AITriggerSetSysReset(WORLD->ai_trigger_set_sys);
+    AITriggerSysAutoSetUp(WORLD, WORLD->ai_trigger_set_sys);
+    if (ResetBits & 0x10) {
+        for (i32 i = 0; i < 8; ++i)
+            if (Player[i]) ResetPlayer(Player[i], 1, NULL, 0);
+        VehicleAreaRememberSpeed = GetVehicleAreaRememberSpeed();
+    }
+    LevHSpecialExists = 0;
+    for (i32 i = 0; i < 88; ++i)
+        if (NuSpecialExistsFn(&LevHSpecial[i])) LevHSpecialExists |= (u64)1 << (i & 63);
+    WORLD->field_50d0 = 0;
     if (WORLD->current_level->reset_fn != NULL) {
         WORLD->current_level->reset_fn(WORLD);
     }
 
-    // Reset requests are edge-triggered. Leaving the bits set would rebuild the
-    // level's AI and gizmo state again on every frame through Batman().
+    CharPlatforms_Reset(WORLD->char_platform_sys);
+    SetSoundFadeDist(WORLD, &Game.options_save);
+    TempOptions.field3_0x3 = Game.options_save.field3_0x3;
+    TempOptions.field4_0x4 = Game.options_save.field4_0x4;
+    TempOptions.field5_0x5 = Game.options_save.field5_0x5;
+    if (WORLD->level_progress && !(WORLD->level_progress->flags_low & 2) && WORLD->camera_splines[1] &&
+        !gone_through_door_to_new_mode && !gone_through_door_to_new_level && !come_from_an_editor) {
+        GameCameraMakeMiniCut(WORLD->camera_splines[1], 0.0f, 2.0f, 0.0f, 1.0f, 0, 1);
+    }
+    gone_through_door_to_new_mode = 0;
+    come_from_an_editor = 0;
+    if (newmode_cutinfo) {
+        NewCutScene(newmode_cutinfo, WORLD->cutscene_sys, NULL, 0);
+        newmode_cutinfo = NULL;
+    }
+    if (BonusArea) Cheats_TurnOff(1);
+    BonusCoinTarget = TotalLevelCoinTally(WORLD, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+    if (BonusCoinTarget > 1000000 || (BonusArea && VehicleArea && BonusCoinTarget != 1000000))
+        BonusCoinTarget = 1000000;
+    if (netclient) BonusCoinTarget = 1000000;
     ResetBits = 0;
+    reset_reimport = 0;
+    reset_restart = 0;
+    CutScene_StartAudio();
+    if (!NOSOUND) WORLD->reset_flags = 1;
+    LookAtBoth = 0;
+    oneAtOnce_SetNumAttackers(1);
+    if (WORLD->level_progress) {
+        if (WORLD->level_progress->flags_low & 2)
+            WORLD->field_5174 = (WORLD->level_progress->flags_low >> 2) & 1;
+        ResetGizFlow(WORLD->giz_flow, &WORLD->level_progress->giz_flow_progress);
+    } else {
+        ResetGizFlow(WORLD->giz_flow, NULL);
+    }
+    EffectOffProgress_Reset(WORLD->level_progress);
     Tag_SetMode(HUB_ADATA != NULL && HUB_ADATA == WORLD->area ? 3 : 1);
+    if (WORLD->area == NULL) {
+        WeaponInOut_NoAIJediSfx = 0;
+        bonusmodearcade = 0;
+    } else {
+        WeaponInOut_NoAIJediSfx = WORLD->area == JEDI_ADATA;
+        bonusmodearcade = 0;
+        if ((WORLD->area->flags & 0x10) && AreaGlobals.values.field_0x14 < AreaGlobals.values.field_0x0c)
+            AreaGlobals.values.field_0x14 = AreaGlobals.values.field_0x0c < 11 ? AreaGlobals.values.field_0x0c : 10;
+    }
+    arcade_placed_stud_total = ((GizmoPickups_TotalScore(WORLD) * 85u / 100u) / 1000u) * 1000u;
 }
 
 void DebrisTimeSlip(i32) {

@@ -213,7 +213,10 @@ typedef struct WORLDINFO_s {
     i32 rtl_id;                         // 0x2ab8  rtlFindByUserId result
     void *light_dir;                    // 0x2abc  rtlGetDirection out-pointer
     LEVEL_OBJECT_RUNTIME_s *lev_objs;   // 0x2ac0  level-object array
-    struct portalpos_s **portal_places; // 0x2ac4
+    union {
+        struct portalpos_s **portal_places;
+        struct nugspline_s **camera_splines;
+    }; // 0x2ac4
 
     GIZMOSYS_s *gizmo_sys; // 0x2ac8
     GIZFLOW_s *giz_flow;   // 0x2acc
@@ -321,7 +324,8 @@ typedef struct WORLDINFO_s {
     GIZMOBLOWUPTYPE_s *gizmo_blowup_types; // 0x50c8
     GIZMOBLOWUP_s *gizmo_blowups;          // 0x50cc
 
-    char filler11[0x50d8 - 0x50d0];
+    i32 field_50d0;
+    char filler11[0x50d8 - 0x50d4];
 
     GIZRANDOMSYS_s *giz_randoms;
 
@@ -351,8 +355,13 @@ typedef struct WORLDINFO_s {
     TRAFFICANIMSYS_s *trafficanim_sys; // 0x516c
     PLUGSYS_s *plug_sys;               // 0x5170
 
-    char filler15[0x51b0 - 0x5174];
+    i32 field_5174;
+    char filler15[0x51b0 - 0x5178];
 } WORLDINFO;
+
+DECOMP_ASSERT(offsetof(WORLDINFO, camera_splines) == 0x2ac4, "WORLDINFO camera splines offset");
+DECOMP_ASSERT(offsetof(WORLDINFO, field_50d0) == 0x50d0, "WORLDINFO reset field offset");
+DECOMP_ASSERT(offsetof(WORLDINFO, field_5174) == 0x5174, "WORLDINFO saved reset field offset");
 
 DECOMP_ASSERT(offsetof(WORLDINFO, gizmo_blowup_type_count) == 0x50c0, "WORLDINFO blowup type count offset");
 DECOMP_ASSERT(offsetof(WORLDINFO, gizmo_blowup_types) == 0x50c8, "WORLDINFO blowup types offset");

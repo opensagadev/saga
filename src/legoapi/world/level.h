@@ -23,7 +23,13 @@ struct AREADATA_s;
 
 struct LEVEL_PROGRESS_s {
     char data[0x2800];
-    i32 flags;
+    union {
+        i32 flags;
+        struct {
+            u8 flags_low;
+            u8 flags_upper[3];
+        };
+    };
     // One bit per object slot. ResetAICreatures uses this saved mask to keep
     // creatures that were permanently removed from being recreated.
     u32 disabled_ai_object_mask[2];
@@ -35,6 +41,7 @@ struct LEVEL_PROGRESS_s {
 };
 
 DECOMP_ASSERT(offsetof(LEVEL_PROGRESS_s, played_cutscene_mask) == 0x281c, "LEVEL_PROGRESS cutscene mask offset");
+DECOMP_ASSERT(offsetof(LEVEL_PROGRESS_s, flags_low) == 0x2800, "LEVEL_PROGRESS low flags offset");
 DECOMP_ASSERT(offsetof(LEVEL_PROGRESS_s, giz_flow_progress) == 0x2c20, "LEVEL_PROGRESS flow progress offset");
 DECOMP_ASSERT(sizeof(LEVEL_PROGRESS_s) == 0x2e24, "LEVEL_PROGRESS size");
 
