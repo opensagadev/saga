@@ -189,6 +189,10 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 
 static const f32 AI_RESPAWN_DELAY = 2.0f;
 
+static f32 Condition_PlayerUsingForce(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    return GizForce_GameObjUsingForce(player, static_cast<GIZFORCE_s *>(argument)) != 0 ? 1.0f : 0.0f;
+}
+
 static f32 Condition_UsingForce(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
     return GizForce_GameObjUsingForce(packet->owner->apiobj.objptr, static_cast<GIZFORCE_s *>(argument)) != 0
                ? 1.0f : 0.0f;
@@ -493,7 +497,7 @@ extern "C" {
         {"EitherPlayerWearingHelmet", NULL, NULL},
         {"PartyUnderCover", NULL, NULL},
         {"NumBaddiesThatCanSeePlayers", NULL, NULL},
-        {"PlayerUsingForce", NULL, NULL},
+        {"PlayerUsingForce", Condition_PlayerUsingForce, Condition_UsingForceInit},
         {"EitherPlayerUsingForce", NULL, NULL},
         {"UsingForce", Condition_UsingForce, Condition_UsingForceInit},
         {"OnForcePlatform", NULL, NULL},
