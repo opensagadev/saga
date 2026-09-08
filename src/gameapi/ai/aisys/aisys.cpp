@@ -5941,33 +5941,39 @@ __used__ static f32 Condition_Side(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
     return 0.0f;
 }
 
-__used__ static f32 Condition_XPos(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                   void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
+static f32 Condition_XPos(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *argument) {
+    GameObject_s *object = static_cast<GameObject_s *>(argument);
+    if (object == NULL) {
+        if (packet == NULL || packet->owner == NULL)
+            return 0.0f;
+        object = packet->owner->apiobj.objptr;
+    }
+    if (object != NULL)
+        return object->apiobj.collision_position.x;
     return 0.0f;
 }
 
-__used__ static f32 Condition_YPos(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                   void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
+static f32 Condition_YPos(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *argument) {
+    GameObject_s *object = static_cast<GameObject_s *>(argument);
+    if (object == NULL) {
+        if (packet == NULL || packet->owner == NULL)
+            return 0.0f;
+        object = packet->owner->apiobj.objptr;
+    }
+    if (object != NULL)
+        return object->apiobj.collision_position.y;
     return 0.0f;
 }
 
-__used__ static f32 Condition_ZPos(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                   void *void_arg) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)arg;
-    (void)void_arg;
+static f32 Condition_ZPos(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *argument) {
+    GameObject_s *object = static_cast<GameObject_s *>(argument);
+    if (object == NULL) {
+        if (packet == NULL || packet->owner == NULL)
+            return 0.0f;
+        object = packet->owner->apiobj.objptr;
+    }
+    if (object != NULL)
+        return object->apiobj.collision_position.z;
     return 0.0f;
 }
 
@@ -6602,11 +6608,8 @@ __used__ static void *Condition_BlowupInit(AISYS *sys, char *arg, AISCRIPT *scri
     return NULL;
 }
 
-__used__ static void *Condition_XYZPosInit(AISYS *sys, char *arg, AISCRIPT *script) {
-    (void)sys;
-    (void)arg;
-    (void)script;
-    return NULL;
+static void *Condition_XYZPosInit(AISYS *sys, char *arg, AISCRIPT *) {
+    return arg != NULL && sys != NULL ? GetNamedGameObject(sys, arg) : NULL;
 }
 
 __used__ static void *Condition_BeenHitInit(AISYS *sys, char *arg, AISCRIPT *script) {
@@ -8141,6 +8144,12 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_I_AM_A_PARTY_CHARACTER].eval_fn = Condition_IAmAPartyCharacter;
             lego_aiconditiondefs[LEGO_AI_CONDITION_LOCATOR_ON_SCREEN].eval_fn = Condition_LocatorOnScreen;
             lego_aiconditiondefs[LEGO_AI_CONDITION_TURRET_ALIVE].eval_fn = Condition_TurretAlive;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_X_POS].eval_fn = Condition_XPos;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_X_POS].init_fn = Condition_XYZPosInit;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_Y_POS].eval_fn = Condition_YPos;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_Y_POS].init_fn = Condition_XYZPosInit;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_Z_POS].eval_fn = Condition_ZPos;
+            lego_aiconditiondefs[LEGO_AI_CONDITION_Z_POS].init_fn = Condition_XYZPosInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_TAKE_OVER_RANGE].eval_fn = Condition_TakeOverRange;
             lego_aiconditiondefs[LEGO_AI_CONDITION_ANIM_SPEED_MUL].eval_fn = Condition_AnimSpeedMul;
             lego_aiconditiondefs[LEGO_AI_CONDITION_TURRET_ALIVE].init_fn = Condition_TurretAliveInit;
