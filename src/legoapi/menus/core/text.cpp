@@ -1,4 +1,5 @@
 #include "legoapi/menus/core/text.h"
+char *ASCII_UP = "\xc2\xac";
 #include "legoapi/legoapi_types.h"
 #include "globals.h"
 #include "legoapi/world/area.h"
