@@ -206,18 +206,6 @@ static __used__ f32 Condition_OffScreenTimer(AISYS_s *, AISCRIPTPROCESS_s *, AIP
 
 
 
-static void *Condition_BeenToLevelInit(AISYS_s *system, char *arg, AISCRIPT_s *) {
-    if (system == NULL || arg == NULL || WORLD == NULL || WORLD->area == NULL) {
-        return reinterpret_cast<void *>(static_cast<isize>(-1));
-    }
-    for (i32 area_level = 0; area_level < WORLD->area->level_count; ++area_level) {
-        const i32 level = WORLD->area->levels[area_level];
-        if (NuStrICmp(arg, LDataList[level].name) == 0) {
-            return reinterpret_cast<void *>(static_cast<isize>(area_level));
-        }
-    }
-    return reinterpret_cast<void *>(static_cast<isize>(-1));
-}
 
 
 static __used__ f32 Condition_BuildItComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
@@ -621,7 +609,6 @@ namespace {
 
             lego_aiconditiondefs[LEGO_AI_CONDITION_OFF_SCREEN_TIMER].eval_fn = Condition_OffScreenTimer;
             lego_aiconditiondefs[LEGO_AI_CONDITION_OFF_SCREEN_TIMER].init_fn = Condition_OffScreenTimerInit;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_TO_LEVEL].init_fn = Condition_BeenToLevelInit;
         }
     };
 
