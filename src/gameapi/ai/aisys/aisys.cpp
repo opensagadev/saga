@@ -49,26 +49,32 @@ extern "C" f32 AIPathNodeDistanceToPathNode(AIPATH *path, i32 start_node, i32 de
             return node->distance_cache[1];
         }
         node->distance_cache_nodes[1] = node->distance_cache_nodes[0];
-        node->distance_cache[1] = node->distance_cache[0];
         node->distance_cache_nodes[0] = static_cast<u8>(destination_node);
-        node->distance_cache[0] = 0.0f;
+        node->distance_cache[1] = node->distance_cache[0];
         cached_distance = &node->distance_cache[0];
-    } else if (route_index != 0xff) {
+        *cached_distance = 0.0f;
+    }
+    i32 node_index = node - path->nodes;
+    if (route_index != 0xff) {
         route = &path->routes[route_index];
         if (((static_cast<u64>(node->route_membership_mask) >> route_index) & 1) == 0) {
             return FLT_MAX;
         }
     }
 
-    i32 node_index = node - path->nodes;
     AIPATHNODE *destination = &path->nodes[destination_node];
     AIPATHCNX *previous_connection = NULL;
     f32 distance = 0.0f;
     while (node != destination) {
-        i32 connection_index;
+        i32 connection_index = 0xff;
         if (route != NULL) {
             if ((static_cast<u64>(destination->route_membership_mask) &
-                 (static_cast<u64>(1) << route_index)) == 0) {
+                 (static_cast<u64>(1) << route_index)) != 0) {
+                u8 from = route->node_routes[node_index];
+                if (from < route->route_count && route->node_routes[destination_node] < route->route_count) {
+                    connection_index = route->route_nodes[from][route->node_routes[destination_node]];
+                }
+            } else {
                 f32 nearest = FLT_MAX;
                 for (i32 index = 0; index < route->exit_node_count; ++index) {
                     f32 first = route->exit_nodes[index] == start_node ? 0.0f :
@@ -90,14 +96,6 @@ extern "C" f32 AIPathNodeDistanceToPathNode(AIPATH *path, i32 start_node, i32 de
                 distance += nearest;
                 break;
             }
-            u8 from = route->node_routes[node_index];
-            if (from >= route->route_count || route->node_routes[destination_node] >= route->route_count) {
-                if (cached_distance != NULL) {
-                    *cached_distance = FLT_MAX;
-                }
-                return FLT_MAX;
-            }
-            connection_index = route->route_nodes[from][route->node_routes[destination_node]];
         } else {
             connection_index = path->route_matrix[node_index][destination_node];
         }
