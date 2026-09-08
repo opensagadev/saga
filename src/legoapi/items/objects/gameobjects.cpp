@@ -541,6 +541,18 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
     return reinterpret_cast<void *>(static_cast<intptr_t>(set));
 }
 
+static f32 Condition_LastAttackerRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    if (packet != NULL && packet->owner != NULL) {
+        GameObject *object = packet->owner->apiobj.objptr;
+        GameObject *attacker = object->last_attacker;
+        if (attacker != NULL) {
+            NUVEC difference;
+            return NuVecDist(&object->apiobj.position, &attacker->apiobj.position, &difference);
+        }
+    }
+    return 1000000000.0f;
+}
+
 static f32 Condition_LastAttackerIsActivePlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
     f32 result = 0.0f;
     if (packet != NULL && packet->owner != NULL) {
@@ -927,7 +939,7 @@ extern "C" {
         {"EitherPlayerPushingSpinner", NULL, NULL},
         {"CharacterRange", NULL, NULL},
         {"BeenSpawned", Condition_BeenSpawned, NULL},
-        {"LastAttackerRange", NULL, NULL},
+        {"LastAttackerRange", Condition_LastAttackerRange, NULL},
         {"LastAttackerIsActivePlayer", Condition_LastAttackerIsActivePlayer, NULL},
         {"PartyContainsDroids", Condition_PartyContainsDroids, NULL},
         {"CannotReachDestination", Condition_CannotReachDestination, NULL},
