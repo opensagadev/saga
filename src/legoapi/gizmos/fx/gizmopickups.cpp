@@ -1,4 +1,5 @@
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "nu2api/nucore/nustring.h"
 
 #include "batman.h"
 #include "decomp.h"
@@ -14,6 +15,34 @@
 #include "legoapi/world/level.h"
 #include "legoapi/world/mission.h"
 #include "legoapi/world/world.h"
+
+GIZMOPICKUP_s *GizmoPickup_FindByName(WORLDINFO_s *world, char *name) {
+    if (name != NULL && world != NULL) {
+        GIZMOPICKUP_s *pickup = world->gizmo_pickup_sys->pickups;
+        if (pickup != NULL) {
+            for (i32 index = 0; index < world->gizmo_pickup_sys->pickup_count; ++index, ++pickup) {
+                if (NuStrICmp(pickup->name, name) == 0)
+                    return pickup;
+            }
+        }
+    }
+    return NULL;
+}
+
+i32 GizmoPickup_BeenTurnedOn(GIZMOPICKUP_s *pickup) {
+    return pickup != NULL ? pickup->state_activated : 0;
+}
+
+u32 GizmoPickups_TotalScore(void *world) {
+    GIZMOPICKUPRUNTIMESYS_s *system = static_cast<WORLDINFO_s *>(world)->gizmo_pickup_sys;
+    GIZMOPICKUP_s *pickup = system->pickups;
+    u32 score = 0;
+    if (pickup != NULL) {
+        for (i32 i = 0; i < system->pickup_count; ++i, ++pickup)
+            score += GizmoPickupSys_Game.types[pickup->type_index].score;
+    }
+    return score;
+}
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/numath/nufloat.h"

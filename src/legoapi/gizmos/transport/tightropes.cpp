@@ -12,6 +12,30 @@
 
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
+#include "legoapi/items/base/apiobject.h"
+#include "legoapi/characters/core/character.h"
+#include "nu2api/numath/nuvec.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nutrig.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/characters/motion/animlist.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/core/input/qrand.h"
+#include "globals.h"
+#include <math.h>
+
+DECOMP_ASSERT(offsetof(WORLDINFO, tightropes) == 0x505c, "World tightrope array offset");
+DECOMP_ASSERT(offsetof(WORLDINFO, tightrope_count) == 0x5060, "World tightrope count offset");
+
+extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
+extern void FindAnglesZX(NUVEC *, u16 *, u16 *);
+extern void GameObjectOrigin(GameObject_s *);
+
+extern f32 PushingTowardsAngle(u16, u16);
+extern void StartJump(GameObject_s *, i32);
+extern void StartEndOfJump(GameObject_s *);
+extern i32 StartFallLand(GameObject_s *, i32);
 
 extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
@@ -21,92 +45,94 @@ struct TIGHTROPEPROGRESS {
     i32 state[2];
 };
 
-TIGHTROPE *TightRope_InRange(GameObject_s *object, WORLDINFO_s *world, NUVEC *result) {
+TIGHTROPE *TightRope_InRange(GameObject_s *object, WORLDINFO_s *world, NUVEC *position) {
     TIGHTROPE *rope = world->tightropes;
-    const f32 width = 3.0f * object->apiobj.field_0x1dc;
-    const NUVEC position = object->apiobj.collision_position;
-    for (i32 i = 0; i < world->tightrope_count; ++i, ++rope) {
-        if (rope->enabled == 0 || rope->active == 0) {
+    f32 width = 3.0f * object->apiobj.field_0x1dc;
+    NUVEC origin = object->apiobj.collision_position;
+    for (i32 index = 0; index < world->tightrope_count; ++index, ++rope) {
+        if (rope->enabled == 0 || rope->available == 0) {
             continue;
         }
-        NUVEC local;
-        local.x = position.x - rope->start.x;
-        local.z = position.z - rope->start.z;
-        NuVecRotateY(&local, &local, -rope->angle);
-        if (local.z >= 0.0f && local.z <= rope->horizontal_length && local.x >= -width && local.x <= width) {
-            local.x = 0.0f;
-            local.y = rope->start.y + (rope->end.y - rope->start.y) * (local.z / rope->horizontal_length);
-            f32 margin = object->apiobj.field_0x1e0;
-            if (NuFabs(local.y - position.y) < margin) {
-                if (result != NULL) {
-                    if ((static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->flags_090 &
-                         0x10000000) == 0) {
-                        margin = object->apiobj.field_0x1dc;
-                    }
-                    if (local.z > rope->horizontal_length - margin) {
-                        local.z = rope->horizontal_length - margin;
-                    } else if (local.z < margin) {
-                        local.z = margin;
-                    }
-                    NuVecRotateY(result, &local, rope->angle);
-                    result->x += rope->start.x;
-                    result->z += rope->start.z;
-                }
-                return rope;
-            }
+        NUVEC offset;
+        offset.x = origin.x - rope->start.x;
+        offset.y = 0.0f;
+        offset.z = origin.z - rope->start.z;
+        NuVecRotateY(&offset, &offset, -rope->rotation);
+        if (!(offset.z >= 0.0f && rope->horizontal_length >= offset.z && offset.x >= -width && width >= offset.x)) {
+            continue;
         }
+        offset.x = 0.0f;
+        offset.y = (rope->end.y - rope->start.y) * (offset.z / rope->horizontal_length) + rope->start.y;
+        if (!(object->apiobj.field_0x1e0 > fabsf(offset.y - origin.y))) {
+            continue;
+        }
+        if (position != NULL) {
+            f32 margin = (object->apiobj.character_data->game_character->flags_090 & 0x10000000) != 0
+                             ? object->apiobj.field_0x1e0
+                             : object->apiobj.field_0x1dc;
+            if (offset.z > rope->horizontal_length - margin) {
+                offset.z = rope->horizontal_length - margin;
+            } else if (margin > offset.z) {
+                offset.z = margin;
+            }
+            NuVecRotateY(position, &offset, rope->rotation);
+            position->x += rope->start.x;
+            position->z += rope->start.z;
+        }
+        return rope;
     }
     return NULL;
 }
 
-static __used__ i32 TightRope_Attach(GameObject_s *object, WORLDINFO_s *world) {
-    NUVEC point;
-    TIGHTROPE *rope = TightRope_InRange(object, world, &point);
+static i32 TightRope_Attach(GameObject_s *object, WORLDINFO_s *world) {
+    NUVEC position;
+    TIGHTROPE *rope = TightRope_InRange(object, world, &position);
     if (rope == NULL) {
         return 0;
     }
     object->character_context = 0x44;
     object->field_0x788 = rope;
-    object->context_variant_flags =
-        (object->context_variant_flags & ~8) |
-        (((static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->flags_090 & 0x80000) == 0)
-         << 3);
+    object->context_variant_flags = (object->context_variant_flags & ~8) |
+                                    ((((object->apiobj.character_data->game_character->flags_090 >> 19) ^ 1) & 1) << 3);
     if (object->apiobj.character_model->model_data_b[0x8f] != NULL &&
-        ((static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->flags_090 & 0x80000) == 0 ||
-         point.y > (object->apiobj.upper_position.y - object->apiobj.lower_position.y) * 0.25f +
-                       object->apiobj.lower_position.y)) {
+        ((object->apiobj.character_data->game_character->flags_090 & 0x80000) == 0 ||
+         position.y > (object->apiobj.upper_position.y - object->apiobj.lower_position.y) * 0.25f +
+                          object->apiobj.lower_position.y)) {
         object->context_animation = 0x8f;
         object->context_animation_timer = AnimDuration(object->id, 0x8f, 0.0f, 0.0f, 1);
     } else {
         object->context_animation = 0x88;
     }
-    object->tightrope_position = point;
-    i32 difference =
-        RotDiff(static_cast<TIGHTROPE *>(object->field_0x788)->angle, object->apiobj.movement_facing_angle);
+    object->context_destination = position;
+    rope = static_cast<TIGHTROPE *>(object->field_0x788);
+    i32 difference = RotDiff(rope->rotation, object->apiobj.movement_facing_angle);
     if (difference < 0) {
         difference = -difference;
     }
-    u16 angle = static_cast<TIGHTROPE *>(object->field_0x788)->angle;
-    if (difference > 0x4000) {
-        angle += 0x8000;
-    }
-    object->apiobj.movement_facing_angle = angle;
-    object->field_0x768 =
-        NuVecXZDist(&object->apiobj.collision_position, &static_cast<TIGHTROPE *>(object->field_0x788)->start, NULL);
     rope = static_cast<TIGHTROPE *>(object->field_0x788);
-    f32 horizontal = NuFsqrt(rope->direction.x * rope->direction.x + rope->direction.z * rope->direction.z);
-    NuVecRotateX(&point, &v010, -NuAtan2D(static_cast<TIGHTROPE *>(object->field_0x788)->direction.y, horizontal));
-    NuVecRotateY(&point, &point, static_cast<TIGHTROPE *>(object->field_0x788)->angle);
-    FindAnglesZX(&point, &object->tightrope_x_rotation, &object->tightrope_z_rotation);
-    if ((static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->flags_090 & 0x10000000) != 0) {
-        point.x = 0.0f;
-        point.y = object->apiobj.upper_position.y - object->apiobj.lower_position.y;
-        point.z = 0.0f;
-        NuVecRotateZ(&object->tightrope_offset, &point, object->tightrope_z_rotation);
-        NuVecRotateX(&object->tightrope_offset, &object->tightrope_offset, object->tightrope_x_rotation);
-        NuVecSub(&object->tightrope_offset, &point, &object->tightrope_offset);
+    u16 rotation = rope->rotation;
+    if (difference > 0x4000) {
+        rotation += 0x8000;
+    }
+    object->apiobj.movement_facing_angle = rotation;
+    object->field_0x768 = NuVecXZDist(&object->apiobj.collision_position, &rope->start, NULL);
+    rope = static_cast<TIGHTROPE *>(object->field_0x788);
+    f32 horizontal_length = NuFsqrt(rope->direction.x * rope->direction.x + rope->direction.z * rope->direction.z);
+    rope = static_cast<TIGHTROPE *>(object->field_0x788);
+    i32 slope = NuAtan2D(rope->direction.y, horizontal_length);
+    NuVecRotateX(&position, &v010, -slope);
+    rope = static_cast<TIGHTROPE *>(object->field_0x788);
+    NuVecRotateY(&position, &position, rope->rotation);
+    FindAnglesZX(&position, &object->context_x_rotation, &object->context_z_rotation);
+    if ((object->apiobj.character_data->game_character->flags_090 & 0x10000000) != 0) {
+        position.x = 0.0f;
+        position.y = object->apiobj.upper_position.y - object->apiobj.lower_position.y;
+        position.z = 0.0f;
+        NuVecRotateZ(&object->context_position_offset, &position, object->context_z_rotation);
+        NuVecRotateX(&object->context_position_offset, &object->context_position_offset, object->context_x_rotation);
+        NuVecSub(&object->context_position_offset, &position, &object->context_position_offset);
     } else {
-        object->tightrope_offset = v000;
+        object->context_position_offset = v000;
     }
     return 1;
 }
@@ -311,4 +337,224 @@ ADDGIZMOTYPE *TightRopes_RegisterGizmo(i32 type_id) {
     addtype.fns.add_level_sfx_fn = NULL;
 
     return &addtype;
+}
+
+static i32 TightRope_MoveUpdate(GameObject_s *object, i32 jumping) {
+    if (!(object->pad_gamepad->input_magnitude > 0.0f) || object->context_animation == 0x8f) {
+        if (jumping == 0) {
+            object->context_animation = 0x88;
+        }
+        return 1;
+    }
+    NUVEC previous = object->context_destination;
+    TIGHTROPE *rope = static_cast<TIGHTROPE *>(object->field_0x788);
+    u16 rotation = rope->rotation;
+    f32 input = PushingTowardsAngle(GamePad_InputAngle(object, object->pad_gamepad), rotation);
+    f32 direction;
+    f32 speed;
+    if (input > NuTrigTable[0x3000]) {
+        if (jumping != 0) {
+            speed = 0.6f;
+        } else {
+            rope = static_cast<TIGHTROPE *>(object->field_0x788);
+            object->context_animation = 0x89;
+            object->apiobj.movement_facing_angle = rope->rotation;
+            speed = AnimSpeed(object->apiobj.character_model, 0x89);
+        }
+        direction = 1.0f;
+    } else if (-NuTrigTable[0x3000] > input) {
+        if (jumping != 0) {
+            speed = 0.6f;
+        } else {
+            rope = static_cast<TIGHTROPE *>(object->field_0x788);
+            object->context_animation = 0x89;
+            object->apiobj.movement_facing_angle = rope->rotation + 0x8000;
+            speed = AnimSpeed(object->apiobj.character_model, 0x89);
+        }
+        direction = -1.0f;
+    } else {
+        if (jumping == 0) {
+            object->context_animation = 0x88;
+        }
+        return 1;
+    }
+    NUVEC movement;
+    rope = static_cast<TIGHTROPE *>(object->field_0x788);
+    NuVecScale(&movement, &rope->direction, speed * direction * FRAMETIME);
+    NuVecAdd(&object->context_destination, &object->context_destination, &movement);
+    rope = static_cast<TIGHTROPE *>(object->field_0x788);
+    NuVecSub(&object->context_destination, &object->context_destination, &rope->start);
+    object->context_destination.z = NuVecDot(&object->context_destination, &rope->direction);
+    f32 margin = (object->apiobj.character_data->game_character->flags_090 & 0x10000000) != 0
+                     ? object->apiobj.field_0x1e0
+                     : object->apiobj.field_0x1dc;
+    i32 result = 1;
+    if (object->context_destination.z > rope->horizontal_length - margin) {
+        object->context_destination.z = rope->horizontal_length - margin;
+        result = 0;
+    } else if (margin > object->context_destination.z) {
+        object->context_destination.z = margin;
+        result = 0;
+    }
+    NuVecScale(&object->context_destination, &rope->direction, object->context_destination.z);
+    NuVecAdd(&object->context_destination, &object->context_destination, &rope->start);
+    if (jumping == 0 && previous.x == object->context_destination.x && previous.y == object->context_destination.y &&
+        previous.z == object->context_destination.z) {
+        object->context_animation = 0x88;
+    }
+    return result;
+}
+
+void TightRope_MoveCode(GameObject_s *object, i32 jump_pressed) {
+    if (object->character_context != 0x44) {
+        if (object->apiobj.field_0x27d != 0 || !(0.0f >= object->apiobj.velocity.y) ||
+            object->apiobj.character_model->model_data_b[0x88] == NULL) {
+            return;
+        }
+        if (object->character_context != -1) {
+            if (object->character_context != 0 || !(object->context_animation_timer >= 0.1f) ||
+                object->action_movement_state == 3 || object->action_movement_state == 4 ||
+                object->action_movement_state == 8) {
+                return;
+            }
+        }
+        if ((object->apiobj.object_flags & 0x80) == 0 && (object->field_0xf01 & 0x40) == 0) {
+            return;
+        }
+        TightRope_Attach(object, WORLD);
+        object->build_button_taps = 0;
+        object->external_force.z = 0.0f;
+        object->external_force.y = 0.0f;
+        return;
+    }
+    if (object->context_animation != 0x8f) {
+        object->external_force.y += FRAMETIME;
+        if (static_cast<u16>(object->context_animation - 5) <= 1) {
+            object->context_animation_timer += FRAMETIME;
+            void *rope = object->field_0x788;
+            if (object->context_animation == 5) {
+                if (object->context_animation_timer >=
+                    object->airborne_action_duration + object->airborne_action_duration) {
+                    StartEndOfJump(object);
+                }
+            } else if (object->context_animation_timer >= object->airborne_action_duration) {
+                object->context_animation = 5;
+            }
+            if (0.0f >= object->apiobj.velocity.y && TightRope_Attach(object, WORLD) == 0 &&
+                object->apiobj.field_0x27d != 0) {
+                object->movement_runtime_flags |= 4;
+                if (object->context_animation != 5 || StartFallLand(object, -1) == 0) {
+                    if (object->apiobj.character_model->model_data_b[7] != NULL &&
+                        object->pad_gamepad->input_magnitude == 0.0f) {
+                        object->character_context = 1;
+                        object->context_animation = 7;
+                        object->context_animation_timer = AnimDuration(object->id, 7, 0.0f, 0.0f, 1);
+                        object->jump_reentry_timer = 0.2f;
+                        ResetAnimPacket(&object->apiobj.anim_packet, -1);
+                    } else {
+                        object->character_context = -1;
+                    }
+                }
+                object->movement_runtime_flags &= ~4;
+            }
+            if (object->character_context != 0x44 || object->field_0x788 != rope) {
+                return;
+            }
+            TightRope_MoveUpdate(object, 1);
+        } else if (jump_pressed == 0) {
+            if (TightRope_MoveUpdate(object, 0) == 0 && object->context_animation != 0x8f &&
+                object->external_force.y >= 0.5f) {
+                StartJump(object, 0);
+                object->apiobj.velocity.y =
+                    (object->apiobj.character_data->game_character->flags_090 & 0x80000) != 0 ? 1.2f : 1.8f;
+            }
+        } else {
+            goto jump;
+        }
+    } else {
+        if (jump_pressed != 0) {
+            goto jump;
+        }
+        f32 *playing = AnimPlaying(&object->apiobj.anim_packet, 0x8f, 1, 0);
+        if (playing != NULL) {
+            f32 frame = AnimListFrame(object->apiobj.character_model, object->context_animation, 0);
+            if (frame >= 1.0f && *playing >= frame && object->pad_gamepad->input_magnitude > 0.0f &&
+                fabsf(PushingTowardsAngle(GamePad_InputAngle(object, object->pad_gamepad),
+                                          static_cast<TIGHTROPE *>(object->field_0x788)->rotation)) >
+                    NuTrigTable[0x3000]) {
+                TightRope_MoveUpdate(object, 0);
+            } else {
+                object->context_animation_timer -= FRAMETIME;
+                if (0.0f >= object->context_animation_timer) {
+                    object->context_animation = 0x88;
+                }
+            }
+        }
+    }
+    object->field_0x768 =
+        NuVecXZDist(&object->apiobj.collision_position, &static_cast<TIGHTROPE *>(object->field_0x788)->start, NULL);
+    return;
+
+jump:
+    if ((object->apiobj.object_flags & 0x80) != 0) {
+        object->apiobj.velocity.y = 2.0f;
+        object->context_animation = 6;
+        object->context_animation_timer = 0.0f;
+        f32 duration = AnimDuration(object->id, 6, 0.0f, 0.0f, 0);
+        object->airborne_action_duration = duration <= 0.0f ? 1.0f : duration;
+        ResetAnimPacket(&object->apiobj.anim_packet, -1);
+    } else {
+        StartJump(object, 0);
+        object->movement_runtime_flags |= 0x10;
+    }
+}
+
+TIGHTROPE *TightRope_FindNearest(NUVEC *position, WORLDINFO_s *world, i32 *endpoint, f32 *distance_squared) {
+    TIGHTROPE *nearest = NULL;
+    i32 nearest_endpoint = -1;
+    f32 nearest_distance = 1000000000.0f;
+    TIGHTROPE *rope = world->tightropes;
+    for (i32 index = 0; index < world->tightrope_count; ++index, ++rope) {
+        f32 distance = NuVecDistSqr(position, &rope->start, NULL);
+        if (nearest_distance > distance) {
+            nearest_distance = distance;
+            nearest = rope;
+            nearest_endpoint = 0;
+        }
+        distance = NuVecDistSqr(position, &rope->end, NULL);
+        if (nearest_distance > distance) {
+            nearest_distance = distance;
+            nearest = rope;
+            nearest_endpoint = 1;
+        }
+    }
+    if (endpoint != NULL) {
+        *endpoint = nearest_endpoint;
+    }
+    if (distance_squared != NULL) {
+        *distance_squared = nearest_distance;
+    }
+    return nearest;
+}
+
+i32 TightRope_SetTargetMom(GameObject_s *object) {
+    NUVEC *anchor = (object->apiobj.character_data->game_character->flags_090 & 0x80000) != 0
+                        ? &object->apiobj.lower_position
+                        : &object->apiobj.upper_position;
+    object->target_velocity.x = (object->context_destination.x - anchor->x) * 3.0f;
+    object->target_velocity.y = (object->context_destination.y - anchor->y) * 3.0f;
+    object->target_velocity.z = (object->context_destination.z - anchor->z) * 3.0f;
+    TIGHTROPE *rope = static_cast<TIGHTROPE *>(object->field_0x788);
+    u16 rotation = rope->rotation + 0x4000;
+    f32 fraction = object->field_0x768 / rope->horizontal_length;
+    if (fraction > 1.0f) {
+        fraction = 1.0f;
+    }
+    f32 amplitude = 0.5f * NU_SIN_LUT(static_cast<i32>(fraction * 32768.0f));
+    f32 direction = NU_SIN_LUT(rotation);
+    object->target_velocity.x += (qrand() * (1.0f / 65535.0f) - 0.5f) * amplitude * direction;
+    object->target_velocity.y -= qrand() * (1.0f / 65535.0f) * amplitude;
+    direction = NU_COS_LUT(rotation);
+    object->target_velocity.z += (qrand() * (1.0f / 65535.0f) - 0.5f) * amplitude * direction;
+    return static_cast<u16>(object->context_animation - 5) > 1;
 }

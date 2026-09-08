@@ -650,20 +650,146 @@ extern "C" {
         return y;
     }
 
-    void FindSock(void) {
+    SOCK *FindSock(SOCKSYS *system, char *name) {
+        if (system != NULL) {
+            SOCK *sock = system->sock;
+            for (i32 index = 0; index < 64; ++index, ++sock) {
+                if (sock->valid != 0 && NuStrICmp(name, sock->name) == 0)
+                    return sock;
+            }
+        }
+        return NULL;
     }
 
-    void MidDistanceFromSockStart(void) {
+    f32 MidDistanceFromSockStart(SOCKSYS *system, SOCKPOSITION *position) {
+        if (system != NULL && position->location.sock != -1) {
+            SOCKSEGMENT *segment = &system->sock[position->location.sock].segments[position->location.segment];
+            return segment->distance_from_start + segment->length * position->ratio;
+        }
+        return 0.0f;
     }
 
-    void MoveSockPosition(void) {
+    void MoveSockPosition(SOCKSYS *system, SOCKPOSITION *source, f32 distance, SOCKPOSITION *result) {
+        *result = *source;
+        if (system == NULL || result->location.sock == -1 || distance == 0.0f)
+            return;
+        i32 direction;
+        if (distance > 0.0f)
+            direction = 1;
+        else {
+            direction = 2;
+            distance = -distance;
+        }
+        i32 length;
+        NUVEC *from;
+        NUVEC *to;
+        SOCK *sock = &system->sock[result->location.sock];
+        NUVEC *point = &result->midpoint;
+        if (sock->unknown_33 != 0)
+            length = sock->length + 1;
+        else
+            length = sock->length;
+        for (;;) {
+            result->next_segment = static_cast<i16>(result->location.segment + 1);
+            if (result->next_segment == length && sock->unknown_33 != 0)
+                result->next_segment = 0;
+            if (sock->mid != NULL) {
+                from = &sock->mid->pts[result->location.segment];
+                to = &sock->mid->pts[result->next_segment];
+            } else {
+                from = &sock->segments[result->location.segment].midpoint;
+                to = &sock->segments[result->location.segment].next_midpoint;
+            }
+            NUVEC *target = direction == 1 ? to : from;
+            f32 remaining = NuVecDist(point, target, NULL);
+            if (distance > remaining) {
+                *point = *target;
+                result->ratio = 0.0f;
+                distance -= remaining;
+                if (direction == 1) {
+                    if (sock->unknown_33 != 0) {
+                        ++result->location.segment;
+                        if (result->location.segment == length)
+                            result->location.segment = 0;
+                    } else {
+                        if (result->location.segment >= length)
+                            break;
+                        ++result->location.segment;
+                    }
+                } else {
+                    if (sock->unknown_33 != 0) {
+                        --result->location.segment;
+                        if (result->location.segment == -1)
+                            result->location.segment = sock->length;
+                    } else {
+                        if (result->location.segment <= 0)
+                            break;
+                        --result->location.segment;
+                    }
+                }
+                continue;
+            }
+            if (remaining > 0.0f && distance > 0.0f) {
+                f32 ratio = distance / remaining;
+                point->x += (target->x - point->x) * ratio;
+                point->y += (target->y - point->y) * ratio;
+                point->z += (target->z - point->z) * ratio;
+                if (sock->mid != NULL) {
+                    from = &sock->mid->pts[result->location.segment];
+                    to = &sock->mid->pts[result->next_segment];
+                } else {
+                    from = &sock->segments[result->location.segment].midpoint;
+                    to = &sock->segments[result->location.segment].next_midpoint;
+                }
+                result->ratio = NuVecDist(from, point, NULL) / NuVecDist(from, to, NULL);
+            } else {
+                result->ratio = 0.0f;
+            }
+            break;
+        }
+        FillSockPosition(system, result);
+        result->camera_position = temp_sockcampos;
     }
 
     void SetSockBit(SOCK *sock, i32 index) {
         SetSockBitValue(sock, index);
     }
 
-    void SetSockPostion(void) {
+    void SetSockPostion(SOCKSYS *system, SOCKPOSITION *position, i32 index, i32 segment, f32 ratio) {
+        position->location.sock = -1;
+        if (system == NULL)
+            return;
+        if (index < 0 || index > 63)
+            return;
+        SOCK *sock = &system->sock[index];
+        i32 length;
+        if (sock->unknown_33 != 0) {
+            length = sock->length + 1;
+            if (segment > length)
+                segment = 0;
+        } else {
+            length = sock->length;
+            if (segment > length)
+                segment = length;
+        }
+        if (segment < 0)
+            segment = 0;
+        if (ratio < 0.0f)
+            ratio = 0.0f;
+        else if (ratio > 1.0f)
+            ratio = 1.0f;
+        position->location.sock = static_cast<i8>(index);
+        position->location.segment = static_cast<i16>(segment);
+        position->ratio = ratio;
+        position->next_segment = static_cast<i16>(segment + 1);
+        if (position->next_segment == length && sock->unknown_33 != 0)
+            position->next_segment = 0;
+        position->candidate_count = 1;
+        position->flags = 0;
+        position->candidate_mask = 1u << (index & 31);
+        FillSockPosition(system, position);
+        position->camera_position = temp_sockcampos;
+        SockSysPointAlongMID(sock, position, &position->midpoint);
     }
 
     bool SockBitSet(SOCK *sock, i32 index) {

@@ -1,6 +1,7 @@
 #include "legoapi/gizmo/base/gizmo.h"
 #include "decomp.h"
 #include "globals.h"
+#include "MechInputTouch/MechInputTouch_types.h"
 
 #include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
 #include "legoapi/gizmo/base/GizBuildItObjectInterface.h"
@@ -478,72 +479,101 @@ void GizmoSysClearLevelProgress(void *unknown, i32 type_id) {
     }
 }
 
-extern f32 hackFlashTimer;
-extern GAMEANIMSET_s *hackFlashingGameAnimSet;
-nuhspecial_s *hackFlashingSpecial;
+extern "C" {
+    extern f32 hackFlashTimer;
+    extern GAMEANIMSET_s *hackFlashingGameAnimSet;
+    nuhspecial_s *hackFlashingSpecial;
+}
 
-void GizForceObjectInterface::GetPos(VuVec &position, i32) const {
-    if (animation_object != NULL) {
-        NUVEC *origin = NuSpecialGetDrawPos(&animation_object->special);
-        position = VuVec(origin->x, origin->y, origin->z, 1.0f);
+void GizForceObjectInterface::GetPos(VuVec &result, i32) const {
+    if (selected_object != NULL) {
+        NUVEC *position = NuSpecialGetDrawPos(&selected_object->special);
+        result = VuVec(position->x, position->y, position->z, 1.0f);
     } else {
-        position = VuVec(force->position.x, force->position.y, force->position.z, 1.0f);
+        result = VuVec(force.position.x, force.position.y, force.position.z, 1.0f);
     }
 }
 
 f32 GizForceObjectInterface::GetRadius() const {
-    if (animation_object != NULL)
-        return NuSpecialGetOriginRadius(&animation_object->special);
-    return force->radius;
+    if (selected_object != NULL)
+        return NuSpecialGetOriginRadius(&selected_object->special);
+    return force.radius;
 }
 
 const char *GizForceObjectInterface::GetTargetName() const {
-    return force->name;
+    return force.name;
 }
 
 void *GizForceObjectInterface::GetTgtVoidPtr() {
-    if (animation_object != NULL)
-        return animation_object;
-    return force;
+    if (selected_object != NULL)
+        return selected_object;
+    return &force;
 }
 
-GizForceObjectInterface::GizForceObjectInterface(GIZFORCE_s &object) : force(&object) {
-    object.mech_object_interface = this;
+GizForceObjectInterface::GizForceObjectInterface(GIZFORCE_s &value) : force(value) {
+    force.mech_object_interface = this;
 }
 
 void GizForceObjectInterface::TargetedFlash() {
-    if ((force->field_0xaa & 0x40) == 0) {
+    if (!(force.field_0xaa & 0x40)) {
         hackFlashTimer = 1.0f;
-        if (animation_object != NULL) {
-            hackFlashingSpecial = &animation_object->special;
+        if (selected_object != NULL) {
+            hackFlashingSpecial = &selected_object->special;
             hackFlashingGameAnimSet = NULL;
         } else {
             hackFlashingSpecial = NULL;
-            hackFlashingGameAnimSet = force->anim_set;
+            hackFlashingGameAnimSet = force.anim_set;
         }
     }
 }
 
 GizForceObjectInterface::~GizForceObjectInterface() {
-    force->mech_object_interface = NULL;
+    force.mech_object_interface = NULL;
 }
 
-void GizLeverObjectInterface::GetPos(VuVec &, i32) const {
+void MechObjectInterface::GetFloorTargetPos(VuVec &position, i32 mode) const {
+    GetPos(position, mode);
 }
 
-void GizLeverObjectInterface::GetRadius() const {
+void MechTempPosInterface::GetFloorTargetPos(VuVec &result, i32 mode) const {
+    GetPos(result, mode);
 }
 
-void GizLeverObjectInterface::GetTargetName() const {
+MechTempPosInterface::MechTempPosInterface(VuVec const &value) {
+    position.x = value.x;
+    position.y = value.y;
+    position.z = value.z;
+    position.w = value.w;
+    radius = 0.2f;
 }
 
-GizLeverObjectInterface::GizLeverObjectInterface(LEVER_s &) {
+MechTempPosInterface::MechTempPosInterface(nuvec_s const &value) {
+    position.xyz = value;
+    radius = 0.2f;
+}
+
+void GizLeverObjectInterface::GetPos(VuVec &position, i32) const {
+    position = VuVec(lever.position.x, lever.position.y, lever.position.z, 1.0f);
+}
+
+f32 GizLeverObjectInterface::GetRadius() const {
+    return 0.1f;
+}
+
+const char *GizLeverObjectInterface::GetTargetName() const {
+    return lever.name;
+}
+
+GizLeverObjectInterface::GizLeverObjectInterface(LEVER_s &value) : lever(value) {
+    lever.mech_object = this;
 }
 
 void GizLeverObjectInterface::TargetedFlash() {
+    lever.flash_timer = 1.0f;
 }
 
 GizLeverObjectInterface::~GizLeverObjectInterface() {
+    lever.mech_object = NULL;
 }
 
 void GizPanelObjectInterface::GetFloorTargetPos(VuVec &, i32) const {
@@ -689,25 +719,33 @@ void HatMachineObjectInterface::TargetedFlash() {
 HatMachineObjectInterface::~HatMachineObjectInterface() {
 }
 
-void GizObstacleObjectInterface::GetPos(VuVec &, i32) const {
+void GizObstacleObjectInterface::GetPos(VuVec &result, i32) const {
+    result = VuVec(obstacle.evaluated_position.x, obstacle.evaluated_position.y, obstacle.evaluated_position.z, 1.0f);
 }
 
-void GizObstacleObjectInterface::GetRadius() const {
+f32 GizObstacleObjectInterface::GetRadius() const {
+    return obstacle.field_0x58;
 }
 
-void GizObstacleObjectInterface::GetTargetName() const {
+const char *GizObstacleObjectInterface::GetTargetName() const {
+    return obstacle.name;
 }
 
-GizObstacleObjectInterface::GizObstacleObjectInterface(GIZOBSTACLE_s &) {
+GizObstacleObjectInterface::GizObstacleObjectInterface(GIZOBSTACLE_s &value) : obstacle(value) {
+    obstacle.mech_object_interface = this;
 }
 
-void GizObstacleObjectInterface::IsDead() {
+bool GizObstacleObjectInterface::IsDead() {
+    return !(obstacle.progress_flags & 1);
 }
 
 void GizObstacleObjectInterface::TargetedFlash() {
+    hackFlashTimer = 1.0f;
+    hackFlashingGameAnimSet = obstacle.anim_set;
 }
 
 GizObstacleObjectInterface::~GizObstacleObjectInterface() {
+    obstacle.mech_object_interface = NULL;
 }
 
 static __used__ void CheckIfParentsFinished(GIZFLOW_s *system, FLOWBOX_s *box) {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gameapi/ai/aisys/aipath.h"
+#include "gameapi/ai/aisys/aiscript_types.h"
 #include "legoapi/items/base/apiobject.h"
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nu3d/nuhspecial.h"
@@ -10,98 +11,14 @@
 #include "nu2api/numath/nuang.h"
 #include "nu2api/numath/nuvec.h"
 
-struct AISCRIPTACTIONDEF_s;
-struct AISCRIPTCONDITIONDEF_s;
+struct AIMESSAGESYS_s;
+struct AIMESSAGE_s;
 
-typedef struct AIREFSCRIPT_s {
-    NULISTLNK list_node;
-    char *name;
-    struct AISCRIPT_s *script;
-    char *return_state_name;
-    struct AISTATE_s *return_state;
-    u32 check_global_scripts : 1;
-    u32 check_level_scripts : 1;
-    NULISTHDR conditions;
-} AIREFSCRIPT;
-
-typedef struct AISTATE_s {
-    NULISTLNK list_node;
-    NULISTHDR conditions;
-    NULISTHDR actions;
-    char *name;
-    NULISTHDR ref_scripts;
-} AISTATE;
-
-typedef struct AIACTION_s {
-    NULISTLNK list_node;
-    char **params;
-    i32 param_count;
-    struct AISCRIPTACTIONDEF_s *def;
-} AIACTION;
-
-typedef struct AICONDITION_s {
-    NULISTLNK list_node;
-    f32 param_val;
-    char type;
-    i8 param_idx;
-    u16 bool_and : 1;
-    u16 keep_blocked : 1;
-    u16 is_param_idx_valid : 1;
-    u16 is_complex : 1;
-    char *complex_arg;
-    char *arg;
-    void *void_arg;
-    struct AISCRIPTCONDITIONDEF_s *def;
-    char *next_state_name;
-    AISTATE *next_state;
-    struct AICONDITION_s *param_cond;
-} AICONDITION;
-
-enum AICONDITION_COMPARISON {
-    AICONDITION_EQUAL = 0,
-    AICONDITION_LESS_THAN = 1,
-    AICONDITION_GREATER_THAN = 2,
-    AICONDITION_LESS_THAN_OR_EQUAL = 3,
-    AICONDITION_GREATER_THAN_OR_EQUAL = 4,
-    AICONDITION_NOT_EQUAL = 5,
-};
-
-typedef struct AIACTIONMACRO_s {
-    NULISTLNK list_node;
-    char *name;
-    NULISTHDR actions;
-} AIACTIONMACRO;
-
-typedef struct AICONDITIONMACRO_s {
-    NULISTLNK list_node;
-    char *name;
-    NULISTHDR conditions;
-} AICONDITIONMACRO;
-
-typedef struct AISCRIPTPARAMS_s {
-    char *name;
-    f32 default_val;
-} AISCRIPTPARAMS;
-
-typedef struct AICONSTPARAMS_s {
-    char name[32];
-    f32 default_val;
-} AICONSTPARAMS;
-
-typedef struct AISCRIPT_s {
-    NULISTLNK list_node;
-    char *name;
-    char *derived_from;
-    NULISTHDR states;
-    AISCRIPTPARAMS params[4];
-    AISTATE *base_state;
-    u32 is_level_script : 1;
-    u32 is_derived : 1;
-    u32 is_derived_from_level_script : 1;
-    NULISTHDR ref_scripts;
-    NULISTHDR condition_macros;
-    NULISTHDR action_macros;
-} AISCRIPT;
+typedef i32 (*PREPARINGSPECIALMOVEFN)(AIPACKET_s *, APIOBJECT_s *, i32);
+extern PREPARINGSPECIALMOVEFN PreparingForSpecialMoveFn;
+i32 TryToTeleportToNextNode(GameObject_s *, AIPATHNODE_s *, i32);
+void SetSpecialMove(GameObject_s *, AIPATHNODE_s *, AIPATHNODE_s *, char);
+void ClearSpecialMove(GameObject_s *);
 
 typedef struct AIPATHCNX_s {
     union {
@@ -166,7 +83,7 @@ typedef struct AIPATHNODE_s {
     u8 runtime_flags;
     i16 path_flags;
     u8 distance_cache_nodes[2];
-    u8 special_type;
+    u8 special_route_index;
     u8 padding_0x31[3];
     AIPATHCNX **connections;
     f32 distance_cache[2];
@@ -179,20 +96,23 @@ typedef struct AIPATHNODE_s {
         };
     };
     NUVEC special_position;
-    i16 value_0x58;
-    i16 value_0x5a;
+    u16 route_membership_mask;
+    u16 route_boundary_mask;
 } AIPATHNODE;
 
 typedef struct AIPATHROUTE_s {
     char *name;
     u8 *node_routes;
     u8 *node_directions;
-    u8 *characters;
+    u8 *exit_nodes;
     u8 route_count;
-    u8 character_count;
+    u8 exit_node_count;
     u8 padding_0x12[2];
     u8 **route_nodes;
-    u32 character_mask[4];
+    union __attribute__((packed, aligned(4))) {
+        u32 character_mask[4];
+        u64 character_masks[2];
+    };
 } AIPATHROUTE;
 
 typedef struct AIPATHSPECIALROUTE_s {
@@ -202,9 +122,9 @@ typedef struct AIPATHSPECIALROUTE_s {
 } AIPATHSPECIALROUTE;
 
 typedef struct AIPATHNODELINK_s {
-    u8 type;
+    u8 node_index;
     u8 padding_0x01;
-    i16 node;
+    i16 special_route_index;
 } AIPATHNODELINK;
 
 typedef struct AIPATH_s {
@@ -217,7 +137,8 @@ typedef struct AIPATH_s {
     u8 padding_0x16[2];
     // Per-frame path bookkeeping. Dynamic special nodes are updated once per
     // bit, while characters mark the node volume they currently occupy.
-    u8 updated_node_bits[0x40];
+    u8 updated_node_bits[0x20];
+    u8 previous_inside_node_bits[0x20];
     u8 inside_node_bits[0x20];
     u8 search_checksum;
     u8 search_reset_node;
@@ -253,19 +174,6 @@ typedef struct AIPATHSYS_s {
     AIPATH *active_path;
     AIPATHSPECIALROUTE *special_routes;
 } AIPATHSYS;
-
-typedef struct AILOCATOR_s {
-    char name[0x10];
-    NUVEC position;
-    i32 flags;
-    AIPATH *path;
-    AIPATHCNX *connection;
-    u8 game_flags;
-    u8 padding_0x29[7];
-    f32 min_distance;
-    f32 max_distance;
-    i32 locator_flags;
-} AILOCATOR;
 
 typedef struct AILOCATORSET_s {
     char name[0x10];
@@ -317,72 +225,6 @@ enum AIAREA_RUNTIME_FLAGS : u8 {
     AIAREA_RUNTIME_OBJECT_STATE_SET = 0x04,
     AIAREA_RUNTIME_CHARACTER_SLOT_SEEN = 0x08,
 };
-
-typedef struct AISCRIPTPROCESSSTACK_s {
-    f32 complex_params[4];
-    u8 is_first_time_state;
-    u8 force_complex_eval;
-} AISCRIPTPROCESSSTACK;
-
-typedef struct AISCRIPTPROCESS_s {
-    AISCRIPT *base_script;
-    AISCRIPT *script;
-
-    AISTATE *state;
-    NULISTLNK *action_node;
-    AISTATE *next_state;
-    f32 params[4];
-    f32 script_timer;
-
-    AISCRIPTPROCESSSTACK param_stack[2];
-
-    u32 is_first_time_action : 1;
-    u32 is_disabled : 1;
-    u32 unknown_flag_4 : 1;
-
-    AIREFSCRIPT *active_refs[4];
-    i32 active_ref_count;
-
-    u8 action_data_1;
-    u8 action_data_2;
-    u16 action_data_6;
-    void *action_data_3;
-    f32 action_data_4;
-    f32 action_data_5;
-
-    NUVEC action_pos;
-
-    AIPATHINFO path_info;
-
-    f32 action_timer;
-
-    AIAREA *unknown_a0;
-    union {
-        AILOCATOR *unknown_a4;
-        AILOCATOR *locator;
-    };
-    union {
-        AILOCATORSET *unknown_a8;
-        AILOCATORSET *locator_set;
-    };
-    NUGSPLINE *unknown_ac;
-
-    // Types uncertain.
-    u8 unknown_b0;
-    u16 unknown_b2;
-
-    u8 interrupt_priority;
-    u8 interrupt_id;
-
-    u16 action_data_7;
-
-    f32 interrupt_timer;
-    AISTATE *interrupt_state;
-    AISTATE *return_to_state;
-
-    // Type uncertain.
-    u32 unknown_c4;
-} AISCRIPTPROCESS;
 
 typedef struct AICREATURE_s {
     char name[0x10];
@@ -484,10 +326,16 @@ typedef struct AIGROUP_s {
 struct AIANTINODE_s {
     NUVEC position;
     f32 radius;
-    f32 height;
-    f32 width;
-    f32 max_height;
-    f32 min_height;
+    union {
+        f32 min_y;
+        f32 height;
+    };
+    f32 min_y_offset;
+    union {
+        f32 max_y;
+        f32 max_height;
+    };
+    f32 max_y_offset;
     union {
         nuhspecial_s special_handle;
         struct {
@@ -505,12 +353,13 @@ struct AIANTINODE_s {
     u8 game_flags;
     u8 type;
     u8 has_special;
-    union {
+    union __attribute__((packed, aligned(4))) {
         struct {
             u8 special_type;
             u8 padding_0x4d[7];
         };
         u32 user_data[2];
+        u64 excluded_character_types;
     };
 };
 
@@ -561,25 +410,50 @@ typedef struct AISYS_s {
 
     NUGSCN *scene;
 } AISYS;
+DECOMP_ASSERT(offsetof(AISYS, player_1) == 0x138c, "AISYS first player offset");
+DECOMP_ASSERT(offsetof(AISYS, player_2) == 0x1390, "AISYS second player offset");
 
 DECOMP_ASSERT(sizeof(AICREATURE) == 0xa4, "AICREATURE size");
 DECOMP_ASSERT(sizeof(AIAREA) == 0x3c, "AIAREA size");
 DECOMP_ASSERT(offsetof(AIAREA, runtime_flags) == 0x2a, "AIAREA runtime flags offset");
 DECOMP_ASSERT(sizeof(AILOCATOR) == 0x3c, "AILOCATOR size");
+DECOMP_ASSERT(offsetof(AILOCATOR, position) == 0x10, "AILOCATOR position offset");
+DECOMP_ASSERT(offsetof(AILOCATOR, flags) == 0x1c, "AILOCATOR rotation offset");
+DECOMP_ASSERT(offsetof(AILOCATOR, path_info) == 0x20, "AILOCATOR path cursor offset");
+DECOMP_ASSERT(offsetof(AILOCATOR, path_info.direction) == 0x28, "AILOCATOR path direction offset");
+DECOMP_ASSERT(offsetof(AILOCATOR, path_info.dist) == 0x30, "AILOCATOR path distance offset");
+DECOMP_ASSERT(offsetof(AILOCATOR, path_info.width) == 0x34, "AILOCATOR path width offset");
+DECOMP_ASSERT(offsetof(AILOCATOR, locator_flags) == 0x38, "AILOCATOR flags offset");
 DECOMP_ASSERT(sizeof(AILOCATORSET) == 0x1c, "AILOCATORSET size");
 DECOMP_ASSERT(sizeof(AIPATHCNX) == 0x24, "AIPATHCNX size");
 DECOMP_ASSERT(sizeof(AIPATHNODE) == 0x5c, "AIPATHNODE size");
 DECOMP_ASSERT(offsetof(AIPATHNODE, runtime_flags) == 0x2b, "AIPATHNODE runtime flags offset");
 DECOMP_ASSERT(offsetof(AIPATHNODE, special_handle) == 0x40, "AIPATHNODE special handle offset");
 DECOMP_ASSERT(sizeof(AIPATHROUTE) == 0x28, "AIPATHROUTE size");
+DECOMP_ASSERT(offsetof(AIPATHROUTE, character_masks) == 0x18, "AIPATHROUTE character masks offset");
+DECOMP_ASSERT(sizeof(AIPATHNODELINK) == 0x04, "AIPATHNODELINK size");
+DECOMP_ASSERT(offsetof(AIPATHNODELINK, node_index) == 0x00, "AIPATHNODELINK node index offset");
+DECOMP_ASSERT(offsetof(AIPATHNODELINK, special_route_index) == 0x02, "AIPATHNODELINK route index offset");
+DECOMP_ASSERT(offsetof(AIPATHNODE, special_route_index) == 0x30, "AIPATHNODE special route index offset");
+DECOMP_ASSERT(offsetof(AIPATHNODE, route_membership_mask) == 0x58, "AIPATHNODE route membership offset");
+DECOMP_ASSERT(offsetof(AIPATHNODE, route_boundary_mask) == 0x5a, "AIPATHNODE route boundary offset");
+DECOMP_ASSERT(offsetof(AIPATHROUTE, node_routes) == 0x04, "AIPATHROUTE node mapping offset");
+DECOMP_ASSERT(offsetof(AIPATHROUTE, exit_nodes) == 0x0c, "AIPATHROUTE exit nodes offset");
+DECOMP_ASSERT(offsetof(AIPATHROUTE, exit_node_count) == 0x11, "AIPATHROUTE exit count offset");
+DECOMP_ASSERT(offsetof(AIPATHROUTE, route_nodes) == 0x14, "AIPATHROUTE connection matrix offset");
 DECOMP_ASSERT(sizeof(AIPATH) == 0xa8, "AIPATH size");
 DECOMP_ASSERT(offsetof(AIPATH, updated_node_bits) == 0x18, "AIPATH updated-node bits offset");
 DECOMP_ASSERT(offsetof(AIPATH, inside_node_bits) == 0x58, "AIPATH occupied-node bits offset");
+DECOMP_ASSERT(offsetof(AIPATH, previous_inside_node_bits) == 0x38, "AIPATH previous occupied-node bits offset");
 DECOMP_ASSERT(sizeof(AIPATHSYS) == 0x10, "AIPATHSYS size");
 DECOMP_ASSERT(sizeof(AIANTINODE) == 0x54, "AIANTINODE size");
 DECOMP_ASSERT(offsetof(AIANTINODE, user_data) == 0x4c, "AIANTINODE exclusion mask offset");
+DECOMP_ASSERT(offsetof(AIANTINODE, radius) == 0xc, "AIANTINODE radius offset");
+DECOMP_ASSERT(offsetof(AIANTINODE, min_y) == 0x10, "AIANTINODE lower bound offset");
+DECOMP_ASSERT(offsetof(AIANTINODE, max_y) == 0x18, "AIANTINODE upper bound offset");
 DECOMP_ASSERT(offsetof(AIANTINODE, special_handle) == 0x20, "AIANTINODE special handle offset");
 DECOMP_ASSERT(offsetof(AIANTINODE, rotation_offset) == 0x3c, "AIANTINODE rotation offset");
+DECOMP_ASSERT(offsetof(AIANTINODE, excluded_character_types) == 0x4c, "AIANTINODE exclusion mask offset");
 DECOMP_ASSERT(offsetof(AICREATURE, type) == 0x4e, "AICREATURE type offset");
 DECOMP_ASSERT(offsetof(AICREATURE, count) == 0x50, "AICREATURE count offset");
 DECOMP_ASSERT(offsetof(AICREATURE, active_mask) == 0x58, "AICREATURE active-mask offset");
@@ -590,6 +464,10 @@ DECOMP_ASSERT(offsetof(AIROW, pos) == 0x18, "AIROW position offset");
 DECOMP_ASSERT(offsetof(AIROW, is_alive) == 0x2d, "AIROW live-member mask offset");
 DECOMP_ASSERT(sizeof(AIGROUP) == 0x134, "AIGROUP size");
 DECOMP_ASSERT(offsetof(AIGROUP, member_is_alive) == 0x4c, "AIGROUP live-member mask offset");
+DECOMP_ASSERT(sizeof(AIROW) == 0x34, "AIROW size");
+DECOMP_ASSERT(offsetof(AIROW, pos) == 0x18, "AIROW position offset");
+DECOMP_ASSERT(offsetof(AIROW, y_rot) == 0x24, "AIROW rotation offset");
+DECOMP_ASSERT(offsetof(AIGROUP, row_count) == 0x6, "AIGROUP row count offset");
 DECOMP_ASSERT(offsetof(AIGROUP, rows) == 0x54, "AIGROUP rows offset");
 DECOMP_ASSERT(offsetof(AIGROUP, count_across) == 0x8, "AIGROUP count-across offset");
 DECOMP_ASSERT(offsetof(AIGROUP, x_spacing) == 0x128, "AIGROUP spacing offset");
@@ -637,7 +515,7 @@ enum AISCRIPT_REGISTRY_INDEX {
     API_AI_ACTION_SET_LOCATOR = 36,
     API_AI_ACTION_FOLLOW_PATH = 38,
     API_AI_ACTION_OVERRIDE_ANIMATION = 40,
-    API_AI_ACTION_RETURN_TO_STATE = 53,
+    API_AI_ACTION_RETURN_TO_STATE = 52,
     API_AI_CONDITION_LOCATOR_RANGE = 2,
     API_AI_CONDITION_LOCATOR_RANGE_XZ = 3,
     API_AI_CONDITION_LOCATOR_RANGE_Y = 4,
@@ -711,6 +589,66 @@ enum AISCRIPT_REGISTRY_INDEX {
     LEGO_AI_CONDITION_FORCE_COMPLETE = 56,
     LEGO_AI_CONDITION_FORCE_FINISHED = 57,
     LEGO_AI_CONDITION_CATEGORY_IS = 71,
+    LEGO_AI_CONDITION_I_AM_A = 62,
+    LEGO_AI_CONDITION_PARTY_UNDER_COVER = 44,
+    LEGO_AI_CONDITION_PREFERS_BRAWLING = 4,
+    LEGO_AI_CONDITION_NEAREST_PARTY_RANGE = 151,
+    LEGO_AI_CONDITION_NEAREST_PARTY_XZ_RANGE = 152,
+    LEGO_AI_CONDITION_OPPONENT_IS_A = 63,
+    LEGO_AI_CONDITION_PLAYER_1_IS = 74,
+    LEGO_AI_CONDITION_EITHER_PLAYER_IS = 73,
+    LEGO_AI_CONDITION_PLAYER_2_IS = 75,
+    LEGO_AI_CONDITION_LOCATOR_ON_SCREEN = 18,
+    LEGO_AI_CONDITION_TURRET_ALIVE = 54,
+    LEGO_AI_CONDITION_ACTIVE = 2,
+    LEGO_AI_CONDITION_DEBUG = 1,
+    LEGO_AI_CONDITION_GLYN_TEST = 0,
+    LEGO_AI_CONDITION_HOVER_PHASE = 21,
+    LEGO_AI_CONDITION_SPAWN_COUNT = 16,
+    LEGO_AI_CONDITION_BEEN_ALERTED = 14,
+    LEGO_AI_CONDITION_ON_GROUND = 13,
+    LEGO_AI_CONDITION_COLLIDING = 28,
+    LEGO_AI_CONDITION_GOT_VICTIM = 143,
+    LEGO_AI_CONDITION_MY_SET = 145,
+    LEGO_AI_CONDITION_BEING_TOWED = 165,
+    LEGO_AI_CONDITION_BEEN_HIT = 20,
+    LEGO_AI_CONDITION_IS_ALIVE = 5,
+    LEGO_AI_CONDITION_ON_OBJECT = 8,
+    LEGO_AI_CONDITION_CONTEXT = 78,
+    LEGO_AI_CONDITION_IN_SWAMP = 171,
+    LEGO_AI_CONDITION_GOT_GUN = 3,
+    LEGO_AI_CONDITION_SIDE = 150,
+    LEGO_AI_CONDITION_X_POS = 24,
+    LEGO_AI_CONDITION_Y_POS = 25,
+    LEGO_AI_CONDITION_Z_POS = 26,
+    LEGO_AI_CONDITION_TAKE_OVER_RANGE = 137,
+    LEGO_AI_CONDITION_TAKE_OVER_TARGET_IN_TRIGGER_AREA = 138,
+    LEGO_AI_CONDITION_IN_SAME_TRIGGER_AREA_AS_NEAREST_PLAYER = 172,
+    LEGO_AI_CONDITION_EITHER_PLAYER_LOCATOR_RANGE_XZ = 12,
+    LEGO_AI_CONDITION_EITHER_PLAYER_ON_OBJECT = 11,
+    LEGO_AI_CONDITION_CHARACTER_EXISTS = 131,
+    LEGO_AI_CONDITION_BUILD_IT_COMPLETE = 60,
+    LEGO_AI_CONDITION_HAS_TAKE_OVER = 136,
+    LEGO_AI_CONDITION_SHOP_ACTIVE = 149,
+    LEGO_AI_CONDITION_SCREEN_WIPE = 146,
+    LEGO_AI_CONDITION_CAN_HEAR_RADIO = 164,
+    LEGO_AI_CONDITION_BEHIND_CAMERA = 17,
+    LEGO_AI_CONDITION_NUM_BADDIES = 82,
+    LEGO_AI_CONDITION_BLOWUP_BLOWNUP = 61,
+    LEGO_AI_CONDITION_ANIM_SPEED_MUL = 161,
+    LEGO_AI_CONDITION_GIZMO_OUTPUT_0 = 155,
+    LEGO_AI_CONDITION_GIZMO_OUTPUT_1 = 156,
+    LEGO_AI_CONDITION_GIZMO_OUTPUT_2 = 157,
+    LEGO_AI_CONDITION_GIZMO_OUTPUT_3 = 158,
+    LEGO_AI_CONDITION_GIZMO_VISIBILITY = 159,
+    LEGO_AI_CONDITION_FLOW_BOX_COMPLETE = 163,
+    LEGO_AI_CONDITION_AREA_COMPLETE = 169,
+    LEGO_AI_CONDITION_I_AM_A_GOODIE_BADDIE = 69,
+    LEGO_AI_CONDITION_I_AM_A_GOODY = 66,
+    LEGO_AI_CONDITION_I_AM_A_BADDY = 67,
+    LEGO_AI_CONDITION_I_AM_A_NEUTRAL = 68,
+    LEGO_AI_CONDITION_I_AM_A_PARTY_CHARACTER = 70,
+    LEGO_AI_CONDITION_PLAYER_CATEGORY_IS = 72,
     LEGO_AI_CONDITION_NUM_IN_SET_ALIVE = 77,
     LEGO_AI_CONDITION_BEEN_TO_LEVEL = 84,
     LEGO_AI_CONDITION_MESSAGE = 86,
@@ -726,10 +664,8 @@ enum AISCRIPT_REGISTRY_INDEX {
     LEGO_AI_CONDITION_IN_HUB_AREA = 174,
     LEGO_AI_CONDITION_IS_LOW_END_DEVICE = 175,
     LEGO_AI_CONDITION_RANDOM_MAP_CHARS_AVAILABLE = 176,
-    LEGO_AI_CONDITION_PLAYER_CATEGORY_IS = 72,
     LEGO_AI_CONDITION_FORCE_AT_END = 36,
     LEGO_AI_CONDITION_FORCE_AT_START = 35,
-    LEGO_AI_CONDITION_BLOWUP_BLOWNUP = 61,
     LEGO_AI_CONDITION_BUILDIT_COMPLETE = 60,
 };
 
@@ -766,6 +702,7 @@ extern "C" {
     extern NULISTHDR global_aiscripts;
 
     extern i32 ai_usepackfile;
+    extern i32 ai_onlyusepackfile;
 
     extern GAMEPARAMTOFLOAT *GameParamToFloatFn;
     extern AICHARACTERTYPEID *GlobalCharacterTypeIDFn;
@@ -785,6 +722,12 @@ extern "C" {
     extern AIGETNAMEDAPIOBJECT *GetNamedAPIObjectFn;
     extern AIGETCREATUREORIGIN *GetAICreatureOriginFn;
     extern char *AiLevelPathName;
+    extern AISCRIPTPROCESS *pSetStateDebugee;
+
+    void AiSysSetStateDebugee(AISCRIPTPROCESS *processor);
+    void AiSysUsePackFile(i32 enabled);
+    void AiSysOnlyUsePakFile(i32 enabled);
+    void InitFn_GameParamToFloat(GAMEPARAMTOFLOAT *function);
 
     void InitFn_AIActionParseSpeed(AIACTIONPARSESPEED *function);
     void InitFn_AIBigJumpToDestination(AIBIGJUMPTODESTINATION *function);
@@ -801,6 +744,9 @@ extern "C" {
     void AIScriptLoadAllPakFile(void *pak, char *path, VARIPTR *buf, VARIPTR *buf_end, AISYS *sys);
 
     void AIScriptInitConditions(AISYS *sys);
+    void AIScriptForceParamReEval(AISCRIPTPROCESS *processor);
+    char *AIScriptNameFromIx(AISYS *system, i32 index);
+    void AIScriptSetLevelPath(char *path);
 
     void AIScriptProcessorInit(AISYS *sys, AIPACKET *packet, AISCRIPTPROCESS *processor, AICREATURE *creature,
                                char *script_name, char *start_state_name, i32 can_use_default, AISCRIPT *script,
@@ -836,18 +782,53 @@ extern "C" {
                                           NUVEC *position, f32 off_screen_radius, i32 ignore_assigned);
     void AILocatorSet_CheckLocatorsStillAssigned(AISYS *system, AILOCATORSET *locator_set);
     void AISysCharacterSetPath(AIPACKET *packet, AIPATH *path);
+    void AISysFindRoute(AIPACKET *packet);
     void AISysCharacterSetPathCnx(AIPACKET *packet, NUVEC *position, AIPATHCNX *connection, i32 direction);
+    void CalculateLocatorDirection(i32 direction, struct numtx_s *matrix, NUVEC *out);
+    u32 AISysGetPathColour(i32 index);
+    i32 AISysGetPathColourCount(void);
+    void AISysGetPathPos(AISYS *system, NUVEC *position, AIPATHINFO *info, AIPATH *path, i32 checks);
+    void AISysGetPathPosEx(AISYS *system, NUVEC *position, AIPATHINFO *info, AIPATH *path, i32 checks,
+                           i32 search_all_paths, f32 *nearest_distance_squared);
     i32 WithinConnection(AISYS *system, NUVEC *position, AIPATH *path, AIPATHCNX *connection, i32 checks,
                          AIPATHCNX *previous_connection, i32 route, i32 ground, AIPATHINFO *path_info, f32 radius,
                          i32 update_once);
     f32 AIPathNodeDistanceToPathNode(AIPATH *path, i32 start_node, i32 destination_node, i32 route,
                                      u32 excluded_route_mask);
+    i32 AISysGetCharacterWaypoint(const AIPACKET *packet, NUVEC *position);
     void AISysGetCharacterPathPos(AISYS *system, APIOBJECT *object, AIPACKET *packet, i32 checks, i32 ground);
     void AISysUpdateCharacterPathPos(AISYS *system, APIOBJECT *object, AIPACKET *packet, i32 checks, f32 elapsed);
     void AISysCharacterMovement(AISYS *system, AIPACKET *packet, APIOBJECT *object, i32 checks);
     void AISysProcessCharacter(AISYS *system, APIOBJECT *object, AIPACKET *packet, i32 checks, f32 elapsed,
                                i32 use_three_dimensions, i32 process_ai);
     void AISysProcess(AISYS *system, APIOBJECT *player_1, APIOBJECT *player_2);
+    void AIFormationFollow(AIPACKET *packet);
+    AIMESSAGESYS_s *CreateAIMessageSys(VARIPTR *cursor, VARIPTR *end, i32 count);
+    void ResetAIMessageSys(AIMESSAGESYS_s *system);
+    void ClearAIMessageSys(AIMESSAGESYS_s *system);
+    AIMESSAGE_s *CheckAIMessage(AIMESSAGESYS_s *system, char *name, AIMESSAGE_s *message);
+    f32 GetAIMessage(AIMESSAGESYS_s *system, char *name, AIMESSAGE_s *message);
+    void SetAIMessage(AIMESSAGESYS_s *system, char *name, f32 value, AIMESSAGE_s *message);
+    AIMESSAGE_s *QueryAIMessage(AIMESSAGESYS_s *system, AIMESSAGE_s *message);
+    void RemoveAIMessage(AIMESSAGESYS_s *system, char *name, AIMESSAGE_s *message);
+    AILOCALMESSAGE_s *FindLocalAIMessage(AISCRIPTPROCESS *processor, char *name);
+    void AddLocalAIMessage(AISCRIPTPROCESS *processor, AILOCALMESSAGE_s *message, char *name);
+    void AIAntinodeMove(AIANTINODE *antinode, NUVEC *position, f32 radius, f32 below, f32 above);
+    AIANTINODE *AIAntinodeCreate(NUVEC *position, f32 radius);
+    AIANTINODE *AIAntinodeCreateSingleFrame(NUVEC *position, f32 radius);
+    void AIAntinodeDestroy(AIANTINODE *antinode);
+    void AIAntinodeCullSingleFrame(void);
+    void AISysCreatureAntinodeInteraction(AISYS *system, i32 object_count, APIOBJECT **objects, i32 *immovable);
+    void AISysCreatureInteraction3D(AISYS *system, i32 object_count, APIOBJECT **objects, i32 *immovable,
+                                    f32 delta_time);
+    void AISysCreatureInteraction2D(AISYS *system, i32 object_count, APIOBJECT **objects, i32 *immovable,
+                                    f32 delta_time);
+    void LEGO_AISysCreatureInteraction2D(AISYS *system, i32 object_count, APIOBJECT **objects, i32 *immovable,
+                                         f32 delta_time);
+    extern void (*checkantinodefns[3])(APIOBJECT *, AIANTINODE *, NUVEC *, f32);
+    void AISetPathHeightTol(f32 tolerance);
+    void AISysSetPathCylinderCheck(i32 enabled);
+    AIPATHCNX *AIPathFindPathCnxFromIX(AISYS *system, AIPATH *path, u8 from_index, u8 to_index);
     void AIMoveInstruction(AIPACKET *packet, NUVEC *destination, f32 stopping_distance, AIPATHINFO *path_info, i32 mode,
                            f32 movement_parameter);
     void FollowAPIObject(APIOBJECT *object, APIOBJECT *target, i32 flags, f32 movement_parameter);
@@ -860,3 +841,11 @@ f32 AiParseExpression(char *expr);
 
 void AIScriptOpenPakFileParse(AISCRIPT **script_ref, void *pak, char *filename, char *path, VARIPTR *buf,
                               VARIPTR *buf_end);
+
+#ifdef __cplusplus
+bool AISysNodeCanReachThisJumpConnection(GameObject_s &object, AIPATH_s &path, unsigned char node_index,
+                                         AIPATHCNX_s &connection, i32 direction);
+bool AISysCharacterCanReachThisJumpConnection(GameObject_s &object, AIPATH_s &path, AIPATHCNX_s &connection,
+                                              i32 direction);
+u32 DoSomeChecks(GameObject_s &object, AIPATH_s &path, AIPATHCNX_s &connection, i32 direction);
+#endif

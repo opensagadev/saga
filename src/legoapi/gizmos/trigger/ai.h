@@ -11,6 +11,8 @@ typedef struct LEVELSCRIPTPROCESS_s {
 
     u32 unknown_d8;
 } LEVELSCRIPTPROCESS;
+DECOMP_ASSERT(sizeof(LEVELSCRIPTPROCESS) == 0xdc, "Level script processor size");
+DECOMP_ASSERT(offsetof(LEVELSCRIPTPROCESS, processor) == 0x10, "Level script processor state offset");
 
 typedef struct AI_s {
 } AI;

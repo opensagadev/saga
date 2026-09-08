@@ -37,6 +37,7 @@ extern "C" {
     void DebrisTypeStatusAlwaysOff(i32 type);
     void DebrisTypeStatusAlwaysOn(i32 type);
     void DebrisTypeStatusNormal(i32 type);
+    void KillPart(PART_s *part, i32 reason);
     i32 ParticlesPerFrame(f32 particles_per_frame, f32 frame_time);
     i32 ParticlesPerSecond(f32 particles_per_second, f32 frame_time);
     i32 AddFiniteShotPART(i32 part_type, NUVEC *pos, i32 count);

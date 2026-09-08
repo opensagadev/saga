@@ -1,6 +1,7 @@
 #ifndef LEGOAPI_TYPES_H
 #define LEGOAPI_TYPES_H
 #pragma once
+#include "gameapi/ai/aisys/aimessage_types.h"
 
 #include "nu2api/nu3d/ShaderManagerOpenGL.h"
 #include "decomp_assert.h"
@@ -492,9 +493,18 @@ struct AITRIGGERSET_s {
     union {
         u8 pad_0x000[0x204];
         struct {
-            u32 reserved_000;
-            GIZMO_s *triggers[8];
-            AITRIGGERSET_TARGET targets[8];
+            union {
+                u32 reserved_000;
+                FLOWBOX_s *flowbox;
+            };
+            union {
+                GIZMO_s *triggers[8];
+                GIZMO_s *gizmos[8];
+            };
+            union {
+                AITRIGGERSET_TARGET targets[8];
+                AILOCATOR locators[8];
+            };
         };
     };
     i8 trigger_indices[8];
@@ -502,7 +512,8 @@ struct AITRIGGERSET_s {
         u8 pad_0x20c[8];
         struct {
             u8 trigger_count;
-            u8 reserved_20d[3];
+            u8 field_20d;
+            u16 field_0x20e;
             u8 flags;
             u8 reserved_211[3];
         };
@@ -512,8 +523,8 @@ DECOMP_ASSERT(sizeof(AITRIGGERSET_s) == 0x214, "AITRIGGERSET_s size");
 DECOMP_ASSERT(offsetof(AITRIGGERSET_s, flags) == 0x210, "AITRIGGERSET flags offset");
 struct AITRIGGERSETSYS_s {
     AITRIGGERSET_s sets[32];
-    i8 field_0x4280[64];
-    i8 field_0x42c0[64];
+    i8 field_0x4280[64]; // Trigger-set index assigned to each Obj[] slot, or -1.
+    i8 field_0x42c0[64]; // Trigger index within that set, or -1.
     i32 field_0x4300;
 };
 DECOMP_ASSERT(sizeof(AITRIGGERSETSYS_s) == 0x4304, "AITRIGGERSETSYS_s size");
@@ -539,6 +550,7 @@ struct AREASAVE_s {
     f32 challenge_trial_time;
 };
 DECOMP_ASSERT(sizeof(AREASAVE_s) == 0xc, "AREASAVE_s size");
+DECOMP_ASSERT(offsetof(AREASAVE_s, area_complete) == 0x1, "AREASAVE area completion offset");
 DECOMP_ASSERT(offsetof(AREASAVE_s, challenge_trial_time) == 0x8, "AREASAVE challenge time offset");
 struct ATTRACTO_s;
 struct BATARANG_s {
@@ -952,6 +964,7 @@ struct FADEINFO_s {
     FADETYPE_VALUE pending_type;
     i32 field_28;
 };
+DECOMP_ASSERT(offsetof(FADEINFO_s, fade) == 4, "FADEINFO fade offset");
 struct FADETYPE {
     FADETYPE_VALUE type;
 };
@@ -972,10 +985,17 @@ struct FLOWBOXGIZMODATA_s {
 DECOMP_ASSERT(sizeof(FLOWBOXGIZMODATA_s) == 0xc, "FLOWBOXGIZMODATA_s ABI");
 struct FLOWBOXACTION_s {
     FLOWBOXACTION_s *next;
-    char **parameters;
-    i32 parameter_count;
+    union {
+        char **parameters;
+        char **arguments;
+    };
+    union {
+        i32 parameter_count;
+        i32 argument_count;
+    };
     GIZACTIONDEFN_s *definition;
 };
+typedef FLOWBOXACTION_s FLOWBOXACTIONDATA_s;
 DECOMP_ASSERT(sizeof(FLOWBOXACTION_s) == 0x10, "Flow-box action node ABI");
 DECOMP_ASSERT(offsetof(FLOWBOXACTION_s, parameters) == 0x04, "Flow-box action parameters offset");
 DECOMP_ASSERT(offsetof(FLOWBOXACTION_s, parameter_count) == 0x08, "Flow-box action parameter count offset");
@@ -985,7 +1005,13 @@ struct FLOWBOX_s {
     u8 loop_parent_count;
     u8 child_count;
     u8 type;
-    u32 runtime_id;
+    union {
+        u32 runtime_id;
+        struct {
+            u8 ai_trigger_group;
+            u8 runtime_id_upper[3];
+        };
+    };
     u8 last_process_frame;
     u8 loop_checksum;
     union {
@@ -1006,6 +1032,8 @@ struct FLOWBOX_s {
     char *name;
 };
 DECOMP_ASSERT(sizeof(FLOWBOX_s) == 0x20, "FLOWBOX_s ABI");
+DECOMP_ASSERT(offsetof(FLOWBOX_s, state_flags_low) == 0xa, "FLOWBOX completion flags offset");
+DECOMP_ASSERT(offsetof(FLOWBOX_s, ai_trigger_group) == 4, "FLOWBOX AI trigger group offset");
 struct FS_FILEENTRYHDR {};
 struct FadeBase {
     virtual ~FadeBase() = default;
@@ -1350,20 +1378,11 @@ struct FLOWACTION_s {
 };
 DECOMP_ASSERT(sizeof(FLOWACTION_s) == 0x10, "flow action ABI");
 
-struct AIMESSAGESYS_s {
-    i32 count;
-    AIMESSAGE_s *messages;
-    NULISTHDR free_list;
-    NULISTHDR active_list;
-};
-
-struct AIMESSAGE_s {
-    NULISTLNK links;
-    u8 payload[0x24];
-};
-
-DECOMP_ASSERT(sizeof(AIMESSAGE_s) == 0x2c, "AIMESSAGE_s size");
-DECOMP_ASSERT(sizeof(AIMESSAGESYS_s) == 0x18, "AIMESSAGESYS_s size");
+DECOMP_ASSERT(sizeof(FLOWBOXACTIONDATA_s) == 0x10, "FLOWBOXACTIONDATA size");
+DECOMP_ASSERT(offsetof(FLOWBOXACTIONDATA_s, arguments) == 4, "FLOWBOXACTIONDATA arguments offset");
+DECOMP_ASSERT(offsetof(FLOWBOXACTIONDATA_s, argument_count) == 8, "FLOWBOXACTIONDATA argument count offset");
+DECOMP_ASSERT(offsetof(FLOWBOXACTIONDATA_s, definition) == 0xc, "FLOWBOXACTIONDATA definition offset");
+DECOMP_ASSERT(offsetof(FLOWBOX_s, actions) == 0xc, "FLOWBOX actions offset");
 
 // The AI message system: a fixed pool of 0x38-byte messages; the free list
 // and the active list live in the header (ResetGizAIMessageSys fills the
@@ -1397,21 +1416,28 @@ DECOMP_ASSERT(offsetof(GIZAIMESSAGE_s, flags) == 0x36, "GIZAIMESSAGE_s flags off
 // Defined by gizmos/traps/gizbombgen.h.
 struct GIZFLOWPROGRESS_s {
     i32 valid;
-    u32 active[16];
+    union {
+        u32 active[16];
+        u32 state_bit_0[16];
+    };
     union {
         u32 triggered[16];
+        u32 state_bit_8[16];
         u32 reversing[16];
     };
     union {
         u32 completed[16];
+        u32 state_bit_1[16];
         u32 finished[16];
     };
     union {
         u32 latched[16];
+        u32 state_bit_5[16];
         u32 waiting_for_children[16];
     };
     union {
         u32 output_state[16];
+        u32 state_bit_10[16];
         u32 loop_pending[16];
     };
 };
@@ -1522,6 +1548,10 @@ struct GIZMOPICKUP_s {
             u8 state_visible : 1;
             u8 other_state_flags : 5;
         };
+        struct {
+            u8 activation_state_padding : 7;
+            u8 state_activated : 1;
+        };
     }; // 0x17
     union {
         u8 activation_group;
@@ -1543,6 +1573,7 @@ DECOMP_ASSERT(sizeof(GIZMOPICKUP_s) == 0x2c, "GIZMOPICKUP_s ABI");
 DECOMP_ASSERT(offsetof(GIZMOPICKUP_s, position) == 0x08, "GIZMOPICKUP position offset");
 DECOMP_ASSERT(offsetof(GIZMOPICKUP_s, state_flags) == 0x17, "GIZMOPICKUP state flags offset");
 DECOMP_ASSERT(offsetof(GIZMOPICKUP_s, floor_height) == 0x1c, "GIZMOPICKUP floor height offset");
+DECOMP_ASSERT(offsetof(GIZMOPICKUP_s, type_index) == 0x25, "GIZMOPICKUP type index offset");
 
 typedef void (*GIZMOPICKUPUPDATEFN)(WORLDINFO_s *, GIZMOPICKUP_s *);
 typedef void (*GIZMOPICKUPCOLLECTFN)(WORLDINFO_s *, GIZMOPICKUP_s *, i32, GameObject_s *, i32);
@@ -1570,6 +1601,7 @@ struct GIZMO_PICKUP_TYPE {
 };
 DECOMP_ASSERT(sizeof(GIZMO_PICKUP_TYPE) == 0x38, "GIZMO_PICKUP_TYPE ABI");
 DECOMP_ASSERT(offsetof(GIZMO_PICKUP_TYPE, type_code) == 0x0c, "GIZMO_PICKUP_TYPE code offset");
+DECOMP_ASSERT(offsetof(GIZMO_PICKUP_TYPE, score) == 0x12, "GIZMO_PICKUP_TYPE score offset");
 DECOMP_ASSERT(offsetof(GIZMO_PICKUP_TYPE, update_fn) == 0x24, "GIZMO_PICKUP_TYPE update offset");
 
 struct GIZMOPICKUPSYS_s {
@@ -1661,7 +1693,13 @@ struct GIZSPINNER_s {
     NUVEC position;                  // 0x05c
     GAMEANIMSET_s *anim_set;         // 0x068
     GAMEANIMOBJ_s *primary_anim_obj; // 0x06c
-    u8 field_0x070[8];
+    union {
+        u8 field_0x070[8];
+        struct {
+            f32 field_70;
+            u32 field_74;
+        };
+    };
     f32 animation_speed; // 0x078
     u16 rotation;        // 0x07c
     u16 previous_rotation;
@@ -1689,6 +1727,7 @@ struct GIZSPINNER_s {
 DECOMP_ASSERT(sizeof(GIZSPINNER_s) == 0x304, "GIZSPINNER_s ABI");
 DECOMP_ASSERT(offsetof(GIZSPINNER_s, name) == 0x40, "GIZSPINNER name offset");
 DECOMP_ASSERT(offsetof(GIZSPINNER_s, position) == 0x5c, "GIZSPINNER position offset");
+DECOMP_ASSERT(offsetof(GIZSPINNER_s, field_70) == 0x70, "GIZSPINNER trigger progress offset");
 DECOMP_ASSERT(offsetof(GIZSPINNER_s, anim_set) == 0x68, "GIZSPINNER anim-set offset");
 DECOMP_ASSERT(offsetof(GIZSPINNER_s, flags) == 0xac, "GIZSPINNER flags offset");
 DECOMP_ASSERT(offsetof(GIZSPINNER_s, animation_points) == 0x2dc, "GIZSPINNER animation-points offset");
@@ -3439,7 +3478,10 @@ struct GIZBUILDIT_s {
     f32 field_0x54;
     f32 radius_scale; // 0x58
     i16 field_0x5c;
-    i16 field_0x5e;
+    union {
+        i16 field_0x5e;
+        u16 completion_score;
+    };
     i16 field_0x60;
     i16 field_0x62;
     NUVEC effect_position; // 0x64
@@ -3461,6 +3503,7 @@ struct GIZBUILDIT_s {
     MechObjectInterface *GetMechObjectInterface();
 };
 DECOMP_ASSERT(sizeof(GIZBUILDIT_s) == 0x84, "GIZBUILDIT_s ABI");
+DECOMP_ASSERT(offsetof(GIZBUILDIT_s, completion_score) == 0x5e, "GIZBUILDIT completion score offset");
 DECOMP_ASSERT(offsetof(GIZBUILDIT_s, mech_object_interface) == 0x1c, "GIZBUILDIT interface offset");
 DECOMP_ASSERT(offsetof(GIZBUILDIT_s, radius_scale) == 0x58, "GIZBUILDIT radius scale offset");
 DECOMP_ASSERT(offsetof(GIZBUILDIT_s, start_position) == 0x2c, "GIZBUILDIT start position offset");
@@ -3581,7 +3624,8 @@ struct GIZFORCE_s {
     i16 blowup_type;  // 0x8c
     union {
         i16 debris_type;
-        u16 pickup_count; // 0x8e
+        u16 pickup_count;     // 0x8e
+        u16 completion_score; // 0x8e
     };
     union {
         i16 hit_points;
@@ -3621,6 +3665,8 @@ struct GIZFORCE_s {
     MechObjectInterface *GetMechObjectInterface();
 };
 DECOMP_ASSERT(sizeof(GIZFORCE_s) == 0xac, "GIZFORCE_s ABI");
+DECOMP_ASSERT(offsetof(GIZFORCE_s, mech_object_interface) == 0xa4, "Force object interface offset");
+DECOMP_ASSERT(offsetof(GIZFORCE_s, completion_score) == 0x8e, "GIZFORCE completion score offset");
 DECOMP_ASSERT(offsetof(GIZFORCE_s, anim_set) == 0x28, "GIZFORCE animation set offset");
 DECOMP_ASSERT(offsetof(GIZFORCE_s, config_flags) == 0x78, "GIZFORCE config flags offset");
 DECOMP_ASSERT(offsetof(GIZFORCE_s, pickup_count) == 0x8e, "GIZFORCE pickup count offset");
@@ -3750,6 +3796,8 @@ DECOMP_ASSERT(offsetof(GIZMOBLOWUP_s, draw_flags) == 0xa0, "GIZMOBLOWUP draw fla
 DECOMP_ASSERT(offsetof(GIZMOBLOWUP_s, type) == 0xac, "GIZMOBLOWUP type offset");
 DECOMP_ASSERT(offsetof(GIZMOBLOWUP_s, target_scale) == 0xb0, "GIZMOBLOWUP target scale offset");
 DECOMP_ASSERT(offsetof(GIZMOBLOWUP_s, reflection_height) == 0xdc, "GIZMOBLOWUP reflection height offset");
+DECOMP_ASSERT(offsetof(GIZMOBLOWUP_s, field_0xa8) == 0xa8, "GIZMOBLOWUP base score offset");
+DECOMP_ASSERT(offsetof(GIZMOBLOWUP_s, field_0x115) == 0x115, "GIZMOBLOWUP score multiplier offset");
 DECOMP_ASSERT(offsetof(GIZMOBLOWUP_s, name) == 0xfa, "GIZMOBLOWUP name offset");
 DECOMP_ASSERT(offsetof(GIZMOBLOWUP_s, platform_id) == 0x10a, "GIZMOBLOWUP platform id offset");
 DECOMP_ASSERT(offsetof(GIZMOBLOWUP_s, override_special) == 0x11c, "GIZMOBLOWUP override special offset");
@@ -3795,23 +3843,30 @@ struct GIZOBSTACLE_s {
     i16 trigger_box_yaw;
     i16 room_id;     // 0x86
     i16 blowup_type; // 0x88, name-table id until PostLoad
-    i16 pickup_count;
+    union {
+        i16 pickup_count;
+        u16 completion_score;
+    };
     i16 start_sfx_id; // 0x8c
     i16 stop_sfx_id;  // 0x8e
     u8 state;         // 0x90
     u8 mode;          // 0x91
     u8 trigger_mode;  // 0x92
-    u8 field_0x93[5];
-    u8 progress_flags; // 0x98, persisted by GizObstacles progress data
-    u8 control_flags;  // 0x99, GIZOBSTACLE_CONTROL_FLAGS
+    u8 field_0x93;
+    MechObjectInterface *mech_object_interface; // 0x94
+    u8 progress_flags;                          // 0x98, persisted by GizObstacles progress data
+    u8 control_flags;                           // 0x99, GIZOBSTACLE_CONTROL_FLAGS
     u8 field_0x9a[2];
     i32 proximity_output; // 0x9c
     u8 runtime_flags;     // 0xa0, GIZOBSTACLE_RUNTIME_FLAGS
     u8 field_a1_0xa1;
     u8 field_0xa2[2];
     void ClearMechObjectInterface();
-    void GetMechObjectInterface();
+    MechObjectInterface *GetMechObjectInterface();
 };
+DECOMP_ASSERT(offsetof(GIZOBSTACLE_s, mech_object_interface) == 0x94, "Obstacle interface offset");
+DECOMP_ASSERT(offsetof(GIZOBSTACLE_s, evaluated_position) == 0x28, "Obstacle evaluated position offset");
+DECOMP_ASSERT(offsetof(GIZOBSTACLE_s, field_0x58) == 0x58, "Obstacle evaluated radius offset");
 
 enum GIZOBSTACLE_CONFIG_FLAGS : u32 {
     GIZOBSTACLE_CONFIG_INVERT_PROXIMITY = 0x0001,
@@ -3863,6 +3918,7 @@ enum GIZOBSTACLE_RUNTIME_FLAGS : u8 {
 };
 
 DECOMP_ASSERT(sizeof(GIZOBSTACLE_s) == 0xa4, "GIZOBSTACLE_s ABI");
+DECOMP_ASSERT(offsetof(GIZOBSTACLE_s, completion_score) == 0x8a, "GIZOBSTACLE completion score offset");
 DECOMP_ASSERT(offsetof(GIZOBSTACLE_s, anim_set) == 0x34, "GIZOBSTACLE anim set offset");
 DECOMP_ASSERT(offsetof(GIZOBSTACLE_s, config_flags) == 0x68, "GIZOBSTACLE config flags offset");
 DECOMP_ASSERT(offsetof(GIZOBSTACLE_s, progress_flags) == 0x98, "GIZOBSTACLE progress flags offset");
@@ -4049,7 +4105,13 @@ struct GIZTURRET_s {
     i32 field_0x70;
     NUVEC field_0x74[4];
     NUMTX field_0xa4;
-    u8 field_0xe4[0xec - 0xe4];
+    union {
+        u8 field_0xe4[0xec - 0xe4];
+        struct {
+            u8 reserved_e4[4];
+            GameObject_s *controller; // 0xe8
+        };
+    };
     f32 field_0xec;
     f32 field_0xf0;
     f32 reflection_alpha; // 0xf4
@@ -4065,7 +4127,10 @@ struct GIZTURRET_s {
             u16 behavior_flags_high;
         };
     };
-    i16 field_0x10c;
+    union {
+        i16 field_0x10c;
+        u16 completion_score;
+    };
     i16 room_id; // 0x10e
     i16 field_0x110;
     i16 field_0x112;
@@ -4093,6 +4158,8 @@ struct GIZTURRET_s {
     void GetMechObjectInterface();
 };
 DECOMP_ASSERT(sizeof(GIZTURRET_s) == 0x144, "GIZTURRET_s ABI");
+DECOMP_ASSERT(offsetof(GIZTURRET_s, controller) == 0xe8, "GIZTURRET controller offset");
+DECOMP_ASSERT(offsetof(GIZTURRET_s, completion_score) == 0x10c, "GIZTURRET completion score offset");
 DECOMP_ASSERT(offsetof(GIZTURRET_s, position) == 0x24, "GIZTURRET position offset");
 DECOMP_ASSERT(offsetof(GIZTURRET_s, pitch) == 0x54, "GIZTURRET pitch offset");
 DECOMP_ASSERT(offsetof(GIZTURRET_s, yaw) == 0x60, "GIZTURRET yaw offset");
@@ -4243,24 +4310,24 @@ enum LEVER_FLAGS : u16 {
 };
 
 struct LEVER_s {
-    NUMTX transform;            // 0x00
-    void *mech_object;          // 0x40
-    NUVEC floor_position;       // 0x44
-    NUVEC target_offset;        // 0x50
-    char name[0x10];            // 0x5c
-    NUVEC position;             // 0x6c
-    f32 idle_animation_timer;   // 0x78
-    f32 pull_progress;          // 0x7c
-    f32 auto_reset_timer;       // 0x80
-    f32 flash_timer;            // 0x84
-    f32 auto_reset_delay;       // 0x88
-    f32 target_indicator_scale; // 0x8c
-    u16 y_rotation;             // 0x90
-    i16 model_special_index;    // 0x92
-    i16 platform_id;            // 0x94
-    u16 animation_frame;        // 0x96
-    u16 target_x_rotation;      // 0x98
-    u16 target_z_rotation;      // 0x9a
+    NUMTX transform;                  // 0x00
+    MechObjectInterface *mech_object; // 0x40
+    NUVEC floor_position;             // 0x44
+    NUVEC target_offset;              // 0x50
+    char name[0x10];                  // 0x5c
+    NUVEC position;                   // 0x6c
+    f32 idle_animation_timer;         // 0x78
+    f32 pull_progress;                // 0x7c
+    f32 auto_reset_timer;             // 0x80
+    f32 flash_timer;                  // 0x84
+    f32 auto_reset_delay;             // 0x88
+    f32 target_indicator_scale;       // 0x8c
+    u16 y_rotation;                   // 0x90
+    i16 model_special_index;          // 0x92
+    i16 platform_id;                  // 0x94
+    u16 animation_frame;              // 0x96
+    u16 target_x_rotation;            // 0x98
+    u16 target_z_rotation;            // 0x9a
     union {
         u16 flags; // 0x9c, LEVER_FLAGS
         struct {
@@ -4279,9 +4346,10 @@ struct LEVER_s {
     u8 field_0x9f[9];
 
     void ClearMechObjectInterface();
-    void GetMechObjectInterface();
+    MechObjectInterface *GetMechObjectInterface();
 };
 DECOMP_ASSERT(sizeof(LEVER_s) == 0xa8, "LEVER_s ABI");
+DECOMP_ASSERT(offsetof(LEVER_s, mech_object) == 0x40, "Lever interface pointer offset");
 DECOMP_ASSERT(offsetof(LEVER_s, target_offset) == 0x50, "LEVER target offset");
 DECOMP_ASSERT(offsetof(LEVER_s, floor_position) == 0x44, "LEVER movement target offset");
 DECOMP_ASSERT(offsetof(LEVER_s, name) == 0x5c, "LEVER name offset");
@@ -4492,7 +4560,9 @@ struct PART_s {
     i32 *lighting_template;
     i32 field_1e0, field_1e4;
     f32 field_1e8, field_1ec;
-    i32 field_1f0, field_1f4, field_1f8;
+    i32 field_1f0;
+    i32 field_1f4;
+    i32 field_1f8;
     f32 field_1fc;
     u32 field_200;
     u16 field_204;
@@ -4508,6 +4578,11 @@ struct PART_s {
     void GetMechObjectInterface();
 };
 DECOMP_ASSERT(sizeof(PART_s) == 0x224, "PART size");
+DECOMP_ASSERT(offsetof(PART_s, field_1c0) == 0x1c0, "PART kill callback offset");
+DECOMP_ASSERT(offsetof(PART_s, debris_key) == 0x1d8, "PART debris key offset");
+DECOMP_ASSERT(offsetof(PART_s, lighting_template) == 0x1dc, "PART dynamic handle offset");
+DECOMP_ASSERT(offsetof(PART_s, field_1f4) == 0x1f4, "PART death effect offset");
+DECOMP_ASSERT(offsetof(PART_s, field_1fc) == 0x1fc, "PART death effect scale offset");
 DECOMP_ASSERT(offsetof(PART_s, position) == 0x30, "PART position offset");
 DECOMP_ASSERT(offsetof(PART_s, velocity) == 0x80, "PART velocity offset");
 DECOMP_ASSERT(offsetof(PART_s, owner) == 0xd4, "PART owner offset");

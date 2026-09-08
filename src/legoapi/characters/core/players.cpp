@@ -1244,13 +1244,6 @@ void StarWars_AutoSetAICapabilities(GameObject_s *object);
 i32 CanPullLevers(i32 id);
 extern f32 DEFAULT_MOVE_RANGE;
 
-i32 CanPullLevers(i32 id) {
-    u32 flags = CDataList[id].model_flags;
-    if ((flags & 0x1000010) == 0x1000010)
-        return 0;
-    return (flags & 0x40088) != 0;
-}
-
 void InitPlayerAI(GameObject_s *object) {
     StarWars_AutoSetAICapabilities(object);
     u8 *b = reinterpret_cast<u8 *>(object);

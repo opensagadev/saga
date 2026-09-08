@@ -5,11 +5,22 @@
 #include "legoapi/world/level.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nutex.h"
-#include "globals.h"
-#include "gameapi/ai/aisys/aisys.h"
+#include "legoapi/gizmo/object/takeoverobjects.h"
+#include "legoapi/items/base/apiobject.h"
 #include "legoapi/characters/core/character.h"
-#include "legoapi/characters/motion.h"
+#include "legoapi/world/level.h"
+#include "globals.h"
+#include "nu2api/nucore/nustring.h"
 #include <string.h>
+#include "legoapi/characters/core/players.h"
+#include "legoapi/props/doors/door.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/items/objects/gameobjects.h"
+
+extern i32 Area_CharIDInCurrentList(i32 character_id);
+void SnapCreaturePos(GameObject_s *, NUVEC *, i32, AIPATHINFO_s *, i32);
+void InitPlayerAI(GameObject_s *);
+void TakeOverGameObject(GameObject_s *, GameObject_s *, i32, i32);
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -41,19 +52,19 @@ void ReleaseTakeOver(GameObject_s *object, i32) {
         void *field_c8;
     } rider_script, object_script;
     DECOMP_ASSERT(sizeof(ScriptSnapshot) == 0xcc, "Takeover script snapshot ABI");
-    memcpy(&rider_script.process, rider->ai.script_process, sizeof(rider_script.process));
+    memcpy(&rider_script.process, &rider->ai.script_process, sizeof(rider_script.process));
     rider_script.field_c8 = rider->ai.field_0xc8;
     u8 rider_set = rider->ai.creature_set;
-    memcpy(&object_script.process, object->ai.script_process, sizeof(object_script.process));
+    memcpy(&object_script.process, &object->ai.script_process, sizeof(object_script.process));
     object_script.field_c8 = object->ai.field_0xc8;
     u8 object_set = object->ai.creature_set;
     u16 rider_flag = rider->apiobj.field_0x1f8 & 0x100;
     u16 object_flag = object->apiobj.field_0x1f8 & 0x100;
     if ((rider->field_0xf00 & 2) == 0 && TagCode(rider, object, 1, 0, 0) == 0)
         return;
-    memcpy(rider->ai.script_process, &object_script.process, sizeof(object_script.process));
+    memcpy(&rider->ai.script_process, &object_script.process, sizeof(object_script.process));
     rider->ai.field_0xc8 = object_script.field_c8;
-    memcpy(object->ai.script_process, &rider_script.process, sizeof(rider_script.process));
+    memcpy(&object->ai.script_process, &rider_script.process, sizeof(rider_script.process));
     object->ai.field_0xc8 = rider_script.field_c8;
     rider->ai.creature_set = rider_set;
     object->ai.creature_set = object_set;
@@ -117,48 +128,133 @@ void SuperCounters_Reset(i32 area_index) {
 void UpdatePickupFlicker() {
 }
 
-struct TAKEOVER_OBJECT_RECORD {
-    GameObject_s *object;
-    u8 saved_state[0x10];
-    char script_name[0x10];
-    i16 model;
-    u8 creature_index;
-    u8 original_level;
-    u8 current_level;
-    u8 reserved_29[3];
-};
-DECOMP_ASSERT(sizeof(TAKEOVER_OBJECT_RECORD) == 0x2c, "Takeover record size");
-DECOMP_ASSERT(offsetof(TAKEOVER_OBJECT_RECORD, script_name) == 0x14, "Takeover script offset");
-DECOMP_ASSERT(offsetof(TAKEOVER_OBJECT_RECORD, model) == 0x24, "Takeover model offset");
-TAKEOVER_OBJECT_RECORD takeoverobjects[8];
+TAKEOVEROBJECT_s takeoverobjects[8];
 i32 num_takeoverobjects;
+
+void ClearTakeOverObjectSys() {
+    memset(takeoverobjects, 0, sizeof(takeoverobjects));
+    num_takeoverobjects = 0;
+}
 
 void RegisterTakeOverObject(GameObject_s *object) {
     if ((object->apiobj.character_data->game_character->flags_090 & 0x80) != 0 ||
         (object->apiobj.field_0x1f4 & 0x4000) == 0 || (WORLD->current_level->flags & LEVEL_FORGET_TAKEOVERS) != 0) {
         return;
     }
-    const u8 level = static_cast<u8>(WORLD->current_level->area_level_index);
+    u8 level = static_cast<u8>(WORLD->current_level->area_level_index);
     if (num_takeoverobjects > 7 || (object->apiobj.field_0x1f4 & 0x400) == 0) {
         return;
     }
-    i32 index = 0;
-    while (index < num_takeoverobjects) {
-        if (takeoverobjects[index].object == object)
+    i32 index;
+    for (index = 0; index < num_takeoverobjects; ++index) {
+        if (takeoverobjects[index].object == object) {
             return;
-        ++index;
+        }
     }
-    TAKEOVER_OBJECT_RECORD &record = takeoverobjects[index];
-    record.object = object;
-    AISCRIPTPROCESS *process = reinterpret_cast<AISCRIPTPROCESS *>(object->ai.script_process);
-    if (process->script != NULL && process->script->name != NULL) {
-        NuStrNCpy(record.script_name, process->script->name, 16);
+    takeoverobjects[index].object = object;
+    AISCRIPT *script = object->ai.script_process.script;
+    if (script != NULL && script->name != NULL) {
+        NuStrNCpy(takeoverobjects[index].script_name, script->name, 0x10);
     }
-    record.model = object->id;
-    record.creature_index = object->ai.field_0x134;
-    record.original_level = level;
-    record.current_level = level;
+    takeoverobjects[index].character_id = object->id;
+    takeoverobjects[index].registered_level = level;
+    takeoverobjects[index].current_level = level;
+    takeoverobjects[index].source_creature = object->ai.field_0x134;
     ++num_takeoverobjects;
+}
+
+void StoreStatusTakeOverObjectSys() {
+    if (netclient != 0) {
+        return;
+    }
+    u8 level = static_cast<u8>(WORLD->current_level->area_level_index);
+    TAKEOVEROBJECT_s *record = takeoverobjects;
+    for (i32 index = 0; index < num_takeoverobjects; ++index, ++record) {
+        GameObject_s *object = record->object;
+        if (object == NULL) {
+            continue;
+        }
+        record->last_safe_position = object->apiobj.last_safe_position;
+        record->heading = object->apiobj.field_0x276;
+        u8 contact = 0xff;
+        if (object->field_0xcc0 != NULL && LEGOCONTEXT_BEENTAKENOVER != -1 &&
+            object->field_0xcc0->character_context == LEGOCONTEXT_BEENTAKENOVER &&
+            static_cast<u8>(object->apiobj.field_0x27c) != 0xff && Door_Last != NULL &&
+            Door_Last->takeover_character_mask != 0) {
+            if (Door_Last->takeover_character_mask == ~static_cast<u64>(0)) {
+                contact = static_cast<u8>(object->apiobj.field_0x27c);
+            } else {
+                u8 character_index = static_cast<u8>(Area_CharIDInCurrentList(object->id));
+                if (character_index < 63 && ((Door_Last->takeover_character_mask >> character_index) & 1) != 0) {
+                    contact = static_cast<u8>(record->object->apiobj.field_0x27c);
+                }
+            }
+        }
+        record->contact_index = contact;
+        object = record->object;
+        record->hitpoints = object->current_hp;
+        if (record->hitpoints == 0 && object->hitpoints != 0) {
+            record->hitpoints = object->hitpoints;
+        }
+        record->current_level = level;
+    }
+}
+
+void ReStoreStatusTakeOverObjectSys(i32 restore_progress) {
+    if (netclient != 0) {
+        return;
+    }
+    i32 level = static_cast<i8>(WORLD->current_level->area_level_index);
+    for (i32 index = 0; index < num_takeoverobjects; ++index) {
+        TAKEOVEROBJECT_s *record = &takeoverobjects[index];
+        if (restore_progress != 0 || record->current_level != level) {
+            record->object = NULL;
+        }
+        if (record->contact_index != 0xff) {
+            record->current_level = static_cast<u8>(level);
+        }
+        if (record->registered_level == level) {
+            if (record->object == NULL) {
+                if (record->source_creature != 0xff) {
+                    for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index) {
+                        if (Obj[object_index].ai.field_0x134 == record->source_creature) {
+                            record->object = &Obj[object_index];
+                            break;
+                        }
+                    }
+                } else if (record->current_level == level) {
+                    record->object =
+                        AddDynamicCreature(record->character_id, &record->last_safe_position, record->heading,
+                                           record->script_name, NULL, NULL, 1, NULL, NULL, 0, 0);
+                }
+            }
+            if (record->object != NULL && record->current_level != level) {
+                KillGameObject(record->object, 5, 0);
+                record->object = NULL;
+                continue;
+            }
+        } else if (record->current_level == level && record->object == NULL) {
+            record->object = AddDynamicCreature(record->character_id, &record->last_safe_position, record->heading,
+                                                record->script_name, NULL, NULL, 1, NULL, NULL, 0, 0);
+        }
+        GameObject_s *object = record->object;
+        if (object != NULL) {
+            object->current_hp = record->hitpoints;
+            GameObject_s *controller;
+            if (record->contact_index != 0xff && (controller = Player[record->contact_index]) != NULL) {
+                object->apiobj.flags_high |= 0x10;
+                object->apiobj.flags_low |= 1;
+                object->apiobj.field_0x287 = 0;
+                object->ai.reset_mode = 2;
+                SnapCreaturePos(object, &controller->apiobj.position, controller->apiobj.field_0x276,
+                                &controller->ai.path_info, 1);
+                InitPlayerAI(controller);
+                TakeOverGameObject(controller, record->object, 0, 1);
+            } else {
+                SnapCreaturePos(record->object, &record->last_safe_position, record->heading, NULL, 1);
+            }
+        }
+    }
 }
 
 void SuperCounters_FindPickup(WORLDINFO_s *, GIZMO_s *, nuvec_s *, SUPERCOUNTERPICKUP **) {

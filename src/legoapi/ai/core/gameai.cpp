@@ -1,6 +1,10 @@
 #include "decomp.h"
+#include "globals.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/numath/numtx.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/gizmos/transport/tightropes.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/nuvec.h"
 
@@ -20,6 +24,11 @@ extern i32 adaptivedifficulty[3];
 i8 adtabentries[9][4] = {{-1, -1, -1, -1}, {-1, -1, -1, 0}, {-1, -1, 0, 0}, {-1, 0, 0, 0}, {0, 0, 0, 0},
                          {1, 0, 0, 0},     {1, 1, 0, 0},    {1, 1, 1, 0},   {1, 1, 1, 1}};
 i8 (*adtab)[4] = &adtabentries[4];
+
+extern void InitSurfaceInfo(GameObject_s *);
+extern i32 SetObjOnSurface(GameObject_s *, i32);
+extern void Player_ClearContext(GameObject_s *, i32);
+extern void Player_ResetContexts(PLAYERPACKET_s *);
 
 i32 CheckPosAIArea(AIAREA_s *area, nuvec_s *position, float tolerance) {
     if (position == NULL || area == NULL) {

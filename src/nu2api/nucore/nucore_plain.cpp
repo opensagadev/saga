@@ -2547,7 +2547,13 @@ extern "C" {
     i32 NuSpecialClipTestShadowLights(NUVEC *, NUVEC *, i32) {
         return 0;
     }
-    i32 NuSpecialCompare(nuhspecial_s *, nuhspecial_s *) {
+    i32 NuSpecialCompare(nuhspecial_s *first, nuhspecial_s *second) {
+        if (first->special != NULL && first->special == second->special) {
+            return 1;
+        }
+        if (first->display_special != NULL && first->display_special == second->display_special) {
+            return 1;
+        }
         return 0;
     }
     void NuSpecialConstAlpha(i32 enabled, f32 alpha) {

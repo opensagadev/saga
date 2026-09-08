@@ -85,8 +85,8 @@ GameObject_s *AddGameObject(i32 id) {
     }
 
     object->ai.owner = object;
-    object->field_0x2a8 = 0;
-    object->field_0x2ac = 0;
+    object->apiobj.field_0x2a8 = 0;
+    object->apiobj.field_0x2ac = 0;
     object->apiobj.objptr = object;
     object->apiobj.ai = &object->ai;
 
@@ -134,9 +134,6 @@ static __used__ void Punch_HitExtraCode_LSW(GameObject_s *, nuvec_s *) {
 }
 
 static __used__ void TrenchKilledCallback(GameObject_s *) {
-}
-
-static __used__ void TightRope_MoveUpdate(GameObject_s *, i32) {
 }
 
 static __used__ void SurfaceInfo_ExtraReflect(GameObject_s *) {

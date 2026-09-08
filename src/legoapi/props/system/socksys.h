@@ -84,21 +84,24 @@ DECOMP_ASSERT(sizeof(SOCKPOSITION) == 0x38, "SOCKPOSITION size");
 // `sock_lateral_`, `sock_trackin_`, `sock_limit_`) and are resolved against
 // the scene splines by SockSysFindInScene.
 typedef struct SOCK {
-    NUGSPLINE *cam;         // 0x00 — sock_cam_ rail; NULL until found in scene
-    NUGSPLINE *a;           // 0x04 — sock_a_ rail spline
-    NUGSPLINE *b;           // 0x08 — sock_b_ rail spline
-    NUGSPLINE *c;           // 0x0c — sock_c_ rail spline (optional)
-    NUGSPLINE *d;           // 0x10 — sock_d_ rail spline (optional)
-    NUGSPLINE *mid;         // 0x14 — sock_mid_ centre spline (optional)
-    NUGSPLINE *left;        // 0x18 — sock_left_ rail spline (optional)
-    NUGSPLINE *right;       // 0x1c — sock_right_ rail spline (optional)
-    NUGSPLINE *look;        // 0x20 — sock_look_ spline (optional)
-    NUGSPLINE *lateral;     // 0x24 — sock_lateral_ spline (optional)
-    NUGSPLINE *trackin;     // 0x28 — sock_trackin_ spline (optional)
-    NUGSPLINE *limit;       // 0x2c — sock_limit_ spline (optional)
-    u16 length;             // 0x30 — rail point count - 1
-    u8 valid;               // 0x32 — 1 once the socket has been populated
-    u8 unknown_33;          // 0x33
+    NUGSPLINE *cam;     // 0x00 — sock_cam_ rail; NULL until found in scene
+    NUGSPLINE *a;       // 0x04 — sock_a_ rail spline
+    NUGSPLINE *b;       // 0x08 — sock_b_ rail spline
+    NUGSPLINE *c;       // 0x0c — sock_c_ rail spline (optional)
+    NUGSPLINE *d;       // 0x10 — sock_d_ rail spline (optional)
+    NUGSPLINE *mid;     // 0x14 — sock_mid_ centre spline (optional)
+    NUGSPLINE *left;    // 0x18 — sock_left_ rail spline (optional)
+    NUGSPLINE *right;   // 0x1c — sock_right_ rail spline (optional)
+    NUGSPLINE *look;    // 0x20 — sock_look_ spline (optional)
+    NUGSPLINE *lateral; // 0x24 — sock_lateral_ spline (optional)
+    NUGSPLINE *trackin; // 0x28 — sock_trackin_ spline (optional)
+    NUGSPLINE *limit;   // 0x2c — sock_limit_ spline (optional)
+    u16 length;         // 0x30 — rail point count - 1
+    u8 valid;           // 0x32 — 1 once the socket has been populated
+    union {
+        u8 unknown_33;
+        u8 looping;
+    }; // 0x33
     SOCKSEGMENT *segments;  // 0x34 — generated data for each rail segment
     SOCKROT *cam_rotations; // 0x38 — generated camera-rail rotations
     SOCKROT *mid_rotations; // 0x3c — generated midpoint-rail rotations
@@ -168,6 +171,10 @@ typedef struct SOCK {
     u8 unknown_114[40];             // 0x114
 } SOCK;
 
+DECOMP_ASSERT(offsetof(SOCK, looping) == 0x33, "SOCK loop flag offset");
+DECOMP_ASSERT(offsetof(SOCK, length) == 0x30, "SOCK rail length offset");
+DECOMP_ASSERT(offsetof(SOCKPOSITION, midpoint_rotation) == 0x24, "SOCKPOSITION midpoint rotation offset");
+
 typedef struct SOCKSYS {
     SOCK *sock; // 0x0 — array of 64 SOCK entries
     i32 count;  // 0x4 — number of sockets with a valid rail
@@ -178,6 +185,10 @@ DECOMP_ASSERT(offsetof(SOCK, mid_force_outer_radius) == 0x78, "SOCK outer force 
 
 #ifdef __cplusplus
 extern "C" {
+    SOCK *FindSock(SOCKSYS *system, char *name);
+    void SetSockPostion(SOCKSYS *system, SOCKPOSITION *position, i32 index, i32 segment, f32 ratio);
+    void MoveSockPosition(SOCKSYS *system, SOCKPOSITION *source, f32 distance, SOCKPOSITION *result);
+    f32 MidDistanceFromSockStart(SOCKSYS *system, SOCKPOSITION *position);
 #endif
 
     void SockSysFindInScene(SOCKSYS *sock_sys, NUGSCN *gscn);

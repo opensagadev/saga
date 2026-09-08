@@ -13,6 +13,8 @@ extern i32 PickupFlickerFrame;
 typedef struct GIZMOPICKUP_s GIZMOPICKUP;
 
 ADDGIZMOTYPE *GizmoPickups_RegisterGizmo(i32 type_id);
+GIZMOPICKUP_s *GizmoPickup_FindByName(WORLDINFO_s *world, char *name);
+i32 GizmoPickup_BeenTurnedOn(GIZMOPICKUP_s *pickup);
 u32 GizmoPickups_TotalScore(void *world);
 
 extern "C" {

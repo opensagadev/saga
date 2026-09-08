@@ -7,23 +7,24 @@ struct GIZFORCESYS_s;
 
 struct GAMEANIMOBJ_s;
 struct GizForceObjectInterface : MechObjectInterface {
+    GIZFORCE_s &force;
+    GAMEANIMOBJ_s *selected_object;
     GizForceObjectInterface(GIZFORCE_s &);
     void GetPos(VuVec &, i32) const override;
     f32 GetRadius() const override;
     const char *GetTargetName() const override;
+    void *GetTgtVoidPtr() override;
     i32 GetObjectType() const override {
         return 5;
     }
-    void *GetTgtVoidPtr() override;
     GIZFORCE_s *GetGizForce() override {
-        return force;
+        return &force;
     }
     void TargetedFlash() override;
-    virtual ~GizForceObjectInterface();
-    GIZFORCE_s *force;
-    GAMEANIMOBJ_s *animation_object;
+    ~GizForceObjectInterface() override;
 };
-DECOMP_ASSERT(sizeof(GizForceObjectInterface) == 16, "GizForceObjectInterface ABI");
+DECOMP_ASSERT(sizeof(GizForceObjectInterface) == 0x10, "Force object interface size");
+DECOMP_ASSERT(offsetof(GizForceObjectInterface, selected_object) == 0xc, "Force selected object offset");
 
 GIZFORCE_s *GizForce_FindByName(GIZFORCESYS_s *, char *);
 GIZFORCE_s *GizForces_FindForce(WORLDINFO_s *, char *);

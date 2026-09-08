@@ -15,6 +15,19 @@
 
 #include <string.h>
 
+GIZSPINNER_s *GizSpinner_FindBySpecialName(void *world_ptr, char *name) {
+    WORLDINFO_s *world = static_cast<WORLDINFO_s *>(world_ptr);
+    if (name != NULL && world != NULL) {
+        for (i32 index = 0; index < world->current_level->max_spinners; ++index) {
+            GIZSPINNER_s *spinner = &world->spinners[index];
+            if (spinner != NULL && (spinner->flags & 1) != 0 &&
+                NuStrCmp(NuSpecialGetName(&spinner->special), name) == 0)
+                return spinner;
+        }
+    }
+    return NULL;
+}
+
 extern "C" {
     void NewTerrPlatformsOff(void);
     i32 ShadowInfo(void);

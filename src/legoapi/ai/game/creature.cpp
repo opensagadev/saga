@@ -16,6 +16,28 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
+void FreeTorpedoPacket(TORPEDOPACKET_s **packet);
+void RemoveGameObject(GameObject_s *object, i32 immediate);
+
+void ClearAICreatures() {
+    GameObject_s *object = Obj;
+    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
+        if ((object->apiobj.flags_low & 1) != 0 && (object->apiobj.field_0x1f4 & 0x400) != 0) {
+            FreeTorpedoPacket(&object->torpedo);
+            RemoveGameObject(object, 1);
+        }
+    }
+}
+
+void AICreatureResumeScript(GameObject_s *object) {
+    AISCRIPT *script = object->ai.script_process.base_script;
+    if (script != NULL) {
+        AIScriptProcessorInit(WORLD->ai_sys, &object->ai, &object->ai.script_process, NULL, NULL, NULL, 0, script,
+                              script->base_state);
+        object->ai.script_process.active_ref_count = 0;
+    }
+}
+
 extern "C" {
     extern NUVEC plr_lastpos;
     AIGROUP *CreateAIGroup(AISYS *system, u8 count_across, f32 x_spacing, f32 z_spacing, f32 max_speed);
@@ -142,7 +164,7 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
     object->apiobj.minviewheight = creature.min_view_height;
 
     const u8 column = object->ai.group_column;
-    const u8 row = object->ai.group_member;
+    const u8 row = object->ai.group_row;
     NUVEC offset = {
         static_cast<f32>((column + 1) / 2) * creature.x_spacing * ((column & 1) != 0 ? -1.0f : 1.0f),
         0.0f,
@@ -156,7 +178,7 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
         angle = locator->flags;
         NuVecRotateY(&offset, &offset, angle);
         NuVecAdd(&object->apiobj.position, &offset, &locator->position);
-        path_info = reinterpret_cast<AIPATHINFO *>(&locator->path);
+        path_info = &locator->path_info;
         object->ai.respawn_locator = NULL;
     } else {
         angle = creature.y_rot;
@@ -186,7 +208,7 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
     AISysCharacterSetPathCnx(packet, &object->apiobj.position, path_info->connection, path_info->direction);
     object->apiobj.field_0x287 = 0;
 
-    AISCRIPTPROCESS *processor = reinterpret_cast<AISCRIPTPROCESS *>(&object->ai);
+    AISCRIPTPROCESS *processor = &object->ai.script_process;
     AIScriptProcessorInit(WORLD->ai_sys, packet, processor, &creature, creature.script_name, NULL, 1, NULL, NULL);
     object->ai.field_0x138 = 0xff;
     object->ai.field_0x139 = 0;
@@ -210,12 +232,12 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
 
     if (object->ai.group != NULL) {
         AIGROUP *group = object->ai.group;
-        if (object->ai.group_row < 32) {
-            group->member_is_alive |= 1u << object->ai.group_row;
+        if (object->ai.group_member_index < 32) {
+            group->member_is_alive |= 1u << object->ai.group_member_index;
         }
 
-        AIROW &group_row = group->rows[object->ai.group_member];
-        const i32 member_column = object->ai.group_row - creature.count_across * object->ai.group_member;
+        AIROW &group_row = group->rows[object->ai.group_row];
+        const i32 member_column = object->ai.group_member_index - creature.count_across * object->ai.group_row;
         if (static_cast<u32>(member_column) < 8) {
             group_row.is_alive |= static_cast<u8>(1u << member_column);
         }
@@ -236,7 +258,29 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
     object->field_0x10d0 = object->apiobj.position.z;
 }
 
-void SnapCreaturePos(GameObject_s *, nuvec_s *, i32, AIPATHINFO_s *, i32) {
+void SnapCreaturePos(GameObject_s *object, nuvec_s *position, i32 angle, AIPATHINFO_s *path_info, i32 set_on_surface) {
+    object->apiobj.position = *position;
+    object->apiobj.field_0x276 = angle;
+    object->apiobj.facing_angle = angle;
+    object->apiobj.movement_facing_angle = angle;
+    object->apiobj.initial_position = object->apiobj.position;
+    object->apiobj.collision_position = object->apiobj.position;
+    plr_lastpos = object->apiobj.position;
+    object->apiobj.start_position = object->apiobj.position;
+    object->apiobj.respawn_position = object->apiobj.position;
+    object->apiobj.last_safe_position = object->apiobj.position;
+    object->ai_update_position = object->apiobj.position;
+    object->reset_velocity = v000;
+    object->apiobj.velocity = v000;
+    InitSurfaceInfo(object);
+    if (set_on_surface != 0) {
+        SetObjOnSurface(object, 0);
+    }
+    if (path_info != NULL) {
+        object->ai.path_info = *path_info;
+    } else {
+        AISysGetCharacterPathPos(WORLD->ai_sys, &object->apiobj, &object->ai, 0xff, 1);
+    }
 }
 
 void ResetAICreatures(AISYS_s *system) {
@@ -268,7 +312,7 @@ void ResetAICreatures(AISYS_s *system) {
         object.ai.reset_mode = AI_CREATURE_RESET_READY;
 
         AIPACKET *packet = reinterpret_cast<AIPACKET *>(&object.ai);
-        AISCRIPTPROCESS *processor = reinterpret_cast<AISCRIPTPROCESS *>(&object.ai);
+        AISCRIPTPROCESS *processor = &object.ai.script_process;
         AIScriptProcessorInit(WORLD->ai_sys, packet, processor, &creature, creature.script_name, "", 1, NULL, NULL);
         if (processor->state != NULL && processor->state->name != NULL && NuStrICmp(processor->state->name, "") == 0) {
             creature.activate_type = 2;
@@ -281,9 +325,9 @@ void ResetAICreatures(AISYS_s *system) {
             object.ai.reset_mode = AI_CREATURE_RESET_DISABLED;
             continue;
         }
-        if (creature.count > 1 && creature.start_stagger > 0.0f && object.ai.group_row != 0) {
+        if (creature.count > 1 && creature.start_stagger > 0.0f && object.ai.group_member_index != 0) {
             object.ai.reset_mode = AI_CREATURE_RESET_STAGGERED;
-            object.ai_spawn_delay = static_cast<f32>(object.ai.group_row) * creature.start_stagger;
+            object.ai_spawn_delay = static_cast<f32>(object.ai.group_member_index) * creature.start_stagger;
             continue;
         }
 

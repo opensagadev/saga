@@ -2,6 +2,7 @@
 
 #include "decomp.h"
 #include "nu2api/nucore/common.h"
+#include "nu2api/numath/nuvec.h"
 
 struct AIPATH_s;
 struct AIPATHCNX_s;
@@ -40,3 +41,20 @@ enum AIPATHINFO_FLAGS : u8 {
 };
 
 DECOMP_ASSERT(sizeof(AIPATHINFO) == 0x18, "AIPATHINFO size");
+
+typedef struct AILOCATOR_s {
+    char name[0x10];
+    NUVEC position;
+    union {
+        i32 flags;
+        i32 direction;
+    };
+    union {
+        AIPATHINFO path_info;
+        AIPATHINFO path;
+    };
+    i32 locator_flags;
+} AILOCATOR;
+DECOMP_ASSERT(sizeof(AILOCATOR) == 0x3c, "AILOCATOR size");
+DECOMP_ASSERT(offsetof(AILOCATOR, direction) == 0x1c, "AILOCATOR direction offset");
+DECOMP_ASSERT(offsetof(AILOCATOR, path_info) == 0x20, "AILOCATOR path info offset");

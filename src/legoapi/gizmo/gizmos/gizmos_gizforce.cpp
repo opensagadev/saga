@@ -96,17 +96,6 @@ GIZFORCE_s *GizForce_FindByName(GIZFORCESYS_s *force_sys, char *name) {
     return force;
 }
 
-u32 GizForce_TotalScore(void *context) {
-    GIZFORCESYS_s *system = static_cast<WORLDINFO_s *>(context)->giz_force_sys;
-    u32 total = 0;
-    if (system != NULL && system->forces != NULL) {
-        GIZFORCE_s *force = system->forces;
-        for (i32 i = 0; i < system->count; ++i, ++force)
-            total += static_cast<u16>(force->pickup_count);
-    }
-    return total;
-}
-
 i32 GizForce_UpdateHint(HINT_s *) {
     for (i32 i = 0; i < 2; ++i) {
         GameObject_s *object = Player[i];
@@ -363,16 +352,4 @@ i32 GizForce_FindBestForceTarget(GIZFORCESYS_s *force_sys, GameObject_s *object)
         object->gizforce_target_object = best->animation;
     }
     return 0;
-}
-
-void GIZFORCE_s::ClearMechObjectInterface() {
-    if (mech_object_interface != NULL)
-        delete mech_object_interface;
-}
-
-MechObjectInterface *GIZFORCE_s::GetMechObjectInterface() {
-    if (mech_object_interface != NULL)
-        return mech_object_interface;
-    new GizForceObjectInterface(*this);
-    return mech_object_interface;
 }

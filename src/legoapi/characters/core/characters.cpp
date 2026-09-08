@@ -11,6 +11,7 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/charconfig.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/characters/motion.h"
 #include "legoapi/items/base/collection.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/menus/screens/store.h"
@@ -249,14 +250,6 @@ void FinishWeirdoNames(i32) {
 }
 
 extern i32 addcreature_override_id_check;
-void AICreatureResumeScript(GameObject_s *object) {
-    AISCRIPT *script = reinterpret_cast<AISCRIPTPROCESS *>(&object->ai)->base_script;
-    if (script != NULL) {
-        AISCRIPTPROCESS *processor = reinterpret_cast<AISCRIPTPROCESS *>(&object->ai);
-        AIScriptProcessorInit(WORLD->ai_sys, &object->ai, processor, NULL, NULL, NULL, 0, script, script->base_state);
-        processor->active_ref_count = 0;
-    }
-}
 
 extern f32 default_mover_extra;
 extern void SetGameObjectCharacterData(GameObject_s *obj);
@@ -1162,9 +1155,6 @@ void CollectCharcters_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, floa
 }
 
 void RegisterGizmoTypes_Indy(variptr_u *, variptr_u *) {
-}
-
-void Area_CharIDInCurrentList(i32) {
 }
 
 void SetProtocolDroidFallAnim(GameObject_s *object) {

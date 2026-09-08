@@ -4,6 +4,50 @@
 
 #include "nu2api/nucore/common.h"
 #include "nu2api/numath/nuang.h"
+#include "nu2api/numath/nufloat.h"
+
+#ifdef __cplusplus
+static inline i16 NuASin(f32 sin) {
+    f32 abs;
+    f32 sqrt;
+    f32 unknown_a;
+    f32 unknown_b;
+    f32 unknown_c;
+    f32 unknown_d;
+
+    abs = NuFabs(sin);
+    sqrt = NuFsqrt(1.0f - sin * sin);
+
+    unknown_a = MIN(sqrt, abs);
+
+    unknown_b = MAX((MIN((abs - 0.70710677f) * 3.40282e+38f, 1.0f)), -1.0f);
+
+    unknown_c = MIN(sin * 3.40282e+38f, 1.0f);
+    unknown_c = MAX(unknown_c, -1.0f);
+
+    unknown_d = unknown_b * unknown_c + unknown_c;
+
+    return (unknown_d * 0.785398f - (unknown_b * unknown_c * unknown_a) +
+            -0.166667f * (unknown_b * unknown_c * unknown_a) *
+                ((unknown_b * unknown_c * unknown_a) * (unknown_b * unknown_c * unknown_a)) +
+            -0.075f * ((unknown_b * unknown_c * unknown_a) * (unknown_b * unknown_c * unknown_a)) *
+                ((unknown_b * unknown_c * unknown_a) *
+                 ((unknown_b * unknown_c * unknown_a) * (unknown_b * unknown_c * unknown_a))) +
+            -0.0446429f *
+                ((unknown_b * unknown_c * unknown_a) *
+                 ((unknown_b * unknown_c * unknown_a) * (unknown_b * unknown_c * unknown_a))) *
+                (((unknown_b * unknown_c * unknown_a) * (unknown_b * unknown_c * unknown_a)) *
+                 ((unknown_b * unknown_c * unknown_a) * (unknown_b * unknown_c * unknown_a))) +
+            -0.0303819f *
+                (((unknown_b * unknown_c * unknown_a) * (unknown_b * unknown_c * unknown_a)) *
+                 ((unknown_b * unknown_c * unknown_a) * (unknown_b * unknown_c * unknown_a))) *
+                (((unknown_b * unknown_c * unknown_a) * (unknown_b * unknown_c * unknown_a)) *
+                 ((unknown_b * unknown_c * unknown_a) *
+                  ((unknown_b * unknown_c * unknown_a) * (unknown_b * unknown_c * unknown_a))))) *
+           10430.4f;
+}
+
+#endif
 
 #define NUTRIGTABLE_COUNT 32768
 #define NUTRIGTABLE_INTERVAL (f32)(2.0f * M_PI / NUTRIGTABLE_COUNT)

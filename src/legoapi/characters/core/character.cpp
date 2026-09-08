@@ -2,6 +2,14 @@
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
 
+i32 CanPullLevers(i32 character_id) {
+    u32 flags = CDataList[character_id].model_flags;
+    if ((flags & 0x01000010) == 0x01000010) {
+        return 0;
+    }
+    return (flags & 0x00040088) != 0;
+}
+
 #include "legoapi/characters/core/CharacterObjectInterface.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/world/area.h"
@@ -91,6 +99,7 @@ extern "C" {
     i16 id_PROBEDROID = -1;
     i16 id_PKDROID = -1;
     i16 id_SNAKE = -1;
+    i16 id_BAT = -1;
     i16 id_WOMPRAT = -1;
     i16 id_WAMPA = -1;
     i16 id_HANINCARBONITE = -1;
@@ -106,8 +115,8 @@ extern "C" {
     i16 id_WATTO = -1;
     i16 id_CHEWBACCA = -1;
     i16 id_WOOKIEE = -1;
-    i16 id_ATST_LOWRES = -1;
     i16 id_ATST = -1;
+    i16 id_ATST_LOWRES = -1;
     i16 id_BARMAN = -1;
     i16 id_DROIDEKA = -1;
     i16 id_SUPERBATTLEDROID = -1;
@@ -308,6 +317,7 @@ extern "C" {
         {"probedroid", &id_PROBEDROID},
         {"pkdroid", &id_PKDROID},
         {"snake", &id_SNAKE},
+        {"bat", &id_BAT},
         {"womprat", &id_WOMPRAT},
         {"wampa", &id_WAMPA},
         {"hanincarbonite", &id_HANINCARBONITE},
@@ -324,6 +334,7 @@ extern "C" {
         {"weirdo2", &id_WEIRDO2},
         {"chewbacca", &id_CHEWBACCA},
         {"wookie", &id_WOOKIEE},
+        {"atst", &id_ATST},
         {"atst_lowres", &id_ATST_LOWRES},
         {"atst", &id_ATST},
         {"barman", &id_BARMAN},

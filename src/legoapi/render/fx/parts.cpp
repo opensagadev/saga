@@ -1,9 +1,11 @@
 #include "legoapi/audio/sfx.h"
+#include "legoapi/render/fx/parts.h"
 #include "legoapi/legoapi_types.h"
 #include "globals.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "gameapi/edtools/edfile.h"
 #include "legoapi/render/fx.h"
+#include "legoapi/render/core/rtl.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/world/world.h"
@@ -85,6 +87,7 @@ static NUVEC PartNorm;
 extern u8 object_switches[0x80];
 
 extern "C" {
+    void DebFreeInstantly(i32 *handle);
     // Shared suspend flag consulted by all timed debris emitters.
     i32 debris_suspended = 0;
 

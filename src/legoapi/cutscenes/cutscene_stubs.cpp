@@ -36,7 +36,7 @@ extern "C" {
     void DebrisEmitterPos(i32, f32, f32, f32);
     void DebrisOrientationMtx(i32, NUMTX *);
     void DebrisPosOrientationMtx(i32, NUMTX *);
-    void AddScaledFiniteShotDebrisEffect(i32 *, i32, NUVEC *, i32, i32, i32, f32);
+    void AddScaledFiniteShotDebrisEffect(i32 *, i32, NUVEC *, NUVEC *, NUVEC *, i32, f32);
     void DebrisEmitterOrientationMtx(i32, NUMTX *);
     void DebFreeInstantly(i32 *);
     void NuRndrAxisArrowsMtx(NUMTX *, f32, i32);

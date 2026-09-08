@@ -39,13 +39,19 @@ struct DOOR_s {
     NUGSPLINE *camera_spline;    // 0x0f8
     f32 camera_wait;             // 0x0fc
     f32 camera_blend_time;       // 0x100
-    u32 vehicle_mask;            // 0x104
-    i32 vehicle_mode;            // 0x108
-    NUPLANE plane;               // 0x10c
-    void *cutscene;              // 0x11c
+    union {
+        u64 takeover_character_mask; // 0x104
+        struct {
+            u32 vehicle_mask;
+            i32 vehicle_mode;
+        };
+    };
+    NUPLANE plane;  // 0x10c
+    void *cutscene; // 0x11c
 };
 
 DECOMP_ASSERT(sizeof(DOOR_s) == 0x120, "DOOR_s size");
+DECOMP_ASSERT(offsetof(DOOR_s, takeover_character_mask) == 0x104, "Door takeover character mask offset");
 
 // ---- Hub exit-door bookkeeping ----
 

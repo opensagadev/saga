@@ -19,9 +19,6 @@
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "nu2api/numath/nuvec.h"
 
-void Action_Circle(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
-}
-
 void Action_Sebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
 }
 
@@ -63,9 +60,6 @@ void Action_SetLapTime(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i3
 }
 
 void Action_MoveForward(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
-}
-
-void Action_CirclePlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
 }
 
 void Action_EndCameraCut(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
@@ -136,9 +130,6 @@ i32 Action_UseTriggerSet(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET
 void Action_BoulderSection(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
 }
 
-void Action_CircleOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
-}
-
 i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
                           i32 first_time, float) {
     if (first_time == 0) {
@@ -162,7 +153,7 @@ void Action_DynamicCameraCut(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char 
 }
 
 f32 party_follow_offsets[8];
-i32 party_under_cover;
+extern "C" i32 party_under_cover;
 extern f32 drop_back_in_timer;
 
 i32 Action_GameFollowPlayer(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,

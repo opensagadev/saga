@@ -1,4 +1,6 @@
 #include "legoapi/gizmos/traps/gizturrets.h"
+#include "legoapi/world/world.h"
+#include "legoapi/legoapi_types.h"
 
 #include "decomp.h"
 #include "gameapi/edtools/edfile.h"

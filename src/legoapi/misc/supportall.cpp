@@ -29,6 +29,45 @@
 #include "nu2api/numath/nurand.h"
 #include "nu2api/numath/nuvec.h"
 #include "legoapi/world/world.h"
+#include "legoapi/world/mission.h"
+#include "legoapi/world/levels/levels.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "nu2api/nu3d/nuspecial.h"
+
+void Hint_SetHintFromId(i32, i32, i32);
+void MakeBaddiesForgetAboutParty(i32);
+void ResetRadios();
+void SpecialMiniKits_Reset(WORLDINFO_s *);
+void SuperCounters_FixUpGizmos(WORLDINFO_s *);
+void AITriggerSetSysReset(AITRIGGERSETSYS_s *);
+void AITriggerSysAutoSetUp(WORLDINFO_s *, AITRIGGERSETSYS_s *);
+void ResetPlayer(GameObject_s *, i32, nuvec_s *, i32);
+f32 GetVehicleAreaRememberSpeed();
+void CharPlatforms_Reset(CHARPLATFORMSYS_s *);
+void SetSoundFadeDist(WORLDINFO_s *, OPTIONSSAVE_s *);
+void GameCameraMakeMiniCut(nugspline_s *, f32, f32, f32, f32, i32, i32);
+void Cheats_TurnOff(i32);
+void CutScene_StartAudio();
+void oneAtOnce_SetNumAttackers(i32);
+void ResetGizFlow(GIZFLOW_s *, GIZFLOWPROGRESS_s *);
+void EffectOffProgress_Reset(LEVEL_PROGRESS_s *);
+extern GameObject_s *alert_obj;
+extern f32 alert_timer;
+extern f32 LevelNameMul, LevelNameTime;
+extern rtldata_s lev_rtldata;
+extern "C" {
+    extern f32 chattersfxwait, tieonsfxwait, tieoffsfxwait;
+    extern i32 party_under_cover, nbaddies_can_see_players;
+    extern i32 gone_through_door_to_new_level;
+    extern i32 FalconDebKey[2];
+    extern f32 TargetDist_Near2, TargetDist_Mid2;
+    extern u16 TargetDeg_Near, TargetDeg_Mid, TargetDeg_Far;
+    extern i32 makebaddiesforgetinresetbits;
+    extern i32 reset_reimport;
+    extern u32 arcade_placed_stud_total;
+}
 
 void CutScenes_Reset(WORLDINFO_s *);
 void ClearLevelProgress(i32, WORLDINFO_s *);
@@ -119,7 +158,7 @@ u16 TargetDeg_Far;
 extern i32 party_under_cover;
 i32 makebaddiesforgetinresetbits;
 void MakeBaddiesForgetAboutParty(i32);
-i32 nbaddies_can_see_players;
+extern i32 nbaddies_can_see_players;
 i32 reset_reimport;
 
 void CatchUpCode(GameObject_s *, float, float, i32) {

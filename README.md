@@ -1,6 +1,6 @@
 # _saga_
 
-![Progress](https://img.shields.io/badge/matching-30.51%25-orange)
+![Progress](https://img.shields.io/badge/matching-32.29%25-orange)
 [![Bazel build](https://github.com/ttdecomp/saga/actions/workflows/build-bazel.yaml/badge.svg)](https://github.com/ttdecomp/saga/actions/workflows/build-bazel.yaml)
 [![Discord](https://img.shields.io/discord/1467775700894224555?color=%235865F2&logo=discord&logoColor=%23FFFFFF)](https://discord.gg/2HJuMtzA7q)
 [![status & wasm build](https://img.shields.io/badge/status%20%26%20wasm%20build-click%20here-orange?style=flat)](https://opensaga.dev/)
@@ -59,29 +59,29 @@ See https://ttdecomp.github.io/saga/
 | Directory | Fuzzy % | Funcs % |
 |---|---:|---:|
 | `(root)` | 61.8% | 0.0% |
-| `MechInputTouch` | 10.8% | 6.1% |
+| `MechInputTouch` | 10.7% | 6.3% |
 | `editor` | 3.2% | 1.7% |
-| `gameapi` | 15.9% | 1.8% |
+| `gameapi` | 22.6% | 3.8% |
 | `gameframework` | 99.9% | 5.9% |
 | `gamelib` | 16.5% | 5.3% |
 | `java` | 96.0% | 0.0% |
-| `legoapi` | 28.7% | 9.1% |
-| `legoapi/actions` | 15.5% | 1.4% |
-| `legoapi/ai` | 21.9% | 0.5% |
+| `legoapi` | 30.3% | 9.9% |
+| `legoapi/actions` | 16.0% | 1.4% |
+| `legoapi/ai` | 39.9% | 1.7% |
 | `legoapi/audio` | 53.4% | 10.2% |
-| `legoapi/characters` | 26.2% | 6.8% |
-| `legoapi/core` | 26.2% | 6.6% |
+| `legoapi/characters` | 26.5% | 6.9% |
+| `legoapi/core` | 26.3% | 6.6% |
 | `legoapi/cutscenes` | 34.6% | 3.9% |
-| `legoapi/gizmo` | 32.4% | 7.3% |
-| `legoapi/gizmos` | 47.6% | 32.7% |
-| `legoapi/items` | 26.5% | 6.3% |
+| `legoapi/gizmo` | 33.9% | 11.1% |
+| `legoapi/gizmos` | 48.4% | 32.7% |
+| `legoapi/items` | 30.5% | 8.7% |
 | `legoapi/menus` | 24.2% | 6.6% |
-| `legoapi/misc` | 22.4% | 4.2% |
-| `legoapi/props` | 36.9% | 2.4% |
-| `legoapi/render` | 28.6% | 7.6% |
-| `legoapi/world` | 26.7% | 6.4% |
+| `legoapi/misc` | 22.5% | 4.2% |
+| `legoapi/props` | 41.9% | 2.5% |
+| `legoapi/render` | 28.7% | 7.6% |
+| `legoapi/world` | 26.7% | 6.3% |
 | `legogame` | 49.5% | 11.1% |
-| `nu2api` | 44.7% | 19.8% |
+| `nu2api` | 44.8% | 19.8% |
 
 <!-- matching-table-end -->
 

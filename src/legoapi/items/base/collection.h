@@ -1,7 +1,12 @@
 #pragma once
 
+struct WORLDINFO_s;
+
 #include "decomp_assert.h"
 #include "nu2api/nucore/common.h"
+
+u32 TotalLevelCoinTally(WORLDINFO_s *world, u32 *pickups, u32 *blowups, u32 *buildits, u32 *forces, u32 *obstacles,
+                        u32 *turrets, u32 *characters);
 
 struct COLLECTID;
 

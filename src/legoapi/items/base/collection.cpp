@@ -1,4 +1,12 @@
 #include "legoapi/items/base/collection.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmos/traps/gizforce.h"
+#include "legoapi/gizmos/traps/gizturrets.h"
+
+u32 GizmoBlowups_TotalScore(void *world);
 
 #include "decomp.h"
 #include "globals.h"

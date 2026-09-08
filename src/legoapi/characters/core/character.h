@@ -276,7 +276,10 @@ struct GAMECHARACTERDATA_s {
         u32 field_0xec;
         struct {
             i16 weapon_model;
-            i16 field_0xee;
+            union {
+                i16 field_0xee;
+                u16 score;
+            };
         };
     };
     union {
@@ -392,6 +395,7 @@ enum GAMECHARACTER_FLAGS : u32 {
 
 DECOMP_ASSERT(sizeof(GAMECHARACTERDATA) == 0x120, "GAMECHARACTERDATA size");
 DECOMP_ASSERT(offsetof(GAMECHARACTERDATA, weapon_model) == 0xec, "GAMECHARACTERDATA weapon model offset");
+DECOMP_ASSERT(offsetof(GAMECHARACTERDATA, score) == 0xee, "GAMECHARACTERDATA score offset");
 DECOMP_ASSERT(offsetof(GAMECHARACTERDATA, weapon_joints) == 0xf8, "GAMECHARACTERDATA weapon joints offset");
 DECOMP_ASSERT(offsetof(GAMECHARACTERDATA, streak_joints) == 0x100, "GAMECHARACTERDATA streak joints offset");
 DECOMP_ASSERT(offsetof(GAMECHARACTERDATA, tiptoe_speed) == 0x14, "GAMECHARACTERDATA tiptoe speed offset");
@@ -625,3 +629,4 @@ extern "C" {
 
 void LoadSingleCharacter(bgprocinfo_s *info);
 void UpdateCharacterLoad(void);
+i32 NewPlayerCharacter(GameObject_s *object, i32 new_id, i32 old_id, i32 mode);

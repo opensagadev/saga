@@ -5,6 +5,7 @@
 extern i32 spinner_gizmotype_id;
 
 #ifdef __cplusplus
+struct GIZSPINNER_s;
 
 typedef struct SPINNER_s {
     char unknown_00[0x40];
@@ -13,6 +14,7 @@ typedef struct SPINNER_s {
 } SPINNER;
 
 ADDGIZMOTYPE *Spinner_RegisterGizmo(i32 type_id);
+GIZSPINNER_s *GizSpinner_FindBySpecialName(void *world, char *name);
 
 extern "C" {
 #endif

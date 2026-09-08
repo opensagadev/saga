@@ -58,9 +58,6 @@ i32 GizSpinner_GetTargetPoints(GIZSPINNER_s *spinner, nuvec_s *positions, nuvec_
     return count;
 }
 
-void GizSpinner_FindBySpecialName(void *, char *) {
-}
-
 f32 GizSpinner_GetNearestTargetPoint(GIZSPINNER_s *spinner, nuvec_s *origin, nuvec_s *position, nuvec_s *direction,
                                      i32 check_direction) {
     NUVEC positions[8], directions[8];

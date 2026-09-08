@@ -8,6 +8,3 @@ struct AIROW_s;
 struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
-
-void AITriggerSetCreate(AITRIGGERSETSYS_s *, FLOWBOX_s *) {
-}

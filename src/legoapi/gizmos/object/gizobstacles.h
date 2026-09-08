@@ -1,5 +1,8 @@
 #pragma once
 
+#include "nu2api/nucore/fixed_width.h"
+u32 GizObstacles_TotalScore(void *world);
+
 #include "legoapi/gizmo/base/gizmo.h"
 
 extern i32 obstacle_gizmotype_id;

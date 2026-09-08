@@ -100,7 +100,8 @@ extern "C" {
                 return 0;
             }
 
-            if (((static_cast<u64>(static_cast<u16>(path->nodes[first_node_index].value_0x5a)) >> route) & 1) == 0) {
+            if (((static_cast<u64>(static_cast<u16>(path->nodes[first_node_index].route_boundary_mask)) >> route) &
+                 1) == 0) {
                 return 0;
             }
         }

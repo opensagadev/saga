@@ -243,17 +243,6 @@ void GizBuildIt_SetStepTime(GIZBUILDIT_s *buildit, GameObject_s *player) {
     buildit->step_timer = buildit->step_duration;
 }
 
-u32 GizBuildIts_TotalScore(void *context) {
-    GIZBUILDITSYS_s *system = static_cast<WORLDINFO_s *>(context)->giz_buildit_sys;
-    u32 total = 0;
-    if (system != NULL && system->buildits != NULL) {
-        GIZBUILDIT_s *buildit = system->buildits;
-        for (i32 i = 0; i < system->count; ++i, ++buildit)
-            total += static_cast<u16>(buildit->field_0x5e);
-    }
-    return total;
-}
-
 void GizBuildIts_UpdateHint(HINT_s *) {
 }
 

@@ -11,3 +11,5 @@ struct SHOPINPUT;
 
 void TractorBeamCode(GameObject_s *) {
 }
+
+extern i32 LEGOCONTEXT_TUBE;

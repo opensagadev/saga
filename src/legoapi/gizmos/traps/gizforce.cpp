@@ -1,4 +1,20 @@
 #include "legoapi/gizmos/traps/gizforce.h"
+#include "legoapi/gizmo/base/GizForceObjectInterface.h"
+#include "legoapi/world/world.h"
+#include "legoapi/legoapi_types.h"
+
+u32 GizForce_TotalScore(void *world) {
+    GIZFORCESYS_s *system = static_cast<WORLDINFO_s *>(world)->giz_force_sys;
+    u32 total = 0;
+    if (system != NULL) {
+        GIZFORCE_s *item = system->forces;
+        if (item != NULL) {
+            for (i32 i = 0; i < system->count; ++i, ++item)
+                total += item->completion_score;
+        }
+    }
+    return total;
+}
 
 #include "batman.h"
 #include "decomp.h"
@@ -125,6 +141,17 @@ void GizForceSFX_Configure(WORLDINFO_s *world, char *config) {
     }
     NuFParPopCom(parser);
     NuFParDestroy(parser);
+}
+
+void GIZFORCE_s::ClearMechObjectInterface() {
+    if (mech_object_interface != NULL)
+        delete mech_object_interface;
+}
+
+MechObjectInterface *GIZFORCE_s::GetMechObjectInterface() {
+    if (mech_object_interface == NULL)
+        new GizForceObjectInterface(*this);
+    return mech_object_interface;
 }
 
 namespace {

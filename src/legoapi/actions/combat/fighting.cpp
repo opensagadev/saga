@@ -119,9 +119,6 @@ void StartQuickShoot(GameObject_s *object, i32 action) {
     SetWeaponOut(object);
 }
 
-void CanFightLikeAJedi(GameObject_s *) {
-}
-
 void ForceNextLungeTarget(MechObjectInterface *) {
 }
 

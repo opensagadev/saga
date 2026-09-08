@@ -1,4 +1,5 @@
 #include "legoapi/gizmos/object/lever.h"
+#include "legoapi/gizmo/base/GizLeverObjectInterface.h"
 
 #include "batman.h"
 #include "decomp.h"
@@ -12,6 +13,10 @@
 #include "legoapi/characters/motion/animlist.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/animlist.h"
+#include "legoapi/core/input/gamepads.h"
+#include "legoapi/menus/core/gamehint.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/render/fx.h"
@@ -47,7 +52,7 @@ DECOMP_ASSERT(sizeof(LEVERPROGRESS) == 0xc, "LEVER progress ABI");
 
 LEVER_CONFIG LeverSys = {0x55, 0};
 
-u8 show_lever_hint;
+extern "C" u8 show_lever_hint;
 void Hint_SetComplete(i32);
 extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 
@@ -59,78 +64,152 @@ void ReleaseLever(GameObject_s *object) {
     }
 }
 
-void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
-    f32 distance_squared = 1.0e9f;
-    if (object->character_context != 0x4a) {
-        if (object->apiobj.character_model->model_data_b[0x5d] == NULL || object->apiobj.field_0x27d == 0)
-            return;
-        if (ObjLandReady(object) == 0 && objInNetWaitContext(object, 0x4a) == 0)
-            return;
-        LEVER_s *lever = Lever_FindNearest(world, &object->apiobj.lower_position, object, &distance_squared);
-        if (objInNetWaitContext(object, 0x4a) != 0) {
-            object->context_animation_timer -= FRAMETIME;
-            if (object->context_animation_timer <= 0.0f) {
-                object->character_context = -1;
-                object->big_jump_data = NULL;
-            }
-        }
-        if (lever == NULL)
-            return;
-        if (object == player)
-            show_lever_hint = distance_squared < 1.0f;
-        f32 radius = (object->apiobj.field_0x1dc + 0.25f) * lever->target_indicator_scale;
-        if (!(radius * radius > distance_squared))
-            return;
-        if ((object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) == 0 && objInNetWaitContext(object, 0x4a) == 0)
-            return;
-        object->field_0x788 = lever;
-        object->context_animation_timer = 0.0f;
-        object->character_context = 0x4a;
-        object->field_0x768 = 0.0f;
-        object->context_animation = 0x5d;
-        f32 duration = AnimDuration(object->id, 0x5d, 0.0f, 0.0f, 1);
-        if (duration <= 0.0f)
-            duration = 1.0f;
-        object->airborne_action_duration = duration;
-        object->context_flags &= ~0x40;
-        object->apiobj.movement_facing_angle = static_cast<LEVER_s *>(object->field_0x788)->y_rotation;
-        static_cast<LEVER_s *>(object->field_0x788)->interacting = 1;
-        static_cast<LEVER_s *>(object->field_0x788)->pull_progress = 0.0f;
-        static_cast<LEVER_s *>(object->field_0x788)->auto_reset_timer = 0.0f;
-        return;
-    }
-    object->field_0x768 += FRAMETIME;
-    if (object->field_0x768 > 1.0f)
-        object->field_0x768 = 1.0f;
-    object->context_animation_timer += FRAMETIME;
-    if (object->context_animation_timer >= object->airborne_action_duration) {
-        object->character_context = -1;
-        if ((object->context_flags & 0x40) != 0)
-            return;
-    } else {
-        if ((object->context_flags & 0x40) != 0)
-            return;
-        if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL) {
-            f32 *frame = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0);
-            if (frame == NULL)
-                return;
-            f32 current_frame = *frame;
-            if (!(current_frame >= AnimListFrame(object->apiobj.character_model, object->context_animation, 0)))
-                return;
-        } else if (!(object->context_animation_timer >= 0.25f))
-            return;
-    }
-    if ((object->apiobj.character_data->model_flags & 4) != 0)
-        static_cast<LEVER_s *>(object->field_0x788)->baddie = 1;
-    else if ((object->apiobj.character_data->model_flags & 0x200) == 0)
-        static_cast<LEVER_s *>(object->field_0x788)->goodie = 1;
-    static_cast<LEVER_s *>(object->field_0x788)->flags_high |= 8;
-    object->context_flags |= 0x40;
-    if (static_cast<i8>(object->apiobj.flags_low) < 0)
-        Hint_SetComplete(0x60c);
+i32 lever_gizmotype_id = -1;
+
+void LEVER_s::ClearMechObjectInterface() {
+    if (mech_object != NULL)
+        delete mech_object;
 }
 
-i32 lever_gizmotype_id = -1;
+MechObjectInterface *LEVER_s::GetMechObjectInterface() {
+    if (mech_object == NULL)
+        new GizLeverObjectInterface(*this);
+    return mech_object;
+}
+extern "C" {
+    u8 show_lever_hint = 0;
+}
+extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
+
+void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
+    f32 distance = 1.0e9f;
+    if (object->character_context == 0x4a) {
+        object->field_0x768 += FRAMETIME;
+        if (object->field_0x768 > 1.0f)
+            object->field_0x768 = 1.0f;
+        object->context_animation_timer += FRAMETIME;
+        if (object->context_animation_timer >= object->airborne_action_duration) {
+            object->character_context = -1;
+            if (object->context_flags & 0x40)
+                return;
+        } else {
+            if (object->context_flags & 0x40)
+                return;
+            if (object->apiobj.character_model->model_data_b[object->context_animation] != NULL) {
+                f32 *playing = AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0);
+                if (playing == NULL)
+                    return;
+                f32 frame = *playing;
+                if (!(frame >= AnimListFrame(object->apiobj.character_model, object->context_animation, 0)))
+                    return;
+            } else if (!(object->context_animation_timer >= 0.25f)) {
+                return;
+            }
+        }
+        if (!(object->apiobj.character_data->model_flags & 4)) {
+            if (!(object->apiobj.character_data->model_flags & 0x200))
+                static_cast<LEVER_s *>(object->field_0x788)->goodie = 1;
+        } else {
+            static_cast<LEVER_s *>(object->field_0x788)->baddie = 1;
+        }
+        static_cast<LEVER_s *>(object->field_0x788)->flags_high |= 8;
+        object->context_flags |= 0x40;
+        if ((i8)object->apiobj.object_flags < 0)
+            Hint_SetComplete(0x60c);
+        return;
+    }
+    if (object->apiobj.character_model->model_data_b[0x5d] == NULL || object->apiobj.field_0x27d == 0)
+        return;
+    if (!ObjLandReady(object) && !objInNetWaitContext(object, 0x4a))
+        return;
+    LEVER_s *lever = Lever_FindNearest(world, &object->apiobj.lower_position, object, &distance);
+    if (objInNetWaitContext(object, 0x4a)) {
+        object->context_animation_timer -= FRAMETIME;
+        if (object->context_animation_timer <= 0.0f) {
+            object->character_context = -1;
+            object->big_jump_data = NULL;
+        }
+    }
+    if (lever == NULL)
+        return;
+    if (object == player) {
+        show_lever_hint = 0;
+        if (distance < 1.0f)
+            show_lever_hint = 1;
+    }
+    f32 range = (object->apiobj.field_0x1dc + 0.25f) * lever->target_indicator_scale;
+    if (!(distance < range * range))
+        return;
+    if (!(object->pad_gamepad->buttons_pressed & GAMEPAD_SPECIAL) && !objInNetWaitContext(object, 0x4a))
+        return;
+    object->field_0x788 = lever;
+    object->context_animation_timer = 0.0f;
+    object->character_context = 0x4a;
+    object->field_0x768 = 0.0f;
+    object->context_animation = 0x5d;
+    object->airborne_action_duration = AnimDuration(object->id, 0x5d, 0.0f, 0.0f, 1);
+    if (object->airborne_action_duration <= 0.0f)
+        object->airborne_action_duration = 1.0f;
+    object->context_flags &= ~0x40;
+    object->apiobj.movement_facing_angle = static_cast<LEVER_s *>(object->field_0x788)->y_rotation;
+    static_cast<LEVER_s *>(object->field_0x788)->interacting = 1;
+    static_cast<LEVER_s *>(object->field_0x788)->pull_progress = 0.0f;
+    static_cast<LEVER_s *>(object->field_0x788)->auto_reset_timer = 0.0f;
+}
+
+void Lever_GetAbsTargetPos(LEVER_s *lever, nuvec_s *target_position) {
+    if (target_position != NULL && lever != NULL) {
+        NUVEC offset = lever->target_offset;
+        NuVecRotateY(&offset, &offset, lever->y_rotation);
+        offset.x += lever->position.x;
+        offset.z += lever->position.z;
+        *target_position = offset;
+    }
+}
+
+void Levers_InitTerrain(WORLDINFO_s *world) {
+    if (world->levers != NULL) {
+        for (i32 index = 0; index < world->nlevers; ++index) {
+            world->levers[index].platform_id = NewPlatPickupInst(&world->levers[index], 3);
+            PlatInstRotate(world->levers[index].platform_id, 1);
+        }
+    }
+}
+
+LEVER_s *Lever_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObject_s *object, f32 *distance_squared) {
+    LEVER_s *nearest = NULL;
+    f32 nearest_distance = 1.0e9f;
+    LEVER_s *lever = world->levers;
+    for (i32 index = 0; index < world->nlevers; ++index, ++lever) {
+        f32 candidate_distance;
+        if (object != NULL) {
+            if ((lever->flags & (LEVER_FLAG_INTERACTING | LEVER_FLAG_BEING_PULLED | LEVER_FLAG_VISIBLE |
+                                 LEVER_FLAG_ENABLED)) != (LEVER_FLAG_VISIBLE | LEVER_FLAG_ENABLED) ||
+                lever->pull_progress != 0.0f || lever->floor_position.y == 2000000.0f)
+                continue;
+            NUVEC target_position;
+            Lever_GetAbsTargetPos(lever, &target_position);
+            candidate_distance = NuVecDistSqr(position, &target_position, NULL);
+        } else {
+            candidate_distance = NuVecDistSqr(position, &lever->position, NULL);
+        }
+        if (candidate_distance < nearest_distance) {
+            nearest = lever;
+            nearest_distance = candidate_distance;
+        }
+    }
+    if (distance_squared != NULL)
+        *distance_squared = nearest_distance;
+    return nearest;
+}
+
+i32 Lever_FullyPulledDown(LEVER_s *lever) {
+    return lever->visible && lever->being_pulled && lever->pull_progress >= 1.0f;
+}
+
+i32 Lever_BeingPulled(LEVER_s *lever) {
+    return lever->being_pulled;
+}
 
 static i32 Levers_GetMaxGizmos(void *lever) {
     WORLDINFO *world = static_cast<WORLDINFO *>(lever);

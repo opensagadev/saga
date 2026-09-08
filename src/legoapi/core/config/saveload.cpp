@@ -134,9 +134,6 @@ void FS_BuildFilterOutBlocks(char *) {
 void FS_SetCursorToLastFileName() {
 }
 
-void LevelScriptReStoreProgress(WORLDINFO_s *, LEVELSCRIPTPROCESS_s *) {
-}
-
 void LoadState(i32, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *, variptr_u *) {
 }
 

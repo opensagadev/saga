@@ -1,9 +1,13 @@
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/gizmos/transport/grapples.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
 #include "decomp.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "gameapi/edtools/edfile.h"
 #include "gameapi/gui/apimenu.h"
 #include "globals.h"
+#include "legoapi/world/mission.h"
+#include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/fx/spline_position.h"
@@ -19,11 +23,18 @@
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/CharacterObjectInterface.h"
+#include "legoapi/characters/core/charconfig.h"
+#include "legoapi/menus/core/gamehint.h"
+#include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmos/trigger/gizspecial.h"
+#include "legoapi/gizmos/traps/gizforce.h"
+#include "legoapi/gizmos/door/spinner.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/menus/screens/shop.h"
 #include "legoapi/menus/screens/store.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/props/doors/door.h"
+#include "legoapi/props/system/socksys.h"
 #include "legoapi/world/area.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/core/input/timer.h"
@@ -41,6 +52,7 @@
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/nucore/nugcutscene.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -60,6 +72,15 @@ extern "C" {
     u32 _NuTimeBarSlotEnd(void *, i32);
     void AddToAIGroup(AIGROUP_s *group, APIOBJECT_s *object);
     extern NUVEC plr_lastpos;
+    extern i16 id_BAT;
+    extern i16 id_SNAKE;
+    extern i16 id_GRIEVOUS;
+    extern i16 id_BODYGUARD;
+    extern i16 id_IMPERIALGUARD;
+    extern i16 id_JAWA;
+    extern i16 id_UGNAUGHT;
+    extern i16 id_ATAT;
+    extern i16 id_GONKDROID;
 }
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
@@ -208,6 +229,1222 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 
 static const f32 AI_RESPAWN_DELAY = 2.0f;
 
+extern TERRSET *CurTerr;
+extern "C" i32 FindPlatInst(i32 instance);
+
+static f32 Condition_OnForcePlatform(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
+    if (force != NULL && packet != NULL && packet->owner != NULL) {
+        GameObject_s *object = packet->owner->apiobj.objptr;
+        if ((object->apiobj.field_0x27d != 0 || object->apiobj.field_0x27e != 0) &&
+            object->apiobj.supporting_platform_id != -1) {
+            i16 platform = object->apiobj.supporting_platform_id;
+            NUMTX *transform = static_cast<NUMTX *>(CurTerr->platforms[platform].scene_object);
+            if (object->apiobj.position.y >= transform->m31) {
+                for (GAMEANIMOBJ_s *animation = force->anim_set->objects; animation != NULL;
+                     animation = animation->next) {
+                    GIZFORCEANIMDATA_s *data = static_cast<GIZFORCEANIMDATA_s *>(animation->object_data);
+                    if (platform == data->platform_id)
+                        return 1.0f;
+                }
+            }
+        }
+    }
+    return 0.0f;
+}
+
+static f32 Condition_PlayerOnForcePlatform(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
+    if (force != NULL && player != NULL) {
+        GameObject_s *object = player;
+        if ((object->apiobj.field_0x27d != 0 || object->apiobj.field_0x27e != 0) &&
+            object->apiobj.supporting_platform_id != -1) {
+            i16 platform = object->apiobj.supporting_platform_id;
+            NUMTX *transform = static_cast<NUMTX *>(CurTerr->platforms[platform].scene_object);
+            if (object->apiobj.position.y >= transform->m31) {
+                for (GAMEANIMOBJ_s *animation = force->anim_set->objects; animation != NULL;
+                     animation = animation->next) {
+                    GIZFORCEANIMDATA_s *data = static_cast<GIZFORCEANIMDATA_s *>(animation->object_data);
+                    if (platform == data->platform_id)
+                        return 1.0f;
+                }
+            }
+        }
+    }
+    return 0.0f;
+}
+
+static f32 Condition_EitherPlayerOnForcePlatform(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
+    if (force != NULL && player != NULL) {
+        i32 players = 0;
+        if ((player->apiobj.field_0x27d != 0 || player->apiobj.field_0x27e != 0) &&
+            player->apiobj.supporting_platform_id != -1) {
+            NUMTX *transform =
+                static_cast<NUMTX *>(CurTerr->platforms[player->apiobj.supporting_platform_id].scene_object);
+            if (player->apiobj.position.y >= transform->m31)
+                players |= 1;
+        }
+        if (player2 != NULL && (player2->apiobj.field_0x27d != 0 || player2->apiobj.field_0x27e != 0) &&
+            player2->apiobj.supporting_platform_id != -1) {
+            NUMTX *transform =
+                static_cast<NUMTX *>(CurTerr->platforms[player2->apiobj.supporting_platform_id].scene_object);
+            if (player2->apiobj.position.y >= transform->m31)
+                players |= 2;
+        }
+        if (players != 0) {
+            for (GAMEANIMOBJ_s *animation = force->anim_set->objects; animation != NULL; animation = animation->next) {
+                GIZFORCEANIMDATA_s *data = static_cast<GIZFORCEANIMDATA_s *>(animation->object_data);
+                if ((players & 1) && player->apiobj.supporting_platform_id == data->platform_id)
+                    return 1.0f;
+                if ((players & 2) && player2->apiobj.supporting_platform_id == data->platform_id)
+                    return 1.0f;
+            }
+        }
+    }
+    return 0.0f;
+}
+
+static void *Condition_OnForcePlatformInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    GIZMO_s *gizmo = GizmoFindByName(WORLD->gizmo_sys, force_gizmotype_id, name);
+    if (gizmo != NULL) {
+        GIZFORCE_s *force = static_cast<GIZFORCE_s *>(gizmo->object);
+        if (force != NULL && (force->runtime_flags & 1) != 0)
+            return force;
+    }
+    return NULL;
+}
+
+static void *Condition_ForcePushingInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    return name != NULL && GetNamedAPIObjectFn != NULL ? GetNamedAPIObjectFn(system, name) : NULL;
+}
+
+static f32 Condition_ForcePushing(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    GameObject_s *object = static_cast<GameObject_s *>(argument);
+    if (object == NULL && packet != NULL) {
+        if (packet->owner == NULL)
+            return 0.0f;
+        object = packet->owner->apiobj.objptr;
+        if (object == NULL)
+            return 0.0f;
+    }
+    f32 result = 0.0f;
+    if (object != NULL) {
+        result = object->character_context == 0x1b ? 1.0f : 0.0f;
+    }
+    return result;
+}
+
+static f32 Condition_EitherPlayerUsingForce(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
+    return GizForce_GameObjUsingForce(player, force) != 0 || GizForce_GameObjUsingForce(player2, force) != 0 ? 1.0f
+                                                                                                             : 0.0f;
+}
+
+static f32 Condition_PlayerUsingForce(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    return GizForce_GameObjUsingForce(player, static_cast<GIZFORCE_s *>(argument)) != 0 ? 1.0f : 0.0f;
+}
+
+static f32 Condition_UsingForce(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    return GizForce_GameObjUsingForce(packet->owner->apiobj.objptr, static_cast<GIZFORCE_s *>(argument)) != 0 ? 1.0f
+                                                                                                              : 0.0f;
+}
+
+static void *Condition_UsingForceInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    GIZMO_s *gizmo = GizmoFindByName(WORLD->gizmo_sys, force_gizmotype_id, name);
+    return gizmo != NULL ? gizmo->object : NULL;
+}
+
+static f32 Condition_ForceBeingUsed(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
+    if (force == NULL) {
+        return 0.0f;
+    }
+    if ((force->field_0xaa & 0x20) == 0 && force->field_0x3c_bits == 0) {
+        return 0.0f;
+    }
+    return 1.0f;
+}
+
+static void *Condition_ForceInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    return GizmoFindByName(WORLD->gizmo_sys, force_gizmotype_id, name);
+}
+
+static f32 Condition_ForceAtStart(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    return argument != NULL && GizmoGetOutput(WORLD->gizmo_sys, static_cast<GIZMO_s *>(argument), 1, 1) == 0 ? 1.0f
+                                                                                                             : 0.0f;
+}
+
+static f32 Condition_ForceAtEnd(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    return argument != NULL && GizmoGetOutput(WORLD->gizmo_sys, static_cast<GIZMO_s *>(argument), 0, 1) != 0 ? 1.0f
+                                                                                                             : 0.0f;
+}
+
+// The original executable returns zero unconditionally for this condition.
+static f32 Condition_NumForceObjects(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return 0.0f;
+}
+
+static void *Condition_NumForceObjectsInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    i32 flags = 0;
+    if (name != NULL && system != NULL) {
+        flags = NuStrIStr(name, "throwable") != NULL;
+        if (NuStrIStr(name, "inrange") != NULL)
+            flags |= 2;
+    }
+    return reinterpret_cast<void *>(static_cast<intptr_t>(flags));
+}
+
+static f32 Condition_ForceStackComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
+    return force != NULL && force->group != NULL && (force->group->field_0x24 & 2) ? 1.0f : 0.0f;
+}
+
+static f32 Condition_ForceStackCompleteInOrder(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
+    return force != NULL && force->group != NULL && (force->group->field_0x24 & 4) ? 1.0f : 0.0f;
+}
+
+static f32 Condition_ForceComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
+    return force != NULL && GizForce_Complete(force) != 0 ? 1.0f : 0.0f;
+}
+
+static f32 Condition_ForceFinished(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
+    return force != NULL && GizForce_AnimComplete(force) != 0 ? 1.0f : 0.0f;
+}
+
+static void *Condition_ForceCompleteInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, force_gizmotype_id, name);
+    return gizmo != NULL ? gizmo->object : NULL;
+}
+
+static f32 Condition_ObstacleOpenedByPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(argument);
+    if (obstacle != NULL) {
+        return player != NULL && obstacle->triggering_object == player ? 1.0f : 0.0f;
+    }
+    return 0.0f;
+}
+
+static f32 Condition_ObstacleOpenedByEitherPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *,
+                                                  void *argument) {
+    GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(argument);
+    return obstacle != NULL && ((player != NULL && obstacle->triggering_object == player) ||
+                                (player2 != NULL && obstacle->triggering_object == player2))
+               ? 1.0f
+               : 0.0f;
+}
+
+static void *Condition_ObstacleOpenedByPlayerInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    GIZMO_s *gizmo = GizmoFindByName(WORLD->gizmo_sys, obstacle_gizmotype_id, name);
+    return gizmo != NULL ? gizmo->object : NULL;
+}
+
+static f32 Condition_ObstacleLockedOpen(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    return (static_cast<GIZOBSTACLE_s *>(argument)->runtime_flags & 4) != 0 ? 1.0f : 0.0f;
+}
+
+static f32 Condition_ObstacleLockedShut(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    return (static_cast<GIZOBSTACLE_s *>(argument)->runtime_flags & 8) != 0 ? 1.0f : 0.0f;
+}
+
+static void *Condition_GizSpecialInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    return GizmoFindByName(WORLD->gizmo_sys, gizspecial_gizmotype_id, name);
+}
+
+static void *Condition_ObstacleInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    return GizmoFindByName(WORLD->gizmo_sys, obstacle_gizmotype_id, name);
+}
+
+static f32 Condition_ObstacleAtStart(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    return argument != NULL && GizmoGetOutput(WORLD->gizmo_sys, static_cast<GIZMO_s *>(argument), 1, 1) == 0 ? 1.0f
+                                                                                                             : 0.0f;
+}
+
+static f32 Condition_ObstacleAtEnd(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    return argument != NULL && GizmoGetOutput(WORLD->gizmo_sys, static_cast<GIZMO_s *>(argument), 0, 1) != 0 ? 1.0f
+                                                                                                             : 0.0f;
+}
+
+static void *Condition_OnSpeederBikeInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    return name != NULL && system != NULL ? GetNamedGameObject(system, name) : NULL;
+}
+
+static f32 Condition_OnSpeederBike(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    GameObject_s *object = static_cast<GameObject_s *>(argument);
+    if (object == NULL) {
+        if (packet->owner != NULL) {
+            object = packet->owner->apiobj.objptr;
+        }
+    }
+    if (object != NULL) {
+        return object->field_0xcc0 != NULL && object->character_context == 0x3b &&
+                       object->field_0xcc0->id == id_SPEEDERBIKE
+                   ? 1.0f
+                   : 0.0f;
+    }
+    return 0.0f;
+}
+
+static f32 Condition_Player2Active(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return player2 != NULL ? 1.0f : 0.0f;
+}
+
+static void *Condition_TakenOverInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    return name != NULL && system != NULL ? GetNamedGameObject(system, name) : NULL;
+}
+
+static f32 Condition_TakenOver(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *name, void *argument) {
+    GameObject_s *object = static_cast<GameObject_s *>(argument);
+    if (object == NULL) {
+        if (name != NULL) {
+            if (NuStrICmp(name, "Opponent") == 0) {
+                APIOBJECT_s *opponent = packet->owner->apiobj.objptr->ai.opponent_object;
+                if (opponent != NULL)
+                    object = opponent->objptr;
+            } else if (NuStrICmp(name, "TakeoverTarget") == 0) {
+                object = packet->owner->apiobj.objptr;
+                if (object != NULL)
+                    object = object->takeover_target;
+            }
+        } else if (packet != NULL && packet->owner != NULL) {
+            object = packet->owner->apiobj.objptr;
+        }
+    }
+    return object != NULL && object->field_0xcc0 != NULL && object->character_context != 0x3b ? 1.0f : 0.0f;
+}
+
+static void *Condition_LastLevelInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    if (name != NULL && system != NULL && WORLD->area != NULL) {
+        for (i32 index = 0; index < LEVELCOUNT; ++index) {
+            if (NuStrICmp(name, LDataList[index].name) == 0) {
+                return reinterpret_cast<void *>(static_cast<isize>(index));
+            }
+        }
+    }
+    return reinterpret_cast<void *>(static_cast<isize>(-1));
+}
+
+static f32 Condition_LastLevel(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    if (LastLData != NULL) {
+        return LastLData->idx == static_cast<i32>(reinterpret_cast<isize>(argument)) ? 1.0f : 0.0f;
+    }
+    return 0.0f;
+}
+
+static void *Condition_IsVisibleInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    return name;
+}
+
+static f32 Condition_IsVisible(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    nuhspecial_s special = {};
+    NuSpecialFind(WORLD->current_gscn, &special, static_cast<char *>(argument), 1);
+    f32 result = 0.0f;
+    if (NuSpecialExistsFn(&special) != 0) {
+        result = NuSpecialGetVisibilityFn(&special);
+    }
+    return result;
+}
+
+// The reference executable exposes this condition as an unconditional zero.
+static f32 Condition_Indy(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return 0.0f;
+}
+
+// The Android reference executable reports false for the PSP platform.
+static f32 Condition_PSP(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return 0.0f;
+}
+
+// The reference executable exposes this condition as an unconditional zero.
+static f32 Condition_CheatProgress(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return 0.0f;
+}
+
+static f32 Condition_ChallengeMode(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return ChallengeMode != 0 ? 1.0f : 0.0f;
+}
+
+static f32 Condition_Freeplay(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return static_cast<f32>(FreePlay);
+}
+
+static f32 Condition_MissionMode(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return Mission_Active(NULL) != NULL ? 1.0f : 0.0f;
+}
+
+static f32 Condition_MissionWon(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return MissionSys != NULL && MissionSys->field8_0x1d == 2 ? 1.0f : 0.0f;
+}
+
+static f32 Condition_NumInSetAlive(AISYS_s *, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *, void *argument) {
+    i32 set = reinterpret_cast<intptr_t>(argument);
+    if (set == -1)
+        set = process->unknown_b0;
+    f32 result = 0.0f;
+    if (set != 0)
+        result = static_cast<u32>(aicreature_sets_alive[set - 1]);
+    return result;
+}
+
+static f32 Condition_IsSetAlive(AISYS_s *, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *, void *argument) {
+    i32 set = reinterpret_cast<intptr_t>(argument);
+    if (set == -1)
+        set = process->unknown_b0;
+    return set != 0 && aicreature_sets_alive[set - 1] != 0 ? 1.0f : 0.0f;
+}
+
+static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
+    if (arg == NULL)
+        return NULL;
+    if (NuStrICmp(arg, "myset") == 0)
+        return reinterpret_cast<void *>(static_cast<intptr_t>(-1));
+    i32 set = NuAToI(arg);
+    if (set < 1 || set > 16)
+        set = 0;
+    return reinterpret_cast<void *>(static_cast<intptr_t>(set));
+}
+
+extern "C" i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *cutscene);
+
+static f32 Condition_SockXDistanceToPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    f32 result = 0.0f;
+    NUVEC player_offset, object_offset;
+    if (packet == NULL)
+        return 0.0f;
+    if (packet->owner != NULL && player != NULL) {
+        GameObject *object = packet->owner->apiobj.objptr;
+        if (player->field_0x661 != 0xff && player->field_0x661 == object->field_0x661) {
+            NuVecSub(&player_offset, &player->apiobj.position, &player->sock_position.midpoint);
+            NuVecRotateY(&player_offset, &player_offset, -player->sock_position.midpoint_rotation.y);
+            NuVecSub(&object_offset, &object->apiobj.position, &object->sock_position.midpoint);
+            NuVecRotateY(&object_offset, &object_offset, -object->sock_position.midpoint_rotation.y);
+            result = player_offset.x - object_offset.x;
+        }
+    }
+    return result;
+}
+
+static f32 Condition_PlayerDeflectingPart(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return player != NULL && player->force_part != NULL ? 1.0f : 0.0f;
+}
+
+static f32 Condition_CollidingWithOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    if (packet != NULL && packet->opponent_object != NULL && packet->owner != NULL &&
+        (packet->owner->apiobj.colliding_objects_mask & packet->opponent_object->collision_identity_mask) != 0) {
+        return 1.0f;
+    }
+    return 0.0f;
+}
+
+static f32 Condition_OpponentPathPosRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    if (packet != NULL && packet->owner != NULL && packet->opponent_object != NULL &&
+        packet->opponent_object->ai != NULL) {
+        NUVEC difference;
+        return NuVecDist(&packet->owner->apiobj.position, &packet->opponent_object->ai->last_path_position,
+                         &difference);
+    }
+    return 1.0e9f;
+}
+
+static f32 Condition_OpponentToPlayerRange(AISYS_s *system, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    if (packet != NULL && packet->owner != NULL && packet->opponent_object != NULL && system != NULL &&
+        system->player_1 != NULL) {
+        NUVEC difference;
+        return NuVecDist(&system->player_1->position, &packet->opponent_object->position, &difference);
+    }
+    return 1.0e9f;
+}
+
+static f32 Condition_SockDistanceToPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    f32 result = 0.0f;
+    if (packet != NULL && packet->owner != NULL && player != NULL) {
+        GameObject *object = packet->owner->apiobj.objptr;
+        if (player->field_0x661 != 0xff && player->field_0x661 == object->field_0x661) {
+            f32 distance = MidDistanceFromSockStart(WORLD->sock_sys, &player->sock_position);
+            result = distance - MidDistanceFromSockStart(WORLD->sock_sys, &object->sock_position);
+        }
+    }
+    return result;
+}
+
+static f32 Condition_SockDistanceToOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    f32 result = 0.0f;
+    if (packet != NULL && packet->owner != NULL && packet->opponent_object != NULL) {
+        GameObject *object = packet->owner->apiobj.objptr;
+        GameObject *opponent = packet->opponent_object->objptr;
+        if (opponent->field_0x661 != 0xff && opponent->field_0x661 == object->field_0x661) {
+            f32 distance = MidDistanceFromSockStart(WORLD->sock_sys, &opponent->sock_position);
+            result = distance - MidDistanceFromSockStart(WORLD->sock_sys, &object->sock_position);
+        }
+    }
+    return result;
+}
+
+static f32 Condition_FurthestPlayerDistanceAlongSock(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    f32 distance = 0.0f;
+    if (player != NULL) {
+        if (player2 != NULL)
+            distance = player2->sock_position.distance > player->sock_position.distance
+                           ? player2->sock_position.distance
+                           : player->sock_position.distance;
+        else
+            distance = player->sock_position.distance;
+    }
+    return distance;
+}
+
+static f32 Condition_PlayerDistanceAlongSock(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return player != NULL ? player->sock_position.distance : 0.0f;
+}
+
+static f32 Condition_PlayerInSock(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    return argument != NULL && WORLD->sock_sys != NULL &&
+                   argument == &WORLD->sock_sys->sock[static_cast<i8>(player->field_0x661)]
+               ? 1.0f
+               : 0.0f;
+}
+
+static void *Condition_PlayerInSockInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    return FindSock(WORLD->sock_sys, name);
+}
+
+extern "C" f32 NuAnimEndFrameOld(void *animation);
+
+extern i32 Hub_GetRandomCharType();
+extern u8 hub_custodians_finished_loading;
+extern "C" {
+    i32 nbaddies_can_see_players;
+}
+
+static f32 Condition_NumBaddiesThatCanSeePlayers(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return (f32)nbaddies_can_see_players;
+}
+
+static f32 Condition_OnSameObjectAsPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    if (packet != NULL && packet->owner != NULL && player != NULL) {
+        GameObject *object = packet->owner->apiobj.objptr;
+        if ((object->apiobj.packed_contact_state & 0xffff00) != 0 &&
+            (player->apiobj.packed_contact_state & 0xffff00) != 0 && object->apiobj.supporting_platform_id != -1 &&
+            object->apiobj.supporting_platform_id == player->apiobj.supporting_platform_id)
+            return 1.0f;
+    }
+    return 0.0f;
+}
+
+static f32 Condition_RandomMapCharsAvailable(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    if (hub_custodians_finished_loading == 0)
+        return 0.0f;
+    i16 character = Hub_GetRandomCharType();
+    return character != -1 ? 1.0f : 0.0f;
+}
+
+static f32 Condition_EitherPlayerWearingHelmet(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    // The shipped condition only checks the active player despite its name.
+    return player->field_0x108e == 5 ? 1.0f : 0.0f;
+}
+
+static f32 Condition_AreaContainsPartyMember(AISYS_s *system, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *,
+                                             void *argument) {
+    if (system != NULL) {
+        AIAREA *area = static_cast<AIAREA *>(argument);
+        if (area == NULL)
+            area = process->unknown_a0;
+        if (area != NULL && (area->runtime_flags & 8) != 0)
+            return 1.0f;
+    }
+    return 0.0f;
+}
+
+static void *Condition_AreaContainsPartyMemberInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    return name != NULL ? AISysFindArea(system, name) : NULL;
+}
+
+static f32 Condition_CharacterTypeExists(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    if (argument != NULL) {
+        for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
+            if (Obj[index].id == (intptr_t)argument)
+                return 1.0f;
+        }
+    }
+    return 0.0f;
+}
+
+static void *Condition_CharacterTypeExistsInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    if (name != NULL && system != NULL) {
+        for (i32 index = 0; index < CHARCOUNT; ++index) {
+            if (NuStrICmp(CDataList[index].file, name) == 0)
+                return (void *)(intptr_t)index;
+        }
+    }
+    return (void *)(intptr_t)-1;
+}
+
+static f32 Condition_EitherPlayerInMyTriggerArea(AISYS_s *system, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *,
+                                                 void *) {
+    if (system != NULL && process->unknown_a0 != NULL) {
+        AIAREA *area = process->unknown_a0;
+        if (system->player_1 != NULL && area->system != NULL) {
+            i64 mask = 1 << (area - area->system->areas);
+            u64 membership = ((u64)system->player_1->ai_area_mask_high << 32) | system->player_1->ai_area_mask_low;
+            if ((membership & mask) != 0)
+                return 1.0f;
+        }
+        if (system->player_2 != NULL && area->system != NULL) {
+            i64 mask = 1 << (area - area->system->areas);
+            u64 membership = ((u64)system->player_2->ai_area_mask_high << 32) | system->player_2->ai_area_mask_low;
+            if ((membership & mask) != 0)
+                return 1.0f;
+        }
+    }
+    return 0.0f;
+}
+
+static f32 Condition_OnDynamicGrapple(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    GameObject *object = static_cast<GameObject *>(argument);
+    if (object == NULL) {
+        if (packet == NULL || packet->owner == NULL)
+            return 0.0f;
+        object = packet->owner->apiobj.objptr;
+    }
+    if (object != NULL && object->character_context == 0x46) {
+        GRAPPLE *grapple = static_cast<GRAPPLE *>(object->field_0x788);
+        if (grapple != NULL && grapple->has_terrain_platform != 0)
+            return 1.0f;
+    }
+    return 0.0f;
+}
+
+static void *Condition_OnDynamicGrappleInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    return name != NULL && system != NULL ? GetNamedGameObject(system, name) : NULL;
+}
+
+static f32 Condition_AngleAboutMyLocatorToPlayer(AISYS_s *, AISCRIPTPROCESS_s *process, AIPACKET_s *packet, char *,
+                                                 void *argument) {
+    f32 result = 0.0f;
+    if (argument != NULL && process->unknown_a4 != NULL && packet != NULL && packet->owner != NULL) {
+        GameObject *object = packet->owner;
+        GameObject *target = NULL;
+        if ((intptr_t)argument == -1)
+            target = player;
+        else if ((intptr_t)argument == 1)
+            target = Player[1];
+        if (target != NULL) {
+            i32 object_angle = NuAtan2D(object->apiobj.position.x - process->unknown_a4->position.x,
+                                        object->apiobj.position.z - process->unknown_a4->position.z);
+            i32 player_angle = NuAtan2D(target->apiobj.position.x - process->unknown_a4->position.x,
+                                        target->apiobj.position.z - process->unknown_a4->position.z);
+            result = (f32)NuAngSub(player_angle, object_angle);
+        }
+    }
+    return result;
+}
+
+static void *Condition_AngleAboutMyLocatorToPlayerInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    return (void *)(intptr_t)(name != NULL && NuStrICmp(name, "player1") == 0 ? 1 : -1);
+}
+
+static f32 Condition_EitherPlayerUsingHatMachine(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *name, void *) {
+    if (player != NULL && player->character_context == 0x61) {
+        HATMACHINE_s *machine = static_cast<HATMACHINE_s *>(player->field_0x788);
+        if (machine != NULL && (name == NULL || NuStrICmp(machine->name, name) == 0))
+            return 1.0f;
+    }
+    if (player2 != NULL && player2->character_context == 0x61) {
+        HATMACHINE_s *machine = static_cast<HATMACHINE_s *>(player2->field_0x788);
+        if (machine != NULL && (name == NULL || NuStrICmp(machine->name, name) == 0))
+            return 1.0f;
+    }
+    return 0.0f;
+}
+
+static f32 Condition_EitherPlayerPullingLever(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *name, void *) {
+    if (player != NULL && player->character_context == 0x4a) {
+        LEVER_s *lever = static_cast<LEVER_s *>(player->field_0x788);
+        if (lever != NULL && (name == NULL || NuStrICmp(lever->name, name) == 0))
+            return 1.0f;
+    }
+    if (player2 != NULL && player2->character_context == 0x4a) {
+        LEVER_s *lever = static_cast<LEVER_s *>(player2->field_0x788);
+        if (lever != NULL && (name == NULL || NuStrICmp(lever->name, name) == 0))
+            return 1.0f;
+    }
+    return 0.0f;
+}
+
+static f32 Condition_EitherPlayerUsingPanel(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *name, void *) {
+    if (player != NULL && player->character_context == 0x0b) {
+        GIZPANEL_s *panel = static_cast<GIZPANEL_s *>(player->field_0x788);
+        if (panel != NULL && (name == NULL || NuStrICmp(panel->name, name) == 0))
+            return 1.0f;
+    }
+    if (player2 != NULL && player2->character_context == 0x0b) {
+        GIZPANEL_s *panel = static_cast<GIZPANEL_s *>(player2->field_0x788);
+        if (panel != NULL && (name == NULL || NuStrICmp(panel->name, name) == 0))
+            return 1.0f;
+    }
+    return 0.0f;
+}
+
+static f32 Condition_AreaContainsBaddies(AISYS_s *system, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *,
+                                         void *argument) {
+    if (system != NULL) {
+        AIAREA *area = static_cast<AIAREA *>(argument);
+        if (area == NULL)
+            area = process->unknown_a0;
+        if (area != NULL && (area->runtime_flags & 4) != 0)
+            return 1.0f;
+    }
+    return 0.0f;
+}
+
+static void *Condition_AreaContainsBaddiesInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    return name != NULL ? AISysFindArea(system, name) : NULL;
+}
+
+static f32 Condition_AreaContainsGoodies(AISYS_s *system, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *,
+                                         void *argument) {
+    if (system != NULL) {
+        AIAREA *area = static_cast<AIAREA *>(argument);
+        if (area == NULL)
+            area = process->unknown_a0;
+        if (area != NULL && (area->runtime_flags & 2) != 0)
+            return 1.0f;
+    }
+    return 0.0f;
+}
+
+static void *Condition_AreaContainsGoodiesInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    return name != NULL ? AISysFindArea(system, name) : NULL;
+}
+
+static f32 Condition_PickupBeenTurnedOn(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    return argument != NULL ? (f32)GizmoPickup_BeenTurnedOn(static_cast<GIZMOPICKUP_s *>(argument)) : 0.0f;
+}
+
+static void *Condition_PickupBeenTurnedOnInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    return name != NULL ? GizmoPickup_FindByName(WORLD, name) : NULL;
+}
+
+static f32 Condition_AnimationFinished(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    nuinstanim_s *animation = static_cast<nuinstanim_s *>(argument);
+    if (animation != NULL && !animation->playing) {
+        nuanimdata_s *data = WORLD->current_gscn->instance_animation_data[animation->anim_ix];
+        if (data != NULL && animation->ltime >= NuAnimEndFrameOld(data))
+            return 1.0f;
+    }
+    return 0.0f;
+}
+
+static void *Condition_AnimationFinishedInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    nuhspecial_s special;
+    NuSpecialFind(WORLD->current_gscn, &special, name, 1);
+    return NuSpecialExistsFn(&special) != 0 ? NuSpecialGetInstAnim(&special) : NULL;
+}
+
+static f32 Condition_RigidAnimFrame(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    nuinstanim_s *animation = static_cast<nuinstanim_s *>(argument);
+    return animation != NULL ? animation->ltime : 1.0f;
+}
+
+static void *Condition_RigidAnimFrameInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    nuhspecial_s special;
+    NuSpecialFind(WORLD->current_gscn, &special, name, 1);
+    return NuSpecialExistsFn(&special) != 0 ? NuSpecialGetInstAnim(&special) : NULL;
+}
+
+static f32 Condition_FinishedSpline(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL) {
+        GameObject *object = packet->owner->apiobj.objptr;
+        return object->movement_spline != NULL && object->movement_spline_finished == 0 ? 0.0f : 1.0f;
+    }
+    return -1.0f;
+}
+
+static f32 Condition_CutSceneFinished(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    CUTINFO *cut = static_cast<CUTINFO *>(argument);
+    return cut != NULL && cut->instance != NULL &&
+                   instNuGCutSceneIsFinished(static_cast<instNUGCUTSCENE_s *>(cut->instance)) != 0
+               ? 1.0f
+               : 0.0f;
+}
+
+static void *Condition_CutSceneFinishedInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    return CutScene_Find(WORLD->cutscene_sys, name);
+}
+
+static f32 Condition_CutSceneStarted(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    CUTINFO *cut = static_cast<CUTINFO *>(argument);
+    return cut != NULL && cut->instance != NULL && (static_cast<instNUGCUTSCENE_s *>(cut->instance)->flags_88 & 2) != 0
+               ? 1.0f
+               : 0.0f;
+}
+
+static void *Condition_CutSceneStartedInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    return CutScene_Find(WORLD->cutscene_sys, name);
+}
+
+static f32 Condition_CutSceneExists(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    return argument != NULL ? 1.0f : 0.0f;
+}
+
+static void *Condition_CutSceneExistsInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    return CutScene_Find(WORLD->cutscene_sys, name);
+}
+
+static f32 Condition_CutScenePlaying(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    // The reference target returns zero unconditionally for this condition.
+    return 0.0f;
+}
+
+static void *Condition_CutScenePlayingInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    return CutScene_Find(WORLD->cutscene_sys, name);
+}
+
+static f32 Condition_Message(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GIZAIMESSAGE_s *message = static_cast<GIZAIMESSAGE_s *>(argument);
+    return message != NULL ? message->value : 0.0f;
+}
+
+static void *Condition_MessageInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    if (name != NULL && system != NULL && gizaimessagesys != NULL)
+        return CheckGizAIMessage(gizaimessagesys, name, NULL);
+    return NULL;
+}
+
+static f32 Condition_ScriptParam(AISYS_s *, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *, void *argument) {
+    i32 index = reinterpret_cast<intptr_t>(argument);
+    return index >= 0 ? process->params[index] : 0.0f;
+}
+
+static void *Condition_ScriptParamInit(AISYS_s *, char *name, AISCRIPT_s *script) {
+    if (name != NULL) {
+        for (i32 index = 0; index < 4; ++index) {
+            if (NuStrICmp(script->params[index].name, name) == 0)
+                return reinterpret_cast<void *>(static_cast<intptr_t>(index));
+        }
+        return reinterpret_cast<void *>(static_cast<intptr_t>(NuAToI(name)));
+    }
+    return reinterpret_cast<void *>(static_cast<intptr_t>(-1));
+}
+
+static f32 Condition_Blocking(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL) {
+        GameObject *object = packet->owner->apiobj.objptr;
+        u32 flags = CInfo[object->character_context].flags;
+        if ((flags & 0x04000000) != 0 || ((flags & 0x08000000) != 0 && (object->jump_flags & 2) != 0))
+            return 1.0f;
+    }
+    return 0.0f;
+}
+
+static f32 Condition_RaceLap(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return static_cast<f32>(Lap);
+}
+
+static f32 Condition_MusicOn(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return SuperOptions.music_enabled != 0 ? 1.0f : 0.0f;
+}
+
+static f32 Condition_GotOpponentLOS(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL) {
+        GameObject *object = packet->owner->apiobj.objptr;
+        APIOBJECT *opponent = object->character_context == 0x1b ? reinterpret_cast<APIOBJECT *>(object->force_target)
+                                                                : packet->opponent_object;
+        if (opponent != NULL &&
+            ((WORLD->api_object_sys->line_of_sight[packet->owner->apiobj.field_0x289] >> opponent->field_0x289) & 1) !=
+                0)
+            return 1.0f;
+    }
+    return 0.0f;
+}
+
+static f32 Condition_GotLocatorInSet(AISYS_s *system, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *,
+                                     void *argument) {
+    AILOCATORSET *set = static_cast<AILOCATORSET *>(argument);
+    if (set != NULL && process->unknown_a4 != NULL) {
+        u8 locator = static_cast<u8>(process->unknown_a4 - system->locators);
+        for (i32 index = 0; index < set->locator_count; ++index) {
+            if (set->locator_entries[index] == locator)
+                return 1.0f;
+        }
+    }
+    return 0.0f;
+}
+
+static void *Condition_GotLocatorInSetInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    return AIPathFindLocatorSet(system, name);
+}
+
+i32 CanFightLikeAJedi(GameObject_s *object) {
+    return CharCategory_IsCategory(object, 0) != 0 || object->id == id_GRIEVOUS || object->id == id_BODYGUARD ||
+           object->id == id_IMPERIALGUARD;
+}
+
+static f32 Condition_CanFightLikeAJedi(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    return packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL &&
+                   CanFightLikeAJedi(packet->owner) != 0
+               ? 1.0f
+               : 0.0f;
+}
+
+static f32 Condition_EitherPlayerPushingSpinner(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    if (argument != NULL) {
+        if (player != NULL && player->character_context == 0x28 && player->field_0x788 == argument)
+            return 1.0f;
+        if (player2 != NULL && player2->character_context == 0x28 && player2->field_0x788 == argument)
+            return 1.0f;
+    }
+    return 0.0f;
+}
+
+static void *Condition_EitherPlayerPushingSpinnerInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    return GizSpinner_FindBySpecialName(WORLD, name);
+}
+
+static f32 Condition_CharacterRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    GameObject *object = static_cast<GameObject *>(argument);
+    if (packet != NULL && packet->owner != NULL && object != NULL) {
+        NUVEC difference;
+        return NuVecDist(&object->apiobj.position, &packet->owner->apiobj.position, &difference);
+    }
+    return 1000000000.0f;
+}
+
+static void *Condition_CharacterRangeInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    return name != NULL && system != NULL ? GetNamedGameObject(system, name) : NULL;
+}
+
+static f32 Condition_MaulShouldRunAway(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    if (packet->owner != NULL) {
+        i32 angle = NuAtan2D(packet->owner->apiobj.collision_position.x - 5.5f,
+                             packet->owner->apiobj.collision_position.z - 3.65f);
+        for (i32 index = 0; index < 2; ++index) {
+            GameObject *object = Player[index];
+            if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001) {
+                f32 x = object->apiobj.collision_position.x - 5.5f;
+                f32 z = object->apiobj.collision_position.z - 3.65f;
+                if (x * x + z * z < 25.0f && NuAngSub(NuAtan2D(x, z), angle) <= 0xe37)
+                    return 1.0f;
+            }
+        }
+    }
+    return 0.0f;
+}
+
+static f32 Condition_BeenTakenOver(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    GameObject *object = static_cast<GameObject *>(argument);
+    if (object == NULL && packet->owner != NULL)
+        object = packet->owner->apiobj.objptr;
+    return object != NULL && object->field_0xcc0 != NULL && object->character_context == 0x3b ? 1.0f : 0.0f;
+}
+
+static void *Condition_BeenTakenOverInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    return name != NULL && system != NULL ? GetNamedGameObject(system, name) : NULL;
+}
+
+static f32 Condition_LastAttackerRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    if (packet != NULL && packet->owner != NULL) {
+        GameObject *object = packet->owner->apiobj.objptr;
+        GameObject *attacker = object->last_attacker;
+        if (attacker != NULL) {
+            NUVEC difference;
+            return NuVecDist(&object->apiobj.position, &attacker->apiobj.position, &difference);
+        }
+    }
+    return 1000000000.0f;
+}
+
+static f32 Condition_LastAttackerIsActivePlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    f32 result = 0.0f;
+    if (packet != NULL && packet->owner != NULL) {
+        GameObject *attacker = packet->owner->apiobj.objptr->last_attacker;
+        if (attacker != NULL && (attacker->apiobj.flags_low & 0x80) != 0)
+            result = 1.0f;
+    }
+    return result;
+}
+
+static f32 Condition_CannotReachDestination(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    return packet != NULL && (packet->runtime_flags & 0x40) != 0 ? 1.0f : 0.0f;
+}
+
+static f32 Condition_BeenSpawned(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    return packet != NULL && packet->owner != NULL && packet->owner->apiobj.field_0x27c == -1 &&
+                   packet->field_0x134 == 0xff
+               ? 1.0f
+               : 0.0f;
+}
+
+static f32 Condition_ShouldAttackOpponent(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    if (packet != NULL && packet->owner != NULL) {
+        GameObject *object = packet->owner->apiobj.objptr;
+        if (object != NULL && object->ai.opponent_object != NULL) {
+            GameObject *opponent = object->ai.opponent_object->objptr;
+            if (opponent != NULL && (object->ai.field_0x1e5 & 8) != 0 && object->ai.opponent_metric < 1.0f) {
+                if (opponent->id == id_BAT || opponent->id == id_SNAKE)
+                    return 1.0f;
+            }
+        }
+    }
+    return 0.0f;
+}
+
+static f32 Condition_RespawnLocatorIs(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    return argument != NULL && packet != NULL && packet->respawn_locator == argument ? 1.0f : 0.0f;
+}
+
+static void *Condition_RespawnLocatorIsInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    return name != NULL ? AIPathFindLocator(system, name) : NULL;
+}
+
+static f32 Condition_BoltsDontGetDeflectedBack(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    return packet != NULL && packet->owner != NULL && (packet->owner->apiobj.objptr->field_0xefc & 8) != 0 ? 1.0f
+                                                                                                           : 0.0f;
+}
+
+static f32 Condition_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    AITRIGGERSETSYS_s *system = WORLD->ai_trigger_set_sys;
+    if (system == NULL)
+        return 0.0f;
+    if (packet != NULL && packet->owner != NULL) {
+        u8 index = packet->owner->apiobj.field_0x289;
+        if (system->field_0x42c0[index] != -1 && system->sets[system->field_0x4280[index]].field_0x20e != 0)
+            return 1.0f;
+    }
+    return 0.0f;
+}
+
+static f32 Condition_DropBackInTimer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return drop_back_in_timer;
+}
+
+static f32 Condition_InMiniCut(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *arg, void *) {
+    return MiniCutCam != 0 || (arg != NULL && ObstacleCamSpl != NULL) ? 1.0f : 0.0f;
+}
+
+static f32 Condition_BigJumpComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    if (packet != NULL && packet->owner != NULL) {
+        return packet->owner->apiobj.objptr->character_context != 0x1f ? 1.0f : 0.0f;
+    }
+    return 1.0f;
+}
+
+static f32 Condition_AIOverrideControl(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    APIOBJECT *object = static_cast<APIOBJECT *>(argument);
+    if (object == NULL) {
+        if (packet != NULL)
+            object = reinterpret_cast<APIOBJECT *>(packet->owner);
+    }
+    return object != NULL && (object->flags_high & 1) != 0 ? 1.0f : 0.0f;
+}
+
+static void *Condition_AIOverrideControlInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    if (name != NULL && GetNamedAPIObjectFn != NULL)
+        return GetNamedAPIObjectFn(system, name);
+    return NULL;
+}
+
+static f32 Condition_IsOnScreen(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    APIOBJECT *object = static_cast<APIOBJECT *>(argument);
+    if (object == NULL) {
+        if (packet != NULL)
+            object = reinterpret_cast<APIOBJECT *>(packet->owner);
+    }
+    return object != NULL && object->model_draw_result != 0 ? 1.0f : 0.0f;
+}
+
+static void *Condition_IsOnScreenInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    if (name != NULL && GetNamedAPIObjectFn != NULL)
+        return GetNamedAPIObjectFn(system, name);
+    return NULL;
+}
+
+static f32 Condition_IAmPlayer2(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    f32 result = 0.0f;
+    if (packet != NULL && packet->owner != NULL) {
+        if (player == Player[0]) {
+            result = packet->owner->apiobj.objptr == Player[1] ? 1.0f : 0.0f;
+        } else if (player == Player[1]) {
+            result = packet->owner->apiobj.objptr == Player[0] ? 1.0f : 0.0f;
+        }
+    }
+    return result;
+}
+
+static f32 Condition_PlayerOnObject(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    i32 platform = reinterpret_cast<intptr_t>(argument);
+    f32 result = 0.0f;
+    if (player != NULL && platform != -1 && (player->apiobj.field_0x27d != 0 || player->apiobj.field_0x27e != 0)) {
+        if (player->apiobj.supporting_platform_id == platform) {
+            NUMTX *transform = static_cast<NUMTX *>(CurTerr->platforms[platform].scene_object);
+            result = player->apiobj.position.y >= transform->m31 ? 1.0f : 0.0f;
+        }
+    }
+    return result;
+}
+
+static void *Condition_OnObjectInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    nuhspecial_s special;
+    i32 platform = -1;
+    if (CurTerr != NULL) {
+        if (NuSpecialFind(WORLD->current_gscn, &special, name, 1) != 0) {
+            platform = FindPlatInst(NuSpecialGetInstanceix(&special));
+        }
+    }
+    return reinterpret_cast<void *>(static_cast<intptr_t>(platform));
+}
+
+static f32 Condition_PlayerOnGround(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return player != NULL && (player->apiobj.field_0x27d != 0 || player->apiobj.field_0x27e != 0) ? 1.0f : 0.0f;
+}
+
+static f32 Condition_UnderPlayerControl(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GameObject_s *object = static_cast<GameObject_s *>(argument);
+    f32 result = 0.0f;
+    if (object != NULL) {
+        if ((object->apiobj.flags_low & 0x80) != 0)
+            result = 1.0f;
+    }
+    return result;
+}
+
+static void *Condition_UnderPlayerControlInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    if (name != NULL && system != NULL)
+        return GetNamedGameObject(system, name);
+    return NULL;
+}
+
+static f32 Condition_PlayerTakenOver(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return player != NULL && player->field_0xcc0 != NULL && player->character_context != 0x3b ? 1.0f : 0.0f;
+}
+
+static f32 Condition_EitherPlayerTakenOver(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    if (player != NULL && player->field_0xcc0 != NULL && player->character_context != 0x3b)
+        return 1.0f;
+    if (player2 != NULL && player2->field_0xcc0 != NULL && player2->character_context != 0x3b)
+        return 1.0f;
+    return 0.0f;
+}
+
+static f32 Condition_PartyContainsDroids(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    for (i32 index = 0; index < 8; ++index) {
+        GameObject_s *object = Player[index];
+        if (object != NULL && (object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && (object->field_0xeff & 1) == 0 &&
+            (object->apiobj.character_data->model_flags & 0x10) != 0)
+            return 1.0f;
+    }
+    return 0.0f;
+}
+
+static f32 Condition_OpponentContext(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    f32 result = 0.0f;
+    if (packet != NULL && packet->opponent_object != NULL) {
+        if (packet->opponent_object->objptr->character_context == reinterpret_cast<intptr_t>(argument))
+            result = 1.0f;
+    }
+    return result;
+}
+
+static void *Condition_InContextInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    i32 context;
+    if (NuStrICmp(name, "DEACTIVATED") == 0)
+        context = 0x17;
+    else if (NuStrICmp(name, "FORCEDBACK") == 0)
+        context = 0x22;
+    else if (NuStrICmp(name, "GRAB") == 0)
+        context = 0x38;
+    else if (NuStrICmp(name, "EAT") == 0)
+        context = 0x3f;
+    else if (NuStrICmp(name, "FORCEPUSHED") == 0)
+        context = 0x1c;
+    else if (NuStrICmp(name, "FORCEPUSH") == 0)
+        context = 0x1b;
+    else if (NuStrICmp(name, "GETIN") == 0)
+        context = 0x3c;
+    else if (NuStrICmp(name, "BALLOONING") == 0)
+        context = 0x5d;
+    else if (NuStrICmp(name, "STUNNED") == 0)
+        context = 0x5a;
+    else if (NuStrICmp(name, "FLOAT") == 0)
+        context = 0x4b;
+    else if (NuStrICmp(name, "GRAPPLE") == 0)
+        context = 0x46;
+    else
+        context = 0x64;
+    return reinterpret_cast<void *>(static_cast<isize>(context));
+}
+
+static f32 Condition_InContext(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    f32 result = 0.0f;
+    if (packet != NULL && packet->owner != NULL) {
+        GameObject_s *object = packet->owner->apiobj.objptr;
+        if (object != NULL && object->character_context == static_cast<i32>(reinterpret_cast<isize>(argument))) {
+            result = 1.0f;
+        }
+    }
+    return result;
+}
+
+static void *Condition_HitPointsInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    return name != NULL && system != NULL ? GetNamedGameObject(system, name) : NULL;
+}
+
+static f32 Condition_HitPoints(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    GameObject_s *object = static_cast<GameObject_s *>(argument);
+    if (object == NULL) {
+        if (packet != NULL && packet->owner != NULL) {
+            object = packet->owner->apiobj.objptr;
+        }
+    }
+    f32 result = 0.0f;
+    if (object != NULL) {
+        result = static_cast<i8>(object->current_hp);
+    }
+    return result;
+}
+
+static f32 Condition_CurrentHintId(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return Hint_CurrentId();
+}
+
+static void *Condition_HintAvailableInit(AISYS_s *, char *argument, AISCRIPT_s *) {
+    return argument != NULL ? reinterpret_cast<void *>(static_cast<isize>(NuAToI(argument))) : NULL;
+}
+
+static f32 Condition_HintAvailable(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    return argument != NULL && Hint_isAvailable(static_cast<i32>(reinterpret_cast<isize>(argument))) != 0 ? 1.0f : 0.0f;
+}
+
+static f32 Condition_HintComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    return argument != NULL && Hint_isComplete(static_cast<i32>(reinterpret_cast<isize>(argument))) != 0 ? 1.0f : 0.0f;
+}
+
+static f32 Condition_EmptyTakeOver(AISYS_s *system, AISCRIPTPROCESS_s *, AIPACKET_s *, char *name, void *) {
+    if (name == NULL || system == NULL) {
+        return 0.0f;
+    }
+    i32 character = -1;
+    for (i32 index = 0; index < CHARCOUNT && character == -1; ++index) {
+        if (NuStrICmp(CDataList[index].file, name) == 0) {
+            character = index;
+        }
+    }
+    GameObject_s *object = Obj;
+    for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++object) {
+        if ((object->apiobj.field_0x1f8 & 0x1001) == 0x1001 && (object->apiobj.field_0x1f4 & 0x400) != 0 &&
+            object->id == character) {
+            if (object->takeover_target == NULL || object->field_0xcc0 == NULL ||
+                object->field_0xcc0->character_context != 0x3b) {
+                return 1.0f;
+            }
+        }
+    }
+    return 0.0f;
+}
+
 extern "C" {
     AICONDITIONDEF lego_aiconditiondefs[] = {
         {"GlynTest", NULL, NULL},
@@ -216,66 +1453,66 @@ extern "C" {
         {"GotGun", NULL, NULL},
         {"PrefersBrawling", NULL, NULL},
         {"IsAlive", NULL, NULL},
-        {"IsOnScreen", NULL, NULL},
+        {"IsOnScreen", Condition_IsOnScreen, Condition_IsOnScreenInit},
         {"OffScreenTimer", NULL, NULL},
-        {"OnObject", NULL, NULL},
-        {"OnSameObjectAsPlayer", NULL, NULL},
-        {"PlayerOnObject", NULL, NULL},
-        {"EitherPlayerOnObject", NULL, NULL},
+        {"OnObject", NULL, Condition_OnObjectInit},
+        {"OnSameObjectAsPlayer", Condition_OnSameObjectAsPlayer, NULL},
+        {"PlayerOnObject", Condition_PlayerOnObject, Condition_OnObjectInit},
+        {"EitherPlayerOnObject", NULL, Condition_OnObjectInit},
         {"EitherPlayerLocatorRangeXZ", NULL, NULL},
         {"OnGround", NULL, NULL},
         {"BeenAlerted", NULL, NULL},
-        {"PlayerOnGround", NULL, NULL},
+        {"PlayerOnGround", Condition_PlayerOnGround, NULL},
         {"SpawnCount", NULL, NULL},
         {"BehindCamera", NULL, NULL},
         {"LocatorOnScreen", NULL, NULL},
-        {"Blocking", NULL, NULL},
+        {"Blocking", Condition_Blocking, NULL},
         {"BeenHit", NULL, NULL},
         {"HoverPhase", NULL, NULL},
-        {"HitPoints", NULL, NULL},
-        {"OnDynamicGrapple", NULL, NULL},
+        {"HitPoints", Condition_HitPoints, Condition_HitPointsInit},
+        {"OnDynamicGrapple", Condition_OnDynamicGrapple, Condition_OnDynamicGrappleInit},
         {"XPos", NULL, NULL},
         {"YPos", NULL, NULL},
         {"ZPos", NULL, NULL},
-        {"CollidingWithOpponent", NULL, NULL},
+        {"CollidingWithOpponent", Condition_CollidingWithOpponent, NULL},
         {"Colliding", NULL, NULL},
-        {"ObstacleAtStart", NULL, NULL},
-        {"ObstacleAtEnd", NULL, NULL},
-        {"SpecialAtStart", NULL, NULL},
-        {"SpecialAtEnd", NULL, NULL},
-        {"ObstacleLockedOpen", NULL, NULL},
-        {"ObstacleLockedShut", NULL, NULL},
-        {"ForceAtStart", NULL, NULL},
-        {"ForceAtEnd", NULL, NULL},
-        {"ObstacleOpenedByPlayer", NULL, NULL},
-        {"ObstacleOpenedByEitherPlayer", NULL, NULL},
-        {"AnimationFinished", NULL, NULL},
-        {"EitherPlayerPullingLever", NULL, NULL},
-        {"EitherPlayerUsingHatMachine", NULL, NULL},
-        {"EitherPlayerUsingPanel", NULL, NULL},
-        {"EitherPlayerWearingHelmet", NULL, NULL},
+        {"ObstacleAtStart", Condition_ObstacleAtStart, Condition_ObstacleInit},
+        {"ObstacleAtEnd", Condition_ObstacleAtEnd, Condition_ObstacleInit},
+        {"SpecialAtStart", Condition_ObstacleAtStart, Condition_GizSpecialInit},
+        {"SpecialAtEnd", Condition_ObstacleAtEnd, Condition_GizSpecialInit},
+        {"ObstacleLockedOpen", Condition_ObstacleLockedOpen, Condition_ObstacleOpenedByPlayerInit},
+        {"ObstacleLockedShut", Condition_ObstacleLockedShut, Condition_ObstacleOpenedByPlayerInit},
+        {"ForceAtStart", Condition_ForceAtStart, Condition_ForceInit},
+        {"ForceAtEnd", Condition_ForceAtEnd, Condition_ForceInit},
+        {"ObstacleOpenedByPlayer", Condition_ObstacleOpenedByPlayer, Condition_ObstacleOpenedByPlayerInit},
+        {"ObstacleOpenedByEitherPlayer", Condition_ObstacleOpenedByEitherPlayer, Condition_ObstacleOpenedByPlayerInit},
+        {"AnimationFinished", Condition_AnimationFinished, Condition_AnimationFinishedInit},
+        {"EitherPlayerPullingLever", Condition_EitherPlayerPullingLever, NULL},
+        {"EitherPlayerUsingHatMachine", Condition_EitherPlayerUsingHatMachine, NULL},
+        {"EitherPlayerUsingPanel", Condition_EitherPlayerUsingPanel, NULL},
+        {"EitherPlayerWearingHelmet", Condition_EitherPlayerWearingHelmet, NULL},
         {"PartyUnderCover", NULL, NULL},
-        {"NumBaddiesThatCanSeePlayers", NULL, NULL},
-        {"PlayerUsingForce", NULL, NULL},
-        {"EitherPlayerUsingForce", NULL, NULL},
-        {"UsingForce", NULL, NULL},
-        {"OnForcePlatform", NULL, NULL},
-        {"PlayerOnForcePlatform", NULL, NULL},
-        {"EitherPlayerOnForcePlatform", NULL, NULL},
-        {"ForceBeingUsed", NULL, NULL},
-        {"ForcePushing", NULL, NULL},
+        {"NumBaddiesThatCanSeePlayers", Condition_NumBaddiesThatCanSeePlayers, NULL},
+        {"PlayerUsingForce", Condition_PlayerUsingForce, Condition_UsingForceInit},
+        {"EitherPlayerUsingForce", Condition_EitherPlayerUsingForce, Condition_UsingForceInit},
+        {"UsingForce", Condition_UsingForce, Condition_UsingForceInit},
+        {"OnForcePlatform", Condition_OnForcePlatform, Condition_OnForcePlatformInit},
+        {"PlayerOnForcePlatform", Condition_PlayerOnForcePlatform, Condition_OnForcePlatformInit},
+        {"EitherPlayerOnForcePlatform", Condition_EitherPlayerOnForcePlatform, Condition_OnForcePlatformInit},
+        {"ForceBeingUsed", Condition_ForceBeingUsed, Condition_UsingForceInit},
+        {"ForcePushing", Condition_ForcePushing, Condition_ForcePushingInit},
         {"TurretAlive", NULL, NULL},
-        {"PlayerDeflectingPart", NULL, NULL},
-        {"ForceComplete", NULL, NULL},
-        {"ForceFinished", NULL, NULL},
-        {"ForceStackComplete", NULL, NULL},
-        {"ForceStackCompleteInOrder", NULL, NULL},
+        {"PlayerDeflectingPart", Condition_PlayerDeflectingPart, NULL},
+        {"ForceComplete", Condition_ForceComplete, Condition_ForceCompleteInit},
+        {"ForceFinished", Condition_ForceFinished, Condition_ForceCompleteInit},
+        {"ForceStackComplete", Condition_ForceStackComplete, Condition_ForceCompleteInit},
+        {"ForceStackCompleteInOrder", Condition_ForceStackCompleteInOrder, Condition_ForceCompleteInit},
         {"BuildItComplete", NULL, NULL},
         {"BlowupBlownup", NULL, NULL},
         {"IAmA", NULL, NULL},
         {"OpponentIsA", NULL, NULL},
         {"OpponentIsAThreat", NULL, NULL},
-        {"CanFightLikeAJedi", NULL, NULL},
+        {"CanFightLikeAJedi", Condition_CanFightLikeAJedi, NULL},
         {"IAmAGoody", NULL, NULL},
         {"IAmABaddy", NULL, NULL},
         {"IAmANeutral", NULL, NULL},
@@ -286,107 +1523,108 @@ extern "C" {
         {"EitherPlayerIs", NULL, NULL},
         {"Player1Is", NULL, NULL},
         {"Player2Is", NULL, NULL},
-        {"IsSetAlive", NULL, NULL},
-        {"NumInSetAlive", NULL, NULL},
+        {"IsSetAlive", Condition_IsSetAlive, Condition_IsSetAliveInit},
+        {"NumInSetAlive", Condition_NumInSetAlive, Condition_IsSetAliveInit},
         {"Context", NULL, NULL},
-        {"InContext", NULL, NULL},
-        {"OpponentContext", NULL, NULL},
-        {"Player2Active", NULL, NULL},
+        {"InContext", Condition_InContext, Condition_InContextInit},
+        {"OpponentContext", Condition_OpponentContext, Condition_InContextInit},
+        {"Player2Active", Condition_Player2Active, NULL},
         {"NumBaddies", NULL, NULL},
-        {"NumForceObjects", NULL, NULL},
+        {"NumForceObjects", Condition_NumForceObjects, Condition_NumForceObjectsInit},
         {"BeenToLevel", NULL, NULL},
-        {"LastLevel", NULL, NULL},
-        {"Message", NULL, NULL},
-        {"ScriptParam", NULL, NULL},
-        {"CutSceneStarted", NULL, NULL},
-        {"CutSceneFinished", NULL, NULL},
-        {"CutSceneExists", NULL, NULL},
-        {"PlayerInSock", NULL, NULL},
-        {"CutScenePlaying", NULL, NULL},
-        {"RigidAnimFrame", NULL, NULL},
-        {"SockDistanceToPlayer", NULL, NULL},
-        {"SockDistanceToOpponent", NULL, NULL},
-        {"SockXDistanceToPlayer", NULL, NULL},
-        {"PlayerDistanceAlongSock", NULL, NULL},
-        {"FurthestPlayerDistanceAlongSock", NULL, NULL},
-        {"FinishedSpline", NULL, NULL},
-        {"CurrentHintId", NULL, NULL},
-        {"HintAvailable", NULL, NULL},
-        {"HintComplete", NULL, NULL},
-        {"Freeplay", NULL, NULL},
-        {"Indy", NULL, NULL},
-        {"MissionMode", NULL, NULL},
-        {"MissionWon", NULL, NULL},
-        {"ChallengeMode", NULL, NULL},
-        {"PSP", NULL, NULL},
-        {"AIOverrideControl", NULL, NULL},
-        {"BoltsDontGetDeflectedBack", NULL, NULL},
-        {"CheatProgress", NULL, NULL},
-        {"BigJumpComplete", NULL, NULL},
-        {"RespawnLocatorIs", NULL, NULL},
-        {"InMiniCut", NULL, NULL},
-        {"MaulShouldRunAway", NULL, NULL},
-        {"DropBackInTimer", NULL, NULL},
-        {"HelpWithTriggers", NULL, NULL},
-        {"EitherPlayerPushingSpinner", NULL, NULL},
-        {"CharacterRange", NULL, NULL},
-        {"BeenSpawned", NULL, NULL},
-        {"LastAttackerRange", NULL, NULL},
-        {"LastAttackerIsActivePlayer", NULL, NULL},
-        {"PartyContainsDroids", NULL, NULL},
-        {"CannotReachDestination", NULL, NULL},
-        {"TakenOver", NULL, NULL},
-        {"PlayerTakenOver", NULL, NULL},
-        {"EitherPlayerTakenOver", NULL, NULL},
-        {"BeenTakenOver", NULL, NULL},
-        {"OnSpeederBike", NULL, NULL},
-        {"UnderPlayerControl", NULL, NULL},
+        {"LastLevel", Condition_LastLevel, Condition_LastLevelInit},
+        {"Message", Condition_Message, Condition_MessageInit},
+        {"ScriptParam", Condition_ScriptParam, Condition_ScriptParamInit},
+        {"CutSceneStarted", Condition_CutSceneStarted, Condition_CutSceneStartedInit},
+        {"CutSceneFinished", Condition_CutSceneFinished, Condition_CutSceneFinishedInit},
+        {"CutSceneExists", Condition_CutSceneExists, Condition_CutSceneExistsInit},
+        {"PlayerInSock", Condition_PlayerInSock, Condition_PlayerInSockInit},
+        {"CutScenePlaying", Condition_CutScenePlaying, Condition_CutScenePlayingInit},
+        {"RigidAnimFrame", Condition_RigidAnimFrame, Condition_RigidAnimFrameInit},
+        {"SockDistanceToPlayer", Condition_SockDistanceToPlayer, NULL},
+        {"SockDistanceToOpponent", Condition_SockDistanceToOpponent, NULL},
+        {"SockXDistanceToPlayer", Condition_SockXDistanceToPlayer, NULL},
+        {"PlayerDistanceAlongSock", Condition_PlayerDistanceAlongSock, NULL},
+        {"FurthestPlayerDistanceAlongSock", Condition_FurthestPlayerDistanceAlongSock, NULL},
+        {"FinishedSpline", Condition_FinishedSpline, NULL},
+        {"CurrentHintId", Condition_CurrentHintId, NULL},
+        {"HintAvailable", Condition_HintAvailable, Condition_HintAvailableInit},
+        {"HintComplete", Condition_HintComplete, Condition_HintAvailableInit},
+        {"Freeplay", Condition_Freeplay, NULL},
+        {"Indy", Condition_Indy, NULL},
+        {"MissionMode", Condition_MissionMode, NULL},
+        {"MissionWon", Condition_MissionWon, NULL},
+        {"ChallengeMode", Condition_ChallengeMode, NULL},
+        {"PSP", Condition_PSP, NULL},
+        {"AIOverrideControl", Condition_AIOverrideControl, Condition_AIOverrideControlInit},
+        {"BoltsDontGetDeflectedBack", Condition_BoltsDontGetDeflectedBack, NULL},
+        {"CheatProgress", Condition_CheatProgress, NULL},
+        {"BigJumpComplete", Condition_BigJumpComplete, NULL},
+        {"RespawnLocatorIs", Condition_RespawnLocatorIs, Condition_RespawnLocatorIsInit},
+        {"InMiniCut", Condition_InMiniCut, NULL},
+        {"MaulShouldRunAway", Condition_MaulShouldRunAway, NULL},
+        {"DropBackInTimer", Condition_DropBackInTimer, NULL},
+        {"HelpWithTriggers", Condition_HelpWithTriggers, NULL},
+        {"EitherPlayerPushingSpinner", Condition_EitherPlayerPushingSpinner, Condition_EitherPlayerPushingSpinnerInit},
+        {"CharacterRange", Condition_CharacterRange, Condition_CharacterRangeInit},
+        {"BeenSpawned", Condition_BeenSpawned, NULL},
+        {"LastAttackerRange", Condition_LastAttackerRange, NULL},
+        {"LastAttackerIsActivePlayer", Condition_LastAttackerIsActivePlayer, NULL},
+        {"PartyContainsDroids", Condition_PartyContainsDroids, NULL},
+        {"CannotReachDestination", Condition_CannotReachDestination, NULL},
+        {"TakenOver", Condition_TakenOver, Condition_TakenOverInit},
+        {"PlayerTakenOver", Condition_PlayerTakenOver, NULL},
+        {"EitherPlayerTakenOver", Condition_EitherPlayerTakenOver, NULL},
+        {"BeenTakenOver", Condition_BeenTakenOver, Condition_BeenTakenOverInit},
+        {"OnSpeederBike", Condition_OnSpeederBike, Condition_OnSpeederBikeInit},
+        {"UnderPlayerControl", Condition_UnderPlayerControl, Condition_UnderPlayerControlInit},
         {"CharacterExists", NULL, NULL},
-        {"CharacterTypeExists", NULL, NULL},
-        {"GotLocatorInSet", NULL, NULL},
-        {"GotOpponentLOS", NULL, NULL},
-        {"EmptyTakeOver", NULL, NULL},
+        {"CharacterTypeExists", Condition_CharacterTypeExists, Condition_CharacterTypeExistsInit},
+        {"GotLocatorInSet", Condition_GotLocatorInSet, Condition_GotLocatorInSetInit},
+        {"GotOpponentLOS", Condition_GotOpponentLOS, NULL},
+        {"EmptyTakeOver", Condition_EmptyTakeOver, NULL},
         {"HasTakeOverTarget", NULL, NULL},
         {"TakeOverRange", NULL, NULL},
         {"TakeOverTargetInTriggerArea", NULL, NULL},
-        {"EitherPlayerInMyTriggerArea", NULL, NULL},
-        {"AreaContainsBaddies", NULL, NULL},
-        {"AreaContainsGoodies", NULL, NULL},
-        {"AreaContainsPartyMember", NULL, NULL},
+        {"EitherPlayerInMyTriggerArea", Condition_EitherPlayerInMyTriggerArea, NULL},
+        {"AreaContainsBaddies", Condition_AreaContainsBaddies, Condition_AreaContainsBaddiesInit},
+        {"AreaContainsGoodies", Condition_AreaContainsGoodies, Condition_AreaContainsGoodiesInit},
+        {"AreaContainsPartyMember", Condition_AreaContainsPartyMember, Condition_AreaContainsPartyMemberInit},
         {"GotVictim", NULL, NULL},
-        {"IsVisible", NULL, NULL},
+        {"IsVisible", Condition_IsVisible, Condition_IsVisibleInit},
         {"MySet", NULL, NULL},
         {"ScreenWipe", NULL, NULL},
-        {"IAmPlayer2", NULL, NULL},
+        {"IAmPlayer2", Condition_IAmPlayer2, NULL},
         {"HeadTurnRestricted", NULL, NULL},
         {"ShopActive", NULL, NULL},
         {"Side", NULL, NULL},
         {"NearestPartyRange", NULL, NULL},
         {"NearestPartyXZRange", NULL, NULL},
-        {"OpponentToPlayerRange", NULL, NULL},
-        {"OpponentPathPosRange", NULL, NULL},
+        {"OpponentToPlayerRange", Condition_OpponentToPlayerRange, NULL},
+        {"OpponentPathPosRange", Condition_OpponentPathPosRange, NULL},
         {"GizmoOutput0", NULL, NULL},
         {"GizmoOutput1", NULL, NULL},
         {"GizmoOutput2", NULL, NULL},
         {"GizmoOutput3", NULL, NULL},
         {"GizmoVisibility", NULL, NULL},
-        {"AngleAboutMyLocatorToPlayer", NULL, NULL},
+        {"AngleAboutMyLocatorToPlayer", Condition_AngleAboutMyLocatorToPlayer,
+         Condition_AngleAboutMyLocatorToPlayerInit},
         {"AnimSpeedMul", NULL, NULL},
-        {"PickupBeenTurnedOn", NULL, NULL},
+        {"PickupBeenTurnedOn", Condition_PickupBeenTurnedOn, Condition_PickupBeenTurnedOnInit},
         {"FlowBoxComplete", NULL, NULL},
         {"CanHearRadio", NULL, NULL},
         {"BeingTowed", NULL, NULL},
-        {"RaceLap", NULL, NULL},
-        {"MusicOn", NULL, NULL},
+        {"RaceLap", Condition_RaceLap, NULL},
+        {"MusicOn", Condition_MusicOn, NULL},
         {"CharacterLoaded", NULL, NULL},
         {"AreaComplete", NULL, NULL},
-        {"ShouldAttackOpponent", NULL, NULL},
+        {"ShouldAttackOpponent", Condition_ShouldAttackOpponent, NULL},
         {"InSwamp", NULL, NULL},
         {"InSameTriggerAreaAsNearestPlayer", NULL, NULL},
         {"NetworkGameOnGoing", NULL, NULL},
         {"InHubArea", &Condition_InHubArea, &Condition_InHubAreaInit},
         {"IsLowEndDevice", NULL, NULL},
-        {"RandomMapCharsAvailable", NULL, NULL},
+        {"RandomMapCharsAvailable", Condition_RandomMapCharsAvailable, NULL},
         {NULL, NULL, NULL},
     };
 
@@ -990,7 +2228,7 @@ extern "C" {
 }
 
 extern f32 OFFSCREEN_CATCHUP_TIME;
-f32 drop_back_in_timer;
+extern f32 drop_back_in_timer;
 
 i32 TryToTeleportToNextNode(GameObject_s *object, AIPATHNODE_s *node, i32 tightrope) {
     if ((object->apiobj.field_0x1f4 & 0x400) != 0 || !object->ai.path_info.on_path) {
@@ -1156,7 +2394,7 @@ void GameAISysReset(AISYS_s *system) {
     }
 }
 
-extern i32 party_under_cover;
+extern "C" i32 party_under_cover;
 extern i32 party_cant_be_under_cover;
 extern GameObject_s *alert_obj;
 extern f32 alert_timer;
@@ -1791,7 +3029,7 @@ void GameAISysStartFrame(AISYS_s *system) {
     if (system->path_sys != NULL && system->path_sys->path_count != 0) {
         for (i32 index = 0; index < system->path_sys->path_count; ++index) {
             memset(&system->path_sys->paths[index]->updated_node_bits[0], 0, 0x20);
-            memmove(&system->path_sys->paths[index]->updated_node_bits[0x20],
+            memmove(system->path_sys->paths[index]->previous_inside_node_bits,
                     system->path_sys->paths[index]->inside_node_bits, 0x20);
             memset(system->path_sys->paths[index]->inside_node_bits, 0,
                    sizeof(system->path_sys->paths[index]->inside_node_bits));
@@ -1844,13 +3082,13 @@ void GameAISysStartFrame(AISYS_s *system) {
                                    local_position.z >= -area->half_depth && local_position.x <= area->half_width &&
                                    local_position.y <= area->height && local_position.z <= area->half_depth;
             if (!is_inside) {
-                object->ai_area_mask_low &= ~static_cast<u32>(area_bit);
-                object->ai_area_mask_high &= ~static_cast<u32>(area_bit >> 32);
+                object->apiobj.ai_area_mask_low &= ~static_cast<u32>(area_bit);
+                object->apiobj.ai_area_mask_high &= ~static_cast<u32>(area_bit >> 32);
                 continue;
             }
 
-            object->ai_area_mask_low |= static_cast<u32>(area_bit);
-            object->ai_area_mask_high |= static_cast<u32>(area_bit >> 32);
+            object->apiobj.ai_area_mask_low |= static_cast<u32>(area_bit);
+            object->apiobj.ai_area_mask_high |= static_cast<u32>(area_bit >> 32);
             if ((object->apiobj.flags_low & APIOBJECT_FLAG_PLAYER_ACTIVE) != 0) {
                 area->runtime_flags |= AIAREA_RUNTIME_PLAYER_PRESENT;
             }
@@ -1964,9 +3202,6 @@ void GameObjectDimensions(GameObject_s *object) {
         api.field_0x1e0 = api.collision_height;
     }
     GameObjectDimensionsExtra_LSW(object);
-}
-
-void GameObjectUsingLever(GameObject_s *, LEVER_s *) {
 }
 
 void GameAntiNodeData_Init(GAMEANTINODEDATA_s *data, nuhspecial_s *) {
@@ -2161,8 +3396,285 @@ void GameObjectToCameraDistances() {
     }
 }
 
-void GameCreatureOpponentSelection(AISYS_s *, i32, APIOBJECT_s **, i32, APIOBJECT_s **, i32, APIOBJECT_s **, u64,
+extern GameObject_s *alert_obj;
+extern NUVEC alert_pos;
+extern f32 alert_timer;
+extern "C" {
+    i32 party_under_cover;
+}
+i32 ZapTarget(GameObject_s *object);
+
+void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **objects, i32 goody_count,
+                                   APIOBJECT_s **goodies, i32 baddy_count, APIOBJECT_s **baddies, u64 awareness,
                                    float) {
+    NUVEC difference = {0.0f, 0.0f, 0.0f};
+    if (system == NULL)
+        return;
+    if (goody_count == 0)
+        return;
+    f32 distance = 0.0f;
+    i32 complete = baddy_count == 0;
+    if (alert_obj != NULL && (alert_obj->apiobj.flags_high & 0x10) != 0 && (alert_obj->apiobj.field_0x1f4 & 5) == 0 &&
+        (static_cast<GAMECHARACTERDATA *>(alert_obj->apiobj.character_data->field11_0x24)->flags_090 & 0x8000) == 0) {
+        const u64 alert_mask = (u64)1 << alert_obj->apiobj.field_0x289;
+        for (i32 i = 0; i < baddy_count; ++i) {
+            APIOBJECT_s *object = baddies[i];
+            if ((object->ai_awareness_mask & alert_mask) != 0) {
+                object->objptr->alert_target_timer = 5.0f;
+                object->objptr->alert_target = &alert_obj->apiobj;
+            } else if (WORLD->rooms_visible_ptr[object->objptr->room_id] != 0) {
+                difference.x = alert_pos.x - object->collision_position.x;
+                if (object->heardistance > difference.x) {
+                    difference.z = alert_pos.z - object->collision_position.z;
+                    if (object->heardistance > difference.z) {
+                        difference.y = alert_pos.y - object->collision_position.y;
+                        if (object->maxviewheight > difference.y && difference.y > object->minviewheight) {
+                            distance = difference.x * difference.x + difference.z * difference.z;
+                            if (!(object->heardistance * object->heardistance > distance))
+                                continue;
+                            const f32 dx = alert_obj->apiobj.collision_position.x - object->collision_position.x;
+                            const f32 dz = alert_obj->apiobj.collision_position.z - object->collision_position.z;
+                            if ((WORLD->api_object_sys->line_of_sight[object->field_0x289] & alert_mask) != 0 ||
+                                dx * dx + dz * dz > object->viewdistance * object->viewdistance) {
+                                object->objptr->alert_target = &alert_obj->apiobj;
+                                object->ai_awareness_mask |= alert_mask;
+                                awareness |= object->ai_awareness_mask;
+                                object->objptr->alert_target_timer = 5.0f;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        alert_timer -= FRAMETIME;
+        if (!(alert_timer > 0.0f))
+            alert_obj = NULL;
+    }
+    if (system->goody_idx >= goody_count)
+        system->goody_idx = 0;
+    i32 budget = 32;
+    // Pending choices survive budget exhaustion. Publish only after a pass
+    // finishes without changing the baddies' assignments.
+    while (!complete && budget > 0) {
+        complete = 0;
+        while (system->goody_idx < goody_count && budget > 0) {
+            APIOBJECT_s *goody = goodies[system->goody_idx];
+            f32 best_distance = 1.0e9f;
+            APIOBJECT_s *best_baddy = NULL;
+            for (i32 i = 0; i < baddy_count; ++i) {
+                APIOBJECT_s *baddy = baddies[i];
+                if (baddy == goody || baddy->ai->pending_opponent == goody)
+                    continue;
+                i32 have_distance = 0;
+                if (baddy->objptr->field_0xefc & 2) {
+                    goody->ai_awareness_mask &= ~((u64)1 << baddy->field_0x289);
+                } else if ((goody->ai_awareness_mask >> baddy->field_0x289) & 1) {
+                    distance = NuVecDist(&baddy->position, &goody->position, &difference);
+                    have_distance = 1;
+                    if (distance >= goody->viewdistance + baddy->visibility_range_extension)
+                        goody->ai_awareness_mask &= ~((u64)1 << baddy->field_0x289);
+                } else if ((WORLD->api_object_sys->line_of_sight[goody->field_0x289] >> baddy->field_0x289) & 1) {
+                    distance = NuVecDist(&baddy->position, &goody->position, &difference);
+                    have_distance = 1;
+                    if ((!party_under_cover || ((goody->field_0x1f4 & 0x400) && (baddy->field_0x1f4 & 0x400))) &&
+                        (((awareness >> baddy->field_0x289) & 1) ||
+                         (((WORLD->api_object_sys->line_of_sight[goody->field_0x289] >> baddy->field_0x289) & 1) &&
+                          ((goody->flags_high & 8) ||
+                           difference.x * goody->objptr->facing_direction.x +
+                                   difference.z * goody->objptr->facing_direction.z >=
+                               0.0f ||
+                           (goody->heardistance > distance && (baddy->objptr->field_0xef9 & 8)))))) {
+                        goody->ai_awareness_mask |= (u64)1 << baddy->field_0x289;
+                        awareness |= goody->ai_awareness_mask;
+                    }
+                }
+                if (goody->objptr->field_0xefc & 2) {
+                    baddy->ai_awareness_mask &= ~((u64)1 << goody->field_0x289);
+                } else if (baddy->objptr->alert_target == goody) {
+                    baddy->ai_awareness_mask |= (u64)1 << goody->field_0x289;
+                    awareness |= baddy->ai_awareness_mask;
+                } else if ((baddy->ai_awareness_mask >> goody->field_0x289) & 1) {
+                    if (!have_distance)
+                        distance = NuVecDist(&baddy->position, &goody->position, &difference);
+                    have_distance = 1;
+                    if (distance >= baddy->viewdistance + goody->visibility_range_extension)
+                        baddy->ai_awareness_mask &= ~((u64)1 << goody->field_0x289);
+                } else if ((WORLD->api_object_sys->line_of_sight[baddy->field_0x289] >> goody->field_0x289) & 1) {
+                    if (!have_distance)
+                        distance = NuVecDist(&baddy->position, &goody->position, &difference);
+                    have_distance = 1;
+                    if ((!party_under_cover || ((baddy->field_0x1f4 & 0x400) && (goody->field_0x1f4 & 0x400))) &&
+                        (((awareness >> goody->field_0x289) & 1) ||
+                         (((WORLD->api_object_sys->line_of_sight[baddy->field_0x289] >> goody->field_0x289) & 1) &&
+                          ((baddy->flags_high & 8) ||
+                           -difference.z * baddy->objptr->facing_direction.z -
+                                   difference.x * baddy->objptr->facing_direction.x >=
+                               0.0f ||
+                           (baddy->heardistance > distance && (goody->objptr->field_0xef9 & 8)))))) {
+                        baddy->ai_awareness_mask |= (u64)1 << goody->field_0x289;
+                        awareness |= baddy->ai_awareness_mask;
+                    }
+                }
+                if (!((goody->ai_awareness_mask >> baddy->field_0x289) & 1) &&
+                    !((baddy->ai_awareness_mask >> goody->field_0x289) & 1))
+                    continue;
+                if (!have_distance)
+                    distance = NuVecDist(&baddy->position, &goody->position, &difference);
+                GameObject_s *baddy_object = baddy->objptr;
+                i16 baddy_id = baddy_object->id;
+                if (baddy_id == id_JAWA || baddy_id == id_UGNAUGHT) {
+                    if (!ZapTarget(goody->objptr))
+                        baddy->objptr->ai_opponent_exclusion_mask |= (u64)1 << goody->field_0x289;
+                    baddy_object = baddy->objptr;
+                    baddy_id = baddy_object->id;
+                } else if (goody->character_data->model_flags & 0x80000) {
+                    baddy_object->ai_opponent_exclusion_mask |= (u64)1 << goody->field_0x289;
+                } else if ((baddy_object->field_0xefb & 1) && goody->objptr != player && goody->objptr != player2) {
+                    baddy_object->ai_opponent_exclusion_mask |= (u64)1 << goody->field_0x289;
+                } else if (goody->objptr->id == id_DRAGBOMB && baddy_id != id_ATAT) {
+                    baddy_object->ai_opponent_exclusion_mask |= (u64)1 << goody->field_0x289;
+                }
+                GameObject_s *goody_object = goody->objptr;
+                if (!((baddy_object->ai_opponent_exclusion_mask >> goody->field_0x289) & 1)) {
+                    AIPACKET *packet = baddy->ai;
+                    if (packet->pending_nearest_metric > distance) {
+                        packet->pending_nearest_metric = distance;
+                        packet->pending_nearest_opponent = goody;
+                    }
+                    f32 metric = distance;
+                    if (packet->opponent_object == goody)
+                        metric -= 0.5f;
+                    if ((baddy->ai_awareness_mask >> goody->field_0x289) & 1) {
+                        if (packet->pending_opponent == NULL) {
+                            if (!(packet->runtime_flags & 2) ||
+                                ((WORLD->api_object_sys->line_of_sight[baddy->field_0x289] >> goody->field_0x289) &
+                                 1) ||
+                                baddy_object->alert_target == goody) {
+                                if (best_distance > metric) {
+                                    best_distance = distance;
+                                    best_baddy = baddy;
+                                }
+                            }
+                        } else if ((goody->flags_low & 0x80) && (baddy_object->field_0xefb & 0x40)) {
+                            if (!(packet->pending_opponent->flags_low & 0x80) ||
+                                packet->pending_opponent_metric > metric) {
+                                best_distance = distance;
+                                best_baddy = baddy;
+                            }
+                        }
+                    }
+                }
+                if (baddy_id == id_JAWA || baddy_id == id_UGNAUGHT || (baddy->character_data->model_flags & 0x80000))
+                    goody_object->ai_opponent_exclusion_mask |= (u64)1 << baddy->field_0x289;
+                if (!((goody_object->ai_opponent_exclusion_mask >> baddy->field_0x289) & 1)) {
+                    AIPACKET *packet = goody->ai;
+                    if (packet->pending_nearest_metric > distance) {
+                        packet->pending_nearest_metric = distance;
+                        packet->pending_nearest_opponent = baddy;
+                    }
+                    f32 metric = distance;
+                    if (packet->opponent_object == baddy)
+                        metric -= 0.5f;
+                    if (((goody->ai_awareness_mask >> baddy->field_0x289) & 1) &&
+                        (!(packet->runtime_flags & 2) ||
+                         ((WORLD->api_object_sys->line_of_sight[goody->field_0x289] >> baddy->field_0x289) & 1))) {
+                        if (packet->pending_opponent_metric > metric ||
+                            (packet->pending_opponent != NULL && packet->pending_opponent->objptr != NULL &&
+                             packet->pending_opponent->objptr->character_context == 0x5a &&
+                             baddy_object->character_context != 0x5a)) {
+                            packet->pending_opponent_metric = distance;
+                            packet->pending_opponent = baddy;
+                        }
+                    }
+                }
+            }
+            if (baddy_count > 0) {
+                budget -= baddy_count;
+                if (best_baddy != NULL && best_baddy->ai->pending_opponent != goody) {
+                    best_baddy->ai->pending_opponent = goody;
+                    best_baddy->ai->pending_opponent_metric = best_distance;
+                    system->unknown_flag_2 = 1;
+                    if (!((goody->objptr->ai_opponent_exclusion_mask >> best_baddy->field_0x289) & 1) &&
+                        ((goody->ai_awareness_mask >> best_baddy->field_0x289) & 1)) {
+                        AIPACKET *packet = goody->ai;
+                        if (!(packet->field_0x1e5 & 0x10) || packet->pending_opponent_metric > best_distance) {
+                            packet->pending_opponent = best_baddy;
+                            packet->pending_opponent_metric = best_distance;
+                            packet->field_0x1e5 |= 0x10;
+                        }
+                    }
+                }
+            }
+            ++system->goody_idx;
+            if (system->goody_idx >= goody_count) {
+                system->goody_idx = 0;
+                if (system->unknown_flag_2) {
+                    system->unknown_flag_2 = 0;
+                    complete = 0;
+                } else {
+                    complete = 1;
+                }
+            }
+        }
+    }
+    if (!complete)
+        return;
+    system->goody_idx = 0;
+    nbaddies_can_see_players = 0;
+    // Losing LOS alone does not erase the seen history; losing awareness does.
+    for (i32 i = 0; i < goody_count; ++i) {
+        APIOBJECT_s *goody = goodies[i];
+        for (i32 j = 0; j < baddy_count; ++j) {
+            APIOBJECT_s *baddy = baddies[j];
+            if ((goody->ai_awareness_mask >> baddy->field_0x289) & 1) {
+                if ((WORLD->api_object_sys->line_of_sight[goody->field_0x289] >> baddy->field_0x289) & 1)
+                    goody->objptr->ai_seen_mask |= (u64)1 << baddy->field_0x289;
+            } else if ((goody->objptr->ai_seen_mask >> baddy->field_0x289) & 1) {
+                goody->objptr->ai_seen_mask &= ~((u64)1 << baddy->field_0x289);
+            }
+            if ((baddy->ai_awareness_mask >> goody->field_0x289) & 1) {
+                if ((WORLD->api_object_sys->line_of_sight[baddy->field_0x289] >> goody->field_0x289) & 1)
+                    baddy->objptr->ai_seen_mask |= (u64)1 << goody->field_0x289;
+            } else if ((baddy->objptr->ai_seen_mask >> goody->field_0x289) & 1) {
+                baddy->objptr->ai_seen_mask &= ~((u64)1 << goody->field_0x289);
+            }
+        }
+    }
+    for (i32 i = 0; i < count; ++i) {
+        APIOBJECT_s *object = objects[i];
+        AIPACKET *packet = object->ai;
+        packet->opponent_metric = packet->pending_opponent_metric;
+        packet->opponent_object = packet->pending_opponent;
+        packet->field_0x1e5 = (packet->field_0x1e5 & ~8) | ((packet->field_0x1e5 >> 1) & 8);
+        packet = object->ai;
+        packet->nearest_opponent_metric = packet->pending_nearest_metric;
+        packet->nearest_opponent_object = packet->pending_nearest_opponent;
+        packet->pending_opponent_metric = 1.0e9f;
+        packet->pending_nearest_metric = 1.0e9f;
+        packet->field_0x1e5 &= ~0x10;
+        packet->pending_nearest_opponent = NULL;
+        packet->pending_opponent = NULL;
+        if ((awareness >> object->field_0x289) & 1)
+            object->ai->field_0x1e5 |= 0x40;
+        else
+            object->ai->field_0x1e5 &= ~0x40;
+        object->objptr->field_0xef9 &= ~8;
+        GameObject_s *game_object = object->objptr;
+        game_object->ai_opponent_exclusion_mask = 0;
+        if ((player != NULL && ((game_object->ai_seen_mask >> player->apiobj.field_0x289) & 1)) ||
+            (player2 != NULL && ((game_object->ai_seen_mask >> player2->apiobj.field_0x289) & 1)))
+            ++nbaddies_can_see_players;
+        if (game_object->opponent != NULL) {
+            packet = object->ai;
+            packet->opponent_object = static_cast<APIOBJECT_s *>(game_object->opponent);
+            packet->opponent_metric = NuVecDist(&packet->opponent_object->position, &object->position, &difference);
+            packet = object->ai;
+            if (packet->opponent_object->ai->opponent_object == object)
+                packet->field_0x1e5 |= 8;
+            else
+                packet->field_0x1e5 &= ~8;
+        }
+    }
 }
 
 void GameObjectDimensionsExtra_LSW(GameObject_s *) {
@@ -4529,8 +6041,8 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
                                      static_cast<i8>(object->apiobj.field_0x27d));
         }
     }
-    AIScriptProcessorInit(WORLD->ai_sys, &object->ai, reinterpret_cast<AISCRIPTPROCESS *>(&object->ai), NULL,
-                          script_name, NULL, 1, NULL, NULL);
+    AIScriptProcessorInit(WORLD->ai_sys, &object->ai, &object->ai.script_process, NULL, script_name, NULL, 1, NULL,
+                          NULL);
     object->apiobj.field_0x214 = 2000000.0f;
     if (object->ai.group != NULL) {
         AIGROUP *active_group = object->ai.group;
@@ -4707,9 +6219,6 @@ void RemoveDebrisEffectFromStack(debkeydatatype_s *key) {
     }
     key->next = NULL;
     key->previous = NULL;
-}
-
-void ReStoreStatusTakeOverObjectSys(i32) {
 }
 
 extern "C" {

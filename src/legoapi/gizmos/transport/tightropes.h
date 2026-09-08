@@ -6,6 +6,9 @@
 
 #ifdef __cplusplus
 
+struct GameObject_s;
+struct WORLDINFO_s;
+
 typedef struct TIGHTROPE_s {
     char name[16];
     union {
@@ -30,6 +33,7 @@ typedef struct TIGHTROPE_s {
         f32 horizontal_length;
     }; // 0x40
     union {
+        u16 rotation;
         u16 y_rotation;
         u16 angle;
     }; // 0x44
@@ -37,7 +41,10 @@ typedef struct TIGHTROPE_s {
         u8 visible;
         u8 enabled;
     };
-    u8 active;
+    union {
+        u8 active;
+        u8 available;
+    };
 } TIGHTROPE;
 
 DECOMP_ASSERT(sizeof(TIGHTROPE) == 0x48, "TIGHTROPE ABI");
@@ -59,3 +66,5 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+
+void TightRope_MoveCode(GameObject_s *, i32);

@@ -143,17 +143,6 @@ void GizObstacles_AddTrigger(nuvec_s *position) {
     gizobstacletriggers[ngizobstacletriggers++] = position;
 }
 
-u32 GizObstacles_TotalScore(void *context) {
-    GIZOBSTACLESYS_s *system = static_cast<WORLDINFO_s *>(context)->giz_obstacle_sys;
-    u32 total = 0;
-    if (system != NULL && system->obstacles != NULL) {
-        GIZOBSTACLE_s *obstacle = system->obstacles;
-        for (i32 i = 0; i < system->count; ++i, ++obstacle)
-            total += static_cast<u16>(obstacle->pickup_count);
-    }
-    return total;
-}
-
 void GizObstacle_PlayForwards(GIZOBSTACLE_s *obstacle) {
     if (obstacle != NULL) {
         GameAnimSet_SetRepeating(obstacle->anim_set, obstacle->state == 2);
@@ -203,12 +192,6 @@ void GizObstacle_EvalAveragePosAndRadius(GIZOBSTACLE_s *obstacle, i32 state) {
     obstacle->evaluated_position = obstacle->position;
     GameAnimSet_GetCentreAndRadius(obstacle->anim_set, &obstacle->evaluated_position, &obstacle->field_0x58, state, 1,
                                    1);
-}
-
-void GIZOBSTACLE_s::ClearMechObjectInterface() {
-}
-
-void GIZOBSTACLE_s::GetMechObjectInterface() {
 }
 
 // Obstacle modes dispatch through this exact eight-entry target table.

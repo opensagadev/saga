@@ -45,7 +45,9 @@ typedef struct TECHNO_s {
         struct {
             u8 active : 1;
             u8 visible : 1;
-            u8 reserved_flags : 6;
+            u8 used_this_frame : 1;
+            u8 complete : 1;
+            u8 reserved_flags : 4;
         };
     };
     char target_name[16];
@@ -58,6 +60,7 @@ DECOMP_ASSERT(offsetof(TECHNO, position) == 0x10, "TECHNO position offset");
 DECOMP_ASSERT(offsetof(TECHNO, target_mode) == 0x37, "TECHNO target-mode offset");
 DECOMP_ASSERT(offsetof(TECHNO, flags) == 0x3c, "TECHNO flags offset");
 DECOMP_ASSERT(offsetof(TECHNO, controlled_object) == 0x6c, "TECHNO controlled-object offset");
+DECOMP_ASSERT(offsetof(TECHNO, target_mode) == 0x37, "TECHNO target mode offset");
 
 extern TECHNO_CONFIG TechnoSys;
 struct GAMEPAD_s;

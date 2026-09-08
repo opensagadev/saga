@@ -639,11 +639,31 @@ struct MechSystems : BaseThing {
         return *reinterpret_cast<MechTouchUIPauseButton *>(pause_button_storage);
     }
 };
-struct MechTempPosInterface {
-    void GetFloorTargetPos(VuVec &, i32) const;
+struct MechTempPosInterface : MechObjectInterface {
+    VuVec position;
+    f32 radius;
+    void GetPos(VuVec &result, i32) const override {
+        result.xyz = position.xyz;
+    }
+    void GetFloorTargetPos(VuVec &, i32) const override;
+    f32 GetRadius() const override {
+        return radius;
+    }
+    f32 GetHeight() const override {
+        return 0.2f;
+    }
+    const char *GetTargetName() const override {
+        return "(TEMPPOS)";
+    }
+    i32 GetObjectType() const override {
+        return 1;
+    }
     MechTempPosInterface(VuVec const &);
     MechTempPosInterface(nuvec_s const &);
 };
+DECOMP_ASSERT(sizeof(MechTempPosInterface) == 0x1c, "Temporary position interface size");
+DECOMP_ASSERT(offsetof(MechTempPosInterface, position) == 8, "Temporary target position offset");
+DECOMP_ASSERT(offsetof(MechTempPosInterface, radius) == 0x18, "Temporary target radius offset");
 struct MechTouchTask {
     MechTouchTask(MechInputTouchGestureBasedController &);
     virtual ~MechTouchTask();

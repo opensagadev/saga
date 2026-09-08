@@ -12,6 +12,17 @@
 #include "legoapi/world/world_shared.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
+
+TECHNO *Technos_FindControllingTechno(GameObject_s *object) {
+    if (object != NULL) {
+        for (i32 index = 0; index < WORLD->ntechnos; ++index) {
+            TECHNO *techno = &WORLD->technos[index];
+            if (techno->target_mode == 1 && techno->controlled_object == object)
+                return techno;
+        }
+    }
+    return NULL;
+}
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/numath/nufloat.h"

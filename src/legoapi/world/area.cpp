@@ -5,6 +5,19 @@
 
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "globals.h"
+
+i32 Area_CharIDInCurrentList(i32 character_id) {
+    i32 result = -1;
+    if (CurrentCList != NULL) {
+        for (i32 index = 0; CurrentStoryCList[index].model_id != -1 && index != 64; ++index) {
+            if (CurrentStoryCList[index].model_id == character_id) {
+                result = index;
+                break;
+            }
+        }
+    }
+    return result;
+}
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/core/config/cheat.h"

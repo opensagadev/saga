@@ -229,9 +229,6 @@ void Store_HubInitFloorTargets(WORLDINFO_s *) {
 void Store_UprootPackCustodian(i32, GameObject_s *) {
 }
 
-void StoreStatusTakeOverObjectSys() {
-}
-
 static __used__ void StoreUnlockEp2() {
     if (Game_AreaSave != NULL) {
         if (EDataList != NULL) {
