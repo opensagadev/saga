@@ -590,9 +590,6 @@ static __used__ f32 Condition_IAmAGoodieBaddie(AISYS_s *, AISCRIPTPROCESS_s *, A
 }
 
 
-static __used__ f32 Condition_OnDynamicGrapple(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
 
 
 static __used__ f32 Condition_PlayerCategoryIs(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
@@ -1023,9 +1020,6 @@ static __used__ f32 Condition_EitherPlayerOnObject(AISYS_s *, AISCRIPTPROCESS_s 
 
 
 
-static __used__ void *Condition_OnDynamicGrappleInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
-}
 
 
 

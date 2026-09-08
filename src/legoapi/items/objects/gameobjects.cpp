@@ -1,4 +1,5 @@
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/gizmos/transport/grapples.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "decomp.h"
 #include "gameapi/ai/aisys/aisys.h"
@@ -705,6 +706,23 @@ static void *Condition_CharacterTypeExistsInit(AISYS_s *system, char *name, AISC
     return (void *)(intptr_t)-1;
 }
 
+static f32 Condition_OnDynamicGrapple(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
+    GameObject *object = static_cast<GameObject *>(argument);
+    if (object == NULL) {
+        if (packet == NULL || packet->owner == NULL) return 0.0f;
+        object = packet->owner->apiobj.objptr;
+    }
+    if (object != NULL && object->character_context == 0x46) {
+        GRAPPLE *grapple = static_cast<GRAPPLE *>(object->field_0x788);
+        if (grapple != NULL && grapple->has_terrain_platform != 0) return 1.0f;
+    }
+    return 0.0f;
+}
+
+static void *Condition_OnDynamicGrappleInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    return name != NULL && system != NULL ? GetNamedGameObject(system, name) : NULL;
+}
+
 static f32 Condition_AngleAboutMyLocatorToPlayer(AISYS_s *, AISCRIPTPROCESS_s *process, AIPACKET_s *packet, char *, void *argument) {
     f32 result = 0.0f;
     if (argument != NULL && process->unknown_a4 != NULL && packet != NULL && packet->owner != NULL) {
@@ -1297,7 +1315,7 @@ extern "C" {
         {"BeenHit", NULL, NULL},
         {"HoverPhase", NULL, NULL},
         {"HitPoints", Condition_HitPoints, Condition_HitPointsInit},
-        {"OnDynamicGrapple", NULL, NULL},
+        {"OnDynamicGrapple", Condition_OnDynamicGrapple, Condition_OnDynamicGrappleInit},
         {"XPos", NULL, NULL},
         {"YPos", NULL, NULL},
         {"ZPos", NULL, NULL},
