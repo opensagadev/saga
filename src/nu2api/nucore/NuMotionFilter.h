@@ -1,5 +1,7 @@
 #pragma once
 
-struct NuMotionFilter {
+#include "nu2api/nucore/NuMotionFilterGen.h"
+
+struct NuMotionFilter : NuMotionFilterGen {
     void initResources();
 };

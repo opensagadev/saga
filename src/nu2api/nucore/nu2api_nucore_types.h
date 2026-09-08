@@ -143,7 +143,7 @@ struct nudeferredshadingenum_e {};
 struct nudisplaylistitem_s;
 struct nudisplayscene_s;
 struct nudynamiclight_s {};
-struct nueffecttex_s {};
+struct nueffecttex_s;
 struct nufnt_s {};
 struct nuframebuffer_s {};
 struct nugeom_s {};

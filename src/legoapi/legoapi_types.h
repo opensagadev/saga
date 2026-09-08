@@ -1761,8 +1761,6 @@ struct NUGCUTSCENE_s;
 struct NetAddress;
 struct NetMessage;
 struct NetPeer;
-struct NuBloomParameters {};
-
 struct OPTIONSSAVE_s;
 struct PARTDEBENTRY_s {
     i32 type_id;

@@ -1,5 +1,7 @@
 #pragma once
 
-struct NuDeferredFilter {
+#include "nu2api/nucore/NuDeferredFilterGen.h"
+
+struct NuDeferredFilter : NuDeferredFilterGen {
     void initResources();
 };

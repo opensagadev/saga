@@ -186,6 +186,11 @@ extern "C" {
                 *direction = {0.0f, 1.0f, 0.0f};
                 continue;
             }
+            // rtlCalcLights (original 0x3abcb8) resets the directional
+            // light's selection priority before using it as intensity.
+            if (light[0x58] == 5) {
+                *reinterpret_cast<f32 *>(data->data + 0x0c + slot * 4) = 1.0f;
+            }
             const f32 strength =
                 *reinterpret_cast<f32 *>(data->data + 0x0c + slot * 4) * *reinterpret_cast<f32 *>(light + 0x6c) * scale;
             const NUVEC *source_colour = reinterpret_cast<const NUVEC *>(light + 0x18);

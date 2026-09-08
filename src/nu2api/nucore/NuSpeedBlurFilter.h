@@ -1,5 +1,7 @@
 #pragma once
 
-struct NuSpeedBlurFilter {
+#include "nu2api/nucore/NuSpeedBlurFilterGen.h"
+
+struct NuSpeedBlurFilter : NuSpeedBlurFilterGen {
     void initResources();
 };

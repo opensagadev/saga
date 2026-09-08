@@ -17,7 +17,7 @@
 // nucore_plain.cpp stubs / display-list init.
 extern "C" {
     void NuFramebufferInitEx(void);
-    void NuPostEffectInit(void);
+    void NuPostEffectInit(u32, void *, void *);
     void NuAnimInit(i32 max_joints, VARIPTR *buf, VARIPTR buf_end);
     void NuDisplayListInit(VARIPTR *buf, VARIPTR *buf_end);
 }
@@ -170,7 +170,7 @@ i32 NuInitHardware(VARIPTR *buf, VARIPTR *buf_end, i32 heap_size, ...) {
     NuTexInitEx(buf, 0xbb8);
     NuDisplayListInit(buf, buf_end);
     NuFramebufferInitEx();
-    NuPostEffectInit();
+    NuPostEffectInit(flags | 1, buf, buf_end->void_ptr);
     NuMtlInitEx(buf, 512);
     NuRndrInitGeneric();
     NuAnimInit(0xa0, buf, *buf_end);
