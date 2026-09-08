@@ -514,8 +514,15 @@ typedef struct APIOBJECT_s {
     APIOBJECT_s *collision_link; // 0x294, paired objects do not collide with each other
     u32 collision_mask_low;      // 0x298
     u32 collision_mask_high;     // 0x29c
-    u32 field387_0x2a0;          // 0x2a0
-    u32 field388_0x2a4;          // 0x2a4
+    union {
+        // Persistent awareness, indexed by the other object's character index.
+        // Opponent selection updates this separately from the system LOS cache.
+        u64 ai_awareness_mask; // 0x2a0
+        struct {
+            u32 field387_0x2a0;
+            u32 field388_0x2a4;
+        };
+    };
     union {
         u32 ai_area_mask_low;    // 0x2a8
         u32 field_0x2a8;
@@ -527,6 +534,7 @@ typedef struct APIOBJECT_s {
 } APIOBJECT;
 
 DECOMP_ASSERT(sizeof(APIOBJECT) == 0x2b0, "APIOBJECT size");
+DECOMP_ASSERT(offsetof(APIOBJECT, ai_awareness_mask) == 0x2a0, "APIOBJECT AI awareness mask offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, packed_contact_state) == 0x27c, "APIOBJECT packed contact state offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, collision_identity_mask) == 0x1e4, "APIOBJECT collision identity offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, colliding_objects_mask) == 0x1ec, "APIOBJECT colliding objects offset");
@@ -877,10 +885,22 @@ typedef struct GameObject_s {
     GameObject_s *takeover_target;              // 0x0eb0
     u32 field_0xeb4;                            // 0x0eb4, cleared on hub room changes
     NUVEC *context_target_position;             // 0x0eb8
-    u32 field_0xebc;                            // 0x0ebc
-    u32 field_0xec0;                            // 0x0ec0
-    u32 field_0xec4;                            // 0x0ec4
-    u32 field_0xec8;                            // 0x0ec8
+    union {
+        // Set when an aware target has LOS; cleared after awareness is lost.
+        u64 ai_seen_mask; // 0x0ebc
+        struct {
+            u32 field_0xebc;
+            u32 field_0xec0;
+        };
+    };
+    union {
+        // Targets excluded during the current opponent-selection pass.
+        u64 ai_opponent_exclusion_mask; // 0x0ec4
+        struct {
+            u32 field_0xec4;
+            u32 field_0xec8;
+        };
+    };
     u32 field_0xecc;                            // 0x0ecc
     u32 field_0xed0;                            // 0x0ed0
     union {
@@ -1040,6 +1060,8 @@ typedef struct GameObject_s {
 } GameObject;
 
 DECOMP_ASSERT(sizeof(GameObject_s) == 0x10e4, "GameObject size");
+DECOMP_ASSERT(offsetof(GameObject_s, ai_seen_mask) == 0xebc, "GameObject AI seen mask offset");
+DECOMP_ASSERT(offsetof(GameObject_s, ai_opponent_exclusion_mask) == 0xec4, "GameObject opponent exclusion mask offset");
 DECOMP_ASSERT(offsetof(GameObject_s, last_attacker) == 0x10b4, "Last attacker offset");
 DECOMP_ASSERT(offsetof(GameObject_s, use_target) == 0xf08, "GameObject use target offset");
 DECOMP_ASSERT(offsetof(GameObject_s, use_attach_frames) == 0xf0d, "GameObject use attachment frames offset");
