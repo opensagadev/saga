@@ -10,6 +10,10 @@
 #include "globals.h"
 #include "nu2api/nucore/nustring.h"
 #include <string.h>
+#include "legoapi/characters/core/players.h"
+#include "legoapi/props/doors/door.h"
+
+extern i32 Area_CharIDInCurrentList(i32 character_id);
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -68,6 +72,44 @@ void RegisterTakeOverObject(GameObject_s *object) {
     takeoverobjects[index].current_level = level;
     takeoverobjects[index].source_creature = object->ai.field_0x134;
     ++num_takeoverobjects;
+}
+
+void StoreStatusTakeOverObjectSys() {
+    if (netclient != 0) {
+        return;
+    }
+    u8 level = static_cast<u8>(WORLD->current_level->area_level_index);
+    for (i32 index = 0; index < num_takeoverobjects; ++index) {
+        TAKEOVEROBJECT_s *record = &takeoverobjects[index];
+        GameObject_s *object = record->object;
+        if (object == NULL) {
+            continue;
+        }
+        record->last_safe_position = object->apiobj.last_safe_position;
+        record->heading = object->apiobj.field_0x276;
+        u8 contact = 0xff;
+        if (object->field_0xcc0 != NULL && LEGOCONTEXT_BEENTAKENOVER != -1 &&
+            object->field_0xcc0->character_context == LEGOCONTEXT_BEENTAKENOVER &&
+            static_cast<u8>(object->apiobj.field_0x27c) != 0xff && Door_Last != NULL &&
+            Door_Last->takeover_character_mask != 0) {
+            if (Door_Last->takeover_character_mask == ~static_cast<u64>(0)) {
+                contact = static_cast<u8>(object->apiobj.field_0x27c);
+            } else {
+                u8 character_index = static_cast<u8>(Area_CharIDInCurrentList(object->id));
+                if (character_index < 63 &&
+                    ((Door_Last->takeover_character_mask >> character_index) & 1) != 0) {
+                    contact = static_cast<u8>(record->object->apiobj.field_0x27c);
+                }
+            }
+        }
+        record->contact_index = contact;
+        object = record->object;
+        record->hitpoints = object->current_hp;
+        if (record->hitpoints == 0 && object->hitpoints != 0) {
+            record->hitpoints = object->hitpoints;
+        }
+        record->current_level = level;
+    }
 }
 
 void SuperCounters_FindPickup(WORLDINFO_s *, GIZMO_s *, nuvec_s *, SUPERCOUNTERPICKUP **) {
