@@ -9,14 +9,6 @@ extern "C" {
     void PlatInstRotate(i32 platform_id, i32 enabled);
 }
 
-void Levers_InitTerrain(WORLDINFO_s *world) {
-    for (i32 index = 0; index < world->nlevers; ++index) {
-        LEVER_s &lever = world->levers[index];
-        lever.platform_id = NewPlatPickupInst(&lever, 3);
-        PlatInstRotate(lever.platform_id, 1);
-    }
-}
-
 void LEVER_s::ClearMechObjectInterface() {
 }
 

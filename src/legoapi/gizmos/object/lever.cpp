@@ -119,10 +119,9 @@ void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     object->character_context = 0x4a;
     object->field_0x768 = 0.0f;
     object->context_animation = 0x5d;
-    f32 duration = AnimDuration(object->id, 0x5d, 0.0f, 0.0f, 1);
-    if (duration <= 0.0f)
-        duration = 1.0f;
-    object->airborne_action_duration = duration;
+    object->airborne_action_duration = AnimDuration(object->id, 0x5d, 0.0f, 0.0f, 1);
+    if (object->airborne_action_duration <= 0.0f)
+        object->airborne_action_duration = 1.0f;
     object->context_flags &= ~0x40;
     object->apiobj.movement_facing_angle = static_cast<LEVER_s *>(object->field_0x788)->y_rotation;
     static_cast<LEVER_s *>(object->field_0x788)->interacting = 1;
@@ -137,6 +136,15 @@ void Lever_GetAbsTargetPos(LEVER_s *lever, nuvec_s *target_position) {
         offset.x += lever->position.x;
         offset.z += lever->position.z;
         *target_position = offset;
+    }
+}
+
+void Levers_InitTerrain(WORLDINFO_s *world) {
+    if (world->levers != NULL) {
+        for (i32 index = 0; index < world->nlevers; ++index) {
+            world->levers[index].platform_id = NewPlatPickupInst(&world->levers[index], 3);
+            PlatInstRotate(world->levers[index].platform_id, 1);
+        }
     }
 }
 
