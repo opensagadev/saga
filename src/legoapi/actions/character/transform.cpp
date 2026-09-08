@@ -1,3 +1,4 @@
+#include "nu2api/numath/nuquat.h"
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
@@ -75,5 +76,10 @@ i32 Transform_TargettedByObj(void *) {
 void InterpolateRotationMatrix(numtx_s *, numtx_s *, numtx_s *, float) {
 }
 
-void QuatInterpolateRotationMatrix(numtx_s *, numtx_s *, numtx_s *, float) {
+void QuatInterpolateRotationMatrix(NUMTX *result, NUMTX *first, NUMTX *second, f32 fraction) {
+    NUQUAT a, b, interpolated;
+    NuMtxToQuat(second, &b);
+    NuMtxToQuat(first, &a);
+    NuQuatSlerp(&interpolated, &a, &b, fraction);
+    NuQuatToMtx(&interpolated, result);
 }
