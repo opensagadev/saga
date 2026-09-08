@@ -1274,12 +1274,12 @@ static i32 Action_PressSpecialButton(AISYS *, AISCRIPTPROCESS *processor, AIPACK
     if (first_time) {
         for (i32 index = 0; index < param_count; ++index) {
             if (NuStrICmp(params[index], "hold_button") == 0)
-                processor->action_data_1 = 1;
+                processor->hold_special_button = 1;
         }
     }
     object->pad_gamepad->buttons_pressed |= GAMEPAD_SPECIAL;
     i32 result = 1;
-    if (processor->action_data_1 != 0) {
+    if (processor->hold_special_button != 0) {
         object->pad_gamepad->buttons_held |= GAMEPAD_SPECIAL;
         result = 0;
     }

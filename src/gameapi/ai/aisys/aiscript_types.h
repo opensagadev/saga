@@ -129,7 +129,7 @@ typedef struct AISCRIPTPROCESS_s {
     AIREFSCRIPT *active_refs[4];
     i32 active_ref_count;
 
-    u8 action_data_1;
+    union { u8 action_data_1; u8 hold_special_button; };
     u8 action_data_2;
     u16 action_data_6;
     union {
@@ -216,6 +216,7 @@ DECOMP_ASSERT(sizeof(AISCRIPTPROCESSSTACK) == 0x14, "AISCRIPTPROCESSSTACK stride
 DECOMP_ASSERT(offsetof(AISCRIPTPROCESSSTACK, is_first_time_state) == 0x10, "Script operand cache validity offset");
 DECOMP_ASSERT(offsetof(AISCRIPTPROCESSSTACK, force_complex_eval) == 0x11, "Script operand cache fill flag offset");
 DECOMP_ASSERT(sizeof(AISCRIPTPROCESS) == 0xc8, "AISCRIPTPROCESS size");
+DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, hold_special_button) == 0x68, "Special button hold state offset");
 DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, override_control_object) == 0x6c, "AI override saved object offset");
 DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, params) == 0x14, "Script processor parameters offset");
 DECOMP_ASSERT(offsetof(AISCRIPTPROCESS, param_stack) == 0x28, "Script processor operand caches offset");
