@@ -240,10 +240,7 @@ cc_library(
     includes = ["."],
     linkstatic = True,
     linkopts = select({
-        "//bazel/platforms:linux": [
-            "-Wl,--wrap=MenuInMemoryCard",
-            "-Wl,--wrap=edppDeleteEffect",
-        ],
+        "//bazel/platforms:linux": ["-Wl,--wrap=MenuInMemoryCard"],
         "//conditions:default": [],
     }),
     local_defines = ["__FILENAME__=__FILE__"],

@@ -26,7 +26,11 @@ extern "C" void __real__Z7EndPermv();
 extern "C" void __real__Z8LoadPermv();
 extern "C" void __real_NuFrameBegin();
 
-// A recovered UBSan error is still a failed smoke test.
+// Sanitizer errors remain fatal in the smoke test.
+extern "C" const char *__asan_default_options() {
+    return "halt_on_error=1";
+}
+
 extern "C" const char *__ubsan_default_options() {
     return "halt_on_error=1:print_stacktrace=1";
 }

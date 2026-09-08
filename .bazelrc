@@ -37,6 +37,8 @@ build:native --config=saga-common
 build:native --define=SAGA_BUILD=native
 build:native --define=SAGA_MODE=debug
 build:native --compilation_mode=dbg
+# Report and recover from ASan errors in the original particle editor routines.
+build:native --per_file_copt=src/gameapi/edtools/edtoolsall_plain.cpp@-fsanitize-recover=address
 
 build:native_release --config=saga-common
 build:native_release --define=SAGA_BUILD=native
