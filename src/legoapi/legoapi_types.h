@@ -423,9 +423,11 @@ struct AISCRIPTPROCESS_s;
 struct AISCRIPT_s;
 struct AITRIGGERSET_s {
     FLOWBOX_s *flowbox;
-    u8 pad_0x004[0x204 - 4];
+    GIZMO_s *gizmos[8];
+    AILOCATOR locators[8];
     i8 trigger_indices[8];
-    u8 pad_0x20c[2];
+    u8 trigger_count;
+    u8 field_20d;
     u16 field_0x20e; // Tested by Condition_HelpWithTriggers.
     u8 flags;
     u8 pad_0x211[3];
@@ -433,6 +435,9 @@ struct AITRIGGERSET_s {
 DECOMP_ASSERT(sizeof(AITRIGGERSET_s) == 0x214, "AITRIGGERSET_s size");
 DECOMP_ASSERT(offsetof(AITRIGGERSET_s, flowbox) == 0, "AITRIGGERSET flowbox offset");
 DECOMP_ASSERT(offsetof(AITRIGGERSET_s, flags) == 0x210, "AITRIGGERSET flags offset");
+DECOMP_ASSERT(offsetof(AITRIGGERSET_s, gizmos) == 4, "AITRIGGERSET gizmos offset");
+DECOMP_ASSERT(offsetof(AITRIGGERSET_s, locators) == 0x24, "AITRIGGERSET locators offset");
+DECOMP_ASSERT(offsetof(AITRIGGERSET_s, trigger_count) == 0x20c, "AITRIGGERSET trigger count offset");
 DECOMP_ASSERT(offsetof(AITRIGGERSET_s, field_0x20e) == 0x20e, "AITRIGGERSET help field offset");
 struct AITRIGGERSETSYS_s {
     AITRIGGERSET_s sets[32];

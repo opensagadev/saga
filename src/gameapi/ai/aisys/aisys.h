@@ -176,14 +176,6 @@ typedef struct AIPATHSYS_s {
     AIPATHSPECIALROUTE *special_routes;
 } AIPATHSYS;
 
-typedef struct AILOCATOR_s {
-    char name[0x10];
-    NUVEC position;
-    i32 flags;
-    AIPATHINFO path_info;
-    i32 locator_flags;
-} AILOCATOR;
-
 typedef struct AILOCATORSET_s {
     char name[0x10];
     i8 locator_count;
