@@ -897,7 +897,8 @@ typedef struct GameObject_s {
             nugspline_s *movement_spline;
             u8 padding_e74[3];
             u8 movement_spline_finished; // 0x0e77
-            u8 padding_e78[0xeb0 - 0xe78];
+            u8 padding_e78[0xeac - 0xe78];
+            GameObject_s *script_fire_target; // 0xeac
         };
     };
     GameObject_s *takeover_target;              // 0x0eb0
@@ -1196,6 +1197,7 @@ DECOMP_ASSERT(offsetof(GameObject_s, contact_normal) == 0x6a4, "GameObject conta
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x6b0) == 0x6b0, "GameObject terrain contact state offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x780) == 0x780, "GameObject field_0x780 offset");
 DECOMP_ASSERT(offsetof(GameObject_s, takeover_source) == 0xcc4, "GameObject takeover source offset");
+DECOMP_ASSERT(offsetof(GameObject_s, script_fire_target) == 0xeac, "GameObject script firing target offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0xf14) == 0xf14, "GameObject character-switch preserved state offset");
 DECOMP_ASSERT(offsetof(GameObject_s, field_0xf20) == 0xf20, "GameObject character-switch preserved state offset");
 DECOMP_ASSERT(offsetof(GameObject_s, spawn_protection_timer) == 0x100c, "GameObject spawn protection offset");

@@ -4912,15 +4912,63 @@ extern "C" {
 DECOMP_ASSERT(sizeof(lego_aiactiondefs) / sizeof(lego_aiactiondefs[0]) == LEGO_AI_ACTION_NEW_SEBULBA + 2,
               "complete game action registry");
 
-__used__ static i32 Action_FollowDirection(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
-                                           i32 param_4, i32 param_5, f32 param_6) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
-    (void)param_6;
+extern "C" {
+f32 direction_scale = 100.0f;
+}
+
+static i32 Action_FollowDirection(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
+                                 i32 param_count, i32 first_time, f32 delta_time) {
+    if (packet == NULL || packet->owner == NULL)
+        return 1;
+    GameObject_s *object = packet->owner->apiobj.objptr;
+    if (object == NULL)
+        return 1;
+    if (first_time) {
+        processor->action_pos.x = 0.0f;
+        processor->action_pos.y = 0.0f;
+        processor->action_pos.z = 1.0f;
+        const f32 random = NuRandFloat();
+        AILOCATOR *start = NULL;
+        AILOCATOR *end = NULL;
+        for (i32 index = 0; index < param_count; ++index) {
+            char *value = NuStrIStr(params[index], "start=");
+            if (value != NULL) {
+                start = AIPathFindLocator(sys, value + 6);
+            } else if ((value = NuStrIStr(params[index], "end=")) != NULL) {
+                end = AIPathFindLocator(sys, value + 4);
+            } else if ((value = NuStrIStr(params[index], "firerange")) != NULL) {
+                processor->action_data_4 = AIParamToFloat(processor, value + 10);
+            } else if ((value = NuStrIStr(params[index], "fireinterval")) != NULL) {
+                processor->action_data_5 = AIParamToFloat(processor, value + 13);
+            }
+        }
+        if (end != NULL && start != NULL) {
+            NuVecSub(&processor->action_pos, &end->position, &start->position);
+            NuVecNorm(&processor->action_pos, &processor->action_pos);
+        }
+        processor->action_timer = random * processor->action_data_5;
+        NuVecScale(&processor->action_pos, &processor->action_pos, direction_scale);
+    }
+    NUVEC destination;
+    NuVecAdd(&destination, &object->apiobj.position, &processor->action_pos);
+    AIMoveInstruction(packet, &destination, 0.0f, NULL, AIPACKET_MOVEMENT_TO_DESTINATION, 0.0f);
+    APIOBJECT *opponent = packet->opponent_object;
+    if (processor->action_data_4 > 0.0f && opponent != NULL && opponent->ai != NULL) {
+        NUVEC difference;
+        f32 distance_squared = NuVecDistSqr(&packet->owner->apiobj.position, &opponent->position, &difference);
+        if (((WORLD->api_object_sys->line_of_sight[object->apiobj.field_0x289] >> opponent->field_0x289) & 1) &&
+            object->apiobj.model_draw_result != 0 &&
+            processor->action_data_4 * processor->action_data_4 > distance_squared) {
+            if (opponent->field_0x287 == 0 || opponent->objptr->field_0x101c > 0.0f)
+                processor->action_timer -= delta_time;
+            if (opponent->field_0x287 == 0 && processor->action_timer <= 0.0f) {
+                const f32 interval = processor->action_data_5;
+                processor->action_timer = interval * 0.5f + NuRandFloat() * interval;
+                object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
+                object->script_fire_target = packet->opponent_object->objptr;
+            }
+        }
+    }
     return 0;
 }
 
