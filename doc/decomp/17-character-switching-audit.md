@@ -82,6 +82,22 @@ boundaries, repeated parameters, mixed case and embedded prefixes. Calls to
 named lookup, substring search, switching and `SetPlayer` are instrumented;
 this verifies action dispatch, not those dependency implementations.
 
+## Hold-tag hint eligibility (2026-09-08)
+
+`HoldTag_UpdateHint` (`0x22dcc0`) now implements the original eligibility
+predicate: nonzero base control mode, a non-null world whose area differs
+from `HUB_ADATA`, and zero `VehicleArea`. It does not dereference its hint
+argument. Matching improves from 16.296% to 95.556% (91 original / 89 current
+bytes), preserving the existing boolean signature and compiler settings.
+All 144 mapped original/current cases agree, covering negative and positive
+nonzero modes, null world and area pointers, hub identity, and vehicle state.
+Target and native builds pass. Hint processing and registration dependencies
+remain incomplete, so this does not establish an on-screen hint fix.
+
+`SetPlayer` was also checked against its original body (`0x46b0d0`): the
+current selection logic is present, including leaving `player2` untouched
+when neither slot is active. No behavior change was made there.
+
 ## Remaining scope
 
 Recover and compare the original bodies and callers in this area, rather than
@@ -93,7 +109,7 @@ stopping at the two visible symptoms:
 | `TagCode`, `Tag_Check`, `Player_ToggleCharacter` | Audit and match complete transition/input logic and state writes |
 | `Tag_NewTransfer`, `Tag_ResetTransfers`, `Tag_UpdateTransfers` | Improve lifecycle matching; recovered update is 45.572% |
 | `Tag_DrawIcon_LSW`, `Tag_DrawIcon_Batman`, `Tag_NoHiddenIcon` | Finish renderer matching and verify actual mode dispatch |
-| `Tag_UpdateHint`, `HoldTag_UpdateHint`, hint cancellation | Recover hint lifecycle dependencies without unrelated hint work |
+| `Tag_UpdateHint`, `HoldTag_UpdateHint`, hint cancellation | Recover main tag predicate and hint lifecycle; hold-tag eligibility recovered at 95.556% |
 | `DrawPanel`, `DrawCharIcon`, icon-scene lookup/loading | Match portrait selection, visibility and icon-resource dependencies |
 | `UpdateGameObjects`, character reset/new-character paths | Audit remaining shared timer/state reads and writes |
 | Mech touch tag/party callbacks | Compare touch input dispatch and switching completion |

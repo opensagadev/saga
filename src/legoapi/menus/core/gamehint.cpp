@@ -1,6 +1,8 @@
 #include "legoapi/legoapi_types.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "globals.h"
+#include "legoapi/world/world.h"
+#include "legoapi/world/area.h"
 
 u32 LSW_HintConditions;
 HINTSYS_s hintsys = {};
@@ -292,7 +294,10 @@ static __used__ void Hint_AlphaTarget() {
 }
 
 static __used__ bool HoldTag_UpdateHint(HINT_s *) {
-    return false;
+    if (MechInputTouchSystem::s_baseControlMode == 0 || WORLD == NULL || WORLD->area == HUB_ADATA) {
+        return 0;
+    }
+    return VehicleArea == 0;
 }
 
 static __used__ bool HatMachine_UpdateHint(HINT_s *) {
