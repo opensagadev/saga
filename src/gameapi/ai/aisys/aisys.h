@@ -15,6 +15,12 @@
 struct AIMESSAGESYS_s;
 struct AIMESSAGE_s;
 
+typedef i32 (*PREPARINGSPECIALMOVEFN)(AIPACKET_s *, APIOBJECT_s *, i32);
+extern PREPARINGSPECIALMOVEFN PreparingForSpecialMoveFn;
+i32 TryToTeleportToNextNode(GameObject_s *, AIPATHNODE_s *, i32);
+void SetSpecialMove(GameObject_s *, AIPATHNODE_s *, AIPATHNODE_s *, char);
+void ClearSpecialMove(GameObject_s *);
+
 typedef struct AIPATHCNX_s {
     union {
         u32 traversal_flags[2];
@@ -132,7 +138,8 @@ typedef struct AIPATH_s {
     u8 padding_0x16[2];
     // Per-frame path bookkeeping. Dynamic special nodes are updated once per
     // bit, while characters mark the node volume they currently occupy.
-    u8 updated_node_bits[0x40];
+    u8 updated_node_bits[0x20];
+    u8 previous_inside_node_bits[0x20];
     u8 inside_node_bits[0x20];
     u8 search_checksum;
     u8 search_reset_node;
@@ -432,6 +439,7 @@ DECOMP_ASSERT(offsetof(AIPATHROUTE, route_nodes) == 0x14, "AIPATHROUTE connectio
 DECOMP_ASSERT(sizeof(AIPATH) == 0xa8, "AIPATH size");
 DECOMP_ASSERT(offsetof(AIPATH, updated_node_bits) == 0x18, "AIPATH updated-node bits offset");
 DECOMP_ASSERT(offsetof(AIPATH, inside_node_bits) == 0x58, "AIPATH occupied-node bits offset");
+DECOMP_ASSERT(offsetof(AIPATH, previous_inside_node_bits) == 0x38, "AIPATH previous occupied-node bits offset");
 DECOMP_ASSERT(sizeof(AIPATHSYS) == 0x10, "AIPATHSYS size");
 DECOMP_ASSERT(sizeof(AIANTINODE) == 0x54, "AIANTINODE size");
 DECOMP_ASSERT(offsetof(AIANTINODE, radius) == 0xc, "AIANTINODE radius offset");

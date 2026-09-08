@@ -286,7 +286,8 @@ typedef struct WORLDINFO_s {
     PULSESYS_s *pulses_sys; // 0x5054
 
     SPECIALMINIKITSYS_s *special_minikits; // 0x5058
-    u8 reserved_505c[0x8];                 // 0x505c .. 0x5064
+    struct TIGHTROPE_s *tightropes;        // 0x505c
+    i32 tightrope_count;                  // 0x5060
     SIGNAL_s *signals;                     // 0x5064
     i32 signal_count;                      // 0x5068
 

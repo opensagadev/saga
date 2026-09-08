@@ -1,6 +1,10 @@
 #include "decomp.h"
+#include "globals.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/numath/numtx.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/gizmos/transport/tightropes.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/nuvec.h"
 
@@ -22,6 +26,74 @@ extern TerrainQuery_s *TerI;
 extern NUVEC ShadNorm;
 extern TERRAIN_SHAPE *ShadPoly;
 extern i16 castnum;
+
+extern void InitSurfaceInfo(GameObject_s *);
+extern i32 SetObjOnSurface(GameObject_s *, i32);
+extern void Player_ClearContext(GameObject_s *, i32);
+extern void Player_ResetContexts(PLAYERPACKET_s *);
+
+i32 TryToTeleportToNextNode(GameObject_s *object, AIPATHNODE_s *node, i32 tightrope) {
+    if ((object->apiobj.field_0x1f4 & 0x400) != 0 ||
+        (object->ai.path_info.flags & AIPATHINFO_FLAG_ON_PATH) == 0) {
+        return 0;
+    }
+    if (!(object->field_0xf1c >= OFFSCREEN_CATCHUP_TIME)) {
+        if (object->apiobj.model_draw_result != 0 || (object->tag_context_flags & 2) != 0 ||
+            !(drop_back_in_timer > 0.0f)) {
+            return 0;
+        }
+    }
+    NUVEC position = node->position;
+    position.y += object->apiobj.field_0x1e0;
+    if (NuCameraClipTestSphere(&position, object->apiobj.field_0x1e0, &numtx_identity) == 0) {
+        return 0;
+    }
+    if (tightrope != 0) {
+        if (TightRope_SnapTo(object, &node->position) == 0) {
+            return 0;
+        }
+        object->field_0x109c = 0;
+        object->field_0x1092 = 0;
+        object->field_0x1093 = 0;
+        object->ai.path_connection_state = 0;
+        return 1;
+    }
+    object->apiobj.initial_position = node->position;
+    object->apiobj.collision_position = node->position;
+    object->apiobj.start_position = node->position;
+    object->ai.owner->apiobj.position = node->position;
+    plr_lastpos = node->position;
+    object->apiobj.velocity = v000;
+    InitSurfaceInfo(object);
+    SetObjOnSurface(object, 0);
+    object->field_0x1092 = 0;
+    object->field_0x1093 = 0;
+    object->field_0x109c = 0;
+    object->ai.path_connection_state = 0;
+    if (object->field_0xcc0 == NULL) {
+        Player_ClearContext(object, 0);
+        Player_ResetContexts(reinterpret_cast<PLAYERPACKET_s *>(object->player_packet));
+    }
+    return 1;
+}
+
+void SetSpecialMove(GameObject_s *object, AIPATHNODE_s *node, AIPATHNODE_s *next_node, char mode) {
+    object->ai.special_move_node = node;
+    object->field_0x1092 = mode;
+    object->field_0x1093 = 0;
+    object->special_move_next_node = next_node;
+    object->special_move_timer = 0.0f;
+}
+
+void ClearSpecialMove(GameObject_s *object) {
+    object->special_move_timer = 1.0f;
+    object->ai.special_move_node = NULL;
+    object->field_0x1092 = 0;
+    object->field_0x1093 = 0;
+    object->special_move_next_node = NULL;
+    object->field_0x1080 = 0;
+    object->field_0x107f = 0;
+}
 
 i32 CheckPosAIArea(AIAREA_s *area, nuvec_s *position, float tolerance) {
     if (position == NULL || area == NULL) {

@@ -1395,7 +1395,7 @@ void GameAISysStartFrame(AISYS_s *system) {
     if (system->path_sys != NULL && system->path_sys->path_count != 0) {
         for (i32 index = 0; index < system->path_sys->path_count; ++index) {
             memset(&system->path_sys->paths[index]->updated_node_bits[0], 0, 0x20);
-            memmove(&system->path_sys->paths[index]->updated_node_bits[0x20],
+            memmove(system->path_sys->paths[index]->previous_inside_node_bits,
                     system->path_sys->paths[index]->inside_node_bits, 0x20);
             memset(system->path_sys->paths[index]->inside_node_bits, 0,
                    sizeof(system->path_sys->paths[index]->inside_node_bits));
@@ -1541,7 +1541,13 @@ void GameDisplaySettings(LEVELDATADISPLAY *display, i32 *background_colours) {
     background_colours[1] = 0x80000000u | (bottom_r & 0xff) | (bottom_g & 0xff) << 8 | (bottom_b & 0xff) << 16;
 }
 
-void GameObjectSetCanUse(GameObject_s *, void *, unsigned char, unsigned char, float) {
+u8 grapple_attach_frames = 5;
+
+void GameObjectSetCanUse(GameObject_s *object, void *target, unsigned char action, unsigned char, float distance) {
+    object->use_target = target;
+    object->use_action = action;
+    object->use_distance = distance;
+    object->use_attach_frames = grapple_attach_frames;
 }
 
 void GameObjOwnsAnyCables(GameObject_s *) {

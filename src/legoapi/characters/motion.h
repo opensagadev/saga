@@ -11,6 +11,7 @@ extern float DIEAIRJUMPSPEED;
 #include "legoapi/legoapi_types.h"
 
 // Character motion / animation / camera helpers (module legoapi/characters).
+i32 ObjInTube(GameObject_s *object);
 extern MechObjectInterface *forceNextAttackOpponent;
 extern MechObjectInterface *nextShootTarget;
 extern f32 ComboOpponent_Range2;

@@ -1101,3 +1101,6 @@ extern i32 create_qfont3d;
 extern i32 create_qfont2dz;
 extern i32 create_qfont2dlower;
 extern i32 create_qfont3dz;
+extern "C" f32 OFFSCREEN_CATCHUP_TIME;
+extern "C" f32 drop_back_in_timer;
+extern "C" NUVEC plr_lastpos;

@@ -108,9 +108,3 @@ void BackFlipCode(GameObject_s *object) {
         object->apiobj.velocity.z = 0.0f;
     }
 }
-
-void SetSpecialMove(GameObject_s *, AIPATHNODE_s *, AIPATHNODE_s *, char) {
-}
-
-void ClearSpecialMove(GameObject_s *) {
-}

@@ -10,5 +10,4 @@ struct SHOPINPUT;
 void TractorBeamCode(GameObject_s *) {
 }
 
-void ObjInTube(GameObject_s *) {
-}
+i32 LEGOCONTEXT_TUBE = -1;

@@ -38,6 +38,7 @@ typedef struct TUBE_s {
 } TUBE;
 
 DECOMP_ASSERT(sizeof(TUBE) == 0x40, "TUBE ABI");
+DECOMP_ASSERT(offsetof(TUBE, top) == 0x28, "TUBE upper limit offset");
 DECOMP_ASSERT(offsetof(TUBE, flags) == 0x34, "TUBE flags offset");
 
 i32 Tube_InCylinder(GameObject_s *object, TUBE *tube, f32 *horizontal_distance_squared, i32 ignore_height);

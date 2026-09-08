@@ -13,6 +13,7 @@
 #include "legoapi/gizmos/traps/gizforce.h"
 #include "legoapi/gizmos/object/technos.h"
 #include "legoapi/gizmos/transport/tubes.h"
+#include "legoapi/gizmos/transport/tightropes.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/props/system/socksys.h"
 #include "legoapi/render/core/rtl.h"
@@ -36,6 +37,19 @@ extern AREADATA_s *BONUS_GUNSHIP_ADATA;
 
 float SLAMGRAVITY = -15.0f;
 static float applygravity_extrahoveroffset;
+
+extern i32 LEGOCONTEXT_TUBE;
+
+i32 ObjInTube(GameObject_s *object) {
+    if (LEGOCONTEXT_TUBE != -1 && object->character_context == LEGOCONTEXT_TUBE) {
+        return 1;
+    }
+    if (LEGOCONTEXT_GLIDE != -1 && object->character_context == LEGOCONTEXT_GLIDE &&
+        object->field_0x788 != NULL) {
+        return 1;
+    }
+    return 0;
+}
 
 void MovePlayer_DIRECTIONAL(GameObject_s *object);
 void MovePlayer_VEHICLEDIRECTIONAL(GameObject_s *object);
@@ -69,7 +83,6 @@ void Hang_MoveCode(GameObject_s *object);
 void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object);
 void LedgeTerrain_MoveCode(GameObject_s *object);
 void Climb_MoveCode(GameObject_s *object);
-void TightRope_MoveCode(GameObject_s *object, i32 jump_pressed);
 void ForcedBackCode(GameObject_s *object);
 void Tube_MoveCode(GameObject_s *object, WORLDINFO_s *world);
 void PushCode(GameObject_s *object, i32 allow_grab);

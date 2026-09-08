@@ -166,210 +166,573 @@ i32 AIMoveCanReachPath(AISYS_s *system, AIPATH_s *path, AIPATH_s *destination) {
     return 0;
 }
 
-void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
-    AIPATH *path = packet->path_info.path;
-    AIPATHCNX *connection = packet->path_info.connection;
-    AIPATHINFO &destination_path_info = packet->fallback_path_info;
-
-    // The target asks AIMoveFindDivertNode for a cross-path transition and
-    // stops at the current position when none is available. Never substitute a
-    // straight line to a destination on an unrelated path graph.
-    packet->movement_destination = object->position;
-    packet->movement_stopping_distance = 0.0f;
-    if (path == NULL || path != destination_path_info.path || connection == NULL ||
-        destination_path_info.connection == NULL || path->nodes == NULL) {
-        packet->runtime_flags |= AIPACKET_RUNTIME_PATH_BLOCKED;
-        return;
-    }
-
-    AIPATHCNX *destination_connection = destination_path_info.connection;
-    if (connection == destination_connection) {
-        packet->movement_destination = packet->fallback_destination;
-        packet->movement_stopping_distance = packet->fallback_stopping_distance;
-        packet->goal_path_node = NULL;
-        packet->runtime_flags &=
-            static_cast<u8>(~(AIPACKET_RUNTIME_PATH_BLOCKED | AIPACKET_RUNTIME_USING_PATH_WAYPOINT));
-        return;
-    }
-
-    // The target first adopts the destination connection when the character's
-    // terrain origin is already inside its corridor. Its direction is chosen
-    // from the endpoint shared with the current connection.
-    if (WithinConnection(system, &packet->terrain_origin, path, destination_connection, checks, connection,
-                         packet->current_route, object->field_0x289, NULL, object->collision_radius, 0) != 0) {
-        const u8 destination_node_a = destination_connection->node_indices[0];
-        const i32 destination_direction =
-            destination_node_a == connection->node_indices[0] || destination_node_a == connection->node_indices[1] ? 0
-                                                                                                                   : 1;
-        AISysCharacterSetPathCnx(packet, &object->position, destination_connection, destination_direction);
-        if (packet->path_info.connection == destination_connection) {
-            packet->movement_event_flags |= AIPACKET_PATH_CONNECTION_CHANGED;
-            packet->movement_destination = packet->fallback_destination;
-            packet->movement_stopping_distance = packet->fallback_stopping_distance;
-            packet->goal_path_node = NULL;
-            packet->runtime_flags &=
-                static_cast<u8>(~(AIPACKET_RUNTIME_PATH_BLOCKED | AIPACKET_RUNTIME_USING_PATH_WAYPOINT));
-            return;
+static void AIMoveFindDivertNode(AISYS *, AIPATH *path, AIPACKET *packet, NUVEC *destination) {
+    if (path->special_route_count != 0 &&
+        (packet->navigation_flags & AIPACKET_NAVIGATION_FLAG_USE_SPECIAL_ROUTES) != 0) {
+        AIPATHNODELINK *links = path->special_routes;
+        if (packet->divert_node_index >= path->node_count) {
+            packet->divert_node_index = 0xff;
         }
-    }
-
-    const u8 current_node_a = connection->node_indices[0];
-    const u8 current_node_b = connection->node_indices[1];
-    const u8 destination_node_a = destination_connection->node_indices[0];
-    const u8 destination_node_b = destination_connection->node_indices[1];
-    if (current_node_a >= path->node_count || current_node_b >= path->node_count ||
-        destination_node_a >= path->node_count || destination_node_b >= path->node_count) {
-        packet->runtime_flags |= AIPACKET_RUNTIME_PATH_BLOCKED;
-        return;
-    }
-
-    // Match the target's ordinary endpoint solver: compare all four graph
-    // routes between the current and destination connection endpoints, adding
-    // the partial distance along each connection. This also permits a clean
-    // reversal when the valid route leaves behind the character.
-    f32 current_dist = packet->path_info.dist;
-    f32 distance_to_current_a = connection->distance * current_dist;
-    if (distance_to_current_a < 0.0f) {
-        distance_to_current_a = -distance_to_current_a;
-    }
-    f32 distance_to_current_b = connection->distance * (1.0f - current_dist);
-    if (distance_to_current_b < 0.0f) {
-        distance_to_current_b = -distance_to_current_b;
-    }
-    f32 destination_dist = destination_path_info.dist;
-    f32 distance_from_a = destination_connection->distance * destination_dist;
-    if (distance_from_a < 0.0f) {
-        distance_from_a = -distance_from_a;
-    }
-    f32 distance_from_b = destination_connection->distance * (1.0f - destination_dist);
-    if (distance_from_b < 0.0f) {
-        distance_from_b = -distance_from_b;
-    }
-    u8 waypoint_index = connection->node_indices[(packet->path_info.direction != 0 ? 1 : 0) ^ 1];
-    u8 goal_index = destination_connection->node_indices[destination_path_info.direction != 0 ? 1 : 0];
-    f32 best_route_distance = (waypoint_index == current_node_a ? distance_to_current_a : distance_to_current_b) +
-                              AIPathNodeDistanceToPathNode(path, waypoint_index, goal_index, packet->current_route, 0) +
-                              (goal_index == destination_node_a ? distance_from_a : distance_from_b);
-
-    const u8 current_nodes[2] = {current_node_a, current_node_b};
-    const u8 destination_nodes[2] = {destination_node_a, destination_node_b};
-    const f32 current_endpoint_distances[2] = {distance_to_current_a, distance_to_current_b};
-    const f32 destination_endpoint_distances[2] = {distance_from_a, distance_from_b};
-    for (i32 current_end = 0; current_end < 2; ++current_end) {
-        for (i32 destination_end = 0; destination_end < 2; ++destination_end) {
-            const f32 candidate_route_distance =
-                current_endpoint_distances[current_end] +
-                AIPathNodeDistanceToPathNode(path, current_nodes[current_end], destination_nodes[destination_end],
-                                             packet->current_route, 0) +
-                destination_endpoint_distances[destination_end];
-            if (candidate_route_distance < best_route_distance) {
-                best_route_distance = candidate_route_distance;
-                waypoint_index = current_nodes[current_end];
-                goal_index = destination_nodes[destination_end];
+        if (packet->divert_search_index >= path->special_route_count) {
+            packet->divert_search_index = 0;
+        }
+        f32 nearest = FLT_MAX;
+        if (packet->divert_node_index < path->node_count) {
+            nearest = NuVecDistSqr(&path->nodes[packet->divert_node_index].position, destination, NULL);
+        }
+        u8 initial_index = packet->divert_search_index;
+        for (i32 index = 0; index < 4; ++index) {
+            if (packet->divert_search_index != packet->divert_node_index) {
+                f32 distance = NuVecDistSqr(&path->nodes[links[packet->divert_search_index].node_index].position,
+                                            destination, NULL);
+                if (distance < nearest) {
+                    nearest = distance;
+                    packet->divert_node_index = links[packet->divert_search_index].node_index;
+                }
+            }
+            ++packet->divert_search_index;
+            if (packet->divert_search_index > path->special_route_count) {
+                packet->divert_search_index = 0;
+            }
+            if (packet->divert_search_index == initial_index) {
+                break;
+            }
+        }
+    } else {
+        if (packet->divert_node_index >= path->node_count) {
+            packet->divert_node_index = 0xff;
+        }
+        if (packet->divert_search_index >= path->node_count) {
+            packet->divert_search_index = 0;
+        }
+        f32 nearest = FLT_MAX;
+        if (packet->divert_node_index < path->node_count) {
+            nearest = NuVecDistSqr(&path->nodes[packet->divert_node_index].position, destination, NULL);
+        }
+        for (i32 index = 0; index < 4; ++index) {
+            f32 distance = NuVecDistSqr(&path->nodes[packet->divert_search_index].position, destination, NULL);
+            if (distance < nearest) {
+                nearest = distance;
+                packet->divert_node_index = packet->divert_search_index;
+            }
+            ++packet->divert_search_index;
+            if (packet->divert_search_index > path->node_count) {
+                packet->divert_search_index = 0;
             }
         }
     }
+}
 
-    const i32 route_direction = waypoint_index == current_node_b ? 0 : 1;
-    if (packet->path_info.direction != route_direction) {
-        AISysCharacterSetPathCnx(packet, &object->position, connection, route_direction);
-        if (packet->path_info.direction != route_direction) {
-            packet->runtime_flags |= AIPACKET_RUNTIME_PATH_BLOCKED;
+static i32 AIMoveAdjustDestinationPath(AISYS *system, AIPACKET *packet) {
+    if (packet->path_info.path == packet->fallback_path_info.path &&
+        packet->fallback_path_info.connection != NULL) {
+        return 0;
+    }
+    AIMoveFindDivertNode(system, packet->path_info.path, packet, &packet->fallback_destination);
+    if (packet->divert_node_index >= packet->path_info.path->node_count) {
+        return -1;
+    }
+    AIPATHNODE *node = &packet->path_info.path->nodes[packet->divert_node_index];
+    if (node->connection_count == 0) {
+        return -1;
+    }
+    packet->fallback_destination = node->position;
+    packet->fallback_stopping_distance = 0.0f;
+    packet->movement_parameter = NuFmax(node->radius - 1.0f, 1.0f);
+    memset(&packet->fallback_path_info, 0, sizeof(packet->fallback_path_info));
+    packet->fallback_path_info.path = packet->path_info.path;
+    packet->fallback_path_info.connection = node->connections[0];
+    packet->fallback_path_info.direction = node->connections[0]->node_indices[0] == packet->divert_node_index;
+    packet->fallback_path_info.dist = node->connections[0]->node_indices[0] == packet->divert_node_index ? 0.0f : 1.0f;
+    return 1;
+}
+
+static i32 AIMoveChooseExitNodePath(AISYS *system, AIPACKET *packet) {
+    AIPATHNODE *first = &packet->path_info.path->nodes[packet->path_info.connection->node_indices[0]];
+    AIPATHNODE *second = &packet->path_info.path->nodes[packet->path_info.connection->node_indices[1]];
+    f32 distance = NuVecDistSqr(&packet->owner->apiobj.position, &first->position, NULL) - first->radius_squared;
+    f32 second_distance = NuVecDistSqr(&packet->owner->apiobj.position, &second->position, NULL) - second->radius_squared;
+    AIPATHNODE *node = distance < second_distance ? first : second;
+    if (node->special_route_index >= packet->path_info.path->special_route_count) {
+        return 0;
+    }
+    AIPATHSPECIALROUTE *route = &system->path_sys->special_routes[
+        packet->path_info.path->special_routes[node->special_route_index].special_route_index];
+    for (i32 index = 0; index < route->path_count; ++index) {
+        if (route->paths[index] == packet->fallback_path_info.path) {
+            AISysCharacterSetPath(packet, packet->fallback_path_info.path);
+            return 1;
+        }
+    }
+    f32 nearest = FLT_MAX;
+    AIPATH *selected = NULL;
+    for (i32 index = 0; index < route->path_count; ++index) {
+        AIPATH *path = route->paths[index];
+        AIPATHNODELINK *links = path->special_routes;
+        i32 nearest_node = -1;
+        f32 nearest_node_distance = FLT_MAX;
+        for (i32 link = 0; link < path->special_route_count; ++link) {
+            f32 candidate = NuVecDistSqr(&path->nodes[links[link].node_index].position,
+                                        &packet->fallback_destination, NULL);
+            if (candidate < nearest_node_distance) {
+                nearest_node_distance = candidate;
+                nearest_node = links[link].node_index;
+            }
+        }
+        if (nearest_node != -1) {
+            distance = nearest_node_distance;
+        }
+        if (distance < nearest) {
+            nearest = distance;
+            selected = route->paths[index];
+        }
+    }
+    if (selected != NULL) {
+        AISysCharacterSetPath(packet, selected);
+        return 1;
+    }
+    return 0;
+}
+
+static AIPATHCNX *GetNextConnection(const AIPACKET *packet, i32 *direction) {
+    if (packet->goal_path_node == NULL || packet->path_info.connection == NULL) {
+        return NULL;
+    }
+    AIPATH *path = packet->path_info.path;
+    i32 node_index = packet->path_info.connection->node_indices[packet->path_info.direction == 0];
+    AIPATHNODE *node = &path->nodes[node_index];
+    u32 destination = packet->goal_path_node - path->nodes;
+    if (destination > 0xff) {
+        return NULL;
+    }
+    AIPATHCNX *connection = NULL;
+    i32 connection_index = path->route_matrix[node_index][destination];
+    if (connection_index < node->connection_count) {
+        connection = node->connections[connection_index];
+        *direction = connection->node_indices[0] != node_index;
+    }
+    u8 route_index = packet->current_route;
+    if (route_index == 0xff) {
+        return connection;
+    }
+    if ((static_cast<u64>(static_cast<u16>(node->route_membership_mask)) >> route_index & 1) == 0) {
+        return NULL;
+    }
+    if ((static_cast<u64>(static_cast<u16>(node->route_boundary_mask)) >> route_index & 1) != 0) {
+        if (connection == NULL) {
+            return NULL;
+        }
+        if ((static_cast<u64>(connection->route_mask) >> route_index & 1) == 0) {
+            return connection;
+        }
+    }
+    AIPATHROUTE *route = &path->routes[route_index];
+    i32 next_node = destination;
+    if ((static_cast<u64>(static_cast<u16>(path->nodes[destination].route_membership_mask)) >> route_index & 1) == 0) {
+        if (route->exit_node_count == 0) {
+            return NULL;
+        }
+        f32 nearest = FLT_MAX;
+        next_node = 0;
+        for (i32 index = 0; index < route->exit_node_count; ++index) {
+            f32 first = AIPathNodeDistanceToPathNode(packet->path_info.path, node_index,
+                                                    route->exit_nodes[index], packet->current_route, 0);
+            f32 second = AIPathNodeDistanceToPathNode(packet->path_info.path, route->exit_nodes[index],
+                                                     destination, 0xff,
+                                                     static_cast<u32>(static_cast<u64>(1) << packet->current_route));
+            f32 distance = first != FLT_MAX && second != FLT_MAX ? first + second : FLT_MAX;
+            if (distance < nearest) {
+                nearest = distance;
+                next_node = route->exit_nodes[index];
+            }
+        }
+        if (nearest == FLT_MAX) {
+            return NULL;
+        }
+    }
+    connection_index = route->route_nodes[route->node_routes[node_index]][route->node_routes[next_node]];
+    if (connection_index >= node->connection_count) {
+        return NULL;
+    }
+    connection = node->connections[connection_index];
+    *direction = connection->node_indices[0] != node_index;
+    return connection;
+}
+
+extern "C" i32 AISysGetCharacterWaypoint(const AIPACKET *packet, NUVEC *position) {
+    if (packet->path_info.connection != packet->fallback_path_info.connection) {
+        i32 direction;
+        AIPATHCNX *connection = GetNextConnection(packet, &direction);
+        if (connection != NULL) {
+            if (position != NULL) {
+                *position = packet->path_info.path->nodes[connection->node_indices[direction == 0]].position;
+            }
+            return 1;
+        }
+    }
+    return 0;
+}
+
+void AIMoveToDestination(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *object, i32 checks) {
+    i32 direction = 0;
+    NUVEC saved_destination = packet->fallback_destination;
+    f32 saved_stopping_distance = packet->fallback_stopping_distance;
+    f32 saved_parameter = packet->movement_parameter;
+    AIPATHINFO saved_path_info = packet->fallback_path_info;
+    AIPATH *path = packet->path_info.path;
+    i32 diverted = 0;
+    if (path != packet->fallback_path_info.path || packet->fallback_path_info.connection == NULL) {
+        AIMoveFindDivertNode(system, path, packet, &packet->fallback_destination);
+        if (packet->divert_node_index >= packet->path_info.path->node_count ||
+            packet->path_info.path->nodes[packet->divert_node_index].connection_count == 0) {
+            packet->movement_destination = packet->owner->apiobj.position;
+            packet->movement_stopping_distance = 0.0f;
             return;
         }
-        packet->movement_event_flags |= AIPACKET_PATH_CONNECTION_CHANGED;
+        AIPATHNODE *node = &packet->path_info.path->nodes[packet->divert_node_index];
+        packet->fallback_destination = node->position;
+        packet->fallback_stopping_distance = 0.0f;
+        packet->movement_parameter = NuFmax(node->radius - 1.0f, 1.0f);
+        memset(&packet->fallback_path_info, 0, sizeof(packet->fallback_path_info));
+        packet->fallback_path_info.path = packet->path_info.path;
+        path = packet->path_info.path;
+        packet->fallback_path_info.connection = node->connections[0];
+        packet->fallback_path_info.direction = node->connections[0]->node_indices[0] == packet->divert_node_index;
+        packet->fallback_path_info.dist = node->connections[0]->node_indices[0] == packet->divert_node_index ? 0.0f : 1.0f;
+        diverted = 1;
     }
-
-    AIPATHNODE *waypoint = &path->nodes[waypoint_index];
-    packet->goal_path_node = &path->nodes[goal_index];
-    packet->movement_destination = waypoint->position;
-    packet->movement_stopping_distance = 0.0f;
-    packet->runtime_flags |= AIPACKET_RUNTIME_USING_PATH_WAYPOINT;
-
-    AIPATHCNX *next_connection = NULL;
-    if (goal_index == waypoint_index) {
-        next_connection = destination_connection;
-    } else if (path->route_matrix != NULL && path->route_matrix[waypoint_index] != NULL &&
-               waypoint->connections != NULL) {
-        const u8 next_connection_index = path->route_matrix[waypoint_index][goal_index];
-        if (next_connection_index < waypoint->connection_count) {
-            next_connection = waypoint->connections[next_connection_index];
-        }
-    }
-
-    if (next_connection == NULL || next_connection == connection) {
-        packet->runtime_flags |= AIPACKET_RUNTIME_PATH_BLOCKED | AIPACKET_RUNTIME_USING_PATH_WAYPOINT;
-        return;
-    }
-
-    i32 next_direction;
-    if (next_connection->node_indices[0] == waypoint_index) {
-        next_direction = 0;
-    } else if (next_connection->node_indices[1] == waypoint_index) {
-        next_direction = 1;
-    } else {
-        packet->runtime_flags |= AIPACKET_RUNTIME_PATH_BLOCKED | AIPACKET_RUNTIME_USING_PATH_WAYPOINT;
-        return;
-    }
-
-    if (packet->current_route != 0xff) {
-        if (packet->current_route >= 16) {
-            packet->runtime_flags |= AIPACKET_RUNTIME_PATH_BLOCKED | AIPACKET_RUNTIME_USING_PATH_WAYPOINT;
-            return;
-        }
-        const u16 route_bit = static_cast<u16>(1u << packet->current_route);
-        if ((next_connection->route_mask & route_bit) == 0 && (waypoint->route_boundary_mask & route_bit) == 0) {
-            packet->runtime_flags |= AIPACKET_RUNTIME_PATH_BLOCKED | AIPACKET_RUNTIME_USING_PATH_WAYPOINT;
-            return;
-        }
-    }
-
-    const u32 traversal_flags = next_connection->traversal_flags[next_direction];
-    if ((traversal_flags & AIPATH_CONNECTION_CAPABILITY_MASK) != 0) {
-        if ((traversal_flags & AIPATH_CONNECTION_SPECIAL_MASK) != 0) {
+    AIPATHCNX *connection = packet->path_info.connection;
+    AIPATHCNX *destination_connection = packet->fallback_path_info.connection;
+    NUVEC difference;
+    f32 distance_squared = NuVecDistSqr(&packet->fallback_destination, &object->position, &difference);
+    if ((object->supporting_platform_id == -1 ||
+         (path->nodes[connection->node_indices[0]].has_special != 0 &&
+          path->nodes[connection->node_indices[1]].has_special != 0)) &&
+        packet->movement_parameter != 0.0f && difference.y < 0.5f && difference.y > -0.5f &&
+        distance_squared < packet->movement_parameter * packet->movement_parameter) {
+        if (diverted == 0) {
             packet->movement_destination = object->position;
-            packet->frame_state = traversal_flags;
-            packet->runtime_flags &= static_cast<u8>(~AIPACKET_RUNTIME_PATH_BLOCKED);
-            packet->runtime_flags |= AIPACKET_RUNTIME_USING_PATH_WAYPOINT;
+            packet->movement_stopping_distance = 0.0f;
             return;
         }
-        if ((packet->capabilities & traversal_flags) == 0) {
-            packet->frame_state = traversal_flags;
-            packet->runtime_flags |= AIPACKET_RUNTIME_PATH_BLOCKED | AIPACKET_RUNTIME_USING_PATH_WAYPOINT;
+        if ((packet->navigation_flags & 4) != 0) {
+            packet->fallback_destination = saved_destination;
+            packet->fallback_stopping_distance = saved_stopping_distance;
+            packet->movement_parameter = saved_parameter;
+            packet->fallback_path_info = saved_path_info;
+            AIMoveChooseExitNodePath(system, packet);
+            AIMoveAdjustDestinationPath(system, packet);
+            path = packet->path_info.path;
+            connection = packet->path_info.connection;
+            destination_connection = packet->fallback_path_info.connection;
+        }
+    }
+    if (connection == NULL || path == NULL || destination_connection == NULL) {
+        packet->movement_destination = packet->owner->apiobj.position;
+        packet->movement_stopping_distance = 0.0f;
+        return;
+    }
+    if (packet->path_info.connection != packet->fallback_path_info.connection) {
+        if (WithinConnection(system, &packet->terrain_origin, packet->path_info.path,
+                             packet->fallback_path_info.connection, checks, packet->path_info.connection,
+                             packet->current_route, object->field_0x289, NULL, object->collision_radius, 0) != 0) {
+            AIPATHCNX *target = packet->fallback_path_info.connection;
+            AIPATHCNX *current = packet->path_info.connection;
+            direction = target->node_indices[0] != current->node_indices[0] &&
+                        target->node_indices[0] != current->node_indices[1];
+            AISysCharacterSetPathCnx(packet, &object->position, target, direction);
+        }
+        if (packet->path_info.connection != packet->fallback_path_info.connection) {
+            direction = packet->path_info.direction;
+            i32 goal_index = destination_connection->node_indices[0];
+            f32 current_distance = packet->path_info.dist;
+            if (current_distance > 1.0f) {
+                current_distance = 1.0f;
+            } else if (current_distance < 0.0f) {
+                current_distance = 0.0f;
+            }
+            f32 endpoint_distances[2] = {
+                fabsf(current_distance * connection->distance),
+                fabsf((1.0f - current_distance) * connection->distance)
+            };
+            if (packet->current_route != 0xff) {
+                packet->runtime_flags |= 0x10;
+            }
+            f32 best_distance = FLT_MAX;
+            u32 attempted_routes = 0;
+            for (;;) {
+                f32 destination_distances[2] = {
+                    fabsf(packet->fallback_path_info.dist * destination_connection->distance),
+                    fabsf((1.0f - packet->fallback_path_info.dist) * destination_connection->distance)
+                };
+                if (packet->current_route != 0xff &&
+                    ((static_cast<u64>(destination_connection->route_mask) >> packet->current_route) & 1) == 0) {
+                    for (i32 end = 0; end < 2; ++end) {
+                        AIPATHNODE *node = &path->nodes[destination_connection->node_indices[end]];
+                        if ((static_cast<u64>(node->route_membership_mask & ~node->route_boundary_mask) >>
+                             packet->current_route & 1) != 0) {
+                            destination_distances[end] = FLT_MAX;
+                        }
+                    }
+                }
+                if ((connection->traversal_flags[packet->path_info.direction] & 0x40000000) == 0) {
+                    {
+                        f32 candidate = FLT_MAX;
+                        if (destination_distances[0] != FLT_MAX && endpoint_distances[packet->path_info.direction == 0] != FLT_MAX) {
+                            candidate = AIPathNodeDistanceToPathNode(packet->path_info.path,
+                                connection->node_indices[packet->path_info.direction == 0], destination_connection->node_indices[0],
+                                packet->current_route, 0);
+                            if (candidate != FLT_MAX) {
+                                candidate += endpoint_distances[packet->path_info.direction == 0] + destination_distances[0];
+                            }
+                        }
+                        if (candidate < best_distance) {
+                            best_distance = candidate;
+                            goal_index = destination_connection->node_indices[0];
+                            direction = packet->path_info.direction;
+                            packet->runtime_flags &= static_cast<u8>(~0x10);
+                        }
+                    }
+                    {
+                        f32 candidate = FLT_MAX;
+                        if (destination_distances[1] != FLT_MAX && endpoint_distances[packet->path_info.direction == 0] != FLT_MAX) {
+                            candidate = AIPathNodeDistanceToPathNode(packet->path_info.path,
+                                connection->node_indices[packet->path_info.direction == 0], destination_connection->node_indices[1],
+                                packet->current_route, 0);
+                            if (candidate != FLT_MAX) {
+                                candidate += endpoint_distances[packet->path_info.direction == 0] + destination_distances[1];
+                            }
+                        }
+                        if (candidate < best_distance) {
+                            best_distance = candidate;
+                            goal_index = destination_connection->node_indices[1];
+                            direction = packet->path_info.direction;
+                            packet->runtime_flags &= static_cast<u8>(~0x10);
+                        }
+                    }
+                }
+                if ((connection->traversal_flags[packet->path_info.direction == 0] & 0x40000000) == 0) {
+                    {
+                        f32 candidate = FLT_MAX;
+                        if (destination_distances[0] != FLT_MAX && endpoint_distances[packet->path_info.direction] != FLT_MAX) {
+                            candidate = AIPathNodeDistanceToPathNode(packet->path_info.path,
+                                connection->node_indices[packet->path_info.direction], destination_connection->node_indices[0],
+                                packet->current_route, 0);
+                            if (candidate != FLT_MAX) {
+                                candidate += destination_distances[0] + endpoint_distances[packet->path_info.direction];
+                            }
+                        }
+                        if (candidate < best_distance) {
+                            best_distance = candidate;
+                            goal_index = destination_connection->node_indices[0];
+                            direction = packet->path_info.direction == 0;
+                            packet->runtime_flags &= static_cast<u8>(~0x10);
+                        }
+                    }
+                    {
+                        f32 candidate = FLT_MAX;
+                        if (destination_distances[1] != FLT_MAX && endpoint_distances[packet->path_info.direction] != FLT_MAX) {
+                            candidate = AIPathNodeDistanceToPathNode(packet->path_info.path,
+                                connection->node_indices[packet->path_info.direction], destination_connection->node_indices[1],
+                                packet->current_route, 0);
+                            if (candidate != FLT_MAX) {
+                                candidate += destination_distances[1] + endpoint_distances[packet->path_info.direction];
+                            }
+                        }
+                        if (candidate < best_distance) {
+                            best_distance = candidate;
+                            goal_index = destination_connection->node_indices[1];
+                            direction = packet->path_info.direction == 0;
+                            packet->runtime_flags &= static_cast<u8>(~0x10);
+                        }
+                    }
+                }
+                if ((packet->runtime_flags & 0x10) == 0) {
+                    break;
+                }
+                if (packet->current_route != 0xff) {
+                    attempted_routes |= 1u << packet->current_route;
+                }
+                AISysFindRoute(packet);
+                if (((attempted_routes >> packet->current_route) & 1) != 0) {
+                    return;
+                }
+            }
+            packet->goal_path_node = &path->nodes[goal_index];
+            AISysCharacterSetPathCnx(packet, &object->position, connection, direction);
+            AIPATHCNX *next = GetNextConnection(packet, &direction);
+            if (next != NULL) {
+                while (WithinConnection(system, &packet->terrain_origin, packet->path_info.path,
+                                         next, checks, packet->path_info.connection, packet->current_route,
+                                         object->field_0x289, NULL, object->collision_radius, 0) != 0) {
+                    if (connection == destination_connection) {
+                        break;
+                    }
+                    AISysCharacterSetPathCnx(packet, &object->position, next, direction);
+                    if (packet->path_info.connection != next || packet->path_info.direction != direction) {
+                        connection = next;
+                        break;
+                    }
+                    connection = next;
+                    next = GetNextConnection(packet, &direction);
+                    if (next == connection || next == NULL) {
+                        break;
+                    }
+                }
+            } else {
+                u32 flags = destination_connection->traversal_flags[0] |
+                            destination_connection->traversal_flags[1];
+                if ((flags & 0xd8000000) == 0 &&
+                    ((flags & 0xdfffffff) == 0 || (packet->capabilities & (flags & 0xdfffffff)) != 0) &&
+                    WithinConnection(system, &packet->terrain_origin, packet->path_info.path,
+                                     destination_connection, checks, packet->path_info.connection,
+                                     packet->current_route, object->field_0x289, NULL,
+                                     object->collision_radius, 0) != 0) {
+                    AISysCharacterSetPathCnx(packet, &object->position, destination_connection, 0);
+                }
+            }
+        }
+    }
+    if (PreparingForSpecialMoveFn != NULL) {
+        if (connection != destination_connection) {
+            packet->movement_event_flags |= 0x20;
+        }
+        if (PreparingForSpecialMoveFn(packet, object, checks) != 0) {
+            packet->runtime_flags |= 8;
+            packet->movement_event_flags |= 0x40;
             return;
         }
-        packet->navigation_flags |= AIPACKET_NAVIGATION_FLAG_TRANSIENT;
     }
-
-    // Proximity to the node is insufficient at corners and intersections. The
-    // target changes connection only after the collision-sized terrain origin
-    // lies inside the next corridor.
-    if (WithinConnection(system, &packet->terrain_origin, path, next_connection, checks, connection,
-                         packet->current_route, object->field_0x289, NULL, object->collision_radius, 0) == 0) {
-        packet->runtime_flags &= static_cast<u8>(~AIPACKET_RUNTIME_PATH_BLOCKED);
+    AIPATHCNX *current = packet->path_info.connection;
+    u32 flags = current->traversal_flags[packet->path_info.direction];
+    if ((flags & 0xd8000000) != 0) {
+        packet->movement_destination = path->nodes[current->node_indices[packet->path_info.direction]].position;
+        packet->runtime_flags |= 0x40;
+        packet->movement_stopping_distance = 0.0f;
+        packet->frame_state = flags;
         return;
     }
-
-    AISysCharacterSetPathCnx(packet, &object->position, next_connection, next_direction);
-    if (packet->path_info.connection != next_connection) {
-        packet->runtime_flags |= AIPACKET_RUNTIME_PATH_BLOCKED | AIPACKET_RUNTIME_USING_PATH_WAYPOINT;
+    if (current == destination_connection &&
+        (packet->current_route == 0xff ||
+         ((static_cast<u64>(destination_connection->route_mask) >> packet->current_route) & 1) != 0)) {
+        if ((packet->path_info.flags & AIPATHINFO_FLAG_ON_PATH) == 0 || packet->movement_parameter == 0.0f) {
+            packet->movement_stopping_distance = packet->fallback_stopping_distance;
+            packet->movement_destination = packet->fallback_destination;
+            return;
+        }
+        if (distance_squared < packet->movement_parameter * packet->movement_parameter) {
+            if (diverted == 0) {
+                packet->movement_destination = object->position;
+                packet->movement_stopping_distance = 0.0f;
+                return;
+            }
+            if ((packet->navigation_flags & 4) != 0) {
+                packet->fallback_destination = saved_destination;
+                packet->fallback_stopping_distance = saved_stopping_distance;
+                packet->movement_parameter = saved_parameter;
+                packet->fallback_path_info = saved_path_info;
+                AIMoveChooseExitNodePath(system, packet);
+                AIMoveAdjustDestinationPath(system, packet);
+            }
+        }
+        NuVecScale(&difference, &difference, packet->movement_parameter / NuFsqrt(distance_squared));
+        packet->movement_destination.x = packet->fallback_destination.x - difference.x;
+        packet->movement_destination.y = packet->fallback_destination.y;
+        packet->movement_destination.z = packet->fallback_destination.z - difference.z;
+        packet->movement_stopping_distance = packet->fallback_stopping_distance < packet->movement_parameter ?
+                                            0.0f : packet->fallback_stopping_distance;
         return;
     }
-
-    packet->movement_event_flags |= AIPACKET_PATH_CONNECTION_CHANGED;
-    packet->runtime_flags &= static_cast<u8>(~AIPACKET_RUNTIME_PATH_BLOCKED);
-    if (next_connection == destination_connection) {
-        packet->movement_destination = packet->fallback_destination;
-        packet->movement_stopping_distance = packet->fallback_stopping_distance;
-        packet->goal_path_node = NULL;
-        packet->runtime_flags &= static_cast<u8>(~AIPACKET_RUNTIME_USING_PATH_WAYPOINT);
-        return;
+    AIPATHNODE *shared = NULL;
+    if (current->node_indices[0] == destination_connection->node_indices[0]) {
+        shared = &path->nodes[destination_connection->node_indices[0]];
+        direction = 0;
+    } else if (current->node_indices[0] == destination_connection->node_indices[1]) {
+        shared = &path->nodes[destination_connection->node_indices[1]];
+        direction = 1;
+    } else if (current->node_indices[1] == destination_connection->node_indices[0]) {
+        shared = &path->nodes[destination_connection->node_indices[0]];
+        direction = 0;
+    } else if (current->node_indices[1] == destination_connection->node_indices[1]) {
+        shared = &path->nodes[destination_connection->node_indices[1]];
+        direction = 1;
     }
-
-    const u8 next_waypoint_index = next_connection->node_indices[next_direction ^ 1];
-    if (next_waypoint_index < path->node_count) {
-        packet->movement_destination = path->nodes[next_waypoint_index].position;
+    AIPATHCNX *next;
+    if (shared != NULL && (packet->current_route == 0xff ||
+        ((static_cast<u64>(destination_connection->route_mask) >> packet->current_route) & 1) != 0 ||
+        ((static_cast<u64>(shared->route_boundary_mask) >> packet->current_route) & 1) != 0)) {
+        next = destination_connection;
+    } else {
+        next = GetNextConnection(packet, &direction);
     }
+    if (next != NULL) {
+        flags = next->traversal_flags[direction];
+        if ((flags & 0xdfffffff) != 0) {
+            if ((flags & 0xd8000000) != 0) {
+                packet->movement_destination = object->position;
+                packet->runtime_flags |= 0x40;
+                packet->movement_stopping_distance = 0.0f;
+                packet->frame_state = flags;
+                return;
+            }
+            if ((packet->capabilities & flags) != 0) {
+                packet->navigation_flags |= 1;
+            } else {
+                packet->runtime_flags |= 0x60;
+                packet->frame_state = next->traversal_flags[direction];
+                next = NULL;
+            }
+        }
+        if (next != NULL) {
+            NUVEC target;
+            if (next == destination_connection) {
+                target = packet->fallback_destination;
+            } else {
+                target = path->nodes[next->node_indices[direction]].position;
+                packet->runtime_flags |= 8;
+            }
+            if (WithinConnection(system, &target, packet->path_info.path, current, checks,
+                                 packet->path_info.connection, packet->current_route,
+                                 object->field_0x289, NULL, object->collision_radius, 0) == 0) {
+                if (CalculateIntersection(system, packet, object, current, next) != 0) {
+                    bool use_left = false;
+                    NUVEC offset;
+                    if ((packet->movement_flags & AIPACKET_MOVEMENT_DIVERSION_LEFT) != 0) {
+                        NuVecSub(&offset, &packet->left_diversion, &object->position);
+                        i32 angle = NuAtan2D(offset.x, offset.z);
+                        NuVecSub(&offset, &target, &object->position);
+                        if (NuAngSub(NuAtan2D(offset.x, offset.z), angle) < 0) {
+                            target = packet->left_diversion;
+                            packet->runtime_flags |= 8;
+                            use_left = true;
+                        }
+                    }
+                    if (!use_left && (packet->movement_flags & AIPACKET_MOVEMENT_DIVERSION_RIGHT) != 0) {
+                        NuVecSub(&offset, &packet->right_diversion, &object->position);
+                        i32 angle = NuAtan2D(offset.x, offset.z);
+                        NuVecSub(&offset, &target, &object->position);
+                        if (NuAngSub(NuAtan2D(offset.x, offset.z), angle) > 0) {
+                            target = packet->right_diversion;
+                            packet->runtime_flags |= 8;
+                        }
+                    }
+                } else {
+                    target = path->nodes[next->node_indices[direction]].position;
+                }
+            }
+            packet->movement_stopping_distance = 0.0f;
+            packet->movement_destination = target;
+            return;
+        }
+    }
+    packet->movement_destination = path->nodes[
+        packet->path_info.connection->node_indices[packet->path_info.direction == 0]].position;
+    packet->movement_stopping_distance = 0.0f;
+    NUVEC offset;
+    if (NuVecDistSqr(&packet->movement_destination, &object->position, &offset) < 1.0f) {
+        packet->movement_destination = object->position;
+    }
+    packet->runtime_flags |= 0x40;
 }
 
 void AIRetreatFromDestination2(AISYS_s *system, AIPACKET_s *packet, APIOBJECT_s *object, i32 checks);
