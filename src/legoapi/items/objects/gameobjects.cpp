@@ -551,6 +551,20 @@ static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
 
 extern "C" i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *cutscene);
 
+static f32 Condition_FurthestPlayerDistanceAlongSock(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    f32 distance = 0.0f;
+    if (player != NULL) {
+        if (player2 != NULL) distance = player2->sock_position.distance > player->sock_position.distance ?
+            player2->sock_position.distance : player->sock_position.distance;
+        else distance = player->sock_position.distance;
+    }
+    return distance;
+}
+
+static f32 Condition_PlayerDistanceAlongSock(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return player != NULL ? player->sock_position.distance : 0.0f;
+}
+
 static f32 Condition_PlayerInSock(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     return argument != NULL && WORLD->sock_sys != NULL &&
         argument == &WORLD->sock_sys->sock[static_cast<i8>(player->field_0x661)] ? 1.0f : 0.0f;
@@ -1119,8 +1133,8 @@ extern "C" {
         {"SockDistanceToPlayer", NULL, NULL},
         {"SockDistanceToOpponent", NULL, NULL},
         {"SockXDistanceToPlayer", NULL, NULL},
-        {"PlayerDistanceAlongSock", NULL, NULL},
-        {"FurthestPlayerDistanceAlongSock", NULL, NULL},
+        {"PlayerDistanceAlongSock", Condition_PlayerDistanceAlongSock, NULL},
+        {"FurthestPlayerDistanceAlongSock", Condition_FurthestPlayerDistanceAlongSock, NULL},
         {"FinishedSpline", Condition_FinishedSpline, NULL},
         {"CurrentHintId", Condition_CurrentHintId, NULL},
         {"HintAvailable", Condition_HintAvailable, Condition_HintAvailableInit},

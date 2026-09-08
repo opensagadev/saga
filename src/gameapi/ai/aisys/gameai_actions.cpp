@@ -1125,10 +1125,6 @@ static __used__ void *Condition_CharacterTypeExistsInit(AISYS_s *, char *, AISCR
 }
 
 
-static __used__ f32 Condition_PlayerDistanceAlongSock(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
-
 
 static __used__ f32 Condition_RandomMapCharsAvailable(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     if (hub_custodians_finished_loading == 0) {
@@ -1194,11 +1190,6 @@ static __used__ f32 Condition_TakeOverTargetInTriggerArea(AISYS_s *, AISCRIPTPRO
 
 static __used__ void *Condition_AngleAboutMyLocatorToPlayerInit(AISYS_s *, char *, AISCRIPT_s *) {
     return nullptr;
-}
-
-static __used__ f32 Condition_FurthestPlayerDistanceAlongSock(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *,
-                                                              void *) {
-    return 0;
 }
 
 static __used__ void *Condition_TakeOverTargetInTriggerAreaInit(AISYS_s *, char *, AISCRIPT_s *) {
