@@ -1188,6 +1188,23 @@ static i32 Action_CanShootObstructions(AISYS *, AISCRIPTPROCESS *, AIPACKET *pac
     return 1;
 }
 
+static i32 Action_CanHitForceObjects(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **params,
+                                    i32 param_count, i32, f32) {
+    if (packet == NULL || packet->owner == NULL)
+        return 1;
+    GameObject_s *object = packet->owner->apiobj.objptr;
+    if (object == NULL)
+        return 1;
+    object->field_0xef8 |= 0x40;
+    if (param_count != 0) {
+        for (i32 index = 0; index < param_count; ++index) {
+            if (NuStrICmp(params[index], "FALSE") == 0)
+                object->field_0xef8 &= ~0x40;
+        }
+    }
+    return 1;
+}
+
 static i32 Action_SetDoomedEscapeLocator(AISYS *system, AISCRIPTPROCESS *processor, AIPACKET *packet,
                                        char **params, i32 param_count, i32 first_time, f32) {
     if (first_time) {
@@ -4855,7 +4872,7 @@ extern "C" {
         {"NotWithParty", Action_NotWithParty, 1, 0, 0},
         {"TakeDamage", Action_TakeDamage, 0, 0, 0},
         {"TagCharacter", Action_TagCharacter, 1, 0, 0},
-        {"CanHitForceObjects", NULL, 0, 0, 0},
+        {"CanHitForceObjects", Action_CanHitForceObjects, 0, 0, 0},
         {"AlwaysBackFlip", Action_AlwaysBackFlip, 0, 0, 0},
         {"PlayerSpeederHack", NULL, 0, 0, 0},
         {"SetAnimSpeedMul", Action_SetAnimSpeedMul, 0, 0, 0},

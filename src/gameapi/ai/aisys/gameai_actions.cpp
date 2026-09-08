@@ -256,14 +256,6 @@ static __used__ f32 Condition_OffScreenTimer(AISYS_s *, AISCRIPTPROCESS_s *, AIP
 
 
 
-static __used__ i32 Action_CanHitForceObjects(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params,
-                                              i32 param_count, i32 first_time, f32) {
-    GameObject_s *object = ActionOwner(packet);
-    if (first_time != 0 && object != NULL) {
-        object->field_0xef8 = (object->field_0xef8 & ~0x40u) | (ActionToggleEnabled(params, param_count) ? 0x40u : 0u);
-    }
-    return 1;
-}
 
 static __used__ i32 Action_CanTriggerObstacle(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **params,
                                               i32 param_count, i32 first_time, f32) {
@@ -946,7 +938,6 @@ namespace {
             lego_aiactiondefs[LEGO_AI_ACTION_CAN_SHOOT_OFF_SCREEN].eval_fn = Action_CanShootOffScreen;
             lego_aiactiondefs[LEGO_AI_ACTION_SET_BOLTS_DONT_GET_DEFLECTED_BACK].eval_fn =
                 Action_SetBoltsDontGetDeflectedBack;
-            lego_aiactiondefs[LEGO_AI_ACTION_CAN_HIT_FORCE_OBJECTS].eval_fn = Action_CanHitForceObjects;
             lego_aiactiondefs[LEGO_AI_ACTION_PLAYER_SPEEDER_HACK].eval_fn = Action_PlayerSpeederHack;
             lego_aiactiondefs[LEGO_AI_ACTION_CHAR_CLIP_TO_BLOB_SHADOWS].eval_fn = Action_CharClipToBlobShadows;
             lego_aiactiondefs[LEGO_AI_ACTION_DEFLECT_PLAYERS_PART].eval_fn = Action_DeflectPlayersPart;
