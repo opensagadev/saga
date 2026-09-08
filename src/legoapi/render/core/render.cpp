@@ -3052,6 +3052,7 @@ void DrawPanel() {
                 const i32 character_id = player->field_0xcc0 == NULL ? player->id : player->field_0xcc0->id;
                 const f32 icon_timer = player->hud_icon_timer;
                 const i32 draw_character = icon_timer <= 0.0f || (icon_timer < 2.0f && NuFmod(icon_timer, 0.4f) < 0.2f);
+                drawcharicon_i_panel = 0;
                 DrawCharIcon(character_id, -ICONX, status_y, 0.0f, ICONSIZE, 0xa6, alpha, alpha, draw_character, NULL);
                 if (static_cast<i8>(player->apiobj.flags_low) < 0 && player->apiobj.character_data != NULL &&
                     player->apiobj.character_data->name_id != -1) {
