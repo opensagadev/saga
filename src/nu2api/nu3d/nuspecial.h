@@ -81,6 +81,7 @@ extern "C" {
     struct nuvec_s *NuSpecialGetPos(void *special);
     i32 NuSpecialDrawAt(void *special, NUMTX *mtx);
     i32 NuSpecialGetVisibilityFn(void *special);
+    i32 NuSpecialGetOnScreenFn(nuhspecial_s *special);
     i32 NuSpecialGetNoVisiTestFn(nuhspecial_s *special);
     void NuSpecialSetNoVisiTest(nuhspecial_s *special, i32 enabled);
     void NuSpecialSetDrawPos(void *special, void *pos);

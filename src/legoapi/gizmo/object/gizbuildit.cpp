@@ -14,6 +14,7 @@
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/numtx.h"
+#include "nu2api/numath/nuquat.h"
 #include "nu2api/numath/nutrig.h"
 
 #include <string.h>
@@ -347,30 +348,34 @@ void GizBuildit_SetVisibility(GIZBUILDIT_s *buildit, i32 visible) {
                                                   (visible != 0 ? GIZBUILDIT_AVAILABILITY_VISIBLE : 0));
 }
 
-void GizMoveAttractoBuildItPiece(GIZBUILDIT_s *buildit, GAMEANIMOBJ_s *object) {
+void GizMoveAttractoBuildItPiece(GIZBUILDIT_s *buildit, GAMEANIMOBJ_s *piece) {
     f32 progress = 1.0f - buildit->step_timer / buildit->step_duration;
-    GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(object->object_data);
-    NUMTX *matrix = NuSpecialGetDrawMtx(&object->special);
+    GIZBUILDITANIMDATA_s *data = static_cast<GIZBUILDITANIMDATA_s *>(piece->object_data);
+    NUMTX *draw = NuSpecialGetDrawMtx(&piece->special);
     if (progress > 0.0f) {
-        NUMTX start = *matrix;
-        start.m30 = start.m31 = start.m32 = 0.0f;
-        NUMTX end = data->end_mtx;
-        end.m30 = end.m31 = end.m32 = 0.0f;
-        NUQUAT from, to, rotation;
-        NuMtxToQuat(&start, &from);
-        NuMtxToQuat(&end, &to);
-        NuQuatSlerp(&rotation, &from, &to, progress);
-        NUMTX interpolated;
-        NuQuatToMtx(&rotation, &interpolated);
-        interpolated.m30 = matrix->m30 + (data->end_mtx.m30 - matrix->m30) * progress;
-        interpolated.m31 = matrix->m31 + (data->end_mtx.m31 - matrix->m31) * progress;
-        interpolated.m32 = matrix->m32 + (data->end_mtx.m32 - matrix->m32) * progress;
-        interpolated.m31 += 0.1f * NU_SIN_LUT(static_cast<i32>(32768.0f * progress));
-        *matrix = interpolated;
+        NUMTX result;
+        NUMTX from = *draw;
+        from.m30 = from.m31 = from.m32 = 0.0f;
+        NUMTX to = data->end_mtx;
+        to.m30 = to.m31 = to.m32 = 0.0f;
+        NUQUAT rotation, from_rotation, to_rotation;
+        NuMtxToQuat(&from, &from_rotation);
+        NuMtxToQuat(&to, &to_rotation);
+        NuQuatSlerp(&rotation, &from_rotation, &to_rotation, progress);
+        NuQuatToMtx(&rotation, &result);
+        NUVEC delta = {data->end_mtx.m30 - draw->m30, data->end_mtx.m31 - draw->m31, data->end_mtx.m32 - draw->m32};
+        delta.x *= progress;
+        delta.y *= progress;
+        delta.z *= progress;
+        result.m30 = delta.x + draw->m30;
+        result.m31 = delta.y + draw->m31;
+        result.m32 = delta.z + draw->m32;
+        result.m31 += 0.1f * NU_SIN_LUT(progress * 32768.0f);
+        *draw = result;
     }
     if (buildit->linked_buildit != NULL) {
-        data->draw_mtx = *matrix;
+        data->draw_mtx = *draw;
     } else {
-        NuSpecialSetDrawMtx(&object->special, matrix);
+        NuSpecialSetDrawMtx(&piece->special, draw);
     }
 }
