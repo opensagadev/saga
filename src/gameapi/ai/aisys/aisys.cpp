@@ -6321,21 +6321,16 @@ static f32 Condition_OpponentIsA(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, c
     return 0.0f;
 }
 
-__used__ static f32 Condition_OriginRange(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *arg,
-                                          void *void_arg) {
-    (void)processor;
-    (void)arg;
-    (void)void_arg;
-    f32 distance = 0.0f;
+static f32 Condition_OriginRange(AISYS *sys, AISCRIPTPROCESS *, AIPACKET *packet, char *, void *) {
     if (packet != NULL) {
         NUVEC *origin = GetAICreatureOriginFn != NULL ? GetAICreatureOriginFn(sys, packet) : NULL;
         if (origin != NULL) {
-            distance = NuVecDist(&packet->terrain_origin, origin, NULL);
+            return NuVecDist(&packet->terrain_origin, origin, NULL);
         } else if (sys != NULL && packet->field_0x134 != 0xff) {
-            distance = NuVecDist(&packet->terrain_origin, &sys->creatures[packet->field_0x134].pos, NULL);
+            return NuVecDist(&packet->terrain_origin, &sys->creatures[packet->field_0x134].pos, NULL);
         }
     }
-    return distance;
+    return 0.0f;
 }
 
 static f32 Condition_PathBlocked(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char *, void *) {
