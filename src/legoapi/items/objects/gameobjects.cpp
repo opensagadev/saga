@@ -646,6 +646,23 @@ static void *Condition_PlayerInSockInit(AISYS_s *, char *name, AISCRIPT_s *) {
     return FindSock(WORLD->sock_sys, name);
 }
 
+extern "C" f32 NuAnimEndFrameOld(void *animation);
+
+static f32 Condition_AnimationFinished(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    nuinstanim_s *animation = static_cast<nuinstanim_s *>(argument);
+    if (animation != NULL && !animation->playing) {
+        nuanimdata_s *data = WORLD->current_gscn->instance_animation_data[animation->anim_ix];
+        if (data != NULL && animation->ltime >= NuAnimEndFrameOld(data)) return 1.0f;
+    }
+    return 0.0f;
+}
+
+static void *Condition_AnimationFinishedInit(AISYS_s *, char *name, AISCRIPT_s *) {
+    nuhspecial_s special;
+    NuSpecialFind(WORLD->current_gscn, &special, name, 1);
+    return NuSpecialExistsFn(&special) != 0 ? NuSpecialGetInstAnim(&special) : NULL;
+}
+
 static f32 Condition_RigidAnimFrame(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     nuinstanim_s *animation = static_cast<nuinstanim_s *>(argument);
     return animation != NULL ? animation->ltime : 1.0f;
@@ -1147,7 +1164,7 @@ extern "C" {
         {"ForceAtEnd", Condition_ForceAtEnd, Condition_ForceInit},
         {"ObstacleOpenedByPlayer", Condition_ObstacleOpenedByPlayer, Condition_ObstacleOpenedByPlayerInit},
         {"ObstacleOpenedByEitherPlayer", Condition_ObstacleOpenedByEitherPlayer, Condition_ObstacleOpenedByPlayerInit},
-        {"AnimationFinished", NULL, NULL},
+        {"AnimationFinished", Condition_AnimationFinished, Condition_AnimationFinishedInit},
         {"EitherPlayerPullingLever", NULL, NULL},
         {"EitherPlayerUsingHatMachine", NULL, NULL},
         {"EitherPlayerUsingPanel", NULL, NULL},
