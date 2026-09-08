@@ -6829,7 +6829,19 @@ DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size
 
 
 extern "C" void *AISysBufferAlloc(VARIPTR *cursor, VARIPTR *end, u32 size);
-extern "C" void ResetAIMessageSys(AIMESSAGESYS_s *system);
+extern "C" void ResetAIMessageSys(AIMESSAGESYS_s *sys) {
+    if (sys != NULL) {
+        NULISTHDR *free_list = &sys->free_list;
+        free_list->head = NULL;
+        free_list->tail = NULL;
+        sys->active_list.head = NULL;
+        sys->active_list.tail = NULL;
+        memset(sys->messages, 0, sys->count * sizeof(AIMESSAGE_s));
+        for (i32 index = 0; index < sys->count; ++index) {
+            NuLinkedListAppend(free_list, &sys->messages[index].links);
+        }
+    }
+}
 
 extern "C" AIMESSAGESYS_s *CreateAIMessageSys(VARIPTR *cursor, VARIPTR *end, i32 count) {
     AIMESSAGESYS_s *system = static_cast<AIMESSAGESYS_s *>(AISysBufferAlloc(cursor, end, sizeof(AIMESSAGESYS_s)));
@@ -6943,6 +6955,10 @@ extern "C" void AddLocalAIMessage(AISCRIPTPROCESS *processor, AILOCALMESSAGE_s *
 
 AIANTINODE dynamic_antinodes[64] = {};
 extern "C" f32 default_path_heighttol;
+
+extern "C" void AISetPathHeightTol(f32 tolerance) {
+    default_path_heighttol = tolerance;
+}
 
 extern "C" AIANTINODE *AIAntinodeCreate(NUVEC *position, f32 radius) {
     for (i32 index = 0; index < 64; ++index) {

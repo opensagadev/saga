@@ -1219,8 +1219,6 @@ extern "C" {
         AiLevelPathName = path;
     }
 
-    void AISetPathHeightTol(void) {
-    }
 
     // libTTapp.so 0x3e5fd0: carve a zeroed, 16-byte-aligned block from the
     // permbuffer cursor. Returns NULL when the cursor or the end pointer is
@@ -2117,20 +2115,6 @@ extern "C" {
     }
 
 
-    void ResetAIMessageSys(AIMESSAGESYS_s *sys) {
-        if (sys == NULL) {
-            return;
-        }
-
-        sys->free_list.head = NULL;
-        sys->free_list.tail = NULL;
-        sys->active_list.head = NULL;
-        sys->active_list.tail = NULL;
-        memset(sys->messages, 0, (usize)sys->count * sizeof(AIMESSAGE_s));
-        for (i32 i = 0; i < sys->count; ++i) {
-            NuLinkedListAppend(&sys->free_list, &sys->messages[i].links);
-        }
-    }
 
 
 } // extern "C"
