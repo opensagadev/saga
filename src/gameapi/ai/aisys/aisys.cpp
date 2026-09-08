@@ -957,6 +957,15 @@ __used__ static i32 Action_GoToNode(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
 
 void LevelScriptReStoreProgress(WORLDINFO_s *, LEVELSCRIPTPROCESS_s *);
 
+static i32 Action_DisableNarrowSocks(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **params,
+                                   i32 param_count, i32, f32) {
+    i32 disabled = 1;
+    if (param_count != 0 && params != NULL && params[0] != NULL && NuStrICmp("FALSE", params[0]) == 0)
+        disabled = 0;
+    disable_narrow_socks = disabled;
+    return 1;
+}
+
 extern void DrawBossHitPoints(GameObject_s *);
 
 static i32 Action_DrawBossHitPoints(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, char **,
@@ -4530,7 +4539,7 @@ extern "C" {
         {"SpeederBeingChased", NULL, 0, 0, 0},
         {"ThrowDetonator", Action_ThrowDetonator, 0, 0, 0},
         {"SetScaleOverride", NULL, 0, 0, 0},
-        {"DisableNarrowSocks", NULL, 1, 0, 0},
+        {"DisableNarrowSocks", Action_DisableNarrowSocks, 1, 0, 0},
         {"UseTimeBasedUpdate", NULL, 0, 0, 0},
         {"ForceLightning", Action_ForceLightning, 0, 0, 0},
         {"WalkBackwards", Action_WalkBackwards, 0, 0, 0},
