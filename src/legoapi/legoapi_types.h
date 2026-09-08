@@ -753,6 +753,7 @@ struct FADEINFO_s {
     FADETYPE_VALUE pending_type;
     i32 field_28;
 };
+DECOMP_ASSERT(offsetof(FADEINFO_s, fade) == 4, "FADEINFO fade offset");
 struct FADETYPE {
     FADETYPE_VALUE type;
 };
