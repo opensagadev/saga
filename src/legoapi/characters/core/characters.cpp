@@ -243,11 +243,9 @@ void ResetPlayerMoves(GameObject_s *object) {
                       reinterpret_cast<CHARACTERDATA_s *>(object->apiobj.character_data));
     object->fall_acceleration_timer = 0.0f;
     object->tag_state = 0.0f;
-    object->apiobj.field_0x1fc = v000.x;
-    object->apiobj.field_0x200 = v000.y;
-    object->apiobj.field_0x204 = v000.z;
-    object->field_0xefc |= 0x80;
+    object->apiobj.movement_direction = v000;
     object->input_toggle_hold_time = TOGGLEHOLDTIME;
+    object->field_0xefc |= 0x80;
     ResetCharacterIdle(object, 2, GetDefaultIdle(object));
     if (object->apiobj.character_model->model_data_b[1] != NULL) {
         ResetAnimPacket(&object->apiobj.anim_packet, 1);
@@ -262,7 +260,7 @@ void ResetPlayerMoves(GameObject_s *object) {
     SetFlicker(object, 0.0f);
     ResetCoinPacket(object->coinpacket);
     object->apiobj.respawn_timer = 0.0f;
-    object->apiobj.object_flags &= ~0x2000u;
+    object->apiobj.flags_high &= ~0x20u;
     DrawOffsetCode(object, 1);
 }
 void Player_ResetContexts(PLAYERPACKET_s *);
