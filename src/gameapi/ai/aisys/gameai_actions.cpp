@@ -589,9 +589,6 @@ static __used__ f32 Condition_LocatorOnScreen(AISYS_s *, AISCRIPTPROCESS_s *, AI
     return 0;
 }
 
-static __used__ f32 Condition_NumForceObjects(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
 
 static __used__ f32 Condition_OpponentContext(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
     return 0;
@@ -1179,9 +1176,6 @@ static __used__ f32 Condition_NearestPartyXZRange(AISYS_s *, AISCRIPTPROCESS_s *
     return 0;
 }
 
-static __used__ void *Condition_NumForceObjectsInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
-}
 
 
 static __used__ f32 Condition_PartyContainsDroids(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {

@@ -324,6 +324,20 @@ static f32 Condition_ForceAtEnd(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, ch
     return argument != NULL && GizmoGetOutput(WORLD->gizmo_sys, static_cast<GIZMO_s *>(argument), 0, 1) != 0 ? 1.0f : 0.0f;
 }
 
+// The original executable returns zero unconditionally for this condition.
+static f32 Condition_NumForceObjects(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    return 0.0f;
+}
+
+static void *Condition_NumForceObjectsInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    i32 flags = 0;
+    if (name != NULL && system != NULL) {
+        flags = NuStrIStr(name, "throwable") != NULL;
+        if (NuStrIStr(name, "inrange") != NULL) flags |= 2;
+    }
+    return reinterpret_cast<void *>(static_cast<intptr_t>(flags));
+}
+
 static f32 Condition_ForceStackComplete(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
     GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
     return force != NULL && force->group != NULL && (force->group->field_0x24 & 2) ? 1.0f : 0.0f;
@@ -642,7 +656,7 @@ extern "C" {
         {"OpponentContext", NULL, NULL},
         {"Player2Active", Condition_Player2Active, NULL},
         {"NumBaddies", NULL, NULL},
-        {"NumForceObjects", NULL, NULL},
+        {"NumForceObjects", Condition_NumForceObjects, Condition_NumForceObjectsInit},
         {"BeenToLevel", NULL, NULL},
         {"LastLevel", Condition_LastLevel, Condition_LastLevelInit},
         {"Message", NULL, NULL},
