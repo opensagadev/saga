@@ -35,6 +35,8 @@ Native and WASM builds define `HOST_BUILD` and use the host harness.
 | [10-animation-regression-audit.md](10-animation-regression-audit.md) | historical animation-related regression audit |
 | [11-animation-runtime-inventory.md](11-animation-runtime-inventory.md) | animation runtime coverage, active paths, and remaining gaps |
 | [12-gameplay-regression-audit.md](12-gameplay-regression-audit.md) | gameplay regression evidence, matching status, and unresolved paths |
+| [13-post-processing-audit.md](13-post-processing-audit.md) | directional-light intensity, retained Android post-effects, and runtime limitations |
+| [14-save-format-audit.md](14-save-format-audit.md) | save layout, serialized enums, original-binary evidence, and unresolved fields |
 
 ## Non-negotiable matching facts
 
