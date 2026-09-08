@@ -1129,7 +1129,9 @@ typedef struct GameObject_s {
     i16 field_0x1078; // 0x1078 reflected/platform terrain id
     i16 field_0x107a; // 0x107a terrain id
     i16 field_0x107c; // 0x107c
-    u8 pad_107e[0x1084 - 0x107e];
+    u8 field_0x107e;
+    u8 field_0x107f;
+    f32 field_0x1080;
     u8 field_0x1084;     // 0x1084
     u8 use_model_origin; // 0x1085
     u8 field_0x1086;     // 0x1086
@@ -1149,8 +1151,12 @@ typedef struct GameObject_s {
     u8 field_0x1094;
     u8 pad_1095[3];
     u32 field_0x1098;
-    u32 field_0x109c;                      // 0x109c
-    u8 pad_10a0[0x10b0 - 0x10a0];          // 0x10a0 .. 0x10b0
+    union {
+        u32 field_0x109c; // 0x109c
+        f32 special_move_progress;
+    };
+    AIPATHNODE_s *special_move_node; // 0x10a0
+    u8 pad_10a4[0x10b0 - 0x10a4];
     void *opponent;                        // 0x10b0
     void *last_attacker;                   // 0x10b4
     void *field_0x10b8;                    // 0x10b8

@@ -122,16 +122,3 @@ void BackFlipCode(GameObject_s *object) {
         object->apiobj.velocity.z = 0.0f;
     }
 }
-
-void SetSpecialMove(GameObject_s *, AIPATHNODE_s *, AIPATHNODE_s *, char) {
-}
-
-void ClearSpecialMove(GameObject_s *object) {
-    object->field_0x109c = 0x3f800000;
-    object->ai.field_0x180 = NULL;
-    object->field_0x1092 = 0;
-    object->field_0x1093 = 0;
-    memset(object->pad_10a0, 0, 4);
-    memset(object->pad_107e + 2, 0, 4);
-    object->pad_107e[1] = 0;
-}

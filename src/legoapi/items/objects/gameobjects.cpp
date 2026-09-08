@@ -977,6 +977,24 @@ extern "C" {
     }
 }
 
+void SetSpecialMove(GameObject_s *object, AIPATHNODE_s *target, AIPATHNODE_s *node, char move) {
+    object->ai.field_0x180 = target;
+    object->field_0x1092 = move;
+    object->field_0x1093 = 0;
+    object->special_move_node = node;
+    object->special_move_progress = 0.0f;
+}
+
+void ClearSpecialMove(GameObject_s *object) {
+    object->special_move_progress = 1.0f;
+    object->ai.field_0x180 = NULL;
+    object->field_0x1092 = 0;
+    object->field_0x1093 = 0;
+    object->special_move_node = NULL;
+    object->field_0x1080 = 0.0f;
+    object->field_0x107f = 0;
+}
+
 void GameAISysInit() {
     RegisterAIScriptActions(lego_aiactiondefs);
     RegisterAIScriptConditions(lego_aiconditiondefs);
