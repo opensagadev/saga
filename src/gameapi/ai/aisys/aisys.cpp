@@ -957,6 +957,33 @@ __used__ static i32 Action_GoToNode(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
 
 void LevelScriptReStoreProgress(WORLDINFO_s *, LEVELSCRIPTPROCESS_s *);
 
+extern void oneAtOnce_SetNumAttackers(i32);
+extern void oneAtOnce_SetAttackersPerRow(i32);
+
+static i32 Action_SetAttackersAtOnce(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *, char **params,
+                                   i32 param_count, i32 first_time, f32) {
+    if (first_time && param_count != 0) {
+        for (i32 index = 0; index < param_count; ++index) {
+            char *value = NuStrIStr(params[index], "max");
+            if (value != NULL)
+                oneAtOnce_SetNumAttackers((i32)AIParamToFloat(processor, value + 4));
+        }
+    }
+    return 1;
+}
+
+static i32 Action_SetAttackersPerRow(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *, char **params,
+                                   i32 param_count, i32 first_time, f32) {
+    if (first_time && param_count != 0) {
+        for (i32 index = 0; index < param_count; ++index) {
+            char *value = NuStrIStr(params[index], "num");
+            if (value != NULL)
+                oneAtOnce_SetAttackersPerRow((i32)AIParamToFloat(processor, value + 4));
+        }
+    }
+    return 1;
+}
+
 static i32 Action_AddScriptProcessor(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *, char **params,
                                     i32 param_count, i32 first_time, f32) {
     if (first_time && param_count > 0) {
@@ -4440,8 +4467,8 @@ extern "C" {
         {"WalkBackwards", Action_WalkBackwards, 0, 0, 0},
         {"AddScriptProcessor", Action_AddScriptProcessor, 0, 0, 0},
         {"SetUseOneAtOnce", NULL, 0, 0, 0},
-        {"SetAO_MaxAttackers", NULL, 0, 0, 0},
-        {"SetAO_AttackersPerRow", NULL, 0, 0, 0},
+        {"SetAO_MaxAttackers", Action_SetAttackersAtOnce, 0, 0, 0},
+        {"SetAO_AttackersPerRow", Action_SetAttackersPerRow, 0, 0, 0},
         {"SetAO_RowDist", NULL, 0, 0, 0},
         {"SetAO_InitRowDist", Action_InitRowDist, 0, 0, 0},
         {"SetTechnoComplete", NULL, 0, 0, 0},
