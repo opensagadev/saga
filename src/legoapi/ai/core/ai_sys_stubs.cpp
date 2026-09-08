@@ -1444,7 +1444,70 @@ extern "C" {
             }
         }
 
-        if (search_all_paths == 0) {
+        if (search_all_paths != 0) {
+            AIPATH *saved_path = info->path;
+            AIPATHCNX *saved_connection = info->connection;
+            u8 saved_direction = info->direction;
+            if (info->path_index == 0xff) {
+                info->path_index = saved_path->index;
+            }
+            if (info->path_index >= system->path_sys->path_count) {
+                info->path_index = 0;
+            }
+            info->path = system->path_sys->paths[info->path_index];
+            if (info->next_check >= info->path->node_count) {
+                info->next_check = 0;
+            }
+            AISysResetPathSearchConnectionChecks(info->path);
+            u8 start_path = info->path_index;
+            u16 start_node = info->next_check;
+            i32 inside_extents = 0;
+            while (checks != 0) {
+                if (inside_extents == 0) {
+                    inside_extents = AIPathCheckExtents(info->path, position);
+                }
+                if (inside_extents != 0) {
+                    AIPATHNODE *node = &info->path->nodes[info->next_check];
+                    for (i32 index = 0; index < node->connection_count; ++index) {
+                        AIPATHCNX *candidate = node->connections[index];
+                        if (WithinConnection(system, position, info->path, candidate, 1, NULL,
+                                             0xff, 0xff, info, 0.0f, 1)) {
+                            return;
+                        }
+                        if (nearest_distance_squared != NULL) {
+                            AIPATHCNX *connection = node->connections[index];
+                            f32 distance = NuLineToPointDistSqrEx(
+                                &info->path->nodes[connection->node_indices[0]].position,
+                                &info->path->nodes[connection->node_indices[1]].position, position, NULL);
+                            if (distance < *nearest_distance_squared) {
+                                *nearest_distance_squared = distance;
+                                saved_connection = candidate;
+                                saved_path = info->path;
+                            }
+                        }
+                    }
+                    ++info->next_check;
+                }
+                if (inside_extents == 0 || info->next_check >= info->path->node_count) {
+                    info->next_check = 0;
+                    ++info->path_index;
+                    if (info->path_index >= system->path_sys->path_count) {
+                        info->path_index = 0;
+                    }
+                    info->path = system->path_sys->paths[info->path_index];
+                    info->connection = NULL;
+                    AISysResetPathSearchConnectionChecks(info->path);
+                    inside_extents = 0;
+                }
+                --checks;
+                if (info->path_index == start_path && info->next_check == start_node) {
+                    break;
+                }
+            }
+            info->path = saved_path;
+            info->connection = saved_connection;
+            info->direction = saved_direction;
+        } else {
             i32 remaining = info->path->node_count < checks ? info->path->node_count : checks;
             while (remaining != 0) {
                 AIPATHNODE *node = &info->path->nodes[info->next_check];
@@ -1457,71 +1520,7 @@ extern "C" {
                 info->next_check = (info->next_check + 1) % info->path->node_count;
                 --remaining;
             }
-            return;
         }
-
-        AIPATH *saved_path = info->path;
-        AIPATHCNX *saved_connection = info->connection;
-        u8 saved_direction = info->direction;
-        if (info->path_index == 0xff) {
-            info->path_index = saved_path->index;
-        }
-        if (info->path_index >= system->path_sys->path_count) {
-            info->path_index = 0;
-        }
-        info->path = system->path_sys->paths[info->path_index];
-        if (info->next_check >= info->path->node_count) {
-            info->next_check = 0;
-        }
-        AISysResetPathSearchConnectionChecks(info->path);
-        u8 start_path = info->path_index;
-        u16 start_node = info->next_check;
-        i32 inside_extents = 0;
-        while (checks != 0) {
-            if (inside_extents == 0) {
-                inside_extents = AIPathCheckExtents(info->path, position);
-            }
-            if (inside_extents != 0) {
-                AIPATHNODE *node = &info->path->nodes[info->next_check];
-                for (i32 index = 0; index < node->connection_count; ++index) {
-                    AIPATHCNX *candidate = node->connections[index];
-                    if (WithinConnection(system, position, info->path, candidate, 1, NULL,
-                                         0xff, 0xff, info, 0.0f, 1)) {
-                        return;
-                    }
-                    if (nearest_distance_squared != NULL) {
-                        AIPATHCNX *connection = node->connections[index];
-                        f32 distance = NuLineToPointDistSqrEx(
-                            &info->path->nodes[connection->node_indices[0]].position,
-                            &info->path->nodes[connection->node_indices[1]].position, position, NULL);
-                        if (distance < *nearest_distance_squared) {
-                            *nearest_distance_squared = distance;
-                            saved_connection = candidate;
-                            saved_path = info->path;
-                        }
-                    }
-                }
-                ++info->next_check;
-            }
-            if (inside_extents == 0 || info->next_check >= info->path->node_count) {
-                info->next_check = 0;
-                ++info->path_index;
-                if (info->path_index >= system->path_sys->path_count) {
-                    info->path_index = 0;
-                }
-                info->path = system->path_sys->paths[info->path_index];
-                info->connection = NULL;
-                AISysResetPathSearchConnectionChecks(info->path);
-                inside_extents = 0;
-            }
-            --checks;
-            if (info->path_index == start_path && info->next_check == start_node) {
-                break;
-            }
-        }
-        info->path = saved_path;
-        info->connection = saved_connection;
-        info->direction = saved_direction;
     }
 
     void *AISysLoadEx(void *buffer, void *buffer_end, i32 storage_size, void *scene, char *directory, char *name,
