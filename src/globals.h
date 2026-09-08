@@ -604,6 +604,7 @@ extern i32 LEGO_AIPATHCNX_DONT_JUMP_NOW;
 extern f32 *fakeanimendframe;
 extern f32 *fakeanimframe;
 extern f32 ai_moveradius;
+extern i32 new_retreat;
 extern f32 aitol;
 extern f32 DEFAULT_MOVE_RANGE;
 extern f32 engagefiretime;

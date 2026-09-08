@@ -1853,6 +1853,7 @@ i32 LEGO_AIPATHCNX_DONT_JUMP_NOW = 0;
 f32 *fakeanimendframe = NULL;
 f32 *fakeanimframe = NULL;
 f32 ai_moveradius = 0.1f;
+i32 new_retreat = 1;
 i32 mechAutoJumpFlags = 0;
 i32 mechAutoJumpCantReachFlags = 0;
 i32 ai_fighting = 0;
