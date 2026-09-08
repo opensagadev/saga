@@ -193,15 +193,15 @@ static void *Condition_HitPointsInit(AISYS_s *system, char *name, AISCRIPT_s *) 
 static f32 Condition_HitPoints(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
     GameObject_s *object = static_cast<GameObject_s *>(argument);
     if (object == NULL) {
-        if (packet == NULL || packet->owner == NULL) {
-            return 0.0f;
-        }
-        object = packet->owner->apiobj.objptr;
-        if (object == NULL) {
-            return 0.0f;
+        if (packet != NULL && packet->owner != NULL) {
+            object = packet->owner->apiobj.objptr;
         }
     }
-    return static_cast<f32>(static_cast<i8>(object->current_hp));
+    f32 result = 0.0f;
+    if (object != NULL) {
+        result = static_cast<i8>(object->current_hp);
+    }
+    return result;
 }
 
 static f32 Condition_CurrentHintId(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
