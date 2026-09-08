@@ -294,6 +294,21 @@ conversion and scaled 32-bit table addressing wrap to the first entry.
 It does not prove the original game naturally produces these inputs or that
 Cantina movement is correct. No source angle guard or cutoff was added.
 
+A subsequent current-build Cantina tagging fixture extends the earlier
+transfer-only check to 180 rendered frames (`/tmp/saga-tag-sustained.log`).
+It places an eligible Obi-Wan within the original search radius, supplies
+tag input, and then resumes ordinary updates. Player slot 0 and the controller
+remain assigned to Obi-Wan, who renders and responds to movement input.
+However, this is not a sanitizer-clean run: the angle-table error also occurs.
+A second fixture stops at the diagnostic (`/tmp/saga-tag-angle.log`) five
+draws after transfer. `MovePlayer` is processing a different NPC, with
+`accepts_player_input=false`, deltas `(-0.000738143921, 0.000556945801)`,
+distance zero and reciprocal infinity. The failing call comes from the NPC
+pass of `UpdateGameObjects`, not the newly controlled character. These
+observations establish sustained control after the controlled tag transfer
+and keep the separate AI normalization investigation open; they do not prove
+natural target acquisition or correct Cantina movement.
+
 A native build-sound inventory confirms event 0x3a resolves to `MK-Pickup`
 (SFX 50, sample 357, 22050 Hz, enabled) and event 0x3b to `LegoForm` (SFX 128,
 sample 434, 11025 Hz, enabled and looping). Both have volume 16383. The
