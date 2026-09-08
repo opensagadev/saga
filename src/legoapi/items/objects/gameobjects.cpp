@@ -190,6 +190,15 @@ static f32 Condition_CurrentHintId(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *,
     return Hint_CurrentId();
 }
 
+static void *Condition_HintAvailableInit(AISYS_s *, char *argument, AISCRIPT_s *) {
+    return argument != NULL ? reinterpret_cast<void *>(static_cast<isize>(NuAToI(argument))) : NULL;
+}
+
+static f32 Condition_HintAvailable(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    return argument != NULL && Hint_isAvailable(static_cast<i32>(reinterpret_cast<isize>(argument))) != 0
+               ? 1.0f : 0.0f;
+}
+
 static f32 Condition_EmptyTakeOver(AISYS_s *system, AISCRIPTPROCESS_s *, AIPACKET_s *, char *name, void *) {
     if (name == NULL || system == NULL) {
         return 0.0f;
@@ -316,7 +325,7 @@ extern "C" {
         {"FurthestPlayerDistanceAlongSock", NULL, NULL},
         {"FinishedSpline", NULL, NULL},
         {"CurrentHintId", Condition_CurrentHintId, NULL},
-        {"HintAvailable", NULL, NULL},
+        {"HintAvailable", Condition_HintAvailable, Condition_HintAvailableInit},
         {"HintComplete", NULL, NULL},
         {"Freeplay", NULL, NULL},
         {"Indy", NULL, NULL},

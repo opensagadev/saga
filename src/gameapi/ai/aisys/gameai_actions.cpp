@@ -84,10 +84,6 @@ static f32 Condition_ForceFinished(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *,
 }
 
 
-static __used__ f32 Condition_HintAvailable(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
-
 static __used__ void *Condition_HitPointsInit(AISYS_s *, char *, AISCRIPT_s *) {
     return nullptr;
 }
@@ -858,9 +854,6 @@ static void *Condition_ForceCompleteInit(AISYS_s *, char *name, AISCRIPT_s *) {
     return gizmo != NULL ? gizmo->object : NULL;
 }
 
-static __used__ void *Condition_HintAvailableInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
-}
 
 
 static __used__ f32 Condition_LastAttackerRange(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
