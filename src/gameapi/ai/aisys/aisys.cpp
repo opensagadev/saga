@@ -6828,6 +6828,15 @@ DECOMP_ASSERT(sizeof(api_aiactiondefs) == 0x294, "API action registry size");
 DECOMP_ASSERT(sizeof(api_aiconditiondefs) == 0x258, "API condition registry size");
 
 
+extern "C" void AIAntinodeMove(AIANTINODE *antinode, NUVEC *position, f32 radius, f32 below, f32 above) {
+    if (antinode != NULL) {
+        antinode->position = *position;
+        antinode->radius = radius;
+        antinode->min_y = antinode->position.y - below;
+        antinode->max_y = antinode->position.y + above;
+    }
+}
+
 extern "C" void AIFormationFollow(AIPACKET *packet) {
     AIGROUP *group = packet->group;
     if (packet->group_row < group->row_count) {
@@ -6835,15 +6844,10 @@ extern "C" void AIFormationFollow(AIPACKET *packet) {
         u8 column = packet->group_column;
         NUVEC offset;
         if ((packet->movement_event_flags & 1) != 0) {
-            offset.x = 0.0f;
-            if ((group->count_across & 1) == 0) {
-                offset.x = -(0.5f * group->x_spacing);
-            }
+            offset.x = (group->count_across & 1) != 0 ? 0.0f : -(0.5f * group->x_spacing);
         } else {
-            offset.x = ((column + 1) / 2) * group->x_spacing;
-            if ((column & 1) != 0) {
-                offset.x = -offset.x;
-            }
+            f32 column_offset = ((column + 1) / 2) * group->x_spacing;
+            offset.x = (column & 1) != 0 ? -column_offset : column_offset;
         }
         if (group->is_reversed) {
             offset.x = -offset.x;

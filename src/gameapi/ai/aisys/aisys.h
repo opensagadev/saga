@@ -323,10 +323,10 @@ typedef struct AIGROUP_s {
 struct AIANTINODE_s {
     NUVEC position;
     f32 radius;
-    f32 height;
-    f32 width;
-    f32 max_height;
-    f32 min_height;
+    f32 min_y;
+    f32 min_y_offset;
+    f32 max_y;
+    f32 max_y_offset;
     union {
         nuhspecial_s special_handle;
         struct {
@@ -418,6 +418,9 @@ DECOMP_ASSERT(offsetof(AIPATH, updated_node_bits) == 0x18, "AIPATH updated-node 
 DECOMP_ASSERT(offsetof(AIPATH, inside_node_bits) == 0x58, "AIPATH occupied-node bits offset");
 DECOMP_ASSERT(sizeof(AIPATHSYS) == 0x10, "AIPATHSYS size");
 DECOMP_ASSERT(sizeof(AIANTINODE) == 0x54, "AIANTINODE size");
+DECOMP_ASSERT(offsetof(AIANTINODE, radius) == 0xc, "AIANTINODE radius offset");
+DECOMP_ASSERT(offsetof(AIANTINODE, min_y) == 0x10, "AIANTINODE lower bound offset");
+DECOMP_ASSERT(offsetof(AIANTINODE, max_y) == 0x18, "AIANTINODE upper bound offset");
 DECOMP_ASSERT(offsetof(AIANTINODE, special_handle) == 0x20, "AIANTINODE special handle offset");
 DECOMP_ASSERT(offsetof(AIANTINODE, rotation_offset) == 0x3c, "AIANTINODE rotation offset");
 DECOMP_ASSERT(offsetof(AICREATURE, type) == 0x4e, "AICREATURE type offset");
@@ -682,6 +685,7 @@ extern "C" {
                                i32 use_three_dimensions, i32 process_ai);
     void AISysProcess(AISYS *system, APIOBJECT *player_1, APIOBJECT *player_2);
     void AIFormationFollow(AIPACKET *packet);
+    void AIAntinodeMove(AIANTINODE *antinode, NUVEC *position, f32 radius, f32 below, f32 above);
     void AIMoveInstruction(AIPACKET *packet, NUVEC *destination, f32 stopping_distance, AIPATHINFO *path_info, i32 mode,
                            f32 movement_parameter);
     void FollowAPIObject(APIOBJECT *object, APIOBJECT *target, i32 flags, f32 movement_parameter);

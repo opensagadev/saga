@@ -544,10 +544,10 @@ static void AISysLoadAntinodes(AISYS *system, i32 version, NUGSCN *scene) {
         antinode->radius = EdFileReadFloat();
         antinode->base_radius = antinode->radius;
         antinode->base_height = antinode->radius;
-        antinode->height = EdFileReadFloat();
-        antinode->max_height = EdFileReadFloat();
-        antinode->width = antinode->height - antinode->position.y;
-        antinode->min_height = antinode->max_height - antinode->position.y;
+        antinode->min_y = EdFileReadFloat();
+        antinode->max_y = EdFileReadFloat();
+        antinode->min_y_offset = antinode->min_y - antinode->position.y;
+        antinode->max_y_offset = antinode->max_y - antinode->position.y;
 
         if (version > 14) {
             antinode->flags = EdFileReadInt();
@@ -587,8 +587,6 @@ extern "C" {
     void AIAntinodeDestroy(void) {
     }
 
-    void AIAntinodeMove(void) {
-    }
 
 
 
@@ -1705,8 +1703,8 @@ extern "C" {
 
             NUMTX *draw_matrix = NuSpecialGetDrawMtx(special);
             NuVecMtxTransform(&antinode->position, &antinode->special_position, draw_matrix);
-            antinode->height = antinode->width + antinode->position.y;
-            antinode->max_height = antinode->position.y + antinode->min_height;
+            antinode->min_y = antinode->min_y_offset + antinode->position.y;
+            antinode->max_y = antinode->position.y + antinode->max_y_offset;
 
             if (antinode->type != 0) {
                 NUVEC forward = {0.0f, 0.0f, 1.0f};
