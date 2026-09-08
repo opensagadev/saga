@@ -2251,7 +2251,7 @@ extern "C" {
             if ((object->field_0x1f8 & APIOBJECT_FLAG_AI_PLAYER_MASK) == APIOBJECT_FLAG_PLAYER_ACTIVE) {
                 packet->path_connection_state = 0;
                 packet->movement_destination = object->position;
-                packet->movement_target = NULL;
+                packet->field_0x180 = NULL;
                 packet->field_0x1e6 = runtime_flags & 7;
                 packet->field_0x1e7 &= 0x3f;
                 packet->navigation_flags &= static_cast<u8>(~AIPACKET_NAVIGATION_FLAG_TRANSIENT);

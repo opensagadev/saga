@@ -1547,3 +1547,15 @@ validate the still-empty torpedo cleanup implementation or full level-reset
 behavior. The shared native build encountered an undeclared `TempGame` in
 concurrently edited `hub.cpp`; that unrelated source was preserved.
 The isolated native build passes with only this recovery applied.
+
+## Player-controlled AI packet reset (2026-09-08)
+
+Original `AISysProcessCharacter` at `0x3f8fa7` clears packet offset `0x180`
+when processing a player-controlled object. The reconstruction instead cleared
+the adjacent movement-target pointer at `0x184`. Correcting the field raises
+instruction matching from 51.040% to 51.042%; the complete function remains
+partial. Eight original/target machine-code cases agree on the two pointers,
+runtime flags, connection state, and movement position across 2D/3D and
+clearance settings. The fixture replaces path updating with an empty callee
+to isolate the player branch. It does not prove a fix for natural NPC wiggle.
+Android and native smoke-runner builds pass.
