@@ -1336,10 +1336,6 @@ static __used__ f32 Condition_EitherPlayerUsingPanel(AISYS_s *, AISCRIPTPROCESS_
 
 
 
-static __used__ f32 Condition_ObstacleOpenedByPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
-
 static __used__ void *Condition_PickupBeenTurnedOnInit(AISYS_s *, char *, AISCRIPT_s *) {
     return nullptr;
 }
@@ -1452,11 +1448,6 @@ static __used__ f32 Condition_NumBaddiesThatCanSeePlayers(AISYS_s *, AISCRIPTPRO
 
 static __used__ f32 Condition_TakeOverTargetInTriggerArea(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *,
                                                           void *) {
-    return 0;
-}
-
-static __used__ f32 Condition_ObstacleOpenedByEitherPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *,
-                                                           void *) {
     return 0;
 }
 

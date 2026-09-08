@@ -188,6 +188,20 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 
 static const f32 AI_RESPAWN_DELAY = 2.0f;
 
+static f32 Condition_ObstacleOpenedByPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(argument);
+    if (obstacle != NULL) {
+        return player != NULL && obstacle->triggering_object == player ? 1.0f : 0.0f;
+    }
+    return 0.0f;
+}
+
+static f32 Condition_ObstacleOpenedByEitherPlayer(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    GIZOBSTACLE_s *obstacle = static_cast<GIZOBSTACLE_s *>(argument);
+    return obstacle != NULL && ((player != NULL && obstacle->triggering_object == player) ||
+                               (player2 != NULL && obstacle->triggering_object == player2)) ? 1.0f : 0.0f;
+}
+
 static void *Condition_ObstacleOpenedByPlayerInit(AISYS_s *, char *name, AISCRIPT_s *) {
     GIZMO_s *gizmo = GizmoFindByName(WORLD->gizmo_sys, obstacle_gizmotype_id, name);
     return gizmo != NULL ? gizmo->object : NULL;
@@ -421,8 +435,8 @@ extern "C" {
         {"ObstacleLockedShut", Condition_ObstacleLockedShut, Condition_ObstacleOpenedByPlayerInit},
         {"ForceAtStart", NULL, NULL},
         {"ForceAtEnd", NULL, NULL},
-        {"ObstacleOpenedByPlayer", NULL, NULL},
-        {"ObstacleOpenedByEitherPlayer", NULL, NULL},
+        {"ObstacleOpenedByPlayer", Condition_ObstacleOpenedByPlayer, Condition_ObstacleOpenedByPlayerInit},
+        {"ObstacleOpenedByEitherPlayer", Condition_ObstacleOpenedByEitherPlayer, Condition_ObstacleOpenedByPlayerInit},
         {"AnimationFinished", NULL, NULL},
         {"EitherPlayerPullingLever", NULL, NULL},
         {"EitherPlayerUsingHatMachine", NULL, NULL},
