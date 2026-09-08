@@ -1462,7 +1462,7 @@ extern "C" {
             if (count != 0) {
                 for (i32 index = 0; index < object_count; ++index) {
                     APIOBJECT *object = objects[index];
-                    if ((object->flags_low & 0x80) != 0 || object->ignore_antinodes) {
+                    if ((object->object_flags & 0x20080) != 0) {
                         continue;
                     }
                     for (i32 obstacle = 0; obstacle < count; ++obstacle) {

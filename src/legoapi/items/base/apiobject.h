@@ -418,25 +418,30 @@ typedef struct APIOBJECT_s {
     u32 field_0x1f0;        // 0x1f0  player mission-complete mask hi
     u32 field_0x1f4;        // 0x1f4
     union {
-        u16 field_0x1f8; // 0x1f8  complete object flags
+        u32 object_flags; // 0x1f8, complete flag word
         struct {
-            u8 flags_low;
-            u8 flags_high;
-        };
-        struct {
-            u16 in_use : 1;
-            u16 other_object_flags : 15;
+            union {
+                u16 field_0x1f8;
+                struct {
+                    u8 flags_low;
+                    u8 flags_high;
+                };
+                struct {
+                    u16 in_use : 1;
+                    u16 other_object_flags : 15;
+                };
+            };
+            union {
+                u8 field_0x1fa;
+                struct {
+                    u8 object_flag_1fa_0 : 1;
+                    u8 ignore_antinodes : 1;
+                    u8 object_flags_1fa_2_7 : 6;
+                };
+            };
+            u8 field_0x1fb;
         };
     };
-    union {
-        u8 field_0x1fa; // 0x1fa
-        struct {
-            u8 object_flag_1fa_0 : 1;
-            u8 ignore_antinodes : 1;
-            u8 object_flags_1fa_2_7 : 6;
-        };
-    };
-    u8 field_0x1fb;
     union {
         struct {
             f32 field_0x1fc;
@@ -1043,6 +1048,7 @@ DECOMP_ASSERT(offsetof(APIOBJECT, animation_root_delta) == 0x268, "APIOBJECT ani
 DECOMP_ASSERT(offsetof(APIOBJECT, movement_direction) == 0x1fc, "APIOBJECT movement direction offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, collision_special) == 0x208, "APIOBJECT collision special offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, field_0x1fa) == 0x1fa, "APIOBJECT antinode flags offset");
+DECOMP_ASSERT(offsetof(APIOBJECT, object_flags) == 0x1f8, "APIOBJECT complete flag word offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, collision_position) == 0x80, "APIOBJECT collision position offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, pitch_angle) == 0x274, "APIOBJECT pitch angle offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, supporting_platform_id) == 0x27a, "APIOBJECT supporting platform id offset");
