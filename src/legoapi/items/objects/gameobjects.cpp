@@ -485,6 +485,24 @@ static f32 Condition_IsVisible(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, cha
     return result;
 }
 
+static f32 Condition_IsSetAlive(AISYS_s *, AISCRIPTPROCESS_s *process, AIPACKET_s *, char *, void *argument) {
+    i32 set = reinterpret_cast<intptr_t>(argument);
+    if (set == -1) set = process->unknown_b0;
+    return set != 0 && aicreature_sets_alive[set - 1] != 0 ? 1.0f : 0.0f;
+}
+
+static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
+    isize set = 0;
+    if (arg != NULL) {
+        if (NuStrICmp(arg, "myset") == 0) set = -1;
+        else {
+            i32 parsed = NuAToI(arg);
+            if (parsed >= 1 && parsed <= 16) set = parsed;
+        }
+    }
+    return reinterpret_cast<void *>(set);
+}
+
 static f32 Condition_IsOnScreen(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
     APIOBJECT *object = static_cast<APIOBJECT *>(argument);
     if (object == NULL) {
@@ -744,8 +762,8 @@ extern "C" {
         {"EitherPlayerIs", NULL, NULL},
         {"Player1Is", NULL, NULL},
         {"Player2Is", NULL, NULL},
-        {"IsSetAlive", NULL, NULL},
-        {"NumInSetAlive", NULL, NULL},
+        {"IsSetAlive", Condition_IsSetAlive, Condition_IsSetAliveInit},
+        {"NumInSetAlive", NULL, Condition_IsSetAliveInit},
         {"Context", NULL, NULL},
         {"InContext", Condition_InContext, Condition_InContextInit},
         {"OpponentContext", Condition_OpponentContext, Condition_InContextInit},

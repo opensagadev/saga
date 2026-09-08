@@ -285,20 +285,6 @@ static __used__ f32 Condition_IsLowEndDevice(AISYS_s *, AISCRIPTPROCESS_s *, AIP
 }
 
 
-static void *Condition_IsSetAliveInit(AISYS_s *, char *arg, AISCRIPT_s *) {
-    isize creature_set = AI_CREATURE_SET_NONE;
-    if (arg != NULL) {
-        if (NuStrICmp(arg, "myset") == 0) {
-            creature_set = AI_CREATURE_SET_CURRENT;
-        } else {
-            const i32 parsed_set = NuAToI(arg);
-            if (parsed_set >= AI_CREATURE_SET_FIRST && parsed_set <= AI_CREATURE_SET_LAST) {
-                creature_set = parsed_set;
-            }
-        }
-    }
-    return reinterpret_cast<void *>(creature_set);
-}
 
 
 
@@ -1418,7 +1404,6 @@ namespace {
             lego_aiconditiondefs[LEGO_AI_CONDITION_OFF_SCREEN_TIMER].init_fn = Condition_OffScreenTimerInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CATEGORY_IS].init_fn = Condition_CategoryIsInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_NUM_IN_SET_ALIVE].eval_fn = Condition_NumInSetAlive;
-            lego_aiconditiondefs[LEGO_AI_CONDITION_NUM_IN_SET_ALIVE].init_fn = Condition_IsSetAliveInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_BEEN_TO_LEVEL].init_fn = Condition_BeenToLevelInit;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CUT_SCENE_FINISHED].eval_fn = Condition_CutSceneFinished;
             lego_aiconditiondefs[LEGO_AI_CONDITION_CUT_SCENE_FINISHED].init_fn = Condition_CutSceneFinishedInit;
