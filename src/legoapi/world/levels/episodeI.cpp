@@ -104,9 +104,9 @@ struct PACEMAKERDATA_s {
 // position at 0x10, rotation at 0x1c). Overlays AILOCATOR_s.
 struct GUNGAN_GROUP_s {
     char pad_0x00[0x10];
-    NUVEC pos;      // 0x10
-    i32 rot;        // 0x1c
-    void *pathinfo; // 0x20 AIPATHINFO passed to AddDynamicCreature
+    NUVEC pos;             // 0x10
+    i32 rot;               // 0x1c
+    AIPATHINFO_s pathinfo; // 0x20 embedded route cursor
 };
 
 // WORLDINFO::lev_objs uses the engine's 16-byte special-entry layout.
@@ -157,12 +157,13 @@ static GameObject_s *Maul_obj;             // _ZL8Maul_obj
 // _ZL8gungan_a).
 static struct {
     undefined pad_0x00[2];
-    u16 count;         // 0x02 number of origin/target locator pairs
+    i16 count;         // 0x02 number of origin/target locator pairs
     void *origins[32]; // 0x04 AIPathFindLocator("origin_N")
     void *targets[32]; // 0x84 AIPathFindLocator("target_N")
     float spawn_timer; // 0x104
     i16 model_index;   // 0x108
-    i16 models[4];     // 0x10c kaadu, gungan, falumpaset, gungan
+    i16 pad_0x10a;
+    i16 models[4]; // 0x10c kaadu, gungan, falumpaset, gungan
 } gungan_a;
 
 // ===========================================================================
@@ -475,40 +476,39 @@ void GunganA_Update(WORLDINFO_s *world) {
     if (g_lowEndLevelBehaviour != 0)
         maxtime = gungan_a_time_LowEnd;
     if (gungan_a.count != 0 && gungan_a.spawn_timer > maxtime) {
-        NuRand(NULL);
         i32 r = NuRand(NULL) % gungan_a.count;
-        // Original selects via sbb: normal path caps 14 neutrals / 4 baddies,
-        // low-end path 6 / 3.
+        // Normal limits: four neutrals and fourteen enemies; low-end: three/six.
         i32 nh = (g_lowEndLevelBehaviour == 0) ? 14 : 6;
         i32 nb = (g_lowEndLevelBehaviour == 0) ? 4 : 3;
+        GameObject_s *obj;
         if (nb > active_neutral_count) {
             i32 nv = (gungan_a.model_index + 1) % 4;
             gungan_a.model_index = (i16)nv;
             i32 model = gungan_a.models[nv];
             GUNGAN_GROUP_s *grp = (GUNGAN_GROUP_s *)gungan_a.origins[r];
-            GameObject_s *obj = AddDynamicCreature(model, &grp->pos, grp->rot, "Wildlife",
-                                                   (AIPATHINFO_s *)grp->pathinfo, NULL, 0, NULL, NULL, 0, 0);
-            if (obj != NULL) {
-                obj->ai.field_0x364 = gungan_a.targets[r];
-                if (g_lowEndLevelBehaviour == 0)
-                    obj->field_0xf04 &= 0x7f;
-            }
-        } else if (active_baddy_count > nh) {
+            obj = AddDynamicCreature(model, &grp->pos, grp->rot, "Wildlife", &grp->pathinfo, NULL, 0, NULL, NULL, 0, 0);
+        } else if (nh > active_baddy_count) {
             i32 pick = NuRand(NULL);
-            i32 model = (pick & 1) ? id_STAP : id_BATTLEDROID;
-            const char *name = (pick & 1) ? "STAP" : "Battledroid";
-            GUNGAN_GROUP_s *grp = (GUNGAN_GROUP_s *)gungan_a.origins[r];
-            GameObject_s *obj =
-                (GameObject_s *)AddDynamicCreature(model, &grp->pos, grp->rot, const_cast<char *>(name),
-                                                   (AIPATHINFO_s *)grp->pathinfo, NULL, 0, NULL, NULL, 0, 0);
-            if (obj != NULL) {
-                obj->ai.field_0x364 = gungan_a.targets[r];
-                if (g_lowEndLevelBehaviour == 0)
-                    obj->field_0xf04 &= 0x7f;
+            if ((pick & 1) != 0) {
+                GUNGAN_GROUP_s *grp = (GUNGAN_GROUP_s *)gungan_a.origins[r];
+                obj =
+                    AddDynamicCreature(id_STAP, &grp->pos, grp->rot, "STAP", &grp->pathinfo, NULL, 0, NULL, NULL, 0, 0);
+            } else {
+                GUNGAN_GROUP_s *grp = (GUNGAN_GROUP_s *)gungan_a.origins[r];
+                obj = AddDynamicCreature(id_BATTLEDROID, &grp->pos, grp->rot, "Battledroid", &grp->pathinfo, NULL, 0,
+                                         NULL, NULL, 0, 0);
             }
         } else {
-            gungan_a.spawn_timer = 0.25f - NuFloatRand(NULL) * 0.5f;
+            goto reset_spawn_timer;
         }
+        if (obj != NULL) {
+            const bool normal = g_lowEndLevelBehaviour == 0;
+            obj->ai.field_0x364 = gungan_a.targets[r];
+            if (normal)
+                obj->field_0xf04 &= 0x7f;
+        }
+    reset_spawn_timer:
+        gungan_a.spawn_timer = 0.25f - NuFloatRand(NULL) * 0.5f;
     }
 }
 

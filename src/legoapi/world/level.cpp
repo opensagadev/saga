@@ -2155,6 +2155,16 @@ void FixUpLevels(LEVELFIXUP *fixup) {
         if (level != NULL) {
         }
     }
+
+    const i32 count = LEVELCOUNT;
+    LEVELDATA *status_level = STATUS_LDATA;
+    LEVELDATA *entry = LDataList;
+    for (i32 i = 0; i < count; ++i, ++entry) {
+        if ((entry->flags & LEVEL_STATUS) != 0 || entry == status_level) {
+            entry->update_fn = UpdateStatusScreen;
+            entry->draw_status_fn = DrawStatusScreen;
+        }
+    }
 }
 
 void Level_Update(WORLDINFO *world) {

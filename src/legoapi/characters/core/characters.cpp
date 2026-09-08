@@ -616,7 +616,21 @@ queue_character:
     bgPostRequest(LoadSingleCharacter, NULL, NULL, 0);
 }
 
-void CharScenes_LevelDump(WORLDINFO_s *) {
+void CharScenes_LevelDump(WORLDINFO_s *world) {
+    CHARSCENE_s *scenes = world->minikit.character_scenes;
+    if (scenes != NULL && CHARCOUNT > 0) {
+        i32 i = 0;
+        do {
+            CHARSCENE_s *entry = &scenes[i];
+            if (entry->scene != NULL) {
+                NuGScnRemove(entry->scene);
+                scenes = world->minikit.character_scenes;
+                entry = &scenes[i];
+            }
+            ++i;
+            entry->scene = NULL;
+        } while (CHARCOUNT > i);
+    }
 }
 
 void CollectAllCharacters(i32) {

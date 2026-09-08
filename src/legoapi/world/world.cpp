@@ -78,6 +78,7 @@ u32 LEGOOBJ_DEFAULTLASTCOIN = -1;
 
 APICHARACTERSYS *apicharsys;
 void CutScenes_Destroy(CUTSYS *system);
+void CharScenes_LevelDump(WORLDINFO *world);
 
 // --- World-module helpers (kept with the WorldInfo API) ---
 
@@ -101,6 +102,7 @@ void WorldInfo_Dump(WORLDINFO *world) {
     // The full routine also tears down the level's gameplay subsystems and
     // editor pages. These scene removals are the original calls at
     // 0x481bcc..0x481d6b and must happen before Reset reuses the bump buffer.
+    CharScenes_LevelDump(world);
     CutScenes_Destroy(world->cutscene_sys);
     if (world->icons_gscn != nullptr) {
         NuGScnRemove(world->icons_gscn);
@@ -714,9 +716,9 @@ i32 WorldInfo_Reset(WORLDINFO *world, i32 level_idx) {
     }
 
     if (new_level_from_menu != 0) {
-        WORLDINFO *other = world + 1;
-        if (WORLD != world) {
-            other = WORLD;
+        WORLDINFO *other = WorldInfo;
+        if (world == WorldInfo) {
+            other = WorldInfo + 1;
         }
         if (other->loaded != 0 && other->level_idx == level_idx) {
             WorldInfo_Dump(other);
