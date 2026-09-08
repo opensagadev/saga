@@ -1264,6 +1264,28 @@ static i32 Action_PressActionButton(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet
     return 1;
 }
 
+static i32 Action_PressSpecialButton(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet,
+                                     char **params, i32 param_count, i32 first_time, f32) {
+    if (packet == NULL || packet->owner == NULL)
+        return 1;
+    GameObject_s *object = packet->owner->apiobj.objptr;
+    if (object == NULL)
+        return 1;
+    if (first_time) {
+        for (i32 index = 0; index < param_count; ++index) {
+            if (NuStrICmp(params[index], "hold_button") == 0)
+                processor->action_data_1 = 1;
+        }
+    }
+    object->pad_gamepad->buttons_pressed |= GAMEPAD_SPECIAL;
+    i32 result = 1;
+    if (processor->action_data_1 != 0) {
+        object->pad_gamepad->buttons_held |= GAMEPAD_SPECIAL;
+        result = 0;
+    }
+    return result;
+}
+
 static i32 Action_SetAIOverrideControl(AISYS *system, AISCRIPTPROCESS *processor, AIPACKET *packet,
                                        char **params, i32 param_count, i32 first_time, f32) {
     APIOBJECT *object;
@@ -4995,7 +5017,7 @@ extern "C" {
         {"SetLastSafePathPos", NULL, 0, 0, 0},
         {"SetDontMove", Action_SetDontMove, 0, 0, 0},
         {"DontSetStoppedFlag", NULL, 0, 0, 0},
-        {"PressSpecialButton", NULL, 0, 0, 0},
+        {"PressSpecialButton", Action_PressSpecialButton, 0, 0, 0},
         {"PressTagButton", Action_PressTagButton, 0, 0, 0},
         {"PressActionButton", Action_PressActionButton, 0, 0, 0},
         {"UseWeapon", Action_UseWeapon, 0, 0, 0},

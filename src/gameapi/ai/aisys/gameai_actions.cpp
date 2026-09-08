@@ -342,29 +342,6 @@ static __used__ i32 Action_GizmoSetVisibility(AISYS_s *, AISCRIPTPROCESS_s *, AI
 
 
 
-static __used__ i32 Action_PressSpecialButton(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet,
-                                              char **params, i32 param_count, i32 first_time, f32) {
-    if (processor == NULL) {
-        return 1;
-    }
-    if (first_time != 0) {
-        processor->action_data_1 = 0;
-        for (i32 index = 0; index < param_count; ++index) {
-            if (NuStrICmp(params[index], "hold_button") == 0) {
-                processor->action_data_1 = 1;
-            }
-        }
-    }
-
-    GameObject_s *object = ActionOwner(packet);
-    if (object != NULL && object->pad_gamepad != NULL) {
-        object->pad_gamepad->buttons_pressed |= GAMEPAD_SPECIAL;
-        if (processor->action_data_1 != 0) {
-            object->pad_gamepad->buttons_held |= GAMEPAD_SPECIAL;
-        }
-    }
-    return processor->action_data_1 == 0 ? 1 : 0;
-}
 
 
 
@@ -893,7 +870,6 @@ namespace {
             lego_aiactiondefs[LEGO_AI_ACTION_PLAYER_SPEEDER_HACK].eval_fn = Action_PlayerSpeederHack;
             lego_aiactiondefs[LEGO_AI_ACTION_SET_LAST_SAFE_PATH_POS].eval_fn = Action_SetLastSafePathPos;
             lego_aiactiondefs[LEGO_AI_ACTION_DONT_SET_STOPPED_FLAG].eval_fn = Action_DontSetStoppedFlag;
-            lego_aiactiondefs[LEGO_AI_ACTION_PRESS_SPECIAL_BUTTON].eval_fn = Action_PressSpecialButton;
             lego_aiactiondefs[LEGO_AI_ACTION_DONT_AVOID_CHARACTER].eval_fn = Action_DontAvoidCharacter;
             lego_aiactiondefs[LEGO_AI_ACTION_CREATE_SPLINE_CREATURES].eval_fn = Action_CreateSplineCreatures;
             lego_aiactiondefs[LEGO_AI_ACTION_FOLLOW_CHARACTER].eval_fn = Action_FollowCharacter;
