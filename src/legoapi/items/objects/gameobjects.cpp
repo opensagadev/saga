@@ -649,6 +649,24 @@ static void *Condition_PlayerInSockInit(AISYS_s *, char *name, AISCRIPT_s *) {
 
 extern "C" f32 NuAnimEndFrameOld(void *animation);
 
+static f32 Condition_CharacterTypeExists(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *argument) {
+    if (argument != NULL) {
+        for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
+            if (Obj[index].id == (intptr_t)argument) return 1.0f;
+        }
+    }
+    return 0.0f;
+}
+
+static void *Condition_CharacterTypeExistsInit(AISYS_s *system, char *name, AISCRIPT_s *) {
+    if (name != NULL && system != NULL) {
+        for (i32 index = 0; index < CHARCOUNT; ++index) {
+            if (NuStrICmp(CDataList[index].file, name) == 0) return (void *)(intptr_t)index;
+        }
+    }
+    return (void *)(intptr_t)-1;
+}
+
 static f32 Condition_EitherPlayerUsingPanel(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *name, void *) {
     if (player != NULL && player->character_context == 0x0b) {
         GIZPANEL_s *panel = static_cast<GIZPANEL_s *>(player->field_0x788);
@@ -1304,7 +1322,7 @@ extern "C" {
         {"OnSpeederBike", Condition_OnSpeederBike, Condition_OnSpeederBikeInit},
         {"UnderPlayerControl", Condition_UnderPlayerControl, Condition_UnderPlayerControlInit},
         {"CharacterExists", NULL, NULL},
-        {"CharacterTypeExists", NULL, NULL},
+        {"CharacterTypeExists", Condition_CharacterTypeExists, Condition_CharacterTypeExistsInit},
         {"GotLocatorInSet", Condition_GotLocatorInSet, Condition_GotLocatorInSetInit},
         {"GotOpponentLOS", Condition_GotOpponentLOS, NULL},
         {"EmptyTakeOver", Condition_EmptyTakeOver, NULL},

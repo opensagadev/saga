@@ -988,9 +988,6 @@ static void *Condition_CharacterLoadedInit(AISYS_s *, char *argument, AISCRIPT_s
     return reinterpret_cast<void *>(static_cast<isize>(CharIDFromName(argument)));
 }
 
-static __used__ f32 Condition_CharacterTypeExists(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
-}
 
 static __used__ void *Condition_FlowBoxCompleteInit(AISYS_s *, char *, AISCRIPT_s *) {
     return nullptr;
@@ -1063,9 +1060,6 @@ static __used__ f32 Condition_AreaContainsPartyMember(AISYS_s *, AISCRIPTPROCESS
     return 0;
 }
 
-static __used__ void *Condition_CharacterTypeExistsInit(AISYS_s *, char *, AISCRIPT_s *) {
-    return nullptr;
-}
 
 
 
