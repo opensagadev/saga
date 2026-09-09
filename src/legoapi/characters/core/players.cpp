@@ -1506,7 +1506,47 @@ void SetToLastSafePos(GameObject_s *object) {
     object->saved_position = object->apiobj.position = object->apiobj.start_position;
 }
 
-i32 AvailableToPlayer(u32, i32, i32, i32) {
+i32 AvailableToPlayer(u32 character_flags, i32 weapon_action, i32 context, i32 require_all) {
+    for (i32 index = 0; index < 8; ++index) {
+        GameObject_s *object = Player[index];
+        if (object == NULL || object->apiobj.character_data == NULL)
+            continue;
+        if (require_all != 0) {
+            if ((character_flags == 0 ||
+                 (object->apiobj.character_data->model_flags & character_flags) == character_flags) &&
+                (weapon_action == -1 ||
+                 static_cast<i8>(object->apiobj.character_data->game_character->uses_weapon_action) == weapon_action) &&
+                (context == 0 || object->field_0x108e == context))
+                return 1;
+        } else {
+            if ((character_flags != 0 &&
+                 (object->apiobj.character_data->model_flags & character_flags) == character_flags) ||
+                (weapon_action != -1 &&
+                 static_cast<i8>(object->apiobj.character_data->game_character->uses_weapon_action) == weapon_action) ||
+                context == 0 || object->field_0x108e == context)
+                return 1;
+        }
+    }
+    if (FreePlay != 0) {
+        for (i32 index = 0; index < apicharsys->character_count; ++index) {
+            i32 model = apicharsys->playermodelids[index];
+            if (model == -1 || FreePlay == 0 || (apicharsys->models[model].flags & 1) == 0)
+                continue;
+            if (!((Game_CharacterSave != NULL && (Game_CharacterSave[index] & 1) != 0) ||
+                  (static_cast<i32>(GCDataList[index].flags_090) < 0 && Cheats_CheckFlags(0x100) != 0)))
+                continue;
+            if (character_flags != 0) {
+                if ((CDataList[index].model_flags & character_flags) == character_flags) {
+                    if (require_all == 0)
+                        return 1;
+                } else if (require_all != 0) {
+                    continue;
+                }
+            }
+            if (weapon_action == -1 || static_cast<i8>(GCDataList[index].uses_weapon_action) == weapon_action)
+                return 1;
+        }
+    }
     return 0;
 }
 
