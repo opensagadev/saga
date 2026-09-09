@@ -781,12 +781,13 @@ u32 StarWars_ParseAIPathCnxFlag(char *name) {
 
 void StarWars_AutoSetAICapabilities(GameObject_s *object) {
     CHARACTERDATA *character = object->apiobj.character_data;
-    object->ai.capabilities = character->ai_path_capabilities | STARWARS_AI_CAPABILITY_DEFAULT;
+    const u32 path_capabilities = character->ai_path_capabilities;
+    object->ai.capabilities = path_capabilities | STARWARS_AI_CAPABILITY_DEFAULT;
     if ((object->apiobj.field_0x1f4 & 1) != 0) {
         object->ai.capabilities =
-            character->ai_path_capabilities | STARWARS_AI_CAPABILITY_DEFAULT | STARWARS_AI_CAPABILITY_OBJECT_STATE_SET;
+            path_capabilities | STARWARS_AI_CAPABILITY_DEFAULT | STARWARS_AI_CAPABILITY_OBJECT_STATE_SET;
     } else if ((object->apiobj.field_0x1f4 & 4) == 0) {
-        object->ai.capabilities = character->ai_path_capabilities | STARWARS_AI_CAPABILITY_DEFAULT |
+        object->ai.capabilities = path_capabilities | STARWARS_AI_CAPABILITY_DEFAULT |
                                   STARWARS_AI_CAPABILITY_OBJECT_STATE_CLEAR;
     }
 
@@ -794,10 +795,10 @@ void StarWars_AutoSetAICapabilities(GameObject_s *object) {
         object->ai.capabilities |= STARWARS_AI_CAPABILITY_MODEL_ATTACHMENT;
     }
 
-    const u32 model_flags = character->model_flags;
-    if ((model_flags & 0x00200008) == 0x8) {
+    if ((character->model_flags & 0x00200008) == 0x8) {
         object->ai.capabilities |= STARWARS_AI_CAPABILITY_MODEL_FLAG_8_EXCLUSIVE;
     }
+    const u32 model_flags = character->model_flags;
     if ((model_flags & 0x8) != 0) {
         object->ai.capabilities |= STARWARS_AI_CAPABILITY_MODEL_FLAG_8;
     }
