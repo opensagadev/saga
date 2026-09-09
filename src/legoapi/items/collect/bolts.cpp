@@ -232,7 +232,57 @@ void Bolt_Shoot(GameObject_s *object, i32 type_id, i32 fire_flags) {
     }
 }
 
-void Bolts_Draw(WORLDINFO_s *) {
+i32 MatrixReflectionVU0_AXISY(NUMTX *, f32, f32, NUMTX *);
+void Bolt_End(BOLT_s *, i32);
+extern i32 Paused;
+
+void Bolts_Draw(WORLDINFO_s *world) {
+    NUVEC scale = {0.0f, 0.0f, 0.0f};
+    for (BOLT_s *bolt = Bolt; bolt != Bolt + 32; ++bolt) {
+        if (!bolt->active)
+            continue;
+        BOLTTYPE_s *type = bolt->type;
+        f32 size = type->scale_callback != NULL ? type->scale_callback(bolt) : bolt->scale;
+        NUMTX matrix = bolt->effect_orientation;
+        if (bolt->time < type->field_24) {
+            scale.y = (type->field_60 & 0x2000000) != 0 ? size : (bolt->time / type->field_24) * size;
+            scale.x = scale.z = (bolt->flags & 0x200) != 0 ? scale.y : size;
+            NuMtxPreScale(&matrix, &scale);
+        } else if (bolt->scale != 1.0f) {
+            scale.x = scale.y = scale.z = size;
+            NuMtxPreScale(&matrix, &scale);
+        }
+        NuMtxTranslate(&matrix, &bolt->position);
+        i32 first = 0, second = 0;
+        if (NuSpecialExistsFn(type->pad_68))
+            first = NuSpecialDrawAt(type->pad_68, &matrix);
+        if (NuSpecialExistsFn(type->pad_68 + 12))
+            second = NuSpecialDrawAt(type->pad_68 + 12, &matrix);
+        if (bolt->field_0xe8 != 2000000.0f) {
+            NUMTX reflection;
+            if (MatrixReflectionVU0_AXISY(&matrix, bolt->field_0xe8, world->current_level->unknown_0cc,
+                                         &reflection)) {
+                if (NuSpecialExistsFn(type->pad_68 + 24))
+                    NuSpecialDrawAt(type->pad_68 + 24, &reflection);
+                if (NuSpecialExistsFn(type->pad_68 + 36))
+                    NuSpecialDrawAt(type->pad_68 + 36, &reflection);
+            }
+        }
+        if (bolt->field_0xe4 != 2000000.0f) {
+            scale.x = scale.z = scale.y;
+            NuMtxSetScale(&matrix, &scale);
+            NuMtxRotateZ(&matrix, bolt->surface_z_rotation);
+            NuMtxRotateX(&matrix, bolt->surface_x_rotation);
+            matrix.m30 = bolt->position.x;
+            matrix.m31 = bolt->field_0xe4 + 0.005f;
+            matrix.m32 = bolt->position.z;
+            NuSpecialDrawAt(type->pad_68 + 48, &matrix);
+        }
+        if (first != 0 || second != 0)
+            bolt->field_0x102 = 1;
+        else if (!Paused && bolt->field_0x102 != 0 && (bolt->flags & 0x20) == 0)
+            Bolt_End(bolt, 0);
+    }
 }
 
 void Bolts_Reset() {
