@@ -123,7 +123,7 @@ void GizPanel_Reset(GIZPANEL_s *panel) {
     floor_position->y = 0.0f;
     floor_position->x = 0.0f;
     floor_position->z = 0.4f;
-    NuVecRotateY(floor_position, floor_position, static_cast<u16>(panel->y_rotation + 0x8000));
+    NuVecRotateY(floor_position, floor_position, panel->y_rotation + 0x8000);
     NuVecAdd(floor_position, floor_position, &panel->position);
 
     NUVEC target_position;
@@ -132,7 +132,7 @@ void GizPanel_Reset(GIZPANEL_s *panel) {
     floor_position->y = GameShadow(NULL, floor_position, 0.2f, -1);
     const f32 target_floor = GameShadow(NULL, &target_position, 0.2f, -1);
     panel->target_offset.y = target_floor;
-    if (target_floor != -1.0f) {
+    if (target_floor != 2000000.0f) {
         panel->target_offset.y = target_floor + GIZPANEL_PLAYERPOSLIFT;
         FindAnglesZX(&ShadNorm, &panel->target_pitch, &panel->target_roll);
     }
