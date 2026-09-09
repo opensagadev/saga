@@ -201,7 +201,7 @@ void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 void GameAudio_PlaySfxById(i32, NUVEC *, i32, i32);
 static void CommunicateCode(GameObject_s *, i32, i32);
 static void PunchCode(GameObject_s *, i32, i32, i32, i32, f32);
-static i32 ShootCode(GameObject_s *, i32, i32, i32, i32, i32);
+static i32 __attribute__((regparm(2))) ShootCode(GameObject_s *, i32, i32, i32, i32, i32);
 static void ForcePushed_MoveCode(GameObject_s *);
 static void DeactivatedCode(GameObject_s *);
 static void ZapCode(GameObject_s *, i32, i32);
@@ -4131,7 +4131,7 @@ void Move_WEIRDO(GameObject_s *object) {
     u32 special_pressed = pad->buttons_pressed & GAMEPAD_SPECIAL;
     u32 tag_pressed = pad->buttons_pressed & GAMEPAD_TAG;
     i32 hit_effect = object->blade_index == -1 ? -1 : BladeTab[object->blade_index].hit_effect;
-    i16 glow_model;
+    i32 glow_model;
     if (SuperWeirdo(object) && (object->apiobj.character_data->model_flags & 8) == 0)
         glow_model = 0xdf;
     else
@@ -4139,7 +4139,7 @@ void Move_WEIRDO(GameObject_s *object) {
     DropInOutCode(object);
     ApplyGravity(object, NULL, 0.0f, 8.0f, NULL);
     u16 weapon = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->weapon_model & 0xfffd;
-    bool has_sabre = weapon == 0x65 || weapon == 0x69;
+    i32 has_sabre = weapon == 0x65 || weapon == 0x69;
     if (object->suit != NULL)
         Signal_MoveCode(WORLD, object);
     TakeHitCode(object);
@@ -6618,7 +6618,7 @@ void SetWeaponIn(GameObject_s *);
 GIZMOBLOWUP_s *GizmoBlowUp_Target(GameObject_s *, NUVEC *, NUVEC *, f32, f32, i32, i32, i32);
 i32 GizmoSys_SetBestBoltTarget(GIZMOSYS *, void *, GameObject_s *, NUVEC *, NUVEC *, f32, f32, i32, i32, i32);
 
-static __used__ i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32 weapon_mode,
+static __used__ i32 __attribute__((regparm(2))) ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32 weapon_mode,
                               i32 allow_airborne, i32 fire_mode) {
     GameObject_s *target = NULL;
     GIZMOBLOWUP_s *blowup = NULL;
