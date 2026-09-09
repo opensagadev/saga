@@ -6592,7 +6592,7 @@ static void CommunicateCode(GameObject_s *object, i32 pressed, i32) {
 static __used__ void PunchCode(GameObject_s *, i32, i32, i32, i32, f32) {
 }
 
-static __used__ void ShootThisFrame(GameObject_s *object, i32 bolt_id, i32 flags) {
+static __used__ void __attribute__((regparm(2))) ShootThisFrame(GameObject_s *object, i32 bolt_id, i32 flags) {
     if (object == Player[0] && nextShootTarget.Get() != NULL)
         nextShootTarget = NuMechPtr<MechObjectInterface, 4>();
     if ((object->apiobj.field_0x1f4 & 0x40000) != 0 && object->apiobj.field_0x27c != -1)
