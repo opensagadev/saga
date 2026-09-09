@@ -294,8 +294,9 @@ void ResetAICreatures(AISYS_s *system) {
     }
     system->has_done_reset = 1;
 
-    for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index) {
-        GameObject_s &object = Obj[object_index];
+    GameObject_s *objects = Obj;
+    for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index, ++objects) {
+        GameObject_s &object = *objects;
         if ((object.apiobj.field_0x1f8 & APIOBJECT_FLAG_IN_USE) == 0 ||
             (object.apiobj.field_0x1f4 & APIOBJECT_MOTION_FLAG_AI_CONTROLLED) == 0) {
             continue;
@@ -318,8 +319,8 @@ void ResetAICreatures(AISYS_s *system) {
 
         AIPACKET *packet = reinterpret_cast<AIPACKET *>(&object.ai);
         AISCRIPTPROCESS *processor = &object.ai.script_process;
-        AIScriptProcessorInit(WORLD->ai_sys, packet, processor, &creature, creature.script_name, "", 1, NULL, NULL);
-        if (processor->state != NULL && processor->state->name != NULL && NuStrICmp(processor->state->name, "") == 0) {
+        AIScriptProcessorInit(WORLD->ai_sys, packet, processor, &creature, creature.script_name, "InActive", 1, NULL, NULL);
+        if (processor->state != NULL && processor->state->name != NULL && NuStrICmp(processor->state->name, "InActive") == 0) {
             creature.activate_type = 2;
         }
 
@@ -332,7 +333,7 @@ void ResetAICreatures(AISYS_s *system) {
         }
         if (creature.count > 1 && creature.start_stagger > 0.0f && object.ai.group_member_index != 0) {
             object.ai.reset_mode = AI_CREATURE_RESET_STAGGERED;
-            object.ai_spawn_delay = static_cast<f32>(object.ai.group_member_index) * creature.start_stagger;
+            object.ai_spawn_delay = static_cast<f32>(static_cast<u32>(object.ai.group_member_index)) * creature.start_stagger;
             continue;
         }
 
