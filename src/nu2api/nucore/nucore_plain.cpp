@@ -2257,7 +2257,6 @@ extern "C" {
     void NuEffectTex360Create3D_aliased(void) {
     }
     nueffecttex_s *NuEffectTexCreate2D(i32, i32, i32, i32, i32) {
-        return NULL;
     }
     void NuEffectTexCreateCube(void) {
     }
@@ -2308,7 +2307,6 @@ extern "C" {
     void NuFramebufferCopyTex2D(i32, nueffecttex_s *, i32, i32, i32, i32, i32) {
     }
     nuframebuffer_s *NuFramebufferCreate() {
-        return NULL;
     }
     void NuFramebufferDestroy(nuframebuffer_s *) {
     }
