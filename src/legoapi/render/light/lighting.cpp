@@ -1,4 +1,11 @@
 #include "decomp.h"
+#include "globals.h"
+#include "gamelib/util/gamelib_util_types.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/core/input/timer.h"
+#include "legoapi/core/input/qrand.h"
+#include "nu2api/numath/nutrig.h"
+#include "nu2api/numath/nufloat.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/legoapi_types.h"
@@ -64,6 +71,11 @@ extern "C" {
 }
 
 static constexpr u32 kNeutralSpotLightFade = 0x80808080u;
+
+i32 Lighting_HighlightFlash;
+i32 (*Lighting_BlueFlickerFn)(GameObject_s *);
+i32 Lighting_FlashRedOnLastHeart;
+extern f32 GhostLightMul;
 
 void SetLevelLights(void *set, float) {
     rtlApplySetScale(set, &lev_rtldata, reinterpret_cast<NUVEC *>(&global_camera.mtx.m30), NULL, 0x10, 1.0f);
@@ -144,9 +156,80 @@ void SetCreatureLights(APIOBJECT_s *object) {
         return;
     }
 
-    OBJECTLIGHTINGSTATE_s *lights = &owner->lighting_state;
-    SetLights(&lights->intensity[0], &lights->direction[0], &lights->intensity[1], &lights->direction[1],
-              &lights->intensity[2], &lights->direction[2], &lights->ambient);
+    OBJECTLIGHTINGSTATE_s lights = owner->lighting_state;
+    f32 red = 1.0f, green = 1.0f, blue = 1.0f;
+    GAMECHARACTERDATA *character = static_cast<GAMECHARACTERDATA *>(owner->apiobj.character_data->field11_0x24);
+    if (owner->field_0x1024 > 0.0f) {
+        const f32 flash = owner->field_0x1024 / 0.4f;
+        red = 1.0f + flash;
+        green = blue = 1.0f - flash;
+    } else if (Lighting_HighlightFlash != 0 && static_cast<i8>(owner->apiobj.object_flags) < 0 &&
+               owner->timer_d5c > 0.0f && (owner->timer_d5c >= 2.0f || NuFmod(owner->timer_d5c, 0.4f) >= 0.2f)) {
+        if (owner->apiobj.field_0x27c == 1) {
+            red = 1.7f; green = 2.0f; blue = 1.4f;
+        } else {
+            red = 1.4f; green = 1.85f; blue = 2.0f;
+        }
+    } else if ((character->flags_090 & 0x8000) != 0 && static_cast<i8>(owner->apiobj.object_flags) >= 0) {
+        red = 1.4f; green = 1.85f; blue = 2.0f;
+    } else if (Lighting_BlueFlickerFn != NULL && Lighting_BlueFlickerFn(owner) != 0) {
+        if (qrand() > 0x7fff) {
+            red = 0.25f; blue = 0.5f;
+        } else {
+            red = 1.0f; blue = 2.0f;
+        }
+        character = static_cast<GAMECHARACTERDATA *>(owner->apiobj.character_data->field11_0x24);
+        green = blue;
+        if ((character->flags_094[2] & 1) != 0)
+            red = blue;
+        else
+            red *= 0.0f;
+    } else if (owner->interaction_arrow_blend > 0.0f) {
+        const f32 phase = NuFmod(GameTimer.time_elapsed_mod_seconds, 0.5f) * 2.0f;
+        const f32 scale = owner->interaction_arrow_blend * 0.5f * NU_SIN_LUT(static_cast<i32>(phase * 65536.0f)) + 1.0f;
+        red = green = blue = scale;
+    } else if (Lighting_FlashRedOnLastHeart != 0 && static_cast<i8>(owner->apiobj.object_flags) < 0 &&
+               owner->current_hp == 1 && owner->hitpoints > 1 && owner->field_0x1024 < -0.5f) {
+        const f32 phase = ((owner->field_0x1024 + 1.0f) * 2.0f) * 65536.0f + 16384.0f;
+        const f32 flash = (1.0f - NU_SIN_LUT(static_cast<i32>(phase))) * 0.5f * 0.333f;
+        red = 1.0f + flash;
+        green = blue = 1.0f - flash;
+    } else if (owner->spawn_protection_timer > 0.0f && owner->apiobj.field_0x27c != -1) {
+        const f32 phase = NuFmod(2.5f - owner->spawn_protection_timer, 0.5f) * 2.0f;
+        const f32 scale = NuTrigTable[static_cast<u16>(static_cast<i32>(phase * 65536.0f)) >> 1] + 1.0f;
+        red = green = blue = scale;
+    }
+    if (owner->field_0xd6c > 0.0f) {
+        const f32 scale = owner->field_0xd6c * -0.334f + 1.0f;
+        red *= scale; green *= scale; blue *= scale;
+    }
+    character = static_cast<GAMECHARACTERDATA *>(owner->apiobj.character_data->field11_0x24);
+    if ((character->flags_090 & 0x8000) != 0) {
+        red *= GhostLightMul; green *= GhostLightMul; blue *= GhostLightMul;
+        if (red > 2.0f) red = 2.0f;
+        if (green > 2.0f) green = 2.0f;
+        if (blue > 2.0f) blue = 2.0f;
+    }
+    if (red != 1.0f) {
+        lights.ambient.x *= red;
+        for (i32 i = 0; i < 3; ++i) lights.intensity[i].r *= red;
+    }
+    if (green != 1.0f) {
+        lights.ambient.y *= green;
+        for (i32 i = 0; i < 3; ++i) lights.intensity[i].g *= green;
+    }
+    if (blue != 1.0f) {
+        lights.ambient.z *= blue;
+        for (i32 i = 0; i < 3; ++i) lights.intensity[i].b *= blue;
+    }
+    SetLights(&lights.intensity[0], &lights.direction[0], &lights.intensity[1], &lights.direction[1],
+              &lights.intensity[2], &lights.direction[2], &lights.ambient);
+    owner->targeted_flash -= FRAMETIME;
+    if (TouchHacks::ShouldFlash(owner->targeted_flash)) {
+        NUCOLOUR3 *colour = TouchHacks::GetFlashColour();
+        NuRndrLightingStateCurrent.ambient = *colour;
+        NuRndrSetAmbientLightPS(colour);
+    }
 }
 
 void SetLights_RTLDATA(rtldata_s *data, float scale) {
