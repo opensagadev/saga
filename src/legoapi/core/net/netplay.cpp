@@ -106,6 +106,8 @@ void InitChallenge(i32);
 void InitMission(MISSIONSYS_s *, i32);
 
 void FinishStatusPacket(i32 choice) {
+    LOG_INFO("level results choice=%d flags=%x challenge=%d mission=%d", choice, StatusPacket.mode_flags,
+             StatusPacket.challenge_state, StatusPacket.mission_state);
     RememberPlayerIDs(1, static_cast<i16>(StatusPacket.player0_model), static_cast<i16>(StatusPacket.player1_model));
     if (StatusPacket.finish_callback(WORLD, &StatusPacket, choice) != 0) {
         return;

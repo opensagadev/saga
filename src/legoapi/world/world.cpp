@@ -387,6 +387,7 @@ void WorldInfo_Init(WORLDINFO *world) {
 }
 
 void WorldInfo_Load(WORLDINFO *world) {
+    LOG_INFO("world load world=%p", (void *)world);
     char buf[268];
     char titles[64];
     LEVELDATA *level;

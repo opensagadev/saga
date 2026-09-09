@@ -1477,8 +1477,19 @@ extern "C" {
                         first_time = 1;
                     }
 
+                    LOG_INFO_IF(
+                        packet == NULL && first_time,
+                        "level-script action processor=%p script=%s state=%s action=%s params=%d [%s, %s, %s, %s]",
+                        (void *)processor, processor->script->name, processor->state->name, action->def->name,
+                        action->param_count, action->param_count > 0 ? action->params[0] : "",
+                        action->param_count > 1 ? action->params[1] : "",
+                        action->param_count > 2 ? action->params[2] : "",
+                        action->param_count > 3 ? action->params[3] : "");
                     action_completed = action->def->eval_fn(system, processor, packet, action->params,
                                                             action->param_count, first_time, elapsed) != 0;
+                    LOG_INFO_IF(packet == NULL && action_completed,
+                                "level-script action complete processor=%p action=%s", (void *)processor,
+                                action->def->name);
                     if (!action_completed) {
                         break;
                     }

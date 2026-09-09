@@ -337,6 +337,7 @@ void GizmoActivate(GIZMOSYS *gizmo_sys, GIZMO *gizmo, i32 unknown1, i32 unknown2
     }
 
     type->fns.activate_fn(gizmo, unknown1);
+    LOG_INFO("gizmo activate type=%s gizmo=%p active=%d", type->name, (void *)gizmo, unknown1);
 }
 
 char *GizmoGetOutputName(GIZMOSYS *gizmo_sys, GIZMO *gizmo, i32 output_index) {
@@ -1401,6 +1402,8 @@ void GizmoActivateReverse(GIZMOSYS_s *system, GIZMO_s *gizmo, i32 reverse, i32 v
         return;
     }
     gizmotypes->types[gizmo->type_id].fns.activate_rev_fn(gizmo, reverse, command);
+    LOG_INFO("gizmo reverse activation type=%s gizmo=%p reverse=%d visibility=%d",
+             gizmotypes->types[gizmo->type_id].name, (void *)gizmo, reverse, visibility);
     if (visibility != 0) {
         GizmoSetVisibility(system, gizmo, reverse == 0, 1);
     }

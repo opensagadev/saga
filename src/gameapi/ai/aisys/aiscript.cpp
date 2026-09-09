@@ -1,4 +1,6 @@
 #include "gameapi/ai/aisys/aisys.h"
+#include "decomp.h"
+#include "legoapi/world/world.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -1062,6 +1064,7 @@ static i32 AIScriptBuildDerivedScript(AISCRIPT *script, VARIPTR *buf, VARIPTR *b
 }
 
 void AIScriptLoadAllPakFile(void *pak, char *path, VARIPTR *buf, VARIPTR *buf_end, AISYS *sys) {
+    LOG_INFO("script load path=%s system=%p", path != NULL ? path : "<none>", (void *)sys);
     NULISTHDR *scripts;
     i32 item_idx;
     void *memfile;
@@ -1261,6 +1264,8 @@ void AIScriptProcessorInit(AISYS *sys, AIPACKET *packet, AISCRIPTPROCESS *proces
 
     if (script != NULL) {
         processor->script = script;
+        LOG_INFO_IF(packet == NULL, "level-script init processor=%p script=%s start=%s", (void *)processor,
+                    script->name, start_state_name != NULL ? start_state_name : "Base");
         processor->next_state = NULL;
 
         if (processor->base_script == NULL) {
@@ -1379,6 +1384,11 @@ void AIScriptSetState(AISCRIPTPROCESS *processor, AISTATE *state) {
     NULISTLNK *action_node;
 
     if (state != NULL && processor != NULL) {
+        LOG_INFO_IF(WORLD != NULL && (uintptr_t)processor >= (uintptr_t)&WORLD->processors[0] &&
+                        (uintptr_t)processor < (uintptr_t)&WORLD->processors[32] && processor->state != state,
+                    "level-script state processor=%p script=%s from=%s to=%s", (void *)processor,
+                    processor->script != NULL ? processor->script->name : "<none>",
+                    processor->state != NULL ? processor->state->name : "<none>", state->name);
         if (!processor->unknown_flag_4) {
             processor->unknown_b2 = 0;
         }

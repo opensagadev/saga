@@ -197,7 +197,6 @@ void SpaceResetAudioPoint() {
 void CheckMusicSwapInstant() {
 }
 void UpdateBackgroundMusic() {
-    LOG_DEBUG("UpdateBackgroundMusic");
 }
 extern "C" {
     i32 fake_seeking;

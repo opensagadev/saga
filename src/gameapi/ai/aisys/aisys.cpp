@@ -8494,6 +8494,8 @@ extern "C" f32 GetAIMessage(AIMESSAGESYS_s *system, char *name, AIMESSAGE_s *mes
 extern "C" void SetAIMessage(AIMESSAGESYS_s *system, char *name, f32 value, AIMESSAGE_s *message) {
     message = CheckAIMessage(system, name, message);
     if (message != NULL) {
+        LOG_INFO_IF(message->value != value, "script message name=%.32s value=%g -> %g", message->name, message->value,
+                    value);
         message->value = value;
     }
 }

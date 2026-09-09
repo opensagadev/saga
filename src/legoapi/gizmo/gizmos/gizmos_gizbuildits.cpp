@@ -57,6 +57,8 @@ i32 GizBuildIt_AtEnd(GIZBUILDIT_s *buildit) {
 }
 
 void GizBuildIt_Finish(GIZBUILDIT_s *buildit) {
+    LOG_INFO_IF(buildit->build_state != GIZBUILDIT_BUILD_COMPLETE, "build completed name=%s buildit=%p", buildit->name,
+                (void *)buildit);
     buildit->build_state = GIZBUILDIT_BUILD_COMPLETE;
     if ((buildit->state_flags & GIZBUILDIT_STATE_TURN_OFF_WHEN_COMPLETE) != 0) {
         GizBuildIt_TurnOff(buildit);

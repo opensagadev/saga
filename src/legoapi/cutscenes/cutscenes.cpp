@@ -727,6 +727,7 @@ i32 CutScene_IsSkippable(CUTINFO *cut) {
 }
 
 i32 CutScene_StartFn_LSW(CUTINFO *cut) {
+    LOG_INFO("cutscene start requested cut=%p world=%p", (void *)cut, (void *)WORLD);
     if (PODRACE_ADATA != NULL && PODRACE_ADATA == WORLD->area) {
         if (cut != game_cutscenes.podrace_pod_explode && cut != game_cutscenes.podrace_out_of_time) {
             return 0;
@@ -1321,6 +1322,7 @@ void CutScene_DrawSubtitles() {
 }
 
 void CutScene_StoppedFn_LSW(CUTINFO *cut) {
+    LOG_INFO("cutscene stopped cut=%p world=%p", (void *)cut, (void *)WORLD);
     if (cut != game_cutscenes.cutscene) {
         return;
     }

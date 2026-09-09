@@ -30,6 +30,9 @@ void LevelScriptReStoreProgress(WORLDINFO_s *world, LEVELSCRIPTPROCESS_s *proces
             if (NuStrICmp(world->level_progress->scripts[index].name, process->name) == 0) {
                 for (i32 parameter = 0; parameter < 4; ++parameter)
                     process->processor.params[parameter] = world->level_progress->scripts[index].params[parameter];
+                LOG_INFO("level-script progress restored name=%s params=[%g, %g, %g, %g]", process->name,
+                         process->processor.params[0], process->processor.params[1], process->processor.params[2],
+                         process->processor.params[3]);
                 break;
             }
         }
