@@ -3,6 +3,7 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/gizmos/object/gizpanel.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/menus/core/gamehint.h"
 #include "legoapi/world/world_shared.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/numath/numtx.h"
@@ -11,6 +12,11 @@
 
 extern NUVEC nusound_special_positions[5];
 extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
+extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
+void FastWeaponIn(GameObject_s *, i32);
+void MakeBaddiesForgetAboutParty(i32);
+void SetProtocolDroidInterfaceAction(GameObject_s *);
+void GizPanel_PlaySfx(char *, nuvec_s *, i32);
 
 extern "C" f32 GIZPANEL_PLAYERPOSLIFT;
 extern "C" {
@@ -52,7 +58,56 @@ static __used__ void GizPanel_CreateTerrain(GIZPANEL_s *panel) {
     PlatInstRotate(panel->platform_id, 1);
 }
 
-void GizPanel_Use(GameObject_s &, GIZPANEL_s &) {
+void GizPanel_Use(GameObject_s &object, GIZPANEL_s &panel) {
+    object.field_0x788 = &panel;
+    object.field_0x768 = 0.0f;
+    object.delayed_turn_timer = 0.0f;
+    object.apiobj.movement_facing_angle = panel.y_rotation;
+    object.field_0xe21 &= ~0x10;
+    object.character_context = 0x0b;
+    object.field_0x7a3 = 0;
+    FastWeaponIn(&object, 0);
+    object.movement_runtime_flags |= 2;
+    GIZPANEL_s *active_panel = static_cast<GIZPANEL_s *>(object.field_0x788);
+    if (active_panel->model_variant == 2) {
+        object.context_animation = object.apiobj.character_model->model_data_b[0x46] != NULL ? 0x46 : 0x45;
+        if (static_cast<i8>(object.apiobj.object_flags) < 0) {
+            Hint_SetComplete(0x261);
+            Hint_SetComplete(0x26a);
+        }
+    } else if (active_panel->model_variant == 3) {
+        object.context_animation = object.apiobj.character_model->model_data_b[0x45] != NULL ? 0x45 :
+            (object.apiobj.character_model->model_data_b[0x46] != NULL ? 0x46 : 0x45);
+        MakeBaddiesForgetAboutParty(1);
+        if (static_cast<i8>(object.apiobj.object_flags) < 0) {
+            Hint_SetComplete(0x260);
+            Hint_SetComplete(0x269);
+        }
+    } else {
+        object.context_animation = 0x18;
+        if (active_panel->model_variant == 1) {
+            if (!InStory() || (static_cast<GIZPANEL_s *>(object.field_0x788)->draw_flags & 4) == 0)
+                GizPanel_PlaySfx("TC14_VLA", &object.apiobj.collision_position, 1 << object.apiobj.field_0x27c);
+            if ((object.apiobj.character_data->model_flags & 0x20) != 0)
+                SetProtocolDroidInterfaceAction(&object);
+        } else {
+            if (!InStory() || (static_cast<GIZPANEL_s *>(object.field_0x788)->draw_flags & 4) == 0)
+                GizPanel_PlaySfx("R2D2_VLA", &object.apiobj.collision_position, 1 << object.apiobj.field_0x27c);
+        }
+        if (static_cast<i8>(object.apiobj.object_flags) < 0) {
+            Hint_SetComplete(0x25f);
+            if (static_cast<GIZPANEL_s *>(object.field_0x788)->model_variant == 0)
+                Hint_SetComplete(0x625);
+            else
+                Hint_SetComplete(0x624);
+        }
+        LSW_HintConditions |= 4;
+    }
+    f32 duration = AnimDuration(object.id, object.context_animation, 0.0f, 0.0f, 1);
+    object.field_0xdb0 = 0.0f;
+    if (duration <= 0.0f)
+        duration = 2.0f;
+    object.context_animation_timer = duration;
 }
 
 void GizPanel_Reset(GIZPANEL_s *panel) {
