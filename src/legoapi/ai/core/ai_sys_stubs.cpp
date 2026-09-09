@@ -2699,8 +2699,8 @@ extern "C" {
         system->player_2 = player_2;
 
         AIANTINODE *dynamic = dynamic_antinodes;
-        const i32 antinode_count = system->antinode_count;
-        for (i32 index = 0; index < antinode_count + 64; ++index) {
+        for (i32 index = 0; index < system->antinode_count + 64; ++index) {
+            const i32 antinode_count = system->antinode_count;
             AIANTINODE *antinode =
                 index < antinode_count ? &system->antinodes[index] : &dynamic[index - antinode_count];
             if (antinode->has_special == 0) {
