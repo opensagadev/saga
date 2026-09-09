@@ -4168,7 +4168,7 @@ i32 NuFramebuffer360GetTileCount(nuframebuffer_s *) {
 }
 void NuShaderObject360LoadShader(nushaderobject_s *) {
 }
-void NuShaderObject360LoadPackFile(char *, variptr_u *, char *) {
+void NuShaderObject360LoadPackFile(char *, variptr_u *, variptr_u) {
 }
 void NuShaderObject360UnloadShader(nushaderobject_s *) {
 }
