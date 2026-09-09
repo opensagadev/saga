@@ -2645,13 +2645,15 @@ extern "C" {
                 radius = end->radius;
             }
 
-            NUVEC perpendicular = {direction.z * radius, 0.0f, -direction.x * radius};
+            const f32 direction_x = direction.x;
+            direction.x = direction.z * radius;
+            direction.z = -direction_x * radius;
             locator->position = start->position;
 
             NUVEC offset;
             NuVecScale(&offset, &delta, position_on_connection);
             NuVecAdd(&locator->position, &locator->position, &offset);
-            NuVecScale(&offset, &perpendicular, locator->path_info.width);
+            NuVecScale(&offset, &direction, locator->path_info.width);
             NuVecAdd(&locator->position, &locator->position, &offset);
 
             const i32 path_angle = static_cast<i32>(NuAtan2(delta.x, delta.z) * 10430.378f);
