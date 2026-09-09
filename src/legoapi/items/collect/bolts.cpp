@@ -959,7 +959,8 @@ void Bolt_End(BOLT_s *bolt, i32 run_callback) {
 void Bolt_Find(i32, nuvec_s *, GameObject_s *) {
 }
 
-void Bolt_Free(BOLT_s *) {
+void Bolt_Free(BOLT_s *bolt) {
+    bolt->active = 0;
 }
 
 static bool Bolt_RayCast(BOLT_s *, NUVEC *, NUVEC *, f32);
