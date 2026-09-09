@@ -49,9 +49,6 @@ bool MechInputTouchGestureTracker::OnSwipe(GameObject_s &, TouchHolder &, i32) {
     return false;
 }
 
-MechTouchUIElement::~MechTouchUIElement() {
-}
-
 void MechTouchUIElement::Process(float) {
 }
 
@@ -329,6 +326,8 @@ void MechTouchUITexButton::UpdateTexture(i16 texture) {
 }
 
 MechTouchUITexButton::~MechTouchUITexButton() {
+    NuMtlDestroy(material);
+    material = NULL;
 }
 
 MechTouchUIPauseButton::MechTouchUIPauseButton() {

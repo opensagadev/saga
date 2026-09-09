@@ -104,21 +104,21 @@ struct MechInputTouchGestureTracker {
 typedef void (*MechTouchUICallback)(MechTouchUIElement &, TouchHolder &);
 float GetAspectRatio();
 
-struct MechTouchUIElement {
+struct MechTouchUIElement : NuMechPtr<MechTouchUIElement, 4>::ManagedBase {
     MechTouchUIElement()
-        : managed_links(NULL), position(), radius_x(0.0f), radius_y(0.0f), on_down(NULL), on_click(NULL), on_hold(NULL),
+        : position(), radius_x(0.0f), radius_y(0.0f), on_down(NULL), on_click(NULL), on_hold(NULL),
           on_release(NULL), on_leave(NULL), hovered(0), disabled(0), visible(1), rectangular(0), owner(NULL) {
     }
     MechTouchUIElement(VuVec const &pos, float radius)
-        : managed_links(NULL), position(pos), radius_x(GetAspectRatio() * radius), radius_y(radius), on_down(NULL),
+        : position(pos), radius_x(GetAspectRatio() * radius), radius_y(radius), on_down(NULL),
           on_click(NULL), on_hold(NULL), on_release(NULL), on_leave(NULL), hovered(0), disabled(0), visible(1),
           owner(NULL) {
     }
-    virtual ~MechTouchUIElement();
+    virtual ~MechTouchUIElement() {
+    }
     virtual void Process(float);
     virtual void Render();
 
-    void *managed_links;
     VuVec position;
     float radius_x;
     float radius_y;
