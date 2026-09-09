@@ -211,7 +211,7 @@ i32 NuAtan2D(f32 dx, f32 dy) {
 }
 
 f32 NuAtan2(f32 dx, f32 dy) {
-    return NuAtan2D(dx, dy) * (f32)(2.0f * M_PI / USHRT_MAX); // the number of radians per discrete integer angle
+    return NuAtan2D(dx, dy) * 0.000095873802492f;
 }
 
 float NuSinApprox2(i32 ang) {
