@@ -6,6 +6,7 @@
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/core/charconfig.h"
 #include "legoapi/gizmo/base/gizactions.h"
+#include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/props/doors/door.h"
@@ -736,7 +737,25 @@ static __used__ void GizAction_ChangeTechnoTgt(GIZFLOW_s *, FLOWBOX_s *, char **
 static __used__ void GizAction_ActivatePartEffect(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
 }
 
-static __used__ void GizAction_SetGizmoVisibility(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
+static __used__ void GizAction_SetGizmoVisibility(GIZFLOW_s *flow, FLOWBOX_s *, char **params, int count) {
+    char *name = NULL;
+    i32 type = -1;
+    i32 visible = 1;
+    for (i32 index = 0; index < count; ++index) {
+        char *value = NuStrIStr(params[index], "name=");
+        if (value != NULL) {
+            name = value + 5;
+        } else if ((value = NuStrIStr(params[index], "type=")) != NULL) {
+            type = GizmoGetTypeIDByName(flow->gizmo_sys, value + 5);
+        } else if (NuStrIStr(params[index], "FALSE") != NULL) {
+            visible = 0;
+        }
+    }
+    if (name != NULL) {
+        GIZMO *gizmo = GizmoFindByName(flow->gizmo_sys, type, name);
+        if (gizmo != NULL)
+            GizmoSetVisibility(flow->gizmo_sys, gizmo, visible, 1);
+    }
 }
 
 static __used__ void GizAction_SetPickupVisibility(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
