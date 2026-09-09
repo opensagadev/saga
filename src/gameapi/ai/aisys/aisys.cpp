@@ -4663,29 +4663,31 @@ __used__ static i32 Action_DontRaycastLOS(AISYS *sys, AISCRIPTPROCESS *processor
     return 1;
 }
 
+static i32 PartyMemberInWay(GameObject_s *, GameObject_s *);
+
 __used__ static i32 Action_EngageOpponent(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                           i32 param_4, i32 param_5, f32 param_6) {
-    if (packet == NULL || packet->owner == NULL || processor == NULL) {
+    if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL) {
         return 1;
     }
 
-    GameObject_s *object = packet->owner;
+    GameObject_s *object = packet->owner->apiobj.objptr;
     ai_fighting = 1;
     if (param_5 != 0) {
         processor->action_data_5 = engagefiretime;
         packet->movement_instruction_parameter = idealgoalrange;
         f32 initial_fire_fraction = NuRandFloat();
-        bool explicit_fire_range = false;
+        i32 explicit_fire_range = 0;
 
         for (i32 index = 0; index < param_4; ++index) {
-            char *value = ActionSubstringValue(params[index], "firerange");
+            char *value = NuStrIStr(params[index], "firerange");
             if (value != NULL) {
-                processor->action_data_4 = AIParamToFloat(processor, value);
-                explicit_fire_range = true;
-            } else if ((value = ActionSubstringValue(params[index], "goalrange")) != NULL) {
-                packet->movement_instruction_parameter = AIParamToFloat(processor, value);
-            } else if ((value = ActionSubstringValue(params[index], "minrange")) != NULL) {
-                packet->movement_instruction_parameter = AIParamToFloat(processor, value);
+                processor->action_data_4 = AIParamToFloat(processor, value + 10);
+                explicit_fire_range = 1;
+            } else if ((value = NuStrIStr(params[index], "goalrange")) != NULL) {
+                packet->movement_instruction_parameter = AIParamToFloat(processor, value + 10);
+            } else if ((value = NuStrIStr(params[index], "minrange=")) != NULL) {
+                packet->movement_instruction_parameter = AIParamToFloat(processor, value + 9);
                 processor->action_data_1 |= 2;
             } else if (NuStrIStr(params[index], "static") != NULL) {
                 packet->movement_instruction_parameter = 0.0f;
@@ -4696,14 +4698,14 @@ __used__ static i32 Action_EngageOpponent(AISYS *sys, AISCRIPTPROCESS *processor
             } else if (NuStrIStr(params[index], "circle") != NULL) {
                 packet->field_0x1e5 ^= 2;
                 processor->action_data_1 |= 8;
-            } else if ((value = ActionSubstringValue(params[index], "fireinterval")) != NULL) {
-                processor->action_data_5 = AIParamToFloat(processor, value);
-            } else if ((value = ActionSubstringValue(params[index], "opponent")) != NULL) {
-                processor->action_data_3 = GetNamedGameObject(sys, value);
+            } else if ((value = NuStrIStr(params[index], "fireinterval")) != NULL) {
+                processor->action_data_5 = AIParamToFloat(processor, value + 13);
+            } else if ((value = NuStrIStr(params[index], "opponent=")) != NULL) {
+                processor->action_data_3 = GetNamedGameObject(sys, value + 9);
             } else if (NuStrIStr(params[index], "instant") != NULL) {
                 initial_fire_fraction = 0.0f;
-            } else if ((value = ActionSubstringValue(params[index], "attack_override")) != NULL) {
-                processor->action_data_6 = ActionAttackOverride(value);
+            } else if ((value = NuStrIStr(params[index], "attack_override")) != NULL) {
+                processor->action_data_6 = ActionAttackOverride(value + 16);
             }
         }
         if (LSW1 != 0) {
@@ -4718,69 +4720,122 @@ __used__ static i32 Action_EngageOpponent(AISYS *sys, AISCRIPTPROCESS *processor
     }
 
     GameObject_s *opponent = static_cast<GameObject_s *>(processor->action_data_3);
-    if (!ActionValidOpponent(opponent)) {
-        opponent = ActionPacketOpponent(packet);
-    }
-    if (!ActionValidOpponent(opponent)) {
-        return 0;
+    if (opponent != NULL) {
+        if ((opponent->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
+            (opponent->apiobj.field_0x287 != 0 && !(opponent->field_0x101c > 0.0f)))
+            opponent = NULL;
     }
     if (processor->action_data_6 != 0) {
         object->attack_override = static_cast<u8>(processor->action_data_6);
     }
+    if (opponent == NULL) {
+        APIOBJECT *api_opponent = static_cast<APIOBJECT *>(packet->opponent);
+        if (api_opponent == NULL || api_opponent->ai == NULL || api_opponent->objptr == NULL)
+            return 0;
+        opponent = api_opponent->objptr;
+    }
     object->field_0xef8 |= 0x20;
+    if ((opponent->apiobj.field_0x1f8 & 0x1001) != 0x1001 || opponent->apiobj.field_0x287 != 0 ||
+        opponent->character_context == 0x2b ||
+        (static_cast<i8>(opponent->apiobj.flags_low) < 0 && opponent->spawn_protection_timer > 1.5f))
+        return 0;
 
-    const f32 distance_squared = NuVecDistSqr(&opponent->apiobj.position, &object->apiobj.position, NULL);
-    f32 goal_range = packet->movement_instruction_parameter;
+    NUVEC difference;
+    const f32 distance_squared = NuVecDistSqr(&opponent->apiobj.position, &packet->owner->apiobj.position, &difference);
+    f32 goal_range;
     if ((object->field_0xf01 & 0x20) != 0) {
-        if (oneAtOnce_CanAttack(object, opponent)) {
-            goal_range = 0.0f;
+        if (oneAtOnce_CanAttack(object, static_cast<APIOBJECT *>(object->ai.opponent)->objptr)) {
+            goal_range = 0.1f;
             processor->action_data_1 &= static_cast<u8>(~2u);
         } else {
             goal_range = oneAtOnce_GetHoldRange(object);
             processor->action_data_1 |= 2;
         }
+    } else {
+        goal_range = packet->movement_instruction_parameter;
+        if (goal_range != 0.0f &&
+            ((static_cast<i8>(opponent->apiobj.flags_low) < 0 && object->apiobj.model_draw_result == 0) ||
+             ((WORLD->api_object_sys->line_of_sight[packet->owner->apiobj.field_0x289] >>
+               opponent->apiobj.field_0x289) & 1) == 0))
+            goal_range = 0.1f;
     }
 
     if (goal_range == 0.0f) {
-        packet->movement_look_target = &opponent->apiobj.position;
+        if ((object->apiobj.character_data->game_character->flags_090 & 0x100) == 0)
+            packet->movement_look_target = &opponent->apiobj.position;
     } else {
-        const f32 near_range = MAX(0.0f, goal_range - aitol);
-        const f32 far_range = goal_range + aitol;
-        if (distance_squared < near_range * near_range) {
-            processor->action_data_1 |= 0x10;
-        } else if (distance_squared > far_range * far_range) {
+        const f32 stopping_distance = MIN(goal_range, opponent->ai.mover_height);
+        if ((object->field_0xefe & 1) == 0)
             processor->action_data_1 &= static_cast<u8>(~0x10u);
-        }
-
-        if ((processor->action_data_1 & 0x10) != 0) {
-            AIMoveInstruction(packet, &opponent->ai.last_path_position, MIN(goal_range, opponent->ai.mover_height),
+        const u32 character_flags = object->apiobj.character_data->game_character->flags_090 & 0x100;
+        const f32 near_range = goal_range - aitol;
+        const f32 far_range = goal_range + aitol;
+        if ((object->field_0xefe & 1) != 0 && character_flags != 0) {
+            if ((processor->action_data_1 & 0x10) != 0) {
+                if (distance_squared > far_range * far_range)
+                    processor->action_data_1 &= static_cast<u8>(~0x10u);
+            } else if (distance_squared < near_range * near_range) {
+                processor->action_data_1 |= 0x10;
+            }
+            if ((processor->action_data_1 & 0x10) != 0) {
+                AIMoveInstruction(packet, &opponent->ai.last_path_position, stopping_distance,
+                                  &opponent->ai.path_info, AIPACKET_MOVEMENT_RETREAT, goal_range);
+                packet->goal_speed_mode = 1;
+                object->field_0xefd |= 0x80;
+            } else {
+                AIMoveInstruction(packet, &opponent->ai.last_path_position, 0.0f,
+                                  &opponent->ai.path_info, AIPACKET_MOVEMENT_TO_DESTINATION, 0.01f);
+                packet->goal_speed_mode = 0;
+            }
+        } else if (character_flags != 0 && distance_squared < near_range * near_range) {
+            AIMoveInstruction(packet, &opponent->ai.last_path_position, stopping_distance,
                               &opponent->ai.path_info, AIPACKET_MOVEMENT_RETREAT, goal_range);
             packet->goal_speed_mode = 1;
-            object->field_0xefd |= 0x80;
+            if ((object->apiobj.character_data->game_character->flags_090 & 0x100) != 0)
+                object->field_0xefd |= 0x80;
+        } else if ((processor->action_data_1 & 0x20) != 0 && distance_squared < near_range * near_range) {
+            AIMoveInstruction(packet, &opponent->ai.last_path_position, stopping_distance,
+                              &opponent->ai.path_info, AIPACKET_MOVEMENT_RETREAT, goal_range);
+            packet->goal_speed_mode = 1;
         } else if (distance_squared > far_range * far_range && (processor->action_data_1 & 2) == 0) {
-            AIMoveInstruction(packet, &opponent->ai.last_path_position, MIN(goal_range, opponent->ai.mover_height),
+            AIMoveInstruction(packet, &opponent->ai.last_path_position, stopping_distance,
                               &opponent->ai.path_info, AIPACKET_MOVEMENT_TO_DESTINATION, goal_range);
             packet->goal_speed_mode = 0;
         } else if ((processor->action_data_1 & 8) != 0) {
-            AIMoveInstruction(packet, &opponent->ai.last_path_position, MIN(goal_range, opponent->ai.mover_height),
+            AIMoveInstruction(packet, &opponent->ai.last_path_position, stopping_distance,
                               &opponent->ai.path_info, AIPACKET_MOVEMENT_CIRCLE, goal_range);
             packet->goal_speed_mode = 0;
-        } else {
+        } else if (character_flags == 0) {
             packet->movement_look_target = &opponent->apiobj.position;
         }
     }
 
-    const bool may_fire_offscreen = object->apiobj.model_draw_result != 0 || (processor->action_data_1 & 1) != 0;
-    const bool minicut_allows_fire = MiniCutCam == 0 || (processor->action_data_1 & 4) == 0;
-    if (may_fire_offscreen && minicut_allows_fire &&
-        distance_squared < processor->action_data_4 * processor->action_data_4) {
+    if (((WORLD->api_object_sys->line_of_sight[object->apiobj.field_0x289] >> opponent->apiobj.field_0x289) & 1) == 0)
+        return 0;
+    const u32 character_flags = object->apiobj.character_data->game_character->flags_090 & 0x100;
+    if (character_flags != 0 && (object->field_0xefe & 1) != 0)
+        return 0;
+    if (object->apiobj.model_draw_result == 0 && (processor->action_data_1 & 1) == 0)
+        return 0;
+    if (!(distance_squared < processor->action_data_4 * processor->action_data_4))
+        return 0;
+    if (character_flags == 0)
         packet->movement_look_target = &opponent->apiobj.position;
-        *reinterpret_cast<GameObject_s **>(reinterpret_cast<u8 *>(object) + 0xeac) = opponent;
+    if (MiniCutCam != 0 && (processor->action_data_1 & 4) != 0) {
+        const f32 interval = processor->action_data_5;
+        processor->action_timer = NuRandFloat() * interval + 2.0f;
+    } else {
         processor->action_timer -= param_6;
+    }
+    if (opponent->apiobj.field_0x287 == 0) {
+        object->script_fire_target = opponent;
         if (processor->action_timer <= 0.0f) {
-            processor->action_timer = (2.0f + NuRandFloat()) * processor->action_data_5;
-            if (oneAtOnce_CanAttack(object, opponent) && object->pad_gamepad != NULL) {
-                object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
+            const f32 interval = processor->action_data_5;
+            const f32 random = NuRandFloat();
+            processor->action_timer = 0.5f * interval + random * interval;
+            if ((object->apiobj.field_0x1f4 & 5) != 0 || !PartyMemberInWay(object, opponent)) {
+                if (oneAtOnce_CanAttack(object, opponent))
+                    object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
             }
         }
     }
