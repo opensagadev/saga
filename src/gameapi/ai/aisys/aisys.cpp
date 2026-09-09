@@ -167,7 +167,8 @@ extern "C" f32 AIPathNodeDistanceToPathNode(AIPATH *path, i32 start_node, i32 de
     if (start_node == destination_node) {
         return 0.0f;
     }
-    AIPATHNODE *node = &path->nodes[start_node];
+    AIPATHNODE *nodes = path->nodes;
+    AIPATHNODE *node = &nodes[start_node];
     f32 *cached_distance = NULL;
     AIPATHROUTE *route = NULL;
     if (excluded_route_mask == 0 && route_index == 0xff) {
@@ -179,11 +180,12 @@ extern "C" f32 AIPathNodeDistanceToPathNode(AIPATH *path, i32 start_node, i32 de
         }
         node->distance_cache_nodes[1] = node->distance_cache_nodes[0];
         node->distance_cache_nodes[0] = static_cast<u8>(destination_node);
+        nodes = path->nodes;
         node->distance_cache[1] = node->distance_cache[0];
         cached_distance = &node->distance_cache[0];
         *cached_distance = 0.0f;
     }
-    i32 node_index = node - path->nodes;
+    i32 node_index = node - nodes;
     if (route_index != 0xff) {
         route = &path->routes[route_index];
         if (((static_cast<u64>(node->route_membership_mask) >> route_index) & 1) == 0) {
@@ -191,7 +193,7 @@ extern "C" f32 AIPathNodeDistanceToPathNode(AIPATH *path, i32 start_node, i32 de
         }
     }
 
-    AIPATHNODE *destination = &path->nodes[destination_node];
+    AIPATHNODE *destination = &nodes[destination_node];
     AIPATHCNX *previous_connection = NULL;
     f32 distance = 0.0f;
     while (node != destination) {
@@ -252,7 +254,7 @@ extern "C" f32 AIPathNodeDistanceToPathNode(AIPATH *path, i32 start_node, i32 de
         }
         node_index =
             connection->node_indices[0] == node_index ? connection->node_indices[1] : connection->node_indices[0];
-        node = &path->nodes[node_index];
+        node = &nodes[node_index];
         distance += connection->distance;
         previous_connection = connection;
     }
