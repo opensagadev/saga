@@ -328,27 +328,31 @@ void AIPathCnxControllerDestroy(AIPATHCNXCONTROLSYS_s *system, AIPATHCNXCONTROLL
 }
 
 void AIPathCnxSetTemporaryBlock(AIPATH_s *path, char *from_name, char *to_name, i32 blocked) {
-    if (path == NULL || from_name == NULL || to_name == NULL) {
+    if (from_name == NULL || path == NULL || to_name == NULL) {
         return;
     }
     AIPATHNODE *from = AIPathFindNode(NULL, path, from_name);
     AIPATHNODE *to = AIPathFindNode(NULL, path, to_name);
-    if (from == NULL || to == NULL || from->connections == NULL) {
+    if (to == NULL || from == NULL) {
         return;
     }
-    const u8 to_index = static_cast<u8>(to - path->nodes);
+    const i32 to_index = to - path->nodes;
     for (i32 index = 0; index < from->connection_count; ++index) {
         AIPATHCNX *connection = from->connections[index];
-        for (i32 direction = 0; direction < 2; ++direction) {
-            if (connection->node_indices[direction] == to_index) {
-                if (blocked != 0) {
-                    connection->traversal_flags[direction] |= 0x80000000u;
-                } else {
-                    connection->traversal_flags[direction] &= 0x7fffffffu;
-                }
-                return;
-            }
+        i32 direction;
+        if (connection->node_indices[0] == to_index) {
+            direction = 1;
+        } else if (connection->node_indices[1] == to_index) {
+            direction = 0;
+        } else {
+            continue;
         }
+        if (blocked != 0) {
+            connection->traversal_flags[direction] |= 0x80000000u;
+        } else {
+            connection->traversal_flags[direction] &= 0x7fffffffu;
+        }
+        return;
     }
 }
 
