@@ -163,7 +163,7 @@ void CutScene_PostUpdateFn_LSW(void);
 void CutScene_StoppedFn_LSW(CUTINFO *);
 i32 CutScene_ReplaceCharacterModelFn_LSW(CUTINFO *, NUGCUTCHAR_s *);
 i32 InitBolt_AddMomentumType_LSW(BOLT_s *, GameObject_s *, nuvec_s *);
-void Bolt_HitPlatFn_LSW(BOLT_s *);
+i32 Bolt_HitPlatFn_LSW(BOLT_s *);
 void Bolt_HitCustomFn_LSW(BOLT_s *, nuvec_s *);
 void GameBlowUpBlownUpFn_LSW(GIZMOBLOWUP_s *);
 void GizObstacle_SetDefaultSFXFn_LSW(void *, GIZOBSTACLE_s *);

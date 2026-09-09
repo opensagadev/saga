@@ -1147,7 +1147,7 @@ extern void (*CutScene_PostUpdateFn)(void);
 extern void (*CutScene_StoppedFn)(CUTINFO *);
 extern i32 (*CutScene_ReplaceCharacterModelFn)(CUTINFO *, NUGCUTCHAR_s *);
 extern i32 (*InitBolt_AddMomentumType)(BOLT_s *, GameObject_s *, nuvec_s *);
-extern void (*Bolt_HitPlatFn)(BOLT_s *);
+extern i32 (*Bolt_HitPlatFn)(BOLT_s *);
 extern void (*Bolt_HitCustomFn)(BOLT_s *, nuvec_s *);
 extern void (*GameBlowUpBlownUpFn)(GIZMOBLOWUP_s *);
 extern void (*GizmoBlowup_TransformDrawFn)(GIZMOBLOWUP_s *);
