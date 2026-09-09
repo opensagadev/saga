@@ -7,6 +7,10 @@
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/numusic/sfx.h"
+
+extern NUVEC nusound_special_positions[5];
+extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 
 extern "C" f32 GIZPANEL_PLAYERPOSLIFT;
 extern "C" {
@@ -78,7 +82,26 @@ void GizPanel_Reset(GIZPANEL_s *panel) {
     NuMtxTranslate(&panel->matrix, &panel->position);
 }
 
-void GizPanel_PlaySfx(char *, nuvec_s *, i32) {
+void GizPanel_PlaySfx(char *name, nuvec_s *position, i32 player_bits) {
+    if (position == NULL || name == NULL)
+        return;
+    const i16 sfx_id = static_cast<i16>(GetSfxId(name));
+    if (sfx_id == -1)
+        return;
+    if (player_bits == 0) {
+        PlaySfxById(sfx_id, position);
+    } else {
+        if ((player_bits & 1) != 0) {
+            nusound_special_positions[1] = *position;
+            PlaySfxById(sfx_id, &nusound_special_positions[1]);
+            nusound_special_positions[1] = nusound_special_positions[0];
+        }
+        if ((player_bits & 2) != 0) {
+            nusound_special_positions[2] = *position;
+            PlaySfxById(sfx_id, &nusound_special_positions[2]);
+            nusound_special_positions[2] = nusound_special_positions[0];
+        }
+    }
 }
 
 void GizPanel_MoveCode(WORLDINFO_s *, GameObject_s *, i32) {
