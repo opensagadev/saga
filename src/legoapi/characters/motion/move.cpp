@@ -527,7 +527,10 @@ void Move_WALKER(GameObject_s *) {
 void Move_CRITTER(GameObject_s *) {
 }
 
-void Move_DEFAULT(GameObject_s *) {
+void Move_DEFAULT(GameObject_s *object) {
+    DropInOutCode(object);
+    if ((object->field_0xe20 & 0x20) == 0)
+        ApplyGravity(object, NULL, 0.0f, 0.0f, NULL);
 }
 
 void Move_DRAGBOMB(GameObject_s *) {
