@@ -3396,10 +3396,20 @@ __used__ static i32 Action_CannotDropIn(AISYS *sys, AISCRIPTPROCESS *processor, 
     (void)processor;
     (void)param_6;
     if (param_5 != 0) {
-        bool enabled;
-        GameObject_s *object = ActionCharacterAndToggle(sys, packet, params, param_4, &enabled);
+        GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+        i32 enabled = 1;
+        for (i32 index = 0; index < param_4; ++index) {
+            char *value = NuStrIStr(params[index], "character=");
+            if (value != NULL) {
+                object = GetNamedGameObject(sys, value + 10);
+            } else if ((value = NuStrIStr(params[index], "tag_to=")) != NULL) {
+                GetNamedGameObject(sys, value + 7);
+            } else if (NuStrICmp(params[index], "FALSE") == 0) {
+                enabled = 0;
+            }
+        }
         if (object != NULL) {
-            object->field_0xefb = static_cast<u8>((object->field_0xefb & ~4u) | (enabled ? 4u : 0u));
+            object->field_0xefb = static_cast<u8>((object->field_0xefb & ~4u) | ((enabled & 1) << 2));
         }
     }
     return 1;
