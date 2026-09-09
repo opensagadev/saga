@@ -2670,19 +2670,19 @@ extern "C" {
     }
 
     void FollowAPIObject(APIOBJECT *object, APIOBJECT *target, i32 flags, f32 movement_parameter) {
-        AIPACKET *packet = object->ai;
-        AIPACKET *target_packet = target->ai;
+        AIPACKET *packet;
+        AIPACKET *target_packet;
 
         NUVEC *destination;
         i32 movement_mode;
-        if ((flags & 1) == 0) {
-            destination = &target_packet->last_path_position;
-            movement_mode = AIPACKET_MOVEMENT_TO_DESTINATION;
-        } else {
+        if ((flags & 1) != 0) {
+            packet = object->ai;
+            target_packet = target->ai;
             bool use_target_path_position = false;
             AIPATH *path = packet->path_info.path;
             if (path != NULL && path == target_packet->path_info.path) {
-                if ((target_packet->path_info.flags & AIPATHINFO_FLAG_ON_PATH) != 0 &&
+                if (((target_packet->path_info.flags & AIPATHINFO_FLAG_ON_PATH) != 0 ||
+                     packet->path_info.connection != target_packet->path_info.connection) &&
                     packet->path_info.connection != NULL && target_packet->path_info.connection != NULL &&
                     (packet->runtime_flags & AIPACKET_RUNTIME_ROUTE_SELECTED) == 0) {
                     const u8 object_direction = packet->path_info.connection->direction_a;
@@ -2701,6 +2701,11 @@ extern "C" {
                 destination = &target_packet->terrain_origin;
                 movement_mode = AIPACKET_MOVEMENT_DIRECT;
             }
+        } else {
+            packet = object->ai;
+            target_packet = target->ai;
+            destination = &target_packet->last_path_position;
+            movement_mode = AIPACKET_MOVEMENT_TO_DESTINATION;
         }
 
         const f32 stopping_distance = (flags & 2) != 0 ? 0.0f : target_packet->mover_height;
