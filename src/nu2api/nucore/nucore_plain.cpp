@@ -3345,7 +3345,93 @@ extern "C" {
         NuSpecialClearShadowClipTestResults();
         return drawn;
     }
-    void NuHGobjRndrRandShadowSurfacePoints(void) {
+    u32 NuWindRand(void);
+    i32 NuHGobjRndrRandShadowSurfacePoints(nuhgobj_s *object, NUMTX *world_matrix, NUMTX *joint_matrices,
+                                          i32 count, NUVEC *positions, i32 exclusion_mask) {
+        if (NuCameraClipTestExtents(&object->bounds_min, &object->bounds_max, world_matrix, 0.0f, 0) == 0) {
+            return 0;
+        }
+        nuhgobjshadowgroup_s *groups = object->shadow_groups;
+        if (groups == NULL || object->suppress_shadow_surface_points != 0) {
+            return 1;
+        }
+        i32 total = 0;
+        for (nuhgobjshadowgroup_s *group = groups; group->joint_index != 0xff; ++group) {
+            for (i32 i = 0; i < group->ellipse_count; ++i) {
+                if ((*reinterpret_cast<u32 *>(&group->ellipses[i][4]) & 1) == 0) {
+                    ++total;
+                }
+            }
+            for (i32 i = 0; i < group->cylinder_count; ++i) {
+                if ((*reinterpret_cast<u32 *>(&group->cylinders[i][4]) & 1) == 0) {
+                    ++total;
+                }
+            }
+        }
+        if (total == 0) {
+            return 1;
+        }
+        i16 counts[256];
+        for (i32 i = 0; i < total; ++i) {
+            counts[i] = 0;
+        }
+        for (i32 i = 0; i < count; ++i) {
+            ++counts[(static_cast<i32>(NuWindRand()) >> 8) % total];
+        }
+        if (count > 0) {
+            groups = object->shadow_groups;
+        }
+        i32 index = 0;
+        NUMTX combined;
+        NUVEC4 point;
+        for (nuhgobjshadowgroup_s *group = groups; group->joint_index != 0xff; ++group) {
+            if (count == 0) {
+                continue;
+            }
+            i32 matrix_ready = 0;
+            for (i32 i = 0; i < group->ellipse_count; ++i) {
+                if (exclusion_mask != 0 && (*reinterpret_cast<u32 *>(&group->ellipses[i][4]) & exclusion_mask) != 0) {
+                    continue;
+                }
+                i32 n = counts[index];
+                if (n != 0) {
+                    if (matrix_ready == 0) {
+                        NuMtxMulVU0(&combined, &joint_matrices[group->joint_index], world_matrix);
+                    }
+                    for (i32 j = 0; j < n; ++j) {
+                        NuRndrCalcRandEllipsePos(&point, &combined, reinterpret_cast<NUVEC *>(group->ellipses[i]));
+                        --count;
+                        positions[count].x = point.x;
+                        positions[count].y = point.y;
+                        positions[count].z = point.z;
+                    }
+                    matrix_ready = 1;
+                }
+                ++index;
+            }
+            for (i32 i = 0; i < group->cylinder_count; ++i) {
+                // Original 0x2cfcf7 uses the ellipse table for this filter too.
+                if (exclusion_mask != 0 && (*reinterpret_cast<u32 *>(&group->ellipses[i][4]) & exclusion_mask) != 0) {
+                    continue;
+                }
+                i32 n = counts[index];
+                if (n != 0) {
+                    if (matrix_ready == 0) {
+                        NuMtxMulVU0(&combined, &joint_matrices[group->joint_index], world_matrix);
+                    }
+                    for (i32 j = 0; j < n; ++j) {
+                        NuRndrCalcRandCylinderPos(&point, &combined, reinterpret_cast<NUVEC *>(group->cylinders[i]));
+                        --count;
+                        positions[count].x = point.x;
+                        positions[count].y = point.y;
+                        positions[count].z = point.z;
+                    }
+                    matrix_ready = 1;
+                }
+                ++index;
+            }
+        }
+        return 1;
     }
     void NuHGobjSetClippingRootTrackerOverride(void) {
     }

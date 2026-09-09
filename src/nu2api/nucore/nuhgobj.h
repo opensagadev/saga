@@ -73,6 +73,16 @@ struct nuhgobjrender_s {
     void *alternate_smooth_skin_special;
 };
 
+struct nuhgobjshadowgroup_s {
+    u8 (*ellipses)[0x30];
+    u8 (*cylinders)[0x40];
+    void *field_0x8;
+    u8 ellipse_count;
+    u8 cylinder_count;
+    u8 field_0xe;
+    u8 joint_index;
+};
+
 struct nuhgobj_s {
     u8 data[0x110];
     nudldlistscene_s *display_list; // 0x110
@@ -89,7 +99,15 @@ struct nuhgobj_s {
     u8 *point_of_interest_map;        // 0x18c
     i32 render_count;                 // 0x190
     nuhgobjrender_s *render_parts;    // 0x194
-    u8 data_0x198[0x14];
+    union {
+        u8 data_0x198[0x14];
+        struct {
+            u32 field_0x198;
+            nuhgobjshadowgroup_s *shadow_groups;
+            u8 suppress_shadow_surface_points;
+            u8 data_0x1a1[0x0b];
+        };
+    };
     NUVEC bounds_min; // 0x1ac
     NUVEC bounds_max; // 0x1b8
 };
@@ -102,6 +120,8 @@ DECOMP_ASSERT(sizeof(NUJOINTANIM_s) == 0x34, "NUJOINTANIM_s size");
 DECOMP_ASSERT(offsetof(NUJOINTANIM_s, joint_index) == 0x30, "NUJOINTANIM_s joint index offset");
 DECOMP_ASSERT(offsetof(NUJOINTANIM_s, flags) == 0x31, "NUJOINTANIM_s flags offset");
 DECOMP_ASSERT(sizeof(nuhgobjrender_s) == 0x14, "nuhgobjrender_s size");
+DECOMP_ASSERT(sizeof(nuhgobjshadowgroup_s) == 0x10, "nuhgobjshadowgroup_s size");
+DECOMP_ASSERT(offsetof(nuhgobj_s, shadow_groups) == 0x19c, "nuhgobj_s shadow groups offset");
 DECOMP_ASSERT(sizeof(nuhgobj_s) == 0x1c4, "nuhgobj_s size");
 
 // NuHGobj system (module nu2api/nucore, nucore_plain.cpp).
@@ -110,6 +130,8 @@ DECOMP_ASSERT(sizeof(nuhgobj_s) == 0x1c4, "nuhgobj_s size");
 extern "C" {
 #endif
     extern NUJOINTPROCANIMFN JointProcAnimFn;
+    i32 NuHGobjRndrRandShadowSurfacePoints(nuhgobj_s *object, NUMTX *world_matrix, NUMTX *joint_matrices,
+                                           i32 count, NUVEC *positions, i32 exclusion_mask);
     i32 NuHGobjReversibleCharacters(i32 enabled);
     i32 NuHGobjForceShadowsOnCharacters(i32 enabled);
     void NuAnimBuffProceduralAnimation(nuanimbuff_s *buffer, nuhgobj_s *object, i32 override_count,
