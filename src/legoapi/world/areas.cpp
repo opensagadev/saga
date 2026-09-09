@@ -53,6 +53,7 @@ extern void Hub_LockUnlockDoors(struct WORLDINFO_s *);
 extern void FreeTorpedoPacket(struct TORPEDOPACKET_s **);
 extern void RemoveGameObject(struct GameObject_s *, i32);
 extern void IconScenes_Dump(void);
+GIZAIMESSAGE_s *CheckGizAIMessage(GIZAIMESSAGESYS_s *, const char *, GIZAIMESSAGE_s *);
 extern void CharScenes_AreaDump(void);
 extern void Particles_DumpAreaPage(void);
 extern void Customiser_RestoreModelTextureIDs(struct CUSTOMISER *);
@@ -160,6 +161,26 @@ void Area_Configure(i32 area, i32 param, EXTRAMODEL *models, i16 *s) {
 
     while (NuFParGetLine(fp) != 0) {
         if (NuFParGetWord(fp) == 0 || fp->word_buf[0] == '\0') {
+            continue;
+        }
+        if (NuStrICmp(fp->word_buf, "AIMessage") == 0) {
+            if (NuFParGetWord(fp) != 0) {
+                GIZAIMESSAGE_s *message = CheckGizAIMessage(gizaimessagesys, fp->word_buf, NULL);
+                if (message != NULL) {
+                    message->flags |= 1;
+                    while (NuFParGetWord(fp) != 0) {
+                        char *output = NuStrIStr(fp->word_buf, "output");
+                        if (output != NULL) {
+                            i32 index = NuAToI(output + 6);
+                            if (NuFParGetWord(fp) != 0 && static_cast<u32>(index) < 8) {
+                                message->output_values[index] = static_cast<i8>(NuAToI(fp->word_buf));
+                                if (index >= message->output_count)
+                                    message->output_count = static_cast<i8>(index + 1);
+                            }
+                        }
+                    }
+                }
+            }
             continue;
         }
         if (NuStrICmp(fp->word_buf, "character") != 0 || NuFParGetWord(fp) == 0) {
