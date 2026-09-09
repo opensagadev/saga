@@ -24,6 +24,9 @@ extern "C" {
     extern i32 edpp_types_used;
     extern usize edpp_page_scene[8];
     extern i32 edpp_page_used[8];
+    extern i32 edpp_page_on[8];
+    extern PartHeader **DmaDebTypes;
+    extern i32 freeDmaDebType;
     extern i32 DEBPAGE_GENERAL;
     extern i32 DEBPAGE_CHARACTER;
     extern i32 DEBPAGE_AREA;
@@ -426,7 +429,31 @@ extern "C" {
     }
     void edpartRegisterPointerToGameCharLocation(void) {
     }
-    void edppClearPage(i8) {
+    void edppClearPage(i8 page) {
+        edpp_page_on[page] = 0;
+        edpp_page_used[page] = 0;
+        for (i32 index = 0; index < 512; ++index) {
+            if (edpp_ptls[index].page == page)
+                edppPtlDestroy(index);
+        }
+        for (i32 index = 1; index < EDPP_MAX_TYPES; ++index) {
+            if (debtab[index] == NULL || debtab[index]->page != static_cast<u8>(page))
+                continue;
+            debtab[index]->disabled = 1;
+            for (i32 key = 0; key < maxdebkeys; ++key) {
+                if (debkeydata[key].effect_index == index) {
+                    i32 handle = key;
+                    DebFreeInstantly(&handle);
+                }
+            }
+            DebFreeOrphansInstantly(debtab[index]);
+            if (debtab[index]->native_data != NULL) {
+                DmaDebTypes[--freeDmaDebType] = debtab[index]->native_data;
+                debtab[index]->native_data = NULL;
+            }
+            debtab[index] = NULL;
+            --edpp_types_used;
+        }
     }
     void edppDeleteEffect(i32 index) {
         if (edpp_ptls[edpp_nearest].effect_index == index)

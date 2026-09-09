@@ -3032,7 +3032,9 @@ struct edpp_particle_s {
     NUVEC position;
     i32 effect_index;
     i32 instance_id;
-    u8 pad_0x14[0x58 - 0x14];
+    u8 pad_0x14[0x51 - 0x14];
+    i8 page;
+    u8 pad_0x52[0x58 - 0x52];
 };
 DECOMP_ASSERT(sizeof(edpp_particle_s) == 0x58, "edpp_particle_s ABI");
 struct pushblock_s {
