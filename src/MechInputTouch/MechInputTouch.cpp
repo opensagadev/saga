@@ -16,9 +16,6 @@ void MechAutoJumpGetBest(JumpTriggerPacket const &, i32) {
 void MechAutoJumpSetIsUsing(GameObject_s &, MechAutoJumpConnection &) {
 }
 
-void MechHintUIButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &) {
-}
-
 void MechTouchUITagButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &) {
 }
 
