@@ -62,11 +62,16 @@ void SetObjAsHeadTarget(GameObject_s *, GameObject_s *, i8, f32, f32, f32);
 void SetBallooningHeight(GameObject_s *, f32);
 void GameObjectSetCanUse(GameObject_s *, void *, u8, u8, f32);
 i32 Suit_GetIndex(SUIT_s *);
+void GameObjectOrigin(GameObject_s *);
 BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
 extern i16 id_YODA, id_YODAGHOST, id_GAMORREANGUARD, id_JANGOFETT;
 extern i32 LEGO_AIPATHCNX_WALLSHUFFLE;
+extern i32 VehicleArea;
+extern i32 TERRAINMASK_NONWEAPON, TERRAINMASK_NONDROID;
 f32 DEFENDTIME = 4.0f;
 extern f32 jump_stuck_time;
+i32 teleport_all_freeplay_modes = 1;
+i32 drop_in_teleport = 3;
 
 static f32 Condition_IAmAPartyCharacter(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
     if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.field_0x27c != -1) {
@@ -2151,6 +2156,8 @@ static void TestWalkAround(APIOBJECT *object, APIOBJECT *other, NUVEC *differenc
 }
 
 void GameAIProcess() {
+    if (TimingBarSet == 4)
+        TBOPENFN("(Sys)", 4);
     ai_fighting = 0;
     AISysProcess(WORLD->ai_sys, reinterpret_cast<APIOBJECT *>(player), reinterpret_cast<APIOBJECT *>(player2));
 
@@ -2267,6 +2274,7 @@ void GameAIProcess() {
     }
 
     u64 awareness = 0;
+    NUVEC wall_direction;
     for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
         GameObject_s *object = &Obj[index];
         i32 ground_checks;
@@ -2359,11 +2367,65 @@ void GameAIProcess() {
                 (static_cast<SUIT_s *>(object->suit)->flags & 0x10) != 0)
                 object->pad_gamepad->buttons_held |= GAMEPAD_SPECIAL;
             AIPATHCNX *connection = object->ai.path_info.connection;
-            if ((connection == NULL ||
-                 (connection->traversal_flags[object->ai.path_info.direction] & object->ai.capabilities &
-                  LEGO_AIPATHCNX_WALLSHUFFLE) == 0) &&
-                object->ai.path_connection_state == 0 && (object->ai.path_info.flags & 1) != 0 &&
-                object->apiobj.movement_stuck_time > jump_stuck_time) {
+            if (connection != NULL &&
+                (connection->traversal_flags[object->ai.path_info.direction] & object->ai.capabilities &
+                 LEGO_AIPATHCNX_WALLSHUFFLE) != 0) {
+                object->field_0xf02 |= 1;
+                AIPATHNODE *nodes = object->ai.path_info.path->nodes;
+                i32 direction = object->ai.path_info.direction;
+                u8 other_node = connection->node_indices[direction == 0];
+                u8 node = connection->node_indices[direction];
+                u16 angle;
+                if (object->character_context == 0x45) {
+                    angle = object->takeover_start_angle;
+                    wall_direction = v001;
+                    NuVecRotateY(&wall_direction, &wall_direction, angle);
+                } else {
+                    NUVEC lateral;
+                    NuVecSub(&lateral, &nodes[other_node].position, &nodes[node].position);
+                    lateral.y = 0.0f;
+                    NuVecNorm(&lateral, &lateral);
+                    NuVecRotateY(&lateral, &lateral, 0x4000);
+                    NUVEC ray = lateral;
+                    f32 first_distance = 1.0e9f;
+                    if (GameRayCast(&nodes[node].position, &ray, 0.0f,
+                                    TERRAINMASK_NONWEAPON | TERRAINMASK_NONDROID | 0x5f) != 0)
+                        first_distance = NuVecMag(&ray);
+                    ray.x = -lateral.x;
+                    ray.y = 0.0f;
+                    ray.z = -lateral.z;
+                    f32 second_distance = 1.0e9f;
+                    if (GameRayCast(&nodes[node].position, &ray, 0.0f,
+                                    TERRAINMASK_NONWEAPON | TERRAINMASK_NONDROID | 0x5f) != 0)
+                        second_distance = NuVecMag(&ray);
+                    if (first_distance < 1.0e9f || second_distance < 1.0e9f) {
+                        if (second_distance > first_distance) {
+                            wall_direction = lateral;
+                        } else {
+                            wall_direction.x = -lateral.x;
+                            wall_direction.y = 0.0f;
+                            wall_direction.z = -lateral.z;
+                        }
+                    }
+                    angle = NuAtan2D(wall_direction.x, wall_direction.z);
+                }
+                NUVEC movement;
+                movement.x = object->ai.movement_position.x - object->apiobj.position.x;
+                movement.y = 0.0f;
+                movement.z = object->ai.movement_position.z - object->apiobj.position.z;
+                f32 distance = NuVecMag(&movement);
+                if (distance > ai_moveradius)
+                    NuVecScale(&movement, &movement, (ai_moveradius / distance) * 2.0f);
+                NuVecRotateY(&movement, &movement, -static_cast<i32>(angle));
+                movement.z = 0.0f;
+                NuVecRotateY(&movement, &movement, angle);
+                NuVecScale(&wall_direction, &wall_direction, ai_moveradius);
+                NuVecAdd(&movement, &movement, &wall_direction);
+                object->ai.movement_position.x = object->apiobj.position.x + movement.x;
+                object->ai.movement_position.y = object->apiobj.position.y;
+                object->ai.movement_position.z = object->apiobj.position.z + movement.z;
+            } else if (object->ai.path_connection_state == 0 && (object->ai.path_info.flags & 1) != 0 &&
+                       object->apiobj.movement_stuck_time > jump_stuck_time) {
                 if (object->apiobj.supporting_platform_id != -1 && connection != NULL &&
                     (connection->original_traversal_flags[0] & LEGO_AIPATHCNX_BLOCKAGE) != 0) {
                     if ((object->apiobj.character_data->model_flags & 0x88) != 0) {
@@ -2390,6 +2452,25 @@ void GameAIProcess() {
         }
         if (FreePlay != 0 && (object->apiobj.field_0x1f4 & 0x400) == 0) {
             if ((object->apiobj.flags_low & 0x80) == 0 && object->character_context != 0x0b) {
+                if (drop_in_teleport == 1 && VehicleArea == 0 && (Arcade != 0 || teleport_all_freeplay_modes != 0) &&
+                    object->apiobj.model_draw_result == 0 && (object->tag_flags & 2) == 0 &&
+                    drop_back_in_timer > 0.0f) {
+                    NUVEC position = player->apiobj.last_safe_position;
+                    if (position.x == player->apiobj.position.x && position.y == player->apiobj.position.y &&
+                        position.z == player->apiobj.position.z)
+                        position.z += 0.01f;
+                    object->apiobj.start_position = position;
+                    object->apiobj.position = object->apiobj.start_position;
+                    object->apiobj.velocity = v000;
+                    object->apiobj.field_0x276 = player->apiobj.field_0x276;
+                    ResetPlayerMoves(object);
+                    object->apiobj.movement_stuck_time = 0.0f;
+                    InitSurfaceInfo(object);
+                    SetObjOnSurface(object, 1);
+                    GameObjectOrigin(object);
+                    AddGameDebris(WORLD->debris_sys, 0x5c, &object->apiobj.collision_position);
+                    goto ai_combat;
+                }
                 if ((object->ai.field_0x1e6 & AIPACKET_RUNTIME_ROUTE_SELECTED) != 0) {
                     object->ai.current_route = 0xff;
                     object->route_character_id = -1;
@@ -2447,6 +2528,7 @@ void GameAIProcess() {
         } else if ((object->ai.field_0x1e6 & AIPACKET_RUNTIME_USING_PATH_WAYPOINT) != 0) {
             AISysFindRoute(&object->ai);
         }
+    ai_combat:
         if ((object->apiobj.field_0x1f8 & 0x180) == 0x80) {
             object->field_0xefc &= ~4;
             object->apiobj.flags_high =
@@ -2586,15 +2668,23 @@ void GameAIProcess() {
             object->ai.field_0x1e5 &= ~0x20;
         }
     }
+    if (TimingBarSet == 4)
+        TBCLOSEFN("(Sys)", 4);
     active_goody_count = goody_count;
     active_baddy_count = baddy_count;
     active_neutral_count = neutral_count;
+    if (TimingBarSet == 4)
+        TBOPENFN("(LOS)", 4);
     for (i32 index = 0; index < neutral_count; ++index)
         baddies[baddy_count + index] = neutral_objects[index];
     i32 los_count = baddy_count + neutral_count;
     timetogetlos = (f32)(los_count * los_count) * FRAMETIME * 0.5f;
     APIObjectLOSChecks(WORLD->api_object_sys, 2, goody_count, goodies, los_count, baddies,
                       (f32)static_cast<u8>(WORLD->current_level->unknown_0da));
+    if (TimingBarSet == 4)
+        TBCLOSEFN("(LOS)", 4);
+    if (TimingBarSet == 4)
+        TBOPENFN("(Avoid)", 4);
     if (test_new_interaction == 0) {
         LEGO_AISysCreatureInteraction2D(WORLD->ai_sys, interactive_count, interactive_objects, NULL, FRAMETIME);
     } else {
@@ -2682,15 +2772,25 @@ void GameAIProcess() {
         }
         AISysCreatureAntinodeInteraction(WORLD->ai_sys, interactive_count, interactive_objects, NULL);
     }
+    if (TimingBarSet == 4)
+        TBCLOSEFN("(Avoid)", 4);
     if (party_under_cover != 0) {
         for (i32 index = 0; index < 8; ++index) {
             if (Player[index] != NULL)
                 Player[index]->ai.field_0x1e5 &= ~0x40;
         }
     }
+    if (TimingBarSet == 4)
+        TBOPENFN("(Opponent)", 4);
     GameCreatureOpponentSelection(WORLD->ai_sys, interactive_count, interactive_objects, goody_count, goodies,
-                                  baddy_count, baddies, awareness, FRAMETIME);
+                                 baddy_count, baddies, awareness, FRAMETIME);
+    if (TimingBarSet == 4)
+        TBCLOSEFN("(Opponent)", 4);
+    if (TimingBarSet == 4)
+        TBOPENFN("(Turret)", 4);
     GizTurrets_OpponentSelection(WORLD->giz_turret_sys, goody_count, goodies, baddy_count, baddies);
+    if (TimingBarSet == 4)
+        TBCLOSEFN("(Turret)", 4);
     oneAtOnce_MaintainArray();
 }
 
