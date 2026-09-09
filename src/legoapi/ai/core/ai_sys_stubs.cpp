@@ -2711,14 +2711,18 @@ extern "C" {
                 packet->field_0x1e7 = source_flags & 0x3f;
                 if ((source_flags & AIPACKET_MOVEMENT_SOURCE_ACTIVE) != 0) {
                     const u8 source = (source_flags & AIPACKET_MOVEMENT_SOURCE_MASK) >> 2;
-                    if (source == 1 && packet->field_0x134 != 0xff) {
-                        AICREATURE *creature = &system->creatures[packet->field_0x134];
-                        AIMoveInstruction(packet, &creature->pos, 0.0f, &creature->path_info,
-                                          AIPACKET_MOVEMENT_TO_DESTINATION, 0.0f);
-                    } else if (source == 2 && packet->locator != NULL) {
-                        AIPATHINFO *locator_path = &packet->locator->path_info;
-                        AIMoveInstruction(packet, &packet->locator->position, 0.0f, locator_path,
-                                          AIPACKET_MOVEMENT_TO_DESTINATION, 0.0f);
+                    if (source == 1) {
+                        if (packet->field_0x134 != 0xff) {
+                            AICREATURE *creature = &system->creatures[packet->field_0x134];
+                            AIMoveInstruction(packet, &creature->pos, 0.0f, &creature->path_info,
+                                              AIPACKET_MOVEMENT_TO_DESTINATION, 0.0f);
+                        }
+                    } else if (source == 2) {
+                        if (packet->locator != NULL) {
+                            AIPATHINFO *locator_path = &packet->locator->path_info;
+                            AIMoveInstruction(packet, &packet->locator->position, 0.0f, locator_path,
+                                              AIPACKET_MOVEMENT_TO_DESTINATION, 0.0f);
+                        }
                     } else {
                         packet->field_0x1e7 = source_flags & 0x2f;
                     }
@@ -2774,22 +2778,30 @@ extern "C" {
         }
 
         NUVEC delta;
-        f32 distance;
         if (use_three_dimensions == 0) {
-            distance = NuVecXZDist(&packet->movement_destination, &object->position, &delta);
+            const f32 distance = NuVecXZDist(&packet->movement_destination, &object->position, &delta);
+            const f32 stopping_clearance = clearance + packet->movement_stopping_distance;
+            if (distance > packet->mover_height + clearance + packet->movement_stopping_distance) {
+                const f32 scale = distance != 0.0f && packet->mover_height != 0.0f ? packet->mover_height / distance : 0.0f;
+                NuVecScale(&delta, &delta, scale);
+                NuVecAdd(&packet->movement_position, &object->position, &delta);
+            } else {
+                const f32 scale = distance != 0.0f && stopping_clearance != 0.0f ? stopping_clearance / distance : 0.0f;
+                NuVecScale(&delta, &delta, scale);
+                NuVecSub(&packet->movement_position, &packet->movement_destination, &delta);
+            }
         } else {
-            distance = NuVecDist(&packet->movement_destination, &object->position, &delta);
-        }
-
-        const f32 stopping_clearance = clearance + packet->movement_stopping_distance;
-        if (distance <= packet->mover_height + clearance + packet->movement_stopping_distance) {
-            const f32 scale = distance != 0.0f && stopping_clearance != 0.0f ? stopping_clearance / distance : 0.0f;
-            NuVecScale(&delta, &delta, scale);
-            NuVecSub(&packet->movement_position, &packet->movement_destination, &delta);
-        } else {
-            const f32 scale = distance != 0.0f && packet->mover_height != 0.0f ? packet->mover_height / distance : 0.0f;
-            NuVecScale(&delta, &delta, scale);
-            NuVecAdd(&packet->movement_position, &object->position, &delta);
+            const f32 distance = NuVecDist(&packet->movement_destination, &object->position, &delta);
+            const f32 stopping_clearance = clearance + packet->movement_stopping_distance;
+            if (distance > packet->mover_height + clearance + packet->movement_stopping_distance) {
+                const f32 scale = distance != 0.0f && packet->mover_height != 0.0f ? packet->mover_height / distance : 0.0f;
+                NuVecScale(&delta, &delta, scale);
+                NuVecAdd(&packet->movement_position, &object->position, &delta);
+            } else {
+                const f32 scale = distance != 0.0f && stopping_clearance != 0.0f ? stopping_clearance / distance : 0.0f;
+                NuVecScale(&delta, &delta, scale);
+                NuVecSub(&packet->movement_position, &packet->movement_destination, &delta);
+            }
         }
     }
 
