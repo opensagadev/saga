@@ -1005,6 +1005,11 @@ extern "C" {
     }
 
     extern i32 drawcharactermodel_nobsa;
+    void (*APIObjResetShadowMapRenderingFn)(void);
+    void (*APIObjEnableShadowMapRenderingFn)(void);
+    i32 nurndr_force_lod;
+    void NuRndrStartReflectionRender(i32);
+    void NuRndrEndReflectionRender(void);
 
     i32 APIDrawCharacterModel(CHARACTERMODEL_s *model, CHARACTERDATA *, ANIMPACKET_s *animation, NUMTX *matrix, NUMTX *,
                               NUMTX *reflection_matrix, NUVEC *locator_positions, NUMTX *locator_matrices,
@@ -1173,17 +1178,32 @@ extern "C" {
             StoreLocatorCoordinates(model, matrix, output_matrices, locator_positions, locator_matrices);
             drawcharactermodel_locatorsupdated = 1;
 
+            const i32 render_flags = object == NULL || (object->apiobj.field_0x1f4 & 0x200) == 0;
             if (object != NULL && apicharsys != NULL && apicharsys->set_creature_lights != NULL) {
                 apicharsys->set_creature_lights(&object->apiobj);
             }
 
             if (!evaluate_only) {
-                const i32 render_flags = object == NULL || (object->apiobj.field_0x1f4 & 0x200) == 0;
+                if (object != NULL && (object->apiobj.field_0x1f4 & 0x20000) != 0) {
+                    if (APIObjResetShadowMapRenderingFn != NULL)
+                        APIObjResetShadowMapRenderingFn();
+                    APITransparentCharDraw(model->hierarchy, matrix, render_count, render_indices, output_matrices,
+                                           dwa, render_flags);
+                    if (APIObjEnableShadowMapRenderingFn != NULL)
+                        APIObjEnableShadowMapRenderingFn();
+                }
                 result = NuHGobjRndrMtxDwa(model->hierarchy, matrix, render_count, render_indices, output_matrices, dwa,
                                            render_flags);
                 if (reflection_matrix != NULL) {
+                    model->hierarchy->data_0x198[8] = 1;
+                    if (object == NULL || (object->apiobj.field_0x1f4 & 0x1000) == 0)
+                        nurndr_force_lod = 1;
+                    NuRndrStartReflectionRender(result);
                     NuHGobjRndrMtxDwa(model->hierarchy, reflection_matrix, render_count, render_indices, output_matrices,
                                       dwa, render_flags);
+                    NuRndrEndReflectionRender();
+                    if (object == NULL || (object->apiobj.field_0x1f4 & 0x1000) == 0)
+                        nurndr_force_lod = 0;
                 }
             }
 
