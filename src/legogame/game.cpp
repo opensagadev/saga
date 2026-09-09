@@ -39,6 +39,9 @@ void AddFancyMessageRGB(char *, f32, f32, f32, f32, i32, u8, u8, u8);
 void BuyAllShopExtras();
 void ReCalculateCompletionPoints();
 void AddPartDebris(PARTDEBSYS_s *, i32, NUVEC *);
+extern i32 Lighting_HighlightFlash;
+extern i32 (*Lighting_BlueFlickerFn)(GameObject_s *);
+i32 ObjZappedBlue(GameObject_s *);
 
 extern i32 (*GizBuildit_AutoBuildPosFn)(void *, NUVEC *, NUVEC *, u16 *);
 static i32 GizBuildit_AutoBuildPos_Game(void *context, NUVEC *position, NUVEC *result, u16 *angle) {
@@ -758,8 +761,8 @@ void InitGameAfterConfig(void) {
     ForcePush_Waft = 1;
     ForcePush_SuperPush = 1;
     ForcePush_SuperMindTrick = 1;
-    //  Lighting_HighlightFlash = 1;
-    //  Lighting_BlueFlickerFn = ObjZappedBlue;
+    Lighting_HighlightFlash = 1;
+    Lighting_BlueFlickerFn = ObjZappedBlue;
     //  AddGameMsg_Default._56_4_ = GameMsg_EndDelay_Game;
     WorldInfo_InitMenuFn = Game_WorldInfo_InitMenu;
     WorldInfo_InitLastFn = Game_WorldInfo_InitLast;
