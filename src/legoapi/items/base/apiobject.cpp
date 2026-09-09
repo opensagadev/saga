@@ -410,7 +410,148 @@ extern "C" {
         memset(object, 0, system->object_size);
     }
 
-    void APIObjectLOSChecks(void) {
+    i32 NewRayCast(NUVEC *position, NUVEC *movement, f32 radius, i32 scan_flags);
+
+    i32 QuickNewRayCast(NUVEC *position, NUVEC *movement, f32 radius, i32 scan_flags, f32 max_distance, f32 step) {
+        if (step > 0.0f) {
+            f32 distance = movement->x * movement->x + movement->y * movement->y + movement->z * movement->z;
+            i32 hit;
+            if (distance > max_distance * max_distance)
+                return 0;
+            if (distance < step * step)
+                return NewRayCast(position, movement, radius, scan_flags);
+            distance = NuFsqrt(distance);
+            NUVEC direction;
+            NuVecScale(&direction, movement, NuFdiv(1.0f, distance));
+            NUVEC travelled = {0.0f, 0.0f, 0.0f};
+            NUVEC current = *position;
+            NUVEC segment;
+            while (distance > 0.0f) {
+                if (distance >= step) {
+                    NuVecScale(&segment, &direction, step);
+                    distance -= step;
+                } else {
+                    NuVecScale(&segment, &direction, distance);
+                    distance = 0.0f;
+                }
+                hit = NewRayCast(&current, &segment, radius, scan_flags);
+                if (hit != 0) {
+                    NuVecAdd(movement, &travelled, &segment);
+                    return hit;
+                }
+                NuVecAdd(&current, &current, &segment);
+                NuVecAdd(&travelled, &travelled, &segment);
+            }
+            return 0;
+        } else {
+            return NewRayCast(position, movement, radius, scan_flags);
+        }
+    }
+
+    void APIObjectLOSChecks(APIOBJECTSYS_s *system, i32 checks, i32 source_count, APIOBJECT **sources, i32 target_count,
+                            APIOBJECT **targets, f32 ray_step) {
+        i32 source_visible;
+        i32 target_visible;
+        i32 initial_target;
+        i32 initial_source;
+        if (system == NULL || checks == 0 || source_count == 0 || target_count == 0)
+            goto done;
+        if (system->los_source_index >= source_count) {
+            system->los_source_index = 0;
+            ++system->los_target_index;
+        }
+        if (system->los_target_index >= target_count)
+            system->los_target_index = 0;
+        initial_target = system->los_target_index;
+        initial_source = system->los_source_index;
+        do {
+            APIOBJECT *target = targets[system->los_target_index];
+            i32 target_index = target->field_0x289;
+            do {
+                APIOBJECT *source = sources[system->los_source_index];
+                i32 source_index = source->field_0x289;
+                NUVEC difference;
+                NuVecSub(&difference, &target->collision_position, &source->collision_position);
+                f32 distance_squared =
+                    difference.x * difference.x + difference.y * difference.y + difference.z * difference.z;
+                f32 source_range = source->viewdistance + target->visibility_range_extension;
+                f32 target_range = target->viewdistance + source->visibility_range_extension;
+                if (static_cast<u8>(source->flags_high & 2)) {
+                    source_visible = 1;
+                } else if ((static_cast<u8>(source->flags_high & 0x40) || static_cast<u8>(target->flags_high & 0x40)) &&
+                           ((system->line_of_sight[source_index] >> target->field_0x289) & 1) != 0 &&
+                           distance_squared < source_range * source_range) {
+                    source_visible = 1;
+                } else if (distance_squared < source_range * source_range &&
+                           difference.y - target->field_0x1e0 < source->maxviewheight &&
+                           difference.y + target->field_0x1e0 > source->minviewheight) {
+                    source_visible = 1;
+                } else {
+                    source_visible = 0;
+                }
+                if (static_cast<u8>(target->flags_high & 2)) {
+                    target_visible = 1;
+                } else if ((static_cast<u8>(target->flags_high & 0x40) || static_cast<u8>(source->flags_high & 0x40)) &&
+                           ((system->line_of_sight[target_index] >> source->field_0x289) & 1) != 0 &&
+                           distance_squared < target_range * target_range) {
+                    target_visible = 1;
+                } else if (distance_squared < target_range * target_range &&
+                           -difference.y - source->field_0x1e0 < target->maxviewheight &&
+                           source->field_0x1e0 - difference.y > target->minviewheight) {
+                    target_visible = 1;
+                } else {
+                    target_visible = 0;
+                }
+                if ((source_visible | target_visible) != 0) {
+                    if (static_cast<u8>(system->flags_210 & 1) || static_cast<u8>(target->flags_high & 4) ||
+                        static_cast<u8>(source->flags_high & 4)) {
+                        if (source_visible != 0)
+                            system->line_of_sight[source_index] |= (u64)1 << target_index;
+                        else
+                            system->line_of_sight[source_index] &= ~((u64)1 << target_index);
+                        if (target_visible != 0)
+                            system->line_of_sight[target_index] |= (u64)1 << source_index;
+                        else
+                            system->line_of_sight[target_index] &= ~((u64)1 << source_index);
+                    } else if (QuickNewRayCast(&source->collision_position, &difference, 0.0f, 0, 100.0f, ray_step) ==
+                               0) {
+                        if (source_visible != 0)
+                            system->line_of_sight[source_index] |= (u64)1 << target_index;
+                        else
+                            system->line_of_sight[source_index] &= ~((u64)1 << target_index);
+                        if (target_visible != 0)
+                            system->line_of_sight[target_index] |= (u64)1 << source_index;
+                        else
+                            system->line_of_sight[target_index] &= ~((u64)1 << source_index);
+                    } else {
+                        if (source_visible != 0 && static_cast<u8>(source->flags_high & 4))
+                            system->line_of_sight[source_index] |= (u64)1 << target_index;
+                        else
+                            system->line_of_sight[source_index] &= ~((u64)1 << target_index);
+                        if (target_visible != 0 && static_cast<u8>(target->flags_high & 4))
+                            system->line_of_sight[target_index] |= (u64)1 << source_index;
+                        else
+                            system->line_of_sight[target_index] &= ~((u64)1 << source_index);
+                    }
+                } else {
+                    system->line_of_sight[target_index] &= ~((u64)1 << source_index);
+                    system->line_of_sight[source_index] &= ~((u64)1 << target_index);
+                }
+                ++system->los_source_index;
+                --checks;
+                if (checks == 0)
+                    goto done;
+                if (system->los_source_index == initial_source && system->los_target_index == initial_target)
+                    goto done;
+            } while (system->los_source_index < source_count);
+            system->los_source_index = 0;
+            ++system->los_target_index;
+            if (system->los_target_index >= target_count)
+                system->los_target_index = 0;
+            if (system->los_source_index == initial_source && system->los_target_index == initial_target)
+                goto done;
+        } while (checks != 0);
+    done:;
     }
 
     void APIObjectVelocities(GameObject_s *object) {

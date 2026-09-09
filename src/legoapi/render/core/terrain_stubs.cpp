@@ -2301,9 +2301,6 @@ extern "C" {
         }
     }
 
-    void QuickNewRayCast(void) {
-    }
-
     void SortDebrisRenderStack(void) {
     }
 

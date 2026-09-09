@@ -636,7 +636,9 @@ struct APIOBJECTSYS_s {
         u64 line_of_sight[64];
         u32 hostility_masks[64][2]; // 0x008, one 64-bit mask per object slot
         struct {
-            u8 state_008[0x210 - 8];
+            u8 state_008[0x208 - 8];
+            i32 los_source_index;
+            i32 los_target_index;
             union {
                 u8 flags_210;
                 u8 runtime_flags;
@@ -648,11 +650,17 @@ struct APIOBJECTSYS_s {
 
 DECOMP_ASSERT(sizeof(APIOBJECTSYS_s) == 0x214, "APIOBJECTSYS size");
 DECOMP_ASSERT(offsetof(APIOBJECTSYS_s, flags_210) == 0x210, "APIOBJECTSYS flags offset");
+DECOMP_ASSERT(offsetof(APIOBJECTSYS_s, los_source_index) == 0x208, "APIOBJECTSYS LOS source index offset");
+DECOMP_ASSERT(offsetof(APIOBJECTSYS_s, los_target_index) == 0x20c, "APIOBJECTSYS LOS target index offset");
 DECOMP_ASSERT(offsetof(APIOBJECTSYS_s, hostility_masks) == 8, "APIOBJECTSYS hostility masks offset");
 
 extern "C" APIOBJECT *APIObjectCreate(APIOBJECTSYS_s *system);
 extern "C" void APIObjectDestroy(APIOBJECTSYS_s *system, APIOBJECT *object);
 extern "C" void APIObjectDestroyAll(APIOBJECTSYS_s *system);
+extern "C" void APIObjectLOSChecks(APIOBJECTSYS_s *system, i32 checks, i32 source_count, APIOBJECT **sources,
+                                   i32 target_count, APIOBJECT **targets, f32 ray_step);
+extern "C" i32 QuickNewRayCast(NUVEC *position, NUVEC *movement, f32 radius, i32 scan_flags, f32 max_distance,
+                               f32 step);
 extern "C" void APIObjectSetUsed(APIOBJECT *object, i32 index, i32 used);
 extern "C" void APIObjectVelocities(GameObject_s *object);
 extern "C" i32 APIObjectCollision(APIOBJECT *first, APIOBJECT *second);
