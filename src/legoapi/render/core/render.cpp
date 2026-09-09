@@ -1,4 +1,5 @@
 #include "legoapi/render/core/render.h"
+#include "nu2api/nu3d/numtl.h"
 #include "legoapi/cutscenes/cutscenes.h"
 #include <stdio.h>
 
