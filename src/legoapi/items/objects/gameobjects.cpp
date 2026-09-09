@@ -2106,6 +2106,39 @@ extern i32 party_cant_be_under_cover;
 extern AREADATA *VADER_ADATA;
 extern GameObject_s *alert_obj;
 void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system);
+i32 Hub_InMenu();
+i32 test_new_interaction;
+i32 debug_ignore_players;
+i32 WALKSTEALTH;
+i32 active_goody_count;
+extern i32 active_baddy_count;
+f32 timetogetlos;
+void GameCreatureOpponentSelection(AISYS_s *, i32, APIOBJECT **, i32, APIOBJECT **, i32, APIOBJECT **, u64, f32);
+void GizTurrets_OpponentSelection(GIZTURRETSYS_s *, i32, APIOBJECT **, i32, APIOBJECT **);
+
+static void TestWalkAround(APIOBJECT *object, APIOBJECT *other, NUVEC *difference, f32 radius) {
+    if (difference->x * difference->x + difference->z * difference->z < radius * radius) {
+        difference->x = object->position.x - other->position.x;
+        difference->z = object->position.z - other->position.z;
+        i32 angle = NuAtan2D(difference->x, difference->z);
+        difference->x = object->ai->movement_destination.x - other->position.x;
+        difference->z = object->ai->movement_destination.z - other->position.z;
+        i32 turn = NuAngSub(NuAtan2D(difference->x, difference->z), angle);
+        i32 limit = static_cast<i32>((ai_moveradius / radius) * 10430.378f);
+        if (turn > limit)
+            turn = limit;
+        else if (turn < -limit)
+            turn = -limit;
+        angle = NuAngAdd(angle, turn);
+        difference->x = 0.0f;
+        difference->y = 0.0f;
+        difference->z = radius;
+        NuVecRotateY(difference, difference, angle);
+        object->ai->movement_position.x = other->position.x + difference->x;
+        object->ai->movement_position.y = object->ai->movement_destination.y;
+        object->ai->movement_position.z = other->position.z + difference->z;
+    }
+}
 
 void GameAIProcess() {
     ai_fighting = 0;
@@ -2178,44 +2211,290 @@ void GameAIProcess() {
     }
     AITriggerSetSysProcess(WORLD->ai_trigger_set_sys);
 
+    APIOBJECT *neutral_objects[64];
+    APIOBJECT *interactive_objects[64];
+    APIOBJECT *goodies[64];
+    APIOBJECT *baddies[64];
+    i32 neutral_count = 0;
+    i32 interactive_count = 0;
+    i32 goody_count = 0;
+    i32 baddy_count = 0;
+    f32 follow_offset = 0.0f;
+    for (i32 index = 0; index < 8; ++index) {
+        GameObject_s *object = Player[index];
+        if (index < 2 && Player[1] == player)
+            object = Player[1 - index];
+        if (object != NULL && (object->apiobj.object_flags & 0x1001) == 0x1001 &&
+            (object->apiobj.field_0x287 == 0 || object->field_0x101c > 0.0f) && object->character_context != 0x17 &&
+            object->character_context != 0x5a) {
+            if (party_under_cover != 0 && (object->ai.field_0x1e5 & 0x40) != 0)
+                party_under_cover = 0;
+            if (!(object->camera_screen_position.x > -0.85f && object->camera_screen_position.x < 0.85f &&
+                  object->camera_screen_position.y > -0.85f && object->camera_screen_position.y < 0.85f) &&
+                (object->tag_flags & 2) == 0 && drop_back_in_timer > 0.0f) {
+                object->ai.nearest_opponent = NULL;
+                object->ai.pending_nearest_opponent = NULL;
+                object->ai.pending_nearest_metric = 1.0e9f;
+                object->ai.opponent = NULL;
+                object->ai.pending_opponent = NULL;
+                object->ai.pending_opponent_metric = 1.0e9f;
+                object->ai.field_0x1e5 &= ~0x10;
+            } else if ((object->apiobj.field_0x1f4 & 1) != 0) {
+                baddies[baddy_count++] = &object->apiobj;
+            } else if ((object->apiobj.field_0x1f4 & 4) != 0) {
+                neutral_objects[neutral_count++] = &object->apiobj;
+            } else {
+                goodies[goody_count++] = &object->apiobj;
+            }
+        }
+        object = Player[index];
+        if (object != NULL && (object->apiobj.object_flags & 0x1001) == 0x1001 &&
+            (object->apiobj.field_0x287 == 0 || object->field_0x101c > 0.0f) && (object->field_0xeff & 1) == 0 &&
+            (object->apiobj.flags_low & 0x80) == 0) {
+            party_follow_offsets[object->apiobj.field_0x27c] = follow_offset;
+            follow_offset += 0.2f;
+        }
+    }
+
+    u64 awareness = 0;
     for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
         GameObject_s *object = &Obj[index];
+        i32 ground_checks;
+        i32 process_ai;
         const u16 character_flags = APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER;
-        if ((object->apiobj.field_0x1f8 & character_flags) != character_flags || object->apiobj.field_0x287 != 0) {
-            continue;
+        object->active_trigger_set = NULL;
+        if ((object->apiobj.field_0x1f8 & character_flags) != character_flags || object->apiobj.field_0x287 != 0 ||
+            object->character_context == 0x3b) {
+            goto interaction;
         }
 
-        i32 ground_checks = object->apiobj.field_0x27d != 0;
-        if (ground_checks == 0 && object->apiobj.character_data != NULL) {
+        ground_checks = object->apiobj.field_0x27d != 0;
+        if (ground_checks == 0) {
             ground_checks = (object->apiobj.character_data->model_flags >> 13) & 1;
         }
 
-        const i32 process_ai = (object->field_0xf00 & GAME_OBJECT_AI_UPDATE_PROCESS) != 0;
-        if (object->character_context != 0x3b && (object->apiobj.field_0x1f4 & 0x40000) == 0) {
-            if (object->pad_gamepad->pad == NULL) {
-                object->pad_gamepad->buttons_held = 0;
-                object->pad_gamepad->buttons_pressed = 0;
-                object->pad_gamepad->buttons_released = 0;
-                object->pad_gamepad->left_directions = 0;
-                object->pad_gamepad->previous_left_directions = 0;
-                object->pad_gamepad->right_directions = 0;
-                object->pad_gamepad->previous_right_directions = 0;
-                object->pad_gamepad->unknown_20 = 0;
+        process_ai = (object->field_0xf00 & GAME_OBJECT_AI_UPDATE_PROCESS) != 0;
+        if ((object->apiobj.field_0x1f4 & 0x400) != 0) {
+            if ((object->apiobj.field_0x1f4 & 0x10000) != 0) {
+                baddies[baddy_count++] = &object->apiobj;
+                goodies[goody_count++] = &object->apiobj;
+            } else if ((object->apiobj.field_0x1f4 & 1) != 0) {
+                baddies[baddy_count++] = &object->apiobj;
+            } else if ((object->apiobj.field_0x1f4 & 4) != 0) {
+                neutral_objects[neutral_count++] = &object->apiobj;
+            } else {
+                goodies[goody_count++] = &object->apiobj;
             }
-            if (process_ai != 0) {
-                object->script_fire_target = NULL;
-                object->field_0xef9 = (object->field_0xef9 & ~4) | ((object->field_0xef9 << 1) & 4);
-                object->field_0xef8 &= ~0x20;
-                if ((object->field_0xef9 & 0x80) != 0) {
-                    object->field_0xef9 &= ~0x80;
-                    object->field_0xe64 = object->field_0xe58;
-                }
-                object->field_0xefa &= ~3;
+        }
+        if ((object->apiobj.field_0x1f4 & 0x40000) != 0) {
+            if ((object->apiobj.flags_high & 0x10) != 0 && object->apiobj.field_0x287 == 0 &&
+                object->context_target_position == NULL &&
+                (object->apiobj.character_data->game_character->flags_090 & 0x8000) == 0) {
+                interactive_objects[interactive_count++] = &object->apiobj;
+                object->apiobj.resolved_collision_priority = 0;
+                object->apiobj.collision_priority = HIGHGAMEOBJECT - object->apiobj.field_0x289;
+                object->ai.field_0x1e5 |= 0x20;
+            } else if (object->field_0x101c > 0.0f) {
+                object->ai.field_0x1e5 |= 0x20;
+            } else {
+                object->ai.nearest_opponent = NULL;
+                object->ai.opponent = NULL;
+                object->ai.field_0x1e5 &= ~0x20;
             }
+            if (object->opponent != NULL && (static_cast<APIOBJECT *>(object->opponent)->flags_low & 1) == 0)
+                object->opponent = NULL;
+            if (object->ai.opponent_object != NULL && ((object->ai.opponent_object->flags_low & 1) == 0 ||
+                                                       (object->ai.opponent_object->ai->field_0x1e5 & 0x20) == 0)) {
+                object->ai.opponent_metric = 1.0e9f;
+                object->ai.opponent = NULL;
+            }
+            if (process_ai != 0)
+                AISysUpdateCharacterPathPos(WORLD->ai_sys, &object->apiobj, &object->ai, ground_checks,
+                                            object->ai_elapsed_time);
+            continue;
+        }
+        if (object->pad_gamepad->pad == NULL) {
+            object->pad_gamepad->buttons_held = 0;
+            object->pad_gamepad->buttons_pressed = 0;
+            object->pad_gamepad->buttons_released = 0;
+            object->pad_gamepad->left_directions = 0;
+            object->pad_gamepad->previous_left_directions = 0;
+            object->pad_gamepad->right_directions = 0;
+            object->pad_gamepad->previous_right_directions = 0;
+            object->pad_gamepad->unknown_20 = 0;
+        }
+        awareness |= object->apiobj.ai_awareness_mask;
+        if (process_ai != 0) {
+            object->script_fire_target = NULL;
+            object->field_0xef9 = (object->field_0xef9 & ~4) | ((object->field_0xef9 << 1) & 4);
+            object->field_0xef8 &= ~0x20;
+            if ((object->field_0xef9 & 0x80) != 0) {
+                object->field_0xef9 &= ~0x80;
+                object->field_0xe64 = object->field_0xe58;
+            }
+            object->field_0xefa &= ~3;
         }
         AISysProcessCharacter(WORLD->ai_sys, &object->apiobj, &object->ai, ground_checks, object->ai_elapsed_time, 0,
                               process_ai);
+    interaction:
+        if ((object->apiobj.flags_high & 0x10) != 0 && object->apiobj.field_0x287 == 0 &&
+            object->context_target_position == NULL &&
+            (object->apiobj.character_data->game_character->flags_090 & 0x8000) == 0) {
+            interactive_objects[interactive_count++] = &object->apiobj;
+            object->apiobj.resolved_collision_priority = 0;
+            object->apiobj.collision_priority = HIGHGAMEOBJECT - object->apiobj.field_0x289;
+            if ((object->apiobj.flags_low & 2) != 0 || (object->field_0xeff & 0x80) != 0) {
+                object->apiobj.collision_priority = 0x8000;
+            } else if ((object->apiobj.flags_low & 0x80) == 0) {
+                if ((object->ai.field_0x1e7 & 0x80) != 0)
+                    object->apiobj.collision_priority |= 0x4000;
+                if ((object->ai.field_0x1e7 & 0x40) != 0)
+                    object->apiobj.collision_priority |= 0x2000;
+                if ((object->ai.navigation_flags & 1) != 0)
+                    object->apiobj.collision_priority |= 0x1000;
+                if ((object->pad_gamepad->allocated_5a & 2) != 0)
+                    object->apiobj.collision_priority |= 0x800;
+                if ((object->ai.path_info.flags & 1) == 0 || object->ai.path_info.connection == NULL)
+                    object->apiobj.collision_priority |= 0x400;
+                if (object->ai.movement_parameter == 0.0f) {
+                    f32 x = object->ai.fallback_destination.x - object->apiobj.position.x;
+                    f32 z = object->ai.fallback_destination.z - object->apiobj.position.z;
+                    f32 radius = object->ai.mover_height + 1.0f;
+                    if (x * x + z * z < radius * radius)
+                        object->apiobj.collision_priority |= 0x200;
+                }
+            }
+            object->ai.field_0x1e5 |= 0x20;
+            if (object->opponent != NULL && (static_cast<APIOBJECT *>(object->opponent)->flags_low & 1) == 0)
+                object->opponent = NULL;
+            if (object->ai.opponent_object != NULL && ((object->ai.opponent_object->flags_low & 1) == 0 ||
+                                                       (object->ai.opponent_object->ai->field_0x1e5 & 0x20) == 0)) {
+                object->ai.opponent = NULL;
+                object->ai.opponent_metric = 1.0e9f;
+            }
+            if ((object->field_0xeff & 8) != 0 || debug_ignore_players != 0 || Hub_InMenu() != 0) {
+                object->ai_opponent_exclusion_mask |= (u64)1 << player->apiobj.field_0x289;
+                if (player2 != NULL)
+                    object->ai_opponent_exclusion_mask |= (u64)1 << player2->apiobj.field_0x289;
+            }
+            if ((object->apiobj.flags_low & 0x80) != 0 && object->apiobj.field_0x27d != 0 &&
+                object->pad_gamepad->input_magnitude >
+                    (WALKSTEALTH != 0 ? object->apiobj.character_data->game_character->walk_speed
+                                      : object->apiobj.character_data->game_character->tiptoe_speed))
+                object->field_0xef9 |= 8;
+        } else if (object->field_0x101c > 0.0f) {
+            object->ai.field_0x1e5 |= 0x20;
+        } else {
+            object->ai.nearest_opponent = NULL;
+            object->ai.opponent = NULL;
+            object->ai.field_0x1e5 &= ~0x20;
+        }
     }
+    active_goody_count = goody_count;
+    active_baddy_count = baddy_count;
+    active_neutral_count = neutral_count;
+    for (i32 index = 0; index < neutral_count; ++index)
+        baddies[baddy_count + index] = neutral_objects[index];
+    i32 los_count = baddy_count + neutral_count;
+    timetogetlos = (f32)(los_count * los_count) * FRAMETIME * 0.5f;
+    APIObjectLOSChecks(WORLD->api_object_sys, 2, goody_count, goodies, los_count, baddies,
+                      (f32)static_cast<u8>(WORLD->current_level->unknown_0da));
+    if (test_new_interaction == 0) {
+        LEGO_AISysCreatureInteraction2D(WORLD->ai_sys, interactive_count, interactive_objects, NULL, FRAMETIME);
+    } else {
+        for (i32 index = 0; index < interactive_count; ++index) {
+            f32 timer = interactive_objects[index]->ai->antinode_timer - FRAMETIME;
+            if (timer < 0.0f)
+                timer = 0.0f;
+            interactive_objects[index]->ai->antinode_timer = timer;
+        }
+        for (i32 first_index = 0; first_index < interactive_count - 1; ++first_index) {
+            APIOBJECT *first = interactive_objects[first_index];
+            for (i32 second_index = first_index + 1; second_index < interactive_count; ++second_index) {
+                APIOBJECT *second = interactive_objects[second_index];
+                f32 radius = first->ai->mover_height + second->ai->mover_height;
+                NUVEC difference;
+                difference.x = first->ai->movement_position.x - second->ai->movement_position.x;
+                if (difference.x > radius || difference.x < -radius)
+                    continue;
+                difference.z = first->ai->movement_position.z - second->ai->movement_position.z;
+                if (difference.z > radius || difference.z < -radius)
+                    continue;
+                if (first->collision_min.y > second->collision_max.y ||
+                    second->collision_min.y > first->collision_max.y || first->collision_link == second ||
+                    second->collision_link == first)
+                    continue;
+                bool fixed_first;
+                bool fixed_second;
+                if (first->collision_priority > second->collision_priority) {
+                    fixed_first = true;
+                    fixed_second = (second->flags_low & 0x80) != 0;
+                } else if (first->collision_priority < second->collision_priority) {
+                    fixed_first = (first->flags_low & 0x80) != 0;
+                    fixed_second = true;
+                } else {
+                    continue;
+                }
+                if (fixed_first && fixed_second)
+                    continue;
+                f32 distance = NuFsqrt(difference.x * difference.x + difference.z * difference.z);
+                if (distance < radius) {
+                    difference.y = 0.0f;
+                    if (fixed_first) {
+                        if (first->collision_priority > second->resolved_collision_priority) {
+                            second->resolved_collision_priority = first->collision_priority;
+                            difference.x = -difference.x;
+                            difference.z = -difference.z;
+                            TestWalkAround(second, first, &difference, radius);
+                        }
+                    } else if (fixed_second) {
+                        if (second->collision_priority > first->resolved_collision_priority) {
+                            first->resolved_collision_priority = second->collision_priority;
+                            TestWalkAround(first, second, &difference, radius);
+                        }
+                    } else {
+                        first->resolved_collision_priority = second->collision_priority;
+                        difference.x = -difference.x;
+                        difference.z = -difference.z;
+                        TestWalkAround(second, first, &difference, radius);
+                    }
+                    AIPACKET *first_ai = first->ai;
+                    AIPACKET *second_ai = second->ai;
+                    f32 first_timer = first_ai->antinode_timer;
+                    f32 second_timer = second_ai->antinode_timer;
+                    if (first_timer > antinode_time && second_timer > antinode_time) {
+                        if (first_timer > second_timer) {
+                            second_ai->antinode_timer = first_timer;
+                            second_ai->antinode_clockwise = first_ai->antinode_clockwise;
+                        } else {
+                            first_ai->antinode_timer = second_timer;
+                            first_ai->antinode_clockwise = second_ai->antinode_clockwise;
+                        }
+                    } else if (second_timer > antinode_time) {
+                        first_ai->antinode_timer = second_timer;
+                        first_ai->antinode_clockwise = second_ai->antinode_clockwise;
+                    } else if (first_timer > 0.0f) {
+                        second_ai->antinode_timer = first_timer;
+                        second_ai->antinode_clockwise = first_ai->antinode_clockwise;
+                    }
+                    if (((first->field_0x1f4 ^ second->field_0x1f4) & 1) != 0) {
+                        first->ai->field_0x1e5 |= 0x40;
+                        second->ai->field_0x1e5 |= 0x40;
+                    }
+                }
+            }
+        }
+        AISysCreatureAntinodeInteraction(WORLD->ai_sys, interactive_count, interactive_objects, NULL);
+    }
+    if (party_under_cover != 0) {
+        for (i32 index = 0; index < 8; ++index) {
+            if (Player[index] != NULL)
+                Player[index]->ai.field_0x1e5 &= ~0x40;
+        }
+    }
+    GameCreatureOpponentSelection(WORLD->ai_sys, interactive_count, interactive_objects, goody_count, goodies,
+                                  baddy_count, baddies, awareness, FRAMETIME);
+    GizTurrets_OpponentSelection(WORLD->giz_turret_sys, goody_count, goodies, baddy_count, baddies);
     oneAtOnce_MaintainArray();
 }
 
