@@ -20,6 +20,11 @@ extern "C" {
     void edbitsRegisterBaseTerrain(void *terrain);
     void edppStartPage(i32 page);
     void edppStopPage(i32 page);
+    void edppClearPage(i8 page);
+    void edpartClearPage(i8 page);
+    void edgraClearPage(i8 page);
+    void edbriClearPage(i8 page);
+    void edanimClearPage(i32 page);
     void edanimStartPage(i32 page);
     void edanimStopPage(i32 page);
     void edpartStartPage(i8 page);

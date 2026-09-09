@@ -137,7 +137,7 @@ extern "C" {
     }
     void edGraInitTerrainSwapProtection(void) {
     }
-    void edanimClearPage(void) {
+    void edanimClearPage(i32) {
     }
     void edanimLookupSpecial(void) {
     }
@@ -233,7 +233,7 @@ extern "C" {
         memset(edbri_page_on, 0, sizeof(edbri_page_on));
         edbri_bridges_used = 0;
     }
-    void edbriClearPage(void) {
+    void edbriClearPage(i8) {
     }
     void edbriStartAllPages(void) {
     }
@@ -357,7 +357,7 @@ extern "C" {
     }
     void edgraBufferUsage(void) {
     }
-    void edgraClearPage(void) {
+    void edgraClearPage(i8) {
     }
     void edgraClumpsReset(void) {
     }
@@ -410,7 +410,7 @@ extern "C" {
     }
     void edmainSetReturn(void) {
     }
-    void edpartClearPage(void) {
+    void edpartClearPage(i8) {
     }
     void edpartDestroyAllParticles(void) {
     }
@@ -426,7 +426,7 @@ extern "C" {
     }
     void edpartRegisterPointerToGameCharLocation(void) {
     }
-    void edppClearPage(void) {
+    void edppClearPage(i8) {
     }
     void edppDeleteEffect(i32 index) {
         if (edpp_ptls[edpp_nearest].effect_index == index)

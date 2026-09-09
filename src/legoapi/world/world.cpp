@@ -25,6 +25,8 @@
 #include "nu2api/nucore/nutime.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nufile/nufpar.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "gameapi/edtools/edgra.h"
 
 // Globals shared across world loading — defined here until moved to globals.cpp
 TIMER LevelTimer;
@@ -79,6 +81,14 @@ u32 LEGOOBJ_DEFAULTLASTCOIN = -1;
 APICHARACTERSYS *apicharsys;
 void CutScenes_Destroy(CUTSYS *system);
 void CharScenes_LevelDump(WORLDINFO *world);
+void Customiser_DumpAll(CUSTOMISER *, WORLDINFO *);
+void CharacterMiniKits_Dump(WORLDINFO *);
+void DestroyRippleMtls(WORLDINFO *);
+extern "C" {
+    void ClearLinkedCutSceneMusic(void *);
+    extern i32 edpp_page_on[8];
+    extern i32 part_page_on[8];
+}
 
 // --- World-module helpers (kept with the WorldInfo API) ---
 
@@ -99,15 +109,56 @@ void SetAreaPickupGravity(i32 area, i32 level) {
     }
 }
 void WorldInfo_Dump(WORLDINFO *world) {
-    // The full routine also tears down the level's gameplay subsystems and
-    // editor pages. These scene removals are the original calls at
-    // 0x481bcc..0x481d6b and must happen before Reset reuses the bump buffer.
+    if (world->mech_auto_jump_manager != NULL) {
+        delete world->mech_auto_jump_manager;
+        world->mech_auto_jump_manager = NULL;
+    }
+    MechSystems::Get()->ExitLevel(world);
+    Customiser_DumpAll(reinterpret_cast<CUSTOMISER *>(Game_Customiser), world);
+    if (world->cutscene_sys != NULL) {
+        for (i32 index = 0; index < world->cutscene_sys->count; ++index)
+            ClearLinkedCutSceneMusic(world->cutscene_sys->cuts[index]->instance);
+    }
+    CharacterMiniKits_Dump(world);
     CharScenes_LevelDump(world);
     CutScenes_Destroy(world->cutscene_sys);
     if (world->icons_gscn != nullptr) {
         NuGScnRemove(world->icons_gscn);
         world->icons_gscn = nullptr;
     }
+    if (world->page_pp != -1) {
+        edppStopPage(static_cast<i8>(world->page_pp));
+        edppClearPage(static_cast<i8>(world->page_pp));
+    }
+    if (world->page_part != -1) {
+        edpartStopPage(static_cast<i8>(world->page_part));
+        edpartClearPage(static_cast<i8>(world->page_part));
+    }
+    if (world->page_grass != -1) {
+        edgraStopPage(static_cast<i8>(world->page_grass));
+        edgraClearPage(static_cast<i8>(world->page_grass));
+    }
+    if (world->page_bridge != -1)
+        edbriClearPage(static_cast<i8>(world->page_bridge));
+    if (world->page_anim != -1) {
+        edanimStopPage(world->page_anim);
+        edanimClearPage(world->page_anim);
+    }
+    if (BGLOAD == 0) {
+        for (i32 page = 2; page < 8; ++page) {
+            if (edpp_page_on[page] != 0) {
+                edppStopPage(page);
+                edppClearPage(page);
+            }
+        }
+        for (i32 page = 1; page < 8; ++page) {
+            if (part_page_on[page] != 0) {
+                edpartStopPage(page);
+                edpartClearPage(page);
+            }
+        }
+    }
+    DestroyRippleMtls(world);
     if (world->current_gscn != nullptr) {
         NuGScnRemove(world->current_gscn);
         world->current_gscn = nullptr;
