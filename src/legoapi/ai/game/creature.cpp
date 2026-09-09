@@ -261,6 +261,13 @@ void ResetAICreature(GameObject_s *object, AISYS_s *system) {
     object->field_0x10c8 = object->apiobj.position.x;
     object->field_0x10cc = object->apiobj.position.y;
     object->field_0x10d0 = object->apiobj.position.z;
+    if ((object->apiobj.character_data->model_flags & 0x20000000) != 0 &&
+        object->apiobj.character_model->model_data_b[0x41] != NULL) {
+        object->context_animation_timer = 1000000000.0f;
+        object->field_0x7a5 = 0x17;
+        object->context_animation = 0x41;
+        ResetAnimPacket(&object->apiobj.anim_packet, 0x41);
+    }
 }
 
 void SnapCreaturePos(GameObject_s *object, nuvec_s *position, i32 angle, AIPATHINFO_s *path_info, i32 set_on_surface) {
