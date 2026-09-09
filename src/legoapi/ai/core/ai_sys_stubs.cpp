@@ -650,7 +650,7 @@ static void AISysLoadPathRoutes(AISYS *system, AIPATH *path) {
 
             i32 character_count = EdFileReadChar();
             for (i32 character_index = 0; character_index < character_count; ++character_index) {
-                char character_name[256] = {};
+                char character_name[256];
                 i32 character_name_length = EdFileReadChar();
                 EdFileRead(character_name, character_name_length);
                 if (SpecialRouteCharacterTypeIDFn != NULL) {
@@ -686,6 +686,9 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene) {
     }
 
     AIPATHSYS *path_system = static_cast<AIPATHSYS *>(AISysLoadAlloc(system, sizeof(AIPATHSYS)));
+    if (path_system == NULL) {
+        return NULL;
+    }
     path_system->path_count = static_cast<u8>(path_count);
     path_system->paths = static_cast<AIPATH **>(AISysLoadAlloc(system, path_system->path_count * sizeof(AIPATH *)));
 
@@ -739,7 +742,7 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene) {
                 node->distance_cache_nodes[1] = 0xff;
                 node->special_route_index = static_cast<u8>(EdFileReadChar());
 
-                char special_name[256] = {};
+                char special_name[256];
                 i32 special_name_length = EdFileReadChar();
                 if (special_name_length != 0) {
                     EdFileRead(special_name, special_name_length);
@@ -1201,12 +1204,13 @@ static void AISysLoadLocatorSets(AISYS *system, i32 version) {
         AILOCATORSET *locator_set = &system->locator_sets[index];
         EdFileRead(locator_set->name, sizeof(locator_set->name));
         locator_set->locator_count = static_cast<i8>(EdFileReadInt());
-        locator_set->locator_entries = static_cast<u8 *>(AISysLoadAlloc(system, locator_set->locator_count));
+        locator_set->locator_entries =
+            static_cast<u8 *>(AISysLoadAlloc(system, locator_set->locator_count * sizeof(AILOCATORSET)));
         for (i32 locator_index = 0; locator_index < locator_set->locator_count; ++locator_index) {
             locator_set->locator_entries[locator_index] = static_cast<u8>(EdFileReadChar());
         }
         locator_set->assigned = static_cast<u8 *>(AISysLoadAlloc(system, locator_set->locator_count));
-        memset(locator_set->assigned, 0xff, locator_set->locator_count);
+        memset(locator_set->assigned, 0, locator_set->locator_count);
     }
 }
 
