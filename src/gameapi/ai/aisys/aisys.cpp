@@ -2512,7 +2512,7 @@ __used__ static i32 Action_FollowPath(AISYS *sys, AISCRIPTPROCESS *processor, AI
 
     AIMoveInstruction(packet, NULL, 0.0f, NULL, AIPACKET_MOVEMENT_WANDER, packet->movement_instruction_parameter);
 
-    if (processor->action_timer <= completion_time) {
+    if (!(processor->action_timer > completion_time)) {
         return 0;
     }
 
