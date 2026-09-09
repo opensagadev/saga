@@ -6,6 +6,7 @@
 #include "gameapi/edtools/edfile.h"
 #include "gameapi/gui/apimenu.h"
 #include "globals.h"
+#include "gamelib/util/gamelib_util_types.h"
 #include "legoapi/world/mission.h"
 #include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/core/config/cheat.h"
@@ -2097,14 +2098,85 @@ i32 GameRayCast(NUVEC *position, NUVEC *displacement, f32 radius, i32 mask) {
     return hit;
 }
 
+f32 draw_attention_distance = 2.0f;
+extern f32 party_follow_offsets[8];
+extern i32 active_neutral_count;
+extern "C" i32 party_under_cover;
+extern i32 party_cant_be_under_cover;
+extern AREADATA *VADER_ADATA;
+extern GameObject_s *alert_obj;
+void AITriggerSetSysProcess(AITRIGGERSETSYS_s *system);
+
 void GameAIProcess() {
-    if (WORLD == NULL || WORLD->ai_sys == NULL || Obj == NULL) {
-        return;
+    ai_fighting = 0;
+    AISysProcess(WORLD->ai_sys, reinterpret_cast<APIOBJECT *>(player), reinterpret_cast<APIOBJECT *>(player2));
+
+    for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
+        GameObject_s *object = &Obj[index];
+        if ((object->apiobj.flags_high & 0x10) == 0 || object->apiobj.field_0x287 != 0) {
+            continue;
+        }
+        object->ai.capabilities &= ~0x00e00000u;
+        if ((object->apiobj.flags_low & 0x80) != 0 && TouchHacks::TouchControlsActive) {
+            if ((object->ai.capabilities & 1) != 0)
+                object->ai.capabilities |= 0x00200000;
+            if ((object->ai.capabilities & 2) != 0)
+                object->ai.capabilities |= 0x00400000;
+            if ((object->ai.capabilities & 0x20) != 0)
+                object->ai.capabilities |= 0x00800000;
+        }
+        object->field_0xefd &= 0x7f;
+        object->field_0xf01 &= 0x3f;
+        object->field_0xf02 &= 0xfc;
+        object->field_0x107e = 0;
+        if (object->use_action_frames != 0) {
+            --object->use_action_frames;
+        } else if (object->use_action_parameter > 0.0f) {
+            object->use_action_parameter -= FRAMETIME;
+        } else {
+            object->can_use_object = NULL;
+            object->use_action = 0;
+        }
+        if (object->field_0x1094 != 0)
+            --object->field_0x1094;
+        object->apiobj.visibility_range_extension =
+            (object->ai.field_0x1e5 & 0x40) != 0 ? draw_attention_distance : 0.0f;
+        if (MiniCutCam != 0 && (object->apiobj.flags_high & 1) != 0) {
+            object->pad_gamepad->buttons_held &= GAMEPAD_START;
+            object->pad_gamepad->buttons_pressed &= GAMEPAD_START;
+        }
+        if (object->alert_target != NULL) {
+            object->alert_target_timer -= FRAMETIME;
+            if (object->alert_target_timer <= 0.0f) {
+                object->alert_target = NULL;
+                object->alert_target_timer = 0.0f;
+            }
+        }
     }
 
-    APIOBJECT *first_player = player != NULL ? &player->apiobj : NULL;
-    APIOBJECT *second_player = player2 != NULL ? &player2->apiobj : NULL;
-    AISysProcess(WORLD->ai_sys, first_player, second_player);
+    party_under_cover = 0;
+    active_neutral_count = 0;
+    i32 all_under_cover = 1;
+    for (i32 index = 0; index < 8; ++index) {
+        GameObject_s *object = Player[index];
+        if (object != NULL && (object->apiobj.object_flags & 0x1001) == 0x1001 &&
+            (object->apiobj.field_0x287 == 0 || object->field_0x101c > 0.0f) && (object->field_0xeff & 1) == 0 &&
+            (VADER_ADATA == NULL || WORLD->area != VADER_ADATA) && party_cant_be_under_cover == 0) {
+            if (object->field_0x108e == 5 ||
+                ((FreePlay != 0 || WORLD->current_level == HUB_LDATA) &&
+                 (object->apiobj.character_data->model_flags & 0x204) != 0 && object->field_0xcc0 == NULL)) {
+                if (alert_obj == NULL || alert_obj->apiobj.field_0x27c == -1 || (alert_obj->field_0xeff & 1) != 0)
+                    party_under_cover = 1;
+            }
+            if ((object->apiobj.character_data->model_flags & 0x80000) == 0)
+                all_under_cover = 0;
+        }
+        party_follow_offsets[index] = 0.5f;
+    }
+    if ((VADER_ADATA == NULL || WORLD->area != VADER_ADATA) && all_under_cover != 0 && party_cant_be_under_cover == 0) {
+        party_under_cover = 1;
+    }
+    AITriggerSetSysProcess(WORLD->ai_trigger_set_sys);
 
     for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
         GameObject_s *object = &Obj[index];
