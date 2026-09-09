@@ -58,6 +58,8 @@
 #include <stdio.h>
 #include <string.h>
 
+void SetObjAsHeadTarget(GameObject_s *, GameObject_s *, i8, f32, f32, f32);
+
 static f32 Condition_IAmAPartyCharacter(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
     if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.field_0x27c != -1) {
         return 1.0f;
@@ -2336,6 +2338,41 @@ void GameAIProcess() {
         }
         AISysProcessCharacter(WORLD->ai_sys, &object->apiobj, &object->ai, ground_checks, object->ai_elapsed_time, 0,
                               process_ai);
+        if ((FreePlay == 0 || (object->apiobj.field_0x1f4 & 0x400) != 0) &&
+            (object->ai.field_0x1e6 & AIPACKET_RUNTIME_USING_PATH_WAYPOINT) != 0)
+            AISysFindRoute(&object->ai);
+        if ((object->apiobj.field_0x1f8 & 0x180) == 0x80) {
+            object->field_0xefc &= ~4;
+            object->apiobj.flags_high =
+                (object->apiobj.flags_high & ~2) | ((object->apiobj.character_data->model_flags >> 27) & 2);
+        } else {
+            object->apiobj.flags_high &= ~2;
+        }
+        if ((object->apiobj.character_data->game_character->flags_094[3] & 0x10) != 0 &&
+            (object->apiobj.flags_low & 0x80) == 0) {
+            f32 threshold = object->apiobj.character_data->game_character->walk_speed - 0.01f;
+            if (object->field_0xe31 == 1) {
+                if (threshold >= object->pad_gamepad->input_magnitude) {
+                    object->ai_jump_timer += FRAMETIME;
+                    if (object->ai_jump_timer > 0.1f) {
+                        object->pad_gamepad->buttons_pressed |= GAMEPAD_JUMP;
+                        object->ai_jump_timer = 0.0f;
+                    }
+                } else {
+                    object->ai_jump_timer = 0.0f;
+                }
+            } else if (object->pad_gamepad->input_magnitude > threshold) {
+                object->ai_jump_timer += FRAMETIME;
+                if (object->ai_jump_timer > 1.0f) {
+                    object->pad_gamepad->buttons_pressed |= GAMEPAD_JUMP;
+                    object->ai_jump_timer = 0.0f;
+                }
+            } else {
+                object->ai_jump_timer = 0.0f;
+            }
+        }
+        if (object->ai.action_target_ref != NULL)
+            SetObjAsHeadTarget(object, *object->ai.action_target_ref, 2, 1.0f, 0.0f, 0.0f);
     interaction:
         if ((object->apiobj.flags_high & 0x10) != 0 && object->apiobj.field_0x287 == 0 &&
             object->context_target_position == NULL &&

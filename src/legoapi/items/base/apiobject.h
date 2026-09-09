@@ -1045,7 +1045,10 @@ typedef struct GameObject_s {
     f32 field_0xddc;
     f32 field_0xde0; // 0x0de0
     f32 hold_timer;  // 0x0de4
-    u8 pad_de8[0xdec - 0xde8];
+    union {
+        u8 pad_de8[0xdec - 0xde8];
+        f32 ai_jump_timer;
+    };
     f32 field_0xdec; // 0x0dec
     union {
         u8 pad_df0[0xdf8 - 0xdf0];
@@ -1591,6 +1594,7 @@ DECOMP_ASSERT(offsetof(GameObject_s, collision_target) == 0xcb8, "GameObject col
 DECOMP_ASSERT(offsetof(GameObject_s, block_attacker) == 0xce8, "GameObject block attacker offset");
 DECOMP_ASSERT(offsetof(GameObject_s, incoming_bolt) == 0xcf4, "GameObject incoming bolt offset");
 DECOMP_ASSERT(offsetof(GameObject_s, block_cooldown) == 0xdd8, "GameObject block cooldown offset");
+DECOMP_ASSERT(offsetof(GameObject_s, ai_jump_timer) == 0xde8, "GameObject AI jump timer offset");
 DECOMP_ASSERT(offsetof(GameObject_s, ai_combo_cooldown) == 0xd48, "GameObject AI combo cooldown offset");
 DECOMP_ASSERT(offsetof(GameObject_s, force_glow_position) == 0xc58, "GameObject force glow position offset");
 DECOMP_ASSERT(offsetof(GameObject_s, force_glow_candidate) == 0xd0c, "GameObject force glow candidate offset");
