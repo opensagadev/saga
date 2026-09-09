@@ -705,10 +705,38 @@ static __used__ void GizAction_SetAIMessage(GIZFLOW_s *, FLOWBOX_s *, char **, i
 static __used__ void GizActions_PlaySpecial(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
 }
 
-static __used__ void GizAction_ActivateGizmo(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
+static __used__ void GizAction_ActivateGizmo(GIZFLOW_s *flow, FLOWBOX_s *, char **params, int count) {
+    char *name = NULL;
+    i32 type = -1;
+    i32 active = 1;
+    for (i32 index = 0; index < count; ++index) {
+        char *value = NuStrIStr(params[index], "name=");
+        if (value != NULL)
+            name = value + 5;
+        else if ((value = NuStrIStr(params[index], "type=")) != NULL)
+            type = GizmoGetTypeIDByName(flow->gizmo_sys, value + 5);
+        else if (NuStrIStr(params[index], "FALSE") != NULL)
+            active = 0;
+    }
+    if (name != NULL) {
+        GIZMO *gizmo = GizmoFindByName(flow->gizmo_sys, type, name);
+        if (gizmo != NULL)
+            GizmoActivate(flow->gizmo_sys, gizmo, active, 1);
+    }
 }
 
-static __used__ void GizAction_SetVisibility(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
+static __used__ void GizAction_SetVisibility(GIZFLOW_s *, FLOWBOX_s *, char **params, int count) {
+    nuhspecial_s special = {};
+    i32 visible = 1;
+    for (i32 index = 0; index < count; ++index) {
+        char *value = NuStrIStr(params[index], "name=");
+        if (value != NULL)
+            NuSpecialFind(WORLD->current_gscn, &special, value + 5, 1);
+        else if (NuStrIStr(params[index], "FALSE") != NULL)
+            visible = 0;
+    }
+    if (NuSpecialExistsFn(&special))
+        NuSpecialSetVisibility(&special, visible);
 }
 
 static __used__ void GizAction_TurnOnFlowBox(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
