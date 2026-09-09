@@ -1078,11 +1078,11 @@ extern "C" {
 
         AIPATHNODE *from = AIPathFindNode(system, path, from_name);
         AIPATHNODE *to = AIPathFindNode(system, path, to_name);
-        if (from == NULL || to == NULL || from == to || from->connections == NULL) {
+        if (to == NULL || from == NULL || from == to) {
             return NULL;
         }
 
-        const u8 to_index = static_cast<u8>(to - path->nodes);
+        const i32 to_index = to - path->nodes;
         for (i32 index = 0; index < from->connection_count; ++index) {
             AIPATHCNX *connection = from->connections[index];
             if (connection->node_indices[0] == to_index) {
