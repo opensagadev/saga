@@ -132,7 +132,7 @@ i32 Action_FollowPlayer(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *
         }
     }
 
-    if (sys != NULL && sys->player_1 != NULL && sys->player_1->ai != NULL) {
+    if (sys->player_1 != NULL && sys->player_1->ai != NULL) {
         FollowAPIObject(&packet->owner->apiobj, sys->player_1, processor->action_data_1,
                         packet->movement_instruction_parameter);
     }
