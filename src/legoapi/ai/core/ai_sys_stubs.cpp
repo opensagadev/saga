@@ -2881,12 +2881,15 @@ extern "C" {
     }
 
     void AddToAIGroup(AIGROUP *group, APIOBJECT *object) {
-        if (group == NULL || object == NULL || group->member_count >= 16 || group->count_across == 0) {
+        if (object == NULL || group == NULL || group->member_count >= 16) {
             return;
         }
 
         const u8 member_index = group->member_count;
-        const i32 row_count = (member_index + group->count_across) / group->count_across;
+        const u32 count_across = group->count_across;
+        i32 row_count = static_cast<i32>(NuFdiv(static_cast<f32>(member_index + 1), static_cast<f32>(count_across)));
+        if ((member_index + 1) % group->count_across != 0)
+            ++row_count;
         if (row_count > 4) {
             return;
         }
@@ -2894,11 +2897,8 @@ extern "C" {
         if (member_index == 0) {
             group->leader = object;
             if (group->x_spacing > 0.0f) {
-                group->radius = (group->count_across - 1) * group->x_spacing * 0.5f;
-                const f32 turn_radius_per_frame = group->radius * 0.016666668f;
-                group->rotation_speed = turn_radius_per_frame != 0.0f
-                                            ? static_cast<i16>(group->max_speed / turn_radius_per_frame * 10430.378f)
-                                            : 0;
+                group->radius = (static_cast<f32>(count_across) - 1.0f) * group->x_spacing * 0.5f;
+                group->rotation_speed = static_cast<i32>(10430.378f * NuFdiv(group->max_speed, group->radius * 60.0f));
             } else {
                 group->radius = 0.0f;
                 group->rotation_speed = 100;
@@ -2907,11 +2907,12 @@ extern "C" {
 
         group->row_count = static_cast<u8>(row_count);
         object->ai->group = group;
-        object->ai->group_member_index = member_index;
-        object->ai->group_row = member_index / group->count_across;
-        object->ai->group_column = member_index % group->count_across;
-        group->members[member_index] = object;
-        group->member_count = member_index + 1;
+        object->ai->group_member_index = group->member_count;
+        object->ai->group_row = static_cast<i32>(NuFdiv(static_cast<f32>(static_cast<u32>(group->member_count)),
+                                                       static_cast<f32>(static_cast<u32>(group->count_across))));
+        object->ai->group_column = group->member_count % group->count_across;
+        group->members[group->member_count] = object;
+        ++group->member_count;
     }
 
     void AiRndrLine3d(void) {
