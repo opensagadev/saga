@@ -410,18 +410,6 @@ static __used__ i32 MatchExtension(char *, char *, i32) {
     return 0;
 }
 
-static __used__ float fxy(unsigned int, unsigned int) {
-    return 0;
-}
-
-static __used__ unsigned int fxyda(float, float) {
-    return 0;
-}
-
-static __used__ float fxydaf(float, float) {
-    return 0;
-}
-
 static __used__ int icomp(const void *, const void *) {
     return 0;
 }

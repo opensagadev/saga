@@ -2,7 +2,7 @@
 
 #include "nu2api/nucore/common.h"
 #include "nu2api/numath/numtx.h"
-#include "decomp_assert.h"
+#include "decomp.h"
 
 struct nudldlistscene_s;
 struct nugscn_s;

@@ -10,7 +10,7 @@
 #include "legoapi/render/core/SwipeDecalRenderer.h"
 #include "nu2api/nucore/NuTouchInputElement.h"
 #include "nu2api/nucore/nuvuvec.hpp"
-#include "decomp_assert.h"
+#include "decomp.h"
 
 struct AIPATHCNX_s;
 struct AIPATH_s;

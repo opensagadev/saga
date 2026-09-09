@@ -4,10 +4,10 @@
 #include "gameapi/ai/aisys/aimessage_types.h"
 
 #include "nu2api/nu3d/ShaderManagerOpenGL.h"
-#include "decomp_assert.h"
+#include "decomp.h"
 #include "nu2api/nucore/fixed_width.h"
 #include "nu2api/nucore/numemory.h"
-#include "decomp_assert.h"
+#include "decomp.h"
 #include "nu2api/nucore/nulist.h"
 #include "nu2api/nucore/nuanim3.h"
 #include "nu2api/nu3d/nuhspecial.h"

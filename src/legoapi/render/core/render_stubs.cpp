@@ -612,7 +612,11 @@ extern "C" {
         render_state.state.konst_id++;
     }
 
-    void RndrStateSetReflection(void) {
+    void RndrStateSetReflection(i32 reflection) {
+        render_state.reflection = reflection;
+        render_state.reflection_state = NULL;
+        render_state.state.global_id++;
+        render_state.state.reflection_id++;
     }
 
     void RndrStateUpdate(void *, NUMTL *, NUDISPLAYLISTITEM *) {

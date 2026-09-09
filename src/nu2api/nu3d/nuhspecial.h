@@ -1,6 +1,6 @@
 #pragma once
 
-#include "decomp_assert.h"
+#include "decomp.h"
 
 struct nugscn_s;
 struct NUDISPLAYSPECIAL;

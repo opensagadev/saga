@@ -162,7 +162,7 @@ build with `-malign-double` (the repo does not). A decompiled struct with a
 `double` at a 4-aligned offset stays 4-aligned here — that's correct, don't
 "fix" it to 8.
 
-Original-layout checks must use `DECOMP_ASSERT` from `decomp_assert.h`, not a
+Original-layout checks must use `DECOMP_ASSERT` from `decomp.h`, not a
 bare `static_assert`. It is a compile-time assertion in the original 32-bit
 matching build and a no-op in host builds, whose pointer width legitimately
 changes pointer-bearing structure sizes and offsets. Runtime code must use

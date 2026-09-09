@@ -1,6 +1,6 @@
 #pragma once
 
-#include "decomp_assert.h"
+#include "decomp.h"
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/NuPostFilterGen.h"
 

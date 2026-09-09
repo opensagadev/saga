@@ -9,6 +9,7 @@
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nushader.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/nulst.h"
 #include "nu2api/nufile/nufile.h"
@@ -19,6 +20,35 @@ extern "C" void *NuShaderManagerRetrieveShader(NUSHADERMTLDESC *desc, void *mtl)
 extern "C" void *NuShaderManagerRetrieveShaderVariant(NUSHADERMTLDESC *desc, void *mtl, i32 variant);
 extern "C" NUSHADEROBJECT *NuShaderManagerGetShaderById(i32 id);
 extern "C" void NuShaderManagerReleaseShader(NUSHADEROBJECT *shader);
+
+extern "C" i32 NuSpecialForceToAlpha(nuhspecial_s *special) {
+    if (special->scene == NULL) {
+        return 0;
+    }
+    NUDLDLISTSCENE *scene = special->scene->display_list;
+    NUCLIPOBJECT *object = special->display_special->clip_objects;
+    if (object->nmaterials <= 0) {
+        return 0;
+    }
+    NUMTL *material = scene->mtls[object->material_ids[0]];
+    if (material == NULL) {
+        return 0;
+    }
+    i32 index = 0;
+    do {
+        do {
+            material->attribs.alpha_mode = NUMTL_ALPHA_MODE_ALPHA;
+            NuMtlUpdate(material);
+            material = material->next;
+        } while (material != NULL);
+        ++index;
+        if (object->nmaterials <= index) {
+            break;
+        }
+        material = scene->mtls[object->material_ids[index]];
+    } while (material != NULL);
+    return 1;
+}
 
 static i32 max_materials;
 static NUMTL *material_list;

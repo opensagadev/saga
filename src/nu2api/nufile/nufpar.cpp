@@ -541,6 +541,20 @@ f32 NuFParGetFloatRDP(NUFPAR *parser) {
     }
 }
 
+void NuFParGetOptionalInt(NUFPAR *parser, i32 *value) {
+    char buf[64];
+    NuFParGetWord(parser);
+    if (parser->is_utf16)
+        NuUnicodeToAscii(buf, (NUWCHAR16 *)parser->word_buf);
+    else
+        NuStrCpy(buf, parser->word_buf);
+    if (value != NULL && buf[0] != '\0') {
+        *value = NuAToI(buf);
+        if (*value == 0)
+            NuFParUnGetWord(parser);
+    }
+}
+
 i32 NuFParGetInt(NUFPAR *parser) {
     char buf[64];
 

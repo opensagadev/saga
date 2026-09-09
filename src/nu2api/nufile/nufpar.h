@@ -78,6 +78,7 @@ extern "C" {
     f32 NuFParGetFloat(NUFPAR *parser);
     f32 NuFParGetFloatRDP(NUFPAR *parser);
     i32 NuFParGetInt(NUFPAR *parser);
+    void NuFParGetOptionalInt(NUFPAR *parser, i32 *value);
     i32 NuFParGetIntRDP(NUFPAR *parser);
 
     i32 NuFParPushCom(NUFPAR *parser, NUFPCOMJMP *commands);

@@ -59,14 +59,23 @@ extern "C" {
     }
 
     f32 NuFmod(f32 a, f32 b);
+    i32 NuEquiv(f32 a, f32 b);
+    void NuEquivTollerance(f32 tolerance);
 
     f32 NuFloor(f32 f);
+    f32 NuCeil(f32 value);
+    f32 NuFrsqrt(f32 value);
+    i32 NuMiscNextPow2(i32 value);
+    i32 NuMiscNextPow2Exp(i32 value);
+    i32 NuMiscPow2Exp(i32 value);
 
     f32 NuLog10(float x);
 
     f32 NuExp10(float x);
 
     f32 NuPowFast(f32 base, f32 exponent);
+    i16 NuFloatToHalf(f32 value);
+    f32 NuHalfToFloat(i16 value);
 #ifdef __cplusplus
 }
 

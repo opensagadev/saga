@@ -1,6 +1,6 @@
 #pragma once
 
-#include "decomp_assert.h"
+#include "decomp.h"
 #include "nu2api/nucore/nuanim3.h"
 #include "nu2api/numath/numtx.h"
 

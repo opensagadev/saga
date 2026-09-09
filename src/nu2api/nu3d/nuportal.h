@@ -2,7 +2,7 @@
 
 #include "nu2api/nucore/common.h"
 #include "nu2api/numath/nuplane.h"
-#include "decomp_assert.h"
+#include "decomp.h"
 
 typedef struct nuportal_s {
     NUPLANE plane;    // 0x00, separates the two adjoining rooms

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "decomp_assert.h"
+#include "decomp.h"
 #include "nu2api/nucore/fixed_width.h"
 #include <stddef.h>
 

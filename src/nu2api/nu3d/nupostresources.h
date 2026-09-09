@@ -1,7 +1,7 @@
 #pragma once
 
 #include "nu2api/nucore/common.h"
-#include "decomp_assert.h"
+#include "decomp.h"
 
 struct nueffecttex_s {
     i16 unknown_00;

@@ -5,7 +5,7 @@
 #include "nu2api/nu3d/nuspline.h"
 #include "nu2api/nucore/common.h"
 #include "nu2api/numath/numtx.h"
-#include "decomp_assert.h"
+#include "decomp.h"
 
 typedef struct SOCKROT {
     u16 x;

@@ -3,6 +3,10 @@
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/nurndr.h"
 
+enum NUMTL_ALPHA_MODE {
+    NUMTL_ALPHA_MODE_ALPHA = 1,
+};
+
 typedef struct numtlattrib_s {
     u32 alpha_mode : 4;
     u32 filter_mode : 2;

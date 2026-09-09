@@ -1,7 +1,7 @@
 #pragma once
 
 #include "nu2api/nucore/common.h"
-#include "decomp_assert.h"
+#include "decomp.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,11 +39,20 @@ extern "C" {
     void NuLstDestroy(NULSTHDR *list);
 
     NULNKHDR *NuLstAlloc(NULSTHDR *list);
+    NULNKHDR *NuLstAllocFree(NULSTHDR *list);
+    NULNKHDR *NuLstAllocBefore(NULNKHDR *anchor);
+    NULNKHDR *NuLstAllocAfter(NULNKHDR *anchor);
     NULNKHDR *NuLstAllocHead(NULSTHDR *list);
     NULNKHDR *NuLstAllocTail(NULSTHDR *list);
     void NuLstFree(NULNKHDR *node);
 
     NULNKHDR *NuLstGetNext(NULSTHDR *list, NULNKHDR *node);
+    NULNKHDR *NuLstGetPrev(NULSTHDR *list, NULNKHDR *node);
+    NULNKHDR *NuLstGetFree(NULSTHDR *list);
+    void NuLstAtachHead(NULSTHDR *list, NULNKHDR *node);
+    void NuLstAttachTail(NULSTHDR *list, NULNKHDR *node);
+    i32 NuLstMoveNext(NULSTHDR *list, NULNKHDR *node);
+    i32 NuLstMovePrev(NULSTHDR *list, NULNKHDR *node);
 #ifdef __cplusplus
 }
 #endif

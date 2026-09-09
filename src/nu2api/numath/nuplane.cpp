@@ -4,6 +4,153 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuvec.h"
 
+i32 NuPlnPlnIntersect(NUPLANE *first, NUPLANE *second, NUVEC *point, NUVEC *direction) {
+    f32 cross_y = first->c * second->a - first->a * second->c;
+    f32 cross_z = first->a * second->b - first->b * second->a;
+    NUVEC normal;
+    normal.x = first->b * second->c - first->c * second->b;
+    normal.y = cross_y;
+    normal.z = cross_z;
+    NuVecNorm(&normal, &normal);
+    *direction = normal;
+    normal.x = NuFabs(normal.x);
+    normal.y = NuFabs(normal.y);
+    normal.z = NuFabs(normal.z);
+    if (normal.z >= normal.x && normal.z >= normal.y) {
+        if (NuFabs(second->a) < 0.0001f) {
+            point->y = (first->d * second->a / first->a - second->d) / (-second->a * first->b / first->a + second->b);
+            point->x = (-first->d - first->b * point->y) / first->a;
+            point->z = 0.0f;
+        } else {
+            point->y = (second->d * first->a / second->a - first->d) / (-first->a * second->b / second->a + first->b);
+            point->x = (-second->d - second->b * point->y) / second->a;
+            point->z = 0.0f;
+        }
+    } else if (normal.y >= normal.x && normal.y >= normal.z) {
+        if (NuFabs(second->a) < 0.0001f) {
+            point->z = (first->d * second->a / first->a - second->d) / (-second->a * first->c / first->a + second->c);
+            point->x = (-first->d - first->c * point->z) / first->a;
+            point->y = 0.0f;
+        } else {
+            point->z = (second->d * first->a / second->a - first->d) / (-first->a * second->c / second->a + first->c);
+            point->x = (-second->d - second->c * point->z) / second->a;
+            point->y = 0.0f;
+        }
+    } else {
+        if (NuFabs(second->b) < 0.0001f) {
+            point->z = (first->d * second->b / first->b - second->d) / (-second->b * first->c / first->b + second->c);
+            point->y = (-first->d - first->c * point->z) / first->b;
+            point->x = 0.0f;
+        } else {
+            point->z = (second->d * first->b / second->b - first->d) / (-first->b * second->c / second->b + first->c);
+            point->y = (-second->d - second->c * point->z) / second->b;
+            point->x = 0.0f;
+        }
+    }
+    // The original evaluates this residual but returns zero on both paths.
+    if (first->a * point->x + first->b * point->y + first->c * point->z + first->d > 0.0001f) {
+        return 0;
+    }
+    return 0;
+}
+
+f32 NuInfiniteLineToPointDistSqrEx(NUVEC *start, NUVEC *end, NUVEC *point, NUVEC *closest) {
+    f32 length;
+    f32 projection;
+    f32 distance;
+    NUVEC direction;
+    NUVEC relative;
+    NUVEC projected;
+    NUVEC delta;
+    NuVecSub(&direction, end, start);
+    length = NuVecMag(&direction);
+    NuVecScale(&direction, &direction, 1.0f / length);
+    NuVecSub(&relative, point, start);
+    projection = NuVecDot(&direction, &relative);
+    NuVecScale(&projected, &direction, projection);
+    NuVecAdd(&projected, &projected, start);
+    distance = NuVecDistSqr(&projected, point, &delta);
+    if (closest != NULL)
+        *closest = projected;
+    return distance;
+}
+
+f32 NuInfiniteLineToPointDistSqr(NUVEC *start, NUVEC *end, NUVEC *point) {
+    return NuInfiniteLineToPointDistSqrEx(start, end, point, NULL);
+}
+
+f32 NuLineToPointDistSqr(NUVEC *start, NUVEC *end, NUVEC *point) {
+    return NuLineToPointDistSqrEx(start, end, point, NULL);
+}
+
+f32 NuLineToLineDist(NUVEC *a, NUVEC *b, NUVEC *c, NUVEC *d) {
+    f32 distance;
+    NUVEC offset;
+    NUVEC first;
+    NUVEC second;
+    NUVEC between;
+    NUVEC normal;
+    NuVecSub(&offset, c, a);
+    NuVecSub(&first, b, a);
+    NuVecSub(&second, d, c);
+    NuVecSub(&between, b, c);
+    NuVecCross(&normal, &first, &second);
+    distance = NuVecDot(&offset, &normal);
+    distance /= NuVecMag(&normal);
+    return distance;
+}
+
+f32 NuPlnDist(NUPLANE *plane, NUVEC *point) {
+    f32 distance = NuVecDot(point, (NUVEC *)plane) + plane->d;
+    return distance;
+}
+
+f32 NuPlnDist2(NUPLANE *plane, NUVEC *a, NUVEC *b) {
+    f32 da = NuVecDot(a, (NUVEC *)plane) + plane->d;
+    f32 db = NuVecDot(b, (NUVEC *)plane) + plane->d;
+    if (da < 0.0f && db < 0.0f)
+        return da > db ? da : db;
+    if (da > 0.0f && db > 0.0f)
+        return da < db ? da : db;
+    return 0.0f;
+}
+
+i32 NuPlnLineVU0(NUPLANE *plane, NUVEC *start, NUVEC *end, NUVEC *out) {
+    return NuPlnLine(plane, start, end, out);
+}
+
+i32 NuPlnLine2(NUPLANE *plane, NUVEC *a, NUVEC *b, NUVEC *c, NUVEC *start, NUVEC *end, NUVEC *out, f32 *distance,
+               f32 *fraction) {
+    if (NuPlnLine(plane, start, end, out)) {
+        if (NuPtInPoly(out, a, b, c, plane)) {
+            if (distance != NULL || fraction != NULL) {
+                f32 hit_distance;
+                f32 line_length;
+                NUVEC delta;
+                NUVEC line;
+                NuVecSub(&delta, out, start);
+                hit_distance = NuVecMag(&delta);
+                if (distance != NULL)
+                    *distance = hit_distance;
+                if (fraction != NULL) {
+                    NuVecSub(&line, end, start);
+                    line_length = NuVecMag(&line);
+                    *fraction = hit_distance / line_length;
+                }
+            }
+            return 1;
+        }
+    }
+    return 0;
+}
+
+void NuPlnEqnPn(NUPLANE *out, NUVEC *point, NUVEC *normal) {
+    out->a = normal->x;
+    out->b = normal->y;
+    out->c = normal->z;
+    out->d = -(out->a * point->x + out->b * point->y + out->c * point->z);
+}
+
 void NuPlnEqn(NUPLANE *out, NUVEC *pnt0, NUVEC *pnt1, NUVEC *pnt2) {
     NUVEC *pln;
     NUVEC v1_minus_0;

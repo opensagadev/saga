@@ -14,7 +14,7 @@
 #include "nu2api/numusic/sfx.h"
 #include "nu2api/nusound/nusound.h"
 #include "nu2api/nufile/nufile.h"
-#include "decomp_assert.h"
+#include "decomp.h"
 
 #include <stdio.h>
 #include <string.h>

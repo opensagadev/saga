@@ -1,5 +1,5 @@
 #include "gamelib/util/gamelib_util_types.h"
-#include "decomp_assert.h"
+#include "decomp.h"
 #include <cstddef>
 
 DECOMP_ASSERT(sizeof(VirtualStackAllocator) == 0x10, "VirtualStackAllocator size");

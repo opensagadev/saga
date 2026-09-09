@@ -63,6 +63,118 @@ static u16 fxyd(f32 dx, f32 dy) {
     }
 }
 
+i32 NuAtani(i32 dx, i32 dy) {
+    if (dx == 0) {
+        return dy < 0 ? 0x8000 : 0;
+    } else if (dy == 0) {
+        return dx < 0 ? 0xc000 : 0x4000;
+    } else if (dx < 0) {
+        if (dy < 0)
+            return xy(-dx, -dy) + 0x8000;
+        return -xy(-dx, dy);
+    } else if (dy < 0) {
+        return 0x8000 - xy(dx, -dy);
+    }
+    return xy(dx, dy);
+}
+
+static u16 fxyda(f32 dx, f32 dy) {
+    f32 fraction;
+    i32 index;
+    f32 result;
+    if (dx > dy) {
+        fraction = dy * 512.0f / dx;
+        index = (i32)fraction;
+        fraction -= index;
+        result = (0x4000 - (i32)ang[index]) * (1.0f - fraction);
+        result += (0x4000 - (i32)ang[index + 1]) * fraction;
+        return result;
+    } else if (dx == dy) {
+        return ang[512];
+    } else {
+        fraction = dx * 512.0f / dy;
+        index = (i32)fraction;
+        fraction -= index;
+        result = (u32)ang[index] * (1.0f - fraction);
+        result += (u32)ang[index + 1] * fraction;
+        return result;
+    }
+}
+
+i32 NuAtan2DA(f32 dx, f32 dy) {
+    if (dx == 0.0f) {
+        return 0.0f > dy ? 0x8000 : 0;
+    } else if (dy == 0.0f) {
+        return 0.0f > dx ? 0xc000 : 0x4000;
+    } else if (0.0f > dx) {
+        if (0.0f > dy)
+            return fxyda(-dx, -dy) + 0x8000;
+        return -fxyda(-dx, dy);
+    } else if (0.0f > dy) {
+        return 0x8000 - fxyda(dx, -dy);
+    }
+    return fxyda(dx, dy);
+}
+
+static f32 fxydaf(f32 dx, f32 dy) {
+    f32 fraction;
+    i32 index;
+    f32 result;
+    if (dx > dy) {
+        fraction = dy * 512.0f / dx;
+        index = (i32)fraction;
+        fraction -= index;
+        result = (0x4000 - (i32)ang[index]) * (1.0f - fraction);
+        result += (0x4000 - (i32)ang[index + 1]) * fraction;
+        return result;
+    } else if (dx == dy) {
+        return (u32)ang[512];
+    } else {
+        fraction = dx * 512.0f / dy;
+        index = (i32)fraction;
+        fraction -= index;
+        result = (u32)ang[index] * (1.0f - fraction);
+        result += (u32)ang[index + 1] * fraction;
+        return result;
+    }
+}
+
+f32 NuAtan2DAF(f32 dx, f32 dy) {
+    if (dx == 0.0f) {
+        return 0.0f > dy ? 32768.0f : 0.0f;
+    } else if (dy == 0.0f) {
+        return 0.0f > dx ? -16384.0f : 16384.0f;
+    } else if (0.0f > dx) {
+        if (0.0f > dy)
+            return fxydaf(-dx, -dy) - 32768.0f;
+        return -fxydaf(-dx, dy);
+    } else if (0.0f > dy) {
+        return 32768.0f - fxydaf(dx, -dy);
+    }
+    return fxydaf(dx, dy);
+}
+
+static f32 fxy(u32 dx, u32 dy) {
+    if (dx > dy)
+        return (0x4000 - (i32)NU_ATAN2_LUT(dy, dx)) * 0.000095873802492f;
+    return (u32)NU_ATAN2_LUT(dx, dy) * 0.000095873802492f;
+}
+
+f32 NuAtanf(i32 dx, i32 dy) {
+    if (dx == 0) {
+        return dy < 0 ? 3.1415927410125732f : 0.0f;
+    } else if (dy == 0) {
+        return dx < 0 ? -1.5707963705062866f : 1.5707963705062866f;
+    } else if (dx < 0) {
+        if (dy < 0)
+            return fxy(-dx, -dy) + 3.1415927410125732f;
+        return -fxy(-dx, dy);
+    } else if (dy < 0) {
+        return 3.1415927410125732f - fxy(dx, -dy);
+    }
+    return fxy(dx, dy);
+}
+
 #undef NU_ATAN2_LUT
 
 i32 NuAtan2D(f32 dx, f32 dy) {
@@ -99,6 +211,18 @@ float NuSin_Accurate(float x) {
     return sinf(x);
 }
 
-static double NuSinApprox3(i32) {
-    return 0.0;
+static f32 NuSinApprox3(i32 angle) {
+    f32 x;
+    angle &= 0xffff;
+    if (angle > 0xc000)
+        angle -= 0xc000;
+    else if (angle > 0x4000)
+        angle = 0xc000 - angle;
+    else
+        angle += 0x4000;
+    x = angle * 9.58738019107841e-05f;
+    x -= 1.5707963705062866f;
+    return x + -0.16666656732559204f * (x * x * x) + (x * x * x) * (x * x) * 0.008333025500178337f +
+           (x * x * x) * (x * x) * (x * x) * -0.00019807413627859205f +
+           (x * x * x) * (x * x) * (x * x) * (x * x) * 2.601886990305502e-06f;
 }

@@ -11,6 +11,9 @@
 
 struct nuinstanim_s;
 
+f32 NuSpecialGetAnimPos(nuhspecial_s *special);
+void NuSpecialReflection(i32 reflection);
+
 enum NULEGACYINSTANCE_FLAGS : u8 {
     NULEGACYINSTANCE_FLAG_VISIBLE = 1 << 0,
     NULEGACYINSTANCE_FLAG_NO_VISIBILITY_TEST = 1 << 3,
@@ -22,6 +25,7 @@ enum NULEGACYSPECIAL_FLAGS : u32 {
 
 enum NUDISPLAYSPECIAL_FLAGS : u32 {
     NUDISPLAYSPECIAL_FLAG_VISIBLE = 1 << 1,
+    NUDISPLAYSPECIAL_FLAG_ON_SCREEN = 1 << 2,
     NUDISPLAYSPECIAL_FLAG_NO_VISIBILITY_TEST = 1 << 7,
     NUDISPLAYSPECIAL_FLAG_COLLISION = 1 << 9,
     NUDISPLAYSPECIAL_FLAG_MATRIX_UPDATED = 1 << 10,
@@ -69,6 +73,11 @@ extern "C" {
     void NuSpecialGetRadius(void *special, NUVEC *position, f32 *radius);
     f32 NuSpecialGetAnimEndFrame(nuhspecial_s *special);
     nuinstanim_s *NuSpecialGetInstAnim(nuhspecial_s *special);
+    void NuSpecialSetInstAnimTime(nuhspecial_s *special, f32 frame);
+    i32 NuSpecialTestAnim(nuhspecial_s *special);
+    void NuSpecialSetMtx(nuhspecial_s *special, NUMTX *matrix);
+    void NuSpecialSetCollision(nuhspecial_s *special, i32 enabled);
+    i32 NuSpecialForceToAlpha(nuhspecial_s *special);
     NUMTX *NuSpecialGetInstanceMtx(nuhspecial_s *special);
     i32 NuSpecialGetInstanceix(nuhspecial_s *special);
     char *NuSpecialGetName(nuhspecial_s *special);
@@ -84,7 +93,9 @@ extern "C" {
     i32 NuSpecialGetOnScreenFn(nuhspecial_s *special);
     i32 NuSpecialGetNoVisiTestFn(nuhspecial_s *special);
     void NuSpecialSetNoVisiTest(nuhspecial_s *special, i32 enabled);
-    void NuSpecialSetDrawPos(void *special, void *pos);
+    void NuSpecialSetOnScreen(nuhspecial_s *special, i32 enabled);
+    void NuSpecialSetInstanceMtx(nuhspecial_s *special, NUMTX *matrix);
+    void NuSpecialSetDrawPos(nuhspecial_s *special, NUVEC *pos);
     i32 NuSpecialClipTestExtents(void *special, void *mtx);
     i32 NuSpecialSetClipping(i32 enabled, i32 state);
     void NuSpecialConstAlpha(i32 enabled, f32 alpha);

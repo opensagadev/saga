@@ -3,7 +3,7 @@
 #include "nu2api/nucore/common.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
-#include "decomp_assert.h"
+#include "decomp.h"
 
 // Forward declarations shared with sibling headers.
 struct numtl_s;

@@ -2,8 +2,16 @@
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nurndrstat.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuvec4.h"
+
+extern "C" i32 nuspecial_reflection;
+
+void NuSpecialReflection(i32 reflection) {
+    nuspecial_reflection = reflection;
+    RndrStateSetReflection(reflection);
+}
 
 extern "C" i32 NuSpecialGetNumSpecials(NUGSCN *scene) {
     i32 count = scene->numspecial;
@@ -138,6 +146,71 @@ extern "C" NUMTX *NuSpecialGetInstanceMtx(nuhspecial_s *special) {
     return NULL;
 }
 
+extern "C" i32 NuSpecialTestAnim(nuhspecial_s *special) {
+    if (special->display_special != NULL) {
+        nuinstanim_s *animation = special->display_special->instance_animation;
+        if (animation != NULL && animation != reinterpret_cast<nuinstanim_s *>(-1)) {
+            return 1;
+        }
+    } else if (special->special != NULL) {
+        NuSpecialLegacyLayout *legacy = static_cast<NuSpecialLegacyLayout *>(special->special);
+        if (static_cast<NuLegacyInstanceLayout *>(legacy->instance)->animation != NULL) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+extern "C" void NuSpecialSetMtx(nuhspecial_s *special, NUMTX *matrix) {
+    if (special->display_special != NULL) {
+        special->display_special->instance_mtx = *matrix;
+    } else {
+        *static_cast<NUMTX *>(special->special) = *matrix;
+    }
+}
+
+extern "C" void NuSpecialSetCollision(nuhspecial_s *special, i32 enabled) {
+    if (special == NULL || special->scene == NULL) {
+        return;
+    }
+    NuSpecialLegacyLayout *legacy = static_cast<NuSpecialLegacyLayout *>(special->special);
+    if (legacy != NULL) {
+        if (enabled != 0) {
+            legacy->flags |= NULEGACYSPECIAL_FLAG_COLLISION;
+        } else {
+            legacy->flags &= ~NULEGACYSPECIAL_FLAG_COLLISION;
+        }
+    } else if (special->display_special != NULL) {
+        if (enabled != 0) {
+            special->display_special->flags |= NUDISPLAYSPECIAL_FLAG_COLLISION;
+        } else {
+            special->display_special->flags &= ~NUDISPLAYSPECIAL_FLAG_COLLISION;
+        }
+    }
+}
+
+extern "C" void NuSpecialSetDrawPos(nuhspecial_s *special, NUVEC *pos) {
+    if (special == NULL || special->scene == NULL) {
+        return;
+    }
+    NuSpecialLegacyLayout *legacy = static_cast<NuSpecialLegacyLayout *>(special->special);
+    if (legacy != NULL) {
+        NUMTX *matrix = static_cast<NUMTX *>(legacy->instance);
+        matrix->m30 = pos->x;
+        matrix->m31 = pos->y;
+        matrix->m32 = pos->z;
+    } else {
+        NUMTX *matrix = &special->display_special->draw_mtx;
+        matrix->m30 = pos->x;
+        matrix->m31 = pos->y;
+        matrix->m32 = pos->z;
+        if ((special->scene->display_list->instance_visibility_enabled & 1) != 0) {
+            NuDisplayListUpdateSpecial(special);
+            special->display_special->flags |= NUDISPLAYSPECIAL_FLAG_MATRIX_UPDATED;
+        }
+    }
+}
+
 extern "C" f32 NuSpecialGetAnimEndFrame(nuhspecial_s *special) {
     if (special == NULL) {
         return 0.0f;
@@ -165,6 +238,19 @@ extern "C" f32 NuSpecialGetAnimEndFrame(nuhspecial_s *special) {
     const u16 lookup_index = instance_animation->end_frame_lookup_index;
     const u32 end_frame = scene->animation_end_frames[lookup_index - 1].end_frame;
     return static_cast<f32>(end_frame);
+}
+
+f32 NuSpecialGetAnimPos(nuhspecial_s *special) {
+    nuinstanim_s *animation = NuSpecialGetInstAnim(special);
+    if (animation == NULL || special->scene->instance_animation_data[animation->anim_ix] == NULL) {
+        return 0.0f;
+    }
+    f32 end_frame = NuSpecialGetAnimEndFrame(special);
+    f32 position = (animation->ltime - 1.0f) / (end_frame - 1.0f);
+    if (position < 0.0f) {
+        return 0.0f;
+    }
+    return position > 1.0f ? 1.0f : position;
 }
 
 extern "C" char *NuSpecialGetName(nuhspecial_s *special) {
@@ -215,6 +301,31 @@ extern "C" void NuSpecialSetNoVisiTest(nuhspecial_s *special, i32 enabled) {
         display->flags |= NUDISPLAYSPECIAL_FLAG_NO_VISIBILITY_TEST;
     } else {
         display->flags &= ~NUDISPLAYSPECIAL_FLAG_NO_VISIBILITY_TEST;
+    }
+}
+
+extern "C" void NuSpecialSetOnScreen(nuhspecial_s *special, i32 enabled) {
+    if (special->scene == NULL)
+        return;
+    NuSpecialLegacyLayout *legacy = static_cast<NuSpecialLegacyLayout *>(special->special);
+    if (legacy != NULL) {
+        NuLegacyInstanceLayout *instance = static_cast<NuLegacyInstanceLayout *>(legacy->instance);
+        instance->on_screen = enabled;
+        return;
+    }
+    NUDISPLAYSPECIAL *display = special->display_special;
+    if (display == NULL)
+        return;
+    if (enabled != 0)
+        display->flags |= NUDISPLAYSPECIAL_FLAG_ON_SCREEN;
+    else
+        display->flags &= ~NUDISPLAYSPECIAL_FLAG_ON_SCREEN;
+}
+
+extern "C" void NuSpecialSetInstanceMtx(nuhspecial_s *special, NUMTX *matrix) {
+    if (special != NULL && special->scene != NULL && special->special != NULL) {
+        NuSpecialLegacyLayout *legacy = static_cast<NuSpecialLegacyLayout *>(special->special);
+        *static_cast<NUMTX *>(legacy->instance) = *matrix;
     }
 }
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "legoapi/gizmo/base/gizmo.h"
-#include "decomp_assert.h"
+#include "decomp.h"
 #include "nu2api/numath/numtx.h"
 #include <stddef.h>
 

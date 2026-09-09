@@ -5,18 +5,19 @@ from pathlib import Path
 import re
 import sys
 
-
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "src"
 HOST_ROOTS = (SRC / "host" / "harness", SRC / "host" / "platform")
 HOST_BUILD_ALLOWLIST = {
     SRC / "decomp.h",
-    SRC / "decomp_assert.h",
+    SRC / "decomp.h",
     SRC / "gameframework/saveload.cpp",
     SRC / "nu2api/nucore/common.h",
 }
 SOURCE_SUFFIXES = {".c", ".cc", ".cpp", ".h", ".hh", ".hpp"}
-HOST_INCLUDE = re.compile(r"^\s*#\s*include\s*[<\"]host/(?:harness|platform)/", re.MULTILINE)
+HOST_INCLUDE = re.compile(
+    r"^\s*#\s*include\s*[<\"]host/(?:harness|platform)/", re.MULTILINE
+)
 
 
 def is_under(path: Path, roots: tuple[Path, ...]) -> bool:
@@ -27,7 +28,9 @@ def main() -> int:
     errors: list[str] = []
     legacy = SRC / "host-utils"
     if legacy.exists() and any(path.is_file() for path in legacy.rglob("*")):
-        errors.append("src/host-utils still exists; use src/host/harness or src/host/platform")
+        errors.append(
+            "src/host-utils still exists; use src/host/harness or src/host/platform"
+        )
 
     for path in SRC.rglob("*"):
         if not path.is_file() or path.suffix not in SOURCE_SUFFIXES:
@@ -36,7 +39,9 @@ def main() -> int:
         if not is_under(path, HOST_ROOTS) and HOST_INCLUDE.search(text):
             errors.append(f"{path.relative_to(ROOT)} includes host-only code")
         if "HOST_BUILD" in text and path not in HOST_BUILD_ALLOWLIST:
-            errors.append(f"{path.relative_to(ROOT)} contains a behavioral HOST_BUILD fork")
+            errors.append(
+                f"{path.relative_to(ROOT)} contains a behavioral HOST_BUILD fork"
+            )
 
     if errors:
         for error in errors:

@@ -72,13 +72,18 @@ extern "C" {
     i32 NuAtan2D(f32 dx, f32 dy);
     f32 NuAtan2(f32 dx, f32 dy);
 
-    f32 NuAtanf(f32 x);
-    NUANG NuAtani(f32 x);
-    NUANG NuAtan2DA(f32 dx, f32 dy);
+    /// Integer coordinates; returns radians, measured from the positive dy axis.
+    f32 NuAtanf(i32 dx, i32 dy);
+    /// Integer coordinates; returns angle units (65536 per revolution).
+    i32 NuAtani(i32 dx, i32 dy);
+    /// Floating coordinates with interpolation; returns integer angle units.
+    i32 NuAtan2DA(f32 dx, f32 dy);
+    /// Floating coordinates with interpolation; returns signed floating angle units.
     f32 NuAtan2DAF(f32 dx, f32 dy);
 
-    f32 NuSinf(NUANG ang);
-    f32 NuCosf(NUANG ang);
+    /// Polynomial approximations taking radians.
+    f32 NuSinf(f32 angle);
+    f32 NuCosf(f32 angle);
 #ifdef __cplusplus
 }
 

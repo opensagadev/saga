@@ -1,6 +1,6 @@
 #pragma once
 
-#include "decomp_assert.h"
+#include "decomp.h"
 #include "nu2api/nucore/common.h"
 
 struct MENUPACKET_s {

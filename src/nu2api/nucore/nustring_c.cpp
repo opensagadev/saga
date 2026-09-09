@@ -3,6 +3,596 @@
 #include "decomp.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nufile/nufpar.h"
+#include "nu2api/nuplatform/nuplatform.h"
+#include <stdarg.h>
+
+i32 NuIsAl(char c) {
+    switch (c) {
+        case 'A' ... 'Z':
+        case 'a' ... 'z':
+        case '_':
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+i32 NuIsAlW(NUWCHAR c) {
+    switch (c) {
+        case 'A' ... 'Z':
+        case 'a' ... 'z':
+        case '_':
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+i32 NuStrToL(char *str, char **end, i32 radix) {
+    i32 value = 0;
+    i32 sign = 0;
+    char c = *str++;
+    while (c == ' ' || c == '\t')
+        c = *str++;
+    if (c == '-') {
+        sign = -1;
+        c = *str++;
+    } else if (c == '+')
+        c = *str++;
+    if (radix == 0) {
+        radix = 10;
+        if (c == '0' && (*str == 'x' || *str == 'X')) {
+            radix = 16;
+            ++str;
+            c = *str;
+        }
+    }
+    while (1) {
+        if (c >= '0' && c <= '9')
+            c -= '0';
+        else if (c >= 'A' && c <= 'Z')
+            c -= 'A' - 10;
+        else if (c >= 'a' && c <= 'z')
+            c -= 'a' - 10;
+        else
+            break;
+        if (c >= radix)
+            break;
+        value *= radix;
+        value += c;
+        c = *str++;
+    }
+    if (end != NULL)
+        *end = str - 1;
+    return sign != 0 ? value * sign : value;
+}
+
+i32 NuStrToLW(NUWCHAR *str, NUWCHAR **end, i32 radix) {
+    i32 value = 0;
+    i32 sign = 0;
+    NUWCHAR c = *str++;
+    while (c == ' ' || c == '\t')
+        c = *str++;
+    if (c == '-') {
+        sign = -1;
+        c = *str++;
+    } else if (c == '+')
+        c = *str++;
+    if (radix == 0) {
+        radix = 10;
+        if (c == '0' && (*str == 'x' || *str == 'X')) {
+            radix = 16;
+            ++str;
+            c = *str;
+        }
+    }
+    while (1) {
+        if (c >= '0' && c <= '9')
+            c -= '0';
+        else if (c >= 'A' && c <= 'Z')
+            c -= 'A' - 10;
+        else if (c >= 'a' && c <= 'z')
+            c -= 'a' - 10;
+        else
+            break;
+        if (c >= radix)
+            break;
+        value *= radix;
+        value += c;
+        c = *str++;
+    }
+    if (end != NULL)
+        *end = str - 1;
+    return sign != 0 ? value * sign : value;
+}
+
+void NuStrSubstituteString(char *dst, char *src, char *search, char *replacement) {
+    i32 matched = 0;
+    while (*src != 0) {
+        while (search[matched] != 0) {
+            if (NuToLower(src[matched]) != NuToLower(search[matched])) {
+                matched = 0;
+                break;
+            }
+            ++matched;
+        }
+        if (matched != 0) {
+            src += matched;
+            if (replacement != NULL) {
+                matched = 0;
+                while (replacement[matched] != 0) {
+                    *dst = replacement[matched];
+                    ++dst;
+                    ++matched;
+                }
+            }
+            matched = 0;
+        } else {
+            *dst = *src;
+            ++dst;
+            ++src;
+        }
+    }
+    *dst = 0;
+}
+
+void NuStrToLower(char *str) {
+    char *cursor = str;
+    while (*cursor != 0) {
+        *cursor = NuToLower(*cursor);
+        ++cursor;
+    }
+}
+
+void NuStrGetPath(char *dst, char *src) {
+    char *separator = NuStrRChr(src, '/');
+    char *backslash = NuStrRChr(src, '\\');
+    if (backslash > separator)
+        separator = backslash;
+    if (separator == NULL) {
+        *dst = 0;
+    } else {
+        i32 length = separator - src + 1;
+        NuStrNCpy(dst, src, length);
+    }
+}
+
+void NuStrGetExt(char *dst, char *src) {
+    char *separator;
+    char *extension = NuStrRChr(src, '.');
+    separator = NuStrRChr(src, '/');
+    char *backslash = NuStrRChr(src, '\\');
+    if (backslash > separator)
+        separator = backslash;
+    if (extension == NULL || separator > extension) {
+        *dst = 0;
+    } else {
+        char *end = src + NuStrLen(src);
+        i32 length = end - extension;
+        if (length == 0)
+            *dst = 0;
+        else
+            NuStrNCpy(dst, extension + 1, length);
+    }
+}
+
+void NuStrGetFilenameNoExt(char *dst, char *src) {
+    char *extension = NuStrRChr(src, '.');
+    if (extension == NULL)
+        extension = src + (NuStrLen(src) - 1);
+    char *separator = NuStrRChr(src, '/');
+    char *backslash = NuStrRChr(src, '\\');
+    if (backslash > separator)
+        separator = backslash;
+    if (separator == NULL)
+        separator = src;
+    // Preserve the original's unconditional advance, even for a bare filename.
+    ++separator;
+    i32 length = extension - separator + 1;
+    NuStrNCpy(dst, separator, length);
+}
+
+i32 NuStrNCpyW(NUWCHAR *dst, const NUWCHAR *src, i32 n) {
+    i32 copied = 0;
+    if (src == NULL) {
+        *dst = 0;
+        return 0;
+    }
+    do {
+        --n;
+        if (n <= 0) {
+            *dst = 0;
+            ++copied;
+            break;
+        }
+        *dst = *src;
+        ++dst;
+        ++copied;
+    } while (*src++ != 0);
+    return copied - 1;
+}
+
+i32 NuStrNCmpW(const NUWCHAR *a, const NUWCHAR *b, i32 n) {
+    NUWCHAR ca, cb;
+    if (a == NULL)
+        return -1;
+    if (b == NULL)
+        return 1;
+    if (n == 0)
+        return 0;
+    if (n == -1)
+        n = NuStrLenW(a);
+    else if (n == -2)
+        n = NuStrLenW(b);
+    do {
+        ca = *a;
+        cb = *b;
+        if (ca > cb)
+            return 1;
+        if (ca < cb)
+            return -1;
+        ++a;
+        ++b;
+        --n;
+    } while (ca != 0 && cb != 0 && n != 0);
+    return 0;
+}
+
+i32 NuStrNICmpW(const NUWCHAR *a, const NUWCHAR *b, i32 n) {
+    NUWCHAR ca, cb;
+    if (a == NULL)
+        return -1;
+    if (b == NULL)
+        return 1;
+    if (n == 0)
+        return 0;
+    if (n == -1)
+        n = NuStrLenW(a);
+    else if (n == -2)
+        n = NuStrLenW(b);
+    do {
+        ca = NuToUpperW(*a);
+        cb = NuToUpperW(*b);
+        if (ca > cb)
+            return 1;
+        if (ca < cb)
+            return -1;
+        ++a;
+        ++b;
+        --n;
+    } while (ca != 0 && cb != 0 && n != 0);
+    return 0;
+}
+
+NUWCHAR *NuStrRChrW(NUWCHAR *str, NUWCHAR c) {
+    NUWCHAR *cursor = str;
+    while (*cursor != 0)
+        ++cursor;
+    while (cursor >= str) {
+        if (*cursor == c)
+            return cursor;
+        --cursor;
+    }
+    return NULL;
+}
+
+NUWCHAR *NuStrStrW(NUWCHAR *str, const NUWCHAR *sub) {
+    while (*str != 0) {
+        NUWCHAR *cursor = str;
+        const NUWCHAR *match = sub;
+        while (*match != 0) {
+            if (*cursor == 0)
+                break;
+            if (*cursor != *match)
+                break;
+            ++cursor;
+            ++match;
+        }
+        if (*match == 0)
+            return str;
+        ++str;
+    }
+    return NULL;
+}
+
+NUWCHAR *NuStrIStrW(NUWCHAR *str, const NUWCHAR *sub) {
+    while (*str != 0) {
+        NUWCHAR *cursor = str;
+        const NUWCHAR *match = sub;
+        while (*match != 0) {
+            if (*cursor == 0)
+                break;
+            if (NuToUpperW(*cursor) != NuToUpperW(*match))
+                break;
+            ++cursor;
+            ++match;
+        }
+        if (*match == 0)
+            return str;
+        ++str;
+    }
+    return NULL;
+}
+
+NUWCHAR *NuIToAW(i32 value, NUWCHAR *buffer, i32 radix) {
+    NUWCHAR reversed[33];
+    NUWCHAR *digit = reversed;
+    NUWCHAR *out = buffer;
+    if (value < 0) {
+        value = -value;
+        *out++ = '-';
+    }
+    do {
+        *digit++ = value % radix + '0';
+        value /= radix;
+    } while (value != 0);
+    while (digit != reversed)
+        *out++ = *--digit;
+    *out++ = 0;
+    return buffer;
+}
+
+i32 NuAToIW(const NUWCHAR *str) {
+    i32 value = 0;
+    i32 sign = 0;
+    NUWCHAR c = *str++;
+    if (c == '-') {
+        sign = -1;
+        c = *str++;
+    }
+    while (c >= '0' && c <= '9') {
+        value = (value << 3) + (value << 1);
+        value = value + c - '0';
+        c = *str++;
+    }
+    return sign != 0 ? value * sign : value;
+}
+
+f32 NuAToFW(const NUWCHAR *str) {
+    f32 value = 0.0f;
+    f32 divisor = 1.0f;
+    NUWCHAR c = *str++;
+    if (c == '-') {
+        divisor = -1.0f;
+        c = *str++;
+    }
+    while (c >= '0' && c <= '9') {
+        value *= 10.0f;
+        value += c - '0';
+        c = *str++;
+    }
+    if (c == '.') {
+        c = *str++;
+        while (c >= '0' && c <= '9') {
+            divisor *= 10.0f;
+            value *= 10.0f;
+            value += c - '0';
+            c = *str++;
+        }
+    }
+    return value / divisor;
+}
+
+void NuUTF8ToUnicode(NUWCHAR16 *dst, NUWCHAR8 *src) {
+    if (src == NULL)
+        return;
+    if (dst == NULL)
+        return;
+    *dst = 0;
+    while (*src != 0) {
+        if (*src <= 0x7f) {
+            *dst = *src;
+            ++src;
+        } else if (*src <= 0xdf) {
+            *dst = (*src & 0x1f) << 6;
+            ++src;
+            *dst |= *src & 0x3f;
+            ++src;
+        } else if (*src <= 0xef) {
+            *dst = (*src & 0x0f) << 12;
+            ++src;
+            *dst |= (*src & 0x3f) << 6;
+            ++src;
+            *dst |= *src & 0x3f;
+            ++src;
+        } else {
+            *dst = '?';
+            ++src;
+        }
+        ++dst;
+    }
+    *dst = 0;
+}
+
+void NuStrCatW(NUWCHAR *str, const NUWCHAR *ext) {
+    while (*str != 0)
+        ++str;
+    if (ext != NULL) {
+        do {
+            *str = *ext;
+            ++str;
+        } while (*ext++ != 0);
+    }
+}
+
+NUWCHAR *NuStrChrW(NUWCHAR *str, NUWCHAR c) {
+    while (*str != 0) {
+        if (*str == c)
+            return str;
+        ++str;
+    }
+    return NULL;
+}
+
+i32 NuStrCmpW(const NUWCHAR *a, const NUWCHAR *b) {
+    NUWCHAR ca;
+    NUWCHAR cb;
+    if (a == NULL)
+        return -1;
+    if (b == NULL)
+        return 1;
+    do {
+        ca = *a;
+        cb = *b;
+        if (ca > cb)
+            return 1;
+        if (ca < cb)
+            return -1;
+        ++a;
+        ++b;
+    } while (ca != 0 && cb != 0);
+    return 0;
+}
+
+i32 NuStrCpyWC(char *dst, const char *src, const char *replacement) {
+    i32 copied = 0;
+    if (src == NULL) {
+        *dst = '\0';
+    } else {
+        do {
+            if (*src != '*') {
+                *dst = *src;
+                ++dst;
+                ++copied;
+            } else {
+                const char *cursor;
+                if ((cursor = replacement) != NULL) {
+                    while (cursor != NULL && *cursor != '\0') {
+                        *dst = *cursor;
+                        ++dst;
+                        ++cursor;
+                        ++copied;
+                    }
+                }
+            }
+        } while (*src++ != '\0');
+    }
+    return copied;
+}
+
+i32 NuStrLenU(NUWCHAR8 *str) {
+    i32 offset = 0;
+    i32 characters = 0;
+    while (str[offset] != 0) {
+        ++characters;
+        ++offset;
+        while (str[offset] >= 0x80 && str[offset] <= 0xbf)
+            ++offset;
+    }
+    return characters;
+}
+
+void NuStrLwr(char *dst, const char *src) {
+    while (*src != '\0') {
+        *dst = NuToLower(*src);
+        ++dst;
+        ++src;
+    }
+    *dst = *src;
+}
+
+void NuStrLwrW(NUWCHAR *dst, const NUWCHAR *src) {
+    while (*src != 0) {
+        *dst = NuToLowerW(*src);
+        ++dst;
+        ++src;
+    }
+    *dst = *src;
+}
+
+void NuStrUprW(NUWCHAR *dst, const NUWCHAR *src) {
+    while (*src != 0) {
+        *dst = NuToUpperW(*src);
+        ++dst;
+        ++src;
+    }
+    *dst = *src;
+}
+
+i32 NuStrNCat(char *str, const char *ext, i32 n) {
+    while (*str != '\0')
+        ++str;
+    i32 copied = 0;
+    if (ext != NULL) {
+        do {
+            if (n == 0)
+                break;
+            *str = *ext;
+            ++str;
+            ++copied;
+            --n;
+        } while (*ext++ != '\0');
+    }
+    return copied;
+}
+
+i32 NuStrNCatW(NUWCHAR *str, const NUWCHAR *ext, i32 n) {
+    while (*str != 0)
+        ++str;
+    i32 copied = 0;
+    if (ext != NULL) {
+        do {
+            if (n == 0)
+                break;
+            *str = *ext;
+            ++str;
+            ++copied;
+            --n;
+        } while (*ext++ != 0);
+    }
+    return copied;
+}
+
+i32 NuStrFindPosU(NUWCHAR8 *str, i32 character_index) {
+    i32 offset = 0;
+    i32 characters = 0;
+    if (character_index == 0)
+        return 0;
+    while (str[offset] != 0) {
+        ++characters;
+        ++offset;
+        while (str[offset] >= 0x80 && str[offset] <= 0xbf)
+            ++offset;
+        if (character_index == characters)
+            break;
+    }
+    return offset;
+}
+
+char *NuIToA(i32 value, char *buffer, i32 radix) {
+    char reversed[33];
+    char *digit = reversed;
+    char *out = buffer;
+    if (value < 0) {
+        value = -value;
+        *out++ = '-';
+    }
+    do {
+        *digit++ = value % radix + '0';
+        value /= radix;
+    } while (value != 0);
+    while (digit != reversed)
+        *out++ = *--digit;
+    *out++ = '\0';
+    return buffer;
+}
+
+i32 NuStringTok(char *str, ...) {
+    char *token;
+    i32 value;
+    va_list args;
+    va_start(args, str);
+    do {
+        token = va_arg(args, char *);
+        value = va_arg(args, i32);
+        if (token != NULL) {
+            if (NuStrICmp(str, token) == 0)
+                break;
+        }
+    } while (token != NULL);
+    va_end(args);
+    return value;
+}
 
 NUWCHAR8 *NuUnicodeCharFromUTF8(NUWCHAR16 *dst, NUWCHAR8 *src) {
     NUWCHAR16 c0 = *src++;
@@ -103,6 +693,13 @@ i32 NuStrCpy(char *dst, const char *src) {
     *dst = '\0';
 
     return dst - dst_start;
+}
+
+void NuStrFixExt(char *dst, char *src, char *ext, i32 dst_size) {
+    if (src == NULL || ext == NULL || dst == NULL)
+        return;
+    NuStrFixExtPlatform(dst, src, ext, dst_size, g_platformName);
+    return;
 }
 
 void NuStrFixExtPlatform(char *dst, char *src, char *ext, i32 dst_size, char *platform_string) {

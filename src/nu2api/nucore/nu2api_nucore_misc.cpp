@@ -384,12 +384,6 @@ void NuPortalSetOverride(NUVEC *position) {
     override_campos = position;
 }
 
-void NuSpecialGetAnimPos(nuhspecial_s *) {
-}
-
-void NuSpecialReflection(i32) {
-}
-
 void NuDisplaySceneUnclip(nudisplayscene_s *) {
 }
 

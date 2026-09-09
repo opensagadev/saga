@@ -131,6 +131,10 @@ extern "C" {
     void NuMtxTransposeR(NUMTX *m, NUMTX *m0);
     void NuMtxTranspose(NUMTX *m, NUMTX *m0);
     void NuMtxInv(NUMTX *m, NUMTX *m0);
+    void NuMtxInvVU0(NUMTX *out, NUMTX *in);
+    void NuMtxMulArrayVU0(NUMTX *out, NUMTX *left, NUMTX *right, i32 count);
+    void NuMtxMulnVU0(NUMTX *out, NUMTX *left, NUMTX **right);
+    void NuMtxPreScaleUVU0(NUMTX *matrix, f32 scale);
     void NuMtxInvR(NUMTX *m, NUMTX *m0);
     f32 NuMtxDet3(NUMTX *m);
     void NuMtxLookAtX(NUMTX *m, NUVEC *pnt);

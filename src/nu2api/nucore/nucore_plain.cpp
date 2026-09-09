@@ -1912,76 +1912,8 @@ extern "C" {
     // Math / geometry
     // ---------------------------------------------------------------------------
 
-    void NuBez3Subdiv(void) {
-    }
-    void NuBez3ToCubic(void) {
-    }
-    void NuBezierCubicPatchEvaluate(void) {
-    }
-    void NuBezierCubicPatchEvaluatePartials(void) {
-    }
-    void NuBezierCubicPatchPartialsU(void) {
-    }
-    void NuBezierCubicPatchPartialsUU(void) {
-    }
-    void NuBezierCubicPatchPartialsUUU(void) {
-    }
-    void NuBezierCubicPatchPartialsUUV(void) {
-    }
-    void NuBezierCubicPatchPartialsUUVV(void) {
-    }
-    void NuBezierCubicPatchPartialsUUVVV(void) {
-    }
-    void NuBezierCubicPatchPartialsUVV(void) {
-    }
-    void NuBezierCubicPatchPartialsV(void) {
-    }
-    void NuBezierCubicPatchPartialsVV(void) {
-    }
-    void NuBezierCubicPatchPartialsVVV(void) {
-    }
-    void NuBezierQuadraticTriangleEvaluateBarycentric(void) {
-    }
-    void NuBezierQuadraticTriangleEvaluateParametric(void) {
-    }
-    void NuBezierQuadraticTrianglePartialsUU(void) {
-    }
-    void NuBezierQuadraticTrianglePartialsUeV(void) {
-    }
-    void NuBezierQuadraticTrianglePartialsVV(void) {
-    }
-    void NuCeil(void) {
-    }
-    void NuCubicToBez3(void) {
-    }
-    void NuEquiv(void) {
-    }
-    void NuEquivTollerance(void) {
-    }
-    void NuFrsqrt(void) {
-    }
-    void NuHalfToFloat(void) {
-    }
-    void NuInfiniteLineToPointDistSqr(void) {
-    }
-    void NuInfiniteLineToPointDistSqrEx(void) {
-    }
-    void NuLineToLineDist(void) {
-    }
-    void NuLineToPointDistSqr(void) {
-    }
     f32 NuLog2(f32 value) {
         return NuLog10(value) * 3.321928f;
-    }
-    void NuMiscNextPow2(void) {
-    }
-    void NuMiscNextPow2Exp(void) {
-    }
-    void NuMiscPow2Exp(void) {
-    }
-    void NuMtxInvVU0(void) {
-    }
-    void NuMtxMulArrayVU0(void) {
     }
     // Original @0x2babf0.  The VU0 entry point is an ordinary CPU wrapper in
     // this build; animation evaluation uses it to combine an animated joint
@@ -1991,10 +1923,6 @@ extern "C" {
     }
     void NuMtxMulVU0(NUMTX *result, NUMTX *left, NUMTX *right) {
         NuMtxMulH(result, left, right);
-    }
-    void NuMtxMulnVU0(void) {
-    }
-    void NuMtxPreScaleUVU0(void) {
     }
     void NuMtxPreScaleVU0(NUMTX *matrix, NUVEC *scale) {
         NuMtxPreScale(matrix, scale);
@@ -2006,18 +1934,6 @@ extern "C" {
     }
     void NuMtxSetRotateXYZVU0(NUMTX *matrix, NUANGVEC *angles) {
         NuMtxSetRotateXYZ(matrix, angles);
-    }
-    void NuPlnDist(void) {
-    }
-    void NuPlnDist2(void) {
-    }
-    void NuPlnEqnPn(void) {
-    }
-    void NuPlnLine2(void) {
-    }
-    void NuPlnLineVU0(void) {
-    }
-    void NuPlnPlnIntersect(void) {
     }
     static f32 pow_x[32], pow_y[32], pow_rv[32];
     static i32 pow_cache_free;
@@ -2605,8 +2521,6 @@ extern "C" {
     }
     void NuSpecialForceMtl(void) {
     }
-    void NuSpecialForceToAlpha(void) {
-    }
     void NuSpecialGetActiveShadowLights(void) {
     }
     void NuSpecialGetBounds(void *special, NUVEC *minimum, NUVEC *maximum) {
@@ -2746,8 +2660,6 @@ extern "C" {
         nuspecial_clip_state = enabled != 0 ? state : -1;
         return previous;
     }
-    void NuSpecialSetCollision(void) {
-    }
     void NuSpecialSetDrawMtx(void *special, NUMTX *mtx) {
         NuPlainSpecialHandleLayout *handle = reinterpret_cast<NuPlainSpecialHandleLayout *>(special);
         if (handle == NULL || handle->scene == NULL) {
@@ -2766,19 +2678,7 @@ extern "C" {
             display->flags |= 0x400;
         }
     }
-    void NuSpecialSetDrawPos(void *, void *) {
-    }
-    void NuSpecialSetInstAnimTime(void) {
-    }
-    void NuSpecialSetInstanceMtx(void) {
-    }
-    void NuSpecialSetMtx(void) {
-    }
-    void NuSpecialSetOnScreen(void) {
-    }
     void NuSpecialSetRenderPlane(void) {
-    }
-    void NuSpecialTestAnim(void) {
     }
     void NuSpecialVertexOffsets(void) {
     }
@@ -3755,120 +3655,15 @@ extern "C" {
     // Strings / conversion / Unicode
     // ---------------------------------------------------------------------------
 
-    void NuAToFW(void) {
-    }
-    void NuAToIW(void) {
-    }
-    char *NuIToA(i32 value, char *buffer, i32 radix) {
-        if (buffer == NULL || radix < 2 || radix > 36) {
-            return buffer;
-        }
-
-        static const char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-        char reversed[34];
-        i32 length = 0;
-        const bool negative = value < 0 && radix == 10;
-        u32 magnitude = negative ? 0u - static_cast<u32>(value) : static_cast<u32>(value);
-        do {
-            reversed[length++] = digits[magnitude % static_cast<u32>(radix)];
-            magnitude /= static_cast<u32>(radix);
-        } while (magnitude != 0);
-        if (negative) {
-            reversed[length++] = '-';
-        }
-        for (i32 i = 0; i < length; ++i) {
-            buffer[i] = reversed[length - i - 1];
-        }
-        buffer[length] = '\0';
-        return buffer;
-    }
-    void NuIToAW(void) {
-    }
-    void NuIsAl(void) {
-    }
-    void NuIsAlW(void) {
-    }
     void NuSPrintfW(void) {
-    }
-    void NuStrCatW(void) {
-    }
-    void NuStrChrW(void) {
-    }
-    void NuStrCmpW(void) {
-    }
-    void NuStrCpyWC(void) {
-    }
-    void NuStrFindPosU(void) {
-    }
-    void NuStrFixExt(void) {
-    }
-    void NuStrGetExt(void) {
-    }
-    void NuStrGetFilenameNoExt(void) {
-    }
-    void NuStrGetPath(void) {
     }
     void NuStrICmpWC(void) {
     }
-    void NuStrIStrW(void) {
-    }
-    void NuStrLenU(void) {
-    }
-    void NuStrLwr(void) {
-    }
-    void NuStrLwrW(void) {
-    }
-    i32 NuStrNCat(char *str, const char *ext, i32 n) {
-        while (*str != '\0') {
-            ++str;
-        }
-
-        i32 copied = 0;
-        if (ext != NULL) {
-            do {
-                if (n == 0) {
-                    break;
-                }
-                *str++ = *ext;
-                ++copied;
-                --n;
-            } while (*ext++ != '\0');
-        }
-        return copied;
-    }
-    void NuStrNCatW(void) {
-    }
-    void NuStrNCmpW(void) {
-    }
-    void NuStrNCpyW(void) {
-    }
-    void NuStrNICmpW(void) {
-    }
-    void NuStrRChrW(void) {
-    }
-    void NuStrStrW(void) {
-    }
-    void NuStrSubstituteString(void) {
-    }
-    void NuStrToL(void) {
-    }
-    void NuStrToLW(void) {
-    }
-    void NuStrToLower(void) {
-    }
     void NuStrTrap(void) {
-    }
-    void NuStrUprW(void) {
-    }
-    void NuStringTok(void) {
-    }
-    void NuUTF8ToUnicode(void) {
     }
     void NuFParCreateGivenFH(void) {
     }
     void NuFParGetOptionalFloat(void) {
-    }
-    void NuFParGetOptionalInt(void) {
     }
     void NuFParGetPos(void) {
     }
@@ -3894,24 +3689,6 @@ extern "C" {
     void NuLinkedListInsertAfter(void) {
     }
     void NuLinkedListInsertBefore(void) {
-    }
-    void NuLstAllocAfter(void) {
-    }
-    void NuLstAllocBefore(void) {
-    }
-    void NuLstAllocFree(void) {
-    }
-    void NuLstAtachHead(void) {
-    }
-    void NuLstAttachTail(void) {
-    }
-    void NuLstGetFree(void) {
-    }
-    void NuLstGetPrev(void) {
-    }
-    void NuLstMoveNext(void) {
-    }
-    void NuLstMovePrev(void) {
     }
 
     // ---------------------------------------------------------------------------

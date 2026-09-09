@@ -1,6 +1,6 @@
 #pragma once
 
-#include "decomp_assert.h"
+#include "decomp.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "nu2api/numath/nuvec.h"
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "nu2api/nucore/NuPostFilterGen.h"
-#include "decomp_assert.h"
+#include "decomp.h"
 
 struct NuMotionAccumFilterGen : NuPostFilterGen {
     f32 GetTiming(i32 *);

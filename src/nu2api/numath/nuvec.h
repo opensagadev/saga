@@ -50,6 +50,26 @@ extern "C" {
     /// @param[out] v The negated vector, i.e. `-v0`.
     /// @param v0 The vector to negate.
     void NuVecNeg(NUVEC *v, NUVEC *v0);
+    NUVEC NuBezierCubicPatchEvaluate(NUVEC *control, f32 u, f32 v);
+    NUVEC NuBezierCubicPatchEvaluatePartials(NUVEC *control, f32 u, f32 v, i32 order_u, i32 order_v);
+    void NuCubicToBez3(f32 *cubic, f32 *bezier);
+    void NuBez3Subdiv(f32 *control, f32 t, f32 *left, f32 *right);
+    void NuBez3ToCubic(f32 *bezier, f32 *cubic);
+    void NuBezierCubicPatchPartialsU(NUVEC *control, NUVEC *out0, NUVEC *out1, NUVEC *out2, NUVEC *out3);
+    void NuBezierCubicPatchPartialsUU(NUVEC *control, NUVEC *out0, NUVEC *out1, NUVEC *out2, NUVEC *out3);
+    void NuBezierCubicPatchPartialsUUV(NUVEC *control, NUVEC *out0, NUVEC *out1, NUVEC *out2, NUVEC *out3);
+    void NuBezierCubicPatchPartialsUVV(NUVEC *control, NUVEC *out0, NUVEC *out1, NUVEC *out2, NUVEC *out3);
+    void NuBezierCubicPatchPartialsV(NUVEC *control, NUVEC *out0, NUVEC *out1, NUVEC *out2, NUVEC *out3);
+    void NuBezierCubicPatchPartialsVV(NUVEC *control, NUVEC *out0, NUVEC *out1, NUVEC *out2, NUVEC *out3);
+    NUVEC NuBezierQuadraticTrianglePartialsUU(NUVEC *control);
+    void NuBezierCubicPatchPartialsUUVVV(NUVEC *control, NUVEC *out0, NUVEC *out1, NUVEC *out2, NUVEC *out3);
+    void NuBezierCubicPatchPartialsUUVV(NUVEC *control, NUVEC *out0, NUVEC *out1, NUVEC *out2, NUVEC *out3);
+    void NuBezierCubicPatchPartialsUUU(NUVEC *control, NUVEC *out0, NUVEC *out1, NUVEC *out2, NUVEC *out3);
+    void NuBezierCubicPatchPartialsVVV(NUVEC *control, NUVEC *out0, NUVEC *out1, NUVEC *out2, NUVEC *out3);
+    NUVEC NuBezierQuadraticTriangleEvaluateBarycentric(NUVEC *control, f32 u, f32 v, f32 w);
+    NUVEC NuBezierQuadraticTriangleEvaluateParametric(NUVEC *control, f32 u, f32 v);
+    NUVEC NuBezierQuadraticTrianglePartialsVV(NUVEC *control);
+    NUVEC NuBezierQuadraticTrianglePartialsUeV(NUVEC *control);
 
     /// @relatesalso nuvec_s
     /// @brief Adds two vectors.
@@ -182,6 +202,21 @@ extern "C" {
     void NuVecRotateZ(NUVEC *v, NUVEC *v0, NUANG a);
     /// @brief Builds a horizontal vector of the given magnitude and Y rotation.
     void NuVecRotateYValZ(NUVEC *v, f32 magnitude, NUANG a);
+    void NuVecRotateYValX(NUVEC *v, f32 magnitude, NUANG a);
+    f32 NuVecDiffSqrVU0(NUVEC *a, NUVEC *b);
+    f32 NuVecDiffVU0(NUVEC *a, NUVEC *b);
+    f32 NuVecMagVU0(NUVEC *v);
+    f32 NuVecNormVU0(NUVEC *out, NUVEC *v);
+    void NuVecMtxRotateValX(NUVEC *out, f32 value, struct numtx_s *matrix);
+    void NuVecMtxRotateValY(NUVEC *out, f32 value, struct numtx_s *matrix);
+    void NuVecMtxRotateValZ(NUVEC *out, f32 value, struct numtx_s *matrix);
+    void NuVecInvMtxRotateValX(NUVEC *out, f32 value, struct numtx_s *matrix);
+    void NuVecInvMtxRotateValY(NUVEC *out, f32 value, struct numtx_s *matrix);
+    void NuVecInvMtxRotateValZ(NUVEC *out, f32 value, struct numtx_s *matrix);
+    void NuVecInvMtxScale(NUVEC *out, NUVEC *v, struct numtx_s *matrix);
+    void NuVecInvMtxTranslate(NUVEC *out, NUVEC *v, struct numtx_s *matrix);
+    void NuVecInvMtxTransformVU0(NUVEC *out, NUVEC *v, struct numtx_s *matrix);
+    void NuVecMtxRotateH(NUVEC *out, NUVEC *v, struct numtx_s *matrix);
 
     /// @relatesalso nuvec_s
     /// @brief Computes the surface normal of a triangle.
@@ -317,5 +352,6 @@ extern "C" {
 /// @param count The number of vectors in the arrays `out` and `v`.
 /// @sa NuVecMtxTransform
 void NuVecMtxTransformBlock(NUVEC *out, NUVEC *v, struct numtx_s *m, i32 count);
+u32 NuVecToRGBA(NUVEC *v, f32 alpha);
 
 #endif

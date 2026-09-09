@@ -2,7 +2,7 @@
 
 #include <GLES2/gl2.h>
 
-#include "decomp_assert.h"
+#include "decomp.h"
 #include "nu2api/nucore/common.h"
 
 struct nushaderobjectkey_s;
