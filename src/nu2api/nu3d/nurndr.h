@@ -55,6 +55,9 @@ extern i32 g_backingHeight;
 #ifdef __cplusplus
 
 void NuRndrStreamInit(i32 stream_buffer_size, VARIPTR *buffer);
+// axes[0] is the center; axes[1..3] are the three shape basis vectors.
+void NuRndrCalcRandEllipsePos(struct nuvec4_s *position, NUMTX *matrix, NUVEC *axes);
+void NuRndrCalcRandCylinderPos(struct nuvec4_s *position, NUMTX *matrix, NUVEC *axes);
 
 extern "C" {
 #endif
