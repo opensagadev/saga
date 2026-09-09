@@ -40,7 +40,6 @@ DECOMP_ASSERT(sizeof(RepeatSfx) == 0x10, "RepeatSfx size");
 static i32 repsfxcount;
 static RepeatSfx repsfxtab[32];
 static i32 ticktock;
-static i32 deathstar_hold_count;
 extern "C" f32 MusicVolume __asm__("_ZL11MusicVolume") __attribute__((visibility("hidden"))) = 1.0f;
 extern "C" i32 NumSfx __asm__("_ZL6NumSfx") __attribute__((visibility("hidden")));
 extern "C" i32 NumSfxInst __asm__("_ZL10NumSfxInst") __attribute__((visibility("hidden")));
@@ -112,7 +111,6 @@ void SetupBlowupSfx(WORLDINFO_s *world, specialsfx_s *special_sfx);
 void Pulses_AddSfx(PULSESYS_s *system, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx_count);
 void Move_BEAST(GameObject_s *object);
 void PlayFootStepSfx(GameObject_s *object);
-i32 CheckMusicOther(void);
 i32 qrand(void);
 void GameCam_NewShake(GAMECAMERA_s *camera, f32 amount, f32 duration, f32 speed);
 void GameCam_Judder(GAMECAMERA_s *camera, f32 amount, i32 axis, nuvec_s *source);
@@ -709,86 +707,6 @@ void LoadSpecialSfxFile(WORLDINFO *world) {
     }
 }
 
-i32 ActionMusicFn() {
-    LEVELDATA_s *level = WORLD->current_level;
-    if (Arcade != 0 || DoubleScore != 0 || Cheat_PowerUpActive(-1) != 0 ||
-        (level == CRUISERA_LDATA && MiniCutCam != 0) || (level == CRUISERD_LDATA && CruiserD_LiftChase != 0) ||
-        level == DEATHSTARRESCUEE_LDATA) {
-        return 1;
-    }
-    if (level == MOSEISLEYD_LDATA && CheckMusicOther() != 0) {
-        return 1;
-    }
-    if (level == CLOUDCITYESCAPEA_LDATA) {
-        return 1;
-    }
-    if (level == SPEEDERCHASEA_LDATA) {
-        nuvec_s position;
-        SOCKPOSITION_s socket_position;
-        if (Players_AveragePos(&position, &socket_position) != 0) {
-            const i8 socket = socket_position.location.sock;
-            if (socket == 7 || socket == 8) {
-                return 1;
-            }
-            if (socket == 2 || socket == 3 || socket == 4 || socket == 6 || socket == 9) {
-                return 0;
-            }
-        }
-        level = WORLD->current_level;
-    }
-    if (level == HUB_LDATA) {
-        return ai_fighting != 0;
-    }
-    for (i32 i = 0; i < 2; ++i) {
-        GameObject_s *player = Player[i];
-        if (player != NULL &&
-            (player->ai.opponent != NULL || (player->ai.nearest_opponent != NULL &&
-                                             static_cast<APIOBJECT *>(player->ai.nearest_opponent)->field_0x287 == 0 &&
-                                             player->ai.nearest_opponent_metric < 3.0f))) {
-            return 1;
-        }
-    }
-    return 0;
-}
-
-i32 CheckMusicOther() {
-    nuvec_s position;
-    SOCKPOSITION_s socket_position;
-    if (Players_AveragePos(&position, &socket_position) == 0) {
-        return 0;
-    }
-    LEVELDATA_s *level = WORLD->current_level;
-    if (level == HUB_LDATA) {
-        return Hub_Outside() != 0;
-    }
-    if (level == KAMINOA_LDATA) {
-        return KaminoInside() != 0;
-    }
-    if (level == KAMINOC_LDATA) {
-        return KaminoDiscoOn() != 0;
-    }
-    if (level == KAMINOE_LDATA) {
-        return KaminoInside() == 0;
-    }
-    if (level == MOSEISLEYD_LDATA) {
-        return socket_position.location.sock == 3;
-    }
-    if (level == DEATHSTARBATTLED_LDATA) {
-        if (DeathStarShieldDown() != 0) {
-            deathstar_hold_count = 30;
-            return 1;
-        }
-        if (deathstar_hold_count > 0) {
-            --deathstar_hold_count;
-            return 1;
-        }
-    } else if (level == ASTEROIDCHASEB_LDATA) {
-        return GameCam->sock_position.location.sock == 4;
-    } else if (level == SARLACCPITB_LDATA) {
-        return SarlaccPitDiscoActive(WORLD) != 0;
-    }
-    return 0;
-}
 
 extern "C" {
 

@@ -90,6 +90,7 @@ build:target --per_file_copt=^src/legoapi/core/input/timer\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/core/input/timing\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/core/input/gamepads\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/world/levels/episodeI\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/world/levels/podsprint\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levels/episodeII\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levels/episodeIII\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levels/episodeIV\.cpp$@-O3

@@ -3918,7 +3918,9 @@ extern "C" {
     }
     void NuTimeBarInit(void) {
     }
-    static i32 NuTimeBar_PeakReset asm("_ZL19NuTimeBar_PeakReset");
+    extern "C++" {
+        static i32 NuTimeBar_PeakReset;
+    }
     void NuTimeBarResetPeaks(void) {
         NuTimeBar_PeakReset = 1;
     }
@@ -4136,51 +4138,37 @@ extern "C" {
     // PS2 / Xbox legacy shims
     // ---------------------------------------------------------------------------
 
-    struct nupad_s;
-    struct nuframebuffer_s;
-    struct nushaderobject_s;
-    union variptr_u;
-
-    void NuXboxLiveInit() __asm__("_Z14NuXboxLiveInitv");
-    void NuXboxLiveInit() {
-    }
-    void NuPs2PadDemoEnd() __asm__("_Z15NuPs2PadDemoEndv");
-    void NuPs2PadDemoEnd() {
-    }
-    i32 NuPs2GetLanguage() __asm__("_Z16NuPs2GetLanguagev");
-    i32 NuPs2GetLanguage() {
-        return 0;
-    }
-    void NuPs2PadSetMotors(nupad_s *, i32, i32) __asm__("_Z17NuPs2PadSetMotorsP7nupad_sii");
-    void NuPs2PadSetMotors(nupad_s *, i32, i32) {
-    }
-    void Nu360ConfigureSMBSharing(char **) __asm__("_Z24Nu360ConfigureSMBSharingPPc");
-    void Nu360ConfigureSMBSharing(char **) {
-    }
-    void NuFramebuffer360EndZPass() __asm__("_Z24NuFramebuffer360EndZPassv");
-    void NuFramebuffer360EndZPass() {
-    }
-    bool NuFramebuffer360HasZPass() __asm__("_Z24NuFramebuffer360HasZPassv");
-    bool NuFramebuffer360HasZPass() {
-        return false;
-    }
-    void NuFramebuffer360BeginZPass(i32) __asm__("_Z26NuFramebuffer360BeginZPassi");
-    void NuFramebuffer360BeginZPass(i32) {
-    }
-    i32 NuFramebuffer360GetTileCount(nuframebuffer_s *) __asm__("_Z28NuFramebuffer360GetTileCountP15nuframebuffer_s");
-    i32 NuFramebuffer360GetTileCount(nuframebuffer_s *) {
-        return 0;
-    }
-    void NuShaderObject360LoadShader(nushaderobject_s *) __asm__("_Z27NuShaderObject360LoadShaderP16nushaderobject_s");
-    void NuShaderObject360LoadShader(nushaderobject_s *) {
-    }
-    void NuShaderObject360LoadPackFile(char *, variptr_u *,
-                                       char *) __asm__("_Z29NuShaderObject360LoadPackFilePcP9variptr_uS0_");
-    void NuShaderObject360LoadPackFile(char *, variptr_u *, char *) {
-    }
-    void
-    NuShaderObject360UnloadShader(nushaderobject_s *) __asm__("_Z29NuShaderObject360UnloadShaderP16nushaderobject_s");
-    void NuShaderObject360UnloadShader(nushaderobject_s *) {
-    }
-
 } // extern "C"
+
+struct nupad_s;
+struct nuframebuffer_s;
+struct nushaderobject_s;
+union variptr_u;
+
+void NuXboxLiveInit() {
+}
+void NuPs2PadDemoEnd() {
+}
+i32 NuPs2GetLanguage() {
+    return 0;
+}
+void NuPs2PadSetMotors(nupad_s *, i32, i32) {
+}
+void Nu360ConfigureSMBSharing(char **) {
+}
+void NuFramebuffer360EndZPass() {
+}
+bool NuFramebuffer360HasZPass() {
+    return false;
+}
+void NuFramebuffer360BeginZPass(i32) {
+}
+i32 NuFramebuffer360GetTileCount(nuframebuffer_s *) {
+    return 0;
+}
+void NuShaderObject360LoadShader(nushaderobject_s *) {
+}
+void NuShaderObject360LoadPackFile(char *, variptr_u *, char *) {
+}
+void NuShaderObject360UnloadShader(nushaderobject_s *) {
+}

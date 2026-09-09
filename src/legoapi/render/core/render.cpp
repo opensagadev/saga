@@ -168,16 +168,7 @@ f32 GetAspectRatio();
 void Hint_Draw(i32 player_index);
 extern i32 CutScenePlayer_CanStart(i32 cutscene_id);
 
-NUCAMERA *cam;
-NUMTX local_inv_view_mtx;
-NUVEC world_campos;
-NUVEC *override_campos;
-NUFRUSTRUM **frustra;
-i32 *nfrustra;
-i16 camera_roomid;
-static NUPLANE near_clip_plane;
-NUPLANE cam_plane;
-i32 draw_portals;
+
 
 namespace {
     struct NuDisplaySpecialLayout {
@@ -224,7 +215,7 @@ extern "C" {
     void RndrStateCopyGlobalState(NUGLOBALRNDRSTATE *state);
     i32 NuDisplayListRndrSpecial(nuhspecial_s *special, NUMTX *mtx, i32 skinned, void *skin_mtx, void *blend_values);
     void Initialise_PS(NUGSCN *scene);
-    void SetAllInstancesVisible(void);
+    void SetAllInstancesVisible(NUGSCN *scene);
     void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 
     static void DisplaySceneSetClipResult(NUDLDLISTSCENE *scene, i32 clip_index, i32 clip_result) {
@@ -391,59 +382,6 @@ extern "C" {
         }
     }
 
-    i32 NuPortalVisibility(NUGSCN *scene) {
-        Initialise_PS(scene);
-        NUVEC *camera_position = override_campos != NULL ? override_campos : &world_campos;
-        if (portals_enabled == 0) {
-            SetAllInstancesVisible();
-            return 0;
-        }
-        if (scene->max_portals == 0 || scene->num_rooms == 0 || scene->portal_instance_count == 0) {
-            return 0;
-        }
-
-        scene->num_portal_frusta = 0;
-        nfrustra = &scene->num_portal_frusta;
-        frustra = scene->portal_frusta;
-        SetAllInstancesHidden(scene);
-        cam = NuCameraGetCam();
-        local_inv_view_mtx = *NuCameraGetMtx();
-        world_campos = {
-            global_camera.mtx.m30,
-            global_camera.mtx.m31,
-            global_camera.mtx.m32,
-        };
-
-        camera_roomid = static_cast<i16>(NuPortalWhichRoom(scene, camera_position));
-        scene->camera_room = camera_roomid;
-        if (camera_roomid == -1) {
-            return 0;
-        }
-
-        const f32 forward_x = local_inv_view_mtx.m20;
-        const f32 forward_y = local_inv_view_mtx.m21;
-        const f32 forward_z = local_inv_view_mtx.m22;
-        cam_plane.a = forward_x;
-        cam_plane.b = forward_y;
-        cam_plane.c = forward_z;
-        cam_plane.d = -(world_campos.x * forward_x + world_campos.y * forward_y + world_campos.z * forward_z);
-
-        near_clip_plane.a = forward_x;
-        near_clip_plane.b = forward_y;
-        near_clip_plane.c = forward_z;
-        near_clip_plane.d = -((world_campos.x + cam->near_clip * forward_x) * forward_x +
-                              (world_campos.y + cam->near_clip * forward_y) * forward_y +
-                              (world_campos.z + cam->near_clip * forward_z) * forward_z);
-
-        NUVEC minimum = {-1.0f, -1.0f, -1.0f};
-        NUVEC maximum = {1.0f, 1.0f, 1.0f};
-        NUFRUSTRUM *frustum = buildFrustrum(&minimum, &maximum, -2);
-        for (i32 i = 0; i < scene->num_rooms; ++i) {
-            scene->rooms[i].flags &= ~NUROOM_FLAG_VISITED;
-        }
-        roomRecursive(scene, frustum, camera_roomid, -1, 0);
-        return 1;
-    }
     void NuGScnRndr3(NUGSCN *scene) {
         NuDisplaySceneRndr(scene->display_list);
     }
@@ -2434,6 +2372,7 @@ void DrawMessageBoxRGBA(float, float, float, float, u32, u32, u32, u32, numtl_s 
 
 void DrawSuperStoryTime(float, float, float, i32, i32) {
 }
+
 
 void ResetForceBack() {
     ForceBackObj = NULL;

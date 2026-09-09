@@ -56,8 +56,8 @@ enum NuPostEffectFlag : i32 {
 };
 
 i32 g_effectFlags; // bss - see masks above
-extern i32 g_effectsRan __asm__("_ZL12g_effectsRan") __attribute__((visibility("hidden")));
-extern u8 g_lastFrameEffect __asm__("_ZL17g_lastFrameEffect") __attribute__((visibility("hidden")));
+static i32 g_effectsRan = 0;
+static u8 g_lastFrameEffect = 0;
 
 NuDeferredFilter *deferredFilter;
 static NuMainFilter *mainFilter;

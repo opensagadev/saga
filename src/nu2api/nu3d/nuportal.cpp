@@ -11,14 +11,14 @@ static i8 fstackmem[12288];
 static VARIPTR fstack_limit;
 static VARIPTR fstack_top;
 
-extern NUCAMERA *cam;
-extern NUMTX local_inv_view_mtx;
-extern NUVEC world_campos;
-extern i16 camera_roomid;
-extern NUPLANE cam_plane;
-extern NUFRUSTRUM **frustra;
-extern i32 *nfrustra;
-extern i32 draw_portals;
+static NUCAMERA *cam;
+static NUMTX local_inv_view_mtx;
+static NUVEC world_campos;
+static i16 camera_roomid;
+static NUPLANE cam_plane;
+static NUFRUSTRUM **frustra;
+static i32 *nfrustra;
+static i32 draw_portals;
 
 extern "C" void clipRoomAgainstFrustrum(NUGSCN *scene, NUROOM *room, NUFRUSTRUM *frustum);
 
@@ -35,7 +35,7 @@ static NUFRUSTRUM *allocateFrustrum(i16 plane_count, i16 room_id) {
     return frustum;
 }
 
-void transposeClipPlanes(NUFRUSTRUM *frustum) {
+static __used__ void transposeClipPlanes(NUFRUSTRUM *frustum) {
     for (i32 i = 0; i < 8; ++i) {
         const NUPLANE &plane = i < frustum->plane_count ? frustum->planes[i] : cam_plane;
         frustum->transposed_planes[i] = plane.a;
@@ -56,7 +56,7 @@ static void transformFrustrumPlane(NUPLANE *plane) {
         -(local_inv_view_mtx.m30 * plane->a + local_inv_view_mtx.m31 * plane->b + local_inv_view_mtx.m32 * plane->c);
 }
 
-NUFRUSTRUM *buildFrustrum(NUVEC *minimum, NUVEC *maximum, i16 room_id) {
+static __used__ NUFRUSTRUM *buildFrustrum(NUVEC *minimum, NUVEC *maximum, i16 room_id) {
     NUFRUSTRUM *frustum = allocateFrustrum(4, room_id);
     frustum->minimum = *minimum;
     frustum->maximum = *maximum;
@@ -151,7 +151,7 @@ static NUFRUSTRUM *copyFrustrum(NUFRUSTRUM *source, i16 room_id) {
     return copy;
 }
 
-void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_id, i16 previous_room, i32 depth) {
+static __used__ void roomRecursive(NUGSCN *scene, NUFRUSTRUM *frustum, i16 room_id, i16 previous_room, i32 depth) {
     if (depth >= 2) {
         for (i32 i = 0; i < depth - 1; ++i) {
             if (rooms_visited[i] == room_id) {
@@ -276,4 +276,97 @@ void NuPortalSetActive(NUGSCN *scene, i32 portal_id, i32 active) {
 
 void NuPortalMaxDepth(struct nugscn_s *scene, i32 depth) {
     scene->portal_depth = depth;
+}
+
+static NUVEC *override_campos;
+extern i32 portals_enabled;
+static NUPLANE near_clip_plane;
+extern "C" void Initialise_PS(NUGSCN *scene);
+extern "C" void SetAllInstancesVisible(NUGSCN *scene);
+void SetAllInstancesHidden(NUGSCN *scene);
+
+extern "C" i32 NuPortalVisibility(NUGSCN *scene) {
+    Initialise_PS(scene);
+    NUVEC *camera_position = override_campos != NULL ? override_campos : &world_campos;
+    if (portals_enabled == 0) {
+        SetAllInstancesVisible(scene);
+        return 0;
+    }
+    if (scene->max_portals == 0 || scene->num_rooms == 0 || scene->portal_instance_count == 0) {
+        return 0;
+    }
+
+    scene->num_portal_frusta = 0;
+    nfrustra = &scene->num_portal_frusta;
+    frustra = scene->portal_frusta;
+    SetAllInstancesHidden(scene);
+    cam = NuCameraGetCam();
+    local_inv_view_mtx = *NuCameraGetMtx();
+    world_campos = {
+        global_camera.mtx.m30,
+        global_camera.mtx.m31,
+        global_camera.mtx.m32,
+    };
+
+    camera_roomid = static_cast<i16>(NuPortalWhichRoom(scene, camera_position));
+    scene->camera_room = camera_roomid;
+    if (camera_roomid == -1) {
+        return 0;
+    }
+
+    const f32 forward_x = local_inv_view_mtx.m20;
+    const f32 forward_y = local_inv_view_mtx.m21;
+    const f32 forward_z = local_inv_view_mtx.m22;
+    cam_plane.a = forward_x;
+    cam_plane.b = forward_y;
+    cam_plane.c = forward_z;
+    cam_plane.d = -(world_campos.x * forward_x + world_campos.y * forward_y + world_campos.z * forward_z);
+
+    near_clip_plane.a = forward_x;
+    near_clip_plane.b = forward_y;
+    near_clip_plane.c = forward_z;
+    near_clip_plane.d = -((world_campos.x + cam->near_clip * forward_x) * forward_x +
+                          (world_campos.y + cam->near_clip * forward_y) * forward_y +
+                          (world_campos.z + cam->near_clip * forward_z) * forward_z);
+
+    NUVEC minimum = {-1.0f, -1.0f, -1.0f};
+    NUVEC maximum = {1.0f, 1.0f, 1.0f};
+    NUFRUSTRUM *frustum = buildFrustrum(&minimum, &maximum, -2);
+    for (i32 i = 0; i < scene->num_rooms; ++i) {
+        scene->rooms[i].flags &= ~NUROOM_FLAG_VISITED;
+    }
+    roomRecursive(scene, frustum, camera_roomid, -1, 0);
+    return 1;
+}
+
+void NuPortalSetOverride(NUVEC *position) {
+    override_campos = position;
+}
+
+void NuPortalEnableDebugDraw(i32 enabled) {
+    draw_portals = enabled;
+}
+
+extern "C" i32 clipTestSphere(NUPORTALSPHERE *sphere, NUFRUSTRUM *frustum) {
+    i32 fully_inside = 0;
+    for (i32 i = 0; i < frustum->plane_count; ++i) {
+        const NUPLANE &plane = frustum->planes[i];
+        const f32 distance =
+            plane.a * sphere->center.x + plane.b * sphere->center.y + plane.c * sphere->center.z + plane.d;
+        if (distance < -sphere->radius) {
+            return 0;
+        }
+        if (distance > sphere->radius) {
+            ++fully_inside;
+        }
+    }
+    const f32 camera_distance = cam_plane.a * sphere->center.x + cam_plane.b * sphere->center.y +
+                                cam_plane.c * sphere->center.z + cam_plane.d;
+    if (camera_distance < -sphere->radius) {
+        return 0;
+    }
+    if (camera_distance > sphere->radius) {
+        ++fully_inside;
+    }
+    return fully_inside == frustum->plane_count + 1 ? 1 : 2;
 }

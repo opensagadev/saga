@@ -65,31 +65,7 @@ extern "C" {
     extern nudisplayscene_s currentScene;
 
     void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
-    extern NUPLANE cam_plane;
 
-    i32 clipTestSphere(NUPORTALSPHERE *sphere, NUFRUSTRUM *frustum) {
-        i32 fully_inside = 0;
-        for (i32 i = 0; i < frustum->plane_count; ++i) {
-            const NUPLANE &plane = frustum->planes[i];
-            const f32 distance =
-                plane.a * sphere->center.x + plane.b * sphere->center.y + plane.c * sphere->center.z + plane.d;
-            if (distance < -sphere->radius) {
-                return 0;
-            }
-            if (distance > sphere->radius) {
-                ++fully_inside;
-            }
-        }
-        const f32 camera_distance = cam_plane.a * sphere->center.x + cam_plane.b * sphere->center.y +
-                                    cam_plane.c * sphere->center.z + cam_plane.d;
-        if (camera_distance < -sphere->radius) {
-            return 0;
-        }
-        if (camera_distance > sphere->radius) {
-            ++fully_inside;
-        }
-        return fully_inside == frustum->plane_count + 1 ? 1 : 2;
-    }
 
     i32 clipTestBox(NUVEC *minimum, NUVEC *maximum, NUPLANE *planes, i32 plane_count) {
         i32 inside_vertices = 0;
@@ -628,7 +604,7 @@ extern "C" {
     void SetAiRndrCullDistance(void) {
     }
 
-    void SetAllInstancesVisible(void) {
+    void SetAllInstancesVisible(NUGSCN *scene) {
         memset(PortalVisiFlags, 0xff, sizeof(PortalVisiFlags));
     }
 

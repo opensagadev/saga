@@ -1,3 +1,8 @@
+#include "nu2api/numusic/sfx.h"
+#include "legoapi/props/system/socksys.h"
+#include "legoapi/world/world_shared.h"
+#include "legoapi/characters/core/players.h"
+#include "legoapi/core/config/cheat.h"
 #include "legogame/game.h"
 #include "legoapi/characters/motion.h"
 
@@ -112,10 +117,8 @@ static i32 CanStartHold_Game(GameObject_s *) {
     return 1;
 }
 #include "legoapi/audio/audio.h"
-#include "legoapi/characters/core/players.h"
 #include "legoapi/props/doors/door.h"
 #include "legoapi/world/area.h"
-#include "legoapi/core/config/cheat.h"
 #include "legoapi/items/base/collection.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/menus/core/text.h"
@@ -341,9 +344,146 @@ SUPEROPTIONS_s SuperOptions = {};
 static CUTSCENESYS CutSceneSys_LSW = {0x5b, 0x5c, 0xe7, 2};
 void CutScenes_InitSystem(CUTSCENESYS *);
 void GameAudio_Init(GAMEAUDIO *);
-extern __attribute__((visibility("hidden"))) i32 GameAudio_CheckReverb_LSW() asm("_ZL25GameAudio_CheckReverb_LSWv");
-extern __attribute__((visibility("hidden"))) i32
-GameAudio_OverrideFootStep_LSW(GameObject_s *, i32) asm("_ZL30GameAudio_OverrideFootStep_LSWP12GameObject_si");
+
+extern AREADATA *DAGOBAH_ADATA;
+extern AREADATA *DEATHSTARESCAPE_ADATA;
+extern AREADATA *DEATHSTARRESCUE_ADATA;
+extern AREADATA *HOTHESCAPE_ADATA;
+extern AREADATA *JABBASPALACE_ADATA;
+extern "C" i32 CruiserD_LiftChase;
+extern i32 DoubleScore;
+i32 Players_AveragePos(nuvec_s *position, SOCKPOSITION_s *socket_position);
+i32 Hub_Outside(void);
+i32 KaminoInside(void);
+i32 KaminoDiscoOn(void);
+bool DeathStarShieldDown(void);
+bool SarlaccPitDiscoActive(WORLDINFO_s *world);
+static i32 deathstar_hold_count;
+static i32 CheckMusicOther(void);
+
+static i32 GameAudio_CheckReverb_LSW() {
+    LEVELDATA *level = WorldInfo_CurrentlyActive()->current_level;
+    if (level == HOTHBATTLEB_LDATA || level == TATOOINED_LDATA) {
+        return 1;
+    }
+    if (level == ASTEROIDCHASEB_LDATA && GameCam->sock_position.location.sock == 4) {
+        return 1;
+    }
+    return 0;
+}
+
+static i32 GameAudio_OverrideFootStep_LSW(GameObject_s *object, i32 alternate) {
+    WORLDINFO *world = WorldInfo_CurrentlyActive();
+    AREADATA *area = world->area;
+    LEVELDATA *level = world->current_level;
+
+    if ((area == HOTHESCAPE_ADATA || level == JABBASPALACEE_LDATA) && alternate == 0) {
+        return GetSfxId("fs_ice");
+    }
+
+    if (area == DAGOBAH_ADATA && alternate == 0) {
+        if (level != DAGOBAHA_LDATA || object->apiobj.field_0x281 != 0x14) {
+            if (level != DAGOBAHD_LDATA) {
+                if (level != DAGOBAHE_LDATA ||
+                    (GameCam->sock_position.location.sock != 4 && GameCam->sock_position.location.sock != 1)) {
+                    return GetSfxId("fs_swamp");
+                }
+            }
+        }
+    }
+
+    if (level == JABBASPALACEA_LDATA && (object->apiobj.field_0x281 == 9 || object->apiobj.field_0x281 == 0x18)) {
+        return GetSfxId("fs_ice");
+    }
+
+    if ((area == DEATHSTARRESCUE_ADATA || area == DEATHSTARESCAPE_ADATA || WORLD->area == JABBASPALACE_ADATA) &&
+        object->apiobj.field_0x281 == 0x14) {
+        return GetSfxId("FS_JWalkM");
+    }
+
+    return -1;
+}
+
+static i32 ActionMusicFn() {
+    LEVELDATA_s *level = WORLD->current_level;
+    if (Arcade != 0 || DoubleScore != 0 || Cheat_PowerUpActive(-1) != 0 ||
+        (level == CRUISERA_LDATA && MiniCutCam != 0) || (level == CRUISERD_LDATA && CruiserD_LiftChase != 0) ||
+        level == DEATHSTARRESCUEE_LDATA) {
+        return 1;
+    }
+    if (level == MOSEISLEYD_LDATA && CheckMusicOther() != 0) {
+        return 1;
+    }
+    if (level == CLOUDCITYESCAPEA_LDATA) {
+        return 1;
+    }
+    if (level == SPEEDERCHASEA_LDATA) {
+        nuvec_s position;
+        SOCKPOSITION_s socket_position;
+        if (Players_AveragePos(&position, &socket_position) != 0) {
+            const i8 socket = socket_position.location.sock;
+            if (socket == 7 || socket == 8) {
+                return 1;
+            }
+            if (socket == 2 || socket == 3 || socket == 4 || socket == 6 || socket == 9) {
+                return 0;
+            }
+        }
+        level = WORLD->current_level;
+    }
+    if (level == HUB_LDATA) {
+        return ai_fighting != 0;
+    }
+    for (i32 i = 0; i < 2; ++i) {
+        GameObject_s *player = Player[i];
+        if (player != NULL &&
+            (player->ai.opponent != NULL || (player->ai.nearest_opponent != NULL &&
+                                             static_cast<APIOBJECT *>(player->ai.nearest_opponent)->field_0x287 == 0 &&
+                                             player->ai.nearest_opponent_metric < 3.0f))) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static i32 CheckMusicOther() {
+    nuvec_s position;
+    SOCKPOSITION_s socket_position;
+    if (Players_AveragePos(&position, &socket_position) == 0) {
+        return 0;
+    }
+    LEVELDATA_s *level = WORLD->current_level;
+    if (level == HUB_LDATA) {
+        return Hub_Outside() != 0;
+    }
+    if (level == KAMINOA_LDATA) {
+        return KaminoInside() != 0;
+    }
+    if (level == KAMINOC_LDATA) {
+        return KaminoDiscoOn() != 0;
+    }
+    if (level == KAMINOE_LDATA) {
+        return KaminoInside() == 0;
+    }
+    if (level == MOSEISLEYD_LDATA) {
+        return socket_position.location.sock == 3;
+    }
+    if (level == DEATHSTARBATTLED_LDATA) {
+        if (DeathStarShieldDown() != 0) {
+            deathstar_hold_count = 30;
+            return 1;
+        }
+        if (deathstar_hold_count > 0) {
+            --deathstar_hold_count;
+            return 1;
+        }
+    } else if (level == ASTEROIDCHASEB_LDATA) {
+        return GameCam->sock_position.location.sock == 4;
+    } else if (level == SARLACCPITB_LDATA) {
+        return SarlaccPitDiscoActive(WORLD) != 0;
+    }
+    return 0;
+}
 
 static GAMEAUDIO GameAudio_LSW = {
     GameAudio_OverrideFootStep_LSW,

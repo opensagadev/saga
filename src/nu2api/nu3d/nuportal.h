@@ -88,6 +88,7 @@ extern "C" {
     void NuPortalSetActiveDirect(NUPORTAL *portal, i32 active);
     i32 NuPortalWhichRoom(struct nugscn_s *scene, NUVEC *position);
     void FlagRoomInstancesAsVisible(NUROOM *room, struct nugscn_s *scene);
+    i32 clipTestSphere(NUPORTALSPHERE *sphere, NUFRUSTRUM *frustum);
 
 #ifdef __cplusplus
 }
@@ -95,14 +96,4 @@ extern "C" {
 void NuPortalSetOverride(NUVEC *position);
 void NuPortalEnableDebugDraw(i32 enabled);
 
-// These helpers were file-local in the original combined render translation unit.
-// They live in nuportal.cpp here, so retain their original local symbol names while
-// allowing the recovered NuPortalVisibility body in render.cpp to call them.
-extern __attribute__((visibility("hidden"))) NUFRUSTRUM *
-buildFrustrum(NUVEC *minimum, NUVEC *maximum, i16 room_id) asm("_ZL13buildFrustrumP7nuvec_sS0_s");
-extern __attribute__((visibility("hidden"))) void
-transposeClipPlanes(NUFRUSTRUM *frustum) asm("_ZL19transposeClipPlanesP10NUFRUSTRUM");
-extern __attribute__((visibility("hidden"))) void
-roomRecursive(struct nugscn_s *scene, NUFRUSTRUM *frustum, i16 room_id, i16 previous_room,
-              i32 depth) asm("_ZL13roomRecursiveP8nugscn_sP10NUFRUSTRUMssi");
 #endif

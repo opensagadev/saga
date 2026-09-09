@@ -390,8 +390,8 @@ typedef struct {
     u8 field_0xb;
 } PlayerItemTypeEntry;
 
-extern PlayerItemTypeEntry *PlayerItemType __asm__("_ZL14PlayerItemType") __attribute__((visibility("hidden")));
-extern i32 PLAYERITEMTYPECOUNT __asm__("_ZL19PLAYERITEMTYPECOUNT") __attribute__((visibility("hidden")));
+static PlayerItemTypeEntry * PlayerItemType = NULL;
+static i32 PLAYERITEMTYPECOUNT = 0;
 
 extern i8 BoltType_FindIDByName(char *name, WORLDINFO *world);
 

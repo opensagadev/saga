@@ -351,11 +351,7 @@ void NuDisplayListCreate(nudisplayscene_s *raw_scene, variptr_u *buffer, variptr
 void NuFadeSetFxCodeMtls(nugeom_s *, unsigned char *) {
 }
 
-extern NUVEC *override_campos;
 
-void NuPortalSetOverride(NUVEC *position) {
-    override_campos = position;
-}
 
 void NuDisplaySceneUnclip(nudisplayscene_s *) {
 }
@@ -603,11 +599,7 @@ void NuIOS_GetPurchaseResult() {
 void NuLightMotionBlurEffect(i32, float) {
 }
 
-extern i32 draw_portals;
 
-void NuPortalEnableDebugDraw(i32 enabled) {
-    draw_portals = enabled;
-}
 
 void NuTimeGetMicrosecondsPS(u32 *, u32 *) {
 }
@@ -740,7 +732,7 @@ void NuIOS_CopyBackbufferToTexture(nunativetex_s *texture, bool) {
 void NuIOS_IsProductPurchasedByNum(i32) {
 }
 
-static i32 g_vaoRecordCount asm("_ZL16g_vaoRecordCount");
+static i32 g_vaoRecordCount;
 
 void NuIOS_ResetVAODuplicateFinder() {
     g_vaoRecordCount = 0;

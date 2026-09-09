@@ -1119,26 +1119,6 @@ float PodSprint_InStartCountdown(WORLDINFO_s *world) {
     return podsprint.speed;
 }
 
-// Unsigned views of the i16 model-id globals. The original defines
-// PodSprint_RollMul in a translation unit which declares these ids as
-// unsigned, so it compares them with a 16-bit compare against zero-extended
-// values (the other consumers of this file sign-extend on use).
-extern "C" u16 uid_CLONEARC __asm__("id_CLONEARC");
-extern "C" u16 uid_IMPERIALSHUTTLE __asm__("id_IMPERIALSHUTTLE");
-extern "C" u16 uid_NABOOSTARFIGHTER __asm__("id_NABOOSTARFIGHTER");
-extern "C" u16 uid_XWING __asm__("id_XWING");
-extern "C" u16 uid_SNOWSPEEDER __asm__("id_SNOWSPEEDER");
-extern "C" u16 uid_MILLENNIUMFALCON __asm__("id_MILLENNIUMFALCON");
-extern "C" u16 uid_NEW_REPUBLIC_GUNSHIP __asm__("id_NEW_REPUBLIC_GUNSHIP");
-
-float PodSprint_RollMul(GameObject_s *obj) {
-    u16 id = obj->id;
-    if (id == uid_CLONEARC || id == uid_IMPERIALSHUTTLE || id == uid_NABOOSTARFIGHTER)
-        return 0.6f;
-    if (id == uid_XWING || id == uid_SNOWSPEEDER || id == uid_MILLENNIUMFALCON || id == uid_NEW_REPUBLIC_GUNSHIP)
-        return 0.8f;
-    return 1.0f;
-}
 
 void PodSprintA_Init(WORLDINFO_s *world) {
     PODSPRINT_s *ps = &podsprint;

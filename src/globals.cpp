@@ -50,8 +50,6 @@ extern const u8 CurveGroupMasks[3] = {
 u8 BitCountTable[256] = {};
 i32 isBitCountTable = 0;
 f32 MAXFRAMETIME = 0;
-i32 g_effectsRan asm("_ZL12g_effectsRan") = 0;
-u8 g_lastFrameEffect asm("_ZL17g_lastFrameEffect") = 0;
 extern "C" {
     f32 partglobaltime = 0;
     u32 partseed = 0;
@@ -1737,8 +1735,6 @@ i32 create_qfont3dz = 0;
 // ------------------------------------------------------------------------
 // Cutscene & system misc
 // ------------------------------------------------------------------------
-void *PlayerItemType __asm__("_ZL14PlayerItemType") = 0;
-i32 PLAYERITEMTYPECOUNT __asm__("_ZL19PLAYERITEMTYPECOUNT") = 0;
 u32 EXBLOWUPFLAGS = 0;
 i32 BeenAttacked = 0;
 FadeSystem FadeSys;
