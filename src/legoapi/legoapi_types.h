@@ -4577,7 +4577,10 @@ struct PART_s {
     i8 field_207;
     u8 field_208, field_209, field_20a;
     i8 field_20b;
-    u32 field_20c;
+    union {
+        u32 field_20c;
+        f32 crate_spawn_delay;
+    };
     f32 field_210, field_214;
     union {
         u32 force_flags;

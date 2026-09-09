@@ -10,6 +10,11 @@
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/nu3d/nuspecial.h"
+#include "legoapi/render/fx.h"
+#include "legoapi/render/fx/parts.h"
+#include "legoapi/audio/sfx.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -335,16 +340,71 @@ void ResetAICreatures(AISYS_s *system) {
     }
 }
 
-void CreatureCrate_Stop(PART_s *) {
+void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
+void NewRumbleAllPlayers(f32, f32, i32, i32);
+i32 ObjHitObj_Flags(GameObject_s *);
+
+void CreatureCrate_Stop(PART_s *part) {
+    GameObject_s *object = part->owner;
+    if (object == NULL)
+        return;
+    i16 debris = FindGameDebris(WORLD->debris_sys, "CRATE_POP");
+    if (debris != -1)
+        AddGameDebris(WORLD->debris_sys, debris, &part->position);
+    i32 type = PARTLookupType("CRATE_PART");
+    if (type != -1)
+        AddFiniteShotPART(type, &part->position, 1);
+    object->ai.reset_mode = 2;
+    object->apiobj.field_0x1f8 |= 0x1000;
+    PlaySfx("Explode1", &part->position);
+    GameCam_Judder(GameCam, 0.1f, 0, NULL);
+    NewRumbleAllPlayers(0.0f, 0.0f, 2, 0);
 }
 
-void CreatureCrate_DrawFn(PART_s *) {
+i32 CreatureCrate_DrawFn(PART_s *part) {
+    return !(part->crate_spawn_delay > 0.0f);
 }
 
-void CreatureCrate_MoveFn(PART_s *, float) {
+void CreatureCrate_MoveFn(PART_s *part, f32 elapsed) {
+    part->crate_spawn_delay -= elapsed;
+    if (part->crate_spawn_delay <= 0.0f) {
+        part->move_callback = NULL;
+        part->draw_callback = NULL;
+    }
 }
 
-void SpawnCreatureFromCrate(GameObject_s *, float, float) {
+void SpawnCreatureFromCrate(GameObject_s *object, f32 height, f32 delay) {
+    NUVEC velocity = {0.0f, 0.0f, 0.0f};
+    if (!NuSpecialExistsFn(&WORLD->lev_objs[0xe6].special))
+        return;
+    NUMTX matrix;
+    NuMtxSetTranslation(&matrix, &object->apiobj.collision_position);
+    ADDPART_s parameters = Default_ADDPART;
+    parameters.flags = 0x313;
+    parameters.matrix = &matrix;
+    parameters.velocity = &velocity;
+    matrix.m31 += height;
+    parameters.special = &WORLD->lev_objs[0xe6].special;
+    parameters.owner = object;
+    parameters.field_14 = 0.1f;
+    parameters.field_18 = 0.1f;
+    parameters.gravity = -2.0f;
+    parameters.draw_fn = CreatureCrate_DrawFn;
+    parameters.move_fn = CreatureCrate_MoveFn;
+    parameters.stop_fn = CreatureCrate_Stop;
+    parameters.time_step = FRAMETIME;
+    PART_s *part = AddPart(&parameters);
+    if (part == NULL)
+        return;
+    part->force_flags = static_cast<u16>(ObjHitObj_Flags(object));
+    if (!(delay > 0.0f)) {
+        part->move_callback = NULL;
+        part->draw_callback = NULL;
+        delay = 0.0f;
+    }
+    part->crate_spawn_delay = delay;
+    object->ai.reset_mode = 3;
+    object->apiobj.field_0x1f8 &= ~0x1000;
 }
 
 void SpawnMeleeCreatureType(i32) {
