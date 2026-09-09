@@ -460,7 +460,10 @@ typedef struct APIOBJECT_s {
     };
     NUVEC field_0x1c0;      // 0x1c0  alternate camera position used by vehicle type 0x2b
     NUVEC respawn_position; // 0x1cc
-    f32 respawn_timer;      // 0x1d8
+    union {
+        f32 respawn_timer;
+        f32 movement_stuck_time;
+    }; // 0x1d8
     f32 field_0x1dc;        // 0x1dc
     f32 field_0x1e0;        // 0x1e0
     union __attribute__((packed, aligned(4))) {
@@ -1355,7 +1358,13 @@ typedef struct GameObject_s {
     u16 previous_movement_angle; // 0x106c
     u16 field_0x106e;            // 0x106e
     i16 id;                      // 0x1070
-    u8 pad_1072[0x1076 - 0x1072];
+    union {
+        u8 pad_1072[0x1076 - 0x1072];
+        struct {
+            i16 route_character_id;
+            i16 route_suit_index;
+        };
+    };
     i16 room_id;      // 0x1076, portal room containing the character
     i16 field_0x1078; // 0x1078 reflected/platform terrain id
     i16 field_0x107a; // 0x107a terrain id
@@ -1372,7 +1381,10 @@ typedef struct GameObject_s {
     u8 hitpoints;        // 0x108a
     i8 current_hp;       // 0x108b, signed in pickup and tag health comparisons
     i8 head_target_priority;
-    u8 pad_108d;
+    union {
+        u8 pad_108d;
+        u8 route_start_index;
+    };
     u8 field_0x108e; // 0x108e
     u8 field_0x108f;
     u8 one_at_once_player; // 0x1090 (0xff when no attack slot is assigned)
@@ -1380,7 +1392,13 @@ typedef struct GameObject_s {
     u8 field_0x1092;       // 0x1092
     u8 field_0x1093;       // 0x1093
     u8 field_0x1094;
-    u8 pad_1095[3];
+    union {
+        u8 pad_1095[3];
+        struct {
+            u8 route_search_index;
+            u8 pad_1096[2];
+        };
+    };
     u32 field_0x1098;
     union {
         u32 field_0x109c; // 0x109c
@@ -1519,6 +1537,7 @@ DECOMP_ASSERT(offsetof(APIOBJECT, collision_position) == 0x80, "APIOBJECT collis
 DECOMP_ASSERT(offsetof(APIOBJECT, antinode_special) == 0x208, "APIOBJECT antinode special offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, pitch_angle) == 0x274, "APIOBJECT pitch angle offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, supporting_platform_id) == 0x27a, "APIOBJECT supporting platform id offset");
+DECOMP_ASSERT(offsetof(APIOBJECT, movement_stuck_time) == 0x1d8, "APIOBJECT movement stuck timer offset");
 DECOMP_ASSERT(offsetof(APIOBJECT, model_draw_result) == 0x284, "APIOBJECT model draw result offset");
 DECOMP_ASSERT(offsetof(GameObject_s, apiobj.ai_area_mask_low) == 0x2a8, "GameObject AI area mask offset");
 DECOMP_ASSERT(offsetof(GameObject_s, sock_position) == 0x660, "GameObject socket position offset");
@@ -1595,6 +1614,10 @@ DECOMP_ASSERT(offsetof(GameObject_s, block_attacker) == 0xce8, "GameObject block
 DECOMP_ASSERT(offsetof(GameObject_s, incoming_bolt) == 0xcf4, "GameObject incoming bolt offset");
 DECOMP_ASSERT(offsetof(GameObject_s, block_cooldown) == 0xdd8, "GameObject block cooldown offset");
 DECOMP_ASSERT(offsetof(GameObject_s, ai_jump_timer) == 0xde8, "GameObject AI jump timer offset");
+DECOMP_ASSERT(offsetof(GameObject_s, route_character_id) == 0x1072, "GameObject route character offset");
+DECOMP_ASSERT(offsetof(GameObject_s, route_suit_index) == 0x1074, "GameObject route suit offset");
+DECOMP_ASSERT(offsetof(GameObject_s, route_start_index) == 0x108d, "GameObject route search start offset");
+DECOMP_ASSERT(offsetof(GameObject_s, route_search_index) == 0x1095, "GameObject route search cursor offset");
 DECOMP_ASSERT(offsetof(GameObject_s, ai_combo_cooldown) == 0xd48, "GameObject AI combo cooldown offset");
 DECOMP_ASSERT(offsetof(GameObject_s, force_glow_position) == 0xc58, "GameObject force glow position offset");
 DECOMP_ASSERT(offsetof(GameObject_s, force_glow_candidate) == 0xd0c, "GameObject force glow candidate offset");

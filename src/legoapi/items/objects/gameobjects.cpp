@@ -60,9 +60,13 @@
 
 void SetObjAsHeadTarget(GameObject_s *, GameObject_s *, i8, f32, f32, f32);
 void SetBallooningHeight(GameObject_s *, f32);
+void GameObjectSetCanUse(GameObject_s *, void *, u8, u8, f32);
+i32 Suit_GetIndex(SUIT_s *);
 BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
 extern i16 id_YODA, id_YODAGHOST, id_GAMORREANGUARD, id_JANGOFETT;
+extern i32 LEGO_AIPATHCNX_WALLSHUFFLE;
 f32 DEFENDTIME = 4.0f;
+extern f32 jump_stuck_time;
 
 static f32 Condition_IAmAPartyCharacter(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
     if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.field_0x27c != -1) {
@@ -2351,10 +2355,98 @@ void GameAIProcess() {
             if (object->apiobj.field_0x27c != -1 && object->field_0xe31 != 0 &&
                 (object->ai.capabilities & LEGO_AIPATHCNX_R2D2GLIDE) == 0)
                 object->field_0xe31 = 0;
+            if (object->character_context == 0x4b && object->suit != NULL &&
+                (static_cast<SUIT_s *>(object->suit)->flags & 0x10) != 0)
+                object->pad_gamepad->buttons_held |= GAMEPAD_SPECIAL;
+            AIPATHCNX *connection = object->ai.path_info.connection;
+            if ((connection == NULL ||
+                 (connection->traversal_flags[object->ai.path_info.direction] & object->ai.capabilities &
+                  LEGO_AIPATHCNX_WALLSHUFFLE) == 0) &&
+                object->ai.path_connection_state == 0 && (object->ai.path_info.flags & 1) != 0 &&
+                object->apiobj.movement_stuck_time > jump_stuck_time) {
+                if (object->apiobj.supporting_platform_id != -1 && connection != NULL &&
+                    (connection->original_traversal_flags[0] & LEGO_AIPATHCNX_BLOCKAGE) != 0) {
+                    if ((object->apiobj.character_data->model_flags & 0x88) != 0) {
+                        object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
+                        object->apiobj.movement_stuck_time = 0.0f;
+                        GameObjectSetCanUse(object, NULL, 5, 0, 1.0f);
+                    } else if (FreePlay != 0) {
+                        object->input_toggle_hold_time -= FRAMETIME;
+                        if (object->input_toggle_hold_time <= 0.0f) {
+                            Player_ToggleCharacter(object, 1, 0);
+                            if (object->id == id_DROIDEKA)
+                                Player_ToggleCharacter(object, 1, 0);
+                            object->input_toggle_hold_time = object->apiobj.model_draw_result != 0 ? 0.25f : 0.0f;
+                        }
+                    }
+                } else if ((object->ai.capabilities & (LEGO_AIPATHCNX_R2D2GLIDE | LEGO_AIPATHCNX_JUMP)) != 0 &&
+                           object->field_0xe31 == 0) {
+                    object->pad_gamepad->buttons_pressed |= GAMEPAD_JUMP;
+                    object->apiobj.movement_stuck_time = 0.0f;
+                } else {
+                    object->ai.field_0x1e6 |= AIPACKET_RUNTIME_USING_PATH_WAYPOINT;
+                }
+            }
         }
-        if ((FreePlay == 0 || (object->apiobj.field_0x1f4 & 0x400) != 0) &&
-            (object->ai.field_0x1e6 & AIPACKET_RUNTIME_USING_PATH_WAYPOINT) != 0)
+        if (FreePlay != 0 && (object->apiobj.field_0x1f4 & 0x400) == 0) {
+            if ((object->apiobj.flags_low & 0x80) == 0 && object->character_context != 0x0b) {
+                if ((object->ai.field_0x1e6 & AIPACKET_RUNTIME_ROUTE_SELECTED) != 0) {
+                    object->ai.current_route = 0xff;
+                    object->route_character_id = -1;
+                    object->field_0xf14 = 0;
+                } else if ((object->ai.field_0x1e6 & AIPACKET_RUNTIME_USING_PATH_WAYPOINT) != 0 &&
+                           ((object->ai.field_0x1e6 & AIPACKET_RUNTIME_PATH_BLOCKED) != 0 ||
+                            (object->ai.path_info.connection != NULL && object->ai.path_info.connection->route_mask != 0))) {
+                    if ((object->field_0xefc & 0x40) != 0) {
+                        if (object->field_0xf14 != object->ai.frame_state) {
+                            object->route_character_id = -1;
+                            object->route_suit_index = -1;
+                            object->field_0xefc &= ~0x40;
+                            object->field_0xf14 = 0;
+                        }
+                    } else if ((object->ai.frame_state & LEGO_AIPATHCNX_DONTTOGGLE) == 0) {
+                        if (object->route_character_id == -1 || object->field_0xf14 != object->ai.frame_state ||
+                            object->route_character_id == id_DROIDEKA) {
+                            object->route_character_id = object->id;
+                            object->route_suit_index =
+                                object->suit != NULL ? Suit_GetIndex(static_cast<SUIT_s *>(object->suit)) : -1;
+                            object->input_toggle_hold_time = 0.0f;
+                            object->field_0xf14 = object->ai.frame_state;
+                            object->route_start_index = object->ai.next_route;
+                            object->route_search_index = object->ai.next_route;
+                        }
+                        object->input_toggle_hold_time -= FRAMETIME;
+                        if (object->input_toggle_hold_time <= 0.0f) {
+                            Player_ToggleCharacter(object, 1, 0);
+                            if (object->id == id_DROIDEKA)
+                                Player_ToggleCharacter(object, 1, 0);
+                            object->input_toggle_hold_time = object->apiobj.model_draw_result != 0 ? 0.25f : 0.0f;
+                            if (object->id == object->route_character_id &&
+                                Suit_GetIndex(static_cast<SUIT_s *>(object->suit)) == object->route_suit_index) {
+                                Player_ToggleCharacter(object, -1, 0);
+                                if (object->id == id_DROIDEKA)
+                                    Player_ToggleCharacter(object, -1, 0);
+                                object->route_character_id = object->id;
+                                object->route_suit_index = Suit_GetIndex(static_cast<SUIT_s *>(object->suit));
+                                object->ai.next_route = object->route_search_index;
+                                AISysFindRoute(&object->ai);
+                                object->route_search_index = object->ai.next_route;
+                                if (object->route_search_index == object->route_start_index)
+                                    object->field_0xefc |= 0x40;
+                            }
+                        }
+                    }
+                } else {
+                    object->route_character_id = -1;
+                    object->route_suit_index = -1;
+                    object->field_0xefc &= ~0x40;
+                    object->field_0xf14 = 0;
+                    object->route_search_index = 0;
+                }
+            }
+        } else if ((object->ai.field_0x1e6 & AIPACKET_RUNTIME_USING_PATH_WAYPOINT) != 0) {
             AISysFindRoute(&object->ai);
+        }
         if ((object->apiobj.field_0x1f8 & 0x180) == 0x80) {
             object->field_0xefc &= ~4;
             object->apiobj.flags_high =
