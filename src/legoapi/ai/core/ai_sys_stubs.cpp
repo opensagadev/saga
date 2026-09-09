@@ -313,12 +313,12 @@ static void AISysLoadPathRoutes(AISYS *system, AIPATH *path) {
                 if (path->node_count != 0 && route->route_count != 0) {
                     route->node_routes = static_cast<u8 *>(AISysLoadAlloc(system, path->node_count));
                     EdFileRead(route->node_routes, path->node_count);
-                    route->node_directions = static_cast<u8 *>(AISysLoadAlloc(system, path->node_count));
-                    EdFileRead(route->node_directions, path->node_count);
+                    route->node_directions = static_cast<u8 *>(AISysLoadAlloc(system, route->route_count));
+                    EdFileRead(route->node_directions, route->route_count);
                     route->route_nodes = static_cast<u8 **>(AISysLoadAlloc(system, route->route_count * sizeof(u8 *)));
                     for (i32 route_index = 0; route_index < route->route_count; ++route_index) {
-                        route->route_nodes[route_index] = static_cast<u8 *>(AISysLoadAlloc(system, path->node_count));
-                        EdFileRead(route->route_nodes[route_index], path->node_count);
+                        route->route_nodes[route_index] = static_cast<u8 *>(AISysLoadAlloc(system, route->route_count));
+                        EdFileRead(route->route_nodes[route_index], route->route_count);
                     }
                     if (route->exit_node_count != 0) {
                         route->exit_nodes = static_cast<u8 *>(AISysLoadAlloc(system, route->exit_node_count));
@@ -334,13 +334,9 @@ static void AISysLoadPathRoutes(AISYS *system, AIPATH *path) {
                 EdFileRead(character_name, character_name_length);
                 if (SpecialRouteCharacterTypeIDFn != NULL) {
                     u8 type = SpecialRouteCharacterTypeIDFn(character_name);
-                    if (type < 32) {
-                        route->character_mask[0] |= 1u << type;
-                    } else if (type < 64) {
-                        u32 bit = 1u << (type & 31);
-                        route->character_mask[1] |= bit;
-                        route->character_mask[2] |= bit;
-                        route->character_mask[3] |= bit;
+                    if (type < 64) {
+                        route->character_masks[0] |= static_cast<u64>(1) << type;
+                        route->character_masks[1] |= static_cast<u64>(1) << type;
                     } else {
                         route->character_mask[0] = 0xffffffff;
                         route->character_mask[1] = 0xffffffff;
