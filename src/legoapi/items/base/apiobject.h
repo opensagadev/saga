@@ -813,7 +813,10 @@ typedef struct GameObject_s {
     };
     GIZMOBLOWUP_s *blowup_target; // 0x0784
     void *field_0x788;            // 0x0788
-    u8 pad_78c[0x790 - 0x78c];
+    union {
+        u8 pad_78c[0x790 - 0x78c];
+        i32 panel_use_request;
+    };
     void *big_jump_data; // 0x0790
     union {
         u16 context_x_rotation;

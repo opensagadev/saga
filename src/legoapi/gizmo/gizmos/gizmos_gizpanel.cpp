@@ -1,10 +1,12 @@
 #include "decomp.h"
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/motion.h"
 #include "legoapi/gizmos/object/gizpanel.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/menus/core/gamehint.h"
 #include "legoapi/world/world_shared.h"
+#include "legoapi/world/mission.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
@@ -12,11 +14,17 @@
 
 extern NUVEC nusound_special_positions[5];
 extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
+extern "C" void PlaySfx(char *, nuvec_s *);
 extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 void FastWeaponIn(GameObject_s *, i32);
 void MakeBaddiesForgetAboutParty(i32);
 void SetProtocolDroidInterfaceAction(GameObject_s *);
 void GizPanel_PlaySfx(char *, nuvec_s *, i32);
+void NewBuzz(nupad_s *, f32, i32);
+void NewRumble(nupad_s *, f32, i32);
+static __used__ u8 storm_panel_active;
+static __used__ u8 droid_panel_active;
+static __used__ u8 bountyhunter_panel_active;
 
 extern "C" f32 GIZPANEL_PLAYERPOSLIFT;
 extern "C" {
@@ -159,7 +167,88 @@ void GizPanel_PlaySfx(char *name, nuvec_s *position, i32 player_bits) {
     }
 }
 
-void GizPanel_MoveCode(WORLDINFO_s *, GameObject_s *, i32) {
+void GizPanel_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 use) {
+    if (use != 0 && static_cast<i8>(object->apiobj.object_flags) >= 0 && world->current_level == MOSEISLEYA_LDATA)
+        use = 0;
+    if (object->field_0xdb0 > 0.0f)
+        object->field_0xdb0 -= FRAMETIME;
+    storm_panel_active = 0;
+    droid_panel_active = 0;
+    bountyhunter_panel_active = 0;
+    if (object->character_context == 0x0b && object->field_0x788 != NULL) {
+        if (object->apiobj.character_model->model_data_b[object->context_animation] == NULL ||
+            AnimPlaying(&object->apiobj.anim_packet, object->context_animation, 1, 0) != NULL) {
+            object->field_0x768 += FRAMETIME;
+            if (object->field_0x768 > 1.0f)
+                object->field_0x768 = 1.0f;
+            object->context_animation_timer -= FRAMETIME;
+            if (object->context_animation_timer <= 0.0f) {
+                object->character_context = -1;
+                static_cast<GIZPANEL_s *>(object->field_0x788)->flags = static_cast<GIZPANEL_FLAGS>(
+                    static_cast<GIZPANEL_s *>(object->field_0x788)->flags & ~1);
+                static_cast<GIZPANEL_s *>(object->field_0x788)->flags = static_cast<GIZPANEL_FLAGS>(
+                    static_cast<GIZPANEL_s *>(object->field_0x788)->flags | 2);
+                object->field_0x788 = NULL;
+            }
+            if ((object->field_0xe21 & 0x10) == 0)
+                object->field_0xe21 |= 0x10;
+        } else {
+            object->context_animation_timer -= FRAMETIME;
+            if (object->context_animation_timer <= 0.0f) {
+                if (object->field_0x788 != NULL) {
+                    NewBuzz(object->pad_gamepad->pad, 0.1f, 0);
+                    if (static_cast<GIZPANEL_s *>(object->field_0x788)->model_variant == 2)
+                        PlaySfx("Hunter_Granted", &object->apiobj.collision_position);
+                    if (static_cast<GIZPANEL_s *>(object->field_0x788)->model_variant == 3)
+                        PlaySfx("Trooper_Granted", &object->apiobj.collision_position);
+                } else {
+                    NewRumble(object->pad_gamepad->pad, 0.5f, 0);
+                }
+                if (static_cast<i8>(object->apiobj.object_flags) < 0) {
+                    const u8 variant = static_cast<GIZPANEL_s *>(object->field_0x788)->model_variant;
+                    if (variant <= 1) {
+                        if (Mission_Active(NULL) != NULL) {
+                            Hint_SetComplete(0x2b9);
+                        } else {
+                            Hint_SetComplete(0x25f);
+                            LSW_HintConditions |= 4;
+                            if (static_cast<GIZPANEL_s *>(object->field_0x788)->model_variant == 0)
+                                Hint_SetComplete(0x625);
+                            else
+                                Hint_SetComplete(0x624);
+                        }
+                    } else if (variant == 3) {
+                        Hint_SetComplete(0x260);
+                    } else if (variant == 2) {
+                        Hint_SetComplete(0x261);
+                    }
+                }
+                object->character_context = -1;
+                static_cast<GIZPANEL_s *>(object->field_0x788)->flags = static_cast<GIZPANEL_FLAGS>(
+                    static_cast<GIZPANEL_s *>(object->field_0x788)->flags & ~1);
+                static_cast<GIZPANEL_s *>(object->field_0x788)->flags = static_cast<GIZPANEL_FLAGS>(
+                    static_cast<GIZPANEL_s *>(object->field_0x788)->flags | 2);
+                object->field_0x788 = NULL;
+            } else if ((object->apiobj.character_data->model_flags & 0x20) != 0) {
+                SetProtocolDroidInterfaceAction(object);
+            }
+        }
+        return;
+    }
+    if (object->character_context != 1 && object->character_context != -1 && object->character_context != 2 &&
+        !objInNetWaitContext(object, 0x0b))
+        return;
+    f32 distance;
+    GIZPANEL_s *panel = GizPanel_FindNearest(WORLD, &object->apiobj.position, object, &distance, 1);
+    if (panel != NULL) {
+        const f32 radius = (0.25f + object->apiobj.field_0x1dc) * panel->target_scale;
+        if (distance < radius * radius && (use != 0 || (object->panel_use_request == 1 && object->big_jump_data != NULL)))
+            GizPanel_Use(*object, *panel);
+    } else if (use != 0 && static_cast<i8>(object->apiobj.object_flags) < 0 &&
+               (object->apiobj.character_data->model_flags & 0x20) != 0 && object->field_0xdb0 <= 0.0f) {
+        GizPanel_PlaySfx("TC14_VLN", &object->apiobj.collision_position, 1 << object->apiobj.field_0x27c);
+        object->field_0xdb0 = 0.5f;
+    }
 }
 
 i32 GizPanel_BeingUsed(GIZPANEL_s *panel) {
