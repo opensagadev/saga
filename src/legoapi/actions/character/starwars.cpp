@@ -16,9 +16,6 @@ MIDSPECIALMOVEFN MidSpecialMoveFn = NULL;
 static __used__ void SpecialMove_ConfigParticipant(nufpar_s *, i16 *, i8 *, i16 *) {
 }
 
-static __used__ void RowMoveWander(AIGROUP_s *, AIROW_s *, AIROW_s *, APIOBJECT_s *) {
-}
-
 static __used__ void RowMoveTowards(AIGROUP_s *, AIROW_s *, AIROW_s *, APIOBJECT_s *) {
 }
 

@@ -21,6 +21,143 @@
 
 static const u32 iAISysPathColoursG[5] = {0xffff0000, 0xff00ff00, 0xff00ffff, 0xffff00ff, 0xffffff00};
 
+extern "C" f32 (*GetCharacterGoalSpeedFn)(APIOBJECT *);
+
+static __used__ i32 RowMoveWander(AIGROUP *group, AIROW *row, AIROW *previous, APIOBJECT *leader) {
+    AIPATHCNX *connection = row->path_info.connection;
+    if (connection == NULL)
+        return 0;
+    i32 node_index = connection->node_indices[row->path_info.direction == 0];
+    if (row->next_connection == NULL) {
+        if (previous != NULL) {
+            row->next_connection = previous->path_info.connection == connection ? previous->next_connection
+                                                                                : previous->path_info.connection;
+            if (row->next_connection == NULL)
+                return 0;
+        } else {
+            AIPATHNODE *node = &row->path_info.path->nodes[node_index];
+            i32 first = NuRandInt() % node->connection_count;
+            for (i32 i = 0; i < node->connection_count; ++i) {
+                row->next_connection = node->connections[(first + i) % node->connection_count];
+                AIPATHCNX *next = row->next_connection;
+                if (next != connection) {
+                    u8 route = leader->ai->field_0x138;
+                    if (route == 0xff || ((static_cast<u64>(next->route_mask) >> route) & 1) != 0 ||
+                        ((static_cast<u64>(node->route_boundary_mask) >> route) & 1) != 0) {
+                        i32 direction = node_index != next->node_indices[0];
+                        AIPATHNODE *other = &row->path_info.path->nodes[next->node_indices[direction ^ 1]];
+                        if (other->radius > group->radius && next->traversal_flags[direction] == 0)
+                            break;
+                    }
+                }
+                row->next_connection = NULL;
+            }
+            if (row->next_connection == NULL)
+                row->next_connection = connection;
+        }
+        AIPATHCNX *next = row->next_connection;
+        if (next->traversal_flags[node_index != next->node_indices[0]] == 0) {
+            i32 current_angle = connection->rotation;
+            if (row->path_info.direction != 0)
+                current_angle = NuAngAdd(0x8000, current_angle);
+            i32 next_angle;
+            if (connection->node_indices[row->path_info.direction == 0] == next->node_indices[0]) {
+                row->next_direction = 0;
+                next_angle = next->rotation;
+            } else {
+                row->next_direction = 1;
+                next_angle = NuAngAdd(0x8000, next->rotation);
+            }
+            row->is_clockwise = NuAngSub(next_angle, current_angle) < 0;
+        }
+    }
+    NUVEC offset = {row->is_clockwise ? -group->radius : group->radius, 0.0f, 0.0f};
+    NUVEC rotated, centre;
+    NuVecRotateY(&rotated, &offset, row->y_rot);
+    NuVecAdd(&centre, &rotated, &row->pos);
+    if (!row->is_turning) {
+        if (row->path_info.connection != row->next_connection) {
+            AIPATHNODE *nodes = row->path_info.path->nodes;
+            f32 distance = NuInfiniteLineToPointDistSqr(&nodes[row->next_connection->node_indices[0]].position,
+                                                       &nodes[row->next_connection->node_indices[1]].position, &centre);
+            if (group->radius * group->radius >= distance)
+                row->is_turning = 1;
+        } else {
+            AIPATHNODE *node = &row->path_info.path->nodes[
+                row->path_info.connection->node_indices[row->path_info.direction == 0]];
+            f32 distance = NuVecXZDistSqr(&row->pos, &node->position, &rotated);
+            if (node->radius_squared > distance) {
+                for (i32 i = 0; i < group->row_count; ++i) {
+                    group->rows[i].next_connection = NULL;
+                    group->rows[i].y_rot = NuAngAdd(group->rows[i].y_rot, 0x8000);
+                    group->rows[i].path_info.direction = group->rows[i].path_info.direction == 0;
+                }
+                group->leader = NULL;
+                group->is_reversed = !group->is_reversed;
+                if (group->is_reversed) {
+                    for (i32 i = group->member_count - 1; i != -1; --i) {
+                        APIOBJECT *object = group->members[i];
+                        if (object != NULL && (object->field_0x1f8 & 0x1001) == 0x1001 && object->field_0x287 == 0) {
+                            group->leader = object;
+                            break;
+                        }
+                    }
+                } else {
+                    for (i32 i = 0; i < group->member_count; ++i) {
+                        APIOBJECT *object = group->members[i];
+                        if (object->objptr != NULL && (object->field_0x1f8 & 0x1001) == 0x1001 && object->field_0x287 == 0) {
+                            group->leader = object;
+                            break;
+                        }
+                    }
+                }
+                return 1;
+            }
+        }
+    }
+    if (row->is_turning) {
+        i32 angle = row->next_connection->rotation;
+        if (row->next_direction != 0)
+            angle = NuAngAdd(angle, 0x8000);
+        i32 difference = NuAngSub(angle, row->y_rot);
+        i32 step = group->rotation_speed;
+        if (difference <= step) {
+            step = -step;
+            if (difference >= step) {
+                row->is_turning = 0;
+                row->path_info.connection = row->next_connection;
+                row->next_connection = NULL;
+                row->path_info.direction = row->next_direction;
+                step = difference;
+            }
+        }
+        row->y_rot = NuAngAdd(step, row->y_rot);
+        NuVecRotateY(&rotated, &offset, row->y_rot);
+        NuVecSub(&row->pos, &centre, &rotated);
+        return 0;
+    }
+    if (!group->is_row_turning) {
+        i32 angle = row->path_info.connection->rotation;
+        if (row->path_info.direction != 0)
+            angle = NuAngAdd(angle, 0x8000);
+        i32 difference = NuAngSub(angle, row->y_rot);
+        i32 step = group->rotation_speed;
+        if (difference <= step) {
+            step = -step;
+            if (difference >= step)
+                step = difference;
+        }
+        row->y_rot = NuAngAdd(step, row->y_rot);
+        rotated.x = rotated.y = rotated.z = 0.0f;
+        if (GetCharacterGoalSpeedFn != NULL)
+            rotated.z = GetCharacterGoalSpeedFn(leader);
+        NuVecRotateY(&rotated, &rotated, row->y_rot);
+        NuVecAdd(&row->pos, &row->pos, &rotated);
+        row->pos.y = leader->position.y;
+    }
+    return 0;
+}
+
 static void AISysCheckAntinode_Rectangle(APIOBJECT *object, AIANTINODE *antinode, NUVEC *difference, f32 radius) {
     difference->x = object->ai->movement_position.x - antinode->position.x;
     if (difference->x > radius || difference->x < -radius) {
