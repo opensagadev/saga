@@ -65,6 +65,7 @@ DECOMP_ASSERT(offsetof(NUDISPLAYSPECIAL, flags) == 0xb8, "display special flags 
 
 extern "C" {
     void NuGScnGetSpecial(nuhspecial_s *special, NUGSCN *scene, i32 index);
+    i32 NuGScnNumSpecials(NUGSCN *scene);
     i32 NuSpecialGetNumSpecials(NUGSCN *scene);
     i32 NuSpecialGetFirst(NUGSCN *scene, nuhspecial_s *special, i32 flags);
     void NuSpecialGetNext(nuhspecial_s *special);

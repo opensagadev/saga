@@ -6,6 +6,8 @@
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nucore/nutime.h"
 #include "nu2api/nucore/nuthread.h"
+#include "nu2api/nucore/nustring.h"
+#include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/numath/numtx.h"
 
 #include <string.h>
@@ -161,7 +163,16 @@ extern "C" {
         edanim_page_used[page] = 0;
         edanim_page_scene[page] = NULL;
     }
-    void edanimLookupSpecial(void) {
+    i32 edanimLookupSpecial(char *name, NUGSCN *scene) {
+        if (scene != NULL) {
+            nuhspecial_s special;
+            for (i32 index = 0; index < NuGScnNumSpecials(scene); ++index) {
+                NuGScnGetSpecial(&special, scene, index);
+                if (NuStrNICmp(NuSpecialGetName(&special), name, 19) == 0)
+                    return index;
+            }
+        }
+        return -1;
     }
     void edanimParamReset(void) {
         for (i32 i = 0; i < 64; ++i) {

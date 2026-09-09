@@ -17,6 +17,7 @@ extern "C" {
     void edbitsRegisterBaseScene(NUGSCN *scene);
     void edanimRegisterBaseScene(NUGSCN *scene);
     i32 edanimLoadPage(char *path, NUGSCN *scene);
+    i32 edanimLookupSpecial(char *name, NUGSCN *scene);
     void edbitsRegisterBaseTerrain(void *terrain);
     void edppStartPage(i32 page);
     void edppStopPage(i32 page);
