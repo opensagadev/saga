@@ -248,7 +248,10 @@ typedef struct AIPACKET_s {
         f32 action_target_limit;
     };
     GameObject_s *dont_avoid_character; // 0xf4
-    u8 pad_f8[0x104 - 0xf8];
+    union {
+        u8 pad_f8[0x104 - 0xf8];
+        NUVEC creature_origin; // 0xf8, cached formation position
+    };
     union {
         NUVEC movement_destination; // 0x104
         NUVEC reset_position;

@@ -1788,8 +1788,22 @@ static f32 GetMinViewHeight(i32 character_type) {
     return static_cast<GAMECHARACTERDATA *>(apicharsys->char_data[character_type].field11_0x24)->minviewheight;
 }
 
-static NUVEC *GetAICreatureOrigin(AISYS *, AIPACKET *) {
-    return NULL;
+static NUVEC *GetAICreatureOrigin(AISYS *system, AIPACKET *packet) {
+    if (packet == NULL || system == NULL || packet->field_0x134 == 0xff)
+        return NULL;
+    if ((packet->navigation_flags & 8) == 0) {
+        AICREATURE *creature = &system->creatures[packet->field_0x134];
+        NUVEC offset;
+        offset.x = ((packet->group_column + 1) >> 1) * creature->x_spacing;
+        if ((packet->group_column & 1) != 0)
+            offset.x = -offset.x;
+        offset.y = 0.0f;
+        offset.z = -creature->z_spacing * (f32)(u32)packet->group_row;
+        NuVecRotateY(&offset, &offset, creature->y_rot);
+        NuVecAdd(&packet->creature_origin, &offset, &creature->pos);
+        packet->navigation_flags |= 8;
+    }
+    return &packet->creature_origin;
 }
 
 static APIOBJECT *GetNamedAPIObject(AISYS *system, char *name) {
