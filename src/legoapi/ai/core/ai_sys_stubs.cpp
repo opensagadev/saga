@@ -2506,7 +2506,11 @@ extern "C" {
             if (packet->path_info.path == NULL) {
                 packet->last_path_position = object->position;
             } else {
-                AISysGetCharacterPathPos(system, object, packet, (object->field_0x1fa & 8) == 0, checks);
+                if ((object->field_0x1fa & 8) == 0) {
+                    AISysGetCharacterPathPos(system, object, packet, 1, checks);
+                } else {
+                    AISysGetCharacterPathPos(system, object, packet, 0, checks);
+                }
                 movement_source_flags = packet->field_0x1e7;
             }
 
@@ -2517,21 +2521,27 @@ extern "C" {
             }
         } else {
             AIPATH *path = packet->path_info.path;
-            AIPATHCNX *connection = packet->path_info.connection;
-            if (path != NULL && connection != NULL) {
-                for (i32 endpoint = 0; endpoint < 2; ++endpoint) {
-                    const u8 node_index = connection->node_indices[endpoint];
-                    AIPATHNODE *node = &path->nodes[node_index];
-                    if (node->has_special != 0 &&
-                        (path->updated_node_bits[node_index >> 3] & (1u << (node_index & 7))) == 0) {
-                        AIPathNodeUpdatePos(system, path, node);
+            if (path != NULL && packet->path_info.connection != NULL) {
+                u8 node_index = packet->path_info.connection->node_indices[0];
+                AIPATHNODE *first = &path->nodes[node_index];
+                AIPATHNODE *second = &path->nodes[packet->path_info.connection->node_indices[1]];
+                if (first->has_special != 0 &&
+                    (path->updated_node_bits[node_index / 8] & (1u << (node_index % 8))) == 0) {
+                    AIPathNodeUpdatePos(system, path, first);
+                }
+                if (second->has_special != 0) {
+                    node_index = packet->path_info.connection->node_indices[1];
+                    path = packet->path_info.path;
+                    if ((path->updated_node_bits[node_index / 8] & (1u << (node_index % 8))) == 0) {
+                        AIPathNodeUpdatePos(system, path, second);
                     }
                 }
             }
 
+            path = packet->path_info.path;
             if (packet->inside_path_node != -1 && path != NULL) {
-                const i32 node_index = packet->inside_path_node;
-                path->inside_node_bits[node_index >> 3] |= static_cast<u8>(1u << (node_index & 7));
+                const i16 node_index = packet->inside_path_node;
+                path->inside_node_bits[node_index / 8] |= static_cast<u8>(1u << (node_index % 8));
             }
             packet->time_off_path = 0.0f;
             movement_source_flags = packet->field_0x1e7;
