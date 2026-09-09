@@ -699,7 +699,31 @@ static __used__ void GizAction_ActivateChar(GIZFLOW_s *flow, FLOWBOX_s *, char *
     }
 }
 
-static __used__ void GizAction_SetAIMessage(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
+static __used__ void GizAction_SetAIMessage(GIZFLOW_s *, FLOWBOX_s *, char **params, int count) {
+    char *name = NULL;
+    f32 value = 0.0f;
+    i32 mode = 0;
+    for (i32 index = 0; index < count; ++index) {
+        char *argument = NuStrIStr(params[index], "Name");
+        if (argument != NULL)
+            name = argument + NuStrLen("Name") + 1;
+        else if ((argument = NuStrIStr(params[index], "Val")) != NULL)
+            value = NuAToF(argument + NuStrLen("Val") + 1);
+        else if ((argument = NuStrIStr(params[index], "increment=")) != NULL) {
+            value = NuAToF(argument + 10);
+            mode = 1;
+        } else if ((argument = NuStrIStr(params[index], "decrement=")) != NULL) {
+            value = NuAToF(argument + 10);
+            mode = -1;
+        }
+    }
+    GIZAIMESSAGE_s *message = CheckGizAIMessage(gizaimessagesys, name, NULL);
+    if (mode == 0)
+        message->value = value;
+    else if (mode == 1)
+        message->value = value + message->value;
+    else if (mode == -1)
+        message->value = message->value - value;
 }
 
 static __used__ void GizActions_PlaySpecial(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
