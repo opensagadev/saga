@@ -40,7 +40,7 @@ void PartImpact_ThermalDetonator(PART_s *) {
 void PartUpdate_ThermalDetonator(PART_s *) {
 }
 
-void Detonate(nuvec_s *position, u16 flags) {
+EXPLOSION *Detonate(nuvec_s *position, u16 flags) {
     AddGameDebris(WORLD->debris_sys, 0x49, position);
     AddGameDebris(WORLD->debris_sys, 0x4a, position);
     AddGameDebris(WORLD->debris_sys, 0x4b, position);
@@ -61,5 +61,5 @@ void Detonate(nuvec_s *position, u16 flags) {
         amount_a = 0.75f;
         amount_b = 0.5f;
     }
-    AddExplosion(position, amount_a, amount_b, NULL, -1, (flags & 0xffff) | 0x67);
+    return AddExplosion(position, amount_a, amount_b, NULL, -1, (flags & 0xffff) | 0x67);
 }

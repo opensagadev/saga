@@ -120,9 +120,6 @@ static __used__ void ShieldCode(GameObject_s *) {
 static __used__ void TrenchMove(GameObject_s *) {
 }
 
-static __used__ void ZapCode(GameObject_s *, i32, i32) {
-}
-
 static __used__ void Punch_HitHold(GameObject_s *, GameObject_s *) {
 }
 
@@ -150,7 +147,4 @@ static __used__ i32 SpecialObjectFilter(void *) {
 }
 
 static __used__ void KilledTrooperCannon(GameObject_s *) {
-}
-
-static __used__ void FireCode(GameObject_s *, int, int, float, int) {
 }

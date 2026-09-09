@@ -13,7 +13,7 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 void Batarangs_CheckLostData(void *);
-void Detonate(nuvec_s *, u16);
+EXPLOSION *Detonate(nuvec_s *, u16);
 void Detonator_Detonate(DETONATOR_s *);
 
 struct DetonatorHitData {

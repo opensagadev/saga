@@ -202,6 +202,18 @@ void GameAudio_PlaySfxById(i32, NUVEC *, i32, i32);
 static void CommunicateCode(GameObject_s *, i32, i32);
 static void PunchCode(GameObject_s *, i32, i32, i32, i32, f32);
 static void ShootCode(GameObject_s *, i32, i32, i32, i32, i32);
+static void ForcePushed_MoveCode(GameObject_s *);
+static void DeactivatedCode(GameObject_s *);
+static void ZapCode(GameObject_s *, i32, i32);
+static void FireCode(GameObject_s *, i32, i32, f32, i32);
+void KeepWeaponIn(GameObject_s *);
+void BigJumpCode(GameObject_s *);
+void InstantKillParts(GameObject_s *, i32, f32);
+EXPLOSION *Detonate(NUVEC *, u16);
+void AddFancyMessage(char *, f32, f32, f32, f32, i32, i32);
+extern i16 tCHEAT_SELFDESTRUCT;
+extern i16 id_BATTLEDROID, id_BUZZDROID, id_SUPERBATTLEDROID, id_PROBEDROID;
+extern i16 id_NAFFDROID1, id_NAFFDROID2, id_NAFFDROID4, id_MOUSEDROID;
 static void DodgeCode(GameObject_s *, i32, i32);
 void Grapple_MoveCode(GameObject_s *);
 void SuperCarry_MoveCode(WORLDINFO_s *, GameObject_s *);
@@ -995,7 +1007,129 @@ i32 MovePlayer_CIRCLE(GameObject_s *object) {
     return 1;
 }
 
-void Move_DROIDGENERIC(GameObject_s *) {
+static __used__ void ZapCode(GameObject_s *, i32, i32) {
+}
+
+static __used__ void FireCode(GameObject_s *, i32, i32, f32, i32) {
+}
+
+static void SelfDestructCode(GameObject_s *object, i32 pressed) {
+    if (static_cast<i8>(object->apiobj.flags_low) >= 0 || object->apiobj.field_0x287 != 0 ||
+        object->character_context == 0x0b || object->character_context == 0x16 || object->character_context == 0x2b ||
+        pressed == 0)
+        return;
+    InstantKillParts(object, 1, 0.0f);
+    EXPLOSION *explosion = Detonate(&object->apiobj.collision_position, 0);
+    if (explosion != NULL && Arcade != 0 && static_cast<u8>(object->apiobj.field_0x27c) <= 1) {
+        explosion->field_0x24 |= 0x10000;
+        explosion->object = object;
+    }
+    KillPlayer(object, 2, 1, NULL);
+    if (object->camera_screen_position.z > 0.0f)
+        AddFancyMessage(TTab[tCHEAT_SELFDESTRUCT], object->camera_screen_position.x, object->camera_screen_position.y,
+                        0.25f, 1.0f, 1, 0);
+}
+
+void Move_DROIDGENERIC(GameObject_s *object) {
+    const i32 jump_pressed = GAMEPAD_JUMP & object->pad_gamepad->buttons_pressed;
+    const i32 jump_held = GAMEPAD_JUMP & object->pad_gamepad->buttons_held;
+    i32 zap_pressed = (GAMEPAD_ACTION | GAMEPAD_SPECIAL) & object->pad_gamepad->buttons_pressed;
+    if ((object->apiobj.character_data->model_flags & 0x40) != 0) {
+        if (Cheat[32].enabled != 0)
+            zap_pressed = GAMEPAD_ACTION & object->pad_gamepad->buttons_pressed;
+        KeepWeaponIn(object);
+    } else if (object->apiobj.character_data->game_character->uses_weapon_action == 4 || object->id == id_PROBEDROID) {
+        KeepWeaponOut(object);
+    }
+    DropInOutCode(object);
+    ApplyGravity(object, NULL, 0.0f, object->id == id_BATTLEDROID ? 0.0f : 8.0f, NULL);
+    if ((object->apiobj.character_data->model_flags & 0x10) != 0 || VehicleArea == 0) {
+        TakeHitCode(object);
+        if ((object->apiobj.character_data->model_flags & 0x40) != 0)
+            FloatCode(object);
+        SlideCode(object);
+        FlattenCode(object);
+        ForcePushed_MoveCode(object);
+        ForcedBackCode(object);
+        Tube_MoveCode(object, WORLD);
+    }
+    if ((object->apiobj.character_data->model_flags & 0x40) != 0) {
+        JumpCode(object, jump_pressed, jump_held, 4, 0, 0, -1);
+        GizPanel_MoveCode(WORLD, object, (GAMEPAD_SPECIAL | GAMEPAD_ACTION) & object->pad_gamepad->buttons_pressed);
+    } else {
+        Glide_MoveCode(object);
+        if (object->id == id_SUPERBATTLEDROID) {
+            WeaponOutCode(object);
+            WeaponInCode(object);
+            WeaponScalingCode(object);
+            ShootCode(object, GAMEPAD_ACTION & object->pad_gamepad->buttons_pressed,
+                      GAMEPAD_SPECIAL & object->pad_gamepad->buttons_pressed, 1, 0, 0);
+        } else if (object->id == id_GONKDROID) {
+            if (Cheat_IsOn(8)) {
+                JumpCode(object, jump_pressed, jump_held, 0x40, 0, 0, -1);
+                goto zap;
+            }
+        } else if ((object->apiobj.character_data->model_flags & 0x20) == 0 &&
+                   (object->apiobj.character_data->game_character->flags_094[0] & 8) == 0) {
+            ShootCode(object, GAMEPAD_ACTION & object->pad_gamepad->buttons_pressed, 0, 0, 0, 0);
+        }
+        JumpCode(object, 0, 0, 0x80, 0, 0, -1);
+    }
+zap:
+    if (object->id == id_BUZZDROID)
+        PunchCode(object, GAMEPAD_ACTION & object->pad_gamepad->buttons_pressed, 0, 0, 1, 0.0f);
+    ZapCode(object, zap_pressed, 0);
+    DeactivatedCode(object);
+    if (object->character_context == -1 && object->field_0xe31 == 0 && object->apiobj.field_0x27d != 0 &&
+        object->apiobj.field_0x27e == 0 &&
+        ((object->movement_runtime_flags & 4) != 0 ||
+         (object->fall_animation_timer >= 0.2f && (object->pad_gamepad->input_magnitude == 0.0f ||
+                                                   (static_cast<i8>(object->apiobj.flags_low) >= 0 &&
+                                                    object->apiobj.character_model->model_data_b[0x59] != NULL)))))
+        StartFallLand(object, -1);
+    if (object->apiobj.field_0x27d != 0)
+        object->movement_runtime_flags &= ~4;
+    if ((object->apiobj.character_data->model_flags & 0x10) != 0) {
+        if ((object->apiobj.character_data->model_flags & 0x40) != 0) {
+            PeriscodeCode(object);
+        } else {
+            if (VehicleArea == 0) {
+                if (object->character_context == -1 && object->field_0xe31 == 0 && object->apiobj.field_0x27d != 0 &&
+                    object->apiobj.field_0x27e == 0 &&
+                    ((object->movement_runtime_flags & 4) != 0 ||
+                     (object->fall_animation_timer >= 0.2f &&
+                      (object->pad_gamepad->input_magnitude == 0.0f ||
+                       (static_cast<i8>(object->apiobj.flags_low) >= 0 &&
+                        object->apiobj.character_model->model_data_b[0x59] != NULL)))))
+                    StartFallLand(object, -1);
+                if (object->apiobj.field_0x27d != 0)
+                    object->movement_runtime_flags &= ~4;
+            }
+            if (object->id == id_NAFFDROID1 || object->id == id_NAFFDROID2 || object->id == id_NAFFDROID4 ||
+                object->id == id_MOUSEDROID) {
+                if (object->apiobj.field_0x27d != 0 && object->character_context == -1 &&
+                    object->pad_gamepad->input_magnitude > 0.0f)
+                    PlaySfx(const_cast<char *>(object->id == id_MOUSEDROID ? "drd_mousebot_lp" : "R2Move"),
+                            &object->apiobj.collision_position);
+            } else if (object->id == id_PROBEDROID) {
+                PlaySfx("Probot_EngLp", &object->apiobj.collision_position);
+                FireCode(object, GAMEPAD_ACTION & object->pad_gamepad->buttons_pressed,
+                         GAMEPAD_ACTION & object->pad_gamepad->buttons_pressed, 0.5f, 1);
+            }
+        }
+    }
+    if (static_cast<i8>(object->apiobj.character_data->game_character->flags_094[0]) < 0)
+        CommunicateCode(object, GAMEPAD_SPECIAL & object->pad_gamepad->buttons_pressed, 0);
+    if ((object->apiobj.character_data->model_flags & 0x20) != 0) {
+        GizPanel_MoveCode(WORLD, object, (GAMEPAD_SPECIAL | GAMEPAD_ACTION) & object->pad_gamepad->buttons_pressed);
+        if (WORLD->current_level == HOTHESCAPEB_LDATA)
+            BigJumpCode(object);
+    }
+    const i32 special_pressed = GAMEPAD_SPECIAL & object->pad_gamepad->buttons_pressed;
+    if ((object->apiobj.character_data->model_flags & 0x10) != 0 && (object->movement_runtime_flags & 2) == 0 &&
+        Cheat_IsOn(0x20))
+        SelfDestructCode(object, special_pressed);
+    GizmoBlowupCheckProximity(WORLD, object);
 }
 
 void GunShip_DragBombSeekBlowUp(GameObject_s *object);

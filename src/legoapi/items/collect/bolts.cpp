@@ -1117,7 +1117,7 @@ static __used__ unsigned int Batarang_GetTargetPos(BATARANG_s *, int, nuvec_s *)
 static __used__ void CollideBoltStarFighter(BOLT_s *, starfighter_s *, _vuv_s *, _vuv_s *) {
 }
 
-void Detonate(NUVEC *, u16);
+EXPLOSION *Detonate(NUVEC *, u16);
 static __used__ void EndBolt_EwokTorpedo(BOLT_s *bolt) {
     Detonate(&bolt->position, 0);
 }

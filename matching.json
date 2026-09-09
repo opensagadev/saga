@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 32.43084,
+    "fuzzy_match_percent": 32.45274,
     "total_code": "4722419",
     "matched_code": "64502",
     "matched_code_percent": 1.3658679,
@@ -48204,7 +48204,7 @@
           "address": 1413136,
           "offset": 523168,
           "size": 838,
-          "match_percent": 86.18132
+          "match_percent": 86.0989
         },
         {
           "name": "_ZL19LightSabreComboCodeP12GameObject_siiii",
@@ -48295,6 +48295,14 @@
           "match_percent": 74.229164
         },
         {
+          "name": "_ZL8FireCodeP12GameObject_siifi",
+          "demangled_name": "FireCode(GameObject_s*, int, int, float, int)",
+          "address": 1445952,
+          "offset": 555984,
+          "size": 2473,
+          "match_percent": 0.801527
+        },
+        {
           "name": "_ZL9DodgeCodeP12GameObject_sii",
           "demangled_name": "DodgeCode(GameObject_s*, int, int)",
           "address": 1449696,
@@ -48317,6 +48325,14 @@
           "offset": 574256,
           "size": 243,
           "match_percent": 86.93939
+        },
+        {
+          "name": "_ZL7ZapCodeP12GameObject_sii",
+          "demangled_name": "ZapCode(GameObject_s*, int, int)",
+          "address": 1464480,
+          "offset": 574512,
+          "size": 2709,
+          "match_percent": 0.934256
         },
         {
           "name": "_Z11CanObjSlideP12GameObject_si",
@@ -48468,7 +48484,7 @@
           "address": 1510928,
           "offset": 620960,
           "size": 2051,
-          "match_percent": 0.919037
+          "match_percent": 50.973743
         },
         {
           "name": "_Z11Move_WALKERP12GameObject_s",
@@ -62142,22 +62158,6 @@
           "offset": 457952,
           "size": 415,
           "match_percent": 3.917526
-        },
-        {
-          "name": "_ZL8FireCodeP12GameObject_siifi",
-          "demangled_name": "FireCode(GameObject_s*, int, int, float, int)",
-          "address": 1445952,
-          "offset": 555984,
-          "size": 2473,
-          "match_percent": 0.744275
-        },
-        {
-          "name": "_ZL7ZapCodeP12GameObject_sii",
-          "demangled_name": "ZapCode(GameObject_s*, int, int)",
-          "address": 1464480,
-          "offset": 574512,
-          "size": 2709,
-          "match_percent": 0.692041
         },
         {
           "name": "_ZL20TrenchKilledCallbackP12GameObject_s",
