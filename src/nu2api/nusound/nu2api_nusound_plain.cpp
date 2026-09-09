@@ -257,7 +257,7 @@ extern "C" {
         }
         params.sound_count = final_count;
     }
-    void edbitsSoundPlay(void) {
+    void edbitsSoundPlay(NUVEC *, i32) {
     }
     void gcutSetSoundVol(i32 sound_volume, i32 music_volume) {
         gcutSoundVol = sound_volume;

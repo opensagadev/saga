@@ -9,8 +9,14 @@
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/numath/numtx.h"
+#include "nu2api/numath/nuvec.h"
+#include "nu2api/nucore/nuvideo.h"
 
 #include <string.h>
+#include <math.h>
+
+float edanimPlayerAnimDistance(i32 parameter_index);
+extern u8 object_switches[0x80];
 
 struct edbridge_s {
     i32 instance_id;
@@ -32,6 +38,11 @@ extern "C" {
     extern i32 edpp_page_on[8];
     extern PartHeader **DmaDebTypes;
     extern i32 freeDmaDebType;
+    i32 LookupDebrisEffect(char *name);
+    i32 edbitsLookupSoundFX(char *name);
+    void edbitsSoundPlay(NUVEC *position, i32 sound);
+    void edanimSoundDestroy(i32 parameter_index, i32 sound_index);
+    void AddVariableShotDebrisEffectTimed3(i32, NUVEC *, NUVEC *, i32, f32, NUMTX *, NUMTX *);
     extern part_type_s part_types[128];
     extern i32 part_types_used;
     extern i32 part_emits_used;
@@ -51,6 +62,7 @@ extern "C" {
     edanim_param_s AnimParams[64];
     i32 edbits_anim_page;
     i32 edanim_particle_mode;
+    i32 edanim_sound_mode;
     i32 edanim_next_param;
     i32 edanim_params_used;
     i32 edanim_page_on[8];
@@ -323,7 +335,144 @@ extern "C" {
     void edanimStopPage(i32 page) {
         edanim_page_on[page] = 0;
     }
-    void edanimUpdateObjects(float) {
+    void edanimUpdateObjects(float elapsed) {
+        static i32 localframecount;
+        float seconds;
+        if (NuVideoGetMode() == 3)
+            seconds = elapsed / 50.0f;
+        else
+            seconds = elapsed / 60.0f;
+        for (i32 index = 0; index < 64; ++index) {
+            edanim_param_s *param = &AnimParams[index];
+            if (param->instance_id == -1 || edanim_page_on[param->page] == 0)
+                continue;
+            nuhspecial_s special;
+            nuinstanim_s *animation = NULL;
+            if (edanim_page_scene[param->page] != NULL) {
+                NuGScnGetSpecial(&special, edanim_page_scene[param->page], param->instance_id);
+                animation = NuSpecialGetInstAnim(&special);
+                NuSpecialGetInstanceix(&special);
+            }
+            if (animation != NULL) {
+                switch (param->field_00c) {
+                    case 1:
+                        animation->playing = 0;
+                        if (param->field_010 != -1 && object_switches[param->field_010] != 0)
+                            animation->playing = 1;
+                        break;
+                    case 2:
+                        animation->repeating = 0;
+                        if (param->field_010 != -1 && object_switches[param->field_010] != 0 && !animation->playing) {
+                            animation->ltime = 1.0f;
+                            animation->playing = 1;
+                            animation->backwards = 0;
+                            animation->waiting = 0;
+                        }
+                        break;
+                    case 3:
+                        animation->repeating = 1;
+                        if (param->field_010 != -1 && object_switches[param->field_010] != 0)
+                            animation->playing = 1;
+                        break;
+                    case 4:
+                        animation->playing = param->field_014 > edanimPlayerAnimDistance(index);
+                        break;
+                    case 5:
+                        animation->repeating = 0;
+                        if (param->field_014 > edanimPlayerAnimDistance(index) && !animation->playing) {
+                            animation->playing = 1;
+                            animation->backwards = 0;
+                            animation->waiting = 0;
+                            animation->ltime = 1.0f;
+                        }
+                        break;
+                    case 6:
+                        animation->repeating = 1;
+                        if (param->field_014 > edanimPlayerAnimDistance(index))
+                            animation->playing = 1;
+                        break;
+                    case 10:
+                        animation->ltime = 1.0f;
+                        animation->playing = 0;
+                        break;
+                    case 11:
+                        animation->playing = 1;
+                        break;
+                    case 12:
+                        animation->playing = 1;
+                        animation->repeating = 1;
+                        break;
+                }
+                if (index == edanim_nearest_param_id && (edanim_particle_mode != 0 || edanim_sound_mode != 0))
+                    animation->ltime = 1.0f;
+            }
+            if (NuSpecialGetVisibilityFn(&special) != NULL) {
+                i32 particle_index = 0;
+                while (particle_index < param->effect_count) {
+                    i32 effect = param->effect_ids[particle_index];
+                    if (effect != -1 && debtab[effect] != NULL) {
+                        if (param->effect_flags[particle_index] == 0 || (animation != NULL && animation->playing)) {
+                            NUMTX matrix;
+                            NuMtxInvRSS(&matrix, NuSpecialGetMtx(&special));
+                            NuMtxMul(&matrix, &matrix, NuSpecialGetDrawMtx(&special));
+                            NUVEC position = *reinterpret_cast<NUVEC *>(param->effect_positions[particle_index]);
+                            NuVecMtxTransform(&position, &position, &matrix);
+                            NUMTX orientation = numtx_identity;
+                            NuMtxRotateZ(&orientation, param->effect_angles[particle_index]);
+                            NuMtxRotateY(&orientation, param->effect_angle_ranges[particle_index]);
+                            NuMtxMul(&matrix, &orientation, &matrix);
+                            AddVariableShotDebrisEffectTimed3(param->effect_ids[particle_index], &position, &nuvec_zero,
+                                                             param->effect_intervals[particle_index], seconds, &matrix,
+                                                             &numtx_identity);
+                        }
+                    } else if (param->effect_names[particle_index][0] != 0) {
+                        param->effect_ids[particle_index] = LookupDebrisEffect(param->effect_names[particle_index]);
+                        if (param->effect_ids[particle_index] == -1) {
+                            edanimParticleDestroy(index, particle_index);
+                            continue;
+                        }
+                    }
+                    ++particle_index;
+                }
+                for (i32 sound_index = 0; sound_index < param->sound_count; ++sound_index) {
+                    i32 sound = param->sound_ids[sound_index];
+                    if (sound == -1) {
+                        if (param->sound_names[sound_index][0] != 0) {
+                            param->sound_ids[sound_index] = edbitsLookupSoundFX(param->sound_names[sound_index]);
+                            if (param->sound_ids[sound_index] == -1) {
+                                edanimSoundDestroy(index, sound_index);
+                                --sound_index;
+                            }
+                        }
+                        continue;
+                    }
+                    i32 play = -1;
+                    if (param->sound_flags[sound_index] == 1) {
+                        i32 interval = static_cast<i32>(param->sound_values[sound_index]);
+                        if (static_cast<i32>(static_cast<float>(localframecount) + elapsed) / interval > localframecount / interval)
+                            play = sound;
+                    } else if (animation != NULL) {
+                        float frame = param->sound_values[sound_index];
+                        if (animation->ltime >= frame && frame > param->field_17c)
+                            play = sound;
+                        if (animation->oscillate && frame >= animation->ltime && fabsf(param->field_17c) > frame)
+                            play = sound;
+                    }
+                    if (play != -1) {
+                        NUMTX matrix;
+                        NuMtxInvRSS(&matrix, NuSpecialGetMtx(&special));
+                        NuMtxMul(&matrix, &matrix, NuSpecialGetDrawMtx(&special));
+                        // The original uses the completed particle-loop index here (0x35d332).
+                        NUVEC position = *reinterpret_cast<NUVEC *>(param->sound_positions[particle_index]);
+                        NuVecMtxTransform(&position, &position, &matrix);
+                        edbitsSoundPlay(&position, play);
+                    }
+                }
+            }
+            if (animation != NULL)
+                param->field_17c = animation->oscillate ? -animation->ltime : animation->ltime;
+        }
+        localframecount += static_cast<i32>(elapsed);
     }
     void edbitsDrawBBox(void) {
     }
@@ -353,7 +502,8 @@ extern "C" {
     }
     void edbitsLookupSound(void) {
     }
-    void edbitsLookupSoundFX(void) {
+    i32 edbitsLookupSoundFX(char *) {
+        return -1;
     }
     void edbitsProcessCubemapDump(void) {
     }
