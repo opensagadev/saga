@@ -579,7 +579,13 @@ typedef struct APIOBJECT_s {
     union {
         undefined field_0x28a[0x0a];
         struct {
-            u8 pad_28a[4];
+            union {
+                u8 pad_28a[4];
+                struct {
+                    u16 surface_effect_count;
+                    u16 surface_effect_id;
+                };
+            };
             union {
                 u16 movement_request_flags;
                 u16 collision_priority;

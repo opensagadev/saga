@@ -32,6 +32,7 @@ extern i32 apiloadcharactermodels_nopakfile;
 
 using ANIMREDIRECTFN = i32 (*)(char *, void *, CHARACTERANIM_s *, char *);
 extern "C" void APIResetCharacterRemap(void);
+extern "C" void AddVariableShotDebrisEffect(i32 effect_id, NUVEC *position, i32 count, i16 angle_z, i16 angle_y);
 static ANIMREDIRECTFN RedirectAnimFn;
 static void *RedirectAnimList;
 static char RedirectAnimDir[0x40];
@@ -983,9 +984,9 @@ extern "C" {
     extern void RootFnY(NUMTX *, void *, NUVEC *, NUVEC *, NUVEC *, f32);
     extern void BlendRootFn(NUMTX *, void *, NUVEC *, NUVEC *, NUVEC *, f32);
 
-    // Original @0x3d0563. This restores the ordinary hierarchy evaluation and
-    // render path; DWA, locator/effect, transparency and random-shadow branches
-    // remain separate pending transcriptions of their original helpers.
+    // Original @0x3d0563. Hierarchy evaluation, DWA, locator storage, character
+    // surface effects, transparency and reflection. The AddAnimEffects branch
+    // still awaits reconstruction of its animation-event helper.
     nuhgobj_s *Temphgobj;
     u8 TempNumJoints;
 
@@ -1194,6 +1195,17 @@ extern "C" {
                 }
                 result = NuHGobjRndrMtxDwa(model->hierarchy, matrix, render_count, render_indices, output_matrices, dwa,
                                            render_flags);
+                if (object != NULL && object->apiobj.surface_effect_count != 0) {
+                    if (object->apiobj.surface_effect_count > 16)
+                        object->apiobj.surface_effect_count = 16;
+                    NUVEC points[16];
+                    NuHGobjRndrRandShadowSurfacePoints(model->hierarchy, matrix, output_matrices,
+                                                       object->apiobj.surface_effect_count, points, 0);
+                    for (i32 i = 0; i < object->apiobj.surface_effect_count; ++i) {
+                        AddVariableShotDebrisEffect(object->apiobj.surface_effect_id, &points[i], 1, 0, 0);
+                    }
+                    object->apiobj.surface_effect_count = 0;
+                }
                 if (reflection_matrix != NULL) {
                     model->hierarchy->data_0x198[8] = 1;
                     if (object == NULL || (object->apiobj.field_0x1f4 & 0x1000) == 0)
