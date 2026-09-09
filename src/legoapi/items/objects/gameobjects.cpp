@@ -11,6 +11,7 @@
 #include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/render/fx.h"
+#include "legoapi/render/fx/parts.h"
 #include "legoapi/render/fx/spline_position.h"
 #include "nu2api/nucore/nupad.h"
 #include "nu2api/numath/nuvec.h"
@@ -50,6 +51,7 @@
 #include "legoapi/audio/sfx.h"
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nulgtlaser.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/nucore/nustring.h"
@@ -64,6 +66,29 @@ void GameObjectSetCanUse(GameObject_s *, void *, u8, u8, f32);
 i32 Suit_GetIndex(SUIT_s *);
 void GameObjectOrigin(GameObject_s *);
 BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
+void Bolt_Shoot(GameObject_s *, i32, i32);
+void Torpedo_Shoot(GameObject_s *);
+void GameAudio_PlaySfxById(i32, NUVEC *, i32, i32);
+void PartUpdate_Basketball(PART_s *);
+void PartImpact_Basketball(PART_s *);
+void AddSlamDebris(GameObject_s *);
+void Batarang_Release(GameObject_s *, i32);
+void SuperCarry_Throw(GameObject_s *, i32);
+void ThermalDetonator_Throw(GameObject_s *);
+void BobaRocket_Kill(PART_s *, i32);
+void BobaRocket_Move(PART_s *, f32);
+void BobaRocket_Deflect(PART_s *);
+void PartCollide_3D(PART_s *);
+extern f32 rocket_speed;
+extern f32 sabrerubwait;
+NUVEC *GetZapOrigin(GameObject_s *);
+void PowerUp_Particles(WORLDINFO_s *, NUVEC *);
+void PlaySabreSfx(char *, GameObject_s *, NUVEC *, i32);
+i32 testlaser_type;
+f32 testlaser_endw = 0.1f;
+f32 testlaser_sizewab = 0.01f;
+f32 testlaser_sizel = 0.1f;
+f32 testlaser_sizew = 0.02f;
 extern i16 id_YODA, id_YODAGHOST, id_GAMORREANGUARD, id_JANGOFETT;
 extern i32 LEGO_AIPATHCNX_WALLSHUFFLE;
 extern i32 VehicleArea;
@@ -97,6 +122,16 @@ extern "C" {
     extern i16 id_UGNAUGHT;
     extern i16 id_ATAT;
     extern i16 id_GONKDROID;
+    extern i16 id_BASKETCANNON;
+    extern i16 id_R2Q5;
+    extern i16 id_LANDSPEEDER, id_MILLENNIUMFALCON;
+    extern i32 FalconDebKey[2];
+    void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
+    void AddDebrisEffect(i32 *, i32, f32, f32, f32);
+    void DebrisPosOrientationMtx(i32, NUMTX *);
+    void DebFreeInstantly(i32 *);
+    void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
+    f32 NewRayCastGetTOFI();
 }
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
@@ -4519,25 +4554,338 @@ static void LightSabreStreakCode(GameObject_s *object, i32 blade, i32 effect) {
 }
 
 void GameObjectStuffAfterAnimation() {
-    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
-        GameObject_s *object = &Obj[i];
+    GameObject_s *object = Obj;
+    i32 count = HIGHGAMEOBJECT;
+    for (i32 i = 0; i < count; ++i, ++object) {
         if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || object->apiobj.field_0x287 != 0 ||
-            object->apiobj.field_0x288 == 0 || object->apiobj.model_draw_result == 0)
+            object->apiobj.field_0x288 == 0)
             continue;
-        GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-        if ((object->apiobj.character_data->model_flags & 8) == 0 && object->id != id_BODYGUARD &&
-            object->id != id_IMPERIALGUARD)
-            continue;
-        const i32 effect = object->blade_index == -1 ? -1 : BladeTab[object->blade_index].hit_effect;
-        if ((data->field275_0x116 == 3 || object->id == id_GRIEVOUS || object->id == id_COUNTDOOKU) &&
-            object->character_context == 0 && object->action_movement_state == 3)
-            object->sabre_flags |= 2;
-        const u8 streak = object->sabre_flags & 2;
-        LightSabreStreakCode(object, 0, effect);
-        if (object->id == id_DARTHMAUL) {
-            object->sabre_flags = streak | 1;
-            LightSabreStreakCode(object, 1, effect);
+        const bool drawn = object->apiobj.model_draw_result != 0;
+        if (drawn || (object->field_0x1050 & 4) != 0) {
+            if (object->script_fire_target != NULL && (object->script_fire_target->apiobj.field_0x1f8 & 1) == 0)
+                object->script_fire_target = NULL;
+            if (static_cast<i8>(object->quick_shoot_bolt_id) != -1) {
+                if (object->id == id_BASKETCANNON) {
+                    GAMECHARACTERDATA *data =
+                        static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+                    GameAudio_PlaySfxById(data->sfx_shoot, &object->apiobj.collision_position, 0, 0);
+                    NUMTX matrix;
+                    i32 joint = data->weapon_shoot_joints[0];
+                    if (drawn && joint != -1 && object->apiobj.character_model->points_of_interest[joint] != NULL)
+                        matrix = object->joint_matrices[joint];
+                    else {
+                        matrix = object->apiobj.field_0xb8;
+                        *NUMTX_GET_ROW_VEC(&matrix, 3) = object->apiobj.collision_position;
+                    }
+                    NUVEC velocity = {0.0f, 2.0f * (static_cast<f32>(qrand()) * (1.0f / 65535.0f)),
+                                      -(3.0f + 2.0f * (static_cast<f32>(qrand()) * (1.0f / 65535.0f)))};
+                    NuVecMtxRotate(&velocity, &velocity, &matrix);
+                    ADDPART_s part = Default_ADDPART;
+                    part.matrix = &matrix;
+                    part.velocity = &velocity;
+                    part.field_28 = 90;
+                    part.gravity = -10.0f;
+                    part.flags = 0x10;
+                    part.field_14 = 0.05f;
+                    part.field_18 = 0.05f;
+                    part.special = &WORLD->lev_objs[90].special;
+                    part.field_48 = PartUpdate_Basketball;
+                    part.field_3c = PartImpact_Basketball;
+                    part.stop_fn = PartStop_Flickerer;
+                    part.draw_fn = PartDraw_Flickerer;
+                    part.time_step = FRAMETIME;
+                    AddPart(&part);
+                } else {
+                    Bolt_Shoot(object, static_cast<i8>(object->quick_shoot_bolt_id), object->quick_shoot_flags);
+                    if (object->quick_shoot_bolt_id == 29)
+                        object->context_flags |= 0x40;
+                }
+            }
+            if ((object->field_0xe23 & 4) != 0)
+                Torpedo_Shoot(object);
         }
+        if (drawn && ((object->apiobj.character_data->model_flags & 8) != 0 || object->id == id_BODYGUARD ||
+                      object->id == id_IMPERIALGUARD)) {
+            GAMECHARACTERDATA *data = static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+            const i32 effect = object->blade_index == -1 ? -1 : BladeTab[object->blade_index].hit_effect;
+            if ((data->field275_0x116 == 3 || object->id == id_GRIEVOUS || object->id == id_COUNTDOOKU) &&
+                object->character_context == 0 && object->action_movement_state == 3)
+                object->sabre_flags |= 2;
+            if (object->id == id_BODYGUARD && (object->character_context == 12 || object->character_context == 24) &&
+                static_cast<u16>(object->context_animation - 26) <= 1)
+                object->sabre_flags |= 2;
+            u8 streak = object->sabre_flags & 2;
+            const u8 damage = object->sabre_flags & 4;
+            if (object->id == id_GRIEVOUS) {
+                bool reset_streak = (object->character_context == 12 || object->character_context == 24) &&
+                                    object->context_animation == 26;
+                if (reset_streak) {
+                    object->sabre_flags |= 2;
+                    streak = 2;
+                }
+                i32 first = -1, second = -1;
+                if (damage != 0) {
+                    if (object->character_context == 13) {
+                        first = 2;
+                        second = 0;
+                    } else if (object->character_context == 16) {
+                        first = 3;
+                        second = 2;
+                    } else if (object->character_context == 5 &&
+                               static_cast<u16>(object->context_animation - 46) <= 13) {
+                        static const i32 first_blade[14] = {-1, -1, -1, 2, 2, 2, 2, 1, 3, 3, -1, -1, -1, -1};
+                        static const i32 second_blade[14] = {0, 3, 3, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2};
+                        first = first_blade[object->context_animation - 46];
+                        second = second_blade[object->context_animation - 46];
+                    }
+                }
+                u8 flags = streak | 1;
+                for (i32 blade = 0; blade < 4; ++blade) {
+                    if (blade == 2 && reset_streak)
+                        flags = 1;
+                    object->sabre_flags = flags;
+                    if (damage != 0 && (first == blade || second == blade))
+                        object->sabre_flags |= damage;
+                    if (object->character_context == 16) {
+                        if (blade < 2)
+                            object->sabre_flags &= ~2;
+                        else
+                            object->sabre_flags |= 2;
+                    }
+                    LightSabreStreakCode(object, blade, effect);
+                }
+            } else if (object->id == id_DARTHMAUL) {
+                LightSabreStreakCode(object, 0, effect);
+                object->sabre_flags = streak | 1;
+                LightSabreStreakCode(object, 1, effect);
+            } else if (object->id == id_BODYGUARD) {
+                u8 first = object->sabre_flags;
+                u8 second = first;
+                if (object->character_context == 5 && damage != 0) {
+                    if (object->combo_stage == 2) {
+                        first &= ~4;
+                        second |= 4;
+                    } else {
+                        first |= 4;
+                        second &= ~4;
+                    }
+                } else if (object->character_context == 0 && object->action_movement_state == 4) {
+                    first |= 2;
+                    second = first;
+                }
+                object->sabre_flags = first;
+                LightSabreStreakCode(object, 0, effect);
+                object->sabre_flags = second;
+                LightSabreStreakCode(object, 1, effect);
+            } else
+                LightSabreStreakCode(object, 0, effect);
+        }
+        const i32 debris_joint = static_cast<i8>(object->pad_e3c[1]);
+        if (debris_joint != -1)
+            AddGameDebris(WORLD->debris_sys, (object->movement_runtime_flags & 1) != 0 ? 139 : 138,
+                          NUMTX_GET_ROW_VEC(&object->joint_matrices[debris_joint], 3));
+        if (object->character_context == 38) {
+            CHARACTERANIM_s *animation =
+                static_cast<CHARACTERANIM_s *>(object->apiobj.character_model->model_data_a[object->context_animation]);
+            if (animation != NULL && static_cast<i8>(animation->locator) != -1 &&
+                ((object->context_flags & 0x40) == 0 || debris_joint != -1)) {
+                NUVEC points[2];
+                points[0] = points[1] =
+                    *NUMTX_GET_ROW_VEC(&object->joint_matrices[static_cast<i8>(animation->locator)], 3);
+                points[0].y += 0.075f;
+                points[1].y -= 0.075f;
+                AddStreakPoints(points, 0.25f, 0xffffffff, &object->sabre_streaks[0][0], 0, object);
+            }
+        }
+        if (object->slam_debris_effect != -1)
+            AddSlamDebris(object);
+        if (object->pad_e3c[0] != 0)
+            Batarang_Release(object, object->pad_e3c[0]);
+        if (static_cast<i8>(object->field_0xe22) < 0)
+            SuperCarry_Throw(object, 0);
+        if ((object->field_0xe20 & 0x10) != 0) {
+            NUMTX matrix;
+            i32 joint =
+                drawn ? static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->rocket_locator
+                      : -1;
+            if (drawn && joint != -1 && object->apiobj.character_model->points_of_interest[joint] != NULL)
+                matrix = object->joint_matrices[joint];
+            else {
+                NuMtxSetRotationX(&matrix, 0x1555);
+                NuMtxRotateY(&matrix, object->apiobj.field_0x276 + 0x8000);
+                *NUMTX_GET_ROW_VEC(&matrix, 3) = object->apiobj.collision_position;
+            }
+            NUVEC velocity = {0.0f, 0.0f, -1.0f};
+            NuVecMtxRotate(&velocity, &velocity, &matrix);
+            ADDPART_s part = Default_ADDPART;
+            part.matrix = &matrix;
+            part.velocity = &velocity;
+            part.field_14 = 0.1f;
+            part.field_18 = 0.1f;
+            part.special = &WORLD->lev_objs[232].special;
+            part.field_28 = 232;
+            const bool player = (object->apiobj.field_0x1f8 & 0x80) != 0;
+            part.flags = player ? 0xc11b : 0xc31b;
+            part.owner = object;
+            part.field_90 = static_cast<u8>(object->apiobj.field_0x289);
+            part.field_44 = BobaRocket_Kill;
+            part.move_fn = BobaRocket_Move;
+            part.update_fn = BobaRocket_Deflect;
+            part.field_40 = PartCollide_3D;
+            part.time_step = FRAMETIME;
+            part.gravity = 0.0f;
+            part.field_a4 = player ? 4.0f + 2.0f * (static_cast<f32>(qrand()) * (1.0f / 65535.0f)) : 10.0f;
+            NUVEC direction;
+            BoltSys->shoot_direction(object, &direction);
+            f32 range = part.field_a4 * rocket_speed;
+            part.recipient = TargetGameObject(object, &object->apiobj.collision_position, &direction, range,
+                                              range * range, 0, 1, 0, -1);
+            PART_s *created = AddPart(&part);
+            if (created != NULL)
+                created->force_flags = ObjHitObj_Flags(object);
+        }
+        if ((object->movement_runtime_flags & 0x40) != 0)
+            ThermalDetonator_Throw(object);
+        if ((object->field_0xe23 & 2) != 0 && object->field_0x780 != NULL) {
+            NUVEC *origin = GetZapOrigin(object);
+            NUVEC delta;
+            f32 distance =
+                NuVecDist(&static_cast<GameObject_s *>(object->field_0x780)->apiobj.collision_position, origin, &delta);
+            NuLgtLaser(testlaser_type, testlaser_sizew, testlaser_sizel, testlaser_sizewab, origin, &delta,
+                       object->id == id_R2Q5 ? 0xff202080 : 0xff808040, testlaser_endw, distance);
+        }
+        if (drawn && (object->apiobj.character_data->model_flags & 8) != 0 && object->weapon_scale == 1.0f) {
+            for (i32 blade = 0; blade < 4; ++blade) {
+                if (object->apiobj.field_0x288 == 0 || (object->field_0xe23 & 8) == 0)
+                    continue;
+                GAMECHARACTERDATA *blade_data =
+                    static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
+                i32 joint_a = blade_data->streak_joints[blade][0];
+                i32 joint_b = blade_data->streak_joints[blade][1];
+                if (joint_a == -1 || object->apiobj.character_model->points_of_interest[joint_a] == NULL ||
+                    joint_b == -1 || object->apiobj.character_model->points_of_interest[joint_b] == NULL)
+                    continue;
+                NUVEC points[2];
+                points[0] = *NUMTX_GET_ROW_VEC(&object->joint_matrices[joint_a], 3);
+                points[1] = *NUMTX_GET_ROW_VEC(&object->joint_matrices[joint_b], 3);
+                i32 colour = object->blade_states[blade];
+                if (colour != -1 && object->character_context == 5 && (object->context_flags & 0x1c) == 0 &&
+                    (static_cast<u8>(object->combo_branch) & 0xfb) == 2) {
+                    i32 index = object->combo_branch == 6 ? BladeTab[colour].hit_effect : BladeTab[colour].effect_6;
+                    i32 effect = WORLD->debris_sys->entries[index].effect;
+                    if (effect != -1) {
+                        i32 count = ParticlesPerSecond(100.0f, FRAMETIME);
+                        if (count > 0) {
+                            f32 fraction = static_cast<f32>(qrand()) * (1.0f / 65535.0f);
+                            NUVEC position = {points[0].x + (points[1].x - points[0].x) * fraction,
+                                              points[0].y + (points[1].y - points[0].y) * fraction,
+                                              points[0].z + (points[1].z - points[0].z) * fraction};
+                            AddVariableShotDebrisEffect(effect, &position, count, 0, 0);
+                        }
+                    }
+                }
+                if ((object->apiobj.field_0x1f8 & 0x80) == 0)
+                    continue;
+                bool hit = false;
+                for (i32 side = 0; side < 2; ++side) {
+                    NUVEC delta;
+                    NuVecSub(&delta, &points[1 - side], &points[side]);
+                    if (GameRayCast(&points[side], &delta, 0.0f, TERRAINMASK_NONWEAPON | 0x1f) != 0) {
+                        hit = true;
+                        f32 fraction = NewRayCastGetTOFI();
+                        NUVEC position = {points[side].x + (points[1 - side].x - points[side].x) * fraction,
+                                          points[side].y + (points[1 - side].y - points[side].y) * fraction,
+                                          points[side].z + (points[1 - side].z - points[side].z) * fraction};
+                        i32 index;
+                        if (object->id == id_GRIEVOUS && static_cast<u32>(blade - 1) <= 1 &&
+                            (object->apiobj.field_0x27c == -1 ||
+                             (Cheat_IsOn(25) == 0 &&
+                              (object->apiobj.field_0x27c == -1 || !Player_HasPurpleForce(object)))))
+                            index = 65;
+                        else
+                            index = object->blade_index == -1 ? -1 : BladeTab[object->blade_index].effect_8;
+                        if (index != -1) {
+                            i32 effect = WORLD->debris_sys->entries[index].effect;
+                            if (effect != -1) {
+                                i32 count = ParticlesPerSecond(50.0f, FRAMETIME);
+                                if (count > 0)
+                                    AddVariableShotDebrisEffect(effect, &position, count, 0, 0);
+                            }
+                        }
+                    }
+                }
+                if (hit && sabrerubwait <= 0.0f && object->apiobj.anim_packet.blending == 0 &&
+                    object->character_context != 5 && object->character_context != 16 &&
+                    object->character_context != 13 && object->character_context != 14 &&
+                    (CInfo[object->character_context].flags & 0x4000000) == 0 &&
+                    ((CInfo[object->character_context].flags & 0x8000000) == 0 || (object->jump_flags & 2) == 0)) {
+                    PlaySabreSfx(const_cast<char *>("SaberSparks"), object, &points[blade], 1);
+                    sabrerubwait = 0.3f + 0.3f * (static_cast<f32>(qrand()) * (1.0f / 65535.0f));
+                    if (GetMenuID() == -1)
+                        NewRumble(object->pad_gamepad->pad,
+                                  0.2f + 0.2f * (static_cast<f32>(qrand()) * (1.0f / 65535.0f)), 0);
+                }
+            }
+        }
+        if (drawn && object->id == id_LANDSPEEDER) {
+            f32 ratio = object->pad_gamepad->input_magnitude /
+                        static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24)->movement_speed;
+            i32 effect = WORLD->debris_sys->entries[105].effect;
+            if (effect != -1)
+                AddVariableShotDebrisEffectTimed1(effect, &object->apiobj.lower_position, 60, FRAMETIME, 0, 0, NULL);
+            effect = WORLD->debris_sys->entries[104].effect;
+            if (effect != -1) {
+                for (i32 joint = 2; joint <= 4; ++joint) {
+                    if (object->apiobj.character_model->points_of_interest[joint] != NULL) {
+                        i32 count = static_cast<i32>(60.0f * ratio);
+                        if (count > 0)
+                            AddVariableShotDebrisEffectTimed1(effect,
+                                                              NUMTX_GET_ROW_VEC(&object->joint_matrices[joint], 3),
+                                                              count, FRAMETIME, 0, 0, NULL);
+                    }
+                }
+            }
+            effect = WORLD->debris_sys->entries[103].effect;
+            if (effect != -1 && object->apiobj.field_0x218 != 2000000.0f) {
+                for (i32 joint = 2; joint <= 4; ++joint) {
+                    if (object->apiobj.character_model->points_of_interest[joint] != NULL) {
+                        NUVEC position = *NUMTX_GET_ROW_VEC(&object->joint_matrices[joint], 3);
+                        f32 height = position.y - object->apiobj.field_0x218;
+                        if (height > 0.0f && height <= 0.2f) {
+                            f32 amount = height < 0.1f ? 25.0f : (1.0f - (height - 0.1f) / 0.1f) * 25.0f;
+                            if (static_cast<i32>(amount * ratio) > 0) {
+                                position.y = object->apiobj.field_0x218;
+                                AddVariableShotDebrisEffectTimed1(effect, &position, 60, FRAMETIME, 0, 0, NULL);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (VehicleArea != 0 && static_cast<u8>(object->apiobj.field_0x27c) <= 1) {
+            i32 *key = &FalconDebKey[static_cast<u8>(object->apiobj.field_0x27c)];
+            if (object->id == id_MILLENNIUMFALCON && (object->apiobj.field_0x1f8 & 0x80) != 0 &&
+                (object->field_0xe24 & 8) != 0 && object->apiobj.character_model->points_of_interest[2] != NULL &&
+                object->apiobj.field_0xa8 == 1.0f) {
+                if (*key == -1)
+                    AddDebrisEffect(key, WORLD->debris_sys->entries[136].effect, 0.0f, 0.0f, 0.0f);
+                else {
+                    NUMTX matrix = object->joint_matrices[2];
+                    NuMtxPreRotateX(&matrix, 0x4000);
+                    DebrisPosOrientationMtx(*key, &matrix);
+                }
+            } else
+                DebFreeInstantly(key);
+        }
+        if (object->field_0xdec > 0.0f && object->apiobj.field_0x287 == 0) {
+            f32 radius = object->apiobj.field_0x1dc * (0.5f + 0.5f * (static_cast<f32>(qrand()) * (1.0f / 65535.0f)));
+            u16 angle = qrand();
+            NUVEC position = {object->apiobj.position.x + radius * NuTrigTable[angle >> 1],
+                              object->apiobj.position.y + object->field_0xffc * object->apiobj.field_0xa8 + 0.05f,
+                              object->apiobj.position.z + radius * NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff]};
+            PowerUp_Particles(WORLD, &position);
+        }
+        count = HIGHGAMEOBJECT;
     }
 }
 

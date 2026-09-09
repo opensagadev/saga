@@ -130,6 +130,7 @@ extern "C" {
     i16 id_EWOK = -1;
     i16 id_CATAPULT = -1;
     i16 id_BASKETCANNON = -1;
+    i16 id_R2Q5 = -1;
     i16 id_BANTHA = -1;
     i16 id_BOMARRMONK = -1;
     i16 id_DEWBACK = -1;
@@ -350,6 +351,7 @@ extern "C" {
         {"ewok", &id_EWOK},
         {"catapult", &id_CATAPULT},
         {"basketcannon", &id_BASKETCANNON},
+        {"r2q5", &id_R2Q5},
         {"bantha", &id_BANTHA},
         {"bomarrmonk", &id_BOMARRMONK},
         {"dewback", &id_DEWBACK},

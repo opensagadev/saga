@@ -66,6 +66,8 @@ void DagobahC_Panel(WORLDINFO_s *) {
 void KillParts_ATAT(ADDPART_s *, i32, i32, GameObject_s *) {
 }
 
+f32 rocket_speed = 1.2f;
+
 void BobaRocket_Kill(PART_s *, i32) {
 }
 
