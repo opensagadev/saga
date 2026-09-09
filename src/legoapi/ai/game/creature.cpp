@@ -85,7 +85,7 @@ void InitAICreatures(AISYS_s *system) {
             continue;
         }
 
-        const i32 count = creature.count;
+        i32 count = creature.count;
         if (count == 0) {
             continue;
         }
@@ -101,6 +101,7 @@ void InitAICreatures(AISYS_s *system) {
 
             GameObject_s *object = AddCreature(creature.type, 1);
             if (object == NULL) {
+                count = creature.count;
                 continue;
             }
 
@@ -110,13 +111,13 @@ void InitAICreatures(AISYS_s *system) {
             const u32 model_flags = apicharsys->char_data[creature.type].model_flags;
             if ((model_flags & 0x200) != 0) {
                 object->apiobj.field_0x1f4 |= 0x404;
-            } else if ((model_flags & 0x400) != 0) {
+            } else if ((model_flags & 0x4) != 0) {
                 object->apiobj.field_0x1f4 |= 0x401;
             }
             object->field_0x1050 |= (model_flags & 0x1000) != 0 ? 5 : 1;
             object->ai.field_0x134 = static_cast<u8>(creature_index);
 
-            if (member == 0 && count > 1 && creature.start_stagger == 0.0f) {
+            if (member == 0 && creature.count > 1 && creature.start_stagger == 0.0f) {
                 GAMECHARACTERDATA *character =
                     static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
                 group = CreateAIGroup(system, creature.count_across, creature.x_spacing, creature.z_spacing,
@@ -130,6 +131,7 @@ void InitAICreatures(AISYS_s *system) {
             object->ai.locator = creature.locator;
             object->ai.respawn_locator = creature.respawn_locator;
             object->ai.creature_set = creature.set;
+            count = creature.count;
         }
     }
 
