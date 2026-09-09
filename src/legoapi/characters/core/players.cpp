@@ -1066,10 +1066,6 @@ static __used__ i32 SelectOpponent(GameObject_s *, f32, f32, i32, i32) {
     return 0;
 }
 
-static __used__ i32 ShootThisFrame(GameObject_s *, i32, i32) {
-    return 0;
-}
-
 static __used__ void Player_ClearContext_Game(GameObject_s *, i32) {
 }
 

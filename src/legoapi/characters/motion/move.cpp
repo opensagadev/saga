@@ -6589,6 +6589,23 @@ static void CommunicateCode(GameObject_s *object, i32 pressed, i32) {
 static __used__ void PunchCode(GameObject_s *, i32, i32, i32, i32, f32) {
 }
 
+static __used__ void ShootThisFrame(GameObject_s *object, i32 bolt_id, i32 flags) {
+    if (object == Player[0] && nextShootTarget.Get() != NULL)
+        nextShootTarget = NuMechPtr<MechObjectInterface, 4>();
+    if ((object->apiobj.field_0x1f4 & 0x40000) != 0 && object->apiobj.field_0x27c != -1)
+        return;
+    NewBuzzFrames(object->pad_gamepad->pad, (object->apiobj.character_data->model_flags & 0x2000) != 0 ? 1 : 2, 0);
+    object->field_0xef9 |= 8;
+    object->quick_shoot_bolt_id = bolt_id;
+    object->quick_shoot_flags = flags;
+    if ((object->apiobj.character_data->game_character->flags_098[0] & 2) != 0) {
+        extern void SetWeaponIn(GameObject_s *);
+        SetWeaponIn(object);
+    }
+    if (object->field_0x7e4 != NULL && object->field_0x7e4[8] == 2 && object->field_0x7e8 != 0)
+        --object->field_0x7e8;
+}
+
 static __used__ void ShootCode(GameObject_s *, i32, i32, i32, i32, i32) {
 }
 
