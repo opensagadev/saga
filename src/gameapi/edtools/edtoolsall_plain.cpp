@@ -20,6 +20,8 @@ struct edbridge_s {
 };
 DECOMP_ASSERT(sizeof(edbridge_s) == 0x44, "edbridge_s size");
 
+static NUVEC *ed_loc;
+
 extern "C" {
     extern debinftype *effecttypes;
     extern debinftype **debtab;
@@ -555,11 +557,13 @@ extern "C" {
     }
     void edmainProcess(void) {
     }
-    void edmainQueryLocVec(void) {
+    NUVEC *edmainQueryLocVec(void) {
+        return ed_loc;
     }
     void edmainRegister(void) {
     }
-    void edmainRegisterLocVec(void) {
+    void edmainRegisterLocVec(NUVEC *position) {
+        ed_loc = position;
     }
     void edmainRender(void) {
     }
@@ -614,7 +618,8 @@ extern "C" {
         memset(part_page_on, 0, sizeof(part_page_on));
         edpart_instances_used = 0;
     }
-    void edpartRegisterPointerToGameCharLocation(void) {
+    void edpartRegisterPointerToGameCharLocation(NUVEC *position) {
+        edmainRegisterLocVec(position);
     }
     void edppClearPage(i8 page) {
         edpp_page_on[page] = 0;
@@ -758,7 +763,8 @@ extern "C" {
         }
         return page_index;
     }
-    void edppRegisterPointerToGameCharLocation(void) {
+    void edppRegisterPointerToGameCharLocation(NUVEC *position) {
+        edmainRegisterLocVec(position);
     }
     void edppRestartAllEffectsInLevel(void) {
     }

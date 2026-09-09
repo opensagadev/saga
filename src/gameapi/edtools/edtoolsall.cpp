@@ -1,11 +1,15 @@
 #include "gameapi_edtools_types.h"
 #include "gameapi/edtools/edcam.h"
+#include "gameapi/edtools/edstubs.h"
+#include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/numath/nuvec.h"
 
 extern "C" {
     extern edpp_particle_s edpp_ptls[512];
     extern i32 edpp_nearest;
     extern NUVEC edpp_cam_pos;
+    extern edanim_param_s AnimParams[64];
+    extern NUGSCN *edanim_page_scene[8];
 }
 
 void EdTerrInit(void *, void *) {
@@ -325,7 +329,15 @@ void edpartMultipleCopyCopy() {
 void edpartMultipleCopyClear() {
 }
 
-void edanimPlayerAnimDistance(i32) {
+float edanimPlayerAnimDistance(i32 parameter_index) {
+    if (edmainQueryLocVec() != NULL) {
+        nuhspecial_s special;
+        NuGScnGetSpecial(&special, edanim_page_scene[AnimParams[parameter_index].page],
+                        AnimParams[parameter_index].instance_id);
+        NUVEC *position = edmainQueryLocVec();
+        return NuVecDist(NuSpecialGetPos(&special), position, NULL);
+    }
+    return 0.0f;
 }
 
 void edanimRenderSoundEmitters(i32) {
