@@ -5,6 +5,7 @@
 #include "gameapi/edtools/edstubs.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nucore/nutime.h"
+#include "nu2api/nucore/nuthread.h"
 #include "nu2api/numath/numtx.h"
 
 #include <string.h>
@@ -27,6 +28,13 @@ extern "C" {
     extern i32 edpp_page_on[8];
     extern PartHeader **DmaDebTypes;
     extern i32 freeDmaDebType;
+    extern part_type_s part_types[128];
+    extern i32 part_types_used;
+    extern i32 part_emits_used;
+    extern NUGSCN *part_scene[32];
+    extern i32 part_scene_pageid[32];
+    void CheckPartCount(void);
+    void KillPartsByScene(NUGSCN *);
     extern i32 DEBPAGE_GENERAL;
     extern i32 DEBPAGE_CHARACTER;
     extern i32 DEBPAGE_AREA;
@@ -413,7 +421,34 @@ extern "C" {
     }
     void edmainSetReturn(void) {
     }
-    void edpartClearPage(i8) {
+    void edpartClearPage(i8 page) {
+        NuThreadDisableThreadSwap();
+        CheckPartCount();
+        if (part_page_on[page] != 0)
+            edpartStopPage(page);
+        for (i32 index = 0; index < 128; ++index) {
+            if (part_types[index].page == page && part_types[index].name[0] != 0) {
+                part_types[index].name[0] = 0;
+                part_types[index].effect_ids[0] = -1;
+                --part_types_used;
+            }
+        }
+        for (i32 index = 0; index < 40; ++index) {
+            if (part_emits[index].page == page && part_emits[index].effect_id != -1) {
+                part_emits[index].effect_id = -1;
+                --part_emits_used;
+            }
+        }
+        CheckPartCount();
+        for (i32 index = 0; index < 32; ++index) {
+            if (part_scene_pageid[index] == page) {
+                KillPartsByScene(part_scene[index]);
+                part_scene_pageid[index] = -1;
+                part_scene[index] = NULL;
+            }
+        }
+        NuThreadEnableThreadSwap();
+        part_page_used[page] = 0;
     }
     void edpartDestroyAllParticles(void) {
     }

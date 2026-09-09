@@ -1459,7 +1459,15 @@ extern "C" {
         }
     }
 
-    void KillPartsByScene(void) {
+    void KillPartsByScene(NUGSCN *scene) {
+        PART_s *part = Part;
+        for (i32 index = 0; index < MAXPARTS; ++index, ++part) {
+            if ((part->active & 1) != 0 && part->source_special != NULL && part->special.scene == scene) {
+                part->active &= ~1;
+                memset(&part->special, 0, sizeof(part->special));
+                part->source_special = NULL;
+            }
+        }
     }
 
     void NewPartRotation(PART_s *part) {
