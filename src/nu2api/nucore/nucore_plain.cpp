@@ -60,6 +60,7 @@ void NuDebugMsgPrint(char *);
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nurndrstat.h"
 #include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nupostresources.h"
 #include "nu2api/nu3d/nuvport.h"
 #include "nu2api/nu3d/nuocclusion.h"
 #include "nu2api/nu3d/nurndr.h"
@@ -2255,7 +2256,8 @@ extern "C" {
     }
     void NuEffectTex360Create3D_aliased(void) {
     }
-    void NuEffectTexCreate2D(void) {
+    nueffecttex_s *NuEffectTexCreate2D(i32, i32, i32, i32, i32) {
+        return NULL;
     }
     void NuEffectTexCreateCube(void) {
     }
@@ -2263,8 +2265,8 @@ extern "C" {
     }
     void NuEffectTexCreateFromNativeTex(void) {
     }
-    void NuEffectTexGetDimension(const void *texture, i32 lod, i32 *width, i32 *height) {
-        const i16 *dimensions = static_cast<const i16 *>(texture);
+    void NuEffectTexGetDimension(nueffecttex_s *texture, i32 lod, i32 *width, i32 *height) {
+        const i16 *dimensions = reinterpret_cast<const i16 *>(texture);
         *width = (dimensions[1] >> lod) & ~1;
         *height = (dimensions[2] >> lod) & ~1;
     }
@@ -2273,7 +2275,9 @@ extern "C" {
     void *NuEffectTexGetLockedVP(void) {
         return NULL;
     }
-    void NuEffectTexLockVP(void) {
+    void NuEffectTexLockVP(void *buffer, void *buffer_end) {
+        (void)buffer;
+        (void)buffer_end;
     }
     void NuEffectTexMapNative(void) {
     }
@@ -2295,23 +2299,24 @@ extern "C" {
     }
     void NuFadeObjUpdateArray(void *) {
     }
-    void NuFramebufferAttachTex2D(void) {
+    void NuFramebufferAttachTex2D(nuframebuffer_s *, i32, nueffecttex_s *, i32) {
     }
-    void NuFramebufferBind(void) {
+    void NuFramebufferBind(nuframebuffer_s *) {
     }
     static void NuFramebufferClear(void) {
     }
-    void NuFramebufferCopyTex2D(void) {
+    void NuFramebufferCopyTex2D(i32, nueffecttex_s *, i32, i32, i32, i32, i32) {
     }
-    void NuFramebufferCreate(void) {
+    nuframebuffer_s *NuFramebufferCreate() {
+        return NULL;
     }
-    void NuFramebufferDestroy(void) {
+    void NuFramebufferDestroy(nuframebuffer_s *) {
     }
     void NuFramebufferDrawBuffers(void) {
     }
-    void NuFramebufferEnableGuards(void) {
+    void NuFramebufferEnableGuards(nuframebuffer_s *, bool) {
     }
-    void *NuFramebufferGetAttachedTex(nuframebuffer_s *, i32, i32 *, i32 *) {
+    nueffecttex_s *NuFramebufferGetAttachedTex(nuframebuffer_s *, i32, i32 *, i32 *) {
         return NULL;
     }
     void *NuFramebufferGetBackBuffer(void) {
@@ -2326,25 +2331,25 @@ extern "C" {
     nuframebuffer_s *NuFramebufferGetFrontBuffer(void) {
         return NULL;
     }
-    i32 NuFramebufferGetHeight(const nuframebuffer_s *framebuffer) {
+    i32 NuFramebufferGetHeight(nuframebuffer_s *framebuffer) {
         return *reinterpret_cast<const i32 *>(reinterpret_cast<const u8 *>(framebuffer) + 0xe0);
     }
     nuframebuffer_s *NuFramebufferGetObject(i32) {
         return NULL;
     }
-    i32 NuFramebufferGetSamples(const nuframebuffer_s *framebuffer) {
+    i32 NuFramebufferGetSamples(nuframebuffer_s *framebuffer) {
         return *reinterpret_cast<const i32 *>(reinterpret_cast<const u8 *>(framebuffer) + 0xe8);
     }
-    i32 NuFramebufferGetWidth(const nuframebuffer_s *framebuffer) {
+    i32 NuFramebufferGetWidth(nuframebuffer_s *framebuffer) {
         return *reinterpret_cast<const i32 *>(reinterpret_cast<const u8 *>(framebuffer) + 0xdc);
     }
     void NuFramebufferInitEx(void) {
     }
-    void NuFramebufferResolve(void) {
+    void NuFramebufferResolve(i32, bool) {
     }
-    void NuFramebufferResolveAll(void) {
+    void NuFramebufferResolveAll(bool) {
     }
-    void NuFramebufferResolveMultisample(void) {
+    void NuFramebufferResolveMultisample(i32) {
     }
     void NuFramebufferSetClearColor(void) {
     }
