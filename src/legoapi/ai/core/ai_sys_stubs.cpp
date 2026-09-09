@@ -392,6 +392,8 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene) {
                 connection->game_flags = EdFileReadShort();
                 connection->width = EdFileReadFloat();
                 connection->cost = EdFileReadFloat();
+                if (connection->cost == 0.0f)
+                    connection->cost = 0.00001f;
             }
         }
 
@@ -429,7 +431,7 @@ static AIPATHSYS *AISysLoadPaths(AISYS *system, i32 version, NUGSCN *scene) {
                     node->connections =
                         static_cast<AIPATHCNX **>(AISysLoadAlloc(system, node->connection_count * sizeof(AIPATHCNX *)));
                     for (i32 i = 0; i < node->connection_count; ++i) {
-                        u16 connection_index = EdFileReadShort();
+                        i16 connection_index = EdFileReadShort();
                         node->connections[i] = &path->connections[connection_index];
                     }
                     if ((node->connection_count & 1) != 0) {
