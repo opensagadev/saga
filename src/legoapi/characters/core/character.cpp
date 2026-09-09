@@ -1093,72 +1093,79 @@ extern "C" {
                 }
             }
 
-            auto animation_at = [model](i32 index) -> ani3_animheader_s * {
-                if (index < 0 || apicharsys == NULL || index >= apicharsys->model_id_capacity ||
-                    model->model_data_b == NULL) {
-                    return NULL;
-                }
-                return static_cast<ani3_animheader_s *>(model->model_data_b[index]);
-            };
-            auto animation_flags = [model](i32 index) -> u32 {
-                if (index < 0 || apicharsys == NULL || index >= apicharsys->model_id_capacity ||
-                    model->model_data_a == NULL || model->model_data_a[index] == NULL) {
-                    return 0;
-                }
-                return static_cast<CHARACTERANIM_s *>(model->model_data_a[index])->flags;
-            };
-
             bool evaluated = false;
             if (animation != NULL && drawcharactermodel_noani == 0 && drawcharactermodel_restpose == 0) {
                 if (animation->frame != 0xffff) {
-                    const i32 first_index = animation->field_0x3a;
-                    const i32 second_index = animation->frame;
-                    ani3_animheader_s *first = animation_at(first_index);
-                    ani3_animheader_s *second = animation_at(second_index);
-                    if (first != NULL && second != NULL) {
-                        NuHGobjEvalAnimBlend2(model->hierarchy, first, animation->time, second, animation->time,
-                                              animation->field_0x44, joint_override_count, joint_overrides,
-                                              output_matrices);
+                    if (animation->field_0x3a >= 0 && animation->field_0x3a < apicharsys->model_id_capacity && model->model_data_b[animation->field_0x3a] != NULL &&
+                        static_cast<i16>(animation->frame) >= 0 && static_cast<i16>(animation->frame) < apicharsys->model_id_capacity && model->model_data_b[static_cast<i16>(animation->frame)] != NULL) {
+                        NuHGobjEvalAnimBlend2(model->hierarchy,
+                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->field_0x3a]), animation->time,
+                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->frame]), animation->time,
+                            animation->field_0x44, joint_override_count, joint_overrides, output_matrices);
                         evaluated = true;
                     }
-                } else if (animation->blending != 0) {
-                    const i32 first_index = animation->blend_animation_a;
-                    const i32 second_index = animation->blend_animation_b;
-                    ani3_animheader_s *first = animation_at(first_index);
-                    ani3_animheader_s *second = animation_at(second_index);
-                    if (first != NULL && second != NULL) {
-                        f32 blend =
-                            animation->blend_duration != 0.0f ? animation->blend_elapsed / animation->blend_duration : 0.0f;
-                        const u32 combined_flags = animation_flags(first_index) | animation_flags(second_index);
-                        if ((combined_flags & 0x20) != 0) {
-                            NuHGobjEvalAnimBlend2Root(model->hierarchy, first, animation->time, second,
-                                                      animation->blend_target_time, blend, joint_override_count,
-                                                      joint_overrides, output_matrices, BlendRootFn, object);
-                        } else {
-                            NuHGobjEvalAnimBlend2(model->hierarchy, first, animation->time, second,
-                                                  animation->blend_target_time, blend, joint_override_count,
-                                                  joint_overrides, output_matrices);
-                        }
-                        evaluated = true;
+                } else if (animation->blending != 0 &&
+                    animation->blend_animation_a >= 0 && animation->blend_animation_a < apicharsys->model_id_capacity && model->model_data_b[animation->blend_animation_a] != NULL &&
+                    animation->blend_animation_b >= 0 && animation->blend_animation_b < apicharsys->model_id_capacity && model->model_data_b[animation->blend_animation_b] != NULL) {
+                    if ((static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->blend_animation_a])->flags & 0x20) != 0 ||
+                        (static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->blend_animation_b])->flags & 0x20) != 0) {
+                        NuHGobjEvalAnimBlend2Root(model->hierarchy,
+                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->blend_animation_a]), animation->time,
+                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->blend_animation_b]), animation->blend_target_time,
+                            animation->blend_elapsed / animation->blend_duration, joint_override_count, joint_overrides,
+                            output_matrices, BlendRootFn, object);
+                    } else {
+                        NuHGobjEvalAnimBlend2(model->hierarchy,
+                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->blend_animation_a]), animation->time,
+                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->blend_animation_b]), animation->blend_target_time,
+                            animation->blend_elapsed / animation->blend_duration, joint_override_count, joint_overrides,
+                            output_matrices);
                     }
-                } else {
-                    const i32 index = animation->animation_index;
-                    ani3_animheader_s *selected = animation_at(index);
-                    if (selected != NULL) {
-                        const u32 selected_flags = animation_flags(index);
-                        if ((selected_flags & 0x20) != 0) {
-                            NUHGOBJROOTFN root_fn = (selected_flags & 0x200) != 0 ? RootFnY : RootFn;
-                            NuHGobjEvalAnim2Root(model->hierarchy, selected, animation->current_time, joint_override_count,
-                                                 joint_overrides, output_matrices, root_fn, object);
-                        } else {
-                            NuHGobjEvalAnim2(model->hierarchy, selected, animation->current_time, joint_override_count,
-                                             joint_overrides, output_matrices);
-                        }
-                        evaluated = true;
+                    evaluated = true;
+                } else if (animation->blending != 0 &&
+                    animation->blend_animation_b >= 0 && animation->blend_animation_b < apicharsys->model_id_capacity && model->model_data_b[animation->blend_animation_b] != NULL) {
+                    CHARACTERANIM_s *selected = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->blend_animation_b]);
+                    if ((selected->flags & 0x20) != 0) {
+                        NuHGobjEvalAnim2Root(model->hierarchy,
+                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->blend_animation_b]), animation->blend_target_time,
+                            joint_override_count, joint_overrides, output_matrices,
+                            (selected->flags & 0x200) != 0 ? RootFnY : RootFn, object);
+                    } else {
+                        NuHGobjEvalAnim2(model->hierarchy,
+                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->blend_animation_b]), animation->blend_target_time,
+                            joint_override_count, joint_overrides, output_matrices);
                     }
+                    evaluated = true;
+                } else if (animation->blending != 0 &&
+                    animation->blend_animation_a >= 0 && animation->blend_animation_a < apicharsys->model_id_capacity && model->model_data_b[animation->blend_animation_a] != NULL) {
+                    CHARACTERANIM_s *selected = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->blend_animation_a]);
+                    if ((selected->flags & 0x20) != 0) {
+                        NuHGobjEvalAnim2Root(model->hierarchy,
+                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->blend_animation_a]), animation->time,
+                            joint_override_count, joint_overrides, output_matrices,
+                            (selected->flags & 0x200) != 0 ? RootFnY : RootFn, object);
+                    } else {
+                        NuHGobjEvalAnim2(model->hierarchy,
+                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->blend_animation_a]), animation->time,
+                            joint_override_count, joint_overrides, output_matrices);
+                    }
+                    evaluated = true;
+                } else if (animation->blending == 0 &&
+                    animation->animation_index >= 0 && animation->animation_index < apicharsys->model_id_capacity && model->model_data_b[animation->animation_index] != NULL) {
+                    CHARACTERANIM_s *selected = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->animation_index]);
+                    if ((selected->flags & 0x20) != 0) {
+                        NuHGobjEvalAnim2Root(model->hierarchy,
+                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->animation_index]), animation->current_time,
+                            joint_override_count, joint_overrides, output_matrices,
+                            (selected->flags & 0x200) != 0 ? RootFnY : RootFn, object);
+                    } else {
+                        NuHGobjEvalAnim2(model->hierarchy,
+                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->animation_index]), animation->current_time,
+                            joint_override_count, joint_overrides, output_matrices);
+                    }
+                    evaluated = true;
                 }
             }
-
             if (!evaluated) {
                 NuHGobjEval(model->hierarchy, joint_override_count,
                             reinterpret_cast<nuhgobjjointoverride_s *>(joint_overrides), output_matrices);
