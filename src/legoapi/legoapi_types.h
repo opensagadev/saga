@@ -707,7 +707,20 @@ struct CHARPLATFORMSYS_s {
 DECOMP_ASSERT(offsetof(CHARPLATFORMSYS_s, platforms) == 0x8, "CHARPLATFORMSYS platforms offset");
 struct CHARVARIANT {};
 struct CHEAT;
-struct CLIMBOBJECTSYS_s {};
+struct CLIMBOBJECT_s {
+    u8 field_0x00[0x14];
+    AIPATHCNX_s *connection;
+    AIPATH_s *path;
+    u8 flags;
+    u8 field_0x1d[3];
+};
+struct CLIMBOBJECTSYS_s {
+    CLIMBOBJECT_s *objects;
+    u16 count;
+    u16 capacity;
+};
+DECOMP_ASSERT(sizeof(CLIMBOBJECT_s) == 0x20, "CLIMBOBJECT_s size");
+DECOMP_ASSERT(sizeof(CLIMBOBJECTSYS_s) == 8, "CLIMBOBJECTSYS_s size");
 struct CUSTOMISER {
     union {
         u8 pad_0x00[0x6c];

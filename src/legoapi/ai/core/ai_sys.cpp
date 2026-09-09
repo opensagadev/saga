@@ -11,6 +11,7 @@ struct minitrooperteam_s;
 struct nuvec_s;
 
 extern "C" void *AISysBufferAlloc(VARIPTR *cursor, VARIPTR *buf_end, u32 size);
+void *GameBufferAlloc(VARIPTR *, VARIPTR *, i32);
 void AIPathCnxControlSysReset(AIPATHCNXCONTROLSYS_s *system);
 extern "C" void *AISysLoadEx(void *buf, void *buf_end, i32 size, void *gscn, char *dir, char *name, char *param,
                              char *load_dir);
@@ -52,10 +53,14 @@ void GameAIScriptAddLevelSfx(WORLDINFO *world, NULISTHDR *scripts) {
     (void)scripts;
 }
 void *CreateClimbObjectSys(VARIPTR *buf, VARIPTR *buf_end, i32 count) {
-    (void)buf;
-    (void)buf_end;
-    (void)count;
-    return NULL;
+    if (count == 0)
+        return NULL;
+    CLIMBOBJECTSYS_s *system = static_cast<CLIMBOBJECTSYS_s *>(GameBufferAlloc(buf, buf_end, sizeof(CLIMBOBJECTSYS_s)));
+    if (system == NULL)
+        return NULL;
+    system->capacity = static_cast<u16>(count);
+    system->objects = static_cast<CLIMBOBJECT_s *>(GameBufferAlloc(buf, buf_end, system->capacity * sizeof(CLIMBOBJECT_s)));
+    return system;
 }
 extern "C" APIOBJECTSYS_s *APIObjectSysInit(i32 size, VARIPTR *buf, VARIPTR *buf_end) {
     APIOBJECTSYS_s *system = static_cast<APIOBJECTSYS_s *>(AISysBufferAlloc(buf, buf_end, sizeof(APIOBJECTSYS_s)));
