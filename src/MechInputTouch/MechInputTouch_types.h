@@ -916,8 +916,13 @@ struct MechTouchUITexButton : MechTouchUIElement {
     void Render() override;
     void UpdateTexture(i16);
     ~MechTouchUITexButton() override;
-    u8 field_0x3c[0x90 - 0x3c];
+    struct numtl_s *material;
+    f32 *alpha_target;
+    f32 alpha_from, alpha_to, alpha_elapsed, alpha_duration, alpha_delay, alpha;
+    f32 *scale_target;
+    f32 scale_from, scale_to, scale_elapsed, scale_duration, scale_delay, scale;
 };
+DECOMP_ASSERT(sizeof(MechTouchUITexButton) == 0x78, "MechTouchUITexButton size");
 
 DECOMP_ASSERT(sizeof(NuVec2) == 0x8, "NuVec2 size");
 DECOMP_ASSERT(sizeof(MechInputTouchGestureTracker) == 0x4, "MechInputTouchGestureTracker size");

@@ -8,6 +8,9 @@
 #include "legoapi/render/core/render.h"
 #include "legoapi/menus/core/text.h"
 #include "legoapi/world/level.h"
+#include "nu2api/nu3d/numtl.h"
+
+void RndrTexQuad(f32, f32, f32, f32, i32, numtl_s *, i32);
 
 extern i32 CutSceneWaiting;
 extern i32 editor_active;
@@ -269,16 +272,60 @@ void MechTouchUITagButton::Render() {
 MechTouchUITagButton::~MechTouchUITagButton() {
 }
 
-MechTouchUITexButton::MechTouchUITexButton(VuVec const &, float) {
+MechTouchUITexButton::MechTouchUITexButton(VuVec const &pos, float radius)
+    : MechTouchUIElement(pos, radius) {
+    rectangular = 0;
+    alpha_target = &alpha;
+    alpha_elapsed = 0.0f;
+    alpha_duration = -1.0f;
+    alpha_delay = 0.0f;
+    scale_target = &scale;
+    scale_elapsed = 0.0f;
+    scale_duration = -1.0f;
+    scale_delay = 0.0f;
+    alpha = alpha_to = alpha_from = 1.0f;
+    scale = scale_to = scale_from = 1.0f;
+    material = NuMtlCreate(1);
+    material->attribs.cull_mode = 2;
+    material->attribs.z_mode = 1;
+    material->attribs.alpha_mode = 1;
+    material->attribs.unknown_2_1_2 = 2;
+    material->attribs.alpha_test = 1;
+    material->diffuse_color.r = 0.0f;
+    material->diffuse_color.g = 0.0f;
+    material->diffuse_color.b = 0.0f;
+    material->opacity = 0.0f;
+    material->sort_pri = 255;
 }
 
 void MechTouchUITexButton::Process(float) {
+    if (!(scale_duration < 0.0f) && !(scale_elapsed >= scale_duration + scale_delay)) {
+        scale_elapsed += FRAMETIME;
+        if (scale_elapsed > scale_duration + scale_delay)
+            scale_elapsed = scale_duration + scale_delay;
+        if (scale_elapsed >= scale_delay)
+            *scale_target = ((scale_elapsed - scale_delay) / scale_duration) * (scale_to - scale_from) + scale_from;
+    }
+    if (!(alpha_duration < 0.0f) && !(alpha_elapsed >= alpha_duration + alpha_delay)) {
+        alpha_elapsed += FRAMETIME;
+        if (alpha_elapsed > alpha_duration + alpha_delay)
+            alpha_elapsed = alpha_duration + alpha_delay;
+        if (alpha_elapsed >= alpha_delay)
+            *alpha_target = ((alpha_elapsed - alpha_delay) / alpha_duration) * (alpha_to - alpha_from) + alpha_from;
+    }
+    visible = alpha > 0.001f;
 }
 
 void MechTouchUITexButton::Render() {
+    RndrTexQuad((position.x + 1.0f) * 0.5f, (1.0f - position.y) * 0.5f,
+                scale * radius_x, radius_y * scale,
+                static_cast<i32>((static_cast<u32>(static_cast<i32>(alpha * 128.0f)) << 24) | 0x808080),
+                material, 0);
 }
 
-void MechTouchUITexButton::UpdateTexture(i16) {
+void MechTouchUITexButton::UpdateTexture(i16 texture) {
+    material->tex_id = texture;
+    NuMtlUpdate(material);
 }
 
 MechTouchUITexButton::~MechTouchUITexButton() {
