@@ -2982,29 +2982,32 @@ extern "C" {
         NuVecMtxRotate(out, out, matrix);
     }
 
-    AIGROUP *CreateAIGroup(AISYS *system, u8 count_across, f32 x_spacing, f32 z_spacing, f32 max_speed) {
-        if (system == NULL || count_across == 0) {
+    AIGROUP *CreateAIGroup(AISYS *system, i32 count_across, f32 x_spacing, f32 z_spacing, f32 max_speed) {
+        if (count_across == 0 || system == NULL) {
             return NULL;
         }
 
-        for (i32 index = 0; index < 16; ++index) {
-            AIGROUP *group = &system->groups[index];
-            if (group->is_used != 0) {
-                continue;
-            }
-
-            group->is_used = 1;
-            group->count_across = count_across;
-            group->x_spacing = x_spacing;
-            group->z_spacing = z_spacing;
-            group->is_in_formation = 0;
-            group->max_speed = max_speed;
-            return group;
+        i32 index;
+        AIGROUP *group;
+        for (index = 0; index < 16; ++index) {
+            group = &system->groups[index];
+            if (group->is_used == 0)
+                break;
         }
-        return NULL;
+        if (index == 16)
+            return NULL;
+        system->groups[index].is_used = 1;
+        group->count_across = count_across;
+        group->x_spacing = x_spacing;
+        group->z_spacing = z_spacing;
+        group->is_in_formation = 0;
+        group->max_speed = max_speed;
+        return group;
     }
 
-    void DestroyAIGroup(void) {
+    void DestroyAIGroup(AIGROUP *group) {
+        if (group != NULL)
+            memset(group, 0, sizeof(*group));
     }
 
     void FindAIDirectionedRandomPointOnNetwork2D(AIPACKET *packet, NUVEC *position, NUVEC *direction, f32 distance,

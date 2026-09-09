@@ -803,6 +803,7 @@ extern "C" {
                                i32 use_three_dimensions, i32 process_ai);
     void AISysProcess(AISYS *system, APIOBJECT *player_1, APIOBJECT *player_2);
     void AIFormationFollow(AIPACKET *packet);
+    void DestroyAIGroup(AIGROUP *group);
     AIMESSAGESYS_s *CreateAIMessageSys(VARIPTR *cursor, VARIPTR *end, i32 count);
     void ResetAIMessageSys(AIMESSAGESYS_s *system);
     void ClearAIMessageSys(AIMESSAGESYS_s *system);

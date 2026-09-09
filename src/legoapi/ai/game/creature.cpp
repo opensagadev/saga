@@ -40,7 +40,7 @@ void AICreatureResumeScript(GameObject_s *object) {
 
 extern "C" {
     extern NUVEC plr_lastpos;
-    AIGROUP *CreateAIGroup(AISYS *system, u8 count_across, f32 x_spacing, f32 z_spacing, f32 max_speed);
+    AIGROUP *CreateAIGroup(AISYS *system, i32 count_across, f32 x_spacing, f32 z_spacing, f32 max_speed);
     void AddToAIGroup(AIGROUP *group, APIOBJECT *object);
     void AISysCharacterSetPath(AIPACKET *packet, AIPATH *path);
     void AISysCharacterSetPathCnx(AIPACKET *packet, NUVEC *position, AIPATHCNX *connection, i32 direction);
