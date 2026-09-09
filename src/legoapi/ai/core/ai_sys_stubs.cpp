@@ -1590,26 +1590,15 @@ extern "C" {
         }
 
         const i32 node_index = static_cast<i32>(node - path->nodes);
-        const u8 node_bit = static_cast<u8>(1u << (node_index & 7));
-        u8 &updated_nodes = path->updated_node_bits[node_index >> 3];
+        const u8 node_bit = static_cast<u8>(1u << (node_index % 8));
+        u8 &updated_nodes = path->updated_node_bits[node_index / 8];
         if ((updated_nodes & node_bit) != 0) {
             return;
         }
         updated_nodes |= node_bit;
 
         nuhspecial_s *special = &node->special_handle;
-        if ((node->runtime_flags & AIPATHNODE_RUNTIME_SPECIAL_UNAVAILABLE) == 0) {
-            if (NuSpecialGetVisibilityFn(special) == 0 &&
-                (FindAlternativeSpecialObjectFn == NULL || FindAlternativeSpecialObjectFn(system, special) == 0)) {
-                node->runtime_flags |= AIPATHNODE_RUNTIME_SPECIAL_UNAVAILABLE;
-                for (i32 index = 0; index < node->connection_count; ++index) {
-                    AIPATHCNX *connection = node->connections[index];
-                    connection->traversal_flags[0] |= AIPATH_CONNECTION_FLAG_SPECIAL_UNAVAILABLE;
-                    connection->traversal_flags[1] |= AIPATH_CONNECTION_FLAG_SPECIAL_UNAVAILABLE;
-                }
-                return;
-            }
-        } else {
+        if ((node->runtime_flags & AIPATHNODE_RUNTIME_SPECIAL_UNAVAILABLE) != 0) {
             if (NuSpecialGetVisibilityFn(special) == 0) {
                 return;
             }
@@ -1623,6 +1612,17 @@ extern "C" {
                     connection->traversal_flags[0] &= ~AIPATH_CONNECTION_FLAG_SPECIAL_UNAVAILABLE;
                     connection->traversal_flags[1] &= ~AIPATH_CONNECTION_FLAG_SPECIAL_UNAVAILABLE;
                 }
+            }
+        } else {
+            if (NuSpecialGetVisibilityFn(special) == 0 &&
+                (FindAlternativeSpecialObjectFn == NULL || FindAlternativeSpecialObjectFn(system, special) == 0)) {
+                node->runtime_flags |= AIPATHNODE_RUNTIME_SPECIAL_UNAVAILABLE;
+                for (i32 index = 0; index < node->connection_count; ++index) {
+                    AIPATHCNX *connection = node->connections[index];
+                    connection->traversal_flags[0] |= AIPATH_CONNECTION_FLAG_SPECIAL_UNAVAILABLE;
+                    connection->traversal_flags[1] |= AIPATH_CONNECTION_FLAG_SPECIAL_UNAVAILABLE;
+                }
+                return;
             }
         }
 
@@ -1662,10 +1662,11 @@ extern "C" {
             }
         }
 
-        nuinstanim_s *animation = NuSpecialGetInstAnim(special);
+        nuinstanim_s *animation;
         if (previous_position.x != node->position.x || previous_position.y != node->position.y ||
             previous_position.z != node->position.z ||
-            (animation != NULL && (animation->flags & NUINSTANIM_FLAG_PLAYING) != 0 && animation->tfactor != 0.0f)) {
+            ((animation = NuSpecialGetInstAnim(special)) != NULL &&
+             (animation->flags & NUINSTANIM_FLAG_PLAYING) != 0 && animation->tfactor != 0.0f)) {
             node->runtime_flags |= AIPATHNODE_RUNTIME_POSITION_CHANGED;
         } else {
             node->runtime_flags &= static_cast<u8>(~AIPATHNODE_RUNTIME_POSITION_CHANGED);
