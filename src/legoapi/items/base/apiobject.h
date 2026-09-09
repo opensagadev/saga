@@ -1127,7 +1127,8 @@ typedef struct GameObject_s {
     struct MechTouchTask *touch_task;           // 0x0e4c
     MechObjectInterface *mech_object_interface; // 0x0e50
     MechAddonCollection *addons;                // 0x0e54
-    u8 pad_e58[0xe70 - 0xe58];                  // 0x0e58 .. 0x0e70
+    NUVEC field_0xe58;
+    NUVEC field_0xe64;
     union {
         nugspline_s *movement_spline; // 0x0e70
         struct {

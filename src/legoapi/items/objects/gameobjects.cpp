@@ -2191,6 +2191,28 @@ void GameAIProcess() {
         }
 
         const i32 process_ai = (object->field_0xf00 & GAME_OBJECT_AI_UPDATE_PROCESS) != 0;
+        if (object->character_context != 0x3b && (object->apiobj.field_0x1f4 & 0x40000) == 0) {
+            if (object->pad_gamepad->pad == NULL) {
+                object->pad_gamepad->buttons_held = 0;
+                object->pad_gamepad->buttons_pressed = 0;
+                object->pad_gamepad->buttons_released = 0;
+                object->pad_gamepad->left_directions = 0;
+                object->pad_gamepad->previous_left_directions = 0;
+                object->pad_gamepad->right_directions = 0;
+                object->pad_gamepad->previous_right_directions = 0;
+                object->pad_gamepad->unknown_20 = 0;
+            }
+            if (process_ai != 0) {
+                object->script_fire_target = NULL;
+                object->field_0xef9 = (object->field_0xef9 & ~4) | ((object->field_0xef9 << 1) & 4);
+                object->field_0xef8 &= ~0x20;
+                if ((object->field_0xef9 & 0x80) != 0) {
+                    object->field_0xef9 &= ~0x80;
+                    object->field_0xe64 = object->field_0xe58;
+                }
+                object->field_0xefa &= ~3;
+            }
+        }
         AISysProcessCharacter(WORLD->ai_sys, &object->apiobj, &object->ai, ground_checks, object->ai_elapsed_time, 0,
                               process_ai);
     }
