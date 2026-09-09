@@ -514,8 +514,9 @@ static void GizObstacles_Reset(void *world_ptr, void *data, void *progress_ptr) 
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     GIZOBSTACLESYS_s *obstacle_sys = static_cast<GIZOBSTACLESYS_s *>(data);
     GIZOBSTACLEPROGRESS_s *progress = static_cast<GIZOBSTACLEPROGRESS_s *>(progress_ptr);
-    for (i32 index = 0; index < obstacle_sys->count; ++index) {
-        GIZOBSTACLE_s &obstacle = obstacle_sys->obstacles[index];
+    GIZOBSTACLE_s *obstacle_entry = obstacle_sys->obstacles;
+    for (i32 index = 0; index < obstacle_sys->count; ++index, ++obstacle_entry) {
+        GIZOBSTACLE_s &obstacle = *obstacle_entry;
         obstacle.progress_flags = static_cast<u8>(
             (obstacle.progress_flags | GIZOBSTACLE_PROGRESS_FLAG_ENABLED | GIZOBSTACLE_PROGRESS_FLAG_VISIBLE) &
             ~(GIZOBSTACLE_PROGRESS_FLAG_EXTERNAL_CONTROL | GIZOBSTACLE_PROGRESS_FLAG_PUSH_CONTROL));
@@ -526,14 +527,9 @@ static void GizObstacles_Reset(void *world_ptr, void *data, void *progress_ptr) 
         GAMEANIMSET_s *anim_set = obstacle.anim_set;
         if (anim_set != NULL) {
             for (GAMEANIMOBJ_s *object = anim_set->objects; object != NULL; object = object->next) {
-                i16 fallback_object_data[2] = {};
                 i16 *object_data = static_cast<i16 *>(object->object_data);
-                if (object_data == NULL) {
-                    object_data = fallback_object_data;
-                }
-
                 object_data[1] = -1;
-                if (world->terrain != NULL && (static_cast<u32 *>(world->terrain)[0] & 1) == 0 &&
+                if (world->terrain != NULL && (object_data[0] & 1) == 0 &&
                     NuSpecialExistsFn(&object->special) != 0) {
                     object_data[1] = FindPlatInst(NuSpecialGetInstanceix(&object->special));
                 }
