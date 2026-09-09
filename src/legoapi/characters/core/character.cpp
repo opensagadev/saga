@@ -1014,17 +1014,51 @@ extern "C" {
         if (model == NULL)
             return 0;
         i32 result = 0;
+        i32 evaluate_only = 0;
+        if (animation != NULL) {
+            if (animation->frame != 0xffff) {
+                if (animation->field_0x3a >= 0 && animation->field_0x3a < apicharsys->model_id_capacity && model->model_data_b[animation->field_0x3a] != NULL &&
+                    static_cast<i16>(animation->frame) >= 0 && static_cast<i16>(animation->frame) < apicharsys->model_id_capacity && model->model_data_b[static_cast<i16>(animation->frame)] != NULL) {
+                    if ((static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->field_0x3a])->flags & 0x220) != 0 ||
+                        (static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->frame])->flags & 0x220) != 0)
+                        evaluate_only = 1;
+                }
+            } else if (animation->blending != 0 &&
+                       animation->blend_animation_a >= 0 && animation->blend_animation_a < apicharsys->model_id_capacity && model->model_data_b[animation->blend_animation_a] != NULL &&
+                       animation->blend_animation_b >= 0 && animation->blend_animation_b < apicharsys->model_id_capacity && model->model_data_b[animation->blend_animation_b] != NULL) {
+                if ((static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->blend_animation_a])->flags & 0x220) != 0 ||
+                    (static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->blend_animation_b])->flags & 0x220) != 0)
+                    evaluate_only = 1;
+            } else if (animation->blending != 0 &&
+                       animation->blend_animation_b >= 0 && animation->blend_animation_b < apicharsys->model_id_capacity && model->model_data_b[animation->blend_animation_b] != NULL) {
+                if ((static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->blend_animation_b])->flags & 0x220) != 0)
+                    evaluate_only = 1;
+            } else if (animation->blending != 0 &&
+                       animation->blend_animation_a >= 0 && animation->blend_animation_a < apicharsys->model_id_capacity && model->model_data_b[animation->blend_animation_a] != NULL) {
+                if ((static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->blend_animation_a])->flags & 0x220) != 0)
+                    evaluate_only = 1;
+            } else if (animation->blending == 0 &&
+                       animation->animation_index >= 0 && animation->animation_index < apicharsys->model_id_capacity && model->model_data_b[animation->animation_index] != NULL) {
+                if ((static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->animation_index])->flags & 0x220) != 0)
+                    evaluate_only = 1;
+            }
+        }
         if (model->hierarchy == NULL || matrix == NULL)
             goto cleanup;
 
         {
-            bool evaluate_only = false;
-            if (object == NULL || (object->apiobj.field_0x1f4 & 0x200) == 0) {
-                if (NuCameraClipTestExtents(&model->hierarchy->bounds_min, &model->hierarchy->bounds_max, matrix,
-                                            character_farclip, 0) == 0) {
-                    evaluate_only = true;
-                }
+            NUVEC bounds_min = model->hierarchy->bounds_min;
+            NUVEC bounds_max = model->hierarchy->bounds_max;
+            if ((object == NULL || (object->apiobj.field_0x1f4 & 0x200) == 0) &&
+                NuCameraClipTestExtents(&bounds_min, &bounds_max, matrix, character_farclip, 0) == 0) {
+                if (evaluate_only == 0)
+                    goto cleanup;
+                evaluate_only = 1;
+            } else {
+                evaluate_only = 0;
             }
+            if (evaluate_only != 0)
+                NuHGobjRestrictEvaluation(model->hierarchy);
 
             i16 render_indices[32];
             const i32 render_count = MakeLayerList != NULL ? MakeLayerList(model, render_indices, flags) : 0;
@@ -1118,6 +1152,8 @@ extern "C" {
                 }
             }
 
+            if (evaluate_only != 0)
+                NuHGobjRestoreEvaluation();
         }
     cleanup:
         drawcharactermodel_nobsa = 0;
