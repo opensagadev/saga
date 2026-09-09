@@ -274,9 +274,6 @@ void Bolt_Reflect(nuvec_s *normal, nuvec_s *incoming, nuvec_s *out) {
     out->z = z;
 }
 
-void Bolts_Update(WORLDINFO_s *) {
-}
-
 extern "C" {
     void KillPart(PART_s *, i32);
 }
@@ -1325,6 +1322,170 @@ extern "C" {
     }
 
 } // extern "C"
+
+extern "C" {
+    void NewTerrHitInfo(u8 *);
+    void NewRayCastGetImpactNormal(NUVEC *);
+    i32 NewShadowOnPlatform();
+    i32 ShadowInfo();
+    void AddVariableShotDebrisEffectTimed5(i32, NUVEC *, NUVEC *, NUVEC *, i32, f32, NUMTX *, NUMTX *, i16, u8);
+}
+f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
+f32 FindReflectionNoPlatforms(NUVEC *);
+void FindAnglesZX(NUVEC *, u16 *, u16 *);
+
+void Bolts_Update(WORLDINFO_s *world) {
+    NUVEC normal = v010;
+    u8 processed[32] = {};
+    for (BOLT_s *bolt = Bolt; bolt != Bolt + 32; ++bolt) {
+        if (!bolt->active || processed[bolt - Bolt])
+            continue;
+        if (bolt->owner != NULL && (bolt->owner->apiobj.field_0x1f8 & 0x1001) != 0x1001)
+            bolt->owner = NULL;
+        BOLTTYPE_s *type = bolt->type;
+        if ((bolt->flags & 4) == 0) {
+            bolt->ray_time -= FRAMETIME;
+            if (bolt->ray_time <= 0.0f) {
+                NUVEC movement, end;
+                NuVecScale(&movement, &bolt->field_0xac, 0.2f * bolt->speed);
+                bolt->ray_time = 0.2f;
+                if (bolt->acceleration_y != 0.0f)
+                    movement.y = 0.2f * bolt->velocity.y + (bolt->acceleration_y * 0.5f) * 0.04f;
+                NuVecAdd(&end, &bolt->position, &movement);
+                NuVecSub(&movement, &end, &bolt->ray_end);
+                if (Bolt_RayCast(bolt, &bolt->ray_end, &movement, bolt->ray_radius)) {
+                    u8 info[4];
+                    NewRayCastGetImpactNormal(&normal);
+                    NewTerrHitInfo(info);
+                    f32 time = bolt->time;
+                    f32 ray_time = bolt->ray_time;
+                    bolt->lifetime = time + ray_time * NewRayCastGetTOFI();
+                    if (bolt->type->ricochet_callback != NULL)
+                        bolt->type->ricochet_callback(bolt, &normal);
+                }
+                bolt->field_0xe8 = 2000000.0f;
+                f32 height = GameShadow(NULL, &bolt->position, 5.0f, -1);
+                if (height != 2000000.0f) {
+                    if (NuSpecialExistsFn(type->pad_68 + 0x30)) {
+                        bolt->field_0xe4 = height;
+                        FindAnglesZX(&ShadNorm, &bolt->surface_x_rotation, &bolt->surface_z_rotation);
+                    }
+                    u32 surface = ShadowInfo();
+                    if (surface <= 31 && (TerSurface[surface].flags & 2) != 0)
+                        bolt->field_0xe8 = height;
+                    else if (static_cast<f32>(NewShadowOnPlatform()) != -1.0f)
+                        bolt->field_0xe8 = FindReflectionNoPlatforms(&bolt->position);
+                }
+            }
+        }
+        bolt->time += FRAMETIME;
+        if (type->update_callback != NULL)
+            type->update_callback(bolt);
+        if (bolt->acceleration_y != 0.0f) {
+            bolt->velocity.y += FRAMETIME * bolt->acceleration_y;
+            bolt->speed = NuVecMag(&bolt->velocity);
+            NuVecNorm(&bolt->field_0xac, &bolt->velocity);
+            if ((bolt->flags & 0x1000) != 0) {
+                u16 x, y;
+                FindAnglesXY(&bolt->field_0xac, &x, &y);
+                NuMtxSetRotationX(&bolt->effect_orientation, x + 0x4000);
+                NuMtxRotateY(&bolt->effect_orientation, y);
+                NuMtxSetRotationX(&bolt->orientation, x);
+                NuMtxRotateY(&bolt->orientation, y);
+            }
+        }
+        bolt->position.x += bolt->velocity.x * FRAMETIME;
+        bolt->position.y += bolt->velocity.y * FRAMETIME;
+        bolt->position.z += bolt->velocity.z * FRAMETIME;
+        NUVEC points[3];
+        points[1] = bolt->position;
+        if ((bolt->flags & 0x200) == 0) {
+            NUVEC offset = {0.0f, 0.0f, bolt->collision_radius + bolt->collision_radius};
+            NuVecMtxRotate(&offset, &offset, &bolt->orientation);
+            NuVecSub(&points[0], &bolt->position, &offset);
+            NuVecAdd(&points[2], &bolt->position, &offset);
+        }
+        bolt->bounds_min.x = bolt->position.x - bolt->radius;
+        bolt->bounds_min.y = bolt->position.y - bolt->radius;
+        bolt->bounds_min.z = bolt->position.z - bolt->radius;
+        bolt->bounds_max.x = bolt->position.x + bolt->radius;
+        bolt->bounds_max.y = bolt->position.y + bolt->radius;
+        bolt->bounds_max.z = bolt->position.z + bolt->radius;
+        bool expired = bolt->time >= bolt->lifetime;
+        bool surface_hit = false;
+        if (expired) {
+            if (bolt->field_0x104 != -1) {
+                NUVEC reflection;
+                Bolt_Reflect(&bolt->hit_normal, &bolt->velocity, &reflection);
+                NuVecScale(&reflection, &reflection, 0.2f);
+                i32 platform_reflection = bolt->hit_platform != -1 && bolt->field_0x104 != -1 &&
+                                          (TerSurface[bolt->field_0x104].flags & 0x1000) != 0;
+                BoltSys->debris(bolt, points, -1, &reflection, platform_reflection);
+                surface_hit = true;
+            } else
+                BoltSys->debris(bolt, points, -1, NULL, 0);
+            Bolt_End(bolt, 1);
+        } else {
+            if (Bolt_HitCustomFn != NULL)
+                Bolt_HitCustomFn(bolt, points);
+            for (i32 i = 0; i < 2; ++i) {
+                i16 effect = static_cast<i16>(static_cast<u32>(type->field_30) >> (i * 16));
+                u16 count = static_cast<u16>(static_cast<u32>(type->field_34) >> (i * 16));
+                if (effect != -1 && count != 0)
+                    AddVariableShotDebrisEffectTimed5(world->debris_sys->entries[effect].effect, &bolt->position,
+                                                     NULL, &bolt->velocity, count, FRAMETIME, NULL, NULL, 20000, 0);
+            }
+        }
+        if ((bolt->flags & 0x10000) != 0)
+            continue;
+        u8 *hits = expired ? NULL : processed;
+        if (Bolt_HitGameObjects(bolt, points, &bolt->bounds_min, &bolt->bounds_max, bolt->collision_radius, hits))
+            continue;
+        bool interact = (bolt->flags & 0x13) != 0 ||
+                        (bolt->owner != NULL && ((bolt->owner->field_0xefb & 0x10) != 0 ||
+                                                static_cast<u8>(bolt->owner->use_action) == 5));
+        bool handled = false;
+        if (interact) {
+            if (expired && bolt->hit_platform != -1) {
+                if (Bolt_HitPlatFn == NULL || !Bolt_HitPlatFn(bolt))
+                    Bolt_HitPlat(bolt, processed, world);
+                handled = true;
+            } else if (GizmoSys_BoltHit(world->gizmo_sys, world, bolt, points, &bolt->bounds_min,
+                                       &bolt->bounds_max, bolt->collision_radius, hits))
+                handled = true;
+            else if (GizmoBlowUp_Hit(bolt->owner, (bolt->flags & 0x200) ? &points[1] : points,
+                                     (bolt->flags & 0x200) ? 1 : 3, bolt->collision_radius, &bolt->bounds_min,
+                                     &bolt->bounds_max, bolt, 1, hits)) {
+                BoltSys->debris(bolt, points, -1, NULL, 0);
+                if (bolt->owner != NULL)
+                    NewRumble(bolt->owner->pad_gamepad->pad, 0.6f, 0);
+                Bolt_End(bolt, 1);
+                Bolt_PlayHitSfx(bolt);
+                handled = true;
+            } else if (Bolt_HitParts(bolt, points, &bolt->bounds_min, &bolt->bounds_max,
+                                     bolt->collision_radius, Bolt_HitPartMode(bolt)))
+                handled = true;
+        }
+        if (!expired)
+            continue;
+        if (!handled) {
+            if (!interact && surface_hit && bolt->hit_platform != -1 && bolt->field_0x104 != -1 &&
+                (TerSurface[bolt->field_0x104].flags & 0x1000) != 0) {
+                GameAudio_PlaySfx(41, &bolt->position, 0, 0);
+                Bolt_AddDeflectedBolt(bolt, &bolt->field_0xac, &bolt->hit_normal, processed);
+            }
+            if (surface_hit && bolt->field_0x104 >= 0 && bolt->field_0x104 <= 31 &&
+                (TerSurface[bolt->field_0x104].flags & 0x800) != 0 && (bolt->flags & 0x8000) == 0) {
+                GameAudio_PlaySfx(41, &bolt->position, 0, 0);
+                Bolt_AddDeflectedBolt(bolt, &bolt->velocity, &bolt->hit_normal, processed);
+            } else if ((bolt->flags & 0x80000) == 0)
+                Bolt_PlayHitSfx(bolt);
+        }
+        if (BoltSys->stop_targeting != NULL && bolt->owner != NULL &&
+            (bolt->owner->apiobj.flags_low & 0x80) != 0)
+            BoltSys->stop_targeting(bolt->owner, &bolt->position);
+    }
+}
 
 i8 BoltType_FindIDByName(char *name, WORLDINFO *world) {
     if (NuStrLen(name) == 0)
