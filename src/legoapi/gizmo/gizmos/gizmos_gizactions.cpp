@@ -739,7 +739,22 @@ static __used__ void GizAction_SetVisibility(GIZFLOW_s *, FLOWBOX_s *, char **pa
         NuSpecialSetVisibility(&special, visible);
 }
 
-static __used__ void GizAction_TurnOnFlowBox(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
+static __used__ void GizAction_TurnOnFlowBox(GIZFLOW_s *flow, FLOWBOX_s *, char **params, int count) {
+    char *name = NULL;
+    i32 enabled = 1;
+    for (i32 index = 0; index < count; ++index) {
+        char *value = NuStrIStr(params[index], "name=");
+        if (value != NULL)
+            name = value + 5;
+        else if (NuStrICmp(params[index], "FALSE") == 0)
+            enabled = 0;
+    }
+    if (name != NULL && flow != NULL) {
+        for (i32 index = 0; index < flow->flowbox_count; ++index) {
+            if (flow->flowboxes[index].name != NULL && NuStrICmp(flow->flowboxes[index].name, name) == 0)
+                flow->flowboxes[index].state_flags_low = (flow->flowboxes[index].state_flags_low & ~1) | (enabled & 1);
+        }
+    }
 }
 
 static __used__ void GizActions_ActivateBelt(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
