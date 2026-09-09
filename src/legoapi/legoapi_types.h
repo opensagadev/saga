@@ -1890,7 +1890,12 @@ struct PLATSKINMEMINFO {
 };
 DECOMP_ASSERT(sizeof(PLATSKINMEMINFO) == 8, "PLATSKINMEMINFO ABI");
 struct PLAYERITEMTYPE_s {};
-struct PLAYERITEM_s {};
+struct PLAYERITEM_s {
+    u8 *type;
+    u8 ammunition;
+    u8 reserved[3];
+};
+DECOMP_ASSERT(sizeof(PLAYERITEM_s) == 8, "PLAYERITEM size");
 
 // Per-player runtime state embedded at GameObject_s + 0x6b4.  The packet is
 // reset independently of the rest of the object by ResetPlayerPacket and is

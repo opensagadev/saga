@@ -764,7 +764,10 @@ i32 PlayersDropInOut() {
     return 0;
 }
 
-void PlayerItem_GotAmmo(PLAYERITEM_s *) {
+i32 PlayerItem_GotAmmo(PLAYERITEM_s *item) {
+    if (item != NULL && item->type != NULL && item->type[8] == 2)
+        return item->ammunition != 0;
+    return 1;
 }
 
 i32 Players_AveragePos(nuvec_s *, SOCKPOSITION_s *) {
