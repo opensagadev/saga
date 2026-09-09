@@ -6220,15 +6220,107 @@ __used__ static i32 Action_SetViewDistance(AISYS *sys, AISCRIPTPROCESS *processo
     return 1;
 }
 
+extern i32 LineIntersectSphere(NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
+
+// The original shooting action calls the out-of-line PartyMemberInWay clone.
+static __attribute__((noinline)) i32 PartyMemberInWay(GameObject_s *object, GameObject_s *opponent) {
+    NUVEC difference, direction;
+    const f32 target_distance = NuVecDistSqr(&opponent->apiobj.collision_position,
+                                            &object->apiobj.collision_position, &difference);
+    const f32 length = NuFsqrt(target_distance);
+    NuVecScale(&direction, &difference, length != 0.0f ? 1.0f / length : 0.0f);
+    for (i32 index = 0; index < 8; ++index) {
+        GameObject_s *member = Player[index];
+        if (member == NULL || (member->apiobj.field_0x1f8 & 0x1001) != 0x1001 || member == object || member == opponent)
+            continue;
+        if (NuVecDistSqr(&object->apiobj.collision_position, &member->apiobj.collision_position, &difference) < target_distance) {
+            member = Player[index];
+            const f32 radius = 0.125f + member->apiobj.field_0x1dc;
+            if (LineIntersectSphere(&object->apiobj.collision_position, &direction,
+                                    &member->apiobj.collision_position, radius * radius, NULL))
+                return true;
+        }
+    }
+    return false;
+}
+
 __used__ static i32 Action_ShootAtOpponent(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                            i32 param_4, i32 param_5, f32 param_6) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
-    (void)param_6;
+    if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL)
+        return 1;
+    GameObject_s *object = packet->owner->apiobj.objptr;
+    if (param_5 != 0) {
+        processor->action_data_5 = engagefiretime;
+        f32 fraction = NuRandFloat();
+        bool explicit_range = false;
+        for (i32 index = 0; index < param_4; ++index) {
+            char *value;
+            if ((value = NuStrIStr(params[index], "firerange")) != NULL) {
+                processor->action_data_4 = AIParamToFloat(processor, value + 10);
+                explicit_range = true;
+            } else if (NuStrIStr(params[index], "offscreen") != NULL) {
+                processor->action_data_1 |= 1;
+            } else if (NuStrIStr(params[index], "no_fire_in_minicut") != NULL) {
+                processor->action_data_1 |= 4;
+            } else if ((value = NuStrIStr(params[index], "fireinterval")) != NULL) {
+                processor->action_data_5 = AIParamToFloat(processor, value + 13);
+            } else if ((value = NuStrIStr(params[index], "opponent=")) != NULL) {
+                processor->action_data_3 = GetNamedGameObject(sys, value + 9);
+            } else if (NuStrIStr(params[index], "instant") != NULL) {
+                fraction = 0.0f;
+            } else if (NuStrICmp(params[index], "frontArcOnly") == 0) {
+                processor->action_data_2 = 1;
+            }
+        }
+        processor->action_timer = fraction * processor->action_data_5;
+        if (!explicit_range)
+            processor->action_data_4 = packet->movement_instruction_parameter == 0.0f ? 9999.9f :
+                packet->movement_instruction_parameter + aitol;
+    }
+    GameObject_s *opponent = static_cast<GameObject_s *>(processor->action_data_3);
+    if (opponent == NULL || (opponent->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
+        (opponent->apiobj.field_0x287 != 0 && !(opponent->field_0x101c > 0.0f))) {
+        if (packet->opponent_object == NULL || packet->opponent_object->ai == NULL || packet->opponent_object->objptr == NULL)
+            return 0;
+        opponent = packet->opponent_object->objptr;
+    }
+    NUVEC difference;
+    const f32 distance = NuVecDistSqr(&packet->owner->apiobj.position, &opponent->apiobj.position, &difference);
+    object->field_0xef8 |= 0x20;
+    i32 outside_arc = processor->action_data_2;
+    if (outside_arc != 0) {
+        NUVEC relative;
+        NuVecSub(&relative, &opponent->apiobj.position, &packet->owner->apiobj.position);
+        NuVecRotateY(&relative, &relative, -static_cast<i32>(packet->owner->apiobj.field_0x276));
+        if (relative.z > 0.0f)
+            outside_arc = 0;
+    }
+    if (((WORLD->api_object_sys->line_of_sight[object->apiobj.field_0x289] >> opponent->apiobj.field_0x289) & 1) == 0)
+        return 0;
+    if (object->apiobj.model_draw_result == 0 && (processor->action_data_1 & 1) == 0)
+        return 0;
+    if (!(distance < processor->action_data_4 * processor->action_data_4))
+        return 0;
+    if (opponent->apiobj.field_0x287 != 0 && !(opponent->field_0x101c > 0.0f))
+        return 0;
+    if (outside_arc != 0)
+        return 0;
+    packet->movement_look_target = &opponent->apiobj.position;
+    if (MiniCutCam != 0 && (processor->action_data_1 & 4) != 0) {
+        const f32 interval = processor->action_data_5;
+        processor->action_timer = NuRandFloat() * interval + 2.0f;
+    } else {
+        processor->action_timer -= param_6;
+    }
+    if (opponent->apiobj.field_0x287 == 0 && processor->action_timer <= 0.0f) {
+        const f32 interval = processor->action_data_5;
+        const f32 random = NuRandFloat();
+        processor->action_timer = 0.5f * interval + random * interval;
+        if ((object->apiobj.field_0x1f4 & 5) != 0 || !PartyMemberInWay(object, opponent)) {
+            object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
+            object->script_fire_target = opponent;
+        }
+    }
     return 0;
 }
 
