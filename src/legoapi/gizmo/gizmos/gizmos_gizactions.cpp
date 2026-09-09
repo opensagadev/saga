@@ -17,6 +17,7 @@
 #include "legoapi/gizmos/transport/grapples.h"
 #include "legoapi/gizmos/traps/gizforce.h"
 #include "legoapi/gizmos/object/lever.h"
+#include "legoapi/gizmos/object/gizpanel.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "nu2api/numath/nuvec.h"
 
@@ -39,7 +40,52 @@ i32 Action_SetState(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *, char 
     return 0;
 }
 
-void Action_UsePanel(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
+void AISysGetPathPos2(AISYS_s *, NUVEC *, AIPATHINFO_s *, NUVEC *, AIPATH_s *, i32);
+
+i32 Action_UsePanel(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
+                    i32 param_count, i32 first_time, f32 elapsed) {
+    if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL)
+        return 1;
+    GameObject_s *object = packet->owner->apiobj.objptr;
+    if (first_time != 0) {
+        for (i32 index = 0; index < param_count; ++index) {
+            char *name = NuStrIStr(params[index], "name=");
+            if (name == NULL)
+                continue;
+            GIZMO *gizmo = GizmoFindByName(WORLD->gizmo_sys, gizpanel_gizmotype_id, name + 5);
+            if (gizmo == NULL || gizmo->object == NULL)
+                continue;
+            GIZPANEL *panel = static_cast<GIZPANEL *>(gizmo->object);
+            processor->action_data_3 = panel;
+            if ((panel->flags & 2) != 0)
+                continue;
+            processor->action_pos = panel->floor_position;
+            f32 height = GameShadow(NULL, &processor->action_pos, 5.0f, -1);
+            if (height != 2000000.0f)
+                processor->action_pos.y = height;
+            AISysGetPathPos2(system, &processor->action_pos, &processor->path_info, &processor->action_pos, NULL,
+                            0xff);
+        }
+    }
+    GIZPANEL *panel = static_cast<GIZPANEL *>(processor->action_data_3);
+    if (panel == NULL || (panel->flags & 2) != 0)
+        return 1;
+    AIMoveInstruction(packet, &processor->action_pos, 0.0f, &processor->path_info, 1, 0.0f);
+    if (GizPanel_CanUsePanel(object, panel) != 0) {
+        f32 distance = NuVecDistSqr(&packet->terrain_origin, &processor->action_pos, NULL);
+        if (distance < ai_moveradius * ai_moveradius) {
+            packet->movement_look_target = &panel->position;
+            object->pad_gamepad->buttons_pressed |= GAMEPAD_SPECIAL;
+        }
+    } else if (FreePlay != 0) {
+        processor->action_timer -= elapsed;
+        if (processor->action_timer < 0.0f) {
+            processor->action_timer = 0.5f;
+            object->pad_gamepad->buttons_pressed |= GAMEPAD_TOGGLERIGHT;
+        }
+    }
+    return object->field_0x7a5 == 0x0b && object->field_0x788 == panel;
 }
 
 void Action_CameraCut(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {

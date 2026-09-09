@@ -295,6 +295,7 @@ static i32 Action_SetCurrentSpeed(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char *
 
 i32 Action_SetState(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 i32 Action_FollowPlayer(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
+i32 Action_UsePanel(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 static i32 Action_GoToOriginalPath(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 static i32 Action_BigJumpToLocator(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 static i32 Action_UseBigJumpToJump(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
@@ -5747,7 +5748,7 @@ extern "C" {
         {"HelpWithTriggers", NULL, 0, 0, 0},
         {"UseTriggerSet", NULL, 0, 0, 0},
         {"PullLever", NULL, 0, 0, 0},
-        {"UsePanel", NULL, 0, 0, 0},
+        {"UsePanel", Action_UsePanel, 0, 0, 0},
         {"UseTechno", NULL, 0, 0, 0},
         {"ReleaseLocator", NULL, 0, 0, 0},
         {"AssignLocator", NULL, 0, 0, 0},
