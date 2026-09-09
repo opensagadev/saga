@@ -7063,10 +7063,10 @@ GameObject_s *AddDynamicCreature(i32 model, nuvec_s *position, i32 angle, char *
     object->apiobj.field_0x214 = 2000000.0f;
     if (object->ai.group != NULL) {
         AIGROUP *active_group = object->ai.group;
-        u32 member = object->ai.group_row;
+        u32 member = object->ai.group_member_index;
         active_group->member_is_alive |= (member & 32) ? 0 : (1u << (member & 31));
-        AIROW *row = &active_group->rows[object->ai.group_member];
-        u32 column = object->ai.group_row - object->ai.group_member * active_group->count_across;
+        AIROW *row = &active_group->rows[object->ai.group_row];
+        u32 column = object->ai.group_member_index - object->ai.group_row * active_group->count_across;
         row->is_alive |= (column & 32) ? 0 : (1u << (column & 31));
         if (object->ai.group_column == 0) {
             row->pos = object->apiobj.position;
