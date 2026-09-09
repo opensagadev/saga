@@ -18,12 +18,6 @@ extern "C" {
         (void)scene;
     }
 
-    i32 edanimLoadPage(char *path, NUGSCN *scene) {
-        (void)path;
-        (void)scene;
-        return -1;
-    }
-
     void edbitsRegisterBaseTerrain(void *terrain) {
         (void)terrain;
     }

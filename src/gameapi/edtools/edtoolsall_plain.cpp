@@ -35,6 +35,8 @@ extern "C" {
     extern i32 part_emits_used;
     extern NUGSCN *part_scene[32];
     extern i32 part_scene_pageid[32];
+    i32 FindPlatInst(i32);
+    void PlatInstBounce(i32, f32, f32, f32);
     void CheckPartCount(void);
     void KillPartsByScene(NUGSCN *);
     extern i32 DEBPAGE_GENERAL;
@@ -45,6 +47,8 @@ extern "C" {
     i32 part_page_used[8];
     i32 edpart_instances_used;
     edanim_param_s AnimParams[64];
+    i32 edbits_anim_page;
+    i32 edanim_particle_mode;
     i32 edanim_next_param;
     i32 edanim_params_used;
     i32 edanim_page_on[8];
@@ -64,6 +68,7 @@ extern "C" {
 void FileLoadSingleEffectType(debinftype *, i32, char);
 extern "C" void NuBridgeInit(void);
 
+void edanimDetermineNearestAnim(f32);
 void edppDetermineNearest(float);
 void edppPtlDestroy(i32);
 extern "C" {
@@ -151,6 +156,118 @@ extern "C" {
     }
     void edGraInitTerrainSwapProtection(void) {
     }
+    i32 edanimLoadPage(char *path, NUGSCN *scene) {
+        i32 page;
+        if (edanim_page_used[0] == 0)
+            page = 0;
+        else if (edanim_page_used[1] == 0)
+            page = 1;
+        else if (edanim_page_used[2] == 0)
+            page = 2;
+        else if (edanim_page_used[3] == 0)
+            page = 3;
+        else if (edanim_page_used[4] == 0)
+            page = 4;
+        else if (edanim_page_used[5] == 0)
+            page = 5;
+        else if (edanim_page_used[6] == 0)
+            page = 6;
+        else if (edanim_page_used[7] == 0)
+            page = 7;
+        else
+            return -1;
+        EdFileSetMedia(1);
+        if (EdFileOpen(path, NUFILE_READ) == 0)
+            return -1;
+        EdFileSetReadWrongEndianess(1);
+        i32 version = EdFileReadInt();
+        if (version > 6) {
+            EdFileSetReadWrongEndianess(0);
+            EdFileClose();
+            return -1;
+        }
+        i32 count = EdFileReadInt();
+        if (count + edanim_params_used > 64)
+            count = 64 - edanim_params_used;
+        i32 slot = 0;
+        for (i32 index = 0; index < count; ++index) {
+            while (AnimParams[slot].instance_id != -1 && slot < 64)
+                ++slot;
+            if (slot >= 64)
+                continue;
+            char name[20];
+            EdFileRead(name, 20);
+            edanim_param_s *param = &AnimParams[slot];
+            param->instance_id = edanimLookupSpecial(name, scene);
+            param->effect_count = EdFileReadInt();
+            param->sound_count = version > 1 ? EdFileReadInt() : 0;
+            param->field_00c = EdFileReadInt();
+            param->field_010 = EdFileReadInt();
+            param->field_014 = EdFileReadFloat();
+            param->field_018 = EdFileReadFloat();
+            if (param->effect_count > 8)
+                param->effect_count = 8;
+            for (i32 effect = 0; effect < param->effect_count; ++effect) {
+                EdFileRead(param->effect_names[effect], 16);
+                param->effect_ids[effect] = -1;
+                if (version > 4) {
+                    param->effect_intervals[effect] = version == 5 ? static_cast<i32>(EdFileReadFloat()) : EdFileReadInt();
+                } else {
+                    i32 interval = EdFileReadInt();
+                    param->effect_intervals[effect] = interval > 0 ? interval * 60 : interval == 0 ? 0 : -60 / interval;
+                }
+                param->effect_flags[effect] = EdFileReadInt();
+                EdFileReadNuVec(reinterpret_cast<NUVEC *>(param->effect_positions[effect]));
+                if (version > 2) {
+                    param->effect_angles[effect] = EdFileReadShort();
+                    param->effect_angle_ranges[effect] = EdFileReadShort();
+                } else {
+                    param->effect_angles[effect] = 0;
+                    param->effect_angle_ranges[effect] = 0;
+                }
+            }
+            param->field_17c = 0.99f;
+            if (version > 1) {
+                if (param->sound_count > 8)
+                    param->sound_count = 8;
+                for (i32 sound = 0; sound < param->sound_count; ++sound) {
+                    EdFileRead(param->sound_names[sound], 16);
+                    param->sound_ids[sound] = -1;
+                    param->sound_flags[sound] = EdFileReadInt();
+                    param->sound_values[sound] = EdFileReadFloat();
+                    EdFileReadNuVec(reinterpret_cast<NUVEC *>(param->sound_positions[sound]));
+                }
+            }
+            nuhspecial_s special;
+            NuGScnGetSpecial(&special, scene, param->instance_id);
+            param->platform_id = FindPlatInst(NuSpecialGetInstanceix(&special));
+            if (version > 3) {
+                param->bounce_impulse = EdFileReadFloat();
+                param->bounce_spring = EdFileReadFloat();
+                param->bounce_damping = EdFileReadFloat();
+            } else {
+                param->bounce_impulse = 0.0f;
+                param->bounce_spring = 0.0f;
+                param->bounce_damping = 0.0f;
+            }
+            if (param->platform_id != -1)
+                PlatInstBounce(param->platform_id, param->bounce_impulse, param->bounce_spring, param->bounce_damping);
+            param->page = static_cast<i8>(page);
+            ++edanim_params_used;
+        }
+        EdFileSetReadWrongEndianess(0);
+        EdFileClose();
+        edanim_page_used[page] = 1;
+        edanim_page_scene[page] = scene;
+        edbits_anim_page = page;
+        edanim_next_param = count;
+        edanim_particle_mode = 0;
+        edanim_nearest = -1;
+        edanim_nearest_param_id = -1;
+        edanimDetermineNearestAnim(1.0f);
+        return page;
+    }
+
     void edanimClearPage(i32 page) {
         if (edanim_page_on[page] != 0)
             edanimStopPage(page);
