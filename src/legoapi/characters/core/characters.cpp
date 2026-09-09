@@ -1157,10 +1157,17 @@ void CollectCharcters_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, floa
 void RegisterGizmoTypes_Indy(variptr_u *, variptr_u *) {
 }
 
-void SetProtocolDroidFallAnim(GameObject_s *object) {
-    static const i16 fall_animations[] = {76, 75, 40};
-    const u8 variant = object->field_0xe38;
-    object->apiobj.anim_packet.requested_animation = variant >= 1 && variant <= 3 ? fall_animations[variant - 1] : 5;
+i32 SetProtocolDroidFallAnim(GameObject_s *object) {
+    switch (object->field_0xe38) {
+        case 1:
+            return 76;
+        case 2:
+            return 75;
+        case 3:
+            return 40;
+        default:
+            return 5;
+    }
 }
 
 void CollectCharactersOff_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
