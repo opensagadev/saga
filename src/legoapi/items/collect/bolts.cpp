@@ -1439,7 +1439,52 @@ void Bolts_Update(WORLDINFO_s *world) {
         if ((bolt->flags & 0x10000) != 0)
             continue;
         u8 *hits = expired ? NULL : processed;
-        if (Bolt_HitGameObjects(bolt, points, &bolt->bounds_min, &bolt->bounds_max, bolt->collision_radius, hits))
+        bool character_hit = false;
+        if (expired)
+            character_hit = Bolt_HitGameObjects(bolt, points, &bolt->bounds_min, &bolt->bounds_max,
+                                               bolt->collision_radius, NULL) != 0;
+        else {
+            GameObject_s *object = Obj;
+            i32 count = HIGHGAMEOBJECT;
+            u32 flags = bolt->flags;
+            for (i32 i = 0; i < count; ++i, ++object) {
+                if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001 || object->apiobj.field_0x287 != 0)
+                    continue;
+                GameObject_s *owner = bolt->owner;
+                if (object == owner || (object->field_0xe20 & 0x20) != 0)
+                    continue;
+                if (owner != NULL && owner->field_0xcc0 != NULL && object == owner->field_0xcc0)
+                    continue;
+                if ((flags & 0x80) != 0 && object->apiobj.field_0x27c == -1 &&
+                    (object->field_0xcc0 == NULL || object->field_0xcc0->apiobj.field_0x27c == -1))
+                    continue;
+                if ((CInfo[object->character_context].flags & 0x8080) != 0 ||
+                    (object->movement_runtime_flags & 0x80) != 0)
+                    continue;
+                if (VehicleArea != 0 && BonusArea == 0 && owner != NULL && owner->apiobj.field_0x27c != -1 &&
+                    object->apiobj.field_0x27c != -1)
+                    continue;
+                if ((object->apiobj.character_data->game_character->flags_090 & 0x8000) != 0)
+                    continue;
+                if (bolt->bounds_min.x > object->apiobj.collision_max.x ||
+                    object->apiobj.collision_min.x > bolt->bounds_max.x ||
+                    bolt->bounds_min.z > object->apiobj.collision_max.z ||
+                    object->apiobj.collision_min.z > bolt->bounds_max.z)
+                    continue;
+                if ((flags & 0x8000000) == 0 &&
+                    (bolt->bounds_min.y > object->apiobj.collision_max.y ||
+                     object->apiobj.collision_min.y > bolt->bounds_max.y))
+                    continue;
+                if (Bolt_HitGameObject(bolt, object, points, &bolt->bounds_min, &bolt->bounds_max,
+                                      bolt->collision_radius, processed)) {
+                    character_hit = true;
+                    break;
+                }
+                flags = bolt->flags;
+                count = HIGHGAMEOBJECT;
+            }
+        }
+        if (character_hit)
             continue;
         bool interact = (bolt->flags & 0x13) != 0 ||
                         (bolt->owner != NULL && ((bolt->owner->field_0xefb & 0x10) != 0 ||
