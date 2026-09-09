@@ -924,31 +924,33 @@ __used__ static i32 Action_Activate(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
     GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
     i32 creature_set = 0;
     for (i32 index = 0; index < param_4; ++index) {
-        char *value = ActionParamValue(params[index], "character");
+        char *value = NuStrIStr(params[index], "character=");
         if (value != NULL) {
-            object = GetNamedGameObject(sys, value);
+            object = GetNamedGameObject(sys, value + 10);
             continue;
         }
-        value = ActionParamValue(params[index], "set");
+        value = NuStrIStr(params[index], "set=");
         if (value != NULL) {
-            const i32 parsed_set = static_cast<i32>(AIParamToFloat(processor, value));
+            const i32 parsed_set = static_cast<i32>(AIParamToFloat(processor, value + 4));
             creature_set = static_cast<u32>(parsed_set) < 17 ? parsed_set : 0;
         }
     }
 
     if (creature_set != 0) {
-        for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
-            GameObject_s *candidate = &Obj[index];
+        GameObject_s *candidate = Obj;
+        i32 object_count = HIGHGAMEOBJECT;
+        for (i32 index = 0; index < object_count; ++index, ++candidate) {
             if ((candidate->apiobj.field_0x1f8 & APIOBJECT_FLAG_IN_USE) != 0 &&
                 candidate->ai.creature_set == creature_set) {
                 if (candidate->ai.field_0x134 == 0xff) {
                     candidate->apiobj.flags_high |= 0x10;
                     AIScriptSetBaseScriptStateByName(reinterpret_cast<AISCRIPTPROCESS *>(&candidate->ai),
-                                                     const_cast<char *>("Active"));
+                                                     const_cast<char *>("Base"));
                 } else {
                     ResetAICreature(candidate, sys);
                 }
                 ++aicreature_sets_alive[creature_set - 1];
+                object_count = HIGHGAMEOBJECT;
             }
         }
         return 1;
@@ -958,7 +960,7 @@ __used__ static i32 Action_Activate(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
         if (object->ai.field_0x134 == 0xff) {
             object->apiobj.flags_high |= 0x10;
             AIScriptSetBaseScriptStateByName(reinterpret_cast<AISCRIPTPROCESS *>(&object->ai),
-                                             const_cast<char *>("Active"));
+                                             const_cast<char *>("Base"));
         } else {
             ResetAICreature(object, sys);
         }
