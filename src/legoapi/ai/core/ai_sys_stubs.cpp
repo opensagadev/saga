@@ -2755,12 +2755,12 @@ extern "C" {
 
             const f32 position_on_connection = locator->path_info.dist;
             f32 radius;
-            if (position_on_connection < 0.0f) {
-                radius = start->radius;
-            } else if (position_on_connection <= 1.0f) {
-                radius = end->radius * position_on_connection + (1.0f - position_on_connection) * start->radius;
-            } else {
+            if (position_on_connection > 1.0f) {
                 radius = end->radius;
+            } else if (position_on_connection < 0.0f) {
+                radius = start->radius;
+            } else {
+                radius = end->radius * position_on_connection + (1.0f - position_on_connection) * start->radius;
             }
 
             const f32 direction_x = direction.x;
