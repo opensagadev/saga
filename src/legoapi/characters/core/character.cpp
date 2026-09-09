@@ -986,6 +986,24 @@ extern "C" {
     // Original @0x3d0563. This restores the ordinary hierarchy evaluation and
     // render path; DWA, locator/effect, transparency and random-shadow branches
     // remain separate pending transcriptions of their original helpers.
+    nuhgobj_s *Temphgobj;
+    u8 TempNumJoints;
+
+    void NuHGobjRestrictEvaluation(nuhgobj_s *object) {
+        Temphgobj = object;
+        if (object != NULL) {
+            TempNumJoints = object->joint_count;
+            object->joint_count = 1;
+        }
+    }
+
+    void NuHGobjRestoreEvaluation(void) {
+        if (Temphgobj != NULL) {
+            Temphgobj->joint_count = TempNumJoints;
+            Temphgobj = NULL;
+        }
+    }
+
     extern i32 drawcharactermodel_nobsa;
 
     i32 APIDrawCharacterModel(CHARACTERMODEL_s *model, CHARACTERDATA *, ANIMPACKET_s *animation, NUMTX *matrix, NUMTX *,

@@ -3257,10 +3257,6 @@ extern "C" {
     }
     void NuHGobjPOIMtxFromIX(void) {
     }
-    void NuHGobjRestoreEvaluation(void) {
-    }
-    void NuHGobjRestrictEvaluation(void) {
-    }
     i32 NuHGobjReversibleCharacters(i32 enabled) {
         i32 previous = nuapi.reversible_characters;
         nuapi.reversible_characters = enabled;
