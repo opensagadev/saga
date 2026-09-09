@@ -311,6 +311,37 @@ static __used__ i32 RowMoveTowards(AIGROUP *group, AIROW *row, AIROW *previous, 
     return 0;
 }
 
+static void FormationMove(AIGROUP *group, i32 (*move)(AIGROUP *, AIROW *, AIROW *, APIOBJECT *)) {
+    i32 turning = 0;
+    if (move != NULL && group->is_in_formation) {
+        AIROW *previous = NULL;
+        if (group->is_reversed) {
+            for (i32 i = group->row_count - 1; i != -1; --i) {
+                AIROW *row = &group->rows[i];
+                if (row->is_alive) {
+                    if (move(group, row, previous, group->leader) != 0)
+                        break;
+                    if (row->is_turning)
+                        turning = 1;
+                    previous = row;
+                }
+            }
+        } else {
+            for (i32 i = 0; i < group->row_count; ++i) {
+                AIROW *row = &group->rows[i];
+                if (row->is_alive) {
+                    if (move(group, row, previous, group->leader) != 0)
+                        break;
+                    if (row->is_turning)
+                        turning = 1;
+                    previous = row;
+                }
+            }
+        }
+    }
+    group->is_row_turning = turning;
+}
+
 static void AISysCheckAntinode_Rectangle(APIOBJECT *object, AIANTINODE *antinode, NUVEC *difference, f32 radius) {
     difference->x = object->ai->movement_position.x - antinode->position.x;
     if (difference->x > radius || difference->x < -radius) {
@@ -1333,13 +1364,20 @@ extern "C" {
                            f32 movement_parameter) {
         AIGROUP *group = packet->group;
         if (group != NULL && group->is_in_formation) {
-            // FormationMove's leader-row update remains to be recovered.
-            if (mode == 4 || mode == AIPACKET_MOVEMENT_TO_DESTINATION) {
+            switch (mode) {
+            case AIPACKET_MOVEMENT_WANDER:
+                if (group->leader == reinterpret_cast<APIOBJECT *>(packet->owner))
+                    FormationMove(group, RowMoveWander);
                 AIFormationFollow(packet);
                 return;
-            }
-            if (mode == 5) {
+            case AIPACKET_MOVEMENT_FORMATION:
                 mode = AIPACKET_MOVEMENT_TO_DESTINATION;
+                break;
+            case AIPACKET_MOVEMENT_TO_DESTINATION:
+                if (group->leader == reinterpret_cast<APIOBJECT *>(packet->owner))
+                    FormationMove(group, RowMoveTowards);
+                AIFormationFollow(packet);
+                return;
             }
         }
 
