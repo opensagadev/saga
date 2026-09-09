@@ -1499,7 +1499,11 @@ void ResetPlayerMoves(GameObject_s *object) {
     DrawOffsetCode(object, 1);
 }
 
-void SetToLastSafePos(GameObject_s *) {
+void SetToLastSafePos(GameObject_s *object) {
+    NUVEC position = {object->apiobj.last_safe_position.x, object->apiobj.last_safe_position.y,
+                      object->apiobj.last_safe_position.z};
+    object->apiobj.start_position = position;
+    object->saved_position = object->apiobj.position = object->apiobj.start_position;
 }
 
 i32 AvailableToPlayer(u32, i32, i32, i32) {
@@ -1515,7 +1519,17 @@ void UnderPlayerControl(GameObject_s *) {
 void ActivePlayerInRange(nuvec_s *, float, float *) {
 }
 
-void GetOtherActivePlayer(GameObject_s *) {
+GameObject_s *GetOtherActivePlayer(GameObject_s *object) {
+    GameObject_s *other;
+    if (Player[0] == object)
+        other = Player[1];
+    else if (Player[1] == object)
+        other = Player[0];
+    else
+        return NULL;
+    if (other != NULL && static_cast<i8>(other->apiobj.field_0x1f8) < 0)
+        return other;
+    return NULL;
 }
 
 bool FindNearestPlayerToVec(nuvec_s *position, GameObject_s **nearest_player, float &distance_squared,
