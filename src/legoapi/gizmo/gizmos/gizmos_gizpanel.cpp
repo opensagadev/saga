@@ -1,6 +1,7 @@
 #include "decomp.h"
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/gizmos/object/gizpanel.h"
 #include "legoapi/legoapi_types.h"
@@ -268,7 +269,54 @@ GIZPANEL_s *GizPanel_FindByName(WORLDINFO_s *world, char *name) {
     return NULL;
 }
 
-void GizPanel_UpdateHint(HINT_s *) {
+i32 GizPanel_UpdateHint(HINT_s *hint) {
+    bool storm = false;
+    bool droid = false;
+    bool bountyhunter = false;
+    i32 droid_type = -1;
+    for (i32 index = 0; index < 8; ++index) {
+        if (Player[index] == NULL)
+            continue;
+        f32 distance;
+        GIZPANEL_s *panel = GizPanel_FindNearest(WORLD, &Player[index]->apiobj.position, Player[index], &distance, 0);
+        if (panel == NULL || static_cast<u8>(panel->flags & 0x0b) != 8)
+            continue;
+        f32 radius = (1.0f + Player[index]->apiobj.field_0x1dc) * panel->target_scale;
+        if (distance < radius * radius) {
+            switch (panel->model_variant) {
+                case 0:
+                case 1:
+                    droid = true;
+                    droid_type = panel->model_variant;
+                    break;
+                case 2:
+                    bountyhunter = true;
+                    break;
+                case 3:
+                    storm = true;
+                    break;
+            }
+        }
+    }
+    if (storm && (hint->control_mode_ids[0] == 0x269 || hint->control_mode_ids[0] == 0x260)) {
+        if (AvailableToPlayer(0, 1, 5, 0) != 0)
+            return hint->control_mode_ids[0] == 0x260;
+        return hint->control_mode_ids[0] == 0x269;
+    }
+    if (bountyhunter && (hint->control_mode_ids[0] == 0x26a || hint->control_mode_ids[0] == 0x261)) {
+        if (AvailableToPlayer(0x1000000, -1, 6, 0) != 0)
+            return hint->control_mode_ids[0] == 0x261;
+        return hint->control_mode_ids[0] == 0x26a;
+    }
+    if (droid) {
+        if (hint->control_mode_ids[0] == 0x624)
+            return droid_type == 1 && FreePlay != 0 && AvailableToPlayer(0x30, -1, 0, 1) == 0;
+        if (hint->control_mode_ids[0] == 0x625)
+            return droid_type == 0 && FreePlay != 0 && AvailableToPlayer(0x50, -1, 0, 1) == 0;
+        if (hint->control_mode_ids[0] == 0x25f)
+            return (LSW_HintConditions & 2) != 0;
+    }
+    return 0;
 }
 
 i32 GizPanel_CanUsePanel(GameObject_s *object, GIZPANEL_s *panel) {
