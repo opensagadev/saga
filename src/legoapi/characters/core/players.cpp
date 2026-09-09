@@ -1513,7 +1513,9 @@ i32 AvailableToPlayer(u32, i32, i32, i32) {
 void GetNumLocalPlayers() {
 }
 
-void UnderPlayerControl(GameObject_s *) {
+i32 UnderPlayerControl(GameObject_s *object) {
+    return static_cast<i8>(object->apiobj.flags_low) < 0 ||
+           (object->field_0xcc0 != NULL && static_cast<i8>(object->field_0xcc0->apiobj.flags_low) < 0);
 }
 
 void ActivePlayerInRange(nuvec_s *, float, float *) {
