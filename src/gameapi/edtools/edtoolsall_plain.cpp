@@ -47,6 +47,7 @@ extern "C" {
     i32 edanim_params_used;
     i32 edanim_page_on[8];
     i32 edanim_page_used[8];
+    NUGSCN *edanim_page_scene[8];
     i32 edanim_nearest;
     i32 edanim_nearest_param_id;
     i32 edanim_sound_type;
@@ -148,7 +149,17 @@ extern "C" {
     }
     void edGraInitTerrainSwapProtection(void) {
     }
-    void edanimClearPage(i32) {
+    void edanimClearPage(i32 page) {
+        if (edanim_page_on[page] != 0)
+            edanimStopPage(page);
+        for (i32 index = 0; index < 64; ++index) {
+            if (AnimParams[index].page == page) {
+                AnimParams[index].instance_id = -1;
+                --edanim_params_used;
+            }
+        }
+        edanim_page_used[page] = 0;
+        edanim_page_scene[page] = NULL;
     }
     void edanimLookupSpecial(void) {
     }
@@ -165,9 +176,12 @@ extern "C" {
     }
     void edanimRegisterCubeDumpInfo(void) {
     }
-    void edanimStartPage(i32) {
+    void edanimStartPage(i32 page) {
+        if (edanim_page_used[page] != 0 && edanim_page_scene[page] != NULL && edanim_page_on[page] == 0)
+            edanim_page_on[page] = 1;
     }
-    void edanimStopPage(i32) {
+    void edanimStopPage(i32 page) {
+        edanim_page_on[page] = 0;
     }
     void edanimUpdateObjects(float) {
     }

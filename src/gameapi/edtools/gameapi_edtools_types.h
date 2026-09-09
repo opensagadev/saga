@@ -110,7 +110,9 @@ struct edanim_param_s {
     i32 sound_flags[8];
     float sound_values[8];
     float sound_positions[8][3];
-    u8 reserved_2c0[0x2d4 - 0x2c0];
+    u8 reserved_2c0[0x2d0 - 0x2c0];
+    i8 page;
+    u8 reserved_2d1[3];
 };
 static_assert(sizeof(edanim_param_s) == 0x2d4, "edanim_param_s size");
 
