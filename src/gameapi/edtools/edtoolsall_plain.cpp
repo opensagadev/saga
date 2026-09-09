@@ -300,7 +300,17 @@ extern "C" {
         memset(edanim_page_used, 0, sizeof(edanim_page_used));
         memset(edanim_page_on, 0, sizeof(edanim_page_on));
     }
-    void edanimParticleDestroy(void) {
+    void edanimParticleDestroy(i32 parameter_index, i32 particle_index) {
+        edanim_param_s *parameters = AnimParams;
+        for (i32 index = particle_index; index < parameters[parameter_index].effect_count - 1; ++index) {
+            parameters[parameter_index].effect_ids[index] = parameters[parameter_index].effect_ids[index + 1];
+            parameters[parameter_index].effect_intervals[index] = parameters[parameter_index].effect_intervals[index + 1];
+            parameters[parameter_index].effect_flags[index] = parameters[parameter_index].effect_flags[index + 1];
+            memcpy(parameters[parameter_index].effect_positions[index],
+                   parameters[parameter_index].effect_positions[index + 1], sizeof(NUVEC));
+            strcpy(parameters[parameter_index].effect_names[index], parameters[parameter_index].effect_names[index + 1]);
+        }
+        --parameters[parameter_index].effect_count;
     }
     void edanimRegisterCubeDumpInfo(void) {
     }
