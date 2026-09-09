@@ -307,6 +307,8 @@ DECOMP_ASSERT(offsetof(instNUGCUTSCENE_s, pending_stream_buffer) == 0xec,
 DECOMP_ASSERT(sizeof(instNUGCUTSCENE_s) == 0xf8, "cutscene instance size");
 
 typedef void (*NUGCUTSCENECHARACTERCREATEDATAFN)(NUGCUTCHAR_s *, instNUGCUTCHAR_s *, variptr_u *);
+typedef NUGSCN *(*NUGCUTSCENEGETHGOBJFN)(instNUGCUTSCENE_s *, i32);
+typedef void (*NUGCUTSCENECHARACTERDESTROYDATAFN)(NUGCUTCHAR_s *, instNUGCUTCHAR_s *);
 typedef void (*NUGCUTSCENECHARACTEREVALFN)(instNUGCUTSCENE_s *, NUGCUTSCENE_s *, instNUGCUTCHAR_s *, NUGCUTCHAR_s *,
                                            f32);
 typedef void (*NUGCUTSCENECHARACTERRELEASEFN)(instNUGCUTCHAR_s *, NUGCUTCHAR_s *);
@@ -323,6 +325,8 @@ typedef void (*NUGCUTSCENESFXUPDATEFN)(NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s
                                        i32);
 
 extern "C" NUGCUTSCENECHARACTERCREATEDATAFN NuCutSceneCharacterCreateData;
+extern "C" NUGCUTSCENEGETHGOBJFN NuCutSceneGetHGObj;
+extern "C" NUGCUTSCENECHARACTERDESTROYDATAFN NuCutSceneCharacterDestroyData;
 extern "C" NUGCUTSCENECHARACTEREVALFN NuCutSceneCharacterEval;
 extern "C" NUGCUTSCENECHARACTERRELEASEFN NuCutSceneCharacterRelease;
 extern "C" NUGCUTSCENECHARACTERPROCESSFN NuCutSceneCharacterProcess;
@@ -336,6 +340,8 @@ extern "C" NUGCUTSCENESFXUPDATEFN NuCutSceneSFXUpdate;
 extern "C" void instNuGCutSceneSetMtx(instNUGCUTSCENE_s *instance, NUMTX *matrix);
 
 extern "C" void NuSetCutSceneCharacterCreateDataFn(NUGCUTSCENECHARACTERCREATEDATAFN function);
+extern "C" void NuSetGetHGObjFromIndxFn(NUGCUTSCENEGETHGOBJFN function);
+extern "C" void NuSetCutSceneCharacterDestroyDataFn(NUGCUTSCENECHARACTERDESTROYDATAFN function);
 extern "C" void NuSetCutSceneCharacterEvalFn(NUGCUTSCENECHARACTEREVALFN function);
 extern "C" void NuSetCutSceneCharacterReleaseFn(NUGCUTSCENECHARACTERRELEASEFN function);
 extern "C" void NuSetCutSceneCharacterProcessFn(NUGCUTSCENECHARACTERPROCESSFN function);

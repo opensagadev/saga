@@ -20,6 +20,9 @@ extern "C" {
 #endif
 
     NUGSPLINE *NuSplineFind(NUGSCN *scene, char *name);
+    i32 NuSplineFindAllSub(NUGSCN *scene, char *name, NUGSPLINE **results, i32 capacity);
+    NUGSPLINE *NuSplineFindNextBeg(NUGSCN *scene, char *name, NUGSPLINE *previous);
+    void NuSplineGetRandomPoint(NUGSPLINE *spline, NUVEC *point);
     i32 NuSplineFindAllBeg(NUGSCN *scene, char *prefix, NUGSPLINE **results, i32 max_results);
 
 #ifdef __cplusplus

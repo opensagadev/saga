@@ -37,6 +37,7 @@ extern "C" {
     void NuStrGetExt(char *dst, char *src);
     void NuStrGetFilenameNoExt(char *dst, char *src);
     i32 NuStrCmp(const char *a, const char *b);
+    void NuStrTrap(const char *text, const char *match);
     char *NuStrChr(char *src, char c);
     i32 NuStrCpy(char *dst, const char *src);
     void NuStrFixExtPlatform(char *dst, char *src, char *ext, i32 dst_size, char *platform_string);

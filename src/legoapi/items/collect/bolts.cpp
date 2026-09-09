@@ -131,8 +131,7 @@ void Bolt_Shoot(GameObject_s *object, i32 type_id, i32 fire_flags) {
         GameObject_s *target = object->script_fire_target;
         velocity = &target->apiobj.velocity;
         target_position = intercept_position = &target->apiobj.collision_position;
-        if ((object->apiobj.character_data->model_flags & 0x2000) == 0 &&
-            (object->apiobj.field_0x1f4 & 1) != 0) {
+        if ((object->apiobj.character_data->model_flags & 0x2000) == 0 && (object->apiobj.field_0x1f4 & 1) != 0) {
             adjusted_position = target->apiobj.collision_position;
             adjusted_position.y += Bolt_ObjTargetPosYAdjust(target);
             target_position = &adjusted_position;
@@ -174,7 +173,7 @@ void Bolt_Shoot(GameObject_s *object, i32 type_id, i32 fire_flags) {
             if (static_cast<i32>(flags) < 0 && static_cast<i8>(object->apiobj.flags_low) >= 0 &&
                 object->script_fire_target != NULL) {
                 f32 distance = NuVecXZDist(&object->script_fire_target->apiobj.collision_position,
-                                          &object->apiobj.collision_position, NULL);
+                                           &object->apiobj.collision_position, NULL);
                 if (distance > 2.0f)
                     distance = 2.0f;
                 f32 degrees = (flags & 0x200000) != 0 ? -10.0f : -20.0f;

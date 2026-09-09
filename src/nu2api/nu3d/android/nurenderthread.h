@@ -10,7 +10,9 @@ extern "C" {
     void NuRenderThreadLock(void);
     void NuRenderThreadUnlock(void);
     i32 NuRenderThreadIsLocked(void);
+    i32 NuRenderThreadIsCurrentThread(void);
     void NuRenderThreadCreate(void);
+    void NuRenderThreadDestroy(void);
 
     i32 renderThread_processRenderScenes(void);
 #ifdef __cplusplus

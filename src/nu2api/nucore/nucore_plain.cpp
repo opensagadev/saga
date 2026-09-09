@@ -3789,29 +3789,10 @@ extern "C" {
     // Viewport
     // ---------------------------------------------------------------------------
 
-    void NuViewPortSet(void) {
-    }
-    void NuVpGetClippingMtx(void) {
-    }
-    void NuVpGetCurrent2(void) {
-    }
-    void NuVpSetCurrent2(void) {
-    }
-    void NuVpSetPosition(void) {
-    }
-    void NuVpSetPosition2(void) {
-    }
-    void NuVpSetSize(void) {
-    }
-    void NuVpSetSize2(void) {
-    }
-
     // ---------------------------------------------------------------------------
     // Strings / conversion / Unicode
     // ---------------------------------------------------------------------------
 
-    void NuStrTrap(void) {
-    }
     void NuQTAddElement(void) {
     }
     void NuQTCreate(void) {
@@ -3828,9 +3809,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
     // Debug / error / html / profiling
     // ---------------------------------------------------------------------------
-
-    void NuErrorCheck(void) {
-    }
 
     void NuErrorSleep(void) {
     }
@@ -3873,19 +3851,13 @@ extern "C" {
     // Time
     // ---------------------------------------------------------------------------
 
-    void NuTimeForceFrameTime(void) {
-    }
     void NuTimeGetSinceStartFrame(void) {
     }
     void NuTimeGetStartFrame(void) {
     }
     void NuTimeGetTime(void) {
     }
-    void NuTimeScanlines(void) {
-    }
     void NuTimeStartFrame(void) {
-    }
-    void NuTimeWait(void) {
     }
 
     // ---------------------------------------------------------------------------
@@ -3896,14 +3868,14 @@ extern "C" {
     }
     void NuEnableVBlankE(void) {
     }
+#ifndef ANDROID
     void NuGetCurrentThreadId(void) {
     }
+#endif
+#ifndef ANDROID
     void NuThreadCreate(void) {
     }
-    void NuThreadSignalRecieve(void) {
-    }
-    void NuThreadSignalSend(void) {
-    }
+#endif
     void NuPause(void) {
     }
     void NuPhoneOSMessagePost(void) {
@@ -3912,7 +3884,10 @@ extern "C" {
     }
     void NuPhysicalProtect(void) {
     }
-    void NuSetGetHGObjFromIndxFn(void) {
+    NUGCUTSCENEGETHGOBJFN NuCutSceneGetHGObj;
+
+    void NuSetGetHGObjFromIndxFn(NUGCUTSCENEGETHGOBJFN function) {
+        NuCutSceneGetHGObj = function;
     }
     void NuSetPadDemoEndButtons(u32) {
     }
@@ -3921,7 +3896,10 @@ extern "C" {
     void NuSetCutSceneCharacterCreateDataFn(NUGCUTSCENECHARACTERCREATEDATAFN function) {
         NuCutSceneCharacterCreateData = function;
     }
-    void NuSetCutSceneCharacterDestroyDataFn(void) {
+    NUGCUTSCENECHARACTERDESTROYDATAFN NuCutSceneCharacterDestroyData;
+
+    void NuSetCutSceneCharacterDestroyDataFn(NUGCUTSCENECHARACTERDESTROYDATAFN function) {
+        NuCutSceneCharacterDestroyData = function;
     }
     void NuSetCutSceneCharacterEvalFn(NUGCUTSCENECHARACTEREVALFN function) {
         NuCutSceneCharacterEval = function;
@@ -3962,12 +3940,6 @@ extern "C" {
     // Spline / online / net / other gameplay support
     // ---------------------------------------------------------------------------
 
-    void NuSplineFindAllSub(void) {
-    }
-    void NuSplineFindNextBeg(void) {
-    }
-    void NuSplineGetRandomPoint(void) {
-    }
     void NuSplineList(void) {
     }
     void NuOnlineAchievementAchieved(void) {
@@ -3982,15 +3954,13 @@ extern "C" {
     }
     void NuOnlineHasPlayerDownloadedPS(void) {
     }
-    void NuOnlineHasPlayerSignedIn(void) {
-    }
     void NuOnlineHasPlayerSignedInEx(void) {
     }
     void NuOnlineHasPlayerSignedInExPS(void) {
     }
-    void NuOnlineHasPlayerSignedInPS(void) {
-    }
-    void NuOnlineInit(void) {
+    extern i32 g_signedinUser;
+    i32 NuOnlineHasPlayerSignedInPS(void) {
+        return g_signedinUser != -1;
     }
     void NuOnlineInitPS(void) {
     }
@@ -4061,10 +4031,6 @@ extern "C" {
     extern void (*nuapi_endframe_callbackfn)(void);
     void NuRegisterEndFrameCallBackFn(void (*callback)(void)) {
         nuapi_endframe_callbackfn = callback;
-    }
-    void NuRenderThreadDestroy(void) {
-    }
-    void NuRenderThreadIsCurrentThread(void) {
     }
     void NuRndIsReflectionGobj(void) {
     }

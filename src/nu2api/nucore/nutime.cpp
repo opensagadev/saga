@@ -10,6 +10,28 @@ f32 NuTimeGetFrameTime(void) {
     return nuapi.frametime;
 }
 
+void NuTimeForceFrameTime(f32 frame_time) {
+    nuapi.forced_frame_time = frame_time;
+}
+
+void NuTimeWait(f32 milliseconds) {
+    f32 elapsed = 0.0f;
+    NUTIME start;
+    NUTIME current;
+    NUTIME difference;
+
+    NuTimeGet(&start);
+    while (elapsed < milliseconds) {
+        NuTimeGet(&current);
+        NuTimeSub(&difference, &current, &start);
+        elapsed = NuTimeMilliSeconds(&difference);
+    }
+}
+
+f32 NuTimeScanlines(NUTIME *t) {
+    return NuTimeSeconds(t) * 272.0f * 60.0f;
+}
+
 f32 NuTimeSeconds(NUTIME *t) {
     u32 low;
     u32 high;

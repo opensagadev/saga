@@ -166,17 +166,25 @@ void SetCreatureLights(APIOBJECT_s *object) {
     } else if (Lighting_HighlightFlash != 0 && static_cast<i8>(owner->apiobj.object_flags) < 0 &&
                owner->timer_d5c > 0.0f && (owner->timer_d5c >= 2.0f || NuFmod(owner->timer_d5c, 0.4f) >= 0.2f)) {
         if (owner->apiobj.field_0x27c == 1) {
-            red = 1.7f; green = 2.0f; blue = 1.4f;
+            red = 1.7f;
+            green = 2.0f;
+            blue = 1.4f;
         } else {
-            red = 1.4f; green = 1.85f; blue = 2.0f;
+            red = 1.4f;
+            green = 1.85f;
+            blue = 2.0f;
         }
     } else if ((character->flags_090 & 0x8000) != 0 && static_cast<i8>(owner->apiobj.object_flags) >= 0) {
-        red = 1.4f; green = 1.85f; blue = 2.0f;
+        red = 1.4f;
+        green = 1.85f;
+        blue = 2.0f;
     } else if (Lighting_BlueFlickerFn != NULL && Lighting_BlueFlickerFn(owner) != 0) {
         if (qrand() > 0x7fff) {
-            red = 0.25f; blue = 0.5f;
+            red = 0.25f;
+            blue = 0.5f;
         } else {
-            red = 1.0f; blue = 2.0f;
+            red = 1.0f;
+            blue = 2.0f;
         }
         character = static_cast<GAMECHARACTERDATA *>(owner->apiobj.character_data->field11_0x24);
         green = blue;
@@ -201,26 +209,36 @@ void SetCreatureLights(APIOBJECT_s *object) {
     }
     if (owner->field_0xd6c > 0.0f) {
         const f32 scale = owner->field_0xd6c * -0.334f + 1.0f;
-        red *= scale; green *= scale; blue *= scale;
+        red *= scale;
+        green *= scale;
+        blue *= scale;
     }
     character = static_cast<GAMECHARACTERDATA *>(owner->apiobj.character_data->field11_0x24);
     if ((character->flags_090 & 0x8000) != 0) {
-        red *= GhostLightMul; green *= GhostLightMul; blue *= GhostLightMul;
-        if (red > 2.0f) red = 2.0f;
-        if (green > 2.0f) green = 2.0f;
-        if (blue > 2.0f) blue = 2.0f;
+        red *= GhostLightMul;
+        green *= GhostLightMul;
+        blue *= GhostLightMul;
+        if (red > 2.0f)
+            red = 2.0f;
+        if (green > 2.0f)
+            green = 2.0f;
+        if (blue > 2.0f)
+            blue = 2.0f;
     }
     if (red != 1.0f) {
         lights.ambient.x *= red;
-        for (i32 i = 0; i < 3; ++i) lights.intensity[i].r *= red;
+        for (i32 i = 0; i < 3; ++i)
+            lights.intensity[i].r *= red;
     }
     if (green != 1.0f) {
         lights.ambient.y *= green;
-        for (i32 i = 0; i < 3; ++i) lights.intensity[i].g *= green;
+        for (i32 i = 0; i < 3; ++i)
+            lights.intensity[i].g *= green;
     }
     if (blue != 1.0f) {
         lights.ambient.z *= blue;
-        for (i32 i = 0; i < 3; ++i) lights.intensity[i].b *= blue;
+        for (i32 i = 0; i < 3; ++i)
+            lights.intensity[i].b *= blue;
     }
     SetLights(&lights.intensity[0], &lights.direction[0], &lights.intensity[1], &lights.direction[1],
               &lights.intensity[2], &lights.direction[2], &lights.ambient);

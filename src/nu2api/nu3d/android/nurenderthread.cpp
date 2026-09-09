@@ -27,6 +27,11 @@ static volatile i32 renderThreadCS;
 i64 getCurrentTime();
 static i32 renderThreadIsLocked;
 pthread_t g_renderThread;
+thread_local i32 gt_currentThreadId = -1;
+
+extern "C" i32 NuRenderThreadIsCurrentThread(void) {
+    return gt_currentThreadId == 0;
+}
 
 // Original file-static double buffers (bss 0x119db.. / 0x119fd..).
 static nudisplayscene_s sceneParameters_safe[16];
@@ -95,6 +100,10 @@ void NuRenderThreadCreate(void) {
     NuIOS_InitRenderThread();
     pthread_create(&g_renderThread, NULL, renderThread_main, NULL);
     renderThreadCS = NuThreadCreateCriticalSection();
+}
+
+void NuRenderThreadDestroy(void) {
+    NuThreadDestroyCriticalSection(renderThreadCS);
 }
 
 void *renderThread_main(void *arg) {

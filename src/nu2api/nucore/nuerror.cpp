@@ -9,6 +9,7 @@ extern "C" {
     typedef void (*NuErrorFunctionPtr)(char *, ...);
     typedef void (*NuDebugTTYFunctionPtr)(i32, char *, ...);
     static i32 bHaveErr;
+    static i32 nuerror_status;
     static char ErrMsg[1024];
     static char *nufile;
     static i32 nuline;
@@ -19,6 +20,13 @@ extern "C" {
     void (*nudebug_handler)(char *);
     void (*nuwarning_handler)(char *);
     i32 DisableDebugMsg;
+
+    void NuErrorCheck(void) {
+        if (nuerror_status) {
+            // The original Android build has no error-reporting body here.
+            return;
+        }
+    }
 
     void NuSetWarningMsgHandler(void (*handler)(char *)) {
         nuwarning_handler = handler;

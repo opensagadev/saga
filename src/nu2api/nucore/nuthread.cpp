@@ -57,6 +57,13 @@ void NuEnableVBlank() {
 void NuDisableVBlank() {
 }
 
+// Legacy signal entry points have empty bodies in the original Android binary.
+void NuThreadSignalSend(void) {
+}
+
+void NuThreadSignalRecieve(void) {
+}
+
 nuthreadenableswapfn *NuThreadEnableThreadSwap = &NuEnableVBlank;
 nuthreaddisableswapfn *NuThreadDisableThreadSwap = &NuDisableVBlank;
 
@@ -66,8 +73,44 @@ nuthreaddisableswapfn *NuThreadDisableThreadSwap = &NuDisableVBlank;
 // functions in this file. Who knows what was going on.
 #ifdef ANDROID
 static NULEGACYTHREADDATA NuThread_Threads[0x10];
+static char NuThread_ThreadsUsed[16];
 
 pthread_key_t g_currentThreadSpecificKey;
+
+static void ThreadMain(u64 thread_data_value) {
+    NULEGACYTHREADDATA *thread_data = reinterpret_cast<NULEGACYTHREADDATA *>(static_cast<usize>(thread_data_value));
+    pthread_setspecific(g_currentThreadSpecificKey, thread_data);
+    thread_data->thread_fn(thread_data->fn_arg);
+    pthread_exit(NULL);
+}
+
+i32 NuThreadCreate(void (*function)(void *), void *argument) {
+    i32 i;
+    i32 index = -1;
+    for (i = 0; i < 16; i++) {
+        if (NuThread_ThreadsUsed[i] == 0) {
+            index = i;
+            break;
+        }
+    }
+    if (index == -1) {
+        return -1;
+    }
+    NuThread_Threads[index].thread_fn = function;
+    NuThread_Threads[index].fn_arg = argument;
+    pthread_attr_t attributes;
+    pthread_attr_init(&attributes);
+    pthread_attr_setstacksize(&attributes, 0x10000);
+    i32 result = pthread_create(&NuThread_Threads[index].thread, &attributes,
+                                reinterpret_cast<void *(*)(void *)>(ThreadMain), &NuThread_Threads[index]);
+    pthread_attr_destroy(&attributes);
+    NuThread_ThreadsUsed[index] = 1;
+    return index;
+}
+
+i32 NuGetCurrentThreadId(void) {
+    return (NULEGACYTHREADDATA *)pthread_getspecific(g_currentThreadSpecificKey) - NuThread_Threads;
+}
 
 void DataDestructor(void *data) {
 }

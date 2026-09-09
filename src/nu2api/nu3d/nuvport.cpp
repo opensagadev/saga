@@ -2,31 +2,24 @@
 
 #include "decomp.h"
 #include "nu2api/nu3d/nurndr.h"
+#include "nu2api/numath/nufloat.h"
 
 extern "C" void NuRndrStateUpdateCameraState(void);
 
 static constexpr f32 kVirtualWidth = 640.0f;
 static constexpr f32 kVirtualHeight = 224.0f;
-static constexpr f32 kViewportCenterX = 2048.0f;
-static constexpr f32 kViewportCenterY = 2048.0f;
 
 NUVIEWPORT vpCurrent = {0};
 NUVIEWPORT vpDevice = {0};
 i32 vport_inval = 0;
 NUMTX vp_smtx = {0}; // scaling matrix
+NUMTX vp_cmtx = {
+    1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+};
 NUVPREGION g_NuVpRegion = {
     0.0f, 0.0f, kVirtualWidth, kVirtualHeight, 0.0f, 0.0f, kVirtualWidth, kVirtualHeight,
     1.0f, 1.0f, 0.0f,          0.0f,           1.0f, 1.0f, 0.0f,          0.0f,
 };
-
-void NuPs2GetViewport(NUVIEWPORT *vp) {
-    vp->x = (i32)((kViewportCenterX - (f32)nurndr_pixel_width * 0.5f) * 16.0f);
-    vp->y = (i32)((kViewportCenterY - (f32)nurndr_pixel_height * 0.5f) * 16.0f);
-    vp->width = (i32)((f32)nurndr_pixel_width * 10240.0f / kVirtualWidth);
-    vp->height = (i32)((f32)nurndr_pixel_height * 3584.0f / kVirtualHeight);
-    vp->min_z = 0.0f;
-    vp->max_z = 1.0f;
-}
 
 void NuVpInit(void) {
     NuPs2GetViewport(&vpDevice);
@@ -41,24 +34,6 @@ void NuVpInit(void) {
     vport_inval = 1;
 
     NuVpUpdate();
-}
-
-void NuVpSetRegions(f32 source_x, f32 source_y, f32 source_right, f32 source_bottom, f32 dest_x, f32 dest_y,
-                    f32 dest_right, f32 dest_bottom) {
-    g_NuVpRegion.source_x = source_x;
-    g_NuVpRegion.source_y = source_y;
-    g_NuVpRegion.source_width = source_right;
-    g_NuVpRegion.source_height = source_bottom;
-    g_NuVpRegion.dest_x = dest_x;
-    g_NuVpRegion.dest_y = dest_y;
-    g_NuVpRegion.dest_width = dest_right;
-    g_NuVpRegion.dest_height = dest_bottom;
-    g_NuVpRegion.width_scale = (dest_right - dest_x) / kVirtualWidth;
-    g_NuVpRegion.height_scale = (dest_bottom - dest_y) / kVirtualHeight;
-    g_NuVpRegion.projection_x_scale = kVirtualWidth / (source_right - source_x);
-    g_NuVpRegion.projection_y_scale = kVirtualHeight / (source_bottom - source_y);
-    g_NuVpRegion.projection_x_offset = ((kVirtualWidth - source_right) - source_x) * 2.0f / kVirtualWidth;
-    g_NuVpRegion.projection_y_offset = ((kVirtualHeight - source_bottom) - source_y) * -2.0f / kVirtualHeight;
 }
 
 void NuVpResetRegions(void) {
@@ -81,14 +56,11 @@ void NuVpGetScalingMtx(NUMTX *dest) {
     *dest = vp_smtx;
 }
 
-void NuVpUpdate(void) {
-    if (vport_inval != 0) {
-        vport_inval = 0;
-        NuVpSetScalingMtx();
-        vpCurrent.clip_height = 1.0f;
-        vpCurrent.clip_width = 1.0f;
-        NuRndrStateUpdateCameraState();
+void NuVpGetClippingMtx(NUMTX *dest) {
+    if (dest == NULL) {
+        return;
     }
+    *dest = vp_cmtx;
 }
 
 NUVIEWPORT *NuVpGetCurrentViewport(void) {
@@ -102,6 +74,39 @@ void NuVpGetCurrent(NUVIEWPORT *viewport) {
 void NuVpSetCurrent(NUVIEWPORT *viewport) {
     vpCurrent = *viewport;
     vport_inval = 1;
+}
+
+void NuVpSetCurrent2(NUVIEWPORT2 *viewport) {
+    NuVpSetPosition2(viewport->x, viewport->y);
+    NuVpSetSize2(viewport->width, viewport->height);
+    // The original leaves the depth range unchanged.
+    vpCurrent.center_x = viewport->center_x;
+    vpCurrent.center_y = viewport->center_y;
+    vpCurrent.clip_min_x = viewport->clip_min_x;
+    vpCurrent.clip_min_y = viewport->clip_min_y;
+    vpCurrent.clip_max_x = viewport->clip_max_x;
+    vpCurrent.clip_max_y = viewport->clip_max_y;
+    vpCurrent.clip_width = viewport->clip_width;
+    vpCurrent.clip_height = viewport->clip_height;
+    vpCurrent.scissor_width = viewport->scissor_width;
+    vpCurrent.scissor_height = viewport->scissor_height;
+    vport_inval = 1;
+}
+
+void NuVpGetCurrent2(NUVIEWPORT2 *viewport) {
+    NuVpGetPosition2(&viewport->x, &viewport->y);
+    NuVpGetSize2(&viewport->width, &viewport->height);
+    // The original does not write the depth range in this representation.
+    viewport->center_x = vpCurrent.center_x;
+    viewport->center_y = vpCurrent.center_y;
+    viewport->clip_min_x = vpCurrent.clip_min_x;
+    viewport->clip_min_y = vpCurrent.clip_min_y;
+    viewport->clip_max_x = vpCurrent.clip_max_x;
+    viewport->clip_max_y = vpCurrent.clip_max_y;
+    viewport->clip_width = vpCurrent.clip_width;
+    viewport->clip_height = vpCurrent.clip_height;
+    viewport->scissor_width = vpCurrent.scissor_width;
+    viewport->scissor_height = vpCurrent.scissor_height;
 }
 
 void NuVpGetRegions(f32 *source_x, f32 *source_y, f32 *source_right, f32 *source_bottom, f32 *dest_x, f32 *dest_y,
@@ -153,42 +158,57 @@ f32 NuVpVirtualHeight(f32 value) {
 }
 
 void NuVpGetPosition2(f32 *x, f32 *y) {
-    const f32 x_scale = (f32)nurndr_pixel_width / kVirtualWidth;
-    const f32 y_scale = (f32)nurndr_pixel_height / kVirtualHeight;
-    *x = ((f32)vpCurrent.x * 0.0625f - (kViewportCenterX - (f32)(nurndr_pixel_width >> 1))) / x_scale;
-    *y = ((f32)vpCurrent.y * 0.0625f - (kViewportCenterY - (f32)(nurndr_pixel_height >> 1))) / y_scale;
+    *x = NuFdiv((f32)vpCurrent.x * 0.0625f - ((f32)PS2_VCNTR_X - (f32)(nurndr_pixel_width >> 1)),
+                NuFdiv((f32)nurndr_pixel_width, (f32)PS2_VREZ_W));
+    *y = NuFdiv((f32)vpCurrent.y * 0.0625f - ((f32)PS2_VCNTR_Y - (f32)(nurndr_pixel_height >> 1)),
+                NuFdiv((f32)nurndr_pixel_height, (f32)PS2_VREZ_H));
+}
+
+void NuVpSetPosition2(f32 x, f32 y) {
+    x += g_NuVpRegion.x_offset;
+    y += g_NuVpRegion.y_offset;
+    vpCurrent.x =
+        (i32)(((f32)nurndr_pixel_width * x / (f32)PS2_VREZ_W + ((f32)PS2_VCNTR_X - (f32)(nurndr_pixel_width >> 1))) *
+              16.0f);
+    vpCurrent.y =
+        (i32)(((f32)nurndr_pixel_height * y / (f32)PS2_VREZ_H + ((f32)PS2_VCNTR_Y - (f32)(nurndr_pixel_height >> 1))) *
+              16.0f);
+    vport_inval = 1;
+}
+
+void NuVpSetPosition(f32 x, f32 y) {
+    NuVpSetPosition2(NuFdiv(x * 0.0625f - ((f32)PS2_VCNTR_X - (f32)(nurndr_pixel_width >> 1)),
+                            NuFdiv((f32)nurndr_pixel_width, (f32)PS2_VREZ_W)),
+                     NuFdiv(y * 0.0625f - ((f32)PS2_VCNTR_Y - (f32)(nurndr_pixel_height >> 1)),
+                            NuFdiv((f32)nurndr_pixel_height, (f32)PS2_VREZ_H)));
 }
 
 void NuVpGetSize2(f32 *width, f32 *height) {
-    *width = ((f32)vpCurrent.width * 0.0625f) / ((f32)nurndr_pixel_width / kVirtualWidth);
-    *height = ((f32)vpCurrent.height * 0.0625f) / ((f32)nurndr_pixel_height / kVirtualHeight);
+    *width = ((f32)vpCurrent.width * 0.0625f) / ((f32)nurndr_pixel_width / (f32)PS2_VREZ_W);
+    *height = ((f32)vpCurrent.height * 0.0625f) / ((f32)nurndr_pixel_height / (f32)PS2_VREZ_H);
 }
 
-void NuVpSetScalingMtx(void) {
-    f32 vp_x = (f32)(vpCurrent.x >> 4);
-    f32 vp_y = (f32)(vpCurrent.y >> 4);
-    f32 vp_w = (f32)(vpCurrent.width >> 4);
-    f32 vp_h = (f32)(vpCurrent.height >> 4);
-    f32 vp_minz = vpCurrent.min_z;
-    f32 vp_maxz = vpCurrent.max_z;
-
-    vp_smtx.m00 = vp_w * 0.5f;
-    vp_smtx.m01 = 0.0f;
-    vp_smtx.m02 = 0.0f;
-    vp_smtx.m03 = 0.0f;
-    vp_smtx.m10 = 0.0f;
-    vp_smtx.m11 = -vp_h * 0.5f;
-    vp_smtx.m12 = 0.0f;
-    vp_smtx.m13 = 0.0f;
-    vp_smtx.m20 = 0.0f;
-    vp_smtx.m21 = 0.0f;
-    vp_smtx.m22 = vp_maxz - vp_minz;
-    vp_smtx.m23 = 0.0f;
-    vp_smtx.m30 = vpCurrent.center_x * vp_w + vp_x;
-    vp_smtx.m31 = vpCurrent.center_y * vp_h + vp_y;
-    vp_smtx.m32 = vp_minz;
-    vp_smtx.m33 = 1.0f;
+void NuVpSetSize2(f32 width, f32 height) {
+    width *= g_NuVpRegion.width_scale;
+    height *= g_NuVpRegion.height_scale;
+    vpCurrent.width = (i32)((f32)nurndr_pixel_width * width / (f32)PS2_VREZ_W * 16.0f);
+    vpCurrent.height = (i32)((f32)nurndr_pixel_height * height / (f32)PS2_VREZ_H * 16.0f);
+    vport_inval = 1;
 }
 
-static __used__ void NuVpSetClippingMtx(void) {
+void NuVpSetSize(f32 width, f32 height) {
+    NuVpSetSize2(width * 0.0625f / ((f32)nurndr_pixel_width / (f32)PS2_VREZ_W),
+                 height * 0.0625f / ((f32)nurndr_pixel_height / (f32)PS2_VREZ_H));
+}
+
+void NuViewPortSet(f32 left, f32 top, f32 right, f32 bottom) {
+    static NUVIEWPORT2 vp = {
+        0.0f, 0.0f, 640.0f, 224.0f, 8388607.0f, 0.0f, 0.5f, 0.5f, 0.01f, 0.01f, 0.99f, 0.99f, 0.0f, 0.0f, 0.0f, 0.0f,
+    };
+    vp.x = left;
+    vp.y = top;
+    vp.width = right - left;
+    vp.height = bottom - top;
+    NuVpSetCurrent2(&vp);
+    NuVpUpdate();
 }

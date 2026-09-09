@@ -150,10 +150,3 @@ void EndOfDemo(i32) {
     new_level_from_menu = 1;
     NewGame();
 }
-
-static __used__ void ThreadMain(u64 thread_data_value) {
-    NULEGACYTHREADDATA *thread_data = reinterpret_cast<NULEGACYTHREADDATA *>(static_cast<usize>(thread_data_value));
-    pthread_setspecific(g_currentThreadSpecificKey, thread_data);
-    thread_data->thread_fn(thread_data->fn_arg);
-    pthread_exit(NULL);
-}

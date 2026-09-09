@@ -35,6 +35,8 @@ extern "C" {
     extern u32 nu_current_thread_id;
 #ifdef ANDROID
     extern pthread_key_t g_currentThreadSpecificKey;
+    i32 NuGetCurrentThreadId(void);
+    i32 NuThreadCreate(void (*function)(void *), void *argument);
 #endif
     extern nuthreadenableswapfn *NuThreadEnableThreadSwap;
     extern nuthreaddisableswapfn *NuThreadDisableThreadSwap;
@@ -47,6 +49,8 @@ extern "C" {
 
     void NuEnableVBlank();
     void NuDisableVBlank();
+    void NuThreadSignalSend(void);
+    void NuThreadSignalRecieve(void);
 #ifdef __cplusplus
 }
 

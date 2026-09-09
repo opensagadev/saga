@@ -43,8 +43,8 @@ i32 Action_SetState(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *, char 
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 void AISysGetPathPos2(AISYS_s *, NUVEC *, AIPATHINFO_s *, NUVEC *, AIPATH_s *, i32);
 
-i32 Action_UsePanel(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
-                    i32 param_count, i32 first_time, f32 elapsed) {
+i32 Action_UsePanel(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params, i32 param_count,
+                    i32 first_time, f32 elapsed) {
     if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL)
         return 1;
     GameObject_s *object = packet->owner->apiobj.objptr;
@@ -64,8 +64,7 @@ i32 Action_UsePanel(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *p
             f32 height = GameShadow(NULL, &processor->action_pos, 5.0f, -1);
             if (height != 2000000.0f)
                 processor->action_pos.y = height;
-            AISysGetPathPos2(system, &processor->action_pos, &processor->path_info, &processor->action_pos, NULL,
-                            0xff);
+            AISysGetPathPos2(system, &processor->action_pos, &processor->path_info, &processor->action_pos, NULL, 0xff);
         }
     }
     GIZPANEL *panel = static_cast<GIZPANEL *>(processor->action_data_3);

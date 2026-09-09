@@ -2,6 +2,14 @@
 #include <stdio.h>
 #include <string.h>
 
+i32 global_tr;
+
+void NuStrTrap(const char *text, const char *match) {
+    if (NuStrCmp(text, match) == 0) {
+        global_tr++;
+    }
+}
+
 i32 NuVSPrintf(char *dest, const char *format, va_list args) {
     return vsprintf(dest, format, args);
 }
