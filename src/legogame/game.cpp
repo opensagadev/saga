@@ -44,6 +44,16 @@ extern i32 (*Lighting_BlueFlickerFn)(GameObject_s *);
 i32 ObjZappedBlue(GameObject_s *);
 extern i16 LEGOACT_SHOOTRIGHT, LEGOACT_SHOOTLEFT, LEGOACT_SHOOTBACK;
 
+f32 minikittime;
+extern f32 (*Hint_AlphaTargetFn)();
+extern i32 (*Hub_PanelBusyFn)();
+i32 Hub_PanelBusy();
+static f32 Hint_AlphaTarget() {
+    if (minikittime > 0.0f && ChallengeMode == 0)
+        return 0.0f;
+    return 1.0f;
+}
+
 extern i32 (*GizBuildit_AutoBuildPosFn)(void *, NUVEC *, NUVEC *, u16 *);
 static i32 GizBuildit_AutoBuildPos_Game(void *context, NUVEC *position, NUVEC *result, u16 *angle) {
     WORLDINFO_s *world = static_cast<WORLDINFO_s *>(context);
@@ -957,7 +967,7 @@ void InitGameAfterConfig(void) {
     IsWearingBackPackFn = IsWearingBackPack_Game;
     //  Grass_Available = 1;
     //  PauseGame_ExtraCodeFn = PauseGame_ExtraCode;
-    //  Hub_PanelBusyFn = Hub_PanelBusy;
+    Hub_PanelBusyFn = Hub_PanelBusy;
     CheckMusicOtherFn = CheckMusicOther;
     GizBuildIt_CanStartBuildingFn = GizBuildIt_CanStartBuildingFn_Game;
     GizBuildIt_FinishFn = GizBuildIt_FinishFn_Game;
@@ -973,7 +983,7 @@ void InitGameAfterConfig(void) {
     //  MatrixReflection_CanOverrideFn = MatrixReflection_CanOverride;
     Jump_PreventJumpFn = Jump_PreventJump;
     //  SurfaceInfo_ExtraReflectFn = SurfaceInfo_ExtraReflect;
-    //  Hint_AlphaTargetFn = Hint_AlphaTarget;
+    Hint_AlphaTargetFn = Hint_AlphaTarget;
     //  Arcade_TextCrawlID = 0x1f1;
     //  Arcade_TextCrawlParagraphs = 2;
     //  GizmoPickups_Collide2DFn = GizmoPickups_Collide2D;

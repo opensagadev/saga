@@ -737,9 +737,6 @@ static __used__ void GameMsg_EndDelay_Game(GAMEMESSAGE_s *) {
 static __used__ void GameMsg_Draw_MiniKitDetector(GAMEMESSAGE_s *, nuvec_s *, float) {
 }
 
-static __used__ void Hint_AlphaTarget() {
-}
-
 static __used__ bool HoldTag_UpdateHint(HINT_s *) {
     if (MechInputTouchSystem::s_baseControlMode == 0 || WORLD == NULL || WORLD->area == HUB_ADATA) {
         return 0;
