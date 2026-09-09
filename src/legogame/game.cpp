@@ -42,6 +42,7 @@ void AddPartDebris(PARTDEBSYS_s *, i32, NUVEC *);
 extern i32 Lighting_HighlightFlash;
 extern i32 (*Lighting_BlueFlickerFn)(GameObject_s *);
 i32 ObjZappedBlue(GameObject_s *);
+extern i16 LEGOACT_SHOOTRIGHT, LEGOACT_SHOOTLEFT, LEGOACT_SHOOTBACK;
 
 extern i32 (*GizBuildit_AutoBuildPosFn)(void *, NUVEC *, NUVEC *, u16 *);
 static i32 GizBuildit_AutoBuildPos_Game(void *context, NUVEC *position, NUVEC *result, u16 *angle) {
@@ -784,9 +785,9 @@ void InitGameAfterConfig(void) {
     LEGOACT_BACKFLIP = 0x77;
     LEGOACT_DEACTIVATED = 0x41;
     //  LEGOACT_PUNCH_BEHIND = 0x94;
-    //  LEGOACT_SHOOTRIGHT = 0x5b;
-    //  LEGOACT_SHOOTLEFT = 0x5a;
-    //  LEGOACT_SHOOTBACK = 0x5c;
+    LEGOACT_SHOOTRIGHT = 0x5b;
+    LEGOACT_SHOOTLEFT = 0x5a;
+    LEGOACT_SHOOTBACK = 0x5c;
     LEGOACT_LEDGE_GRAB = 0xda;
     LEGOACT_LEDGE_IDLE = 0x9d;
     LEGOACT_LEDGE_LEFT = 0x9e;

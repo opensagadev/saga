@@ -63,7 +63,174 @@ BOLT_s *Bolt_Alloc() {
     return &Bolt[index];
 }
 
-void Bolt_Shoot(GameObject_s *, i32, i32) {
+extern i32 addbolt_nosfx;
+extern i32 addbolt_newsfx;
+extern NUVEC addbolt_newpos;
+f32 BOLT_SHOOTFLASHTIME = 0.1f;
+f32 Bolt_ObjTargetPosYAdjust(GameObject_s *);
+void FindAnglesXY(NUVEC *, u16 *, u16 *);
+void CalculateInterceptVector(NUVEC *, NUVEC *, NUVEC *, f32, NUVEC *, NUVEC *);
+void GameAudio_PlaySfxById(i32, NUVEC *, i32, i32);
+i16 LEGOACT_SHOOTBACK = -1;
+i16 LEGOACT_SHOOTLEFT = -1;
+i16 LEGOACT_SHOOTRIGHT = -1;
+
+void Bolt_Shoot(GameObject_s *object, i32 type_id, i32 fire_flags) {
+    BOLTTYPE_s *type = BoltType_FindByID(type_id, WORLD);
+    u32 flags = type->field_60;
+    f32 speed = type->field_10;
+    f32 duration = type->field_14;
+    if (static_cast<i8>(object->apiobj.flags_low) < 0) {
+        flags |= 0x20;
+        if (object->apiobj.field_0x27c == 0)
+            flags |= 1;
+        else if (object->apiobj.field_0x27c == 1)
+            flags |= 2;
+    }
+    if ((object->field_0xefc & 8) != 0)
+        flags |= 0x40;
+    NUVEC aimed_position = object->attack_target_position;
+    NUVEC origin, direction;
+    BoltSys->shoot_origin(object, &origin);
+    u16 heading = BoltSys->shoot_direction(object, &direction);
+    if (object->character_context != -1 && object->context_animation != -1) {
+        if (object->context_animation == LEGOACT_SHOOTRIGHT)
+            heading += 0x4000;
+        else if (object->context_animation == LEGOACT_SHOOTLEFT)
+            heading -= 0x4000;
+        else if (object->context_animation == LEGOACT_SHOOTBACK)
+            heading += 0x8000;
+    }
+    NUVEC adjusted_position, target_velocity;
+    f32 target_distance = 0.0f;
+    if ((object->field_0xe21 & 8) != 0) {
+        if (static_cast<i8>(object->field_0xef9) >= 0 && object->script_fire_target == NULL &&
+            object->apiobj.field_0x27c != -1 &&
+            (object->attack_target_velocity.x != 0.0f || object->attack_target_velocity.y != 0.0f ||
+             object->attack_target_velocity.z != 0.0f)) {
+            target_distance = duration * speed;
+            NuVecSub(&adjusted_position, &aimed_position, &origin);
+            NuVecNorm(&adjusted_position, &adjusted_position);
+            NuVecScale(&adjusted_position, &adjusted_position, target_distance);
+            NuVecAdd(&aimed_position, &origin, &adjusted_position);
+        } else {
+            target_distance = NuVecDist(&origin, &aimed_position, NULL);
+        }
+    }
+    NUVEC *target_position = NULL;
+    NUVEC *intercept_position = NULL;
+    NUVEC *velocity = NULL;
+    if (static_cast<i8>(object->field_0xef9) < 0) {
+        target_position = intercept_position = &object->field_0xe58;
+        if ((object->field_0xefa & 3) == 2) {
+            NuVecSub(&target_velocity, &object->field_0xe58, &object->field_0xe64);
+            NuVecScale(&target_velocity, &target_velocity, 1.0f / FRAMETIME);
+            velocity = &target_velocity;
+        }
+    } else if (object->script_fire_target != NULL) {
+        GameObject_s *target = object->script_fire_target;
+        velocity = &target->apiobj.velocity;
+        target_position = intercept_position = &target->apiobj.collision_position;
+        if ((object->apiobj.character_data->model_flags & 0x2000) == 0 &&
+            (object->apiobj.field_0x1f4 & 1) != 0) {
+            adjusted_position = target->apiobj.collision_position;
+            adjusted_position.y += Bolt_ObjTargetPosYAdjust(target);
+            target_position = &adjusted_position;
+        }
+    } else if ((object->field_0xe21 & 8) != 0) {
+        target_position = intercept_position = &aimed_position;
+    }
+    i16 sounds[8];
+    NUVEC sound_positions[8];
+    i32 sound_count = 0;
+    i32 bolts[5], bolt_count = 0;
+    i32 used_locator = 0;
+    for (i32 index = 0; index < 5; ++index) {
+        if ((index == 1 && fire_flags == 1) || (index == 0 && fire_flags == 2))
+            continue;
+        if (BoltSys->alternate_fire != NULL && BoltSys->alternate_fire(object, index) == 0)
+            continue;
+        NUVEC *shot_position;
+        if (index == 4) {
+            if (used_locator != 0)
+                break;
+            shot_position = &origin;
+        } else {
+            if (object->apiobj.model_draw_result == 0)
+                continue;
+            GAMECHARACTERDATA *data = object->apiobj.character_data->game_character;
+            i32 locator = data->weapon_shoot_joints[index];
+            if (locator == -1 || object->apiobj.character_model->points_of_interest[locator] == NULL) {
+                locator = data->weapon_joints[index];
+                if (locator == -1 || object->apiobj.character_model->points_of_interest[locator] == NULL)
+                    continue;
+            }
+            used_locator = 1;
+            shot_position = reinterpret_cast<NUVEC *>(&object->joint_matrices[locator].m30);
+        }
+        NUMTX matrix;
+        if ((flags & 0x600000) != 0) {
+            i32 pitch = (flags & 0x200000) != 0 ? 0xf8e4 : 0xf1c8;
+            if (static_cast<i32>(flags) < 0 && static_cast<i8>(object->apiobj.flags_low) >= 0 &&
+                object->script_fire_target != NULL) {
+                f32 distance = NuVecXZDist(&object->script_fire_target->apiobj.collision_position,
+                                          &object->apiobj.collision_position, NULL);
+                if (distance > 2.0f)
+                    distance = 2.0f;
+                f32 degrees = (flags & 0x200000) != 0 ? -10.0f : -20.0f;
+                pitch = static_cast<u16>(static_cast<i32>(((degrees * distance) * 0.5f * 65536.0f) / 360.0f));
+            }
+            if (target_position != NULL)
+                heading = NuAtan2D(target_position->x - shot_position->x, target_position->z - shot_position->z);
+            NUANGVEC angles = {pitch, heading, 0};
+            NuMtxSetRotationXYVU0(&matrix, &angles);
+        } else if (target_position != NULL) {
+            NUVEC delta;
+            if (velocity != NULL && (object->field_0xefa & 2) != 0)
+                CalculateInterceptVector(shot_position, intercept_position, velocity, speed, &delta, NULL);
+            else
+                NuVecSub(&delta, target_position, shot_position);
+            FindAnglesXY(&delta, NULL, NULL);
+            NUANGVEC angles = {static_cast<u16>(temp_xrot), static_cast<u16>(temp_yrot), 0};
+            NuMtxSetRotationXYVU0(&matrix, &angles);
+        } else if (object->field_0x1086 == 4) {
+            FindAnglesXY(&direction, NULL, NULL);
+            NUANGVEC angles = {static_cast<u16>(temp_xrot), static_cast<u16>(temp_yrot), 0};
+            NuMtxSetRotationXYVU0(&matrix, &angles);
+        } else {
+            NuMtxSetRotationY(&matrix, heading);
+        }
+        addbolt_nosfx = 1;
+        BOLT_s *bolt = Bolt_Add(object, shot_position, &matrix, type_id, 0);
+        if (bolt != NULL)
+            bolts[bolt_count++] = bolt->index;
+        if (addbolt_newsfx != -1 && sound_count < 8) {
+            sounds[sound_count] = addbolt_newsfx;
+            sound_positions[sound_count++] = addbolt_newpos;
+        }
+        if ((type->field_60 & 0x20000000) != 0)
+            object->timer_d50 = BOLT_SHOOTFLASHTIME;
+    }
+    object->field_0xe22 |= 4;
+    if (sound_count != 0) {
+        i32 index = sound_count == 1 ? 0 : qrand() / (0xffff / sound_count + 1);
+        GameAudio_PlaySfxById(sounds[index], &sound_positions[index], 0, 0);
+    }
+    if ((object->field_0xe21 & 8) != 0 && bolt_count > 1) {
+        f32 duration_scale = type->field_14;
+        for (i32 index = 0; index < bolt_count; ++index) {
+            BOLT_s *bolt = &Bolt[bolts[index]];
+            f32 factor = 0.0f;
+            if (target_distance != 0.0f) {
+                f32 range = bolt->speed * bolt->lifetime;
+                if (range != 0.0f)
+                    factor = target_distance / range;
+            }
+            f32 lifetime = factor * duration_scale;
+            if (bolt->lifetime > lifetime)
+                bolt->lifetime = lifetime;
+        }
+    }
 }
 
 void Bolts_Draw(WORLDINFO_s *) {
