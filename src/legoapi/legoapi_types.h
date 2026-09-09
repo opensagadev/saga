@@ -1778,7 +1778,10 @@ struct HINT_s {
     i32 shop_price;       // 0x08: consumed by InitShop
     f32 display_duration; // 0x0c; zero has no timed cancellation
     f32 repeat_delay;     // 0x10
-    u8 pad_0x14[4];
+    union {
+        u8 pad_0x14[4];
+        i32 (*availability_fn)(HINT_s *);
+    };
     void (*on_display)(HINT_s *); // 0x18
     u8 completion_flags[4];       // 0x1c
     f32 field_0x20;
@@ -1799,7 +1802,10 @@ struct HINTSYS_s {
         i32 current_hint;
         f32 display_elapsed; // 0x18
     };
-    i32 field_0x1c;
+    union {
+        i32 field_0x1c;
+        f32 alpha;
+    };
 };
 DECOMP_ASSERT(sizeof(HINTSYS_s) == 0x20, "HINTSYS_s size");
 struct HINTUIBUTTON_s {

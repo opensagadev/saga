@@ -8,15 +8,63 @@
 #include "legoapi/render/core/render.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "nu2api/numath/nufloat.h"
+#include "legoapi/world/mission.h"
 
 u32 LSW_HintConditions;
 HINTSYS_s hintsys = {};
 HINTUIBUTTON_s *hintUIButton = NULL;
 f32 AlphaBlendTime = 1.0f;
-f32 ICONXPOS_TOUCHYFEELY;
+extern f32 ICONX;
+f32 ICONXPOS_TOUCHYFEELY = -ICONX;
 f32 ICONYPOS_TOUCHYFEELY = -0.699999988f;
 f32 ICONXPOS_VIRTUALS = -0.61500001f;
 f32 ICONYPOS_VIRTUALS = 0.47f;
+
+struct HintScalarTransition {
+    f32 *target;
+    f32 from, to, elapsed, duration, delay, value;
+    HintScalarTransition() : target(&value), elapsed(0.0f), duration(-1.0f), delay(0.0f) {
+    }
+    void Update(f32 dt) {
+        if (!(duration < 0.0f) && !(elapsed >= duration + delay)) {
+            elapsed += dt;
+            if (elapsed > duration + delay)
+                elapsed = duration + delay;
+            if (elapsed >= delay)
+                *target = ((elapsed - delay) / duration) * (to - from) + from;
+        }
+    }
+};
+struct HintVectorTransition {
+    VuVec *target;
+    VuVec from, to;
+    f32 elapsed, duration, delay;
+    VuVec value;
+    HintVectorTransition() : target(&value), elapsed(0.0f), duration(-1.0f), delay(0.0f) {
+    }
+    void Update(f32 dt) {
+        if (!(duration < 0.0f) && !(elapsed >= duration + delay)) {
+            elapsed += dt;
+            if (elapsed > duration + delay)
+                elapsed = duration + delay;
+            if (elapsed >= delay) {
+                const f32 amount = (elapsed - delay) / duration;
+                target->w = 0.0f;
+                target->y = amount * (to.y - from.y) + from.y;
+                target->z = amount * (to.z - from.z) + from.z;
+                target->x = amount * (to.x - from.x) + from.x;
+            }
+        }
+    }
+};
+HintVectorTransition hintIconPos;
+HintScalarTransition hintIconScale;
+HintScalarTransition hintYPop;
+f32 (*Hint_AlphaTargetFn)();
+i32 (*Hub_PanelBusyFn)();
+extern i32 only_process_this_hint_id;
+f32 SeekLinearF(f32, f32, f32);
+void Hint_SetHint(HINT_s *, i32, i32);
 
 extern i32 NewMode, Paused, editor_active, CutSceneWaiting, PANELOFF;
 extern FadeSystem FadeSys;
@@ -202,7 +250,54 @@ void Hint_Reset() {
     hintsys.field_0x1c = 0;
 }
 
-void Hint_Process(float) {
+void Hint_Process(float elapsed) {
+    WORLDINFO *world = WorldInfo_CurrentlyActive();
+    const i32 only_hint = only_process_this_hint_id;
+    only_process_this_hint_id = -1;
+    hintIconPos.Update(elapsed);
+    hintIconScale.Update(elapsed);
+    hintYPop.Update(elapsed);
+    if (hintsys.hints == NULL)
+        return;
+
+    bool available = HINTS_ON != 0 && CUTSTOPGAME == 0 && MiniCutCam != 1 && MiniCutCam != 2 && MiniCutCam != 3 &&
+                     SuperStory == 0 && BonusArea == 0 && (world->current_level->flags & 0x200) == 0 &&
+                     (world->area == NULL || (world->area->flags & 0x124) == 0) && GetMenuID() == -1 &&
+                     FadeSys.fade == 0.0f &&
+                     (world->area == NULL || world->area != HUB_ADATA || Hub_PanelBusyFn == NULL || Hub_PanelBusyFn() == 0);
+    if (ChallengeMode != 0)
+        available = false;
+    else if (Mission_Active(NULL) != NULL)
+        available = false;
+    if (hintUIButton->field_0x78 != NULL || hintUIButton->field_0x7c != NULL)
+        available = false;
+
+    for (HINT_s *hint = hintsys.hints; hint->control_mode_ids[0] != -1; ++hint) {
+        if (hintsys.active_hint != hint && hint->field_0x20 > 0.0f)
+            hint->field_0x20 -= elapsed;
+        if (only_hint != -1 && hint->control_mode_ids[0] != only_hint)
+            continue;
+        const i32 control_mode = MechInputTouchSystem::s_baseControlMode;
+        const i32 id = hint->control_mode_ids[control_mode];
+        if (id == -1 || TTab[id] == NULL || !available || hintUIButton->field_0x78 != NULL ||
+            hintUIButton->field_0x7c != NULL || hintsys.active_hint != NULL ||
+            hint->completion_flags[control_mode] != 0 || hint->availability_fn == NULL)
+            continue;
+        if (hint->availability_fn(hint) == 0 || hint->field_0x20 > 0.0f ||
+            hint->completion_flags[MechInputTouchSystem::s_baseControlMode] == 1)
+            continue;
+        Hint_SetHint(hint, 0, 0);
+    }
+
+    const f32 target = Hint_AlphaTargetFn != NULL ? Hint_AlphaTargetFn() : 1.0f;
+    hintsys.alpha = SeekLinearF(hintsys.alpha, target, 3.0f * FRAMETIME);
+    HINT_s *hint = hintsys.active_hint;
+    if (hint != NULL) {
+        hintsys.display_elapsed += elapsed;
+        if ((hint->display_duration > 0.0f && hintsys.display_elapsed >= hint->display_duration) ||
+            *reinterpret_cast<void **>(MechSystems::Get()->PlayerButton().field_0x3c) != NULL)
+            hintsys.active_hint = NULL;
+    }
 }
 
 void Hint_SetHint(HINT_s *hint, i32 force, i32 allow_completed) {
