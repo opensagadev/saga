@@ -307,7 +307,7 @@ GIZPANEL_s *GizPanel_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObje
         GIZPANEL_s *panel = &world->giz_panel_sys->panels[index];
         f32 distance;
         if (object != NULL) {
-            if ((panel->flags & 0x0f) != 0x0c || panel->floor_position.y == -1.0f)
+            if ((panel->flags & 0x0f) != 0x0c || panel->floor_position.y == 2000000.0f)
                 continue;
             if (check_eligibility != 0 && GizPanel_CanUsePanel(object, panel) == 0)
                 continue;
