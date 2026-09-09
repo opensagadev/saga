@@ -1968,36 +1968,6 @@ extern "C" {
     }
     void NuDatGetFileInfo(void) {
     }
-    void NuHeapAlloc(void) {
-    }
-    void NuHeapAllocAligned(void) {
-    }
-    void NuHeapAllocAlignedNamed(void) {
-    }
-    void NuHeapAllocNamed(void) {
-    }
-    void NuHeapCreate(void) {
-    }
-    void NuHeapDefragAllocation(void) {
-    }
-    void NuHeapDestroy(void) {
-    }
-    void NuHeapFree(void) {
-    }
-    void NuHeapGetAllocatedBlockCount(void) {
-    }
-    void NuHeapGetFreeBlockCount(void) {
-    }
-    void NuHeapGetTotalAllocated(void) {
-    }
-    void NuHeapGetTotalFree(void) {
-    }
-    void NuAllocHigh(void) {
-    }
-    void NuAllocHighInit(void) {
-    }
-    void NuFreeHigh(void) {
-    }
     void *NuMemAllocFn(u32 size) {
         return NU_ALLOC(size, 4, 1, "", 0);
     }
@@ -3823,21 +3793,7 @@ extern "C" {
     }
     void NuVpGetClippingMtx(void) {
     }
-    void NuVpGetCurrent(void) {
-    }
     void NuVpGetCurrent2(void) {
-    }
-    void NuVpGetRegions(void) {
-    }
-    void NuVpPixelHeight(void) {
-    }
-    void NuVpPixelWidth(void) {
-    }
-    void NuVpSetCentre(void) {
-    }
-    void NuVpSetClipping(void) {
-    }
-    void NuVpSetCurrent(void) {
     }
     void NuVpSetCurrent2(void) {
     }
@@ -3848,12 +3804,6 @@ extern "C" {
     void NuVpSetSize(void) {
     }
     void NuVpSetSize2(void) {
-    }
-    void NuVpSetZRange(void) {
-    }
-    void NuVpVirtualHeight(void) {
-    }
-    void NuVpVirtualWidth(void) {
     }
 
     // ---------------------------------------------------------------------------

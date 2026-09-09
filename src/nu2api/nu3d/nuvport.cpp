@@ -95,6 +95,63 @@ NUVIEWPORT *NuVpGetCurrentViewport(void) {
     return &vpCurrent;
 }
 
+void NuVpGetCurrent(NUVIEWPORT *viewport) {
+    *viewport = vpCurrent;
+}
+
+void NuVpSetCurrent(NUVIEWPORT *viewport) {
+    vpCurrent = *viewport;
+    vport_inval = 1;
+}
+
+void NuVpGetRegions(f32 *source_x, f32 *source_y, f32 *source_right, f32 *source_bottom, f32 *dest_x, f32 *dest_y,
+                    f32 *dest_right, f32 *dest_bottom) {
+    *source_x = g_NuVpRegion.source_x;
+    *source_y = g_NuVpRegion.source_y;
+    *source_right = g_NuVpRegion.source_width;
+    *source_bottom = g_NuVpRegion.source_height;
+    *dest_x = g_NuVpRegion.dest_x;
+    *dest_y = g_NuVpRegion.dest_y;
+    *dest_right = g_NuVpRegion.dest_width;
+    *dest_bottom = g_NuVpRegion.dest_height;
+}
+
+void NuVpSetCentre(f32 x, f32 y) {
+    vpCurrent.center_x = x;
+    vpCurrent.center_y = y;
+    vport_inval = 1;
+}
+
+void NuVpSetZRange(f32 minimum, f32 maximum) {
+    vpCurrent.min_z = minimum;
+    vpCurrent.max_z = maximum;
+    vport_inval = 1;
+}
+
+void NuVpSetClipping(f32 left, f32 top, f32 right, f32 bottom) {
+    vpCurrent.clip_min_x = left < 0.0f ? 0.0f : left;
+    vpCurrent.clip_min_y = top < 0.0f ? 0.0f : top;
+    vpCurrent.clip_max_x = right > 1.0f ? 1.0f : right;
+    vpCurrent.clip_max_y = bottom > 1.0f ? 1.0f : bottom;
+    vport_inval = 1;
+}
+
+f32 NuVpPixelWidth(f32 value) {
+    return (f32)vpCurrent.width * value + (f32)vpCurrent.x;
+}
+
+f32 NuVpPixelHeight(f32 value) {
+    return (f32)vpCurrent.height * value + (f32)vpCurrent.y;
+}
+
+f32 NuVpVirtualWidth(f32 value) {
+    return value / (f32)vpCurrent.width;
+}
+
+f32 NuVpVirtualHeight(f32 value) {
+    return value / (f32)vpCurrent.height;
+}
+
 void NuVpGetPosition2(f32 *x, f32 *y) {
     const f32 x_scale = (f32)nurndr_pixel_width / kVirtualWidth;
     const f32 y_scale = (f32)nurndr_pixel_height / kVirtualHeight;

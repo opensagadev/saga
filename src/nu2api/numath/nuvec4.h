@@ -18,6 +18,7 @@ typedef struct nuhalfvec4_s {
 } NUHALFVEC4;
 
 #ifdef __cplusplus
+f32 NuBez3EvaluateX(NUVEC4 *control, f32 t);
 extern "C" {
 #endif
     void NuVec4MtxTransform(NUVEC4 *v, NUVEC *v0, NUMTX *m0);

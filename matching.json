@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 33.88207,
+    "fuzzy_match_percent": 34.05043,
     "total_code": "4722419",
-    "matched_code": "75533",
-    "matched_code_percent": 1.5994556,
+    "matched_code": "78444",
+    "matched_code_percent": 1.6610978,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 1531,
-    "matched_functions_percent": 11.375288,
+    "matched_functions": 1556,
+    "matched_functions_percent": 11.561037,
     "total_units": 1
   },
   "text": {
@@ -22324,7 +22324,7 @@
           "address": 1608912,
           "offset": 718944,
           "size": 474,
-          "match_percent": 39.96
+          "match_percent": 39.88
         },
         {
           "name": "_ZL18Action_SetRunSpeedP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -23212,7 +23212,7 @@
           "address": 1682752,
           "offset": 792784,
           "size": 1407,
-          "match_percent": 1.538462
+          "match_percent": 38.255386
         },
         {
           "name": "_ZL21Action_EngageOpponentP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -24044,7 +24044,7 @@
           "address": 4085952,
           "offset": 3195984,
           "size": 162,
-          "match_percent": 99.679245
+          "match_percent": 99.962265
         },
         {
           "name": "AISetPathHeightTol",
@@ -24276,7 +24276,7 @@
           "address": 4128912,
           "offset": 3238944,
           "size": 509,
-          "match_percent": 74.38461
+          "match_percent": 74.726494
         },
         {
           "name": "AIFormationFollow",
@@ -54948,7 +54948,7 @@
           "address": 2004048,
           "offset": 1114080,
           "size": 374,
-          "match_percent": 84.72152
+          "match_percent": 83.98734
         },
         {
           "name": "_Z20GizPanel_CanUsePanelP12GameObject_sP10GIZPANEL_s",
@@ -54980,7 +54980,7 @@
           "address": 2005248,
           "offset": 1115280,
           "size": 125,
-          "match_percent": 97.270836
+          "match_percent": 99.666664
         },
         {
           "name": "_Z20GizPanel_FindNearestP11WORLDINFO_sP7nuvec_sP12GameObject_sPfi",
@@ -54988,7 +54988,7 @@
           "address": 2005376,
           "offset": 1115408,
           "size": 769,
-          "match_percent": 20.28022
+          "match_percent": 35.153847
         },
         {
           "name": "_Z18GizPanel_BeingUsedP10GIZPANEL_s",
@@ -55004,7 +55004,7 @@
           "address": 2006576,
           "offset": 1116608,
           "size": 266,
-          "match_percent": 5.454546
+          "match_percent": 99.96104
         },
         {
           "name": "_Z12GizPanel_UseR12GameObject_sR10GIZPANEL_s",
@@ -55012,7 +55012,7 @@
           "address": 2006848,
           "offset": 1116880,
           "size": 737,
-          "match_percent": 2.818792
+          "match_percent": 92.966446
         },
         {
           "name": "_Z17GizPanel_MoveCodeP11WORLDINFO_sP12GameObject_si",
@@ -55020,7 +55020,7 @@
           "address": 2007600,
           "offset": 1117632,
           "size": 1188,
-          "match_percent": 1.627907
+          "match_percent": 83.825584
         },
         {
           "name": "_Z19GizPanel_UpdateHintP6HINT_s",
@@ -80337,7 +80337,7 @@
           "address": 4877072,
           "offset": 3987104,
           "size": 167,
-          "match_percent": 14.482758
+          "match_percent": 99.965515
         },
         {
           "name": "_Z10LoadLightsP11WORLDINFO_sPc",
@@ -90542,6 +90542,46 @@
           "match_percent": 99.902435
         },
         {
+          "name": "NuVpSetZRange",
+          "demangled_name": "NuVpSetZRange",
+          "address": 2991872,
+          "offset": 2101904,
+          "size": 52,
+          "match_percent": 99.7
+        },
+        {
+          "name": "NuVpSetCentre",
+          "demangled_name": "NuVpSetCentre",
+          "address": 2991936,
+          "offset": 2101968,
+          "size": 52,
+          "match_percent": 99.7
+        },
+        {
+          "name": "NuVpSetClipping",
+          "demangled_name": "NuVpSetClipping",
+          "address": 2992000,
+          "offset": 2102032,
+          "size": 119,
+          "match_percent": 99.84615
+        },
+        {
+          "name": "NuVpSetCurrent",
+          "demangled_name": "NuVpSetCurrent",
+          "address": 2992128,
+          "offset": 2102160,
+          "size": 130,
+          "match_percent": 99.92683
+        },
+        {
+          "name": "NuVpGetCurrent",
+          "demangled_name": "NuVpGetCurrent",
+          "address": 2992272,
+          "offset": 2102304,
+          "size": 118,
+          "match_percent": 99.948715
+        },
+        {
           "name": "NuVpGetPosition2",
           "demangled_name": "NuVpGetPosition2",
           "address": 2992944,
@@ -90558,6 +90598,38 @@
           "match_percent": 78.8
         },
         {
+          "name": "NuVpVirtualWidth",
+          "demangled_name": "NuVpVirtualWidth",
+          "address": 2994224,
+          "offset": 2104256,
+          "size": 49,
+          "match_percent": 99.818184
+        },
+        {
+          "name": "NuVpVirtualHeight",
+          "demangled_name": "NuVpVirtualHeight",
+          "address": 2994288,
+          "offset": 2104320,
+          "size": 49,
+          "match_percent": 99.818184
+        },
+        {
+          "name": "NuVpPixelWidth",
+          "demangled_name": "NuVpPixelWidth",
+          "address": 2994352,
+          "offset": 2104384,
+          "size": 53,
+          "match_percent": 99.833336
+        },
+        {
+          "name": "NuVpPixelHeight",
+          "demangled_name": "NuVpPixelHeight",
+          "address": 2994416,
+          "offset": 2104448,
+          "size": 54,
+          "match_percent": 99.833336
+        },
+        {
           "name": "NuVpGetScalingMtx",
           "demangled_name": "NuVpGetScalingMtx",
           "address": 2994608,
@@ -90572,6 +90644,14 @@
           "offset": 2104768,
           "size": 22,
           "match_percent": 99.75
+        },
+        {
+          "name": "NuVpGetRegions",
+          "demangled_name": "NuVpGetRegions",
+          "address": 2997808,
+          "offset": 2107840,
+          "size": 121,
+          "match_percent": 99.92857
         },
         {
           "name": "NuVpResetRegions",
@@ -92542,30 +92622,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "_Z10NuMemAlloci",
-          "demangled_name": "NuMemAlloc(int)",
-          "address": 2455321,
-          "offset": 1565353,
-          "size": 419,
-          "match_percent": 3.529412
-        },
-        {
-          "name": "_Z9NuMemFreePv",
-          "demangled_name": "NuMemFree(void*)",
-          "address": 2455740,
-          "offset": 1565772,
-          "size": 74,
-          "match_percent": 17.5
-        },
-        {
-          "name": "_Z11NuMemDumpFni",
-          "demangled_name": "NuMemDumpFn(int)",
-          "address": 2456006,
-          "offset": 1566038,
-          "size": 90,
-          "match_percent": 13.125
-        },
-        {
           "name": "_Z18NuFrameEndBgLoadPSi",
           "demangled_name": "NuFrameEndBgLoadPS(int)",
           "address": 2530385,
@@ -92660,30 +92716,6 @@
           "offset": 1684256,
           "size": 9,
           "match_percent": 100.0
-        },
-        {
-          "name": "_Z9NuStrCatCPcc",
-          "demangled_name": "NuStrCatC(char*, char)",
-          "address": 2584288,
-          "offset": 1694320,
-          "size": 35,
-          "match_percent": 32.307693
-        },
-        {
-          "name": "_Z15NuBez3EvaluateXP8nuvec4_sf",
-          "demangled_name": "NuBez3EvaluateX(nuvec4_s*, float)",
-          "address": 2671085,
-          "offset": 1781117,
-          "size": 309,
-          "match_percent": 5.454546
-        },
-        {
-          "name": "_Z15NuASin_Accuratef",
-          "demangled_name": "NuASin_Accurate(float)",
-          "address": 2696261,
-          "offset": 1806293,
-          "size": 522,
-          "match_percent": 3.307087
         },
         {
           "name": "_Z29NuIOS_ResetVAODuplicateFinderv",
@@ -94863,102 +94895,6 @@
           "match_percent": 15.555555
         },
         {
-          "name": "NuHeapCreate",
-          "demangled_name": "NuHeapCreate",
-          "address": 2457200,
-          "offset": 1567232,
-          "size": 562,
-          "match_percent": 2.957746
-        },
-        {
-          "name": "NuHeapDestroy",
-          "demangled_name": "NuHeapDestroy",
-          "address": 2457767,
-          "offset": 1567799,
-          "size": 21,
-          "match_percent": 35.0
-        },
-        {
-          "name": "NuHeapAlloc",
-          "demangled_name": "NuHeapAlloc",
-          "address": 2457788,
-          "offset": 1567820,
-          "size": 60,
-          "match_percent": 24.705883
-        },
-        {
-          "name": "NuHeapAllocNamed",
-          "demangled_name": "NuHeapAllocNamed",
-          "address": 2457848,
-          "offset": 1567880,
-          "size": 59,
-          "match_percent": 23.333334
-        },
-        {
-          "name": "NuHeapAllocAligned",
-          "demangled_name": "NuHeapAllocAligned",
-          "address": 2457907,
-          "offset": 1567939,
-          "size": 59,
-          "match_percent": 23.333334
-        },
-        {
-          "name": "NuHeapAllocAlignedNamed",
-          "demangled_name": "NuHeapAllocAlignedNamed",
-          "address": 2457966,
-          "offset": 1567998,
-          "size": 342,
-          "match_percent": 4.485982
-        },
-        {
-          "name": "NuHeapFree",
-          "demangled_name": "NuHeapFree",
-          "address": 2458308,
-          "offset": 1568340,
-          "size": 482,
-          "match_percent": 0.789474
-        },
-        {
-          "name": "NuHeapGetAllocatedBlockCount",
-          "demangled_name": "NuHeapGetAllocatedBlockCount",
-          "address": 2458790,
-          "offset": 1568822,
-          "size": 22,
-          "match_percent": 46.666668
-        },
-        {
-          "name": "NuHeapGetFreeBlockCount",
-          "demangled_name": "NuHeapGetFreeBlockCount",
-          "address": 2458812,
-          "offset": 1568844,
-          "size": 64,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuHeapGetTotalAllocated",
-          "demangled_name": "NuHeapGetTotalAllocated",
-          "address": 2458876,
-          "offset": 1568908,
-          "size": 22,
-          "match_percent": 46.666668
-        },
-        {
-          "name": "NuHeapGetTotalFree",
-          "demangled_name": "NuHeapGetTotalFree",
-          "address": 2458898,
-          "offset": 1568930,
-          "size": 74,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuHeapDefragAllocation",
-          "demangled_name": "NuHeapDefragAllocation",
-          "address": 2458972,
-          "offset": 1569004,
-          "size": 517,
-          "match_percent": 2.781457
-        },
-        {
           "name": "NuDatGetFileInfo",
           "demangled_name": "NuDatGetFileInfo",
           "address": 2474689,
@@ -94981,30 +94917,6 @@
           "offset": 1592158,
           "size": 22,
           "match_percent": 20.0
-        },
-        {
-          "name": "NuAllocHighInit",
-          "demangled_name": "NuAllocHighInit",
-          "address": 2495858,
-          "offset": 1605890,
-          "size": 100,
-          "match_percent": 13.548388
-        },
-        {
-          "name": "NuAllocHigh",
-          "demangled_name": "NuAllocHigh",
-          "address": 2495958,
-          "offset": 1605990,
-          "size": 175,
-          "match_percent": 7.118644
-        },
-        {
-          "name": "NuFreeHigh",
-          "demangled_name": "NuFreeHigh",
-          "address": 2496133,
-          "offset": 1606165,
-          "size": 254,
-          "match_percent": 5.106383
         },
         {
           "name": "NuQTAddElement",
@@ -98239,46 +98151,6 @@
           "match_percent": 99.77778
         },
         {
-          "name": "NuVpSetZRange",
-          "demangled_name": "NuVpSetZRange",
-          "address": 2991872,
-          "offset": 2101904,
-          "size": 52,
-          "match_percent": 42.0
-        },
-        {
-          "name": "NuVpSetCentre",
-          "demangled_name": "NuVpSetCentre",
-          "address": 2991936,
-          "offset": 2101968,
-          "size": 52,
-          "match_percent": 42.0
-        },
-        {
-          "name": "NuVpSetClipping",
-          "demangled_name": "NuVpSetClipping",
-          "address": 2992000,
-          "offset": 2102032,
-          "size": 119,
-          "match_percent": 16.153847
-        },
-        {
-          "name": "NuVpSetCurrent",
-          "demangled_name": "NuVpSetCurrent",
-          "address": 2992128,
-          "offset": 2102160,
-          "size": 130,
-          "match_percent": 10.243902
-        },
-        {
-          "name": "NuVpGetCurrent",
-          "demangled_name": "NuVpGetCurrent",
-          "address": 2992272,
-          "offset": 2102304,
-          "size": 118,
-          "match_percent": 10.769231
-        },
-        {
           "name": "NuVpSetPosition2",
           "demangled_name": "NuVpSetPosition2",
           "address": 2992400,
@@ -98325,38 +98197,6 @@
           "offset": 2104080,
           "size": 169,
           "match_percent": 10.243902
-        },
-        {
-          "name": "NuVpVirtualWidth",
-          "demangled_name": "NuVpVirtualWidth",
-          "address": 2994224,
-          "offset": 2104256,
-          "size": 49,
-          "match_percent": 38.18182
-        },
-        {
-          "name": "NuVpVirtualHeight",
-          "demangled_name": "NuVpVirtualHeight",
-          "address": 2994288,
-          "offset": 2104320,
-          "size": 49,
-          "match_percent": 38.18182
-        },
-        {
-          "name": "NuVpPixelWidth",
-          "demangled_name": "NuVpPixelWidth",
-          "address": 2994352,
-          "offset": 2104384,
-          "size": 53,
-          "match_percent": 35.0
-        },
-        {
-          "name": "NuVpPixelHeight",
-          "demangled_name": "NuVpPixelHeight",
-          "address": 2994416,
-          "offset": 2104448,
-          "size": 54,
-          "match_percent": 35.0
         },
         {
           "name": "NuVpGetClippingMtx",
@@ -98437,14 +98277,6 @@
           "offset": 2107424,
           "size": 105,
           "match_percent": 20.0
-        },
-        {
-          "name": "NuVpGetRegions",
-          "demangled_name": "NuVpGetRegions",
-          "address": 2997808,
-          "offset": 2107840,
-          "size": 121,
-          "match_percent": 15.0
         },
         {
           "name": "NuVisiEvaluate",
@@ -99832,6 +99664,229 @@
       ]
     },
     {
+      "name": "nu2api/nucore/nuheap.cpp.o",
+      "source": "src/nu2api/nucore/nuheap.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nuheap.o",
+      "functions": [
+        {
+          "name": "_ZL20NuHeapBlock_SetInUseP11NUHEAPBLOCKj",
+          "demangled_name": "NuHeapBlock_SetInUse(NUHEAPBLOCK*, unsigned int)",
+          "address": 2456435,
+          "offset": 1566467,
+          "size": 50,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL20NuHeapBlock_GetInUseP11NUHEAPBLOCK",
+          "demangled_name": "NuHeapBlock_GetInUse(NUHEAPBLOCK*)",
+          "address": 2456485,
+          "offset": 1566517,
+          "size": 27,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL19NuHeapBlock_SetSizeP11NUHEAPBLOCKj",
+          "demangled_name": "NuHeapBlock_SetSize(NUHEAPBLOCK*, unsigned int)",
+          "address": 2456512,
+          "offset": 1566544,
+          "size": 39,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL19NuHeapBlock_GetSizeP11NUHEAPBLOCK",
+          "demangled_name": "NuHeapBlock_GetSize(NUHEAPBLOCK*)",
+          "address": 2456551,
+          "offset": 1566583,
+          "size": 16,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL23NuHeapBlock_SetNextFreeP11NUHEAPBLOCKS0_",
+          "demangled_name": "NuHeapBlock_SetNextFree(NUHEAPBLOCK*, NUHEAPBLOCK*)",
+          "address": 2456567,
+          "offset": 1566599,
+          "size": 15,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL23NuHeapBlock_GetNextFreeP11NUHEAPBLOCK",
+          "demangled_name": "NuHeapBlock_GetNextFree(NUHEAPBLOCK*)",
+          "address": 2456582,
+          "offset": 1566614,
+          "size": 12,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL23NuHeapBlock_SetPrevFreeP11NUHEAPBLOCKS0_",
+          "demangled_name": "NuHeapBlock_SetPrevFree(NUHEAPBLOCK*, NUHEAPBLOCK*)",
+          "address": 2456594,
+          "offset": 1566626,
+          "size": 15,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL27NuHeapBlock_GetUsableMemoryP11NUHEAPBLOCK",
+          "demangled_name": "NuHeapBlock_GetUsableMemory(NUHEAPBLOCK*)",
+          "address": 2456609,
+          "offset": 1566641,
+          "size": 12,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL23NuHeapBlock_WriteFooterP11NUHEAPBLOCK",
+          "demangled_name": "NuHeapBlock_WriteFooter(NUHEAPBLOCK*)",
+          "address": 2456621,
+          "offset": 1566653,
+          "size": 34,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL30NuHeapBlock_RemoveFromFreeListP11NUHEAPBLOCK",
+          "demangled_name": "NuHeapBlock_RemoveFromFreeList(NUHEAPBLOCK*)",
+          "address": 2456655,
+          "offset": 1566687,
+          "size": 56,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL19NuHeapBlock_SetNameP11NUHEAPBLOCKPc",
+          "demangled_name": "NuHeapBlock_SetName(NUHEAPBLOCK*, char*)",
+          "address": 2456711,
+          "offset": 1566743,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL26NuHeapBlock_SplitFreeBlockP11NUHEAPBLOCKPjPS0_S2_j",
+          "demangled_name": "NuHeapBlock_SplitFreeBlock(NUHEAPBLOCK*, unsigned int*, NUHEAPBLOCK**, NUHEAPBLOCK**, unsigned int)",
+          "address": 2456716,
+          "offset": 1566748,
+          "size": 423,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL19NuHeapBlock_GetNextP11NUHEAPBLOCK",
+          "demangled_name": "NuHeapBlock_GetNext(NUHEAPBLOCK*)",
+          "address": 2457139,
+          "offset": 1567171,
+          "size": 36,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL19NuHeapBlock_GetPrevP11NUHEAPBLOCK",
+          "demangled_name": "NuHeapBlock_GetPrev(NUHEAPBLOCK*)",
+          "address": 2457175,
+          "offset": 1567207,
+          "size": 25,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuHeapCreate",
+          "demangled_name": "NuHeapCreate",
+          "address": 2457200,
+          "offset": 1567232,
+          "size": 562,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL23NuHeap_PrintAllocationsPv",
+          "demangled_name": "NuHeap_PrintAllocations(void*)",
+          "address": 2457762,
+          "offset": 1567794,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuHeapDestroy",
+          "demangled_name": "NuHeapDestroy",
+          "address": 2457767,
+          "offset": 1567799,
+          "size": 21,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuHeapAlloc",
+          "demangled_name": "NuHeapAlloc",
+          "address": 2457788,
+          "offset": 1567820,
+          "size": 60,
+          "match_percent": 99.94118
+        },
+        {
+          "name": "NuHeapAllocNamed",
+          "demangled_name": "NuHeapAllocNamed",
+          "address": 2457848,
+          "offset": 1567880,
+          "size": 59,
+          "match_percent": 99.94444
+        },
+        {
+          "name": "NuHeapAllocAligned",
+          "demangled_name": "NuHeapAllocAligned",
+          "address": 2457907,
+          "offset": 1567939,
+          "size": 59,
+          "match_percent": 99.94444
+        },
+        {
+          "name": "NuHeapAllocAlignedNamed",
+          "demangled_name": "NuHeapAllocAlignedNamed",
+          "address": 2457966,
+          "offset": 1567998,
+          "size": 342,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuHeapFree",
+          "demangled_name": "NuHeapFree",
+          "address": 2458308,
+          "offset": 1568340,
+          "size": 482,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuHeapGetAllocatedBlockCount",
+          "demangled_name": "NuHeapGetAllocatedBlockCount",
+          "address": 2458790,
+          "offset": 1568822,
+          "size": 22,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuHeapGetFreeBlockCount",
+          "demangled_name": "NuHeapGetFreeBlockCount",
+          "address": 2458812,
+          "offset": 1568844,
+          "size": 64,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuHeapGetTotalAllocated",
+          "demangled_name": "NuHeapGetTotalAllocated",
+          "address": 2458876,
+          "offset": 1568908,
+          "size": 22,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuHeapGetTotalFree",
+          "demangled_name": "NuHeapGetTotalFree",
+          "address": 2458898,
+          "offset": 1568930,
+          "size": 74,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuHeapDefragAllocation",
+          "demangled_name": "NuHeapDefragAllocation",
+          "address": 2458972,
+          "offset": 1569004,
+          "size": 517,
+          "match_percent": 100.0
+        }
+      ]
+    },
+    {
       "name": "nu2api/nucore/nuhgobj.cpp.o",
       "source": "src/nu2api/nucore/nuhgobj.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nuhgobj.o",
@@ -100222,12 +100277,36 @@
           "match_percent": 99.71429
         },
         {
+          "name": "_Z10NuMemAlloci",
+          "demangled_name": "NuMemAlloc(int)",
+          "address": 2455321,
+          "offset": 1565353,
+          "size": 419,
+          "match_percent": 99.79832
+        },
+        {
+          "name": "_Z9NuMemFreePv",
+          "demangled_name": "NuMemFree(void*)",
+          "address": 2455740,
+          "offset": 1565772,
+          "size": 74,
+          "match_percent": 99.875
+        },
+        {
           "name": "_Z15NuMemValidateFnv",
           "demangled_name": "NuMemValidateFn()",
           "address": 2455814,
           "offset": 1565846,
           "size": 192,
           "match_percent": 96.63158
+        },
+        {
+          "name": "_Z11NuMemDumpFni",
+          "demangled_name": "NuMemDumpFn(int)",
+          "address": 2456006,
+          "offset": 1566038,
+          "size": 90,
+          "match_percent": 83.375
         },
         {
           "name": "_Z12NuMemFlushFnv",
@@ -100324,6 +100403,37 @@
           "offset": 1605792,
           "size": 98,
           "match_percent": 99.96875
+        }
+      ]
+    },
+    {
+      "name": "nu2api/nucore/numemhigh.cpp.o",
+      "source": "src/nu2api/nucore/numemhigh.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/numemhigh.o",
+      "functions": [
+        {
+          "name": "NuAllocHighInit",
+          "demangled_name": "NuAllocHighInit",
+          "address": 2495858,
+          "offset": 1605890,
+          "size": 100,
+          "match_percent": 99.83871
+        },
+        {
+          "name": "NuAllocHigh",
+          "demangled_name": "NuAllocHigh",
+          "address": 2495958,
+          "offset": 1605990,
+          "size": 175,
+          "match_percent": 99.932205
+        },
+        {
+          "name": "NuFreeHigh",
+          "demangled_name": "NuFreeHigh",
+          "address": 2496133,
+          "offset": 1606165,
+          "size": 254,
+          "match_percent": 99.96809
         }
       ]
     },
@@ -100963,126 +101073,6 @@
           "offset": 124688,
           "size": 289,
           "match_percent": 4.421053
-        },
-        {
-          "name": "_ZL20NuHeapBlock_SetInUseP11NUHEAPBLOCKj",
-          "demangled_name": "NuHeapBlock_SetInUse(NUHEAPBLOCK*, unsigned int)",
-          "address": 2456435,
-          "offset": 1566467,
-          "size": 50,
-          "match_percent": 22.105263
-        },
-        {
-          "name": "_ZL20NuHeapBlock_GetInUseP11NUHEAPBLOCK",
-          "demangled_name": "NuHeapBlock_GetInUse(NUHEAPBLOCK*)",
-          "address": 2456485,
-          "offset": 1566517,
-          "size": 27,
-          "match_percent": 34.545456
-        },
-        {
-          "name": "_ZL19NuHeapBlock_SetSizeP11NUHEAPBLOCKj",
-          "demangled_name": "NuHeapBlock_SetSize(NUHEAPBLOCK*, unsigned int)",
-          "address": 2456512,
-          "offset": 1566544,
-          "size": 39,
-          "match_percent": 26.25
-        },
-        {
-          "name": "_ZL19NuHeapBlock_GetSizeP11NUHEAPBLOCK",
-          "demangled_name": "NuHeapBlock_GetSize(NUHEAPBLOCK*)",
-          "address": 2456551,
-          "offset": 1566583,
-          "size": 16,
-          "match_percent": 34.285713
-        },
-        {
-          "name": "_ZL23NuHeapBlock_SetNextFreeP11NUHEAPBLOCKS0_",
-          "demangled_name": "NuHeapBlock_SetNextFree(NUHEAPBLOCK*, NUHEAPBLOCK*)",
-          "address": 2456567,
-          "offset": 1566599,
-          "size": 15,
-          "match_percent": 20.0
-        },
-        {
-          "name": "_ZL23NuHeapBlock_GetNextFreeP11NUHEAPBLOCK",
-          "demangled_name": "NuHeapBlock_GetNextFree(NUHEAPBLOCK*)",
-          "address": 2456582,
-          "offset": 1566614,
-          "size": 12,
-          "match_percent": 16.666666
-        },
-        {
-          "name": "_ZL23NuHeapBlock_SetPrevFreeP11NUHEAPBLOCKS0_",
-          "demangled_name": "NuHeapBlock_SetPrevFree(NUHEAPBLOCK*, NUHEAPBLOCK*)",
-          "address": 2456594,
-          "offset": 1566626,
-          "size": 15,
-          "match_percent": 20.0
-        },
-        {
-          "name": "_ZL27NuHeapBlock_GetUsableMemoryP11NUHEAPBLOCK",
-          "demangled_name": "NuHeapBlock_GetUsableMemory(NUHEAPBLOCK*)",
-          "address": 2456609,
-          "offset": 1566641,
-          "size": 12,
-          "match_percent": 16.666666
-        },
-        {
-          "name": "_ZL23NuHeapBlock_WriteFooterP11NUHEAPBLOCK",
-          "demangled_name": "NuHeapBlock_WriteFooter(NUHEAPBLOCK*)",
-          "address": 2456621,
-          "offset": 1566653,
-          "size": 34,
-          "match_percent": 32.307693
-        },
-        {
-          "name": "_ZL30NuHeapBlock_RemoveFromFreeListP11NUHEAPBLOCK",
-          "demangled_name": "NuHeapBlock_RemoveFromFreeList(NUHEAPBLOCK*)",
-          "address": 2456655,
-          "offset": 1566687,
-          "size": 56,
-          "match_percent": 19.09091
-        },
-        {
-          "name": "_ZL19NuHeapBlock_SetNameP11NUHEAPBLOCKPc",
-          "demangled_name": "NuHeapBlock_SetName(NUHEAPBLOCK*, char*)",
-          "address": 2456711,
-          "offset": 1566743,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "_ZL26NuHeapBlock_SplitFreeBlockP11NUHEAPBLOCKPjPS0_S2_j",
-          "demangled_name": "NuHeapBlock_SplitFreeBlock(NUHEAPBLOCK*, unsigned int*, NUHEAPBLOCK**, NUHEAPBLOCK**, unsigned int)",
-          "address": 2456716,
-          "offset": 1566748,
-          "size": 423,
-          "match_percent": 3.111111
-        },
-        {
-          "name": "_ZL19NuHeapBlock_GetNextP11NUHEAPBLOCK",
-          "demangled_name": "NuHeapBlock_GetNext(NUHEAPBLOCK*)",
-          "address": 2457139,
-          "offset": 1567171,
-          "size": 36,
-          "match_percent": 29.23077
-        },
-        {
-          "name": "_ZL19NuHeapBlock_GetPrevP11NUHEAPBLOCK",
-          "demangled_name": "NuHeapBlock_GetPrev(NUHEAPBLOCK*)",
-          "address": 2457175,
-          "offset": 1567207,
-          "size": 25,
-          "match_percent": 38.0
-        },
-        {
-          "name": "_ZL23NuHeap_PrintAllocationsPv",
-          "demangled_name": "NuHeap_PrintAllocations(void*)",
-          "address": 2457762,
-          "offset": 1567794,
-          "size": 5,
-          "match_percent": 0.0
         }
       ]
     },
@@ -102092,6 +102082,14 @@
       "source": "src/nu2api/nucore/nustring.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nustring.o",
       "functions": [
+        {
+          "name": "_Z9NuStrCatCPcc",
+          "demangled_name": "NuStrCatC(char*, char)",
+          "address": 2584288,
+          "offset": 1694320,
+          "size": 35,
+          "match_percent": 100.0
+        },
         {
           "name": "_Z14NuStrStripPathPKc",
           "demangled_name": "NuStrStripPath(char const*)",
@@ -106405,6 +106403,14 @@
           "match_percent": 99.89189
         },
         {
+          "name": "_Z15NuBez3EvaluateXP8nuvec4_sf",
+          "demangled_name": "NuBez3EvaluateX(nuvec4_s*, float)",
+          "address": 2671085,
+          "offset": 1781117,
+          "size": 309,
+          "match_percent": 99.766235
+        },
+        {
           "name": "NuLog10",
           "demangled_name": "NuLog10",
           "address": 2687225,
@@ -107941,6 +107947,14 @@
           "offset": 1796010,
           "size": 470,
           "match_percent": 99.8125
+        },
+        {
+          "name": "_Z15NuASin_Accuratef",
+          "demangled_name": "NuASin_Accurate(float)",
+          "address": 2696261,
+          "offset": 1806293,
+          "size": 522,
+          "match_percent": 99.85827
         },
         {
           "name": "_Z14NuSin_Accuratef",
@@ -131204,7 +131218,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 507,
+    "bazel_units": 509,
     "functions": 13454,
     "assigned_functions": 12258,
     "ambiguous_functions": 225,

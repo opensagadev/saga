@@ -6225,19 +6225,20 @@ extern i32 LineIntersectSphere(NUVEC *, NUVEC *, NUVEC *, f32, f32 *);
 // The original shooting action calls the out-of-line PartyMemberInWay clone.
 static __attribute__((noinline)) i32 PartyMemberInWay(GameObject_s *object, GameObject_s *opponent) {
     NUVEC difference, direction;
-    const f32 target_distance = NuVecDistSqr(&opponent->apiobj.collision_position,
-                                            &object->apiobj.collision_position, &difference);
+    const f32 target_distance =
+        NuVecDistSqr(&opponent->apiobj.collision_position, &object->apiobj.collision_position, &difference);
     const f32 length = NuFsqrt(target_distance);
     NuVecScale(&direction, &difference, length != 0.0f ? 1.0f / length : 0.0f);
     for (i32 index = 0; index < 8; ++index) {
         GameObject_s *member = Player[index];
         if (member == NULL || (member->apiobj.field_0x1f8 & 0x1001) != 0x1001 || member == object || member == opponent)
             continue;
-        if (NuVecDistSqr(&object->apiobj.collision_position, &member->apiobj.collision_position, &difference) < target_distance) {
+        if (NuVecDistSqr(&object->apiobj.collision_position, &member->apiobj.collision_position, &difference) <
+            target_distance) {
             member = Player[index];
             const f32 radius = 0.125f + member->apiobj.field_0x1dc;
-            if (LineIntersectSphere(&object->apiobj.collision_position, &direction,
-                                    &member->apiobj.collision_position, radius * radius, NULL))
+            if (LineIntersectSphere(&object->apiobj.collision_position, &direction, &member->apiobj.collision_position,
+                                    radius * radius, NULL))
                 return true;
         }
     }
@@ -6274,13 +6275,15 @@ __used__ static i32 Action_ShootAtOpponent(AISYS *sys, AISCRIPTPROCESS *processo
         }
         processor->action_timer = fraction * processor->action_data_5;
         if (!explicit_range)
-            processor->action_data_4 = packet->movement_instruction_parameter == 0.0f ? 9999.9f :
-                packet->movement_instruction_parameter + aitol;
+            processor->action_data_4 = packet->movement_instruction_parameter == 0.0f
+                                           ? 9999.9f
+                                           : packet->movement_instruction_parameter + aitol;
     }
     GameObject_s *opponent = static_cast<GameObject_s *>(processor->action_data_3);
     if (opponent == NULL || (opponent->apiobj.field_0x1f8 & 0x1001) != 0x1001 ||
         (opponent->apiobj.field_0x287 != 0 && !(opponent->field_0x101c > 0.0f))) {
-        if (packet->opponent_object == NULL || packet->opponent_object->ai == NULL || packet->opponent_object->objptr == NULL)
+        if (packet->opponent_object == NULL || packet->opponent_object->ai == NULL ||
+            packet->opponent_object->objptr == NULL)
             return 0;
         opponent = packet->opponent_object->objptr;
     }

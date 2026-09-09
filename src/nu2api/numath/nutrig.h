@@ -7,6 +7,7 @@
 #include "nu2api/numath/nufloat.h"
 
 #ifdef __cplusplus
+f32 NuASin_Accurate(f32 value);
 static inline i16 NuASin(f32 sin) {
     f32 abs;
     f32 sqrt;

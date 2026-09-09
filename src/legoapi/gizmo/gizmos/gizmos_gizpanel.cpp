@@ -84,8 +84,9 @@ void GizPanel_Use(GameObject_s &object, GIZPANEL_s &panel) {
             Hint_SetComplete(0x26a);
         }
     } else if (active_panel->model_variant == 3) {
-        object.context_animation = object.apiobj.character_model->model_data_b[0x45] != NULL ? 0x45 :
-            (object.apiobj.character_model->model_data_b[0x46] != NULL ? 0x46 : 0x45);
+        object.context_animation = object.apiobj.character_model->model_data_b[0x45] != NULL
+                                       ? 0x45
+                                       : (object.apiobj.character_model->model_data_b[0x46] != NULL ? 0x46 : 0x45);
         MakeBaddiesForgetAboutParty(1);
         if (static_cast<i8>(object.apiobj.object_flags) < 0) {
             Hint_SetComplete(0x260);
@@ -184,10 +185,10 @@ void GizPanel_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 use) {
             object->context_animation_timer -= FRAMETIME;
             if (object->context_animation_timer <= 0.0f) {
                 object->character_context = -1;
-                static_cast<GIZPANEL_s *>(object->field_0x788)->flags = static_cast<GIZPANEL_FLAGS>(
-                    static_cast<GIZPANEL_s *>(object->field_0x788)->flags & ~1);
-                static_cast<GIZPANEL_s *>(object->field_0x788)->flags = static_cast<GIZPANEL_FLAGS>(
-                    static_cast<GIZPANEL_s *>(object->field_0x788)->flags | 2);
+                static_cast<GIZPANEL_s *>(object->field_0x788)->flags =
+                    static_cast<GIZPANEL_FLAGS>(static_cast<GIZPANEL_s *>(object->field_0x788)->flags & ~1);
+                static_cast<GIZPANEL_s *>(object->field_0x788)->flags =
+                    static_cast<GIZPANEL_FLAGS>(static_cast<GIZPANEL_s *>(object->field_0x788)->flags | 2);
                 object->field_0x788 = NULL;
             }
             if ((object->field_0xe21 & 0x10) == 0)
@@ -224,10 +225,10 @@ void GizPanel_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 use) {
                     }
                 }
                 object->character_context = -1;
-                static_cast<GIZPANEL_s *>(object->field_0x788)->flags = static_cast<GIZPANEL_FLAGS>(
-                    static_cast<GIZPANEL_s *>(object->field_0x788)->flags & ~1);
-                static_cast<GIZPANEL_s *>(object->field_0x788)->flags = static_cast<GIZPANEL_FLAGS>(
-                    static_cast<GIZPANEL_s *>(object->field_0x788)->flags | 2);
+                static_cast<GIZPANEL_s *>(object->field_0x788)->flags =
+                    static_cast<GIZPANEL_FLAGS>(static_cast<GIZPANEL_s *>(object->field_0x788)->flags & ~1);
+                static_cast<GIZPANEL_s *>(object->field_0x788)->flags =
+                    static_cast<GIZPANEL_FLAGS>(static_cast<GIZPANEL_s *>(object->field_0x788)->flags | 2);
                 object->field_0x788 = NULL;
             } else if ((object->apiobj.character_data->model_flags & 0x20) != 0) {
                 SetProtocolDroidInterfaceAction(object);
@@ -242,7 +243,8 @@ void GizPanel_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 use) {
     GIZPANEL_s *panel = GizPanel_FindNearest(WORLD, &object->apiobj.position, object, &distance, 1);
     if (panel != NULL) {
         const f32 radius = (0.25f + object->apiobj.field_0x1dc) * panel->target_scale;
-        if (distance < radius * radius && (use != 0 || (object->panel_use_request == 1 && object->big_jump_data != NULL)))
+        if (distance < radius * radius &&
+            (use != 0 || (object->panel_use_request == 1 && object->big_jump_data != NULL)))
             GizPanel_Use(*object, *panel);
     } else if (use != 0 && static_cast<i8>(object->apiobj.object_flags) < 0 &&
                (object->apiobj.character_data->model_flags & 0x20) != 0 && object->field_0xdb0 <= 0.0f) {

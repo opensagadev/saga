@@ -25,6 +25,7 @@ typedef struct nustringbank_s {
 } NUSTRINGBANK;
 
 #ifdef __cplusplus
+void NuStrCatC(char *text, char character);
 extern "C" {
     i32 NuVSPrintf(char *dest, const char *format, va_list args);
     i32 NuSPrintfW(NUWCHAR *dest, NUWCHAR *format, ...);

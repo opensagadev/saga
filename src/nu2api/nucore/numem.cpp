@@ -1,4 +1,5 @@
 #include "nu2api/nucore/numem.h"
+#include "nu2api/nucore/nuheap.h"
 #include "nu2api/nucore/numemory.h"
 #include <string.h>
 #include <stdlib.h>
@@ -11,6 +12,20 @@ struct NUMEMALLOCATION {
 };
 
 static NUMEMALLOCATION *alloc_list;
+
+void NuMemDumpFn(i32 mode) {
+    NUMEMALLOCATION *block = alloc_list;
+    VARIPTR tail;
+    void *tail_data;
+    // The Android binary retains the traversal and metadata calculations,
+    // but contains no calls to print the allocation records.
+    while (block) {
+        tail.void_ptr = block + 1;
+        tail.addr += block->size;
+        tail_data = (u8 *)tail.void_ptr + 12;
+        block = block->next;
+    }
+}
 
 void *NuMemValidateFn(void) {
     i32 result;
@@ -50,13 +65,60 @@ static NUMEMEXTERNAL *memexternal;
 static NUMEMEXTERNAL memext;
 static NUMEMDISCARDABLE *discardbuff;
 static isize peakallocaddr;
+static i32 totalloc;
 
 extern "C" {
     void *NuMem_Heap;
+    extern i32 highallocaddr;
+}
+
+void *NuMemAlloc(i32 size) {
+    void *block;
+    isize end;
+    if (memexternal != NULL) {
+        memexternal->cursor->addr = (memexternal->cursor->addr + 15) & ~(usize)15;
+        if (memexternal->end.addr - memexternal->cursor->addr >= (usize)size) {
+            block = memexternal->cursor->void_ptr;
+            memexternal->cursor->addr += size;
+            return block;
+        }
+        return NULL;
+    }
+    if (discardbuff != NULL) {
+        size = (size + 15) & ~15;
+        if (discardbuff->remaining > size) {
+            block = discardbuff->cursor;
+            discardbuff->cursor += size;
+            discardbuff->remaining -= size;
+            return block;
+        }
+        return NULL;
+    }
+    totalloc += size;
+    if (NuMem_Heap != NULL) {
+        block = NuHeapAllocAligned(NuMem_Heap, size, 4);
+    } else {
+        block = malloc(size);
+    }
+    memset(block, 0, size);
+    end = (isize)block + size;
+    if (end > highallocaddr)
+        highallocaddr = end;
+    if (end > peakallocaddr)
+        peakallocaddr = end;
+    return block;
 }
 
 void NuMemSetHeap(void *heap) {
     NuMem_Heap = heap;
+}
+
+void NuMemFree(void *ptr) {
+    if (NuMem_Heap != NULL) {
+        NuHeapFree(NuMem_Heap, ptr);
+    } else {
+        free(ptr);
+    }
 }
 
 isize NuMemGetPeakAllocAddr(void) {

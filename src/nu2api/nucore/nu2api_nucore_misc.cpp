@@ -45,16 +45,10 @@ extern "C" void NuAnimBuffEvaluate_3(nuanimbuff_s *buffer, nuhgobj_s *object, NU
                                      ani3_animheader_s *animation, NUHGOBJROOTFN root_fn, NUVEC *root_translation,
                                      void *root_data);
 
-void NuMemAlloc(i32) {
-}
-
 void NuHGobjRead(variptr_u *, char *) {
 }
 
 static void NuHtmlFlush(i32) {
-}
-
-void NuMemDumpFn(i32) {
 }
 
 void NuDDSGetSize(char const *) {
@@ -93,12 +87,6 @@ void NuQFntSetMtx2d(void *, numtx_s *) {
 }
 
 void NuWarningPrint(char *) {
-}
-
-void NuASin_Accurate(float) {
-}
-
-void NuBez3EvaluateX(nuvec4_s *, float) {
 }
 
 void NuDebugMsgPrint(char *message) {
@@ -967,12 +955,6 @@ extern "C" {
 i32 NuLgtRand() {
     NuLgtSeed = (NuLgtSeed * 0x24cd + 1) & 0xffff;
     return NuLgtSeed;
-}
-
-void NuMemFree(void *) {
-}
-
-void NuStrCatC(char *, char) {
 }
 
 NuDynamicLight::RenderSet::RenderSet() {

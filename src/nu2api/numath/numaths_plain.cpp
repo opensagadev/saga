@@ -8,6 +8,18 @@
 #include <float.h>
 #include <string.h>
 
+f32 NuBez3EvaluateX(NUVEC4 *control, f32 t) {
+    NUVEC4 powers;
+    NUVEC4 coefficients;
+    NUMTX basis = {-1.0f, 3.0f, -3.0f, 1.0f, 3.0f, -6.0f, 3.0f, 0.0f, -3.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f};
+    powers.x = t * t * t;
+    powers.y = t * t;
+    powers.z = t;
+    powers.w = 1.0f;
+    NuVec4MtxTransformH(&coefficients, control, &basis);
+    return NuVec4Dot(&coefficients, &powers);
+}
+
 extern "C" {
 
     f32 NuLog10(f32 x) {

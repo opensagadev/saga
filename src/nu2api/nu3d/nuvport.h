@@ -55,6 +55,17 @@ extern "C" {
 
     void NuVpRestore(void);
     NUVIEWPORT *NuVpGetCurrentViewport(void);
+    void NuVpGetCurrent(NUVIEWPORT *viewport);
+    void NuVpSetCurrent(NUVIEWPORT *viewport);
+    void NuVpGetRegions(f32 *source_x, f32 *source_y, f32 *source_right, f32 *source_bottom, f32 *dest_x, f32 *dest_y,
+                        f32 *dest_right, f32 *dest_bottom);
+    void NuVpSetCentre(f32 x, f32 y);
+    void NuVpSetZRange(f32 minimum, f32 maximum);
+    void NuVpSetClipping(f32 left, f32 top, f32 right, f32 bottom);
+    f32 NuVpPixelWidth(f32 value);
+    f32 NuVpPixelHeight(f32 value);
+    f32 NuVpVirtualWidth(f32 value);
+    f32 NuVpVirtualHeight(f32 value);
     void NuVpGetPosition2(f32 *x, f32 *y);
     void NuVpGetSize2(f32 *width, f32 *height);
     void NuVpGetScalingMtx(NUMTX *dest);

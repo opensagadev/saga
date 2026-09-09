@@ -4,6 +4,15 @@
 #include <stdio.h>
 #include <string.h>
 
+void NuStrCatC(char *text, char character) {
+    while (*text != '\0')
+        text++;
+    if (character != '\0') {
+        *text = character;
+        text[1] = '\0';
+    }
+}
+
 void NuStrFormatAddress(char *buf, u32 buf_len, void *ptr) {
     char address[21];
 

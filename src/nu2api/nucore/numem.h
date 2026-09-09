@@ -31,8 +31,11 @@ typedef struct numemblk_s {
 #ifdef __cplusplus
 void NuMemBlkCheckFreeList(NUMEMBLK *pool);
 NUMEMEXTERNAL *NuMemGetExternal(void);
+void NuMemFree(void *ptr);
+void *NuMemAlloc(i32 size);
 void *NuMemValidateFn(void);
 void NuMemFlushFn(void);
+void NuMemDumpFn(i32 mode);
 extern "C" {
 #endif
     void NuMemSet128(void *ptr, u32 value, isize size);
@@ -40,6 +43,9 @@ extern "C" {
     void *NuMemAllocFn(u32 size);
     void *NuMemReAllocFn(void *ptr, u32 size);
     void NuMemFreeFn(void *ptr);
+    void NuAllocHighInit(usize buffer, u32 size);
+    void *NuAllocHigh(u32 size);
+    void NuFreeHigh(void *ptr);
     void NuMemSetExternal(VARIPTR *cursor, VARIPTR *end);
     void NuMemSetHeap(void *heap);
     isize NuMemGetPeakAllocAddr(void);
