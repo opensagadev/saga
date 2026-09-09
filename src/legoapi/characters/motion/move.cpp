@@ -201,7 +201,10 @@ void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 void GameAudio_PlaySfxById(i32, NUVEC *, i32, i32);
 static void CommunicateCode(GameObject_s *, i32, i32);
 static void PunchCode(GameObject_s *, i32, i32, i32, i32, f32);
-static i32 __attribute__((regparm(2))) ShootCode(GameObject_s *, i32, i32, i32, i32, i32);
+#if defined(__i386__)
+__attribute__((regparm(2)))
+#endif
+static i32 ShootCode(GameObject_s *, i32, i32, i32, i32, i32);
 static void ForcePushed_MoveCode(GameObject_s *);
 static void DeactivatedCode(GameObject_s *);
 static void ZapCode(GameObject_s *, i32, i32);
@@ -6592,7 +6595,10 @@ static void CommunicateCode(GameObject_s *object, i32 pressed, i32) {
 static __used__ void PunchCode(GameObject_s *, i32, i32, i32, i32, f32) {
 }
 
-static __used__ void __attribute__((regparm(2))) ShootThisFrame(GameObject_s *object, i32 bolt_id, i32 flags) {
+#if defined(__i386__)
+__attribute__((regparm(2)))
+#endif
+static __used__ void ShootThisFrame(GameObject_s *object, i32 bolt_id, i32 flags) {
     if (object == Player[0] && nextShootTarget.Get() != NULL)
         nextShootTarget = NuMechPtr<MechObjectInterface, 4>();
     if ((object->apiobj.field_0x1f4 & 0x40000) != 0 && object->apiobj.field_0x27c != -1)
@@ -6618,7 +6624,10 @@ void SetWeaponIn(GameObject_s *);
 GIZMOBLOWUP_s *GizmoBlowUp_Target(GameObject_s *, NUVEC *, NUVEC *, f32, f32, i32, i32, i32);
 i32 GizmoSys_SetBestBoltTarget(GIZMOSYS *, void *, GameObject_s *, NUVEC *, NUVEC *, f32, f32, i32, i32, i32);
 
-static __used__ i32 __attribute__((regparm(2))) ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32 weapon_mode,
+#if defined(__i386__)
+__attribute__((regparm(2)))
+#endif
+static __used__ i32 ShootCode(GameObject_s *object, i32 pressed, i32 special_pressed, i32 weapon_mode,
                               i32 allow_airborne, i32 fire_mode) {
     GameObject_s *target = NULL;
     GIZMOBLOWUP_s *blowup = NULL;
