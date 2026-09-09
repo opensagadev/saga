@@ -21,6 +21,7 @@ void SetLights(NUCOLOUR3 *colour0, NUVEC *direction0, NUCOLOUR3 *colour1, NUVEC 
 extern "C" {
     void rtlResetEx(rtldata_s *data, i32 reset_cached);
     void rtlApplySetScale(void *, rtldata_s *, NUVEC *, NUMTX *, i32, f32);
+    void rtlDynamicMasterEnable(i32);
 }
 
 void SetFlicker(GameObject_s *object, float duration) {
@@ -112,7 +113,13 @@ void LightGameObject(GameObject_s *object, void *set) {
     object->field_0xefc &= 0x7f;
 }
 
-void FindAndSetLights(nuvec_s *, float, void *) {
+void FindAndSetLights(nuvec_s *position, float scale, void *set) {
+    rtldata_s lights;
+    rtlResetEx(&lights, 1);
+    rtlDynamicMasterEnable(0);
+    rtlApplySetScale(set, &lights, position, NULL, -1, scale);
+    rtlDynamicMasterEnable(1);
+    rtlSetLights(&lights);
 }
 
 void LightSabreDebris(GameObject_s *) {
