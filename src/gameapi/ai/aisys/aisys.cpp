@@ -4323,15 +4323,73 @@ static i32 Action_ShadowTerrain(AISYS *, AISCRIPTPROCESS *, AIPACKET *packet, ch
 }
 
 __used__ static i32 Action_SnapToLocator(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
-                                         i32 param_4, i32 param_5, f32 param_6) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
-    (void)param_6;
-    return 0;
+                                         i32 param_count, i32 first_time, f32) {
+    if (first_time != 0) {
+        GameObject *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+        char *name = NULL;
+        i32 personal = 0;
+        i32 indexed = 0;
+        i32 random_count = 0;
+        i32 check_terrain = 1;
+        for (i32 i = 0; i < param_count; ++i) {
+            char *value;
+            if ((value = NuStrIStr(params[i], "name")) != NULL)
+                name = value + 5;
+            else if (NuStrIStr(params[i], "personal") != NULL)
+                personal = 1;
+            else if (NuStrIStr(params[i], "indexed") != NULL)
+                indexed = 1;
+            else if ((value = NuStrIStr(params[i], "random")) != NULL)
+                random_count = (i32)AIParamToFloat(processor, value + 9);
+            else if ((value = NuStrIStr(params[i], "character")) != NULL)
+                object = GetNamedGameObject(sys, value + 10);
+            else if ((value = NuStrIStr(params[i], "player=")) != NULL) {
+                i32 player = (i32)AIParamToFloat(processor, value + 7) - 1;
+                if ((u32)player <= 1)
+                    object = Player[player];
+            } else if (NuStrIStr(params[i], "dont_check_terrain") != NULL)
+                check_terrain = 0;
+        }
+        if (object == NULL && packet != NULL && packet->owner != NULL)
+            object = packet->owner->apiobj.objptr;
+        if (object != NULL) {
+            AILOCATOR *locator = object->ai.locator;
+            if (name != NULL) {
+                char locator_name[64];
+                if (indexed && object->apiobj.field_0x27c != -1)
+                    sprintf(locator_name, "%s_%d", name, object->apiobj.field_0x27c);
+                else if (personal && object->apiobj.character_data != NULL)
+                    sprintf(locator_name, "%s_%s", name, object->apiobj.character_data->file);
+                else if (random_count != 0)
+                    sprintf(locator_name, "%s_%d", name, NuRand(NULL) % random_count);
+                else
+                    sprintf(locator_name, name);
+                locator = AIPathFindLocator(sys, locator_name);
+            }
+            if (locator != NULL) {
+                NUVEC position = locator->position;
+                object->apiobj.position = position;
+                object->apiobj.field_0x276 = locator->flags;
+                object->apiobj.facing_angle = locator->flags;
+                object->apiobj.movement_facing_angle = locator->flags;
+                object->ai.path_info = locator->path_info;
+                object->apiobj.initial_position = position;
+                object->apiobj.collision_position = position;
+                plr_lastpos = position;
+                object->apiobj.start_position = position;
+                object->apiobj.respawn_position = position;
+                object->apiobj.last_safe_position = position;
+                object->saved_position = position;
+                object->apiobj.velocity = v000;
+                extern void InitSurfaceInfo(GameObject *);
+                extern i32 SetObjOnSurface(GameObject *, i32);
+                InitSurfaceInfo(object);
+                if (check_terrain != 0)
+                    SetObjOnSurface(object, 0);
+            }
+        }
+    }
+    return 1;
 }
 
 __used__ static i32 Action_SnapWeaponOut(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
