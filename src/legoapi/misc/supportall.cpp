@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include "decomp.h"
+#include "nu2api/nucore/nustring.h"
 #include "globals.h"
 #include "legoapi/core/input/qrand.h"
 #include "gameapi/ai/aisys/aisys.h"
@@ -630,51 +631,119 @@ void DisplayListPrintItem(nudisplaylistitem_s *, i32, i32, i32 *, i32) {
 // Transcribed from the original C-linkage symbols:
 //   NuHtmlBegin    0x2d5ca0   NuHtmlFlush   0x2d5c30
 //   NuHtmlWrite    0x2d5cd0   NuHtmlHeading1 0x2d5d40
-static char nudl_html_buf[0xc00]; // original bss buffer @0xb9d750-rel
-static char *nudl_html_cursor;    // original @0xb9d720-rel
-static char *nudl_html_end;       // original @0xb9d730-rel
-static void *nudl_html_file;      // original file-handle pointer
+static char nudl_html_buf[0x1000]; // flush threshold leaves room for formatted output
+static char *nudl_html_cursor;     // original @0xb9d720-rel
+static char *nudl_html_end;        // original @0xb9d730-rel
+extern "C" {
+    NUFILE hfh;
+    char unknown[8] = "unknown";
+}
 
 void NuHtmlFlush(i32 force) {
-    if (nudl_html_cursor > nudl_html_buf || force) {
-        *nudl_html_cursor = '\0';
-        NuFileWriteString(static_cast<NUFILE>(reinterpret_cast<usize>(nudl_html_file)), nudl_html_buf);
+    if ((nudl_html_cursor > nudl_html_end) | force) {
+        NuFileWriteString(hfh, nudl_html_buf);
         nudl_html_cursor = nudl_html_buf;
-        nudl_html_end = nudl_html_buf + sizeof(nudl_html_buf);
+        nudl_html_end = nudl_html_buf + 0xc00;
     }
 }
 
 extern "C" void NuHtmlBegin(void *file) {
-    nudl_html_file = file;
+    hfh = static_cast<NUFILE>(reinterpret_cast<usize>(file));
     nudl_html_cursor = nudl_html_buf;
-    nudl_html_end = nudl_html_buf + sizeof(nudl_html_buf);
+    nudl_html_end = nudl_html_buf + 0xc00;
 }
 
-extern "C" void NuHtmlWrite(const char *text) {
+extern "C" void NuHtmlWrite(const char *text, ...) {
     if (text == NULL || text[0] == '\0') {
-        text = ""; // original substitutes an empty-string constant
+        text = unknown;
     }
-    // The original vsprintf's with an empty vararg list, i.e. a plain copy.
-    usize len = strlen(text);
-    if ((usize)(nudl_html_end - nudl_html_cursor) > len) {
-        memcpy(nudl_html_cursor, text, len + 1);
-        nudl_html_cursor += len;
-    }
+    va_list ap;
+    va_start(ap, text);
+    vsprintf(nudl_html_cursor, text, ap);
+    va_end(ap);
+    nudl_html_cursor += NuStrLen(nudl_html_cursor);
     NuHtmlFlush(0);
 }
 
 extern "C" void NuHtmlHeading1(const char *fmt, ...) {
     if (fmt == NULL || fmt[0] == '\0') {
-        fmt = "";
+        fmt = unknown;
     }
-    NuHtmlWrite("<h1>");
+    NuHtmlWrite("<table width=100%c bgcolor=#CFCFE5><tr><td><font face=arial size=+3> ", '%');
     va_list ap;
     va_start(ap, fmt);
-    char tmp[0xc00];
-    vsnprintf(tmp, sizeof(tmp), fmt, ap);
+    vsprintf(nudl_html_cursor, fmt, ap);
     va_end(ap);
-    NuHtmlWrite(tmp);
-    NuHtmlWrite("</h1>");
+    nudl_html_cursor += NuStrLen(nudl_html_cursor);
+    NuHtmlWrite("</font></table>\n");
+}
+
+extern "C" void NuHtmlBanner(void) {
+    NuHtmlWrite("<table   width=100%c height=20 bgcolor=#FF0000><tr><td><font face=arial size=+2></font></table>", '%');
+}
+
+extern "C" void NuHtmlHeading2(const char *fmt, ...) {
+    if (fmt == NULL || fmt[0] == '\0') {
+        fmt = unknown;
+    }
+    NuHtmlWrite("<table width=100%c bgcolor=#DFDFE5><tr><td><font face=arial size=+2> ", '%');
+    va_list ap;
+    va_start(ap, fmt);
+    vsprintf(nudl_html_cursor, fmt, ap);
+    va_end(ap);
+    nudl_html_cursor += NuStrLen(nudl_html_cursor);
+    NuHtmlWrite("</font></table>\n");
+}
+
+extern "C" void NuHtmlHeading3(const char *fmt, ...) {
+    if (fmt == NULL || fmt[0] == '\0') {
+        fmt = unknown;
+    }
+    NuHtmlWrite("<table width=100%c bgcolor=#FFDFE5><tr><td><font face=arial size=+0> ", '%');
+    va_list ap;
+    va_start(ap, fmt);
+    vsprintf(nudl_html_cursor, fmt, ap);
+    va_end(ap);
+    nudl_html_cursor += NuStrLen(nudl_html_cursor);
+    NuHtmlWrite("</font></table>\n");
+}
+
+extern "C" void NuHtmlEnd(void) {
+    NuHtmlFlush(1);
+    hfh = 0;
+}
+
+void NuHtmlTitle(char *title) {
+    NuHtmlWrite("<HR><Center><B>");
+    NuHtmlWrite(title);
+    NuHtmlWrite("</B></Center><HR>");
+    NuHtmlWrite("<P><P>");
+}
+
+extern "C" void NuHtmlBitmap(char *filename, i32 width, i32 height, char *caption, char *source) {
+    char tag[256];
+    NuHtmlWrite("<P>");
+    if (height != 0 && width != 0) {
+        sprintf(tag, "<IMG ALIGN=\"left\" HEIGHT=\"%d\" WIDTH=\"%d\" SRC=\"%s\">", height, width, filename);
+    } else {
+        sprintf(tag, "<IMG ALIGN=\"left\" SRC=\"%s\">", filename);
+    }
+    NuHtmlWrite(tag);
+    if (caption != NULL) {
+        NuHtmlWrite(caption);
+    }
+    NuHtmlWrite("<BR CLEAR=\"all\"> <P>&nbsp;<P>");
+    if (source != NULL && NuStrCmp(filename, source) != 0) {
+        NuFileCopy(filename, source);
+    }
+}
+
+void NuHtmlGraphArray(char **strings) {
+    char *text = *strings++;
+    while (text != NULL) {
+        NuHtmlWrite(text);
+        text = *strings++;
+    }
 }
 
 void AddChunkToRenderStack(particlechunkrendertype_s *chunk, particlechunkrendertype_s **stack) {

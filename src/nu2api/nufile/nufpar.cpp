@@ -1,4 +1,19 @@
 #include "nu2api/nufile/nufpar.h"
+
+void NuFParGetPos(NUFPAR *parser, NUFPARPOS *position) {
+    position->line_num = parser->line_num;
+    position->line_pos = parser->line_pos;
+    position->char_pos = parser->char_pos;
+    position->buf_start = parser->buf_start;
+    position->buf_end = parser->buf_end;
+}
+
+void NuFParSetPos(NUFPAR *parser, NUFPARPOS *position) {
+    parser->char_pos = position->char_pos;
+    parser->line_pos = position->line_pos;
+    if (parser->char_pos < parser->buf_start || parser->char_pos > parser->buf_end)
+        parser->buf_end = parser->char_pos - 1;
+}
 #include "nu2api/nu3d/nutexanm.h"
 
 #include <string.h>
@@ -118,6 +133,20 @@ NUFPAR *NuFParCreate(char *filename) {
 
             NuFileClose(file_handle);
         }
+    }
+
+    return NULL;
+}
+
+NUFPAR *NuFParCreateGivenFH(char *filename, NUFILE file_handle) {
+    if (file_handle != 0) {
+        NUFPAR *parser = NuFParOpen(file_handle);
+        if (parser != NULL) {
+            NuStrCpy(parser->file_name, filename);
+            return parser;
+        }
+
+        NuFileClose(file_handle);
     }
 
     return NULL;
@@ -555,6 +584,20 @@ void NuFParGetOptionalInt(NUFPAR *parser, i32 *value) {
     }
 }
 
+void NuFParGetOptionalFloat(NUFPAR *parser, f32 *value) {
+    char buf[64];
+    NuFParGetWord(parser);
+    if (parser->is_utf16)
+        NuUnicodeToAscii(buf, (NUWCHAR16 *)parser->word_buf);
+    else
+        NuStrCpy(buf, parser->word_buf);
+    if (value != NULL && buf[0] != '\0') {
+        *value = NuAToF(buf);
+        if (*value == 0.0f)
+            NuFParUnGetWord(parser);
+    }
+}
+
 i32 NuFParGetInt(NUFPAR *parser) {
     char buf[64];
 
@@ -630,6 +673,19 @@ i32 NuFParPushComCTX(NUFPAR *parser, NUFPCOMJMPCTX *commands) {
 
     parser->command_stack.jump_ctx[parser->command_pos] = commands;
     parser->command_stack2.jump_ctx[parser->command_pos] = NULL;
+
+    return parser->command_pos;
+}
+
+i32 NuFParPushComCTX2(NUFPAR *parser, NUFPCOMJMPCTX *commands, NUFPCOMJMPCTX *commands2) {
+    if (parser->command_pos >= 7) {
+        return -1;
+    }
+
+    parser->command_pos++;
+
+    parser->command_stack.jump_ctx[parser->command_pos] = commands;
+    parser->command_stack2.jump_ctx[parser->command_pos] = commands2;
 
     return parser->command_pos;
 }

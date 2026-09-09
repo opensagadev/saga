@@ -1,8 +1,36 @@
 #include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/numath/nutrig.h"
 
 #include <string.h>
 
 NUMTX clip_test_mtx;
+
+void NuCameraRestoreState(i32 handle) {
+    i32 index = handle - 1;
+    if (index < cam_state_count) {
+        NUCAMERASTATE *state = &cam_state[index];
+        global_camera = state->camera;
+        vmtx = state->view;
+        pmtx = state->projection;
+        smtx = state->screen;
+        vpmtx = state->view_projection;
+        vpc_sci_mtx = state->view_projection_scissor;
+        vpc_vport_mtx = state->view_projection_viewport;
+        pc_vport_mtx = state->viewport;
+        vpsmtx = state->view_projection_screen;
+        psmtx = state->projection_screen;
+        camfx = state->effects;
+        zx = state->zx;
+        zy = state->zy;
+        zxs = state->zxs;
+        zys = state->zys;
+        // The original restores the derived matrices but not ClipPlanes or
+        // the stack count; the handle remains available for subsequent use.
+        FaceYDirStream(NuAtan2D(-global_camera.mtx.m20, -global_camera.mtx.m22));
+        NuRndrSetViewMtx(&vpsmtx, &vpc_vport_mtx, &vpc_sci_mtx);
+    }
+}
 
 __attribute__((weak)) i32 NuCameraClipTestExtents(NUVEC *min, NUVEC *max, NUMTX *world_mtx, f32 far_clip,
                                                   i32 should_clip_to_screen) {

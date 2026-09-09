@@ -377,9 +377,6 @@ i32 RotDiff(u16 current, u16 target) {
     return difference;
 }
 
-void memmove(void *, void const *, i32) {
-}
-
 void rawClip(VuVec const *, VuVec *, i32, VuVec const &) {
 }
 

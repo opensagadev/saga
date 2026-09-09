@@ -5,6 +5,14 @@
 
 struct nufpar_s;
 
+typedef struct nufparpos_s {
+    i32 line_num;
+    i32 line_pos;
+    i32 char_pos;
+    i32 buf_start;
+    i32 buf_end;
+} NUFPARPOS;
+
 typedef void nufpcomfn(struct nufpar_s *);
 typedef void nufpcomctxfn(struct nufpar_s *, void *);
 
@@ -58,11 +66,14 @@ typedef struct nufpar_s {
 extern "C" {
 #endif
     void NuFParInit(i32 max_count, i32 buf_size);
+    void NuFParGetPos(NUFPAR *parser, NUFPARPOS *position);
+    void NuFParSetPos(NUFPAR *parser, NUFPARPOS *position);
 
     NUFPAR *NuFParOpen(NUFILE file_handle);
     void NuFParClose(NUFPAR *parser);
 
     NUFPAR *NuFParCreate(char *filename);
+    NUFPAR *NuFParCreateGivenFH(char *filename, NUFILE file_handle);
     NUFPAR *NuFParCreateMem(char *name, char *buffer, i32 bufferSize);
     void NuFParDestroy(NUFPAR *parser);
 
@@ -79,11 +90,13 @@ extern "C" {
     f32 NuFParGetFloatRDP(NUFPAR *parser);
     i32 NuFParGetInt(NUFPAR *parser);
     void NuFParGetOptionalInt(NUFPAR *parser, i32 *value);
+    void NuFParGetOptionalFloat(NUFPAR *parser, f32 *value);
     i32 NuFParGetIntRDP(NUFPAR *parser);
 
     i32 NuFParPushCom(NUFPAR *parser, NUFPCOMJMP *commands);
     i32 NuFParPushCom2(NUFPAR *parser, NUFPCOMJMP *commands, NUFPCOMJMP *commands2);
     i32 NuFParPushComCTX(NUFPAR *parser, NUFPCOMJMPCTX *commands);
+    i32 NuFParPushComCTX2(NUFPAR *parser, NUFPCOMJMPCTX *commands, NUFPCOMJMPCTX *commands2);
     void NuFParPopCom(NUFPAR *parser);
 
     nufpcomfn *NuFParSetInterpreterErrorHandler(nufpcomfn *fn);

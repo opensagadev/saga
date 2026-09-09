@@ -3,6 +3,17 @@
 #include "decomp.h"
 
 #include "nu2api/nucore/nustring.h"
+#include <string.h>
+
+char application_dir[256];
+
+void NuFileSetAppDirectory(char *path) {
+    strcpy(application_dir, path);
+}
+
+void NuFileGetAppDirectory(char *dest) {
+    strcpy(dest, application_dir);
+}
 
 i32 DEVHOST_Interrogate(NUFILE_DEVICE *device) {
     device->status = 1;

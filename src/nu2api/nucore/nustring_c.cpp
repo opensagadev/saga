@@ -1,4 +1,69 @@
 #include "nu2api/nucore/nustring.h"
+#include <stdio.h>
+#include <string.h>
+
+i32 NuVSPrintf(char *dest, const char *format, va_list args) {
+    return vsprintf(dest, format, args);
+}
+
+i32 NuSPrintfW(NUWCHAR *dest, NUWCHAR *format, ...) {
+    va_list args;
+    char ascii_format[256];
+    char text[256];
+    NuUnicodeToAscii(ascii_format, format);
+    va_start(args, format);
+    vsprintf(text, ascii_format, args);
+    va_end(args);
+    NuAsciiToUnicode(dest, text);
+    return NuStrLenW(dest);
+}
+
+i32 NuStrICmpWC(char *pattern, char *text, char *wildcard) {
+    i32 index;
+    char a, b;
+    i32 suffix_length, text_length, wildcard_length;
+    if (pattern == NULL)
+        return -1;
+    if (text == NULL)
+        return 1;
+    while (*pattern != '\0' && *pattern != '*') {
+        a = NuToUpper((u8)*pattern);
+        b = NuToUpper((u8)*text);
+        if (a > b)
+            return 1;
+        if (a < b)
+            return -1;
+        ++pattern;
+        ++text;
+    }
+    if (*pattern == '*') {
+        ++pattern;
+        suffix_length = NuStrLen(pattern);
+        text_length = NuStrLen(text);
+        wildcard_length = text_length - suffix_length;
+        if (wildcard_length < 0)
+            return 1;
+        if (wildcard != NULL) {
+            for (index = 0; index < wildcard_length; ++index)
+                wildcard[index] = text[index];
+            wildcard[index] = '\0';
+        }
+        text += text_length - suffix_length;
+    } else if (wildcard != NULL) {
+        *wildcard = '\0';
+    }
+    while (*pattern != '\0') {
+        a = NuToUpper((u8)*pattern);
+        b = NuToUpper((u8)*text);
+        if (a > b)
+            return 1;
+        if (a < b)
+            return -1;
+        ++pattern;
+        ++text;
+    }
+    return 0;
+}
 
 #include "decomp.h"
 #include "nu2api/nufile/nufile.h"
@@ -1439,6 +1504,336 @@ i32 NuStringTableLoadCSV(char *filepath, VARIPTR *buf, VARIPTR buf_end, char *la
     return bank->string_count;
 }
 
+i32 NuStringTableLoadTXT(char *filepath, VARIPTR *buf, VARIPTR buf_end) {
+    i32 i;
+    i32 max_strings;
+    NUSTRING *strings = NULL;
+    NUSTRINGBANK *bank = &StringBank[CurrentStringBank];
+    char *tmp_buf = NULL;
+    void *mem_buf;
+    i32 bytes_read;
+    NUFILE mem_file;
+    NUFPAR *parser;
+    i32 len;
+
+    bank->strings = NULL;
+    bank->max_strings = 0;
+    bank->string_count = 0;
+    i = max_strings = 0;
+    mem_buf = (void *)(buf_end.addr - 0x100000);
+    bytes_read = NuFileLoadBuffer(filepath, mem_buf, 0x100000);
+    tmp_buf = (char *)((usize)mem_buf + bytes_read);
+    mem_file = NuMemFileOpen(mem_buf, bytes_read, NUFILE_READ);
+    if (mem_file != 0) {
+        parser = NuFParOpen(mem_file);
+        if (parser != NULL) {
+            while (NuFParGetLine(parser) != 0) {
+                max_strings++;
+            }
+            NuFParClose(parser);
+        }
+        NuFileClose(mem_file);
+    }
+
+    strings = (NUSTRING *)ALIGN(buf->addr, 0x4);
+    buf->addr = ALIGN(buf->addr, 0x4);
+    buf->addr += max_strings * sizeof(NUSTRING);
+    mem_file = NuMemFileOpen(mem_buf, bytes_read, NUFILE_READ);
+    if (mem_file != 0) {
+        parser = NuFParOpen(mem_file);
+        if (parser != NULL) {
+            while (NuFParGetLine(parser) != 0) {
+                NuFParGetWord(parser);
+                NuFParGetWord(parser);
+                len = NuStrLenW((NUWCHAR *)parser->word_buf) + 1;
+                strings[i].id = buf->char_ptr;
+                buf->addr += len;
+                NuUnicodeToAscii(strings[i].id, (NUWCHAR16 *)parser->word_buf);
+                NuFParGetWord(parser);
+                len = NuStrLenW((NUWCHAR *)parser->word_buf) + 1;
+                strings[i].str_utf16 = (NUWCHAR *)ALIGN(buf->addr, 0x2);
+                buf->addr = ALIGN(buf->addr, 0x2);
+                buf->addr += len * 2;
+                NuStrCpyW(strings[i].str_utf16, (NUWCHAR *)parser->word_buf);
+
+                // The original reserves and copies UTF-16 before storing the
+                // selected output encoding, including when it is UTF-16 again.
+                if (nustring_format == 1) {
+                    len = NuStrLenW((NUWCHAR *)parser->word_buf) + 1;
+                    strings[i].str_utf16 = (NUWCHAR *)ALIGN(buf->addr, 0x2);
+                    buf->addr = ALIGN(buf->addr, 0x2);
+                    buf->addr += len * 2;
+                    NuStrCpyW(strings[i].str_utf16, (NUWCHAR *)parser->word_buf);
+                } else {
+                    NuUnicodeToUTF8((NUWCHAR8 *)tmp_buf, (NUWCHAR16 *)parser->word_buf);
+                    len = NuStrLen(tmp_buf) + 1;
+                    strings[i].str_utf8 = (NUWCHAR8 *)ALIGN(buf->addr, 0x2);
+                    buf->addr = ALIGN(buf->addr, 0x2);
+                    buf->addr += len;
+                    NuStrCpy((char *)strings[i].str_utf8, tmp_buf);
+                }
+                i++;
+            }
+            NuFParClose(parser);
+            bank->strings = strings;
+            bank->string_count = i;
+            bank->max_strings = max_strings;
+        }
+        NuFileClose(mem_file);
+    }
+    return bank->string_count;
+}
+
+i32 NuStringTableLoad(char *filepath, VARIPTR *buf, VARIPTR buf_end) {
+    i32 is_csv = 0;
+    char *extension = NuStrRChr(filepath, '.');
+    if (extension != NULL) {
+        if (NuStrICmp(extension, ".csv") == 0) {
+            is_csv = 1;
+        }
+    }
+    if (is_csv) {
+        return NuStringTableLoadCSV(filepath, buf, buf_end, "LABEL", "ENGLISH");
+    } else {
+        return NuStringTableLoadTXT(filepath, buf, buf_end);
+    }
+}
+
+void NuStringTableSaveCharacterList(char *filepath, char *scratch, i32 report_missing) {
+    i32 i;
+    i32 j;
+    i32 count = 0;
+    i32 overflow = 0;
+    i32 missing_count = 0;
+    char *used = NULL;
+    NUWCHAR character = 0;
+    i32 bank;
+    NUFILE file;
+    NUWCHAR bom;
+    NUWCHAR characters[512];
+    NUWCHAR missing[512];
+    char message[512];
+
+    used = scratch;
+    memset(used, 0, 0x1fff);
+    memset(characters, 0, 0x400);
+    memset(message, 0, 0x200);
+    bank = CurrentStringBank;
+    for (i = 0; i < StringBank[bank].string_count; i++) {
+        if (StringBank[bank].strings[i].str_utf16 != NULL) {
+            for (j = 0; StringBank[bank].strings[i].str_utf16[j] != 0; j++) {
+                character = StringBank[bank].strings[i].str_utf16[j];
+                used[character >> 3] |= 1 << (character & 7);
+            }
+        }
+    }
+    for (character = 0; character != 0xffff; character++) {
+        if ((used[character >> 3] >> (character & 7)) & 1) {
+            characters[count] = character;
+            count++;
+            if (count > 511) {
+                overflow = 1;
+                break;
+            }
+        }
+    }
+    file = NuFileOpen(filepath, NUFILE_WRITE);
+    if (file != 0) {
+        bom = 0xfeff;
+        NuFileWrite(file, &bom, 2);
+        NuFileWrite(file, characters, NuStrLenW(characters) * 2);
+        if (overflow) {
+            NuAsciiToUnicode(characters, " [over 512 unique chars - too many!]");
+            NuFileWrite(file, characters, count * 2);
+        } else {
+            sprintf(message, " [%d unique chars] ", count);
+            NuAsciiToUnicode(characters, message);
+            NuFileWrite(file, characters, NuStrLen(message) * 2);
+        }
+        // The original retains this reporting branch, but never populates
+        // missing or increments missing_count.
+        if (report_missing) {
+            if (missing_count == 0) {
+                NuStrCpy(message, " [no missing chars]");
+            } else {
+                NuFileWrite(file, missing, missing_count * 2);
+                sprintf(message, " [%d missing chars]", missing_count);
+            }
+            NuAsciiToUnicode(characters, message);
+            NuFileWrite(file, characters, NuStrLen(message) * 2);
+        }
+        NuFileClose(file);
+    }
+}
+
+static u16 bad_equiv[][2] = {{'a', '@'}, {'a', '4'}, {'e', '3'}, {'i', '1'},
+                             {'l', '1'}, {'o', '0'}, {'t', '7'}, {0, 0}};
+static u16 bad_fluff[] = {'!', 0xffa3, '$', '%', '^', '&', '*', '(', ')', '_', '+', '-', '=', '{',
+                          '}', '[',    ']', '@', '~', '#', '?', '<', '>', ',', '.', ' ', 0};
+static NUWCHAR **BadWords;
+static i32 NumBadWords;
+
+void NuStringFilterLoad(char *path, VARIPTR *buf, VARIPTR buf_end) {
+    i32 count;
+    i32 i;
+    i32 length;
+    i32 j;
+    void *mem_buf = (void *)(buf_end.addr - 0x100000);
+    i32 bytes_read = NuFileLoadBuffer(path, mem_buf, 0x100000);
+    NUFILE file;
+    NUFPAR *parser;
+    NUWCHAR word[128];
+
+    count = 0;
+    file = NuMemFileOpen(mem_buf, bytes_read, NUFILE_READ);
+    if (file != 0) {
+        parser = NuFParOpen(file);
+        if (parser != NULL) {
+            do {
+                if (NuFParGetWord(parser) > 0)
+                    count++;
+            } while (NuFParGetLine(parser) != 0);
+            NuFParClose(parser);
+        }
+        NuFileClose(file);
+    }
+    BadWords = (NUWCHAR **)ALIGN(buf->addr, 4);
+    buf->addr = ALIGN(buf->addr, 4);
+    buf->addr += (count + 1) * sizeof(NUWCHAR *);
+    memset(BadWords, 0, (count + 1) * sizeof(NUWCHAR *));
+    i = 0;
+    file = NuMemFileOpen(mem_buf, bytes_read, NUFILE_READ);
+    if (file != 0) {
+        parser = NuFParOpen(file);
+        if (parser != NULL) {
+            do {
+                if (NuFParGetWord(parser) > 0) {
+                    NuUTF8ToUnicode(word, (NUWCHAR8 *)parser->word_buf);
+                    length = NuStrLenW(word);
+                    if (length <= 3) {
+                        for (j = length; j >= 0; j--)
+                            word[j + 1] = word[j];
+                        word[0] = '!';
+                        length++;
+                    }
+                    length++;
+                    BadWords[i] = (NUWCHAR *)ALIGN(buf->addr, 2);
+                    buf->addr = ALIGN(buf->addr, 2);
+                    buf->addr += length * 2;
+                    NuStrLwrW(BadWords[i], word);
+                    i++;
+                }
+            } while (NuFParGetLine(parser) != 0 && i < count);
+            NuFParClose(parser);
+        }
+        NuFileClose(file);
+    }
+    NumBadWords = i;
+}
+
+static i32 NuStringCharEquiv(u16 a, u16 b) {
+    i32 i = 0;
+    if (a == b) {
+        return 1;
+    } else {
+        while (bad_equiv[i][0] != 0) {
+            if (bad_equiv[i][1] == a && bad_equiv[i][0] == b)
+                return 1;
+            if (bad_equiv[i][1] == b && bad_equiv[i][0] == a)
+                return 1;
+            i++;
+        }
+    }
+    return 0;
+}
+
+static i32 NuStringIsFluff(u16 character) {
+    i32 i = 0;
+    while (bad_fluff[i] != 0) {
+        if (bad_fluff[i] == character)
+            return 1;
+        i++;
+    }
+    return 0;
+}
+
+static u16 *NuStringBadSubString(const u16 *text, const u16 *word, i32 *length, i32 whole_word) {
+    const u16 *cursor;
+    const u16 *match;
+    i32 boundary = 1;
+    while (*text != 0) {
+        cursor = text;
+        match = word;
+        if (boundary || !whole_word) {
+            while (*match != 0) {
+                if (*cursor == 0)
+                    break;
+                if (NuStringCharEquiv(*cursor, *match) == 0)
+                    break;
+                cursor++;
+                while (*cursor != 0) {
+                    if (!NuStringIsFluff(*cursor) && *cursor != *match)
+                        break;
+                    cursor++;
+                }
+                match++;
+            }
+            if (*match == 0) {
+                if (!whole_word || cursor[1] == 0 || NuStringIsFluff(cursor[1])) {
+                    *length = cursor - text;
+                    return (u16 *)text;
+                }
+            }
+        }
+        if (NuStringIsFluff(*text))
+            boundary = 1;
+        else
+            boundary = 0;
+        text++;
+    }
+    return NULL;
+}
+
+i32 NuStringFilterBadWordsW(NUWCHAR *dest, NUWCHAR *source, NUWCHAR *replacement) {
+    i32 i = 0;
+    i32 changed = 0;
+    i32 whole_word;
+    NUWCHAR *word;
+    NUWCHAR *match;
+    i32 length;
+    NUWCHAR lower[256];
+    if (source != dest)
+        NuStrCpyW(dest, source);
+    NuStrLwrW(lower, dest);
+    while (BadWords[i] != NULL) {
+        if (BadWords[i][0] == '!') {
+            word = BadWords[i] + 1;
+            whole_word = 1;
+        } else {
+            word = BadWords[i];
+            whole_word = 0;
+        }
+        match = NuStringBadSubString(lower, word, &length, whole_word);
+        if (match != NULL) {
+            NuStrCpyW(dest, replacement);
+            changed = 1;
+        }
+        i++;
+    }
+    return changed;
+}
+
+i32 NuStringFilterBadWords(NUWCHAR8 *dest, NUWCHAR8 *source, NUWCHAR8 *replacement) {
+    i32 changed;
+    NUWCHAR text[128];
+    NUWCHAR substitute[128];
+    NuUTF8ToUnicode(text, source);
+    NuUTF8ToUnicode(substitute, replacement);
+    changed = NuStringFilterBadWordsW(text, text, substitute);
+    NuUnicodeToUTF8(dest, text);
+    return changed;
+}
+
 void NuStringTableSetBank(i32 bank) {
     if (bank >= 0 && bank < 3) {
         CurrentStringBank = bank;
@@ -1447,6 +1842,52 @@ void NuStringTableSetBank(i32 bank) {
 
 void NuStringTableSetFormat(i32 format) {
     nustring_format = format;
+}
+
+i32 NuStringTableGetFormat(void) {
+    return nustring_format;
+}
+
+void NuStringTableUnload(void) {
+    StringBank[CurrentStringBank].strings = NULL;
+    StringBank[CurrentStringBank].max_strings = 0;
+    StringBank[CurrentStringBank].string_count = 0;
+}
+
+i32 NuStringTableGetIdByName(char *name) {
+    i32 j;
+    i32 i;
+
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < StringBank[i].string_count; j++) {
+            if (StringBank[i].strings[j].id != NULL && StringBank[i].strings[j].str_utf16 != NULL) {
+                if (NuStrICmp(StringBank[i].strings[j].id, name) == 0) {
+                    return j + (i << 24);
+                }
+            }
+        }
+    }
+
+    return -1;
+}
+
+NUWCHAR *NuStringTableGetById(i32 id) {
+    u32 bank = 0;
+
+    if ((u32)id > 0xffffff && id != -1) {
+        bank = (u32)id >> 24;
+        id &= 0xffffff;
+    }
+    if (bank > 2) {
+        return NULL;
+    }
+    if (id < 0) {
+        return NULL;
+    }
+    if (id >= StringBank[bank].string_count) {
+        return NULL;
+    }
+    return StringBank[bank].strings[id].str_utf16;
 }
 
 NUWCHAR *NuStringTableGetByName(char *name) {

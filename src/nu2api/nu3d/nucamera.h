@@ -38,11 +38,80 @@ typedef struct nuclipplanes_s {
     NUMTX abs_scissor_planes;
 } NUCLIPPLANES;
 
+enum NUCAMERA_CLIP_FLAGS {
+    NUCAMERA_CLIP_PROJECTION_VALID = 1 << 0,
+};
+
+enum NUCAMERA_EXTENTS_FLAGS {
+    NUCAMERA_EXTENTS_SKIP_SCISSOR = 1 << 0,
+    NUCAMERA_EXTENTS_SKIP_NEAR = 1 << 1,
+};
+
+enum NUCAMERA_OUTCODE {
+    NUCAMERA_OUT_LEFT = 1 << 0,
+    NUCAMERA_OUT_RIGHT = 1 << 1,
+    NUCAMERA_OUT_TOP = 1 << 2,
+    NUCAMERA_OUT_BOTTOM = 1 << 3,
+    NUCAMERA_OUT_FAR = 1 << 4,
+    NUCAMERA_OUT_NEAR = 1 << 5,
+};
+
+typedef struct nucameraclip_s {
+    NUMTX clip;
+    NUMTX projection;
+    u8 flags;
+    f32 far_clip;
+    f32 near_clip;
+    f32 x_scale;
+    f32 y_scale;
+} NUCAMERACLIP;
+
+typedef struct nucamerastate_s {
+    NUCAMERA camera;
+    NUMTX view;
+    NUMTX projection;
+    NUMTX screen;
+    NUMTX view_projection;
+    NUMTX view_projection_scissor;
+    NUMTX view_projection_viewport;
+    NUMTX viewport;
+    NUMTX view_projection_screen;
+    NUMTX projection_screen;
+    i32 effects;
+    f32 zx, zy, zxs, zys;
+    u32 unused_2cc;
+    NUCLIPPLANES planes;
+} NUCAMERASTATE;
+
 #ifdef __cplusplus
 
 void NuCameraBuildClipPlanes(void);
 
 extern "C" {
+    extern i32 cam_state_count;
+    extern NUCAMERASTATE cam_state[16];
+    i32 NuCameraSaveState(void);
+    void NuCameraCalcClipMtx(NUCAMERACLIP *clip, NUCAMERA *camera, i32 use_cached_projection);
+    void NuCameraClearStateBuffer(void);
+    void NuCameraRestoreState(i32 handle);
+    extern i32 camfx;
+    extern NUVEC cam_axes;
+    extern i32 force_camera_farclip;
+    void NuCameraSetAxes(NUVEC *axes);
+    void NuCameraGetAxes(NUVEC *axes);
+    void NuCameraForceFarclip(i32 enabled);
+    void NuCameraGetClippingRatios(f32 *horizontal, f32 *vertical);
+    i32 NuCameraClipTestPointScissor(NUVEC *point);
+    i32 NuCameraClipTestExtentsGeneric(NUVEC *min, NUVEC *max, NUMTX *world_mtx, f32 far_clip, i32 flags,
+                                       f32 *min_depth);
+    i32 NuCameraClipTestPointVport(NUVEC *point);
+    void NuCameraTransformScreen(NUVEC *screen, NUVEC *world, i32 count, NUMTX *matrix);
+    void NuCameraTransformScreenVU0(NUVEC4 *screen, NUVEC4 *world, i32 count, NUMTX *matrix);
+    void NuCameraTransformView(NUVEC *view, NUVEC *world, i32 count, NUMTX *matrix);
+    f32 NuCameraCalcAperture(f32 focal_length, f32 root_fstop);
+    f32 NuCameraCalcRootFStop(f32 focal_length, f32 aperture);
+    f32 NuCameraFOVToFocalLen(f32 fov);
+    f32 NuCameraFocalLenToFOV(f32 focal_length);
 #endif
     extern NUMTX clip_planes;
     extern NUCAMERA global_camera;

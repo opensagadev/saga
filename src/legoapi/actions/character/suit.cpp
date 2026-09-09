@@ -23,16 +23,26 @@ void Suit_GetNext(SUIT_s *) {
 }
 
 i32 Suit_GetIndex(SUIT_s *suit) {
-    if (suit == &Suit[0]) return 0;
-    if (suit == &Suit[1]) return 1;
-    if (suit == &Suit[2]) return 2;
-    if (suit == &Suit[3]) return 3;
-    if (suit == &Suit[4]) return 4;
-    if (suit == &Suit[5]) return 5;
-    if (suit == &Suit[6]) return 6;
-    if (suit == &Suit[7]) return 7;
-    if (suit == &Suit[8]) return 8;
-    if (suit == &Suit[9]) return 9;
+    if (suit == &Suit[0])
+        return 0;
+    if (suit == &Suit[1])
+        return 1;
+    if (suit == &Suit[2])
+        return 2;
+    if (suit == &Suit[3])
+        return 3;
+    if (suit == &Suit[4])
+        return 4;
+    if (suit == &Suit[5])
+        return 5;
+    if (suit == &Suit[6])
+        return 6;
+    if (suit == &Suit[7])
+        return 7;
+    if (suit == &Suit[8])
+        return 8;
+    if (suit == &Suit[9])
+        return 9;
     return -1;
 }
 

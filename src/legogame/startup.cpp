@@ -57,7 +57,6 @@ NUMTL *NuMtlCreate3D(i32 count);
 
 extern "C" {
     // nucore / nurndr plain stubs and editor helpers (extern "C" TUs).
-    void NuStringFilterLoad(char *, VARIPTR *, VARIPTR *);
     f32 NuIOS_GetAspectRatio(void);
     i32 NuIOS_GetDeviceLanguage(void);
     void NuLanguageSet(i32 language);
@@ -263,7 +262,7 @@ static void LoadPermData(BGPROCINFO *proc) {
 
     MechSystems::Get()->LoadPerm();
 
-    NuStringFilterLoad((char *)"stuff\\text\\badwords.txt", &permbuffer_ptr, &permbuffer_end);
+    NuStringFilterLoad((char *)"stuff\\text\\badwords.txt", &permbuffer_ptr, permbuffer_end);
 
     // Audio / rendering permanents.
     MusicInfo = ConfigureMusic((char *)"audio\\music.txt", &permbuffer_ptr, &permbuffer_end);

@@ -2,6 +2,20 @@
 
 #include <stddef.h>
 
+int NuLinkedListCheck(NULISTHDR *list) {
+    NULISTLNK *node;
+    int count;
+    NULISTLNK *previous = NULL;
+    count = 0;
+    node = list->head;
+    while (node != NULL) {
+        count++;
+        previous = node;
+        node = node->next;
+    }
+    return count;
+}
+
 void NuLinkedListAppend(NULISTHDR *list, NULISTLNK *node) {
     node->next = NULL;
     node->prev = list->tail;
@@ -30,6 +44,36 @@ void NuLinkedListInsert(NULISTHDR *list, NULISTLNK *node) {
     }
 
     list->head = node;
+}
+
+void NuLinkedListInsertBefore(NULISTHDR *list, NULISTLNK *position, NULISTLNK *node) {
+    if (position != NULL) {
+        node->next = position;
+        node->prev = position->prev;
+        if (position->prev != NULL) {
+            position->prev->next = node;
+        } else {
+            list->head = node;
+        }
+        position->prev = node;
+    } else {
+        NuLinkedListInsert(list, node);
+    }
+}
+
+void NuLinkedListInsertAfter(NULISTHDR *list, NULISTLNK *position, NULISTLNK *node) {
+    if (position != NULL) {
+        node->prev = position;
+        node->next = position->next;
+        if (position->next != NULL) {
+            position->next->prev = node;
+        } else {
+            list->tail = node;
+        }
+        position->next = node;
+    } else {
+        NuLinkedListAppend(list, node);
+    }
 }
 
 void NuLinkedListRemove(NULISTHDR *list, NULISTLNK *node) {

@@ -94,8 +94,67 @@ static void AquireFileBuffer(FILEINFO *info) {
 i32 numdevices = 0;
 
 NUFILE_DEVICE devices[16] = {0};
+NUFILE_DEVICE enum_devices[16];
+i32 enum_numdevices;
+
+i32 NuFileEnumerateDevices(NUFILE_DEVICE **result) {
+    i32 count = 0;
+    for (i32 index = 0; index < numdevices; ++index) {
+        if ((devices[index].interrogate_fn(&devices[index]) & NUFILE_DEVICE_STATUS_EXCLUDE_FROM_ENUMERATION) != 0) {
+            continue;
+        }
+        enum_devices[count] = devices[index];
+        ++count;
+    }
+    *result = enum_devices;
+    enum_numdevices = count;
+    return count;
+}
 
 i32 file_criticalsection;
+
+i32 NuFileGetDevices(NUFILE_DEVICE **result) {
+    if (result != NULL) {
+        *result = enum_devices;
+    }
+    return enum_numdevices;
+}
+
+i32 NuFileRefreshDevices(NUFILE_DEVICE **result) {
+    for (i32 index = 0; index < numdevices; ++index) {
+        if (devices[index].id == 1) {
+            i32 port = devices[index].params[0];
+            i32 slot = devices[index].params[1];
+            if (NuMcCheckCardPresent(port, slot) != 0) {
+                if (NuMcCheckCardFormatted(port, slot) != 0) {
+                    devices[index].attr |= 8;
+                }
+                devices[index].free_space = NuMcCheckCardFreeSpace(port, slot);
+            } else {
+                devices[index].id = -1;
+            }
+        }
+    }
+    if (result != NULL) {
+        *result = devices;
+    }
+    return numdevices;
+}
+
+NUFILE_DEVICE *NuFileFindDevice(i32 id, i32 unit) {
+    if (id == -3) {
+        return default_device;
+    }
+    if (id == -2 || id == -1) {
+        id = 2;
+    }
+    for (i32 index = 0; index < numdevices; ++index) {
+        if (devices[index].id == id && (unit < 0 || devices[index].unit_id == unit)) {
+            return &devices[index];
+        }
+    }
+    return NULL;
+}
 
 NUFILE_DEVICE *NuFileGetDeviceFromPath(char *path) {
     NUFILE_DEVICE *device;
@@ -352,6 +411,28 @@ i64 NuFileSeek(NUFILE file, i64 offset, NUFILESEEK whence) {
     return info->read_pos;
 }
 
+i32 NuFileExistQuiet(char *filepath) {
+    NUFILE file = 0;
+    if (filepath == NULL || *filepath == '\0') {
+        return 0;
+    }
+    i32 buffering = nufile_buffering_enabled;
+    nufile_buffering_enabled = 0;
+    if (curr_dat != NULL) {
+        i32 index = NuDatFileFindTree(curr_dat, filepath);
+        if (index >= 0) {
+            nufile_buffering_enabled = buffering;
+            return curr_dat->file_info[index].decompressed_len;
+        }
+    }
+    file = NuFileOpenDF(filepath, NUFILE_READ, curr_dat, 1);
+    if (file != 0) {
+        NuFileClose(file);
+    }
+    nufile_buffering_enabled = buffering;
+    return file != 0;
+}
+
 i64 NuFileSize(char *filepath) {
     i32 file;
     i64 pos;
@@ -578,6 +659,18 @@ u16 NuFileReadWChar(NUFILE file) {
 
 i32 NuFile_SwapEndianOnWrite;
 
+static void NuFileEndianSwap16(void *value) {
+    u8 *value_ptr;
+    u16 swapped;
+    u8 *swap_ptr;
+
+    value_ptr = (u8 *)value;
+    swap_ptr = (u8 *)&swapped;
+    swap_ptr[0] = value_ptr[1];
+    swap_ptr[1] = value_ptr[0];
+    *((u16 *)value) = swapped;
+}
+
 static void NuFileEndianSwap32(void *value) {
     u8 *value_ptr;
     u32 swapped;
@@ -603,6 +696,38 @@ i32 NuFileWriteInt(NUFILE file, i32 value) {
     }
 
     return NuFileWrite(file, &tmp, sizeof(i32));
+}
+
+i32 NuFileWriteFloat(NUFILE file, float value) {
+    float tmp = value;
+    if (NuFile_SwapEndianOnWrite != 0) {
+        NuFileEndianSwap32(&tmp);
+    }
+    return NuFileWrite(file, &tmp, sizeof(tmp));
+}
+
+i32 NuFileWriteShort(NUFILE file, i16 value) {
+    i16 tmp = value;
+    if (NuFile_SwapEndianOnWrite != 0) {
+        NuFileEndianSwap16(&tmp);
+    }
+    return NuFileWrite(file, &tmp, sizeof(tmp));
+}
+
+i32 NuFileWriteUnsignedShort(NUFILE file, u16 value) {
+    u16 tmp = value;
+    if (NuFile_SwapEndianOnWrite != 0) {
+        NuFileEndianSwap16(&tmp);
+    }
+    return NuFileWrite(file, &tmp, sizeof(tmp));
+}
+
+i32 NuFileWriteChar(NUFILE file, i8 value) {
+    return NuFileWrite(file, &value, sizeof(value));
+}
+
+i32 NuFileWriteUnsignedChar(NUFILE file, u8 value) {
+    return NuFileWrite(file, &value, sizeof(value));
 }
 
 u32 NuFileWriteUnsignedInt(NUFILE file, u32 value) {
@@ -1484,6 +1609,23 @@ static FILEEXTINFO *NuFileExtGetInfo(char *path, i32 path_len) {
     return NULL;
 }
 
+i32 NuFileExtGetType(char *path, i32 path_len) {
+    FILEEXTINFO *info = NuFileExtGetInfo(path, path_len);
+    if (info != NULL)
+        return info->type;
+    return NUFILETYPE_UNKNOWN;
+}
+
+i32 NuFileExtRemove(char *dest, char *path) {
+    i32 length = NuStrCpy(dest, path);
+    FILEEXTINFO *info = NuFileExtGetInfo(path, length);
+    if (info != NULL) {
+        dest[length - info->len] = '\0';
+        return info->type;
+    }
+    return NUFILETYPE_UNKNOWN;
+}
+
 i32 NuFileExtGetExt(char *dest, i32 dest_size, NUFILETYPE type) {
     for (FILEEXTINFO *info = extensions; info->extension[0] != '\0'; ++info) {
         if (info->platform != PC_PLATFORM || info->type != type) {
@@ -1658,7 +1800,4 @@ i32 NuFileInitEx(i32 device_id, i32 reboot_iop, i32 eject) {
 
 void NuFileInit(i32 device_id) {
     NuFileInitEx(device_id, 1, 0);
-}
-
-static void NuFileEndianSwap16(void *) {
 }

@@ -14,7 +14,10 @@ typedef struct nulisthdr_s {
 extern "C" {
 #endif
     void NuLinkedListAppend(NULISTHDR *list, NULISTLNK *node);
+    int NuLinkedListCheck(NULISTHDR *list);
     void NuLinkedListInsert(NULISTHDR *list, NULISTLNK *node);
+    void NuLinkedListInsertBefore(NULISTHDR *list, NULISTLNK *position, NULISTLNK *node);
+    void NuLinkedListInsertAfter(NULISTHDR *list, NULISTLNK *position, NULISTLNK *node);
     void NuLinkedListRemove(NULISTHDR *list, NULISTLNK *node);
 
     NULISTLNK *NuLinkedListGetHead(NULISTHDR *list);

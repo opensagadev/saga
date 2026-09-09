@@ -4,6 +4,19 @@
 
 typedef i32 NUFILE;
 
+// Only the timestamp portion is recovered so far. The preceding metadata
+// and byte at 0x15 are not interpreted by NuFileIsNewer.
+typedef struct nufile_info_s {
+    u8 unknown_00[16];
+    i8 second;
+    i8 minute;
+    i8 hour;
+    i8 day;
+    i8 month;
+    u8 unknown_15;
+    i16 year;
+} NUFILE_INFO;
+
 typedef enum nufilemode_e {
     NUFILE_READ = 0,
     NUFILE_WRITE = 1,
@@ -50,6 +63,10 @@ struct nufile_device_s;
 
 typedef i32 nufiledevFormatName(struct nufile_device_s *, char *, char *, i32);
 typedef i32 nufiledevInterrogate(struct nufile_device_s *);
+
+enum NUFILE_DEVICE_STATUS {
+    NUFILE_DEVICE_STATUS_EXCLUDE_FROM_ENUMERATION = 1 << 1,
+};
 
 typedef struct nufile_device_s {
     i32 id;
@@ -259,6 +276,46 @@ class NuFileBase : public NuFile::IFile {
 };
 
 extern "C" {
+    // Returns one when the second record has the later timestamp.
+    i32 NuFileIsNewer(NUFILE_INFO *first, NUFILE_INFO *second);
+    // Alignment is specified as a bit mask (for example, 15 for 16-byte alignment).
+    i32 NuFileAlign(NUFILE file, i32 mask);
+    i32 NuFileAlignRead(NUFILE file, i32 mask);
+    void *NuFileLoad(char *path);
+    i32 NuFileCopy(char *dest, char *source);
+    i32 NuFileCopyEx(char *dest, char *source, void *buffer, i32 capacity);
+    i32 NuFileExistQuiet(char *filepath);
+    void NuFileBeginBlkWrite(NUFILE file, i32 tag, i32 negative_size);
+    void NuFileEndBlkWrite(NUFILE file);
+    i32 NuFileBeginBlkRead(NUFILE file, i32 expected_tag);
+    void NuFileEndBlkRead(NUFILE file);
+    i32 NuFileGetBlkSize(void);
+    void NuFileInitAddress(i32 capacity);
+    void NuFileTidyAddress(void);
+    void NuFileWriteAddress(NUFILE file, void *address);
+    void NuFileSetAddress(NUFILE file, void *address);
+    void NuFilePatchAddress(NUFILE file);
+    void NuFileGetCurrentDllPath(char *dest);
+    i32 NuFileGetCurrentPath(char *dest);
+    i32 NuFileGetCurrentSysPath(char *dest);
+    void NuFileSetCurrentDirectory(char *path);
+    void NuFileSetCurrentSysDirectory(char *path);
+    NUFILE_DEVICE *NuFileFindDevice(i32 id, i32 unit);
+    i32 NuFileEnumerateDevices(NUFILE_DEVICE **result);
+    i32 NuFileRefreshDevices(NUFILE_DEVICE **result);
+    i32 NuFileGetDevices(NUFILE_DEVICE **result);
+    i32 NuFileGetCurrentDirectory(char *dest);
+    i32 NuFileFormatName(char *dest, char *name, i32 capacity);
+    void NuFileSetAppDirectory(char *path);
+    void NuFileGetAppDirectory(char *dest);
+    i32 NuMcCheckCardPresent(i32 port, i32 slot);
+    i32 NuMcCheckCardFormatted(i32 port, i32 slot);
+    i32 NuMcCheckCardFreeSpace(i32 port, i32 slot);
+    i32 NuFileAppendPath(char *dest, char *path, char *name);
+    i32 NuFileExtractFile(char *dest, char *path);
+    i32 NuFileExtractFilename(char *dest, char *path);
+    i32 NuFileExtractPath(char *dest, char *path);
+    i32 NuFileExtractExt(char *dest, char *path);
 #endif
     extern char g_datfileMode;
     extern i32 NuFile_SwapEndianOnWrite;
@@ -278,6 +335,7 @@ extern "C" {
     i32 NuFileRead(NUFILE file, void *buf, i32 size);
     i32 NuFileWrite(NUFILE file, void *data, i32 size);
     void NuFileWriteString(NUFILE file, const char *text);
+    i32 NuFileWriteStringV(NUFILE file, const char *format, ...);
     NUFILE_DEVICE *NuFileGetDeviceFromPath(char *path);
     i64 NuFileOpenSize(NUFILE file);
     i64 NuFileSeek(NUFILE file, i64 offset, NUFILESEEK seekMode);
@@ -292,6 +350,9 @@ extern "C" {
     i64 NuFileSize(char *filepath);
     i32 NuFileExtConvert(char *dest, char *path);
     i32 NuFileExtGetExt(char *dest, i32 dest_size, NUFILETYPE type);
+    i32 NuFileExtGetType(char *path, i32 path_len);
+    i32 NuFileExtRemove(char *dest, char *path);
+    i32 NuFileEOF(NUFILE file);
     i64 NuFilePos(NUFILE file);
     void NuFileUpCase(NUFILE_DEVICE *device, char *filepath);
 
@@ -307,6 +368,13 @@ extern "C" {
     u16 NuFileReadWChar(NUFILE file);
 
     i32 NuFileWriteInt(NUFILE file, i32 value);
+    i32 NuFileWriteFloat(NUFILE file, float value);
+    i32 NuFileWriteShort(NUFILE file, i16 value);
+    i32 NuFileWriteUnsignedShort(NUFILE file, u16 value);
+    i32 NuFileWriteChar(NUFILE file, i8 value);
+    i32 NuFileWriteUnsignedChar(NUFILE file, u8 value);
+    i32 NuFileSwapEndianOnWrite(i32 enabled);
+    void NuFileSetCurrentDllDirectory(char *path);
     u32 NuFileWriteUnsignedInt(NUFILE file, u32 value);
 
     // Platform-specific file functions

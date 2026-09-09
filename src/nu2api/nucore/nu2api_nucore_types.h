@@ -3,6 +3,7 @@
 #pragma once
 
 #include "nu2api/nucore/fixed_width.h"
+#include "nu2api/nucore/numem.h"
 
 #include "nu2api/nucore/NuCopyFilter.h"
 #include "nu2api/nucore/NuDataPortManager.h"
@@ -149,7 +150,6 @@ struct nuframebuffer_s {};
 struct nugeom_s {};
 struct nugscn_s;
 struct nuhspecial_s;
-struct numemblk_s {};
 struct numtl_s;
 struct numtx_s;
 struct nunativetex_s;

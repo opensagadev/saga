@@ -14,6 +14,9 @@ struct nuvec4_s;
 
 i32 nurndr_pixel_width;
 i32 nurndr_pixel_height;
+i32 nurndr_nforced_mtls;
+NUMTL **nurndr_forced_mtl_table;
+NUMTL *nurndr_forced_mtl;
 
 void NuRndrInitEx(i32 stream_buffer_size, VARIPTR *buffer) {
     NuRndrStreamInit(stream_buffer_size, buffer);

@@ -464,8 +464,8 @@ typedef struct APIOBJECT_s {
         f32 respawn_timer;
         f32 movement_stuck_time;
     }; // 0x1d8
-    f32 field_0x1dc;        // 0x1dc
-    f32 field_0x1e0;        // 0x1e0
+    f32 field_0x1dc; // 0x1dc
+    f32 field_0x1e0; // 0x1e0
     union __attribute__((packed, aligned(4))) {
         struct {
             u32 field_0x1e4;

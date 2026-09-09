@@ -8,6 +8,22 @@
 
 static NUFILEPAK_ERROR fpk_err;
 
+NUFILEPAK_ERROR NuFilePakGetLastError(void) {
+    return fpk_err;
+}
+
+u32 NuFilePakGetSize(void *hdr_ptr) {
+    fpk_err = NUFILEPAK_ERROR_NONE;
+    NUFILEPAKHDR *hdr = (NUFILEPAKHDR *)hdr_ptr;
+    return hdr->file_size;
+}
+
+void NuFilePakRelocate(void *hdr_ptr, void *dest) {
+    fpk_err = NUFILEPAK_ERROR_NONE;
+    NUFILEPAKHDR *hdr = (NUFILEPAKHDR *)hdr_ptr;
+    memmove(dest, hdr_ptr, hdr->file_size);
+}
+
 static u32 CalcChecksum(void *data, i32 len) {
     unsigned char *bytes;
     u32 sum;

@@ -11,6 +11,10 @@
 #include "nu2api/numath/nuvec4.h"
 
 NUCAMERA global_camera;
+i32 cam_state_count;
+NUCAMERASTATE cam_state[16];
+NUVEC cam_axes = {1.0f, 1.0f, 1.0f};
+i32 force_camera_farclip;
 NUMTX cmtx = {
     1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
 };

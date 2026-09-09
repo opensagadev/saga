@@ -7,6 +7,33 @@
 #include "nu2api/numath/nuvec4.h"
 
 extern "C" i32 nuspecial_reflection;
+i32 nuspecial_draw_state;
+
+extern "C" void NuSpecialMtl(NUMTL *material) {
+    nurndr_forced_mtl = material;
+}
+
+extern "C" void NuSpecialForceMtl(NUMTL *material) {
+    if (material != NULL) {
+        nuspecial_draw_state |= NUSPECIAL_DRAW_FORCE_MATERIAL;
+    } else {
+        nuspecial_draw_state &= ~NUSPECIAL_DRAW_FORCE_MATERIAL;
+    }
+    nurndr_forced_mtl = material;
+}
+
+extern "C" void NuSpecialMtlMap(i32 count, NUMTL **materials) {
+    if (count != 0) {
+        nurndr_nforced_mtls = count;
+        nuspecial_draw_state |= NUSPECIAL_DRAW_MATERIAL_MAP;
+        nurndr_forced_mtl_table = materials;
+        return;
+    } else {
+        nuspecial_draw_state &= ~NUSPECIAL_DRAW_MATERIAL_MAP;
+        nurndr_forced_mtl_table = NULL;
+        return;
+    }
+}
 
 void NuSpecialReflection(i32 reflection) {
     nuspecial_reflection = reflection;
@@ -167,6 +194,20 @@ extern "C" void NuSpecialSetMtx(nuhspecial_s *special, NUMTX *matrix) {
     } else {
         *static_cast<NUMTX *>(special->special) = *matrix;
     }
+}
+
+extern "C" i32 NuSpecialGetCollision(nuhspecial_s *special) {
+    if (special == NULL || special->scene == NULL) {
+        return 0;
+    }
+    NuSpecialLegacyLayout *legacy = static_cast<NuSpecialLegacyLayout *>(special->special);
+    if (legacy != NULL) {
+        return legacy->flags & NULEGACYSPECIAL_FLAG_COLLISION;
+    }
+    if (special->display_special != NULL) {
+        return special->display_special->flags & NUDISPLAYSPECIAL_FLAG_COLLISION;
+    }
+    return 0;
 }
 
 extern "C" void NuSpecialSetCollision(nuhspecial_s *special, i32 enabled) {

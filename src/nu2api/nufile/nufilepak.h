@@ -63,6 +63,9 @@ extern "C" {
                            u32 key_len);
 
     i32 NuFilePakGetItem(void *hdr, char *item_name);
+    NUFILEPAK_ERROR NuFilePakGetLastError(void);
+    u32 NuFilePakGetSize(void *hdr);
+    void NuFilePakRelocate(void *hdr, void *dest);
     i32 NuFilePakGetItemInfo(void *hdr, i32 item_handle, void **addr, i32 *size);
     i32 NuFilePakCondense(void *hdr);
     i32 NuFilePakSetItemRequired(void *hdr, i32 item_handle, i32 required);

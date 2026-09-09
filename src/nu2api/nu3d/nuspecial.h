@@ -11,6 +11,11 @@
 
 struct nuinstanim_s;
 
+enum NUSPECIAL_DRAW_FLAGS {
+    NUSPECIAL_DRAW_MATERIAL_MAP = 1 << 2,
+    NUSPECIAL_DRAW_FORCE_MATERIAL = 1 << 3,
+};
+
 f32 NuSpecialGetAnimPos(nuhspecial_s *special);
 void NuSpecialReflection(i32 reflection);
 
@@ -70,6 +75,7 @@ extern "C" {
     i32 NuSpecialGetOnScreenFn(nuhspecial_s *special);
     void NuSpecialClear(void *special);
     void NuSpecialGetBounds(void *special, NUVEC *minimum, NUVEC *maximum);
+    void NuSpecialSetBounds(nuhspecial_s *special, NUVEC *minimum, NUVEC *maximum);
     void NuSpecialGetRadius(void *special, NUVEC *position, f32 *radius);
     f32 NuSpecialGetAnimEndFrame(nuhspecial_s *special);
     nuinstanim_s *NuSpecialGetInstAnim(nuhspecial_s *special);
@@ -77,7 +83,13 @@ extern "C" {
     i32 NuSpecialTestAnim(nuhspecial_s *special);
     void NuSpecialSetMtx(nuhspecial_s *special, NUMTX *matrix);
     void NuSpecialSetCollision(nuhspecial_s *special, i32 enabled);
+    i32 NuSpecialGetCollision(nuhspecial_s *special);
     i32 NuSpecialForceToAlpha(nuhspecial_s *special);
+    NUMTL *NuSpecialGetMtl(nuhspecial_s *special, i32 index);
+    void NuSpecialMtl(NUMTL *material);
+    void NuSpecialForceMtl(NUMTL *material);
+    void NuSpecialMtlMap(i32 count, NUMTL **materials);
+    i32 NuSpecialNumMtls(nuhspecial_s *special);
     NUMTX *NuSpecialGetInstanceMtx(nuhspecial_s *special);
     i32 NuSpecialGetInstanceix(nuhspecial_s *special);
     char *NuSpecialGetName(nuhspecial_s *special);

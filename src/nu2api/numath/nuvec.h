@@ -8,6 +8,11 @@
 
 struct numtx_s;
 
+#ifdef __cplusplus
+struct nuvec_s;
+i32 NuVecClipTestPointVU0(nuvec_s *point, numtx_s *matrix);
+#endif
+
 /// @brief A vector in 3-dimensional space.
 typedef struct nuvec_s {
     /// @brief The x component of the vector.

@@ -8,6 +8,10 @@
 
 typedef struct rndrstream_s RNDRSTREAM;
 
+extern i32 nurndr_nforced_mtls;
+extern struct numtl_s **nurndr_forced_mtl_table;
+extern struct numtl_s *nurndr_forced_mtl;
+
 typedef i32 NUCOLOUR32;
 
 typedef struct NURND_VERTEX3D {

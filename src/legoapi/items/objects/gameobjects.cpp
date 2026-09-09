@@ -2357,8 +2357,8 @@ void GameAIProcess() {
         if ((object->apiobj.flags_low & 0x80) == 0) {
             if (object->character_context == 0x5d)
                 SetBallooningHeight(object, object->ai.movement_destination.y);
-            if (WORLD->current_level == JEDI_B_LDATA && object->id == id_JANGOFETT &&
-                (object->field_0xefb & 8) != 0 && object->hover_height_override != 1.0e9f && object->field_0xe31 == 0)
+            if (WORLD->current_level == JEDI_B_LDATA && object->id == id_JANGOFETT && (object->field_0xefb & 8) != 0 &&
+                object->hover_height_override != 1.0e9f && object->field_0xe31 == 0)
                 object->field_0xe31 = 1;
             if (object->apiobj.field_0x27c != -1 && object->field_0xe31 != 0 &&
                 (object->ai.capabilities & LEGO_AIPATHCNX_R2D2GLIDE) == 0)
@@ -2367,9 +2367,8 @@ void GameAIProcess() {
                 (static_cast<SUIT_s *>(object->suit)->flags & 0x10) != 0)
                 object->pad_gamepad->buttons_held |= GAMEPAD_SPECIAL;
             AIPATHCNX *connection = object->ai.path_info.connection;
-            if (connection != NULL &&
-                (connection->traversal_flags[object->ai.path_info.direction] & object->ai.capabilities &
-                 LEGO_AIPATHCNX_WALLSHUFFLE) != 0) {
+            if (connection != NULL && (connection->traversal_flags[object->ai.path_info.direction] &
+                                       object->ai.capabilities & LEGO_AIPATHCNX_WALLSHUFFLE) != 0) {
                 object->field_0xf02 |= 1;
                 AIPATHNODE *nodes = object->ai.path_info.path->nodes;
                 i32 direction = object->ai.path_info.direction;
@@ -2477,7 +2476,8 @@ void GameAIProcess() {
                     object->field_0xf14 = 0;
                 } else if ((object->ai.field_0x1e6 & AIPACKET_RUNTIME_USING_PATH_WAYPOINT) != 0 &&
                            ((object->ai.field_0x1e6 & AIPACKET_RUNTIME_PATH_BLOCKED) != 0 ||
-                            (object->ai.path_info.connection != NULL && object->ai.path_info.connection->route_mask != 0))) {
+                            (object->ai.path_info.connection != NULL &&
+                             object->ai.path_info.connection->route_mask != 0))) {
                     if ((object->field_0xefc & 0x40) != 0) {
                         if (object->field_0xf14 != object->ai.frame_state) {
                             object->route_character_id = -1;
@@ -2546,9 +2546,9 @@ void GameAIProcess() {
                     NuVecScale(&direction, &direction, scale);
                     NuVecRotateY(&forward, &v001, object->apiobj.movement_facing_angle);
                     f32 dot = NuVecDot(&direction, &forward);
-                    u16 angle = object->ai.opponent_metric < 0.5f ? 0x3aaa
+                    u16 angle = object->ai.opponent_metric < 0.5f   ? 0x3aaa
                                 : object->ai.opponent_metric < 1.0f ? 0x3000
-                                                                   : 0x2555;
+                                                                    : 0x2555;
                     if (dot > NuTrigTable[angle]) {
                         object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
                         object->script_fire_target = *object->ai.action_target_ref;
@@ -2580,12 +2580,12 @@ void GameAIProcess() {
             }
             if ((object->field_0xef8 & 8) != 0 &&
                 (defend || (object->field_0xef8 & 0x30) != 0 ||
-                 ((object->id == id_YODA || object->id == id_YODAGHOST) &&
-                  (object->apiobj.flags_low & 0x80) == 0 && object->apiobj.field_0x27c != -1))) {
+                 ((object->id == id_YODA || object->id == id_YODAGHOST) && (object->apiobj.flags_low & 0x80) == 0 &&
+                  object->apiobj.field_0x27c != -1))) {
                 if ((object->field_0xe22 & 1) == 0 && object->character_context != 7 && object->field_0xe32 == 0)
                     object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
-            } else if ((object->pad_gamepad->buttons_pressed & GAMEPAD_ACTION) == 0 &&
-                       (object->field_0xe22 & 1) != 0 && object->character_context != 6 && object->field_0xe32 == 0) {
+            } else if ((object->pad_gamepad->buttons_pressed & GAMEPAD_ACTION) == 0 && (object->field_0xe22 & 1) != 0 &&
+                       object->character_context != 6 && object->field_0xe32 == 0) {
                 object->pad_gamepad->buttons_pressed |= GAMEPAD_SPECIAL;
             }
         }
@@ -2680,7 +2680,7 @@ void GameAIProcess() {
     i32 los_count = baddy_count + neutral_count;
     timetogetlos = (f32)(los_count * los_count) * FRAMETIME * 0.5f;
     APIObjectLOSChecks(WORLD->api_object_sys, 2, goody_count, goodies, los_count, baddies,
-                      (f32)static_cast<u8>(WORLD->current_level->unknown_0da));
+                       (f32) static_cast<u8>(WORLD->current_level->unknown_0da));
     if (TimingBarSet == 4)
         TBCLOSEFN("(LOS)", 4);
     if (TimingBarSet == 4)
@@ -2783,7 +2783,7 @@ void GameAIProcess() {
     if (TimingBarSet == 4)
         TBOPENFN("(Opponent)", 4);
     GameCreatureOpponentSelection(WORLD->ai_sys, interactive_count, interactive_objects, goody_count, goodies,
-                                 baddy_count, baddies, awareness, FRAMETIME);
+                                  baddy_count, baddies, awareness, FRAMETIME);
     if (TimingBarSet == 4)
         TBCLOSEFN("(Opponent)", 4);
     if (TimingBarSet == 4)

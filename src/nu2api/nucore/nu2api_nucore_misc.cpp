@@ -54,9 +54,6 @@ void NuHGobjRead(variptr_u *, char *) {
 static void NuHtmlFlush(i32) {
 }
 
-void NuHtmlTitle(char *) {
-}
-
 void NuMemDumpFn(i32) {
 }
 
@@ -68,9 +65,6 @@ void NuErrorPrint(char *message) {
 }
 
 void NuFntFindEnd(nutex_s *, i32 *, i32 *, i32, i32) {
-}
-
-void NuMemFlushFn() {
 }
 
 void NuBridgeAlloc() {
@@ -144,9 +138,6 @@ void NuIOSDLLightmap(void *arg) {
 void NuLgtArcLaserEx(i32, nuvec_s *, nuvec_s *, nuvec_s *, float, float, float, float, i32, i32) {
 }
 
-void NuMemValidateFn() {
-}
-
 void NuVpSetDestRect(float, float, float, float) {
 }
 
@@ -156,13 +147,7 @@ void NuBrdigeDrawRope(numtl_s *, nuvec_s *, nuvec_s *, i32, i32 *, i32) {
 void NuDDSGetMipLevel(i32, i32, i32, NUTEXFORMAT, i32, bool, i32, i32, i32 &, i32 &, i32 &) {
 }
 
-void NuHtmlGraphArray(char **) {
-}
-
 void NuLgtSetArcMatEx(i32, numtl_s *, float, float, float, float) {
-}
-
-void NuMemGetExternal() {
 }
 
 extern "C" u8 CutSceneBoundingBoxTrackRoot;
@@ -433,9 +418,6 @@ void NuGCutSceneSysInitVfx(i32 (*)(char const *), i32 (*)(i32, VuMtx *), void (*
 // NuIOSDLGeom2DCallback is transcribed in android/nuiosdl_gl.cpp (original 0x29d1a0).
 
 void NuIOS_GetInAppProduct(i32, NuIOS_InAppProduct *) {
-}
-
-void NuMemBlkCheckFreeList(numemblk_s *) {
 }
 
 extern "C" i32 g_signedinUser;
@@ -1021,14 +1003,4 @@ void NuNetEmu::PackStats::Draw(float, float, float, float, NetSmallStats::eInfo)
 }
 
 static __used__ void NuErrorFunction(char *, ...) {
-}
-
-static __used__ void NuWarningFunction(char *, ...) {
-}
-
-static __used__ void NuDebugMsgFunction(char *, ...) {
-}
-
-static __used__ i32 NuDebugMsgFunctionTTY(i32, char *, ...) {
-    return 0;
 }

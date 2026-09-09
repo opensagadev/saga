@@ -1,5 +1,17 @@
 #include "nu2api/nufile/nufile.h"
 
+i32 NuMcCheckCardPresent(i32 port, i32 slot) {
+    return 0;
+}
+
+i32 NuMcCheckCardFormatted(i32 port, i32 slot) {
+    return 0;
+}
+
+i32 NuMcCheckCardFreeSpace(i32 port, i32 slot) {
+    return 0;
+}
+
 i32 NuMcOpen(i32 port, i32 slot, char *filepath, i32 mode, i32 async) {
     return 0;
 }

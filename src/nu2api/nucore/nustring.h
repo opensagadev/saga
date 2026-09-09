@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stddef.h>
+#include <stdarg.h>
 
 #include "nu2api/nucore/common.h"
 
@@ -25,6 +26,9 @@ typedef struct nustringbank_s {
 
 #ifdef __cplusplus
 extern "C" {
+    i32 NuVSPrintf(char *dest, const char *format, va_list args);
+    i32 NuSPrintfW(NUWCHAR *dest, NUWCHAR *format, ...);
+    i32 NuStrICmpWC(char *pattern, char *text, char *wildcard);
 #endif
     void NuStrCat(char *str, const char *ext);
     void NuStrToLower(char *str);
@@ -97,9 +101,19 @@ extern "C" {
     void NuStrSubstituteString(char *dst, char *src, char *search, char *replacement);
 
     i32 NuStringTableLoadCSV(char *filepath, VARIPTR *buf, VARIPTR buf_end, char *label, char *language);
+    i32 NuStringTableLoadTXT(char *filepath, VARIPTR *buf, VARIPTR buf_end);
+    i32 NuStringTableLoad(char *filepath, VARIPTR *buf, VARIPTR buf_end);
 
     void NuStringTableSetBank(i32 bank);
     void NuStringTableSetFormat(i32 format);
+    i32 NuStringTableGetFormat(void);
+    void NuStringTableUnload(void);
+    void NuStringFilterLoad(char *path, VARIPTR *buf, VARIPTR buf_end);
+    i32 NuStringFilterBadWordsW(NUWCHAR *dest, NUWCHAR *source, NUWCHAR *replacement);
+    i32 NuStringFilterBadWords(NUWCHAR8 *dest, NUWCHAR8 *source, NUWCHAR8 *replacement);
+    void NuStringTableSaveCharacterList(char *filepath, char *scratch, i32 report_missing);
+    i32 NuStringTableGetIdByName(char *name);
+    NUWCHAR *NuStringTableGetById(i32 id);
 
     NUWCHAR *NuStringTableGetByName(char *name);
 #ifdef __cplusplus
