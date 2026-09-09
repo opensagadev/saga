@@ -303,23 +303,42 @@ GIZPANEL_s *GizPanel_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObje
         return NULL;
     GIZPANEL_s *nearest = NULL;
     f32 nearest_distance = 1.0e9f;
-    for (i32 index = 0; index < world->giz_panel_sys->count; ++index) {
-        GIZPANEL_s *panel = &world->giz_panel_sys->panels[index];
-        f32 distance;
-        if (object != NULL) {
+    if (object != NULL && check_eligibility != 0) {
+        for (i32 index = 0; index < world->giz_panel_sys->count; ++index) {
+            GIZPANEL_s *panel = &world->giz_panel_sys->panels[index];
             if ((panel->flags & 0x0f) != 0x0c || panel->floor_position.y == 2000000.0f)
                 continue;
-            if (check_eligibility != 0 && GizPanel_CanUsePanel(object, panel) == 0)
+            if (GizPanel_CanUsePanel(object, panel) == 0)
                 continue;
             NUVEC target;
             GizPanel_GetAbsTargetPos(panel, &target, 0);
-            distance = NuVecDistSqr(position, &target, NULL);
-        } else {
-            distance = NuVecDistSqr(position, &panel->position, NULL);
+            const f32 distance = NuVecDistSqr(position, &target, NULL);
+            if (distance < nearest_distance) {
+                nearest_distance = distance;
+                nearest = panel;
+            }
         }
-        if (distance < nearest_distance) {
-            nearest_distance = distance;
-            nearest = panel;
+    } else if (object != NULL) {
+        for (i32 index = 0; index < world->giz_panel_sys->count; ++index) {
+            GIZPANEL_s *panel = &world->giz_panel_sys->panels[index];
+            if ((panel->flags & 0x0f) != 0x0c || panel->floor_position.y == 2000000.0f)
+                continue;
+            NUVEC target;
+            GizPanel_GetAbsTargetPos(panel, &target, 0);
+            const f32 distance = NuVecDistSqr(position, &target, NULL);
+            if (distance < nearest_distance) {
+                nearest_distance = distance;
+                nearest = panel;
+            }
+        }
+    } else {
+        for (i32 index = 0; index < world->giz_panel_sys->count; ++index) {
+            GIZPANEL_s *panel = &world->giz_panel_sys->panels[index];
+            const f32 distance = NuVecDistSqr(position, &panel->position, NULL);
+            if (distance < nearest_distance) {
+                nearest_distance = distance;
+                nearest = panel;
+            }
         }
     }
     if (distance_squared != NULL)
