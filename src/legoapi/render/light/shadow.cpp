@@ -89,6 +89,7 @@ void ResetShadowMapRenderingFn() {
 }
 
 void EnableShadowMapRenderingFn() {
+    EnableShadowMapRendering(0);
 }
 
 extern "C" {

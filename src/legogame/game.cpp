@@ -13,6 +13,12 @@
 #include "legoapi/gizmos/traps/attractos.h"
 #include "legoapi/gizmos/door/zipups.h"
 #include "legoapi/world/area.h"
+extern "C" {
+    extern void (*APIObjResetShadowMapRenderingFn)(void);
+    extern void (*APIObjEnableShadowMapRenderingFn)(void);
+}
+void ResetShadowMapRenderingFn(void);
+void EnableShadowMapRenderingFn(void);
 extern i32 (*GizBuildIt_CanStartBuildingFn)(GIZBUILDIT_s *, GameObject_s *);
 extern BOLTTYPE_s GlobalBoltType[44];
 void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
@@ -991,8 +997,8 @@ void InitGameAfterConfig(void) {
     Tag_NoHiddenIconFn = Tag_NoHiddenIcon;
     //  Collection_GetSelectingPlayerIDsFn = Collection_GetSelectingPlayerIDs;
     GizmoBlowUp_SfxFn = GizmoBlowUp_Sfx;
-    //  APIObjResetShadowMapRenderingFn = ResetShadowMapRenderingFn;
-    //  APIObjEnableShadowMapRenderingFn = EnableShadowMapRenderingFn;
+    APIObjResetShadowMapRenderingFn = ResetShadowMapRenderingFn;
+    APIObjEnableShadowMapRenderingFn = EnableShadowMapRenderingFn;
     //  GameMsg_GetExtraObjFn = GameMsg_GetExtraObj;
     Jump_EndOfLandContextFn = Jump_EndOfLandContext;
     BigJump_EndOfLandFn = BigJump_EndOfLand;
