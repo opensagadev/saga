@@ -476,9 +476,9 @@ extern "C" {
                     difference.x * difference.x + difference.y * difference.y + difference.z * difference.z;
                 f32 source_range = source->viewdistance + target->visibility_range_extension;
                 f32 target_range = target->viewdistance + source->visibility_range_extension;
-                if (static_cast<u8>(source->flags_high & 2)) {
+                if (source->force_los_visible) {
                     source_visible = 1;
-                } else if ((static_cast<u8>(source->flags_high & 0x40) || static_cast<u8>(target->flags_high & 0x40)) &&
+                } else if ((source->use_cached_los || target->use_cached_los) &&
                            ((system->line_of_sight[source_index] >> target->field_0x289) & 1) != 0 &&
                            distance_squared < source_range * source_range) {
                     source_visible = 1;
@@ -489,9 +489,9 @@ extern "C" {
                 } else {
                     source_visible = 0;
                 }
-                if (static_cast<u8>(target->flags_high & 2)) {
+                if (target->force_los_visible) {
                     target_visible = 1;
-                } else if ((static_cast<u8>(target->flags_high & 0x40) || static_cast<u8>(source->flags_high & 0x40)) &&
+                } else if ((target->use_cached_los || source->use_cached_los) &&
                            ((system->line_of_sight[target_index] >> source->field_0x289) & 1) != 0 &&
                            distance_squared < target_range * target_range) {
                     target_visible = 1;
@@ -503,8 +503,8 @@ extern "C" {
                     target_visible = 0;
                 }
                 if ((source_visible | target_visible) != 0) {
-                    if (static_cast<u8>(system->flags_210 & 1) || static_cast<u8>(target->flags_high & 4) ||
-                        static_cast<u8>(source->flags_high & 4)) {
+                    if (system->skip_los_raycast || target->skip_los_raycast ||
+                        source->skip_los_raycast) {
                         if (source_visible != 0)
                             system->line_of_sight[source_index] |= (u64)1 << target_index;
                         else
@@ -524,11 +524,11 @@ extern "C" {
                         else
                             system->line_of_sight[target_index] &= ~((u64)1 << source_index);
                     } else {
-                        if (source_visible != 0 && static_cast<u8>(source->flags_high & 4))
+                        if (source_visible != 0 && source->skip_los_raycast)
                             system->line_of_sight[source_index] |= (u64)1 << target_index;
                         else
                             system->line_of_sight[source_index] &= ~((u64)1 << target_index);
-                        if (target_visible != 0 && static_cast<u8>(target->flags_high & 4))
+                        if (target_visible != 0 && target->skip_los_raycast)
                             system->line_of_sight[target_index] |= (u64)1 << source_index;
                         else
                             system->line_of_sight[target_index] &= ~((u64)1 << source_index);

@@ -486,7 +486,17 @@ typedef struct APIOBJECT_s {
         u32 object_flags; // 0x1f8, complete flag word
         struct {
             u8 flags_low;
-            u8 flags_high;
+            union {
+                u8 flags_high;
+                struct {
+                    u8 : 1;
+                    u8 force_los_visible : 1;
+                    u8 skip_los_raycast : 1;
+                    u8 : 3;
+                    u8 use_cached_los : 1;
+                    u8 : 1;
+                };
+            };
             union {
                 u8 field_0x1fa;
                 struct {
@@ -645,6 +655,10 @@ struct APIOBJECTSYS_s {
             union {
                 u8 flags_210;
                 u8 runtime_flags;
+                struct {
+                    u8 skip_los_raycast : 1;
+                    u8 : 7;
+                };
             };
             u8 state_211[3];
         };
