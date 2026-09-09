@@ -2238,10 +2238,7 @@ extern "C" {
             packet->path_info.next_check = 0;
             packet->path_info.path_index = 0;
         }
-        if (path == NULL) {
-            return;
-        }
-
+        path = packet->path_info.path;
         AISysResetPathSearchConnectionChecks(path);
 
         AIPATHCNX *current_connection = packet->path_info.connection;
@@ -2254,37 +2251,32 @@ extern "C" {
 
             const bool check_adjacent_connections =
                 (object->flags_low & APIOBJECT_FLAG_PLAYER_ACTIVE) != 0 ||
-                (packet->movement_target == NULL && packet->path_connection_state == 0 && ground != 0);
+                (packet->field_0x180 == NULL && packet->path_connection_state == 0 && ground != 0);
             if (!check_adjacent_connections) {
                 return;
             }
 
-            const u8 first_node_index = current_connection->node_indices[current_direction];
-            if (first_node_index < path->node_count) {
-                AIPATHNODE &first_node = path->nodes[first_node_index];
-                for (i32 connection_index = 0; connection_index < first_node.connection_count; ++connection_index) {
-                    AIPATHCNX *candidate = first_node.connections[connection_index];
-                    if (candidate != current_connection &&
-                        AISysCharacterTestPathCnx(system, object, packet, candidate, 0, &nearest_distance_squared) !=
-                            0) {
-                        return;
-                    }
-                }
+            path = packet->path_info.path;
+            AIPATHNODE &first_node = path->nodes[current_connection->node_indices[current_direction]];
+            for (i32 connection_index = 0; connection_index < first_node.connection_count; ++connection_index) {
+                AIPATHCNX *candidate = first_node.connections[connection_index];
+                if (candidate != current_connection &&
+                    AISysCharacterTestPathCnx(system, object, packet, candidate,
+                                              candidate->node_indices[0] != current_connection->node_indices[current_direction],
+                                              &nearest_distance_squared) != 0)
+                    return;
             }
 
             path = packet->path_info.path;
-            const u8 second_node_index = current_connection->node_indices[current_direction == 0];
-            if (second_node_index < path->node_count) {
-                AIPATHNODE &second_node = path->nodes[second_node_index];
-                for (i32 connection_index = 0; connection_index < second_node.connection_count; ++connection_index) {
-                    AIPATHCNX *candidate = second_node.connections[connection_index];
-                    const i32 direction = candidate->node_indices[0] != second_node_index;
-                    if (candidate != current_connection &&
-                        AISysCharacterTestPathCnx(system, object, packet, candidate, direction,
-                                                  &nearest_distance_squared) != 0) {
-                        return;
-                    }
-                }
+            const i32 other_direction = current_direction == 0;
+            AIPATHNODE &second_node = path->nodes[current_connection->node_indices[other_direction]];
+            for (i32 connection_index = 0; connection_index < second_node.connection_count; ++connection_index) {
+                AIPATHCNX *candidate = second_node.connections[connection_index];
+                if (candidate != current_connection &&
+                    AISysCharacterTestPathCnx(system, object, packet, candidate,
+                                              candidate->node_indices[0] != current_connection->node_indices[other_direction],
+                                              &nearest_distance_squared) != 0)
+                    return;
             }
         }
 
@@ -2292,9 +2284,6 @@ extern "C" {
         if ((packet->navigation_flags & AIPACKET_NAVIGATION_FLAG_SEARCH_ALL_PATHS) == 0) {
             i32 remaining_checks = path->node_count < checks ? path->node_count : checks;
             while (remaining_checks-- > 0) {
-                if (packet->path_info.next_check >= path->node_count) {
-                    packet->path_info.next_check = 0;
-                }
                 AIPATHNODE &node = path->nodes[packet->path_info.next_check];
                 for (i32 connection_index = 0; connection_index < node.connection_count; ++connection_index) {
                     if (AISysCharacterTestPathCnx(system, object, packet, node.connections[connection_index], -1,
@@ -2302,6 +2291,7 @@ extern "C" {
                         return;
                     }
                 }
+                path = packet->path_info.path;
                 packet->path_info.next_check = (packet->path_info.next_check + 1) % path->node_count;
             }
             return;
@@ -2327,13 +2317,14 @@ extern "C" {
         }
         AISysResetPathSearchConnectionChecks(path);
 
-        bool position_inside_path_bounds = false;
+        i32 position_inside_path_bounds = 0;
         for (i32 remaining_checks = checks; remaining_checks > 0; --remaining_checks) {
             if (!position_inside_path_bounds) {
-                position_inside_path_bounds = AIPathCheckExtents(path, &packet->owner->apiobj.position) != 0;
+                position_inside_path_bounds = AIPathCheckExtents(packet->path_info.path, &packet->owner->apiobj.position);
             }
 
             if (position_inside_path_bounds) {
+                path = packet->path_info.path;
                 AIPATHNODE &node = path->nodes[packet->path_info.next_check];
                 for (i32 connection_index = 0; connection_index < node.connection_count; ++connection_index) {
                     if (AISysCharacterTestPathCnx(system, object, packet, node.connections[connection_index], -1,
@@ -2343,6 +2334,7 @@ extern "C" {
                 }
 
                 ++packet->path_info.next_check;
+                path = packet->path_info.path;
                 if (packet->path_info.next_check < path->node_count) {
                     continue;
                 }
@@ -2357,8 +2349,8 @@ extern "C" {
             path = system->path_sys->paths[packet->path_info.path_index];
             packet->path_info.path = path;
             AISysCharacterSetPathCnx(packet, &object->position, NULL, 0);
-            AISysResetPathSearchConnectionChecks(path);
-            position_inside_path_bounds = false;
+            AISysResetPathSearchConnectionChecks(packet->path_info.path);
+            position_inside_path_bounds = 0;
         }
 
         packet->path_info.path = original_path;
