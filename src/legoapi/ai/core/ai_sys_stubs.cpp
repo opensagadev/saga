@@ -1945,46 +1945,46 @@ extern "C" {
 
     void AISysCharacterMovement(AISYS *system, AIPACKET *packet, APIOBJECT *object, i32 checks) {
         packet->movement_event_flags &= static_cast<u8>(~AIPACKET_PATH_CONNECTION_CHANGED);
-        if (MidSpecialMoveFn != NULL && MidSpecialMoveFn(system, packet, object) != 0) {
+        if (MidSpecialMoveFn == NULL || MidSpecialMoveFn(system, packet, object) == 0) {
+            if (packet->path_info.path != NULL && packet->path_info.connection != NULL) {
+                packet->movement_destination = object->position;
+                packet->movement_stopping_distance = 0.0f;
+                switch (packet->movement_flags & AIPACKET_MOVEMENT_MODE_MASK) {
+                    case AIPACKET_MOVEMENT_TO_DESTINATION:
+                        AIMoveToDestination(system, packet, object, checks);
+                        break;
+                    case AIPACKET_MOVEMENT_RETREAT:
+                        AIRetreatFromDestination(system, packet, object, checks);
+                        break;
+                    case AIPACKET_MOVEMENT_CIRCLE:
+                        AICircle(system, packet, object, checks);
+                        break;
+                    case AIPACKET_MOVEMENT_WANDER:
+                        AIWander(system, packet, object, checks);
+                        break;
+                    case AIPACKET_MOVEMENT_AVOIDING_CAMERA:
+                        AIMoveToDestinationAvoidingCamera(system, packet, object, checks);
+                        break;
+                    case AIPACKET_MOVEMENT_DIRECT:
+                        AIMoveDirectlyToDestination(system, packet, object, checks);
+                        break;
+                }
+            } else {
+                packet->movement_destination = object->position;
+                packet->movement_stopping_distance = 0.0f;
+                const u8 mode = packet->movement_flags & AIPACKET_MOVEMENT_MODE_MASK;
+                if (mode == AIPACKET_MOVEMENT_DIRECT || mode == AIPACKET_MOVEMENT_TO_DESTINATION ||
+                    mode == AIPACKET_MOVEMENT_AVOIDING_CAMERA) {
+                    packet->movement_stopping_distance = packet->fallback_stopping_distance;
+                    packet->movement_destination = packet->fallback_destination;
+                }
+            }
+
+            packet->movement_flags &= static_cast<u8>(~AIPACKET_MOVEMENT_MODE_MASK);
+        } else {
             packet->field_0x1e6 |= AIPACKET_RUNTIME_SPECIAL_MOVE;
             packet->field_0x1e7 |= AIPACKET_MOVEMENT_SPECIAL_HANDLED;
-            return;
         }
-
-        packet->movement_destination = object->position;
-        packet->movement_stopping_distance = 0.0f;
-        u8 movement_flags = packet->movement_flags;
-        const u8 mode = movement_flags & AIPACKET_MOVEMENT_MODE_MASK;
-
-        if (packet->path_info.path != NULL && packet->path_info.connection != NULL) {
-            switch (mode) {
-                case AIPACKET_MOVEMENT_TO_DESTINATION:
-                    AIMoveToDestination(system, packet, object, checks);
-                    break;
-                case AIPACKET_MOVEMENT_RETREAT:
-                    AIRetreatFromDestination(system, packet, object, checks);
-                    break;
-                case AIPACKET_MOVEMENT_CIRCLE:
-                    AICircle(system, packet, object, checks);
-                    break;
-                case AIPACKET_MOVEMENT_WANDER:
-                    AIWander(system, packet, object, checks);
-                    break;
-                case AIPACKET_MOVEMENT_AVOIDING_CAMERA:
-                    AIMoveToDestinationAvoidingCamera(system, packet, object, checks);
-                    break;
-                case AIPACKET_MOVEMENT_DIRECT:
-                    AIMoveDirectlyToDestination(system, packet, object, checks);
-                    break;
-            }
-            movement_flags = packet->movement_flags;
-        } else if (mode == AIPACKET_MOVEMENT_TO_DESTINATION || mode == AIPACKET_MOVEMENT_AVOIDING_CAMERA ||
-                   mode == AIPACKET_MOVEMENT_DIRECT) {
-            packet->movement_destination = packet->fallback_destination;
-            packet->movement_stopping_distance = packet->fallback_stopping_distance;
-        }
-
-        packet->movement_flags = movement_flags & static_cast<u8>(~AIPACKET_MOVEMENT_MODE_MASK);
     }
 
     void AISysCreatureAntinodeInteraction(AISYS *system, i32 object_count, APIOBJECT **objects, i32 *) {
