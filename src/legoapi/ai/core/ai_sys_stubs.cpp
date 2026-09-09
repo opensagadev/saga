@@ -816,6 +816,120 @@ static i16 AISysPathIntersectionAngle(f32 value) {
                                              10430.4f));
 }
 
+extern "C" i32 WithinConnection(AISYS *system, NUVEC *position, AIPATH *path, AIPATHCNX *connection, i32 checks,
+                                 AIPATHCNX *previous_connection, i32 route, i32 ground, AIPATHINFO *path_info,
+                                 f32 radius, i32 update_once) {
+    (void)checks;
+    (void)ground;
+    if (update_once != 0) {
+        if (connection->last_search_checksum == path->search_checksum)
+            return 0;
+        connection->last_search_checksum = path->search_checksum;
+    }
+    if (route != 0xff && previous_connection != NULL &&
+        ((static_cast<u64>(connection->route_mask) >> route) & 1) == 0) {
+        AIPATHNODE *shared;
+        if (previous_connection->node_indices[0] == connection->node_indices[0])
+            shared = &path->nodes[connection->node_indices[0]];
+        else if (previous_connection->node_indices[0] == connection->node_indices[1])
+            shared = &path->nodes[connection->node_indices[1]];
+        else if (previous_connection->node_indices[1] == connection->node_indices[0])
+            shared = &path->nodes[connection->node_indices[0]];
+        else if (previous_connection->node_indices[1] == connection->node_indices[1])
+            shared = &path->nodes[connection->node_indices[1]];
+        else
+            return 0;
+        if (shared == NULL || ((static_cast<u64>(shared->route_boundary_mask) >> route) & 1) == 0)
+            return 0;
+    }
+
+    AIPATHNODE *first = &path->nodes[connection->node_indices[0]];
+    AIPATHNODE *second = &path->nodes[connection->node_indices[1]];
+    f32 first_radius = first->radius;
+    f32 second_radius = second->radius;
+    u8 narrow = 0;
+    if (first_radius > radius + 0.05f)
+        first_radius -= radius;
+    else
+        narrow = 1;
+    if (second_radius > radius + 0.05f)
+        second_radius -= radius;
+    else
+        narrow = 1;
+
+    if (first->has_special != 0 &&
+        (path->updated_node_bits[connection->node_indices[0] >> 3] & (1 << (connection->node_indices[0] & 7))) == 0)
+        AIPathNodeUpdatePos(system, path, first);
+    if (second->has_special != 0 &&
+        (path->updated_node_bits[connection->node_indices[1] >> 3] & (1 << (connection->node_indices[1] & 7))) == 0)
+        AIPathNodeUpdatePos(system, path, second);
+
+    NUVEC delta;
+    delta.x = position->x - first->position.x;
+    delta.z = position->z - first->position.z;
+    NUVEC local;
+    NuVecRotateY(&local, &delta, -connection->rotation);
+    if (NuFabs(second_radius - first_radius) > connection->horizontal_distance) {
+        if (second_radius > first_radius) {
+            first = second;
+            first_radius = second_radius;
+        }
+        if (first->min_height > position->y || position->y > first->max_height)
+            return 0;
+        const f32 dx = position->x - first->position.x;
+        const f32 dz = position->z - first->position.z;
+        if (!(first_radius * first_radius >= dx * dx + dz * dz))
+            return 0;
+    } else {
+        if (NuFabs(local.x) > first_radius && NuFabs(local.x) > second_radius)
+            return 0;
+        if (local.z < -first_radius || local.z > connection->horizontal_distance + second_radius)
+            return 0;
+        const i32 angle = AISysPathIntersectionAngle((second_radius - first_radius) / connection->horizontal_distance);
+        NUVEC wall = local;
+        if (wall.x < 0.0f)
+            wall.x = -wall.x;
+        NuVecRotateY(&wall, &wall, -angle);
+        NUVEC radial;
+        if (wall.z < 0.0f) {
+            if (first->min_height > position->y || position->y > first->max_height)
+                return 0;
+            if (!(first_radius * first_radius >= NuVecXZDistSqr(position, &first->position, &radial)))
+                return 0;
+        } else if (wall.z > NU_COS_LUT(angle) * connection->horizontal_distance) {
+            if (second->min_height > position->y || position->y > second->max_height)
+                return 0;
+            if (!(second_radius * second_radius >= NuVecXZDistSqr(position, &second->position, &radial)))
+                return 0;
+        } else {
+            f32 minimum, maximum;
+            if (first_radius > local.z) {
+                minimum = first->min_height;
+                maximum = first->max_height;
+            } else if (local.z > connection->horizontal_distance - second_radius) {
+                minimum = second->min_height;
+                maximum = second->max_height;
+            } else {
+                const f32 fraction = (local.z - first_radius) /
+                                     (connection->horizontal_distance - (first_radius + second_radius));
+                const f32 inverse = 1.0f - fraction;
+                minimum = second->min_height * fraction + first->min_height * inverse;
+                maximum = second->max_height * fraction + first->max_height * inverse;
+            }
+            if (minimum > position->y || position->y > maximum || !(first_radius > wall.x))
+                return 0;
+        }
+    }
+    if (path_info != NULL) {
+        path_info->direction = 0;
+        path_info->flags = ((path_info->flags | 1) & ~8) | (narrow << 3);
+        path_info->connection = connection;
+        path_info->dist = local.z / connection->horizontal_distance;
+        path_info->width = local.x;
+    }
+    return 1;
+}
+
 static u32 AISysCharacterTestPathCnx(AISYS *system, APIOBJECT *object, AIPACKET *packet, AIPATHCNX *connection,
                                      i32 direction, f32 *nearest_distance) {
     AIPATH *path = packet->path_info.path;
