@@ -392,7 +392,9 @@ void MakeJumpReachHeight(GameObject_s *object, float height, i32 force) {
     }
 }
 
-void SetBallooningHeight(GameObject_s *, float) {
+void SetBallooningHeight(GameObject_s *object, float height) {
+    if (object->character_context == 0x5d)
+        object->field_0x768 = height;
 }
 
 void StartJump(GameObject_s *object, i32 movement_state) {

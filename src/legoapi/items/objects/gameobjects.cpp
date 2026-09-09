@@ -59,6 +59,10 @@
 #include <string.h>
 
 void SetObjAsHeadTarget(GameObject_s *, GameObject_s *, i8, f32, f32, f32);
+void SetBallooningHeight(GameObject_s *, f32);
+BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
+extern i16 id_YODA, id_YODAGHOST, id_GAMORREANGUARD, id_JANGOFETT;
+f32 DEFENDTIME = 4.0f;
 
 static f32 Condition_IAmAPartyCharacter(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
     if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.field_0x27c != -1) {
@@ -2338,6 +2342,16 @@ void GameAIProcess() {
         }
         AISysProcessCharacter(WORLD->ai_sys, &object->apiobj, &object->ai, ground_checks, object->ai_elapsed_time, 0,
                               process_ai);
+        if ((object->apiobj.flags_low & 0x80) == 0) {
+            if (object->character_context == 0x5d)
+                SetBallooningHeight(object, object->ai.movement_destination.y);
+            if (WORLD->current_level == JEDI_B_LDATA && object->id == id_JANGOFETT &&
+                (object->field_0xefb & 8) != 0 && object->hover_height_override != 1.0e9f && object->field_0xe31 == 0)
+                object->field_0xe31 = 1;
+            if (object->apiobj.field_0x27c != -1 && object->field_0xe31 != 0 &&
+                (object->ai.capabilities & LEGO_AIPATHCNX_R2D2GLIDE) == 0)
+                object->field_0xe31 = 0;
+        }
         if ((FreePlay == 0 || (object->apiobj.field_0x1f4 & 0x400) != 0) &&
             (object->ai.field_0x1e6 & AIPACKET_RUNTIME_USING_PATH_WAYPOINT) != 0)
             AISysFindRoute(&object->ai);
@@ -2347,6 +2361,59 @@ void GameAIProcess() {
                 (object->apiobj.flags_high & ~2) | ((object->apiobj.character_data->model_flags >> 27) & 2);
         } else {
             object->apiobj.flags_high &= ~2;
+            bool defend = false;
+            if ((object->field_0xef8 & 0x80) != 0 && object->ai.opponent_object != NULL) {
+                BOLTTYPE_s *bolt = BoltType_FindByID(0, WORLD);
+                if (bolt->field_10 * bolt->field_14 > object->ai.opponent_metric) {
+                    NUVEC direction, forward;
+                    NuVecSub(&direction, &object->ai.opponent_object->collision_position,
+                             &object->apiobj.collision_position);
+                    f32 scale = object->ai.opponent_metric == 0.0f ? 0.0f : 1.0f / object->ai.opponent_metric;
+                    NuVecScale(&direction, &direction, scale);
+                    NuVecRotateY(&forward, &v001, object->apiobj.movement_facing_angle);
+                    f32 dot = NuVecDot(&direction, &forward);
+                    u16 angle = object->ai.opponent_metric < 0.5f ? 0x3aaa
+                                : object->ai.opponent_metric < 1.0f ? 0x3000
+                                                                   : 0x2555;
+                    if (dot > NuTrigTable[angle]) {
+                        object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
+                        object->script_fire_target = *object->ai.action_target_ref;
+                    }
+                }
+                defend = true;
+            }
+            if (FreePlay != 0 && (object->apiobj.field_0x1f4 & 0x400) == 0 && object->id == id_DROIDEKA)
+                object->pad_gamepad->buttons_pressed |= GAMEPAD_TOGGLERIGHT;
+            if ((object->field_0xef8 & 2) != 0 &&
+                ((object->apiobj.field_0x1f4 & 0x400) != 0 || party_under_cover == 0 ||
+                 (object->field_0xeff & 1) != 0) &&
+                (CanFightLikeAJedi(object) != 0 || object->id == id_GAMORREANGUARD)) {
+                if ((object->field_0xef8 & 1) != 0 || object->ai.opponent_object != NULL ||
+                    (object->field_0xe22 & 8) != 0)
+                    object->field_0xed8 = DEFENDTIME;
+                if (object->field_0xed8 > 0.0f) {
+                    defend = true;
+                    if ((object->field_0xe22 & 9) == 9)
+                        object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
+                }
+            }
+            if ((object->field_0xefb & 0x20) != 0) {
+                defend = true;
+                if ((object->field_0xe22 & 1) != 0) {
+                    object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
+                    object->field_0xefb &= ~0x20;
+                }
+            }
+            if ((object->field_0xef8 & 8) != 0 &&
+                (defend || (object->field_0xef8 & 0x30) != 0 ||
+                 ((object->id == id_YODA || object->id == id_YODAGHOST) &&
+                  (object->apiobj.flags_low & 0x80) == 0 && object->apiobj.field_0x27c != -1))) {
+                if ((object->field_0xe22 & 1) == 0 && object->character_context != 7 && object->field_0xe32 == 0)
+                    object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
+            } else if ((object->pad_gamepad->buttons_pressed & GAMEPAD_ACTION) == 0 &&
+                       (object->field_0xe22 & 1) != 0 && object->character_context != 6 && object->field_0xe32 == 0) {
+                object->pad_gamepad->buttons_pressed |= GAMEPAD_SPECIAL;
+            }
         }
         if ((object->apiobj.character_data->game_character->flags_094[3] & 0x10) != 0 &&
             (object->apiobj.flags_low & 0x80) == 0) {
