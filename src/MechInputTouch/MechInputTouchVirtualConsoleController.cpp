@@ -1,4 +1,5 @@
 #include "MechInputTouch_types.h"
+i16 MechInputTouchVirtualConsoleController::s_textures[9];
 
 float MechInputTouchVirtualConsoleController::s_defaultDPadPosX = -0.72f;
 float MechInputTouchVirtualConsoleController::s_defaultDPadPosY = -0.65f;

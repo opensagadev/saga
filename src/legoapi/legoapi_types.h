@@ -1822,8 +1822,9 @@ struct HINTUIBUTTON_s {
     f32 field_0x98;
     u8 pad_0x9c[0xa0 - 0x9c];
     u8 field_0xa0;
+    f32 field_0xa4;
 };
-DECOMP_ASSERT(sizeof(HINTUIBUTTON_s) == 0xa4, "HINTUIBUTTON_s size");
+DECOMP_ASSERT(sizeof(HINTUIBUTTON_s) == 0xa8, "HINTUIBUTTON_s size");
 DECOMP_ASSERT(offsetof(HINTUIBUTTON_s, field_0x7c) == 0x7c, "HINTUIBUTTON_s pending hint offset");
 struct HOTHBATTLE_MELEE_s {};
 struct HashRedirect;

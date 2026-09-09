@@ -3,11 +3,159 @@
 #include "globals.h"
 #include "legoapi/world/world.h"
 #include "legoapi/world/area.h"
+#include "legoapi/world/level.h"
+#include "legoapi/core/input/timer.h"
+#include "legoapi/render/core/render.h"
+#include "gamelib/util/gamelib_util_types.h"
+#include "nu2api/numath/nufloat.h"
 
 u32 LSW_HintConditions;
 HINTSYS_s hintsys = {};
 HINTUIBUTTON_s *hintUIButton = NULL;
 f32 AlphaBlendTime = 1.0f;
+f32 ICONXPOS_TOUCHYFEELY;
+f32 ICONYPOS_TOUCHYFEELY = -0.699999988f;
+f32 ICONXPOS_VIRTUALS = -0.61500001f;
+f32 ICONYPOS_VIRTUALS = 0.47f;
+
+extern i32 NewMode, Paused, editor_active, CutSceneWaiting, PANELOFF;
+extern FadeSystem FadeSys;
+i32 GetMenuID();
+void MechHintUIButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
+
+struct MechHintUIButton : MechTouchUITexButton {
+    HINT_s *active_hint;
+    HINT_s *pending_hint;
+    f32 display_elapsed;
+    f32 *slide_target;
+    f32 slide_from, slide_to, slide_elapsed, slide_duration, slide_delay, slide;
+    u8 pulse_active;
+    f32 pulse_remaining;
+
+    MechHintUIButton(VuVec const &pos, f32 radius) : MechTouchUITexButton(pos, radius) {
+        slide_elapsed = 0.0f;
+        slide_duration = -1.0f;
+        slide_delay = 0.0f;
+        active_hint = NULL;
+        pending_hint = NULL;
+        slide_target = &slide;
+        on_click = MechHintUIButton_OnClick_Callback;
+    }
+    ~MechHintUIButton() override {
+    }
+    void __attribute__((weak)) Process(float) override;
+    void __attribute__((weak)) Render() override;
+    void StartPulse() {
+        static f32 PulseAgainTime = 2.0f;
+        pulse_active = 1;
+        pulse_remaining = PulseAgainTime;
+        if (visible)
+            MechSystems::Get()->NewRadarPulse(position, false);
+    }
+};
+DECOMP_ASSERT(sizeof(MechHintUIButton) == 0xa8, "MechHintUIButton size");
+
+void initHintSys() {
+    hintsys.current_hint = 0;
+    hintsys.state = 2;
+    hintsys.active_hint = NULL;
+    MechHintUIButton *button = new MechHintUIButton(VuVec(ICONXPOS_TOUCHYFEELY, ICONYPOS_TOUCHYFEELY, 0.0f, 1.0f), 0.075f);
+    button->UpdateTexture(MechInputTouchVirtualConsoleController::s_textures[3]);
+    button->alpha = 0.0f;
+    button->alpha_to = 0.0f;
+    button->slide = -1.5f;
+    button->visible = 0;
+    button->slide_to = -1.5f;
+    button->pulse_active = 0;
+    button->slide_elapsed = button->slide_duration;
+    hintUIButton = reinterpret_cast<HINTUIBUTTON_s *>(button);
+    button->alpha_elapsed = button->alpha_duration;
+    MechSystems::Get()->TouchUI().AddUIElement(*button);
+}
+
+void MechHintUIButton::Render() {
+    if (NewMode != 0 || NewLData != NULL)
+        return;
+    LEVEL_OBJECT_RUNTIME *icon = &WORLD->lev_objs[0xd4];
+    if (icon->active == 0)
+        return;
+    const f32 opacity = alpha;
+    const u16 angle = static_cast<u16>(static_cast<i32>((NuFmod(GameTimer.time_elapsed, 2.5f) / 2.5f) * 65536.0f));
+    DrawPanel3DObject(position.x, position.y, 1.0f, scale, scale, scale, 0, angle, 0, &icon->special, 2, opacity);
+}
+
+void MechHintUIButton::Process(float elapsed) {
+    if (active_hint != NULL) {
+        display_elapsed += elapsed;
+        if (*reinterpret_cast<void **>(MechSystems::Get()->PlayerButton().field_0x3c) != NULL ||
+            (active_hint->display_duration > 0.0f && display_elapsed >= active_hint->display_duration)) {
+            if (active_hint != NULL) {
+                const f32 blend = AlphaBlendTime;
+                pending_hint = NULL;
+                slide_from = *slide_target;
+                slide_to = -1.5f;
+                slide_elapsed = 0.0f;
+                slide_delay = 0.0f;
+                active_hint = NULL;
+                slide_duration = blend;
+                alpha_from = *alpha_target;
+                pulse_active = 0;
+                alpha_to = 0.0f;
+                alpha_elapsed = 0.0f;
+                alpha_delay = 0.0f;
+                alpha_duration = blend;
+            }
+        }
+    }
+    HINT_s *next_hint = pending_hint;
+    const u8 was_pulsing = pulse_active;
+    scale = scale_to = hovered ? 0.6f : 0.5f;
+    scale_elapsed = scale_duration;
+    if (!(slide_duration < 0.0f) && !(slide_elapsed >= slide_duration + slide_delay)) {
+        slide_elapsed += elapsed;
+        if (slide_elapsed > slide_duration + slide_delay)
+            slide_elapsed = slide_duration + slide_delay;
+        if (slide_elapsed >= slide_delay)
+            *slide_target = ((slide_elapsed - slide_delay) / slide_duration) * (slide_to - slide_from) + slide_from;
+    }
+    position.x = slide;
+    if (next_hint != NULL && (slide_duration < 0.0f || slide_elapsed >= slide_duration + slide_delay)) {
+        active_hint = next_hint;
+        pending_hint = NULL;
+        display_elapsed = 0.0f;
+        const bool touch = TouchHacks::TouchControlsActive || MechInputTouchSystem::s_actualTouchMode == 7;
+        position.y = touch ? ICONYPOS_TOUCHYFEELY : ICONYPOS_VIRTUALS;
+        const f32 blend = AlphaBlendTime;
+        slide_from = *slide_target;
+        slide_to = touch ? ICONXPOS_TOUCHYFEELY : ICONXPOS_VIRTUALS;
+        slide_elapsed = 0.0f;
+        slide_delay = 0.0f;
+        slide_duration = blend;
+        alpha_from = *alpha_target;
+        alpha_to = 1.0f;
+        alpha_elapsed = 0.0f;
+        alpha_duration = blend;
+        alpha_delay = 0.0f;
+    }
+    if (was_pulsing) {
+        pulse_remaining -= elapsed;
+        if (0.0f >= pulse_remaining)
+            StartPulse();
+    }
+    MechTouchUITexButton::Process(elapsed);
+    if (visible) {
+        visible = 0;
+        if (NewMode == 0 && NewLData == NULL && editor_active == 0 && GameTimer.time_elapsed > 0.0f &&
+            GameTimer.update_count != 0 && WORLD != NULL && WORLD->current_level != TITLES_LDATA &&
+            CutSceneWaiting == 0 && Paused == 0 && CUTSTOPGAME == 0 && MiniCutCam == 0 && PANELOFF == 0 &&
+            WORLD->current_level != STATUS_LDATA && (WORLD->current_level->flags & 0x400) == 0)
+            visible = 1;
+    }
+    disabled = (GetMenuID() != -1 && GetMenuID() != 13) || Paused != 0 || NewMode != 0 || NewLData != NULL ||
+               CUTSTOPGAME != 0 || MiniCutCam != 0 || FadeSys.fade > 0.0f || player == NULL;
+    if (!pulse_active && (slide_duration < 0.0f || slide_elapsed >= slide_duration + slide_delay) && slide > -1.0f)
+        StartPulse();
+}
 
 void CLEAR_HINT_COMPLETE(i32 hint_id);
 i32 HINT_COMPLETE(i32 hint_id);

@@ -407,6 +407,7 @@ struct MechInputTouchSystem {
     i32 control_mode;
 };
 struct MechInputTouchVirtualConsoleController {
+    static i16 s_textures[9];
     static float s_defaultDPadPosX;
     static float s_defaultDPadPosY;
     static float s_defaultButtonsPosX;

@@ -14,9 +14,6 @@ u8 show_unlock_shop_hint = 0;
 u8 show_unlock_customiser_hint = 0;
 u8 show_unlock_minikitviewer_hint = 0;
 
-void initHintSys() {
-}
-
 i32 HINT_COMPLETE(i32 hint_id) {
     if (hint_id < 0) {
         return 0;
