@@ -708,7 +708,9 @@ DECOMP_ASSERT(offsetof(CHARPLATFORMSYS_s, platforms) == 0x8, "CHARPLATFORMSYS pl
 struct CHARVARIANT {};
 struct CHEAT;
 struct CLIMBOBJECT_s {
-    u8 field_0x00[0x14];
+    NUVEC normal;
+    f32 impact_x;
+    f32 impact_z;
     AIPATHCNX_s *connection;
     AIPATH_s *path;
     u8 flags;
