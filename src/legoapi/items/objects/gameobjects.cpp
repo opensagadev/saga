@@ -3967,7 +3967,7 @@ APIOBJECT *GameAPIOBJECTFromObjID(u8 object_id) {
         object->ai.reset_mode != AI_OBJECT_ROUTE_STATE_SCRIPT_VISIBLE) {
         return NULL;
     }
-    if (object->apiobj.field_0x287 != 0 && object->field_0x101c <= 0.0f) {
+    if (object->apiobj.field_0x287 != 0 && !(object->field_0x101c > 0.0f)) {
         return NULL;
     }
     return &object->apiobj;
