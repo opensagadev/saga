@@ -4579,6 +4579,7 @@ static i32 BigJump_LandAction_Default(GameObject_s *object) {
                 return LEGOACT_FLIPLAND;
             return LEGOACT_LAND;
         case 1:
+            return LEGOACT_LAND;
         default:
             return LEGOACT_LAND;
     }
