@@ -1,6 +1,6 @@
 # _saga_
 
-![Progress](https://img.shields.io/badge/matching-37.43%25-orange)
+![Progress](https://img.shields.io/badge/matching-37.44%25-orange)
 [![Bazel build](https://github.com/ttdecomp/saga/actions/workflows/build-bazel.yaml/badge.svg)](https://github.com/ttdecomp/saga/actions/workflows/build-bazel.yaml)
 [![Discord](https://img.shields.io/discord/1467775700894224555?color=%235865F2&logo=discord&logoColor=%23FFFFFF)](https://discord.gg/2HJuMtzA7q)
 [![status & wasm build](https://img.shields.io/badge/status%20%26%20wasm%20build-click%20here-orange?style=flat)](https://opensaga.dev/)
@@ -61,7 +61,7 @@ See https://ttdecomp.github.io/saga/
 | `(root)` | 62.0% | 50.0% |
 | `MechInputTouch` | 17.0% | 25.8% |
 | `editor` | 3.2% | 2.3% |
-| `gameapi` | 24.2% | 14.4% |
+| `gameapi` | 24.3% | 14.4% |
 | `gameframework` | 100.0% | 52.9% |
 | `gamelib` | 19.4% | 15.6% |
 | `java` | 96.1% | 73.1% |

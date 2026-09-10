@@ -1,5 +1,9 @@
 #include "decomp.h"
 
+struct edui_interact_s;
+struct eduimenu_s;
+struct eduiitem_s;
+
 // Editor-UI callback/helper stubs (C, unmangled). These are static callback
 // functions for the edui menu system (item interact/process/render handlers,
 // directory-list callbacks, and the graph-line renderer). They are stubbed
@@ -17,9 +21,11 @@ static __used__ void eduicbInteractColourPick(void) {
 }
 static __used__ void eduicbInteractExpander(void) {
 }
-static __used__ void eduicbInteractFilter(void) {
+static __used__ i32 eduicbInteractProp(struct edui_interact_s *interact) {
+    return 0;
 }
-static __used__ void eduicbInteractProp(void) {
+static __used__ i32 eduicbInteractFilter(struct edui_interact_s *interact) {
+    return eduicbInteractProp(interact);
 }
 static __used__ void eduicbInteractSel(void) {
 }
@@ -75,9 +81,8 @@ static __used__ void eduicbRenderExpander(void) {
 }
 static __used__ void eduicbRenderFilePick(void) {
 }
-static __used__ void eduicbRenderFilter(void) {
-}
-static __used__ void eduicbRenderGradPick(void) {
+static __used__ i32 eduicbRenderGradPick(struct eduimenu_s *menu, struct eduiitem_s *item, i32 x, i32 y, i32 scale) {
+    return 0;
 }
 static __used__ void eduicbRenderGraph(void) {
 }
@@ -85,7 +90,11 @@ static __used__ void eduicbRenderGreyPick(void) {
 }
 static __used__ void eduicbRenderNumber(void) {
 }
-static __used__ void eduicbRenderProp(void) {
+static __used__ i32 eduicbRenderProp(struct eduimenu_s *menu, struct eduiitem_s *item, i32 x, i32 y, i32 scale) {
+    return 0;
+}
+static __used__ i32 eduicbRenderFilter(struct eduimenu_s *menu, struct eduiitem_s *item, i32 x, i32 y, i32 scale) {
+    return eduicbRenderProp(menu, item, x, y, scale);
 }
 static __used__ void eduicbRenderSel(void) {
 }
