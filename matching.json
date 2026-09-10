@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 37.48991,
+    "fuzzy_match_percent": 37.49419,
     "total_code": "4722419",
     "matched_code": "355919",
     "matched_code_percent": 7.536794,
@@ -49512,14 +49512,6 @@
           "match_percent": 38.57143
         },
         {
-          "name": "_Z14CanSaveAndExitP11WORLDINFO_s",
-          "demangled_name": "CanSaveAndExit(WORLDINFO_s*)",
-          "address": 4695072,
-          "offset": 3805104,
-          "size": 203,
-          "match_percent": 0.0
-        },
-        {
           "name": "_Z12SaveGizmoSysP10GIZMOSYS_sPcS1_",
           "demangled_name": "SaveGizmoSys(GIZMOSYS_s*, char*, char*)",
           "address": 4913216,
@@ -66360,7 +66352,7 @@
           "address": 4348208,
           "offset": 3458240,
           "size": 86,
-          "match_percent": 70.945946
+          "match_percent": 71.35135
         },
         {
           "name": "_ZN9BaseThing18RemoveDependanciesEP15ThingRemoveData",
@@ -66681,6 +66673,14 @@
           "offset": 3805088,
           "size": 9,
           "match_percent": 100.0
+        },
+        {
+          "name": "_Z14CanSaveAndExitP11WORLDINFO_s",
+          "demangled_name": "CanSaveAndExit(WORLDINFO_s*)",
+          "address": 4695072,
+          "offset": 3805104,
+          "size": 203,
+          "match_percent": 99.48276
         },
         {
           "name": "_Z23Game_100PercentCompletev",
