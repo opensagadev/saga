@@ -3343,19 +3343,32 @@ extern "C" {
                           movement_parameter);
     }
 
-    void InitFn_AIPathDeleted(void) {
+    typedef void AIEDITORCALLBACK(void);
+
+    AIEDITORCALLBACK *AIPathDeletedFn;
+    AIEDITORCALLBACK *AIPathNodeDeletedFn;
+    AIEDITORCALLBACK *AIPathNodeMovedFn;
+    AIEDITORCALLBACK *GameAISYSRebuildFromEditorDataFn;
+    AIEDITORCALLBACK *GameAISaveFn;
+
+    void InitFn_AIPathDeleted(AIEDITORCALLBACK *function) {
+        AIPathDeletedFn = function;
     }
 
-    void InitFn_AIPathNodeDeleted(void) {
+    void InitFn_AIPathNodeDeleted(AIEDITORCALLBACK *function) {
+        AIPathNodeDeletedFn = function;
     }
 
-    void InitFn_AIPathNodeMoved(void) {
+    void InitFn_AIPathNodeMoved(AIEDITORCALLBACK *function) {
+        AIPathNodeMovedFn = function;
     }
 
-    void InitFn_GameAISYSRebuildFromEditorData(void) {
+    void InitFn_GameAISYSRebuildFromEditorData(AIEDITORCALLBACK *function) {
+        GameAISYSRebuildFromEditorDataFn = function;
     }
 
-    void InitFn_GameAISave(void) {
+    void InitFn_GameAISave(AIEDITORCALLBACK *function) {
+        GameAISaveFn = function;
     }
 
     void InitFn_GameParamToFloat(GAMEPARAMTOFLOAT *function) {

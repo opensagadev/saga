@@ -28,9 +28,13 @@ static __used__ void aieditor_cbCancelSaveMenu(eduimenu_s *, eduiitem_s *, unsig
 
 extern "C" {
 
+    typedef void AIEDITORMOVEPLAYERS(void);
+    AIEDITORMOVEPLAYERS *AIEditorMovePlayersFn;
+
     void aieditor_SetCurrentScript(char *, i32);
 
-    void InitFn_AIEditorMovePlayers(void) {
+    void InitFn_AIEditorMovePlayers(AIEDITORMOVEPLAYERS *function) {
+        AIEditorMovePlayersFn = function;
     }
 
     void aieditor_AddMessage(void) {

@@ -91,8 +91,14 @@ void GizMiniCut_Activate(GIZMO *gizmo, i32 active) {
 }
 
 static NUVEC *GizMiniCut_GetPos(GIZMO *gizmo) {
-    UNIMPLEMENTED();
-    return {};
+    if (gizmo == NULL || gizmo->object == NULL) {
+        return NULL;
+    }
+    MINICUT *minicut = static_cast<MINICUT *>(gizmo->object);
+    if (minicut->part_count == 0) {
+        return NULL;
+    }
+    return minicut->parts[0].resolved_position;
 }
 
 static i32 GizMiniCut_UsingSpecial(GIZMO **, void *, i32, char *) {

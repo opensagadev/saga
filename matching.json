@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 36.75127,
+    "fuzzy_match_percent": 36.75614,
     "total_code": "4722419",
-    "matched_code": "346820",
-    "matched_code_percent": 7.3441176,
+    "matched_code": "347050",
+    "matched_code_percent": 7.348988,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4025,
-    "matched_functions_percent": 29.905638,
+    "matched_functions": 4033,
+    "matched_functions_percent": 29.965078,
     "total_units": 1
   },
   "text": {
@@ -18398,7 +18398,7 @@
           "address": 4220400,
           "offset": 3330432,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "aieditor_AddMessage",
@@ -41092,7 +41092,7 @@
           "address": 4173376,
           "offset": 3283408,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "InitFn_GameAISave",
@@ -41100,7 +41100,7 @@
           "address": 4173408,
           "offset": 3283440,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "InitFn_AIPathNodeDeleted",
@@ -41108,7 +41108,7 @@
           "address": 4173440,
           "offset": 3283472,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "InitFn_AIPathNodeMoved",
@@ -41116,7 +41116,7 @@
           "address": 4173472,
           "offset": 3283504,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "InitFn_AIPathDeleted",
@@ -41124,7 +41124,7 @@
           "address": 4173504,
           "offset": 3283536,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "FindAIDirectionedRandomPointOnNetwork2D",
@@ -61576,7 +61576,7 @@
           "address": 5082464,
           "offset": 4192496,
           "size": 35,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL24GizMiniCut_GetOutputNameP7GIZMO_si",
@@ -96503,7 +96503,7 @@
           "address": 2832976,
           "offset": 1943008,
           "size": 51,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "NuDynamicLightAddRenderScene",

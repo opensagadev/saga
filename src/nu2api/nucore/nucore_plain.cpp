@@ -2989,7 +2989,15 @@ extern "C" {
     }
     void NuDynamicLightGetParameterf(void) {
     }
-    void NuDynamicLightGetParameteri(void) {
+    i32 NuDynamicLightGetParameteri(NuDynamicLight *light, i32 parameter) {
+        switch (parameter) {
+            case 4:
+                return light->parameter_4;
+            case 5:
+                return light->parameter_5;
+            default:
+                return 0;
+        }
     }
     void NuDynamicLightGetProjection(void) {
     }
