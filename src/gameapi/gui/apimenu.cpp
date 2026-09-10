@@ -1126,13 +1126,16 @@ static __used__ void MenuUpdateHowToPlay(MENU *menu) {
         return;
     }
 
-    if (menu->selected_item == 0) {
-        SuperOptions.music_enabled = SuperOptions.music_enabled == 0;
-        MenuSFX = GameAudio_GetSfxId(0x30);
-    } else if (menu->selected_item == 1) {
-        NewMenu(26, -1, -1);
-        MenuSFX = GameAudio_GetSfxId(0x30);
-        NuIOS_RecordFlurryEvent("menu_howtoplay");
+    switch (menu->selected_item) {
+        case 0:
+            SuperOptions.music_enabled = SuperOptions.music_enabled == 0;
+            MenuSFX = GameAudio_GetSfxId(0x30);
+            break;
+        case 1:
+            NewMenu(26, -1, -1);
+            MenuSFX = GameAudio_GetSfxId(0x30);
+            NuIOS_RecordFlurryEvent("menu_howtoplay");
+            break;
     }
 }
 static __used__ void MenuUpdatePauseExit(MENU *menu) {
