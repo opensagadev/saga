@@ -3360,8 +3360,15 @@ SwipeDecalRenderer::SwipeDecalRenderer(TouchHolder &, i32, SwipeDecalRenderer::S
 static __used__ void PauseRenderOff() {
 }
 
-static __used__ bool MatrixReflection_CanOverride() {
-    return false;
+static __used__ i32 MatrixReflection_CanOverride() {
+    i32 result = 1;
+    if (WORLD->current_level == DEATHSTARESCAPEA_LDATA) {
+        const i8 sock = GameCam->sock_position.location.sock;
+        if (sock != 0) {
+            result = sock == 3;
+        }
+    }
+    return result;
 }
 
 static __used__ void DrawStarFighter(starfighter_s *) {

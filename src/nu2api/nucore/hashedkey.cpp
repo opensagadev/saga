@@ -9,9 +9,8 @@ __attribute__((weak)) void HashedKey::Set(const char *name) {
     u32 hash = 0x811c9dc5;
     for (; *name != '\0'; ++name) {
         u32 character = static_cast<i8>(*name);
-        if (character - 'a' < 26)
-            character -= 'a' - 'A';
-        hash = character ^ hash * 0x1000193;
+        const u32 multiplied_hash = hash * 0x1000193;
+        hash = (character - 'a' < 26 ? character - ('a' - 'A') : character) ^ multiplied_hash;
     }
     value = hash;
 }

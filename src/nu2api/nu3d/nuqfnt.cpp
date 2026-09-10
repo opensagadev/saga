@@ -12,6 +12,8 @@
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nuplatform/nuplatform.h"
 
+i32 UnicodeToIndexFast(VUCHARIDX *map, i32 count, u16 unicode);
+
 static i32 nuqfnt_init;
 
 u8 sysfont[] = {
@@ -686,23 +688,7 @@ u16 NuQFntEncodeUnicodeChar(NUQFNT *font, u16 character) {
         return 0xffff;
 
     VUFNT *vufnt = reinterpret_cast<VUFNT *>(font);
-    struct UnicodeIndex {
-        u16 unicode;
-        u16 index;
-    };
-    UnicodeIndex *map = reinterpret_cast<UnicodeIndex *>(vufnt->unicode_map);
-    i32 low = 0;
-    i32 high = vufnt->unicode_count - 1;
-    while (low <= high) {
-        i32 middle = (low + high) >> 1;
-        if (map[middle].unicode == character)
-            return map[middle].index;
-        if (map[middle].unicode < character)
-            low = middle + 1;
-        else
-            high = middle - 1;
-    }
-    return 0xffff;
+    return UnicodeToIndexFast(vufnt->unicode_map, vufnt->unicode_count, character);
 }
 
 f32 NuQFntPrintJustifiedW(NUQFNT *font, u16 *text, f32 x, f32 y, f32 z, f32 sx, f32 sy, f32 width, f32 line_spacing,

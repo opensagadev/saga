@@ -165,12 +165,14 @@ void GameAntinode_UnregisterAntiNode(GAMEANTINODESYS_s *system, GAMEANTINODE_s *
         previous->next = system->free;
         system->free = previous;
     } else {
-        while (previous->next != NULL && previous->next != node)
+        while (previous->next != NULL) {
+            if (previous->next == node) {
+                previous->next = node->next;
+                node->next = system->free;
+                system->free = node;
+                break;
+            }
             previous = previous->next;
-        if (previous->next != NULL) {
-            previous->next = node->next;
-            node->next = system->free;
-            system->free = node;
         }
     }
     --system->count;

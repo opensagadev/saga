@@ -624,12 +624,11 @@ static void *Levers_ReserveBufferSpace(void *world_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
     world->levers = NULL;
     world->nlevers = 0;
-    if (world->current_level->max_levers == 0) {
-        return NULL;
+    if (world->current_level->max_levers != 0) {
+        world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 0x10);
+        world->levers = reinterpret_cast<LEVER_s *>(world->giz_buffer.addr);
+        world->giz_buffer.addr += world->current_level->max_levers * sizeof(LEVER_s);
     }
-
-    world->levers = static_cast<LEVER_s *>(
-        GameBufferAlloc(&world->giz_buffer, &world->unknown_0108, world->current_level->max_levers * sizeof(LEVER_s)));
     return world->levers;
 }
 

@@ -7437,13 +7437,17 @@ void RemoveAnyChunkControls(i32 *chunk) {
 }
 
 void RemoveChunkFromRenderStack(particlechunkrendertype_s *chunk, particlechunkrendertype_s **stack) {
-    if (chunk->previous != NULL) {
+    if (*stack == chunk) {
+        particlechunkrendertype_s *next = chunk->next;
+        *stack = next;
+        if (next != NULL) {
+            next->previous = NULL;
+        }
+    } else if (chunk->previous != NULL) {
         chunk->previous->next = chunk->next;
-    } else if (*stack == chunk) {
-        *stack = chunk->next;
-    }
-    if (chunk->next != NULL) {
-        chunk->next->previous = chunk->previous;
+        if (chunk->next != NULL) {
+            chunk->next->previous = chunk->previous;
+        }
     }
     chunk->previous = NULL;
     chunk->next = NULL;
