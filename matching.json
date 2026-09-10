@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 37.80787,
+    "fuzzy_match_percent": 37.46216,
     "total_code": "4722419",
-    "matched_code": "362257",
-    "matched_code_percent": 7.6710052,
+    "matched_code": "362448",
+    "matched_code_percent": 7.6750493,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4338,
-    "matched_functions_percent": 32.23122,
+    "matched_functions": 4357,
+    "matched_functions_percent": 32.37239,
     "total_units": 1
   },
   "text": {
@@ -14545,7 +14545,7 @@
           "address": 926912,
           "offset": 36944,
           "size": 157,
-          "match_percent": 10.35
+          "match_percent": 0.0
         },
         {
           "name": "_ZN17MechEdgeStopAddon9OnProcessEN9MechAddon12ProcessStageEf",
@@ -14553,7 +14553,7 @@
           "address": 5244832,
           "offset": 4354864,
           "size": 262,
-          "match_percent": 0.0
+          "match_percent": 82.07353
         },
         {
           "name": "_ZN17MechEdgeStopAddonD1Ev",
@@ -14561,7 +14561,7 @@
           "address": 5245104,
           "offset": 4355136,
           "size": 133,
-          "match_percent": 1.0
+          "match_percent": 91.22222
         },
         {
           "name": "_ZN17MechEdgeStopAddonD2Ev",
@@ -14569,7 +14569,7 @@
           "address": 5245104,
           "offset": 4355136,
           "size": 133,
-          "match_percent": 1.0
+          "match_percent": 91.22222
         },
         {
           "name": "_ZN17MechEdgeStopAddonD0Ev",
@@ -14577,7 +14577,7 @@
           "address": 5245248,
           "offset": 4355280,
           "size": 56,
-          "match_percent": 24.5
+          "match_percent": 100.0
         },
         {
           "name": "_ZN17MechEdgeStopAddonC1ER19MechObjectInterface",
@@ -14585,7 +14585,7 @@
           "address": 5245312,
           "offset": 4355344,
           "size": 179,
-          "match_percent": 24.0
+          "match_percent": 79.591835
         },
         {
           "name": "_ZN17MechEdgeStopAddonC2ER19MechObjectInterface",
@@ -14593,7 +14593,7 @@
           "address": 5245312,
           "offset": 4355344,
           "size": 179,
-          "match_percent": 24.0
+          "match_percent": 79.591835
         }
       ]
     },
@@ -19339,7 +19339,7 @@
           "address": 5487712,
           "offset": 4597744,
           "size": 85,
-          "match_percent": 13.125
+          "match_percent": 92.96875
         },
         {
           "name": "_ZN11ClassEditor16IsSelectedObjectEPvP5EdRef",
@@ -19651,7 +19651,7 @@
           "address": 5530160,
           "offset": 4640192,
           "size": 90,
-          "match_percent": 11.351352
+          "match_percent": 61.216217
         },
         {
           "name": "_ZN12PropertyMenu9AddObjectER11ClassObject",
@@ -20298,7 +20298,7 @@
           "address": 5467392,
           "offset": 4577424,
           "size": 14,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_Z23cbEdLevelSetSliderFloatP10eduimenu_sP10eduiitem_sj",
@@ -20306,7 +20306,7 @@
           "address": 5468464,
           "offset": 4578496,
           "size": 17,
-          "match_percent": 0.0
+          "match_percent": 98.0
         },
         {
           "name": "_ZN11ClassEditor12RegisterToolER6EdTool",
@@ -20314,7 +20314,7 @@
           "address": 5486656,
           "offset": 4596688,
           "size": 56,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN11ClassEditor13UpdateSnapRayER5VuVec",
@@ -20330,7 +20330,7 @@
           "address": 5487584,
           "offset": 4597616,
           "size": 52,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN15ClassObjectList8IsInListEP7EdClass",
@@ -20338,7 +20338,7 @@
           "address": 5487872,
           "offset": 4597904,
           "size": 49,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN11LevelEditor14RegisterEditorER10BaseEditor",
@@ -20346,7 +20346,7 @@
           "address": 5509872,
           "offset": 4619904,
           "size": 70,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN11LevelEditor8GetSceneEi",
@@ -20354,7 +20354,7 @@
           "address": 5511344,
           "offset": 4621376,
           "size": 35,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_Z21cbEdLevelSetSliderIntP10eduimenu_sP10eduiitem_sj",
@@ -20362,7 +20362,7 @@
           "address": 5518688,
           "offset": 4628720,
           "size": 15,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN11LevelEditor11SetNextMenuEP10eduimenu_s",
@@ -20370,7 +20370,7 @@
           "address": 5519680,
           "offset": 4629712,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN12PropertyMenu14ContainsObjectEPv",
@@ -20378,7 +20378,7 @@
           "address": 5530256,
           "offset": 4640288,
           "size": 63,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN12PropertyTool14SetMenuControlEP10eduimenu_sP9EdControl",
@@ -20386,7 +20386,7 @@
           "address": 5532160,
           "offset": 4642192,
           "size": 49,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN12PropertyTool13HasActiveMenuEv",
@@ -25587,7 +25587,7 @@
           "address": 3344640,
           "offset": 2454672,
           "size": 60,
-          "match_percent": 5.333334
+          "match_percent": 0.0
         },
         {
           "name": "_ZL22edanimcbSetSwitchDelayP10eduimenu_sP10eduiitem_sj",
@@ -25595,7 +25595,7 @@
           "address": 3344704,
           "offset": 2454736,
           "size": 62,
-          "match_percent": 14.666667
+          "match_percent": 0.0
         },
         {
           "name": "_ZL20edanimcbSetSwitchVarP10eduimenu_sP10eduiitem_sj",
@@ -25603,7 +25603,7 @@
           "address": 3344768,
           "offset": 2454800,
           "size": 62,
-          "match_percent": 14.666667
+          "match_percent": 0.0
         },
         {
           "name": "_ZL22edanimcbSetSoundTimingP10eduimenu_sP10eduiitem_sj",
@@ -25611,7 +25611,7 @@
           "address": 3344832,
           "offset": 2454864,
           "size": 56,
-          "match_percent": 20.0
+          "match_percent": 0.0
         },
         {
           "name": "_ZL21edanimcbCancelOptMenuP10eduimenu_sS0_",
@@ -25627,7 +25627,7 @@
           "address": 3345072,
           "offset": 2455104,
           "size": 84,
-          "match_percent": 5.333334
+          "match_percent": 80.0
         },
         {
           "name": "_ZL11edanimClosev",
@@ -35671,7 +35671,7 @@
           "address": 5488304,
           "offset": 4598336,
           "size": 35,
-          "match_percent": 7.272728
+          "match_percent": 0.0
         },
         {
           "name": "_ZN14EdInputContext9GetRepeatEi",
@@ -35679,7 +35679,7 @@
           "address": 5488736,
           "offset": 4598768,
           "size": 35,
-          "match_percent": 7.272728
+          "match_percent": 0.0
         },
         {
           "name": "_Z17eduiSetPinnedMenuP10eduimenu_s",
@@ -35687,7 +35687,7 @@
           "address": 5506608,
           "offset": 4616640,
           "size": 24,
-          "match_percent": 21.666666
+          "match_percent": 0.0
         },
         {
           "name": "_Z16edSetPadDisabledi",
@@ -35695,7 +35695,7 @@
           "address": 5506800,
           "offset": 4616832,
           "size": 24,
-          "match_percent": 21.666666
+          "match_percent": 0.0
         },
         {
           "name": "_Z16edGetPadDisabledv",
@@ -35703,7 +35703,7 @@
           "address": 5506832,
           "offset": 4616864,
           "size": 22,
-          "match_percent": 38.57143
+          "match_percent": 0.0
         },
         {
           "name": "_ZN10EdRegistry5FlushEv",
@@ -35711,7 +35711,7 @@
           "address": 5535424,
           "offset": 4645456,
           "size": 26,
-          "match_percent": 16.0
+          "match_percent": 0.0
         },
         {
           "name": "_ZN10EdRegistry7GetTypeEi",
@@ -35719,7 +35719,7 @@
           "address": 5536688,
           "offset": 4646720,
           "size": 35,
-          "match_percent": 5.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZN10EdRegistry10GetClassIdEP7EdClass",
@@ -35727,7 +35727,7 @@
           "address": 5539120,
           "offset": 4649152,
           "size": 21,
-          "match_percent": 36.666668
+          "match_percent": 0.0
         },
         {
           "name": "_ZN10EdRegistry8GetClassEi",
@@ -35735,7 +35735,7 @@
           "address": 5539280,
           "offset": 4649312,
           "size": 35,
-          "match_percent": 5.714286
+          "match_percent": 100.0
         }
       ]
     },
@@ -37566,7 +37566,7 @@
           "address": 5443728,
           "offset": 4553760,
           "size": 35,
-          "match_percent": 35.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN20NetworkObjectManager15ContinuityBreakEif",
@@ -37582,7 +37582,7 @@
           "address": 5444224,
           "offset": 4554256,
           "size": 73,
-          "match_percent": 20.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN20NetworkObjectManager5OwnerEi",
@@ -37590,7 +37590,7 @@
           "address": 5444304,
           "offset": 4554336,
           "size": 64,
-          "match_percent": 19.09091
+          "match_percent": 100.0
         },
         {
           "name": "_ZN20NetworkObjectManager10PeerJoinedERK7NetPeer",
@@ -37925,7 +37925,7 @@
           "address": 5420720,
           "offset": 4530752,
           "size": 27,
-          "match_percent": 13.333333
+          "match_percent": 0.0
         },
         {
           "name": "_ZN20NetworkObjectManager17FindNetworkObjectEi",
@@ -37933,7 +37933,7 @@
           "address": 5442736,
           "offset": 4552768,
           "size": 35,
-          "match_percent": 5.714286
+          "match_percent": 100.0
         },
         {
           "name": "_ZN20NetworkObjectManager17FindPendingObjectEP13NetworkObject",
@@ -37941,7 +37941,7 @@
           "address": 5443344,
           "offset": 4553376,
           "size": 98,
-          "match_percent": 10.645162
+          "match_percent": 75.935486
         },
         {
           "name": "_ZN20NetworkObjectManager7GetGuidEPv",
@@ -37949,7 +37949,7 @@
           "address": 5443664,
           "offset": 4553696,
           "size": 64,
-          "match_percent": 15.0
+          "match_percent": 0.0
         }
       ]
     },
@@ -42104,6 +42104,14 @@
           "offset": 1283712,
           "size": 1921,
           "match_percent": 1.055409
+        },
+        {
+          "name": "_ZL15DistanceToPlaneP7nuvec_sS0_S0_",
+          "demangled_name": "DistanceToPlane(nuvec_s*, nuvec_s*, nuvec_s*)",
+          "address": 3917296,
+          "offset": 3027328,
+          "size": 148,
+          "match_percent": 14.088889
         }
       ]
     },
@@ -55320,22 +55328,6 @@
           "match_percent": 5.232558
         },
         {
-          "name": "_Z18Grapple_AddDynamicPvi",
-          "demangled_name": "Grapple_AddDynamic(void*, int)",
-          "address": 5069104,
-          "offset": 4179136,
-          "size": 244,
-          "match_percent": 9.72973
-        },
-        {
-          "name": "_Z21Grapple_RemoveDynamicPv",
-          "demangled_name": "Grapple_RemoveDynamic(void*)",
-          "address": 5069360,
-          "offset": 4179392,
-          "size": 111,
-          "match_percent": 0.0
-        },
-        {
           "name": "_Z16Grapple_MoveCodeP12GameObject_s",
           "demangled_name": "Grapple_MoveCode(GameObject_s*)",
           "address": 5069472,
@@ -55994,7 +55986,7 @@
           "address": 923440,
           "offset": 33472,
           "size": 93,
-          "match_percent": 29.411764
+          "match_percent": 0.0
         },
         {
           "name": "_Z18GizMiniCut_GetGuidP7GIZMO_s",
@@ -56002,7 +55994,7 @@
           "address": 5084592,
           "offset": 4194624,
           "size": 30,
-          "match_percent": 6.666666
+          "match_percent": 100.0
         }
       ]
     },
@@ -59534,7 +59526,7 @@
           "address": 5061824,
           "offset": 4171856,
           "size": 4986,
-          "match_percent": 97.71384
+          "match_percent": 97.71904
         },
         {
           "name": "_Z22Grapples_RegisterGizmoi",
@@ -59543,6 +59535,22 @@
           "offset": 4178736,
           "size": 386,
           "match_percent": 99.44615
+        },
+        {
+          "name": "_Z18Grapple_AddDynamicPvi",
+          "demangled_name": "Grapple_AddDynamic(void*, int)",
+          "address": 5069104,
+          "offset": 4179136,
+          "size": 244,
+          "match_percent": 25.486486
+        },
+        {
+          "name": "_Z21Grapple_RemoveDynamicPv",
+          "demangled_name": "Grapple_RemoveDynamic(void*)",
+          "address": 5069360,
+          "offset": 4179392,
+          "size": 111,
+          "match_percent": 66.53333
         }
       ]
     },
@@ -71797,7 +71805,16 @@
       "name": "legoapi/misc/legoapi_helpers.cpp.o",
       "source": "src/legoapi/misc/legoapi_helpers.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/legoapi_helpers.o",
-      "functions": []
+      "functions": [
+        {
+          "name": "_ZL7RotDifftt",
+          "demangled_name": "RotDiff(unsigned short, unsigned short)",
+          "address": 3916433,
+          "offset": 3026465,
+          "size": 78,
+          "match_percent": 40.739132
+        }
+      ]
     },
     {
       "name": "legoapi/misc/legoapi_misc.cpp.o",
@@ -73675,7 +73692,7 @@
           "address": 1133600,
           "offset": 243632,
           "size": 147,
-          "match_percent": 5.945946
+          "match_percent": 11.351352
         },
         {
           "name": "_Z14ForceAlongSockP12GameObject_s",
@@ -73683,15 +73700,7 @@
           "address": 1389072,
           "offset": 499104,
           "size": 237,
-          "match_percent": 0.0
-        },
-        {
-          "name": "_ZL15AdjustMinMaxBoxP7nuvec_sS0_S0_",
-          "demangled_name": "AdjustMinMaxBox(nuvec_s*, nuvec_s*, nuvec_s*)",
-          "address": 3916511,
-          "offset": 3026543,
-          "size": 220,
-          "match_percent": 99.13158
+          "match_percent": 96.039215
         },
         {
           "name": "SockSysFindInScene",
@@ -73699,7 +73708,7 @@
           "address": 3917573,
           "offset": 3027605,
           "size": 2164,
-          "match_percent": 99.30406
+          "match_percent": 15.691057
         },
         {
           "name": "SockSysInit",
@@ -73707,15 +73716,7 @@
           "address": 3919737,
           "offset": 3029769,
           "size": 182,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL16SockEdgeAnglesXYP7nuvec_sS0_PtS1_",
-          "demangled_name": "SockEdgeAnglesXY(nuvec_s*, nuvec_s*, unsigned short*, unsigned short*)",
-          "address": 3919919,
-          "offset": 3029951,
-          "size": 217,
-          "match_percent": 100.0
+          "match_percent": 35.898304
         },
         {
           "name": "_ZL14SockRailAnglesP4SOCKP11nugspline_sP7SOCKROT",
@@ -73723,7 +73724,7 @@
           "address": 3920136,
           "offset": 3030168,
           "size": 1326,
-          "match_percent": 37.894497
+          "match_percent": 0.0
         },
         {
           "name": "_ZL13SockDataErrorv",
@@ -73731,7 +73732,7 @@
           "address": 3921462,
           "offset": 3031494,
           "size": 5,
-          "match_percent": 100.0
+          "match_percent": 0.0
         },
         {
           "name": "SockSys_GenerateData",
@@ -73739,7 +73740,7 @@
           "address": 3921467,
           "offset": 3031499,
           "size": 3611,
-          "match_percent": 47.026203
+          "match_percent": 0.0
         },
         {
           "name": "SockSysPointAlongSpline",
@@ -73747,7 +73748,7 @@
           "address": 3925078,
           "offset": 3035110,
           "size": 235,
-          "match_percent": 100.0
+          "match_percent": 14.297298
         },
         {
           "name": "SockSysTrackInSplineInfo",
@@ -73755,7 +73756,7 @@
           "address": 3925313,
           "offset": 3035345,
           "size": 292,
-          "match_percent": 4.651163
+          "match_percent": 4.883721
         },
         {
           "name": "_ZL16FillSockPositionP7SOCKSYSP14SOCKPOSITION_s",
@@ -73763,22 +73764,6 @@
           "address": 3925605,
           "offset": 3035637,
           "size": 772,
-          "match_percent": 70.632034
-        },
-        {
-          "name": "_ZL20SockSysPointAlongMIDP4SOCKP14SOCKPOSITION_sP7nuvec_s",
-          "demangled_name": "SockSysPointAlongMID(SOCK*, SOCKPOSITION_s*, nuvec_s*)",
-          "address": 3926377,
-          "offset": 3036409,
-          "size": 351,
-          "match_percent": 82.843475
-        },
-        {
-          "name": "_ZL16BestSockPositionP7SOCKSYSP7nuvec_sP14SOCKPOSITION_sii",
-          "demangled_name": "BestSockPosition(SOCKSYS*, nuvec_s*, SOCKPOSITION_s*, int, int)",
-          "address": 3926728,
-          "offset": 3036760,
-          "size": 2164,
           "match_percent": 0.0
         },
         {
@@ -73787,7 +73772,7 @@
           "address": 3928892,
           "offset": 3038924,
           "size": 981,
-          "match_percent": 68.30961
+          "match_percent": 0.0
         },
         {
           "name": "MoveSockPosition",
@@ -73795,7 +73780,7 @@
           "address": 3929873,
           "offset": 3039905,
           "size": 1450,
-          "match_percent": 98.247
+          "match_percent": 11.985612
         },
         {
           "name": "ComplexSockAngles",
@@ -73803,7 +73788,7 @@
           "address": 3931323,
           "offset": 3041355,
           "size": 1017,
-          "match_percent": 99.80623
+          "match_percent": 10.854672
         },
         {
           "name": "SetSockPostion",
@@ -73811,7 +73796,7 @@
           "address": 3932340,
           "offset": 3042372,
           "size": 418,
-          "match_percent": 99.150795
+          "match_percent": 0.0
         },
         {
           "name": "SetSockBit",
@@ -73819,7 +73804,7 @@
           "address": 3932758,
           "offset": 3042790,
           "size": 79,
-          "match_percent": 22.806452
+          "match_percent": 25.129032
         },
         {
           "name": "SockBitSet",
@@ -73827,7 +73812,7 @@
           "address": 3932837,
           "offset": 3042869,
           "size": 74,
-          "match_percent": 15.290322
+          "match_percent": 14.806452
         },
         {
           "name": "MidDistanceFromSockStart",
@@ -73835,7 +73820,7 @@
           "address": 3932911,
           "offset": 3042943,
           "size": 148,
-          "match_percent": 99.97872
+          "match_percent": 12.957447
         },
         {
           "name": "FindSock",
@@ -73843,7 +73828,7 @@
           "address": 3933059,
           "offset": 3043091,
           "size": 135,
-          "match_percent": 100.0
+          "match_percent": 2.72093
         },
         {
           "name": "SockSegmentsAhead",
@@ -73851,7 +73836,7 @@
           "address": 3933194,
           "offset": 3043226,
           "size": 274,
-          "match_percent": 88.89011
+          "match_percent": 11.10989
         },
         {
           "name": "EnforceSockYLimits",
@@ -73859,7 +73844,7 @@
           "address": 3933468,
           "offset": 3043500,
           "size": 120,
-          "match_percent": 93.425
+          "match_percent": 10.2
         },
         {
           "name": "_Z15GetSockEdgeEnumPc",
@@ -73867,7 +73852,7 @@
           "address": 3937474,
           "offset": 3047506,
           "size": 105,
-          "match_percent": 12.121212
+          "match_percent": 12.727273
         },
         {
           "name": "SockSysConfigureNuFPar",
@@ -73875,7 +73860,7 @@
           "address": 3938372,
           "offset": 3048404,
           "size": 518,
-          "match_percent": 45.84733
+          "match_percent": 9.770992
         },
         {
           "name": "SockSys_Configure",
@@ -73883,7 +73868,7 @@
           "address": 3938890,
           "offset": 3048922,
           "size": 397,
-          "match_percent": 95.26415
+          "match_percent": 30.924528
         },
         {
           "name": "SockSysCamera",
@@ -73891,7 +73876,7 @@
           "address": 3939610,
           "offset": 3049642,
           "size": 9247,
-          "match_percent": 69.42416
+          "match_percent": 11.049091
         },
         {
           "name": "SockSysCameraWithOverlapBlend",
@@ -73899,7 +73884,7 @@
           "address": 3951814,
           "offset": 3061846,
           "size": 2116,
-          "match_percent": 0.718133
+          "match_percent": 0.754039
         },
         {
           "name": "SockRotationMatrix",
@@ -73907,7 +73892,7 @@
           "address": 3953930,
           "offset": 3063962,
           "size": 3621,
-          "match_percent": 87.852356
+          "match_percent": 1.99267
         },
         {
           "name": "SockOn",
@@ -73915,7 +73900,7 @@
           "address": 3957551,
           "offset": 3067583,
           "size": 101,
-          "match_percent": 10.30303
+          "match_percent": 12.727273
         },
         {
           "name": "SockOff",
@@ -73923,7 +73908,7 @@
           "address": 3957652,
           "offset": 3067684,
           "size": 101,
-          "match_percent": 10.30303
+          "match_percent": 12.727273
         },
         {
           "name": "SockSysSetObjectVisibility",
@@ -73931,7 +73916,7 @@
           "address": 3957753,
           "offset": 3067785,
           "size": 140,
-          "match_percent": 8.888889
+          "match_percent": 9.333333
         }
       ]
     },
@@ -76136,6 +76121,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL12InsideLineXZffffff",
+          "demangled_name": "InsideLineXZ(float, float, float, float, float, float)",
+          "address": 3917181,
+          "offset": 3027213,
+          "size": 115,
+          "match_percent": 14.193548
+        },
+        {
           "name": "rtlGetEnvPath",
           "demangled_name": "rtlGetEnvPath",
           "address": 4876768,
@@ -77984,7 +77977,7 @@
           "address": 3701024,
           "offset": 2811056,
           "size": 89,
-          "match_percent": 1.714286
+          "match_percent": 100.0
         },
         {
           "name": "NewPlatInst",
@@ -78408,6 +78401,14 @@
           "offset": 2087552,
           "size": 135,
           "match_percent": 99.75
+        },
+        {
+          "name": "_ZL12SplineLengthP11nugspline_si",
+          "demangled_name": "SplineLength(nugspline_s*, int)",
+          "address": 3916731,
+          "offset": 3026763,
+          "size": 276,
+          "match_percent": 4.418605
         },
         {
           "name": "_Z24LevelSplines_InitForGameP11LEVELSPLINE",
@@ -96855,7 +96856,7 @@
           "address": 2832928,
           "offset": 1942960,
           "size": 47,
-          "match_percent": 7.5
+          "match_percent": 100.0
         },
         {
           "name": "NuDynamicLightGetParameteri",
@@ -107873,6 +107874,14 @@
           "offset": 1799928,
           "size": 58,
           "match_percent": 100.0
+        },
+        {
+          "name": "_ZL16OnOrOutsidePlaneP7nuvec_sS0_S0_",
+          "demangled_name": "OnOrOutsidePlane(nuvec_s*, nuvec_s*, nuvec_s*)",
+          "address": 3917007,
+          "offset": 3027039,
+          "size": 174,
+          "match_percent": 8.627451
         }
       ]
     },
@@ -116899,7 +116908,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -116923,7 +116931,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -116947,7 +116954,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -117000,7 +117006,6 @@
       "match_percent": 53.041668,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -117024,7 +117029,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -117048,7 +117052,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -117101,7 +117104,6 @@
       "match_percent": 53.041668,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -117125,7 +117127,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -117149,7 +117150,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -117213,7 +117213,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -117237,7 +117236,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -117261,7 +117259,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -117319,7 +117316,6 @@
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
-        "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -117357,10 +117353,9 @@
       "address": 2557325,
       "offset": 1667357,
       "size": 373,
-      "match_percent": 93.125,
+      "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -117384,7 +117379,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -117408,7 +117402,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -117472,7 +117465,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -117496,7 +117488,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -117520,7 +117511,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -117584,7 +117574,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -117608,7 +117597,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -117632,7 +117620,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -117696,7 +117683,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -117720,7 +117706,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -117744,7 +117729,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -117808,7 +117792,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -117832,7 +117815,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -117856,7 +117838,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -117920,7 +117901,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -117944,7 +117924,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -117968,7 +117947,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -118159,7 +118137,6 @@
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
-        "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -118194,7 +118171,6 @@
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
-        "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -118235,7 +118211,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -118259,7 +118234,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -118283,7 +118257,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -118347,7 +118320,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -118371,7 +118343,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -118395,7 +118366,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -118459,7 +118429,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -118483,7 +118452,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -118507,7 +118475,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -118616,7 +118583,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -118640,7 +118606,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -118664,7 +118629,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -118739,7 +118703,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -118763,7 +118726,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -118787,7 +118749,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -118862,7 +118823,6 @@
       "size": 50,
       "match_percent": 100.0,
       "candidate_units": [
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -118978,7 +118938,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -119002,7 +118961,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -119026,7 +118984,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -119100,7 +119057,6 @@
       "size": 50,
       "match_percent": 100.0,
       "candidate_units": [
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -119171,7 +119127,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -119195,7 +119150,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -119219,7 +119173,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -119282,7 +119235,6 @@
       "size": 50,
       "match_percent": 100.0,
       "candidate_units": [
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -119365,7 +119317,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -119389,7 +119340,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -119413,7 +119363,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -119477,7 +119426,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -119501,7 +119449,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -119525,7 +119472,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -119589,7 +119535,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -119613,7 +119558,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -119637,7 +119581,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -119701,7 +119644,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -119725,7 +119667,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -119749,7 +119690,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -119823,7 +119763,6 @@
       "size": 50,
       "match_percent": 100.0,
       "candidate_units": [
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -119872,7 +119811,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -119896,7 +119834,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -119920,7 +119857,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -119984,7 +119920,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -120008,7 +119943,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -120032,7 +119966,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -120107,7 +120040,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -120131,7 +120063,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -120155,7 +120086,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -120219,7 +120149,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -120243,7 +120172,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -120267,7 +120195,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -120343,7 +120270,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -120367,7 +120293,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -120391,7 +120316,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -120455,7 +120379,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -120479,7 +120402,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -120503,7 +120425,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -120561,7 +120482,6 @@
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
-        "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -120602,7 +120522,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -120626,7 +120545,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -120650,7 +120568,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -120714,7 +120631,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -120738,7 +120654,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -120762,7 +120677,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -120826,7 +120740,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -120850,7 +120763,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -120874,7 +120786,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -120938,7 +120849,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -120962,7 +120872,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -120986,7 +120895,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -121113,7 +121021,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -121137,7 +121044,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -121161,7 +121067,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -121225,7 +121130,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -121249,7 +121153,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -121273,7 +121176,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -121337,7 +121239,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -121361,7 +121262,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -121385,7 +121285,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -121723,7 +121622,6 @@
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
-        "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -121797,7 +121695,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -121821,7 +121718,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -121845,7 +121741,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -121903,7 +121798,6 @@
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
-        "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -121938,7 +121832,6 @@
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
-        "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -121971,66 +121864,6 @@
       ]
     },
     {
-      "name": "_ZL7RotDifftt",
-      "demangled_name": "RotDiff(unsigned short, unsigned short)",
-      "address": 3916433,
-      "offset": 3026465,
-      "size": 78,
-      "match_percent": 40.739132,
-      "candidate_units": [
-        "legoapi/misc/legoapi_helpers.cpp.o",
-        "legoapi/props/system/socksysall.cpp.o"
-      ]
-    },
-    {
-      "name": "_ZL12SplineLengthP11nugspline_si",
-      "demangled_name": "SplineLength(nugspline_s*, int)",
-      "address": 3916731,
-      "offset": 3026763,
-      "size": 276,
-      "match_percent": 72.5814,
-      "candidate_units": [
-        "legoapi/props/system/socksysall.cpp.o",
-        "legoapi/render/fx/edsplines.cpp.o"
-      ]
-    },
-    {
-      "name": "_ZL16OnOrOutsidePlaneP7nuvec_sS0_S0_",
-      "demangled_name": "OnOrOutsidePlane(nuvec_s*, nuvec_s*, nuvec_s*)",
-      "address": 3917007,
-      "offset": 3027039,
-      "size": 174,
-      "match_percent": 64.01961,
-      "candidate_units": [
-        "legoapi/props/system/socksysall.cpp.o",
-        "nu2api/numath/nuplane.cpp.o"
-      ]
-    },
-    {
-      "name": "_ZL12InsideLineXZffffff",
-      "demangled_name": "InsideLineXZ(float, float, float, float, float, float)",
-      "address": 3917181,
-      "offset": 3027213,
-      "size": 115,
-      "match_percent": 88.22581,
-      "candidate_units": [
-        "legoapi/props/system/socksysall.cpp.o",
-        "legoapi/render/core/rtl.cpp.o"
-      ]
-    },
-    {
-      "name": "_ZL15DistanceToPlaneP7nuvec_sS0_S0_",
-      "demangled_name": "DistanceToPlane(nuvec_s*, nuvec_s*, nuvec_s*)",
-      "address": 3917296,
-      "offset": 3027328,
-      "size": 148,
-      "match_percent": 14.088889,
-      "candidate_units": [
-        "legoapi/ai/game/misc_a_game.cpp.o",
-        "legoapi/props/system/socksysall.cpp.o"
-      ]
-    },
-    {
       "name": "_Z41__static_initialization_and_destruction_0ii",
       "demangled_name": "__static_initialization_and_destruction_0(int, int)",
       "address": 3957893,
@@ -122039,7 +121872,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -122063,7 +121895,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -122087,7 +121918,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -122145,7 +121975,6 @@
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
-        "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -122180,7 +122009,6 @@
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
-        "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -122256,7 +122084,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -122280,7 +122107,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -122304,7 +122130,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -122617,7 +122442,7 @@
       "address": 4502096,
       "offset": 3612128,
       "size": 9,
-      "match_percent": 24.444445,
+      "match_percent": 100.0,
       "candidate_units": [
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "legoapi/items/objects/gameobjects.cpp.o"
@@ -122629,7 +122454,7 @@
       "address": 4502112,
       "offset": 3612144,
       "size": 9,
-      "match_percent": 24.444445,
+      "match_percent": 100.0,
       "candidate_units": [
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "legoapi/items/objects/gameobjects.cpp.o"
@@ -122641,7 +122466,7 @@
       "address": 4502128,
       "offset": 3612160,
       "size": 12,
-      "match_percent": 21.75,
+      "match_percent": 100.0,
       "candidate_units": [
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "legoapi/items/objects/gameobjects.cpp.o"
@@ -122653,7 +122478,7 @@
       "address": 4502144,
       "offset": 3612176,
       "size": 9,
-      "match_percent": 24.444445,
+      "match_percent": 100.0,
       "candidate_units": [
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "legoapi/items/objects/gameobjects.cpp.o"
@@ -122665,7 +122490,7 @@
       "address": 4502160,
       "offset": 3612192,
       "size": 133,
-      "match_percent": 0.0,
+      "match_percent": 91.22222,
       "candidate_units": [
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "legoapi/items/objects/gameobjects.cpp.o"
@@ -122677,7 +122502,7 @@
       "address": 4502160,
       "offset": 3612192,
       "size": 133,
-      "match_percent": 0.0,
+      "match_percent": 91.22222,
       "candidate_units": [
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "legoapi/items/objects/gameobjects.cpp.o"
@@ -122689,7 +122514,7 @@
       "address": 4502304,
       "offset": 3612336,
       "size": 141,
-      "match_percent": 12.842105,
+      "match_percent": 91.68421,
       "candidate_units": [
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "legoapi/items/objects/gameobjects.cpp.o"
@@ -122739,7 +122564,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -122763,7 +122587,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -122787,7 +122610,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -122851,7 +122673,6 @@
       "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutofireAddon.cpp.o",
-        "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
@@ -122875,7 +122696,6 @@
         "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
-        "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
@@ -122899,7 +122719,6 @@
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizminicut.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -125095,6 +124914,38 @@
       "address": 3916195,
       "offset": 3026227,
       "size": 29,
+      "match_percent": 0.0
+    },
+    {
+      "name": "_ZL15AdjustMinMaxBoxP7nuvec_sS0_S0_",
+      "demangled_name": "AdjustMinMaxBox(nuvec_s*, nuvec_s*, nuvec_s*)",
+      "address": 3916511,
+      "offset": 3026543,
+      "size": 220,
+      "match_percent": 0.0
+    },
+    {
+      "name": "_ZL16SockEdgeAnglesXYP7nuvec_sS0_PtS1_",
+      "demangled_name": "SockEdgeAnglesXY(nuvec_s*, nuvec_s*, unsigned short*, unsigned short*)",
+      "address": 3919919,
+      "offset": 3029951,
+      "size": 217,
+      "match_percent": 0.0
+    },
+    {
+      "name": "_ZL20SockSysPointAlongMIDP4SOCKP14SOCKPOSITION_sP7nuvec_s",
+      "demangled_name": "SockSysPointAlongMID(SOCK*, SOCKPOSITION_s*, nuvec_s*)",
+      "address": 3926377,
+      "offset": 3036409,
+      "size": 351,
+      "match_percent": 0.0
+    },
+    {
+      "name": "_ZL16BestSockPositionP7SOCKSYSP7nuvec_sP14SOCKPOSITION_sii",
+      "demangled_name": "BestSockPosition(SOCKSYS*, nuvec_s*, SOCKPOSITION_s*, int, int)",
+      "address": 3926728,
+      "offset": 3036760,
+      "size": 2164,
       "match_percent": 0.0
     },
     {
@@ -130373,8 +130224,8 @@
   "summary": {
     "bazel_units": 523,
     "functions": 13454,
-    "assigned_functions": 12292,
-    "ambiguous_functions": 234,
-    "unassigned_functions": 928
+    "assigned_functions": 12293,
+    "ambiguous_functions": 229,
+    "unassigned_functions": 932
   }
 }

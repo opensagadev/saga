@@ -3005,7 +3005,12 @@ extern "C" {
     }
     void NuDynamicLightSetParameterf(void) {
     }
-    void NuDynamicLightSetParameteri(void) {
+    void NuDynamicLightSetParameteri(NuDynamicLight *light, i32 parameter, i32 value) {
+        if (parameter == 4) {
+            light->parameter_4 = value;
+        } else if (parameter == 5) {
+            light->parameter_5 = value;
+        }
     }
     void NuDynamicLightSetUsedOnSpecials(NuDynamicLight *light, i32 enabled) {
         light->used_on_specials = enabled;

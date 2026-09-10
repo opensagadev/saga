@@ -155,6 +155,8 @@ struct EdBitControl {
     void cbSelectItem(eduimenu_s *, eduiitem_s *, u32);
 };
 struct EdClass {
+    u8 reserved_00[0x18];
+
     void AddType(EdRef *);
     void CopyObject(void *, void *);
     void FindMember(EdMember *, void *, i32, i32);
@@ -309,6 +311,14 @@ struct EdRefSpline {
     void SetMemberData(void *, i32, void *, i32, i16 *);
 };
 struct EdRegistry {
+    u32 reserved_00;
+    EdType *types;
+    EdClass *classes;
+    u8 reserved_0c[0x10];
+    i32 type_count;
+    u32 reserved_20;
+    i32 class_count;
+
     void AddMapping(char *, char *);
     void AddObjectNotifier(EdObjectNotifier *);
     void ClassIFaceProcess(EdClass *, void *, EdInputContext &);
@@ -320,12 +330,12 @@ struct EdRegistry {
     void DestroyObject(EdClassInterface *, void *, i32, i32);
     void Flush();
     void GetClass(char *);
-    void GetClass(i32);
+    EdClass *GetClass(i32);
     void GetClassId(EdClass *);
     void GetClassId(char *);
     void GetStreamClassMapping(EdStream &, i32 *, i32 &, i32);
     void GetType(char *);
-    void GetType(i32);
+    EdType *GetType(i32);
     void GetTypeId(char *);
     void Initialise(variptr_u &, variptr_u &, i32, i32, i32, i32);
     void MapName(char *);
@@ -385,8 +395,17 @@ struct EdSystem {
     void Reset();
 };
 struct EdType {
+    u8 reserved_00[0xc];
+
     void Serialise(EdStream &);
 };
+
+static_assert(sizeof(EdClass) == 0x18, "EdClass size");
+static_assert(sizeof(EdType) == 0xc, "EdType size");
+static_assert(offsetof(EdRegistry, types) == 0x4, "EdRegistry::types offset");
+static_assert(offsetof(EdRegistry, classes) == 0x8, "EdRegistry::classes offset");
+static_assert(offsetof(EdRegistry, type_count) == 0x1c, "EdRegistry::type_count offset");
+static_assert(offsetof(EdRegistry, class_count) == 0x24, "EdRegistry::class_count offset");
 struct EdVectorControl {
     void AddMenuItem(eduimenu_s *, EdRef *, void *);
     void Destroy();

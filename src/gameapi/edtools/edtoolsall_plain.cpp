@@ -142,6 +142,9 @@ extern "C" {
     NUGSCN *edanim_page_scene[8];
     i32 edanim_nearest;
     i32 edanim_nearest_param_id;
+    i32 edanim_nearest_particle;
+    i32 edanim_nearest_sound;
+    i32 edanim_particle_type;
     i32 edanim_sound_type;
     NUGSCN *edbits_base_scene;
     edbridge_s edBridges[64];

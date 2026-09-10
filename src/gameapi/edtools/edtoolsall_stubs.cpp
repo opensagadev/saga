@@ -13,13 +13,21 @@ void eduiSetPinnedMenu(eduimenu_s *) {
 void EdRegistry::Flush() {
 }
 
-void EdRegistry::GetClass(i32) {
+EdClass *EdRegistry::GetClass(i32 index) {
+    if (index < 0 || index >= class_count) {
+        return nullptr;
+    }
+    return &classes[index];
 }
 
 void EdRegistry::GetClassId(EdClass *) {
 }
 
-void EdRegistry::GetType(i32) {
+EdType *EdRegistry::GetType(i32 index) {
+    if (index < 0 || index >= type_count) {
+        return nullptr;
+    }
+    return &types[index];
 }
 
 void EdInputContext::GetRelease(i32) {

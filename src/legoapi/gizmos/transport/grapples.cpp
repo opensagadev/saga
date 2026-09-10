@@ -35,6 +35,36 @@ struct GRAPPLEPROGRESS {
 static NUVEC GrapplePointOffset = {0.0f, -0.023f, 0.169f};
 static GRAPPLE DynamicGrapple[4];
 
+GRAPPLE *Grapple_AddDynamic(void *attached_object, i32 retain_attachment) {
+    for (i32 index = 0; index < 4; ++index) {
+        if (DynamicGrapple[index].attached_object == attached_object) {
+            return &DynamicGrapple[index];
+        }
+    }
+
+    for (i32 index = 0; index < 4; ++index) {
+        GRAPPLE *grapple = &DynamicGrapple[index];
+        if (grapple->attached_object == NULL) {
+            grapple->attached_object = static_cast<GameObject_s *>(attached_object);
+            grapple->retain_attachment = static_cast<u8>(retain_attachment);
+            grapple->flags |= GRAPPLE_FLAG_VISIBLE;
+            return grapple;
+        }
+    }
+    return NULL;
+}
+
+void Grapple_RemoveDynamic(void *attached_object) {
+    for (i32 index = 0; index < 4; ++index) {
+        GRAPPLE *grapple = &DynamicGrapple[index];
+        if (grapple->attached_object == attached_object) {
+            grapple->attached_object = NULL;
+            grapple->flags &= ~GRAPPLE_FLAG_VISIBLE;
+            return;
+        }
+    }
+}
+
 static void Grapple_ResetRopePoints(GRAPPLE *grapple) {
     const f32 segment_length = grapple->rope_length / 6.0f;
     for (i32 point_index = 0; point_index < 6; ++point_index) {

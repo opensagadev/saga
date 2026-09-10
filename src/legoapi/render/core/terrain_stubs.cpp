@@ -541,7 +541,17 @@ extern "C" {
     void AITerrShadowOnPlatform(void) {
     }
 
-    void CheckForPlatInst(void) {
+    i32 CheckForPlatInst(i32 instance) {
+        if (CurTerr->max_platforms <= 0) {
+            return 0;
+        }
+        TERRAIN_PLATFORM *platform = CurTerr->platforms;
+        for (i32 i = 0; i < CurTerr->max_platforms; ++i, ++platform) {
+            if (platform->scene_object != NULL && static_cast<i16>(platform->scene_object_index) == instance) {
+                return 1;
+            }
+        }
+        return 0;
     }
 
     PartHeader *CreateDmaPartEffectList(void *memory, i32 *size) {

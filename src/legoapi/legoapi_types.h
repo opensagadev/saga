@@ -11,6 +11,7 @@
 #include "decomp.h"
 #include "nu2api/nucore/nulist.h"
 #include "nu2api/nucore/nuanim3.h"
+#include "nu2api/nucore/nuvuvec.hpp"
 #include "nu2api/nu3d/nuhspecial.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
@@ -959,7 +960,11 @@ struct EdFileOutputStream;
 struct EdInputContext;
 struct EdRef;
 struct EdStream;
-struct EdTool {};
+struct EdTool {
+    u8 reserved_0x00[4];
+    EdTool *next;
+    EdTool *previous;
+};
 enum FADETYPE_VALUE {
     FADE_TYPE_NONE = -1,
     FADE_TYPE_SCREEN = 0,
@@ -3278,6 +3283,11 @@ struct terrsitu_s {};
 struct uv1deb {};
 struct uv1debdata;
 struct BaseEditor {
+    u8 reserved_0x00[4];
+    BaseEditor *next;
+    BaseEditor *previous;
+    i32 field_0x0c;
+
     void Initialise(variptr_u &, variptr_u &, i32);
     void ReadBuffer(void **, void *, i32);
     void WriteBeginBlock(i32, i32);
@@ -3299,6 +3309,15 @@ DECOMP_ASSERT(sizeof(CantPickupBombTimerAddon) == 0x1c, "CantPickupBombTimerAddo
 DECOMP_ASSERT(offsetof(CantPickupBombTimerAddon, remaining_time) == 0x18, "Bomb pickup timer offset");
 
 struct ClassEditor {
+    u8 reserved_0x00[0x10];
+    EdTool *first_tool;
+    EdTool *last_tool;
+    i32 tool_count;
+    u8 reserved_0x1c[0x50 - 0x1c];
+    VuVec snap_ray;
+    u8 reserved_0x60[4];
+    i32 snap_mode;
+
     ClassEditor();
     void AddMenuItems(eduimenu_s *);
     void ClearLevel(i32);
@@ -3374,15 +3393,30 @@ struct ClassEditor {
     void cbFileSelected(eduimenu_s *, eduiitem_s *, u32);
 };
 struct ClassObject {
+    EdClass *ed_class;
+    void *object;
+    EdRef *reference;
+
     void GetName(char *, i32);
     void Set(char *);
 };
+struct ClassObjectListEntry {
+    ClassObjectListEntry *next;
+    ClassObjectListEntry *previous;
+    EdClass *ed_class;
+    void *object;
+    EdRef *reference;
+};
 struct ClassObjectList {
+    ClassObjectListEntry *first;
+    ClassObjectListEntry *last;
+    i32 count;
+
     void GetAveragePosition(VuVec &);
     void GetAveragePosition(VuVec &, float &);
-    void IsInList(ClassObject);
-    void IsInList(EdClass *);
-    void IsInList(void *, EdRef *);
+    bool IsInList(ClassObject);
+    bool IsInList(EdClass *);
+    bool IsInList(void *, EdRef *);
 };
 struct ClickToPressStartGestureTracker {
     void OnClick(GameObject_s &, TouchHolder &);
@@ -4464,7 +4498,9 @@ DECOMP_ASSERT(offsetof(LEVER_s, name) == 0x5c, "LEVER name offset");
 DECOMP_ASSERT(offsetof(LEVER_s, position) == 0x6c, "LEVER position offset");
 DECOMP_ASSERT(offsetof(LEVER_s, flags) == 0x9c, "LEVER flags offset");
 struct LevelEditorScene {
-    u8 data[0xa8];
+    u8 reserved_0x00[0xa0];
+    nugscn_s *scene;
+    i32 field_0xa4;
 };
 DECOMP_ASSERT(sizeof(LevelEditorScene) == 0xa8, "LevelEditorScene ABI");
 
@@ -4472,6 +4508,9 @@ struct LevelEditor {
     u8 pad_0x000[0x2a0];
     i32 reset_pending;
     LevelEditorScene scenes[10]; // 0x2a4
+    BaseEditor *first_editor;
+    BaseEditor *last_editor;
+    i32 editor_count;
 
     void AddInfoText(char *);
     void AddScene(char *, nugscn_s *, i32);
@@ -4490,7 +4529,7 @@ struct LevelEditor {
     void Flush();
     LevelEditorScene *GetEdScene(i32);
     void GetScene(char *);
-    void GetScene(i32);
+    nugscn_s *GetScene(i32);
     void Initalise(variptr_u &, variptr_u &, i32);
     void IsActiveScene(nugscn_s *);
     void IsEditable(i32);
@@ -4808,13 +4847,17 @@ struct PODSPRINTNETPACKET_s {
 };
 
 struct PropertyMenu {
-    u8 reserved_0x00[0x70];
+    PropertyMenu *next;
+    PropertyMenu *previous;
+    eduimenu_s *menu;
+    EdControl *control;
+    ClassObject objects[8];
     i32 object_count;
 
     void AddObject(ClassObject &);
     void ClearObjecs();
-    void ContainsObject(ClassObject &);
-    void ContainsObject(void *);
+    bool ContainsObject(ClassObject &);
+    bool ContainsObject(void *);
     void Destroy();
     void SelectAttr(i32);
 };

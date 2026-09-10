@@ -39,6 +39,7 @@ struct eduiitem_s {
     i32 type;
     union {
         i32 data;
+        void *data_ptr;
         u8 unknown_0c[4];
     };
     u8 unknown_10;

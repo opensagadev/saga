@@ -117,7 +117,11 @@ void NetworkObjectManager::FlushObjects(i32) {
 void NetworkObjectManager::GetNextGuid() {
 }
 
-void NetworkObjectManager::GetObject(i32) {
+void *NetworkObjectManager::GetObject(i32 id) {
+    if (id < 1 || id > 2048) {
+        return NULL;
+    }
+    return objects[id].object;
 }
 
 void NetworkObjectManager::GetPeerStatus() {
@@ -132,7 +136,15 @@ void NetworkObjectManager::Init() {
 void NetworkObjectManager::InitClassStats() {
 }
 
-void NetworkObjectManager::IsLocal(i32) {
+i32 NetworkObjectManager::IsLocal(i32 id) {
+    if (id == 0) {
+        return 1;
+    }
+    NetworkObject *network_object = FindNetworkObject(id);
+    if (network_object == NULL) {
+        return 1;
+    }
+    return network_object->owner->local;
 }
 
 void NetworkObjectManager::IsPeerReady(NetPeer const &) const {
@@ -159,7 +171,15 @@ void NetworkObjectManager::ObjectOtherCall(void *, i32, NetMessage) {
 void NetworkObjectManager::ObjectOwnerCall(void *, i32, NetMessage) {
 }
 
-void NetworkObjectManager::Owner(i32) {
+NetPeer const *NetworkObjectManager::Owner(i32 id) {
+    if (id == 0) {
+        return NULL;
+    }
+    NetworkObject *network_object = FindNetworkObject(id);
+    if (network_object == NULL) {
+        return NULL;
+    }
+    return network_object->owner;
 }
 
 void NetworkObjectManager::PeerJoined(NetPeer const &) {

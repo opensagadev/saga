@@ -62,7 +62,10 @@ struct NetAddress {
     u32 value;
 };
 struct NetListenerInterface {};
-struct NetPeer {};
+struct NetPeer {
+    u8 reserved_00[0xc];
+    u8 local;
+};
 struct ReplicatorData {};
 struct WORLDINFO_s;
 struct ePeerLeftReason {};
@@ -87,7 +90,11 @@ struct FtpFile {
     u8 reserved_00[8];
     i32 accepted;
     u8 reserved_0c[0x94];
-    NetworkObject *network_object; // 0xa0
+    struct TransferReference {
+        u8 reserved_00[0x4b0];
+        i32 reference_count;
+    };
+    TransferReference *network_object; // 0xa0
     u8 reserved_a4[0x8];
     void *transfer; // 0xac
     i32 Accept();
@@ -218,11 +225,18 @@ struct NetTransporter {
     void StatsUpdate();
 };
 struct NetworkObject {
-    u8 reserved_00[0x4b0];
-    i32 reference_count; // 0x4b0
+    u16 flags;
+    i16 id;
+    u32 reserved_04;
+    NetPeer const *owner;
+    void *object;
+    EdClass *object_class;
+    void *replicator_data;
+
     void Destroy();
     void Initialise(i32, void *, EdClass *, NetPeer const &, i32);
 };
+static_assert(sizeof(NetworkObject) == 0x18, "NetworkObject size");
 struct NetworkObjectManager {
     // The manager reset routine is an intentional no-op in the original.
     struct NetPeerPush {
@@ -241,18 +255,24 @@ struct NetworkObjectManager {
     void ChangeContext(NOSContext &);
     void ConstructObject(NetworkObject *, NetworkObjectManager::NetPeerPush *);
     void ContinuityBreak(i32, float);
-    void FindNetworkObject(i32);
+    NetworkObject *FindNetworkObject(i32);
     void FindNetworkObject(void *);
-    void FindPendingObject(NetworkObject *);
+    struct PendingObject {
+        u32 field_00;
+        u32 field_04;
+        NetworkObject *object;
+    };
+
+    PendingObject *FindPendingObject(NetworkObject *);
     void FlushObjects(i32);
     void GetGuid(void *);
     void GetNextGuid();
-    void GetObject(i32);
+    void *GetObject(i32);
     void GetPeerStatus();
     void ImportObjects();
     void Init();
     void InitClassStats();
-    void IsLocal(i32);
+    i32 IsLocal(i32);
     void IsPeerReady(NetPeer const &) const;
     void IsPeerStarted(NetPeer const &) const;
     NetworkObjectManager();
@@ -261,7 +281,7 @@ struct NetworkObjectManager {
     void ObjectCall(void *, i32, NetMessage, NetPeer const *);
     void ObjectOtherCall(void *, i32, NetMessage);
     void ObjectOwnerCall(void *, i32, NetMessage);
-    void Owner(i32);
+    NetPeer const *Owner(i32);
     void PeerJoined(NetPeer const &);
     void PeerLeft(NetPeer const &, ePeerLeftReason);
     void Push(NetworkObject const *, NetReplicator *, ReplicatorData &, NetworkObjectManager::NetPeerPush *);
@@ -299,7 +319,15 @@ struct NetworkObjectManager {
     void Update();
     void UpdateLocalObjectList();
     virtual ~NetworkObjectManager();
+
+    u8 reserved_04[0x2c];
+    NetworkObject objects[2049];
+    u8 reserved_c048[0xfec];
+    PendingObject pending_objects[32];
 };
+static_assert(offsetof(NetworkObjectManager, objects) == 0x30, "NetworkObjectManager::objects offset");
+static_assert(offsetof(NetworkObjectManager, pending_objects) == 0xd034,
+              "NetworkObjectManager::pending_objects offset");
 struct TouchHacks {
     static bool TouchControlsActive;
 

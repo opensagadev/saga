@@ -348,7 +348,13 @@ void PropertyMenu::ClearObjecs() {
     object_count = 0;
 }
 
-void PropertyMenu::ContainsObject(ClassObject &) {
+bool PropertyMenu::ContainsObject(ClassObject &object) {
+    for (i32 i = 0; i < object_count; ++i) {
+        if (objects[i].object == object.object && objects[i].reference == object.reference) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void PropertyMenu::Destroy() {
@@ -438,7 +444,28 @@ void ClassObjectList::GetAveragePosition(VuVec &) {
 void ClassObjectList::GetAveragePosition(VuVec &, float &) {
 }
 
-void ClassObjectList::IsInList(void *, EdRef *) {
+bool ClassObjectList::IsInList(void *object, EdRef *reference) {
+    ClassObjectListEntry *entry = first;
+    if (entry == NULL) {
+        return false;
+    }
+
+    if (reference != NULL) {
+        do {
+            if (entry->object == object && entry->reference == reference) {
+                return true;
+            }
+            entry = entry->next;
+        } while (entry != NULL);
+    } else {
+        do {
+            if (entry->object == object) {
+                return true;
+            }
+            entry = entry->next;
+        } while (entry != NULL);
+    }
+    return false;
 }
 
 void DumpAreaData(i32, i32) {

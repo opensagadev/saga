@@ -14,6 +14,7 @@ build:target --per_file_copt=^src/gamelib/util/AndroidOBBUtils\.cpp$@-O3
 # The allocator has no vectorizable code; -O2 and -O3 emit the same measured
 # bodies, including nine exact constructors/destructor helpers.
 build:target --per_file_copt=^src/gamelib/util/VirtualStackAllocator\.cpp$@-O2
+build:target --per_file_copt=^src/gamelib/util/Network_stubs\.cpp$@-O3
 # Recovered stub-only device units: -O3 reproduces FileSize exactly and the
 # APK constructor/CreateNuFile and SetCurrentDir bodies apart from relocation.
 build:target --per_file_copt=^src/nu2api/nufile/nufiledevice\.cpp$@-O3
@@ -24,6 +25,7 @@ build:target --per_file_copt=^src/gameapi/ai/aisys/aisys\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/ai/aisys/gameai_actions\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/edtools/edfile\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/edtools/edsplines\.cpp$@-O3
+build:target --per_file_copt=^src/gameapi/edtools/edtoolsall_stubs\.cpp$@-O2
 build:target --per_file_copt=^src/gameframework/savesystem\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/gui/apimenu\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/menus/core/panel\.cpp$@-O2
@@ -65,6 +67,7 @@ build:target --per_file_copt=^src/legoapi/actions/combat/shovesys\.cpp$@-O1
 build:target --per_file_copt=^src/legoapi/actions/movement/pushblocks\.cpp$@-O1
 build:target --per_file_copt=^src/legoapi/actions/movement/jumping\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/actions/movement/climbing\.cpp$@-O2
+build:target --per_file_copt=^src/MechInputTouch/MechEdgeStopAddon\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/render/core/render\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/render/core/screen\.cpp$@-O2
 # Shader material filters use optimized switch lowering and leaf epilogues.
@@ -115,6 +118,7 @@ build:target --per_file_copt=^src/legoapi/items/objects/gameobjects\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/objects/objectsall\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/props/doors/door\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/props/doors/doors\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/props/system/socksysall\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/actions/character/speederchase\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/core/input/timer\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/core/input/timing\.cpp$@-O2
@@ -137,6 +141,7 @@ build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_gizmopickups\.cpp$
 build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_spinner\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/object/gizbuildit\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/object/giztimers\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/gizmo/object/gizminicut\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_gizobstacles\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_grabber\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_grapples\.cpp$@-O3
@@ -223,7 +228,6 @@ build:target --per_file_copt=^src/nu2api/nu3d/nuwater_speed\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nu3d/nuspline\.c$@-O3
 build:target --per_file_copt=^src/nu2api/nu3d/nuqfnt\.cpp$@-O2
 build:target --per_file_copt=^src/nu2api/nu3d/nurndr\.cpp$@-O3
-build:target --per_file_copt=^src/nu2api/nu3d/nushader\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nu3d/nutex\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nu3d/nuvport\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nu3d/android/numtl_android\.cpp$@-O2
@@ -336,6 +340,7 @@ build:target --per_file_copt=^src/gamelib/util/Network\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/core/net/network\.cpp$@-O3
 build:target --per_file_copt=^src/gamelib/util/V2SessionManager\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nu3d/nushadermanager_plain\.cpp$@-O3
+build:target --per_file_copt=^src/nu2api/nu3d/nushader\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/ai/game/aitrigger\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/audio/radio\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/object/gizforce\.cpp$@-O3

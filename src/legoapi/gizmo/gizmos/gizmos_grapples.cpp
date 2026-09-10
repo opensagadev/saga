@@ -14,9 +14,6 @@ i32 Grapple_LookAtPos(GameObject_s *, nuvec_s *) {
     return 0;
 }
 
-void Grapple_AddDynamic(void *, i32) {
-}
-
 void Grapple_ReachedTop(GameObject_s *) {
 }
 
@@ -43,9 +40,6 @@ i32 Grapple_SetTargetMom(GameObject_s *object) {
         object->target_velocity.z = (point.z - object->apiobj.upper_position.z) * 5.0f;
     }
     return 1;
-}
-
-void Grapple_RemoveDynamic(void *) {
 }
 
 void Grapple_FindNearestToPos(WORLDINFO_s *, nuvec_s *) {
