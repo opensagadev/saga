@@ -122,12 +122,10 @@ namespace {
         if (progress == NULL) {
             return;
         }
-        for (i32 word = 0; word < GIZMOPICKUP_PROGRESS_WORDS; ++word) {
-            progress->collected[word] = 0;
-            progress->enabled[word] = 0xffffffff;
-            progress->visible[word] = 0xffffffff;
-            progress->activated[word] = 0;
-        }
+        memset(progress->visible, 0xff, sizeof(progress->visible));
+        memset(progress->enabled, 0xff, sizeof(progress->enabled));
+        memset(progress->collected, 0, sizeof(progress->collected));
+        memset(progress->activated, 0, sizeof(progress->activated));
     }
 
     void DrawPickupList(WORLDINFO *world, GIZMOPICKUP_s *pickups, i32 count) {
@@ -551,27 +549,37 @@ static void GizmoPickups_Reset(void *world_ptr, void *, void *progress_ptr) {
 
 static void *GizmoPickups_ReserveBufferSpace(void *world_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    if (world == NULL || world->current_level == NULL) {
-        return NULL;
-    }
+    world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
+    GIZMOPICKUPRUNTIMESYS_s *pickup_sys = reinterpret_cast<GIZMOPICKUPRUNTIMESYS_s *>(world->giz_buffer.addr);
+    world->gizmo_pickup_sys = pickup_sys;
+    world->giz_buffer.addr += sizeof(*pickup_sys);
+    memset(pickup_sys, 0, sizeof(*pickup_sys));
 
-    GIZMOPICKUPRUNTIMESYS_s *pickup_sys = static_cast<GIZMOPICKUPRUNTIMESYS_s *>(
-        GameBufferAlloc(&world->giz_buffer, &world->unknown_0108, sizeof(GIZMOPICKUPRUNTIMESYS_s)));
-    if (pickup_sys == NULL) {
-        return NULL;
-    }
     pickup_sys->draw_distance = 10.0f;
-    pickup_sys->pickup_scale = GetAreaPickupScale(world);
-    AreaPickupScale = pickup_sys->pickup_scale;
+    AreaPickupScale = 1.0f;
+    const i32 area_index = world->level_sub_id;
+    if (area_index >= 0 && area_index < AREACOUNT) {
+        const u16 flags = ADataList[area_index].flags;
+        if ((flags & AREAFLAG_NOPICKUPGRAVITY) != 0) {
+            AreaPickupScale = 6.0f;
+        } else if ((flags & AREAFLAG_VEHICLE_AREA) != 0) {
+            AreaPickupScale = BonusArea == 0 ? 5.0f : 3.0f;
+        }
+    }
+    pickup_sys->pickup_scale = AreaPickupScale;
     SetAreaPickupGravity(world->level_sub_id, world->level_idx);
 
+    usize buffer_address = world->giz_buffer.addr;
     if (world->current_level->max_pickups != 0) {
-        pickup_sys->pickups = static_cast<GIZMOPICKUP_s *>(GameBufferAlloc(
-            &world->giz_buffer, &world->unknown_0108, world->current_level->max_pickups * sizeof(GIZMOPICKUP_s)));
+        buffer_address = ALIGN(buffer_address, 4);
+        world->giz_buffer.addr = buffer_address;
+        pickup_sys->pickups = reinterpret_cast<GIZMOPICKUP_s *>(buffer_address);
+        buffer_address += world->current_level->max_pickups * sizeof(GIZMOPICKUP_s);
     }
-    pickup_sys->temporary_pickups = static_cast<GIZMOPICKUP_s *>(GameBufferAlloc(
-        &world->giz_buffer, &world->unknown_0108, GIZMOPICKUP_TEMPORARY_CAPACITY * sizeof(GIZMOPICKUP_s)));
-    world->gizmo_pickup_sys = pickup_sys;
+    buffer_address = ALIGN(buffer_address, 4);
+    world->giz_buffer.addr = buffer_address;
+    pickup_sys->temporary_pickups = reinterpret_cast<GIZMOPICKUP_s *>(buffer_address);
+    world->giz_buffer.addr += GIZMOPICKUP_TEMPORARY_CAPACITY * sizeof(GIZMOPICKUP_s);
     return pickup_sys;
 }
 

@@ -1476,21 +1476,6 @@ extern "C" {
 
 } // extern "C"
 
-extern f32 CurrentSpeed;
-extern f32 avg_currentspeed_mul;
-
-// Original: 237 bytes.
-f32 ForceAlongSock(GameObject_s *object) {
-    if (object->sock_position.location.sock == -1 || CurrentSpeed == 0.0f)
-        return 0.0f;
-    f32 speed = (1.0f + object->field_0xc38) * (CurrentSpeed * avg_currentspeed_mul);
-    NUVEC force = {0.0f, 0.0f, speed};
-    NuVecRotateX(&force, &force, object->sock_position.midpoint_rotation.x);
-    NuVecRotateY(&force, &force, object->sock_position.midpoint_rotation.y);
-    NuVecAdd(&object->target_velocity, &object->target_velocity, &force);
-    return speed;
-}
-
 void GetSockEdgeEnum(char *) {
 }
 

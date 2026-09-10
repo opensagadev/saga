@@ -540,29 +540,40 @@ extern "C" i32 NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *locator, float frame, NUMTX
 extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *locator, float frame, nuanimtime_s *time, float *scale,
                                      float *rate) {
     if (locator->animation == NULL) {
-        if (scale != NULL && (locator->flags & 8) != 0) {
+        const i32 visible = locator->flags & 8;
+        if (scale != NULL && visible != 0) {
             *scale = locator->locator_scale;
         }
-        return locator->flags & 8;
+        return visible;
     }
     if (*reinterpret_cast<u32 *>(locator->animation) + 0xbeb1b6ccU < 2) {
         return NuGCutLocatorIsVisble_3(locator, frame, scale, rate);
     }
     nuanimdata2_s *animation = locator->animation;
-    auto evaluate = [&](u32 curve) {
-        u8 type = animation->curve_types[curve];
-        return type == 0 ? animation->curves[curve].data.constant
-                         : NuAnimCurve2CalcValEx(&animation->curves[curve], time, type);
-    };
     if (rate != NULL) {
         *rate = 1.0f;
     }
+    nuanimcurve2_s *curves = animation->curves;
+    u8 *curve_types = animation->curve_types;
     if (animation->curve_count == 4) {
-        return static_cast<i32>(evaluate(3));
+        const i8 type = curve_types[3];
+        if (type == 0) {
+            return static_cast<i32>(curves[3].data.constant);
+        }
+        return static_cast<i32>(NuAnimCurve2CalcValEx(&curves[3], time, static_cast<u32>(type)));
     }
-    i32 visible = static_cast<i32>(evaluate(7));
+    const i8 visible_type = curve_types[7];
+    i32 visible;
+    if (visible_type == 0) {
+        visible = static_cast<i32>(curves[7].data.constant);
+    } else {
+        visible = static_cast<i32>(NuAnimCurve2CalcValEx(&curves[7], time, static_cast<u32>(visible_type)));
+    }
     if (visible != 0 && scale != NULL) {
-        *scale = evaluate(6);
+        const i8 scale_type = curve_types[6];
+        *scale = scale_type == 0
+                     ? curves[6].data.constant
+                     : NuAnimCurve2CalcValEx(&curves[6], time, static_cast<u32>(scale_type));
     }
     return visible;
 }

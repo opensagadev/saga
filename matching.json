@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 38.01505,
+    "fuzzy_match_percent": 38.145584,
     "total_code": "4722419",
-    "matched_code": "364625",
-    "matched_code_percent": 7.721149,
+    "matched_code": "365240",
+    "matched_code_percent": 7.734172,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4393,
-    "matched_functions_percent": 32.63987,
+    "matched_functions": 4396,
+    "matched_functions_percent": 32.66216,
     "total_units": 1
   },
   "text": {
@@ -41962,7 +41962,7 @@
           "address": 4906016,
           "offset": 4016048,
           "size": 500,
-          "match_percent": 0.0
+          "match_percent": 62.07194
         },
         {
           "name": "_Z27GameAntinode_Debug_DrawGridP11WORLDINFO_s",
@@ -46170,7 +46170,7 @@
           "address": 4632400,
           "offset": 3742432,
           "size": 383,
-          "match_percent": 0.0
+          "match_percent": 69.56701
         },
         {
           "name": "_Z9SetPlayerv",
@@ -46711,7 +46711,7 @@
           "address": 920272,
           "offset": 30304,
           "size": 93,
-          "match_percent": 29.411764
+          "match_percent": 0.0
         },
         {
           "name": "_Z14CharPivot_InitP9CHARPIVOT",
@@ -46719,7 +46719,7 @@
           "address": 4814336,
           "offset": 3924368,
           "size": 68,
-          "match_percent": 19.0
+          "match_percent": 99.954544
         },
         {
           "name": "_Z15CharPivot_CheckP12GameObject_sP7nuvec_s",
@@ -46727,7 +46727,7 @@
           "address": 4814416,
           "offset": 3924448,
           "size": 459,
-          "match_percent": 0.0
+          "match_percent": 74.86325
         }
       ]
     },
@@ -47210,7 +47210,7 @@
           "address": 1492512,
           "offset": 602544,
           "size": 1109,
-          "match_percent": 29.876984
+          "match_percent": 29.817461
         },
         {
           "name": "_Z17Animate_ASTROMECHP12GameObject_s",
@@ -47218,7 +47218,7 @@
           "address": 1493632,
           "offset": 603664,
           "size": 549,
-          "match_percent": 0.0
+          "match_percent": 29.647058
         },
         {
           "name": "_Z16Animate_PROTOCOLP12GameObject_s",
@@ -47298,7 +47298,7 @@
           "address": 1518432,
           "offset": 628464,
           "size": 487,
-          "match_percent": 22.483606
+          "match_percent": 37.360657
         },
         {
           "name": "_Z17Animate_GEONOSIANP12GameObject_s",
@@ -47306,7 +47306,7 @@
           "address": 1519872,
           "offset": 629904,
           "size": 501,
-          "match_percent": 0.0
+          "match_percent": 0.595238
         },
         {
           "name": "_Z11Animate_PODP12GameObject_s",
@@ -48201,6 +48201,14 @@
           "offset": 489184,
           "size": 9744,
           "match_percent": 0.372285
+        },
+        {
+          "name": "_Z14ForceAlongSockP12GameObject_s",
+          "demangled_name": "ForceAlongSock(GameObject_s*)",
+          "address": 1389072,
+          "offset": 499104,
+          "size": 237,
+          "match_percent": 96.039215
         },
         {
           "name": "_Z16MovePlayer_TWISTP12GameObject_s",
@@ -51581,7 +51589,7 @@
           "address": 4826992,
           "offset": 3937024,
           "size": 39,
-          "match_percent": 98.75
+          "match_percent": 100.0
         },
         {
           "name": "_ZL24CutScene_RigidPostRenderP13NUGCUTRIGID_sP17instNUGCUTRIGID_sP7numtx_s",
@@ -51589,7 +51597,7 @@
           "address": 4831152,
           "offset": 3941184,
           "size": 516,
-          "match_percent": 81.9375
+          "match_percent": 81.859375
         },
         {
           "name": "_ZL23CutScene_FindCharactersP13NUGCUTSCENE_s",
@@ -51597,7 +51605,7 @@
           "address": 4833584,
           "offset": 3943616,
           "size": 345,
-          "match_percent": 0.0
+          "match_percent": 31.343138
         },
         {
           "name": "_Z23CutScenes_ConfigureListPcP9variptr_uS0_",
@@ -57696,7 +57704,7 @@
           "address": 4976288,
           "offset": 4086320,
           "size": 510,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL33GizmoPickups_AllocateProgressDataP9variptr_uS0_",
@@ -57736,7 +57744,7 @@
           "address": 4982816,
           "offset": 4092848,
           "size": 283,
-          "match_percent": 27.541666
+          "match_percent": 27.61111
         },
         {
           "name": "_ZL26GizmoPickups_StoreProgressPvS_S_",
@@ -57760,7 +57768,7 @@
           "address": 4984928,
           "offset": 4094960,
           "size": 369,
-          "match_percent": 0.0
+          "match_percent": 51.646343
         },
         {
           "name": "_Z23GizmoPickups_TotalScorePv",
@@ -59605,7 +59613,7 @@
           "address": 1961200,
           "offset": 1071232,
           "size": 847,
-          "match_percent": 79.869156
+          "match_percent": 68.799065
         },
         {
           "name": "_ZL20Ledges_ClearProgressPvS_",
@@ -59613,7 +59621,7 @@
           "address": 1962048,
           "offset": 1072080,
           "size": 66,
-          "match_percent": 24.928572
+          "match_percent": 100.0
         },
         {
           "name": "_ZL27Ledges_AllocateProgressDataP9variptr_uS0_",
@@ -59645,7 +59653,7 @@
           "address": 1962608,
           "offset": 1072640,
           "size": 1749,
-          "match_percent": 44.13602
+          "match_percent": 55.377834
         },
         {
           "name": "_ZL11Ledges_LoadPvS_",
@@ -59653,7 +59661,7 @@
           "address": 1964368,
           "offset": 1074400,
           "size": 336,
-          "match_percent": 15.144444
+          "match_percent": 58.855556
         },
         {
           "name": "_ZL20Ledges_StoreProgressPvS_S_",
@@ -59661,7 +59669,7 @@
           "address": 1964704,
           "offset": 1074736,
           "size": 182,
-          "match_percent": 52.563637
+          "match_percent": 79.27273
         },
         {
           "name": "_Z20Ledges_RegisterGizmoi",
@@ -66687,7 +66695,7 @@
           "address": 4753376,
           "offset": 3863408,
           "size": 1292,
-          "match_percent": 29.631207
+          "match_percent": 29.684397
         },
         {
           "name": "_Z13GameFog_Resetv",
@@ -66735,7 +66743,7 @@
           "address": 4789696,
           "offset": 3899728,
           "size": 536,
-          "match_percent": 0.0
+          "match_percent": 95.37681
         },
         {
           "name": "_Z15GameBufferAllocP9variptr_uS0_i",
@@ -71991,7 +71999,7 @@
           "address": 3459920,
           "offset": 2569952,
           "size": 443,
-          "match_percent": 0.0
+          "match_percent": 97.92381
         },
         {
           "name": "DebReAlloc2",
@@ -73660,14 +73668,6 @@
           "offset": 243632,
           "size": 147,
           "match_percent": 5.945946
-        },
-        {
-          "name": "_Z14ForceAlongSockP12GameObject_s",
-          "demangled_name": "ForceAlongSock(GameObject_s*)",
-          "address": 1389072,
-          "offset": 499104,
-          "size": 237,
-          "match_percent": 0.0
         },
         {
           "name": "_ZL15AdjustMinMaxBoxP7nuvec_sS0_S0_",
@@ -75717,7 +75717,7 @@
           "address": 3842650,
           "offset": 2952682,
           "size": 564,
-          "match_percent": 0.0
+          "match_percent": 99.817566
         },
         {
           "name": "rtlDynamicFree",
@@ -75957,7 +75957,7 @@
           "address": 3851389,
           "offset": 2961421,
           "size": 4488,
-          "match_percent": 0.32
+          "match_percent": 16.8888
         },
         {
           "name": "_ZL13rtlCalcShadowP10rtlidata_s",
@@ -75973,7 +75973,7 @@
           "address": 3856941,
           "offset": 2966973,
           "size": 368,
-          "match_percent": 0.0
+          "match_percent": 98.239586
         },
         {
           "name": "_ZL29rtlApplyModifiersToChainLightP5rtl_s",
@@ -80978,7 +80978,7 @@
           "address": 5121664,
           "offset": 4231696,
           "size": 553,
-          "match_percent": 0.0
+          "match_percent": 40.28182
         },
         {
           "name": "_Z15Surface_DeflectP7nuvec_sS0_S0_i",
@@ -91594,7 +91594,7 @@
           "address": 2579200,
           "offset": 1689232,
           "size": 457,
-          "match_percent": 0.0
+          "match_percent": 62.7438
         },
         {
           "name": "_ZN13NuInputDevice14SetIndexByTypeEj",
@@ -94278,7 +94278,7 @@
           "address": 4418336,
           "offset": 3528368,
           "size": 373,
-          "match_percent": 0.0
+          "match_percent": 96.24
         },
         {
           "name": "_Z25NuGCutRigidForceInstancedP13NUGCUTSCENE_s",
@@ -114391,7 +114391,7 @@
           "address": 3298080,
           "offset": 2408112,
           "size": 567,
-          "match_percent": 57.619354
+          "match_percent": 57.167744
         },
         {
           "name": "_ZN15NuSoundStreamerC1Ev",
@@ -114447,7 +114447,7 @@
           "address": 3303184,
           "offset": 2413216,
           "size": 459,
-          "match_percent": 0.0
+          "match_percent": 24.942623
         },
         {
           "name": "_ZN15NuSoundStreamer14ShutdownThreadEv",
@@ -116943,7 +116943,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -117037,7 +117036,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -117131,7 +117129,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -117236,7 +117233,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -117375,7 +117371,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -117480,7 +117475,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -117585,7 +117579,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -117690,7 +117683,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -117795,7 +117787,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -117900,7 +117891,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -118206,7 +118196,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -118311,7 +118300,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -118416,7 +118404,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -118566,7 +118553,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -118682,7 +118668,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -118772,7 +118757,6 @@
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -118910,7 +118894,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -118999,7 +118982,6 @@
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -119092,7 +119074,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -119170,7 +119151,6 @@
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -119275,7 +119255,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -119380,7 +119359,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -119485,7 +119463,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -119590,7 +119567,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -119679,7 +119655,6 @@
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
@@ -119750,7 +119725,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -119855,7 +119829,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -119971,7 +119944,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -120076,7 +120048,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -120193,7 +120164,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -120298,7 +120268,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -120437,7 +120406,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -120542,7 +120510,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -120647,7 +120614,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -120752,7 +120718,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -120920,7 +120885,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -121025,7 +120989,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -121130,7 +121093,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -121582,7 +121544,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -121815,7 +121776,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -122023,7 +121983,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -122499,7 +122458,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",
@@ -122604,7 +122562,6 @@
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
-        "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/characters/motion/gameanim_modes.cpp.o",
         "legoapi/core/config/config.cpp.o",

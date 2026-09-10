@@ -198,39 +198,43 @@ GAMEANTINODE_s *GameAntinode_UpdateAntiNodeUsingData(GAMEANTINODESYS_s *system, 
                                                      u16 angle, GAMEANTINODEDATA_s *data, f32 duration, i32 disabled) {
     if (data == NULL || position == NULL)
         return node;
+
     if ((data->mode & 1) != 0) {
-        if (node != NULL)
+        if (node != NULL) {
             GameAntinode_UnregisterAntiNode(system, node);
-        return NULL;
+            node = NULL;
+        }
+    } else if (node != NULL) {
+        if (disabled != 0) {
+            GameAntinode_UnregisterAntiNode(system, node);
+            node = NULL;
+        } else {
+            node->position = data->position;
+            NuVecRotateY(&node->position, &node->position, angle);
+            NuVecAdd(&node->position, &node->position, position);
+            node->min_y = data->min_y + position->y;
+            node->max_y = position->y + data->max_y;
+            node->radius = data->radius;
+            node->extent_x = data->extent_x;
+            node->extent_z = data->extent_z;
+            node->angle = data->flags + angle;
+            node->shape = data->use_largest_extent;
+            node->remaining_time = duration;
+
+            f32 radius = node->radius;
+            if (node->shape == 1)
+                radius = node->extent_x > node->extent_z ? node->extent_x : node->extent_z;
+            else if (node->shape == 2)
+                radius = NuFsqrt(node->extent_x * node->extent_x + node->extent_z * node->extent_z);
+
+            // Unlike registration, updates use the enclosing radius only for grid coverage.
+            GameAntinode_FindGridPosition(system->world, &node->position, radius, radius, &node->grid_min_x,
+                                          &node->grid_min_z, &node->grid_max_x, &node->grid_max_z);
+        }
+    } else if (disabled == 0) {
+        node = GameAntinode_RegisterAntiNodeUsingData(system, position, angle, data, duration, 0);
     }
-    if (node == NULL) {
-        if (disabled == 0)
-            node = GameAntinode_RegisterAntiNodeUsingData(system, position, angle, data, duration, 0);
-        return node;
-    }
-    if (disabled != 0) {
-        GameAntinode_UnregisterAntiNode(system, node);
-        return NULL;
-    }
-    node->position = data->position;
-    NuVecRotateY(&node->position, &node->position, angle);
-    NuVecAdd(&node->position, &node->position, position);
-    node->min_y = data->min_y + position->y;
-    node->max_y = position->y + data->max_y;
-    node->radius = data->radius;
-    node->extent_x = data->extent_x;
-    node->extent_z = data->extent_z;
-    node->angle = data->flags + angle;
-    node->shape = data->use_largest_extent;
-    node->remaining_time = duration;
-    f32 radius = node->radius;
-    if (node->shape == 1)
-        radius = node->extent_x > node->extent_z ? node->extent_x : node->extent_z;
-    else if (node->shape == 2)
-        radius = NuFsqrt(node->extent_x * node->extent_x + node->extent_z * node->extent_z);
-    // Unlike registration, the original update uses the enclosing radius only for grid coverage.
-    GameAntinode_FindGridPosition(system->world, &node->position, radius, radius, &node->grid_min_x, &node->grid_min_z,
-                                  &node->grid_max_x, &node->grid_max_z);
+
     return node;
 }
 

@@ -15,13 +15,19 @@ struct rtl_s {
     f32 parameters[4];
     f32 parameter_54;
     u8 type;
-    u8 flags;
+    union {
+        u8 flags;
+        struct {
+            u8 disabled : 1;
+            u8 reserved_flags : 7;
+        };
+    };
     i16 pitch;
     i16 yaw;
     i16 field_5e;
     i16 field_60;
     u8 pad_62[2];
-    u32 field_64;
+    f32 field_64;
     u16 field_68;
     i16 uid;
     f32 intensity;

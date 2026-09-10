@@ -54,8 +54,9 @@ void CharPivot_Check(GameObject_s *object, NUVEC *velocity) {
                 continue;
         }
         if (pivot->point_of_interest == -1) {
-            object->apiobj.field_0x276 = object->apiobj.movement_facing_angle = object->apiobj.facing_angle =
-                object->previous_movement_angle;
+            object->apiobj.field_0x276 = object->previous_movement_angle;
+            object->apiobj.movement_facing_angle = object->previous_movement_angle;
+            object->apiobj.facing_angle = object->previous_movement_angle;
         } else if (object->apiobj.character_model->points_of_interest[pivot->point_of_interest] != NULL) {
             i32 rotation = -RotDiff(object->previous_movement_angle, object->apiobj.field_0x276);
             NUVEC point = *NUMTX_GET_ROW_VEC(&object->joint_matrices[pivot->point_of_interest], 3);

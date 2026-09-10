@@ -81,15 +81,15 @@ extern "C" {
     }
 
     i32 DebAlloc(void) {
-        if (maxdebkeys <= freedebkeyptr) {
+        if (freedebkeyptr >= maxdebkeys) {
             return -1;
         }
 
-        const i16 slot = freedebkeys[freedebkeyptr++];
+        const i32 slot = freedebkeys[freedebkeyptr++];
         debkeydatatype_s *key = debkeydata + slot;
-        // DebAlloc clears the particle-chunk pointer area with an alignment
-        // aware sequence in the original.  It is exactly 0x80 bytes.
-        memset(key->particle_chunks, 0, sizeof(key->particle_chunks));
+        for (i32 i = 0; i < 32; ++i) {
+            key->particle_chunks[i] = NULL;
+        }
         key->allocated_chunk_count = 0;
         key->field_18a = 0;
         key->particle_count = 0;

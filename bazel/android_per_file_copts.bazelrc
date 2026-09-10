@@ -99,6 +99,8 @@ build:target --per_file_copt=^src/legoapi/characters/motion/chris\.cpp$@-O2
 # The original keeps ResetSpaceLevel's full local symbol and passes its two
 # pointer arguments in eax/edx; disabling IPA-SRA reproduces that exact shape.
 build:target --per_file_copt=^src/legoapi/characters/motion/chris\.cpp$@-fno-ipa-sra
+# Both pivot routines use optimized loop and vector lowering in the target.
+build:target --per_file_copt=^src/legoapi/characters/motion/charpivot\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/cutscenes/cutscene\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/characters/core/playeritems\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/characters/motion/charshadows\.cpp$@-O3
@@ -187,7 +189,9 @@ build:target --per_file_copt=^src/legoapi/gizmos/traps/gizturrets\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/transport/grapples\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/fx/guidelines\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/object/hatmachine\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/gizmos/transport/ledges\.cpp$@-O3
+# Ledge progress, loading, and attachment code use the target's compact O2
+# lowering; this also preserves the unit's already-exact registration leaves.
+build:target --per_file_copt=^src/legoapi/gizmos/transport/ledges\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/gizmos/object/lever\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/trigger/minicut\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/object/newblowup\.cpp$@-O3

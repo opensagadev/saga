@@ -240,9 +240,8 @@ void NuSoundDecoder::RequestBuffer(bool loop, NuSoundWeakPtr<NuSoundBufferCallba
     }
 
     NuSoundBuffer &buffer = this->buffers[this->decode_pos % this->ring_count];
-    NuSoundWeakPtr<NuSoundBufferCallback> request;
-    request.Set((NuSoundBufferCallback *)callback.obj);
-    NuSoundDecoder::sDecodeThread->RequestDecode(*this, buffer, request, (loop & 1) != 0);
+    NuSoundDecoder::sDecodeThread->RequestDecode(
+        *this, buffer, NuSoundWeakPtr<NuSoundBufferCallback>((NuSoundBufferCallback *)callback.obj), (loop & 1) != 0);
     this->decode_pos++;
 
     this->consumed_pos++;

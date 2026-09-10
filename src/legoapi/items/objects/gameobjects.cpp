@@ -2067,12 +2067,36 @@ extern "C" {
 }
 extern i32 TimingBarSet;
 extern i32 SHADOWCALLS;
+extern u32 LAYER_HOVERIGNORE;
 
 f32 GameShadow(GameObject_s *object, nuvec_s *position, f32 probe_height, i32 terrain_mask) {
-    i32 object_platform_id = -1;
-    if (object != NULL && object->field_0x107c != -1) {
-        object_platform_id = object->field_0x107c;
-        PlatOnOff(object_platform_id, 0);
+    i32 disabled_platforms[16];
+    i32 disabled_platform_count = 0;
+
+    if (object != NULL) {
+        WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+        if (object->field_0x107c != -1) {
+            disabled_platforms[disabled_platform_count++] = object->field_0x107c;
+        }
+
+        if (world != NULL && world->char_platform_sys != NULL && VehicleArea == 0 &&
+            static_cast<i8>(object->apiobj.field_0x1f8) >= 0) {
+            CHARPLATFORMSYS_s *system = world->char_platform_sys;
+            for (i32 i = 0; i < system->platform_count; ++i) {
+                if (system->platforms[i].object != NULL) {
+                    disabled_platforms[disabled_platform_count++] = system->platforms[i].object->field_0x107c;
+                }
+            }
+        }
+
+        for (i32 i = 0; i < disabled_platform_count; ++i) {
+            PlatOnOff(disabled_platforms[i], 0);
+        }
+
+        if (LAYER_HOVERIGNORE != 0xffffffff &&
+            static_cast<GAMECHARACTERDATA_s *>(object->apiobj.character_data->field11_0x24)->field_0x28 == 0.0f) {
+            terrain_mask &= ~LAYER_HOVERIGNORE;
+        }
     }
 
     if (TimingBarSet == 2) {
@@ -2084,8 +2108,11 @@ f32 GameShadow(GameObject_s *object, nuvec_s *position, f32 probe_height, i32 te
         TBCLOSEFN("Ter", 2);
     }
 
-    if (object_platform_id != -1) {
-        PlatOnOff(object_platform_id, 1);
+    if (object != NULL && object->field_0x107c != -1) {
+        PlatOnOff(object->field_0x107c, 1);
+    }
+    for (i32 i = 0; i < disabled_platform_count; ++i) {
+        PlatOnOff(disabled_platforms[i], 1);
     }
     return shadow_height;
 }
@@ -4990,20 +5017,23 @@ void ThingManager::DisplayThings(ThingRenderData *data) {
     if (this->count <= 0) {
         return;
     }
-    for (i32 i = 0; i < this->count; i++) {
+    i32 i = 0;
+    do {
         BaseThing *thing = this->things[i];
         if (thing == NULL || (thing->flags & THING_FLAG_SKIP_DISPLAY)) {
-            continue;
+        } else {
+            if (thing->profiling_0xc != NULL) {
+                _NuTimeBarSlotBegin(this->timebar, 3, name);
+                thing = this->things[i];
+            }
+            thing->Display(data);
+            thing = this->things[i];
+            if (thing->profiling_0xc != NULL) {
+                _NuTimeBarSlotEnd(this->timebar, 3);
+            }
         }
-        if (thing->profiling_0xc != NULL) {
-            _NuTimeBarSlotBegin(this->timebar, 3, name);
-        }
-        thing->Display(data);
-        thing = this->things[i];
-        if (thing->profiling_0xc != NULL) {
-            _NuTimeBarSlotEnd(this->timebar, 3);
-        }
-    }
+        ++i;
+    } while (i < this->count);
 }
 
 void ThingManager::EffectsThings(ThingRenderData *) {
@@ -5117,20 +5147,23 @@ void ThingManager::RenderThings(ThingRenderData *data) {
     if (this->count <= 0) {
         return;
     }
-    for (i32 i = 0; i < this->count; i++) {
+    i32 i = 0;
+    do {
         BaseThing *thing = this->things[i];
         if (thing == NULL || (thing->flags & THING_FLAG_SKIP_RENDER)) {
-            continue;
+        } else {
+            if (thing->profiling_0xc != NULL) {
+                _NuTimeBarSlotBegin(this->timebar, 1, name);
+                thing = this->things[i];
+            }
+            thing->Render(data);
+            thing = this->things[i];
+            if (thing->profiling_0xc != NULL) {
+                _NuTimeBarSlotEnd(this->timebar, 1);
+            }
         }
-        if (thing->profiling_0xc != NULL) {
-            _NuTimeBarSlotBegin(this->timebar, 1, name);
-        }
-        thing->Render(data);
-        thing = this->things[i];
-        if (thing->profiling_0xc != NULL) {
-            _NuTimeBarSlotEnd(this->timebar, 1);
-        }
-    }
+        ++i;
+    } while (i < this->count);
 }
 
 void ThingManager::ResetThings(ThingResetData *data) {

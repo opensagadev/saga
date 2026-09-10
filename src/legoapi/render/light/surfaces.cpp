@@ -33,6 +33,7 @@ extern TerrainQuery_s *TerI;
 extern NUVEC ShadNorm;
 
 f32 GameShadow(GameObject_s *object, NUVEC *position, f32 probe_height, i32 terrain_mask);
+f32 FindReflectionNoPlatforms(NUVEC *position);
 i32 UnderWater(GameObject_s *object);
 void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
 extern "C" i32 NewShadowOnPlatform();
@@ -212,12 +213,13 @@ void InitSurfaceInfo(GameObject_s *object) {
         object->surface_normal = v010;
     } else {
         GetSurfaceInfo(object, 1, shadow_height);
-        object->field_0xd6c = (TerSurface[api.field_0x281].flags & 8) != 0 ? 1.0f : 0.0f;
+        object->field_0xd6c =
+            (TerSurface[static_cast<i8>(api.field_0x281)].flags & 8) != 0 ? 1.0f : 0.0f;
         FindAnglesZX(&object->surface_normal, NULL, NULL);
-        object->field_0x105e = static_cast<u16>(temp_xrot);
         object->field_0x1062 = static_cast<u16>(temp_xrot);
-        object->field_0x1060 = static_cast<u16>(temp_zrot);
+        object->field_0x105e = static_cast<u16>(temp_xrot);
         object->field_0x1064 = static_cast<u16>(temp_zrot);
+        object->field_0x1060 = static_cast<u16>(temp_zrot);
     }
 
     api.is_underwater = static_cast<u8>(UnderWater(object));
@@ -226,7 +228,22 @@ void InitSurfaceInfo(GameObject_s *object) {
     api.field_0x220 = 2000000.0f;
     api.field_0x27f = 0xff;
     api.field_0x280 = 0xff;
-    GetSurfaceInfo(object, 1, shadow_height);
+    GetSurfaceInfo(object, 1, api.field_0x218);
+
+    const GAMECHARACTERDATA_s *character =
+        static_cast<GAMECHARACTERDATA_s *>(api.character_data->field11_0x24);
+    if ((character->flags_090 & 0x8000) == 0 && object->field_0x1020 == 2000000.0f &&
+        object->field_0x1078 != -1) {
+        const f32 reflection_height = FindReflectionNoPlatforms(&api.position);
+        if (reflection_height != 2000000.0f) {
+            object->field_0x1020 = reflection_height;
+            object->field_0x1087 = 2;
+        }
+    }
+
+    if (SurfaceInfo_ExtraReflectFn != NULL) {
+        SurfaceInfo_ExtraReflectFn(object);
+    }
 }
 
 enum SurfaceDeflectMode : i32 {

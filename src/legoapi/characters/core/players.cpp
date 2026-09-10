@@ -770,7 +770,30 @@ i32 PlayerItem_GotAmmo(PLAYERITEM_s *item) {
     return 1;
 }
 
-i32 Players_AveragePos(nuvec_s *, SOCKPOSITION_s *) {
+i32 Players_AveragePos(nuvec_s *position, SOCKPOSITION_s *socket_position) {
+    NUVEC total = {0.0f, 0.0f, 0.0f};
+    f32 player_count = 0.0f;
+
+    if (Player[0] != NULL && static_cast<i8>(Player[0]->apiobj.field_0x1f8) < 0) {
+        NuVecAdd(&total, &total, &Player[0]->apiobj.position);
+        player_count += 1.0f;
+    }
+    if (Player[1] != NULL && static_cast<i8>(Player[1]->apiobj.field_0x1f8) < 0) {
+        NuVecAdd(&total, &total, &Player[1]->apiobj.position);
+        player_count += 1.0f;
+    }
+
+    if (player_count > 0.0f) {
+        NuVecScale(position, &total, 1.0f / player_count);
+        if (socket_position != NULL) {
+            ComplexSockPosition(WORLD->sock_sys, position, -1, -1, socket_position);
+        }
+        return 1;
+    }
+
+    if (socket_position != NULL) {
+        socket_position->location.sock = -1;
+    }
     return 0;
 }
 

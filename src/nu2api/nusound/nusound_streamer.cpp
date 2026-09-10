@@ -481,10 +481,8 @@ void NuSoundStreamingSample::RequestBuffer(bool loop, NuSoundWeakPtr<NuSoundBuff
         // thread; the voice gets it once the fill completes.
         NuSoundBuffer *buffer = (&this->sound_buffer1)[this->some_count % 2];
 
-        NuSoundWeakPtr<NuSoundBufferCallback> local;
-        local.Set((NuSoundBufferCallback *)callback.obj);
-
-        this->streamer->RequestFill(this, buffer, loop, local);
+        this->streamer->RequestFill(this, buffer, loop,
+                                    NuSoundWeakPtr<NuSoundBufferCallback>((NuSoundBufferCallback *)callback.obj));
         this->some_count++;
     }
 

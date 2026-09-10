@@ -43,11 +43,11 @@ void NuInputDevice::ProcessTouchData() {
         return;
 
     u32 count = touch_data.touch_count;
-    u32 previous_count = unknown_touch_data.touch_count;
     for (u32 i = 0; i < count; ++i) {
         touch_data.touch_events[i].unknown_01 = 0;
         touch_data.touch_events[i].unknown_02 = 0;
     }
+    u32 previous_count = unknown_touch_data.touch_count;
     for (u32 i = 0; i < count; ++i) {
         u32 previous = 0xff;
         for (u32 j = 0; j < previous_count; ++j) {

@@ -1202,27 +1202,27 @@ static void CutScene_FindCharacters(NUGCUTSCENE_s *cutscene) {
     for (i32 i = 0; i < system->character_count; ++i) {
         NUGCUTCHAR_s *character = &system->characters[i];
         character->flags |= 2;
-        character->character_model = NULL;
 
-        for (i32 j = 0; j < apicharsys->loaded_model_count; ++j) {
-            APICHARACTERMODEL *model = &apicharsys->models[j];
-            i32 character_id = model->model_id;
-            if (NuStrICmp(character->name, CDataList[character_id].file) != 0) {
-                continue;
+        i32 model_index;
+        for (model_index = 0; model_index < apicharsys->loaded_model_count; ++model_index) {
+            i32 character_id = apicharsys->models[model_index].model_id;
+            if (NuStrICmp(character->name, CDataList[character_id].file) == 0) {
+                character->character_model = &apicharsys->models[model_index];
+                if (character_id != -1) {
+                    CS_cutsys->character_bits[character_id / 32] |= 1U << (character_id & 0x1f);
+                }
+                break;
             }
-
-            character->character_model = model;
-            if (character_id != -1) {
-                CS_cutsys->character_bits[character_id >> 5] |= 1U << (character_id & 0x1f);
-            }
-            break;
+        }
+        if (model_index == apicharsys->loaded_model_count) {
+            character->character_model = NULL;
         }
 
-        if (character->has_locator == 0 || reinterpret_cast<usize>(character->locator) > 0xfe) {
-            character->locator_index = 0xff;
-        } else {
+        if (character->has_locator != 0 && reinterpret_cast<isize>(character->locator) <= 0xfe) {
             character->locator_index = static_cast<u8>(reinterpret_cast<usize>(character->locator));
             character->locator = &cutscene->locator_system->locators[character->locator_index];
+        } else {
+            character->locator_index = 0xff;
         }
     }
 }
