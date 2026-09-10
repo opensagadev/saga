@@ -17,11 +17,10 @@ struct SHOPINPUT;
 
 extern i32 DoubleScore;
 extern i32 Paused;
-extern "C" f32 MusicVolume __asm__("_ZL11MusicVolume") __attribute__((visibility("hidden")));
-extern GAMEAUDIO *GameAudio __asm__("_ZL9GameAudio") __attribute__((visibility("hidden")));
 i32 (*GameAudio_ActionMusicFn)(void) = NULL;
 static f32 sticky_attack_timeout[2] = {1.0f, 6.0f};
 static i32 CurrentMusicPair_Quiet = -1;
+static i32 last_currentmusicpair_quiet = -1;
 static i32 sticky_attack;
 static f32 sticky_attack_time;
 static i32 MusicPlrsUnderAttack;
@@ -77,11 +76,7 @@ void MusicClearAll() {
     MusicPlrsHoldAttack = 0;
     CurrentMusicPair_Quiet = -1;
 }
-void GameAudio_PlaySfxAndSetVolume(i32 sfx, nuvec_s *position, f32 volume) {
-    if (static_cast<u32>(sfx) < 0x55) {
-        PlaySfxByIdAndSetVolume(GameAudio->sfx_ids[sfx], position, volume);
-    }
-}
+
 void GameAudio_SetActionMusicTimes(f32 initial_delay, f32 hold_time) {
     sticky_attack_timeout[0] = initial_delay;
     sticky_attack_timeout[1] = hold_time;
@@ -294,63 +289,6 @@ extern "C" {
         Music.seek_offset = 0.0f;
     }
 
-    void MusicSeekOffset(i32 track, f32 seek_offset) {
-        const i16 transition_frames = Music.transition_frames;
-        const i16 primary_stream = Music.primary_stream;
-        if (seek_offset < 0.0f) {
-            seek_offset = Music.seek_offset;
-        }
-        if (track < 0 || track >= SFX_MUSIC_COUNT) {
-            return;
-        }
-
-        if (static_cast<u16>(Music.state - MUSIC_PLAYBACK_DUAL_STREAM) < 3) {
-            if (Music.current_track == track && !Music.pause_requested) {
-                return;
-            }
-            const i32 stream = Music.primary_stream;
-            Music.requested_track = -1;
-            Music.state = MUSIC_PLAYBACK_DUAL_STREAM;
-            Music.current_track = static_cast<i16>(track);
-            Music.queued_track = static_cast<i16>(track);
-            reinterpret_cast<u8 *>(&Music)[stream + 0x12] = 0;
-            if (transition_frames < 64) {
-                Music.pause_requested = true;
-            } else {
-                Music.pause_requested = false;
-                const i32 volume = static_cast<i32>(static_cast<f32>(g_music[track].index) * MusicVolume);
-                if (NOSOUND == 0 && NOMUSIC == 0) {
-                    NuSound3StopStereoStream(stream);
-                    NuSound3PlayStereoV(NUSOUNDPLAYTOK_STEREOSTREAM, stream, NUSOUNDPLAYTOK_SAMPLE, track,
-                                        NUSOUNDPLAYTOK_VOL, volume, NUSOUNDPLAYTOK_STARTOFFSET,
-                                        static_cast<f64>(seek_offset), NUSOUNDPLAYTOK_ONESHOT, NUSOUNDPLAYTOK_END);
-                    Music.secondary_stream = primary_stream;
-                }
-                Music.transition_frames = 0;
-                Music.seek_offset = 0.0f;
-            }
-            return;
-        }
-
-        const i32 stream = Music.primary_stream;
-        Music.pause_requested = false;
-        reinterpret_cast<u8 *>(&Music)[stream + 0x12] = 0;
-        Music.state = MUSIC_PLAYBACK_ACTIVE;
-        Music.transition_frames = 0;
-        Music.requested_track = static_cast<i16>(track);
-        Music.current_track = static_cast<i16>(track);
-        Music.queued_track = static_cast<i16>(track);
-        const i32 volume = static_cast<i32>(static_cast<f32>(g_music[track].index) * MusicVolume);
-        if (NOSOUND == 0 && NOMUSIC == 0) {
-            NuSound3StopStereoStream(stream);
-            NuSound3PlayStereoV(NUSOUNDPLAYTOK_STEREOSTREAM, stream, NUSOUNDPLAYTOK_SAMPLE, track, NUSOUNDPLAYTOK_VOL,
-                                volume, NUSOUNDPLAYTOK_STARTOFFSET, static_cast<f64>(seek_offset),
-                                NUSOUNDPLAYTOK_ONESHOT, NUSOUNDPLAYTOK_END);
-            Music.transition_frames = 0;
-            Music.secondary_stream = primary_stream;
-        }
-    }
-
     i32 MusicSeeking(void) {
         if (fake_seeking != 0 || Music.pause_requested) {
             return 1;
@@ -394,4 +332,68 @@ void SetSoundFadeDist(WORLDINFO_s *world, OPTIONSSAVE_s *options) {
     }
     GameSetSoundVolume(options);
     GameSetMusicVolume(options);
+}
+
+i32 GamePlayMusic(LEVELDATA_s *level, i32 check, OPTIONSSAVE_s *options) {
+    (void)options;
+    i32 other = MusicOther;
+    last_currentmusicpair_quiet = CurrentMusicPair_Quiet;
+    MusicOther = 0;
+    if (NOSOUND != 0) {
+        last_currentmusicpair_quiet = CurrentMusicPair_Quiet;
+        MusicOther = 0;
+        return NOSOUND;
+    }
+    if (NOMUSIC != 0) {
+        last_currentmusicpair_quiet = CurrentMusicPair_Quiet;
+        MusicOther = 0;
+        return NOMUSIC;
+    }
+
+    i32 music_other = 0;
+    if (CheckMusicOtherFn != NULL) {
+        music_other = CheckMusicOtherFn();
+    }
+
+    if (check == 0) {
+        sticky_attack_time = 0;
+        sticky_attack = PlayersUnderAttack;
+    } else if (music_other == other) {
+        MusicOther = music_other;
+        return music_other;
+    }
+
+    MusicOther = music_other;
+    // music_tracks is [class][pair]: the quiet slot of the selected pair,
+    // plus the action/ambient slots of the MusicOther pair.
+    music_man.SelectTrackByHandle(TRACK_CLASS_QUIET, level->music_tracks[0][music_other]);
+    music_man.SelectTrackByHandle(TRACK_CLASS_ACTION, level->music_tracks[1][MusicOther]);
+    music_man.SelectTrackByHandle(TRACK_CLASS_NOMUSIC, level->music_tracks[2][MusicOther]);
+
+    if (SuperOptions.music_enabled == 0) {
+        return music_man.PlayTrack(TRACK_CLASS_NOMUSIC);
+    }
+
+    // Attack mode: prefer the pair matching the attack state.
+    if (sticky_attack == 0) {
+        i32 handle = music_man.GetTrackHandle(TRACK_CLASS_QUIET, NULL);
+        if (handle != -1) {
+            return music_man.PlayTrack(TRACK_CLASS_QUIET);
+        }
+        handle = music_man.GetTrackHandle(TRACK_CLASS_ACTION, NULL);
+        if (handle == -1) {
+            return music_man.PlayTrack(TRACK_CLASS_NOMUSIC);
+        }
+        return music_man.PlayTrack(TRACK_CLASS_ACTION);
+    } else {
+        i32 handle = music_man.GetTrackHandle(TRACK_CLASS_ACTION, NULL);
+        if (handle == -1) {
+            handle = music_man.GetTrackHandle(TRACK_CLASS_QUIET, NULL);
+            if (handle != -1) {
+                return music_man.PlayTrack(TRACK_CLASS_QUIET);
+            }
+            return music_man.PlayTrack(TRACK_CLASS_NOMUSIC);
+        }
+        return music_man.PlayTrack(TRACK_CLASS_ACTION);
+    }
 }

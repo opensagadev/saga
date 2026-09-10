@@ -389,12 +389,6 @@ extern MAIN_FRAME_COUNTERS_s MainFrameCounters;
 extern i32 GAMERAND;
 extern i32 come_from_an_editor;
 
-extern __attribute__((visibility("hidden"))) GameObject_s *ForceBackObj asm("_ZL12ForceBackObj");
-extern __attribute__((visibility("hidden"))) NUVEC *ForceBackPos asm("_ZL12ForceBackPos");
-extern __attribute__((visibility("hidden"))) i32 ForceBackType asm("_ZL13ForceBackType");
-extern __attribute__((visibility("hidden"))) f32 ForceBackRadius asm("_ZL15ForceBackRadius");
-extern __attribute__((visibility("hidden"))) f32 ForceBackRadius2 asm("_ZL16ForceBackRadius2");
-
 // ------------------------------------------------------------------------
 // Super buffer / memory arena
 // ------------------------------------------------------------------------

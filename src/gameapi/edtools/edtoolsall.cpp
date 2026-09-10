@@ -1,10 +1,43 @@
 #include "gameapi_edtools_types.h"
 #include "gameapi/edtools/edcam.h"
 #include "gameapi/edtools/edstubs.h"
+#include "gameapi/edtools/edgra.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/nufile/nufile.h"
+#include <stdio.h>
+#include <string.h>
+#include "nu2api/numath/nurand.h"
+
+extern "C" void NuPs2VideoScreenDump(char *, i32, f32, f32, i32, i32, i32);
 
 extern "C" {
+    extern edgra_clump_s *GrassClumps;
+    extern i32 EDGRA_MAX_UNITS_PER_INDIVIDUAL_CLUMP;
+    i32 edgra_nearest;
+    i32 edgra_rotz, edgra_roty;
+    NUVEC edgra_cam_pos;
+    i32 edgra_nearest_instance;
+    f32 edgra_size;
+    i32 edgra_mode = 1;
+    i32 edgra_clump_size;
+    extern i32 edgra_units_used;
+    extern void *edgra_free_vecbuffer;
+    extern i32 EDGRA_MAX_CLUMPS, EDGRA_MAX_INDIVIDUAL_CLUMPS;
+    extern i32 edgra_clumps_used, edgra_ind_clumps_used;
+    extern i32 *IndGrassClumpsUsed;
+    extern i32 edgra_page_used[8];
+    extern NUGSCN *edgra_page_scene[8];
+    extern void *edgra_page_terrain[8];
+    extern NUMTX *edgra_page_matrix_stack[8];
+    extern NUGSCN *edbits_base_scene;
+    void *edbits_base_terrain;
+    NUMTX *edgra_mtxbuffer;
+    i32 edgra_copy_source = -1;
+    i32 edgra_last_clump_in_buffer = -1;
+    i32 edgra_pageid, edgra_instance_type;
+    f32 edgra_global_fadein = 15.0f, edgra_global_fadeout = 25.0f;
+    void edgraInitAllClumps(void);
     extern edpp_particle_s edpp_ptls[512];
     extern i32 edpp_nearest;
     extern NUVEC edpp_cam_pos;
@@ -108,7 +141,18 @@ void EdDrawPolyArrow(VuVec const &, VuVec const &, i32, i32, float, float, float
 void edbriDrawCursor() {
 }
 
-void edgraClumpPlace(i32, nuvec_s *) {
+void edgraClumpPlace(i32 index, NUVEC *position) {
+    edgra_clump_s *clump = &GrassClumps[index];
+    clump->position = *position;
+    clump->size = edgra_size;
+    clump->rotation_z = edgra_rotz;
+    clump->rotation_y = edgra_roty;
+    if (edgra_mode != 3) {
+        if (edgra_units_used + edgra_clump_size - clump->element_count <= 0x3000)
+            clump->element_count = edgra_clump_size;
+    }
+    edgra_free_vecbuffer = static_cast<NUVEC *>(clump->vector_buffer) + clump->element_count;
+    edgraInitAllClumps();
 }
 
 void edgraDrawCursor() {
@@ -123,9 +167,6 @@ void edpartScaleType(i32, float) {
 void edppSaveEffects(char *, char) {
 }
 
-void edrtlAddBurnout(nuvec_s *) {
-}
-
 void EdDrawLineSphere(VuVec const &, float, float, i32) {
 }
 
@@ -135,22 +176,84 @@ void EdDrawPolySector(VuVec const &, float, i32, i32, i32, i32, i32) {
 void edanimDrawCursor() {
 }
 
-void edbriBridgePlace(i32, nuvec_s *) {
-}
-
-void edgraClumpCreate(nuvec_s *) {
-}
-
-void edgraClumpReseed(i32) {
+i32 edgraClumpCreate(NUVEC *position) {
+    if (edgra_clumps_used == EDGRA_MAX_CLUMPS)
+        return -1;
+    if (edgra_copy_source == -1 && edgra_mode == 3) {
+        if (edgra_units_used == 0x3000 || edgra_ind_clumps_used == EDGRA_MAX_INDIVIDUAL_CLUMPS)
+            return -1;
+    } else if (edgra_units_used + edgra_clump_size > 0x3000)
+        return -1;
+    i32 index = 0;
+    while (GrassClumps[index].element_count != 0)
+        ++index;
+    edgra_clump_s *clump = &GrassClumps[index];
+    if (edgra_copy_source != -1) {
+        clump->field_18 = GrassClumps[edgra_copy_source].field_18;
+        clump->special_index = GrassClumps[edgra_copy_source].special_index;
+        clump->field_20 = GrassClumps[edgra_copy_source].field_20;
+        clump->element_count = edgra_clump_size;
+        clump->flags = GrassClumps[edgra_copy_source].flags;
+        clump->page = edgra_pageid;
+        clump->seed = NuRand(NULL);
+        GrassClumps[index].unknown_25 = GrassClumps[edgra_copy_source].unknown_25;
+        GrassClumps[index].field_2c = GrassClumps[edgra_copy_source].field_2c;
+        GrassClumps[index].unknown_26 = GrassClumps[edgra_copy_source].unknown_26;
+        GrassClumps[index].field_30 = GrassClumps[edgra_copy_source].field_30;
+        GrassClumps[index].kind = GrassClumps[edgra_copy_source].kind;
+        GrassClumps[index].near_distance = GrassClumps[edgra_copy_source].near_distance;
+        GrassClumps[index].field_42 = GrassClumps[edgra_copy_source].field_42;
+        GrassClumps[index].far_distance = GrassClumps[edgra_copy_source].far_distance;
+        GrassClumps[index].field_44 = GrassClumps[edgra_copy_source].field_44;
+        GrassClumps[index].field_43 = GrassClumps[edgra_copy_source].field_43;
+    } else {
+        clump->special_index = edgra_instance_type;
+        clump->element_count = edgra_mode == 3 ? 1 : edgra_clump_size;
+        clump->field_18 = 0.2f;
+        clump->field_20 = 1.0f;
+        clump->flags = 1;
+        clump->page = edgra_pageid;
+        clump->seed = NuRand(NULL);
+        GrassClumps[index].unknown_25 = 1;
+        GrassClumps[index].unknown_26 = 1;
+        GrassClumps[index].field_2c = 0.0f;
+        GrassClumps[index].field_30 = 1.0f;
+        GrassClumps[index].kind = edgra_mode;
+        GrassClumps[index].near_distance = edgra_global_fadein;
+        GrassClumps[index].far_distance = edgra_global_fadeout;
+        GrassClumps[index].field_42 = 1;
+        GrassClumps[index].field_44 = 0.0f;
+        GrassClumps[index].field_43 = 1;
+    }
+    if (GrassClumps[index].kind == 3) {
+        i32 individual = 0;
+        while (IndGrassClumpsUsed[individual])
+            ++individual;
+        GrassClumps[index].individual_index = individual;
+        IndGrassClumpsUsed[individual] = 1;
+        GetIndGrassClump(individual, 0)->position.x = 0.0f;
+        GetIndGrassClump(individual, 0)->position.y = 0.0f;
+        GetIndGrassClump(individual, 0)->position.z = 0.0f;
+        GetIndGrassClump(individual, 0)->field_0c = 1.0f;
+        GetIndGrassClump(individual, 0)->field_10 = edgra_rotz;
+        GetIndGrassClump(individual, 0)->field_12 = edgra_roty;
+        ++edgra_ind_clumps_used;
+    } else
+        GrassClumps[index].individual_index = -1;
+    ++edgra_clumps_used;
+    if (!edgra_page_used[edgra_pageid]) {
+        edgra_page_used[edgra_pageid] = 1;
+        edgra_page_scene[edgra_pageid] = edbits_base_scene;
+        edgra_page_terrain[edgra_pageid] = edbits_base_terrain;
+        edgra_page_matrix_stack[edgra_pageid] = edgra_mtxbuffer;
+    }
+    GrassClumps[index].vector_buffer = edgra_free_vecbuffer;
+    edgra_last_clump_in_buffer = index;
+    edgraClumpPlace(index, position);
+    return index;
 }
 
 void edpartDrawCursor() {
-}
-
-void edrtlBurnoutSave(char *, burnset_s *) {
-}
-
-void edrtlInitBurnset(burnset_s *) {
 }
 
 void EdDrawLineCircleX(VuVec const &, float, i32, i32) {
@@ -168,21 +271,12 @@ void EdDrawLineSegment(VuVec const &, VuVec const &, i32) {
 void edanimParamCreate(i32) {
 }
 
-void edbriBridgeCreate(nuvec_s *) {
-}
-
-void edbriBridgeUpdate(i32, nugscn_s *) {
-}
-
 void edcamSetContoller(i32 invert_pitch) {
     edcam_s *camera = edcamGetEdCam();
     camera->freedoms &= ~EDCAM_FREEDOM_INVERT_PAD_PITCH;
     if (invert_pitch != 0) {
         camera->freedoms |= EDCAM_FREEDOM_INVERT_PAD_PITCH;
     }
-}
-
-void edgraClumpDestroy(i32) {
 }
 
 void edpartSaveEffects(char *, char) {
@@ -194,20 +288,6 @@ void edppPtlChangeType(i32, i32) {
 void edppPtlCreateCopy(nuvec_s *, i32) {
 }
 
-void edrtlPlaceBurnout(i32, nuvec_s *) {
-}
-
-void edrtlResetBurnset(burnset_s *burnset) {
-    if (burnset == NULL) {
-        return;
-    }
-    for (i32 i = 0; i < 32; ++i) {
-        burnset->burnouts[i].active = 0;
-    }
-    burnset->active_count = 0;
-    burnset->selected_index = -1;
-}
-
 void EdDrawPolyCylinder(VuMtx const &, float, float, float, i32, i32, i32, i32) {
 }
 
@@ -217,22 +297,37 @@ void EdDrawPolyCylinder(VuVec const &, VuVec const &, i32, i32, i32, float, floa
 void edanimParamDestroy(i32) {
 }
 
-void edbitsDoSingleDump(i32) {
-}
-
-void edbriBridgeDestroy(i32) {
+void edbitsDoSingleDump(i32 face) {
+    char filename[32];
+    i32 index;
+    for (index = 0; index < 1000; ++index) {
+        sprintf(filename, "pictures\\cub%03d_%d.bmp", index, face);
+        if (NuFileSize(filename) <= 0)
+            break;
+        if (index == 999)
+            break;
+    }
+    sprintf(filename, "pictures\\cub%03d_", index);
+    NuPs2VideoScreenDump(filename, 1, 1.0f, 1.0f, face, 0, 0);
 }
 
 void edgraCalculatePage(char, i32) {
 }
 
-void edgraInstancePlace(i32, nuvec_s *) {
+void edgraInstancePlace(i32 index, NUVEC *position) {
+    GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, index)->position.x =
+        position->x - GrassClumps[edgra_nearest].position.x;
+    GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, index)->position.y =
+        position->y - GrassClumps[edgra_nearest].position.y;
+    GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, index)->position.z =
+        position->z - GrassClumps[edgra_nearest].position.z;
+    GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, index)->field_0c = 1.0f;
+    GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, index)->field_10 = edgra_rotz;
+    GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, index)->field_12 = edgra_roty;
+    edgraInitAllClumps();
 }
 
 void edpartLookupObject(char *) {
-}
-
-void edrtlRemoveBurnout(i32) {
 }
 
 void edSpline_FindAllBeg(nugscn_s *, char *, nugspline_s **, i32) {
@@ -253,7 +348,11 @@ void edanimParticlePlace(i32, nuvec_s *) {
 void edanimStartAllPages() {
 }
 
-void edgraInstanceCreate(nuvec_s *) {
+void edgraInstanceCreate(NUVEC *position) {
+    if (edgra_nearest != -1 && GrassClumps[edgra_nearest].element_count != EDGRA_MAX_UNITS_PER_INDIVIDUAL_CLUMP) {
+        i32 index = GrassClumps[edgra_nearest].element_count++;
+        edgraInstancePlace(index, position);
+    }
 }
 
 void edpartPtlChangeType(i32, i32) {
@@ -262,13 +361,26 @@ void edpartPtlChangeType(i32, i32) {
 void edppDestroyAllPages() {
 }
 
-void edrtlBurnoutLoadSet(char *, burnset_s *) {
-}
-
 void edanimParticleCreate(nuvec_s *) {
 }
 
-void edgraInstanceDestroy(i32) {
+void edgraInstanceDestroy(i32 index) {
+    if (edgra_nearest != -1 && GrassClumps[edgra_nearest].element_count != 1) {
+        if (index != GrassClumps[edgra_nearest].element_count - 1) {
+            for (i32 i = index; i < GrassClumps[edgra_nearest].element_count - 1; ++i) {
+                GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, i)->position =
+                    GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, i + 1)->position;
+                GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, i)->field_0c =
+                    GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, i + 1)->field_0c;
+                GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, i)->field_10 =
+                    GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, i + 1)->field_10;
+                GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, i)->field_12 =
+                    GetIndGrassClump(GrassClumps[edgra_nearest].individual_index, i + 1)->field_12;
+            }
+        }
+        --GrassClumps[edgra_nearest].element_count;
+        edgraInitAllClumps();
+    }
 }
 
 void edppDetermineNearest(float max_distance_squared) {
@@ -305,7 +417,24 @@ void edppMultipleCopyCopy() {
 void edbriDetermineNearest(float) {
 }
 
-void edgraSortVectorBuffer(i32) {
+void edgraSortVectorBuffer(i32 index) {
+    NUVEC temporary[256];
+    if (index != -1 && index != edgra_last_clump_in_buffer && GrassClumps[index].vector_buffer) {
+        u8 *buffer = static_cast<u8 *>(GrassClumps[index].vector_buffer);
+        usize bytes = GrassClumps[index].element_count * sizeof(NUVEC);
+        memcpy(temporary, buffer, bytes);
+        memmove(buffer, buffer + bytes, static_cast<u8 *>(edgra_free_vecbuffer) - (buffer + bytes));
+        memcpy(static_cast<u8 *>(edgra_free_vecbuffer) - bytes, temporary, bytes);
+        edgra_last_clump_in_buffer = index;
+        for (i32 i = 0; i < EDGRA_MAX_CLUMPS; ++i) {
+            if (i != index && GrassClumps[i].element_count &&
+                GrassClumps[i].vector_buffer > GrassClumps[index].vector_buffer) {
+                GrassClumps[i].vector_buffer = static_cast<u8 *>(GrassClumps[i].vector_buffer) - bytes;
+            }
+        }
+        GrassClumps[index].vector_buffer = static_cast<u8 *>(edgra_free_vecbuffer) - bytes;
+        edgraInitAllClumps();
+    }
 }
 
 void edpartDestroyAllPages() {
@@ -333,7 +462,7 @@ float edanimPlayerAnimDistance(i32 parameter_index) {
     if (edmainQueryLocVec() != NULL) {
         nuhspecial_s special;
         NuGScnGetSpecial(&special, edanim_page_scene[AnimParams[parameter_index].page],
-                        AnimParams[parameter_index].instance_id);
+                         AnimParams[parameter_index].instance_id);
         NUVEC *position = edmainQueryLocVec();
         return NuVecDist(NuSpecialGetPos(&special), position, NULL);
     }
@@ -346,13 +475,29 @@ void edanimRenderSoundEmitters(i32) {
 void edbobs_DrawCoordinateInfo(nuvec_s *, i32, i32) {
 }
 
-void edrtlDetermineNearestBurn(float, burnset_s *) {
-}
-
 void edanimDetermineNearestAnim(float) {
 }
 
-void edgraDetermineNearestClump(float) {
+void edgraDetermineNearestClump(f32 distance) {
+    NUVEC delta;
+    if (edgra_nearest != -1) {
+        NuVecSub(&delta, &edgra_cam_pos, &GrassClumps[edgra_nearest].position);
+        if (delta.x * delta.x + delta.y * delta.y + delta.z * delta.z == 0.0f)
+            return;
+    }
+    edgra_nearest = -1;
+    for (i32 i = 0; i < EDGRA_MAX_CLUMPS; ++i) {
+        if (GrassClumps[i].element_count) {
+            NuVecSub(&delta, &edgra_cam_pos, &GrassClumps[i].position);
+            f32 candidate = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
+            if (distance < 0.0f || candidate < distance) {
+                distance = candidate;
+                edgra_nearest = i;
+            }
+        }
+    }
+    if (edgra_nearest != -1)
+        edgraSortVectorBuffer(edgra_nearest);
 }
 
 void eduiItemFileSelectorCreate(u32, eduiiattr_s *, void (*)(eduimenu_s *, eduiitem_s *, u32), char *) {
@@ -364,7 +509,30 @@ void edanimDetermineNearestSound(float) {
 void edanimRenderParticleEmitters(i32) {
 }
 
-void edgraDetermineNearestInstance(float) {
+void edgraDetermineNearestInstance(f32 distance) {
+    NUVEC delta;
+    if (edgra_nearest == -1) {
+        edgra_nearest_instance = -1;
+        return;
+    }
+    i32 individual = GrassClumps[edgra_nearest].individual_index;
+    if (edgra_nearest_instance != -1) {
+        NuVecAdd(&delta, &GrassClumps[edgra_nearest].position,
+                 &GetIndGrassClump(individual, edgra_nearest_instance)->position);
+        NuVecSub(&delta, &edgra_cam_pos, &delta);
+        if (delta.x * delta.x + delta.y * delta.y + delta.z * delta.z == 0.0f)
+            return;
+    }
+    edgra_nearest_instance = -1;
+    for (i32 i = 0; i < GrassClumps[edgra_nearest].element_count; ++i) {
+        NuVecAdd(&delta, &GrassClumps[edgra_nearest].position, &GetIndGrassClump(individual, i)->position);
+        NuVecSub(&delta, &edgra_cam_pos, &delta);
+        f32 candidate = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
+        if (distance < 0.0f || candidate < distance) {
+            distance = candidate;
+            edgra_nearest_instance = i;
+        }
+    }
 }
 
 void edanimDetermineNearestParticle(float) {

@@ -1,6 +1,7 @@
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/nutexanm.h"
 #include "nu2api/nu3d/nugscn.h"
+#include "nu2api/nu3d/nupostresources.h"
 
 #include "decomp.h"
 #include "nu2api/nu3d/android/nutex_android.h"
@@ -100,6 +101,42 @@ i32 max_textures;
 static NUNATIVETEX **texture_list;
 static i32 *texture_order;
 static i32 gTextureLoadCount;
+
+void NuTexCleartid(i32 tex_id) {
+    if (tex_id != 0) {
+        if (NuTexGetRefCount(tex_id) != -1) {
+            NuEffectTexGetEffectFromNative(tex_id);
+            NuTexDestroyPS(texture_list[tex_id - 1]);
+        }
+        texture_list[tex_id - 1] = NULL;
+    }
+}
+
+void NuTexCreateFramebufferCopy(void *buffer, void *buffer_end) {
+    NuEffectTexLockVP(buffer, buffer_end);
+    nuframebuffer_s *framebuffer = NuFramebufferGetObject(1);
+    i32 width = NuFramebufferGetWidth(framebuffer);
+    i32 height = NuFramebufferGetHeight(framebuffer);
+    nueffecttex_s *texture = NuEffectTexCreate2D(width, height, 1, 1, 1);
+    NuEffectTexUnlockVP();
+    NuEffectTexMapNative(texture);
+}
+
+i32 NuTexReserveNative(NUNATIVETEX *texture, i32 tex_id) {
+    if (texture == NULL)
+        return 0;
+    if (tex_id != 0) {
+        texture_list[tex_id - 1] = texture;
+        return tex_id;
+    }
+    for (i32 i = 0; i < max_textures; ++i) {
+        if (texture_list[i] == NULL) {
+            texture_list[i] = texture;
+            return i + 1;
+        }
+    }
+    return 0;
+}
 
 void NuTexInitEx(VARIPTR *buf, i32 max_tex_count) {
     max_textures = max_tex_count;

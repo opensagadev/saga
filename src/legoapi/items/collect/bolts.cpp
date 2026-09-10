@@ -260,8 +260,7 @@ void Bolts_Draw(WORLDINFO_s *world) {
             second = NuSpecialDrawAt(type->pad_68 + 12, &matrix);
         if (bolt->field_0xe8 != 2000000.0f) {
             NUMTX reflection;
-            if (MatrixReflectionVU0_AXISY(&matrix, bolt->field_0xe8, world->current_level->unknown_0cc,
-                                         &reflection)) {
+            if (MatrixReflectionVU0_AXISY(&matrix, bolt->field_0xe8, world->current_level->unknown_0cc, &reflection)) {
                 if (NuSpecialExistsFn(type->pad_68 + 24))
                     NuSpecialDrawAt(type->pad_68 + 24, &reflection);
                 if (NuSpecialExistsFn(type->pad_68 + 36))
@@ -1482,8 +1481,8 @@ void Bolts_Update(WORLDINFO_s *world) {
                 i16 effect = static_cast<i16>(static_cast<u32>(type->field_30) >> (i * 16));
                 u16 count = static_cast<u16>(static_cast<u32>(type->field_34) >> (i * 16));
                 if (effect != -1 && count != 0)
-                    AddVariableShotDebrisEffectTimed5(world->debris_sys->entries[effect].effect, &bolt->position,
-                                                     NULL, &bolt->velocity, count, FRAMETIME, NULL, NULL, 20000, 0);
+                    AddVariableShotDebrisEffectTimed5(world->debris_sys->entries[effect].effect, &bolt->position, NULL,
+                                                      &bolt->velocity, count, FRAMETIME, NULL, NULL, 20000, 0);
             }
         }
         if ((bolt->flags & 0x10000) != 0)
@@ -1492,7 +1491,7 @@ void Bolts_Update(WORLDINFO_s *world) {
         bool character_hit = false;
         if (expired)
             character_hit = Bolt_HitGameObjects(bolt, points, &bolt->bounds_min, &bolt->bounds_max,
-                                               bolt->collision_radius, NULL) != 0;
+                                                bolt->collision_radius, NULL) != 0;
         else {
             GameObject_s *object = Obj;
             i32 count = HIGHGAMEOBJECT;
@@ -1521,12 +1520,11 @@ void Bolts_Update(WORLDINFO_s *world) {
                     bolt->bounds_min.z > object->apiobj.collision_max.z ||
                     object->apiobj.collision_min.z > bolt->bounds_max.z)
                     continue;
-                if ((flags & 0x8000000) == 0 &&
-                    (bolt->bounds_min.y > object->apiobj.collision_max.y ||
-                     object->apiobj.collision_min.y > bolt->bounds_max.y))
+                if ((flags & 0x8000000) == 0 && (bolt->bounds_min.y > object->apiobj.collision_max.y ||
+                                                 object->apiobj.collision_min.y > bolt->bounds_max.y))
                     continue;
                 if (Bolt_HitGameObject(bolt, object, points, &bolt->bounds_min, &bolt->bounds_max,
-                                      bolt->collision_radius, processed)) {
+                                       bolt->collision_radius, processed)) {
                     character_hit = true;
                     break;
                 }
@@ -1537,16 +1535,16 @@ void Bolts_Update(WORLDINFO_s *world) {
         if (character_hit)
             continue;
         bool interact = (bolt->flags & 0x13) != 0 ||
-                        (bolt->owner != NULL && ((bolt->owner->field_0xefb & 0x10) != 0 ||
-                                                static_cast<u8>(bolt->owner->use_action) == 5));
+                        (bolt->owner != NULL &&
+                         ((bolt->owner->field_0xefb & 0x10) != 0 || static_cast<u8>(bolt->owner->use_action) == 5));
         bool handled = false;
         if (interact) {
             if (expired && bolt->hit_platform != -1) {
                 if (Bolt_HitPlatFn == NULL || !Bolt_HitPlatFn(bolt))
                     Bolt_HitPlat(bolt, processed, world);
                 handled = true;
-            } else if (GizmoSys_BoltHit(world->gizmo_sys, world, bolt, points, &bolt->bounds_min,
-                                       &bolt->bounds_max, bolt->collision_radius, hits))
+            } else if (GizmoSys_BoltHit(world->gizmo_sys, world, bolt, points, &bolt->bounds_min, &bolt->bounds_max,
+                                        bolt->collision_radius, hits))
                 handled = true;
             else if (GizmoBlowUp_Hit(bolt->owner, (bolt->flags & 0x200) ? &points[1] : points,
                                      (bolt->flags & 0x200) ? 1 : 3, bolt->collision_radius, &bolt->bounds_min,
@@ -1557,8 +1555,8 @@ void Bolts_Update(WORLDINFO_s *world) {
                 Bolt_End(bolt, 1);
                 Bolt_PlayHitSfx(bolt);
                 handled = true;
-            } else if (Bolt_HitParts(bolt, points, &bolt->bounds_min, &bolt->bounds_max,
-                                     bolt->collision_radius, Bolt_HitPartMode(bolt)))
+            } else if (Bolt_HitParts(bolt, points, &bolt->bounds_min, &bolt->bounds_max, bolt->collision_radius,
+                                     Bolt_HitPartMode(bolt)))
                 handled = true;
         }
         if (!expired)
@@ -1576,8 +1574,7 @@ void Bolts_Update(WORLDINFO_s *world) {
             } else if ((bolt->flags & 0x80000) == 0)
                 Bolt_PlayHitSfx(bolt);
         }
-        if (BoltSys->stop_targeting != NULL && bolt->owner != NULL &&
-            (bolt->owner->apiobj.flags_low & 0x80) != 0)
+        if (BoltSys->stop_targeting != NULL && bolt->owner != NULL && (bolt->owner->apiobj.flags_low & 0x80) != 0)
             BoltSys->stop_targeting(bolt->owner, &bolt->position);
     }
 }

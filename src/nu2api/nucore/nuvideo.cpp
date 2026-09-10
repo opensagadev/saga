@@ -2,6 +2,9 @@
 
 #include "nu2api/nucore/nuapi.h"
 
+extern "C" void NuSetupVideoModeParams(void) {
+}
+
 i32 NuVideoGetMode(void) {
     return nuapi.video_mode;
 }

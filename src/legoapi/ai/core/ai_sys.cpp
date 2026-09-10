@@ -59,7 +59,8 @@ void *CreateClimbObjectSys(VARIPTR *buf, VARIPTR *buf_end, i32 count) {
     if (system == NULL)
         return NULL;
     system->capacity = static_cast<u16>(count);
-    system->objects = static_cast<CLIMBOBJECT_s *>(GameBufferAlloc(buf, buf_end, system->capacity * sizeof(CLIMBOBJECT_s)));
+    system->objects =
+        static_cast<CLIMBOBJECT_s *>(GameBufferAlloc(buf, buf_end, system->capacity * sizeof(CLIMBOBJECT_s)));
     return system;
 }
 extern "C" APIOBJECTSYS_s *APIObjectSysInit(i32 size, VARIPTR *buf, VARIPTR *buf_end) {

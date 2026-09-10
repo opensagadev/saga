@@ -36,8 +36,10 @@ extern "C" {
     void NuFramebufferCopyTex2D(i32, nueffecttex_s *, i32, i32, i32, i32, i32);
     nueffecttex_s *NuEffectTexCreate2D(i32, i32, i32, i32, i32);
     void NuEffectTexGetDimension(nueffecttex_s *, i32, i32 *, i32 *);
+    nueffecttex_s *NuEffectTexGetEffectFromNative(i32 tex_id);
     void NuEffectTexLockVP(void *, void *);
     void NuEffectTexUnlockVP();
+    void NuEffectTexMapNative(nueffecttex_s *texture);
     void NuRenderContextSetViewport(i32, i32, i32, i32);
 }
 

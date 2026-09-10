@@ -55,11 +55,33 @@ extern i32 g_backingHeight;
 #ifdef __cplusplus
 
 void NuRndrStreamInit(i32 stream_buffer_size, VARIPTR *buffer);
+void NuLightBurnoutEffect(i32 mode, f32 threshold, f32 intensity, f32 flare);
 // axes[0] is the center; axes[1..3] are the three shape basis vectors.
 void NuRndrCalcRandEllipsePos(struct nuvec4_s *position, NUMTX *matrix, NUVEC *axes);
 void NuRndrCalcRandCylinderPos(struct nuvec4_s *position, NUMTX *matrix, NUVEC *axes);
 
 extern "C" {
+    extern i32 g_minmiplevel;
+    extern f32 g_mipmapbias;
+    void NuRndrSetGlobalMinMipLevel(i32 level);
+    void NuRndrSetGlobalMipMapBias(f32 bias);
+    void NuTextureBlendEffect(i32 arg0, i32 arg1, struct nuvec4_s *parameters);
+    void NuRndrSolidTri(NUVEC *a, NUVEC *b, NUVEC *c, i32 colour);
+    void NuRndrWireTri(NUVEC *a, NUVEC *b, NUVEC *c, i32 colour);
+    void NuRndrLineRect2di(i32 x, i32 y, i32 width, i32 height, i32 colour, struct numtl_s *material);
+    extern i32 global_GobjIsReflectedGeometry;
+    extern i32 global_GobjIsShadowReceive;
+    i32 NuRndIsReflectionGobj(void);
+    i32 NuRndIsShadowReceiveRenderGobj(void);
+    extern i32 global_GobjWasDrawnUnreflected;
+    extern f32 global_windspeed;
+    extern f32 global_windscale;
+    i32 NuRndrWasDrawnUnreflectedGobj(void);
+    void NuRndrStartShadowReceiveRender(void);
+    void NuRndrEndShadowReceiveRender(void);
+    i32 NuRndrGetCullDebug(void);
+    void NuRndrSetWind(f32 speed, f32 scale);
+    void NuRndrAnglesZX(NUVEC *direction, NUVEC *angles);
 #endif
     extern i32 NuRndrStopUpdate;
     extern NUVEC NuRndrDebBase;
@@ -79,7 +101,7 @@ extern "C" {
     i32 NuRndrTriStrip3dClip(NURND_VERTEX3D *vertices, i32 count, NUMTX *matrix, struct numtl_s *material);
 
     i32 NuRndrSetViewMtx(NUMTX *vpcs_mtx, NUMTX *viewport_vpc_mtx, NUMTX *scissor_vpc_mtx);
-    void NuRndrStateUpdateCameraState(void);
+    i32 NuRndrStateUpdateCameraState(void);
 
     i32 NuRndrSetAmbientLightPS(const NUCOLOUR3 *colour);
     i32 NuRndrSetDirectionalLightsPS(const NUVEC *dir0, const NUCOLOUR3 *colour0, const NUVEC *dir1,

@@ -4,7 +4,7 @@
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/numath/nufloat.h"
 
-extern "C" void NuRndrStateUpdateCameraState(void);
+extern "C" i32 NuRndrStateUpdateCameraState(void);
 
 static constexpr f32 kVirtualWidth = 640.0f;
 static constexpr f32 kVirtualHeight = 224.0f;

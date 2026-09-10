@@ -4756,7 +4756,8 @@ __used__ static i32 Action_EngageOpponent(AISYS *sys, AISCRIPTPROCESS *processor
         if (goal_range != 0.0f &&
             ((static_cast<i8>(opponent->apiobj.flags_low) < 0 && object->apiobj.model_draw_result == 0) ||
              ((WORLD->api_object_sys->line_of_sight[packet->owner->apiobj.field_0x289] >>
-               opponent->apiobj.field_0x289) & 1) == 0))
+               opponent->apiobj.field_0x289) &
+              1) == 0))
             goal_range = 0.1f;
     }
 
@@ -4778,32 +4779,32 @@ __used__ static i32 Action_EngageOpponent(AISYS *sys, AISCRIPTPROCESS *processor
                 processor->action_data_1 |= 0x10;
             }
             if ((processor->action_data_1 & 0x10) != 0) {
-                AIMoveInstruction(packet, &opponent->ai.last_path_position, stopping_distance,
-                                  &opponent->ai.path_info, AIPACKET_MOVEMENT_RETREAT, goal_range);
+                AIMoveInstruction(packet, &opponent->ai.last_path_position, stopping_distance, &opponent->ai.path_info,
+                                  AIPACKET_MOVEMENT_RETREAT, goal_range);
                 packet->goal_speed_mode = 1;
                 object->field_0xefd |= 0x80;
             } else {
-                AIMoveInstruction(packet, &opponent->ai.last_path_position, 0.0f,
-                                  &opponent->ai.path_info, AIPACKET_MOVEMENT_TO_DESTINATION, 0.01f);
+                AIMoveInstruction(packet, &opponent->ai.last_path_position, 0.0f, &opponent->ai.path_info,
+                                  AIPACKET_MOVEMENT_TO_DESTINATION, 0.01f);
                 packet->goal_speed_mode = 0;
             }
         } else if (character_flags != 0 && distance_squared < near_range * near_range) {
-            AIMoveInstruction(packet, &opponent->ai.last_path_position, stopping_distance,
-                              &opponent->ai.path_info, AIPACKET_MOVEMENT_RETREAT, goal_range);
+            AIMoveInstruction(packet, &opponent->ai.last_path_position, stopping_distance, &opponent->ai.path_info,
+                              AIPACKET_MOVEMENT_RETREAT, goal_range);
             packet->goal_speed_mode = 1;
             if ((object->apiobj.character_data->game_character->flags_090 & 0x100) != 0)
                 object->field_0xefd |= 0x80;
         } else if ((processor->action_data_1 & 0x20) != 0 && distance_squared < near_range * near_range) {
-            AIMoveInstruction(packet, &opponent->ai.last_path_position, stopping_distance,
-                              &opponent->ai.path_info, AIPACKET_MOVEMENT_RETREAT, goal_range);
+            AIMoveInstruction(packet, &opponent->ai.last_path_position, stopping_distance, &opponent->ai.path_info,
+                              AIPACKET_MOVEMENT_RETREAT, goal_range);
             packet->goal_speed_mode = 1;
         } else if (distance_squared > far_range * far_range && (processor->action_data_1 & 2) == 0) {
-            AIMoveInstruction(packet, &opponent->ai.last_path_position, stopping_distance,
-                              &opponent->ai.path_info, AIPACKET_MOVEMENT_TO_DESTINATION, goal_range);
+            AIMoveInstruction(packet, &opponent->ai.last_path_position, stopping_distance, &opponent->ai.path_info,
+                              AIPACKET_MOVEMENT_TO_DESTINATION, goal_range);
             packet->goal_speed_mode = 0;
         } else if ((processor->action_data_1 & 8) != 0) {
-            AIMoveInstruction(packet, &opponent->ai.last_path_position, stopping_distance,
-                              &opponent->ai.path_info, AIPACKET_MOVEMENT_CIRCLE, goal_range);
+            AIMoveInstruction(packet, &opponent->ai.last_path_position, stopping_distance, &opponent->ai.path_info,
+                              AIPACKET_MOVEMENT_CIRCLE, goal_range);
             packet->goal_speed_mode = 0;
         } else if (character_flags == 0) {
             packet->movement_look_target = &opponent->apiobj.position;

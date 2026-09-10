@@ -323,6 +323,8 @@ extern "C" {
 
     i32 DEV_FormatName(NUFILE_DEVICE *device, char *formatted_name, char *path, i32 buf_size);
     i32 DEVHOST_Interrogate(NUFILE_DEVICE *device);
+    void NuFileSetBadGameDisc(void);
+    i32 NuFileCheckBadGameDiscStatus(void);
 
     void NuFileCorrectSlashes(NUFILE_DEVICE *device, char *path);
     void NuFileReldirFix(NUFILE_DEVICE *device, char *path);
@@ -337,6 +339,8 @@ extern "C" {
     void NuFileWriteString(NUFILE file, const char *text);
     i32 NuFileWriteStringV(NUFILE file, const char *format, ...);
     NUFILE_DEVICE *NuFileGetDeviceFromPath(char *path);
+    i32 NuFileFormat(char *path);
+    i32 NuMcFormat(i32 port, i32 slot);
     i64 NuFileOpenSize(NUFILE file);
     i64 NuFileSeek(NUFILE file, i64 offset, NUFILESEEK seekMode);
     i32 NuFileLoadBuffer(char *filepath, void *buf, i32 buf_size);

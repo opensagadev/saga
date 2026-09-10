@@ -16,8 +16,8 @@ NUSOUNDINFO *g_revertSoundInfo;
 i16 *g_soundMap;
 nusound_filename_info_s *SfxInfo = NULL;
 
-extern "C" i32 NumSfx __asm__("_ZL6NumSfx") __attribute__((visibility("hidden"))) = 0;
-extern "C" i32 NumSfxInst __asm__("_ZL10NumSfxInst") __attribute__((visibility("hidden"))) = 0;
+static i32 NumSfx = 0;
+static i32 NumSfxInst = 0;
 static u32 NumSfxNames = 0;
 
 static char sfx_name[1600][32] = {0};
@@ -343,4 +343,12 @@ i32 GetSfxId(const char *name) {
     }
 
     return -1;
+}
+
+extern "C" i32 GetLogicalSfxCount(void) {
+    return NumSfxInst;
+}
+
+extern "C" i32 GetSfxCount(void) {
+    return NumSfx;
 }

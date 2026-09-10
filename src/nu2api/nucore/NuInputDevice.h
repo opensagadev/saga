@@ -5,6 +5,7 @@
 #include "nu2api/nucore/common.h"
 
 extern "C" void NuPad_Interface_ResetAllTouches(void);
+void NuPad_UpdateTouchScreenData(void);
 
 struct NuInputMouseData {
     // Types uncertain.
@@ -79,7 +80,9 @@ class NuInputDeviceTranslator {
                          float *out_motion, NuInputTouchData *out_touch_data, NuInputMouseData *out_mouse_data) = 0;
 };
 
-struct NUPADMOTIONVALUE {};
+// The original API indexes twenty motion channels; their individual meanings
+// have not yet been recovered.
+enum NUPADMOTIONVALUE : u32 { NUPADMOTIONVALUE_COUNT = 20 };
 
 class NuInputDevice {
   public:
@@ -121,26 +124,27 @@ class NuInputDevice {
 
     void DisableDPD();
     void EnableDPD();
-    void GetAttachmentType() const;
-    void GetCaps() const;
-    void GetIndexByType() const;
-    void GetLastValidIndexByType() const;
-    void GetLastValidType() const;
-    void GetMotionValue(NUPADMOTIONVALUE) const;
-    void GetMouseData() const;
-    void GetPort() const;
-    void GetTouchData() const;
-    void GetVolume() const;
-    void HasHeadphonesConnected() const;
-    void IsButtonPressed(u32) const;
-    void IsIntercepted() const;
+    NUPADATTACHMENTTYPE GetAttachmentType() const;
+    u32 GetCaps() const;
+    u32 GetIndexByType() const;
+    u32 GetLastValidIndexByType() const;
+    NUPADTYPE GetLastValidType() const;
+    f32 GetMotionValue(NUPADMOTIONVALUE input) const;
+    const NuInputMouseData *GetMouseData() const;
+    u32 GetPort() const;
+    const NuInputTouchData *GetTouchData() const;
+    f32 GetVolume() const;
+    bool HasHeadphonesConnected() const;
+    bool IsButtonPressed(u32 buttons) const;
+    bool IsIntercepted() const;
     void KillRumble();
     void ProcessTouchData();
     void SetMotors(float motor_1, float motor_2);
-    void SupportsCaps(u32) const;
+    bool SupportsCaps(u32 mask) const;
     ~NuInputDevice();
 
     friend void ::NuPad_Interface_ResetAllTouches(void);
+    friend void ::NuPad_UpdateTouchScreenData(void);
 
   private:
     void DeadZone(NUPADANALOGVALUE input, f32 dead_zone);

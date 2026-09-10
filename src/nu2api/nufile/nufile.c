@@ -6,6 +6,39 @@
 #include <string.h>
 
 char application_dir[256];
+i32 g_badGameDiscStatus;
+
+i32 NuFileCreatePath(void) {
+    return 0;
+}
+
+i32 NuFileCreateDir(void) {
+    return 0;
+}
+
+void NuFileCloseDir(void) {
+}
+
+i32 NuFileOpenDir(void) {
+    return 0;
+}
+
+/* The original Android implementations return these fixed results. */
+i32 NuFileGetInfo(void) {
+    return 1;
+}
+
+i32 NuFileRename(void) {
+    return 0;
+}
+
+void NuFileSetBadGameDisc(void) {
+    g_badGameDiscStatus = 1;
+}
+
+i32 NuFileCheckBadGameDiscStatus(void) {
+    return g_badGameDiscStatus;
+}
 
 void NuFileSetAppDirectory(char *path) {
     strcpy(application_dir, path);

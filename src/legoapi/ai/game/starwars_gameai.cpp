@@ -787,8 +787,8 @@ void StarWars_AutoSetAICapabilities(GameObject_s *object) {
         object->ai.capabilities =
             path_capabilities | STARWARS_AI_CAPABILITY_DEFAULT | STARWARS_AI_CAPABILITY_OBJECT_STATE_SET;
     } else if ((object->apiobj.field_0x1f4 & 4) == 0) {
-        object->ai.capabilities = path_capabilities | STARWARS_AI_CAPABILITY_DEFAULT |
-                                  STARWARS_AI_CAPABILITY_OBJECT_STATE_CLEAR;
+        object->ai.capabilities =
+            path_capabilities | STARWARS_AI_CAPABILITY_DEFAULT | STARWARS_AI_CAPABILITY_OBJECT_STATE_CLEAR;
     }
 
     if (object->apiobj.character_model->model_data_b[6] != NULL) {

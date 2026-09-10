@@ -61,9 +61,6 @@ void NuErrorPrint(char *message) {
 void NuFntFindEnd(nutex_s *, i32 *, i32 *, i32, i32) {
 }
 
-void NuBridgeAlloc() {
-}
-
 void NuWindFreeGrp(NuWindGType *group) {
     if (group != NULL) {
         group->in_use = 0;
@@ -129,9 +126,6 @@ void NuLgtArcLaserEx(i32, nuvec_s *, nuvec_s *, nuvec_s *, float, float, float, 
 void NuVpSetDestRect(float, float, float, float) {
 }
 
-void NuBrdigeDrawRope(numtl_s *, nuvec_s *, nuvec_s *, i32, i32 *, i32) {
-}
-
 void NuDDSGetMipLevel(i32, i32, i32, NUTEXFORMAT, i32, bool, i32, i32, i32 &, i32 &, i32 &) {
 }
 
@@ -159,9 +153,6 @@ i32 NuCameraClipHGobj(nugscn_s *scene, numtx_s *world_matrix, numtx_s *root_matr
     return NuCameraClipTestExtents(&min, &half_extents, &translated_world, 0.0f, 0);
 }
 
-void NuFadeObjFreeMtxs(numtx_s *, i32) {
-}
-
 void NuFntDumpReadable(nufnt_s *, char *) {
 }
 
@@ -171,12 +162,6 @@ void NuLgtArcLaserDraw(i32) {
 }
 
 void NuVpSetSourceRect(float, float, float, float) {
-}
-
-void NuFadeObjAllocData(i32) {
-}
-
-void NuFadeObjAllocMtxs(i32) {
 }
 
 void NuFrameEndBgLoadPS(i32) {
@@ -351,12 +336,7 @@ void NuDisplayListCreate(nudisplayscene_s *raw_scene, variptr_u *buffer, variptr
 void NuFadeSetFxCodeMtls(nugeom_s *, unsigned char *) {
 }
 
-
-
 void NuDisplaySceneUnclip(nudisplayscene_s *) {
-}
-
-void NuFadeObjAllocateGrp() {
 }
 
 void NuGCutRigidCalcMtx_3(NUGCUTRIGID_s *rigid, float frame, numtx_s *mtx) {
@@ -387,13 +367,7 @@ void NuGCutRigidCalcMtx_3(NUGCUTRIGID_s *rigid, float frame, numtx_s *mtx) {
     NuMtxTranslate(mtx, reinterpret_cast<NUVEC *>(&rigid->base_matrix.m30));
 }
 
-void NuLightBurnoutEffect(i32, float, float, float) {
-}
-
 void NuAnimDataChunkCreate(i32) {
-}
-
-void NuFadeObjAngleTerrain(numtx_s *) {
 }
 
 void NuGCutSceneSysInitVfx(i32 (*)(char const *), i32 (*)(i32, VuMtx *), void (*)(i32), void (*)(i32, VuMtx *)) {
@@ -599,8 +573,6 @@ void NuIOS_GetPurchaseResult() {
 void NuLightMotionBlurEffect(i32, float) {
 }
 
-
-
 void NuTimeGetMicrosecondsPS(u32 *, u32 *) {
 }
 
@@ -736,9 +708,6 @@ static i32 g_vaoRecordCount;
 
 void NuIOS_ResetVAODuplicateFinder() {
     g_vaoRecordCount = 0;
-}
-
-void NuFadeObjGetAngleTerrainValues(nuvec_s *) {
 }
 
 void NuIOS_CateInAppPurchaseManager() {
@@ -896,7 +865,8 @@ void NuOnlineSetPresenceModeProfilePS(i32, i32) {
 void NuDynamicLightTestShadowExtrusions(nudynamiclight_s *, _vuv_s const *, _vuv_s const *, i32 *) {
 }
 
-void NuOnlineAchievementAchievedProfile(i32, i32, void (*)(i32, i32)) {
+i32 NuOnlineAchievementAchievedProfile(i32, i32, void (*)(i32, i32)) {
+    return 0;
 }
 
 void NuOnlineSetDefaultContextProfilePS(i32, i32, i32) {

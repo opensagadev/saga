@@ -1119,7 +1119,6 @@ float PodSprint_InStartCountdown(WORLDINFO_s *world) {
     return podsprint.speed;
 }
 
-
 void PodSprintA_Init(WORLDINFO_s *world) {
     PODSPRINT_s *ps = &podsprint;
     memset(ps, 0, sizeof(*ps));

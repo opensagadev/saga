@@ -164,7 +164,8 @@ void initHintSys() {
     hintsys.current_hint = 0;
     hintsys.state = 2;
     hintsys.active_hint = NULL;
-    MechHintUIButton *button = new MechHintUIButton(VuVec(ICONXPOS_TOUCHYFEELY, ICONYPOS_TOUCHYFEELY, 0.0f, 1.0f), 0.075f);
+    MechHintUIButton *button =
+        new MechHintUIButton(VuVec(ICONXPOS_TOUCHYFEELY, ICONYPOS_TOUCHYFEELY, 0.0f, 1.0f), 0.075f);
     button->UpdateTexture(MechInputTouchVirtualConsoleController::s_textures[3]);
     button->alpha = 0.0f;
     button->alpha_to = 0.0f;
@@ -317,11 +318,11 @@ void Hint_Process(float elapsed) {
     if (hintsys.hints == NULL)
         return;
 
-    bool available = HINTS_ON != 0 && CUTSTOPGAME == 0 && MiniCutCam != 1 && MiniCutCam != 2 && MiniCutCam != 3 &&
-                     SuperStory == 0 && BonusArea == 0 && (world->current_level->flags & 0x200) == 0 &&
-                     (world->area == NULL || (world->area->flags & 0x124) == 0) && GetMenuID() == -1 &&
-                     FadeSys.fade == 0.0f &&
-                     (world->area == NULL || world->area != HUB_ADATA || Hub_PanelBusyFn == NULL || Hub_PanelBusyFn() == 0);
+    bool available =
+        HINTS_ON != 0 && CUTSTOPGAME == 0 && MiniCutCam != 1 && MiniCutCam != 2 && MiniCutCam != 3 && SuperStory == 0 &&
+        BonusArea == 0 && (world->current_level->flags & 0x200) == 0 &&
+        (world->area == NULL || (world->area->flags & 0x124) == 0) && GetMenuID() == -1 && FadeSys.fade == 0.0f &&
+        (world->area == NULL || world->area != HUB_ADATA || Hub_PanelBusyFn == NULL || Hub_PanelBusyFn() == 0);
     if (ChallengeMode != 0)
         available = false;
     else if (Mission_Active(NULL) != NULL)
@@ -564,8 +565,7 @@ i32 Hint_isAvailable(i32 hint_id) {
 void Hint_CancelCurrent() {
     HINT_s *hint = hintsys.active_hint;
     if (hint != NULL) {
-        if (hint->display_duration != 0.0f &&
-            hint->display_duration - 0.5f > hintsys.display_elapsed)
+        if (hint->display_duration != 0.0f && hint->display_duration - 0.5f > hintsys.display_elapsed)
             hintsys.display_elapsed = hint->display_duration - 0.5f;
         hint->field_0x20 = 0.0f;
     }

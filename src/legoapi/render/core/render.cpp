@@ -3,6 +3,314 @@
 #include "legoapi/cutscenes/cutscenes.h"
 #include <stdio.h>
 
+extern "C" i32 edbri_page_used[8];
+extern "C" void edbriStartPage(i32 page);
+extern "C" void edbriStartAllPages(void) {
+    for (i32 page = 0; page < 8; ++page) {
+        if (edbri_page_used[page])
+            edbriStartPage(page);
+    }
+}
+#include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nucamera.h"
+#include "nu2api/numath/nutrig.h"
+
+extern "C" void NuRndrLine3dDbg(f32, f32, f32, f32, f32, f32, i32);
+extern "C" void AiRndrLine3dDbg(f32, f32, f32, f32, f32, f32, u32);
+extern "C" void NuRndrLine3d(NURND_VERTEX3D *, numtl_s *, NUMTX *);
+
+extern "C" void edbitsDrawOvalTilted(NUVEC *centre, f32 radius_x, f32 radius_z, i32 colour, i32, i32 rotation_z,
+                                     i32 rotation_y) {
+    NUVEC endpoints[2];
+    NUVEC &previous = endpoints[0];
+    NUVEC &point = endpoints[1];
+    point.x = 0.0f;
+    point.y = 0.0f;
+    point.z = radius_z;
+    if (rotation_z)
+        NuVecRotateZ(&point, &point, rotation_z);
+    if (rotation_y)
+        NuVecRotateY(&point, &point, rotation_y);
+    point.x += centre->x;
+    point.y += centre->y;
+    point.z += centre->z;
+    for (i32 i = 1; i <= 10; ++i) {
+        previous = point;
+        i32 angle = i * 65536 / 10;
+        point.x = radius_x * NU_SIN_LUT(angle);
+        point.y = 0.0f;
+        point.z = radius_z * NU_COS_LUT(angle);
+        if (rotation_z)
+            NuVecRotateZ(&point, &point, rotation_z);
+        if (rotation_y)
+            NuVecRotateY(&point, &point, rotation_y);
+        point.x += centre->x;
+        point.y += centre->y;
+        point.z += centre->z;
+        NuRndrLine3dDbg(previous.x, previous.y, previous.z, point.x, point.y, point.z, colour);
+    }
+}
+
+extern "C" void edbitsDrawCircleXY(NUVEC *, f32, i32, i32);
+
+extern "C" void edbitsDrawTorus(NUVEC *centre, f32 radius, f32 radial_extent, f32 vertical_extent, i32 colour,
+                                i32 unused) {
+    edbitsDrawCircleXY(centre, radius - radial_extent, colour, unused);
+    edbitsDrawCircleXY(centre, radius + radial_extent, colour, unused);
+    NUVEC offset = *centre;
+    offset.y -= vertical_extent;
+    edbitsDrawCircleXY(&offset, radius, colour, unused);
+    offset = *centre;
+    offset.y += vertical_extent;
+    edbitsDrawCircleXY(&offset, radius, colour, unused);
+    for (i32 i = 0; i <= 10; ++i) {
+        i32 angle = i * 65536 / 10;
+        NUVEC point;
+        point.x = centre->x;
+        point.y = centre->y;
+        point.z = centre->z;
+        point.x += radius * NU_SIN_LUT(angle);
+        point.z += radius * NU_COS_LUT(angle);
+        edbitsDrawOvalTilted(&point, vertical_extent, radial_extent, colour, unused, 0x4000, angle);
+    }
+}
+
+extern "C" void edbitsDrawCube(f32 x, f32 y, f32 z, f32 half_x, f32 half_y, f32 half_z, i32 rotation_z, i32 rotation_y,
+                               i32 rotation_x, i32 outer_z, i32 outer_y, i32 colour, numtl_s *material) {
+    NUVEC outlines[4][5] = {{{-1, -1, 1}, {1, -1, 1}, {1, 1, 1}, {-1, 1, 1}, {-1, -1, 1}},
+                            {{-1, -1, -1}, {1, -1, -1}, {1, 1, -1}, {-1, 1, -1}, {-1, -1, -1}},
+                            {{-1, -1, 1}, {-1, -1, -1}, {-1, 1, -1}, {-1, 1, 1}, {-1, -1, 1}},
+                            {{1, -1, 1}, {1, -1, -1}, {1, 1, -1}, {1, 1, 1}, {1, -1, 1}}};
+    NUVEC endpoints[2];
+    NURND_VERTEX3D vertices[2];
+    for (i32 face = 0; face < 4; ++face) {
+        for (i32 edge = 0; edge < 4; ++edge) {
+            endpoints[0].x = half_x * outlines[face][edge].x;
+            endpoints[0].y = half_y * outlines[face][edge].y;
+            endpoints[0].z = half_z * outlines[face][edge].z;
+            endpoints[1].x = half_x * outlines[face][edge + 1].x;
+            endpoints[1].y = half_y * outlines[face][edge + 1].y;
+            endpoints[1].z = half_z * outlines[face][edge + 1].z;
+            NuVecRotateZ(&endpoints[0], &endpoints[0], rotation_z);
+            NuVecRotateY(&endpoints[0], &endpoints[0], rotation_y);
+            NuVecRotateX(&endpoints[0], &endpoints[0], rotation_x);
+            NuVecRotateZ(&endpoints[0], &endpoints[0], outer_z);
+            NuVecRotateY(&endpoints[0], &endpoints[0], outer_y);
+            NuVecRotateZ(&endpoints[1], &endpoints[1], rotation_z);
+            NuVecRotateY(&endpoints[1], &endpoints[1], rotation_y);
+            NuVecRotateX(&endpoints[1], &endpoints[1], rotation_x);
+            NuVecRotateZ(&endpoints[1], &endpoints[1], outer_z);
+            NuVecRotateY(&endpoints[1], &endpoints[1], outer_y);
+            vertices[0].colour = colour;
+            vertices[1].colour = colour;
+            vertices[0].position.x = x + endpoints[0].x;
+            vertices[0].position.y = y + endpoints[0].y;
+            vertices[0].position.z = z + endpoints[0].z;
+            vertices[1].position.x = x + endpoints[1].x;
+            vertices[1].position.y = y + endpoints[1].y;
+            vertices[1].position.z = z + endpoints[1].z;
+            NuRndrLine3d(vertices, material, NULL);
+        }
+    }
+}
+
+extern "C" void edbitsDrawBasicCube(f32 x, f32 y, f32 z, f32 half_x, f32 half_y, f32 half_z, i32 rotation_x,
+                                    i32 rotation_y, i32 rotation_z, i32 colour, numtl_s *material) {
+    NUVEC outlines[4][5] = {{{-1, -1, 1}, {1, -1, 1}, {1, 1, 1}, {-1, 1, 1}, {-1, -1, 1}},
+                            {{-1, -1, -1}, {1, -1, -1}, {1, 1, -1}, {-1, 1, -1}, {-1, -1, -1}},
+                            {{-1, -1, 1}, {-1, -1, -1}, {-1, 1, -1}, {-1, 1, 1}, {-1, -1, 1}},
+                            {{1, -1, 1}, {1, -1, -1}, {1, 1, -1}, {1, 1, 1}, {1, -1, 1}}};
+    NUVEC endpoints[2];
+    NURND_VERTEX3D vertices[2];
+    for (i32 face = 0; face < 4; ++face) {
+        for (i32 edge = 0; edge < 4; ++edge) {
+            endpoints[0].x = half_x * outlines[face][edge].x;
+            endpoints[0].y = half_y * outlines[face][edge].y;
+            endpoints[0].z = half_z * outlines[face][edge].z;
+            endpoints[1].x = half_x * outlines[face][edge + 1].x;
+            endpoints[1].y = half_y * outlines[face][edge + 1].y;
+            endpoints[1].z = half_z * outlines[face][edge + 1].z;
+            NuVecRotateX(&endpoints[0], &endpoints[0], rotation_x);
+            NuVecRotateY(&endpoints[0], &endpoints[0], rotation_y);
+            NuVecRotateZ(&endpoints[0], &endpoints[0], rotation_z);
+            NuVecRotateX(&endpoints[1], &endpoints[1], rotation_x);
+            NuVecRotateY(&endpoints[1], &endpoints[1], rotation_y);
+            NuVecRotateZ(&endpoints[1], &endpoints[1], rotation_z);
+            vertices[0].colour = colour;
+            vertices[1].colour = colour;
+            vertices[0].position.x = x + endpoints[0].x;
+            vertices[0].position.y = y + endpoints[0].y;
+            vertices[0].position.z = z + endpoints[0].z;
+            vertices[1].position.x = x + endpoints[1].x;
+            vertices[1].position.y = y + endpoints[1].y;
+            vertices[1].position.z = z + endpoints[1].z;
+            NuRndrLine3d(vertices, material, NULL);
+        }
+    }
+}
+
+extern "C" void edbitsDrawCross(f32 x, f32 y, f32 z, f32 radius, i32 colour, numtl_s *material) {
+    NUVEC axes[3] = {{1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 1.0f}};
+    NURND_VERTEX3D vertices[2];
+    for (i32 i = 0; i < 3; ++i) {
+        vertices[0].colour = colour;
+        vertices[1].colour = colour;
+        vertices[0].position.x = x + radius * axes[i].x;
+        vertices[0].position.y = y + radius * axes[i].y;
+        vertices[0].position.z = z + radius * axes[i].z;
+        vertices[1].position.x = x - radius * axes[i].x;
+        vertices[1].position.y = y - radius * axes[i].y;
+        vertices[1].position.z = z - radius * axes[i].z;
+        NuRndrLine3d(vertices, material, NULL);
+    }
+}
+
+extern "C" void edbitsDrawDiagonalCross(f32 x, f32 y, f32 z, f32 radius, i32 colour, numtl_s *material) {
+    NUVEC axes[4] = {{1.0f, 1.0f, 1.0f}, {-1.0f, 1.0f, 1.0f}, {1.0f, -1.0f, 1.0f}, {-1.0f, -1.0f, 1.0f}};
+    NURND_VERTEX3D vertices[2];
+    for (i32 i = 0; i < 4; ++i) {
+        vertices[0].colour = colour;
+        vertices[1].colour = colour;
+        vertices[0].position.x = x + radius * axes[i].x;
+        vertices[0].position.y = y + radius * axes[i].y;
+        vertices[0].position.z = z + radius * axes[i].z;
+        vertices[1].position.x = x - radius * axes[i].x;
+        vertices[1].position.y = y - radius * axes[i].y;
+        vertices[1].position.z = z - radius * axes[i].z;
+        NuRndrLine3d(vertices, material, NULL);
+    }
+}
+
+extern "C" void edDrawCross(NUVEC *centre, u8 red, u8 green, u8 blue) {
+    i32 colour = 0xff000000 | red | (green << 8) | (blue << 16);
+    NuRndrLine3dDbg(centre->x - 0.5f, centre->y, centre->z, centre->x + 0.5f, centre->y, centre->z, colour);
+    NuRndrLine3dDbg(centre->x, centre->y - 0.5f, centre->z, centre->x, centre->y + 0.5f, centre->z, colour);
+    NuRndrLine3dDbg(centre->x, centre->y, centre->z - 0.5f, centre->x, centre->y, centre->z + 0.5f, colour);
+}
+
+extern "C" void LocaledbitsDrawSolidEllipseXY(NUVEC *centre, f32 radius_x, f32 radius_z, i32 rotation, f32 lower_y,
+                                              f32 upper_y, u32 colour, i32, i32 segments) {
+    NURND_VERTEX3D vertices[2];
+    NURND_VERTEX3D &first = vertices[0];
+    NURND_VERTEX3D &second = vertices[1];
+    second.position.x = 0.0f;
+    second.position.y = 0.0f;
+    second.position.z = radius_z;
+    NuVecRotateY(&second.position, &second.position, rotation);
+    NuVecAdd(&second.position, &second.position, centre);
+    first.colour = colour;
+    second.colour = colour;
+    for (i32 i = 1; i <= segments; ++i) {
+        first.position = second.position;
+        second.position = *centre;
+        i32 angle = (i * 65536) / segments;
+        NUVEC offset = {radius_x * NU_SIN_LUT(angle), 0.0f, radius_z * NU_COS_LUT(angle)};
+        NuVecRotateY(&offset, &offset, rotation);
+        NuVecAdd(&second.position, centre, &offset);
+        first.position.y = lower_y;
+        second.position.y = lower_y;
+        AiRndrLine3dDbg(first.position.x, first.position.y, first.position.z, second.position.x, second.position.y,
+                        second.position.z, colour);
+        first.position.y = upper_y;
+        second.position.y = upper_y;
+        AiRndrLine3dDbg(first.position.x, first.position.y, first.position.z, second.position.x, second.position.y,
+                        second.position.z, colour);
+        first.position = second.position;
+        first.position.y = lower_y;
+        AiRndrLine3dDbg(first.position.x, first.position.y, first.position.z, second.position.x, second.position.y,
+                        second.position.z, colour);
+    }
+}
+
+extern "C" void LocaledbitsDrawCircleXY(NUVEC *centre, f32 radius, u32 colour, i32, i32 segments) {
+    NUVEC previous = {centre->x, centre->y, centre->z + radius};
+    for (i32 i = 1; i <= segments; ++i) {
+        i32 angle = (i * 65536) / segments;
+        NUVEC next = {centre->x + NU_SIN_LUT(angle) * radius, centre->y, centre->z + NU_COS_LUT(angle) * radius};
+        AiRndrLine3dDbg(previous.x, previous.y, previous.z, next.x, next.y, next.z, colour);
+        previous = next;
+    }
+}
+
+extern "C" void LocaledbitsDrawSolidCircleXY(NUVEC *centre, f32 radius, f32 lower_y, f32 upper_y, u32 colour, i32,
+                                             i32 segments) {
+    f32 previous_x = centre->x;
+    f32 previous_z = centre->z + radius;
+    for (i32 i = 1; i <= segments; ++i) {
+        i32 angle = (i * 65536) / segments;
+        f32 next_x = centre->x + radius * NU_SIN_LUT(angle);
+        f32 next_z = centre->z + NU_COS_LUT(angle) * radius;
+        AiRndrLine3dDbg(previous_x, lower_y, previous_z, next_x, lower_y, next_z, colour);
+        AiRndrLine3dDbg(previous_x, upper_y, previous_z, next_x, upper_y, next_z, colour);
+        AiRndrLine3dDbg(next_x, lower_y, next_z, next_x, upper_y, next_z, colour);
+        previous_x = next_x;
+        previous_z = next_z;
+    }
+}
+
+extern "C" void RndrOSquare(NUVEC *centre, f32 radius, i32 colour) {
+    NUMTX matrix = global_camera.mtx;
+    f32 corners[4][2] = {{-1.0f, -1.0f}, {1.0f, -1.0f}, {1.0f, 1.0f}, {-1.0f, 1.0f}};
+    matrix.m30 = centre->x;
+    matrix.m31 = centre->y;
+    matrix.m32 = centre->z;
+    for (i32 i = 0; i < 4; ++i) {
+        NUVEC start = {corners[i][0] * radius, corners[i][1] * radius, 0.0f};
+        NUVEC end = {corners[(i + 1) & 3][0] * radius, corners[(i + 1) & 3][1] * radius, 0.0f};
+        NuVecMtxTransform(&start, &start, &matrix);
+        NuVecMtxTransform(&end, &end, &matrix);
+        NuRndrLine3dDbg(start.x, start.y, start.z, end.x, end.y, end.z, colour);
+    }
+}
+
+extern "C" void RndrOSphere(NUVEC *centre, f32 radius, i32 colour, i32 segments) {
+    NUMTX matrix = global_camera.mtx;
+    matrix.m30 = centre->x;
+    matrix.m31 = centre->y;
+    matrix.m32 = centre->z;
+    i32 step = 65536 / segments;
+    NURND_VERTEX3D first, second;
+    first.position.x = radius;
+    first.position.y = 0.0f;
+    first.position.z = 0.0f;
+    first.colour = colour;
+    second.colour = colour;
+    NuVecRotateZ(&second.position, &first.position, step);
+    for (i32 i = 0; i < segments; ++i) {
+        NUVEC start = first.position;
+        NUVEC end = second.position;
+        NuVecMtxTransform(&start, &start, &matrix);
+        NuVecMtxTransform(&end, &end, &matrix);
+        NuRndrLine3dDbg(start.x, start.y, start.z, end.x, end.y, end.z, first.colour);
+        first.position = second.position;
+        NuVecRotateZ(&second.position, &second.position, step);
+    }
+}
+
+extern "C" void RndrCircleXZ(NUVEC *centre, f32 radius, i32 colour, i32 segments) {
+    NUMTX matrix = numtx_identity;
+    matrix.m30 = centre->x;
+    matrix.m31 = centre->y;
+    matrix.m32 = centre->z;
+    i32 step = 65536 / segments;
+    NURND_VERTEX3D first, second;
+    first.position.x = radius;
+    first.position.y = 0.0f;
+    first.position.z = 0.0f;
+    first.colour = colour;
+    second.colour = colour;
+    NuVecRotateY(&second.position, &first.position, step);
+    for (i32 i = 0; i < segments; ++i) {
+        NUVEC start = first.position;
+        NUVEC end = second.position;
+        NuVecMtxTransform(&start, &start, &matrix);
+        NuVecMtxTransform(&end, &end, &matrix);
+        NuRndrLine3dDbg(start.x, start.y, start.z, end.x, end.y, end.z, first.colour);
+        first.position = second.position;
+        NuVecRotateY(&second.position, &second.position, step);
+    }
+}
+
 #include "gameapi/gui/apimenu.h"
 #include "gameframework/saveload.h"
 #include "legoapi/menus/core/text.h"
@@ -167,8 +475,6 @@ extern f32 statstime;
 f32 GetAspectRatio();
 void Hint_Draw(i32 player_index);
 extern i32 CutScenePlayer_CanStart(i32 cutscene_id);
-
-
 
 namespace {
     struct NuDisplaySpecialLayout {
@@ -821,7 +1127,41 @@ void DrawAreaBox(nuvec_s *, nuvec_s *, i32, i32) {
 void DrawBox_Now(_vuv_s *, _vuv_s *, i32, i32) {
 }
 
-void DrawLocator(nuvec_s *, float, i32, i32) {
+extern "C" {
+    f32 aiEditor_DrawYOffset = 0.25f;
+    void AiRndrLine3d(NURND_VERTEX3D *, NUMTL *, NUMTX *);
+}
+
+void DrawLocator(nuvec_s *position, float radius, i32 rotation, i32 colour) {
+    NURND_VERTEX3D vertices[2];
+    vertices[0].colour = colour;
+    vertices[1].colour = colour;
+    NUVEC centre = *position;
+    centre.y += aiEditor_DrawYOffset;
+    NUVEC axis = {radius, 0.0f, 0.0f};
+    NuVecRotateY(&axis, &axis, rotation);
+    NuVecAdd(&vertices[0].position, &centre, &axis);
+    NuVecSub(&vertices[1].position, &centre, &axis);
+    AiRndrLine3d(vertices, NULL, NULL);
+    vertices[0].position.x = centre.x;
+    vertices[1].position.x = centre.x;
+    vertices[0].position.y = centre.y - radius;
+    vertices[0].position.z = centre.z;
+    vertices[1].position.z = centre.z;
+    vertices[1].position.y = centre.y + radius;
+    AiRndrLine3d(vertices, NULL, NULL);
+    axis.x = 0.0f;
+    axis.y = 0.0f;
+    axis.z = radius;
+    NuVecRotateY(&axis, &axis, rotation);
+    NuVecAdd(&vertices[0].position, &centre, &axis);
+    NuVecSub(&vertices[1].position, &centre, &axis);
+    AiRndrLine3d(vertices, NULL, NULL);
+    NUVEC arrow = {-axis.z * 0.2f, 0.0f, axis.x * 0.2f};
+    NuVecAdd(&vertices[1].position, &centre, &arrow);
+    AiRndrLine3d(vertices, NULL, NULL);
+    NuVecSub(&vertices[1].position, &centre, &arrow);
+    AiRndrLine3d(vertices, NULL, NULL);
 }
 
 void DrawStreaks() {
@@ -2373,42 +2713,6 @@ void DrawMessageBoxRGBA(float, float, float, float, u32, u32, u32, u32, numtl_s 
 void DrawSuperStoryTime(float, float, float, i32, i32) {
 }
 
-
-void ResetForceBack() {
-    ForceBackObj = NULL;
-    ForceBackPos = NULL;
-}
-
-void SetForceBack(GameObject_s *object, nuvec_s *position, float radius, i32 type) {
-    ForceBackRadius = radius;
-    ForceBackObj = object;
-    ForceBackPos = object != NULL ? &object->apiobj.collision_position : position;
-    ForceBackRadius2 = radius * radius;
-    ForceBackType = type;
-}
-
-void DrawForceBackEffect(nuhspecial_s *special) {
-    if (special == NULL || !NuSpecialExistsFn(special)) {
-        return;
-    }
-    if (ForceBackObj != NULL && ForceBackType != 3) {
-        NuSpecialSetVisibility(special, 1);
-        NUMTX matrix = *NuSpecialGetDrawMtx(special);
-        NUVEC position;
-        position.x = ForceBackObj->apiobj.lower_position.x;
-        position.y = 0.005f + ForceBackObj->apiobj.field_0x218;
-        position.z = ForceBackObj->apiobj.lower_position.z;
-        NUVEC scale;
-        scale.x = scale.y = scale.z = ForceBackRadius;
-        NuMtxSetTranslation(&matrix, &position);
-        NuMtxPreScale(&matrix, &scale);
-        NuSpecialSetDrawMtx(special, &matrix);
-        NuSpecialUpdate(special);
-    } else {
-        NuSpecialSetVisibility(special, 0);
-    }
-}
-
 static inline void RotateForceGlowMatrix(NUMTX *matrix, i32 angle) {
     const f32 cosine = NU_COS_LUT(angle);
     const f32 sine = NU_SIN_LUT(angle);
@@ -2868,10 +3172,15 @@ void DrawArrow(nuhspecial_s *special, float scale_value) {
     }
 }
 
-void DrawCross(nuvec_s *, float, numtl_s *, i32) {
-}
-
-void DrawMSitu(i32) {
+void DrawCross(nuvec_s *centre, float radius, numtl_s *material, i32 colour) {
+    if (material != NULL) {
+        colour = (((i32)(material->diffuse_color.b * 255.0f) & 255) << 16) |
+                 (((i32)(material->diffuse_color.g * 255.0f) & 255) << 8) |
+                 ((i32)(material->diffuse_color.r * 255.0f) & 255);
+    }
+    NuRndrLine3dDbg(centre->x - radius, centre->y, centre->z, centre->x + radius, centre->y, centre->z, colour);
+    NuRndrLine3dDbg(centre->x, centre->y - radius, centre->z, centre->x, centre->y + radius, centre->z, colour);
+    NuRndrLine3dDbg(centre->x, centre->y, centre->z - radius, centre->x, centre->y, centre->z + radius, colour);
 }
 
 static void DrawHitPoints(GameObject_s *object, float x, float y, float scale, float alpha, i32 alignment, float, i32) {

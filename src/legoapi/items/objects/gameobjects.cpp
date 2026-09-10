@@ -1,4 +1,5 @@
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/audio/audio.h"
 #include "legoapi/gizmos/transport/grapples.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "decomp.h"
@@ -3211,29 +3212,7 @@ extern "C" void MenuRegisterSoundFX(i32 move, i32 select, i32 back, i32 no_entry
 i32 GameAudio_GetSfxId(i32 sfx);
 void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
 
-static GAMEAUDIO GameAudio_Default;
-__attribute__((visibility("hidden"))) GAMEAUDIO *GameAudio asm("_ZL9GameAudio");
-
-void GameAudio_Init(GAMEAUDIO *audio) {
-    GameAudio = audio;
-    for (i32 i = 0; i < 0x55; ++i) {
-        audio->sfx_ids[i] = static_cast<i16>(GetSfxId(audio->sfx_names[i]));
-    }
-
-    MenuRegisterSoundFX(GameAudio_GetSfxId(0x2f), GameAudio_GetSfxId(0x30), GameAudio_GetSfxId(0x31),
-                        GameAudio_GetSfxId(0x32));
-}
-
 void GameFog_Update(WORLDINFO_s *) {
-}
-
-void GameAudio_Reset() {
-    memset(&GameAudio_Default, 0, sizeof(GameAudio_Default));
-    GameAudio = &GameAudio_Default;
-    memset(GameAudio_Default.sfx_names, 0, sizeof(GameAudio_Default.sfx_names));
-    for (i32 i = 0; i < 0x55; ++i) {
-        GameAudio_Default.sfx_ids[i] = -1;
-    }
 }
 
 void *GameBufferAlloc(variptr_u *buf, variptr_u *buf_end, i32 size) {
@@ -3391,12 +3370,6 @@ u32 GameAI_TotalScore() {
     return total;
 }
 
-void GameAudio_PlaySfx(i32 sfx, nuvec_s *position, i32 flags, i32 volume) {
-    if ((u32)sfx < 0x55) {
-        GameAudio_PlaySfxById(GameAudio->sfx_ids[sfx], position, flags, volume);
-    }
-}
-
 void GameDrawMenuEntry(MENU_s *menu, char *text) {
     if (Paused != 0) {
         dme_align = PauseMenus_Align;
@@ -3510,13 +3483,6 @@ void GameAnimSys_Update(GAMEANIMSYS_s *system) {
         }
         set = next_set;
     }
-}
-
-i32 GameAudio_GetSfxId(i32 sfx) {
-    if (static_cast<u32>(sfx) <= 0x54) {
-        return GameAudio->sfx_ids[sfx];
-    }
-    return -1;
 }
 
 CABLE_s cables[8];
@@ -6354,9 +6320,8 @@ void ManageGameObjects() {
         if ((object->apiobj.field_0x1f8 & 1) == 0)
             continue;
         if ((object->apiobj.field_0x1f4 & 0x40000) != 0) {
-            if (nethost != 0 && (object->apiobj.field_0x1f8 & 0x1000) == 0 &&
-                object->ai.field_0x134 == 0xff && (object->ai.reset_mode & ~2) != 1 &&
-                (object->apiobj.field_0x1f4 & 0x4000) != 0)
+            if (nethost != 0 && (object->apiobj.field_0x1f8 & 0x1000) == 0 && object->ai.field_0x134 == 0xff &&
+                (object->ai.reset_mode & ~2) != 1 && (object->apiobj.field_0x1f4 & 0x4000) != 0)
                 AIScriptProcess(WORLD->ai_sys, &object->apiobj, &object->ai, &object->ai.script_process, FRAMETIME);
             continue;
         }
@@ -6439,15 +6404,17 @@ void ManageGameObjects() {
                     AICREATURE *creature = &WORLD->ai_sys->creatures[object->ai.field_0x134];
                     if ((object->field_0xefa & 0x10) != 0) {
                         if ((object->field_0xefa & 0x20) == 0) {
-                            object->field_0x101c = object->id == id_STAP2 && WORLD->current_level == NEGOTIATIONSC_LDATA
-                                                       ? 5.0f : 1.0f;
+                            object->field_0x101c =
+                                object->id == id_STAP2 && WORLD->current_level == NEGOTIATIONSC_LDATA ? 5.0f : 1.0f;
                             continue;
                         }
                     } else {
                         u32 limit = object->ai_respawn_count + 1;
                         if (creature->max_respawn_count != -1 && object->ai.respawn_locator == NULL)
                             limit = creature->min_respawn_count +
-                                    (Game.difficulty - 1) * (creature->max_respawn_count - creature->min_respawn_count) / 9 + 1;
+                                    (Game.difficulty - 1) *
+                                        (creature->max_respawn_count - creature->min_respawn_count) / 9 +
+                                    1;
                         if (limit <= object->ai_respawn_count) {
                             object->apiobj.field_0x1f8 &= ~0x1000;
                             object->ai.reset_mode = 4;
@@ -6457,7 +6424,8 @@ void ManageGameObjects() {
                     object->apiobj.field_0x1f8 &= ~0x1000;
                     object->ai.reset_mode = 1;
                     f32 blend = 1.0f - (static_cast<f32>(static_cast<u32>(Game.difficulty)) - 1.0f) / 9.0f;
-                    object->ai_spawn_delay = creature->max_respawn_time * blend + creature->min_respawn_time * (1.0f - blend);
+                    object->ai_spawn_delay =
+                        creature->max_respawn_time * blend + creature->min_respawn_time * (1.0f - blend);
                 } else {
                     object->field_0x101c = 2.0f;
                 }
@@ -6474,36 +6442,38 @@ void ManageGameObjects() {
             AICREATURE *creature = &system->creatures[object->ai.field_0x134];
             if (object->ai.reset_mode == 0) {
                 switch (creature->activate_type) {
-                case 0:
-                    if (Game.difficulty >= creature->activation_difficulty)
-                        ResetAICreature(object, system);
-                    else
-                        object->ai.reset_mode = 4;
-                    break;
-                case 1:
-                    if (creature->activate_area == NULL) {
-                        creature->activate_type = 0;
-                    } else {
-                        i32 area = creature->activate_area - system->areas;
-                        i64 mask = static_cast<i32>(1u << (area & 31));
-                        if (player != NULL && (player->apiobj.ai_area_mask & mask) != 0) {
-                            if (Game.difficulty < creature->activation_difficulty) {
-                                object->ai.reset_mode = 4;
-                            } else if (creature->count > 1 && creature->start_stagger > 0.0f &&
-                                       object->ai.group_member_index != 0) {
-                                object->ai.reset_mode = 1;
-                                object->ai_spawn_delay = static_cast<f32>(static_cast<u32>(object->ai.group_member_index)) *
-                                                         creature->start_stagger;
-                            } else {
-                                ResetAICreature(object, system);
+                    case 0:
+                        if (Game.difficulty >= creature->activation_difficulty)
+                            ResetAICreature(object, system);
+                        else
+                            object->ai.reset_mode = 4;
+                        break;
+                    case 1:
+                        if (creature->activate_area == NULL) {
+                            creature->activate_type = 0;
+                        } else {
+                            i32 area = creature->activate_area - system->areas;
+                            i64 mask = static_cast<i32>(1u << (area & 31));
+                            if (player != NULL && (player->apiobj.ai_area_mask & mask) != 0) {
+                                if (Game.difficulty < creature->activation_difficulty) {
+                                    object->ai.reset_mode = 4;
+                                } else if (creature->count > 1 && creature->start_stagger > 0.0f &&
+                                           object->ai.group_member_index != 0) {
+                                    object->ai.reset_mode = 1;
+                                    object->ai_spawn_delay =
+                                        static_cast<f32>(static_cast<u32>(object->ai.group_member_index)) *
+                                        creature->start_stagger;
+                                } else {
+                                    ResetAICreature(object, system);
+                                }
                             }
                         }
-                    }
-                    break;
-                case 2:
-                    if (Game.difficulty >= creature->activation_difficulty)
-                        AIScriptProcess(system, &object->apiobj, &object->ai, &object->ai.script_process, FRAMETIME);
-                    break;
+                        break;
+                    case 2:
+                        if (Game.difficulty >= creature->activation_difficulty)
+                            AIScriptProcess(system, &object->apiobj, &object->ai, &object->ai.script_process,
+                                            FRAMETIME);
+                        break;
                 }
             } else if (object->ai.reset_mode == 1) {
                 AIGROUP *group = object->ai.group;

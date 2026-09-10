@@ -67,6 +67,12 @@ u32 NuInputManager::GetMaxDevices() const {
     return this->max_devices;
 }
 
+void NuInputManager::KillRumbleAll() {
+    for (u32 i = 0; i < max_devices; ++i)
+        devices[i]->KillRumble();
+    UpdateAll(0.0f);
+}
+
 NuInputDevice *NuInputManager::GetDevice(u32 port) {
     return this->devices[port];
 }

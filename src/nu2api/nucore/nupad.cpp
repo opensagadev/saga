@@ -20,8 +20,64 @@ static i32 g_directpadMapping;
 NUPADMAPPING g_nupadMapping[MAX_GAME_PAD_COUNT];
 i32 g_profilePlayerPad = -1;
 i32 MaxGamePads = MAX_GAME_PAD_COUNT;
+i16 PlayerLastPort[8] = {-1, -1, -1, -1, -1, -1, -1, -1};
 char UseCorrectDeadZoning;
 i32 enable_touch_controls = 1;
+
+void NuPadSetMaxGamePads(i32 count) {
+    MaxGamePads = count;
+}
+
+void NuPadSetValid(i32 port, i32 valid) {
+    g_nupadScannedPads[port].is_valid = valid;
+}
+
+i32 NuPadGetPort(i32 player) {
+    i32 port = g_nupadMapping[player].port;
+    if (port >= 0 && g_nupadScannedPads[port].is_valid)
+        return port;
+    return -1;
+}
+
+i32 NuPadGetPlayer(i32 port) {
+    i32 player = -1;
+    if (g_nupadScannedPads[port].is_valid)
+        player = g_nupadScannedPads[port].mapped_to_pad;
+    return player;
+}
+
+i32 NuPadGetFirstActivePad() {
+    return g_profilePlayerPad;
+}
+
+void NuPadSetMotors(NUPAD *pad, i32 motor0, i32 motor1) {
+    if (g_directpadMapping && g_nupadScannedPads[pad->port].is_valid) {
+        NuPadSetMotorsPS(pad->port, motor0, motor1);
+    } else if (g_nupadMapping[pad->port].port != -1) {
+        NuPadSetMotorsPS(g_nupadMapping[pad->port].port, motor0, motor1);
+    }
+}
+
+void NuPadSetDirectMappingState(i32 state) {
+    g_directpadMapping = state;
+}
+
+void NuPadUseCorrectDeadZoning(i32 state) {
+    UseCorrectDeadZoning = state;
+}
+
+void NuPadMapPortToPS2Port(i32 pad, i32 port) {
+    g_nupadMapping[pad].port = port;
+    g_nupadScannedPads[port].mapped_to_pad = pad;
+    g_nupadScannedPads[port].digital_state.pressed = 0;
+}
+
+void NuPadMapPlayerToPort(i32 player, i32 port) {
+    NuPadSetStatus(player, NUPAD_STATUS_INACTIVE);
+    NuPadMapPortToPS2Port(player, port);
+    NuPadSetStatus(player, NUPAD_STATUS_ACTIVE);
+    PlayerLastPort[player] = port;
+}
 
 extern "C" void NuPadSetStatus(i32 pad, i32 status) {
     if (status == NUPAD_STATUS_ACTIVE) {
@@ -534,6 +590,28 @@ void NuPadRecordStart(void) {
     nuapi.pad_record.is_recording = 1;
 }
 
+void NuPadRecordInit(NURECMODE mode, char *filepath, VARIPTR *buffer, VARIPTR end, i32 size) {
+    NUPADREC *record = &nuapi.pad_record;
+    switch (mode) {
+        default:
+            record->mode = NUPAD_NORM;
+            break;
+        case NUPAD_RECORD:
+            record->mode = NUPAD_RECORD;
+            record->record.void_ptr = NuMemoryGet()->GetThreadMem()->_BlockAlloc(
+                size + 4, 4, NuMemoryManager::MEM_ALLOC_SET_TO_ZERO, "", NUMEMORY_CATEGORY_NONE);
+            record->record.addr = (record->record.addr + 3) & ~(usize)3;
+            record->buf_start = record->record.u8_ptr;
+            record->buf_end = record->record.u8_ptr + size;
+            record->filepath = filepath;
+            break;
+        case NUPAD_PLAY:
+            NuPadRecordLoad(filepath, buffer, end);
+            record->filepath = filepath;
+            break;
+    }
+}
+
 void NuPadRecordPlay(NUGENERICPAD *pad) {
     VARIPTR *record_ptr;
 
@@ -630,5 +708,60 @@ void NuPadRecordSave(char *filepath) {
 
         record->should_end = 0;
         record->mode = NUPAD_NORM;
+    }
+}
+
+void NuPadRecordLoad(char *filepath, VARIPTR *buffer, VARIPTR end) {
+    NUPADREC *record = &nuapi.pad_record;
+    record->mode = NUPAD_NORM;
+    if (filepath != NULL) {
+        NUFILE file = NuFileOpen(filepath, NUFILE_READ);
+        if (file != 0) {
+            i32 size = NuFileReadInt(file);
+            record->record.void_ptr = NuMemoryGet()->GetThreadMem()->_BlockAlloc(
+                size + 4, 4, NuMemoryManager::MEM_ALLOC_SET_TO_ZERO, "", NUMEMORY_CATEGORY_NONE);
+            record->record.addr = (record->record.addr + 3) & ~(usize)3;
+            if (record->record.void_ptr != NULL) {
+                record->buf_start = record->record.u8_ptr;
+                NuFileRead(file, record->record.void_ptr, size);
+                NuFileClose(file);
+                record->buf_end = record->record.u8_ptr + size;
+                record->mode = NUPAD_PLAY;
+            }
+        }
+    }
+}
+
+void NuPadRecordSetPlayEndButtons(i32 buttons) {
+    nuapi.pad_record.end_play_buttons = buttons;
+}
+
+void NuPadRecordSetRecordEndButtons(i32 buttons) {
+    nuapi.pad_record.end_record_buttons = buttons;
+}
+
+void NuPadRecordEndFrame() {
+    VARIPTR *cursor;
+    if (nuapi.pad_record.is_recording) {
+        cursor = (VARIPTR *)&nuapi.pad_record.buf_start;
+        nuapi.pad_record.is_recording = 0;
+    }
+    cursor = &nuapi.pad_record.record;
+    switch (nuapi.pad_record.mode) {
+        case NUPAD_PLAY:
+            if (cursor->u8_ptr == nuapi.pad_record.buf_end) {
+                nuapi.pad_record.mode = NUPAD_NORM;
+            } else {
+                nuapi.frametime = *cursor->f32_ptr++;
+            }
+            break;
+        case NUPAD_RECORD:
+            *cursor->f32_ptr++ = nuapi.frametime;
+            if (cursor->u8_ptr > nuapi.pad_record.buf_end - 0x308) {
+                nuapi.pad_record.mode = NUPAD_NORM;
+            }
+            break;
+        default:
+            break;
     }
 }

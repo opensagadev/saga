@@ -166,6 +166,7 @@ namespace nu2api {
 } // namespace nu2api
 
 using nu2api::g_shaderUniforms;
+extern "C" nu2api::ShaderUniformRecord *NuShaderUniformGetByString(const char *name);
 using nu2api::ShaderUniformRecord;
 
 DECOMP_ASSERT(sizeof(nu2api::ShaderUniformRecord) == 0x5c, "Shader uniform record size");

@@ -77,13 +77,6 @@ extern "C" void NuSpecialGetNext(nuhspecial_s *special) {
 
 namespace {
 
-    struct NuSpecialLegacyLayout {
-        u8 pad_00[0x40];
-        void *instance;
-        char *name;
-        u32 flags;
-    };
-
     struct NuLegacyInstanceLayout {
         u8 pad_00[0x44];
         union {

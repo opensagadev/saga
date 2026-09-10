@@ -63,10 +63,6 @@ NUFPCOMJMPCTX NuMusic::track_jmp_tab[15] = {
 // Globals driving GamePlayMusic. The original keeps these in the batman TU.
 i32 NOMUSIC = 0;
 i32 MusicOther = 0;
-static i32 CurrentMusicPair_Quiet = 0;
-static i32 last_currentmusicpair_quiet = 0;
-i32 sticky_attack __asm__("_ZL13sticky_attack") = 0;
-f32 sticky_attack_time __asm__("_ZL18sticky_attack_time") = 0.0f;
 i32 PlayersUnderAttack = 0;
 i32 (*CheckMusicOtherFn)(void) = NULL;
 
@@ -1140,69 +1136,6 @@ extern "C" f32 numusicGetDuckVolume(void) {
 // boot/init call and 1 when re-invoked from the main loop (where it bails
 // out early if the "other" pair hasn't changed). Classes: 1 = quiet,
 // 2 = action, 0x20 = plain theme (the title music lives here).
-i32 GamePlayMusic(LEVELDATA_s *level, i32 check, OPTIONSSAVE_s *options) {
-    (void)options;
-    i32 other = MusicOther;
-    last_currentmusicpair_quiet = CurrentMusicPair_Quiet;
-    MusicOther = 0;
-    if (NOSOUND != 0) {
-        last_currentmusicpair_quiet = CurrentMusicPair_Quiet;
-        MusicOther = 0;
-        return NOSOUND;
-    }
-    if (NOMUSIC != 0) {
-        last_currentmusicpair_quiet = CurrentMusicPair_Quiet;
-        MusicOther = 0;
-        return NOMUSIC;
-    }
-
-    i32 music_other = 0;
-    if (CheckMusicOtherFn != NULL) {
-        music_other = CheckMusicOtherFn();
-    }
-
-    if (check == 0) {
-        sticky_attack_time = 0;
-        sticky_attack = PlayersUnderAttack;
-    } else if (music_other == other) {
-        MusicOther = music_other;
-        return music_other;
-    }
-
-    MusicOther = music_other;
-    // music_tracks is [class][pair]: the quiet slot of the selected pair,
-    // plus the action/ambient slots of the MusicOther pair.
-    music_man.SelectTrackByHandle(TRACK_CLASS_QUIET, level->music_tracks[0][music_other]);
-    music_man.SelectTrackByHandle(TRACK_CLASS_ACTION, level->music_tracks[1][MusicOther]);
-    music_man.SelectTrackByHandle(TRACK_CLASS_NOMUSIC, level->music_tracks[2][MusicOther]);
-
-    if (SuperOptions.music_enabled == 0) {
-        return music_man.PlayTrack(TRACK_CLASS_NOMUSIC);
-    }
-
-    // Attack mode: prefer the pair matching the attack state.
-    if (sticky_attack == 0) {
-        i32 handle = music_man.GetTrackHandle(TRACK_CLASS_QUIET, NULL);
-        if (handle != -1) {
-            return music_man.PlayTrack(TRACK_CLASS_QUIET);
-        }
-        handle = music_man.GetTrackHandle(TRACK_CLASS_ACTION, NULL);
-        if (handle == -1) {
-            return music_man.PlayTrack(TRACK_CLASS_NOMUSIC);
-        }
-        return music_man.PlayTrack(TRACK_CLASS_ACTION);
-    } else {
-        i32 handle = music_man.GetTrackHandle(TRACK_CLASS_ACTION, NULL);
-        if (handle == -1) {
-            handle = music_man.GetTrackHandle(TRACK_CLASS_QUIET, NULL);
-            if (handle != -1) {
-                return music_man.PlayTrack(TRACK_CLASS_QUIET);
-            }
-            return music_man.PlayTrack(TRACK_CLASS_NOMUSIC);
-        }
-        return music_man.PlayTrack(TRACK_CLASS_ACTION);
-    }
-}
 
 const char *NuMusic::ClassToName(u32) {
     return "UNKNOWN";

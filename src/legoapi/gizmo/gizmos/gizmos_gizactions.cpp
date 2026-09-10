@@ -719,15 +719,15 @@ static __used__ void GizAction_SetAIMessage(GIZFLOW_s *, FLOWBOX_s *, char **par
     }
     GIZAIMESSAGE_s *message = CheckGizAIMessage(gizaimessagesys, name, NULL);
     switch (mode) {
-    case 0:
-        message->value = value;
-        break;
-    case 1:
-        message->value = value + message->value;
-        break;
-    case -1:
-        message->value = message->value - value;
-        break;
+        case 0:
+            message->value = value;
+            break;
+        case 1:
+            message->value = value + message->value;
+            break;
+        case -1:
+            message->value = message->value - value;
+            break;
     }
 }
 

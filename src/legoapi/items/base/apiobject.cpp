@@ -503,8 +503,7 @@ extern "C" {
                     target_visible = 0;
                 }
                 if ((source_visible | target_visible) != 0) {
-                    if (system->skip_los_raycast || target->skip_los_raycast ||
-                        source->skip_los_raycast) {
+                    if (system->skip_los_raycast || target->skip_los_raycast || source->skip_los_raycast) {
                         if (source_visible != 0)
                             system->line_of_sight[source_index] |= (u64)1 << target_index;
                         else

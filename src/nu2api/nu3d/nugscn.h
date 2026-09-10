@@ -1,4 +1,5 @@
 #pragma once
+#include "nu2api/numath/nuvec4.h"
 
 #include "decomp.h"
 
@@ -37,26 +38,29 @@ typedef struct nuvideoresheader_s {
 extern NUVIDEORESHEADER g_VideoResHeader;
 
 struct nudisplayscene_s {
-    u32 render_scene_id; // 0x00
-    void *state_ptr;     // 0x04
-    u32 clear_flags;     // 0x08
-    u32 bg_colour;       // 0x0c
-    f32 clear_alpha;     // 0x10
-    f32 vp_x;            // 0x14
-    f32 vp_y;            // 0x18
-    f32 vp_w;            // 0x1c
-    f32 vp_h;            // 0x20
-    void *unknown_24;    // 0x24
-    u32 unknown_28;      // 0x28
-    u8 pad2c[0x0c];      // 0x2c-0x37
-    u32 unknown_38;      // 0x38
-    void *unknown_3c;    // dynamic light
-    i32 unknown_40;      // 0x40
-    u32 unknown_44;      // 0x44
-    u32 unknown_48;      // 0x48
-    u32 unknown_4c;      // 0x4c
-    u32 unknown_50;      // 0x50
-    u32 unknown_54;      // 0x54
+    u32 render_scene_id;  // 0x00
+    void *state_ptr;      // 0x04
+    u32 clear_flags;      // 0x08
+    u32 bg_colour;        // 0x0c
+    f32 clear_alpha;      // 0x10
+    f32 vp_x;             // 0x14
+    f32 vp_y;             // 0x18
+    f32 vp_w;             // 0x1c
+    f32 vp_h;             // 0x20
+    void *unknown_24;     // 0x24
+    u32 unknown_28;       // 0x28
+    u8 burnout_intensity; // 0x2c
+    u8 pad2d[3];
+    f32 burnout_flare;     // 0x30
+    f32 burnout_threshold; // 0x34
+    u32 unknown_38;        // 0x38
+    void *unknown_3c;      // dynamic light
+    i32 unknown_40;        // 0x40
+    u32 unknown_44;        // 0x44
+    u32 unknown_48;        // 0x48
+    u32 unknown_4c;        // 0x4c
+    u32 unknown_50;        // 0x50
+    u32 unknown_54;        // 0x54
     union {
         NuBloomParameters bloom;
         struct {
@@ -73,20 +77,22 @@ struct nudisplayscene_s {
             u8 padb0[0x14];
         };
     };
-    u32 unknown_c4;          // 0xc4
-    u8 padc8[0x18];          // 0xc8-0xdf
-    u32 unknown_e0;          // 0xe0
-    u32 unknown_e4;          // 0xe4
-    NUMTX motion_previous;   // 0xe8
-    NUMTX motion_current;    // 0x128
-    f32 motion_scale;        // 0x168
-    f32 motion_maximum;      // 0x16c
-    f32 motion_falloff;      // 0x170
-    u32 unknown_174;         // 0x174
-    u32 unknown_178;         // 0x178
-    i32 accumulation_frames; // 0x17c
-    i32 accumulation_mode;   // 0x180
-    f32 accumulation_blend;  // 0x184
+    u32 texture_blend_enabled;       // 0xc4
+    i32 texture_blend_arg0;          // 0xc8
+    i32 texture_blend_arg1;          // 0xcc
+    NUVEC4 texture_blend_parameters; // 0xd0
+    u32 unknown_e0;                  // 0xe0
+    u32 unknown_e4;                  // 0xe4
+    NUMTX motion_previous;           // 0xe8
+    NUMTX motion_current;            // 0x128
+    f32 motion_scale;                // 0x168
+    f32 motion_maximum;              // 0x16c
+    f32 motion_falloff;              // 0x170
+    u32 unknown_174;                 // 0x174
+    u32 unknown_178;                 // 0x178
+    i32 accumulation_frames;         // 0x17c
+    i32 accumulation_mode;           // 0x180
+    f32 accumulation_blend;          // 0x184
     union {
         NuSpeedBlurParameters speed_blur;
         struct {

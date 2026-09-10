@@ -6,6 +6,11 @@
 #include <string.h>
 
 #include "nu2api/nucore/numemory.h"
+#include "nu2api/numath/nufloat.h"
+#include "nu2api/numath/nuvec.h"
+#include "nu2api/numath/nuvec4.h"
+
+extern "C" u32 NuWindRand(void);
 
 struct nugobj_s;
 struct PartHeader;
@@ -17,6 +22,17 @@ i32 nurndr_pixel_height;
 i32 nurndr_nforced_mtls;
 NUMTL **nurndr_forced_mtl_table;
 NUMTL *nurndr_forced_mtl;
+
+i32 global_GobjIsReflectedGeometry;
+i32 global_GobjIsShadowReceive;
+
+i32 NuRndIsReflectionGobj(void) {
+    return global_GobjIsReflectedGeometry;
+}
+
+i32 NuRndIsShadowReceiveRenderGobj(void) {
+    return global_GobjIsShadowReceive;
+}
 
 void NuRndrInitEx(i32 stream_buffer_size, VARIPTR *buffer) {
     NuRndrStreamInit(stream_buffer_size, buffer);
@@ -117,10 +133,6 @@ void NuRndrBurstObjBegin(nugobj_s *, void (*)(rndrstream_s *, numtx_s *, i32)) {
 void NuRndrRectUV2dNoScale(float, float, float, float, float, float, float, float, i32, numtl_s *) {
 }
 
-i32 NuRndrFlickerBeginScene() {
-    return 1;
-}
-
 void NuRndrParticleSetRepeat(nuvec_s *position) {
     NUVEC repeat = {
         (position->x - NuRndrDebBase.x) / NuRndrDebRange.x,
@@ -135,10 +147,33 @@ void NuRndrParticleSetRepeat(nuvec_s *position) {
     position->z = NuRndrDebBase.z + repeat.z * NuRndrDebRange.z;
 }
 
-void NuRndrCalcRandEllipsePos(nuvec4_s *, numtx_s *, nuvec_s *) {
+void NuRndrCalcRandEllipsePos(nuvec4_s *position, numtx_s *matrix, nuvec_s *axes) {
+    f32 x = (f32)(i32)NuWindRand() - 32768.0f;
+    f32 y = (f32)(i32)NuWindRand() - 32768.0f;
+    f32 z = (f32)(i32)NuWindRand() - 32768.0f;
+    f32 scale = 1.0f / NuFsqrt(x * x + y * y + z * z);
+    x *= scale;
+    y *= scale;
+    z *= scale;
+    position->x = axes[1].x * x + axes[2].x * y + axes[3].x * z + axes[0].x;
+    position->y = axes[1].y * x + axes[2].y * y + axes[3].y * z + axes[0].y;
+    position->z = axes[1].z * x + axes[2].z * y + axes[3].z * z + axes[0].z;
+    position->w = 1.0f;
+    NuVec4MtxTransformVU0(position, position, matrix);
 }
 
-void NuRndrCalcRandCylinderPos(nuvec4_s *, numtx_s *, nuvec_s *) {
+void NuRndrCalcRandCylinderPos(nuvec4_s *position, numtx_s *matrix, nuvec_s *axes) {
+    f32 x = (f32)((i32)NuWindRand() - 32768) * (1.0f / 32768.0f);
+    f32 y = (f32)(i32)NuWindRand() - 32768.0f;
+    f32 z = (f32)(i32)NuWindRand() - 32768.0f;
+    f32 scale = 1.0f / NuFsqrt(y * y + z * z);
+    y *= scale;
+    z *= scale;
+    position->x = axes[1].x * x + axes[2].x * y + axes[3].x * z + axes[0].x;
+    position->y = axes[1].y * x + axes[2].y * y + axes[3].y * z + axes[0].y;
+    position->z = axes[1].z * x + axes[2].z * y + axes[3].z * z + axes[0].z;
+    position->w = 1.0f;
+    NuVec4MtxTransformVU0(position, position, matrix);
 }
 
 extern "C" {

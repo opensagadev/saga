@@ -3,6 +3,50 @@
 #include <stdarg.h>
 #include <string.h>
 
+extern "C" i32 Nu360GetCommandLine(char **arguments, i32 capacity) {
+    i32 i;
+    i32 count;
+    i32 done;
+    char *dest;
+    char *source;
+    // The Android original has no command-line provider, but retains this parser.
+    char *command_line = NULL;
+    i32 length;
+    count = 0;
+    if (command_line != NULL) {
+        i = 0;
+        done = 0;
+        dest = arguments[0];
+        source = command_line;
+        if (*source == '\0') {
+            return 0;
+        }
+        count = 0;
+        length = strlen(source);
+        while (i < length && !done) {
+            if (*source == '\0' || *source == ' ') {
+                if (*source == '\0') {
+                    done = 1;
+                    *dest = '\0';
+                } else if (count >= capacity - 1) {
+                    done = 1;
+                    *dest = '\0';
+                } else {
+                    count++;
+                    dest = arguments[count];
+                }
+            } else {
+                *dest = *source;
+                dest++;
+            }
+            source++;
+            i++;
+        }
+        *dest = '\0';
+    }
+    return count + 1;
+}
+
 #include "decomp.h"
 
 #include "nu2api/nu3d/numtl.h"

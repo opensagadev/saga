@@ -12,8 +12,8 @@ class NuInputManager {
     NuInputDevice *GetDevice(u32 port);
     NuInputDevice *GetFirstDeviceByType(NUPADTYPE type);
 
-    void GetDevice(u32 port) const;
-    void GetFirstDeviceByType(NUPADTYPE type) const;
+    const NuInputDevice *GetDevice(u32 port) const;
+    const NuInputDevice *GetFirstDeviceByType(NUPADTYPE type) const;
     void KillRumbleAll();
 
   private:

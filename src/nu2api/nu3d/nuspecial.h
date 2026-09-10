@@ -10,6 +10,25 @@
 #include "nu2api/numath/numtx.h"
 
 struct nuinstanim_s;
+struct NuSpecialLegacyLayout {
+    u8 pad_00[0x40];
+    void *instance;
+    char *name;
+    u32 flags;
+};
+
+struct NUSPECIALVERTEXSTATES {
+    u8 count;
+    u8 block_count; // Number of 16-byte blocks allocated for values.
+    u8 flags;
+    u8 unknown_03;
+    i8 *values;
+};
+extern "C" NUSPECIALVERTEXSTATES *nuspecial_vertex_states;
+extern "C" NUSPECIALVERTEXSTATES *NuVertexStatesCreate(VARIPTR *buffer, i32 count);
+extern "C" void NuVertexStatesSetGroupState(NUSPECIALVERTEXSTATES *states, i32 group, i32 value);
+extern "C" i32 nuspecial_vertex_noffsets;
+extern "C" VARIPTR nuspecial_vertex_offsets;
 
 enum NUSPECIAL_DRAW_FLAGS {
     NUSPECIAL_DRAW_MATERIAL_MAP = 1 << 2,

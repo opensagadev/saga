@@ -269,8 +269,7 @@ void MechTouchUITagButton::Render() {
 MechTouchUITagButton::~MechTouchUITagButton() {
 }
 
-MechTouchUITexButton::MechTouchUITexButton(VuVec const &pos, float radius)
-    : MechTouchUIElement(pos, radius) {
+MechTouchUITexButton::MechTouchUITexButton(VuVec const &pos, float radius) : MechTouchUIElement(pos, radius) {
     rectangular = 0;
     alpha_target = &alpha;
     alpha_elapsed = 0.0f;
@@ -314,10 +313,8 @@ void MechTouchUITexButton::Process(float) {
 }
 
 void MechTouchUITexButton::Render() {
-    RndrTexQuad((position.x + 1.0f) * 0.5f, (1.0f - position.y) * 0.5f,
-                scale * radius_x, radius_y * scale,
-                static_cast<i32>((static_cast<u32>(static_cast<i32>(alpha * 128.0f)) << 24) | 0x808080),
-                material, 0);
+    RndrTexQuad((position.x + 1.0f) * 0.5f, (1.0f - position.y) * 0.5f, scale * radius_x, radius_y * scale,
+                static_cast<i32>((static_cast<u32>(static_cast<i32>(alpha * 128.0f)) << 24) | 0x808080), material, 0);
 }
 
 void MechTouchUITexButton::UpdateTexture(i16 texture) {

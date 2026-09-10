@@ -27,8 +27,6 @@ static __used__ void eduicbItemDestroyExpander(void) {
 }
 static __used__ void eduicbItemDestroyFilter(void) {
 }
-static __used__ void eduicbItemExpanderClose(void) {
-}
 static __used__ void eduicbItemFilePickDestroy(void) {
 }
 static __used__ void eduicbItemGradPickDestroy(void) {

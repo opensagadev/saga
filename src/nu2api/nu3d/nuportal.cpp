@@ -360,8 +360,8 @@ extern "C" i32 clipTestSphere(NUPORTALSPHERE *sphere, NUFRUSTRUM *frustum) {
             ++fully_inside;
         }
     }
-    const f32 camera_distance = cam_plane.a * sphere->center.x + cam_plane.b * sphere->center.y +
-                                cam_plane.c * sphere->center.z + cam_plane.d;
+    const f32 camera_distance =
+        cam_plane.a * sphere->center.x + cam_plane.b * sphere->center.y + cam_plane.c * sphere->center.z + cam_plane.d;
     if (camera_distance < -sphere->radius) {
         return 0;
     }

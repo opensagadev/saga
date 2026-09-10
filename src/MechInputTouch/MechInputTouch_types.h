@@ -106,13 +106,12 @@ float GetAspectRatio();
 
 struct MechTouchUIElement : NuMechPtr<MechTouchUIElement, 4>::ManagedBase {
     MechTouchUIElement()
-        : position(), radius_x(0.0f), radius_y(0.0f), on_down(NULL), on_click(NULL), on_hold(NULL),
-          on_release(NULL), on_leave(NULL), hovered(0), disabled(0), visible(1), rectangular(0), owner(NULL) {
+        : position(), radius_x(0.0f), radius_y(0.0f), on_down(NULL), on_click(NULL), on_hold(NULL), on_release(NULL),
+          on_leave(NULL), hovered(0), disabled(0), visible(1), rectangular(0), owner(NULL) {
     }
     MechTouchUIElement(VuVec const &pos, float radius)
-        : position(pos), radius_x(GetAspectRatio() * radius), radius_y(radius), on_down(NULL),
-          on_click(NULL), on_hold(NULL), on_release(NULL), on_leave(NULL), hovered(0), disabled(0), visible(1),
-          owner(NULL) {
+        : position(pos), radius_x(GetAspectRatio() * radius), radius_y(radius), on_down(NULL), on_click(NULL),
+          on_hold(NULL), on_release(NULL), on_leave(NULL), hovered(0), disabled(0), visible(1), owner(NULL) {
     }
     virtual ~MechTouchUIElement() {
     }

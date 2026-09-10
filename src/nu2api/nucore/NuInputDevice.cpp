@@ -1,4 +1,92 @@
 #include "nu2api/nucore/NuInputDevice.h"
+#include "nu2api/nucore/NuTouchInputButton.h"
+
+void NuTouchInputButton::Update(NuInputTouchData const *data) {
+    bool found = false;
+    u32 count = data->touch_count;
+    pressed = false;
+    for (u32 i = 0; i < count; ++i) {
+        u8 active = data->touch_events[i].unknown_00;
+        u8 released = data->touch_events[i].unknown_01;
+        u8 started = data->touch_events[i].unknown_02;
+        float tx = data->touch_events[i].unknown_04;
+        float ty = data->touch_events[i].unknown_08;
+        u32 touch_id = data->touch_events[i].unknown_14;
+        if (!released && !started && !active)
+            continue;
+        if (touch_captured) {
+            if (touch_id == captured_touch_id) {
+                pressed = true;
+                found = true;
+            }
+        } else if (started) {
+            float dy = ty - y;
+            float dx = tx - x;
+            float ry = height * 0.5f;
+            float rx = width * 0.5f;
+            if (dx * dx / (rx * rx) + dy * dy / (ry * ry) <= 1.0f) {
+                captured_touch_id = touch_id;
+                touch_captured = true;
+                pressed = true;
+                found = true;
+            }
+        }
+        if (released && captured_touch_id == touch_id)
+            touch_captured = false;
+    }
+    if (!found)
+        touch_captured = false;
+}
+
+void NuInputDevice::ProcessTouchData() {
+    if (!(caps & 0x400))
+        return;
+
+    u32 count = touch_data.touch_count;
+    u32 previous_count = unknown_touch_data.touch_count;
+    for (u32 i = 0; i < count; ++i) {
+        touch_data.touch_events[i].unknown_01 = 0;
+        touch_data.touch_events[i].unknown_02 = 0;
+    }
+    for (u32 i = 0; i < count; ++i) {
+        u32 previous = 0xff;
+        for (u32 j = 0; j < previous_count; ++j) {
+            if (unknown_touch_data.touch_events[j].unknown_14 == touch_data.touch_events[i].unknown_14) {
+                previous = j;
+                break;
+            }
+        }
+        if (previous == 0xff)
+            touch_data.touch_events[i].unknown_02 = 1;
+    }
+    u32 added = 0;
+    for (u32 i = 0; i < previous_count; ++i) {
+        if (unknown_touch_data.touch_events[i].unknown_01)
+            continue;
+        u32 current = 0xff;
+        for (u32 j = 0; j < count; ++j) {
+            if (touch_data.touch_events[j].unknown_14 == unknown_touch_data.touch_events[i].unknown_14) {
+                current = j;
+                break;
+            }
+        }
+        if (current == 0xff && added < 10 - count) {
+            NuInputTouch *touch = &touch_data.touch_events[count + added++];
+            *touch = unknown_touch_data.touch_events[i];
+            touch->unknown_01 = 1;
+            touch->unknown_02 = 0;
+        }
+    }
+    touch_data.touch_count = count + added;
+}
+
+NUPADATTACHMENTTYPE NuInputDevice::GetAttachmentType() const {
+    return attch_type;
+}
+
+u32 NuInputDevice::GetCaps() const {
+    return caps;
+}
 
 #include <string.h>
 

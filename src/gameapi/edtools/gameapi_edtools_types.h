@@ -3,6 +3,7 @@
 #pragma once
 
 #include "nu2api/nucore/fixed_width.h"
+#include "nu2api/numath/nuvec.h"
 
 struct ClassObjectList;
 struct EdBitControl;
@@ -82,13 +83,28 @@ struct VuMtx;
 struct VuVec;
 struct burnout_s {
     i32 active;
-    u8 reserved_04[0x24 - 0x04];
+    NUVEC position;
+    float field_10, field_14, field_18, field_1c, field_20;
+};
+struct burn_parameters_s {
+    i32 field_00;
+    float field_04, field_08, field_0c, field_10, field_14;
+    i32 field_18;
+    float field_1c, field_20, field_24;
+    i32 field_28;
+    float field_2c, field_30, field_34, field_38, field_3c;
+    float field_40, field_44, field_48, field_4c, field_50;
 };
 struct burnset_s {
-    u8 reserved_000[0xd0];
+    burn_parameters_s parameters;
+    burn_parameters_s parameters_copy;
+    i32 field_a8, field_ac, field_b0, field_b4;
+    float field_b8, field_bc, field_c0, field_c4, field_c8, field_cc;
     burnout_s burnouts[32];
     i32 active_count;
     i32 selected_index;
+    float field_558, field_55c;
+    i32 field_560;
 };
 struct eduiiattr_s {};
 struct eduiitem_s;

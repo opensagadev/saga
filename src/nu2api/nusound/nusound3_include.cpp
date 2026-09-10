@@ -192,9 +192,9 @@ static NuSoundStreamer *g_NuSoundStreamer = NULL;
 static i16 *ActionPairTab;
 static i16 *AmbientPairTab;
 
-__attribute__((visibility("hidden"))) u16 *g_NuSoundLoadBits asm("_ZL17g_NuSoundLoadBits") = NULL;
-__attribute__((visibility("hidden"))) u16 *g_NuSoundLoadBitsCache asm("_ZL22g_NuSoundLoadBitsCache") = NULL;
-__attribute__((visibility("hidden"))) i32 g_NuSoundNumLoadBitShorts asm("_ZL25g_NuSoundNumLoadBitShorts") = 0;
+static u16 *g_NuSoundLoadBits = NULL;
+static u16 *g_NuSoundLoadBitsCache = NULL;
+static i32 g_NuSoundNumLoadBitShorts = 0;
 static NuThread *g_NuSoundLoadThread = NULL;
 static pthread_mutex_t g_NuSoundLoadCriticalSection = PTHREAD_MUTEX_INITIALIZER;
 
@@ -861,4 +861,14 @@ void NuSound3SetSampleTable(nusound_filename_info_s *info, variptr_u *buffer_sta
 
         g_NuSoundSamples.PushBack(*info);
     }
+}
+
+extern "C" void NuSound3SetRequestTable(u16 *request_bits, i32 short_count) {
+    if (g_NuSoundLoadBitsCache != NULL && g_NuSoundNumLoadBitShorts != short_count) {
+        delete g_NuSoundLoadBitsCache;
+    }
+
+    g_NuSoundLoadBitsCache = new u16[short_count];
+    g_NuSoundNumLoadBitShorts = short_count;
+    g_NuSoundLoadBits = request_bits;
 }

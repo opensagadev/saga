@@ -209,6 +209,7 @@ extern "C" {
     enum {
         NUDL_SCENE_FLAG_CLIP_MATERIALS = 0x02, // 0x74 bit1: material update requested
         NUDL_SCENE_FLAG_CLIPPING = 0x04,       // 0x74 bit2: clip objects present
+        NUDL_SCENE_FLAG_END_SCENE = 0x08,      // 0x74 bit3: update marked at EndScene
         NUDL_SCENE_FLAG_NEEDS_BUILD = 0x10,    // 0x74 bit4: rebuild dynamic items (AddRenderScene)
         NUDL_SCENE_RENDER_FLAG_CENTER_EXTENT_BOUNDS = 0x40,
         NUDL_SCENE_INSTANCE_VISIBILITY_ENABLED = 0x01,
@@ -274,7 +275,10 @@ extern "C" {
         nusortpri_s *sort_list;                              // 0x514 global sortpri chain
         i32 nrender_scenes;                                  // 0x518
         nudisplaylistrenderscene_s *front_render_scenes[24]; // 0x51c written by AddRenderScene
-        nudisplaylistrenderscene_s *safe_render_scenes[27];  // 0x57c read by DrawRenderScene(id)
+        nudisplaylistrenderscene_s *safe_render_scenes[24];  // 0x57c read by DrawRenderScene(id)
+        i32 max_fx;                                          // 0x5dc FX slot capacity
+        u8 *fx_used;                                         // 0x5e0 handle allocation flags
+        NUSORTPRI *fx_sort_pris;                             // 0x5e4 per-FX sort records
         void *fx_items;                                      // 0x5e8
         i32 loading_critical_section;                        // 0x5ec
         NUMTLANIMSET *mtlanim_list;                          // 0x5f0
@@ -359,6 +363,20 @@ extern "C" {
     void DisplayListUpdateRenderState(void *dl, void *local_state);
     void NuDisplayListLinkItem(nudisplaylist_s *dl, u8 type, void *call_addr);
     VARIPTR *NuDisplayListLinkItems(nudisplaylist_s *dl, i32 count);
+    void NuDisplayListLinkList(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *first, NUDISPLAYLISTITEM *last);
+    void NuDisplayListSetFxParam(i32 handle, i32 parameter, f32 value, i32 mode);
+    void NuDisplayListBeginCriticalSection(void);
+    void NuDisplayListEndCriticalSection(void);
+    void NuDisplayListEndScene(void);
+    void NuDisplayListDestroyFx(i32 handle);
+    i32 NuDisplayListCreateFx(i32 type, i32 priority, i32 layer);
+    void NuDisplayListDebugToFile(NUDISPLAYLISTITEM *item, i32 file);
+    void NuDisplayListCaptureBegin(void);
+    void NuDisplayListCaptureEnd(void);
+    void NuDisplayListDraw2D(void);
+    void NuDisplayListDrawAll(void);
+    void NuDisplaySceneClonePS(NUDLDLISTSCENE *source, NUDLDLISTSCENE *destination, VARIPTR *buffer);
+    void DisplayListCreateFxList(VARIPTR *buffer, VARIPTR end, i32 count);
     VARIPTR *NuDisplayListLinkItemVP(nudisplaylist_s *dl, u8 type, void *call_addr, VARIPTR *buf);
 
     // Debug helpers consumed by NuDisplayListCaptureSortPriority (defined as

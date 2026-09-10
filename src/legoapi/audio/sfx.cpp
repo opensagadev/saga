@@ -40,9 +40,7 @@ DECOMP_ASSERT(sizeof(RepeatSfx) == 0x10, "RepeatSfx size");
 static i32 repsfxcount;
 static RepeatSfx repsfxtab[32];
 static i32 ticktock;
-extern "C" f32 MusicVolume __asm__("_ZL11MusicVolume") __attribute__((visibility("hidden"))) = 1.0f;
-extern "C" i32 NumSfx __asm__("_ZL6NumSfx") __attribute__((visibility("hidden")));
-extern "C" i32 NumSfxInst __asm__("_ZL10NumSfxInst") __attribute__((visibility("hidden")));
+static f32 MusicVolume = 1.0f;
 static f32 CutVolume = 0.8f;
 
 extern "C" {
@@ -139,7 +137,10 @@ extern i16 id_WICKET;
 extern f32 chattersfxwait;
 extern i32 DoubleScore;
 
-extern __attribute__((visibility("hidden"))) GAMEAUDIO *GameAudio asm("_ZL9GameAudio");
+static GAMEAUDIO GameAudio_Default;
+static GAMEAUDIO *GameAudio = &GameAudio_Default;
+extern "C" void MenuRegisterSoundFX(i32, i32, i32, i32);
+i32 GameAudio_GetSfxId(i32);
 
 extern "C" {
     void SetSfxBit_On(i32 sound);
@@ -707,18 +708,9 @@ void LoadSpecialSfxFile(WORLDINFO *world) {
     }
 }
 
-
 extern "C" {
 
     f32 sfx_wait;
-
-    i32 GetLogicalSfxCount(void) {
-        return NumSfxInst;
-    }
-
-    i32 GetSfxCount(void) {
-        return NumSfx;
-    }
 
     i32 GetSfxIdN(char *name, i32 length) {
         for (i32 index = 0; index < 1600; ++index) {
@@ -1732,5 +1724,237 @@ void AddLevSfx(WORLDINFO_s *world, nuvec_s *position, char *name, i32 sfx) {
         world->level_sfx_count = index + 1;
     } else if (world->level_sfx[index].references != -1) {
         ++world->level_sfx[index].references;
+    }
+}
+
+void GameAudio_Init(GAMEAUDIO *audio) {
+    GameAudio = audio;
+    for (i32 i = 0; i < 0x55; ++i) {
+        audio->sfx_ids[i] = static_cast<i16>(GetSfxId(audio->sfx_names[i]));
+    }
+
+    MenuRegisterSoundFX(GameAudio_GetSfxId(0x2f), GameAudio_GetSfxId(0x30), GameAudio_GetSfxId(0x31),
+                        GameAudio_GetSfxId(0x32));
+}
+
+void GameAudio_Reset() {
+    memset(&GameAudio_Default, 0, sizeof(GameAudio_Default));
+    GameAudio = &GameAudio_Default;
+    memset(GameAudio_Default.sfx_names, 0, sizeof(GameAudio_Default.sfx_names));
+    for (i32 i = 0; i < 0x55; ++i) {
+        GameAudio_Default.sfx_ids[i] = -1;
+    }
+}
+
+void GameAudio_PlaySfx(i32 sfx, nuvec_s *position, i32 flags, i32 volume) {
+    if ((u32)sfx < 0x55) {
+        GameAudio_PlaySfxById(GameAudio->sfx_ids[sfx], position, flags, volume);
+    }
+}
+
+i32 GameAudio_GetSfxId(i32 sfx) {
+    if (static_cast<u32>(sfx) <= 0x54) {
+        return GameAudio->sfx_ids[sfx];
+    }
+    return -1;
+}
+
+void GameAudio_PlaySfxAndSetVolume(i32 sfx, nuvec_s *position, f32 volume) {
+    if (static_cast<u32>(sfx) < 0x55) {
+        PlaySfxByIdAndSetVolume(GameAudio->sfx_ids[sfx], position, volume);
+    }
+}
+
+extern "C" void MusicSeekOffset(i32 track, f32 seek_offset) {
+    const i16 transition_frames = Music.transition_frames;
+    const i16 primary_stream = Music.primary_stream;
+    if (seek_offset < 0.0f) {
+        seek_offset = Music.seek_offset;
+    }
+    if (track < 0 || track >= SFX_MUSIC_COUNT) {
+        return;
+    }
+
+    if (static_cast<u16>(Music.state - MUSIC_PLAYBACK_DUAL_STREAM) < 3) {
+        if (Music.current_track == track && !Music.pause_requested) {
+            return;
+        }
+        const i32 stream = Music.primary_stream;
+        Music.requested_track = -1;
+        Music.state = MUSIC_PLAYBACK_DUAL_STREAM;
+        Music.current_track = static_cast<i16>(track);
+        Music.queued_track = static_cast<i16>(track);
+        reinterpret_cast<u8 *>(&Music)[stream + 0x12] = 0;
+        if (transition_frames < 64) {
+            Music.pause_requested = true;
+        } else {
+            Music.pause_requested = false;
+            const i32 volume = static_cast<i32>(static_cast<f32>(g_music[track].index) * MusicVolume);
+            if (NOSOUND == 0 && NOMUSIC == 0) {
+                NuSound3StopStereoStream(stream);
+                NuSound3PlayStereoV(NUSOUNDPLAYTOK_STEREOSTREAM, stream, NUSOUNDPLAYTOK_SAMPLE, track,
+                                    NUSOUNDPLAYTOK_VOL, volume, NUSOUNDPLAYTOK_STARTOFFSET,
+                                    static_cast<f64>(seek_offset), NUSOUNDPLAYTOK_ONESHOT, NUSOUNDPLAYTOK_END);
+                Music.secondary_stream = primary_stream;
+            }
+            Music.transition_frames = 0;
+            Music.seek_offset = 0.0f;
+        }
+        return;
+    }
+
+    const i32 stream = Music.primary_stream;
+    Music.pause_requested = false;
+    reinterpret_cast<u8 *>(&Music)[stream + 0x12] = 0;
+    Music.state = MUSIC_PLAYBACK_ACTIVE;
+    Music.transition_frames = 0;
+    Music.requested_track = static_cast<i16>(track);
+    Music.current_track = static_cast<i16>(track);
+    Music.queued_track = static_cast<i16>(track);
+    const i32 volume = static_cast<i32>(static_cast<f32>(g_music[track].index) * MusicVolume);
+    if (NOSOUND == 0 && NOMUSIC == 0) {
+        NuSound3StopStereoStream(stream);
+        NuSound3PlayStereoV(NUSOUNDPLAYTOK_STEREOSTREAM, stream, NUSOUNDPLAYTOK_SAMPLE, track, NUSOUNDPLAYTOK_VOL,
+                            volume, NUSOUNDPLAYTOK_STARTOFFSET, static_cast<f64>(seek_offset), NUSOUNDPLAYTOK_ONESHOT,
+                            NUSOUNDPLAYTOK_END);
+        Music.transition_frames = 0;
+        Music.secondary_stream = primary_stream;
+    }
+}
+
+struct SoundTrackData {
+    u8 reserved_00[0x88];
+    u8 flags_88;
+};
+
+extern "C" void SoundUpdate(float frame_time) {
+    if (Music.update_delay != 0 || frame_time == 0.0f || static_cast<u16>(Music.state - 4) >= 10) {
+        return;
+    }
+
+    switch (Music.state) {
+        case MUSIC_PLAYBACK_ACTIVE:
+            goto active_music;
+        case 5:
+        case 6:
+        case 7:
+        case 9:
+            goto transition_music;
+        case 8:
+        case 10:
+            if (NuSound3GetStereoStreamStatus(Music.primary_stream) != NUSOUND_STEREO_STREAM_FINISHED) {
+                Music.state = static_cast<MusicPlaybackState>(7);
+            }
+            return;
+        case MUSIC_PLAYBACK_DUAL_STREAM:
+        case 12:
+        case MUSIC_PLAYBACK_DUAL_STREAM_PENDING:
+            goto linked_music;
+        default:
+            return;
+    }
+
+transition_music:
+    if (Music.state == 6 || Music.state == 9) {
+        frame_time += frame_time;
+    } else {
+        frame_time *= 0.2f;
+    }
+    Music.transition += frame_time;
+    if (Music.transition >= 1.0f) {
+        Music.transition = 1.0f;
+        const i32 other_stream = 1 - Music.primary_stream;
+        if (static_cast<u16>(Music.state - 5) <= 1) {
+            NuSound3PauseStereoStream(other_stream);
+        } else {
+            NuSound3StopStereoStream(other_stream);
+        }
+        Music.state = MUSIC_PLAYBACK_ACTIVE;
+        Music.transition_frames = 0;
+    }
+
+    if (Music.current_track != -1) {
+        NuSound3SetStereoStreamVolume(
+            Music.primary_stream,
+            static_cast<i32>(static_cast<f32>(g_music[Music.current_track].index) * Music.transition * MusicVolume));
+    }
+    if (Music.queued_track != -1) {
+        NuSound3SetStereoStreamVolume(1 - Music.primary_stream,
+                                      static_cast<i32>(static_cast<f32>(g_music[Music.queued_track].index) *
+                                                       (1.0f - Music.transition) * MusicVolume));
+    }
+    return;
+
+active_music:
+    if (NuSound3GetStereoStreamStatus(Music.secondary_stream) == NUSOUND_STEREO_STREAM_FINISHED) {
+        return;
+    }
+    if (Music.transition_frames <= 0x7f) {
+        ++Music.transition_frames;
+        if (Music.transition_frames <= 0x40) {
+            return;
+        }
+    }
+    if (Music.pause_requested) {
+        MusicPreSeek(Music.requested_track);
+    }
+    if (Music.transition_frames <= 0x18) {
+        return;
+    }
+    if (Music.restore_requested) {
+        RestoreGameMusic();
+        Music.restore_requested = false;
+    }
+    return;
+
+linked_music:
+    SoundTrackData *track_data = static_cast<SoundTrackData *>(Music.track_data);
+    if (track_data != NULL && (track_data->flags_88 & 2) != 0) {
+        Music.resume_frames = 0;
+    } else {
+        const i32 other_stream = 1 - Music.primary_stream;
+        if (NuSound3GetStereoStreamStatus(other_stream) == NUSOUND_STEREO_STREAM_FINISHED) {
+            Music.resume_frames = 0;
+        } else {
+            if (Music.resume_frames <= 0x3f) {
+                ++Music.resume_frames;
+                if (Music.resume_frames <= 8) {
+                    goto update_secondary_stream;
+                }
+            }
+            if (Music.current_track != -1 && Music.state != MUSIC_PLAYBACK_DUAL_STREAM_PENDING &&
+                NuSound3GetStereoStreamStatus(Music.primary_stream) != NUSOUND_STEREO_STREAM_FINISHED &&
+                !Music.pause_requested) {
+                if (Music.state == 12) {
+                    Music.state = MUSIC_PLAYBACK_STOPPED;
+                    NuSound3StopStereoStream(other_stream);
+                    NuSound3StopStereoStream(Music.primary_stream);
+                } else {
+                    Music.state = MUSIC_PLAYBACK_ACTIVE;
+                    NuSound3StopStereoStream(other_stream);
+                    NuSound3ResumeStereoStream(Music.primary_stream);
+                }
+                Music.transition = 1.0f;
+                NuSound3SetStereoStreamVolume(
+                    Music.primary_stream,
+                    static_cast<i32>(static_cast<f32>(g_music[Music.current_track].index) * MusicVolume));
+                Music.transition_frames = 0;
+                Music.requested_track = -1;
+            }
+        }
+    }
+
+update_secondary_stream:
+    if (NuSound3GetStereoStreamStatus(Music.secondary_stream) == NUSOUND_STEREO_STREAM_FINISHED) {
+        return;
+    }
+    if (Music.transition_frames <= 0x7f) {
+        ++Music.transition_frames;
+        if (Music.transition_frames <= 0x40) {
+            return;
+        }
+    }
+    if (Music.pause_requested) {
+        MusicPreSeek(Music.requested_track);
     }
 }

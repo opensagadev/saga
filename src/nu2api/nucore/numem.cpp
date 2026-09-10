@@ -4,6 +4,11 @@
 #include <string.h>
 #include <stdlib.h>
 
+// The original Android implementation does not change page protection.
+extern "C" i32 NuPhysicalProtect(void) {
+    return 0;
+}
+
 struct NUMEMALLOCATION {
     NUMEMALLOCATION *next;
     u8 unknown_04[12];

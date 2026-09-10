@@ -19,6 +19,7 @@
 
 #include "nu2api/nucore/numem.h"
 #include "nu2api/nucore/nuthread.h"
+#include "nu2api/nufile/nufile.h"
 #include "nu2api/nu3d/nurndrstat.h"
 #include "nu2api/nu3d/numtl.h"
 
@@ -61,8 +62,39 @@ static u8 s_2d_item_scratch[0x100] = {0};
 static u8 s_2d_state_storage[0x40] = {0};
 
 // Capture debug state (bss @0x11a0070 / @0x11a0068).
-static i32 s_capture_enabled; // do_capture
-static i32 s_capture_fh;      // capture file handle
+extern "C" {
+    i32 do_capture;
+    i32 capture_fh;
+    i32 nudlist_debug_level = 2;
+    void NuHtmlBegin(void *file);
+    void NuHtmlBanner(void);
+    void NuHtmlEnd(void);
+}
+
+// The original retains reads of this local BSS control despite having no
+// program-side setter. Preserve its externally observable debug accesses.
+static volatile i32 capture_dlist;
+
+extern "C" void NuDisplayListCaptureBegin(void) {
+    i32 request = capture_dlist;
+    if (request) {
+        nudlist_debug_level = request - 1;
+        capture_dlist = 0;
+        do_capture = 1;
+        capture_fh = NuFileOpen("dlist.htm", NUFILE_WRITE);
+        NuHtmlBegin((void *)(isize)capture_fh);
+        NuHtmlWrite("<body bgcolor=#C0C0C0>");
+    }
+}
+
+extern "C" void NuDisplayListCaptureEnd(void) {
+    if (do_capture) {
+        NuHtmlBanner();
+        NuHtmlEnd();
+        NuFileClose(capture_fh);
+        do_capture = 0;
+    }
+}
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Dispatch tables
@@ -228,10 +260,25 @@ extern "C" void DisplayListSetAlphaPS(nudisplaylistitem_s *prev_item, nudisplayl
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Debug capture
+extern "C" void NuDisplayListDebugToFile(NUDISPLAYLISTITEM *item, i32 file) {
+    NuHtmlWrite("<font face=courier new>\n");
+    if (item) {
+        i32 index = 0;
+        do {
+            DisplayListPrintItem(item, index, 0, nullptr, file);
+            if (item->id == kItemId_Next)
+                item = (NUDISPLAYLISTITEM *)item->next;
+            else
+                ++item;
+            ++index;
+        } while (item->type != kItemType_Terminator);
+        DisplayListPrintItem(item, index, 0, nullptr, file);
+    }
+}
 // ──────────────────────────────────────────────────────────────────────────────
 
 extern "C" void NuDisplayListCaptureSortPriority(nusortpri_s *sort_pri) {
-    if (!s_capture_enabled) {
+    if (!do_capture) {
         return;
     }
 
@@ -257,7 +304,7 @@ extern "C" void NuDisplayListCaptureSortPriority(nusortpri_s *sort_pri) {
     do {
         while (true) {
             printed_idx = idx;
-            DisplayListPrintItem(item, printed_idx, 0, nullptr, s_capture_fh);
+            DisplayListPrintItem(item, printed_idx, 0, nullptr, capture_fh);
             if (item->id != kItemId_Next) {
                 break;
             }
@@ -274,7 +321,7 @@ extern "C" void NuDisplayListCaptureSortPriority(nusortpri_s *sort_pri) {
         ++item;
         idx = printed_idx + 1;
     } while (item->type != kItemType_Terminator);
-    DisplayListPrintItem(item, printed_idx + 1, 0, nullptr, s_capture_fh);
+    DisplayListPrintItem(item, printed_idx + 1, 0, nullptr, capture_fh);
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -1127,4 +1174,16 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
 }
 
 extern "C" void NuDisplayListDraw2D(void) {
+}
+
+void NuDisplayListEndScene(void) {
+    NuDisplayListBeginCriticalSection();
+    for (i32 i = 0; i < global_dlist_manager.ndisplay_lists; ++i) {
+        NUDLDLISTSCENE *scene = global_dlist_manager.dlists[i];
+        if (scene->flags & (NUDL_SCENE_FLAG_CLIP_MATERIALS | NUDL_SCENE_FLAG_CLIPPING))
+            scene->flags |= NUDL_SCENE_FLAG_END_SCENE;
+    }
+    if (global_dlist_manager.dyn_mtl_dlist.flags & NUDL_SCENE_FLAG_CLIP_MATERIALS)
+        global_dlist_manager.dyn_mtl_dlist.flags |= NUDL_SCENE_FLAG_END_SCENE;
+    NuDisplayListEndCriticalSection();
 }

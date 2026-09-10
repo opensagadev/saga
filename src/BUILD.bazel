@@ -47,6 +47,7 @@ _ENGINE_SRCS = _ENGINE_ROOT_SRCS + glob(
 )
 
 _HOST_EXCLUDES = [
+    "nu2api/nucore/android/nupostresource_create.cpp",
     "java/android.cpp",
     "nu2api/nu3d/android/gles_extensions.cpp",
     "nu2api/nucore/android/NuInputDevice_android.cpp",
@@ -54,6 +55,7 @@ _HOST_EXCLUDES = [
 ]
 
 _HOST_COMMON_SRCS = [source for source in _ENGINE_SRCS if source not in _HOST_EXCLUDES] + [
+    "host/platform/postresource_create.cpp",
     "java/jni_stub.cpp",
     "host/harness/audio.cpp",
     "host/harness/load.cpp",

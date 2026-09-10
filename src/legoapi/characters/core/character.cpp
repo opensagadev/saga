@@ -749,15 +749,11 @@ static __used__ void ExtraDieSfx_LSW(GameObject_s *) {
 static __used__ void ExtraHurtSfx_LSW(GameObject_s *) {
 }
 
-
-
 extern AREADATA *DAGOBAH_ADATA;
 extern AREADATA *DEATHSTARESCAPE_ADATA;
 extern AREADATA *DEATHSTARRESCUE_ADATA;
 extern AREADATA *HOTHESCAPE_ADATA;
 extern AREADATA *JABBASPALACE_ADATA;
-
-
 
 static __used__ int IsGrabbable(GameObject_s *) {
     return 0;
@@ -979,29 +975,42 @@ extern "C" {
         i32 evaluate_only = 0;
         if (animation != NULL) {
             if (animation->frame != 0xffff) {
-                if (animation->field_0x3a >= 0 && animation->field_0x3a < apicharsys->model_id_capacity && model->model_data_b[animation->field_0x3a] != NULL &&
-                    static_cast<i16>(animation->frame) >= 0 && static_cast<i16>(animation->frame) < apicharsys->model_id_capacity && model->model_data_b[static_cast<i16>(animation->frame)] != NULL) {
-                    if ((static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->field_0x3a])->flags & 0x220) != 0 ||
+                if (animation->field_0x3a >= 0 && animation->field_0x3a < apicharsys->model_id_capacity &&
+                    model->model_data_b[animation->field_0x3a] != NULL && static_cast<i16>(animation->frame) >= 0 &&
+                    static_cast<i16>(animation->frame) < apicharsys->model_id_capacity &&
+                    model->model_data_b[static_cast<i16>(animation->frame)] != NULL) {
+                    if ((static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->field_0x3a])->flags & 0x220) !=
+                            0 ||
                         (static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->frame])->flags & 0x220) != 0)
                         evaluate_only = 1;
                 }
-            } else if (animation->blending != 0 &&
-                       animation->blend_animation_a >= 0 && animation->blend_animation_a < apicharsys->model_id_capacity && model->model_data_b[animation->blend_animation_a] != NULL &&
-                       animation->blend_animation_b >= 0 && animation->blend_animation_b < apicharsys->model_id_capacity && model->model_data_b[animation->blend_animation_b] != NULL) {
-                if ((static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->blend_animation_a])->flags & 0x220) != 0 ||
-                    (static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->blend_animation_b])->flags & 0x220) != 0)
+            } else if (animation->blending != 0 && animation->blend_animation_a >= 0 &&
+                       animation->blend_animation_a < apicharsys->model_id_capacity &&
+                       model->model_data_b[animation->blend_animation_a] != NULL && animation->blend_animation_b >= 0 &&
+                       animation->blend_animation_b < apicharsys->model_id_capacity &&
+                       model->model_data_b[animation->blend_animation_b] != NULL) {
+                if ((static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->blend_animation_a])->flags &
+                     0x220) != 0 ||
+                    (static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->blend_animation_b])->flags &
+                     0x220) != 0)
                     evaluate_only = 1;
-            } else if (animation->blending != 0 &&
-                       animation->blend_animation_b >= 0 && animation->blend_animation_b < apicharsys->model_id_capacity && model->model_data_b[animation->blend_animation_b] != NULL) {
-                if ((static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->blend_animation_b])->flags & 0x220) != 0)
+            } else if (animation->blending != 0 && animation->blend_animation_b >= 0 &&
+                       animation->blend_animation_b < apicharsys->model_id_capacity &&
+                       model->model_data_b[animation->blend_animation_b] != NULL) {
+                if ((static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->blend_animation_b])->flags &
+                     0x220) != 0)
                     evaluate_only = 1;
-            } else if (animation->blending != 0 &&
-                       animation->blend_animation_a >= 0 && animation->blend_animation_a < apicharsys->model_id_capacity && model->model_data_b[animation->blend_animation_a] != NULL) {
-                if ((static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->blend_animation_a])->flags & 0x220) != 0)
+            } else if (animation->blending != 0 && animation->blend_animation_a >= 0 &&
+                       animation->blend_animation_a < apicharsys->model_id_capacity &&
+                       model->model_data_b[animation->blend_animation_a] != NULL) {
+                if ((static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->blend_animation_a])->flags &
+                     0x220) != 0)
                     evaluate_only = 1;
-            } else if (animation->blending == 0 &&
-                       animation->animation_index >= 0 && animation->animation_index < apicharsys->model_id_capacity && model->model_data_b[animation->animation_index] != NULL) {
-                if ((static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->animation_index])->flags & 0x220) != 0)
+            } else if (animation->blending == 0 && animation->animation_index >= 0 &&
+                       animation->animation_index < apicharsys->model_id_capacity &&
+                       model->model_data_b[animation->animation_index] != NULL) {
+                if ((static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->animation_index])->flags & 0x220) !=
+                    0)
                     evaluate_only = 1;
             }
         }
@@ -1030,100 +1039,134 @@ extern "C" {
             void **dwa = NULL;
             if (evaluate_only == 0 && animation != NULL && drawcharactermodel_nobsa == 0 &&
                 drawcharactermodel_restpose == 0) {
-                if (animation->blending != 0 &&
-                    animation->blend_animation_a >= 0 && animation->blend_animation_a < apicharsys->model_id_capacity && model->model_data_c[animation->blend_animation_a] != NULL &&
-                    animation->blend_animation_b >= 0 && animation->blend_animation_b < apicharsys->model_id_capacity && model->model_data_c[animation->blend_animation_b] != NULL) {
-                    dwa = NuHGobjEvalDwaBlend2(render_count, render_indices,
-                        static_cast<nuanimdata2_s *>(model->model_data_c[animation->blend_animation_a]), animation->time,
-                        static_cast<nuanimdata2_s *>(model->model_data_c[animation->blend_animation_b]), animation->blend_target_time,
-                        animation->blend_elapsed / animation->blend_duration);
-                }
-                else if (animation->blending != 0 &&
-                    animation->blend_animation_b >= 0 && animation->blend_animation_b < apicharsys->model_id_capacity && model->model_data_c[animation->blend_animation_b] != NULL) {
+                if (animation->blending != 0 && animation->blend_animation_a >= 0 &&
+                    animation->blend_animation_a < apicharsys->model_id_capacity &&
+                    model->model_data_c[animation->blend_animation_a] != NULL && animation->blend_animation_b >= 0 &&
+                    animation->blend_animation_b < apicharsys->model_id_capacity &&
+                    model->model_data_c[animation->blend_animation_b] != NULL) {
+                    dwa = NuHGobjEvalDwaBlend2(
+                        render_count, render_indices,
+                        static_cast<nuanimdata2_s *>(model->model_data_c[animation->blend_animation_a]),
+                        animation->time,
+                        static_cast<nuanimdata2_s *>(model->model_data_c[animation->blend_animation_b]),
+                        animation->blend_target_time, animation->blend_elapsed / animation->blend_duration);
+                } else if (animation->blending != 0 && animation->blend_animation_b >= 0 &&
+                           animation->blend_animation_b < apicharsys->model_id_capacity &&
+                           model->model_data_c[animation->blend_animation_b] != NULL) {
+                    dwa =
+                        NuHGobjEvalDwa2(render_count, render_indices,
+                                        static_cast<nuanimdata2_s *>(model->model_data_c[animation->blend_animation_b]),
+                                        animation->blend_target_time);
+                } else if (animation->blending != 0 && animation->blend_animation_a >= 0 &&
+                           animation->blend_animation_a < apicharsys->model_id_capacity &&
+                           model->model_data_c[animation->blend_animation_a] != NULL) {
+                    dwa =
+                        NuHGobjEvalDwa2(render_count, render_indices,
+                                        static_cast<nuanimdata2_s *>(model->model_data_c[animation->blend_animation_a]),
+                                        animation->time);
+                } else if (animation->blending == 0 && animation->animation_index >= 0 &&
+                           animation->animation_index < apicharsys->model_id_capacity &&
+                           model->model_data_c[animation->animation_index] != NULL) {
                     dwa = NuHGobjEvalDwa2(render_count, render_indices,
-                        static_cast<nuanimdata2_s *>(model->model_data_c[animation->blend_animation_b]), animation->blend_target_time);
-                }
-                else if (animation->blending != 0 &&
-                    animation->blend_animation_a >= 0 && animation->blend_animation_a < apicharsys->model_id_capacity && model->model_data_c[animation->blend_animation_a] != NULL) {
-                    dwa = NuHGobjEvalDwa2(render_count, render_indices,
-                        static_cast<nuanimdata2_s *>(model->model_data_c[animation->blend_animation_a]), animation->time);
-                }
-                else if (animation->blending == 0 &&
-                    animation->animation_index >= 0 && animation->animation_index < apicharsys->model_id_capacity && model->model_data_c[animation->animation_index] != NULL) {
-                    dwa = NuHGobjEvalDwa2(render_count, render_indices,
-                        static_cast<nuanimdata2_s *>(model->model_data_c[animation->animation_index]), animation->current_time);
+                                          static_cast<nuanimdata2_s *>(model->model_data_c[animation->animation_index]),
+                                          animation->current_time);
                 }
             }
 
             bool evaluated = false;
             if (animation != NULL && drawcharactermodel_noani == 0 && drawcharactermodel_restpose == 0) {
                 if (animation->frame != 0xffff) {
-                    if (animation->field_0x3a >= 0 && animation->field_0x3a < apicharsys->model_id_capacity && model->model_data_b[animation->field_0x3a] != NULL &&
-                        static_cast<i16>(animation->frame) >= 0 && static_cast<i16>(animation->frame) < apicharsys->model_id_capacity && model->model_data_b[static_cast<i16>(animation->frame)] != NULL) {
-                        NuHGobjEvalAnimBlend2(model->hierarchy,
-                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->field_0x3a]), animation->time,
-                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->frame]), animation->time,
-                            animation->field_0x44, joint_override_count, joint_overrides, output_matrices);
+                    if (animation->field_0x3a >= 0 && animation->field_0x3a < apicharsys->model_id_capacity &&
+                        model->model_data_b[animation->field_0x3a] != NULL && static_cast<i16>(animation->frame) >= 0 &&
+                        static_cast<i16>(animation->frame) < apicharsys->model_id_capacity &&
+                        model->model_data_b[static_cast<i16>(animation->frame)] != NULL) {
+                        NuHGobjEvalAnimBlend2(
+                            model->hierarchy,
+                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->field_0x3a]),
+                            animation->time, static_cast<ani3_animheader_s *>(model->model_data_b[animation->frame]),
+                            animation->time, animation->field_0x44, joint_override_count, joint_overrides,
+                            output_matrices);
                         evaluated = true;
                     }
-                } else if (animation->blending != 0 &&
-                    animation->blend_animation_a >= 0 && animation->blend_animation_a < apicharsys->model_id_capacity && model->model_data_b[animation->blend_animation_a] != NULL &&
-                    animation->blend_animation_b >= 0 && animation->blend_animation_b < apicharsys->model_id_capacity && model->model_data_b[animation->blend_animation_b] != NULL) {
-                    if ((static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->blend_animation_a])->flags & 0x20) != 0 ||
-                        (static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->blend_animation_b])->flags & 0x20) != 0) {
-                        NuHGobjEvalAnimBlend2Root(model->hierarchy,
-                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->blend_animation_a]), animation->time,
-                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->blend_animation_b]), animation->blend_target_time,
-                            animation->blend_elapsed / animation->blend_duration, joint_override_count, joint_overrides,
-                            output_matrices, BlendRootFn, object);
+                } else if (animation->blending != 0 && animation->blend_animation_a >= 0 &&
+                           animation->blend_animation_a < apicharsys->model_id_capacity &&
+                           model->model_data_b[animation->blend_animation_a] != NULL &&
+                           animation->blend_animation_b >= 0 &&
+                           animation->blend_animation_b < apicharsys->model_id_capacity &&
+                           model->model_data_b[animation->blend_animation_b] != NULL) {
+                    if ((static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->blend_animation_a])->flags &
+                         0x20) != 0 ||
+                        (static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->blend_animation_b])->flags &
+                         0x20) != 0) {
+                        NuHGobjEvalAnimBlend2Root(
+                            model->hierarchy,
+                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->blend_animation_a]),
+                            animation->time,
+                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->blend_animation_b]),
+                            animation->blend_target_time, animation->blend_elapsed / animation->blend_duration,
+                            joint_override_count, joint_overrides, output_matrices, BlendRootFn, object);
                     } else {
-                        NuHGobjEvalAnimBlend2(model->hierarchy,
-                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->blend_animation_a]), animation->time,
-                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->blend_animation_b]), animation->blend_target_time,
-                            animation->blend_elapsed / animation->blend_duration, joint_override_count, joint_overrides,
-                            output_matrices);
-                    }
-                    evaluated = true;
-                } else if (animation->blending != 0 &&
-                    animation->blend_animation_b >= 0 && animation->blend_animation_b < apicharsys->model_id_capacity && model->model_data_b[animation->blend_animation_b] != NULL) {
-                    CHARACTERANIM_s *selected = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->blend_animation_b]);
-                    if ((selected->flags & 0x20) != 0) {
-                        NuHGobjEvalAnim2Root(model->hierarchy,
-                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->blend_animation_b]), animation->blend_target_time,
-                            joint_override_count, joint_overrides, output_matrices,
-                            (selected->flags & 0x200) != 0 ? RootFnY : RootFn, object);
-                    } else {
-                        NuHGobjEvalAnim2(model->hierarchy,
-                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->blend_animation_b]), animation->blend_target_time,
+                        NuHGobjEvalAnimBlend2(
+                            model->hierarchy,
+                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->blend_animation_a]),
+                            animation->time,
+                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->blend_animation_b]),
+                            animation->blend_target_time, animation->blend_elapsed / animation->blend_duration,
                             joint_override_count, joint_overrides, output_matrices);
                     }
                     evaluated = true;
-                } else if (animation->blending != 0 &&
-                    animation->blend_animation_a >= 0 && animation->blend_animation_a < apicharsys->model_id_capacity && model->model_data_b[animation->blend_animation_a] != NULL) {
-                    CHARACTERANIM_s *selected = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->blend_animation_a]);
+                } else if (animation->blending != 0 && animation->blend_animation_b >= 0 &&
+                           animation->blend_animation_b < apicharsys->model_id_capacity &&
+                           model->model_data_b[animation->blend_animation_b] != NULL) {
+                    CHARACTERANIM_s *selected =
+                        static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->blend_animation_b]);
                     if ((selected->flags & 0x20) != 0) {
-                        NuHGobjEvalAnim2Root(model->hierarchy,
-                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->blend_animation_a]), animation->time,
-                            joint_override_count, joint_overrides, output_matrices,
+                        NuHGobjEvalAnim2Root(
+                            model->hierarchy,
+                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->blend_animation_b]),
+                            animation->blend_target_time, joint_override_count, joint_overrides, output_matrices,
                             (selected->flags & 0x200) != 0 ? RootFnY : RootFn, object);
                     } else {
-                        NuHGobjEvalAnim2(model->hierarchy,
-                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->blend_animation_a]), animation->time,
-                            joint_override_count, joint_overrides, output_matrices);
+                        NuHGobjEvalAnim2(
+                            model->hierarchy,
+                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->blend_animation_b]),
+                            animation->blend_target_time, joint_override_count, joint_overrides, output_matrices);
                     }
                     evaluated = true;
-                } else if (animation->blending == 0 &&
-                    animation->animation_index >= 0 && animation->animation_index < apicharsys->model_id_capacity && model->model_data_b[animation->animation_index] != NULL) {
-                    CHARACTERANIM_s *selected = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->animation_index]);
+                } else if (animation->blending != 0 && animation->blend_animation_a >= 0 &&
+                           animation->blend_animation_a < apicharsys->model_id_capacity &&
+                           model->model_data_b[animation->blend_animation_a] != NULL) {
+                    CHARACTERANIM_s *selected =
+                        static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->blend_animation_a]);
                     if ((selected->flags & 0x20) != 0) {
-                        NuHGobjEvalAnim2Root(model->hierarchy,
-                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->animation_index]), animation->current_time,
-                            joint_override_count, joint_overrides, output_matrices,
+                        NuHGobjEvalAnim2Root(
+                            model->hierarchy,
+                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->blend_animation_a]),
+                            animation->time, joint_override_count, joint_overrides, output_matrices,
                             (selected->flags & 0x200) != 0 ? RootFnY : RootFn, object);
                     } else {
-                        NuHGobjEvalAnim2(model->hierarchy,
-                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->animation_index]), animation->current_time,
-                            joint_override_count, joint_overrides, output_matrices);
+                        NuHGobjEvalAnim2(
+                            model->hierarchy,
+                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->blend_animation_a]),
+                            animation->time, joint_override_count, joint_overrides, output_matrices);
+                    }
+                    evaluated = true;
+                } else if (animation->blending == 0 && animation->animation_index >= 0 &&
+                           animation->animation_index < apicharsys->model_id_capacity &&
+                           model->model_data_b[animation->animation_index] != NULL) {
+                    CHARACTERANIM_s *selected =
+                        static_cast<CHARACTERANIM_s *>(model->model_data_a[animation->animation_index]);
+                    if ((selected->flags & 0x20) != 0) {
+                        NuHGobjEvalAnim2Root(
+                            model->hierarchy,
+                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->animation_index]),
+                            animation->current_time, joint_override_count, joint_overrides, output_matrices,
+                            (selected->flags & 0x200) != 0 ? RootFnY : RootFn, object);
+                    } else {
+                        NuHGobjEvalAnim2(
+                            model->hierarchy,
+                            static_cast<ani3_animheader_s *>(model->model_data_b[animation->animation_index]),
+                            animation->current_time, joint_override_count, joint_overrides, output_matrices);
                     }
                     evaluated = true;
                 }
@@ -1144,8 +1187,8 @@ extern "C" {
                 if (object != NULL && (object->apiobj.field_0x1f4 & 0x20000) != 0) {
                     if (APIObjResetShadowMapRenderingFn != NULL)
                         APIObjResetShadowMapRenderingFn();
-                    APITransparentCharDraw(model->hierarchy, matrix, render_count, render_indices, output_matrices,
-                                           dwa, render_flags);
+                    APITransparentCharDraw(model->hierarchy, matrix, render_count, render_indices, output_matrices, dwa,
+                                           render_flags);
                     if (APIObjEnableShadowMapRenderingFn != NULL)
                         APIObjEnableShadowMapRenderingFn();
                 }
@@ -1167,8 +1210,8 @@ extern "C" {
                     if (object == NULL || (object->apiobj.field_0x1f4 & 0x1000) == 0)
                         nurndr_force_lod = 1;
                     NuRndrStartReflectionRender(result);
-                    NuHGobjRndrMtxDwa(model->hierarchy, reflection_matrix, render_count, render_indices, output_matrices,
-                                      dwa, render_flags);
+                    NuHGobjRndrMtxDwa(model->hierarchy, reflection_matrix, render_count, render_indices,
+                                      output_matrices, dwa, render_flags);
                     NuRndrEndReflectionRender();
                     if (object == NULL || (object->apiobj.field_0x1f4 & 0x1000) == 0)
                         nurndr_force_lod = 0;

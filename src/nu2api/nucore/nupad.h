@@ -210,12 +210,15 @@ extern "C" {
     extern NUPADMAPPING g_nupadMapping[];
     extern i32 g_profilePlayerPad;
     extern i32 MaxGamePads;
+    extern i16 PlayerLastPort[8];
     extern char UseCorrectDeadZoning;
     extern i32 enable_touch_controls;
 
     void NuPadInit(void);
     void NuPadSetStatus(i32 pad, i32 status);
+    void NuPadMapPlayerToPort(i32 player, i32 port);
     void NuPadInitPS(NUGENERICPAD *pad);
+    i32 NuPadGetNumberOfPortsPS(void);
 
     i32 NuPadRead(NUPAD *pad);
 
@@ -224,11 +227,19 @@ extern "C" {
     i32 NuPs2ApplyDeadZone(i32 raw_value, i32 dead_zone);
 
     i32 NuPadGetMaxGamePads(void);
+    void NuPadSetMaxGamePads(i32 count);
+    void NuPadSetValid(i32 port, i32 valid);
+    void NuPadSetMotors(NUPAD *pad, i32 motor0, i32 motor1);
+    void NuPadSetMotorsPS(i32 port, i32 motor0, i32 motor1);
+    void NuPadRecordInit(NURECMODE mode, char *filepath, VARIPTR *buffer, VARIPTR end, i32 size);
+    void NuPadSetDirectMappingState(i32 state);
+    void NuPadUseCorrectDeadZoning(i32 state);
 
     void NuPadRecordStart(void);
     void NuSetPadDemoEndButtons(u32 buttons);
 
     void NuPad_Interface_InputManagerInitialise(void);
+    void NuPad_Interface_Render(void);
     void NuPad_Interface_InputManagerUpdate(f32 unknown);
     void NuPad_Interface_ResetAllTouches(void);
     void NuPad_Interface_TouchScreenInput(i32 touch_id, i32 x, i32 y, i32 pressure, i32 is_down, i32 is_up, i32 is_move,
@@ -243,6 +254,11 @@ extern "C" {
 }
 
 NUPAD *NuPadOpen(i32 port, i32 slot);
+void NuPadMapPortToPS2Port(i32 pad, i32 port);
+i32 NuPadGetPort(i32 player);
+i32 NuPadGetPlayer(i32 port);
+i32 NuPadGetFirstActivePad(void);
+void NuPadGetDeadzonePS(NUPAD *pad);
 void NuPadOpenPS(NUPAD *pad);
 
 void NuPadClose(NUPAD *pad);
@@ -254,8 +270,12 @@ i32 NuPadGetDeadzoneByPortPS(i32 port);
 
 void NuPadRecordPlay(NUGENERICPAD *pad);
 void NuPadRecordEnd(void);
+void NuPadRecordEndFrame(void);
+void NuPadRecordSetPlayEndButtons(i32 buttons);
+void NuPadRecordSetRecordEndButtons(i32 buttons);
 
 void NuPadRecordSave(char *filepath);
+void NuPadRecordLoad(char *filepath, VARIPTR *buffer, VARIPTR end);
 
 void NuPad_UpdateTouchScreenData(void);
 

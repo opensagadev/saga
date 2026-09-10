@@ -1,5 +1,24 @@
 #include "nu2api/nufile/nufile.h"
 
+extern "C" i32 NuMcGetSlotMax(void) {
+    return 0;
+}
+
+extern "C" i32 NuMcCreateDir(void) {
+    return 0;
+}
+
+extern "C" void NuMcCloseDir(void) {
+}
+
+extern "C" i32 NuMcOpenDir(void) {
+    return 0;
+}
+
+extern "C" i32 NuMcReadDir(void) {
+    return 0;
+}
+
 i32 NuMcCheckCardPresent(i32 port, i32 slot) {
     return 0;
 }
@@ -40,4 +59,8 @@ i32 NuMcFileOpenSize(NUFILE file) {
     file -= 0x1000;
 
     return NuMcOpenSize(file);
+}
+
+extern "C" i32 NuMcFormat(i32 port, i32 slot) {
+    return 0;
 }

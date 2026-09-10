@@ -18,19 +18,7 @@ extern "C" {
         (void)scene;
     }
 
-    void edbitsRegisterBaseTerrain(void *terrain) {
-        (void)terrain;
-    }
-
     void edppStartPage(i32 page) {
-        (void)page;
-    }
-
-    void edbriStartPage(i32 page) {
-        (void)page;
-    }
-
-    void edgraStartPage(i8 page) {
         (void)page;
     }
 

@@ -4,9 +4,15 @@
 
 struct NuInputTouchData;
 
-struct NuTouchInputButton {
+struct NuTouchInputButton : NuTouchInputElement {
     NuTouchInputButton(i32, u32);
     NuTouchInputButton(i32, u32, float, float, float, float);
-    void Render();
-    void Update(NuInputTouchData const *);
+    void Render() override;
+    void Update(NuInputTouchData const *) override;
+    bool IsPressed() const override {
+        return pressed;
+    }
+    bool pressed;
+    u32 captured_touch_id;
+    bool touch_captured;
 };

@@ -2,6 +2,14 @@
 #include "legoapi/actions/character/snake.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "globals.h"
+#include "nu2api/nu3d/nuspecial.h"
+
+static GameObject_s *ForceBackObj = NULL;
+static NUVEC *ForceBackPos = NULL;
+static i32 ForceBackType = 0;
+static f32 ForceBackRadius = 0.0f;
+static f32 ForceBackRadius2 = 0.0f;
+
 #include "gamelib/util/gamelib_util_types.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
@@ -7137,4 +7145,39 @@ void Move_BEAST(GameObject_s *object) {
     PooCode(object);
     AwkwardShapeCode(object, 0);
     GizmoBlowupCheckProximity(WORLD, object);
+}
+
+void ResetForceBack() {
+    ForceBackObj = NULL;
+    ForceBackPos = NULL;
+}
+
+void SetForceBack(GameObject_s *object, nuvec_s *position, float radius, i32 type) {
+    ForceBackRadius = radius;
+    ForceBackObj = object;
+    ForceBackPos = object != NULL ? &object->apiobj.collision_position : position;
+    ForceBackRadius2 = radius * radius;
+    ForceBackType = type;
+}
+
+void DrawForceBackEffect(nuhspecial_s *special) {
+    if (special == NULL || !NuSpecialExistsFn(special)) {
+        return;
+    }
+    if (ForceBackObj != NULL && ForceBackType != 3) {
+        NuSpecialSetVisibility(special, 1);
+        NUMTX matrix = *NuSpecialGetDrawMtx(special);
+        NUVEC position;
+        position.x = ForceBackObj->apiobj.lower_position.x;
+        position.y = 0.005f + ForceBackObj->apiobj.field_0x218;
+        position.z = ForceBackObj->apiobj.lower_position.z;
+        NUVEC scale;
+        scale.x = scale.y = scale.z = ForceBackRadius;
+        NuMtxSetTranslation(&matrix, &position);
+        NuMtxPreScale(&matrix, &scale);
+        NuSpecialSetDrawMtx(special, &matrix);
+        NuSpecialUpdate(special);
+    } else {
+        NuSpecialSetVisibility(special, 0);
+    }
 }

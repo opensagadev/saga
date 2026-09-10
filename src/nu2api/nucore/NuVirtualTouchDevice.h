@@ -1,8 +1,8 @@
 #include "nu2api/nucore/NuInputDevice.h"
+#include "nu2api/nucore/NuTouchInputElement.h"
 
 struct NuButtonLayout {
-    // Field composition uncertain.
-    u8 unknown_00[0xc8];
+    NuTouchInputElement *elements[50];
 
     u32 unknown_c8;
 
@@ -27,7 +27,7 @@ class NuVirtualTouchDevice : public NuInputDeviceTranslator {
 
     void CreateDefaultLayout(u32 unknown);
 
-    void GetAspectRatio();
+    f32 GetAspectRatio();
     void Render();
     void SetCurrentLayoutIndex(u32 index);
 

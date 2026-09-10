@@ -99,10 +99,6 @@ extern "C" {
         NuFileWriteInt(file, tag);
         NuFileWriteInt(file, tag);
     }
-    void NuFileCheckBadGameDiscStatus(void) {
-    }
-    void NuFileCloseDir(void) {
-    }
     i32 NuFileCopy(char *dest, char *source) {
         char buffer[1024];
         return NuFileCopyEx(dest, source, buffer, sizeof(buffer));
@@ -128,10 +124,6 @@ extern "C" {
             NuFileClose(output);
         }
         return copied;
-    }
-    void NuFileCreateDir(void) {
-    }
-    void NuFileCreatePath(void) {
     }
     i32 NuFileEOF(NUFILE file) {
         i64 position = NuFilePos(file);
@@ -216,7 +208,15 @@ extern "C" {
         dest[length] = '\0';
         return length;
     }
-    void NuFileFormat(void) {
+    i32 NuFileFormat(char *path) {
+        i32 result = 0;
+        NUFILE_DEVICE *device = NuFileGetDeviceFromPath(path);
+        if (device != NULL && device->id == 1) {
+            i32 port = path[2] - '0';
+            i32 slot = path[3] - '0';
+            result = NuMcFormat(port, slot);
+        }
+        return result;
     }
     i32 NuFileFormatName(char *dest, char *name, i32 capacity) {
         return default_device->format_name_fn(default_device, dest, name, capacity);
@@ -243,8 +243,6 @@ extern "C" {
     }
     i32 NuFileGetEndianSwap(void) {
         return NuFile_SwapEndianOnWrite;
-    }
-    void NuFileGetInfo(void) {
     }
     i32 NuFileGetMediaMode(void) {
         return 0;
@@ -307,8 +305,6 @@ extern "C" {
         nufile_buffering_enabled = buffering;
         return data;
     }
-    void NuFileOpenDir(void) {
-    }
     void NuFilePatchAddress(NUFILE file) {
         i32 ref;
         i32 pos;
@@ -324,8 +320,6 @@ extern "C" {
         }
         NuFileSeek(file, 0, NUFILE_SEEK_END);
     }
-    void NuFileRename(void) {
-    }
     void NuFileSetAddress(NUFILE file, void *address) {
         i32 index;
         if (address != NULL) {
@@ -338,8 +332,6 @@ extern "C" {
             addr_pos[index].address = address;
             addr_pos[index].position = NuFilePos(file);
         }
-    }
-    void NuFileSetBadGameDisc(void) {
     }
     void NuFileSetCurrentDevice(NUFILE_DEVICE *device) {
         default_device = device;

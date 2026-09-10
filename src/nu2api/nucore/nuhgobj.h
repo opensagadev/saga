@@ -130,8 +130,8 @@ DECOMP_ASSERT(sizeof(nuhgobj_s) == 0x1c4, "nuhgobj_s size");
 extern "C" {
 #endif
     extern NUJOINTPROCANIMFN JointProcAnimFn;
-    i32 NuHGobjRndrRandShadowSurfacePoints(nuhgobj_s *object, NUMTX *world_matrix, NUMTX *joint_matrices,
-                                           i32 count, NUVEC *positions, i32 exclusion_mask);
+    i32 NuHGobjRndrRandShadowSurfacePoints(nuhgobj_s *object, NUMTX *world_matrix, NUMTX *joint_matrices, i32 count,
+                                           NUVEC *positions, i32 exclusion_mask);
     i32 NuHGobjReversibleCharacters(i32 enabled);
     i32 NuHGobjForceShadowsOnCharacters(i32 enabled);
     void NuAnimBuffProceduralAnimation(nuanimbuff_s *buffer, nuhgobj_s *object, i32 override_count,

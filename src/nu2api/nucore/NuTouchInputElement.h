@@ -5,19 +5,29 @@
 struct NuInputTouchData;
 
 struct NuTouchInputElement {
-    struct TYPE {};
+    enum TYPE : u32 { TYPE_LEFT_STICK = 0, TYPE_RIGHT_STICK = 1, TYPE_BUTTON = 2 };
     NuTouchInputElement(NuTouchInputElement::TYPE, i32, u32);
     NuTouchInputElement(NuTouchInputElement::TYPE, i32, u32, float, float, float, float);
 
-    virtual ~NuTouchInputElement();
+    virtual ~NuTouchInputElement() {
+    }
     virtual void Render() = 0;
-    virtual void UpdateButtons(i32);
+    virtual void UpdateButtons(i32) {
+    }
     virtual void Update(NuInputTouchData const *) = 0;
-    virtual bool IsPressed() const;
-    virtual float GetStickX() const;
-    virtual float GetStickY() const;
-    virtual void Deactivate();
-    virtual void Activate();
+    virtual bool IsPressed() const {
+        return false;
+    }
+    virtual float GetStickX() const {
+        return 0.0f;
+    }
+    virtual float GetStickY() const {
+        return 0.0f;
+    }
+    virtual void Deactivate() {
+    }
+    virtual void Activate() {
+    }
 
     float x;
     float y;

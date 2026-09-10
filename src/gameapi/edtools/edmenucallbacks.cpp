@@ -1,4 +1,5 @@
 #include "gameapi_edtools_types.h"
+#include "gameapi/edtools/edui.h"
 
 // Level-editor UI/menu callback stubs. All of these are static callback
 // functions for the editor's particle/fog/light/colour editors and their
@@ -370,7 +371,10 @@ extern "C" {
     static void cbGradChange(void) {
     }
 
-    static i32 cbInteractMenuCancelChild(void *) {
+    static i32 cbInteractMenuCancelChild(edui_interact_s *interact) {
+        eduimenu_s *menu = interact->menu;
+        if (menu && menu->child && menu->child->callback)
+            menu->child->callback(menu->child, menu);
         return 0;
     }
 

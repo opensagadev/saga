@@ -35,5 +35,6 @@ extern "C" {
     void edmainExtCamera(NUCAMERA *camera);
     NUCAMERA *edmainGetCamera(void);
     i32 edmainGetCursorEnabled(void);
+    void edmainSetCursorEnabled(i32 enabled);
     void edmainSetCamera(NUMTX *matrix);
 }

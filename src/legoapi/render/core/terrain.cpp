@@ -126,7 +126,40 @@ i32 terraincnt;
 i32 curSphereter;
 i32 platinrange;
 TERRAIN_SHAPE *ShadPoly;
+extern "C" i32 ShadowIntensityInfo(void) {
+    return ShadPoly ? (i32)ShadPoly->normal_flags - 8 : -1;
+}
 TERRAIN_SHAPE *TerrPoly;
+extern "C" void NuRndrLine3dDbg(f32, f32, f32, f32, f32, f32, i32);
+
+extern "C" void SphereDrawEx(NUVEC *centre, f32 radius, f32 vertical_scale, i32 colour) {
+    f32 radius_squared = radius * radius;
+    for (i32 band = 0; band < 8; ++band) {
+        f32 lower_radius = radius * NU_SIN_LUT((band < 4 ? band : 8 - band) * 4096);
+        f32 upper_radius = radius * NU_SIN_LUT((band < 3 ? band + 1 : 7 - band) * 4096);
+        f32 lower_y = NuFsqrt(radius_squared - lower_radius * lower_radius) * vertical_scale;
+        f32 upper_y = NuFsqrt(radius_squared - upper_radius * upper_radius) * vertical_scale;
+        if (band > 4)
+            lower_y = -lower_y;
+        if (band > 3)
+            upper_y = -upper_y;
+        lower_y += radius * vertical_scale + centre->y;
+        upper_y += radius * vertical_scale + centre->y;
+        for (i32 angle = 0; angle < 65536; angle += 2048) {
+            NuRndrLine3dDbg(centre->x + lower_radius * NU_COS_LUT(angle), lower_y,
+                            centre->z + lower_radius * NU_SIN_LUT(angle), centre->x + upper_radius * NU_COS_LUT(angle),
+                            upper_y, centre->z + upper_radius * NU_SIN_LUT(angle), colour);
+            NuRndrLine3dDbg(centre->x + lower_radius * NU_COS_LUT(angle), lower_y,
+                            centre->z + lower_radius * NU_SIN_LUT(angle),
+                            centre->x + lower_radius * NU_COS_LUT(angle + 2048), lower_y,
+                            centre->z + lower_radius * NU_SIN_LUT(angle + 2048), colour);
+        }
+    }
+}
+
+extern "C" void SphereDraw(NUVEC *centre, f32 radius, f32 vertical_scale) {
+    SphereDrawEx(centre, radius, vertical_scale, 0x00400000);
+}
 u8 TerrWallInfo;
 u8 TerrWallTab[4];
 NUVEC TerrWallNorm;
@@ -1336,10 +1369,6 @@ NUVEC TerrainSkin(PLATSKININFO *info, nuvec_s *position, float weight, i32 mode)
     result.z = point.z;
     return result;
 }
-void TerrDrawPlat(tertype *, i16) {
-}
-void TerrDrawSitu(tertype *, terrsitu_s *) {
-}
 void RotateTerrain(tertype *) {
 }
 
@@ -2362,8 +2391,6 @@ void TerrDrawPlatCol(tertype *, i16, i32) {
 }
 void TerrShowCamTerr() {
 }
-void GetIndGrassClump(i32, i32) {
-}
 NUVEC TerrainStaticMtx(PLATSKININFO *info, nuvec_s *position, i32) {
     NUVEC4 point __attribute__((aligned(16)));
     point.x = position->x;
@@ -3179,7 +3206,207 @@ i32 TerrainPlatformMoveCheck(nuvec_s *position, nuvec_s *normal, i32 platform_in
     TerI->hit_type = saved_hit_type;
     return hit_type == 0;
 }
-void TerrDraw(tertype *, i16) {
+// The retained debug renderer reads the older 100-byte terrain record.
+struct TERRAIN_DEBUG_RECORD {
+    u8 unknown_00[0x18];
+    NUVEC vertices[4];
+    NUVEC normals[2];
+    u8 unknown_60[4];
+};
+DECOMP_ASSERT(sizeof(TERRAIN_DEBUG_RECORD) == 100, "Terrain debug record ABI");
+
+void TerrDrawSitu(tertype *terrain, terrsitu_s *situation) {
+    TERRAIN_DEBUG_RECORD *record = reinterpret_cast<TERRAIN_DEBUG_RECORD *>(terrain);
+    NUVEC *origin = reinterpret_cast<NUVEC *>(situation);
+    if (record->normals[1].y > 65535.0f) {
+        for (i32 i = 0; i < 2; ++i) {
+            f32 t = static_cast<f32>(i);
+            NuRndrLine3dDbg(
+                origin->x + record->vertices[0].x, origin->y + record->vertices[0].y, origin->z + record->vertices[0].z,
+                origin->x + record->vertices[1].x + (record->vertices[2].x - record->vertices[1].x) * t,
+                origin->y + record->vertices[1].y + (record->vertices[2].y - record->vertices[1].y) * t,
+                origin->z + record->vertices[1].z + (record->vertices[2].z - record->vertices[1].z) * t, 0x003f7f80);
+        }
+        for (i32 i = 0; i < 2; ++i) {
+            f32 t = static_cast<f32>(i);
+            NuRndrLine3dDbg(
+                origin->x + record->vertices[1].x, origin->y + record->vertices[1].y, origin->z + record->vertices[1].z,
+                origin->x + record->vertices[0].x + (record->vertices[2].x - record->vertices[0].x) * t,
+                origin->y + record->vertices[0].y + (record->vertices[2].y - record->vertices[0].y) * t,
+                origin->z + record->vertices[0].z + (record->vertices[2].z - record->vertices[0].z) * t, 0x003f7f80);
+        }
+    } else {
+        for (i32 i = 0; i < 2; ++i) {
+            f32 t = static_cast<f32>(i);
+            NuRndrLine3dDbg(origin->x + record->vertices[0].x + (record->vertices[1].x - record->vertices[0].x) * t,
+                            origin->y + record->vertices[0].y + (record->vertices[1].y - record->vertices[0].y) * t,
+                            origin->z + record->vertices[0].z + (record->vertices[1].z - record->vertices[0].z) * t,
+                            origin->x + record->vertices[2].x + (record->vertices[3].x - record->vertices[2].x) * t,
+                            origin->y + record->vertices[2].y + (record->vertices[3].y - record->vertices[2].y) * t,
+                            origin->z + record->vertices[2].z + (record->vertices[3].z - record->vertices[2].z) * t,
+                            0xffff7f80);
+        }
+        for (i32 i = 0; i < 2; ++i) {
+            f32 t = static_cast<f32>(i);
+            NuRndrLine3dDbg(origin->x + record->vertices[0].x + (record->vertices[2].x - record->vertices[0].x) * t,
+                            origin->y + record->vertices[0].y + (record->vertices[2].y - record->vertices[0].y) * t,
+                            origin->z + record->vertices[0].z + (record->vertices[2].z - record->vertices[0].z) * t,
+                            origin->x + record->vertices[1].x + (record->vertices[3].x - record->vertices[1].x) * t,
+                            origin->y + record->vertices[1].y + (record->vertices[3].y - record->vertices[1].y) * t,
+                            origin->z + record->vertices[1].z + (record->vertices[3].z - record->vertices[1].z) * t,
+                            0xffff7f80);
+        }
+    }
+}
+
+void TerrDrawPlat(tertype *terrain, i16 index) {
+    TERRAIN_DEBUG_RECORD *record = reinterpret_cast<TERRAIN_DEBUG_RECORD *>(terrain);
+    TERRAIN_PLATFORM *platform = &CurTerr->platforms[CurTerr->groups[index].scene_index];
+    if (platform->scene_transform != NULL) {
+        if (platform->flags & TERRAIN_PLATFORM_FLAG_DISPLAY_LIST_BACKED) {
+            if (!(*static_cast<u8 *>(platform->scene_transform) & 2))
+                return;
+        } else if (!(*static_cast<u8 *>(platform->scene_transform) & 1))
+            return;
+    }
+    NUVEC4 points[5];
+    points[3].x = record->vertices[3].x;
+    points[3].y = record->vertices[3].y;
+    points[3].z = record->vertices[3].z;
+    points[3].w = 0.0f;
+    for (i32 i = 0; i < 3; ++i) {
+        points[i].x = record->vertices[i].x;
+        points[i].y = record->vertices[i].y;
+        points[i].z = record->vertices[i].z;
+        points[i].w = 0.0f;
+    }
+    NUVEC4 &normal = points[4];
+    normal.x = record->normals[0].x * 0.4f;
+    normal.y = record->normals[0].y * 0.4f;
+    normal.z = record->normals[0].z * 0.4f;
+    normal.w = 0.0f;
+    i32 colour = static_cast<i8>(record->unknown_60[2]) < 0 ? 0x0000ffff : 0x00ff0000;
+    if (platform->flags & TERRAIN_PLATFORM_FLAG_ROTATING) {
+        NuVec4MtxTransformVU0(&points[0], &points[0], static_cast<NUMTX *>(platform->scene_object));
+        NuVec4MtxTransformVU0(
+            &points[1], &points[1],
+            static_cast<NUMTX *>(CurTerr->platforms[CurTerr->groups[index].scene_index].scene_object));
+        NuVec4MtxTransformVU0(
+            &points[2], &points[2],
+            static_cast<NUMTX *>(CurTerr->platforms[CurTerr->groups[index].scene_index].scene_object));
+        NuVec4MtxTransformVU0(
+            &points[3], &points[3],
+            static_cast<NUMTX *>(CurTerr->platforms[CurTerr->groups[index].scene_index].scene_object));
+        NuVec4MtxTransformVU0(
+            &normal, &normal,
+            static_cast<NUMTX *>(CurTerr->platforms[CurTerr->groups[index].scene_index].scene_object));
+    }
+    NUVEC *origin;
+    if (record->normals[1].y > 65535.0f) {
+        for (i32 i = 0; i < 2; ++i) {
+            f32 t = static_cast<f32>(i);
+            origin = &CurTerr->groups[index].origin;
+            NuRndrLine3dDbg(origin->x + points[0].x, origin->y + points[0].y, origin->z + points[0].z,
+                            origin->x + points[1].x + (points[2].x - points[1].x) * t,
+                            origin->y + points[1].y + (points[2].y - points[1].y) * t,
+                            origin->z + points[1].z + (points[2].z - points[1].z) * t, colour);
+        }
+        for (i32 i = 0; i < 2; ++i) {
+            f32 t = static_cast<f32>(i);
+            origin = &CurTerr->groups[index].origin;
+            NuRndrLine3dDbg(origin->x + points[1].x, origin->y + points[1].y, origin->z + points[1].z,
+                            origin->x + points[0].x + (points[2].x - points[0].x) * t,
+                            origin->y + points[0].y + (points[2].y - points[0].y) * t,
+                            origin->z + points[0].z + (points[2].z - points[0].z) * t, colour);
+        }
+    } else {
+        for (i32 i = 0; i < 2; ++i) {
+            f32 t = static_cast<f32>(i);
+            origin = &CurTerr->groups[index].origin;
+            NuRndrLine3dDbg(origin->x + points[0].x + (points[1].x - points[0].x) * t,
+                            origin->y + points[0].y + (points[1].y - points[0].y) * t,
+                            origin->z + points[0].z + (points[1].z - points[0].z) * t,
+                            origin->x + points[2].x + (points[3].x - points[2].x) * t,
+                            origin->y + points[2].y + (points[3].y - points[2].y) * t,
+                            origin->z + points[2].z + (points[3].z - points[2].z) * t, colour);
+        }
+        for (i32 i = 0; i < 2; ++i) {
+            f32 t = static_cast<f32>(i);
+            origin = &CurTerr->groups[index].origin;
+            NuRndrLine3dDbg(origin->x + points[0].x + (points[2].x - points[0].x) * t,
+                            origin->y + points[0].y + (points[2].y - points[0].y) * t,
+                            origin->z + points[0].z + (points[2].z - points[0].z) * t,
+                            origin->x + points[1].x + (points[3].x - points[1].x) * t,
+                            origin->y + points[1].y + (points[3].y - points[1].y) * t,
+                            origin->z + points[1].z + (points[3].z - points[1].z) * t, colour);
+        }
+    }
+    origin = &CurTerr->groups[index].origin;
+    f32 z = origin->z + points[0].z;
+    f32 y = origin->y + points[0].y;
+    f32 x = origin->x + points[0].x;
+    colour = static_cast<i8>(index & 0xf0) + static_cast<i8>(index * 16) * 256;
+    NuRndrLine3dDbg(x, y, z, x + normal.x, y + normal.y, z + normal.z, colour);
+}
+
+void TerrDraw(tertype *terrain, i16 index) {
+    TERRAIN_DEBUG_RECORD *record = reinterpret_cast<TERRAIN_DEBUG_RECORD *>(terrain);
+    i32 colour = (index & 0x80) + (static_cast<u8>(index * 64) << 8);
+    if (!(record->normals[1].y > 65535.0f)) {
+        for (i32 i = 0; i < 2; ++i) {
+            f32 t = static_cast<f32>(i);
+            NUVEC *origin = &CurTerr->groups[index].origin;
+            NuRndrLine3dDbg(origin->x + record->vertices[0].x + (record->vertices[1].x - record->vertices[0].x) * t,
+                            origin->y + record->vertices[0].y + (record->vertices[1].y - record->vertices[0].y) * t,
+                            origin->z + record->vertices[0].z + (record->vertices[1].z - record->vertices[0].z) * t,
+                            origin->x + record->vertices[2].x + (record->vertices[3].x - record->vertices[2].x) * t,
+                            origin->y + record->vertices[2].y + (record->vertices[3].y - record->vertices[2].y) * t,
+                            origin->z + record->vertices[2].z + (record->vertices[3].z - record->vertices[2].z) * t,
+                            colour);
+        }
+        for (i32 i = 0; i < 2; ++i) {
+            f32 t = static_cast<f32>(i);
+            NUVEC *origin = &CurTerr->groups[index].origin;
+            NuRndrLine3dDbg(origin->x + record->vertices[0].x + (record->vertices[2].x - record->vertices[0].x) * t,
+                            origin->y + record->vertices[0].y + (record->vertices[2].y - record->vertices[0].y) * t,
+                            origin->z + record->vertices[0].z + (record->vertices[2].z - record->vertices[0].z) * t,
+                            origin->x + record->vertices[1].x + (record->vertices[3].x - record->vertices[1].x) * t,
+                            origin->y + record->vertices[1].y + (record->vertices[3].y - record->vertices[1].y) * t,
+                            origin->z + record->vertices[1].z + (record->vertices[3].z - record->vertices[1].z) * t,
+                            colour);
+        }
+    }
+    NUVEC *origin = &CurTerr->groups[index].origin;
+    f32 z = origin->z + record->vertices[0].z;
+    f32 y = origin->y + record->vertices[0].y;
+    f32 x = origin->x + record->vertices[0].x;
+    NuRndrLine3dDbg(x, y, z, x + record->normals[0].x * 0.4f, y + record->normals[0].y * 0.4f,
+                    z + record->normals[0].z * 0.4f, colour);
+    if (record->normals[1].y < 65536.0f) {
+        origin = &CurTerr->groups[index].origin;
+        z = origin->z + record->vertices[3].z;
+        y = origin->y + record->vertices[3].y;
+        x = origin->x + record->vertices[3].x;
+        NuRndrLine3dDbg(x, y, z, x + record->normals[1].x * 0.4f, y + record->normals[1].y * 0.4f,
+                        z + record->normals[1].z * 0.4f, colour);
+    }
+}
+
+void DrawMSitu(i32 index) {
+    TERRAIN_GROUP *group = &CurTerr->groups[index];
+    if ((u32)group->chunk_type <= TERRAIN_CHUNK_GROUP_SECONDARY && group->data != NULL) {
+        TERRAIN_SHAPE_BATCH *batch = static_cast<TERRAIN_SHAPE_BATCH *>(group->data);
+        while (batch->marker >= 0) {
+            u8 *entry = reinterpret_cast<u8 *>(batch + 1);
+            i32 count = batch->shape_count;
+            for (i32 remaining = count; remaining > 0; --remaining) {
+                TerrDraw(reinterpret_cast<tertype *>(entry), static_cast<i16>(index));
+                // This debug walker uses the original 100-byte record stride.
+                entry += 100;
+            }
+            batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(entry);
+        }
+    }
 }
 
 extern TERRSET *CurTerr;

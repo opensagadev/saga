@@ -5,10 +5,20 @@
 #include "nu2api/nucore/NuTouchInputStick.h"
 #include "nu2api/nucore/NuVirtualTouchDevice.h"
 #include "nu2api/nucore/nupad.h"
+#include "nu2api/numath/nutrig.h"
+extern "C" i32 NuRndrBeginScene(i32 begin_flags);
+extern "C" void NuRndrEndScene(void);
 
 NuInputManager *inputManager;
 NuVirtualTouchDevice *inputTouchDevice;
 bool used_touch_IDs[10];
+
+void NuPad_Interface_Render(void) {
+    NuRndrBeginScene(-1);
+    if (inputTouchDevice != NULL)
+        inputTouchDevice->Render();
+    NuRndrEndScene();
+}
 
 void NuPad_Interface_InputManagerInitialise(void) {
     NuInputDevice *touch_dev;
@@ -73,124 +83,124 @@ i32 NuPad_Interface_GetMaxDevices(void) {
 }
 
 void NuPad_UpdateTouchScreenData(void) {
-}
-
-void NuPadReadPS(i32, unsigned char *, unsigned char *, unsigned char *, unsigned char *, unsigned char *,
-                 unsigned char *, unsigned char *, unsigned char *, u32 *, unsigned char *, u32 *) {
-}
-
-void NuPadGetPort(i32) {
-}
-
-void NuPadGetPlayer(i32) {
-}
-
-void NuPadRecordLoad(char *, variptr_u *, variptr_u) {
-}
-
-void NuPadGetDeadzonePS(nupad_s *) {
-}
-
-void NuPadRecordEndFrame() {
-}
-
-void NuPadMapPortToPS2Port(i32, i32) {
-}
-
-void NuPadGetFirstActivePad() {
-}
-
-void NuPadRecordSetPlayEndButtons(i32) {
-}
-
-void NuPadRecordSetRecordEndButtons(i32) {
+    NuInputDevice *device = inputManager->GetDevice(0);
+    if (device != NULL) {
+        NuInputDevicePS::ReadTouchDataPS(0, &device->touch_data);
+    }
 }
 
 void NuInputDevice::DisableDPD() {
+    NuInputDevicePS::DisableDPDPS(port);
 }
 
 void NuInputDevice::EnableDPD() {
+    NuInputDevicePS::EnableDPDPS(port);
 }
 
-void NuInputDevice::GetAttachmentType() const {
+u32 NuInputDevice::GetIndexByType() const {
+    return idx_by_type;
 }
 
-void NuInputDevice::GetCaps() const {
+u32 NuInputDevice::GetLastValidIndexByType() const {
+    return prev_valid_idx_by_type;
 }
 
-void NuInputDevice::GetIndexByType() const {
+NUPADTYPE NuInputDevice::GetLastValidType() const {
+    return prev_valid_type;
 }
 
-void NuInputDevice::GetLastValidIndexByType() const {
+f32 NuInputDevice::GetMotionValue(NUPADMOTIONVALUE input) const {
+    if (IsConnected())
+        return motion_values[input];
+    return 0.0f;
 }
 
-void NuInputDevice::GetLastValidType() const {
+const NuInputMouseData *NuInputDevice::GetMouseData() const {
+    return &mouse_data;
 }
 
-void NuInputDevice::GetMotionValue(NUPADMOTIONVALUE) const {
+u32 NuInputDevice::GetPort() const {
+    return port;
 }
 
-void NuInputDevice::GetMouseData() const {
+const NuInputTouchData *NuInputDevice::GetTouchData() const {
+    return &touch_data;
 }
 
-void NuInputDevice::GetPort() const {
+f32 NuInputDevice::GetVolume() const {
+    return volume;
 }
 
-void NuInputDevice::GetTouchData() const {
+bool NuInputDevice::HasHeadphonesConnected() const {
+    return has_headphones_connected;
 }
 
-void NuInputDevice::GetVolume() const {
+bool NuInputDevice::IsButtonPressed(u32 buttons) const {
+    return IsConnected() && (button_states & buttons) != 0;
 }
 
-void NuInputDevice::HasHeadphonesConnected() const {
-}
-
-void NuInputDevice::IsButtonPressed(u32) const {
-}
-
-void NuInputDevice::IsIntercepted() const {
+bool NuInputDevice::IsIntercepted() const {
+    return is_intercepted;
 }
 
 void NuInputDevice::KillRumble() {
+    motor_1 = 0.0f;
+    motor_2 = 0.0f;
+    is_rumble_killed = true;
 }
 
-void NuInputDevice::ProcessTouchData() {
+void NuInputDevice::SetMotors(float motor_1, float motor_2) {
+    this->motor_1 = motor_1;
+    this->motor_2 = motor_2;
 }
 
-void NuInputDevice::SetMotors(float, float) {
-}
-
-void NuInputDevice::SupportsCaps(u32) const {
+bool NuInputDevice::SupportsCaps(u32 mask) const {
+    return (GetCaps() & mask) != 0;
 }
 
 NuInputDevice::~NuInputDevice() {
 }
 
 void NuButtonLayout::ActivateLayout() {
+    for (u32 i = 0; i < unknown_c8; ++i)
+        elements[i]->Activate();
 }
 
 void NuButtonLayout::DeactivateLayout() {
+    for (u32 i = 0; i < unknown_c8; ++i)
+        elements[i]->Deactivate();
 }
 
 void NuButtonLayout::Render() {
+    for (u32 i = 0; i < unknown_c8; ++i)
+        elements[i]->Render();
 }
 
-void NuButtonLayout::Update(NuInputTouchData const *) {
+void NuButtonLayout::Update(NuInputTouchData const *data) {
+    for (u32 i = 0; i < unknown_c8; ++i)
+        elements[i]->Update(data);
 }
 
-void NuButtonLayout::UpdateButtons(i32) {
+void NuButtonLayout::UpdateButtons(i32 index) {
+    for (u32 i = 0; i < unknown_c8; ++i)
+        elements[i]->UpdateButtons(index);
 }
 
 NuButtonLayout::~NuButtonLayout() {
+    for (u32 i = 0; i < unknown_c8; ++i)
+        delete elements[i];
 }
 
-void NuInputManager::GetDevice(u32) const {
+const NuInputDevice *NuInputManager::GetDevice(u32 port) const {
+    return devices[port];
 }
 
-void NuInputManager::GetFirstDeviceByType(NUPADTYPE) const {
-}
-
-void NuInputManager::KillRumbleAll() {
+const NuInputDevice *NuInputManager::GetFirstDeviceByType(NUPADTYPE type) const {
+    for (u32 i = 0; i < max_devices; ++i) {
+        if (devices[i]->GetType() == type)
+            return devices[i];
+    }
+    return NULL;
 }
 
 void NuInputDevicePS::DisableDPDPS(u32) {
@@ -202,53 +212,71 @@ void NuInputDevicePS::EnableDPDPS(u32) {
 void NuInputDevicePS::GetIdentifierPS(u32) {
 }
 
-NuTouchInputStick::NuTouchInputStick(NuTouchInputElement::TYPE, i32, u32, float, float, float, float) {
-}
-
 void NuTouchInputStick::Render() {
 }
 
-void NuTouchInputStick::Update(NuInputTouchData const *) {
-}
-
-NuTouchInputButton::NuTouchInputButton(i32, u32) {
-}
-
-NuTouchInputButton::NuTouchInputButton(i32, u32, float, float, float, float) {
+void NuTouchInputStick::Update(NuInputTouchData const *data) {
+    stick_x = 0.0f;
+    stick_y = 0.0f;
+    u32 count = data->touch_count;
+    for (u32 i = 0; i < count; ++i) {
+        const NuInputTouch &touch = data->touch_events[i];
+        u8 active = touch.unknown_00;
+        u8 released = touch.unknown_01;
+        u8 started = touch.unknown_02;
+        float tx = touch.unknown_04;
+        float ty = touch.unknown_08;
+        u32 touch_id = touch.unknown_14;
+        if (!released && !started && !active)
+            continue;
+        float dx = tx - x;
+        float dy = ty - y;
+        float dx2 = dx * dx;
+        float dy2 = dy * dy;
+        if (!unknown_3c && started) {
+            float rx = width * 0.5f;
+            float ry = height * 0.5f;
+            if (dx2 / (rx * rx) + dy2 / (ry * ry) <= 1.0f) {
+                unknown_38 = touch_id;
+                unknown_3c = true;
+            }
+        }
+        if (released && unknown_38 == touch_id) {
+            unknown_3c = false;
+        } else if (unknown_3c && unknown_38 == touch_id) {
+            float distance = NuFsqrt(dy2 + dx2);
+            i32 angle = NuAtan2D(dx, dy);
+            float magnitude = distance / height;
+            float sx = NU_SIN_LUT(angle);
+            float sy = NU_COS_LUT(angle);
+            magnitude = magnitude < 1.0f ? (magnitude < 0.0f ? 0.0f : magnitude) : 1.0f;
+            magnitude = (float)(magnitude * 1.4) * 3.0f;
+            sx *= magnitude;
+            sy *= magnitude;
+            stick_x = sx < 1.0f ? (sx > -1.0f ? sx : -1.0f) : 1.0f;
+            stick_y = sy < 1.0f ? (sy > -1.0f ? sy : -1.0f) : 1.0f;
+            return;
+        }
+    }
+    unknown_3c = false;
 }
 
 void NuTouchInputButton::Render() {
 }
 
-void NuTouchInputButton::Update(NuInputTouchData const *) {
+NuTouchInputElement::NuTouchInputElement(NuTouchInputElement::TYPE type, i32 id, u32 index) {
+    this->id = id;
+    this->index = index;
+    this->type = type;
 }
 
-NuTouchInputElement::NuTouchInputElement(NuTouchInputElement::TYPE, i32, u32) {
-}
-
-NuTouchInputElement::NuTouchInputElement(NuTouchInputElement::TYPE, i32, u32, float, float, float, float) {
-}
-
-__attribute__((weak)) NuTouchInputElement::~NuTouchInputElement() {
-}
-
-__attribute__((weak)) void NuTouchInputElement::UpdateButtons(i32) {
-}
-
-__attribute__((weak)) bool NuTouchInputElement::IsPressed() const {
-    return false;
-}
-
-__attribute__((weak)) float NuTouchInputElement::GetStickX() const {
-    return 0.0f;
-}
-
-__attribute__((weak)) float NuTouchInputElement::GetStickY() const {
-    return 0.0f;
-}
-
-__attribute__((weak)) void NuTouchInputElement::Deactivate() {
-}
-
-__attribute__((weak)) void NuTouchInputElement::Activate() {
+NuTouchInputElement::NuTouchInputElement(NuTouchInputElement::TYPE type, i32 id, u32 index, float x, float y,
+                                         float width, float height) {
+    this->id = id;
+    this->index = index;
+    this->type = type;
+    this->x = x;
+    this->y = y;
+    this->width = width;
+    this->height = height;
 }

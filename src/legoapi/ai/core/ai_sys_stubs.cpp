@@ -4,6 +4,7 @@
 #include "globals.h"
 #include "gameapi/edtools/edfile.h"
 #include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nufile/nufile.h"
@@ -78,13 +79,14 @@ static __used__ i32 RowMoveWander(AIGROUP *group, AIROW *row, AIROW *previous, A
     if (!row->is_turning) {
         if (row->path_info.connection != row->next_connection) {
             AIPATHNODE *nodes = row->path_info.path->nodes;
-            f32 distance = NuInfiniteLineToPointDistSqr(&nodes[row->next_connection->node_indices[0]].position,
-                                                       &nodes[row->next_connection->node_indices[1]].position, &centre);
+            f32 distance =
+                NuInfiniteLineToPointDistSqr(&nodes[row->next_connection->node_indices[0]].position,
+                                             &nodes[row->next_connection->node_indices[1]].position, &centre);
             if (group->radius * group->radius >= distance)
                 row->is_turning = 1;
         } else {
-            AIPATHNODE *node = &row->path_info.path->nodes[
-                row->path_info.connection->node_indices[row->path_info.direction == 0]];
+            AIPATHNODE *node =
+                &row->path_info.path->nodes[row->path_info.connection->node_indices[row->path_info.direction == 0]];
             f32 distance = NuVecXZDistSqr(&row->pos, &node->position, &rotated);
             if (node->radius_squared > distance) {
                 for (i32 i = 0; i < group->row_count; ++i) {
@@ -105,7 +107,8 @@ static __used__ i32 RowMoveWander(AIGROUP *group, AIROW *row, AIROW *previous, A
                 } else {
                     for (i32 i = 0; i < group->member_count; ++i) {
                         APIOBJECT *object = group->members[i];
-                        if (object->objptr != NULL && (object->field_0x1f8 & 0x1001) == 0x1001 && object->field_0x287 == 0) {
+                        if (object->objptr != NULL && (object->field_0x1f8 & 0x1001) == 0x1001 &&
+                            object->field_0x287 == 0) {
                             group->leader = object;
                             break;
                         }
@@ -231,13 +234,14 @@ static __used__ i32 RowMoveTowards(AIGROUP *group, AIROW *row, AIROW *previous, 
     if (!row->is_turning) {
         if (row->path_info.connection != row->next_connection) {
             AIPATHNODE *nodes = row->path_info.path->nodes;
-            f32 distance = NuInfiniteLineToPointDistSqr(&nodes[row->next_connection->node_indices[0]].position,
-                                                       &nodes[row->next_connection->node_indices[1]].position, &centre);
+            f32 distance =
+                NuInfiniteLineToPointDistSqr(&nodes[row->next_connection->node_indices[0]].position,
+                                             &nodes[row->next_connection->node_indices[1]].position, &centre);
             if (group->radius * group->radius >= distance)
                 row->is_turning = 1;
         } else {
-            AIPATHNODE *node = &row->path_info.path->nodes[
-                row->path_info.connection->node_indices[row->path_info.direction == 0]];
+            AIPATHNODE *node =
+                &row->path_info.path->nodes[row->path_info.connection->node_indices[row->path_info.direction == 0]];
             f32 distance = NuVecXZDistSqr(&row->pos, &node->position, &rotated);
             if (node->radius_squared > distance) {
                 for (i32 i = 0; i < group->row_count; ++i) {
@@ -258,7 +262,8 @@ static __used__ i32 RowMoveTowards(AIGROUP *group, AIROW *row, AIROW *previous, 
                 } else {
                     for (i32 i = 0; i < group->member_count; ++i) {
                         APIOBJECT *object = group->members[i];
-                        if (object->objptr != NULL && (object->field_0x1f8 & 0x1001) == 0x1001 && object->field_0x287 == 0) {
+                        if (object->objptr != NULL && (object->field_0x1f8 & 0x1001) == 0x1001 &&
+                            object->field_0x287 == 0) {
                             group->leader = object;
                             break;
                         }
@@ -817,8 +822,8 @@ static i16 AISysPathIntersectionAngle(f32 value) {
 }
 
 extern "C" i32 WithinConnection(AISYS *system, NUVEC *position, AIPATH *path, AIPATHCNX *connection, i32 checks,
-                                 AIPATHCNX *previous_connection, i32 route, i32 ground, AIPATHINFO *path_info,
-                                 f32 radius, i32 update_once) {
+                                AIPATHCNX *previous_connection, i32 route, i32 ground, AIPATHINFO *path_info,
+                                f32 radius, i32 update_once) {
     (void)checks;
     (void)ground;
     if (update_once != 0) {
@@ -910,8 +915,8 @@ extern "C" i32 WithinConnection(AISYS *system, NUVEC *position, AIPATH *path, AI
                 minimum = second->min_height;
                 maximum = second->max_height;
             } else {
-                const f32 fraction = (local.z - first_radius) /
-                                     (connection->horizontal_distance - (first_radius + second_radius));
+                const f32 fraction =
+                    (local.z - first_radius) / (connection->horizontal_distance - (first_radius + second_radius));
                 const f32 inverse = 1.0f - fraction;
                 minimum = second->min_height * fraction + first->min_height * inverse;
                 maximum = second->max_height * fraction + first->max_height * inverse;
@@ -1483,19 +1488,19 @@ extern "C" {
         AIGROUP *group = packet->group;
         if (group != NULL && group->is_in_formation) {
             switch (mode) {
-            case AIPACKET_MOVEMENT_WANDER:
-                if (group->leader == reinterpret_cast<APIOBJECT *>(packet->owner))
-                    FormationMove(group, RowMoveWander);
-                AIFormationFollow(packet);
-                return;
-            case AIPACKET_MOVEMENT_FORMATION:
-                mode = AIPACKET_MOVEMENT_TO_DESTINATION;
-                break;
-            case AIPACKET_MOVEMENT_TO_DESTINATION:
-                if (group->leader == reinterpret_cast<APIOBJECT *>(packet->owner))
-                    FormationMove(group, RowMoveTowards);
-                AIFormationFollow(packet);
-                return;
+                case AIPACKET_MOVEMENT_WANDER:
+                    if (group->leader == reinterpret_cast<APIOBJECT *>(packet->owner))
+                        FormationMove(group, RowMoveWander);
+                    AIFormationFollow(packet);
+                    return;
+                case AIPACKET_MOVEMENT_FORMATION:
+                    mode = AIPACKET_MOVEMENT_TO_DESTINATION;
+                    break;
+                case AIPACKET_MOVEMENT_TO_DESTINATION:
+                    if (group->leader == reinterpret_cast<APIOBJECT *>(packet->owner))
+                        FormationMove(group, RowMoveTowards);
+                    AIFormationFollow(packet);
+                    return;
             }
         }
 
@@ -1665,8 +1670,8 @@ extern "C" {
         nuinstanim_s *animation;
         if (previous_position.x != node->position.x || previous_position.y != node->position.y ||
             previous_position.z != node->position.z ||
-            ((animation = NuSpecialGetInstAnim(special)) != NULL &&
-             (animation->flags & NUINSTANIM_FLAG_PLAYING) != 0 && animation->tfactor != 0.0f)) {
+            ((animation = NuSpecialGetInstAnim(special)) != NULL && (animation->flags & NUINSTANIM_FLAG_PLAYING) != 0 &&
+             animation->tfactor != 0.0f)) {
             node->runtime_flags |= AIPATHNODE_RUNTIME_POSITION_CHANGED;
         } else {
             node->runtime_flags &= static_cast<u8>(~AIPATHNODE_RUNTIME_POSITION_CHANGED);
@@ -2381,7 +2386,8 @@ extern "C" {
                 AIPATHCNX *candidate = first_node.connections[connection_index];
                 if (candidate != current_connection &&
                     AISysCharacterTestPathCnx(system, object, packet, candidate,
-                                              candidate->node_indices[0] != current_connection->node_indices[current_direction],
+                                              candidate->node_indices[0] !=
+                                                  current_connection->node_indices[current_direction],
                                               &nearest_distance_squared) != 0)
                     return;
             }
@@ -2393,7 +2399,8 @@ extern "C" {
                 AIPATHCNX *candidate = second_node.connections[connection_index];
                 if (candidate != current_connection &&
                     AISysCharacterTestPathCnx(system, object, packet, candidate,
-                                              candidate->node_indices[0] != current_connection->node_indices[other_direction],
+                                              candidate->node_indices[0] !=
+                                                  current_connection->node_indices[other_direction],
                                               &nearest_distance_squared) != 0)
                     return;
             }
@@ -2439,7 +2446,8 @@ extern "C" {
         i32 position_inside_path_bounds = 0;
         for (i32 remaining_checks = checks; remaining_checks > 0; --remaining_checks) {
             if (!position_inside_path_bounds) {
-                position_inside_path_bounds = AIPathCheckExtents(packet->path_info.path, &packet->owner->apiobj.position);
+                position_inside_path_bounds =
+                    AIPathCheckExtents(packet->path_info.path, &packet->owner->apiobj.position);
             }
 
             if (position_inside_path_bounds) {
@@ -2903,7 +2911,8 @@ extern "C" {
             const f32 distance = NuVecXZDist(&packet->movement_destination, &object->position, &delta);
             const f32 stopping_clearance = clearance + packet->movement_stopping_distance;
             if (distance > packet->mover_height + clearance + packet->movement_stopping_distance) {
-                const f32 scale = distance != 0.0f && packet->mover_height != 0.0f ? packet->mover_height / distance : 0.0f;
+                const f32 scale =
+                    distance != 0.0f && packet->mover_height != 0.0f ? packet->mover_height / distance : 0.0f;
                 NuVecScale(&delta, &delta, scale);
                 NuVecAdd(&packet->movement_position, &object->position, &delta);
             } else {
@@ -2915,7 +2924,8 @@ extern "C" {
             const f32 distance = NuVecDist(&packet->movement_destination, &object->position, &delta);
             const f32 stopping_clearance = clearance + packet->movement_stopping_distance;
             if (distance > packet->mover_height + clearance + packet->movement_stopping_distance) {
-                const f32 scale = distance != 0.0f && packet->mover_height != 0.0f ? packet->mover_height / distance : 0.0f;
+                const f32 scale =
+                    distance != 0.0f && packet->mover_height != 0.0f ? packet->mover_height / distance : 0.0f;
                 NuVecScale(&delta, &delta, scale);
                 NuVecAdd(&packet->movement_position, &object->position, &delta);
             } else {
@@ -3034,16 +3044,75 @@ extern "C" {
         object->ai->group = group;
         object->ai->group_member_index = group->member_count;
         object->ai->group_row = static_cast<i32>(NuFdiv(static_cast<f32>(static_cast<u32>(group->member_count)),
-                                                       static_cast<f32>(static_cast<u32>(group->count_across))));
+                                                        static_cast<f32>(static_cast<u32>(group->count_across))));
         object->ai->group_column = group->member_count % group->count_across;
         group->members[group->member_count] = object;
         ++group->member_count;
     }
 
-    void AiRndrLine3d(void) {
+    f32 AiRndrCullDistance;
+    void SetAiRndrCullDistance(f32 distance) {
+        AiRndrCullDistance = distance;
     }
 
-    void AiRndrLine3dDbg(void) {
+    struct AIEDITOR_RENDER_STATE {
+        u8 unknown_00[0x28];
+        NUVEC camera_position;
+        u8 unknown_34[0x42ea8 - 0x34];
+        u8 flags;
+    };
+    AIEDITOR_RENDER_STATE *aieditor;
+    void NuRndrLine3dDbg(f32, f32, f32, f32, f32, f32, i32);
+    void AiRndrLine3d(NURND_VERTEX3D *vertices, NUMTL *, NUMTX *matrix) {
+        NUVEC first = vertices[0].position;
+        NUVEC second = vertices[1].position;
+        NUMTX matrix_copy;
+        if (matrix != NULL) {
+            if ((reinterpret_cast<usize>(matrix) & 15) != 0) {
+                matrix_copy = *matrix;
+                matrix = &matrix_copy;
+            }
+            NuVecMtxTransform(&first, &first, matrix);
+            NuVecMtxTransform(&second, &second, matrix);
+        }
+        if (AiRndrCullDistance > 0.0f) {
+            NUVEC position;
+            if (aieditor && (aieditor->flags & 2))
+                position = aieditor->camera_position;
+            else
+                position = *(NUVEC *)&global_camera.mtx.m30;
+            f32 dx = position.x - first.x;
+            f32 dy = position.y - first.y;
+            f32 dz = position.z - first.z;
+            f32 limit = AiRndrCullDistance * AiRndrCullDistance;
+            f32 dx2 = position.x - second.x;
+            f32 dy2 = position.y - second.y;
+            f32 dz2 = position.z - second.z;
+            if (dx * dx + dy * dy + dz * dz > limit && dx2 * dx2 + dy2 * dy2 + dz2 * dz2 > limit)
+                return;
+        }
+        NuRndrLine3dDbg(first.x, first.y, first.z, second.x, second.y, second.z, vertices[0].colour);
+    }
+    void AiRndrLine3dDbg(f32 x0, f32 y0, f32 z0, f32 x1, f32 y1, f32 z1, u32 colour) {
+        if (AiRndrCullDistance > 0.0f) {
+            NUVEC position;
+            if (aieditor && (aieditor->flags & 2))
+                position = aieditor->camera_position;
+            else
+                position = *(NUVEC *)&global_camera.mtx.m30;
+            f32 dx = position.x - x0;
+            f32 dy = position.y - y0;
+            f32 dz = position.z - z0;
+            f32 limit = AiRndrCullDistance * AiRndrCullDistance;
+            if (!(dx * dx + dy * dy + dz * dz < limit)) {
+                dx = position.x - x1;
+                dy = position.y - y1;
+                dz = position.z - z1;
+                if (!(dx * dx + dy * dy + dz * dz < limit))
+                    return;
+            }
+        }
+        NuRndrLine3dDbg(x0, y0, z0, x1, y1, z1, colour);
     }
 
     void AiSysOnlyUsePakFile(i32 enabled) {

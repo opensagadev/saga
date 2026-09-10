@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "gameapi/edtools/edui.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -2163,16 +2164,24 @@ extern "C" {
     void cbCompateDirentBySizeDec(void) {
     }
 
-    void cbInteractMenuKeySelect(void) {
+    i32 cbInteractMenuScrollDown(edui_interact_s *interact) {
+        eduimenu_s *menu = interact->menu;
+        if (menu->field_10) {
+            if (menu->field_10->next)
+                menu->field_10 = menu->field_10->next;
+            menu->selected = menu->field_10;
+        }
+        return 0;
     }
 
-    void cbInteractMenuScrollDown(void) {
-    }
-
-    void cbInteractMenuScrollTo(void) {
-    }
-
-    void cbInteractMenuScrollUp(void) {
+    i32 cbInteractMenuScrollUp(edui_interact_s *interact) {
+        eduimenu_s *menu = interact->menu;
+        if (menu->field_0c) {
+            if (menu->field_0c->previous)
+                menu->field_0c = menu->field_0c->previous;
+            menu->selected = menu->field_0c;
+        }
+        return 0;
     }
 
     void cbInteractMenuTitle(void) {

@@ -82,6 +82,8 @@ typedef struct nuglobalrndrstate_s {
 
 extern "C" {
     extern NUGLOBALRNDRSTATE render_state;
+    void NuRndrStateInit(void);
+    i32 NuRndrStateGetFogEnabled(void);
     void RndrStateSetReflection(i32 reflection);
     void NuRndrStateSetFogEnabled(i32 enabled);
     void NuRndrStateSetFogState(f32 near_distance, f32 far_distance, u32 colour, f32 density);

@@ -71,7 +71,7 @@ i32 NuSplineFindAllBeg(NUGSCN *scene, char *name, NUGSPLINE **results, i32 capac
         return 0;
     i32 count = 0;
     NUGSPLINE *spline = scene->splines;
-    for (i32 i = 0; i < scene->numsplines; i++, spline++) {
+    for (i32 i = 0; i < scene->numsplines; spline++, i++) {
         if (NuStrNICmp(name, spline->name, -1) == 0) {
             results[count++] = spline;
             if (count >= capacity)

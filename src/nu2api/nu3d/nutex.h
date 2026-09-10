@@ -103,6 +103,9 @@ extern "C" {
     i32 NuTexCreateNative(NUNATIVETEX *tex, bool is_pvrtc);
 
     void NuTexDestroy(i32 tex_id);
+    void NuTexCleartid(i32 tex_id);
+    void NuTexCreateFramebufferCopy(void *buffer, void *buffer_end);
+    i32 NuTexReserveNative(NUNATIVETEX *texture, i32 tex_id);
 
     NUNATIVETEX *NuTexGetNative(i32 tex_id);
 

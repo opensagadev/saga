@@ -77,11 +77,6 @@ NUGCUTSCENEFINDCHARACTERSFN NuCutSceneFindCharacters = NULL;
 NUGCUTSCENERESETCHARACTERSFN NuCutSceneResetCharactersFn = NULL;
 NUGCUTSCENERIGIDPOSTRENDERFN NuCutSceneRigidPostRender = NULL;
 NUGCUTSCENEREQUESTSFXFN NuCutSceneRequestSFX = NULL;
-__attribute__((visibility("hidden"))) GameObject_s *ForceBackObj asm("_ZL12ForceBackObj") = NULL;
-__attribute__((visibility("hidden"))) NUVEC *ForceBackPos asm("_ZL12ForceBackPos") = NULL;
-__attribute__((visibility("hidden"))) i32 ForceBackType asm("_ZL13ForceBackType") = 0;
-__attribute__((visibility("hidden"))) f32 ForceBackRadius asm("_ZL15ForceBackRadius") = 0.0f;
-__attribute__((visibility("hidden"))) f32 ForceBackRadius2 asm("_ZL16ForceBackRadius2") = 0.0f;
 
 static CHARACTER_CONTEXT_INFO_s CharacterContextInfoTable[] = {
     {"NoContext", -1, 0x00001000, 0},

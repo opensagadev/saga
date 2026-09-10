@@ -2,21 +2,7 @@
 
 #include "nu2api/nusound/nusound_system.hpp"
 
-extern __attribute__((visibility("hidden"))) u16 *g_NuSoundLoadBits asm("_ZL17g_NuSoundLoadBits");
-extern __attribute__((visibility("hidden"))) u16 *g_NuSoundLoadBitsCache asm("_ZL22g_NuSoundLoadBitsCache");
-extern __attribute__((visibility("hidden"))) i32 g_NuSoundNumLoadBitShorts asm("_ZL25g_NuSoundNumLoadBitShorts");
-
 extern "C" {
-
-    void NuSound3SetRequestTable(u16 *request_bits, i32 short_count) {
-        if (g_NuSoundLoadBitsCache != NULL && g_NuSoundNumLoadBitShorts != short_count) {
-            delete g_NuSoundLoadBitsCache;
-        }
-
-        g_NuSoundLoadBitsCache = new u16[short_count];
-        g_NuSoundNumLoadBitShorts = short_count;
-        g_NuSoundLoadBits = request_bits;
-    }
 
     // The Android original is eight NOPs followed by RET; the callers still
     // supply the full rumble request ABI.

@@ -328,8 +328,10 @@ void ResetAICreatures(AISYS_s *system) {
 
         AIPACKET *packet = reinterpret_cast<AIPACKET *>(&object.ai);
         AISCRIPTPROCESS *processor = &object.ai.script_process;
-        AIScriptProcessorInit(WORLD->ai_sys, packet, processor, &creature, creature.script_name, "InActive", 1, NULL, NULL);
-        if (processor->state != NULL && processor->state->name != NULL && NuStrICmp(processor->state->name, "InActive") == 0) {
+        AIScriptProcessorInit(WORLD->ai_sys, packet, processor, &creature, creature.script_name, "InActive", 1, NULL,
+                              NULL);
+        if (processor->state != NULL && processor->state->name != NULL &&
+            NuStrICmp(processor->state->name, "InActive") == 0) {
             creature.activate_type = 2;
         }
 
@@ -342,7 +344,8 @@ void ResetAICreatures(AISYS_s *system) {
         }
         if (creature.count > 1 && creature.start_stagger > 0.0f && object.ai.group_member_index != 0) {
             object.ai.reset_mode = AI_CREATURE_RESET_STAGGERED;
-            object.ai_spawn_delay = static_cast<f32>(static_cast<u32>(object.ai.group_member_index)) * creature.start_stagger;
+            object.ai_spawn_delay =
+                static_cast<f32>(static_cast<u32>(object.ai.group_member_index)) * creature.start_stagger;
             continue;
         }
 

@@ -5,7 +5,7 @@
 extern NUVIEWPORT vpCurrent;
 extern i32 vport_inval;
 extern NUMTX vp_smtx;
-extern "C" void NuRndrStateUpdateCameraState(void);
+extern "C" i32 NuRndrStateUpdateCameraState(void);
 
 i32 PS2_VCNTR_X = 640;
 i32 PS2_VCNTR_Y = 360;

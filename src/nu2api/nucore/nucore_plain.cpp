@@ -1,5 +1,6 @@
 // Nucore plain — C-linkage surface for the original libTTapp.so nucore TU.
 #include "nu2api/nu3d/nulgtlaser.h"
+#include "nu2api/nucore/nuonline.h"
 struct NUGCUTLOCATORFNENTRY_s;
 extern "C" NUGCUTLOCATORFNENTRY_s *locatorfns;
 //
@@ -53,6 +54,7 @@ void NuDebugMsgPrint(char *);
 #include "nu2api/nucore/nuhgobj.h"
 #include "nu2api/nucore/nugcutscene.h"
 #include "nu2api/nucore/nupad.h"
+#include "nu2api/nucore/nuthread.h"
 #include "nu2api/nucore/nuptrblock.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nu3d/nudlist.h"
@@ -770,16 +772,70 @@ extern "C" {
         NuDisplayListEndCriticalSection();
     }
     void NuDisplayListBeginCriticalSection(void) {
+        NuThreadCriticalSectionBegin(global_dlist_manager.loading_critical_section);
     }
     void NuDisplayListBurstRndrSpecial(void) {
     }
-    void NuDisplayListCaptureBegin(void) {
-    }
-    void NuDisplayListCaptureEnd(void) {
-    }
     void NuDisplayListClipSpecials(void) {
     }
-    void NuDisplayListCreateFx(void) {
+    void DisplayListCreateFxItemPS(void *item, i32 type);
+    void DisplayListCreateFxList(VARIPTR *buffer, VARIPTR end, i32 count) {
+        global_dlist_manager.max_fx = count;
+        global_dlist_manager.fx_used = buffer->u8_ptr;
+        buffer->addr += count;
+        buffer->addr = ALIGN(buffer->addr, 4);
+        global_dlist_manager.fx_sort_pris = (NUSORTPRI *)buffer->void_ptr;
+        buffer->addr += count * sizeof(NUSORTPRI);
+        buffer->addr = ALIGN(buffer->addr, 16);
+        global_dlist_manager.fx_items = buffer->void_ptr;
+        buffer->addr += count * 0x20;
+        for (i32 i = 0; i < count; ++i) {
+            global_dlist_manager.fx_used[i] = 0;
+            NUDISPLAYLISTITEM *terminator = (NUDISPLAYLISTITEM *)global_dlist_manager.fx_items + i * 2 + 1;
+            terminator->type = 0x84;
+            terminator->next = NULL;
+            terminator->id = 4;
+        }
+    }
+    i32 NuDisplayListCreateFx(i32 type, i32 priority, i32 layer) {
+        i32 index = -1;
+        for (i32 i = 0; i < global_dlist_manager.max_fx; ++i) {
+            if (!global_dlist_manager.fx_used[i]) {
+                index = i;
+                break;
+            }
+        }
+        if (index == -1)
+            return 0;
+        NUDISPLAYLISTITEM *item = (NUDISPLAYLISTITEM *)((u8 *)global_dlist_manager.fx_items + index * 0x20);
+        global_dlist_manager.fx_used[index] = 1;
+        NUSORTPRI *record = &global_dlist_manager.fx_sort_pris[index];
+        record->display_scene = NULL;
+        record->sort_pri = priority + (layer << 17);
+        record->items = item;
+        record->field_18 = 0;
+        record->nmtls = 0;
+        NUSORTPRI *previous = NULL;
+        NUSORTPRI *current = global_dlist_manager.sort_list;
+        if (!current) {
+            global_dlist_manager.sort_list = record;
+            record->sys_next = NULL;
+        } else {
+            while (current && record->sort_pri > current->sort_pri) {
+                previous = current;
+                current = current->sys_next;
+            }
+            if (previous) {
+                record->sys_next = current;
+                previous->sys_next = record;
+            } else {
+                record->sys_next = global_dlist_manager.sort_list;
+                global_dlist_manager.sort_list = record;
+            }
+        }
+        ++global_dlist_manager.nused_sort_pris;
+        DisplayListCreateFxItemPS(item, type);
+        return index + 1;
     }
     // original 0x2f8bb0 — defer dynamic material display-list construction to
     // DisplayListLinkDynamicMtls at the next render-buffer swap.
@@ -791,9 +847,21 @@ extern "C" {
             NuThreadCriticalSectionEnd(global_dlist_manager.loading_critical_section);
         }
     }
-    void NuDisplayListDebugToFile(void) {
-    }
-    void NuDisplayListDestroyFx(void) {
+    void DisplayListDestroyFxItemPS(void *item);
+    void NuDisplayListDestroyFx(i32 handle) {
+        i32 index = handle - 1;
+        global_dlist_manager.fx_used[index] = 0;
+        NUSORTPRI *record = &global_dlist_manager.fx_sort_pris[index];
+        NUSORTPRI *previous = global_dlist_manager.sort_list;
+        if (record == previous) {
+            global_dlist_manager.sort_list = record->sys_next;
+        } else {
+            while (previous->sys_next != record)
+                previous = previous->sys_next;
+            previous->sys_next = record->sys_next;
+        }
+        --global_dlist_manager.nused_sort_pris;
+        DisplayListDestroyFxItemPS((u8 *)global_dlist_manager.fx_items + index * 0x20);
     }
     void NuDisplayListDestroyMtl(NUMTL *mtl) {
         NuThreadCriticalSectionBegin(global_dlist_manager.loading_critical_section);
@@ -813,10 +881,16 @@ extern "C" {
     void NuDisplayListDraw(void) {
     }
     void NuDisplayListDrawAll(void) {
+        NuDisplayListCaptureBegin();
+        if (global_dlist_manager.nrender_scenes == 0)
+            NuDisplayListAddRenderScene();
+        for (i32 i = 0; i < global_dlist_manager.nrender_scenes; ++i)
+            NuDisplayListDrawRenderScene(i);
+        NuDisplayListDraw2D();
+        NuDisplayListCaptureEnd();
     }
     void NuDisplayListEndCriticalSection(void) {
-    }
-    void NuDisplayListEndScene(void) {
+        NuThreadCriticalSectionEnd(global_dlist_manager.loading_critical_section);
     }
     VARIPTR *NuDisplayListLinkItemVP(nudisplaylist_s *list, u8 type, void *call_addr, VARIPTR *buf) {
         auto *call = reinterpret_cast<nudisplaylistitem_s *>(buf->void_ptr);
@@ -933,7 +1007,13 @@ extern "C" {
         list->mtl_last = item + 3;
         list->state->mtl = mtl;
     }
-    void NuDisplayListLinkList(void) {
+    void NuDisplayListLinkList(NUDISPLAYLIST *list, NUDISPLAYLISTITEM *first, NUDISPLAYLISTITEM *last) {
+        list->mtl_last->next = first;
+        NUDISPLAYLISTITEM *continuation = list->dyn_geom + 1;
+        last->type = 0x8d;
+        last->next = continuation;
+        last->id = 1;
+        list->mtl_last = last;
     }
     void *NuDisplayListPrepareFaceonPS(VARIPTR *, void *faceon, NUMTX *) {
         return faceon;
@@ -1152,7 +1232,10 @@ extern "C" {
         RndrStateSetConstAlphaTint(0, 0, 0.0f, NULL, NULL);
         return clip_state;
     }
-    void NuDisplayListSetFxParam(void) {
+    void DisplayListSetFxItemParamPS(void *item, i32 parameter, f32 value, i32 mode);
+    void NuDisplayListSetFxParam(i32 handle, i32 parameter, f32 value, i32 mode) {
+        void *item = (u8 *)global_dlist_manager.fx_items + (handle - 1) * 0x20;
+        DisplayListSetFxItemParamPS(item, parameter, value, mode);
     }
 
     // ---------------------------------------------------------------------------
@@ -1160,8 +1243,6 @@ extern "C" {
     // ---------------------------------------------------------------------------
 
     void NuDisplaySceneClone(void) {
-    }
-    void NuDisplaySceneClonePS(void) {
     }
     void NuDisplaySceneDebug(void) {
     }
@@ -1950,16 +2031,6 @@ extern "C" {
     // Bridge / file / heap / memory
     // ---------------------------------------------------------------------------
 
-    void NuBridgeCreate(void) {
-    }
-    void NuBridgeDraw(i32) {
-    }
-    void NuBridgeInit(void) {
-    }
-    void NuBridgeOn(void) {
-    }
-    void NuBridgeRemove(void) {
-    }
     void NuBridgeUpdate(void *) {
     }
     void NuDatClose(void) {
@@ -2266,8 +2337,6 @@ extern "C" {
     }
     void NuEffectTex360Create3D_aliased(void) {
     }
-    nueffecttex_s *NuEffectTexCreate2D(i32, i32, i32, i32, i32) {
-    }
     void NuEffectTexCreateCube(void) {
     }
     void NuEffectTexCreateCube_aliased(void) {
@@ -2279,7 +2348,27 @@ extern "C" {
         *width = (dimensions[1] >> lod) & ~1;
         *height = (dimensions[2] >> lod) & ~1;
     }
-    void NuEffectTexGetEffectFromNative(void) {
+    struct NativeEffectTexture {
+        NUNATIVETEX native;
+        nueffecttex_s *effect;
+        i32 unknown_2c;
+    };
+    DECOMP_ASSERT(sizeof(NativeEffectTexture) == 0x30, "Native effect texture stride");
+    DECOMP_ASSERT(offsetof(NativeEffectTexture, effect) == 0x28, "Native effect texture link");
+
+    struct NativeEffectTexturePool {
+        NativeEffectTexture entries[32];
+        u8 unknown_600[16];
+    };
+    DECOMP_ASSERT(sizeof(NativeEffectTexturePool) == 0x610, "Native effect texture pool size");
+    static NativeEffectTexturePool nativeTexPool;
+
+    nueffecttex_s *NuEffectTexGetEffectFromNative(i32 tex_id) {
+        NativeEffectTexture *texture = (NativeEffectTexture *)NuTexGetNative(tex_id);
+        isize index = ((u8 *)texture - (u8 *)nativeTexPool.entries) / (isize)sizeof(NativeEffectTexture);
+        if ((u32)index < 32)
+            return texture->effect;
+        return NULL;
     }
     void *NuEffectTexGetLockedVP(void) {
         return NULL;
@@ -2288,25 +2377,11 @@ extern "C" {
         (void)buffer;
         (void)buffer_end;
     }
-    void NuEffectTexMapNative(void) {
+    void NuEffectTexMapNative(nueffecttex_s *texture) {
     }
     void NuEffectTexUnlockVP(void) {
     }
     void NuEffectTexUnmapNative(void) {
-    }
-    void NuFadeObjCreateMtx(void) {
-    }
-    void NuFadeObjDraw(void) {
-    }
-    void NuFadeObjInit(void) {
-    }
-    void NuFadeObjSet_SetLightsFn(void) {
-    }
-    void NuFadeObjSetup(void) {
-    }
-    void NuFadeObjUpdate(void) {
-    }
-    void NuFadeObjUpdateArray(void *) {
     }
     void NuFramebufferAttachTex2D(nuframebuffer_s *, i32, nueffecttex_s *, i32) {
     }
@@ -2315,8 +2390,6 @@ extern "C" {
     static void NuFramebufferClear(void) {
     }
     void NuFramebufferCopyTex2D(i32, nueffecttex_s *, i32, i32, i32, i32, i32) {
-    }
-    nuframebuffer_s *NuFramebufferCreate() {
     }
     void NuFramebufferDestroy(nuframebuffer_s *) {
     }
@@ -3346,8 +3419,8 @@ extern "C" {
         return drawn;
     }
     u32 NuWindRand(void);
-    i32 NuHGobjRndrRandShadowSurfacePoints(nuhgobj_s *object, NUMTX *world_matrix, NUMTX *joint_matrices,
-                                          i32 count, NUVEC *positions, i32 exclusion_mask) {
+    i32 NuHGobjRndrRandShadowSurfacePoints(nuhgobj_s *object, NUMTX *world_matrix, NUMTX *joint_matrices, i32 count,
+                                           NUVEC *positions, i32 exclusion_mask) {
         if (NuCameraClipTestExtents(&object->bounds_min, &object->bounds_max, world_matrix, 0.0f, 0) == 0) {
             return 0;
         }
@@ -3521,7 +3594,10 @@ extern "C" {
             *blend_time = animation->curve_count < 9 ? static_cast<f32>(character->blend_time) : curve_value(8);
         }
     }
-    void NuGCutSceneDestroy(NUGCUTSCENE_s *) {
+    void NuGCutSceneDestroy(NUGCUTSCENE_s *cutscene) {
+        if (cutscene->character_system != NULL && NuCutSceneDestroyCharacters != NULL) {
+            NuCutSceneDestroyCharacters(cutscene);
+        }
     }
     void NuGCutSceneLoadAddr(void) {
     }
@@ -3548,69 +3624,37 @@ extern "C" {
     // Input / pad / key / mouse
     // ---------------------------------------------------------------------------
 
-    void NuKeyFlush(void) {
-    }
-    void NuKeyGet(void) {
-    }
-    void NuKeyToAscii(void) {
-    }
-    void NuKey_current(void) {
-    }
-    void NuKey_last(void) {
-    }
-    void NuKey_simple(void) {
-    }
-    i32 NuKeyboard(i32) {
+    struct NUKEYCHAR {
+        u32 key;
+        u8 normal;
+        u8 shifted;
+        u8 padding[2];
+    };
+    NUKEYCHAR NuKeyChar[65] = {
+        {0x2, 0x31, 0x21, {0, 0}},  {0x3, 0x32, 0x22, {0, 0}},  {0x4, 0x33, 0xa3, {0, 0}},  {0x5, 0x34, 0x24, {0, 0}},
+        {0x6, 0x35, 0x25, {0, 0}},  {0x7, 0x36, 0x5e, {0, 0}},  {0x8, 0x37, 0x26, {0, 0}},  {0x9, 0x38, 0x2a, {0, 0}},
+        {0xa, 0x39, 0x28, {0, 0}},  {0xb, 0x30, 0x29, {0, 0}},  {0xc, 0x2d, 0x5f, {0, 0}},  {0xd, 0x3d, 0x2b, {0, 0}},
+        {0xf, 0x09, 0x09, {0, 0}},  {0x10, 0x71, 0x51, {0, 0}}, {0x11, 0x77, 0x57, {0, 0}}, {0x12, 0x65, 0x45, {0, 0}},
+        {0x13, 0x72, 0x52, {0, 0}}, {0x14, 0x74, 0x54, {0, 0}}, {0x15, 0x79, 0x59, {0, 0}}, {0x16, 0x75, 0x55, {0, 0}},
+        {0x17, 0x69, 0x49, {0, 0}}, {0x18, 0x6f, 0x4f, {0, 0}}, {0x19, 0x70, 0x50, {0, 0}}, {0x1a, 0x5b, 0x7b, {0, 0}},
+        {0x1b, 0x5d, 0x7d, {0, 0}}, {0x1e, 0x61, 0x41, {0, 0}}, {0x1f, 0x73, 0x53, {0, 0}}, {0x20, 0x64, 0x44, {0, 0}},
+        {0x21, 0x66, 0x46, {0, 0}}, {0x22, 0x67, 0x47, {0, 0}}, {0x23, 0x68, 0x48, {0, 0}}, {0x24, 0x6a, 0x4a, {0, 0}},
+        {0x25, 0x6b, 0x4b, {0, 0}}, {0x26, 0x6c, 0x4c, {0, 0}}, {0x27, 0x3b, 0x3a, {0, 0}}, {0x28, 0x27, 0x40, {0, 0}},
+        {0x2b, 0x5c, 0x3f, {0, 0}}, {0x2c, 0x7a, 0x5a, {0, 0}}, {0x2d, 0x78, 0x58, {0, 0}}, {0x2e, 0x63, 0x43, {0, 0}},
+        {0x2f, 0x76, 0x56, {0, 0}}, {0x30, 0x62, 0x42, {0, 0}}, {0x31, 0x6e, 0x4e, {0, 0}}, {0x32, 0x6d, 0x4d, {0, 0}},
+        {0x33, 0x2c, 0x3c, {0, 0}}, {0x34, 0x2e, 0x3e, {0, 0}}, {0x35, 0x2f, 0x00, {0, 0}}, {0x37, 0x2a, 0x2a, {0, 0}},
+        {0x39, 0x20, 0x20, {0, 0}}, {0x47, 0x37, 0x37, {0, 0}}, {0x48, 0x38, 0x38, {0, 0}}, {0x49, 0x39, 0x39, {0, 0}},
+        {0x4a, 0x2d, 0x2d, {0, 0}}, {0x4b, 0x34, 0x34, {0, 0}}, {0x4c, 0x35, 0x35, {0, 0}}, {0x4d, 0x36, 0x36, {0, 0}},
+        {0x4e, 0x2b, 0x2b, {0, 0}}, {0x4f, 0x31, 0x31, {0, 0}}, {0x50, 0x32, 0x32, {0, 0}}, {0x51, 0x33, 0x33, {0, 0}},
+        {0x52, 0x30, 0x30, {0, 0}}, {0x53, 0x2e, 0x2e, {0, 0}}, {0x8d, 0x3d, 0x3d, {0, 0}}, {0xb5, 0x2f, 0x2f, {0, 0}},
+        {0x0, 0x00, 0x00, {0, 0}},
+    };
+    i32 NuKeyToAscii(u32 key, i32 shifted) {
+        for (NUKEYCHAR *entry = NuKeyChar; entry->key != 0; ++entry) {
+            if (entry->key == key)
+                return shifted ? entry->shifted : entry->normal;
+        }
         return 0;
-    }
-    i32 NuKeyboard_db(i32) {
-        return 0;
-    }
-    void NuMouseButton(void) {
-    }
-    void NuMouseButton_db(void) {
-    }
-    void NuMouseReadButtons(void) {
-    }
-    void NuMouseReadButtons_db(void) {
-    }
-    void NuMouseReadX(void) {
-    }
-    void NuMouseReadXRel(void) {
-    }
-    void NuMouseReadXVel(void) {
-    }
-    void NuMouseReadY(void) {
-    }
-    void NuMouseReadYRel(void) {
-    }
-    void NuMouseReadYVel(void) {
-    }
-    void NuMouseReadZ(void) {
-    }
-    void NuMouseReadZRel(void) {
-    }
-    void NuMouseReadZVel(void) {
-    }
-    void NuPadGetNumberOfPortsPS(void) {
-    }
-    void NuPadMapPlayerToPort(void) {
-    }
-    void NuPadRecordInit(void) {
-    }
-    void NuPadSetDirectMappingState(void) {
-    }
-    void NuPadSetMaxGamePads(void) {
-    }
-    void NuPadSetMotors(void) {
-    }
-    void NuPadSetMotorsPS(void) {
-    }
-    void NuPadSetValid(void) {
-    }
-    void NuPadUseCorrectDeadZoning(void) {
-    }
-    void NuPad_Interface_Render(void) {
     }
     void NuPad_Interface_TouchScreenInput(i32, i32, i32, i32, i32, i32, i32, i32) {
     }
@@ -3960,13 +4004,13 @@ extern "C" {
     void NuThreadCreate(void) {
     }
 #endif
-    void NuPause(void) {
+    static f32 nu2api_paused;
+    void NuPause(i32 paused) {
+        nu2api_paused = (f32)paused;
     }
     void NuPhoneOSMessagePost(void) {
     }
     void NuPhoneOSMessagePump(void) {
-    }
-    void NuPhysicalProtect(void) {
     }
     NUGCUTSCENEGETHGOBJFN NuCutSceneGetHGObj;
 
@@ -3974,8 +4018,6 @@ extern "C" {
         NuCutSceneGetHGObj = function;
     }
     void NuSetPadDemoEndButtons(u32) {
-    }
-    void NuSetupVideoModeParams(void) {
     }
     void NuSetCutSceneCharacterCreateDataFn(NUGCUTSCENECHARACTERCREATEDATAFN function) {
         NuCutSceneCharacterCreateData = function;
@@ -3997,7 +4039,9 @@ extern "C" {
     void NuSetCutSceneCharacterRenderFn(NUGCUTSCENECHARACTERRENDERFN function) {
         NuCutSceneCharacterRender = function;
     }
-    void NuSetCutSceneDestroyCharactersFn(void) {
+    void (*NuCutSceneDestroyCharacters)(NUGCUTSCENE_s *);
+    void NuSetCutSceneDestroyCharactersFn(void (*callback)(NUGCUTSCENE_s *)) {
+        NuCutSceneDestroyCharacters = callback;
     }
     void NuSetCutSceneFindCharactersFn(NUGCUTSCENEFINDCHARACTERSFN function) {
         NuCutSceneFindCharacters = function;
@@ -4008,7 +4052,9 @@ extern "C" {
     void NuSetCutSceneResetCharactersFn(NUGCUTSCENERESETCHARACTERSFN function) {
         NuCutSceneResetCharactersFn = function;
     }
-    void NuSetCutSceneRigidCollisionCheckFn(void) {
+    NUGCUTSCENERIGIDCOLLISIONCHECKFN NuCutSceneRigidCollisionCheck;
+    void NuSetCutSceneRigidCollisionCheckFn(NUGCUTSCENERIGIDCOLLISIONCHECKFN callback) {
+        NuCutSceneRigidCollisionCheck = callback;
     }
     void NuSetCutSceneRigidPostRenderFn(NUGCUTSCENERIGIDPOSTRENDERFN function) {
         NuCutSceneRigidPostRender = function;
@@ -4026,21 +4072,22 @@ extern "C" {
 
     void NuSplineList(void) {
     }
-    void NuOnlineAchievementAchieved(void) {
+    i32 NuOnlineAchievementAchievedExPS(i32 player, i32 achievement, NUONLINEACHIEVEMENTCALLBACK callback) {
+        // Preserve the original unsigned bound, including its acceptance of index 2.
+        if ((u32)player > 2) {
+            return 0;
+        }
+        return NuOnlineAchievementAchievedProfile(g_nupadMapping[player].port, achievement, callback);
     }
-    void NuOnlineAchievementAchievedEx(void) {
+    i32 NuOnlineAchievementAchievedPS(i32 achievement, NUONLINEACHIEVEMENTCALLBACK callback) {
+        extern i32 g_signedinUser;
+        return NuOnlineAchievementAchievedProfile(g_signedinUser, achievement, callback);
     }
-    void NuOnlineAchievementAchievedExPS(void) {
+    i32 NuOnlineHasPlayerDownloadedPS(u32) {
+        return 0;
     }
-    void NuOnlineAchievementAchievedPS(void) {
-    }
-    void NuOnlineHasPlayerDownloaded(void) {
-    }
-    void NuOnlineHasPlayerDownloadedPS(void) {
-    }
-    void NuOnlineHasPlayerSignedInEx(void) {
-    }
-    void NuOnlineHasPlayerSignedInExPS(void) {
+    i32 NuOnlineHasPlayerSignedInExPS(void) {
+        return 0;
     }
     extern i32 g_signedinUser;
     i32 NuOnlineHasPlayerSignedInPS(void) {
@@ -4048,90 +4095,76 @@ extern "C" {
     }
     void NuOnlineInitPS(void) {
     }
-    void NuOnlineSetContext(void) {
+    void NuOnlineSetContextExPS(i32 player, i32 context, i32 value) {
+        if ((u32)player <= 2) {
+            NuOnlineSetContextProfilePS(g_nupadMapping[player].port, context, value);
+        }
     }
-    void NuOnlineSetContextEx(void) {
+    void NuOnlineSetContextPS(i32 context, i32 value) {
+        NuOnlineSetContextProfilePS(g_signedinUser, context, value);
     }
-    void NuOnlineSetContextExPS(void) {
+    void NuOnlineSetDefaultContextExPS(i32 player, i32 context, i32 value) {
+        if ((u32)player <= 2) {
+            NuOnlineSetDefaultContextProfilePS(g_nupadMapping[player].port, context, value);
+        }
     }
-    void NuOnlineSetContextPS(void) {
+    void NuOnlineSetDefaultContextPS(i32 context, i32 value) {
+        NuOnlineSetDefaultContextProfilePS(g_signedinUser, context, value);
     }
-    void NuOnlineSetDefaultContext(void) {
+    void NuOnlineSetDefaultPresenceModeExPS(i32 player, i32 mode) {
+        if ((u32)player <= 2) {
+            NuOnlineSetDefaultPresenceModeProfilePS(g_nupadMapping[player].port, mode);
+        }
     }
-    void NuOnlineSetDefaultContextEx(void) {
+    void NuOnlineSetDefaultPresenceModePS(i32 mode) {
+        NuOnlineSetDefaultPresenceModeProfilePS(g_signedinUser, mode);
     }
-    void NuOnlineSetDefaultContextExPS(void) {
+    void NuOnlineSetPresenceModeExPS(i32 player, i32 mode) {
+        if ((u32)player <= 2) {
+            NuOnlineSetPresenceModeProfilePS(g_nupadMapping[player].port, mode);
+        }
     }
-    void NuOnlineSetDefaultContextPS(void) {
-    }
-    void NuOnlineSetDefaultPresenceMode(void) {
-    }
-    void NuOnlineSetDefaultPresenceModeEx(void) {
-    }
-    void NuOnlineSetDefaultPresenceModeExPS(void) {
-    }
-    void NuOnlineSetDefaultPresenceModePS(void) {
-    }
-    void NuOnlineSetPresenceMode(void) {
-    }
-    void NuOnlineSetPresenceModeEx(void) {
-    }
-    void NuOnlineSetPresenceModeExPS(void) {
-    }
-    void NuOnlineSetPresenceModePS(void) {
+    void NuOnlineSetPresenceModePS(i32 mode) {
+        NuOnlineSetPresenceModeProfilePS(g_signedinUser, mode);
     }
     void NuOnlineSetProfilePlayer(void) {
     }
-    void NuOnlineSetProperty(void) {
+    void NuOnlineSetPropertyExPS(i32 player, i32 property, i32 size, void *data) {
+        if ((u32)player <= 2) {
+            NuOnlineSetPropertyProfilePS(g_nupadMapping[player].port, property, size, data);
+        }
     }
-    void NuOnlineSetPropertyEx(void) {
-    }
-    void NuOnlineSetPropertyExPS(void) {
-    }
-    void NuOnlineSetPropertyPS(void) {
+    void NuOnlineSetPropertyPS(i32 property, i32 size, void *data) {
+        NuOnlineSetPropertyProfilePS(g_signedinUser, property, size, data);
     }
     void NuOnlineSignInPlayer(void) {
     }
-    void NuOnlineSignInPlayerPS(void) {
-    }
-    void NuMcCloseDir(void) {
-    }
-    void NuMcCreateDir(void) {
-    }
-    void NuMcFormat(void) {
-    }
-    void NuMcGetSlotMax(void) {
-    }
-    void NuMcOpenDir(void) {
-    }
-    void NuMcReadDir(void) {
+    i32 NuOnlineSignInPlayerPS(void) {
+        return 0;
     }
     void NuFmvInit(void) {
     }
-    void NuFmvPlay(void) {
+    i32 NuFmvPlayV(i32 option, ...) {
+        return 1;
     }
-    void NuFmvPlayV(void) {
+    // The original wrapper forwards eight 32-bit arguments through a tagged
+    // option list. Option meanings beyond this layout remain unrecovered.
+    i32 NuFmvPlay(u32 argument0, i32 enabled, u32 argument2, u32 argument3, u32 argument4, u32 argument5, u32 argument6,
+                  u32 argument7) {
+        return NuFmvPlayV(2, argument0, enabled != 0 ? 3 : 0, 4, argument2, 5, argument3, 6, argument4, 7, argument5, 8,
+                          argument6, argument7, 1);
     }
     extern void (*nuapi_endframe_callbackfn)(void);
     void NuRegisterEndFrameCallBackFn(void (*callback)(void)) {
         nuapi_endframe_callbackfn = callback;
-    }
-    void NuRndIsReflectionGobj(void) {
-    }
-    void NuRndIsShadowReceiveRenderGobj(void) {
     }
 
     // ---------------------------------------------------------------------------
     // Rendering extras
     // ---------------------------------------------------------------------------
 
-    void NuStreamInit(void) {
-    }
-    void NuFpException(void) {
-    }
-    void NuFpExceptionMask(void) {
-    }
-    void Nu360GetCommandLine(void) {
+    i32 NuStreamInit(void) {
+        return 0;
     }
 
     // ---------------------------------------------------------------------------

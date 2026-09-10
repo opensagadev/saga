@@ -529,8 +529,7 @@ static void GizObstacles_Reset(void *world_ptr, void *data, void *progress_ptr) 
             for (GAMEANIMOBJ_s *object = anim_set->objects; object != NULL; object = object->next) {
                 i16 *object_data = static_cast<i16 *>(object->object_data);
                 object_data[1] = -1;
-                if (world->terrain != NULL && (object_data[0] & 1) == 0 &&
-                    NuSpecialExistsFn(&object->special) != 0) {
+                if (world->terrain != NULL && (object_data[0] & 1) == 0 && NuSpecialExistsFn(&object->special) != 0) {
                     object_data[1] = FindPlatInst(NuSpecialGetInstanceix(&object->special));
                 }
                 if (object_data[1] != -1) {
