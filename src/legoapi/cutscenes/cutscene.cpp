@@ -1696,7 +1696,7 @@ static inline void instNuGCutSceneDecrementRepeatCount(instNUGCUTSCENE_s *instan
 }
 
 static inline u8 instNuGCutSceneLastStream(instNUGCUTSCENE_s *instance) {
-    return static_cast<u8>(instance->cutscene_copy->field_40);
+    return instance->cutscene_copy->last_stream;
 }
 
 static inline NUGCUTSCENE_s *instNuGCutSceneCurrentStreamBuffer(instNUGCUTSCENE_s *instance) {

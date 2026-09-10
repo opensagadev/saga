@@ -34,7 +34,3 @@ extern "C" {
     }
 
 } // extern "C"
-
-f32 PartObjectInterface::GetRadius() const {
-    return part.radius;
-}

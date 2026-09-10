@@ -1,4 +1,11 @@
 #include "gameapi_edtools_types.h"
+#include "gameapi/edtools/edui.h"
+#include "legoapi/legoapi_types.h"
+
+extern "C" {
+extern part_typedesc_s *edpart_nearest_type;
+i32 edpart_set_part = 5;
+}
 
 // Particle editor subsystem stubs (static, internal linkage).
 
@@ -126,7 +133,10 @@ static void edpartSwitchTypeMenu(eduimenu_s *, eduiitem_s *, u32) {
 }
 static void edpartChangeIvalOnRan(eduimenu_s *, eduiitem_s *, u32) {
 }
-static void edpartChangePartIndex(eduimenu_s *, eduiitem_s *, u32) {
+static void edpartChangePartIndex(eduimenu_s *, eduiitem_s *item, u32) {
+    if (edpart_nearest_type != NULL && edpart_set_part == 5) {
+        edpart_nearest_type->impact_part = item->data;
+    }
 }
 static void edpartDebrisScaleMenu(eduimenu_s *, eduiitem_s *, u32) {
 }

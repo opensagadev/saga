@@ -189,6 +189,10 @@ struct quickboltinfo;
 void PartObjectInterface::GetPos(VuVec &, i32) const {
 }
 
+f32 PartObjectInterface::GetRadius() const {
+    return part.radius;
+}
+
 const char *PartObjectInterface::GetTargetName() const {
     return "Part";
 }

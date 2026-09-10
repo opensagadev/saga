@@ -1,8 +1,11 @@
 #include "gameapi_edtools_types.h"
 #include "gameapi/edtools/edcam.h"
+#include "gameapi/edtools/edfile.h"
 #include "gameapi/edtools/edstubs.h"
 #include "gameapi/edtools/edgra.h"
 #include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nuspline.h"
+#include "nu2api/nucore/nustring.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/nufile/nufile.h"
 #include <stdio.h>
@@ -14,6 +17,10 @@ extern "C" void NuPs2VideoScreenDump(char *, i32, f32, f32, i32, i32, i32);
 EdRegistry theRegistry;
 i32 pad_disabled;
 eduimenu_s *edLevelPinnedMenu;
+
+static NUGSPLINE *splineStore;
+static i32 numSplinesLoaded;
+char *EDSPLINE_FILECHECK = const_cast<char *>("EDSPLINE v. ");
 
 extern "C" {
     extern edgra_clump_s *GrassClumps;
@@ -332,7 +339,93 @@ void edSpline_FindAllBeg(nugscn_s *, char *, nugspline_s **, i32) {
 void edSpline_FindAllSub(nugscn_s *, char *, nugspline_s **, i32) {
 }
 
-void edSpline_SplineFind(nugscn_s *, char *) {
+i32 LoadEditorSplines(char *path, VARIPTR *buf, VARIPTR *buf_end) {
+    splineStore = reinterpret_cast<NUGSPLINE *>(buf->void_ptr);
+    buf->addr = (buf->addr + 3) & ~static_cast<usize>(3);
+
+    EdFileSetMedia(1);
+    if (EdFileOpen(path, NUFILE_READ) == 0) {
+        splineStore = NULL;
+        return 0;
+    }
+
+    const i32 file_check_length = NuStrLen(EDSPLINE_FILECHECK);
+    for (i32 i = 0; i < file_check_length; ++i) {
+        if (EdFileReadChar() != EDSPLINE_FILECHECK[i]) {
+            EdFileClose();
+            splineStore = NULL;
+            return 0;
+        }
+    }
+
+    EdFileReadInt();
+    i32 spline_count = EdFileReadInt();
+    i32 point_count = EdFileReadInt();
+    i32 string_bytes = EdFileReadInt();
+
+    char *name_cursor = reinterpret_cast<char *>(splineStore + spline_count);
+    char *name_end = name_cursor + string_bytes;
+    NUVEC *point_cursor = reinterpret_cast<NUVEC *>((reinterpret_cast<usize>(name_end) + 3) & ~static_cast<usize>(3));
+    NUVEC *data_end = point_cursor + point_count;
+    if (reinterpret_cast<usize>(data_end) > buf_end->addr) {
+        EdFileClose();
+        splineStore = NULL;
+        return 0;
+    }
+
+    for (i32 i = 0; i < spline_count; ++i) {
+        EdFileReadChar();
+        i32 name_length = EdFileReadInt();
+        NUGSPLINE *spline = &splineStore[i];
+        spline->name = name_cursor;
+        spline->pt_size = sizeof(NUVEC);
+        spline->length = static_cast<i16>(EdFileReadInt());
+        spline->pts = point_cursor;
+
+        for (i32 j = 0; j < name_length; ++j) {
+            spline->name[j] = EdFileReadChar();
+        }
+        name_cursor += name_length;
+        if (name_cursor > name_end) {
+            EdFileClose();
+            splineStore = NULL;
+            EdFileClose();
+            numSplinesLoaded = spline_count;
+            buf->void_ptr = data_end;
+            return 0;
+        }
+
+        for (i32 j = 0; j < spline->length; ++j) {
+            point_cursor[j].x = EdFileReadFloat();
+            point_cursor[j].y = EdFileReadFloat();
+            point_cursor[j].z = EdFileReadFloat();
+        }
+        point_cursor += spline->length;
+        if (point_cursor > data_end) {
+            EdFileClose();
+            splineStore = NULL;
+            EdFileClose();
+            numSplinesLoaded = spline_count;
+            buf->void_ptr = data_end;
+            return 0;
+        }
+    }
+
+    EdFileClose();
+    numSplinesLoaded = spline_count;
+    buf->void_ptr = data_end;
+    return spline_count;
+}
+
+NUGSPLINE *edSpline_SplineFind(NUGSCN *scene, char *name) {
+    if (splineStore != NULL) {
+        for (i32 i = 0; i < numSplinesLoaded; ++i) {
+            if (NuStrICmp(splineStore[i].name, name) == 0) {
+                return &splineStore[i];
+            }
+        }
+    }
+    return NuSplineFind(scene, name);
 }
 
 void edSpline_SplineList(nugscn_s *) {

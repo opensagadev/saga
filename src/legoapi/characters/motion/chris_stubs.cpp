@@ -11,6 +11,8 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
+GameObject_s *AnakinC = NULL;
+
 void ChrisAnakinADraw() {
 }
 
@@ -20,5 +22,10 @@ void ChrisAnakinDDraw() {
 void ChrisAnakinAUpdate(WORLDINFO_s *) {
 }
 
-void ChrisUnallocLevelStuff(WORLDINFO_s *) {
+void ChrisUnallocLevelStuff(WORLDINFO_s *world) {
+    world->level_specific_data = NULL;
+    if (AnakinC != NULL) {
+        return;
+    }
+    AnakinC = NULL;
 }

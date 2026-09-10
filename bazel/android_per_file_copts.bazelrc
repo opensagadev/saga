@@ -23,6 +23,8 @@ build:target --per_file_copt=^src/gameapi/ai/aisys/aiscript\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/ai/aisys/aistate\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/ai/aisys/aisys\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/ai/aisys/gameai_actions\.cpp$@-O3
+# Teleport parser callbacks in the target use optimized leaf/control-flow code.
+build:target --per_file_copt=^src/gameapi/ai/gameai_tel\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/edtools/edfile\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/edtools/edsplines\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/edtools/edtoolsall_stubs\.cpp$@-O2
@@ -361,6 +363,7 @@ build:target --per_file_copt=^src/legoapi/items/collect/torpedo\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/characters/core/charconfig\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/characters/motion/move\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/props/objects/ledge\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/props/objects/techno\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/props/objects/zipup\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/actions/movement/pushing\.cpp$@-O3
 build:target --per_file_copt=^src/MechInputTouch/MechInputTouchContextTasks\.cpp$@-O2

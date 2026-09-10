@@ -197,7 +197,14 @@ struct NUGCUTSCENE_s {
     NUGCUTSCENE_s *stream_buffer_1;
     u32 flags;
     i32 stream_buffer_size;
-    u32 field_40;
+    union {
+        u32 field_40;
+        struct {
+            u8 last_stream;
+            u8 pad_41;
+            u16 total_stream_frames;
+        };
+    };
     NUGSCN *scene;
     void *extra_scene;
     u32 field_4c;

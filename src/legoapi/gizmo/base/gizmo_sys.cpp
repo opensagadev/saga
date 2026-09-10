@@ -99,11 +99,6 @@ void LoadGizmoSys(GIZMOSYS_s *gizmo_sys, void *world, char *config_file) {
         gizmo_sys->flags &= ~GIZMOSYS_FLAG_LOADING;
     }
 }
-void LoadEditorSplines(char *path, VARIPTR *buf, VARIPTR *buf_end) {
-    (void)path;
-    (void)buf;
-    (void)buf_end;
-}
 static u32 gizmoblowupnametable[256];
 static i32 gizmoblowupnametable_numids;
 

@@ -4984,18 +4984,20 @@ struct SpecialObject {
 struct TELEPORT_s {
     char name[0x40];
     struct nugspline_s *path;
-    u8 reserved_44[4];
+    f32 duration;
     f32 range_squared;
     u16 flags;
     u8 enabled;
     u8 active;
     nuhspecial_s blocking_special;
-    u8 reserved_5c[0x18];
+    nuhspecial_s flap1_special;
+    nuhspecial_s flap2_special;
     u16 field_74;
     u16 field_76;
     u16 field_78;
     u16 field_7a;
-    u8 reserved_7c[0x80];
+    NUMTX flap1_matrix;
+    NUMTX flap2_matrix;
     TeleportObjectInterface *mech_object_interface;
     void ClearMechObjectInterface();
     void GetMechObjectInterface();

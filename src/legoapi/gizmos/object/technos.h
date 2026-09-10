@@ -51,7 +51,13 @@ typedef struct TECHNO_s {
         };
     };
     char target_name[16];
-    char target_object_name[31];
+    union {
+        char target_object_name[31];
+        struct {
+            u8 target_special_padding[19];
+            u8 target_special_storage[12];
+        };
+    };
     void *controlled_object;
 } TECHNO;
 
@@ -60,6 +66,7 @@ DECOMP_ASSERT(offsetof(TECHNO, position) == 0x10, "TECHNO position offset");
 DECOMP_ASSERT(offsetof(TECHNO, target_mode) == 0x37, "TECHNO target-mode offset");
 DECOMP_ASSERT(offsetof(TECHNO, flags) == 0x3c, "TECHNO flags offset");
 DECOMP_ASSERT(offsetof(TECHNO, controlled_object) == 0x6c, "TECHNO controlled-object offset");
+DECOMP_ASSERT(offsetof(TECHNO, target_special_storage) == 0x60, "TECHNO target-special offset");
 DECOMP_ASSERT(offsetof(TECHNO, target_mode) == 0x37, "TECHNO target mode offset");
 
 extern TECHNO_CONFIG TechnoSys;

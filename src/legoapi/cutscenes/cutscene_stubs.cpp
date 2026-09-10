@@ -2,9 +2,11 @@
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nucore/nugcutscene.h"
+#include "nu2api/numath/nufloat.h"
 #include "nu2api/numusic/numusic.h"
 #include "nu2api/nusound/nusound.h"
 
+#include <cfloat>
 #include <string.h>
 
 extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *, f32, nuanimtime_s *, f32 *, f32 *);
@@ -220,10 +222,42 @@ extern "C" {
         instNuGCutSceneResetCamLock(instance);
     }
 
-    void instNuGCutSceneTimeLeft(void) {
+    f32 instNuGCutSceneTimeLeft(instNUGCUTSCENE_s *instance) {
+        if (instance == NULL || instance->cutscene == NULL) {
+            return 0.0f;
+        }
+
+        NUGCUTSCENE_s *cutscene = instance->cutscene;
+        f32 frames_left;
+        if (cutscene->version > 9) {
+            frames_left = static_cast<f32>(static_cast<i32>(cutscene->total_stream_frames)) - instance->current_frame;
+        } else {
+            if (cutscene->version > 1 && (cutscene->flags & 1) != 0 && cutscene->last_stream != 0) {
+                return FLT_MAX;
+            }
+            frames_left = cutscene->duration - 1.0f - instance->current_frame;
+        }
+
+        f32 time_left = 0.0f;
+        if (frames_left > 0.0f) {
+            if (instance->rate == 0.0f) {
+                return FLT_MAX;
+            }
+            time_left = NuFdiv(frames_left, instance->rate);
+        }
+        return time_left;
     }
 
-    void instNuGCutSceneTotalTime(void) {
+    f32 instNuGCutSceneTotalTime(instNUGCUTSCENE_s *instance) {
+        if (instance == NULL || instance->cutscene == NULL || instance->cutscene->version <= 9) {
+            return 0.0f;
+        }
+
+        f32 total_frames = instance->cutscene_copy->total_stream_frames;
+        if (instance->rate != 0.0f) {
+            return NuFdiv(total_frames, instance->rate);
+        }
+        return 0.0f;
     }
 
     void instNuGCutSceneTranslate(void) {

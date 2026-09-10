@@ -110,7 +110,7 @@ void LoadSpecialSfxFile(WORLDINFO *world);
 // --- gizmo_sys.cpp — gizmo / minikit / collection ---
 GIZMOSYS_s *CreateGizmoSys(void *world, VARIPTR *buf, VARIPTR *buf_end);
 void LoadGizmoSys(GIZMOSYS_s *gizmo_sys, void *world, char *config_file);
-void LoadEditorSplines(char *path, VARIPTR *buf, VARIPTR *buf_end);
+i32 LoadEditorSplines(char *path, VARIPTR *buf, VARIPTR *buf_end);
 void GizmoBlowupResetNameTable(void);
 void Hub_LoadAndFixUpMiniKits(WORLDINFO *world, VARIPTR *buf, VARIPTR *buf_end);
 void MiniKit_Load(MINIKIT *minikit, i32 id, VARIPTR *buf, VARIPTR *buf_end, void *param);

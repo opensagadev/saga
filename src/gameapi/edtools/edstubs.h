@@ -44,4 +44,6 @@ extern "C" {
 
 #ifdef __cplusplus
 }
+
+struct nugspline_s *edSpline_SplineFind(NUGSCN *scene, char *name);
 #endif

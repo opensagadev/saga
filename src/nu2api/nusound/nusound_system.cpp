@@ -798,17 +798,9 @@ void NuSoundSystem::ReleaseEffect(NuSoundEffect *effect) {
         return;
     }
 
-    i32 removed = 0;
-    NuListNodeBase *node = effect_update_list.Head();
-    while (node != effect_update_list.Tail()) {
-        NuListNodeBase *next = node->GetNext();
-        if (static_cast<NuListNode<NuSoundEffect *> *>(node)->value == effect) {
-            effect_update_list.Remove(node);
-            removed++;
-        }
-        node = next;
+    if (effect_update_list.Length() != 0) {
+        effect_update_list.RemoveValue(effect);
     }
-    (void)removed;
     sAllocdMemory[static_cast<i32>(MemoryDiscipline::SCRATCH)] -= sizeof(NuEListNode<NuSoundEffect>);
 
     effect->Shutdown();
