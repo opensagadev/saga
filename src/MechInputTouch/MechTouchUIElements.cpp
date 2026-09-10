@@ -67,9 +67,7 @@ bool MechTouchUI::AddUIElement(MechTouchUIElement &element) {
 
 void MechTouchUI::Init() {
     MechSystems *systems = MechSystems::Get();
-    MechInputTouchGestureTrackingSystem *tracking =
-        reinterpret_cast<MechInputTouchGestureTrackingSystem *>(reinterpret_cast<u8 *>(systems) + 0x84);
-    tracking->RegisterGestureTracker(*this, 100);
+    systems->gesture_tracking_system.RegisterGestureTracker(*this, 100);
 }
 
 MechTouchUI::MechTouchUI() {

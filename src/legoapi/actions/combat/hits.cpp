@@ -855,7 +855,21 @@ void CollideGameObjects(WORLDINFO_s *world) {
 void CalculateRayBoxIntersection(VuVec const &, VuVec const &, VuVec const &, VuVec const &, float, float &) {
 }
 
-void CalcCapsuleIntersectDistance(VuVec const &, VuVec const &, float, VuVec const &, float) {
+f32 CalcCapsuleIntersectDistance(VuVec const &start, VuVec const &direction, f32 maximum_distance, VuVec const &centre,
+                                 f32 radius) {
+    const f32 delta_x = centre.x - start.x;
+    const f32 delta_y = centre.y - start.y;
+    const f32 delta_z = centre.z - start.z;
+    f32 distance = direction.x * delta_x + direction.y * delta_y + direction.z * delta_z;
+
+    if (distance >= 0.0f && distance < maximum_distance) {
+        const f32 distance_from_axis_squared =
+            delta_x * delta_x + delta_y * delta_y + delta_z * delta_z - distance * distance;
+        if (radius * radius >= distance_from_axis_squared) {
+            return distance;
+        }
+    }
+    return 1.0e9f;
 }
 
 i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 secondary_end, tertype *surface) {

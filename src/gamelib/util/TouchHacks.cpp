@@ -17,6 +17,7 @@
 
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 i32 SuperWeirdo(GameObject_s *);
+i32 GizForce_StoodOnForce(GIZFORCE_s *, GameObject_s *);
 
 NUCOLOUR3 flashCol = {2.0f, 2.0f, 2.0f};
 bool TouchHacks::TouchControlsActive;
@@ -118,10 +119,49 @@ bool TouchHacks::CanUseBuildIt(GameObject_s &object) {
            ObjLandReady(&object) != 0;
 }
 
-void TouchHacks::CanUseGizForce(GameObject_s &) {
+bool TouchHacks::CanUseGizForce(GameObject_s &object) {
+    return object.apiobj.character_data != NULL && (object.apiobj.character_data->model_flags & 8) != 0;
 }
 
-void TouchHacks::CanUseGizForce(GameObject_s &, GIZFORCE_s &) {
+bool TouchHacks::CanUseGizForce(GameObject_s &object, GIZFORCE_s &force) {
+    if (force.using_object != NULL || force.field_0x3c_bits != 0 ||
+        (force.state_flags & GIZFORCE_STATE_DESTROYED_OR_THROWN) != 0) {
+        return false;
+    }
+
+    i32 can_use_restricted_force;
+    if (SuperWeirdo(&object) == 0) {
+        if (static_cast<i8>(object.apiobj.flags_low) < 0 && Cheat_IsOn(25) != 0) {
+            can_use_restricted_force = 1;
+        } else {
+            can_use_restricted_force = 0;
+        }
+    } else {
+        can_use_restricted_force = 1;
+    }
+    if ((force.config_flags & GIZFORCE_CONFIG_JEDI_BADDIE_ONLY) != 0 &&
+        (object.apiobj.character_data->model_flags & 4) == 0 && can_use_restricted_force == 0) {
+        return false;
+    }
+
+    if (force.group == NULL) {
+        if (GizForce_Complete(&force) != 0) {
+            return false;
+        }
+    } else if (force.group->count != 0) {
+        GIZFORCE_s *last = force.group->forces[force.group->count - 1];
+        if (last != &force) {
+            if ((force.group->field_0x24 & GIZFORCE_GROUP_ACTIVE) != 0 ||
+                force.anim_set->state == GAMEANIMSET_STATE_AT_END) {
+                return false;
+            }
+            if (last != NULL && ((last->anim_set->flags & 7) != 0 || last->using_object != NULL)) {
+                return false;
+            }
+        }
+    }
+
+    return GizForce_StoodOnForce(&force, &object) == 0;
 }
 
 bool TouchHacks::CanUseHatMachine(GameObject_s &object) {

@@ -396,7 +396,8 @@ struct MechInputTouchSpeederChaseController {
 struct MechInputTouchSystem {
     static i32 s_baseControlMode;
     static i32 s_actualTouchMode;
-    virtual ~MechInputTouchSystem();
+    virtual ~MechInputTouchSystem() {
+    }
     virtual char const *GetName();
     void AddChangeLayoutButtons(NuVirtualTouchDevice &, i32);
     void ChooseTouchLayout(bool);
@@ -410,9 +411,9 @@ struct MechInputTouchSystem {
     void CreateGamePlayLayoutGestureBased_DeathStarTurret(NuVirtualTouchDevice &, i32);
     void CreateGamePlayLayoutGestureBased_Podrace(NuVirtualTouchDevice &, i32);
     void CreateGamePlayLayoutGestureBased_SpeederChase(NuVirtualTouchDevice &, i32);
-    void DetermineMoveDir2D(GameObject_s &, VuVec const &, bool, VuVec &);
-    void FindTargetForce(WORLDINFO_s *, GameObject_s &, VuVec const &, VuVec const &, float &, MechObjectInterface *&,
-                         bool &, bool);
+    static f32 DetermineMoveDir2D(GameObject_s &, VuVec const &, bool, VuVec &);
+    static void FindTargetForce(WORLDINFO_s *, GameObject_s &, VuVec const &, VuVec const &, float &,
+                                MechObjectInterface *&, bool &, bool);
     void FindTargetObject(GameObject_s &, VuVec const &, i32, MechObjectInterface *, MechTempPosInterface *);
     void Init();
     MechInputTouchSystem();
@@ -637,7 +638,9 @@ struct MechSystems : BaseThing {
 
     u32 unknown_0x10[6];
     MechInputTouchSystem input_touch_system;
-    u8 unknown_0x30[0x265c - 0x30];
+    u8 unknown_0x30[0x84 - 0x30];
+    MechInputTouchGestureTrackingSystem gesture_tracking_system;
+    u8 unknown_0x88[0x265c - 0x88];
     u8 ui_storage[0x84];
     u8 player_button_storage[0x164];
     u8 pause_button_storage[0x44];
@@ -657,6 +660,7 @@ struct MechSystems : BaseThing {
         return *reinterpret_cast<MechTouchUIPauseButton *>(pause_button_storage);
     }
 };
+DECOMP_ASSERT(offsetof(MechSystems, gesture_tracking_system) == 0x84, "MechSystems gesture tracking system offset");
 struct MechTempPosInterface : MechObjectInterface {
     VuVec position;
     f32 radius;
