@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 38.145584,
+    "fuzzy_match_percent": 38.247635,
     "total_code": "4722419",
-    "matched_code": "365240",
-    "matched_code_percent": 7.734172,
+    "matched_code": "365373",
+    "matched_code_percent": 7.7369885,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4396,
-    "matched_functions_percent": 32.66216,
+    "matched_functions": 4395,
+    "matched_functions_percent": 32.654728,
     "total_units": 1
   },
   "text": {
@@ -50688,7 +50688,7 @@
           "address": 4422160,
           "offset": 3532192,
           "size": 640,
-          "match_percent": 17.247126
+          "match_percent": 77.93678
         },
         {
           "name": "instNuGCutSceneEnd",
@@ -50696,7 +50696,7 @@
           "address": 4422800,
           "offset": 3532832,
           "size": 656,
-          "match_percent": 0.0
+          "match_percent": 76.2
         },
         {
           "name": "instNuGCutSceneDestroy",
@@ -50752,7 +50752,7 @@
           "address": 4587392,
           "offset": 3697424,
           "size": 332,
-          "match_percent": 73.27957
+          "match_percent": 73.44086
         },
         {
           "name": "_ZL9CS_no_fogP8nufpar_s",
@@ -68369,7 +68369,7 @@
           "address": 3201296,
           "offset": 2311328,
           "size": 114,
-          "match_percent": 8.571428
+          "match_percent": 89.4898
         },
         {
           "name": "_Z22Text3DStringEncodeFontPhPtPv",
@@ -71858,7 +71858,7 @@
           "address": 2874128,
           "offset": 1984160,
           "size": 591,
-          "match_percent": 0.0
+          "match_percent": 54.21233
         },
         {
           "name": "_Z13CDataFromNamePc",
@@ -76204,7 +76204,7 @@
           "address": 3201728,
           "offset": 2311760,
           "size": 416,
-          "match_percent": 4.468085
+          "match_percent": 99.6383
         },
         {
           "name": "_Z27LookupPreloadedShaderObjectjPPjP24LoadedUniqueShaderRecordj",
@@ -76212,7 +76212,7 @@
           "address": 3202144,
           "offset": 2312176,
           "size": 114,
-          "match_percent": 8.571428
+          "match_percent": 89.89796
         },
         {
           "name": "_Z11RenderQuadsPs",
@@ -77120,7 +77120,7 @@
           "address": 3469920,
           "offset": 2579952,
           "size": 578,
-          "match_percent": 0.0
+          "match_percent": 70.5625
         },
         {
           "name": "DebrisPosOrientationMtx",
@@ -79936,7 +79936,7 @@
           "address": 3973507,
           "offset": 3083539,
           "size": 153,
-          "match_percent": 5.818182
+          "match_percent": 99.954544
         },
         {
           "name": "ParticlesPerSecond",
@@ -79944,7 +79944,7 @@
           "address": 3973660,
           "offset": 3083692,
           "size": 66,
-          "match_percent": 46.45
+          "match_percent": 99.95
         },
         {
           "name": "SetPartRTLSet",
@@ -79952,7 +79952,7 @@
           "address": 4320912,
           "offset": 3430944,
           "size": 24,
-          "match_percent": 100.0
+          "match_percent": 45.666668
         },
         {
           "name": "_ZNK19PartObjectInterface9GetRadiusEv",
@@ -79960,7 +79960,7 @@
           "address": 4485584,
           "offset": 3595616,
           "size": 16,
-          "match_percent": 100.0
+          "match_percent": 0.0
         }
       ]
     },
@@ -83391,7 +83391,7 @@
           "address": 2358656,
           "offset": 1468688,
           "size": 173,
-          "match_percent": 99.44444
+          "match_percent": 100.0
         },
         {
           "name": "_Z26BountyHunterPursuitA_ResetP11WORLDINFO_s",
@@ -83399,7 +83399,7 @@
           "address": 2358832,
           "offset": 1468864,
           "size": 220,
-          "match_percent": 87.875
+          "match_percent": 87.42857
         },
         {
           "name": "_Z27BountyHunterPursuitA_UpdateP11WORLDINFO_s",
@@ -83407,7 +83407,7 @@
           "address": 2359056,
           "offset": 1469088,
           "size": 287,
-          "match_percent": 6.666666
+          "match_percent": 83.77778
         },
         {
           "name": "_Z25BountyHunterPursuitB_InitP11WORLDINFO_s",
@@ -83431,7 +83431,7 @@
           "address": 2359728,
           "offset": 1469760,
           "size": 276,
-          "match_percent": 6.5625
+          "match_percent": 60.984375
         },
         {
           "name": "_Z25BountyHunterPursuitC_InitP11WORLDINFO_s",
@@ -83447,7 +83447,7 @@
           "address": 2360032,
           "offset": 1470064,
           "size": 328,
-          "match_percent": 5.454546
+          "match_percent": 99.93507
         },
         {
           "name": "_Z27BountyHunterPursuitC_UpdateP11WORLDINFO_s",
@@ -83455,7 +83455,7 @@
           "address": 2360368,
           "offset": 1470400,
           "size": 412,
-          "match_percent": 0.625
+          "match_percent": 4.802084
         },
         {
           "name": "_Z25BountyHunterPursuitD_InitP11WORLDINFO_s",
@@ -87601,7 +87601,7 @@
           "address": 2752208,
           "offset": 1862240,
           "size": 186,
-          "match_percent": 0.591837
+          "match_percent": 9.877551
         },
         {
           "name": "_Z40NuIOS_CreateGLTexFromPlatfomSpecificFilePKc",
@@ -87609,7 +87609,7 @@
           "address": 2752400,
           "offset": 1862432,
           "size": 345,
-          "match_percent": 0.0
+          "match_percent": 74.12621
         },
         {
           "name": "_Z44NuIOS_CreateGLTexFromPlatfomSpecificForecPVRPKc",
@@ -87617,7 +87617,7 @@
           "address": 2752752,
           "offset": 1862784,
           "size": 313,
-          "match_percent": 31.757895
+          "match_percent": 77.936844
         },
         {
           "name": "_Z25NuIOS_CreateGLTexFromFilePKc",
@@ -89796,7 +89796,7 @@
           "address": 3005344,
           "offset": 2115376,
           "size": 707,
-          "match_percent": 0.0
+          "match_percent": 84.59091
         },
         {
           "name": "NuRndrLineStrip2d",
@@ -90240,7 +90240,7 @@
           "address": 2774960,
           "offset": 1884992,
           "size": 1326,
-          "match_percent": 57.7193
+          "match_percent": 57.74854
         },
         {
           "name": "NuShaderObjectGLSLCreate",
@@ -90591,7 +90591,7 @@
           "address": 3202272,
           "offset": 2312304,
           "size": 711,
-          "match_percent": 0.0
+          "match_percent": 95.773254
         }
       ]
     },
@@ -98479,7 +98479,7 @@
           "address": 2984928,
           "offset": 2094960,
           "size": 676,
-          "match_percent": 0.0
+          "match_percent": 11.131579
         },
         {
           "name": "NuPortalRoomClipTest",
@@ -116985,6 +116985,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -117078,6 +117079,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -117171,6 +117173,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -117275,6 +117278,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -117413,6 +117417,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -117517,6 +117522,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -117621,6 +117627,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -117725,6 +117732,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -117829,6 +117837,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -117933,6 +117942,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -118238,6 +118248,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -118342,6 +118353,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -118446,6 +118458,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -118595,6 +118608,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -118710,6 +118724,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -118936,6 +118951,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -119116,6 +119132,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -119297,6 +119314,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -119401,6 +119419,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -119505,6 +119524,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -119609,6 +119629,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -119767,6 +119788,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -119871,6 +119893,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -119986,6 +120009,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -120090,6 +120114,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -120206,6 +120231,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -120310,6 +120336,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -120448,6 +120475,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -120552,6 +120580,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -120656,6 +120685,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -120760,6 +120790,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -120927,6 +120958,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -121031,6 +121063,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -121135,6 +121168,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -121586,6 +121620,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -121818,6 +121853,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -122025,6 +122061,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -122500,6 +122537,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -122604,6 +122642,7 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
+        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",

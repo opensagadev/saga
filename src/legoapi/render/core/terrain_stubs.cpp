@@ -1044,14 +1044,39 @@ extern "C" {
 
     void DebrisOrientation(i32 handle, i16 z, i16 y) {
         if (handle != -1) {
-            debkeydatatype_s &key = debkeydata[handle];
-            NUMTX *mtx = &key.effect_orientation;
-            NuMtxSetIdentity(mtx);
-            NuMtxRotateZ(mtx, z);
-            NuMtxRotateY(mtx, y);
-            mtx->m30 = 0.0f;
-            mtx->m32 = 0.0f;
-            key.orientation_dirty = 0.0f;
+            NuMtxSetIdentity(&debkeydata[handle].effect_orientation);
+            NUMTX *mtx = &debkeydata[handle].effect_orientation;
+
+            const f32 cos_z = NU_COS_LUT(z);
+            const f32 sin_z = NU_SIN_LUT(z);
+            const f32 z_m00 = mtx->m00;
+            const f32 z_m10 = mtx->m10;
+            const f32 z_m20 = mtx->m20;
+            const f32 z_m30 = mtx->m30;
+            mtx->m00 = z_m00 * cos_z - mtx->m01 * sin_z;
+            mtx->m01 = z_m00 * sin_z + mtx->m01 * cos_z;
+            mtx->m10 = z_m10 * cos_z - mtx->m11 * sin_z;
+            mtx->m11 = z_m10 * sin_z + mtx->m11 * cos_z;
+            mtx->m20 = z_m20 * cos_z - mtx->m21 * sin_z;
+            mtx->m21 = z_m20 * sin_z + mtx->m21 * cos_z;
+            mtx->m30 = z_m30 * cos_z - mtx->m31 * sin_z;
+            mtx->m31 = z_m30 * sin_z + mtx->m31 * cos_z;
+
+            const f32 cos_y = NU_COS_LUT(y);
+            const f32 sin_y = NU_SIN_LUT(y);
+            const f32 y_m00 = mtx->m00;
+            const f32 y_m10 = mtx->m10;
+            const f32 y_m20 = mtx->m20;
+            const f32 y_m30 = mtx->m30;
+            mtx->m00 = y_m00 * cos_y + mtx->m02 * sin_y;
+            mtx->m02 = mtx->m02 * cos_y - y_m00 * sin_y;
+            mtx->m10 = y_m10 * cos_y + mtx->m12 * sin_y;
+            mtx->m12 = mtx->m12 * cos_y - y_m10 * sin_y;
+            mtx->m20 = y_m20 * cos_y + mtx->m22 * sin_y;
+            mtx->m22 = mtx->m22 * cos_y - y_m20 * sin_y;
+            mtx->m30 = y_m30 * cos_y + mtx->m32 * sin_y;
+            mtx->m32 = mtx->m32 * cos_y - y_m30 * sin_y;
+            debkeydata[handle].orientation_dirty = 0.0f;
         }
     }
 

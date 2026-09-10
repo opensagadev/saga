@@ -8,6 +8,7 @@ char *ASCII_UP = "\xc2\xac";
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nuqfnt.h"
 #include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nushader_plain.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nufile/nufpar.h"
 #include "nu2api/numath/nufloat.h"
@@ -895,7 +896,37 @@ extern "C" {
     void UnloadGameFont(void) {
     }
 }
-void LookupHash(u32, u32 *, HashRedirect *, u32) {
+bool LookupHash(u32 key, u32 *value, HashRedirect *redirects, u32 count) {
+    i32 upper = static_cast<i32>(count) - 1;
+    if (upper < 0) {
+        return false;
+    }
+
+    i32 index = upper / 2;
+    HashRedirect *redirect = &redirects[index];
+    if (redirect->key == key) {
+        *value = redirect->value;
+        return true;
+    }
+
+    i32 lower = 0;
+    while (true) {
+        if (key > redirect->key) {
+            lower = index + 1;
+        } else {
+            upper = index - 1;
+        }
+        if (lower > upper) {
+            return false;
+        }
+
+        index = (lower + upper) / 2;
+        redirect = &redirects[index];
+        if (redirect->key == key) {
+            *value = redirect->value;
+            return true;
+        }
+    }
 }
 void MultilineDump(char const *) {
 }

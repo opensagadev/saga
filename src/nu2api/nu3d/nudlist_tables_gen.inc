@@ -1,5 +1,5 @@
 // original .data @0x6610e0, 0x318 entries
-static const HashRedirect g_vertexShaderRedirects[792] = {
+HashRedirect g_vertexShaderRedirects[792] = {
     {0x02c0b39au, 0x004691e4u}, {0x03fec274u, 0x03e0a839u}, {0x04a1f3b8u, 0x03e0a839u}, {0x05a90ac5u, 0x04c1c9d8u},
     {0x09d7609fu, 0x004691e4u}, {0x0b1c54a8u, 0x07d27294u}, {0x0b72ab27u, 0x0053a291u}, {0x0d7d2a11u, 0x076a28f1u},
     {0x0e0e95a6u, 0x004691e4u}, {0x0f30e448u, 0x03e0a839u}, {0x10cc7ebcu, 0x07d27294u}, {0x11869a91u, 0x004691e4u},
@@ -201,7 +201,7 @@ static const HashRedirect g_vertexShaderRedirects[792] = {
 };
 
 // original .data @0x65fe00, 0x25a entries
-static const HashRedirect g_pixelShaderRedirects[602] = {
+HashRedirect g_pixelShaderRedirects[602] = {
     {0x03fec274u, 0x03e0a839u}, {0x04a1f3b8u, 0x03e0a839u}, {0x09d7609fu, 0x02c0b39au}, {0x0b72ab27u, 0x0053a291u},
     {0x0d7d2a11u, 0x076a28f1u}, {0x0e0e95a6u, 0x004691e4u}, {0x0f30e448u, 0x03e0a839u}, {0x10cc7ebcu, 0x0b1c54a8u},
     {0x11869a91u, 0x02c0b39au}, {0x11a4bda1u, 0x04caf42du}, {0x14e0ce5cu, 0x03e0a839u}, {0x1547e911u, 0x0601c01au},
@@ -356,7 +356,7 @@ static const HashRedirect g_pixelShaderRedirects[602] = {
 };
 
 // original .data @0x6629a0, 0x1a1 entries
-static const HashRedirect g_shaderProgramRedirects[417] = {
+HashRedirect g_shaderProgramRedirects[417] = {
     {0x03fec274u, 0x03e0a839u}, {0x04a1f3b8u, 0x03e0a839u}, {0x0b72ab27u, 0x0053a291u}, {0x0d7d2a11u, 0x076a28f1u},
     {0x0e0e95a6u, 0x004691e4u}, {0x0f30e448u, 0x03e0a839u}, {0x11a4bda1u, 0x04caf42du}, {0x14e0ce5cu, 0x03e0a839u},
     {0x1547e911u, 0x0601c01au}, {0x16908bf8u, 0x03e0a839u}, {0x16fb8c6du, 0x04caf42du}, {0x17c5fd83u, 0x05f485c3u},
@@ -465,7 +465,7 @@ static const HashRedirect g_shaderProgramRedirects[417] = {
 };
 
 // original .data @0x65f280, 0x170 entries
-static LoadedUniqueShaderRecord g_loadedUniqueVertexShaders[368] = {
+LoadedUniqueShaderRecord g_loadedUniqueVertexShaders[368] = {
     {0x004691e4u, 0u}, {0x0053a291u, 0u}, {0x00b65b0fu, 0u}, {0x00dc1b7cu, 0u}, {0x00e0e9fcu, 0u}, {0x010c8204u, 0u},
     {0x0172bdd0u, 0u}, {0x0271c436u, 0u}, {0x02b5de42u, 0u}, {0x02f6d4b9u, 0u}, {0x031aba95u, 0u}, {0x03e0a839u, 0u},
     {0x0421da3au, 0u}, {0x0477a33bu, 0u}, {0x04c1c9d8u, 0u}, {0x04caf42du, 0u}, {0x05078bf7u, 0u}, {0x051af09bu, 0u},
@@ -531,7 +531,7 @@ static LoadedUniqueShaderRecord g_loadedUniqueVertexShaders[368] = {
 };
 
 // original .data @0x65e100, 0x22e entries
-static LoadedUniqueShaderRecord g_loadedUniquePixelShaders[558] = {
+LoadedUniqueShaderRecord g_loadedUniquePixelShaders[558] = {
     {0x004691e4u, 0u}, {0x0053a291u, 0u}, {0x00b65b0fu, 0u}, {0x00dc1b7cu, 0u}, {0x00e0e9fcu, 0u}, {0x010c8204u, 0u},
     {0x0172bdd0u, 0u}, {0x0271c436u, 0u}, {0x02b5de42u, 0u}, {0x02c0b39au, 0u}, {0x02f6d4b9u, 0u}, {0x031aba95u, 0u},
     {0x03e0a839u, 0u}, {0x0421da3au, 0u}, {0x0477a33bu, 0u}, {0x04c1c9d8u, 0u}, {0x04caf42du, 0u}, {0x05078bf7u, 0u},

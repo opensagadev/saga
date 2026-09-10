@@ -3745,14 +3745,17 @@ extern "C" {
 
         i16 candidate_count = 0;
         for (i32 room_index = 0; room_index < scene->num_rooms; ++room_index) {
-            NUROOM &room = scene->rooms[room_index];
+            NUROOM *room = &scene->rooms[room_index];
             f32 plane_distance = 0.0f;
-            for (i32 plane_index = 0; plane_index < room.plane_count; ++plane_index) {
-                const NUPLANE &plane = room.planes[plane_index];
-                plane_distance = plane.a * position->x + plane.b * position->y + plane.c * position->z + plane.d;
+            i32 plane_count = room->plane_count;
+            NUPLANE *plane = room->planes;
+            while (plane_count != 0) {
+                plane_distance = plane->a * position->x + plane->b * position->y + plane->c * position->z + plane->d;
                 if (plane_distance > 0.0f) {
                     break;
                 }
+                ++plane;
+                --plane_count;
             }
             if (plane_distance > 0.0f) {
                 continue;
@@ -3767,10 +3770,7 @@ extern "C" {
                     candidates[1] = static_cast<i16>(room_index);
                 }
                 candidate_count = 3;
-                // The original scan leaves the candidate loop here. Keeping
-                // the sentinel prevents a third room from indexing past the
-                // two candidate slots below.
-                break;
+                continue;
             }
 
             candidates[candidate_count++] = static_cast<i16>(room_index);

@@ -9,6 +9,17 @@
 struct nushaderobject_s;
 typedef nushaderobject_s NUSHADEROBJECT;
 
+// Sorted shader-table records used by the original global lookup helpers.
+struct HashRedirect {
+    u32 key;
+    u32 value;
+};
+
+struct LoadedUniqueShaderRecord {
+    u32 key;
+    GLuint gl_shader;
+};
+
 // Combined shader key (ShaderObjectKey): first dword is the program key the
 // redirect tables and slot cache are keyed on.
 namespace nu2api {
@@ -16,17 +27,8 @@ namespace nu2api {
         u32 key[4];
     };
 
-    // { u32 from; u32 to; } binary-search record.
-    struct HashRedirect {
-        u32 key;
-        u32 value;
-    };
-
-    // { u32 key; GLuint shader; } binary-search record (GL id filled on demand).
-    struct LoadedUniqueShaderRecord {
-        u32 key;
-        GLuint gl_shader;
-    };
+    using ::HashRedirect;
+    using ::LoadedUniqueShaderRecord;
 
     // ShaderMtlDescFilter (original layout: 0x24 bytes) — plain data view.
     // Named FilterPlain to avoid collision with legoapi's ShaderMtlDescFilter class.
@@ -43,6 +45,10 @@ namespace nu2api {
     };
 
 } // namespace nu2api
+
+bool LookupHash(u32 key, u32 *value, HashRedirect *redirects, u32 count);
+bool LoadShaderSource(char **source, i32 *size, u32 key, bool pixel_stage);
+bool LookupPreloadedShaderObject(u32 key, u32 **shader, LoadedUniqueShaderRecord *records, u32 count);
 
 extern void *g_shaderManager;
 

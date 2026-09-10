@@ -559,8 +559,8 @@ static void Blowups_Reset(void *world_ptr, void *, void *progress_ptr) {
     if (world->gizmo_blowups != NULL) {
         GIZMOBLOWUP_s *blowup = world->gizmo_blowups;
         for (i32 index = 0; index < world->gizmo_blowup_count; ++index, ++blowup) {
-            blowup->state_flags |= GIZMOBLOWUP_STATE_ACTIVATED;
             blowup->visibility_flags = (blowup->visibility_flags | GIZMOBLOWUP_VISIBLE) & ~GIZMOBLOWUP_DRAWN;
+            blowup->state_flags |= GIZMOBLOWUP_STATE_ACTIVATED;
             blowup->output_flags &= ~GIZMOBLOWUP_OUTPUT_BLOWN_UP;
             blowup->field_0x9f &= ~1;
             blowup->saved_state_1 = blowup->initial_state_1;

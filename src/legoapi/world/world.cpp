@@ -810,16 +810,16 @@ i32 WorldInfo_Reset(WORLDINFO *world, i32 level_idx) {
 
         // Invalidate every page handle (0x2a98 .. 0x2aac).
         world->page_pp = -1;
-        world->page_part = -1;
         world->page_anim = -1;
         world->page_grass = -1;
         world->page_bridge = -1;
+        world->page_part = -1;
 
         i32 progress_index = (i8)levelData->area_level_index;
-        if (progress_index > 0xb || progress_index == -1) {
-            world->level_progress = NULL;
-        } else {
+        if (progress_index <= 0xb && progress_index != -1) {
             world->level_progress = (LEVEL_PROGRESS_s *)((char *)LevelProgressData + progress_index * 0x2e24);
+        } else {
+            world->level_progress = NULL;
         }
 
         // Build config file path

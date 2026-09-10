@@ -420,7 +420,7 @@ extern "C" void NuRndrEndScene(void);
 extern "C" void NuRndrGradRect2di(i32, i32, i32, i32, i32 *, numtl_s *);
 extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
 extern "C" void NuRndrGradRectUV2di(i32, i32, i32, i32, f32, f32, f32, f32, u32 *, numtl_s *);
-extern "C" void NuRndrRectUV2di(i32, i32, i32, i32, f32, f32, f32, f32, u32, numtl_s *);
+extern "C" void NuRndrRectUV2di(i32, i32, i32, i32, f32, f32, f32, f32, i32, numtl_s *);
 extern "C" void NuRndrClear(u32, u32, f32);
 extern "C" NUVIEWPORT *NuVpGetCurrentViewport(void);
 extern char *apiGameName;

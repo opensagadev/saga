@@ -969,19 +969,46 @@ extern "C" void NuRndrRect2di(i32 x, i32 y, i32 w, i32 h, i32 colour, numtl_s *m
     NuPrim2DAddXYZ(sx + sw, sy + sh, 0.0f);
     NuPrim2DEnd();
 }
-extern "C" void NuRndrRectUV2di(i32 x, i32 y, i32 w, i32 h, f32 u0, f32 v0, f32 u1, f32 v1, u32 colour, numtl_s *mtl) {
+extern "C" void NuRndrRectUV2di(i32 x, i32 y, i32 w, i32 h, f32 u0, f32 v0, f32 u1, f32 v1, i32 colour, numtl_s *mtl) {
     const f32 sx = static_cast<f32>(x) * 0.0625f;
     const f32 sy = static_cast<f32>(y) * 0.0625f;
-    const f32 ex = sx + static_cast<f32>(w) * 0.0625f;
-    const f32 ey = sy + static_cast<f32>(h) * 0.0625f;
+    const f32 sw = static_cast<f32>(w) * 0.0625f;
+    const f32 sh = static_cast<f32>(h) * 0.0625f;
 
     NuPrim2DBegin(4, 7, mtl);
-    NuRndrPrimAttributes(colour, false, false);
-    NuRndrPrimUV(u0, v0);
+    u8 *vertex;
+    if (!g_NuPrim_NeedsHalfUVs) {
+        vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
+        *reinterpret_cast<f32 *>(vertex + 0x10) = u0;
+        *reinterpret_cast<f32 *>(vertex + 0x14) = v0;
+    } else {
+        vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
+        *reinterpret_cast<u16 *>(vertex + 0x10) = NuRndrFloatToHalf(u0);
+        *reinterpret_cast<u16 *>(vertex + 0x12) = NuRndrFloatToHalf(v0);
+    }
+    const char *needs_overbrightening = &g_NuPrim_NeedsOverbrightening;
+    i32 adjusted_colour = colour;
+    if (!*needs_overbrightening) {
+        adjusted_colour = ((colour >> 1) & 0x007f7f7f) | (colour & 0xff000000);
+    }
+    *reinterpret_cast<u32 *>(vertex + 0x0c) = adjusted_colour;
     NuPrim2DAddXYZ(sx, sy, 0.0f);
-    NuRndrPrimAttributes(colour, false, false);
-    NuRndrPrimUV(u1, v1);
-    NuPrim2DAddXYZ(ex, ey, 0.0f);
+
+    if (!g_NuPrim_NeedsHalfUVs) {
+        vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
+        *reinterpret_cast<f32 *>(vertex + 0x10) = u1;
+        *reinterpret_cast<f32 *>(vertex + 0x14) = v1;
+    } else {
+        vertex = g_NuPrim_StreamBufferPtr->u8_ptr;
+        *reinterpret_cast<u16 *>(vertex + 0x10) = NuRndrFloatToHalf(u1);
+        *reinterpret_cast<u16 *>(vertex + 0x12) = NuRndrFloatToHalf(v1);
+    }
+    adjusted_colour = colour;
+    if (!*needs_overbrightening) {
+        adjusted_colour = ((colour >> 1) & 0x007f7f7f) | (colour & 0xff000000);
+    }
+    *reinterpret_cast<u32 *>(vertex + 0x0c) = adjusted_colour;
+    NuPrim2DAddXYZ(sx + sw, sy + sh, 0.0f);
     NuPrim2DEnd();
 }
 extern "C" i32 NuRndrSetAmbientLightPS(const NUCOLOUR3 *colour) {

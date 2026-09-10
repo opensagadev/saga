@@ -58,19 +58,23 @@ GLuint NuIOS_CreateGLTexFromPlatfomSpecificFile(const char *filename) {
     i32 remaining = NuFileOpenSize(file);
     g_fileSize = remaining;
     NuThreadCriticalSectionBegin(g_textureLoadBufferCriticalSection);
+    const i32 chunk_limit = g_loadingCharacterInHub != 0 ? 0x4000 : static_cast<i32>(sizeof(buffer));
     u8 *dst = buffer;
-    while (remaining != 0) {
-        i32 chunk = remaining;
-        if (bgProcIsBgThread() != 0 && chunk > (g_loadingCharacterInHub != 0 ? 0x4000 : (i32)sizeof(buffer))) {
-            chunk = g_loadingCharacterInHub != 0 ? 0x4000 : sizeof(buffer);
+    do {
+        i32 chunk;
+        if (bgProcIsBgThread() != 0) {
+            chunk = remaining > chunk_limit ? chunk_limit : remaining;
+            remaining -= chunk;
+        } else {
+            chunk = remaining;
+            remaining = 0;
         }
         NuFileRead(file, dst, chunk);
         dst += chunk;
-        remaining -= chunk;
         if (g_loadingCharacterInHub != 0 && bgProcIsBgThread() != 0) {
             NuIOS_YieldThread();
         }
-    }
+    } while (remaining != 0);
     NuFileOpenSize(file);
     NuFileClose(file);
 
@@ -90,19 +94,23 @@ GLuint NuIOS_CreateGLTexFromPlatfomSpecificForecPVR(const char *filename) {
 
     i32 remaining = NuFileOpenSize(file);
     NuThreadCriticalSectionBegin(g_textureLoadBufferCriticalSection);
+    const i32 chunk_limit = g_loadingCharacterInHub != 0 ? 0x4000 : static_cast<i32>(sizeof(buffer));
     u8 *dst = buffer;
-    while (remaining != 0) {
-        i32 chunk = remaining;
-        if (bgProcIsBgThread() != 0 && chunk > (g_loadingCharacterInHub != 0 ? 0x4000 : (i32)sizeof(buffer))) {
-            chunk = g_loadingCharacterInHub != 0 ? 0x4000 : sizeof(buffer);
+    do {
+        i32 chunk;
+        if (bgProcIsBgThread() != 0) {
+            chunk = remaining > chunk_limit ? chunk_limit : remaining;
+            remaining -= chunk;
+        } else {
+            chunk = remaining;
+            remaining = 0;
         }
         NuFileRead(file, dst, chunk);
         dst += chunk;
-        remaining -= chunk;
         if (g_loadingCharacterInHub != 0 && bgProcIsBgThread() != 0) {
             NuIOS_YieldThread();
         }
-    }
+    } while (remaining != 0);
     NuFileOpenSize(file);
     NuFileClose(file);
 
@@ -207,24 +215,31 @@ load_android_texture:
 
 GLuint NuIOS_CreateGLTexFromPlatformInMemory(void *data, i32 *width, i32 *height, bool is_pvrtc) {
     const i32 platform = NuPlatform::Get()->GetCurrentPlatform();
-    if (is_pvrtc) {
-        const GLuint texture = NuIOS_CreateGLTexFromPVRInMemory(data, width, height);
-        if (texture != 0) {
-            return texture;
+    if (!is_pvrtc) {
+        if (platform > ANDROID_ETC1_PLATFORM) {
+            return loadDefaultTexture(0, 0, 0x20, GL_TEXTURE_2D, GL_TEXTURE_2D);
         }
-    } else if (platform <= ANDROID_ETC1_PLATFORM) {
+
         u32 platform_bit = 1;
         platform_bit <<= platform;
-        if ((platform_bit & 0x1a00) != 0) {
-            const GLuint texture = NuIOS_CreateGLTexFromMemoryDDS(data, width, height);
-            if (texture != 0) {
-                return texture;
+        if ((platform_bit & 0x1a00) == 0) {
+            if ((platform_bit & 0x0500) == 0) {
+                return loadDefaultTexture(0, 0, 0x20, GL_TEXTURE_2D, GL_TEXTURE_2D);
             }
-        } else if ((platform_bit & 0x0500) != 0) {
             const GLuint texture = NuIOS_CreateGLTexFromPVRInMemory(data, width, height);
             if (texture != 0) {
                 return texture;
             }
+        } else {
+            const GLuint texture = NuIOS_CreateGLTexFromMemoryDDS(data, width, height);
+            if (texture != 0) {
+                return texture;
+            }
+        }
+    } else {
+        const GLuint texture = NuIOS_CreateGLTexFromPVRInMemory(data, width, height);
+        if (texture != 0) {
+            return texture;
         }
     }
     return loadDefaultTexture(0, 0, 0x20, GL_TEXTURE_2D, GL_TEXTURE_2D);

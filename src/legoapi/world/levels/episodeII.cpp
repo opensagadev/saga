@@ -15,10 +15,14 @@
 #include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/core/input/timer.h"
+#include "legoapi/menus/core/gamemessage.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/render/core/render.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/numath/nutrig.h"
 #include <string.h>
 // This level's view of the shared 16-byte LevFlag scratch. byte0 holds the
 // bonus-gunship milestone state; byte1 a secondary state.
@@ -78,6 +82,40 @@ static void *pursuit_state[0x20]; // bounty-hunter pursuit state
 static i16 gunship_bolts[2];      // gun-ship bolt type ids
 static u8 gunship_flags[0xa];     // gun-ship weapon-select flags
 static void *gunship_weapons[4];  // gun-ship gizmo weapons
+
+struct ZAMARROW_s {
+    GameObject_s *object;
+    f32 timer;
+};
+
+struct PURSUIT_TRAFFIC_ENTRY_s {
+    nuhspecial_s special;
+    i32 platform_id;
+    f32 animation_frame;
+    u8 pad_0x14[0x139 - 0x14];
+    u8 active;
+    i8 direction;
+    u8 pad_0x13b[0x140 - 0x13b];
+};
+
+struct PURSUIT_TRAFFIC_s {
+    PURSUIT_TRAFFIC_ENTRY_s entries[95];
+    u8 pad_0x76c0[0x77e0 - 0x76c0];
+    i8 count;
+    u8 pad_0x77e1[2];
+    i8 side;
+};
+
+struct PURSUIT_ARROW_COLOURS_s {
+    u8 pad_0x0000[0x1340];
+    u32 colour[3];
+    u8 pad_0x134c[2];
+    u8 enabled;
+};
+
+ZAMARROW_s zamarrow;
+i32 pursuit_c_hack = 1;
+f32 traffic_test_z = -360.0f;
 
 // Episode 2 level handlers, in the game's Episode_II progression:
 // pursuit (coruscant bounty-hunter) / kamino / factory (geonosis droid
@@ -141,7 +179,52 @@ void BountyHunterPursuitB_Reset(WORLDINFO_s *world) {
     pursuit_state[0] = GetNamedGameObject(world->ai_sys, "pursuitb_exit");
 }
 
-void BountyHunterPursuitC_Reset(WORLDINFO_s *) {
+static void UpdateZamArrow(WORLDINFO_s *world) {
+    NUVEC position = zamarrow.object->apiobj.upper_position;
+    position.y += 1.0f;
+    GAMEMESSAGE_s *message = static_cast<GAMEMESSAGE_s *>(
+        AddGameMessage(const_cast<char *>(" "), &position, 0.05f, NULL, 0.0f, 255, 63, 63, 0x10083, 0.0f));
+    if (message == NULL) {
+        return;
+    }
+
+    message->icon = 0x134;
+    message->alpha = static_cast<u8>(NU_SIN_LUT(static_cast<i32>(zamarrow.timer * 16384.0f)) * 128.0f);
+    PURSUIT_ARROW_COLOURS_s *colours = reinterpret_cast<PURSUIT_ARROW_COLOURS_s *>(world->lev_objs);
+    if (colours->enabled != 0) {
+        message->color1 = colours->colour[0];
+        message->color2 = colours->colour[1];
+        message->color3 = colours->colour[2];
+    }
+}
+
+void BountyHunterPursuitC_Reset(WORLDINFO_s *world) {
+    zamarrow = {};
+    zamarrow.object = GetNamedGameObject(world->ai_sys, const_cast<char *>("ai_zam"));
+
+    PURSUIT_TRAFFIC_s *traffic = reinterpret_cast<PURSUIT_TRAFFIC_s *>(world->trafficanim_sys);
+    if (traffic == NULL) {
+        return;
+    }
+
+    traffic->side = 0;
+    PURSUIT_TRAFFIC_ENTRY_s *entry = traffic->entries;
+    for (i32 i = 0; i < traffic->count; ++i, ++entry) {
+        if (pursuit_c_hack == 0) {
+            entry->direction = 0;
+            continue;
+        }
+
+        NUMTX first;
+        NUMTX last;
+        EvalAnim(&entry->special, 1.0f, &first, 1);
+        EvalAnim(&entry->special, entry->animation_frame, &last, 1);
+        if (traffic_test_z > first.m32) {
+            entry->direction = traffic_test_z > last.m32 ? -1 : 0;
+        } else {
+            entry->direction = last.m32 > traffic_test_z ? 1 : 0;
+        }
+    }
 }
 
 void BountyHunterPursuitD_Reset(WORLDINFO_s *world) {
@@ -160,13 +243,74 @@ void BountyHunterPursuitD_Reset(WORLDINFO_s *world) {
     pursuit_state[12] = GetNamedGameObject(world->ai_sys, "pursuitd_last");
 }
 
-void BountyHunterPursuitA_Update(WORLDINFO_s *) {
+void BountyHunterPursuitA_Update(WORLDINFO_s *world) {
+    if (zamarrow.object != NULL && (zamarrow.object->apiobj.field_0x1f8 & 0x1000) != 0 &&
+        zamarrow.object->apiobj.field_0x287 == 0) {
+        if (FadeSys.fade == 0.0f && pause_rndr_on == 0) {
+            zamarrow.timer = MIN(1.0f, zamarrow.timer + FRAMETIME + FRAMETIME);
+            if (0.1f > NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f)) {
+                UpdateZamArrow(world);
+            }
+        } else {
+            zamarrow.timer = 0.0f;
+        }
+    }
 }
 
-void BountyHunterPursuitB_Update(WORLDINFO_s *) {
+void BountyHunterPursuitB_Update(WORLDINFO_s *world) {
+    if (LevAIMessage[0] == NULL || LevAIMessage[0]->value != 1.0f || zamarrow.object == NULL ||
+        (zamarrow.object->apiobj.field_0x1f8 & 0x1000) == 0 || zamarrow.object->apiobj.field_0x287 != 0) {
+        return;
+    }
+
+    if (FadeSys.fade == 0.0f && pause_rndr_on == 0) {
+        zamarrow.timer = MIN(1.0f, zamarrow.timer + FRAMETIME + FRAMETIME);
+        if (0.1f > NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f)) {
+            UpdateZamArrow(world);
+        }
+    } else {
+        zamarrow.timer = 0.0f;
+    }
 }
 
-void BountyHunterPursuitC_Update(WORLDINFO_s *) {
+void BountyHunterPursuitC_Update(WORLDINFO_s *world) {
+    if (zamarrow.object != NULL && (zamarrow.object->apiobj.field_0x1f8 & 0x1000) != 0 &&
+        zamarrow.object->apiobj.field_0x287 == 0) {
+        if (FadeSys.fade == 0.0f && pause_rndr_on == 0) {
+            zamarrow.timer = MIN(1.0f, zamarrow.timer + FRAMETIME + FRAMETIME);
+            if (0.1f > NuFmod(GameTimer.time_elapsed_mod_seconds, 0.2f)) {
+                UpdateZamArrow(world);
+            }
+        } else {
+            zamarrow.timer = 0.0f;
+        }
+    }
+
+    PURSUIT_TRAFFIC_s *traffic = reinterpret_cast<PURSUIT_TRAFFIC_s *>(world->trafficanim_sys);
+    if (traffic == NULL || player == NULL) {
+        return;
+    }
+
+    if (traffic_test_z <= player->apiobj.position.z) {
+        if (traffic->side == 1) {
+            return;
+        }
+        traffic->side = 1;
+    } else {
+        if (traffic->side == -1) {
+            return;
+        }
+        traffic->side = -1;
+    }
+
+    PURSUIT_TRAFFIC_ENTRY_s *entry = traffic->entries;
+    for (i32 i = 0; i < traffic->count; ++i, ++entry) {
+        if (traffic_test_z > player->apiobj.position.z) {
+            entry->active = entry->direction == 1;
+        } else {
+            entry->active = entry->direction == -1;
+        }
+    }
 }
 
 void BountyHunterPursuitD_Update(WORLDINFO_s *) {

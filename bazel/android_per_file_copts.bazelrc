@@ -220,7 +220,6 @@ build:target --per_file_copt=^src/legoapi/render/light/fade\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/render/light/lighting\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/render/light/faders\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/render/fx/parts\.cpp$@-O2
-build:target --per_file_copt=^src/legoapi/render/fx/parts_stubs\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/render/light/shadow\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/render/light/surfaces\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/render/fx/parts_control\.cpp$@-O3

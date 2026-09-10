@@ -95,95 +95,6 @@ namespace nu2api {
             return crc;
         }
 
-        // ---------------------------------------------------------------------------
-        // Sorted-table lookups
-        //
-        // All redirect / preloaded tables are sorted by key and queried with the
-        // same binary search. Returning false means "no entry".
-        // ---------------------------------------------------------------------------
-
-        static bool FindRedirect(u32 key, u32 *outValue, const HashRedirect *table, u32 count) {
-            if (count == 0) {
-                return false;
-            }
-            i32 lo = 0;
-            i32 hi = static_cast<i32>(count) - 1;
-            i32 mid = hi >> 1;
-
-            while (true) {
-                const u32 midKey = table[mid].key;
-                if (midKey == key) {
-                    *outValue = table[mid].value;
-                    return true;
-                }
-                if (midKey < key) {
-                    lo = mid + 1;
-                } else {
-                    hi = mid - 1;
-                }
-                if (hi < lo) {
-                    return false;
-                }
-                mid = (lo + hi) / 2;
-            }
-        }
-
-        static bool FindPreloaded(u32 key, GLuint **outSlot, LoadedUniqueShaderRecord *table, u32 count) {
-            if (count == 0) {
-                return false;
-            }
-            i32 lo = 0;
-            i32 hi = static_cast<i32>(count) - 1;
-            i32 mid = hi >> 1;
-
-            while (true) {
-                const u32 midKey = table[mid].key;
-                if (midKey == key) {
-                    *outSlot = &table[mid].gl_shader;
-                    return true;
-                }
-                if (midKey < key) {
-                    lo = mid + 1;
-                } else {
-                    hi = mid - 1;
-                }
-                if (hi < lo) {
-                    return false;
-                }
-                mid = (lo + hi) / 2;
-            }
-        }
-
-        // ---------------------------------------------------------------------------
-        // Shader source loading
-        // ---------------------------------------------------------------------------
-
-        static constexpr u32 kShaderSourceCapacity = 0x4000;
-        static char s_shaderSourceBuffer[kShaderSourceCapacity];
-
-        static bool TryLoadShaderSource(char **outSource, i32 *outSize, u32 sourceKey, bool pixelStage) {
-            *outSource = nullptr;
-            *outSize = 0;
-
-            char path[268];
-            std::snprintf(path, sizeof(path), "%s/0x%08x.ios_%s", "builtshaders/ios", sourceKey,
-                          pixelStage ? "pcode" : "vcode");
-
-            NUFILE fh = NuFileOpen(path, NUFILE_READ);
-            if (fh == 0) {
-                return false;
-            }
-
-            const i32 size = NuFileOpenSize(fh);
-            *outSize = size;
-            NuFileRead(fh, s_shaderSourceBuffer, size);
-            NuFileClose(fh);
-
-            s_shaderSourceBuffer[size] = '\0';
-            *outSource = s_shaderSourceBuffer;
-            return true;
-        }
-
     } // namespace detail
 } // namespace nu2api
 
@@ -1033,12 +944,8 @@ namespace nu2api {
         NuShaderObjectKeyGenerate3(rawKey, &keyFilter, pixelStage ? 1 : 0);
 
         ShaderObjectKey programKey{};
-        u32 redirected = 0;
-        if (detail::FindRedirect(rawKey[0], &redirected, g_shaderProgramRedirects, 0x1a1)) {
-            programKey.key[0] = redirected;
-        } else {
-            programKey.key[0] = rawKey[0];
-        }
+        programKey.key[0] = rawKey[0];
+        LookupHash(programKey.key[0], &programKey.key[0], g_shaderProgramRedirects, 0x1a1);
 
         ShaderManagerStorage *storage = static_cast<ShaderManagerStorage *>(manager);
 
@@ -1102,18 +1009,13 @@ bool ShaderManagerOpenGL::createShader(const ::ShaderObjectKey &key, NuShaderObj
     u32 vertexKey = key.key;
     u32 pixelKey = key.key;
 
-    u32 remapped = 0;
-    if (FindRedirect(vertexKey, &remapped, g_vertexShaderRedirects, 0x318)) {
-        vertexKey = remapped;
-    }
-    if (FindRedirect(pixelKey, &remapped, g_pixelShaderRedirects, 0x25a)) {
-        pixelKey = remapped;
-    }
+    LookupHash(vertexKey, &vertexKey, g_vertexShaderRedirects, 0x318);
+    LookupHash(pixelKey, &pixelKey, g_pixelShaderRedirects, 0x25a);
 
     GLuint *vertexSlot = nullptr;
     GLuint *pixelSlot = nullptr;
-    FindPreloaded(vertexKey, &vertexSlot, g_loadedUniqueVertexShaders, 0x170);
-    FindPreloaded(pixelKey, &pixelSlot, g_loadedUniquePixelShaders, 0x22e);
+    LookupPreloadedShaderObject(vertexKey, &vertexSlot, g_loadedUniqueVertexShaders, 0x170);
+    LookupPreloadedShaderObject(pixelKey, &pixelSlot, g_loadedUniquePixelShaders, 0x22e);
 
     if (vertexSlot == nullptr || pixelSlot == nullptr) {
         return false;
@@ -1123,10 +1025,11 @@ bool ShaderManagerOpenGL::createShader(const ::ShaderObjectKey &key, NuShaderObj
     if (*vertexSlot == 0) {
         NuThreadCriticalSectionBegin(file_criticalsection);
         NuThreadCriticalSectionBegin(g_shaderBufferCriticalSection);
-        char *src = nullptr;
-        i32 size = 0;
-        const bool loaded = TryLoadShaderSource(&src, &size, vertexKey, false);
-        const bool compiled = loaded && NuShaderObjectGenerateGLSLShader(vertexSlot, GL_VERTEX_SHADER, src, size);
+        char *vertexSource;
+        i32 vertexSize;
+        const bool loaded = LoadShaderSource(&vertexSource, &vertexSize, vertexKey, false);
+        const bool compiled =
+            loaded && NuShaderObjectGenerateGLSLShader(vertexSlot, GL_VERTEX_SHADER, vertexSource, vertexSize);
         NuThreadCriticalSectionEnd(g_shaderBufferCriticalSection);
         NuThreadCriticalSectionEnd(file_criticalsection);
         if (!compiled) {
@@ -1137,10 +1040,11 @@ bool ShaderManagerOpenGL::createShader(const ::ShaderObjectKey &key, NuShaderObj
     if (*pixelSlot == 0) {
         NuThreadCriticalSectionBegin(file_criticalsection);
         NuThreadCriticalSectionBegin(g_shaderBufferCriticalSection);
-        char *src = nullptr;
-        i32 size = 0;
-        const bool loaded = TryLoadShaderSource(&src, &size, pixelKey, true);
-        const bool compiled = loaded && NuShaderObjectGenerateGLSLShader(pixelSlot, GL_FRAGMENT_SHADER, src, size);
+        char *pixelSource;
+        i32 pixelSize;
+        const bool loaded = LoadShaderSource(&pixelSource, &pixelSize, pixelKey, true);
+        const bool compiled =
+            loaded && NuShaderObjectGenerateGLSLShader(pixelSlot, GL_FRAGMENT_SHADER, pixelSource, pixelSize);
         NuThreadCriticalSectionEnd(g_shaderBufferCriticalSection);
         NuThreadCriticalSectionEnd(file_criticalsection);
         if (!compiled) {
