@@ -1,5 +1,7 @@
 #include "MechInputTouch_types.h"
 
+#include <string.h>
+
 #include "gameapi/gui/apimenu.h"
 #include "gameframework/saveload.h"
 #include "globals.h"
@@ -71,9 +73,7 @@ void MechTouchUI::Init() {
 }
 
 MechTouchUI::MechTouchUI() {
-    for (i32 i = 0; i < 32; ++i) {
-        elements[i] = NULL;
-    }
+    memset(elements, 0, sizeof(elements));
 }
 
 bool MechTouchUI::OnClick(GameObject_s &, TouchHolder &holder) {

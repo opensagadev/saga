@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 37.42362,
+    "fuzzy_match_percent": 37.4296,
     "total_code": "4722419",
-    "matched_code": "354278",
-    "matched_code_percent": 7.5020447,
+    "matched_code": "354560",
+    "matched_code_percent": 7.5080166,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4197,
-    "matched_functions_percent": 31.183594,
+    "matched_functions": 4199,
+    "matched_functions_percent": 31.198454,
     "total_units": 1
   },
   "text": {
@@ -17760,7 +17760,7 @@
           "address": 4544096,
           "offset": 3654128,
           "size": 141,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN11MechTouchUIC2Ev",
@@ -17768,7 +17768,7 @@
           "address": 4544096,
           "offset": 3654128,
           "size": 141,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN11MechTouchUID1Ev",
@@ -17816,7 +17816,7 @@
           "address": 4544448,
           "offset": 3654480,
           "size": 100,
-          "match_percent": 99.47369
+          "match_percent": 99.86842
         },
         {
           "name": "_ZN11MechTouchUI11PickElementER6NuVec2",
