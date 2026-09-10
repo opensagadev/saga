@@ -9,10 +9,13 @@
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/render/fx/parts.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/numath/numtx.h"
+#include "nu2api/numath/nuvec.h"
 
 #include <string.h>
 
@@ -22,6 +25,9 @@ AILOCATOR_s *locator;
 GameObject_s *gameobj;
 extern u8 troopercannons_beenReset;
 extern "C" i32 FindPlatInst(i32 instance_ix);
+void Asteroid_PartKill(PART_s *, i32);
+void GizmoBlowupUpdateMatrix(GIZMOBLOWUP_s *);
+void PartCollide_3D(PART_s *);
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -284,6 +290,83 @@ DECOMP_ASSERT(sizeof(ASTEROID_s) == 0x18, "ASTEROID_s size");
 i32 nasteroids;
 ASTEROID_s asteroids[128];
 
+static void Asteroid_AddParts(GIZMOBLOWUP_s *blowup) {
+    i32 special_indices[4] = {0, -1, -1, -1};
+    const i32 part_count = qrand() / 0x4000 + 1;
+    for (i32 index = 1; index < part_count; ++index) {
+        special_indices[index] = qrand() / (0xffff / 3 + 1) + 1;
+    }
+
+    for (i32 index = 0; index < part_count; ++index) {
+        nuhspecial_s *special = &LevHSpecial[special_indices[index]];
+        if (NuSpecialExistsFn(special) == 0) {
+            continue;
+        }
+
+        NUANGVEC rotation = {qrand(), qrand(), qrand()};
+        NUMTX matrix __attribute__((aligned(16)));
+        NuMtxSetRotateXYZVU0(&matrix, &rotation);
+        NuMtxTranslate(&matrix, &blowup->position);
+
+        NUVEC velocity = {0.0f, 0.0f, static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 3.0f + 2.0f};
+        NuVecRotateY(&velocity, &velocity, qrand());
+
+        ADDPART_s params __attribute__((aligned(16))) = Default_ADDPART;
+        params.matrix = &matrix;
+        params.velocity = &velocity;
+        NUVEC centre;
+        NuSpecialGetRadius(special, &centre, &params.field_14);
+        params.field_18 = params.field_14;
+        params.gravity = 0.0f;
+        params.special = special;
+        params.flags = index == 0 ? 0x800019b : 0x8000193;
+        params.field_40 = PartCollide_3D;
+        params.field_44 = Asteroid_PartKill;
+        params.time_step = FRAMETIME;
+        params.field_a4 = static_cast<f32>(qrand()) * (1.0f / 65535.0f) * 3.0f + 7.0f;
+
+        PART_s *part = AddPart(&params);
+        if (part != NULL) {
+            part->force_player_mask = index == 0 ? 1 : 2;
+        }
+    }
+}
+
+static __used__ void Asteroids_Update() {
+    ASTEROID_s *asteroid = asteroids;
+    for (i32 index = 0; index < nasteroids; ++index, ++asteroid) {
+        GIZMOBLOWUP_s *blowup = asteroid->blowup;
+        if (blowup != NULL) {
+            if ((static_cast<u16>(blowup->status_flags) & 0x4001) == 0x4000) {
+                asteroid->activated = 0;
+                blowup->field_0xf0 += static_cast<i16>(static_cast<f32>(asteroid->rotation_speed_x) * FRAMETIME);
+                blowup->field_0xf2 += static_cast<i16>(static_cast<f32>(asteroid->rotation_speed_y) * FRAMETIME);
+                blowup->state_flags |= 1;
+                blowup->field_0xf4 += static_cast<i16>(static_cast<f32>(asteroid->rotation_speed_z) * FRAMETIME);
+                GizmoBlowupUpdateMatrix(blowup);
+                continue;
+            }
+        } else if (NuSpecialGetVisibilityFn(&asteroid->special) != 0) {
+            asteroid->activated = 0;
+            NUMTX *matrix = NuSpecialGetDrawMtx(&asteroid->special);
+            if (matrix != NULL) {
+                NuMtxPreRotateX(matrix, static_cast<i32>(static_cast<f32>(asteroid->rotation_speed_x) * FRAMETIME));
+                NuMtxPreRotateY(matrix, static_cast<i32>(static_cast<f32>(asteroid->rotation_speed_y) * FRAMETIME));
+                NuSpecialUpdate(&asteroid->special);
+                continue;
+            }
+        }
+
+        if (asteroid->activated == 0) {
+            asteroid->activated = 1;
+            if (blowup != NULL) {
+                blowup->field_0xa8 = 0;
+                Asteroid_AddParts(blowup);
+            }
+        }
+    }
+}
+
 static void Asteroids_Reset(WORLDINFO_s *world) {
     static const i32 maxrotspd[3] = {0x1555, 0x38e, 0x16c};
     nuhspecial_s specials[128];
@@ -379,6 +462,7 @@ void AsteroidChaseD_Panel(WORLDINFO_s *) {
 }
 
 void AsteroidChaseA_Update(WORLDINFO_s *) {
+    Asteroids_Update();
 }
 
 void AsteroidChaseB_Update(WORLDINFO_s *) {

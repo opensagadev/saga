@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 36.874073,
+    "fuzzy_match_percent": 36.891373,
     "total_code": "4722419",
-    "matched_code": "348942",
-    "matched_code_percent": 7.3890524,
+    "matched_code": "348947",
+    "matched_code_percent": 7.3891582,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4122,
-    "matched_functions_percent": 30.626348,
+    "matched_functions": 4123,
+    "matched_functions_percent": 30.633778,
     "total_units": 1
   },
   "text": {
@@ -42089,22 +42089,6 @@
           "offset": 1283712,
           "size": 1921,
           "match_percent": 1.055409
-        },
-        {
-          "name": "_ZL17Asteroid_AddPartsP13GIZMOBLOWUP_s",
-          "demangled_name": "Asteroid_AddParts(GIZMOBLOWUP_s*)",
-          "address": 2193680,
-          "offset": 1303712,
-          "size": 792,
-          "match_percent": 2.29885
-        },
-        {
-          "name": "_ZL16Asteroids_Updatev",
-          "demangled_name": "Asteroids_Update()",
-          "address": 2194480,
-          "offset": 1304512,
-          "size": 397,
-          "match_percent": 3.063063
         }
       ]
     },
@@ -84305,12 +84289,28 @@
           "match_percent": 1.288344
         },
         {
+          "name": "_ZL17Asteroid_AddPartsP13GIZMOBLOWUP_s",
+          "demangled_name": "Asteroid_AddParts(GIZMOBLOWUP_s*)",
+          "address": 2193680,
+          "offset": 1303712,
+          "size": 792,
+          "match_percent": 77.666664
+        },
+        {
+          "name": "_ZL16Asteroids_Updatev",
+          "demangled_name": "Asteroids_Update()",
+          "address": 2194480,
+          "offset": 1304512,
+          "size": 397,
+          "match_percent": 56.99099
+        },
+        {
           "name": "_ZL15Asteroids_ResetP11WORLDINFO_s",
           "demangled_name": "Asteroids_Reset(WORLDINFO_s*)",
           "address": 2194880,
           "offset": 1304912,
           "size": 878,
-          "match_percent": 80.73128
+          "match_percent": 80.797356
         },
         {
           "name": "_Z18InitTrooperCannonsP11WORLDINFO_s",
@@ -84446,7 +84446,7 @@
           "address": 2202912,
           "offset": 1312944,
           "size": 5,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_Z19AsteroidChaseB_InitP11WORLDINFO_s",
