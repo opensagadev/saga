@@ -46,6 +46,7 @@ build:target --per_file_copt=^src/legoapi/misc/gamelib_utilities\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/misc/legoapi_misc\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/misc/memory\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/misc/utilities\.cpp$@-O2
+build:target --per_file_copt=^src/legoapi/misc/androidbatman\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/render/core/terrain\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/render/core/terrain_stubs\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/render/core/terrain_runtime\.cpp$@-O3

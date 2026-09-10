@@ -67,6 +67,7 @@ void NuDebugMsgPrint(char *);
 #include "nu2api/nu3d/nuvport.h"
 #include "nu2api/nu3d/nuocclusion.h"
 #include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nuscreen.hpp"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuquat.h"
@@ -1364,7 +1365,8 @@ extern "C" {
         return 0;
     }
     i32 NuIOS_IsSmallScreen(void) {
-        return 0;
+        NuScreen *screen = NuScreen::Get();
+        return screen->GetWidth() * screen->GetHeight() < 10000.0f;
     }
     void NuIOS_RecordFlurryEvent(char *event_name) {
         JNIEnv *env = NULL;

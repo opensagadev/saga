@@ -120,6 +120,8 @@ void *ScaleTerrainT1;
 static void *ScaleTerrainT2;
 TERRAIN_SHAPE *ScaleTerrain;
 static void *TempScanStack;
+static void *TempStackPtr;
+static i32 TerrPlatDis = -1;
 static TERRAIN_WALL_POINT *WallSplList;
 static i32 WallSplCount;
 i32 terraincnt;
@@ -3826,6 +3828,15 @@ namespace {
     }
 
 } // namespace
+
+extern "C" void NewRaySetDisablePalt(i32 disabled) {
+    TerrPlatDis = disabled;
+}
+
+extern "C" void NewScanInit(void) {
+    TempStackPtr = TempScanStack;
+    TerrPlatDis = -1;
+}
 
 void NewScanRot(nuvec_s *position, i32 terrain_mask) {
     void *scratch = NuScratchAlloc32(0xd0);

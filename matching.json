@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 36.89496,
+    "fuzzy_match_percent": 36.9014,
     "total_code": "4722419",
-    "matched_code": "349043",
-    "matched_code_percent": 7.3911905,
+    "matched_code": "349136",
+    "matched_code_percent": 7.3931603,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4127,
-    "matched_functions_percent": 30.663496,
+    "matched_functions": 4129,
+    "matched_functions_percent": 30.678356,
     "total_units": 1
   },
   "text": {
@@ -71569,7 +71569,7 @@
           "address": 900960,
           "offset": 10992,
           "size": 93,
-          "match_percent": 29.411764
+          "match_percent": 99.35294
         },
         {
           "name": "_Z13ObjZappedBlueP12GameObject_s",
@@ -71577,7 +71577,7 @@
           "address": 1367552,
           "offset": 477584,
           "size": 49,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_Z13PeriscodeCodeP12GameObject_s",
@@ -71585,7 +71585,7 @@
           "address": 1510336,
           "offset": 620368,
           "size": 592,
-          "match_percent": 1.746032
+          "match_percent": 3.333333
         },
         {
           "name": "_Z25RegisterGizmoTypes_BatmanP9variptr_uS0_",
@@ -71593,7 +71593,7 @@
           "address": 1856048,
           "offset": 966080,
           "size": 127,
-          "match_percent": 9.565217
+          "match_percent": 18.26087
         },
         {
           "name": "_Z7NewScanP7nuvec_sii",
@@ -71601,7 +71601,7 @@
           "address": 3636048,
           "offset": 2746080,
           "size": 5207,
-          "match_percent": 0.3125
+          "match_percent": 0.716912
         },
         {
           "name": "_Z17NewScanHandelFullP7nuvec_sS0_fii",
@@ -71609,7 +71609,7 @@
           "address": 3710864,
           "offset": 2820896,
           "size": 4872,
-          "match_percent": 0.286707
+          "match_percent": 0.3649
         },
         {
           "name": "_Z19NewScanHandelSubsetPsP7nuvec_sS1_fi",
@@ -71617,7 +71617,7 @@
           "address": 3715744,
           "offset": 2825776,
           "size": 2404,
-          "match_percent": 0.591304
+          "match_percent": 1.252174
         }
       ]
     },
@@ -76855,6 +76855,22 @@
           "match_percent": 92.22727
         },
         {
+          "name": "NewScanInit",
+          "demangled_name": "NewScanInit",
+          "address": 3710816,
+          "offset": 2820848,
+          "size": 34,
+          "match_percent": 99.5
+        },
+        {
+          "name": "NewRaySetDisablePalt",
+          "demangled_name": "NewRaySetDisablePalt",
+          "address": 3718560,
+          "offset": 2828592,
+          "size": 24,
+          "match_percent": 99.85714
+        },
+        {
           "name": "_Z17ScanTerrainHandeliPs",
           "demangled_name": "ScanTerrainHandel(int, short*)",
           "address": 3718592,
@@ -78061,28 +78077,12 @@
           "match_percent": 79.875
         },
         {
-          "name": "NewScanInit",
-          "demangled_name": "NewScanInit",
-          "address": 3710816,
-          "offset": 2820848,
-          "size": 34,
-          "match_percent": 0.0
-        },
-        {
           "name": "NewScanHandel",
           "demangled_name": "NewScanHandel",
           "address": 3718176,
           "offset": 2828208,
           "size": 372,
           "match_percent": 4.827586
-        },
-        {
-          "name": "NewRaySetDisablePalt",
-          "demangled_name": "NewRaySetDisablePalt",
-          "address": 3718560,
-          "offset": 2828592,
-          "size": 24,
-          "match_percent": 99.85714
         },
         {
           "name": "NewRayCastSetHandel",
@@ -86892,7 +86892,7 @@
           "address": 2735920,
           "offset": 1845952,
           "size": 44,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_Z13NuMtlInitExPSP9variptr_u",
@@ -95794,7 +95794,7 @@
           "address": 930688,
           "offset": 40720,
           "size": 45,
-          "match_percent": 0.0
+          "match_percent": 99.90909
         },
         {
           "name": "NuIOS_HardwareSupportsRetina",
@@ -115512,7 +115512,7 @@
           "address": 3307808,
           "offset": 2417840,
           "size": 39,
-          "match_percent": 0.0
+          "match_percent": 15.666667
         },
         {
           "name": "_ZN12NuSoundVoice9SetVolumeEf",
@@ -116920,7 +116920,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -117036,7 +117035,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -117152,7 +117150,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -117279,7 +117276,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -117335,7 +117331,6 @@
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/collect/attracto.cpp.o",
         "legoapi/items/collect/torpedo.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/props/objects/ledge.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/objects/zipup.cpp.o",
@@ -117454,7 +117449,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -117581,7 +117575,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -117708,7 +117701,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -117835,7 +117827,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -117962,7 +117953,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -118089,7 +118079,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -118278,7 +118267,6 @@
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/collect/attracto.cpp.o",
         "legoapi/items/collect/torpedo.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/props/objects/ledge.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/objects/zipup.cpp.o",
@@ -118326,7 +118314,6 @@
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/collect/attracto.cpp.o",
         "legoapi/items/collect/torpedo.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/props/objects/ledge.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/objects/zipup.cpp.o",
@@ -118445,7 +118432,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -118572,7 +118558,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -118699,7 +118684,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -118871,7 +118855,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -119009,7 +118992,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -119279,7 +119261,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -119503,7 +119484,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -119728,7 +119708,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -119855,7 +119834,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -119982,7 +119960,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -120109,7 +120086,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -120311,7 +120287,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -120438,7 +120413,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -120576,7 +120550,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -120703,7 +120676,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -120842,7 +120814,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -120969,7 +120940,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -121025,7 +120995,6 @@
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/collect/attracto.cpp.o",
         "legoapi/items/collect/torpedo.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/props/objects/ledge.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/objects/zipup.cpp.o",
@@ -121144,7 +121113,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -121271,7 +121239,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -121398,7 +121365,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -121525,7 +121491,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -121715,7 +121680,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -121842,7 +121806,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -121969,7 +121932,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -122344,7 +122306,6 @@
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/collect/attracto.cpp.o",
         "legoapi/items/collect/torpedo.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/props/objects/ledge.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/objects/zipup.cpp.o",
@@ -122496,7 +122457,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -122552,7 +122512,6 @@
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/collect/attracto.cpp.o",
         "legoapi/items/collect/torpedo.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/props/objects/ledge.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/objects/zipup.cpp.o",
@@ -122600,7 +122559,6 @@
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/collect/attracto.cpp.o",
         "legoapi/items/collect/torpedo.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/props/objects/ledge.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/objects/zipup.cpp.o",
@@ -122779,7 +122737,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -122835,7 +122792,6 @@
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/collect/attracto.cpp.o",
         "legoapi/items/collect/torpedo.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/props/objects/ledge.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/objects/zipup.cpp.o",
@@ -122883,7 +122839,6 @@
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/collect/attracto.cpp.o",
         "legoapi/items/collect/torpedo.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/props/objects/ledge.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/objects/zipup.cpp.o",
@@ -123037,7 +122992,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -123535,7 +123489,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",
@@ -123662,7 +123615,6 @@
         "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
-        "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
         "legoapi/misc/stream.cpp.o",

@@ -915,7 +915,7 @@ void NuSoundVoice::SetSurroundMode(NuSoundSystem::SurroundMode mode) {
 }
 
 void NuSoundVoice::SetVelocity(VuVec const &value) {
-    memcpy(&this->velocity, &value, sizeof(this->velocity));
+    this->velocity = value;
 }
 
 void NuSoundVoice::UnregisterHandle(NuSoundHandle *handle) {

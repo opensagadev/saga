@@ -16,6 +16,12 @@ class NuScreen {
     static NuScreen *Get() {
         return ms_instance;
     }
+    f32 GetWidth() const {
+        return width;
+    }
+    f32 GetHeight() const {
+        return height;
+    }
     static void Create();
 
     void Destroy();
