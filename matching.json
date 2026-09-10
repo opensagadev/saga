@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 37.460087,
+    "fuzzy_match_percent": 37.48991,
     "total_code": "4722419",
     "matched_code": "355919",
     "matched_code_percent": 7.536794,
@@ -87786,12 +87786,60 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z22NuMtxCalcCheapFaceY_v2P7numtx_sP7nuvec_s",
+          "demangled_name": "NuMtxCalcCheapFaceY_v2(numtx_s*, nuvec_s*)",
+          "address": 2961040,
+          "offset": 2071072,
+          "size": 169,
+          "match_percent": 85.906975
+        },
+        {
+          "name": "NuMtxCalcFaceOn",
+          "demangled_name": "NuMtxCalcFaceOn",
+          "address": 2961216,
+          "offset": 2071248,
+          "size": 438,
+          "match_percent": 94.729164
+        },
+        {
+          "name": "NuMtxCalcFaceY",
+          "demangled_name": "NuMtxCalcFaceY",
+          "address": 2961664,
+          "offset": 2071696,
+          "size": 347,
+          "match_percent": 83.925
+        },
+        {
           "name": "NuCameraGetViewMtx",
           "demangled_name": "NuCameraGetViewMtx",
           "address": 2962016,
           "offset": 2072048,
           "size": 22,
           "match_percent": 100.0
+        },
+        {
+          "name": "NuMtxCalcDebrisFaceOn",
+          "demangled_name": "NuMtxCalcDebrisFaceOn",
+          "address": 2962048,
+          "offset": 2072080,
+          "size": 173,
+          "match_percent": 99.97727
+        },
+        {
+          "name": "_Z19NuMtxCalcCheapFaceYP7numtx_sP7nuvec_s",
+          "demangled_name": "NuMtxCalcCheapFaceY(numtx_s*, nuvec_s*)",
+          "address": 2962224,
+          "offset": 2072256,
+          "size": 334,
+          "match_percent": 80.03846
+        },
+        {
+          "name": "NuMtxCalcCheapFaceOn",
+          "demangled_name": "NuMtxCalcCheapFaceOn",
+          "address": 2962560,
+          "offset": 2072592,
+          "size": 222,
+          "match_percent": 85.203705
         },
         {
           "name": "NuCameraGetProjectionMtx",
@@ -107667,54 +107715,6 @@
           "offset": 1841999,
           "size": 428,
           "match_percent": 8.769231
-        },
-        {
-          "name": "_Z22NuMtxCalcCheapFaceY_v2P7numtx_sP7nuvec_s",
-          "demangled_name": "NuMtxCalcCheapFaceY_v2(numtx_s*, nuvec_s*)",
-          "address": 2961040,
-          "offset": 2071072,
-          "size": 169,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuMtxCalcFaceOn",
-          "demangled_name": "NuMtxCalcFaceOn",
-          "address": 2961216,
-          "offset": 2071248,
-          "size": 438,
-          "match_percent": 8.510417
-        },
-        {
-          "name": "NuMtxCalcFaceY",
-          "demangled_name": "NuMtxCalcFaceY",
-          "address": 2961664,
-          "offset": 2071696,
-          "size": 347,
-          "match_percent": 10.15
-        },
-        {
-          "name": "NuMtxCalcDebrisFaceOn",
-          "demangled_name": "NuMtxCalcDebrisFaceOn",
-          "address": 2962048,
-          "offset": 2072080,
-          "size": 173,
-          "match_percent": 0.0
-        },
-        {
-          "name": "_Z19NuMtxCalcCheapFaceYP7numtx_sP7nuvec_s",
-          "demangled_name": "NuMtxCalcCheapFaceY(numtx_s*, nuvec_s*)",
-          "address": 2962224,
-          "offset": 2072256,
-          "size": 334,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuMtxCalcCheapFaceOn",
-          "demangled_name": "NuMtxCalcCheapFaceOn",
-          "address": 2962560,
-          "offset": 2072592,
-          "size": 222,
-          "match_percent": 0.0
         }
       ]
     },

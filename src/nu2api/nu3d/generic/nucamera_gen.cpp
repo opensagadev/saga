@@ -115,6 +115,89 @@ NUMTX *NuCameraGetMtx(void) {
     return &global_camera.mtx;
 }
 
+void NuMtxCalcCheapFaceY_v2(NUMTX *m, NUVEC *v) {
+    NUMTX *camera = NuCameraGetMtx();
+    NuVecCross(NUMTX_GET_ROW_VEC(m, 0), NUMTX_GET_ROW_VEC(camera, 2), v);
+    NuVecNorm(NUMTX_GET_ROW_VEC(m, 0), NUMTX_GET_ROW_VEC(m, 0));
+    *NUMTX_GET_ROW_VEC(m, 1) = *v;
+    NuVecCross(NUMTX_GET_ROW_VEC(m, 2), NUMTX_GET_ROW_VEC(m, 0), NUMTX_GET_ROW_VEC(m, 1));
+    m->m33 = 1.0f;
+    m->m23 = 0.0f;
+    m->m13 = 0.0f;
+    m->m03 = 0.0f;
+    m->m32 = 0.0f;
+    m->m31 = 0.0f;
+    m->m30 = 0.0f;
+}
+
+void NuMtxCalcFaceOn(NUMTX *m, NUVEC *v) {
+    NUVEC world_up = {0.0f, 1.0f, 0.0f};
+    NUVEC right;
+    NUVEC up;
+    NUVEC forward;
+    NUVEC camera_position;
+
+    NuMtxGetTranslation(NuCameraGetMtx(), &camera_position);
+    NuVecSub(&forward, &camera_position, v);
+    NuVecNorm(&forward, &forward);
+
+    f32 projection = NuVecDot(&world_up, &forward);
+    up.x = world_up.x - forward.x * projection;
+    up.y = world_up.y - forward.y * projection;
+    up.z = world_up.z - forward.z * projection;
+    NuVecNorm(&up, &up);
+    NuVecCross(&right, &up, &forward);
+
+    m->m00 = right.x;
+    m->m10 = up.x;
+    m->m20 = forward.x;
+    m->m01 = right.y;
+    m->m11 = up.y;
+    m->m21 = forward.y;
+    m->m02 = right.z;
+    m->m12 = up.z;
+    m->m22 = forward.z;
+    m->m33 = 1.0f;
+    m->m23 = 0.0f;
+    m->m13 = 0.0f;
+    m->m03 = 0.0f;
+    m->m30 = v->x;
+    m->m31 = v->y;
+    m->m32 = v->z;
+}
+
+void NuMtxCalcFaceY(NUMTX *m, NUVEC *v) {
+    NUVEC world_up = {0.0f, 1.0f, 0.0f};
+    NUVEC right;
+    NUVEC up;
+    NUVEC forward;
+    NUVEC camera_position;
+
+    NuMtxGetTranslation(NuCameraGetMtx(), &camera_position);
+    NuVecSub(&forward, &camera_position, v);
+    NuVecCross(&right, &world_up, &forward);
+    NuVecNorm(&right, &right);
+    NuVecCross(&up, &forward, &right);
+    NuVecNorm(&up, &up);
+
+    m->m00 = right.x;
+    m->m10 = world_up.x;
+    m->m20 = up.x;
+    m->m01 = right.y;
+    m->m11 = world_up.y;
+    m->m21 = up.y;
+    m->m02 = right.z;
+    m->m12 = world_up.z;
+    m->m22 = up.z;
+    m->m33 = 1.0f;
+    m->m23 = 0.0f;
+    m->m13 = 0.0f;
+    m->m03 = 0.0f;
+    m->m30 = v->x;
+    m->m31 = v->y;
+    m->m32 = v->z;
+}
+
 void NuCameraGetClipMtx(NUMTX *viewport, NUMTX *scissor) {
     if (viewport != NULL) {
         memcpy(viewport, &vpc_vport_mtx, sizeof(NUMTX));
@@ -135,6 +218,79 @@ NUMTX *NuCameraGetScalingMtx(void) {
 
 NUMTX *NuCameraGetViewMtx(void) {
     return &vmtx;
+}
+
+void NuMtxCalcDebrisFaceOn(NUMTX *m) {
+    NUMTX *view = NuCameraGetViewMtx();
+    m->m00 = -view->m00;
+    m->m10 = view->m01;
+    m->m20 = -view->m02;
+    m->m01 = -view->m10;
+    m->m11 = view->m11;
+    m->m21 = -view->m12;
+    m->m02 = -view->m20;
+    m->m12 = view->m21;
+    m->m22 = -view->m22;
+    m->m23 = 0.0f;
+    m->m13 = 0.0f;
+    m->m03 = 0.0f;
+    m->m33 = 1.0f;
+}
+
+void NuMtxCalcCheapFaceY(NUMTX *m, NUVEC *v) {
+    NUMTX *view = NuCameraGetViewMtx();
+    NUVEC right;
+    NUVEC up;
+
+    right.x = -view->m00;
+    right.y = 0.0f;
+    right.z = -view->m20;
+    NuVecNorm(&right, &right);
+
+    m->m00 = right.x;
+    m->m01 = right.y;
+    m->m02 = right.z;
+
+    up.x = 0.0f;
+    up.y = 1.0f;
+    up.z = 0.0f;
+    m->m11 = up.y;
+    m->m10 = up.x;
+    m->m12 = up.z;
+
+    NUVEC forward = {-view->m02, 0.0f, -view->m22};
+    NuVecNorm(&forward, &forward);
+
+    m->m20 = forward.x;
+    m->m21 = forward.y;
+    m->m22 = forward.z;
+    m->m33 = 1.0f;
+    m->m23 = 0.0f;
+    m->m13 = 0.0f;
+    m->m03 = 0.0f;
+    m->m30 = v->x;
+    m->m31 = v->y;
+    m->m32 = v->z;
+}
+
+void NuMtxCalcCheapFaceOn(NUMTX *m, NUVEC *v) {
+    NUMTX *view = NuCameraGetViewMtx();
+    m->m00 = -view->m00;
+    m->m10 = view->m01;
+    m->m20 = -view->m02;
+    m->m01 = -view->m10;
+    m->m11 = view->m11;
+    m->m21 = -view->m12;
+    m->m02 = -view->m20;
+    m->m12 = view->m21;
+    m->m22 = -view->m22;
+    m->m03 = 0.0f;
+    m->m13 = 0.0f;
+    m->m23 = 0.0f;
+    m->m30 = v->x;
+    m->m31 = v->y;
+    m->m32 = v->z;
+    m->m33 = 1.0f;
 }
 
 NUMTX *NuCameraGetVPMtx(void) {
