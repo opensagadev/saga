@@ -100,6 +100,8 @@ build:target --per_file_copt=^src/legoapi/ai/game/starwars_gameai\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/ai/game/aipathcnxhelper\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/core/config/cheats\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/base/collection\.cpp$@-O3
+# Game-object initialization uses optimized pointer-induction loops in the target.
+build:target --per_file_copt=^src/legoapi/items/base/game_object\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/items/collect/bolt\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/collect/bolts\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/items/collect/attracto\.cpp$@-O3

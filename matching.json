@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 37.40947,
+    "fuzzy_match_percent": 37.419796,
     "total_code": "4722419",
-    "matched_code": "354138",
-    "matched_code_percent": 7.49908,
+    "matched_code": "354278",
+    "matched_code_percent": 7.5020447,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4196,
-    "matched_functions_percent": 31.176165,
+    "matched_functions": 4197,
+    "matched_functions_percent": 31.183594,
     "total_units": 1
   },
   "text": {
@@ -62282,7 +62282,7 @@
           "address": 1157408,
           "offset": 267440,
           "size": 27,
-          "match_percent": 41.25
+          "match_percent": 35.0
         },
         {
           "name": "_ZL24SurfaceInfo_ExtraReflectP12GameObject_s",
@@ -62290,7 +62290,7 @@
           "address": 1158112,
           "offset": 268144,
           "size": 217,
-          "match_percent": 4.888889
+          "match_percent": 9.333333
         },
         {
           "name": "_ZL22Punch_HitExtraCode_LSWP12GameObject_sP7nuvec_s",
@@ -62298,7 +62298,7 @@
           "address": 1160544,
           "offset": 270576,
           "size": 326,
-          "match_percent": 4.285714
+          "match_percent": 5.454546
         },
         {
           "name": "_ZL13Punch_HitHoldP12GameObject_sS0_",
@@ -62306,7 +62306,7 @@
           "address": 1160880,
           "offset": 270912,
           "size": 113,
-          "match_percent": 10.645162
+          "match_percent": 15.483871
         },
         {
           "name": "_ZL19Punch_GetDamage_LSWP12GameObject_sS0_",
@@ -62314,7 +62314,7 @@
           "address": 1161008,
           "offset": 271040,
           "size": 288,
-          "match_percent": 4.126984
+          "match_percent": 6.031746
         },
         {
           "name": "_ZL10ShieldCodeP12GameObject_s",
@@ -62322,7 +62322,7 @@
           "address": 1347920,
           "offset": 457952,
           "size": 415,
-          "match_percent": 3.917526
+          "match_percent": 4.329897
         },
         {
           "name": "_ZL20TrenchKilledCallbackP12GameObject_s",
@@ -62330,7 +62330,7 @@
           "address": 2171680,
           "offset": 1281712,
           "size": 71,
-          "match_percent": 3.809524
+          "match_percent": 20.0
         },
         {
           "name": "_ZL10TrenchMoveP12GameObject_s",
@@ -62338,7 +62338,7 @@
           "address": 2172416,
           "offset": 1282448,
           "size": 1250,
-          "match_percent": 1.523438
+          "match_percent": 1.640625
         },
         {
           "name": "_ZL19KilledTrooperCannonP12GameObject_s",
@@ -62346,7 +62346,7 @@
           "address": 2196768,
           "offset": 1306800,
           "size": 314,
-          "match_percent": 2.894737
+          "match_percent": 5.526316
         },
         {
           "name": "_ZL15UpdateTotalPtlsP10debinftype",
@@ -62354,7 +62354,7 @@
           "address": 3463184,
           "offset": 2573216,
           "size": 317,
-          "match_percent": 3.850575
+          "match_percent": 4.827586
         },
         {
           "name": "_Z13AddGameObjecti",
@@ -62362,7 +62362,7 @@
           "address": 4642352,
           "offset": 3752384,
           "size": 665,
-          "match_percent": 0.0
+          "match_percent": 24.198717
         },
         {
           "name": "_Z16ClearGameObjectsP14APIOBJECTSYS_s",
@@ -62370,7 +62370,7 @@
           "address": 4643744,
           "offset": 3753776,
           "size": 140,
-          "match_percent": 40.897434
+          "match_percent": 100.0
         },
         {
           "name": "_Z20InitGameObjectLightsv",
@@ -62378,7 +62378,7 @@
           "address": 4877472,
           "offset": 3987504,
           "size": 201,
-          "match_percent": 0.0
+          "match_percent": 95.0
         },
         {
           "name": "_ZL19SpecialObjectFilterPv",
@@ -62386,7 +62386,7 @@
           "address": 5470304,
           "offset": 4580336,
           "size": 35,
-          "match_percent": 28.88889
+          "match_percent": 42.22222
         }
       ]
     },
@@ -116919,7 +116919,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -117021,7 +117020,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -117123,7 +117121,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -117236,7 +117233,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -117389,7 +117385,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -117502,7 +117497,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -117615,7 +117609,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -117728,7 +117721,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -117841,7 +117833,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -117954,7 +117945,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -118280,7 +118270,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -118393,7 +118382,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -118506,7 +118494,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -118664,7 +118651,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -118788,7 +118774,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -118881,7 +118866,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/animpacket.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
@@ -119032,7 +119016,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -119124,7 +119107,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/animpacket.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
@@ -119230,7 +119212,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -119311,7 +119292,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/animpacket.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
@@ -119429,7 +119409,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -119542,7 +119521,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -119655,7 +119633,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -119768,7 +119745,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -119860,7 +119836,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/animpacket.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
@@ -119944,7 +119919,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -120057,7 +120031,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -120181,7 +120154,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -120294,7 +120266,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -120419,7 +120390,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -120532,7 +120502,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -120685,7 +120654,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -120798,7 +120766,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -120911,7 +120878,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -121024,7 +120990,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -121200,7 +121165,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -121313,7 +121277,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -121426,7 +121389,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -121931,7 +121893,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -122184,7 +122145,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -122412,7 +122372,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -122896,7 +122855,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
@@ -123009,7 +122967,6 @@
         "legoapi/gizmo/object/giztimers.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/game_object.cpp.o",
         "legoapi/items/base/scene.cpp.o",
         "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",

@@ -97,10 +97,11 @@ GameObject_s *AddGameObject(i32 id) {
     return object;
 }
 void InitGameObjectLights(void) {
-    for (i32 i = 0; i < 64; ++i)
-        Obj[i].dynamic_light_id = -1;
-    for (i32 i = 0; i < HIGHGAMEOBJECT; ++i) {
-        GameObject_s *object = &Obj[i];
+    GameObject_s *object = Obj;
+    i32 i;
+    for (i = 0; i < 64; ++i)
+        object[i].dynamic_light_id = -1;
+    for (i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
         if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001)
             continue;
         object->dynamic_light_id = rtlDynamicAlloc();
