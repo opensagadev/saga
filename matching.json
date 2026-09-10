@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 37.420574,
+    "fuzzy_match_percent": 37.42144,
     "total_code": "4722419",
     "matched_code": "354278",
     "matched_code_percent": 7.5020447,
@@ -47435,7 +47435,7 @@
           "address": 2987392,
           "offset": 2097424,
           "size": 212,
-          "match_percent": 0.0
+          "match_percent": 19.36111
         },
         {
           "name": "StateAnimEvaluate",

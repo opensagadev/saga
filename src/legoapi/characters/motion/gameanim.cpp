@@ -3061,27 +3061,27 @@ extern "C" {
     }
 
     bool StateAnimEvaluate2(StateAnim *state, u8 *index, char *value, f32 frame) {
-        u32 current = *index;
-        u32 count = state->count;
+        i32 current = *index;
+        i32 count = state->count;
         if (current >= count) {
             current = count - 1;
         }
+        if (current < 0) {
+            current = 0;
+        }
         char old_value = state->values[current];
-        u32 selected;
         if (frame < state->times[current]) {
-            selected = current;
-            while (selected != 0 && frame < state->times[selected - 1]) {
-                --selected;
+            while (current != 0 && frame < state->times[current - 1]) {
+                --current;
             }
         } else {
-            selected = current;
-            while (selected + 1 < count && state->times[selected + 1] <= frame) {
-                ++selected;
+            while (current < count - 1 && state->times[current + 1] <= frame) {
+                ++current;
             }
         }
-        char new_value = state->values[selected];
+        char new_value = state->values[current];
         *value = new_value;
-        *index = static_cast<u8>(selected);
+        *index = static_cast<u8>(current);
         return old_value != new_value;
     }
 
