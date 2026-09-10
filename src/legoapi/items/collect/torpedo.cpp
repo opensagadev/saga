@@ -40,8 +40,8 @@ void GetShootOrigin_LSW(GameObject_s *object, nuvec_s *position) {
     if (object->id == id_ATAT) {
         u16 angle = object->apiobj.field_0x276;
         f32 scale = object->apiobj.field_0x1dc;
-        position->x += (NuTrigTable[angle >> 1] * scale) * 1.5f;
-        position->z += (scale * NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff]) * 1.5f;
+        position->x += (NU_SIN_LUT(angle) * scale) * 1.5f;
+        position->z += (scale * NU_COS_LUT(angle)) * 1.5f;
     }
 }
 

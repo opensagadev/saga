@@ -326,6 +326,7 @@ build:target --per_file_copt=^src/legoapi/gizmo/object/gizmopickup\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/collect/batarang\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/collect/minikits\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/fx/ripples\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/items/collect/torpedo\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/characters/core/charconfig\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/characters/motion/move\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/props/objects/ledge\.cpp$@-O3
