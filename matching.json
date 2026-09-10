@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 36.62942,
+    "fuzzy_match_percent": 36.65325,
     "total_code": "4722419",
-    "matched_code": "345109",
-    "matched_code_percent": 7.307886,
+    "matched_code": "345593",
+    "matched_code_percent": 7.3181353,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 3985,
-    "matched_functions_percent": 29.60844,
+    "matched_functions": 3997,
+    "matched_functions_percent": 29.6976,
     "total_units": 1
   },
   "text": {
@@ -33912,7 +33912,7 @@
           "address": 3537312,
           "offset": 2647344,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "edbitsRegisterRequestSound",
@@ -33920,7 +33920,7 @@
           "address": 3537344,
           "offset": 2647376,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "edbitsLookupSound",
@@ -34232,7 +34232,7 @@
           "address": 3769776,
           "offset": 2879808,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 99.85714
         },
         {
           "name": "edmainCurrent",
@@ -35152,7 +35152,7 @@
           "address": 3811136,
           "offset": 2921168,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 99.85714
         },
         {
           "name": "eduiGetCursorCoords",
@@ -35216,7 +35216,7 @@
           "address": 3812400,
           "offset": 2922432,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 99.85714
         },
         {
           "name": "eduiRenderCursor",
@@ -35264,7 +35264,7 @@
           "address": 3815056,
           "offset": 2925088,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 99.85714
         },
         {
           "name": "eduiSetFontScale",
@@ -35272,7 +35272,7 @@
           "address": 3815088,
           "offset": 2925120,
           "size": 40,
-          "match_percent": 20.0
+          "match_percent": 99.71429
         },
         {
           "name": "eduiItemColourSliderCreate",
@@ -78042,7 +78042,7 @@
           "address": 3718560,
           "offset": 2828592,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 99.85714
         },
         {
           "name": "NewRayCastSetHandel",
@@ -90364,7 +90364,7 @@
           "address": 3181536,
           "offset": 2291568,
           "size": 145,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "NuShaderManagerReleaseShader",
@@ -90372,7 +90372,23 @@
           "address": 3181824,
           "offset": 2291856,
           "size": 13,
-          "match_percent": 0.0
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuShaderManagerDestroyShaders",
+          "demangled_name": "NuShaderManagerDestroyShaders",
+          "address": 3181840,
+          "offset": 2291872,
+          "size": 78,
+          "match_percent": 93.07692
+        },
+        {
+          "name": "NuShaderManagerSetCurrentShader",
+          "demangled_name": "NuShaderManagerSetCurrentShader",
+          "address": 3181920,
+          "offset": 2291952,
+          "size": 30,
+          "match_percent": 100.0
         },
         {
           "name": "NuShaderManagerGetCurrentShader",
@@ -90380,7 +90396,7 @@
           "address": 3181952,
           "offset": 2291984,
           "size": 26,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "NuShaderManagerGetShaderById",
@@ -90388,7 +90404,7 @@
           "address": 3181984,
           "offset": 2292016,
           "size": 51,
-          "match_percent": 15.571428
+          "match_percent": 100.0
         },
         {
           "name": "NuShaderManagerBindShader",
@@ -90396,7 +90412,7 @@
           "address": 3182048,
           "offset": 2292080,
           "size": 89,
-          "match_percent": 16.083334
+          "match_percent": 100.0
         },
         {
           "name": "NuShaderManagerRetrieveShaderVariant",
@@ -90404,7 +90420,7 @@
           "address": 3182576,
           "offset": 2292608,
           "size": 78,
-          "match_percent": 53.68421
+          "match_percent": 42.94737
         },
         {
           "name": "NuShaderManagerRetrieveShader",
@@ -90412,7 +90428,7 @@
           "address": 3182656,
           "offset": 2292688,
           "size": 78,
-          "match_percent": 47.38889
+          "match_percent": 40.944443
         },
         {
           "name": "NuShaderObjectKeyGenerate3",
@@ -90420,7 +90436,7 @@
           "address": 3184160,
           "offset": 2294192,
           "size": 1201,
-          "match_percent": 0.0
+          "match_percent": 33.5414
         },
         {
           "name": "_ZN19ShaderManagerOpenGL35adaptShaderMaterialForShaderVersionEP17nushadermtldesc_s",
@@ -90428,7 +90444,7 @@
           "address": 3200448,
           "offset": 2310480,
           "size": 563,
-          "match_percent": 0.0
+          "match_percent": 33.179104
         },
         {
           "name": "_ZN19ShaderManagerOpenGL12createShaderERK15ShaderObjectKeyP14NuShaderObjecti",
@@ -90436,7 +90452,7 @@
           "address": 3202272,
           "offset": 2312304,
           "size": 711,
-          "match_percent": 27.389534
+          "match_percent": 0.0
         }
       ]
     },
@@ -96503,7 +96519,7 @@
           "address": 2833088,
           "offset": 1943120,
           "size": 15,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "NuDynamicLightSetUsedOnSpecials",
@@ -96511,7 +96527,7 @@
           "address": 2833104,
           "offset": 1943136,
           "size": 17,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "NuDynamicLightDestroy",
@@ -97079,7 +97095,7 @@
           "address": 2921824,
           "offset": 2031856,
           "size": 25,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "NuSpecialSetClipping",
@@ -97127,7 +97143,7 @@
           "address": 2922160,
           "offset": 2032192,
           "size": 25,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "NuSpecialClipTestShadowLights",
@@ -97151,7 +97167,7 @@
           "address": 2922240,
           "offset": 2032272,
           "size": 46,
-          "match_percent": 32.307693
+          "match_percent": 98.84615
         },
         {
           "name": "NuSpecialClearShadowClipTestResults",
@@ -98023,7 +98039,7 @@
           "address": 2980336,
           "offset": 2090368,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 99.85714
         },
         {
           "name": "NuTimeBarIndicateGpuFrameOut",
@@ -98031,7 +98047,7 @@
           "address": 2980368,
           "offset": 2090400,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 99.85714
         },
         {
           "name": "NuCameraIntersectsAABB",
@@ -103557,22 +103573,6 @@
           "offset": 2291840,
           "size": 9,
           "match_percent": 100.0
-        },
-        {
-          "name": "NuShaderManagerDestroyShaders",
-          "demangled_name": "NuShaderManagerDestroyShaders",
-          "address": 3181840,
-          "offset": 2291872,
-          "size": 78,
-          "match_percent": 16.153847
-        },
-        {
-          "name": "NuShaderManagerSetCurrentShader",
-          "demangled_name": "NuShaderManagerSetCurrentShader",
-          "address": 3181920,
-          "offset": 2291952,
-          "size": 30,
-          "match_percent": 20.0
         },
         {
           "name": "NuShaderManagerSetShininessFactor",
@@ -116798,7 +116798,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -117173,7 +117172,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -117356,7 +117354,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -117489,7 +117486,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -117622,7 +117618,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -117755,7 +117750,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -117888,7 +117882,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -118021,7 +118014,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -118374,7 +118366,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -118507,7 +118498,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -118640,7 +118630,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -118818,7 +118807,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -118962,7 +118950,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -119053,7 +119040,6 @@
         "nu2api/nu3d/nudlist_stubs.cpp.o",
         "nu2api/nu3d/nufadeobj.cpp.o",
         "nu2api/nu3d/nuprim.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o"
@@ -119242,7 +119228,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -119332,7 +119317,6 @@
         "nu2api/nu3d/nudlist_stubs.cpp.o",
         "nu2api/nu3d/nufadeobj.cpp.o",
         "nu2api/nu3d/nuprim.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o"
@@ -119476,7 +119460,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -119555,7 +119538,6 @@
         "nu2api/nu3d/nudlist_stubs.cpp.o",
         "nu2api/nu3d/nufadeobj.cpp.o",
         "nu2api/nu3d/nuprim.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o"
@@ -119711,7 +119693,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -119844,7 +119825,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -119977,7 +119957,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -120110,7 +120089,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -120200,7 +120178,6 @@
         "nu2api/nu3d/nudlist_stubs.cpp.o",
         "nu2api/nu3d/nufadeobj.cpp.o",
         "nu2api/nu3d/nuprim.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o"
@@ -120322,7 +120299,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -120455,7 +120431,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -120599,7 +120574,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -120732,7 +120706,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -120877,7 +120850,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -121010,7 +120982,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -121193,7 +121164,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -121326,7 +121296,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -121459,7 +121428,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -121592,7 +121560,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -121788,7 +121755,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -121921,7 +121887,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -122054,7 +122019,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -122589,7 +122553,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -122882,7 +122845,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -123150,7 +123112,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -123630,7 +123591,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"
@@ -123763,7 +123723,6 @@
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuptl_flush.cpp.o",
         "nu2api/nu3d/nurndr_noops.cpp.o",
-        "nu2api/nu3d/nushadermanager_plain.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nuplatform/nudevicespecs.cpp.o",
         "nu2api/nusound/nu2api_nusound_types.cpp.o"

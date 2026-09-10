@@ -35,4 +35,8 @@ struct NuDynamicLight {
     void setupCustomCameraFrustum(nucamera_s *, float const *, i32);
     void testShadowExtrusion(VuVec const &, VuVec const &, i32);
     void testShadowExtrusions(VuVec const &, VuVec const &);
+
+    u8 pad_0[0x7d8];
+    i32 used_on_specials;
 };
+DECOMP_ASSERT(offsetof(NuDynamicLight, used_on_specials) == 0x7d8, "Dynamic light special-use flag offset");

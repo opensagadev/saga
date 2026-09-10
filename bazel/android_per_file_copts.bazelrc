@@ -290,6 +290,7 @@ build:target --per_file_copt=^src/nu2api/nusound/nusound_handle\.cpp$@-O2
 build:target --per_file_copt=^src/gamelib/util/Ftp\.cpp$@-O3
 build:target --per_file_copt=^src/gamelib/util/Network\.cpp$@-O3
 build:target --per_file_copt=^src/gamelib/util/V2SessionManager\.cpp$@-O3
+build:target --per_file_copt=^src/nu2api/nu3d/nushadermanager_plain\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/ai/game/aitrigger\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/audio/radio\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/object/gizforce\.cpp$@-O3

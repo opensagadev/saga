@@ -15,9 +15,6 @@
 extern "C" void NuShaderManagerDestroy(void) {
 }
 
-extern "C" void NuShaderManagerDestroyShaders(void) {
-}
-
 extern "C" void NuShaderManagerForceShader(void) {
 }
 
@@ -30,9 +27,6 @@ extern "C" f32 NuShaderManagerGetShininessFactor(void) {
 }
 
 extern "C" void NuShaderManagerLoadCompiledShaders(void) {
-}
-
-extern "C" void NuShaderManagerSetCurrentShader(void) {
 }
 
 extern "C" void NuShaderManagerSetShaderSaveFolder(void) {

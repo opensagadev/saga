@@ -661,23 +661,35 @@ extern "C" void NuShaderManagerInit(VARIPTR *arena, VARIPTR arena_end) {
 }
 
 extern "C" NUSHADEROBJECT *NuShaderManagerGetShaderById(i32 id) {
-    if (static_cast<u32>(id) >= nu2api::kSlotCount) {
+    ShaderManagerOpenGL *manager = static_cast<ShaderManagerOpenGL *>(g_shaderManager);
+    if (static_cast<u32>(id) > nu2api::kSlotCount) {
         return NULL;
     }
-    return nu2api::SlotPtr(id);
+    return &manager->slots[id];
 }
 
 // original 0x318d10 — the manager stores the address of the bound object,
 // rather than its numeric shader id.
 extern "C" NUSHADEROBJECT *NuShaderManagerGetCurrentShader(void) {
-    return nu2api::ManagerBoundSlot();
+    return static_cast<ShaderManagerOpenGL *>(g_shaderManager)->bound_slot;
 }
 
 extern "C" void NuShaderManagerReleaseShader(NUSHADEROBJECT *slot) {
-    if (slot == NULL) {
-        return;
+    slot->glsl.base.field1--;
+}
+
+extern "C" void NuShaderManagerSetCurrentShader(NUSHADEROBJECT *slot) {
+    static_cast<ShaderManagerOpenGL *>(g_shaderManager)->bound_slot = slot;
+}
+
+extern "C" void NuShaderManagerDestroyShaders(void) {
+    ShaderManagerOpenGL *manager = static_cast<ShaderManagerOpenGL *>(g_shaderManager);
+    for (i32 i = 0; i < nu2api::kSlotCount; ++i) {
+        NUSHADEROBJECT *slot = &manager->slots[i];
+        if (slot->glsl.base.field1 >= 0) {
+            NuShaderObjectUnInit(slot);
+        }
     }
-    nu2api::SlotRefCount(slot)--;
 }
 
 extern u32 g_boundShader;

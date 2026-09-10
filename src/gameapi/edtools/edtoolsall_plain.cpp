@@ -30,8 +30,19 @@ static i32 edgra_clumpthin = 1;
 static i32 edgra_elementthin = 1;
 static VARIPTR gra_ptr;
 static VARIPTR gra_end;
+static i32 editor_return;
+static i32 bShowCursor = 1;
+static i32 edui_font;
+static f32 edui_font_scale_x = 0.9f;
+static f32 edui_font_scale_y = 0.9f;
+static u32 edui_cursor_colour = 0xff000000;
 extern "C" {
+    typedef void (*EDBITSPLAYSOUNDCALLBACK)(NUVEC *, i32);
+    typedef i32 (*EDBITSREQUESTSOUNDCALLBACK)(char *);
+
     i32 bCameraEnabled = 1;
+    EDBITSPLAYSOUNDCALLBACK edbitsPlaySound;
+    EDBITSREQUESTSOUNDCALLBACK edbitsRequestSound;
     eduimenu_s *edui_messagemenu;
     edgra_clump_s *GrassClumps;
     i32 EDGRA_MAX_CLUMPS;
@@ -770,9 +781,11 @@ extern "C" {
         }
         edbits_what_game = game;
     }
-    void edbitsRegisterPlaySound(void) {
+    void edbitsRegisterPlaySound(EDBITSPLAYSOUNDCALLBACK callback) {
+        edbitsPlaySound = callback;
     }
-    void edbitsRegisterRequestSound(void) {
+    void edbitsRegisterRequestSound(EDBITSREQUESTSOUNDCALLBACK callback) {
+        edbitsRequestSound = callback;
     }
     char edbits_general_save_directory[256];
     char edbits_general_save_name[256];
@@ -1163,7 +1176,8 @@ extern "C" {
     }
     void edmainSetMainMenuScale(void) {
     }
-    void edmainSetReturn(void) {
+    void edmainSetReturn(i32 result) {
+        editor_return = result;
     }
     void edpartClearPage(i8 page) {
         NuThreadDisableThreadSwap();
@@ -1955,7 +1969,8 @@ extern "C" {
     void eduiSetCameraEnabled(i32 enabled) {
         bCameraEnabled = enabled;
     }
-    void eduiSetCursorColour(void) {
+    void eduiSetCursorColour(u32 colour) {
+        edui_cursor_colour = colour;
     }
     void eduiSetCursorCoords(f32 x, f32 y) {
         edui_cursor_x = x * 640.0f;
@@ -1964,9 +1979,12 @@ extern "C" {
     void eduiSetDefaultActiveMenu(eduimenu_s *menu) {
         default_active_menu = menu;
     }
-    void eduiSetFont(void) {
+    void eduiSetFont(i32 font) {
+        edui_font = font;
     }
-    void eduiSetFontScale(void) {
+    void eduiSetFontScale(f32 x, f32 y) {
+        edui_font_scale_x = x;
+        edui_font_scale_y = y;
     }
     void eduiSetGlobalSliderAccel(void) {
     }
@@ -1975,7 +1993,8 @@ extern "C" {
     void eduiSetUsingMenuFocus(i32 enabled) {
         bUsingMenuFocus = enabled;
     }
-    void eduiShowCursor(void) {
+    void eduiShowCursor(i32 show) {
+        bShowCursor = show;
     }
     i32 eduiUsedAlgPad(nupad_s *pad) {
         if (pad) {

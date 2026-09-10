@@ -60,6 +60,7 @@ i32 PlatSkinMax;
 i32 PlatSkinMaxSize;
 i32 PlatSkinCnt;
 static i32 PlatSkinResetTotal = -1;
+static i32 TerrPlatDis = -1;
 void SkinPlatformSize(i32, unsigned char *, PLATSKININFO *);
 extern i32 PlatImpactId;
 i32 ReadTerrainPickup(unsigned char *, i16 **, TERRPICKUPSET *);
@@ -1736,7 +1737,8 @@ extern "C" {
     void NewRayCastSetMask(void) {
     }
 
-    void NewRaySetDisablePalt(void) {
+    void NewRaySetDisablePalt(i32 disabled) {
+        TerrPlatDis = disabled;
     }
 
     void NewScanHandel(void) {

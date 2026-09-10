@@ -85,6 +85,8 @@ extern "C" {
     i32 *AnimBuffEvalJoint = NULL;
     i32 nuspecial_shadowLightCount = 0;
     i32 nuspecial_shadowLightHaveClipOverrides = 0;
+    void *nuspecial_shadowLight[4];
+    i32 nuspecial_shadowLightClipOverride[4];
 }
 
 extern "C" void ANI_FixUpAddrs(ani3_animheader_s *, isize, i32);
@@ -155,6 +157,9 @@ namespace {
 
     static i32 nuspecial_clip_state = -1;
 } // namespace
+
+static i32 NuTimeBar_EngineEnabled;
+static i32 NuTimeBar_GpuFrameOutEnabled;
 
 extern "C" {
     i32 nuspecial_const_tint_enabled;
@@ -2623,7 +2628,11 @@ extern "C" {
     }
     void NuSpecialBurstDrawAt(void) {
     }
-    void NuSpecialClear(void *) {
+    void NuSpecialClear(void *special) {
+        NuPlainSpecialHandleLayout *handle = static_cast<NuPlainSpecialHandleLayout *>(special);
+        handle->scene = NULL;
+        handle->special = NULL;
+        handle->display_special = NULL;
     }
     void NuSpecialClearShadowClipTestResults(void) {
         nuspecial_shadowLightHaveClipOverrides = 0;
@@ -2847,9 +2856,14 @@ extern "C" {
         *position = object->center;
         *radius = object->radius;
     }
-    void NuSpecialGetShadowClipTestResult(void) {
+    i32 NuSpecialGetShadowClipTestResult(i32 index) {
+        if (nuspecial_shadowLightHaveClipOverrides != 0) {
+            return nuspecial_shadowLightClipOverride[index];
+        }
+        return -1;
     }
-    void NuSpecialGetShadowLight(void) {
+    void *NuSpecialGetShadowLight(i32 index) {
+        return nuspecial_shadowLight[index];
     }
     i32 NuSpecialHasActiveShadowLights(void) {
         return nuspecial_shadowLightCount > 0;
@@ -2981,7 +2995,8 @@ extern "C" {
     }
     void NuDynamicLightGetView(void) {
     }
-    void NuDynamicLightIsUsedOnSpecials(void) {
+    i32 NuDynamicLightIsUsedOnSpecials(NuDynamicLight *light) {
+        return light->used_on_specials;
     }
     void NuDynamicLightLookAt(void) {
     }
@@ -2996,7 +3011,8 @@ extern "C" {
     }
     void NuDynamicLightSetParameteri(void) {
     }
-    void NuDynamicLightSetUsedOnSpecials(void) {
+    void NuDynamicLightSetUsedOnSpecials(NuDynamicLight *light, i32 enabled) {
+        light->used_on_specials = enabled;
     }
     void NuDynamicLightSetupCustomCameraFrustum(void) {
     }
@@ -3956,9 +3972,11 @@ extern "C" {
     }
     void NuTimeBarDestroySet(void) {
     }
-    void NuTimeBarEnable(void) {
+    void NuTimeBarEnable(i32 enabled) {
+        NuTimeBar_EngineEnabled = enabled;
     }
-    void NuTimeBarIndicateGpuFrameOut(void) {
+    void NuTimeBarIndicateGpuFrameOut(i32 enabled) {
+        NuTimeBar_GpuFrameOutEnabled = enabled;
     }
     void NuTimeBarInit(void) {
     }
