@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 37.278065,
+    "fuzzy_match_percent": 37.28173,
     "total_code": "4722419",
     "matched_code": "353355",
     "matched_code_percent": 7.4824996,
@@ -45669,7 +45669,7 @@
           "address": 4625152,
           "offset": 3735184,
           "size": 173,
-          "match_percent": 0.0
+          "match_percent": 99.97959
         },
         {
           "name": "_ZL10CharConfigiPcS_P9variptr_uS1_iS_iiP12nufpcomjmp_s",

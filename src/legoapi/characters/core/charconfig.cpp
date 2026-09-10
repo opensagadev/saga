@@ -2581,9 +2581,11 @@ void CharConfig_ConfigureAll(i32 permanent, NUFPCOMJMP *game_keywords) {
 }
 
 void CharConfig_CalculateJumpStats(float jump_speed, float gravity, float *duration, float *height) {
-    f32 ascent_time = 0.0f;
     const f32 downward_speed = 0.0f - jump_speed;
-    if (gravity != 0.0f && downward_speed != 0.0f)
+    f32 ascent_time;
+    if (downward_speed == 0.0f || gravity == 0.0f)
+        ascent_time = 0.0f;
+    else
         ascent_time = downward_speed / gravity;
     if (duration != NULL) {
         *duration = ascent_time + ascent_time;
