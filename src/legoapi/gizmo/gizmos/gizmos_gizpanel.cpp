@@ -40,33 +40,6 @@ i32 SuperWeirdo(GameObject_s *object);
 extern i16 id_DARTHVADER, id_GRANDMOFFTARKIN, id_IMPERIALOFFICER, id_IMPERIALSHUTTLEPILOT;
 void GizPanel_GetAbsTargetPos(GIZPANEL_s *panel, nuvec_s *target_position, i32 player_position);
 
-static __used__ void GizPanel_CreateTerrain(GIZPANEL_s *panel) {
-    if (panel == NULL) {
-        return;
-    }
-    if (panel->platform_id != -1) {
-        DeletePlatinst(panel->platform_id);
-    }
-
-    switch (panel->model_variant) {
-        case 0:
-            panel->platform_id = NewPlatPickupInst(panel, 4);
-            break;
-        case 1:
-            panel->platform_id = NewPlatPickupInst(panel, 7);
-            break;
-        case 2:
-            panel->platform_id = NewPlatPickupInst(panel, 5);
-            break;
-        case 3:
-            panel->platform_id = NewPlatPickupInst(panel, 6);
-            break;
-        default:
-            break;
-    }
-    PlatInstRotate(panel->platform_id, 1);
-}
-
 void GizPanel_Use(GameObject_s &object, GIZPANEL_s &panel) {
     object.field_0x788 = &panel;
     object.field_0x768 = 0.0f;
@@ -394,20 +367,6 @@ GIZPANEL_s *GizPanel_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObje
     if (distance_squared != NULL)
         *distance_squared = nearest_distance;
     return nearest;
-}
-
-void GizPanel_InitTerrain(WORLDINFO_s *world) {
-    GIZPANELSYS_s *panel_sys = world->giz_panel_sys;
-    if (panel_sys == NULL || panel_sys->count <= 0) {
-        return;
-    }
-
-    for (i32 index = 0; index < panel_sys->count; ++index) {
-        GIZPANEL_s *panel = &panel_sys->panels[index];
-        panel->platform_id = -1;
-        GizPanel_CreateTerrain(panel);
-        panel_sys = world->giz_panel_sys;
-    }
 }
 
 void GizPanel_GetAbsPlayerPos(GIZPANEL_s *panel, nuvec_s *position) {

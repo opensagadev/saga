@@ -30,6 +30,23 @@ extern "C" f32 *AnimPlaying(ANIMPACKET_s *packet, i32 animation, i32 target, i32
     return NULL;
 }
 
+extern "C" i32 AnimBlendingFromTo(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, i32 source_animation,
+                                  i32 target_animation) {
+    if (packet->blending != 0 && source_animation != -1 && packet->blend_animation_a == source_animation &&
+        target_animation != -1 && packet->blend_animation_b == target_animation) {
+        if (model != NULL) {
+            if (source_animation == -1 || model->model_data_b[source_animation] == NULL) {
+                return 0;
+            }
+            if (target_animation == -1 || model->model_data_b[target_animation] == NULL) {
+                return 0;
+            }
+        }
+        return 1;
+    }
+    return 0;
+}
+
 extern "C" void ResetMiniAnimPacket(MINIANIMPACKET_s *packet, i32 animation) {
     if (packet != NULL) {
         packet->requested_animation_id = animation;

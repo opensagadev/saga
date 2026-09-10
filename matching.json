@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 37.236446,
+    "fuzzy_match_percent": 37.238167,
     "total_code": "4722419",
-    "matched_code": "352124",
-    "matched_code_percent": 7.456433,
+    "matched_code": "352757",
+    "matched_code_percent": 7.4698367,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4177,
-    "matched_functions_percent": 31.034994,
+    "matched_functions": 4181,
+    "matched_functions_percent": 31.064716,
     "total_units": 1
   },
   "text": {
@@ -47590,14 +47590,6 @@
           "match_percent": 13.515152
         },
         {
-          "name": "AnimBlendingFromTo",
-          "demangled_name": "AnimBlendingFromTo",
-          "address": 3994198,
-          "offset": 3104230,
-          "size": 141,
-          "match_percent": 0.0
-        },
-        {
           "name": "CurrentAnim",
           "demangled_name": "CurrentAnim",
           "address": 3994452,
@@ -55036,28 +55028,12 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizmos_gizpanel.o",
       "functions": [
         {
-          "name": "_ZL22GizPanel_CreateTerrainP10GIZPANEL_s",
-          "demangled_name": "GizPanel_CreateTerrain(GIZPANEL_s*)",
-          "address": 1996336,
-          "offset": 1106368,
-          "size": 230,
-          "match_percent": 68.98333
-        },
-        {
-          "name": "_Z20GizPanel_InitTerrainP11WORLDINFO_s",
-          "demangled_name": "GizPanel_InitTerrain(WORLDINFO_s*)",
-          "address": 2000256,
-          "offset": 1110288,
-          "size": 75,
-          "match_percent": 0.0
-        },
-        {
           "name": "_Z24GizPanel_GetAbsTargetPosP10GIZPANEL_sP7nuvec_si",
           "demangled_name": "GizPanel_GetAbsTargetPos(GIZPANEL_s*, nuvec_s*, int)",
           "address": 2000336,
           "offset": 1110368,
           "size": 272,
-          "match_percent": 99.791664
+          "match_percent": 100.0
         },
         {
           "name": "_Z24GizPanel_GetAbsPlayerPosP10GIZPANEL_sP7nuvec_s",
@@ -55113,7 +55089,7 @@
           "address": 2005376,
           "offset": 1115408,
           "size": 769,
-          "match_percent": 35.15934
+          "match_percent": 35.131866
         },
         {
           "name": "_Z18GizPanel_BeingUsedP10GIZPANEL_s",
@@ -58472,12 +58448,20 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL22GizPanel_CreateTerrainP10GIZPANEL_s",
+          "demangled_name": "GizPanel_CreateTerrain(GIZPANEL_s*)",
+          "address": 1996336,
+          "offset": 1106368,
+          "size": 230,
+          "match_percent": 70.98333
+        },
+        {
           "name": "_ZL22GizPanel_SetVisibilityP7GIZMO_si",
           "demangled_name": "GizPanel_SetVisibility(GIZMO_s*, int)",
           "address": 1996576,
           "offset": 1106608,
           "size": 145,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL15GizPanel_UpdatePvS_f",
@@ -58485,7 +58469,7 @@
           "address": 1996736,
           "offset": 1106768,
           "size": 3181,
-          "match_percent": 6.471111
+          "match_percent": 4.762963
         },
         {
           "name": "_ZL18GizPanel_AddGizmosP10GIZMOSYS_siPvS1_",
@@ -58504,12 +58488,20 @@
           "match_percent": 54.80357
         },
         {
+          "name": "_Z20GizPanel_InitTerrainP11WORLDINFO_s",
+          "demangled_name": "GizPanel_InitTerrain(WORLDINFO_s*)",
+          "address": 2000256,
+          "offset": 1110288,
+          "size": 75,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL13GizPanel_DrawPvS_f",
           "demangled_name": "GizPanel_Draw(void*, void*, float)",
           "address": 2000608,
           "offset": 1110640,
           "size": 3337,
-          "match_percent": 29.94514
+          "match_percent": 25.815046
         },
         {
           "name": "_ZL15GizPanels_ResetPvS_S_",
@@ -61902,6 +61894,14 @@
           "offset": 3099296,
           "size": 112,
           "match_percent": 99.97143
+        },
+        {
+          "name": "AnimBlendingFromTo",
+          "demangled_name": "AnimBlendingFromTo",
+          "address": 3994198,
+          "offset": 3104230,
+          "size": 141,
+          "match_percent": 100.0
         },
         {
           "name": "AnimPlaying",
@@ -116436,7 +116436,7 @@
       "address": 898752,
       "offset": 8784,
       "size": 93,
-      "match_percent": 99.35294,
+      "match_percent": 0.0,
       "candidate_units": [
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmos/object/gizpanel.cpp.o"

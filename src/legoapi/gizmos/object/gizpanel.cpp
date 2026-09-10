@@ -412,14 +412,13 @@ static void GizPanel_SetVisibility(GIZMO *gizmo, i32 visible) {
     }
 
     GIZPANEL *panel = static_cast<GIZPANEL *>(gizmo->object);
-    const bool was_visible = (panel->flags & GIZPANEL_FLAG_VISIBLE) != 0;
-    panel->flags = static_cast<GIZPANEL_FLAGS>((panel->flags & ~GIZPANEL_FLAG_VISIBLE) |
-                                               ((visible != 0) ? GIZPANEL_FLAG_VISIBLE : 0));
-    if (visible != 0) {
-        if (!was_visible) {
+    const i32 was_visible = panel->visible;
+    panel->visible = visible != 0;
+    if (panel->visible != 0) {
+        if (was_visible == 0) {
             GizPanel_CreateTerrain(panel);
         }
-    } else if (was_visible) {
+    } else if (was_visible != 0) {
         DeletePlatinst(panel->platform_id);
     }
 }
@@ -472,6 +471,20 @@ static void GizPanels_StoreProgress(void *world_ptr, void *, void *progress_ptr)
             ++index;
             ++panel;
         } while (index != panel_sys->count && index != 32);
+    }
+}
+
+void GizPanel_InitTerrain(WORLDINFO_s *world) {
+    GIZPANELSYS_s *panel_sys = world->giz_panel_sys;
+    if (panel_sys == NULL || panel_sys->count <= 0) {
+        return;
+    }
+
+    for (i32 index = 0; index < panel_sys->count; ++index) {
+        GIZPANEL_s *panel = &panel_sys->panels[index];
+        panel->platform_id = -1;
+        GizPanel_CreateTerrain(panel);
+        panel_sys = world->giz_panel_sys;
     }
 }
 

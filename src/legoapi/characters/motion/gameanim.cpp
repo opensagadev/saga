@@ -2696,20 +2696,6 @@ extern "C" {
     void AddAnimEffects(void) {
     }
 
-    i32 AnimBlendingFromTo(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, i32 source_animation, i32 target_animation) {
-        if (packet->blending == 0 || source_animation == -1 || packet->blend_animation_a != source_animation ||
-            target_animation == -1 || packet->blend_animation_b != target_animation) {
-            return 0;
-        }
-        if (model == NULL) {
-            return 1;
-        }
-        if (!HasAnimation(model, source_animation) || !HasAnimation(model, target_animation)) {
-            return 0;
-        }
-        return 1;
-    }
-
     f32 animduration_blendouttime;
 
     f32 AnimDuration(i32 character_id, i32 animation, f32 start_frame, f32 end_frame, i32 subtract_frame_time) {
