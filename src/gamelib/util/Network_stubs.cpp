@@ -1,6 +1,8 @@
 #include "gamelib_util_types.h"
 
 void NetMessage::RaiseError() {
+    extern NetSession *theSession;
+    theSession->error = 0xa0001000;
 }
 
 NetworkObject *NetworkObjectManager::FindNetworkObject(i32 id) {
@@ -26,5 +28,13 @@ NetworkObjectManager::PendingObject *NetworkObjectManager::FindPendingObject(Net
     return &pending_objects[i];
 }
 
-void NetworkObjectManager::GetGuid(void *) {
+i32 NetworkObjectManager::GetGuid(void *object) {
+    if (object == NULL) {
+        return 0;
+    }
+    NetworkObject *network_object = FindNetworkObject(object);
+    if (network_object == NULL) {
+        return 0;
+    }
+    return network_object->id;
 }

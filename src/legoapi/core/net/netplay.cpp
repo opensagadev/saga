@@ -170,5 +170,9 @@ i32 FinishStatusPacket_LSW(WORLDINFO_s *, STATUSPACKET_s *, i32) {
     return 0;
 }
 
-void setObjInNetWaitContext(GameObject_s *, i32) {
+void setObjInNetWaitContext(GameObject_s *object, i32 animation) {
+    if (object != NULL) {
+        object->field_0x7a5 = static_cast<u8>(LEGOCONTEXT_NETWAIT);
+        object->context_animation = static_cast<i16>(animation);
+    }
 }

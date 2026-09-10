@@ -3,6 +3,7 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuquat.h"
 #include "nu2api/numath/nurand.h"
+#include "nu2api/nucore/nutime.h"
 #include "nu2api/numusic/sfx.h"
 #include "nu2api/nusound/nusound.h"
 
@@ -19,6 +20,8 @@ i32 g_numGroups;
 SoundGroup g_groups[128];
 i32 g_lenGroupBuffer;
 i16 g_groupBuffer[512];
+static NUTIME frameStartTime;
+static u32 frameStartMilliseconds;
 
 DECOMP_ASSERT(sizeof(SoundGroup) == 8, "SoundGroup size");
 
@@ -175,13 +178,19 @@ i32 GroupBuffer_GetSampleByIndex(i32 group_id, i32 sample_index) {
 
 extern "C" {
 
+    u32 UtilGetTime(void) {
+        NUTIME now;
+        NuTimeGet(&now);
+        return static_cast<u32>(NuTimeMilliSeconds(&now));
+    }
+
+    u32 UtilGetFrameStartTime(void) {
+        return frameStartMilliseconds;
+    }
+
     void UtilFrameStart(void) {
-    }
-
-    void UtilGetFrameStartTime(void) {
-    }
-
-    void UtilGetTime(void) {
+        NuTimeGet(&frameStartTime);
+        frameStartMilliseconds = static_cast<u32>(NuTimeMilliSeconds(&frameStartTime));
     }
 
     // Original @0x286a8b. This is the VU-friendly approximation used while

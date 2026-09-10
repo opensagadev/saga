@@ -11,6 +11,10 @@
 
 extern "C" void NuPs2VideoScreenDump(char *, i32, f32, f32, i32, i32, i32);
 
+EdRegistry theRegistry;
+i32 pad_disabled;
+eduimenu_s *edLevelPinnedMenu;
+
 extern "C" {
     extern edgra_clump_s *GrassClumps;
     extern i32 EDGRA_MAX_UNITS_PER_INDIVIDUAL_CLUMP;
@@ -710,22 +714,56 @@ void EdManipulator::SelectAxis(EdInputContext &, VuVec &, VuVec &, VuVec &, VuMt
 void EdManipulator::SelectRotator(EdInputContext &, VuVec &, VuVec &) {
 }
 
-void EdInputContext::Clear(i32) {
+void EdInputContext::Clear(i32 input) {
+    if (static_cast<u32>(input) < 40) {
+        values[input] = 0.0f;
+        cleared[input] = 1;
+    }
 }
 
 EdInputContext::EdInputContext() {
 }
 
-void EdInputContext::Get(i32) {
+f32 EdInputContext::Get(i32 input) {
+    if (static_cast<u32>(input) < 40) {
+        return values[input];
+    }
+    return 0.0f;
 }
 
-void EdInputContext::GetHold(i32) {
+f32 EdInputContext::GetHold(i32 input) {
+    if (static_cast<u32>(input) < 40 && held[input] != 0) {
+        return values[input];
+    }
+    return 0.0f;
 }
 
-void EdInputContext::GetPress(i32) {
+f32 EdInputContext::GetPress(i32 input) {
+    if (static_cast<u32>(input) < 40 && pressed[input] != 0) {
+        return values[input];
+    }
+    return 0.0f;
 }
 
-void EdInputContext::Set(i32, float, float) {
+void EdInputContext::Set(i32 input, float value, float repeat_delay) {
+    if (value != 0.0f) {
+        float now = current_time;
+        float repeat_threshold = repeat_window + now;
+        values[input] = value;
+        float next_repeat = repeat_times[input];
+        pressed[input] = held[input] == 0;
+        held[input] = 1;
+        if (next_repeat >= repeat_threshold || next_repeat == 0.0f) {
+            repeated[input] = 1;
+        }
+        repeat_times[input] = now + repeat_delay;
+        return;
+    }
+
+    values[input] = value;
+    released[input] = held[input] != 0;
+    repeat_times[input] = 0.0f;
+    held[input] = 0;
 }
 
 void EdInputContext::Update(nucamera_s *, nupad_s *, float, bool) {

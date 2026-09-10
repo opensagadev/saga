@@ -67,7 +67,23 @@ struct part_typedesc_s;
 union variptr_u;
 
 struct ClassObjectList;
-struct EdMember {};
+struct EdMember {
+    struct VTable {
+        void *(*GetMemberObject)(EdMember *, void const *);
+        void (*GetMemberData)(EdMember *, void const *, i32, void *, i32);
+    };
+
+    VTable *vtable;
+    EdMember *next;
+    u32 reserved_08;
+    i32 type_id;
+    u8 reserved_10[8];
+    i32 array_size;
+    i32 class_marker;
+    u32 reserved_20;
+    u16 replication_group;
+    u16 reserved_26;
+};
 struct EdObjectNotifier {};
 struct EdSubSystem {
     virtual ~EdSubSystem();
@@ -155,7 +171,9 @@ struct EdBitControl {
     void cbSelectItem(eduimenu_s *, eduiitem_s *, u32);
 };
 struct EdClass {
-    u8 reserved_00[0x18];
+    u8 reserved_00[8];
+    EdMember *members;
+    u8 reserved_0c[0xc];
 
     void AddType(EdRef *);
     void CopyObject(void *, void *);
@@ -228,13 +246,24 @@ struct EdFileOutputStream {
     void SerialiseBuffer(void *, i32, i32);
 };
 struct EdInputContext {
+    u8 reserved_00[0x48];
+    f32 current_time;
+    f32 repeat_window;
+    u8 held[40];
+    u8 pressed[40];
+    u8 released[40];
+    u8 repeated[40];
+    u8 cleared[40];
+    f32 values[40];
+    f32 repeat_times[40];
+
     void Clear(i32);
     EdInputContext();
-    void Get(i32);
-    void GetHold(i32);
-    void GetPress(i32);
-    void GetRelease(i32);
-    void GetRepeat(i32);
+    f32 Get(i32);
+    f32 GetHold(i32);
+    f32 GetPress(i32);
+    f32 GetRelease(i32);
+    f32 GetRepeat(i32);
     void Set(i32, float, float);
     void Update(nucamera_s *, nupad_s *, float, bool);
 };
@@ -318,6 +347,8 @@ struct EdRegistry {
     i32 type_count;
     u32 reserved_20;
     i32 class_count;
+    u32 reserved_28;
+    i32 object_count;
 
     void AddMapping(char *, char *);
     void AddObjectNotifier(EdObjectNotifier *);
@@ -331,7 +362,7 @@ struct EdRegistry {
     void Flush();
     void GetClass(char *);
     EdClass *GetClass(i32);
-    void GetClassId(EdClass *);
+    i32 GetClassId(EdClass *);
     void GetClassId(char *);
     void GetStreamClassMapping(EdStream &, i32 *, i32 &, i32);
     void GetType(char *);
@@ -395,17 +426,26 @@ struct EdSystem {
     void Reset();
 };
 struct EdType {
-    u8 reserved_00[0xc];
+    u32 reserved_00;
+    i32 size;
+    u32 reserved_08;
 
     void Serialise(EdStream &);
 };
 
-static_assert(sizeof(EdClass) == 0x18, "EdClass size");
-static_assert(sizeof(EdType) == 0xc, "EdType size");
-static_assert(offsetof(EdRegistry, types) == 0x4, "EdRegistry::types offset");
-static_assert(offsetof(EdRegistry, classes) == 0x8, "EdRegistry::classes offset");
-static_assert(offsetof(EdRegistry, type_count) == 0x1c, "EdRegistry::type_count offset");
-static_assert(offsetof(EdRegistry, class_count) == 0x24, "EdRegistry::class_count offset");
+static_assert(sizeof(void *) != 4 || sizeof(EdClass) == 0x18, "EdClass 32-bit size");
+static_assert(sizeof(void *) != 4 || sizeof(EdType) == 0xc, "EdType 32-bit size");
+static_assert(sizeof(void *) != 4 || sizeof(EdMember) == 0x28, "EdMember 32-bit size");
+static_assert(sizeof(void *) != 4 || offsetof(EdRegistry, types) == 0x4,
+              "EdRegistry::types 32-bit offset");
+static_assert(sizeof(void *) != 4 || offsetof(EdRegistry, classes) == 0x8,
+              "EdRegistry::classes 32-bit offset");
+static_assert(sizeof(void *) != 4 || offsetof(EdRegistry, type_count) == 0x1c,
+              "EdRegistry::type_count 32-bit offset");
+static_assert(sizeof(void *) != 4 || offsetof(EdRegistry, class_count) == 0x24,
+              "EdRegistry::class_count 32-bit offset");
+static_assert(sizeof(void *) != 4 || offsetof(EdRegistry, object_count) == 0x2c,
+              "EdRegistry::object_count 32-bit offset");
 struct EdVectorControl {
     void AddMenuItem(eduimenu_s *, EdRef *, void *);
     void Destroy();

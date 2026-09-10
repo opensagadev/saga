@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 37.46216,
+    "fuzzy_match_percent": 37.933483,
     "total_code": "4722419",
-    "matched_code": "362448",
-    "matched_code_percent": 7.6750493,
+    "matched_code": "364511",
+    "matched_code_percent": 7.718735,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4357,
-    "matched_functions_percent": 32.37239,
+    "matched_functions": 4388,
+    "matched_functions_percent": 32.60272,
     "total_units": 1
   },
   "text": {
@@ -32545,7 +32545,7 @@
           "address": 5488000,
           "offset": 4598032,
           "size": 161,
-          "match_percent": 7.179487
+          "match_percent": 88.97436
         },
         {
           "name": "_ZN14EdInputContext5ClearEi",
@@ -32553,7 +32553,7 @@
           "address": 5488176,
           "offset": 4598208,
           "size": 33,
-          "match_percent": 20.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN14EdInputContext3GetEi",
@@ -32561,7 +32561,7 @@
           "address": 5488224,
           "offset": 4598256,
           "size": 27,
-          "match_percent": 46.666668
+          "match_percent": 100.0
         },
         {
           "name": "_ZN14EdInputContext8GetPressEi",
@@ -32569,7 +32569,7 @@
           "address": 5488256,
           "offset": 4598288,
           "size": 35,
-          "match_percent": 38.18182
+          "match_percent": 100.0
         },
         {
           "name": "_ZN14EdInputContext7GetHoldEi",
@@ -32577,7 +32577,7 @@
           "address": 5488352,
           "offset": 4598384,
           "size": 35,
-          "match_percent": 38.18182
+          "match_percent": 100.0
         },
         {
           "name": "_ZN15EdVectorControlC1Ev",
@@ -35671,7 +35671,7 @@
           "address": 5488304,
           "offset": 4598336,
           "size": 35,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN14EdInputContext9GetRepeatEi",
@@ -35679,7 +35679,7 @@
           "address": 5488736,
           "offset": 4598768,
           "size": 35,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_Z17eduiSetPinnedMenuP10eduimenu_s",
@@ -35687,7 +35687,7 @@
           "address": 5506608,
           "offset": 4616640,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_Z16edSetPadDisabledi",
@@ -35695,7 +35695,7 @@
           "address": 5506800,
           "offset": 4616832,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_Z16edGetPadDisabledv",
@@ -35703,7 +35703,7 @@
           "address": 5506832,
           "offset": 4616864,
           "size": 22,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN10EdRegistry5FlushEv",
@@ -35711,7 +35711,7 @@
           "address": 5535424,
           "offset": 4645456,
           "size": 26,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN10EdRegistry7GetTypeEi",
@@ -35727,7 +35727,7 @@
           "address": 5539120,
           "offset": 4649152,
           "size": 21,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN10EdRegistry8GetClassEi",
@@ -37105,6 +37105,14 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gamelib/Network.o",
       "functions": [
         {
+          "name": "_GLOBAL__sub_I_Network.cpp",
+          "demangled_name": "_GLOBAL__sub_I_Network.cpp",
+          "address": 928032,
+          "offset": 38064,
+          "size": 283,
+          "match_percent": 20.869566
+        },
+        {
           "name": "_Z16NetworkSyncPausev",
           "demangled_name": "NetworkSyncPause()",
           "address": 4693808,
@@ -37230,7 +37238,7 @@
           "address": 5432736,
           "offset": 4542768,
           "size": 300,
-          "match_percent": 5.121951
+          "match_percent": 5.243902
         },
         {
           "name": "_ZN19NetSimpleReplicator9AllowPushEPK7EdClassPKvR14ReplicatorDataii",
@@ -37238,7 +37246,7 @@
           "address": 5433040,
           "offset": 4543072,
           "size": 111,
-          "match_percent": 12.352942
+          "match_percent": 75.82353
         },
         {
           "name": "_ZN18NetConstReplicator9AllowPushEPK7EdClassPKvR14ReplicatorDataii",
@@ -37246,7 +37254,7 @@
           "address": 5433152,
           "offset": 4543184,
           "size": 103,
-          "match_percent": 6.25
+          "match_percent": 52.65625
         },
         {
           "name": "_ZN13NetReplicator15SerialiseObjectER8EdStreamP7NetPeerPK7EdClassPvR14ReplicatorDataPs",
@@ -37262,7 +37270,7 @@
           "address": 5433760,
           "offset": 4543792,
           "size": 128,
-          "match_percent": 12.352942
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13NetworkObject7DestroyEv",
@@ -37270,7 +37278,7 @@
           "address": 5433888,
           "offset": 4543920,
           "size": 130,
-          "match_percent": 13.548388
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13NetReplicatorC1Eiff",
@@ -37278,7 +37286,7 @@
           "address": 5434032,
           "offset": 4544064,
           "size": 337,
-          "match_percent": 5.0
+          "match_percent": 25.321428
         },
         {
           "name": "_ZN13NetReplicatorC2Eiff",
@@ -37286,7 +37294,7 @@
           "address": 5434032,
           "offset": 4544064,
           "size": 337,
-          "match_percent": 5.0
+          "match_percent": 25.321428
         },
         {
           "name": "_ZN20NetChangedReplicator9InitTableEv",
@@ -37294,7 +37302,7 @@
           "address": 5434384,
           "offset": 4544416,
           "size": 768,
-          "match_percent": 2.608696
+          "match_percent": 99.972824
         },
         {
           "name": "_ZNK20NetChangedReplicator8CheckSumEPKhjRj",
@@ -37302,7 +37310,7 @@
           "address": 5435152,
           "offset": 4545184,
           "size": 82,
-          "match_percent": 13.125
+          "match_percent": 76.25
         },
         {
           "name": "_ZNK20NetChangedReplicator14CheckSumObjectEPK7EdClassPKvRj",
@@ -37310,7 +37318,7 @@
           "address": 5435248,
           "offset": 4545280,
           "size": 293,
-          "match_percent": 4.666666
+          "match_percent": 79.73333
         },
         {
           "name": "_ZN20NetChangedReplicator9AllowPushEPK7EdClassPKvR14ReplicatorDataii",
@@ -37318,7 +37326,7 @@
           "address": 5435552,
           "offset": 4545584,
           "size": 223,
-          "match_percent": 6.4
+          "match_percent": 45.053333
         },
         {
           "name": "_ZN12NetPredictor15SerialiseObjectER8EdStreamP7NetPeerPK7EdClassPvR14ReplicatorDataPNS_13PredictorTimeEPs",
@@ -37406,7 +37414,7 @@
           "address": 5438816,
           "offset": 4548848,
           "size": 59,
-          "match_percent": 28.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN20NetworkObjectManager18RegisterRemoteCallEPFvR10NetMessageEi",
@@ -37414,7 +37422,7 @@
           "address": 5438880,
           "offset": 4548912,
           "size": 65,
-          "match_percent": 24.705883
+          "match_percent": 67.117645
         },
         {
           "name": "_ZN20NetworkObjectManager18RegisterObjectCallEPFvPvR10NetMessageEi",
@@ -37422,7 +37430,7 @@
           "address": 5438960,
           "offset": 4548992,
           "size": 65,
-          "match_percent": 24.705883
+          "match_percent": 67.117645
         },
         {
           "name": "_ZN20NetworkObjectManager10RemoteCallEi10NetMessagePK7NetPeer",
@@ -37470,7 +37478,7 @@
           "address": 5440480,
           "offset": 4550512,
           "size": 193,
-          "match_percent": 5.915493
+          "match_percent": 24.84507
         },
         {
           "name": "_ZN20NetworkObjectManager20AddToLocalObjectListEP13NetworkObject",
@@ -37478,7 +37486,7 @@
           "address": 5440736,
           "offset": 4550768,
           "size": 87,
-          "match_percent": 13.125
+          "match_percent": 73.71875
         },
         {
           "name": "_ZN20NetworkObjectManager25RemoveFromLocalObjectListEP13NetworkObject",
@@ -37486,7 +37494,7 @@
           "address": 5440832,
           "offset": 4550864,
           "size": 64,
-          "match_percent": 17.5
+          "match_percent": 100.0
         },
         {
           "name": "_ZN20NetworkObjectManager21UpdateLocalObjectListEv",
@@ -37502,7 +37510,7 @@
           "address": 5440912,
           "offset": 4550944,
           "size": 68,
-          "match_percent": 16.8
+          "match_percent": 100.0
         },
         {
           "name": "_ZN20NetworkObjectManager15ObjectOtherCallEPvi10NetMessage",
@@ -37542,7 +37550,7 @@
           "address": 5443248,
           "offset": 4553280,
           "size": 65,
-          "match_percent": 23.333334
+          "match_percent": 100.0
         },
         {
           "name": "_ZN20NetworkObjectManager18StealPendingObjectEv",
@@ -37550,7 +37558,7 @@
           "address": 5443456,
           "offset": 4553488,
           "size": 131,
-          "match_percent": 10.243902
+          "match_percent": 100.0
         },
         {
           "name": "_ZN20NetworkObjectManager19RemovePendingObjectEP13NetworkObject",
@@ -37558,7 +37566,7 @@
           "address": 5443600,
           "offset": 4553632,
           "size": 55,
-          "match_percent": 26.666666
+          "match_percent": 100.0
         },
         {
           "name": "_ZN20NetworkObjectManager9GetObjectEi",
@@ -37638,7 +37646,7 @@
           "address": 5448032,
           "offset": 4558064,
           "size": 65,
-          "match_percent": 23.333334
+          "match_percent": 100.0
         },
         {
           "name": "_ZN20NetworkObjectManager13ImportObjectsEv",
@@ -37814,7 +37822,7 @@
           "address": 5456768,
           "offset": 4566800,
           "size": 53,
-          "match_percent": 30.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN20NetworkObjectManager19ReceiveStartMessageER10NetMessageRK7NetPeer",
@@ -37855,6 +37863,14 @@
           "offset": 4569632,
           "size": 439,
           "match_percent": 3.149606
+        },
+        {
+          "name": "_ZN13NetReplicator12DoPredictionEPK7EdClassPvR14ReplicatorDatai",
+          "demangled_name": "NetReplicator::DoPrediction(EdClass const*, void*, ReplicatorData&, int)",
+          "address": 5460112,
+          "offset": 4570144,
+          "size": 9,
+          "match_percent": 62.5
         },
         {
           "name": "_ZNK13NetSmallStats4DrawEffffNS_5eInfoE",
@@ -37925,7 +37941,7 @@
           "address": 5420720,
           "offset": 4530752,
           "size": 27,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN20NetworkObjectManager17FindNetworkObjectEi",
@@ -37949,7 +37965,7 @@
           "address": 5443664,
           "offset": 4553696,
           "size": 64,
-          "match_percent": 0.0
+          "match_percent": 100.0
         }
       ]
     },
@@ -42104,14 +42120,6 @@
           "offset": 1283712,
           "size": 1921,
           "match_percent": 1.055409
-        },
-        {
-          "name": "_ZL15DistanceToPlaneP7nuvec_sS0_S0_",
-          "demangled_name": "DistanceToPlane(nuvec_s*, nuvec_s*, nuvec_s*)",
-          "address": 3917296,
-          "offset": 3027328,
-          "size": 148,
-          "match_percent": 14.088889
         }
       ]
     },
@@ -50038,7 +50046,7 @@
           "address": 925280,
           "offset": 35312,
           "size": 93,
-          "match_percent": 29.411764
+          "match_percent": 99.35294
         },
         {
           "name": "_Z17ResetPlayerPacketP14PLAYERPACKET_sP15CHARACTERDATA_s",
@@ -50046,7 +50054,7 @@
           "address": 1032944,
           "offset": 142976,
           "size": 644,
-          "match_percent": 0.0
+          "match_percent": 77.32653
         },
         {
           "name": "_Z22FinishStatusPacket_LSWP11WORLDINFO_sP14STATUSPACKET_si",
@@ -50054,7 +50062,7 @@
           "address": 2019824,
           "offset": 1129856,
           "size": 9,
-          "match_percent": 32.5
+          "match_percent": 100.0
         },
         {
           "name": "_Z17GetClientMineInfoPP7nuvec_sPPyS3_",
@@ -50062,7 +50070,7 @@
           "address": 2082224,
           "offset": 1192256,
           "size": 50,
-          "match_percent": 27.142857
+          "match_percent": 30.0
         },
         {
           "name": "_Z18FinishStatusPacketi",
@@ -50070,7 +50078,7 @@
           "address": 2447232,
           "offset": 1557264,
           "size": 732,
-          "match_percent": 0.0
+          "match_percent": 25.19186
         },
         {
           "name": "_Z18FinishLoop_Networkv",
@@ -50078,7 +50086,7 @@
           "address": 4760592,
           "offset": 3870624,
           "size": 9,
-          "match_percent": 24.444445
+          "match_percent": 100.0
         },
         {
           "name": "_Z22setObjInNetWaitContextP12GameObject_si",
@@ -50086,7 +50094,7 @@
           "address": 5148064,
           "offset": 4258096,
           "size": 45,
-          "match_percent": 7.272728
+          "match_percent": 100.0
         }
       ]
     },
@@ -71781,7 +71789,7 @@
           "address": 5428032,
           "offset": 4538064,
           "size": 115,
-          "match_percent": 13.125
+          "match_percent": 99.96875
         },
         {
           "name": "UtilGetFrameStartTime",
@@ -71789,7 +71797,7 @@
           "address": 5428160,
           "offset": 4538192,
           "size": 22,
-          "match_percent": 12.5
+          "match_percent": 99.875
         },
         {
           "name": "UtilFrameStart",
@@ -71797,7 +71805,7 @@
           "address": 5428192,
           "offset": 4538224,
           "size": 123,
-          "match_percent": 12.727273
+          "match_percent": 99.93939
         }
       ]
     },
@@ -71805,16 +71813,7 @@
       "name": "legoapi/misc/legoapi_helpers.cpp.o",
       "source": "src/legoapi/misc/legoapi_helpers.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/legoapi_helpers.o",
-      "functions": [
-        {
-          "name": "_ZL7RotDifftt",
-          "demangled_name": "RotDiff(unsigned short, unsigned short)",
-          "address": 3916433,
-          "offset": 3026465,
-          "size": 78,
-          "match_percent": 40.739132
-        }
-      ]
+      "functions": []
     },
     {
       "name": "legoapi/misc/legoapi_misc.cpp.o",
@@ -73692,7 +73691,7 @@
           "address": 1133600,
           "offset": 243632,
           "size": 147,
-          "match_percent": 11.351352
+          "match_percent": 5.945946
         },
         {
           "name": "_Z14ForceAlongSockP12GameObject_s",
@@ -73700,7 +73699,15 @@
           "address": 1389072,
           "offset": 499104,
           "size": 237,
-          "match_percent": 96.039215
+          "match_percent": 0.0
+        },
+        {
+          "name": "_ZL15AdjustMinMaxBoxP7nuvec_sS0_S0_",
+          "demangled_name": "AdjustMinMaxBox(nuvec_s*, nuvec_s*, nuvec_s*)",
+          "address": 3916511,
+          "offset": 3026543,
+          "size": 220,
+          "match_percent": 99.13158
         },
         {
           "name": "SockSysFindInScene",
@@ -73708,7 +73715,7 @@
           "address": 3917573,
           "offset": 3027605,
           "size": 2164,
-          "match_percent": 15.691057
+          "match_percent": 99.30406
         },
         {
           "name": "SockSysInit",
@@ -73716,7 +73723,15 @@
           "address": 3919737,
           "offset": 3029769,
           "size": 182,
-          "match_percent": 35.898304
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL16SockEdgeAnglesXYP7nuvec_sS0_PtS1_",
+          "demangled_name": "SockEdgeAnglesXY(nuvec_s*, nuvec_s*, unsigned short*, unsigned short*)",
+          "address": 3919919,
+          "offset": 3029951,
+          "size": 217,
+          "match_percent": 100.0
         },
         {
           "name": "_ZL14SockRailAnglesP4SOCKP11nugspline_sP7SOCKROT",
@@ -73724,7 +73739,7 @@
           "address": 3920136,
           "offset": 3030168,
           "size": 1326,
-          "match_percent": 0.0
+          "match_percent": 37.894497
         },
         {
           "name": "_ZL13SockDataErrorv",
@@ -73732,7 +73747,7 @@
           "address": 3921462,
           "offset": 3031494,
           "size": 5,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "SockSys_GenerateData",
@@ -73740,7 +73755,7 @@
           "address": 3921467,
           "offset": 3031499,
           "size": 3611,
-          "match_percent": 0.0
+          "match_percent": 47.026203
         },
         {
           "name": "SockSysPointAlongSpline",
@@ -73748,7 +73763,7 @@
           "address": 3925078,
           "offset": 3035110,
           "size": 235,
-          "match_percent": 14.297298
+          "match_percent": 100.0
         },
         {
           "name": "SockSysTrackInSplineInfo",
@@ -73756,7 +73771,7 @@
           "address": 3925313,
           "offset": 3035345,
           "size": 292,
-          "match_percent": 4.883721
+          "match_percent": 4.651163
         },
         {
           "name": "_ZL16FillSockPositionP7SOCKSYSP14SOCKPOSITION_s",
@@ -73764,6 +73779,22 @@
           "address": 3925605,
           "offset": 3035637,
           "size": 772,
+          "match_percent": 70.632034
+        },
+        {
+          "name": "_ZL20SockSysPointAlongMIDP4SOCKP14SOCKPOSITION_sP7nuvec_s",
+          "demangled_name": "SockSysPointAlongMID(SOCK*, SOCKPOSITION_s*, nuvec_s*)",
+          "address": 3926377,
+          "offset": 3036409,
+          "size": 351,
+          "match_percent": 82.843475
+        },
+        {
+          "name": "_ZL16BestSockPositionP7SOCKSYSP7nuvec_sP14SOCKPOSITION_sii",
+          "demangled_name": "BestSockPosition(SOCKSYS*, nuvec_s*, SOCKPOSITION_s*, int, int)",
+          "address": 3926728,
+          "offset": 3036760,
+          "size": 2164,
           "match_percent": 0.0
         },
         {
@@ -73772,7 +73803,7 @@
           "address": 3928892,
           "offset": 3038924,
           "size": 981,
-          "match_percent": 0.0
+          "match_percent": 68.30961
         },
         {
           "name": "MoveSockPosition",
@@ -73780,7 +73811,7 @@
           "address": 3929873,
           "offset": 3039905,
           "size": 1450,
-          "match_percent": 11.985612
+          "match_percent": 98.247
         },
         {
           "name": "ComplexSockAngles",
@@ -73788,7 +73819,7 @@
           "address": 3931323,
           "offset": 3041355,
           "size": 1017,
-          "match_percent": 10.854672
+          "match_percent": 99.80623
         },
         {
           "name": "SetSockPostion",
@@ -73796,7 +73827,7 @@
           "address": 3932340,
           "offset": 3042372,
           "size": 418,
-          "match_percent": 0.0
+          "match_percent": 99.150795
         },
         {
           "name": "SetSockBit",
@@ -73804,7 +73835,7 @@
           "address": 3932758,
           "offset": 3042790,
           "size": 79,
-          "match_percent": 25.129032
+          "match_percent": 22.806452
         },
         {
           "name": "SockBitSet",
@@ -73812,7 +73843,7 @@
           "address": 3932837,
           "offset": 3042869,
           "size": 74,
-          "match_percent": 14.806452
+          "match_percent": 15.290322
         },
         {
           "name": "MidDistanceFromSockStart",
@@ -73820,7 +73851,7 @@
           "address": 3932911,
           "offset": 3042943,
           "size": 148,
-          "match_percent": 12.957447
+          "match_percent": 99.97872
         },
         {
           "name": "FindSock",
@@ -73828,7 +73859,7 @@
           "address": 3933059,
           "offset": 3043091,
           "size": 135,
-          "match_percent": 2.72093
+          "match_percent": 100.0
         },
         {
           "name": "SockSegmentsAhead",
@@ -73836,7 +73867,7 @@
           "address": 3933194,
           "offset": 3043226,
           "size": 274,
-          "match_percent": 11.10989
+          "match_percent": 88.89011
         },
         {
           "name": "EnforceSockYLimits",
@@ -73844,7 +73875,7 @@
           "address": 3933468,
           "offset": 3043500,
           "size": 120,
-          "match_percent": 10.2
+          "match_percent": 93.425
         },
         {
           "name": "_Z15GetSockEdgeEnumPc",
@@ -73852,7 +73883,7 @@
           "address": 3937474,
           "offset": 3047506,
           "size": 105,
-          "match_percent": 12.727273
+          "match_percent": 12.121212
         },
         {
           "name": "SockSysConfigureNuFPar",
@@ -73860,7 +73891,7 @@
           "address": 3938372,
           "offset": 3048404,
           "size": 518,
-          "match_percent": 9.770992
+          "match_percent": 45.84733
         },
         {
           "name": "SockSys_Configure",
@@ -73868,7 +73899,7 @@
           "address": 3938890,
           "offset": 3048922,
           "size": 397,
-          "match_percent": 30.924528
+          "match_percent": 95.26415
         },
         {
           "name": "SockSysCamera",
@@ -73876,7 +73907,7 @@
           "address": 3939610,
           "offset": 3049642,
           "size": 9247,
-          "match_percent": 11.049091
+          "match_percent": 69.42416
         },
         {
           "name": "SockSysCameraWithOverlapBlend",
@@ -73884,7 +73915,7 @@
           "address": 3951814,
           "offset": 3061846,
           "size": 2116,
-          "match_percent": 0.754039
+          "match_percent": 0.718133
         },
         {
           "name": "SockRotationMatrix",
@@ -73892,7 +73923,7 @@
           "address": 3953930,
           "offset": 3063962,
           "size": 3621,
-          "match_percent": 1.99267
+          "match_percent": 87.852356
         },
         {
           "name": "SockOn",
@@ -73900,7 +73931,7 @@
           "address": 3957551,
           "offset": 3067583,
           "size": 101,
-          "match_percent": 12.727273
+          "match_percent": 10.30303
         },
         {
           "name": "SockOff",
@@ -73908,7 +73939,7 @@
           "address": 3957652,
           "offset": 3067684,
           "size": 101,
-          "match_percent": 12.727273
+          "match_percent": 10.30303
         },
         {
           "name": "SockSysSetObjectVisibility",
@@ -73916,7 +73947,7 @@
           "address": 3957753,
           "offset": 3067785,
           "size": 140,
-          "match_percent": 9.333333
+          "match_percent": 8.888889
         }
       ]
     },
@@ -76119,14 +76150,6 @@
           "offset": 3025757,
           "size": 97,
           "match_percent": 100.0
-        },
-        {
-          "name": "_ZL12InsideLineXZffffff",
-          "demangled_name": "InsideLineXZ(float, float, float, float, float, float)",
-          "address": 3917181,
-          "offset": 3027213,
-          "size": 115,
-          "match_percent": 14.193548
         },
         {
           "name": "rtlGetEnvPath",
@@ -78401,14 +78424,6 @@
           "offset": 2087552,
           "size": 135,
           "match_percent": 99.75
-        },
-        {
-          "name": "_ZL12SplineLengthP11nugspline_si",
-          "demangled_name": "SplineLength(nugspline_s*, int)",
-          "address": 3916731,
-          "offset": 3026763,
-          "size": 276,
-          "match_percent": 4.418605
         },
         {
           "name": "_Z24LevelSplines_InitForGameP11LEVELSPLINE",
@@ -107874,14 +107889,6 @@
           "offset": 1799928,
           "size": 58,
           "match_percent": 100.0
-        },
-        {
-          "name": "_ZL16OnOrOutsidePlaneP7nuvec_sS0_S0_",
-          "demangled_name": "OnOrOutsidePlane(nuvec_s*, nuvec_s*, nuvec_s*)",
-          "address": 3917007,
-          "offset": 3027039,
-          "size": 174,
-          "match_percent": 8.627451
         }
       ]
     },
@@ -116948,7 +116955,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -117046,7 +117052,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -117144,7 +117149,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -117253,7 +117257,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -117316,6 +117319,7 @@
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
+        "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -117396,7 +117400,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -117505,7 +117508,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -117614,7 +117616,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -117723,7 +117724,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -117832,7 +117832,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -117941,7 +117940,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -118137,6 +118135,7 @@
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
+        "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -118171,6 +118170,7 @@
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
+        "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -118251,7 +118251,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -118360,7 +118359,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -118469,7 +118467,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -118623,7 +118620,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -118743,7 +118739,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -118834,7 +118829,6 @@
         "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -118978,7 +118972,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -119068,7 +119061,6 @@
         "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -119167,7 +119159,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -119246,7 +119237,6 @@
         "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -119357,7 +119347,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -119466,7 +119455,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -119575,7 +119563,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -119684,7 +119671,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -119774,7 +119760,6 @@
         "legoapi/characters/motion/charpivot.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -119851,7 +119836,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -119960,7 +119944,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -120080,7 +120063,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -120189,7 +120171,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -120310,7 +120291,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -120419,7 +120399,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -120482,6 +120461,7 @@
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
+        "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -120562,7 +120542,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -120671,7 +120650,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -120780,7 +120758,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -120889,7 +120866,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -121061,7 +121037,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -121170,7 +121145,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -121279,7 +121253,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -121622,6 +121595,7 @@
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
+        "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -121735,7 +121709,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -121798,6 +121771,7 @@
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
+        "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -121832,6 +121806,7 @@
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
+        "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -121861,6 +121836,66 @@
       "match_percent": 0.0,
       "candidate_units": [
         "nu2api/numath/vumath.c.o"
+      ]
+    },
+    {
+      "name": "_ZL7RotDifftt",
+      "demangled_name": "RotDiff(unsigned short, unsigned short)",
+      "address": 3916433,
+      "offset": 3026465,
+      "size": 78,
+      "match_percent": 40.739132,
+      "candidate_units": [
+        "legoapi/misc/legoapi_helpers.cpp.o",
+        "legoapi/props/system/socksysall.cpp.o"
+      ]
+    },
+    {
+      "name": "_ZL12SplineLengthP11nugspline_si",
+      "demangled_name": "SplineLength(nugspline_s*, int)",
+      "address": 3916731,
+      "offset": 3026763,
+      "size": 276,
+      "match_percent": 72.5814,
+      "candidate_units": [
+        "legoapi/props/system/socksysall.cpp.o",
+        "legoapi/render/fx/edsplines.cpp.o"
+      ]
+    },
+    {
+      "name": "_ZL16OnOrOutsidePlaneP7nuvec_sS0_S0_",
+      "demangled_name": "OnOrOutsidePlane(nuvec_s*, nuvec_s*, nuvec_s*)",
+      "address": 3917007,
+      "offset": 3027039,
+      "size": 174,
+      "match_percent": 64.01961,
+      "candidate_units": [
+        "legoapi/props/system/socksysall.cpp.o",
+        "nu2api/numath/nuplane.cpp.o"
+      ]
+    },
+    {
+      "name": "_ZL12InsideLineXZffffff",
+      "demangled_name": "InsideLineXZ(float, float, float, float, float, float)",
+      "address": 3917181,
+      "offset": 3027213,
+      "size": 115,
+      "match_percent": 88.22581,
+      "candidate_units": [
+        "legoapi/props/system/socksysall.cpp.o",
+        "legoapi/render/core/rtl.cpp.o"
+      ]
+    },
+    {
+      "name": "_ZL15DistanceToPlaneP7nuvec_sS0_S0_",
+      "demangled_name": "DistanceToPlane(nuvec_s*, nuvec_s*, nuvec_s*)",
+      "address": 3917296,
+      "offset": 3027328,
+      "size": 148,
+      "match_percent": 14.088889,
+      "candidate_units": [
+        "legoapi/ai/game/misc_a_game.cpp.o",
+        "legoapi/props/system/socksysall.cpp.o"
       ]
     },
     {
@@ -121912,7 +121947,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -121975,6 +122009,7 @@
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
+        "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -122009,6 +122044,7 @@
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
+        "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -122124,7 +122160,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -122604,7 +122639,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -122713,7 +122747,6 @@
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
-        "legoapi/core/net/netplay.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
@@ -123434,14 +123467,6 @@
       "address": 927840,
       "offset": 37872,
       "size": 177,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_Network.cpp",
-      "demangled_name": "_GLOBAL__sub_I_Network.cpp",
-      "address": 928032,
-      "offset": 38064,
-      "size": 283,
       "match_percent": 0.0
     },
     {
@@ -124914,38 +124939,6 @@
       "address": 3916195,
       "offset": 3026227,
       "size": 29,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZL15AdjustMinMaxBoxP7nuvec_sS0_S0_",
-      "demangled_name": "AdjustMinMaxBox(nuvec_s*, nuvec_s*, nuvec_s*)",
-      "address": 3916511,
-      "offset": 3026543,
-      "size": 220,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZL16SockEdgeAnglesXYP7nuvec_sS0_PtS1_",
-      "demangled_name": "SockEdgeAnglesXY(nuvec_s*, nuvec_s*, unsigned short*, unsigned short*)",
-      "address": 3919919,
-      "offset": 3029951,
-      "size": 217,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZL20SockSysPointAlongMIDP4SOCKP14SOCKPOSITION_sP7nuvec_s",
-      "demangled_name": "SockSysPointAlongMID(SOCK*, SOCKPOSITION_s*, nuvec_s*)",
-      "address": 3926377,
-      "offset": 3036409,
-      "size": 351,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZL16BestSockPositionP7SOCKSYSP7nuvec_sP14SOCKPOSITION_sii",
-      "demangled_name": "BestSockPosition(SOCKSYS*, nuvec_s*, SOCKPOSITION_s*, int, int)",
-      "address": 3926728,
-      "offset": 3036760,
-      "size": 2164,
       "match_percent": 0.0
     },
     {
@@ -128053,14 +128046,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZN13NetReplicator12DoPredictionEPK7EdClassPvR14ReplicatorDatai",
-      "demangled_name": "NetReplicator::DoPrediction(EdClass const*, void*, ReplicatorData&, int)",
-      "address": 5460112,
-      "offset": 4570144,
-      "size": 9,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZN16V2SessionManager4InitEPc",
       "demangled_name": "V2SessionManager::Init(char*)",
       "address": 5461600,
@@ -130224,8 +130209,8 @@
   "summary": {
     "bazel_units": 523,
     "functions": 13454,
-    "assigned_functions": 12293,
-    "ambiguous_functions": 229,
-    "unassigned_functions": 932
+    "assigned_functions": 12294,
+    "ambiguous_functions": 234,
+    "unassigned_functions": 926
   }
 }

@@ -1,16 +1,25 @@
 #include "gameapi_edtools_types.h"
 #include "gameapi/edtools/edcam.h"
 
-void edGetPadDisabled() {
+i32 edGetPadDisabled() {
+    extern i32 pad_disabled;
+    return pad_disabled;
 }
 
-void edSetPadDisabled(i32) {
+void edSetPadDisabled(i32 disabled) {
+    extern i32 pad_disabled;
+    pad_disabled = disabled;
 }
 
-void eduiSetPinnedMenu(eduimenu_s *) {
+void eduiSetPinnedMenu(eduimenu_s *menu) {
+    extern eduimenu_s *edLevelPinnedMenu;
+    edLevelPinnedMenu = menu;
 }
 
 void EdRegistry::Flush() {
+    type_count = 0;
+    class_count = 0;
+    object_count = 0;
 }
 
 EdClass *EdRegistry::GetClass(i32 index) {
@@ -20,7 +29,8 @@ EdClass *EdRegistry::GetClass(i32 index) {
     return &classes[index];
 }
 
-void EdRegistry::GetClassId(EdClass *) {
+i32 EdRegistry::GetClassId(EdClass *object_class) {
+    return object_class - classes;
 }
 
 EdType *EdRegistry::GetType(i32 index) {
@@ -30,8 +40,16 @@ EdType *EdRegistry::GetType(i32 index) {
     return &types[index];
 }
 
-void EdInputContext::GetRelease(i32) {
+f32 EdInputContext::GetRelease(i32 input) {
+    if (static_cast<u32>(input) < 40 && released[input] != 0) {
+        return values[input];
+    }
+    return 0.0f;
 }
 
-void EdInputContext::GetRepeat(i32) {
+f32 EdInputContext::GetRepeat(i32 input) {
+    if (static_cast<u32>(input) < 40 && repeated[input] != 0) {
+        return values[input];
+    }
+    return 0.0f;
 }
