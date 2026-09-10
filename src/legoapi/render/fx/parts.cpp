@@ -254,7 +254,7 @@ i32 CannotKill(GameObject_s *);
 i32 ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32);
 void NewRumble(nupad_s *, f32, i32);
 
-static __used__ void PartCollide(PART_s *part, i32 three_dimensional) {
+static void PartCollide(PART_s *part, i32 three_dimensional) {
     const NUVEC minimum = {part->position.x - part->field_0e4, part->position.y - part->field_0e4,
                            part->position.z - part->field_0e4};
     const NUVEC maximum = {part->position.x + part->field_0e4, part->position.y + part->field_0e4,

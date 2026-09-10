@@ -219,7 +219,11 @@ i32 MatrixReflection(numtx_s *, i32, float, float, numtx_s *) {
 void OnOrOutsidePlane(nuvec_s *, nuvec_s *, nuvec_s *) {
 }
 
-void PackShortIntoInt(i16, i16) {
+i32 PackShortIntoInt(i16 high, i16 low) {
+    i32 packed = high;
+    packed <<= 16;
+    packed |= static_cast<u16>(low);
+    return packed;
 }
 
 void RatioAlongLineXZ(nuvec_s *, nuvec_s *, nuvec_s *) {
@@ -380,7 +384,8 @@ i32 RotDiff(u16 current, u16 target) {
 void rawClip(VuVec const *, VuVec *, i32, VuVec const &) {
 }
 
-void getqseed() {
+i32 getqseed() {
+    return qseed;
 }
 
 void clampBias(float) {

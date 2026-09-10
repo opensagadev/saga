@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 36.614704,
+    "fuzzy_match_percent": 36.61604,
     "total_code": "4722419",
-    "matched_code": "344464",
-    "matched_code_percent": 7.294228,
+    "matched_code": "344527",
+    "matched_code_percent": 7.295562,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 3954,
-    "matched_functions_percent": 29.37811,
+    "matched_functions": 3958,
+    "matched_functions_percent": 29.407831,
     "total_units": 1
   },
   "text": {
@@ -72828,7 +72828,7 @@
           "address": 4784704,
           "offset": 3894736,
           "size": 22,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_Z10ResetSeedsv",
@@ -73036,7 +73036,7 @@
           "address": 5148112,
           "offset": 4258144,
           "size": 16,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_Z15PackCharIntoIntcccc",
@@ -78868,7 +78868,7 @@
           "address": 1184976,
           "offset": 295008,
           "size": 14,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_Z14PartCollide_2DP6PART_s",
@@ -78876,7 +78876,7 @@
           "address": 1184992,
           "offset": 295024,
           "size": 11,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_Z19PartKill_ForceThrowP6PART_si",
