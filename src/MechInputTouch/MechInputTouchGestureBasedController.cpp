@@ -1,5 +1,7 @@
 #include "MechInputTouch_types.h"
 
+i32 GetMenuID();
+
 void MechInputTouchGestureBasedController::Activate() {
 }
 
@@ -22,7 +24,12 @@ MechInputTouchGestureBasedController::MechInputTouchGestureBasedController(
     field_a0 = 0.0f;
 }
 
-void MechInputTouchGestureBasedController::MenuDisable() {
+bool MechInputTouchGestureBasedController::MenuDisable() {
+    const i32 menu_id = GetMenuID();
+    if (menu_id == 12 || menu_id == 16 || menu_id == 13 || menu_id == 17 || menu_id == 8 || menu_id == 18) {
+        return true;
+    }
+    return menu_id == 14;
 }
 
 bool MechInputTouchGestureBasedController::OnClick(GameObject_s &, TouchHolder &) {

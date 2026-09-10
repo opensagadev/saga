@@ -667,7 +667,13 @@ u32 GizmoBlowups_TotalScore(void *context) {
     return total;
 }
 
-void GizmoBlowupTypeNameBlank(char *) {
+i32 GizmoBlowupTypeNameBlank(char *name) {
+    for (u32 offset = 0; offset < 0x20; offset += sizeof(i32)) {
+        if (*reinterpret_cast<i32 *>(name + offset) != 0) {
+            return 0;
+        }
+    }
+    return 1;
 }
 
 i32 GizmoBlowupCheckProximity(WORLDINFO_s *world, GameObject_s *object) {

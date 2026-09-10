@@ -693,7 +693,7 @@ struct MechInputTouchGestureBasedController : MechInputTouchMainController, Mech
     void Deactivate();
     void KillTasks(bool);
     MechInputTouchGestureBasedController(i32, MechInputTouchGestureBasedController::StickMode);
-    void MenuDisable();
+    bool MenuDisable();
     bool OnClick(GameObject_s &, TouchHolder &) override;
     bool OnDoubleClick(GameObject_s &, TouchHolder &) override;
     bool OnDown(GameObject_s &, TouchHolder &) override;

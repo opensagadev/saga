@@ -45,6 +45,7 @@ static f32 CutVolume = 0.8f;
 
 extern "C" {
     u16 GlobalSfxBits[100];
+    u16 SfxBits[100];
     SoundTable CurrentSFXTAB;
     void (*ExtraDieSfxFn)(GameObject_s *);
     void (*ExtraHurtSfxFn)(GameObject_s *);
@@ -179,7 +180,19 @@ i32 AmbientFromQuiet(i32 idx) {
 }
 
 extern "C" void ResetSounds(void) {
-    memmove(SfxBits, GlobalSfxBits, sizeof(SfxBits));
+    memcpy(SfxBits, GlobalSfxBits, sizeof(SfxBits));
+}
+
+extern "C" void PrepareSounds(const u16 *sounds) {
+    for (i32 i = 0; i < 100; ++i) {
+        SfxBits[i] |= sounds[i];
+    }
+}
+
+extern "C" void MaskSounds(const u16 *mask) {
+    for (i32 i = 0; i < 100; ++i) {
+        SfxBits[i] &= mask[i];
+    }
 }
 
 void SetLevelSfxBits(WORLDINFO *world) {

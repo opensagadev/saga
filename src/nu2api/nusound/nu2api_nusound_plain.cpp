@@ -15,8 +15,6 @@ extern "C" void RestoreGameMusic(void);
 extern "C" edanim_param_s AnimParams[64];
 
 extern "C" {
-
-    u16 SfxBits[100];
     i32 g_NuSoundMaxVoicesPerSample = 3;
     f32 AUDIOFADELEVEL = 1.0f;
     f32 MASTERVOLUME = 1.0f;
@@ -33,16 +31,6 @@ extern "C" {
 
     f32 GetSoundVolume(void) {
         return MASTERVOLUME;
-    }
-    void MaskSounds(const u16 *mask) {
-        for (i32 i = 0; i < 100; ++i) {
-            SfxBits[i] &= mask[i];
-        }
-    }
-    void PrepareSounds(const u16 *sounds) {
-        for (i32 i = 0; i < 100; ++i) {
-            SfxBits[i] |= sounds[i];
-        }
     }
     void SetSoundBitsById(const i32 *sound_ids, SoundBitCallback set_bit) {
         while (true) {

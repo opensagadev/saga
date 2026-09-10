@@ -667,6 +667,14 @@ extern "C" {
         memset(PortalVisiFlags, 0xff, sizeof(PortalVisiFlags));
     }
 
+} // extern "C"
+
+void SetAllInstancesHidden(NUGSCN *) {
+    memset(PortalVisiFlags, 0, sizeof(PortalVisiFlags));
+}
+
+extern "C" {
+
     i32 ShadowInfo(void) {
         extern TERRAIN_SHAPE *ShadPoly;
         return ShadPoly != NULL ? ShadPoly->material[0] : -1;

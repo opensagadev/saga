@@ -7408,10 +7408,6 @@ void FindNearestGameObject(nuvec_s *, GameObject_s *, u32, float, float, i32, i3
                            i32 (*)(GameObject_s *), bool) {
 }
 
-void SetAllInstancesHidden(nugscn_s *) {
-    memset(PortalVisiFlags, 0, sizeof(PortalVisiFlags));
-}
-
 extern "C" {
     extern debris_chunk_control_s *debris_chunk_control_stack[2];
     extern debris_chunk_control_s **freechunkcontrols;

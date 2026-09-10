@@ -207,7 +207,13 @@ void AddPickups(i32 coins, i32 hearts, i32 torpedoes, i32 powerups, nuvec_s *pos
     }
 }
 
-void IsACoinType(i32) {
+i32 IsACoinType(i32 type) {
+    for (i32 i = 0; i < 4; ++i) {
+        if (CoinTab[i] == type) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 void AddMiscPickups(nuvec_s *, i32, i32, i32) {

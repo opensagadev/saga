@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 36.92953,
+    "fuzzy_match_percent": 36.936905,
     "total_code": "4722419",
-    "matched_code": "349944",
-    "matched_code_percent": 7.4102697,
+    "matched_code": "350199",
+    "matched_code_percent": 7.4156704,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4146,
-    "matched_functions_percent": 30.804667,
+    "matched_functions": 4150,
+    "matched_functions_percent": 30.834385,
     "total_units": 1
   },
   "text": {
@@ -16354,7 +16354,7 @@
           "address": 4511952,
           "offset": 3621984,
           "size": 75,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedController9KillTasksEb",
@@ -42691,7 +42691,15 @@
           "address": 3437792,
           "offset": 2547824,
           "size": 53,
-          "match_percent": 0.0
+          "match_percent": 100.0
+        },
+        {
+          "name": "PrepareSounds",
+          "demangled_name": "PrepareSounds",
+          "address": 3437856,
+          "offset": 2547888,
+          "size": 319,
+          "match_percent": 100.0
         },
         {
           "name": "PrepareAllSounds",
@@ -42699,7 +42707,15 @@
           "address": 3438176,
           "offset": 2548208,
           "size": 133,
-          "match_percent": 0.0
+          "match_percent": 26.875
+        },
+        {
+          "name": "MaskSounds",
+          "demangled_name": "MaskSounds",
+          "address": 3438320,
+          "offset": 2548352,
+          "size": 319,
+          "match_percent": 100.0
         },
         {
           "name": "RegisterSounds",
@@ -56171,7 +56187,7 @@
           "address": 4958864,
           "offset": 4068896,
           "size": 67,
-          "match_percent": 0.0
+          "match_percent": 86.0
         },
         {
           "name": "_Z27GizBlowup_InitSingleTerrainP13GIZMOBLOWUP_s",
@@ -56489,7 +56505,7 @@
           "address": 1994000,
           "offset": 1104032,
           "size": 71,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_Z18DropTorpedoPickupsP15TORPEDOPACKET_si",
@@ -65882,14 +65898,6 @@
           "offset": 1533392,
           "size": 2162,
           "match_percent": 64.89805
-        },
-        {
-          "name": "_Z21SetAllInstancesHiddenP8nugscn_s",
-          "demangled_name": "SetAllInstancesHidden(nugscn_s*)",
-          "address": 3130119,
-          "offset": 2240151,
-          "size": 56,
-          "match_percent": 0.0
         },
         {
           "name": "_Z12GetUsageMaskP19NuShaderUsageMask_s",
@@ -75591,6 +75599,14 @@
           "demangled_name": "SetAllInstancesVisible",
           "address": 3130063,
           "offset": 2240095,
+          "size": 56,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z21SetAllInstancesHiddenP8nugscn_s",
+          "demangled_name": "SetAllInstancesHidden(nugscn_s*)",
+          "address": 3130119,
+          "offset": 2240151,
           "size": 56,
           "match_percent": 100.0
         },
@@ -109719,22 +109735,6 @@
       "source": "src/nu2api/nusound/nu2api_nusound_plain.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nu2api_nusound_plain.o",
       "functions": [
-        {
-          "name": "PrepareSounds",
-          "demangled_name": "PrepareSounds",
-          "address": 3437856,
-          "offset": 2547888,
-          "size": 319,
-          "match_percent": 100.0
-        },
-        {
-          "name": "MaskSounds",
-          "demangled_name": "MaskSounds",
-          "address": 3438320,
-          "offset": 2548352,
-          "size": 319,
-          "match_percent": 100.0
-        },
         {
           "name": "SetSoundBitsBySingleId",
           "demangled_name": "SetSoundBitsBySingleId",
