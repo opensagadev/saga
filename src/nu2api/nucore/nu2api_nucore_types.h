@@ -294,7 +294,7 @@ struct NuThreadBase {
 struct NuThreadManager {
     void CreateThreadSuspended(void (*)(void *), void *, i32, char const *, i32, NUTHREADCAFECORE, NUTHREADXBOX360CORE);
     void FreeTLS(i32);
-    void GetMainThread();
+    NuThread *GetMainThread();
 };
 struct NuVirtualTouchDevice {
     f32 GetAspectRatio();

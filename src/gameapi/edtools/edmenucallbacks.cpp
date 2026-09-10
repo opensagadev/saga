@@ -156,8 +156,6 @@ static void cbPasteIntoLight(eduimenu_s *, eduiitem_s *, u32) {
 }
 static void cbPtlChangeCutOn(eduimenu_s *, eduiitem_s *, u32) {
 }
-static void cbPtlChangeETime(eduimenu_s *, eduiitem_s *, u32) {
-}
 static void cbPtlEmitVelMenu(eduimenu_s *, eduiitem_s *, u32) {
 }
 static void cbPtlReadoutMenu(eduimenu_s *, eduiitem_s *, u32) {
@@ -184,8 +182,6 @@ static void cbPtlApplyCollEnv(eduimenu_s *, eduiitem_s *, u32) {
 }
 static void cbPtlChangeCutOff(eduimenu_s *, eduiitem_s *, u32) {
 }
-static void cbPtlChangeIvalOn(eduimenu_s *, eduiitem_s *, u32) {
-}
 static void cbPtlChangeSScale(eduimenu_s *, eduiitem_s *, u32) {
 }
 static void cbPtlDeleteEffect(eduimenu_s *, eduiitem_s *, u32) {
@@ -197,10 +193,6 @@ static void cbPtlStartVelMenu(eduimenu_s *, eduiitem_s *, u32) {
 static void cbPtlVarStartMenu(eduimenu_s *, eduiitem_s *, u32) {
 }
 static void cbPtlChangeEmitVel(eduimenu_s *, eduiitem_s *, u32) {
-}
-static void cbPtlChangeGenRate(eduimenu_s *, eduiitem_s *, u32) {
-}
-static void cbPtlChangeIvalOff(eduimenu_s *, eduiitem_s *, u32) {
 }
 static void cbPtlRepeatBoxMenu(eduimenu_s *, eduiitem_s *, u32) {
 }
@@ -226,8 +218,6 @@ static void cbPtlSelTextureType(eduimenu_s *, eduiitem_s *, u32) {
 }
 static void cbToggleHasSpecular(eduimenu_s *, eduiitem_s *, u32) {
 }
-static void cbPtlChangeIvalOnRan(eduimenu_s *, eduiitem_s *, u32) {
-}
 static void cbPtlQuickDeleteMenu(eduimenu_s *, eduiitem_s *, u32) {
 }
 static void cbPtlQuickDeleteType(eduimenu_s *, eduiitem_s *, u32) {
@@ -237,8 +227,6 @@ static void cbEdLevelEditorSelect(eduimenu_s *, eduiitem_s *, u32) {
 static void cbEdLevelSettingsMenu(eduimenu_s *, eduiitem_s *, u32) {
 }
 static void cbPtlChangeDrawCutOff(eduimenu_s *, eduiitem_s *, u32) {
-}
-static void cbPtlChangeIvalOffRan(eduimenu_s *, eduiitem_s *, u32) {
 }
 static void cbPtlChangeRepeatFlag(eduimenu_s *, eduiitem_s *, u32) {
 }

@@ -285,6 +285,10 @@ static edcam_s gp_cam = {
     {0, 0, 0},
 };
 
+void edcamSetContoller(i32 invert_pitch) {
+    gp_cam.invert_pad_pitch = invert_pitch;
+}
+
 static NUCAMERA *edmaincam = NULL;
 static NUCAMERA *edinternalcam = NULL;
 static eduimenu_s *active_menu;

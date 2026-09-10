@@ -1,6 +1,6 @@
 # _saga_
 
-![Progress](https://img.shields.io/badge/matching-37.51%25-orange)
+![Progress](https://img.shields.io/badge/matching-37.78%25-orange)
 [![Bazel build](https://github.com/ttdecomp/saga/actions/workflows/build-bazel.yaml/badge.svg)](https://github.com/ttdecomp/saga/actions/workflows/build-bazel.yaml)
 [![Discord](https://img.shields.io/discord/1467775700894224555?color=%235865F2&logo=discord&logoColor=%23FFFFFF)](https://discord.gg/2HJuMtzA7q)
 [![status & wasm build](https://img.shields.io/badge/status%20%26%20wasm%20build-click%20here-orange?style=flat)](https://opensaga.dev/)
@@ -61,24 +61,24 @@ See https://ttdecomp.github.io/saga/
 | `(root)` | 62.0% | 50.0% |
 | `MechInputTouch` | 17.0% | 25.8% |
 | `editor` | 3.2% | 2.3% |
-| `gameapi` | 24.3% | 14.4% |
+| `gameapi` | 25.5% | 16.2% |
 | `gameframework` | 100.0% | 52.9% |
 | `gamelib` | 20.1% | 15.6% |
 | `java` | 96.1% | 73.1% |
-| `legoapi` | 35.1% | 27.8% |
+| `legoapi` | 35.3% | 28.1% |
 | `legoapi/actions` | 31.5% | 6.7% |
 | `legoapi/ai` | 47.6% | 24.1% |
 | `legoapi/audio` | 54.5% | 44.7% |
-| `legoapi/characters` | 32.7% | 18.5% |
+| `legoapi/characters` | 32.8% | 18.5% |
 | `legoapi/core` | 28.3% | 14.9% |
 | `legoapi/cutscenes` | 34.7% | 13.5% |
-| `legoapi/gizmo` | 39.1% | 34.5% |
+| `legoapi/gizmo` | 40.7% | 35.2% |
 | `legoapi/gizmos` | 49.0% | 47.2% |
-| `legoapi/items` | 37.7% | 36.0% |
-| `legoapi/menus` | 26.3% | 26.2% |
+| `legoapi/items` | 37.8% | 36.1% |
+| `legoapi/menus` | 26.3% | 27.4% |
 | `legoapi/misc` | 26.3% | 12.5% |
-| `legoapi/props` | 44.0% | 11.1% |
-| `legoapi/render` | 34.2% | 23.5% |
+| `legoapi/props` | 47.2% | 11.1% |
+| `legoapi/render` | 34.2% | 24.5% |
 | `legoapi/world` | 28.0% | 30.2% |
 | `legogame` | 50.6% | 56.1% |
 | `nu2api` | 57.3% | 53.7% |

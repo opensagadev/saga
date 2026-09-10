@@ -7416,22 +7416,20 @@ void DeactivateGameObject(GameObject_s *object) {
     }
 
     if (object->field_0xcc0 != NULL) {
-        if ((object->apiobj.flags_high & 0x40) == 0) {
-            KillGameObject(object->field_0xcc0, 4, 0);
-            object->apiobj.flags_high &= static_cast<u8>(~0x10u);
-        } else {
+        if ((object->apiobj.field_0x1f4 & 0x4000) != 0) {
             ReleaseTakeOver(object, 1);
+        } else {
+            KillGameObject(object->field_0xcc0, 4, 0);
+            object->apiobj.character = 0;
         }
     }
-    object->apiobj.flags_high &= static_cast<u8>(~0x10u);
+    object->apiobj.character = 0;
 
     if (object->ai.field_0x134 != 0xff &&
         AIScriptSetBaseScriptStateByName(reinterpret_cast<AISCRIPTPROCESS *>(&object->ai),
                                          const_cast<char *>("InActive")) != 0) {
         object->ai.reset_mode = 0;
-        if (WORLD != NULL && WORLD->ai_sys != NULL && object->ai.field_0x134 < WORLD->ai_sys->creature_count) {
-            WORLD->ai_sys->creatures[object->ai.field_0x134].activate_type = 2;
-        }
+        WORLD->ai_sys->creatures[object->ai.field_0x134].activate_type = 2;
     } else {
         object->ai.reset_mode = 4;
     }

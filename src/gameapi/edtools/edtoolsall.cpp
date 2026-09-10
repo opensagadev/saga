@@ -271,14 +271,6 @@ void EdDrawLineSegment(VuVec const &, VuVec const &, i32) {
 void edanimParamCreate(i32) {
 }
 
-void edcamSetContoller(i32 invert_pitch) {
-    edcam_s *camera = edcamGetEdCam();
-    camera->freedoms &= ~EDCAM_FREEDOM_INVERT_PAD_PITCH;
-    if (invert_pitch != 0) {
-        camera->freedoms |= EDCAM_FREEDOM_INVERT_PAD_PITCH;
-    }
-}
-
 void edpartSaveEffects(char *, char) {
 }
 

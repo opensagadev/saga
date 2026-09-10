@@ -479,7 +479,6 @@ void Text_SetLanguage_Game(i32 language) {
     }
 }
 void Text3DStringEncodeFont(unsigned char *src, u16 *dst, void *font) {
-    static unsigned char missing_character[] = "\xe2\x96\xa1";
     u16 character;
 
     while (*src != 0) {
@@ -492,7 +491,7 @@ void Text3DStringEncodeFont(unsigned char *src, u16 *dst, void *font) {
 
         *dst = NuQFntEncodeUnicodeChar(font, character);
         if (*dst == 0xffff) {
-            NuUnicodeCharFromUTF8(&character, missing_character);
+            NuUnicodeCharFromUTF8(&character, (unsigned char *)"\xe2\x96\xa1");
             *dst = NuQFntEncodeUnicodeChar(font, character);
             if (*dst == 0xffff)
                 *dst = NuQFntEncodeUnicodeChar(font, '?');

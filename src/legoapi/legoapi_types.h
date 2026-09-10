@@ -1717,8 +1717,8 @@ struct GIZSPINNER_s {
     };
     f32 animation_speed; // 0x078
     u16 rotation;        // 0x07c
-    u16 previous_rotation;
     u16 target_rotation;
+    u16 previous_rotation;
     u16 initial_rotation; // 0x082
     u32 state_flags;      // 0x084, GIZSPINNER_STATE_FLAGS
     u8 field_0x088;
@@ -2731,14 +2731,17 @@ struct debinftype {
     f32 last_render_time;    // 0x2ac (target)
     u8 fields_2b0[0x40];     // 0x2b0 (target)
     u8 process_spheres;      // 0x2f0 (target)
-    u8 time_group;           // 0x2f1
+    i8 time_group;           // 0x2f1
     u8 field_2f2;
     u8 use_explicit_clip_box; // 0x2f3
     f32 thinning;             // 0x2f4
-    u8 fields_2f8[0xd8];      // 0x2f8
+    union {
+        u8 fields_2f8[0xd8];
+        NUVEC repeat_box;     // 0x2f8
+    };
     i16 particle_keys[8];     // 0x3d0
     i32 sound_data[12];       // 0x3e0
-    u8 trail_count;           // 0x410
+    i8 trail_count;           // 0x410
     u8 radial_segments;       // 0x411
     u8 camera_facing;         // 0x412
     u8 field_413;
@@ -2860,13 +2863,19 @@ struct debkeydatatype_s {
     f32 sphere_next_time;
     i32 trigger_first;
     i32 trigger_second;
-    i32 trigger_third;
+    union {
+        i32 trigger_third;
+        f32 switch_variable;
+    };
     i16 reflection_x;
     i16 reflection_y;
     f32 collision_plane;
     f32 reflection_scale;
     i16 collision_timers[4];
-    u8 fields_2f0[2];
+    union {
+        i16 render_group;
+        u8 fields_2f0[2];
+    };
     i16 field_2f2;
     u8 field_2f4;
     u8 process_collision_sound;
@@ -3080,9 +3089,16 @@ struct edpp_particle_s {
     NUVEC position;
     i32 effect_index;
     i32 instance_id;
-    u8 pad_0x14[0x51 - 0x14];
+    u8 pad_0x14[0x34 - 0x14];
+    i32 switch_type;
+    i32 switch_id;
+    f32 switch_variable;
+    u8 pad_0x40[0x4c - 0x40];
+    i16 render_group;
+    u8 pad_0x4e[0x51 - 0x4e];
     i8 page;
-    u8 pad_0x52[0x58 - 0x52];
+    i8 detail_levels;
+    u8 pad_0x53[0x58 - 0x53];
 };
 DECOMP_ASSERT(sizeof(edpp_particle_s) == 0x58, "edpp_particle_s ABI");
 struct pushblock_s {

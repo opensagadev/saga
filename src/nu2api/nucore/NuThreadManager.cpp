@@ -55,5 +55,6 @@ void NuThreadManager::FreeTLS(i32 index) {
     bitflags &= ~(1U << index);
 }
 
-void NuThreadManager::GetMainThread() {
+NuThread *NuThreadManager::GetMainThread() {
+    return thread;
 }

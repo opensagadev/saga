@@ -320,7 +320,7 @@ static void GizSpinner_StoreProgressData(void *world_ptr, void *, void *progress
             continue;
         }
         entry->flags |= SPINNER_PROGRESS_VALID;
-        entry->rotation = spinner->previous_rotation;
+        entry->rotation = spinner->target_rotation;
         entry->flags =
             static_cast<u8>((entry->flags & ~SPINNER_PROGRESS_ARM_VISIBLE) |
                             (((spinner->flags & GIZSPINNER_FLAG_HIDE_ARM) == 0) ? SPINNER_PROGRESS_ARM_VISIBLE : 0));

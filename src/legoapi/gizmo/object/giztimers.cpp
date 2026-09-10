@@ -21,7 +21,7 @@ GIZMO *createGizTimer(void *, float time, i32 random_time, char *name) {
         return NULL;
     GIZTIMER *timer = &world->giz_timers[world->giz_timers_count];
     timer->start_time = time;
-    timer->flags = (timer->flags & ~2) | ((random_time & 1) << 1);
+    timer->random_time = random_time;
     NuStrNCpy(timer->name, name, sizeof(timer->name));
     ++world->giz_timers_count;
     return AddGizmo(world->gizmo_sys, giztimer_gizmotype_id, NULL, timer);

@@ -276,6 +276,7 @@ extern void PlayRepeatSfx(char *name, i32 sfx_id, f32 initial_delay, char play_c
 extern void ResetAICreature(GameObject_s *object, AISYS_s *system);
 extern void DeactivateGameObject(GameObject_s *object);
 extern void Player_ClearContext(GameObject_s *object, i32 mode);
+extern void ReleaseTakeOver(GameObject_s *object, i32 immediate);
 extern void InitSplinePosition(SPLINEPOS_s *position, nugspline_s *spline, f32 distance, i32 looping);
 extern void KillParts(GameObject_s *object, i32 part, i32 joint, i32 visible, f32 velocity, i32 flags, u16 *part_ids);
 extern u32 StarWars_ParseAIPathCnxFlag(char *name);
@@ -2364,21 +2365,21 @@ __used__ static i32 Action_DeActivate(AISYS *sys, AISCRIPTPROCESS *processor, AI
     GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
     i32 creature_set = 0;
     for (i32 index = 0; index < param_4; ++index) {
-        char *value = ActionParamValue(params[index], "character");
+        char *value = NuStrIStr(params[index], "character=");
         if (value != NULL) {
-            object = GetNamedGameObject(sys, value);
+            object = GetNamedGameObject(sys, value + 10);
             continue;
         }
-        value = ActionParamValue(params[index], "set");
+        value = NuStrIStr(params[index], "set=");
         if (value != NULL) {
-            const i32 parsed_set = static_cast<i32>(AIParamToFloat(processor, value));
+            const i32 parsed_set = static_cast<i32>(AIParamToFloat(processor, value + 4));
             creature_set = static_cast<u32>(parsed_set) < 17 ? parsed_set : 0;
         }
     }
 
     if (creature_set != 0) {
-        for (i32 index = 0; index < HIGHGAMEOBJECT; ++index) {
-            GameObject_s *candidate = &Obj[index];
+        GameObject_s *candidate = Obj;
+        for (i32 index = 0; index < HIGHGAMEOBJECT; ++index, ++candidate) {
             if ((candidate->apiobj.field_0x1f8 & (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER)) ==
                     (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER) &&
                 candidate->ai.creature_set == creature_set) {
@@ -3270,18 +3271,37 @@ __used__ static i32 Action_SetTaggable(AISYS *sys, AISCRIPTPROCESS *processor, A
     }
 
     GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
-    bool taggable = false;
-    for (i32 index = 0; index < param_4; ++index) {
-        char *value = NuStrIStr(params[index], "character=");
-        if (value != NULL) {
-            object = GetNamedGameObject(sys, value + NuStrLen("character="));
-        } else if (NuStrICmp(params[index], "FALSE") != 0 && NuStrIStr(params[index], "tag_to=") == NULL) {
-            taggable = true;
+    GameObject_s *tag_to = NULL;
+    i32 disabled = 0;
+    if (param_4 != 0) {
+        for (i32 index = 0; index < param_4; ++index) {
+            char *value = NuStrIStr(params[index], "character=");
+            if (value != NULL) {
+                object = GetNamedGameObject(sys, value + 10);
+            } else if ((value = NuStrIStr(params[index], "tag_to=")) != NULL) {
+                tag_to = GetNamedGameObject(sys, value + 7);
+            } else if (NuStrICmp(params[index], "FALSE") == 0) {
+                disabled = 1;
+            }
         }
     }
     if (object != NULL) {
+        bool set_disabled = false;
+        if (disabled != 0) {
+            if (static_cast<i8>(object->apiobj.flags_low) < 0) {
+                if (object->field_0xcc0 != NULL) {
+                    ReleaseTakeOver(object, 0);
+                    set_disabled = disabled;
+                } else if (TagCharacter(object, tag_to, 0) != 0) {
+                    set_disabled = disabled;
+                }
+                SetPlayer();
+            } else {
+                set_disabled = disabled;
+            }
+        }
         u8 *tag_flags = reinterpret_cast<u8 *>(object) + 0x7b5;
-        *tag_flags = (*tag_flags & static_cast<u8>(~2u)) | static_cast<u8>(taggable ? 2 : 0);
+        *tag_flags = static_cast<u8>((*tag_flags & ~2u) | (static_cast<u8>(set_disabled) << 1));
     }
     return 1;
 }
@@ -3308,13 +3328,31 @@ __used__ static i32 Action_CanBeCarried(AISYS *sys, AISCRIPTPROCESS *processor, 
     (void)processor;
     (void)param_6;
     if (param_5 != 0) {
-        bool enabled;
-        GameObject_s *object = ActionCharacterAndToggle(sys, packet, params, param_4, &enabled);
+        GameObject_s *object = NULL;
+        if (packet != NULL && packet->owner != NULL) {
+            object = packet->owner->apiobj.objptr;
+        }
+
+        i32 enabled = 1;
+        if (param_4 != 0) {
+            for (i32 index = 0; index < param_4; ++index) {
+                if (NuStrICmp(params[index], "FALSE") == 0) {
+                    enabled = 0;
+                } else {
+                    char *value = NuStrIStr(params[index], "character=");
+                    if (value != NULL) {
+                        object = GetNamedGameObject(sys, value + 10);
+                    }
+                }
+            }
+        }
+
         if (object != NULL) {
             if (object->character_context == 0x3c || object->field_0xcc0 != NULL) {
                 Player_ClearContext(object, 1);
             }
-            object->field_0xf00 = static_cast<u8>((object->field_0xf00 & ~2u) | (enabled ? 2u : 0u));
+            object->field_0xf00 =
+                static_cast<u8>((object->field_0xf00 & ~2u) | (static_cast<u8>(enabled) << 1));
         }
     }
     return 1;
@@ -6095,28 +6133,35 @@ __used__ static i32 Action_ResetGameCamera(AISYS *sys, AISCRIPTPROCESS *processo
 __used__ static i32 Action_SetAnimSpeedMul(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                            i32 param_4, i32 param_5, f32 param_6) {
     (void)sys;
-    (void)processor;
+    (void)param_5;
     (void)param_6;
     GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
-    if (object != NULL && param_5 != 0 && param_4 > 0) {
-        f32 multiply_by = 1.0f;
-        f32 maximum = 1.0e9f;
+    if (object != NULL) {
+        if (param_4 == 0) {
+            return 1;
+        }
         f32 minimum = 0.0f;
+        f32 maximum = 1.0e9f;
+        f32 multiply_by = 1.0f;
         for (i32 index = 0; index < param_4; ++index) {
-            char *value = ActionParamValue(params[index], "value");
+            char *value = NuStrIStr(params[index], "value=");
             if (value != NULL) {
-                object->animation_speed_multiplier = AIParamToFloat(processor, value);
-            } else if ((value = ActionParamValue(params[index], "multiply_by")) != NULL) {
-                multiply_by = AIParamToFloat(processor, value);
-            } else if ((value = ActionParamValue(params[index], "max")) != NULL) {
-                maximum = AIParamToFloat(processor, value);
-            } else if ((value = ActionParamValue(params[index], "min")) != NULL) {
-                minimum = AIParamToFloat(processor, value);
+                object->animation_speed_multiplier = AIParamToFloat(processor, value + 6);
+            } else if ((value = NuStrIStr(params[index], "multiply_by=")) != NULL) {
+                multiply_by = AIParamToFloat(processor, value + 12);
+            } else if ((value = NuStrIStr(params[index], "max=")) != NULL) {
+                maximum = AIParamToFloat(processor, value + 4);
+            } else if ((value = NuStrIStr(params[index], "min=")) != NULL) {
+                minimum = AIParamToFloat(processor, value + 4);
             }
         }
         if (multiply_by != 1.0f) {
-            object->animation_speed_multiplier =
-                MAX(minimum, MIN(maximum, object->animation_speed_multiplier * multiply_by));
+            f32 speed = object->animation_speed_multiplier * multiply_by;
+            if (speed > maximum) {
+                object->animation_speed_multiplier = maximum;
+            } else {
+                object->animation_speed_multiplier = MAX(minimum, speed);
+            }
         }
     }
     return 1;

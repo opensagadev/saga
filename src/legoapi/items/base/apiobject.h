@@ -495,7 +495,9 @@ typedef struct APIOBJECT_s {
                     u8 : 1;
                     u8 force_los_visible : 1;
                     u8 skip_los_raycast : 1;
-                    u8 : 3;
+                    u8 : 1;
+                    u8 character : 1;
+                    u8 respawn_enabled : 1;
                     u8 use_cached_los : 1;
                     u8 : 1;
                 };

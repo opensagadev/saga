@@ -301,25 +301,19 @@ static __used__ void ZipUp_GetStartPoint(GameObject_s *object, NUVEC *position) 
     i32 joint = character->grapple_locators[0];
     if (joint != -1 && object->apiobj.character_model->points_of_interest[joint] != NULL &&
         object->apiobj.field_0x288 != 0) {
-        position->x = object->joint_matrices[joint].m30;
-        position->y = object->joint_matrices[joint].m31;
-        position->z = object->joint_matrices[joint].m32;
+        *position = *NUMTX_GET_ROW_VEC(&object->joint_matrices[joint], 3);
         return;
     }
     joint = character->weapon_shoot_joints[0];
     if (joint != -1 && object->apiobj.character_model->points_of_interest[joint] != NULL &&
         object->apiobj.field_0x288 != 0) {
-        position->x = object->joint_matrices[joint].m30;
-        position->y = object->joint_matrices[joint].m31;
-        position->z = object->joint_matrices[joint].m32;
+        *position = *NUMTX_GET_ROW_VEC(&object->joint_matrices[joint], 3);
         return;
     }
     joint = character->weapon_joints[0];
     if (joint != -1 && object->apiobj.character_model->points_of_interest[joint] != NULL &&
         object->apiobj.field_0x288 != 0) {
-        position->x = object->joint_matrices[joint].m30;
-        position->y = object->joint_matrices[joint].m31;
-        position->z = object->joint_matrices[joint].m32;
+        *position = *NUMTX_GET_ROW_VEC(&object->joint_matrices[joint], 3);
         return;
     }
     position->x = object->apiobj.collision_position.x;

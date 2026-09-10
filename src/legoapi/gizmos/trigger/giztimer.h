@@ -9,7 +9,14 @@ typedef struct GIZTIMER_s {
     f32 time_remaining;
     f32 start_time;
     char filler1[2];
-    u8 flags; // unsure if this is actually what this is
+    union {
+        u8 flags;
+        struct {
+            u8 active : 1;
+            u8 random_time : 1;
+            u8 reserved_flags : 6;
+        };
+    };
     char filler2;
     char name[16];
 } GIZTIMER;

@@ -1229,10 +1229,14 @@ extern "C" {
         DebrisCutSceneMode = enabled;
     }
 
-    void DebrisSetDetailLevels(void) {
+    void DebrisSetDetailLevels(i32 handle, i32 detail_levels) {
+        debkeydata[handle].field_1da = static_cast<u8>(detail_levels);
     }
 
-    void DebrisSetDrawFlag(void) {
+    void DebrisSetDrawFlag(i32 handle, i8 draw_flag) {
+        if (handle != -1) {
+            debkeydata[handle].field_2f7 = draw_flag;
+        }
     }
 
     void DebrisSetFacing(i32 handle, u8 enabled, i16 x_angle, i16 y_angle) {
