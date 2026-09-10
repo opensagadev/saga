@@ -113,6 +113,7 @@ build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_gizactions\.cpp$@-
 build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_gizmopickups\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/object/gizbuildit\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_gizobstacles\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_newblowup\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_tubes\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/world\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levelconfig\.cpp$@-O3
