@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 37.248264,
+    "fuzzy_match_percent": 37.269634,
     "total_code": "4722419",
-    "matched_code": "352903",
-    "matched_code_percent": 7.4729285,
+    "matched_code": "353355",
+    "matched_code_percent": 7.4824996,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4182,
-    "matched_functions_percent": 31.072145,
+    "matched_functions": 4191,
+    "matched_functions_percent": 31.139015,
     "total_units": 1
   },
   "text": {
@@ -76324,7 +76324,7 @@
           "address": 3182144,
           "offset": 2292176,
           "size": 54,
-          "match_percent": 55.733334
+          "match_percent": 100.0
         },
         {
           "name": "NuShaderManagerSetElementfv",
@@ -76332,7 +76332,7 @@
           "address": 3182208,
           "offset": 2292240,
           "size": 62,
-          "match_percent": 59.941177
+          "match_percent": 100.0
         },
         {
           "name": "NuShaderManagerSetElementsfv",
@@ -76340,7 +76340,7 @@
           "address": 3182272,
           "offset": 2292304,
           "size": 70,
-          "match_percent": 63.263157
+          "match_percent": 100.0
         },
         {
           "name": "NuShaderManagerSetElementsfv_transpose",
@@ -76348,7 +76348,7 @@
           "address": 3182352,
           "offset": 2292384,
           "size": 70,
-          "match_percent": 63.263157
+          "match_percent": 100.0
         },
         {
           "name": "_ZN19ShaderMtlDescFilter12internalInitEPK17nushadermtldesc_sPK7numtl_sii",
@@ -76356,7 +76356,7 @@
           "address": 3183168,
           "offset": 2293200,
           "size": 374,
-          "match_percent": 0.0
+          "match_percent": 26.806452
         },
         {
           "name": "_ZNK19ShaderMtlDescFilter8hasLayerEi",
@@ -76364,7 +76364,7 @@
           "address": 3183552,
           "offset": 2293584,
           "size": 153,
-          "match_percent": 0.0
+          "match_percent": 32.962265
         },
         {
           "name": "_ZNK19ShaderMtlDescFilter13hasDiffuseMapEi",
@@ -76372,7 +76372,7 @@
           "address": 3183712,
           "offset": 2293744,
           "size": 125,
-          "match_percent": 16.019608
+          "match_percent": 33.627453
         },
         {
           "name": "_ZNK19ShaderMtlDescFilter14getVertexFlagsEv",
@@ -76380,7 +76380,7 @@
           "address": 3183840,
           "offset": 2293872,
           "size": 318,
-          "match_percent": 0.0
+          "match_percent": 39.132652
         },
         {
           "name": "_ZN19ShaderManagerOpenGL12createShaderER19ShaderMtlDescFilterbP14NuShaderObjecti",
@@ -76388,7 +76388,7 @@
           "address": 3201024,
           "offset": 2311056,
           "size": 113,
-          "match_percent": 39.07143
+          "match_percent": 100.0
         },
         {
           "name": "_ZN19ShaderManagerOpenGLD1Ev",
@@ -76396,7 +76396,7 @@
           "address": 3201152,
           "offset": 2311184,
           "size": 74,
-          "match_percent": 30.782608
+          "match_percent": 71.91304
         },
         {
           "name": "_ZN19ShaderManagerOpenGLD2Ev",
@@ -76404,7 +76404,7 @@
           "address": 3201152,
           "offset": 2311184,
           "size": 74,
-          "match_percent": 30.782608
+          "match_percent": 71.91304
         },
         {
           "name": "_ZN19ShaderManagerOpenGLD0Ev",
@@ -76412,7 +76412,7 @@
           "address": 3201232,
           "offset": 2311264,
           "size": 56,
-          "match_percent": 24.5
+          "match_percent": 100.0
         },
         {
           "name": "_ZN19ShaderManagerOpenGLC1ER21VirtualStackAllocator",
@@ -76420,7 +76420,7 @@
           "address": 3201536,
           "offset": 2311568,
           "size": 190,
-          "match_percent": 47.272728
+          "match_percent": 79.704544
         },
         {
           "name": "_ZN19ShaderManagerOpenGLC2ER21VirtualStackAllocator",
@@ -76428,7 +76428,7 @@
           "address": 3201536,
           "offset": 2311568,
           "size": 190,
-          "match_percent": 47.272728
+          "match_percent": 79.704544
         },
         {
           "name": "_ZN19ShaderManagerOpenGL5setfvE19SHADERSEMANTIC_enumPKf",
@@ -76436,7 +76436,7 @@
           "address": 3202992,
           "offset": 2313024,
           "size": 67,
-          "match_percent": 31.68421
+          "match_percent": 99.947365
         },
         {
           "name": "_ZN19ShaderManagerOpenGL12setElementfvE19SHADERSEMANTIC_enumiPKf",
@@ -76444,7 +76444,7 @@
           "address": 3203072,
           "offset": 2313104,
           "size": 67,
-          "match_percent": 31.68421
+          "match_percent": 99.947365
         },
         {
           "name": "_ZN19ShaderManagerOpenGL13setElementsfvE19SHADERSEMANTIC_enumiiPKf",
@@ -76452,7 +76452,7 @@
           "address": 3203152,
           "offset": 2313184,
           "size": 67,
-          "match_percent": 31.68421
+          "match_percent": 99.947365
         },
         {
           "name": "_ZN19ShaderManagerOpenGL23setElementsfv_transposeE19SHADERSEMANTIC_enumiiPKf",
@@ -76460,7 +76460,7 @@
           "address": 3203232,
           "offset": 2313264,
           "size": 67,
-          "match_percent": 31.68421
+          "match_percent": 99.947365
         },
         {
           "name": "_ZN21ShaderManagerTemplateI14NuShaderObjectE12createShaderER19ShaderMtlDescFilterbPS0_i",
@@ -76468,7 +76468,7 @@
           "address": 3203312,
           "offset": 2313344,
           "size": 9,
-          "match_percent": 47.5
+          "match_percent": 100.0
         },
         {
           "name": "_ZN21ShaderManagerTemplateI14NuShaderObjectE12createShaderERK15ShaderObjectKeyPS0_i",
@@ -76476,7 +76476,7 @@
           "address": 3203328,
           "offset": 2313360,
           "size": 9,
-          "match_percent": 32.5
+          "match_percent": 100.0
         },
         {
           "name": "_ZN21ShaderManagerTemplateI14NuShaderObjectE35adaptShaderMaterialForShaderVersionEP17nushadermtldesc_s",
@@ -76484,7 +76484,7 @@
           "address": 3203344,
           "offset": 2313376,
           "size": 9,
-          "match_percent": 24.444445
+          "match_percent": 100.0
         },
         {
           "name": "_ZN21ShaderManagerTemplateI14NuShaderObjectED1Ev",
@@ -76492,7 +76492,7 @@
           "address": 3203360,
           "offset": 2313392,
           "size": 74,
-          "match_percent": 3.826087
+          "match_percent": 71.91304
         },
         {
           "name": "_ZN21ShaderManagerTemplateI14NuShaderObjectED2Ev",
@@ -76500,7 +76500,7 @@
           "address": 3203360,
           "offset": 2313392,
           "size": 74,
-          "match_percent": 3.826087
+          "match_percent": 71.91304
         },
         {
           "name": "_ZN21ShaderManagerTemplateI14NuShaderObjectED0Ev",
@@ -76508,7 +76508,7 @@
           "address": 3203440,
           "offset": 2313472,
           "size": 111,
-          "match_percent": 14.357142
+          "match_percent": 28.285715
         }
       ]
     },
@@ -116944,7 +116944,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -117051,7 +117050,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -117158,7 +117156,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -117276,7 +117273,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -117437,7 +117433,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -117555,7 +117550,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -117673,7 +117667,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -117791,7 +117784,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -117909,7 +117901,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -118027,7 +118018,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -118364,7 +118354,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -118482,7 +118471,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -118600,7 +118588,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -118763,7 +118750,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -118892,7 +118878,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -118971,7 +118956,6 @@
         "legoapi/props/objects/zipup.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -119146,7 +119130,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -119224,7 +119207,6 @@
         "legoapi/props/objects/zipup.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -119354,7 +119336,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -119421,7 +119402,6 @@
         "legoapi/props/objects/zipup.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -119563,7 +119543,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -119681,7 +119660,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -119799,7 +119777,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -119917,7 +119894,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -119995,7 +119971,6 @@
         "legoapi/props/objects/zipup.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -120103,7 +120078,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -120221,7 +120195,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -120350,7 +120323,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -120468,7 +120440,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -120598,7 +120569,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -120716,7 +120686,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -120877,7 +120846,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -120995,7 +120963,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -121113,7 +121080,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -121231,7 +121197,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -121412,7 +121377,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -121530,7 +121494,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -121648,7 +121611,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -122161,7 +122123,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -122425,7 +122386,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -122664,7 +122624,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -123153,7 +123112,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
@@ -123271,7 +123229,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/core/shader.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",

@@ -65,6 +65,8 @@ build:target --per_file_copt=^src/legoapi/actions/movement/jumping\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/actions/movement/climbing\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/render/core/render\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/render/core/screen\.cpp$@-O2
+# Shader material filters use optimized switch lowering and leaf epilogues.
+build:target --per_file_copt=^src/legoapi/render/core/shader\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/render/fx/edsplines\.cpp$@-O3
 build:target --per_file_copt=^src/gamelib/NewTerrain\.cpp$@-O2
 build:target --per_file_copt=^src/gamelib/crc/crc\.cpp$@-O3
