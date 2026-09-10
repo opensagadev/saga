@@ -55,7 +55,7 @@ extern "C" {
     NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path);
     void NuGScnRemove(NUGSCN *scene);
     void NuGScnReadFromMemory(NUGSCN *scene);
-    void NuGHGFixup(NUGSCN *scene);
+    NUGSCN *NuGHGFixup(NUGSCN *scene, void *);
     void NuRndrInitWorld(void);
 }
 i32 NuGScnUploadGfxDataFromFilePS(VARIPTR *buf, VARIPTR *buf_end, i32 file);

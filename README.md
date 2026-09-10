@@ -78,7 +78,7 @@ See https://ttdecomp.github.io/saga/
 | `legoapi/menus` | 26.3% | 26.2% |
 | `legoapi/misc` | 26.2% | 12.5% |
 | `legoapi/props` | 43.0% | 11.2% |
-| `legoapi/render` | 33.9% | 22.2% |
+| `legoapi/render` | 33.9% | 22.3% |
 | `legoapi/world` | 27.8% | 29.9% |
 | `legogame` | 50.6% | 56.1% |
 | `nu2api` | 56.9% | 53.2% |

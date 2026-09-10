@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 36.9263,
+    "fuzzy_match_percent": 36.926826,
     "total_code": "4722419",
-    "matched_code": "349771",
-    "matched_code_percent": 7.4066067,
+    "matched_code": "349796",
+    "matched_code_percent": 7.4071364,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4141,
-    "matched_functions_percent": 30.767515,
+    "matched_functions": 4142,
+    "matched_functions_percent": 30.774944,
     "total_units": 1
   },
   "text": {
@@ -74649,7 +74649,7 @@
           "address": 3125152,
           "offset": 2235184,
           "size": 25,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "NuGScnReadFromMemory",

@@ -956,7 +956,8 @@ i32 NuGScnUploadGfxDataFromFilePS(VARIPTR *buf, VARIPTR buf_end, i32 file) {
     return total_size;
 }
 
-static NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path, NUGSCN *scene) {
+static NUGSCN *NuReadGraphicsData(VARIPTR *buf, VARIPTR *buf_end, char *path, char *, char *scene_data) {
+    NUGSCN *scene = reinterpret_cast<NUGSCN *>(scene_data);
     if (scene == NULL) {
         char converted_path[1033];
         NuFileExtConvert(converted_path, path);
@@ -1029,20 +1030,20 @@ extern "C" {
     NUGSCN *NuGScnRead(VARIPTR *buf, VARIPTR buf_end, char *path) {
         RemoveDirectionalMaps = 1;
         RemoveNormalMaps = 1;
-        NUGSCN *scene = NuReadGraphicsData(buf, &buf_end, path, NULL);
+        NUGSCN *scene = NuReadGraphicsData(buf, &buf_end, path, NULL, NULL);
         RemoveNormalMaps = 0;
         RemoveDirectionalMaps = 0;
         return scene;
     }
     void NuGScnReadFromMemory(NUGSCN *scene) {
-        NuReadGraphicsData(NULL, NULL, NULL, scene);
+        NuReadGraphicsData(NULL, NULL, NULL, NULL, reinterpret_cast<char *>(scene));
     }
-    void NuGHGFixup(NUGSCN *scene) {
-        NuGScnReadFromMemory(scene);
+    NUGSCN *NuGHGFixup(NUGSCN *scene, void *) {
+        return NuReadGraphicsData(NULL, NULL, NULL, NULL, reinterpret_cast<char *>(scene));
     }
     nuhgobj_s *NuGHGRead(char *path, VARIPTR *buf, VARIPTR buf_end) {
         nuapi.loading_hgobj = 1;
-        nuhgobj_s *object = reinterpret_cast<nuhgobj_s *>(NuReadGraphicsData(buf, &buf_end, path, NULL));
+        nuhgobj_s *object = reinterpret_cast<nuhgobj_s *>(NuReadGraphicsData(buf, &buf_end, path, NULL, NULL));
         if (object != NULL && nuapi.force_shadows_on_characters != 0 && object->display_list != NULL) {
             for (i32 i = 0; i < object->display_list->nspecials; ++i) {
                 object->display_list->visibility_flags[i] |= 0x20;
