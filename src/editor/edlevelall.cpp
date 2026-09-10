@@ -285,7 +285,11 @@ void LevelEditor::FindSceneId(char *) {
 void LevelEditor::Flush() {
 }
 
-void LevelEditor::GetEdScene(i32) {
+LevelEditorScene *LevelEditor::GetEdScene(i32 index) {
+    if (static_cast<u32>(index) >= 10) {
+        return NULL;
+    }
+    return &scenes[index];
 }
 
 void LevelEditor::GetScene(char *) {

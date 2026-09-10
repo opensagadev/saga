@@ -17,6 +17,7 @@
 #include <string.h>
 
 extern TERRAIN_SURFACE_s TerSurface[32];
+extern i32 dagobah_training;
 AILOCATOR_s *locator;
 GameObject_s *gameobj;
 extern u8 troopercannons_beenReset;
@@ -35,6 +36,7 @@ void DagobahA_Init(WORLDINFO_s *) {
 }
 
 void DagobahB_Init(WORLDINFO_s *) {
+    dagobah_training = 0;
 }
 
 void DagobahC_Init(WORLDINFO_s *) {
@@ -224,7 +226,14 @@ void CloudCityTrapB_Update(WORLDINFO_s *) {
 void CloudCityTrapC_Update(WORLDINFO_s *) {
 }
 
-void HothBattle_Melee_init(HOTHBATTLE_MELEE_s *) {
+void HothBattle_Melee_init(HOTHBATTLE_MELEE_s *melee) {
+    if (melee != NULL) {
+        melee->field_0x8 = 0;
+        melee->field_0x0 = 0;
+        melee->field_0x1 = 0;
+        melee->field_0x2 = 1;
+        melee->field_0x4 = -1;
+    }
 }
 
 void CloudCityEscapeA_Panel(WORLDINFO_s *) {

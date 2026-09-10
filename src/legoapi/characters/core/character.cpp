@@ -755,8 +755,8 @@ extern AREADATA *DEATHSTARRESCUE_ADATA;
 extern AREADATA *HOTHESCAPE_ADATA;
 extern AREADATA *JABBASPALACE_ADATA;
 
-static __used__ int IsGrabbable(GameObject_s *) {
-    return 0;
+static __used__ int IsGrabbable(GameObject_s *object) {
+    return (object->apiobj.character_data->game_character->flags_090 & GAMECHARACTER_FLAG_GRAB_DISABLED) == 0;
 }
 
 static void NormalizeAnimPath(char *path) {

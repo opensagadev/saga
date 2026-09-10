@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 36.688416,
+    "fuzzy_match_percent": 36.74381,
     "total_code": "4722419",
-    "matched_code": "346518",
-    "matched_code_percent": 7.3377223,
+    "matched_code": "346714",
+    "matched_code_percent": 7.3418727,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4013,
-    "matched_functions_percent": 29.816479,
+    "matched_functions": 4019,
+    "matched_functions_percent": 29.86106,
     "total_units": 1
   },
   "text": {
@@ -19331,7 +19331,7 @@
           "address": 5511728,
           "offset": 4621760,
           "size": 35,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN11ClassEditor24cbEdClassSelectClassMenuEP10eduimenu_sP10eduiitem_sj",
@@ -38993,7 +38993,7 @@
           "address": 920464,
           "offset": 30496,
           "size": 93,
-          "match_percent": 29.411764
+          "match_percent": 99.35294
         },
         {
           "name": "_ZL19JediBKilledCallbackP12GameObject_s",
@@ -39001,7 +39001,7 @@
           "address": 2113424,
           "offset": 1223456,
           "size": 879,
-          "match_percent": 1.447368
+          "match_percent": 3.947368
         },
         {
           "name": "_Z22SpecialMoves_ConfigurePcP9variptr_uS1_",
@@ -39009,7 +39009,7 @@
           "address": 4815712,
           "offset": 3925744,
           "size": 794,
-          "match_percent": 1.708543
+          "match_percent": 2.713568
         },
         {
           "name": "_Z29SpecialMove_GetAttackerActioni",
@@ -39017,7 +39017,7 @@
           "address": 4816512,
           "offset": 3926544,
           "size": 46,
-          "match_percent": 6.666666
+          "match_percent": 35.0
         },
         {
           "name": "_Z27SpecialMove_GetVictimActioni",
@@ -39025,7 +39025,7 @@
           "address": 4816560,
           "offset": 3926592,
           "size": 46,
-          "match_percent": 6.666666
+          "match_percent": 35.0
         },
         {
           "name": "_Z28SpecialMove_GetDistanceAparti",
@@ -39033,7 +39033,7 @@
           "address": 4816608,
           "offset": 3926640,
           "size": 43,
-          "match_percent": 0.0
+          "match_percent": 99.916664
         },
         {
           "name": "_Z20SpecialMove_GetFlagsij",
@@ -39041,7 +39041,7 @@
           "address": 4816656,
           "offset": 3926688,
           "size": 65,
-          "match_percent": 0.0
+          "match_percent": 99.95
         },
         {
           "name": "_Z17SpecialMove_CheckP12GameObject_sS0_",
@@ -39049,7 +39049,7 @@
           "address": 4816736,
           "offset": 3926768,
           "size": 318,
-          "match_percent": 0.0
+          "match_percent": 4.222222
         },
         {
           "name": "_Z25SpecialMove_ReleaseVictimP12GameObject_s",
@@ -39057,7 +39057,7 @@
           "address": 4817056,
           "offset": 3927088,
           "size": 337,
-          "match_percent": 3.333333
+          "match_percent": 5.185185
         },
         {
           "name": "_Z18SpecialMove_CancelP12GameObject_s",
@@ -39065,7 +39065,7 @@
           "address": 4817408,
           "offset": 3927440,
           "size": 211,
-          "match_percent": 4.741379
+          "match_percent": 7.241379
         },
         {
           "name": "_Z22SpecialMove_VictimCodeP12GameObject_s",
@@ -39073,7 +39073,7 @@
           "address": 4817632,
           "offset": 3927664,
           "size": 301,
-          "match_percent": 3.333333
+          "match_percent": 6.363637
         },
         {
           "name": "_Z33SpecialMove_Attacker_SetTargetMomP12GameObject_s",
@@ -39081,7 +39081,7 @@
           "address": 4817936,
           "offset": 3927968,
           "size": 198,
-          "match_percent": 0.0
+          "match_percent": 60.813953
         },
         {
           "name": "_Z12BackFlipCodeP12GameObject_s",
@@ -39089,7 +39089,7 @@
           "address": 5171392,
           "offset": 4281424,
           "size": 251,
-          "match_percent": 0.0
+          "match_percent": 88.3871
         }
       ]
     },
@@ -43240,7 +43240,7 @@
           "address": 2269920,
           "offset": 1379952,
           "size": 26,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "APICharacterSysInit",
@@ -57785,7 +57785,7 @@
           "address": 4910176,
           "offset": 4020208,
           "size": 166,
-          "match_percent": 98.90909
+          "match_percent": 98.36364
         },
         {
           "name": "_ZL15GuideLines_DrawPvS_f",
@@ -57801,7 +57801,7 @@
           "address": 4910368,
           "offset": 4020400,
           "size": 34,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL23GuideLine_SetVisibilityP7GIZMO_si",
@@ -57809,7 +57809,7 @@
           "address": 4910416,
           "offset": 4020448,
           "size": 36,
-          "match_percent": 0.0
+          "match_percent": 99.0
         },
         {
           "name": "_ZL23GuideLines_GetMaxGizmosPv",
@@ -71929,7 +71929,7 @@
           "address": 3459920,
           "offset": 2569952,
           "size": 443,
-          "match_percent": 22.438095
+          "match_percent": 0.0
         },
         {
           "name": "DebReAlloc2",
@@ -71937,7 +71937,7 @@
           "address": 3460432,
           "offset": 2570464,
           "size": 2485,
-          "match_percent": 0.0
+          "match_percent": 14.47665
         },
         {
           "name": "DebReAlloc",
@@ -71945,7 +71945,7 @@
           "address": 3462928,
           "offset": 2572960,
           "size": 249,
-          "match_percent": 0.0
+          "match_percent": 41.77778
         },
         {
           "name": "DebFreeOrphansInstantly",
@@ -71953,7 +71953,7 @@
           "address": 3469104,
           "offset": 2579136,
           "size": 430,
-          "match_percent": 7.594595
+          "match_percent": 55.11712
         },
         {
           "name": "DebFreeAllChunksInstantly",
@@ -71961,7 +71961,7 @@
           "address": 3469536,
           "offset": 2579568,
           "size": 127,
-          "match_percent": 9.523809
+          "match_percent": 10.0
         },
         {
           "name": "DebFreeInstantly",
@@ -71969,7 +71969,7 @@
           "address": 3474592,
           "offset": 2584624,
           "size": 678,
-          "match_percent": 0.0
+          "match_percent": 52.892616
         },
         {
           "name": "DebFree",
@@ -71977,7 +71977,7 @@
           "address": 3475568,
           "offset": 2585600,
           "size": 1472,
-          "match_percent": 0.0
+          "match_percent": 45.322582
         },
         {
           "name": "CrashDataPtr",
@@ -71985,7 +71985,7 @@
           "address": 3700992,
           "offset": 2811024,
           "size": 22,
-          "match_percent": 27.5
+          "match_percent": 12.5
         },
         {
           "name": "_ZN13MemoryManager9AllocPoolEji",
@@ -71993,7 +71993,7 @@
           "address": 4347712,
           "offset": 3457744,
           "size": 205,
-          "match_percent": 0.0
+          "match_percent": 91.484375
         },
         {
           "name": "_ZN13MemoryManager8FreePoolEPvj",
@@ -72001,7 +72001,7 @@
           "address": 4347920,
           "offset": 3457952,
           "size": 42,
-          "match_percent": 0.0
+          "match_percent": 100.0
         }
       ]
     },
@@ -84606,7 +84606,7 @@
           "address": 2215376,
           "offset": 1325408,
           "size": 26,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_Z14DagobahB_ResetP11WORLDINFO_s",
@@ -84718,7 +84718,7 @@
           "address": 2219248,
           "offset": 1329280,
           "size": 33,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_Z16HothBattleE_DrawP11WORLDINFO_s",
@@ -116711,7 +116711,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -116771,7 +116770,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -116831,7 +116829,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -116891,7 +116888,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -116951,7 +116947,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -117011,7 +117006,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -117082,7 +117076,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -117142,7 +117135,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -117184,7 +117176,6 @@
         "gameapi/ai/aisys/gameai_actions.cpp.o",
         "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/actions/movement/climbing.cpp.o",
         "legoapi/actions/movement/jumping.cpp.o",
@@ -117263,7 +117254,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -117323,7 +117313,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -117394,7 +117383,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -117454,7 +117442,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -117525,7 +117512,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -117585,7 +117571,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -117656,7 +117641,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -117716,7 +117700,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -117787,7 +117770,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -117847,7 +117829,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -117918,7 +117899,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -117978,7 +117958,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -118140,7 +118119,6 @@
         "gameapi/ai/aisys/gameai_actions.cpp.o",
         "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/actions/movement/climbing.cpp.o",
         "legoapi/actions/movement/jumping.cpp.o",
@@ -118190,7 +118168,6 @@
         "gameapi/ai/aisys/gameai_actions.cpp.o",
         "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/actions/movement/climbing.cpp.o",
         "legoapi/actions/movement/jumping.cpp.o",
@@ -118269,7 +118246,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -118329,7 +118305,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -118400,7 +118375,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -118460,7 +118434,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -118531,7 +118504,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -118591,7 +118563,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -118707,7 +118678,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -118767,7 +118737,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -118849,7 +118818,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -118909,7 +118877,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -118976,7 +118943,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -119125,7 +119091,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -119185,7 +119150,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -119251,7 +119215,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -119355,7 +119318,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -119415,7 +119377,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -119470,7 +119431,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -119586,7 +119546,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -119646,7 +119605,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -119717,7 +119675,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -119777,7 +119734,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -119848,7 +119804,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -119908,7 +119863,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -119979,7 +119933,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -120039,7 +119992,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -120105,7 +120057,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -120187,7 +120138,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -120247,7 +120197,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -120318,7 +120267,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -120378,7 +120326,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -120460,7 +120407,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -120520,7 +120466,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -120591,7 +120536,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -120651,7 +120595,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -120734,7 +120677,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -120794,7 +120736,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -120865,7 +120806,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -120925,7 +120865,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -120967,7 +120906,6 @@
         "gameapi/ai/aisys/gameai_actions.cpp.o",
         "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/actions/movement/climbing.cpp.o",
         "legoapi/actions/movement/jumping.cpp.o",
@@ -121046,7 +120984,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -121106,7 +121043,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -121177,7 +121113,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -121237,7 +121172,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -121308,7 +121242,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -121368,7 +121301,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -121439,7 +121371,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -121499,7 +121430,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -121633,7 +121563,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -121693,7 +121622,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -121764,7 +121692,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -121824,7 +121751,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -121895,7 +121821,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -121955,7 +121880,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -122316,7 +122240,6 @@
         "gameapi/ai/aisys/gameai_actions.cpp.o",
         "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/actions/movement/climbing.cpp.o",
         "legoapi/actions/movement/jumping.cpp.o",
@@ -122428,7 +122351,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -122488,7 +122410,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -122530,7 +122451,6 @@
         "gameapi/ai/aisys/gameai_actions.cpp.o",
         "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/actions/movement/climbing.cpp.o",
         "legoapi/actions/movement/jumping.cpp.o",
@@ -122580,7 +122500,6 @@
         "gameapi/ai/aisys/gameai_actions.cpp.o",
         "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/actions/movement/climbing.cpp.o",
         "legoapi/actions/movement/jumping.cpp.o",
@@ -122719,7 +122638,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -122779,7 +122697,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -122821,7 +122738,6 @@
         "gameapi/ai/aisys/gameai_actions.cpp.o",
         "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/actions/movement/climbing.cpp.o",
         "legoapi/actions/movement/jumping.cpp.o",
@@ -122871,7 +122787,6 @@
         "gameapi/ai/aisys/gameai_actions.cpp.o",
         "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/actions/movement/climbing.cpp.o",
         "legoapi/actions/movement/jumping.cpp.o",
@@ -122985,7 +122900,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -123045,7 +122959,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -123463,7 +123376,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -123523,7 +123435,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
@@ -123594,7 +123505,6 @@
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/snake.cpp.o",
-        "legoapi/actions/character/specialmoves.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/fighting.cpp.o",
@@ -123654,7 +123564,6 @@
         "legoapi/misc/androidbatman.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
-        "legoapi/misc/memory.cpp.o",
         "legoapi/misc/stream.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",

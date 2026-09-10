@@ -21,8 +21,8 @@ struct SPECIALMOVE_s {
 DECOMP_ASSERT(sizeof(SPECIALMOVE_s) == 0x10, "SPECIALMOVE size");
 DECOMP_ASSERT(offsetof(SPECIALMOVE_s, victim_animation) == 8, "SPECIALMOVE victim animation offset");
 DECOMP_ASSERT(offsetof(SPECIALMOVE_s, flags) == 10, "SPECIALMOVE flags offset");
-SPECIALMOVE_s *SpecialMove;
-i32 SpecialMoveCount;
+static SPECIALMOVE_s *SpecialMove;
+static i32 SpecialMoveCount;
 i32 LEGOCONTEXT_SPECIALMOVE_ATTACKER = -1;
 i32 LEGOCONTEXT_SPECIALMOVE_VICTIM = -1;
 
@@ -53,10 +53,13 @@ void SpecialMove_Cancel(GameObject_s *) {
 }
 
 u32 SpecialMove_GetFlags(i32 index, u32 mask) {
-    if (index == -1)
+    if (index == -1) {
         return 0;
-    u32 flags = SpecialMove[index].flags;
-    return mask == 0 ? flags : flags & mask;
+    }
+    if (mask != 0) {
+        return SpecialMove[index].flags & mask;
+    }
+    return SpecialMove[index].flags;
 }
 
 void SpecialMove_VictimCode(GameObject_s *) {

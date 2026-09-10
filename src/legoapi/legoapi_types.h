@@ -1847,7 +1847,16 @@ struct HINTUIBUTTON_s {
 };
 DECOMP_ASSERT(sizeof(HINTUIBUTTON_s) == 0xa8, "HINTUIBUTTON_s size");
 DECOMP_ASSERT(offsetof(HINTUIBUTTON_s, field_0x7c) == 0x7c, "HINTUIBUTTON_s pending hint offset");
-struct HOTHBATTLE_MELEE_s {};
+struct HOTHBATTLE_MELEE_s {
+    u8 field_0x0;
+    u8 field_0x1;
+    u8 field_0x2;
+    u8 field_0x3;
+    i8 field_0x4;
+    u8 field_0x5[3];
+    i32 field_0x8;
+};
+DECOMP_ASSERT(sizeof(HOTHBATTLE_MELEE_s) == 0xc, "HOTHBATTLE_MELEE_s ABI");
 struct HashRedirect;
 struct LANGUAGEDATA {
     i32 language;   // 0x00
@@ -4395,9 +4404,15 @@ DECOMP_ASSERT(offsetof(LEVER_s, floor_position) == 0x44, "LEVER movement target 
 DECOMP_ASSERT(offsetof(LEVER_s, name) == 0x5c, "LEVER name offset");
 DECOMP_ASSERT(offsetof(LEVER_s, position) == 0x6c, "LEVER position offset");
 DECOMP_ASSERT(offsetof(LEVER_s, flags) == 0x9c, "LEVER flags offset");
+struct LevelEditorScene {
+    u8 data[0xa8];
+};
+DECOMP_ASSERT(sizeof(LevelEditorScene) == 0xa8, "LevelEditorScene ABI");
+
 struct LevelEditor {
     u8 pad_0x000[0x2a0];
     i32 reset_pending;
+    LevelEditorScene scenes[10]; // 0x2a4
 
     void AddInfoText(char *);
     void AddScene(char *, nugscn_s *, i32);
@@ -4414,7 +4429,7 @@ struct LevelEditor {
     void Exit();
     void FindSceneId(char *);
     void Flush();
-    void GetEdScene(i32);
+    LevelEditorScene *GetEdScene(i32);
     void GetScene(char *);
     void GetScene(i32);
     void Initalise(variptr_u &, variptr_u &, i32);
@@ -4436,6 +4451,7 @@ struct LevelEditor {
     void WriteStream(EdFileOutputStream &);
 };
 DECOMP_ASSERT(offsetof(LevelEditor, reset_pending) == 0x2a0, "LevelEditor reset_pending offset");
+DECOMP_ASSERT(offsetof(LevelEditor, scenes) == 0x2a4, "LevelEditor scenes offset");
 struct MemoryManager {
     usize cursor;
     usize end;

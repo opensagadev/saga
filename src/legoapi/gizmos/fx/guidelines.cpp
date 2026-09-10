@@ -34,12 +34,16 @@ static i32 GuideLine_GetNumOutputs(GIZMO *gizmo) {
     return 1;
 }
 
-static void GuideLine_Activate(GIZMO *gizmo, i32) {
-    UNIMPLEMENTED();
+static void GuideLine_Activate(GIZMO *gizmo, i32 active) {
+    if (gizmo != NULL) {
+        static_cast<GUIDELINE *>(gizmo->object)->active = active != 0;
+    }
 }
 
-static void GuideLine_SetVisibility(GIZMO *gizmo, i32) {
-    UNIMPLEMENTED();
+static void GuideLine_SetVisibility(GIZMO *gizmo, i32 visible) {
+    if (gizmo != NULL) {
+        static_cast<GUIDELINE *>(gizmo->object)->visible = visible != 0;
+    }
 }
 
 static void *GuideLines_AllocateProgressData(VARIPTR *, VARIPTR *) {

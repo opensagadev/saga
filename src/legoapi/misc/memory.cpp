@@ -10,12 +10,9 @@
 // recycled by the pop path below (memset of the requested size only), while a
 // fresh carve rounds up to the full 32-byte block and updates the counters.
 void *MemoryManager::AllocPool(u32 size, i32 zero) {
-    i32 size_class;
-    if ((i32)(size - 1) < 0) {
-        size_class = (i32)(size + 0x1e) >> 5;
-    } else {
-        size_class = (i32)(size - 1) >> 5;
-    }
+    const i32 adjusted_size =
+        static_cast<i32>(size - 1) < 0 ? static_cast<i32>(size + 0x1e) : static_cast<i32>(size - 1);
+    const i32 size_class = adjusted_size >> 5;
 
     void **free_head = &free_lists[size_class];
     void *item = *free_head;
@@ -45,12 +42,9 @@ void *MemoryManager::AllocPool(u32 size, i32 zero) {
 // MemoryManager::FreePool @0x425810: pushes the block onto its size class's
 // free list (the next AllocPool of that class pops it, first word = next).
 void MemoryManager::FreePool(void *item, u32 size) {
-    i32 size_class;
-    if ((i32)(size - 1) < 0) {
-        size_class = (i32)(size + 0x1e) >> 5;
-    } else {
-        size_class = (i32)(size - 1) >> 5;
-    }
+    const i32 adjusted_size =
+        static_cast<i32>(size - 1) < 0 ? static_cast<i32>(size + 0x1e) : static_cast<i32>(size - 1);
+    const i32 size_class = adjusted_size >> 5;
 
     void **free_head = &free_lists[size_class];
     *reinterpret_cast<void **>(item) = *free_head;
