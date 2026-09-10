@@ -336,7 +336,8 @@ void edSpline_FindAllBeg(nugscn_s *, char *, nugspline_s **, i32) {
 void edSpline_FindAllSub(nugscn_s *, char *, nugspline_s **, i32) {
 }
 
-void edSpline_SplineFind(nugscn_s *, char *) {
+nugspline_s *edSpline_SplineFind(nugscn_s *, char *) {
+    return NULL;
 }
 
 void edSpline_SplineList(nugscn_s *) {
