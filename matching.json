@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 36.86763,
+    "fuzzy_match_percent": 36.874073,
     "total_code": "4722419",
-    "matched_code": "348937",
-    "matched_code_percent": 7.3889465,
+    "matched_code": "348942",
+    "matched_code_percent": 7.3890524,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4121,
-    "matched_functions_percent": 30.618917,
+    "matched_functions": 4122,
+    "matched_functions_percent": 30.626348,
     "total_units": 1
   },
   "text": {
@@ -69402,14 +69402,6 @@
           "match_percent": 18.224138
         },
         {
-          "name": "_Z20MenuUpdateSelectModeP6MENU_s",
-          "demangled_name": "MenuUpdateSelectMode(MENU_s*)",
-          "address": 1790368,
-          "offset": 900400,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
           "name": "_Z18MenuDrawSelectModeP6MENU_s",
           "demangled_name": "MenuDrawSelectMode(MENU_s*)",
           "address": 1790384,
@@ -70343,7 +70335,7 @@
           "address": 4391712,
           "offset": 3501744,
           "size": 2088,
-          "match_percent": 94.65141
+          "match_percent": 95.331154
         },
         {
           "name": "DrawMenuEntry",
@@ -85236,7 +85228,7 @@
           "address": 1733584,
           "offset": 843616,
           "size": 2007,
-          "match_percent": 1.014493
+          "match_percent": 14.719807
         },
         {
           "name": "_Z24Hub_UpdateFreePlaySelectv",
@@ -85244,7 +85236,7 @@
           "address": 1736304,
           "offset": 846336,
           "size": 4058,
-          "match_percent": 9.455767
+          "match_percent": 9.708847
         },
         {
           "name": "_Z8Hub_LoadP11WORLDINFO_sP9variptr_uS2_",
@@ -85421,6 +85413,14 @@
           "offset": 886880,
           "size": 1979,
           "match_percent": 81.2679
+        },
+        {
+          "name": "_Z20MenuUpdateSelectModeP6MENU_s",
+          "demangled_name": "MenuUpdateSelectMode(MENU_s*)",
+          "address": 1790368,
+          "offset": 900400,
+          "size": 5,
+          "match_percent": 100.0
         },
         {
           "name": "_Z20Hub_ActivateDoorMenuPP11LEVELDATA_s",

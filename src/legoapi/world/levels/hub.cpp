@@ -163,6 +163,7 @@ static GIZMO *hub_minikitviewer_gizmo = NULL;
 static NUGSPLINE *hub_minikitviewer_camspl = NULL;
 static f32 freeplaytime = 0.0f;
 static f32 freeplayduration = 0.0f;
+static f32 selectmodeduration = 0.0f;
 static i32 fpcount = 0;
 static APICHARACTERMODELLIST_s fplist[341] = {};
 static f32 stats_xscale = 1.0f;
@@ -1938,6 +1939,69 @@ static void Hub_MakeFreePlayList(i32 first_model, i32 second_model) {
 }
 
 static __used__ void Hub_UpdateSelectMode() {
+    MENU *menu = &GameMenu[GameMenuLevel];
+
+    if (selectmodemode == 2 || selectmodemode == 3) {
+        selectmodetime += FRAMETIME;
+        if (selectmodetime < selectmodeduration) {
+            return;
+        }
+
+        if (selectmodemode == 3) {
+            WipeBackToHub();
+            return;
+        }
+
+        if (NewLData != NULL) {
+            return;
+        }
+        NextArea_FreePlay = 0;
+        FreePlay = 0;
+        NewLData = &LDataList[hub_new_level];
+        loadareacharacters_no_backdrop_reset = 1;
+        const FADETYPE fade = {FADE_TYPE_STILL};
+        FadeSys.SetFade(fade, 0);
+        FinishLoop_On = 0;
+        return;
+    }
+
+    if (menu->cancel_pressed != 0) {
+        MenuSFX = GameAudio_GetSfxId(0x31);
+        selectmodetime = 0.0f;
+        selectmodemode = 3;
+        selectmodeduration = 0.6f;
+        return;
+    }
+    if (menu->confirm_pressed == 0) {
+        hub_selectmode = menu->selected_item;
+        return;
+    }
+
+    const i32 area = LDataList[hub_new_level].area_index;
+    hub_selectmode = menu->selected_item;
+    if (hub_selectmode == 0) {
+        MenuSFX = GameAudio_GetSfxId(0x30);
+        selectmodetime = 0.0f;
+        selectmodemode = 2;
+        selectmodeduration = 0.6f;
+        return;
+    }
+    if (hub_selectmode == 1 && area >= 0 && area < AREACOUNT &&
+        (LOSTTEMPLE_ADATA == NULL || area != LOSTTEMPLE_ADATA->index) && FreePlayUnlocked() &&
+        (ADataList[area].flags & AREAFLAG_NO_FREEPLAY) == 0 && Game_AreaSave != NULL &&
+        Game_AreaSave[area].area_complete != 0) {
+        MenuSFX = GameAudio_GetSfxId(0x30);
+        hub_freeplaysource = 0;
+        Hub_InitFreePlaySelect(area, -1, -1);
+        NewMenu(17, -1, -1);
+        return;
+    }
+
+    MenuSFX = GameAudio_GetSfxId(0x32);
+}
+
+void MenuUpdateSelectMode(MENU_s *) {
+    Hub_UpdateSelectMode();
 }
 
 static __used__ void Hub_DrawBonusModeMenu(int, float) {
