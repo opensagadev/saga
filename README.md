@@ -59,7 +59,7 @@ See https://ttdecomp.github.io/saga/
 | Directory | Fuzzy % | Funcs % |
 |---|---:|---:|
 | `(root)` | 62.0% | 50.0% |
-| `MechInputTouch` | 15.6% | 23.1% |
+| `MechInputTouch` | 15.7% | 23.9% |
 | `editor` | 3.2% | 2.3% |
 | `gameapi` | 24.1% | 14.4% |
 | `gameframework` | 100.0% | 52.9% |

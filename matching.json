@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 36.926826,
+    "fuzzy_match_percent": 36.92953,
     "total_code": "4722419",
-    "matched_code": "349796",
-    "matched_code_percent": 7.4071364,
+    "matched_code": "349944",
+    "matched_code_percent": 7.4102697,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4142,
-    "matched_functions_percent": 30.774944,
+    "matched_functions": 4146,
+    "matched_functions_percent": 30.804667,
     "total_units": 1
   },
   "text": {
@@ -15142,7 +15142,7 @@
           "address": 4459184,
           "offset": 3569216,
           "size": 29,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN30MechInputTouchButtonControlledD2Ev",
@@ -15150,7 +15150,7 @@
           "address": 4459184,
           "offset": 3569216,
           "size": 29,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN30MechInputTouchButtonControlled16ControlledUpdateEPK16NuInputTouchData",
@@ -15182,7 +15182,7 @@
           "address": 4459376,
           "offset": 3569408,
           "size": 45,
-          "match_percent": 22.384615
+          "match_percent": 100.0
         },
         {
           "name": "_ZN20MechInputTouchButtonD0Ev",
@@ -15190,7 +15190,7 @@
           "address": 4459424,
           "offset": 3569456,
           "size": 45,
-          "match_percent": 22.384615
+          "match_percent": 100.0
         },
         {
           "name": "_ZN30MechInputTouchButtonControlled15ControlledResetEv",

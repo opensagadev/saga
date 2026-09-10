@@ -245,7 +245,8 @@ struct MechInputTouchButton : NuTouchInputElement {
     void FindPossibleTriggeringIndexFromID(u32);
     MechInputTouchButton(NuTouchInputElement::TYPE, i32, i32);
     MechInputTouchButton(i32, u32, float, float, float, float, i32);
-    virtual ~MechInputTouchButton();
+    virtual ~MechInputTouchButton() {
+    }
     virtual void Render();
     virtual void Update(NuInputTouchData const *);
     virtual void Reset();
@@ -263,7 +264,8 @@ struct MechInputTouchButton : NuTouchInputElement {
 };
 struct MechInputTouchButtonControlled : MechInputTouchButton {
     MechInputTouchButtonControlled(MechInputTouchMainController &, i32);
-    virtual ~MechInputTouchButtonControlled();
+    virtual ~MechInputTouchButtonControlled() {
+    }
     virtual void Reset();
     virtual bool ControlledUpdate(NuInputTouchData const *);
     virtual void ControlledRender();

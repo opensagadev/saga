@@ -23,9 +23,6 @@ MechInputTouchButton::MechInputTouchButton(i32, u32, float, float, float, float,
     : NuTouchInputElement(NuTouchInputElement::TYPE(), 0, 0) {
 }
 
-__attribute__((weak)) MechInputTouchButton::~MechInputTouchButton() {
-}
-
 __attribute__((weak)) void MechInputTouchButton::Render() {
 }
 
@@ -91,9 +88,6 @@ MechInputTouchMainDummyButton::MechInputTouchMainDummyButton(MechInputTouchMainC
 
 MechInputTouchButtonControlled::MechInputTouchButtonControlled(MechInputTouchMainController &, i32 index)
     : MechInputTouchButton(NuTouchInputElement::TYPE(), 2, 0), controller_index(index) {
-}
-
-__attribute__((weak)) MechInputTouchButtonControlled::~MechInputTouchButtonControlled() {
 }
 
 __attribute__((weak)) bool MechInputTouchButtonControlled::ControlledUpdate(NuInputTouchData const *) {
