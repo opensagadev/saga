@@ -2444,19 +2444,9 @@ extern "C" {
     }
     static void NuFramebufferSwapBuffers(void) {
     }
-    void NuLightAddSpot(void) {
-    }
-    void NuLightFogG(void) {
-    }
-    void NuLightFogPal(void) {
-    }
     void NuLightFogX(f32 near_distance, f32 far_distance, u32 colour, f32, f32, i32, f32 density) {
         NuRndrStateSetFogEnabled(1);
         NuRndrStateSetFogState(near_distance, far_distance, colour, density);
-    }
-    void NuLightInit(void) {
-    }
-    void NuLightMatInit(void) {
     }
     i32 speedblur_enabled = 1;
     f32 NuLightsx, NuLightsy;
@@ -2482,8 +2472,6 @@ extern "C" {
     void NuLightSpeedBlurScale(f32 x, f32 y) {
         NuLightsx = x;
         NuLightsy = y;
-    }
-    void NuLightSpotFadeSet(u32) {
     }
     void NuLgtArcLaser(void) {
     }
@@ -2958,11 +2946,7 @@ extern "C" {
     }
     void NuTimeBarSlotSetEx(void) {
     }
-    void NuWaterInit(void) {
-    }
     void NuWaterOverride(void) {
-    }
-    void NuWaterRender(void) {
     }
 
     // ---------------------------------------------------------------------------
@@ -3637,10 +3621,6 @@ extern "C" {
     }
     void NuGSceneSetCrossFadeAlpha(void) {
     }
-    void NuGHGPostRelocateFixupPS(void) {
-    }
-    void NuGHGPreRelocateFixupPS(void) {
-    }
     void NuGHGRelocate(void) {
     }
 
@@ -3699,9 +3679,6 @@ extern "C" {
     }
     void NuPs2VideoScreenDump(void) {
     }
-    void NuPs2VideoSetPos(void) {
-    }
-
     // ---------------------------------------------------------------------------
     // Culling / visibility / portals / occlusion
     // ---------------------------------------------------------------------------
@@ -4018,10 +3995,6 @@ extern "C" {
     // Thread / misc OS
     // ---------------------------------------------------------------------------
 
-    void NuDisableVBlankE(void) {
-    }
-    void NuEnableVBlankE(void) {
-    }
 #ifndef ANDROID
     void NuGetCurrentThreadId(void) {
     }
@@ -4042,8 +4015,6 @@ extern "C" {
 
     void NuSetGetHGObjFromIndxFn(NUGCUTSCENEGETHGOBJFN function) {
         NuCutSceneGetHGObj = function;
-    }
-    void NuSetPadDemoEndButtons(u32) {
     }
     void NuSetCutSceneCharacterCreateDataFn(NUGCUTSCENECHARACTERCREATEDATAFN function) {
         NuCutSceneCharacterCreateData = function;
@@ -4205,13 +4176,6 @@ struct nushaderobject_s;
 union variptr_u;
 
 void NuXboxLiveInit() {
-}
-void NuPs2PadDemoEnd() {
-}
-i32 NuPs2GetLanguage() {
-    return 0;
-}
-void NuPs2PadSetMotors(nupad_s *, i32, i32) {
 }
 void Nu360ConfigureSMBSharing(char **) {
 }

@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 36.860447,
+    "fuzzy_match_percent": 36.864872,
     "total_code": "4722419",
-    "matched_code": "348597",
-    "matched_code_percent": 7.3817463,
+    "matched_code": "348807",
+    "matched_code_percent": 7.3861933,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4065,
-    "matched_functions_percent": 30.202839,
+    "matched_functions": 4100,
+    "matched_functions_percent": 30.462889,
     "total_units": 1
   },
   "text": {
@@ -76233,30 +76233,6 @@
           "match_percent": 8.571428
         },
         {
-          "name": "_Z18ScreenDumpAviBeginiPciiiiffi",
-          "demangled_name": "ScreenDumpAviBegin(int, char*, int, int, int, int, float, float, int)",
-          "address": 3241029,
-          "offset": 2351061,
-          "size": 10,
-          "match_percent": 0.0
-        },
-        {
-          "name": "_Z16ScreenDumpAviEndv",
-          "demangled_name": "ScreenDumpAviEnd()",
-          "address": 3241039,
-          "offset": 2351071,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "_Z18ScreenDumpAviFramev",
-          "demangled_name": "ScreenDumpAviFrame()",
-          "address": 3241044,
-          "offset": 2351076,
-          "size": 10,
-          "match_percent": 0.0
-        },
-        {
           "name": "_Z11RenderQuadsPs",
           "demangled_name": "RenderQuads(short*)",
           "address": 3718160,
@@ -89039,46 +89015,6 @@
           "match_percent": 7.983333
         },
         {
-          "name": "_Z16NuRndrFlickerEndv",
-          "demangled_name": "NuRndrFlickerEnd()",
-          "address": 3238594,
-          "offset": 2348626,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "_Z17NuRndrSetXYOffsetii",
-          "demangled_name": "NuRndrSetXYOffset(int, int)",
-          "address": 3238624,
-          "offset": 2348656,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "_Z16NuRndrSetScissoriiii",
-          "demangled_name": "NuRndrSetScissor(int, int, int, int)",
-          "address": 3238639,
-          "offset": 2348671,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "_Z10NuRndrGobjP8nugobj_sP7numtx_s",
-          "demangled_name": "NuRndrGobj(nugobj_s*, numtx_s*)",
-          "address": 3238707,
-          "offset": 2348739,
-          "size": 10,
-          "match_percent": 0.0
-        },
-        {
-          "name": "_Z19NuRndrBurstObjBeginP8nugobj_sPFvP12rndrstream_sP7numtx_siE",
-          "demangled_name": "NuRndrBurstObjBegin(nugobj_s*, void (*)(rndrstream_s*, numtx_s*, int))",
-          "address": 3238737,
-          "offset": 2348769,
-          "size": 10,
-          "match_percent": 0.0
-        },
-        {
           "name": "NuRndrSetDirectionalLights",
           "demangled_name": "NuRndrSetDirectionalLights",
           "address": 3841260,
@@ -89978,86 +89914,6 @@
           "offset": 2295968,
           "size": 131,
           "match_percent": 99.98
-        },
-        {
-          "name": "NuRndrAddShadowPrims",
-          "demangled_name": "NuRndrAddShadowPrims",
-          "address": 3238473,
-          "offset": 2348505,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuRndrShadowInit",
-          "demangled_name": "NuRndrShadowInit",
-          "address": 3238554,
-          "offset": 2348586,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuRndrTrailEx",
-          "demangled_name": "NuRndrTrailEx",
-          "address": 3238559,
-          "offset": 2348591,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuRndrAddFootPrint",
-          "demangled_name": "NuRndrAddFootPrint",
-          "address": 3238574,
-          "offset": 2348606,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuMtlReadEventSetHandler",
-          "demangled_name": "NuMtlReadEventSetHandler",
-          "address": 3238604,
-          "offset": 2348636,
-          "size": 10,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuRndrFootPrints",
-          "demangled_name": "NuRndrFootPrints",
-          "address": 3238634,
-          "offset": 2348666,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuRndrDither",
-          "demangled_name": "NuRndrDither",
-          "address": 3238727,
-          "offset": 2348759,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuRndrBurstObjEnd",
-          "demangled_name": "NuRndrBurstObjEnd",
-          "address": 3238732,
-          "offset": 2348764,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuRndrBurstObjAdd",
-          "demangled_name": "NuRndrBurstObjAdd",
-          "address": 3238747,
-          "offset": 2348779,
-          "size": 10,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuRndrBurstObjAddNoClip",
-          "demangled_name": "NuRndrBurstObjAddNoClip",
-          "address": 3238757,
-          "offset": 2348789,
-          "size": 5,
-          "match_percent": 0.0
         }
       ]
     },
@@ -93018,6 +92874,300 @@
           "address": 2559344,
           "offset": 1669376,
           "size": 5,
+          "match_percent": 100.0
+        }
+      ]
+    },
+    {
+      "name": "nu2api/nucore/android/stubs_android.cpp.o",
+      "source": "src/nu2api/nucore/android/stubs_android.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/stubs_android.o",
+      "functions": [
+        {
+          "name": "NuRndrAddShadowPrims",
+          "demangled_name": "NuRndrAddShadowPrims",
+          "address": 3238473,
+          "offset": 2348505,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z17NuPs2PadSetMotorsP7nupad_sii",
+          "demangled_name": "NuPs2PadSetMotors(nupad_s*, int, int)",
+          "address": 3238529,
+          "offset": 2348561,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuSetPadDemoEndButtons",
+          "demangled_name": "NuSetPadDemoEndButtons",
+          "address": 3238534,
+          "offset": 2348566,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuPs2VideoSetPos",
+          "demangled_name": "NuPs2VideoSetPos",
+          "address": 3238539,
+          "offset": 2348571,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuWaterInit",
+          "demangled_name": "NuWaterInit",
+          "address": 3238549,
+          "offset": 2348581,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRndrShadowInit",
+          "demangled_name": "NuRndrShadowInit",
+          "address": 3238554,
+          "offset": 2348586,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRndrTrailEx",
+          "demangled_name": "NuRndrTrailEx",
+          "address": 3238559,
+          "offset": 2348591,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuLightMatInit",
+          "demangled_name": "NuLightMatInit",
+          "address": 3238564,
+          "offset": 2348596,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRndrAddFootPrint",
+          "demangled_name": "NuRndrAddFootPrint",
+          "address": 3238574,
+          "offset": 2348606,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuLightFogG",
+          "demangled_name": "NuLightFogG",
+          "address": 3238579,
+          "offset": 2348611,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z16NuRndrFlickerEndv",
+          "demangled_name": "NuRndrFlickerEnd()",
+          "address": 3238594,
+          "offset": 2348626,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuLightSpotFadeSet",
+          "demangled_name": "NuLightSpotFadeSet",
+          "address": 3238599,
+          "offset": 2348631,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuMtlReadEventSetHandler",
+          "demangled_name": "NuMtlReadEventSetHandler",
+          "address": 3238604,
+          "offset": 2348636,
+          "size": 10,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z16NuPs2GetLanguagev",
+          "demangled_name": "NuPs2GetLanguage()",
+          "address": 3238614,
+          "offset": 2348646,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z17NuRndrSetXYOffsetii",
+          "demangled_name": "NuRndrSetXYOffset(int, int)",
+          "address": 3238624,
+          "offset": 2348656,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRndrFootPrints",
+          "demangled_name": "NuRndrFootPrints",
+          "address": 3238634,
+          "offset": 2348666,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z16NuRndrSetScissoriiii",
+          "demangled_name": "NuRndrSetScissor(int, int, int, int)",
+          "address": 3238639,
+          "offset": 2348671,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuGHGPreRelocateFixupPS",
+          "demangled_name": "NuGHGPreRelocateFixupPS",
+          "address": 3238644,
+          "offset": 2348676,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuGHGPostRelocateFixupPS",
+          "demangled_name": "NuGHGPostRelocateFixupPS",
+          "address": 3238649,
+          "offset": 2348681,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuLightInit",
+          "demangled_name": "NuLightInit",
+          "address": 3238654,
+          "offset": 2348686,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z10NuRndrGobjP8nugobj_sP7numtx_s",
+          "demangled_name": "NuRndrGobj(nugobj_s*, numtx_s*)",
+          "address": 3238707,
+          "offset": 2348739,
+          "size": 10,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z15NuPs2PadDemoEndv",
+          "demangled_name": "NuPs2PadDemoEnd()",
+          "address": 3238717,
+          "offset": 2348749,
+          "size": 10,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRndrDither",
+          "demangled_name": "NuRndrDither",
+          "address": 3238727,
+          "offset": 2348759,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRndrBurstObjEnd",
+          "demangled_name": "NuRndrBurstObjEnd",
+          "address": 3238732,
+          "offset": 2348764,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z19NuRndrBurstObjBeginP8nugobj_sPFvP12rndrstream_sP7numtx_siE",
+          "demangled_name": "NuRndrBurstObjBegin(nugobj_s*, void (*)(rndrstream_s*, numtx_s*, int))",
+          "address": 3238737,
+          "offset": 2348769,
+          "size": 10,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRndrBurstObjAdd",
+          "demangled_name": "NuRndrBurstObjAdd",
+          "address": 3238747,
+          "offset": 2348779,
+          "size": 10,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRndrBurstObjAddNoClip",
+          "demangled_name": "NuRndrBurstObjAddNoClip",
+          "address": 3238757,
+          "offset": 2348789,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuEnableVBlankE",
+          "demangled_name": "NuEnableVBlankE",
+          "address": 3238762,
+          "offset": 2348794,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuDisableVBlankE",
+          "demangled_name": "NuDisableVBlankE",
+          "address": 3238767,
+          "offset": 2348799,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuLightFogPal",
+          "demangled_name": "NuLightFogPal",
+          "address": 3238772,
+          "offset": 2348804,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuWaterRender",
+          "demangled_name": "NuWaterRender",
+          "address": 3238777,
+          "offset": 2348809,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuLightAddSpot",
+          "demangled_name": "NuLightAddSpot",
+          "address": 3238782,
+          "offset": 2348814,
+          "size": 5,
+          "match_percent": 100.0
+        }
+      ]
+    },
+    {
+      "name": "nu2api/nucore/android/stubvideo.cpp.o",
+      "source": "src/nu2api/nucore/android/stubvideo.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/stubvideo.o",
+      "functions": [
+        {
+          "name": "_Z18ScreenDumpAviBeginiPciiiiffi",
+          "demangled_name": "ScreenDumpAviBegin(int, char*, int, int, int, int, float, float, int)",
+          "address": 3241029,
+          "offset": 2351061,
+          "size": 10,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z16ScreenDumpAviEndv",
+          "demangled_name": "ScreenDumpAviEnd()",
+          "address": 3241039,
+          "offset": 2351071,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z18ScreenDumpAviFramev",
+          "demangled_name": "ScreenDumpAviFrame()",
+          "address": 3241044,
+          "offset": 2351076,
+          "size": 10,
           "match_percent": 100.0
         }
       ]
@@ -98960,142 +99110,6 @@
           "offset": 2331888,
           "size": 9,
           "match_percent": 100.0
-        },
-        {
-          "name": "_Z17NuPs2PadSetMotorsP7nupad_sii",
-          "demangled_name": "NuPs2PadSetMotors(nupad_s*, int, int)",
-          "address": 3238529,
-          "offset": 2348561,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuSetPadDemoEndButtons",
-          "demangled_name": "NuSetPadDemoEndButtons",
-          "address": 3238534,
-          "offset": 2348566,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuPs2VideoSetPos",
-          "demangled_name": "NuPs2VideoSetPos",
-          "address": 3238539,
-          "offset": 2348571,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuWaterInit",
-          "demangled_name": "NuWaterInit",
-          "address": 3238549,
-          "offset": 2348581,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuLightMatInit",
-          "demangled_name": "NuLightMatInit",
-          "address": 3238564,
-          "offset": 2348596,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuLightFogG",
-          "demangled_name": "NuLightFogG",
-          "address": 3238579,
-          "offset": 2348611,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuLightSpotFadeSet",
-          "demangled_name": "NuLightSpotFadeSet",
-          "address": 3238599,
-          "offset": 2348631,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "_Z16NuPs2GetLanguagev",
-          "demangled_name": "NuPs2GetLanguage()",
-          "address": 3238614,
-          "offset": 2348646,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuGHGPreRelocateFixupPS",
-          "demangled_name": "NuGHGPreRelocateFixupPS",
-          "address": 3238644,
-          "offset": 2348676,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuGHGPostRelocateFixupPS",
-          "demangled_name": "NuGHGPostRelocateFixupPS",
-          "address": 3238649,
-          "offset": 2348681,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuLightInit",
-          "demangled_name": "NuLightInit",
-          "address": 3238654,
-          "offset": 2348686,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "_Z15NuPs2PadDemoEndv",
-          "demangled_name": "NuPs2PadDemoEnd()",
-          "address": 3238717,
-          "offset": 2348749,
-          "size": 10,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuEnableVBlankE",
-          "demangled_name": "NuEnableVBlankE",
-          "address": 3238762,
-          "offset": 2348794,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuDisableVBlankE",
-          "demangled_name": "NuDisableVBlankE",
-          "address": 3238767,
-          "offset": 2348799,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuLightFogPal",
-          "demangled_name": "NuLightFogPal",
-          "address": 3238772,
-          "offset": 2348804,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuWaterRender",
-          "demangled_name": "NuWaterRender",
-          "address": 3238777,
-          "offset": 2348809,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuLightAddSpot",
-          "demangled_name": "NuLightAddSpot",
-          "address": 3238782,
-          "offset": 2348814,
-          "size": 5,
-          "match_percent": 0.0
         },
         {
           "name": "NuScratchReset",
@@ -131096,7 +131110,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 516,
+    "bazel_units": 518,
     "functions": 13454,
     "assigned_functions": 12290,
     "ambiguous_functions": 235,

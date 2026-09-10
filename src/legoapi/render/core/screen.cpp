@@ -161,9 +161,6 @@ i8 IsGrabbingScreen() {
 void LoadShaderSource(char **, i32 *, u32, bool) {
 }
 
-void ScreenDumpAviEnd() {
-}
-
 void UpdateCutBorders() {
     f32 target_scale = 1.0f;
 
@@ -234,12 +231,6 @@ void HandleStillRender() {
 }
 
 void PreRenderFlashHack() {
-}
-
-void ScreenDumpAviBegin(i32, char *, i32, i32, i32, i32, float, float, i32) {
-}
-
-void ScreenDumpAviFrame() {
 }
 
 void UCStretchToCorners(i16 *, i16 *) {

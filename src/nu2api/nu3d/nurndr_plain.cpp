@@ -458,8 +458,6 @@ extern "C" void NuMtlFindVariantMtl(void) {
 }
 extern "C" void NuMtlFindVariantMtlFromDesc(void) {
 }
-extern "C" void NuMtlReadEventSetHandler(void) {
-}
 extern "C" void NuMtlRegisterForOverride(void) {
 }
 extern "C" void NuMtlSetRenderPlane(void) {
@@ -471,10 +469,6 @@ extern "C" void NuMtlSpecialSetUV(void) {
 
 // Debug / visualisation geometry
 extern "C" void NuRndr3dLine(void) {
-}
-extern "C" void NuRndrAddFootPrint(void) {
-}
-extern "C" void NuRndrAddShadowPrims(void) {
 }
 extern "C" void NuRndrAnglesZX(NUVEC *direction, NUVEC *angles) {
     NUVEC rotated;
@@ -510,12 +504,6 @@ extern "C" void NuRndrAxisBright(void) {
 }
 extern "C" void NuRndrBoundingBox(void) {
 }
-extern "C" void NuRndrBurstObjAdd(void) {
-}
-extern "C" void NuRndrBurstObjAddNoClip(void) {
-}
-extern "C" void NuRndrBurstObjEnd(void) {
-}
 extern "C" void NuRndrCircle(void) {
 }
 extern "C" f32 *NuRndrCreateBlendShapeDeformerWeightsArray(i32 count) {
@@ -536,15 +524,11 @@ f32 **NuRndrCreateBlendShapeDWAPointers(i32 count) {
     }
     return rndr_blend_shape_deformer_wt_ptrs + rndr_blend_shape_deformer_wt_ptrs_cnt;
 }
-extern "C" void NuRndrDither(void) {
-}
 extern "C" void NuRndrEndReflectionRender(void) {
     NuSpecialReflection(0);
 }
 extern "C" void NuRndrEndShadowReceiveRender(void) {
     global_GobjIsShadowReceive = 0;
-}
-extern "C" void NuRndrFootPrints(void) {
 }
 extern "C" void NuRndrFx(i32 paused, void *) {
     if (NuRndrBeginSceneEx(-1, -2, 0) != 0) {
@@ -1194,8 +1178,6 @@ extern "C" void NuRndrShadPolys(void *) {
 }
 extern "C" void NuRndrShadowDirCol(const NUVEC *, u32, f32, f32) {
 }
-extern "C" void NuRndrShadowInit(u8 *) {
-}
 static inline void NuRndrPrimPosition(f32 x, f32 y, f32 z) {
     PrimVertexRaw *vertex = (PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr;
     vertex->x = x;
@@ -1448,8 +1430,6 @@ extern "C" i32 NuRndrStrip3d(NURND_VERTEX3D *vertices, numtl_s *material, NUMTX 
         g_NuPrim_VertexCount += count;
     NuPrim3DEnd();
     return 1;
-}
-extern "C" void NuRndrTrailEx(void) {
 }
 extern "C" void NuRndrTri3dClip(void) {
 }

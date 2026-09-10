@@ -95,29 +95,17 @@ void NuRndrStreamInit(i32 stream_buffer_size, VARIPTR *buffer) {
     rndrstream_free.addr = ALIGN(rndrstream[0].addr, 16);
 }
 
-void NuRndrGobj(nugobj_s *, numtx_s *) {
-}
-
 void NuRndrFlush(i32) {
 }
 
 void NuRndrRectUV2d(float, float, float, float, float, float, float, float, float, i32, numtl_s *) {
 }
 
-void NuRndrFlickerEnd() {
-}
-
 void NuRndrRectUV2diZ(i32, i32, i32, i32, float, float, float, float, i32, numtl_s *, i32) {
-}
-
-void NuRndrSetScissor(i32, i32, i32, i32) {
 }
 
 void NuRndrInitGeneric() {
     NuVpResetRegions();
-}
-
-void NuRndrSetXYOffset(i32, i32) {
 }
 
 void NuRndrGradRect2diZ(i32, i32, i32, i32, i32 *, numtl_s *, i32) {
@@ -125,9 +113,6 @@ void NuRndrGradRect2diZ(i32, i32, i32, i32, i32 *, numtl_s *, i32) {
 
 void NuRndrParticleDraw(variptr_u *, PartHeader *, uv1debdata *, float, numtx_s *, i32 *, float, i32, numtl_s *, float,
                         float) {
-}
-
-void NuRndrBurstObjBegin(nugobj_s *, void (*)(rndrstream_s *, numtx_s *, i32)) {
 }
 
 void NuRndrRectUV2dNoScale(float, float, float, float, float, float, float, float, i32, numtl_s *) {
