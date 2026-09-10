@@ -311,11 +311,11 @@ struct TouchHacks {
     void CalculateXZVelForArcToHitPoint(VuVec const &, VuVec const &, float, float);
     static i32 CanBlowupBeBlownUp(GIZMOBLOWUP_s &, i32);
     void CanForceTargetObj(GameObject_s &, GameObject_s &);
-    void CanJump(GameObject_s &);
+    static bool CanJump(GameObject_s &);
     void CanJumpToPoint(GameObject_s &, AIPATHNODE_s const &);
     void CanJumpToPoint(GameObject_s &, VuVec const &);
     static bool CanLunge(GameObject_s &);
-    void CanPoo(GameObject_s &);
+    static bool CanPoo(GameObject_s &);
     static bool CanShoot(GameObject_s &);
     static bool CanSlam(GameObject_s &);
     void CanTagTo(GameObject_s &, GameObject_s &);
@@ -328,7 +328,7 @@ struct TouchHacks {
     static bool CanUseHatMachine(GameObject_s &);
     static bool CanUseLever(GameObject_s &);
     static bool CanUseTeleport(GameObject_s &);
-    void CanUseVehicleSmartBomb(GameObject_s &);
+    static bool CanUseVehicleSmartBomb(GameObject_s &);
     static bool CanUseZipup(GameObject_s &);
     static bool CheckForAboutToRunIntoKillTerrain(GameObject_s &, float);
     void CheckForAboutToRunOffAnEdge(GameObject_s &, float);

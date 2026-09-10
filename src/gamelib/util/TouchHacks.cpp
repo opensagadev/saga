@@ -2,10 +2,12 @@
 
 #include "globals.h"
 #include "legoapi/core/input/qrand.h"
+#include "legoapi/core/config/cheat.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/items/base/apiobject.h"
+#include "legoapi/items/base/collection.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/numath/nufloat.h"
@@ -21,6 +23,7 @@ bool TouchHacks::TouchControlsActive;
 extern i32 BonusArea;
 extern "C" i16 id_GRABCONTROL, id_WICKET, id_EWOK;
 extern "C" i16 id_ATST, id_ATST_LOWRES;
+extern "C" i16 id_WATTO, id_GONKDROID;
 extern i16 LEGOACT_SLAM;
 
 bool TouchHacks::AiPlayerTakeDamageOnKillRescue(GameObject_s &) {
@@ -46,7 +49,12 @@ i32 TouchHacks::CanBlowupBeBlownUp(GIZMOBLOWUP_s &blowup, i32 hit_type) {
 void TouchHacks::CanForceTargetObj(GameObject_s &, GameObject_s &) {
 }
 
-void TouchHacks::CanJump(GameObject_s &) {
+bool TouchHacks::CanJump(GameObject_s &object) {
+    return (object.apiobj.field_0x27d != 0 || object.ground_contact_grace_timer > 0.0f) &&
+           object.apiobj.character_model != NULL && ObjLandReady(&object) &&
+           (object.apiobj.character_model->model_data_b[6] != NULL ||
+            (object.apiobj.character_data->model_flags & 0x40) != 0 || object.id == id_WATTO ||
+            (object.id == id_GONKDROID && Cheat_IsOn(8)));
 }
 
 void TouchHacks::CanJumpToPoint(GameObject_s &, AIPATHNODE_s const &) {
@@ -61,7 +69,10 @@ bool TouchHacks::CanLunge(GameObject_s &object) {
            LEGOACT_LUNGE != -1 && object.apiobj.character_model->model_data_b[LEGOACT_LUNGE] != NULL;
 }
 
-void TouchHacks::CanPoo(GameObject_s &) {
+bool TouchHacks::CanPoo(GameObject_s &object) {
+    return (object.apiobj.character_data->game_character->flags_094[3] & 0x80) != 0 && object.character_context == -1 &&
+           object.apiobj.field_0x27d != 0 && (object.apiobj.flags_low & 0x80) != 0 &&
+           (Cheat[1].enabled != 0 || Cheat[9].enabled != 0);
 }
 
 bool TouchHacks::CanShoot(GameObject_s &object) {
@@ -127,7 +138,9 @@ bool TouchHacks::CanUseTeleport(GameObject_s &object) {
            ((object.apiobj.character_data->model_flags & 0x40000) != 0 || SuperWeirdo(&object));
 }
 
-void TouchHacks::CanUseVehicleSmartBomb(GameObject_s &) {
+bool TouchHacks::CanUseVehicleSmartBomb(GameObject_s &object) {
+    return Cheat_IsOn(20) && (object.apiobj.flags_low & 0x80) != 0 &&
+           (object.apiobj.character_data->model_flags & 0x2000) != 0 && InCollectList_Index(object.id, NULL, 0) != -1;
 }
 
 bool TouchHacks::CanUseZipup(GameObject_s &object) {

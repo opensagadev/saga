@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 36.57831,
+    "fuzzy_match_percent": 36.58442,
     "total_code": "4722419",
-    "matched_code": "343597",
-    "matched_code_percent": 7.2758684,
+    "matched_code": "343644",
+    "matched_code_percent": 7.2768636,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 3927,
-    "matched_functions_percent": 29.177502,
+    "matched_functions": 3928,
+    "matched_functions_percent": 29.18493,
     "total_units": 1
   },
   "text": {
@@ -37885,7 +37885,7 @@
           "address": 4502736,
           "offset": 3612768,
           "size": 94,
-          "match_percent": 16.153847
+          "match_percent": 78.38461
         },
         {
           "name": "_ZN10TouchHacks22CanUseVehicleSmartBombER12GameObject_s",
@@ -37893,7 +37893,7 @@
           "address": 4502832,
           "offset": 3612864,
           "size": 132,
-          "match_percent": 12.352942
+          "match_percent": 65.29412
         },
         {
           "name": "_ZN10TouchHacks23TriggerVehicleSmartBombER12GameObject_s",
@@ -37997,7 +37997,7 @@
           "address": 4506464,
           "offset": 3616496,
           "size": 47,
-          "match_percent": 98.92857
+          "match_percent": 100.0
         },
         {
           "name": "_ZN10TouchHacks14CanJumpToPointER12GameObject_sRK12AIPATHNODE_s",
@@ -38085,7 +38085,7 @@
           "address": 4508528,
           "offset": 3618560,
           "size": 167,
-          "match_percent": 4.347826
+          "match_percent": 99.978264
         },
         {
           "name": "_ZN10TouchHacks13CanUseBuildItER12GameObject_s",
