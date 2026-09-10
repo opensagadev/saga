@@ -19,6 +19,7 @@
 #include "legoapi/render/core/render.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nutex.h"
+#include <string.h>
 // This level's view of the shared 16-byte LevFlag scratch. byte0 holds the
 // bonus-gunship milestone state; byte1 a secondary state.
 enum GUNSHIP_STATE_e {
@@ -46,10 +47,19 @@ extern "C" {
 
 // --- File-local statics (original _ZL... symbols; not renamed) ---------------
 
-// Kamino disco-room state (original _ZL11kaminodisco). A byte flag (0/1/2)
-// that KaminoC_Init clears via memset of the enclosing disco struct, which is
-// why readers cannot be constant-folded.
-static u8 kaminodisco;
+// Kamino disco-room state (original _ZL11kaminodisco).
+struct KaminoDiscoState {
+    u8 pad_0x000[0x3d4];
+    u8 initialized;
+    u8 mode;
+    i8 first_character;
+    i8 second_character;
+    i32 counter;
+    u8 pending;
+    u8 pad_0x3dd[0xb];
+};
+DECOMP_ASSERT(sizeof(KaminoDiscoState) == 0x3e8, "KaminoDiscoState size");
+static KaminoDiscoState kaminodisco;
 static GIZAIMESSAGE_s *dooku_c; // _ZL7dooku_c
 struct dooku_state_s {
     i32 hit_message;
@@ -186,7 +196,7 @@ i32 KaminoInside() {
 }
 
 i32 KaminoDiscoOn() {
-    return kaminodisco == 2;
+    return kaminodisco.mode == 2;
 }
 
 i32 KaminoInDiscoRoom() {
@@ -207,6 +217,7 @@ void KaminoA_AlwaysUpdate(WORLDINFO_s *) {
 }
 
 void KaminoC_Init(WORLDINFO_s *) {
+    memset(&kaminodisco, 0, sizeof(kaminodisco));
 }
 
 void KaminoC_Reset(WORLDINFO_s *) {

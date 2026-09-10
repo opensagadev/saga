@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 36.918762,
+    "fuzzy_match_percent": 36.92199,
     "total_code": "4722419",
-    "matched_code": "349711",
-    "matched_code_percent": 7.4053364,
+    "matched_code": "349771",
+    "matched_code_percent": 7.4066067,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4137,
-    "matched_functions_percent": 30.737797,
+    "matched_functions": 4141,
+    "matched_functions_percent": 30.767515,
     "total_units": 1
   },
   "text": {
@@ -46862,7 +46862,7 @@
           "address": 2309392,
           "offset": 1419424,
           "size": 2796,
-          "match_percent": 24.796915
+          "match_percent": 27.07198
         },
         {
           "name": "_Z18ChrisAnakinCUpdatev",
@@ -46942,7 +46942,7 @@
           "address": 2338592,
           "offset": 1448624,
           "size": 15,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_Z17ChrisAnakinAResetP11WORLDINFO_s",
@@ -46950,7 +46950,7 @@
           "address": 2338672,
           "offset": 1448704,
           "size": 15,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_Z16ChrisAnakinBInitv",
@@ -46990,7 +46990,7 @@
           "address": 2338992,
           "offset": 1449024,
           "size": 15,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_Z16ChrisAnakinDInitP11WORLDINFO_s",
@@ -46998,7 +46998,7 @@
           "address": 2339008,
           "offset": 1449040,
           "size": 15,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_Z18ChrisAnakinDUpdateP11WORLDINFO_s",
@@ -83193,7 +83193,7 @@
           "address": 2133312,
           "offset": 1243344,
           "size": 2089,
-          "match_percent": 0.887949
+          "match_percent": 1.114165
         },
         {
           "name": "_Z13KaminoC_ResetP11WORLDINFO_s",
@@ -83305,7 +83305,7 @@
           "address": 2150448,
           "offset": 1260480,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 99.833336
         },
         {
           "name": "_Z16KaminoOutro_InitP11WORLDINFO_s",
