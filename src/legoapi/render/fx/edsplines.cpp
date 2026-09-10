@@ -19,7 +19,16 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-void setnextpoint(float, float) {
+static f32 curx;
+static f32 cury;
+static f32 nextx;
+static f32 dx;
+i32 size;
+
+void setnextpoint(float x, float y) {
+    nextx = x;
+    dx = (x - curx) / y;
+    size = static_cast<i32>(y);
 }
 
 void BezierLinePos(VuVec &, VuVec &, VuVec &, VuVec &, VuVec &, float) {
@@ -166,7 +175,21 @@ void PointAlongSpline(NUGSPLINE *spline, f32 along, NUVEC *position, u16 *angle,
     }
 }
 
-void getnextdatapoint(float *, i32 *) {
+i32 getnextdatapoint(float *value, i32 *delta) {
+    const f32 next_y = cury + 1.0f;
+    const f32 old_x = curx;
+    *value = old_x;
+    const i32 old_value = static_cast<i32>(old_x);
+    cury = next_y;
+    --size;
+    const f32 next_x = old_x + dx;
+    curx = next_x;
+    *delta = static_cast<i32>(next_x) - old_value;
+    if (size != 0) {
+        return 0;
+    }
+    curx = nextx;
+    return -1;
 }
 
 void FlightSpline_Init(WORLDINFO_s *, flightspline_s *, i32) {
@@ -343,7 +366,9 @@ void nugraph_compute_linear_point(i32, float, nuvec_s *, nuvec_s *) {
 void nugraph_compute_catmull_point(i32, float, nuvec_s *, nuvec_s *) {
 }
 
-void setpoint(float) {
+void setpoint(float x) {
+    curx = x;
+    cury = 0.0f;
 }
 
 static __used__ f32 SplineLength(nugspline_s *, i32) {

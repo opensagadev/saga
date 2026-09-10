@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 36.92199,
+    "fuzzy_match_percent": 36.9263,
     "total_code": "4722419",
     "matched_code": "349771",
     "matched_code_percent": 7.4066067,
@@ -78377,7 +78377,7 @@
           "address": 2977408,
           "offset": 2087440,
           "size": 36,
-          "match_percent": 0.0
+          "match_percent": 99.666664
         },
         {
           "name": "_Z12setnextpointff",
@@ -78385,7 +78385,7 @@
           "address": 2977456,
           "offset": 2087488,
           "size": 64,
-          "match_percent": 35.0
+          "match_percent": 99.75
         },
         {
           "name": "_Z16getnextdatapointPfPi",
@@ -78393,7 +78393,7 @@
           "address": 2977520,
           "offset": 2087552,
           "size": 135,
-          "match_percent": 6.25
+          "match_percent": 99.75
         },
         {
           "name": "_Z24LevelSplines_InitForGameP11LEVELSPLINE",
