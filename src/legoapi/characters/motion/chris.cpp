@@ -272,7 +272,8 @@ set_door_timer:
 void ChrisRadialCam(nuvec_s *, nuvec_s *) {
 }
 
-void ChrisAnakinAInit(WORLDINFO_s *) {
+void ChrisAnakinAInit(WORLDINFO_s *world) {
+    ResetSpaceLevel(world, world->space_level);
 }
 
 void ChrisAnakinBDraw() {
@@ -284,7 +285,8 @@ void ChrisAnakinBInit() {
 void ChrisAnakinCInit() {
 }
 
-void ChrisAnakinDInit(WORLDINFO_s *) {
+void ChrisAnakinDInit(WORLDINFO_s *world) {
+    ResetSpaceLevel(world, world->space_level);
 }
 
 void DogFightARestart() {

@@ -160,6 +160,12 @@ namespace {
 
 static i32 NuTimeBar_EngineEnabled;
 static i32 NuTimeBar_GpuFrameOutEnabled;
+static i32 clip_special_objects = 1;
+
+using NUHGOBJVIDEOMEMFN = void (*)(nuhgobj_s *);
+
+NUHGOBJVIDEOMEMFN hgobj_to_video_mem;
+NUHGOBJVIDEOMEMFN video_mem_to_hgobj;
 
 extern "C" {
     i32 nuspecial_const_tint_enabled;
@@ -781,7 +787,8 @@ extern "C" {
     }
     void NuDisplayListBurstRndrSpecial(void) {
     }
-    void NuDisplayListClipSpecials(void) {
+    void NuDisplayListClipSpecials(i32 enabled) {
+        clip_special_objects = enabled;
     }
     void DisplayListCreateFxItemPS(void *item, i32 type);
     void DisplayListCreateFxList(VARIPTR *buffer, VARIPTR end, i32 count) {
@@ -3302,7 +3309,8 @@ extern "C" {
         nuapi.force_shadows_on_characters = enabled;
         return previous;
     }
-    void NuHGobjFromVideoMem(void) {
+    void NuHGobjFromVideoMem(NUHGOBJVIDEOMEMFN callback) {
+        video_mem_to_hgobj = callback;
     }
     nuhgobjpoi_s *NuHGobjGetPOI(nuhgobj_s *object, i32 index) {
         const u8 mapped_index = static_cast<u8>(index);
@@ -3505,7 +3513,8 @@ extern "C" {
     void NuHGobjSetClippingRootTrackerOverride(i32 enabled) {
         CutSceneBoundingBoxTrackRoot = static_cast<u8>(enabled);
     }
-    void NuHGobjToVideoMem(void) {
+    void NuHGobjToVideoMem(NUHGOBJVIDEOMEMFN callback) {
+        hgobj_to_video_mem = callback;
     }
     void NuGCutCharAnimProcess(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible, u32 *animation_index,
                                f32 *animation_rate, f32 *blend_time, f32 *animation_start_frame, i32 *layer_mask) {

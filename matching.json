@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 36.891373,
+    "fuzzy_match_percent": 36.89496,
     "total_code": "4722419",
-    "matched_code": "348947",
-    "matched_code_percent": 7.3891582,
+    "matched_code": "349043",
+    "matched_code_percent": 7.3911905,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4123,
-    "matched_functions_percent": 30.633778,
+    "matched_functions": 4127,
+    "matched_functions_percent": 30.663496,
     "total_units": 1
   },
   "text": {
@@ -71879,14 +71879,6 @@
           "match_percent": 45.082066
         },
         {
-          "name": "_Z10ClearStillv",
-          "demangled_name": "ClearStill()",
-          "address": 4771552,
-          "offset": 3881584,
-          "size": 34,
-          "match_percent": 0.0
-        },
-        {
           "name": "_Z17CollectIDUnlockedi",
           "demangled_name": "CollectIDUnlocked(int)",
           "address": 5096800,
@@ -76279,6 +76271,14 @@
           "offset": 3881056,
           "size": 23,
           "match_percent": 99.875
+        },
+        {
+          "name": "_Z10ClearStillv",
+          "demangled_name": "ClearStill()",
+          "address": 4771552,
+          "offset": 3881584,
+          "size": 34,
+          "match_percent": 99.833336
         },
         {
           "name": "_Z17HandleStillRenderv",
@@ -88012,7 +88012,7 @@
           "address": 2739203,
           "offset": 1849235,
           "size": 27,
-          "match_percent": 0.0
+          "match_percent": 55.0
         },
         {
           "name": "_Z27NuDisplayListCreateMtlDlistP19nudisplaylistitem_sP7numtl_sP9variptr_uS3_",
@@ -88100,7 +88100,7 @@
           "address": 3068064,
           "offset": 2178096,
           "size": 249,
-          "match_percent": 68.61429
+          "match_percent": 68.828575
         },
         {
           "name": "NuDisplayListDrawRenderScene",
@@ -89607,7 +89607,7 @@
           "address": 2991184,
           "offset": 2101216,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "NuGScnFromVideoMem",
@@ -89615,7 +89615,7 @@
           "address": 2991216,
           "offset": 2101248,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "NuRndrClear",
@@ -98442,7 +98442,7 @@
           "address": 2991248,
           "offset": 2101280,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "NuHGobjFromVideoMem",
@@ -98450,7 +98450,7 @@
           "address": 2991280,
           "offset": 2101312,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "NuHGobjReversibleCharacters",
@@ -98730,7 +98730,7 @@
           "address": 3063760,
           "offset": 2173792,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 99.85714
         },
         {
           "name": "NuDisplayListBurstRndrSpecial",

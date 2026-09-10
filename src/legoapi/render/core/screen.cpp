@@ -95,6 +95,11 @@ void NeedScreenGrab(i32 needed) {
     ScreenGrabNeeded = needed != 0;
 }
 
+void ClearStill() {
+    old_pause_state = 0;
+    Paused = 0;
+}
+
 extern f32 CameraZoom;
 extern "C" f32 NuIOS_GetAspectRatio(void);
 

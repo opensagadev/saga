@@ -56,11 +56,6 @@ extern "C" {
     NUDLIST_MANAGER global_dlist_manager = {0};
 }
 
-// Scratch backing for the 2D list's item cursor so AddItem is safe before
-// NuDisplayListInit has run (host safety net).
-static u8 s_2d_item_scratch[0x100] = {0};
-static u8 s_2d_state_storage[0x40] = {0};
-
 // Capture debug state (bss @0x11a0070 / @0x11a0068).
 extern "C" {
     i32 do_capture;
@@ -198,14 +193,7 @@ static nudisplaylistitem_s *AddCallItem(nudisplaylist_s *list, u8 type, void *ne
 }
 
 extern "C" nudisplaylist_s *NuDisplayListGet2dList(void) {
-    nudisplaylist_s *list = &global_dlist_manager.dlist_2d;
-    if (list->items == nullptr) {
-        list->items = reinterpret_cast<nudisplaylistitem_s *>(s_2d_item_scratch);
-        if (list->state == nullptr) {
-            list->state = reinterpret_cast<nurndrstate_s *>(s_2d_state_storage);
-        }
-    }
-    return list;
+    return &global_dlist_manager.dlist_2d;
 }
 
 extern "C" void NuDisplayListResetBuffer(void) {

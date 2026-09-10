@@ -412,7 +412,13 @@ extern "C" void NuGScnFixupTIDsPS(NUGSCN *scene) {
         }
     }
 }
-extern "C" void NuGScnFromVideoMem(void) {
+using NUGSCNVIDEOMEMFN = void (*)(NUGSCN *);
+
+NUGSCNVIDEOMEMFN gscene_to_video_mem;
+NUGSCNVIDEOMEMFN video_mem_to_gscene;
+
+extern "C" void NuGScnFromVideoMem(NUGSCNVIDEOMEMFN callback) {
+    video_mem_to_gscene = callback;
 }
 extern "C" void NuGScnReadForMultiRender(void) {
 }
@@ -426,7 +432,8 @@ extern "C" void NuGScnRndr(NUGSCN *scene) {
     }
     ++scene->rendered_additional_scene_count;
 }
-extern "C" void NuGScnToVideoMem(void) {
+extern "C" void NuGScnToVideoMem(NUGSCNVIDEOMEMFN callback) {
+    gscene_to_video_mem = callback;
 }
 
 // Material

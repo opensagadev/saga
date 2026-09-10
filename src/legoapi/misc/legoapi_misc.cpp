@@ -34,9 +34,6 @@ extern "C" {
     extern FadeSystem FadeSys;
 }
 
-void ClearStill() {
-}
-
 // Original: 43 bytes.
 i32 CircleLevel(LEVELDATA_s *level) {
     return BONUS_GUNSHIPB_LDATA != NULL && level == BONUS_GUNSHIPB_LDATA;
