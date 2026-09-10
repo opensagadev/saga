@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 36.85992,
+    "fuzzy_match_percent": 36.860447,
     "total_code": "4722419",
-    "matched_code": "348572",
-    "matched_code_percent": 7.381217,
+    "matched_code": "348597",
+    "matched_code_percent": 7.3817463,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4061,
-    "matched_functions_percent": 30.173117,
+    "matched_functions": 4065,
+    "matched_functions_percent": 30.202839,
     "total_units": 1
   },
   "text": {
@@ -49704,38 +49704,6 @@
           "match_percent": 20.0
         },
         {
-          "name": "SavePadRecord",
-          "demangled_name": "SavePadRecord",
-          "address": 2542839,
-          "offset": 1652871,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "SetPadRecPtr",
-          "demangled_name": "SetPadRecPtr",
-          "address": 2542844,
-          "offset": 1652876,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "InitPadPlayRecord",
-          "demangled_name": "InitPadPlayRecord",
-          "address": 2542849,
-          "offset": 1652881,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "PadRecPtr",
-          "demangled_name": "PadRecPtr",
-          "address": 2555892,
-          "offset": 1665924,
-          "size": 10,
-          "match_percent": 0.0
-        },
-        {
           "name": "TestForController",
           "demangled_name": "TestForController",
           "address": 4360224,
@@ -92808,6 +92776,14 @@
           "offset": 1665623,
           "size": 10,
           "match_percent": 100.0
+        },
+        {
+          "name": "PadRecPtr",
+          "demangled_name": "PadRecPtr",
+          "address": 2555892,
+          "offset": 1665924,
+          "size": 10,
+          "match_percent": 100.0
         }
       ]
     },
@@ -101663,6 +101639,30 @@
           "address": 2542811,
           "offset": 1652843,
           "size": 28,
+          "match_percent": 100.0
+        },
+        {
+          "name": "SavePadRecord",
+          "demangled_name": "SavePadRecord",
+          "address": 2542839,
+          "offset": 1652871,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "SetPadRecPtr",
+          "demangled_name": "SetPadRecPtr",
+          "address": 2542844,
+          "offset": 1652876,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "InitPadPlayRecord",
+          "demangled_name": "InitPadPlayRecord",
+          "address": 2542849,
+          "offset": 1652881,
+          "size": 5,
           "match_percent": 100.0
         }
       ]

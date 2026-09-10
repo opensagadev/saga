@@ -765,3 +765,16 @@ void NuPadRecordEndFrame() {
             break;
     }
 }
+
+extern "C" {
+
+    void SavePadRecord(void) {
+    }
+
+    void SetPadRecPtr(void) {
+    }
+
+    void InitPadPlayRecord(void) {
+    }
+
+} // extern "C"

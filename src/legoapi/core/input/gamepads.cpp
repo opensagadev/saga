@@ -170,18 +170,6 @@ extern "C" {
     void Controller_Update(void) {
     }
 
-    void InitPadPlayRecord(void) {
-    }
-
-    void PadRecPtr(void) {
-    }
-
-    void SavePadRecord(void) {
-    }
-
-    void SetPadRecPtr(void) {
-    }
-
     bool TestForController(void) {
         return Controller_IsConnected() != 0 || enable_touch_controls == 0;
     }
