@@ -223,7 +223,7 @@ float NuCosApprox2(i32 ang) {
 }
 
 float NuSin_Accurate(float x) {
-    return sinf(x);
+    (void)x;
 }
 
 static f32 NuSinApprox3(i32 angle) {

@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 37.231804,
+    "fuzzy_match_percent": 37.236446,
     "total_code": "4722419",
-    "matched_code": "352012",
-    "matched_code_percent": 7.4540615,
+    "matched_code": "352124",
+    "matched_code_percent": 7.456433,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4175,
-    "matched_functions_percent": 31.020134,
+    "matched_functions": 4177,
+    "matched_functions_percent": 31.034994,
     "total_units": 1
   },
   "text": {
@@ -89182,6 +89182,29 @@
       ]
     },
     {
+      "name": "nu2api/nu3d/nurndr_alloc.cpp.o",
+      "source": "src/nu2api/nu3d/nurndr_alloc.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nurndr_alloc.o",
+      "functions": [
+        {
+          "name": "NuRndrCreateBlendShapeDeformerWeightsArray",
+          "demangled_name": "NuRndrCreateBlendShapeDeformerWeightsArray",
+          "address": 2707644,
+          "offset": 1817676,
+          "size": 136,
+          "match_percent": 99.64286
+        },
+        {
+          "name": "_Z33NuRndrCreateBlendShapeDWAPointersi",
+          "demangled_name": "NuRndrCreateBlendShapeDWAPointers(int)",
+          "address": 2707780,
+          "offset": 1817812,
+          "size": 87,
+          "match_percent": 100.0
+        }
+      ]
+    },
+    {
       "name": "nu2api/nu3d/nurndr_grad.cpp.o",
       "source": "src/nu2api/nu3d/nurndr_grad.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nurndr_grad.o",
@@ -89272,22 +89295,6 @@
       "source": "src/nu2api/nu3d/nurndr_plain.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nurndr_plain.o",
       "functions": [
-        {
-          "name": "NuRndrCreateBlendShapeDeformerWeightsArray",
-          "demangled_name": "NuRndrCreateBlendShapeDeformerWeightsArray",
-          "address": 2707644,
-          "offset": 1817676,
-          "size": 136,
-          "match_percent": 0.0
-        },
-        {
-          "name": "_Z33NuRndrCreateBlendShapeDWAPointersi",
-          "demangled_name": "NuRndrCreateBlendShapeDWAPointers(int)",
-          "address": 2707780,
-          "offset": 1817812,
-          "size": 87,
-          "match_percent": 32.962963
-        },
         {
           "name": "NuRndrShadPolys",
           "demangled_name": "NuRndrShadPolys",
@@ -108326,7 +108333,7 @@
           "address": 2696783,
           "offset": 1806815,
           "size": 25,
-          "match_percent": 0.0
+          "match_percent": 100.0
         }
       ]
     },
@@ -130757,7 +130764,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 522,
+    "bazel_units": 523,
     "functions": 13454,
     "assigned_functions": 12290,
     "ambiguous_functions": 235,
