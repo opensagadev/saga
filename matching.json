@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 37.4296,
+    "fuzzy_match_percent": 37.43159,
     "total_code": "4722419",
-    "matched_code": "354560",
-    "matched_code_percent": 7.5080166,
+    "matched_code": "354923",
+    "matched_code_percent": 7.515703,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4199,
-    "matched_functions_percent": 31.198454,
+    "matched_functions": 4204,
+    "matched_functions_percent": 31.235605,
     "total_units": 1
   },
   "text": {
@@ -112201,7 +112201,7 @@
           "address": 3341152,
           "offset": 2451184,
           "size": 81,
-          "match_percent": 70.52631
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13NuSoundLoader8ReadDataEPvy",
@@ -112424,7 +112424,7 @@
           "address": 3332640,
           "offset": 2442672,
           "size": 60,
-          "match_percent": 77.5
+          "match_percent": 100.0
         },
         {
           "name": "_ZN16NuSoundLoaderOGGD2Ev",
@@ -112432,7 +112432,7 @@
           "address": 3332640,
           "offset": 2442672,
           "size": 60,
-          "match_percent": 77.5
+          "match_percent": 100.0
         },
         {
           "name": "_ZN16NuSoundLoaderOGGD0Ev",
@@ -112440,7 +112440,7 @@
           "address": 3332704,
           "offset": 2442736,
           "size": 81,
-          "match_percent": 76.57895
+          "match_percent": 100.0
         },
         {
           "name": "_ZNK16NuSoundLoaderOGG16OGGFileCallbacks11GetPositionEv",
@@ -112735,7 +112735,7 @@
           "address": 3329248,
           "offset": 2439280,
           "size": 81,
-          "match_percent": 70.52631
+          "match_percent": 100.0
         },
         {
           "name": "_ZN16NuSoundLoaderWAVC1Ev",

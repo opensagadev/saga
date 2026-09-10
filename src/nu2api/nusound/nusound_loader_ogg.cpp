@@ -29,6 +29,9 @@ void NuSoundLoaderOGG::OGGFileCallbacks::SetFile(NUFILE file) {
 NuSoundLoaderOGG::NuSoundLoaderOGG() : buffer(NULL) {
 }
 
+NuSoundLoaderOGG::~NuSoundLoaderOGG() {
+}
+
 NuSoundStreamDesc *NuSoundLoaderOGG::CreateHeader() {
     NuSoundHeaderOGG *header = (NuSoundHeaderOGG *)NuSoundSystem::_AllocMemory(
         NuSoundSystem::MemoryDiscipline::SCRATCH, sizeof(NuSoundHeaderOGG), 4,

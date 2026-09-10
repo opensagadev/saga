@@ -47,6 +47,9 @@ class NuSoundLoaderOGG : public NuSoundLoader {
         NUFILE file;
 
       public:
+        ~OGGFileCallbacks() {
+        }
+
         virtual void SetFile(NUFILE file);
         virtual i32 Read(void *dest, u32 size);
         virtual i32 Seek(i32 offset, u32 origin);
@@ -56,6 +59,7 @@ class NuSoundLoaderOGG : public NuSoundLoader {
     };
 
     NuSoundLoaderOGG();
+    ~NuSoundLoaderOGG();
 
     NuSoundStreamDesc::DataFormat GetDecodedDataFormat();
     NuSoundStreamDesc *CreateHeader();

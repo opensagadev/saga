@@ -4,6 +4,7 @@
 
 #include <pthread.h>
 
+#include "nu2api/nucore/numemory.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nusound/nusound_buffer.hpp"
 #include "nu2api/nusound/nusound_streamdesc.hpp"
@@ -40,6 +41,10 @@ class NuSoundLoader {
 
   public:
     NuSoundLoader();
+
+    static void operator delete(void *allocation) {
+        NuMemoryGet()->GetThreadMem()->BlockFree(allocation, 0);
+    }
 
     void CloseStream();
     static u64 Deinterleave(char *data, int length, char **dest, int sample_size, NuSoundSystem::ChannelConfig config);
