@@ -18,10 +18,36 @@ void CoinTotal_Draw(i32 total, f32 y, f32 scale, i32 remember_positions, f32 ico
 void DrawSuperStoryTime(f32 x, f32 timer, f32 target, i32 flags, i32 draw_icon);
 void Text_MakeScore(u32 score, char *text);
 
-HudRadarPulse::HudRadarPulse(VuVec const &) {
+HudRadarPulse::HudRadarPulse(VuVec const &initial_position) : position(initial_position) {
+    pulses[1].delay = 0.2f;
+    pulses[2].delay = 0.4f;
+
+    pulses[0].delay_finished = 0;
+    pulses[0].finished = 0;
+    pulses[0].angle = 0;
+    pulses[0].delay = 0.0f;
+    pulses[1].delay_finished = 0;
+    pulses[0].radius = 0.0f;
+    pulses[1].finished = 0;
+    pulses[0].speed = 0.75f;
+    pulses[1].angle = 0;
+    pulses[1].radius = 0.0f;
+    pulses[2].delay_finished = 0;
+    pulses[1].speed = 0.75f;
+    pulses[2].finished = 0;
+    pulses[2].radius = 0.0f;
+    pulses[2].angle = 0;
+    pulses[2].speed = 0.75f;
+
+    active = 1;
+    paused = 0;
 }
 
-void HudRadarPulse::IsFinished() {
+i32 HudRadarPulse::IsFinished() {
+    if (pulses[0].delay_finished && pulses[0].finished && pulses[1].delay_finished && pulses[1].finished &&
+        pulses[2].delay_finished)
+        return pulses[2].finished;
+    return 0;
 }
 
 void HudRadarPulse::Process(float) {

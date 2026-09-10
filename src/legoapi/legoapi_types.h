@@ -4334,12 +4334,34 @@ struct HATMACHINESYS_s {
     HATMACHINE_s *machines; // 0x0c
 };
 DECOMP_ASSERT(sizeof(HATMACHINESYS_s) == 0x10, "HATMACHINESYS_s ABI");
+struct HudRadarPulseStage {
+    i32 angle;
+    f32 radius;
+    f32 speed;
+    f32 delay;
+    u8 delay_finished;
+    u8 finished;
+    u8 reserved_12[2];
+};
+DECOMP_ASSERT(sizeof(HudRadarPulseStage) == 0x14, "HudRadarPulseStage ABI");
+
 struct HudRadarPulse {
     HudRadarPulse(VuVec const &);
-    void IsFinished();
+    i32 IsFinished();
     void Process(float);
     void Render();
+
+    HudRadarPulseStage pulses[3];
+    VuVec position;
+    u8 active;
+    u8 paused;
+    u8 reserved_4e[2];
 };
+DECOMP_ASSERT(offsetof(HudRadarPulse, pulses) == 0x00, "HudRadarPulse::pulses ABI");
+DECOMP_ASSERT(offsetof(HudRadarPulse, position) == 0x3c, "HudRadarPulse::position ABI");
+DECOMP_ASSERT(offsetof(HudRadarPulse, active) == 0x4c, "HudRadarPulse::active ABI");
+DECOMP_ASSERT(offsetof(HudRadarPulse, paused) == 0x4d, "HudRadarPulse::paused ABI");
+DECOMP_ASSERT(sizeof(HudRadarPulse) == 0x50, "HudRadarPulse ABI");
 enum LEVER_FLAGS : u16 {
     LEVER_FLAG_INTERACTING = 0x0001,
     LEVER_FLAG_BEING_PULLED = 0x0002,
