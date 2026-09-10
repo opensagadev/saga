@@ -1,13 +1,58 @@
 #include "gameapi_edtools_types.h"
+#include "gameapi/edtools/edui.h"
 #include "legoapi/legoapi_types.h"
 
 extern "C" {
     extern edpp_particle_s edpp_ptls[512];
+    extern i32 edpp_nearest;
+    extern debkeydatatype_s *debkeydata;
+    extern debinftype **debtab;
+    void DebReAlloc(debkeydatatype_s *key, i32 particle_count);
     void DebFreeInstantly(i32 *handle);
     void edppRestartAllEffectsInLevel(void);
 }
 
 // Particle list editor subsystem stubs (static, internal linkage).
+
+static __used__ void UpdateTotalPtls(debinftype *effect) {
+    f32 elapsed = 0.0f;
+    f32 active_time = 0.0f;
+
+    while (effect->particle_lifetime > elapsed) {
+        f32 duration = effect->emission_period_random + effect->emission_pause;
+        f32 remaining = effect->particle_lifetime - elapsed;
+        if (duration > remaining) {
+            duration = remaining;
+        }
+        active_time += duration;
+        elapsed += duration;
+
+        duration = effect->emission_pause_random;
+        remaining = effect->particle_lifetime - elapsed;
+        if (duration > remaining) {
+            duration = remaining;
+        }
+        elapsed += duration;
+    }
+
+    i32 particle_count =
+        static_cast<i32>(static_cast<f32>(effect->frequency) * (active_time / elapsed) * effect->particle_lifetime);
+    if (particle_count < 1) {
+        particle_count = 1;
+    }
+    particle_count *= static_cast<i8>(effect->trail_count) + 1;
+    effect->max_particles = static_cast<i16>(particle_count);
+
+    for (i32 i = 0; i < 512; ++i) {
+        i32 instance_id = edpp_ptls[i].instance_id;
+        if (instance_id != 99999 && instance_id != -1) {
+            debkeydatatype_s *key = &debkeydata[instance_id];
+            if (debtab[key->effect_index] == effect) {
+                DebReAlloc(key, effect->max_particles);
+            }
+        }
+    }
+}
 
 static __used__ void edptlcbPageMenu(eduimenu_s *, eduiitem_s *, u32) {
 }
@@ -67,7 +112,19 @@ static __used__ void edptlcbSetSwitchType(eduimenu_s *, eduiitem_s *, u32) {
 }
 static __used__ void edptlcbApplyGhostTime(eduimenu_s *, eduiitem_s *, u32) {
 }
-static __used__ void edptlcbApplyNumGhosts(eduimenu_s *, eduiitem_s *, u32) {
+static __used__ void edptlcbApplyNumGhosts(eduimenu_s *, eduiitem_s *item, u32) {
+    if (edpp_nearest == -1) {
+        return;
+    }
+
+    i32 instance_id = edpp_ptls[edpp_nearest].instance_id;
+    if (instance_id == -1) {
+        return;
+    }
+
+    debinftype *effect = debtab[debkeydata[instance_id].effect_index];
+    effect->trail_count = static_cast<u8>(static_cast<i32>(static_cast<edui_slider_s *>(item)->value));
+    UpdateTotalPtls(effect);
 }
 static __used__ void edptlcbApplyStarRatio(eduimenu_s *, eduiitem_s *, u32) {
 }

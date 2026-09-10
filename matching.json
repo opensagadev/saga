@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 37.50233,
+    "fuzzy_match_percent": 37.50722,
     "total_code": "4722419",
     "matched_code": "355919",
     "matched_code_percent": 7.536794,
@@ -30450,12 +30450,20 @@
           "match_percent": 2.876712
         },
         {
+          "name": "_ZL15UpdateTotalPtlsP10debinftype",
+          "demangled_name": "UpdateTotalPtls(debinftype*)",
+          "address": 3463184,
+          "offset": 2573216,
+          "size": 317,
+          "match_percent": 49.103447
+        },
+        {
           "name": "_ZL21edptlcbApplyNumGhostsP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edptlcbApplyNumGhosts(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3463504,
           "offset": 2573536,
           "size": 98,
-          "match_percent": 0.0
+          "match_percent": 92.55556
         },
         {
           "name": "_ZL16edptlcbSetDetailP10eduimenu_sP10eduiitem_sj",
@@ -62338,14 +62346,6 @@
           "offset": 1306800,
           "size": 314,
           "match_percent": 5.526316
-        },
-        {
-          "name": "_ZL15UpdateTotalPtlsP10debinftype",
-          "demangled_name": "UpdateTotalPtls(debinftype*)",
-          "address": 3463184,
-          "offset": 2573216,
-          "size": 317,
-          "match_percent": 4.827586
         },
         {
           "name": "_Z13AddGameObjecti",

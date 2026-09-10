@@ -301,7 +301,7 @@ extern "C" {
         }
     }
 
-    void rtlDynamicMasterEnable(void) {
+    void rtlDynamicMasterEnable(i32 enabled) {
     }
 
     bool rtlDynamicEnable(i32 id, i32 enabled) {

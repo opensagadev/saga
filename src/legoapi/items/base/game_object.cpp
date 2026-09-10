@@ -140,9 +140,6 @@ static __used__ void SurfaceInfo_ExtraReflect(GameObject_s *) {
 static __used__ void PauseGame_ExtraCode() {
 }
 
-static __used__ void UpdateTotalPtls(debinftype *) {
-}
-
 static __used__ i32 SpecialObjectFilter(void *) {
     return 0;
 }

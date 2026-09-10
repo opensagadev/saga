@@ -28,7 +28,7 @@ void SetLights(NUCOLOUR3 *colour0, NUVEC *direction0, NUCOLOUR3 *colour1, NUVEC 
 extern "C" {
     void rtlResetEx(rtldata_s *data, i32 reset_cached);
     void rtlApplySetScale(void *, rtldata_s *, NUVEC *, NUMTX *, i32, f32);
-    void rtlDynamicMasterEnable(i32);
+    void rtlDynamicMasterEnable(i32 enabled);
 }
 
 void SetFlicker(GameObject_s *object, float duration) {
