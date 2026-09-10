@@ -51,6 +51,7 @@ static f32 ForceBackRadius2 = 0.0f;
 #include "nu2api/numath/nuvec.h"
 
 extern AREADATA_s *PODSPRINT_ADATA;
+extern AREADATA_s *PODRACE_ADATA;
 extern AREADATA_s *GUNSHIP_ADATA;
 extern AREADATA_s *BONUS_GUNSHIP_ADATA;
 extern "C" i16 id_GRABCONTROL, id_GRABR2CONTROL;
@@ -4535,16 +4536,8 @@ void MoveToMarker::Process(float) {
 void MoveToMarker::Render() {
 }
 
-static __used__ i32 Jump_UpdateHint(HINT_s *) {
-    return 0;
-}
-static __used__ i32 Move_UpdateHint(HINT_s *) {
-    return 0;
-}
+extern u8 show_lever_hint;
 
-static __used__ bool Lever_UpdateHint(HINT_s *) {
-    return false;
-}
 struct _vuv_s;
 static __used__ void MakeWingFormation(_vuv_s *, _vuv_s *, f32, i32) {
 }
@@ -4595,12 +4588,7 @@ static i32 BigJump_LandAction_Default(GameObject_s *object) {
 }
 i32 (*BigJump_LandActionFn)(GameObject_s *) = BigJump_LandAction_Default;
 
-static __used__ bool AutoJump_UpdateHint(HINT_s *) {
-    return {};
-}
-
-static __used__ void VehicleStuff_UpdateHint(HINT_s *) {
-}
+i32 show_autojump_hint;
 
 i32 Slam_Start(GameObject_s *object, f32 speed) {
     if (LEGOCONTEXT_JUMP == -1)

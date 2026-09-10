@@ -39,7 +39,7 @@ i32 NoPad(i32 port, i32 require_game_input);
 void PadOutPause(i32 port, struct WORLDINFO_s *world);
 
 extern "C" i32 Controller_IsConnected();
-extern "C" i32 TestForController();
+extern "C" bool TestForController();
 
 extern f32 PadOldSpeed2[2];
 extern f32 PadOldSpeed[2];

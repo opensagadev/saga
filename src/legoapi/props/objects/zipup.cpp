@@ -1,4 +1,6 @@
 #include "decomp.h"
+#include "MechInputTouch/MechInputTouch_types.h"
+#include "legoapi/characters/core/players.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
@@ -403,5 +405,15 @@ ZIPUP *ZipUp_FindNearest(WORLDINFO_s *world, nuvec_s *position, float radius, fl
     return nearest;
 }
 
-void ZipUps_UpdateHint(HINT_s *) {
+i32 ZipUps_UpdateHint(HINT_s *hint) {
+    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+    if (world == NULL || world->zipups == NULL)
+        return 0;
+    for (i32 i = 0; i < world->zipup_count; ++i) {
+        ZIPUP *zipup = &world->zipups[i];
+        if (hint->completion_flags[MechInputTouchSystem::s_baseControlMode] == 0 && CanDrawZipUpSwirls != 0 &&
+            (zipup->flags & ZIPUP_FLAG_ACTIVE) != 0 && ActivePlayerInRange(&zipup->lower_position, 2.0f, NULL))
+            return 1;
+    }
+    return 0;
 }

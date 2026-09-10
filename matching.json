@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 36.522846,
+    "fuzzy_match_percent": 36.57006,
     "total_code": "4722419",
-    "matched_code": "342898",
-    "matched_code_percent": 7.261067,
+    "matched_code": "343263",
+    "matched_code_percent": 7.268796,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 3917,
-    "matched_functions_percent": 29.1032,
+    "matched_functions": 3922,
+    "matched_functions_percent": 29.140354,
     "total_units": 1
   },
   "text": {
@@ -40440,7 +40440,7 @@
           "address": 5219520,
           "offset": 4329552,
           "size": 451,
-          "match_percent": 4.117647
+          "match_percent": 40.117645
         },
         {
           "name": "_Z30GizPushBlock_EndFrameCompletedP11pushblock_si",
@@ -41985,14 +41985,6 @@
           "offset": 1304512,
           "size": 397,
           "match_percent": 3.063063
-        },
-        {
-          "name": "_ZL17Attack_UpdateHintP6HINT_s",
-          "demangled_name": "Attack_UpdateHint(HINT_s*)",
-          "address": 2285248,
-          "offset": 1395280,
-          "size": 89,
-          "match_percent": 14.482758
         }
       ]
     },
@@ -45820,7 +45812,7 @@
           "address": 1084464,
           "offset": 194496,
           "size": 724,
-          "match_percent": 4.216216
+          "match_percent": 20.891891
         },
         {
           "name": "_Z17AvailableToPlayerjiii",
@@ -45991,22 +45983,6 @@
           "match_percent": 13.294642
         },
         {
-          "name": "_ZL23PlayerButton_UpdateHintP6HINT_s",
-          "demangled_name": "PlayerButton_UpdateHint(HINT_s*)",
-          "address": 2284608,
-          "offset": 1394640,
-          "size": 126,
-          "match_percent": 11.16279
-        },
-        {
-          "name": "_ZL21PlayerButton_PlayHintP6HINT_s",
-          "demangled_name": "PlayerButton_PlayHint(HINT_s*)",
-          "address": 2285344,
-          "offset": 1395376,
-          "size": 74,
-          "match_percent": 24.705883
-        },
-        {
           "name": "_Z40PlayerButton_OnClick_Callback_NextButtonR18MechTouchUIElementR11TouchHolder",
           "demangled_name": "PlayerButton_OnClick_Callback_NextButton(MechTouchUIElement&, TouchHolder&)",
           "address": 4550560,
@@ -46100,7 +46076,7 @@
           "address": 4634576,
           "offset": 3744608,
           "size": 1943,
-          "match_percent": 10.457627
+          "match_percent": 10.489407
         },
         {
           "name": "_Z25FindFurthestPlayerFromVecP7nuvec_sPP12GameObject_sRfbj",
@@ -48629,46 +48605,6 @@
           "match_percent": 70.03488
         },
         {
-          "name": "_ZL15Move_UpdateHintP6HINT_s",
-          "demangled_name": "Move_UpdateHint(HINT_s*)",
-          "address": 2284464,
-          "offset": 1394496,
-          "size": 143,
-          "match_percent": 10.731708
-        },
-        {
-          "name": "_ZL15Jump_UpdateHintP6HINT_s",
-          "demangled_name": "Jump_UpdateHint(HINT_s*)",
-          "address": 2284976,
-          "offset": 1395008,
-          "size": 231,
-          "match_percent": 6.875
-        },
-        {
-          "name": "_ZL16Lever_UpdateHintP6HINT_s",
-          "demangled_name": "Lever_UpdateHint(HINT_s*)",
-          "address": 2285216,
-          "offset": 1395248,
-          "size": 30,
-          "match_percent": 17.777779
-        },
-        {
-          "name": "_ZL23VehicleStuff_UpdateHintP6HINT_s",
-          "demangled_name": "VehicleStuff_UpdateHint(HINT_s*)",
-          "address": 2285552,
-          "offset": 1395584,
-          "size": 195,
-          "match_percent": 13.846154
-        },
-        {
-          "name": "_ZL19AutoJump_UpdateHintP6HINT_s",
-          "demangled_name": "AutoJump_UpdateHint(HINT_s*)",
-          "address": 2286064,
-          "offset": 1396096,
-          "size": 112,
-          "match_percent": 16.129032
-        },
-        {
           "name": "_ZL17MakeWingFormationP6_vuv_sS0_fi",
           "demangled_name": "MakeWingFormation(_vuv_s*, _vuv_s*, float, int)",
           "address": 2307376,
@@ -49685,7 +49621,7 @@
           "address": 4360224,
           "offset": 3470256,
           "size": 51,
-          "match_percent": 92.8125
+          "match_percent": 99.0625
         },
         {
           "name": "_Z34VirtualControlDPad_OnDown_CallbackR18MechTouchUIElementR11TouchHolder",
@@ -54486,7 +54422,7 @@
           "address": 5053840,
           "offset": 4163872,
           "size": 64,
-          "match_percent": 22.105263
+          "match_percent": 100.0
         },
         {
           "name": "_Z20GizBuildIt_KillPartsP12GIZBUILDIT_s",
@@ -55553,7 +55489,7 @@
           "address": 1237408,
           "offset": 347440,
           "size": 790,
-          "match_percent": 2.352941
+          "match_percent": 36.098038
         },
         {
           "name": "_Z15Teleports_ResetP11WORLDINFO_s",
@@ -55601,7 +55537,7 @@
           "address": 1242880,
           "offset": 352912,
           "size": 349,
-          "match_percent": 5.454546
+          "match_percent": 43.116882
         }
       ]
     },
@@ -67468,22 +67404,6 @@
           "match_percent": 13.548388
         },
         {
-          "name": "_ZL18HoldTag_UpdateHintP6HINT_s",
-          "demangled_name": "HoldTag_UpdateHint(HINT_s*)",
-          "address": 2284736,
-          "offset": 1394768,
-          "size": 91,
-          "match_percent": 95.74074
-        },
-        {
-          "name": "_ZL21HatMachine_UpdateHintP6HINT_s",
-          "demangled_name": "HatMachine_UpdateHint(HINT_s*)",
-          "address": 2285424,
-          "offset": 1395456,
-          "size": 118,
-          "match_percent": 12.820513
-        },
-        {
           "name": "_ZL28GameMsg_Draw_MiniKitDetectorP13GAMEMESSAGE_sP7nuvec_sf",
           "demangled_name": "GameMsg_Draw_MiniKitDetector(GAMEMESSAGE_s*, nuvec_s*, float)",
           "address": 4976800,
@@ -67721,7 +67641,7 @@
           "address": 5219984,
           "offset": 4330016,
           "size": 623,
-          "match_percent": 2.346369
+          "match_percent": 0.497207
         }
       ]
     },
@@ -67854,7 +67774,7 @@
           "address": 1423072,
           "offset": 533104,
           "size": 1232,
-          "match_percent": 2.8125
+          "match_percent": 15.603125
         },
         {
           "name": "_Z19DragBomb_UpdateHintP6HINT_s",
@@ -67862,7 +67782,7 @@
           "address": 1469392,
           "offset": 579424,
           "size": 167,
-          "match_percent": 61.68085
+          "match_percent": 76.78723
         },
         {
           "name": "_Z20SmartBomb_UpdateHintP6HINT_s",
@@ -67870,7 +67790,7 @@
           "address": 1485296,
           "offset": 595328,
           "size": 95,
-          "match_percent": 100.0
+          "match_percent": 99.5
         },
         {
           "name": "_Z15Tilt_UpdateHintP6HINT_s",
@@ -67894,7 +67814,31 @@
           "address": 1845168,
           "offset": 955200,
           "size": 736,
-          "match_percent": 2.282609
+          "match_percent": 2.043478
+        },
+        {
+          "name": "_ZL15Move_UpdateHintP6HINT_s",
+          "demangled_name": "Move_UpdateHint(HINT_s*)",
+          "address": 2284464,
+          "offset": 1394496,
+          "size": 143,
+          "match_percent": 70.731705
+        },
+        {
+          "name": "_ZL23PlayerButton_UpdateHintP6HINT_s",
+          "demangled_name": "PlayerButton_UpdateHint(HINT_s*)",
+          "address": 2284608,
+          "offset": 1394640,
+          "size": 126,
+          "match_percent": 81.51163
+        },
+        {
+          "name": "_ZL18HoldTag_UpdateHintP6HINT_s",
+          "demangled_name": "HoldTag_UpdateHint(HINT_s*)",
+          "address": 2284736,
+          "offset": 1394768,
+          "size": 91,
+          "match_percent": 100.0
         },
         {
           "name": "_ZL25UnlockHubStuff_UpdateHintP6HINT_s",
@@ -67902,7 +67846,55 @@
           "address": 2284832,
           "offset": 1394864,
           "size": 141,
-          "match_percent": 10.243902
+          "match_percent": 83.097565
+        },
+        {
+          "name": "_ZL15Jump_UpdateHintP6HINT_s",
+          "demangled_name": "Jump_UpdateHint(HINT_s*)",
+          "address": 2284976,
+          "offset": 1395008,
+          "size": 231,
+          "match_percent": 96.875
+        },
+        {
+          "name": "_ZL16Lever_UpdateHintP6HINT_s",
+          "demangled_name": "Lever_UpdateHint(HINT_s*)",
+          "address": 2285216,
+          "offset": 1395248,
+          "size": 30,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL17Attack_UpdateHintP6HINT_s",
+          "demangled_name": "Attack_UpdateHint(HINT_s*)",
+          "address": 2285248,
+          "offset": 1395280,
+          "size": 89,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL21PlayerButton_PlayHintP6HINT_s",
+          "demangled_name": "PlayerButton_PlayHint(HINT_s*)",
+          "address": 2285344,
+          "offset": 1395376,
+          "size": 74,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL21HatMachine_UpdateHintP6HINT_s",
+          "demangled_name": "HatMachine_UpdateHint(HINT_s*)",
+          "address": 2285424,
+          "offset": 1395456,
+          "size": 118,
+          "match_percent": 92.948715
+        },
+        {
+          "name": "_ZL23VehicleStuff_UpdateHintP6HINT_s",
+          "demangled_name": "VehicleStuff_UpdateHint(HINT_s*)",
+          "address": 2285552,
+          "offset": 1395584,
+          "size": 195,
+          "match_percent": 99.753845
         },
         {
           "name": "_ZL15Sith_UpdateHintP6HINT_s",
@@ -67910,7 +67902,15 @@
           "address": 2285760,
           "offset": 1395792,
           "size": 293,
-          "match_percent": 5.526316
+          "match_percent": 88.86842
+        },
+        {
+          "name": "_ZL19AutoJump_UpdateHintP6HINT_s",
+          "demangled_name": "AutoJump_UpdateHint(HINT_s*)",
+          "address": 2286064,
+          "offset": 1396096,
+          "size": 112,
+          "match_percent": 100.0
         },
         {
           "name": "_Z22CurrentHintButtonScalev",
@@ -67934,7 +67934,7 @@
           "address": 2288592,
           "offset": 1398624,
           "size": 107,
-          "match_percent": 17.5
+          "match_percent": 89.166664
         },
         {
           "name": "_Z22initGameHintSys_Batmanv",
@@ -70934,7 +70934,7 @@
           "address": 2442128,
           "offset": 1552160,
           "size": 1885,
-          "match_percent": 33.876236
+          "match_percent": 33.90099
         },
         {
           "name": "_Z18UpdateStatusScreenP11WORLDINFO_s",
@@ -73494,7 +73494,7 @@
           "address": 1915600,
           "offset": 1025632,
           "size": 196,
-          "match_percent": 5.3125
+          "match_percent": 6.265625
         },
         {
           "name": "_Z16ZipUps_DrawLinesv",
@@ -85244,7 +85244,7 @@
           "address": 1766272,
           "offset": 876304,
           "size": 10455,
-          "match_percent": 36.798225
+          "match_percent": 36.80809
         },
         {
           "name": "_Z14Hub_ResetPanelv",

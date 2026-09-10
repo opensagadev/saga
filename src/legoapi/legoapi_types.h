@@ -1794,8 +1794,8 @@ struct HINT_s {
     f32 display_duration; // 0x0c; zero has no timed cancellation
     f32 repeat_delay;     // 0x10
     union {
-        u8 pad_0x14[4];
         i32 (*availability_fn)(HINT_s *);
+        u8 pad_0x14[4];
     };
     void (*on_display)(HINT_s *); // 0x18
     u8 completion_flags[4];       // 0x1c
@@ -3121,6 +3121,7 @@ struct pushblock_s {
             };
         };
         u8 state_flags[4];
+        u32 packed_state_flags;
     };
     union {
         u16 completion_flags; // 0xcc
@@ -4824,10 +4825,15 @@ struct SpecialObject {
     SpecialObject();
 };
 struct TELEPORT_s {
-    u8 reserved_00[0x4e];
+    u8 reserved_00[0x40];
+    struct nugspline_s *path;
+    u8 reserved_44[4];
+    f32 range_squared;
+    u16 flags;
     u8 enabled;
     u8 active;
-    u8 reserved_50[0x24];
+    nuhspecial_s blocking_special;
+    u8 reserved_5c[0x18];
     u16 field_74;
     u16 field_76;
     u16 field_78;

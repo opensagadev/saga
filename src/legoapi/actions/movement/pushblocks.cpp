@@ -6,6 +6,7 @@
 #include "legoapi/gizmo/base/gizactions.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/numath/nuvec.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -43,7 +44,28 @@ i32 NewBlockAction(GameObject_s *object) {
     return 1;
 }
 
-void NearestPushBlock(WORLDINFO_s *, nuvec_s *, float) {
+pushblock_s *NearestPushBlock(WORLDINFO_s *world, nuvec_s *position, float range) {
+    if (position == NULL || world == NULL)
+        return NULL;
+    const NUVEC minimum = {position->x - range, position->y - range, position->z - range};
+    const NUVEC maximum = {position->x + range, position->y + range, position->z + range};
+    pushblock_s *nearest = NULL;
+    f32 nearest_distance = 1000000000.0f;
+    for (i32 i = 0; i < world->push_block_count; ++i) {
+        pushblock_s *block = &world->push_blocks[i];
+        if ((block->packed_state_flags & 0x1040100) != 0x1040000)
+            continue;
+        NUVEC *candidate = block->position;
+        if (candidate->x < minimum.x || candidate->x > maximum.x || candidate->z < minimum.z ||
+            candidate->z > maximum.z || candidate->y < minimum.y || candidate->y > maximum.y)
+            continue;
+        const f32 distance = NuVecDistSqr(position, candidate, NULL);
+        if (distance < nearest_distance) {
+            nearest = block;
+            nearest_distance = distance;
+        }
+    }
+    return nearest;
 }
 
 void PushSeekComplete(pushblock_s *, i32) {

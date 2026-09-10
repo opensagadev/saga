@@ -423,7 +423,8 @@ struct PLAYERCHARACTERCONFIG_s {
     u8 unknown_50[0x8c - 0x50];
     f32 shadow_radius; // 0x8c; values below 99 override the character radius
     u32 flags_090;     // 0x90; bit 0x400 suppresses the offscreen Force glow
-    u8 unknown_94[0xf0 - 0x94];
+    u32 flags_094;
+    u8 unknown_98[0xf0 - 0x98];
     u16 shadow_joint_mask; // 0xf0
     u8 unknown_f2[0xf6 - 0xf2];
     u8 blob_shadow_alpha; // 0xf6; 0xff selects the current level's alpha

@@ -1073,7 +1073,7 @@ extern GIZAIMESSAGE_s *LevAIMessage[8];
 extern GIZBUILDIT_s *LevBuildIt[4];
 extern i32 LevelLocator;
 extern GIZOBSTACLE_s *LevGizObst[8];
-extern i32 LevBlowUp[5];
+extern GIZMOBLOWUP_s *LevBlowUp[5];
 extern i32 LevSfxId[4];
 extern i32 LevelCodeSpline[8];
 extern GIZFORCE_s *LevGizForce[4];

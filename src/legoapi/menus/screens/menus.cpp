@@ -27,7 +27,7 @@ struct SHOPINPUT;
 
 extern "C" void NewMenu(i32 menu_id, i32 menu_y, i32 param3);
 extern "C" void loadsaveCallEachFrame(void);
-extern "C" i32 TestForController(void);
+extern "C" bool TestForController(void);
 i32 GetMenuID(void);
 void MenuDrawBackground(void);
 extern u32 GAMEPAD_START;

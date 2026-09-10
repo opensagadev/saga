@@ -737,18 +737,20 @@ static __used__ void GameMsg_EndDelay_Game(GAMEMESSAGE_s *) {
 static __used__ void GameMsg_Draw_MiniKitDetector(GAMEMESSAGE_s *, nuvec_s *, float) {
 }
 
-static __used__ bool HoldTag_UpdateHint(HINT_s *) {
-    if (MechInputTouchSystem::s_baseControlMode == 0 || WORLD == NULL || WORLD->area == HUB_ADATA) {
+i16 LEGOACT_PUSH = -1;
+pushblock_s *NearestPushBlock(WORLDINFO_s *, nuvec_s *, f32);
+
+i32 Push_UpdateHints(HINT_s *) {
+    if (LEGOACT_PUSH == -1)
         return 0;
+    for (i32 i = 0; i < 8; ++i) {
+        GameObject_s *object = Player[i];
+        if (object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0 &&
+            object->apiobj.character_model->model_data_b[LEGOACT_PUSH] != NULL &&
+            NearestPushBlock(WORLD, &object->apiobj.collision_position, 2.0f) != NULL)
+            return 1;
     }
-    return VehicleArea == 0;
-}
-
-static __used__ bool HatMachine_UpdateHint(HINT_s *) {
-    return false;
-}
-
-void Push_UpdateHints(HINT_s *) {
+    return 0;
 }
 
 void Percent_UpdateHint(HINT_s *) {

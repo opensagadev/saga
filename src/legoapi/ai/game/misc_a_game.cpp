@@ -17,10 +17,6 @@ static __used__ void Asteroids_Update() {
 static __used__ void Asteroid_AddParts(GIZMOBLOWUP_s *) {
 }
 
-static __used__ bool Attack_UpdateHint(HINT_s *) {
-    return {};
-}
-
 static __used__ void *CreatePodRaceMine(nuvec_s *) {
     return {};
 }

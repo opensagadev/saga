@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "MechInputTouch/MechInputTouch_types.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/legoapi_types.h"
@@ -245,7 +246,10 @@ void GizBuildIt_SetStepTime(GIZBUILDIT_s *buildit, GameObject_s *player) {
     buildit->step_timer = buildit->step_duration;
 }
 
-void GizBuildIts_UpdateHint(HINT_s *) {
+i32 GizBuildIts_UpdateHint(HINT_s *hint) {
+    if (hint->completion_flags[MechInputTouchSystem::s_baseControlMode] != 0)
+        return 0;
+    return GizBuildIt_AnyReacting(WorldInfo_CurrentlyActive()) != NULL;
 }
 
 void SetHeadTarget(GameObject_s *, NUVEC *, i8, f32, f32, f32);

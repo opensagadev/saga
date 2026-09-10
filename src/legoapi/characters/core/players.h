@@ -116,6 +116,7 @@ void PostResetCode(GameObject_s *obj);
 NUVEC *Player_StartPos(GameObject_s *obj);
 i32 Players_BothActive(void);
 i32 AvailableToPlayer(u32 character_flags, i32 character_id, i32 context, i32 require_all);
+i32 ActivePlayerInRange(nuvec_s *position, f32 range_squared, f32 *distance_squared);
 bool FindNearestPlayerToVec(NUVEC *position, GameObject_s **nearest_player, f32 &distance_squared,
                             bool require_character_flags, u32 character_flags);
 TORPEDOPACKET *GetTorpedoPacket(void);

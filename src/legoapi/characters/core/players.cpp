@@ -1084,12 +1084,6 @@ static __used__ unsigned int CanPushObstacles_Game(GameObject_s *) {
     return {};
 }
 
-static __used__ void PlayerButton_PlayHint(HINT_s *) {
-}
-
-static __used__ void PlayerButton_UpdateHint(HINT_s *) {
-}
-
 void KillPlayer(GameObject_s *, i32, i32, nuvec_s *) {
 }
 
@@ -1558,7 +1552,19 @@ i32 UnderPlayerControl(GameObject_s *object) {
            (object->field_0xcc0 != NULL && static_cast<i8>(object->field_0xcc0->apiobj.flags_low) < 0);
 }
 
-void ActivePlayerInRange(nuvec_s *, float, float *) {
+i32 ActivePlayerInRange(nuvec_s *position, float range_squared, float *distance_squared) {
+    for (i32 i = 0; i < 8; ++i) {
+        GameObject_s *object = Player[i];
+        if (object != NULL && static_cast<i8>(object->apiobj.flags_low) < 0) {
+            const f32 distance = NuVecDistSqr(&object->apiobj.collision_position, position, NULL);
+            if (distance < range_squared) {
+                if (distance_squared != NULL)
+                    *distance_squared = distance;
+                return 1;
+            }
+        }
+    }
+    return 0;
 }
 
 GameObject_s *GetOtherActivePlayer(GameObject_s *object) {

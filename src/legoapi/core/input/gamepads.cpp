@@ -182,7 +182,7 @@ extern "C" {
     void SetPadRecPtr(void) {
     }
 
-    i32 TestForController(void) {
+    bool TestForController(void) {
         return Controller_IsConnected() != 0 || enable_touch_controls == 0;
     }
 
