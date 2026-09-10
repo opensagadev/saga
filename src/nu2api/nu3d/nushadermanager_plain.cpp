@@ -31,6 +31,8 @@ using nu2api::HashRedirect;
 using nu2api::LoadedUniqueShaderRecord;
 using nu2api::ShaderMtlDescFilterPlain;
 
+void *g_shaderManager = nullptr;
+
 #include <GLES2/gl2.h>
 #include <cstdio>
 #include <cstring>
@@ -220,8 +222,6 @@ namespace nu2api {
     inline NUSHADEROBJECT *&ManagerBoundSlot() {
         return Manager()->bound_slot;
     }
-
-    void *g_shaderManager = nullptr;
 
     // ---------------------------------------------------------------------------
     // Uniform table
@@ -656,7 +656,7 @@ extern "C" void NuShaderManagerInit(VARIPTR *arena, VARIPTR arena_end) {
     allocator.setExternalMemoryPool(arena->void_ptr, static_cast<u32>(arena_end.addr - arena->addr));
     void *memory = allocator.cursor;
     allocator.cursor += sizeof(ShaderManagerOpenGL);
-    nu2api::g_shaderManager = new (memory) ShaderManagerOpenGL(allocator);
+    g_shaderManager = new (memory) ShaderManagerOpenGL(allocator);
     arena->addr += allocator.cursor - allocator.base;
 }
 
@@ -687,7 +687,7 @@ extern "C" {
 }
 
 extern "C" void NuShaderManagerBindShader(NUSHADEROBJECT *slot) {
-    (void)nu2api::g_shaderManager;
+    (void)g_shaderManager;
     nu2api::ManagerBoundSlot() = slot;
     if (slot == NULL) {
         return;
@@ -1065,11 +1065,11 @@ namespace nu2api {
 // ---------------------------------------------------------------------------
 
 extern "C" void *NuShaderManagerRetrieveShader(NUSHADERMTLDESC *desc, void *mtl) {
-    return nu2api::RetrieveShader(nu2api::g_shaderManager, desc, mtl, 0, 0, false);
+    return nu2api::RetrieveShader(g_shaderManager, desc, mtl, 0, 0, false);
 }
 
 extern "C" void *NuShaderManagerRetrieveShaderVariant(NUSHADERMTLDESC *desc, void *mtl, i32 variant) {
-    return nu2api::RetrieveShader(nu2api::g_shaderManager, desc, mtl, variant, 0, false);
+    return nu2api::RetrieveShader(g_shaderManager, desc, mtl, variant, 0, false);
 }
 
 // GL uniform dispatch table — matches the original .data at 0x65e0b8.

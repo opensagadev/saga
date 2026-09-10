@@ -84,7 +84,10 @@ extern "C" {
         NuSound3ResumeStereoStream(1 - music->primary_stream);
     }
 
-    void SetForceScenePlayBack(void) {
+    u8 ForceScenePlayBack;
+
+    void SetForceScenePlayBack(i32 enabled) {
+        ForceScenePlayBack = static_cast<u8>(enabled);
     }
 
     void instCutSceneTimeElapsed(void) {

@@ -33,6 +33,8 @@ enum SHADERSEMANTIC_enum : i32;
 struct NuShaderObject : NUSHADEROBJECT {};
 
 template <typename T> struct ShaderManagerTemplate {
+    static f32 shininessFactor;
+
     T slots[400];
     i32 last_allocated;
     NUSHADEROBJECT *bound_slot;
@@ -57,6 +59,8 @@ template <typename T> struct ShaderManagerTemplate {
     virtual void adaptShaderMaterialForShaderVersion(nushadermtldesc_s *) {
     }
 };
+template <typename T> f32 ShaderManagerTemplate<T>::shininessFactor = 1.0f;
+
 struct ShaderManagerOpenGL : ShaderManagerTemplate<NuShaderObject> {
     ShaderManagerOpenGL(VirtualStackAllocator &);
     virtual ~ShaderManagerOpenGL();

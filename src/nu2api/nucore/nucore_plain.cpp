@@ -83,6 +83,8 @@ extern "C" {
     NUANIMBUFFEVALUATECB AnimBuffEvalCB = NULL;
     void **AnimBuffEvalData = NULL;
     i32 *AnimBuffEvalJoint = NULL;
+    i32 nuspecial_shadowLightCount = 0;
+    i32 nuspecial_shadowLightHaveClipOverrides = 0;
 }
 
 extern "C" void ANI_FixUpAddrs(ani3_animheader_s *, isize, i32);
@@ -152,8 +154,6 @@ namespace {
     };
 
     static i32 nuspecial_clip_state = -1;
-    static i32 nuspecial_shadow_light_count = 0;
-    static i32 nuspecial_shadow_light_have_clip_results = 0;
 } // namespace
 
 extern "C" {
@@ -1347,7 +1347,8 @@ extern "C" {
     }
     void NuIOS_HardwareSupportsRetina(void) {
     }
-    void NuIOS_IsLowestEndDevice(void) {
+    i32 NuIOS_IsLowestEndDevice(void) {
+        return g_isLowestEndDevice;
     }
     i32 NuIOS_IsMidRangeDevice(void) {
         return 0;
@@ -2211,7 +2212,8 @@ extern "C" {
     NUQFNT_CSMODE NuQFntGetCoordinateSystem(void) {
         return NuQFntCSMode;
     }
-    void NuQFntGetPrintMode(void) {
+    u32 NuQFntGetPrintMode(void) {
+        return NuQFntMode;
     }
     f32 NuQFntHeightScale(void) {
         return qfnt_height_scale;
@@ -2263,7 +2265,8 @@ extern "C" {
     }
     void NuQFntSetPointSize(void) {
     }
-    void NuQFntSetPrintMode(void) {
+    void NuQFntSetPrintMode(u32 mode) {
+        NuQFntMode = mode;
     }
     void NuQFntSetScale2d(void) {
     }
@@ -2623,7 +2626,7 @@ extern "C" {
     void NuSpecialClear(void *) {
     }
     void NuSpecialClearShadowClipTestResults(void) {
-        nuspecial_shadow_light_have_clip_results = 0;
+        nuspecial_shadowLightHaveClipOverrides = 0;
     }
     void NuSpecialClearShadowLights(void) {
     }
@@ -2686,7 +2689,8 @@ extern "C" {
     }
     void NuSpecialFindMultiWC(void) {
     }
-    void NuSpecialGetActiveShadowLights(void) {
+    i32 NuSpecialGetActiveShadowLights(void) {
+        return nuspecial_shadowLightCount;
     }
     void NuSpecialGetBounds(void *special, NUVEC *minimum, NUVEC *maximum) {
         NuPlainSpecialHandleLayout *handle = reinterpret_cast<NuPlainSpecialHandleLayout *>(special);
@@ -2848,9 +2852,10 @@ extern "C" {
     void NuSpecialGetShadowLight(void) {
     }
     i32 NuSpecialHasActiveShadowLights(void) {
-        return nuspecial_shadow_light_count > 0;
+        return nuspecial_shadowLightCount > 0;
     }
-    void NuSpecialHaveShadowClipTestResults(void) {
+    i32 NuSpecialHaveShadowClipTestResults(void) {
+        return nuspecial_shadowLightHaveClipOverrides;
     }
     void NuSpecialList(void) {
     }
@@ -3059,15 +3064,9 @@ extern "C" {
     }
     void NuWindUpdateArray(NUVEC **);
 
-    void NuPartEnableRayCasts(void) {
-    }
-    void NuPartGetSeed(void) {
-    }
     extern "C" f32 partglobaltime;
     void NuPartResetGlobalTime(void) {
         partglobaltime = 0;
-    }
-    void NuPartSetSeed(i32) {
     }
     void NuPolyShadowInit(void) {
     }
@@ -3506,7 +3505,8 @@ extern "C" {
         }
         return 1;
     }
-    void NuHGobjSetClippingRootTrackerOverride(void) {
+    void NuHGobjSetClippingRootTrackerOverride(i32 enabled) {
+        CutSceneBoundingBoxTrackRoot = static_cast<u8>(enabled);
     }
     void NuHGobjToVideoMem(void) {
     }

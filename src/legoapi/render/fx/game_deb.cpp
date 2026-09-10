@@ -642,7 +642,7 @@ extern "C" {
     f32 timeincrement = 0.0f;
     i32 globalframes = 0;
     i32 update_debris_enabled = 1;
-    u32 debrisseed = 0;
+    u32 debrisseed = 0x5c0999;
     i32 processdeb = 0;
     f32 glyntestha = 0.0f;
     DEBRISMOMENTUMADJUSTER gencodetab[7] = {

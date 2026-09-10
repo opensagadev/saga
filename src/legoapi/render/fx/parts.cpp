@@ -130,6 +130,19 @@ extern "C" {
     extern i32 edpp_page_on[8];
     extern i32 edpp_instances_used;
     extern u32 partseed;
+
+    void NuPartEnableRayCasts(i32 enabled) {
+        part_raycasts_enabled = enabled;
+    }
+
+    u32 NuPartGetSeed(void) {
+        return partseed;
+    }
+
+    void NuPartSetSeed(i32 seed) {
+        partseed = static_cast<u32>(seed);
+    }
+
     extern part_type_s part_types[128];
     extern part_emit_s part_emits[512];
     extern i32 part_emits_used;

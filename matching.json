@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 36.619892,
+    "fuzzy_match_percent": 36.62942,
     "total_code": "4722419",
-    "matched_code": "344707",
-    "matched_code_percent": 7.299373,
+    "matched_code": "345109",
+    "matched_code_percent": 7.307886,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 3968,
-    "matched_functions_percent": 29.482132,
+    "matched_functions": 3985,
+    "matched_functions_percent": 29.60844,
     "total_units": 1
   },
   "text": {
@@ -34768,7 +34768,7 @@
           "address": 3783840,
           "offset": 2893872,
           "size": 22,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "eduiSetCameraEnabled",
@@ -34776,7 +34776,7 @@
           "address": 3783872,
           "offset": 2893904,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "eduiItemPropCreateEx",
@@ -49929,7 +49929,7 @@
           "address": 5239712,
           "offset": 4349744,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 99.85714
         }
       ]
     },
@@ -51064,7 +51064,7 @@
           "address": 2987360,
           "offset": 2097392,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "CheckStreamFileID",
@@ -57857,7 +57857,7 @@
           "address": 4910608,
           "offset": 4020640,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL31GuideLines_AllocateProgressDataP9variptr_uS0_",
@@ -77482,7 +77482,7 @@
           "address": 3512976,
           "offset": 2623008,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 74.0
         },
         {
           "name": "DebrisGetSeed",
@@ -79423,6 +79423,30 @@
           "match_percent": 100.0
         },
         {
+          "name": "NuPartEnableRayCasts",
+          "demangled_name": "NuPartEnableRayCasts",
+          "address": 4314480,
+          "offset": 3424512,
+          "size": 24,
+          "match_percent": 99.85714
+        },
+        {
+          "name": "NuPartSetSeed",
+          "demangled_name": "NuPartSetSeed",
+          "address": 4314512,
+          "offset": 3424544,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuPartGetSeed",
+          "demangled_name": "NuPartGetSeed",
+          "address": 4314544,
+          "offset": 3424576,
+          "size": 22,
+          "match_percent": 100.0
+        },
+        {
           "name": "ResetParts",
           "demangled_name": "ResetParts",
           "address": 4314608,
@@ -79444,7 +79468,7 @@
           "address": 4315088,
           "offset": 3425120,
           "size": 284,
-          "match_percent": 59.5
+          "match_percent": 59.5625
         },
         {
           "name": "_Z22NewPartOrderedRotationP6PART_s",
@@ -79452,7 +79476,7 @@
           "address": 4315376,
           "offset": 3425408,
           "size": 266,
-          "match_percent": 99.85185
+          "match_percent": 99.94444
         },
         {
           "name": "_Z12PartTimeSlipv",
@@ -79508,7 +79532,7 @@
           "address": 4320944,
           "offset": 3430976,
           "size": 429,
-          "match_percent": 99.91753
+          "match_percent": 99.96907
         },
         {
           "name": "PARTLookupType",
@@ -79684,7 +79708,7 @@
           "address": 4339456,
           "offset": 3449488,
           "size": 250,
-          "match_percent": 88.01923
+          "match_percent": 88.11539
         },
         {
           "name": "UpdateParts",
@@ -79692,7 +79716,7 @@
           "address": 4339712,
           "offset": 3449744,
           "size": 3454,
-          "match_percent": 10.875683
+          "match_percent": 11.075136
         },
         {
           "name": "AddScaledFiniteShotPART",
@@ -95399,7 +95423,7 @@
           "address": 930288,
           "offset": 40320,
           "size": 22,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "NuIOS_IsMidRangeDevice",
@@ -97087,7 +97111,7 @@
           "address": 2922096,
           "offset": 2032128,
           "size": 22,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "NuSpecialHasActiveShadowLights",
@@ -97095,7 +97119,7 @@
           "address": 2922128,
           "offset": 2032160,
           "size": 28,
-          "match_percent": 47.5
+          "match_percent": 100.0
         },
         {
           "name": "NuSpecialGetShadowLight",
@@ -97119,7 +97143,7 @@
           "address": 2922208,
           "offset": 2032240,
           "size": 22,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "NuSpecialGetShadowClipTestResult",
@@ -97135,7 +97159,7 @@
           "address": 2922288,
           "offset": 2032320,
           "size": 26,
-          "match_percent": 48.57143
+          "match_percent": 100.0
         },
         {
           "name": "NuSplineList",
@@ -97151,7 +97175,7 @@
           "address": 2923072,
           "offset": 2033104,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "NuQFntGetPrintMode",
@@ -97159,7 +97183,7 @@
           "address": 2923248,
           "offset": 2033280,
           "size": 22,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "NuQFntLenScale",
@@ -98087,7 +98111,7 @@
           "address": 2990464,
           "offset": 2100496,
           "size": 24,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "NuHGobjJointMtx",
@@ -99024,30 +99048,6 @@
           "offset": 2893936,
           "size": 78,
           "match_percent": 99.51613
-        },
-        {
-          "name": "NuPartEnableRayCasts",
-          "demangled_name": "NuPartEnableRayCasts",
-          "address": 4314480,
-          "offset": 3424512,
-          "size": 24,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuPartSetSeed",
-          "demangled_name": "NuPartSetSeed",
-          "address": 4314512,
-          "offset": 3424544,
-          "size": 24,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuPartGetSeed",
-          "demangled_name": "NuPartGetSeed",
-          "address": 4314544,
-          "offset": 3424576,
-          "size": 22,
-          "match_percent": 0.0
         },
         {
           "name": "NuPartResetGlobalTime",
@@ -103580,7 +103580,7 @@
           "address": 3182432,
           "offset": 2292464,
           "size": 28,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "NuShaderManagerGetShininessFactor",
@@ -103588,7 +103588,7 @@
           "address": 3182464,
           "offset": 2292496,
           "size": 22,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "NuShaderManagerGetInstance",
@@ -103596,7 +103596,7 @@
           "address": 3182496,
           "offset": 2292528,
           "size": 22,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "NuShaderManagerSetShaderSaveFolder",

@@ -42,8 +42,9 @@ namespace nu2api {
         i32 param4; // 0x20 (field8_0x20)
     };
 
-    extern void *g_shaderManager;
 } // namespace nu2api
+
+extern void *g_shaderManager;
 
 extern "C" NUSHADEROBJECT *NuShaderManagerGetShaderById(i32 id);
 extern "C" void NuShaderManagerReleaseShader(NUSHADEROBJECT *shader);

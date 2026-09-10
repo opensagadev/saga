@@ -52,7 +52,7 @@ i32 isBitCountTable = 0;
 f32 MAXFRAMETIME = 0;
 extern "C" {
     f32 partglobaltime = 0;
-    u32 partseed = 0;
+    u32 partseed = 0x5c0999;
     i32 g_signedinUser = -1;
 }
 MAIN_FRAME_COUNTERS_s MainFrameCounters = {};

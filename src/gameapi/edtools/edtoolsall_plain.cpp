@@ -31,6 +31,7 @@ static i32 edgra_elementthin = 1;
 static VARIPTR gra_ptr;
 static VARIPTR gra_end;
 extern "C" {
+    i32 bCameraEnabled = 1;
     eduimenu_s *edui_messagemenu;
     edgra_clump_s *GrassClumps;
     i32 EDGRA_MAX_CLUMPS;
@@ -1436,7 +1437,8 @@ extern "C" {
     }
     void eduiGetAnalougePadValue(void) {
     }
-    void eduiGetCameraEnabled(void) {
+    i32 eduiGetCameraEnabled(void) {
+        return bCameraEnabled;
     }
     void eduiGetCursorCoords(f32 *x, f32 *y) {
         *x = edui_cursor_x / 640.0f;
@@ -1950,7 +1952,8 @@ extern "C" {
             }
         }
     }
-    void eduiSetCameraEnabled(void) {
+    void eduiSetCameraEnabled(i32 enabled) {
+        bCameraEnabled = enabled;
     }
     void eduiSetCursorColour(void) {
     }

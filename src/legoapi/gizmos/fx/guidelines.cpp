@@ -47,17 +47,21 @@ static void *GuideLines_AllocateProgressData(VARIPTR *, VARIPTR *) {
     return {};
 }
 
-static void GuideLines_ClearProgress(void *, void *) {
-    UNIMPLEMENTED();
+struct GUIDELINEPROGRESS {
+    u32 state[2];
+};
+
+static void GuideLines_ClearProgress(void *, void *progress_data) {
+    if (progress_data != NULL) {
+        GUIDELINEPROGRESS *progress = static_cast<GUIDELINEPROGRESS *>(progress_data);
+        progress->state[0] = 0xffffffff;
+        progress->state[1] = 0xffffffff;
+    }
 }
 
 static void GuideLines_StoreProgress(void *, void *, void *) {
     UNIMPLEMENTED();
 }
-
-struct GUIDELINEPROGRESS {
-    u32 state[2];
-};
 
 static void GuideLines_Reset(void *world_info, void *, void *progress_data) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_info);

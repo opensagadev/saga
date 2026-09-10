@@ -1,4 +1,5 @@
 #include "legoapi/legoapi_types.h"
+#include "nu2api/nu3d/nushader_plain.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nushader.h"
 #include <cstring>
@@ -168,26 +169,21 @@ void ShaderMtlDescFilter::internalInit(nushadermtldesc_s const *material_desc, n
     }
 }
 
-namespace nu2api {
-    extern void *g_shaderManager;
-}
-
 extern "C" void NuShaderManagerSetfv(i32 semantic, const f32 *values) {
-    static_cast<ShaderManagerOpenGL *>(nu2api::g_shaderManager)
-        ->setfv(static_cast<SHADERSEMANTIC_enum>(semantic), values);
+    static_cast<ShaderManagerOpenGL *>(g_shaderManager)->setfv(static_cast<SHADERSEMANTIC_enum>(semantic), values);
 }
 
 extern "C" void NuShaderManagerSetElementfv(i32 semantic, i32 element, const f32 *values) {
-    static_cast<ShaderManagerOpenGL *>(nu2api::g_shaderManager)
+    static_cast<ShaderManagerOpenGL *>(g_shaderManager)
         ->setElementfv(static_cast<SHADERSEMANTIC_enum>(semantic), element, values);
 }
 
 extern "C" void NuShaderManagerSetElementsfv(i32 semantic, i32 first_element, i32 count, const f32 *values) {
-    static_cast<ShaderManagerOpenGL *>(nu2api::g_shaderManager)
+    static_cast<ShaderManagerOpenGL *>(g_shaderManager)
         ->setElementsfv(static_cast<SHADERSEMANTIC_enum>(semantic), first_element, count, values);
 }
 
 extern "C" void NuShaderManagerSetElementsfv_transpose(i32 semantic, i32 first_element, i32 count, const f32 *values) {
-    static_cast<ShaderManagerOpenGL *>(nu2api::g_shaderManager)
+    static_cast<ShaderManagerOpenGL *>(g_shaderManager)
         ->setElementsfv_transpose(static_cast<SHADERSEMANTIC_enum>(semantic), first_element, count, values);
 }
