@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 37.49419,
+    "fuzzy_match_percent": 37.50233,
     "total_code": "4722419",
     "matched_code": "355919",
     "matched_code_percent": 7.536794,
@@ -36671,7 +36671,31 @@
           "address": 3435488,
           "offset": 2545520,
           "size": 234,
-          "match_percent": 0.0
+          "match_percent": 91.72727
+        },
+        {
+          "name": "CRC_Process",
+          "demangled_name": "CRC_Process",
+          "address": 3435728,
+          "offset": 2545760,
+          "size": 81,
+          "match_percent": 52.3125
+        },
+        {
+          "name": "CRC_ProcessString",
+          "demangled_name": "CRC_ProcessString",
+          "address": 3435824,
+          "offset": 2545856,
+          "size": 80,
+          "match_percent": 77.333336
+        },
+        {
+          "name": "CRC_ProcessStringN",
+          "demangled_name": "CRC_ProcessStringN",
+          "address": 3435904,
+          "offset": 2545936,
+          "size": 144,
+          "match_percent": 45.93182
         },
         {
           "name": "CRC_ProcessStringIgnoreCase",
@@ -36679,7 +36703,15 @@
           "address": 3436048,
           "offset": 2546080,
           "size": 129,
-          "match_percent": 51.4
+          "match_percent": 48.711113
+        },
+        {
+          "name": "CRC_ProcessStringNIgnoreCase",
+          "demangled_name": "CRC_ProcessStringNIgnoreCase",
+          "address": 3436192,
+          "offset": 2546224,
+          "size": 147,
+          "match_percent": 26.870968
         }
       ]
     },
@@ -36851,40 +36883,7 @@
       "name": "gamelib/util/CRC16_plain.cpp.o",
       "source": "src/gamelib/util/CRC16_plain.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gamelib/CRC16_plain.o",
-      "functions": [
-        {
-          "name": "CRC_Process",
-          "demangled_name": "CRC_Process",
-          "address": 3435728,
-          "offset": 2545760,
-          "size": 81,
-          "match_percent": 12.1875
-        },
-        {
-          "name": "CRC_ProcessString",
-          "demangled_name": "CRC_ProcessString",
-          "address": 3435824,
-          "offset": 2545856,
-          "size": 80,
-          "match_percent": 12.666667
-        },
-        {
-          "name": "CRC_ProcessStringN",
-          "demangled_name": "CRC_ProcessStringN",
-          "address": 3435904,
-          "offset": 2545936,
-          "size": 144,
-          "match_percent": 5.0
-        },
-        {
-          "name": "CRC_ProcessStringNIgnoreCase",
-          "demangled_name": "CRC_ProcessStringNIgnoreCase",
-          "address": 3436192,
-          "offset": 2546224,
-          "size": 147,
-          "match_percent": 6.290323
-        }
-      ]
+      "functions": []
     },
     {
       "name": "gamelib/util/Ftp.cpp.o",
