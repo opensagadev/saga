@@ -6338,7 +6338,23 @@ void TurnCode(GameObject_s *, i32, GAMEPAD_s *) {
 void FloatCode(GameObject_s *) {
 }
 
-void SlideCode(GameObject_s *) {
+void SlideCode(GameObject_s *object) {
+    if (object->field_0x7a5 != 0x33) {
+        StartSlide(object, 1);
+    } else {
+        if (object->apiobj.field_0x27d != 0 && CanObjSlide(object, static_cast<i8>(object->apiobj.field_0x281)) != 0) {
+            object->airborne_action_duration = 0.25f;
+        } else if (object->airborne_action_duration > 0.0f) {
+            object->airborne_action_duration -= FRAMETIME;
+            if (object->airborne_action_duration <= 0.0f) {
+                object->field_0x7a5 = -1;
+            }
+        }
+
+        if (object->apiobj.field_0x27d != 0) {
+            PlaySfx("Char_Slide_Lp", &object->apiobj.lower_position);
+        }
+    }
 }
 
 void StartHold(GameObject_s *object) {
