@@ -184,7 +184,7 @@ void NetChangedReplicator::CheckSumObject(EdClass const *object_class, void cons
     while (member != NULL) {
         if (member->class_marker < 0) {
             EdClass *member_class = theRegistry.GetClass(member->type_id);
-            void *member_object = member->vtable->GetMemberObject(member, object);
+            void *member_object = member->vtable->get_member_object(member, object);
             if (member_object != NULL) {
                 CheckSumObject(member_class, member_object, checksum);
             }
@@ -192,7 +192,7 @@ void NetChangedReplicator::CheckSumObject(EdClass const *object_class, void cons
             EdType *type = theRegistry.GetType(member->type_id);
             i32 size = member->array_size > 0 ? member->array_size : type->size;
             u8 data[256];
-            member->vtable->GetMemberData(member, object, member->type_id, data, sizeof(data));
+            member->vtable->get_member_data(member, object, member->type_id, data, sizeof(data));
             CheckSum(data, static_cast<u32>(size), checksum);
     }
         member = member->next;

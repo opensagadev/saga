@@ -69,8 +69,8 @@ union variptr_u;
 struct ClassObjectList;
 struct EdMember {
     struct VTable {
-        void *(*GetMemberObject)(EdMember *, void const *);
-        void (*GetMemberData)(EdMember *, void const *, i32, void *, i32);
+        void *(*get_member_object)(EdMember *, void const *);
+        void (*get_member_data)(EdMember *, void const *, i32, void *, i32);
     };
 
     VTable *vtable;
