@@ -180,7 +180,7 @@ void oneAtOnce_MaintainArray() {
 }
 
 void oneAtOnce_SetDistPerRow(float distance) {
-    AtOnce_RowDist = distance >= 0.0f ? distance : 0.0f;
+    AtOnce_RowDist = MAX(0.0f, distance);
 }
 
 void NarrowSockExceptions_Init(NARROWSOCKEXCEPTION *) {
@@ -191,7 +191,7 @@ void oneAtOnce_SetNumAttackers(i32 attackers) {
 }
 
 void oneAtOnce_SetInitDistPerRow(float distance) {
-    AtOnce_InitialRowDist = distance >= 0.0f ? distance : 0.0f;
+    AtOnce_InitialRowDist = MAX(0.0f, distance);
 }
 
 void oneAtOnce_SetAttackersPerRow(i32 attackers) {

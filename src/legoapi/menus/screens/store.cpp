@@ -27,6 +27,8 @@ extern u32 GAMEPAD_MENUSELECT;
 extern u32 GAMEPAD_MENUCANCEL;
 
 extern void TurnEpisodeDoorLightsOn(i32);
+extern f32 *HUB_AREAPANELX;
+extern f32 HUB_AREAPANELX_ONETRUEJEDIGOLDBRICK[6];
 
 STOREPACK StorePack[11] = {0};
 
@@ -290,4 +292,5 @@ static __used__ void StoreUnlockArcade() {
 static __used__ void StoreUnlockBounty() {
 }
 static __used__ void StoreUnlockChallenge() {
+    HUB_AREAPANELX = HUB_AREAPANELX_ONETRUEJEDIGOLDBRICK;
 }

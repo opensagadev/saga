@@ -3884,8 +3884,17 @@ struct GIZOBSTACLE_s {
     u8 trigger_mode;  // 0x92
     u8 field_0x93;
     MechObjectInterface *mech_object_interface; // 0x94
-    u8 progress_flags;                          // 0x98, persisted by GizObstacles progress data
-    u8 control_flags;                           // 0x99, GIZOBSTACLE_CONTROL_FLAGS
+    union {
+        u8 progress_flags; // 0x98, persisted by GizObstacles progress data
+        struct {
+            u8 progress_enabled : 1;
+            u8 progress_visible : 1;
+            u8 progress_external_control : 1;
+            u8 progress_push_control : 1;
+            u8 progress_reserved : 4;
+        };
+    };
+    u8 control_flags; // 0x99, GIZOBSTACLE_CONTROL_FLAGS
     u8 field_0x9a[2];
     i32 proximity_output; // 0x9c
     u8 runtime_flags;     // 0xa0, GIZOBSTACLE_RUNTIME_FLAGS
@@ -4915,7 +4924,11 @@ struct ThingManager {
     u32 field_0x10;     // 0x10 high-water cursor (written by the ctor / AllocPool)
     i32 field_0x14;     // 0x14 AddThingAfterThis reservation, folded in by the next AddThing
     void *timebar;      // 0x18 NuTimeBarCreateSet handle (profiling, stubbed)
+    u32 field_0x1c;
+    i32 ed_timing_state; // 0x20 editor timing selection state
 };
+DECOMP_ASSERT(sizeof(ThingManager) == 0x24, "ThingManager ABI");
+DECOMP_ASSERT(offsetof(ThingManager, ed_timing_state) == 0x20, "ThingManager timing state offset");
 // GameThingManager shares the base vtable entries (only the dtors differ) and
 // registers itself in theGameThings (ctor @0x4e8b00 / D1 dtor @0x4e8a80).
 struct GameThingManager : ThingManager {

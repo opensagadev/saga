@@ -171,7 +171,9 @@ void GizObstacle_SetPushControlled(GIZOBSTACLE_s *, GameObject_s *, float) {
 void GizObstacle_SetDefaultSFXFn_LSW(void *, GIZOBSTACLE_s *) {
 }
 
-void GizObstacle_SetTechnoControlled(GIZOBSTACLE_s *, float) {
+void GizObstacle_SetTechnoControlled(GIZOBSTACLE_s *obstacle, float speed) {
+    obstacle->progress_external_control = 1;
+    obstacle->animation_speed = speed;
 }
 
 void Move_BEAST(GameObject_s *object);

@@ -246,9 +246,11 @@ void MenuDrawSave(MENU_s *menu) {
 }
 
 void MenuExitLoad(MENU_s *) {
+    Menu_InLoadFlow = 0;
 }
 
 void MenuExitSave(MENU_s *) {
+    Menu_InSaveFlow = 0;
 }
 
 void MenuDrawClips(MENU_s *) {
@@ -1125,6 +1127,7 @@ void MenuEnterInsertCard(MENU_s *) {
 }
 
 void MenuExitCardWarning(MENU_s *) {
+    Menu_InWarningFlow = 0;
 }
 
 void MenuUpdateBonusMode(MENU_s *) {

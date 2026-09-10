@@ -5158,6 +5158,7 @@ void ThingManager::edTimingEnter() {
 }
 
 void ThingManager::edTimingInit() {
+    static_cast<ThingManager *>(theThingManager)->ed_timing_state = 0;
 }
 
 void ThingManager::edTimingProc(float, nupad_s *) {
