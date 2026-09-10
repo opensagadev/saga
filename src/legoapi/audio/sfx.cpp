@@ -41,8 +41,6 @@ static i32 repsfxcount;
 static RepeatSfx repsfxtab[32];
 static i32 ticktock;
 extern "C" f32 MusicVolume __asm__("_ZL11MusicVolume") __attribute__((visibility("hidden"))) = 1.0f;
-extern "C" i32 NumSfx __asm__("_ZL6NumSfx") __attribute__((visibility("hidden")));
-extern "C" i32 NumSfxInst __asm__("_ZL10NumSfxInst") __attribute__((visibility("hidden")));
 static f32 CutVolume = 0.8f;
 
 extern "C" {
@@ -712,13 +710,6 @@ extern "C" {
 
     f32 sfx_wait;
 
-    i32 GetLogicalSfxCount(void) {
-        return NumSfxInst;
-    }
-
-    i32 GetSfxCount(void) {
-        return NumSfx;
-    }
 
     i32 GetSfxIdN(char *name, i32 length) {
         for (i32 index = 0; index < 1600; ++index) {
