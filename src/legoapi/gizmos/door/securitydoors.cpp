@@ -31,25 +31,27 @@ static char *SecurityDoor_GetGizmoName(GIZMO *gizmo) {
 }
 
 static i32 SecurityDoor_GetOutput(GIZMO *gizmo, i32, i32) {
-    UNIMPLEMENTED();
-    return {};
+    return static_cast<SECURITYDOOR *>(gizmo->object)->opened;
 }
 
-static char *SecurityDoor_GetOutputName(GIZMO *gizmo, i32 output_index) {
-    UNIMPLEMENTED();
-    return {};
+static char *SecurityDoor_GetOutputName(GIZMO *, i32) {
+    return "Opened";
 }
 
 static i32 SecurityDoor_GetNumOutputs(GIZMO *) {
     return 1;
 }
 
-static void SecurityDoor_Activate(GIZMO *gizmo, i32) {
-    UNIMPLEMENTED();
+static void SecurityDoor_Activate(GIZMO *gizmo, i32 active) {
+    if (gizmo != NULL) {
+        static_cast<SECURITYDOOR *>(gizmo->object)->active = active != 0;
+    }
 }
 
-static void SecurityDoor_SetVisibility(GIZMO *gizmo, i32) {
-    UNIMPLEMENTED();
+static void SecurityDoor_SetVisibility(GIZMO *gizmo, i32 visible) {
+    if (gizmo != NULL) {
+        static_cast<SECURITYDOOR *>(gizmo->object)->visible = visible != 0;
+    }
 }
 
 static NUVEC *SecurityDoor_GetPos(GIZMO *gizmo) {

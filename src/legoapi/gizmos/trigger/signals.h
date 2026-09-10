@@ -7,6 +7,11 @@
 #ifdef __cplusplus
 
 typedef struct SIGNAL_s {
+    enum {
+        FLAG_VISIBLE = 1 << 0,
+        FLAG_ACTIVE = 1 << 1,
+    };
+
     char name[0x10];
     NUMTX matrix;
     NUVEC position;
@@ -18,7 +23,14 @@ typedef struct SIGNAL_s {
     u16 animation_2;
     char character_letter;
     char suit_letter;
-    u8 flags;
+    union {
+        u8 flags;
+        struct {
+            u8 visible : 1;
+            u8 active : 1;
+            u8 reserved_flags : 6;
+        };
+    };
     u8 pad_6b;
     f32 radius;
     f32 scale;

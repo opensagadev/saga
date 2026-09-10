@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 36.74381,
+    "fuzzy_match_percent": 36.75127,
     "total_code": "4722419",
-    "matched_code": "346714",
-    "matched_code_percent": 7.3418727,
+    "matched_code": "346820",
+    "matched_code_percent": 7.3441176,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4019,
-    "matched_functions_percent": 29.86106,
+    "matched_functions": 4025,
+    "matched_functions_percent": 29.905638,
     "total_units": 1
   },
   "text": {
@@ -57022,7 +57022,7 @@
           "address": 1967344,
           "offset": 1077376,
           "size": 40,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL26SecurityDoor_SetVisibilityP7GIZMO_si",
@@ -57030,7 +57030,7 @@
           "address": 1967392,
           "offset": 1077424,
           "size": 42,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL26SecurityDoors_GetMaxGizmosPv",
@@ -57054,7 +57054,7 @@
           "address": 1967504,
           "offset": 1077536,
           "size": 20,
-          "match_percent": 16.666666
+          "match_percent": 100.0
         },
         {
           "name": "_ZL26SecurityDoor_GetOutputNameP7GIZMO_si",
@@ -57062,7 +57062,7 @@
           "address": 1967536,
           "offset": 1077568,
           "size": 22,
-          "match_percent": 77.5
+          "match_percent": 100.0
         },
         {
           "name": "_ZL26SecurityDoor_GetNumOutputsP7GIZMO_s",
@@ -57118,7 +57118,7 @@
           "address": 1968976,
           "offset": 1079008,
           "size": 159,
-          "match_percent": 100.0
+          "match_percent": 99.680855
         },
         {
           "name": "_ZL20SecurityDoors_UpdatePvS_f",
@@ -61663,7 +61663,7 @@
           "address": 1888544,
           "offset": 998576,
           "size": 36,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL18Signal_ActivateRevP7GIZMO_sii",
@@ -61671,7 +61671,7 @@
           "address": 1888592,
           "offset": 998624,
           "size": 83,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL13Signal_GetPosP7GIZMO_s",
@@ -61703,7 +61703,7 @@
           "address": 1888784,
           "offset": 998816,
           "size": 22,
-          "match_percent": 47.5
+          "match_percent": 100.0
         },
         {
           "name": "_ZL20Signal_GetOutputNameP7GIZMO_si",
@@ -61711,7 +61711,7 @@
           "address": 1888816,
           "offset": 998848,
           "size": 22,
-          "match_percent": 77.5
+          "match_percent": 99.875
         },
         {
           "name": "_ZL20Signal_GetNumOutputsP7GIZMO_s",
@@ -61791,7 +61791,7 @@
           "address": 1894016,
           "offset": 1004048,
           "size": 140,
-          "match_percent": 10.243902
+          "match_percent": 91.21951
         },
         {
           "name": "_Z21Signals_RegisterGizmoi",

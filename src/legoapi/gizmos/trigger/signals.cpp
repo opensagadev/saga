@@ -5,6 +5,11 @@
 
 #include <string.h>
 
+extern "C" {
+    i32 DeletePlatinst(i32 platform_id);
+    i16 NewPlatPickupInst(void *object, i32 object_type);
+}
+
 static i32 Signals_GetMaxGizmos(void *world_info) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_info);
     return world != NULL ? world->current_level->max_signals : 0;
@@ -28,30 +33,60 @@ static char *Signal_GetGizmoName(GIZMO *gizmo) {
 }
 
 static i32 Signal_GetOutput(GIZMO *gizmo, i32, i32) {
-    UNIMPLEMENTED();
-    return {};
+    SIGNAL *signal = static_cast<SIGNAL *>(gizmo->object);
+    return (signal->flags & (SIGNAL::FLAG_VISIBLE | SIGNAL::FLAG_ACTIVE)) ==
+           (SIGNAL::FLAG_VISIBLE | SIGNAL::FLAG_ACTIVE);
 }
 
-static char *Signal_GetOutputName(GIZMO *gizmo, i32 output_index) {
-    UNIMPLEMENTED();
-    return {};
+static char *Signal_GetOutputName(GIZMO *, i32) {
+    return "Active";
 }
 
 static i32 Signal_GetNumOutputs(GIZMO *) {
     return 1;
 }
 
-static void Signal_Activate(GIZMO *gizmo, i32) {
-    UNIMPLEMENTED();
+static void Signal_Activate(GIZMO *gizmo, i32 active) {
+    if (gizmo != NULL) {
+        static_cast<SIGNAL *>(gizmo->object)->active = active != 0;
+    }
 }
 
-static i32 Signal_ActivateRev(GIZMO *gizmo, i32, i32) {
-    UNIMPLEMENTED();
-    return {};
+static i32 Signal_ActivateRev(GIZMO *gizmo, i32 active, i32 reverse) {
+    if (gizmo == NULL) {
+        return 0;
+    }
+    SIGNAL *signal = static_cast<SIGNAL *>(gizmo->object);
+    if (signal == NULL) {
+        return 0;
+    }
+    if ((reverse & 1) == 0) {
+        signal->active = active == 0;
+        return 1;
+    }
+    return signal->active == active;
 }
 
-static void Signal_SetGizmoVisibility(GIZMO *gizmo, i32) {
-    UNIMPLEMENTED();
+static void Signal_SetGizmoVisibility(GIZMO *gizmo, i32 visible) {
+    if (gizmo == NULL) {
+        return;
+    }
+
+    SIGNAL *signal = static_cast<SIGNAL *>(gizmo->object);
+    u8 was_visible = signal->visible;
+    signal->visible = visible != 0;
+
+    if (signal->visible) {
+        if (was_visible) {
+            return;
+        }
+        signal->platform_id = NewPlatPickupInst(&signal->matrix, 2);
+        return;
+    }
+    if (!was_visible) {
+        return;
+    }
+    DeletePlatinst(signal->platform_id);
 }
 
 static NUVEC *Signal_GetPos(GIZMO *gizmo) {

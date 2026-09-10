@@ -13,7 +13,15 @@ typedef struct SECURITYDOOR_s {
     NUVEC position;
     i16 platform_id[2];
     u16 yaw;
-    u8 flags;
+    union {
+        u8 flags;
+        struct {
+            u8 active : 1;
+            u8 visible : 1;
+            u8 opened : 1;
+            u8 reserved_flags : 5;
+        };
+    };
     u8 state;
     NUVEC player_position;
     u16 terrain_angle_z;
