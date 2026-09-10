@@ -10,6 +10,7 @@
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/levels/levels.h"
+#include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "nu2api/nu3d/nuspecial.h"
@@ -75,13 +76,29 @@ static CRUISERC_s cruiser_c;
 // Dogfight (Dogfight_A)
 // ===========================================================================
 
+void SpaceResetAudioPoint();
+void ProcessCurrentSpeed(WORLDINFO_s *, speedup_s *);
+extern AREADATA *DOGFIGHT_ADATA;
+
+speedup_s DogFightSpeedList[] = {
+    {58.0f, 0.5f},  {72.0f, 1.0f},  {174.0f, 0.5f}, {183.0f, 1.0f}, {207.0f, 0.5f},
+    {220.0f, 1.0f}, {313.0f, 0.5f}, {335.0f, 1.0f}, {0.0f, 0.0f},
+};
+
 void ChrisDogFightAInit(WORLDINFO_s *) {
 }
 
 void ChrisDogFightAReset(WORLDINFO_s *) {
 }
 
-void ChrisDogFightAUpdate(WORLDINFO_s *) {
+void ChrisDogFightAUpdate(WORLDINFO_s *world) {
+    SpaceResetAudioPoint();
+    ProcessCurrentSpeed(world, DogFightSpeedList);
+
+    if (AreaGlobals.values.field_0x00 == 0 && *((u8 *)LevFlag) == 0 && DOGFIGHT_ADATA != NULL &&
+        Game.area_save[DOGFIGHT_ADATA->index].area_complete == 0 && GamePlayTimer.time_elapsed >= 3.0f) {
+        *((u8 *)LevFlag) = 1;
+    }
 }
 
 void ChrisDogFightADraw(WORLDINFO_s *) {

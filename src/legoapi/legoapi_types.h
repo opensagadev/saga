@@ -3252,7 +3252,10 @@ DECOMP_ASSERT(sizeof(shopitem_s) == 0x74, "shopitem_s size");
 DECOMP_ASSERT(offsetof(shopitem_s, item_id) == 0x60, "shopitem_s item-id offset");
 DECOMP_ASSERT(offsetof(shopitem_s, special) == 0x68, "shopitem_s special offset");
 struct specialsfx_s;
-struct speedup_s {};
+struct speedup_s {
+    f32 distance;
+    f32 speed;
+};
 struct starfighter_s {};
 struct terrsitu_s {};
 struct uv1deb {};
