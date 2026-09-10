@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 37.43713,
+    "fuzzy_match_percent": 37.460087,
     "total_code": "4722419",
-    "matched_code": "354923",
-    "matched_code_percent": 7.515703,
+    "matched_code": "355919",
+    "matched_code_percent": 7.536794,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4204,
-    "matched_functions_percent": 31.235605,
+    "matched_functions": 4218,
+    "matched_functions_percent": 31.339624,
     "total_units": 1
   },
   "text": {
@@ -110801,7 +110801,7 @@
           "address": 3272304,
           "offset": 2382336,
           "size": 81,
-          "match_percent": 70.52631
+          "match_percent": 100.0
         },
         {
           "name": "_ZN14NuSoundDecoderC1EPKcP13NuSoundSource",
@@ -111008,7 +111008,7 @@
           "address": 3334688,
           "offset": 2444720,
           "size": 103,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN17NuSoundDecoderOGGD2Ev",
@@ -111016,7 +111016,7 @@
           "address": 3334688,
           "offset": 2444720,
           "size": 103,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZThn232_N17NuSoundDecoderOGGD1Ev",
@@ -111024,7 +111024,7 @@
           "address": 3334800,
           "offset": 2444832,
           "size": 10,
-          "match_percent": 70.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN17NuSoundDecoderOGGD0Ev",
@@ -111032,7 +111032,7 @@
           "address": 3334816,
           "offset": 2444848,
           "size": 81,
-          "match_percent": 70.52631
+          "match_percent": 100.0
         },
         {
           "name": "_ZThn232_N17NuSoundDecoderOGGD0Ev",
@@ -111048,7 +111048,7 @@
           "address": 3334928,
           "offset": 2444960,
           "size": 724,
-          "match_percent": 56.076576
+          "match_percent": 56.031532
         },
         {
           "name": "_ZN17NuSoundDecoderOGG23OGGReadCallbacksDecoderC1Ev",
@@ -111104,7 +111104,7 @@
           "address": 3337232,
           "offset": 2447264,
           "size": 1227,
-          "match_percent": 31.812298
+          "match_percent": 31.488672
         }
       ]
     },
@@ -114138,7 +114138,7 @@
           "address": 3294720,
           "offset": 2404752,
           "size": 81,
-          "match_percent": 70.52631
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13NuSoundSample16GetResourceCountEv",
@@ -114257,7 +114257,7 @@
           "address": 3295184,
           "offset": 2405216,
           "size": 81,
-          "match_percent": 70.52631
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13NuSoundSourceC1EPKcNS_10SourceTypeENS_8FeedTypeE",
@@ -114344,7 +114344,7 @@
           "address": 3295968,
           "offset": 2406000,
           "size": 81,
-          "match_percent": 70.52631
+          "match_percent": 100.0
         },
         {
           "name": "_ZN22NuSoundStreamingSampleC1EPKc",
@@ -115414,7 +115414,7 @@
           "address": 3305408,
           "offset": 2415440,
           "size": 630,
-          "match_percent": 0.0
+          "match_percent": 39.26543
         },
         {
           "name": "_ZN12NuSoundVoiceD2Ev",
@@ -115422,7 +115422,7 @@
           "address": 3305408,
           "offset": 2415440,
           "size": 630,
-          "match_percent": 0.0
+          "match_percent": 39.26543
         },
         {
           "name": "_ZN12NuSoundVoiceD0Ev",
@@ -115430,7 +115430,7 @@
           "address": 3306048,
           "offset": 2416080,
           "size": 81,
-          "match_percent": 70.52631
+          "match_percent": 100.0
         },
         {
           "name": "_ZNK12NuSoundVoice8GetStateEv",
@@ -115942,7 +115942,7 @@
           "address": 3312832,
           "offset": 2422864,
           "size": 5626,
-          "match_percent": 70.58642
+          "match_percent": 70.669754
         },
         {
           "name": "_ZN12NuSoundVoice12RemoveEffectEP13NuSoundEffect",
@@ -116022,7 +116022,7 @@
           "address": 3319872,
           "offset": 2429904,
           "size": 158,
-          "match_percent": 60.363636
+          "match_percent": 60.090908
         },
         {
           "name": "_ZN12NuSoundVoice4PlayEv",
@@ -116030,7 +116030,7 @@
           "address": 3320032,
           "offset": 2430064,
           "size": 795,
-          "match_percent": 6.847716
+          "match_percent": 6.898477
         },
         {
           "name": "_ZN12NuSoundVoice19CheckStarvedBuffersEv",
@@ -116181,7 +116181,7 @@
           "address": 3324640,
           "offset": 2434672,
           "size": 81,
-          "match_percent": 70.52631
+          "match_percent": 100.0
         },
         {
           "name": "_ZN14NuVoiceAndroid12SubmitBufferEP13NuSoundBuffer",
@@ -116317,6 +116317,30 @@
           "offset": 2386576,
           "size": 331,
           "match_percent": 69.943184
+        },
+        {
+          "name": "_ZN17NuSoundWeakPtrObjI21NuSoundBufferCallbackED1Ev",
+          "demangled_name": "NuSoundWeakPtrObj<NuSoundBufferCallback>::~NuSoundWeakPtrObj()",
+          "address": 3320864,
+          "offset": 2430896,
+          "size": 469,
+          "match_percent": 43.730495
+        },
+        {
+          "name": "_ZN17NuSoundWeakPtrObjI21NuSoundBufferCallbackED2Ev",
+          "demangled_name": "NuSoundWeakPtrObj<NuSoundBufferCallback>::~NuSoundWeakPtrObj()",
+          "address": 3320864,
+          "offset": 2430896,
+          "size": 469,
+          "match_percent": 43.730495
+        },
+        {
+          "name": "_ZN17NuSoundWeakPtrObjI21NuSoundBufferCallbackED0Ev",
+          "demangled_name": "NuSoundWeakPtrObj<NuSoundBufferCallback>::~NuSoundWeakPtrObj()",
+          "address": 3321344,
+          "offset": 2431376,
+          "size": 56,
+          "match_percent": 100.0
         }
       ]
     }
@@ -121675,51 +121699,12 @@
       ]
     },
     {
-      "name": "_ZN17NuSoundWeakPtrObjI21NuSoundBufferCallbackED1Ev",
-      "demangled_name": "NuSoundWeakPtrObj<NuSoundBufferCallback>::~NuSoundWeakPtrObj()",
-      "address": 3320864,
-      "offset": 2430896,
-      "size": 469,
-      "match_percent": 43.730495,
-      "candidate_units": [
-        "nu2api/nusound/nusound_decoder_ogg.cpp.o",
-        "nu2api/nusound/nusound_voice.cpp.o",
-        "nu2api/nusound/nusound_weakptr.cpp.o"
-      ]
-    },
-    {
-      "name": "_ZN17NuSoundWeakPtrObjI21NuSoundBufferCallbackED2Ev",
-      "demangled_name": "NuSoundWeakPtrObj<NuSoundBufferCallback>::~NuSoundWeakPtrObj()",
-      "address": 3320864,
-      "offset": 2430896,
-      "size": 469,
-      "match_percent": 43.730495,
-      "candidate_units": [
-        "nu2api/nusound/nusound_decoder_ogg.cpp.o",
-        "nu2api/nusound/nusound_voice.cpp.o",
-        "nu2api/nusound/nusound_weakptr.cpp.o"
-      ]
-    },
-    {
-      "name": "_ZN17NuSoundWeakPtrObjI21NuSoundBufferCallbackED0Ev",
-      "demangled_name": "NuSoundWeakPtrObj<NuSoundBufferCallback>::~NuSoundWeakPtrObj()",
-      "address": 3321344,
-      "offset": 2431376,
-      "size": 56,
-      "match_percent": 0.0,
-      "candidate_units": [
-        "nu2api/nusound/nusound_decoder_ogg.cpp.o",
-        "nu2api/nusound/nusound_voice.cpp.o",
-        "nu2api/nusound/nusound_weakptr.cpp.o"
-      ]
-    },
-    {
       "name": "_ZN21NuSoundBufferCallbackD1Ev",
       "demangled_name": "NuSoundBufferCallback::~NuSoundBufferCallback()",
       "address": 3321408,
       "offset": 2431440,
       "size": 45,
-      "match_percent": 0.0,
+      "match_percent": 100.0,
       "candidate_units": [
         "nu2api/nusound/nusound_decoder_ogg.cpp.o",
         "nu2api/nusound/nusound_voice.cpp.o"
@@ -121731,7 +121716,7 @@
       "address": 3321408,
       "offset": 2431440,
       "size": 45,
-      "match_percent": 0.0,
+      "match_percent": 100.0,
       "candidate_units": [
         "nu2api/nusound/nusound_decoder_ogg.cpp.o",
         "nu2api/nusound/nusound_voice.cpp.o"
@@ -121743,7 +121728,7 @@
       "address": 3321456,
       "offset": 2431488,
       "size": 67,
-      "match_percent": 0.0,
+      "match_percent": 100.0,
       "candidate_units": [
         "nu2api/nusound/nusound_decoder_ogg.cpp.o",
         "nu2api/nusound/nusound_voice.cpp.o"
@@ -130438,8 +130423,8 @@
   "summary": {
     "bazel_units": 523,
     "functions": 13454,
-    "assigned_functions": 12291,
-    "ambiguous_functions": 235,
+    "assigned_functions": 12294,
+    "ambiguous_functions": 232,
     "unassigned_functions": 928
   }
 }

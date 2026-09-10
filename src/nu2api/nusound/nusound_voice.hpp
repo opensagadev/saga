@@ -11,6 +11,7 @@
 
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/nuelist.hpp"
+#include "nu2api/nucore/numemory.h"
 #include "nu2api/nusound/nusound_buffer.hpp"
 #include "nu2api/nusound/nusound_system.hpp"
 #include "nu2api/nusound/nusound_sync.hpp"
@@ -138,6 +139,10 @@ class NuSoundVoice : public NuSoundBufferCallback {
   public:
     NuSoundVoice(NuSoundSource *sound_source, bool loop);
     virtual ~NuSoundVoice();
+
+    static void operator delete(void *allocation) {
+        NuMemoryGet()->GetThreadMem()->BlockFree(allocation, 0);
+    }
 
     // NuSoundBufferCallback: implemented by NuVoiceAndroid (the device write).
     void SubmitBuffer(NuSoundBuffer *buffer) override = 0;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "nu2api/nucore/common.h"
+#include "nu2api/nucore/numemory.h"
 
 class NuSoundStreamDesc;
 class NuSoundBufferCallback;
@@ -32,6 +33,10 @@ class NuSoundSource {
   public:
     NuSoundSource(const char *file, SourceType source_type, FeedType feed_type);
     virtual ~NuSoundSource();
+
+    static void operator delete(void *allocation) {
+        NuMemoryGet()->GetThreadMem()->BlockFree(allocation, 0);
+    }
 
     virtual const char *GetName() const;
     virtual NuSoundSource *GetEncodedSource();
