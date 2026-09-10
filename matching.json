@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 36.864872,
+    "fuzzy_match_percent": 36.86763,
     "total_code": "4722419",
-    "matched_code": "348807",
-    "matched_code_percent": 7.3861933,
+    "matched_code": "348937",
+    "matched_code_percent": 7.3889465,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4100,
-    "matched_functions_percent": 30.462889,
+    "matched_functions": 4121,
+    "matched_functions_percent": 30.618917,
     "total_units": 1
   },
   "text": {
@@ -86591,6 +86591,38 @@
           "offset": 2245338,
           "size": 22,
           "match_percent": 100.0
+        },
+        {
+          "name": "_Z24NuGScnBufferAllocAlignedii",
+          "demangled_name": "NuGScnBufferAllocAligned(int, int)",
+          "address": 3135409,
+          "offset": 2245441,
+          "size": 10,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z19NuGScnLoadShadersPSPcP9variptr_uS0_",
+          "demangled_name": "NuGScnLoadShadersPS(char*, variptr_u*, variptr_u)",
+          "address": 3135462,
+          "offset": 2245494,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuGSceneSetCrossFadeAlpha",
+          "demangled_name": "NuGSceneSetCrossFadeAlpha",
+          "address": 3141560,
+          "offset": 2251592,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuGSceneProcessCrossFade",
+          "demangled_name": "NuGSceneProcessCrossFade",
+          "address": 3141565,
+          "offset": 2251597,
+          "size": 5,
+          "match_percent": 100.0
         }
       ]
     },
@@ -87118,6 +87150,29 @@
       ]
     },
     {
+      "name": "nu2api/nu3d/android/nurain_android.cpp.o",
+      "source": "src/nu2api/nu3d/android/nurain_android.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nurain_android.o",
+      "functions": [
+        {
+          "name": "NuRainProcess",
+          "demangled_name": "NuRainProcess",
+          "address": 5419357,
+          "offset": 4529389,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRainDraw",
+          "demangled_name": "NuRainDraw",
+          "address": 5419372,
+          "offset": 4529404,
+          "size": 5,
+          "match_percent": 100.0
+        }
+      ]
+    },
+    {
       "name": "nu2api/nu3d/android/nurenderthread.cpp.o",
       "source": "src/nu2api/nu3d/android/nurenderthread.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nurenderthread.o",
@@ -87218,6 +87273,46 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nurndr_android.o",
       "functions": [
         {
+          "name": "NuRndrPspDraw",
+          "demangled_name": "NuRndrPspDraw",
+          "address": 2707639,
+          "offset": 1817671,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRndrSetFxMtx",
+          "demangled_name": "NuRndrSetFxMtx",
+          "address": 2708266,
+          "offset": 1818298,
+          "size": 10,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuWaterOverride",
+          "demangled_name": "NuWaterOverride",
+          "address": 2708276,
+          "offset": 1818308,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRndrShadowDirCol",
+          "demangled_name": "NuRndrShadowDirCol",
+          "address": 2708286,
+          "offset": 1818318,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuPolyShadowInit",
+          "demangled_name": "NuPolyShadowInit",
+          "address": 2709399,
+          "offset": 1819431,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
           "name": "FaceYDirStream",
           "demangled_name": "FaceYDirStream",
           "address": 2711516,
@@ -87244,10 +87339,33 @@
       ]
     },
     {
+      "name": "nu2api/nu3d/android/nurndr_android_cpp.cpp.o",
+      "source": "src/nu2api/nu3d/android/nurndr_android_cpp.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nurndr_android_cpp.o",
+      "functions": [
+        {
+          "name": "_Z11NuRndrFlushi",
+          "demangled_name": "NuRndrFlush(int)",
+          "address": 2708281,
+          "offset": 1818313,
+          "size": 5,
+          "match_percent": 100.0
+        }
+      ]
+    },
+    {
       "name": "nu2api/nu3d/android/nutex_android.cpp.o",
       "source": "src/nu2api/nu3d/android/nutex_android.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nutex_android.o",
       "functions": [
+        {
+          "name": "_Z15NuTexReadBitmapPc",
+          "demangled_name": "NuTexReadBitmap(char*)",
+          "address": 2741877,
+          "offset": 1851909,
+          "size": 10,
+          "match_percent": 100.0
+        },
         {
           "name": "_Z13NuTexCreatePSP13nunativetex_sb",
           "demangled_name": "NuTexCreatePS(nunativetex_s*, bool)",
@@ -87305,12 +87423,36 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z15NuTexAssignAddrii",
+          "demangled_name": "NuTexAssignAddr(int, int)",
+          "address": 2742224,
+          "offset": 1852256,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuTexCreateEx",
+          "demangled_name": "NuTexCreateEx",
+          "address": 2742229,
+          "offset": 1852261,
+          "size": 10,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z13NuTexInitExPSP9variptr_u",
           "demangled_name": "NuTexInitExPS(variptr_u*)",
           "address": 2742239,
           "offset": 1852271,
           "size": 291,
           "match_percent": 99.96429
+        },
+        {
+          "name": "_Z12NuTexReadTexv",
+          "demangled_name": "NuTexReadTex()",
+          "address": 2742530,
+          "offset": 1852562,
+          "size": 5,
+          "match_percent": 100.0
         },
         {
           "name": "NuTexRead",
@@ -88008,6 +88150,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "NuDisplayListDraw",
+          "demangled_name": "NuDisplayListDraw",
+          "address": 2731042,
+          "offset": 1841074,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
           "name": "NuDisplayListAddClut",
           "demangled_name": "NuDisplayListAddClut",
           "address": 2731057,
@@ -88291,22 +88441,6 @@
           "offset": 2237440,
           "size": 185,
           "match_percent": 87.54237
-        },
-        {
-          "name": "_Z24NuGScnBufferAllocAlignedii",
-          "demangled_name": "NuGScnBufferAllocAligned(int, int)",
-          "address": 3135409,
-          "offset": 2245441,
-          "size": 10,
-          "match_percent": 0.0
-        },
-        {
-          "name": "_Z19NuGScnLoadShadersPSPcP9variptr_uS0_",
-          "demangled_name": "NuGScnLoadShadersPS(char*, variptr_u*, variptr_u)",
-          "address": 3135462,
-          "offset": 2245494,
-          "size": 5,
-          "match_percent": 0.0
         },
         {
           "name": "_Z20NuGScnReadTexturesPSiP9variptr_uS_",
@@ -88895,14 +89029,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nurndr.o",
       "functions": [
         {
-          "name": "_Z11NuRndrFlushi",
-          "demangled_name": "NuRndrFlush(int)",
-          "address": 2708281,
-          "offset": 1818313,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
           "name": "_Z23NuRndrParticleSetRepeatP7nuvec_s",
           "demangled_name": "NuRndrParticleSetRepeat(nuvec_s*)",
           "address": 2721734,
@@ -89124,14 +89250,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nurndr_plain.o",
       "functions": [
         {
-          "name": "NuRndrPspDraw",
-          "demangled_name": "NuRndrPspDraw",
-          "address": 2707639,
-          "offset": 1817671,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
           "name": "NuRndrCreateBlendShapeDeformerWeightsArray",
           "demangled_name": "NuRndrCreateBlendShapeDeformerWeightsArray",
           "address": 2707644,
@@ -89146,22 +89264,6 @@
           "offset": 1817812,
           "size": 87,
           "match_percent": 32.962963
-        },
-        {
-          "name": "NuRndrSetFxMtx",
-          "demangled_name": "NuRndrSetFxMtx",
-          "address": 2708266,
-          "offset": 1818298,
-          "size": 10,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuRndrShadowDirCol",
-          "demangled_name": "NuRndrShadowDirCol",
-          "address": 2708286,
-          "offset": 1818318,
-          "size": 5,
-          "match_percent": 0.0
         },
         {
           "name": "NuRndrShadPolys",
@@ -89282,14 +89384,6 @@
           "offset": 1850547,
           "size": 636,
           "match_percent": 27.106796
-        },
-        {
-          "name": "NuTexCreateEx",
-          "demangled_name": "NuTexCreateEx",
-          "address": 2742229,
-          "offset": 1852261,
-          "size": 10,
-          "match_percent": 0.0
         },
         {
           "name": "NuRndrSetAmbientLightPS",
@@ -90692,30 +90786,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nutex.o",
       "functions": [
         {
-          "name": "_Z15NuTexReadBitmapPc",
-          "demangled_name": "NuTexReadBitmap(char*)",
-          "address": 2741877,
-          "offset": 1851909,
-          "size": 10,
-          "match_percent": 0.0
-        },
-        {
-          "name": "_Z15NuTexAssignAddrii",
-          "demangled_name": "NuTexAssignAddr(int, int)",
-          "address": 2742224,
-          "offset": 1852256,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "_Z12NuTexReadTexv",
-          "demangled_name": "NuTexReadTex()",
-          "address": 2742530,
-          "offset": 1852562,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
           "name": "_Z30NuTexGetUnresolvedTextureTIDPSv",
           "demangled_name": "NuTexGetUnresolvedTextureTIDPS()",
           "address": 2990448,
@@ -91309,14 +91379,6 @@
           "match_percent": 7.682539
         },
         {
-          "name": "_Z17NuCheckGLErrorsFLPKci",
-          "demangled_name": "NuCheckGLErrorsFL(char const*, int)",
-          "address": 2702023,
-          "offset": 1812055,
-          "size": 10,
-          "match_percent": 0.0
-        },
-        {
           "name": "NuIOS_AllocateSystemFramebuffers",
           "demangled_name": "NuIOS_AllocateSystemFramebuffers",
           "address": 3240400,
@@ -91331,6 +91393,21 @@
           "offset": 2350928,
           "size": 91,
           "match_percent": 99.73684
+        }
+      ]
+    },
+    {
+      "name": "nu2api/nuandroid/ios_graphics_stubs.cpp.o",
+      "source": "src/nu2api/nuandroid/ios_graphics_stubs.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/ios_graphics_stubs.o",
+      "functions": [
+        {
+          "name": "_Z17NuCheckGLErrorsFLPKci",
+          "demangled_name": "NuCheckGLErrorsFL(char const*, int)",
+          "address": 2702023,
+          "offset": 1812055,
+          "size": 10,
+          "match_percent": 100.0
         }
       ]
     },
@@ -92594,6 +92671,14 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nuapi_android.o",
       "functions": [
         {
+          "name": "_Z14NuXboxLiveInitv",
+          "demangled_name": "NuXboxLiveInit()",
+          "address": 2555197,
+          "offset": 1665229,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
           "name": "NudxFw_D3DBeginCriticalSection",
           "demangled_name": "NudxFw_D3DBeginCriticalSection",
           "address": 2555202,
@@ -92844,6 +92929,14 @@
           "offset": 1668863,
           "size": 49,
           "match_percent": 75.35294
+        },
+        {
+          "name": "NuTimeGetTime",
+          "demangled_name": "NuTimeGetTime",
+          "address": 2558880,
+          "offset": 1668912,
+          "size": 5,
+          "match_percent": 100.0
         }
       ]
     },
@@ -95880,22 +95973,6 @@
           "match_percent": 24.705883
         },
         {
-          "name": "NuOnlineSignInPlayer",
-          "demangled_name": "NuOnlineSignInPlayer",
-          "address": 2543812,
-          "offset": 1653844,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "_Z14NuXboxLiveInitv",
-          "demangled_name": "NuXboxLiveInit()",
-          "address": 2555197,
-          "offset": 1665229,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
           "name": "NuPs2ApplyDeadZone",
           "demangled_name": "NuPs2ApplyDeadZone",
           "address": 2555912,
@@ -95910,14 +95987,6 @@
           "offset": 1666106,
           "size": 106,
           "match_percent": 14.482758
-        },
-        {
-          "name": "NuTimeGetTime",
-          "demangled_name": "NuTimeGetTime",
-          "address": 2558880,
-          "offset": 1668912,
-          "size": 5,
-          "match_percent": 0.0
         },
         {
           "name": "NuPad_Interface_TouchScreenInput",
@@ -96184,28 +96253,12 @@
           "match_percent": 65.13333
         },
         {
-          "name": "NuWaterOverride",
-          "demangled_name": "NuWaterOverride",
-          "address": 2708276,
-          "offset": 1818308,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
           "name": "NuLightFogX",
           "demangled_name": "NuLightFogX",
           "address": 2708301,
           "offset": 1818333,
           "size": 70,
           "match_percent": 44.857143
-        },
-        {
-          "name": "NuPolyShadowInit",
-          "demangled_name": "NuPolyShadowInit",
-          "address": 2709399,
-          "offset": 1819431,
-          "size": 5,
-          "match_percent": 0.0
         },
         {
           "name": "_ZL22NuDisplayListSetID_CNTP19nudisplaylistitem_s",
@@ -96254,14 +96307,6 @@
           "offset": 1840931,
           "size": 90,
           "match_percent": 49.565216
-        },
-        {
-          "name": "NuDisplayListDraw",
-          "demangled_name": "NuDisplayListDraw",
-          "address": 2731042,
-          "offset": 1841074,
-          "size": 5,
-          "match_percent": 0.0
         },
         {
           "name": "NuDisplayListLinkItem",
@@ -98952,22 +98997,6 @@
           "match_percent": 46.666668
         },
         {
-          "name": "NuGSceneSetCrossFadeAlpha",
-          "demangled_name": "NuGSceneSetCrossFadeAlpha",
-          "address": 3141560,
-          "offset": 2251592,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuGSceneProcessCrossFade",
-          "demangled_name": "NuGSceneProcessCrossFade",
-          "address": 3141565,
-          "offset": 2251597,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
           "name": "NuEffectTexLockVP",
           "demangled_name": "NuEffectTexLockVP",
           "address": 3141984,
@@ -99350,22 +99379,6 @@
           "offset": 4528160,
           "size": 196,
           "match_percent": 7.5
-        },
-        {
-          "name": "NuRainProcess",
-          "demangled_name": "NuRainProcess",
-          "address": 5419357,
-          "offset": 4529389,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuRainDraw",
-          "demangled_name": "NuRainDraw",
-          "address": 5419372,
-          "offset": 4529404,
-          "size": 5,
-          "match_percent": 0.0
         },
         {
           "name": "NuRainSetFall",
@@ -101286,6 +101299,14 @@
           "address": 2543761,
           "offset": 1653793,
           "size": 51,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuOnlineSignInPlayer",
+          "demangled_name": "NuOnlineSignInPlayer",
+          "address": 2543812,
+          "offset": 1653844,
+          "size": 5,
           "match_percent": 100.0
         },
         {
@@ -131110,7 +131131,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 518,
+    "bazel_units": 521,
     "functions": 13454,
     "assigned_functions": 12290,
     "ambiguous_functions": 235,

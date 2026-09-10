@@ -180,6 +180,20 @@ i32 NuTexReserve(i32 size) {
 void NuTexUnReserve() {
 }
 
+i32 NuTexReadBitmap(char *) {
+    return 0;
+}
+
+void NuTexAssignAddr(i32, i32) {
+}
+
+extern "C" i32 NuTexCreateEx(void) {
+    return 0;
+}
+
+void NuTexReadTex(void) {
+}
+
 void NuTexSetTextureWithStagePS(NUNATIVETEX *tex, GLuint stage) {
     GLuint gl_tex;
 

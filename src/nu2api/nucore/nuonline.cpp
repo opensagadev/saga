@@ -18,6 +18,8 @@ extern "C" {
     }
     void NuOnlineSetPropertyEx(void) {
     }
+    void NuOnlineSignInPlayer(void) {
+    }
 }
 
 i32 NuOnlineAchievementAchieved(i32 achievement, NUONLINEACHIEVEMENTCALLBACK callback) {

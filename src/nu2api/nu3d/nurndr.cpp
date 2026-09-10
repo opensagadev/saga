@@ -95,9 +95,6 @@ void NuRndrStreamInit(i32 stream_buffer_size, VARIPTR *buffer) {
     rndrstream_free.addr = ALIGN(rndrstream[0].addr, 16);
 }
 
-void NuRndrFlush(i32) {
-}
-
 void NuRndrRectUV2d(float, float, float, float, float, float, float, float, float, i32, numtl_s *) {
 }
 

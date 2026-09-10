@@ -12,3 +12,16 @@
 
 i32 g_vaoLifetimeMutex = -1;
 u32 g_lastBoundVAO;
+
+void *NuGScnBufferAllocAligned(i32, i32) {
+    return NULL;
+}
+
+void NuGScnLoadShadersPS(char *, variptr_u *, variptr_u) {
+}
+
+extern "C" void NuGSceneSetCrossFadeAlpha(void) {
+}
+
+extern "C" void NuGSceneProcessCrossFade(void) {
+}

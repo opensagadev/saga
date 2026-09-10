@@ -58,12 +58,6 @@ __attribute__((weak)) void NuIOS_AllocateSystemFramebuffers(void) {
 // Diagnostics / caps
 // ---------------------------------------------------------------------------
 
-i32 NuCheckGLErrorsFL(const char *file, i32 line) {
-    (void)file;
-    (void)line;
-    return 0;
-}
-
 i32 NuIOS_IsLowEndDevice(void) {
     return g_isLowEndDevice;
 }

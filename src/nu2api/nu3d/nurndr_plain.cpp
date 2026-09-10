@@ -928,8 +928,6 @@ extern "C" void NuRndrParticleGroup(uv1debdata *chunks, PartHeader *header, NUMT
     }
 }
 
-extern "C" void NuRndrPspDraw(void) {
-}
 extern "C" void NuRndrRect(f32 x, f32 y, f32 z, f32 width, f32 height, f32 u0, f32 v0, f32 u1, f32 v1, i32 colour,
                            NUMTL *material) {
     NuPrim2DBegin(4, 7, material);
@@ -1130,9 +1128,6 @@ extern "C" i32 NuRndrSetDirectionalLightsPS(const NUVEC *dir0, const NUCOLOUR3 *
     render_state.state.lights_id++;
     return 1;
 }
-extern "C" i32 NuRndrSetFxMtx(NUMTX *) {
-    return 1;
-}
 extern "C" {
     i32 g_minmiplevel = 13;
     f32 g_mipmapbias;
@@ -1175,8 +1170,6 @@ extern "C" void NuRndrSetWind(f32 speed, f32 scale) {
     global_windscale = scale;
 }
 extern "C" void NuRndrShadPolys(void *) {
-}
-extern "C" void NuRndrShadowDirCol(const NUVEC *, u32, f32, f32) {
 }
 static inline void NuRndrPrimPosition(f32 x, f32 y, f32 z) {
     PrimVertexRaw *vertex = (PrimVertexRaw *)g_NuPrim_StreamBufferPtr->void_ptr;
@@ -1510,8 +1503,6 @@ extern "C" nu2api::ShaderUniformRecord *NuShaderUniformGetByString(const char *n
             return &g_shaderUniforms[i];
     }
     return NULL;
-}
-extern "C" void NuTexCreateEx(void) {
 }
 extern "C" void NuTexDestroy(i32) {
 }

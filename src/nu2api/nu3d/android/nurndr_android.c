@@ -9,3 +9,19 @@ i32 NuRndrSetViewMtx(NUMTX *vpcs_mtx, NUMTX *viewport_vpc_mtx, NUMTX *scissor_vp
 
 void FaceYDirStream(i32 y_angle) {
 }
+
+void NuRndrPspDraw(void) {
+}
+
+i32 NuRndrSetFxMtx(NUMTX *matrix) {
+    return 1;
+}
+
+void NuWaterOverride(void) {
+}
+
+void NuRndrShadowDirCol(const NUVEC *direction, u32 colour, f32 near_distance, f32 far_distance) {
+}
+
+void NuPolyShadowInit(void) {
+}

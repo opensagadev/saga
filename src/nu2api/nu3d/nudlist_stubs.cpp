@@ -6,6 +6,9 @@ extern "C" void NuDisplayListCheckBuffer(void) {
 extern "C" void DisplayListSwapBuffersPS(void) {
 }
 
+extern "C" void NuDisplayListDraw(void) {
+}
+
 // NuDisplaySceneAddPS @ 0x2ab7aa.  The apparently redundant assignment is
 // present in the Android original.
 extern "C" void NuDisplaySceneAddPS(NUDLDLISTSCENE *scene) {

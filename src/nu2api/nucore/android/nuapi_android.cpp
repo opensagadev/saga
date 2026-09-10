@@ -18,6 +18,9 @@ extern "C" NUPADREC *PadRecPtr(void) {
     return NULL;
 }
 
+void NuXboxLiveInit(void) {
+}
+
 void InitializeGLMutex(void) {
 }
 

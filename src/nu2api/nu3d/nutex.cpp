@@ -389,16 +389,6 @@ i32 NuDDSGetTextureDescription(const char *dds_data, NUTEXFORMAT &out_format, i3
 void NuTexRemap(i32, i32) {
 }
 
-void NuTexReadTex() {
-}
-
-void NuTexAssignAddr(i32, i32) {
-}
-
-i32 NuTexReadBitmap(char *) {
-    return 0;
-}
-
 nutexmanager_s *NuTexGetManager() {
     return g_texman;
 }

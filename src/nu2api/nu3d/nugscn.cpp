@@ -117,9 +117,6 @@ void NuGScnMtlLayerMask(nugscn_s *scene, unsigned char mask) {
     display_list->material_layer_mask = mask;
 }
 
-void NuGScnLoadShadersPS(char *, variptr_u *, variptr_u) {
-}
-
 __attribute__((weak)) i32 NuGScnReadTexturesPS(i32 file, variptr_u *buf, variptr_u buf_end) {
     (void)buf_end;
     i32 bytes_read = 0;
@@ -176,8 +173,4 @@ __attribute__((weak)) i32 NuGScnReadTexturesPS(i32 file, variptr_u *buf, variptr
         }
     }
     return bytes_read;
-}
-
-void *NuGScnBufferAllocAligned(i32, i32) {
-    return NULL;
 }

@@ -883,8 +883,6 @@ extern "C" {
         }
         NuThreadCriticalSectionEnd(global_dlist_manager.loading_critical_section);
     }
-    void NuDisplayListDraw(void) {
-    }
     void NuDisplayListDrawAll(void) {
         NuDisplayListCaptureBegin();
         if (global_dlist_manager.nrender_scenes == 0)
@@ -2518,10 +2516,6 @@ extern "C" {
         currentScene.bloom = *parameters;
     }
     // This entry point is empty in the original Android binary.
-    void NuRainDraw(i32) {
-    }
-    void NuRainProcess(void) {
-    }
     void NuRainSetFall(void) {
     }
     void NuRenderContextInit(void) {
@@ -2946,8 +2940,6 @@ extern "C" {
     }
     void NuTimeBarSlotSetEx(void) {
     }
-    void NuWaterOverride(void) {
-    }
 
     // ---------------------------------------------------------------------------
     // Light / wind / particles / debris
@@ -3076,9 +3068,6 @@ extern "C" {
     void NuPartResetGlobalTime(void) {
         partglobaltime = 0;
     }
-    void NuPolyShadowInit(void) {
-    }
-
     // ---------------------------------------------------------------------------
     // Gobj / hierarchy / scene graph
     // ---------------------------------------------------------------------------
@@ -3615,11 +3604,7 @@ extern "C" {
     void NuGCutSetCutAudioStream(i32 stream) {
         NuGCutAudioStream = stream;
     }
-    void NuGSceneProcessCrossFade(void) {
-    }
     void NuGSceneSetCrossFade(void) {
-    }
-    void NuGSceneSetCrossFadeAlpha(void) {
     }
     void NuGHGRelocate(void) {
     }
@@ -3986,8 +3971,6 @@ extern "C" {
     }
     void NuTimeGetStartFrame(void) {
     }
-    void NuTimeGetTime(void) {
-    }
     void NuTimeStartFrame(void) {
     }
 
@@ -4134,8 +4117,6 @@ extern "C" {
     void NuOnlineSetPropertyPS(i32 property, i32 size, void *data) {
         NuOnlineSetPropertyProfilePS(g_signedinUser, property, size, data);
     }
-    void NuOnlineSignInPlayer(void) {
-    }
     i32 NuOnlineSignInPlayerPS(void) {
         return 0;
     }
@@ -4175,8 +4156,6 @@ struct nuframebuffer_s;
 struct nushaderobject_s;
 union variptr_u;
 
-void NuXboxLiveInit() {
-}
 void Nu360ConfigureSMBSharing(char **) {
 }
 void NuFramebuffer360EndZPass() {
