@@ -2814,9 +2814,12 @@ struct dma_particle_chunk_s {
     u8 command;
     u8 fields_001[3];
     dma_particle_chunk_s *next;
-    u8 fields_008[0x18]; // particle records start at 0x20
+    u8 fields_008[0x0c];
+    u32 field_014;
+    u32 field_018;
+    u32 field_01c;
     dma_particle_s particles[32];
-    u8 end_command;
+    u32 end_command;
 };
 DECOMP_ASSERT(sizeof(dma_particle_s) == 0x20, "dma_particle_s size");
 DECOMP_ASSERT(offsetof(dma_particle_s, position) == 0x00, "dma particle position offset");
@@ -2824,6 +2827,7 @@ DECOMP_ASSERT(offsetof(dma_particle_s, start_time) == 0x0c, "dma particle start 
 DECOMP_ASSERT(offsetof(dma_particle_s, momentum) == 0x10, "dma particle momentum offset");
 DECOMP_ASSERT(offsetof(dma_particle_s, inverse_lifetime) == 0x1c, "dma particle lifetime offset");
 DECOMP_ASSERT(offsetof(dma_particle_chunk_s, next) == 0x04, "dma particle next offset");
+DECOMP_ASSERT(offsetof(dma_particle_chunk_s, field_014) == 0x14, "dma particle header offset");
 DECOMP_ASSERT(offsetof(dma_particle_chunk_s, particles) == 0x20, "dma particle data offset");
 DECOMP_ASSERT(offsetof(dma_particle_chunk_s, end_command) == 0x420, "dma particle terminator offset");
 DECOMP_ASSERT(sizeof(dma_particle_chunk_s) == 0x424, "dma_particle_chunk_s size");

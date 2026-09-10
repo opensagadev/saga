@@ -487,6 +487,7 @@ void Text3DStringEncodeFont(unsigned char *src, u16 *dst, void *font) {
             if (*src == 0)
                 break;
             src = NuUnicodeCharFromUTF8(&character, src);
+            continue;
         }
 
         *dst = NuQFntEncodeUnicodeChar(font, character);
@@ -587,20 +588,18 @@ extern "C" {
             game_font = QFont2D;
         if (button_font == nullptr)
             button_font = QFont2DButtons;
-        if (game_font == nullptr || button_font == nullptr)
-            return;
-
-        f32 scale = game_font->height / button_font->height;
-        vucharidx_s *game_map = static_cast<vucharidx_s *>(game_font->unicode_map);
-        vucharidx_s *button_map = static_cast<vucharidx_s *>(button_font->unicode_map);
-        VUFNTCHAR *game_glyphs = game_font->glyphs;
-        VUFNTCHAR *button_glyphs = button_font->glyphs;
-        for (i32 i = 0; i < button_font->unicode_count; i++) {
-            for (i32 j = 0; j < game_font->unicode_count; j++) {
-                if (button_map[i].unicode == game_map[j].unicode) {
-                    if (button_map[i].unicode >= 0x531 && button_map[i].unicode <= 0x53f)
-                        game_glyphs[game_map[j].index].width = button_glyphs[button_map[i].index].width * scale;
-                    break;
+        if (game_font != nullptr && button_font != nullptr) {
+            f32 scale = game_font->height / button_font->height;
+            for (i32 i = 0; i < button_font->glyph_count; i++) {
+                for (i32 j = 0; j < game_font->glyph_count; j++) {
+                    if (button_font->unicode_map[i].unicode == game_font->unicode_map[j].unicode) {
+                        if (button_font->unicode_map[i].unicode >= 0x531 &&
+                            button_font->unicode_map[i].unicode <= 0x53f) {
+                            game_font->glyphs[game_font->unicode_map[j].index].width =
+                                button_font->glyphs[button_font->unicode_map[i].index].width * scale;
+                        }
+                        break;
+                    }
                 }
             }
         }

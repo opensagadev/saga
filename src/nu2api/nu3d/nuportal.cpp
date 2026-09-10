@@ -370,3 +370,36 @@ extern "C" i32 clipTestSphere(NUPORTALSPHERE *sphere, NUFRUSTRUM *frustum) {
     }
     return fully_inside == frustum->plane_count + 1 ? 1 : 2;
 }
+
+extern "C" i32 clipTestBox(NUVEC *minimum, NUVEC *maximum, NUPLANE *planes, i32 plane_count) {
+    i32 inside_vertices = 0;
+    for (i32 plane_index = 0; plane_index < plane_count; ++plane_index) {
+        const NUPLANE &plane = planes[plane_index];
+        i32 inside_plane = 0;
+        for (i32 corner = 0; corner < 8; ++corner) {
+            const f32 x = (corner & 1) != 0 ? maximum->x : minimum->x;
+            const f32 y = (corner & 2) != 0 ? maximum->y : minimum->y;
+            const f32 z = (corner & 4) != 0 ? maximum->z : minimum->z;
+            if (plane.a * x + plane.b * y + plane.c * z + plane.d >= 0.0f) {
+                ++inside_plane;
+                ++inside_vertices;
+            }
+        }
+        if (inside_plane == 0) {
+            return 0;
+        }
+    }
+    return inside_vertices == plane_count * 8 ? 1 : 2;
+}
+
+extern "C" i32 NuPortalClipTestBox(NUVEC *center, NUVEC *extent, NUFRUSTRUM *frustum) {
+    for (i32 i = 0; i < frustum->plane_count; ++i) {
+        const NUPLANE &plane = frustum->planes[i];
+        const f32 distance = plane.a * center->x + plane.b * center->y + plane.c * center->z + plane.d;
+        const f32 radius = NuFabs(plane.a) * extent->x + NuFabs(plane.b) * extent->y + NuFabs(plane.c) * extent->z;
+        if (distance < -radius) {
+            return 0;
+        }
+    }
+    return 1;
+}

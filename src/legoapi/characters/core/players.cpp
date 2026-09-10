@@ -1072,17 +1072,7 @@ static __used__ i32 SelectOpponent(GameObject_s *, f32, f32, i32, i32) {
 static __used__ void Player_ClearContext_Game(GameObject_s *, i32) {
 }
 
-static __used__ unsigned int CanStartHold_Game(GameObject_s *) {
-    return {};
-}
-
-static __used__ unsigned int CanPushBlocks_Game(GameObject_s *) {
-    return {};
-}
-
-static __used__ unsigned int CanPushObstacles_Game(GameObject_s *) {
-    return {};
-}
+u32 (*CanPushObstaclesFn)(GameObject_s *) = NULL;
 
 void KillPlayer(GameObject_s *, i32, i32, nuvec_s *) {
 }

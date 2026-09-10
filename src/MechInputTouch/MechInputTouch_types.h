@@ -833,7 +833,7 @@ struct MechTouchTaskGoTo : MechTouchTask {
     f32 field_3c;
     f32 field_40;
     f32 field_44;
-    u32 field_48;
+    f32 field_48;
     u8 field_4c;
     u8 field_4d;
     u8 field_4e;

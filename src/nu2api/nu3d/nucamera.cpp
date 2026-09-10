@@ -6,6 +6,21 @@
 
 NUMTX clip_test_mtx;
 
+void NuCameraSetProjectionMtx(NUMTX *mtx, f32 fov, f32 aspect, f32 near_clip, f32 far_clip) {
+    near_clip = near_clip < 0.1f ? 0.1f : near_clip;
+    i32 angle = (i32)(fov / 2.0f * 10430.378f);
+    f32 cotangent = NuTrigTable[(angle + 0x4000) >> 1 & 0x7fff] / NuTrigTable[angle >> 1 & 0x7fff];
+    f32 x_scale = aspect * cotangent;
+    f32 y_scale = cotangent;
+    f32 depth = far_clip / (far_clip - near_clip);
+    memset(mtx, 0, sizeof(*mtx));
+    mtx->m00 = x_scale;
+    mtx->m11 = y_scale;
+    mtx->m22 = depth;
+    mtx->m23 = 1.0f;
+    mtx->m32 = -depth * near_clip;
+}
+
 void NuCameraRestoreState(i32 handle) {
     i32 index = handle - 1;
     if (index < cam_state_count) {

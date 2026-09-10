@@ -66,39 +66,6 @@ extern "C" {
 
     void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 
-    i32 clipTestBox(NUVEC *minimum, NUVEC *maximum, NUPLANE *planes, i32 plane_count) {
-        i32 inside_vertices = 0;
-        for (i32 plane_index = 0; plane_index < plane_count; ++plane_index) {
-            const NUPLANE &plane = planes[plane_index];
-            i32 inside_plane = 0;
-            for (i32 corner = 0; corner < 8; ++corner) {
-                const f32 x = (corner & 1) != 0 ? maximum->x : minimum->x;
-                const f32 y = (corner & 2) != 0 ? maximum->y : minimum->y;
-                const f32 z = (corner & 4) != 0 ? maximum->z : minimum->z;
-                if (plane.a * x + plane.b * y + plane.c * z + plane.d >= 0.0f) {
-                    ++inside_plane;
-                    ++inside_vertices;
-                }
-            }
-            if (inside_plane == 0) {
-                return 0;
-            }
-        }
-        return inside_vertices == plane_count * 8 ? 1 : 2;
-    }
-
-    i32 NuPortalClipTestBox(NUVEC *center, NUVEC *extent, NUFRUSTRUM *frustum) {
-        for (i32 i = 0; i < frustum->plane_count; ++i) {
-            const NUPLANE &plane = frustum->planes[i];
-            const f32 distance = plane.a * center->x + plane.b * center->y + plane.c * center->z + plane.d;
-            const f32 radius = NuFabs(plane.a) * extent->x + NuFabs(plane.b) * extent->y + NuFabs(plane.c) * extent->z;
-            if (distance < -radius) {
-                return 0;
-            }
-        }
-        return 1;
-    }
-
     void clipRoomAgainstFrustrum(NUGSCN *scene, NUROOM *room, NUFRUSTRUM *frustum) {
         u32 instance_index;
         i32 clip_result;
@@ -467,6 +434,50 @@ extern "C" {
 
     void Initialise_PS(NUGSCN *scene) {
         scene->instance_visibility_flags = PortalVisiFlags;
+    }
+
+    PartHeader *CreateDmaPartEffectList(void *memory, i32 *size) {
+        u8 *cursor = reinterpret_cast<u8 *>(ALIGN(reinterpret_cast<usize>(memory), 0x10));
+        u8 *start = cursor;
+        PartHeader *header = reinterpret_cast<PartHeader *>(cursor);
+        debris_particle_frame_s *frame = header->frames;
+        frame += 64;
+        cursor = reinterpret_cast<u8 *>(frame);
+        *size = cursor - start;
+        return reinterpret_cast<PartHeader *>(start);
+    }
+
+    dma_particle_chunk_s *CreateDmaParticleSet(void *memory, i32 *size) {
+        dma_particle_chunk_s *chunk = static_cast<dma_particle_chunk_s *>(memory);
+        u8 *cursor = static_cast<u8 *>(memory);
+        chunk->command = 0x52;
+        chunk->next = NULL;
+        cursor += 0x10;
+        reinterpret_cast<u32 *>(cursor)[1] = 0;
+        reinterpret_cast<u32 *>(cursor)[2] = 0;
+        reinterpret_cast<u32 *>(cursor)[3] = 0;
+        reinterpret_cast<u32 *>(cursor)[4] = 0;
+        cursor += 0x10;
+        for (i32 i = 0; i < 32; ++i) {
+            dma_particle_s *particle = reinterpret_cast<dma_particle_s *>(cursor);
+            particle->position.x = 1.0f;
+            particle->position.y = 2.0f;
+            particle->position.z = 3.0f;
+            particle->momentum.x = 4.0f;
+            particle->momentum.y = 5.0f;
+            particle->momentum.z = 6.0f;
+            particle->start_time = -1.0f;
+            particle->inverse_lifetime = 128.0f;
+            cursor += sizeof(*particle);
+        }
+        *reinterpret_cast<u32 *>(cursor) = 0;
+        cursor += sizeof(u32);
+        *size = cursor - reinterpret_cast<u8 *>(chunk);
+        return chunk;
+    }
+
+    dma_particle_chunk_s *CreateDmaParticleSetGlass(void *memory, i32 *size) {
+        return CreateDmaParticleSet(memory, size);
     }
 
     void LinkDmaParticalSets(dma_particle_chunk_s **chunks, i32 count) {

@@ -35,6 +35,3 @@ void InitRopeMtl(char *name, variptr_u *buffer, variptr_u *buffer_end) {
         NuMtlUpdate(ropemtl);
     }
 }
-
-void ropesegment(numtl_s *, nuvec_s *, i32, i32) {
-}

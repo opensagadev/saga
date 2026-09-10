@@ -95,11 +95,47 @@ template <typename T> class NuList {
         return this->length;
     }
 
+    bool Contains(T const &value) const {
+        if (length == 0) {
+            return false;
+        }
+        NuListNodeBase *node = head;
+        NuListNodeBase *last = tail->GetPrev();
+        do {
+            node = node->GetNext();
+            if (static_cast<NuListNode<T> *>(node)->value == value) {
+                return true;
+            }
+        } while (node != last);
+        return false;
+    }
+
     void Remove(NuListNodeBase *node) {
         length--;
 
         node->Remove();
 
         NU_FREE(node);
+    }
+
+    i32 RemoveValue(T const &value) {
+        i32 removed = 0;
+        NuListNodeBase *node = Head();
+        NuListNodeBase *end = Tail();
+        while (node != end) {
+            while (node != end && static_cast<NuListNode<T> *>(node)->value != value) {
+                node = node->GetNext();
+            }
+            if (node == end) {
+                break;
+            }
+            NuListNodeBase *next = node->GetNext();
+            node->Remove();
+            NU_FREE(node);
+            ++removed;
+            node = next;
+        }
+        length -= removed;
+        return removed;
     }
 };

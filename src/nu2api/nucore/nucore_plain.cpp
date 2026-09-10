@@ -613,20 +613,6 @@ extern "C" {
         if (NuOcclusionManagerIsInitialised())
             NuOcclusionManagerOnCameraSet();
     }
-    void NuCameraSetProjectionMtx(NUMTX *mtx, f32 fov, f32 aspect, f32 near_clip, f32 far_clip) {
-        if (near_clip < 0.1f) {
-            near_clip = 0.1f;
-        }
-        i32 angle = (i32)(fov * 0.5f * 10430.378f);
-        f32 cotangent = NuTrigTable[(angle + 0x4000) >> 1 & 0x7fff] / NuTrigTable[angle >> 1 & 0x7fff];
-        f32 depth = far_clip / (far_clip - near_clip);
-        memset(mtx, 0, sizeof(*mtx));
-        mtx->m00 = aspect * cotangent;
-        mtx->m11 = cotangent;
-        mtx->m22 = depth;
-        mtx->m23 = 1.0f;
-        mtx->m32 = -depth * near_clip;
-    }
     void NuCameraSetReflect(NUCAMERA *camera, NuCameraReflect *reflect) {
         global_reflect = *reflect;
         NuCameraSet(camera);

@@ -20,6 +20,8 @@ enum PushBlockCompletionFlags {
     PUSH_BLOCK_ANY_OUTPUT_MASK = 0x7f8,
 };
 
+u32 (*CanPushBlocksFn)(GameObject_s *) = NULL;
+
 void KnockPushBlock(pushblock_s *, nuvec_s *) {
 }
 

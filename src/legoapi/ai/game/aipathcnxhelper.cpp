@@ -358,12 +358,17 @@ void AIPathCnxSetTemporaryBlock(AIPATH_s *path, char *from_name, char *to_name, 
 
 AIPATHCNXHELPER_s *AIPathCnxHelperSys_AddHelper(AIPATHCNXHELPERSYS_s *system, AIPATHCNX_s *connection, u8 direction,
                                                 void *target, u8 type) {
-    if (system == NULL || system->helper_count >= system->field_0x00 || target == NULL || connection == NULL) {
+    if (system == NULL) {
         return NULL;
     }
 
-    for (i32 index = 0; index < system->helper_count; ++index) {
-        AIPATHCNXHELPER_s *helper = &system->helpers[index];
+    i16 helper_count = system->helper_count;
+    if (helper_count >= system->field_0x00 || target == NULL || connection == NULL) {
+        return NULL;
+    }
+
+    AIPATHCNXHELPER_s *helper = system->helpers;
+    for (i32 index = 0; index < helper_count; ++index, ++helper) {
         if (helper->connection == connection && helper->type == type && helper->target == target) {
             if (helper->direction != direction) {
                 helper->direction = 0xff;
@@ -372,7 +377,9 @@ AIPATHCNXHELPER_s *AIPathCnxHelperSys_AddHelper(AIPATHCNXHELPERSYS_s *system, AI
         }
     }
 
-    AIPATHCNXHELPER_s *helper = &system->helpers[system->helper_count++];
+    helper = &system->helpers[helper_count];
+    ++helper_count;
+    system->helper_count = helper_count;
     helper->connection = connection;
     helper->target = target;
     helper->direction = direction;

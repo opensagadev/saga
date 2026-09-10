@@ -75,6 +75,9 @@ struct TERRAIN_PLATFORM_CALLBACK {
 static i32 PlatCodeCallback;
 static TERRAIN_PLATFORM_CALLBACK PlatCallback[8];
 extern "C" i32 DeletePlatinst(i32 platform_index);
+extern "C" PartHeader *CreateDmaPartEffectList(void *memory, i32 *size);
+extern "C" dma_particle_chunk_s *CreateDmaParticleSet(void *memory, i32 *size);
+extern "C" dma_particle_chunk_s *CreateDmaParticleSetGlass(void *memory, i32 *size);
 void ScanTerrIDRemovePlat(i32 platform_index);
 
 u8 TerrainHitInfo[4];
@@ -552,35 +555,6 @@ extern "C" {
             }
         }
         return 0;
-    }
-
-    PartHeader *CreateDmaPartEffectList(void *memory, i32 *size) {
-        *size = sizeof(PartHeader);
-        return reinterpret_cast<PartHeader *>(ALIGN(reinterpret_cast<usize>(memory), 0x10));
-    }
-
-    dma_particle_chunk_s *CreateDmaParticleSet(void *memory, i32 *size) {
-        dma_particle_chunk_s *chunk = static_cast<dma_particle_chunk_s *>(memory);
-        memset(chunk, 0, sizeof(*chunk));
-        chunk->command = 0x52;
-        for (i32 i = 0; i < 32; ++i) {
-            dma_particle_s &particle = chunk->particles[i];
-            particle.position.x = 1.0f;
-            particle.position.y = 2.0f;
-            particle.position.z = 3.0f;
-            particle.start_time = -1.0f;
-            particle.momentum.x = 4.0f;
-            particle.momentum.y = 5.0f;
-            particle.momentum.z = 6.0f;
-            particle.inverse_lifetime = 128.0f;
-        }
-        chunk->end_command = 0;
-        *size = sizeof(*chunk);
-        return chunk;
-    }
-
-    dma_particle_chunk_s *CreateDmaParticleSetGlass(void *memory, i32 *size) {
-        return CreateDmaParticleSet(memory, size);
     }
 
     i32 CreateScaledEffect(i32 effect_index, f32 requested_scale) {

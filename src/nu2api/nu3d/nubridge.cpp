@@ -4,7 +4,8 @@
 #include <stdio.h>
 
 i32 NuBridgeAlloc(void);
-void ropesegment(numtl_s *, NUVEC *, i32, i32);
+void ropesegment(numtl_s *, NUVEC *, i32, i32) {
+}
 
 void NuBrdigeDrawRope(numtl_s *material, NUVEC *first, NUVEC *second, i32, i32 *boundaries, i32 colour) {
     for (i32 i = 0; boundaries[i] < boundaries[i + 1]; ++i) {

@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 37.933483,
+    "fuzzy_match_percent": 38.01505,
     "total_code": "4722419",
-    "matched_code": "364511",
-    "matched_code_percent": 7.718735,
+    "matched_code": "364625",
+    "matched_code_percent": 7.721149,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4388,
-    "matched_functions_percent": 32.60272,
+    "matched_functions": 4393,
+    "matched_functions_percent": 32.63987,
     "total_units": 1
   },
   "text": {
@@ -15292,7 +15292,7 @@
           "address": 4461024,
           "offset": 3571056,
           "size": 274,
-          "match_percent": 0.0
+          "match_percent": 86.70422
         },
         {
           "name": "_ZN35MechTouchTaskPlannedDoubleClickGoTo6UpdateEv",
@@ -40102,7 +40102,7 @@
           "address": 927168,
           "offset": 37200,
           "size": 93,
-          "match_percent": 29.411764
+          "match_percent": 99.35294
         },
         {
           "name": "_Z11InitRopeMtlPcP9variptr_uS1_",
@@ -40110,15 +40110,7 @@
           "address": 1916208,
           "offset": 1026240,
           "size": 270,
-          "match_percent": 0.0
-        },
-        {
-          "name": "_Z11ropesegmentP7numtl_sP7nuvec_sii",
-          "demangled_name": "ropesegment(numtl_s*, nuvec_s*, int, int)",
-          "address": 3164477,
-          "offset": 2274509,
-          "size": 5,
-          "match_percent": 100.0
+          "match_percent": 80.731346
         }
       ]
     },
@@ -40203,15 +40195,7 @@
           "address": 926144,
           "offset": 36176,
           "size": 93,
-          "match_percent": 29.411764
-        },
-        {
-          "name": "_ZL18CanSuperCarry_GameP12GameObject_s",
-          "demangled_name": "CanSuperCarry_Game(GameObject_s*)",
-          "address": 1153072,
-          "offset": 263104,
-          "size": 23,
-          "match_percent": 37.142857
+          "match_percent": 99.35294
         },
         {
           "name": "_Z14LetGoOfBalloonP12GameObject_s",
@@ -40219,7 +40203,7 @@
           "address": 1418672,
           "offset": 528704,
           "size": 486,
-          "match_percent": 3.738318
+          "match_percent": 3.925234
         },
         {
           "name": "_Z15MovingBackwardsP12GameObject_s",
@@ -40227,7 +40211,7 @@
           "address": 4633520,
           "offset": 3743552,
           "size": 119,
-          "match_percent": 10.558824
+          "match_percent": 69.55882
         },
         {
           "name": "_Z12ObjLandReadyP12GameObject_s",
@@ -40235,7 +40219,7 @@
           "address": 5170320,
           "offset": 4280352,
           "size": 139,
-          "match_percent": 13.071428
+          "match_percent": 66.78571
         },
         {
           "name": "_Z23SuperCarry_SetTargetMomP12GameObject_sf",
@@ -40243,7 +40227,7 @@
           "address": 5231104,
           "offset": 4341136,
           "size": 312,
-          "match_percent": 0.0
+          "match_percent": 93.22078
         },
         {
           "name": "_Z20SuperCarry_YRotationP12GameObject_st",
@@ -40251,7 +40235,7 @@
           "address": 5231424,
           "offset": 4341456,
           "size": 390,
-          "match_percent": 0.0
+          "match_percent": 99.96512
         }
       ]
     },
@@ -41599,7 +41583,7 @@
           "address": 5244272,
           "offset": 4354304,
           "size": 220,
-          "match_percent": 0.0
+          "match_percent": 64.275
         },
         {
           "name": "_Z23AIPathCnxHelperSys_FindP20AIPATHCNXHELPERSYS_sP12GameObject_sP11AIPATHCNX_shhPFiP17AIPATHCNXHELPER_sS2_S4_hhE",
@@ -45995,22 +45979,6 @@
           "offset": 201360,
           "size": 92,
           "match_percent": 99.96
-        },
-        {
-          "name": "_ZL21CanPushObstacles_GameP12GameObject_s",
-          "demangled_name": "CanPushObstacles_Game(GameObject_s*)",
-          "address": 1153040,
-          "offset": 263072,
-          "size": 23,
-          "match_percent": 34.285713
-        },
-        {
-          "name": "_ZL18CanPushBlocks_GameP12GameObject_s",
-          "demangled_name": "CanPushBlocks_Game(GameObject_s*)",
-          "address": 1153104,
-          "offset": 263136,
-          "size": 12,
-          "match_percent": 92.5
         },
         {
           "name": "_ZL24Player_ClearContext_GameP12GameObject_si",
@@ -67897,6 +67865,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z15AddGameMsgCountP7nuvec_siihhhf",
+          "demangled_name": "AddGameMsgCount(nuvec_s*, int, int, unsigned char, unsigned char, unsigned char, float)",
+          "address": 4874192,
+          "offset": 3984224,
+          "size": 330,
+          "match_percent": 99.90769
+        },
+        {
           "name": "_Z18AddFancyMessageRGBPcffffihhh",
           "demangled_name": "AddFancyMessageRGB(char*, float, float, float, float, int, unsigned char, unsigned char, unsigned char)",
           "address": 4874528,
@@ -67926,14 +67902,6 @@
           "offset": 1566318,
           "size": 10,
           "match_percent": 80.0
-        },
-        {
-          "name": "_Z15AddGameMsgCountP7nuvec_siihhhf",
-          "demangled_name": "AddGameMsgCount(nuvec_s*, int, int, unsigned char, unsigned char, unsigned char, float)",
-          "address": 4874192,
-          "offset": 3984224,
-          "size": 330,
-          "match_percent": 0.0
         }
       ]
     },
@@ -68401,7 +68369,7 @@
           "address": 4368416,
           "offset": 3478448,
           "size": 245,
-          "match_percent": 0.0
+          "match_percent": 56.935066
         },
         {
           "name": "Text3DStringEncode",
@@ -68633,7 +68601,7 @@
           "address": 4400608,
           "offset": 3510640,
           "size": 324,
-          "match_percent": 0.0
+          "match_percent": 12.441176
         },
         {
           "name": "LoadButtonFont",
@@ -70956,7 +70924,7 @@
           "address": 2034592,
           "offset": 1144624,
           "size": 329,
-          "match_percent": 0.0
+          "match_percent": 93.45588
         },
         {
           "name": "_Z17Prompt_LSW_UpdateP14STATUS_STAGE_sP14STATUSPACKET_sf",
@@ -75321,6 +75289,30 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/render_stubs.o",
       "functions": [
         {
+          "name": "CreateDmaParticleSet",
+          "demangled_name": "CreateDmaParticleSet",
+          "address": 2721195,
+          "offset": 1831227,
+          "size": 290,
+          "match_percent": 81.3735
+        },
+        {
+          "name": "CreateDmaParticleSetGlass",
+          "demangled_name": "CreateDmaParticleSetGlass",
+          "address": 2721485,
+          "offset": 1831517,
+          "size": 44,
+          "match_percent": 100.0
+        },
+        {
+          "name": "CreateDmaPartEffectList",
+          "demangled_name": "CreateDmaPartEffectList",
+          "address": 2721529,
+          "offset": 1831561,
+          "size": 80,
+          "match_percent": 86.53571
+        },
+        {
           "name": "LinkDmaParticalSets",
           "demangled_name": "LinkDmaParticalSets",
           "address": 2721609,
@@ -75575,22 +75567,6 @@
           "offset": 2091296,
           "size": 596,
           "match_percent": 2.816901
-        },
-        {
-          "name": "clipTestBox",
-          "demangled_name": "clipTestBox",
-          "address": 2985904,
-          "offset": 2095936,
-          "size": 663,
-          "match_percent": 0.0
-        },
-        {
-          "name": "NuPortalClipTestBox",
-          "demangled_name": "NuPortalClipTestBox",
-          "address": 2986576,
-          "offset": 2096608,
-          "size": 253,
-          "match_percent": 0.0
         },
         {
           "name": "RndrMaskScreen",
@@ -77026,30 +77002,6 @@
       "source": "src/legoapi/render/core/terrain_stubs.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/terrain_stubs.o",
       "functions": [
-        {
-          "name": "CreateDmaParticleSet",
-          "demangled_name": "CreateDmaParticleSet",
-          "address": 2721195,
-          "offset": 1831227,
-          "size": 290,
-          "match_percent": 0.0
-        },
-        {
-          "name": "CreateDmaParticleSetGlass",
-          "demangled_name": "CreateDmaParticleSetGlass",
-          "address": 2721485,
-          "offset": 1831517,
-          "size": 44,
-          "match_percent": 65.13333
-        },
-        {
-          "name": "CreateDmaPartEffectList",
-          "demangled_name": "CreateDmaPartEffectList",
-          "address": 2721529,
-          "offset": 1831561,
-          "size": 80,
-          "match_percent": 20.285715
-        },
         {
           "name": "DebrisReserveTrashableSpace",
           "demangled_name": "DebrisReserveTrashableSpace",
@@ -85932,6 +85884,30 @@
           "match_percent": 98.63636
         },
         {
+          "name": "_ZL21CanPushObstacles_GameP12GameObject_s",
+          "demangled_name": "CanPushObstacles_Game(GameObject_s*)",
+          "address": 1153040,
+          "offset": 263072,
+          "size": 23,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL18CanSuperCarry_GameP12GameObject_s",
+          "demangled_name": "CanSuperCarry_Game(GameObject_s*)",
+          "address": 1153072,
+          "offset": 263104,
+          "size": 23,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL18CanPushBlocks_GameP12GameObject_s",
+          "demangled_name": "CanPushBlocks_Game(GameObject_s*)",
+          "address": 1153104,
+          "offset": 263136,
+          "size": 12,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL13CanGlide_GameP12GameObject_s",
           "demangled_name": "CanGlide_Game(GameObject_s*)",
           "address": 1153120,
@@ -85945,6 +85921,14 @@
           "address": 1153168,
           "offset": 263200,
           "size": 99,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL17CanStartHold_GameP12GameObject_s",
+          "demangled_name": "CanStartHold_Game(GameObject_s*)",
+          "address": 1153280,
+          "offset": 263312,
+          "size": 12,
           "match_percent": 100.0
         },
         {
@@ -87992,6 +87976,14 @@
           "match_percent": 99.960785
         },
         {
+          "name": "_Z11ropesegmentP7numtl_sP7nuvec_sii",
+          "demangled_name": "ropesegment(numtl_s*, nuvec_s*, int, int)",
+          "address": 3164477,
+          "offset": 2274509,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z16NuBrdigeDrawRopeP7numtl_sP7nuvec_sS2_iPii",
           "demangled_name": "NuBrdigeDrawRope(numtl_s*, nuvec_s*, nuvec_s*, int, int*, int)",
           "address": 3164482,
@@ -88014,6 +88006,14 @@
       "source": "src/nu2api/nu3d/nucamera.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nucamera.o",
       "functions": [
+        {
+          "name": "NuCameraSetProjectionMtx",
+          "demangled_name": "NuCameraSetProjectionMtx",
+          "address": 2767720,
+          "offset": 1877752,
+          "size": 343,
+          "match_percent": 99.931816
+        },
         {
           "name": "NuCameraRestoreState",
           "demangled_name": "NuCameraRestoreState",
@@ -88764,6 +88764,22 @@
           "offset": 2095648,
           "size": 283,
           "match_percent": 95.52941
+        },
+        {
+          "name": "clipTestBox",
+          "demangled_name": "clipTestBox",
+          "address": 2985904,
+          "offset": 2095936,
+          "size": 663,
+          "match_percent": 59.227547
+        },
+        {
+          "name": "NuPortalClipTestBox",
+          "demangled_name": "NuPortalClipTestBox",
+          "address": 2986576,
+          "offset": 2096608,
+          "size": 253,
+          "match_percent": 99.971016
         },
         {
           "name": "_Z23NuPortalEnableDebugDrawi",
@@ -96704,14 +96720,6 @@
           "offset": 1877648,
           "size": 9,
           "match_percent": 100.0
-        },
-        {
-          "name": "NuCameraSetProjectionMtx",
-          "demangled_name": "NuCameraSetProjectionMtx",
-          "address": 2767720,
-          "offset": 1877752,
-          "size": 343,
-          "match_percent": 0.0
         },
         {
           "name": "NuOcclusionManagerIsInitialised",
@@ -115949,7 +115957,7 @@
           "address": 3318464,
           "offset": 2428496,
           "size": 308,
-          "match_percent": 0.0
+          "match_percent": 51.05
         },
         {
           "name": "_ZN12NuSoundVoice13UpdateEffectsEfN13NuSoundEffect18EffectProcessStageE",
@@ -116720,18 +116728,6 @@
       ]
     },
     {
-      "name": "_ZL17CanStartHold_GameP12GameObject_s",
-      "demangled_name": "CanStartHold_Game(GameObject_s*)",
-      "address": 1153280,
-      "offset": 263312,
-      "size": 12,
-      "match_percent": 92.5,
-      "candidate_units": [
-        "legoapi/characters/core/players.cpp.o",
-        "legogame/game.cpp.o"
-      ]
-    },
-    {
       "name": "_ZL19Credits_Update_GameP11WORLDINFO_s",
       "demangled_name": "Credits_Update_Game(WORLDINFO_s*)",
       "address": 1194240,
@@ -116941,9 +116937,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -116972,7 +116966,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117038,9 +117031,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -117069,7 +117060,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117135,9 +117125,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -117166,7 +117154,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117243,9 +117230,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -117274,7 +117259,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117315,7 +117299,6 @@
       "candidate_units": [
         "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -117386,9 +117369,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -117417,7 +117398,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117494,9 +117474,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -117525,7 +117503,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117602,9 +117579,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -117633,7 +117608,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117710,9 +117684,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -117741,7 +117713,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117818,9 +117789,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -117849,7 +117818,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117926,9 +117894,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -117957,7 +117923,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118131,7 +118096,6 @@
       "candidate_units": [
         "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -118166,7 +118130,6 @@
       "candidate_units": [
         "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -118237,9 +118200,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -118268,7 +118229,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118345,9 +118305,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -118376,7 +118334,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118453,9 +118410,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -118484,7 +118439,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118606,9 +118560,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -118637,7 +118589,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118725,9 +118676,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -118756,7 +118705,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118822,8 +118770,6 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
         "legoapi/characters/motion/charpivot.cpp.o",
@@ -118958,9 +118904,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -118989,7 +118933,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119054,8 +118997,6 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
         "legoapi/characters/motion/charpivot.cpp.o",
@@ -119145,9 +119086,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -119176,7 +119115,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119230,8 +119168,6 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
         "legoapi/characters/motion/charpivot.cpp.o",
@@ -119333,9 +119269,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -119364,7 +119298,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119441,9 +119374,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -119472,7 +119403,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119549,9 +119479,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -119580,7 +119508,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119657,9 +119584,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -119688,7 +119613,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119753,8 +119677,6 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/characters/core/character_plain.cpp.o",
         "legoapi/characters/motion/charpivot.cpp.o",
@@ -119822,9 +119744,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -119853,7 +119773,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119930,9 +119849,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -119961,7 +119878,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120049,9 +119965,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -120080,7 +119994,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120157,9 +120070,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -120188,7 +120099,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120277,9 +120187,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -120308,7 +120216,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120385,9 +120292,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -120416,7 +120321,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120457,7 +120361,6 @@
       "candidate_units": [
         "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -120528,9 +120431,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -120559,7 +120460,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120636,9 +120536,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -120667,7 +120565,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120744,9 +120641,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -120775,7 +120670,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120852,9 +120746,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -120883,7 +120775,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -121023,9 +120914,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -121054,7 +120943,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -121131,9 +121019,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -121162,7 +121048,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -121239,9 +121124,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -121270,7 +121153,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -121591,7 +121473,6 @@
       "candidate_units": [
         "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -121695,9 +121576,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -121726,7 +121605,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -121767,7 +121645,6 @@
       "candidate_units": [
         "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -121802,7 +121679,6 @@
       "candidate_units": [
         "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -121933,9 +121809,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -121964,7 +121838,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -122005,7 +121878,6 @@
       "candidate_units": [
         "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -122040,7 +121912,6 @@
       "candidate_units": [
         "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -122146,9 +122017,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -122177,7 +122046,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -122625,9 +122493,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -122656,7 +122522,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -122733,9 +122598,7 @@
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/character/suit.cpp.o",
-        "legoapi/actions/combat/rope.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
-        "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
         "legoapi/ai/game/aitrigger_stubs.cpp.o",
@@ -122764,7 +122627,6 @@
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/items/objects/traffic.cpp.o",
-        "legoapi/menus/core/gamemessages_stubs.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -130209,8 +130071,8 @@
   "summary": {
     "bazel_units": 523,
     "functions": 13454,
-    "assigned_functions": 12294,
-    "ambiguous_functions": 234,
+    "assigned_functions": 12295,
+    "ambiguous_functions": 233,
     "unassigned_functions": 926
   }
 }

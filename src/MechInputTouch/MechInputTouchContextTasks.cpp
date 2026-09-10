@@ -1,4 +1,12 @@
 #include "MechInputTouch_types.h"
+#include "globals.h"
+#include "legoapi/items/base/apiobject.h"
+
+extern i16 id_YODA;
+extern i16 id_YODAGHOST;
+
+f32 s_mechTouchMoveToStuckVel = 0.2f;
+f32 s_mechTouchMoveToStuckTime = 0.55f;
 
 HashedKey MechTouchTask::HashId("UNKNOWN");
 HashedKey MechTouchTaskGoTo::HashId("Goto");
@@ -52,6 +60,40 @@ bool MechTouchTaskGoTo::Update() {
 }
 
 void MechTouchTaskGoTo::UpdateStuck() {
+    const bool was_stuck = field_4e != 0;
+    field_4e = 0;
+    if (was_stuck) {
+        field_48 = 0;
+        return;
+    }
+
+    f32 velocity_threshold = s_mechTouchMoveToStuckVel;
+    const f32 velocity_delta = field_38 - field_40;
+    if (player != NULL && (player->id == id_YODA || player->id == id_YODAGHOST)) {
+        velocity_threshold *= 0.25f;
+    }
+
+    if (field_4f == 0) {
+        field_4f = velocity_delta > velocity_threshold;
+    } else {
+        bool stuck = false;
+        if (field_34 > 0.25f && velocity_delta > 0.0f) {
+            stuck = velocity_delta < velocity_threshold * 0.5f;
+        }
+        field_4e = stuck;
+    }
+
+    f32 stuck_time = 0.0f;
+    if (field_40 >= field_3c) {
+        stuck_time = field_30 + FRAMETIME;
+    }
+    field_30 = stuck_time;
+    if (stuck_time > s_mechTouchMoveToStuckTime) {
+        field_4e = 1;
+    }
+    if (field_4e != 0) {
+        field_48 = 1.0f;
+    }
 }
 
 void MechTouchTaskGoTo::UpdateTarget(MechObjectInterface &) {

@@ -116,6 +116,18 @@ extern i32 (*CanStartHoldFn)(GameObject_s *);
 static i32 CanStartHold_Game(GameObject_s *) {
     return 1;
 }
+extern u32 (*CanSuperCarryFn)(GameObject_s *);
+static u32 CanSuperCarry_Game(GameObject_s *object) {
+    return (object->apiobj.character_data->game_character->flags_090 & GAMECHARACTER_FLAG_CAN_SUPER_CARRY) != 0;
+}
+extern u32 (*CanPushBlocksFn)(GameObject_s *);
+static u32 CanPushBlocks_Game(GameObject_s *) {
+    return 1;
+}
+extern u32 (*CanPushObstaclesFn)(GameObject_s *);
+static u32 CanPushObstacles_Game(GameObject_s *object) {
+    return (object->apiobj.character_data->game_character->flags_090 & GAMECHARACTER_FLAG_CAN_SUPER_CARRY) != 0;
+}
 #include "legoapi/audio/audio.h"
 #include "legoapi/props/doors/door.h"
 #include "legoapi/world/area.h"
@@ -1096,9 +1108,9 @@ void InitGameAfterConfig(void) {
     CutScenePlayer_Configure("cut\\clips.txt", &permbuffer_ptr, &permbuffer_end, &tCLIPi, &tINTRO, &tMIDTRO, &tOUTRO,
                              &tENDING);
     CanMagnetClimbFn = CanMagnetClimb_Game;
-    //  CanPushObstaclesFn = CanPushObstacles_Game;
-    //  CanSuperCarryFn = CanSuperCarry_Game;
-    //  CanPushBlocksFn = CanPushBlocks_Game;
+    CanPushObstaclesFn = CanPushObstacles_Game;
+    CanSuperCarryFn = CanSuperCarry_Game;
+    CanPushBlocksFn = CanPushBlocks_Game;
     CanGlideFn = CanGlide_Game;
     UsingExtraActionsFn = UsingExtraActions_Game;
     CanStartHoldFn = CanStartHold_Game;

@@ -63,10 +63,16 @@ build:target --per_file_copt=^src/legoapi/actions/character/specialmoves\.cpp$@-
 build:target --per_file_copt=^src/legoapi/actions/character/snake\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/actions/combat/hits\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/actions/combat/fighting\.cpp$@-O3
+# The rope material setup is optimized in the target: its local buffer clear,
+# material bitfield initialization, and success/failure paths are folded.
+build:target --per_file_copt=^src/legoapi/actions/combat/rope\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/actions/combat/shovesys\.cpp$@-O1
 build:target --per_file_copt=^src/legoapi/actions/movement/pushblocks\.cpp$@-O1
 build:target --per_file_copt=^src/legoapi/actions/movement/jumping\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/actions/movement/climbing\.cpp$@-O2
+# Super-carry movement is optimized in the target; its state dispatch and
+# animation-speed selection are folded before the trig-table update.
+build:target --per_file_copt=^src/legoapi/actions/movement/carrying\.cpp$@-O3
 build:target --per_file_copt=^src/MechInputTouch/MechEdgeStopAddon\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/render/core/render\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/render/core/screen\.cpp$@-O2

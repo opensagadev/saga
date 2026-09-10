@@ -806,23 +806,15 @@ void NuSoundVoice::RegisterHandle(NuSoundHandle *handle) {
 }
 
 void NuSoundVoice::RemoveEffect(NuSoundEffect *effect) {
-    NuListNodeBase *node = effects.Head();
-    NuListNodeBase *end = effects.Tail();
-    while (node != end) {
-        if (static_cast<NuListNode<NuSoundEffect *> *>(node)->value == effect) {
-            effect->DetachVoice(this);
-            do {
-                NuListNodeBase *next = node->GetNext();
-                effects.Remove(node);
-                node = next;
-                while (node != end && static_cast<NuListNode<NuSoundEffect *> *>(node)->value != effect) {
-                    node = node->GetNext();
-                }
-            } while (node != end);
-            return;
-        }
-        node = node->GetNext();
+    if (!effects.Contains(effect)) {
+        return;
     }
+    effect->DetachVoice(this);
+    if (effects.Length() != 0) {
+        effects.RemoveValue(effect);
+    }
+    NuSoundSystem::sAllocdMemory[static_cast<i32>(NuSoundSystem::MemoryDiscipline::SCRATCH)] -=
+        sizeof(NuListNode<NuSoundEffect *>);
 }
 
 void NuSoundVoice::SetControllerBits(i32 bits) {

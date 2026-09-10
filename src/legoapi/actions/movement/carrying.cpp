@@ -59,10 +59,6 @@ i32 SuperCarry_SetTargetMom(GameObject_s *object, float input_speed) {
     return 0;
 }
 
-static __used__ unsigned int CanSuperCarry_Game(GameObject_s *) {
-    return {};
-}
-
 i32 ObjLandReady(GameObject_s *object) {
     if (object == NULL) {
         return 0;

@@ -1,3 +1,5 @@
+#include <cstdio>
+
 #include "decomp.h"
 #include "globals.h"
 #include "legoapi/items/base/apiobject.h"
@@ -330,22 +332,6 @@ void ResetGameMessages() {
     }
 }
 
-void AddFancyMessageRGB(char *text, float x, float y, float scale, float duration, i32 message_id, unsigned char red,
-                        unsigned char green, unsigned char blue) {
-    if (message_id != 0) {
-        GameAudio_PlaySfx(0x2c, NULL, 0, 0);
-        GameAudio_PlaySfx(0x26, NULL, 0, 0);
-        NewRumbleAllPlayers(0.7f, 0.0f, 0, 0);
-        GameCam_NewShake(GameCam, 1.0f, 1.0f, 1.0f);
-    }
-
-    NUVEC position = {x, y, 1.0f};
-    scale += scale;
-    const f32 scale_offset = scale * 0.5f;
-    AddGameMessage(text, &position, scale, &position, scale + scale_offset, red, green, blue, 0x4020, duration);
-    AddGameMessage(text, &position, scale, &position, scale - scale_offset, red, green, blue, 0x4020, duration);
-}
-
 i32 FindGameMsgsWithID(i32 id, i32 remove, i32 player, GAMEMESSAGE_s *exclude) {
     i32 count = 0;
     GAME_MESSAGE_DATA *message = reinterpret_cast<GAME_MESSAGE_DATA *>(&GameMessage[0]);
@@ -386,6 +372,34 @@ i32 FindGameMsgsWithID(i32 id, i32 remove, i32 player, GAMEMESSAGE_s *exclude) {
         }
     }
     return count;
+}
+
+void AddGameMsgCount(nuvec_s *position, i32 count, i32 total, unsigned char red, unsigned char green,
+                     unsigned char blue, float field_0xd4) {
+    char text[32];
+    sprintf(text, "layerTakenOver", count, total);
+
+    void *message = position != NULL ? AddGameMessage(text, position, 0.6f, NULL, 0.8f, red, green, blue, 0x4023, 1.0f)
+                                     : AddGameMessage(text, &v001, 0.6f, NULL, 0.8f, red, green, blue, 0x4020, 1.0f);
+    if (message != NULL) {
+        *reinterpret_cast<float *>(reinterpret_cast<char *>(message) + 0xd4) = field_0xd4;
+    }
+}
+
+void AddFancyMessageRGB(char *text, float x, float y, float scale, float duration, i32 message_id, unsigned char red,
+                        unsigned char green, unsigned char blue) {
+    if (message_id != 0) {
+        GameAudio_PlaySfx(0x2c, NULL, 0, 0);
+        GameAudio_PlaySfx(0x26, NULL, 0, 0);
+        NewRumbleAllPlayers(0.7f, 0.0f, 0, 0);
+        GameCam_NewShake(GameCam, 1.0f, 1.0f, 1.0f);
+    }
+
+    NUVEC position = {x, y, 1.0f};
+    scale += scale;
+    const f32 scale_offset = scale * 0.5f;
+    AddGameMessage(text, &position, scale, &position, scale + scale_offset, red, green, blue, 0x4020, duration);
+    AddGameMessage(text, &position, scale, &position, scale - scale_offset, red, green, blue, 0x4020, duration);
 }
 
 void UpdateGameMessages() {

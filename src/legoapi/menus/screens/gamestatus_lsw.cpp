@@ -307,11 +307,7 @@ void NextStatusStage(STATUSPACKET_s *packet) {
 
 void Prompt_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) {
     if (active != 0) {
-        if (stage->field_0x18 >= 0.5f) {
-            Status_DrawPromptMenu(packet, 1, 1.0f);
-            DrawPlayerIconPrompts(packet->player0_active, tSELECT, 1.0f, -1, -1, -1, tSELECTING, packet->player1_active,
-                                  tSELECT, 1.0f, -1, -1, -1, tSELECTING);
-        } else {
+        if (stage->field_0x18 < 0.5f) {
             f32 alpha =
                 NuTrigTable[(static_cast<i32>((stage->field_0x18 + stage->field_0x18) * 16384.0f) >> 1) & 0x7fff];
             if (stage->field_0x14 == 1) {
@@ -319,6 +315,10 @@ void Prompt_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 active) 
             }
             Status_DrawPromptMenu(packet, 0, alpha);
             draw_player_icons = 1;
+        } else {
+            Status_DrawPromptMenu(packet, 1, 1.0f);
+            DrawPlayerIconPrompts(packet->player0_active, tSELECT, 1.0f, -1, -1, -1, tSELECTING, packet->player1_active,
+                                  tSELECT, 1.0f, -1, -1, -1, tSELECTING);
         }
     }
 }
