@@ -165,18 +165,31 @@ template <typename T, usize Offset> class NuEListOffset {
 
     void Remove(T *entry) {
         Links *entry_links = GetLinks(entry);
-        T *previous = entry_links->prev;
         T *next = entry_links->next;
-        if (next != nullptr || previous != nullptr) {
+        if (next != nullptr) {
+            T *previous = entry_links->prev;
             length--;
+            Links *next_links = GetLinks(next);
             if (previous != nullptr) {
-                GetLinks(previous)->next = next;
-            }
-            if (next != nullptr) {
-                GetLinks(next)->prev = previous;
+                if (next_links != nullptr) {
+                    GetLinks(previous)->next = next;
+                    next_links->prev = previous;
+                } else {
+                    GetLinks(previous)->next = nullptr;
+                }
+            } else if (next_links != nullptr) {
+                next_links->prev = nullptr;
             }
             entry_links->next = nullptr;
             entry_links->prev = nullptr;
+        } else {
+            T *previous = entry_links->prev;
+            if (previous != nullptr) {
+                length--;
+                GetLinks(previous)->next = nullptr;
+                entry_links->next = nullptr;
+                entry_links->prev = nullptr;
+            }
         }
     }
 };

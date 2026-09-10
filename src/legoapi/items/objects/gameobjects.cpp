@@ -4912,6 +4912,14 @@ bool GameObject_s::IsRunningTaskType(HashedKey const &type) {
 }
 
 void GameObject_s::KillTasks() {
+    MechTouchTask *task = touch_task;
+    while (task != NULL) {
+        MechTouchTask *next = task->next;
+        task->OnStop();
+        delete task;
+        task = next;
+    }
+    touch_task = NULL;
 }
 
 // ThingManager::AddThing @0x424c10. Appends at count; the pending
@@ -7442,13 +7450,13 @@ void RemoveChunkFromRenderStack(particlechunkrendertype_s *chunk, particlechunkr
 }
 
 void RemoveChunkControlFromStack(debris_chunk_control_s *control, debris_chunk_control_s **stack) {
-    debris_chunk_control_s *current = *stack;
-    while (current != NULL && current != control) {
-        stack = &current->next;
-        current = current->next;
-    }
-    if (current == control) {
-        *stack = control->next;
+    debris_chunk_control_s **link = stack;
+    while (*link != NULL) {
+        if (*link == control) {
+            *link = control->next;
+            break;
+        }
+        link = &(*link)->next;
     }
     control->next = NULL;
 }

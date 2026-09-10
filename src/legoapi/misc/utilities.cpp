@@ -388,7 +388,11 @@ i32 getqseed() {
     return qseed;
 }
 
-void clampBias(float) {
+f32 clampBias(f32 bias) {
+    if (bias < -16.0f) {
+        return -16.0f;
+    }
+    return 15.96875f < bias ? 15.96875f : bias;
 }
 
 i32 findrange(nugscn_s *scene, i32 first_joint) {

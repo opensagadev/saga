@@ -244,10 +244,10 @@ void BigJumpCode(GameObject_s *object) {
         object->ai.movement_event_flags |= 2;
 }
 
-bool UseFallAnim(GameObject_s *object) {
+i32 UseFallAnim(GameObject_s *object) {
     const CHARACTER_CONTEXT_INFO_s &context = CInfo[object->character_context];
-    return (context.flags & CHARACTER_CONTEXT_INFO_FLAG_USE_FALL_ANIMATION) != 0 &&
-           Jump_HasAction(object, PLAYER_JUMP_ACTION_FALL);
+    return (context.flags & CHARACTER_CONTEXT_INFO_FLAG_USE_FALL_ANIMATION) != 0 && LEGOACT_FALL != -1 &&
+           object->apiobj.character_model->model_data_b[LEGOACT_FALL] != NULL;
 }
 
 i32 LEGOCONTEXT_BIGJUMP = -1;

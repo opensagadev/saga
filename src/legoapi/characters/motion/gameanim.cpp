@@ -46,7 +46,7 @@ float CalcValue1648(char *, i32, i32, float, ani3_scalemin_s *);
 void CalcValue1648Get2Values(char *, i32, i32, ani3_scalemin_s *, float *, float *);
 extern "C" void VuQuatSlerpFast(NUQUAT *out, NUQUAT *from, NUQUAT *to, f32 t);
 void EvalAnim(nuhspecial_s *special, f32 frame, numtx_s *matrix, i32 include_instance_translation);
-bool UseFallAnim(GameObject_s *object);
+i32 UseFallAnim(GameObject_s *object);
 i32 GetDefaultIdle(GameObject_s *object);
 i32 SetProtocolDroidFallAnim(GameObject_s *object);
 // TODO: Restore target-local linkage once the four remaining animation-mode
