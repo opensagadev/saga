@@ -4057,17 +4057,17 @@ struct GIZPANEL_s {
     };
     GIZPANEL_DRAW_FLAGS draw_flags; // 0x69
     u8 field_0x6a[2];
-    NUVEC floor_position;  // 0x6c
-    NUVEC target_offset;   // 0x78
-    u16 target_x_rotation; // 0x84
-    u16 target_y_rotation; // 0x86
-    u16 arm_x_rotation;    // 0x88
-    u16 target_pitch;      // 0x8a
-    u16 target_roll;       // 0x8c
-    i16 platform_id;       // 0x8e
-    f32 activation_time;   // 0x90
-    f32 target_scale;      // 0x94
-    u8 field_0x98[4];
+    NUVEC floor_position;                       // 0x6c
+    NUVEC target_offset;                        // 0x78
+    u16 target_x_rotation;                      // 0x84
+    u16 target_y_rotation;                      // 0x86
+    u16 arm_x_rotation;                         // 0x88
+    u16 target_pitch;                           // 0x8a
+    u16 target_roll;                            // 0x8c
+    i16 platform_id;                            // 0x8e
+    f32 activation_time;                        // 0x90
+    f32 target_scale;                           // 0x94
+    MechObjectInterface *mech_object_interface; // 0x98
 
     void ClearMechObjectInterface();
     void GetMechObjectInterface();
@@ -4180,9 +4180,9 @@ struct GIZTURRET_s {
     i16 field_0x134;
     u8 field_0x136[2];
     i16 field_0x138;
-    u8 flags;         // 0x13a
-    u8 runtime_flags; // 0x13b
-    u8 field_0x13c[4];
+    u8 flags;                                   // 0x13a
+    u8 runtime_flags;                           // 0x13b
+    MechObjectInterface *mech_object_interface; // 0x13c
     f32 field_0x140;
     void ClearMechObjectInterface();
     void GetMechObjectInterface();
@@ -4296,7 +4296,8 @@ struct HATMACHINE_s {
         f32 idle_bounce_timer;
         f32 blink_timer;
     }; // 0x9c
-    u8 reserved_a0[8];
+    u8 reserved_a0[4];
+    MechObjectInterface *mech_object_interface; // 0xa4
 
     void ClearMechObjectInterface();
     void GetMechObjectInterface();

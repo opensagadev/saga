@@ -878,7 +878,7 @@ struct MechTouchUICharIcon : MechTouchUIElement {
 };
 struct MechTouchUIPartySelector {
     void BlendOut();
-    void BlendedOut();
+    bool BlendedOut();
     void Cleanup();
     MechTouchUIPartySelector(MechTouchUIPlayerButton &, i32 *);
     ~MechTouchUIPartySelector();

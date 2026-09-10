@@ -577,25 +577,32 @@ GizLeverObjectInterface::~GizLeverObjectInterface() {
     lever.mech_object = NULL;
 }
 
-void GizPanelObjectInterface::GetFloorTargetPos(VuVec &, i32) const {
+void GizPanelObjectInterface::GetFloorTargetPos(VuVec &position, i32) const {
+    position = VuVec(panel.position.x, panel.position.y, panel.position.z, 1.0f);
 }
 
-void GizPanelObjectInterface::GetPos(VuVec &, i32) const {
+void GizPanelObjectInterface::GetPos(VuVec &position, i32) const {
+    GizPanel_GetAbsTargetPos(&panel, &position.xyz, 1);
 }
 
-void GizPanelObjectInterface::GetRadius() const {
+f32 GizPanelObjectInterface::GetRadius() const {
+    return 0.1f;
 }
 
-void GizPanelObjectInterface::GetTargetName() const {
+const char *GizPanelObjectInterface::GetTargetName() const {
+    return panel.name;
 }
 
-GizPanelObjectInterface::GizPanelObjectInterface(GIZPANEL_s &) {
+GizPanelObjectInterface::GizPanelObjectInterface(GIZPANEL_s &value) : panel(value) {
+    panel.mech_object_interface = this;
 }
 
 void GizPanelObjectInterface::TargetedFlash() {
+    panel.flash_timer = 1.0f;
 }
 
 GizPanelObjectInterface::~GizPanelObjectInterface() {
+    panel.mech_object_interface = NULL;
 }
 
 void TeleportObjectInterface::GetPos(VuVec &, i32) const {
@@ -651,22 +658,29 @@ GizBlowupObjectInterface::~GizBlowupObjectInterface() {
     blowup->mech_object_interface = NULL;
 }
 
-void GizTurretObjectInterface::GetPos(VuVec &, i32) const {
+void GizTurretObjectInterface::GetPos(VuVec &position, i32) const {
+    position = VuVec(turret.field_0x3c.x, turret.field_0x3c.y, turret.field_0x3c.z, 1.0f);
 }
 
-void GizTurretObjectInterface::GetRadius() const {
+f32 GizTurretObjectInterface::GetRadius() const {
+    return 0.1f;
 }
 
-void GizTurretObjectInterface::GetTargetName() const {
+const char *GizTurretObjectInterface::GetTargetName() const {
+    return turret.name;
 }
 
-GizTurretObjectInterface::GizTurretObjectInterface(GIZTURRET_s &) {
+GizTurretObjectInterface::GizTurretObjectInterface(GIZTURRET_s &value) : turret(value) {
+    turret.mech_object_interface = this;
 }
 
 void GizTurretObjectInterface::TargetedFlash() {
+    hackFlashTimer = 1.0f;
+    hackFlashingGameAnimSet = turret.anim_set;
 }
 
 GizTurretObjectInterface::~GizTurretObjectInterface() {
+    turret.mech_object_interface = NULL;
 }
 
 void CalcAveragePosAndRad(GIZBUILDIT_s &, VuVec &, f32 &, bool);
@@ -702,22 +716,28 @@ GizBuildItObjectInterface::~GizBuildItObjectInterface() {
     buildit->mech_object_interface = NULL;
 }
 
-void HatMachineObjectInterface::GetPos(VuVec &, i32) const {
+void HatMachineObjectInterface::GetPos(VuVec &position, i32) const {
+    position = VuVec(machine.position.x, machine.position.y, machine.position.z, 1.0f);
 }
 
-void HatMachineObjectInterface::GetRadius() const {
+f32 HatMachineObjectInterface::GetRadius() const {
+    return 0.1f;
 }
 
-void HatMachineObjectInterface::GetTargetName() const {
+const char *HatMachineObjectInterface::GetTargetName() const {
+    return machine.name;
 }
 
-HatMachineObjectInterface::HatMachineObjectInterface(HATMACHINE_s &) {
+HatMachineObjectInterface::HatMachineObjectInterface(HATMACHINE_s &value) : machine(value) {
+    machine.mech_object_interface = this;
 }
 
 void HatMachineObjectInterface::TargetedFlash() {
+    machine.flash_timer = 1.0f;
 }
 
 HatMachineObjectInterface::~HatMachineObjectInterface() {
+    machine.mech_object_interface = NULL;
 }
 
 void GizObstacleObjectInterface::GetPos(VuVec &result, i32) const {
