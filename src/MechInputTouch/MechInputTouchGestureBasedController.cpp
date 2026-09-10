@@ -1,4 +1,6 @@
 #include "MechInputTouch_types.h"
+#include "globals.h"
+#include "legoapi/items/base/apiobject.h"
 
 i32 GetMenuID();
 
@@ -8,7 +10,17 @@ void MechInputTouchGestureBasedController::Activate() {
 void MechInputTouchGestureBasedController::Deactivate() {
 }
 
-void MechInputTouchGestureBasedController::KillTasks(bool) {
+void MechInputTouchGestureBasedController::KillTasks(bool kill_active_task) {
+    GameObject_s *object = Player[player_id];
+    if (object == NULL) {
+        return;
+    }
+    if (object->touch_task == NULL) {
+        return;
+    }
+    if ((object->touch_task->flags & 2) == 0 || kill_active_task) {
+        object->KillTasks();
+    }
 }
 
 MechInputTouchGestureBasedController::MechInputTouchGestureBasedController(

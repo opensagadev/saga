@@ -2778,10 +2778,18 @@ extern "C" {
     void AnimList_NoLoad(void) {
     }
 
-    void AnimList_RequestAnimGroupForCreatures(void) {
+    void AnimList_RequestAnimGroups(i32 group, ...) {
     }
 
-    void AnimList_RequestAnimGroups(void) {
+    void AnimList_RequestAnimGroupForCreatures(i32 creature, ...) {
+        va_list groups;
+        va_start(groups, creature);
+        i32 group = va_arg(groups, i32);
+        while (group != -1) {
+            AnimList_RequestAnimGroups(group, creature, -1);
+            group = va_arg(groups, i32);
+        }
+        va_end(groups);
     }
 
     i32 AnimMiscFlags(CHARACTERMODEL_s *model, i32 animation) {

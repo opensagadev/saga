@@ -39,12 +39,8 @@ extern "C" {
 }
 
 i32 NeedsPretendAnim(GameObject_s *object) {
-    const i16 animation = object->apiobj.anim_packet.overlay_animation;
-    if (object->apiobj.character_model->model_data_b[animation] != NULL) {
-        return 1;
-    }
-
-    return object->id == id_JEDISTARFIGHTERYELLOWEP3 || object->id == id_JEDISTARFIGHTERREDEP3 ||
+    return object->apiobj.character_model->model_data_b[object->apiobj.anim_packet.requested_animation] == NULL ||
+           object->id == id_JEDISTARFIGHTERREDEP3 || object->id == id_JEDISTARFIGHTERYELLOWEP3 ||
            object->id == id_TIEINTERCEPTOR;
 }
 
