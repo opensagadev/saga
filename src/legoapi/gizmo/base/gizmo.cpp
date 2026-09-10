@@ -605,19 +605,32 @@ GizPanelObjectInterface::~GizPanelObjectInterface() {
     panel.mech_object_interface = NULL;
 }
 
-void TeleportObjectInterface::GetPos(VuVec &, i32) const {
+void TeleportObjectInterface::GetPos(VuVec &position, i32 direction) const {
+    NUVEC *point;
+    if (direction != -1) {
+        point = teleport.path->pts;
+    } else if (index > 0 && (teleport.flags & 1) == 0) {
+        point = &teleport.path->pts[teleport.path->length - 1];
+    } else {
+        point = teleport.path->pts;
+    }
+    position = VuVec(point->x, point->y, point->z, 1.0f);
 }
 
-void TeleportObjectInterface::GetRadius() const {
+f32 TeleportObjectInterface::GetRadius() const {
+    return 0.1f;
 }
 
-void TeleportObjectInterface::GetTargetName() const {
+const char *TeleportObjectInterface::GetTargetName() const {
+    return teleport.name;
 }
 
 void TeleportObjectInterface::TargetedFlash() {
 }
 
-TeleportObjectInterface::TeleportObjectInterface(TELEPORT_s &, i32) {
+TeleportObjectInterface::TeleportObjectInterface(TELEPORT_s &value, i32 teleport_index)
+    : field_0x4(NULL), teleport(value), index(teleport_index) {
+    value.mech_object_interface = this;
 }
 
 TeleportObjectInterface::~TeleportObjectInterface() {

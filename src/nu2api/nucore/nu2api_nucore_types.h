@@ -205,11 +205,11 @@ struct NuMemoryPool {
     struct IEventHandler {};
     struct IVisitor {};
     struct Page;
-    void GetAllocatedBytes();
-    void GetDebugName() const;
-    void GetFreeBytes();
-    void GetLargeBlockBytes();
-    void GetPagedBytes();
+    u32 GetAllocatedBytes();
+    const char *GetDebugName() const;
+    u32 GetFreeBytes();
+    u32 GetLargeBlockBytes();
+    u32 GetPagedBytes();
     void InterlockedPop(NuMemoryPool::FreeBlock volatile **);
     void InterlockedPush(NuMemoryPool::FreeBlock volatile **, void *);
     void Merge(NuMemoryPool::FreeBlock volatile *, NuMemoryPool::FreeBlock volatile *);
@@ -242,16 +242,16 @@ struct NuMemoryManager {
     void GetBlockDebugContext(void *);
     u32 GetBlockSize(void *);
     u32 GetCategoryAllocatedBytes(u16);
-    void GetCurrentContextID() const;
-    void GetCurrentContextName() const;
-    void GetDebugName() const;
-    void GetFreeBytes() const;
-    void GetNumFreeFragments() const;
-    void GetOverrideCategory();
-    void GetOverrideCategoryBGThread();
-    void GetPagedBytes();
-    void GetSmallBinSize(u32);
-    void IsZombie();
+    u32 GetCurrentContextID() const;
+    const char *GetCurrentContextName() const;
+    const char *GetDebugName() const;
+    u32 GetFreeBytes() const;
+    u32 GetNumFreeFragments() const;
+    u16 GetOverrideCategory();
+    u16 GetOverrideCategoryBGThread();
+    u32 GetPagedBytes();
+    static u32 GetSmallBinSize(u32);
+    bool IsZombie();
     void MergeLargeBinSegments(NuMemoryManager::FreeHeader *, NuMemoryManager::FreeHeader *);
     void PushContext(char const *);
     void ReleaseExternalPage(void *);
@@ -289,7 +289,7 @@ struct NuThread {
     void SetDebugName(char const *);
 };
 struct NuThreadBase {
-    void GetDebugName() const;
+    const char *GetDebugName() const;
 };
 struct NuThreadManager {
     void CreateThreadSuspended(void (*)(void *), void *, i32, char const *, i32, NUTHREADCAFECORE, NUTHREADXBOX360CORE);

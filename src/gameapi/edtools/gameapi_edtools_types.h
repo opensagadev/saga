@@ -3,6 +3,7 @@
 #pragma once
 
 #include "nu2api/nucore/fixed_width.h"
+#include "nu2api/nucore/nuvuvec.hpp"
 #include "nu2api/numath/nuvec.h"
 
 struct ClassObjectList;
@@ -410,14 +411,19 @@ struct KnotHelper {
     void Render(void *, i32);
 };
 struct SplineHelper {
+    u8 reserved_0x00[8];
+    SplineObject *first_object;
+    u8 reserved_0x0c[4];
+    i32 object_count;
+
     void AddMenuItems(eduimenu_s *);
     void ClearLevel(i32);
     void CreateObject(void *, i32, i32);
     void DestroyObject(void *, i32);
     void Find(char *);
     void Find(char *, SplineObject **, i32);
-    void GetNextObject(void *);
-    void GetNumObjects();
+    void *GetNextObject(void *);
+    i32 GetNumObjects();
     void Initialise();
     void PostLoadInitialisation(MemoryBuffer *, MemoryBuffer *);
     void PreLoadInitialisation(MemoryBuffer *, MemoryBuffer *);
@@ -431,12 +437,21 @@ struct SplineHelper {
     void cbEdSplineSmoothSpline(eduimenu_s *, eduiitem_s *, u32);
 };
 struct SplineKnot {
+    SplineKnot *next;
+    u8 reserved_0x04[4];
+    VuVec position;
+
     void Smooth();
 };
 struct SplineKnotList {
-    void GetPoint(i32, VuVec &);
+    SplineKnot *first;
+
+    i32 GetPoint(i32, VuVec &);
 };
 struct SplineObject {
+    u8 reserved_0x00[4];
+    SplineObject *next;
+
     void Clone();
     void Draw(i32, i32, i32, float);
     void DropPoint(VuVec &);
@@ -447,17 +462,24 @@ struct SplineObject {
     void SmoothKnots();
 };
 struct SplinePointBlock {
+    SplinePointBlock *next;
+    u8 reserved_0x08[8];
+    i32 point_count;
+    VuVec *points;
+
     void Draw();
     SplinePointBlock();
     SplinePointBlock(i32);
     virtual ~SplinePointBlock();
 };
 struct SplinePointList {
+    SplinePointBlock *first;
+
     void AddPoint(VuVec &);
     void Clear();
     void Draw();
-    void GetNumPoints();
-    void GetPoint(i32, VuVec &);
+    i32 GetNumPoints();
+    i32 GetPoint(i32, VuVec &);
 };
 struct SplineTool {
     void Initialise(variptr_u &, variptr_u &, i32);

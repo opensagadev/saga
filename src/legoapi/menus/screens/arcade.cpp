@@ -55,5 +55,6 @@ void Arcade_CoinCollected(i32, u32 *, u32) {
 void Arcade_UpdateEndMenu(MENU_s *) {
 }
 
-void Arcade_BothPlayersActive() {
+i32 Arcade_BothPlayersActive() {
+    return true;
 }

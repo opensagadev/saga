@@ -1,6 +1,6 @@
 # _saga_
 
-![Progress](https://img.shields.io/badge/matching-37.78%25-orange)
+![Progress](https://img.shields.io/badge/matching-37.81%25-orange)
 [![Bazel build](https://github.com/ttdecomp/saga/actions/workflows/build-bazel.yaml/badge.svg)](https://github.com/ttdecomp/saga/actions/workflows/build-bazel.yaml)
 [![Discord](https://img.shields.io/discord/1467775700894224555?color=%235865F2&logo=discord&logoColor=%23FFFFFF)](https://discord.gg/2HJuMtzA7q)
 [![status & wasm build](https://img.shields.io/badge/status%20%26%20wasm%20build-click%20here-orange?style=flat)](https://opensaga.dev/)
@@ -59,29 +59,29 @@ See https://ttdecomp.github.io/saga/
 | Directory | Fuzzy % | Funcs % |
 |---|---:|---:|
 | `(root)` | 62.0% | 50.0% |
-| `MechInputTouch` | 17.0% | 25.8% |
-| `editor` | 3.2% | 2.3% |
-| `gameapi` | 25.5% | 16.2% |
+| `MechInputTouch` | 17.0% | 26.1% |
+| `editor` | 3.1% | 2.9% |
+| `gameapi` | 25.6% | 16.5% |
 | `gameframework` | 100.0% | 52.9% |
-| `gamelib` | 20.1% | 15.6% |
+| `gamelib` | 20.1% | 16.4% |
 | `java` | 96.1% | 73.1% |
-| `legoapi` | 35.3% | 28.1% |
-| `legoapi/actions` | 31.5% | 6.7% |
+| `legoapi` | 35.3% | 28.7% |
+| `legoapi/actions` | 31.5% | 7.2% |
 | `legoapi/ai` | 47.6% | 24.1% |
 | `legoapi/audio` | 54.5% | 44.7% |
 | `legoapi/characters` | 32.8% | 18.5% |
-| `legoapi/core` | 28.3% | 14.9% |
-| `legoapi/cutscenes` | 34.7% | 13.5% |
-| `legoapi/gizmo` | 40.7% | 35.2% |
+| `legoapi/core` | 28.6% | 18.9% |
+| `legoapi/cutscenes` | 34.8% | 14.6% |
+| `legoapi/gizmo` | 40.8% | 36.1% |
 | `legoapi/gizmos` | 49.0% | 47.2% |
-| `legoapi/items` | 37.8% | 36.1% |
-| `legoapi/menus` | 26.3% | 27.4% |
+| `legoapi/items` | 37.9% | 37.9% |
+| `legoapi/menus` | 26.3% | 27.6% |
 | `legoapi/misc` | 26.3% | 12.5% |
 | `legoapi/props` | 47.2% | 11.1% |
-| `legoapi/render` | 34.2% | 24.5% |
+| `legoapi/render` | 34.2% | 25.1% |
 | `legoapi/world` | 28.0% | 30.2% |
 | `legogame` | 50.6% | 56.1% |
-| `nu2api` | 57.3% | 53.7% |
+| `nu2api` | 57.4% | 54.3% |
 
 <!-- matching-table-end -->
 

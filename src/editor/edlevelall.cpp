@@ -345,6 +345,7 @@ void PropertyMenu::AddObject(ClassObject &) {
 }
 
 void PropertyMenu::ClearObjecs() {
+    object_count = 0;
 }
 
 void PropertyMenu::ContainsObject(ClassObject &) {

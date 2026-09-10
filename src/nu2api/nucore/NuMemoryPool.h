@@ -18,7 +18,10 @@ class NuMemoryPool {
         FreeBlock *next;
     };
 
-    struct Page;
+    struct Page {
+        Page *next;
+        u32 size;
+    };
 
   public:
     class IVisitor {
@@ -31,11 +34,11 @@ class NuMemoryPool {
     NuMemoryPool(IEventHandler *event_handler, u32 size, const char *name);
     ~NuMemoryPool();
 
-    void GetAllocatedBytes();
-    void GetDebugName() const;
-    void GetFreeBytes();
-    void GetLargeBlockBytes();
-    void GetPagedBytes();
+    u32 GetAllocatedBytes();
+    const char *GetDebugName() const;
+    u32 GetFreeBytes();
+    u32 GetLargeBlockBytes();
+    u32 GetPagedBytes();
     void InterlockedPop(FreeBlock volatile **out_head);
     void InterlockedPush(FreeBlock volatile **head, void *block);
     void Merge(FreeBlock volatile *a, FreeBlock volatile *b);
@@ -54,6 +57,14 @@ class NuMemoryPool {
 
     NuMemoryPool *next;
     const char *name;
+    u8 reserved_0x08[8];
+    u32 free_bytes;
+    u32 large_block_bytes;
+    Page *pages;
+    u8 reserved_0x1c[0x400];
+    bool page_list_stable;
+    u8 reserved_0x41d[3];
+    pthread_mutex_t mutex;
 
     static void InterlockedAdd(volatile u32 *augend, u32 addend);
     static void InterlockedSub(volatile u32 *minuend, u32 subtrahend);

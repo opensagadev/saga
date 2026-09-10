@@ -58,7 +58,9 @@ struct GIZMOBLOWUP_s;
 struct GameObject_s;
 struct NOSContext {};
 struct NOSFilter {};
-struct NetAddress {};
+struct NetAddress {
+    u32 value;
+};
 struct NetListenerInterface {};
 struct NetPeer {};
 struct ReplicatorData {};
@@ -82,11 +84,13 @@ struct CRC16 {
     void hashInverse(unsigned char const *, i32);
 };
 struct FtpFile {
-    u8 reserved_00[0xa0];
+    u8 reserved_00[8];
+    i32 accepted;
+    u8 reserved_0c[0x94];
     NetworkObject *network_object; // 0xa0
     u8 reserved_a4[0x8];
     void *transfer; // 0xac
-    void Accept();
+    i32 Accept();
     void Accept(i32);
     void Accept(i32, void *);
     void Init(i32, char const *, i32, NetAddress const &, void *, i32);
@@ -110,7 +114,7 @@ struct NetFtpManager {
     void FindTransfer(char const *, NetAddress const &, i32);
     void FindTransfer(char const *, NetAddress const &, i32) const;
     void Get(char const *, void *, i32, NetAddress const &);
-    void GetTransfers() const;
+    FtpFile const *GetTransfers() const;
     void Init();
     NetFtpManager();
     void PeerLeft(NetAddress const &, ePeerLeftReason);

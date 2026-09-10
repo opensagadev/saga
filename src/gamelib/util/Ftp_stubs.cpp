@@ -2,5 +2,7 @@
 
 #include "gamelib_util_types.h"
 
-void FtpFile::Accept() {
+i32 FtpFile::Accept() {
+    accepted = true;
+    return 0;
 }

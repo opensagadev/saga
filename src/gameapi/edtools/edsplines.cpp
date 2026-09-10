@@ -54,10 +54,12 @@ void SplineHelper::Find(char *) {
 void SplineHelper::Find(char *, SplineObject **, i32) {
 }
 
-void SplineHelper::GetNextObject(void *) {
+void *SplineHelper::GetNextObject(void *current) {
+    return current != NULL ? static_cast<SplineObject *>(current)->next : first_object;
 }
 
-void SplineHelper::GetNumObjects() {
+int SplineHelper::GetNumObjects() {
+    return object_count;
 }
 
 void SplineHelper::Initialise() {
@@ -117,7 +119,19 @@ void SplineObject::ReverseKnots() {
 void SplineObject::SmoothKnots() {
 }
 
-void SplineKnotList::GetPoint(i32, VuVec &) {
+i32 SplineKnotList::GetPoint(i32 index, VuVec &point) {
+    SplineKnot *knot = first;
+    while (knot != NULL && index != 0) {
+        knot = knot->next;
+        index--;
+    }
+
+    if (knot == NULL) {
+        return false;
+    }
+
+    point = knot->position;
+    return true;
 }
 
 void SplinePointList::AddPoint(VuVec &) {
@@ -129,10 +143,26 @@ void SplinePointList::Clear() {
 void SplinePointList::Draw() {
 }
 
-void SplinePointList::GetNumPoints() {
+i32 SplinePointList::GetNumPoints() {
+    i32 point_count = 0;
+    for (SplinePointBlock *block = first; block != NULL; block = block->next) {
+        point_count = block->point_count;
+    }
+    return point_count;
 }
 
-void SplinePointList::GetPoint(i32, VuVec &) {
+i32 SplinePointList::GetPoint(i32 index, VuVec &point) {
+    SplinePointBlock *block = first;
+    while (block != NULL && index >= block->point_count) {
+        block = block->next;
+    }
+
+    if (block == NULL) {
+        return false;
+    }
+
+    point = block->points[index];
+    return true;
 }
 
 void SplinePointBlock::Draw() {

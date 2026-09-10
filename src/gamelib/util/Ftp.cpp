@@ -16,7 +16,8 @@ void NetFtpManager::FindTransfer(char const *, NetAddress const &, i32) const {
 void NetFtpManager::Get(char const *, void *, i32, NetAddress const &) {
 }
 
-void NetFtpManager::GetTransfers() const {
+FtpFile const *NetFtpManager::GetTransfers() const {
+    return files;
 }
 
 void NetFtpManager::Init() {

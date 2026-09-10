@@ -2,6 +2,7 @@
 #define LEGOAPI_TYPES_H
 #pragma once
 #include "gameapi/ai/aisys/aimessage_types.h"
+#include "gamelib/util/gamelib_util_types.h"
 
 #include "nu2api/nu3d/ShaderManagerOpenGL.h"
 #include "decomp.h"
@@ -4693,7 +4694,11 @@ struct PART_s {
         u32 force_flags;
         GIZMOBLOWUP_s *carried_blowup; // 0x218, thrown-object callback data
     };
-    u32 field_21c, field_220;
+    u32 field_21c;
+    union {
+        u32 field_220;
+        PartObjectInterface *mech_object_interface;
+    };
     void ClearMechObjectInterface();
     void GetMechObjectInterface();
 };
@@ -4716,9 +4721,12 @@ DECOMP_ASSERT(offsetof(PART_s, force_player_mask) == 0x206, "PART Force player m
 DECOMP_ASSERT(offsetof(PART_s, force_flags) == 0x218, "PART Force flags offset");
 DECOMP_ASSERT(offsetof(PART_s, carried_blowup) == 0x218, "PART carried blowup offset");
 struct PartObjectInterface {
+    void *field_0x4;
+    PART_s &part;
+
     void GetPos(VuVec &, i32) const;
-    void GetRadius() const;
-    void GetTargetName() const;
+    f32 GetRadius() const;
+    const char *GetTargetName() const;
     PartObjectInterface(PART_s &);
     virtual ~PartObjectInterface();
 };
@@ -4730,6 +4738,8 @@ struct Placeable {
     void SetInitialPosition(VuVec const *);
 };
 struct PlaceableHelper {
+    i32 object_type_count;
+
     void Find(char *);
     void Find(char *, Placeable **, i32);
     void FindObject(char *);
@@ -4798,6 +4808,9 @@ struct PODSPRINTNETPACKET_s {
 };
 
 struct PropertyMenu {
+    u8 reserved_0x00[0x70];
+    i32 object_count;
+
     void AddObject(ClassObject &);
     void ClearObjecs();
     void ContainsObject(ClassObject &);
@@ -4806,6 +4819,9 @@ struct PropertyMenu {
     void SelectAttr(i32);
 };
 struct PropertyTool {
+    u8 reserved_0x00[0xc];
+    PropertyMenu *active_menu;
+
     void AddPropertyMenuItems(eduimenu_s *, EdClass *, void *, eduiitem_s *);
     void AutoLocateMenu(PropertyMenu *);
     void BringToFront(PropertyMenu *);
@@ -4816,7 +4832,7 @@ struct PropertyTool {
     void GetNextActiveMenu();
     void GetNextDefaultActiveMenu(eduimenu_s *);
     void GetTypeName(EdRef *, char *);
-    void HasActiveMenu();
+    bool HasActiveMenu();
     void Initialise(variptr_u &, variptr_u &, i32);
     void Process(EdInputContext &);
     void ProcessControls(EdInputContext &);
@@ -4851,11 +4867,16 @@ struct SNIPER_s {
 }; // 0x20 bytes: the original strides this array by 0x20
 
 struct SceneInstance {
-    void GetCurrentPosition() const;
-    void GetCurrentTransform() const;
-    void GetInitialPosition() const;
-    void GetInitialTransform() const;
-    void GetVisibility() const;
+    u8 reserved_0x00[0x34];
+    NUMTX initial_transform;
+    NUMTX current_transform;
+    i32 visibility;
+
+    VuVec const *GetCurrentPosition() const;
+    VuMtx const *GetCurrentTransform() const;
+    VuVec const *GetInitialPosition() const;
+    VuMtx const *GetInitialTransform() const;
+    i32 GetVisibility() const;
     void Render(VuMtx const *) const;
     SceneInstance();
     void SetCurrentPosition(VuVec const *);
@@ -4869,13 +4890,18 @@ struct SceneObject {
     SceneObject();
 };
 struct SceneObjectHelper {
+    u8 reserved_0x00[0x6c];
+    i32 scene_object_count;
+    u8 reserved_0x70[0x30];
+    i32 owned_object_count;
+
     void AddMenuItems(eduimenu_s *);
     void ClearLevel(i32);
     void CreateObject(void *, i32, i32);
     void DestroyObject(void *, i32);
     void Flush();
     void GetNextObject(void *);
-    void GetNumObjects();
+    i32 GetNumObjects();
     void Initialise();
     void PostLoadInitialisation(MemoryBuffer *, MemoryBuffer *);
     void PreLoadInitialisation(MemoryBuffer *, MemoryBuffer *);
@@ -4909,7 +4935,7 @@ struct SpecialObject {
     SpecialObject();
 };
 struct TELEPORT_s {
-    u8 reserved_00[0x40];
+    char name[0x40];
     struct nugspline_s *path;
     u8 reserved_44[4];
     f32 range_squared;
@@ -4922,7 +4948,8 @@ struct TELEPORT_s {
     u16 field_76;
     u16 field_78;
     u16 field_7a;
-    u8 reserved_7c[0x84];
+    u8 reserved_7c[0x80];
+    TeleportObjectInterface *mech_object_interface;
     void ClearMechObjectInterface();
     void GetMechObjectInterface();
 };
@@ -4945,11 +4972,18 @@ struct TMClient {
     void TestKey(i32);
 };
 struct TTNetwork {
+  private:
+    u8 reserved_04[0x2168];
+    NetAddress my_address;
+    NetAddress my_host_address;
+    i32 has_my_host_address;
+
+  public:
     void Broadcast(NetMessage, unsigned char);
     void ClearMyHostAddress();
     void Display(ThingRenderData *);
-    void GetMyAddress() const;
-    void GetMyHostAddress() const;
+    const NetAddress &GetMyAddress() const;
+    const NetAddress *GetMyHostAddress() const;
     void Initialise();
     void ProcessEvenWhenPaused(ThingProcessData *);
     void ReliableBroadcast(NetMessage, unsigned char);
@@ -4958,7 +4992,7 @@ struct TTNetwork {
     void Send(NetMessage, unsigned char, NetPeer &);
     void SetMyHostAddress(NetAddress const &);
     void Shutdown();
-    void Suspend();
+    bool Suspend();
     TTNetwork();
     void Update();
     virtual ~TTNetwork();

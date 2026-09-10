@@ -22,6 +22,7 @@ void PlaceableHelper::IsEditorObject(ClassObject &) {
 }
 
 PlaceableHelper::PlaceableHelper() {
+    object_type_count = 0;
 }
 
 void PlaceableHelper::RegisterObjectType(char *, PlaceableInterface *) {

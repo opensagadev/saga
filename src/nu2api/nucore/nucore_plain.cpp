@@ -2968,7 +2968,8 @@ extern "C" {
     }
     void NuDynamicLightEndCapture(void) {
     }
-    void NuDynamicLightGetActiveRenderSetCount(void) {
+    i32 NuDynamicLightGetActiveRenderSetCount(NuDynamicLight *light) {
+        return light->active_render_set_count;
     }
     void NuDynamicLightGetDList(void) {
     }
@@ -2984,9 +2985,11 @@ extern "C" {
                 return 0;
         }
     }
-    void NuDynamicLightGetProjection(void) {
+    NUMTX *NuDynamicLightGetProjection(NuDynamicLight *light) {
+        return &light->projection;
     }
-    void NuDynamicLightGetView(void) {
+    NUMTX *NuDynamicLightGetView(NuDynamicLight *light) {
+        return &light->view;
     }
     i32 NuDynamicLightIsUsedOnSpecials(NuDynamicLight *light) {
         return light->used_on_specials;

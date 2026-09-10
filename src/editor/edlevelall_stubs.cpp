@@ -21,7 +21,8 @@ void LevelEditor::SetNextMenu(eduimenu_s *) {
 void PropertyMenu::ContainsObject(void *) {
 }
 
-void PropertyTool::HasActiveMenu() {
+bool PropertyTool::HasActiveMenu() {
+    return active_menu != NULL;
 }
 
 void PropertyTool::SetMenuControl(eduimenu_s *, EdControl *) {

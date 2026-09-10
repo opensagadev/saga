@@ -1051,7 +1051,8 @@ i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 seconda
     return collision_found;
 }
 
-void CheckCol(nutex_s *, i32, i32, i32, i32) {
+i32 CheckCol(nutex_s *, i32, i32, i32, i32) {
+    return true;
 }
 
 void HitRumble(GameObject_s *) {

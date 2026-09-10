@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 37.77585,
+    "fuzzy_match_percent": 37.80787,
     "total_code": "4722419",
-    "matched_code": "360725",
-    "matched_code_percent": 7.638564,
+    "matched_code": "362257",
+    "matched_code_percent": 7.6710052,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4274,
-    "matched_functions_percent": 31.755703,
+    "matched_functions": 4338,
+    "matched_functions_percent": 32.23122,
     "total_units": 1
   },
   "text": {
@@ -15245,7 +15245,7 @@
           "address": 4459568,
           "offset": 3569600,
           "size": 16,
-          "match_percent": 44.0
+          "match_percent": 100.0
         }
       ]
     },
@@ -19014,14 +19014,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_editor/edlevelall.o",
       "functions": [
         {
-          "name": "_GLOBAL__sub_I_edlevelall.cpp",
-          "demangled_name": "_GLOBAL__sub_I_edlevelall.cpp",
-          "address": 928992,
-          "offset": 39024,
-          "size": 811,
-          "match_percent": 15.006536
-        },
-        {
           "name": "_Z16areaEditor_Enterv",
           "demangled_name": "areaEditor_Enter()",
           "address": 4046944,
@@ -19675,7 +19667,7 @@
           "address": 5530400,
           "offset": 4640432,
           "size": 16,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "_ZN12PropertyMenu10SelectAttrEi",
@@ -20306,7 +20298,7 @@
           "address": 5467392,
           "offset": 4577424,
           "size": 14,
-          "match_percent": 36.666668
+          "match_percent": 0.0
         },
         {
           "name": "_Z23cbEdLevelSetSliderFloatP10eduimenu_sP10eduiitem_sj",
@@ -20314,7 +20306,7 @@
           "address": 5468464,
           "offset": 4578496,
           "size": 17,
-          "match_percent": 44.0
+          "match_percent": 0.0
         },
         {
           "name": "_ZN11ClassEditor12RegisterToolER6EdTool",
@@ -20322,7 +20314,7 @@
           "address": 5486656,
           "offset": 4596688,
           "size": 56,
-          "match_percent": 11.578947
+          "match_percent": 0.0
         },
         {
           "name": "_ZN11ClassEditor13UpdateSnapRayER5VuVec",
@@ -20330,7 +20322,7 @@
           "address": 5487248,
           "offset": 4597280,
           "size": 71,
-          "match_percent": 12.173913
+          "match_percent": 0.0
         },
         {
           "name": "_ZN15ClassObjectList8IsInListE11ClassObject",
@@ -20338,7 +20330,7 @@
           "address": 5487584,
           "offset": 4597616,
           "size": 52,
-          "match_percent": 3.809524
+          "match_percent": 0.0
         },
         {
           "name": "_ZN15ClassObjectList8IsInListEP7EdClass",
@@ -20346,7 +20338,7 @@
           "address": 5487872,
           "offset": 4597904,
           "size": 49,
-          "match_percent": 4.210527
+          "match_percent": 0.0
         },
         {
           "name": "_ZN11LevelEditor14RegisterEditorER10BaseEditor",
@@ -20354,7 +20346,7 @@
           "address": 5509872,
           "offset": 4619904,
           "size": 70,
-          "match_percent": 12.222222
+          "match_percent": 0.0
         },
         {
           "name": "_ZN11LevelEditor8GetSceneEi",
@@ -20362,7 +20354,7 @@
           "address": 5511344,
           "offset": 4621376,
           "size": 35,
-          "match_percent": 7.272728
+          "match_percent": 0.0
         },
         {
           "name": "_Z21cbEdLevelSetSliderIntP10eduimenu_sP10eduiitem_sj",
@@ -20370,7 +20362,7 @@
           "address": 5518688,
           "offset": 4628720,
           "size": 15,
-          "match_percent": 26.0
+          "match_percent": 0.0
         },
         {
           "name": "_ZN11LevelEditor11SetNextMenuEP10eduimenu_s",
@@ -20378,7 +20370,7 @@
           "address": 5519680,
           "offset": 4629712,
           "size": 24,
-          "match_percent": 21.666666
+          "match_percent": 0.0
         },
         {
           "name": "_ZN12PropertyMenu14ContainsObjectEPv",
@@ -20386,7 +20378,7 @@
           "address": 5530256,
           "offset": 4640288,
           "size": 63,
-          "match_percent": 13.2
+          "match_percent": 0.0
         },
         {
           "name": "_ZN12PropertyTool14SetMenuControlEP10eduimenu_sP9EdControl",
@@ -20394,7 +20386,7 @@
           "address": 5532160,
           "offset": 4642192,
           "size": 49,
-          "match_percent": 15.0
+          "match_percent": 0.0
         },
         {
           "name": "_ZN12PropertyTool13HasActiveMenuEv",
@@ -20402,7 +20394,7 @@
           "address": 5534192,
           "offset": 4644224,
           "size": 13,
-          "match_percent": 16.0
+          "match_percent": 100.0
         }
       ]
     },
@@ -31171,7 +31163,7 @@
           "address": 4791344,
           "offset": 3901376,
           "size": 238,
-          "match_percent": 5.549296
+          "match_percent": 6.760563
         },
         {
           "name": "_ZN12SplineHelper21PreLoadInitialisationEP12MemoryBufferS1_",
@@ -31179,7 +31171,7 @@
           "address": 5470368,
           "offset": 4580400,
           "size": 9,
-          "match_percent": 24.444445
+          "match_percent": 100.0
         },
         {
           "name": "_ZN12SplineHelper13GetNumObjectsEv",
@@ -31187,7 +31179,7 @@
           "address": 5470384,
           "offset": 4580416,
           "size": 12,
-          "match_percent": 11.428572
+          "match_percent": 100.0
         },
         {
           "name": "_ZN12SplineHelper13GetNextObjectEPv",
@@ -31195,7 +31187,7 @@
           "address": 5470400,
           "offset": 4580432,
           "size": 24,
-          "match_percent": 8.888889
+          "match_percent": 100.0
         },
         {
           "name": "_ZN12SplineHelper23cbEdSplineAutoGenPointsEP10eduimenu_sP10eduiitem_sj",
@@ -31203,7 +31195,7 @@
           "address": 5470432,
           "offset": 4580464,
           "size": 50,
-          "match_percent": 20.625
+          "match_percent": 26.25
         },
         {
           "name": "_ZN10KnotHelper13GetNumObjectsEv",
@@ -31211,7 +31203,7 @@
           "address": 5470496,
           "offset": 4580528,
           "size": 44,
-          "match_percent": 15.714286
+          "match_percent": 30.0
         },
         {
           "name": "_ZN10SplineTool10InitialiseER9variptr_uS1_i",
@@ -31219,7 +31211,7 @@
           "address": 5470544,
           "offset": 4580576,
           "size": 9,
-          "match_percent": 24.444445
+          "match_percent": 100.0
         },
         {
           "name": "_ZN10SplineTool7ProcessER14EdInputContext",
@@ -31227,7 +31219,7 @@
           "address": 5470560,
           "offset": 4580592,
           "size": 9,
-          "match_percent": 27.5
+          "match_percent": 62.5
         },
         {
           "name": "_ZN10SplineTool6RenderEv",
@@ -31235,7 +31227,7 @@
           "address": 5470576,
           "offset": 4580608,
           "size": 9,
-          "match_percent": 24.444445
+          "match_percent": 100.0
         },
         {
           "name": "_ZN16SplinePointBlockD1Ev",
@@ -31243,7 +31235,7 @@
           "address": 5471888,
           "offset": 4581920,
           "size": 72,
-          "match_percent": 44.38095
+          "match_percent": 30.380953
         },
         {
           "name": "_ZN16SplinePointBlockD2Ev",
@@ -31251,7 +31243,7 @@
           "address": 5471888,
           "offset": 4581920,
           "size": 72,
-          "match_percent": 44.38095
+          "match_percent": 30.380953
         },
         {
           "name": "_ZN16SplinePointBlockD0Ev",
@@ -31259,7 +31251,7 @@
           "address": 5471968,
           "offset": 4582000,
           "size": 74,
-          "match_percent": 34.882355
+          "match_percent": 78.82353
         },
         {
           "name": "_ZN10KnotHelper13DestroyObjectEPvi",
@@ -31267,7 +31259,7 @@
           "address": 5472048,
           "offset": 4582080,
           "size": 237,
-          "match_percent": 5.846154
+          "match_percent": 6.461538
         },
         {
           "name": "_ZN12SplineHelper12AddMenuItemsEP10eduimenu_s",
@@ -31275,7 +31267,7 @@
           "address": 5474464,
           "offset": 4584496,
           "size": 387,
-          "match_percent": 4.074074
+          "match_percent": 5.185185
         },
         {
           "name": "_ZN12SplineHelper10ClearLevelEi",
@@ -31283,7 +31275,7 @@
           "address": 5481136,
           "offset": 4591168,
           "size": 120,
-          "match_percent": 9.75
+          "match_percent": 10.5
         },
         {
           "name": "_ZN10KnotHelper13GetNextObjectEPv",
@@ -31291,7 +31283,7 @@
           "address": 5482496,
           "offset": 4592528,
           "size": 129,
-          "match_percent": 1.73913
+          "match_percent": 8.695652
         },
         {
           "name": "_ZN12SplineHelper13DestroyObjectEPvi",
@@ -31299,7 +31291,7 @@
           "address": 5482640,
           "offset": 4592672,
           "size": 145,
-          "match_percent": 7.021276
+          "match_percent": 10.212766
         },
         {
           "name": "_ZN12SplineHelper12CreateObjectEPvii",
@@ -31307,7 +31299,7 @@
           "address": 5483648,
           "offset": 4593680,
           "size": 198,
-          "match_percent": 6.734694
+          "match_percent": 8.571428
         },
         {
           "name": "_ZN10KnotHelper6RenderEPvi",
@@ -31315,7 +31307,7 @@
           "address": 5496848,
           "offset": 4606880,
           "size": 286,
-          "match_percent": 3.793103
+          "match_percent": 7.241379
         },
         {
           "name": "_ZN10KnotHelper7ProcessEPvR14EdInputContext",
@@ -31323,7 +31315,7 @@
           "address": 5531728,
           "offset": 4641760,
           "size": 133,
-          "match_percent": 7.096774
+          "match_percent": 13.548388
         },
         {
           "name": "_ZN12SplineHelper15SerialiseObjectER8EdStreamPv",
@@ -31331,7 +31323,7 @@
           "address": 5543072,
           "offset": 4653104,
           "size": 395,
-          "match_percent": 3.508772
+          "match_percent": 4.210527
         },
         {
           "name": "_ZN16SplinePointBlockC1Ev",
@@ -31339,7 +31331,7 @@
           "address": 5579152,
           "offset": 4689184,
           "size": 110,
-          "match_percent": 24.583334
+          "match_percent": 25.0
         },
         {
           "name": "_ZN16SplinePointBlockC2Ev",
@@ -31347,7 +31339,7 @@
           "address": 5579152,
           "offset": 4689184,
           "size": 110,
-          "match_percent": 24.583334
+          "match_percent": 25.0
         },
         {
           "name": "_ZN16SplinePointBlockC1Ei",
@@ -31355,7 +31347,7 @@
           "address": 5579264,
           "offset": 4689296,
           "size": 109,
-          "match_percent": 23.076923
+          "match_percent": 25.192308
         },
         {
           "name": "_ZN16SplinePointBlockC2Ei",
@@ -31363,7 +31355,7 @@
           "address": 5579264,
           "offset": 4689296,
           "size": 109,
-          "match_percent": 23.076923
+          "match_percent": 25.192308
         },
         {
           "name": "_ZN16SplinePointBlock4DrawEv",
@@ -31371,7 +31363,7 @@
           "address": 5579376,
           "offset": 4689408,
           "size": 80,
-          "match_percent": 14.074074
+          "match_percent": 17.777779
         },
         {
           "name": "_ZN15SplinePointList12GetNumPointsEv",
@@ -31379,7 +31371,7 @@
           "address": 5579456,
           "offset": 4689488,
           "size": 30,
-          "match_percent": 22.5
+          "match_percent": 100.0
         },
         {
           "name": "_ZN15SplinePointList8GetPointEiR5VuVec",
@@ -31387,7 +31379,7 @@
           "address": 5579488,
           "offset": 4689520,
           "size": 85,
-          "match_percent": 8.235294
+          "match_percent": 24.32353
         },
         {
           "name": "_ZN15SplinePointList8AddPointER5VuVec",
@@ -31395,7 +31387,7 @@
           "address": 5579584,
           "offset": 4689616,
           "size": 261,
-          "match_percent": 4.303797
+          "match_percent": 6.075949
         },
         {
           "name": "_ZN15SplinePointList5ClearEv",
@@ -31403,7 +31395,7 @@
           "address": 5579856,
           "offset": 4689888,
           "size": 132,
-          "match_percent": 7.333334
+          "match_percent": 9.333333
         },
         {
           "name": "_ZN15SplinePointList4DrawEv",
@@ -31411,7 +31403,7 @@
           "address": 5580304,
           "offset": 4690336,
           "size": 54,
-          "match_percent": 16.5
+          "match_percent": 24.0
         },
         {
           "name": "_ZN14SplineKnotList8GetPointEiR5VuVec",
@@ -31419,7 +31411,7 @@
           "address": 5580368,
           "offset": 4690400,
           "size": 78,
-          "match_percent": 10.3125
+          "match_percent": 32.25
         },
         {
           "name": "_ZN12SplineObject12ReverseKnotsEv",
@@ -31427,7 +31419,7 @@
           "address": 5580448,
           "offset": 4690480,
           "size": 324,
-          "match_percent": 4.020618
+          "match_percent": 4.329897
         },
         {
           "name": "_ZN12SplineObject4DrawEiiif",
@@ -31435,7 +31427,7 @@
           "address": 5580784,
           "offset": 4690816,
           "size": 297,
-          "match_percent": 4.23913
+          "match_percent": 4.565218
         },
         {
           "name": "_ZN12SplineHelper6RenderEPvi",
@@ -31443,7 +31435,7 @@
           "address": 5581088,
           "offset": 4691120,
           "size": 65,
-          "match_percent": 18.333334
+          "match_percent": 23.333334
         },
         {
           "name": "_ZN12SplineHelper10InitialiseEv",
@@ -31451,7 +31443,7 @@
           "address": 5581168,
           "offset": 4691200,
           "size": 1951,
-          "match_percent": 0.85
+          "match_percent": 1.05
         },
         {
           "name": "_ZN12SplineHelper4FindEPc",
@@ -31459,7 +31451,7 @@
           "address": 5583120,
           "offset": 4693152,
           "size": 92,
-          "match_percent": 10.27027
+          "match_percent": 12.972973
         },
         {
           "name": "_ZN12SplineHelper4FindEPcPP12SplineObjecti",
@@ -31467,7 +31459,7 @@
           "address": 5583216,
           "offset": 4693248,
           "size": 101,
-          "match_percent": 10.540541
+          "match_percent": 11.351352
         },
         {
           "name": "_ZN12SplineObject9DropPointER5VuVec",
@@ -31475,7 +31467,7 @@
           "address": 5593968,
           "offset": 4704000,
           "size": 179,
-          "match_percent": 8.0
+          "match_percent": 8.4
         },
         {
           "name": "_ZN12SplineObject15GenBezierPointsEv",
@@ -31483,7 +31475,7 @@
           "address": 5594160,
           "offset": 4704192,
           "size": 380,
-          "match_percent": 3.823529
+          "match_percent": 4.705883
         },
         {
           "name": "_ZN12SplineObject15GenLinearPointsEv",
@@ -31491,7 +31483,7 @@
           "address": 5594544,
           "offset": 4704576,
           "size": 276,
-          "match_percent": 4.788733
+          "match_percent": 5.915493
         },
         {
           "name": "_ZN12SplineObject9GenPointsEv",
@@ -31499,7 +31491,7 @@
           "address": 5594832,
           "offset": 4704864,
           "size": 59,
-          "match_percent": 19.411764
+          "match_percent": 24.705883
         },
         {
           "name": "_ZN12SplineHelper21cbEdSplineReGenPointsEP10eduimenu_sP10eduiitem_sj",
@@ -31507,7 +31499,7 @@
           "address": 5594896,
           "offset": 4704928,
           "size": 85,
-          "match_percent": 13.103448
+          "match_percent": 14.482758
         },
         {
           "name": "_ZN12SplineHelper23cbEdSplineReverseSplineEP10eduimenu_sP10eduiitem_sj",
@@ -31515,7 +31507,7 @@
           "address": 5594992,
           "offset": 4705024,
           "size": 132,
-          "match_percent": 5.945946
+          "match_percent": 11.351352
         },
         {
           "name": "_ZN12SplineObject5CloneEv",
@@ -31523,7 +31515,7 @@
           "address": 5595136,
           "offset": 4705168,
           "size": 483,
-          "match_percent": 2.905983
+          "match_percent": 4.102564
         },
         {
           "name": "_ZN12SplineHelper22PostLoadInitialisationEP12MemoryBufferS1_",
@@ -31531,7 +31523,7 @@
           "address": 5595632,
           "offset": 4705664,
           "size": 54,
-          "match_percent": 17.368422
+          "match_percent": 22.105263
         },
         {
           "name": "_ZN12SplineHelper7ProcessEPvR14EdInputContext",
@@ -31539,7 +31531,7 @@
           "address": 5595696,
           "offset": 4705728,
           "size": 94,
-          "match_percent": 12.692307
+          "match_percent": 16.153847
         },
         {
           "name": "_ZN10SplineKnot6SmoothEv",
@@ -31547,7 +31539,7 @@
           "address": 5595792,
           "offset": 4705824,
           "size": 514,
-          "match_percent": 3.2
+          "match_percent": 3.36
         },
         {
           "name": "_ZN12SplineHelper20cbEdSplineSmoothKnotEP10eduimenu_sP10eduiitem_sj",
@@ -31555,7 +31547,7 @@
           "address": 5596320,
           "offset": 4706352,
           "size": 211,
-          "match_percent": 5.633803
+          "match_percent": 5.915493
         },
         {
           "name": "_ZN12SplineObject11SmoothKnotsEv",
@@ -31563,7 +31555,7 @@
           "address": 5596544,
           "offset": 4706576,
           "size": 53,
-          "match_percent": 17.368422
+          "match_percent": 22.105263
         },
         {
           "name": "_ZN12SplineHelper22cbEdSplineSmoothSplineEP10eduimenu_sP10eduiitem_sj",
@@ -31571,7 +31563,7 @@
           "address": 5596608,
           "offset": 4706640,
           "size": 132,
-          "match_percent": 5.945946
+          "match_percent": 11.351352
         },
         {
           "name": "_ZN10KnotHelper12CreateObjectEPvii",
@@ -31579,7 +31571,7 @@
           "address": 5596752,
           "offset": 4706784,
           "size": 571,
-          "match_percent": 2.222222
+          "match_percent": 2.745098
         },
         {
           "name": "_ZN10KnotHelper16DistanceToObjectER5VuVecS1_PvPP5EdRef",
@@ -31587,7 +31579,7 @@
           "address": 5599568,
           "offset": 4709600,
           "size": 300,
-          "match_percent": 3.055556
+          "match_percent": 5.833334
         }
       ]
     },
@@ -37000,7 +36992,7 @@
           "address": 5429216,
           "offset": 4539248,
           "size": 12,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13NetFtpManager6UpdateEv",
@@ -37103,7 +37095,7 @@
           "address": 5430080,
           "offset": 4540112,
           "size": 16,
-          "match_percent": 36.666668
+          "match_percent": 100.0
         }
       ]
     },
@@ -39943,7 +39935,7 @@
           "address": 2928640,
           "offset": 2038672,
           "size": 12,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "_Z11InsideLineFffffff",
@@ -50101,7 +50093,7 @@
           "address": 5421936,
           "offset": 4531968,
           "size": 472,
-          "match_percent": 1.880342
+          "match_percent": 3.589744
         },
         {
           "name": "_ZN9TTNetworkD1Ev",
@@ -50109,7 +50101,7 @@
           "address": 5422432,
           "offset": 4532464,
           "size": 248,
-          "match_percent": 20.224138
+          "match_percent": 10.310345
         },
         {
           "name": "_ZN9TTNetworkD2Ev",
@@ -50117,7 +50109,7 @@
           "address": 5422432,
           "offset": 4532464,
           "size": 248,
-          "match_percent": 20.224138
+          "match_percent": 10.310345
         },
         {
           "name": "_ZN9TTNetworkD0Ev",
@@ -50125,7 +50117,7 @@
           "address": 5422704,
           "offset": 4532736,
           "size": 56,
-          "match_percent": 24.5
+          "match_percent": 100.0
         },
         {
           "name": "_ZN9TTNetwork4SendE10NetMessagehR7NetPeer",
@@ -50133,7 +50125,7 @@
           "address": 5422784,
           "offset": 4532816,
           "size": 346,
-          "match_percent": 4.881188
+          "match_percent": 4.158416
         },
         {
           "name": "_ZN9TTNetwork17ReliableBroadcastE10NetMessageh",
@@ -50141,7 +50133,7 @@
           "address": 5423136,
           "offset": 4533168,
           "size": 586,
-          "match_percent": 3.286667
+          "match_percent": 3.2
         },
         {
           "name": "_ZN9TTNetwork9BroadcastE10NetMessageh",
@@ -50149,7 +50141,7 @@
           "address": 5423728,
           "offset": 4533760,
           "size": 570,
-          "match_percent": 3.331081
+          "match_percent": 3.243243
         },
         {
           "name": "_ZN9TTNetwork12ReliableSendE10NetMessagehR7NetPeerPKcj",
@@ -50157,7 +50149,7 @@
           "address": 5424304,
           "offset": 4534336,
           "size": 362,
-          "match_percent": 5.163462
+          "match_percent": 3.269231
         },
         {
           "name": "_ZN9TTNetworkC1Ev",
@@ -50165,7 +50157,7 @@
           "address": 5424672,
           "offset": 4534704,
           "size": 233,
-          "match_percent": 15.409091
+          "match_percent": 12.613636
         },
         {
           "name": "_ZN9TTNetworkC2Ev",
@@ -50173,7 +50165,7 @@
           "address": 5424672,
           "offset": 4534704,
           "size": 233,
-          "match_percent": 15.409091
+          "match_percent": 12.613636
         },
         {
           "name": "_ZN9TTNetwork10InitialiseEv",
@@ -50181,7 +50173,7 @@
           "address": 5424912,
           "offset": 4534944,
           "size": 254,
-          "match_percent": 5.4
+          "match_percent": 8.4
         },
         {
           "name": "_ZN9TTNetwork6ResumeEv",
@@ -50189,7 +50181,7 @@
           "address": 5425168,
           "offset": 4535200,
           "size": 9,
-          "match_percent": 24.444445
+          "match_percent": 100.0
         },
         {
           "name": "_ZN9TTNetwork7SuspendEv",
@@ -50197,7 +50189,7 @@
           "address": 5425184,
           "offset": 4535216,
           "size": 12,
-          "match_percent": 16.75
+          "match_percent": 100.0
         },
         {
           "name": "_ZN9TTNetwork8ShutdownEv",
@@ -50205,7 +50197,7 @@
           "address": 5425200,
           "offset": 4535232,
           "size": 110,
-          "match_percent": 10.384615
+          "match_percent": 16.153847
         },
         {
           "name": "_ZNK9TTNetwork12GetMyAddressEv",
@@ -50213,7 +50205,7 @@
           "address": 5425312,
           "offset": 4535344,
           "size": 14,
-          "match_percent": 11.428572
+          "match_percent": 100.0
         },
         {
           "name": "_ZNK9TTNetwork16GetMyHostAddressEv",
@@ -50221,7 +50213,7 @@
           "address": 5425328,
           "offset": 4535360,
           "size": 26,
-          "match_percent": 10.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN9TTNetwork16SetMyHostAddressERK10NetAddress",
@@ -50229,7 +50221,7 @@
           "address": 5425360,
           "offset": 4535392,
           "size": 27,
-          "match_percent": 13.333333
+          "match_percent": 100.0
         },
         {
           "name": "_ZN9TTNetwork18ClearMyHostAddressEv",
@@ -50237,7 +50229,7 @@
           "address": 5425392,
           "offset": 4535424,
           "size": 19,
-          "match_percent": 11.428572
+          "match_percent": 100.0
         },
         {
           "name": "_ZN9TTNetwork6UpdateEv",
@@ -50245,7 +50237,7 @@
           "address": 5425424,
           "offset": 4535456,
           "size": 126,
-          "match_percent": 9.0
+          "match_percent": 14.0
         },
         {
           "name": "_ZN9TTNetwork21ProcessEvenWhenPausedEP16ThingProcessData",
@@ -50253,7 +50245,7 @@
           "address": 5425552,
           "offset": 4535584,
           "size": 211,
-          "match_percent": 3.666667
+          "match_percent": 7.0
         },
         {
           "name": "_ZL10NOSGetGuidv",
@@ -50261,7 +50253,7 @@
           "address": 5440688,
           "offset": 4550720,
           "size": 38,
-          "match_percent": 34.545456
+          "match_percent": 38.18182
         }
       ]
     },
@@ -51246,7 +51238,7 @@
           "address": 4411712,
           "offset": 3521744,
           "size": 16,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "instNuGCutSceneDisable",
@@ -51254,7 +51246,7 @@
           "address": 4411728,
           "offset": 3521760,
           "size": 16,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "instNuGCutSceneSetPos",
@@ -52727,7 +52719,7 @@
           "address": 4484976,
           "offset": 3595008,
           "size": 12,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "_ZNK23TeleportObjectInterface9GetRadiusEv",
@@ -52735,7 +52727,7 @@
           "address": 4484992,
           "offset": 3595024,
           "size": 22,
-          "match_percent": 12.5
+          "match_percent": 99.875
         },
         {
           "name": "_ZN23TeleportObjectInterface13TargetedFlashEv",
@@ -52879,7 +52871,7 @@
           "address": 4485872,
           "offset": 3595904,
           "size": 98,
-          "match_percent": 14.0
+          "match_percent": 87.833336
         },
         {
           "name": "_ZNK23GizForceObjectInterface6GetPosER5VuVeci",
@@ -53223,7 +53215,7 @@
           "address": 4488880,
           "offset": 3598912,
           "size": 56,
-          "match_percent": 46.933334
+          "match_percent": 100.0
         },
         {
           "name": "_ZN23TeleportObjectInterfaceC2ER10TELEPORT_si",
@@ -53231,7 +53223,7 @@
           "address": 4488880,
           "offset": 3598912,
           "size": 56,
-          "match_percent": 46.933334
+          "match_percent": 100.0
         },
         {
           "name": "_ZN25HatMachineObjectInterfaceC1ER12HATMACHINE_s",
@@ -55404,7 +55396,7 @@
           "address": 2016656,
           "offset": 1126688,
           "size": 145,
-          "match_percent": 9.512196
+          "match_percent": 10.243902
         },
         {
           "name": "_ZN12HATMACHINE_s22GetMechObjectInterfaceEv",
@@ -55412,7 +55404,7 @@
           "address": 2016816,
           "offset": 1126848,
           "size": 99,
-          "match_percent": 9.166667
+          "match_percent": 17.5
         },
         {
           "name": "_ZN12HATMACHINE_s24ClearMechObjectInterfaceEv",
@@ -55420,7 +55412,7 @@
           "address": 2016928,
           "offset": 1126960,
           "size": 31,
-          "match_percent": 22.0
+          "match_percent": 42.0
         },
         {
           "name": "_Z22HatMachine_FindNearestP11WORLDINFO_sP7nuvec_sP12GameObject_sPf",
@@ -55428,7 +55420,7 @@
           "address": 2016960,
           "offset": 1126992,
           "size": 463,
-          "match_percent": 2.931035
+          "match_percent": 3.62069
         },
         {
           "name": "_Z20HatMachine_BeingUsedP12HATMACHINE_s",
@@ -55436,7 +55428,7 @@
           "address": 2017424,
           "offset": 1127456,
           "size": 14,
-          "match_percent": 13.333333
+          "match_percent": 100.0
         },
         {
           "name": "_Z19HatMachine_MoveCodeP11WORLDINFO_sP12GameObject_si",
@@ -55444,7 +55436,7 @@
           "address": 2017840,
           "offset": 1127872,
           "size": 1955,
-          "match_percent": 0.997443
+          "match_percent": 1.074169
         }
       ]
     },
@@ -56289,7 +56281,7 @@
           "address": 4975072,
           "offset": 4085104,
           "size": 21,
-          "match_percent": 20.0
+          "match_percent": 100.0
         },
         {
           "name": "_Z31GizmoBlowupTypeGetNameFromIndexP11WORLDINFO_si",
@@ -62392,7 +62384,7 @@
           "address": 5469312,
           "offset": 4579344,
           "size": 15,
-          "match_percent": 11.428572
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13SceneInstance13SetVisibilityEi",
@@ -62400,7 +62392,7 @@
           "address": 5469328,
           "offset": 4579360,
           "size": 17,
-          "match_percent": 36.666668
+          "match_percent": 100.0
         },
         {
           "name": "_ZNK13SceneInstance19GetInitialTransformEv",
@@ -62408,7 +62400,7 @@
           "address": 5469360,
           "offset": 4579392,
           "size": 12,
-          "match_percent": 11.428572
+          "match_percent": 100.0
         },
         {
           "name": "_ZNK13SceneInstance19GetCurrentTransformEv",
@@ -62416,7 +62408,7 @@
           "address": 5469376,
           "offset": 4579408,
           "size": 12,
-          "match_percent": 11.428572
+          "match_percent": 100.0
         },
         {
           "name": "_ZNK13SceneInstance18GetInitialPositionEv",
@@ -62424,7 +62416,7 @@
           "address": 5469392,
           "offset": 4579424,
           "size": 12,
-          "match_percent": 11.428572
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13SceneInstance18SetInitialPositionEPK5VuVec",
@@ -62432,7 +62424,7 @@
           "address": 5469408,
           "offset": 4579440,
           "size": 39,
-          "match_percent": 23.333334
+          "match_percent": 15.666667
         },
         {
           "name": "_ZNK13SceneInstance18GetCurrentPositionEv",
@@ -62440,7 +62432,7 @@
           "address": 5469456,
           "offset": 4579488,
           "size": 14,
-          "match_percent": 11.428572
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13SceneInstance18SetCurrentPositionEPK5VuVec",
@@ -62448,7 +62440,7 @@
           "address": 5469472,
           "offset": 4579504,
           "size": 39,
-          "match_percent": 23.333334
+          "match_percent": 15.666667
         },
         {
           "name": "_ZNK13SceneInstance6RenderEPK5VuMtx",
@@ -62456,7 +62448,7 @@
           "address": 5476768,
           "offset": 4586800,
           "size": 46,
-          "match_percent": 23.571428
+          "match_percent": 30.0
         },
         {
           "name": "_ZN13SceneInstance19SetInitialTransformEPK5VuMtx",
@@ -62464,7 +62456,7 @@
           "address": 5485696,
           "offset": 4595728,
           "size": 104,
-          "match_percent": 2.285714
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13SceneInstance19SetCurrentTransformEPK5VuMtx",
@@ -62472,7 +62464,7 @@
           "address": 5485808,
           "offset": 4595840,
           "size": 143,
-          "match_percent": 2.285714
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13SceneInstanceC1Ev",
@@ -62480,7 +62472,7 @@
           "address": 5574448,
           "offset": 4684480,
           "size": 118,
-          "match_percent": 11.0
+          "match_percent": 14.0
         },
         {
           "name": "_ZN13SceneInstanceC2Ev",
@@ -62488,7 +62480,7 @@
           "address": 5574448,
           "offset": 4684480,
           "size": 118,
-          "match_percent": 11.0
+          "match_percent": 14.0
         }
       ]
     },
@@ -62503,7 +62495,7 @@
           "address": 5469520,
           "offset": 4579552,
           "size": 247,
-          "match_percent": 4.0
+          "match_percent": 6.352941
         },
         {
           "name": "_ZN17SceneObjectHelper5FlushEv",
@@ -62511,7 +62503,7 @@
           "address": 5469776,
           "offset": 4579808,
           "size": 256,
-          "match_percent": 5.0
+          "match_percent": 6.363637
         },
         {
           "name": "_ZN17SceneObjectHelper22PostLoadInitialisationEP12MemoryBufferS1_",
@@ -62519,7 +62511,7 @@
           "address": 5470032,
           "offset": 4580064,
           "size": 9,
-          "match_percent": 24.444445
+          "match_percent": 100.0
         },
         {
           "name": "_ZN17SceneObjectHelper11UpdateListsEP12MemoryBufferS1_",
@@ -62527,7 +62519,7 @@
           "address": 5470048,
           "offset": 4580080,
           "size": 37,
-          "match_percent": 20.0
+          "match_percent": 38.18182
         },
         {
           "name": "_ZN17SceneObjectHelper13GetNumObjectsEv",
@@ -62535,7 +62527,7 @@
           "address": 5470096,
           "offset": 4580128,
           "size": 16,
-          "match_percent": 36.666668
+          "match_percent": 100.0
         },
         {
           "name": "_ZN17SceneObjectHelper30cbEdSceneObjectShowHiddenSolidEP10eduimenu_sP10eduiitem_sj",
@@ -62543,7 +62535,7 @@
           "address": 5470112,
           "offset": 4580144,
           "size": 56,
-          "match_percent": 20.625
+          "match_percent": 26.25
         },
         {
           "name": "_ZN17SceneObjectHelper29cbEdSceneObjectShowHiddenWireEP10eduimenu_sP10eduiitem_sj",
@@ -62551,7 +62543,7 @@
           "address": 5470176,
           "offset": 4580208,
           "size": 56,
-          "match_percent": 20.625
+          "match_percent": 26.25
         },
         {
           "name": "_ZN17SceneObjectHelper31cbEdSceneObjectShowOwnedObjectsEP10eduimenu_sP10eduiitem_sj",
@@ -62559,7 +62551,7 @@
           "address": 5470240,
           "offset": 4580272,
           "size": 56,
-          "match_percent": 20.625
+          "match_percent": 26.25
         },
         {
           "name": "_ZN17SceneObjectHelper12AddMenuItemsEP10eduimenu_s",
@@ -62567,7 +62559,7 @@
           "address": 5474864,
           "offset": 4584896,
           "size": 292,
-          "match_percent": 3.606557
+          "match_percent": 6.885246
         },
         {
           "name": "_ZN17SceneObjectHelper13GetNextObjectEPv",
@@ -62575,7 +62567,7 @@
           "address": 5475168,
           "offset": 4585200,
           "size": 292,
-          "match_percent": 2.588235
+          "match_percent": 4.941176
         },
         {
           "name": "_ZN17SceneObjectHelper13DestroyObjectEPvi",
@@ -62583,7 +62575,7 @@
           "address": 5482352,
           "offset": 4592384,
           "size": 136,
-          "match_percent": 6.111111
+          "match_percent": 11.666667
         },
         {
           "name": "_ZN17SceneObjectHelper9SubRenderEv",
@@ -62591,7 +62583,7 @@
           "address": 5568288,
           "offset": 4678320,
           "size": 236,
-          "match_percent": 5.238095
+          "match_percent": 6.666666
         },
         {
           "name": "_ZN11SceneObjectC1Ev",
@@ -62599,7 +62591,7 @@
           "address": 5573888,
           "offset": 4683920,
           "size": 79,
-          "match_percent": 11.578947
+          "match_percent": 22.105263
         },
         {
           "name": "_ZN11SceneObjectC2Ev",
@@ -62607,7 +62599,7 @@
           "address": 5573888,
           "offset": 4683920,
           "size": 79,
-          "match_percent": 11.578947
+          "match_percent": 22.105263
         },
         {
           "name": "_ZN17SceneObjectHelper21PreLoadInitialisationEP12MemoryBufferS1_",
@@ -62615,7 +62607,7 @@
           "address": 5573968,
           "offset": 4684000,
           "size": 469,
-          "match_percent": 2.977099
+          "match_percent": 4.122138
         },
         {
           "name": "_ZN17SceneObjectHelper12CreateObjectEPvii",
@@ -62623,7 +62615,7 @@
           "address": 5574576,
           "offset": 4684608,
           "size": 168,
-          "match_percent": 5.238095
+          "match_percent": 10.0
         },
         {
           "name": "_ZNK11SceneObject5CloneEi",
@@ -62631,7 +62623,7 @@
           "address": 5574752,
           "offset": 4684784,
           "size": 204,
-          "match_percent": 5.116279
+          "match_percent": 9.767442
         },
         {
           "name": "_ZN17SceneObjectHelper14SetSceneFilterEPc",
@@ -62639,7 +62631,7 @@
           "address": 5574960,
           "offset": 4684992,
           "size": 49,
-          "match_percent": 22.0
+          "match_percent": 28.0
         },
         {
           "name": "_ZN17SceneObjectHelper10InitialiseEv",
@@ -62647,7 +62639,7 @@
           "address": 5591856,
           "offset": 4701888,
           "size": 1264,
-          "match_percent": 1.349206
+          "match_percent": 1.666667
         }
       ]
     },
@@ -67308,7 +67300,7 @@
           "address": 5526608,
           "offset": 4636640,
           "size": 15,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "_ZN15PlaceableHelperC2Ev",
@@ -67316,7 +67308,7 @@
           "address": 5526608,
           "offset": 4636640,
           "size": 15,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "_ZN15PlaceableHelper18RegisterObjectTypeEPcP18PlaceableInterface",
@@ -68808,7 +68800,7 @@
           "address": 1730384,
           "offset": 840416,
           "size": 12,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "_Z14Arcade_GetModePj",
@@ -78282,14 +78274,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/edsplines.o",
       "functions": [
         {
-          "name": "_GLOBAL__sub_I_edsplines.cpp",
-          "demangled_name": "_GLOBAL__sub_I_edsplines.cpp",
-          "address": 921616,
-          "offset": 31648,
-          "size": 93,
-          "match_percent": 99.35294
-        },
-        {
           "name": "_Z15CalcSplinePointP14flightspline_sP6_vuv_sf",
           "demangled_name": "CalcSplinePoint(flightspline_s*, _vuv_s*, float)",
           "address": 2314208,
@@ -78962,7 +78946,7 @@
           "address": 1243696,
           "offset": 353728,
           "size": 12,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "_ZL14TiePart_ImpactP6PART_s",
@@ -79218,7 +79202,7 @@
           "address": 2171664,
           "offset": 1281696,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "_ZL24PartKill_EjectedCreatureP6PART_si",
@@ -79650,7 +79634,7 @@
           "address": 4327056,
           "offset": 3437088,
           "size": 12,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "GetPartName",
@@ -79818,7 +79802,7 @@
           "address": 4485504,
           "offset": 3595536,
           "size": 22,
-          "match_percent": 12.5
+          "match_percent": 99.375
         },
         {
           "name": "_ZNK19PartObjectInterface6GetPosER5VuVeci",
@@ -79858,7 +79842,7 @@
           "address": 4489136,
           "offset": 3599168,
           "size": 49,
-          "match_percent": 49.923077
+          "match_percent": 90.76923
         },
         {
           "name": "_ZN19PartObjectInterfaceC2ER6PART_s",
@@ -79866,7 +79850,7 @@
           "address": 4489136,
           "offset": 3599168,
           "size": 49,
-          "match_percent": 49.923077
+          "match_percent": 90.76923
         },
         {
           "name": "_Z13InitPartTablePPc",
@@ -79984,7 +79968,7 @@
           "address": 3973507,
           "offset": 3083539,
           "size": 153,
-          "match_percent": 99.954544
+          "match_percent": 5.818182
         },
         {
           "name": "ParticlesPerSecond",
@@ -79992,7 +79976,7 @@
           "address": 3973660,
           "offset": 3083692,
           "size": 66,
-          "match_percent": 99.95
+          "match_percent": 46.45
         },
         {
           "name": "SetPartRTLSet",
@@ -80000,7 +79984,7 @@
           "address": 4320912,
           "offset": 3430944,
           "size": 24,
-          "match_percent": 45.666668
+          "match_percent": 100.0
         },
         {
           "name": "_ZNK19PartObjectInterface9GetRadiusEv",
@@ -80008,7 +79992,7 @@
           "address": 4485584,
           "offset": 3595616,
           "size": 16,
-          "match_percent": 36.666668
+          "match_percent": 100.0
         }
       ]
     },
@@ -92174,7 +92158,7 @@
           "address": 986960,
           "offset": 96992,
           "size": 11,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "_ZN15NuThreadManager16GetCurrentThreadEv",
@@ -96799,7 +96783,7 @@
           "address": 2832048,
           "offset": 1942080,
           "size": 15,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "NuDynamicLightBeginCapture",
@@ -96839,7 +96823,7 @@
           "address": 2832432,
           "offset": 1942464,
           "size": 14,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "NuDynamicLightGetProjection",
@@ -96847,7 +96831,7 @@
           "address": 2832448,
           "offset": 1942480,
           "size": 14,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "NuDynamicLightSetParameterf",
@@ -100555,7 +100539,7 @@
           "address": 989392,
           "offset": 99424,
           "size": 13,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "_ZN8NuMemory12GetThreadMemEv",
@@ -100707,7 +100691,7 @@
           "address": 991376,
           "offset": 101408,
           "size": 12,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "_ZN15NuMemoryManager13VisitManagersEPNS_8IVisitorE",
@@ -100723,7 +100707,7 @@
           "address": 992624,
           "offset": 102656,
           "size": 28,
-          "match_percent": 20.0
+          "match_percent": 99.28571
         },
         {
           "name": "_ZN15NuMemoryManager8IsZombieEv",
@@ -100731,7 +100715,7 @@
           "address": 992672,
           "offset": 102704,
           "size": 13,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "_ZN15NuMemoryManager10VisitPagesEPNS_12IPageVisitorE",
@@ -100779,7 +100763,7 @@
           "address": 997136,
           "offset": 107168,
           "size": 27,
-          "match_percent": 46.666668
+          "match_percent": 100.0
         },
         {
           "name": "_ZNK15NuMemoryManager19GetCurrentContextIDEv",
@@ -100787,7 +100771,7 @@
           "address": 997168,
           "offset": 107200,
           "size": 27,
-          "match_percent": 46.666668
+          "match_percent": 100.0
         },
         {
           "name": "_ZN15NuMemoryManager22GetBlockDebugBackTraceEPvPS0_",
@@ -100907,7 +100891,7 @@
           "address": 1006448,
           "offset": 116480,
           "size": 116,
-          "match_percent": 12.727273
+          "match_percent": 100.0
         },
         {
           "name": "_ZNK15NuMemoryManager12GetFreeBytesEv",
@@ -100915,7 +100899,7 @@
           "address": 1006576,
           "offset": 116608,
           "size": 56,
-          "match_percent": 26.25
+          "match_percent": 100.0
         },
         {
           "name": "_ZN15NuMemoryManager17GetAllocatedBytesEv",
@@ -100923,7 +100907,7 @@
           "address": 1006640,
           "offset": 116672,
           "size": 70,
-          "match_percent": 22.105263
+          "match_percent": 100.0
         },
         {
           "name": "_ZN15NuMemoryManager11PushContextEPKc",
@@ -100939,7 +100923,7 @@
           "address": 1011072,
           "offset": 121104,
           "size": 15,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "_ZN15NuMemoryManager19SetOverrideCategoryEt",
@@ -100963,7 +100947,7 @@
           "address": 1011152,
           "offset": 121184,
           "size": 16,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "_ZN15NuMemoryManager27GetOverrideCategoryBGThreadEv",
@@ -100971,7 +100955,7 @@
           "address": 1011168,
           "offset": 121200,
           "size": 16,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "_ZN15NuMemoryManager25GetCategoryAllocatedBytesEt",
@@ -101027,7 +101011,7 @@
           "address": 1011776,
           "offset": 121808,
           "size": 12,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "_ZN12NuMemoryPool5MergeEPVNS_9FreeBlockES2_",
@@ -101107,7 +101091,7 @@
           "address": 1014432,
           "offset": 124464,
           "size": 127,
-          "match_percent": 12.727273
+          "match_percent": 93.78788
         },
         {
           "name": "_ZN12NuMemoryPool12GetFreeBytesEv",
@@ -101115,7 +101099,7 @@
           "address": 1014560,
           "offset": 124592,
           "size": 12,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "_ZN12NuMemoryPool17GetAllocatedBytesEv",
@@ -101123,7 +101107,7 @@
           "address": 1014576,
           "offset": 124608,
           "size": 51,
-          "match_percent": 32.307693
+          "match_percent": 100.0
         },
         {
           "name": "_ZN12NuMemoryPool18GetLargeBlockBytesEv",
@@ -101131,7 +101115,7 @@
           "address": 1014640,
           "offset": 124672,
           "size": 12,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "_ZN12NuMemoryPool9PageAllocEjPKc",
@@ -103511,7 +103495,7 @@
           "address": 986480,
           "offset": 96512,
           "size": 12,
-          "match_percent": 11.428572
+          "match_percent": 19.142857
         },
         {
           "name": "_ZL10ThreadMainy",
@@ -113459,7 +113443,7 @@
           "address": 3219328,
           "offset": 2329360,
           "size": 9,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "NuSound3StopStream",
@@ -116554,6 +116538,18 @@
       ]
     },
     {
+      "name": "_GLOBAL__sub_I_edsplines.cpp",
+      "demangled_name": "_GLOBAL__sub_I_edsplines.cpp",
+      "address": 921616,
+      "offset": 31648,
+      "size": 93,
+      "match_percent": 99.35294,
+      "candidate_units": [
+        "gameapi/edtools/edsplines.cpp.o",
+        "legoapi/render/fx/edsplines.cpp.o"
+      ]
+    },
+    {
       "name": "_GLOBAL__sub_I_guidelines.cpp",
       "demangled_name": "_GLOBAL__sub_I_guidelines.cpp",
       "address": 921712,
@@ -116657,6 +116653,18 @@
       "candidate_units": [
         "legoapi/gizmos/door/plugs.cpp.o",
         "legoapi/items/objects/plugs.cpp.o"
+      ]
+    },
+    {
+      "name": "_GLOBAL__sub_I_edlevelall.cpp",
+      "demangled_name": "_GLOBAL__sub_I_edlevelall.cpp",
+      "address": 928992,
+      "offset": 39024,
+      "size": 811,
+      "match_percent": 15.006536,
+      "candidate_units": [
+        "editor/edlevelall.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o"
       ]
     },
     {
@@ -116893,7 +116901,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -116902,9 +116909,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -116924,11 +116942,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -116938,8 +116954,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -116967,7 +116981,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -116989,7 +117002,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -116998,9 +117010,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -117020,11 +117043,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -117034,8 +117055,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -117063,7 +117082,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -117085,7 +117103,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -117094,9 +117111,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -117116,11 +117144,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -117130,8 +117156,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -117159,7 +117183,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -117192,7 +117215,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -117201,9 +117223,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -117223,11 +117256,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -117237,8 +117268,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -117266,7 +117295,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -117289,7 +117317,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
@@ -117335,7 +117362,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -117344,9 +117370,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -117366,11 +117403,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -117380,8 +117415,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -117409,7 +117442,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -117442,7 +117474,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -117451,9 +117482,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -117473,11 +117515,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -117487,8 +117527,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -117516,7 +117554,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -117549,7 +117586,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -117558,9 +117594,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -117580,11 +117627,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -117594,8 +117639,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -117623,7 +117666,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -117656,7 +117698,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -117665,9 +117706,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -117687,11 +117739,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -117701,8 +117751,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -117730,7 +117778,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -117763,7 +117810,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -117772,9 +117818,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -117794,11 +117851,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -117808,8 +117863,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -117837,7 +117890,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -117870,7 +117922,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -117879,9 +117930,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -117901,11 +117963,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -117915,8 +117975,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -117944,7 +118002,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -118100,7 +118157,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
@@ -118136,7 +118192,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
@@ -118182,7 +118237,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -118191,9 +118245,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -118213,11 +118278,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -118227,8 +118290,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -118256,7 +118317,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -118289,7 +118349,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -118298,9 +118357,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -118320,11 +118390,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -118334,8 +118402,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -118363,7 +118429,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -118396,7 +118461,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -118405,9 +118469,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -118427,11 +118502,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -118441,8 +118514,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -118470,7 +118541,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -118548,7 +118618,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -118557,9 +118626,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -118579,11 +118659,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -118593,8 +118671,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -118622,7 +118698,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -118666,7 +118741,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -118675,9 +118749,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -118697,11 +118782,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -118711,8 +118794,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -118740,7 +118821,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -118900,7 +118980,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -118909,9 +118988,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -118931,11 +119021,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -118945,8 +119033,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -118974,7 +119060,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -119088,7 +119173,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -119097,9 +119181,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -119119,11 +119214,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -119133,8 +119226,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -119162,7 +119253,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -119277,7 +119367,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -119286,9 +119375,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -119308,11 +119408,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -119322,8 +119420,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -119351,7 +119447,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -119384,7 +119479,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -119393,9 +119487,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -119415,11 +119520,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -119429,8 +119532,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -119458,7 +119559,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -119491,7 +119591,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -119500,9 +119599,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -119522,11 +119632,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -119536,8 +119644,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -119565,7 +119671,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -119598,7 +119703,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -119607,9 +119711,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -119629,11 +119744,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -119643,8 +119756,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -119672,7 +119783,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -119764,7 +119874,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -119773,9 +119882,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -119795,11 +119915,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -119809,8 +119927,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -119838,7 +119954,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -119871,7 +119986,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -119880,9 +119994,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -119902,11 +120027,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -119916,8 +120039,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -119945,7 +120066,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -119989,7 +120109,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -119998,9 +120117,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -120020,11 +120150,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -120034,8 +120162,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -120063,7 +120189,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -120096,7 +120221,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -120105,9 +120229,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -120127,11 +120262,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -120141,8 +120274,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -120170,7 +120301,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -120215,7 +120345,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -120224,9 +120353,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -120246,11 +120386,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -120260,8 +120398,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -120289,7 +120425,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -120322,7 +120457,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -120331,9 +120465,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -120353,11 +120498,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -120367,8 +120510,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -120396,7 +120537,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -120419,7 +120559,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
@@ -120465,7 +120604,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -120474,9 +120612,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -120496,11 +120645,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -120510,8 +120657,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -120539,7 +120684,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -120572,7 +120716,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -120581,9 +120724,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -120603,11 +120757,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -120617,8 +120769,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -120646,7 +120796,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -120679,7 +120828,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -120688,9 +120836,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -120710,11 +120869,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -120724,8 +120881,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -120753,7 +120908,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -120786,7 +120940,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -120795,9 +120948,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -120817,11 +120981,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -120831,8 +120993,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -120860,7 +121020,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -120956,7 +121115,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -120965,9 +121123,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -120987,11 +121156,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -121001,8 +121168,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -121030,7 +121195,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -121063,7 +121227,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -121072,9 +121235,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -121094,11 +121268,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -121108,8 +121280,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -121137,7 +121307,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -121170,7 +121339,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -121179,9 +121347,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -121201,11 +121380,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -121215,8 +121392,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -121244,7 +121419,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -121547,7 +121721,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
@@ -121626,7 +121799,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -121635,9 +121807,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -121657,11 +121840,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -121671,8 +121852,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -121700,7 +121879,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -121723,7 +121901,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
@@ -121759,7 +121936,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
@@ -121865,7 +122041,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -121874,9 +122049,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -121896,11 +122082,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -121910,8 +122094,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -121939,7 +122121,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -121962,7 +122143,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
@@ -121998,7 +122178,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/actions/movement/carrying.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
@@ -122079,7 +122258,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -122088,9 +122266,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -122110,11 +122299,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -122124,8 +122311,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -122153,7 +122338,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -122557,7 +122741,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -122566,9 +122749,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -122588,11 +122782,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -122602,8 +122794,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -122631,7 +122821,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -122664,7 +122853,6 @@
         "MechInputTouch/MechAutofireAddon.cpp.o",
         "MechInputTouch/MechEdgeStopAddon.cpp.o",
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
-        "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
@@ -122673,9 +122861,20 @@
         "MechInputTouch/MechInputTouchVirtualConsoleController.cpp.o",
         "MechInputTouch/MechJumpAutopilotAddon.cpp.o",
         "MechInputTouch/MechObjectInterface.cpp.o",
-        "editor/edlevelall_stubs.cpp.o",
         "editor/edtoolsall.cpp.o",
+        "gameapi/edtools/edanimall.cpp.o",
+        "gameapi/edtools/edanimcallbacks.cpp.o",
+        "gameapi/edtools/edbriall.cpp.o",
+        "gameapi/edtools/edbricallbacks.cpp.o",
+        "gameapi/edtools/edgraall.cpp.o",
+        "gameapi/edtools/edgracallbacks.cpp.o",
+        "gameapi/edtools/edlevelall.cpp.o",
+        "gameapi/edtools/edmenucallbacks.cpp.o",
+        "gameapi/edtools/edpartall.cpp.o",
+        "gameapi/edtools/edpartcallbacks.cpp.o",
+        "gameapi/edtools/edrtl.cpp.o",
         "gameapi/edtools/edrtlall.cpp.o",
+        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "gameapi/edtools/edtoolsall_stubs.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
@@ -122695,11 +122894,9 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/net/netplay.cpp.o",
-        "legoapi/core/net/network.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizminicut.cpp.o",
@@ -122709,8 +122906,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/base/scene.cpp.o",
-        "legoapi/items/base/sceneobject.cpp.o",
         "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
@@ -122738,7 +122933,6 @@
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -130179,8 +130373,8 @@
   "summary": {
     "bazel_units": 523,
     "functions": 13454,
-    "assigned_functions": 12294,
-    "ambiguous_functions": 232,
+    "assigned_functions": 12292,
+    "ambiguous_functions": 234,
     "unassigned_functions": 928
   }
 }

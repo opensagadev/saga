@@ -1,18 +1,23 @@
 #include "legoapi/legoapi_types.h"
 
-void SceneInstance::GetCurrentPosition() const {
+VuVec const *SceneInstance::GetCurrentPosition() const {
+    return reinterpret_cast<VuVec const *>(&current_transform.m30);
 }
 
-void SceneInstance::GetCurrentTransform() const {
+VuMtx const *SceneInstance::GetCurrentTransform() const {
+    return reinterpret_cast<VuMtx const *>(&current_transform);
 }
 
-void SceneInstance::GetInitialPosition() const {
+VuVec const *SceneInstance::GetInitialPosition() const {
+    return reinterpret_cast<VuVec const *>(&initial_transform.m30);
 }
 
-void SceneInstance::GetInitialTransform() const {
+VuMtx const *SceneInstance::GetInitialTransform() const {
+    return reinterpret_cast<VuMtx const *>(&initial_transform);
 }
 
-void SceneInstance::GetVisibility() const {
+int SceneInstance::GetVisibility() const {
+    return visibility;
 }
 
 void SceneInstance::Render(VuMtx const *) const {
@@ -21,17 +26,22 @@ void SceneInstance::Render(VuMtx const *) const {
 SceneInstance::SceneInstance() {
 }
 
-void SceneInstance::SetCurrentPosition(VuVec const *) {
+void SceneInstance::SetCurrentPosition(VuVec const *position) {
+    *reinterpret_cast<VuVec *>(&current_transform.m30) = *position;
 }
 
-void SceneInstance::SetCurrentTransform(VuMtx const *) {
+void SceneInstance::SetCurrentTransform(VuMtx const *transform) {
+    current_transform = *reinterpret_cast<NUMTX const *>(transform);
 }
 
-void SceneInstance::SetInitialPosition(VuVec const *) {
+void SceneInstance::SetInitialPosition(VuVec const *position) {
+    *reinterpret_cast<VuVec *>(&current_transform.m30) = *position;
 }
 
-void SceneInstance::SetInitialTransform(VuMtx const *) {
+void SceneInstance::SetInitialTransform(VuMtx const *transform) {
+    initial_transform = *reinterpret_cast<NUMTX const *>(transform);
 }
 
-void SceneInstance::SetVisibility(i32) {
+void SceneInstance::SetVisibility(i32 visible) {
+    visibility = visible;
 }

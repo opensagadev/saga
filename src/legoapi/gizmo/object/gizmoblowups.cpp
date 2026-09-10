@@ -639,7 +639,8 @@ void GizBlowup_DeleteTerrain() {
     }
 }
 
-void GizmoBlowupTypeGetCount(WORLDINFO_s *) {
+i32 GizmoBlowupTypeGetCount(WORLDINFO_s *world) {
+    return world != NULL ? world->gizmo_blowup_type_count : -1;
 }
 
 void GizmoBlowupUpdateMatrix(GIZMOBLOWUP_s *blowup) {

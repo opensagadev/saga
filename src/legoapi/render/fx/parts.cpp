@@ -189,10 +189,12 @@ struct quickboltinfo;
 void PartObjectInterface::GetPos(VuVec &, i32) const {
 }
 
-void PartObjectInterface::GetTargetName() const {
+const char *PartObjectInterface::GetTargetName() const {
+    return "Part";
 }
 
-PartObjectInterface::PartObjectInterface(PART_s &) {
+PartObjectInterface::PartObjectInterface(PART_s &value) : field_0x4(NULL), part(value) {
+    value.mech_object_interface = this;
 }
 
 PartObjectInterface::~PartObjectInterface() {
@@ -501,7 +503,8 @@ static __used__ void PowerUp_EndMsg(GAMEMESSAGE_s *) {
 static __used__ void PowerUp_UpdateMsg(GAMEMESSAGE_s *) {
 }
 
-static __used__ void SpeederPart_Draw(PART_s *) {
+static __used__ i32 SpeederPart_Draw(PART_s *) {
+    return true;
 }
 
 static __used__ void SpeederPart_Kill(PART_s *, i32) {
@@ -537,7 +540,8 @@ static __used__ i32 PartDraw_VehicleHeart(PART_s *part) {
     return 0;
 }
 
-static __used__ void PartKill_DrawCreature(PART_s *) {
+static __used__ i32 PartKill_DrawCreature(PART_s *) {
+    return false;
 }
 
 static __used__ void PartMove_VehicleHeart(PART_s *, f32) {
@@ -1392,7 +1396,8 @@ extern "C" {
     void FindPart(void) {
     }
 
-    void GetMaxPartTypes(void) {
+    i32 GetMaxPartTypes(void) {
+        return 0x80;
     }
 
     void GetPartCount(void) {

@@ -39,7 +39,8 @@ extern "C" {
     }
     void NuSound3FRead(void) {
     }
-    void NuSound3FSeek(void) {
+    i64 NuSound3FSeek(void) {
+        return 0;
     }
     void NuSound3FindFree(void) {
     }

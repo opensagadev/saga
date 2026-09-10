@@ -8,15 +8,18 @@ void TTNetwork::Broadcast(NetMessage, unsigned char) {
 }
 
 void TTNetwork::ClearMyHostAddress() {
+    has_my_host_address = false;
 }
 
 void TTNetwork::Display(ThingRenderData *) {
 }
 
-void TTNetwork::GetMyAddress() const {
+const NetAddress &TTNetwork::GetMyAddress() const {
+    return my_address;
 }
 
-void TTNetwork::GetMyHostAddress() const {
+const NetAddress *TTNetwork::GetMyHostAddress() const {
+    return has_my_host_address ? &my_host_address : NULL;
 }
 
 void TTNetwork::Initialise() {
@@ -37,13 +40,16 @@ void TTNetwork::Resume() {
 void TTNetwork::Send(NetMessage, unsigned char, NetPeer &) {
 }
 
-void TTNetwork::SetMyHostAddress(NetAddress const &) {
+void TTNetwork::SetMyHostAddress(NetAddress const &address) {
+    has_my_host_address = true;
+    my_host_address = address;
 }
 
 void TTNetwork::Shutdown() {
 }
 
-void TTNetwork::Suspend() {
+bool TTNetwork::Suspend() {
+    return true;
 }
 
 TTNetwork::TTNetwork() {

@@ -80,7 +80,7 @@ class NuThreadBase {
     void SetLocalStorage(u32 idx, void *storage);
 
     void SetDebugName(const char *name);
-    void GetDebugName() const;
+    const char *GetDebugName() const;
 
     void (*GetThreadFn() const)(void *);
     void *GetParam() const;

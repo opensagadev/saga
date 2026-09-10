@@ -131,5 +131,6 @@ void NuThread::Resume() {
 void NuThread::SetDebugName(char const *) {
 }
 
-void NuThreadBase::GetDebugName() const {
+const char *NuThreadBase::GetDebugName() const {
+    return name;
 }

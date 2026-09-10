@@ -1,6 +1,7 @@
 #pragma once
 
 #include "nu2api/nucore/common.h"
+#include "nu2api/numath/numtx.h"
 
 struct nuframebuffer_s;
 struct nugscn_s;
@@ -36,7 +37,11 @@ struct NuDynamicLight {
     void testShadowExtrusion(VuVec const &, VuVec const &, i32);
     void testShadowExtrusions(VuVec const &, VuVec const &);
 
-    u8 pad_0[0x7b4];
+    u8 pad_0[0x6d0];
+    i32 active_render_set_count;
+    u8 pad_6d4[0x60];
+    NUMTX view;
+    NUMTX projection;
     i32 parameter_4;
     i32 parameter_5;
     u8 pad_7bc[0x1c];

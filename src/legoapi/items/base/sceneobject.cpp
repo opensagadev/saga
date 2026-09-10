@@ -24,7 +24,8 @@ void SceneObjectHelper::Flush() {
 void SceneObjectHelper::GetNextObject(void *) {
 }
 
-void SceneObjectHelper::GetNumObjects() {
+i32 SceneObjectHelper::GetNumObjects() {
+    return scene_object_count + owned_object_count;
 }
 
 void SceneObjectHelper::Initialise() {

@@ -181,19 +181,34 @@ NuMemoryManager *NuMemory::CreateMemoryManager(NuMemoryManager::IEventHandler *e
     return manager;
 }
 
-void NuMemoryPool::GetAllocatedBytes() {
+u32 NuMemoryPool::GetAllocatedBytes() {
+    return GetPagedBytes() - free_bytes;
 }
 
-void NuMemoryPool::GetDebugName() const {
+const char *NuMemoryPool::GetDebugName() const {
+    return name;
 }
 
-void NuMemoryPool::GetFreeBytes() {
+u32 NuMemoryPool::GetFreeBytes() {
+    return free_bytes;
 }
 
-void NuMemoryPool::GetLargeBlockBytes() {
+u32 NuMemoryPool::GetLargeBlockBytes() {
+    return large_block_bytes;
 }
 
-void NuMemoryPool::GetPagedBytes() {
+u32 NuMemoryPool::GetPagedBytes() {
+    u32 paged_bytes = 0;
+
+    pthread_mutex_lock(&mutex);
+    page_list_stable = false;
+    for (Page *page = pages; page != NULL; page = page->next) {
+        paged_bytes += page->size;
+    }
+    page_list_stable = true;
+    pthread_mutex_unlock(&mutex);
+
+    return paged_bytes;
 }
 
 void NuMemoryPool::InterlockedPop(NuMemoryPool::FreeBlock volatile **) {
@@ -247,7 +262,8 @@ void NuMemoryManager::DumpBlocksForContext(u32, NuSymbolQuery *, NuMemoryManager
 void NuMemoryManager::FindAndTouchMatchingBlocks(NuMemoryManager::DebugHeader *, u32 *, u32) {
 }
 
-void NuMemoryManager::GetAllocatedBytes() {
+u32 NuMemoryManager::GetAllocatedBytes() {
+    return GetPagedBytes() - GetFreeBytes();
 }
 
 u32 NuMemoryManager::GetBlockAlignment(void *ptr) {
@@ -290,34 +306,60 @@ u32 NuMemoryManager::GetCategoryAllocatedBytes(u16 category) {
     return stats.bytes_alloc_by_category[category];
 }
 
-void NuMemoryManager::GetCurrentContextID() const {
+u32 NuMemoryManager::GetCurrentContextID() const {
+    return cur_ctx != NULL ? cur_ctx->id : 0;
 }
 
-void NuMemoryManager::GetCurrentContextName() const {
+const char *NuMemoryManager::GetCurrentContextName() const {
+    return cur_ctx != NULL ? cur_ctx->name : NULL;
 }
 
-void NuMemoryManager::GetDebugName() const {
+const char *NuMemoryManager::GetDebugName() const {
+    return name != NULL ? name : "null";
 }
 
-void NuMemoryManager::GetFreeBytes() const {
+u32 NuMemoryManager::GetFreeBytes() const {
+    u32 fragment_overhead = m_headerSize + 4;
+    if (idx > 0x1d) {
+        fragment_overhead += 4;
+    }
+    return stats.free_frag_bytes - fragment_overhead * stats.frag_count;
 }
 
-void NuMemoryManager::GetNumFreeFragments() const {
+u32 NuMemoryManager::GetNumFreeFragments() const {
+    return stats.frag_count;
 }
 
-void NuMemoryManager::GetOverrideCategory() {
+u16 NuMemoryManager::GetOverrideCategory() {
+    return override_category;
 }
 
-void NuMemoryManager::GetOverrideCategoryBGThread() {
+u16 NuMemoryManager::GetOverrideCategoryBGThread() {
+    return override_category_bg_thread;
 }
 
-void NuMemoryManager::GetPagedBytes() {
+u32 NuMemoryManager::GetPagedBytes() {
+    u32 paged_bytes = 0;
+
+    if ((m_flags & MEM_MANAGER_IN_ERROR_STATE) != 0) {
+        return paged_bytes;
+    }
+
+    pthread_mutex_lock(&mutex);
+    for (Page *page = pages; page != NULL; page = page->next) {
+        paged_bytes += page->size;
+    }
+    pthread_mutex_unlock(&mutex);
+
+    return paged_bytes;
 }
 
-void NuMemoryManager::GetSmallBinSize(u32) {
+u32 NuMemoryManager::GetSmallBinSize(u32 index) {
+    return index * 4;
 }
 
-void NuMemoryManager::IsZombie() {
+bool NuMemoryManager::IsZombie() {
+    return is_zombie;
 }
 
 void NuMemoryManager::MergeLargeBinSegments(NuMemoryManager::FreeHeader *, NuMemoryManager::FreeHeader *) {
@@ -386,6 +428,7 @@ void NuMemory::MoveFreeMem2IntoMem1() {
 }
 
 void NuMemory::SetSoakTestMode() {
+    in_soak_test_mode = true;
 }
 
 typedef struct NUHEAPBLOCK NUHEAPBLOCK;

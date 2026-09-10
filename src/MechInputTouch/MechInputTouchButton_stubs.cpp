@@ -2,5 +2,6 @@
 
 #include "MechInputTouch_types.h"
 
-void MechInputTouchMainDummyButton::IsPressed() const {
+u8 MechInputTouchMainDummyButton::IsPressed() const {
+    return controller->button_repeats[button_type];
 }

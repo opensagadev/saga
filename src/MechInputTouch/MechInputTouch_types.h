@@ -344,7 +344,11 @@ DECOMP_ASSERT(offsetof(MechInputTouchMainController, button_repeats) == 0x48, "R
 DECOMP_ASSERT(offsetof(MechInputTouchMainController, buttons_repeat_timers) == 0x4c, "Touch repeat timers offset");
 
 struct MechInputTouchMainDummyButton {
-    void IsPressed() const;
+    u8 reserved_0x00[0x30];
+    MechInputTouchMainController *controller;
+    u32 button_type;
+
+    u8 IsPressed() const;
     MechInputTouchMainDummyButton(MechInputTouchMainController &, u32, MechInputTouchMainController::eButtonTypes);
 };
 struct MechInputTouchMainDummyStick {

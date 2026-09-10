@@ -4,7 +4,8 @@
 void HatMachine_MoveCode(WORLDINFO_s *, GameObject_s *, i32) {
 }
 
-void HatMachine_BeingUsed(HATMACHINE_s *) {
+i32 HatMachine_BeingUsed(HATMACHINE_s *hat_machine) {
+    return hat_machine->state_bit0;
 }
 
 void HatMachine_FindNearest(WORLDINFO_s *, nuvec_s *, GameObject_s *, float *) {

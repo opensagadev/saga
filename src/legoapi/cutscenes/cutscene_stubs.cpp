@@ -135,10 +135,12 @@ extern "C" {
         memset(camera->targets, 0, count * sizeof(instNUGCUTCAMTGT_s));
     }
 
-    void instNuGCutSceneDisable(void) {
+    void instNuGCutSceneDisable(instNUGCUTSCENE_s *instance) {
+        instance->flags_89 |= 0x8;
     }
 
-    void instNuGCutSceneEnable(void) {
+    void instNuGCutSceneEnable(instNUGCUTSCENE_s *instance) {
+        instance->flags_89 &= ~0x8;
     }
 
     void instNuGCutSceneFind(void) {
