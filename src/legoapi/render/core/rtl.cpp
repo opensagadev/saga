@@ -23,6 +23,10 @@ static i32 rtl_dynamic_cnt;
 static i16 rtl_uid = 1;
 
 extern "C" {
+    rtlset *curr_set = NULL;
+}
+
+extern "C" {
     static void NuVecClear(NUVEC *v) {
         v->x = v->y = v->z = 0.0f;
     }

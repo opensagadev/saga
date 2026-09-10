@@ -38,13 +38,30 @@ DECOMP_ASSERT(offsetof(rtl_s, inner_radius) == 0x3c, "RTL radius offset");
 DECOMP_ASSERT(offsetof(rtl_s, type) == 0x58, "RTL type offset");
 DECOMP_ASSERT(offsetof(rtl_s, uid) == 0x6a, "RTL UID offset");
 
+struct rtlfog_s {
+    u8 reserved_00[0x8];
+    u32 colour;
+    u8 reserved_0c[0x8];
+    i32 type;
+    u8 reserved_18[0x4];
+    f32 radius;
+    NUVEC position;
+    u8 reserved_2c[0x20];
+};
+DECOMP_ASSERT(sizeof(rtlfog_s) == 0x4c, "RTL fog size");
+
 struct rtlset {
     u32 header;
     rtl_s lights[128];
+    rtlfog_s fog[32];
 };
 DECOMP_ASSERT(offsetof(rtlset, lights) == 4, "RTL set light-array offset");
+DECOMP_ASSERT(offsetof(rtlset, fog) == 0x4604, "RTL set fog-array offset");
+DECOMP_ASSERT(sizeof(rtlset) == 0x4f84, "RTL set size");
 
 extern "C" {
+    extern rtlset *curr_set;
+
     i32 rtlInitDynamic(VARIPTR *, VARIPTR, i32);
     i32 rtlDynamicAlloc(void);
     i32 rtlDynamicAllocTemplate(rtlset *, i32);

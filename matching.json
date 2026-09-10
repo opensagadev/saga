@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 37.387623,
+    "fuzzy_match_percent": 37.395664,
     "total_code": "4722419",
     "matched_code": "353940",
     "matched_code_percent": 7.494888,
@@ -30734,6 +30734,22 @@
           "offset": 3006039,
           "size": 3116,
           "match_percent": 0.522876
+        },
+        {
+          "name": "_ZL13SelectPrevFogv",
+          "demangled_name": "SelectPrevFog()",
+          "address": 3899732,
+          "offset": 3009764,
+          "size": 181,
+          "match_percent": 99.9434
+        },
+        {
+          "name": "_ZL13SelectNextFogv",
+          "demangled_name": "SelectNextFog()",
+          "address": 3899913,
+          "offset": 3009945,
+          "size": 199,
+          "match_percent": 99.913795
         },
         {
           "name": "_ZL12edrtlProcFogfP7nupad_s",
@@ -74841,22 +74857,6 @@
           "offset": 2958432,
           "size": 210,
           "match_percent": 6.769231
-        },
-        {
-          "name": "_ZL13SelectPrevFogv",
-          "demangled_name": "SelectPrevFog()",
-          "address": 3899732,
-          "offset": 3009764,
-          "size": 181,
-          "match_percent": 0.0
-        },
-        {
-          "name": "_ZL13SelectNextFogv",
-          "demangled_name": "SelectNextFog()",
-          "address": 3899913,
-          "offset": 3009945,
-          "size": 199,
-          "match_percent": 0.0
         },
         {
           "name": "LocaledbitsDrawSolidCircleXY",

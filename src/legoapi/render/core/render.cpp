@@ -4025,12 +4025,6 @@ static __used__ double ApplyAntilights(rtl_s *, rtlidata_s *, float) {
 static __used__ void DisplayListMaterialClipUpdate(nudisplayscene_s *) {
 }
 
-static __used__ void SelectNextFog() {
-}
-
-static __used__ void SelectPrevFog() {
-}
-
 static __used__ void PreWarmGeomsAndBakeVAOs(nudisplayscene_s *raw_scene, nunativegscene_s *) {
     NUDLDLISTSCENE *scene = reinterpret_cast<NUDLDLISTSCENE *>(raw_scene);
     for (i32 clip_index = 0; clip_index < scene->nclip_objects; ++clip_index) {
