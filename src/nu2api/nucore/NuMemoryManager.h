@@ -215,7 +215,7 @@ class NuMemoryManager {
     void GetBlockDebugBackTrace(void *ptr, void **out);
     void GetBlockDebugContext(void *ptr);
     u32 GetBlockSize(void *ptr);
-    void GetCategoryAllocatedBytes(u16 category);
+    u32 GetCategoryAllocatedBytes(u16 category);
     void GetCurrentContextID() const;
     void GetCurrentContextName() const;
     void GetDebugName() const;

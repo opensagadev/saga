@@ -22,6 +22,7 @@
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nu3d/nuqfnt.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/nufile/nufile.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/numath/nutrig.h"
 
@@ -2146,10 +2147,12 @@ extern "C" {
     void cbCancelSubMenuFromItem(void) {
     }
 
-    void cbCompateDirentByDateAsc(void) {
+    i32 cbCompateDirentByDateAsc(NUFILE_INFO *first, NUFILE_INFO *second) {
+        return first->year - second->year;
     }
 
-    void cbCompateDirentByDateDec(void) {
+    i32 cbCompateDirentByDateDec(NUFILE_INFO *first, NUFILE_INFO *second) {
+        return second->year - first->year;
     }
 
     void cbCompateDirentByNameAsc(void) {

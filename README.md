@@ -65,23 +65,23 @@ See https://ttdecomp.github.io/saga/
 | `gameframework` | 100.0% | 52.9% |
 | `gamelib` | 18.1% | 11.9% |
 | `java` | 96.1% | 73.1% |
-| `legoapi` | 33.9% | 26.2% |
+| `legoapi` | 33.9% | 26.3% |
 | `legoapi/actions` | 21.3% | 2.4% |
 | `legoapi/ai` | 45.7% | 20.5% |
 | `legoapi/audio` | 53.7% | 43.1% |
 | `legoapi/characters` | 32.3% | 17.2% |
 | `legoapi/core` | 28.0% | 14.4% |
-| `legoapi/cutscenes` | 34.6% | 11.8% |
-| `legoapi/gizmo` | 38.0% | 32.9% |
-| `legoapi/gizmos` | 48.6% | 45.2% |
+| `legoapi/cutscenes` | 34.7% | 12.9% |
+| `legoapi/gizmo` | 38.0% | 33.1% |
+| `legoapi/gizmos` | 48.7% | 45.4% |
 | `legoapi/items` | 36.3% | 34.4% |
-| `legoapi/menus` | 26.1% | 24.9% |
+| `legoapi/menus` | 26.1% | 25.3% |
 | `legoapi/misc` | 23.8% | 11.4% |
 | `legoapi/props` | 43.0% | 11.2% |
 | `legoapi/render` | 33.8% | 22.0% |
 | `legoapi/world` | 27.5% | 29.3% |
 | `legogame` | 50.6% | 56.1% |
-| `nu2api` | 56.7% | 50.7% |
+| `nu2api` | 56.7% | 50.8% |
 
 <!-- matching-table-end -->
 

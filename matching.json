@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 36.61604,
+    "fuzzy_match_percent": 36.619892,
     "total_code": "4722419",
-    "matched_code": "344527",
-    "matched_code_percent": 7.295562,
+    "matched_code": "344707",
+    "matched_code_percent": 7.299373,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 3958,
-    "matched_functions_percent": 29.407831,
+    "matched_functions": 3968,
+    "matched_functions_percent": 29.482132,
     "total_units": 1
   },
   "text": {
@@ -51208,7 +51208,7 @@
           "address": 4412512,
           "offset": 3522544,
           "size": 17,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "instNuGCutSceneSetEndCallback",
@@ -51216,7 +51216,7 @@
           "address": 4412544,
           "offset": 3522576,
           "size": 17,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "instNuGCutSceneRotateY",
@@ -54764,7 +54764,7 @@
           "address": 4986112,
           "offset": 4096144,
           "size": 15,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_Z17GizmoPickup_InBoxP11WORLDINFO_siP7nuvec_sS2_",
@@ -57078,7 +57078,7 @@
           "address": 1967584,
           "offset": 1077616,
           "size": 19,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL27SecurityDoors_ClearProgressPvS_",
@@ -69479,7 +69479,7 @@
           "address": 3775344,
           "offset": 2885376,
           "size": 19,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "cbCompateDirentByDateDec",
@@ -69487,7 +69487,7 @@
           "address": 3775376,
           "offset": 2885408,
           "size": 19,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "cbCompateDirentBySizeAsc",
@@ -92020,7 +92020,7 @@
           "address": 986928,
           "offset": 96960,
           "size": 19,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN15NuThreadManager13GetMainThreadEv",
@@ -95927,7 +95927,7 @@
           "address": 2730693,
           "offset": 1840725,
           "size": 13,
-          "match_percent": 0.0
+          "match_percent": 5.666666
         },
         {
           "name": "_ZL23NuDisplayListSetID_NEXTP19nudisplaylistitem_s",
@@ -95935,7 +95935,7 @@
           "address": 2730706,
           "offset": 1840738,
           "size": 13,
-          "match_percent": 0.0
+          "match_percent": 5.666666
         },
         {
           "name": "_ZL22NuDisplayListSetID_RETP19nudisplaylistitem_s",
@@ -95943,7 +95943,7 @@
           "address": 2730719,
           "offset": 1840751,
           "size": 13,
-          "match_percent": 0.0
+          "match_percent": 5.666666
         },
         {
           "name": "_ZL18NuDisplayListSetIDP19nudisplaylistitem_sh",
@@ -100723,7 +100723,7 @@
           "address": 1011088,
           "offset": 121120,
           "size": 18,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN15NuMemoryManager27SetOverrideCategoryBGThreadEt",
@@ -100731,7 +100731,7 @@
           "address": 1011120,
           "offset": 121152,
           "size": 18,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN15NuMemoryManager19GetOverrideCategoryEv",
@@ -100755,7 +100755,7 @@
           "address": 1011184,
           "offset": 121216,
           "size": 19,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN12NuMemoryPool15InterlockedPushEPPVNS_9FreeBlockEPv",

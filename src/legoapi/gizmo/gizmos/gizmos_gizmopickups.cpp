@@ -185,7 +185,10 @@ void GizmoPickup_FindNearest(WORLDINFO_s *, nuvec_s *, float *) {
 void GizmoPickup_NumberOfType(WORLDINFO_s *, i32, char) {
 }
 
-void GizmoPickup_TurnOnPickup(GIZMOPICKUP_s *) {
+void GizmoPickup_TurnOnPickup(GIZMOPICKUP_s *pickup) {
+    if (pickup != NULL) {
+        pickup->state_flags |= GIZMOPICKUP_STATE_ENABLED | GIZMOPICKUP_STATE_VISIBLE | GIZMOPICKUP_STATE_ACTIVATED;
+    }
 }
 
 // Static pickup collision helpers. Moved from gizmisc_stubs.cpp.

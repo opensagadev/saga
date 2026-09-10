@@ -286,7 +286,8 @@ __attribute__((weak)) u32 NuMemoryManager::GetBlockSize(void *ptr) {
     return payload_size - (manager_index > 0x1d ? 8 : 4);
 }
 
-void NuMemoryManager::GetCategoryAllocatedBytes(u16) {
+u32 NuMemoryManager::GetCategoryAllocatedBytes(u16 category) {
+    return stats.bytes_alloc_by_category[category];
 }
 
 void NuMemoryManager::GetCurrentContextID() const {
@@ -334,10 +335,12 @@ void NuMemoryManager::SetBlockDebugContext(void *, u32) {
 void NuMemoryManager::SetBlockDebugName(void *, char const *) {
 }
 
-void NuMemoryManager::SetOverrideCategory(u16) {
+void NuMemoryManager::SetOverrideCategory(u16 category) {
+    override_category = category;
 }
 
-void NuMemoryManager::SetOverrideCategoryBGThread(u16) {
+void NuMemoryManager::SetOverrideCategoryBGThread(u16 category) {
+    override_category_bg_thread = category;
 }
 
 void NuMemoryManager::SortLargeBin(u32) {

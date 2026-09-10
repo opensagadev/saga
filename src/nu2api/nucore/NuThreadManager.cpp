@@ -51,7 +51,8 @@ void NuThreadManager::CreateThreadSuspended(void (*)(void *), void *, i32, char 
                                             NUTHREADXBOX360CORE) {
 }
 
-void NuThreadManager::FreeTLS(i32) {
+void NuThreadManager::FreeTLS(i32 index) {
+    bitflags &= ~(1U << index);
 }
 
 void NuThreadManager::GetMainThread() {

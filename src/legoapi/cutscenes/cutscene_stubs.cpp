@@ -110,7 +110,8 @@ extern "C" {
     void instNuGCutSceneCalculateAverageCentre(void) {
     }
 
-    void instNuGCutSceneChain(void) {
+    void instNuGCutSceneChain(instNUGCUTSCENE_s *instance, instNUGCUTSCENE_s *next) {
+        instance->chained_instance = next;
     }
 
     void instNuGCutSceneCharGetStartMtx(void) {
@@ -159,7 +160,8 @@ extern "C" {
     void instNuGCutSceneRotateY(void) {
     }
 
-    void instNuGCutSceneSetEndCallback(void) {
+    void instNuGCutSceneSetEndCallback(instNUGCUTSCENE_s *instance, void (*callback)(instNUGCUTSCENE_s *)) {
+        instance->end_callback = callback;
     }
 
     void instNuGCutSceneSetMtx(instNUGCUTSCENE_s *instance, NUMTX *matrix) {

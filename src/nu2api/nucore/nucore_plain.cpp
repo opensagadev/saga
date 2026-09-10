@@ -949,16 +949,16 @@ static __attribute__((used)) void NuDisplayListSetNext(nudisplaylistitem_s *item
     item->next = next;
 }
 static __attribute__((used)) void NuDisplayListSetID_CNT(nudisplaylistitem_s *item) {
-    (void)item;
+    item->id = 0;
 }
 static __attribute__((used)) void NuDisplayListSetID_RET(nudisplaylistitem_s *item) {
-    (void)item;
+    item->id = 4;
 }
 static __attribute__((used)) void NuDisplayListSetID_CALL(nudisplaylistitem_s *item) {
     (void)item;
 }
 static __attribute__((used)) void NuDisplayListSetID_NEXT(nudisplaylistitem_s *item) {
-    (void)item;
+    item->id = 1;
 }
 
 extern "C" {

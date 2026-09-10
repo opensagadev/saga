@@ -53,8 +53,7 @@ static void SecurityDoor_SetVisibility(GIZMO *gizmo, i32) {
 }
 
 static NUVEC *SecurityDoor_GetPos(GIZMO *gizmo) {
-    UNIMPLEMENTED();
-    return {};
+    return gizmo != NULL ? &static_cast<SECURITYDOOR *>(gizmo->object)->position : NULL;
 }
 
 static void *SecurityDoors_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end) {

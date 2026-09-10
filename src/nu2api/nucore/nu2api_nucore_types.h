@@ -241,7 +241,7 @@ struct NuMemoryManager {
     void GetBlockDebugBackTrace(void *, void **);
     void GetBlockDebugContext(void *);
     u32 GetBlockSize(void *);
-    void GetCategoryAllocatedBytes(u16);
+    u32 GetCategoryAllocatedBytes(u16);
     void GetCurrentContextID() const;
     void GetCurrentContextName() const;
     void GetDebugName() const;
