@@ -27,7 +27,19 @@ typedef struct SHARD_s {
                 u8 reserved_3a[2];
                 u16 spin_angle;
             };
-            u8 state_flags; // 0x3c
+            union {
+                u8 state_flags; // 0x3c
+                struct {
+                    u8 active : 1;
+                    u8 visible : 1;
+                    u8 collecting : 1;
+                    u8 collected : 1;
+                    u8 drawn : 1;
+                    u8 random_offset : 1;
+                    u8 tumble_x : 1;
+                    u8 reserved_state : 1;
+                };
+            };
             u8 reserved_3d[3];
             f32 collection_time;       // 0x40
             GameObject_s *collector;   // 0x44

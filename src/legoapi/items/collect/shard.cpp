@@ -14,13 +14,13 @@ void NewBuzzFrames(nupad_s *, i32, i32);
 i32 qrand();
 void Shard_Collect(SHARD_s *shard, GameObject_s *object) {
     shard->collection_time = 0.0f;
-    shard->state_flags |= 4;
+    shard->collecting = 1;
     shard->collector = object;
     NuVecRotateZ(&shard->collection_velocity, &v010, shard->angle_z);
     NuVecRotateZ(&shard->collection_velocity, &shard->collection_velocity, shard->angle_x);
     NuVecScale(&shard->collection_velocity, &shard->collection_velocity, 3.0f);
     NewBuzzFrames(shard->collector->pad_gamepad->pad, 1, 0);
-    shard->state_flags = (shard->state_flags & ~0x40) | (qrand() <= 0x7fff ? 0x40 : 0);
+    shard->tumble_x = qrand() <= 0x7fff;
 }
 
 SHARD *Shard_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObject_s *object, float *distance_squared) {

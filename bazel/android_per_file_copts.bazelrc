@@ -103,6 +103,8 @@ build:target --per_file_copt=^src/legoapi/items/base/collection\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/collect/bolt\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/collect/bolts\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/items/collect/attracto\.cpp$@-O3
+# Shard collection and lookup bodies are optimized in the target.
+build:target --per_file_copt=^src/legoapi/items/collect/shard\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/objects/gameobjects\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/objects/objectsall\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/props/doors/door\.cpp$@-O3
