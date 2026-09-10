@@ -3489,10 +3489,23 @@ CABLE_s cables[8];
 CABLE_s *GameObjIsCableTied(GameObject_s *object) {
     if (cables[0].target != object)
         return NULL;
-    for (i32 i = 0; i < 8; ++i) {
-        if ((cables[i].flags_1e9 & 1) != 0)
-            return &cables[i];
-    }
+
+    if ((cables[0].flags_1e9 & 1) != 0)
+        return &cables[0];
+    if ((cables[1].flags_1e9 & 1) != 0)
+        return &cables[1];
+    if ((cables[2].flags_1e9 & 1) != 0)
+        return &cables[2];
+    if ((cables[3].flags_1e9 & 1) != 0)
+        return &cables[3];
+    if ((cables[4].flags_1e9 & 1) != 0)
+        return &cables[4];
+    if ((cables[5].flags_1e9 & 1) != 0)
+        return &cables[5];
+    if ((cables[6].flags_1e9 & 1) != 0)
+        return &cables[6];
+    if ((cables[7].flags_1e9 & 1) != 0)
+        return &cables[7];
     return NULL;
 }
 
