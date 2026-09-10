@@ -271,6 +271,7 @@ build:target --per_file_copt=^src/nu2api/nusound/nusound_effect_doppler\.cpp$@-O
 build:target --per_file_copt=^src/nu2api/nusound/nusound_effect_fader\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nusound/nusound_effect_pitchramp\.cpp$@-O3
 build:target --per_file_copt=^src/MechInputTouch/MechInputTouchButton\.cpp$@-O2
+build:target --per_file_copt=^src/MechInputTouch/MechAutoJumpManager\.cpp$@-O3
 build:target --per_file_copt=^src/MechInputTouch/MechInputTouchMainController\.cpp$@-O2
 build:target --per_file_copt=^src/MechInputTouch/MechInputTouchGestureBasedController\.cpp$@-O2
 build:target --per_file_copt=^src/MechInputTouch/MechSystems\.cpp$@-O2

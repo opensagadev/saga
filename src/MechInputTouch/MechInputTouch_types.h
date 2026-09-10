@@ -84,7 +84,27 @@ struct AIPATHCNX_s;
 struct AIPATH_s;
 struct AISYS_s;
 struct JumpTriggerPacket {};
-struct MechAutoJumpConnection {};
+struct MechAutoJumpVector {
+    f32 x;
+    f32 y;
+    f32 z;
+};
+struct MechAutoJumpConnection {
+    NULISTLNK link;
+    AIPATH_s *path;
+    AIPATHCNX_s *connection;
+    i32 direction;
+    u8 active;
+    u8 use_path_direction;
+    u8 is_using;
+    u8 allow_streak;
+    GameObject_s *using_object;
+    u32 base_colour;
+    u32 colour;
+    MechAutoJumpVector base_colour_components;
+    MechAutoJumpVector streak_colour_components;
+};
+DECOMP_ASSERT(sizeof(MechAutoJumpConnection) == 0x3c, "MechAutoJumpConnection size");
 struct NuVec2 {
     float x;
     float y;
