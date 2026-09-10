@@ -506,7 +506,7 @@ void WorldInfo_Load(WORLDINFO *world) {
         world->current_gscn = NuGScnRead(&world->giz_buffer, world->unknown_0108, buf);
         numtl_force_mipmode = 0;
 
-        StoreSceneProgress(world->current_gscn, (SCENEPROGRESS_s *)world->progress_data, 1);
+        StoreSceneProgress(world->current_gscn, (SCENEPROGRESS_s *)&world->progress_data, 1);
         SaveSceneObjectAnimTFactors(world->current_gscn);
 
         if (world->current_gscn != NULL) {

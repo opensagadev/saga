@@ -2277,12 +2277,13 @@ void GameAnimSys_ClearProgress(i32 idx) {
 
 void ClearLevelProgress(i32 index, WORLDINFO *world) {
     if (index >= 0) {
-        u8 *entry = (u8 *)LevelProgressData + index * 0x2e24;
-        memset(entry, 0, 0x2e24);
+        i32 offset = index * sizeof(LEVEL_PROGRESS_s);
+        memset((u8 *)LevelProgressData + offset, 0, sizeof(LEVEL_PROGRESS_s));
+        u8 *entry = (u8 *)LevelProgressData + offset;
         *(u32 *)(entry + 0x281c) = 0;
         *(u32 *)(entry + 0x2810) = 0x49f42400;
         if (world != NULL) {
-            memcpy(entry, (u8 *)world + 0x15c, 0x2800);
+            *reinterpret_cast<LEVEL_PROGRESS_DATA_s *>(entry) = world->progress_data;
         }
     }
     GizmoSysClearLevelProgress(NULL, index);

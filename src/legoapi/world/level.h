@@ -30,7 +30,7 @@ void LevelScriptReStoreProgress(WORLDINFO_s *, LEVELSCRIPTPROCESS_s *);
 DECOMP_ASSERT(sizeof(LEVELSCRIPTPROGRESS_s) == 0x20, "Saved script progress ABI");
 
 struct LEVEL_PROGRESS_s {
-    char data[0x2800];
+    LEVEL_PROGRESS_DATA_s data;
     union {
         i32 flags;
         struct {

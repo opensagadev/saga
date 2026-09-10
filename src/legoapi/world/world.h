@@ -164,6 +164,11 @@ typedef struct PORTALDOOR_s {
 
 DECOMP_ASSERT(sizeof(PORTALDOOR) == 0x10, "PORTALDOOR size");
 
+struct LEVEL_PROGRESS_DATA_s {
+    u32 words[0xa00];
+};
+DECOMP_ASSERT(sizeof(LEVEL_PROGRESS_DATA_s) == 0x2800, "Level progress data size");
+
 // Layout matches the original WORLDINFO_s (0x51b0 = 20912 bytes).
 // Field offsets verified against the original binary disassembly.
 typedef struct WORLDINFO_s {
@@ -193,9 +198,9 @@ typedef struct WORLDINFO_s {
     NUGSCN *current_gscn;              // 0x13c
     NUGSCN *scene;                     // 0x140
 
-    f32 level_min[3];         // 0x144  CalculateWorldSize output
-    f32 level_max[3];         // 0x150
-    u8 progress_data[0x2800]; // 0x15c .. 0x295c  level progress store
+    f32 level_min[3];                    // 0x144  CalculateWorldSize output
+    f32 level_max[3];                    // 0x150
+    LEVEL_PROGRESS_DATA_s progress_data; // 0x15c .. 0x295c  level progress store
 
     void *terrain; // 0x295c  LoadTerrainFile result
 
