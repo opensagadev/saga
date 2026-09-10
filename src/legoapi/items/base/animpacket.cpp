@@ -15,6 +15,21 @@ extern "C" f32 AnimSpeed(CHARACTERMODEL_s *model, i32 animation) {
                : 0.0f;
 }
 
+extern "C" f32 *AnimPlaying(ANIMPACKET_s *packet, i32 animation, i32 target, i32 source) {
+    if (packet == NULL || animation == -1)
+        return NULL;
+    if (packet->blending != 0) {
+        if (target != 0 && packet->blend_animation_b == animation)
+            return &packet->blend_target_time;
+        if (source != 0 && packet->blend_animation_a == animation)
+            return &packet->blend_source_time;
+    } else {
+        if (packet->animation_index == animation)
+            return &packet->current_time;
+    }
+    return NULL;
+}
+
 extern "C" void ResetMiniAnimPacket(MINIANIMPACKET_s *packet, i32 animation) {
     if (packet != NULL) {
         packet->requested_animation_id = animation;

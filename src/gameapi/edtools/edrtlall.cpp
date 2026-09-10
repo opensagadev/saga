@@ -1,8 +1,23 @@
 #include "gameapi_edtools_types.h"
+#include "legoapi/render/core/render.h"
 
 struct nuvtx_tc1_s;
 struct numtl_s;
 struct numtx_s;
+
+struct EDRTLFOG_s {
+    u8 reserved_00[0x8];
+    u32 colour;
+    u8 reserved_0c[0x8];
+    i32 type;
+    u8 reserved_18[0x4];
+    f32 radius;
+    NUVEC position;
+    u8 reserved_2c[0x20];
+};
+DECOMP_ASSERT(sizeof(EDRTLFOG_s) == 0x4c, "EDRTL fog size");
+
+static i32 numsegs = 16;
 
 // RTL editor subsystem stubs (static, internal linkage).
 
@@ -19,6 +34,19 @@ static void edrtlProcFog(float, nupad_s *) {
 static void edrtlProcRTL(float, nupad_s *) {
 }
 static void edrtlDrawFogs() {
+}
+
+extern "C" void edrtlDrawFog(EDRTLFOG_s *fog) {
+    if (fog != NULL) {
+        i32 colour = (fog->colour & 0xffffff) | 0x80000000;
+        switch (fog->type) {
+            default:
+                break;
+            case 1:
+                RndrOSphere(&fog->position, fog->radius, colour, numsegs, 0);
+                break;
+        }
+    }
 }
 static void edrtlDrawHelp() {
 }

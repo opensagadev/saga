@@ -32,6 +32,8 @@ extern i32 apiloadcharactermodels_nopakfile;
 
 using ANIMREDIRECTFN = i32 (*)(char *, void *, CHARACTERANIM_s *, char *);
 extern "C" void APIResetCharacterRemap(void);
+extern "C" void NuHGobjRestrictEvaluation(nuhgobj_s *object);
+extern "C" void NuHGobjRestoreEvaluation(void);
 extern "C" void AddVariableShotDebrisEffect(i32 effect_id, NUVEC *position, i32 count, i16 angle_z, i16 angle_y);
 static ANIMREDIRECTFN RedirectAnimFn;
 static void *RedirectAnimList;
@@ -835,12 +837,12 @@ extern "C" {
     i32 apiloadcharactermodels_append = 0;
 
     void APIObjectRegisterAnimRedirect(ANIMREDIRECTFN fn, void *list, char *directory) {
+        i32 length = NuStrLen(directory);
         RedirectAnimFn = fn;
         RedirectAnimList = list;
-        if (NuStrLen(directory) <= 0x3f) {
+        if (length <= 0x3f) {
             NuStrCpy(RedirectAnimDir, directory);
-            i32 length = NuStrLen(directory);
-            if (length != 0 && directory[length - 1] != '\\') {
+            if (directory[length - 1] != '\\') {
                 NuStrCat(RedirectAnimDir, "\\");
             }
         }
@@ -936,27 +938,6 @@ extern "C" {
     extern void RootFnY(NUMTX *, void *, NUVEC *, NUVEC *, NUVEC *, f32);
     extern void BlendRootFn(NUMTX *, void *, NUVEC *, NUVEC *, NUVEC *, f32);
 
-    // Original @0x3d0563. Hierarchy evaluation, DWA, locator storage, character
-    // surface effects, transparency and reflection. The AddAnimEffects branch
-    // still awaits reconstruction of its animation-event helper.
-    nuhgobj_s *Temphgobj;
-    u8 TempNumJoints;
-
-    void NuHGobjRestrictEvaluation(nuhgobj_s *object) {
-        Temphgobj = object;
-        if (object != NULL) {
-            TempNumJoints = object->joint_count;
-            object->joint_count = 1;
-        }
-    }
-
-    void NuHGobjRestoreEvaluation(void) {
-        if (Temphgobj != NULL) {
-            Temphgobj->joint_count = TempNumJoints;
-            Temphgobj = NULL;
-        }
-    }
-
     extern i32 drawcharactermodel_nobsa;
     void (*APIObjResetShadowMapRenderingFn)(void);
     void (*APIObjEnableShadowMapRenderingFn)(void);
@@ -964,6 +945,9 @@ extern "C" {
     void NuRndrStartReflectionRender(i32);
     void NuRndrEndReflectionRender(void);
 
+    // Original @0x3d0563. Hierarchy evaluation, DWA, locator storage, character
+    // surface effects, transparency and reflection. The AddAnimEffects branch
+    // still awaits reconstruction of its animation-event helper.
     i32 APIDrawCharacterModel(CHARACTERMODEL_s *model, CHARACTERDATA *, ANIMPACKET_s *animation, NUMTX *matrix, NUMTX *,
                               NUMTX *reflection_matrix, NUVEC *locator_positions, NUMTX *locator_matrices,
                               GameObject_s *object, u32 flags, NUJOINTANIM_s *joint_overrides, i32 joint_override_count,
@@ -1425,14 +1409,6 @@ extern "C" {
                 ++apicharsys->loaded_model_count;
             }
             ++list;
-        }
-    }
-
-    void APIResetCharacterRemap(void) {
-        for (i32 i = 0; i < apicharsys->character_count; ++i) {
-            if ((apicharsys->char_data[i].model_flags & 2) == 0) {
-                apicharsys->playermodelids[i] = -1;
-            }
         }
     }
 

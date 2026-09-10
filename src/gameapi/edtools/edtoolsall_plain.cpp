@@ -1380,8 +1380,6 @@ extern "C" {
     }
     void edrtlCalculateBurnoutEx(void) {
     }
-    void edrtlDrawFog(void) {
-    }
     void edrtlDrawLight(void) {
     }
     void edrtlDrawLightEx(void) {

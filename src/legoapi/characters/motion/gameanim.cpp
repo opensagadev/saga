@@ -2835,21 +2835,6 @@ extern "C" {
         packet->overlay_animation = -1;
     }
 
-    f32 *AnimPlaying(ANIMPACKET_s *packet, i32 animation, i32 target, i32 source) {
-        if (packet == NULL || animation == -1)
-            return NULL;
-        if (packet->blending == 0) {
-            if (packet->animation_index == animation)
-                return &packet->current_time;
-        } else {
-            if (target != 0 && packet->blend_animation_b == animation)
-                return &packet->blend_target_time;
-            if (source != 0 && packet->blend_animation_a == animation)
-                return &packet->blend_source_time;
-        }
-        return NULL;
-    }
-
     void AnimsAvailableToBothCharacters(void) {
     }
 

@@ -36,6 +36,7 @@ struct SHOPINPUT;
 
 extern "C" {
     GIZBOMBGEN *HothBattleC_BombGenerator = NULL;
+    HOTHBATTLE_MELEE_s melee;
 }
 
 void DagobahA_Init(WORLDINFO_s *) {
@@ -234,7 +235,7 @@ void CloudCityTrapC_Update(WORLDINFO_s *) {
 
 void HothBattle_Melee_init(HOTHBATTLE_MELEE_s *melee) {
     if (melee != NULL) {
-        melee->field_0x8 = 0;
+        melee->waves[0].field_0x0 = 0;
         melee->field_0x0 = 0;
         melee->field_0x1 = 0;
         melee->field_0x2 = 1;
@@ -266,7 +267,14 @@ void HothBattle_StartNewWave() {
 void HothEscapeC_AlwaysUpdate(WORLDINFO_s *) {
 }
 
-void isHothBattleWaveCreature(GameObject_s *) {
+i32 isHothBattleWaveCreature(GameObject_s *object) {
+    for (i32 wave = 0; wave < 4; ++wave) {
+        for (i32 creature = 0; creature < 4; ++creature) {
+            if (melee.waves[wave].creatures[creature] == object)
+                return 1;
+        }
+    }
+    return 0;
 }
 
 void HothBattle_ManageBackgroundCreatures() {

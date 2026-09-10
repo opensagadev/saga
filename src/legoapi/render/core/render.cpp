@@ -263,7 +263,7 @@ extern "C" void RndrOSquare(NUVEC *centre, f32 radius, i32 colour) {
     }
 }
 
-extern "C" void RndrOSphere(NUVEC *centre, f32 radius, i32 colour, i32 segments) {
+extern "C" void RndrOSphere(NUVEC *centre, f32 radius, i32 colour, i32 segments, i32) {
     NUMTX matrix = global_camera.mtx;
     matrix.m30 = centre->x;
     matrix.m31 = centre->y;

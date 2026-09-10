@@ -1847,6 +1847,18 @@ struct HINTUIBUTTON_s {
 };
 DECOMP_ASSERT(sizeof(HINTUIBUTTON_s) == 0xa8, "HINTUIBUTTON_s size");
 DECOMP_ASSERT(offsetof(HINTUIBUTTON_s, field_0x7c) == 0x7c, "HINTUIBUTTON_s pending hint offset");
+struct HOTHBATTLE_MELEE_WAVE_s {
+    i32 field_0x0;
+    i16 character_id;
+    u8 reserved_06[2];
+    GameObject_s *creatures[4];
+    u8 field_0x18;
+    u8 field_0x19;
+    u8 reserved_1a;
+    char name[0xd];
+};
+DECOMP_ASSERT(sizeof(HOTHBATTLE_MELEE_WAVE_s) == 0x28, "HOTHBATTLE_MELEE_WAVE_s ABI");
+
 struct HOTHBATTLE_MELEE_s {
     u8 field_0x0;
     u8 field_0x1;
@@ -1854,9 +1866,14 @@ struct HOTHBATTLE_MELEE_s {
     u8 field_0x3;
     i8 field_0x4;
     u8 field_0x5[3];
-    i32 field_0x8;
+    HOTHBATTLE_MELEE_WAVE_s waves[4];
+    u8 reserved_0xa8[0x1c];
+    u8 creature_count;
+    u8 reserved_0xc5[3];
 };
-DECOMP_ASSERT(sizeof(HOTHBATTLE_MELEE_s) == 0xc, "HOTHBATTLE_MELEE_s ABI");
+DECOMP_ASSERT(sizeof(HOTHBATTLE_MELEE_s) == 0xc8, "HOTHBATTLE_MELEE_s ABI");
+DECOMP_ASSERT(offsetof(HOTHBATTLE_MELEE_s, waves[0].creatures) == 0x10, "HOTHBATTLE melee creature offset");
+DECOMP_ASSERT(offsetof(HOTHBATTLE_MELEE_s, creature_count) == 0xc4, "HOTHBATTLE melee count offset");
 struct HashRedirect;
 struct LANGUAGEDATA {
     i32 language;   // 0x00
