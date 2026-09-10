@@ -3,6 +3,8 @@
 #include "globals.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nurndr.h"
@@ -12,11 +14,14 @@
 #include "legoapi/render/light/shadow.h"
 
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
+i32 SuperWeirdo(GameObject_s *);
 
 NUCOLOUR3 flashCol = {2.0f, 2.0f, 2.0f};
 bool TouchHacks::TouchControlsActive;
 extern i32 BonusArea;
 extern "C" i16 id_GRABCONTROL, id_WICKET, id_EWOK;
+extern "C" i16 id_ATST, id_ATST_LOWRES;
+extern i16 LEGOACT_SLAM;
 
 bool TouchHacks::AiPlayerTakeDamageOnKillRescue(GameObject_s &) {
     return TouchControlsActive;
@@ -50,16 +55,22 @@ void TouchHacks::CanJumpToPoint(GameObject_s &, AIPATHNODE_s const &) {
 void TouchHacks::CanJumpToPoint(GameObject_s &, VuVec const &) {
 }
 
-void TouchHacks::CanLunge(GameObject_s &) {
+bool TouchHacks::CanLunge(GameObject_s &object) {
+    CHARACTERDATA *character = object.apiobj.character_data;
+    return (character->game_character->field275_0x116 != 0 || (character->model_flags & 8) != 0) &&
+           LEGOACT_LUNGE != -1 && object.apiobj.character_model->model_data_b[LEGOACT_LUNGE] != NULL;
 }
 
 void TouchHacks::CanPoo(GameObject_s &) {
 }
 
-void TouchHacks::CanShoot(GameObject_s &) {
+bool TouchHacks::CanShoot(GameObject_s &object) {
+    CHARACTERDATA *character = object.apiobj.character_data;
+    return (character->model_flags & 0x10000000) != 0 && (character->game_character->flags_094[0] & 8) == 0;
 }
 
-void TouchHacks::CanSlam(GameObject_s &) {
+bool TouchHacks::CanSlam(GameObject_s &object) {
+    return LEGOACT_SLAM != -1 && object.apiobj.character_model->model_data_b[LEGOACT_SLAM] != NULL;
 }
 
 void TouchHacks::CanTagTo(GameObject_s &, GameObject_s &) {
@@ -89,7 +100,11 @@ bool TouchHacks::CanToggleTo(GameObject_s &object, i32 id) {
     return true;
 }
 
-void TouchHacks::CanUseBuildIt(GameObject_s &) {
+bool TouchHacks::CanUseBuildIt(GameObject_s &object) {
+    return LEGOACT_BUILD != -1 && object.apiobj.character_model != NULL &&
+           object.apiobj.character_model->model_data_b[LEGOACT_BUILD] != NULL &&
+           !AnimPlaying(&object.apiobj.anim_packet, LEGOACT_BUILD, 1, 1) && object.apiobj.field_0x27d != 0 &&
+           ObjLandReady(&object) != 0;
 }
 
 void TouchHacks::CanUseGizForce(GameObject_s &) {
@@ -98,13 +113,18 @@ void TouchHacks::CanUseGizForce(GameObject_s &) {
 void TouchHacks::CanUseGizForce(GameObject_s &, GIZFORCE_s &) {
 }
 
-void TouchHacks::CanUseHatMachine(GameObject_s &) {
+bool TouchHacks::CanUseHatMachine(GameObject_s &object) {
+    return object.apiobj.character_model->model_data_b[93] != NULL && object.apiobj.field_0x27d != 0 &&
+           ObjLandReady(&object) != 0;
 }
 
-void TouchHacks::CanUseLever(GameObject_s &) {
+bool TouchHacks::CanUseLever(GameObject_s &object) {
+    return object.apiobj.character_model->model_data_b[93] != NULL && object.apiobj.field_0x27d != 0;
 }
 
-void TouchHacks::CanUseTeleport(GameObject_s &) {
+bool TouchHacks::CanUseTeleport(GameObject_s &object) {
+    return object.apiobj.character_data != NULL &&
+           ((object.apiobj.character_data->model_flags & 0x40000) != 0 || SuperWeirdo(&object));
 }
 
 void TouchHacks::CanUseVehicleSmartBomb(GameObject_s &) {
@@ -188,7 +208,10 @@ bool TouchHacks::InParty(GameObject_s &object) {
 void TouchHacks::PlaySmartBombBuildupEffects(GameObject_s &, float, float) {
 }
 
-void TouchHacks::ShouldAutoGrabDragBomb(GameObject_s &) {
+bool TouchHacks::ShouldAutoGrabDragBomb(GameObject_s &object) {
+    if (object.id == id_ATST || object.id == id_ATST_LOWRES)
+        return false;
+    return TouchControlsActive;
 }
 
 bool TouchHacks::ShouldBlock(GameObject_s &object) {
@@ -199,7 +222,6 @@ bool TouchHacks::ShouldBlock(GameObject_s &object) {
 }
 
 CABLE_s *GameObjIsCableTied(GameObject_s *);
-extern "C" i16 id_ATST, id_ATST_LOWRES;
 i32 TouchHacks::ShouldDeflectBolt(GameObject_s &object, BOLT_s &bolt) {
     if (!TouchControlsActive || VehicleArea == 0)
         return 0;

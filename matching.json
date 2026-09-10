@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 36.57006,
+    "fuzzy_match_percent": 36.57831,
     "total_code": "4722419",
-    "matched_code": "343263",
-    "matched_code_percent": 7.268796,
+    "matched_code": "343597",
+    "matched_code_percent": 7.2758684,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 3922,
-    "matched_functions_percent": 29.140354,
+    "matched_functions": 3927,
+    "matched_functions_percent": 29.177502,
     "total_units": 1
   },
   "text": {
@@ -37853,7 +37853,7 @@
           "address": 4502512,
           "offset": 3612544,
           "size": 59,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN10TouchHacks20GetIncomingPartRangeEv",
@@ -37989,7 +37989,7 @@
           "address": 4506384,
           "offset": 3616416,
           "size": 72,
-          "match_percent": 18.26087
+          "match_percent": 99.347824
         },
         {
           "name": "_ZN10TouchHacks7CanSlamER12GameObject_s",
@@ -37997,7 +37997,7 @@
           "address": 4506464,
           "offset": 3616496,
           "size": 47,
-          "match_percent": 30.0
+          "match_percent": 98.92857
         },
         {
           "name": "_ZN10TouchHacks14CanJumpToPointER12GameObject_sRK12AIPATHNODE_s",
@@ -38013,7 +38013,7 @@
           "address": 4506768,
           "offset": 3616800,
           "size": 35,
-          "match_percent": 38.18182
+          "match_percent": 100.0
         },
         {
           "name": "_ZN10TouchHacks7InPartyER12GameObject_s",
@@ -38053,7 +38053,7 @@
           "address": 4508032,
           "offset": 3618064,
           "size": 68,
-          "match_percent": 18.26087
+          "match_percent": 28.47826
         },
         {
           "name": "_ZN10TouchHacks11CanUseZipupER12GameObject_s",
@@ -38061,7 +38061,7 @@
           "address": 4508112,
           "offset": 3618144,
           "size": 147,
-          "match_percent": 95.681816
+          "match_percent": 96.02273
         },
         {
           "name": "_ZN10TouchHacks19ShouldKeepWeaponOutER12GameObject_s",
@@ -38093,7 +38093,7 @@
           "address": 4508704,
           "offset": 3618736,
           "size": 136,
-          "match_percent": 11.052631
+          "match_percent": 100.0
         },
         {
           "name": "_ZN10TouchHacks14CanUseGizForceER12GameObject_s",
@@ -38165,7 +38165,7 @@
           "address": 4510176,
           "offset": 3620208,
           "size": 35,
-          "match_percent": 0.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN10TouchHacks16CanUseHatMachineER12GameObject_s",
@@ -38173,7 +38173,7 @@
           "address": 4510224,
           "offset": 3620256,
           "size": 69,
-          "match_percent": 21.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZN10TouchHacks30CleanupAllMechObjectInterfacesEP11WORLDINFO_s",
