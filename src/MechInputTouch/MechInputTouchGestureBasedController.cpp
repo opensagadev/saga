@@ -10,29 +10,43 @@ void MechInputTouchGestureBasedController::KillTasks(bool) {
 }
 
 MechInputTouchGestureBasedController::MechInputTouchGestureBasedController(
-    i32 index, MechInputTouchGestureBasedController::StickMode)
-    : MechInputTouchMainController(index) {
+    i32 index, MechInputTouchGestureBasedController::StickMode mode)
+    : MechInputTouchMainController(index), temporary_position(), stick_mode(mode), field_a5(0), target(NULL) {
+    active = 0;
+    field_a6 = 0;
+    field_98 = 0.0f;
+    current_task = NULL;
+    field_90 = NULL;
+    field_94 = NULL;
+    field_9c = 0.0f;
+    field_a0 = 0.0f;
 }
 
 void MechInputTouchGestureBasedController::MenuDisable() {
 }
 
-void MechInputTouchGestureBasedController::OnClick(GameObject_s &, TouchHolder &) {
+bool MechInputTouchGestureBasedController::OnClick(GameObject_s &, TouchHolder &) {
+    return false;
 }
 
-void MechInputTouchGestureBasedController::OnDoubleClick(GameObject_s &, TouchHolder &) {
+bool MechInputTouchGestureBasedController::OnDoubleClick(GameObject_s &, TouchHolder &) {
+    return false;
 }
 
-void MechInputTouchGestureBasedController::OnDown(GameObject_s &, TouchHolder &) {
+bool MechInputTouchGestureBasedController::OnDown(GameObject_s &, TouchHolder &) {
+    return false;
 }
 
-void MechInputTouchGestureBasedController::OnHold(GameObject_s &, TouchHolder &) {
+bool MechInputTouchGestureBasedController::OnHold(GameObject_s &, TouchHolder &) {
+    return false;
 }
 
-void MechInputTouchGestureBasedController::OnRelease(GameObject_s &, TouchHolder &) {
+bool MechInputTouchGestureBasedController::OnRelease(GameObject_s &, TouchHolder &) {
+    return false;
 }
 
-void MechInputTouchGestureBasedController::OnSwipe(GameObject_s &, TouchHolder &, i32) {
+bool MechInputTouchGestureBasedController::OnSwipe(GameObject_s &, TouchHolder &, i32) {
+    return false;
 }
 
 void MechInputTouchGestureBasedController::PerformCloseMechanic(GameObject_s &, TouchHolder &) {

@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 36.799023,
+    "fuzzy_match_percent": 36.816334,
     "total_code": "4722419",
-    "matched_code": "348267",
-    "matched_code_percent": 7.3747582,
+    "matched_code": "348344",
+    "matched_code_percent": 7.376389,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4055,
-    "matched_functions_percent": 30.128538,
+    "matched_functions": 4058,
+    "matched_functions_percent": 30.150827,
     "total_units": 1
   },
   "text": {
@@ -15452,7 +15452,7 @@
           "address": 4466352,
           "offset": 3576384,
           "size": 283,
-          "match_percent": 81.81013
+          "match_percent": 86.01266
         },
         {
           "name": "_ZN35MechTouchTaskPlannedDoubleClickGoToD2Ev",
@@ -15460,7 +15460,7 @@
           "address": 4466352,
           "offset": 3576384,
           "size": 283,
-          "match_percent": 81.81013
+          "match_percent": 86.01266
         },
         {
           "name": "_ZN35MechTouchTaskPlannedDoubleClickGoToD0Ev",
@@ -15524,7 +15524,7 @@
           "address": 4467680,
           "offset": 3577712,
           "size": 237,
-          "match_percent": 34.81818
+          "match_percent": 30.484848
         },
         {
           "name": "_ZN17MechTouchTaskGoToD2Ev",
@@ -15532,7 +15532,7 @@
           "address": 4467680,
           "offset": 3577712,
           "size": 237,
-          "match_percent": 34.81818
+          "match_percent": 30.484848
         },
         {
           "name": "_ZN17MechTouchTaskGoToD0Ev",
@@ -15636,7 +15636,7 @@
           "address": 4472496,
           "offset": 3582528,
           "size": 246,
-          "match_percent": 96.33929
+          "match_percent": 95.26786
         },
         {
           "name": "_ZN17MechTouchTaskGoToC2ER36MechInputTouchGestureBasedControllerP19MechObjectInterface",
@@ -15644,7 +15644,7 @@
           "address": 4472496,
           "offset": 3582528,
           "size": 246,
-          "match_percent": 96.33929
+          "match_percent": 95.26786
         },
         {
           "name": "_ZN24MechTouchTaskPlannedGoTo8OnResumeEv",
@@ -16282,7 +16282,7 @@
           "address": 916128,
           "offset": 26160,
           "size": 93,
-          "match_percent": 29.411764
+          "match_percent": 0.0
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedController6RenderEv",
@@ -16290,7 +16290,7 @@
           "address": 4510992,
           "offset": 3621024,
           "size": 9,
-          "match_percent": 24.444445
+          "match_percent": 100.0
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedController10DeactivateEv",
@@ -16298,7 +16298,7 @@
           "address": 4511008,
           "offset": 3621040,
           "size": 188,
-          "match_percent": 7.647059
+          "match_percent": 8.235294
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedController8ActivateEv",
@@ -16306,7 +16306,7 @@
           "address": 4511200,
           "offset": 3621232,
           "size": 172,
-          "match_percent": 5.641025
+          "match_percent": 10.769231
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedControllerD1Ev",
@@ -16314,7 +16314,7 @@
           "address": 4511376,
           "offset": 3621408,
           "size": 252,
-          "match_percent": 25.016129
+          "match_percent": 93.46774
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedControllerD2Ev",
@@ -16322,7 +16322,7 @@
           "address": 4511376,
           "offset": 3621408,
           "size": 252,
-          "match_percent": 25.016129
+          "match_percent": 93.46774
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedControllerD0Ev",
@@ -16330,7 +16330,7 @@
           "address": 4511632,
           "offset": 3621664,
           "size": 56,
-          "match_percent": 24.5
+          "match_percent": 100.0
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedControllerC1EiNS_9StickModeE",
@@ -16338,7 +16338,7 @@
           "address": 4511696,
           "offset": 3621728,
           "size": 252,
-          "match_percent": 27.541666
+          "match_percent": 99.916664
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedControllerC2EiNS_9StickModeE",
@@ -16346,7 +16346,7 @@
           "address": 4511696,
           "offset": 3621728,
           "size": 252,
-          "match_percent": 27.541666
+          "match_percent": 99.916664
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedController11MenuDisableEv",
@@ -16354,7 +16354,7 @@
           "address": 4511952,
           "offset": 3621984,
           "size": 75,
-          "match_percent": 14.222222
+          "match_percent": 0.0
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedController9KillTasksEb",
@@ -16362,7 +16362,7 @@
           "address": 4512144,
           "offset": 3622176,
           "size": 82,
-          "match_percent": 17.925926
+          "match_percent": 0.0
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedController12StartNewTaskEP13MechTouchTaskR11TouchHolderbb",
@@ -16370,7 +16370,7 @@
           "address": 4512240,
           "offset": 3622272,
           "size": 259,
-          "match_percent": 5.357143
+          "match_percent": 6.0
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedController9OnReleaseER12GameObject_sR11TouchHolder",
@@ -16378,7 +16378,15 @@
           "address": 4512512,
           "offset": 3622544,
           "size": 610,
-          "match_percent": 1.62963
+          "match_percent": 2.222222
+        },
+        {
+          "name": "_ZThn108_N36MechInputTouchGestureBasedController9OnReleaseER12GameObject_sR11TouchHolder",
+          "demangled_name": "{virtual override thunk({offset(-108)}, MechInputTouchGestureBasedController::OnRelease(GameObject_s&, TouchHolder&))}",
+          "address": 4513136,
+          "offset": 3623168,
+          "size": 10,
+          "match_percent": 70.0
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedController6OnDownER12GameObject_sR11TouchHolder",
@@ -16386,7 +16394,15 @@
           "address": 4513152,
           "offset": 3623184,
           "size": 616,
-          "match_percent": 1.942446
+          "match_percent": 3.165468
+        },
+        {
+          "name": "_ZThn108_N36MechInputTouchGestureBasedController6OnDownER12GameObject_sR11TouchHolder",
+          "demangled_name": "{virtual override thunk({offset(-108)}, MechInputTouchGestureBasedController::OnDown(GameObject_s&, TouchHolder&))}",
+          "address": 4513776,
+          "offset": 3623808,
+          "size": 10,
+          "match_percent": 70.0
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedController6OnHoldER12GameObject_sR11TouchHolder",
@@ -16394,7 +16410,15 @@
           "address": 4513792,
           "offset": 3623824,
           "size": 1880,
-          "match_percent": 0.863931
+          "match_percent": 1.339093
+        },
+        {
+          "name": "_ZThn108_N36MechInputTouchGestureBasedController6OnHoldER12GameObject_sR11TouchHolder",
+          "demangled_name": "{virtual override thunk({offset(-108)}, MechInputTouchGestureBasedController::OnHold(GameObject_s&, TouchHolder&))}",
+          "address": 4515680,
+          "offset": 3625712,
+          "size": 10,
+          "match_percent": 70.0
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedController19ProcessDragMovementER12GameObject_s",
@@ -16402,7 +16426,7 @@
           "address": 4515696,
           "offset": 3625728,
           "size": 1372,
-          "match_percent": 1.26183
+          "match_percent": 1.324921
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedController20StartJumpUsingAIPathERK17JumpTriggerPacketi",
@@ -16410,7 +16434,7 @@
           "address": 4517072,
           "offset": 3627104,
           "size": 547,
-          "match_percent": 2.609272
+          "match_percent": 3.576159
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedController15TriggerJumpTaskERK17JumpTriggerPacketbbb",
@@ -16418,7 +16442,7 @@
           "address": 4517632,
           "offset": 3627664,
           "size": 565,
-          "match_percent": 4.044445
+          "match_percent": 3.111111
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedController7OnSwipeER12GameObject_sR11TouchHolderi",
@@ -16426,7 +16450,15 @@
           "address": 4518208,
           "offset": 3628240,
           "size": 1073,
-          "match_percent": 1.184211
+          "match_percent": 1.666667
+        },
+        {
+          "name": "_ZThn108_N36MechInputTouchGestureBasedController7OnSwipeER12GameObject_sR11TouchHolderi",
+          "demangled_name": "{virtual override thunk({offset(-108)}, MechInputTouchGestureBasedController::OnSwipe(GameObject_s&, TouchHolder&, int))}",
+          "address": 4519296,
+          "offset": 3629328,
+          "size": 10,
+          "match_percent": 70.0
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedController13OnDoubleClickER12GameObject_sR11TouchHolder",
@@ -16434,7 +16466,15 @@
           "address": 4519312,
           "offset": 3629344,
           "size": 2029,
-          "match_percent": 0.984849
+          "match_percent": 1.111111
+        },
+        {
+          "name": "_ZThn108_N36MechInputTouchGestureBasedController13OnDoubleClickER12GameObject_sR11TouchHolder",
+          "demangled_name": "{virtual override thunk({offset(-108)}, MechInputTouchGestureBasedController::OnDoubleClick(GameObject_s&, TouchHolder&))}",
+          "address": 4521344,
+          "offset": 3631376,
+          "size": 10,
+          "match_percent": 70.0
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedController22ProcessAutoJumpOverGapEP12GameObject_s",
@@ -16442,7 +16482,7 @@
           "address": 4521360,
           "offset": 3631392,
           "size": 961,
-          "match_percent": 1.869159
+          "match_percent": 1.588785
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedController24ProcessAutoJumpWhenStuckER12GameObject_s",
@@ -16450,7 +16490,7 @@
           "address": 4522336,
           "offset": 3632368,
           "size": 1086,
-          "match_percent": 1.22905
+          "match_percent": 2.346369
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedController6UpdateEPK16NuInputTouchData",
@@ -16458,7 +16498,7 @@
           "address": 4523424,
           "offset": 3633456,
           "size": 1113,
-          "match_percent": 1.503759
+          "match_percent": 1.578947
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedController20PerformCloseMechanicER12GameObject_sR11TouchHolder",
@@ -16466,7 +16506,7 @@
           "address": 4524544,
           "offset": 3634576,
           "size": 1258,
-          "match_percent": 1.423488
+          "match_percent": 1.494662
         },
         {
           "name": "_ZN36MechInputTouchGestureBasedController7OnClickER12GameObject_sR11TouchHolder",
@@ -16474,7 +16514,15 @@
           "address": 4525808,
           "offset": 3635840,
           "size": 3444,
-          "match_percent": 0.480192
+          "match_percent": 0.528211
+        },
+        {
+          "name": "_ZThn108_N36MechInputTouchGestureBasedController7OnClickER12GameObject_sR11TouchHolder",
+          "demangled_name": "{virtual override thunk({offset(-108)}, MechInputTouchGestureBasedController::OnClick(GameObject_s&, TouchHolder&))}",
+          "address": 4529264,
+          "offset": 3639296,
+          "size": 10,
+          "match_percent": 70.0
         }
       ]
     },
@@ -48090,7 +48138,7 @@
           "address": 1358976,
           "offset": 469008,
           "size": 461,
-          "match_percent": 52.672268
+          "match_percent": 50.54622
         },
         {
           "name": "_ZL20ForcePushed_MoveCodeP12GameObject_s",
@@ -55926,7 +55974,7 @@
           "address": 5055488,
           "offset": 4165520,
           "size": 352,
-          "match_percent": 79.35238
+          "match_percent": 78.75238
         },
         {
           "name": "_Z16BuildIt_MoveCodeP12GameObject_s",
@@ -55934,7 +55982,7 @@
           "address": 5055840,
           "offset": 4165872,
           "size": 1298,
-          "match_percent": 75.70297
+          "match_percent": 75.9868
         }
       ]
     },
@@ -66449,7 +66497,7 @@
           "address": 4580256,
           "offset": 3690288,
           "size": 133,
-          "match_percent": 85.22222
+          "match_percent": 91.22222
         },
         {
           "name": "_ZN24CantPickupBombTimerAddonD2Ev",
@@ -66457,7 +66505,7 @@
           "address": 4580256,
           "offset": 3690288,
           "size": 133,
-          "match_percent": 85.22222
+          "match_percent": 91.22222
         },
         {
           "name": "_ZN24CantPickupBombTimerAddonD0Ev",
@@ -66545,7 +66593,7 @@
           "address": 4643024,
           "offset": 3753056,
           "size": 193,
-          "match_percent": 87.566666
+          "match_percent": 86.083336
         },
         {
           "name": "_Z16RemoveGameObjectP12GameObject_si",
@@ -116769,7 +116817,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -116887,7 +116934,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -117005,7 +117051,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -117134,7 +117179,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -117312,7 +117356,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -117441,7 +117484,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -117570,7 +117612,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -117699,7 +117740,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -117828,7 +117868,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -117957,7 +117996,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -118317,7 +118355,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -118446,7 +118483,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -118575,7 +118611,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -118749,7 +118784,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -118889,7 +118923,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -119162,7 +119195,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -119389,7 +119421,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -119617,7 +119648,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -119746,7 +119776,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -119866,7 +119895,7 @@
       "address": 2754400,
       "offset": 1864432,
       "size": 373,
-      "match_percent": 99.7,
+      "match_percent": 95.6875,
       "candidate_units": [
         "MechInputTouch/MechAutoJumpManager.cpp.o",
         "MechInputTouch/MechAutofireAddon.cpp.o",
@@ -119875,7 +119904,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -119995,7 +120023,7 @@
       "address": 2755348,
       "offset": 1865380,
       "size": 373,
-      "match_percent": 95.6875,
+      "match_percent": 99.7,
       "candidate_units": [
         "MechInputTouch/MechAutoJumpManager.cpp.o",
         "MechInputTouch/MechAutofireAddon.cpp.o",
@@ -120004,7 +120032,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -120209,7 +120236,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -120338,7 +120364,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -120478,7 +120503,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -120607,7 +120631,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -120748,7 +120771,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -120877,7 +120899,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -121055,7 +121076,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -121184,7 +121204,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -121313,7 +121332,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -121442,7 +121460,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -121634,7 +121651,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -121763,7 +121779,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -121892,7 +121907,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -122422,7 +122436,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -122709,7 +122722,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -122971,7 +122983,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -123119,6 +123130,18 @@
       ]
     },
     {
+      "name": "_ZNK28MechInputTouchMainController11GetPlayerIdEv",
+      "demangled_name": "MechInputTouchMainController::GetPlayerId() const",
+      "address": 4460672,
+      "offset": 3570704,
+      "size": 12,
+      "match_percent": 100.0,
+      "candidate_units": [
+        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
+        "MechInputTouch/MechInputTouchMainController.cpp.o"
+      ]
+    },
+    {
       "name": "_ZN23NuMechPtr_ManagedObjectD1Ev",
       "demangled_name": "NuMechPtr_ManagedObject::~NuMechPtr_ManagedObject()",
       "address": 4480944,
@@ -123127,6 +123150,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "MechInputTouch/MechInputTouchContextTasks.cpp.o",
+        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechTouchUIElements.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/gizmo/base/gizmo.cpp.o"
@@ -123141,6 +123165,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "MechInputTouch/MechInputTouchContextTasks.cpp.o",
+        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechTouchUIElements.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/gizmo/base/gizmo.cpp.o"
@@ -123155,6 +123180,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "MechInputTouch/MechInputTouchContextTasks.cpp.o",
+        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechTouchUIElements.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/gizmo/base/gizmo.cpp.o"
@@ -123169,6 +123195,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "MechInputTouch/MechInputTouchContextTasks.cpp.o",
+        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/gizmo/base/gizmo.cpp.o"
       ]
@@ -123182,6 +123209,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "MechInputTouch/MechInputTouchContextTasks.cpp.o",
+        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/gizmo/base/gizmo.cpp.o"
       ]
@@ -123195,6 +123223,7 @@
       "match_percent": 100.0,
       "candidate_units": [
         "MechInputTouch/MechInputTouchContextTasks.cpp.o",
+        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "legoapi/characters/core/character.cpp.o",
         "legoapi/gizmo/base/gizmo.cpp.o"
       ]
@@ -123453,7 +123482,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -123582,7 +123610,6 @@
         "MechInputTouch/MechInputTouchBonusCavalryController.cpp.o",
         "MechInputTouch/MechInputTouchButton_stubs.cpp.o",
         "MechInputTouch/MechInputTouchDeathStarTurretController.cpp.o",
-        "MechInputTouch/MechInputTouchGestureBasedController.cpp.o",
         "MechInputTouch/MechInputTouchGestureTracker.cpp.o",
         "MechInputTouch/MechInputTouchMenuController.cpp.o",
         "MechInputTouch/MechInputTouchPodraceController.cpp.o",
@@ -126056,14 +126083,6 @@
       "match_percent": 0.0
     },
     {
-      "name": "_ZNK28MechInputTouchMainController11GetPlayerIdEv",
-      "demangled_name": "MechInputTouchMainController::GetPlayerId() const",
-      "address": 4460672,
-      "offset": 3570704,
-      "size": 12,
-      "match_percent": 0.0
-    },
-    {
       "name": "_ZN29MechInputTouchMainDummyButton6RenderEv",
       "demangled_name": "MechInputTouchMainDummyButton::Render()",
       "address": 4460688,
@@ -126549,54 +126568,6 @@
       "address": 4490176,
       "offset": 3600208,
       "size": 12,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZThn108_N36MechInputTouchGestureBasedController9OnReleaseER12GameObject_sR11TouchHolder",
-      "demangled_name": "{virtual override thunk({offset(-108)}, MechInputTouchGestureBasedController::OnRelease(GameObject_s&, TouchHolder&))}",
-      "address": 4513136,
-      "offset": 3623168,
-      "size": 10,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZThn108_N36MechInputTouchGestureBasedController6OnDownER12GameObject_sR11TouchHolder",
-      "demangled_name": "{virtual override thunk({offset(-108)}, MechInputTouchGestureBasedController::OnDown(GameObject_s&, TouchHolder&))}",
-      "address": 4513776,
-      "offset": 3623808,
-      "size": 10,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZThn108_N36MechInputTouchGestureBasedController6OnHoldER12GameObject_sR11TouchHolder",
-      "demangled_name": "{virtual override thunk({offset(-108)}, MechInputTouchGestureBasedController::OnHold(GameObject_s&, TouchHolder&))}",
-      "address": 4515680,
-      "offset": 3625712,
-      "size": 10,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZThn108_N36MechInputTouchGestureBasedController7OnSwipeER12GameObject_sR11TouchHolderi",
-      "demangled_name": "{virtual override thunk({offset(-108)}, MechInputTouchGestureBasedController::OnSwipe(GameObject_s&, TouchHolder&, int))}",
-      "address": 4519296,
-      "offset": 3629328,
-      "size": 10,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZThn108_N36MechInputTouchGestureBasedController13OnDoubleClickER12GameObject_sR11TouchHolder",
-      "demangled_name": "{virtual override thunk({offset(-108)}, MechInputTouchGestureBasedController::OnDoubleClick(GameObject_s&, TouchHolder&))}",
-      "address": 4521344,
-      "offset": 3631376,
-      "size": 10,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_ZThn108_N36MechInputTouchGestureBasedController7OnClickER12GameObject_sR11TouchHolder",
-      "demangled_name": "{virtual override thunk({offset(-108)}, MechInputTouchGestureBasedController::OnClick(GameObject_s&, TouchHolder&))}",
-      "address": 4529264,
-      "offset": 3639296,
-      "size": 10,
       "match_percent": 0.0
     },
     {
@@ -131179,8 +131150,8 @@
   "summary": {
     "bazel_units": 516,
     "functions": 13454,
-    "assigned_functions": 12284,
-    "ambiguous_functions": 234,
-    "unassigned_functions": 936
+    "assigned_functions": 12290,
+    "ambiguous_functions": 235,
+    "unassigned_functions": 929
   }
 }
