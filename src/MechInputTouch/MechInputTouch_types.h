@@ -266,30 +266,6 @@ struct MechInputTouchDeathStarTurretController {
     void Update(NuInputTouchData const *);
     virtual ~MechInputTouchDeathStarTurretController();
 };
-struct MechInputTouchGestureBasedController {
-    struct StickMode {};
-    void Activate();
-    void Deactivate();
-    void KillTasks(bool);
-    MechInputTouchGestureBasedController(i32, MechInputTouchGestureBasedController::StickMode);
-    void MenuDisable();
-    void OnClick(GameObject_s &, TouchHolder &);
-    void OnDoubleClick(GameObject_s &, TouchHolder &);
-    void OnDown(GameObject_s &, TouchHolder &);
-    void OnHold(GameObject_s &, TouchHolder &);
-    void OnRelease(GameObject_s &, TouchHolder &);
-    void OnSwipe(GameObject_s &, TouchHolder &, i32);
-    void PerformCloseMechanic(GameObject_s &, TouchHolder &);
-    void ProcessAutoJumpOverGap(GameObject_s *);
-    void ProcessAutoJumpWhenStuck(GameObject_s &);
-    void ProcessDragMovement(GameObject_s &);
-    void Render();
-    void StartJumpUsingAIPath(JumpTriggerPacket const &, i32);
-    void StartNewTask(MechTouchTask *, TouchHolder &, bool, bool);
-    void TriggerJumpTask(JumpTriggerPacket const &, bool, bool, bool);
-    void Update(NuInputTouchData const *);
-    virtual ~MechInputTouchGestureBasedController();
-};
 struct MechInputTouchGestureTrackingSystem {
     void GetTouch(NuInputTouch const &);
     void LookForClicks(GameObject_s &);
@@ -306,24 +282,67 @@ struct MechInputTouchGestureTrackingSystem {
     void Update(NuInputTouchData const *);
     virtual ~MechInputTouchGestureTrackingSystem();
 };
-struct MechInputTouchMainController {
+struct MechInputTouchMainController : NuTouchInputElement {
     struct eButtonTypes {};
-    u8 unknown_04[0x3c];
-    u32 buttons_pressed;
-    u32 buttons_were_pressed;
-    u32 buttons_repeat;
+    f32 stick_values[4];
+    union {
+        u32 buttons_pressed;
+        u8 button_pressed[4];
+    };
+    union {
+        u32 buttons_were_pressed;
+        u8 button_was_pressed[4];
+    };
+    union {
+        u32 buttons_repeat;
+        u8 button_repeats[4];
+    };
     float buttons_repeat_timers[4];
-    i32 unknown_5c;
+    float field_5c;
+    float field_60;
     i32 player_id;
-    u8 unknown_68;
+    u8 field_68;
+    u8 pad_69[3];
 
     MechInputTouchMainController(i32);
     void RemoveUnpressedButtons(NuInputTouchData &, NuInputTouchData const &);
-    void Render();
+    void Render() override;
     void ResetButtons();
-    void Update(NuInputTouchData const *);
+    void Update(NuInputTouchData const *) override;
     void UpdateButtons();
-    virtual ~MechInputTouchMainController();
+    ~MechInputTouchMainController() override;
+};
+DECOMP_ASSERT(sizeof(MechInputTouchMainController) == 0x6c, "Main touch controller ABI");
+DECOMP_ASSERT(offsetof(MechInputTouchMainController, button_pressed) == 0x40, "Current touch buttons offset");
+DECOMP_ASSERT(offsetof(MechInputTouchMainController, button_was_pressed) == 0x44, "Previous touch buttons offset");
+DECOMP_ASSERT(offsetof(MechInputTouchMainController, button_repeats) == 0x48, "Repeated touch buttons offset");
+DECOMP_ASSERT(offsetof(MechInputTouchMainController, buttons_repeat_timers) == 0x4c, "Touch repeat timers offset");
+
+struct MechInputTouchGestureBasedController : MechInputTouchMainController {
+    struct StickMode {
+        u32 value;
+    };
+    void Activate();
+    void Deactivate();
+    void KillTasks(bool);
+    MechInputTouchGestureBasedController(i32, MechInputTouchGestureBasedController::StickMode);
+    void MenuDisable();
+    void OnClick(GameObject_s &, TouchHolder &);
+    void OnDoubleClick(GameObject_s &, TouchHolder &);
+    void OnDown(GameObject_s &, TouchHolder &);
+    void OnHold(GameObject_s &, TouchHolder &);
+    void OnRelease(GameObject_s &, TouchHolder &);
+    void OnSwipe(GameObject_s &, TouchHolder &, i32);
+    void PerformCloseMechanic(GameObject_s &, TouchHolder &);
+    void ProcessAutoJumpOverGap(GameObject_s *);
+    void ProcessAutoJumpWhenStuck(GameObject_s &);
+    void ProcessDragMovement(GameObject_s &);
+    void Render() override;
+    void StartJumpUsingAIPath(JumpTriggerPacket const &, i32);
+    void StartNewTask(MechTouchTask *, TouchHolder &, bool, bool);
+    void TriggerJumpTask(JumpTriggerPacket const &, bool, bool, bool);
+    void Update(NuInputTouchData const *) override;
+    ~MechInputTouchGestureBasedController() override;
 };
 struct MechInputTouchMainDummyButton {
     void IsPressed() const;
@@ -642,6 +661,8 @@ struct MechSystems : BaseThing {
 struct MechTempPosInterface : MechObjectInterface {
     VuVec position;
     f32 radius;
+    MechTempPosInterface() : position(VuVec_Zero), radius(0.2f) {
+    }
     void GetPos(VuVec &result, i32) const override {
         result.xyz = position.xyz;
     }
@@ -678,7 +699,8 @@ struct MechTouchTask {
     }
     virtual void OnResume() {
     }
-    virtual void Update() {
+    virtual bool Update() {
+        return false;
     }
     virtual void BackgroundProcess() {
     }
@@ -720,10 +742,13 @@ struct MechTouchTaskBigJump {
     MechTouchTaskBigJump(MechInputTouchGestureBasedController &, nuvec_s &, signed char);
     void Update();
 };
-struct MechTouchTaskBlock {
+struct MechTouchTaskBlock : MechTouchTask {
     static HashedKey HashId;
     MechTouchTaskBlock(MechInputTouchGestureBasedController &);
-    void Update();
+    const HashedKey &GetHashId() override {
+        return HashId;
+    }
+    bool Update() override;
 };
 struct MechTouchTaskGoTo : MechTouchTask {
     MechTouchTaskGoTo(MechInputTouchGestureBasedController &, MechObjectInterface *);
@@ -733,7 +758,7 @@ struct MechTouchTaskGoTo : MechTouchTask {
     void OnStart() override;
     void OnStop() override;
     void Render() override;
-    void Update() override;
+    bool Update() override;
     void UpdateStuck();
     void UpdateTarget(MechObjectInterface &) override;
     i32 IsGoToTask() override {
@@ -768,7 +793,7 @@ struct MechTouchTaskBuildIt : MechTouchTaskGoTo {
     const HashedKey &GetHashId() override {
         return HashId;
     }
-    void Update() override;
+    bool Update() override;
     static HashedKey HashId;
 };
 struct MechTouchTaskHatMachine {
@@ -787,15 +812,26 @@ struct MechTouchTaskPanel {
     MechTouchTaskPanel(MechInputTouchGestureBasedController &, MechObjectInterface *, VuVec const &);
     void Update();
 };
-struct MechTouchTaskPlannedDoubleClickGoTo {
+struct MechTouchTaskPlannedDoubleClickGoTo : MechTouchTask {
     static HashedKey HashId;
-    void BackgroundProcess();
+    void BackgroundProcess() override;
     MechTouchTaskPlannedDoubleClickGoTo(MechInputTouchGestureBasedController &, MechObjectInterface *);
-    void OnResume();
-    void OnStart();
-    void OnStop();
-    void Update();
-    virtual ~MechTouchTaskPlannedDoubleClickGoTo();
+    const HashedKey &GetHashId() override {
+        return HashId;
+    }
+    void OnResume() override;
+    void OnStart() override;
+    void OnStop() override;
+    bool Update() override;
+    ~MechTouchTaskPlannedDoubleClickGoTo() override;
+
+    NuMechPtr<MechObjectInterface, 4> target;
+    NuMechPtr<MechObjectInterface, 4> move_to_marker;
+    MechTempPosInterface target_position;
+    u8 field_4c;
+    bool finished;
+    u8 field_4e;
+    u8 pad_4f;
 };
 struct MechTouchTaskPlannedGoTo {
     static HashedKey HashId;
@@ -832,12 +868,19 @@ struct MechTouchTaskUseTeleport {
     MechTouchTaskUseTeleport(MechInputTouchGestureBasedController &, MechObjectInterface *, VuVec const &);
     void Update();
 };
-struct MechTouchTaskUseZipUp {
+struct MechTouchTaskUseZipUp : MechTouchTask {
     static HashedKey HashId;
     MechTouchTaskUseZipUp(MechInputTouchGestureBasedController &);
-    void OnStart();
-    void Update();
+    const HashedKey &GetHashId() override {
+        return HashId;
+    }
+    void OnStart() override;
+    bool Update() override;
 };
+DECOMP_ASSERT(sizeof(MechTouchTaskBlock) == 0x18, "Block touch task ABI");
+DECOMP_ASSERT(sizeof(MechTouchTaskUseZipUp) == 0x18, "Zip-up touch task ABI");
+DECOMP_ASSERT(sizeof(MechTouchTaskPlannedDoubleClickGoTo) == 0x50, "Double-click touch task ABI");
+DECOMP_ASSERT(offsetof(MechTouchTaskPlannedDoubleClickGoTo, finished) == 0x4d, "Double-click completion flag offset");
 struct MechTouchUI : MechInputTouchGestureTracker {
     bool AddUIElement(MechTouchUIElement &);
     void Init();

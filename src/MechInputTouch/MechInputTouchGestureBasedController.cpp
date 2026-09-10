@@ -10,7 +10,8 @@ void MechInputTouchGestureBasedController::KillTasks(bool) {
 }
 
 MechInputTouchGestureBasedController::MechInputTouchGestureBasedController(
-    i32, MechInputTouchGestureBasedController::StickMode) {
+    i32 index, MechInputTouchGestureBasedController::StickMode)
+    : MechInputTouchMainController(index) {
 }
 
 void MechInputTouchGestureBasedController::MenuDisable() {

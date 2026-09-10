@@ -47,7 +47,8 @@ void MechTouchTaskGoTo::OnStop() {
 void MechTouchTaskGoTo::Render() {
 }
 
-void MechTouchTaskGoTo::Update() {
+bool MechTouchTaskGoTo::Update() {
+    return false;
 }
 
 void MechTouchTaskGoTo::UpdateStuck() {
@@ -68,10 +69,13 @@ void MechTouchTaskJump::OnStop() {
 void MechTouchTaskJump::Update() {
 }
 
-MechTouchTaskBlock::MechTouchTaskBlock(MechInputTouchGestureBasedController &) {
+MechTouchTaskBlock::MechTouchTaskBlock(MechInputTouchGestureBasedController &owner) : MechTouchTask(owner) {
+    flags |= 5;
 }
 
-void MechTouchTaskBlock::Update() {
+bool MechTouchTaskBlock::Update() {
+    controller->button_was_pressed[0] = 1;
+    return true;
 }
 
 MechTouchTaskPanel::MechTouchTaskPanel(MechInputTouchGestureBasedController &, MechObjectInterface *, VuVec const &) {
@@ -115,7 +119,8 @@ MechTouchTaskBuildIt::MechTouchTaskBuildIt(MechInputTouchGestureBasedController 
     flags |= 1;
 }
 
-void MechTouchTaskBuildIt::Update() {
+bool MechTouchTaskBuildIt::Update() {
+    return false;
 }
 
 MechTouchTaskUseForce::MechTouchTaskUseForce(MechInputTouchGestureBasedController &, MechObjectInterface *,
@@ -131,13 +136,15 @@ void MechTouchTaskUseForce::OnStop() {
 void MechTouchTaskUseForce::Update() {
 }
 
-MechTouchTaskUseZipUp::MechTouchTaskUseZipUp(MechInputTouchGestureBasedController &) {
+MechTouchTaskUseZipUp::MechTouchTaskUseZipUp(MechInputTouchGestureBasedController &owner) : MechTouchTask(owner) {
 }
 
 void MechTouchTaskUseZipUp::OnStart() {
 }
 
-void MechTouchTaskUseZipUp::Update() {
+bool MechTouchTaskUseZipUp::Update() {
+    controller->button_pressed[3] = 1;
+    return false;
 }
 
 MechTouchTaskPullLever::MechTouchTaskPullLever(MechInputTouchGestureBasedController &, MechObjectInterface *,
@@ -201,8 +208,9 @@ void MechTouchTaskAstroJetPack::Update() {
 void MechTouchTaskPlannedDoubleClickGoTo::BackgroundProcess() {
 }
 
-MechTouchTaskPlannedDoubleClickGoTo::MechTouchTaskPlannedDoubleClickGoTo(MechInputTouchGestureBasedController &,
-                                                                         MechObjectInterface *) {
+MechTouchTaskPlannedDoubleClickGoTo::MechTouchTaskPlannedDoubleClickGoTo(MechInputTouchGestureBasedController &owner,
+                                                                         MechObjectInterface *object)
+    : MechTouchTask(owner), target(object), move_to_marker(), target_position(), field_4c(0), finished(0), field_4e(1) {
 }
 
 void MechTouchTaskPlannedDoubleClickGoTo::OnResume() {
@@ -214,7 +222,8 @@ void MechTouchTaskPlannedDoubleClickGoTo::OnStart() {
 void MechTouchTaskPlannedDoubleClickGoTo::OnStop() {
 }
 
-void MechTouchTaskPlannedDoubleClickGoTo::Update() {
+bool MechTouchTaskPlannedDoubleClickGoTo::Update() {
+    return !finished;
 }
 
 MechTouchTaskPlannedDoubleClickGoTo::~MechTouchTaskPlannedDoubleClickGoTo() {
