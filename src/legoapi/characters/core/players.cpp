@@ -111,7 +111,7 @@ void Players_Init(void) {
                 pi = PLAYERCOUNT;
                 g->oldpos = &OldPlrSPos[PLAYERCOUNT];
                 p[PLAYERCOUNT] = g;
-                p[pi]->batarang = Batarang + pi * 0xb4;
+                p[pi]->batarang = &Batarang[pi];
                 g->apiobj.field_0x27c = (char)pi;
                 p[pi]->torpedo = GetTorpedoPacket();
 
