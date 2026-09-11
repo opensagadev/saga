@@ -120,6 +120,8 @@ i32 ActivePlayerInRange(nuvec_s *position, f32 range_squared, f32 *distance_squa
 bool FindNearestPlayerToVec(NUVEC *position, GameObject_s **nearest_player, f32 &distance_squared,
                             bool require_character_flags, u32 character_flags);
 TORPEDOPACKET *GetTorpedoPacket(void);
+void FreeTorpedoPacket(TORPEDOPACKET_s **packet);
+i32 getMaxTorpedos(GameObject_s *object);
 void SetHitPoints(GameObject_s *obj, i32 hp);
 void RememberPlayerIDs(i32 a, i32 b, i32 c);
 void Player_CopyEssentials(GameObject_s *source, GameObject_s *destination);

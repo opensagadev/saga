@@ -41,6 +41,7 @@ extern "C" {
     i32 ParticlesPerFrame(f32 particles_per_frame, f32 frame_time);
     i32 ParticlesPerSecond(f32 particles_per_second, f32 frame_time);
     i32 AddFiniteShotPART(i32 part_type, NUVEC *pos, i32 count);
+    void AddFiniteShotDebrisEffect(i32 *handle, i32 effect, NUVEC *position, i32 count);
 #ifdef __cplusplus
 }
 #endif

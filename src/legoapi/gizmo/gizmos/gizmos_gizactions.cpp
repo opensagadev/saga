@@ -13,6 +13,7 @@
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/numath/nurand.h"
 #include "legoapi/gizmos/transport/grapples.h"
 #include "legoapi/gizmos/traps/gizforce.h"
@@ -142,7 +143,26 @@ i32 Action_FollowPlayer(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *
 void Action_PlayCutScene(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
 }
 
-void Action_SetVisibility(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+i32 Action_SetVisibility(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **params, i32 param_count,
+                         i32 first_time, float) {
+    if (first_time == 0) {
+        return 1;
+    }
+
+    nuhspecial_s special = {};
+    i32 visible = 1;
+    for (i32 index = 0; index < param_count; ++index) {
+        char *value = NuStrIStr(params[index], "name=");
+        if (value != NULL) {
+            NuSpecialFind(WORLD->current_gscn, &special, value + 5, 1);
+        } else if (NuStrIStr(params[index], "FALSE") != NULL) {
+            visible = 0;
+        }
+    }
+    if (NuSpecialExistsFn(&special) != 0) {
+        NuSpecialSetVisibility(&special, visible);
+    }
+    return 1;
 }
 
 i32 Action_HelpWithTriggers(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float);

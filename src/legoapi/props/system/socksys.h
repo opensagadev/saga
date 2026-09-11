@@ -192,6 +192,8 @@ DECOMP_ASSERT(offsetof(SOCK, mid_force_outer_radius) == 0x78, "SOCK outer force 
 #ifdef __cplusplus
 extern "C" {
     SOCK *FindSock(SOCKSYS *system, char *name);
+    void SockOff(SOCKSYS *system, i32 index);
+    void SockOn(SOCKSYS *system, i32 index);
     void SetSockPostion(SOCKSYS *system, SOCKPOSITION *position, i32 index, i32 segment, f32 ratio);
     void MoveSockPosition(SOCKSYS *system, SOCKPOSITION *source, f32 distance, SOCKPOSITION *result);
     f32 MidDistanceFromSockStart(SOCKSYS *system, SOCKPOSITION *position);

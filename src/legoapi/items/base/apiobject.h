@@ -992,7 +992,10 @@ typedef struct GameObject_s {
     void *force_glow_object;
     void *force_glow_candidate;
     GameObject_s *airborne_collision_target; // 0x0d10
-    u32 field_0xd14;                         // 0x0d14
+    union {
+        u32 field_0xd14;
+        GameObject_s *force_push_target;
+    };                                      // 0x0d14
     f32 ground_contact_grace_timer;          // 0x0d18, keeps airborne animation briefly after contact
     f32 jump_reentry_timer;                  // 0x0d1c
     f32 airborne_input_timer;                // 0x0d20

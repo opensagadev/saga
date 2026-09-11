@@ -796,10 +796,10 @@ extern "C" {
         return SockBitIsSet(sock, index);
     }
 
-    void SockOff(void) {
+    void SockOff(SOCKSYS *, i32) {
     }
 
-    void SockOn(void) {
+    void SockOn(SOCKSYS *, i32) {
     }
 
     void SockRotationMatrix(SOCKSYS *system, SOCKPOSITION *position, NUMTX *out, i32 stride, i32 mode) {
