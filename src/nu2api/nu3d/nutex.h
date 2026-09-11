@@ -110,7 +110,7 @@ extern "C" {
     NUNATIVETEX *NuTexGetNative(i32 tex_id);
 
     void NuTexAddReference(i32 tex_id, struct nugscn_s *scene);
-    void NuTexRemoveReference(i32 tex_id);
+    void NuTexRemoveReference(i32 tex_id, struct nugscn_s *scene);
     i32 NuTexGetRefCount(i32 tex_id);
     i32 NuTexResolveReference(struct nugscn_s *scene, i32 tex_id);
 

@@ -185,7 +185,7 @@ typedef struct TORPEDOPACKET_s {
     u8 pad_05[3];
     f32 field_08;
     f32 ricochet_time; // 0x0c
-    u8 pad_10[4];
+    f32 steal_timer; // 0x10
     u32 pickup_data[5];        // 0x14
     u32 pickup_flags[5];       // 0x28
     NUVEC pickup_positions[5]; // 0x3c
@@ -841,8 +841,12 @@ typedef struct GameObject_s {
     union {
         u8 pad_78c[0x790 - 0x78c];
         i32 panel_use_request;
+        i32 tube_entry_state;
     };
-    void *big_jump_data; // 0x0790
+    union {
+        void *big_jump_data;
+        void *tube_entry_data;
+    }; // 0x0790
     union {
         u16 context_x_rotation;
         u16 magnet_surface_angle;
@@ -1020,7 +1024,10 @@ typedef struct GameObject_s {
         };
     };
     f32 quick_shoot_timer; // 0x0d54
-    u8 pad_d58[4];
+    union {
+        u8 pad_d58[4];
+        f32 torpedo_fire_cooldown;
+    };
     union {
         i32 pause_input_state; // 0x0d5c, cleared when entering pause
         f32 timer_d5c;
@@ -1038,7 +1045,10 @@ typedef struct GameObject_s {
     f32 movement_animation_release_timer; // 0x0d74
     f32 field_0xd78;                      // 0x0d78
     f32 terrain_origin_floor_offset;      // 0x0d7c
-    f32 field_0xd80;                      // 0x0d80
+    union {
+        f32 field_0xd80;
+        f32 torpedo_target_timer;
+    };                                   // 0x0d80
     f32 force_glow_target;
     f32 force_glow_step;
     f32 field_0xd8c; // 0x0d8c

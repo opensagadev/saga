@@ -45,6 +45,7 @@ DECOMP_ASSERT(offsetof(TUBE, flags) == 0x34, "TUBE flags offset");
 
 i32 Tube_InCylinder(GameObject_s *object, TUBE *tube, f32 *horizontal_distance_squared, i32 ignore_height);
 TUBE *Tube_InAnyCylinder(WORLDINFO_s *world, GameObject_s *object, i32 ignore_height);
+TUBE *Tube_FindByName(WORLDINFO_s *world, char *name);
 i32 Tube_IsObjBitSet(TUBE *tube, i32 object_index);
 void Tube_SetObjBit(TUBE *tube, i32 object_index);
 

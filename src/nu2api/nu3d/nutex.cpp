@@ -77,7 +77,7 @@ void NuTexAddReference(i32 tex_id, NUGSCN *) {
     }
 }
 
-void NuTexRemoveReference(i32 tex_id) {
+void NuTexRemoveReference(i32 tex_id, NUGSCN *) {
     NUNATIVETEX *tex;
 
     tex = NuTexGetNative(tex_id);

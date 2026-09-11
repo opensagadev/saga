@@ -1006,7 +1006,27 @@ void Bolt_End(BOLT_s *bolt, i32 run_callback) {
         bolt->type->end_callback(bolt);
 }
 
-void Bolt_Find(i32, nuvec_s *, GameObject_s *) {
+BOLT_s *Bolt_Find(i32 type_id, NUVEC *position, GameObject_s *owner) {
+    BOLT_s *nearest = NULL;
+    f32 nearest_distance = 0.49f;
+    for (i32 index = 0; index < 32; ++index) {
+        BOLT_s *bolt = &Bolt[index];
+        if (bolt->active == 0)
+            continue;
+        if (type_id != -1 && bolt->type_id != type_id)
+            continue;
+        if (owner != NULL && bolt->owner != owner)
+            continue;
+        if (position == NULL)
+            return bolt;
+
+        const f32 distance = NuVecDistSqr(&bolt->position, position, NULL);
+        if (distance < nearest_distance) {
+            nearest_distance = distance;
+            nearest = bolt;
+        }
+    }
+    return nearest;
 }
 
 void Bolt_Free(BOLT_s *bolt) {

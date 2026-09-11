@@ -1294,7 +1294,10 @@ struct GAMEMESSAGE_s {
     u8 active; // 0xf8
     u8 pad_0xf9[4];
     i8 player_index;
-    u8 pad_0xfe[0x114 - 0xfe];
+    u8 target_type; // 0xfe
+    u8 pad_0xff[0x10c - 0xff];
+    void (*draw_callback)(GAMEMESSAGE_s *, NUVEC *, f32); // 0x10c
+    u8 pad_0x110[4];
 };
 DECOMP_ASSERT(sizeof(GAMEMESSAGE_s) == 0x114, "GAMEMESSAGE_s size");
 static_assert(offsetof(GAMEMESSAGE_s, target_position) == 0x88, "game message target position offset");

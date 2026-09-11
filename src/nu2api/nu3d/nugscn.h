@@ -386,6 +386,7 @@ i32 NuGScnReadTexturesPS(i32 file, VARIPTR *buf, VARIPTR buf_end);
 void NuGScnCreatePS(NUGSCN *scene, VARIPTR *buf, VARIPTR *buf_end);
 i32 NuGScnFixupTID(NUGSCN *scene, i32 tid);
 void NuGScnFixupTIDs(NUGSCN *scene);
+i32 NuGScnRestoreTID(NUGSCN *scene, i32 tid);
 void NuGScnRestoreTIDs(NUGSCN *scene);
 
 extern "C" {
@@ -397,6 +398,7 @@ extern "C" {
     void NuGScnRemove(NUGSCN *scene);
     void NuGScnFixupPS(NUGSCN *scene);
     void NuGScnFixupTIDsPS(NUGSCN *scene);
+    void NuGScnRestoreTIDsPS(NUGSCN *scene);
     // The trailing flags argument is passed as 1 by every caller in the
     // original binary; the original implementation never reads it.
     i32 NuSpecialFind(NUGSCN *scene, struct nuhspecial_s *dest, char *name, i32 flags);

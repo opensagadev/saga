@@ -395,6 +395,7 @@ void DrawGameObjectsDraw(i32 pass);
 void EnableShadowMapRendering(i32 enable);
 void ResetShadowMapRendering();
 static void DrawParaphernalia(GameObject_s *object);
+void DrawTorpedos(GameObject_s *object);
 
 struct GAMEMESSAGE_s;
 struct HINT_s;
@@ -1674,9 +1675,6 @@ void DrawTopShelf(i32) {
         menu->item_column[menu_index] = menu_index;
         menu->item_row[menu_index] = 0;
     }
-}
-
-void DrawTorpedos(GameObject_s *) {
 }
 
 void Draw_LOADING() {

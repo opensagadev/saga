@@ -626,18 +626,6 @@ void PostResetCode(GameObject_s *obj) {
     }
 }
 
-static TORPEDOPACKET TorpedoPackets[16];
-
-TORPEDOPACKET *GetTorpedoPacket(void) {
-    for (i32 i = 0; i < 16; i++) {
-        if ((TorpedoPackets[i].field_0x1 & 1) == 0) {
-            TorpedoPackets[i].field_0x1 |= 1;
-            return &TorpedoPackets[i];
-        }
-    }
-    return NULL;
-}
-
 void SetHitPoints(GameObject_s *obj, i32 hp) {
     obj->current_hp = (u8)hp;
     if ((i8)hp > (i32)(u32)obj->hitpoints) {

@@ -420,7 +420,30 @@ extern "C" void NuGScnFromVideoMem(NUGSCNVIDEOMEMFN callback) {
 }
 extern "C" void NuGScnReadForMultiRender(void) {
 }
-extern "C" void NuGScnRestoreTIDsPS(void) {
+extern "C" void NuGScnRestoreTIDsPS(NUGSCN *scene) {
+    if (scene->display_list == NULL) {
+        return;
+    }
+
+    for (i32 i = 0; i < scene->display_list->nitems; ++i) {
+        NUDISPLAYLISTITEM *item = &scene->display_list->items[i];
+        if (item->type == 0xb0) {
+            i32 *packet = static_cast<i32 *>(item->next);
+            if (packet[0] == 2) {
+                for (i32 texture = 0; texture < 3; ++texture) {
+                    packet[texture + 2] = NuGScnRestoreTID(scene, packet[texture + 2]);
+                }
+            }
+            packet[1] = NuGScnRestoreTID(scene, packet[1]);
+        } else if (item->type == 0xae || item->type == 0xaf) {
+            i32 *packet = static_cast<i32 *>(item->next);
+            if (packet != NULL) {
+                for (i32 texture = 0; texture < 3; ++texture) {
+                    packet[texture] = NuGScnRestoreTID(scene, packet[texture]);
+                }
+            }
+        }
+    }
 }
 extern "C" void NuGScnRndr(NUGSCN *scene) {
     if (scene->additional_scenes != NULL && scene->rendered_additional_scene_count > 0) {

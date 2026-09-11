@@ -6,6 +6,7 @@
 #include "globals.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/render/fx/parts.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nuspecial.h"
@@ -20,6 +21,16 @@ void EnableShadowMapRendering(i32 enable);
 void ResetShadowMapRendering();
 void Draw3DObject(WORLDINFO_s *world, i32 object_index, NUVEC *position, u16 x_rotation, u16 y_rotation, u16 z_rotation,
                   f32 x_scale, f32 y_scale, f32 z_scale, i32 flags);
+
+i32 PartDraw_Torp(PART_s *part) {
+    i32 draw = PartDraw_Flickerer(part);
+    if (draw != 0 && WORLD->lev_objs[0x7b].active != 0) {
+        NUMTX matrix = part->transform;
+        NuMtxPreScaleU(&matrix, 0.1f * WORLD->giz_torp_machine_sys->scale);
+        NuSpecialDrawAt(&WORLD->lev_objs[0x7b].special, &matrix);
+    }
+    return draw;
+}
 
 enum GIZTORP_LEVEL_OBJECT {
     GIZTORP_LEVEL_OBJECT_GLOW = 0x121,

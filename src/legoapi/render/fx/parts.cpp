@@ -8,6 +8,7 @@
 #include "legoapi/render/core/rtl.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmos/traps/giztorpmachine.h"
 #include "legoapi/world/world.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/area.h"
@@ -2237,9 +2238,43 @@ i32 SetPartTarget(GameObject_s *object, PART_s *target) {
 WORLDINFO_s *WorldInfo_CurrentlyActive();
 extern f32 FRAMETIME;
 void PartCollide_3D(PART_s *);
+void PartCollide_2D(PART_s *);
 void PartUpdate_Heart(PART_s *);
 void PartStop_Flickerer(PART_s *);
 i32 PartDraw_Flickerer(PART_s *);
+i32 PartDraw_Torp(PART_s *);
+
+void AddTorpedoAsPart(nuvec_s *position, nuvec_s *velocity, float scale, float lifetime) {
+    WORLDINFO_s *world = WorldInfo_CurrentlyActive();
+    ADDPART_s params __attribute__((aligned(16))) = Default_ADDPART;
+    params.position = position;
+    params.velocity = velocity;
+    f32 torpedo_scale = 0.1f * WORLD->giz_torp_machine_sys->scale;
+    params.field_14 = torpedo_scale * GizmoPickupType[8].shadow_radius_x;
+    params.field_18 = torpedo_scale * GizmoPickupType[8].shadow_extent_x;
+    params.gravity = AreaPickupGravity;
+    if (params.gravity == 0.0f)
+        params.field_a4 = 15.0f;
+    params.special = &world->lev_objs[0x79].special;
+    params.field_28 = 0x79;
+    params.flags = 0x256;
+    params.move_fn = params.gravity == 0.0f ? PartMove_VehiclePickup : NULL;
+    params.field_40 = PartCollide_3D;
+    if (FreePlay != 0 && WORLD->current_level == ANAKINSFLIGHTB_LDATA)
+        params.field_40 = PartCollide_2D;
+    params.field_48 = NULL;
+    params.stop_fn = PartStop_Flickerer;
+    params.draw_fn = PartDraw_Torp;
+    params.field_88 = lifetime;
+    params.time_step = FRAMETIME;
+    params.field_c0 = scale;
+    PART_s *part = AddPart(&params);
+    if (part != NULL) {
+        part->rotation_y = qrand();
+        part->force_player_mask = 3;
+        part->field_214 = 0.1f * WORLD->giz_torp_machine_sys->scale * NU_SIN_LUT(0x4000);
+    }
+}
 
 void AddHeartAsPart(GameObject_s *recipient, nuvec_s *position, nuvec_s *velocity, float scale, float lifetime) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();

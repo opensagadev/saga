@@ -205,6 +205,7 @@ build:target --per_file_copt=^src/legoapi/gizmos/door/securitydoors\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/traps/shards\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/trigger/signals\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/props/objects/signal\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/props/objects/tubes\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/door/spinner\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/object/technos\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/transport/teleport\.cpp$@-O3

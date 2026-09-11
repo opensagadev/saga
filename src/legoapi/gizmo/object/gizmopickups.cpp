@@ -241,6 +241,3 @@ i32 InDoubleScoreZone(GameObject_s *object) {
     }
     return 0;
 }
-
-void DropTorpedoPickups(TORPEDOPACKET_s *, i32) {
-}
