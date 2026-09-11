@@ -1769,13 +1769,20 @@ struct GRABBER_s {
     };
     u8 reserved_498[0x4b0 - 0x498];
     CHARACTERMODEL_s *character_model; // 0x4b0, APICharacterLoaded result
-    u8 reserved_4b4[0x554 - 0x4b4];
+    u8 reserved_4b4[0x530 - 0x4b4];
+    f32 scale; // 0x530
+    f32 speed; // 0x534
+    f32 radius; // 0x538
+    u8 reserved_53c[0x554 - 0x53c];
     f32 platform_contact_timer; // 0x554
     u8 reserved_558;
     u8 flags_559;
-    u8 reserved_55a[0x560 - 0x55a];
+    u8 reserved_55a[0x55e - 0x55a];
+    i16 character_id; // 0x55e
     i16 platform_id; // 0x560
-    u8 reserved_562[0x568 - 0x562];
+    u8 move_xy;  // 0x562
+    u8 invert_x; // 0x563
+    u8 reserved_564[0x568 - 0x564];
 };
 DECOMP_ASSERT(sizeof(GRABBER_s) == 0x568, "GRABBER allocation size");
 DECOMP_ASSERT(offsetof(GRABBER_s, grab_matrix) == 0x40, "GRABBER grab matrix offset");
@@ -2655,7 +2662,44 @@ struct TEXTENTRY {
     i16 value;
     i16 pad;
 };
-struct TRAFFICANIMSYS_s {};
+struct TRAFFICANIM_s {
+    nuhspecial_s special;       // 0x000
+    void *animation;            // 0x00c
+    f32 end_frame;              // 0x010
+    f32 tfactor;                // 0x014
+    f32 frame_interval;         // 0x018
+    f32 random_interval;        // 0x01c
+    f32 room_frame_interval;    // 0x020
+    f32 y_offset;               // 0x024
+    i8 vehicle_indices[16];     // 0x028
+    u8 rooms[256];              // 0x038
+    i8 vehicle_count;           // 0x138
+    u8 disabled;                // 0x139
+    u8 reserved_13a[2];
+    f32 next_spawn_time;        // 0x13c
+};
+DECOMP_ASSERT(sizeof(TRAFFICANIM_s) == 0x140, "traffic animation size");
+
+struct TRAFFICANIMINSTANCE_s {
+    NULISTLNK link;          // 0x00
+    TRAFFICANIM_s *animation; // 0x08
+    f32 frame;               // 0x0c
+    i8 vehicle_index;        // 0x10
+    u8 reserved_11[3];
+};
+DECOMP_ASSERT(sizeof(TRAFFICANIMINSTANCE_s) == 0x14, "traffic animation instance size");
+
+struct TRAFFICANIMSYS_s {
+    TRAFFICANIM_s animations[64];          // 0x0000
+    nuhspecial_s vehicles[16];             // 0x5000
+    TRAFFICANIMINSTANCE_s instances[500];  // 0x50c0
+    NULISTHDR free_instances;              // 0x77d0
+    NULISTHDR active_instances;            // 0x77d8
+    i8 animation_count;                    // 0x77e0
+    i8 vehicle_count;                      // 0x77e1
+    u8 reserved_77e2[2];
+};
+DECOMP_ASSERT(sizeof(TRAFFICANIMSYS_s) == 0x77e4, "traffic animation system size");
 struct TUBE_s;
 struct ThingLevelData {};
 struct ThingRemoveData {};

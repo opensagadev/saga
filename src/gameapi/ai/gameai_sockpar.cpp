@@ -1,11 +1,20 @@
 #include "decomp.h"
 #include "legoapi/props/system/socksys.h"
+#include "nu2api/nucore/nustring.h"
 #include "nu2api/nufile/nufpar.h"
 #include "nu2api/numath/nufloat.h"
 
 extern "C" SOCK *sockpar_sock;
+i32 GetSockEdgeEnum(char *name);
 
-static __used__ void SockParBlend(nufpar_s *, void *) {
+static __used__ void SockParBlend(nufpar_s *parser, void *) {
+    i32 value = NuFParGetInt(parser);
+    NuFParGetWord(parser);
+    i32 edge = GetSockEdgeEnum(parser->word_buf);
+    u32 index = sockpar_sock->blend_count;
+    sockpar_sock->blend_entries[index].edge = static_cast<i8>(edge);
+    sockpar_sock->blend_entries[index].value = static_cast<u8>(value);
+    sockpar_sock->blend_count = index + 1;
 }
 static __used__ void SockParCam1Zoom(nufpar_s *parser, void *) {
     sockpar_sock->single_player_pullback = NuFParGetFloat(parser);
@@ -98,33 +107,64 @@ static __used__ void SockParCamZOffset(nufpar_s *parser, void *) {
     sockpar_sock->camera_arena_offset.z = NuFParGetFloat(parser);
 }
 static __used__ void SockParCircuit(nufpar_s *, void *) {
+    sockpar_sock->looping = 1;
 }
-static __used__ void SockParCurSpeed(nufpar_s *, void *) {
+static __used__ void SockParCurSpeed(nufpar_s *parser, void *) {
+    sockpar_sock->current_speed = NuFParGetFloat(parser);
 }
 static __used__ void SockParIgnore(nufpar_s *parser, void *) {
     while (NuFParGetWord(parser) != 0) {
         SetSockBit(sockpar_sock, NuAToI(parser->word_buf));
     }
 }
-static __used__ void SockParMidforce(nufpar_s *, void *) {
+static __used__ void SockParMidforce(nufpar_s *parser, void *) {
+    if (NuFParGetWord(parser) == 0) {
+        return;
+    }
+    if (NuStrICmp(parser->word_buf, const_cast<char *>("y")) == 0) {
+        sockpar_sock->flags |= 0x02;
+    } else if (NuStrICmp(parser->word_buf, const_cast<char *>("xz")) == 0) {
+        sockpar_sock->flags |= 0x04;
+    } else if (NuStrICmp(parser->word_buf, const_cast<char *>("xyz")) == 0) {
+        sockpar_sock->flags |= 0x04;
+        sockpar_sock->flags ^= 0x04;
+    }
 }
-static __used__ void SockParMidforceYscale(nufpar_s *, void *) {
+static __used__ void SockParMidforceYscale(nufpar_s *parser, void *) {
+    sockpar_sock->unknown_7c = NuFParGetFloat(parser);
 }
 static __used__ void SockParMidForceDown(nufpar_s *, void *) {
+    sockpar_sock->flags |= 0x08;
 }
-static __used__ void SockParMidForceYScale(nufpar_s *, void *) {
+static __used__ void SockParMidForceYScale(nufpar_s *parser, void *) {
+    sockpar_sock->unknown_7c = NuFParGetFloat(parser);
 }
-static __used__ void SockParMidRangeInner(nufpar_s *, void *) {
+static __used__ void SockParMidRangeInner(nufpar_s *parser, void *) {
+    sockpar_sock->mid_force_inner_radius = NuFParGetFloat(parser);
 }
-static __used__ void SockParMidRangeOuter(nufpar_s *, void *) {
+static __used__ void SockParMidRangeOuter(nufpar_s *parser, void *) {
+    f32 radius = NuFParGetFloat(parser);
+    if (radius >= 0.0f && radius > sockpar_sock->mid_force_inner_radius) {
+        sockpar_sock->mid_force_outer_radius = radius;
+    } else {
+        sockpar_sock->mid_force_outer_radius = sockpar_sock->mid_force_inner_radius;
+    }
 }
 static __used__ void SockParMisc1(nufpar_s *, void *) {
+    sockpar_sock->flags |= 0x0800;
 }
 static __used__ void SockParMisc2(nufpar_s *, void *) {
+    sockpar_sock->flags |= 0x1000;
 }
-static __used__ void SockParMoveAngle(nufpar_s *, void *) {
+static __used__ void SockParMoveAngle(nufpar_s *parser, void *) {
+    sockpar_sock->flags |= 0x40;
+    const i32 angle = NuFParGetInt(parser) % 360;
+    sockpar_sock->input_yaw = static_cast<u16>((angle << 16) / 360);
 }
-static __used__ void SockParName(nufpar_s *, void *) {
+static __used__ void SockParName(nufpar_s *parser, void *) {
+    if (NuFParGetWord(parser) != 0 && NuStrLen(parser->word_buf) < 16) {
+        NuStrCpy(sockpar_sock->name, parser->word_buf);
+    }
 }
 static __used__ void SockParObj(nufpar_s *, void *) {
 }

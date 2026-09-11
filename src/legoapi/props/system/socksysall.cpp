@@ -1476,7 +1476,14 @@ extern "C" {
 
 } // extern "C"
 
-void GetSockEdgeEnum(char *) {
+i32 GetSockEdgeEnum(char *name) {
+    if (NuStrICmp(name, const_cast<char *>("SIDE")) == 0) {
+        return 0;
+    }
+    if (NuStrICmp(name, const_cast<char *>("END")) == 0) {
+        return 1;
+    }
+    return -1;
 }
 
 void GoingForwardsAlongNarrowSock(GameObject_s *) {

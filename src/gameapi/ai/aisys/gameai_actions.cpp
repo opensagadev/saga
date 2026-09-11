@@ -287,8 +287,12 @@ static __used__ i32 Action_CreateSplineCreatures(AISYS_s *system, AISCRIPTPROCES
     return 1;
 }
 
-static __used__ f32 Condition_HeadTurnRestricted(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
-    return 0;
+static __used__ f32 Condition_HeadTurnRestricted(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *) {
+    GameObject_s *object = ActionOwner(packet);
+    if (object == NULL) {
+        return 0.0f;
+    }
+    return static_cast<f32>(static_cast<u32>(object->field_0xefe & 1));
 }
 
 static __used__ f32 Condition_NetworkGameOnGoing(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {

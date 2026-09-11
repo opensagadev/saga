@@ -9,8 +9,11 @@
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/render/core/render.h"
 #include "legoapi/render/fx/parts.h"
+#include "legoapi/world/levels/levels.h"
 #include "legoapi/world/world.h"
+#include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nutex.h"
@@ -86,7 +89,14 @@ void BobaRocket_Move(PART_s *, float) {
 void DagobahA_Update(WORLDINFO_s *) {
 }
 
-void HothBattleA_Draw(WORLDINFO_s *) {
+void HothBattleA_Draw(WORLDINFO_s *world) {
+    if (TimingBarSet == 5) {
+        TBOPENFN("mini", 5);
+    }
+    DrawMiniSnowTroopers(world);
+    if (TimingBarSet == 5) {
+        TBCLOSEFN("mini", 5);
+    }
 }
 
 void HothBattleA_Init(WORLDINFO_s *) {
@@ -95,13 +105,30 @@ void HothBattleA_Init(WORLDINFO_s *) {
 void HothBattleB_Init(WORLDINFO_s *) {
 }
 
-void HothBattleC_Draw(WORLDINFO_s *) {
+void HothBattleC_Draw(WORLDINFO_s *world) {
+    if (TimingBarSet == 5) {
+        TBOPENFN("mini", 5);
+    }
+    DrawMiniSnowTroopers(world);
+    if (TimingBarSet == 5) {
+        TBCLOSEFN("mini", 5);
+    }
 }
 
 void HothBattleC_Init(WORLDINFO_s *) {
 }
 
-void HothBattleE_Draw(WORLDINFO_s *) {
+void HothBattleE_Draw(WORLDINFO_s *world) {
+    if (NuIOS_IsLowEndDevice()) {
+        return;
+    }
+    if (TimingBarSet == 5) {
+        TBOPENFN("mini", 5);
+    }
+    DrawMiniSnowTroopers(world);
+    if (TimingBarSet == 5) {
+        TBCLOSEFN("mini", 5);
+    }
 }
 
 void HothBattleE_Init(WORLDINFO_s *) {

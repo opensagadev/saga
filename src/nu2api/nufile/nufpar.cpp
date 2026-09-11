@@ -867,21 +867,3 @@ static __used__ void SockCamCAMERARAYTILTDIST(nufpar_s *, void *) {
 
 static __used__ void SockCamCAMERARAYTILTHEIGHT(nufpar_s *, void *) {
 }
-
-static __used__ void Traffic_animobj(nufpar_s *) {
-}
-
-static __used__ void Traffic_tfactor(nufpar_s *) {
-}
-
-static __used__ void Traffic_vehicle(nufpar_s *) {
-}
-
-static __used__ void TrafficAnim_yoffset(nufpar_s *) {
-}
-
-static __used__ void Traffic_rand_interval(nufpar_s *) {
-}
-
-static __used__ void Traffic_frame_interval(nufpar_s *) {
-}

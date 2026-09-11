@@ -83,9 +83,21 @@ struct BOLTTYPE_s {
     f32 field_20;
     f32 field_24;
     i32 field_28;
-    i32 field_2c;
-    i32 field_30;
-    i32 field_34;
+    union {
+        i32 field_2c;
+        struct {
+            i16 field_2c_lo;
+            i16 debris_id;
+        };
+    };
+    union {
+        i32 field_30;
+        i16 moving_debris[2];
+    };
+    union {
+        i32 field_34;
+        i16 moving_debris_counts[2];
+    };
     i16 field_38;
     i16 field_3a;
     u8 field_3c;
@@ -102,7 +114,16 @@ struct BOLTTYPE_s {
     u32 field_60;
     i16 shoot_sfx_id;
     i16 hit_sfx_id;
-    u8 pad_68[0x3c];
+    union {
+        u8 pad_68[0x3c];
+        struct {
+            nuhspecial_s object_special;
+            nuhspecial_s glow_special;
+            nuhspecial_s reference_object_special;
+            nuhspecial_s reference_glow_special;
+            nuhspecial_s shadow_special;
+        } specials;
+    };
 };
 DECOMP_ASSERT(sizeof(BOLTTYPE_s) == 0xa4, "BOLTTYPE_s size");
 DECOMP_ASSERT(offsetof(BOLTTYPE_s, end_callback) == 0x4c, "BOLTTYPE end callback offset");

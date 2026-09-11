@@ -399,11 +399,10 @@ void Doors_Configure(WORLDINFO_s *world, char *config) {
     world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
     DOOR_s *doors = reinterpret_cast<DOOR_s *>(world->giz_buffer.void_ptr);
     world->doors = doors;
-    door_config_world = world;
-    door_config = doors;
     NuFParPushCom(parser, Door_ConfigKeywords);
 
-    bool in_door = false;
+    i32 in_door = 0;
+    DOOR_s *door = doors;
     while (NuFParGetLine(parser) != 0) {
         if (NuFParGetWord(parser) == 0) {
             continue;
@@ -414,25 +413,27 @@ void Doors_Configure(WORLDINFO_s *world, char *config) {
                 continue;
             }
 
-            door_config->name[0] = '\0';
-            door_config->camera_spline_name[0] = '\0';
-            door_config->spline = NULL;
-            door_config->pos = v000;
-            door_config->radius = 1.0f;
-            door_config->normal = v010;
-            door_config->level = -1;
-            door_config->freeplay_level = -1;
-            door_config->next_sock = 0xff;
-            door_config->flags = 0;
-            door_config->vehicle = 0xff;
-            door_config->active = 0;
-            door_config->camera_spline = NULL;
-            door_config->camera_wait = 0.0f;
-            door_config->camera_blend_time = 1.0f;
-            door_config->vehicle_mask = 0;
-            door_config->vehicle_mode = 0;
-            door_config->cutscene = NULL;
-            in_door = true;
+            door_config_world = world;
+            door_config = door;
+            door->name[0] = '\0';
+            door->camera_spline_name[0] = '\0';
+            door->spline = NULL;
+            door->pos = v000;
+            door->radius = 1.0f;
+            door->normal = v001;
+            door->level = -1;
+            door->freeplay_level = -1;
+            door->next_sock = 0xff;
+            door->flags = 0;
+            door->vehicle = 0xff;
+            door->active = 0;
+            door->camera_spline = NULL;
+            door->camera_wait = 0.0f;
+            door->camera_blend_time = 1.0f;
+            door->vehicle_mask = 0;
+            door->vehicle_mode = 0;
+            door->cutscene = NULL;
+            in_door = 1;
             continue;
         }
 
@@ -441,19 +442,19 @@ void Doors_Configure(WORLDINFO_s *world, char *config) {
             continue;
         }
 
-        if (door_config->spline != NULL && door_config->level != -1) {
-            if (door_config->freeplay_level == -1) {
-                door_config->freeplay_level = door_config->level;
+        if (door->spline != NULL && door->level != -1) {
+            if (door->freeplay_level == -1) {
+                door->freeplay_level = door->level;
             }
             world->door_count++;
-            door_config++;
+            door++;
         }
-        in_door = false;
+        in_door = 0;
     }
 
     NuFParDestroy(parser);
     if (world->door_count > 0) {
-        world->giz_buffer.addr = ALIGN(reinterpret_cast<usize>(door_config), 16);
+        world->giz_buffer.addr = ALIGN(reinterpret_cast<usize>(door), 16);
     } else {
         world->doors = NULL;
     }

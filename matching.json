@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 38.29906,
+    "fuzzy_match_percent": 38.416492,
     "total_code": "4722419",
-    "matched_code": "365389",
-    "matched_code_percent": 7.7373266,
+    "matched_code": "366415",
+    "matched_code_percent": 7.759053,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4396,
-    "matched_functions_percent": 32.66216,
+    "matched_functions": 4412,
+    "matched_functions_percent": 32.781036,
     "total_units": 1
   },
   "text": {
@@ -24675,7 +24675,7 @@
           "address": 1587392,
           "offset": 697424,
           "size": 104,
-          "match_percent": 14.666667
+          "match_percent": 99.96667
         },
         {
           "name": "_ZL28Condition_NetworkGameOnGoingP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
@@ -24722,7 +24722,7 @@
           "address": 4714032,
           "offset": 3824064,
           "size": 27,
-          "match_percent": 31.428572
+          "match_percent": 99.85714
         },
         {
           "name": "_ZL11BT_convergeP8nufpar_s",
@@ -24730,7 +24730,7 @@
           "address": 4714064,
           "offset": 3824096,
           "size": 27,
-          "match_percent": 31.428572
+          "match_percent": 99.85714
         },
         {
           "name": "_ZL20BT_canonlyhitplayersP8nufpar_s",
@@ -24738,7 +24738,7 @@
           "address": 4714096,
           "offset": 3824128,
           "size": 27,
-          "match_percent": 31.428572
+          "match_percent": 99.85714
         },
         {
           "name": "_ZL13BT_no_terrainP8nufpar_s",
@@ -24746,7 +24746,7 @@
           "address": 4714128,
           "offset": 3824160,
           "size": 24,
-          "match_percent": 31.428572
+          "match_percent": 99.85714
         },
         {
           "name": "_ZL13BT_no_collideP8nufpar_s",
@@ -24754,7 +24754,7 @@
           "address": 4714160,
           "offset": 3824192,
           "size": 27,
-          "match_percent": 31.428572
+          "match_percent": 99.85714
         },
         {
           "name": "_ZL15BT_trooper_boltP8nufpar_s",
@@ -24762,7 +24762,7 @@
           "address": 4714192,
           "offset": 3824224,
           "size": 27,
-          "match_percent": 31.428572
+          "match_percent": 99.85714
         },
         {
           "name": "_ZL16BT_single_debrisP8nufpar_s",
@@ -24770,7 +24770,7 @@
           "address": 4714224,
           "offset": 3824256,
           "size": 27,
-          "match_percent": 31.428572
+          "match_percent": 99.85714
         },
         {
           "name": "_ZL9BT_damageP8nufpar_s",
@@ -24778,7 +24778,7 @@
           "address": 4714800,
           "offset": 3824832,
           "size": 57,
-          "match_percent": 15.714286
+          "match_percent": 45.785713
         },
         {
           "name": "_ZL13BT_rand_angleP8nufpar_s",
@@ -24786,7 +24786,7 @@
           "address": 4714864,
           "offset": 3824896,
           "size": 79,
-          "match_percent": 12.222222
+          "match_percent": 54.5
         },
         {
           "name": "_ZL8BT_scaleP8nufpar_s",
@@ -24794,7 +24794,7 @@
           "address": 4714944,
           "offset": 3824976,
           "size": 57,
-          "match_percent": 15.714286
+          "match_percent": 61.642857
         },
         {
           "name": "_ZL9BT_radiusP8nufpar_s",
@@ -24802,7 +24802,7 @@
           "address": 4715008,
           "offset": 3825040,
           "size": 57,
-          "match_percent": 15.714286
+          "match_percent": 61.642857
         },
         {
           "name": "_ZL11BT_durationP8nufpar_s",
@@ -24810,7 +24810,7 @@
           "address": 4715072,
           "offset": 3825104,
           "size": 57,
-          "match_percent": 15.714286
+          "match_percent": 61.642857
         },
         {
           "name": "_ZL8BT_speedP8nufpar_s",
@@ -24818,7 +24818,7 @@
           "address": 4715136,
           "offset": 3825168,
           "size": 57,
-          "match_percent": 15.714286
+          "match_percent": 61.642857
         },
         {
           "name": "_ZL10BT_sfx_hitP8nufpar_s",
@@ -24826,7 +24826,7 @@
           "address": 4715680,
           "offset": 3825712,
           "size": 84,
-          "match_percent": 12.857142
+          "match_percent": 82.14286
         },
         {
           "name": "_ZL12BT_sfx_shootP8nufpar_s",
@@ -24834,7 +24834,7 @@
           "address": 4715776,
           "offset": 3825808,
           "size": 84,
-          "match_percent": 12.857142
+          "match_percent": 82.14286
         },
         {
           "name": "_ZL14BT_sceneconfigP8nufpar_s",
@@ -24842,7 +24842,7 @@
           "address": 4715872,
           "offset": 3825904,
           "size": 235,
-          "match_percent": 3.728814
+          "match_percent": 99.79661
         },
         {
           "name": "_ZL11BT_part_hitP8nufpar_s",
@@ -24850,7 +24850,7 @@
           "address": 4716112,
           "offset": 3826144,
           "size": 100,
-          "match_percent": 9.166667
+          "match_percent": 83.25
         },
         {
           "name": "_ZL9BT_debrisP8nufpar_s",
@@ -24858,7 +24858,7 @@
           "address": 4716224,
           "offset": 3826256,
           "size": 100,
-          "match_percent": 9.166667
+          "match_percent": 83.25
         },
         {
           "name": "_ZL16BT_debris_movingP8nufpar_s",
@@ -24866,7 +24866,7 @@
           "address": 4716336,
           "offset": 3826368,
           "size": 183,
-          "match_percent": 5.116279
+          "match_percent": 86.18604
         },
         {
           "name": "_ZL13BT_shadow_objP8nufpar_s",
@@ -24874,7 +24874,7 @@
           "address": 4716528,
           "offset": 3826560,
           "size": 104,
-          "match_percent": 8.8
+          "match_percent": 99.92
         },
         {
           "name": "_ZL15BT_ref_glow_objP8nufpar_s",
@@ -24882,7 +24882,7 @@
           "address": 4716640,
           "offset": 3826672,
           "size": 104,
-          "match_percent": 8.8
+          "match_percent": 99.92
         },
         {
           "name": "_ZL11BT_glow_objP8nufpar_s",
@@ -24890,7 +24890,7 @@
           "address": 4716752,
           "offset": 3826784,
           "size": 141,
-          "match_percent": 6.285714
+          "match_percent": 76.11429
         },
         {
           "name": "_ZL10BT_ref_objP8nufpar_s",
@@ -24898,7 +24898,7 @@
           "address": 4716896,
           "offset": 3826928,
           "size": 101,
-          "match_percent": 8.8
+          "match_percent": 99.92
         },
         {
           "name": "_ZL6BT_objP8nufpar_s",
@@ -24906,7 +24906,7 @@
           "address": 4717008,
           "offset": 3827040,
           "size": 141,
-          "match_percent": 6.285714
+          "match_percent": 76.11429
         },
         {
           "name": "_ZL7BT_nameP8nufpar_s",
@@ -24914,7 +24914,7 @@
           "address": 4717152,
           "offset": 3827184,
           "size": 112,
-          "match_percent": 7.586207
+          "match_percent": 99.965515
         }
       ]
     },
@@ -25054,7 +25054,7 @@
           "address": 2269888,
           "offset": 1379920,
           "size": 27,
-          "match_percent": 13.333333
+          "match_percent": 100.0
         },
         {
           "name": "_ZL11Grab_shadowP8nufpar_s",
@@ -25062,7 +25062,7 @@
           "address": 2270400,
           "offset": 1380432,
           "size": 119,
-          "match_percent": 7.096774
+          "match_percent": 99.96774
         },
         {
           "name": "_ZL12Grab_move_xyP8nufpar_s",
@@ -25070,7 +25070,7 @@
           "address": 2270528,
           "offset": 1380560,
           "size": 53,
-          "match_percent": 22.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL11Grab_rotateP8nufpar_s",
@@ -25078,7 +25078,7 @@
           "address": 2270592,
           "offset": 1380624,
           "size": 80,
-          "match_percent": 11.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL10Grab_scaleP8nufpar_s",
@@ -25086,7 +25086,7 @@
           "address": 2270672,
           "offset": 1380704,
           "size": 62,
-          "match_percent": 14.666667
+          "match_percent": 100.0
         },
         {
           "name": "_ZL10Grab_speedP8nufpar_s",
@@ -25094,7 +25094,7 @@
           "address": 2270736,
           "offset": 1380768,
           "size": 62,
-          "match_percent": 14.666667
+          "match_percent": 100.0
         },
         {
           "name": "_ZL11Grab_radiusP8nufpar_s",
@@ -25102,7 +25102,7 @@
           "address": 2270800,
           "offset": 1380832,
           "size": 62,
-          "match_percent": 14.666667
+          "match_percent": 100.0
         },
         {
           "name": "_ZL9Grab_typeP8nufpar_s",
@@ -25110,7 +25110,7 @@
           "address": 2270864,
           "offset": 1380896,
           "size": 213,
-          "match_percent": 4.4
+          "match_percent": 99.8
         }
       ]
     },
@@ -25125,7 +25125,7 @@
           "address": 3933588,
           "offset": 3043620,
           "size": 28,
-          "match_percent": 44.444443
+          "match_percent": 100.0
         },
         {
           "name": "_ZL15SockParCurSpeedP8nufpar_sPv",
@@ -25133,7 +25133,7 @@
           "address": 3933616,
           "offset": 3043648,
           "size": 62,
-          "match_percent": 19.047619
+          "match_percent": 100.0
         },
         {
           "name": "_ZL20SockParMidRangeInnerP8nufpar_sPv",
@@ -25141,7 +25141,7 @@
           "address": 3933678,
           "offset": 3043710,
           "size": 62,
-          "match_percent": 19.047619
+          "match_percent": 100.0
         },
         {
           "name": "_ZL20SockParMidRangeOuterP8nufpar_sPv",
@@ -25149,7 +25149,7 @@
           "address": 3933740,
           "offset": 3043772,
           "size": 139,
-          "match_percent": 9.523809
+          "match_percent": 99.97619
         },
         {
           "name": "_ZL21SockParMidforceYscaleP8nufpar_sPv",
@@ -25157,7 +25157,7 @@
           "address": 3933879,
           "offset": 3043911,
           "size": 62,
-          "match_percent": 19.047619
+          "match_percent": 100.0
         },
         {
           "name": "_ZL15SockParMidforceP8nufpar_sPv",
@@ -25165,7 +25165,7 @@
           "address": 3933941,
           "offset": 3043973,
           "size": 273,
-          "match_percent": 5.194805
+          "match_percent": 95.80519
         },
         {
           "name": "_ZL19SockParMidForceDownP8nufpar_sPv",
@@ -25173,7 +25173,7 @@
           "address": 3934214,
           "offset": 3044246,
           "size": 43,
-          "match_percent": 30.76923
+          "match_percent": 100.0
         },
         {
           "name": "_ZL21SockParMidForceYScaleP8nufpar_sPv",
@@ -25181,7 +25181,7 @@
           "address": 3934257,
           "offset": 3044289,
           "size": 62,
-          "match_percent": 19.047619
+          "match_percent": 100.0
         },
         {
           "name": "_ZL22SockParCamScaleLateralP8nufpar_sPv",
@@ -25373,7 +25373,7 @@
           "address": 3936069,
           "offset": 3046101,
           "size": 157,
-          "match_percent": 6.896552
+          "match_percent": 80.913795
         },
         {
           "name": "_ZL16SockParCamBehindP8nufpar_sPv",
@@ -25437,7 +25437,7 @@
           "address": 3936773,
           "offset": 3046805,
           "size": 43,
-          "match_percent": 30.76923
+          "match_percent": 100.0
         },
         {
           "name": "_ZL12SockParMisc2P8nufpar_sPv",
@@ -25445,7 +25445,7 @@
           "address": 3936816,
           "offset": 3046848,
           "size": 43,
-          "match_percent": 30.76923
+          "match_percent": 100.0
         },
         {
           "name": "_ZL13SockParIgnoreP8nufpar_sPv",
@@ -25469,7 +25469,7 @@
           "address": 3936987,
           "offset": 3047019,
           "size": 114,
-          "match_percent": 11.764706
+          "match_percent": 100.0
         },
         {
           "name": "_ZL10SockParObjP8nufpar_sPv",
@@ -25485,7 +25485,7 @@
           "address": 3937579,
           "offset": 3047611,
           "size": 174,
-          "match_percent": 7.843137
+          "match_percent": 70.13725
         }
       ]
     },
@@ -46806,7 +46806,7 @@
           "address": 4811376,
           "offset": 3921408,
           "size": 419,
-          "match_percent": 2.64151
+          "match_percent": 30.85849
         },
         {
           "name": "_Z19CharPlatforms_ResetP17CHARPLATFORMSYS_s",
@@ -46822,7 +46822,7 @@
           "address": 4812080,
           "offset": 3922112,
           "size": 457,
-          "match_percent": 89.36752
+          "match_percent": 89.15385
         },
         {
           "name": "_Z30CharPlatform_FindObjFromPlatIDP17CHARPLATFORMSYS_si",
@@ -63203,7 +63203,7 @@
           "address": 4723536,
           "offset": 3833568,
           "size": 4485,
-          "match_percent": 55.77952
+          "match_percent": 55.352142
         },
         {
           "name": "_Z8Bolt_AddP12GameObject_sP7nuvec_sP7numtx_sii",
@@ -63259,7 +63259,7 @@
           "address": 4738176,
           "offset": 3848208,
           "size": 4533,
-          "match_percent": 33.474445
+          "match_percent": 33.392223
         },
         {
           "name": "_Z12BoltSys_InitP7BOLTSYS",
@@ -67480,7 +67480,55 @@
           "address": 900768,
           "offset": 10800,
           "size": 93,
-          "match_percent": 29.411764
+          "match_percent": 99.35294
+        },
+        {
+          "name": "_ZL15Traffic_tfactorP8nufpar_s",
+          "demangled_name": "Traffic_tfactor(nufpar_s*)",
+          "address": 2362720,
+          "offset": 1472752,
+          "size": 40,
+          "match_percent": 99.90909
+        },
+        {
+          "name": "_ZL21Traffic_rand_intervalP8nufpar_s",
+          "demangled_name": "Traffic_rand_interval(nufpar_s*)",
+          "address": 2362768,
+          "offset": 1472800,
+          "size": 40,
+          "match_percent": 99.90909
+        },
+        {
+          "name": "_ZL22Traffic_frame_intervalP8nufpar_s",
+          "demangled_name": "Traffic_frame_interval(nufpar_s*)",
+          "address": 2362816,
+          "offset": 1472848,
+          "size": 40,
+          "match_percent": 99.90909
+        },
+        {
+          "name": "_ZL19TrafficAnim_yoffsetP8nufpar_s",
+          "demangled_name": "TrafficAnim_yoffset(nufpar_s*)",
+          "address": 2362864,
+          "offset": 1472896,
+          "size": 61,
+          "match_percent": 99.9375
+        },
+        {
+          "name": "_ZL15Traffic_vehicleP8nufpar_s",
+          "demangled_name": "Traffic_vehicle(nufpar_s*)",
+          "address": 2362928,
+          "offset": 1472960,
+          "size": 302,
+          "match_percent": 68.80723
+        },
+        {
+          "name": "_ZL15Traffic_animobjP8nufpar_s",
+          "demangled_name": "Traffic_animobj(nufpar_s*)",
+          "address": 2363232,
+          "offset": 1473264,
+          "size": 294,
+          "match_percent": 84.12987
         },
         {
           "name": "_Z24TrafficAnimSys_ConfigureP11WORLDINFO_sPc",
@@ -67488,7 +67536,7 @@
           "address": 2363536,
           "offset": 1473568,
           "size": 775,
-          "match_percent": 2.312139
+          "match_percent": 70.45665
         },
         {
           "name": "_Z20TrafficAnimSys_ResetP16TRAFFICANIMSYS_s",
@@ -67496,7 +67544,7 @@
           "address": 2364320,
           "offset": 1474352,
           "size": 599,
-          "match_percent": 2.671233
+          "match_percent": 69.26712
         },
         {
           "name": "_Z21TrafficAnimSys_UpdateP16TRAFFICANIMSYS_s",
@@ -67504,7 +67552,7 @@
           "address": 2364928,
           "offset": 1474960,
           "size": 649,
-          "match_percent": 2.54902
+          "match_percent": 3.137255
         },
         {
           "name": "_Z19TrafficAnimSys_DrawP16TRAFFICANIMSYS_s",
@@ -67512,7 +67560,7 @@
           "address": 2365584,
           "offset": 1475616,
           "size": 580,
-          "match_percent": 2.666667
+          "match_percent": 3.2
         }
       ]
     },
@@ -73264,7 +73312,7 @@
           "address": 4744704,
           "offset": 3854736,
           "size": 678,
-          "match_percent": 0.190789
+          "match_percent": 8.519737
         },
         {
           "name": "_Z10Door_Resetv",
@@ -73381,7 +73429,7 @@
           "address": 2012688,
           "offset": 1122720,
           "size": 161,
-          "match_percent": 5.238095
+          "match_percent": 100.0
         }
       ]
     },
@@ -73851,7 +73899,7 @@
           "address": 3937474,
           "offset": 3047506,
           "size": 105,
-          "match_percent": 12.121212
+          "match_percent": 99.93939
         },
         {
           "name": "SockSysConfigureNuFPar",
@@ -83024,7 +83072,7 @@
           "address": 2112736,
           "offset": 1222768,
           "size": 101,
-          "match_percent": 99.76
+          "match_percent": 99.96
         }
       ]
     },
@@ -84708,7 +84756,7 @@
           "address": 2217824,
           "offset": 1327856,
           "size": 128,
-          "match_percent": 4.375
+          "match_percent": 99.9375
         },
         {
           "name": "_Z16HothBattleB_InitP11WORLDINFO_s",
@@ -84748,7 +84796,7 @@
           "address": 2219120,
           "offset": 1329152,
           "size": 128,
-          "match_percent": 4.375
+          "match_percent": 99.9375
         },
         {
           "name": "_Z21HothBattle_Melee_initP18HOTHBATTLE_MELEE_s",
@@ -84764,7 +84812,7 @@
           "address": 2219296,
           "offset": 1329328,
           "size": 144,
-          "match_percent": 3.888889
+          "match_percent": 99.94444
         },
         {
           "name": "_Z17HothBattleE_PanelP11WORLDINFO_s",
@@ -105762,54 +105810,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nufpar.o",
       "functions": [
         {
-          "name": "_ZL15Traffic_tfactorP8nufpar_s",
-          "demangled_name": "Traffic_tfactor(nufpar_s*)",
-          "address": 2362720,
-          "offset": 1472752,
-          "size": 40,
-          "match_percent": 34.545456
-        },
-        {
-          "name": "_ZL21Traffic_rand_intervalP8nufpar_s",
-          "demangled_name": "Traffic_rand_interval(nufpar_s*)",
-          "address": 2362768,
-          "offset": 1472800,
-          "size": 40,
-          "match_percent": 34.545456
-        },
-        {
-          "name": "_ZL22Traffic_frame_intervalP8nufpar_s",
-          "demangled_name": "Traffic_frame_interval(nufpar_s*)",
-          "address": 2362816,
-          "offset": 1472848,
-          "size": 40,
-          "match_percent": 34.545456
-        },
-        {
-          "name": "_ZL19TrafficAnim_yoffsetP8nufpar_s",
-          "demangled_name": "TrafficAnim_yoffset(nufpar_s*)",
-          "address": 2362864,
-          "offset": 1472896,
-          "size": 61,
-          "match_percent": 13.75
-        },
-        {
-          "name": "_ZL15Traffic_vehicleP8nufpar_s",
-          "demangled_name": "Traffic_vehicle(nufpar_s*)",
-          "address": 2362928,
-          "offset": 1472960,
-          "size": 302,
-          "match_percent": 3.975903
-        },
-        {
-          "name": "_ZL15Traffic_animobjP8nufpar_s",
-          "demangled_name": "Traffic_animobj(nufpar_s*)",
-          "address": 2363232,
-          "offset": 1473264,
-          "size": 294,
-          "match_percent": 3.506494
-        },
-        {
           "name": "_Z9NuGetCharP8nufpar_s",
           "demangled_name": "NuGetChar(nufpar_s*)",
           "address": 2487178,
@@ -116964,7 +116964,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -116974,7 +116973,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -117057,7 +117055,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117067,7 +117064,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -117150,7 +117146,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117160,7 +117155,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -117254,7 +117248,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117264,7 +117257,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -117392,7 +117384,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117402,7 +117393,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -117496,7 +117486,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117506,7 +117495,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -117600,7 +117588,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117610,7 +117597,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -117704,7 +117690,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117714,7 +117699,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -117808,7 +117792,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117818,7 +117801,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -117912,7 +117894,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117922,7 +117903,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -118217,7 +118197,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118227,7 +118206,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -118321,7 +118299,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118331,7 +118308,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -118425,7 +118401,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118435,7 +118410,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -118574,7 +118548,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118584,7 +118557,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -118689,7 +118661,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118699,7 +118670,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -118914,7 +118884,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118924,7 +118893,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -119093,7 +119061,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119103,7 +119070,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -119273,7 +119239,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119283,7 +119248,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -119377,7 +119341,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119387,7 +119350,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -119481,7 +119443,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119491,7 +119452,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -119585,7 +119545,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119595,7 +119554,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -119742,7 +119700,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119752,7 +119709,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -119846,7 +119802,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119856,7 +119811,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -119961,7 +119915,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119971,7 +119924,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -120065,7 +120017,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120075,7 +120026,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -120181,7 +120131,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120191,7 +120140,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -120285,7 +120233,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120295,7 +120242,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -120423,7 +120369,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120433,7 +120378,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -120527,7 +120471,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120537,7 +120480,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -120631,7 +120573,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120641,7 +120582,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -120735,7 +120675,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120745,7 +120684,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -120902,7 +120840,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120912,7 +120849,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -121006,7 +120942,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -121016,7 +120951,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -121110,7 +121044,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -121120,7 +121053,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -121561,7 +121493,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -121571,7 +121502,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -121793,7 +121723,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -121803,7 +121732,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -122000,7 +121928,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -122010,7 +121937,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -122475,7 +122401,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -122485,7 +122410,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -122579,7 +122503,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/items/objects/traffic.cpp.o",
         "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -122589,7 +122512,6 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o",
         "legoapi/props/objects/lever.cpp.o",
         "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",

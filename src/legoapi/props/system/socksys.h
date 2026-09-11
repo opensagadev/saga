@@ -166,8 +166,14 @@ typedef struct SOCK {
     u16 unknown_fc;                 // 0xfc — count of specials at 0xf8
     u8 unknown_fe;                  // 0xfe
     u8 unknown_ff;                  // 0xff
-    u8 unknown_100[16];             // 0x100 — exception entries (2 bytes each)
-    u32 unknown_110;                // 0x110 — exception entry count
+    struct {
+        u8 value;
+        i8 edge;
+    } blend_entries[8]; // 0x100
+    union {
+        u32 unknown_110;
+        u32 blend_count;
+    }; // 0x110
     u8 unknown_114[40];             // 0x114
 } SOCK;
 

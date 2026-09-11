@@ -4,6 +4,8 @@
 #include "legoapi/items/objects/gameobjects.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/nucore/nustring.h"
+#include "nu2api/nufile/nufpar.h"
 #include "nu2api/numath/nufloat.h"
 #include <string.h>
 
@@ -241,6 +243,54 @@ void CharPlatforms_Reset(CHARPLATFORMSYS_s *system) {
     }
 }
 
+void CharPlatforms_Configure(WORLDINFO_s *world, char *config) {
+    world->char_platform_sys = NULL;
+    if (world->current_gscn == NULL) {
+        return;
+    }
+
+    NUFPAR *parser = NuFParCreateMem(const_cast<char *>("CharPlatforms"), config, 0xffff);
+    if (parser == NULL) {
+        return;
+    }
+
+    world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
+    CHARPLATFORMSYS_s *system = reinterpret_cast<CHARPLATFORMSYS_s *>(world->giz_buffer.void_ptr);
+    world->char_platform_sys = system;
+    system->field_0x00 = reinterpret_cast<i32>(world->current_gscn);
+    system->platform_count = 0;
+
+    while (NuFParGetLine(parser) != 0) {
+        if (NuFParGetWord(parser) == 0) {
+            break;
+        }
+        if (NuStrICmp(parser->word_buf, const_cast<char *>("char_platform")) != 0 ||
+            NuFParGetWord(parser) == 0) {
+            continue;
+        }
+
+        CHARPLATFORM_s *platform = &system->platforms[system->platform_count];
+        platform->object_id = CharIDFromName(parser->word_buf);
+        if (platform->object_id == -1 || NuFParGetWord(parser) == 0) {
+            continue;
+        }
+        if (NuSpecialFind(world->current_gscn, &platform->special, parser->word_buf, 1) == 0) {
+            continue;
+        }
+
+        platform->platform_id = -1;
+        platform->object = NULL;
+        ++system->platform_count;
+    }
+
+    NuFParDestroy(parser);
+    if (system->platform_count > 0) {
+        world->giz_buffer.addr = ALIGN(reinterpret_cast<usize>(&system->platforms[system->platform_count]), 4);
+    } else {
+        world->char_platform_sys = NULL;
+    }
+}
+
 void CharPlatforms_Update(CHARPLATFORMSYS_s *system) {
     if (system == NULL)
         return;
@@ -291,9 +341,4 @@ GameObject_s *CharPlatform_FindObjFromPlatID(CHARPLATFORMSYS_s *system, i32 plat
         }
     }
     return NULL;
-}
-
-void CharPlatforms_Configure(WORLDINFO_s *world, char *config) {
-    (void)world;
-    (void)config;
 }
