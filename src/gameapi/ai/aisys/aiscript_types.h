@@ -10,6 +10,7 @@ struct AIAREA_s;
 struct APIOBJECT_s;
 struct AILOCATOR_s;
 struct AILOCATORSET_s;
+struct GameObject_s;
 
 struct AISCRIPTACTIONDEF_s;
 struct AISCRIPTCONDITIONDEF_s;
@@ -142,6 +143,7 @@ typedef struct AISCRIPTPROCESS_s {
     union {
         f32 action_data_4;
         f32 follow_direction_fire_range;
+        GameObject_s *action_object;
     };
     union {
         f32 action_data_5;

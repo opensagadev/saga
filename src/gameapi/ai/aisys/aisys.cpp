@@ -14,6 +14,7 @@
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/characters/motion/gameanim.h"
+#include "legoapi/audio/sfx.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/core/input/qrand.h"
@@ -39,6 +40,7 @@
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nuspline.h"
 #include "nu2api/nu3d/nuspecial.h"
+#include "nu2api/nu3d/nulgtlaser.h"
 #include "nu2api/numath/nuang.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
@@ -47,6 +49,7 @@
 #include "nu2api/numath/numtx.h"
 
 extern i32 Hub_GetRandomCharType();
+void AddGameMsgCount(NUVEC *position, i32 count, i32 total, u8 red, u8 green, u8 blue, f32 duration);
 extern "C" void AISysFindRoute(AIPACKET *packet) {
     AIPATH *path = packet->path_info.path;
     if (path->route_count == 0 || packet->path_info.connection == NULL) {
@@ -277,6 +280,7 @@ extern void ResetAICreature(GameObject_s *object, AISYS_s *system);
 extern void DeactivateGameObject(GameObject_s *object);
 extern void Player_ClearContext(GameObject_s *object, i32 mode);
 extern void ReleaseTakeOver(GameObject_s *object, i32 immediate);
+extern void TakeOverGameObject(GameObject_s *rider, GameObject_s *vehicle, i32 blend_camera, i32 immediate);
 extern void InitSplinePosition(SPLINEPOS_s *position, nugspline_s *spline, f32 distance, i32 looping);
 extern void KillParts(GameObject_s *object, i32 part, i32 joint, i32 visible, f32 velocity, i32 flags, u16 *part_ids);
 extern u32 StarWars_ParseAIPathCnxFlag(char *name);
@@ -677,14 +681,62 @@ __used__ static i32 Action_AddPart(AISYS *, AISCRIPTPROCESS *processor, AIPACKET
 
 __used__ static i32 Action_BigJump(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params, i32 param_4,
                                    i32 param_5, f32 param_6) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
     (void)param_6;
-    return 0;
+    NUVEC destination = {1.0e9f, 1.0e9f, 1.0e9f};
+    if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL) {
+        return 1;
+    }
+
+    GameObject_s *object = packet->owner->apiobj.objptr;
+    if (param_5 != 0) {
+        GameObject_s *target = NULL;
+        i32 to_origin = 0;
+        i32 check_terrain = 0;
+        f32 jump_factor = 1.0f;
+        i32 slam = 0;
+
+        for (i32 index = 0; index < param_4; ++index) {
+            char *value = NuStrIStr(params[index], const_cast<char *>("tgt_character="));
+            if (value != NULL) {
+                target = GetNamedGameObject(sys, value + 14);
+            } else if (NuStrICmp(params[index], "slam") == 0) {
+                slam = 1;
+            } else if (NuStrICmp(params[index], "to_origin") == 0) {
+                to_origin = 1;
+            } else if ((value = NuStrIStr(params[index], const_cast<char *>("jump_factor="))) != NULL) {
+                jump_factor = AIParamToFloat(processor, value + 12);
+                if (jump_factor < 0.0f) {
+                    jump_factor = 0.0f;
+                }
+            } else if ((value = NuStrIStr(params[index], const_cast<char *>("x="))) != NULL) {
+                destination.x = AIParamToFloat(processor, value + 2);
+            } else if ((value = NuStrIStr(params[index], const_cast<char *>("y="))) != NULL) {
+                destination.y = AIParamToFloat(processor, value + 2);
+            } else if ((value = NuStrIStr(params[index], const_cast<char *>("z="))) != NULL) {
+                destination.z = AIParamToFloat(processor, value + 2);
+            } else if (NuStrICmp(params[index], "check_terrain") == 0) {
+                check_terrain = 1;
+            }
+        }
+
+        if (to_origin != 0 && (object->apiobj.field_0x1f4 & 0x400) != 0 && object->ai.field_0x134 != 0xff) {
+            AICREATURE *creature = &sys->creatures[object->ai.field_0x134];
+            StartBigJump(object, &creature->pos, slam, jump_factor, 1.0f, 0, 0);
+            object->ai.path_info = creature->path_info;
+            object->ai.last_path_position = creature->pos;
+        } else if (target != NULL) {
+            StartBigJump(object, &target->apiobj.last_safe_position, slam, jump_factor, 1.0f, 0, 0);
+            object->ai.path_info = target->ai.path_info;
+            object->ai.last_path_position = target->ai.last_path_position;
+        } else {
+            NUVEC *jump_destination = &destination;
+            if (destination.x == 1.0e9f && destination.y == 1.0e9f && destination.z == 1.0e9f) {
+                jump_destination = &object->apiobj.position;
+            }
+            StartBigJump(object, jump_destination, slam, jump_factor, 1.0f, check_terrain, 0);
+        }
+    }
+    return object->character_context != 0x1f;
 }
 
 __used__ static i32 Action_CanTurn(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params, i32 param_4,
@@ -1966,14 +2018,67 @@ __used__ static i32 Action_SetParam(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
 
 __used__ static i32 Action_TakeOver(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                     i32 param_4, i32 param_5, f32 param_6) {
-    (void)sys;
     (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
     (void)param_6;
-    return 0;
+    if (param_5 == 0) {
+        return 1;
+    }
+
+    GameObject_s *object = NULL;
+    if (packet != NULL && packet->owner != NULL) {
+        object = packet->owner->apiobj.objptr;
+    }
+    GameObject_s *target = object != NULL ? object->takeover_target : NULL;
+    i32 release = 0;
+
+    if (param_4 > 0) {
+        for (i32 index = 0; index < param_4; ++index) {
+            char *value = NuStrIStr(params[index], "character=");
+            if (value != NULL) {
+                object = GetNamedGameObject(sys, value + 10);
+            } else {
+                value = NuStrIStr(params[index], "player=");
+                if (value != NULL) {
+                    i32 player_index = static_cast<i32>(AIParamToFloat(processor, value + 7)) - 1;
+                    if (static_cast<u32>(player_index) < 2) {
+                        object = Player[player_index];
+                    }
+                } else {
+                    value = NuStrIStr(params[index], "target=");
+                    if (value != NULL) {
+                        target = GetNamedGameObject(sys, value + 7);
+                    } else if (NuStrIStr(params[index], "Opponent") != NULL) {
+                        if (packet != NULL && packet->opponent_object != NULL) {
+                            target = packet->opponent_object->objptr;
+                        }
+                    } else if (NuStrIStr(params[index], "release") != NULL) {
+                        release = 1;
+                    }
+                }
+            }
+        }
+    }
+
+    if (release != 0) {
+        if (object != NULL) {
+            ReleaseTakeOver(object, 0);
+        }
+        return 1;
+    }
+    if (target == NULL || object == NULL) {
+        return 1;
+    }
+
+    if ((target->apiobj.character_data->model_flags & 0x40000000) != 0 &&
+        (target->character_context == 0x3e || target->character_context == 0x17)) {
+        return 0;
+    }
+    PLAYERCHARACTERCONFIG_s *target_config = target->apiobj.character_data->player_config;
+    if (target->field_0xcc0 == NULL && (target_config->flags_090 & 0x40) != 0 &&
+        (object->apiobj.character_data->model_flags & 0x10) == 0) {
+        TakeOverGameObject(object, target, 1, 0);
+    }
+    return 1;
 }
 
 __used__ static i32 Action_UseForce(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
@@ -3458,12 +3563,79 @@ __used__ static i32 Action_CannotDropIn(AISYS *sys, AISCRIPTPROCESS *processor, 
 __used__ static i32 Action_EngageObject(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                         i32 param_4, i32 param_5, f32 param_6) {
     (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
-    (void)param_6;
+    if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL) {
+        return 1;
+    }
+
+    GameObject_s *object = packet->owner->apiobj.objptr;
+    if (param_5 != 0) {
+        packet->movement_instruction_parameter = idealgoalrange;
+        processor->action_data_5 = engagefiretime;
+
+        char *name = NULL;
+        i32 nearest = 0;
+        for (i32 index = 0; index < param_4; ++index) {
+            char *value = NuStrIStr(params[index], const_cast<char *>("name"));
+            if (value != NULL) {
+                name = value + 5;
+            } else if ((value = NuStrIStr(params[index], const_cast<char *>("fireinterval"))) != NULL) {
+                processor->action_data_5 = AIParamToFloat(processor, value + 13);
+            } else if (NuStrIStr(params[index], const_cast<char *>("nearest")) != NULL) {
+                nearest = 1;
+            } else if (NuStrIStr(params[index], const_cast<char *>("predictive")) != NULL) {
+                processor->action_data_1 = 1;
+            }
+        }
+
+        processor->action_timer = NuRandFloat() * processor->action_data_5;
+        if (name != NULL) {
+            if (nearest != 0) {
+                nuhspecial_s specials[50];
+                const i32 special_count = NuSpecialFindMulti(WORLD->current_gscn, specials, name, 50, 0);
+                if (special_count > 0) {
+                    f32 nearest_distance = 1.0e9f;
+                    NUVEC difference;
+                    for (i32 index = 0; index < special_count; ++index) {
+                        NUVEC *position = NuSpecialGetDrawPos(&specials[index]);
+                        const f32 distance =
+                            NuVecDistSqr(&packet->owner->apiobj.position, position, &difference);
+                        if (distance < nearest_distance) {
+                            nearest_distance = distance;
+                            processor->action_data_3 = position;
+                        }
+                    }
+                }
+            } else {
+                nuhspecial_s special;
+                if (NuSpecialFind(WORLD->current_gscn, &special, name, 1) != 0) {
+                    processor->action_data_3 = NuSpecialGetDrawPos(&special);
+                }
+            }
+        }
+
+        if (processor->action_data_3 != NULL) {
+            object->field_0xefa |= 1;
+            object->quick_shoot_timer = NuRandFloat() * processor->action_data_5;
+        }
+    }
+
+    NUVEC *target = static_cast<NUVEC *>(processor->action_data_3);
+    if (target == NULL) {
+        return 0;
+    }
+
+    packet->movement_look_target = target;
+    processor->action_timer -= param_6;
+    object->field_0xe58 = *target;
+    object->field_0xef9 |= 0x80;
+    object->field_0xef8 |= 0x20;
+    if (processor->action_timer > 0.0f) {
+        return 0;
+    }
+
+    object->field_0xefa = static_cast<u8>((object->field_0xefa & ~2u) | ((processor->action_data_1 & 1) << 1));
+    processor->action_timer = (0.5f + NuRandFloat()) * processor->action_data_5;
+    object->pad_gamepad->buttons_pressed |= GAMEPAD_ACTION;
     return 0;
 }
 
@@ -3687,26 +3859,106 @@ __used__ static i32 Action_SetInterrupt(AISYS *, AISCRIPTPROCESS *processor, AIP
 
 __used__ static i32 Action_SetLevelPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                         i32 param_4, i32 param_5, f32 param_6) {
-    (void)sys;
     (void)processor;
     (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
     (void)param_6;
-    return 0;
+    if (param_5 == 0 || sys->path_sys == NULL) {
+        return 1;
+    }
+
+    char *path_name = NULL;
+    for (i32 index = 0; index < param_4; ++index) {
+        char *value = NuStrIStr(params[index], const_cast<char *>("name"));
+        if (value != NULL) {
+            path_name = value + 5;
+        }
+    }
+
+    if (AISysSetLevelPath(sys, path_name) == 0) {
+        return 1;
+    }
+
+    for (i32 index = 0; index < 8; ++index) {
+        GameObject_s *object = Player[index];
+        if (object == NULL || (object->apiobj.field_0x1f8 & (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER)) !=
+                                  (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER)) {
+            continue;
+        }
+        AIPACKET *object_packet = &object->ai;
+        AISysCharacterSetPath(object_packet, sys->path_sys->active_path);
+        AISysGetCharacterPathPos(WORLD->ai_sys, &object->apiobj, object_packet, 0xff,
+                                 static_cast<i8>(object->apiobj.field_0x27d));
+    }
+    return 1;
 }
 
 __used__ static i32 Action_SetStateArea(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                         i32 param_4, i32 param_5, f32 param_6) {
     (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
     (void)param_6;
-    return 0;
+    if (param_5 == 0) {
+        return 1;
+    }
+
+    char *state_name = NULL;
+    i32 types[10];
+    i32 type_count = 0;
+    f32 range_squared = 0.0f;
+    for (i32 index = 0; index < param_4; ++index) {
+        char *value = NuStrIStr(params[index], const_cast<char *>("range="));
+        if (value != NULL) {
+            const f32 range = AIParamToFloat(processor, value + 6);
+            range_squared = range * range;
+        } else if ((value = NuStrIStr(params[index], const_cast<char *>("type"))) != NULL) {
+            if (LevelCharacterTypeIDFn != NULL && LevelCharacterGlobalIDFn != NULL) {
+                const i32 local_type = static_cast<u8>(LevelCharacterTypeIDFn(value + 5));
+                if (local_type != 0xff) {
+                    const i32 global_type = LevelCharacterGlobalIDFn(local_type);
+                    if (global_type != -1 && type_count < 10) {
+                        types[type_count++] = global_type;
+                    }
+                }
+            }
+        } else if ((value = NuStrIStr(params[index], const_cast<char *>("State="))) != NULL) {
+            state_name = value + 6;
+        }
+    }
+
+    if (state_name == NULL || (type_count == 0 && !(range_squared > 0.0f))) {
+        processor->next_state = AIStateFind(state_name, processor->script);
+        return 1;
+    }
+
+    NUVEC origin = v000;
+    if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL) {
+        origin = packet->owner->apiobj.objptr->apiobj.collision_position;
+    }
+
+    for (i32 object_index = 0; object_index < HIGHGAMEOBJECT; ++object_index) {
+        GameObject_s *object = &Obj[object_index];
+        if ((object->apiobj.field_0x1f8 & (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER)) !=
+                (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER) ||
+            (object->apiobj.field_0x1f4 & 0x400) == 0) {
+            continue;
+        }
+
+        NUVEC difference;
+        NuVecSub(&difference, &origin, &object->apiobj.position);
+        const f32 distance_squared =
+            difference.x * difference.x + difference.y * difference.y + difference.z * difference.z;
+
+        i32 matching_type = type_count == 0;
+        for (i32 type_index = 0; type_index < type_count; ++type_index) {
+            if (object->id == types[type_index]) {
+                matching_type = 1;
+            }
+        }
+        if (matching_type != 0 && range_squared > distance_squared) {
+            AIPACKET *object_packet = object->apiobj.ai;
+            object_packet->script_process.next_state = AIStateFind(state_name, object_packet->script_process.script);
+        }
+    }
+    return 1;
 }
 
 __used__ static i32 Action_SetWalkSpeed(AISYS *, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
@@ -4912,13 +5164,63 @@ __used__ static i32 Action_FollowOpponent(AISYS *sys, AISCRIPTPROCESS *processor
 
 __used__ static i32 Action_ForceLightning(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                           i32 param_4, i32 param_5, f32 param_6) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
     (void)param_6;
+    GameObject_s *object = NULL;
+    if (packet != NULL && packet->owner != NULL) {
+        object = packet->owner->apiobj.objptr;
+    }
+
+    if (param_5 != 0) {
+        if (param_4 != 0) {
+            for (i32 index = 0; index < param_4; ++index) {
+                char *value = NuStrIStr(params[index], "locator=");
+                if (value != NULL) {
+                    AILOCATOR *locator = AIPathFindLocator(sys, value + 8);
+                    if (locator != NULL) {
+                        processor->action_pos = locator->position;
+                        processor->action_data_1 = 1;
+                    }
+                } else {
+                    value = NuStrIStr(params[index], "randxz=");
+                    if (value != NULL) {
+                        processor->action_data_4 = AIParamToFloat(processor, value + 7);
+                    }
+                }
+            }
+        }
+    }
+
+    if (object == NULL || processor->action_data_1 == 0) {
+        return 0;
+    }
+
+    NUVEC target;
+    NUVEC direction;
+    NUVEC primary;
+    NUVEC secondary;
+    ForceLightning_Origin(object, &primary, &secondary);
+
+    target = processor->action_pos;
+    if (processor->action_data_4 > 0.0f) {
+        target.x += processor->action_data_4 -
+                    NuRandFloat() * (processor->action_data_4 + processor->action_data_4);
+        target.z += processor->action_data_4 -
+                    NuRandFloat() * (processor->action_data_4 + processor->action_data_4);
+    }
+
+    if (primary.y != 1000000000.0f) {
+        f32 distance = NuVecDist(&target, &primary, &direction);
+        NuLgtLaser(lightning_type, lightning_sizew[0], lightning_sizel[0], lightning_sizewab[0], &primary,
+                   &direction, lightning_col[0], lightning_endw[0], distance);
+        PlaySfx("ForceLightningLp", &processor->action_pos);
+    }
+    if (secondary.y != 1000000000.0f) {
+        f32 distance = NuVecDist(&target, &secondary, &direction);
+        NuLgtLaser(lightning_type, lightning_sizew[0], lightning_sizel[0], lightning_sizewab[0], &secondary,
+                   &direction, lightning_col[0], lightning_endw[0], distance);
+        PlaySfx("ForceLightningLp", &processor->action_pos);
+    }
+    packet->movement_look_target = &processor->action_pos;
     return 0;
 }
 
@@ -5209,13 +5511,86 @@ __used__ static i32 Action_SetScriptState(AISYS *sys, AISCRIPTPROCESS *processor
 __used__ static i32 Action_SnapToPosition(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                           i32 param_4, i32 param_5, f32 param_6) {
     (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
     (void)param_6;
-    return 0;
+    if (param_5 == 0) {
+        return 1;
+    }
+
+    GameObject_s *object = NULL;
+    if (packet != NULL && packet->owner != NULL) {
+        object = packet->owner->apiobj.objptr;
+    }
+
+    i32 rotation = 0;
+    i32 check_terrain = 1;
+    f32 x = 0.0f;
+    f32 y = 0.0f;
+    f32 z = 0.0f;
+    if (param_4 > 0) {
+        for (i32 index = 0; index < param_4; ++index) {
+            char *value = NuStrIStr(params[index], "player1");
+            if (value != NULL) {
+                object = player;
+            } else {
+                value = NuStrIStr(params[index], "player");
+                if (value != NULL) {
+                    object = player;
+                } else {
+                    value = NuStrIStr(params[index], "player2");
+                    if (value != NULL) {
+                        object = player2;
+                    } else {
+                        value = NuStrIStr(params[index], "roty");
+                        if (value != NULL) {
+                            rotation = static_cast<i32>(static_cast<i32>(AIParamToFloat(processor, value + 5)) *
+                                                        182.04444885253906f);
+                        } else {
+                            value = NuStrIStr(params[index], "x");
+                            if (value != NULL) {
+                                x = AIParamToFloat(processor, value + 2);
+                            } else {
+                                value = NuStrIStr(params[index], "y");
+                                if (value != NULL) {
+                                    y = AIParamToFloat(processor, value + 2);
+                                } else {
+                                    value = NuStrIStr(params[index], "z");
+                                    if (value != NULL) {
+                                        z = AIParamToFloat(processor, value + 2);
+                                    } else if (NuStrIStr(params[index], "dont_check_terrain") != NULL) {
+                                        check_terrain = 0;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (object == NULL) {
+        return 1;
+    }
+
+    object->apiobj.field_0x276 = static_cast<u16>(rotation);
+    object->apiobj.position.x = x;
+    object->apiobj.facing_angle = static_cast<u16>(rotation);
+    object->apiobj.position.y = y;
+    object->apiobj.movement_facing_angle = static_cast<u16>(rotation);
+    object->apiobj.position.z = z;
+    object->apiobj.initial_position = object->apiobj.position;
+    object->apiobj.collision_position = object->apiobj.position;
+    plr_lastpos = object->apiobj.position;
+    object->apiobj.start_position = object->apiobj.position;
+    object->apiobj.respawn_position = object->apiobj.position;
+    object->apiobj.last_safe_position = object->apiobj.position;
+    object->saved_position = object->apiobj.position;
+    object->apiobj.velocity = v000;
+    InitSurfaceInfo(object);
+    if (check_terrain != 0) {
+        SetObjOnSurface(object, 0);
+    }
+    return 1;
 }
 
 __used__ static i32 Action_ThrowDetonator(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
@@ -5233,13 +5608,70 @@ __used__ static i32 Action_ThrowDetonator(AISYS *sys, AISCRIPTPROCESS *processor
 __used__ static i32 Action_AddGameMsgCount(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                            i32 param_4, i32 param_5, f32 param_6) {
     (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
     (void)param_6;
-    return 0;
+    if (param_5 != 0) {
+        GameObject_s *object = NULL;
+        if (packet != NULL && packet->owner != NULL) {
+            object = packet->owner->apiobj.objptr;
+        }
+        if (param_4 > 0) {
+            NUVEC *position = NULL;
+            i32 count = 0;
+            i32 total = 0;
+            u8 red = 0;
+            u8 green = 0;
+            u8 blue = 0;
+
+            for (i32 index = 0; index < param_4; ++index) {
+                if (NuStrICmp("mypos", params[index]) == 0) {
+                    if (object != NULL) {
+                        position = &object->apiobj.collision_position;
+                    }
+                } else {
+                    char *value = NuStrIStr(params[index], "count=");
+                    if (value != NULL) {
+                        count = static_cast<i32>(AIParamToFloat(processor, value + 6));
+                    } else {
+                        value = NuStrIStr(params[index], "total=");
+                        if (value != NULL) {
+                            total = static_cast<i32>(AIParamToFloat(processor, value + 6));
+                        } else {
+                            value = NuStrIStr(params[index], "messageval=");
+                            if (value != NULL) {
+                                GIZAIMESSAGE_s *message = CheckGizAIMessage(gizaimessagesys, value + 11, NULL);
+                                if (message != NULL) {
+                                    total = static_cast<i32>(message->value);
+                                }
+                            } else {
+                                value = NuStrIStr(params[index], "Red=");
+                                if (value != NULL) {
+                                    red = static_cast<u8>(AIParamToFloat(processor, value + 4));
+                                } else {
+                                    value = NuStrIStr(params[index], "Green=");
+                                    if (value != NULL) {
+                                        green = static_cast<u8>(AIParamToFloat(processor, value + 6));
+                                    } else {
+                                        value = NuStrIStr(params[index], "Blue=");
+                                        if (value != NULL) {
+                                            blue = static_cast<u8>(AIParamToFloat(processor, value + 5));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (total > count) {
+                return 1;
+            }
+            if (total == 0) {
+                return 1;
+            }
+            AddGameMsgCount(position, count, total, red, green, blue, 0.75f);
+        }
+    }
+    return 1;
 }
 
 __used__ static i32 Action_CreateCreatures(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
@@ -6245,61 +6677,69 @@ __used__ static i32 Action_SetInvulnerable(AISYS *sys, AISCRIPTPROCESS *processo
         return 1;
     }
 
-    GameObject_s *object = packet != NULL ? packet->owner : NULL;
-    i16 types[10] = {};
+    i32 types[10];
     i32 type_count = 0;
-    bool enabled = true;
-    bool still_take_hit = false;
+    i32 still_take_hit = 0;
+    GameObject_s *object = packet != NULL && packet->owner != NULL ? packet->owner->apiobj.objptr : NULL;
+    i32 enabled = 1;
     for (i32 index = 0; index < param_4; ++index) {
-        char *value = ActionParamValue(params[index], "type");
-        if (value != NULL && LevelCharacterTypeIDFn != NULL && LevelCharacterGlobalIDFn != NULL && type_count < 10) {
-            const i32 local_type = LevelCharacterTypeIDFn(value);
-            if (local_type != -1) {
-                const i32 global_type = LevelCharacterGlobalIDFn(static_cast<u8>(local_type));
-                if (global_type != -1) {
-                    types[type_count++] = static_cast<i16>(global_type);
+        char *value = NuStrIStr(params[index], const_cast<char *>("type="));
+        if (value != NULL) {
+            if (LevelCharacterTypeIDFn != NULL && LevelCharacterGlobalIDFn != NULL) {
+                const i32 local_type = static_cast<u8>(LevelCharacterTypeIDFn(value + 5));
+                if (local_type != 0xff) {
+                    const i32 global_type = LevelCharacterGlobalIDFn(local_type);
+                    if (global_type != -1 && type_count < 10) {
+                        types[type_count++] = global_type;
+                    }
                 }
             }
             continue;
         }
-        value = ActionParamValue(params[index], "character");
+        value = NuStrIStr(params[index], const_cast<char *>("character="));
         if (value != NULL) {
-            object = GetNamedGameObject(sys, value);
+            object = GetNamedGameObject(sys, value + 10);
         } else if (NuStrICmp(params[index], "FALSE") == 0) {
-            enabled = false;
+            enabled = 0;
         } else if (NuStrICmp(params[index], "still_do_take_hit_anim") == 0) {
-            still_take_hit = true;
+            still_take_hit = 1;
         }
     }
 
-    const auto apply = [enabled, still_take_hit](GameObject_s *candidate) {
-        if (candidate == NULL || (candidate->apiobj.field_0x1f4 & 0x1000u) == 0) {
-            return;
-        }
-        if (enabled) {
-            candidate->field_0xefe |= 0x40;
-            candidate->field_0xefd = static_cast<u8>((candidate->field_0xefd & ~0x10u) | (still_take_hit ? 0x10u : 0u));
-        } else {
-            candidate->field_0xefe &= static_cast<u8>(~0x40u);
-        }
-    };
-
     if (type_count != 0) {
-        for (i32 object_index = 0; Obj != NULL && object_index < HIGHGAMEOBJECT; ++object_index) {
-            GameObject_s *candidate = &Obj[object_index];
+        const i32 object_count = HIGHGAMEOBJECT;
+        GameObject_s *candidate = Obj;
+        still_take_hit = (still_take_hit & 1) << 4;
+        for (i32 object_index = 0; object_index < object_count; ++object_index, ++candidate) {
             if ((candidate->apiobj.field_0x1f8 & (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER)) !=
-                (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER)) {
+                    (APIOBJECT_FLAG_IN_USE | APIOBJECT_FLAG_CHARACTER) ||
+                (candidate->apiobj.field_0x1f4 & 0x400) == 0) {
                 continue;
             }
-            for (i32 type_index = 0; type_index < type_count; ++type_index) {
-                if (candidate->id == types[type_index]) {
-                    apply(candidate);
-                    break;
+            if (enabled) {
+                for (i32 type_index = 0; type_index < type_count; ++type_index) {
+                    if (candidate->id == types[type_index]) {
+                        candidate->field_0xefe |= 0x40;
+                        candidate->field_0xefd =
+                            static_cast<u8>((candidate->field_0xefd & ~0x10u) | still_take_hit);
+                    }
+                }
+            } else {
+                for (i32 type_index = 0; type_index < type_count; ++type_index) {
+                    if (candidate->id == types[type_index]) {
+                        candidate->field_0xefe &= static_cast<u8>(~0x40u);
+                    }
                 }
             }
         }
-    } else {
-        apply(object);
+    } else if (object != NULL && (object->apiobj.field_0x1f4 & 0x400) != 0) {
+        if (enabled) {
+            still_take_hit = (still_take_hit & 1) << 4;
+            object->field_0xefe |= 0x40;
+            object->field_0xefd = static_cast<u8>((object->field_0xefd & ~0x10u) | still_take_hit);
+        } else {
+            object->field_0xefe &= static_cast<u8>(~0x40u);
+        }
     }
     return 1;
 }
@@ -6554,14 +6994,78 @@ __used__ static i32 Action_AddTorpedoPacket(AISYS *sys, AISCRIPTPROCESS *process
 
 __used__ static i32 Action_BigJumpToLocator(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                             i32 param_4, i32 param_5, f32 param_6) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
     (void)param_6;
-    return 0;
+
+    GameObject_s *object = processor->action_object;
+    if (param_5 != 0) {
+        if (packet != NULL && packet->owner != NULL && packet->owner->apiobj.objptr != NULL) {
+            object = packet->owner->apiobj.objptr;
+        }
+        processor->action_data_3 = processor->unknown_a4;
+
+        i32 personal = 0;
+        i32 indexed = 0;
+        i32 random_count = 0;
+        char *name = NULL;
+        f32 jump_factor = 1.0f;
+        AIAREA *required_area = NULL;
+
+        for (i32 index = 0; index < param_4; ++index) {
+            char *value = NuStrIStr(params[index], const_cast<char *>("name"));
+            if (value != NULL) {
+                name = value + 5;
+            } else if (NuStrIStr(params[index], const_cast<char *>("personal")) != NULL) {
+                personal = 1;
+            } else if (NuStrIStr(params[index], const_cast<char *>("indexed")) != NULL) {
+                indexed = 1;
+            } else if ((value = NuStrIStr(params[index], const_cast<char *>("random="))) != NULL) {
+                random_count = static_cast<i32>(AIParamToFloat(processor, value + 9));
+            } else if ((value = NuStrIStr(params[index], const_cast<char *>("jump_factor="))) != NULL) {
+                jump_factor = AIParamToFloat(processor, value + 12);
+                if (jump_factor < 0.0f) {
+                    jump_factor = 0.0f;
+                }
+            } else if ((value = NuStrIStr(params[index], const_cast<char *>("IfInArea="))) != NULL) {
+                required_area = AISysFindArea(sys, value + 9);
+            } else if ((value = NuStrIStr(params[index], const_cast<char *>("character="))) != NULL) {
+                object = GetNamedGameObject(sys, value + 10);
+            }
+        }
+
+        if (object == NULL) {
+            return 1;
+        }
+        processor->action_object = object;
+
+        if (required_area != NULL) {
+            const i32 area_index = static_cast<i32>(required_area - WORLD->ai_sys->areas);
+            if (sys->player_1 == NULL || (object->apiobj.ai_area_mask & (1ull << area_index)) == 0) {
+                return 1;
+            }
+        }
+
+        if (name != NULL) {
+            char locator_name[64];
+            if (indexed != 0 && static_cast<i8>(object->apiobj.field_0x27c) != -1) {
+                sprintf(locator_name, "%s_%d", name, static_cast<i8>(object->apiobj.field_0x27c));
+            } else if (personal != 0 && object->apiobj.character_data != NULL) {
+                sprintf(locator_name, "%s_%s", name, object->apiobj.character_data->file);
+            } else if (random_count != 0) {
+                sprintf(locator_name, "%s_%d", name, NuRand(NULL) % random_count);
+            } else {
+                sprintf(locator_name, name);
+            }
+            processor->action_data_3 = AIPathFindLocator(sys, locator_name);
+        }
+
+        AILOCATOR *locator = static_cast<AILOCATOR *>(processor->action_data_3);
+        if (locator != NULL) {
+            StartBigJump(object, &locator->position, 0, jump_factor, 1.0f, 0, 0);
+            object->ai.path_info = locator->path_info;
+            object->ai.last_path_position = locator->position;
+        }
+    }
+    return object->character_context != 0x1f;
 }
 
 __used__ static i32 Action_CatchUpForbidden(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
@@ -6594,13 +7098,85 @@ __used__ static i32 Action_CheckWallSplines(AISYS *sys, AISCRIPTPROCESS *process
 
 __used__ static i32 Action_GoToOriginalPath(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                             i32 param_4, i32 param_5, f32 param_6) {
-    (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
     (void)param_6;
+    NUVEC difference;
+    if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL) {
+        return 1;
+    }
+
+    GameObject_s *object = packet->owner->apiobj.objptr;
+    if (sys == NULL || sys->path_sys == NULL || (object->apiobj.field_0x1f4 & 0x400) == 0 ||
+        object->ai.field_0x134 == 0xff) {
+        return 0;
+    }
+
+    AIPATH *original_path = sys->creatures[packet->field_0x134].path_info.path;
+    AIPATH *current_path = packet->path_info.path;
+    if (param_5 != 0) {
+        if (current_path == original_path) {
+            return 1;
+        }
+        for (i32 index = 0; index < param_4; ++index) {
+            if (AIActionParseSpeedFn != NULL) {
+                AIActionParseSpeedFn(params[index], &packet->goal_speed_mode);
+            }
+        }
+        current_path = packet->path_info.path;
+        packet->goal_path_node = NULL;
+        if (current_path == NULL) {
+            return 0;
+        }
+
+        if (sys->path_sys->active_path != current_path || original_path == NULL ||
+            (original_path->flags & 2) == 0 || original_path->node_count == 0) {
+            return 0;
+        }
+
+        AIPATHNODE *node = original_path->nodes;
+        i32 node_index = 0;
+        while (node_index < original_path->node_count && (node->runtime_flags & 1) == 0) {
+            ++node_index;
+            ++node;
+        }
+        if (node_index >= original_path->node_count) {
+            return 1;
+        }
+
+        processor->action_data_3 = node;
+        AISysCharacterSetPath(packet, current_path);
+
+        AIPATHCNX *connection = &sys->path_sys->active_path->connections[static_cast<u16>(node->path_flags)];
+        AIPATHINFO &move_path = processor->path_info;
+        AIPATHNODE *target_node = &move_path.path->nodes[connection->node_indices[0]];
+        move_path.connection = connection;
+        move_path.direction = 0;
+        move_path.flags |= AIPATHINFO_FLAG_ON_PATH;
+
+        difference.x = node->position.x - target_node->position.x;
+        difference.z = node->position.z - target_node->position.z;
+        NuVecRotateY(&difference, &difference, -connection->rotation);
+        move_path.dist = difference.z / connection->max_horizontal_distance;
+        move_path.width = difference.x;
+        AIMoveInstruction(packet, &node->position, 0.0f, &move_path, AIPACKET_MOVEMENT_TO_DESTINATION,
+                          packet->movement_instruction_parameter);
+        return 0;
+    }
+
+    AIPATHNODE *node = static_cast<AIPATHNODE *>(processor->action_data_3);
+    if (node == NULL) {
+        return 0;
+    }
+
+    const f32 distance = NuVecXZDistSqr(&packet->terrain_origin, &node->position, &difference);
+    if (distance < node->radius_squared) {
+        memset(&packet->path_info, 0, sizeof(packet->path_info));
+        AISysCharacterSetPath(packet, original_path);
+        AISysCharacterSetPathCnx(packet, &packet->owner->apiobj.position, packet->fallback_path_info.connection, 0);
+        return 1;
+    }
+
+    AIMoveInstruction(packet, &node->position, 0.0f, &processor->path_info, AIPACKET_MOVEMENT_TO_DESTINATION,
+                      packet->movement_instruction_parameter);
     return 0;
 }
 
@@ -6754,13 +7330,84 @@ __used__ static i32 Action_SetReturnToState(AISYS *, AISCRIPTPROCESS *processor,
 __used__ static i32 Action_SetScaleOverride(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                             i32 param_4, i32 param_5, f32 param_6) {
     (void)sys;
-    (void)processor;
-    (void)packet;
-    (void)params;
-    (void)param_4;
-    (void)param_5;
     (void)param_6;
-    return 0;
+    if (packet == NULL || packet->owner == NULL || packet->owner->apiobj.objptr == NULL) {
+        return 1;
+    }
+
+    f32 scale;
+    GameObject_s *object = packet->owner->apiobj.objptr;
+    if (param_5 != 0) {
+        scale = 1000000000.0f;
+        f32 time = 0.0f;
+        f32 zero = 0.0f;
+        f32 min = 1000000000.0f;
+        f32 max = 1000000000.0f;
+
+        if (param_4 <= 0) {
+            scale = 1000000000.0f;
+        } else {
+            for (i32 index = 0; index < param_4; ++index) {
+                if (NuStrICmp(params[index], "reset") == 0) {
+                    scale = 1000000000.0f;
+                } else {
+                    char *value = NuStrIStr(params[index], "min=");
+                    if (value != NULL) {
+                        min = AIParamToFloat(processor, value + 4);
+                    } else {
+                        value = NuStrIStr(params[index], "max=");
+                        if (value != NULL) {
+                            max = AIParamToFloat(processor, value + 4);
+                        } else {
+                            value = NuStrIStr(params[index], "time");
+                            if (value != NULL) {
+                                time = AIParamToFloat(processor, value + NuStrLen("time") + 1);
+                            } else {
+                                scale = AIParamToFloat(processor, params[index]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (time != zero) {
+            if (max != 1000000000.0f) {
+                if (min != 1000000000.0f) {
+                    f32 random = NuRandFloat();
+                    scale = random * max + (1.0f - random) * min;
+                }
+            }
+            processor->action_data_4 = time;
+            processor->action_data_5 = (scale - object->field_0x1038) / time;
+            if (!(time > zero)) {
+                return 1;
+            }
+        } else {
+            if (max != 1000000000.0f) {
+                if (min != 1000000000.0f) {
+                    f32 random = NuRandFloat();
+                    object->field_0x1038 = random * max + (1.0f - random) * min;
+                    return 1;
+                }
+            }
+            object->field_0x1038 = scale;
+            return 1;
+        }
+    }
+
+    f32 remaining = processor->action_data_4;
+    if (!(remaining > 0.0f)) {
+        return 1;
+    }
+    if (remaining > FRAMETIME) {
+        object->field_0x1038 += FRAMETIME * processor->action_data_5;
+        processor->action_data_4 = remaining - FRAMETIME;
+        return 0;
+    }
+    object->field_0x1038 += remaining * processor->action_data_5;
+    processor->action_data_4 = 0.0f;
+    return 1;
 }
 
 __used__ static i32 Action_UseBigJumpToJump(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,

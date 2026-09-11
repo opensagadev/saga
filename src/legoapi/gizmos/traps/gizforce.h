@@ -12,6 +12,7 @@ extern i32 force_gizmotype_id;
 typedef struct GIZFORCE_s GIZFORCE;
 struct GameObject_s;
 i32 GizForce_GameObjUsingForce(GameObject_s *object, GIZFORCE_s *force);
+void ForceLightning_Origin(GameObject_s *object, NUVEC *primary, NUVEC *secondary);
 
 void GizForce_PlayForwards(GIZFORCE_s *force);
 void GizForce_PlayBackwards(GIZFORCE_s *force);
