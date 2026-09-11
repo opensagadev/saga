@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 38.416492,
+    "fuzzy_match_percent": 38.51596,
     "total_code": "4722419",
-    "matched_code": "366415",
-    "matched_code_percent": 7.759053,
+    "matched_code": "366657",
+    "matched_code_percent": 7.764178,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4412,
-    "matched_functions_percent": 32.781036,
+    "matched_functions": 4413,
+    "matched_functions_percent": 32.788467,
     "total_units": 1
   },
   "text": {
@@ -25111,6 +25111,14 @@
           "offset": 1380896,
           "size": 213,
           "match_percent": 99.8
+        },
+        {
+          "name": "_Z17Grabber_ConfigureP11WORLDINFO_sPc",
+          "demangled_name": "Grabber_Configure(WORLDINFO_s*, char*)",
+          "address": 2271088,
+          "offset": 1381120,
+          "size": 866,
+          "match_percent": 53.23858
         }
       ]
     },
@@ -25540,7 +25548,7 @@
           "address": 1235504,
           "offset": 345536,
           "size": 57,
-          "match_percent": 61.642857
+          "match_percent": 99.92857
         },
         {
           "name": "_ZL8Tel_nameP8nufpar_s",
@@ -25548,7 +25556,7 @@
           "address": 1235568,
           "offset": 345600,
           "size": 112,
-          "match_percent": 99.96154
+          "match_percent": 99.57692
         },
         {
           "name": "_ZL7Tel_objP8nufpar_s",
@@ -25564,7 +25572,7 @@
           "address": 1235792,
           "offset": 345824,
           "size": 512,
-          "match_percent": 79.68376
+          "match_percent": 99.91453
         },
         {
           "name": "_ZL10Tel_splineP8nufpar_s",
@@ -25572,7 +25580,15 @@
           "address": 1236304,
           "offset": 346336,
           "size": 285,
-          "match_percent": 75.136986
+          "match_percent": 92.78082
+        },
+        {
+          "name": "_Z19Teleports_ConfigureP11WORLDINFO_sPc",
+          "demangled_name": "Teleports_Configure(WORLDINFO_s*, char*)",
+          "address": 1236736,
+          "offset": 346768,
+          "size": 669,
+          "match_percent": 80.62162
         }
       ]
     },
@@ -57060,7 +57076,7 @@
           "address": 1967248,
           "offset": 1077280,
           "size": 87,
-          "match_percent": 24.444445
+          "match_percent": 46.833332
         },
         {
           "name": "_ZL21SecurityDoor_ActivateP7GIZMO_si",
@@ -57148,7 +57164,7 @@
           "address": 1967712,
           "offset": 1077744,
           "size": 1117,
-          "match_percent": 0.566802
+          "match_percent": 24.651821
         },
         {
           "name": "_ZL23SecurityDoors_AddGizmosP10GIZMOSYS_siPvS1_",
@@ -57156,7 +57172,7 @@
           "address": 1968832,
           "offset": 1078864,
           "size": 140,
-          "match_percent": 9.545455
+          "match_percent": 87.86364
         },
         {
           "name": "_ZL18SecurityDoors_LoadPvS_",
@@ -57172,7 +57188,7 @@
           "address": 1969136,
           "offset": 1079168,
           "size": 541,
-          "match_percent": 2.833333
+          "match_percent": 92.625
         },
         {
           "name": "_ZL19SecurityDoors_ResetPvS_S_",
@@ -57180,7 +57196,7 @@
           "address": 1969680,
           "offset": 1079712,
           "size": 897,
-          "match_percent": 2.566845
+          "match_percent": 58.33155
         },
         {
           "name": "_ZL27SecurityDoors_StoreProgressPvS_S_",
@@ -57188,7 +57204,7 @@
           "address": 1970592,
           "offset": 1080624,
           "size": 174,
-          "match_percent": 7.777778
+          "match_percent": 45.88889
         },
         {
           "name": "_Z27SecurityDoors_RegisterGizmoi",
@@ -59764,7 +59780,7 @@
           "address": 1243232,
           "offset": 353264,
           "size": 340,
-          "match_percent": 92.72222
+          "match_percent": 92.62963
         }
       ]
     },
@@ -63834,7 +63850,7 @@
           "address": 5131280,
           "offset": 4241312,
           "size": 1586,
-          "match_percent": 1.122995
+          "match_percent": 48.842247
         },
         {
           "name": "_Z12Pulses_ResetP10PULSESYS_s",
@@ -63850,7 +63866,7 @@
           "address": 5133072,
           "offset": 4243104,
           "size": 2117,
-          "match_percent": 0.945946
+          "match_percent": 26.063063
         },
         {
           "name": "_Z13Pulses_AddSfxP10PULSESYS_sPiS1_i",
@@ -63858,7 +63874,7 @@
           "address": 5135200,
           "offset": 4245232,
           "size": 242,
-          "match_percent": 6.666666
+          "match_percent": 100.0
         }
       ]
     },
@@ -67063,14 +67079,6 @@
           "offset": 1379984,
           "size": 440,
           "match_percent": 3.617021
-        },
-        {
-          "name": "_Z17Grabber_ConfigureP11WORLDINFO_sPc",
-          "demangled_name": "Grabber_Configure(WORLDINFO_s*, char*)",
-          "address": 2271088,
-          "offset": 1381120,
-          "size": 866,
-          "match_percent": 1.116751
         }
       ]
     },
@@ -67544,7 +67552,7 @@
           "address": 2364320,
           "offset": 1474352,
           "size": 599,
-          "match_percent": 69.26712
+          "match_percent": 69.369865
         },
         {
           "name": "_Z21TrafficAnimSys_UpdateP16TRAFFICANIMSYS_s",
@@ -67552,7 +67560,7 @@
           "address": 2364928,
           "offset": 1474960,
           "size": 649,
-          "match_percent": 3.137255
+          "match_percent": 38.4183
         },
         {
           "name": "_Z19TrafficAnimSys_DrawP16TRAFFICANIMSYS_s",
@@ -67560,7 +67568,7 @@
           "address": 2365584,
           "offset": 1475616,
           "size": 580,
-          "match_percent": 3.2
+          "match_percent": 64.013336
         }
       ]
     },
@@ -73608,16 +73616,7 @@
       "name": "legoapi/props/objects/teleport.cpp.o",
       "source": "src/legoapi/props/objects/teleport.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/1/teleport.o",
-      "functions": [
-        {
-          "name": "_Z19Teleports_ConfigureP11WORLDINFO_sPc",
-          "demangled_name": "Teleports_Configure(WORLDINFO_s*, char*)",
-          "address": 1236736,
-          "offset": 346768,
-          "size": 669,
-          "match_percent": 2.297297
-        }
-      ]
+      "functions": []
     },
     {
       "name": "legoapi/props/objects/tightrope.cpp.o",

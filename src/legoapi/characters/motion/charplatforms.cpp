@@ -257,7 +257,7 @@ void CharPlatforms_Configure(WORLDINFO_s *world, char *config) {
     world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
     CHARPLATFORMSYS_s *system = reinterpret_cast<CHARPLATFORMSYS_s *>(world->giz_buffer.void_ptr);
     world->char_platform_sys = system;
-    system->field_0x00 = reinterpret_cast<i32>(world->current_gscn);
+    system->field_0x00 = static_cast<i32>(reinterpret_cast<usize>(world->current_gscn));
     system->platform_count = 0;
 
     while (NuFParGetLine(parser) != 0) {

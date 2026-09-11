@@ -1754,11 +1754,24 @@ DECOMP_ASSERT(offsetof(GIZSPINNER_s, flags) == 0xac, "GIZSPINNER flags offset");
 DECOMP_ASSERT(offsetof(GIZSPINNER_s, animation_points) == 0x2dc, "GIZSPINNER animation-points offset");
 struct GIZTURRETSYS_s;
 struct GRABBER_s {
-    u8 reserved_000[0x40];
+    union {
+        NUMTX matrix; // 0x00, source scene-special matrix
+        struct {
+            u8 reserved_000[0x30];
+            NUVEC position; // 0x30, translation from the source matrix
+            u8 reserved_03c[0x40 - 0x3c];
+        };
+    };
     NUMTX grab_matrix; // 0x40
-    u8 reserved_080[0x484 - 0x80];
-    f32 field_0x484;
-    u8 reserved_488[4];
+    u8 reserved_080[0x480 - 0x80];
+    union {
+        NUVEC initial_position; // 0x480
+        struct {
+            f32 field_0x480;
+            f32 field_0x484;
+            f32 field_0x488;
+        };
+    };
     union {
         NUVEC grab_position;
         struct {
@@ -1769,7 +1782,10 @@ struct GRABBER_s {
     };
     u8 reserved_498[0x4b0 - 0x498];
     CHARACTERMODEL_s *character_model; // 0x4b0, APICharacterLoaded result
-    u8 reserved_4b4[0x530 - 0x4b4];
+    u8 reserved_4b4[0x4fc - 0x4b4];
+    nuhspecial_s special;        // 0x4fc, source scene special
+    nuhspecial_s shadow_special; // 0x508
+    u8 reserved_514[0x530 - 0x514];
     f32 scale; // 0x530
     f32 speed; // 0x534
     f32 radius; // 0x538
@@ -1785,8 +1801,13 @@ struct GRABBER_s {
     u8 reserved_564[0x568 - 0x564];
 };
 DECOMP_ASSERT(sizeof(GRABBER_s) == 0x568, "GRABBER allocation size");
+DECOMP_ASSERT(offsetof(GRABBER_s, matrix) == 0x00, "GRABBER source matrix offset");
+DECOMP_ASSERT(offsetof(GRABBER_s, position) == 0x30, "GRABBER source position offset");
 DECOMP_ASSERT(offsetof(GRABBER_s, grab_matrix) == 0x40, "GRABBER grab matrix offset");
+DECOMP_ASSERT(offsetof(GRABBER_s, initial_position) == 0x480, "GRABBER initial position offset");
 DECOMP_ASSERT(offsetof(GRABBER_s, character_model) == 0x4b0, "GRABBER character model offset");
+DECOMP_ASSERT(offsetof(GRABBER_s, special) == 0x4fc, "GRABBER special offset");
+DECOMP_ASSERT(offsetof(GRABBER_s, shadow_special) == 0x508, "GRABBER shadow special offset");
 DECOMP_ASSERT(offsetof(GRABBER_s, flags_559) == 0x559, "GRABBER model flags offset");
 DECOMP_ASSERT(offsetof(GRABBER_s, platform_contact_timer) == 0x554, "GRABBER platform contact timer offset");
 DECOMP_ASSERT(offsetof(GRABBER_s, platform_id) == 0x560, "GRABBER platform ID offset");
@@ -2086,10 +2107,22 @@ struct PLUG_s;
 struct PULSESYS_s {
     PULSE_s *pulses;
     u16 pulse_count;
-    u16 pad_0x06;
+    i16 sfx_turn_on;
+    i16 sfx_turn_off;
+    i16 sfx_on_loop;
+    i16 sfx_off_loop;
+    i16 sfx_hit_player;
+    f32 collide_radius;
+    f32 hit_direction_line;
+    f32 hit_direction_radius_origin;
+    i16 debris_hit_player;
+    u8 radial_hit_direction;
+    u8 pad_0x1f;
 };
-DECOMP_ASSERT(sizeof(PULSESYS_s) == 0x8, "PULSESYS_s size");
+DECOMP_ASSERT(sizeof(PULSESYS_s) == 0x20, "PULSESYS_s size");
 DECOMP_ASSERT(offsetof(PULSESYS_s, pulse_count) == 0x4, "PULSESYS pulse count offset");
+DECOMP_ASSERT(offsetof(PULSESYS_s, collide_radius) == 0x10, "PULSESYS collision radius offset");
+DECOMP_ASSERT(offsetof(PULSESYS_s, radial_hit_direction) == 0x1e, "PULSESYS hit direction mode offset");
 struct PartHeader;
 struct PropertyMenuList {};
 struct REGISTERSTATUSPACKET_s {

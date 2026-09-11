@@ -44,7 +44,7 @@ static __used__ void Tel_Hacky_Cam(nufpar_s *) {
 }
 static __used__ void Tel_name(nufpar_s *parser) {
     if (NuFParGetWord(parser) != 0) {
-        GizmoGetUniqueName(WORLD->gizmo_sys, "Teleport_", parser->word_buf, Tel_teleport->name,
+        GizmoGetUniqueName(WORLD->gizmo_sys, "TLT_", parser->word_buf, Tel_teleport->name,
                            sizeof(Tel_teleport->name));
     }
 }
@@ -76,8 +76,92 @@ static __used__ void Tel_spline(nufpar_s *parser) {
         }
     }
 
-    NuStrCpy(Tel_teleport->name, "Teleport_");
+    NuStrCpy(Tel_teleport->name, "TLT_");
     NuStrCat(Tel_teleport->name, Tel_teleport->path->name);
-    GizmoGetUniqueName(Tel_worldinfo->gizmo_sys, "Teleport_", Tel_teleport->name, Tel_teleport->name,
+    GizmoGetUniqueName(Tel_worldinfo->gizmo_sys, "TLT_", Tel_teleport->name, Tel_teleport->name,
                        sizeof(Tel_teleport->name));
+}
+
+static NUFPCOMJMP Teleport_ConfigKeywords[] = {{"spline", Tel_spline},
+                                               {"duration", Tel_duration},
+                                               {"range", Tel_range},
+                                               {"1_way", Tel_1_way},
+                                               {"crawl", Tel_crawl},
+                                               {"flip_flap", Tel_flip_flap},
+                                               {"hackycam", Tel_Hacky_Cam},
+                                               {"obj", Tel_obj},
+                                               {"flap1", Tel_flap},
+                                               {"flap2", Tel_flap},
+                                               {"name", Tel_name},
+                                               {NULL, NULL}};
+
+void Teleports_Configure(WORLDINFO_s *world, char *config) {
+    world->teleports = NULL;
+    if (world->current_gscn == NULL) {
+        return;
+    }
+
+    NUFPAR *parser = NuFParCreateMem("teleports", config, 0xffff);
+    if (parser == NULL) {
+        return;
+    }
+
+    world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
+    TELEPORT_s *teleport = reinterpret_cast<TELEPORT_s *>(world->giz_buffer.void_ptr);
+    world->teleports = teleport;
+    NuFParPushCom(parser, Teleport_ConfigKeywords);
+
+    i32 active = 0;
+    while (NuFParGetLine(parser) != 0) {
+        if (NuFParGetWord(parser) == 0) {
+            continue;
+        }
+
+        if (active) {
+            if (NuStrICmp(parser->word_buf, "teleport_end") != 0) {
+                NuFParInterpretWord(parser);
+                active = 1;
+                continue;
+            }
+
+            if (NuStrLen(Tel_teleport->name) == 0) {
+                NuStrCpy(Tel_teleport->name, "TLT_");
+                NuStrCat(Tel_teleport->name, "TeleportNoSpline!");
+                GizmoGetUniqueName(WORLD->gizmo_sys, "TLT_", Tel_teleport->name, Tel_teleport->name,
+                                   sizeof(Tel_teleport->name));
+            }
+
+            active = 0;
+            if (teleport->path != NULL) {
+                ++world->teleport_count;
+                ++teleport;
+            }
+            continue;
+        }
+
+        if (NuStrICmp(parser->word_buf, "teleport_start") != 0) {
+            continue;
+        }
+
+        Tel_worldinfo = world;
+        Tel_teleport = teleport;
+        NuStrCpy(teleport->name, "");
+        teleport->enabled = 1;
+        teleport->path = NULL;
+        teleport->duration = 5.0f;
+        teleport->range_squared = 0.0f;
+        teleport->flags = 0;
+        teleport->active = 0;
+        teleport->blocking_special = {};
+        teleport->flap1_special = {};
+        teleport->flap2_special = {};
+        active = 1;
+    }
+
+    NuFParDestroy(parser);
+    if (world->teleport_count > 0) {
+        world->giz_buffer.addr = ALIGN(reinterpret_cast<usize>(teleport), 16);
+    } else {
+        world->teleports = NULL;
+    }
 }
