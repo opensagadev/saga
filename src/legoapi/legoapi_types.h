@@ -3084,7 +3084,18 @@ struct nufile_device_s;
 struct nufpar_s;
 struct nufpcomjmp_s;
 struct nuglobalrndrstate_s;
-struct nugraph_s {};
+struct nugraph_s {
+    i8 interpolation;
+    i8 point_count;
+    u8 pad_02[2];
+    f32 x[8];
+    f32 y[8];
+    f32 x_scale;
+    f32 y_scale;
+    f32 x_extent;
+    f32 y_extent;
+};
+DECOMP_ASSERT(sizeof(nugraph_s) == 0x54, "nugraph_s ABI");
 struct nugscn_s;
 struct nugspline_s;
 enum NUINSTANIM_FLAGS : u32 {
@@ -4308,13 +4319,8 @@ struct GIZTURRET_s {
     i32 field_0x70;
     NUVEC field_0x74[4];
     NUMTX field_0xa4;
-    union {
-        u8 field_0xe4[0xec - 0xe4];
-        struct {
-            u8 reserved_e4[4];
-            GameObject_s *controller; // 0xe8
-        };
-    };
+    void *field_0xe4;
+    GameObject_s *controller; // 0xe8
     f32 field_0xec;
     f32 field_0xf0;
     f32 reflection_alpha; // 0xf4
@@ -4358,7 +4364,7 @@ struct GIZTURRET_s {
     MechObjectInterface *mech_object_interface; // 0x13c
     f32 field_0x140;
     void ClearMechObjectInterface();
-    void GetMechObjectInterface();
+    MechObjectInterface *GetMechObjectInterface();
 };
 DECOMP_ASSERT(sizeof(GIZTURRET_s) == 0x144, "GIZTURRET_s ABI");
 DECOMP_ASSERT(offsetof(GIZTURRET_s, controller) == 0xe8, "GIZTURRET controller offset");
@@ -4779,7 +4785,8 @@ struct PART_s {
     u8 rotation_axis_1, rotation_axis_2;
     u8 active;
     u8 render_flags;
-    u8 pad_146[2];
+    u8 reflection_flags;
+    u8 pad_147;
     nuhspecial_s special;
     nuhspecial_s *source_special;
     NUVEC lighting[7];
@@ -4817,7 +4824,10 @@ struct PART_s {
         u32 force_flags;
         GIZMOBLOWUP_s *carried_blowup; // 0x218, thrown-object callback data
     };
-    u32 field_21c;
+    union {
+        u32 field_21c;
+        f32 reflection_height;
+    };
     union {
         u32 field_220;
         PartObjectInterface *mech_object_interface;

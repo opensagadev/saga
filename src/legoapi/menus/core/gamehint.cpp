@@ -8,6 +8,7 @@
 #include "legoapi/render/core/render.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "nu2api/numath/nufloat.h"
+#include "nu2api/nucore/nustring.h"
 #include "legoapi/world/mission.h"
 
 u32 LSW_HintConditions;
@@ -65,6 +66,7 @@ i32 (*Hub_PanelBusyFn)();
 extern i32 only_process_this_hint_id;
 f32 SeekLinearF(f32, f32, f32);
 void Hint_SetHint(HINT_s *, i32, i32);
+i32 Text_ExpandButtonString(char *, char *);
 
 extern i32 NewMode, Paused, editor_active, CutSceneWaiting, PANELOFF;
 extern FadeSystem FadeSys;
@@ -591,7 +593,53 @@ void Hint_CancelCurrent() {
     }
 }
 
-void Hint_ExpandButtons(char *, char *) {
+void Hint_ExpandButtons(char *input, char *output) {
+    char token[256];
+    char expanded[64];
+
+    *output = '\0';
+    while (*input != '\0') {
+        if (*input != '[') {
+            *output = *input;
+            output[1] = '\0';
+            ++input;
+            ++output;
+            continue;
+        }
+
+        token[0] = '[';
+        i32 token_length = 1;
+        while (input[token_length] != ']' && input[token_length] != '\0') {
+            token[token_length] = input[token_length];
+            ++token_length;
+        }
+
+        char literal = '[';
+        if (input[token_length] != '\0') {
+            token[token_length] = ']';
+            token[token_length + 1] = '\0';
+            token_length = NuStrLen(token);
+            if (token_length > 0 && Text_ExpandButtonString(token, expanded) != 0) {
+                char *character = expanded;
+                while (*character != '\0') {
+                    *output = *character;
+                    output[1] = '\0';
+                    ++character;
+                    ++output;
+                }
+                NuStrCat(output, expanded);
+                input += token_length;
+                continue;
+            }
+            literal = *input;
+        }
+
+        *output = literal;
+        output[1] = '\0';
+        ++input;
+        ++output;
+    }
+    *output = '\0';
 }
 
 void Hint_SaveGameState(HINT_s *hint) {

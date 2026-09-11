@@ -502,7 +502,32 @@ void Text3DStringEncodeFont(unsigned char *src, u16 *dst, void *font) {
     }
     *dst = 0;
 }
-void Text_ExpandButtonString(char *, char *) {
+i32 Text_ExpandButtonString(char *input, char *output) {
+    if (NuStrICmp(input, "[TAG]") == 0 || NuStrICmp(input, "[TRIANGLE]") == 0 || NuStrICmp(input, "[T]") == 0) {
+        strcpy(output, "[[y]]");
+        return 1;
+    }
+    if (NuStrICmp(input, "[SQUARE]") == 0 || NuStrICmp(input, "[S]") == 0 || NuStrICmp(input, "[ACTION]") == 0) {
+        strcpy(output, "[[x]]");
+        return 1;
+    }
+    if (NuStrICmp(input, "[CIRCLE]") == 0 || NuStrICmp(input, "[O]") == 0 || NuStrICmp(input, "[SPECIAL]") == 0) {
+        strcpy(output, "[[b]]");
+        return 1;
+    }
+    if (NuStrICmp(input, "[CROSS]") == 0 || NuStrICmp(input, "[X]") == 0 || NuStrICmp(input, "[JUMP]") == 0) {
+        strcpy(output, "[[a]]");
+        return 1;
+    }
+    if (NuStrICmp(input, "[TOGGLELEFT]") == 0) {
+        strcpy(output, "[[lb]]");
+        return 1;
+    }
+    if (NuStrICmp(input, "[TOGGLERIGHT]") == 0) {
+        strcpy(output, "[[rb]]");
+        return 1;
+    }
+    return 0;
 }
 void Text_InitDefaultStrings() {
 }
@@ -555,7 +580,53 @@ void Text_LocaliseDecimalPoint(char *text) {
         }
     }
 }
-void Text_ExpandAllButtonStrings(char *, char *) {
+void Text_ExpandAllButtonStrings(char *input, char *output) {
+    char token[256];
+    char expanded[64];
+
+    *output = '\0';
+    while (*input != '\0') {
+        if (*input != '[') {
+            *output = *input;
+            output[1] = '\0';
+            ++input;
+            ++output;
+            continue;
+        }
+
+        token[0] = '[';
+        i32 token_length = 1;
+        while (input[token_length] != ']' && input[token_length] != '\0') {
+            token[token_length] = input[token_length];
+            ++token_length;
+        }
+
+        char literal = '[';
+        if (input[token_length] != '\0') {
+            token[token_length] = ']';
+            token[token_length + 1] = '\0';
+            token_length = NuStrLen(token);
+            if (token_length > 0 && Text_ExpandButtonString(token, expanded) != 0) {
+                char *character = expanded;
+                while (*character != '\0') {
+                    *output = *character;
+                    output[1] = '\0';
+                    ++character;
+                    ++output;
+                }
+                NuStrCat(output, expanded);
+                input += token_length;
+                continue;
+            }
+            literal = *input;
+        }
+
+        *output = literal;
+        output[1] = '\0';
+        ++input;
+        ++output;
+    }
+    *output = '\0';
 }
 void Text_FillInExtendedSaveInfo() {
 }

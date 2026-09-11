@@ -154,6 +154,9 @@ build:target --per_file_copt=^src/legoapi/gizmo/object/gizbuildit\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/object/giztimers\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/object/gizminicut\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_gizobstacles\.cpp$@-O3
+# Turret lookup and hint traversal use the same optimized leaf/loop forms as
+# the surrounding generated gizmo translation units.
+build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_gizturrets\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_grabber\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_grapples\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_hatmachine\.cpp$@-O3
@@ -335,6 +338,8 @@ build:target --per_file_copt=^src/legoapi/ai/core/gameai\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/ai/game/lsw_hub_ai\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/cutscenes/minicamcut\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/items/collect/detonator\.cpp$@-O2
+# Thermal-detonator callbacks use the target's optimized leaf/call layout.
+build:target --per_file_copt=^src/legoapi/items/collect/thermaldetonators\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/items/fx/explosions\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/items/fx/pulses\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/items/objects/placeable\.cpp$@-O2

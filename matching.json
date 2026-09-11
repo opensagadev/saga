@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 39.092648,
+    "fuzzy_match_percent": 39.31025,
     "total_code": "4722419",
-    "matched_code": "367889",
-    "matched_code_percent": 7.790266,
+    "matched_code": "369113",
+    "matched_code_percent": 7.816185,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4462,
-    "matched_functions_percent": 33.15254,
+    "matched_functions": 4469,
+    "matched_functions_percent": 33.204548,
     "total_units": 1
   },
   "text": {
@@ -49000,7 +49000,7 @@
           "address": 5195248,
           "offset": 4305280,
           "size": 116,
-          "match_percent": 13.548388
+          "match_percent": 99.96774
         },
         {
           "name": "_Z24WallShuffle_SetTargetMomP12GameObject_st",
@@ -49032,7 +49032,7 @@
           "address": 5213344,
           "offset": 4323376,
           "size": 162,
-          "match_percent": 3.846154
+          "match_percent": 99.98077
         }
       ]
     },
@@ -53751,7 +53751,7 @@
           "address": 4916416,
           "offset": 4026448,
           "size": 266,
-          "match_percent": 4.468085
+          "match_percent": 100.0
         },
         {
           "name": "_Z15GizmoFindByNameP10GIZMOSYS_siPc",
@@ -53759,7 +53759,7 @@
           "address": 4916688,
           "offset": 4026720,
           "size": 352,
-          "match_percent": 85.333336
+          "match_percent": 85.51588
         },
         {
           "name": "_Z12GizmoGetNameP7GIZMO_s",
@@ -53983,7 +53983,7 @@
           "address": 4935008,
           "offset": 4045040,
           "size": 432,
-          "match_percent": 96.735535
+          "match_percent": 99.87603
         },
         {
           "name": "_Z12ResetGizFlowP9GIZFLOW_sP17GIZFLOWPROGRESS_s",
@@ -55151,7 +55151,7 @@
           "address": 4994528,
           "offset": 4104560,
           "size": 652,
-          "match_percent": 2.439024
+          "match_percent": 92.45731
         },
         {
           "name": "_Z34GizTurret_CalculateInterceptVectorP7nuvec_sP7numtx_sS0_S0_fS0_S0_j",
@@ -55159,7 +55159,7 @@
           "address": 4995184,
           "offset": 4105216,
           "size": 473,
-          "match_percent": 2.786885
+          "match_percent": 96.83607
         },
         {
           "name": "_Z21GizTurrets_UpdateHintP6HINT_s",
@@ -55167,7 +55167,7 @@
           "address": 5001248,
           "offset": 4111280,
           "size": 274,
-          "match_percent": 4.594595
+          "match_percent": 58.351353
         },
         {
           "name": "_Z28GizTurrets_OpponentSelectionP14GIZTURRETSYS_siPP11APIOBJECT_siS3_",
@@ -55175,7 +55175,7 @@
           "address": 5001536,
           "offset": 4111568,
           "size": 821,
-          "match_percent": 1.980198
+          "match_percent": 2.079208
         },
         {
           "name": "_Z21GizTurret_FindNearestP14GIZTURRETSYS_sP7nuvec_sP12GameObject_sPfi",
@@ -55183,7 +55183,7 @@
           "address": 5002368,
           "offset": 4112400,
           "size": 265,
-          "match_percent": 4.788733
+          "match_percent": 63.394367
         },
         {
           "name": "_Z20GizTurret_FindByNameP14GIZTURRETSYS_sPc",
@@ -55191,7 +55191,7 @@
           "address": 5002640,
           "offset": 4112672,
           "size": 115,
-          "match_percent": 8.478261
+          "match_percent": 48.565216
         },
         {
           "name": "_Z26GizTurret_FindByControllerP14GIZTURRETSYS_sR12GameObject_s",
@@ -55199,7 +55199,7 @@
           "address": 5002768,
           "offset": 4112800,
           "size": 65,
-          "match_percent": 13.75
+          "match_percent": 79.166664
         },
         {
           "name": "_Z14GizTurrets_HitPvP11GIZTURRET_sP7nuvec_sii",
@@ -55207,7 +55207,7 @@
           "address": 5002848,
           "offset": 4112880,
           "size": 936,
-          "match_percent": 1.189189
+          "match_percent": 2.27027
         },
         {
           "name": "_ZN11GIZTURRET_s22GetMechObjectInterfaceEv",
@@ -55215,7 +55215,7 @@
           "address": 5005312,
           "offset": 4115344,
           "size": 99,
-          "match_percent": 9.166667
+          "match_percent": 100.0
         },
         {
           "name": "_ZN11GIZTURRET_s24ClearMechObjectInterfaceEv",
@@ -55223,7 +55223,7 @@
           "address": 5006608,
           "offset": 4116640,
           "size": 31,
-          "match_percent": 22.0
+          "match_percent": 100.0
         }
       ]
     },
@@ -60925,7 +60925,7 @@
           "address": 4992528,
           "offset": 4102560,
           "size": 975,
-          "match_percent": 47.18797
+          "match_percent": 47.451126
         },
         {
           "name": "_ZL31GizTurrets_AllocateProgressDataP9variptr_uS0_",
@@ -60989,7 +60989,7 @@
           "address": 5004944,
           "offset": 4114976,
           "size": 356,
-          "match_percent": 4.716981
+          "match_percent": 7.622642
         },
         {
           "name": "_ZL28GizTurrets_GetBestBoltTargetP10GIZMOSET_sPfP7nuvec_sS3_PvS3_S3_ffiii",
@@ -63629,7 +63629,7 @@
           "address": 896640,
           "offset": 6672,
           "size": 281,
-          "match_percent": 13.465117
+          "match_percent": 59.32558
         },
         {
           "name": "_Z25PartKill_ThermalDetonatorP6PART_si",
@@ -63637,7 +63637,7 @@
           "address": 1839120,
           "offset": 949152,
           "size": 175,
-          "match_percent": 4.489796
+          "match_percent": 100.0
         },
         {
           "name": "_Z25PartDraw_ThermalDetonatorP6PART_s",
@@ -63645,7 +63645,7 @@
           "address": 1839296,
           "offset": 949328,
           "size": 504,
-          "match_percent": 2.992424
+          "match_percent": 70.106064
         },
         {
           "name": "_Z27PartUpdate_ThermalDetonatorP6PART_s",
@@ -63653,7 +63653,7 @@
           "address": 1839808,
           "offset": 949840,
           "size": 579,
-          "match_percent": 1.818182
+          "match_percent": 3.471074
         },
         {
           "name": "_Z27PartImpact_ThermalDetonatorP6PART_s",
@@ -63661,7 +63661,7 @@
           "address": 1840400,
           "offset": 950432,
           "size": 655,
-          "match_percent": 1.549296
+          "match_percent": 2.957746
         },
         {
           "name": "_Z22ThermalDetonator_ThrowP12GameObject_s",
@@ -63669,7 +63669,7 @@
           "address": 1841056,
           "offset": 951088,
           "size": 2052,
-          "match_percent": 0.804878
+          "match_percent": 1.02439
         },
         {
           "name": "_Z25ThermalDetonator_ThrowMomP12GameObject_sP7nuvec_s",
@@ -63677,7 +63677,7 @@
           "address": 1843120,
           "offset": 953152,
           "size": 1065,
-          "match_percent": 1.743363
+          "match_percent": 1.858407
         },
         {
           "name": "_Z25ThermalDetonator_MoveCodeP12GameObject_s",
@@ -63685,7 +63685,7 @@
           "address": 1844192,
           "offset": 954224,
           "size": 976,
-          "match_percent": 1.268293
+          "match_percent": 0.780488
         },
         {
           "name": "_Z8DetonateP7nuvec_st",
@@ -63693,7 +63693,7 @@
           "address": 1921744,
           "offset": 1031776,
           "size": 469,
-          "match_percent": 21.34694
+          "match_percent": 99.72449
         }
       ]
     },
@@ -67639,7 +67639,7 @@
           "address": 5140400,
           "offset": 4250432,
           "size": 308,
-          "match_percent": 4.329897
+          "match_percent": 64.701035
         },
         {
           "name": "_Z14Hint_CurrentIdv",
@@ -68393,7 +68393,7 @@
           "address": 2409024,
           "offset": 1519056,
           "size": 535,
-          "match_percent": 3.181818
+          "match_percent": 99.469696
         },
         {
           "name": "_Z8GetLineWPti",
@@ -68785,7 +68785,7 @@
           "address": 4777664,
           "offset": 3887696,
           "size": 308,
-          "match_percent": 4.329897
+          "match_percent": 64.701035
         },
         {
           "name": "_Z19IntroText_SetTextIDi",
@@ -74039,7 +74039,7 @@
           "address": 2671394,
           "offset": 1781426,
           "size": 126,
-          "match_percent": 10.0
+          "match_percent": 99.76471
         },
         {
           "name": "nugraphAddPoint",
@@ -74047,7 +74047,7 @@
           "address": 2671520,
           "offset": 1781552,
           "size": 314,
-          "match_percent": 2.916667
+          "match_percent": 100.0
         },
         {
           "name": "nugraphDeletePoint",
@@ -74055,7 +74055,87 @@
           "address": 2671834,
           "offset": 1781866,
           "size": 173,
-          "match_percent": 5.964286
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z18nugraphGetXatIndexP9nugraph_si",
+          "demangled_name": "nugraphGetXatIndex(nugraph_s*, int)",
+          "address": 2672007,
+          "offset": 1782039,
+          "size": 244,
+          "match_percent": 99.97298
+        },
+        {
+          "name": "_Z18nugraphGetYatIndexP9nugraph_si",
+          "demangled_name": "nugraphGetYatIndex(nugraph_s*, int)",
+          "address": 2672251,
+          "offset": 1782283,
+          "size": 258,
+          "match_percent": 99.974686
+        },
+        {
+          "name": "_Z13nugraph_blendiiPif",
+          "demangled_name": "nugraph_blend(int, int, int*, float)",
+          "address": 2672509,
+          "offset": 1782541,
+          "size": 1017,
+          "match_percent": 93.722565
+        },
+        {
+          "name": "_Z21nugraph_compute_pointPiiifP7nuvec_sS1_",
+          "demangled_name": "nugraph_compute_point(int*, int, int, float, nuvec_s*, nuvec_s*)",
+          "address": 2673526,
+          "offset": 1783558,
+          "size": 250,
+          "match_percent": 99.960526
+        },
+        {
+          "name": "_Z29nugraph_compute_catmull_pointifP7nuvec_sS0_",
+          "demangled_name": "nugraph_compute_catmull_point(int, float, nuvec_s*, nuvec_s*)",
+          "address": 2673776,
+          "offset": 1783808,
+          "size": 1326,
+          "match_percent": 99.31979
+        },
+        {
+          "name": "_Z28nugraph_compute_linear_pointifP7nuvec_sS0_",
+          "demangled_name": "nugraph_compute_linear_point(int, float, nuvec_s*, nuvec_s*)",
+          "address": 2675102,
+          "offset": 1785134,
+          "size": 421,
+          "match_percent": 99.99275
+        },
+        {
+          "name": "_Z25nugraph_compute_intervalsPiii",
+          "demangled_name": "nugraph_compute_intervals(int*, int, int)",
+          "address": 2675523,
+          "offset": 1785555,
+          "size": 166,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z15nugraph_bsplineiiP7nuvec_sS0_i",
+          "demangled_name": "nugraph_bspline(int, int, nuvec_s*, nuvec_s*, int)",
+          "address": 2675689,
+          "offset": 1785721,
+          "size": 443,
+          "match_percent": 99.98052
+        },
+        {
+          "name": "_Z18nugraph_catmullromiP7nuvec_sS0_i",
+          "demangled_name": "nugraph_catmullrom(int, nuvec_s*, nuvec_s*, int)",
+          "address": 2676132,
+          "offset": 1786164,
+          "size": 381,
+          "match_percent": 99.98529
+        },
+        {
+          "name": "_Z14nugraph_lineariP7nuvec_sS0_i",
+          "demangled_name": "nugraph_linear(int, nuvec_s*, nuvec_s*, int)",
+          "address": 2676513,
+          "offset": 1786545,
+          "size": 381,
+          "match_percent": 99.98529
         },
         {
           "name": "nugraphFreeTempCurveData",
@@ -74063,7 +74143,7 @@
           "address": 2676894,
           "offset": 1786926,
           "size": 146,
-          "match_percent": 11.111111
+          "match_percent": 99.833336
         },
         {
           "name": "nugraphCalcCurve",
@@ -74071,7 +74151,7 @@
           "address": 2677040,
           "offset": 1787072,
           "size": 621,
-          "match_percent": 2.469136
+          "match_percent": 99.8642
         },
         {
           "name": "nugraphGetXatT",
@@ -74079,7 +74159,7 @@
           "address": 2677661,
           "offset": 1787693,
           "size": 166,
-          "match_percent": 8.333333
+          "match_percent": 99.854164
         },
         {
           "name": "nugraphGetYatT",
@@ -74087,7 +74167,7 @@
           "address": 2677827,
           "offset": 1787859,
           "size": 167,
-          "match_percent": 8.333333
+          "match_percent": 99.854164
         },
         {
           "name": "nugraphGetYatX",
@@ -78313,86 +78393,6 @@
           "match_percent": 99.78319
         },
         {
-          "name": "_Z18nugraphGetXatIndexP9nugraph_si",
-          "demangled_name": "nugraphGetXatIndex(nugraph_s*, int)",
-          "address": 2672007,
-          "offset": 1782039,
-          "size": 244,
-          "match_percent": 5.675676
-        },
-        {
-          "name": "_Z18nugraphGetYatIndexP9nugraph_si",
-          "demangled_name": "nugraphGetYatIndex(nugraph_s*, int)",
-          "address": 2672251,
-          "offset": 1782283,
-          "size": 258,
-          "match_percent": 5.316456
-        },
-        {
-          "name": "_Z13nugraph_blendiiPif",
-          "demangled_name": "nugraph_blend(int, int, int*, float)",
-          "address": 2672509,
-          "offset": 1782541,
-          "size": 1017,
-          "match_percent": 1.280488
-        },
-        {
-          "name": "_Z21nugraph_compute_pointPiiifP7nuvec_sS1_",
-          "demangled_name": "nugraph_compute_point(int*, int, int, float, nuvec_s*, nuvec_s*)",
-          "address": 2673526,
-          "offset": 1783558,
-          "size": 250,
-          "match_percent": 5.526316
-        },
-        {
-          "name": "_Z29nugraph_compute_catmull_pointifP7nuvec_sS0_",
-          "demangled_name": "nugraph_compute_catmull_point(int, float, nuvec_s*, nuvec_s*)",
-          "address": 2673776,
-          "offset": 1783808,
-          "size": 1326,
-          "match_percent": 1.218274
-        },
-        {
-          "name": "_Z28nugraph_compute_linear_pointifP7nuvec_sS0_",
-          "demangled_name": "nugraph_compute_linear_point(int, float, nuvec_s*, nuvec_s*)",
-          "address": 2675102,
-          "offset": 1785134,
-          "size": 421,
-          "match_percent": 3.478261
-        },
-        {
-          "name": "_Z25nugraph_compute_intervalsPiii",
-          "demangled_name": "nugraph_compute_intervals(int*, int, int)",
-          "address": 2675523,
-          "offset": 1785555,
-          "size": 166,
-          "match_percent": 6.774194
-        },
-        {
-          "name": "_Z15nugraph_bsplineiiP7nuvec_sS0_i",
-          "demangled_name": "nugraph_bspline(int, int, nuvec_s*, nuvec_s*, int)",
-          "address": 2675689,
-          "offset": 1785721,
-          "size": 443,
-          "match_percent": 2.727273
-        },
-        {
-          "name": "_Z18nugraph_catmullromiP7nuvec_sS0_i",
-          "demangled_name": "nugraph_catmullrom(int, nuvec_s*, nuvec_s*, int)",
-          "address": 2676132,
-          "offset": 1786164,
-          "size": 381,
-          "match_percent": 3.088235
-        },
-        {
-          "name": "_Z14nugraph_lineariP7nuvec_sS0_i",
-          "demangled_name": "nugraph_linear(int, nuvec_s*, nuvec_s*, int)",
-          "address": 2676513,
-          "offset": 1786545,
-          "size": 381,
-          "match_percent": 3.088235
-        },
-        {
           "name": "_Z8setpointf",
           "demangled_name": "setpoint(float)",
           "address": 2977408,
@@ -79577,7 +79577,7 @@
           "address": 4317360,
           "offset": 3427392,
           "size": 2574,
-          "match_percent": 57.363308
+          "match_percent": 56.257195
         },
         {
           "name": "KillAllParts",
@@ -116949,7 +116949,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -116958,7 +116957,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -117039,7 +117037,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -117048,7 +117045,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -117129,7 +117125,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -117138,7 +117133,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -117230,7 +117224,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -117239,7 +117232,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -117365,7 +117357,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -117374,7 +117365,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -117466,7 +117456,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -117475,7 +117464,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -117567,7 +117555,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -117576,7 +117563,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -117668,7 +117654,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -117677,7 +117662,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -117769,7 +117753,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -117778,7 +117761,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -117870,7 +117852,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -117879,7 +117860,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -118172,7 +118152,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -118181,7 +118160,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -118273,7 +118251,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -118282,7 +118259,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -118374,7 +118350,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -118383,7 +118358,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -118520,7 +118494,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -118529,7 +118502,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -118632,7 +118604,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -118641,7 +118612,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -118718,7 +118688,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/animpacket.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -118853,7 +118822,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -118862,7 +118830,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -118938,7 +118905,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/animpacket.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -119028,7 +118994,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -119037,7 +119002,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -119102,7 +119066,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/animpacket.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -119204,7 +119167,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -119213,7 +119175,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -119305,7 +119266,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -119314,7 +119274,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -119406,7 +119365,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -119415,7 +119373,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -119507,7 +119464,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -119516,7 +119472,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -119592,7 +119547,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/animpacket.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
@@ -119660,7 +119614,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -119669,7 +119622,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -119761,7 +119713,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -119770,7 +119721,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -119873,7 +119823,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -119882,7 +119831,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -119974,7 +119922,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -119983,7 +119930,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -120087,7 +120033,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -120096,7 +120041,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -120188,7 +120132,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -120197,7 +120140,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -120323,7 +120265,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -120332,7 +120273,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -120424,7 +120364,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -120433,7 +120372,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -120525,7 +120463,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -120534,7 +120471,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -120626,7 +120562,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -120635,7 +120570,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -120790,7 +120724,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -120799,7 +120732,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -120891,7 +120823,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -120900,7 +120831,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -120992,7 +120922,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -121001,7 +120930,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -121440,7 +121368,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -121449,7 +121376,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -121669,7 +121595,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -121678,7 +121603,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -121873,7 +121797,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -121882,7 +121805,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -122280,7 +122202,7 @@
       "address": 4994032,
       "offset": 4104064,
       "size": 94,
-      "match_percent": 8.28,
+      "match_percent": 16.8,
       "candidate_units": [
         "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmos/traps/gizturrets.cpp.o"
@@ -122345,7 +122267,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -122354,7 +122275,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
@@ -122446,7 +122366,6 @@
         "legoapi/core/input/input.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_gizturrets.cpp.o",
         "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
@@ -122455,7 +122374,6 @@
         "legoapi/gizmo/object/gizrandom.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/collect/thermaldetonators.cpp.o",
         "legoapi/items/objects/cable.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",

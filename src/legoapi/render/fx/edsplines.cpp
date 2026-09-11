@@ -34,19 +34,10 @@ void setnextpoint(float x, float y) {
 void BezierLinePos(VuVec &, VuVec &, VuVec &, VuVec &, VuVec &, float) {
 }
 
-void nugraph_blend(i32, i32, i32 *, float) {
-}
-
 void BezierLineEval(VuVec &, VuVec &, VuVec &, VuVec &, VuVec &, float) {
 }
 
-void nugraph_linear(i32, nuvec_s *, nuvec_s *, i32) {
-}
-
 void CalcSplinePoint(flightspline_s *, _vuv_s *, float) {
-}
-
-void nugraph_bspline(i32, i32, nuvec_s *, nuvec_s *, i32) {
 }
 
 void BezierLineLength(VuVec &, VuVec &, VuVec &, VuVec &) {
@@ -272,15 +263,6 @@ void InitSplinePosition(SPLINEPOS_s *position, nugspline_s *spline, float distan
     }
 }
 
-void nugraphGetXatIndex(nugraph_s *, i32) {
-}
-
-void nugraphGetYatIndex(nugraph_s *, i32) {
-}
-
-void nugraph_catmullrom(i32, nuvec_s *, nuvec_s *, i32) {
-}
-
 void GetNearestSplinePos(NUVEC *origin, SPLINEPOS_s *result, NUGSPLINE *spline, i32 looping, i16 first_point,
                          i16 last_point) {
     if (result == NULL)
@@ -322,9 +304,6 @@ void GetNearestSplinePos(NUVEC *origin, SPLINEPOS_s *result, NUGSPLINE *spline, 
     result->along = (result->segment_distance / result->segment_length + result->segment) / (logical_count - 1);
 }
 
-void nugraph_compute_point(i32 *, i32, i32, float, nuvec_s *, nuvec_s *) {
-}
-
 void CalcSplinePointFromDist(flightspline_s *, _vuv_s *, float) {
 }
 
@@ -354,16 +333,7 @@ void LevelSplines_InitForGame(LEVELSPLINE *splines) {
     }
 }
 
-void nugraph_compute_intervals(i32 *, i32, i32) {
-}
-
 void EvaluateSplineXZIntersection(nugspline_s *, i32, SPLINEPOS_s *, nugspline_s *, i32, SPLINEPOS_s *) {
-}
-
-void nugraph_compute_linear_point(i32, float, nuvec_s *, nuvec_s *) {
-}
-
-void nugraph_compute_catmull_point(i32, float, nuvec_s *, nuvec_s *) {
 }
 
 void setpoint(float x) {

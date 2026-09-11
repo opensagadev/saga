@@ -1275,7 +1275,40 @@ void GizmoSysReset(GIZMOSYS *gizmo_sys, void *world, i32 progress_index) {
     }
 }
 
-void GizmoFindByData(GIZMOSYS_s *, i32, void *) {
+GIZMO *GizmoFindByData(GIZMOSYS *gizmo_sys, i32 type_id, void *data) {
+    if (gizmotypes == NULL || data == NULL || gizmo_sys == NULL) {
+        return NULL;
+    }
+
+    if (type_id >= 0 && type_id <= gizmotypes->count) {
+        GIZMOTYPE &type = gizmotypes->types[type_id];
+        GIZMOSET &set = gizmo_sys->sets[type_id];
+        if (type.fns.get_gizmo_name_fn == NULL) {
+            return NULL;
+        }
+
+        GIZMO *gizmo = set.gizmos;
+        for (i32 i = 0; i < set.count; ++i, ++gizmo) {
+            if (gizmo->object == data) {
+                return gizmo;
+            }
+        }
+        return NULL;
+    }
+
+    GIZMOTYPE *type = gizmotypes->types;
+    GIZMOSET *set = gizmo_sys->sets;
+    for (i32 type_index = 0; type_index < gizmotypes->count; ++type_index, ++type, ++set) {
+        if (type->fns.get_gizmo_name_fn != NULL) {
+            GIZMO *gizmo = set->gizmos;
+            for (i32 i = 0; i < set->count; ++i, ++gizmo) {
+                if (gizmo->object == data) {
+                    return gizmo;
+                }
+            }
+        }
+    }
+    return NULL;
 }
 
 GIZMO *GizmoFindByName(GIZMOSYS *gizmo_sys, i32 type_id, char *name) {

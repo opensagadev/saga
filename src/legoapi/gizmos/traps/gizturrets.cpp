@@ -20,6 +20,13 @@
 #include <string.h>
 
 i32 GizmoBlowupGetTypeFromNameTableId(WORLDINFO_s *world, i32 name_table_id);
+void GizTurrets_Hit(void *, GIZTURRET_s *, nuvec_s *, i32, i32);
+
+struct GizTurretAnimObjectData {
+    u8 flags;
+    u8 role;
+    i16 platform_id;
+};
 
 u32 GizTurrets_TotalScore(void *context) {
     GIZTURRETSYS_s *system = static_cast<WORLDINFO_s *>(context)->giz_turret_sys;
@@ -224,9 +231,42 @@ static NUVEC *GizmoTurret_GetPos(GIZMO *gizmo) {
     return NULL;
 }
 
-static i32 GizTurrets_BoltHitPlat(void *, void *, BOLT *, unsigned char *) {
-    UNIMPLEMENTED();
-    return {};
+static i32 GizTurrets_BoltHitPlat(void *world_ptr, void *system_ptr, BOLT *bolt, unsigned char *) {
+    GIZTURRETSYS_s *system = static_cast<GIZTURRETSYS_s *>(system_ptr);
+    if (system == NULL || system->count == 0) {
+        return 0;
+    }
+
+    GIZTURRET_s *turret = system->turrets;
+    for (i32 index = 0; index < system->count; ++index, ++turret) {
+        if ((turret->flags & GIZTURRET_FLAG_VISIBLE) == 0 ||
+            (turret->flags & GIZTURRET_FLAG_ACTIVE) == 0 || (turret->flags & 0x30) != 0 ||
+            (turret->runtime_flags & 2) == 0) {
+            continue;
+        }
+
+        GAMEANIMOBJ_s *object = turret->anim_set->objects;
+        while (object != NULL) {
+            GizTurretAnimObjectData *data = static_cast<GizTurretAnimObjectData *>(object->object_data);
+            if (data->platform_id == bolt->hit_platform) {
+                BOLTTYPE_s *bolt_type = BoltType_FindByID(bolt->type_id, static_cast<WORLDINFO_s *>(world_ptr));
+                i32 player_index;
+                if (bolt->owner == NULL) {
+                    player_index = -1;
+                } else if (((turret->behavior_flags & 0x10000) != 0 && bolt->owner->field_0xcc0 == NULL) ||
+                           ((turret->behavior_flags & 0x20000) != 0 &&
+                            static_cast<i8>(bolt->owner->apiobj.field_0x1f8) >= 0)) {
+                    player_index = 0;
+                } else {
+                    player_index = bolt->owner->apiobj.field_0x27c;
+                }
+                GizTurrets_Hit(world_ptr, turret, &bolt->position, player_index, bolt_type->field_3c);
+                return 1;
+            }
+            object = object->next;
+        }
+    }
+    return 0;
 }
 
 static i32 *GizTurrets_GetBestBoltTarget(GIZMOSET *, float *, NUVEC *, NUVEC *, void *, NUVEC *, NUVEC *, float, float,
