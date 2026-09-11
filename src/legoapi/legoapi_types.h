@@ -3094,8 +3094,10 @@ struct nugraph_s {
     f32 y_scale;
     f32 x_extent;
     f32 y_extent;
+    f32 x_offset;
+    f32 y_offset;
 };
-DECOMP_ASSERT(sizeof(nugraph_s) == 0x54, "nugraph_s ABI");
+DECOMP_ASSERT(sizeof(nugraph_s) == 0x5c, "nugraph_s ABI");
 struct nugscn_s;
 struct nugspline_s;
 enum NUINSTANIM_FLAGS : u32 {

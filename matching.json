@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 39.31025,
+    "fuzzy_match_percent": 39.402073,
     "total_code": "4722419",
-    "matched_code": "369113",
-    "matched_code_percent": 7.816185,
+    "matched_code": "370312",
+    "matched_code_percent": 7.841574,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4469,
-    "matched_functions_percent": 33.204548,
+    "matched_functions": 4476,
+    "matched_functions_percent": 33.256557,
     "total_units": 1
   },
   "text": {
@@ -74175,7 +74175,7 @@
           "address": 2677994,
           "offset": 1788026,
           "size": 2527,
-          "match_percent": 0.596125
+          "match_percent": 99.940384
         },
         {
           "name": "nugraphGetYatXScaled",
@@ -74183,7 +74183,7 @@
           "address": 2680521,
           "offset": 1790553,
           "size": 113,
-          "match_percent": 12.121212
+          "match_percent": 88.30303
         },
         {
           "name": "nugraphGenerateLookupTable",
@@ -74191,7 +74191,7 @@
           "address": 2680634,
           "offset": 1790666,
           "size": 654,
-          "match_percent": 2.173913
+          "match_percent": 99.96739
         },
         {
           "name": "nugraphFileSave",
@@ -74199,7 +74199,7 @@
           "address": 2681288,
           "offset": 1791320,
           "size": 200,
-          "match_percent": 8.333333
+          "match_percent": 100.0
         },
         {
           "name": "nugraphFileSaveGraphOnly",
@@ -74207,7 +74207,7 @@
           "address": 2681488,
           "offset": 1791520,
           "size": 96,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "nugraphFileLoadGraphOnly",
@@ -74215,7 +74215,7 @@
           "address": 2681584,
           "offset": 1791616,
           "size": 96,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "nugraphFileSaveGraphOnlyToFile",
@@ -74223,7 +74223,7 @@
           "address": 2681680,
           "offset": 1791712,
           "size": 103,
-          "match_percent": 14.285714
+          "match_percent": 100.0
         },
         {
           "name": "nugraphFileLoadGraphOnlyToFile",
@@ -74231,7 +74231,7 @@
           "address": 2681783,
           "offset": 1791815,
           "size": 308,
-          "match_percent": 4.878049
+          "match_percent": 100.0
         },
         {
           "name": "nugraphFileLoadGraph",
@@ -74239,7 +74239,7 @@
           "address": 2682091,
           "offset": 1792123,
           "size": 190,
-          "match_percent": 6.557377
+          "match_percent": 100.0
         },
         {
           "name": "nugraphFileLoadTable",
@@ -74247,7 +74247,7 @@
           "address": 2682281,
           "offset": 1792313,
           "size": 206,
-          "match_percent": 6.060606
+          "match_percent": 100.0
         }
       ]
     },
