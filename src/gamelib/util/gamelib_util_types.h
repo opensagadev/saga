@@ -142,17 +142,17 @@ struct NetConstReplicator : NetReplicator {
 };
 struct NetFtpManager {
     FtpFile files[32];
-    void Abort(char const *, NetAddress const &, i32, i32);
+    i32 Abort(char const *, NetAddress const &, i32, i32);
     void FindTransfer(char const *, NetAddress const &, i32);
     void FindTransfer(char const *, NetAddress const &, i32) const;
-    void Get(char const *, void *, i32, NetAddress const &);
+    i32 Get(char const *, void *, i32, NetAddress const &);
     FtpFile const *GetTransfers() const;
     void Init();
     NetFtpManager();
     void PeerLeft(NetAddress const &, ePeerLeftReason);
     void Receive(NetMessage, unsigned char, NetAddress const &);
     void Reset();
-    void Send(char const *, void const *, i32, NetAddress const &);
+    i32 Send(char const *, void const *, i32, NetAddress const &);
     void Term();
     void Update();
     virtual ~NetFtpManager();

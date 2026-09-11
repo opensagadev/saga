@@ -8,9 +8,11 @@ extern "C" {
     // supply the full rumble request ABI.
     void NuSound3AddRumble(nupad_s *, f32, i32, i32, f32) {
     }
-    void NuSound3AddStream(void) {
+    i32 NuSound3AddStream(void) {
+        return 0;
     }
-    void NuSound3AddStreamEx(void) {
+    i32 NuSound3AddStreamEx(void) {
+        return 0;
     }
     f32 NuSound3AmplitudeTodB(f32 amplitude) {
         return NuSoundSystem::AmplitudeTodB(amplitude);
@@ -19,9 +21,11 @@ extern "C" {
     }
     void NuSound3CancelCheckStereo(void) {
     }
-    void NuSound3CheckStream(void) {
+    i32 NuSound3CheckStream(void) {
+        return 0;
     }
-    void NuSound3CheckWaitUpdate(void) {
+    i32 NuSound3CheckWaitUpdate(void) {
+        return 0;
     }
     void NuSound3ClearLoopHold(void) {
     }
@@ -31,26 +35,34 @@ extern "C" {
     }
     void NuSound3DrawMem(void) {
     }
-    void NuSound3FClose(void) {
+    i32 NuSound3FClose(void) {
+        return 0;
     }
-    void NuSound3FOpen(void) {
+    i32 NuSound3FOpen(void) {
+        return 0;
     }
-    void NuSound3FOpenSize(void) {
+    i32 NuSound3FOpenSize(void) {
+        return 0;
     }
-    void NuSound3FRead(void) {
+    i32 NuSound3FRead(void) {
+        return 0;
     }
     i64 NuSound3FSeek(void) {
         return 0;
     }
-    void NuSound3FindFree(void) {
+    i32 NuSound3FindFree(void) {
+        return 0;
     }
-    void NuSound3FlushBG(void) {
+    i32 NuSound3FlushBG(void) {
+        return 0;
     }
-    void NuSound3FlushFG(void) {
+    i32 NuSound3FlushFG(void) {
+        return 0;
     }
     void NuSound3FlushLoops(void) {
     }
-    void NuSound3GetSize(void) {
+    i32 NuSound3GetSize(void) {
+        return 0;
     }
     void NuSound3GetStreamInfo(void) {
     }
@@ -79,15 +91,19 @@ extern "C" {
     }
     void NuSound3PlayInterleavedStereo(void) {
     }
-    void NuSound3PlayStream(void) {
+    i32 NuSound3PlayStream(void) {
+        return 0;
     }
-    void NuSound3ReadStream(void) {
+    i32 NuSound3ReadStream(void) {
+        return 0;
     }
     void NuSound3RemoveStreamID(void) {
     }
-    void NuSound3ReserveStream(void) {
+    i32 NuSound3ReserveStream(void) {
+        return 0;
     }
-    void NuSound3RestoreStreamPitch(void) {
+    i32 NuSound3RestoreStreamPitch(void) {
+        return 0;
     }
     void NuSound3SetDPL(i32, i32) {
     }
@@ -117,7 +133,8 @@ extern "C" {
     }
     void NuSound3SetStereoIopBufferSize(void) {
     }
-    void NuSound3SetStreamPitch(void) {
+    i32 NuSound3SetStreamPitch(void) {
+        return 0;
     }
     i32 NuSound3SetStreamVolume(i32 stream_index, i32 volume) {
         NuSound3SetStereoStreamVolume(stream_index, volume);
@@ -127,15 +144,19 @@ extern "C" {
     }
     void NuSound3StopSFX(void) {
     }
-    void NuSound3StopStream(void) {
+    i32 NuSound3StopStream(void) {
+        return 0;
     }
-    void NuSound3StreamClose(void) {
+    i32 NuSound3StreamClose(void) {
+        return 0;
     }
-    void NuSound3StreamOpen(void) {
+    i32 NuSound3StreamOpen(void) {
+        return 0;
     }
     void NuSound3UpdateEx(void) {
     }
-    void NuSound3UpdatePending(void) {
+    i32 NuSound3UpdatePending(void) {
+        return 0;
     }
     void NuSound3UpdateRumble(f32) {
     }

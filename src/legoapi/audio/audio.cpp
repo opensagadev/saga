@@ -189,7 +189,8 @@ void SpaceResetAudioPoint() {
     }
     SetPreSeekStartPoint(0.0f);
 }
-void CheckMusicSwapInstant() {
+i32 CheckMusicSwapInstant() {
+    return 0;
 }
 void UpdateBackgroundMusic() {
 }

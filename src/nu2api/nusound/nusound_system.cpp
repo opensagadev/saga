@@ -1045,33 +1045,31 @@ f32 NuSoundSystem::dBToAmplitude(f32 db) {
 }
 
 NuSoundVoice *NuSoundSystem::CreateVoice(NuSoundSource *source, bool loop) {
-    NuSoundVoice *voice;
-
-    if (!this->SourceRequiresDecoder(source)) {
-        if (source->IsStreamOpen() == false) {
-            return NULL;
-        }
-        NuSoundStreamDesc *desc = source->GetStreamDesc();
-        NuSoundVoiceFactory *factory = this->factory_list.GetFactory(desc->GetDecodedDataFormat());
-        voice = factory->CreateVoice(source, loop);
-        if (voice == NULL) {
-            return NULL;
-        }
-    } else {
-        NuSoundDecoder *decoder = this->CreateDecoder(source);
+    NuSoundDecoder *decoder = NULL;
+    NuSoundSource *voice_source = source;
+    if (this->SourceRequiresDecoder(source)) {
+        decoder = this->CreateDecoder(source);
         decoder->OpenStream(loop);
         if (decoder->IsStreamOpen() == false) {
             this->ReleaseDecoder(decoder);
             return NULL;
         }
-        NuSoundStreamDesc *desc = decoder->GetStreamDesc();
-        NuSoundVoiceFactory *factory = this->factory_list.GetFactory(desc->GetDecodedDataFormat());
-        voice = factory->CreateVoice(decoder, loop);
-        if (voice == NULL) {
-            decoder->CloseStream();
-            this->ReleaseDecoder(decoder);
+        voice_source = decoder;
+    } else {
+        if (source->IsStreamOpen() == false) {
             return NULL;
         }
+    }
+
+    NuSoundStreamDesc *desc = voice_source->GetStreamDesc();
+    NuSoundVoiceFactory *factory = this->factory_list.GetFactory(desc->GetDecodedDataFormat());
+    NuSoundVoice *voice = factory->CreateVoice(voice_source, loop);
+    if (voice == NULL) {
+        if (decoder != NULL) {
+            decoder->CloseStream();
+            this->ReleaseDecoder(decoder);
+        }
+        return NULL;
     }
 
     this->mutex.Lock();

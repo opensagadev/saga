@@ -324,7 +324,8 @@ void ChrisAfterBurnerCam(nuvec_s *, nuvec_s *) {
 void ChrisAllocLevelStuff(WORLDINFO_s *) {
 }
 
-void DidBoltHitChrisJobby(WORLDINFO_s *, BOLT_s *) {
+i32 DidBoltHitChrisJobby(WORLDINFO_s *, BOLT_s *) {
+    return 0;
 }
 
 void ChrisExtraBoltCollision(BOLT_s *, nuvec_s *) {

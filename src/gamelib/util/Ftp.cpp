@@ -4,7 +4,8 @@
 
 extern NetTransporter theNetwork;
 
-void NetFtpManager::Abort(char const *, NetAddress const &, i32, i32) {
+i32 NetFtpManager::Abort(char const *, NetAddress const &, i32, i32) {
+    return 0;
 }
 
 void NetFtpManager::FindTransfer(char const *, NetAddress const &, i32) {
@@ -13,7 +14,8 @@ void NetFtpManager::FindTransfer(char const *, NetAddress const &, i32) {
 void NetFtpManager::FindTransfer(char const *, NetAddress const &, i32) const {
 }
 
-void NetFtpManager::Get(char const *, void *, i32, NetAddress const &) {
+i32 NetFtpManager::Get(char const *, void *, i32, NetAddress const &) {
+    return 0;
 }
 
 FtpFile const *NetFtpManager::GetTransfers() const {
@@ -53,7 +55,8 @@ void NetFtpManager::Reset() {
     } while (file != end);
 }
 
-void NetFtpManager::Send(char const *, void const *, i32, NetAddress const &) {
+i32 NetFtpManager::Send(char const *, void const *, i32, NetAddress const &) {
+    return 0;
 }
 
 void NetFtpManager::Term() {

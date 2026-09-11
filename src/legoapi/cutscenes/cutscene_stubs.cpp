@@ -46,7 +46,8 @@ extern "C" {
 
 extern "C" {
 
-    void CheckStreamFileID(void) {
+    i32 CheckStreamFileID(void) {
+        return 0;
     }
 
     void ClearLinkedCutSceneMusic(void *context) {

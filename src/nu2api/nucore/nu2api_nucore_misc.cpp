@@ -367,7 +367,20 @@ void NuGCutRigidCalcMtx_3(NUGCUTRIGID_s *rigid, float frame, numtx_s *mtx) {
     NuMtxTranslate(mtx, reinterpret_cast<NUVEC *>(&rigid->base_matrix.m30));
 }
 
-void NuAnimDataChunkCreate(i32) {
+nuanimdatachunk_s *NuAnimDataChunkCreate(i32 curve_set_count) {
+    NuMemoryManager *memory = NuMemoryGet()->GetThreadMem();
+    u8 *data = static_cast<u8 *>(memory->_BlockAlloc(0x14, 4, 1, "", 0));
+    *reinterpret_cast<i32 *>(data) = curve_set_count;
+    *reinterpret_cast<void **>(data + 4) = NULL;
+    *reinterpret_cast<void **>(data + 8) = NULL;
+    *reinterpret_cast<void **>(data + 0xc) = NULL;
+    *reinterpret_cast<void **>(data + 0x10) = NULL;
+
+    const u32 array_size = static_cast<u32>(curve_set_count) * sizeof(void *);
+    void **curve_sets = static_cast<void **>(memory->_BlockAlloc(array_size, 4, 1, "", 0));
+    *reinterpret_cast<void ***>(data + 8) = curve_sets;
+    memset(curve_sets, 0, array_size);
+    return reinterpret_cast<nuanimdatachunk_s *>(data);
 }
 
 void NuGCutSceneSysInitVfx(i32 (*)(char const *), i32 (*)(i32, VuMtx *), void (*)(i32), void (*)(i32, VuMtx *)) {
@@ -375,7 +388,8 @@ void NuGCutSceneSysInitVfx(i32 (*)(char const *), i32 (*)(i32, VuMtx *), void (*
 
 // NuIOSDLGeom2DCallback is transcribed in android/nuiosdl_gl.cpp (original 0x29d1a0).
 
-void NuIOS_GetInAppProduct(i32, NuIOS_InAppProduct *) {
+i32 NuIOS_GetInAppProduct(i32, NuIOS_InAppProduct *) {
+    return 0;
 }
 
 extern "C" i32 g_signedinUser;
@@ -384,7 +398,32 @@ void NuOnlineResetProfiles() {
     g_signedinUser = -1;
 }
 
-void NuAnimDataChunkDestroy(nuanimdatachunk_s *) {
+extern "C" void NuAnimCurveSetDestroy(void *, i32);
+
+void NuAnimDataChunkDestroy(nuanimdatachunk_s *chunk) {
+    u8 *data = reinterpret_cast<u8 *>(chunk);
+    const i32 curve_set_count = *reinterpret_cast<i32 *>(data);
+    void **curve_sets = *reinterpret_cast<void ***>(data + 8);
+    const i32 destroy_curves = *reinterpret_cast<void **>(data + 0x10) == NULL;
+
+    for (i32 index = 0; index < curve_set_count; ++index) {
+        if (curve_sets[index] != NULL) {
+            NuAnimCurveSetDestroy(curve_sets[index], destroy_curves);
+        }
+    }
+
+    void *curve_data = *reinterpret_cast<void **>(data + 0xc);
+    if (curve_data != NULL) {
+        NuMemoryGet()->GetThreadMem()->BlockFree(curve_data, 0);
+    }
+    void *shared_data = *reinterpret_cast<void **>(data + 0x10);
+    if (shared_data != NULL) {
+        NuMemoryGet()->GetThreadMem()->BlockFree(shared_data, 0);
+    }
+    if (curve_sets != NULL) {
+        NuMemoryGet()->GetThreadMem()->BlockFree(curve_sets, 0);
+    }
+    NuMemoryGet()->GetThreadMem()->BlockFree(chunk, 0);
 }
 
 void NuAnimRelocatePtrsANI3(ani3_animheader_s *, i32) {
@@ -578,7 +617,8 @@ extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *locator, float frame, nuan
     return visible;
 }
 
-void NuIOS_GetPurchaseResult() {
+i32 NuIOS_GetPurchaseResult() {
+    return 0;
 }
 
 void NuLightMotionBlurEffect(i32, float) {
@@ -606,7 +646,8 @@ void NuIOSDLLightmapOffsetOld(void *arg) {
 void NuIOS_DisplaySystemAlert(char const *) {
 }
 
-void NuIOS_IsProductPurchased(char *) {
+i32 NuIOS_IsProductPurchased(char *) {
+    return 0;
 }
 
 void NuAnimGetAnimDataSizeANI3(ani3_animheader_s *) {
@@ -618,7 +659,8 @@ void NuGCutRigidForceInstanced(NUGCUTSCENE_s *) {
 void NuIOSDLReflectionCallback(void *) {
 }
 
-void NuIOS_GetInAppProductByID(char *, NuIOS_InAppProduct *) {
+i32 NuIOS_GetInAppProductByID(char *, NuIOS_InAppProduct *) {
+    return 0;
 }
 
 void NuIOS_GetShaderProgramKey(ShaderObjectKey const &) {
@@ -645,7 +687,8 @@ void NuDDSSetTextureDescription(char *, NUTEXFORMAT, i32, i32, i32, i32, nutextu
 void NuIOS_GetNumInAppPurchases() {
 }
 
-void NuIOS_PurchaseInAppProduct(char *) {
+i32 NuIOS_PurchaseInAppProduct(char *) {
+    return 0;
 }
 
 // Original @0x2ce760.
@@ -712,7 +755,8 @@ void NuIOS_CopyBackbufferToTexture(nunativetex_s *texture, bool) {
     EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nurenderthread.cpp", 299);
 }
 
-void NuIOS_IsProductPurchasedByNum(i32) {
+i32 NuIOS_IsProductPurchasedByNum(i32) {
+    return 0;
 }
 
 static i32 g_vaoRecordCount;
@@ -727,10 +771,12 @@ void NuIOS_CateInAppPurchaseManager() {
 void NuDynamicLightingGetParameterfv(nudeferredshadingenum_e, float *) {
 }
 
-void NuIOS_GetInAppProductIdentifier(i32, NuIOS_InAppProduct *) {
+i32 NuIOS_GetInAppProductIdentifier(i32, NuIOS_InAppProduct *) {
+    return 0;
 }
 
-void NuIOS_PurchaseInAppProductByNum(i32) {
+i32 NuIOS_PurchaseInAppProductByNum(i32) {
+    return 0;
 }
 
 void NuIOSDLDeferredTransformCallback(void *) {

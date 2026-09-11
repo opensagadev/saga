@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 39.023006,
+    "fuzzy_match_percent": 39.092648,
     "total_code": "4722419",
-    "matched_code": "367250",
-    "matched_code_percent": 7.776735,
+    "matched_code": "367889",
+    "matched_code_percent": 7.790266,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4416,
-    "matched_functions_percent": 32.81076,
+    "matched_functions": 4462,
+    "matched_functions_percent": 33.15254,
     "total_units": 1
   },
   "text": {
@@ -36976,7 +36976,7 @@
           "address": 5428688,
           "offset": 4538720,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13NetFtpManager3GetEPKcPviRK10NetAddress",
@@ -36984,7 +36984,7 @@
           "address": 5428704,
           "offset": 4538736,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13NetFtpManager5AbortEPKcRK10NetAddressii",
@@ -36992,7 +36992,7 @@
           "address": 5428720,
           "offset": 4538752,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "_ZN13NetFtpManager12FindTransferEPKcRK10NetAddressi",
@@ -42437,7 +42437,7 @@
           "address": 5108880,
           "offset": 4218912,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "_Z19ProcessMusicChangesP11LEVELDATA_sP13OPTIONSSAVE_s",
@@ -46932,7 +46932,7 @@
           "address": 2313808,
           "offset": 1423840,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "_Z31ChrisGetTargetedSpaceShipMatrixP12GameObject_sP7numtx_s",
@@ -51166,7 +51166,7 @@
           "address": 3219344,
           "offset": 2329376,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "ClearLinkedCutSceneMusic",
@@ -68012,7 +68012,7 @@
           "address": 1530560,
           "offset": 640592,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "_Z23IndyUnlocked_UpdateHintP6HINT_s",
@@ -73576,7 +73576,7 @@
           "address": 1947696,
           "offset": 1057728,
           "size": 503,
-          "match_percent": 3.529412
+          "match_percent": 77.70588
         },
         {
           "name": "_Z22GizTechno_CanUseTechnoP12GameObject_sP8TECHNO_s",
@@ -73584,7 +73584,7 @@
           "address": 1948208,
           "offset": 1058240,
           "size": 12,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "_Z18Techno_FindNearestP11WORLDINFO_sP7nuvec_sP12GameObject_sPf",
@@ -73592,7 +73592,7 @@
           "address": 1948224,
           "offset": 1058256,
           "size": 406,
-          "match_percent": 3.888889
+          "match_percent": 99.833336
         },
         {
           "name": "_Z14Techno_isReadyP8TECHNO_s",
@@ -73608,7 +73608,7 @@
           "address": 1949248,
           "offset": 1059280,
           "size": 719,
-          "match_percent": 2.658228
+          "match_percent": 26.120253
         }
       ]
     },
@@ -93717,7 +93717,7 @@
           "address": 933456,
           "offset": 43488,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "_Z25NuIOS_GetInAppProductByIDPcP18NuIOS_InAppProduct",
@@ -93725,7 +93725,7 @@
           "address": 933472,
           "offset": 43504,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "_Z31NuIOS_GetInAppProductIdentifieriP18NuIOS_InAppProduct",
@@ -93733,7 +93733,7 @@
           "address": 933488,
           "offset": 43520,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "_Z26NuIOS_PurchaseInAppProductPc",
@@ -93741,7 +93741,7 @@
           "address": 933504,
           "offset": 43536,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "_Z31NuIOS_PurchaseInAppProductByNumi",
@@ -93749,7 +93749,7 @@
           "address": 933520,
           "offset": 43552,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "_Z24NuIOS_IsProductPurchasedPc",
@@ -93757,7 +93757,7 @@
           "address": 933536,
           "offset": 43568,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "_Z29NuIOS_IsProductPurchasedByNumi",
@@ -93765,7 +93765,7 @@
           "address": 933552,
           "offset": 43584,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "_Z23NuIOS_GetPurchaseResultv",
@@ -93773,7 +93773,7 @@
           "address": 933568,
           "offset": 43600,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "_Z24NuIOS_DisplaySystemAlertPKc",
@@ -94053,7 +94053,7 @@
           "address": 2863776,
           "offset": 1973808,
           "size": 232,
-          "match_percent": 8.75
+          "match_percent": 67.729164
         },
         {
           "name": "_Z22NuAnimDataChunkDestroyP17nuanimdatachunk_s",
@@ -94061,7 +94061,7 @@
           "address": 2865808,
           "offset": 1975840,
           "size": 240,
-          "match_percent": 5.915493
+          "match_percent": 76.69014
         },
         {
           "name": "_Z14NuAnimBuffInitiP9variptr_uS_",
@@ -94365,7 +94365,7 @@
           "address": 4424288,
           "offset": 3534320,
           "size": 937,
-          "match_percent": 15.371094
+          "match_percent": 15.3125
         },
         {
           "name": "_Z26NuDDSSetTextureDescriptionPc11NUTEXFORMATiiii15nutexturetype_e",
@@ -96006,7 +96006,7 @@
           "address": 2474689,
           "offset": 1584721,
           "size": 297,
-          "match_percent": 4.158416
+          "match_percent": 15.118812
         },
         {
           "name": "NuDatClose",
@@ -96014,15 +96014,7 @@
           "address": 2478810,
           "offset": 1588842,
           "size": 224,
-          "match_percent": 5.915493
-        },
-        {
-          "name": "NuDatGet",
-          "demangled_name": "NuDatGet",
-          "address": 2482126,
-          "offset": 1592158,
-          "size": 22,
-          "match_percent": 20.0
+          "match_percent": 18.521128
         },
         {
           "name": "NuQTAddElement",
@@ -96062,7 +96054,7 @@
           "address": 2518823,
           "offset": 1628855,
           "size": 288,
-          "match_percent": 5.25
+          "match_percent": 10.8
         },
         {
           "name": "NuPPUnpack",
@@ -96118,7 +96110,7 @@
           "address": 2542854,
           "offset": 1652886,
           "size": 51,
-          "match_percent": 24.705883
+          "match_percent": 54.294117
         },
         {
           "name": "NuPs2ApplyDeadZone",
@@ -96294,7 +96286,7 @@
           "address": 2576560,
           "offset": 1686592,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuSysDirClose",
@@ -96310,7 +96302,7 @@
           "address": 2576688,
           "offset": 1686720,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuPhoneOSMessagePost",
@@ -97014,7 +97006,7 @@
           "address": 2859456,
           "offset": 1969488,
           "size": 519,
-          "match_percent": 3.870968
+          "match_percent": 28.890322
         },
         {
           "name": "NuAnimDataLoadBuff",
@@ -97022,7 +97014,7 @@
           "address": 2859984,
           "offset": 1970016,
           "size": 118,
-          "match_percent": 12.0
+          "match_percent": 91.65714
         },
         {
           "name": "NuAnimCurveCalcVal2",
@@ -97054,7 +97046,7 @@
           "address": 2862912,
           "offset": 1972944,
           "size": 294,
-          "match_percent": 5.783133
+          "match_percent": 77.89156
         },
         {
           "name": "NuAnimData2CalcTime",
@@ -97070,7 +97062,7 @@
           "address": 2863648,
           "offset": 1973680,
           "size": 119,
-          "match_percent": 14.0
+          "match_percent": 100.0
         },
         {
           "name": "NuAnimDataCreate",
@@ -97078,7 +97070,7 @@
           "address": 2864016,
           "offset": 1974048,
           "size": 155,
-          "match_percent": 12.0
+          "match_percent": 93.34286
         },
         {
           "name": "NuAnimCurveSetCreate",
@@ -97086,7 +97078,7 @@
           "address": 2864176,
           "offset": 1974208,
           "size": 320,
-          "match_percent": 6.268657
+          "match_percent": 99.98508
         },
         {
           "name": "NuAnimDataRead",
@@ -97094,7 +97086,7 @@
           "address": 2864496,
           "offset": 1974528,
           "size": 958,
-          "match_percent": 1.707317
+          "match_percent": 53.727642
         },
         {
           "name": "NuAnimCurveDestroy",
@@ -97102,7 +97094,7 @@
           "address": 2865456,
           "offset": 1975488,
           "size": 121,
-          "match_percent": 14.482758
+          "match_percent": 100.0
         },
         {
           "name": "NuAnimCurveSetDestroy",
@@ -97110,7 +97102,7 @@
           "address": 2865584,
           "offset": 1975616,
           "size": 209,
-          "match_percent": 6.885246
+          "match_percent": 80.95082
         },
         {
           "name": "NuAnimDataDestroy",
@@ -97118,7 +97110,7 @@
           "address": 2866048,
           "offset": 1976080,
           "size": 135,
-          "match_percent": 11.707317
+          "match_percent": 76.39024
         },
         {
           "name": "NuAnimCurveCreate",
@@ -97126,7 +97118,7 @@
           "address": 2866192,
           "offset": 1976224,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuAnimBuffProceduralAnimation",
@@ -97174,7 +97166,7 @@
           "address": 2867392,
           "offset": 1977424,
           "size": 359,
-          "match_percent": 29.10484
+          "match_percent": 29.629032
         },
         {
           "name": "NuAnimData2Relocate",
@@ -97894,7 +97886,7 @@
           "address": 2928912,
           "offset": 2038944,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuFntDestroy",
@@ -97918,7 +97910,7 @@
           "address": 2928960,
           "offset": 2038992,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuHGobjEval",
@@ -98622,7 +98614,7 @@
           "address": 2995120,
           "offset": 2105152,
           "size": 335,
-          "match_percent": 56.714287
+          "match_percent": 50.766235
         },
         {
           "name": "NuCameraSetEx",
@@ -99166,7 +99158,7 @@
           "address": 3142032,
           "offset": 2252064,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuEffectTexCreateCube",
@@ -103931,7 +103923,7 @@
           "address": 3194032,
           "offset": 2304064,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuShaderObjectGLSLSetupTextureStates",
@@ -104845,6 +104837,14 @@
           "offset": 1592117,
           "size": 41,
           "match_percent": 99.833336
+        },
+        {
+          "name": "NuDatGet",
+          "demangled_name": "NuDatGet",
+          "address": 2482126,
+          "offset": 1592158,
+          "size": 22,
+          "match_percent": 99.85714
         },
         {
           "name": "_ZL12AddExtensionPcii",
@@ -113434,7 +113434,7 @@
           "address": 3219264,
           "offset": 2329296,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuSound3FOpen",
@@ -113442,7 +113442,7 @@
           "address": 3219280,
           "offset": 2329312,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuSound3FOpenSize",
@@ -113450,7 +113450,7 @@
           "address": 3219296,
           "offset": 2329328,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuSound3FRead",
@@ -113458,7 +113458,7 @@
           "address": 3219312,
           "offset": 2329344,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuSound3FSeek",
@@ -113474,7 +113474,7 @@
           "address": 3219360,
           "offset": 2329392,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuSound3RemoveStreamID",
@@ -113490,7 +113490,7 @@
           "address": 3219392,
           "offset": 2329424,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuSound3AddStream",
@@ -113498,7 +113498,7 @@
           "address": 3219408,
           "offset": 2329440,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuSound3InitLoopInfo",
@@ -113522,7 +113522,7 @@
           "address": 3219472,
           "offset": 2329504,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuSound3GetSize",
@@ -113530,7 +113530,7 @@
           "address": 3219488,
           "offset": 2329520,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuSound3CancelCheckStereo",
@@ -113554,7 +113554,7 @@
           "address": 3219536,
           "offset": 2329568,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuSound3PlayInterleavedStereo",
@@ -113602,7 +113602,7 @@
           "address": 3219632,
           "offset": 2329664,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuSound3BeginWaitUpdate",
@@ -113618,7 +113618,7 @@
           "address": 3219664,
           "offset": 2329696,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuSound3SetStreamPitch",
@@ -113626,7 +113626,7 @@
           "address": 3219680,
           "offset": 2329712,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuSound3GetStreamInfo",
@@ -113650,7 +113650,7 @@
           "address": 3221424,
           "offset": 2331456,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuSound3LoadingSfx",
@@ -113770,7 +113770,7 @@
           "address": 3221664,
           "offset": 2331696,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuSound3ReadStream",
@@ -113778,7 +113778,7 @@
           "address": 3221680,
           "offset": 2331712,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuSound3CheckStream",
@@ -113786,7 +113786,7 @@
           "address": 3221696,
           "offset": 2331728,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuSound3StreamClose",
@@ -113794,7 +113794,7 @@
           "address": 3221712,
           "offset": 2331744,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuSound3FlushBG",
@@ -113802,7 +113802,7 @@
           "address": 3221728,
           "offset": 2331760,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuSound3FlushFG",
@@ -113810,7 +113810,7 @@
           "address": 3221744,
           "offset": 2331776,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuSound3ReserveStream",
@@ -113818,7 +113818,7 @@
           "address": 3221760,
           "offset": 2331792,
           "size": 9,
-          "match_percent": 62.5
+          "match_percent": 100.0
         },
         {
           "name": "NuSound3InitThreadSafeHackyMess",
@@ -114997,7 +114997,7 @@
           "address": 3258352,
           "offset": 2368384,
           "size": 418,
-          "match_percent": 0.0
+          "match_percent": 0.744
         },
         {
           "name": "_ZN13NuSoundSystem17FileTypeSupportedENS_8FileTypeE",

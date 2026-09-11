@@ -44,7 +44,8 @@ i32 HINT_COMPLETE(i32 hint_id) {
     return Game.hint_completion_bits[word] & (1U << (hint_id & 0x1f));
 }
 
-void Tilt_UpdateHint(HINT_s *) {
+i32 Tilt_UpdateHint(HINT_s *) {
+    return 0;
 }
 
 void CurrentHintAlpha() {

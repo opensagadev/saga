@@ -1168,6 +1168,10 @@ NUDATHDR *NuDatSet(NUDATHDR *header) {
     return dat;
 }
 
+extern "C" NUDATHDR *NuDatGet(void) {
+    return curr_dat;
+}
+
 static i32 OpenDatFileBase(NUDATHDR *hdr, i32 file_idx) {
     NUDATOPENFILEINFO *open_file;
 

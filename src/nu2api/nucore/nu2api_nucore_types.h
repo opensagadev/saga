@@ -266,7 +266,9 @@ struct NuMemoryManager {
     void ValidateBlockDeferredContent(NuMemoryManager::Header *, char const *);
     void VisitManagers(NuMemoryManager::IVisitor *);
     void VisitPages(NuMemoryManager::IPageVisitor *);
+    void *_BlockAlloc(u32, u32, u32, char const *, u16);
     void _MultiBlockAlloc(u32, u32, u32, void **, u32, char const *, u16);
+    void BlockFree(void *, u32);
 };
 struct NuMemory {
     struct MemErrorHandler {
@@ -280,9 +282,11 @@ struct NuMemory {
     void CreateMemoryPool(NuMemoryPool::IEventHandler *, u32, char const *);
     void DestroyMemoryManager(NuMemoryManager *);
     void DestroyMemoryPool(NuMemoryPool *);
+    NuMemoryManager *GetThreadMem();
     void MoveFreeMem2IntoMem1();
     void SetSoakTestMode();
 };
+NuMemory *NuMemoryGet();
 class NuRenderDevice;
 struct NuThread {
     void Resume();
