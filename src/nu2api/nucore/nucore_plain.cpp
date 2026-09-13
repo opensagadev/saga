@@ -4786,13 +4786,6 @@ void NuFramebuffer360BeginZPass(i32) {
 i32 NuFramebuffer360GetTileCount(nuframebuffer_s *) {
     return 0;
 }
-void NuShaderObject360LoadShader(nushaderobject_s *) {
-}
-void NuShaderObject360LoadPackFile(char *, variptr_u *, variptr_u) {
-}
-void NuShaderObject360UnloadShader(nushaderobject_s *) {
-}
-
 void NuLgtSetArcMatEx(i32 type, numtl_s *material, f32 u0, f32 v0, f32 u1, f32 v1) {
     if (type > 3)
         return;

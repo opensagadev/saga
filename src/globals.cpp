@@ -222,8 +222,6 @@ f32 rtltimer1adv = 2500.0f;
 // Camera
 // ------------------------------------------------------------------------
 NUCAMERA *pNuCam = NULL;
-static GAMECAMERA_s GameCamera;
-GAMECAMERA_s *GameCam = &GameCamera;
 i32 (*GameCam_ObjLookingWithLeftStick)(GameObject_s *object) = nullptr;
 i32 LookAtBoth = 0;
 PLAYPLANE_s PlayPlane[6] = {};

@@ -1,19 +1,21 @@
-#include "nu2api/nu3d/numtl.h"
 #include "decomp.h"
+#include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nu2api_nu3d_types.h"
 #include "nu2api/nu3d/nushader.h"
 #include "nu2api/nu3d/nushader_internal.h"
 #include "nu2api/nu3d/nushader_plain.h"
+#include "nu2api/nu3d/NuRenderDevice.h"
 #include "nu2api/nu3d/android/nuiosdl_gl.h"
+#include "nu2api/nu3d/android/nutex_android.h"
+#include "nu2api/nu3d/android/nutex_ios_ex.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/nuandroid/ios_graphics.h"
+#include "nu2api/nucore/bgproc.h"
+#include "nu2api/nucore/nuapi.h"
 #include "nu2api/nucore/nustring.h"
-
 #include "nu2api/numath/numtx.h"
 
-#include <ctype.h>
 #include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include "nu2api/nucore/nustring.h"
 
 // Weak COMDAT helper emitted by the original shader implementation. Keeping
 // the real C++ tag (`GLSLParameter`) is ABI-significant: the tag, not a typedef
@@ -32,73 +34,52 @@ void __attribute__((weak)) GLSLParameter::setElementsMatrix(i32 first_element, i
     glUniform4fv(location + first_element * 4, vector_count, reinterpret_cast<const f32 *>(transposed));
 }
 
-#include "nu2api/nu3d/NuRenderDevice.h"
-#include "nu2api/nuandroid/ios_graphics.h"
-#include "nu2api/nucore/bgproc.h"
-#include "nu2api/nucore/nustring.h"
-
 struct nushaderuniform_e {
     i32 name_kind;
 };
 
-extern "C" {
-    extern i32 g_semanticMaskCount;
-    extern NUSHADERUSAGEMASK g_semanticMasks[128];
-}
+static const GLSLTypeInfo typeInfoTable[] = {
+    {GL_FLOAT, 1, 0, 1},      {GL_FLOAT_VEC2, 1, 1, 1}, {GL_FLOAT_VEC3, 1, 2, 1},
+    {GL_FLOAT_VEC4, 1, 3, 1}, {GL_FLOAT_MAT2, 3, 1, 2}, {GL_FLOAT_MAT3, 3, 2, 3},
+    {GL_FLOAT_MAT4, 3, 3, 4}, {GL_SAMPLER_2D, 4, 0, 1}, {GL_SAMPLER_CUBE, 4, 0, 1},
+};
 
-static f32 water_theta_step = 0.26666668f;
-
-namespace {
-    static const GLSLTypeInfo kGLSLTypeInfo[] = {
-        {GL_FLOAT, 1, 0, 1},      {GL_FLOAT_VEC2, 1, 1, 1}, {GL_FLOAT_VEC3, 1, 2, 1},
-        {GL_FLOAT_VEC4, 1, 3, 1}, {GL_FLOAT_MAT2, 3, 1, 2}, {GL_FLOAT_MAT3, 3, 2, 3},
-        {GL_FLOAT_MAT4, 3, 3, 4}, {GL_SAMPLER_2D, 4, 0, 1}, {GL_SAMPLER_CUBE, 4, 0, 1},
-    };
-
-    static NUSHADERUSAGEMASK *GetUsageMask(const NUSHADERUSAGEMASK *mask) {
-        for (i32 i = 0; i < g_semanticMaskCount; ++i) {
-            if (memcmp(&g_semanticMasks[i], mask, sizeof(*mask)) == 0) {
-                return &g_semanticMasks[i];
-            }
+NUSHADERUSAGEMASK *GetUsageMask(NUSHADERUSAGEMASK *mask) {
+    for (i32 i = 0; i < g_semanticMaskCount; ++i) {
+        if (memcmp(&g_semanticMasks[i], mask, sizeof(*mask)) == 0) {
+            return &g_semanticMasks[i];
         }
-        NUSHADERUSAGEMASK *result = &g_semanticMasks[g_semanticMaskCount++];
-        *result = *mask;
-        return result;
     }
-} // namespace
+    NUSHADERUSAGEMASK *result = &g_semanticMasks[g_semanticMaskCount++];
+    *result = *mask;
+    return result;
+}
 
 extern "C" const GLSLTypeInfo *GetGLSLTypeInfo(GLenum type) {
     if (type == GL_FLOAT)
-        return &kGLSLTypeInfo[0];
+        return &typeInfoTable[0];
     if (type == GL_FLOAT_VEC2)
-        return &kGLSLTypeInfo[1];
+        return &typeInfoTable[1];
     if (type == GL_FLOAT_VEC3)
-        return &kGLSLTypeInfo[2];
+        return &typeInfoTable[2];
     if (type == GL_FLOAT_VEC4)
-        return &kGLSLTypeInfo[3];
+        return &typeInfoTable[3];
     if (type == GL_FLOAT_MAT2)
-        return &kGLSLTypeInfo[4];
+        return &typeInfoTable[4];
     if (type == GL_FLOAT_MAT3)
-        return &kGLSLTypeInfo[5];
+        return &typeInfoTable[5];
     if (type == GL_FLOAT_MAT4)
-        return &kGLSLTypeInfo[6];
+        return &typeInfoTable[6];
     if (type == GL_SAMPLER_2D)
-        return &kGLSLTypeInfo[7];
+        return &typeInfoTable[7];
     if (type == GL_SAMPLER_CUBE)
-        return &kGLSLTypeInfo[8];
+        return &typeInfoTable[8];
     return NULL;
 }
 
 extern "C" {
     i32 g_semanticMaskCount;
     NUSHADERUSAGEMASK g_semanticMasks[128];
-}
-
-void NuShaderObjectBaseCreate(NUSHADEROBJECTBASE *shader) {
-    shader->field0 = -1;
-    shader->field1 = 0;
-    shader->key = 0;
-    shader->field3 = 0;
 }
 
 void NuShaderObjectGLSLCreate(NUSHADEROBJECTGLSL *shader) {
@@ -167,10 +148,6 @@ extern "C" void NuShaderObjectSetElementsfv_transpose(NUSHADEROBJECT *shader, i3
     }
 }
 
-void NuShaderObjectBaseDestroy(NUSHADEROBJECTBASE *shader) {
-    shader->field1 = 0;
-}
-
 void NuShaderObjectGLSLDestroy(NUSHADEROBJECTGLSL *shader) {
     if (shader->fragment_shader != 0) {
         glDeleteShader(shader->fragment_shader);
@@ -191,20 +168,7 @@ void NuShaderObjectGLSLDestroy(NUSHADEROBJECTGLSL *shader) {
 void NuShaderObjectDestroy(NUSHADEROBJECT *shader) {
 }
 
-void NuShaderObjectBaseInit(NUSHADEROBJECTBASE *shader, NUSHADEROBJECTKEY *key, i32 unk) {
-    memcpy(&shader->key, key, sizeof(shader->key));
-    shader->field0 = unk;
-}
-
 void NuShaderObjectUnInit(NUSHADEROBJECT *shader) {
-}
-
-void NuShaderObjectBaseUnInit(NUSHADEROBJECTBASE *shader) {
-    shader->field0 = -1;
-}
-
-void NuShaderObjectBaseSetWaterSpeed(f32 speed) {
-    water_theta_step = speed * 0.1f;
 }
 
 i32 NuShaderObjectBindAttributeLocationsGLSL(GLuint program) {
@@ -528,54 +492,25 @@ extern "C" NUSHADEROBJECT *NuShaderObjectUnserialize(VARIPTR *buffer) {
     return reinterpret_cast<NUSHADEROBJECT *>(address);
 }
 
-#include "nu2api/nucore/nuapi.h"
-#include "nu2api/nu3d/nucamera.h"
-#include "nu2api/numath/nurand.h"
-#include "nu2api/numath/nutrig.h"
-
-extern "C" void NuShaderObjectBaseUpdateWaterTable(NUSHADEROBJECT *shader, numtl_s *mtl) {
-    static NUVEC4 waterTable[32];
-    static i32 lastintsame = -1;
-    static numtl_s *prev_mtl;
-    static f32 theta = 0.7f;
-    i32 frame;
-    memcpy(&frame, &nuapi.frame_count, sizeof(frame));
-    const f32 *material = reinterpret_cast<const f32 *>(mtl);
-    if (frame != lastintsame)
-        theta = material[0x60 / 4] * water_theta_step + theta;
-    if (frame != lastintsame || mtl != prev_mtl) {
-        NUMTX inverse;
-        NUVEC scale = {0.5f, 0.5f, 0.5f};
-        NuMtxInvR(&inverse, &global_camera.mtx);
-        NuMtxScale(&inverse, &scale);
-        inverse.m03 = inverse.m13 = inverse.m23 = 0.0f;
-        const f32 amplitude = 0.1f * material[0x6c / 4];
-        u32 seed = 17;
-        NuRandFloatSeeded(&seed);
-        for (i32 i = 0; i < 32; ++i) {
-            NUVEC displacement;
-            f32 phase = (NuRandFloatSeeded(&seed) * 0.4f + 0.8f) * theta;
-            i32 angle = static_cast<i32>((NuRandFloatSeeded(&seed) * 6.283f + phase) * 10430.3779296875f);
-            displacement.x = (amplitude * NuTrigTable[(angle >> 1) & 0x7fff]) * 4.0f;
-            phase = (NuRandFloatSeeded(&seed) * 0.8f + 0.6f) * theta;
-            angle = static_cast<i32>((NuRandFloatSeeded(&seed) * 5.717f + phase) * 10430.3779296875f);
-            displacement.y = (amplitude * NuTrigTable[((angle + 0x4000) >> 1) & 0x7fff]) * 4.0f;
-            phase = (NuRandFloatSeeded(&seed) * 0.4f + 0.7f) * theta;
-            angle = static_cast<i32>((NuRandFloatSeeded(&seed) * 6.283f + phase) * 10430.3779296875f);
-            displacement.z = amplitude * NuTrigTable[(angle >> 1) & 0x7fff];
-            waterTable[i].w = 0.25f * displacement.x;
-            NuVecMtxTransformH(reinterpret_cast<NUVEC *>(&waterTable[i]), &displacement, &inverse);
-        }
-    }
-    NuShaderObjectSetElementsfv(shader, 31, 0, 32, reinterpret_cast<const f32 *>(waterTable));
-    prev_mtl = mtl;
-    memcpy(&lastintsame, &nuapi.frame_count, sizeof(lastintsame));
+void NuShaderObject360LoadShader(nushaderobject_s *) {
 }
 
-#include "nu2api/nu3d/android/nuiosdl_gl.h"
-#include "nu2api/nu3d/android/nutex_android.h"
-#include "nu2api/nu3d/android/nutex_ios_ex.h"
-#include "nu2api/nu3d/nutex.h"
+void NuShaderObject360LoadPackFile(char *, variptr_u *, variptr_u) {
+}
+
+void NuShaderObject360UnloadShader(nushaderobject_s *) {
+}
+
+extern "C" void *NuShaderObjectLoadFromFile(void) {
+    return NULL;
+}
+
+f32 clampBias(f32 bias) {
+    if (bias < -16.0f) {
+        return -16.0f;
+    }
+    return 15.96875f < bias ? 15.96875f : bias;
+}
 
 static char g_clzTable[] = {
     0, 31, 9, 30, 3, 8,  18, 29, 2,  5,  7,  14, 12, 17, 22, 28,

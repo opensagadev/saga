@@ -1,8 +1,10 @@
 #include "legoapi/gizmos/trigger/minicut.h"
 
 #include "decomp.h"
+#include "globals.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "gameapi/edtools/edfile.h"
+#include "legoapi/legoapi_types.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
@@ -16,6 +18,9 @@ extern i32 editor_active;
 extern i32 MiniCutCam;
 void GameCameraMakeMiniCut3(u32, float, i32, i32, i32, void *, i32, NUVEC *, float, float, float, float, float, float,
                             float, i32, nugspline_s *, char, char);
+
+static GAMECAMERA_s GameCamera;
+GAMECAMERA_s *GameCam = &GameCamera;
 
 static i32 GizMiniCut_GetMaxGizmos(void *world_ptr) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);

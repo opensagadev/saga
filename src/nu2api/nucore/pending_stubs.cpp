@@ -38,7 +38,3 @@ extern "C" void NuShaderObjectKeyGenerate4(void) {
 
 extern "C" void NuShaderObjectKeySetUberShaderHash(void) {
 }
-
-extern "C" void *NuShaderObjectLoadFromFile(void) {
-    return NULL;
-}
