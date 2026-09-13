@@ -32,6 +32,7 @@ extern "C" {
     APIDEBRISSYS_s *InitGameDebris(VARIPTR *cursor, VARIPTR end, i32 count, i32 named_count, char **names, char page);
     i32 PARTLookupType(char *name);
     i32 LookupDebrisEffect(char *name);
+    i32 LookupDebrisEffectPageIgnore(char *name, i32 page, i32 ignore);
     i32 LookupDebrisEffectPage(char *name, char page);
     i32 LookupDebrisEffectPageOnly(char *name, char page);
     void DebrisTypeStatusAlwaysOff(i32 type);

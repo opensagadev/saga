@@ -85,6 +85,7 @@ build:target --per_file_copt=^src/legoapi/actions/character/specialmoves\.cpp$@-
 # Snake-body allocation and destruction are optimized in the target: the
 # four-slot search is unrolled and the fixed-size clear is emitted inline.
 build:target --per_file_copt=^src/legoapi/actions/character/snake\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/actions/character/suit\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/actions/combat/hits\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/actions/combat/fighting\.cpp$@-O3
 # The rope material setup is optimized in the target: its local buffer clear,

@@ -25,7 +25,42 @@ static GIZMOPICKUPSYS_s *GizmoPickupSys = &GizmoPickupSys_Game;
 
 static GIZMOPICKUP_s *GizmoPickups_CollideList(GameObject_s *, GIZMOPICKUP_s *, i32);
 
-void GizmoPickup_InBox(WORLDINFO_s *, i32, nuvec_s *, nuvec_s *) {
+GIZMOPICKUP_s *GizmoPickup_InBox(WORLDINFO_s *world, i32 type_index, NUVEC *minimum, NUVEC *maximum) {
+    GIZMOPICKUPRUNTIMESYS_s *runtime = world->gizmo_pickup_sys;
+    GIZMOPICKUP_s *pickup = runtime->pickups;
+    if (pickup == NULL) {
+        return NULL;
+    }
+
+    GIZMO_PICKUP_TYPE *type = &GizmoPickupSys->types[type_index];
+    if (type->field_0x0f != 0) {
+        return NULL;
+    }
+    const f32 radius = type->shadow_extent_x * AreaPickupScale;
+    const i32 count = runtime->pickup_count;
+    const f32 low_x = minimum->x - radius;
+    const f32 high_x = maximum->x + radius;
+    const f32 low_y = minimum->y - radius;
+    const f32 high_y = maximum->y + radius;
+    const f32 low_z = minimum->z - radius;
+    const f32 high_z = maximum->z + radius;
+    for (i32 index = 0; index < count; ++index, ++pickup) {
+        if (pickup->type_index != type_index) {
+            continue;
+        }
+        if ((pickup->state_flags & 6) != 6) {
+            continue;
+        }
+        if ((pickup->state_flags & GIZMOPICKUP_STATE_COLLECTED) != 0) {
+            continue;
+        }
+        if (low_x > pickup->position.x || pickup->position.x > high_x || low_z > pickup->position.z ||
+            pickup->position.z > high_z || low_y > pickup->position.y || pickup->position.y > high_y) {
+            continue;
+        }
+        return pickup;
+    }
+    return NULL;
 }
 
 GIZMOPICKUP_s *GizmoPickups_Collide(WORLDINFO_s *world, GameObject_s *object, i32) {
@@ -50,23 +85,50 @@ GIZMOPICKUP_s *GizmoPickups_Collide(WORLDINFO_s *world, GameObject_s *object, i3
     if ((pickup->state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0 && GizmoPickupSys->alternate_type != -1) {
         type_index = GizmoPickupSys->alternate_type;
     }
-    GIZMO_PICKUP_TYPE *type = &GizmoPickupSys->types[type_index];
-    if (type->collection_sfx_name != NULL) {
-        PlaySfx(type->collection_sfx_name, &pickup->position);
+    if (GizmoPickupSys->types[type_index].collection_sfx_name != NULL) {
+        PlaySfx(GizmoPickupSys->types[type_index].collection_sfx_name, &pickup->position);
     }
-    if (type->collect_fn != NULL) {
-        type->collect_fn(world, pickup, type_index, object, 0);
+    if (GizmoPickupSys->types[type_index].collect_fn != NULL) {
+        GizmoPickupSys->types[type_index].collect_fn(world, pickup, type_index, object, 0);
     }
-    if ((type->flags & GIZMOPICKUP_TYPE_FLAG_40) != 0) {
+    if ((GizmoPickupSys->types[type_index].flags & GIZMOPICKUP_TYPE_FLAG_40) != 0) {
         ++AreaGlobals.values.field_0x18;
     }
     return pickup;
 }
 
-void GizmoPickup_FindNearest(WORLDINFO_s *, nuvec_s *, float *) {
+GIZMOPICKUP_s *GizmoPickup_FindNearest(WORLDINFO_s *world, NUVEC *position, f32 *distance) {
+    GIZMOPICKUPRUNTIMESYS_s *runtime = world->gizmo_pickup_sys;
+    GIZMOPICKUP_s *pickup = runtime->pickups;
+    GIZMOPICKUP_s *nearest = NULL;
+    f32 best_distance = 1.0e9f;
+    for (i32 index = 0; index < world->gizmo_pickup_sys->pickup_count; ++index, ++pickup) {
+        f32 candidate = NuVecDistSqr(position, &pickup->position, NULL);
+        if (candidate < best_distance) {
+            best_distance = candidate;
+            nearest = pickup;
+        }
+    }
+    if (distance != NULL) {
+        *distance = best_distance;
+    }
+    return nearest;
 }
 
-void GizmoPickup_NumberOfType(WORLDINFO_s *, i32, char) {
+i32 GizmoPickup_NumberOfType(WORLDINFO_s *world, i32 type_index, char type_code) {
+    GIZMOPICKUPRUNTIMESYS_s *runtime = world->gizmo_pickup_sys;
+    GIZMOPICKUP_s *pickup = runtime->pickups;
+    if (type_code == 0 && type_index == -1) {
+        return 0;
+    }
+
+    i32 count = 0;
+    for (i32 index = 0; index < runtime->pickup_count; ++index, ++pickup) {
+        if (type_code != 0 ? pickup->type_code == type_code : pickup->type_index == type_index) {
+            ++count;
+        }
+    }
+    return count;
 }
 
 void GizmoPickup_TurnOnPickup(GIZMOPICKUP_s *pickup) {
@@ -369,12 +431,9 @@ static i32 GizmoPickups_GetMaxGizmos(void *pickup) {
 }
 
 static void GizmoPickups_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *, void *data) {
-    GIZMOPICKUPRUNTIMESYS_s *pickup_sys = static_cast<GIZMOPICKUPRUNTIMESYS_s *>(data);
-    if (pickup_sys == NULL || pickup_sys->pickups == NULL) {
-        return;
-    }
-    for (i32 index = 0; index < pickup_sys->pickup_count; ++index) {
-        GIZMOPICKUP_s &pickup = pickup_sys->pickups[index];
+    WORLDINFO *world = static_cast<WORLDINFO *>(data);
+    for (i32 index = 0; index < world->gizmo_pickup_sys->pickup_count; ++index) {
+        GIZMOPICKUP_s &pickup = world->gizmo_pickup_sys->pickups[index];
         if ((pickup.config_flags & GIZMOPICKUP_CONFIG_REGISTER_GIZMO) != 0) {
             AddGizmo(gizmo_sys, type_id, NULL, &pickup);
         }
@@ -440,7 +499,8 @@ static i32 GizmoPickup_GetNumOutputs(GIZMO *) {
 }
 
 static void GizmoPickup_Activate(GIZMO *gizmo, i32 activate) {
-    if (gizmo == NULL || gizmo->object == NULL) {
+    WORLDINFO *world = WorldInfo_CurrentlyActive();
+    if (gizmo == NULL) {
         return;
     }
 
@@ -448,34 +508,38 @@ static void GizmoPickup_Activate(GIZMO *gizmo, i32 activate) {
     if (activate == 0) {
         pickup->state_flags &= static_cast<u8>(~GIZMOPICKUP_STATE_ENABLED);
     } else {
-        pickup->state_flags |= GIZMOPICKUP_STATE_ENABLED | GIZMOPICKUP_STATE_ACTIVATED;
+        pickup->state_flags |= GIZMOPICKUP_STATE_ENABLED;
         SuperCounter_ActivateGizmoPickup(gizmo, pickup);
-
-        GIZMO_PICKUP_TYPE *type = GetPickupType(*pickup);
-        const bool challenge_type = (type->flags & GIZMOPICKUP_TYPE_CHALLENGE_MODE_FILTER) != 0;
-        if ((ChallengeMode != 0) == challenge_type && Mission_Active(NULL) == NULL) {
-            if (type->activation_sfx_name != NULL) {
-                PlaySfx(type->activation_sfx_name, &pickup->position);
+        if ((pickup->state_flags & GIZMOPICKUP_STATE_ENABLED) != 0) {
+            pickup->state_flags |= GIZMOPICKUP_STATE_ACTIVATED;
+            i32 type_index = pickup->type_index;
+            if ((pickup->state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0 &&
+                GizmoPickupSys->alternate_type != -1) {
+                type_index = GizmoPickupSys->alternate_type;
             }
-            if (type->debris_id != -1) {
-                WORLDINFO *world = WorldInfo_CurrentlyActive();
-                if (world != NULL) {
-                    AddGameDebris(world->debris_sys, type->debris_id, &pickup->position);
+            GIZMO_PICKUP_TYPE *type = &GizmoPickupSys->types[type_index];
+            const bool challenge_type = (type->flags & GIZMOPICKUP_TYPE_CHALLENGE_MODE_FILTER) != 0;
+            if ((ChallengeMode != 0) == challenge_type && Mission_Active(NULL) == NULL) {
+                if (type->activation_sfx_name != NULL) {
+                    PlaySfx(type->activation_sfx_name, &pickup->position);
+                }
+                if (type->debris_id != -1) {
+                    i32 debris_id = type->debris_id;
+                    if ((pickup->state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0) {
+                        debris_id = GizmoPickupSys->types[GizmoPickupSys->alternate_type].debris_id;
+                    }
+                    AddGameDebris(world->debris_sys, debris_id, &pickup->position);
                 }
             }
         }
     }
 
-    if (pickup->activation_group == 0) {
+    if (pickup->activation_group == 0 || world->gizmo_pickup_sys->pickup_count <= 0) {
         return;
     }
-    WORLDINFO *world = WorldInfo_CurrentlyActive();
-    if (world == NULL || world->gizmo_pickup_sys == NULL || world->gizmo_pickup_sys->temporary_pickups == NULL) {
-        return;
-    }
-    const u8 enabled_and_visible = activate != 0 ? GIZMOPICKUP_STATE_ENABLED | GIZMOPICKUP_STATE_VISIBLE : 0;
-    for (i32 index = 0; index < GIZMOPICKUP_TEMPORARY_CAPACITY; ++index) {
-        GIZMOPICKUP_s &group_pickup = world->gizmo_pickup_sys->temporary_pickups[index];
+    const u8 enabled_and_visible = (activate & 1) != 0 ? GIZMOPICKUP_STATE_ENABLED | GIZMOPICKUP_STATE_VISIBLE : 0;
+    for (i32 index = 0; index < world->gizmo_pickup_sys->pickup_count; ++index) {
+        GIZMOPICKUP_s &group_pickup = world->gizmo_pickup_sys->pickups[index];
         if (group_pickup.activation_group == pickup->activation_group) {
             group_pickup.state_flags =
                 static_cast<u8>((group_pickup.state_flags & ~(GIZMOPICKUP_STATE_ENABLED | GIZMOPICKUP_STATE_VISIBLE)) |

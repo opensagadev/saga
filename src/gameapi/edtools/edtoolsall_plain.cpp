@@ -8,6 +8,7 @@
 #include "gameapi/edtools/edcam.h"
 #include "gameapi/edtools/edstubs.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/render/fx.h"
 #include "legoapi/render/fx/game_deb.h"
 #include "nu2api/nucore/nutime.h"
 #include "nu2api/nucore/nuthread.h"
@@ -109,7 +110,6 @@ extern "C" {
     extern usize edpp_page_scene[8];
     extern i32 edpp_page_used[8];
     extern i32 edpp_page_on[8];
-    i32 LookupDebrisEffect(char *name);
     i32 edbitsLookupSoundFX(char *name);
     void edbitsSoundPlay(NUVEC *position, i32 sound);
     void edanimSoundDestroy(i32 parameter_index, i32 sound_index);
@@ -248,7 +248,6 @@ extern "C" {
     extern debkeydatatype_s *debkeydata;
     extern i32 maxdebkeys;
     void DebFreeOrphansInstantly(debinftype *);
-    i32 LookupDebrisEffectPageIgnore(char *, i32, i32);
     void DebFreeInstantly(i32 *);
 }
 

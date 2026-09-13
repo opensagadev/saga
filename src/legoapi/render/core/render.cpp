@@ -1,5 +1,6 @@
 #include "legoapi/render/core/render.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
 #include "nu2api/nu3d/numtl.h"
 #include "legoapi/cutscenes/cutscenes.h"
 #include <stdio.h>
@@ -2959,7 +2960,6 @@ i32 FindGameMsgsWithID(i32, i32, i32, GAMEMESSAGE_s *);
 f32 PowerUp_GetPanelY(i32);
 u32 Cheat_MultiplyScore(u32);
 void Text_MakeScore(u32, char *);
-i32 GizmoPickup_NumberOfType(WORLDINFO_s *, i32, char);
 void Hub_DrawImportantBrick(i32, f32, f32, f32, i32, i32);
 void Arcade_DrawPanel(i32);
 GameObject_s *Mission_FindTarget(MISSIONSYS *, u64 *);

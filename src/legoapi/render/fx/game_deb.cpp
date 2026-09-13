@@ -943,14 +943,15 @@ extern "C" {
     // LookupDebrisEffectPageIgnore @0x355d30. Search the requested page first,
     // then the two permanent pages, then every other active page.
     i32 LookupDebrisEffectPageIgnore(char *name, i32 page, i32 ignore) {
-        if (name == NULL || debtab == NULL) {
+        if (name == NULL) {
             return -1;
         }
 
-        if (static_cast<u32>(page) < 8 && edpp_page_used[page] != 0) {
+        const u8 requested_page = static_cast<u8>(page);
+        if (requested_page < 8 && edpp_page_used[requested_page] != 0) {
             for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
                 debinftype *effect = debtab[i];
-                if (i != ignore && effect != NULL && effect->page == static_cast<u8>(page) &&
+                if (i != ignore && effect != NULL && effect->page == requested_page &&
                     NuStrICmp(effect->name, name) == 0) {
                     return i;
                 }
@@ -959,7 +960,9 @@ extern "C" {
 
         for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
             debinftype *effect = debtab[i];
-            if (i != ignore && effect != NULL && effect->page < 2 && edpp_page_used[effect->page] != 0 &&
+            if (i != ignore && effect != NULL &&
+                ((effect->page == 0 && edpp_page_used[0] != 0) ||
+                 (effect->page == 1 && edpp_page_used[1] != 0)) &&
                 NuStrICmp(effect->name, name) == 0) {
                 return i;
             }
@@ -967,7 +970,7 @@ extern "C" {
 
         for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
             debinftype *effect = debtab[i];
-            if (i != ignore && effect != NULL && effect->page < 8 && edpp_page_used[effect->page] != 0 &&
+            if (i != ignore && effect != NULL && edpp_page_used[static_cast<i8>(effect->page)] != 0 &&
                 NuStrICmp(effect->name, name) == 0) {
                 return i;
             }
@@ -981,15 +984,14 @@ extern "C" {
     }
 
     i32 LookupDebrisEffectPageOnly(char *name, char page) {
-        if (name == NULL || debtab == NULL) {
+        if (name == NULL) {
             return -1;
         }
 
-        const u8 requested_page = static_cast<u8>(page);
-        if (requested_page < 8 && edpp_page_used[requested_page] != 0) {
+        if (static_cast<u8>(page) < 8 && edpp_page_used[page] != 0) {
             for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
                 debinftype *effect = debtab[i];
-                if (effect != NULL && effect->page == requested_page && NuStrICmp(effect->name, name) == 0) {
+                if (effect != NULL && effect->page == static_cast<u8>(page) && NuStrICmp(effect->name, name) == 0) {
                     return i;
                 }
             }
@@ -997,7 +999,9 @@ extern "C" {
 
         for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
             debinftype *effect = debtab[i];
-            if (effect != NULL && effect->page < 2 && edpp_page_used[effect->page] != 0 &&
+            if (effect != NULL &&
+                ((effect->page == 0 && edpp_page_used[0] != 0) ||
+                 (effect->page == 1 && edpp_page_used[1] != 0)) &&
                 NuStrICmp(effect->name, name) == 0) {
                 return i;
             }
