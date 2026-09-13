@@ -6,7 +6,7 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/nucore/nustring.h"
-#include "nu2api/nu3d/android/nuiosdl_gl.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/nuspecial.h"
@@ -263,8 +263,6 @@ extern "C" {
     void FmvTimePS(void) {
         STUBBED();
     }
-
-
 
     void PerspectMidPoint(NUVEC *result, NUVEC *first, NUVEC *second, NUVEC *camera_position) {
         f32 first_distance = NuVecDist(camera_position, first, NULL);

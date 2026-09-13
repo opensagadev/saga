@@ -63,10 +63,17 @@ void NuLightBurnoutEffect(i32 mode, f32 threshold, f32 intensity, f32 flare);
 // axes[0] is the center; axes[1..3] are the three shape basis vectors.
 void NuRndrCalcRandEllipsePos(struct nuvec4_s *position, NUMTX *matrix, NUVEC *axes);
 void NuRndrCalcRandCylinderPos(struct nuvec4_s *position, NUMTX *matrix, NUVEC *axes);
+i32 NuRndrFlickerBeginScene(void);
+void NuRndrFlickerEnd(void);
 
 extern "C" {
     void NuRndrSwapStreamBuffers(void);
     i32 NuRndrSwapScreen(i32 mode);
+    void NuRndrClear(i32 clear_flags, i32 background_colour, f32 alpha);
+    void NuRndrGradClear(i32 clear_flags, i32 top_colour, i32 bottom_colour, f32 alpha);
+    i32 NuRndrSetBlendData(void);
+    void NuRndrShadowOnOff(i32 enabled);
+    void NuRndrLine3dDbgFlush(void);
     extern i32 g_minmiplevel;
     extern f32 g_mipmapbias;
     void NuRndrSetGlobalMinMipLevel(i32 level);

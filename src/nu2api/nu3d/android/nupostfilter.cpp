@@ -24,7 +24,7 @@
 #include "nu2api/nucore/NuCopyFilter.h"
 #include "nu2api/nucore/NuPostFilter.h"
 #include "nu2api/nu3d/nupostresources.h"
-#include "nu2api/nu3d/android/nuiosdl_gl.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
 #include "nu2api/nuandroid/ios_graphics.h"
 
 // ──────────────────────────────────────────────────────────────────────────────

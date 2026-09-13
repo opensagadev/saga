@@ -8,7 +8,7 @@
 
 #include "decomp.h"
 #include "nu2api/nu3d/NuRenderDevice.h"
-#include "nu2api/nu3d/android/nuiosdl_gl.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
 
 // ---------------------------------------------------------------------------

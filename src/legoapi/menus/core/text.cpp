@@ -9,6 +9,7 @@ char *ASCII_UP = "\xc2\xac";
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nuqfnt.h"
 #include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nushader_plain.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nufile/nufpar.h"
@@ -48,7 +49,6 @@ extern "C" {
     void NuMtxRotateZ(NUMTX *mtx, i32 angle);
     void NuMtxTranslate(NUMTX *mtx, NUVEC *vec);
 }
-extern "C" void NuRndrClear(u32 flags, u32 colour, f32 alpha);
 void Text3DStringEncodeFont(unsigned char *src, u16 *dst, void *font);
 extern "C" void TextDecode(char *source, unsigned char *dest);
 extern "C" void Text3DEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,

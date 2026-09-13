@@ -8,7 +8,7 @@
 #include "nu2api/nu3d/nutex.h"
 #include <GLES2/gl2.h>
 #include "legoapi/legoapi_types.h"
-#include "nu2api/nu3d/android/nuiosdl_gl.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
 #include "nu2api/nu3d/android/nudlist_callbacks.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
 #include "nu2api/nu3d/android/nutex_android.h"
@@ -131,8 +131,12 @@ void NuMtlSetShaderDescPS(NUMTL *mtl, NUSHADERMTLDESC *desc) {
 extern "C" {
     NUSHADERPROGRAM *g_ps3default_2d_t0xc0;
 }
-static inline i32 NuApiFrameCount() { return nuapi.frame_count; }
-static inline usize ptrToUsize(const void *p) { return reinterpret_cast<usize>(p); }
+static inline i32 NuApiFrameCount() {
+    return nuapi.frame_count;
+}
+static inline usize ptrToUsize(const void *p) {
+    return reinterpret_cast<usize>(p);
+}
 
 // Shader programmes cached per TU (original file-statics at 0x99b440..).
 static NUSHADERPROGRAM *g_faceonProgram = nullptr;      // _ZL15g_faceonProgram
@@ -146,7 +150,6 @@ static NUSHADERPROGRAM *g_debrisGlassProgram = nullptr;
 static i32 NuIOSDLMtlCallback_refractionRT = 0;                 // @0x99b480
 static NUNATIVETEX NuIOSDLMtlCallback_nativeRefractionTex = {}; // @0x99b4a0
 static i32 NuIOSDLMtlCallback_lastFrameCount = -1;
-
 
 // ---------------------------------------------------------------------------
 // Material-variant helpers — raw offsets from the original binary.
@@ -174,7 +177,6 @@ static inline char DebrisGlassSelector(const numtl_s *mtl) {
 }
 
 static constexpr char kGlassDebrisMarker = (char)-0x69; // 0x97
-
 
 // original 0x29c110 — mirrors GL cull state, flipping front/back when the
 // reflection pass is active.
@@ -277,7 +279,6 @@ extern "C" void NuMtlSetRenderStatesPS(numtl_s *mtl) {
     NuIOS_SetCullMode(mtl->attribs.cull_mode);
 }
 
-
 // original 0x29c070
 extern "C" void NuIOS_SetVertexFormat(usize fmt) {
     g_boundVertexFormat = fmt;
@@ -316,7 +317,6 @@ extern "C" void NuIOSMtlInit(void) {
                                                     reinterpret_cast<const char *>(debris_glass_px));
     EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/numtl_android.cpp", 0x1f3);
 }
-
 
 // original 0x29c480 — per-material display-list callback.  Selects the GL
 // programme, vertex format, and textures for the three material families:

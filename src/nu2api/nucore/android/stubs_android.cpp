@@ -1,5 +1,5 @@
 #include "decomp.h"
-#include "nu2api/nucore/common.h"
+#include "nu2api/nu3d/nurndr.h"
 
 struct nugobj_s;
 struct numtx_s;
@@ -8,6 +8,10 @@ struct rndrstream_s;
 
 extern "C" void NuRndrAddShadowPrims(void) {
     STUBBED();
+}
+
+extern "C" void NuRndrGradClear(i32 clear_flags, i32 top_colour, i32, f32 alpha) {
+    NuRndrClear(clear_flags, top_colour, alpha);
 }
 
 void NuPs2PadSetMotors(nupad_s *, i32, i32) {
@@ -38,12 +42,20 @@ extern "C" void NuLightMatInit(void) {
     STUBBED();
 }
 
+// Original 0x316aa9: exact no-op in the platform support run.
+extern "C" void NuRndrInitWorld(void) {
+}
+
 extern "C" void NuRndrAddFootPrint(void) {
     STUBBED();
 }
 
 extern "C" void NuLightFogG(void) {
     STUBBED();
+}
+
+i32 NuRndrFlickerBeginScene(void) {
+    return 1;
 }
 
 void NuRndrFlickerEnd(void) {
@@ -63,7 +75,16 @@ void NuPs2GetLanguage(void) {
     STUBBED();
 }
 
+extern "C" void NuRndrShadowOnOff(i32 enabled) {
+    STUBBED();
+    (void)enabled;
+}
+
 void NuRndrSetXYOffset(i32, i32) {
+    STUBBED();
+}
+
+extern "C" void NuRndrLine3dDbgFlush(void) {
     STUBBED();
 }
 

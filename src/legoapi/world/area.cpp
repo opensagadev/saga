@@ -164,7 +164,6 @@ extern void BackDrop_Draw(f32, i32);
 extern void NeedScreenGrab(i32);
 extern void GrabStillScreen(void);
 extern i16 tTOUCHTOSTART;
-extern "C" void NuRndrGradClear(i32, i32, i32, f32);
 extern "C" i32 NuRndrBeginScene(i32);
 extern "C" void NuRndrEndScene(void);
 extern "C" f32 NuFrameEnd(void);

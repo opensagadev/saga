@@ -4,6 +4,7 @@
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/nurndrstat.h"
+#include "nu2api/nu3d/nurndr.h"
 #include "gameapi/edtools/edstubs.h"
 #include "globals.h"
 #include "legoapi/world/world.h"
@@ -25,8 +26,6 @@ extern "C" {
     void DebFreeAllCreatedEffects(void);
     void DebrisSetRenderGroup(i32 group);
     i32 NuRndrBeginScene(i32 flags);
-    void NuRndrClear(u32 flags, u32 colour, f32 depth);
-    void NuRndrGradClear(i32 flags, i32 top_colour, i32 bottom_colour, f32 depth);
     void NuRndrEndScene(void);
 }
 

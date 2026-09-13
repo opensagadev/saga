@@ -23,7 +23,6 @@ struct SHOPINPUT;
 
 extern "C" void SetQFont2D(void);
 extern "C" i32 NuRndrBeginScene(i32 flags);
-extern "C" void NuRndrClear(i32 flags, i32 colour, f32 alpha);
 extern "C" void NuRndrEndScene(void);
 extern NUCAMERA *pNuCam;
 extern "C" f32 NuIOS_GetAspectRatio(void);
@@ -246,4 +245,6 @@ void InitPanel(i32) {
 }
 
 // DrawPanel reads the private slide timer maintained by the panel lifecycle.
-f32 Panel_GetRedBrickSlideTime() { return redbrickslidetime; }
+f32 Panel_GetRedBrickSlideTime() {
+    return redbrickslidetime;
+}

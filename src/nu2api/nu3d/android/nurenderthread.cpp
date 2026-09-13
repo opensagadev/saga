@@ -12,7 +12,7 @@
 
 #include "decomp.h"
 #include "nu2api/nu3d/NuRenderDevice.h"
-#include "nu2api/nu3d/android/nuiosdl_gl.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
 #include "nu2api/nu3d/android/nuposteffect_plain.h"
 #include "nu2api/nu3d/android/nupostfilter.h"
 #include "nu2api/nu3d/android/nutimebar_plain.h"

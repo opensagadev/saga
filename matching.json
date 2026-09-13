@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 45.91929,
+    "fuzzy_match_percent": 45.923058,
     "total_code": "4722419",
-    "matched_code": "399724",
-    "matched_code_percent": 8.464391,
+    "matched_code": "399753",
+    "matched_code_percent": 8.465005,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4752,
-    "matched_functions_percent": 35.307228,
+    "matched_functions": 4753,
+    "matched_functions_percent": 35.31466,
     "total_units": 1
   },
   "text": {
@@ -86924,269 +86924,6 @@
       ]
     },
     {
-      "name": "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
-      "source": "src/nu2api/nu3d/android/nuiosdl_gl.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nuiosdl_gl.o",
-      "functions": [
-        {
-          "name": "NuRenderContextSetWorld",
-          "demangled_name": "NuRenderContextSetWorld",
-          "address": 2699705,
-          "offset": 1809737,
-          "size": 303,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuRenderContextSetWorld_transpose",
-          "demangled_name": "NuRenderContextSetWorld_transpose",
-          "address": 2700008,
-          "offset": 1810040,
-          "size": 79,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuRenderContextSetKTint",
-          "demangled_name": "NuRenderContextSetKTint",
-          "address": 2700087,
-          "offset": 1810119,
-          "size": 76,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuRenderContextGetKTint",
-          "demangled_name": "NuRenderContextGetKTint",
-          "address": 2700163,
-          "offset": 1810195,
-          "size": 22,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuRenderContextGetMaterialInUse",
-          "demangled_name": "NuRenderContextGetMaterialInUse",
-          "address": 2700185,
-          "offset": 1810217,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuRenderContextSetZFunc_inline",
-          "demangled_name": "NuRenderContextSetZFunc_inline",
-          "address": 2700209,
-          "offset": 1810241,
-          "size": 215,
-          "match_percent": 99.81481
-        },
-        {
-          "name": "NuIOS_GetAlphaTestParameters",
-          "demangled_name": "NuIOS_GetAlphaTestParameters",
-          "address": 2700424,
-          "offset": 1810456,
-          "size": 620,
-          "match_percent": 99.862274
-        },
-        {
-          "name": "NuShaderProgramSetVertexParamfv",
-          "demangled_name": "NuShaderProgramSetVertexParamfv",
-          "address": 2701044,
-          "offset": 1811076,
-          "size": 163,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuShaderProgramSetFragmentParamfv",
-          "demangled_name": "NuShaderProgramSetFragmentParamfv",
-          "address": 2701207,
-          "offset": 1811239,
-          "size": 170,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuIOS_BindVertexAttributesOverrideDataLayout",
-          "demangled_name": "NuIOS_BindVertexAttributesOverrideDataLayout",
-          "address": 2701755,
-          "offset": 1811787,
-          "size": 67,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuIOS_BindVertexAttributesImmediateOverrideDataLayout",
-          "demangled_name": "NuIOS_BindVertexAttributesImmediateOverrideDataLayout",
-          "address": 2701925,
-          "offset": 1811957,
-          "size": 98,
-          "match_percent": 83.72
-        },
-        {
-          "name": "_ZL26Nu360SetObjectShadowFactorf",
-          "demangled_name": "Nu360SetObjectShadowFactor(float)",
-          "address": 2702033,
-          "offset": 1812065,
-          "size": 5,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z21NuIOSDLGeom2DCallbackPv",
-          "demangled_name": "NuIOSDLGeom2DCallback(void*)",
-          "address": 2702038,
-          "offset": 1812070,
-          "size": 531,
-          "match_percent": 38.08397
-        },
-        {
-          "name": "_Z26NuIOSDLPreWarmGeomCallbackPv",
-          "demangled_name": "NuIOSDLPreWarmGeomCallback(void*)",
-          "address": 2703923,
-          "offset": 1813955,
-          "size": 218,
-          "match_percent": 76.17911
-        },
-        {
-          "name": "_Z19NuIOSDLGeomCallbackPv",
-          "demangled_name": "NuIOSDLGeomCallback(void*)",
-          "address": 2704141,
-          "offset": 1814173,
-          "size": 1111,
-          "match_percent": 98.16604
-        },
-        {
-          "name": "_Z22NuIOSDLSkinMtxCallbackPv",
-          "demangled_name": "NuIOSDLSkinMtxCallback(void*)",
-          "address": 2705252,
-          "offset": 1815284,
-          "size": 104,
-          "match_percent": 82.58064
-        },
-        {
-          "name": "_Z24NuIOSDLTransformCallbackPv",
-          "demangled_name": "NuIOSDLTransformCallback(void*)",
-          "address": 2705356,
-          "offset": 1815388,
-          "size": 258,
-          "match_percent": 94.9589
-        },
-        {
-          "name": "_Z32NuIOSDLDeferredTransformCallbackPv",
-          "demangled_name": "NuIOSDLDeferredTransformCallback(void*)",
-          "address": 2705614,
-          "offset": 1815646,
-          "size": 103,
-          "match_percent": 99.93939
-        },
-        {
-          "name": "_Z30NuIOSDLTransformParamsCallbackPv",
-          "demangled_name": "NuIOSDLTransformParamsCallback(void*)",
-          "address": 2705717,
-          "offset": 1815749,
-          "size": 258,
-          "match_percent": 94.9589
-        },
-        {
-          "name": "_Z38NuIOSDLDeferredTransformParamsCallbackPv",
-          "demangled_name": "NuIOSDLDeferredTransformParamsCallback(void*)",
-          "address": 2705975,
-          "offset": 1816007,
-          "size": 103,
-          "match_percent": 99.93939
-        },
-        {
-          "name": "_Z30NuIOSDLFaceOnTransformCallbackPv",
-          "demangled_name": "NuIOSDLFaceOnTransformCallback(void*)",
-          "address": 2706078,
-          "offset": 1816110,
-          "size": 628,
-          "match_percent": 99.94156
-        },
-        {
-          "name": "_Z27NuIOSDLVertexGroupsCallbackPv",
-          "demangled_name": "NuIOSDLVertexGroupsCallback(void*)",
-          "address": 2706706,
-          "offset": 1816738,
-          "size": 129,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z28NuIOSDLVertexOffsetsCallbackPv",
-          "demangled_name": "NuIOSDLVertexOffsetsCallback(void*)",
-          "address": 2706835,
-          "offset": 1816867,
-          "size": 107,
-          "match_percent": 71.16129
-        },
-        {
-          "name": "_Z21NuIOSDLLightsCallbackPv",
-          "demangled_name": "NuIOSDLLightsCallback(void*)",
-          "address": 2706942,
-          "offset": 1816974,
-          "size": 692,
-          "match_percent": 51.014927
-        },
-        {
-          "name": "_Z20NuIOSDLKonstCallbackPv",
-          "demangled_name": "NuIOSDLKonstCallback(void*)",
-          "address": 2707867,
-          "offset": 1817899,
-          "size": 21,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z18NuIOSDLFogCallbackPv",
-          "demangled_name": "NuIOSDLFogCallback(void*)",
-          "address": 2707888,
-          "offset": 1817920,
-          "size": 378,
-          "match_percent": 60.237625
-        },
-        {
-          "name": "_Z21NuIOSDLFaceOnCallbackPv",
-          "demangled_name": "NuIOSDLFaceOnCallback(void*)",
-          "address": 2708371,
-          "offset": 1818403,
-          "size": 141,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z18NuIOSDLLightmapOldPv",
-          "demangled_name": "NuIOSDLLightmapOld(void*)",
-          "address": 2708512,
-          "offset": 1818544,
-          "size": 208,
-          "match_percent": 70.46667
-        },
-        {
-          "name": "_Z24NuIOSDLLightmapOffsetOldPv",
-          "demangled_name": "NuIOSDLLightmapOffsetOld(void*)",
-          "address": 2708720,
-          "offset": 1818752,
-          "size": 254,
-          "match_percent": 77.02941
-        },
-        {
-          "name": "_Z15NuIOSDLLightmapPv",
-          "demangled_name": "NuIOSDLLightmap(void*)",
-          "address": 2708974,
-          "offset": 1819006,
-          "size": 425,
-          "match_percent": 58.70476
-        },
-        {
-          "name": "NuRenderContextSetZFunc",
-          "demangled_name": "NuRenderContextSetZFunc",
-          "address": 2766944,
-          "offset": 1876976,
-          "size": 241,
-          "match_percent": 24.12963
-        },
-        {
-          "name": "_Z21NuIOSDLCameraCallbackPv",
-          "demangled_name": "NuIOSDLCameraCallback(void*)",
-          "address": 2773288,
-          "offset": 1883320,
-          "size": 204,
-          "match_percent": 99.96923
-        }
-      ]
-    },
-    {
       "name": "nu2api/nu3d/android/numtl_android.cpp.o",
       "source": "src/nu2api/nu3d/android/numtl_android.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/numtl_android.o",
@@ -87922,58 +87659,10 @@
       ]
     },
     {
-      "name": "nu2api/nu3d/android/nurndr_android.c.o",
-      "source": "src/nu2api/nu3d/android/nurndr_android.c",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nurndr_android.o",
+      "name": "nu2api/nu3d/android/nurndr.c.o",
+      "source": "src/nu2api/nu3d/android/nurndr.c",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/0/nurndr.o",
       "functions": [
-        {
-          "name": "NuRndrPspDraw",
-          "demangled_name": "NuRndrPspDraw",
-          "address": 2707639,
-          "offset": 1817671,
-          "size": 5,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuRndrSetFxMtx",
-          "demangled_name": "NuRndrSetFxMtx",
-          "address": 2708266,
-          "offset": 1818298,
-          "size": 10,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuWaterOverride",
-          "demangled_name": "NuWaterOverride",
-          "address": 2708276,
-          "offset": 1818308,
-          "size": 5,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuRndrShadowDirCol",
-          "demangled_name": "NuRndrShadowDirCol",
-          "address": 2708286,
-          "offset": 1818318,
-          "size": 5,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuPolyShadowInit",
-          "demangled_name": "NuPolyShadowInit",
-          "address": 2709399,
-          "offset": 1819431,
-          "size": 5,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_GLOBAL__sub_I_nurndr_android.c",
-          "demangled_name": "_GLOBAL__sub_I_nurndr_android.c",
-          "address": 2711395,
-          "offset": 1821427,
-          "size": 29,
-          "match_percent": 100.0
-        },
         {
           "name": "NuDisplayListCheckBuffer",
           "demangled_name": "NuDisplayListCheckBuffer",
@@ -88015,11 +87704,378 @@
           "match_percent": 100.0
         },
         {
-          "name": "NuRndrInitWorld",
-          "demangled_name": "NuRndrInitWorld",
-          "address": 3238569,
-          "offset": 2348601,
+          "name": "_GLOBAL__sub_I_nurndr.c",
+          "demangled_name": "_GLOBAL__sub_I_nurndr.c",
+          "address": 2714254,
+          "offset": 1824286,
+          "size": 29,
+          "match_percent": 100.0
+        }
+      ]
+    },
+    {
+      "name": "nu2api/nu3d/android/nurndr_android.c.o",
+      "source": "src/nu2api/nu3d/android/nurndr_android.c",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nurndr_android.o",
+      "functions": [
+        {
+          "name": "NuRenderContextSetWorld",
+          "demangled_name": "NuRenderContextSetWorld",
+          "address": 2699705,
+          "offset": 1809737,
+          "size": 303,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRenderContextSetWorld_transpose",
+          "demangled_name": "NuRenderContextSetWorld_transpose",
+          "address": 2700008,
+          "offset": 1810040,
+          "size": 79,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRenderContextSetKTint",
+          "demangled_name": "NuRenderContextSetKTint",
+          "address": 2700087,
+          "offset": 1810119,
+          "size": 76,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRenderContextGetKTint",
+          "demangled_name": "NuRenderContextGetKTint",
+          "address": 2700163,
+          "offset": 1810195,
+          "size": 22,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRenderContextGetMaterialInUse",
+          "demangled_name": "NuRenderContextGetMaterialInUse",
+          "address": 2700185,
+          "offset": 1810217,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRenderContextSetZFunc_inline",
+          "demangled_name": "NuRenderContextSetZFunc_inline",
+          "address": 2700209,
+          "offset": 1810241,
+          "size": 215,
+          "match_percent": 99.81481
+        },
+        {
+          "name": "NuIOS_GetAlphaTestParameters",
+          "demangled_name": "NuIOS_GetAlphaTestParameters",
+          "address": 2700424,
+          "offset": 1810456,
+          "size": 620,
+          "match_percent": 99.862274
+        },
+        {
+          "name": "NuShaderProgramSetVertexParamfv",
+          "demangled_name": "NuShaderProgramSetVertexParamfv",
+          "address": 2701044,
+          "offset": 1811076,
+          "size": 163,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuShaderProgramSetFragmentParamfv",
+          "demangled_name": "NuShaderProgramSetFragmentParamfv",
+          "address": 2701207,
+          "offset": 1811239,
+          "size": 170,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuIOS_BindVertexAttributesOverrideDataLayout",
+          "demangled_name": "NuIOS_BindVertexAttributesOverrideDataLayout",
+          "address": 2701755,
+          "offset": 1811787,
+          "size": 67,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuIOS_BindVertexAttributesImmediateOverrideDataLayout",
+          "demangled_name": "NuIOS_BindVertexAttributesImmediateOverrideDataLayout",
+          "address": 2701925,
+          "offset": 1811957,
+          "size": 98,
+          "match_percent": 83.72
+        },
+        {
+          "name": "_ZL26Nu360SetObjectShadowFactorf",
+          "demangled_name": "Nu360SetObjectShadowFactor(float)",
+          "address": 2702033,
+          "offset": 1812065,
           "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z21NuIOSDLGeom2DCallbackPv",
+          "demangled_name": "NuIOSDLGeom2DCallback(void*)",
+          "address": 2702038,
+          "offset": 1812070,
+          "size": 531,
+          "match_percent": 38.08397
+        },
+        {
+          "name": "_Z26NuIOSDLPreWarmGeomCallbackPv",
+          "demangled_name": "NuIOSDLPreWarmGeomCallback(void*)",
+          "address": 2703923,
+          "offset": 1813955,
+          "size": 218,
+          "match_percent": 76.17911
+        },
+        {
+          "name": "_Z19NuIOSDLGeomCallbackPv",
+          "demangled_name": "NuIOSDLGeomCallback(void*)",
+          "address": 2704141,
+          "offset": 1814173,
+          "size": 1111,
+          "match_percent": 98.16604
+        },
+        {
+          "name": "_Z22NuIOSDLSkinMtxCallbackPv",
+          "demangled_name": "NuIOSDLSkinMtxCallback(void*)",
+          "address": 2705252,
+          "offset": 1815284,
+          "size": 104,
+          "match_percent": 82.58064
+        },
+        {
+          "name": "_Z24NuIOSDLTransformCallbackPv",
+          "demangled_name": "NuIOSDLTransformCallback(void*)",
+          "address": 2705356,
+          "offset": 1815388,
+          "size": 258,
+          "match_percent": 94.9589
+        },
+        {
+          "name": "_Z32NuIOSDLDeferredTransformCallbackPv",
+          "demangled_name": "NuIOSDLDeferredTransformCallback(void*)",
+          "address": 2705614,
+          "offset": 1815646,
+          "size": 103,
+          "match_percent": 99.93939
+        },
+        {
+          "name": "_Z30NuIOSDLTransformParamsCallbackPv",
+          "demangled_name": "NuIOSDLTransformParamsCallback(void*)",
+          "address": 2705717,
+          "offset": 1815749,
+          "size": 258,
+          "match_percent": 94.9589
+        },
+        {
+          "name": "_Z38NuIOSDLDeferredTransformParamsCallbackPv",
+          "demangled_name": "NuIOSDLDeferredTransformParamsCallback(void*)",
+          "address": 2705975,
+          "offset": 1816007,
+          "size": 103,
+          "match_percent": 99.93939
+        },
+        {
+          "name": "_Z30NuIOSDLFaceOnTransformCallbackPv",
+          "demangled_name": "NuIOSDLFaceOnTransformCallback(void*)",
+          "address": 2706078,
+          "offset": 1816110,
+          "size": 628,
+          "match_percent": 99.94156
+        },
+        {
+          "name": "_Z27NuIOSDLVertexGroupsCallbackPv",
+          "demangled_name": "NuIOSDLVertexGroupsCallback(void*)",
+          "address": 2706706,
+          "offset": 1816738,
+          "size": 129,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z28NuIOSDLVertexOffsetsCallbackPv",
+          "demangled_name": "NuIOSDLVertexOffsetsCallback(void*)",
+          "address": 2706835,
+          "offset": 1816867,
+          "size": 107,
+          "match_percent": 71.16129
+        },
+        {
+          "name": "_Z21NuIOSDLLightsCallbackPv",
+          "demangled_name": "NuIOSDLLightsCallback(void*)",
+          "address": 2706942,
+          "offset": 1816974,
+          "size": 692,
+          "match_percent": 51.014927
+        },
+        {
+          "name": "NuRndrPspDraw",
+          "demangled_name": "NuRndrPspDraw",
+          "address": 2707639,
+          "offset": 1817671,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRndrCreateBlendShapeDeformerWeightsArray",
+          "demangled_name": "NuRndrCreateBlendShapeDeformerWeightsArray",
+          "address": 2707644,
+          "offset": 1817676,
+          "size": 136,
+          "match_percent": 99.64286
+        },
+        {
+          "name": "_Z33NuRndrCreateBlendShapeDWAPointersi",
+          "demangled_name": "NuRndrCreateBlendShapeDWAPointers(int)",
+          "address": 2707780,
+          "offset": 1817812,
+          "size": 87,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z20NuIOSDLKonstCallbackPv",
+          "demangled_name": "NuIOSDLKonstCallback(void*)",
+          "address": 2707867,
+          "offset": 1817899,
+          "size": 21,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z18NuIOSDLFogCallbackPv",
+          "demangled_name": "NuIOSDLFogCallback(void*)",
+          "address": 2707888,
+          "offset": 1817920,
+          "size": 378,
+          "match_percent": 60.237625
+        },
+        {
+          "name": "NuRndrSetFxMtx",
+          "demangled_name": "NuRndrSetFxMtx",
+          "address": 2708266,
+          "offset": 1818298,
+          "size": 10,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuWaterOverride",
+          "demangled_name": "NuWaterOverride",
+          "address": 2708276,
+          "offset": 1818308,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRndrShadowDirCol",
+          "demangled_name": "NuRndrShadowDirCol",
+          "address": 2708286,
+          "offset": 1818318,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRndrSetBlendData",
+          "demangled_name": "NuRndrSetBlendData",
+          "address": 2708291,
+          "offset": 1818323,
+          "size": 10,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z21NuIOSDLFaceOnCallbackPv",
+          "demangled_name": "NuIOSDLFaceOnCallback(void*)",
+          "address": 2708371,
+          "offset": 1818403,
+          "size": 141,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z18NuIOSDLLightmapOldPv",
+          "demangled_name": "NuIOSDLLightmapOld(void*)",
+          "address": 2708512,
+          "offset": 1818544,
+          "size": 208,
+          "match_percent": 70.46667
+        },
+        {
+          "name": "_Z24NuIOSDLLightmapOffsetOldPv",
+          "demangled_name": "NuIOSDLLightmapOffsetOld(void*)",
+          "address": 2708720,
+          "offset": 1818752,
+          "size": 254,
+          "match_percent": 77.02941
+        },
+        {
+          "name": "_Z15NuIOSDLLightmapPv",
+          "demangled_name": "NuIOSDLLightmap(void*)",
+          "address": 2708974,
+          "offset": 1819006,
+          "size": 425,
+          "match_percent": 58.70476
+        },
+        {
+          "name": "NuPolyShadowInit",
+          "demangled_name": "NuPolyShadowInit",
+          "address": 2709399,
+          "offset": 1819431,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRndrAddShadow",
+          "demangled_name": "NuRndrAddShadow",
+          "address": 2709404,
+          "offset": 1819436,
+          "size": 331,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRndrShadPolys",
+          "demangled_name": "NuRndrShadPolys",
+          "address": 2709735,
+          "offset": 1819767,
+          "size": 1267,
+          "match_percent": 99.884865
+        },
+        {
+          "name": "NuRndrScreenGrabTileInit",
+          "demangled_name": "NuRndrScreenGrabTileInit",
+          "address": 2711002,
+          "offset": 1821034,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRndrScreenGrabTileDeInit",
+          "demangled_name": "NuRndrScreenGrabTileDeInit",
+          "address": 2711007,
+          "offset": 1821039,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRndrScreenGrabTileBegin",
+          "demangled_name": "NuRndrScreenGrabTileBegin",
+          "address": 2711012,
+          "offset": 1821044,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRndrScreenGrabTileEnd",
+          "demangled_name": "NuRndrScreenGrabTileEnd",
+          "address": 2711017,
+          "offset": 1821049,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_GLOBAL__sub_I_nurndr_android.c",
+          "demangled_name": "_GLOBAL__sub_I_nurndr_android.c",
+          "address": 2711395,
+          "offset": 1821427,
+          "size": 29,
           "match_percent": 100.0
         }
       ]
@@ -89256,6 +89312,14 @@
           "offset": 1881683,
           "size": 1637,
           "match_percent": 23.0
+        },
+        {
+          "name": "_Z21NuIOSDLCameraCallbackPv",
+          "demangled_name": "NuIOSDLCameraCallback(void*)",
+          "address": 2773288,
+          "offset": 1883320,
+          "size": 204,
+          "match_percent": 99.96923
         }
       ]
     },
@@ -90235,7 +90299,7 @@
     {
       "name": "nu2api/nu3d/nurndr.cpp.o",
       "source": "src/nu2api/nu3d/nurndr.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nurndr.o",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/1/nurndr.o",
       "functions": [
         {
           "name": "NuRndIsReflectionGobj",
@@ -90348,115 +90412,6 @@
           "offset": 2951582,
           "size": 170,
           "match_percent": 42.638298
-        }
-      ]
-    },
-    {
-      "name": "nu2api/nu3d/nurndr_alloc.cpp.o",
-      "source": "src/nu2api/nu3d/nurndr_alloc.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nurndr_alloc.o",
-      "functions": [
-        {
-          "name": "NuRndrCreateBlendShapeDeformerWeightsArray",
-          "demangled_name": "NuRndrCreateBlendShapeDeformerWeightsArray",
-          "address": 2707644,
-          "offset": 1817676,
-          "size": 136,
-          "match_percent": 99.64286
-        },
-        {
-          "name": "_Z33NuRndrCreateBlendShapeDWAPointersi",
-          "demangled_name": "NuRndrCreateBlendShapeDWAPointers(int)",
-          "address": 2707780,
-          "offset": 1817812,
-          "size": 87,
-          "match_percent": 100.0
-        }
-      ]
-    },
-    {
-      "name": "nu2api/nu3d/nurndr_grad.cpp.o",
-      "source": "src/nu2api/nu3d/nurndr_grad.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nurndr_grad.o",
-      "functions": [
-        {
-          "name": "NuRndrGradClear",
-          "demangled_name": "NuRndrGradClear",
-          "address": 3238478,
-          "offset": 2348510,
-          "size": 51,
-          "match_percent": 100.0
-        }
-      ]
-    },
-    {
-      "name": "nu2api/nu3d/nurndr_noops.cpp.o",
-      "source": "src/nu2api/nu3d/nurndr_noops.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nurndr_noops.o",
-      "functions": [
-        {
-          "name": "NuRndrSetBlendData",
-          "demangled_name": "NuRndrSetBlendData",
-          "address": 2708291,
-          "offset": 1818323,
-          "size": 10,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuRndrScreenGrabTileInit",
-          "demangled_name": "NuRndrScreenGrabTileInit",
-          "address": 2711002,
-          "offset": 1821034,
-          "size": 5,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuRndrScreenGrabTileDeInit",
-          "demangled_name": "NuRndrScreenGrabTileDeInit",
-          "address": 2711007,
-          "offset": 1821039,
-          "size": 5,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuRndrScreenGrabTileBegin",
-          "demangled_name": "NuRndrScreenGrabTileBegin",
-          "address": 2711012,
-          "offset": 1821044,
-          "size": 5,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuRndrScreenGrabTileEnd",
-          "demangled_name": "NuRndrScreenGrabTileEnd",
-          "address": 2711017,
-          "offset": 1821049,
-          "size": 5,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z23NuRndrFlickerBeginScenev",
-          "demangled_name": "NuRndrFlickerBeginScene()",
-          "address": 3238584,
-          "offset": 2348616,
-          "size": 10,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuRndrShadowOnOff",
-          "demangled_name": "NuRndrShadowOnOff",
-          "address": 3238619,
-          "offset": 2348651,
-          "size": 5,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuRndrLine3dDbgFlush",
-          "demangled_name": "NuRndrLine3dDbgFlush",
-          "address": 3238629,
-          "offset": 2348661,
-          "size": 5,
-          "match_percent": 100.0
         }
       ]
     },
@@ -91104,29 +91059,6 @@
           "offset": 2295968,
           "size": 131,
           "match_percent": 100.0
-        }
-      ]
-    },
-    {
-      "name": "nu2api/nu3d/nurndr_shadow.cpp.o",
-      "source": "src/nu2api/nu3d/nurndr_shadow.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nurndr_shadow.o",
-      "functions": [
-        {
-          "name": "NuRndrAddShadow",
-          "demangled_name": "NuRndrAddShadow",
-          "address": 2709404,
-          "offset": 1819436,
-          "size": 331,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuRndrShadPolys",
-          "demangled_name": "NuRndrShadPolys",
-          "address": 2709735,
-          "offset": 1819767,
-          "size": 1267,
-          "match_percent": 99.884865
         }
       ]
     },
@@ -94480,6 +94412,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "NuRndrGradClear",
+          "demangled_name": "NuRndrGradClear",
+          "address": 3238478,
+          "offset": 2348510,
+          "size": 51,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z17NuPs2PadSetMotorsP7nupad_sii",
           "demangled_name": "NuPs2PadSetMotors(nupad_s*, int, int)",
           "address": 3238529,
@@ -94536,6 +94476,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "NuRndrInitWorld",
+          "demangled_name": "NuRndrInitWorld",
+          "address": 3238569,
+          "offset": 2348601,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
           "name": "NuRndrAddFootPrint",
           "demangled_name": "NuRndrAddFootPrint",
           "address": 3238574,
@@ -94549,6 +94497,14 @@
           "address": 3238579,
           "offset": 2348611,
           "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z23NuRndrFlickerBeginScenev",
+          "demangled_name": "NuRndrFlickerBeginScene()",
+          "address": 3238584,
+          "offset": 2348616,
+          "size": 10,
           "match_percent": 100.0
         },
         {
@@ -94584,10 +94540,26 @@
           "match_percent": 100.0
         },
         {
+          "name": "NuRndrShadowOnOff",
+          "demangled_name": "NuRndrShadowOnOff",
+          "address": 3238619,
+          "offset": 2348651,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z17NuRndrSetXYOffsetii",
           "demangled_name": "NuRndrSetXYOffset(int, int)",
           "address": 3238624,
           "offset": 2348656,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRndrLine3dDbgFlush",
+          "demangled_name": "NuRndrLine3dDbgFlush",
+          "address": 3238629,
+          "offset": 2348661,
           "size": 5,
           "match_percent": 100.0
         },
@@ -97521,6 +97493,14 @@
           "offset": 1875824,
           "size": 1124,
           "match_percent": 58.929203
+        },
+        {
+          "name": "NuRenderContextSetZFunc",
+          "demangled_name": "NuRenderContextSetZFunc",
+          "address": 2766944,
+          "offset": 1876976,
+          "size": 241,
+          "match_percent": 85.92593
         },
         {
           "name": "NuRenderContextSetAlphaBlend",
@@ -117180,14 +117160,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -117260,14 +117239,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -117340,14 +117318,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -117433,14 +117410,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -117562,14 +117538,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -117655,14 +117630,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -117748,14 +117722,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -117841,14 +117814,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -117934,14 +117906,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -118027,14 +117998,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -118334,14 +118304,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -118427,14 +118396,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -118520,14 +118488,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -118544,8 +118511,8 @@
       "match_percent": 100.0,
       "candidate_units": [
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
-        "nu2api/nu3d/android/nuptl_android.c.o"
+        "nu2api/nu3d/android/nuptl_android.c.o",
+        "nu2api/nu3d/android/nurndr_android.c.o"
       ]
     },
     {
@@ -118567,10 +118534,10 @@
       "address": 2701377,
       "offset": 1811409,
       "size": 307,
-      "match_percent": 84.26923,
+      "match_percent": 87.30769,
       "candidate_units": [
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
-        "nu2api/nu3d/android/nuptl_android.c.o"
+        "nu2api/nu3d/android/nuptl_android.c.o",
+        "nu2api/nu3d/android/nurndr_android.c.o"
       ]
     },
     {
@@ -118579,10 +118546,10 @@
       "address": 2701684,
       "offset": 1811716,
       "size": 71,
-      "match_percent": 100.0,
+      "match_percent": 88.28571,
       "candidate_units": [
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
-        "nu2api/nu3d/android/nuptl_android.c.o"
+        "nu2api/nu3d/android/nuptl_android.c.o",
+        "nu2api/nu3d/android/nurndr_android.c.o"
       ]
     },
     {
@@ -118591,10 +118558,10 @@
       "address": 2701822,
       "offset": 1811854,
       "size": 103,
-      "match_percent": 100.0,
+      "match_percent": 85.46154,
       "candidate_units": [
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
-        "nu2api/nu3d/android/nuptl_android.c.o"
+        "nu2api/nu3d/android/nuptl_android.c.o",
+        "nu2api/nu3d/android/nurndr_android.c.o"
       ]
     },
     {
@@ -118662,14 +118629,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -118699,7 +118665,7 @@
       "match_percent": 82.30769,
       "candidate_units": [
         "nu2api/nu3d/android/nudlist_android.c.o",
-        "nu2api/nu3d/android/nurndr_android.c.o"
+        "nu2api/nu3d/android/nurndr.c.o"
       ]
     },
     {
@@ -118767,14 +118733,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -118791,8 +118756,8 @@
       "match_percent": 100.0,
       "candidate_units": [
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
-        "nu2api/nu3d/android/nuptl_android.c.o"
+        "nu2api/nu3d/android/nuptl_android.c.o",
+        "nu2api/nu3d/android/nurndr_android.c.o"
       ]
     },
     {
@@ -118832,10 +118797,10 @@
         "legoapi/render/core/rtl.cpp.o",
         "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuprim_android.c.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/glutils.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -118890,10 +118855,10 @@
       "address": 2714532,
       "offset": 1824564,
       "size": 307,
-      "match_percent": 87.30769,
+      "match_percent": 84.26923,
       "candidate_units": [
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
-        "nu2api/nu3d/android/nuptl_android.c.o"
+        "nu2api/nu3d/android/nuptl_android.c.o",
+        "nu2api/nu3d/android/nurndr_android.c.o"
       ]
     },
     {
@@ -118902,10 +118867,10 @@
       "address": 2714839,
       "offset": 1824871,
       "size": 71,
-      "match_percent": 88.28571,
+      "match_percent": 100.0,
       "candidate_units": [
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
-        "nu2api/nu3d/android/nuptl_android.c.o"
+        "nu2api/nu3d/android/nuptl_android.c.o",
+        "nu2api/nu3d/android/nurndr_android.c.o"
       ]
     },
     {
@@ -118914,10 +118879,10 @@
       "address": 2714910,
       "offset": 1824942,
       "size": 103,
-      "match_percent": 85.46154,
+      "match_percent": 100.0,
       "candidate_units": [
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
-        "nu2api/nu3d/android/nuptl_android.c.o"
+        "nu2api/nu3d/android/nuptl_android.c.o",
+        "nu2api/nu3d/android/nurndr_android.c.o"
       ]
     },
     {
@@ -118985,14 +118950,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -119022,7 +118986,7 @@
       "match_percent": 82.30769,
       "candidate_units": [
         "nu2api/nu3d/android/nudlist_android.c.o",
-        "nu2api/nu3d/android/nurndr_android.c.o"
+        "nu2api/nu3d/android/nurndr.c.o"
       ]
     },
     {
@@ -119049,10 +119013,10 @@
         "legoapi/render/core/rtl.cpp.o",
         "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuprim_android.c.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/glutils.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -119154,14 +119118,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -119206,10 +119169,10 @@
         "legoapi/render/core/rtl.cpp.o",
         "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuprim_android.c.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/glutils.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -119323,14 +119286,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -119416,14 +119378,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -119509,14 +119470,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -119602,14 +119562,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -119665,10 +119624,10 @@
         "legoapi/render/core/rtl.cpp.o",
         "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuprim_android.c.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/glutils.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
@@ -119744,14 +119703,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -119837,14 +119795,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -119941,14 +119898,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -120034,14 +119990,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -120058,8 +120013,8 @@
       "match_percent": 100.0,
       "candidate_units": [
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
-        "nu2api/nu3d/android/nuptl_android.c.o"
+        "nu2api/nu3d/android/nuptl_android.c.o",
+        "nu2api/nu3d/android/nurndr_android.c.o"
       ]
     },
     {
@@ -120140,14 +120095,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -120233,14 +120187,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -120362,14 +120315,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -120455,14 +120407,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -120548,14 +120499,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -120641,14 +120591,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -120797,14 +120746,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -120890,14 +120838,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -120983,14 +120930,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -121425,14 +121371,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -121638,14 +121583,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -121814,14 +121758,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -122266,14 +122209,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -122359,14 +122301,13 @@
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
         "nu2api/nu3d/android/nuscratch_android.c.o",
         "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
@@ -123774,14 +123715,6 @@
       "address": 2689824,
       "offset": 1799856,
       "size": 31,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_nurndr.c",
-      "demangled_name": "_GLOBAL__sub_I_nurndr.c",
-      "address": 2714254,
-      "offset": 1824286,
-      "size": 29,
       "match_percent": 0.0
     },
     {
@@ -129498,10 +129431,10 @@
     }
   ],
   "summary": {
-    "bazel_units": 514,
+    "bazel_units": 510,
     "functions": 13454,
-    "assigned_functions": 12348,
+    "assigned_functions": 12349,
     "ambiguous_functions": 216,
-    "unassigned_functions": 890
+    "unassigned_functions": 889
   }
 }

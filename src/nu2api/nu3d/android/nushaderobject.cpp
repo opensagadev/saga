@@ -5,7 +5,7 @@
 #include "nu2api/nu3d/nushader_internal.h"
 #include "nu2api/nu3d/nushader_plain.h"
 #include "nu2api/nu3d/NuRenderDevice.h"
-#include "nu2api/nu3d/android/nuiosdl_gl.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
 #include "nu2api/nu3d/android/nutex_android.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
 #include "nu2api/nu3d/nutex.h"
