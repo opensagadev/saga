@@ -2532,3 +2532,122 @@ change is an improvement. The only other scored change is an incidental
 +0.02457-point shift in the unchanged `CharConfig_ConfigureAll`. Original
 text-symbol coverage remains 13,425/13,425. The full build, lint, repository,
 and Map/Cantina gates for this checkpoint are recorded in the loader section.
+
+### API object transparency and hierarchy-evaluation prefix
+
+The original `apiobject.c` text order runs `NuHGobjRestrictEvaluation`
+(`0x3d0146`), `NuHGobjRestoreEvaluation` (`0x3d0187`),
+`APITransparentInit` (`0x3d01c9`), and `APITransparentCharDraw`
+(`0x3d03aa`) immediately before `APIDrawCharacterModel`. These unchanged
+bodies now live in `apiobject.cpp` in that order. The original contiguous
+BSS symbols `TempNumJoints` (`0x123f93c`), `Temphgobj` (`0x123f940`),
+`APITrans_Mtl` (`0x123f944`), and `notransparentchardraw` (`0x123f94c`)
+moved with their users. This also removed the now-empty
+`character_plain.cpp` catch-all source unit. The hierarchy-evaluation
+helpers have real declarations in `nuhgobj.h`; material and alpha calls use
+`numtl.h` and `nuspecial.h`.
+
+The transparency pair rises 21.950413→99.93388% and
+34.038166→96.73283% in `/tmp/api_transparent_stage1.json`; no other
+scored body changes. Moving the evaluation helpers and their data retains
+both exact 100% matches and the 45.32655% whole score in
+`/tmp/api_restrict_transparent_stage2.json`. A rebuilt native Map/Cantina
+smoke passed 120 frames on its second attempt. The first reached gameplay
+and hit the previously documented `MovePlayer`/`nutrig.cpp:77` UBSan flake;
+no source behavior or sanitizer setting was changed to avoid it.
+
+Separately, `nurndr_force_lod` (`0x11a7cb0`) sits after
+`nurndr_forced_mtl` and before `currentScene` in the original renderer BSS
+run. Its definition moved from `character.cpp` to `nurndr.cpp`, and
+`nurndr.h` now declares it. `/tmp/api_force_lod_stage3.json` retains the
+45.32655% whole score and has no assigned-symbol score changes.
+
+The next coherent `apiobject.cpp` owner move places the unchanged original
+`APIDrawCharacterModel` (`0x3d0563`) immediately after the transparent-draw
+group. Its contiguous draw-state BSS (`drawcharactermodel_nobsa`, `noani`,
+`restpose`, `keepmergeaction`, and `locatorsupdated`, `0x123f928..938`), the
+shadow-map callback pointers (`0x123f950/954`), and adjacent
+`character_farclip` (`0x123f958`) moved with it from `globals.cpp` and
+`character.cpp`. The draw routine now calls the original animation-root,
+debris, camera, and reflection declarations through their real headers;
+source-local declarations were removed. No behavior or assembly was changed.
+
+The target, native executable, and native smoke builds pass. The rebuilt
+Map/Cantina smoke passes `--area Map --frames 120` with 120 healthy frames
+(`/tmp/api_draw_map_smoke.log`). The normalized full-binary report
+`/tmp/api_draw_stage4.json` raises `APIDrawCharacterModel` from 24.581024%
+to 91.492386% and the whole score from 45.32655% to 45.40149%. Every
+previously assigned original-address function retains its score or improves;
+none disappears or regresses. `git diff --check` passes.
+
+### API object animation lookup and layer-list prefix
+
+The original `apiobject.c` text sequence after the model dump is
+`FindAnimIX` (`0x3cd274`), `AnimDuration` (`0x3cd2ed`),
+`MakeLayerList_Index` (`0x3cd56e`), then `StoreLocatorCoordinates`
+(`0x3cd5ec`). The unchanged first two bodies moved from the `-O2`
+`gameanim.cpp` catch-all to the original API-object owner, which compiles
+at its established default `-O0`. The global
+`animduration_blendouttime` (`0x123f924`) moved with `AnimDuration` into
+the same original BSS run as the draw state. `AnimDuration` now has a real
+prototype in `gameanim.h`; a conflicting five-integer source-local
+declaration in `gizmos_grabber.cpp` was removed in favor of that header.
+
+The unchanged `MakeLayerList_Index` body then moved from
+`render_stubs.cpp` into `apiobject.cpp`, and `StoreLocatorCoordinates`
+was placed after it in original address order. The normalized reports
+show `FindAnimIX` 21.428572→97.61905%, `AnimDuration` 0→78.849464%,
+and whole-binary matching 45.40149→45.41414% in
+`/tmp/api_anim_lookup_stage5.json`; `/tmp/api_layerlist_stage6.json`
+retains that whole score and the 94.61539% layer-list score. No assigned
+original address/name score regresses in either stage. Target and native
+smoke builds pass; the rebuilt Map/Cantina run passes 120 healthy frames
+on its first attempt.
+
+The initialized `ActionInfoList`/`_CInfoTab` tables were checked against
+the original data order and initializer evidence. That evidence does not
+support placing them in `apiobject.c`; they remain in their current owner
+pending a separate high-confidence TU reconstruction. No table move was
+made merely to group them with the API-object action helper functions.
+
+### API object animation-packet and frame-query prefix
+
+The unchanged `ResetAnimPacket` (`0x3cde82`), `SetAnimTimeRandom`
+(`0x3cdf80`), `AnimPacket_MiniToFull` (`0x3cf071`),
+`AnimPacket_FullToMini` (`0x3cf13b`), `AnimListFrame` (`0x3cf3ce`),
+and `AnimListFrameArray` (`0x3cf48f`) bodies moved from `gameanim.cpp`
+to the original `apiobject.c` owner in address order. `CurrentAnim` and
+three empty animation placeholders remain in `gameanim.cpp`: moving the
+placeholders produced small incidental score losses, while restoring
+`CurrentAnim` along with them preserved the no-regression gate. The
+`HasAnimation`-dependent random-time query and packet update routines
+were not moved; no cross-TU bridge or duplicate helper was introduced.
+
+The rebuilt, normalized `/tmp/api_packet_helpers_stage7.json` increases
+whole-binary matching from 45.41414% to 45.425747%. The six moved
+functions improve respectively 23.069767→77.04651%, 29.18→76.54%,
+8.765625→100%, 6.107143→100%, 21.6→44.314285%, and
+24.304348→64.13043%. There are zero assigned original-address/name
+regressions and zero missing assignments versus the stage-6 baseline.
+Target, native executable, and smoke builds pass; the rebuilt Map/Cantina
+smoke advances 120 healthy frames on its first run. `git diff --check`
+passes for the affected source and documentation files.
+
+The next isolated move places `GetAnimTimeRandom` (`0x3ce024`) immediately
+after `SetAnimTimeRandom` in `apiobject.cpp`. The original body tests only
+the model pointer and `model->model_data_b[animation]` before calling
+`NuRandFloat` and `NuAnimEndFrame`; its disassembly has no nonnegative-index
+or `model_data_b`-pointer guard. The previous shared `HasAnimation` helper
+added those extra conditions and would have required an artificial cross-TU
+bridge. The source now expresses the original two checks directly, without
+assembly, attributes, or a bridge. In normalized
+`/tmp/api_get_anim_random_stage8.json`, the function rises
+6.574468→90.06383% and whole-binary matching reaches 45.42856% with no
+other assigned-symbol score change. The integrated `matching.json` records
+45.42856%, up from the prior committed 45.31275%, with no scored function
+regression and 13,425/13,425 original text symbols provided. Target, WASM,
+native/smoke, and all three lint-mode builds pass, as do the four repository
+checks. The rebuilt Map/Cantina 120-frame smoke passed on attempt three;
+attempts one and two reached gameplay but hit the previously documented
+`MovePlayer`/`nutrig.cpp:77` sanitizer flake. No matching behavior or
+sanitizer setting was changed to avoid it.

@@ -24,6 +24,7 @@ i32 nurndr_pixel_height;
 i32 nurndr_nforced_mtls;
 NUMTL **nurndr_forced_mtl_table;
 NUMTL *nurndr_forced_mtl;
+i32 nurndr_force_lod;
 
 i32 global_GobjIsReflectedGeometry;
 i32 global_GobjIsShadowReceive;

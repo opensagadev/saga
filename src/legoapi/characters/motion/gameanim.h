@@ -34,6 +34,9 @@ struct characterdata_s;
 struct nugscn_s;
 struct nuhspecial_s;
 struct numtx_s;
+extern "C" void RootFn(numtx_s *, void *, NUVEC *, NUVEC *, NUVEC *, f32);
+extern "C" void RootFnY(numtx_s *, void *, NUVEC *, NUVEC *, NUVEC *, f32);
+extern "C" void BlendRootFn(numtx_s *, void *, NUVEC *, NUVEC *, NUVEC *, f32);
 f32 GameAnimSet_AutoSetReflectY(GAMEANIMSET_s *set, nuvec_s *position, numtx_s *matrix);
 enum GAMEANIMSET_VISIBILITY : i32;
 
@@ -90,6 +93,7 @@ extern "C" {
     void AnimPacket_MiniToFull(MINIANIMPACKET_s *mini_packet, ANIMPACKET_s *packet);
     void AnimPacket_FullToMini(ANIMPACKET_s *packet, MINIANIMPACKET_s *mini_packet);
     i32 FindAnimIX(characterdata_s *character, char *name);
+    f32 AnimDuration(i32 character_id, i32 animation, f32 start_frame, f32 end_frame, i32 subtract_frame_time);
     f32 GetAnimTimeRandom(CHARACTERMODEL_s *model, i32 animation);
     void SetAnimTimeRandom(CHARACTERMODEL_s *model, ANIMPACKET_s *packet);
     void ResetAnimPacket(ANIMPACKET_s *packet, i16 animation);

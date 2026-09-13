@@ -161,7 +161,6 @@ static GAMECHARACTERDATA *GetGameCharacterData(GameObject_s *object);
 void UpdateCharacterIdle(GameObject_s *object);
 void AutoWeaponOnOff(GameObject_s *object);
 void AddFootSteps(GameObject_s *object);
-extern "C" f32 AnimDuration(i32 character_id, i32 animation, f32 start_frame, f32 end_frame, i32 subtract_frame_time);
 void RootFnEx(NUMTX *matrix, void *data, NUVEC *source_root, NUVEC *target_root, NUVEC *root_delta, f32 blend,
               i32 include_y);
 extern "C" void PlaySfxByIdAndSetVolume(i32 sfx_id, NUVEC *position, f32 volume);
@@ -2798,69 +2797,12 @@ extern "C" {
     void AddAnimEffects(void) {
     }
 
-    f32 animduration_blendouttime;
-
-    f32 AnimDuration(i32 character_id, i32 animation, f32 start_frame, f32 end_frame, i32 subtract_frame_time) {
-        if (apicharsys == NULL || character_id < 0 || character_id >= apicharsys->character_count || animation < 0 ||
-            animation >= apicharsys->model_id_capacity) {
-            return 0.0f;
-        }
-
-        const i16 model_index = apicharsys->playermodelids[character_id];
-        if (model_index == -1) {
-            return 0.0f;
-        }
-
-        CHARACTERMODEL_s *model = &apicharsys->models[model_index];
-        if (model->model_data_b == NULL || model->model_data_b[animation] == NULL || model->model_data_a == NULL ||
-            model->model_data_a[animation] == NULL) {
-            return 0.0f;
-        }
-
-        f32 duration = NuAnimEndFrame(model->model_data_b[animation]);
-        if (start_frame >= 1.0f && duration > start_frame) {
-            if (end_frame >= 1.0f && duration > end_frame && end_frame > start_frame) {
-                duration = end_frame - start_frame;
-            } else {
-                duration -= start_frame;
-            }
-        } else if (end_frame >= 1.0f && duration > end_frame && end_frame > start_frame) {
-            duration = end_frame - 1.0f;
-        } else {
-            duration -= 1.0f;
-        }
-
-        CHARACTERANIM_s *animation_info = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation]);
-        duration *= (1.0f / (animation_info->playback_rate / 30.0f)) * (1.0f / 30.0f);
-        animduration_blendouttime = animation_info->blend_out_time;
-        if (subtract_frame_time != 0) {
-            duration -= animduration_blendouttime;
-        }
-        return duration;
-    }
-
     float AnimEndFrame(void *model_ptr, i32 animation) {
         CHARACTERMODEL_s *model = static_cast<CHARACTERMODEL_s *>(model_ptr);
         if (animation == -1 || model->model_data_b[animation] == NULL) {
             return 0.0f;
         }
         return NuAnimEndFrame(model->model_data_b[animation]);
-    }
-
-    f32 AnimListFrame(CHARACTERMODEL_s *model, i32 animation, i32 frame) {
-        if (animation == -1 || model->model_data_b[animation] == NULL || frame < 0 || frame > 3) {
-            return 0.0f;
-        }
-        CHARACTERANIM_s *info = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation]);
-        return info->event_frames[frame];
-    }
-
-    f32 *AnimListFrameArray(CHARACTERMODEL_s *model, i32 animation) {
-        if (animation == -1 || model->model_data_b[animation] == NULL) {
-            return NULL;
-        }
-        CHARACTERANIM_s *info = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation]);
-        return info->event_frames;
     }
 
     void AnimList_NoLoad(void) {
@@ -2885,42 +2827,6 @@ extern "C" {
             return 0;
         }
         return static_cast<CHARACTERANIM_s *>(model->model_data_a[animation])->misc_flags;
-    }
-
-    void AnimPacket_FullToMini(ANIMPACKET_s *packet, MINIANIMPACKET_s *mini_packet) {
-        mini_packet->current_time = packet->current_time;
-        mini_packet->previous_time = packet->previous_time;
-        mini_packet->blend_elapsed = packet->blend_elapsed;
-        mini_packet->blend_duration = packet->blend_duration;
-        mini_packet->blend_source_time = packet->blend_source_time;
-        mini_packet->blend_target_time = packet->blend_target_time;
-        mini_packet->flags = packet->flags;
-        mini_packet->blending = packet->blending;
-        mini_packet->blend_animation_a = packet->blend_animation_a;
-        mini_packet->blend_animation_b = packet->blend_animation_b;
-        mini_packet->animation_index = packet->animation_index;
-        mini_packet->previous_animation = packet->previous_animation;
-        mini_packet->requested_animation_id = packet->requested_animation;
-    }
-
-    void AnimPacket_MiniToFull(MINIANIMPACKET_s *mini_packet, ANIMPACKET_s *packet) {
-        packet->current_time = mini_packet->current_time;
-        packet->previous_time = mini_packet->previous_time;
-        packet->blend_elapsed = mini_packet->blend_elapsed;
-        packet->blend_duration = mini_packet->blend_duration;
-        packet->blend_source_time = mini_packet->blend_source_time;
-        packet->blend_target_time = mini_packet->blend_target_time;
-        packet->flags = mini_packet->flags;
-        packet->blending = mini_packet->blending;
-        packet->blend_animation_a = mini_packet->blend_animation_a;
-        packet->blend_animation_b = mini_packet->blend_animation_b;
-        packet->animation_index = mini_packet->animation_index;
-        packet->previous_animation = mini_packet->previous_animation;
-        packet->requested_animation = mini_packet->requested_animation_id;
-        packet->blend_source_reversed = 0;
-        packet->blend_target_reversed = 0;
-        packet->current_reversed = 0;
-        packet->overlay_animation = -1;
     }
 
     void AnimsAvailableToBothCharacters(void) {
@@ -3035,26 +2941,6 @@ extern "C" {
     void EvalModelAnim(void) {
     }
 
-    i32 FindAnimIX(CHARACTERDATA *character, char *name) {
-        if (character != NULL) {
-            CHARACTERANIM_s *animation = character->animations;
-            while (animation != NULL && animation->name != NULL) {
-                if (NuStrICmp(name, animation->name) == 0) {
-                    return animation->animation_id;
-                }
-                ++animation;
-            }
-        }
-        return -1;
-    }
-
-    f32 GetAnimTimeRandom(CHARACTERMODEL_s *model, i32 animation) {
-        if (!HasAnimation(model, animation)) {
-            return 0.0f;
-        }
-        return 1.0f + NuRandFloat() * (NuAnimEndFrame(model->model_data_b[animation]) - 1.0f);
-    }
-
     f32 GetInstAnimEndFrame(nugscn_s *scene, nuinstanim_s *instance_animation) {
         if (instance_animation == NULL) {
             return 0.0f;
@@ -3072,43 +2958,12 @@ extern "C" {
         return static_cast<f32>(scene->animation_end_frames[instance_animation->end_frame_lookup_index - 1].end_frame);
     }
 
-    void ResetAnimPacket(ANIMPACKET_s *packet, i16 animation) {
-        if (packet == NULL) {
-            return;
-        }
-        packet->requested_animation = animation;
-        packet->previous_animation = packet->requested_animation;
-        packet->animation_index = packet->previous_animation;
-        packet->previous_time = 1.0f;
-        packet->blend_target_time = packet->previous_time;
-        packet->current_time = packet->blend_target_time;
-        packet->blending = 0;
-        packet->flags = ANIMPACKET_FLAG_ANIMATION_CHANGED;
-        packet->overlay_animation = -1;
-        packet->current_reversed = 0;
-        packet->blend_source_reversed = 0;
-        packet->blend_target_reversed = 0;
-    }
-
     void RootFn(NUMTX *matrix, void *data, NUVEC *source_root, NUVEC *target_root, NUVEC *root_delta, f32 blend) {
         RootFnEx(matrix, data, source_root, target_root, root_delta, blend, 0);
     }
 
     void RootFnY(NUMTX *matrix, void *data, NUVEC *source_root, NUVEC *target_root, NUVEC *root_delta, f32 blend) {
         RootFnEx(matrix, data, source_root, target_root, root_delta, blend, 1);
-    }
-
-    void SetAnimTimeRandom(CHARACTERMODEL_s *model, ANIMPACKET_s *packet) {
-        if (model == NULL || packet == NULL) {
-            return;
-        }
-
-        void *animation = model->model_data_b[packet->field_0x3a];
-        if (animation != NULL) {
-            const f32 random = NuRandFloat();
-            const f32 end_frame = NuAnimEndFrame(model->model_data_b[packet->field_0x3a]);
-            packet->field_0x00 = 1.0f + random * (end_frame - 1.0f);
-        }
     }
 
     NUJOINTPROCANIMFN JointProcAnimFn;

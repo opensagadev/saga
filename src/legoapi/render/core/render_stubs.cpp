@@ -328,25 +328,6 @@ extern "C" {
         scene->instance_visibility_flags = PortalVisiFlags;
     }
 
-    // Original @0x3cd56e. Build the hierarchy render-part list selected by
-    // the caller's bit mask.
-    i32 MakeLayerList_Index(CHARACTERMODEL_s *model, i16 *layers, u32 mask) {
-        if (model == NULL) {
-            return 0;
-        }
-
-        i32 count = 0;
-        u32 layer_bit = 1;
-        for (i32 layer = 0; layer <= 31 && layer < model->hierarchy->render_count; ++layer) {
-            if ((mask & layer_bit) != 0) {
-                *layers++ = static_cast<i16>(layer);
-                ++count;
-            }
-            layer_bit <<= 1;
-        }
-        return count;
-    }
-
     void PerspectMidPoint(NUVEC *result, NUVEC *first, NUVEC *second, NUVEC *camera_position) {
         f32 first_distance = NuVecDist(camera_position, first, NULL);
         f32 second_distance = NuVecDist(camera_position, second, NULL);
