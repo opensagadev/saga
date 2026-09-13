@@ -3281,11 +3281,11 @@ can alter that shared state. Using the real typed table accesses rather
 than caching a pointer across callbacks raises its original-address
 score 50.37→63.85%, with no other score changes in the isolated trial.
 
-Original `GizmoPickups_AddGizmos` takes a `WORLDINFO *` as its fourth
+Original `GizmoPickups_AddGizmos` takes a `WORLDINFO *` as its third
 callback argument, reads the world's pickup runtime for its count and
 records, selects configured pickups with bit 0x02, and reloads the
 runtime after `AddGizmo`. Its former runtime-pointer interpretation and
-null guards were not original. The typed body rises 22.28→99.97%; the
+null guards were not original. The typed body rises 22.28→100%; the
 adjacent `GizmoPickups_CollideList` improves 77.01→77.14%, with no
 regression. The debris lookup exports also now have their real `fx.h`
 declarations: the editor and cutscene callers no longer rely on
@@ -3301,3 +3301,50 @@ modes pass; repository checks are 4/4, original text symbols are
 120 healthy frames. The previously documented intermittent
 `MovePlayer`/trig sanitizer flake was not observed in this run; the
 original movement behavior remains unchanged.
+
+### Pickup load callback and panel TU hypothesis
+
+The original `GizmoPickups_Load` at `0x4c0d60` ignores its second
+callback argument and reads the runtime system from its `WORLDINFO *`
+argument. A nonzero pickup count is its only early return; the
+version-5 pickup scale and version-6 draw-distance behavior consult
+`ADataList[world->level_sub_id].flags`, with the original 100.0
+draw-distance clamp for `AREAFLAG_NOPICKUPGRAVITY`. Correcting those
+typed ownership and area-flag paths raises the body 21.01→25.88%.
+The array access is direct as in the original, without a non-original
+area-index bounds check; that last change shifts two neighboring
+pickup scores by ±0.07 point and leaves the aggregate unchanged.
+An attempted loop-count
+reload lowered it to 21.97% and was reverted. The adjacent
+`GizmoPickups_ReserveBufferSpace` has no supported semantic correction
+yet and remains unchanged.
+
+The rebuilt native smoke exposed a callback-argument error from the
+previous AddGizmos change: it had interpreted the *fourth* argument,
+`set->unknown`, as the world, yielding a null runtime dereference on
+level load. Original stack offsets and `GizmoSysAddGizmos` both show
+that the *third* argument is the world. Correcting it makes
+`GizmoPickups_AddGizmos` exact (99.97→100%) and restores the original
+callback contract. This is a case where a near-perfect fuzzy score
+did not validate runtime behavior; the smoke test caught it. The next
+smoke reached gameplay but hit the previously documented intermittent
+`MovePlayer`/trig sanitizer failure; its retry passed 120 healthy
+frames. Target/WASM/native builds and all three lint modes pass,
+repository checks are 4/4, and original text coverage remains
+13,425/13,425.
+
+The original Panel text has a contiguous `Panel_Clear` → melee-target
+helpers → `DrawTimer` → `InitPanel` → `DrawPanel` → `PanelRender` run
+from `0x140950` to `0x1449c0`. Local `redbrickslidetime` sits beside
+local melee-target state in the original data surface. The current
+split between `panel.cpp` and `render.cpp` requires the build-only
+`Panel_GetRedBrickSlideTime` export for `DrawPanel`; it is the sole
+known extra global text symbol. This is a strong original-TU ownership
+hypothesis, but moving the 12,845-byte `DrawPanel` body is high risk:
+the two current files use different optimization levels. A disposable
+worktree trial will measure all adjacent Panel scores and the extra
+symbol surface before accepting any move. The bounded worktree trial
+could not build without moving a large network of render-local helper
+declarations, constants, and state; no matching comparison was valid.
+The trial was not transplanted, and the Panel consolidation remains a
+future dependency-mapping task rather than an accepted change.

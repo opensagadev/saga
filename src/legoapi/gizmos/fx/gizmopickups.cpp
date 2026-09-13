@@ -225,13 +225,11 @@ namespace {
     }
 
     f32 GetAreaPickupScale(const WORLDINFO *world) {
-        if (world == NULL || world->area == NULL) {
-            return 1.0f;
-        }
-        if ((world->area->flags & AREAFLAG_NOPICKUPGRAVITY) != 0) {
+        const u16 flags = ADataList[world->level_sub_id].flags;
+        if ((flags & AREAFLAG_NOPICKUPGRAVITY) != 0) {
             return 6.0f;
         }
-        if ((world->area->flags & AREAFLAG_VEHICLE_AREA) != 0) {
+        if ((flags & AREAFLAG_VEHICLE_AREA) != 0) {
             return BonusArea == 0 ? 5.0f : 3.0f;
         }
         return 1.0f;
@@ -430,7 +428,7 @@ static i32 GizmoPickups_GetMaxGizmos(void *pickup) {
     return world != NULL ? world->current_level->max_pickups : 0;
 }
 
-static void GizmoPickups_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *, void *data) {
+static void GizmoPickups_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *data, void *) {
     WORLDINFO *world = static_cast<WORLDINFO *>(data);
     for (i32 index = 0; index < world->gizmo_pickup_sys->pickup_count; ++index) {
         GIZMOPICKUP_s &pickup = world->gizmo_pickup_sys->pickups[index];
@@ -792,10 +790,10 @@ static void *GizmoPickups_ReserveBufferSpace(void *world_ptr) {
     return pickup_sys;
 }
 
-static i32 GizmoPickups_Load(void *world_ptr, void *data) {
+static i32 GizmoPickups_Load(void *world_ptr, void *) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    GIZMOPICKUPRUNTIMESYS_s *pickup_sys = static_cast<GIZMOPICKUPRUNTIMESYS_s *>(data);
-    if (world == NULL || pickup_sys == NULL || pickup_sys->pickup_count != 0) {
+    GIZMOPICKUPRUNTIMESYS_s *pickup_sys = world->gizmo_pickup_sys;
+    if (pickup_sys->pickup_count != 0) {
         return 0;
     }
 
@@ -819,7 +817,7 @@ static i32 GizmoPickups_Load(void *world_ptr, void *data) {
     if (pickup_sys->draw_distance < 10.0f) {
         pickup_sys->draw_distance = 10.0f;
     }
-    if (version == 6 && world->area != NULL && (world->area->flags & AREAFLAG_VEHICLE_AREA) != 0 &&
+    if (version == 6 && (ADataList[world->level_sub_id].flags & AREAFLAG_NOPICKUPGRAVITY) != 0 &&
         pickup_sys->draw_distance < 100.0f) {
         pickup_sys->draw_distance = 100.0f;
     }

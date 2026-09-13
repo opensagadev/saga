@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 45.823692,
+    "fuzzy_match_percent": 45.82448,
     "total_code": "4722419",
-    "matched_code": "397452",
-    "matched_code_percent": 8.41628,
+    "matched_code": "397570",
+    "matched_code_percent": 8.418778,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4733,
-    "matched_functions_percent": 35.16606,
+    "matched_functions": 4734,
+    "matched_functions_percent": 35.173492,
     "total_units": 1
   },
   "text": {
@@ -57444,7 +57444,7 @@
           "address": 4979696,
           "offset": 4089728,
           "size": 118,
-          "match_percent": 99.97436
+          "match_percent": 100.0
         },
         {
           "name": "_ZL18GizmoPickups_ResetPvS_S_",
@@ -57460,7 +57460,7 @@
           "address": 4982816,
           "offset": 4092848,
           "size": 283,
-          "match_percent": 27.541666
+          "match_percent": 27.61111
         },
         {
           "name": "_ZL26GizmoPickups_StoreProgressPvS_S_",
@@ -57468,7 +57468,7 @@
           "address": 4983104,
           "offset": 4093136,
           "size": 671,
-          "match_percent": 62.57047
+          "match_percent": 62.503357
         },
         {
           "name": "_Z20GizmoPickups_InitSysP16GIZMOPICKUPSYS_s",
@@ -57492,7 +57492,7 @@
           "address": 4984160,
           "offset": 4094192,
           "size": 762,
-          "match_percent": 21.005102
+          "match_percent": 25.87755
         },
         {
           "name": "_ZL31GizmoPickups_ReserveBufferSpacePv",
