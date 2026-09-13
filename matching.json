@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 45.61409,
+    "fuzzy_match_percent": 45.683086,
     "total_code": "4722419",
-    "matched_code": "394554",
-    "matched_code_percent": 8.354913,
+    "matched_code": "395177",
+    "matched_code_percent": 8.368106,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4717,
-    "matched_functions_percent": 35.04718,
+    "matched_functions": 4720,
+    "matched_functions_percent": 35.069473,
     "total_units": 1
   },
   "text": {
@@ -23063,6 +23063,14 @@
           "match_percent": 65.78362
         },
         {
+          "name": "_ZL18ParseAIPathCnxFlagPc",
+          "demangled_name": "ParseAIPathCnxFlag(char*)",
+          "address": 1646672,
+          "offset": 756704,
+          "size": 202,
+          "match_percent": 86.05357
+        },
+        {
           "name": "_ZL20Action_CnxControllerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
           "demangled_name": "Action_CnxController(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
           "address": 1646880,
@@ -43726,12 +43734,28 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z14GetDefaultIdleP12GameObject_s",
+          "demangled_name": "GetDefaultIdle(GameObject_s*)",
+          "address": 1037440,
+          "offset": 147472,
+          "size": 177,
+          "match_percent": 51.0
+        },
+        {
           "name": "_Z18ResetCharacterIdleP12GameObject_sii",
           "demangled_name": "ResetCharacterIdle(GameObject_s*, int, int)",
           "address": 1037632,
           "offset": 147664,
           "size": 357,
           "match_percent": 37.451218
+        },
+        {
+          "name": "_ZL16NewCharacterIdleP12GameObject_si",
+          "demangled_name": "NewCharacterIdle(GameObject_s*, int)",
+          "address": 1038000,
+          "offset": 148032,
+          "size": 650,
+          "match_percent": 36.026043
         },
         {
           "name": "_Z12InitCreatureP12GameObject_sii",
@@ -47207,14 +47231,6 @@
           "match_percent": 0.0
         },
         {
-          "name": "_Z14GetDefaultIdleP12GameObject_s",
-          "demangled_name": "GetDefaultIdle(GameObject_s*)",
-          "address": 1037440,
-          "offset": 147472,
-          "size": 177,
-          "match_percent": 51.0
-        },
-        {
           "name": "_Z13AnimatePlayerP12GameObject_s",
           "demangled_name": "AnimatePlayer(GameObject_s*)",
           "address": 1070800,
@@ -47308,7 +47324,7 @@
           "address": 1492512,
           "offset": 602544,
           "size": 1109,
-          "match_percent": 29.817461
+          "match_percent": 29.876984
         },
         {
           "name": "_Z17Animate_ASTROMECHP12GameObject_s",
@@ -47324,7 +47340,7 @@
           "address": 1507040,
           "offset": 617072,
           "size": 639,
-          "match_percent": 36.89375
+          "match_percent": 36.8
         },
         {
           "name": "_Z19Animate_BATTLEDROIDP12GameObject_s",
@@ -47332,7 +47348,7 @@
           "address": 1507680,
           "offset": 617712,
           "size": 533,
-          "match_percent": 37.992702
+          "match_percent": 38.029198
         },
         {
           "name": "_Z23Animate_REPUBLICGUNSHIPP12GameObject_s",
@@ -47516,7 +47532,7 @@
           "address": 2906832,
           "offset": 2016864,
           "size": 2692,
-          "match_percent": 39.842182
+          "match_percent": 39.83481
         },
         {
           "name": "ANI_Ani3ExtractAllNodeCurves",
@@ -47559,46 +47575,6 @@
           "match_percent": 83.92453
         },
         {
-          "name": "AnimEndFrame",
-          "demangled_name": "AnimEndFrame",
-          "address": 3958557,
-          "offset": 3068589,
-          "size": 110,
-          "match_percent": 21.61111
-        },
-        {
-          "name": "AnimMiscFlags",
-          "demangled_name": "AnimMiscFlags",
-          "address": 3958667,
-          "offset": 3068699,
-          "size": 64,
-          "match_percent": 8.458333
-        },
-        {
-          "name": "AnimList_NoLoad",
-          "demangled_name": "AnimList_NoLoad",
-          "address": 3958731,
-          "offset": 3068763,
-          "size": 169,
-          "match_percent": 7.368421
-        },
-        {
-          "name": "AnimList_RequestAnimGroups",
-          "demangled_name": "AnimList_RequestAnimGroups",
-          "address": 3958900,
-          "offset": 3068932,
-          "size": 171,
-          "match_percent": 7.118644
-        },
-        {
-          "name": "AnimList_RequestAnimGroupForCreatures",
-          "demangled_name": "AnimList_RequestAnimGroupForCreatures",
-          "address": 3959071,
-          "offset": 3069103,
-          "size": 83,
-          "match_percent": 28.785715
-        },
-        {
           "name": "_Z18FindTexAnimFromMtlP8nugscn_sP7numtl_s",
           "demangled_name": "FindTexAnimFromMtl(nugscn_s*, numtl_s*)",
           "address": 4418816,
@@ -47612,7 +47588,7 @@
           "address": 4799696,
           "offset": 3909728,
           "size": 319,
-          "match_percent": 95.49451
+          "match_percent": 95.65934
         },
         {
           "name": "_Z9EvalAnim2P12nuhspecial_sf",
@@ -47636,7 +47612,7 @@
           "address": 4801248,
           "offset": 3911280,
           "size": 230,
-          "match_percent": 70.90625
+          "match_percent": 71.375
         },
         {
           "name": "_Z37GameAnimSys_AllocateLevelProgressDataP9variptr_uS0_ii",
@@ -47780,7 +47756,7 @@
           "address": 4884960,
           "offset": 3994992,
           "size": 575,
-          "match_percent": 35.618183
+          "match_percent": 35.70909
         },
         {
           "name": "_Z30GameAnimSet_GetCentreAndRadiusP13GAMEANIMSET_sP7nuvec_sPfiii",
@@ -47788,7 +47764,7 @@
           "address": 4885536,
           "offset": 3995568,
           "size": 850,
-          "match_percent": 82.01942
+          "match_percent": 84.02913
         },
         {
           "name": "_Z28GameAnimSet_IsAnimationResetP13GAMEANIMSET_s",
@@ -47964,7 +47940,7 @@
           "address": 5119792,
           "offset": 4229824,
           "size": 476,
-          "match_percent": 97.833336
+          "match_percent": 100.0
         },
         {
           "name": "_Z19SuperCarry_CarryingP12GameObject_s",
@@ -61806,6 +61782,46 @@
           "match_percent": 10.384615
         },
         {
+          "name": "AnimEndFrame",
+          "demangled_name": "AnimEndFrame",
+          "address": 3958557,
+          "offset": 3068589,
+          "size": 110,
+          "match_percent": 99.97222
+        },
+        {
+          "name": "AnimMiscFlags",
+          "demangled_name": "AnimMiscFlags",
+          "address": 3958667,
+          "offset": 3068699,
+          "size": 64,
+          "match_percent": 100.0
+        },
+        {
+          "name": "AnimList_NoLoad",
+          "demangled_name": "AnimList_NoLoad",
+          "address": 3958731,
+          "offset": 3068763,
+          "size": 169,
+          "match_percent": 92.50877
+        },
+        {
+          "name": "AnimList_RequestAnimGroups",
+          "demangled_name": "AnimList_RequestAnimGroups",
+          "address": 3958900,
+          "offset": 3068932,
+          "size": 171,
+          "match_percent": 72.47458
+        },
+        {
+          "name": "AnimList_RequestAnimGroupForCreatures",
+          "demangled_name": "AnimList_RequestAnimGroupForCreatures",
+          "address": 3959071,
+          "offset": 3069103,
+          "size": 83,
+          "match_percent": 100.0
+        },
+        {
           "name": "SetAnimBlendMode",
           "demangled_name": "SetAnimBlendMode",
           "address": 3959154,
@@ -62180,6 +62196,14 @@
           "offset": 3099572,
           "size": 159,
           "match_percent": 90.06383
+        },
+        {
+          "name": "_ZL15UpdateAnimTimerP16CHARACTERMODEL_sP12ANIMPACKET_ssfffiPcif",
+          "demangled_name": "UpdateAnimTimer(CHARACTERMODEL_s*, ANIMPACKET_s*, short, float, float, float, int, char*, int, float)",
+          "address": 3989699,
+          "offset": 3099731,
+          "size": 1057,
+          "match_percent": 63.810997
         },
         {
           "name": "UpdateAnimPacket",
@@ -79500,14 +79524,6 @@
           "match_percent": 2.327586
         },
         {
-          "name": "_ZL15UpdateAnimTimerP16CHARACTERMODEL_sP12ANIMPACKET_ssfffiPcif",
-          "demangled_name": "UpdateAnimTimer(CHARACTERMODEL_s*, ANIMPACKET_s*, short, float, float, float, int, char*, int, float)",
-          "address": 3989699,
-          "offset": 3099731,
-          "size": 1057,
-          "match_percent": 1.443299
-        },
-        {
           "name": "PartRayCast",
           "demangled_name": "PartRayCast",
           "address": 4294944,
@@ -81255,6 +81271,54 @@
       "source": "src/legoapi/world/level.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/level.o",
       "functions": [
+        {
+          "name": "_ZL19Credits_Update_GameP11WORLDINFO_s",
+          "demangled_name": "Credits_Update_Game(WORLDINFO_s*)",
+          "address": 1194240,
+          "offset": 304272,
+          "size": 124,
+          "match_percent": 14.0
+        },
+        {
+          "name": "_ZL11Titles_DrawP11WORLDINFO_s",
+          "demangled_name": "Titles_Draw(WORLDINFO_s*)",
+          "address": 1194368,
+          "offset": 304400,
+          "size": 3029,
+          "match_percent": 46.91892
+        },
+        {
+          "name": "_ZL13Titles_UpdateP11WORLDINFO_s",
+          "demangled_name": "Titles_Update(WORLDINFO_s*)",
+          "address": 1197408,
+          "offset": 307440,
+          "size": 364,
+          "match_percent": 51.518074
+        },
+        {
+          "name": "_ZL17Credits_Draw_GameP11WORLDINFO_s",
+          "demangled_name": "Credits_Draw_Game(WORLDINFO_s*)",
+          "address": 1197776,
+          "offset": 307808,
+          "size": 930,
+          "match_percent": 2.474227
+        },
+        {
+          "name": "_ZL17Credits_Init_GameP11WORLDINFO_s",
+          "demangled_name": "Credits_Init_Game(WORLDINFO_s*)",
+          "address": 1199984,
+          "offset": 310016,
+          "size": 367,
+          "match_percent": 5.526316
+        },
+        {
+          "name": "_ZL11Titles_InitP11WORLDINFO_s",
+          "demangled_name": "Titles_Init(WORLDINFO_s*)",
+          "address": 1200352,
+          "offset": 310384,
+          "size": 675,
+          "match_percent": 0.0
+        },
         {
           "name": "_Z18ClearLevelProgressiP11WORLDINFO_s",
           "demangled_name": "ClearLevelProgress(int, WORLDINFO_s*)",
@@ -100062,6 +100126,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL15NuErrorFunctionPcz",
+          "demangled_name": "NuErrorFunction(char*, ...)",
+          "address": 2546843,
+          "offset": 1656875,
+          "size": 197,
+          "match_percent": 99.92
+        },
+        {
           "name": "NuErrorProlog",
           "demangled_name": "NuErrorProlog",
           "address": 2547040,
@@ -117024,90 +117096,6 @@
       ]
     },
     {
-      "name": "_ZL16NewCharacterIdleP12GameObject_si",
-      "demangled_name": "NewCharacterIdle(GameObject_s*, int)",
-      "address": 1038000,
-      "offset": 148032,
-      "size": 650,
-      "match_percent": 4.6875,
-      "candidate_units": [
-        "legoapi/characters/core/character.cpp.o",
-        "legoapi/characters/core/characters.cpp.o"
-      ]
-    },
-    {
-      "name": "_ZL19Credits_Update_GameP11WORLDINFO_s",
-      "demangled_name": "Credits_Update_Game(WORLDINFO_s*)",
-      "address": 1194240,
-      "offset": 304272,
-      "size": 124,
-      "match_percent": 11.0,
-      "candidate_units": [
-        "legoapi/menus/screens/credits.cpp.o",
-        "legoapi/world/level.cpp.o"
-      ]
-    },
-    {
-      "name": "_ZL11Titles_DrawP11WORLDINFO_s",
-      "demangled_name": "Titles_Draw(WORLDINFO_s*)",
-      "address": 1194368,
-      "offset": 304400,
-      "size": 3029,
-      "match_percent": 0.70946,
-      "candidate_units": [
-        "legoapi/cutscenes/cutscenes.cpp.o",
-        "legoapi/world/level.cpp.o"
-      ]
-    },
-    {
-      "name": "_ZL13Titles_UpdateP11WORLDINFO_s",
-      "demangled_name": "Titles_Update(WORLDINFO_s*)",
-      "address": 1197408,
-      "offset": 307440,
-      "size": 364,
-      "match_percent": 5.060241,
-      "candidate_units": [
-        "legoapi/cutscenes/cutscenes.cpp.o",
-        "legoapi/world/level.cpp.o"
-      ]
-    },
-    {
-      "name": "_ZL17Credits_Draw_GameP11WORLDINFO_s",
-      "demangled_name": "Credits_Draw_Game(WORLDINFO_s*)",
-      "address": 1197776,
-      "offset": 307808,
-      "size": 930,
-      "match_percent": 2.010309,
-      "candidate_units": [
-        "legoapi/menus/screens/credits.cpp.o",
-        "legoapi/world/level.cpp.o"
-      ]
-    },
-    {
-      "name": "_ZL17Credits_Init_GameP11WORLDINFO_s",
-      "demangled_name": "Credits_Init_Game(WORLDINFO_s*)",
-      "address": 1199984,
-      "offset": 310016,
-      "size": 367,
-      "match_percent": 3.552632,
-      "candidate_units": [
-        "legoapi/menus/screens/credits.cpp.o",
-        "legoapi/world/level.cpp.o"
-      ]
-    },
-    {
-      "name": "_ZL11Titles_InitP11WORLDINFO_s",
-      "demangled_name": "Titles_Init(WORLDINFO_s*)",
-      "address": 1200352,
-      "offset": 310384,
-      "size": 675,
-      "match_percent": 2.5,
-      "candidate_units": [
-        "legoapi/cutscenes/cutscenes.cpp.o",
-        "legoapi/world/level.cpp.o"
-      ]
-    },
-    {
       "name": "_ZL28Condition_IAmAPartyCharacterP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
       "demangled_name": "Condition_IAmAPartyCharacter(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char*, void*)",
       "address": 1579552,
@@ -117138,18 +117126,6 @@
       "size": 52,
       "match_percent": 100.0,
       "candidate_units": [
-        "gameapi/ai/aisys/aisys.cpp.o"
-      ]
-    },
-    {
-      "name": "_ZL18ParseAIPathCnxFlagPc",
-      "demangled_name": "ParseAIPathCnxFlag(char*)",
-      "address": 1646672,
-      "offset": 756704,
-      "size": 202,
-      "match_percent": 7.5,
-      "candidate_units": [
-        "editor/edpath.cpp.o",
         "gameapi/ai/aisys/aisys.cpp.o"
       ]
     },
@@ -117196,18 +117172,6 @@
       "candidate_units": [
         "legoapi/misc/utilities.cpp.o",
         "nu2api/nufile/nufile.cpp.o"
-      ]
-    },
-    {
-      "name": "_ZL15NuErrorFunctionPcz",
-      "demangled_name": "NuErrorFunction(char*, ...)",
-      "address": 2546843,
-      "offset": 1656875,
-      "size": 197,
-      "match_percent": 8.4,
-      "candidate_units": [
-        "nu2api/nucore/nu2api_nucore_misc.cpp.o",
-        "nu2api/nucore/nuerror.cpp.o"
       ]
     },
     {
@@ -129837,8 +129801,8 @@
   "summary": {
     "bazel_units": 524,
     "functions": 13454,
-    "assigned_functions": 12335,
-    "ambiguous_functions": 229,
+    "assigned_functions": 12344,
+    "ambiguous_functions": 220,
     "unassigned_functions": 890
   }
 }

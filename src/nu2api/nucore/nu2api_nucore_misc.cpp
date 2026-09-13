@@ -837,6 +837,3 @@ NuNetEmu::EmuPacket::~EmuPacket() {
 
 void NuNetEmu::PackStats::Draw(float, float, float, float, NetSmallStats::eInfo) const {
 }
-
-static __used__ void NuErrorFunction(char *, ...) {
-}

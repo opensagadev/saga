@@ -603,9 +603,6 @@ CharacterObjectInterface::~CharacterObjectInterface() {
     object->mech_object_interface = NULL;
 }
 
-static __used__ void NewCharacterIdle(GameObject_s *, i32) {
-}
-
 static __used__ void ExtraDieSfx_LSW(GameObject_s *) {
 }
 

@@ -653,7 +653,6 @@ extern void SetGameObjectCharacterData(GameObject_s *obj);
 extern void GetTopBot(GameObject_s *obj);
 extern void GameObjectDimensions(GameObject_s *obj);
 extern void GameObjectOrigin(GameObject_s *obj);
-extern i32 GetDefaultIdle(GameObject_s *obj);
 extern void ResetCharacterIdle(GameObject_s *obj, i32 mode, i32 idle);
 extern void *Suit_GetDefault(i32 id);
 extern void ResetLights(NUVEC *position, rtldata_s *data, void *set);
@@ -934,7 +933,33 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
     return 1;
 }
 
-i32 GetDefaultIdle(GameObject_s *object);
+struct DefaultIdleCharacterData {
+    u8 pad[0x116];
+    u8 use_standard_idle;
+};
+
+i32 GetDefaultIdle(GameObject_s *obj) {
+    CHARACTERDATA *character = obj->apiobj.character_data;
+    DefaultIdleCharacterData *game_character = static_cast<DefaultIdleCharacterData *>(character->field11_0x24);
+
+    i32 animation = 25;
+    i32 table_offset = 100;
+    if (game_character->use_standard_idle == 0 && (character->model_flags & 0x80) != 0) {
+        animation = 118;
+        table_offset = 472;
+    }
+    if (obj->batarang != NULL && *(reinterpret_cast<u8 *>(obj->batarang) + 0x7d) != 0) {
+        return 151;
+    }
+
+    u8 *animation_table = reinterpret_cast<u8 *>(obj->apiobj.character_model->model_data_b);
+    void *entry = *reinterpret_cast<void **>(animation_table + table_offset);
+    if (entry != NULL &&
+        (*reinterpret_cast<i32 *>(animation_table + 4) == 0 || (obj->field_0xe22 & 1) != 0 || obj->field_0xe32 == 1)) {
+        return animation;
+    }
+    return 1;
+}
 
 static i32 IdleRepetitionCount(u8 minimum, u8 maximum) {
     if (maximum <= minimum) {

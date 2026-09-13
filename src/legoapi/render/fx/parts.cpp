@@ -545,6 +545,9 @@ static __used__ void PartMove_VehiclePickup(PART_s *, f32) {
 static __used__ void UpdateAnimTimer(CHARACTERMODEL_s *, ANIMPACKET_s *, i16, f32, f32, f32, i32, char *, i32, f32) {
 }
 
+static __used__ void PartKill_EjectedCreature(PART_s *, i32) {
+}
+
 static __used__ void UpdateCustomPieceAnim(CUSTOMPIECEANIM *, u16, u16) {
 }
 

@@ -74,7 +74,7 @@ i32 StartSlide(GameObject_s *object, i32 check_contact);
 #ifdef __cplusplus
 extern "C" {
 #endif
-    float AnimEndFrame(void *animset, i32 unknown);
+    float AnimEndFrame(CHARACTERMODEL_s *model, i32 animation);
 #ifdef __cplusplus
 }
 #endif

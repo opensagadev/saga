@@ -2859,3 +2859,112 @@ checks pass. Original text-symbol coverage remains 13,425/13,425 with
 zero missing. The rebuilt Map/Cantina fixture advances 120 healthy
 frames on this run; the original `MovePlayer`/trig sanitizer flake
 remains documented and unchanged.
+
+### Character idle and duplicate local-symbol cleanup
+
+The unchanged `GetDefaultIdle` (`0x0fd480`) moved from the unrelated
+`gameanim.cpp` catch-all next to original address neighbor
+`ResetCharacterIdle` in `characters.cpp`, with one real C++ declaration
+in `character.h` replacing source-local prototypes. Its own score
+remains 51.0% in `/tmp/idle_owner_stage1.json`. The target-built
+whole score rises 45.61409→45.614716%, but two unchanged functions
+regress slightly from the `gameanim.cpp` codegen change:
+`Animate_PROTOCOL` 36.89375→36.8% and
+`ANI_SimpleAni3PlayerV4Joint_Blend` 39.842182→39.83481%.
+These small losses are retained as explicit matching debt while the
+original ANI3 owner is investigated; no source-order or attribute
+workaround was added to hide them.
+
+Three duplicate, attribute-retained local placeholders had genuine
+implementations elsewhere and were removed in measured steps.
+`NewCharacterIdle` now maps to its real `characters.cpp` body at
+36.026043% (`/tmp/idle_owner_stage2.json`). Removing the empty
+`UpdateAnimTimer` placeholder from `parts.cpp` exposed that the real
+API-object timer was incorrectly inside an `extern "C"` block. Moving
+only that local helper across the language-linkage boundary restores
+the original C++ local symbol and raises it 1.443299→63.810997% in
+`/tmp/idle_owner_stage4.json`. An empty `NuErrorFunction` in
+`nu2api_nucore_misc.cpp` was then removed so the real `nuerror.cpp`
+body maps at 99.92% (`/tmp/duplicate_nuerror_stage5.json`).
+
+Finally, six empty `Credits_*_Game` and `Titles_*` local placeholders
+in `credits.cpp` and `cutscenes.cpp` were removed: all six original
+addresses now map to their real `level.cpp` owners, although several
+of those bodies remain low-scoring and need ordinary reconstruction.
+The target-built `/tmp/duplicate_titles_stage6.json` reaches
+45.669994% whole-binary matching with 221 ambiguous and 890
+unassigned symbols. The real `Titles_Init` maps at 0% where the old
+empty placeholder had 2.5% from incidental prologue overlap. This
+honest local score loss is retained rather than restoring a fake
+definition; `Titles_Init` needs genuine body recovery. The other
+duplicate-removal substeps add no scored regressions beyond the two
+already named from the idle move.
+
+The original ANI3 player/extraction symbols form a contiguous text run,
+but moving their complete helper family from `gameanim.cpp` into the
+existing `nuanim.cpp` (`-O3`) was not a viable ownership change. The
+target-built trial fell from 45.669994% to 45.6149%; three player
+variants, including Euler-quaternion and base variants, fell to 0%.
+The entire trial was reverted, and `/tmp/ani3_reverted.json` verifies
+the baseline at 45.669994% with no changed function scores. The
+contiguous address run alone is insufficient to establish the correct
+compilation mode or source boundary. A separate, evidence-backed
+optimization-level reconstruction is needed before moving this family.
+
+A source-level control-flow trial for `GetDefaultIdle` likewise matched
+the table-mode check order seen in disassembly but lowered its own score
+51.0→45.473682% (`/tmp/idle_logic_trial.json`). That trial was reverted;
+the behavior and measured baseline remain unchanged.
+
+One further exact-symbol duplicate was verified in `editor/edpath.cpp`:
+the empty, attribute-retained `ParseAIPathCnxFlag(char *)` shadowed an
+implemented and called local function in `gameapi/ai/aisys/aisys.cpp`.
+Removing only that placeholder makes the original address map to the
+real owner, raises the function 7.5→86.05357%, and raises the
+target-built whole score to 45.673355% in
+`/tmp/duplicate_parseaipath_stage7.json`. The ambiguous count falls
+221→220; no other scored function changes.
+
+The original API-object prefix is also a contiguous run: `AnimEndFrame`
+at `0x3c671d`, `AnimMiscFlags` at `0x3c678b`, three `AnimList_*`
+functions through `0x3c691f`, then `SetAnimBlendMode` at `0x3c6972`.
+The first five were still in `gameanim.cpp`. Moving them initially
+unchanged, along with their sole-use `HasAnimation` helper, into
+`apiobject.cpp` reconstructs that boundary. A real `AnimMiscFlags`
+declaration in `gameanim.h` replaces a call-site `extern` in `hits.cpp`.
+The first target report `/tmp/api_animlist_trial.json` raises `AnimEndFrame`
+21.61111→81.02778% and whole matching 45.673355→45.674595%. The three
+still-stubbed `AnimList_*` functions fall 28.79→25.71%, 7.37→5.96%,
+and 7.12→5.76% respectively; at this stage they require genuine body recovery,
+not a TU or attribute workaround. No function outside this five-body
+unit changes score.
+
+The original `AnimMiscFlags` body only rejects animation `-1` or a
+missing animation entry. The moved implementation's `HasAnimation`
+helper also rejected null models and every negative index, so it was
+removed and the original positive predicate used directly. That
+semantic correction makes `AnimMiscFlags` exact at 100% in
+`/tmp/api_animmisc_positive.json`. `AnimEndFrame` had the same original
+positive-predicate shape, which lifts it to 93.916664% in
+`/tmp/api_animend_positive.json`. Finally, its real model pointer is
+declared as `CHARACTERMODEL_s *` in `motion.h`, eliminating an unnecessary
+`void *` cast and stack spill; `/tmp/api_animend_typed.json` reports
+99.97222% for `AnimEndFrame` and 45.67627% whole-binary matching.
+Only these two function scores changed in the semantic/type substeps.
+
+The remaining three animation-list bodies were then recovered from
+their original table traversal and sentinel loops, using the existing
+typed `APICHARACTERSYS`, `CHARACTERDATA`, and `CHARACTERANIM_s` fields.
+`AnimList_NoLoad` takes character IDs up to `-1` and sets animation
+flag `0x8000`; it rises 5.964912→92.50877% in
+`/tmp/api_animlist_noload.json`. `AnimList_RequestAnimGroups` takes one
+character ID followed by group IDs, clearing that flag for matching
+animation groups; it rises 5.762712→72.47458% in
+`/tmp/api_animlist_groups.json`. `AnimList_RequestAnimGroupForCreatures`
+takes one group ID followed by creature IDs and delegates in the
+opposite argument order from the old placeholder's misleading names.
+Expressing its original sentinel-first loop makes it exact at 100%
+(`/tmp/api_animlist_creatures_sentinel.json`). These are real behavior
+implementations, not symbol-retention or compiler-attribute tricks.
+The whole score reaches 45.683086%, with no additional scored
+regressions in this recovery sequence.

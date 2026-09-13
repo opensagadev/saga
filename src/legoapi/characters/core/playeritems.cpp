@@ -20,7 +20,6 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 void GameAudio_PlaySfx(i32 sfx, NUVEC *position, i32 flags, i32 volume);
-i32 GetDefaultIdle(GameObject_s *object);
 void ResetCharacterIdle(GameObject_s *object, i32 mode, i32 animation);
 i32 (*Fighting_WeaponInActionFn)(GameObject_s *) = NULL;
 i32 (*Fighting_WeaponOutActionFn)(GameObject_s *) = NULL;

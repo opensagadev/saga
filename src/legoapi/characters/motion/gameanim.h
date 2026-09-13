@@ -97,6 +97,10 @@ void AnimatePlayer(GameObject_s *object);
 extern "C" {
 #endif
     void SetAnimBlendMode(i32 mode);
+    i32 AnimMiscFlags(CHARACTERMODEL_s *model, i32 animation);
+    void AnimList_NoLoad(i32 character_id, ...);
+    void AnimList_RequestAnimGroups(i32 character_id, ...);
+    void AnimList_RequestAnimGroupForCreatures(i32 group_id, ...);
     i32 GetAnimBlendMode(void);
     i32 CurrentAnim(ANIMPACKET_s *packet);
     f32 AnimSpeed(CHARACTERMODEL_s *model, i32 animation);
