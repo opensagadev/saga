@@ -1,5 +1,6 @@
 #include "decomp.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/menus/core/gamehint.h"
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
 #include "MechInputTouch/MechInputTouch_types.h"
@@ -49,7 +50,18 @@ i32 Tilt_UpdateHint(HINT_s *) {
     return 0;
 }
 
-void CurrentHintAlpha() {
+f32 CurrentHintAlpha() {
+    if (hintsys.active_hint == NULL)
+        return 0.0f;
+    f32 alpha = 1.0f;
+    f32 duration = hintsys.active_hint->display_duration;
+    f32 fade_start = duration - 0.5f;
+    if (duration > 0.0f && hintsys.display_elapsed >= fade_start) {
+        alpha = 1.0f - (hintsys.display_elapsed - fade_start) / (duration - fade_start);
+        if (alpha < 0.0f)
+            alpha = 0.0f;
+    }
+    return alpha * hintsys.alpha;
 }
 
 i32 Dodge_UpdateHint(HINT_s *hint) {

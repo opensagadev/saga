@@ -1,5 +1,7 @@
 #ifdef __cplusplus
 
+extern float minikittime;
+
 struct WORLDINFO_s;
 
 void InitGameBeforeConfig(void);

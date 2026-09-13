@@ -282,26 +282,7 @@ static void PreWarmGeomsAndBakeVAOs(nudisplayscene_s *scene, nunativegscene_s *)
 }
 
 extern "C" void NuGScnFixupPS(NUGSCN *scene) {
-    struct NativeScene {
-        u16 nvertex_buffers;
-        u16 pad_02;
-        usize *vertex_buffers;
-        u16 nindex_buffers;
-        u16 pad_0a;
-        usize *index_buffers;
-        NUDISPLAYLISTGEOM **geometries;
-        i32 ngeometries;
-        struct NativeVertexStream **vertex_streams;
-        i32 nvertex_streams;
-    };
-
-    struct NativeVertexStream {
-        u32 unknown_00;
-        u32 unknown_04;
-        usize vertex_buffer;
-    };
-
-    NativeScene *native_scene = reinterpret_cast<NativeScene *>(scene->field437_0x1d0);
+    nunativegscene_s *native_scene = scene->field437_0x1d0;
     i32 dynamic_indices[64];
     i32 ndynamic = 0;
     for (i32 i = 0; i < native_scene->ngeometries; ++i) {
@@ -340,7 +321,7 @@ extern "C" void NuGScnFixupPS(NUGSCN *scene) {
         g_VideoResHeader.vertex_buffers[dynamic_indices[i]] = 0;
     }
     for (i32 i = 0; i < native_scene->nvertex_streams; ++i) {
-        NativeVertexStream *stream = native_scene->vertex_streams[i];
+        nunativevertexstream_s *stream = native_scene->vertex_streams[i];
         i32 index = static_cast<i32>(stream->vertex_buffer);
         stream->vertex_buffer = g_VideoResHeader.vertex_buffers[index];
     }
@@ -384,7 +365,73 @@ SAGA_HOST_WEAK void NuGScnCreatePS(nugscn_s *scene, variptr_u *, variptr_u *) {
     }
 }
 
-void NuGScnDestroyPS(nugscn_s *) {
+void NuGScnDestroyPS(nugscn_s *scene) {
+    nunativegscene_s *native_scene = scene->field437_0x1d0;
+    if (native_scene == NULL) {
+        return;
+    }
+
+    BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nugscn_android.c", 0x2fd);
+    NuIOSBindVAO(0);
+    EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nugscn_android.c", 0x2ff);
+
+    NuThreadCriticalSectionBegin(g_vaoLifetimeMutex);
+    for (i32 i = 0; i < native_scene->ngeometries; ++i) {
+        NUDISPLAYLISTGEOM *geometry = native_scene->geometries[i];
+        if (geometry->vertex_format != 0) {
+            if (geometry->immediate != 0) {
+                BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nugscn_android.c", 0x30b);
+                glDeleteBuffers(1, reinterpret_cast<GLuint *>(&geometry->vertex_format));
+                EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nugscn_android.c", 0x30d);
+            }
+            if (bgProcIsBgThread()) {
+                NuIOS_YieldThread();
+            }
+        }
+        geometry->vertex_format = 0;
+    }
+    NuThreadCriticalSectionEnd(g_vaoLifetimeMutex);
+
+    for (u32 i = 0; i < native_scene->nvertex_buffers; ++i) {
+        if (native_scene->vertex_buffers[i] != 0) {
+            BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nugscn_android.c", 0x32d);
+            glDeleteBuffers(1, reinterpret_cast<GLuint *>(&native_scene->vertex_buffers[i]));
+            EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nugscn_android.c", 0x32f);
+            if (bgProcIsBgThread()) {
+                NuIOS_YieldThread();
+            }
+            native_scene->vertex_buffers[i] = 0;
+        }
+    }
+    for (u32 i = 0; i < native_scene->nindex_buffers; ++i) {
+        if (native_scene->index_buffers[i] != 0) {
+            BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nugscn_android.c", 0x33f);
+            glDeleteBuffers(1, reinterpret_cast<GLuint *>(&native_scene->index_buffers[i]));
+            EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nugscn_android.c", 0x341);
+            if (bgProcIsBgThread()) {
+                NuIOS_YieldThread();
+            }
+            native_scene->index_buffers[i] = 0;
+        }
+    }
+
+    BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nugscn_android.c", 0x34c);
+    memset(g_lastBound2DTexIds, 0xff, sizeof(g_lastBound2DTexIds));
+    memset(g_lastBoundCubeTexIds, 0xff, sizeof(g_lastBoundCubeTexIds));
+    EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nugscn_android.c", 0x353);
+
+    for (i32 i = 0; i < scene->ntextures; ++i) {
+        NUNATIVETEX *texture = scene->textures[i];
+        if (texture->platform.gl_tex != 0) {
+            BeginCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nugscn_android.c", 0x35a);
+            glDeleteTextures(1, &texture->platform.gl_tex);
+            texture->platform.gl_tex = 0;
+            EndCriticalSectionGL("i:/SagaTouch-Android_9176564/nu2api.saga/nu3d/android/nugscn_android.c", 0x35e);
+            if (bgProcIsBgThread()) {
+                NuIOS_YieldThread();
+            }
+        }
+    }
 }
 
 extern "C" void NuGSceneSetCrossFade(void) {

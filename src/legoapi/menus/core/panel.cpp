@@ -5,6 +5,8 @@
 #include "legoapi/world/mission.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/world/levels/levels.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
@@ -12,6 +14,7 @@
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nuprim.h"
+#include <stdio.h>
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -22,7 +25,6 @@ extern "C" void SetQFont2D(void);
 extern "C" i32 NuRndrBeginScene(i32 flags);
 extern "C" void NuRndrClear(i32 flags, i32 colour, f32 alpha);
 extern "C" void NuRndrEndScene(void);
-extern FadeSystem FadeSys;
 extern NUCAMERA *pNuCam;
 extern "C" f32 NuIOS_GetAspectRatio(void);
 void SetPanelLights(f32 intensity);
@@ -32,14 +34,14 @@ void TBOPENFN(char *name, i32 bar);
 void TBCLOSEFN(char *name, i32 bar);
 
 extern NUMTL *FadeMtl2;
-extern i32 TimingBarSet;
 
-extern f32 statstime;
 extern f32 cointotaltime;
 extern f32 goldbricktime;
 extern i32 SuperStory;
 
 static f32 redbrickslidetime;
+f32 TimerAlpha = 0.0f;
+f32 TimerScale = 1.0f;
 
 void PanelRender(WORLDINFO_s *) {
     NuRndrBeginScene(-1);
@@ -213,6 +215,26 @@ i32 CoinsGoToMainTotal() {
         return 1;
     }
     return 0;
+}
+
+void DrawTimer(i32 time, i32 expanded, i32 reset) {
+    if (reset != 0) {
+        TimerScale = 1.0f;
+        TimerAlpha = 0.0f;
+        return;
+    }
+    if (expanded != 0)
+        TimerScale = 2.0f;
+    TimerScale = SeekLinearF(TimerScale, 1.0f, FRAMETIME * 2.0f);
+    if (FadeSys.fade != 0.0f)
+        return;
+    if (TimerAlpha < 1.0f)
+        TimerAlpha = TimerAlpha + FRAMETIME * 2.0f < 1.0f ? TimerAlpha + FRAMETIME * 2.0f : 1.0f;
+    char text[16];
+    sprintf(text, "%d", time);
+    f32 scale = TimerScale * 0.75f;
+    Text3DEx(text, 0.0f, BOSSICONY, 1.0f, scale, scale, scale, 0, 255, 0, 255,
+             static_cast<u8>(static_cast<i32>(TimerAlpha * 128.0f)));
 }
 
 void InitPanel(i32) {

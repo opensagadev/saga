@@ -14,6 +14,7 @@
 #include "nu2api/nu3d/NuRenderDevice.h"
 #include "nu2api/nu3d/android/nuiosdl_gl.h"
 #include "nu2api/nu3d/android/nuposteffect_plain.h"
+#include "nu2api/nu3d/android/nupostfilter.h"
 #include "nu2api/nu3d/android/nutimebar_plain.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
 #include "nu2api/nu3d/nudlist.h"
