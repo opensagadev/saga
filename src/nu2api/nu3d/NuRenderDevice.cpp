@@ -79,7 +79,6 @@ NuRenderDevice::NuRenderDevice() : NuRenderDeviceGen() {
 // Optional GLES2 extensions (loaded via eglGetProcAddress)
 // ---------------------------------------------------------------------------
 
-
 __attribute__((weak)) void NuRenderInspectEGLConfig(EGLDisplay display, EGLConfig config) {
     EGLint config_attribs[6] = {};
     eglGetConfigAttrib(display, config, EGL_RED_SIZE, &config_attribs[0]);
@@ -410,16 +409,4 @@ void NuRenderDevice::OpenglErrorCallback(u32, u32, u32, u32, i32, char const *, 
 
 i32 NuRenderDeviceIsContextValid() {
     return g_renderDevice.IsContextValid();
-}
-
-// ---------------------------------------------------------------------------
-// Stubs for iOS/legacy vertex paths that are not used on this platform
-// ---------------------------------------------------------------------------
-
-struct numtl_s;
-typedef struct NuVertexFormatPS NuVertexFormatPS;
-
-static __used__ i32 NuIOS_GetOrCreateVAO(u32, u32, u32, NuVertexFormatPS *) {
-    STUBBED();
-    return 0;
 }

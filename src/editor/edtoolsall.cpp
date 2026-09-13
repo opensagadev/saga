@@ -7,14 +7,6 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-void DumpShaderSource(u32) {
-    STUBBED();
-}
-
-void DumpProgramSource(u32) {
-    STUBBED();
-}
-
 void cbFileSaveEffects(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
@@ -24,10 +16,6 @@ void routeEditor_Render(i32, i32, float, float) {
 }
 
 void routeEditor_Process(nupad_s *) {
-    STUBBED();
-}
-
-void DumpShaderAttributes(u32) {
     STUBBED();
 }
 
@@ -41,10 +29,6 @@ void antinodeEditor_Enter() {
 }
 
 void creatureEditor_Enter() {
-    STUBBED();
-}
-
-void DumpAttributeBindings() {
     STUBBED();
 }
 

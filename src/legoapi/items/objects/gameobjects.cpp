@@ -46,6 +46,7 @@
 #include "legoapi/gizmo/base/gizactions.h"
 #include "legoapi/gizmos/transport/grapples.h"
 #include "nu2api/numath/nufloat.h"
+#include "nu2api/nu3d/nurndr.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numusic/sfx.h"
 #include "nu2api/nucore/numemory.h"
@@ -188,9 +189,6 @@ void *Condition_InHubAreaInit(AISYS_s *, char *, AISCRIPT_s *);
 extern i32 LEGO_AIPATHCNX_BLOCKAGE;
 
 extern "C" i32 AISysSetLevelPath(AISYS_s *system, char *path_name);
-
-extern "C" void NuLightFogX(f32 start, f32 end, u32 colour, f32 unused_start, f32 unused_end, i32 high_quality,
-                            f32 density);
 
 GAMEFOG_STATE GameFog = {};
 

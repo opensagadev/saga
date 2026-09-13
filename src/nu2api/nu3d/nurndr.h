@@ -130,22 +130,29 @@ extern "C" {
 
     i32 NuRndrSetViewMtx(NUMTX *vpcs_mtx, NUMTX *viewport_vpc_mtx, NUMTX *scissor_vpc_mtx);
     i32 NuRndrStateUpdateCameraState(void);
+    i32 NuRndrBeginSceneEx(i32 begin_flags, i32 layer, i32 mode);
+    void NuRndrEndSceneEx(i32 mode);
+    void NuRndrFx(i32 paused, void *context);
 
     i32 NuRndrSetAmbientLightPS(const NUCOLOUR3 *colour);
     i32 NuRndrSetDirectionalLightsPS(const NUVEC *dir0, const NUCOLOUR3 *colour0, const NUVEC *dir1,
                                      const NUCOLOUR3 *colour1, const NUVEC *dir2, const NUCOLOUR3 *colour2);
     i32 NuRndrSetFxMtx(NUMTX *matrix);
     i32 NuRndrSetSpecularLightPS(const NUVEC *direction, const NUCOLOUR4 *intensity);
+    void NuRndrStateSetSpecularLightEx(const NUVEC *direction, const NUMTX *matrix, const NUCOLOUR3 *colour);
     void NuRndrStartReflectionRender(i32 clear_depth);
     void NuRndrEndReflectionRender(void);
 
     void FaceYDirStream(i32 y_angle);
     void NuRndrAddShadow(NUVEC *position, f32 radius, i32 opacity, i32 x_rotation, i32 y_rotation, i32 z_rotation);
+    void NuLightFogX(f32 near_distance, f32 far_distance, u32 colour, f32 unused_near, f32 unused_far, i32 high_quality,
+                     f32 density);
     f32 *NuRndrCreateBlendShapeDeformerWeightsArray(i32 count);
 #ifdef __cplusplus
 }
 
 f32 **NuRndrCreateBlendShapeDWAPointers(i32 count);
+void NuRndrFlush(i32 mode);
 #endif
 
 extern f32 circle_scale_radius;

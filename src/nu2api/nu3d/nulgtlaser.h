@@ -53,6 +53,7 @@ DECOMP_ASSERT(sizeof(NULGTARCLASER) == 0x44, "Arc lightning record size");
 DECOMP_ASSERT(offsetof(NULGTARCLASER, colour) == 0x38, "Arc lightning colour offset");
 void NuLgtArcLaserEx(i32 type, NUVEC *start, NUVEC *end, NUVEC *bend, f32 width, f32 segment_length, f32 wobble,
                      f32 bend_amount, i32 colour, i32 flags);
+void NuLgtArcLaserDraw(i32 paused);
 extern "C" {
     extern NULGTARCLASER NuLgtArcLaserData[16];
     extern i32 NuLgtArcLaserOldCnt;

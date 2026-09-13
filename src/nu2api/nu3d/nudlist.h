@@ -392,7 +392,7 @@ extern "C" {
     extern VARIPTR rndrstream_free;
     extern VARIPTR *display_list_buffer_end;
 
-    static VARIPTR *NuDisplayListGetBuffer(void) {
+    static inline VARIPTR *NuDisplayListGetBuffer(void) {
         display_list_buffer->addr = ALIGN(display_list_buffer->addr, 0x10);
 
         return display_list_buffer;

@@ -274,6 +274,7 @@ build:target --per_file_copt=^src/nu2api/nu3d/nurndr\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nu3d/nutex\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nu3d/NuDDSFunctions\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nu3d/nuvport\.cpp$@-O3
+build:target --per_file_copt=^src/nu2api/nu3d/nurendercontext\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nu3d/android/numtl_android\.cpp$@-O2
 build:target --per_file_copt=^src/nu2api/nu3d/android/nufmv_android\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nu3d/android/nuqfnt_android\.cpp$@-O2

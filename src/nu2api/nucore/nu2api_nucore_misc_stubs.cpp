@@ -15,7 +15,3 @@ void NuDisplayListSetInstSurfGeom(void *) {
 void NuTerminateHardware() {
     STUBBED();
 }
-
-void NuIOSDLDeferredMtlCallback(void *) {
-    STUBBED();
-}

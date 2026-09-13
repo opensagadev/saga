@@ -1008,9 +1008,6 @@ bool LookupHash(u32 key, u32 *value, HashRedirect *redirects, u32 count) {
         }
     }
 }
-void MultilineDump(char const *) {
-    STUBBED();
-}
 void GetMatchLength(unsigned char *, unsigned char *, abi_ulong) {
     STUBBED();
 }
