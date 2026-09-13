@@ -1,6 +1,6 @@
 #include "decomp.h"
 #include "nu2api_numath_types.h"
-#include "nu2api/nucore/nuvuvec.hpp"
+#include "nu2api/numath/vuvec_internal.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numath/nuvec4.h"

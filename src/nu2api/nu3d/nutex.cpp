@@ -193,6 +193,10 @@ extern "C" i32 NuTexGenTexture(NUNATIVETEX *tex) {
     return 0;
 }
 
+extern "C" void NuTexDestroy(i32) {
+    STUBBED();
+}
+
 NUNATIVETEX *NuTexGetNative(i32 tex_id) {
     if (tex_id > 0) {
         return texture_list[tex_id - 1];
@@ -247,7 +251,6 @@ i32 NuTexWidth(i32 tex_id) {
 i32 NuTexHeight(i32 tex_id) {
     return texture_list[tex_id - 1]->height;
 }
-
 
 void NuTexRemap(i32, i32) {
     STUBBED();
