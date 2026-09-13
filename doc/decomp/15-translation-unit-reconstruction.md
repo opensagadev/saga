@@ -1,7 +1,7 @@
 # Original translation-unit reconstruction
 
-At the latest measured target build, there are 514 current translation
-units and a 45.8886% whole-binary fuzzy match. This is a source-ownership
+At the latest measured target build, there are 513 current translation
+units and a 45.9169% whole-binary fuzzy match. This is a source-ownership
 overview; the matching percentage does not measure how many original file
 boundaries are known. “Reconstructed” below means the source boundary has
 evidence and passed a matching comparison; it does not mean every body is
@@ -18,10 +18,11 @@ For the complete text/data symbol surface, generate the machine ledger:
 
 ```sh
 PYTHONPATH=. python3 scripts/restructure/generate_original_tu_map.py
-PYTHONPATH=. python3 -m unittest scripts.restructure.test_original_tu_map scripts.restructure.test_calibrate_tu_map scripts.restructure.test_text_adjacency scripts.restructure.test_original_local_xrefs
+PYTHONPATH=. python3 -m unittest scripts.restructure.test_original_tu_map scripts.restructure.test_calibrate_tu_map scripts.restructure.test_text_adjacency scripts.restructure.test_original_local_xrefs scripts.restructure.test_original_relocations
 PYTHONPATH=. python3 scripts/restructure/generate_original_tu_map.py \
   --current bazel-out/k8-fastbuild/bin/src/libTTapp.so --units matching.json \
-  --with-local-xrefs --output .work/original-tu-map-current.json
+  --with-local-xrefs --with-relocations \
+  --output .work/original-tu-map-current.json
 ```
 
 The ledgers are ignored. They preserve address, section, size, binding,
@@ -31,6 +32,16 @@ It inventories 32,596 allocated original symbols, including 14,541 text,
 The original/current target have 14,561/11,559 dynamic relocations, 190/186
 PLT slots, and `0x4a58`/`0x3c70` bytes of `.got`; these are linker/layout
 diagnostics, not TU ownership proof by themselves.
+The opt-in relocation pass records all 14,751 original dynamic relocation
+sites, including 4,758 in `.got`, 7,013 in `.data`, and 2,463 in
+`.data.rel.ro*`. It identifies a containing named object at 9,568 sites
+and an exact named static target at 11,114 sites. Its section offsets and
+pointer targets help test data grouping and GOT order; a relocation site
+or pointer target alone cannot establish the emitting TU.
+All 4,758 original `.got` slots have relocation entries, while the current
+target has 3,868 slots, a gap of 890. Missing code/data references from
+unfinished bodies can cause this as well as TU layout; do not attribute the
+gap to file placement alone.
 Twelve symbol-free include/comment shells were removed; the include-only
 `legoai.cpp` remains because it owns an original static initializer. An
 artificial local `RotDiff` stub was removed, exposing the real owner in
@@ -85,10 +96,16 @@ linkage.
 | Panel: `0x140950–0x1449c0` run; `Panel_Clear` and `DrawPanel` access the same local `redbrickslidetime` | `legoapi/menus/core/panel.cpp` and `legoapi/render/core/render.cpp` | `DrawTimer` and its state moved. **Open:** full `-O2` co-location is structurally supported but costs 0.0049 overall points via `DrawPanel`; `-O3` helps the initializer but drops `PanelRender` by 10 points. Both trials were rejected; the accessor remains temporary. |
 | Post-filter: `nupostfilter.cpp` local block, including `texturePool` at `0x11cd820` | `nu2api/nu3d/android/nupostfilter.cpp`; framebuffer pair in `nuposteffect_plain.cpp` | Measured split and genuine Init/Destroy flows improved matching. Both files require `-O2`. The 0x810-byte local pool has no verified text xref or field layout, so it is not fabricated in source. |
 | NuSound buffer: embedded `nusound_buffer.cpp :53` path and adjacent method run | `nu2api/nusound/nusound_buffer.cpp` | Owner and `-O3` are supported; allocation control flow improved, with other method bodies still open. |
-| `numaths.c`: text `[0x290b20, 0x292e9c)` including its trailing static initializer and constructor | Split across `nu2api/numath` files and nearby catch-alls | **Open.** The preceding `0x290b01` `numath_includes.c` constructor closes a different unit; a second local `VuVecSet` starts the next unit at `0x292e9c`. Consolidate only this measured run, preserving its constructed vector constants and default-mode codegen. |
+| `numaths.c`: text `[0x290b20, 0x292e9c)` including its trailing static initializer and constructor | `nu2api/numath/numaths.c`, compiled as C++; formerly split across seven math/engine files and two game files | All 37 reported exported functions in the measured run now share one source in original address order; the empty `nucamvu0.c` shell was removed. Including the existing `VuVec` header emits this TU's six original-sized LOCAL constants; the original-named constructor is now exact. Whole fuzzy rose 0.0283 points, seven exact functions gained, none lost. **Open:** original LOCAL `rand`/`VuVecSet` and final optimization calibration. The preceding `numath_includes.c` constructor and next-unit `VuVecSet` at `0x292e9c` remain separate. |
 | Terrain data/collision: `gameliball.cpp` initializer block owns local `TerI`, `SphereData`, `PlatCallback`, and impact data | `legoapi/render/core/terrain*.cpp`, `gameliball.cpp`, terrain functions in `hits.cpp`, `transform.cpp`, `surfaces.cpp`, `episode.cpp` | **Open.** `TerI` users span six current files, including verified original terrain-run functions; a state-only move would need a false cross-TU bridge. The text run `0x36de60–0x38f460` also interleaves unrelated animation. Plan the complete dependency cut before migrating. |
 | Editor tools: local camera/UI/cursor/menu state under `_GLOBAL__sub_I_edtoolsall.cpp`, text span `0x330900–0x3a9c88`; separate RTL starts next | `gameapi/edtools/edtoolsall_plain.cpp`, `edtoolsall.cpp`, `edui.c`, editor callbacks | **Open.** The `-O2` plain owner already holds much real state and many exact helpers. Audit the UI/camera/file tail and local callbacks before co-location; the `edui.c` `__used__` stubs are not evidence for optimization or a real boundary. |
 | Menu/customiser, timing, and large catch-all files | `customise.cpp`, `timing.cpp`, `nucore_plain.cpp`, `edtoolsall*.cpp`, `aisys.cpp`, `gameobjects.cpp` | **Open.** Split only complete, evidenced dependent groups. Do not sacrifice exact neighbors to reproduce a basename or a speculative optimization level. |
+
+The numerical-solver locals `Newton_Raphson` and
+`Laguerre_With_Deflation` belong to the original Vorbis LPC run near
+`0x513340`, not `numaths.c`. Removing their duplicate forced-emission stubs
+from `numaths.c` lets the already-linked real Vorbis implementations match
+at 99.99% and 99.98%.
 
 ## Remaining reconstruction plan
 
@@ -109,6 +126,12 @@ linkage.
 5. Prioritize the unresolved terrain LOCAL-state cut, editor callbacks, Panel
    co-location regression, and catch-all/resource owners. Do not invent
    unused pools or merge a constructor-delimited block without direct xrefs.
+
+The current `matching.json` lists eight units with no reported functions and
+40 with one. This is a review queue, not a deletion rule: some are legitimate
+data owners (`animation.cpp`, `contexts.cpp`) or initializer-only units
+(`legoai.cpp`). Remove or merge a tiny file only after checking its actual
+object symbols and the original TU evidence.
 
 For each sensible move, compare function and whole scores, exact-match
 transitions, symbol coverage, and neighboring bodies. Run target, native,

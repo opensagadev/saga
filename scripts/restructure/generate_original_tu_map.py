@@ -292,7 +292,7 @@ def local_xref_components(edges: list[dict], mapped: list[dict]) -> tuple[list[d
 
 def build_map(
     original: Path, current: Path | None = None, units: list[dict] | None = None,
-    *, with_local_xrefs: bool = False,
+    *, with_local_xrefs: bool = False, with_relocations: bool = False,
 ) -> dict:
     if (current is None) != (units is None):
         raise ValueError("current ELF and unit manifest must be supplied together")
@@ -433,6 +433,16 @@ def build_map(
         )
         inventory["original_local_xrefs"] = local_xrefs
         inventory["original_strong_local_xref_components"] = xref_components
+    if with_relocations:
+        from scripts.restructure.original_relocations import extract as extract_relocations
+
+        relocations, relocation_summary = extract_relocations(original)
+        inventory["rules"]["original_dynamic_relocations"] = (
+            "exact original ELF dynamic relocation sites and static pointer targets; "
+            "containing/exact symbols are positional evidence only, never TU ownership"
+        )
+        inventory["original_dynamic_relocations"] = relocations
+        summary.update(relocation_summary)
     return inventory
 
 
@@ -443,6 +453,7 @@ def main() -> None:
     parser.add_argument("--units", type=Path, help="JSON source/object manifest")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--with-local-xrefs", action="store_true", help="add verified original i386 LOCAL references (requires Capstone)")
+    parser.add_argument("--with-relocations", action="store_true", help="add original GOT/data dynamic relocation sites and static pointer targets")
     args = parser.parse_args()
     if (args.current is None) != (args.units is None):
         parser.error("--current and --units must be supplied together")
@@ -453,6 +464,7 @@ def main() -> None:
     inventory = build_map(
         original.resolve(), args.current.resolve() if args.current else None, units,
         with_local_xrefs=args.with_local_xrefs,
+        with_relocations=args.with_relocations,
     )
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(inventory, indent=2) + "\n", encoding="utf-8")

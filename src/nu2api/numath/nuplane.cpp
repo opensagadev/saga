@@ -115,10 +115,6 @@ f32 NuPlnDist2(NUPLANE *plane, NUVEC *a, NUVEC *b) {
     return 0.0f;
 }
 
-i32 NuPlnLineVU0(NUPLANE *plane, NUVEC *start, NUVEC *end, NUVEC *out) {
-    return NuPlnLine(plane, start, end, out);
-}
-
 i32 NuPlnLine2(NUPLANE *plane, NUVEC *a, NUVEC *b, NUVEC *c, NUVEC *start, NUVEC *end, NUVEC *out, f32 *distance,
                f32 *fraction) {
     if (NuPlnLine(plane, start, end, out)) {

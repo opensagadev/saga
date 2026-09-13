@@ -37,10 +37,6 @@ void ResetSeeds() {
     NuPartSetSeed(0);
 }
 
-void makenuvec4(float, float, float, float) {
-    STUBBED();
-}
-
 i32 i_temp_xrot;
 
 void FindAnglesXY(nuvec_s *direction, u16 *x_rotation, u16 *y_rotation) {
@@ -516,10 +512,6 @@ i32 findrange(nugscn_s *scene, i32 first_joint) {
         ++end_joint;
     }
     return end_joint - 1;
-}
-
-void makenuvec(float, float, float) {
-    STUBBED();
 }
 
 static __used__ i32 MatchExtension(char *, char *, i32) {

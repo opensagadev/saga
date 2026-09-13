@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 45.88864,
+    "fuzzy_match_percent": 45.91694,
     "total_code": "4722419",
-    "matched_code": "399251",
-    "matched_code_percent": 8.454375,
+    "matched_code": "399613",
+    "matched_code_percent": 8.46204,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4742,
-    "matched_functions_percent": 35.23293,
+    "matched_functions": 4749,
+    "matched_functions_percent": 35.28494,
     "total_units": 1
   },
   "text": {
@@ -56234,14 +56234,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/0/gizrandom.o",
       "functions": [
         {
-          "name": "_Z10randyfloatv",
-          "demangled_name": "randyfloat()",
-          "address": 2694035,
-          "offset": 1804067,
-          "size": 73,
-          "match_percent": 19.047619
-        },
-        {
           "name": "_Z17RandomIDFromFlagsjjiP23APICHARACTERMODELLIST_si",
           "demangled_name": "RandomIDFromFlags(unsigned int, unsigned int, int, APICHARACTERMODELLIST_s*, int)",
           "address": 4594640,
@@ -72981,22 +72973,6 @@
           "match_percent": 19.09091
         },
         {
-          "name": "_Z9makenuvecfff",
-          "demangled_name": "makenuvec(float, float, float)",
-          "address": 2694406,
-          "offset": 1804438,
-          "size": 57,
-          "match_percent": 26.25
-        },
-        {
-          "name": "_Z10makenuvec4ffff",
-          "demangled_name": "makenuvec4(float, float, float, float)",
-          "address": 2694463,
-          "offset": 1804495,
-          "size": 69,
-          "match_percent": 22.105263
-        },
-        {
           "name": "_Z7rawClipPK5VuVecPS_iRS0_",
           "demangled_name": "rawClip(VuVec const*, VuVec*, int, VuVec const&)",
           "address": 2836480,
@@ -89284,21 +89260,6 @@
       ]
     },
     {
-      "name": "nu2api/nu3d/nucamvu0.c.o",
-      "source": "src/nu2api/nu3d/nucamvu0.c",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nucamvu0.o",
-      "functions": [
-        {
-          "name": "NuCameraInitClipTestVU0",
-          "demangled_name": "NuCameraInitClipTestVU0",
-          "address": 2691008,
-          "offset": 1801040,
-          "size": 5,
-          "match_percent": 100.0
-        }
-      ]
-    },
-    {
       "name": "nu2api/nu3d/nudlist.cpp.o",
       "source": "src/nu2api/nu3d/nudlist.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nudlist.o",
@@ -97295,47 +97256,7 @@
           "address": 2686715,
           "offset": 1796747,
           "size": 370,
-          "match_percent": 5.166666
-        },
-        {
-          "name": "NuMtxMulVU0",
-          "demangled_name": "NuMtxMulVU0",
-          "address": 2698270,
-          "offset": 1808302,
-          "size": 51,
-          "match_percent": 68.882355
-        },
-        {
-          "name": "NuMtxScaleVU0",
-          "demangled_name": "NuMtxScaleVU0",
-          "address": 2698321,
-          "offset": 1808353,
-          "size": 44,
-          "match_percent": 65.13333
-        },
-        {
-          "name": "NuMtxPreScaleVU0",
-          "demangled_name": "NuMtxPreScaleVU0",
-          "address": 2698365,
-          "offset": 1808397,
-          "size": 44,
-          "match_percent": 65.13333
-        },
-        {
-          "name": "NuMtxMulRVU0",
-          "demangled_name": "NuMtxMulRVU0",
-          "address": 2698409,
-          "offset": 1808441,
-          "size": 51,
-          "match_percent": 68.882355
-        },
-        {
-          "name": "NuMtxSetRotateXYZVU0",
-          "demangled_name": "NuMtxSetRotateXYZVU0",
-          "address": 2698460,
-          "offset": 1808492,
-          "size": 44,
-          "match_percent": 65.13333
+          "match_percent": 5.111111
         },
         {
           "name": "NuLightFogX",
@@ -97959,7 +97880,7 @@
           "address": 2866240,
           "offset": 1976272,
           "size": 633,
-          "match_percent": 68.92994
+          "match_percent": 69.025475
         },
         {
           "name": "NuAnimBuffCreate",
@@ -98047,7 +97968,7 @@
           "address": 2871680,
           "offset": 1981712,
           "size": 1800,
-          "match_percent": 58.851257
+          "match_percent": 58.061787
         },
         {
           "name": "NuAnimBuffAccumulate_3",
@@ -98087,7 +98008,7 @@
           "address": 2911584,
           "offset": 2021616,
           "size": 3105,
-          "match_percent": 83.077354
+          "match_percent": 83.09845
         },
         {
           "name": "NuAnimCurve2SetApplyToJointTransLoc",
@@ -98095,7 +98016,7 @@
           "address": 2914704,
           "offset": 2024736,
           "size": 2117,
-          "match_percent": 84.62157
+          "match_percent": 84.12941
         },
         {
           "name": "NuAnimCurve2SetApplyToJoint",
@@ -98495,7 +98416,7 @@
           "address": 2928064,
           "offset": 2038096,
           "size": 231,
-          "match_percent": 99.76363
+          "match_percent": 99.94546
         },
         {
           "name": "NuQFntSetColour2d",
@@ -98807,7 +98728,7 @@
           "address": 2949152,
           "offset": 2059184,
           "size": 99,
-          "match_percent": 99.375
+          "match_percent": 100.0
         },
         {
           "name": "NuDepthOfFieldEffect",
@@ -98815,7 +98736,7 @@
           "address": 2949264,
           "offset": 2059296,
           "size": 112,
-          "match_percent": 98.94444
+          "match_percent": 99.77778
         },
         {
           "name": "NuDepthOfFieldEffect1",
@@ -98943,7 +98864,7 @@
           "address": 2962816,
           "offset": 2072848,
           "size": 560,
-          "match_percent": 99.5566
+          "match_percent": 99.41509
         },
         {
           "name": "NuCameraGetClippingMtx",
@@ -99303,7 +99224,7 @@
           "address": 2994768,
           "offset": 2104800,
           "size": 351,
-          "match_percent": 49.103897
+          "match_percent": 54.844154
         },
         {
           "name": "NuCameraSetVPortClipMtx",
@@ -99623,7 +99544,7 @@
           "address": 3093312,
           "offset": 2203344,
           "size": 3273,
-          "match_percent": 16.78125
+          "match_percent": 16.794271
         },
         {
           "name": "NuDynamicLightAddShadowCasterScene",
@@ -106780,10 +106701,18 @@
       ]
     },
     {
-      "name": "nu2api/numath/numaths.cpp.o",
-      "source": "src/nu2api/numath/numaths.cpp",
+      "name": "nu2api/numath/numaths.c.o",
+      "source": "src/nu2api/numath/numaths.c",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/numaths.o",
       "functions": [
+        {
+          "name": "NuPlnLineVU0",
+          "demangled_name": "NuPlnLineVU0",
+          "address": 2689896,
+          "offset": 1799928,
+          "size": 58,
+          "match_percent": 100.0
+        },
         {
           "name": "_Z21NuVecClipTestPointVU0P7nuvec_sP7numtx_s",
           "demangled_name": "NuVecClipTestPointVU0(nuvec_s*, numtx_s*)",
@@ -106793,20 +106722,292 @@
           "match_percent": 100.0
         },
         {
-          "name": "_ZL14Newton_RaphsonPfiS_",
-          "demangled_name": "Newton_Raphson(float*, int, float*)",
-          "address": 5321536,
-          "offset": 4431568,
-          "size": 412,
-          "match_percent": 3.043478
+          "name": "NuVec4MtxTransformHVU0",
+          "demangled_name": "NuVec4MtxTransformHVU0",
+          "address": 2689964,
+          "offset": 1799996,
+          "size": 51,
+          "match_percent": 100.0
         },
         {
-          "name": "_ZL23Laguerre_With_DeflationPfiS_",
-          "demangled_name": "Laguerre_With_Deflation(float*, int, float*)",
-          "address": 5321952,
-          "offset": 4431984,
-          "size": 850,
-          "match_percent": 2.0
+          "name": "NuMtxMulArrayVU0",
+          "demangled_name": "NuMtxMulArrayVU0",
+          "address": 2690015,
+          "offset": 1800047,
+          "size": 111,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuVecConvertToIntVU0",
+          "demangled_name": "NuVecConvertToIntVU0",
+          "address": 2690126,
+          "offset": 1800158,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuVec4ScaleXYZVU0",
+          "demangled_name": "NuVec4ScaleXYZVU0",
+          "address": 2690131,
+          "offset": 1800163,
+          "size": 51,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuVec4MtxTransformVU0",
+          "demangled_name": "NuVec4MtxTransformVU0",
+          "address": 2690182,
+          "offset": 1800214,
+          "size": 512,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuVec4MtxRotateVU0",
+          "demangled_name": "NuVec4MtxRotateVU0",
+          "address": 2690694,
+          "offset": 1800726,
+          "size": 314,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuCameraInitClipTestVU0",
+          "demangled_name": "NuCameraInitClipTestVU0",
+          "address": 2691008,
+          "offset": 1801040,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuMtxMulnVU0",
+          "demangled_name": "NuMtxMulnVU0",
+          "address": 2691013,
+          "offset": 1801045,
+          "size": 53,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuVec4MtxTransformVU0x2",
+          "demangled_name": "NuVec4MtxTransformVU0x2",
+          "address": 2691066,
+          "offset": 1801098,
+          "size": 551,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuVec4MtxTransformVU0x3",
+          "demangled_name": "NuVec4MtxTransformVU0x3",
+          "address": 2691617,
+          "offset": 1801649,
+          "size": 551,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuVec4MtxTransformVU0x4",
+          "demangled_name": "NuVec4MtxTransformVU0x4",
+          "address": 2692168,
+          "offset": 1802200,
+          "size": 551,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuMtxPreScaleUVU0",
+          "demangled_name": "NuMtxPreScaleUVU0",
+          "address": 2692719,
+          "offset": 1802751,
+          "size": 229,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuMtxSetRotationXYVU0",
+          "demangled_name": "NuMtxSetRotationXYVU0",
+          "address": 2692948,
+          "offset": 1802980,
+          "size": 620,
+          "match_percent": 99.94839
+        },
+        {
+          "name": "NuMtxInvVU0",
+          "demangled_name": "NuMtxInvVU0",
+          "address": 2693568,
+          "offset": 1803600,
+          "size": 467,
+          "match_percent": 99.96212
+        },
+        {
+          "name": "_Z10randyfloatv",
+          "demangled_name": "randyfloat()",
+          "address": 2694035,
+          "offset": 1804067,
+          "size": 73,
+          "match_percent": 19.047619
+        },
+        {
+          "name": "NuVecInvMtxTransformVU0",
+          "demangled_name": "NuVecInvMtxTransformVU0",
+          "address": 2694108,
+          "offset": 1804140,
+          "size": 298,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z9makenuvecfff",
+          "demangled_name": "makenuvec(float, float, float)",
+          "address": 2694406,
+          "offset": 1804438,
+          "size": 57,
+          "match_percent": 25.0
+        },
+        {
+          "name": "_Z10makenuvec4ffff",
+          "demangled_name": "makenuvec4(float, float, float, float)",
+          "address": 2694463,
+          "offset": 1804495,
+          "size": 69,
+          "match_percent": 21.052631
+        },
+        {
+          "name": "_Z11NuVecToRGBAP7nuvec_sf",
+          "demangled_name": "NuVecToRGBA(nuvec_s*, float)",
+          "address": 2694532,
+          "offset": 1804564,
+          "size": 389,
+          "match_percent": 99.89216
+        },
+        {
+          "name": "NuVecNormVU0",
+          "demangled_name": "NuVecNormVU0",
+          "address": 2694921,
+          "offset": 1804953,
+          "size": 301,
+          "match_percent": 99.94253
+        },
+        {
+          "name": "NuVec4MtxInvTransformVU0",
+          "demangled_name": "NuVec4MtxInvTransformVU0",
+          "address": 2695222,
+          "offset": 1805254,
+          "size": 69,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuVecMtxTransformVU0",
+          "demangled_name": "NuVecMtxTransformVU0",
+          "address": 2695291,
+          "offset": 1805323,
+          "size": 51,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuVec4MtxInvRotVU0",
+          "demangled_name": "NuVec4MtxInvRotVU0",
+          "address": 2695342,
+          "offset": 1805374,
+          "size": 394,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuVecDiffVU0",
+          "demangled_name": "NuVecDiffVU0",
+          "address": 2695736,
+          "offset": 1805768,
+          "size": 206,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuVecMagVU0",
+          "demangled_name": "NuVecMagVU0",
+          "address": 2695942,
+          "offset": 1805974,
+          "size": 149,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuVecDiffSqrVU0",
+          "demangled_name": "NuVecDiffSqrVU0",
+          "address": 2696091,
+          "offset": 1806123,
+          "size": 170,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z15NuASin_Accuratef",
+          "demangled_name": "NuASin_Accurate(float)",
+          "address": 2696261,
+          "offset": 1806293,
+          "size": 522,
+          "match_percent": 99.86614
+        },
+        {
+          "name": "_Z14NuSin_Accuratef",
+          "demangled_name": "NuSin_Accurate(float)",
+          "address": 2696783,
+          "offset": 1806815,
+          "size": 25,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z11NuQuatLerp2P8nuquat_sS0_S0_f",
+          "demangled_name": "NuQuatLerp2(nuquat_s*, nuquat_s*, nuquat_s*, float)",
+          "address": 2696808,
+          "offset": 1806840,
+          "size": 673,
+          "match_percent": 99.994736
+        },
+        {
+          "name": "_Z20NuQuatSlerp_AccurateP8nuquat_sS0_S0_f",
+          "demangled_name": "NuQuatSlerp_Accurate(nuquat_s*, nuquat_s*, nuquat_s*, float)",
+          "address": 2697481,
+          "offset": 1807513,
+          "size": 789,
+          "match_percent": 99.93939
+        },
+        {
+          "name": "NuMtxMulVU0",
+          "demangled_name": "NuMtxMulVU0",
+          "address": 2698270,
+          "offset": 1808302,
+          "size": 51,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuMtxScaleVU0",
+          "demangled_name": "NuMtxScaleVU0",
+          "address": 2698321,
+          "offset": 1808353,
+          "size": 44,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuMtxPreScaleVU0",
+          "demangled_name": "NuMtxPreScaleVU0",
+          "address": 2698365,
+          "offset": 1808397,
+          "size": 44,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuMtxMulRVU0",
+          "demangled_name": "NuMtxMulRVU0",
+          "address": 2698409,
+          "offset": 1808441,
+          "size": 51,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuMtxSetRotateXYZVU0",
+          "demangled_name": "NuMtxSetRotateXYZVU0",
+          "address": 2698460,
+          "offset": 1808492,
+          "size": 44,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_GLOBAL__sub_I_numaths.c",
+          "demangled_name": "_GLOBAL__sub_I_numaths.c",
+          "address": 2698877,
+          "offset": 1808909,
+          "size": 29,
+          "match_percent": 100.0
         }
       ]
     },
@@ -107197,174 +107398,6 @@
           "address": 2688772,
           "offset": 1798804,
           "size": 57,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuVec4MtxTransformHVU0",
-          "demangled_name": "NuVec4MtxTransformHVU0",
-          "address": 2689964,
-          "offset": 1799996,
-          "size": 51,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuMtxMulArrayVU0",
-          "demangled_name": "NuMtxMulArrayVU0",
-          "address": 2690015,
-          "offset": 1800047,
-          "size": 111,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuVecConvertToIntVU0",
-          "demangled_name": "NuVecConvertToIntVU0",
-          "address": 2690126,
-          "offset": 1800158,
-          "size": 5,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuVec4ScaleXYZVU0",
-          "demangled_name": "NuVec4ScaleXYZVU0",
-          "address": 2690131,
-          "offset": 1800163,
-          "size": 51,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuVec4MtxTransformVU0",
-          "demangled_name": "NuVec4MtxTransformVU0",
-          "address": 2690182,
-          "offset": 1800214,
-          "size": 512,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuVec4MtxRotateVU0",
-          "demangled_name": "NuVec4MtxRotateVU0",
-          "address": 2690694,
-          "offset": 1800726,
-          "size": 314,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuMtxMulnVU0",
-          "demangled_name": "NuMtxMulnVU0",
-          "address": 2691013,
-          "offset": 1801045,
-          "size": 53,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuVec4MtxTransformVU0x2",
-          "demangled_name": "NuVec4MtxTransformVU0x2",
-          "address": 2691066,
-          "offset": 1801098,
-          "size": 551,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuVec4MtxTransformVU0x3",
-          "demangled_name": "NuVec4MtxTransformVU0x3",
-          "address": 2691617,
-          "offset": 1801649,
-          "size": 551,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuVec4MtxTransformVU0x4",
-          "demangled_name": "NuVec4MtxTransformVU0x4",
-          "address": 2692168,
-          "offset": 1802200,
-          "size": 551,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuMtxPreScaleUVU0",
-          "demangled_name": "NuMtxPreScaleUVU0",
-          "address": 2692719,
-          "offset": 1802751,
-          "size": 229,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuMtxInvVU0",
-          "demangled_name": "NuMtxInvVU0",
-          "address": 2693568,
-          "offset": 1803600,
-          "size": 467,
-          "match_percent": 99.96212
-        },
-        {
-          "name": "NuVecInvMtxTransformVU0",
-          "demangled_name": "NuVecInvMtxTransformVU0",
-          "address": 2694108,
-          "offset": 1804140,
-          "size": 298,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z11NuVecToRGBAP7nuvec_sf",
-          "demangled_name": "NuVecToRGBA(nuvec_s*, float)",
-          "address": 2694532,
-          "offset": 1804564,
-          "size": 389,
-          "match_percent": 99.89216
-        },
-        {
-          "name": "NuVecNormVU0",
-          "demangled_name": "NuVecNormVU0",
-          "address": 2694921,
-          "offset": 1804953,
-          "size": 301,
-          "match_percent": 99.94253
-        },
-        {
-          "name": "NuVec4MtxInvTransformVU0",
-          "demangled_name": "NuVec4MtxInvTransformVU0",
-          "address": 2695222,
-          "offset": 1805254,
-          "size": 69,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuVecMtxTransformVU0",
-          "demangled_name": "NuVecMtxTransformVU0",
-          "address": 2695291,
-          "offset": 1805323,
-          "size": 51,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuVec4MtxInvRotVU0",
-          "demangled_name": "NuVec4MtxInvRotVU0",
-          "address": 2695342,
-          "offset": 1805374,
-          "size": 394,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuVecDiffVU0",
-          "demangled_name": "NuVecDiffVU0",
-          "address": 2695736,
-          "offset": 1805768,
-          "size": 206,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuVecMagVU0",
-          "demangled_name": "NuVecMagVU0",
-          "address": 2695942,
-          "offset": 1805974,
-          "size": 149,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuVecDiffSqrVU0",
-          "demangled_name": "NuVecDiffSqrVU0",
-          "address": 2696091,
-          "offset": 1806123,
-          "size": 170,
           "match_percent": 100.0
         },
         {
@@ -108023,14 +108056,6 @@
           "match_percent": 99.9699
         },
         {
-          "name": "NuMtxSetRotationXYVU0",
-          "demangled_name": "NuMtxSetRotationXYVU0",
-          "address": 2692948,
-          "offset": 1802980,
-          "size": 620,
-          "match_percent": 99.94839
-        },
-        {
           "name": "_Z25NuMtxCalcCheapFaceOnDebugP7numtx_sP7nuvec_s",
           "demangled_name": "NuMtxCalcCheapFaceOnDebug(numtx_s*, nuvec_s*)",
           "address": 2731967,
@@ -108204,14 +108229,6 @@
           "offset": 1770273,
           "size": 236,
           "match_percent": 100.0
-        },
-        {
-          "name": "NuPlnLineVU0",
-          "demangled_name": "NuPlnLineVU0",
-          "address": 2689896,
-          "offset": 1799928,
-          "size": 58,
-          "match_percent": 100.0
         }
       ]
     },
@@ -108371,22 +108388,6 @@
           "offset": 1758632,
           "size": 115,
           "match_percent": 99.86667
-        },
-        {
-          "name": "_Z11NuQuatLerp2P8nuquat_sS0_S0_f",
-          "demangled_name": "NuQuatLerp2(nuquat_s*, nuquat_s*, nuquat_s*, float)",
-          "address": 2696808,
-          "offset": 1806840,
-          "size": 673,
-          "match_percent": 99.994736
-        },
-        {
-          "name": "_Z20NuQuatSlerp_AccurateP8nuquat_sS0_S0_f",
-          "demangled_name": "NuQuatSlerp_Accurate(nuquat_s*, nuquat_s*, nuquat_s*, float)",
-          "address": 2697481,
-          "offset": 1807513,
-          "size": 789,
-          "match_percent": 99.93939
         }
       ]
     },
@@ -108632,22 +108633,6 @@
           "offset": 1796010,
           "size": 470,
           "match_percent": 99.82143
-        },
-        {
-          "name": "_Z15NuASin_Accuratef",
-          "demangled_name": "NuASin_Accurate(float)",
-          "address": 2696261,
-          "offset": 1806293,
-          "size": 522,
-          "match_percent": 99.86614
-        },
-        {
-          "name": "_Z14NuSin_Accuratef",
-          "demangled_name": "NuSin_Accurate(float)",
-          "address": 2696783,
-          "offset": 1806815,
-          "size": 25,
-          "match_percent": 100.0
         }
       ]
     },
@@ -117188,7 +117173,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -117266,7 +117252,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -117344,7 +117331,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -117433,7 +117421,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -117459,6 +117448,7 @@
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/numaths_plain.cpp.o",
         "nu2api/numath/numtx.cpp.o",
         "nu2api/numath/nuplane.cpp.o",
@@ -117556,7 +117546,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -117645,7 +117636,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -117734,7 +117726,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -117823,7 +117816,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -117912,7 +117906,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -118001,7 +117996,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -118169,6 +118165,7 @@
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/numaths_plain.cpp.o",
         "nu2api/numath/numtx.cpp.o",
         "nu2api/numath/nuplane.cpp.o",
@@ -118203,6 +118200,7 @@
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/numaths_plain.cpp.o",
         "nu2api/numath/numtx.cpp.o",
         "nu2api/numath/nuplane.cpp.o",
@@ -118300,7 +118298,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -118389,7 +118388,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -118478,7 +118478,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -118616,7 +118617,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -118717,7 +118719,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -118931,7 +118934,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -119096,7 +119100,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -119261,7 +119266,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -119350,7 +119356,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -119439,7 +119446,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -119528,7 +119536,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -119666,7 +119675,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -119755,7 +119765,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -119855,7 +119866,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -119944,7 +119956,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -120046,7 +120059,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -120135,7 +120149,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -120161,6 +120176,7 @@
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/numaths_plain.cpp.o",
         "nu2api/numath/numtx.cpp.o",
         "nu2api/numath/nuplane.cpp.o",
@@ -120258,7 +120274,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -120347,7 +120364,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -120436,7 +120454,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -120525,7 +120544,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -120677,7 +120697,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -120766,7 +120787,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -120855,7 +120877,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -121161,6 +121184,7 @@
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/numaths_plain.cpp.o",
         "nu2api/numath/numtx.cpp.o",
         "nu2api/numath/nuplane.cpp.o",
@@ -121291,7 +121315,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -121317,6 +121342,7 @@
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/numaths_plain.cpp.o",
         "nu2api/numath/numtx.cpp.o",
         "nu2api/numath/nuplane.cpp.o",
@@ -121351,6 +121377,7 @@
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/numaths_plain.cpp.o",
         "nu2api/numath/numtx.cpp.o",
         "nu2api/numath/nuplane.cpp.o",
@@ -121496,7 +121523,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -121522,6 +121550,7 @@
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/numaths_plain.cpp.o",
         "nu2api/numath/numtx.cpp.o",
         "nu2api/numath/nuplane.cpp.o",
@@ -121556,6 +121585,7 @@
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/numaths_plain.cpp.o",
         "nu2api/numath/numtx.cpp.o",
         "nu2api/numath/nuplane.cpp.o",
@@ -121664,7 +121694,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -122112,7 +122143,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     },
     {
@@ -122201,7 +122233,8 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o"
+        "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/numaths.c.o"
       ]
     }
   ],
@@ -123604,14 +123637,6 @@
       "address": 2689824,
       "offset": 1799856,
       "size": 31,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_numaths.c",
-      "demangled_name": "_GLOBAL__sub_I_numaths.c",
-      "address": 2698877,
-      "offset": 1808909,
-      "size": 29,
       "match_percent": 0.0
     },
     {
@@ -126053,6 +126078,22 @@
       "offset": 4431520,
       "size": 35,
       "match_percent": 100.0
+    },
+    {
+      "name": "_ZL14Newton_RaphsonPfiS_",
+      "demangled_name": "Newton_Raphson(float*, int, float*)",
+      "address": 5321536,
+      "offset": 4431568,
+      "size": 412,
+      "match_percent": 99.99275
+    },
+    {
+      "name": "_ZL23Laguerre_With_DeflationPfiS_",
+      "demangled_name": "Laguerre_With_Deflation(float*, int, float*)",
+      "address": 5321952,
+      "offset": 4431984,
+      "size": 850,
+      "match_percent": 99.97619
     },
     {
       "name": "_Z19vorbis_lsp_to_curvePfPiiiS_iff",
@@ -129328,10 +129369,10 @@
     }
   ],
   "summary": {
-    "bazel_units": 514,
+    "bazel_units": 513,
     "functions": 13454,
-    "assigned_functions": 12348,
+    "assigned_functions": 12347,
     "ambiguous_functions": 216,
-    "unassigned_functions": 890
+    "unassigned_functions": 891
   }
 }
