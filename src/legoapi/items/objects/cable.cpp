@@ -7,6 +7,7 @@
 #include "nu2api/numusic/sfx.h"
 #include <string.h>
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "nu2api/nucore/nupad.h"
 #include "gameapi/ai/aisys/aisys.h"
@@ -24,7 +25,6 @@ f32 cable_speed = 20.0f;
 i32 atat_locators[4] = {0, 1, 2, 3};
 extern AREADATA_s *HOTHBATTLE_ADATA;
 extern LEVELDATA_s *HOTHBATTLED_LDATA;
-extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 void IncrementMinikitCounter(GameObject_s *);
 void FaceOpponent(GameObject_s *, NUVEC *);
 extern i16 id_ATAT, id_ATST, id_ATST_LOWRES;

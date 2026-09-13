@@ -61,7 +61,6 @@ void ResetPlayerMoves(GameObject_s *obj);
 void SetProtocolDroidDeactivatedAction(GameObject_s *);
 void NewBuzz(nupad_s *, f32, i32);
 void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
-extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 extern "C" f32 chattersfxwait;
 
 void Players_Init(void) {

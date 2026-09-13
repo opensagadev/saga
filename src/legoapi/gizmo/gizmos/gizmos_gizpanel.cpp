@@ -3,6 +3,7 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/gizmos/object/gizpanel.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/menus/core/gamehint.h"
@@ -16,7 +17,6 @@
 extern NUVEC nusound_special_positions[5];
 extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 extern "C" void PlaySfx(char *, nuvec_s *);
-extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 void FastWeaponIn(GameObject_s *, i32);
 void MakeBaddiesForgetAboutParty(i32);
 void SetProtocolDroidInterfaceAction(GameObject_s *);

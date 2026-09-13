@@ -21,7 +21,6 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
 void GameObjectOrigin(GameObject_s *);
 

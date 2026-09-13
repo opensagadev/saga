@@ -5724,7 +5724,6 @@ extern u8 PlayerRGB[2][3];
 extern i16 id_BUGGY, id_GYROCOPTER, id_BANTHA, id_BOMARRMONK, id_DEWBACK;
 extern i16 id_LANDSPEEDER, id_FLASHSPEEDER, id_TAUNTAUN, id_SPEEDERBIKE;
 extern i16 id_HEAVYREPEATINGCANNON, id_BIGGUN, id_TROOPERCANNON, id_STAP2, id_CLONEWALKER;
-extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 f32 SpeederChaseATATInOutMul(NUVEC *, NUVEC *);
 void PlayJumpSfx(GameObject_s *, i32);
 void ReleaseForce(GameObject_s *, i32);

@@ -139,7 +139,6 @@ i32 GrappleSwingMode = 1;
 void Hint_SetComplete(i32);
 i32 (*CanStartHoldFn)(GameObject_s *) = NULL;
 void PlaySabreSfx(char *, GameObject_s *, NUVEC *, i32);
-extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 extern "C" f32 *AnimListFrameArray(CHARACTERMODEL_s *, i32);
 void HeadMovement(GameObject_s *object);
 void CloakMovement(GameObject_s *object);
