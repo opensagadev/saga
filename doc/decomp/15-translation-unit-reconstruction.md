@@ -3348,3 +3348,164 @@ could not build without moving a large network of render-local helper
 declarations, constants, and state; no matching comparison was valid.
 The trial was not transplanted, and the Panel consolidation remains a
 future dependency-mapping task rather than an accepted change.
+
+The original executable supplies stronger evidence for a shared Panel
+storage owner than address adjacency alone. `Panel_Clear` at `0x1409df`
+stores to PIC base `0x616870` plus `0x8b460`, while `DrawPanel` at
+`0x143bd4` loads from that same displacement. Both resolve to the local
+`redbrickslidetime` at `0x6a1cd0`. The current cross-file
+`Panel_GetRedBrickSlideTime()` accessor is consequently a reconstruction
+artifact; removing it requires a buildable dependency migration, not a
+compiler or linker workaround. The executable has no useful `STT_FILE`
+entries, and current objdiff unit attribution is not independent evidence
+of original source-file ownership.
+
+The original `DrawPanel` also calls the local `DrawCoinTotal` at
+`0xd9470` (for example `0x142029`) and local `DrawHitPoints` clone at
+`0x13d530` (`0x142e4e`). These are the two genuine internal-function
+dependencies that must accompany a faithful Panel move; their current
+definitions, plus local `DrawCoinTotalY`, live in `render.cpp`.
+The other trial compiler errors mostly identify exported functions or
+data that need declarations in real owning headers before migration.
+
+### DrawTimer body and Panel optimization trial
+
+`DrawTimer(i32,i32,i32)` at `0x141540` is a 436-byte original body in
+the Panel text run. It resets `TimerScale`/`TimerAlpha` on its third
+argument, expands scale on its second, eases it toward 1 at twice
+`FRAMETIME`, suppresses text during a fade, raises alpha to a cap of
+1, then formats and draws the timer with the original colour/scale
+parameters. Its real `TimerScale`/`TimerAlpha` globals and canonical
+render declaration replace the empty body, raising 4.67→78.48% in a
+target-built isolated trial. No other body regressed.
+
+An independent `panel.cpp` `-O2`→`-O3` trial raised its generated
+initializer 0→99.35% and slightly improved `AddCoinsToPanel`, but
+regressed `PanelRender` 93.41→83.40%. Because the Panel TU split is
+not yet established, the optimization change was reverted rather
+than accepting that large adjacent-body regression for a small whole
+score gain.
+
+The accepted DrawTimer body passed target, WASM, and native builds with
+their clang-tidy targets, repository checks (4/4), symbol coverage
+(13,425/13,425 original text symbols), and a 120-frame Map/Cantina
+native sanitizer smoke. The header now declares the original GLOBAL
+`TimerAlpha` and `TimerScale` objects as well as `DrawTimer`.
+
+An isolated ownership trial then moved `DrawTimer` and its two GLOBAL
+timer objects from `render.cpp` into `panel.cpp`, adjacent to `InitPanel`
+and the local slide timer, using the real `render.h` declarations.
+`DrawTimer` rose 78.48→87.43%; `Panel_Clear`, `InitPanel`, and
+`PanelRender` stayed unchanged. The accepted combined target report
+is 45.8442% versus committed 45.8245%, with no exact losses. A 0.04-point
+shift in unchanged `PodDust` code accompanied a larger Speeder change;
+the overall score still rose 0.0197 points. The remaining Render/Panel
+boundary, especially `DrawPanel` and its local helpers, is tracked above.
+
+### Speeder melee targets and hint alpha
+
+Original `SpeederChase_DrawMeleeTargets` at `0x140a20` gates on fade and
+count, phases its icon positions from `minikittime` unless in Super Story,
+then draws balanced left/right rows with dimmed alpha. It depends on
+`CurrentHintAlpha` at `0x22e2d0`, whose original float-returning body
+fades the active hint over its last half-second. Reconstructing both
+bodies and declaring shared state/functions in their owning headers
+raised Speeder 2.94→68.56% and hint alpha 12.35→90.79%; no source-local
+linker externs or ABI attributes were added.
+
+The combined Panel/Speeder unit passed target, WASM, and native builds
+with clang-tidy, repository checks (4/4), complete original-text symbol
+coverage (13,425/13,425), and a 120-frame Map/Cantina native sanitizer
+smoke. The previously documented original `MovePlayer` tiny-movement
+flake was not observed in this run and remains intentionally unfixed
+for matching.
+
+### Android scene and post-filter TU leads
+
+The original `NuGScnDestroyPS` (`0x2febd9`, 967 bytes) belongs to a
+scene run with embedded `nu2api.saga/nu3d/android/nugscn_android.c`
+paths. Its disassembly has an unoptimized stack/local shape and performs
+real GL resource teardown: it deletes geometry, vertex/index-buffer,
+and texture handles under the appropriate critical sections, yields to
+the background thread, and invalidates both 16-entry texture-binding
+caches. The current 1.63%-matching empty body is in
+`nugscn_android.cpp`; the existing native-scene layout is only a
+function-local approximation and needs one shared, offset-checked type
+before a faithful Destroy implementation. The original symbol has C++
+linkage despite the `.c` path string. Per-file `-O0` is a hypothesis to
+measure for the whole scene unit, not a declaration of the right mode.
+
+The original local symbol block for `nupostfilter.cpp` contains one
+`texturePool` object at `0x11cd820` (2,064 bytes), immediately before
+its static initializer. No current source definition was found, so
+data ownership is still missing rather than merely assigned to the
+wrong current object. A measured move put the 21-function post-effect
+family and state into `nupostfilter.cpp`, with its real export header,
+while the two unrelated framebuffer clear/swap functions remain in
+`nuposteffect_plain.cpp` and its own header. Both files need `-O2`:
+removing that mode from the framebuffer file regressed two exact matches.
+With both rules, the split is target-built and function/whole scores
+are unchanged; the unknown pool layout was not invented. Original
+`NuPostEffectInit` actually uses
+100×100 resource dimensions; those current constants are not evidence
+of a stub and should be preserved while reconstructing its conditional
+filter-construction sequence.
+
+The missing pool is a zero-initialized LOCAL `.bss` object of size
+`0x810`; the nearby `nativeTexPool` is `0x610`. These sizes suggest
+32 slots of `0x40` and `0x30` bytes plus 16 bytes respectively, but
+the original `.text` has no verified xref to `texturePool`, and the
+effect-texture create/lock entries are stubs. There is no supported
+field layout or runtime use yet. We deliberately did not add an opaque
+unused static kept alive by a compiler attribute merely to reproduce
+the symbol; that would violate the source-level matching rule.
+
+The accepted post-filter split was checked after the header boundary:
+target, native, and WASM builds with clang-tidy pass; all four repository
+checks and 13,425/13,425 original-text symbol coverage pass; Map/Cantina
+smoke advances 120 healthy frames. The resulting 525-unit report has no
+function-score or whole-score change from before the split.
+
+### ANI3/NuAnim ownership boundary
+
+The original text from `NuAnimBuffEvaluate_3` at `0x2bd180` through
+`NuAnimCurve2SetApplyToJoint` ending at `0x2c8253` forms one contiguous
+animation run: the `CalcValue1648*` helpers, ANI3 joint players and
+blends, buffer accumulator, all-node extractor/wrapper, and subsequent
+curve application routines. Current definitions are split across
+`gameanim.cpp`, `nucore_plain.cpp`, and `nuanim.cpp`. The original ELF
+contains exactly one LOCAL `KeyStructSizes` object at `0x57d243`;
+both the extractor and remaining game-animation code consume that table.
+An extractor-only migration would duplicate this file-local object, so
+that isolated diagnostic trial was stopped before scoring. Reconstruct
+the full dependent player/evaluator family together, then test its
+per-file optimization as a unit; `gameanim.cpp` currently builds at
+`-O2`, while `nuanim.cpp` and `nucore_plain.cpp` explicitly build at
+`-O3`.
+
+### NuSoundBuffer allocation branch order
+
+`NuSoundBuffer::Allocate` remains in the original-supported sound-buffer
+TU (`0x31e560`, embedded `nusound_buffer.cpp :53` path). Its disassembly
+returns immediately when an existing allocation is large enough, frees
+only before a required reallocation, and distinguishes allocation
+failure by comparing the requested size with free memory: `-2` when
+enough free memory remains, `-1` otherwise. Correcting that source flow
+raised the body 16.50→19.24% in a target-built trial, with no other
+function score change. This is a semantic correction, not an ABI or
+compiler-option adjustment.
+
+### NuGScnDestroyPS implementation and gate
+
+`NuGScnDestroyPS` now implements the original handle-deletion,
+critical-section, yield, cache-invalidation, and zeroing sequence. The
+native scene/vertex-stream layout is shared by FixupPS and DestroyPS in
+the owning Android scene header, with original 32-bit offsets checked at
+compile time; no C-linkage or optimization override was introduced.
+Its score rose 1.63→90.73%, with all other Android scene functions
+unchanged. The combined target report is now 45.8626% versus committed
+45.8245%, five improved functions and only the previously noted
+0.04-point PodDust shift; no exact-match losses. Target, WASM, and
+native builds with clang-tidy, repository checks (4/4), original-text
+symbol coverage (13,425/13,425), and 120-frame Map/Cantina sanitizer
+smoke all pass on this unit.

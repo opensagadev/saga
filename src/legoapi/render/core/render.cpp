@@ -3457,9 +3457,6 @@ draw_panel_menu:
     NuCameraSet(pNuCam);
 }
 
-void DrawTimer(i32, i32, i32) {
-}
-
 void SwipeDecalRenderer::Process(float) {
 }
 
