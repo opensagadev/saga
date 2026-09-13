@@ -1461,7 +1461,6 @@ i32 DeactivatePlayer(GameObject_s *object, f32 duration, GameObject_s *source) {
 }
 
 void ResetPlayerPacket(PLAYERPACKET_s *, CHARACTERDATA_s *);
-i32 GetDefaultIdle(GameObject_s *);
 void ResetCharacterIdle(GameObject_s *, i32, i32);
 void SetGameObjectCharacterData(GameObject_s *);
 void SetFlicker(GameObject_s *, f32);

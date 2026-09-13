@@ -534,6 +534,7 @@ DECOMP_ASSERT(offsetof(CHARACTERDATA, collision_radius) == 0x30, "CHARACTERDATA 
 DECOMP_ASSERT(offsetof(CHARACTERDATA, model_scale) == 0x3c, "CHARACTERDATA model-scale offset");
 
 extern "C" i32 MakeLayerList_Index(CHARACTERMODEL_s *model, i16 *layers, u32 mask);
+i32 GetDefaultIdle(GameObject_s *object);
 extern "C" void StoreLocatorCoordinates(CHARACTERMODEL_s *model, NUMTX *world_matrix, NUMTX *joint_matrices,
                                         NUVEC *positions, NUMTX *matrices);
 extern "C" void APITransparentCharDraw(nuhgobj_s *object, NUMTX *world_matrix, i32 render_count, i16 *render_indices,

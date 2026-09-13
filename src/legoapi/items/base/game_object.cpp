@@ -25,7 +25,6 @@ extern void SetGameObjectCharacterData(GameObject_s *obj);
 extern void GetTopBot(GameObject_s *obj);
 extern void GameObjectDimensions(GameObject_s *obj);
 extern void GameObjectOrigin(GameObject_s *obj);
-extern i32 GetDefaultIdle(GameObject_s *obj);
 extern void ResetCharacterIdle(GameObject_s *obj, i32 mode, i32 idle);
 extern void *Suit_GetDefault(i32 id);
 extern void ResetLights(NUVEC *position, rtldata_s *data, void *set);

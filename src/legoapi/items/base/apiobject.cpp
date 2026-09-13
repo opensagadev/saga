@@ -28,6 +28,7 @@
 #include "nu2api/nufile/nufpar.h"
 
 #include <float.h>
+#include <stdarg.h>
 #include <string.h>
 
 static f32 MINFORCEAPART = 0.333f;
@@ -88,6 +89,66 @@ static void GameObjectForceApart2D(APIOBJECT *first, APIOBJECT *second) {
 }
 
 extern "C" {
+
+    float AnimEndFrame(CHARACTERMODEL_s *model, i32 animation) {
+        if (animation != -1 && model->model_data_b[animation] != NULL) {
+            return NuAnimEndFrame(model->model_data_b[animation]);
+        }
+        return 0.0f;
+    }
+
+    i32 AnimMiscFlags(CHARACTERMODEL_s *model, i32 animation) {
+        if (animation != -1 && model->model_data_b[animation] != NULL) {
+            return static_cast<CHARACTERANIM_s *>(model->model_data_a[animation])->misc_flags;
+        }
+        return 0;
+    }
+
+    void AnimList_NoLoad(i32 character_id, ...) {
+        va_list characters;
+        va_start(characters, character_id);
+        do {
+            CHARACTERDATA *character = apicharsys != NULL ? &apicharsys->char_data[character_id] : NULL;
+            CHARACTERANIM_s *animations = character != NULL ? character->animations : NULL;
+            if (animations != NULL) {
+                for (CHARACTERANIM_s *animation = animations; animation->name != NULL; ++animation) {
+                    animation->flags |= 0x8000;
+                }
+            }
+            character_id = va_arg(characters, i32);
+        } while (character_id != -1);
+        va_end(characters);
+    }
+
+    void AnimList_RequestAnimGroups(i32 character_id, ...) {
+        CHARACTERDATA *character = apicharsys != NULL ? &apicharsys->char_data[character_id] : NULL;
+        CHARACTERANIM_s *animations = character != NULL ? character->animations : NULL;
+        va_list groups;
+        va_start(groups, character_id);
+        i32 group_id = va_arg(groups, i32);
+        while (group_id != -1) {
+            for (CHARACTERANIM_s *animation = animations; animation->name != NULL; ++animation) {
+                if (animation->field_0x0a == group_id) {
+                    animation->flags &= ~0x8000;
+                }
+            }
+            group_id = va_arg(groups, i32);
+        }
+        va_end(groups);
+    }
+
+    void AnimList_RequestAnimGroupForCreatures(i32 group_id, ...) {
+        va_list creatures;
+        va_start(creatures, group_id);
+        while (true) {
+            i32 creature_id = va_arg(creatures, i32);
+            if (creature_id == -1) {
+                break;
+            }
+            AnimList_RequestAnimGroups(creature_id, group_id, -1);
+        }
+        va_end(creatures);
+    }
 
     void SetAnimBlendMode(i32 mode) {
         AnimBlendMode = mode;
@@ -1261,6 +1322,8 @@ extern "C" {
         return 1.0f + NuRandFloat() * (NuAnimEndFrame(model->model_data_b[animation]) - 1.0f);
     }
 
+} // extern "C"
+
 static f32 UpdateAnimTimer(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, i16 animation, f32 time, f32 frame_step,
                            f32 movement_speed, i32 report_events, char *reversed, i32 backwards,
                            f32 backwards_multiplier) {
@@ -1346,6 +1409,7 @@ static f32 UpdateAnimTimer(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, i16 an
     return time;
 }
 
+extern "C" {
 
     void UpdateAnimPacket(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, f32 frame_step, f32 movement_speed,
                           f32 blend_step, f32 backwards_multiplier) {

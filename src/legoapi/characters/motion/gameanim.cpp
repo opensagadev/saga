@@ -196,10 +196,6 @@ enum CHARACTER_ANIMATION : i16 {
     CHARACTER_ANIMATION_SUIT_RUN = 200,
 };
 
-static bool HasAnimation(const CHARACTERMODEL_s *model, i32 animation) {
-    return model != NULL && animation >= 0 && model->model_data_b != NULL && model->model_data_b[animation] != NULL;
-}
-
 static void MoveAnim_Check(GameObject_s *object) {
     if (GetAnimBlendMode() == 1) {
         return;
@@ -2687,38 +2683,6 @@ extern "C" {
         return 0;
     }
 
-    float AnimEndFrame(void *model_ptr, i32 animation) {
-        CHARACTERMODEL_s *model = static_cast<CHARACTERMODEL_s *>(model_ptr);
-        if (animation == -1 || model->model_data_b[animation] == NULL) {
-            return 0.0f;
-        }
-        return NuAnimEndFrame(model->model_data_b[animation]);
-    }
-
-    void AnimList_NoLoad(void) {
-    }
-
-    void AnimList_RequestAnimGroups(i32 group, ...) {
-    }
-
-    void AnimList_RequestAnimGroupForCreatures(i32 creature, ...) {
-        va_list groups;
-        va_start(groups, creature);
-        i32 group = va_arg(groups, i32);
-        while (group != -1) {
-            AnimList_RequestAnimGroups(group, creature, -1);
-            group = va_arg(groups, i32);
-        }
-        va_end(groups);
-    }
-
-    i32 AnimMiscFlags(CHARACTERMODEL_s *model, i32 animation) {
-        if (!HasAnimation(model, animation)) {
-            return 0;
-        }
-        return static_cast<CHARACTERANIM_s *>(model->model_data_a[animation])->misc_flags;
-    }
-
     f32 GetInstAnimEndFrame(nugscn_s *scene, nuinstanim_s *instance_animation) {
         if (instance_animation == NULL) {
             return 0.0f;
@@ -2870,34 +2834,6 @@ void SetAnimFrame(nuhspecial_s *special, float frame) {
     instance_animation->mtx.m31 = instance_matrix->m31;
     instance_animation->mtx.m32 = instance_matrix->m32;
     instance_animation->ltime = frame;
-}
-
-struct DefaultIdleCharacterData {
-    u8 pad[0x116];
-    u8 use_standard_idle;
-};
-
-i32 GetDefaultIdle(GameObject_s *obj) {
-    CHARACTERDATA *character = obj->apiobj.character_data;
-    DefaultIdleCharacterData *game_character = static_cast<DefaultIdleCharacterData *>(character->field11_0x24);
-
-    i32 animation = 25;
-    i32 table_offset = 100;
-    if (game_character->use_standard_idle == 0 && (character->model_flags & 0x80) != 0) {
-        animation = 118;
-        table_offset = 472;
-    }
-    if (obj->batarang != NULL && *(reinterpret_cast<u8 *>(obj->batarang) + 0x7d) != 0) {
-        return 151;
-    }
-
-    u8 *animation_table = reinterpret_cast<u8 *>(obj->apiobj.character_model->model_data_b);
-    void *entry = *reinterpret_cast<void **>(animation_table + table_offset);
-    if (entry != NULL &&
-        (*reinterpret_cast<i32 *>(animation_table + 4) == 0 || (obj->field_0xe22 & 1) != 0 || obj->field_0xe32 == 1)) {
-        return animation;
-    }
-    return 1;
 }
 
 i32 GetAnimDirection(nuinstanim_s *animation) {

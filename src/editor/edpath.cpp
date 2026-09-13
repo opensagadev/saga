@@ -64,9 +64,6 @@ DECOMP_ASSERT(offsetof(EdUiNameInputItem, name) == 0x4c, "editor name input offs
 DECOMP_ASSERT(offsetof(EdUiNameInputItem, max_name_length) == 0x15a, "editor name input limit offset");
 
 
-static __used__ void ParseAIPathCnxFlag(char *) {
-}
-
 static __used__ void pathEditorDrawPath(EDAIPATH_s *, i32) {
 }
 

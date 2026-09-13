@@ -1854,12 +1854,3 @@ void LevelComplete_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, flo
         PlaySfx(const_cast<char *>("PickupCoin"), NULL);
     }
 }
-
-static __used__ void Titles_Draw(WORLDINFO_s *) {
-}
-
-static __used__ void Titles_Init(WORLDINFO_s *) {
-}
-
-static __used__ void Titles_Update(WORLDINFO_s *) {
-}

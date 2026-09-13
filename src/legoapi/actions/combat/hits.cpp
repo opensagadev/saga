@@ -2,6 +2,7 @@
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/legoapi_types.h"
@@ -85,7 +86,6 @@ i32 Cheat_IsOn(i32);
 void SetFlicker(GameObject_s *, f32);
 void Player_ClearContext(GameObject_s *, i32);
 extern "C" void AddGameDebris(APIDEBRISSYS_s *, i32, NUVEC *);
-extern "C" i32 AnimMiscFlags(CHARACTERMODEL_s *, i32);
 extern "C" void NuSpecialSetVisibility(void *, i32);
 static const u8 objhit_damage_joints[3] = {6, 8, 7};
 
