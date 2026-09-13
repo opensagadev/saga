@@ -80,7 +80,6 @@ GizForceLOSState_s GizForceLOSInfo[2];
 i32 DEFAULT_PLAYERHITPOINTS = 8;
 u32 LEGOOBJ_DEFAULTLASTCOIN = -1;
 
-APICHARACTERSYS *apicharsys;
 void CutScenes_Destroy(CUTSYS *system);
 void CharScenes_LevelDump(WORLDINFO *world);
 void Customiser_DumpAll(CUSTOMISER *, WORLDINFO *);
@@ -981,7 +980,6 @@ void WorldInfo_ReArrangeBuffers(i32 area1, i32 area2) {
 }
 
 extern "C" {
-    i32 InModelList(APICHARACTERMODELLIST_s *, i32, i32 *);
     extern i16 id_DARTHVADER;
     extern i16 id_THEEMPEROR;
     extern i16 id_GRANDMOFFTARKIN;

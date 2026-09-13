@@ -14,6 +14,7 @@
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/items/base/collection.h"
+#include "legoapi/items/base/apiobject.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/menus/screens/store.h"
 #include "legoapi/menus/screens/shop.h"
@@ -98,8 +99,6 @@ struct SHOPINPUT;
 void CharConfig_ConfigureAll(i32 permanent, nufpcomjmp_s *game_keywords);
 void ExtraCharacterFixUpAfterConfig();
 extern i32 CHARPAK;
-extern i32 apiloadcharactermodels_nopakfile;
-extern "C" i32 apiloadcharactermodels_append;
 
 extern i32 GetMenuID(void);
 extern i32 InCollectList_Index(i32 id, COLLECTID *list, i32 count);

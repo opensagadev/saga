@@ -651,6 +651,8 @@ extern "C" void APIObjectCollisions(i32 count, APIOBJECT **objects, NUVEC *minim
                                     i32 (*collide)(APIOBJECT *, APIOBJECT *));
 extern "C" i32 APIObjectCollision(APIOBJECT *first, APIOBJECT *second);
 extern "C" i32 APIObjectCollision2D(APIOBJECT *first, APIOBJECT *second);
+extern "C" i32 InModelList(APICHARACTERMODELLIST_s *list, i32 id, i32 *out_index);
+extern "C" void APIDumpCharacterModels(i32 mode);
 
 struct APIOBJECTSYS_s {
     u32 object_size;

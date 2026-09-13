@@ -3098,14 +3098,6 @@ extern "C" {
         RootFnEx(matrix, data, source_root, target_root, root_delta, blend, 1);
     }
 
-    ACTIONINFO_s *APIActionInfo;
-    EXTRAACTIONDATA_s *APIExtraActionData;
-
-    void SetActionInfo(ACTIONINFO_s *action_info, EXTRAACTIONDATA_s *extra_action_data) {
-        APIActionInfo = action_info;
-        APIExtraActionData = extra_action_data;
-    }
-
     void SetAnimTimeRandom(CHARACTERMODEL_s *model, ANIMPACKET_s *packet) {
         if (model == NULL || packet == NULL) {
             return;

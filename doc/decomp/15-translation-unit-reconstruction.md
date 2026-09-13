@@ -2423,3 +2423,112 @@ The integrated target, WASM, and native/smoke builds pass, as do all
 three lint modes, four repository checks, and the original text-symbol
 audit (13,425/13,425; zero missing). The generated `matching.json`
 records the 45.218660% whole-binary result.
+
+### Animation curve evaluator ownership
+
+The original animation text run orders `NuAnimCurveCalcVal2` at `0x2ba450`
+before `NuAnimCurve2CalcValEx` at `0x2ba930`. Both unchanged source bodies
+now live in `nuanim.cpp` in that order, adjacent to its bit-count table
+owner. Their existing C-linkage declarations in `nuanim3.h` suffice;
+`nuanim.cpp` uses the real `nufloat.h` declaration for `NuFloor`.
+
+An isolated move of `NuAnimCurveCalcVal2` retained its 99.99152% score in
+`/tmp/anim_curve_calcval2_stage1.json`. Adding `NuAnimCurve2CalcValEx`
+retained 35.091427% in `/tmp/anim_curve_both_stage2.json`. Against the
+committed 45.218660% baseline, the raw whole score stays 45.218660%; all
+assigned original address/name keys remain present and no scored body
+changes by more than 0.01 percentage point. Target, WASM, native/smoke
+builds, four checks, and the symbol audit pass (13,425/13,425; zero
+missing). A rebuilt 120-frame `Negotiations` smoke attempt stops before
+gameplay at the separately documented signed-overflow sanitizer diagnostic
+in `cutscene.cpp:938`; its log is `/tmp/anim_curve_smoke.log`. No cutscene
+source or sanitizer setting was changed in this move.
+
+### API object character-list configuration
+
+The original `apiobject.c` text run places `ConfigureCharacterList` after
+`ActionFromName`. Its unchanged source body moved from `character.cpp` into
+`apiobject.cpp` immediately after that action lookup, using the real
+`nufpar.h` parser declarations. The existing C-linkage declaration in
+`character.h` remains the public API; no shim or signature change was added.
+
+Against `/tmp/apiobject_actions_stage2.json`, its original address-keyed
+score rises from 0% to 79.344215% in `/tmp/api_configure_raw.json`. Raw
+whole-binary matching rises 45.225945→45.244232%. A subsequent normalized
+comparison revealed that `APICharacterSysInit` had fallen from 16.444853%
+to 0% as a secondary code-generation effect. Moving that function into its
+original owner in the next character-system unit resolves this regression
+and raises it to 67.39338%. The target build and `git diff --check` pass;
+final integrated runtime and repository gates remain for the combined tree.
+
+### API object character-model loader cluster
+
+The original `apiobject.c` run orders local `NormalizeAnimPath`
+(`0x3cbed2`), `LoadAnimFromPAK` (`0x3cbf1f`), and `LoadAnim`
+(`0x3cc039`) after `APICharacterModelReset`, then
+`APIObjectRegisterAnimRedirect` (`0x3cc15a`),
+`APIResetCharacterRemap` (`0x3cc1dc`), and `APILoadCharacterModels`
+(`0x3cc247`). These bodies and the loader-only path/filter helpers now
+live together in `apiobject.cpp` in that order. The redirect callback/list
+remain file-local. The 64-byte `RedirectAnimDir` is restored to its original
+initialized data value, `chars\\commonanims\\`, rather than the current
+zero-filled buffer. Global `apiloadcharactermodels_append` and
+`apiloadcharactermodels_nopakfile` moved next to `apicharsys`, matching the
+original linked-data group. Public declarations are in `players.h`; the
+loader uses the real file, PAK, pointer-block, animation, and hierarchy
+headers. `ActionInfoList`/`ActionInfo` ownership is separate remaining
+work and was not changed in this slice.
+
+Against `/tmp/api_character_dump_stage5.json` (45.261227%), the coherent
+stage report `/tmp/api_loader_atomic_stage1.json` reaches 45.31275% raw
+whole-binary. `APIObjectRegisterAnimRedirect` rises 25.921053→99.92105%,
+`APILoadCharacterModels` rises 0→61.476406%, and the previously exact
+`APIResetCharacterRemap` stays 100%. The local `LoadAnimFromPAK` remains
+4.367816%. Across the 12,333 assigned original address/name keys, only
+Register, Load, and the unchanged `CharConfig_ConfigureAll` (+0.02457
+percentage point) change by more than 0.01 point; none regress.
+
+Target, WASM, native/smoke builds, three lint modes, four repository
+checks, and the original text-symbol audit pass (13,425/13,425; zero
+missing). The rebuilt `--area Map --frames 120` smoke reached gameplay on
+each attempt; the first two stopped at the documented `nutrig.cpp:77`
+out-of-bounds sanitizer flake, and the third passed with 120 healthy frames.
+Logs are `/tmp/api_loader_map_smoke1.log` through `smoke3.log`. A separate
+`Negotiations` smoke attempt stopped at the documented cutscene signed
+overflow before gameplay; it was not used as the Map/Cantina gate. No
+sanitizer setting or unrelated source was changed to avoid either issue.
+
+### API object action and character-system owner checkpoint
+
+The original `_GLOBAL__sub_I_apiobject.c` at `0x3d223a` closes a contiguous
+text run containing the character loader, `InModelList`, action-info helpers,
+and `ConfigureCharacterList`. The original local BSS symbols
+`_ZL13APIActionInfo` and `_ZL18APIExtraActionData` are now defined beside their
+four action-info functions in `apiobject.cpp`. The unchanged `InModelList`
+body moved there from `gameobjects.cpp`; its public declaration moved from
+`gameobjects.h` to `apiobject.h`, and consumers use that real header. The
+unchanged `SetActionInfo`, `ActionInfoFlags`, `ActionInfoName`, and
+`ActionFromName` bodies moved from the animation/gizmo files into that owner,
+without source-local link-time `extern` bridges. Their existing declarations
+in `gizactions.h` remain the exported interface.
+
+The original character-system prefix also now sits in address order in
+`apiobject.cpp`: `APICharacterSysInit` (`0x3cba8f`),
+`APICharacterModelReset` (`0x3cbde7`), the loader cluster documented above,
+`APICharacterLoaded` (`0x3cd188`), and `APIDumpCharacterModels`
+(`0x3cd1ea`). The `apicharsys` definition moved from `world.cpp` to that
+owner, using its declaration in `players.h`. The dump declaration is in
+`apiobject.h`, replacing an area-file-local prototype. These are source and
+ownership moves, not replacement implementations or ABI workarounds.
+
+The isolated reports show `InModelList` 4.264706→100%, `SetActionInfo`
+54.2→99.8%, `ActionInfoFlags` 26.4375→99.875%, `ActionInfoName`
+50.4375→99.8125%, `ActionFromName` 14.228572→91.828575%,
+`APICharacterSysInit` 16.444853→67.39338%, `APICharacterModelReset`
+17.125→71.1875%, `APICharacterLoaded` 29.67647→45.14706%, and
+`APIDumpCharacterModels` 19.711111→80.111115%. The normalized integrated
+`matching.json` is 45.31275%, up from the committed 45.21866%; every scored
+change is an improvement. The only other scored change is an incidental
++0.02457-point shift in the unchanged `CharConfig_ConfigureAll`. Original
+text-symbol coverage remains 13,425/13,425. The full build, lint, repository,
+and Map/Cantina gates for this checkpoint are recorded in the loader section.

@@ -527,7 +527,6 @@ i16 tTECHNOLOGYSUIT = 0;
 i16 tMAGNETSUIT = 0;
 i16 tATTRACTSUIT = 0;
 i32 CHARPAK = 0;
-i32 apiloadcharactermodels_nopakfile = 0;
 
 // ------------------------------------------------------------------------
 // Level object tables

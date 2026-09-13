@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 45.21866,
+    "fuzzy_match_percent": 45.31275,
     "total_code": "4722419",
-    "matched_code": "393917",
-    "matched_code_percent": 8.341424,
+    "matched_code": "394020",
+    "matched_code_percent": 8.343605,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4712,
-    "matched_functions_percent": 35.010033,
+    "matched_functions": 4713,
+    "matched_functions_percent": 35.01746,
     "total_units": 1
   },
   "text": {
@@ -43574,54 +43574,6 @@
           "match_percent": 17.5
         },
         {
-          "name": "APICharacterSysInit",
-          "demangled_name": "APICharacterSysInit",
-          "address": 3979919,
-          "offset": 3089951,
-          "size": 856,
-          "match_percent": 16.444853
-        },
-        {
-          "name": "APICharacterModelReset",
-          "demangled_name": "APICharacterModelReset",
-          "address": 3980775,
-          "offset": 3090807,
-          "size": 235,
-          "match_percent": 17.125
-        },
-        {
-          "name": "APIObjectRegisterAnimRedirect",
-          "demangled_name": "APIObjectRegisterAnimRedirect",
-          "address": 3981658,
-          "offset": 3091690,
-          "size": 130,
-          "match_percent": 25.921053
-        },
-        {
-          "name": "APILoadCharacterModels",
-          "demangled_name": "APILoadCharacterModels",
-          "address": 3981895,
-          "offset": 3091927,
-          "size": 3905,
-          "match_percent": 0.0
-        },
-        {
-          "name": "APICharacterLoaded",
-          "demangled_name": "APICharacterLoaded",
-          "address": 3985800,
-          "offset": 3095832,
-          "size": 98,
-          "match_percent": 29.67647
-        },
-        {
-          "name": "APIDumpCharacterModels",
-          "demangled_name": "APIDumpCharacterModels",
-          "address": 3985898,
-          "offset": 3095930,
-          "size": 138,
-          "match_percent": 19.711111
-        },
-        {
           "name": "APITransparentInit",
           "demangled_name": "APITransparentInit",
           "address": 3998153,
@@ -43644,14 +43596,6 @@
           "offset": 3109107,
           "size": 5289,
           "match_percent": 24.581024
-        },
-        {
-          "name": "ConfigureCharacterList",
-          "demangled_name": "ConfigureCharacterList",
-          "address": 4004819,
-          "offset": 3114851,
-          "size": 1266,
-          "match_percent": 0.0
         },
         {
           "name": "_ZNK24CharacterObjectInterface13GetTargetNameEv",
@@ -43780,14 +43724,6 @@
       "source": "src/legoapi/characters/core/character_plain.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/character_plain.o",
       "functions": [
-        {
-          "name": "APIResetCharacterRemap",
-          "demangled_name": "APIResetCharacterRemap",
-          "address": 3981788,
-          "offset": 3091820,
-          "size": 107,
-          "match_percent": 100.0
-        },
         {
           "name": "NuHGobjRestrictEvaluation",
           "demangled_name": "NuHGobjRestrictEvaluation",
@@ -45920,7 +45856,7 @@
           "address": 4626976,
           "offset": 3737008,
           "size": 1736,
-          "match_percent": 57.479115
+          "match_percent": 57.503685
         },
         {
           "name": "_Z21CanWearHatsInFreePlayi",
@@ -47891,14 +47827,6 @@
           "offset": 3106167,
           "size": 1887,
           "match_percent": 14.257092
-        },
-        {
-          "name": "SetActionInfo",
-          "demangled_name": "SetActionInfo",
-          "address": 4004467,
-          "offset": 3114499,
-          "size": 35,
-          "match_percent": 54.2
         },
         {
           "name": "_Z18FindTexAnimFromMtlP8nugscn_sP7numtl_s",
@@ -52259,30 +52187,6 @@
           "offset": 6960,
           "size": 93,
           "match_percent": 99.35294
-        },
-        {
-          "name": "ActionInfoFlags",
-          "demangled_name": "ActionInfoFlags",
-          "address": 4004502,
-          "offset": 3114534,
-          "size": 51,
-          "match_percent": 26.4375
-        },
-        {
-          "name": "ActionInfoName",
-          "demangled_name": "ActionInfoName",
-          "address": 4004553,
-          "offset": 3114585,
-          "size": 51,
-          "match_percent": 50.4375
-        },
-        {
-          "name": "ActionFromName",
-          "demangled_name": "ActionFromName",
-          "address": 4004604,
-          "offset": 3114636,
-          "size": 215,
-          "match_percent": 14.228572
         },
         {
           "name": "_Z18RegisterGizActionsP15GIZACTIONDEFN_s",
@@ -62298,12 +62202,116 @@
           "match_percent": 84.33498
         },
         {
+          "name": "APICharacterSysInit",
+          "demangled_name": "APICharacterSysInit",
+          "address": 3979919,
+          "offset": 3089951,
+          "size": 856,
+          "match_percent": 67.39338
+        },
+        {
+          "name": "APICharacterModelReset",
+          "demangled_name": "APICharacterModelReset",
+          "address": 3980775,
+          "offset": 3090807,
+          "size": 235,
+          "match_percent": 71.1875
+        },
+        {
+          "name": "APIObjectRegisterAnimRedirect",
+          "demangled_name": "APIObjectRegisterAnimRedirect",
+          "address": 3981658,
+          "offset": 3091690,
+          "size": 130,
+          "match_percent": 99.92105
+        },
+        {
+          "name": "APIResetCharacterRemap",
+          "demangled_name": "APIResetCharacterRemap",
+          "address": 3981788,
+          "offset": 3091820,
+          "size": 107,
+          "match_percent": 100.0
+        },
+        {
+          "name": "APILoadCharacterModels",
+          "demangled_name": "APILoadCharacterModels",
+          "address": 3981895,
+          "offset": 3091927,
+          "size": 3905,
+          "match_percent": 61.476406
+        },
+        {
+          "name": "APICharacterLoaded",
+          "demangled_name": "APICharacterLoaded",
+          "address": 3985800,
+          "offset": 3095832,
+          "size": 98,
+          "match_percent": 45.14706
+        },
+        {
+          "name": "APIDumpCharacterModels",
+          "demangled_name": "APIDumpCharacterModels",
+          "address": 3985898,
+          "offset": 3095930,
+          "size": 138,
+          "match_percent": 80.111115
+        },
+        {
           "name": "StoreLocatorCoordinates",
           "demangled_name": "StoreLocatorCoordinates",
           "address": 3986924,
           "offset": 3096956,
           "size": 326,
           "match_percent": 73.53608
+        },
+        {
+          "name": "InModelList",
+          "demangled_name": "InModelList",
+          "address": 4004364,
+          "offset": 3114396,
+          "size": 103,
+          "match_percent": 100.0
+        },
+        {
+          "name": "SetActionInfo",
+          "demangled_name": "SetActionInfo",
+          "address": 4004467,
+          "offset": 3114499,
+          "size": 35,
+          "match_percent": 99.8
+        },
+        {
+          "name": "ActionInfoFlags",
+          "demangled_name": "ActionInfoFlags",
+          "address": 4004502,
+          "offset": 3114534,
+          "size": 51,
+          "match_percent": 99.875
+        },
+        {
+          "name": "ActionInfoName",
+          "demangled_name": "ActionInfoName",
+          "address": 4004553,
+          "offset": 3114585,
+          "size": 51,
+          "match_percent": 99.8125
+        },
+        {
+          "name": "ActionFromName",
+          "demangled_name": "ActionFromName",
+          "address": 4004604,
+          "offset": 3114636,
+          "size": 215,
+          "match_percent": 91.828575
+        },
+        {
+          "name": "ConfigureCharacterList",
+          "demangled_name": "ConfigureCharacterList",
+          "address": 4004819,
+          "offset": 3114851,
+          "size": 1266,
+          "match_percent": 79.344215
         }
       ]
     },
@@ -66164,14 +66172,6 @@
           "offset": 2584512,
           "size": 110,
           "match_percent": 100.0
-        },
-        {
-          "name": "InModelList",
-          "demangled_name": "InModelList",
-          "address": 4004364,
-          "offset": 3114396,
-          "size": 103,
-          "match_percent": 4.264706
         },
         {
           "name": "SetScriptErrorLevel",
@@ -95591,6 +95591,22 @@
           "match_percent": 73.48387
         },
         {
+          "name": "NuAnimCurveCalcVal2",
+          "demangled_name": "NuAnimCurveCalcVal2",
+          "address": 2860112,
+          "offset": 1970144,
+          "size": 454,
+          "match_percent": 99.99152
+        },
+        {
+          "name": "NuAnimCurve2CalcValEx",
+          "demangled_name": "NuAnimCurve2CalcValEx",
+          "address": 2861360,
+          "offset": 1971392,
+          "size": 1379,
+          "match_percent": 35.091427
+        },
+        {
           "name": "_Z25NuAnimGetAnimDataSizeANI3P17ani3_animheader_s",
           "demangled_name": "NuAnimGetAnimDataSizeANI3(ani3_animheader_s*)",
           "address": 2862752,
@@ -97794,28 +97810,12 @@
           "match_percent": 91.65714
         },
         {
-          "name": "NuAnimCurveCalcVal2",
-          "demangled_name": "NuAnimCurveCalcVal2",
-          "address": 2860112,
-          "offset": 1970144,
-          "size": 454,
-          "match_percent": 99.99152
-        },
-        {
           "name": "NuAnimCurveSetApplyToMatrix",
           "demangled_name": "NuAnimCurveSetApplyToMatrix",
           "address": 2860576,
           "offset": 1970608,
           "size": 781,
           "match_percent": 99.99005
-        },
-        {
-          "name": "NuAnimCurve2CalcValEx",
-          "demangled_name": "NuAnimCurve2CalcValEx",
-          "address": 2861360,
-          "offset": 1971392,
-          "size": 1379,
-          "match_percent": 35.091427
         },
         {
           "name": "NuAnimDataCalcTime",
@@ -122220,10 +122220,10 @@
       "address": 3981010,
       "offset": 3091042,
       "size": 77,
-      "match_percent": 45.67857,
+      "match_percent": 15.0,
       "candidate_units": [
-        "legoapi/characters/core/character.cpp.o",
-        "legoapi/characters/motion/gameanim.cpp.o"
+        "legoapi/characters/motion/gameanim.cpp.o",
+        "legoapi/items/base/apiobject.cpp.o"
       ]
     },
     {
@@ -122232,10 +122232,10 @@
       "address": 3981369,
       "offset": 3091401,
       "size": 289,
-      "match_percent": 18.16854,
+      "match_percent": 4.269663,
       "candidate_units": [
-        "legoapi/characters/core/character.cpp.o",
-        "legoapi/characters/motion/gameanim.cpp.o"
+        "legoapi/characters/motion/gameanim.cpp.o",
+        "legoapi/items/base/apiobject.cpp.o"
       ]
     },
     {
