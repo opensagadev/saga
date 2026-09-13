@@ -94,6 +94,11 @@ extern i32 DEFAULT_PLAYERHITPOINTS;
 extern u32 LEGOOBJ_DEFAULTLASTCOIN;
 
 extern APICHARACTERSYS *apicharsys;
+using ANIMREDIRECTFN = i32 (*)(char *, void *, CHARACTERANIM_s *, char *);
+extern "C" i32 apiloadcharactermodels_append;
+extern i32 apiloadcharactermodels_nopakfile;
+extern "C" void APIObjectRegisterAnimRedirect(ANIMREDIRECTFN fn, void *list, char *directory);
+extern "C" void APIResetCharacterRemap(void);
 
 i32 PlayersDropInOut();
 

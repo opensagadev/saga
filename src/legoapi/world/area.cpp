@@ -118,7 +118,6 @@ extern AREADATA *LEGOCITY_ADATA;
 extern AREADATA *NEWTOWN_ADATA;
 extern AREADATA *JIMTEST_ADATA;
 extern i32 CHARPAK;
-extern i32 apiloadcharactermodels_nopakfile;
 extern i32 CharacterDataLoad;
 extern i32 loadareadata_loadlevel;
 extern i32 AreaDataLoaded;
@@ -176,7 +175,6 @@ extern "C" i32 NuKeyboard_db(i32);
 extern "C" i32 NuSound3LoadingSfx(void);
 extern void Particles_LoadAreaPage(char *);
 extern "C" {
-    extern void APIResetCharacterRemap(void);
     extern void SoundKillAll(void);
 }
 

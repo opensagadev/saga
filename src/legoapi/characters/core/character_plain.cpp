@@ -5,13 +5,6 @@
 
 extern "C" {
 
-    void APIResetCharacterRemap(void) {
-        for (i32 i = 0; i < apicharsys->character_count; ++i) {
-            if ((apicharsys->char_data[i].model_flags & 2) == 0) {
-                apicharsys->playermodelids[i] = -1;
-            }
-        }
-    }
 
     nuhgobj_s *Temphgobj;
     u8 TempNumJoints;

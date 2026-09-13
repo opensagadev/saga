@@ -3,6 +3,7 @@
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/items/base/apiobject.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/area.h"
@@ -58,7 +59,6 @@ extern void CharScenes_AreaDump(void);
 extern void Particles_DumpAreaPage(void);
 extern void Customiser_RestoreModelTextureIDs(struct CUSTOMISER *);
 extern void Customiser_DumpAccessories(struct CUSTOMISER *);
-extern "C" void APIDumpCharacterModels(i32);
 extern void SuperCounters_Reset(i32);
 extern void NewAreaMusicChanges(void);
 extern void ClearTakeOverObjectSys(void);

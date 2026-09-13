@@ -59,7 +59,6 @@ APIOBJECT_s *GameAPIOBJECTFromObjID(u8 object_id);
 f32 GameShadow(GameObject_s *object, NUVEC *position, f32 scale, i32 flags);
 i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUMTX *matrix, NUMTX *secondary_matrix,
                            NUMTX *tertiary_matrix, NUMTX *auxiliary_matrix, GameObject_s *object, u32 flags);
-extern "C" i32 InModelList(APICHARACTERMODELLIST_s *list, i32 id, i32 *out_index);
 
 void GameAISysInit();
 void GameAISysReset(struct AISYS_s *aisys);
