@@ -136,6 +136,7 @@ extern "C" {
     extern NUVEC4 NearPlane, AbsNearPlane;
     extern NUMTX AbsFrustrumPlanes, AbsScissorPlanes;
     void BuildCamSpaceClipPlanes(void);
+    void ChooseCorrectLOD(i32 *index, NUVEC *center, f32 *lod_ranges);
     void BuildWorldSpaceClipPlanes(void);
 
     extern f32 zx;

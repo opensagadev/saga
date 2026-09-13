@@ -3,6 +3,7 @@
 #include "decomp.h"
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/fixed_width.h"
+#include "nu2api/nufile/nufile.h"
 #include "nu2api/numath/nuvec.h"
 
 struct ani3_animheader_s;
@@ -91,6 +92,15 @@ struct nuanimdata2_s {
 #ifdef __cplusplus
 extern "C" {
 #endif
+    void buildBitCountTable(void);
+    void *NuAnimDataFixPtrs(void *animation, isize delta);
+    void *NuAnimDataCreate(i32 chunk_count);
+    void *NuAnimCurveSetCreate(i32 curve_count);
+    void *NuAnimDataRead(NUFILE file);
+    void NuAnimInit(i32 max_joints, VARIPTR *buf, VARIPTR buf_end);
+    void *NuAnimData2FixPtrs(void *data, isize delta, isize external_delta, i32 flags);
+    void ANI_FixUpAddrs(ani3_animheader_s *animation, isize delta, i32 flags);
+    void *NuAnimData2Relocate(void **data, VARIPTR *buf);
     void *NuAnimData2Fixup(i32 file_size, void **data);
     void *NuAnimData2LoadBuffEx(char *path, VARIPTR *buf, VARIPTR *buf_end, void **result);
     void *NuAnimData2LoadBuff(char *path, VARIPTR *buf, VARIPTR *buf_end);

@@ -165,6 +165,8 @@ typedef struct nudatfileinfo_s {
     i32 compression_mode;
 } NUDATFILEINFO;
 
+extern NUDATFILEINFO dat_file_infos[20];
+
 typedef i32 NUPSFILE;
 
 enum NUFILE_OFFSETS {
@@ -411,6 +413,8 @@ extern "C" {
     NUDATHDR *NuDatOpenEx(char *filepath, VARIPTR *buf, i32 *_unused, i16 mode);
     void NuDatFileClose(NUFILE file);
     NUDATHDR *NuDatSet(NUDATHDR *header);
+    void NuDatClose(NUDATHDR *header);
+    i32 NuDatGetFileInfo(NUDATHDR *header, char *name, i64 *position, i32 *length);
     i32 NuDatFileOpenSize(NUFILE file);
 
     // NuDatFile functions

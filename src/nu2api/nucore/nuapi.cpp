@@ -56,13 +56,13 @@ extern "C" i32 Nu360GetCommandLine(char **arguments, i32 capacity) {
 #include "nu2api/nu3d/nuvport.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nufile/nufile.h"
+#include "nu2api/nucore/nuanim3.h"
 #include "nu2api/numath/nutrig.h"
 
 // Nucore bootstrap helpers; display-list initialization is declared in nudlist.h.
 extern "C" {
     void NuFramebufferInitEx(void);
     void NuPostEffectInit(u32, void *, void *);
-    void NuAnimInit(i32 max_joints, VARIPTR *buf, VARIPTR buf_end);
 }
 
 void NuRndrInitGeneric(void); // nurndr.cpp (C++ linkage)

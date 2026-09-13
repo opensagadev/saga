@@ -41,7 +41,10 @@ typedef struct nuwind_s {
 extern "C" {
 #endif
     void NuWindInitialise(NUWIND *wind);
+    void NuWindSetWorldSize(NUWIND *wind, f32 size);
+    void NuWindSetSpeed(NUWIND *wind, f32 speed);
     i32 NuWindCurrent(NUWIND *wind);
+    void NuWindAnimate(NUWIND *wind, f32 frametime);
 #ifdef __cplusplus
 }
 #endif

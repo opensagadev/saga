@@ -2249,3 +2249,177 @@ extra-symbol baseline. Original text-symbol coverage remains
 13,425/13,425 with zero missing. The rebuilt Map/Cantina fixture
 advanced 120 healthy frames; the original movement/trig sanitizer
 flake remains documented above and was neither changed nor suppressed.
+
+### Animation-data relocation slice
+
+The original animation text run places `buildBitCountTable` at `0x2ba140`,
+ANI3 helpers at `0x2baea0`/`0x2baed0`, and the adjacent
+`NuAnimData2FixPtrs` through `NuAnimData2LoadBuffFromPAK` run at
+`0x2bc0c0`–`0x2bc52f`. The existing `nuanim.cpp` owner contains the ANI3
+helpers. The binary has neither DWARF nor `STT_FILE` basename proof; contiguous
+original text and animation-local data are the ownership evidence. This
+bounded change moves the five bodies after `FixPtrs` into that owner, while
+leaving `FixPtrs`, `buildBitCountTable`, `BitCountTable`, and file-local
+`isBitCountTable` with their current users for a separate checkpoint.
+
+`NuAnimData2Relocate` was an empty no-argument stand-in. Its original
+`0x2bc230` body establishes `extern "C" void *NuAnimData2Relocate(void **,
+VARIPTR *)`: it tests the magic at `*data`; ANI4/ANI5 sizes the animation,
+copies it to the aligned buffer, advances that buffer, relocates pointers by
+the destination-minus-source delta, and returns the destination. Legacy data
+copies the header size word's byte count, replaces `*data`, advances the
+buffer, fixes header slot 2 with the new-header-minus-old-base delta, sets
+header slot 1 to the new header, and returns slot 2. C-linkage declarations
+reside in `nuanim3.h`; no caller shim was added.
+
+Against committed `matching.json` (45.205032% whole-binary), isolated stage
+reports were preserved as `/tmp/anim_relocate_stage1.json`,
+`/tmp/anim_fixup_stage2.json`, `/tmp/anim_loadex_stage3.json`,
+`/tmp/anim_load_stage4.json`, and `/tmp/anim_pak_stage5.json`:
+
+| Original body | Baseline | Final | Result |
+| --- | ---: | ---: | --- |
+| `NuAnimData2Relocate` | 5.833334% | 82.19444% | Reconstructed and moved |
+| `NuAnimData2Fixup` | 82.977776% | 82.977776% | Moved unchanged |
+| `NuAnimData2LoadBuffEx` | 91.17544% | 91.17544% | Moved unchanged |
+| `NuAnimData2LoadBuff` | 100% | 100% | Exact body preserved |
+| `NuAnimData2LoadBuffFromPAK` | 46.125% | 46.125% | Moved unchanged |
+
+The final raw objdiff whole-binary score is 45.20888%. Across the 12,333
+assigned original address/name keys, only `NuAnimData2Relocate` changes by
+more than 0.01 percentage point; there are no scored regressions or
+neighboring changes. Target, WASM, native, and smoke builds, three lint
+modes, four repository checks, and the symbol audit pass. Text-symbol
+coverage remains 13,425/13,425 with zero missing. The rebuilt Map/Cantina
+fixture advanced 120 healthy frames.
+
+### Wind API owner and rejected exact-body move
+
+The original `nuwind.c` text run is consecutive: `NuWindInitialise`
+`0x2e4550`, `NuWindSetCurrent` `0x2e45a0`, `NuWindSetWorldSize`
+`0x2e45e0`, `NuWindSetSpeed` `0x2e4620`, `NuWindCurrent` `0x2e4660`,
+and `NuWindAnimate` `0x2e4680`. Its `_GLOBAL__sub_I_nuwind.c` marker
+supports the basename, while the suffix does not by itself establish C
+language mode. Both the existing wind owner and catch-all compile at
+`-O3`. The implemented WorldSize, Speed, and Animate bodies now live in
+`gamelib/nuwind/nuwind.cpp` in original relative order, with genuine API
+declarations in `nuwind.h`; the source-local Animate declaration in
+`nucore_frame.cpp` was removed. The neighboring `NuWindLoad` and
+`NuWindUnload` are at a separate original text address and were not
+moved by name association.
+
+The setter move `/tmp/wind_setters_stage1.json` and Animate move
+`/tmp/wind_animate_stage2.json` preserve the 45.208880% post-animation
+whole score and every scored original-address body. A separate trial
+moved the already-exact SetCurrent to the wind owner. Its 100% score
+stayed exact, but untouched `NuHGobjEvalAnim2Root_3` rose
+99.71186→99.96610% while `NuHGobjEvalAnim2Root` fell
+69.65931→69.04417%, lowering the whole score to 45.208733%.
+With no primary-body gain, that trial was reverted; the restored
+report exactly reproduces 45.208880% and all stage-2 body scores.
+The loop initializing eight texture handles in `NuWindInitialise` was
+also tested as an ordinary `memset`; it emitted the same scalar body
+and score as the loop, so the loop was retained. The original's two
+vector stores remain an unresolved code-generation difference, not a
+reason for an intrinsic or matching-only attribute.
+
+The combined animation-and-wind source passes target, WASM, and
+native/smoke builds, all three lint modes, four repository checks,
+and the extra-symbol audit. Original text-symbol coverage remains
+13,425/13,425 with zero missing. The rebuilt Map/Cantina fixture
+advanced 120 healthy frames; the original movement/trig sanitizer
+flake remains documented above.
+
+### Render-scene Z-prepass flag
+
+The original C++ `NuMarkSceneAsZPrePass` at `0x2d06f0` stores one at
+`currentScene + 0x24`. That field is reset to zero by
+`NuRndrBeginScene`, so it is now represented as the `u32 z_pre_pass`
+flag in the typed scene layout rather than an unknown pointer. The
+empty catch-all stub moved to the existing renderer scene owner, with
+its declaration in `nurndr.h`. The address-keyed body rises from
+31.428572% to an exact 100% in `/tmp/zprepass_stage1.json`; the whole
+score rises 45.208880→45.209274%, and no other scored body changes.
+
+### Animation bit-count state ownership
+
+The original animation run places `buildBitCountTable` at `0x2ba140`,
+`NuAnimDataFixPtrs` at `0x2ba1c0`, `NuAnimDataRead` at `0x2bb570`,
+`NuAnimInit` at `0x2bbf50`, and `NuAnimData2FixPtrs` at `0x2bc0c0`.
+Its global `BitCountTable` is a 256-byte object at `0x11aa720`, adjacent to
+other animation globals; file-local `_ZL15isBitCountTable` is a four-byte
+object at `0x11b1680` near animation static data. Both source TUs are
+configured at `-O3`. These data and direct flag users now live together in
+`nuanim.cpp`; the two curve evaluators still read the exported table from
+the catch-all TU, and are reserved for separate measured moves. The real
+C-linkage declarations are in `nuanim3.h`; the local `NuAnimInit` declaration
+in `nuapi.cpp` was replaced by that header.
+
+The initial ownership-only trial (`/tmp/anim_state_stage1.json`) retained
+`buildBitCountTable` at 99.97436%, `NuAnimDataRead` at 95.3252%, and
+`NuAnimInit` at its exact 100%, but `NuAnimData2FixPtrs` dipped from
+29.629032% to 29.10484%. Restoring its original lazy table-init test,
+relocated-null check, and nonzero-curve pointer behavior raised it to
+39.83871% in `/tmp/anim_state_stage2.json`. `NuAnimDataFixPtrs` returned
+to its 73.48387% baseline, while `NuAnimCurveCalcVal2` remains 99.99152%.
+The raw combined score at this checkpoint is 45.209972% against the
+45.20888% saved baseline. The combined tree also contains an independently
+changed Z-prepass body; `NuDatGetFileInfo`, whose source was not changed in
+this slice, falls 16.30693→15.118812% under the new catch-all TU layout.
+That secondary code-generation difference remains for owner-level review;
+no unrelated source was altered to tune it. Target, WASM, native/smoke
+builds, all three lint modes, four checks, and symbol coverage
+(13,425/13,425; zero missing) pass. Those gates were run during concurrent
+work on other independent source slices; a final integrated gate remains
+appropriate after the combined tree is frozen.
+
+Two 120-frame `Negotiations` smoke attempts on this combined native build
+did not reach gameplay. Both stopped at a signed-integer-overflow sanitizer
+failure in `NuGCutSceneLoad`, `cutscene.cpp:938`, where the loaded cutscene
+address is subtracted from `cutscene->relocation_delta`; the diagnostic was
+`-1959091648 - 374210560` outside the signed 32-bit range. The trace runs
+through `CutScenes_Load` (`cutscene.cpp:679`), `WorldInfo_Load`
+(`world.cpp:585`), and `WorldInfo_StreamLevel` (`world.cpp:862`). Logs are
+`/tmp/anim_state_smoke.log` and `/tmp/anim_state_smoke_retry.log`. This is
+a reproducible sanitizer gate failure in a separate source area, not a
+successful runtime smoke; no cutscene source or sanitizer setting was changed
+as part of the animation state move.
+
+### Camera LOD selection and data-file owner
+
+The original `ChooseCorrectLOD` at `0x2d7cd0` immediately precedes
+`BuildWorldSpaceClipPlanes` in the camera text run. Its old zero-argument
+renderer stub was replaced by the recovered three-argument C interface
+in `nucamera.h` and a real `nucamera_gen.cpp` body. It first checks the
+current LOD threshold, computes squared distance from the supplied center
+to the global camera position using `NuVecSub`/`NuVecMagSqr`, reloads the
+selected index after those calls, and advances until the distance no
+longer lies below the next threshold. That post-call reload is visible
+in the original and raises the body from 68.95744% in the first source
+trial to 88.297874% in `/tmp/camera_lod_stage2.json`, versus 4.680851%
+for the old stub. No other scored body changed in that refinement.
+
+`NuDatGetFileInfo` at `0x25c2c1` follows the exact `NuFileIsNewer` and
+`NuDatCalcPos` bodies in the original file-I/O run. Moving its unchanged
+logic and the sole-use `nufile_lsn_allowed` definition from the catch-all
+to `nufile_plain.cpp`, with a real declaration in `nufile.h`, raises the
+body from 15.118812% to 61.316833% in `/tmp/nudat_owner_stage1.json`.
+This also resolves the secondary matching dip noted in the animation
+section. `NuDatClose` at `0x25d2da` belongs to the same run; its unchanged
+body now shares that owner and uses the exported `dat_file_infos`
+declaration in `nufile.h` instead of a function-local `extern`. It rises
+18.521128→64.22535% in `/tmp/nudat_close_stage2.json`. The exact
+file-I/O neighbors remain exact, and the whole score is 45.218660%.
+The camera `NuCameraSetVPortClipMtx` also rises 50.766235→56.714287%
+after the data-file move, a secondary code-generation effect rather than
+a source change to that camera function. No scored body regresses in
+either data-file stage.
+
+The rebuilt 120-frame Map/Cantina smoke passes on the final data-file
+source. Two preceding attempts reached gameplay but hit the documented
+`MovePlayer`/trig sanitizer flake; the third advanced 120 healthy frames.
+No matching behavior or sanitizer setting was changed to avoid it.
+The integrated target, WASM, and native/smoke builds pass, as do all
+three lint modes, four repository checks, and the original text-symbol
+audit (13,425/13,425; zero missing). The generated `matching.json`
+records the 45.218660% whole-binary result.

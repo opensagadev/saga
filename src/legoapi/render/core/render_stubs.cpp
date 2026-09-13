@@ -102,9 +102,6 @@ extern "C" {
     void AddColourPick(void) {
     }
 
-    void ChooseCorrectLOD(void) {
-    }
-
     void *DisplayListCreateFaceonTransformPS(VARIPTR *buffer, NUMTX *transform, NUMTL *, void *faceon_data) {
         buffer->addr = ALIGN(buffer->addr, 4);
         auto *packet = static_cast<NuFaceOnTransformPacket *>(buffer->void_ptr);

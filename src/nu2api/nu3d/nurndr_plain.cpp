@@ -120,7 +120,7 @@ extern "C" i32 NuRndrBeginScene(i32 /*begin_flags*/) {
     currentScene.render_scene_id = 0xffffffff;
     currentScene.clear_flags = 0;
     currentScene.state_ptr = nullptr;
-    currentScene.unknown_24 = nullptr;
+    currentScene.z_pre_pass = 0;
     currentScene.unknown_28 = 0;
     currentScene.unknown_58 = 0;
     currentScene.unknown_38 = 0;
@@ -140,6 +140,10 @@ extern "C" i32 NuRndrBeginScene(i32 /*begin_flags*/) {
 
 extern "C" i32 NuRndrBeginSceneEx(i32 begin_flags, i32, i32) {
     return NuRndrBeginScene(begin_flags);
+}
+
+void NuMarkSceneAsZPrePass() {
+    currentScene.z_pre_pass = 1;
 }
 
 extern "C" void NuRndrClear(i32 clear_flags, i32 bg_colour, f32 alpha) {

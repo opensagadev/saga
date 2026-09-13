@@ -54,6 +54,7 @@ extern i32 g_backingHeight;
 
 #ifdef __cplusplus
 
+void NuMarkSceneAsZPrePass();
 void NuRndrStreamInit(i32 stream_buffer_size, VARIPTR *buffer);
 extern i32 rndr_blend_shape_deformer_wt_cnt;
 extern i32 rndr_blend_shape_deformer_wt_ptrs_cnt;
