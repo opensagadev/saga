@@ -28,7 +28,6 @@
 DECOMP_ASSERT(offsetof(WORLDINFO, tightropes) == 0x505c, "World tightrope array offset");
 DECOMP_ASSERT(offsetof(WORLDINFO, tightrope_count) == 0x5060, "World tightrope count offset");
 
-extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 extern void FindAnglesZX(NUVEC *, u16 *, u16 *);
 extern void GameObjectOrigin(GameObject_s *);
 
@@ -37,7 +36,6 @@ extern void StartJump(GameObject_s *, i32);
 extern void StartEndOfJump(GameObject_s *);
 extern i32 StartFallLand(GameObject_s *, i32);
 
-extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
 void GameObjectOrigin(GameObject_s *);
 

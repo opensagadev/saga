@@ -481,7 +481,6 @@ i32 GameAudio_GetPlrSfxBits(void *);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 void PlayJumpSfx(GameObject_s *, i32);
 i32 RotDiff(u16, u16);
-extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 
 void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
     APIOBJECT &api = object->apiobj;

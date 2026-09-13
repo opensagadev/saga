@@ -6,6 +6,7 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/characters/motion/animlist.h"
+#include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
@@ -25,7 +26,6 @@ extern "C" i16 id_MINISLAVE1;
 
 void TurnCodeCamSafe(GameObject_s *object, NUMTX *matrix);
 void ResetForceGlow(PLAYERPACKET_s *packet);
-extern "C" f32 AnimDuration(i32 character, i32 animation, f32 start, f32 end, i32 subtract_frame);
 i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *object, i32 effects, i32 cause, i32 damage, GameObject_s *source, i32 respawn);
 
 void DeRotatePoint(nuvec_s *point) {

@@ -2651,3 +2651,83 @@ checks. The rebuilt Map/Cantina 120-frame smoke passed on attempt three;
 attempts one and two reached gameplay but hit the previously documented
 `MovePlayer`/`nutrig.cpp:77` sanitizer flake. No matching behavior or
 sanitizer setting was changed to avoid it.
+
+### API object current-animation query and blend-mode state
+
+The unchanged `CurrentAnim` (`0x3cf354`) moved from the `-O2`
+`gameanim.cpp` catch-all into the original `apiobject.c` owner. The
+target-built `/tmp/api_currentanim_stage9.json` raises it from 32.6% to
+95.86667%, and the whole score from 45.42856% to 45.42903%, with no
+other scored change. The shared `gameanim.h` now declares `AnimDuration`;
+its 19 old source-local declarations were removed across 17 callers, adding the
+real header in files that lacked it. The conflicting local
+`ResetAnimPacket(void *, i32)` declaration in `characters.cpp` was also
+removed in favor of the existing typed header declaration. Target-built
+`/tmp/api_anim_header_stage10.json` retains every original-address score.
+
+The original `_ZL13AnimBlendMode` local data symbol is at `0x664e08` and
+has initialized bytes `01 00 00 00`, not zero-filled BSS. Its storage now
+lives in `apiobject.cpp` with `SetAnimBlendMode` (`0x3c6972`) and
+`GetAnimBlendMode` (`0x3c698c`) in original order. Their declarations are
+in `gameanim.h` for the remaining callers; the two-function
+`gameanim_modes.cpp` fragment was removed. The target-built
+`/tmp/api_blendmode_stage11.json` retains all original-address scores and
+reduces the current target source count by one. A rebuilt Map/Cantina
+smoke passes 120 frames on attempt two; attempt one reached gameplay and
+hit the previously documented `MovePlayer`/trig sanitizer flake. Restoring
+the original initial value was based on the executable's data bytes, not
+a code-generation trick.
+
+`APIObjectSysInit` (`0x3c69a2`) then moved unchanged from `ai_sys.cpp`
+next to the blend-mode accessors, preserving its 88.796295% score in
+`/tmp/api_sysinit_stage12.json` and the 45.42903% whole score.
+`AISysBufferAlloc` has a real declaration in `aisys.h` instead of an
+`ai_sys.cpp`-local external prototype. Its original disassembly calls
+that allocator twice and `memset` twice, as the unchanged body does.
+
+### API object packet update and root motion
+
+The original local `UpdateAnimTimer` (`0x3ce0c3`), `UpdateAnimPacket`
+(`0x3ce4e4`), and `UpdateMiniAnimPacket` (`0x3cf1e7`) now share the
+`apiobject.cpp` translation unit with the packet converters and
+`AnimBlendMode`. The timer reads the animation metadata directly from
+`model_data_a`; the packet update reads the TU-local blend mode directly.
+The executable's packet path checks for the `-1` animation sentinel before
+the relevant array accesses, so the source keeps those checks without
+adding a broader nonnegative-index guard. No helper bridge, assembly, or
+attribute was introduced.
+
+The target-built `/tmp/api_packet_final_raw.json` raises whole-binary
+matching from 45.42903% to 45.470016%. `UpdateAnimPacket` rises from
+0% to 64.0339% and `UpdateMiniAnimPacket` from 13.515152% to
+99.969696%. Three unchanged functions remaining in `gameanim.cpp`
+regress in the same build: `ANI_Ani3ExtractAllNodeCurves`
+31.460567→26.078865%, `Animate_ATAT` 56.57353→56.35294%, and
+`GetDefaultIdle` 51.175438→51.0%. Their objdiff instruction changes
+are not solely GOT/PLT relocation differences, so the losses are
+recorded as genuine current-TU/codegen sensitivity, not dismissed as
+noise. The original packet owner and net whole-binary gain justify
+retaining this structural move; the three bodies remain matching work.
+Target and native builds pass, and a rebuilt Map/Cantina fixture
+advances 120 healthy frames. The separately documented intermittent
+`MovePlayer`/trig sanitizer failure remains possible; original movement
+behavior and sanitizer settings are unchanged.
+
+The next coherent move places `RootFnEx` (`0x3cf63d`), `RootFn`
+(`0x3cf947`), `RootFnY` (`0x3cf997`), and `BlendRootFn` (`0x3cf9e7`)
+in `apiobject.cpp` in original address order. `RootFnEx` now has a real
+C++-linkage declaration in `gameanim.h` rather than a source-local
+prototype. In the normalized `/tmp/api_rootmotion_final_raw.json`,
+whole-binary matching rises again to 45.49253%; `RootFnEx` holds at
+87.88584%, both wrappers rise from 53.375% to 100%, and
+`BlendRootFn` rises from 14.257092% to 66.53546%. No assigned
+original-address score regresses in this root-motion step. Target and
+native builds and a rebuilt 120-frame Map/Cantina smoke pass.
+
+The integrated checkpoint records 45.49253% in `matching.json`, up from
+the previous commit's 45.42856%. Target, WASM, native/smoke, and all
+three lint-mode builds pass, as do the four repository checks. Original
+text-symbol coverage is 13,425/13,425 with zero missing. The combined
+original-address comparison has the three packet-move regressions named
+above and no others; no artificial code or sanitizer change was made to
+conceal them.

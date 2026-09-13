@@ -54,7 +54,6 @@ void ComboRotateCode(GameObject_s *, i32) {
 }
 
 BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
-extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 void NewBuzzFrames(nupad_s *, i32, i32);
 void SetWeaponIn(GameObject_s *);
 void SetWeaponOut(GameObject_s *);

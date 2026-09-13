@@ -13,6 +13,7 @@
 #include "legoapi/characters/core/charconfig.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/items/base/collection.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/items/objects/gameobjects.h"
@@ -656,7 +657,6 @@ extern i32 GetDefaultIdle(GameObject_s *obj);
 extern void ResetCharacterIdle(GameObject_s *obj, i32 mode, i32 idle);
 extern void *Suit_GetDefault(i32 id);
 extern void ResetLights(NUVEC *position, rtldata_s *data, void *set);
-extern "C" void ResetAnimPacket(void *packet, i32 enabled);
 extern void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
 
 static u32 LayerBit(u8 layer) {
@@ -934,7 +934,6 @@ i32 NewPlayerCharacter(GameObject_s *object, i32 id, i32 old_id, i32) {
     return 1;
 }
 
-extern "C" f32 AnimDuration(i32 character_id, i32 animation, f32 start_frame, f32 end_frame, i32 subtract_frame_time);
 i32 GetDefaultIdle(GameObject_s *object);
 
 static i32 IdleRepetitionCount(u8 minimum, u8 maximum) {

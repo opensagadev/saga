@@ -3,6 +3,13 @@
 #include "nu2api/nucore/common.h"
 #include "nu2api/numath/nuvec.h"
 
+enum CHARACTER_ANIMATION_FLAGS : u32 {
+    CHARACTER_ANIMATION_FLAG_SYNCHRONISED = 0x02,
+    CHARACTER_ANIMATION_FLAG_ROOT_MOTION = 0x20,
+    CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT = 0x80,
+    CHARACTER_ANIMATION_FLAG_VERTICAL_ROOT_MOTION = 0x200,
+};
+
 enum PLAYER_JUMP_ACTION : i16 {
     PLAYER_JUMP_ACTION_FALL = 5,
     PLAYER_JUMP_ACTION_JUMP = 6,
@@ -34,6 +41,7 @@ struct characterdata_s;
 struct nugscn_s;
 struct nuhspecial_s;
 struct numtx_s;
+void RootFnEx(numtx_s *, void *, NUVEC *, NUVEC *, NUVEC *, f32, i32);
 extern "C" void RootFn(numtx_s *, void *, NUVEC *, NUVEC *, NUVEC *, f32);
 extern "C" void RootFnY(numtx_s *, void *, NUVEC *, NUVEC *, NUVEC *, f32);
 extern "C" void BlendRootFn(numtx_s *, void *, NUVEC *, NUVEC *, NUVEC *, f32);
@@ -88,6 +96,8 @@ void AnimatePlayer(GameObject_s *object);
 #ifdef __cplusplus
 extern "C" {
 #endif
+    void SetAnimBlendMode(i32 mode);
+    i32 GetAnimBlendMode(void);
     i32 CurrentAnim(ANIMPACKET_s *packet);
     f32 AnimSpeed(CHARACTERMODEL_s *model, i32 animation);
     void AnimPacket_MiniToFull(MINIANIMPACKET_s *mini_packet, ANIMPACKET_s *packet);

@@ -25,7 +25,6 @@ void StartLunge(GameObject_s *, f32, f32);
 i32 Slam_Start(GameObject_s *, f32);
 void StartHold(GameObject_s *);
 void ComboHitFrame(GameObject_s *, i32);
-extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 void PlaySabreSfx(char *, GameObject_s *, NUVEC *, i32);
 i32 DoubleJump_JediSlam = 0;
 f32 SLAMJUMPSPEED = 3.0f;

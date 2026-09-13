@@ -54,7 +54,6 @@ LEVER_CONFIG LeverSys = {0x55, 0};
 
 extern "C" u8 show_lever_hint;
 void Hint_SetComplete(i32);
-extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 
 void ReleaseLever(GameObject_s *object) {
     if (object->character_context == 0x4a) {
@@ -79,8 +78,6 @@ MechObjectInterface *LEVER_s::GetMechObjectInterface() {
 extern "C" {
     u8 show_lever_hint = 0;
 }
-extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
-
 void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object) {
     f32 distance = 1.0e9f;
     if (object->character_context == 0x4a) {

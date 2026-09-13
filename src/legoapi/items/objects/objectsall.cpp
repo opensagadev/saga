@@ -15,6 +15,7 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuvec.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/gameanim.h"
 
 #include <string.h>
 
@@ -27,7 +28,6 @@ f32 BUCK_RIDERJUMPCLEARANCE = 1.0f;
 void (*BuckStartExtraFn)(GameObject_s *) = NULL;
 void NewRumble(nupad_s *, f32, i32);
 void StartJump(GameObject_s *, i32);
-extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 
 void Buck_Start(GameObject_s *object, GameObject_s *rider) {
     if (LEGOCONTEXT_BUCK == -1 || LEGOACT_BUCK == -1 ||

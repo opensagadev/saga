@@ -29,7 +29,6 @@ i32 SuperCarry_KeepObjectLevel = 1;
 
 #include "nu2api/numath/nuang.h"
 #include "nu2api/nu3d/nuspecial.h"
-extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *, i32, i32, i32, GameObject_s *, i32);
 u32 (*CanSuperCarryFn)(GameObject_s *) = NULL;
 i32 SuperCarry_Carrying(GameObject_s *);

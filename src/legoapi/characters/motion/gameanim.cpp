@@ -161,8 +161,6 @@ static GAMECHARACTERDATA *GetGameCharacterData(GameObject_s *object);
 void UpdateCharacterIdle(GameObject_s *object);
 void AutoWeaponOnOff(GameObject_s *object);
 void AddFootSteps(GameObject_s *object);
-void RootFnEx(NUMTX *matrix, void *data, NUVEC *source_root, NUVEC *target_root, NUVEC *root_delta, f32 blend,
-              i32 include_y);
 extern "C" void PlaySfxByIdAndSetVolume(i32 sfx_id, NUVEC *position, f32 volume);
 i32 MatrixReflection(NUMTX *matrix, i32 axis, f32 plane, f32 height, NUMTX *result);
 
@@ -171,7 +169,6 @@ extern i16 id_IMPERIALGUARD;
 extern i16 id_YODA;
 extern i16 id_YODAGHOST;
 extern i16 id_GONKDROID;
-extern "C" i32 GetAnimBlendMode(void);
 
 enum CHARACTER_ANIMATION : i16 {
     CHARACTER_ANIMATION_WALK = 0,
@@ -197,13 +194,6 @@ enum CHARACTER_ANIMATION : i16 {
     CHARACTER_ANIMATION_SUIT_TIPTOE = 198,
     CHARACTER_ANIMATION_SUIT_WALK = 199,
     CHARACTER_ANIMATION_SUIT_RUN = 200,
-};
-
-enum CHARACTER_ANIMATION_FLAGS : u32 {
-    CHARACTER_ANIMATION_FLAG_SYNCHRONISED = 0x02,
-    CHARACTER_ANIMATION_FLAG_ROOT_MOTION = 0x20,
-    CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT = 0x80,
-    CHARACTER_ANIMATION_FLAG_VERTICAL_ROOT_MOTION = 0x200,
 };
 
 static bool HasAnimation(const CHARACTERMODEL_s *model, i32 animation) {
@@ -356,94 +346,6 @@ static GAMECHARACTERDATA *GetGameCharacterData(GameObject_s *object) {
         return NULL;
     }
     return static_cast<GAMECHARACTERDATA *>(object->apiobj.character_data->field11_0x24);
-}
-
-static f32 UpdateAnimTimer(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, i16 animation, f32 time, f32 frame_step,
-                           f32 movement_speed, i32 report_events, char *reversed, i32 backwards,
-                           f32 backwards_multiplier) {
-    CHARACTERANIM_s *animation_info = GetAnimationInfo(model, animation);
-    if (!HasAnimation(model, animation) || animation_info == NULL) {
-        return time;
-    }
-
-    f32 rate = animation_info->playback_rate;
-    if (animation_info->movement_speed > 0.0f) {
-        rate *= movement_speed / animation_info->movement_speed;
-        if (rate >= 0.0f) {
-            if (animation_info->movement_rate_cap > 0.0f && rate > animation_info->movement_rate_cap) {
-                rate = animation_info->movement_rate_cap;
-            }
-        } else if (animation_info->movement_rate_cap < 0.0f && rate < animation_info->movement_rate_cap) {
-            rate = animation_info->movement_rate_cap;
-        }
-    }
-    if (*reversed != 0) {
-        frame_step = -(frame_step * backwards_multiplier);
-    }
-
-    const f32 delta = rate * (frame_step / 30.0f);
-    time += delta;
-    const f32 end_frame = NuAnimEndFrame(model->model_data_b[animation]);
-    bool looped = false;
-
-    // Original 0x3ce29f only enters reverse playback for an ordered negative delta.
-    if (!(delta < 0.0f)) {
-        if (time > end_frame) {
-            if ((animation_info->flags & CHARACTER_ANIMATION_FLAG_SYNCHRONISED) == 0) {
-                time = end_frame;
-                if (report_events) {
-                    packet->flags |= ANIMPACKET_FLAG_FINISHED;
-                }
-            } else {
-                if (end_frame > 1.0f) {
-                    while (time > end_frame) {
-                        time -= end_frame - 1.0f;
-                    }
-                } else {
-                    time = 1.0f;
-                }
-                if (report_events) {
-                    packet->flags |= ANIMPACKET_FLAG_LOOPED;
-                }
-                looped = true;
-            }
-        }
-    } else {
-        if (report_events) {
-            packet->flags |= ANIMPACKET_FLAG_PLAYING_REVERSED;
-        }
-        if (time < 1.0f) {
-            if ((animation_info->flags & CHARACTER_ANIMATION_FLAG_SYNCHRONISED) == 0) {
-                time = 1.0f;
-                if (report_events) {
-                    packet->flags |= ANIMPACKET_FLAG_FINISHED;
-                }
-            } else {
-                if (end_frame > 1.0f) {
-                    while (time < 1.0f) {
-                        time += end_frame - 1.0f;
-                    }
-                } else {
-                    time = 1.0f;
-                }
-                if (report_events) {
-                    packet->flags |= ANIMPACKET_FLAG_LOOPED;
-                }
-                looped = true;
-            }
-        }
-    }
-
-    if (looped) {
-        if (*reversed == 0) {
-            if (backwards && (animation_info->flags & CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT) != 0) {
-                *reversed = 1;
-            }
-        } else if (!backwards) {
-            *reversed = 0;
-        }
-    }
-    return time;
 }
 
 static void StartAnimation(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, i16 animation, bool backwards) {
@@ -2832,110 +2734,7 @@ extern "C" {
     void AnimsAvailableToBothCharacters(void) {
     }
 
-    void BlendRootFn(NUMTX *matrix, void *data, NUVEC *source_root, NUVEC *target_root, NUVEC *root_delta, f32 blend) {
-        APIOBJECT *object = static_cast<APIOBJECT *>(data);
-        CHARACTERANIM_s *source_animation = static_cast<CHARACTERANIM_s *>(
-            object->character_model->model_data_a[object->anim_packet.blend_animation_a]);
-        CHARACTERANIM_s *target_animation = static_cast<CHARACTERANIM_s *>(
-            object->character_model->model_data_a[object->anim_packet.blend_animation_b]);
-
-        NUVEC source_motion;
-        NUVEC target_motion;
-        NUVEC source_position;
-        NUVEC target_position;
-
-        if ((source_animation->flags & CHARACTER_ANIMATION_FLAG_ROOT_MOTION) != 0) {
-            if (object->previous_animation_root_time > object->anim_packet.blend_source_time ||
-                object->previous_animation_root_info != source_animation) {
-                object->previous_animation_root = *source_root;
-                object->previous_animation_root_info = source_animation;
-            }
-
-            source_motion.x = source_root->x - object->previous_animation_root.x;
-            source_motion.y = (source_animation->flags & CHARACTER_ANIMATION_FLAG_VERTICAL_ROOT_MOTION) != 0
-                                  ? source_root->y - object->previous_animation_root.y
-                                  : 0.0f;
-            source_motion.z = source_root->z - object->previous_animation_root.z;
-            object->previous_animation_root = *source_root;
-
-            source_position.x = 0.0f;
-            source_position.y =
-                (source_animation->flags & CHARACTER_ANIMATION_FLAG_VERTICAL_ROOT_MOTION) != 0 ? 0.0f : source_root->y;
-            source_position.z = 0.0f;
-            object->previous_animation_root_time = object->anim_packet.blend_source_time;
-        } else {
-            source_motion.x = 0.0f;
-            source_motion.y = 0.0f;
-            source_motion.z = 0.0f;
-            source_position = *source_root;
-            object->previous_animation_root_time = FLT_MAX;
-        }
-
-        NUVEC source_offset = source_animation->root_translation;
-
-        if ((target_animation->flags & CHARACTER_ANIMATION_FLAG_ROOT_MOTION) != 0) {
-            if (object->previous_blend_target_root_time > object->anim_packet.blend_target_time ||
-                object->previous_blend_target_root_info != target_animation) {
-                object->previous_blend_target_root = *target_root;
-                object->previous_blend_target_root_info = target_animation;
-            }
-
-            target_motion.x = target_root->x - object->previous_blend_target_root.x;
-            target_motion.y = (target_animation->flags & CHARACTER_ANIMATION_FLAG_VERTICAL_ROOT_MOTION) != 0
-                                  ? target_root->y - object->previous_blend_target_root.y
-                                  : 0.0f;
-            target_motion.z = target_root->z - object->previous_blend_target_root.z;
-            object->previous_blend_target_root = *target_root;
-
-            target_position.x = 0.0f;
-            target_position.y =
-                (target_animation->flags & CHARACTER_ANIMATION_FLAG_VERTICAL_ROOT_MOTION) != 0 ? 0.0f : target_root->y;
-            target_position.z = 0.0f;
-            object->previous_blend_target_root_time = object->anim_packet.blend_target_time;
-        } else {
-            target_motion.x = 0.0f;
-            target_motion.y = 0.0f;
-            target_motion.z = 0.0f;
-            target_position = *target_root;
-            object->previous_blend_target_root_time = FLT_MAX;
-        }
-
-        NUVEC target_offset = target_animation->root_translation;
-        NuVecLerp(NUMTX_GET_ROW_VEC(matrix, 3), &source_position, &target_position, blend);
-
-        NUVEC blended_offset;
-        NuVecLerp(&blended_offset, &source_offset, &target_offset, blend);
-        root_delta->x += blended_offset.x;
-        root_delta->y += blended_offset.y;
-        root_delta->z += blended_offset.z;
-        NuMtxTranslate(matrix, root_delta);
-
-        NuVecMtxRotate(&source_motion, &source_motion, &object->field_0xb8);
-        if ((source_animation->flags & CHARACTER_ANIMATION_FLAG_VERTICAL_ROOT_MOTION) == 0) {
-            source_motion.y = 0.0f;
-        }
-        NuVecMtxRotate(&target_motion, &target_motion, &object->field_0xb8);
-        if ((target_animation->flags & CHARACTER_ANIMATION_FLAG_VERTICAL_ROOT_MOTION) == 0) {
-            target_motion.y = 0.0f;
-        }
-        NuVecLerp(&object->animation_root_delta, &source_motion, &target_motion, blend);
-
-        const f32 root_motion_epsilon = 1.0e-11f;
-        if (((source_animation->flags & CHARACTER_ANIMATION_FLAG_VERTICAL_ROOT_MOTION) != 0 ||
-             (target_animation->flags & CHARACTER_ANIMATION_FLAG_VERTICAL_ROOT_MOTION) != 0) &&
-            object->animation_root_delta.y == 0.0f) {
-            object->animation_root_delta.y = root_motion_epsilon;
-        } else if (object->animation_root_delta.x == 0.0f && object->animation_root_delta.y == 0.0f &&
-                   object->animation_root_delta.z == 0.0f) {
-            object->animation_root_delta.x = root_motion_epsilon;
-        }
-    }
-
     void BlendTimeBetweenAnims(void) {
-    }
-
-    i32 CurrentAnim(ANIMPACKET_s *packet) {
-        return packet->blending == 0 ? packet->animation_index : packet->blend_animation_b;
     }
 
     void EvalModelAnim(void) {
@@ -2956,14 +2755,6 @@ extern "C" {
         }
 
         return static_cast<f32>(scene->animation_end_frames[instance_animation->end_frame_lookup_index - 1].end_frame);
-    }
-
-    void RootFn(NUMTX *matrix, void *data, NUVEC *source_root, NUVEC *target_root, NUVEC *root_delta, f32 blend) {
-        RootFnEx(matrix, data, source_root, target_root, root_delta, blend, 0);
-    }
-
-    void RootFnY(NUMTX *matrix, void *data, NUVEC *source_root, NUVEC *target_root, NUVEC *root_delta, f32 blend) {
-        RootFnEx(matrix, data, source_root, target_root, root_delta, blend, 1);
     }
 
     NUJOINTPROCANIMFN JointProcAnimFn;
@@ -3072,187 +2863,6 @@ extern "C" {
         return state;
     }
 
-    void UpdateAnimPacket(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, f32 frame_step, f32 movement_speed,
-                          f32 blend_step, f32 backwards_multiplier) {
-        i32 backwards = 0;
-        i32 interrupted_reversed = 0;
-        i32 interrupted = 0;
-        if (movement_speed < 0.0f) {
-            backwards = 1;
-            movement_speed = -movement_speed;
-        }
-
-        if (model == NULL || packet == NULL) {
-            return;
-        }
-
-        const i32 paused = packet->flags & ANIMPACKET_FLAG_PAUSED;
-        const i32 force_restart = packet->flags & ANIMPACKET_FLAG_FORCE_RESTART;
-        packet->flags = 0;
-        packet->previous_time = packet->blending == 0 ? packet->current_time : packet->blend_target_time;
-        if (frame_step == 0.0f) {
-            packet->flags |= ANIMPACKET_FLAG_ZERO_TIMESTEP;
-            return;
-        }
-
-        if (packet->overlay_animation == -1) {
-            CHARACTERANIM_s *current_info;
-            if (packet->blending != 0) {
-                const i16 requested = packet->requested_animation;
-                CHARACTERANIM_s *requested_info = GetAnimationInfo(model, requested);
-                if (requested != -1 && requested != packet->blend_animation_b && HasAnimation(model, requested) &&
-                    requested_info != NULL && requested_info->blend_in_time == 0.0f) {
-                    packet->animation_index = requested;
-                    if (backwards != 0 &&
-                        (requested_info->flags & CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT) != 0) {
-                        packet->current_reversed = 1;
-                        packet->current_time = NuAnimEndFrame(model->model_data_b[requested]);
-                    } else {
-                        packet->current_reversed = 0;
-                        packet->current_time = 1.0f;
-                    }
-                    packet->blending = 0;
-                    packet->previous_time = packet->current_time;
-                    packet->flags |= ANIMPACKET_FLAG_ANIMATION_CHANGED;
-                    goto update_timers;
-                }
-
-                packet->blend_elapsed += blend_step;
-                if (packet->blend_elapsed >= packet->blend_duration) {
-                    packet->blending = 0;
-                    packet->animation_index = packet->blend_animation_b;
-                    packet->current_time = packet->blend_target_time;
-                    packet->current_reversed = packet->blend_target_reversed;
-                    packet->flags |= ANIMPACKET_FLAG_BLEND_FINISHED;
-                    goto update_timers;
-                }
-
-                if (GetAnimBlendMode() != 1 || requested == packet->blend_animation_b ||
-                    !HasAnimation(model, requested)) {
-                    goto update_timers;
-                }
-
-                if (packet->blend_elapsed < packet->blend_duration * 0.5f) {
-                    packet->previous_animation = packet->blend_animation_a;
-                    interrupted_reversed = static_cast<i8>(packet->blend_source_reversed);
-                    interrupted = 1;
-                } else {
-                    packet->previous_animation = packet->blend_animation_b;
-                    interrupted_reversed = static_cast<i8>(packet->blend_target_reversed);
-                    packet->blend_source_time = packet->blend_target_time;
-                    interrupted = 1;
-                }
-            }
-
-            // Interrupted blends enter the transition directly (original
-            // 0x3ce858/0x3ce88a), even when returning to their source animation.
-            if (interrupted == 0 && packet->requested_animation == packet->previous_animation) {
-                if (force_restart == 0 || packet->requested_animation != packet->animation_index ||
-                    !HasAnimation(model, packet->animation_index)) {
-                    packet->animation_index = packet->requested_animation;
-                    packet->blending = 0;
-                    goto update_timers;
-                }
-            }
-
-            if (packet->previous_animation != -1 && packet->requested_animation != -1 &&
-                HasAnimation(model, packet->previous_animation) && HasAnimation(model, packet->requested_animation)) {
-                CHARACTERANIM_s *source_info = GetAnimationInfo(model, packet->previous_animation);
-                CHARACTERANIM_s *target_info = GetAnimationInfo(model, packet->requested_animation);
-                if (source_info != NULL && target_info != NULL && source_info->blend_out_time > blend_step &&
-                    target_info->blend_in_time > blend_step) {
-                    packet->blending = 1;
-                    packet->blend_animation_a = packet->previous_animation;
-                    packet->blend_source_reversed = static_cast<u8>(interrupted_reversed);
-                    packet->blend_animation_b = packet->requested_animation;
-                    if (interrupted == 0) {
-                        packet->blend_source_time = packet->current_time;
-                    }
-                    packet->blend_source_reversed = packet->current_reversed;
-
-                    const bool synchronised = (source_info->flags & CHARACTER_ANIMATION_FLAG_SYNCHRONISED) != 0 &&
-                                              (target_info->flags & CHARACTER_ANIMATION_FLAG_SYNCHRONISED) != 0 &&
-                                              source_info->playback_rate == target_info->playback_rate &&
-                                              NuAnimEndFrame(model->model_data_b[packet->blend_animation_a]) ==
-                                                  NuAnimEndFrame(model->model_data_b[packet->blend_animation_b]);
-                    if (synchronised) {
-                        packet->blend_target_time = packet->blend_source_time;
-                        packet->blend_target_reversed =
-                            backwards != 0 && (target_info->flags & CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT) != 0
-                                ? 1
-                                : 0;
-                    } else if (backwards != 0 &&
-                               (target_info->flags & CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT) != 0) {
-                        packet->blend_target_reversed = 1;
-                        packet->blend_target_time = NuAnimEndFrame(model->model_data_b[packet->blend_animation_b]);
-                    } else {
-                        packet->blend_target_reversed = 0;
-                        packet->blend_target_time = 1.0f;
-                    }
-                    packet->blend_elapsed = 0.0f;
-                    packet->blend_duration = target_info->blend_in_time;
-                    if (packet->blend_duration > source_info->blend_out_time) {
-                        packet->blend_duration = source_info->blend_out_time;
-                    }
-                    packet->flags |= ANIMPACKET_FLAG_ANIMATION_CHANGED;
-                    goto update_timers;
-                }
-            }
-
-            packet->animation_index = packet->requested_animation;
-            current_info = GetAnimationInfo(model, packet->animation_index);
-            if (backwards != 0 && HasAnimation(model, packet->animation_index) && current_info != NULL &&
-                (current_info->flags & CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT) != 0) {
-                packet->current_reversed = 1;
-                packet->current_time = NuAnimEndFrame(model->model_data_b[packet->animation_index]);
-            } else {
-                packet->current_reversed = 0;
-                packet->current_time = 1.0f;
-            }
-            packet->blending = 0;
-            packet->previous_time = packet->current_time;
-            packet->flags |= ANIMPACKET_FLAG_ANIMATION_CHANGED;
-
-        update_timers:
-            if (packet->blending == 0) {
-                if (!HasAnimation(model, packet->animation_index)) {
-                    const i16 requested_animation = packet->requested_animation;
-                    ResetAnimPacket(packet, -1);
-                    packet->requested_animation = requested_animation;
-                    return;
-                }
-                if (paused != 0) {
-                    frame_step = 0.0f;
-                }
-                packet->current_time = UpdateAnimTimer(
-                    model, packet, packet->animation_index, packet->current_time, frame_step, movement_speed, 1,
-                    reinterpret_cast<char *>(&packet->current_reversed), backwards, backwards_multiplier);
-            } else if (HasAnimation(model, packet->blend_animation_a) &&
-                       HasAnimation(model, packet->blend_animation_b)) {
-                packet->blend_source_time = UpdateAnimTimer(
-                    model, packet, packet->blend_animation_a, packet->blend_source_time, frame_step, movement_speed, 0,
-                    reinterpret_cast<char *>(&packet->blend_source_reversed), backwards, backwards_multiplier);
-                packet->blend_target_time = UpdateAnimTimer(
-                    model, packet, packet->blend_animation_b, packet->blend_target_time, frame_step, movement_speed, 1,
-                    reinterpret_cast<char *>(&packet->blend_target_reversed), backwards, backwards_multiplier);
-            }
-        } else if (HasAnimation(model, packet->requested_animation) && HasAnimation(model, packet->overlay_animation)) {
-            packet->blend_source_time = UpdateAnimTimer(
-                model, packet, packet->requested_animation, packet->blend_source_time, frame_step, movement_speed, 0,
-                reinterpret_cast<char *>(&packet->blend_source_reversed), backwards, backwards_multiplier);
-            packet->blend_target_time = UpdateAnimTimer(
-                model, packet, packet->overlay_animation, packet->blend_target_time, frame_step, movement_speed, 1,
-                reinterpret_cast<char *>(&packet->blend_target_reversed), backwards, backwards_multiplier);
-        }
-    }
-
-    void UpdateMiniAnimPacket(CHARACTERMODEL_s *model, MINIANIMPACKET_s *mini_packet, f32 frame_step,
-                              f32 movement_speed, f32 blend_step) {
-        ANIMPACKET_s packet;
-        AnimPacket_MiniToFull(mini_packet, &packet);
-        UpdateAnimPacket(model, &packet, frame_step, movement_speed, blend_step, 0.0f);
-        AnimPacket_FullToMini(&packet, mini_packet);
-    }
 
 } // extern "C"
 

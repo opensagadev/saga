@@ -250,7 +250,6 @@ static i32 Fighting_WeaponOutAction_Game(GameObject_s *object) {
 extern "C" i32 NuIOS_IsSmallScreen(void);
 extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 extern "C" void SetAPIObjPlaySfxByIdFn(void (*play_sfx)(i32, nuvec_s *));
-extern "C" void SetAnimBlendMode(i32 mode);
 f32 GameSetSoundVolume(OPTIONSSAVE_s *);
 f32 GameSetMusicVolume(OPTIONSSAVE_s *);
 void GameAudio_Reset(void);

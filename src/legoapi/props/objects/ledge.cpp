@@ -20,7 +20,6 @@ f32 LEDGETERRAINLOOKAHEAD = 0.02f;
 i32 LedgeTerrain_CheckAnims = 1;
 extern "C" TERRAIN_SURFACE_s TerSurface[32];
 void StartJump(GameObject_s *, i32);
-extern "C" f32 AnimDuration(i32, i32, f32, f32, i32);
 
 static i32 LedgeTerrain_Attach(GameObject_s *object, u16 facing, NUVEC *position, u16 *wall_angle) {
     *wall_angle = NuAtan2D(object->contact_normal.x, object->contact_normal.z);
