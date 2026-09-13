@@ -5388,9 +5388,6 @@ i32 NoLayerKill(GameObject_s *object) {
     return 0;
 }
 
-void GetUsageMask(NuShaderUsageMask_s *) {
-}
-
 void GetTakeOverPos(GameObject_s *, NUVEC *);
 void ReleaseTakeOver(GameObject_s *, i32);
 void TakeOverGameObject2(GameObject_s *, GameObject_s *, i32);

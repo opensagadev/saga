@@ -476,13 +476,6 @@ i32 getqseed() {
     return qseed;
 }
 
-f32 clampBias(f32 bias) {
-    if (bias < -16.0f) {
-        return -16.0f;
-    }
-    return 15.96875f < bias ? 15.96875f : bias;
-}
-
 i32 findrange(nugscn_s *scene, i32 first_joint) {
     // This helper's original C++ ABI names nugscn_s, but animation callers
     // pass the hierarchy object whose joint table starts at the same offsets.

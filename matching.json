@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 45.876186,
+    "fuzzy_match_percent": 45.876938,
     "total_code": "4722419",
-    "matched_code": "397570",
-    "matched_code_percent": 8.418778,
+    "matched_code": "398998",
+    "matched_code_percent": 8.449018,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4734,
-    "matched_functions_percent": 35.173492,
+    "matched_functions": 4740,
+    "matched_functions_percent": 35.218067,
     "total_units": 1
   },
   "text": {
@@ -66242,14 +66242,6 @@
           "match_percent": 64.89805
         },
         {
-          "name": "_Z12GetUsageMaskP19NuShaderUsageMask_s",
-          "demangled_name": "GetUsageMask(NuShaderUsageMask_s*)",
-          "address": 3191984,
-          "offset": 2302016,
-          "size": 175,
-          "match_percent": 6.774194
-        },
-        {
           "name": "_Z26RemoveChunkFromRenderStackP25particlechunkrendertype_sPS0_",
           "demangled_name": "RemoveChunkFromRenderStack(particlechunkrendertype_s*, particlechunkrendertype_s**)",
           "address": 3459328,
@@ -73155,14 +73147,6 @@
           "offset": 1979408,
           "size": 109,
           "match_percent": 81.61539
-        },
-        {
-          "name": "_Z9clampBiasf",
-          "demangled_name": "clampBias(float)",
-          "address": 3194128,
-          "offset": 2304160,
-          "size": 80,
-          "match_percent": 99.9
         },
         {
           "name": "_Z14SolveQuadraticfffPfS_",
@@ -88271,6 +88255,269 @@
       ]
     },
     {
+      "name": "nu2api/nu3d/android/nushaderobject.cpp.o",
+      "source": "src/nu2api/nu3d/android/nushaderobject.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nushaderobject.o",
+      "functions": [
+        {
+          "name": "NuShaderObjectGLSLCreate",
+          "demangled_name": "NuShaderObjectGLSLCreate",
+          "address": 3189280,
+          "offset": 2299312,
+          "size": 34,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuShaderObjectCreate",
+          "demangled_name": "NuShaderObjectCreate",
+          "address": 3189328,
+          "offset": 2299360,
+          "size": 58,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuShaderObjectDestroy",
+          "demangled_name": "NuShaderObjectDestroy",
+          "address": 3189392,
+          "offset": 2299424,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z40NuShaderObjectBindAttributeLocationsGLSLj",
+          "demangled_name": "NuShaderObjectBindAttributeLocationsGLSL(unsigned int)",
+          "address": 3189408,
+          "offset": 2299440,
+          "size": 452,
+          "match_percent": 99.84536
+        },
+        {
+          "name": "NuShaderObjectGLSLDestroy",
+          "demangled_name": "NuShaderObjectGLSLDestroy",
+          "address": 3189872,
+          "offset": 2299904,
+          "size": 121,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z32NuShaderObjectGenerateGLSLShaderPjjPKci",
+          "demangled_name": "NuShaderObjectGenerateGLSLShader(unsigned int*, unsigned int, char const*, int)",
+          "address": 3190000,
+          "offset": 2300032,
+          "size": 242,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z43NuShaderObjectCombineGLSLShadersIntoProgramPjjj",
+          "demangled_name": "NuShaderObjectCombineGLSLShadersIntoProgram(unsigned int*, unsigned int, unsigned int)",
+          "address": 3190256,
+          "offset": 2300288,
+          "size": 250,
+          "match_percent": 95.234375
+        },
+        {
+          "name": "_Z22NuShaderObjectInitGLSLP20nushaderobjectglsl_sPK19nushaderobjectkey_siPKciS5_i",
+          "demangled_name": "NuShaderObjectInitGLSL(nushaderobjectglsl_s*, nushaderobjectkey_s const*, int, char const*, int, char const*, int)",
+          "address": 3190512,
+          "offset": 2300544,
+          "size": 344,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z22NuShaderObjectInitGLSLP20nushaderobjectglsl_sPK19nushaderobjectkey_sijj",
+          "demangled_name": "NuShaderObjectInitGLSL(nushaderobjectglsl_s*, nushaderobjectkey_s const*, int, unsigned int, unsigned int)",
+          "address": 3190864,
+          "offset": 2300896,
+          "size": 183,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z22NuShaderObjectInitGLSLP20nushaderobjectglsl_sPK19nushaderobjectkey_siPKcij",
+          "demangled_name": "NuShaderObjectInitGLSL(nushaderobjectglsl_s*, nushaderobjectkey_s const*, int, char const*, int, unsigned int)",
+          "address": 3191056,
+          "offset": 2301088,
+          "size": 255,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z22NuShaderObjectInitGLSLP20nushaderobjectglsl_sPK19nushaderobjectkey_sijPKci",
+          "demangled_name": "NuShaderObjectInitGLSL(nushaderobjectglsl_s*, nushaderobjectkey_s const*, int, unsigned int, char const*, int)",
+          "address": 3191312,
+          "offset": 2301344,
+          "size": 286,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuShaderObjectUnInit",
+          "demangled_name": "NuShaderObjectUnInit",
+          "address": 3191600,
+          "offset": 2301632,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuShaderObjectGLSLAllocateParameter",
+          "demangled_name": "NuShaderObjectGLSLAllocateParameter",
+          "address": 3191616,
+          "offset": 2301648,
+          "size": 22,
+          "match_percent": 98.57143
+        },
+        {
+          "name": "_Z34NuShaderObjectGLSLGetSemanticIndexPKcR17nushaderuniform_e",
+          "demangled_name": "NuShaderObjectGLSLGetSemanticIndex(char const*, nushaderuniform_e&)",
+          "address": 3191648,
+          "offset": 2301680,
+          "size": 152,
+          "match_percent": 100.0
+        },
+        {
+          "name": "GetGLSLTypeInfo",
+          "demangled_name": "GetGLSLTypeInfo",
+          "address": 3191808,
+          "offset": 2301840,
+          "size": 167,
+          "match_percent": 99.166664
+        },
+        {
+          "name": "_Z12GetUsageMaskP19NuShaderUsageMask_s",
+          "demangled_name": "GetUsageMask(NuShaderUsageMask_s*)",
+          "address": 3191984,
+          "offset": 2302016,
+          "size": 175,
+          "match_percent": 23.67742
+        },
+        {
+          "name": "NuShaderObjectGLSLProbeSemantics",
+          "demangled_name": "NuShaderObjectGLSLProbeSemantics",
+          "address": 3192160,
+          "offset": 2302192,
+          "size": 898,
+          "match_percent": 2.461883
+        },
+        {
+          "name": "NuShaderObjectInit",
+          "demangled_name": "NuShaderObjectInit",
+          "address": 3193072,
+          "offset": 2303104,
+          "size": 118,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z18NuShaderObjectInitP16nushaderobject_sPK19nushaderobjectkey_sijj14eSHADERVERSION",
+          "demangled_name": "NuShaderObjectInit(nushaderobject_s*, nushaderobjectkey_s const*, int, unsigned int, unsigned int, eSHADERVERSION)",
+          "address": 3193200,
+          "offset": 2303232,
+          "size": 88,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z18NuShaderObjectInitP16nushaderobject_sPK19nushaderobjectkey_siPKcij14eSHADERVERSION",
+          "demangled_name": "NuShaderObjectInit(nushaderobject_s*, nushaderobjectkey_s const*, int, char const*, int, unsigned int, eSHADERVERSION)",
+          "address": 3193296,
+          "offset": 2303328,
+          "size": 96,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z18NuShaderObjectInitP16nushaderobject_sPK19nushaderobjectkey_sijPKci14eSHADERVERSION",
+          "demangled_name": "NuShaderObjectInit(nushaderobject_s*, nushaderobjectkey_s const*, int, unsigned int, char const*, int, eSHADERVERSION)",
+          "address": 3193392,
+          "offset": 2303424,
+          "size": 96,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuShaderObjectSetElementsfv",
+          "demangled_name": "NuShaderObjectSetElementsfv",
+          "address": 3193488,
+          "offset": 2303520,
+          "size": 206,
+          "match_percent": 75.3871
+        },
+        {
+          "name": "NuShaderObjectSetElementsfv_transpose",
+          "demangled_name": "NuShaderObjectSetElementsfv_transpose",
+          "address": 3193696,
+          "offset": 2303728,
+          "size": 271,
+          "match_percent": 4.868421
+        },
+        {
+          "name": "_Z29NuShaderObject360LoadPackFilePcP9variptr_uS0_",
+          "demangled_name": "NuShaderObject360LoadPackFile(char*, variptr_u*, variptr_u)",
+          "address": 3193968,
+          "offset": 2304000,
+          "size": 64,
+          "match_percent": 26.25
+        },
+        {
+          "name": "NuShaderObjectLoadFromFile",
+          "demangled_name": "NuShaderObjectLoadFromFile",
+          "address": 3194032,
+          "offset": 2304064,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuShaderObjectUnserialize",
+          "demangled_name": "NuShaderObjectUnserialize",
+          "address": 3194048,
+          "offset": 2304080,
+          "size": 33,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z27NuShaderObject360LoadShaderP16nushaderobject_s",
+          "demangled_name": "NuShaderObject360LoadShader(nushaderobject_s*)",
+          "address": 3194096,
+          "offset": 2304128,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z29NuShaderObject360UnloadShaderP16nushaderobject_s",
+          "demangled_name": "NuShaderObject360UnloadShader(nushaderobject_s*)",
+          "address": 3194112,
+          "offset": 2304144,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z9clampBiasf",
+          "demangled_name": "clampBias(float)",
+          "address": 3194128,
+          "offset": 2304160,
+          "size": 80,
+          "match_percent": 99.9
+        },
+        {
+          "name": "NuShaderObjectGLSLSetupTextureStates",
+          "demangled_name": "NuShaderObjectGLSLSetupTextureStates",
+          "address": 3194208,
+          "offset": 2304240,
+          "size": 3640,
+          "match_percent": 59.996037
+        },
+        {
+          "name": "NuShaderObjectGLSLSetupMaterial",
+          "demangled_name": "NuShaderObjectGLSLSetupMaterial",
+          "address": 3197856,
+          "offset": 2307888,
+          "size": 2381,
+          "match_percent": 63.448334
+        },
+        {
+          "name": "_ZN13GLSLParameter17setElementsMatrixEiiPKf",
+          "demangled_name": "GLSLParameter::setElementsMatrix(int, int, float const*)",
+          "address": 3200240,
+          "offset": 2310272,
+          "size": 194,
+          "match_percent": 68.113205
+        }
+      ]
+    },
+    {
       "name": "nu2api/nu3d/android/nushaderprogram_android.cpp.o",
       "source": "src/nu2api/nu3d/android/nushaderprogram_android.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nushaderprogram_android.o",
@@ -91082,269 +91329,6 @@
       ]
     },
     {
-      "name": "nu2api/nu3d/nushader.cpp.o",
-      "source": "src/nu2api/nu3d/nushader.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nushader.o",
-      "functions": [
-        {
-          "name": "NuShaderObjectGLSLCreate",
-          "demangled_name": "NuShaderObjectGLSLCreate",
-          "address": 3189280,
-          "offset": 2299312,
-          "size": 34,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuShaderObjectCreate",
-          "demangled_name": "NuShaderObjectCreate",
-          "address": 3189328,
-          "offset": 2299360,
-          "size": 58,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuShaderObjectDestroy",
-          "demangled_name": "NuShaderObjectDestroy",
-          "address": 3189392,
-          "offset": 2299424,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z40NuShaderObjectBindAttributeLocationsGLSLj",
-          "demangled_name": "NuShaderObjectBindAttributeLocationsGLSL(unsigned int)",
-          "address": 3189408,
-          "offset": 2299440,
-          "size": 452,
-          "match_percent": 99.175255
-        },
-        {
-          "name": "NuShaderObjectGLSLDestroy",
-          "demangled_name": "NuShaderObjectGLSLDestroy",
-          "address": 3189872,
-          "offset": 2299904,
-          "size": 121,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z32NuShaderObjectGenerateGLSLShaderPjjPKci",
-          "demangled_name": "NuShaderObjectGenerateGLSLShader(unsigned int*, unsigned int, char const*, int)",
-          "address": 3190000,
-          "offset": 2300032,
-          "size": 242,
-          "match_percent": 99.91803
-        },
-        {
-          "name": "_Z43NuShaderObjectCombineGLSLShadersIntoProgramPjjj",
-          "demangled_name": "NuShaderObjectCombineGLSLShadersIntoProgram(unsigned int*, unsigned int, unsigned int)",
-          "address": 3190256,
-          "offset": 2300288,
-          "size": 250,
-          "match_percent": 95.15625
-        },
-        {
-          "name": "_Z22NuShaderObjectInitGLSLP20nushaderobjectglsl_sPK19nushaderobjectkey_siPKciS5_i",
-          "demangled_name": "NuShaderObjectInitGLSL(nushaderobjectglsl_s*, nushaderobjectkey_s const*, int, char const*, int, char const*, int)",
-          "address": 3190512,
-          "offset": 2300544,
-          "size": 344,
-          "match_percent": 99.833336
-        },
-        {
-          "name": "_Z22NuShaderObjectInitGLSLP20nushaderobjectglsl_sPK19nushaderobjectkey_sijj",
-          "demangled_name": "NuShaderObjectInitGLSL(nushaderobjectglsl_s*, nushaderobjectkey_s const*, int, unsigned int, unsigned int)",
-          "address": 3190864,
-          "offset": 2300896,
-          "size": 183,
-          "match_percent": 99.893616
-        },
-        {
-          "name": "_Z22NuShaderObjectInitGLSLP20nushaderobjectglsl_sPK19nushaderobjectkey_siPKcij",
-          "demangled_name": "NuShaderObjectInitGLSL(nushaderobjectglsl_s*, nushaderobjectkey_s const*, int, char const*, int, unsigned int)",
-          "address": 3191056,
-          "offset": 2301088,
-          "size": 255,
-          "match_percent": 99.84127
-        },
-        {
-          "name": "_Z22NuShaderObjectInitGLSLP20nushaderobjectglsl_sPK19nushaderobjectkey_sijPKci",
-          "demangled_name": "NuShaderObjectInitGLSL(nushaderobjectglsl_s*, nushaderobjectkey_s const*, int, unsigned int, char const*, int)",
-          "address": 3191312,
-          "offset": 2301344,
-          "size": 286,
-          "match_percent": 99.861115
-        },
-        {
-          "name": "NuShaderObjectUnInit",
-          "demangled_name": "NuShaderObjectUnInit",
-          "address": 3191600,
-          "offset": 2301632,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuShaderObjectGLSLAllocateParameter",
-          "demangled_name": "NuShaderObjectGLSLAllocateParameter",
-          "address": 3191616,
-          "offset": 2301648,
-          "size": 22,
-          "match_percent": 98.57143
-        },
-        {
-          "name": "_Z34NuShaderObjectGLSLGetSemanticIndexPKcR17nushaderuniform_e",
-          "demangled_name": "NuShaderObjectGLSLGetSemanticIndex(char const*, nushaderuniform_e&)",
-          "address": 3191648,
-          "offset": 2301680,
-          "size": 152,
-          "match_percent": 100.0
-        },
-        {
-          "name": "GetGLSLTypeInfo",
-          "demangled_name": "GetGLSLTypeInfo",
-          "address": 3191808,
-          "offset": 2301840,
-          "size": 167,
-          "match_percent": 98.645836
-        },
-        {
-          "name": "NuShaderObjectGLSLProbeSemantics",
-          "demangled_name": "NuShaderObjectGLSLProbeSemantics",
-          "address": 3192160,
-          "offset": 2302192,
-          "size": 898,
-          "match_percent": 2.461883
-        },
-        {
-          "name": "NuShaderObjectInit",
-          "demangled_name": "NuShaderObjectInit",
-          "address": 3193072,
-          "offset": 2303104,
-          "size": 118,
-          "match_percent": 99.82758
-        },
-        {
-          "name": "_Z18NuShaderObjectInitP16nushaderobject_sPK19nushaderobjectkey_sijj14eSHADERVERSION",
-          "demangled_name": "NuShaderObjectInit(nushaderobject_s*, nushaderobjectkey_s const*, int, unsigned int, unsigned int, eSHADERVERSION)",
-          "address": 3193200,
-          "offset": 2303232,
-          "size": 88,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z18NuShaderObjectInitP16nushaderobject_sPK19nushaderobjectkey_siPKcij14eSHADERVERSION",
-          "demangled_name": "NuShaderObjectInit(nushaderobject_s*, nushaderobjectkey_s const*, int, char const*, int, unsigned int, eSHADERVERSION)",
-          "address": 3193296,
-          "offset": 2303328,
-          "size": 96,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z18NuShaderObjectInitP16nushaderobject_sPK19nushaderobjectkey_sijPKci14eSHADERVERSION",
-          "demangled_name": "NuShaderObjectInit(nushaderobject_s*, nushaderobjectkey_s const*, int, unsigned int, char const*, int, eSHADERVERSION)",
-          "address": 3193392,
-          "offset": 2303424,
-          "size": 96,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuShaderObjectSetElementsfv",
-          "demangled_name": "NuShaderObjectSetElementsfv",
-          "address": 3193488,
-          "offset": 2303520,
-          "size": 206,
-          "match_percent": 75.548386
-        },
-        {
-          "name": "NuShaderObjectSetElementsfv_transpose",
-          "demangled_name": "NuShaderObjectSetElementsfv_transpose",
-          "address": 3193696,
-          "offset": 2303728,
-          "size": 271,
-          "match_percent": 4.93421
-        },
-        {
-          "name": "NuShaderObjectUnserialize",
-          "demangled_name": "NuShaderObjectUnserialize",
-          "address": 3194048,
-          "offset": 2304080,
-          "size": 33,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuShaderObjectGLSLSetupTextureStates",
-          "demangled_name": "NuShaderObjectGLSLSetupTextureStates",
-          "address": 3194208,
-          "offset": 2304240,
-          "size": 3640,
-          "match_percent": 59.996037
-        },
-        {
-          "name": "NuShaderObjectGLSLSetupMaterial",
-          "demangled_name": "NuShaderObjectGLSLSetupMaterial",
-          "address": 3197856,
-          "offset": 2307888,
-          "size": 2381,
-          "match_percent": 63.448334
-        },
-        {
-          "name": "_ZN13GLSLParameter17setElementsMatrixEiiPKf",
-          "demangled_name": "GLSLParameter::setElementsMatrix(int, int, float const*)",
-          "address": 3200240,
-          "offset": 2310272,
-          "size": 194,
-          "match_percent": 67.830185
-        },
-        {
-          "name": "NuShaderObjectBaseCreate",
-          "demangled_name": "NuShaderObjectBaseCreate",
-          "address": 3204016,
-          "offset": 2314048,
-          "size": 32,
-          "match_percent": 8.222222
-        },
-        {
-          "name": "NuShaderObjectBaseDestroy",
-          "demangled_name": "NuShaderObjectBaseDestroy",
-          "address": 3204048,
-          "offset": 2314080,
-          "size": 16,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuShaderObjectBaseInit",
-          "demangled_name": "NuShaderObjectBaseInit",
-          "address": 3204064,
-          "offset": 2314096,
-          "size": 20,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuShaderObjectBaseUnInit",
-          "demangled_name": "NuShaderObjectBaseUnInit",
-          "address": 3204096,
-          "offset": 2314128,
-          "size": 15,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuShaderObjectBaseSetWaterSpeed",
-          "demangled_name": "NuShaderObjectBaseSetWaterSpeed",
-          "address": 3204112,
-          "offset": 2314144,
-          "size": 34,
-          "match_percent": 99.666664
-        },
-        {
-          "name": "NuShaderObjectBaseUpdateWaterTable",
-          "demangled_name": "NuShaderObjectBaseUpdateWaterTable",
-          "address": 3204160,
-          "offset": 2314192,
-          "size": 865,
-          "match_percent": 55.71006
-        }
-      ]
-    },
-    {
       "name": "nu2api/nu3d/nushadermanager_plain.cpp.o",
       "source": "src/nu2api/nu3d/nushadermanager_plain.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nushadermanager_plain.o",
@@ -91460,6 +91444,61 @@
           "offset": 2312304,
           "size": 711,
           "match_percent": 95.773254
+        }
+      ]
+    },
+    {
+      "name": "nu2api/nu3d/nushaderobjectbase.cpp.o",
+      "source": "src/nu2api/nu3d/nushaderobjectbase.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nushaderobjectbase.o",
+      "functions": [
+        {
+          "name": "NuShaderObjectBaseCreate",
+          "demangled_name": "NuShaderObjectBaseCreate",
+          "address": 3204016,
+          "offset": 2314048,
+          "size": 32,
+          "match_percent": 8.222222
+        },
+        {
+          "name": "NuShaderObjectBaseDestroy",
+          "demangled_name": "NuShaderObjectBaseDestroy",
+          "address": 3204048,
+          "offset": 2314080,
+          "size": 16,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuShaderObjectBaseInit",
+          "demangled_name": "NuShaderObjectBaseInit",
+          "address": 3204064,
+          "offset": 2314096,
+          "size": 20,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuShaderObjectBaseUnInit",
+          "demangled_name": "NuShaderObjectBaseUnInit",
+          "address": 3204096,
+          "offset": 2314128,
+          "size": 15,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuShaderObjectBaseSetWaterSpeed",
+          "demangled_name": "NuShaderObjectBaseSetWaterSpeed",
+          "address": 3204112,
+          "offset": 2314144,
+          "size": 34,
+          "match_percent": 99.666664
+        },
+        {
+          "name": "NuShaderObjectBaseUpdateWaterTable",
+          "demangled_name": "NuShaderObjectBaseUpdateWaterTable",
+          "address": 3204160,
+          "offset": 2314192,
+          "size": 865,
+          "match_percent": 55.71006
         }
       ]
     },
@@ -99892,30 +99931,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "_Z29NuShaderObject360LoadPackFilePcP9variptr_uS0_",
-          "demangled_name": "NuShaderObject360LoadPackFile(char*, variptr_u*, variptr_u)",
-          "address": 3193968,
-          "offset": 2304000,
-          "size": 64,
-          "match_percent": 26.25
-        },
-        {
-          "name": "_Z27NuShaderObject360LoadShaderP16nushaderobject_s",
-          "demangled_name": "NuShaderObject360LoadShader(nushaderobject_s*)",
-          "address": 3194096,
-          "offset": 2304128,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z29NuShaderObject360UnloadShaderP16nushaderobject_s",
-          "demangled_name": "NuShaderObject360UnloadShader(nushaderobject_s*)",
-          "address": 3194112,
-          "offset": 2304144,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
           "name": "NuStreamInit",
           "demangled_name": "NuStreamInit",
           "address": 3221856,
@@ -104242,14 +104257,6 @@
           "offset": 2295776,
           "size": 186,
           "match_percent": 7.118644
-        },
-        {
-          "name": "NuShaderObjectLoadFromFile",
-          "demangled_name": "NuShaderObjectLoadFromFile",
-          "address": 3194032,
-          "offset": 2304064,
-          "size": 9,
-          "match_percent": 100.0
         }
       ]
     },
@@ -129738,7 +129745,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 527,
+    "bazel_units": 528,
     "functions": 13454,
     "assigned_functions": 12344,
     "ambiguous_functions": 220,
