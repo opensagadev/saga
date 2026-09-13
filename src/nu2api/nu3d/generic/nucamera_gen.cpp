@@ -560,6 +560,23 @@ extern "C" void BuildCamSpaceClipPlanes(void) {
     CamSpaceScissorPlanes.m23 = CamSpaceScissorPlanes.m22;
 }
 
+extern "C" void ChooseCorrectLOD(i32 *index, NUVEC *center, f32 *lod_ranges) {
+    if (lod_ranges[*index] == 0.0f) {
+        return;
+    }
+
+    NUVEC delta;
+    NuVecSub(&delta, center, reinterpret_cast<NUVEC *>(&global_camera.mtx.m30));
+    f32 distance_sqr = NuVecMagSqr(&delta);
+    i32 selected = *index;
+    if (distance_sqr < lod_ranges[selected]) {
+        do {
+            ++selected;
+        } while (distance_sqr < lod_ranges[selected]);
+        *index = selected;
+    }
+}
+
 extern "C" void BuildWorldSpaceClipPlanes(void) {
     NuMtxMulH(&FrustrumPlanes, &vmtx, &CamSpaceFrustrumPlanes);
     NuMtxMulH(&ScissorPlanes, &vmtx, &CamSpaceScissorPlanes);

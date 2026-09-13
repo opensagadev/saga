@@ -42,7 +42,6 @@ u8 ForcePlayEndFrame = 0;
 u8 ForceEulerToQuat = 0;
 u8 QuatPushes[4] = {};
 i32 NumQuatPushes = 0;
-u8 BitCountTable[256] = {};
 f32 MAXFRAMETIME = 0;
 extern "C" {
     f32 partglobaltime = 0;

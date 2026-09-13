@@ -9,7 +9,6 @@ extern "C" {
     i32 NuHasError();
     void NuMtlAnimate(f32);
     void NuTexAnimProcess(f32);
-    void NuWindAnimate(NUWIND *, f32);
     void NuOcclusionManagerEndFrame();
     void NuTimeBarSetRender(i32);
     void NuPad_Interface_Render();

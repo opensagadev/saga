@@ -47,7 +47,7 @@ struct nurenderscene_s {
     f32 vp_y;             // 0x18
     f32 vp_w;             // 0x1c
     f32 vp_h;             // 0x20
-    void *unknown_24;     // 0x24
+    u32 z_pre_pass;       // 0x24
     u32 unknown_28;       // 0x28
     u8 burnout_intensity; // 0x2c
     u8 pad2d[3];

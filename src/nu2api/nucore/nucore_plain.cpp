@@ -93,17 +93,6 @@ struct nuanimdatachunk_s;
 nuanimdatachunk_s *NuAnimDataChunkCreate(i32 curve_set_count);
 
 extern "C" {
-    static i32 isBitCountTable;
-    void buildBitCountTable(void) {
-        for (u32 value = 0; value < 256; ++value) {
-            BitCountTable[value] = 0;
-            for (u32 bit = 0; bit < 8; ++bit) {
-                if ((value >> bit) & 1)
-                    ++BitCountTable[value];
-            }
-        }
-        isBitCountTable = 1;
-    }
 
     u8 CutSceneBoundingBoxTrackRoot = 0;
     i32 NuGCutAudioStream = 0;
@@ -119,7 +108,6 @@ extern "C" {
     extern i32 g_writingSaveCriticalSection;
 }
 
-extern "C" void ANI_FixUpAddrs(ani3_animheader_s *, isize, i32);
 extern "C" void ANI_Ani3ExtractAllNodeCurves(ani3_animheader_s *, f32, f32 *, i32, char *);
 extern "C" {
     i32 nuspecial_clip_state = -1;
@@ -223,7 +211,6 @@ extern "C" {
     i32 NuHasError(void);
     void NuMtlAnimate(f32 frame_time);
     void NuTexAnimProcess(f32 frame_time);
-    void NuWindAnimate(NUWIND *wind, f32 frametime);
     void NuTimeBarSetRender(i32 set);
     void NuShaderManagerSetfv(i32 semantic, const f32 *values);
 
@@ -2224,115 +2211,6 @@ extern "C" {
         time->time_byte = static_cast<u32>((byte_frame >> 3) & 0xff);
         time->time_mask = (1u << ((chunk_frame & 7) + 1)) - 1u;
     }
-    void *NuAnimData2FixPtrs(void *data, isize delta, isize external_delta, i32 flags) {
-
-        buildBitCountTable();
-
-        if (data == NULL) {
-            return NULL;
-        }
-        nuanimdata2_s *anim = reinterpret_cast<nuanimdata2_s *>(reinterpret_cast<usize>(data) + delta);
-        if (*reinterpret_cast<u32 *>(&anim->duration) + 0xbeb1b6ccU < 2) {
-            ANI_FixUpAddrs(reinterpret_cast<ani3_animheader_s *>(anim),
-                           external_delta == 0 ? static_cast<isize>(reinterpret_cast<usize>(anim)) : delta, flags);
-            return anim;
-        }
-
-        if (anim->curves != NULL) {
-            anim->curves = reinterpret_cast<nuanimcurve2_s *>(reinterpret_cast<usize>(anim->curves) + delta);
-        }
-        if (anim->curve_types != NULL) {
-            anim->curve_types = reinterpret_cast<u8 *>(reinterpret_cast<usize>(anim->curve_types) + delta);
-        }
-        if (anim->node_flags != NULL) {
-            anim->node_flags = reinterpret_cast<u8 *>(reinterpret_cast<usize>(anim->node_flags) + delta);
-        }
-        i32 curve_count = static_cast<i32>(anim->curve_count) * static_cast<i32>(anim->node_count);
-        for (i32 i = 0; i < curve_count; ++i) {
-            if (anim->curve_types[i] != 0) {
-                nuanimcurvedata_s *curve = anim->curves[i].data.curvedata;
-                if (curve != NULL) {
-                    curve = reinterpret_cast<nuanimcurvedata_s *>(reinterpret_cast<usize>(curve) + delta);
-                    anim->curves[i].data.curvedata = curve;
-                } else {
-                    continue;
-                }
-                if (curve->key_mask != NULL) {
-                    curve->key_mask = reinterpret_cast<u32 *>(reinterpret_cast<usize>(curve->key_mask) + delta);
-                }
-                if (curve->key_offsets != NULL) {
-                    curve->key_offsets = reinterpret_cast<u16 *>(reinterpret_cast<usize>(curve->key_offsets) + delta);
-                }
-                if (curve->key_data != NULL) {
-                    curve->key_data = reinterpret_cast<u8 *>(reinterpret_cast<usize>(curve->key_data) + delta);
-                }
-            }
-        }
-        return anim;
-    }
-    void *NuAnimData2Fixup(i32 file_size, void **data) {
-        u32 *header = static_cast<u32 *>(*data);
-        u32 magic = header[0];
-        if (static_cast<i32>(header[1]) > static_cast<i32>(0x414e4934)) {
-            return NuPtrBlockFix(header);
-        }
-
-        if (magic == 0x414e4933 || magic == 0x414e4934) {
-            ANI_FixUpAddrs(reinterpret_cast<ani3_animheader_s *>(header),
-                           static_cast<isize>(reinterpret_cast<usize>(header)), 0);
-            return header;
-        }
-
-        header[0] = static_cast<u32>(file_size);
-        const usize relocation_delta = reinterpret_cast<usize>(header) - static_cast<usize>(header[1]);
-        header[2] = reinterpret_cast<usize>(
-            NuAnimData2FixPtrs(reinterpret_cast<void *>(static_cast<usize>(header[2])), (isize)relocation_delta, 0, 0));
-        header = static_cast<u32 *>(*data);
-        header[1] = reinterpret_cast<usize>(header);
-        return reinterpret_cast<void *>(static_cast<usize>(header[2]));
-    }
-
-    void *NuAnimData2LoadBuffEx(char *path, VARIPTR *buf, VARIPTR *buf_end, void **result) {
-        buf->addr = ALIGN(buf->addr, 0x10);
-        const i32 file_size = NuFileLoadBuffer(path, buf->void_ptr, static_cast<i32>(buf_end->addr - buf->addr));
-        if (file_size == 0) {
-            if (NuFileGetLastError() == -1) {
-                *buf = *buf_end;
-            }
-            *result = NULL;
-            return NULL;
-        }
-
-        void *data = buf->void_ptr;
-        if (static_cast<i32>(static_cast<u32 *>(data)[1]) > static_cast<i32>(0x414e4934)) {
-            data = NuPtrBlockFix(data);
-            buf->void_ptr = data;
-            buf->addr += static_cast<usize>(file_size);
-            *result = data;
-            return data;
-        }
-
-        *result = data;
-        buf->addr += static_cast<usize>(file_size);
-        return NuAnimData2Fixup(file_size, result);
-    }
-
-    void *NuAnimData2LoadBuff(char *path, VARIPTR *buf, VARIPTR *buf_end) {
-        void *result;
-        return NuAnimData2LoadBuffEx(path, buf, buf_end, &result);
-    }
-
-    void *NuAnimData2LoadBuffFromPAK(void *data, i32 file_size) {
-        if (file_size == 0) {
-            return NULL;
-        }
-        if (static_cast<i32>(static_cast<u32 *>(data)[1]) > static_cast<i32>(0x414e4934)) {
-            return NuPtrBlockFix(data);
-        }
-        return NuAnimData2Fixup(file_size, &data);
-    }
-    void NuAnimData2Relocate(void) {
-    }
     void NuAnimDataCalcTime(void *animation, f32 frame, nuanimtime_s *time) {
         u8 *data = static_cast<u8 *>(animation);
         const f32 duration = *reinterpret_cast<f32 *>(data);
@@ -2405,55 +2283,6 @@ extern "C" {
         NuFileClose(file);
         return static_cast<i32>(header[0]);
     }
-    static inline void *NuLegacyRelocatePointer(void *pointer, isize delta) {
-        return pointer == NULL ? NULL : reinterpret_cast<void *>(reinterpret_cast<usize>(pointer) + delta);
-    }
-    void *NuAnimDataFixPtrs(void *animation, isize delta) {
-
-        if (isBitCountTable == 0)
-            buildBitCountTable();
-        animation = NuLegacyRelocatePointer(animation, delta);
-        u8 *data = static_cast<u8 *>(animation);
-        void *&name = *reinterpret_cast<void **>(data + 4);
-        name = NuLegacyRelocatePointer(name, delta);
-        void **&chunks = *reinterpret_cast<void ***>(data + 0xc);
-        chunks = static_cast<void **>(NuLegacyRelocatePointer(chunks, delta));
-        if (chunks != NULL) {
-            i32 chunk_count = *reinterpret_cast<i32 *>(data + 8);
-            for (i32 i = 0; i < chunk_count; ++i) {
-                chunks[i] = NuLegacyRelocatePointer(chunks[i], delta);
-                u8 *chunk = static_cast<u8 *>(chunks[i]);
-                if (chunk != NULL) {
-                    void **&sets = *reinterpret_cast<void ***>(chunk + 8);
-                    sets = static_cast<void **>(NuLegacyRelocatePointer(sets, delta));
-                    if (sets != NULL) {
-                        i32 set_count = *reinterpret_cast<i32 *>(chunk);
-                        for (i32 j = 0; j < set_count; ++j) {
-                            sets[j] = NuLegacyRelocatePointer(sets[j], delta);
-                            u8 *set = static_cast<u8 *>(sets[j]);
-                            if (set != NULL) {
-                                void *&constants = *reinterpret_cast<void **>(set + 4);
-                                constants = NuLegacyRelocatePointer(constants, delta);
-                                void **&curves = *reinterpret_cast<void ***>(set + 8);
-                                curves = static_cast<void **>(NuLegacyRelocatePointer(curves, delta));
-                                if (curves != NULL) {
-                                    for (i32 k = 0; k < *reinterpret_cast<i8 *>(set + 0xc); ++k) {
-                                        curves[k] = NuLegacyRelocatePointer(curves[k], delta);
-                                        u8 *curve = static_cast<u8 *>(curves[k]);
-                                        if (curve != NULL) {
-                                            void *&keys = *reinterpret_cast<void **>(curve + 4);
-                                            keys = NuLegacyRelocatePointer(keys, delta);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return animation;
-    }
     void *NuAnimDataLoadBuff(char *path, VARIPTR *buf, VARIPTR *buf_end) {
         buf->addr = ALIGN(buf->addr, 16);
         u8 *file_data = static_cast<u8 *>(buf->void_ptr);
@@ -2464,99 +2293,6 @@ extern "C" {
         *reinterpret_cast<isize *>(file_data + 4) = delta;
         void *animation = NuAnimDataFixPtrs(*reinterpret_cast<void **>(file_data + 8), delta);
         *reinterpret_cast<void **>(file_data + 8) = animation;
-        return animation;
-    }
-    void *NuAnimDataRead(NUFILE file) {
-
-        if (isBitCountTable == 0) {
-            buildBitCountTable();
-        }
-
-        char *name = NULL;
-        const i32 name_size = NuFileReadInt(file);
-        if (name_size != 0) {
-            name = static_cast<char *>(NU_ALLOC(name_size, 4, 1, "", 0));
-            NuFileRead(file, name, name_size);
-        }
-
-        const f32 duration = NuFileReadFloat(file);
-        const i32 chunk_count = NuFileReadInt(file);
-        u8 *animation = static_cast<u8 *>(NuAnimDataCreate(chunk_count));
-        *reinterpret_cast<f32 *>(animation) = duration;
-        *reinterpret_cast<char **>(animation + 4) = name;
-
-        for (i32 chunk_index = 0; chunk_index < *reinterpret_cast<i32 *>(animation + 8); ++chunk_index) {
-            const i32 curve_set_count = NuFileReadInt(file);
-            void **chunk_slot = *reinterpret_cast<void ***>(animation + 0xc) + chunk_index;
-            u8 *chunk = reinterpret_cast<u8 *>(NuAnimDataChunkCreate(curve_set_count));
-            *chunk_slot = chunk;
-            *reinterpret_cast<i32 *>(chunk) = curve_set_count;
-
-            u8 *curve_data = NULL;
-            const i32 curve_data_count = NuFileReadInt(file);
-            if (curve_data_count != 0) {
-                const u32 curve_data_size = static_cast<u32>(curve_data_count) * 0x10;
-                curve_data = static_cast<u8 *>(NU_ALLOC(curve_data_size, 4, 1, "", 0));
-                *reinterpret_cast<void **>(chunk + 0xc) = curve_data;
-                NuFileRead(file, curve_data, curve_data_size);
-                curve_data = *reinterpret_cast<u8 **>(chunk + 0xc);
-            } else {
-                *reinterpret_cast<void **>(chunk + 0xc) = NULL;
-            }
-
-            u8 *shared_curves = NULL;
-            const i32 shared_curve_count = NuFileReadInt(file);
-            if (shared_curve_count != 0) {
-                const u32 shared_curve_size = static_cast<u32>(shared_curve_count) * 0x10;
-                shared_curves = static_cast<u8 *>(NU_ALLOC(shared_curve_size, 4, 1, "", 0));
-                *reinterpret_cast<void **>(chunk + 0x10) = shared_curves;
-                NuFileRead(file, shared_curves, shared_curve_size);
-            } else {
-                *reinterpret_cast<void **>(chunk + 0x10) = NULL;
-            }
-
-            for (i32 set_index = 0; set_index < curve_set_count; ++set_index) {
-                const i32 curve_count = NuFileReadChar(file);
-                if (curve_count == 0) {
-                    continue;
-                }
-
-                void **set_slot = *reinterpret_cast<void ***>(chunk + 8) + set_index;
-                *set_slot = NuAnimCurveSetCreate(curve_count);
-                u8 *curve_set = static_cast<u8 *>((*reinterpret_cast<void ***>(chunk + 8))[set_index]);
-                *reinterpret_cast<i32 *>(curve_set) = NuFileReadInt(file);
-                for (i32 curve_index = 0;
-                     curve_index < *reinterpret_cast<i8 *>(
-                                       static_cast<u8 *>((*reinterpret_cast<void ***>(chunk + 8))[set_index]) + 0xc);
-                     ++curve_index) {
-                    curve_set = static_cast<u8 *>((*reinterpret_cast<void ***>(chunk + 8))[set_index]);
-                    f32 *value = *reinterpret_cast<f32 **>(curve_set + 4) + curve_index;
-                    *value = NuFileReadFloat(file);
-                }
-            }
-
-            u8 *shared_cursor = *reinterpret_cast<u8 **>(chunk + 0x10);
-            u8 *curve_data_cursor = curve_data;
-            for (i32 set_index = 0; set_index < *reinterpret_cast<i32 *>(chunk); ++set_index) {
-                u8 *curve_set = static_cast<u8 *>((*reinterpret_cast<void ***>(chunk + 8))[set_index]);
-                if (curve_set == NULL) {
-                    continue;
-                }
-                for (i32 curve_index = 0;
-                     curve_index < *reinterpret_cast<i8 *>(
-                                       static_cast<u8 *>((*reinterpret_cast<void ***>(chunk + 8))[set_index]) + 0xc);
-                     ++curve_index) {
-                    curve_set = static_cast<u8 *>((*reinterpret_cast<void ***>(chunk + 8))[set_index]);
-                    if ((*reinterpret_cast<f32 **>(curve_set + 4))[curve_index] == FLT_MAX) {
-                        (*reinterpret_cast<void ***>(curve_set + 8))[curve_index] = shared_cursor;
-                        ++*reinterpret_cast<i32 *>(chunk + 4);
-                        *reinterpret_cast<void **>(shared_cursor + 4) = curve_data_cursor;
-                        curve_data_cursor += *reinterpret_cast<i32 *>(shared_cursor + 8) << 4;
-                        shared_cursor += 0x10;
-                    }
-                }
-            }
-        }
         return animation;
     }
     void *NuAnimGetAnimLOD(void *animation, i32 lod) {
@@ -2576,11 +2312,6 @@ extern "C" {
     }
     i32 NuAnimGetUseQuatsFlag(void) {
         return ForceEulerToQuat;
-    }
-    void NuAnimInit(i32 max_joints, VARIPTR *buf, VARIPTR buf_end) {
-
-        buildBitCountTable();
-        NuAnimBuffInit(max_joints, buf, buf_end);
     }
     i32 NuAnimNumNodes(void *animation) {
         const ani3_animheader_s *header = static_cast<const ani3_animheader_s *>(animation);
@@ -2615,48 +2346,6 @@ extern "C" {
     // Bridge / file / heap / memory
     // ---------------------------------------------------------------------------
 
-    void NuDatClose(NUDATHDR *header) {
-        extern NUDATFILEINFO dat_file_infos[20];
-
-        for (i32 index = 0; index < 20; ++index) {
-            NUDATOPENFILEINFO *open_file = &header->open_files[index];
-            if (open_file->dat_file != 0) {
-                NuFileClose(open_file->dat_file);
-            }
-            if (open_file->info_idx >= 0) {
-                dat_file_infos[open_file->info_idx].is_used = 0;
-            }
-        }
-        if (header->unknown != 0) {
-            NU_FREE(header);
-        }
-    }
-    i32 nufile_lsn_allowed = 1;
-
-    i32 NuDatGetFileInfo(NUDATHDR *header, char *name, i64 *position, i32 *length) {
-        if (header == NULL) {
-            return -1;
-        }
-
-        const i32 index = NuDatFileFindTree(header, name);
-        if (index < 0) {
-            return -1;
-        }
-
-        const NUDATFINFO *file = &header->file_info[index];
-        const i64 file_position = NuDatCalcPos(header, file->file_offset);
-        if (position != NULL) {
-            if (nufile_lsn_allowed != 0 && header->unknown2 != 0) {
-                *position = header->unknown2 + file_position / 0x800;
-            } else {
-                *position = file_position;
-            }
-        }
-        if (length != NULL) {
-            *length = file->file_len;
-        }
-        return index;
-    }
     void *NuMemAllocFn(u32 size) {
         return NU_ALLOC(size, 4, 1, "", 0);
     }
@@ -4090,17 +3779,6 @@ extern "C" {
         NuVecMtxTransform(&maximum.xyz, &maximum.xyz, matrix);
         light->testShadowExtrusions(minimum, maximum);
     }
-    void NuWindAnimate(NUWIND *wind, f32 frametime) {
-        if (wind != NULL) {
-            wind->unk2.z += (1.0f / 256.0f) * wind->unk2.y * frametime;
-            if (wind->unk2.z >= 1.0f) {
-                wind->unk2.z = NuFmod(wind->unk2.z, 1.0f);
-            }
-            f32 scaled_time = 5.0f * frametime;
-            wind->unk2.w = frametime + wind->unk2.w;
-            wind->unk3 = scaled_time + wind->unk3;
-        }
-    }
     extern "C++" NuWindGType *NuWindAllocateGrp();
     extern "C++" void NuWindFreeGrp(NuWindGType *group);
 
@@ -4128,16 +3806,6 @@ extern "C" {
         } else if (wind->unk0[index] >= 0) {
             wind->unk1 = index;
             nuapi.wind = wind;
-        }
-    }
-    void NuWindSetSpeed(NUWIND *wind, f32 speed) {
-        if (wind != NULL) {
-            wind->unk2.y = 1.0f <= speed ? speed : 1.0f;
-        }
-    }
-    void NuWindSetWorldSize(NUWIND *wind, f32 size) {
-        if (wind != NULL) {
-            wind->unk2.x = 1.0f <= size ? size : 1.0f;
         }
     }
 
