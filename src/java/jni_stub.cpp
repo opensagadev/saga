@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include <stddef.h>
 
 #include "java/java.h"
@@ -45,75 +46,99 @@ extern "C" {
     }
 
     void Java_com_tt_tech_CheckGamepadStatus_nativeSetGamePadConnected(void) {
+        STUBBED();
     }
 
     void Java_com_tt_tech_TTActivity_nativeCacheJNIVars(void) {
+        STUBBED();
     }
 
     void Java_com_tt_tech_TTActivity_nativeOnCreate(void) {
+        STUBBED();
     }
 
     void Java_com_tt_tech_TTActivity_nativeOnKeyDown(void) {
+        STUBBED();
     }
 
     void Java_com_tt_tech_TTActivity_nativeOnKeyUp(void) {
+        STUBBED();
     }
 
     void Java_com_tt_tech_TTActivity_nativeOnPause(void) {
+        STUBBED();
     }
 
     void Java_com_tt_tech_TTActivity_nativeOnResume(void) {
+        STUBBED();
     }
 
     void Java_com_tt_tech_TTActivity_nativeOnSensorUpdate(void) {
+        STUBBED();
     }
 
     void Java_com_tt_tech_TTActivity_nativeOnStart(void) {
+        STUBBED();
     }
 
     void Java_com_tt_tech_TTActivity_nativeOnStop(void) {
+        STUBBED();
     }
 
     void Java_com_tt_tech_TTActivity_nativeOnTouchDown(void) {
+        STUBBED();
     }
 
     void Java_com_tt_tech_TTActivity_nativeOnTouchMove(void) {
+        STUBBED();
     }
 
     void Java_com_tt_tech_TTActivity_nativeOnTouchUp(void) {
+        STUBBED();
     }
 
     void Java_com_tt_tech_TTActivity_nativeSetAndroidVersion(void) {
+        STUBBED();
     }
 
     void Java_com_tt_tech_TTActivity_nativeSetAssetManager(void) {
+        STUBBED();
     }
 
     void Java_com_tt_tech_TTActivity_nativeSetCaps(void) {
+        STUBBED();
     }
 
     void Java_com_tt_tech_TTActivity_nativeSetLanguage(void) {
+        STUBBED();
     }
 
     void Java_com_tt_tech_TTActivity_nativeSetManufacturer(void) {
+        STUBBED();
     }
 
     void Java_com_tt_tech_TTActivity_nativeSetModel(void) {
+        STUBBED();
     }
 
     void Java_com_tt_tech_TTActivity_nativeSetObbInfo(void) {
+        STUBBED();
     }
 
     void Java_com_tt_tech_TTActivity_nativeSetPaths(void) {
+        STUBBED();
     }
 
     void Java_com_tt_tech_TTActivity_nativeSetScreenDimesions(void) {
+        STUBBED();
     }
 
     void Java_com_tt_tech_TTActivity_nativeSetSurface(void) {
+        STUBBED();
     }
 
     void Java_com_tt_tech_TTActivity_nativeUpdateGamepadAxisValues(void) {
+        STUBBED();
     }
 
 } // extern "C"

@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "gamelib_util_types.h"
 #include "gamelib/util/Utilities.h"
 #include "gameapi/edtools/gameapi_edtools_types.h"
@@ -13,42 +14,53 @@ extern NetTransporter theNetwork;
 extern MemoryManager theMemoryManager;
 
 void NetworkSyncPause() {
+    STUBBED();
 }
 
 void NetRotator2::PredictValue(EdClass const *, void *, NetPredictor::PredictorTime *, NetPredictor::PredictorData **,
                                float *, i32) {
+    STUBBED();
 }
 
 bool NetPredictor::AllowPush(EdClass const *, void const *, ReplicatorData &, i32, i32) {
+    STUBBED();
     return false;
 }
 
 void NetPredictor::CheckPredictionError(EdClass const *, void *, float *, float *, i32) {
+    STUBBED();
 }
 
 void NetPredictor::DoPrediction(EdClass const *, void *, ReplicatorData &, NetPredictor::PredictorTime *, i32) {
+    STUBBED();
 }
 
 void NetPredictor::DoPrediction(EdClass const *, void *, ReplicatorData &, i32) {
+    STUBBED();
 }
 
 void NetPredictor::SerialiseObject(EdStream &, NetPeer *, EdClass const *, void *, ReplicatorData &,
                                    NetPredictor::PredictorTime *, i16 *) {
+    STUBBED();
 }
 
 void NetPredictor::SerialiseObject(EdStream &, NetPeer *, EdClass const *, void *, ReplicatorData &, i16 *) {
+    STUBBED();
 }
 
 void NetPredictor::StoreSampleData(EdClass const *, void *, NetPredictor::PredictorTime *,
                                    NetPredictor::PredictorData **, float *, i32) {
+    STUBBED();
 }
 
 void NetPredictor2::PredictValue(EdClass const *, void *, NetPredictor::PredictorTime *, NetPredictor::PredictorData **,
                                  float *, i32) {
+    STUBBED();
 }
 
 void NetPredictor3::PredictValue(EdClass const *, void *, NetPredictor::PredictorTime *, NetPredictor::PredictorData **,
                                  float *, i32) {
+    STUBBED();
 }
 
 NetReplicator::NetReplicator(i32 group, float minimum_seconds, float maximum_seconds) {
@@ -67,9 +79,11 @@ NetReplicator::NetReplicator(i32 group, float minimum_seconds, float maximum_sec
 }
 
 void NetReplicator::SerialiseObject(EdStream &, NetPeer *, EdClass const *, void *, ReplicatorData &, i16 *) {
+    STUBBED();
 }
 
 void NetReplicator::DoPrediction(EdClass const *, void *, ReplicatorData &, i32) {
+    STUBBED();
 }
 
 void NetworkObject::Destroy() {
@@ -101,6 +115,7 @@ void NetworkObject::Initialise(i32 guid, void *new_object, EdClass *new_class, N
 }
 
 void NetListenerList::Find(NetListenerBinding *) {
+    STUBBED();
 }
 
 bool NetConstReplicator::AllowPush(EdClass const *, void const *, ReplicatorData &data, i32 force, i32) {
@@ -116,12 +131,15 @@ bool NetConstReplicator::AllowPush(EdClass const *, void const *, ReplicatorData
 }
 
 NetListenerBinding::NetListenerBinding(NetListenerInterface *, unsigned char, char *) {
+    STUBBED();
 }
 
 void NetListenerBinding::operator=(NetListenerBinding const &) {
+    STUBBED();
 }
 
 void NetListenerBinding::operator==(NetListenerBinding const &) {
+    STUBBED();
 }
 
 bool NetSimpleReplicator::AllowPush(EdClass const *, void const *, ReplicatorData &data, i32 force, i32) {
@@ -215,6 +233,7 @@ void NetChangedReplicator::InitTable() {
 }
 
 void NetworkObjectManager::Acquire(i32) {
+    STUBBED();
 }
 
 void NetworkObjectManager::AddToLocalObjectList(NetworkObject *object) {
@@ -240,9 +259,11 @@ void NetworkObjectManager::BindFilter(NOSFilter *filter, EdClass const *object_c
 }
 
 void NetworkObjectManager::BindReplicator(NetReplicator *, EdClass const *) {
+    STUBBED();
 }
 
 void NetworkObjectManager::CalcReplicatorDataSize(NetReplicator *, EdClass const *, i32 &, i32 &) {
+    STUBBED();
 }
 
 void NetworkObjectManager::ChangeContext(NOSContext &new_context) {
@@ -250,9 +271,11 @@ void NetworkObjectManager::ChangeContext(NOSContext &new_context) {
 }
 
 void NetworkObjectManager::ConstructObject(NetworkObject *, NetworkObjectManager::NetPeerPush *) {
+    STUBBED();
 }
 
 void NetworkObjectManager::ContinuityBreak(i32, float) {
+    STUBBED();
 }
 
 NetworkObject *NetworkObjectManager::FindNetworkObject(void *object) {
@@ -268,6 +291,7 @@ NetworkObject *NetworkObjectManager::FindNetworkObject(void *object) {
 }
 
 void NetworkObjectManager::FlushObjects(i32) {
+    STUBBED();
 }
 
 i32 NetworkObjectManager::GetNextGuid() {
@@ -303,15 +327,19 @@ void *NetworkObjectManager::GetObject(i32 id) {
 }
 
 void NetworkObjectManager::GetPeerStatus() {
+    STUBBED();
 }
 
 void NetworkObjectManager::ImportObjects() {
+    STUBBED();
 }
 
 void NetworkObjectManager::Init() {
+    STUBBED();
 }
 
 void NetworkObjectManager::InitClassStats() {
+    STUBBED();
 }
 
 i32 NetworkObjectManager::IsLocal(i32 id) {
@@ -326,12 +354,15 @@ i32 NetworkObjectManager::IsLocal(i32 id) {
 }
 
 void NetworkObjectManager::IsPeerReady(NetPeer const &) const {
+    STUBBED();
 }
 
 void NetworkObjectManager::IsPeerStarted(NetPeer const &) const {
+    STUBBED();
 }
 
 NetworkObjectManager::NetworkObjectManager() {
+    STUBBED();
 }
 
 void NetworkObjectManager::NotifyCreateObject(void *object, EdClass *object_class, void *, i32, i32 guid, i32 flags) {
@@ -347,12 +378,15 @@ void NetworkObjectManager::NotifyDestroyObject(void *object, EdClass *object_cla
 }
 
 void NetworkObjectManager::ObjectCall(void *, i32, NetMessage, NetPeer const *) {
+    STUBBED();
 }
 
 void NetworkObjectManager::ObjectOtherCall(void *, i32, NetMessage) {
+    STUBBED();
 }
 
 void NetworkObjectManager::ObjectOwnerCall(void *, i32, NetMessage) {
+    STUBBED();
 }
 
 NetPeer const *NetworkObjectManager::Owner(i32 id) {
@@ -367,61 +401,80 @@ NetPeer const *NetworkObjectManager::Owner(i32 id) {
 }
 
 void NetworkObjectManager::PeerJoined(NetPeer const &) {
+    STUBBED();
 }
 
 void NetworkObjectManager::PeerLeft(NetPeer const &, ePeerLeftReason) {
+    STUBBED();
 }
 
 void NetworkObjectManager::Push(NetworkObject const *, NetReplicator *, ReplicatorData &,
                                 NetworkObjectManager::NetPeerPush *) {
+    STUBBED();
 }
 
 void NetworkObjectManager::PushObject(NetworkObject *, NetworkObjectManager::NetPeerPush *, i32) {
+    STUBBED();
 }
 
 void NetworkObjectManager::Receive(NetMessage, unsigned char, NetPeer const &) {
+    STUBBED();
 }
 
 void NetworkObjectManager::ReceiveAcquireMessage(NetMessage &, NetPeer const &) {
+    STUBBED();
 }
 
 void NetworkObjectManager::ReceiveAcquiredMessage(NetMessage &, NetPeer const &) {
+    STUBBED();
 }
 
 void NetworkObjectManager::ReceiveAdoptedMessage(NetMessage &, NetPeer const &) {
+    STUBBED();
 }
 
 void NetworkObjectManager::ReceiveConstructorMessage(NetMessage &, NetPeer const &) {
+    STUBBED();
 }
 
 void NetworkObjectManager::ReceiveContinuityBreak(NetMessage &, NetPeer const &) {
+    STUBBED();
 }
 
 void NetworkObjectManager::ReceiveObjectCallMessage(NetMessage &, NetPeer const &) {
+    STUBBED();
 }
 
 void NetworkObjectManager::ReceiveReleaseMessage(NetMessage &, NetPeer const &) {
+    STUBBED();
 }
 
 void NetworkObjectManager::ReceiveRemoteCallMessage(NetMessage &, NetPeer const &) {
+    STUBBED();
 }
 
 void NetworkObjectManager::ReceiveReplicaMessage(NetMessage &, NetPeer const &) {
+    STUBBED();
 }
 
 void NetworkObjectManager::ReceiveStartMessage(NetMessage &, NetPeer const &) {
+    STUBBED();
 }
 
 void NetworkObjectManager::ReceiveStatusMessage(NetMessage &, NetPeer const &) {
+    STUBBED();
 }
 
 void NetworkObjectManager::ReceiveStopMessage(NetMessage &, NetPeer const &) {
+    STUBBED();
 }
 
 void NetworkObjectManager::Recover(NetworkObject *) {
+    STUBBED();
 }
 
 void NetworkObjectManager::RegisterObject(void *, EdClass *, i32) {
+    STUBBED();
 }
 
 void NetworkObjectManager::RegisterObjectCall(void (*callback)(void *, NetMessage &), i32 id) {
@@ -443,9 +496,11 @@ void NetworkObjectManager::RegisterRemoteCall(void (*callback)(NetMessage &), i3
 }
 
 void NetworkObjectManager::ReleaseObject(void *, EdClass *, i32) {
+    STUBBED();
 }
 
 void NetworkObjectManager::RemoteCall(i32, NetMessage, NetPeer const *) {
+    STUBBED();
 }
 
 void NetworkObjectManager::RemoveFromLocalObjectList(NetworkObject *object) {
@@ -468,21 +523,27 @@ void NetworkObjectManager::RemovePendingObject(NetworkObject *object) {
 }
 
 void NetworkObjectManager::Reset() {
+    STUBBED();
 }
 
 void NetworkObjectManager::SendAcquireMessage(NetworkObject *) {
+    STUBBED();
 }
 
 void NetworkObjectManager::SendAcquiredMessage(i16, NetPeer const &) {
+    STUBBED();
 }
 
 void NetworkObjectManager::SendAdoptedMessage(i16) {
+    STUBBED();
 }
 
 void NetworkObjectManager::SendPushMessage(NetMessage *, NetworkObjectManager::NetPeerPush const *, i32) {
+    STUBBED();
 }
 
 void NetworkObjectManager::Start(NOSContext const &) {
+    STUBBED();
 }
 
 NetworkObjectManager::PendingObject *NetworkObjectManager::StealPendingObject() {
@@ -497,15 +558,19 @@ NetworkObjectManager::PendingObject *NetworkObjectManager::StealPendingObject() 
 }
 
 void NetworkObjectManager::Stop() {
+    STUBBED();
 }
 
 void NetworkObjectManager::Term() {
+    STUBBED();
 }
 
 void NetworkObjectManager::Update() {
+    STUBBED();
 }
 
 void NetworkObjectManager::UpdateLocalObjectList() {
+    STUBBED();
 }
 
 NetworkObjectManager::~NetworkObjectManager() {

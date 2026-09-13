@@ -749,6 +749,7 @@ __used__ static i32 Action_BigJump(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
 
 __used__ static i32 Action_CanTurn(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params, i32 param_4,
                                    i32 param_5, f32 param_6) {
+    STUBBED();
     (void)sys;
     (void)processor;
     (void)packet;
@@ -761,6 +762,7 @@ __used__ static i32 Action_CanTurn(AISYS *sys, AISCRIPTPROCESS *processor, AIPAC
 
 __used__ static i32 Action_Explode(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params, i32 param_4,
                                    i32 param_5, f32 param_6) {
+    STUBBED();
     (void)sys;
     (void)processor;
     (void)packet;
@@ -2382,6 +2384,7 @@ __used__ static i32 Action_DontAimAt(AISYS *sys, AISCRIPTPROCESS *processor, AIP
 
 __used__ static i32 Action_EatVictim(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                      i32 param_4, i32 param_5, f32 param_6) {
+    STUBBED();
     (void)sys;
     (void)processor;
     (void)packet;
@@ -2846,6 +2849,7 @@ __used__ static i32 Action_GoToOrigin(AISYS *sys, AISCRIPTPROCESS *processor, AI
 
 __used__ static i32 Action_GrabVictim(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                       i32 param_4, i32 param_5, f32 param_6) {
+    STUBBED();
     (void)sys;
     (void)processor;
     (void)packet;
@@ -2874,6 +2878,7 @@ __used__ static i32 Action_NoLosCheck(AISYS *sys, AISCRIPTPROCESS *processor, AI
 
 __used__ static i32 Action_ProbeDroid(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                       i32 param_4, i32 param_5, f32 param_6) {
+    STUBBED();
     (void)sys;
     (void)processor;
     (void)packet;
@@ -4070,6 +4075,7 @@ __used__ static i32 Action_RaceOpponent(AISYS *sys, AISCRIPTPROCESS *processor, 
 
 __used__ static i32 Action_ResetContext(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                         i32 param_4, i32 param_5, f32 param_6) {
+    STUBBED();
     (void)sys;
     (void)processor;
     (void)packet;
@@ -4390,6 +4396,7 @@ __used__ static i32 Action_TagCharacter(AISYS *sys, AISCRIPTPROCESS *processor, 
 
 __used__ static i32 Action_TurnOnPickup(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                         i32 param_4, i32 param_5, f32 param_6) {
+    STUBBED();
     (void)sys;
     (void)processor;
     (void)packet;
@@ -4439,6 +4446,7 @@ __used__ static i32 Action_AddPartDebris(AISYS *sys, AISCRIPTPROCESS *processor,
 
 __used__ static i32 Action_CanPullLevers(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                          i32 param_4, i32 param_5, f32 param_6) {
+    STUBBED();
     (void)sys;
     (void)processor;
     (void)packet;
@@ -4652,6 +4660,7 @@ __used__ static i32 Action_CnxController(AISYS *sys, AISCRIPTPROCESS *processor,
 
 __used__ static i32 Action_CompleteLevel(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                          i32 param_4, i32 param_5, f32 param_6) {
+    STUBBED();
     (void)sys;
     (void)processor;
     (void)packet;
@@ -4704,6 +4713,7 @@ __used__ static i32 Action_FormationMove(AISYS *sys, AISCRIPTPROCESS *processor,
 
 __used__ static i32 Action_GizmoActivate(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                          i32 param_4, i32 param_5, f32 param_6) {
+    STUBBED();
     (void)sys;
     (void)processor;
     (void)packet;
@@ -4896,6 +4906,7 @@ __used__ static i32 Action_KeepWeaponOut(AISYS *sys, AISCRIPTPROCESS *processor,
 
 __used__ static i32 Action_ReleaseVictim(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                          i32 param_4, i32 param_5, f32 param_6) {
+    STUBBED();
     (void)sys;
     (void)processor;
     (void)packet;
@@ -5126,6 +5137,7 @@ __used__ static i32 Action_SnapWeaponOut(AISYS *sys, AISCRIPTPROCESS *processor,
 
 __used__ static i32 Action_TriggerBlowUp(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                          i32 param_4, i32 param_5, f32 param_6) {
+    STUBBED();
     (void)sys;
     (void)processor;
     (void)packet;
@@ -5138,6 +5150,7 @@ __used__ static i32 Action_TriggerBlowUp(AISYS *sys, AISCRIPTPROCESS *processor,
 
 __used__ static i32 Action_UpdateSockPos(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                          i32 param_4, i32 param_5, f32 param_6) {
+    STUBBED();
     (void)sys;
     (void)processor;
     (void)packet;
@@ -5177,6 +5190,7 @@ __used__ static i32 Action_WalkBackwards(AISYS *sys, AISCRIPTPROCESS *processor,
 
 __used__ static i32 Action_AddMiscPickups(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                           i32 param_4, i32 param_5, f32 param_6) {
+    STUBBED();
     (void)sys;
     (void)processor;
     (void)packet;
@@ -5189,6 +5203,7 @@ __used__ static i32 Action_AddMiscPickups(AISYS *sys, AISCRIPTPROCESS *processor
 
 __used__ static i32 Action_AlertCreatures(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                           i32 param_4, i32 param_5, f32 param_6) {
+    STUBBED();
     (void)sys;
     (void)processor;
     (void)packet;
@@ -5314,6 +5329,7 @@ __used__ static i32 Action_AttackOpponent(AISYS *sys, AISCRIPTPROCESS *processor
 
 __used__ static i32 Action_BreakFormation(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                           i32 param_4, i32 param_5, f32 param_6) {
+    STUBBED();
     (void)sys;
     (void)processor;
     (void)packet;
@@ -5756,6 +5772,7 @@ __used__ static i32 Action_GoToNodeRandom(AISYS *sys, AISCRIPTPROCESS *processor
 
 __used__ static i32 Action_LetGoOfBalloon(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                           i32 param_4, i32 param_5, f32 param_6) {
+    STUBBED();
     (void)sys;
     (void)processor;
     (void)packet;
@@ -5839,6 +5856,7 @@ __used__ static i32 Action_PrefersPlayers(AISYS *sys, AISCRIPTPROCESS *processor
 
 __used__ static i32 Action_PressTagButton(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                           i32 param_4, i32 param_5, f32 param_6) {
+    STUBBED();
     (void)sys;
     (void)processor;
     (void)packet;
@@ -5851,6 +5869,7 @@ __used__ static i32 Action_PressTagButton(AISYS *sys, AISCRIPTPROCESS *processor
 
 __used__ static i32 Action_SetCanTakeOver(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                           i32 param_4, i32 param_5, f32 param_6) {
+    STUBBED();
     (void)sys;
     (void)processor;
     (void)packet;
@@ -6123,6 +6142,7 @@ __used__ static i32 Action_SnapToPosition(AISYS *sys, AISCRIPTPROCESS *processor
 
 __used__ static i32 Action_ThrowDetonator(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                           i32 param_4, i32 param_5, f32 param_6) {
+    STUBBED();
     (void)sys;
     (void)processor;
     (void)packet;
@@ -7275,6 +7295,7 @@ __used__ static i32 Action_PressJumpButton(AISYS *sys, AISCRIPTPROCESS *processo
 
 __used__ static i32 Action_ReleaseTakeOver(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                            i32 param_4, i32 param_5, f32 param_6) {
+    STUBBED();
     (void)sys;
     (void)processor;
     (void)packet;
@@ -7390,6 +7411,7 @@ __used__ static i32 Action_SetHearDistance(AISYS *sys, AISCRIPTPROCESS *processo
 
 __used__ static i32 Action_SetHintComplete(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                            i32 param_4, i32 param_5, f32 param_6) {
+    STUBBED();
     (void)sys;
     (void)processor;
     (void)packet;
@@ -7820,6 +7842,7 @@ __used__ static i32 Action_BigJumpToLocator(AISYS *sys, AISCRIPTPROCESS *process
 
 __used__ static i32 Action_CatchUpForbidden(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                             i32 param_4, i32 param_5, f32 param_6) {
+    STUBBED();
     (void)sys;
     (void)processor;
     (void)packet;
@@ -7932,6 +7955,7 @@ __used__ static i32 Action_GoToOriginalPath(AISYS *sys, AISCRIPTPROCESS *process
 
 __used__ static i32 Action_JudderGameCamera(AISYS *sys, AISCRIPTPROCESS *processor, AIPACKET *packet, char **params,
                                             i32 param_4, i32 param_5, f32 param_6) {
+    STUBBED();
     (void)sys;
     (void)processor;
     (void)packet;

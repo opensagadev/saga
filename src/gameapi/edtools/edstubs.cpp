@@ -11,18 +11,22 @@
 extern "C" {
 
     void edbitsRegisterBaseScene(NUGSCN *scene) {
+        STUBBED();
         (void)scene;
     }
 
     void edanimRegisterBaseScene(NUGSCN *scene) {
+        STUBBED();
         (void)scene;
     }
 
     void edppStartPage(i32 page) {
+        STUBBED();
         (void)page;
     }
 
     i32 edgraLoadPage(char *path, void *gscn, i32 terrain, void *buf, void *buf_end) {
+        STUBBED();
         (void)path;
         (void)gscn;
         (void)terrain;
@@ -32,6 +36,7 @@ extern "C" {
     }
 
     i32 edbriLoadPage(char *path, void *gscn) {
+        STUBBED();
         (void)path;
         (void)gscn;
         return -1;

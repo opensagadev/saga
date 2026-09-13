@@ -1,6 +1,8 @@
+#include "decomp.h"
 #include "gamelib_util_types.h"
 
 void NetSmallStats::Draw(float, float, float, float, NetSmallStats::eInfo) const {
+    STUBBED();
 }
 
 void NetSample::Reset() {
@@ -32,7 +34,9 @@ void NetSample::Max(NetSample const &other) {
 }
 
 void NetStats::Draw(float, float, float, float, NetSmallStats::eInfo) const {
+    STUBBED();
 }
 
 void NetStats::Update() {
+    STUBBED();
 }

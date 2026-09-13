@@ -67,9 +67,11 @@ static __used__ void ParseAIPathCnxFlag(char *) {
 }
 
 static __used__ void pathEditorDrawPath(EDAIPATH_s *, i32) {
+    STUBBED();
 }
 
 static __used__ void TestPointPathCheck(nuvec_s *, EDAIPATHNODE_s *, EDAIPATHNODE_s *, f32 *, f32 *, i32 *, f32) {
+    STUBBED();
 }
 
 static __used__ void pathEditor_cbCreatePath(eduimenu_s *, eduiitem_s *, u32) {
@@ -96,6 +98,7 @@ static __used__ void pathEditor_cbCreatePath(eduimenu_s *, eduiitem_s *, u32) {
 }
 
 static __used__ void pathEditor_cbDeletePath(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 static __used__ void pathEditor_cbRenameNode(eduimenu_s *, eduiitem_s *item, u32) {
@@ -139,6 +142,7 @@ static __used__ void pathEditor_cbCancelRenameNodeMenu(eduimenu_s *, eduimenu_s 
 static __used__ void pathEditor_cbCancelSelectMenu(eduimenu_s *, eduimenu_s *);
 static __used__ void pathEditor_cbSetCurrentPath(eduimenu_s *, eduiitem_s *, u32);
 static __used__ void pathEditor_cbSetShareNode(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 static __used__ void pathEditor_cbShareNodeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
@@ -181,12 +185,15 @@ static __used__ void pathEditor_cbShareNodeMenu(eduimenu_s *parent, eduiitem_s *
 }
 
 static __used__ void pathEditorCalcRouteIterator(AIPATH_s *, f32 *, u8 *, i32, i32, f32, i32) {
+    STUBBED();
 }
 
 static __used__ void pathEditor_cbCnxFlagsToggle(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 static __used__ void pathEditor_cbDeletePathNode(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 static __used__ void pathEditor_cbRenameNodeMenu(eduimenu_s *parent, eduiitem_s *, u32) {
@@ -307,9 +314,11 @@ static __used__ void pathEditor_cbCancelSelectMenu(eduimenu_s *, eduimenu_s *men
 }
 
 static __used__ void pathEditor_cbDisconnectPathNode(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 static __used__ void pathEditorCalculateDistanceTable(AIPATH_s *, i32, variptr_u *, variptr_u *) {
+    STUBBED();
 }
 
 static __used__ void pathEditor_cbCancelDeleteAreaMenu(eduimenu_s *, eduimenu_s *) {
@@ -371,9 +380,11 @@ static __used__ void routeEditor_cbRouteUsers(eduimenu_s *parent, eduiitem_s *, 
 }
 
 static __used__ void routeEditor_cbCreateRoute(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 static __used__ void routeEditor_cbDeleteRoute(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 static __used__ void routeEditor_cbRenameRoute(eduimenu_s *, eduiitem_s *item, u32) {
@@ -443,6 +454,7 @@ static __used__ void routeEditor_cbCancelRenameRouteMenu(eduimenu_s *, eduimenu_
 extern "C" {
 
     void pathEditorCreateData(void) {
+        STUBBED();
     }
 
     void pathEditorDrawPaths(void) {
@@ -476,6 +488,7 @@ extern "C" {
     }
 
     void pathEditorSaveData(void) {
+        STUBBED();
     }
 
     void pathEditor_CalcNodeIXs(void) {
@@ -503,9 +516,11 @@ extern "C" {
     }
 
     void pathEditor_OnPathCheck(void) {
+        STUBBED();
     }
 
     void pathEditor_QuickOnPathCheck(void) {
+        STUBBED();
     }
 
     void pathEditor_UpdateNodesOnPlatforms(void) {
@@ -525,9 +540,11 @@ extern "C" {
 } // extern "C"
 
 void pathEditor_Enter(void) {
+    STUBBED();
 }
 
 void pathEditor_Render(i32, i32, float, float) {
+    STUBBED();
 }
 
 static EDAIPATHNODE_s *pathEditor_GetNearestNode(EDAIPATH_s *path, i32 require_radius) {

@@ -133,6 +133,11 @@ Generated placeholder bodies usually omit parameter names and return a neutral
 value. Hand-maintained stubs may name parameters, cast them to `(void)`, and use
 `UNIMPLEMENTED("reason")`. Match the surrounding file's style.
 
+Put `STUBBED();` at the start of an unfinished function body. It logs once per
+function in host builds and compiles away in target builds. Intentional no-op
+destructors, constructors completed by initializer lists, and virtual defaults
+do not need this marker.
+
 `UNIMPLEMENTED` and `LOG_*` produce host diagnostics and compile away in target
 builds. `__FILENAME__` is currently a correct repository-relative path such as
 `src/legoapi/world/world.cpp`; the former `src/src/` prefix bug is fixed.

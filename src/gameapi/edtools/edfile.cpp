@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "gameapi/edtools/edfile.h"
 
 #include <string.h>
@@ -238,6 +239,7 @@ void EdFileSetPakFile(void *pak) {
 }
 
 void EdFileSetReadWrongEndianess(i32 value) {
+    STUBBED();
 }
 
 void EdFileRead(void *buf, i32 len) {

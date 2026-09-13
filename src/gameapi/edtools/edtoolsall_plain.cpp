@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "gameapi/edtools/edgra.h"
 #include "gameapi/edtools/edui.h"
 #include "nu2api/nucore/numemory.h"
@@ -323,10 +324,13 @@ extern "C" {
         return ed_main_menu;
     }
     void edGraDisableTerrainSwap(void) {
+        STUBBED();
     }
     void edGraEnableTerrainSwap(void) {
+        STUBBED();
     }
     void edGraInitTerrainSwapProtection(void) {
+        STUBBED();
     }
     i32 edanimLoadPage(char *path, NUGSCN *scene) {
         i32 page;
@@ -488,6 +492,7 @@ extern "C" {
         --parameters[parameter_index].effect_count;
     }
     void edanimRegisterCubeDumpInfo(void) {
+        STUBBED();
     }
     void edanimStartPage(i32 page) {
         if (edanim_page_used[page] != 0 && edanim_page_scene[page] != NULL && edanim_page_on[page] == 0)
@@ -664,6 +669,7 @@ extern "C" {
         edbitsDrawCircleTilted(centre, radius, colour, unused, 0x4000, 0x6000);
     }
     char *edbitsGetSoundName(i32) {
+        STUBBED();
         return NULL;
     }
     i32 edbitsLookupInstance(char *name, NUGSCN *scene) {
@@ -694,6 +700,7 @@ extern "C" {
         return -1;
     }
     i32 edbitsLookupSoundFX(char *) {
+        STUBBED();
         return -1;
     }
     NUCAMERA *cubemapcam;
@@ -1152,10 +1159,13 @@ extern "C" {
     void *ed_fnt;
 
     void edmainInit(void) {
+        STUBBED();
     }
     void edmainInitEx(void) {
+        STUBBED();
     }
     void edmainProcess(void) {
+        STUBBED();
     }
     NUVEC *edmainQueryLocVec(void) {
         return ed_loc;
@@ -1174,6 +1184,7 @@ extern "C" {
         ed_loc = position;
     }
     void edmainRender(void) {
+        STUBBED();
     }
     void edmainSetCamera(NUMTX *matrix) {
         edmaincam->mtx = *matrix;
@@ -1183,6 +1194,7 @@ extern "C" {
         edmain_cursor_enabled = enabled;
     }
     void edmainSetMainMenuScale(void) {
+        STUBBED();
     }
     void edmainSetReturn(i32 result) {
         editor_return = result;
@@ -1217,6 +1229,7 @@ extern "C" {
         part_page_used[page] = 0;
     }
     void edpartDestroyAllParticles(void) {
+        STUBBED();
     }
     void edpartParticleReset(void) {
         part_emit_s *emit = part_emits;
@@ -1290,14 +1303,19 @@ extern "C" {
         edppDetermineNearest(1.0f);
     }
     void edppDestroyAllEffects(void) {
+        STUBBED();
     }
     void edppDestroyAllParticles(void) {
+        STUBBED();
     }
     void edppDrawSpheres(void) {
+        STUBBED();
     }
     void edppDrawTorus(void) {
+        STUBBED();
     }
     void edppFindAllSounds(void) {
+        STUBBED();
     }
     // Parts-page loader (edppLoadPage @0x36c630).  The normal general (0) and
     // character (5) pages only contain effect-type records; instance records
@@ -1377,28 +1395,40 @@ extern "C" {
         edmainRegisterLocVec(position);
     }
     void edppRestartAllEffectsInLevel(void) {
+        STUBBED();
     }
     void edppSetSaveName(void) {
+        STUBBED();
     }
     void edppStopPage(i32) {
+        STUBBED();
     }
     void edqrand(void) {
+        STUBBED();
     }
     void edrtlCalculateBurnout(void) {
+        STUBBED();
     }
     void edrtlCalculateBurnoutEx(void) {
+        STUBBED();
     }
     void edrtlDrawLight(void) {
+        STUBBED();
     }
     void edrtlDrawLightEx(void) {
+        STUBBED();
     }
     void edrtlGetFogSet(void) {
+        STUBBED();
     }
     void eduiAddPropTextPickEnt(void) {
+        STUBBED();
     }
     void eduiAddTextPickEnt(void) {
+        STUBBED();
     }
     void eduiAddTextPickEntEx(void) {
+        STUBBED();
     }
     i32 eduiClearActiveMenu(void) {
         eduiSetActiveMenu(NULL);
@@ -1417,8 +1447,10 @@ extern "C" {
         return result;
     }
     void eduiCreate3LineMessageMenu(void) {
+        STUBBED();
     }
     void eduiCreateMessageMenu(void) {
+        STUBBED();
     }
     i32 eduiCursorOverMenu(eduimenu_s *menu) {
         return edui_cursor_x >= menu->x && edui_cursor_y >= menu->y && edui_cursor_x < menu->x + menu->width &&
@@ -1456,6 +1488,7 @@ extern "C" {
         return eduiGetTopLevelParent(active_menu);
     }
     void eduiGetAnalougePadValue(void) {
+        STUBBED();
     }
     i32 eduiGetCameraEnabled(void) {
         return bCameraEnabled;
@@ -1479,68 +1512,100 @@ extern "C" {
         return bUsingMenuFocus;
     }
     void eduiGradPickRead(void) {
+        STUBBED();
     }
     void eduiGradStageAdd(void) {
+        STUBBED();
     }
     void eduiGradStageAddRGB(void) {
+        STUBBED();
     }
     void eduiGradStageDelete(void) {
+        STUBBED();
     }
     void eduiGradStageSetHSV(void) {
+        STUBBED();
     }
     void eduiGradStageSetRGB(void) {
+        STUBBED();
     }
     void eduiIitemExpanderSetDepth(void) {
+        STUBBED();
     }
     void eduiInit(void) {
+        STUBBED();
     }
     void eduiInitMaterials(void) {
+        STUBBED();
     }
     void eduiItemCheckCreate(void) {
+        STUBBED();
     }
     void eduiItemColourPickCreate(void) {
+        STUBBED();
     }
     void eduiItemColourPickSetHSV(void) {
+        STUBBED();
     }
     void eduiItemColourPickSetRGB(void) {
+        STUBBED();
     }
     void eduiItemColourSliderCreate(void) {
+        STUBBED();
     }
     void eduiItemDataGradPickCreate(void) {
+        STUBBED();
     }
     void eduiItemExpanderAddChild(void) {
+        STUBBED();
     }
     void eduiItemExpanderCreate(void) {
+        STUBBED();
     }
     void eduiItemFilePickCreate(void) {
+        STUBBED();
     }
     void eduiItemFilePickSetFmt(void) {
+        STUBBED();
     }
     void eduiItemFilterAddItem(void) {
+        STUBBED();
     }
     void eduiItemFilterCreate(void) {
+        STUBBED();
     }
     void eduiItemFilterRemoveItem(void) {
+        STUBBED();
     }
     void eduiItemGradPickCreate(void) {
+        STUBBED();
     }
     void eduiItemGraphAddOnionSkin(void) {
+        STUBBED();
     }
     void eduiItemGraphCreate(void) {
+        STUBBED();
     }
     void eduiItemGraphSetCursor(void) {
+        STUBBED();
     }
     void eduiItemGraphSetLabels(void) {
+        STUBBED();
     }
     void eduiItemGreyGradPickCreate(void) {
+        STUBBED();
     }
     void eduiItemGreyPickCreate(void) {
+        STUBBED();
     }
     void eduiItemNumberCreate(void) {
+        STUBBED();
     }
     void eduiItemPropCreate(void) {
+        STUBBED();
     }
     void eduiItemPropCreateEx(void) {
+        STUBBED();
     }
     i32 eduiItemPropSetText(edui_prop_s *item, char *text) {
         if (item->property_text && NuStrLen(item->property_text) < NuStrLen(text)) {
@@ -1558,12 +1623,16 @@ extern "C" {
         return 0;
     }
     void eduiItemRender(void) {
+        STUBBED();
     }
     void eduiItemSelCreate(void) {
+        STUBBED();
     }
     void eduiItemSelWithClipColourCreate(void) {
+        STUBBED();
     }
     void eduiItemSeparatorCreate(void) {
+        STUBBED();
     }
     i32 eduiItemSetText(eduiitem_s *item, char *text) {
         if (item->text && NuStrLen(item->text) < NuStrLen(text)) {
@@ -1581,8 +1650,10 @@ extern "C" {
         return 0;
     }
     void eduiItemSliderCreate(void) {
+        STUBBED();
     }
     void eduiItemSliderCreateInt(void) {
+        STUBBED();
     }
     void eduiItemSliderSetFmt(edui_slider_s *item, char *format) {
         if (!item->format) {
@@ -1610,14 +1681,19 @@ extern "C" {
             item->changed(NULL, item, 0);
     }
     void eduiItemTextPickCreate(void) {
+        STUBBED();
     }
     void eduiItemTextPickSetFmt(void) {
+        STUBBED();
     }
     void eduiItemTextSelectorCreate(void) {
+        STUBBED();
     }
     void eduiItemTexturePickCreate(void) {
+        STUBBED();
     }
     void eduiItemToggleCreate(void) {
+        STUBBED();
     }
     eduiitem_s *edui_last_item;
     eduiitem_s *eduiMenuAddItem(eduimenu_s *menu, eduiitem_s *item) {
@@ -1761,8 +1837,10 @@ extern "C" {
             menu->selected = menu->first;
     }
     void eduiMenuFitOnScreen(void) {
+        STUBBED();
     }
     void eduiMenuFitWidth(void) {
+        STUBBED();
     }
     void eduiMenuHighlight(eduimenu_s *menu, eduiitem_s *item) {
         if (item->selection_group) {
@@ -1854,6 +1932,7 @@ extern "C" {
         return eduiProcessInteracts(menu, pad);
     }
     void eduiMenuProcessInput(eduimenu_s *menu, f32 delta_time, nupad_s *pad, i32 item_result) {
+        STUBBED();
     }
     i32 eduiMenuProcessSelectedItem(eduimenu_s *menu, f32 delta_time, nupad_s *pad) {
         if (menu && menu->selected && !(menu->selected->flags & EDUI_ITEM_DISABLED) && menu->selected->process)
@@ -1877,17 +1956,22 @@ extern "C" {
         item->previous = NULL;
     }
     void eduiMenuRender(void) {
+        STUBBED();
     }
     void eduiMenuSelectFirstEntry(eduimenu_s *menu) {
         menu->selected = NULL;
     }
     void eduiMenuSetAttr(void) {
+        STUBBED();
     }
     void eduiMenuSetDisabled(void) {
+        STUBBED();
     }
     void eduiMenuSetTransparency(void) {
+        STUBBED();
     }
     void eduiMenuSortItemsByTxt(void) {
+        STUBBED();
     }
     void eduiProcessCursor(f32 delta_time, nupad_s *pad) {
         eduiProcessCursorDefault(delta_time, pad);
@@ -1955,8 +2039,10 @@ extern "C" {
         return result;
     }
     void eduiRenderCursor(void) {
+        STUBBED();
     }
     void eduiRenderInteracts(void) {
+        STUBBED();
     }
     void eduiSetActiveMenu(eduimenu_s *menu) {
         if (eduiGetUsingMenuFocus()) {
@@ -1994,8 +2080,10 @@ extern "C" {
         edui_font_scale_y = y;
     }
     void eduiSetGlobalSliderAccel(void) {
+        STUBBED();
     }
     void eduiSetRenderPlane(void) {
+        STUBBED();
     }
     void eduiSetUsingMenuFocus(i32 enabled) {
         bUsingMenuFocus = enabled;

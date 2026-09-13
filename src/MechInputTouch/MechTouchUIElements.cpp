@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "MechInputTouch_types.h"
 #include "legoapi/audio/audio.h"
 
@@ -31,33 +32,41 @@ void PlayerButton_OnLeave_Callback(MechTouchUIElement &, TouchHolder &);
 void MechTouchUIPauseButton_OnClick_Callback(MechTouchUIElement &, TouchHolder &);
 
 bool MechInputTouchGestureTracker::OnDown(GameObject_s &, TouchHolder &) {
+    STUBBED();
     return false;
 }
 
 bool MechInputTouchGestureTracker::OnRelease(GameObject_s &, TouchHolder &) {
+    STUBBED();
     return false;
 }
 
 bool MechInputTouchGestureTracker::OnClick(GameObject_s &, TouchHolder &) {
+    STUBBED();
     return false;
 }
 
 bool MechInputTouchGestureTracker::OnDoubleClick(GameObject_s &, TouchHolder &) {
+    STUBBED();
     return false;
 }
 
 bool MechInputTouchGestureTracker::OnHold(GameObject_s &, TouchHolder &) {
+    STUBBED();
     return false;
 }
 
 bool MechInputTouchGestureTracker::OnSwipe(GameObject_s &, TouchHolder &, i32) {
+    STUBBED();
     return false;
 }
 
 void MechTouchUIElement::Process(float) {
+    STUBBED();
 }
 
 void MechTouchUIElement::Render() {
+    STUBBED();
 }
 
 bool MechTouchUI::AddUIElement(MechTouchUIElement &element) {
@@ -238,6 +247,7 @@ MechTouchUICharIcon::MechTouchUICharIcon(MechTouchUIPartySelector &party, VuVec 
 }
 
 void MechTouchUICharIcon::Process(float) {
+    STUBBED();
 }
 
 void MechTouchUICharIcon::Render() {
@@ -256,6 +266,7 @@ void MechTouchUICharIcon::Render() {
 }
 
 void MechTouchUICharIcon::SetupDisabled() {
+    STUBBED();
 }
 
 void MechTouchUITagButton::FadeOut() {
@@ -329,9 +340,11 @@ MechTouchUITagButton::MechTouchUITagButton(GameObject_s &object, TouchHolder &ho
 }
 
 void MechTouchUITagButton::Process(float) {
+    STUBBED();
 }
 
 void MechTouchUITagButton::Render() {
+    STUBBED();
 }
 
 MechTouchUITagButton::~MechTouchUITagButton() {
@@ -476,9 +489,11 @@ MechTouchUIPlayerButton::MechTouchUIPlayerButton() : MechTouchUIElement(VuVec(-0
 }
 
 void MechTouchUIPlayerButton::Process(float) {
+    STUBBED();
 }
 
 void MechTouchUIPlayerButton::SetupTargetIds() {
+    STUBBED();
 }
 
 void MechTouchUIPlayerButton::ShowChooser() {
@@ -494,6 +509,7 @@ void MechTouchUIPlayerButton::ShowChooser() {
 }
 
 void MechTouchUIPlayerButton::TriggerTagNext() {
+    STUBBED();
 }
 
 void MechTouchUIPartySelector::BlendOut() {
@@ -535,6 +551,7 @@ void MechTouchUIPartySelector::Cleanup() {
 }
 
 MechTouchUIPartySelector::MechTouchUIPartySelector(MechTouchUIPlayerButton &, i32 *) {
+    STUBBED();
 }
 
 MechTouchUIPartySelector::~MechTouchUIPartySelector() {

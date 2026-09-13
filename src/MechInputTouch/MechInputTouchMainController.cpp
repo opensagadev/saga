@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "MechInputTouch_types.h"
 #include "globals.h"
 
@@ -19,9 +20,11 @@ MechInputTouchMainController::MechInputTouchMainController(i32 index)
 }
 
 void MechInputTouchMainController::RemoveUnpressedButtons(NuInputTouchData &, NuInputTouchData const &) {
+    STUBBED();
 }
 
 void MechInputTouchMainController::Render() {
+    STUBBED();
 }
 
 void MechInputTouchMainController::ResetButtons() {
@@ -32,6 +35,7 @@ void MechInputTouchMainController::ResetButtons() {
 }
 
 void MechInputTouchMainController::Update(NuInputTouchData const *) {
+    STUBBED();
 }
 
 void MechInputTouchMainController::UpdateButtons() {

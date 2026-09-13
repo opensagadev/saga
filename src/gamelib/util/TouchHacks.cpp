@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "gamelib_util_types.h"
 
 #include "globals.h"
@@ -31,12 +32,15 @@ bool TouchHacks::AiPlayerTakeDamageOnKillRescue(GameObject_s &) {
 }
 
 void TouchHacks::CalculateJumpVelToHitPoint(GameObject_s &, VuVec const &) {
+    STUBBED();
 }
 
 void TouchHacks::CalculateJumpVelToHitPointDblJump(GameObject_s &, VuVec const &) {
+    STUBBED();
 }
 
 void TouchHacks::CalculateXZVelForArcToHitPoint(VuVec const &, VuVec const &, float, float) {
+    STUBBED();
 }
 
 i32 TouchHacks::CanBlowupBeBlownUp(GIZMOBLOWUP_s &blowup, i32 hit_type) {
@@ -47,6 +51,7 @@ i32 TouchHacks::CanBlowupBeBlownUp(GIZMOBLOWUP_s &blowup, i32 hit_type) {
 }
 
 void TouchHacks::CanForceTargetObj(GameObject_s &, GameObject_s &) {
+    STUBBED();
 }
 
 bool TouchHacks::CanJump(GameObject_s &object) {
@@ -58,9 +63,11 @@ bool TouchHacks::CanJump(GameObject_s &object) {
 }
 
 void TouchHacks::CanJumpToPoint(GameObject_s &, AIPATHNODE_s const &) {
+    STUBBED();
 }
 
 void TouchHacks::CanJumpToPoint(GameObject_s &, VuVec const &) {
+    STUBBED();
 }
 
 bool TouchHacks::CanLunge(GameObject_s &object) {
@@ -85,6 +92,7 @@ bool TouchHacks::CanSlam(GameObject_s &object) {
 }
 
 void TouchHacks::CanTagTo(GameObject_s &, GameObject_s &) {
+    STUBBED();
 }
 
 void Move_CHARACTER(GameObject_s *);
@@ -122,6 +130,7 @@ bool TouchHacks::CanTagVehicle(GameObject_s &object, GameObject_s &vehicle) {
 }
 
 void TouchHacks::CanThrowBountyBomb(GameObject_s &) {
+    STUBBED();
 }
 
 void Move_DEFAULT(GameObject_s *);
@@ -252,15 +261,19 @@ bool TouchHacks::CheckForAboutToRunIntoKillTerrain(GameObject_s &object, float t
 }
 
 void TouchHacks::CheckForAboutToRunOffAnEdge(GameObject_s &, float) {
+    STUBBED();
 }
 
 void TouchHacks::CheckJumpForLandingSpot(GameObject_s &, float) {
+    STUBBED();
 }
 
 void TouchHacks::CleanupAllMechObjectInterfaces(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void TouchHacks::FindBombTarget(GameObject_s &) {
+    STUBBED();
 }
 
 nucolour3_s *TouchHacks::GetFlashColour() {
@@ -276,6 +289,7 @@ i32 TouchHacks::GetLoseStudsDieValue() {
 }
 
 i32 TouchHacks::GetLoseStudsFallValue() {
+    STUBBED();
     return 0;
 }
 
@@ -289,6 +303,7 @@ bool TouchHacks::InParty(GameObject_s &object) {
 }
 
 void TouchHacks::PlaySmartBombBuildupEffects(GameObject_s &, float, float) {
+    STUBBED();
 }
 
 bool TouchHacks::ShouldAutoGrabDragBomb(GameObject_s &object) {
@@ -351,4 +366,5 @@ bool TouchHacks::SolveRoot(float a, float b, float c, float &root1, float &root2
 }
 
 void TouchHacks::TriggerVehicleSmartBomb(GameObject_s &) {
+    STUBBED();
 }

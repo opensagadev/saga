@@ -1,14 +1,18 @@
+#include "decomp.h"
 #include "gamelib_util_types.h"
 
 #include <stdio.h>
 
 void V2SessionManager::Log(char *, ...) {
+    STUBBED();
 }
 
 void V2SessionManager::RemoveAllPeers(ePeerLeftReason) {
+    STUBBED();
 }
 
 void V2SessionManager::RemovePeer(NetPeer *, ePeerLeftReason) {
+    STUBBED();
 }
 
 void V2SessionManager::Reset() {
@@ -34,13 +38,17 @@ void V2SessionManager::Reset() {
 }
 
 void V2SessionManager::SetHostGameData(i32 *, i32) {
+    STUBBED();
 }
 
 void V2SessionManager::Update() {
+    STUBBED();
 }
 
 V2SessionManager::V2SessionManager(char *) {
+    STUBBED();
 }
 
 void V2SessionManager::VerifyStrings(char **, char **, i32, char *) {
+    STUBBED();
 }

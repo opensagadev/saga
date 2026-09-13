@@ -245,6 +245,7 @@ extern "C" {
     }
 
     void aieditor_Proc(void) {
+        STUBBED();
     }
 
     i32 aieditor_Register(const char *name, void (*enter)(), void (*callback_24)(), void (*callback_28)(),
@@ -285,6 +286,7 @@ extern "C" {
     }
 
     void aieditor_Render(void) {
+        STUBBED();
     }
 
     void aieditor_Reset(void) {
@@ -296,6 +298,7 @@ extern "C" {
     }
 
     void aieditor_Save(void) {
+        STUBBED();
     }
 
     void aieditor_SetCurrentScript(char *name, const AIEditorScriptSelection *selection) {
@@ -358,6 +361,7 @@ extern "C" {
     }
 
     void aieditor_cbSave(void) {
+        STUBBED();
     }
 
     void aieditor_cbShowCreaturesSetToggle(eduimenu_s *, eduiitem_s *item, u32) {

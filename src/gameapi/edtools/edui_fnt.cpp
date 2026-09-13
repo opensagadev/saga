@@ -8,7 +8,9 @@
 // __used__ keeps them emitted and lint-clean.
 
 static __used__ void eduiFntPrintEx(void *, int, int, int, char *, ...) {
+    STUBBED();
 }
 
 static __used__ void eduiFntPrintClipEx(void *, float, float, int, float, float, char *, ...) {
+    STUBBED();
 }

@@ -8,78 +8,107 @@ struct eduiitem_s;
 struct nupad_s;
 
 static __used__ void locatorEditor_cbDeleteLocator(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static __used__ void locatorEditor_cbRenameLocator(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static __used__ void locatorEditor_cbSetLocatorSet(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static __used__ void locatorEditor_cbEmptyLocatorSet(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static __used__ void locatorEditor_cbCreateLocatorSet(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static __used__ void locatorEditor_cbDeleteLocatorSet(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static __used__ void locatorEditor_cbRenameLocatorSet(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static __used__ void locatorEditor_cbSelectLocatorSet(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static __used__ void locatorEditor_cbAddLocatorsByName(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static __used__ void locatorEditor_cbRenameLocatorMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static __used__ void locatorEditor_cbRenameLocatorSetMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static __used__ void locatorEditor_cbAddLocatorsByNameMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static __used__ void locatorEditor_cbAddLocatorsByNameYesNo(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static __used__ void locatorEditor_cbCancelRenameMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
 }
 static __used__ void locatorEditor_cbCancelSelectLocatorSet(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
 }
 static __used__ void locatorEditor_cbCancelDeleteLocatorMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
 }
 static __used__ void locatorEditor_cbCancelRenameLocatorSetMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
 }
 
 static __used__ void *CreateCreature(int, nuvec_s *, int) {
+    STUBBED();
     return {};
 }
 
 static __used__ void DestroyLocator(EDLOCATOR_s *) {
+    STUBBED();
 }
 
 static __used__ unsigned int AddLocatorToSet(EDLOCATORSET_s *, EDLOCATOR_s *, EDLOCATOR_s *) {
+    STUBBED();
     return {};
 }
 
 extern "C" {
 
     void locatorEditorDrawLocators(void) {
+        STUBBED();
     }
 
     void locatorEditorSaveData(void) {
+        STUBBED();
     }
 
     void locatorEditor_GetNearest(void) {
+        STUBBED();
     }
 
     void locatorEditor_PathDeleted(void) {
+        STUBBED();
     }
 
     void locatorEditor_PathNodeDeleted(void) {
+        STUBBED();
     }
 
     void locatorEditor_PathNodeMoved(void) {
+        STUBBED();
     }
 
 } // extern "C"
 
 void locatorEditor_Enter(void) {
+    STUBBED();
 }
 
 void locatorEditor_Render(i32, i32, float, float) {
+    STUBBED();
 }
 
 void locatorEditor_Process(nupad_s *) {
+    STUBBED();
 }
