@@ -3176,3 +3176,128 @@ pass; repository checks are 4/4, original text symbols 13,425/13,425,
 and the 120-frame Map/Cantina smoke passes. The separate intermittent
 tiny-movement sanitizer issue remains documented and the original
 movement behavior remains unchanged for matching.
+
+### Game-owned disguise-adjust callback
+
+Original static `DisguiseAdjust_LSW(i32,i32,NUVEC*,NUVEC*)` is the
+1,204-byte body at `0x119ce0`, between
+`SetSoundFadeDistCallBackFn_LSW` and
+`GizBuildIt_CanStartBuildingFn_Game` in the `game.cpp` callback run.
+The old `suit.cpp` empty `__used__` placeholder had neither this
+owner nor behavior. The genuine game callback now initializes scale
+from `v111` and offset from `v000`, applies the original ordered
+character-ID scale cases, then the hat/character offset cases, and
+is assigned to `DisguiseAdjustFn` during game setup. Its ID globals
+are declared in the real `character.h`; the callback pointer is
+declared in its `render.h` owner. No asm, attribute, forced emission,
+or linker-only source extern was introduced.
+
+The disassembly-backed isotropic scale groups are: 2.2 Tauntaun;
+4.6 Dewback; 3.8 Bantha; 5.1 AT-ST; 2.25 SnowMob;
+2.3 MoonCar/MapCar; 7 AT-AT, New Republic gunships and Naboo
+starfighters; 3 Probe Droid; 10 X-wing/Millennium Falcon; 6.5
+Y-wing; 4 Snowspeeder; 6 TIE craft, Wookie Flyer, Vulture/Tri-Fighter
+droids and Anakin's new pods; 8 Imperial Shuttle, Slave I and
+Sebulba's pod; 5 Clone ARC and Anakin's speeders. Comparisons remain
+in original order because uninitialized model-ID globals share `-1`.
+Hat 5/6 takes offset.z `-0.03` first; otherwise snow/death-star
+troopers take `-0.00999`, the real `GCDataList[id]` byte at `+0x116`
+can take `-0.03`, and the remaining Gonk/Imperial/alien cases use
+the disassembly's `-0.0075`, `-0.03`, `+0.015`, or `-0.0225` values.
+
+In `/tmp/disguise_adjust_trial.json` versus
+`/tmp/disguise_adjust_baseline.json`, the original-address body rises
+1.49→99.90071%, retains 1,204 bytes, and is mapped to
+`legogame/game.cpp.o`. All seven Suits bodies stay exact at 100%; the
+adjacent game callbacks stay at 99.02439% and 100%. The mixed whole
+score 45.7657→45.7993% also includes disjoint concurrent GizmoPickup,
+NuTexAnim, and debris changes, which are not attributed to this
+callback. Target and native builds pass; the rebuilt Map/Cantina
+fixture advances 120 healthy frames without sanitizer failure on
+this run, and `git diff --check` is clean.
+
+### Suits, texture animation, debris, and pickup ownership
+
+The ten-entry Suits table and its original pointer/index/character-ID
+relationships now give `Suits_Init`, `Suit_FindFromLetter`,
+`Suit_GetNext`, `Suit_GetDefault`, `Suit_GetLast`, `Suit_GetIndex`, and
+`Suits_CollectAll` real bodies; all seven are exact. An isolated
+optimization trial showed that `-O3` makes `Suits_CollectAll` exact
+and raises the unit initializer to 99.35%; `-O2` left the bodies the
+same but collapsed that initializer to zero. The Suits family therefore
+has an evidence-backed `-O3` per-file setting and a real `suit.h`
+interface; its two `Suit_GetDefault` callers no longer use local
+linker-resolved declarations.
+
+The texture-animation unit now declares its exports in `nutexanm.h`
+and implements the original case-insensitive linked-list search and
+allocation-flag-dependent destruction paths. `NuTexAnimFind`,
+`NuTexAnimEnvDestroy`, and `NuTexAnimDestroy` are each exact. The
+same original 0x20-byte record layout, inline texture-ID array,
+arena-or-`NU_ALLOC` allocation, and environment creation path now give
+`NuTexAnimCreate` a real body (6.67→83.13%). `NuTexAnimEnvCreate` now
+initializes the seven original fields inline instead of calling a
+reset helper absent from the original body, improving 37.78→89.80%.
+Their ownership and free conditions are original behavior, not
+matching-only branches.
+
+Debris page lookup exposed a mismatch between semantic evidence and
+local fuzzy score. The original has no `debtab` null guard in these
+paths, compares the requested page by its low byte, and indexes
+`edpp_page_used` by the sign-extended effect page without a protective
+range check. The first original-evidenced changes temporarily lowered
+`PageIgnore` 28.39→21.55%. Disassembly of both page lookups then showed
+an explicit page-0/page-1 branch, not a generic `< 2` array index.
+Restoring that source-level branch raises `LookupDebrisEffectPageOnly`
+5.04→58.90% and `PageIgnore` 28.39→30.13%. The neighboring exact
+debris lookups remain exact; no non-original guard was reintroduced.
+
+The pickup runtime's typed world pointer and 0x2c-byte pickup records
+now support three real exported scans in `gizmopickups.cpp`:
+`GizmoPickup_InBox` applies the type's scaled radius and state filters
+before testing an expanded three-axis AABB; `NumberOfType` counts by
+type code or index; `FindNearest` chooses the least squared distance.
+Their real declarations replace caller-local ones. Scores rise
+5.06→99.99%, 9.06→89.98%, and 7.78→99.96%, respectively. The nearest
+scan re-reads the world runtime count after `NuVecDistSqr`, matching
+the original alias-visible loop rather than forcing a cached count.
+
+The same original pickup unit places `GizmoPickup_Activate` at
+`0x4bfa00` (493 bytes). Its previous body used a temporary group list,
+ran activation effects regardless of the callback result, and used
+different alternate-type and challenge checks. The reconstructed
+callback first asks `WorldInfo_CurrentlyActive`, toggles ENABLED, calls
+`SuperCounter`, and only marks ACTIVATED and performs audio/debris work
+if that callback leaves ENABLED set. Group propagation traverses the
+permanent runtime pickups and applies ENABLED/VISIBLE from the low bit
+of `activate`; alternate sound and debris select the signed alternate
+type only when present. The target-built body rises 6.61→55.37%.
+A pointer-traversal source variant scored 47.50% and was rejected;
+`GizmoPickups_Draw` shifts 27.61→27.54% with no exact-match loss.
+
+The adjacent `GizmoPickups_Collide` must reload its type-table entry
+after `PlaySfx` and again after the collection callback: either call
+can alter that shared state. Using the real typed table accesses rather
+than caching a pointer across callbacks raises its original-address
+score 50.37→63.85%, with no other score changes in the isolated trial.
+
+Original `GizmoPickups_AddGizmos` takes a `WORLDINFO *` as its fourth
+callback argument, reads the world's pickup runtime for its count and
+records, selects configured pickups with bit 0x02, and reloads the
+runtime after `AddGizmo`. Its former runtime-pointer interpretation and
+null guards were not original. The typed body rises 22.28→99.97%; the
+adjacent `GizmoPickups_CollideList` improves 77.01→77.14%, with no
+regression. The debris lookup exports also now have their real `fx.h`
+declarations: the editor and cutscene callers no longer rely on
+source-local signatures, including the cutscene's incorrectly wide
+page parameter.
+
+For this integrated batch, the normalized target report moves
+45.7312→45.8237%: 26 original-address bodies improve, one neighboring
+`GizmoPickups_Draw` body shifts -0.07 point, and ten exact matches are
+gained with none lost. Target/WASM/native builds and all three lint
+modes pass; repository checks are 4/4, original text symbols are
+13,425/13,425, and the Map/Cantina native sanitizer smoke advances
+120 healthy frames. The previously documented intermittent
+`MovePlayer`/trig sanitizer flake was not observed in this run; the
+original movement behavior remains unchanged.

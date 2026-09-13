@@ -9,6 +9,7 @@
 #include <math.h>
 
 #include "legoapi/characters/core/character.h"
+#include "legoapi/render/fx.h"
 #include "legoapi/menus/core/text.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
@@ -719,8 +720,6 @@ extern "C" void *NuAnimData2FixPtrs(void *, isize, isize, i32);
 extern "C" StateAnim *StateAnimFixPtrs(StateAnim *, isize);
 extern "C" i32 StateAnimEvaluate(StateAnim *, u8 *, u8 *, f32);
 extern "C" void NuAnimCurve2SetApplyToMatrix_3(ani3_animheader_s *, i32, f32, NUMTX *);
-extern "C" i32 LookupDebrisEffectPage(char *, i32);
-extern "C" i32 LookupDebrisEffectPageOnly(char *, i32);
 extern "C" {
     extern i32 NuGCutDebFixUp_SearchAllPages;
     extern NUGCUTLOCATORFNENTRY_s *locatorfns;

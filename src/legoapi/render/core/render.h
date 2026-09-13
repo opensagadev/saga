@@ -6,6 +6,8 @@
 
 // Core rendering helpers (module legoapi/render/core, render.cpp).
 
+extern void (*DisguiseAdjustFn)(i32 character_id, i32 hat, NUVEC *scale, NUVEC *offset);
+
 void DrawPaintLights(void);
 void BackDrop_ResetColours(void);
 void DrawTimer(i32 mins, i32 secs, i32 unknown);

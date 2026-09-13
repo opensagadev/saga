@@ -22,6 +22,9 @@
 #include "legoapi/gizmos/traps/attractos.h"
 #include "legoapi/gizmos/door/zipups.h"
 #include "legoapi/world/area.h"
+#include "legoapi/characters/core/character.h"
+#include "legoapi/render/core/render.h"
+#include "nu2api/numath/nuvec.h"
 
 void NarrowSockExceptions_Init(NARROWSOCKEXCEPTION *);
 NARROWSOCKEXCEPTION NarrowSockException_LSW[] = {
@@ -334,6 +337,78 @@ static i32 SetSoundFadeDistCallBackFn_LSW(WORLDINFO_s *) {
         return 0;
     }
     return 1;
+}
+
+static void DisguiseAdjust_LSW(i32 character_id, i32 hat, NUVEC *scale, NUVEC *offset) {
+    *scale = v111;
+    *offset = v000;
+
+    if (character_id == id_TAUNTAUN) {
+        scale->x = 2.2f;
+    } else if (character_id == id_DEWBACK) {
+        scale->x = 4.6f;
+    } else if (character_id == id_BANTHA) {
+        scale->x = 3.8f;
+    } else if (character_id == id_ATST) {
+        scale->x = 5.1f;
+    } else if (character_id == id_SNOWMOB) {
+        scale->x = 2.25f;
+    } else if (character_id == id_MOONCAR || character_id == id_MAPCAR) {
+        scale->x = 2.3f;
+    } else if (character_id == id_ATAT) {
+        scale->x = 7.0f;
+    } else if (character_id == id_PROBEDROID) {
+        scale->x = 3.0f;
+    } else if (character_id == id_XWING) {
+        scale->x = 10.0f;
+    } else if (character_id == id_YWING) {
+        scale->x = 6.5f;
+    } else if (character_id == id_SNOWSPEEDER) {
+        scale->x = 4.0f;
+    } else if (character_id == id_MILLENNIUMFALCON) {
+        scale->x = 10.0f;
+    } else if (character_id == id_TIEFIGHTER || character_id == id_TIEINTERCEPTOR ||
+               character_id == id_TIEFIGHTERDARTH || character_id == id_TIEBOMBER) {
+        scale->x = 6.0f;
+    } else if (character_id == id_IMPERIALSHUTTLE || character_id == id_SLAVE1) {
+        scale->x = 8.0f;
+    } else if (character_id == id_WOOKIEFLYER) {
+        scale->x = 6.0f;
+    } else if (character_id == id_CLONEARC) {
+        scale->x = 5.0f;
+    } else if (character_id == id_VULTUREDROID || character_id == id_DROIDTRIFIGHTER ||
+               character_id == id_ANAKINSNEWPOD || character_id == id_ANAKINSNEWPODGREEN) {
+        scale->x = 6.0f;
+    } else if (character_id == id_NEW_REPUBLIC_GUNSHIP || character_id == id_NEW_REPUBLIC_GUNSHIP_GREEN ||
+               character_id == id_NABOOSTARFIGHTER || character_id == id_NABOOSTARFIGHTERLIME) {
+        scale->x = 7.0f;
+    } else if (character_id == id_ANAKINSSPEEDER || character_id == id_ANAKINSSPEEDER_GREEN) {
+        scale->x = 5.0f;
+    } else if (character_id == id_SEBULBASPOD) {
+        scale->x = 8.0f;
+    }
+
+    if (hat == 5 || hat == 6) {
+        offset->z = -0.03f;
+    } else if (character_id == id_SNOWTROOPER || character_id == id_DEATHSTARTROOPER) {
+        offset->z = -0.00999f;
+    } else if (GCDataList[character_id].field275_0x116 == 1) {
+        offset->z = -0.03f;
+    } else if (character_id == id_GONKDROID) {
+        offset->z = -0.0075f;
+    } else if (character_id == id_IMPERIALSPY || character_id == id_DARTHVADER || character_id == id_GREEDO ||
+               character_id == id_BOSSK || character_id == id_CANTINABAND) {
+        offset->z = -0.03f;
+    } else if (character_id == id_IMPERIALGUARD) {
+        offset->z = 0.015f;
+    } else if (character_id == id_UGNAUGHT) {
+        offset->z = -0.0225f;
+    }
+
+    if (scale->x != 1.0f) {
+        scale->y = scale->x;
+        scale->z = scale->x;
+    }
 }
 
 u16 MakeSaveHash(void) {
@@ -914,7 +989,7 @@ void InitGameAfterConfig(void) {
     //  Punch_HitExtraCodeFn = Punch_HitExtraCode_LSW;
     SetSoundFadeDistCallBackFn = SetSoundFadeDistCallBackFn_LSW;
     //  PlayerItemTypes_Init((PLAYERITEMTYPE_s *)PlayerItemType_INDY);
-    //  DisguiseAdjustFn = DisguiseAdjust_LSW;
+    DisguiseAdjustFn = DisguiseAdjust_LSW;
     //  SUPERCARRY_THROWSPEED_XZ = 0x40000000;
     //  SUPERCARRY_THROWSPEED_Y = 0x3fc00000;
     //  SUPERCARRY_RELEASESPEED_XZ = 0x3f800000;

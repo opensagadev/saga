@@ -9,6 +9,7 @@ extern "C" {
     void PlaySfx(const char *, nuvec_s *);
 }
 #include "legoapi/legoapi_types.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/world/level.h"
 #include "legoapi/characters/motion.h"
 #include "nu2api/numath/numtx.h"
@@ -152,7 +153,6 @@ void ConstantRumble(GameObject_s *, f32, f32);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 void Hint_SetComplete(i32);
 i32 GameAnimSet_IsAnimationReset(GAMEANIMSET_s *);
-GIZMOPICKUP_s *GizmoPickup_InBox(WORLDINFO_s *, i32, NUVEC *, NUVEC *);
 void Pup_CollectCoin(WORLDINFO_s *, GIZMOPICKUP_s *, i32, GameObject_s *, i32);
 void CollectMinikit(NUVEC *, char *, i32);
 GIZMOBLOWUP_s *FindNearestGizmoBlowUp(WORLDINFO_s *, NUVEC *, f32);

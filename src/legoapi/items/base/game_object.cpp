@@ -1,6 +1,7 @@
 #include "legoapi/world/world_shared.h"
 
 #include "decomp.h"
+#include "legoapi/actions/character/suit.h"
 #include "legoapi/render/core/rtl.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
@@ -26,7 +27,6 @@ extern void GetTopBot(GameObject_s *obj);
 extern void GameObjectDimensions(GameObject_s *obj);
 extern void GameObjectOrigin(GameObject_s *obj);
 extern void ResetCharacterIdle(GameObject_s *obj, i32 mode, i32 idle);
-extern void *Suit_GetDefault(i32 id);
 extern void ResetLights(NUVEC *position, rtldata_s *data, void *set);
 extern "C" void ResetAnimPacket(void *packet, i32 enabled);
 extern void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);

@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 45.73121,
+    "fuzzy_match_percent": 45.823692,
     "total_code": "4722419",
-    "matched_code": "395623",
-    "matched_code_percent": 8.37755,
+    "matched_code": "397452",
+    "matched_code_percent": 8.41628,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4723,
-    "matched_functions_percent": 35.091763,
+    "matched_functions": 4733,
+    "matched_functions_percent": 35.16606,
     "total_units": 1
   },
   "text": {
@@ -39775,15 +39775,7 @@
           "address": 897408,
           "offset": 7440,
           "size": 93,
-          "match_percent": 29.411764
-        },
-        {
-          "name": "_ZL18DisguiseAdjust_LSWiiP7nuvec_sS0_",
-          "demangled_name": "DisguiseAdjust_LSW(int, int, nuvec_s*, nuvec_s*)",
-          "address": 1154272,
-          "offset": 264304,
-          "size": 1204,
-          "match_percent": 1.170213
+          "match_percent": 99.35294
         },
         {
           "name": "_Z10Suits_Initv",
@@ -39791,7 +39783,7 @@
           "address": 1896128,
           "offset": 1006160,
           "size": 261,
-          "match_percent": 5.5
+          "match_percent": 100.0
         },
         {
           "name": "_Z13Suit_GetIndexP6SUIT_s",
@@ -39799,7 +39791,7 @@
           "address": 1896400,
           "offset": 1006432,
           "size": 191,
-          "match_percent": 8.905405
+          "match_percent": 100.0
         },
         {
           "name": "_Z19Suit_FindFromLetterc",
@@ -39807,7 +39799,7 @@
           "address": 1896592,
           "offset": 1006624,
           "size": 191,
-          "match_percent": 6.111111
+          "match_percent": 100.0
         },
         {
           "name": "_Z12Suit_GetNextP6SUIT_s",
@@ -39815,7 +39807,7 @@
           "address": 1896784,
           "offset": 1006816,
           "size": 56,
-          "match_percent": 18.333334
+          "match_percent": 100.0
         },
         {
           "name": "_Z12Suit_GetLastii",
@@ -39823,7 +39815,7 @@
           "address": 1896848,
           "offset": 1006880,
           "size": 602,
-          "match_percent": 2.48366
+          "match_percent": 100.0
         },
         {
           "name": "_Z15Suit_GetDefaulti",
@@ -39831,7 +39823,7 @@
           "address": 1897456,
           "offset": 1007488,
           "size": 228,
-          "match_percent": 4.805195
+          "match_percent": 100.0
         },
         {
           "name": "_Z16Suits_CollectAllv",
@@ -39839,7 +39831,7 @@
           "address": 1897696,
           "offset": 1007728,
           "size": 40,
-          "match_percent": 57.142857
+          "match_percent": 100.0
         }
       ]
     },
@@ -57428,7 +57420,7 @@
           "address": 4978160,
           "offset": 4088192,
           "size": 961,
-          "match_percent": 77.00889
+          "match_percent": 77.14222
         },
         {
           "name": "_ZL33GizmoPickups_AllocateProgressDataP9variptr_uS0_",
@@ -57444,7 +57436,7 @@
           "address": 4979200,
           "offset": 4089232,
           "size": 493,
-          "match_percent": 6.613139
+          "match_percent": 55.37226
         },
         {
           "name": "_ZL22GizmoPickups_AddGizmosP10GIZMOSYS_siPvS1_",
@@ -57452,7 +57444,7 @@
           "address": 4979696,
           "offset": 4089728,
           "size": 118,
-          "match_percent": 22.282051
+          "match_percent": 99.97436
         },
         {
           "name": "_ZL18GizmoPickups_ResetPvS_S_",
@@ -57468,7 +57460,7 @@
           "address": 4982816,
           "offset": 4092848,
           "size": 283,
-          "match_percent": 27.61111
+          "match_percent": 27.541666
         },
         {
           "name": "_ZL26GizmoPickups_StoreProgressPvS_S_",
@@ -57476,7 +57468,7 @@
           "address": 4983104,
           "offset": 4093136,
           "size": 671,
-          "match_percent": 62.503357
+          "match_percent": 62.57047
         },
         {
           "name": "_Z20GizmoPickups_InitSysP16GIZMOPICKUPSYS_s",
@@ -57492,7 +57484,7 @@
           "address": 4983808,
           "offset": 4093840,
           "size": 214,
-          "match_percent": 7.777778
+          "match_percent": 99.96296
         },
         {
           "name": "_ZL17GizmoPickups_LoadPvS_",
@@ -57500,7 +57492,7 @@
           "address": 4984160,
           "offset": 4094192,
           "size": 762,
-          "match_percent": 20.928572
+          "match_percent": 21.005102
         },
         {
           "name": "_ZL31GizmoPickups_ReserveBufferSpacePv",
@@ -57532,7 +57524,7 @@
           "address": 4985824,
           "offset": 4095856,
           "size": 145,
-          "match_percent": 9.056603
+          "match_percent": 89.98113
         },
         {
           "name": "_Z22GizmoPickup_FindByNameP11WORLDINFO_sPc",
@@ -57564,7 +57556,7 @@
           "address": 4986160,
           "offset": 4096192,
           "size": 259,
-          "match_percent": 5.060241
+          "match_percent": 99.98795
         },
         {
           "name": "_Z20GizmoPickups_CollideP11WORLDINFO_sP12GameObject_si",
@@ -57572,7 +57564,7 @@
           "address": 4986432,
           "offset": 4096464,
           "size": 343,
-          "match_percent": 50.373627
+          "match_percent": 63.846153
         },
         {
           "name": "_ZL19GizmoPickups_UpdatePvS_f",
@@ -57588,7 +57580,7 @@
           "address": 4989984,
           "offset": 4100016,
           "size": 169,
-          "match_percent": 96.01923
+          "match_percent": 98.23077
         }
       ]
     },
@@ -78852,7 +78844,7 @@
           "address": 3497264,
           "offset": 2607296,
           "size": 446,
-          "match_percent": 28.390072
+          "match_percent": 30.127659
         },
         {
           "name": "LookupDebrisEffectPage",
@@ -78868,7 +78860,7 @@
           "address": 3497776,
           "offset": 2607808,
           "size": 283,
-          "match_percent": 5.043478
+          "match_percent": 58.902172
         },
         {
           "name": "LookupDebrisEffect",
@@ -86057,6 +86049,14 @@
           "offset": 263456,
           "size": 839,
           "match_percent": 99.02439
+        },
+        {
+          "name": "_ZL18DisguiseAdjust_LSWiiP7nuvec_sS0_",
+          "demangled_name": "DisguiseAdjust_LSW(int, int, nuvec_s*, nuvec_s*)",
+          "address": 1154272,
+          "offset": 264304,
+          "size": 1204,
+          "match_percent": 99.90071
         },
         {
           "name": "_ZL34GizBuildIt_CanStartBuildingFn_GameP12GIZBUILDIT_sP12GameObject_s",
@@ -103826,7 +103826,7 @@
           "address": 2930608,
           "offset": 2040640,
           "size": 82,
-          "match_percent": 22.105263
+          "match_percent": 100.0
         },
         {
           "name": "NuTexAnimEnvCreate",
@@ -103834,7 +103834,7 @@
           "address": 2930704,
           "offset": 2040736,
           "size": 252,
-          "match_percent": 37.78182
+          "match_percent": 89.8
         },
         {
           "name": "NuTexAnimEnvReset",
@@ -103946,7 +103946,7 @@
           "address": 2935808,
           "offset": 2045840,
           "size": 84,
-          "match_percent": 13.714286
+          "match_percent": 100.0
         },
         {
           "name": "NuTexAnimDestroy",
@@ -103954,7 +103954,7 @@
           "address": 2935904,
           "offset": 2045936,
           "size": 94,
-          "match_percent": 17.5
+          "match_percent": 100.0
         },
         {
           "name": "NuTexAnimCreate",
@@ -103962,7 +103962,7 @@
           "address": 2936000,
           "offset": 2046032,
           "size": 258,
-          "match_percent": 6.666666
+          "match_percent": 83.12698
         },
         {
           "name": "NuTexAnimProcessEx",
@@ -117208,7 +117208,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -117295,7 +117294,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -117382,7 +117380,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -117480,7 +117477,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -117612,7 +117608,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -117710,7 +117705,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -117808,7 +117802,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -117906,7 +117899,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -118004,7 +117996,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -118102,7 +118093,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -118410,7 +118400,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -118508,7 +118497,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -118606,7 +118594,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -118753,7 +118740,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -118863,7 +118849,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -118952,7 +118937,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
@@ -119088,7 +119072,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -119176,7 +119159,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
@@ -119264,7 +119246,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -119340,7 +119321,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
@@ -119440,7 +119420,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -119538,7 +119517,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -119636,7 +119614,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -119734,7 +119711,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -119821,7 +119797,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
@@ -119883,7 +119858,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -119981,7 +119955,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -120090,7 +120063,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -120188,7 +120160,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -120299,7 +120270,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -120397,7 +120367,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -120529,7 +120498,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -120627,7 +120595,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -120725,7 +120692,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -120823,7 +120789,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -120984,7 +120949,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -121082,7 +121046,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -121180,7 +121143,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -121625,7 +121587,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -121851,7 +121812,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -122028,7 +121988,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -122485,7 +122444,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
@@ -122583,7 +122541,6 @@
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/character/speederchase_stubs.cpp.o",
-        "legoapi/actions/character/suit.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
