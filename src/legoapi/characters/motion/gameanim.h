@@ -107,6 +107,11 @@ extern "C" {
     f32 GetAnimTimeRandom(CHARACTERMODEL_s *model, i32 animation);
     void SetAnimTimeRandom(CHARACTERMODEL_s *model, ANIMPACKET_s *packet);
     void ResetAnimPacket(ANIMPACKET_s *packet, i16 animation);
+    f32 BlendTimeBetweenAnims(CHARACTERMODEL_s *model, i32 source_animation, i32 target_animation);
+    i32 AnimsAvailableToBothCharacters(ANIMPACKET_s *packet, i32 first_character, i32 second_character);
+    void EvalModelAnim(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, numtx_s *world_matrix,
+                       numtx_s *joint_matrices, void ***dwa_output, NUVEC *locator_positions,
+                       numtx_s *locator_matrices, u32 layer_mask);
     f32 AnimStopFrame(CHARACTERMODEL_s *model, i32 animation);
     void UpdateAnimPacket(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, f32 frame_step, f32 movement_speed,
                           f32 blend_step, f32 backwards_multiplier);

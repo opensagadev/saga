@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 45.49253,
+    "fuzzy_match_percent": 45.61409,
     "total_code": "4722419",
     "matched_code": "394554",
     "matched_code_percent": 8.354913,
@@ -43435,21 +43435,6 @@
       ]
     },
     {
-      "name": "legoapi/audio/sfx_callbacks.cpp.o",
-      "source": "src/legoapi/audio/sfx_callbacks.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/sfx_callbacks.o",
-      "functions": [
-        {
-          "name": "SetAPIObjPlaySfxByIdFn",
-          "demangled_name": "SetAPIObjPlaySfxByIdFn",
-          "address": 3975659,
-          "offset": 3085691,
-          "size": 27,
-          "match_percent": 100.0
-        }
-      ]
-    },
-    {
       "name": "legoapi/audio/specialsfx.cpp.o",
       "source": "src/legoapi/audio/specialsfx.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/specialsfx.o",
@@ -47612,46 +47597,6 @@
           "offset": 3069103,
           "size": 83,
           "match_percent": 28.785715
-        },
-        {
-          "name": "AddAnimEffects",
-          "demangled_name": "AddAnimEffects",
-          "address": 3975686,
-          "offset": 3085718,
-          "size": 4233,
-          "match_percent": 0.729336
-        },
-        {
-          "name": "_ZL15LoadAnimFromPAKPciS_i",
-          "demangled_name": "LoadAnimFromPAK(char*, int, char*, int)",
-          "address": 3981087,
-          "offset": 3091119,
-          "size": 282,
-          "match_percent": 4.367816
-        },
-        {
-          "name": "EvalModelAnim",
-          "demangled_name": "EvalModelAnim",
-          "address": 3987250,
-          "offset": 3097282,
-          "size": 1697,
-          "match_percent": 0.823529
-        },
-        {
-          "name": "BlendTimeBetweenAnims",
-          "demangled_name": "BlendTimeBetweenAnims",
-          "address": 3988947,
-          "offset": 3098979,
-          "size": 175,
-          "match_percent": 7.118644
-        },
-        {
-          "name": "AnimsAvailableToBothCharacters",
-          "demangled_name": "AnimsAvailableToBothCharacters",
-          "address": 3994827,
-          "offset": 3104859,
-          "size": 370,
-          "match_percent": 3.333333
         },
         {
           "name": "_Z18FindTexAnimFromMtlP8nugscn_sP7numtl_s",
@@ -61832,53 +61777,6 @@
       ]
     },
     {
-      "name": "legoapi/items/base/animpacket.cpp.o",
-      "source": "src/legoapi/items/base/animpacket.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/animpacket.o",
-      "functions": [
-        {
-          "name": "ResetMiniAnimPacket",
-          "demangled_name": "ResetMiniAnimPacket",
-          "address": 3989264,
-          "offset": 3099296,
-          "size": 112,
-          "match_percent": 99.97143
-        },
-        {
-          "name": "AnimBlendingFromTo",
-          "demangled_name": "AnimBlendingFromTo",
-          "address": 3994198,
-          "offset": 3104230,
-          "size": 141,
-          "match_percent": 100.0
-        },
-        {
-          "name": "AnimPlaying",
-          "demangled_name": "AnimPlaying",
-          "address": 3994339,
-          "offset": 3104371,
-          "size": 113,
-          "match_percent": 100.0
-        },
-        {
-          "name": "AnimSpeed",
-          "demangled_name": "AnimSpeed",
-          "address": 3994487,
-          "offset": 3104519,
-          "size": 87,
-          "match_percent": 99.965515
-        },
-        {
-          "name": "AnimStopFrame",
-          "demangled_name": "AnimStopFrame",
-          "address": 3994680,
-          "offset": 3104712,
-          "size": 87,
-          "match_percent": 99.965515
-        }
-      ]
-    },
-    {
       "name": "legoapi/items/base/apiobject.cpp.o",
       "source": "src/legoapi/items/base/apiobject.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/apiobject.o",
@@ -62028,6 +61926,102 @@
           "match_percent": 84.33498
         },
         {
+          "name": "ParticlesPerFrame",
+          "demangled_name": "ParticlesPerFrame",
+          "address": 3973507,
+          "offset": 3083539,
+          "size": 153,
+          "match_percent": 99.954544
+        },
+        {
+          "name": "ParticlesPerSecond",
+          "demangled_name": "ParticlesPerSecond",
+          "address": 3973660,
+          "offset": 3083692,
+          "size": 66,
+          "match_percent": 99.95
+        },
+        {
+          "name": "FindGameDebris",
+          "demangled_name": "FindGameDebris",
+          "address": 3973726,
+          "offset": 3083758,
+          "size": 114,
+          "match_percent": 100.0
+        },
+        {
+          "name": "InitGameDebris",
+          "demangled_name": "InitGameDebris",
+          "address": 3973840,
+          "offset": 3083872,
+          "size": 742,
+          "match_percent": 49.82377
+        },
+        {
+          "name": "AddGameDebris",
+          "demangled_name": "AddGameDebris",
+          "address": 3974582,
+          "offset": 3084614,
+          "size": 145,
+          "match_percent": 100.0
+        },
+        {
+          "name": "AddGameDebrisMomentum",
+          "demangled_name": "AddGameDebrisMomentum",
+          "address": 3974727,
+          "offset": 3084759,
+          "size": 159,
+          "match_percent": 100.0
+        },
+        {
+          "name": "AddGameDebrisXYZ",
+          "demangled_name": "AddGameDebrisXYZ",
+          "address": 3974886,
+          "offset": 3084918,
+          "size": 163,
+          "match_percent": 100.0
+        },
+        {
+          "name": "AddGameDebrisRot",
+          "demangled_name": "AddGameDebrisRot",
+          "address": 3975049,
+          "offset": 3085081,
+          "size": 176,
+          "match_percent": 94.7541
+        },
+        {
+          "name": "AddGameDebrisMtx",
+          "demangled_name": "AddGameDebrisMtx",
+          "address": 3975225,
+          "offset": 3085257,
+          "size": 228,
+          "match_percent": 100.0
+        },
+        {
+          "name": "AddGameDebrisMom",
+          "demangled_name": "AddGameDebrisMom",
+          "address": 3975453,
+          "offset": 3085485,
+          "size": 206,
+          "match_percent": 99.95082
+        },
+        {
+          "name": "SetAPIObjPlaySfxByIdFn",
+          "demangled_name": "SetAPIObjPlaySfxByIdFn",
+          "address": 3975659,
+          "offset": 3085691,
+          "size": 27,
+          "match_percent": 100.0
+        },
+        {
+          "name": "AddAnimEffects",
+          "demangled_name": "AddAnimEffects",
+          "address": 3975686,
+          "offset": 3085718,
+          "size": 4233,
+          "match_percent": 75.60859
+        },
+        {
           "name": "APICharacterSysInit",
           "demangled_name": "APICharacterSysInit",
           "address": 3979919,
@@ -62042,6 +62036,30 @@
           "offset": 3090807,
           "size": 235,
           "match_percent": 71.1875
+        },
+        {
+          "name": "_ZL17NormalizeAnimPathPc",
+          "demangled_name": "NormalizeAnimPath(char*)",
+          "address": 3981010,
+          "offset": 3091042,
+          "size": 77,
+          "match_percent": 91.92857
+        },
+        {
+          "name": "_ZL15LoadAnimFromPAKPciS_i",
+          "demangled_name": "LoadAnimFromPAK(char*, int, char*, int)",
+          "address": 3981087,
+          "offset": 3091119,
+          "size": 282,
+          "match_percent": 52.022987
+        },
+        {
+          "name": "_ZL8LoadAnimPciP9variptr_uS0_",
+          "demangled_name": "LoadAnim(char*, int, variptr_u*, variptr_u)",
+          "address": 3981369,
+          "offset": 3091401,
+          "size": 289,
+          "match_percent": 53.08989
         },
         {
           "name": "APIObjectRegisterAnimRedirect",
@@ -62116,12 +62134,36 @@
           "match_percent": 73.53608
         },
         {
+          "name": "EvalModelAnim",
+          "demangled_name": "EvalModelAnim",
+          "address": 3987250,
+          "offset": 3097282,
+          "size": 1697,
+          "match_percent": 99.9902
+        },
+        {
+          "name": "BlendTimeBetweenAnims",
+          "demangled_name": "BlendTimeBetweenAnims",
+          "address": 3988947,
+          "offset": 3098979,
+          "size": 175,
+          "match_percent": 82.22034
+        },
+        {
           "name": "ResetAnimPacket",
           "demangled_name": "ResetAnimPacket",
           "address": 3989122,
           "offset": 3099154,
           "size": 142,
           "match_percent": 77.04651
+        },
+        {
+          "name": "ResetMiniAnimPacket",
+          "demangled_name": "ResetMiniAnimPacket",
+          "address": 3989264,
+          "offset": 3099296,
+          "size": 112,
+          "match_percent": 99.97143
         },
         {
           "name": "SetAnimTimeRandom",
@@ -62172,12 +62214,36 @@
           "match_percent": 99.969696
         },
         {
+          "name": "AnimBlendingFromTo",
+          "demangled_name": "AnimBlendingFromTo",
+          "address": 3994198,
+          "offset": 3104230,
+          "size": 141,
+          "match_percent": 100.0
+        },
+        {
+          "name": "AnimPlaying",
+          "demangled_name": "AnimPlaying",
+          "address": 3994339,
+          "offset": 3104371,
+          "size": 113,
+          "match_percent": 100.0
+        },
+        {
           "name": "CurrentAnim",
           "demangled_name": "CurrentAnim",
           "address": 3994452,
           "offset": 3104484,
           "size": 35,
           "match_percent": 95.86667
+        },
+        {
+          "name": "AnimSpeed",
+          "demangled_name": "AnimSpeed",
+          "address": 3994487,
+          "offset": 3104519,
+          "size": 87,
+          "match_percent": 99.965515
         },
         {
           "name": "AnimListFrame",
@@ -62188,12 +62254,28 @@
           "match_percent": 44.314285
         },
         {
+          "name": "AnimStopFrame",
+          "demangled_name": "AnimStopFrame",
+          "address": 3994680,
+          "offset": 3104712,
+          "size": 87,
+          "match_percent": 99.965515
+        },
+        {
           "name": "AnimListFrameArray",
           "demangled_name": "AnimListFrameArray",
           "address": 3994767,
           "offset": 3104799,
           "size": 60,
           "match_percent": 64.13043
+        },
+        {
+          "name": "AnimsAvailableToBothCharacters",
+          "demangled_name": "AnimsAvailableToBothCharacters",
+          "address": 3994827,
+          "offset": 3104859,
+          "size": 370,
+          "match_percent": 84.809525
         },
         {
           "name": "_Z8RootFnExP7numtx_sPvP7nuvec_sS3_S3_fi",
@@ -62265,7 +62347,7 @@
           "address": 3999075,
           "offset": 3109107,
           "size": 5289,
-          "match_percent": 91.492386
+          "match_percent": 93.77008
         },
         {
           "name": "InModelList",
@@ -78775,77 +78857,6 @@
       ]
     },
     {
-      "name": "legoapi/render/fx/game_debris_api.cpp.o",
-      "source": "src/legoapi/render/fx/game_debris_api.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/game_debris_api.o",
-      "functions": [
-        {
-          "name": "FindGameDebris",
-          "demangled_name": "FindGameDebris",
-          "address": 3973726,
-          "offset": 3083758,
-          "size": 114,
-          "match_percent": 100.0
-        },
-        {
-          "name": "InitGameDebris",
-          "demangled_name": "InitGameDebris",
-          "address": 3973840,
-          "offset": 3083872,
-          "size": 742,
-          "match_percent": 49.82377
-        },
-        {
-          "name": "AddGameDebris",
-          "demangled_name": "AddGameDebris",
-          "address": 3974582,
-          "offset": 3084614,
-          "size": 145,
-          "match_percent": 100.0
-        },
-        {
-          "name": "AddGameDebrisMomentum",
-          "demangled_name": "AddGameDebrisMomentum",
-          "address": 3974727,
-          "offset": 3084759,
-          "size": 159,
-          "match_percent": 100.0
-        },
-        {
-          "name": "AddGameDebrisXYZ",
-          "demangled_name": "AddGameDebrisXYZ",
-          "address": 3974886,
-          "offset": 3084918,
-          "size": 163,
-          "match_percent": 100.0
-        },
-        {
-          "name": "AddGameDebrisRot",
-          "demangled_name": "AddGameDebrisRot",
-          "address": 3975049,
-          "offset": 3085081,
-          "size": 176,
-          "match_percent": 94.7541
-        },
-        {
-          "name": "AddGameDebrisMtx",
-          "demangled_name": "AddGameDebrisMtx",
-          "address": 3975225,
-          "offset": 3085257,
-          "size": 228,
-          "match_percent": 100.0
-        },
-        {
-          "name": "AddGameDebrisMom",
-          "demangled_name": "AddGameDebrisMom",
-          "address": 3975453,
-          "offset": 3085485,
-          "size": 206,
-          "match_percent": 99.95082
-        }
-      ]
-    },
-    {
       "name": "legoapi/render/fx/inflate.cpp.o",
       "source": "src/legoapi/render/fx/inflate.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/inflate.o",
@@ -79998,22 +80009,6 @@
       "source": "src/legoapi/render/fx/parts_stubs.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/parts_stubs.o",
       "functions": [
-        {
-          "name": "ParticlesPerFrame",
-          "demangled_name": "ParticlesPerFrame",
-          "address": 3973507,
-          "offset": 3083539,
-          "size": 153,
-          "match_percent": 99.954544
-        },
-        {
-          "name": "ParticlesPerSecond",
-          "demangled_name": "ParticlesPerSecond",
-          "address": 3973660,
-          "offset": 3083692,
-          "size": 66,
-          "match_percent": 99.95
-        },
         {
           "name": "SetPartRTLSet",
           "demangled_name": "SetPartRTLSet",
@@ -117285,7 +117280,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -117374,7 +117368,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -117463,7 +117456,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -117563,7 +117555,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -117597,7 +117588,6 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
         "nu2api/nu3d/nucamera.cpp.o",
@@ -117698,7 +117688,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -117798,7 +117787,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -117898,7 +117886,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -117998,7 +117985,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -118098,7 +118084,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -118198,7 +118183,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -118374,7 +118358,6 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
         "nu2api/nu3d/nucamera.cpp.o",
@@ -118409,7 +118392,6 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
         "nu2api/nu3d/nucamera.cpp.o",
@@ -118510,7 +118492,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -118610,7 +118591,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -118710,7 +118690,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -118859,7 +118838,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -118971,7 +118949,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -119032,14 +119009,12 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
-        "legoapi/items/base/animpacket.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -119200,7 +119175,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -119260,14 +119234,12 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
-        "legoapi/items/base/animpacket.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -119380,7 +119352,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -119428,14 +119399,12 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
-        "legoapi/items/base/animpacket.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -119560,7 +119529,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -119660,7 +119628,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -119760,7 +119727,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -119860,7 +119826,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -119919,14 +119884,12 @@
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
-        "legoapi/items/base/animpacket.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
         "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -120013,7 +119976,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -120113,7 +120075,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -120224,7 +120185,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -120324,7 +120284,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -120437,7 +120396,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -120537,7 +120495,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -120571,7 +120528,6 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
         "nu2api/nu3d/nucamera.cpp.o",
@@ -120672,7 +120628,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -120772,7 +120727,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -120872,7 +120826,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -120972,7 +120925,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -121135,7 +121087,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -121235,7 +121186,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -121335,7 +121285,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -121649,7 +121598,6 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
         "nu2api/nu3d/nucamera.cpp.o",
@@ -121783,7 +121731,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -121817,7 +121764,6 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
         "nu2api/nu3d/nucamera.cpp.o",
@@ -121852,7 +121798,6 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
         "nu2api/nu3d/nucamera.cpp.o",
@@ -122013,7 +121958,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -122047,7 +121991,6 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
         "nu2api/nu3d/nucamera.cpp.o",
@@ -122082,7 +122025,6 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
         "nu2api/nu3d/nucamera.cpp.o",
@@ -122122,30 +122064,6 @@
       "match_percent": 0.0,
       "candidate_units": [
         "nu2api/numath/vumath.c.o"
-      ]
-    },
-    {
-      "name": "_ZL17NormalizeAnimPathPc",
-      "demangled_name": "NormalizeAnimPath(char*)",
-      "address": 3981010,
-      "offset": 3091042,
-      "size": 77,
-      "match_percent": 15.0,
-      "candidate_units": [
-        "legoapi/characters/motion/gameanim.cpp.o",
-        "legoapi/items/base/apiobject.cpp.o"
-      ]
-    },
-    {
-      "name": "_ZL8LoadAnimPciP9variptr_uS0_",
-      "demangled_name": "LoadAnim(char*, int, variptr_u*, variptr_u)",
-      "address": 3981369,
-      "offset": 3091401,
-      "size": 289,
-      "match_percent": 4.269663,
-      "candidate_units": [
-        "legoapi/characters/motion/gameanim.cpp.o",
-        "legoapi/items/base/apiobject.cpp.o"
       ]
     },
     {
@@ -122218,7 +122136,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -122677,7 +122594,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -122777,7 +122693,6 @@
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/render/fx/game_debris_api.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "legoapi/world/levels/new_town.cpp.o",
@@ -129920,10 +129835,10 @@
     }
   ],
   "summary": {
-    "bazel_units": 527,
+    "bazel_units": 524,
     "functions": 13454,
-    "assigned_functions": 12333,
-    "ambiguous_functions": 231,
+    "assigned_functions": 12335,
+    "ambiguous_functions": 229,
     "unassigned_functions": 890
   }
 }

@@ -40,6 +40,8 @@ struct APIOBJECT_s;
 
 extern "C" void (*APIObjResetShadowMapRenderingFn)(void);
 extern "C" void (*APIObjEnableShadowMapRenderingFn)(void);
+extern "C" void (*APIObjPlaySfxByIdFn)(i32, NUVEC *);
+extern "C" void SetAPIObjPlaySfxByIdFn(void (*play_sfx)(i32, NUVEC *));
 
 enum CHARACTER_CONTEXT : i8 {
     CHARACTER_CONTEXT_JUMP = 0,

@@ -2708,6 +2708,15 @@ are not solely GOT/PLT relocation differences, so the losses are
 recorded as genuine current-TU/codegen sensitivity, not dismissed as
 noise. The original packet owner and net whole-binary gain justify
 retaining this structural move; the three bodies remain matching work.
+`ANI_Ani3ExtractAllNodeCurves` sits in the original ANI3/NuAnim symbol
+neighborhood with its `CalcValue1648` helpers and ANI player variants;
+that family is currently split across multiple source units and flags.
+A coherent owner/optimization trial is preferable to changing the ANI
+algorithm merely to chase this compiler-layout regression. The original
+`GetDefaultIdle` address neighbors `ResetCharacterIdle`, not the
+API-object `AnimDuration` run; `Animate_ATAT` neighbors other
+character-motion modes. These are candidate structural follow-ups, not
+proven TU assignments.
 Target and native builds pass, and a rebuilt Map/Cantina fixture
 advances 120 healthy frames. The separately documented intermittent
 `MovePlayer`/trig sanitizer failure remains possible; original movement
@@ -2731,3 +2740,122 @@ text-symbol coverage is 13,425/13,425 with zero missing. The combined
 original-address comparison has the three packet-move regressions named
 above and no others; no artificial code or sanitizer change was made to
 conceal them.
+
+### API object particle, debris, and SFX prefix
+
+The original contiguous run `0x3ca183`–`0x3ca9eb` now lives in
+`apiobject.cpp` in address order: `ParticlesPerFrame`,
+`ParticlesPerSecond`, `FindGameDebris`, `InitGameDebris`, the six
+`AddGameDebris*` variants, and `SetAPIObjPlaySfxByIdFn`. The adjacent
+`APIObjPlaySfxByIdFn` BSS callback storage moved with its setter.
+`edpp_types_used` and `debtab` are in a distant original data cluster
+and remain with their current debris-engine owner. Real declarations
+in `fx.h`, `game_deb.h`, and `apiobject.h` replace source-local export
+prototypes; the now-empty API debris and SFX fragment sources were
+removed. No new Bazel target was added.
+
+The target-built `/tmp/api_debris_final.json` retains the 45.49253%
+whole-binary score and every one of the 11 original-address match
+scores, with zero regressions or missing assignments. The target
+source-unit count falls from 527 to 525. Target and native builds
+pass, and a rebuilt Map/Cantina fixture advances 120 healthy frames.
+
+### API object animation-transition queries
+
+The original `BlendTimeBetweenAnims` (`0x3cddd3`) and
+`AnimsAvailableToBothCharacters` (`0x3cf4cb`) were empty placeholders
+in the `gameanim.cpp` catch-all. Their reconstructed bodies now live in
+the address-ordered `apiobject.cpp` run. The former checks the two
+`model_data_a` entries and returns the lesser blend-in/blend-out time;
+the latter resolves both model IDs through `apicharsys`, then checks
+the active or blending animation entries for both models. Both use the
+original `-1` sentinels and direct array accesses without new guards.
+The exports have typed declarations in `gameanim.h`.
+
+In the target-built `/tmp/api_anim_empty_stage2.json`, whole-binary
+matching rises from 45.49253% to 45.501694%. The two bodies rise
+7.118644→82.22% and 3.333333→84.81%, respectively, with no scored
+regressions or lost symbol assignments. Target and native builds pass;
+the rebuilt Map/Cantina fixture advances 120 healthy frames.
+
+### API object model-animation evaluator
+
+`EvalModelAnim` (`0x3cd732`) is now a typed eight-argument function in
+`apiobject.cpp`, replacing the empty `gameanim.cpp` placeholder. The
+original calls it from `KillParts` at `0x13840b`; the existing
+`APIDrawCharacterModel` evaluation path is separate and was not
+refactored. The body calls the `MakeLayerList` callback, selects DWA
+blend/target/source/current evaluation when an output is requested,
+then selects ordinary animation blend/target/source/current or the
+rest-pose fallback before storing locator coordinates. It follows
+the original model-ID bounds and pointer checks.
+
+In target-built `/tmp/api_evalmodel_stage1.json`, this body rises from
+0.823529% to 99.9902%, lifting whole-binary matching from 45.501694%
+to 45.53733%, with no other scored change or lost assignment. Target
+and native builds pass, and the rebuilt Map/Cantina smoke advances
+120 healthy frames.
+
+### API object animation effects and draw call
+
+The original `AddAnimEffects` (`0x3caa06`, 4,233 bytes) is no longer an
+empty `gameanim.cpp` placeholder. Its source-level body now follows the
+original SFX setter in `apiobject.cpp`, with a typed ten-argument export
+in `charconfig.h`. It selects the active animation and timed character
+effects, handles locator/terrain position and footprint callbacks,
+dispatches the original debris variants, updates object effect bits,
+and invokes the API-object sound callback. No new safety guard, assembly,
+attribute, fake initializer, or linker-only helper was introduced.
+
+The original `APIDrawCharacterModel` calls this helper at `0x3d16a0`
+after its locator update, gated on locator matrices, character data,
+effect data, and a null world-info argument. That verified call is now
+present. Its callback and debris-system arguments have typed parameters
+in the public `character.h` declaration; the two existing callers
+already supplied null callback and the debris-system pointer or null.
+
+Target-built `/tmp/api_addeffects_stage3.json` raises
+`AddAnimEffects` from 0.729336% to 75.60859% and
+`APIDrawCharacterModel` from 91.492386% to 93.77008%, lifting the
+whole-binary score from 45.53733% to 45.607002% with no scored
+regressions or lost assignments. Target and native builds and a rebuilt
+120-frame Map/Cantina smoke pass. Remaining instruction differences
+are not being chased with speculative behavior changes.
+
+### API object packet-helper completion and loader locals
+
+Five unchanged near-exact packet helpers moved from the separate
+`animpacket.cpp` fragment into their original positions in
+`apiobject.cpp`: `ResetMiniAnimPacket`, `AnimBlendingFromTo`,
+`AnimPlaying`, `AnimSpeed`, and `AnimStopFrame`. The empty fragment
+source was removed; `animpacket.h` now declares the missing
+`AnimBlendingFromTo` export. The target-built
+`/tmp/api_packet_five_stage1.json` preserves every function score and
+the 45.607002% whole score, with no missing assignment, and reduces
+the target unit count to 524. Target and native builds and the rebuilt
+120-frame Map/Cantina smoke pass.
+
+An ownership audit then exposed three old, attribute-retained dummy
+`LoadAnim`/`LoadAnimFromPAK`/`NormalizeAnimPath` locals in
+`gameanim.cpp`. Real local implementations already lived in
+`apiobject.cpp`; the dummy functions were removed. The original
+`LoadAnimFromPAK` takes a `char *` buffer, not `void *`, so the real
+implementation and its call now use that type. In target-built
+`/tmp/api_loader_typed.json`, the original local symbol at
+`0x3cbf1f` maps to the real API-object function and rises from
+4.367816% to 52.022987%. The two neighboring real local helpers
+also map to `apiobject.cpp` (91.92857% and 53.08989%). The whole
+score reaches 45.61409% without any scored regression. This removes
+matching-only `__used__` placeholders rather than adding another
+symbol-retention workaround.
+
+The integrated `matching.json` now records 45.61409%, up from the
+previous commit's 45.49253%, with no scored original-address regression
+in this batch. The current API-object source unit contains the mapped
+particle/debris/SFX, animation/evaluation/packet/root-motion, draw,
+action, and loader runs in their original address order. Target, WASM,
+native/smoke, all three lint-mode builds, and the four repository
+checks pass. Original text-symbol coverage remains 13,425/13,425 with
+zero missing. The rebuilt Map/Cantina fixture advances 120 healthy
+frames on this run; the original `MovePlayer`/trig sanitizer flake
+remains documented and unchanged.

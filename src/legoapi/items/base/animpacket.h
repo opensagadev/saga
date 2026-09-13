@@ -66,6 +66,9 @@ struct ANIMPACKET_s {
 };
 
 DECOMP_ASSERT(sizeof(ANIMPACKET_s) == 0x48, "ANIMPACKET_s size");
+struct CHARACTERMODEL_s;
+extern "C" i32 AnimBlendingFromTo(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, i32 source_animation,
+                                    i32 target_animation);
 extern "C" f32 *AnimPlaying(ANIMPACKET_s *packet, i32 animation, i32 target, i32 source);
 
 struct MINIANIMPACKET_s {
