@@ -5,21 +5,6 @@
 
 #include "nu2api/numath/nuang.h"
 
-f32 NuASin_Accurate(f32 value) {
-    if (value >= 0.0f) {
-        if (value >= 1.0f)
-            return 1.57079637f;
-        return 1.57079637f -
-               NuFsqrt(1.0f - value) * (1.57072878f - 0.212114394f * value + 0.0742610022f * value * value -
-                                        0.0187292993f * value * value * value);
-    }
-    if (value <= -1.0f)
-        return -1.57079637f;
-    return NuFsqrt(value + 1.0f) * (1.57072878f + 0.212114394f * value + 0.0742610022f * value * value +
-                                    0.0187292993f * value * value * value) -
-           1.57079637f;
-}
-
 #define ANG_COUNT 513
 static u16 ang[ANG_COUNT] = {
     0x0000, 0x0014, 0x0029, 0x003d, 0x0051, 0x0066, 0x007a, 0x008f, 0x00a3, 0x00b7, 0x00cc, 0x00e0, 0x00f4, 0x0109,
@@ -223,11 +208,6 @@ float NuSinApprox2(i32 ang) {
 
 float NuCosApprox2(i32 ang) {
     return NuSinApprox3(ang + 0x4000);
-}
-
-float NuSin_Accurate(float x) {
-    STUBBED();
-    (void)x;
 }
 
 static f32 NuSinApprox3(i32 angle) {

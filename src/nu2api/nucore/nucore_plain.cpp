@@ -195,11 +195,11 @@ extern "C" {
 }
 
 // C++-linkage helpers defined in sibling TUs.
-void NuPadRecordEndFrame(void);                                  // nupad_interface.cpp
-void bgSuspendMain(i32);                                         // main.cpp
-void NuAnimBuffInit(i32, VARIPTR *, VARIPTR);                    // nu2api_nucore_misc.cpp
-i32 NuCameraClipHGobj(nugscn_s *, NUMTX *, NUMTX *);             // nu2api_nucore_misc.cpp
-i32 findrange(nugscn_s *, i32);                                  // utilities.cpp
+void NuPadRecordEndFrame(void);                      // nupad_interface.cpp
+void bgSuspendMain(i32);                             // main.cpp
+void NuAnimBuffInit(i32, VARIPTR *, VARIPTR);        // nu2api_nucore_misc.cpp
+i32 NuCameraClipHGobj(nugscn_s *, NUMTX *, NUMTX *); // nu2api_nucore_misc.cpp
+i32 findrange(nugscn_s *, i32);                      // utilities.cpp
 
 extern "C" {
 
@@ -871,7 +871,6 @@ extern "C" {
 } // extern "C"
 
 // Local helpers matching original static display-list setters (t local symbols)
-
 
 extern "C" {
     // original 0x2e8cc0
@@ -2227,26 +2226,6 @@ extern "C" {
     f32 NuLog2(f32 value) {
         return NuLog10(value) * 3.321928f;
     }
-    // Original @0x2babf0.  The VU0 entry point is an ordinary CPU wrapper in
-    // this build; animation evaluation uses it to combine an animated joint
-    // rotation with that joint's bind-pose matrix.
-    void NuMtxMulRVU0(NUMTX *result, NUMTX *left, NUMTX *right) {
-        NuMtxMulR(result, left, right);
-    }
-    void NuMtxMulVU0(NUMTX *result, NUMTX *left, NUMTX *right) {
-        NuMtxMulH(result, left, right);
-    }
-    void NuMtxPreScaleVU0(NUMTX *matrix, NUVEC *scale) {
-        NuMtxPreScale(matrix, scale);
-    }
-    // Original @0x2bad80.  Preserve the public VU0-shaped entry point while
-    // sharing the scalar matrix implementation used by the host build.
-    void NuMtxScaleVU0(NUMTX *matrix, NUVEC *scale) {
-        NuMtxScale(matrix, scale);
-    }
-    void NuMtxSetRotateXYZVU0(NUMTX *matrix, NUANGVEC *angles) {
-        NuMtxSetRotateXYZ(matrix, angles);
-    }
     static f32 pow_x[32], pow_y[32], pow_rv[32];
     static i32 pow_cache_free;
     f32 NuPow(f32 x, f32 y) {
@@ -3480,7 +3459,6 @@ extern "C" {
         ++render_state.state.global_id;
         ++render_state.state.vertex_groups_id;
     }
-
 
     // ---------------------------------------------------------------------------
     // Light / wind / particles / debris

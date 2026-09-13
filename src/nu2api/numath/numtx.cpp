@@ -1471,28 +1471,3 @@ void NuMtxToQuat(NUMTX *m, struct nuquat_s *out) {
         out->w = q[3];
     }
 }
-
-void NuMtxSetRotationXYVU0(NUMTX *matrix, NUANGVEC *angles) {
-    f32 cx = NU_COS_LUT(angles->x);
-    f32 sx = NU_SIN_LUT(angles->x);
-    f32 cy = NU_COS_LUT(angles->y);
-    f32 sy = NU_SIN_LUT(angles->y);
-    f32 cz = NU_COS_LUT(0);
-    f32 sz = NU_SIN_LUT(0);
-    matrix->m00 = cy * cz;
-    matrix->m01 = cy * sz;
-    matrix->m02 = -sy;
-    matrix->m03 = 0.0f;
-    matrix->m10 = sx * sy * cz - cx * sz;
-    matrix->m11 = sx * sy * sz + cx * cz;
-    matrix->m12 = sx * cy;
-    matrix->m13 = 0.0f;
-    matrix->m20 = cx * sy * cz + sx * sz;
-    matrix->m21 = cx * sy * sz - sx * cz;
-    matrix->m22 = cx * cy;
-    matrix->m23 = 0.0f;
-    matrix->m30 = 0.0f;
-    matrix->m31 = 0.0f;
-    matrix->m32 = 0.0f;
-    matrix->m33 = 1.0f;
-}
