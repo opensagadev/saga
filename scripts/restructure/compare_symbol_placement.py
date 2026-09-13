@@ -396,6 +396,22 @@ def read_fresh_ledger(path: Path, original: Path, current: Path, units: Path | N
     ledger = json.loads(path.read_text(encoding="utf-8"))
     if "original_local_xrefs" not in ledger or "original_symbols" not in ledger:
         raise ValueError(f"{path} lacks the local-xref inventory")
+    stored_original = ledger.get("original")
+    stored_current = ledger.get("current")
+    if (not isinstance(stored_original, str) or not isinstance(stored_current, str) or
+            Path(stored_original).resolve() != original.resolve() or
+            Path(stored_current).resolve() != current.resolve()):
+        raise ValueError(f"{path} was generated for different ELF inputs")
+    if units is not None:
+        manifest = json.loads(units.read_text(encoding="utf-8"))
+        entries = manifest["units"] if isinstance(manifest, dict) else manifest
+        current_units = ledger.get("current_units")
+        if not isinstance(current_units, list) or [
+            (unit["source"], unit["object"], unit.get("optimization")) for unit in current_units
+        ] != [
+            (unit["source"], unit["object"], unit.get("optimization")) for unit in entries
+        ]:
+            raise ValueError(f"{path} was generated for a different unit manifest")
     return ledger
 
 

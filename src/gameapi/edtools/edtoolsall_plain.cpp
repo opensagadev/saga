@@ -1406,21 +1406,6 @@ extern "C" {
     void edqrand(void) {
         STUBBED();
     }
-    void edrtlCalculateBurnout(void) {
-        STUBBED();
-    }
-    void edrtlCalculateBurnoutEx(void) {
-        STUBBED();
-    }
-    void edrtlDrawLight(void) {
-        STUBBED();
-    }
-    void edrtlDrawLightEx(void) {
-        STUBBED();
-    }
-    void edrtlGetFogSet(void) {
-        STUBBED();
-    }
     void eduiAddPropTextPickEnt(void) {
         STUBBED();
     }

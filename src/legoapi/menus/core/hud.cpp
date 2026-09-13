@@ -124,10 +124,6 @@ void HudRadarPulse::Render() {
     }
 }
 
-static __used__ void RefreshUI() {
-    STUBBED();
-}
-
 static __used__ void DrawSpaceLevel(spacelevel_s *) {
     STUBBED();
 }

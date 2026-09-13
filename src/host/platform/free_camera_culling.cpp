@@ -4,8 +4,6 @@
 
 #include "nu2api/nu3d/nucamera.h"
 
-extern NUMTX clip_test_mtx;
-
 extern "C" i32 NuCameraClipTestExtents(NUVEC *min, NUVEC *max, NUMTX *world_mtx, f32 far_clip,
                                        i32 should_clip_to_screen) {
     if (HostFreeCameraActive()) {
