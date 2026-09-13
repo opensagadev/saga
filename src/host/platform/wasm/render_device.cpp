@@ -101,6 +101,7 @@ void HostSetMsaaEnabled(bool enabled) {
 }
 
 void NuRenderInspectEGLConfig(EGLDisplay, EGLConfig) {
+    STUBBED();
 }
 
 void NuRenderDevice::BeginCriticalSection(const char *, i32) {

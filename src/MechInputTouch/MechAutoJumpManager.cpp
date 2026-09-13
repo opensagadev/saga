@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "MechInputTouch_types.h"
 
 #include "gameapi/ai/aisys/aisys.h"
@@ -120,6 +121,7 @@ void MechAutoJumpManager::DeleteJumpConnectionsAndStreaks() {
 }
 
 void MechAutoJumpManager::Init() {
+    STUBBED();
 }
 
 MechAutoJumpManager::MechAutoJumpManager(AISYS_s *ai_system) {

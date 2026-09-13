@@ -167,6 +167,7 @@ static __used__ void SockParName(nufpar_s *parser, void *) {
     }
 }
 static __used__ void SockParObj(nufpar_s *, void *) {
+    STUBBED();
 }
 static __used__ void SockParOffsetBlendRatio(nufpar_s *parser, void *) {
     const f32 ratio = NuFParGetFloat(parser);

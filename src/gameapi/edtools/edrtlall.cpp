@@ -70,18 +70,25 @@ static EDRTLFOG_s *SelectNextFog() {
 // RTL editor subsystem stubs (static, internal linkage).
 
 static void edrtlClose() {
+    STUBBED();
 }
 static void edrtlEnter() {
+    STUBBED();
 }
 static void edrtlLeave() {
+    STUBBED();
 }
 static void edrtlRender() {
+    STUBBED();
 }
 static void edrtlProcFog(float, nupad_s *) {
+    STUBBED();
 }
 static void edrtlProcRTL(float, nupad_s *) {
+    STUBBED();
 }
 static void edrtlDrawFogs() {
+    STUBBED();
 }
 
 extern "C" void edrtlDrawFog(EDRTLFOG_s *fog) {
@@ -97,46 +104,67 @@ extern "C" void edrtlDrawFog(EDRTLFOG_s *fog) {
     }
 }
 static void edrtlDrawHelp() {
+    STUBBED();
 }
 static void edrtlProcBurn(float, nupad_s *) {
+    STUBBED();
 }
 static void edrtlSaveUndo() {
+    STUBBED();
 }
 static void edrtlDrawCursor() {
+    STUBBED();
 }
 static void edrtlDrawLights() {
+    STUBBED();
 }
 static void edrtlRndrLine3d(nuvtx_tc1_s *, numtl_s *, numtx_s *) {
+    STUBBED();
 }
 static void edrtlBurnSetMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void edrtlDrawFogInfo() {
+    STUBBED();
 }
 static void edrtlDrawRTLInfo() {
+    STUBBED();
 }
 static void edrtlBurnMainMenu() {
+    STUBBED();
 }
 static void edrtlDrawBurnInfo() {
+    STUBBED();
 }
 static void edrtlDrawBurnouts() {
+    STUBBED();
 }
 static void edrtlSetBurnRadius(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void edrtlBurnRadiusMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void edrtlInvalidateUndo() {
+    STUBBED();
 }
 static void edrtlSetBurnFalloff(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void edrtlBurnoutFileLoad(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void edrtlBurnoutFileSave(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void edrtlSetBurnsetFlare(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void edrtlBurnDefaultsMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void edrtlSetBurnsetRadius(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 extern NUQFNT *system_qfont;
@@ -245,108 +273,160 @@ static eduiitem_s *fog_paste_item;
 static eduiitem_s *fog_pasteinto_item;
 i32 modifier_cnt = 1;
 static void cbAssocID(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbExcludeID(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbUserID(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbLightType(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbModifierType(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbLowColour(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbHighTime(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbRHighTime(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbLowTime(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbRLowTime(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbCancelLightProperties(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
 }
 static void cbHighColour(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbMultiplier(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbGroupID(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbToggleCastShadow(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbToggleHasSpecular(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbHideType(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbCancelDeleteMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
 }
 static void cbDeleteYes(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbDeleteNo(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbScaleAllMultipliersUp(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbScaleAllMultipliersDown(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbLoad(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbCancelMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
 }
 static void cbLightProperties(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbCopyLight(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbPasteLight(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbPasteIntoLight(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbCopyToGroup(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbUndoLight(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbRedoLight(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbNoZBuffer(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbSave(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbSetControls(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbFogColour(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbFogAlpha(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbFogDensity(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbFogDensityWii(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbFogStart(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbFogEnd(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbFogStartPSP(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbFogEndPSP(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbHazeColour(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbHazeDensity(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbBlurDensity(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbFogAdjRng(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbFogAdjNear(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbFogAdjFar(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbDOFFStop(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbCopyFog(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbPasteFog(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static void cbPasteIntoFog(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 static __used__ void InitUI() {
     static i32 initialised;

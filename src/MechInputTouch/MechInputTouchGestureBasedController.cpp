@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "MechInputTouch_types.h"
 #include "globals.h"
 #include "legoapi/items/base/apiobject.h"
@@ -5,9 +6,11 @@
 i32 GetMenuID();
 
 void MechInputTouchGestureBasedController::Activate() {
+    STUBBED();
 }
 
 void MechInputTouchGestureBasedController::Deactivate() {
+    STUBBED();
 }
 
 void MechInputTouchGestureBasedController::KillTasks(bool kill_active_task) {
@@ -45,54 +48,69 @@ bool MechInputTouchGestureBasedController::MenuDisable() {
 }
 
 bool MechInputTouchGestureBasedController::OnClick(GameObject_s &, TouchHolder &) {
+    STUBBED();
     return false;
 }
 
 bool MechInputTouchGestureBasedController::OnDoubleClick(GameObject_s &, TouchHolder &) {
+    STUBBED();
     return false;
 }
 
 bool MechInputTouchGestureBasedController::OnDown(GameObject_s &, TouchHolder &) {
+    STUBBED();
     return false;
 }
 
 bool MechInputTouchGestureBasedController::OnHold(GameObject_s &, TouchHolder &) {
+    STUBBED();
     return false;
 }
 
 bool MechInputTouchGestureBasedController::OnRelease(GameObject_s &, TouchHolder &) {
+    STUBBED();
     return false;
 }
 
 bool MechInputTouchGestureBasedController::OnSwipe(GameObject_s &, TouchHolder &, i32) {
+    STUBBED();
     return false;
 }
 
 void MechInputTouchGestureBasedController::PerformCloseMechanic(GameObject_s &, TouchHolder &) {
+    STUBBED();
 }
 
 void MechInputTouchGestureBasedController::ProcessAutoJumpOverGap(GameObject_s *) {
+    STUBBED();
 }
 
 void MechInputTouchGestureBasedController::ProcessAutoJumpWhenStuck(GameObject_s &) {
+    STUBBED();
 }
 
 void MechInputTouchGestureBasedController::ProcessDragMovement(GameObject_s &) {
+    STUBBED();
 }
 
 void MechInputTouchGestureBasedController::Render() {
+    STUBBED();
 }
 
 void MechInputTouchGestureBasedController::StartJumpUsingAIPath(JumpTriggerPacket const &, i32) {
+    STUBBED();
 }
 
 void MechInputTouchGestureBasedController::StartNewTask(MechTouchTask *, TouchHolder &, bool, bool) {
+    STUBBED();
 }
 
 void MechInputTouchGestureBasedController::TriggerJumpTask(JumpTriggerPacket const &, bool, bool, bool) {
+    STUBBED();
 }
 
 void MechInputTouchGestureBasedController::Update(NuInputTouchData const *) {
+    STUBBED();
 }
 
 MechInputTouchGestureBasedController::~MechInputTouchGestureBasedController() {

@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "gamelib_util_types.h"
 
 #include "nu2api/nu3d/nurndr.h"
@@ -17,19 +18,25 @@ TouchHacks::TintStack::~TintStack() {
 }
 
 void NetworkObjectManager::NetPeerPush::FlushMessages() {
+    STUBBED();
 }
 
 void NetworkObjectManager::NetPeerPush::GetMessage(i32) {
+    STUBBED();
 }
 
 void NetworkObjectManager::NetPeerPush::GetReliableMessage(i32) {
+    STUBBED();
 }
 
 void NetworkObjectManager::NetPeerPush::NextStage() {
+    STUBBED();
 }
 
 void NetworkObjectManager::NetPeerPush::Stop() {
+    STUBBED();
 }
 
 void NetworkObjectManager::NetPeerPush::Sync() {
+    STUBBED();
 }

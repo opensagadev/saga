@@ -933,12 +933,16 @@ void MenuUpdateNewGame(MENU *menu) {
     }
 }
 static __used__ void MenuDrawMiniKit(MENU *) {
+    STUBBED();
 }
 static __used__ void MenuEnterTitles(MENU *) {
+    STUBBED();
 }
 static __used__ void MenuUpdateMiniKit(MENU *) {
+    STUBBED();
 }
 static __used__ void MenuDrawBonusWin(MENU *) {
+    STUBBED();
 }
 static void MenuRefreshPauseCutTarget() {
     pausecut_skip_to_level = -1;
@@ -1080,8 +1084,10 @@ static __used__ void MenuExitHowToPlay(MENU *) {
     TriggerExtraDataSave();
 }
 static __used__ void MenuInitHowToPlay(MENU *) {
+    STUBBED();
 }
 static __used__ void MenuUpdateBonusWin(MENU *) {
+    STUBBED();
 }
 static __used__ void MenuUpdatePauseCut(MENU *menu) {
     MenuRefreshPauseCutTarget();
@@ -1258,8 +1264,10 @@ static __used__ void MenuDrawPauseRestart(MENU *menu) {
     GameDrawMenuEntry(menu, TTab[tNO]);
 }
 static __used__ void MenuDrawBonusComplete(MENU *) {
+    STUBBED();
 }
 static __used__ void MenuDrawSelectLanguage(MENU *) {
+    STUBBED();
 }
 static __used__ void MenuUpdatePauseRestart(MENU *menu) {
     if (menu->confirm_pressed != 0 && menu->selected_item == 0) {
@@ -1275,6 +1283,8 @@ static __used__ void MenuUpdatePauseRestart(MENU *menu) {
     }
 }
 static __used__ void MenuUpdateBonusComplete(MENU *) {
+    STUBBED();
 }
 static __used__ void MenuUpdateSelectLanguage(MENU *) {
+    STUBBED();
 }
