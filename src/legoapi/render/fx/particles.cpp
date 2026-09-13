@@ -31,9 +31,11 @@ extern "C" {
 }
 
 void OctreeRndr(unsigned char *, nuoctreenode_s *, i32) {
+    STUBBED();
 }
 
 void AddCameraRain(WORLDINFO_s *, i32) {
+    STUBBED();
 }
 
 void Particles_Stop(WORLDINFO_s *world) {
@@ -69,9 +71,11 @@ void Particles_Start(WORLDINFO_s *world) {
 }
 
 void Particles_DumpAreaPage() {
+    STUBBED();
 }
 
 void Particles_LoadAreaPage(char *) {
+    STUBBED();
 }
 
 void NoRender() {

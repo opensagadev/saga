@@ -47,12 +47,15 @@ extern "C" i32 FindPlatInst(i32 instance_ix);
 // ===========================================================================
 
 void JabbasPalaceA_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void JabbasPalaceB_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void JabbasPalaceE_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void JabbasPalaceA_Reset(WORLDINFO_s *) {
@@ -90,12 +93,15 @@ void JabbasPalaceE_Reset(WORLDINFO_s *world) {
 }
 
 void JabbasPalaceE_Panel(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void JabbasPalaceA_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void JabbasPalaceE_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 // ===========================================================================
@@ -103,6 +109,7 @@ void JabbasPalaceE_Update(WORLDINFO_s *) {
 // ===========================================================================
 
 void SarlaccPitA_Draw(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void SarlaccPitA_Reset(WORLDINFO_s *world) {
@@ -117,27 +124,35 @@ void SarlaccPitA_Reset(WORLDINFO_s *world) {
 }
 
 void SarlaccPitB_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void SarlaccPitB_Reset(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void SarlaccPitB_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void SarlaccPitB_SpecialUpdate(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void SarlaccPitC_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void SarlaccPitC_Reset(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void SarlaccPitC_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 bool SarlaccPitDiscoActive(WORLDINFO_s *) {
+    STUBBED();
     // Disco-state behavior remains unreconstructed.
     return false;
 }
@@ -147,12 +162,15 @@ bool SarlaccPitDiscoActive(WORLDINFO_s *) {
 // ===========================================================================
 
 void EndorBattleA_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void EndorBattleC_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void EndorBattleA_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 // ===========================================================================
@@ -160,15 +178,19 @@ void EndorBattleA_Update(WORLDINFO_s *) {
 // ===========================================================================
 
 void DeathStar2BattleD_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void DeathStar2BattleD_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void DeathStar2BattleD_InZapRange(GameObject_s *) {
+    STUBBED();
 }
 
 void DeathStar2BattleA_AlwaysUpdate(WORLDINFO_s *) {
+    STUBBED();
 }
 
 // ===========================================================================
@@ -689,6 +711,7 @@ void EmperorFightA_Update(WORLDINFO_s *world) {
 }
 
 void EmperorFightA_Panel(WORLDINFO_s *) {
+    STUBBED();
 }
 
 // ===========================================================================
@@ -696,12 +719,15 @@ void EmperorFightA_Panel(WORLDINFO_s *) {
 // ===========================================================================
 
 void DeathStar2BattleFire_Draw(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void DeathStar2BattleFire_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void DeathStar2BattleFire_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 static f32 slowDownTimer[2];

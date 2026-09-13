@@ -270,6 +270,7 @@ set_door_timer:
 }
 
 void ChrisRadialCam(nuvec_s *, nuvec_s *) {
+    STUBBED();
 }
 
 void ChrisAnakinAInit(WORLDINFO_s *world) {
@@ -277,12 +278,15 @@ void ChrisAnakinAInit(WORLDINFO_s *world) {
 }
 
 void ChrisAnakinBDraw() {
+    STUBBED();
 }
 
 void ChrisAnakinBInit() {
+    STUBBED();
 }
 
 void ChrisAnakinCInit() {
+    STUBBED();
 }
 
 void ChrisAnakinDInit(WORLDINFO_s *world) {
@@ -290,9 +294,11 @@ void ChrisAnakinDInit(WORLDINFO_s *world) {
 }
 
 void DogFightARestart() {
+    STUBBED();
 }
 
 void ChrisAnakinAPanel(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void ChrisAnakinAReset(WORLDINFO_s *world) {
@@ -300,9 +306,11 @@ void ChrisAnakinAReset(WORLDINFO_s *world) {
 }
 
 void ChrisAnakinBReset() {
+    STUBBED();
 }
 
 void ChrisAnakinCReset() {
+    STUBBED();
 }
 
 void ChrisAnakinDReset(WORLDINFO_s *world) {
@@ -310,29 +318,38 @@ void ChrisAnakinDReset(WORLDINFO_s *world) {
 }
 
 void ChrisAnakinBUpdate() {
+    STUBBED();
 }
 
 void ChrisAnakinCUpdate() {
+    STUBBED();
 }
 
 void ChrisAnakinDUpdate(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void ChrisAfterBurnerCam(nuvec_s *, nuvec_s *) {
+    STUBBED();
 }
 
 void ChrisAllocLevelStuff(WORLDINFO_s *) {
+    STUBBED();
 }
 
 i32 DidBoltHitChrisJobby(WORLDINFO_s *, BOLT_s *) {
+    STUBBED();
     return 0;
 }
 
 void ChrisExtraBoltCollision(BOLT_s *, nuvec_s *) {
+    STUBBED();
 }
 
 void ChrisGetSpaceShipMatrix(GameObject_s *, numtx_s *) {
+    STUBBED();
 }
 
 void ChrisGetTargetedSpaceShipMatrix(GameObject_s *, numtx_s *) {
+    STUBBED();
 }

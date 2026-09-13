@@ -8,10 +8,13 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 void SecurityDoor_MoveCode(WORLDINFO_s *, GameObject_s *) {
+    STUBBED();
 }
 
 void SecurityDoor_FindNearest(WORLDINFO_s *, nuvec_s *, GameObject_s *, float *) {
+    STUBBED();
 }
 
 void SecurityDoors_InitTerrain(WORLDINFO_s *) {
+    STUBBED();
 }

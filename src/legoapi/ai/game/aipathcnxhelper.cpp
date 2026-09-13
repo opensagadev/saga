@@ -78,6 +78,7 @@ i32 AIPathCheckExtents(AIPATH *path, NUVEC *position) {
 }
 
 void pathEditorDrawNode(nuvec_s *, float, float, float, u32, numtl_s *, i32, i32) {
+    STUBBED();
 }
 
 void (*AIPathCnxHelperSysInitFn)(WORLDINFO_s *) = NULL;
@@ -388,6 +389,7 @@ AIPATHCNXHELPER_s *AIPathCnxHelperSys_AddHelper(AIPATHCNXHELPERSYS_s *system, AI
 }
 
 void pathEditorDrawConnectionInfo(nuvec_s *, float, nuvec_s *, u32, i32) {
+    STUBBED();
 }
 
 void AIPathCnxControllerSetOnRange(AIPATHCNXCONTROLLER_s *controller, i32 start_frame, i32 end_frame) {

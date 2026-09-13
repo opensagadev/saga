@@ -133,6 +133,7 @@ bool NuRenderDevice::IsExtensionSupported(const char *wanted) {
 // ---------------------------------------------------------------------------
 
 void NuRenderDevice::FrameEnd() {
+    STUBBED();
     // No-op in this build — original flushed per-frame bookkeeping.
 }
 
@@ -362,6 +363,7 @@ void NuRenderDevice::OnLostFocus() {
 }
 
 void NuRenderDevice::OnAppStarted() {
+    STUBBED();
 }
 
 void NuRenderDevice::OnAppRestarted() {
@@ -395,9 +397,11 @@ i32 NuRenderDevice::DetermineNominalAspectRatio(u32 w, u32 h) const {
 }
 
 void NuRenderDevice::PreInitialize() {
+    STUBBED();
 }
 
 void NuRenderDevice::OpenglErrorCallback(u32, u32, u32, u32, i32, char const *, void *) {
+    STUBBED();
 }
 
 // ---------------------------------------------------------------------------
@@ -416,5 +420,6 @@ struct numtl_s;
 typedef struct NuVertexFormatPS NuVertexFormatPS;
 
 static __used__ i32 NuIOS_GetOrCreateVAO(u32, u32, u32, NuVertexFormatPS *) {
+    STUBBED();
     return 0;
 }

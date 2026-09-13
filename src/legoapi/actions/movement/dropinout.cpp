@@ -8,12 +8,15 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 void StartDropIn(GameObject_s *) {
+    STUBBED();
 }
 
 void StartDropOut(GameObject_s *) {
+    STUBBED();
 }
 
 void DropInOutCode(GameObject_s *) {
+    STUBBED();
 }
 
 f32 DropInOutScale(GameObject_s *object) {
@@ -30,7 +33,9 @@ f32 DropInOutScale(GameObject_s *object) {
 }
 
 void FreePlay_DropInToPlayerPos(GameObject_s *) {
+    STUBBED();
 }
 
 void DropOut(i32, i32, i32, i32) {
+    STUBBED();
 }

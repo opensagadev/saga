@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "nudevicespecs.hpp"
 
 #include <GLES2/gl2.h>
@@ -23,6 +24,7 @@ void NuDeviceSpecs::Create() {
 }
 
 void NuDeviceSpecs::Exists() {
+    STUBBED();
 }
 
 void NuDeviceSpecs::Destroy() {

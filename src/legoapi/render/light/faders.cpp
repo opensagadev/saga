@@ -10,6 +10,7 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 void Faders_Draw(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void Faders_Reset(WORLDINFO_s *world) {
@@ -21,6 +22,7 @@ void Faders_Reset(WORLDINFO_s *world) {
 }
 
 void Faders_Configure(WORLDINFO_s *world, char *config) {
+    STUBBED();
     (void)world;
     (void)config;
 }

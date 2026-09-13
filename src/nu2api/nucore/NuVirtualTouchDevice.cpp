@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "nu2api/nucore/NuVirtualTouchDevice.h"
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nucore/NuTouchInputStick.h"
@@ -70,6 +71,7 @@ void NuVirtualTouchDevice::Execute(u32 port, NUPADTYPE in_type, NUPADATTACHMENTT
 }
 
 void NuVirtualTouchDevice::CreateDefaultLayout(u32 unknown) {
+    STUBBED();
 }
 
 f32 NuVirtualTouchDevice::GetAspectRatio() {

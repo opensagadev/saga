@@ -182,6 +182,7 @@ void IncreaseScore(u32 *total, u64 amount, i32 apply_multiplier) {
 }
 
 void RegisterHelpers() {
+    STUBBED();
 }
 
 void NewGame() {

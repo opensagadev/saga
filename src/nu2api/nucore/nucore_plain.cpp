@@ -434,6 +434,7 @@ extern "C" {
         return &vpsmtx;
     }
     void NuCameraIntersectsAABB(void) {
+        STUBBED();
     }
     i32 prev_lock;
     NUCAMERA locked_camera;
@@ -1151,6 +1152,7 @@ extern "C" {
     // ---------------------------------------------------------------------------
 
     void NuDisplaySceneDebug(void) {
+        STUBBED();
     }
 
     // ---------------------------------------------------------------------------
@@ -1176,6 +1178,7 @@ extern "C" {
     // ---------------------------------------------------------------------------
 
     void NuIOS_AwardAchievement(void) {
+        STUBBED();
     }
     void NuIOS_CheckCurrentFramebuffer(void) {
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -1209,6 +1212,7 @@ extern "C" {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
     void NuIOS_DeallocateSystemRenderbuffer(GLuint) {
+        STUBBED();
     }
     void NuIOS_FreeMemoryForSuspend(void) {
         const char *source_path = "i:/SagaTouch-Android_9176564/nu2api.saga/nuandroid/ios_graphics.cpp";
@@ -1293,6 +1297,7 @@ extern "C" {
         return g_isLowestEndDevice;
     }
     i32 NuIOS_IsMidRangeDevice(void) {
+        STUBBED();
         return 0;
     }
     i32 NuIOS_IsSmallScreen(void) {
@@ -1313,6 +1318,7 @@ extern "C" {
         env->functions->DeleteLocalRef(env, event);
     }
     void NuIOS_ShowAchievements(void) {
+        STUBBED();
     }
 
     // ---------------------------------------------------------------------------
@@ -1743,6 +1749,7 @@ extern "C" {
         matrix->m32 = -matrix->m32;
     }
     void *NuAnimCurveCreate(void) {
+        STUBBED();
         return NULL;
     }
     void NuAnimCurveDestroy(void *curve) {
@@ -2202,11 +2209,14 @@ extern "C" {
     }
 
     void NuSysDirClose(void) {
+        STUBBED();
     }
     i32 NuSysDirOpen(void) {
+        STUBBED();
         return 0;
     }
     i32 NuSysDirRead(void) {
+        STUBBED();
         return 0;
     }
 
@@ -2266,6 +2276,7 @@ extern "C" {
         return power;
     }
     void NuEulerXYZFromQuat(void) {
+        STUBBED();
     }
 
     // ---------------------------------------------------------------------------
@@ -2273,52 +2284,75 @@ extern "C" {
     // ---------------------------------------------------------------------------
 
     void NuFntClose(void) {
+        STUBBED();
     }
     void *NuFntCreate(void) {
+        STUBBED();
         return NULL;
     }
     void NuFntDestroy(void) {
+        STUBBED();
     }
     void NuFntGetScreenHeight(void) {
+        STUBBED();
     }
     void NuFntInit(void) {
+        STUBBED();
     }
     void *NuFntLoadPtr(void) {
+        STUBBED();
         return NULL;
     }
     void NuFntMoveAbs(void) {
+        STUBBED();
     }
     void NuFntMoveRel(void) {
+        STUBBED();
     }
     void NuFntPointSize(void) {
+        STUBBED();
     }
     void NuFntPos(void) {
+        STUBBED();
     }
     void NuFntPrint(void) {
+        STUBBED();
     }
     void NuFntPrintEx(void) {
+        STUBBED();
     }
     void NuFntPrintLen(void) {
+        STUBBED();
     }
     void NuFntPrintLenV(void) {
+        STUBBED();
     }
     void NuFntPrintV(void) {
+        STUBBED();
     }
     void NuFntScale(void) {
+        STUBBED();
     }
     void NuFntSet(void) {
+        STUBBED();
     }
     void NuFntSetFixedWidthNumerals(void) {
+        STUBBED();
     }
     void NuFntSetPen(void) {
+        STUBBED();
     }
     void NuFntToLower(void) {
+        STUBBED();
     }
     void NuFntToUpper(void) {
+        STUBBED();
     }
     void NuFntWrite(void) {
+        STUBBED();
     }
     void NuQFntCreate(void) {
+        STUBBED();
     }
     void NuQFntDestroy(VUFNT *font) {
         if (font != NULL) {
@@ -2462,8 +2496,10 @@ extern "C" {
         NuQFntPopPrintMode();
     }
     void NuQFntWrite(void) {
+        STUBBED();
     }
     void NuQFntWriteUniversalFont(void) {
+        STUBBED();
     }
 
     // ---------------------------------------------------------------------------
@@ -2534,17 +2570,23 @@ extern "C" {
         }
     }
     void *NuEffectTexCreate1D(void) {
+        STUBBED();
         return NULL;
     }
     void NuEffectTex360Create2D_aliased(void) {
+        STUBBED();
     }
     void NuEffectTex360Create3D_aliased(void) {
+        STUBBED();
     }
     void NuEffectTexCreateCube(void) {
+        STUBBED();
     }
     void NuEffectTexCreateCube_aliased(void) {
+        STUBBED();
     }
     void NuEffectTexCreateFromNativeTex(void) {
+        STUBBED();
     }
     void NuEffectTexGetDimension(nueffecttex_s *texture, i32 lod, i32 *width, i32 *height) {
         const i16 *dimensions = reinterpret_cast<const i16 *>(texture);
@@ -2574,51 +2616,69 @@ extern "C" {
         return NULL;
     }
     void *NuEffectTexGetLockedVP(void) {
+        STUBBED();
         return NULL;
     }
     void NuEffectTexLockVP(void *buffer, void *buffer_end) {
+        STUBBED();
         (void)buffer;
         (void)buffer_end;
     }
     void NuEffectTexMapNative(nueffecttex_s *texture) {
+        STUBBED();
     }
     void NuEffectTexUnlockVP(void) {
+        STUBBED();
     }
     void NuEffectTexUnmapNative(void) {
+        STUBBED();
     }
     void NuFramebufferAttachTex2D(nuframebuffer_s *, i32, nueffecttex_s *, i32) {
+        STUBBED();
     }
     void NuFramebufferBind(nuframebuffer_s *) {
+        STUBBED();
     }
     static void NuFramebufferClear(void) {
+        STUBBED();
     }
     void NuFramebufferCopyTex2D(i32, nueffecttex_s *, i32, i32, i32, i32, i32) {
+        STUBBED();
     }
     void NuFramebufferDestroy(nuframebuffer_s *) {
+        STUBBED();
     }
     void NuFramebufferDrawBuffers(void) {
+        STUBBED();
     }
     void NuFramebufferEnableGuards(nuframebuffer_s *, bool) {
+        STUBBED();
     }
     nueffecttex_s *NuFramebufferGetAttachedTex(nuframebuffer_s *, i32, i32 *, i32 *) {
+        STUBBED();
         return NULL;
     }
     void *NuFramebufferGetBackBuffer(void) {
+        STUBBED();
         return NULL;
     }
     nuframebuffer_s *NuFramebufferGetBound(void) {
+        STUBBED();
         return NULL;
     }
     nuframebuffer_s *NuFramebufferGetDefault(void) {
+        STUBBED();
         return NULL;
     }
     nuframebuffer_s *NuFramebufferGetFrontBuffer(void) {
+        STUBBED();
         return NULL;
     }
     i32 NuFramebufferGetHeight(nuframebuffer_s *framebuffer) {
         return *reinterpret_cast<const i32 *>(reinterpret_cast<const u8 *>(framebuffer) + 0xe0);
     }
     nuframebuffer_s *NuFramebufferGetObject(i32) {
+        STUBBED();
         return NULL;
     }
     i32 NuFramebufferGetSamples(nuframebuffer_s *framebuffer) {
@@ -2628,17 +2688,22 @@ extern "C" {
         return *reinterpret_cast<const i32 *>(reinterpret_cast<const u8 *>(framebuffer) + 0xdc);
     }
     void NuFramebufferInitEx(void) {
+        STUBBED();
     }
     void NuFramebufferResolve(i32, bool) {
+        STUBBED();
     }
     void NuFramebufferResolveAll(bool) {
+        STUBBED();
     }
     void NuFramebufferResolveMultisample(i32) {
         NuFramebufferResolveAll(true);
     }
     void NuFramebufferSetClearColor(void) {
+        STUBBED();
     }
     static void NuFramebufferSwapBuffers(void) {
+        STUBBED();
     }
     void NuLightFogX(f32 near_distance, f32 far_distance, u32 colour, f32, f32, i32, f32 density) {
         NuRndrStateSetFogEnabled(1);
@@ -2951,10 +3016,13 @@ extern "C" {
         memcpy(g_renderContext_world, &numtx_identity, sizeof(numtx_identity));
     }
     void NuRenderContext360BeginGameTime(void) {
+        STUBBED();
     }
     void NuRenderContext360EndGameTime(void) {
+        STUBBED();
     }
     void NuRenderContextSetAlphaBlend(void) {
+        STUBBED();
     }
     SAGA_HOST_WEAK void NuRenderContextSetViewProj(NUMTX *view, NUMTX *projection) {
         extern f32 g_renderContext_viewProj[16];
@@ -3027,10 +3095,13 @@ extern "C" {
     }
     // Original 0x2a33d0, 9 bytes: this platform deliberately does nothing.
     void NuRenderContextSetViewport(i32, i32, i32, i32) {
+        STUBBED();
     }
     void NuSpecialAddShadowLight(void) {
+        STUBBED();
     }
     void NuSpecialBurstDrawAt(void) {
+        STUBBED();
     }
     void NuSpecialClear(void *special) {
         NuPlainSpecialHandleLayout *handle = static_cast<NuPlainSpecialHandleLayout *>(special);
@@ -3042,6 +3113,7 @@ extern "C" {
         nuspecial_shadowLightHaveClipOverrides = 0;
     }
     void NuSpecialClearShadowLights(void) {
+        STUBBED();
     }
     i32 NuSpecialClipTestExtents(void *special, void *matrix_arg) {
         NUMTX *matrix = static_cast<NUMTX *>(matrix_arg);
@@ -3059,6 +3131,7 @@ extern "C" {
         return NuCameraClipTestExtents(&display->min, &display->max, matrix, 0.0f, 0);
     }
     i32 NuSpecialClipTestShadowLights(NUVEC *, NUVEC *, i32) {
+        STUBBED();
         return 0;
     }
     i32 NuSpecialCompare(nuhspecial_s *first, nuhspecial_s *second) {
@@ -3139,9 +3212,11 @@ extern "C" {
         return 0;
     }
     i32 NuSpecialFindMulti(NUGSCN *, nuhspecial_s *, char *, i32, i32) {
+        STUBBED();
         return 0;
     }
     void NuSpecialFindMultiWC(void) {
+        STUBBED();
     }
     i32 NuSpecialGetActiveShadowLights(void) {
         return nuspecial_shadowLightCount;
@@ -3318,6 +3393,7 @@ extern "C" {
         return nuspecial_shadowLightHaveClipOverrides;
     }
     void NuSpecialList(void) {
+        STUBBED();
     }
     i32 NuSpecialNumMtls(nuhspecial_s *special) {
         NuPlainLegacySpecialLayout *legacy = static_cast<NuPlainLegacySpecialLayout *>(special->special);
@@ -3347,6 +3423,7 @@ extern "C" {
         return 0;
     }
     void NuSpecialSetAlphaTest(void) {
+        STUBBED();
     }
     void NuSpecialSetBounds(nuhspecial_s *special, NUVEC *minimum, NUVEC *maximum) {
         NuPlainLegacySpecialLayout *legacy = static_cast<NuPlainLegacySpecialLayout *>(special->special);
@@ -3392,6 +3469,7 @@ extern "C" {
         }
     }
     void NuSpecialSetRenderPlane(void) {
+        STUBBED();
     }
     void NuSpecialVertexOffsets(i32 count, VARIPTR offsets) {
         nuspecial_vertex_offsets = offsets;
@@ -3430,11 +3508,13 @@ extern "C" {
         NuDynamicLight::destroy(light);
     }
     void NuDynamicLightEndCapture(void) {
+        STUBBED();
     }
     i32 NuDynamicLightGetActiveRenderSetCount(NuDynamicLight *light) {
         return light->active_render_set_count;
     }
     void NuDynamicLightGetDList(void) {
+        STUBBED();
     }
     f32 NuDynamicLightGetParameterf(NuDynamicLight *light, i32 parameter) {
         switch (parameter) {
@@ -3587,6 +3667,7 @@ extern "C" {
         light->setupCustomCameraFrustum(camera, splits, count);
     }
     void NuDynamicLightTestShadowExtrusionExtent(void) {
+        STUBBED();
     }
     void NuDynamicLightTestShadowExtrusions(NuDynamicLight *light, const VuVec *first, const VuVec *second) {
         VuVec first_copy;
@@ -3712,6 +3793,7 @@ extern "C" {
         }
     }
     void NuHGobjEvalAnim(void) {
+        STUBBED();
     }
     // Original @0x2cd730.
     void NuHGobjEvalAnim2(nuhgobj_s *object, ani3_animheader_s *animation, f32 time, i32 override_count,
@@ -3799,6 +3881,7 @@ extern "C" {
         NuAnimBuffDestroyScratch(&buffer);
     }
     void NuHGobjEvalAnimBlend(void) {
+        STUBBED();
     }
     // Original @0x2ce980.
     void NuHGobjEvalAnimBlend2(nuhgobj_s *object, ani3_animheader_s *animation_a, f32 time_a,
@@ -3818,6 +3901,7 @@ extern "C" {
                                     blend, override_count, overrides, matrices, root_fn, root_data);
     }
     void NuHGobjEvalDwa(void) {
+        STUBBED();
     }
     void **NuHGobjEvalDwa2(i32 render_count, i16 *render_indices, nuanimdata2_s *animation, f32 frame) {
         if (animation == NULL || render_count == 0) {
@@ -4054,6 +4138,7 @@ extern "C" {
         NuMtxMulVU0(result, result, world_matrix);
     }
     void NuHGobjPOIMtxFromIX(void) {
+        STUBBED();
     }
     i32 NuHGobjReversibleCharacters(i32 enabled) {
         i32 previous = nuapi.reversible_characters;
@@ -4341,6 +4426,7 @@ extern "C" {
         NuGCutAudioStream = stream;
     }
     void NuGHGRelocate(void) {
+        STUBBED();
     }
 
     // ---------------------------------------------------------------------------
@@ -4380,6 +4466,7 @@ extern "C" {
         return 0;
     }
     void NuPad_Interface_TouchScreenInput(i32, i32, i32, i32, i32, i32, i32, i32) {
+        STUBBED();
     }
     i32 NuPs2ApplyDeadZone(i32 raw_value, i32 dead_zone) {
         i32 value = raw_value - 128;
@@ -4538,6 +4625,7 @@ extern "C" {
         return -1;
     }
     void NuVisiBoxTree(void) {
+        STUBBED();
     }
     i32 VisiSysCameraLock;
     i32 LoadedOcclusionData;
@@ -4577,10 +4665,13 @@ extern "C" {
         return result;
     }
     void NuVisiInstTree(void *, NUGSCN *) {
+        STUBBED();
     }
     void NuVisiOcclusion(void *) {
+        STUBBED();
     }
     void NuVisiOctree(void) {
+        STUBBED();
     }
     void NuOcclusionManagerAddOccluderOBB(const NUVEC *minimum, const NUVEC *maximum, const NUMTX *matrix) {
         g_OcclusionManager.AddOccluder(minimum, maximum, matrix);
@@ -4613,6 +4704,7 @@ extern "C" {
         g_OcclusionManager.OnCameraSet();
     }
     void NuOcclusionManagerRenderStats(void) {
+        STUBBED();
     }
     void NuOcclusionManagerRenderZPass(void) {
         g_OcclusionManager.RenderZPass();
@@ -4643,21 +4735,27 @@ extern "C" {
     // ---------------------------------------------------------------------------
 
     void NuErrorSleep(void) {
+        STUBBED();
     }
 
     void NuHtmlHBarGraph(void) {
+        STUBBED();
     }
     void NuHtmlHLineGraph(void) {
+        STUBBED();
     }
     void NuHtmlVBarGraph(void) {
+        STUBBED();
     }
     void NuTimeBarInit(void) {
         VARIPTR unused = {};
         NuTimeBarInitEx(NULL, unused);
     }
     void NuTimeBarSetRender(i32) {
+        STUBBED();
     }
     void NuTimeBarSetRenderHorizontal(void) {
+        STUBBED();
     }
 
     // ---------------------------------------------------------------------------
@@ -4665,10 +4763,13 @@ extern "C" {
     // ---------------------------------------------------------------------------
 
     void NuTimeGetSinceStartFrame(void) {
+        STUBBED();
     }
     void NuTimeGetStartFrame(void) {
+        STUBBED();
     }
     void NuTimeStartFrame(void) {
+        STUBBED();
     }
 
     // ---------------------------------------------------------------------------
@@ -4677,10 +4778,12 @@ extern "C" {
 
 #ifndef ANDROID
     void NuGetCurrentThreadId(void) {
+        STUBBED();
     }
 #endif
 #ifndef ANDROID
     void NuThreadCreate(void) {
+        STUBBED();
     }
 #endif
     static f32 nu2api_paused;
@@ -4688,8 +4791,10 @@ extern "C" {
         nu2api_paused = (f32)paused;
     }
     void NuPhoneOSMessagePost(void) {
+        STUBBED();
     }
     void NuPhoneOSMessagePump(void) {
+        STUBBED();
     }
     NUGCUTSCENEGETHGOBJFN NuCutSceneGetHGObj;
 
@@ -4748,6 +4853,7 @@ extern "C" {
     // ---------------------------------------------------------------------------
 
     void NuSplineList(void) {
+        STUBBED();
     }
     extern void (*nuapi_endframe_callbackfn)(void);
     void NuRegisterEndFrameCallBackFn(void (*callback)(void)) {
@@ -4759,6 +4865,7 @@ extern "C" {
     // ---------------------------------------------------------------------------
 
     i32 NuStreamInit(void) {
+        STUBBED();
         return 0;
     }
 
@@ -4774,15 +4881,20 @@ struct nushaderobject_s;
 union variptr_u;
 
 void Nu360ConfigureSMBSharing(char **) {
+    STUBBED();
 }
 void NuFramebuffer360EndZPass() {
+    STUBBED();
 }
 bool NuFramebuffer360HasZPass() {
+    STUBBED();
     return false;
 }
 void NuFramebuffer360BeginZPass(i32) {
+    STUBBED();
 }
 i32 NuFramebuffer360GetTileCount(nuframebuffer_s *) {
+    STUBBED();
     return 0;
 }
 void NuLgtSetArcMatEx(i32 type, numtl_s *material, f32 u0, f32 v0, f32 u1, f32 v1) {

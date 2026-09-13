@@ -14,6 +14,7 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 void GrabVictim(GameObject_s *, GameObject_s *) {
+    STUBBED();
 }
 
 extern "C" {
@@ -102,6 +103,7 @@ SNAKEBODY_s *CreateSnakeBody(GameObject_s *object, i32 segment_count) {
 }
 
 void UpdateSnakeBody(GameObject_s *) {
+    STUBBED();
 }
 
 void DestroySnakeBody(GameObject_s *object) {
@@ -112,4 +114,5 @@ void DestroySnakeBody(GameObject_s *object) {
 }
 
 void EatVictim(GameObject_s *) {
+    STUBBED();
 }

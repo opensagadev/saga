@@ -108,9 +108,11 @@ void GizmoBlowupDraw(void *world_ptr, void *, float) {
 }
 
 void GizmoSortBlowups(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void GizmoSwapBlowups(GIZMOBLOWUP_s *, GIZMOBLOWUP_s *) {
+    STUBBED();
 }
 
 i32 MAXBLOWUPRANDSPANG = 60;
@@ -436,9 +438,11 @@ i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *blowup, i32 effects, i32 hit_type, i32 dama
 }
 
 void BlowupObjEmit_Stop(PART_s *) {
+    STUBBED();
 }
 
 void GizmoBlowupTypeAdd(WORLDINFO_s *, nuhspecial_s *, i32, i32 *) {
+    STUBBED();
 }
 
 GIZMOBLOWUPTYPE_s *GizmoBlowup_FindType(char *name, WORLDINFO_s *world) {
@@ -486,6 +490,7 @@ void GizBlowup_InitTerrain() {
 }
 
 void GizmoBlowupTypeRemove(GIZMOBLOWUPTYPE_s *, WORLDINFO_s *) {
+    STUBBED();
 }
 
 void Bolt_AddDeflectedBolt(BOLT_s *, nuvec_s *, nuvec_s *, unsigned char *);

@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/items/base/apiobject.h"
 
@@ -169,5 +170,6 @@ void Cheat_SetOnOffBitfield(i32 *onoffs, i32 count) {
 }
 
 bool FreePlayUnlocked() {
+    STUBBED();
     return true;
 }

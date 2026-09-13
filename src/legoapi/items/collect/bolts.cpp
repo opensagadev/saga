@@ -578,6 +578,7 @@ i32 Bolt_HitGameObjects(BOLT_s *bolt, NUVEC *points, NUVEC *minimum, NUVEC *maxi
 }
 
 void Bolt_HitCustomFn_LSW(BOLT_s *, nuvec_s *) {
+    STUBBED();
 }
 
 i32 addbolt_nosfx;
@@ -768,6 +769,7 @@ finish:
 }
 
 void Bolt_AddDeflectedBolt(BOLT_s *, nuvec_s *, nuvec_s *, unsigned char *) {
+    STUBBED();
 }
 
 extern "C" TERRAIN_SURFACE_s TerSurface[32];
@@ -1345,10 +1347,12 @@ static __used__ i32 Bolt_GetShootDirection_Default(GameObject_s *object, nuvec_s
 }
 
 static __used__ unsigned int Batarang_GetTargetPos(BATARANG_s *, int, nuvec_s *) {
+    STUBBED();
     return {};
 }
 
 static __used__ void CollideBoltStarFighter(BOLT_s *, starfighter_s *, _vuv_s *, _vuv_s *) {
+    STUBBED();
 }
 
 EXPLOSION *Detonate(NUVEC *, u16);
@@ -1357,26 +1361,33 @@ static __used__ void EndBolt_EwokTorpedo(BOLT_s *bolt) {
 }
 
 static __used__ void ProcessSpaceLevel(spacelevel_s *) {
+    STUBBED();
 }
 
 static __used__ void ProcessStarFighter(starfighter_s *, quickboltinfo *) {
+    STUBBED();
 }
 
 static __used__ void StarFighterAlign(starfighter_s *, _vuv_s *, f32, i32) {
+    STUBBED();
 }
 
 static __used__ void TrooperTeamSetStateCode(minitrooperteam_s *) {
+    STUBBED();
 }
 
 static __used__ unsigned int BoltInitSfx_LSW(GameObject_s *) {
+    STUBBED();
     return {};
 }
 
 void BoltTypes_Init(WORLDINFO_s *world) {
+    STUBBED();
     (void)world;
 }
 
 void BoltTypes_Configure(WORLDINFO_s *world, char *config) {
+    STUBBED();
     (void)world;
     (void)config;
 }
@@ -1384,6 +1395,7 @@ void BoltTypes_Configure(WORLDINFO_s *world, char *config) {
 extern "C" {
 
     void HitParts(void) {
+        STUBBED();
     }
 
 } // extern "C"

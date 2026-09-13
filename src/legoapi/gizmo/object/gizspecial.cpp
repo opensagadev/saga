@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/gizmos/trigger/gizspecial.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nuspecial.h"
@@ -38,6 +39,7 @@ i32 Gizmo_FindNuSpecial(nugscn_s *scene, nuhspecial_s *special, char *name, i32 
 }
 
 void ReleaseAllTakeOvers() {
+    STUBBED();
 }
 
 i32 GizmoGetGizmosUsingSpecial(GIZMOSYS *gizmo_sys, void *world, GIZMO **result, i32 result_capacity, char *name) {

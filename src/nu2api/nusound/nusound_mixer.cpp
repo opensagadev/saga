@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "nu2api_nusound_types.h"
 
 u8 NuSoundMixer::sDownmixerChannelMaps[4][8] = {
@@ -52,6 +53,7 @@ NuSoundMixer::NuSoundMixer(NuSoundSystem::ChannelConfig config, NuSoundSystem::C
                            NuSoundMixer::OutputLayout layout, NuSoundSystem::DownmixType downmix,
                            NuSoundRoutingTable *table)
     : input_config(config), output_config(output), output_layout(layout), downmix_type(downmix), routing_table(table) {
+    STUBBED();
 }
 
 NuSoundMixer::~NuSoundMixer() {

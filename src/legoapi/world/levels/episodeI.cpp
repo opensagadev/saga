@@ -243,6 +243,7 @@ static __used__ void PodRaceSnipersReset(void) {
 // legoapi/ai/game/misc_a_game.cpp; this one stays unused so the compiler drops
 // it exactly like today's build does.
 static void *CreatePodRaceMine(nuvec_s *pos) {
+    STUBBED();
     (void)pos;
     return NULL;
 }
@@ -529,6 +530,7 @@ void RescueA_Init(WORLDINFO_s *world) {
 }
 
 void RescueB_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void RescueC_Init(WORLDINFO_s *world) {
@@ -1587,6 +1589,7 @@ void RetakeG_Init(WORLDINFO_s *world) {
 }
 
 void RetakeG_Reset(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void RetakeG_Update(WORLDINFO_s *world) {
@@ -1664,6 +1667,7 @@ void MaulA_Reset(WORLDINFO_s *world) {
 }
 
 void MaulA_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void MaulA_Panel(WORLDINFO_s *world) {
@@ -1688,15 +1692,19 @@ void MaulB_Init(WORLDINFO_s *world) {
 }
 
 void MaulD_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void MaulD_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void MaulE_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void MaulE_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void MaulF_Init(WORLDINFO_s *world) {
@@ -1712,6 +1720,7 @@ void MaulF_Reset(WORLDINFO_s *world) {
 }
 
 void MaulF_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void MaulF_Panel(WORLDINFO_s *world) {
@@ -1742,6 +1751,7 @@ void AnakinsFlightB_Init(WORLDINFO_s *world) {
 }
 
 void AnakinsFlightB_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void AnakinsFlightB_Draw(WORLDINFO_s *world) {

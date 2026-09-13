@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/legoapi_types.h"
 #include "globals.h"
 #include "nu2api/nucore/nustring.h"
@@ -6,6 +7,7 @@ extern BATARANG_s Batarang[8];
 extern "C" i16 id_ROBIN;
 
 void Batarangs_Draw() {
+    STUBBED();
 }
 
 void Batarangs_Reset() {
@@ -18,15 +20,19 @@ void Batarangs_Reset() {
 }
 
 void Batarang_Release(GameObject_s *, i32) {
+    STUBBED();
 }
 
 void Batarangs_Update() {
+    STUBBED();
 }
 
 void Batarang_MoveCode(GameObject_s *) {
+    STUBBED();
 }
 
 void Batarang_Ricochet(BATARANG_s *) {
+    STUBBED();
 }
 
 void Batarang_GetSightInfo(i32 character, i32 *red, i32 *green, i32 *blue, char *text) {
@@ -45,18 +51,23 @@ void Batarang_GetSightInfo(i32 character, i32 *red, i32 *green, i32 *blue, char 
 }
 
 void Batarang_InitRicochet(BATARANG_s *, nuvec_s *) {
+    STUBBED();
 }
 
 void Batarang_SeekToTarget(BATARANG_s *) {
+    STUBBED();
 }
 
 void Batarangs_CheckLostData(void *) {
+    STUBBED();
 }
 
 void Batarang_StartTargetting(GameObject_s *) {
+    STUBBED();
 }
 
 void Batarang_StartThrowQuick(GameObject_s *) {
+    STUBBED();
 }
 
 i32 Batarang_GetObjectFromCharID(i32 character) {
@@ -64,4 +75,5 @@ i32 Batarang_GetObjectFromCharID(i32 character) {
 }
 
 void GetShootDirection_Batman(GameObject_s *, nuvec_s *) {
+    STUBBED();
 }

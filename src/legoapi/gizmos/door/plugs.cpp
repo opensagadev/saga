@@ -68,9 +68,11 @@ static void Plugs_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, v
 }
 
 static void Plugs_Update(void *, void *, float) {
+    STUBBED();
 }
 
 static void Plugs_Draw(void *, void *, float) {
+    STUBBED();
 }
 
 static char *Plug_GetGizmoName(GIZMO *gizmo) {

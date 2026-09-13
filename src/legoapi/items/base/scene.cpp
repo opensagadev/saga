@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/legoapi_types.h"
 
 VuVec const *SceneInstance::GetCurrentPosition() const {
@@ -21,9 +22,11 @@ int SceneInstance::GetVisibility() const {
 }
 
 void SceneInstance::Render(VuMtx const *) const {
+    STUBBED();
 }
 
 SceneInstance::SceneInstance() {
+    STUBBED();
 }
 
 void SceneInstance::SetCurrentPosition(VuVec const *position) {

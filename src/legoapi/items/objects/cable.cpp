@@ -397,6 +397,8 @@ void UpdateCables() {
 }
 
 void CableTargetGameObject(GameObject_s *, nuvec_s *, float) {
+    STUBBED();
 }
 void CableCode(GameObject_s *, i32, float) {
+    STUBBED();
 }

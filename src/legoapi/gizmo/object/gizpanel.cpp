@@ -8,4 +8,5 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 void SetPanelLights(float) {
+    STUBBED();
 }

@@ -142,6 +142,7 @@ i32 ReadTerrain(unsigned char *base_path, i32 first_group, i16 **buffer, TERRSET
 }
 
 void ReadInstanceIDs(i32, nugscn_s *) {
+    STUBBED();
 }
 
 i32 ReadTerrainPickup(unsigned char *base_path, i16 **buffer, TERRPICKUPSET *terrain) {

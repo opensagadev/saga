@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/legoapi_types.h"
 #include "globals.h"
 #include "legoapi/items/base/apiobject.h"
@@ -326,6 +327,7 @@ void Tag_ResetTransfers() {
 }
 
 void Tag_DrawIcon_Batman(GameObject_s *) {
+    STUBBED();
 }
 
 extern "C" void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);

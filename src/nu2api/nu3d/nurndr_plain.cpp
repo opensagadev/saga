@@ -204,6 +204,7 @@ extern "C" void NuGScnFromVideoMem(NUGSCNVIDEOMEMFN callback) {
     video_mem_to_gscene = callback;
 }
 extern "C" void NuGScnReadForMultiRender(void) {
+    STUBBED();
 }
 extern "C" void NuGScnRndr(NUGSCN *scene) {
     if (scene->additional_scenes != NULL && scene->rendered_additional_scene_count > 0) {
@@ -232,23 +233,32 @@ extern "C" void NuMtlAnimateSetSpeedScale(f32 speed_scale) {
     mtl_animation_speed_scale = speed_scale;
 }
 extern "C" void NuMtlAnimateShaderMtlTextures(void) {
+    STUBBED();
 }
 static void NuMtlCreate3D(void) {
+    STUBBED();
 }
 extern "C" void NuMtlCreateBuff(void) {
+    STUBBED();
 }
 extern "C" void NuMtlCreateBuff3D(void) {
+    STUBBED();
 }
 
 extern "C" void NuMtlFindVariantMtl(void) {
+    STUBBED();
 }
 extern "C" void NuMtlFindVariantMtlFromDesc(void) {
+    STUBBED();
 }
 extern "C" void NuMtlRegisterForOverride(void) {
+    STUBBED();
 }
 static void NuMtlSetRenderStatesPS(void) {
+    STUBBED();
 }
 extern "C" void NuMtlSpecialSetUV(void) {
+    STUBBED();
 }
 
 // Debug / visualisation geometry
@@ -485,6 +495,7 @@ extern "C" void NuRndrFx(i32 paused, void *) {
     }
 }
 extern "C" i32 NuRndrGetCullDebug(void) {
+    STUBBED();
     return 0;
 }
 extern i32 global_frame_count;
@@ -1076,6 +1087,7 @@ extern "C" i32 NuRndrSetAmbientLightSpecular(const NUCOLOUR4 *colour) {
     return 0;
 }
 extern "C" void NuRndrSetCullDebug(void) {
+    STUBBED();
 }
 extern "C" {
     i32 NuRndrStopUpdate;
@@ -1582,8 +1594,10 @@ extern "C" nu2api::ShaderUniformRecord *NuShaderUniformGetByString(const char *n
     return NULL;
 }
 extern "C" void NuTexDestroy(i32) {
+    STUBBED();
 }
 static void NuTexGenTexture(void) {
+    STUBBED();
 }
 extern "C" void NuTextureBlendEffect(i32 arg0, i32 arg1, NUVEC4 *parameters) {
     currentScene.texture_blend_arg0 = arg0;

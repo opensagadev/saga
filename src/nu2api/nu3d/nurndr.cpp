@@ -99,9 +99,11 @@ void NuRndrStreamInit(i32 stream_buffer_size, VARIPTR *buffer) {
 }
 
 void NuRndrRectUV2d(float, float, float, float, float, float, float, float, float, i32, numtl_s *) {
+    STUBBED();
 }
 
 void NuRndrRectUV2diZ(i32, i32, i32, i32, float, float, float, float, i32, numtl_s *, i32) {
+    STUBBED();
 }
 
 void NuRndrInitGeneric() {
@@ -109,10 +111,12 @@ void NuRndrInitGeneric() {
 }
 
 void NuRndrGradRect2diZ(i32, i32, i32, i32, i32 *, numtl_s *, i32) {
+    STUBBED();
 }
 
 
 void NuRndrRectUV2dNoScale(float, float, float, float, float, float, float, float, i32, numtl_s *) {
+    STUBBED();
 }
 
 void NuRndrCalcRandEllipsePos(nuvec4_s *position, numtx_s *matrix, nuvec_s *axes) {

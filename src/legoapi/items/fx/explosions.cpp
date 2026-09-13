@@ -44,6 +44,7 @@ EXPLOSION *AddExplosion(nuvec_s *position, float radius, float strength, GameObj
 }
 
 void SetupBlowupSfx(WORLDINFO_s *, specialsfx_s *) {
+    STUBBED();
     // The original Android function has no behavior (padding followed by ret).
 }
 

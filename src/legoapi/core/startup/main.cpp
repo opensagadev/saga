@@ -74,6 +74,7 @@ void FinishLoop(i32 frames) {
 }
 
 void bgSuspendMain(i32) {
+    STUBBED();
 }
 
 void EndOfDemo(i32) {

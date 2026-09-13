@@ -1,4 +1,5 @@
 
+#include "decomp.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec4.h"
@@ -738,6 +739,7 @@ extern "C" {
         out->w = NuFloatToHalf(v->w);
     }
     void NuVecConvertToIntVU0(void) {
+        STUBBED();
     }
     f32 NuVecDiffSqrVU0(NUVEC *a, NUVEC *b) {
         f32 x = a->x - b->x;

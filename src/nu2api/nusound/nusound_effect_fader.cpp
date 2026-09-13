@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "nu2api_nusound_types.h"
 
 bool NuSoundEffectFader::AttachBus(NuSoundBus *) {
@@ -62,6 +63,7 @@ void NuSoundEffectFader::Process(float frametime) {
 }
 
 void NuSoundEffectFader::ProcessBus(NuSoundBus *, float) {
+    STUBBED();
 }
 
 void NuSoundEffectFader::ProcessVoice(NuSoundVoice *voice, float) {

@@ -195,9 +195,11 @@ struct SHOPINPUT;
 // ===========================================================================
 
 void BossKilled(i32) {
+    STUBBED();
 }
 
 void CountOpenEpisodes() {
+    STUBBED();
 }
 
 i32 Episode_IsComplete(EPISODEDATA *episode, i32 *completed_area_count) {
@@ -229,9 +231,11 @@ i32 Episodes_Completed() {
 }
 
 void Episodes_CompleteAllSuperStories() {
+    STUBBED();
 }
 
 void Episode_FindFromArea(i32) {
+    STUBBED();
 }
 
 i32 EpCompleteTotal, EpCompleteCount;
@@ -331,6 +335,7 @@ i32 Episode_CountOpenAreas(i32 episode_index, i32 area_index, AREASAVE_s *saves)
 }
 
 void InitSuperStory(i32) {
+    STUBBED();
 }
 
 i32 InStory() {
@@ -376,6 +381,7 @@ void CoinTotal_Draw(i32 total, f32 y, f32 scale, i32 remember_positions, f32 ico
 }
 
 void DoubleScoreAlpha() {
+    STUBBED();
 }
 
 // ===========================================================================
@@ -383,6 +389,7 @@ void DoubleScoreAlpha() {
 // ===========================================================================
 
 void TrooperShoot(WORLDINFO_s *, minitrooperteam_s *, minisnowtrooper_s *, u16 *, i32) {
+    STUBBED();
 }
 
 void NewTerrStoreAnyInfo() {
@@ -407,19 +414,25 @@ void NewTerrStoreAnyInfo() {
 }
 
 void SetBobaRocketTarget(MechObjectInterface *) {
+    STUBBED();
 }
 
 void FireBountyHunterRocket(GameObject_s *) {
+    STUBBED();
 }
 
 void ResetTrooperCannons(WORLDINFO_s *, i32) {
+    STUBBED();
 }
 
 void UpdateTrooperCannons(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void UpdateMiniSnowTroopers(WORLDINFO_s *) {
+    STUBBED();
 }
 
 static __used__ void seed_chase(f32 *, i32, abi_long) {
+    STUBBED();
 }

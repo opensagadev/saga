@@ -40,6 +40,7 @@ i32 CircleLevel(LEVELDATA_s *level) {
 }
 
 void CurrentStart(GameObject_s *, i32, i32) {
+    STUBBED();
 }
 
 void NewRumble(nupad_s *, f32, i32);
@@ -117,9 +118,11 @@ void ClearLastSafeTakeOver(GameObject_s *object) {
 }
 
 void GetNativeTextureFormatName(NUTEXFORMAT) {
+    STUBBED();
 }
 
 void CatIToX(char *, i32) {
+    STUBBED();
 }
 
 void DoInput(WORLDINFO_s *world) {
@@ -174,14 +177,18 @@ void DoInput(WORLDINFO_s *world) {
 }
 
 void CatI64ToX(char *, i64) {
+    STUBBED();
 }
 
 void DieRumble(GameObject_s *) {
+    STUBBED();
 }
 
 void charToInt(char const *) {
+    STUBBED();
 }
 
 static __used__ i32 _fseek64_wrap(__sFILE *, i64, i32) {
+    STUBBED();
     return 0;
 }

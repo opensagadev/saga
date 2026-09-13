@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "nuscreen.hpp"
 
 #include <cstddef>
@@ -6,6 +7,7 @@
 NuScreen *NuScreen::ms_instance = NULL;
 
 bool NuScreen::Exists() {
+    STUBBED();
 }
 
 void NuScreen::Create() {

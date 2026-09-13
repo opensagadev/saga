@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "nusound_decoder_ogg.hpp"
 
 #include "nu2api/nuandroid/ios_graphics.h"
@@ -35,6 +36,7 @@ NuSoundDecoderOGG::~NuSoundDecoderOGG() {
 
 // libTTapp.so 0x32e1a0.
 void NuSoundDecoderOGG::Reset() {
+    STUBBED();
 }
 
 // libTTapp.so 0x32e1e0.
@@ -61,9 +63,11 @@ i32 NuSoundDecoderOGG::OGGReadCallbacksDecoder::Seek(i32 offset, u32 origin) {
 }
 
 void NuSoundDecoderOGG::OGGReadCallbacksDecoder::Close() {
+    STUBBED();
 }
 
 int NuSoundDecoderOGG::OGGReadCallbacksDecoder::GetPosition() const {
+    STUBBED();
     return 0;
 }
 

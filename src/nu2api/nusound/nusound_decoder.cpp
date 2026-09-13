@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "nusound_decoder.hpp"
 
 #include "nu2api/nucore/nucore.hpp"
@@ -53,6 +54,7 @@ NuSoundDecoder::~NuSoundDecoder() {
 }
 
 __attribute__((weak)) void NuSoundDecoder::Reset() {
+    STUBBED();
 }
 
 // libTTapp.so 0x31ec90: fill the ring buffers upfront. Each buffer is

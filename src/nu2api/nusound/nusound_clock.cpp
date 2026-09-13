@@ -1,6 +1,8 @@
+#include "decomp.h"
 #include "nu2api_nusound_types.h"
 
 void NuSoundClock::Callback::OnCallback(u64, u64) {
+    STUBBED();
 }
 
 void NuSoundClock::AddCallback(NuSoundClock::Callback *callback) {
@@ -12,6 +14,7 @@ u64 NuSoundClock::GetClockFrequency() const {
 }
 
 u64 NuSoundClock::GetTicks() const {
+    STUBBED();
     return 0;
 }
 

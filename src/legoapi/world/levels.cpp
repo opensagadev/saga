@@ -10,10 +10,12 @@
 // Level-system stubs that have not yet been split into a subsystem file.
 
 i32 GetTableLocator(void) {
+    STUBBED();
     return 0;
 }
 
 void getSpawnLocator(float, char *) {
+    STUBBED();
 }
 
 void NewLevelFromMenu(LEVELDATA_s *level, i32 menu_id, i32 menu_y, i32) {
@@ -45,8 +47,10 @@ void NewLevelFromMenu(LEVELDATA_s *level, i32 menu_id, i32 menu_y, i32) {
 }
 
 i32 GetCounterLocator(i32) {
+    STUBBED();
     return 0;
 }
 
 void OffPlat(i32) {
+    STUBBED();
 }

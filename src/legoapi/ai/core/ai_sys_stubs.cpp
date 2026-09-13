@@ -1681,6 +1681,7 @@ extern "C" {
     }
 
     void AISYSRebuildFromEditorData(void) {
+        STUBBED();
     }
 
     void AIScriptForceParamReEval(AISCRIPTPROCESS *processor) {
@@ -3505,6 +3506,7 @@ extern "C" {
     }
 
     void QueryLocalMessage(void) {
+        STUBBED();
     }
 
 } // extern "C"

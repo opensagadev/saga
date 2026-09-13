@@ -48,6 +48,7 @@ void *AIPathCnxHelperSysCreate(VARIPTR *buf, VARIPTR *buf_end, i32 count) {
     return system;
 }
 void GameAIScriptAddLevelSfx(WORLDINFO *world, NULISTHDR *scripts) {
+    STUBBED();
     (void)world;
     (void)scripts;
 }
@@ -63,4 +64,5 @@ void *CreateClimbObjectSys(VARIPTR *buf, VARIPTR *buf_end, i32 count) {
     return system;
 }
 static __used__ void GenerateTrooperTeamShape(minitrooperteam_s *, int) {
+    STUBBED();
 }

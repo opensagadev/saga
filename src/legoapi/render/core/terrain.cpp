@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/world/world_shared.h"
 
 #include <stdio.h>
@@ -1375,6 +1376,7 @@ NUVEC TerrainSkin(PLATSKININFO *info, nuvec_s *position, float weight, i32 mode)
     return result;
 }
 void RotateTerrain(tertype *) {
+    STUBBED();
 }
 
 namespace {
@@ -2403,8 +2405,10 @@ void MakePlayPlanes(GAMECAMERA_s *camera) {
                  &far_corner[0], &far_corner[3], &far_corner[0]);
 }
 void TerrDrawPlatCol(tertype *, i16, i32) {
+    STUBBED();
 }
 void TerrShowCamTerr() {
+    STUBBED();
 }
 NUVEC TerrainStaticMtx(PLATSKININFO *info, nuvec_s *position, i32) {
     NUVEC4_ALIGNED16 point;
@@ -2420,6 +2424,7 @@ NUVEC TerrainStaticMtx(PLATSKININFO *info, nuvec_s *position, i32) {
     return result;
 }
 void ScanTerrainHandel(i32, i16 *) {
+    STUBBED();
 }
 extern "C" void NewShapeInit(NUVEC *offset) {
     offset->x = 0.0f;

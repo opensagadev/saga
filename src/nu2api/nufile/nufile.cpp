@@ -935,6 +935,7 @@ static void NuDatFileDecodeNext() {
 }
 
 static void APIEndianSwap(void *data, i32 count, i32 size) {
+    STUBBED();
 }
 
 NUDATHDR *NuDatOpen(char *filepath, VARIPTR *buf, i32 *_unused) {

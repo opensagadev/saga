@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "nu2api_nucore_types.h"
 #include "nu2api/nu3d/android/nudlist_callbacks.h"
 #include "nu2api/nu3d/nulgtlaser.h"
@@ -52,9 +53,11 @@ extern "C" void NuAnimBuffCreateScratch(nuanimbuff_s *buffer);
 extern "C" void NuAnimBuffDestroyScratch(nuanimbuff_s *buffer);
 
 void NuHGobjRead(variptr_u *, char *) {
+    STUBBED();
 }
 
 static void NuHtmlFlush(i32) {
+    STUBBED();
 }
 
 void NuErrorPrint(char *message) {
@@ -62,6 +65,7 @@ void NuErrorPrint(char *message) {
 }
 
 void NuFntFindEnd(nutex_s *, i32 *, i32 *, i32, i32) {
+    STUBBED();
 }
 
 void NuWindFreeGrp(NuWindGType *group) {
@@ -73,12 +77,15 @@ void NuWindFreeGrp(NuWindGType *group) {
 
 
 void NuFntFindStart(nutex_s *, i32 *, i32 *, i32, i32) {
+    STUBBED();
 }
 
 void NuFntPrintChar(char) {
+    STUBBED();
 }
 
 void NuQFntSetMtx2d(void *, numtx_s *) {
+    STUBBED();
 }
 
 void NuWarningPrint(char *message) {
@@ -90,6 +97,7 @@ void NuDebugMsgPrint(char *message) {
 }
 
 void NuVpSetDestRect(float, float, float, float) {
+    STUBBED();
 }
 
 extern "C" u8 CutSceneBoundingBoxTrackRoot;
@@ -114,6 +122,7 @@ i32 NuCameraClipHGobj(nugscn_s *scene, numtx_s *world_matrix, numtx_s *root_matr
 }
 
 void NuFntDumpReadable(nufnt_s *, char *) {
+    STUBBED();
 }
 
 // NuIOS_SetCullMode is transcribed in android/nuiosdl_gl.cpp (original 0x29c110).
@@ -306,9 +315,11 @@ void NuLgtArcLaserDraw(i32 paused) {
 }
 
 void NuVpSetSourceRect(float, float, float, float) {
+    STUBBED();
 }
 
 void NuFrameEndBgLoadPS(i32) {
+    STUBBED();
 }
 
 void NuGCutRigidCalcMtx(NUGCUTRIGID_s *rigid, float frame, numtx_s *mtx) {
@@ -439,6 +450,7 @@ void NuDisplayListCreate(nudisplayscene_s *raw_scene, variptr_u *buffer, variptr
 }
 
 void NuFadeSetFxCodeMtls(nugeom_s *, unsigned char *) {
+    STUBBED();
 }
 
 void NuGCutRigidCalcMtx_3(NUGCUTRIGID_s *rigid, float frame, numtx_s *mtx) {
@@ -473,6 +485,7 @@ void NuGCutRigidCalcMtx_3(NUGCUTRIGID_s *rigid, float frame, numtx_s *mtx) {
 // NuIOSDLGeom2DCallback is transcribed in android/nuiosdl_gl.cpp (original 0x29d1a0).
 
 i32 NuIOS_GetInAppProduct(i32, NuIOS_InAppProduct *) {
+    STUBBED();
     return 0;
 }
 
@@ -536,39 +549,49 @@ void NuGCutCharAnimProcess_3(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, 
 
 
 i32 NuIOS_GetPurchaseResult() {
+    STUBBED();
     return 0;
 }
 
 void NuLightMotionBlurEffect(i32, float) {
+    STUBBED();
 }
 
 void NuIOS_DisplaySystemAlert(char const *) {
+    STUBBED();
 }
 
 i32 NuIOS_IsProductPurchased(char *) {
+    STUBBED();
     return 0;
 }
 
 
 void NuGCutRigidForceInstanced(NUGCUTSCENE_s *) {
+    STUBBED();
 }
 
 
 i32 NuIOS_GetInAppProductByID(char *, NuIOS_InAppProduct *) {
+    STUBBED();
     return 0;
 }
 
 void NuIOS_GetShaderProgramKey(ShaderObjectKey const &) {
+    STUBBED();
 }
 
 void NuSpecialFindByPlatformID(nugscn_s *, nuhspecial_s *, i32) {
+    STUBBED();
 }
 
 
 void NuIOS_GetNumInAppPurchases() {
+    STUBBED();
 }
 
 i32 NuIOS_PurchaseInAppProduct(char *) {
+    STUBBED();
     return 0;
 }
 
@@ -597,14 +620,17 @@ void NuHGobjEvalAnimBlend2Root_3(nugscn_s *scene, ani3_animheader_s *animation_a
 }
 
 i32 NuIOS_CanMakeInAppPurchases() {
+    STUBBED();
     return 0;
 }
 
 void NuIOS_RestoreInAppPurchases() {
+    STUBBED();
 }
 
 
 void NuCameraTransformScissorClip(nuvec_s *, nuvec_s *, i32, numtx_s *) {
+    STUBBED();
 }
 
 // NuDebrisRendererFlushBuffers is transcribed in android/nuptl_android.c (original 0x296f35).
@@ -622,6 +648,7 @@ void NuIOS_CopyBackbufferToTexture(nunativetex_s *texture, bool) {
 }
 
 i32 NuIOS_IsProductPurchasedByNum(i32) {
+    STUBBED();
     return 0;
 }
 
@@ -632,21 +659,26 @@ void NuIOS_ResetVAODuplicateFinder() {
 }
 
 void NuIOS_CateInAppPurchaseManager() {
+    STUBBED();
 }
 
 void NuDynamicLightingGetParameterfv(nudeferredshadingenum_e, float *) {
+    STUBBED();
 }
 
 i32 NuIOS_GetInAppProductIdentifier(i32, NuIOS_InAppProduct *) {
+    STUBBED();
     return 0;
 }
 
 i32 NuIOS_PurchaseInAppProductByNum(i32) {
+    STUBBED();
     return 0;
 }
 
 
 i32 NuIOS_AreInAppPurchasesAvailable() {
+    STUBBED();
     return 0;
 }
 
@@ -782,10 +814,12 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
 
 
 void NuDynamicLightTestShadowExtrusions(nudynamiclight_s *, _vuv_s const *, _vuv_s const *, i32 *) {
+    STUBBED();
 }
 
 
 void NuRenderContextForceSamplerStatePS(i32, d3dsamplerstate_u const *) {
+    STUBBED();
 }
 
 f32 NuATanf(f32 value) {
@@ -797,6 +831,7 @@ f32 NuATan2f(f32 y, f32 x) {
 }
 
 void NuFntSave(nufnt_s *, i32, char *) {
+    STUBBED();
 }
 
 extern "C" {
@@ -809,25 +844,33 @@ i32 NuLgtRand() {
 }
 
 void NuMemory::MemErrorHandler::CloseDump(NuMemoryManager *, u32) {
+    STUBBED();
 }
 
 void NuMemory::MemErrorHandler::Dump(NuMemoryManager *, u32, char const *) {
+    STUBBED();
 }
 
 void NuMemory::MemErrorHandler::HandleError(NuMemoryManager *, NuMemoryManager::ErrorCode, char const *) {
+    STUBBED();
 }
 
 void NuMemory::MemErrorHandler::OpenDump(NuMemoryManager *, char const *, u32 &) {
+    STUBBED();
 }
 
 void NuNetEmu::EmuPacket::AddPayload(void *, i32) {
+    STUBBED();
 }
 
 NuNetEmu::EmuPacket::EmuPacket(nunetaddr_s *) {
+    STUBBED();
 }
 
 NuNetEmu::EmuPacket::~EmuPacket() {
+    STUBBED();
 }
 
 void NuNetEmu::PackStats::Draw(float, float, float, float, NetSmallStats::eInfo) const {
+    STUBBED();
 }

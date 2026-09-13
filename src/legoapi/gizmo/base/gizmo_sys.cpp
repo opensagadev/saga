@@ -100,11 +100,13 @@ void LoadGizmoSys(GIZMOSYS_s *gizmo_sys, void *world, char *config_file) {
     }
 }
 void Hub_LoadAndFixUpMiniKits(WORLDINFO *world, VARIPTR *buf, VARIPTR *buf_end) {
+    STUBBED();
     (void)world;
     (void)buf;
     (void)buf_end;
 }
 void MiniKit_Load(MINIKIT *minikit, i32 id, VARIPTR *buf, VARIPTR *buf_end, void *param) {
+    STUBBED();
     (void)minikit;
     (void)id;
     (void)buf;
@@ -112,12 +114,14 @@ void MiniKit_Load(MINIKIT *minikit, i32 id, VARIPTR *buf, VARIPTR *buf_end, void
     (void)param;
 }
 void MiniKit_InitPieces(MINIKIT *minikit, i32 count, VARIPTR *buf, VARIPTR *buf_end) {
+    STUBBED();
     (void)minikit;
     (void)count;
     (void)buf;
     (void)buf_end;
 }
 void CharacterMiniKits_Load(COLLECTION_s *collection, WORLDINFO *world, VARIPTR *buf, VARIPTR *buf_end) {
+    STUBBED();
     (void)collection;
     (void)world;
     (void)buf;

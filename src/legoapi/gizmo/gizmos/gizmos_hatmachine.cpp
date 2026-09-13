@@ -3,6 +3,7 @@
 #include "legoapi/gizmo/base/HatMachineObjectInterface.h"
 
 void HatMachine_MoveCode(WORLDINFO_s *, GameObject_s *, i32) {
+    STUBBED();
 }
 
 i32 HatMachine_BeingUsed(HATMACHINE_s *hat_machine) {
@@ -10,9 +11,11 @@ i32 HatMachine_BeingUsed(HATMACHINE_s *hat_machine) {
 }
 
 void HatMachine_FindNearest(WORLDINFO_s *, nuvec_s *, GameObject_s *, float *) {
+    STUBBED();
 }
 
 void HatMachines_InitTerrain(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void HATMACHINE_s::ClearMechObjectInterface() {

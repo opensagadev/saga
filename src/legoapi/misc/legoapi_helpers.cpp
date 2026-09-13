@@ -6,5 +6,6 @@
 // units, so this file hosts the local variants.
 
 static __used__ u16 RotDiff(u16, u16) {
+    STUBBED();
     return 0;
 }

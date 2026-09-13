@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "nu2api/nu3d/NuRenderDevice.h"
 
 #include "globals.h"
@@ -17,6 +18,7 @@ thread_local i32 gt_glContextIndex = -1;
 i32 g_nextGLContextIndex;
 
 i32 _NuCheckGLErrors(const char * /*file*/) {
+    STUBBED();
     // Original is a no-op in release; kept as a hook for debug builds.
     return 0;
 }

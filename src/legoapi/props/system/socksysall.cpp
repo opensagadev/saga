@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/props/system/socksys.h"
 f32 CalculateDistanceToSpecificSideOrEnd(i32, NUVEC *, SOCKPOSITION *, i32, SOCKSYS *);
 void TurnOffAllSocksExcept(SOCKSYS *, i32);
@@ -211,6 +212,7 @@ extern "C" {
 }
 
 static __used__ void SockDataError() {
+    STUBBED();
 }
 
 static i32 RotDiff(u16 from, u16 to) {
@@ -806,9 +808,11 @@ extern "C" {
     }
 
     void SockOff(SOCKSYS *, i32) {
+        STUBBED();
     }
 
     void SockOn(SOCKSYS *, i32) {
+        STUBBED();
     }
 
     void SockRotationMatrix(SOCKSYS *system, SOCKPOSITION *position, NUMTX *out, i32 stride, i32 mode) {
@@ -1410,9 +1414,11 @@ extern "C" {
     }
 
     void SockSysSetObjectVisibility(void) {
+        STUBBED();
     }
 
     void SockSysTrackInSplineInfo(void) {
+        STUBBED();
     }
 
     void SockSys_Configure(SOCKSYS *sock_sys, char *config, i32, VARIPTR *buf, VARIPTR *buf_end, NUGSCN *gscn) {

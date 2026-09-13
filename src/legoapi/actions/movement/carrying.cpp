@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "globals.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/legoapi_types.h"
@@ -74,6 +75,7 @@ i32 ObjLandReady(GameObject_s *object) {
 }
 
 void LetGoOfBalloon(GameObject_s *) {
+    STUBBED();
 }
 
 i32 MovingBackwards(GameObject_s *object) {

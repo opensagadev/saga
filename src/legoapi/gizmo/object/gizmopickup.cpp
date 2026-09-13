@@ -126,6 +126,7 @@ void SuperCounters_Reset(i32 area_index) {
 }
 
 void UpdatePickupFlicker() {
+    STUBBED();
 }
 
 TAKEOVEROBJECT_s takeoverobjects[8];
@@ -258,12 +259,15 @@ void ReStoreStatusTakeOverObjectSys(i32 restore_progress) {
 }
 
 void SuperCounters_FindPickup(WORLDINFO_s *, GIZMO_s *, nuvec_s *, SUPERCOUNTERPICKUP **) {
+    STUBBED();
 }
 
 void SuperCounter_AnyCollected(SUPERCOUNTER *, WORLDINFO_s *) {
+    STUBBED();
 }
 
 void SuperCounters_FixUpGizmos(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void SuperCounters_ResetProcessed(WORLDINFO_s *world) {
@@ -275,7 +279,9 @@ void SuperCounters_ResetProcessed(WORLDINFO_s *world) {
 }
 
 void SuperCounter_ActivateGizmoPickup(GIZMO_s *, GIZMOPICKUP_s *) {
+    STUBBED();
 }
 
 void SuperCounter_FindFromNameAndLevel(char *, WORLDINFO_s *, SUPERCOUNTERPICKUP **) {
+    STUBBED();
 }

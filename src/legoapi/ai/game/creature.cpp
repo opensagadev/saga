@@ -421,6 +421,7 @@ void SpawnCreatureFromCrate(GameObject_s *object, f32 height, f32 delay) {
 }
 
 void SpawnMeleeCreatureType(i32) {
+    STUBBED();
 }
 
 GameObject_s *alert_obj;

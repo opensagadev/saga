@@ -30,6 +30,7 @@ extern "C" {
                                  DEFORMERWEIGHTSARRAY *deformer_weights);
 
     void AddColourPick(void) {
+        STUBBED();
     }
 
     void *DisplayListCreateFaceonTransformPS(VARIPTR *buffer, NUMTX *transform, NUMTL *, void *faceon_data) {
@@ -56,6 +57,7 @@ extern "C" {
     }
 
     void DisplayListCreateFxItemPS(void *, i32) {
+        STUBBED();
     }
 
     void *DisplayListCreateGeomTransformPS(VARIPTR *buffer, NUMTX *transform, NUMTL *mtl, void *next, void *tx) {
@@ -91,12 +93,15 @@ extern "C" {
     }
 
     void DisplayListCreatePS(void) {
+        STUBBED();
     }
 
     void DisplayListCreateRigidSkin2TransformPS(void) {
+        STUBBED();
     }
 
     void DisplayListCreateRigidSkinTransformPS(void) {
+        STUBBED();
     }
 
     // Original 0x29b338.  Build the compact skin-palette packet consumed by
@@ -155,9 +160,11 @@ extern "C" {
     }
 
     void DisplayListDebugPS(void) {
+        STUBBED();
     }
 
     void DisplayListDestroyFxItemPS(void *) {
+        STUBBED();
     }
 
     void NuDisplaySceneClonePS(NUDLDLISTSCENE *source, NUDLDLISTSCENE *destination, VARIPTR *buffer) {
@@ -172,10 +179,12 @@ extern "C" {
     }
 
     void DisplayListPrintItemPS(void) {
+        STUBBED();
     }
 
     // DisplayListSetAlphaPS lives in nu3d/android/nudlist_android.c (original 0x29b8c0).
     void DisplayListSetFxItemParamPS(void *, i32, f32, i32) {
+        STUBBED();
     }
 
     void DisplayListSetShadowCasterFlagPS(NUDISPLAYLISTITEM *previous, NUDISPLAYLISTITEM *, i32 flag) {
@@ -200,6 +209,7 @@ extern "C" {
     }
 
     void DisplayListUpdateSpecialTransformPS(nuhspecial_s *, NUMTX *) {
+        STUBBED();
     }
 
     void DisplaySceneRndrSpecials(NUDLDLISTSCENE *scene, i32, void *visibility_context) {
@@ -251,6 +261,7 @@ extern "C" {
     }
 
     void FmvTimePS(void) {
+        STUBBED();
     }
 
 
@@ -265,6 +276,7 @@ extern "C" {
     }
 
     void RndrMaskScreen(void) {
+        STUBBED();
     }
 
     void *RndrStateBuildFogState(NUGLOBALRNDRSTATE *state) {
@@ -414,14 +426,14 @@ extern "C" {
     }
 
     void RndrStateUpdate(void *, NUMTL *, NUDISPLAYLISTITEM *) {
+        STUBBED();
     }
 
     void RndrStateUpdateFx(void *, NUDISPLAYLISTITEM *) {
+        STUBBED();
     }
 
-
 } // extern "C"
-
 
 extern "C" {
 

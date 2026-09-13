@@ -71,6 +71,7 @@ static char gizspinner_outputName[14] = "100% Complete";
 i16 GizSpinnerGDeb_Fail[3] = {-1, -1, 0};
 
 static void GizSpinner_PanelDraw(void *, void *, float) {
+    STUBBED();
 }
 
 static i32 GizSpinner_GetMaxGizmos(void *world_ptr) {
@@ -519,6 +520,7 @@ static i32 GizSpinner_Load(void *world_ptr, void *) {
 }
 
 void GizSpinners_InitTerrain(WORLDINFO_s *) {
+    STUBBED();
 }
 
 GIZSPINNER_s *GizSpinner_FindBySpecialName(void *world_ptr, char *name) {
@@ -543,6 +545,7 @@ i32 GizSpinner_GetState(GIZSPINNER_s *spinner) {
 }
 
 int GizSpinner_Update(GIZSPINNER_s *) {
+    STUBBED();
     return 0;
 }
 

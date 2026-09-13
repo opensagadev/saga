@@ -24,6 +24,7 @@ struct DetonatorHitData {
 };
 
 void Detonators_Draw() {
+    STUBBED();
 }
 
 void Detonators_Reset() {
@@ -64,7 +65,9 @@ void Detonator_Detonate(DETONATOR_s *detonator) {
 }
 
 void Detonator_MoveCode(GameObject_s *) {
+    STUBBED();
 }
 
 void Detonator_FindNearest(nuvec_s *, float, GameObject_s *) {
+    STUBBED();
 }

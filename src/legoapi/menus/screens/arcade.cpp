@@ -12,6 +12,7 @@ struct MENU_s;
 static f32 Arcade_NeedTwoPlayers_Scale = 1.0f;
 
 void Arcade_Kill(i32, i32) {
+    STUBBED();
 }
 
 i32 Arcade_GetMode(u32 *flags) {
@@ -28,12 +29,15 @@ i32 Arcade_GetMode(u32 *flags) {
 }
 
 void Arcade_AIKilled(i32) {
+    STUBBED();
 }
 
 void Arcade_DrawPanel(i32) {
+    STUBBED();
 }
 
 void Arcade_AwardPoint(i32, i32, i32) {
+    STUBBED();
 }
 
 void Arcade_ResetPanel() {
@@ -41,20 +45,26 @@ void Arcade_ResetPanel() {
 }
 
 void Arcade_DrawEndMenu(MENU_s *) {
+    STUBBED();
 }
 
 void Arcade_UpdatePanel(i32) {
+    STUBBED();
 }
 
 void Arcade_PlayerKilled(i32, i32) {
+    STUBBED();
 }
 
 void Arcade_CoinCollected(i32, u32 *, u32) {
+    STUBBED();
 }
 
 void Arcade_UpdateEndMenu(MENU_s *) {
+    STUBBED();
 }
 
 i32 Arcade_BothPlayersActive() {
+    STUBBED();
     return true;
 }

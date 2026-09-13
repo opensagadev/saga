@@ -24,6 +24,7 @@ extern "C" void DebrisSetSeed(i32);
 extern "C" void NuPartSetSeed(i32);
 
 void HashString(unsigned char *) {
+    STUBBED();
 }
 
 void ResetSeeds() {
@@ -37,6 +38,7 @@ void ResetSeeds() {
 }
 
 void makenuvec4(float, float, float, float) {
+    STUBBED();
 }
 
 i32 i_temp_xrot;
@@ -69,12 +71,15 @@ void FindAnglesZX(nuvec_s *normal, u16 *x_rotation, u16 *z_rotation) {
 }
 
 void getNumDigits(i32) {
+    STUBBED();
 }
 
 void LineCrossedXZ(float, float, float, float, float, float, float, float) {
+    STUBBED();
 }
 
 void ScaleAndClamp(i32) {
+    STUBBED();
 }
 
 void VecRotateAxis(nuvec_s *vector, u16 angle, nuvec_s *axis) {
@@ -289,6 +294,7 @@ i32 OnOrInsidePlane(nuvec_s *point, nuvec_s *plane_point, nuvec_s *plane_normal,
 }
 
 void PackCharIntoInt(char, char, char, char) {
+    STUBBED();
 }
 
 NUVEC TerCrossProduct(NUVEC *a, NUVEC *b) {
@@ -305,10 +311,12 @@ f32 DistanceToLineXZ(NUVEC *position, NUVEC *first, NUVEC *second) {
 }
 
 i32 MatrixReflection(numtx_s *, i32, float, float, numtx_s *) {
+    STUBBED();
     return 0;
 }
 
 void OnOrOutsidePlane(nuvec_s *, nuvec_s *, nuvec_s *) {
+    STUBBED();
 }
 
 i32 PackShortIntoInt(i16 high, i16 low) {
@@ -319,25 +327,32 @@ i32 PackShortIntoInt(i16 high, i16 low) {
 }
 
 void RatioAlongLineXZ(nuvec_s *, nuvec_s *, nuvec_s *) {
+    STUBBED();
 }
 
 i32 XZLinesIntersect(nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *, float *, float *) {
+    STUBBED();
     return 0;
 }
 
 void GetRotationAngles(nuvec_s *, u16 *, u16 *) {
+    STUBBED();
 }
 
 void UnpackCharFromInt(i32, char &, char &, char &, char &) {
+    STUBBED();
 }
 
 void RatioBetweenPlanes(nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *) {
+    STUBBED();
 }
 
 void UnpackShortFromInt(i32, i16 &, i16 &) {
+    STUBBED();
 }
 
 void AnglesBetweenPoints(nuvec_s *, nuvec_s *, u16 *, u16 *) {
+    STUBBED();
 }
 
 bool LineIntersectCircle(NUVEC *origin, NUVEC *direction, NUVEC *center, f32 radius_squared) {
@@ -365,12 +380,15 @@ i32 LineIntersectSphere(NUVEC *origin, NUVEC *direction, NUVEC *center, f32 radi
 }
 
 void LineToPlaneDistance(VuVec &, VuVec &, VuVec &) {
+    STUBBED();
 }
 
 void LineToPointDistance(VuVec &, VuVec &, VuVec &, VuVec *) {
+    STUBBED();
 }
 
 void RatioBetweenEdgesXZ(nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *, nuvec_s *) {
+    STUBBED();
 }
 
 bool SphereSphereOverlap(NUVEC *a, f32 radius_a, NUVEC *b, f32 radius_b) {
@@ -382,6 +400,7 @@ bool SphereSphereOverlap(NUVEC *a, f32 radius_a, NUVEC *b, f32 radius_b) {
 }
 
 void LineToPlaneIntersecion(VuVec &, VuVec &, VuVec &, VuVec *) {
+    STUBBED();
 }
 
 void CalculateInterceptVector(NUVEC *origin, NUVEC *target, NUVEC *velocity, f32 speed, NUVEC *direction,
@@ -423,9 +442,11 @@ void CalculateInterceptVector(NUVEC *origin, NUVEC *target, NUVEC *velocity, f32
 }
 
 void LineToSphereIntersection(VuVec &, VuVec &, VuVec &, float, VuVec *, VuVec *) {
+    STUBBED();
 }
 
 i32 MatrixReflectionVU0_AXISY(numtx_s *, float, float, numtx_s *) {
+    STUBBED();
     return 0;
 }
 
@@ -442,21 +463,27 @@ i32 SphereSphereOverlapScaleY(nuvec_s *position_a, float radius_a, float y_radiu
 }
 
 void IToX(char *, i32) {
+    STUBBED();
 }
 
 void XToI(char *) {
+    STUBBED();
 }
 
 void IsTok(char const *, char const *) {
+    STUBBED();
 }
 
 void CapVec(nuvec_s *, float, nuvec_s *) {
+    STUBBED();
 }
 
 void I64ToX(char *, i64) {
+    STUBBED();
 }
 
 void XToI64(char *) {
+    STUBBED();
 }
 
 i32 RotDiff(u16 current, u16 target) {
@@ -470,6 +497,7 @@ i32 RotDiff(u16 current, u16 target) {
 }
 
 void rawClip(VuVec const *, VuVec *, i32, VuVec const &) {
+    STUBBED();
 }
 
 i32 getqseed() {
@@ -491,16 +519,20 @@ i32 findrange(nugscn_s *scene, i32 first_joint) {
 }
 
 void makenuvec(float, float, float) {
+    STUBBED();
 }
 
 static __used__ i32 MatchExtension(char *, char *, i32) {
+    STUBBED();
     return 0;
 }
 
 static __used__ int icomp(const void *, const void *) {
+    STUBBED();
     return 0;
 }
 
 static __used__ i32 sort32a(void const *, void const *) {
+    STUBBED();
     return 0;
 }

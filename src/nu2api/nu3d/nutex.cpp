@@ -53,6 +53,7 @@ void NuTexHiresFilename(i32 tex_id, char *filename) {
 }
 
 i32 NuTexSwapHires(i32 tex_id_lo, i32 tex_id_hi) {
+    STUBBED();
     return 0;
 }
 
@@ -66,6 +67,7 @@ void NuTexLoadHires(i32 tex_id) {
 }
 
 void NuTexUnloadHires(i32 tex_id) {
+    STUBBED();
 }
 
 void NuTexAddReference(i32 tex_id, NUGSCN *) {
@@ -248,6 +250,7 @@ i32 NuTexHeight(i32 tex_id) {
 
 
 void NuTexRemap(i32, i32) {
+    STUBBED();
 }
 
 nutexmanager_s *NuTexGetManager() {
@@ -260,6 +263,7 @@ void NuTexManagerInit(VARIPTR *buf, VARIPTR) {
 }
 
 void NuTextureCreate3D(i32, i32, i32, i32, i32, nutextureformat_e) {
+    STUBBED();
 }
 
 void NuTexManagerStream(nugscn_s *) {
@@ -267,5 +271,6 @@ void NuTexManagerStream(nugscn_s *) {
 }
 
 i32 NuTexGetUnresolvedTextureTIDPS() {
+    STUBBED();
     return 0;
 }

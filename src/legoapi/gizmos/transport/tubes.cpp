@@ -121,6 +121,7 @@ static void Tubes_Update(void *world_ptr, void *, float frame_time) {
 }
 
 static void Tubes_Draw(void *, void *, float) {
+    STUBBED();
 }
 
 static char *Tube_GetGizmoName(GIZMO *gizmo) {

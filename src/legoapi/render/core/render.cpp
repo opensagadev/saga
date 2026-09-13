@@ -1,8 +1,9 @@
+#include "decomp.h"
 #include "legoapi/render/core/render.h"
-#include "nu2api/nu3d/android/nuportal_android.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "nu2api/nu3d/numtl.h"
+#include "nu2api/nu3d/android/nuportal_android.h"
 #include "legoapi/cutscenes/cutscenes.h"
 #include <stdio.h>
 
@@ -509,7 +510,6 @@ namespace {
 
 DECOMP_ASSERT(sizeof(NuDisplaySpecialLayout) == 0xd0, "display special size");
 
-
 // Camera zoom state
 f32 CameraZoom = 1.0f;
 
@@ -977,6 +977,7 @@ i32 NuSpecialFind(NUGSCN *scene, nuhspecial_s *dest, char *name, i32 flags) {
 }
 
 void DrawCables() {
+    STUBBED();
 }
 
 void DrawRipple(ripple_node_s *node) {
@@ -1002,9 +1003,11 @@ void DrawRipple(ripple_node_s *node) {
 }
 
 void DrawAreaBox(nuvec_s *, nuvec_s *, i32, i32) {
+    STUBBED();
 }
 
 void DrawBox_Now(_vuv_s *, _vuv_s *, i32, i32) {
+    STUBBED();
 }
 
 extern "C" {
@@ -1045,9 +1048,11 @@ void DrawLocator(nuvec_s *position, float radius, i32 rotation, i32 colour) {
 }
 
 void DrawStreaks() {
+    STUBBED();
 }
 
 void Draw_LOADED() {
+    STUBBED();
 }
 
 void Draw3DObject(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
@@ -1132,12 +1137,15 @@ void DrawCharIcon(i32 character_id, float x, float y, float z, float scale, i32 
 }
 
 void DrawHint_LSW(HINT_s *, i32) {
+    STUBBED();
 }
 
 void DrawLine_Now(_vuv_s *, _vuv_s *, i32, i32) {
+    STUBBED();
 }
 
 void DrawParallax(nuhspecial_s *) {
+    STUBBED();
 }
 
 void DrawQuestion(nuvec_s *position, float scale_value, float y_push) {
@@ -1154,6 +1162,7 @@ void DrawQuestion(nuvec_s *position, float scale_value, float y_push) {
 }
 
 void DrawRectRGBA(float, float, float, float, u32, numtl_s *, i32, float) {
+    STUBBED();
 }
 
 void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value, float unused, float y_push, u16 x_rot,
@@ -1214,6 +1223,7 @@ static inline void ShopRotateZ(NUMTX *m, NUANG a) {
     m->m31 = m30 * sinx + m->m31 * cosx;
 }
 void Draw_LOADING() {
+    STUBBED();
 }
 
 #include "nu2api/nu3d/nuprim.h"
@@ -1325,6 +1335,7 @@ void DrawAlphaGrid(i32 rows, i32 cols, NuBloomParameters *parameters) {
 #undef ALPHA_GRID_VERTEX
 
 void DrawArrow_Now(_vum_s *, float, i32, i32) {
+    STUBBED();
 }
 
 extern i16 tNONEWBESTTIME, tNEWBESTTIME;
@@ -1358,6 +1369,7 @@ void DrawBonusTime(STATUSPACKET_s *packet, float position, i32 alpha) {
 }
 
 void DrawCross_Now(_vuv_s *, float, i32, i32) {
+    STUBBED();
 }
 
 void DrawGameState(float x, float y, i32 highlight, i32 slot) {
@@ -1409,6 +1421,7 @@ void DrawGameState(float x, float y, i32 highlight, i32 slot) {
 }
 
 void DrawPauseFade() {
+    STUBBED();
 }
 
 void DrawRippleSet(ripple_set_s *set) {
@@ -1450,18 +1463,23 @@ void DrawSaveSlots(MENU_s *menu, float y) {
 }
 
 void DrawSnakeBody(GameObject_s *) {
+    STUBBED();
 }
 
 void DrawAlphaImage(i32, i32, numtl_s *, i32, NuBloomParameters *) {
+    STUBBED();
 }
 
 void DrawBezierLine(VuVec &, VuVec &, VuVec &, VuVec &, numtl_s *, i32) {
+    STUBBED();
 }
 
 void DrawBonusScore(float, i32, i32, float, i32 *) {
+    STUBBED();
 }
 
 void DrawBoxMtx_Now(_vum_s *, _vuv_s *, i32, i32) {
+    STUBBED();
 }
 
 void DrawBuildUpBar(float x, float y, i32 amount, i32 maximum, float scale, float width, float alpha, u16 angle) {
@@ -1495,9 +1513,11 @@ void DrawBuildUpBar(float x, float y, i32 amount, i32 maximum, float scale, floa
 void *AddGameMessage(char *, NUVEC *, f32, NUVEC *, f32, u8, u8, u8, u32, f32);
 
 void DrawCutBorders(i32) {
+    STUBBED();
 }
 
 void DrawExplosions() {
+    STUBBED();
 }
 
 void DrawItemMenu2D() {
@@ -1525,6 +1545,7 @@ void DrawItemMenu2D() {
 }
 
 void DrawMessageBox(i32, float, float, float, float) {
+    STUBBED();
 }
 
 
@@ -1570,6 +1591,7 @@ void DrawStatusText(char *text, u16 angle, float x, float y, float scale, u32 co
 }
 
 void DrawWallSpline(float) {
+    STUBBED();
 }
 
 void Draw3DObjectMtx(WORLDINFO_s *world, i32 object_index, numtx_s *mtx) {
@@ -1603,6 +1625,7 @@ void DrawGameObjects() {
 }
 
 void DrawPaintLights() {
+    STUBBED();
 }
 
 void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha) {
@@ -1693,12 +1716,15 @@ void DrawTouchPrompt(char *prompt, char *unused_label, bool hovered, bool large)
 }
 
 void Draw_LOADFAILED() {
+    STUBBED();
 }
 
 void DrawAreaCylinder(nuvec_s *, nuvec_s *, i32) {
+    STUBBED();
 }
 
 void DrawCameraTarget(nuvec_s *) {
+    STUBBED();
 }
 
 void DrawGameMessages() {
@@ -1843,6 +1869,7 @@ void DrawGameMessages() {
 }
 
 void DrawMeleeTargets(i16 *, char *, float *, i32) {
+    STUBBED();
 }
 
 f32 KITPOSX = -0.725f;
@@ -1954,6 +1981,7 @@ void DrawStatusScreen(WORLDINFO_s *) {
 }
 
 void Draw_LOADCORRUPT() {
+    STUBBED();
 }
 
 void Draw3DObjectAlpha(WORLDINFO_s *world, i32 object_index, nuvec_s *position, u16 x_rotation, u16 y_rotation,
@@ -1985,6 +2013,7 @@ void DrawBossHitPoints(GameObject_s *object) {
 }
 
 void DrawCameraTarget2(nuvec_s *) {
+    STUBBED();
 }
 
 i32 DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
@@ -2005,6 +2034,7 @@ i32 DrawPanel3DObject(float x, float y, float z, float scale_x, float scale_y, f
 }
 
 void DrawStatusMiniKit(float, float, float, float, float, i32, STATUSPACKET_s *, float) {
+    STUBBED();
 }
 
 extern i16 tUNKNOWN, tPOWERBRICK, tLOCKED, tGOLDBRICK;
@@ -2184,6 +2214,7 @@ void DrawSubItemMenu3D() {
 }
 
 void Draw_NOMEMORYCARD() {
+    STUBBED();
 }
 
 void DrawFadeScreenWipe() {
@@ -2255,9 +2286,11 @@ void DrawFadeScreenWipe() {
 }
 
 void DrawMessageBoxRGBA(float, float, float, float, u32, u32, u32, u32, numtl_s *, i32, float) {
+    STUBBED();
 }
 
 void DrawSuperStoryTime(float, float, float, i32, i32) {
+    STUBBED();
 }
 
 static inline void RotateForceGlowMatrix(NUMTX *matrix, i32 angle) {
@@ -2433,12 +2466,15 @@ void DrawPauseScreenWipe() {
 }
 
 void Draw_AUTOSAVECANCEL() {
+    STUBBED();
 }
 
 void DrawMeleeTargetsRows(i16 *, char *, float *, i32) {
+    STUBBED();
 }
 
 void DrawMiniSnowTroopers(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void DrawPanel3DObjectMtx(nuhspecial_s *special, numtx_s *matrix, float alpha) {
@@ -2476,6 +2512,7 @@ void Draw_NODATAAVAILABLE() {
 }
 
 void DrawInDoubleScoreZone(float) {
+    STUBBED();
 }
 
 i32 dco_locatorposonly;
@@ -2591,6 +2628,7 @@ void DrawObjectOnCharacter(WORLDINFO_s *world, GameObject_s *object, i32 object_
 }
 
 void DrawPlayerIconPrompts(i32, i32, float, i32, i32, i32, i32, i32, i32, float, i32, i32, i32, i32) {
+    STUBBED();
 }
 
 extern f32 DropInOutScale(GameObject_s *object);
@@ -2773,15 +2811,19 @@ i32 DrawGameObjectsProcess() {
 }
 
 void DrawMeleeTargetsNumber(i16 *, unsigned char *, i32, unsigned char, nuhspecial_s *) {
+    STUBBED();
 }
 
 void DrawStatusTextFraction(i32, i32, float, float, u16, float, u32, float, float) {
+    STUBBED();
 }
 
 void DrawGameMessage_Targets(GAMEMESSAGE_s *, nuvec_s *, float) {
+    STUBBED();
 }
 
 void DrawTorpedoTargetSprite(void *, unsigned char, float) {
+    STUBBED();
 }
 
 i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float scale_y, float scale_z, u16 rotate_x,
@@ -2803,9 +2845,11 @@ i32 DrawPanel3DObjectNoAlpha(float x, float y, float z, float scale_x, float sca
 }
 
 void DrawPanel3DObjectMtxNoAlpha(nuhspecial_s *, numtx_s *) {
+    STUBBED();
 }
 
 void Draw_OK(MENU_s *) {
+    STUBBED();
 }
 
 void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value, float, float y_push, u16 x_rot, u16 y_rot,
@@ -2830,6 +2874,7 @@ void DrawItem(nuhspecial_s *special, nuvec_s *position, float scale_value, float
 }
 
 void DrawAABox(_vuv_s *, _vuv_s *, i32) {
+    STUBBED();
 }
 
 void DrawArrow(nuhspecial_s *special, float scale_value) {
@@ -3456,15 +3501,19 @@ draw_panel_menu:
 }
 
 void SwipeDecalRenderer::Process(float) {
+    STUBBED();
 }
 
 void SwipeDecalRenderer::Render() {
+    STUBBED();
 }
 
 SwipeDecalRenderer::SwipeDecalRenderer(TouchHolder &, i32, SwipeDecalRenderer::Style) {
+    STUBBED();
 }
 
 static __used__ void PauseRenderOff() {
+    STUBBED();
 }
 
 static __used__ i32 MatrixReflection_CanOverride() {
@@ -3479,6 +3528,7 @@ static __used__ i32 MatrixReflection_CanOverride() {
 }
 
 static __used__ void DrawStarFighter(starfighter_s *) {
+    STUBBED();
 }
 
 static void DrawWeapon_SetSabreObjects(GameObject_s *object, i32 red, i32 green, i32 blue, i32 purple, i32 *models,
@@ -4122,13 +4172,16 @@ static void DrawParaphernalia(GameObject_s *object) {
 }
 
 static __used__ void DrawFalconSpotLights(GameObject_s *) {
+    STUBBED();
 }
 
 static __used__ double ApplyAntilights(rtl_s *, rtlidata_s *, float) {
+    STUBBED();
     return {};
 }
 
 static __used__ void DisplayListMaterialClipUpdate(nudisplayscene_s *) {
+    STUBBED();
 }
 
 #include "legoapi/legoapi_types.h"

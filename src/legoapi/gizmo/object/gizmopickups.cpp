@@ -217,6 +217,7 @@ i32 IsACoinType(i32 type) {
 }
 
 void AddMiscPickups(nuvec_s *, i32, i32, i32) {
+    STUBBED();
 }
 
 i32 GetRandomCoinType() {

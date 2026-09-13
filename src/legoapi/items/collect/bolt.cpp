@@ -68,12 +68,15 @@ void FullDeflectSmallY(NUVEC *normal, NUVEC *movement, NUVEC *result) {
 }
 
 void GuidedMissile_Kill(PART_s *, i32) {
+    STUBBED();
 }
 
 void GuidedMissile_Move(PART_s *, float) {
+    STUBBED();
 }
 
 void GuidedMissile_Deflect(PART_s *) {
+    STUBBED();
 }
 
 extern "C" i16 id_SPEEDERBIKE;

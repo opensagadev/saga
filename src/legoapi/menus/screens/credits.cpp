@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/render/core/render.h"
@@ -22,6 +23,7 @@ void Credits_Init(WORLDINFO_s *) {
 }
 
 void Credits_Load(WORLDINFO_s *, variptr_u *, variptr_u *) {
+    STUBBED();
 }
 
 void Credits_GetInfo(float *duration, i32 *flag, float *alpha) {
@@ -37,7 +39,9 @@ void Credits_GetInfo(float *duration, i32 *flag, float *alpha) {
 }
 
 void Credits_DrawPanel(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void Credits_UpdateMenu(MENU_s *) {
+    STUBBED();
 }

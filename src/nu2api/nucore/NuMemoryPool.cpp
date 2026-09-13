@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "nu2api/nucore/NuMemoryPool.h"
 #include "nu2api/nucore/numemory.h"
 
@@ -367,6 +368,7 @@ void NuMemoryPool::ReleaseUnreferencedPages() {
 }
 
 void NuMemoryPool::ReleaseUnreferencedPages_OLD() {
+    STUBBED();
 }
 
 void NuMemoryPool::VisitPools(IVisitor *visitor) {

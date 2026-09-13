@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/audio/sfx.h"
 #include "legoapi/render/fx/parts.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
@@ -392,18 +393,23 @@ static void PartCollide(PART_s *part, i32 three_dimensional) {
 }
 
 static __used__ void TiePart_Kill(PART_s *, i32) {
+    STUBBED();
 }
 
 static __used__ void TiePart_Move(PART_s *, f32) {
+    STUBBED();
 }
 
 static __used__ void TiePart_Impact(PART_s *) {
+    STUBBED();
 }
 
 static __used__ void TiePart_KillExplode(PART_s *, i32) {
+    STUBBED();
 }
 
 static __used__ void TieSpinZPart_Move(PART_s *, f32) {
+    STUBBED();
 }
 
 extern f32 coinimpactwait;
@@ -481,28 +487,36 @@ static __used__ void PartExtra_PurpleCoin(PART_s *part) {
 }
 
 static __used__ void PowerUp_DrawPart(PART_s *) {
+    STUBBED();
 }
 
 static __used__ void PowerUp_ImpactPart(PART_s *) {
+    STUBBED();
 }
 
 static __used__ void PowerUp_UpdatePart(PART_s *) {
+    STUBBED();
 }
 
 static __used__ void PowerUp_EndMsg(GAMEMESSAGE_s *) {
+    STUBBED();
 }
 
 static __used__ void PowerUp_UpdateMsg(GAMEMESSAGE_s *) {
+    STUBBED();
 }
 
 static __used__ i32 SpeederPart_Draw(PART_s *) {
+    STUBBED();
     return true;
 }
 
 static __used__ void SpeederPart_Kill(PART_s *, i32) {
+    STUBBED();
 }
 
 static __used__ void SpeederPart_Update(PART_s *) {
+    STUBBED();
 }
 
 extern WORLDINFO_s *WORLD;
@@ -533,22 +547,27 @@ static __used__ i32 PartDraw_VehicleHeart(PART_s *part) {
 }
 
 static __used__ i32 PartKill_DrawCreature(PART_s *) {
+    STUBBED();
     return false;
 }
 
 static __used__ void PartMove_VehicleHeart(PART_s *, f32) {
+    STUBBED();
 }
 
 static __used__ void PartMove_VehiclePickup(PART_s *, f32) {
+    STUBBED();
 }
 
 static __used__ void UpdateAnimTimer(CHARACTERMODEL_s *, ANIMPACKET_s *, i16, f32, f32, f32, i32, char *, i32, f32) {
 }
 
 static __used__ void PartKill_EjectedCreature(PART_s *, i32) {
+    STUBBED();
 }
 
 static __used__ void UpdateCustomPieceAnim(CUSTOMPIECEANIM *, u16, u16) {
+    STUBBED();
 }
 
 extern "C" {
@@ -694,6 +713,7 @@ extern "C" {
     }
 
     void AddFiniteShotDebrisEffectUserData(void) {
+        STUBBED();
     }
 
     i32 AddFiniteShotPART(i32 effect, NUVEC *position, i32 count) {
@@ -718,6 +738,7 @@ extern "C" {
     void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 
     void AddMSituExtraTerrRot(void) {
+        STUBBED();
     }
 
     i32 AddPARTEffect(i32 effect, NUVEC *position) {
@@ -894,6 +915,7 @@ extern "C" {
     }
 
     void AddRotatedDebrisEffect(void) {
+        STUBBED();
     }
 
     void AddScaledFiniteShotDebrisEffect(i32 *key, i32 effect, NUVEC *position, NUVEC *orientation, NUVEC *momentum,
@@ -905,9 +927,11 @@ extern "C" {
     }
 
     void AddScaledFiniteShotPART(void) {
+        STUBBED();
     }
 
     void AddScaledVariableShotDebrisEffect(void) {
+        STUBBED();
     }
 
     void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
@@ -932,15 +956,19 @@ extern "C" {
     }
 
     void AddScaledVariableShotDebrisEffect3(void) {
+        STUBBED();
     }
 
     void AddScaledVariableShotDebrisEffect4(void) {
+        STUBBED();
     }
 
     void AddScaledVariableShotDebrisEffect5(void) {
+        STUBBED();
     }
 
     void AddScaledVariableShotPARTEffect(void) {
+        STUBBED();
     }
 
     void AddVariableShotDebrisEffectMtx(i32, NUVEC *, i32, i16, i16, NUMTX *);
@@ -1237,6 +1265,7 @@ extern "C" {
     }
 
     void AddVariableShotPARTEffect(void) {
+        STUBBED();
     }
 
     i32 NewRayCast(NUVEC *, NUVEC *, f32, i32);
@@ -1340,6 +1369,7 @@ extern "C" {
     }
 
     void CheckPartCount(void) {
+        STUBBED();
     }
 
     void DrawParts(i32 keep_offscreen) {
@@ -1386,6 +1416,7 @@ extern "C" {
     }
 
     void FindPart(void) {
+        STUBBED();
     }
 
     i32 GetMaxPartTypes(void) {
@@ -1393,9 +1424,11 @@ extern "C" {
     }
 
     void GetPartCount(void) {
+        STUBBED();
     }
 
     void GetPartName(void) {
+        STUBBED();
     }
 
     part_type_s part_types[128];
@@ -1491,15 +1524,19 @@ extern "C" {
     }
 
     void PARTEmitterOrientation(void) {
+        STUBBED();
     }
 
     void PARTEmitterPos(void) {
+        STUBBED();
     }
 
     void PARTGetTotalOffTime(void) {
+        STUBBED();
     }
 
     void PARTGetTotalOnTime(void) {
+        STUBBED();
     }
 
     i32 PARTLookupType(char *name) {
@@ -1590,6 +1627,7 @@ extern "C" {
     }
 
     void ReassignPickupInst(void) {
+        STUBBED();
     }
 
     void RemovePARTEffect(i32 index) {
@@ -2656,6 +2694,7 @@ PART_s *FindIncomingPart(void *owner, NUVEC *position, f32 radius, u32 flags, f3
 }
 
 void InstantKillParts(GameObject_s *, i32, float) {
+    STUBBED();
 }
 
 void edpartDestroy(i32 index) {
@@ -2712,6 +2751,7 @@ void PartUpdate_Heart(PART_s *part) {
 }
 
 void Asteroid_PartKill(PART_s *, i32) {
+    STUBBED();
 }
 
 void PartStop_Flickerer(PART_s *part) {
@@ -2768,9 +2808,11 @@ void PartKill_ForceThrow(PART_s *part, i32) {
 }
 
 void PartImpact_Basketball(PART_s *) {
+    STUBBED();
 }
 
 void PartUpdate_Basketball(PART_s *) {
+    STUBBED();
 }
 
 PART_s *Part_FindFromHSpecial(nuhspecial_s *special) {
@@ -2796,4 +2838,5 @@ void NewPartOrderedRotation(PART_s *part) {
 }
 
 void KillParts(GameObject_s *, i32, i32, i32, float, i32, u16 *) {
+    STUBBED();
 }

@@ -27,6 +27,7 @@
 #include "legoapi/render/fx/spline_position.h"
 
 void Action_Sebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+    STUBBED();
 }
 
 i32 Action_SetState(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *, char **params, i32 param_count,
@@ -93,27 +94,35 @@ i32 Action_UsePanel(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET_s *p
 }
 
 void Action_CameraCut(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+    STUBBED();
 }
 
 void Action_CreatePod(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+    STUBBED();
 }
 
 void Action_PullLever(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+    STUBBED();
 }
 
 void Action_UseTechno(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+    STUBBED();
 }
 
 void Action_NewSebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+    STUBBED();
 }
 
 void Action_SetLapTime(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+    STUBBED();
 }
 
 void Action_MoveForward(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+    STUBBED();
 }
 
 void Action_EndCameraCut(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+    STUBBED();
 }
 
 i32 Action_FollowPlayer(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params, i32 param_count,
@@ -145,6 +154,7 @@ i32 Action_FollowPlayer(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *
 }
 
 void Action_PlayCutScene(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+    STUBBED();
 }
 
 i32 Action_SetVisibility(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **params, i32 param_count, i32 first_time,
@@ -198,6 +208,7 @@ i32 Action_UseTriggerSet(AISYS_s *system, AISCRIPTPROCESS_s *processor, AIPACKET
 }
 
 void Action_BoulderSection(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+    STUBBED();
 }
 
 i32 Action_ReleaseLocator(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char **params, i32 param_count,
@@ -595,6 +606,7 @@ change_character:
 }
 
 void Action_MushroomCollapse(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+    STUBBED();
 }
 
 i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,
@@ -843,6 +855,7 @@ i32 Action_AssignLocatorInSet(AISYS_s *sys, AISCRIPTPROCESS_s *, AIPACKET_s *pac
 }
 
 void Action_SpeederBeingChased(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+    STUBBED();
 }
 
 namespace {
@@ -861,18 +874,23 @@ namespace {
 // gizactions_stubs.cpp to satisfy the symbol baseline.
 
 static __used__ void GizAction_SetAIState(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
+    STUBBED();
 }
 
 static __used__ void GizActions_HitBlowup(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
+    STUBBED();
 }
 
 static __used__ void GizActions_PlayForce(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
+    STUBBED();
 }
 
 static __used__ void GizActions_PlayRadio(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
+    STUBBED();
 }
 
 static __used__ void GizActions_EnableSock(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
+    STUBBED();
 }
 
 void ReleaseTakeOver(GameObject_s *, i32);
@@ -956,6 +974,7 @@ static __used__ void GizAction_SetAIMessage(GIZFLOW_s *, FLOWBOX_s *, char **par
 }
 
 static __used__ void GizActions_PlaySpecial(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
+    STUBBED();
 }
 
 static __used__ void GizAction_ActivateGizmo(GIZFLOW_s *flow, FLOWBOX_s *, char **params, int count) {
@@ -1011,6 +1030,7 @@ static __used__ void GizAction_TurnOnFlowBox(GIZFLOW_s *flow, FLOWBOX_s *, char 
 }
 
 static __used__ void GizActions_ActivateBelt(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
+    STUBBED();
 }
 
 static __used__ void GizActions_GoToNewLevel(GIZFLOW_s *, FLOWBOX_s *, char **params, int param_count) {
@@ -1043,15 +1063,19 @@ static __used__ void GizActions_GoToNewLevel(GIZFLOW_s *, FLOWBOX_s *, char **pa
 }
 
 static __used__ void GizActions_PlayCutscene(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
+    STUBBED();
 }
 
 static __used__ void GizActions_PlayObstacle(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
+    STUBBED();
 }
 
 static __used__ void GizAction_ActivateEffect(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
+    STUBBED();
 }
 
 static __used__ void GizActions_CompleteLevel(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
+    STUBBED();
 }
 
 static __used__ void GizActions_GoThroughDoor(GIZFLOW_s *, FLOWBOX_s *, char **params, int param_count) {
@@ -1073,9 +1097,11 @@ static __used__ void GizActions_GoThroughDoor(GIZFLOW_s *, FLOWBOX_s *, char **p
 }
 
 static __used__ void GizAction_ChangeTechnoTgt(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
+    STUBBED();
 }
 
 static __used__ void GizAction_ActivatePartEffect(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
+    STUBBED();
 }
 
 static __used__ void GizAction_SetGizmoVisibility(GIZFLOW_s *flow, FLOWBOX_s *, char **params, int count) {
@@ -1100,9 +1126,11 @@ static __used__ void GizAction_SetGizmoVisibility(GIZFLOW_s *flow, FLOWBOX_s *, 
 }
 
 static __used__ void GizAction_SetPickupVisibility(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
+    STUBBED();
 }
 
 static __used__ void GizActions_ChangeObstTriggerType(GIZFLOW_s *, FLOWBOX_s *, char **, int) {
+    STUBBED();
 }
 
 GIZACTIONDEFN_s game_gizactiondefs[] = {

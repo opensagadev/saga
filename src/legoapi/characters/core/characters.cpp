@@ -149,6 +149,7 @@ void LSW_SetIndy(i32) {
 }
 
 void HairMovement(GameObject_s *) {
+    STUBBED();
 }
 
 void HeadMovement(GameObject_s *object) {
@@ -485,6 +486,7 @@ void HeadMovement(GameObject_s *object) {
 }
 
 void fullcodename(i32) {
+    STUBBED();
 }
 
 nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id);
@@ -602,6 +604,7 @@ void FixUpCharacters(CHARFIXUP *fixup) {
 }
 
 void PostAnimate_FETT(GameObject_s *) {
+    STUBBED();
 }
 
 void ResetAICreature(GameObject_s *, AISYS_s *);
@@ -645,6 +648,7 @@ GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle) {
 }
 
 void FinishWeirdoNames(i32) {
+    STUBBED();
 }
 
 extern i32 addcreature_override_id_check;
@@ -1346,6 +1350,7 @@ void CharScenes_LevelDump(WORLDINFO_s *world) {
 }
 
 void CollectAllCharacters(i32) {
+    STUBBED();
 }
 
 extern VARIPTR characterbuffer_base;
@@ -1448,6 +1453,7 @@ void CollectCharcters_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet) {
 }
 
 void E1CharacterBonus_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 AILOCATOR_s *LocalGetRandomLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,
@@ -1506,6 +1512,7 @@ AILOCATOR_s *LocalGetRandomLocator(AILOCATOR_s **locators, i32 count, f32 clip_r
 }
 
 void PostAnimate_ASTROMECH(GameObject_s *) {
+    STUBBED();
 }
 
 nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id) {
@@ -1627,6 +1634,7 @@ void CollectCharcters_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, floa
 }
 
 void RegisterGizmoTypes_Indy(variptr_u *, variptr_u *) {
+    STUBBED();
 }
 
 i32 SetProtocolDroidFallAnim(GameObject_s *object) {
@@ -1653,6 +1661,7 @@ void CollectCharactersOff_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i3
 }
 
 void CollectCharactersOff_Skip(STATUS_STAGE_s *, STATUSPACKET_s *) {
+    STUBBED();
 }
 
 void ScaleGameObject(GameObject_s *obj);
@@ -1820,4 +1829,5 @@ void LoadPerm2() {
 }
 
 void MapToGrid(nuvec_s *, nuvec_s *, i32 *, i32 *, nuvec_s *, nutexmanager_s *) {
+    STUBBED();
 }

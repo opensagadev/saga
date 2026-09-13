@@ -1,4 +1,5 @@
 
+#include "decomp.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nucore/numemory.h"
@@ -246,6 +247,7 @@ extern "C" {
         return NuFile_SwapEndianOnWrite;
     }
     i32 NuFileGetMediaMode(void) {
+        STUBBED();
         return 0;
     }
     void NuFileInitAddress(i32 capacity) {

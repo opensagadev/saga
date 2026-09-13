@@ -1,9 +1,12 @@
+#include "decomp.h"
 #include "nu2api/nu3d/nudlist.h"
 
 extern "C" void DisplayListSwapBuffersPS(void) {
+    STUBBED();
 }
 
 extern "C" void NuDisplayListDraw(void) {
+    STUBBED();
 }
 
 // NuDisplaySceneAddPS @ 0x2ab7aa.  The apparently redundant assignment is
@@ -18,4 +21,5 @@ extern "C" void NuDisplaySceneAddPS(NUDLDLISTSCENE *scene) {
 
 // NuDisplaySceneDestroyPS @ 0x2ab7f9
 extern "C" void NuDisplaySceneDestroyPS(NUDLDLISTSCENE *) {
+    STUBBED();
 }

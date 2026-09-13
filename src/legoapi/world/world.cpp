@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/world/world.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world_shared.h"
@@ -222,6 +223,7 @@ void SaveSceneObjectAnimTFactors(NUGSCN *gscn) {
     } while (count != 0);
 }
 void CalculateWorldSize(WORLDINFO *world) {
+    STUBBED();
     (void)world;
 }
 

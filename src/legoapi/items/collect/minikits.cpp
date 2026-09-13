@@ -18,9 +18,11 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 void MiniKits_Init(variptr_u *, variptr_u *) {
+    STUBBED();
 }
 
 void CollectMinikit(nuvec_s *, char *, i32) {
+    STUBBED();
 }
 
 i32 AllMiniKitsDone(AREASAVE_s *save) {
@@ -37,9 +39,11 @@ i32 AllMiniKitsDone(AREASAVE_s *save) {
 }
 
 void MiniKitDetector(nuvec_s *) {
+    STUBBED();
 }
 
 void CharMiniKit_Draw(i32, numtx_s *, i32, float, float) {
+    STUBBED();
 }
 
 extern i32 currentminikit, newminikitcount;
@@ -305,6 +309,7 @@ void MiniKit_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float ela
 }
 
 void MiniKit_GameMsg_End(GAMEMESSAGE_s *) {
+    STUBBED();
 }
 
 void ResetMinikitCounter() {
@@ -382,9 +387,11 @@ void AllMiniKits_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet) {
 }
 
 void SpecialMiniKits_Draw(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void AddStatusMiniKitParts() {
+    STUBBED();
 }
 
 void AllMiniKits_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
@@ -406,9 +413,11 @@ void AllMiniKits_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float
 }
 
 void CharacterMiniKits_Dump(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void MiniKit_GameMsg_Update(GAMEMESSAGE_s *) {
+    STUBBED();
 }
 
 void SetEffectVisibility(char *, i32);
@@ -423,6 +432,7 @@ void EffectOffProgress_Reset(LEVEL_PROGRESS_s *progress) {
 }
 
 void IncrementMinikitCounter(GameObject_s *) {
+    STUBBED();
 }
 
 i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible) {
@@ -449,6 +459,7 @@ i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible
 }
 
 void SpecialMiniKits_Configure(WORLDINFO_s *world, char *config) {
+    STUBBED();
     (void)world;
     (void)config;
 }

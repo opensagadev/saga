@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include <stdlib.h>
 
 #include "nu2api/nucore/common.h"
@@ -14,6 +15,7 @@ void NuPlatform::Create(void) {
 }
 
 void NuPlatform::Exists() {
+    STUBBED();
 }
 
 void NuPlatform::Destroy() {

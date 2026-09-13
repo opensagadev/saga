@@ -382,6 +382,7 @@ void StartBallooning(GameObject_s *object, i32 movement_state) {
 }
 
 void StartJetPackFall(GameObject_s *, i32) {
+    STUBBED();
 }
 
 void MakeJumpReachHeight(GameObject_s *object, float height, i32 force) {

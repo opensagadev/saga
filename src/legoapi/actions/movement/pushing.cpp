@@ -19,6 +19,7 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 void ReleasePush(GameObject_s *) {
+    STUBBED();
 }
 
 
@@ -118,9 +119,11 @@ f32 ForceTowardsMid(GameObject_s *object) {
 }
 
 void ResetPushProgress(WORLDINFO_s *, void *) {
+    STUBBED();
 }
 
 void FindForcePushTarget(GameObject_s *, i32, i32) {
+    STUBBED();
 }
 
 f32 PushingTowardsAngle(u16 input_angle, u16 direction) {
@@ -227,4 +230,5 @@ void PushAway(NUVEC *position, f32 radius, NUVEC *minimum, NUVEC *maximum, GameO
 }
 
 void PushCode(GameObject_s *, i32) {
+    STUBBED();
 }

@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "nu2api/nufile/nufile.h"
 
 #include "nu2api/nucore/nustring.h"
@@ -48,12 +49,15 @@ i64 NuFileBase::GetSize() const {
 }
 
 void NuFileBase::Flush() {
+    STUBBED();
 }
 
 void NuFileBase::Closedown() {
+    STUBBED();
 }
 
 void NuFileBase::Init() {
+    STUBBED();
 }
 
 i32 NuFileNormalise(char *dst, i32 length, const char *src) {

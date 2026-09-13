@@ -47,6 +47,7 @@ i32 HINT_COMPLETE(i32 hint_id) {
 }
 
 i32 Tilt_UpdateHint(HINT_s *) {
+    STUBBED();
     return 0;
 }
 
@@ -307,12 +308,15 @@ i32 ShinyMetal_UpdateHint(HINT_s *hint) {
 }
 
 void CurrentHintButtonScale() {
+    STUBBED();
 }
 
 void initGameHintSys_Batman() {
+    STUBBED();
 }
 
 void IndyUnlocked_UpdateHint(HINT_s *) {
+    STUBBED();
 }
 
 static __used__ i32 Sith_UpdateHint(HINT_s *) {

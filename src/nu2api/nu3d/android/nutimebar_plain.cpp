@@ -248,6 +248,7 @@ extern "C" void NuTimeBarResetPeaks(void) {
 }
 
 extern "C" void NuTimeBarSetScaleY(void) {
+    STUBBED();
 }
 
 extern "C" void NuTimeBarEnable(i32 enabled) {

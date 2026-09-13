@@ -29,6 +29,7 @@ extern i32 adaptivedifficulty[3];
 extern i8 (*adtab)[4];
 
 void LoseHelmet(GameObject_s *, i32, i32) {
+    STUBBED();
 }
 
 void SetWeaponIn(GameObject_s *object) {
@@ -388,4 +389,5 @@ void WeaponScalingCode(GameObject_s *object) {
 }
 
 void FindPlayerAndSetWeapon(i32, i32) {
+    STUBBED();
 }

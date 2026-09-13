@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/world/level.h"
 
 #include <stdio.h>
@@ -83,8 +84,10 @@ static void Credits_Init_Game(WORLDINFO *world) {
     LevMtx.m32 = 1.0f;
 }
 static void Credits_Update_Game(WORLDINFO *) {
+    STUBBED();
 }
 static void Credits_Draw_Game(WORLDINFO *) {
+    STUBBED();
 }
 
 extern void NewGame(void);

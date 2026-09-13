@@ -88,9 +88,11 @@ speedup_s DogFightSpeedList[] = {
 };
 
 void ChrisDogFightAInit(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void ChrisDogFightAReset(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void ChrisDogFightAUpdate(WORLDINFO_s *world) {
@@ -104,9 +106,11 @@ void ChrisDogFightAUpdate(WORLDINFO_s *world) {
 }
 
 void ChrisDogFightADraw(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void ChrisDogFightAPanel(WORLDINFO_s *) {
+    STUBBED();
 }
 
 // ===========================================================================
@@ -145,18 +149,23 @@ void CruiserCReset(WORLDINFO_s *) {
 }
 
 void CruiserCUpdate(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void CruiserCPanel(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void CruiserDInit(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void CruiserDReset(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void CruiserDUpdate(WORLDINFO_s *) {
+    STUBBED();
 }
 
 // ===========================================================================
@@ -229,6 +238,7 @@ void KashyyykA_Init(WORLDINFO_s *world) {
 }
 
 void KashyyykB_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void KashyyykC_Init(WORLDINFO_s *world) {
@@ -241,9 +251,11 @@ void KashyyykC_Init(WORLDINFO_s *world) {
 }
 
 void KashyyykD_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void KashyyykA_Panel(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void KashyyykA_Reset(WORLDINFO_s *) {
@@ -252,9 +264,11 @@ void KashyyykA_Reset(WORLDINFO_s *) {
 }
 
 void KashyyykB_Reset(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void KashyyykD_Reset(WORLDINFO_s *) {
+    STUBBED();
 }
 
 i32 AnakinGreenSabre(GameObject_s *obj) {
@@ -267,15 +281,19 @@ i32 AnakinGreenSabre(GameObject_s *obj) {
 }
 
 void KashyyykA_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void KashyyykB_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void KashyyykC_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void KashyyykD_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 // ===========================================================================
@@ -291,9 +309,11 @@ void TempleA_Init(WORLDINFO_s *world) {
 }
 
 void TempleC_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void TempleC_AlwaysUpdate(WORLDINFO_s *) {
+    STUBBED();
 }
 
 // ===========================================================================
@@ -301,9 +321,11 @@ void TempleC_AlwaysUpdate(WORLDINFO_s *) {
 // ===========================================================================
 
 void VaderA_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void VaderB_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 i32 Vader_ObiWanKilledAnakin;
@@ -352,12 +374,15 @@ void VaderC_Reset(WORLDINFO_s *) {
 }
 
 void VaderA_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void VaderB_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void VaderC_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void VaderA_DrawPanel(WORLDINFO_s *) {
@@ -370,9 +395,11 @@ void VaderA_DrawPanel(WORLDINFO_s *) {
 }
 
 void VaderB_DrawPanel(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void VaderC_DrawPanel(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void VaderA_GoneThroughDoor(WORLDINFO_s *, DOOR_s *door) {

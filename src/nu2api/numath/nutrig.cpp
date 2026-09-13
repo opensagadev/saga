@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "nu2api/numath/nutrig.h"
 
 #include <limits.h>
@@ -225,6 +226,7 @@ float NuCosApprox2(i32 ang) {
 }
 
 float NuSin_Accurate(float x) {
+    STUBBED();
     (void)x;
 }
 

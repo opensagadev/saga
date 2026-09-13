@@ -34,6 +34,7 @@ NuSoundAndroid::NuSoundAndroid() : NuSoundSystem() {
 }
 
 NuSoundEffect *NuSoundAndroid::CreateEffect(NuSoundEffect::EffectType) {
+    STUBBED();
     return NULL;
 }
 

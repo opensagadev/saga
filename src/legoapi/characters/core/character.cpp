@@ -604,9 +604,11 @@ CharacterObjectInterface::~CharacterObjectInterface() {
 }
 
 static __used__ void ExtraDieSfx_LSW(GameObject_s *) {
+    STUBBED();
 }
 
 static __used__ void ExtraHurtSfx_LSW(GameObject_s *) {
+    STUBBED();
 }
 
 extern AREADATA *DAGOBAH_ADATA;

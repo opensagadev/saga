@@ -24,16 +24,21 @@ i32 ObjZappedBlue(GameObject_s *object) {
 }
 
 void PeriscodeCode(GameObject_s *) {
+    STUBBED();
 }
 
 void NewScanHandelFull(nuvec_s *, nuvec_s *, float, i32, i32) {
+    STUBBED();
 }
 
 void NewScanHandelSubset(i16 *, nuvec_s *, nuvec_s *, float, i32) {
+    STUBBED();
 }
 
 void RegisterGizmoTypes_Batman(variptr_u *, variptr_u *) {
+    STUBBED();
 }
 
 void NewScan(nuvec_s *, i32, i32) {
+    STUBBED();
 }

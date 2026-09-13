@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/world.h"
 #include "globals.h"
@@ -77,9 +78,11 @@ void Teleports_Reset(WORLDINFO_s *world) {
 }
 
 void Teleport_MoveCode(GameObject_s *, i32) {
+    STUBBED();
 }
 
 void Teleport_NetMoveCode(GameObject_s *) {
+    STUBBED();
 }
 
 i32 Teleport_UpdateHints(HINT_s *hint) {
@@ -99,9 +102,11 @@ i32 Teleport_UpdateHints(HINT_s *hint) {
 }
 
 void Teleports_UpdateAfterGameObjects(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void Teleports_UpdateBeforeGameObjects(WORLDINFO_s *) {
+    STUBBED();
 }
 
 #include "legoapi/gizmo/base/TeleportObjectInterface.h"

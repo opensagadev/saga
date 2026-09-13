@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/characters/core/character.h"
@@ -9,15 +10,19 @@
 #include "nu2api/numath/nuvec.h"
 
 void DisplayListGenerateTransforms(nudisplayscene_s *) {
+    STUBBED();
 }
 
 void bgprocIsFrozen() {
+    STUBBED();
 }
 
 void DisplayListCreateGeomItemPS(variptr_u *, void *, numtl_s *) {
+    STUBBED();
 }
 
 void DisplayListCreateInstSurfGeomPS(variptr_u *, numtx_s *) {
+    STUBBED();
 }
 
 // Flag-sensitive moves from supportall.cpp (-O2): these match at the

@@ -294,6 +294,7 @@ char *GizSpecial_GetName(GIZSPECIAL_s *special) {
 }
 
 void GizSpecial_FindByName(char *, WORLDINFO_s *) {
+    STUBBED();
 }
 
 ADDGIZMOTYPE *GizSpecial_RegisterGizmo(i32 type_id) {

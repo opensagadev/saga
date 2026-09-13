@@ -1,8 +1,10 @@
+#include "decomp.h"
 #include "nu2api/nucore/nuvideo.h"
 
 #include "nu2api/nucore/nuapi.h"
 
 extern "C" void NuSetupVideoModeParams(void) {
+    STUBBED();
 }
 
 i32 NuVideoGetMode(void) {
@@ -36,6 +38,7 @@ NUVIDEO_SWAPMODE NuVideoGetSwapMode(void) {
 }
 
 void NuVideoRollingFrameRateReset(void) {
+    STUBBED();
 }
 
 void NuVideoSetBrightness(f32 brightness) {
