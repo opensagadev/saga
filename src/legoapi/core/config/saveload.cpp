@@ -133,10 +133,6 @@ void FS_BuildFilterBlocks(char *) {
     STUBBED();
 }
 
-void saveloadGetDirectory() {
-    STUBBED();
-}
-
 void FS_MakeDateTimeString(FS_FILEENTRYHDR *, char *) {
     STUBBED();
 }
@@ -262,58 +258,6 @@ extern "C" {
     void loadsaveCallEachFrame(void) {
         saveloadASCallEachFrame();
         UpdateSaveSlots();
-    }
-
-    void saveloadASFormat(void) {
-        STUBBED();
-    }
-
-    void saveloadAutoSave(void) {
-        STUBBED();
-    }
-
-    void saveloadCheckCardFormatted(void) {
-        STUBBED();
-    }
-
-    void saveloadCheckCardFreeSpace(void) {
-        STUBBED();
-    }
-
-    void saveloadCheckCardPresent(void) {
-        STUBBED();
-    }
-
-    void saveloadCheckCardType(void) {
-        STUBBED();
-    }
-
-    void saveloadCheckKeyCode(void) {
-        STUBBED();
-    }
-
-    void saveloadCheckSlotsUsed(void) {
-        STUBBED();
-    }
-
-    void saveloadDeleteSlot(void) {
-        STUBBED();
-    }
-
-    void saveloadFormatCard(void) {
-        STUBBED();
-    }
-
-    void saveloadLoadIcon(void) {
-        STUBBED();
-    }
-
-    void saveloadUnFormatCard(void) {
-        STUBBED();
-    }
-
-    void saveloadWriteKeyCode(void) {
-        STUBBED();
     }
 
     i32 TriggerAutoSave(void) {

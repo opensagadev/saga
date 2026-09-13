@@ -1282,7 +1282,13 @@ CHEAT Cheat[45] = {
 };
 
 #undef CHEAT_ENTRY
-u8 CharVariants_Game[0x5c]; // in-game character-variant table
+CHARVARIANT CharVariants_Game[23] = {
+    {"weirdo"},       {"stormtrooper"}, {"fett"},       {"macewindu"}, {"battledroid"},
+    {"wookiee"},      {"obiwankenobi"}, {"leia"},       {"clone"},     {"rebel"},
+    {"tie"},          {"lando"},        {"luke"},       {"hansolo"},   {"padme"},
+    {"walker_2legs"}, {"walker_4legs"}, {"hoverdroid"}, {"critter"},   {"naboostarfighter"},
+    {"henchman"},     {NULL},           {NULL},
+};
 MemoryManager theMemoryManager;
 #include "legoapi/menus/core/lsw_text_data.inc"
 TEXTCRAWL_s TextCrawl_LSW = {&tCHAPTER, &tVEHICLEBONUS, &tCHARACTERBONUS, 3};

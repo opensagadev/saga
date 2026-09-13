@@ -3,6 +3,7 @@
 #include "nu2api/nu3d/android/nuptl_android.h"
 #include "nu2api/numath/nuvec.h"
 #include "legoapi/core/config/cheat.h"
+#include "legoapi/actions/character/streaks.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -82,7 +83,6 @@ void GizmoBlowupVisibilityOverrides(WORLDINFO_s *);
 void SetTexAnimSignals(void);
 void Customiser_SetUpCharacterData(CUSTOMISER *);
 void Surfaces_Reset(void);
-void ResetStreaks(void);
 void Bolts_Reset(void);
 void Batarangs_Reset(void);
 void Detonators_Reset(void);

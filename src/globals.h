@@ -1076,7 +1076,7 @@ extern LEVELOBJECT ObjTab[0x2ee]; // level-object type table (.data @0x618240, 0
 extern struct LEVELSPLINE SplTab[26];
 extern CHARCATEGORY LSW_CharCategory[10];
 extern CHEAT Cheat[45];
-extern u8 CharVariants_Game[0x5c];
+extern CHARVARIANT CharVariants_Game[23];
 extern MemoryManager theMemoryManager;
 extern struct TEXTENTRY LSW_Text[713];
 

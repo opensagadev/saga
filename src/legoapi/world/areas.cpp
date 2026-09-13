@@ -53,7 +53,6 @@ extern void ReCalculateCompletionPoints(void);
 extern void Hub_LockUnlockDoors(struct WORLDINFO_s *);
 extern void FreeTorpedoPacket(struct TORPEDOPACKET_s **);
 extern void RemoveGameObject(struct GameObject_s *, i32);
-extern void IconScenes_Dump(void);
 GIZAIMESSAGE_s *CheckGizAIMessage(GIZAIMESSAGESYS_s *, const char *, GIZAIMESSAGE_s *);
 extern void CharScenes_AreaDump(void);
 extern void Particles_DumpAreaPage(void);

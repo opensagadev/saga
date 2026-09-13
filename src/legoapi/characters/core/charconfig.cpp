@@ -2281,12 +2281,24 @@ void SetMoveAndAnimateFunctions(u32 model_flag_mask, u32 model_flag_value, u32 g
 void CharConfig_CalculateJumpStats(f32 jump_speed, f32 gravity, f32 *duration, f32 *height);
 i32 Text_StripComments(char *text, char *destination, i32 separators);
 
-void CharVariant_Find(char *) {
-    STUBBED();
+static CHARVARIANT *CharVariant;
+static i32 CHARVARIANTCOUNT;
+
+void CharVariants_Init(CHARVARIANT *variants, i32 count) {
+    if (count > 0 && variants != NULL) {
+        CharVariant = variants;
+        CHARVARIANTCOUNT = count;
+    }
 }
 
-void CharVariants_Init(CHARVARIANT *, i32) {
-    STUBBED();
+i32 CharVariant_Find(char *name) {
+    if (CharVariant != NULL && CHARVARIANTCOUNT > 0) {
+        for (i32 i = 0; i < CHARVARIANTCOUNT; ++i) {
+            if (NuStrICmp(CharVariant[i].name, name) == 0)
+                return i;
+        }
+    }
+    return -1;
 }
 
 void CharCategories_Init(CHARCATEGORY *categories) {

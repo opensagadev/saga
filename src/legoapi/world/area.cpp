@@ -147,7 +147,6 @@ extern OPTIONSSAVE *Game_OptionsSave;
 extern FadeSystem FadeSys;
 extern void *theGameThings;
 
-extern void IconScenes_Load(APICHARACTERMODELLIST_s *, i32, variptr_u *, variptr_u *);
 extern void MakeFreePlayModelList(i32, i32, i32, i32, i32);
 extern void Customiser_LoadAccessories(CUSTOMISER *, APICHARACTERMODELLIST_s *);
 extern void Customiser_SetAnimsToLoad(CUSTOMISER *, i32);

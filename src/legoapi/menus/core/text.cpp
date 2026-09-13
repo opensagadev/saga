@@ -49,7 +49,6 @@ extern "C" {
     void NuMtxTranslate(NUMTX *mtx, NUVEC *vec);
 }
 extern "C" void NuRndrClear(u32 flags, u32 colour, f32 alpha);
-extern "C" void Text3DStringEncode(char *src, u16 *dst);
 void Text3DStringEncodeFont(unsigned char *src, u16 *dst, void *font);
 extern "C" void TextDecode(char *source, unsigned char *dest);
 extern "C" void Text3DEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,

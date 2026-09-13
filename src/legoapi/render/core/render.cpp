@@ -1,9 +1,13 @@
 #include "decomp.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/core/input/gamepads.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/menus/core/text.h"
+#include "legoapi/menus/screens/gamemenuall.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/android/nuportal_android.h"
+#include "nu2api/nu3d/nuvport.h"
 #include "legoapi/cutscenes/cutscenes.h"
 #include <stdio.h>
 
@@ -415,10 +419,7 @@ struct VuVec;
 
 nuhspecial_s *(*GameMsg_GetExtraObjFn)(GAMEMESSAGE_s *);
 
-extern "C" void SetQFont2D(void);
-extern "C" void Text3DStringEncode(char *src, u16 *dst);
 extern "C" bool StateAnimEvaluate2(StateAnim *state, u8 *index, char *value, f32 frame);
-extern "C" void DrawMenu(i32 paused);
 extern "C" i32 NuRndrBeginScene(i32);
 extern "C" void NuRndrEndScene(void);
 extern "C" void NuRndrGradRect2di(i32, i32, i32, i32, i32 *, numtl_s *);
@@ -426,7 +427,6 @@ extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
 extern "C" void NuRndrGradRectUV2di(i32, i32, i32, i32, f32, f32, f32, f32, u32 *, numtl_s *);
 extern "C" void NuRndrRectUV2di(i32, i32, i32, i32, f32, f32, f32, f32, i32, numtl_s *);
 extern "C" void NuRndrClear(u32, u32, f32);
-extern "C" NUVIEWPORT *NuVpGetCurrentViewport(void);
 extern char *apiGameName;
 extern char *apitxt_EMPTY;
 extern char *apitxt_PRESENT;
@@ -458,7 +458,6 @@ extern u8 MENUFLASH1B;
 extern f32 menu_pulse;
 extern f32 menu_pulsate;
 extern i32 menu_flash;
-extern "C" bool TestForController(void);
 extern f32 text3d_height;
 extern f32 text3d_width;
 extern FadeSystem FadeSys;
@@ -470,7 +469,6 @@ extern i32 Paused;
 extern i32 PANELOFF;
 extern i32 noscenespecials;
 extern void RotateGameMatrix(numtx_s *matrix, i32 order, u16 x, u16 y, u16 z);
-extern NUGSCN *IconScene_FindById(i32 character_id);
 extern void SetLevelLights(void *set, f32 scale);
 extern f32 ICONX;
 extern f32 ICONSIZE;
@@ -687,7 +685,6 @@ extern "C" {
             }
         }
     }
-
 }
 
 void SetCameraZoom(f32 zoom) {
@@ -1045,10 +1042,6 @@ void DrawLocator(nuvec_s *position, float radius, i32 rotation, i32 colour) {
     AiRndrLine3d(vertices, NULL, NULL);
     NuVecSub(&vertices[1].position, &centre, &arrow);
     AiRndrLine3d(vertices, NULL, NULL);
-}
-
-void DrawStreaks() {
-    STUBBED();
 }
 
 void Draw_LOADED() {
@@ -1547,7 +1540,6 @@ void DrawItemMenu2D() {
 void DrawMessageBox(i32, float, float, float, float) {
     STUBBED();
 }
-
 
 void DrawStatusText(char *text, u16 angle, float x, float y, float scale, u32 colour, i32 alignment) {
     static NUMTX status_mtx;
@@ -2996,7 +2988,6 @@ void TransformGameMessages(nuvec_s *, nuvec_s *, nuvec_s *);
 f32 Panel_GetRedBrickSlideTime();
 
 void Customiser_TransformToPanel(CUSTOMISER *);
-extern "C" i32 MenuInCriticalMemoryCard();
 i32 Arcade_GetMode(u32 *);
 char *GameObj_GetName(i32, GameObject_s *, char *);
 i32 FindGameMsgsWithID(i32, i32, i32, GAMEMESSAGE_s *);
@@ -3020,10 +3011,7 @@ extern f32 POWERUPOBJSIZE, minikittime, REDBRICKPOSX, REDBRICKPOSY, REDBRICKPOS2
 
 extern i32 screendump, save_paused, abort_load, gone_through_door_to_new_level, DoubleScore;
 extern i32 TERRAINCALLS, SHADOWCALLS, RAYCASTCALLS;
-extern "C" GAMEPAD_s GamePad[64];
 extern "C" TIMER BonusTimer;
-i32 NoPad(i32, i32);
-extern "C" i32 MenuInMemoryCard();
 extern i32 TimingBarSet;
 extern "C" void DebrisDraw(i32, i32);
 

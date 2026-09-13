@@ -1,6 +1,7 @@
 #include "nu2api/nu3d/nuportal.h"
 #include "decomp.h"
 #include "legoapi/actions/character/suit.h"
+#include "legoapi/actions/character/streaks.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
@@ -86,7 +87,6 @@ char *TexAnimList_LSW[32] = {
     (char *)"sebulbaspod",    (char *)"sidious",       (char *)"crowd",       NULL,
 };
 
-void InitStreaks(VARIPTR *, VARIPTR, char *);
 void InitRipples(ripple_set_s **, VARIPTR *, VARIPTR *, i32);
 void CreateFadeMaterials();
 void CreateUsefulMaterials();
@@ -105,8 +105,6 @@ extern i32 CHARPAK;
 extern i32 GetMenuID(void);
 extern i32 InCollectList_Index(i32 id, COLLECTID *list, i32 count);
 extern i32 Collection_Got(i32 id);
-extern void IconScenes_Load(APICHARACTERMODELLIST_s *list, i32 permanent, VARIPTR *buf, VARIPTR *buf_end);
-extern NUGSCN *IconScene_FindById(i32 character_id);
 extern void Customiser_SaveModelTextureIDs(CUSTOMISER *customiser, CHARACTERMODEL_s *model);
 extern CUSTOMISER *CharacterCustomiser;
 extern VARIPTR characterbuffer_ptr;
@@ -483,10 +481,6 @@ void HeadMovement(GameObject_s *object) {
             object->field_0x1089 = object->field_0x1089 + 1;
         }
     }
-}
-
-void fullcodename(i32) {
-    STUBBED();
 }
 
 nuhspecial_s *CharScene_FindHSpecial(WORLDINFO_s *world, i32 character_id);
@@ -1450,10 +1444,6 @@ void CollectCharcters_Skip(STATUS_STAGE_s *stage, STATUSPACKET_s *packet) {
     }
     NextStatusStage(packet);
     NextStatusStage(packet);
-}
-
-void E1CharacterBonus_Init(WORLDINFO_s *) {
-    STUBBED();
 }
 
 AILOCATOR_s *LocalGetRandomLocator(AILOCATOR_s **locators, i32 count, f32 clip_radius, NUVEC *position,

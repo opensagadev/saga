@@ -1,4 +1,5 @@
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/actions/character/streaks.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/audio/audio.h"
 #include "legoapi/gizmos/transport/grapples.h"
@@ -4424,7 +4425,6 @@ void NewRumble(nupad_s *, f32, i32);
 i32 CannotKill(GameObject_s *object);
 u16 ObjHitObj_Flags(GameObject_s *object);
 i32 ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32);
-void AddStreakPoints(NUVEC *, f32, u32, void **, i32, void *);
 i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
 GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC *, BOLT_s *, u32, u8 *);
 i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *, i32, i32, i32, GameObject_s *, i32);

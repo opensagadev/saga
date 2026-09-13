@@ -54,6 +54,26 @@ extern "C" {
     void saveloadASLoad(i32 slot, void *buffer, i32 size);
     void saveloadASDelete(i32 slot);
     void saveloadASCallEachFrame(void);
+    void saveloadASFormat(void);
+    void saveloadAutoSave(void);
+    void saveloadCheckCardFormatted(void);
+    void saveloadCheckCardFreeSpace(void);
+    void saveloadCheckCardPresent(void);
+    void saveloadCheckCardType(void);
+    void saveloadCheckKeyCode(void);
+    void saveloadCheckSlotsUsed(void);
+    void saveloadDeleteSlot(void);
+    void saveloadFormatCard(void);
+    void saveloadLoadIcon(void);
+    void saveloadUnFormatCard(void);
+    void saveloadWriteKeyCode(void);
 #ifdef __cplusplus
 }
+
+char *slotname(i32 index);
+char *slotfolder(i32 index);
+void createslotfolder(i32 slot);
+char *fullslotname(i32 index);
+char *fullcodename(i32 index);
+void saveloadGetDirectory();
 #endif

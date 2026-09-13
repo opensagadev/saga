@@ -48,12 +48,30 @@ char *slotfolder(i32 index) {
     return name;
 }
 
+void createslotfolder(i32 slot) {
+#if defined(HOST_BUILD) && defined(_WIN32)
+    mkdir(slotfolder(slot));
+#else
+    mkdir(slotfolder(slot), 0777);
+#endif
+}
+
 char *fullslotname(i32 index) {
     static char name[4096];
 
     strcpy(name, slotfolder(index));
     strcat(name, "/");
     strcat(name, slotname(index));
+
+    return name;
+}
+
+char *fullcodename(i32 index) {
+    static char name[4096];
+
+    strcpy(name, slotfolder(index));
+    strcat(name, "/");
+    strcat(name, "code.bin");
 
     return name;
 }
@@ -124,14 +142,6 @@ i32 saveloadLoadSlot(i32 slot, void *buffer, i32 size) {
 
 i32 saveloadSaveSlot(i32 slot, void *buffer, i32 size) {
     return PCSaveSlot(slot, buffer, size, static_cast<u32>(-1));
-}
-
-void createslotfolder(i32 slot) {
-#if defined(HOST_BUILD) && defined(_WIN32)
-    mkdir(slotfolder(slot));
-#else
-    mkdir(slotfolder(slot), 0777);
-#endif
 }
 
 extern "C" {
@@ -234,5 +244,63 @@ void saveloadASCallEachFrame(void) {
         statuswait = 0;
         saveload_getinfo();
         saveload_status = 1;
+    }
+}
+
+void saveloadGetDirectory() {
+    STUBBED();
+}
+
+extern "C" {
+    void saveloadASFormat(void) {
+        STUBBED();
+    }
+
+    void saveloadAutoSave(void) {
+        STUBBED();
+    }
+
+    void saveloadCheckCardFormatted(void) {
+        STUBBED();
+    }
+
+    void saveloadCheckCardFreeSpace(void) {
+        STUBBED();
+    }
+
+    void saveloadCheckCardPresent(void) {
+        STUBBED();
+    }
+
+    void saveloadCheckCardType(void) {
+        STUBBED();
+    }
+
+    void saveloadCheckKeyCode(void) {
+        STUBBED();
+    }
+
+    void saveloadCheckSlotsUsed(void) {
+        STUBBED();
+    }
+
+    void saveloadDeleteSlot(void) {
+        STUBBED();
+    }
+
+    void saveloadFormatCard(void) {
+        STUBBED();
+    }
+
+    void saveloadLoadIcon(void) {
+        STUBBED();
+    }
+
+    void saveloadUnFormatCard(void) {
+        STUBBED();
+    }
+
+    void saveloadWriteKeyCode(void) {
+        STUBBED();
     }
 }

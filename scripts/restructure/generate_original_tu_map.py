@@ -19,10 +19,12 @@ import subprocess
 
 from scripts.restructure.elf32 import SHF_ALLOC, read_elf32, workspace_root
 from scripts.restructure.inputs import read_units_manifest
+from scripts.restructure.text_adjacency import text_adjacency_edges
 
 EXCLUDED_TYPES = {3, 4}  # STT_SECTION, STT_FILE
 CONSTRUCTOR = re.compile(r"^_GLOBAL__sub_I_(.+)$")
 EMBEDDED_PATH = re.compile(rb"([A-Za-z]:/[A-Za-z0-9_./-]+\.(?:cpp|c))(?::\d+)?\x00")
+STRONG_LOCAL_XREF = "strong same-TU constraint; not an assignment"
 
 
 def allocated_symbols(sections: list[dict], symbols: list[dict]) -> list[dict]:
@@ -175,8 +177,122 @@ def function_local_anchors(symbols: list[dict]) -> dict[int, list[int]]:
     return anchors
 
 
+def annotate_local_xrefs(
+    edges: list[dict], mapped: list[dict], current_units: list[dict] | None = None
+) -> tuple[list[dict], dict]:
+    """Add ledger metadata; current candidates remain diagnostics, never owners."""
+    by_index = {symbol["symbol_index"]: symbol for symbol in mapped}
+    units_by_id = {unit["id"]: unit for unit in current_units or []}
+    annotated = []
+    strengths = Counter()
+    assessable = discordant = size_concordant_discordant = 0
+    for edge in edges:
+        targets = [by_index[index] for index in edge["object_symbol_indices"]]
+        sections = sorted({target["section"] for target in targets})
+        bindings = sorted({target["binding"] for target in targets})
+        if len(sections) == 1 and sections[0] in (".data", ".bss", ".tdata", ".tbss"):
+            strength = STRONG_LOCAL_XREF
+        elif sections == [".rodata"]:
+            strength = "medium same-TU evidence; read-only constants may be pooled"
+        else:
+            strength = "unclassified reference; no TU constraint"
+        source = by_index[edge["function_symbol_index"]]
+        source_candidates = source.get("current_owner_candidates", [])
+        target_candidates = targets[0].get("current_owner_candidates", []) if len(targets) == 1 else []
+        target_size_concordant = None
+        if len(source_candidates) == len(target_candidates) == 1:
+            assessable += 1
+            is_discordant = source_candidates[0] != target_candidates[0]
+            discordant += is_discordant
+            candidate_unit = units_by_id.get(target_candidates[0])
+            if candidate_unit is not None:
+                original_target = targets[0]
+                target_size_concordant = any(
+                    symbol["name"] == original_target["name"]
+                    and symbol["type"] == original_target["type"]
+                    and symbol["size"] == original_target["size"]
+                    and (symbol["binding"] == 0) == (original_target["binding"] == 0)
+                    for symbol in candidate_unit["symbols"]
+                )
+                size_concordant_discordant += is_discordant and target_size_concordant
+        annotated.append({**edge,
+                          "id": f"original-local-xref:{edge['function_symbol_index']}:{edge['instruction_address']:08x}:{edge['object_address']:08x}",
+                          "target_sections": sections, "target_bindings": bindings,
+                          "same_tu_evidence": strength,
+                          "current_target_object_size_concordant": target_size_concordant})
+        strengths[strength] += 1
+    return annotated, {
+        "original_local_xrefs": len(annotated),
+        "original_local_xrefs_by_strength": dict(sorted(strengths.items())),
+        "original_local_xrefs_alias_ambiguous": sum(edge["object_alias_ambiguous"] for edge in annotated),
+        "current_cross_owner_diagnostic_assessable": assessable,
+        "current_cross_owner_diagnostic_discordant": discordant,
+        "current_cross_owner_diagnostic_discordant_object_size_concordant": size_concordant_discordant,
+    }
+
+
+def local_xref_components(edges: list[dict], mapped: list[dict]) -> tuple[list[dict], dict]:
+    """Find minimum same-TU groups implied by verified writable LOCAL refs.
+
+    These groups contain only reached symbols, not the complete owning TUs.
+    Read-only references and unresolved address aliases cannot join groups.
+    """
+    by_index = {symbol["symbol_index"]: symbol for symbol in mapped}
+    parent: dict[int, int] = {}
+    participating_edges = []
+
+    def root(index: int) -> int:
+        parent.setdefault(index, index)
+        while parent[index] != index:
+            parent[index] = parent[parent[index]]
+            index = parent[index]
+        return index
+
+    for edge in edges:
+        targets = edge["object_symbol_indices"]
+        if edge["same_tu_evidence"] != STRONG_LOCAL_XREF or len(targets) != 1:
+            continue
+        function_index = edge["function_symbol_index"]
+        object_index = targets[0]
+        if function_index not in by_index or object_index not in by_index:
+            continue
+        parent[root(object_index)] = root(function_index)
+        participating_edges.append(edge)
+
+    members: dict[int, set[int]] = defaultdict(set)
+    edge_ids: dict[int, set[str]] = defaultdict(set)
+    for index in parent:
+        members[root(index)].add(index)
+    for edge in participating_edges:
+        edge_ids[root(edge["function_symbol_index"])].add(edge["id"])
+
+    components = []
+    for indices in sorted(members.values(), key=lambda group: min(group)):
+        ordered = sorted(indices)
+        blocks = sorted({by_index[index]["local_initializer_block"] for index in ordered
+                         if by_index[index].get("local_initializer_block") is not None})
+        component_root = root(ordered[0])
+        components.append({
+            "id": len(components),
+            "symbol_indices": ordered,
+            "function_symbol_indices": [index for index in ordered if by_index[index]["type"] == 2],
+            "object_symbol_indices": [index for index in ordered if by_index[index]["type"] == 1],
+            "xref_ids": sorted(edge_ids[component_root]),
+            "local_initializer_blocks": blocks,
+            "certainty": "minimum same-TU constraint; not a complete TU or source assignment",
+        })
+    return components, {
+        "strong_local_xref_components": len(components),
+        "strong_local_xref_component_symbols": sum(len(group["symbol_indices"]) for group in components),
+        "strong_local_xref_components_crossing_initializer_blocks": sum(
+            len(group["local_initializer_blocks"]) > 1 for group in components
+        ),
+    }
+
+
 def build_map(
-    original: Path, current: Path | None = None, units: list[dict] | None = None
+    original: Path, current: Path | None = None, units: list[dict] | None = None,
+    *, with_local_xrefs: bool = False,
 ) -> dict:
     if (current is None) != (units is None):
         raise ValueError("current ELF and unit manifest must be supplied together")
@@ -255,6 +371,7 @@ def build_map(
         mapped.append(entry)
 
     original_section_counts = Counter(symbol["section"] for symbol in mapped)
+    text_edges = text_adjacency_edges(mapped)
     summary = {
         "original_allocated_symbols": len(mapped),
         "initializer_delimited_blocks": len(blocks),
@@ -262,6 +379,7 @@ def build_map(
         "embedded_source_paths": len(embedded_paths),
         "function_local_static_anchors": len(local_anchors),
         "alias_groups": len(aliases),
+        "original_text_adjacency_edges": len(text_edges),
         "original_by_section": dict(sorted(original_section_counts.items())),
     }
     if current is not None:
@@ -276,24 +394,46 @@ def build_map(
                 },
             }
         )
-    return {
+    local_xrefs = None
+    xref_components = None
+    if with_local_xrefs:
+        # Keep baseline inventory dependency-free; Capstone is only needed for
+        # this explicitly requested original-binary disassembly pass.
+        from scripts.restructure.original_local_xrefs import extract
+
+        local_xrefs, xref_summary = annotate_local_xrefs(extract(original), mapped, unit_records)
+        summary.update(xref_summary)
+        xref_components, component_summary = local_xref_components(local_xrefs, mapped)
+        summary.update(component_summary)
+    inventory = {
         "schema_version": 1,
         "rules": {
             "inclusion": "named defined SHT_SYMTAB symbols in SHF_ALLOC sections, excluding STT_SECTION and STT_FILE",
             "local_blocks": "symtab-local-order segments ending at _GLOBAL__sub_I_; not necessarily complete TUs",
             "current_candidates": "same-name, same-type object symbols of the same local/nonlocal binding class; not original TU assignment",
             "aliases": "preserved as separate entries by symbol_table and symbol_index",
+            "text_adjacency_edges": "individual original .text function-site gaps of 0..16 bytes; weak layout evidence only, never TU assignments or clusters",
         },
         "original": str(original),
         "current": str(current) if current is not None else None,
         "summary": summary,
         "original_local_blocks": blocks,
         "original_alias_groups": aliases,
+        "original_text_adjacency_edges": text_edges,
         "original_initializers": initializers,
         "original_embedded_paths": embedded_paths,
         "original_symbols": mapped,
         "current_units": unit_records,
     }
+    if with_local_xrefs:
+        inventory["rules"]["original_local_xrefs"] = (
+            "exact original ELF i386 PIC instruction/REL evidence to LOCAL object addresses; "
+            "non-const state is a same-TU constraint, .rodata is weaker due to pooling; "
+            "current-owner disagreement is diagnostic only, never original TU assignment"
+        )
+        inventory["original_local_xrefs"] = local_xrefs
+        inventory["original_strong_local_xref_components"] = xref_components
+    return inventory
 
 
 def main() -> None:
@@ -302,6 +442,7 @@ def main() -> None:
     parser.add_argument("--current", type=Path)
     parser.add_argument("--units", type=Path, help="JSON source/object manifest")
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--with-local-xrefs", action="store_true", help="add verified original i386 LOCAL references (requires Capstone)")
     args = parser.parse_args()
     if (args.current is None) != (args.units is None):
         parser.error("--current and --units must be supplied together")
@@ -310,7 +451,8 @@ def main() -> None:
     output = args.output or root / ".work/original-tu-map.json"
     units = read_units_manifest(args.units, root) if args.units else None
     inventory = build_map(
-        original.resolve(), args.current.resolve() if args.current else None, units
+        original.resolve(), args.current.resolve() if args.current else None, units,
+        with_local_xrefs=args.with_local_xrefs,
     )
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(inventory, indent=2) + "\n", encoding="utf-8")

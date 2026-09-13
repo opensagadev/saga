@@ -22,6 +22,9 @@ extern "C" {
     i32 MenuCurrentID(void);
     i32 MenuInMemoryCardLoad(void);
     i32 MenuInMemoryCardWarning(void);
+    i32 MenuInMemoryCard(void);
+    i32 MenuInCriticalMemoryCard(void);
+    void DrawMenu(i32 paused);
     void SetButtonScaleMode(i32 mode);
 #ifdef __cplusplus
 }

@@ -509,7 +509,7 @@ void EndMissionsMenu() {
 }
 
 static NUGSCN **IconScene;
-static char IconPath[0x40];
+static char IconPath[0x40] = "stuff\\icons\\";
 
 void IconScenes_Dump() {
     if (IconScene == NULL) {
@@ -1809,8 +1809,21 @@ extern "C" {
         return memcard_slot;
     }
 
-    void MenuInCriticalMemoryCard(void) {
-        STUBBED();
+    i32 MenuInCriticalMemoryCard(void) {
+        if (MenuValidated == 0)
+            return 0;
+
+        const i32 menu_id = MenuInfo[GameMenu[GameMenuLevel].menu].id;
+        switch (menu_id) {
+            case 1001:
+            case 1007:
+            case 1009:
+            case 1014:
+            case 1015:
+                return 1;
+            default:
+                return 0;
+        }
     }
 
     i32 MenuInMemoryCard(void) {

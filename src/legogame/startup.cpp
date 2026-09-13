@@ -102,12 +102,10 @@ void Movies_ConfigureList(char *path, VARIPTR *buf, VARIPTR *buf_end);
 CHARACTERDATA *ConfigureCharacterList(char *path, VARIPTR *buf, VARIPTR *buf_end, i32 max, i32 *count, i32 stride,
                                       GAMECHARACTERDATA **gcdata);
 void CharScenes_Init(VARIPTR *buf, VARIPTR *buf_end);
-void IconScenes_Init(char *prefix, VARIPTR *buf, VARIPTR *buf_end);
 void FixUpCharacters(CHARFIXUP *fixup);
 void MiniKits_Init(VARIPTR *buf, VARIPTR *buf_end);
 void CharCategories_Init(CHARCATEGORY *cat);
 void Cheats_Init(CHEAT *cheats);
-void CharVariants_Init(CHARVARIANT *variants, i32 count);
 LEVELDATA *Levels_ConfigureList(char *path, VARIPTR *buf, VARIPTR *buf_end, i32 max, i32 *count,
                                 void (*set_defaults)(LEVELDATA *, i32));
 void FixUpLevels(LEVELFIXUP *fixup);
@@ -347,7 +345,7 @@ static void LoadPermData(BGPROCINFO *proc) {
     Cheats_Init(reinterpret_cast<CHEAT *>(Cheat));
     PlayerID[0] = id_DEFAULTCHARACTER[0];
     PlayerID[1] = id_DEFAULTCHARACTER[1];
-    CharVariants_Init(reinterpret_cast<CHARVARIANT *>(CharVariants_Game), 0x17);
+    CharVariants_Init(CharVariants_Game, 0x17);
 
     LDataList = Levels_ConfigureList((char *)"levels\\levels.txt", &permbuffer_ptr, &permbuffer_end, 0x16d, &LEVELCOUNT,
                                      &Level_SetDefaults);
