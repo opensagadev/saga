@@ -2156,15 +2156,6 @@ void GameAnimSet_RemoveFromSystemList(GAMEANIMSET_s *set) {
     }
 }
 
-static __used__ i32 LoadAnim(char *, i32, variptr_u *, variptr_u) {
-    return 0;
-}
-static __used__ i32 LoadAnimFromPAK(char *, i32, char *, i32) {
-    return 0;
-}
-static __used__ void NormalizeAnimPath(char *) {
-}
-
 i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, f32 blend,
                                             i32 joint_count, i32 first_joint, NUVEC *root_translation);
 i32 ANI_SimpleAni3PlayerV4Joint_Blend_Quat3W(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, f32 blend,
@@ -2696,9 +2687,6 @@ extern "C" {
         return 0;
     }
 
-    void AddAnimEffects(void) {
-    }
-
     float AnimEndFrame(void *model_ptr, i32 animation) {
         CHARACTERMODEL_s *model = static_cast<CHARACTERMODEL_s *>(model_ptr);
         if (animation == -1 || model->model_data_b[animation] == NULL) {
@@ -2729,15 +2717,6 @@ extern "C" {
             return 0;
         }
         return static_cast<CHARACTERANIM_s *>(model->model_data_a[animation])->misc_flags;
-    }
-
-    void AnimsAvailableToBothCharacters(void) {
-    }
-
-    void BlendTimeBetweenAnims(void) {
-    }
-
-    void EvalModelAnim(void) {
     }
 
     f32 GetInstAnimEndFrame(nugscn_s *scene, nuinstanim_s *instance_animation) {

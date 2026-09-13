@@ -1,9 +1,11 @@
 #include "decomp.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/charconfig.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "legoapi/render/fx.h"
+#include "legoapi/render/fx/game_deb.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/gizmo/base/gizactions.h"
 #include "nu2api/nucore/nuhgobj.h"
@@ -48,6 +50,7 @@ i32 drawcharactermodel_keepmergeaction;
 i32 drawcharactermodel_locatorsupdated;
 void (*APIObjResetShadowMapRenderingFn)(void);
 void (*APIObjEnableShadowMapRenderingFn)(void);
+void (*APIObjPlaySfxByIdFn)(i32, NUVEC *);
 }
 i32 apiloadcharactermodels_nopakfile = 0;
 static ANIMREDIRECTFN RedirectAnimFn;
@@ -729,7 +732,7 @@ static void NormalizeAnimPath(char *path) {
     }
 }
 
-static nuanimdata2_s *LoadAnimFromPAK(char *path, i32 area_animation, void *data, i32 size) {
+static nuanimdata2_s *LoadAnimFromPAK(char *path, i32 area_animation, char *data, i32 size) {
     NormalizeAnimPath(path);
     for (i32 i = 0; i < apicharsys->loaded_animation_count; ++i) {
         if (NuStrCmp(path, apicharsys->animations[i].path) == 0) {
@@ -948,7 +951,7 @@ extern "C" {
                         i32 size;
                         if (item != 0 && NuFilePakGetItemInfo(pak, item, &data, &size) != 0) {
                             model->model_data_c[animation->animation_id] =
-                                LoadAnimFromPAK(animation_path, area_animation, data, size);
+                                LoadAnimFromPAK(animation_path, area_animation, static_cast<char *>(data), size);
                             if (model->model_data_c[animation->animation_id] != NULL) {
                                 model->model_data_a[animation->animation_id] = animation;
                             }
@@ -1114,6 +1117,100 @@ extern "C" {
         }
     }
 
+    void EvalModelAnim(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, NUMTX *world_matrix, NUMTX *joint_matrices,
+                       void ***dwa_output, NUVEC *locator_positions, NUMTX *locator_matrices, u32 layer_mask) {
+        i16 render_indices[32];
+        i32 render_count = MakeLayerList(model, render_indices, layer_mask);
+        if (render_count <= 0) {
+            return;
+        }
+
+        if (dwa_output != NULL) {
+            if (packet->blending != 0 && packet->blend_animation_a >= 0 &&
+                packet->blend_animation_a < apicharsys->model_id_capacity &&
+                model->model_data_c[packet->blend_animation_a] != NULL && packet->blend_animation_b >= 0 &&
+                packet->blend_animation_b < apicharsys->model_id_capacity &&
+                model->model_data_c[packet->blend_animation_b] != NULL) {
+                *dwa_output = NuHGobjEvalDwaBlend2(
+                    render_count, render_indices,
+                    static_cast<nuanimdata2_s *>(model->model_data_c[packet->blend_animation_a]),
+                    packet->blend_source_time,
+                    static_cast<nuanimdata2_s *>(model->model_data_c[packet->blend_animation_b]),
+                    packet->blend_target_time, packet->blend_elapsed / packet->blend_duration);
+            } else if (packet->blending != 0 && packet->blend_animation_b >= 0 &&
+                       packet->blend_animation_b < apicharsys->model_id_capacity &&
+                       model->model_data_c[packet->blend_animation_b] != NULL) {
+                *dwa_output = NuHGobjEvalDwa2(
+                    render_count, render_indices,
+                    static_cast<nuanimdata2_s *>(model->model_data_c[packet->blend_animation_b]),
+                    packet->blend_target_time);
+            } else if (packet->blending != 0 && packet->blend_animation_a >= 0 &&
+                       packet->blend_animation_a < apicharsys->model_id_capacity &&
+                       model->model_data_c[packet->blend_animation_a] != NULL) {
+                *dwa_output = NuHGobjEvalDwa2(
+                    render_count, render_indices,
+                    static_cast<nuanimdata2_s *>(model->model_data_c[packet->blend_animation_a]),
+                    packet->blend_source_time);
+            } else if (packet->blending == 0 && packet->animation_index >= 0 &&
+                       packet->animation_index < apicharsys->model_id_capacity &&
+                       model->model_data_c[packet->animation_index] != NULL) {
+                *dwa_output = NuHGobjEvalDwa2(
+                    render_count, render_indices,
+                    static_cast<nuanimdata2_s *>(model->model_data_c[packet->animation_index]),
+                    packet->current_time);
+            } else {
+                *dwa_output = NULL;
+            }
+        }
+
+        if (packet->blending != 0 && packet->blend_animation_a >= 0 &&
+            packet->blend_animation_a < apicharsys->model_id_capacity &&
+            model->model_data_b[packet->blend_animation_a] != NULL && packet->blend_animation_b >= 0 &&
+            packet->blend_animation_b < apicharsys->model_id_capacity &&
+            model->model_data_b[packet->blend_animation_b] != NULL) {
+            NuHGobjEvalAnimBlend2(
+                model->hierarchy, static_cast<ani3_animheader_s *>(model->model_data_b[packet->blend_animation_a]),
+                packet->blend_source_time,
+                static_cast<ani3_animheader_s *>(model->model_data_b[packet->blend_animation_b]),
+                packet->blend_target_time, packet->blend_elapsed / packet->blend_duration, 0, NULL, joint_matrices);
+        } else if (packet->blending != 0 && packet->blend_animation_b >= 0 &&
+                   packet->blend_animation_b < apicharsys->model_id_capacity &&
+                   model->model_data_b[packet->blend_animation_b] != NULL) {
+            NuHGobjEvalAnim2(model->hierarchy,
+                             static_cast<ani3_animheader_s *>(model->model_data_b[packet->blend_animation_b]),
+                             packet->blend_target_time, 0, NULL, joint_matrices);
+        } else if (packet->blending != 0 && packet->blend_animation_a >= 0 &&
+                   packet->blend_animation_a < apicharsys->model_id_capacity &&
+                   model->model_data_b[packet->blend_animation_a] != NULL) {
+            NuHGobjEvalAnim2(model->hierarchy,
+                             static_cast<ani3_animheader_s *>(model->model_data_b[packet->blend_animation_a]),
+                             packet->blend_source_time, 0, NULL, joint_matrices);
+        } else if (packet->blending == 0 && packet->animation_index >= 0 &&
+                   packet->animation_index < apicharsys->model_id_capacity &&
+                   model->model_data_b[packet->animation_index] != NULL) {
+            NuHGobjEvalAnim2(model->hierarchy,
+                             static_cast<ani3_animheader_s *>(model->model_data_b[packet->animation_index]),
+                             packet->current_time, 0, NULL, joint_matrices);
+        } else {
+            NuHGobjEval(model->hierarchy, 0, NULL, joint_matrices);
+        }
+        StoreLocatorCoordinates(model, world_matrix, joint_matrices, locator_positions, locator_matrices);
+    }
+
+    f32 BlendTimeBetweenAnims(CHARACTERMODEL_s *model, i32 source_animation, i32 target_animation) {
+        if (model->model_data_a[source_animation] == NULL || model->model_data_a[target_animation] == NULL) {
+            return 0.0f;
+        }
+
+        f32 time = static_cast<CHARACTERANIM_s *>(model->model_data_a[target_animation])->blend_in_time;
+        const f32 source_time =
+            static_cast<CHARACTERANIM_s *>(model->model_data_a[source_animation])->blend_out_time;
+        if (time > source_time) {
+            time = source_time;
+        }
+        return time;
+    }
+
     void ResetAnimPacket(ANIMPACKET_s *packet, i16 animation) {
         if (packet == NULL) {
             return;
@@ -1130,6 +1227,19 @@ extern "C" {
         packet->current_reversed = 0;
         packet->blend_source_reversed = 0;
         packet->blend_target_reversed = 0;
+    }
+
+    void ResetMiniAnimPacket(MINIANIMPACKET_s *packet, i32 animation) {
+        if (packet != NULL) {
+            packet->requested_animation_id = animation;
+            packet->previous_animation_id = packet->requested_animation_id;
+            packet->current_animation_id = packet->previous_animation_id;
+            packet->previous_time = 1.0f;
+            packet->blend_target_time = packet->previous_time;
+            packet->current_time = packet->blend_target_time;
+            packet->blending = 0;
+            packet->flags = ANIMPACKET_FLAG_ANIMATION_CHANGED;
+        }
     }
 
     void SetAnimTimeRandom(CHARACTERMODEL_s *model, ANIMPACKET_s *packet) {
@@ -1463,8 +1573,45 @@ static f32 UpdateAnimTimer(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, i16 an
         AnimPacket_FullToMini(&packet, mini_packet);
     }
 
+    i32 AnimBlendingFromTo(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, i32 source_animation, i32 target_animation) {
+        if (packet->blending != 0 && source_animation != -1 && packet->blend_animation_a == source_animation &&
+            target_animation != -1 && packet->blend_animation_b == target_animation) {
+            if (model != NULL) {
+                if (source_animation == -1 || model->model_data_b[source_animation] == NULL) {
+                    return 0;
+                }
+                if (target_animation == -1 || model->model_data_b[target_animation] == NULL) {
+                    return 0;
+                }
+            }
+            return 1;
+        }
+        return 0;
+    }
+
+    f32 *AnimPlaying(ANIMPACKET_s *packet, i32 animation, i32 target, i32 source) {
+        if (packet == NULL || animation == -1)
+            return NULL;
+        if (packet->blending != 0) {
+            if (target != 0 && packet->blend_animation_b == animation)
+                return &packet->blend_target_time;
+            if (source != 0 && packet->blend_animation_a == animation)
+                return &packet->blend_source_time;
+        } else {
+            if (packet->animation_index == animation)
+                return &packet->current_time;
+        }
+        return NULL;
+    }
+
     i32 CurrentAnim(ANIMPACKET_s *packet) {
         return packet->blending == 0 ? packet->animation_index : packet->blend_animation_b;
+    }
+
+    f32 AnimSpeed(CHARACTERMODEL_s *model, i32 animation) {
+        return animation != -1 && model->model_data_b[animation] != NULL
+                   ? static_cast<CHARACTERANIM_s *>(model->model_data_a[animation])->action_speed
+                   : 0.0f;
     }
 
     f32 AnimListFrame(CHARACTERMODEL_s *model, i32 animation, i32 frame) {
@@ -1475,12 +1622,47 @@ static f32 UpdateAnimTimer(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, i16 an
         return info->event_frames[frame];
     }
 
+    f32 AnimStopFrame(CHARACTERMODEL_s *model, i32 animation) {
+        return animation != -1 && model->model_data_b[animation] != NULL
+                   ? static_cast<CHARACTERANIM_s *>(model->model_data_a[animation])->stop_frame
+                   : 0.0f;
+    }
+
     f32 *AnimListFrameArray(CHARACTERMODEL_s *model, i32 animation) {
         if (animation == -1 || model->model_data_b[animation] == NULL) {
             return NULL;
         }
         CHARACTERANIM_s *info = static_cast<CHARACTERANIM_s *>(model->model_data_a[animation]);
         return info->event_frames;
+    }
+
+    i32 AnimsAvailableToBothCharacters(ANIMPACKET_s *packet, i32 first_character, i32 second_character) {
+        if (first_character == -1) {
+            return 0;
+        }
+        i32 first_model_index = apicharsys->playermodelids[first_character];
+        if (first_model_index == -1) {
+            return 0;
+        }
+        CHARACTERMODEL_s *first_model = &apicharsys->models[first_model_index];
+
+        if (second_character == -1) {
+            return 0;
+        }
+        i32 second_model_index = apicharsys->playermodelids[second_character];
+        if (second_model_index == -1) {
+            return 0;
+        }
+        CHARACTERMODEL_s *second_model = &apicharsys->models[second_model_index];
+
+        if (packet->blending != 0) {
+            return first_model->model_data_b[packet->blend_animation_a] != NULL &&
+                   first_model->model_data_b[packet->blend_animation_b] != NULL &&
+                   second_model->model_data_b[packet->blend_animation_a] != NULL &&
+                   second_model->model_data_b[packet->blend_animation_b] != NULL;
+        }
+        return first_model->model_data_b[packet->animation_index] != NULL &&
+               second_model->model_data_b[packet->animation_index] != NULL;
     }
 
 } // extern "C"
@@ -1635,6 +1817,377 @@ extern "C" {
         }
     }
 
+    i32 ParticlesPerFrame(f32 particles_per_frame, f32 frame_time) {
+        i32 scaled_count = static_cast<i32>(particles_per_frame * 65536.0f * (frame_time * 60.0f));
+        i32 count = 0;
+
+        while (scaled_count > 0xffff) {
+            scaled_count -= 0x10000;
+            ++count;
+        }
+        if ((NuRandInt() >> 16) < static_cast<u32>(scaled_count)) {
+            ++count;
+        }
+        return count;
+    }
+
+    i32 ParticlesPerSecond(f32 particles_per_second, f32 frame_time) {
+        return ParticlesPerFrame(particles_per_second / 60.0f, frame_time);
+    }
+
+    i32 FindGameDebris(APIDEBRISSYS_s *debris_sys, char *name) {
+        for (i32 index = debris_sys->named_count; index < debris_sys->capacity; ++index) {
+            if (NuStrICmp(name, debris_sys->entries[index].name) == 0) {
+                return index;
+            }
+        }
+        return -1;
+    }
+
+    APIDEBRISSYS_s *InitGameDebris(VARIPTR *cursor, VARIPTR end, i32 count, i32 flags, char **names, char page) {
+        (void)end;
+        if (cursor->addr == 0) {
+            return NULL;
+        }
+
+        APIDEBRISSYS_s *sys = BUFFER_ALLOC_T(cursor, APIDEBRISSYS_s);
+        sys->named_count = flags;
+        sys->capacity = count;
+        sys->entries = BUFFER_ALLOC_ARRAY(cursor, count, GAMEDEBRISENTRY_s);
+
+        memset(sys->entries, 0xff, static_cast<usize>(count) * sizeof(*sys->entries));
+
+        // Seed the named entries from the debris_name table.
+        for (i32 i = 0; i < sys->named_count; i++) {
+            GAMEDEBRISENTRY_s &entry = sys->entries[i];
+            NuStrCpy(entry.name, names[i]);
+            entry.effect = LookupDebrisEffectPage(entry.name, page);
+        }
+
+        // The original appends the currently registered page effects after
+        // the fixed debris_name set.  effecttypes[0] is reserved, and the
+        // pointer table is append-only while pages are loaded.
+        i32 i = sys->named_count;
+        for (i32 j = 1; i < sys->capacity && j < edpp_types_used; j++) {
+            debinftype *effect = debtab != NULL ? debtab[j] : NULL;
+            if (effect == NULL) {
+                break;
+            }
+            GAMEDEBRISENTRY_s &entry = sys->entries[i];
+            NuStrCpy(entry.name, effect->name);
+            entry.effect = LookupDebrisEffectPageOnly(entry.name, page);
+            i++;
+        }
+
+        for (; i < sys->capacity; i++) {
+            sys->entries[i].effect = -1;
+        }
+
+        return sys;
+    }
+
+    i32 AddGameDebris(APIDEBRISSYS_s *system, i32 type, NUVEC *position) {
+        if (type >= 0 && type < system->capacity && system->entries[type].effect != -1) {
+            i32 handle = -1;
+            AddFiniteShotDebrisEffect(&handle, system->entries[type].effect, position, 1);
+            return 1;
+        }
+        return 0;
+    }
+
+    i32 AddGameDebrisMomentum(APIDEBRISSYS_s *system, i32 type, NUVEC *position, NUVEC *emitter_momentum,
+                              NUVEC *particle_momentum) {
+        if (type >= 0 && type < system->capacity && system->entries[type].effect != -1) {
+            i32 handle = -1;
+            AddFiniteShotDebrisEffect2(&handle, system->entries[type].effect, position, emitter_momentum,
+                                       particle_momentum, 1);
+            return 1;
+        }
+        return 0;
+    }
+
+    i32 AddGameDebrisXYZ(APIDEBRISSYS_s *system, i32 type, f32 x, f32 y, f32 z) {
+        if (type >= 0 && type < system->capacity && system->entries[type].effect != -1) {
+            i32 handle = -1;
+            NUVEC position = {x, y, z};
+            AddFiniteShotDebrisEffect(&handle, system->entries[type].effect, &position, 1);
+            return 1;
+        }
+        return 0;
+    }
+
+    i32 AddGameDebrisRot(APIDEBRISSYS_s *system, i32 type, NUVEC *position, i32 count, i16 z_rotation, i16 y_rotation) {
+        if (type >= 0 && type < system->capacity && system->entries[type].effect != -1 && count > 0) {
+            AddVariableShotDebrisEffect(system->entries[type].effect, position, count, z_rotation, y_rotation);
+            return 1;
+        }
+        return 0;
+    }
+
+    i32 AddGameDebrisMtx(APIDEBRISSYS_s *system, i32 type, NUVEC *position, i32 count, NUMTX *matrix) {
+        if (type >= 0 && type < system->capacity && system->entries[type].effect != -1 && count > 0) {
+            NUMTX_ALIGNED16 orientation;
+            NuMtxSetRotationX(&orientation, 0x4000);
+            NuMtxMulR(&orientation, &orientation, matrix);
+            AddVariableShotDebrisEffectMtx3(system->entries[type].effect, position, &nuvec_zero, count, &orientation,
+                                            &numtx_identity);
+            return 1;
+        }
+        return 0;
+    }
+
+    i32 AddGameDebrisMom(APIDEBRISSYS_s *system, i32 type, NUVEC *position, i32 count, NUVEC *momentum) {
+        if (type >= 0 && type < system->capacity && system->entries[type].effect != -1 && count > 0) {
+            NUVEC zero = {0.0f, 0.0f, 0.0f};
+            if (momentum == NULL)
+                momentum = &zero;
+            AddVariableShotDebrisEffectMtx3(system->entries[type].effect, position, momentum, count, NULL, NULL);
+            return 1;
+        }
+        return 0;
+    }
+
+    void SetAPIObjPlaySfxByIdFn(void (*play_sfx)(i32, NUVEC *)) {
+        APIObjPlaySfxByIdFn = play_sfx;
+    }
+
+    void AddAnimEffects(CHARACTERMODEL_s *model, CHARACTERDATA *, ANIMPACKET_s *packet,
+                        NUMTX *locator_matrices, GameObject_s *object, CHARACTER_EFFECT_s *effects,
+                        WORLDINFO_s *world_info, f32 frame_time,
+                        void (*footprint_callback)(void *, GameObject_s *, i32, i32), APIDEBRISSYS_s *debris_sys) {
+        if (world_info != NULL || effects == NULL) {
+            return;
+        }
+
+        i32 animation_id;
+        f32 animation_time;
+        if (packet->blending != 0 && packet->blend_animation_b >= 0 &&
+            packet->blend_animation_b < apicharsys->model_id_capacity &&
+            model->model_data_b[packet->blend_animation_b] != NULL) {
+            animation_id = packet->blend_animation_b;
+            animation_time = packet->blend_target_time;
+        } else if (packet->blending != 0 && packet->blend_animation_a >= 0 &&
+                   packet->blend_animation_a < apicharsys->model_id_capacity &&
+                   model->model_data_b[packet->blend_animation_a] != NULL) {
+            animation_id = packet->blend_animation_a;
+            animation_time = packet->blend_source_time;
+        } else if (packet->blending == 0 && packet->animation_index >= 0 &&
+                   packet->animation_index < apicharsys->model_id_capacity &&
+                   model->model_data_b[packet->animation_index] != NULL) {
+            animation_id = packet->animation_index;
+            animation_time = packet->current_time;
+        } else {
+            return;
+        }
+
+        for (CHARACTER_EFFECT_s *effect = effects; effect->character_id != -1; ++effect) {
+            if (effect->character_id != model->model_id || effect->action_id != animation_id) {
+                continue;
+            }
+
+            const u32 flags = effect->flags;
+            if (object != NULL) {
+                APIOBJECT *api = &object->apiobj;
+                if ((flags & 0x400) != 0 && api->field_0x27c == -1) {
+                    continue;
+                }
+                if ((flags & 0x10) != 0 && (api->field_0x27d & 2) == 0) {
+                    continue;
+                }
+                if ((flags & 0x40) != 0 && api->is_underwater != 0) {
+                    continue;
+                }
+                if ((flags & 0x20) != 0 && api->is_underwater == 0) {
+                    continue;
+                }
+                if ((flags & 0x80) != 0 && api->intersects_water == 0) {
+                    continue;
+                }
+                if ((flags & 0x03000000) != 0 &&
+                    (api->model_draw_result == 0 || (api->field_0x27d & 2) == 0)) {
+                    continue;
+                }
+            } else if ((flags & 0x03000000) != 0) {
+                continue;
+            }
+
+            i32 active = 0;
+            if ((flags & 0x4) != 0) {
+                active = 1;
+            } else if ((flags & 0x8) != 0) {
+                if (effect->frame_2 > 1.0f && effect->frame_1 > effect->frame_2) {
+                    active = animation_time >= effect->frame_1 || animation_time <= effect->frame_2;
+                } else {
+                    active = animation_time >= effect->frame_1 &&
+                             (effect->frame_2 <= 1.0f || animation_time <= effect->frame_2);
+                }
+            } else {
+                for (i32 event = 0; event <= 1; ++event) {
+                    const f32 event_time = event == 0 ? effect->frame_1 : effect->frame_2;
+                    if (event_time <= 1.0f) {
+                        continue;
+                    }
+                    if ((packet->flags & ANIMPACKET_FLAG_PLAYING_REVERSED) == 0) {
+                        if (animation_time > event_time) {
+                            if (packet->previous_time <= event_time ||
+                                ((packet->flags & ANIMPACKET_FLAG_LOOPED) != 0 &&
+                                 packet->previous_time > animation_time)) {
+                                active = 1;
+                            }
+                        } else if ((packet->flags & ANIMPACKET_FLAG_LOOPED) != 0 &&
+                                   packet->previous_time > animation_time && packet->previous_time <= event_time) {
+                            active = 1;
+                        }
+                    } else if (animation_time < event_time) {
+                        if (packet->previous_time >= event_time) {
+                            active = 1;
+                        }
+                    } else if ((packet->flags & ANIMPACKET_FLAG_LOOPED) != 0 &&
+                               packet->previous_time > animation_time && packet->previous_time >= event_time) {
+                        active = 1;
+                    }
+                }
+            }
+            if (active == 0) {
+                continue;
+            }
+
+            NUVEC position = {0.0f, 0.0f, 0.0f};
+            NUVEC locator_positions[16];
+            i32 locator_indices[16];
+            i32 locator_count = 0;
+            i32 position_count = 0;
+            for (i32 locator = 0; locator < 16; ++locator) {
+                if ((effect->locators & (1 << locator)) == 0 || model->points_of_interest[locator] == NULL) {
+                    continue;
+                }
+                locator_indices[locator_count] = locator;
+                locator_positions[locator_count] = *NUMTX_GET_ROW_VEC(&locator_matrices[locator], 3);
+                if (locator_count == 0 || (flags & 0x800) != 0) {
+                    NuVecAdd(&position, &position, &locator_positions[locator_count]);
+                }
+                ++locator_count;
+            }
+            if (locator_count > 0 && (flags & 0x800) != 0) {
+                NuVecScale(&position, &position, 1.0f / static_cast<f32>(locator_count));
+            }
+            position_count = locator_count;
+            if ((flags & 0x1000) != 0 && object != NULL) {
+                position.x = object->apiobj.position.x;
+                position.y = object->apiobj.collision_min.y;
+                position.z = object->apiobj.position.z;
+                position_count = 1;
+                locator_count = 0;
+            }
+            if (object != NULL) {
+                if (position_count == 0) {
+                    position = object->apiobj.position;
+                    position_count = 1;
+                }
+                if ((flags & 0x2000) != 0 && object->apiobj.field_0x218 != 2000000.0f) {
+                    position.y = object->apiobj.field_0x218;
+                    if (locator_count != 0) {
+                        for (i32 i = 0; i < locator_count; ++i) {
+                            locator_positions[i].y = object->apiobj.field_0x218;
+                        }
+                    }
+                } else if ((flags & 0x4000) != 0 && object->apiobj.water_height != 2000000.0f) {
+                    position.y = object->apiobj.water_height;
+                    if (locator_count != 0) {
+                        for (i32 i = 0; i < locator_count; ++i) {
+                            locator_positions[i].y = object->apiobj.water_height;
+                        }
+                    }
+                }
+            }
+
+            if (footprint_callback != NULL && locator_count == 0 && (flags & 0x03000000) != 0) {
+                footprint_callback(&object->apiobj.position, object, flags & 0x01000000, 1);
+            } else if (footprint_callback != NULL && position_count > 0 && (flags & 0x03000000) != 0) {
+                for (i32 i = 0; i < locator_count; ++i) {
+                    const i32 locator = locator_indices[i];
+                    if (object->apiobj.character_model->points_of_interest[locator] != NULL) {
+                        footprint_callback(&locator_matrices[locator], object, flags & 0x01000000, 0);
+                    }
+                }
+            }
+
+            if (object != NULL) {
+                object->apiobj.field_0x285 |= effect->bits_on;
+                object->apiobj.field_0x285 &= ~effect->bits_off;
+            }
+            if (position_count > 0 && object != NULL &&
+                (((flags & 0x40) != 0 && object->apiobj.is_underwater != 0) ||
+                 ((flags & 0x20) != 0 && object->apiobj.is_underwater == 0))) {
+                continue;
+            }
+
+            bool speed_rejected = false;
+            if (object != NULL) {
+                if ((flags & 0x100000) != 0) {
+                    speed_rejected = effect->minimum > object->apiobj.velocity_magnitude;
+                } else if ((flags & 0x40000) != 0) {
+                    speed_rejected = effect->minimum > object->apiobj.horizontal_velocity_magnitude;
+                }
+                if ((flags & 0x200000) != 0) {
+                    speed_rejected |= object->apiobj.velocity_magnitude > effect->maximum;
+                } else if ((flags & 0x80000) != 0) {
+                    speed_rejected |= object->apiobj.horizontal_velocity_magnitude > effect->maximum;
+                }
+            }
+
+            if (!speed_rejected && position_count > 0 && effect->debris_id != -1 &&
+                effect->debris_id < debris_sys->capacity) {
+                if ((flags & 1) != 0) {
+                    i32 count = effect->particle_rate > 0.0f
+                                    ? ((flags & 0x800000) != 0 ? ParticlesPerSecond(effect->particle_rate, frame_time)
+                                                              : ParticlesPerFrame(effect->particle_rate, frame_time))
+                                    : effect->particle_count;
+                    if (count < 0) {
+                        count = 1;
+                    }
+                    if (count > 0 && (effect->random == 0 || (NuRandInt() >> 16) <= (effect->random << 8))) {
+                        if ((flags & 0x1000) != 0 || (flags & 0x800) != 0 || locator_count == 0) {
+                            if ((flags & 0x400000) != 0 && object != NULL) {
+                                AddGameDebrisMom(debris_sys, effect->debris_id, &position, count,
+                                                 &object->apiobj.velocity);
+                            } else {
+                                AddGameDebrisRot(debris_sys, effect->debris_id, &position, count, 0, 0);
+                            }
+                        } else {
+                            for (i32 i = 0; i < locator_count; ++i) {
+                                if ((flags & 0x400000) != 0 && object != NULL) {
+                                    NUVEC velocity;
+                                    NuVecSub(&velocity, &object->apiobj.position, &object->apiobj.start_position);
+                                    NuVecScale(&velocity, &velocity, 1.0f / frame_time);
+                                    AddGameDebrisMom(debris_sys, effect->debris_id, &locator_positions[i], count,
+                                                     &velocity);
+                                } else if ((flags & 0x4000000) != 0) {
+                                    AddGameDebrisMtx(debris_sys, effect->debris_id, &locator_positions[i], count,
+                                                     &locator_matrices[i]);
+                                } else {
+                                    AddGameDebrisRot(debris_sys, effect->debris_id, &locator_positions[i], count, 0, 0);
+                                }
+                            }
+                        }
+                    }
+                } else if ((flags & 0x1000) != 0 || (flags & 0x800) != 0) {
+                    AddGameDebris(debris_sys, effect->debris_id, &position);
+                } else if (locator_count != 0) {
+                    for (i32 i = 0; i < position_count; ++i) {
+                        AddGameDebris(debris_sys, effect->debris_id, &locator_positions[i]);
+                    }
+                } else {
+                    AddGameDebris(debris_sys, effect->debris_id, &position);
+                }
+            }
+            if (APIObjPlaySfxByIdFn != NULL && object != NULL && effect->sound_id != -1) {
+                APIObjPlaySfxByIdFn(effect->sound_id,
+                                    (flags & 0x8000) != 0 ? &object->apiobj.collision_position : NULL);
+            }
+        }
+    }
+
     void NuHGobjRestrictEvaluation(nuhgobj_s *object) {
         Temphgobj = object;
         if (object != NULL) {
@@ -1716,12 +2269,13 @@ extern "C" {
     }
 
     // Original @0x3d0563. Hierarchy evaluation, DWA, locator storage, character
-    // surface effects, transparency and reflection. The AddAnimEffects branch
-    // still awaits reconstruction of its animation-event helper.
-    i32 APIDrawCharacterModel(CHARACTERMODEL_s *model, CHARACTERDATA *, ANIMPACKET_s *animation, NUMTX *matrix, NUMTX *,
+    // surface effects, transparency and reflection.
+    i32 APIDrawCharacterModel(CHARACTERMODEL_s *model, CHARACTERDATA *character_data, ANIMPACKET_s *animation, NUMTX *matrix, NUMTX *,
                               NUMTX *reflection_matrix, NUVEC *locator_positions, NUMTX *locator_matrices,
                               GameObject_s *object, u32 flags, NUJOINTANIM_s *joint_overrides, i32 joint_override_count,
-                              WORLDINFO_s *, f32, NUMTX *output_matrices, i32, void *) {
+                              WORLDINFO_s *world, f32 frame_time, NUMTX *output_matrices,
+                              void (*footprint_callback)(void *, GameObject_s *, i32, i32),
+                              APIDEBRISSYS_s *debris_sys) {
         drawcharactermodel_locatorsupdated = 0;
         if (model == NULL)
             return 0;
@@ -1931,6 +2485,13 @@ extern "C" {
             }
             StoreLocatorCoordinates(model, matrix, output_matrices, locator_positions, locator_matrices);
             drawcharactermodel_locatorsupdated = 1;
+
+            if (locator_matrices != NULL && world == NULL && character_data != NULL &&
+                character_data->effects != NULL) {
+                AddAnimEffects(model, character_data, animation, locator_matrices, object,
+                               apicharsys->char_data[model->model_id].effects, world, frame_time,
+                               footprint_callback, debris_sys);
+            }
 
             const i32 render_flags = object == NULL || (object->apiobj.field_0x1f4 & 0x200) == 0;
             if (object != NULL && apicharsys != NULL && apicharsys->set_creature_lights != NULL) {

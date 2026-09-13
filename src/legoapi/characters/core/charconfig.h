@@ -4,6 +4,7 @@
 #include "nu2api/nufile/nufpar.h"
 
 struct CHARCATEGORY;
+struct APIDEBRISSYS_s;
 GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle);
 void DeactivateCharacter(char *name);
 
@@ -32,6 +33,12 @@ struct CHARACTER_EFFECT_s {
 DECOMP_ASSERT(sizeof(CHARACTER_EFFECT_s) == 0x34, "CHARACTER_EFFECT size");
 DECOMP_ASSERT(offsetof(CHARACTER_EFFECT_s, flags) == 0x14, "CHARACTER_EFFECT flags offset");
 DECOMP_ASSERT(offsetof(CHARACTER_EFFECT_s, sound_id) == 0x28, "CHARACTER_EFFECT sound offset");
+
+extern "C" void AddAnimEffects(CHARACTERMODEL_s *model, CHARACTERDATA *character_data, ANIMPACKET_s *packet,
+                                NUMTX *locator_matrices, GameObject_s *object, CHARACTER_EFFECT_s *effects,
+                                WORLDINFO_s *world_info, f32 frame_time,
+                                void (*footprint_callback)(void *, GameObject_s *, i32, i32),
+                                APIDEBRISSYS_s *debris_sys);
 
 struct CHARCONFIG_s {
     characterdata_s *character;
