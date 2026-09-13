@@ -33,28 +33,22 @@
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/nuapi.h"
 #include "nu2api/numath/nuvec.h"
 
 // ---------------------------------------------------------------------------
-// Shared render-context globals owned by this TU.
+// Renderer binding cache. Other render-context state lives in
+// nurendercontext.cpp, and material state in numtl_android.cpp.
 // ---------------------------------------------------------------------------
 
 u32 g_boundShader = 0;
 NUSHADERPROGRAM *g_currentShaderProgram = nullptr;
 numtl_s *g_boundMaterial = nullptr;
-numtl_s *g_renderContext_materialInUse = nullptr;
-numtl_s *g_LastMtl = nullptr;
+void *g_boundLightPacket = nullptr;
 usize g_boundVertexFormat = 0;
 u32 g_activeAttributes = 0;
-i32 g_renderContext_zFunc = 0;
-u32 g_alphaRef = 0;
-u32 g_alphaFunc = 0;
-i32 g_alphaTestEnabled = 0;
-u32 g_lastAlphaRef = 0;
-u32 g_lastAlphaBlend = 0;
-i32 g_renderingReflection = 0; // original bss @0x99b360 — flips cull when reflecting.
 
 // The original helper at 0x293168 updates the shared renderer cache.
 static void NuIOSBindVAO(u32 vao) {
@@ -298,6 +292,12 @@ extern "C" {
     }
 }
 
+// Original 0x293ac7: the platform error hook is a no-op in this build.
+i32 NuCheckGLErrorsFL(const char *, i32) {
+    STUBBED();
+    return 0;
+}
+
 // Original 0x293ad1, 5 bytes: deliberately empty on this platform.
 static void Nu360SetObjectShadowFactor(f32) {
 }
@@ -342,6 +342,39 @@ void NuIOSDLGeom2DCallback(void *arg) {
                                                               (const u32 *)g_nuPrimVertexFormat);
         glDrawArrays((GLenum)kPrimModes[pt], 0, (GLsizei)geom->vertex_count);
     }
+}
+
+void DumpAttributeBindings() {
+    STUBBED();
+}
+
+void MultilineDump(char const *) {
+    STUBBED();
+}
+
+void DumpShaderSource(u32) {
+    STUBBED();
+}
+
+void DumpProgramSource(u32) {
+    STUBBED();
+}
+
+void DumpShaderAttributes(u32) {
+    STUBBED();
+}
+
+// The original 0x2940a6 helper and its counter belong to this VAO family.
+static i32 g_vaoRecordCount;
+
+void NuIOS_ResetVAODuplicateFinder() {
+    g_vaoRecordCount = 0;
+}
+
+// Original 0x2940c0. The original record array/layout are still unverified.
+static i32 NuIOS_GetOrCreateVAO(u32, u32, u32, NuVertexFormatPS *) {
+    STUBBED();
+    return 0;
 }
 
 // original 0x294233 — records the material's vertex format on static geometry
@@ -597,38 +630,6 @@ void NuIOSDLFaceOnTransformCallback(void *arg) {
     }
 }
 
-extern "C" void NuRndrPspDraw(void) {
-}
-
-i32 rndr_blend_shape_deformer_wt_cnt = 0x3f00;
-i32 rndr_blend_shape_deformer_wt_ptrs_cnt = 0x800;
-static f32 rndr_blend_shape_deformer_wts[0x4000][0x21];
-static f32 *rndr_blend_shape_deformer_wt_ptrs[0x800];
-
-extern "C" f32 *NuRndrCreateBlendShapeDeformerWeightsArray(i32 count) {
-    i32 size = (count + 0x20) * sizeof(f32);
-    rndr_blend_shape_deformer_wt_cnt -= size;
-    if (rndr_blend_shape_deformer_wt_cnt < 0) {
-        return NULL;
-    }
-    f32 *weights = rndr_blend_shape_deformer_wts[rndr_blend_shape_deformer_wt_cnt];
-    memset(weights, 0, size);
-    return weights;
-}
-
-f32 **NuRndrCreateBlendShapeDWAPointers(i32 count) {
-    rndr_blend_shape_deformer_wt_ptrs_cnt -= count;
-    if (rndr_blend_shape_deformer_wt_cnt < 0) {
-        return NULL;
-    }
-    f32 **pointers = rndr_blend_shape_deformer_wt_ptrs + rndr_blend_shape_deformer_wt_ptrs_cnt;
-    return pointers;
-}
-
-void NuIOSDLKonstCallback(void *arg) {
-    NuRenderContextSetKTint(static_cast<f32 *>(arg));
-}
-
 // Original 0x294d12, 129 bytes. Two header words precede the group data.
 void NuIOSDLVertexGroupsCallback(void *arg) {
     const i32 max_groups = 32;
@@ -697,6 +698,42 @@ void NuIOSDLLightsCallback(void *arg) {
     NuShaderManagerSetfv(0x57, specular_intensity);
 }
 
+void NuIOSDLDeferredMtlCallback(void *) {
+    STUBBED();
+}
+
+extern "C" void NuRndrPspDraw(void) {
+}
+
+i32 rndr_blend_shape_deformer_wt_cnt = 0x3f00;
+i32 rndr_blend_shape_deformer_wt_ptrs_cnt = 0x800;
+static f32 rndr_blend_shape_deformer_wts[0x4000][0x21];
+static f32 *rndr_blend_shape_deformer_wt_ptrs[0x800];
+
+extern "C" f32 *NuRndrCreateBlendShapeDeformerWeightsArray(i32 count) {
+    i32 size = (count + 0x20) * sizeof(f32);
+    rndr_blend_shape_deformer_wt_cnt -= size;
+    if (rndr_blend_shape_deformer_wt_cnt < 0) {
+        return NULL;
+    }
+    f32 *weights = rndr_blend_shape_deformer_wts[rndr_blend_shape_deformer_wt_cnt];
+    memset(weights, 0, size);
+    return weights;
+}
+
+f32 **NuRndrCreateBlendShapeDWAPointers(i32 count) {
+    rndr_blend_shape_deformer_wt_ptrs_cnt -= count;
+    if (rndr_blend_shape_deformer_wt_cnt < 0) {
+        return NULL;
+    }
+    f32 **pointers = rndr_blend_shape_deformer_wt_ptrs + rndr_blend_shape_deformer_wt_ptrs_cnt;
+    return pointers;
+}
+
+void NuIOSDLKonstCallback(void *arg) {
+    NuRenderContextSetKTint(static_cast<f32 *>(arg));
+}
+
 // Original 0x2951b0. Publish the packed fog colour and range to the shader.
 void NuIOSDLFogCallback(void *arg) {
     const NUFOGSTATE *fog = static_cast<const NUFOGSTATE *>(arg);
@@ -729,12 +766,21 @@ extern "C" i32 NuRndrSetFxMtx(NUMTX *matrix) {
 extern "C" void NuWaterOverride(void) {
 }
 
+void NuRndrFlush(i32) {
+    STUBBED();
+}
+
 extern "C" void NuRndrShadowDirCol(const NUVEC *direction, u32 colour, f32 near_distance, f32 far_distance) {
 }
 
 extern "C" i32 NuRndrSetBlendData(void) {
     STUBBED();
     return 0;
+}
+
+extern "C" void NuLightFogX(f32 near_distance, f32 far_distance, u32 colour, f32, f32, i32, f32 density) {
+    NuRndrStateSetFogEnabled(1);
+    NuRndrStateSetFogState(near_distance, far_distance, colour, density);
 }
 
 // original 0x295393, 141 bytes — every face-on entry is expanded to two triangles in

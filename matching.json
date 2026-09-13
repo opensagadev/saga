@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 45.923058,
+    "fuzzy_match_percent": 45.924934,
     "total_code": "4722419",
-    "matched_code": "399753",
-    "matched_code_percent": 8.465005,
+    "matched_code": "400135",
+    "matched_code_percent": 8.473094,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4753,
-    "matched_functions_percent": 35.31466,
+    "matched_functions": 4756,
+    "matched_functions_percent": 35.336952,
     "total_units": 1
   },
   "text": {
@@ -20898,38 +20898,6 @@
       "source": "src/editor/edtoolsall.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_editor/edtoolsall.o",
       "functions": [
-        {
-          "name": "_Z21DumpAttributeBindingsv",
-          "demangled_name": "DumpAttributeBindings()",
-          "address": 2702569,
-          "offset": 1812601,
-          "size": 250,
-          "match_percent": 6.451613
-        },
-        {
-          "name": "_Z16DumpShaderSourcej",
-          "demangled_name": "DumpShaderSource(unsigned int)",
-          "address": 2702916,
-          "offset": 1812948,
-          "size": 309,
-          "match_percent": 4.761905
-        },
-        {
-          "name": "_Z17DumpProgramSourcej",
-          "demangled_name": "DumpProgramSource(unsigned int)",
-          "address": 2703225,
-          "offset": 1813257,
-          "size": 100,
-          "match_percent": 13.333333
-        },
-        {
-          "name": "_Z20DumpShaderAttributesj",
-          "demangled_name": "DumpShaderAttributes(unsigned int)",
-          "address": 2703325,
-          "offset": 1813357,
-          "size": 201,
-          "match_percent": 7.692308
-        },
         {
           "name": "_Z17cbFileSaveEffectsP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "cbFileSaveEffects(eduimenu_s*, eduiitem_s*, unsigned int)",
@@ -68538,14 +68506,6 @@
           "match_percent": 3.709678
         },
         {
-          "name": "_Z13MultilineDumpPKc",
-          "demangled_name": "MultilineDump(char const*)",
-          "address": 2702819,
-          "offset": 1812851,
-          "size": 97,
-          "match_percent": 13.125
-        },
-        {
           "name": "_Z18UnicodeToIndexFastP11vucharidx_sit",
           "demangled_name": "UnicodeToIndexFast(vucharidx_s*, int, unsigned short)",
           "address": 2923984,
@@ -86176,14 +86136,6 @@
           "match_percent": 61.136364
         },
         {
-          "name": "_ZL20NuIOS_GetOrCreateVAOjjjP16NuVertexFormatPS",
-          "demangled_name": "NuIOS_GetOrCreateVAO(unsigned int, unsigned int, unsigned int, NuVertexFormatPS*)",
-          "address": 2703552,
-          "offset": 1813584,
-          "size": 371,
-          "match_percent": 3.247863
-        },
-        {
           "name": "_ZN17NuRenderDeviceGenC1Ev",
           "demangled_name": "NuRenderDeviceGen::NuRenderDeviceGen()",
           "address": 2779072,
@@ -87688,6 +87640,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "NuRndrSetSpecularLightPS",
+          "demangled_name": "NuRndrSetSpecularLightPS",
+          "address": 2711531,
+          "offset": 1821563,
+          "size": 2032,
+          "match_percent": 99.369514
+        },
+        {
           "name": "NuRndrSwapScreen",
           "demangled_name": "NuRndrSwapScreen",
           "address": 2713563,
@@ -87701,6 +87661,14 @@
           "address": 2713736,
           "offset": 1823768,
           "size": 48,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRndrFx",
+          "demangled_name": "NuRndrFx",
+          "address": 2713784,
+          "offset": 1823816,
+          "size": 97,
           "match_percent": 100.0
         },
         {
@@ -87764,7 +87732,7 @@
           "address": 2700209,
           "offset": 1810241,
           "size": 215,
-          "match_percent": 99.81481
+          "match_percent": 100.0
         },
         {
           "name": "NuIOS_GetAlphaTestParameters",
@@ -87807,6 +87775,14 @@
           "match_percent": 83.72
         },
         {
+          "name": "_Z17NuCheckGLErrorsFLPKci",
+          "demangled_name": "NuCheckGLErrorsFL(char const*, int)",
+          "address": 2702023,
+          "offset": 1812055,
+          "size": 10,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL26Nu360SetObjectShadowFactorf",
           "demangled_name": "Nu360SetObjectShadowFactor(float)",
           "address": 2702033,
@@ -87821,6 +87797,62 @@
           "offset": 1812070,
           "size": 531,
           "match_percent": 38.08397
+        },
+        {
+          "name": "_Z21DumpAttributeBindingsv",
+          "demangled_name": "DumpAttributeBindings()",
+          "address": 2702569,
+          "offset": 1812601,
+          "size": 250,
+          "match_percent": 6.451613
+        },
+        {
+          "name": "_Z13MultilineDumpPKc",
+          "demangled_name": "MultilineDump(char const*)",
+          "address": 2702819,
+          "offset": 1812851,
+          "size": 97,
+          "match_percent": 12.5
+        },
+        {
+          "name": "_Z16DumpShaderSourcej",
+          "demangled_name": "DumpShaderSource(unsigned int)",
+          "address": 2702916,
+          "offset": 1812948,
+          "size": 309,
+          "match_percent": 4.761905
+        },
+        {
+          "name": "_Z17DumpProgramSourcej",
+          "demangled_name": "DumpProgramSource(unsigned int)",
+          "address": 2703225,
+          "offset": 1813257,
+          "size": 100,
+          "match_percent": 13.333333
+        },
+        {
+          "name": "_Z20DumpShaderAttributesj",
+          "demangled_name": "DumpShaderAttributes(unsigned int)",
+          "address": 2703325,
+          "offset": 1813357,
+          "size": 201,
+          "match_percent": 7.692308
+        },
+        {
+          "name": "_Z29NuIOS_ResetVAODuplicateFinderv",
+          "demangled_name": "NuIOS_ResetVAODuplicateFinder()",
+          "address": 2703526,
+          "offset": 1813558,
+          "size": 26,
+          "match_percent": 99.85714
+        },
+        {
+          "name": "_ZL20NuIOS_GetOrCreateVAOjjjP16NuVertexFormatPS",
+          "demangled_name": "NuIOS_GetOrCreateVAO(unsigned int, unsigned int, unsigned int, NuVertexFormatPS*)",
+          "address": 2703552,
+          "offset": 1813584,
+          "size": 371,
+          "match_percent": 3.760684
         },
         {
           "name": "_Z26NuIOSDLPreWarmGeomCallbackPv",
@@ -87911,6 +87943,14 @@
           "match_percent": 51.014927
         },
         {
+          "name": "_Z26NuIOSDLDeferredMtlCallbackPv",
+          "demangled_name": "NuIOSDLDeferredMtlCallback(void*)",
+          "address": 2707634,
+          "offset": 1817666,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
           "name": "NuRndrPspDraw",
           "demangled_name": "NuRndrPspDraw",
           "address": 2707639,
@@ -87967,6 +88007,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z11NuRndrFlushi",
+          "demangled_name": "NuRndrFlush(int)",
+          "address": 2708281,
+          "offset": 1818313,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
           "name": "NuRndrShadowDirCol",
           "demangled_name": "NuRndrShadowDirCol",
           "address": 2708286,
@@ -87980,6 +88028,14 @@
           "address": 2708291,
           "offset": 1818323,
           "size": 10,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuLightFogX",
+          "demangled_name": "NuLightFogX",
+          "address": 2708301,
+          "offset": 1818333,
+          "size": 70,
           "match_percent": 100.0
         },
         {
@@ -88076,21 +88132,6 @@
           "address": 2711395,
           "offset": 1821427,
           "size": 29,
-          "match_percent": 100.0
-        }
-      ]
-    },
-    {
-      "name": "nu2api/nu3d/android/nurndr_android_cpp.cpp.o",
-      "source": "src/nu2api/nu3d/android/nurndr_android_cpp.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nurndr_android_cpp.o",
-      "functions": [
-        {
-          "name": "_Z11NuRndrFlushi",
-          "demangled_name": "NuRndrFlush(int)",
-          "address": 2708281,
-          "offset": 1818313,
-          "size": 5,
           "match_percent": 100.0
         }
       ]
@@ -90297,6 +90338,77 @@
       ]
     },
     {
+      "name": "nu2api/nu3d/nurendercontext.cpp.o",
+      "source": "src/nu2api/nu3d/nurendercontext.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nurendercontext.o",
+      "functions": [
+        {
+          "name": "NuRenderContextInit",
+          "demangled_name": "NuRenderContextInit",
+          "address": 2765008,
+          "offset": 1875040,
+          "size": 762,
+          "match_percent": 65.381165
+        },
+        {
+          "name": "NuRenderContextSetViewport",
+          "demangled_name": "NuRenderContextSetViewport",
+          "address": 2765776,
+          "offset": 1875808,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRenderContextSetViewProj",
+          "demangled_name": "NuRenderContextSetViewProj",
+          "address": 2765792,
+          "offset": 1875824,
+          "size": 1124,
+          "match_percent": 58.929203
+        },
+        {
+          "name": "_Z34NuRenderContextForceSamplerStatePSiPK17d3dsamplerstate_u",
+          "demangled_name": "NuRenderContextForceSamplerStatePS(int, d3dsamplerstate_u const*)",
+          "address": 2766928,
+          "offset": 1876960,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRenderContextSetZFunc",
+          "demangled_name": "NuRenderContextSetZFunc",
+          "address": 2766944,
+          "offset": 1876976,
+          "size": 241,
+          "match_percent": 86.01852
+        },
+        {
+          "name": "NuRenderContextSetAlphaBlend",
+          "demangled_name": "NuRenderContextSetAlphaBlend",
+          "address": 2767200,
+          "offset": 1877232,
+          "size": 393,
+          "match_percent": 6.4
+        },
+        {
+          "name": "NuRenderContext360BeginGameTime",
+          "demangled_name": "NuRenderContext360BeginGameTime",
+          "address": 2767600,
+          "offset": 1877632,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuRenderContext360EndGameTime",
+          "demangled_name": "NuRenderContext360EndGameTime",
+          "address": 2767616,
+          "offset": 1877648,
+          "size": 9,
+          "match_percent": 100.0
+        }
+      ]
+    },
+    {
       "name": "nu2api/nu3d/nurndr.cpp.o",
       "source": "src/nu2api/nu3d/nurndr.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/1/nurndr.o",
@@ -90420,14 +90532,6 @@
       "source": "src/nu2api/nu3d/nurndr_plain.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nurndr_plain.o",
       "functions": [
-        {
-          "name": "NuRndrFx",
-          "demangled_name": "NuRndrFx",
-          "address": 2713784,
-          "offset": 1823816,
-          "size": 97,
-          "match_percent": 72.0
-        },
         {
           "name": "NuShaderGetDirtyMask",
           "demangled_name": "NuShaderGetDirtyMask",
@@ -91059,21 +91163,6 @@
           "offset": 2295968,
           "size": 131,
           "match_percent": 100.0
-        }
-      ]
-    },
-    {
-      "name": "nu2api/nu3d/nurndr_specular.cpp.o",
-      "source": "src/nu2api/nu3d/nurndr_specular.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nurndr_specular.o",
-      "functions": [
-        {
-          "name": "NuRndrSetSpecularLightPS",
-          "demangled_name": "NuRndrSetSpecularLightPS",
-          "address": 2711531,
-          "offset": 1821563,
-          "size": 2032,
-          "match_percent": 99.369514
         }
       ]
     },
@@ -92157,21 +92246,6 @@
           "address": 3240896,
           "offset": 2350928,
           "size": 91,
-          "match_percent": 100.0
-        }
-      ]
-    },
-    {
-      "name": "nu2api/nuandroid/ios_graphics_stubs.cpp.o",
-      "source": "src/nu2api/nuandroid/ios_graphics_stubs.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/ios_graphics_stubs.o",
-      "functions": [
-        {
-          "name": "_Z17NuCheckGLErrorsFLPKci",
-          "demangled_name": "NuCheckGLErrorsFL(char const*, int)",
-          "address": 2702023,
-          "offset": 1812055,
-          "size": 10,
           "match_percent": 100.0
         }
       ]
@@ -95167,14 +95241,6 @@
           "match_percent": 65.46667
         },
         {
-          "name": "_Z29NuIOS_ResetVAODuplicateFinderv",
-          "demangled_name": "NuIOS_ResetVAODuplicateFinder()",
-          "address": 2703526,
-          "offset": 1813558,
-          "size": 26,
-          "match_percent": 19.857143
-        },
-        {
           "name": "_Z32NuIOS_CreateGLTexFromPVRInMemoryPvPiS0_",
           "demangled_name": "NuIOS_CreateGLTexFromPVRInMemory(void*, int*, int*)",
           "address": 2746288,
@@ -95189,14 +95255,6 @@
           "offset": 1864877,
           "size": 58,
           "match_percent": 23.333334
-        },
-        {
-          "name": "_Z34NuRenderContextForceSamplerStatePSiPK17d3dsamplerstate_u",
-          "demangled_name": "NuRenderContextForceSamplerStatePS(int, d3dsamplerstate_u const*)",
-          "address": 2766928,
-          "offset": 1876960,
-          "size": 9,
-          "match_percent": 100.0
         },
         {
           "name": "_Z29NuIOS_CopyBackbufferToTextureP13nunativetex_sb",
@@ -95500,14 +95558,6 @@
           "offset": 1665934,
           "size": 10,
           "match_percent": 80.0
-        },
-        {
-          "name": "_Z26NuIOSDLDeferredMtlCallbackPv",
-          "demangled_name": "NuIOSDLDeferredMtlCallback(void*)",
-          "address": 2707634,
-          "offset": 1817666,
-          "size": 5,
-          "match_percent": 100.0
         },
         {
           "name": "_Z28NuDisplayListSetInstSurfGeomPv",
@@ -96446,7 +96496,7 @@
           "address": 3068496,
           "offset": 2178528,
           "size": 697,
-          "match_percent": 77.23404
+          "match_percent": 77.30496
         },
         {
           "name": "_ZN19NuDeferredFilterGen6renderEv",
@@ -97231,14 +97281,6 @@
           "match_percent": 5.111111
         },
         {
-          "name": "NuLightFogX",
-          "demangled_name": "NuLightFogX",
-          "address": 2708301,
-          "offset": 1818333,
-          "size": 70,
-          "match_percent": 44.857143
-        },
-        {
           "name": "NuSpecialDrawAtAlpha",
           "demangled_name": "NuSpecialDrawAtAlpha",
           "address": 2754177,
@@ -97469,62 +97511,6 @@
           "offset": 1872688,
           "size": 15,
           "match_percent": 68.57143
-        },
-        {
-          "name": "NuRenderContextInit",
-          "demangled_name": "NuRenderContextInit",
-          "address": 2765008,
-          "offset": 1875040,
-          "size": 762,
-          "match_percent": 65.381165
-        },
-        {
-          "name": "NuRenderContextSetViewport",
-          "demangled_name": "NuRenderContextSetViewport",
-          "address": 2765776,
-          "offset": 1875808,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuRenderContextSetViewProj",
-          "demangled_name": "NuRenderContextSetViewProj",
-          "address": 2765792,
-          "offset": 1875824,
-          "size": 1124,
-          "match_percent": 58.929203
-        },
-        {
-          "name": "NuRenderContextSetZFunc",
-          "demangled_name": "NuRenderContextSetZFunc",
-          "address": 2766944,
-          "offset": 1876976,
-          "size": 241,
-          "match_percent": 85.92593
-        },
-        {
-          "name": "NuRenderContextSetAlphaBlend",
-          "demangled_name": "NuRenderContextSetAlphaBlend",
-          "address": 2767200,
-          "offset": 1877232,
-          "size": 393,
-          "match_percent": 6.4
-        },
-        {
-          "name": "NuRenderContext360BeginGameTime",
-          "demangled_name": "NuRenderContext360BeginGameTime",
-          "address": 2767600,
-          "offset": 1877632,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuRenderContext360EndGameTime",
-          "demangled_name": "NuRenderContext360EndGameTime",
-          "address": 2767616,
-          "offset": 1877648,
-          "size": 9,
-          "match_percent": 100.0
         },
         {
           "name": "NuOcclusionManagerIsInitialised",
@@ -117440,10 +117426,10 @@
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
         "nu2api/nu3d/nucamera.cpp.o",
         "nu2api/nu3d/nufadeobj.cpp.o",
-        "nu2api/nu3d/nurndr_specular.cpp.o",
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
@@ -118170,10 +118156,10 @@
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
         "nu2api/nu3d/nucamera.cpp.o",
         "nu2api/nu3d/nufadeobj.cpp.o",
-        "nu2api/nu3d/nurndr_specular.cpp.o",
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
@@ -118206,10 +118192,10 @@
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
         "nu2api/nu3d/nucamera.cpp.o",
         "nu2api/nu3d/nufadeobj.cpp.o",
-        "nu2api/nu3d/nurndr_specular.cpp.o",
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
@@ -118781,34 +118767,11 @@
       "size": 50,
       "match_percent": 100.0,
       "candidate_units": [
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gamelib/nuwind/nuwind_groups.cpp.o",
-        "globals.cpp.o",
-        "legoapi/ai/core/ai_sys.cpp.o",
-        "legoapi/core/config/config.cpp.o",
-        "legoapi/core/config/saveload.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
-        "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
         "nu2api/nu3d/android/nudlist_android.c.o",
-        "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuprim_android.c.o",
-        "nu2api/nu3d/android/nuptl_android.c.o",
-        "nu2api/nu3d/android/nurndr.c.o",
-        "nu2api/nu3d/android/nurndr_android.c.o",
-        "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nubridge.cpp.o",
-        "nu2api/nu3d/nudlist_stubs.cpp.o",
-        "nu2api/nu3d/nufadeobj.cpp.o",
-        "nu2api/nu3d/nuprim.cpp.o",
-        "nu2api/nucore/android/nuapi_android.cpp.o",
-        "nu2api/nucore/nuapi.cpp.o"
+        "nu2api/nu3d/android/nuptl_android.c.o"
       ]
     },
     {
@@ -118997,34 +118960,11 @@
       "size": 50,
       "match_percent": 100.0,
       "candidate_units": [
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gamelib/nuwind/nuwind_groups.cpp.o",
-        "globals.cpp.o",
-        "legoapi/ai/core/ai_sys.cpp.o",
-        "legoapi/core/config/config.cpp.o",
-        "legoapi/core/config/saveload.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
-        "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
         "nu2api/nu3d/android/nudlist_android.c.o",
-        "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuprim_android.c.o",
-        "nu2api/nu3d/android/nuptl_android.c.o",
-        "nu2api/nu3d/android/nurndr.c.o",
-        "nu2api/nu3d/android/nurndr_android.c.o",
-        "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nubridge.cpp.o",
-        "nu2api/nu3d/nudlist_stubs.cpp.o",
-        "nu2api/nu3d/nufadeobj.cpp.o",
-        "nu2api/nu3d/nuprim.cpp.o",
-        "nu2api/nucore/android/nuapi_android.cpp.o",
-        "nu2api/nucore/nuapi.cpp.o"
+        "nu2api/nu3d/android/nuptl_android.c.o"
       ]
     },
     {
@@ -119153,34 +119093,11 @@
       "size": 50,
       "match_percent": 100.0,
       "candidate_units": [
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gamelib/nuwind/nuwind_groups.cpp.o",
-        "globals.cpp.o",
-        "legoapi/ai/core/ai_sys.cpp.o",
-        "legoapi/core/config/config.cpp.o",
-        "legoapi/core/config/saveload.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
-        "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
         "nu2api/nu3d/android/nudlist_android.c.o",
-        "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuprim_android.c.o",
-        "nu2api/nu3d/android/nuptl_android.c.o",
-        "nu2api/nu3d/android/nurndr.c.o",
-        "nu2api/nu3d/android/nurndr_android.c.o",
-        "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nubridge.cpp.o",
-        "nu2api/nu3d/nudlist_stubs.cpp.o",
-        "nu2api/nu3d/nufadeobj.cpp.o",
-        "nu2api/nu3d/nuprim.cpp.o",
-        "nu2api/nucore/android/nuapi_android.cpp.o",
-        "nu2api/nucore/nuapi.cpp.o"
+        "nu2api/nu3d/android/nuptl_android.c.o"
       ]
     },
     {
@@ -119608,34 +119525,11 @@
       "size": 50,
       "match_percent": 100.0,
       "candidate_units": [
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gamelib/nuwind/nuwind_groups.cpp.o",
-        "globals.cpp.o",
-        "legoapi/ai/core/ai_sys.cpp.o",
-        "legoapi/core/config/config.cpp.o",
-        "legoapi/core/config/saveload.cpp.o",
-        "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
-        "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/things.cpp.o",
         "legoapi/misc/supportall_stubs.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
         "nu2api/nu3d/android/nudlist_android.c.o",
-        "nu2api/nu3d/android/nugscn_android.cpp.o",
-        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuprim_android.c.o",
-        "nu2api/nu3d/android/nuptl_android.c.o",
-        "nu2api/nu3d/android/nurndr.c.o",
-        "nu2api/nu3d/android/nurndr_android.c.o",
-        "nu2api/nu3d/glutils.c.o",
-        "nu2api/nu3d/nubridge.cpp.o",
-        "nu2api/nu3d/nudlist_stubs.cpp.o",
-        "nu2api/nu3d/nufadeobj.cpp.o",
-        "nu2api/nu3d/nuprim.cpp.o",
-        "nu2api/nucore/android/nuapi_android.cpp.o",
-        "nu2api/nucore/nuapi.cpp.o"
+        "nu2api/nu3d/android/nuptl_android.c.o"
       ]
     },
     {
@@ -120217,10 +120111,10 @@
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
         "nu2api/nu3d/nucamera.cpp.o",
         "nu2api/nu3d/nufadeobj.cpp.o",
-        "nu2api/nu3d/nurndr_specular.cpp.o",
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
@@ -121240,10 +121134,10 @@
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
         "nu2api/nu3d/nucamera.cpp.o",
         "nu2api/nu3d/nufadeobj.cpp.o",
-        "nu2api/nu3d/nurndr_specular.cpp.o",
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
@@ -121401,10 +121295,10 @@
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
         "nu2api/nu3d/nucamera.cpp.o",
         "nu2api/nu3d/nufadeobj.cpp.o",
-        "nu2api/nu3d/nurndr_specular.cpp.o",
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
@@ -121437,10 +121331,10 @@
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
         "nu2api/nu3d/nucamera.cpp.o",
         "nu2api/nu3d/nufadeobj.cpp.o",
-        "nu2api/nu3d/nurndr_specular.cpp.o",
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
@@ -121613,10 +121507,10 @@
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
         "nu2api/nu3d/nucamera.cpp.o",
         "nu2api/nu3d/nufadeobj.cpp.o",
-        "nu2api/nu3d/nurndr_specular.cpp.o",
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
@@ -121649,10 +121543,10 @@
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
+        "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
         "nu2api/nu3d/nucamera.cpp.o",
         "nu2api/nu3d/nufadeobj.cpp.o",
-        "nu2api/nu3d/nurndr_specular.cpp.o",
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
@@ -129431,7 +129325,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 510,
+    "bazel_units": 508,
     "functions": 13454,
     "assigned_functions": 12349,
     "ambiguous_functions": 216,

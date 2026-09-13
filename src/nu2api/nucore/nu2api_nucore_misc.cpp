@@ -74,8 +74,6 @@ void NuWindFreeGrp(NuWindGType *group) {
     }
 }
 
-
-
 void NuFntFindStart(nutex_s *, i32 *, i32 *, i32, i32) {
     STUBBED();
 }
@@ -481,18 +479,12 @@ void NuGCutRigidCalcMtx_3(NUGCUTRIGID_s *rigid, float frame, numtx_s *mtx) {
     NuMtxTranslate(mtx, reinterpret_cast<NUVEC *>(&rigid->base_matrix.m30));
 }
 
-
 // NuIOSDLGeom2DCallback is transcribed in android/nuiosdl_gl.cpp (original 0x29d1a0).
 
 i32 NuIOS_GetInAppProduct(i32, NuIOS_InAppProduct *) {
     STUBBED();
     return 0;
 }
-
-
-
-
-
 
 void NuGCutCharAnimProcess_3(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, i32 *visible, u32 *animation_index,
                              f32 *animation_rate, f32 *blend_time, f32 *animation_start_frame, i32 *layer_mask) {
@@ -546,8 +538,6 @@ void NuGCutCharAnimProcess_3(NUGCUTCHAR_s *character, f32 frame, NUMTX *matrix, 
     }
 }
 
-
-
 i32 NuIOS_GetPurchaseResult() {
     STUBBED();
     return 0;
@@ -566,11 +556,9 @@ i32 NuIOS_IsProductPurchased(char *) {
     return 0;
 }
 
-
 void NuGCutRigidForceInstanced(NUGCUTSCENE_s *) {
     STUBBED();
 }
-
 
 i32 NuIOS_GetInAppProductByID(char *, NuIOS_InAppProduct *) {
     STUBBED();
@@ -584,7 +572,6 @@ void NuIOS_GetShaderProgramKey(ShaderObjectKey const &) {
 void NuSpecialFindByPlatformID(nugscn_s *, nuhspecial_s *, i32) {
     STUBBED();
 }
-
 
 void NuIOS_GetNumInAppPurchases() {
     STUBBED();
@@ -628,13 +615,11 @@ void NuIOS_RestoreInAppPurchases() {
     STUBBED();
 }
 
-
 void NuCameraTransformScissorClip(nuvec_s *, nuvec_s *, i32, numtx_s *) {
     STUBBED();
 }
 
 // NuDebrisRendererFlushBuffers is transcribed in android/nuptl_android.c (original 0x296f35).
-
 
 void NuIOS_CopyBackbufferToTexture(nunativetex_s *texture, bool) {
     texture->width = g_backingWidth;
@@ -650,12 +635,6 @@ void NuIOS_CopyBackbufferToTexture(nunativetex_s *texture, bool) {
 i32 NuIOS_IsProductPurchasedByNum(i32) {
     STUBBED();
     return 0;
-}
-
-static i32 g_vaoRecordCount;
-
-void NuIOS_ResetVAODuplicateFinder() {
-    g_vaoRecordCount = 0;
 }
 
 void NuIOS_CateInAppPurchaseManager() {
@@ -675,7 +654,6 @@ i32 NuIOS_PurchaseInAppProductByNum(i32) {
     STUBBED();
     return 0;
 }
-
 
 i32 NuIOS_AreInAppPurchasesAvailable() {
     STUBBED();
@@ -812,13 +790,7 @@ GLuint NuIOS_CreateGLTexFromPVRInMemory(void *data, i32 *out_width, i32 *out_hei
     return texture;
 }
 
-
 void NuDynamicLightTestShadowExtrusions(nudynamiclight_s *, _vuv_s const *, _vuv_s const *, i32 *) {
-    STUBBED();
-}
-
-
-void NuRenderContextForceSamplerStatePS(i32, d3dsamplerstate_u const *) {
     STUBBED();
 }
 

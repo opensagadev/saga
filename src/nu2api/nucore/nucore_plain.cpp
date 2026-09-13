@@ -1,4 +1,4 @@
-// Nucore plain — C-linkage surface for the original libTTapp.so nucore TU.
+// Temporary C-linkage compatibility surface for unresolved engine owners.
 #include "nu2api/nu3d/nulgtlaser.h"
 #include "nu2api/nu3d/nuprim.h"
 #include "nu2api/numath/nuvec4.h"
@@ -8,31 +8,9 @@ extern "C" {
 }
 #include "nu2api/nucore/nuonline.h"
 //
-// This file provides the C-callable export table that the original binary
-// exposes from its single large nucore translation unit. Every symbol below
-// is present in the ELF dynamic symbol table; the few with non-trivial
-// bodies are faithful transcriptions (original addresses cited inline) while
-// the remainder are pending-transcription stand-ins that preserve link
-// compatibility until their real bodies land in a domain file.
-//
-// Faithfully transcribed in this TU:
-//   NuDisplayListInit              → android/nudlist_android.c @0x29ab93
-//   NuDisplayListLinkMtl           @0x2e8cc0 — minimal 2D-path mtl link
-//   NuCameraSet                    via NuCameraSetEx(cam,0) (matrix work stubbed)
-//   NuIOS_GetAspectRatio           inline ratio from nuapi screen dims
-//   NuIOS_GetDeviceLanguage        @0xe3640  — exact locale ladder
-//   NuFrameEnd                     @0x2e??? — frame pacing + swap + pad tick
-// Transcribed elsewhere (stub removed here, comment left as breadcrumb):
-//   Nu360_dxClear                  → nuposteffect_plain.cpp  @0x317070
-//   NuDisplayListSwapBuffers*      → nudlist.cpp             @0x2eb5d0/0x2eaef0
-//   NuHtmlBegin                    → legoapi/misc/supportall @0x2d5ca0
-//   NuIOS_SetVertexFormat          → nuiosdl_gl.cpp          @0x29c070
-//   NuIOS_Wait/WakeRenderThread    → ios_graphics.cpp        @0xe34b0/0xe3590
-//   NuRenderContextSetZFunc        → this TU pending context extraction @0x2a3860
-//
-// The remaining ~350 symbols are grouped by subsystem below so a reader can
-// tell at a glance which domain still needs decompilation. Each group is
-// alphabetical; every stub is an empty body that matches the original linkage.
+// This file collects functions whose original TU has not yet been
+// reconstructed. Domain families move to their evidenced owner as complete
+// groups; this file is not itself evidence of one original nucore TU.
 
 #include <string.h>
 #include <stdarg.h>
@@ -2686,10 +2664,6 @@ extern "C" {
     static void NuFramebufferSwapBuffers(void) {
         STUBBED();
     }
-    void NuLightFogX(f32 near_distance, f32 far_distance, u32 colour, f32, f32, i32, f32 density) {
-        NuRndrStateSetFogEnabled(1);
-        NuRndrStateSetFogState(near_distance, far_distance, colour, density);
-    }
     i32 speedblur_enabled = 1;
     f32 NuLightsx, NuLightsy;
     void NuLightSpeedBlur(i32 reuse_camera, f32 scale) {
@@ -2985,129 +2959,6 @@ extern "C" {
     }
     void NuPostBloom(i32, const NuBloomParameters *parameters) {
         currentScene.bloom = *parameters;
-    }
-    // Original 0x2a3860, in the render-context run.
-    void NuRenderContextSetZFunc(i32 zfunc) {
-        if (zfunc == g_renderContext_zFunc) {
-            return;
-        }
-
-        switch (zfunc) {
-            case 0: // depth test + write, LEQUAL
-                glEnable(GL_DEPTH_TEST);
-                glDepthMask(GL_TRUE);
-                glDepthFunc(GL_LEQUAL);
-                break;
-            case 1: // depth test, no write (decal / transparent)
-                glEnable(GL_DEPTH_TEST);
-                glDepthMask(GL_FALSE);
-                glDepthFunc(GL_LEQUAL);
-                break;
-            case 2: // no depth test, write enabled
-                glDisable(GL_DEPTH_TEST);
-                glDepthMask(GL_TRUE);
-                break;
-            case 3: // no depth test, no write (UI / 2D)
-                glDisable(GL_DEPTH_TEST);
-                glDepthMask(GL_FALSE);
-                break;
-            default:
-                break;
-        }
-        g_renderContext_zFunc = zfunc;
-    }
-
-    void NuRenderContextInit(void) {
-        extern f32 g_renderContext_viewProj[16];
-        extern f32 g_renderContext_view[16];
-        extern f32 g_renderContext_projection[16];
-        extern f32 g_renderContext_world[16];
-        memcpy(g_renderContext_viewProj, &numtx_identity, sizeof(numtx_identity));
-        memcpy(g_renderContext_view, &numtx_identity, sizeof(numtx_identity));
-        memcpy(g_renderContext_projection, &numtx_identity, sizeof(numtx_identity));
-        memcpy(g_renderContext_world, &numtx_identity, sizeof(numtx_identity));
-    }
-    void NuRenderContext360BeginGameTime(void) {
-        STUBBED();
-    }
-    void NuRenderContext360EndGameTime(void) {
-        STUBBED();
-    }
-    void NuRenderContextSetAlphaBlend(void) {
-        STUBBED();
-    }
-    SAGA_HOST_WEAK void NuRenderContextSetViewProj(NUMTX *view, NUMTX *projection) {
-        extern f32 g_renderContext_viewProj[16];
-        extern f32 g_renderContext_viewProjInverse[16];
-        extern f32 g_renderContext_view[16];
-        extern f32 g_renderContext_projection[16];
-        extern f32 g_renderContext_position[4];
-
-        NUVEC scale = {
-            g_NuVpRegion.projection_x_scale,
-            g_NuVpRegion.projection_y_scale,
-            1.0f,
-        };
-        NUVEC translation = {
-            g_NuVpRegion.projection_x_offset,
-            g_NuVpRegion.projection_y_offset,
-            0.0f,
-        };
-        NUMTX scale_mtx;
-        NUMTX translation_mtx;
-        NUMTX adjusted_projection;
-        NuMtxSetScale(&scale_mtx, &scale);
-        NuMtxSetTranslation(&translation_mtx, &translation);
-        NuMtxMulH(&adjusted_projection, projection, &scale_mtx);
-        NuMtxMulH(&adjusted_projection, &adjusted_projection, &translation_mtx);
-
-        memcpy(g_renderContext_view, view, sizeof(NUMTX));
-        memcpy(g_renderContext_projection, &adjusted_projection, sizeof(NUMTX));
-
-        NUMTX inverse_view;
-        NuMtxInv(&inverse_view, view);
-        g_renderContext_position[0] = inverse_view.m30 / inverse_view.m33;
-        g_renderContext_position[1] = inverse_view.m31 / inverse_view.m33;
-        g_renderContext_position[2] = inverse_view.m32 / inverse_view.m33;
-        g_renderContext_position[3] = 1.0f;
-
-        NuMtxMulH(reinterpret_cast<NUMTX *>(g_renderContext_viewProj), view, &adjusted_projection);
-        NuMtxInvH(reinterpret_cast<NUMTX *>(g_renderContext_viewProjInverse),
-                  reinterpret_cast<NUMTX *>(g_renderContext_viewProj));
-
-        // OpenGL's clip-space depth is [-w,+w], while the engine camera
-        // packet contains the original D3D-style [0,+w] projection.
-        NUMTX depth_remap = numtx_identity;
-        depth_remap.m22 = 2.0f;
-        depth_remap.m32 = -1.0f;
-        NuMtxMulH(reinterpret_cast<NUMTX *>(g_renderContext_viewProj),
-                  reinterpret_cast<NUMTX *>(g_renderContext_viewProj), &depth_remap);
-
-        NuShaderManagerSetfv(0x3d, g_renderContext_view);
-        NuShaderManagerSetfv(0x3e, g_renderContext_viewProj);
-        NuShaderManagerSetfv(0x56, g_renderContext_position);
-
-        f32 fov;
-        f32 aspect;
-        f32 near_clip;
-        f32 far_clip;
-        f32 perspective[4];
-        NuMtxGetPerspectiveD3D(projection, &fov, &aspect, &near_clip, &far_clip);
-        perspective[0] = near_clip;
-        perspective[1] = far_clip;
-        perspective[2] = far_clip - near_clip;
-        perspective[3] = perspective[2] / far_clip;
-        NuShaderManagerSetfv(0x49, perspective);
-
-        f32 frustum[4];
-        NuMtxGetFrustumD3D(projection, &frustum[0], &frustum[1], &frustum[2], &frustum[3], &near_clip, &far_clip);
-        frustum[1] -= frustum[0];
-        frustum[3] -= frustum[2];
-        NuShaderManagerSetfv(0x4a, frustum);
-    }
-    // Original 0x2a33d0, 9 bytes: this platform deliberately does nothing.
-    void NuRenderContextSetViewport(i32, i32, i32, i32) {
-        STUBBED();
     }
     void NuSpecialAddShadowLight(void) {
         STUBBED();

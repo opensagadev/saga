@@ -49,6 +49,16 @@ u8 DebrisGlassIOS_Tex[] = {
 
 static i32 g_DebrisGlassDistortTID;
 
+// Material render-state cache. These objects occupy the material TU's
+// original data/BSS cluster; the last-applied values start invalid.
+u32 g_lastAlphaBlend = 0xffffffffu;
+u32 g_lastAlphaRef = 0xffffffffu;
+i32 g_renderingReflection = 0;
+numtl_s *g_LastMtl = nullptr;
+i32 g_alphaTestEnabled = 0;
+u32 g_alphaFunc = 0;
+u32 g_alphaRef = 0;
+
 // Original numtl_android.cpp, 0x29c090..0x29c0fd and 0x29ca00..0x29ca2d.
 // The plane occupies bits 4..11 of the first material word.
 void NuMtlInsert(NUMTL *mtl, i32 plane) {

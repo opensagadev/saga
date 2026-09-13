@@ -29,7 +29,6 @@ extern u32 g_boundShader;
 struct nushaderprogram_s;
 extern nushaderprogram_s *g_currentShaderProgram;
 extern numtl_s *g_boundMaterial;
-extern numtl_s *g_renderContext_materialInUse;
 extern numtl_s *g_LastMtl;
 extern usize g_boundVertexFormat;
 extern NuVertexFormatPS *g_nuPrimVertexFormat;

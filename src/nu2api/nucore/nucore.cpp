@@ -22,6 +22,7 @@
 #include "nu2api/nu3d/numtl.h"
 extern "C" void DisplaySceneRndrSpecials(NUDLDLISTSCENE *, i32, void *);
 #include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/nurendercontext.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/nucore/NuMainFilter.h"
@@ -46,7 +47,6 @@ extern "C" void DisplaySceneRndrSpecials(NUDLDLISTSCENE *, i32, void *);
 #include "nu2api/numath/nuvec4.h"
 #include "nu2api/numath/nufloat.h"
 
-extern "C" f32 g_renderContext_kTint[4];
 extern const f32 nuvec4_one[4];
 extern "C" void NuShaderManagerSetfv(i32, const f32 *);
 struct VuVec {
@@ -68,9 +68,6 @@ u32 NuPostFilter::m_fullscreenGridIndexBuffer;
 i32 NuPostFilter::m_quadGridPrimCount;
 extern u32 g_lastBoundVAO;
 extern void *g_nuFullscreenVertexFormat;
-extern "C" f32 g_renderContext_projection[16];
-extern "C" f32 g_renderContext_view[16];
-extern "C" void NuRenderContextSetViewProj(NUMTX *, NUMTX *);
 extern "C" void NuFramebufferClear(u32, u32);
 extern "C" f32 NuPow(f32, f32);
 extern "C" f32 NuLog2(f32);

@@ -54,20 +54,7 @@ extern "C" {
 static VARIPTR nuspecial_vertex_offsets_safe;
 static i32 nuspecial_vertex_noffsets_safe;
 
-// Render-context accumulators reset/read by the frame tail (bss 0x119bb..).
-extern "C" {
-    f32 g_renderContext_gpuTime;
-    f32 g_renderContext_postEffectTime;
-    f32 g_renderContext_3dTime;
-    f32 g_renderContext_kTint[4];
-}
 extern const f32 nuvec4_one[4] = {1.0f, 1.0f, 1.0f, 1.0f};
-f32 g_renderContext_viewProj[16];
-f32 g_renderContext_viewProjInverse[16];
-f32 g_renderContext_view[16];
-f32 g_renderContext_projection[16];
-f32 g_renderContext_world[16];
-f32 g_renderContext_position[4];
 
 extern "C" i32 NuDynamicLightIsEnabled(void *light) {
     return light != NULL;

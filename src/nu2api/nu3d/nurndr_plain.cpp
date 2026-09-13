@@ -49,9 +49,6 @@
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nu3d/android/nuptl_android.h"
 
-extern "C" void NuLgtLaserDraw(i32 paused);
-void NuLgtArcLaserDraw(i32 paused);
-
 // ---------------------------------------------------------------------------
 // Scene state — mirrors original BSS layout
 // ---------------------------------------------------------------------------
@@ -484,13 +481,6 @@ extern "C" void NuRndrEndReflectionRender(void) {
 }
 extern "C" void NuRndrEndShadowReceiveRender(void) {
     global_GobjIsShadowReceive = 0;
-}
-extern "C" void NuRndrFx(i32 paused, void *) {
-    if (NuRndrBeginSceneEx(-1, -2, 0) != 0) {
-        NuLgtLaserDraw(paused);
-        NuLgtArcLaserDraw(paused);
-        NuRndrEndSceneEx(0);
-    }
 }
 extern "C" i32 NuRndrGetCullDebug(void) {
     STUBBED();
@@ -1554,7 +1544,6 @@ extern "C" void NuRndrWireTri(NUVEC *a, NUVEC *b, NUVEC *c, i32 colour) {
 
 // Shader / texture / vertex state
 extern "C" {
-    void *g_boundLightPacket;
     void *g_boundCameraPacket;
     ShaderPacketStateMapping g_packetToShaderStateMappings[2] = {
         {{{0, 0, 0, 0}}, &g_boundLightPacket},
