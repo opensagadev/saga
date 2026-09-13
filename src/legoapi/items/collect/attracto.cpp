@@ -196,14 +196,6 @@ ATTRACTO_s *Attracto_FindNearest(WORLDINFO_s *world, NUVEC *position, GameObject
     return nearest;
 }
 
-extern "C" i16 NewPlatPickupInst(void *, i32);
-void Attractos_InitTerrain(WORLDINFO_s *world) {
-    for (i32 i = 0; i < world->attracto_count; ++i) {
-        ATTRACTO_s *attracto = &static_cast<ATTRACTO_s *>(world->attractos)[i];
-        attracto->platform_id = NewPlatPickupInst(&attracto->transform, 4);
-    }
-}
-
 void Attracto_GetSuctionPos(GameObject_s *object, NUVEC *position) {
     *position = object->apiobj.collision_position;
 }

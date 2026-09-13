@@ -370,6 +370,7 @@ build:target --per_file_copt=^src/legoapi/items/fx/explosions\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/items/fx/pulses\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/items/objects/placeable\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/menus/screens/arcade\.cpp$@-O2
+build:target --per_file_copt=^src/legoapi/menus/screens/credits\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/menus/screens/customise\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/characters/core/customiser\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/misc/supportall\.cpp$@-O2

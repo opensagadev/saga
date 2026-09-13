@@ -459,37 +459,3 @@ void Doors_Configure(WORLDINFO_s *world, char *config) {
         world->doors = NULL;
     }
 }
-
-void PortalDoors_Update(WORLDINFO_s *world) {
-    PORTALDOOR *door = world->portal_doors;
-    if (door == NULL || world->portal_door_count <= 0) {
-        return;
-    }
-
-    i32 index = 0;
-    do {
-        nuinstanim_s *animation = NuSpecialGetInstAnim(&door->special);
-        if (animation != NULL) {
-            const f32 end_frame = NuAnimEndFrameOld(door->special.scene->instance_animation_data[animation->anim_ix]);
-            const u16 flags = door->flags;
-            bool closed = false;
-            if ((flags & PORTALDOOR_TRIGGER_AT_END) == 0) {
-                closed = animation->ltime <= 1.0f;
-            } else {
-                closed = animation->ltime < end_frame;
-            }
-
-            if (closed) {
-                if ((flags & (PORTALDOOR_OPENED | PORTALDOOR_CLOSED)) != PORTALDOOR_CLOSED) {
-                    NuPortalSetActive(world->current_gscn, door->portal_id, 0);
-                    door->flags = static_cast<u16>((flags & ~PORTALDOOR_OPENED) | PORTALDOOR_CLOSED);
-                }
-            } else if ((flags & PORTALDOOR_OPENED) == 0) {
-                NuPortalSetActive(world->current_gscn, door->portal_id, 1);
-                door->flags = static_cast<u16>((flags & ~PORTALDOOR_CLOSED) | PORTALDOOR_OPENED);
-            }
-        }
-        ++index;
-        ++door;
-    } while (index < world->portal_door_count);
-}

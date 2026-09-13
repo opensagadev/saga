@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 45.683086,
+    "fuzzy_match_percent": 45.73121,
     "total_code": "4722419",
-    "matched_code": "395177",
-    "matched_code_percent": 8.368106,
+    "matched_code": "395623",
+    "matched_code_percent": 8.37755,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4720,
-    "matched_functions_percent": 35.069473,
+    "matched_functions": 4723,
+    "matched_functions_percent": 35.091763,
     "total_units": 1
   },
   "text": {
@@ -43233,12 +43233,28 @@
           "match_percent": 49.07843
         },
         {
+          "name": "_Z23GameAudio_GetPlrSfxBitsPv",
+          "demangled_name": "GameAudio_GetPlrSfxBits(void*)",
+          "address": 5101760,
+          "offset": 4211792,
+          "size": 33,
+          "match_percent": 61.25
+        },
+        {
           "name": "_Z15GameAudio_Resetv",
           "demangled_name": "GameAudio_Reset()",
           "address": 5101808,
           "offset": 4211840,
           "size": 129,
           "match_percent": 94.79487
+        },
+        {
+          "name": "_Z21GameAudio_PlaySfxByIdiP7nuvec_sii",
+          "demangled_name": "GameAudio_PlaySfxById(int, nuvec_s*, int, int)",
+          "address": 5101952,
+          "offset": 4211984,
+          "size": 199,
+          "match_percent": 99.5
         },
         {
           "name": "_Z17GameAudio_PlaySfxiP7nuvec_sii",
@@ -45834,38 +45850,6 @@
           "offset": 30784,
           "size": 93,
           "match_percent": 0.0
-        },
-        {
-          "name": "_Z24Customiser_NextPieceLeftP10CUSTOMISERiiii",
-          "demangled_name": "Customiser_NextPieceLeft(CUSTOMISER*, int, int, int, int)",
-          "address": 4848704,
-          "offset": 3958736,
-          "size": 309,
-          "match_percent": 75.9
-        },
-        {
-          "name": "_Z25Customiser_NextPieceRightP10CUSTOMISERiiii",
-          "demangled_name": "Customiser_NextPieceRight(CUSTOMISER*, int, int, int, int)",
-          "address": 4849024,
-          "offset": 3959056,
-          "size": 309,
-          "match_percent": 79.455444
-        },
-        {
-          "name": "_Z31Customiser_ResetModelTextureIDsP10CUSTOMISER",
-          "demangled_name": "Customiser_ResetModelTextureIDs(CUSTOMISER*)",
-          "address": 4855920,
-          "offset": 3965952,
-          "size": 195,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z34Customiser_CopyDefaultPiecesToSaveP10CUSTOMISERP15CUSTOMISESAVE_s",
-          "demangled_name": "Customiser_CopyDefaultPiecesToSave(CUSTOMISER*, CUSTOMISESAVE_s*)",
-          "address": 4856784,
-          "offset": 3966816,
-          "size": 239,
-          "match_percent": 100.0
         }
       ]
     },
@@ -54991,7 +54975,7 @@
           "address": 2064864,
           "offset": 1174896,
           "size": 2068,
-          "match_percent": 37.108696
+          "match_percent": 37.097828
         },
         {
           "name": "_Z21HomeNearestTorpTargetP6BOLT_sP15TORPEDOPACKET_s",
@@ -56383,14 +56367,6 @@
           "offset": 3758432,
           "size": 175,
           "match_percent": 5.533333
-        },
-        {
-          "name": "_Z21PortalDoors_ConfigureP11WORLDINFO_sPc",
-          "demangled_name": "PortalDoors_Configure(WORLDINFO_s*, char*)",
-          "address": 4663568,
-          "offset": 3773600,
-          "size": 475,
-          "match_percent": 16.66154
         }
       ]
     },
@@ -58833,6 +58809,22 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z15Technos_FindTgtP8TECHNO_s",
+          "demangled_name": "Technos_FindTgt(TECHNO_s*)",
+          "address": 1947024,
+          "offset": 1057056,
+          "size": 474,
+          "match_percent": 0.0
+        },
+        {
+          "name": "_Z14Technos_TgtPosP8TECHNO_s",
+          "demangled_name": "Technos_TgtPos(TECHNO_s*)",
+          "address": 1947504,
+          "offset": 1057536,
+          "size": 189,
+          "match_percent": 99.72222
+        },
+        {
           "name": "_Z21Technos_RegisterGizmoi",
           "demangled_name": "Technos_RegisterGizmo(int)",
           "address": 1948640,
@@ -58855,6 +58847,22 @@
       "source": "src/legoapi/gizmos/transport/gizportal.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/1/gizportal.o",
       "functions": [
+        {
+          "name": "_Z21PortalDoors_ConfigureP11WORLDINFO_sPc",
+          "demangled_name": "PortalDoors_Configure(WORLDINFO_s*, char*)",
+          "address": 4663568,
+          "offset": 3773600,
+          "size": 475,
+          "match_percent": 86.83846
+        },
+        {
+          "name": "_Z18PortalDoors_UpdateP11WORLDINFO_s",
+          "demangled_name": "PortalDoors_Update(WORLDINFO_s*)",
+          "address": 4664048,
+          "offset": 3774080,
+          "size": 297,
+          "match_percent": 72.6625
+        },
         {
           "name": "_Z17PortalDoors_ResetP11WORLDINFO_s",
           "demangled_name": "PortalDoors_Reset(WORLDINFO_s*)",
@@ -59904,6 +59912,14 @@
           "offset": 1063968,
           "size": 290,
           "match_percent": 90.98837
+        },
+        {
+          "name": "_Z21Attractos_InitTerrainP11WORLDINFO_s",
+          "demangled_name": "Attractos_InitTerrain(WORLDINFO_s*)",
+          "address": 1954240,
+          "offset": 1064272,
+          "size": 112,
+          "match_percent": 99.08572
         },
         {
           "name": "_Z23Attractos_RegisterGizmoi",
@@ -61803,7 +61819,7 @@
           "address": 3958731,
           "offset": 3068763,
           "size": 169,
-          "match_percent": 92.50877
+          "match_percent": 100.0
         },
         {
           "name": "AnimList_RequestAnimGroups",
@@ -61811,7 +61827,7 @@
           "address": 3958900,
           "offset": 3068932,
           "size": 171,
-          "match_percent": 72.47458
+          "match_percent": 100.0
         },
         {
           "name": "AnimList_RequestAnimGroupForCreatures",
@@ -63007,14 +63023,6 @@
           "offset": 8112,
           "size": 93,
           "match_percent": 99.35294
-        },
-        {
-          "name": "_Z21Attractos_InitTerrainP11WORLDINFO_s",
-          "demangled_name": "Attractos_InitTerrain(WORLDINFO_s*)",
-          "address": 1954240,
-          "offset": 1064272,
-          "size": 112,
-          "match_percent": 98.65714
         },
         {
           "name": "_Z20Attracto_FindNearestP11WORLDINFO_sP7nuvec_sP12GameObject_sPf",
@@ -67122,22 +67130,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "_Z23GameAudio_GetPlrSfxBitsPv",
-          "demangled_name": "GameAudio_GetPlrSfxBits(void*)",
-          "address": 5101760,
-          "offset": 4211792,
-          "size": 33,
-          "match_percent": 61.25
-        },
-        {
-          "name": "_Z21GameAudio_PlaySfxByIdiP7nuvec_sii",
-          "demangled_name": "GameAudio_PlaySfxById(int, nuvec_s*, int, int)",
-          "address": 5101952,
-          "offset": 4211984,
-          "size": 199,
-          "match_percent": 99.5
-        },
-        {
           "name": "_Z16GameAudio_AddSfxiPiS_i",
           "demangled_name": "GameAudio_AddSfx(int, int*, int*, int)",
           "address": 5102528,
@@ -69247,7 +69239,7 @@
           "address": 924000,
           "offset": 34032,
           "size": 93,
-          "match_percent": 29.411764
+          "match_percent": 99.35294
         },
         {
           "name": "_Z12Credits_LoadP11WORLDINFO_sP9variptr_uS2_",
@@ -69255,7 +69247,7 @@
           "address": 5109952,
           "offset": 4219984,
           "size": 2516,
-          "match_percent": 0.618182
+          "match_percent": 0.872727
         },
         {
           "name": "_Z12Credits_InitP11WORLDINFO_s",
@@ -69263,7 +69255,7 @@
           "address": 5112480,
           "offset": 4222512,
           "size": 106,
-          "match_percent": 13.75
+          "match_percent": 100.0
         },
         {
           "name": "_Z17Credits_DrawPanelP11WORLDINFO_s",
@@ -69271,7 +69263,7 @@
           "address": 5112592,
           "offset": 4222624,
           "size": 744,
-          "match_percent": 2.4375
+          "match_percent": 3.0
         },
         {
           "name": "_Z18Credits_UpdateMenuP6MENU_s",
@@ -69279,7 +69271,7 @@
           "address": 5113344,
           "offset": 4223376,
           "size": 835,
-          "match_percent": 1.208791
+          "match_percent": 2.307692
         },
         {
           "name": "_Z15Credits_GetInfoPfPiS_",
@@ -69287,7 +69279,7 @@
           "address": 5114192,
           "offset": 4224224,
           "size": 74,
-          "match_percent": 15.0
+          "match_percent": 92.72727
         }
       ]
     },
@@ -69446,7 +69438,23 @@
           "address": 4848480,
           "offset": 3958512,
           "size": 218,
-          "match_percent": 6.760563
+          "match_percent": 93.521126
+        },
+        {
+          "name": "_Z24Customiser_NextPieceLeftP10CUSTOMISERiiii",
+          "demangled_name": "Customiser_NextPieceLeft(CUSTOMISER*, int, int, int, int)",
+          "address": 4848704,
+          "offset": 3958736,
+          "size": 309,
+          "match_percent": 79.25
+        },
+        {
+          "name": "_Z25Customiser_NextPieceRightP10CUSTOMISERiiii",
+          "demangled_name": "Customiser_NextPieceRight(CUSTOMISER*, int, int, int, int)",
+          "address": 4849024,
+          "offset": 3959056,
+          "size": 309,
+          "match_percent": 79.455444
         },
         {
           "name": "_Z26Customiser_LoadAccessoriesP10CUSTOMISERP23APICHARACTERMODELLIST_s",
@@ -69454,7 +69462,7 @@
           "address": 4849344,
           "offset": 3959376,
           "size": 732,
-          "match_percent": 2.857143
+          "match_percent": 61.31746
         },
         {
           "name": "_Z26Customiser_DrawAccessoriesP10CUSTOMISERP12GameObject_sP7numtx_s",
@@ -69497,6 +69505,14 @@
           "match_percent": 7.826087
         },
         {
+          "name": "_Z31Customiser_ResetModelTextureIDsP10CUSTOMISER",
+          "demangled_name": "Customiser_ResetModelTextureIDs(CUSTOMISER*)",
+          "address": 4855920,
+          "offset": 3965952,
+          "size": 195,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z30Customiser_SaveModelTextureIDsP10CUSTOMISERP16CHARACTERMODEL_s",
           "demangled_name": "Customiser_SaveModelTextureIDs(CUSTOMISER*, CHARACTERMODEL_s*)",
           "address": 4856128,
@@ -69519,6 +69535,14 @@
           "offset": 3966704,
           "size": 102,
           "match_percent": 12.0
+        },
+        {
+          "name": "_Z34Customiser_CopyDefaultPiecesToSaveP10CUSTOMISERP15CUSTOMISESAVE_s",
+          "demangled_name": "Customiser_CopyDefaultPiecesToSave(CUSTOMISER*, CUSTOMISESAVE_s*)",
+          "address": 4856784,
+          "offset": 3966816,
+          "size": 239,
+          "match_percent": 100.0
         },
         {
           "name": "_Z20Customiser_ConfigurePcP9variptr_uS1_iiPFiP11CUSTOMPIECEEPFvS3_P8nufpar_sEPFiS_EP15CUSTOMISESAVE_sPs",
@@ -73515,14 +73539,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z18PortalDoors_UpdateP11WORLDINFO_s",
-          "demangled_name": "PortalDoors_Update(WORLDINFO_s*)",
-          "address": 4664048,
-          "offset": 3774080,
-          "size": 297,
-          "match_percent": 72.475
-        },
-        {
           "name": "_Z15Doors_ConfigureP11WORLDINFO_sPc",
           "demangled_name": "Doors_Configure(WORLDINFO_s*, char*)",
           "address": 4744704,
@@ -73761,22 +73777,6 @@
           "offset": 8016,
           "size": 93,
           "match_percent": 99.35294
-        },
-        {
-          "name": "_Z15Technos_FindTgtP8TECHNO_s",
-          "demangled_name": "Technos_FindTgt(TECHNO_s*)",
-          "address": 1947024,
-          "offset": 1057056,
-          "size": 474,
-          "match_percent": 0.0
-        },
-        {
-          "name": "_Z14Technos_TgtPosP8TECHNO_s",
-          "demangled_name": "Technos_TgtPos(TECHNO_s*)",
-          "address": 1947504,
-          "offset": 1057536,
-          "size": 189,
-          "match_percent": 99.72222
         },
         {
           "name": "_Z18Technos_MoveTargetP8TECHNO_sP12GameObject_s",
@@ -81309,7 +81309,7 @@
           "address": 1199984,
           "offset": 310016,
           "size": 367,
-          "match_percent": 5.526316
+          "match_percent": 99.89474
         },
         {
           "name": "_ZL11Titles_InitP11WORLDINFO_s",
@@ -81317,7 +81317,7 @@
           "address": 1200352,
           "offset": 310384,
           "size": 675,
-          "match_percent": 0.0
+          "match_percent": 99.42262
         },
         {
           "name": "_Z18ClearLevelProgressiP11WORLDINFO_s",
@@ -117229,7 +117229,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -117317,7 +117316,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -117405,7 +117403,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -117504,7 +117501,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -117637,7 +117633,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -117736,7 +117731,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -117835,7 +117829,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -117934,7 +117927,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -118033,7 +118025,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -118132,7 +118123,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -118441,7 +118431,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -118540,7 +118529,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -118639,7 +118627,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -118787,7 +118774,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -118898,7 +118884,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -119124,7 +119109,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -119301,7 +119285,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -119478,7 +119461,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -119577,7 +119559,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -119676,7 +119657,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -119775,7 +119755,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -119925,7 +119904,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -120024,7 +120002,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -120134,7 +120111,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -120233,7 +120209,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -120345,7 +120320,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -120444,7 +120418,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -120577,7 +120550,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -120676,7 +120648,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -120775,7 +120746,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -120874,7 +120844,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -121036,7 +121005,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -121135,7 +121103,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -121234,7 +121201,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -121680,7 +121646,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -121907,7 +121872,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -122085,7 +122049,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -122543,7 +122506,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",
@@ -122642,7 +122604,6 @@
         "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
-        "legoapi/menus/screens/credits.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
         "legoapi/misc/legoapi_status.cpp.o",

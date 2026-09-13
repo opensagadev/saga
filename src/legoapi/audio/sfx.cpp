@@ -1,5 +1,7 @@
 #include "legoapi/world/world_shared.h"
 #include "legoapi/audio/audio.h"
+#include "legoapi/audio/sfx.h"
+#include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/characters/core/charconfig.h"
 #include "legoapi/characters/core/players.h"
@@ -92,10 +94,7 @@ bool HandleGroupLimit(i32 group_id) {
 
 extern "C" void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pitch);
 extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
-void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
 void GameAudio_PlaySfx(i32 sfx, nuvec_s *position, i32 flags, i32 volume);
-i32 GameAudio_GetPlrSfxBits(void *object);
-void GameAudio_AddSfx(i32 sfx, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx);
 void SetSfxBit_OnEx(i32);
 void SetSfxBit_OffEx(i32);
 void SetSfxBitTab_OnEx(SoundTable *, i32);
@@ -1780,14 +1779,13 @@ void AddLevSfx(WORLDINFO_s *world, nuvec_s *position, char *name, i32 sfx) {
     }
 }
 
-void GameAudio_Init(GAMEAUDIO *audio) {
-    GameAudio = audio;
-    for (i32 i = 0; i < 0x55; ++i) {
-        audio->sfx_ids[i] = static_cast<i16>(GetSfxId(audio->sfx_names[i]));
+i32 GameAudio_GetPlrSfxBits(void *object_ptr) {
+    APIOBJECT *object = static_cast<APIOBJECT *>(object_ptr);
+    i32 sfx_bits = 0;
+    if (object != NULL && static_cast<i8>(object->flags_low) < 0) {
+        sfx_bits = 1 << object->field_0x27c;
     }
-
-    MenuRegisterSoundFX(GameAudio_GetSfxId(0x2f), GameAudio_GetSfxId(0x30), GameAudio_GetSfxId(0x31),
-                        GameAudio_GetSfxId(0x32));
+    return sfx_bits;
 }
 
 void GameAudio_Reset() {
@@ -1799,10 +1797,36 @@ void GameAudio_Reset() {
     }
 }
 
+void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32) {
+    if (flags == 0) {
+        PlaySfxById(sfx_id, position);
+        return;
+    }
+    if ((flags & ~2) == 1) {
+        nusound_special_positions[1] = *position;
+        PlaySfxById(sfx_id, &nusound_special_positions[1]);
+    }
+    flags -= 2;
+    if (static_cast<u32>(flags) <= 1) {
+        nusound_special_positions[2] = *position;
+        PlaySfxById(sfx_id, &nusound_special_positions[2]);
+    }
+}
+
 void GameAudio_PlaySfx(i32 sfx, nuvec_s *position, i32 flags, i32 volume) {
     if ((u32)sfx < 0x55) {
         GameAudio_PlaySfxById(GameAudio->sfx_ids[sfx], position, flags, volume);
     }
+}
+
+void GameAudio_Init(GAMEAUDIO *audio) {
+    GameAudio = audio;
+    for (i32 i = 0; i < 0x55; ++i) {
+        audio->sfx_ids[i] = static_cast<i16>(GetSfxId(audio->sfx_names[i]));
+    }
+
+    MenuRegisterSoundFX(GameAudio_GetSfxId(0x2f), GameAudio_GetSfxId(0x30), GameAudio_GetSfxId(0x31),
+                        GameAudio_GetSfxId(0x32));
 }
 
 i32 GameAudio_GetSfxId(i32 sfx) {

@@ -181,6 +181,13 @@ static void Attractos_StoreProgress(void *context, void *, void *data) {
     }
 }
 
+void Attractos_InitTerrain(WORLDINFO_s *world) {
+    for (i32 i = 0; i < world->attracto_count; ++i) {
+        ATTRACTO_s *attracto = &static_cast<ATTRACTO_s *>(world->attractos)[i];
+        attracto->platform_id = NewPlatPickupInst(&attracto->transform, 4);
+    }
+}
+
 static void Attractos_Reset(void *context, void *, void *data) {
     WORLDINFO_s *world = static_cast<WORLDINFO_s *>(context);
     ATTRACTOPROGRESS_s *progress = static_cast<ATTRACTOPROGRESS_s *>(data);
