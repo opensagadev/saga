@@ -38,6 +38,9 @@ struct AIPATHNODE_s;
 struct AISCRIPTPROCESS_s;
 struct APIOBJECT_s;
 
+extern "C" void (*APIObjResetShadowMapRenderingFn)(void);
+extern "C" void (*APIObjEnableShadowMapRenderingFn)(void);
+
 enum CHARACTER_CONTEXT : i8 {
     CHARACTER_CONTEXT_JUMP = 0,
     CHARACTER_CONTEXT_LAND_JUMP = 1,

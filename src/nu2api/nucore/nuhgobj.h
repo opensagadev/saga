@@ -159,6 +159,8 @@ extern "C" {
                                f32 frame_b, f32 blend);
     void **NuHGobjEvalDwaBlend2(i32 render_count, i16 *render_indices, nuanimdata2_s *animation_a, f32 frame_a,
                                 nuanimdata2_s *animation_b, f32 frame_b, f32 blend);
+    void NuHGobjRestrictEvaluation(nuhgobj_s *object);
+    void NuHGobjRestoreEvaluation(void);
     i32 NuHGobjRndrMtxDwa(nuhgobj_s *object, NUMTX *world_matrix, i32 render_count, i16 *render_indices,
                           NUMTX *joint_matrices, void **blend_values, i32 render_flags);
 #ifdef __cplusplus

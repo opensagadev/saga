@@ -129,7 +129,6 @@ extern "C" {
     void NewTerrPlatformsOff();
     i32 ShadowInfo();
     void PlaySfxAndSetPitch(const char *, NUVEC *, f32);
-    f32 AnimDuration(i32, i32, i32, i32, i32);
     f32 AnimListFrame(CHARACTERMODEL_s *, i32, i32);
     AIANTINODE_s *AIAntinodeCreateSingleFrame(NUVEC *, f32);
 }

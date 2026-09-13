@@ -11,6 +11,7 @@ typedef struct rndrstream_s RNDRSTREAM;
 extern i32 nurndr_nforced_mtls;
 extern struct numtl_s **nurndr_forced_mtl_table;
 extern struct numtl_s *nurndr_forced_mtl;
+extern i32 nurndr_force_lod;
 
 typedef i32 NUCOLOUR32;
 
