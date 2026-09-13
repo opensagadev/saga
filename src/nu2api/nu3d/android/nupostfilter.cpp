@@ -162,39 +162,72 @@ extern "C" void NuPostEffectInit(u32 flags, void *buffer, void *buffer_end) {
     copyFilter = AllocatePostFilter<NuCopyFilter>();
     NuEffectTexLockVP(buffer, buffer_end);
     NuPostFilterGen::initSharedTextureResources(100, 100);
-    NuPostFilterGen *filters[] = {mainFilter, motionFilter, motionAccumFilter, speedBlurFilter, deferredFilter};
-    for (i32 i = 0; i < 5; ++i) {
-        if (filters[i] != NULL)
-            filters[i]->initTextureResources(100, 100);
-    }
+    if (flags & 0x0c)
+        mainFilter->initTextureResources(100, 100);
+    if (flags & 0x10)
+        motionFilter->initTextureResources(100, 100);
+    if (flags & 0x40)
+        motionAccumFilter->initTextureResources(100, 100);
+    if (flags & 0x80)
+        speedBlurFilter->initTextureResources(100, 100);
+    if (flags & 0x20)
+        deferredFilter->initTextureResources(100, 100);
     if (flags & 1)
         g_backBufferCopy = NuEffectTexCreate2D(100, 100, 1, 1, 2);
     copyFilter->initTextureResources(100, 100);
     NuEffectTexUnlockVP();
     NuPostFilter::initSharedResources(100, 100);
-    for (i32 i = 0; i < 5; ++i) {
-        if (filters[i] != NULL)
-            filters[i]->initResources();
-    }
+    if (flags & 0x0c)
+        mainFilter->initResources();
+    if (flags & 0x10)
+        motionFilter->initResources();
+    if (flags & 0x40)
+        motionAccumFilter->initResources();
+    if (flags & 0x80)
+        speedBlurFilter->initResources();
+    if (flags & 0x20)
+        deferredFilter->initResources();
     copyFilter->initResources();
     NuPostEffectReset();
 }
 
 extern "C" void NuPostEffectDestroy() {
-    NuPostFilterGen *filters[] = {mainFilter,      motionFilter,   motionAccumFilter,
-                                  speedBlurFilter, deferredFilter, copyFilter};
-    for (i32 i = 0; i < 6; ++i) {
-        if (filters[i] != NULL) {
-            filters[i]->destroyTextureResources();
-            filters[i]->destroyResources();
-        }
+    NuPostFilterGen *filter = mainFilter;
+    if (filter != NULL) {
+        filter->destroyTextureResources();
+        filter->destroyResources();
+        mainFilter = NULL;
     }
-    mainFilter = NULL;
-    motionFilter = NULL;
-    motionAccumFilter = NULL;
-    speedBlurFilter = NULL;
-    deferredFilter = NULL;
-    copyFilter = NULL;
+    filter = motionFilter;
+    if (filter != NULL) {
+        filter->destroyTextureResources();
+        filter->destroyResources();
+        motionFilter = NULL;
+    }
+    filter = motionAccumFilter;
+    if (filter != NULL) {
+        filter->destroyTextureResources();
+        filter->destroyResources();
+        motionAccumFilter = NULL;
+    }
+    filter = speedBlurFilter;
+    if (filter != NULL) {
+        filter->destroyTextureResources();
+        filter->destroyResources();
+        speedBlurFilter = NULL;
+    }
+    filter = deferredFilter;
+    if (filter != NULL) {
+        filter->destroyTextureResources();
+        filter->destroyResources();
+        deferredFilter = NULL;
+    }
+    filter = copyFilter;
+    if (filter != NULL) {
+        filter->destroyTextureResources();
+        filter->destroyResources();
+        copyFilter = NULL;
+    }
     NuPostFilterGen::destroySharedTextureResources();
     NuPostFilterGen::destroySharedResources();
     filterCursor = filterMem;

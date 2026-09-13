@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 45.862568,
+    "fuzzy_match_percent": 45.876186,
     "total_code": "4722419",
     "matched_code": "397570",
     "matched_code_percent": 8.418778,
@@ -87690,7 +87690,7 @@
           "address": 2803456,
           "offset": 1913488,
           "size": 262,
-          "match_percent": 30.592106
+          "match_percent": 99.06579
         },
         {
           "name": "NuPostEffectTiming",
@@ -87706,7 +87706,7 @@
           "address": 2858192,
           "offset": 1968224,
           "size": 1077,
-          "match_percent": 4.141264
+          "match_percent": 40.152416
         }
       ]
     },
@@ -88267,6 +88267,37 @@
           "offset": 2350047,
           "size": 29,
           "match_percent": 100.0
+        }
+      ]
+    },
+    {
+      "name": "nu2api/nu3d/android/nushaderprogram_android.cpp.o",
+      "source": "src/nu2api/nu3d/android/nushaderprogram_android.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nushaderprogram_android.o",
+      "functions": [
+        {
+          "name": "_Z17LinkShaderProgramj",
+          "demangled_name": "LinkShaderProgram(unsigned int)",
+          "address": 2774688,
+          "offset": 1884720,
+          "size": 81,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z21ValidateShaderProgramj",
+          "demangled_name": "ValidateShaderProgram(unsigned int)",
+          "address": 2774784,
+          "offset": 1884816,
+          "size": 171,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuShaderProgramCreateIOS",
+          "demangled_name": "NuShaderProgramCreateIOS",
+          "address": 2774960,
+          "offset": 1884992,
+          "size": 1326,
+          "match_percent": 58.154972
         }
       ]
     },
@@ -88965,6 +88996,61 @@
           "offset": 4529318,
           "size": 29,
           "match_percent": 100.0
+        }
+      ]
+    },
+    {
+      "name": "nu2api/nu3d/nu3d_includes.cpp.o",
+      "source": "src/nu2api/nu3d/nu3d_includes.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nu3d_includes.o",
+      "functions": [
+        {
+          "name": "_ZN14NuDynamicLight7destroyEPS_",
+          "demangled_name": "NuDynamicLight::destroy(NuDynamicLight*)",
+          "address": 2833136,
+          "offset": 1943168,
+          "size": 71,
+          "match_percent": 99.90909
+        },
+        {
+          "name": "_ZN14NuDynamicLight9RenderSetC1Ev",
+          "demangled_name": "NuDynamicLight::RenderSet::RenderSet()",
+          "address": 3083312,
+          "offset": 2193344,
+          "size": 864,
+          "match_percent": 86.81225
+        },
+        {
+          "name": "_ZN14NuDynamicLight9RenderSetC2Ev",
+          "demangled_name": "NuDynamicLight::RenderSet::RenderSet()",
+          "address": 3083312,
+          "offset": 2193344,
+          "size": 864,
+          "match_percent": 86.81225
+        },
+        {
+          "name": "_ZN14NuDynamicLightC1Ev",
+          "demangled_name": "NuDynamicLight::NuDynamicLight()",
+          "address": 3084176,
+          "offset": 2194208,
+          "size": 182,
+          "match_percent": 99.18519
+        },
+        {
+          "name": "_ZN14NuDynamicLightC2Ev",
+          "demangled_name": "NuDynamicLight::NuDynamicLight()",
+          "address": 3084176,
+          "offset": 2194208,
+          "size": 182,
+          "match_percent": 99.18519
+        },
+        {
+          "name": "_ZN14NuDynamicLight6createEv",
+          "demangled_name": "NuDynamicLight::create()",
+          "address": 3084368,
+          "offset": 2194400,
+          "size": 271,
+          "match_percent": 89.793106
         }
       ]
     },
@@ -91000,30 +91086,6 @@
       "source": "src/nu2api/nu3d/nushader.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nushader.o",
       "functions": [
-        {
-          "name": "_Z17LinkShaderProgramj",
-          "demangled_name": "LinkShaderProgram(unsigned int)",
-          "address": 2774688,
-          "offset": 1884720,
-          "size": 81,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z21ValidateShaderProgramj",
-          "demangled_name": "ValidateShaderProgram(unsigned int)",
-          "address": 2774784,
-          "offset": 1884816,
-          "size": 171,
-          "match_percent": 100.0
-        },
-        {
-          "name": "NuShaderProgramCreateIOS",
-          "demangled_name": "NuShaderProgramCreateIOS",
-          "address": 2774960,
-          "offset": 1884992,
-          "size": 1326,
-          "match_percent": 57.74854
-        },
         {
           "name": "NuShaderObjectGLSLCreate",
           "demangled_name": "NuShaderObjectGLSLCreate",
@@ -96320,14 +96382,6 @@
           "match_percent": 38.2549
         },
         {
-          "name": "_ZN14NuDynamicLight7destroyEPS_",
-          "demangled_name": "NuDynamicLight::destroy(NuDynamicLight*)",
-          "address": 2833136,
-          "offset": 1943168,
-          "size": 71,
-          "match_percent": 99.90909
-        },
-        {
           "name": "_ZN14NuDynamicLight17setCameraViewProjEP7numtx_sS1_",
           "demangled_name": "NuDynamicLight::setCameraViewProj(numtx_s*, numtx_s*)",
           "address": 2833264,
@@ -96413,7 +96467,7 @@
           "address": 2853008,
           "offset": 1963040,
           "size": 2734,
-          "match_percent": 26.31962
+          "match_percent": 26.477848
         },
         {
           "name": "_ZN14NuDynamicLight28computeShadowFrustrumCapsuleERK5VuVecPS1_RS0_S4_Rf",
@@ -96494,46 +96548,6 @@
           "offset": 2193216,
           "size": 77,
           "match_percent": 100.0
-        },
-        {
-          "name": "_ZN14NuDynamicLight9RenderSetC1Ev",
-          "demangled_name": "NuDynamicLight::RenderSet::RenderSet()",
-          "address": 3083312,
-          "offset": 2193344,
-          "size": 864,
-          "match_percent": 86.759186
-        },
-        {
-          "name": "_ZN14NuDynamicLight9RenderSetC2Ev",
-          "demangled_name": "NuDynamicLight::RenderSet::RenderSet()",
-          "address": 3083312,
-          "offset": 2193344,
-          "size": 864,
-          "match_percent": 86.759186
-        },
-        {
-          "name": "_ZN14NuDynamicLightC1Ev",
-          "demangled_name": "NuDynamicLight::NuDynamicLight()",
-          "address": 3084176,
-          "offset": 2194208,
-          "size": 182,
-          "match_percent": 99.18519
-        },
-        {
-          "name": "_ZN14NuDynamicLightC2Ev",
-          "demangled_name": "NuDynamicLight::NuDynamicLight()",
-          "address": 3084176,
-          "offset": 2194208,
-          "size": 182,
-          "match_percent": 99.18519
-        },
-        {
-          "name": "_ZN14NuDynamicLight6createEv",
-          "demangled_name": "NuDynamicLight::create()",
-          "address": 3084368,
-          "offset": 2194400,
-          "size": 271,
-          "match_percent": 89.793106
         },
         {
           "name": "_ZN14NuDynamicLight20addShadowCasterSceneEP8nugscn_s",
@@ -110866,7 +110880,7 @@
           "address": 3269984,
           "offset": 2380016,
           "size": 253,
-          "match_percent": 19.235294
+          "match_percent": 45.014706
         }
       ]
     },
@@ -129724,7 +129738,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 525,
+    "bazel_units": 527,
     "functions": 13454,
     "assigned_functions": 12344,
     "ambiguous_functions": 220,

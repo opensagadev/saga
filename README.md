@@ -1,6 +1,6 @@
 # saga
 
-![Progress](https://img.shields.io/badge/matching-45.86%25-orange)
+![Progress](https://img.shields.io/badge/matching-45.88%25-orange)
 [![Bazel build](https://github.com/ttdecomp/saga/actions/workflows/build-bazel.yaml/badge.svg)](https://github.com/ttdecomp/saga/actions/workflows/build-bazel.yaml)
 [![Discord](https://img.shields.io/discord/1467775700894224555?color=%235865F2&logo=discord&logoColor=%23FFFFFF)](https://discord.gg/2HJuMtzA7q)
 

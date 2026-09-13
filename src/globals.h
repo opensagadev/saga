@@ -3,6 +3,7 @@
 #include "decomp.h"
 #include "legoapi/characters/motion/animation_ids.h"
 #include "legoapi/characters/motion/contexts.h"
+#include "legoapi/render/fx/game_deb.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/mission.h"
 #include "nu2api/nu3d/nucamera.h"
@@ -72,7 +73,6 @@ DECOMP_ASSERT(sizeof(TERRAIN_LAYER_s) == 0x0c, "TERRAIN_LAYER_s ABI");
 
 typedef i32 (*USING_EXTRA_ACTIONS_FN)(GameObject_s *object);
 
-extern CHARACTER_CONTEXT_INFO_s *CInfo;
 extern USING_EXTRA_ACTIONS_FN UsingExtraActionsFn;
 extern u32 LSW_HintConditions;
 extern bool (*IsWearingBackPackFn)(GameObject_s *);
@@ -1080,8 +1080,6 @@ extern u8 CharVariants_Game[0x5c];
 extern MemoryManager theMemoryManager;
 extern struct TEXTENTRY LSW_Text[713];
 
-extern ACTIONINFO_s *ActionInfo;
-extern EXTRAACTIONDATA_s ExtraActionData[];
 extern void *theGameThings;
 extern void *theThingManager;
 

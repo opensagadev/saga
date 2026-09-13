@@ -74,26 +74,25 @@ bool NuSoundBuffer::IsLocked() const {
 }
 
 i32 NuSoundBuffer::Allocate(u64 size, NuSoundSystem::MemoryDiscipline disc) {
-    if (IsAllocated() && this->size >= size) {
-        return 1;
-    }
-    if (IsAllocated()) {
-        Free();
-    }
+    if (!IsAllocated() || this->size < size) {
+        if (IsAllocated()) {
+            Free();
+        }
 
-    this->memory_buffer = (NuSoundMemoryBuffer *)NuSoundSystem::_AllocMemory(
-        disc, size, 4, "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound_buffer.cpp :53");
+        this->memory_buffer = (NuSoundMemoryBuffer *)NuSoundSystem::_AllocMemory(
+            disc, size, 4, "i:/SagaTouch-Android_9176564/nu2api.2013/nusound/nusound_buffer.cpp :53");
 
-    if (this->memory_buffer != NULL) {
+        if (this->memory_buffer == NULL) {
+            if (size <= NuSoundSystem::GetFreeMemory(disc)) {
+                return -2;
+            }
+            return -1;
+        }
         this->address = this->memory_buffer;
         this->size = size;
         this->memory_discipline = disc;
-        return 1;
     }
-    if (size <= NuSoundSystem::GetFreeMemory(disc)) {
-        return -2;
-    }
-    return -1;
+    return 1;
 }
 
 i32 NuSoundBuffer::Provide(char *address, u64 size) {
