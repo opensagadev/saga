@@ -7,6 +7,7 @@
 // Core rendering helpers (module legoapi/render/core, render.cpp).
 
 void DrawPaintLights(void);
+void BackDrop_ResetColours(void);
 void DrawTimer(i32 mins, i32 secs, i32 unknown);
 void DrawBossHitPoints(GameObject_s *obj);
 void DrawMiniSnowTroopers(WORLDINFO_s *world);

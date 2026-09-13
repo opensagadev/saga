@@ -51,6 +51,7 @@ DECOMP_ASSERT(offsetof(AREADATA, area_index) == 0x87, "AREADATA area index offse
 extern "C" {
 #endif
     extern AREADATA *ADataList;
+    extern AREADATA *LastAData;
     extern AREADATA *HUB_ADATA;
     extern i32 Area;
     extern i32 loadareacharacters_no_backdrop_reset;

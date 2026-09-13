@@ -73,6 +73,8 @@ extern TECHNO_CONFIG TechnoSys;
 struct GAMEPAD_s;
 struct GameObject_s;
 TECHNO *Technos_FindControllingTechno(GameObject_s *object);
+void *Technos_FindTgt(TECHNO_s *techno);
+NUVEC *Technos_TgtPos(TECHNO_s *techno);
 i32 Techno_FindOperator(void *target, GAMEPAD_s **pad, GameObject_s **operator_object);
 
 extern i32 techno_gizmotype_id;

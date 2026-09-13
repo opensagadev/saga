@@ -743,9 +743,11 @@ struct CLIMBOBJECTSYS_s {
 DECOMP_ASSERT(sizeof(CLIMBOBJECT_s) == 0x20, "CLIMBOBJECT_s size");
 DECOMP_ASSERT(sizeof(CLIMBOBJECTSYS_s) == 8, "CLIMBOBJECTSYS_s size");
 struct CUSTOMPIECECATEGORY {
-    u32 field_0;
+    char *name;
     u8 uses_special;
+    i8 material_tag;
 };
+DECOMP_ASSERT(offsetof(CUSTOMPIECECATEGORY, material_tag) == 5, "Customiser material tag offset");
 struct CUSTOMISER {
     union {
         u8 pad_0x00[0x6c];
@@ -766,7 +768,8 @@ struct CUSTOMISER {
     CUSTOMISESAVE_s *save;             // 0x174
     ANIMPACKET_s animation_packets[2]; // 0x178
     i32 model_texture_ids[18];         // 0x208
-    u8 pad_0x250[0xa6c - 0x250];
+    u8 pad_0x250[0xa68 - 0x250];
+    u16 *animation_ids_to_load; // 0xa68; 0xffff-terminated allow-list
     u8 animation_active[2];  // 0xa6c
     u8 animation_state[2];   // 0xa6e
     i32 animation_values[2]; // 0xa70
@@ -783,6 +786,7 @@ DECOMP_ASSERT(offsetof(CUSTOMISER, character_ids) == 0x6c, "CUSTOMISER character
 DECOMP_ASSERT(offsetof(CUSTOMISER, animation_packets) == 0x178, "CUSTOMISER animation packets offset");
 DECOMP_ASSERT(offsetof(CUSTOMISER, model_texture_ids) == 0x208, "CUSTOMISER model texture IDs offset");
 DECOMP_ASSERT(offsetof(CUSTOMISER, animation_active) == 0xa6c, "CUSTOMISER animation active offset");
+DECOMP_ASSERT(offsetof(CUSTOMISER, animation_ids_to_load) == 0xa68, "CUSTOMISER animation load-list offset");
 struct __attribute__((packed)) CUSTOMISESAVE_s {
     i16 pieces[9];           // 0x00
     u8 field_0x12[2];        // 0x12
@@ -811,7 +815,7 @@ DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, primary_name_unlocked) == 0x34, "CUSTOMI
 DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, secondary_name) == 0x4c, "CUSTOMISESAVE secondary name offset");
 DECOMP_ASSERT(offsetof(CUSTOMISESAVE_s, secondary_name_unlocked) == 0x6c, "CUSTOMISESAVE secondary flag offset");
 struct CUSTOMPIECE {
-    u8 unknown_00[4];
+    char *name;
     i16 character_id;
     i16 icon_character_id;
     u8 unknown_08[0xa];

@@ -258,7 +258,6 @@ void InitPartTable(char **names);
 void ResetSeeds(void);
 void GizSpinners_InitTerrain(WORLDINFO_s *world);
 void Signals_InitTerrain(WORLDINFO_s *world);
-void Attractos_InitTerrain(WORLDINFO_s *world);
 void SecurityDoors_InitTerrain(WORLDINFO_s *world);
 void Levers_InitTerrain(WORLDINFO_s *world);
 void GizPanel_InitTerrain(WORLDINFO_s *world);

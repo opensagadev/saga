@@ -19,6 +19,7 @@
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numusic/numusic.h"
 #include "legoapi/world/levels/levels.h"
+#include "legoapi/world/area.h"
 
 extern "C" char ConfigBuffer[0x10000];
 
@@ -52,7 +53,34 @@ extern "C" {
     struct LEVELDATA_s *PODRACELEVELS[11]; // Arrival1-4, Intro, B, C, A, Outro1, Outro2, Status
 }
 
-static void Credits_Init_Game(WORLDINFO *) {
+static void Pictures_FixUp(WORLDINFO *world);
+
+static void Credits_Init_Game(WORLDINFO *world) {
+    static const char *const credit_music[] = {
+        "Ep1_EndCredits", "Ep2_EndCredits", "Ep3_EndCredits",
+        "Ep4_EndCredits", "Ep5_EndCredits", "Ep6_EndCredits",
+    };
+    i32 episode = 0;
+    if (LastAData != NULL) {
+        const i32 last_episode = static_cast<i8>(LastAData->episode_index);
+        if (static_cast<u32>(last_episode) <= 5) {
+            episode = last_episode;
+        }
+    }
+    const char *music_name = credit_music[episode];
+    world->current_level->music_index = GetMusicIndex(const_cast<char *>(music_name), MusicInfo, -1);
+    world->current_level->music_tracks[0][0] = world->current_level->music_tracks[0][1] =
+        music_man.GetTrackHandle(TRACK_CLASS_QUIET, music_name);
+    world->current_level->music_tracks[1][0] = world->current_level->music_tracks[1][1] =
+        music_man.GetTrackHandle(TRACK_CLASS_ACTION, music_name);
+    world->current_level->music_tracks[2][0] = world->current_level->music_tracks[2][1] =
+        music_man.GetTrackHandle(TRACK_CLASS_NOMUSIC, music_name);
+    Credits_Init(world);
+    Pictures_FixUp(world);
+    NUVEC scale = {2.5f, 2.5f, 2.5f};
+    NuMtxSetScale(&LevMtx, &scale);
+    LevMtx.m31 = 0.0f;
+    LevMtx.m32 = 1.0f;
 }
 static void Credits_Update_Game(WORLDINFO *) {
 }
@@ -68,17 +96,17 @@ extern i32 GetMenuID(void);
 static NUVEC titlesstartpos;
 static i32 Pictures_NumLevels;
 
-static void Pictures_FixUp(NUGSCN **scene) {
-    if (*scene != NULL) {
+static void Pictures_FixUp(WORLDINFO *world) {
+    if (world->scene != NULL) {
         Pictures_NumLevels = 0;
         for (i32 episode = 0; episode < EPISODECOUNT; episode++) {
             char name[72];
             sprintf(name, "EP_%i", episode + 1);
-            NuSpecialFind(*scene, &LevHSpecial[10 + episode], name, 1);
+            NuSpecialFind(world->scene, &LevHSpecial[10 + episode], name, 1);
 
             for (i32 chapter = 0; chapter < 8; chapter++) {
                 sprintf(name, "EP_%i_CH_%i", episode + 1, chapter + 1);
-                NuSpecialFind(*scene, &LevHSpecial[20 + Pictures_NumLevels], name, 1);
+                NuSpecialFind(world->scene, &LevHSpecial[20 + Pictures_NumLevels], name, 1);
                 Pictures_NumLevels++;
             }
         }
@@ -87,7 +115,7 @@ static void Pictures_FixUp(NUGSCN **scene) {
             "pod_race", "anakin_flight", "gunship", "new_hope", "lego_city", "new_town",
         };
         for (i32 i = 0; i < 6; i++) {
-            NuSpecialFind(*scene, &LevHSpecial[20 + Pictures_NumLevels], const_cast<char *>(bonus_names[i]), 1);
+            NuSpecialFind(world->scene, &LevHSpecial[20 + Pictures_NumLevels], const_cast<char *>(bonus_names[i]), 1);
             Pictures_NumLevels++;
         }
     }
@@ -116,7 +144,11 @@ static void Titles_Init(WORLDINFO *world) {
             NuStrCpy(title_name, "titles_danish");
             break;
         default:
-            NuStrCpy(title_name, Text_Language == 0x12 ? "titles_us" : "titles_uk");
+            if (Text_Language == 0x12) {
+                NuStrCpy(title_name, "titles_us");
+            } else {
+                NuStrCpy(title_name, "titles_uk");
+            }
             break;
     }
 
@@ -133,11 +165,11 @@ static void Titles_Init(WORLDINFO *world) {
     }
 
     TitlesAlpha = 1.0f;
-    if (GAMEDEMO == 0) {
+    if (GAMEDEMO != 0) {
+        GAMEDEMO = 1;
+    } else {
         PlayerID[0] = id_DEFAULTCHARACTER[0];
         PlayerID[1] = id_DEFAULTCHARACTER[1];
-    } else {
-        GAMEDEMO = 1;
     }
 
     Door_Reset();
@@ -149,7 +181,7 @@ static void Titles_Init(WORLDINFO *world) {
         newgame_menudrawoff = 0;
     }
     BackDrop_ResetColours();
-    Pictures_FixUp(&world->scene);
+    Pictures_FixUp(world);
 }
 
 static void Titles_Update(WORLDINFO *) {

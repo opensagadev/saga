@@ -105,18 +105,20 @@ extern "C" {
     }
 
     void AnimList_NoLoad(i32 character_id, ...) {
+        i32 current_character = character_id;
         va_list characters;
         va_start(characters, character_id);
         do {
-            CHARACTERDATA *character = apicharsys != NULL ? &apicharsys->char_data[character_id] : NULL;
-            CHARACTERANIM_s *animations = character != NULL ? character->animations : NULL;
-            if (animations != NULL) {
-                for (CHARACTERANIM_s *animation = animations; animation->name != NULL; ++animation) {
+            CHARACTERDATA *character = apicharsys != NULL ? &apicharsys->char_data[current_character] : NULL;
+            CHARACTERANIM_s *animation = character != NULL ? character->animations : NULL;
+            if (animation != NULL) {
+                while (animation->name != NULL) {
                     animation->flags |= 0x8000;
+                    ++animation;
                 }
             }
-            character_id = va_arg(characters, i32);
-        } while (character_id != -1);
+            current_character = va_arg(characters, i32);
+        } while (current_character != -1);
         va_end(characters);
     }
 
@@ -125,14 +127,19 @@ extern "C" {
         CHARACTERANIM_s *animations = character != NULL ? character->animations : NULL;
         va_list groups;
         va_start(groups, character_id);
-        i32 group_id = va_arg(groups, i32);
-        while (group_id != -1) {
-            for (CHARACTERANIM_s *animation = animations; animation->name != NULL; ++animation) {
+        CHARACTERANIM_s *animation;
+        while (true) {
+            animation = animations;
+            i32 group_id = va_arg(groups, i32);
+            if (group_id == -1) {
+                break;
+            }
+            while (animation->name != NULL) {
                 if (animation->field_0x0a == group_id) {
                     animation->flags &= ~0x8000;
                 }
+                ++animation;
             }
-            group_id = va_arg(groups, i32);
         }
         va_end(groups);
     }

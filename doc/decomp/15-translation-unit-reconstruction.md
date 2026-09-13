@@ -2968,3 +2968,211 @@ Expressing its original sentinel-first loop makes it exact at 100%
 implementations, not symbol-retention or compiler-attribute tricks.
 The whole score reaches 45.683086%, with no additional scored
 regressions in this recovery sequence.
+
+### Credits/title shared initializer and portal-door owners
+
+The original `Credits_Init_Game` and `Titles_Init` call the same
+`Pictures_FixUp(WORLDINFO_s *)` helper. The former was still empty, so
+the current optimizer folded the helper into `Titles_Init`; its real
+body scored 0% and was nearly three times the original size. Restoring
+the credits music selection, three track-class handles, `Credits_Init`
+call, picture fixup, and level-matrix scale makes the helper shared
+again. A narrow declaration for `LastAData` in `area.h` and a real
+`Credits_Init` declaration in `levels.h` avoid source-local linker
+externs. The target report raises `Credits_Init_Game` 5.526316→70.52631%
+and `Titles_Init` 0→45.47619%; unchanged `Titles_Update` and
+`Titles_Draw` retain their scores. GCC naturally emits the specialized
+helper as `.isra.0`, while the original calls `.isra.1`, so the exact
+helper-symbol score remains 0%; no suffix or attribute workaround was
+added.
+
+The original optimized portal-door run is `PortalDoors_Configure`
+`0x472910`, `PortalDoors_Update` `0x472af0`, then `PortalDoors_Reset`
+`0x472c20`. The first two were split across `gizmo/object/gizportal.cpp`
+(`-O0`) and `props/doors/doors.cpp` (`-O3`), whereas `Reset` already
+matched exactly in `gizmos/transport/gizportal.cpp` (`-O3`). Moving the
+unchanged pair immediately before `Reset` in the latter owner raises
+`Configure` 16.66→86.84% and `Update` 72.47→72.66%, while `Reset`
+stays at 100%. The mixed-owner target comparison
+`/tmp/portal_configure_transport_trial.json` has no portal regression.
+
+Two final source-control-flow corrections in `apiobject.cpp` make
+`AnimList_NoLoad` and `AnimList_RequestAnimGroups` exact at 100%, using
+their original sentinel/inner-loop traversal without changing behavior
+or forcing codegen. The integrated target report reaches 45.702972%
+from the preceding commit's 45.683086%, with six improved and zero
+regressed original-address scores.
+
+Two subsequent, behavior-preserving `Titles_Init` source corrections
+follow its original branch layout: an explicit US/UK title-name branch
+instead of a compiler-selected pointer, and the original `GAMEDEMO`
+branch with player IDs assigned only in its `else` arm. The target body
+returns to the original 675-byte size and rises 45.47619→99.42262%
+in the normalized report, while credits initialization and title
+update/draw scores stay fixed. The remaining differences are relocation,
+stack-frame/local offsets, and independent player-active store order;
+none warrants padding, attributes, or instruction-order tricks.
+
+### Customiser function ownership trial
+
+The original `Customiser_*` run at `0x49fb20`–`0x4a29c0` is an optimized
+`-O2` material unit. Four already-implemented functions were still in
+`characters/core/customiser.cpp`, also `-O2`, while their neighbors
+lived in `menus/screens/customise.cpp`. The unchanged
+`Customiser_NextPieceLeft` (`0x49fc40`) and `NextPieceRight`
+(`0x49fd80`) moved with their sole-use 0x20-byte
+`CUSTOMPIECERESOURCE` layout into the latter file before
+`Customiser_LoadAccessories`. The exact `Customiser_ResetModelTextureIDs`
+(`0x4a1870`) and `Customiser_CopyDefaultPiecesToSave` (`0x4a1bd0`)
+moved to their neighboring function groups. The body-free
+`core/customiser.cpp` was initially removed, but that was reverted:
+the apparently empty source still emits the original
+`_GLOBAL__sub_I_customiser.cpp` initializer through its headers.
+Keeping this small `-O2` TU preserves the initializer assignment;
+the four moved functions remain in `customise.cpp` and no header/API
+signature changed.
+
+Each change was separately target-built and measured against the
+current working report: `/tmp/customiser_pre_trial.json` →
+`/tmp/customiser_nav_stage1.json` → `/tmp/customiser_exact_stage2.json`
+→ `/tmp/customiser_empty_owner_removed.json`. All four snapshots have
+the same 45.7107% whole-binary score and no original-address function
+score changes; both previously exact bodies stay at 100%. The removal
+snapshot had 523 Bazel units but left the original static initializer
+unassigned, so the source and its optimization mapping were restored
+after that trial. The restored report is 45.71068%, 524 units, and 890
+unassigned functions, with no scored change from the removal trial.
+Existing `customise.cpp` function order remains
+broadly interleaved with other menu functions, so this trial does not
+claim to have reconstructed the entire original sequence; no unrelated
+functions were reordered. Target build and `git diff --check` pass.
+
+### Customiser animation-load selection
+
+Original `Customiser_SetAnimsToLoad` at `0x49fb60` (218 bytes) loops
+over the two signed character IDs in `CUSTOMISER`, indexes the typed
+`CDataList` character records, and scans each 0x4c-byte
+`CHARACTERANIM_s` array until its null name. With loading disabled it
+clears bit `0x8000` in every animation's flags. With loading enabled
+it sets the bit, then clears it for animation IDs present in the
+customiser's `u16` allow-list at `+0xa68`, which is terminated by
+`0xffff`. It skips null animation tables and null allow-lists. The
+previous padding in the real `CUSTOMISER` type now exposes that pointer
+with a checked offset, without changing the struct size or API.
+
+The target-built `/tmp/customiser_set_anims_trial.json` compares
+against `/tmp/customiser_anims_baseline.json` at 45.7107%: this body
+rises 6.76→93.52%, and adjacent `Customiser_NextPieceLeft` rises
+75.90→79.25% through ordinary TU codegen. The only other changed
+address is the disjoint, concurrent `Credits_Init_Game` edit
+(70.53→99.89%); no address regresses. The mixed whole score becomes
+45.7172%. Target build and `git diff --check` pass; this bounded
+trial does not claim a full verification gate.
+
+The original `Credits_Init_Game` reloads `world->current_level` for
+each music-track assignment; the reconstructed source had cached the
+pointer across calls that could change it. Using the real field at
+each assignment restores that aliasing behavior and lifts the body
+70.52631→99.89474% without changing the title functions. The final
+integrated report reaches 45.71719% from the preceding commit's
+45.683086%, with eight improved and zero regressed original-address
+functions. Target, WASM, native, all three lint modes, repository
+checks, 13,425/13,425 original text symbols, and a 120-frame Map/Cantina
+smoke pass on this integrated source.
+
+### GameAudio function-owner trial
+
+The original optimized GameAudio text run is
+`GetPlrSfxBits` `0x4dd8c0`, `Reset` `0x4dd8f0`, `PlaySfxById`
+`0x4dd980`, `PlaySfx` `0x4dda50`, `Init` `0x4ddb20`, and `AddSfx`
+`0x4ddbc0`, followed by `SetActionMusicTimes` `0x4ddc40` in its
+separate static-data owner. The already-implemented `GetPlrSfxBits`
+and `PlaySfxById` bodies moved unchanged from `gameobjects.cpp` into
+the `-O3` `audio/sfx.cpp` owner. `Reset`, `PlaySfx`, and `Init` were
+placed in original relative order without body changes. The shared
+sound-position array is declared in its real `globals.h` header;
+`AddSfx` has a real audio-header declaration.
+
+Moving exact `AddSfx` into the same run was separately tried but
+rejected: `/tmp/gameaudio_owner_trial.json` changed it 100→99.14%
+and adjacent `AddLevSfx` 27.20→27.16%. Its body therefore stays in
+`gameobjects.cpp`. The accepted two-move
+`/tmp/gameaudio_two_move_trial.json` leaves every GameAudio original-
+address score unchanged against `/tmp/gameaudio_baseline.json`
+(45.7172%), including exact `AddSfx`; no exact match is lost. The
+only differences in that final mixed report are concurrent disjoint
+Attractos/Torpedo changes, not GameAudio. The target build and
+`git diff --check` pass; root handles the full combined gate.
+
+### Technos two-helper ownership trial
+
+The original contiguous Technos run includes `StoreProgress`
+`0x1db4a0`, exact `FindControllingTechno` `0x1db530`, `FindTgt`
+`0x1db590`, `TgtPos` `0x1db770`, `MoveTarget` `0x1db830`, and
+`RegisterGizmo` `0x1dbbe0`. The already-implemented `FindTgt` and
+`TgtPos` bodies moved unchanged from `props/objects/techno.cpp` into
+`gizmos/object/technos.cpp` immediately after `FindControllingTechno`,
+with real declarations in `technos.h`.
+
+The original file-static `TechnoMoveSpeed[2]` cannot be moved with
+`MoveTarget` alone: `Techno_MoveCode` also writes it when operation
+begins. Moving only the array would split state, and exporting it
+would alter its local linkage. `MoveTarget` and the array therefore
+remain together in `props/objects/techno.cpp` for this bounded trial.
+
+The target-built `/tmp/technos_two_body_trial.json` changes no
+Technos original-address score against
+`/tmp/technos_two_body_baseline.json`: `FindControllingTechno` stays
+exact, `TgtPos` stays 99.72%, `FindTgt` stays 0%, and `MoveTarget`
+stays 77.71%. The mixed whole score rises 45.7172→45.7312% from
+concurrent disjoint Customiser, Credits, and Attractos edits; the
+unrelated TorpedoCode shift is -0.01 point. Both target and native
+links pass on the finalized source, as does `git diff --check`.
+
+### Attractos boundary and resource/credits bodies
+
+The original `Attractos_StoreProgress` (`0x1dd090`) is followed by
+`Attractos_InitTerrain` (`0x1dd1c0`) before the collect-side
+`Attracto_FindNearest` (`0x1dd230`). Moving only the unchanged terrain
+initializer from `items/collect/attracto.cpp` to the neighboring
+`gizmos/traps/attractos.cpp` preserves the collect-side static-data
+cluster and gives the caller a real `attractos.h` declaration. Its
+score rises 98.66→99.09%. The same report records a 37.11→37.10%
+shift in unrelated `TorpedoCode`; no exact match is lost. The larger
+Attracto gameplay cluster was not moved: its local static and the
+interleaved `Attractos_RegisterGizmo` do not establish a single owner.
+
+The original 576-byte file-local `Accessory` array is two sets of nine
+0x20-byte resource records. `Customiser_LoadAccessories` now uses that
+real static state, the -1-terminated model list, the two customiser
+character IDs, typed piece/category fields, and the original nine
+category resource paths. The graphics hierarchy has the same
+material-array/count prefix at +0x0c/+0x10 as `NUGSCN`: this is backed
+by the shared graphics-data loader and `NuHGobjDestroy` passing its
+hierarchy to `NuGScnRemove`, with checked offsets in `nuhgobj.h`.
+The texture branch swaps the matching material texture and updates
+the material; the scene branch loads the `.gsc` and finds its special.
+The unchanged adjacent Customiser scores and the target build guard
+the trial. The loader improves 2.86→61.32%; remaining differences
+are not filled with artificial guards or compiler controls.
+
+The original credits unit has a contiguous `Load`/`Init`/`DrawPanel`/
+`UpdateMenu`/`GetInfo` text run. `Credits_Init` now resets the four
+credits variables, conditionally resets backdrop colours when
+`LastLData != STATUS_LDATA`, and hooks the touch press-start action;
+`Credits_GetInfo` copies the duration, flag, and alpha to non-null
+outputs. Measured target builds at the existing optimization and at
+`-O2`/`-O3` establish the unit's `-O3` override: `Init` reaches 100%,
+`GetInfo` 92.73%, and `_GLOBAL__sub_I_credits.cpp` 99.35%, with no
+exact loss. The remaining `GetInfo` difference is the original's
+load from writable `Credits_Duration` versus the current folded
+120.0f constant; no volatility or attribute was added to force it.
+
+The integrated normalized report is 45.7312% versus the prior
+45.6831% commit: 16 original-address functions improve, one unrelated
+body shifts -0.01 point, and three exact matches are gained with none
+lost. The target, WASM, and native builds and all three lint modes
+pass; repository checks are 4/4, original text symbols 13,425/13,425,
+and the 120-frame Map/Cantina smoke passes. The separate intermittent
+tiny-movement sanitizer issue remains documented and the original
+movement behavior remains unchanged for matching.

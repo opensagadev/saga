@@ -3978,27 +3978,6 @@ void GameAntiNodeData_Read(GAMEANTINODEDATA_s *data) {
     data->mode = static_cast<u8>(EdFileReadChar());
 }
 
-extern "C" {
-    extern NUVEC nusound_special_positions[5];
-    void PlaySfxById(i32 sfx_id, nuvec_s *position);
-}
-
-void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32) {
-    if (flags == 0) {
-        PlaySfxById(sfx_id, position);
-        return;
-    }
-    if ((flags & ~2) == 1) {
-        nusound_special_positions[1] = *position;
-        PlaySfxById(sfx_id, &nusound_special_positions[1]);
-    }
-    flags -= 2;
-    if (static_cast<u32>(flags) <= 1) {
-        nusound_special_positions[2] = *position;
-        PlaySfxById(sfx_id, &nusound_special_positions[2]);
-    }
-}
-
 void Game_GotAllGoldBricks() {
 }
 
@@ -4095,15 +4074,6 @@ apply_layers:
 
 void GameRegisterGizActions() {
     RegisterGizActions(game_gizactiondefs);
-}
-
-i32 GameAudio_GetPlrSfxBits(void *object_ptr) {
-    APIOBJECT *object = static_cast<APIOBJECT *>(object_ptr);
-    i32 sfx_bits = 0;
-    if (object != NULL && static_cast<i8>(object->flags_low) < 0) {
-        sfx_bits = 1 << object->field_0x27c;
-    }
-    return sfx_bits;
 }
 
 void GameBlowUpBlownUpFn_LSW(GIZMOBLOWUP_s *) {

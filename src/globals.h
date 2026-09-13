@@ -37,6 +37,7 @@ extern f32 BOLT_OVERRIDE_PLAYERBOLTSPEED;
 extern f32 BOLT_OVERRIDE_PLAYERBOLTDURATION;
 extern u8 CutSceneCameraCTRL;
 extern f32 nusound_fade_start;
+extern "C" NUVEC nusound_special_positions[5];
 extern f32 nusound_fade_end;
 extern i32 (*SetSoundFadeDistCallBackFn)(WORLDINFO_s *world);
 
