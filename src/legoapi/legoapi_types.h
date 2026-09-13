@@ -724,7 +724,10 @@ struct CHARPLATFORMSYS_s {
     CHARPLATFORM_s platforms[1];
 };
 DECOMP_ASSERT(offsetof(CHARPLATFORMSYS_s, platforms) == 0x8, "CHARPLATFORMSYS platforms offset");
-struct CHARVARIANT {};
+struct CHARVARIANT {
+    char *name;
+};
+DECOMP_ASSERT(sizeof(CHARVARIANT) == 4, "CHARVARIANT size");
 struct CHEAT;
 struct CLIMBOBJECT_s {
     NUVEC normal;
@@ -770,9 +773,9 @@ struct CUSTOMISER {
     i32 model_texture_ids[18];         // 0x208
     u8 pad_0x250[0xa68 - 0x250];
     u16 *animation_ids_to_load; // 0xa68; 0xffff-terminated allow-list
-    u8 animation_active[2];  // 0xa6c
-    u8 animation_state[2];   // 0xa6e
-    i32 animation_values[2]; // 0xa70
+    u8 animation_active[2];     // 0xa6c
+    u8 animation_state[2];      // 0xa6e
+    i32 animation_values[2];    // 0xa70
     u8 pad_0xa78[0xc28 - 0xa78];
     i16 default_pieces[2][10]; // 0xc28; nine saved pieces plus one unused entry per character
 };

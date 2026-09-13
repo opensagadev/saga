@@ -18,6 +18,7 @@ import re
 
 from scripts.restructure.elf32 import SHF_ALLOC, read_elf32, workspace_root
 from scripts.restructure.inputs import read_units_manifest
+from scripts.restructure.text_adjacency import text_adjacency_edges, calibrate_text_edges
 
 STT_FILE = 4
 CONSTRUCTOR = re.compile(r"^_GLOBAL__sub_I_(.+)$")
@@ -233,6 +234,7 @@ def calibrate(
     for symbol in symbols:
         symbol["owners"] = sorted(owners.get(_owner_key(symbol), ()))
     blocks, assignments = local_blocks(symbols)
+    text_edges = text_adjacency_edges(symbols)
     return {
         "rules": {
             "file_symbols": "STT_FILE removed before all inference",
@@ -254,6 +256,7 @@ def calibrate(
         "address_contiguity": address_contiguity(symbols),
         "block_purity": block_purity(symbols, assignments),
         "file_ground_truth": file_block_purity(symbols, assignments, labels),
+        "text_edge_file_calibration": calibrate_text_edges(symbols, text_edges, labels),
     }
 
 
@@ -284,6 +287,7 @@ def main() -> None:
     print(json.dumps(report["address_contiguity"], indent=2))
     print(json.dumps({k: v for k, v in report["block_purity"].items() if k != "blocks"}, indent=2))
     print(json.dumps({k: v for k, v in report["file_ground_truth"].items() if k != "blocks"}, indent=2))
+    print(json.dumps(report["text_edge_file_calibration"], indent=2))
     print(f"Wrote {output}")
 
 

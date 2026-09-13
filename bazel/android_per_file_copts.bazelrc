@@ -164,7 +164,6 @@ build:target --per_file_copt=^src/legoapi/world/levels/episodeIV\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levels/episodeV\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levels/episodeVI\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levels/hub\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/world/levels/lego_city\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/world/levels/episode\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_teleport\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_gizactions\.cpp$@-O3

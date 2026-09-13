@@ -21,6 +21,7 @@ void TextCrawl_Draw(f32 dt, i32 paragraphs, f32 alpha, char *text);
 extern "C" {
 #endif
     void SetQFont2D(void);
+    void Text3DStringEncode(char *src, u16 *dst);
     void Set3DGameFont(vufnt_s *font);
     void SetGameFont(vufnt_s *font);
     extern i32 MenuStopDraw;

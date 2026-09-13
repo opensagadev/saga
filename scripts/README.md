@@ -15,7 +15,7 @@ The configured Git hook has one short call chain:
 git commit
   -> .githooks/pre-commit
   -> bazel run //scripts:pre_commit
-  -> Bazel-provided clang-format -i (all C/C++ files under src/)
+  -> Bazel-provided clang-format -i (staged C/C++ files under src/)
   -> git diff --cached --check
   -> bazel test //scripts/checks:checks
   -> bazel build --config=<mode> //src:clang_tidy_<mode>
@@ -24,8 +24,9 @@ git commit
   -> bazel run //scripts:generate_bazel_objdiff_report
 ```
 
-Safe formatter changes are staged automatically; files with pre-existing
-unstaged or untracked edits stop the hook for review. The binary-dependent
+Formatter changes to staged files are staged automatically. A staged source
+with additional unstaged edits stops the hook before formatting; unrelated
+unstaged and untracked files are untouched. The binary-dependent
 steps are skipped when the locally supplied `res/libTTapp.so` is absent. The
 hook writes and automatically stages `matching.json` and the marked matching
 table in `README.md`. Unsupported clang-tidy modes are omitted: macOS has no

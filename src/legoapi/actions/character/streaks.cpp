@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "legoapi/actions/character/streaks.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
 
@@ -125,6 +126,10 @@ void ResetStreaks() {
 }
 
 void UpdateStreaks(float) {
+    STUBBED();
+}
+
+void DrawStreaks() {
     STUBBED();
 }
 

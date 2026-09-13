@@ -185,8 +185,6 @@ void AddDevice(nufile_device_s *) {
     STUBBED();
 }
 
-extern NUGSCN *IconScene_FindById(i32 character_id);
-
 // LevelObjects_InitForLevel @0x475630. Creates the runtime model table and
 // resolves each registered model from the scene selected by its table kind.
 // Found models are hidden in their source scene: their runtime handle is the

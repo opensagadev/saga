@@ -3,6 +3,7 @@
 #include "nu2api/nu3d/nulgtlaser.h"
 #include "legoapi/gizmos/traps/gizforce.h"
 #include "legoapi/gizmos/object/gizobstacles.h"
+#include "legoapi/gizmos/object/newblowup.h"
 #include "legoapi/audio/sfx.h"
 #include "nu2api/numath/nurand.h"
 #include "legoapi/core/input/qrand.h"
@@ -158,6 +159,80 @@ bool SarlaccPitDiscoActive(WORLDINFO_s *) {
 }
 
 // ===========================================================================
+// Bonus levels: Lego City, Senate, New Town
+// ===========================================================================
+
+static u8 prevOnTaunTaun;
+static u8 prevOnTractor;
+static u8 prevOnMoonCar;
+static u8 prevOnTownCar;
+
+void LegoCity_Init(WORLDINFO_s *) {
+    STUBBED();
+}
+
+void LegoCity_Reset(WORLDINFO_s *world) {
+    prevOnTaunTaun = 0;
+    prevOnTractor = 0;
+    prevOnMoonCar = 0;
+    prevOnTownCar = 0;
+
+    GIZMOPICKUP_s *pickup = world->pickup_sys->pickups;
+    if (pickup == NULL) {
+        return;
+    }
+    if (world->pickup_sys->pickup_count <= 0) {
+        return;
+    }
+
+    for (i32 pickup_index = 0; pickup != NULL && pickup_index < world->pickup_sys->pickup_count;
+         ++pickup_index, ++pickup) {
+        if ((pickup->runtime_flags & 8) == 0) {
+            switch (pickup->type_id) {
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                    pickup->collected = 0;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+}
+
+void LegoCity_Update(WORLDINFO_s *) {
+    STUBBED();
+}
+
+void SenateA_Init(WORLDINFO_s *) {
+    STUBBED();
+}
+
+void NewTown_Init(WORLDINFO_s *world) {
+    LevGizmo[0] = GizmoFindByName(world->gizmo_sys, blowup_gizmotype_id, "newtown");
+    char buf[0x18];
+    i32 i = 1;
+    for (;;) {
+        sprintf(buf, "%i", i);
+        GIZMOBLOWUP_s *g = GizmoBlowUp_FindByName(world, buf);
+        if (g == NULL)
+            break;
+        g->field_0xa0 |= 2;
+        i++;
+    }
+}
+
+void NewTown_Reset(WORLDINFO_s *) {
+    STUBBED();
+}
+
+void NewTown_Update(WORLDINFO_s *) {
+    STUBBED();
+}
+
+// ===========================================================================
 // Endor battle (EndorBattle_A / C)
 // ===========================================================================
 
@@ -170,6 +245,18 @@ void EndorBattleC_Init(WORLDINFO_s *) {
 }
 
 void EndorBattleA_Update(WORLDINFO_s *) {
+    STUBBED();
+}
+
+void Platform_Init(WORLDINFO_s *world) {
+    NuSpecialFind(world->current_gscn, &LevHSpecial[0], const_cast<char *>("slave1_level"), 0);
+}
+
+void Platform_Reset(WORLDINFO_s *) {
+    NuSpecialSetVisibility(&LevHSpecial[0], 0);
+}
+
+void E1CharacterBonus_Init(WORLDINFO_s *) {
     STUBBED();
 }
 

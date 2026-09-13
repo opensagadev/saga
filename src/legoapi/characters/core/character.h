@@ -35,6 +35,8 @@ extern BLADE_s BladeTab[4];
 struct nugscn_s;
 struct nuhgobj_s;
 struct CHARACTERMODEL_s;
+struct CHARVARIANT;
+struct APICHARACTERMODELLIST_s;
 struct APIDEBRISSYS_s;
 struct ANIMPACKET_s;
 struct NUJOINTANIM_s;
@@ -588,6 +590,12 @@ extern "C" {
 
 i32 CharIDFromName(char *name);
 CHARACTERDATA *CDataFromName(char *name);
+void CharVariants_Init(CHARVARIANT *variants, i32 count);
+i32 CharVariant_Find(char *name);
+void IconScenes_Init(char *path, VARIPTR *buf, VARIPTR *buf_end);
+struct nugscn_s *IconScene_FindById(i32 character_id);
+void IconScenes_Load(APICHARACTERMODELLIST_s *list, i32 permanent, VARIPTR *buf, VARIPTR *buf_end);
+void IconScenes_Dump();
 
 extern "C" {
 #endif

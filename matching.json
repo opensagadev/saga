@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 45.87699,
+    "fuzzy_match_percent": 45.88864,
     "total_code": "4722419",
-    "matched_code": "398998",
-    "matched_code_percent": 8.449018,
+    "matched_code": "399251",
+    "matched_code_percent": 8.454375,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4740,
-    "matched_functions_percent": 35.218067,
+    "matched_functions": 4742,
+    "matched_functions_percent": 35.23293,
     "total_units": 1
   },
   "text": {
@@ -25031,12 +25031,6 @@
       ]
     },
     {
-      "name": "gameapi/ai/gameai_cs.cpp.o",
-      "source": "src/gameapi/ai/gameai_cs.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/gameai_cs.o",
-      "functions": []
-    },
-    {
       "name": "gameapi/ai/gameai_d.cpp.o",
       "source": "src/gameapi/ai/gameai_d.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/gameai_d.o",
@@ -36677,12 +36671,92 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z12fullcodenamei",
+          "demangled_name": "fullcodename(int)",
+          "address": 3178958,
+          "offset": 2288990,
+          "size": 175,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZL16saveload_getinfov",
           "demangled_name": "saveload_getinfo()",
           "address": 3179133,
           "offset": 2289165,
           "size": 272,
           "match_percent": 99.984375
+        },
+        {
+          "name": "saveloadLoadIcon",
+          "demangled_name": "saveloadLoadIcon",
+          "address": 3179405,
+          "offset": 2289437,
+          "size": 10,
+          "match_percent": 80.0
+        },
+        {
+          "name": "saveloadCheckCardPresent",
+          "demangled_name": "saveloadCheckCardPresent",
+          "address": 3179415,
+          "offset": 2289447,
+          "size": 10,
+          "match_percent": 80.0
+        },
+        {
+          "name": "saveloadCheckCardType",
+          "demangled_name": "saveloadCheckCardType",
+          "address": 3179425,
+          "offset": 2289457,
+          "size": 10,
+          "match_percent": 80.0
+        },
+        {
+          "name": "saveloadCheckCardFormatted",
+          "demangled_name": "saveloadCheckCardFormatted",
+          "address": 3179435,
+          "offset": 2289467,
+          "size": 10,
+          "match_percent": 80.0
+        },
+        {
+          "name": "saveloadCheckCardFreeSpace",
+          "demangled_name": "saveloadCheckCardFreeSpace",
+          "address": 3179445,
+          "offset": 2289477,
+          "size": 10,
+          "match_percent": 80.0
+        },
+        {
+          "name": "saveloadFormatCard",
+          "demangled_name": "saveloadFormatCard",
+          "address": 3179455,
+          "offset": 2289487,
+          "size": 10,
+          "match_percent": 80.0
+        },
+        {
+          "name": "saveloadUnFormatCard",
+          "demangled_name": "saveloadUnFormatCard",
+          "address": 3179465,
+          "offset": 2289497,
+          "size": 10,
+          "match_percent": 80.0
+        },
+        {
+          "name": "_Z20saveloadGetDirectoryv",
+          "demangled_name": "saveloadGetDirectory()",
+          "address": 3179475,
+          "offset": 2289507,
+          "size": 10,
+          "match_percent": 80.0
+        },
+        {
+          "name": "saveloadCheckSlotsUsed",
+          "demangled_name": "saveloadCheckSlotsUsed",
+          "address": 3179485,
+          "offset": 2289517,
+          "size": 119,
+          "match_percent": 11.428572
         },
         {
           "name": "_Z10PCSaveSlotiPvij",
@@ -36709,6 +36783,30 @@
           "match_percent": 99.98077
         },
         {
+          "name": "saveloadDeleteSlot",
+          "demangled_name": "saveloadDeleteSlot",
+          "address": 3180417,
+          "offset": 2290449,
+          "size": 56,
+          "match_percent": 22.222221
+        },
+        {
+          "name": "saveloadCheckKeyCode",
+          "demangled_name": "saveloadCheckKeyCode",
+          "address": 3180473,
+          "offset": 2290505,
+          "size": 10,
+          "match_percent": 80.0
+        },
+        {
+          "name": "saveloadWriteKeyCode",
+          "demangled_name": "saveloadWriteKeyCode",
+          "address": 3180483,
+          "offset": 2290515,
+          "size": 10,
+          "match_percent": 80.0
+        },
+        {
           "name": "saveloadASSave",
           "demangled_name": "saveloadASSave",
           "address": 3180493,
@@ -36733,6 +36831,14 @@
           "match_percent": 99.925
         },
         {
+          "name": "saveloadASFormat",
+          "demangled_name": "saveloadASFormat",
+          "address": 3180872,
+          "offset": 2290904,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
           "name": "saveloadASDelete",
           "demangled_name": "saveloadASDelete",
           "address": 3180877,
@@ -36747,6 +36853,14 @@
           "offset": 2290996,
           "size": 62,
           "match_percent": 100.0
+        },
+        {
+          "name": "saveloadAutoSave",
+          "demangled_name": "saveloadAutoSave",
+          "address": 3181026,
+          "offset": 2291058,
+          "size": 101,
+          "match_percent": 12.903226
         }
       ]
     },
@@ -37054,12 +37168,6 @@
           "match_percent": 44.848484
         }
       ]
-    },
-    {
-      "name": "gamelib/util/CRC16_plain.cpp.o",
-      "source": "src/gamelib/util/CRC16_plain.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gamelib/CRC16_plain.o",
-      "functions": []
     },
     {
       "name": "gamelib/util/Ftp.cpp.o",
@@ -39681,12 +39789,6 @@
       ]
     },
     {
-      "name": "legoapi/actions/character/speederchase_stubs.cpp.o",
-      "source": "src/legoapi/actions/character/speederchase_stubs.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/speederchase_stubs.o",
-      "functions": []
-    },
-    {
       "name": "legoapi/actions/character/starwars.cpp.o",
       "source": "src/legoapi/actions/character/starwars.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/starwars.o",
@@ -39745,6 +39847,14 @@
           "offset": 3977360,
           "size": 368,
           "match_percent": 4.173913
+        },
+        {
+          "name": "_Z11DrawStreaksv",
+          "demangled_name": "DrawStreaks()",
+          "address": 4867696,
+          "offset": 3977728,
+          "size": 891,
+          "match_percent": 1.85022
         },
         {
           "name": "_Z12ResetStreaksv",
@@ -41887,12 +41997,6 @@
       ]
     },
     {
-      "name": "legoapi/ai/game/aitrigger_stubs.cpp.o",
-      "source": "src/legoapi/ai/game/aitrigger_stubs.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/aitrigger_stubs.o",
-      "functions": []
-    },
-    {
       "name": "legoapi/ai/game/creature.cpp.o",
       "source": "src/legoapi/ai/game/creature.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/creature.o",
@@ -43958,14 +44062,6 @@
           "match_percent": 99.962265
         },
         {
-          "name": "_Z21E1CharacterBonus_InitP11WORLDINFO_s",
-          "demangled_name": "E1CharacterBonus_Init(WORLDINFO_s*)",
-          "address": 2269824,
-          "offset": 1379856,
-          "size": 61,
-          "match_percent": 26.25
-        },
-        {
           "name": "_Z18UpdateCharacterIDsv",
           "demangled_name": "UpdateCharacterIDs()",
           "address": 2381504,
@@ -43988,14 +44084,6 @@
           "offset": 2238416,
           "size": 333,
           "match_percent": 5.060241
-        },
-        {
-          "name": "_Z12fullcodenamei",
-          "demangled_name": "fullcodename(int)",
-          "address": 3178958,
-          "offset": 2288990,
-          "size": 175,
-          "match_percent": 8.4
         },
         {
           "name": "_Z14CharIDFromNamePc",
@@ -44170,7 +44258,7 @@
           "address": 4595072,
           "offset": 3705104,
           "size": 40,
-          "match_percent": 38.18182
+          "match_percent": 99.818184
         },
         {
           "name": "_Z16CharVariant_FindPc",
@@ -44178,7 +44266,7 @@
           "address": 4595120,
           "offset": 3705152,
           "size": 111,
-          "match_percent": 10.5
+          "match_percent": 99.525
         },
         {
           "name": "_ZL17CC_clear_sfx_miscP8nufpar_s",
@@ -46837,22 +46925,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z13Platform_InitP11WORLDINFO_s",
-          "demangled_name": "Platform_Init(WORLDINFO_s*)",
-          "address": 2269696,
-          "offset": 1379728,
-          "size": 68,
-          "match_percent": 99.6875
-        },
-        {
-          "name": "_Z14Platform_ResetP11WORLDINFO_s",
-          "demangled_name": "Platform_Reset(WORLDINFO_s*)",
-          "address": 2269776,
-          "offset": 1379808,
-          "size": 44,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z12SkinPlatformP10terrsitu_sPhP12PLATSKININFO",
           "demangled_name": "SkinPlatform(terrsitu_s*, unsigned char*, PLATSKININFO*)",
           "address": 3629696,
@@ -48976,118 +49048,6 @@
           "offset": 939856,
           "size": 9,
           "match_percent": 24.444445
-        },
-        {
-          "name": "saveloadLoadIcon",
-          "demangled_name": "saveloadLoadIcon",
-          "address": 3179405,
-          "offset": 2289437,
-          "size": 10,
-          "match_percent": 80.0
-        },
-        {
-          "name": "saveloadCheckCardPresent",
-          "demangled_name": "saveloadCheckCardPresent",
-          "address": 3179415,
-          "offset": 2289447,
-          "size": 10,
-          "match_percent": 80.0
-        },
-        {
-          "name": "saveloadCheckCardType",
-          "demangled_name": "saveloadCheckCardType",
-          "address": 3179425,
-          "offset": 2289457,
-          "size": 10,
-          "match_percent": 80.0
-        },
-        {
-          "name": "saveloadCheckCardFormatted",
-          "demangled_name": "saveloadCheckCardFormatted",
-          "address": 3179435,
-          "offset": 2289467,
-          "size": 10,
-          "match_percent": 80.0
-        },
-        {
-          "name": "saveloadCheckCardFreeSpace",
-          "demangled_name": "saveloadCheckCardFreeSpace",
-          "address": 3179445,
-          "offset": 2289477,
-          "size": 10,
-          "match_percent": 80.0
-        },
-        {
-          "name": "saveloadFormatCard",
-          "demangled_name": "saveloadFormatCard",
-          "address": 3179455,
-          "offset": 2289487,
-          "size": 10,
-          "match_percent": 80.0
-        },
-        {
-          "name": "saveloadUnFormatCard",
-          "demangled_name": "saveloadUnFormatCard",
-          "address": 3179465,
-          "offset": 2289497,
-          "size": 10,
-          "match_percent": 80.0
-        },
-        {
-          "name": "_Z20saveloadGetDirectoryv",
-          "demangled_name": "saveloadGetDirectory()",
-          "address": 3179475,
-          "offset": 2289507,
-          "size": 10,
-          "match_percent": 80.0
-        },
-        {
-          "name": "saveloadCheckSlotsUsed",
-          "demangled_name": "saveloadCheckSlotsUsed",
-          "address": 3179485,
-          "offset": 2289517,
-          "size": 119,
-          "match_percent": 11.428572
-        },
-        {
-          "name": "saveloadDeleteSlot",
-          "demangled_name": "saveloadDeleteSlot",
-          "address": 3180417,
-          "offset": 2290449,
-          "size": 56,
-          "match_percent": 22.222221
-        },
-        {
-          "name": "saveloadCheckKeyCode",
-          "demangled_name": "saveloadCheckKeyCode",
-          "address": 3180473,
-          "offset": 2290505,
-          "size": 10,
-          "match_percent": 80.0
-        },
-        {
-          "name": "saveloadWriteKeyCode",
-          "demangled_name": "saveloadWriteKeyCode",
-          "address": 3180483,
-          "offset": 2290515,
-          "size": 10,
-          "match_percent": 80.0
-        },
-        {
-          "name": "saveloadASFormat",
-          "demangled_name": "saveloadASFormat",
-          "address": 3180872,
-          "offset": 2290904,
-          "size": 5,
-          "match_percent": 100.0
-        },
-        {
-          "name": "saveloadAutoSave",
-          "demangled_name": "saveloadAutoSave",
-          "address": 3181026,
-          "offset": 2291058,
-          "size": 101,
-          "match_percent": 12.903226
         },
         {
           "name": "_Z21FS_MakeDateTimeStringP15FS_FILEENTRYHDRPc",
@@ -54768,12 +54728,6 @@
       ]
     },
     {
-      "name": "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
-      "source": "src/legoapi/gizmo/gizmos/gizmos_lever.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizmos_lever.o",
-      "functions": []
-    },
-    {
       "name": "legoapi/gizmo/gizmos/gizmos_teleport.cpp.o",
       "source": "src/legoapi/gizmo/gizmos/gizmos_teleport.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizmos_teleport.o",
@@ -56712,8 +56666,16 @@
     {
       "name": "legoapi/gizmos/door/plugs.cpp.o",
       "source": "src/legoapi/gizmos/door/plugs.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/0/plugs.o",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/plugs.o",
       "functions": [
+        {
+          "name": "_GLOBAL__sub_I_plugs.cpp",
+          "demangled_name": "_GLOBAL__sub_I_plugs.cpp",
+          "address": 926720,
+          "offset": 36752,
+          "size": 93,
+          "match_percent": 99.35294
+        },
         {
           "name": "_ZL13Plug_ActivateP7GIZMO_si",
           "demangled_name": "Plug_Activate(GIZMO_s*, int)",
@@ -58327,8 +58289,16 @@
     {
       "name": "legoapi/gizmos/object/lever.cpp.o",
       "source": "src/legoapi/gizmos/object/lever.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/0/lever.o",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/lever.o",
       "functions": [
+        {
+          "name": "_GLOBAL__sub_I_lever.cpp",
+          "demangled_name": "_GLOBAL__sub_I_lever.cpp",
+          "address": 897504,
+          "offset": 7536,
+          "size": 93,
+          "match_percent": 99.35294
+        },
         {
           "name": "_ZL25Levers_ReserveBufferSpacePv",
           "demangled_name": "Levers_ReserveBufferSpace(void*)",
@@ -59242,8 +59212,16 @@
     {
       "name": "legoapi/gizmos/transport/teleport.cpp.o",
       "source": "src/legoapi/gizmos/transport/teleport.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/0/teleport.o",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/teleport.o",
       "functions": [
+        {
+          "name": "_GLOBAL__sub_I_teleport.cpp",
+          "demangled_name": "_GLOBAL__sub_I_teleport.cpp",
+          "address": 894768,
+          "offset": 4800,
+          "size": 93,
+          "match_percent": 99.35294
+        },
         {
           "name": "_ZL20Teleport_ActivateRevP7GIZMO_sii",
           "demangled_name": "Teleport_ActivateRev(GIZMO_s*, int, int)",
@@ -63544,12 +63522,6 @@
       ]
     },
     {
-      "name": "legoapi/items/collect/bolts_stubs.cpp.o",
-      "source": "src/legoapi/items/collect/bolts_stubs.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/bolts_stubs.o",
-      "functions": []
-    },
-    {
       "name": "legoapi/items/collect/detonator.cpp.o",
       "source": "src/legoapi/items/collect/detonator.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/detonator.o",
@@ -67625,12 +67597,6 @@
       ]
     },
     {
-      "name": "legoapi/items/objects/plugs.cpp.o",
-      "source": "src/legoapi/items/objects/plugs.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/1/plugs.o",
-      "functions": []
-    },
-    {
       "name": "legoapi/items/objects/things.cpp.o",
       "source": "src/legoapi/items/objects/things.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/things.o",
@@ -70445,7 +70411,7 @@
           "address": 4358384,
           "offset": 3468416,
           "size": 102,
-          "match_percent": 14.482758
+          "match_percent": 99.48276
         },
         {
           "name": "MenuInMemoryCardLoad",
@@ -70725,7 +70691,7 @@
           "address": 4588592,
           "offset": 3698624,
           "size": 137,
-          "match_percent": 99.833336
+          "match_percent": 99.97222
         },
         {
           "name": "_Z18IconScene_FindByIdi",
@@ -70741,7 +70707,7 @@
           "address": 4588784,
           "offset": 3698816,
           "size": 332,
-          "match_percent": 85.83721
+          "match_percent": 85.89535
         },
         {
           "name": "_Z15IconScenes_Dumpv",
@@ -72040,12 +72006,6 @@
           "match_percent": 100.0
         }
       ]
-    },
-    {
-      "name": "legoapi/misc/legoapi_helpers.cpp.o",
-      "source": "src/legoapi/misc/legoapi_helpers.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/legoapi_helpers.o",
-      "functions": []
     },
     {
       "name": "legoapi/misc/legoapi_misc.cpp.o",
@@ -73601,12 +73561,6 @@
       ]
     },
     {
-      "name": "legoapi/props/objects/lever.cpp.o",
-      "source": "src/legoapi/props/objects/lever.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/1/lever.o",
-      "functions": []
-    },
-    {
       "name": "legoapi/props/objects/signal.cpp.o",
       "source": "src/legoapi/props/objects/signal.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/signal.o",
@@ -73707,12 +73661,6 @@
           "match_percent": 26.120253
         }
       ]
-    },
-    {
-      "name": "legoapi/props/objects/teleport.cpp.o",
-      "source": "src/legoapi/props/objects/teleport.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/1/teleport.o",
-      "functions": []
     },
     {
       "name": "legoapi/props/objects/tightrope.cpp.o",
@@ -73964,6 +73912,14 @@
       "source": "src/legoapi/props/system/socksysall.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/socksysall.o",
       "functions": [
+        {
+          "name": "_ZL7RotDifftt",
+          "demangled_name": "RotDiff(unsigned short, unsigned short)",
+          "address": 3916433,
+          "offset": 3026465,
+          "size": 78,
+          "match_percent": 100.0
+        },
         {
           "name": "_ZL15AdjustMinMaxBoxP7nuvec_sS0_S0_",
           "demangled_name": "AdjustMinMaxBox(nuvec_s*, nuvec_s*, nuvec_s*)",
@@ -74253,12 +74209,6 @@
           "match_percent": 8.888889
         }
       ]
-    },
-    {
-      "name": "legoapi/props/system/socksysall_stubs.cpp.o",
-      "source": "src/legoapi/props/system/socksysall_stubs.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/socksysall_stubs.o",
-      "functions": []
     },
     {
       "name": "legoapi/render/core/gameliball.cpp.o",
@@ -75494,14 +75444,6 @@
           "offset": 3920240,
           "size": 693,
           "match_percent": 87.48062
-        },
-        {
-          "name": "_Z11DrawStreaksv",
-          "demangled_name": "DrawStreaks()",
-          "address": 4867696,
-          "offset": 3977728,
-          "size": 891,
-          "match_percent": 1.85022
         },
         {
           "name": "_Z16DrawGameMessagesv",
@@ -85053,6 +84995,62 @@
           "match_percent": 2.089552
         },
         {
+          "name": "_Z13LegoCity_InitP11WORLDINFO_s",
+          "demangled_name": "LegoCity_Init(WORLDINFO_s*)",
+          "address": 2264496,
+          "offset": 1374528,
+          "size": 105,
+          "match_percent": 13.548388
+        },
+        {
+          "name": "_Z14LegoCity_ResetP11WORLDINFO_s",
+          "demangled_name": "LegoCity_Reset(WORLDINFO_s*)",
+          "address": 2264608,
+          "offset": 1374640,
+          "size": 124,
+          "match_percent": 93.74286
+        },
+        {
+          "name": "_Z15LegoCity_UpdateP11WORLDINFO_s",
+          "demangled_name": "LegoCity_Update(WORLDINFO_s*)",
+          "address": 2264736,
+          "offset": 1374768,
+          "size": 2241,
+          "match_percent": 0.983607
+        },
+        {
+          "name": "_Z12SenateA_InitP11WORLDINFO_s",
+          "demangled_name": "SenateA_Init(WORLDINFO_s*)",
+          "address": 2266992,
+          "offset": 1377024,
+          "size": 106,
+          "match_percent": 12.352942
+        },
+        {
+          "name": "_Z12NewTown_InitP11WORLDINFO_s",
+          "demangled_name": "NewTown_Init(WORLDINFO_s*)",
+          "address": 2267104,
+          "offset": 1377136,
+          "size": 143,
+          "match_percent": 99.60976
+        },
+        {
+          "name": "_Z13NewTown_ResetP11WORLDINFO_s",
+          "demangled_name": "NewTown_Reset(WORLDINFO_s*)",
+          "address": 2267248,
+          "offset": 1377280,
+          "size": 285,
+          "match_percent": 5.526316
+        },
+        {
+          "name": "_Z14NewTown_UpdateP11WORLDINFO_s",
+          "demangled_name": "NewTown_Update(WORLDINFO_s*)",
+          "address": 2267536,
+          "offset": 1377568,
+          "size": 1753,
+          "match_percent": 1.363636
+        },
+        {
           "name": "_Z17EndorBattleA_InitP11WORLDINFO_s",
           "demangled_name": "EndorBattleA_Init(WORLDINFO_s*)",
           "address": 2269296,
@@ -85075,6 +85073,30 @@
           "offset": 1379616,
           "size": 110,
           "match_percent": 16.153847
+        },
+        {
+          "name": "_Z13Platform_InitP11WORLDINFO_s",
+          "demangled_name": "Platform_Init(WORLDINFO_s*)",
+          "address": 2269696,
+          "offset": 1379728,
+          "size": 68,
+          "match_percent": 99.6875
+        },
+        {
+          "name": "_Z14Platform_ResetP11WORLDINFO_s",
+          "demangled_name": "Platform_Reset(WORLDINFO_s*)",
+          "address": 2269776,
+          "offset": 1379808,
+          "size": 44,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z21E1CharacterBonus_InitP11WORLDINFO_s",
+          "demangled_name": "E1CharacterBonus_Init(WORLDINFO_s*)",
+          "address": 2269824,
+          "offset": 1379856,
+          "size": 61,
+          "match_percent": 26.25
         }
       ]
     },
@@ -85390,68 +85412,6 @@
       ]
     },
     {
-      "name": "legoapi/world/levels/lego_city.cpp.o",
-      "source": "src/legoapi/world/levels/lego_city.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/lego_city.o",
-      "functions": [
-        {
-          "name": "_Z13LegoCity_InitP11WORLDINFO_s",
-          "demangled_name": "LegoCity_Init(WORLDINFO_s*)",
-          "address": 2264496,
-          "offset": 1374528,
-          "size": 105,
-          "match_percent": 13.548388
-        },
-        {
-          "name": "_Z14LegoCity_ResetP11WORLDINFO_s",
-          "demangled_name": "LegoCity_Reset(WORLDINFO_s*)",
-          "address": 2264608,
-          "offset": 1374640,
-          "size": 124,
-          "match_percent": 94.171425
-        },
-        {
-          "name": "_Z15LegoCity_UpdateP11WORLDINFO_s",
-          "demangled_name": "LegoCity_Update(WORLDINFO_s*)",
-          "address": 2264736,
-          "offset": 1374768,
-          "size": 2241,
-          "match_percent": 0.983607
-        }
-      ]
-    },
-    {
-      "name": "legoapi/world/levels/new_town.cpp.o",
-      "source": "src/legoapi/world/levels/new_town.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/new_town.o",
-      "functions": [
-        {
-          "name": "_Z12NewTown_InitP11WORLDINFO_s",
-          "demangled_name": "NewTown_Init(WORLDINFO_s*)",
-          "address": 2267104,
-          "offset": 1377136,
-          "size": 143,
-          "match_percent": 13.609756
-        },
-        {
-          "name": "_Z13NewTown_ResetP11WORLDINFO_s",
-          "demangled_name": "NewTown_Reset(WORLDINFO_s*)",
-          "address": 2267248,
-          "offset": 1377280,
-          "size": 285,
-          "match_percent": 5.263158
-        },
-        {
-          "name": "_Z14NewTown_UpdateP11WORLDINFO_s",
-          "demangled_name": "NewTown_Update(WORLDINFO_s*)",
-          "address": 2267536,
-          "offset": 1377568,
-          "size": 1753,
-          "match_percent": 0.858586
-        }
-      ]
-    },
-    {
       "name": "legoapi/world/levels/podsprint.cpp.o",
       "source": "src/legoapi/world/levels/podsprint.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/podsprint.o",
@@ -85463,21 +85423,6 @@
           "offset": 1212592,
           "size": 119,
           "match_percent": 99.93939
-        }
-      ]
-    },
-    {
-      "name": "legoapi/world/levels/senate.cpp.o",
-      "source": "src/legoapi/world/levels/senate.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/senate.o",
-      "functions": [
-        {
-          "name": "_Z12SenateA_InitP11WORLDINFO_s",
-          "demangled_name": "SenateA_Init(WORLDINFO_s*)",
-          "address": 2266992,
-          "offset": 1377024,
-          "size": 106,
-          "match_percent": 11.588235
         }
       ]
     },
@@ -86127,7 +86072,7 @@
           "address": 1829840,
           "offset": 939872,
           "size": 1849,
-          "match_percent": 68.333336
+          "match_percent": 68.34515
         },
         {
           "name": "_Z8LoadPermv",
@@ -110273,18 +110218,6 @@
       ]
     },
     {
-      "name": "nu2api/nusound/nu2api_nusound_types.cpp.o",
-      "source": "src/nu2api/nusound/nu2api_nusound_types.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nu2api_nusound_types.o",
-      "functions": []
-    },
-    {
-      "name": "nu2api/nusound/nusound.cpp.o",
-      "source": "src/nu2api/nusound/nusound.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nusound.o",
-      "functions": []
-    },
-    {
       "name": "nu2api/nusound/nusound3_include.cpp.o",
       "source": "src/nu2api/nusound/nusound3_include.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nusound3_include.o",
@@ -116822,18 +116755,6 @@
       ]
     },
     {
-      "name": "_GLOBAL__sub_I_teleport.cpp",
-      "demangled_name": "_GLOBAL__sub_I_teleport.cpp",
-      "address": 894768,
-      "offset": 4800,
-      "size": 93,
-      "match_percent": 99.35294,
-      "candidate_units": [
-        "legoapi/gizmos/transport/teleport.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o"
-      ]
-    },
-    {
       "name": "_GLOBAL__sub_I_text.cpp",
       "demangled_name": "_GLOBAL__sub_I_text.cpp",
       "address": 895056,
@@ -116889,18 +116810,6 @@
       "candidate_units": [
         "legoapi/gizmo/object/gizforce.cpp.o",
         "legoapi/gizmos/traps/gizforce.cpp.o"
-      ]
-    },
-    {
-      "name": "_GLOBAL__sub_I_lever.cpp",
-      "demangled_name": "_GLOBAL__sub_I_lever.cpp",
-      "address": 897504,
-      "offset": 7536,
-      "size": 93,
-      "match_percent": 99.35294,
-      "candidate_units": [
-        "legoapi/gizmos/object/lever.cpp.o",
-        "legoapi/props/objects/lever.cpp.o"
       ]
     },
     {
@@ -117090,18 +116999,6 @@
       ]
     },
     {
-      "name": "_GLOBAL__sub_I_plugs.cpp",
-      "demangled_name": "_GLOBAL__sub_I_plugs.cpp",
-      "address": 926720,
-      "offset": 36752,
-      "size": 93,
-      "match_percent": 99.35294,
-      "candidate_units": [
-        "legoapi/gizmos/door/plugs.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o"
-      ]
-    },
-    {
       "name": "_GLOBAL__sub_I_edlevelall.cpp",
       "demangled_name": "_GLOBAL__sub_I_edlevelall.cpp",
       "address": 928992,
@@ -117249,18 +117146,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -117268,7 +117162,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117278,16 +117171,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -117299,8 +117188,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -117336,18 +117224,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -117355,7 +117240,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117365,16 +117249,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -117386,8 +117266,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -117423,18 +117302,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -117442,7 +117318,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117452,16 +117327,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -117473,8 +117344,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -117521,18 +117391,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -117540,7 +117407,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117550,16 +117416,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -117571,8 +117433,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -117653,18 +117514,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -117672,7 +117530,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117682,16 +117539,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -117703,8 +117556,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -117751,18 +117603,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -117770,7 +117619,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117780,16 +117628,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -117801,8 +117645,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -117849,18 +117692,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -117868,7 +117708,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117878,16 +117717,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -117899,8 +117734,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -117947,18 +117781,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -117966,7 +117797,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117976,16 +117806,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -117997,8 +117823,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -118045,18 +117870,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -118064,7 +117886,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118074,16 +117895,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -118095,8 +117912,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -118143,18 +117959,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -118162,7 +117975,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118172,16 +117984,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -118193,8 +118001,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -118451,18 +118258,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -118470,7 +118274,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118480,16 +118283,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -118501,8 +118300,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -118549,18 +118347,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -118568,7 +118363,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118578,16 +118372,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -118599,8 +118389,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -118647,18 +118436,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -118666,7 +118452,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118676,16 +118461,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -118697,8 +118478,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -118794,18 +118574,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -118813,7 +118590,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118823,16 +118599,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -118844,8 +118616,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -118904,18 +118675,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -118923,7 +118691,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118933,16 +118700,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -118954,8 +118717,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -118993,7 +118755,6 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
@@ -119005,7 +118766,6 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
         "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -119129,18 +118889,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -119148,7 +118905,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119158,16 +118914,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -119179,8 +118931,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -119217,7 +118968,6 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
@@ -119229,7 +118979,6 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
         "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -119305,18 +119054,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -119324,7 +119070,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119334,16 +119079,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -119355,8 +119096,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -119381,7 +119121,6 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
@@ -119393,7 +119132,6 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
         "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -119481,18 +119219,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -119500,7 +119235,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119510,16 +119244,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -119531,8 +119261,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -119579,18 +119308,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -119598,7 +119324,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119608,16 +119333,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -119629,8 +119350,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -119677,18 +119397,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -119696,7 +119413,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119706,16 +119422,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -119727,8 +119439,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -119775,18 +119486,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -119794,7 +119502,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119804,16 +119511,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -119825,8 +119528,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -119862,7 +119564,6 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
@@ -119874,7 +119575,6 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
         "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
@@ -119924,18 +119624,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -119943,7 +119640,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119953,16 +119649,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -119974,8 +119666,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -120022,18 +119713,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -120041,7 +119729,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120051,16 +119738,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -120072,8 +119755,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -120131,18 +119813,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -120150,7 +119829,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120160,16 +119838,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -120181,8 +119855,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -120229,18 +119902,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -120248,7 +119918,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120258,16 +119927,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -120279,8 +119944,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -120340,18 +120004,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -120359,7 +120020,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120369,16 +120029,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -120390,8 +120046,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -120438,18 +120093,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -120457,7 +120109,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120467,16 +120118,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -120488,8 +120135,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -120570,18 +120216,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -120589,7 +120232,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120599,16 +120241,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -120620,8 +120258,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -120668,18 +120305,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -120687,7 +120321,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120697,16 +120330,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -120718,8 +120347,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -120766,18 +120394,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -120785,7 +120410,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120795,16 +120419,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -120816,8 +120436,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -120864,18 +120483,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -120883,7 +120499,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120893,16 +120508,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -120914,8 +120525,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -121025,18 +120635,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -121044,7 +120651,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -121054,16 +120660,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -121075,8 +120677,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -121123,18 +120724,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -121142,7 +120740,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -121152,16 +120749,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -121173,8 +120766,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -121221,18 +120813,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -121240,7 +120829,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -121250,16 +120838,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -121271,8 +120855,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -121666,18 +121249,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -121685,7 +121265,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -121695,16 +121274,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -121716,8 +121291,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -121797,18 +121371,6 @@
       "match_percent": 0.0,
       "candidate_units": [
         "nu2api/numath/vumath.c.o"
-      ]
-    },
-    {
-      "name": "_ZL7RotDifftt",
-      "demangled_name": "RotDiff(unsigned short, unsigned short)",
-      "address": 3916433,
-      "offset": 3026465,
-      "size": 78,
-      "match_percent": 40.739132,
-      "candidate_units": [
-        "legoapi/misc/legoapi_helpers.cpp.o",
-        "legoapi/props/system/socksysall.cpp.o"
       ]
     },
     {
@@ -121892,18 +121454,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -121911,7 +121470,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -121921,16 +121479,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -121942,8 +121496,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -122069,18 +121622,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -122088,7 +121638,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -122098,16 +121647,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -122119,8 +121664,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -122526,18 +122070,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -122545,7 +122086,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -122555,16 +122095,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -122576,8 +122112,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     },
     {
@@ -122624,18 +122159,15 @@
         "gameapi/edtools/edrtlall.cpp.o",
         "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
-        "legoapi/actions/character/speederchase_stubs.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/ai/core/legoai.cpp.o",
-        "legoapi/ai/game/aitrigger_stubs.cpp.o",
         "legoapi/ai/game/misc_a_game.cpp.o",
         "legoapi/characters/motion/chris_stubs.cpp.o",
         "legoapi/core/config/config.cpp.o",
         "legoapi/core/config/saveload.cpp.o",
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
-        "legoapi/gizmo/gizmos/gizmos_lever.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
@@ -122643,7 +122175,6 @@
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
         "legoapi/items/objects/grabber.cpp.o",
-        "legoapi/items/objects/plugs.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -122653,16 +122184,12 @@
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
         "legoapi/props/objects/guidelines.cpp.o",
-        "legoapi/props/objects/lever.cpp.o",
-        "legoapi/props/objects/teleport.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.cpp.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
-        "legoapi/world/levels/new_town.cpp.o",
-        "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
@@ -122674,8 +122201,7 @@
         "nu2api/nu3d/nurndr_noops.cpp.o",
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
-        "nu2api/nucore/android/nutime_android.c.o",
-        "nu2api/nusound/nu2api_nusound_types.cpp.o"
+        "nu2api/nucore/android/nutime_android.c.o"
       ]
     }
   ],
@@ -129802,10 +129328,10 @@
     }
   ],
   "summary": {
-    "bazel_units": 530,
+    "bazel_units": 514,
     "functions": 13454,
-    "assigned_functions": 12344,
-    "ambiguous_functions": 220,
+    "assigned_functions": 12348,
+    "ambiguous_functions": 216,
     "unassigned_functions": 890
   }
 }

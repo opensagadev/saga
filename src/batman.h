@@ -5,6 +5,7 @@
 #include "gameframework/saveload.h"
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/actions/character/streaks.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/core/input/timer.h"
@@ -149,8 +150,6 @@ void UpdateRippleSet(ripple_set_s *);
 void DrawRippleSet(ripple_set_s *);
 void UpdateExplosions(void);
 void DrawExplosions(void);
-void DrawStreaks(void);
-void UpdateStreaks(float);
 void ZipUps_DrawLines(void);
 void DrawCables(void);
 void UpdateCables(void);

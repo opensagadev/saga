@@ -114,14 +114,6 @@ void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO
     group->data = buffer;
 }
 
-void Platform_Init(WORLDINFO_s *world) {
-    NuSpecialFind(world->current_gscn, &LevHSpecial[0], const_cast<char *>("slave1_level"), 0);
-}
-
-void Platform_Reset(WORLDINFO_s *) {
-    NuSpecialSetVisibility(&LevHSpecial[0], 0);
-}
-
 void PlatformConnect(char *track_id, nuvec_s *position_delta, nuvec_s *movement_delta, i32 platform_index) {
     if (CurTrackInfo == NULL) {
         CurTrackInfo = AllocTerrId();
