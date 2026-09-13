@@ -4162,11 +4162,6 @@ static __used__ void DrawFalconSpotLights(GameObject_s *) {
     STUBBED();
 }
 
-static __used__ double ApplyAntilights(rtl_s *, rtlidata_s *, float) {
-    STUBBED();
-    return {};
-}
-
 static __used__ void DisplayListMaterialClipUpdate(nudisplayscene_s *) {
     STUBBED();
 }

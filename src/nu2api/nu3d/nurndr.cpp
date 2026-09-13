@@ -114,7 +114,6 @@ void NuRndrGradRect2diZ(i32, i32, i32, i32, i32 *, numtl_s *, i32) {
     STUBBED();
 }
 
-
 void NuRndrRectUV2dNoScale(float, float, float, float, float, float, float, float, i32, numtl_s *) {
     STUBBED();
 }
@@ -146,35 +145,4 @@ void NuRndrCalcRandCylinderPos(nuvec4_s *position, numtx_s *matrix, nuvec_s *axe
     position->z = axes[1].z * x + axes[2].z * y + axes[3].z * z + axes[0].z;
     position->w = 1.0f;
     NuVec4MtxTransformVU0(position, position, matrix);
-}
-
-extern "C" {
-    i32 NuRndrSetAmbientLightPS(const NUCOLOUR3 *);
-    i32 NuRndrSetDirectionalLightsPS(const NUVEC *, const NUCOLOUR3 *, const NUVEC *, const NUCOLOUR3 *, const NUVEC *,
-                                     const NUCOLOUR3 *);
-
-    static __used__ void NuRndrSetAmbientLight(NUCOLOUR3 *colour) {
-        NuRndrSetAmbientLightPS(colour);
-    }
-
-    static __used__ void NuRndrSetDirectionalLights(NUVEC *dir0, NUCOLOUR3 *colour0, NUVEC *dir1, NUCOLOUR3 *colour1,
-                                                    NUVEC *dir2, NUCOLOUR3 *colour2) {
-        NuRndrSetDirectionalLightsPS(dir0, colour0, dir1, colour1, dir2, colour2);
-    }
-
-    static __used__ void NuRndrSetSpecularLight(nuvec_s *direction, nucolour4_s *intensity) {
-        if (direction) {
-            NuRndrLightingStateCurrent.specular_direction = *direction;
-            NuRndrLightingStateCurrent.field_0x60 = 0;
-        } else {
-            NuRndrLightingStateCurrent.field_0x60 = 1;
-        }
-        if (intensity) {
-            NuRndrLightingStateCurrent.specular_intensity = *intensity;
-            NuRndrLightingStateCurrent.field_0x74 = 1;
-        } else {
-            NuRndrLightingStateCurrent.field_0x74 = 0;
-        }
-        NuRndrSetSpecularLightPS(direction, intensity);
-    }
 }

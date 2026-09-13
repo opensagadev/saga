@@ -67,6 +67,8 @@ DECOMP_ASSERT(sizeof(rtlset) == 0x4f84, "RTL set size");
 
 extern "C" {
     extern rtlset *curr_set;
+    extern u16 rtltimer1;
+    extern f32 rtltimer1adv;
 
     i32 rtlInitDynamic(VARIPTR *, VARIPTR, i32);
     i32 rtlDynamicAlloc(void);

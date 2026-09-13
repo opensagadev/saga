@@ -27,6 +27,7 @@ struct NuFaceOnDrawPacket {
 // Renderer state shared with adjacent TUs. Original ownership varies by symbol.
 extern u32 g_boundShader;
 struct nushaderprogram_s;
+// Defined by the shader-program TU; shared with render-state consumers.
 extern nushaderprogram_s *g_currentShaderProgram;
 extern numtl_s *g_boundMaterial;
 extern numtl_s *g_LastMtl;

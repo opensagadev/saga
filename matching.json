@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 45.924934,
+    "fuzzy_match_percent": 45.9281,
     "total_code": "4722419",
-    "matched_code": "400135",
-    "matched_code_percent": 8.473094,
+    "matched_code": "400334",
+    "matched_code_percent": 8.477308,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4756,
-    "matched_functions_percent": 35.336952,
+    "matched_functions": 4758,
+    "matched_functions_percent": 35.35181,
     "total_units": 1
   },
   "text": {
@@ -30198,1059 +30198,6 @@
       ]
     },
     {
-      "name": "gameapi/edtools/edrtl.cpp.o",
-      "source": "src/gameapi/edtools/edrtl.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edrtl.o",
-      "functions": [
-        {
-          "name": "_Z16edrtlInitBurnsetP9burnset_s",
-          "demangled_name": "edrtlInitBurnset(burnset_s*)",
-          "address": 3841812,
-          "offset": 2951844,
-          "size": 564,
-          "match_percent": 99.81022
-        },
-        {
-          "name": "_Z16edrtlBurnoutSavePcP9burnset_s",
-          "demangled_name": "edrtlBurnoutSave(char*, burnset_s*)",
-          "address": 3882826,
-          "offset": 2992858,
-          "size": 833,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z19edrtlBurnoutLoadSetPcP9burnset_s",
-          "demangled_name": "edrtlBurnoutLoadSet(char*, burnset_s*)",
-          "address": 3883659,
-          "offset": 2993691,
-          "size": 1380,
-          "match_percent": 99.925
-        },
-        {
-          "name": "edrtlBurnoutLoad",
-          "demangled_name": "edrtlBurnoutLoad",
-          "address": 3885039,
-          "offset": 2995071,
-          "size": 122,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z17edrtlResetBurnsetP9burnset_s",
-          "demangled_name": "edrtlResetBurnset(burnset_s*)",
-          "address": 3885161,
-          "offset": 2995193,
-          "size": 99,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z15edrtlAddBurnoutP7nuvec_s",
-          "demangled_name": "edrtlAddBurnout(nuvec_s*)",
-          "address": 3885260,
-          "offset": 2995292,
-          "size": 455,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z18edrtlRemoveBurnouti",
-          "demangled_name": "edrtlRemoveBurnout(int)",
-          "address": 3885715,
-          "offset": 2995747,
-          "size": 144,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z17edrtlPlaceBurnoutiP7nuvec_s",
-          "demangled_name": "edrtlPlaceBurnout(int, nuvec_s*)",
-          "address": 3885859,
-          "offset": 2995891,
-          "size": 119,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z25edrtlDetermineNearestBurnfP9burnset_s",
-          "demangled_name": "edrtlDetermineNearestBurn(float, burnset_s*)",
-          "address": 3901754,
-          "offset": 3011786,
-          "size": 463,
-          "match_percent": 99.97656
-        }
-      ]
-    },
-    {
-      "name": "gameapi/edtools/edrtlall.cpp.o",
-      "source": "src/gameapi/edtools/edrtlall.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edrtlall.o",
-      "functions": [
-        {
-          "name": "_ZL13edrtlSaveUndov",
-          "demangled_name": "edrtlSaveUndo()",
-          "address": 3860579,
-          "offset": 2970611,
-          "size": 340,
-          "match_percent": 4.651163
-        },
-        {
-          "name": "_ZL19edrtlInvalidateUndov",
-          "demangled_name": "edrtlInvalidateUndo()",
-          "address": 3861864,
-          "offset": 2971896,
-          "size": 78,
-          "match_percent": 23.529411
-        },
-        {
-          "name": "_ZL12cbCancelMenuP10eduimenu_sS0_",
-          "demangled_name": "cbCancelMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3864434,
-          "offset": 2974466,
-          "size": 28,
-          "match_percent": 50.0
-        },
-        {
-          "name": "_ZL18cbCancelDeleteMenuP10eduimenu_sS0_",
-          "demangled_name": "cbCancelDeleteMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3864462,
-          "offset": 2974494,
-          "size": 28,
-          "match_percent": 50.0
-        },
-        {
-          "name": "_ZL11cbDeleteYesP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbDeleteYes(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3864490,
-          "offset": 2974522,
-          "size": 96,
-          "match_percent": 14.814815
-        },
-        {
-          "name": "_ZL10cbDeleteNoP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbDeleteNo(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3864586,
-          "offset": 2974618,
-          "size": 41,
-          "match_percent": 33.333332
-        },
-        {
-          "name": "_ZL6cbLoadP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbLoad(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3867537,
-          "offset": 2977569,
-          "size": 178,
-          "match_percent": 8.888889
-        },
-        {
-          "name": "_ZL6cbSaveP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbSave(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3867715,
-          "offset": 2977747,
-          "size": 116,
-          "match_percent": 12.5
-        },
-        {
-          "name": "_ZL12cbMultiplierP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbMultiplier(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3867831,
-          "offset": 2977863,
-          "size": 58,
-          "match_percent": 17.0
-        },
-        {
-          "name": "_ZL9cbGroupIDP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbGroupID(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3867889,
-          "offset": 2977921,
-          "size": 66,
-          "match_percent": 15.454545
-        },
-        {
-          "name": "_ZL14cbModifierTypeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbModifierType(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3867955,
-          "offset": 2977987,
-          "size": 63,
-          "match_percent": 18.181818
-        },
-        {
-          "name": "_ZL18cbToggleCastShadowP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbToggleCastShadow(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3868071,
-          "offset": 2978103,
-          "size": 55,
-          "match_percent": 20.0
-        },
-        {
-          "name": "_ZL19cbToggleHasSpecularP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbToggleHasSpecular(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3868126,
-          "offset": 2978158,
-          "size": 56,
-          "match_percent": 20.0
-        },
-        {
-          "name": "_ZL12cbHighColourP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbHighColour(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3868182,
-          "offset": 2978214,
-          "size": 116,
-          "match_percent": 11.111111
-        },
-        {
-          "name": "_ZL11cbLowColourP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbLowColour(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3868298,
-          "offset": 2978330,
-          "size": 116,
-          "match_percent": 11.111111
-        },
-        {
-          "name": "_ZL10cbHighTimeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbHighTime(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3868414,
-          "offset": 2978446,
-          "size": 58,
-          "match_percent": 17.0
-        },
-        {
-          "name": "_ZL11cbRHighTimeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbRHighTime(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3868472,
-          "offset": 2978504,
-          "size": 58,
-          "match_percent": 17.0
-        },
-        {
-          "name": "_ZL9cbLowTimeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbLowTime(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3868530,
-          "offset": 2978562,
-          "size": 58,
-          "match_percent": 17.0
-        },
-        {
-          "name": "_ZL10cbRLowTimeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbRLowTime(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3868588,
-          "offset": 2978620,
-          "size": 58,
-          "match_percent": 17.0
-        },
-        {
-          "name": "_ZL11cbLightTypeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbLightType(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3868646,
-          "offset": 2978678,
-          "size": 63,
-          "match_percent": 18.181818
-        },
-        {
-          "name": "_ZL9cbAssocIDP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbAssocID(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3868709,
-          "offset": 2978741,
-          "size": 212,
-          "match_percent": 5.797102
-        },
-        {
-          "name": "_ZL11cbExcludeIDP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbExcludeID(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3868921,
-          "offset": 2978953,
-          "size": 212,
-          "match_percent": 5.797102
-        },
-        {
-          "name": "_ZL8cbUserIDP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbUserID(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3869133,
-          "offset": 2979165,
-          "size": 64,
-          "match_percent": 18.181818
-        },
-        {
-          "name": "_ZL11cbFogColourP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbFogColour(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3869197,
-          "offset": 2979229,
-          "size": 98,
-          "match_percent": 14.285714
-        },
-        {
-          "name": "_ZL12cbHazeColourP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbHazeColour(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3869295,
-          "offset": 2979327,
-          "size": 98,
-          "match_percent": 14.285714
-        },
-        {
-          "name": "_ZL10cbFogAlphaP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbFogAlpha(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3869393,
-          "offset": 2979425,
-          "size": 116,
-          "match_percent": 10.810811
-        },
-        {
-          "name": "_ZL12cbFogDensityP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbFogDensity(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3869509,
-          "offset": 2979541,
-          "size": 58,
-          "match_percent": 17.0
-        },
-        {
-          "name": "_ZL15cbFogDensityWiiP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbFogDensityWii(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3869567,
-          "offset": 2979599,
-          "size": 58,
-          "match_percent": 17.0
-        },
-        {
-          "name": "_ZL13cbHazeDensityP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbHazeDensity(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3869625,
-          "offset": 2979657,
-          "size": 116,
-          "match_percent": 10.810811
-        },
-        {
-          "name": "_ZL13cbBlurDensityP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbBlurDensity(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3869741,
-          "offset": 2979773,
-          "size": 94,
-          "match_percent": 13.333333
-        },
-        {
-          "name": "_ZL13cbFogStartPSPP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbFogStartPSP(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3869835,
-          "offset": 2979867,
-          "size": 58,
-          "match_percent": 17.0
-        },
-        {
-          "name": "_ZL11cbFogEndPSPP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbFogEndPSP(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3869893,
-          "offset": 2979925,
-          "size": 58,
-          "match_percent": 17.0
-        },
-        {
-          "name": "_ZL10cbFogStartP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbFogStart(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3869951,
-          "offset": 2979983,
-          "size": 57,
-          "match_percent": 17.0
-        },
-        {
-          "name": "_ZL8cbFogEndP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbFogEnd(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3870008,
-          "offset": 2980040,
-          "size": 58,
-          "match_percent": 17.0
-        },
-        {
-          "name": "_ZL11cbFogAdjRngP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbFogAdjRng(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3870066,
-          "offset": 2980098,
-          "size": 301,
-          "match_percent": 5.633803
-        },
-        {
-          "name": "_ZL12cbFogAdjNearP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbFogAdjNear(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3870367,
-          "offset": 2980399,
-          "size": 206,
-          "match_percent": 8.163265
-        },
-        {
-          "name": "_ZL11cbFogAdjFarP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbFogAdjFar(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3870573,
-          "offset": 2980605,
-          "size": 179,
-          "match_percent": 9.090909
-        },
-        {
-          "name": "_ZL10cbDOFFStopP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbDOFFStop(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3870752,
-          "offset": 2980784,
-          "size": 94,
-          "match_percent": 13.333333
-        },
-        {
-          "name": "_ZL11cbCopyLightP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbCopyLight(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3870846,
-          "offset": 2980878,
-          "size": 61,
-          "match_percent": 16.666666
-        },
-        {
-          "name": "_ZL12cbPasteLightP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPasteLight(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3870907,
-          "offset": 2980939,
-          "size": 394,
-          "match_percent": 3.508772
-        },
-        {
-          "name": "_ZL16cbPasteIntoLightP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPasteIntoLight(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3871301,
-          "offset": 2981333,
-          "size": 424,
-          "match_percent": 3.149606
-        },
-        {
-          "name": "_ZL13cbCopyToGroupP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbCopyToGroup(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3871725,
-          "offset": 2981757,
-          "size": 487,
-          "match_percent": 2.877698
-        },
-        {
-          "name": "_ZL11cbUndoLightP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbUndoLight(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3872212,
-          "offset": 2982244,
-          "size": 14,
-          "match_percent": 56.666668
-        },
-        {
-          "name": "_ZL11cbRedoLightP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbRedoLight(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3872226,
-          "offset": 2982258,
-          "size": 14,
-          "match_percent": 56.666668
-        },
-        {
-          "name": "_ZL9cbCopyFogP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbCopyFog(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3872240,
-          "offset": 2982272,
-          "size": 61,
-          "match_percent": 16.666666
-        },
-        {
-          "name": "_ZL10cbPasteFogP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPasteFog(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3872301,
-          "offset": 2982333,
-          "size": 130,
-          "match_percent": 9.756098
-        },
-        {
-          "name": "_ZL14cbPasteIntoFogP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPasteIntoFog(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3872431,
-          "offset": 2982463,
-          "size": 161,
-          "match_percent": 7.407407
-        },
-        {
-          "name": "_ZL10cbHideTypeP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbHideType(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3872592,
-          "offset": 2982624,
-          "size": 43,
-          "match_percent": 26.153847
-        },
-        {
-          "name": "_ZL11cbNoZBufferP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbNoZBuffer(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3872635,
-          "offset": 2982667,
-          "size": 36,
-          "match_percent": 30.90909
-        },
-        {
-          "name": "_ZL17cbLightPropertiesP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbLightProperties(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3872671,
-          "offset": 2982703,
-          "size": 82,
-          "match_percent": 13.793103
-        },
-        {
-          "name": "_ZL23cbCancelLightPropertiesP10eduimenu_sS0_",
-          "demangled_name": "cbCancelLightProperties(eduimenu_s*, eduimenu_s*)",
-          "address": 3872753,
-          "offset": 2982785,
-          "size": 168,
-          "match_percent": 7.692308
-        },
-        {
-          "name": "_ZL13cbSetControlsP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbSetControls(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3872921,
-          "offset": 2982953,
-          "size": 29,
-          "match_percent": 37.77778
-        },
-        {
-          "name": "_ZL23cbScaleAllMultipliersUpP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbScaleAllMultipliersUp(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3872950,
-          "offset": 2982982,
-          "size": 190,
-          "match_percent": 7.407407
-        },
-        {
-          "name": "_ZL25cbScaleAllMultipliersDownP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbScaleAllMultipliersDown(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3873140,
-          "offset": 2983172,
-          "size": 190,
-          "match_percent": 7.407407
-        },
-        {
-          "name": "_ZL6InitUIv",
-          "demangled_name": "InitUI()",
-          "address": 3873421,
-          "offset": 2983453,
-          "size": 9405,
-          "match_percent": 99.78677
-        },
-        {
-          "name": "_ZL21edrtlBurnDefaultsMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlBurnDefaultsMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3886982,
-          "offset": 2997014,
-          "size": 1970,
-          "match_percent": 0.945627
-        },
-        {
-          "name": "_ZL18edrtlSetBurnRadiusP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnRadius(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3890211,
-          "offset": 3000243,
-          "size": 58,
-          "match_percent": 18.88889
-        },
-        {
-          "name": "_ZL19edrtlSetBurnFalloffP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnFalloff(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3890269,
-          "offset": 3000301,
-          "size": 58,
-          "match_percent": 18.88889
-        },
-        {
-          "name": "_ZL19edrtlBurnRadiusMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlBurnRadiusMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3890393,
-          "offset": 3000425,
-          "size": 413,
-          "match_percent": 4.255319
-        },
-        {
-          "name": "_ZL20edrtlSetBurnsetFlareP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnsetFlare(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3890994,
-          "offset": 3001026,
-          "size": 94,
-          "match_percent": 12.5
-        },
-        {
-          "name": "_ZL21edrtlSetBurnsetRadiusP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnsetRadius(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3891088,
-          "offset": 3001120,
-          "size": 94,
-          "match_percent": 12.5
-        },
-        {
-          "name": "_ZL16edrtlBurnSetMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlBurnSetMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3891342,
-          "offset": 3001374,
-          "size": 877,
-          "match_percent": 1.95122
-        },
-        {
-          "name": "_ZL20edrtlBurnoutFileSaveP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlBurnoutFileSave(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3892219,
-          "offset": 3002251,
-          "size": 340,
-          "match_percent": 4.938271
-        },
-        {
-          "name": "_ZL20edrtlBurnoutFileLoadP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlBurnoutFileLoad(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3892559,
-          "offset": 3002591,
-          "size": 339,
-          "match_percent": 4.938271
-        },
-        {
-          "name": "_ZL17edrtlBurnMainMenuv",
-          "demangled_name": "edrtlBurnMainMenu()",
-          "address": 3892976,
-          "offset": 3003008,
-          "size": 695,
-          "match_percent": 2.816901
-        },
-        {
-          "name": "_ZL10edrtlClosev",
-          "demangled_name": "edrtlClose()",
-          "address": 3893948,
-          "offset": 3003980,
-          "size": 5,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL10edrtlEnterv",
-          "demangled_name": "edrtlEnter()",
-          "address": 3893953,
-          "offset": 3003985,
-          "size": 389,
-          "match_percent": 4.878049
-        },
-        {
-          "name": "_ZL10edrtlLeavev",
-          "demangled_name": "edrtlLeave()",
-          "address": 3894342,
-          "offset": 3004374,
-          "size": 50,
-          "match_percent": 28.571428
-        },
-        {
-          "name": "_ZL12edrtlProcRTLfP7nupad_s",
-          "demangled_name": "edrtlProcRTL(float, nupad_s*)",
-          "address": 3896007,
-          "offset": 3006039,
-          "size": 3116,
-          "match_percent": 0.522876
-        },
-        {
-          "name": "_ZL13SelectPrevFogv",
-          "demangled_name": "SelectPrevFog()",
-          "address": 3899732,
-          "offset": 3009764,
-          "size": 181,
-          "match_percent": 99.9434
-        },
-        {
-          "name": "_ZL13SelectNextFogv",
-          "demangled_name": "SelectNextFog()",
-          "address": 3899913,
-          "offset": 3009945,
-          "size": 199,
-          "match_percent": 99.913795
-        },
-        {
-          "name": "_ZL12edrtlProcFogfP7nupad_s",
-          "demangled_name": "edrtlProcFog(float, nupad_s*)",
-          "address": 3900112,
-          "offset": 3010144,
-          "size": 1642,
-          "match_percent": 0.990099
-        },
-        {
-          "name": "_ZL13edrtlProcBurnfP7nupad_s",
-          "demangled_name": "edrtlProcBurn(float, nupad_s*)",
-          "address": 3902217,
-          "offset": 3012249,
-          "size": 1147,
-          "match_percent": 1.360544
-        },
-        {
-          "name": "_ZL15edrtlRndrLine3dP11nuvtx_tc1_sP7numtl_sP7numtx_s",
-          "demangled_name": "edrtlRndrLine3d(nuvtx_tc1_s*, numtl_s*, numtx_s*)",
-          "address": 3905497,
-          "offset": 3015529,
-          "size": 417,
-          "match_percent": 3.703704
-        },
-        {
-          "name": "_ZL15edrtlDrawCursorv",
-          "demangled_name": "edrtlDrawCursor()",
-          "address": 3906121,
-          "offset": 3016153,
-          "size": 455,
-          "match_percent": 4.0
-        },
-        {
-          "name": "_ZL15edrtlDrawLightsv",
-          "demangled_name": "edrtlDrawLights()",
-          "address": 3908792,
-          "offset": 3018824,
-          "size": 225,
-          "match_percent": 5.633803
-        },
-        {
-          "name": "edrtlDrawFog",
-          "demangled_name": "edrtlDrawFog",
-          "address": 3909017,
-          "offset": 3019049,
-          "size": 114,
-          "match_percent": 99.97143
-        },
-        {
-          "name": "_ZL13edrtlDrawFogsv",
-          "demangled_name": "edrtlDrawFogs()",
-          "address": 3909131,
-          "offset": 3019163,
-          "size": 83,
-          "match_percent": 15.384615
-        },
-        {
-          "name": "_ZL17edrtlDrawBurnoutsv",
-          "demangled_name": "edrtlDrawBurnouts()",
-          "address": 3909214,
-          "offset": 3019246,
-          "size": 465,
-          "match_percent": 2.941176
-        },
-        {
-          "name": "_ZL13edrtlDrawHelpv",
-          "demangled_name": "edrtlDrawHelp()",
-          "address": 3909679,
-          "offset": 3019711,
-          "size": 371,
-          "match_percent": 4.040404
-        },
-        {
-          "name": "_ZL16edrtlDrawRTLInfov",
-          "demangled_name": "edrtlDrawRTLInfo()",
-          "address": 3910050,
-          "offset": 3020082,
-          "size": 3428,
-          "match_percent": 0.45819
-        },
-        {
-          "name": "_ZL16edrtlDrawFogInfov",
-          "demangled_name": "edrtlDrawFogInfo()",
-          "address": 3913478,
-          "offset": 3023510,
-          "size": 1113,
-          "match_percent": 1.465202
-        },
-        {
-          "name": "_ZL17edrtlDrawBurnInfov",
-          "demangled_name": "edrtlDrawBurnInfo()",
-          "address": 3914591,
-          "offset": 3024623,
-          "size": 720,
-          "match_percent": 2.325581
-        },
-        {
-          "name": "_ZL11edrtlRenderv",
-          "demangled_name": "edrtlRender()",
-          "address": 3915311,
-          "offset": 3025343,
-          "size": 414,
-          "match_percent": 3.809524
-        }
-      ]
-    },
-    {
-      "name": "gameapi/edtools/edrtlcallbacks.cpp.o",
-      "source": "src/gameapi/edtools/edrtlcallbacks.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edrtlcallbacks.o",
-      "functions": [
-        {
-          "name": "_ZL9edrtlUndov",
-          "demangled_name": "edrtlUndo()",
-          "address": 3860919,
-          "offset": 2970951,
-          "size": 557,
-          "match_percent": 2.857143
-        },
-        {
-          "name": "_ZL9edrtlRedov",
-          "demangled_name": "edrtlRedo()",
-          "address": 3861476,
-          "offset": 2971508,
-          "size": 388,
-          "match_percent": 4.081633
-        },
-        {
-          "name": "_ZL25edrtlSetBurnoutStartAngleP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnoutStartAngle(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3885978,
-          "offset": 2996010,
-          "size": 55,
-          "match_percent": 18.88889
-        },
-        {
-          "name": "_ZL27edrtlSetBurnoutMinIntensityP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnoutMinIntensity(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3886033,
-          "offset": 2996065,
-          "size": 55,
-          "match_percent": 18.88889
-        },
-        {
-          "name": "_ZL23edrtlSetBurnoutEndAngleP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnoutEndAngle(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3886088,
-          "offset": 2996120,
-          "size": 55,
-          "match_percent": 18.88889
-        },
-        {
-          "name": "_ZL27edrtlSetBurnoutMaxIntensityP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnoutMaxIntensity(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3886143,
-          "offset": 2996175,
-          "size": 55,
-          "match_percent": 18.88889
-        },
-        {
-          "name": "_ZL26edrtlSetBurnoutGlobalScaleP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnoutGlobalScale(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3886198,
-          "offset": 2996230,
-          "size": 55,
-          "match_percent": 18.88889
-        },
-        {
-          "name": "_ZL25edrtlSetBurnoutDispersionP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnoutDispersion(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3886253,
-          "offset": 2996285,
-          "size": 55,
-          "match_percent": 18.88889
-        },
-        {
-          "name": "_ZL33edrtlSetBurnoutFragmentGlowFactorP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnoutFragmentGlowFactor(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3886308,
-          "offset": 2996340,
-          "size": 55,
-          "match_percent": 18.88889
-        },
-        {
-          "name": "_ZL24edrtlSetBurnoutThresholdP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnoutThreshold(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3886363,
-          "offset": 2996395,
-          "size": 55,
-          "match_percent": 18.88889
-        },
-        {
-          "name": "_ZL30edrtlSetBurnoutSourceAvailableP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnoutSourceAvailable(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3886418,
-          "offset": 2996450,
-          "size": 58,
-          "match_percent": 21.052631
-        },
-        {
-          "name": "_ZL31edrtlSetBurnoutSourceDirectionXP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnoutSourceDirectionX(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3886476,
-          "offset": 2996508,
-          "size": 55,
-          "match_percent": 18.88889
-        },
-        {
-          "name": "_ZL31edrtlSetBurnoutSourceDirectionYP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnoutSourceDirectionY(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3886531,
-          "offset": 2996563,
-          "size": 55,
-          "match_percent": 18.88889
-        },
-        {
-          "name": "_ZL31edrtlSetBurnoutSourceDirectionZP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnoutSourceDirectionZ(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3886586,
-          "offset": 2996618,
-          "size": 55,
-          "match_percent": 18.88889
-        },
-        {
-          "name": "_ZL32edrtlSetBurnoutSourceInnerRadiusP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnoutSourceInnerRadius(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3886641,
-          "offset": 2996673,
-          "size": 55,
-          "match_percent": 18.88889
-        },
-        {
-          "name": "_ZL35edrtlSetBurnoutSourceInnerIntensityP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnoutSourceInnerIntensity(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3886696,
-          "offset": 2996728,
-          "size": 55,
-          "match_percent": 18.88889
-        },
-        {
-          "name": "_ZL32edrtlSetBurnoutSourceOuterRadiusP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnoutSourceOuterRadius(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3886751,
-          "offset": 2996783,
-          "size": 55,
-          "match_percent": 18.88889
-        },
-        {
-          "name": "_ZL35edrtlSetBurnoutSourceOuterIntensityP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnoutSourceOuterIntensity(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3886806,
-          "offset": 2996838,
-          "size": 55,
-          "match_percent": 18.88889
-        },
-        {
-          "name": "_ZL33edrtlSetBurnoutSourceFallOffPowerP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnoutSourceFallOffPower(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3886861,
-          "offset": 2996893,
-          "size": 55,
-          "match_percent": 18.88889
-        },
-        {
-          "name": "_ZL27edrtlCancelBurnDefaultsMenuP10eduimenu_sS0_",
-          "demangled_name": "edrtlCancelBurnDefaultsMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3886916,
-          "offset": 2996948,
-          "size": 66,
-          "match_percent": 20.0
-        },
-        {
-          "name": "_ZL25edrtlSetBurnoutNormalRateP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnoutNormalRate(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3888952,
-          "offset": 2998984,
-          "size": 58,
-          "match_percent": 18.88889
-        },
-        {
-          "name": "_ZL28edrtlSetBurnoutOvershootRateP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnoutOvershootRate(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3889010,
-          "offset": 2999042,
-          "size": 58,
-          "match_percent": 18.88889
-        },
-        {
-          "name": "_ZL29edrtlSetBurnoutOvershootCutinP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnoutOvershootCutin(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3889068,
-          "offset": 2999100,
-          "size": 58,
-          "match_percent": 18.88889
-        },
-        {
-          "name": "_ZL30edrtlSetBurnoutOvershootAmountP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnoutOvershootAmount(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3889126,
-          "offset": 2999158,
-          "size": 58,
-          "match_percent": 18.88889
-        },
-        {
-          "name": "_ZL28edrtlSetBurnoutOverbrightCapP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnoutOverbrightCap(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3889184,
-          "offset": 2999216,
-          "size": 58,
-          "match_percent": 18.88889
-        },
-        {
-          "name": "_ZL26edrtlSetBurnoutOverdarkCapP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnoutOverdarkCap(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3889242,
-          "offset": 2999274,
-          "size": 58,
-          "match_percent": 18.88889
-        },
-        {
-          "name": "_ZL30edrtlCancelBurnTransitionsMenuP10eduimenu_sS0_",
-          "demangled_name": "edrtlCancelBurnTransitionsMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3889300,
-          "offset": 2999332,
-          "size": 66,
-          "match_percent": 20.0
-        },
-        {
-          "name": "_ZL24edrtlBurnTransitionsMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlBurnTransitionsMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3889366,
-          "offset": 2999398,
-          "size": 845,
-          "match_percent": 2.197802
-        },
-        {
-          "name": "_ZL25edrtlCancelBurnRadiusMenuP10eduimenu_sS0_",
-          "demangled_name": "edrtlCancelBurnRadiusMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3890327,
-          "offset": 3000359,
-          "size": 66,
-          "match_percent": 20.0
-        },
-        {
-          "name": "_ZL24edrtlSetBurnsetThresholdP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnsetThreshold(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3890806,
-          "offset": 3000838,
-          "size": 94,
-          "match_percent": 12.5
-        },
-        {
-          "name": "_ZL24edrtlSetBurnsetIntensityP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnsetIntensity(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3890900,
-          "offset": 3000932,
-          "size": 94,
-          "match_percent": 12.5
-        },
-        {
-          "name": "_ZL22edrtlSetBurnsetFalloffP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "edrtlSetBurnsetFalloff(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3891182,
-          "offset": 3001214,
-          "size": 94,
-          "match_percent": 12.5
-        },
-        {
-          "name": "_ZL22edrtlCancelBurnSetMenuP10eduimenu_sS0_",
-          "demangled_name": "edrtlCancelBurnSetMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3891276,
-          "offset": 3001308,
-          "size": 66,
-          "match_percent": 20.0
-        },
-        {
-          "name": "_ZL23edrtlCancelBurnMainMenuP10eduimenu_sS0_",
-          "demangled_name": "edrtlCancelBurnMainMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3892898,
-          "offset": 3002930,
-          "size": 78,
-          "match_percent": 18.181818
-        },
-        {
-          "name": "_ZL9edrtlInitv",
-          "demangled_name": "edrtlInit()",
-          "address": 3893671,
-          "offset": 3003703,
-          "size": 277,
-          "match_percent": 5.970149
-        },
-        {
-          "name": "_ZL9edrtlProcfP7nupad_s",
-          "demangled_name": "edrtlProc(float, nupad_s*)",
-          "address": 3905914,
-          "offset": 3015946,
-          "size": 207,
-          "match_percent": 7.857143
-        }
-      ]
-    },
-    {
       "name": "gameapi/edtools/edsplines.cpp.o",
       "source": "src/gameapi/edtools/edsplines.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edsplines.o",
@@ -35691,46 +34638,6 @@
           "offset": 2933872,
           "size": 22,
           "match_percent": 100.0
-        },
-        {
-          "name": "edrtlGetFogSet",
-          "demangled_name": "edrtlGetFogSet",
-          "address": 3899669,
-          "offset": 3009701,
-          "size": 63,
-          "match_percent": 21.0
-        },
-        {
-          "name": "edrtlCalculateBurnout",
-          "demangled_name": "edrtlCalculateBurnout",
-          "address": 3903364,
-          "offset": 3013396,
-          "size": 2023,
-          "match_percent": 0.714286
-        },
-        {
-          "name": "edrtlCalculateBurnoutEx",
-          "demangled_name": "edrtlCalculateBurnoutEx",
-          "address": 3905387,
-          "offset": 3015419,
-          "size": 110,
-          "match_percent": 10.5
-        },
-        {
-          "name": "edrtlDrawLight",
-          "demangled_name": "edrtlDrawLight",
-          "address": 3906576,
-          "offset": 3016608,
-          "size": 45,
-          "match_percent": 30.0
-        },
-        {
-          "name": "edrtlDrawLightEx",
-          "demangled_name": "edrtlDrawLightEx",
-          "address": 3906621,
-          "offset": 3016653,
-          "size": 2171,
-          "match_percent": 1.230769
         },
         {
           "name": "edpartRegisterPointerToGameCharLocation",
@@ -68324,14 +67231,6 @@
           "match_percent": 0.429338
         },
         {
-          "name": "_ZL9RefreshUIv",
-          "demangled_name": "RefreshUI()",
-          "address": 3864627,
-          "offset": 2974659,
-          "size": 2884,
-          "match_percent": 0.684736
-        },
-        {
           "name": "_ZN13HudRadarPulseC1ERK5VuVec",
           "demangled_name": "HudRadarPulse::HudRadarPulse(VuVec const&)",
           "address": 4566688,
@@ -69860,14 +68759,6 @@
           "offset": 2951152,
           "size": 40,
           "match_percent": 30.0
-        },
-        {
-          "name": "cbModifierAdjust",
-          "demangled_name": "cbModifierAdjust",
-          "address": 3868018,
-          "offset": 2978050,
-          "size": 53,
-          "match_percent": 23.333334
         },
         {
           "name": "_Z19MenuEnterInsertCardP6MENU_s",
@@ -75006,14 +73897,6 @@
           "match_percent": 65.1659
         },
         {
-          "name": "_ZL15ApplyAntilightsP5rtl_sP10rtlidata_sf",
-          "demangled_name": "ApplyAntilights(rtl_s*, rtlidata_s*, float)",
-          "address": 3848400,
-          "offset": 2958432,
-          "size": 210,
-          "match_percent": 6.769231
-        },
-        {
           "name": "LocaledbitsDrawSolidCircleXY",
           "demangled_name": "LocaledbitsDrawSolidCircleXY",
           "address": 4166288,
@@ -75719,10 +74602,34 @@
       ]
     },
     {
-      "name": "legoapi/render/core/rtl.cpp.o",
-      "source": "src/legoapi/render/core/rtl.cpp",
+      "name": "legoapi/render/core/rtl.c.o",
+      "source": "src/legoapi/render/core/rtl.c",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/rtl.o",
       "functions": [
+        {
+          "name": "NuRndrSetDirectionalLights",
+          "demangled_name": "NuRndrSetDirectionalLights",
+          "address": 3841260,
+          "offset": 2951292,
+          "size": 228,
+          "match_percent": 28.352112
+        },
+        {
+          "name": "NuRndrSetSpecularLight",
+          "demangled_name": "NuRndrSetSpecularLight",
+          "address": 3841550,
+          "offset": 2951582,
+          "size": 170,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z16edrtlInitBurnsetP9burnset_s",
+          "demangled_name": "edrtlInitBurnset(burnset_s*)",
+          "address": 3841812,
+          "offset": 2951844,
+          "size": 564,
+          "match_percent": 99.81022
+        },
         {
           "name": "rtlSetAssocName",
           "demangled_name": "rtlSetAssocName",
@@ -75884,6 +74791,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "IndexLights",
+          "demangled_name": "IndexLights",
+          "address": 3844733,
+          "offset": 2954765,
+          "size": 1753,
+          "match_percent": 0.740741
+        },
+        {
           "name": "rtlLoadSet",
           "demangled_name": "rtlLoadSet",
           "address": 3846486,
@@ -75938,6 +74853,14 @@
           "offset": 2958361,
           "size": 71,
           "match_percent": 13.076923
+        },
+        {
+          "name": "_ZL15ApplyAntilightsP5rtl_sP10rtlidata_sf",
+          "demangled_name": "ApplyAntilights(rtl_s*, rtlidata_s*, float)",
+          "address": 3848400,
+          "offset": 2958432,
+          "size": 210,
+          "match_percent": 13.430769
         },
         {
           "name": "rtlSetModifiers",
@@ -76052,6 +74975,38 @@
           "match_percent": 6.060606
         },
         {
+          "name": "_ZL13edrtlSaveUndov",
+          "demangled_name": "edrtlSaveUndo()",
+          "address": 3860579,
+          "offset": 2970611,
+          "size": 340,
+          "match_percent": 4.651163
+        },
+        {
+          "name": "_ZL9edrtlUndov",
+          "demangled_name": "edrtlUndo()",
+          "address": 3860919,
+          "offset": 2970951,
+          "size": 557,
+          "match_percent": 2.857143
+        },
+        {
+          "name": "_ZL9edrtlRedov",
+          "demangled_name": "edrtlRedo()",
+          "address": 3861476,
+          "offset": 2971508,
+          "size": 388,
+          "match_percent": 4.081633
+        },
+        {
+          "name": "_ZL19edrtlInvalidateUndov",
+          "demangled_name": "edrtlInvalidateUndo()",
+          "address": 3861864,
+          "offset": 2971896,
+          "size": 78,
+          "match_percent": 23.529411
+        },
+        {
           "name": "_ZL6rtlCmpP5rtl_sS0_",
           "demangled_name": "rtlCmp(rtl_s*, rtl_s*)",
           "address": 3861942,
@@ -76116,6 +75071,46 @@
           "match_percent": 1.818182
         },
         {
+          "name": "_ZL12cbCancelMenuP10eduimenu_sS0_",
+          "demangled_name": "cbCancelMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3864434,
+          "offset": 2974466,
+          "size": 28,
+          "match_percent": 50.0
+        },
+        {
+          "name": "_ZL18cbCancelDeleteMenuP10eduimenu_sS0_",
+          "demangled_name": "cbCancelDeleteMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3864462,
+          "offset": 2974494,
+          "size": 28,
+          "match_percent": 50.0
+        },
+        {
+          "name": "_ZL11cbDeleteYesP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbDeleteYes(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3864490,
+          "offset": 2974522,
+          "size": 96,
+          "match_percent": 14.814815
+        },
+        {
+          "name": "_ZL10cbDeleteNoP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbDeleteNo(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3864586,
+          "offset": 2974618,
+          "size": 41,
+          "match_percent": 33.333332
+        },
+        {
+          "name": "_ZL9RefreshUIv",
+          "demangled_name": "RefreshUI()",
+          "address": 3864627,
+          "offset": 2974659,
+          "size": 2884,
+          "match_percent": 0.570613
+        },
+        {
           "name": "rtlSetExt",
           "demangled_name": "rtlSetExt",
           "address": 3867511,
@@ -76124,12 +75119,836 @@
           "match_percent": 42.5
         },
         {
+          "name": "_ZL6cbLoadP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbLoad(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3867537,
+          "offset": 2977569,
+          "size": 178,
+          "match_percent": 8.888889
+        },
+        {
+          "name": "_ZL6cbSaveP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbSave(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3867715,
+          "offset": 2977747,
+          "size": 116,
+          "match_percent": 12.5
+        },
+        {
+          "name": "_ZL12cbMultiplierP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbMultiplier(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3867831,
+          "offset": 2977863,
+          "size": 58,
+          "match_percent": 17.0
+        },
+        {
+          "name": "_ZL9cbGroupIDP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbGroupID(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3867889,
+          "offset": 2977921,
+          "size": 66,
+          "match_percent": 15.454545
+        },
+        {
+          "name": "_ZL14cbModifierTypeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbModifierType(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3867955,
+          "offset": 2977987,
+          "size": 63,
+          "match_percent": 18.181818
+        },
+        {
+          "name": "cbModifierAdjust",
+          "demangled_name": "cbModifierAdjust",
+          "address": 3868018,
+          "offset": 2978050,
+          "size": 53,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL18cbToggleCastShadowP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbToggleCastShadow(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3868071,
+          "offset": 2978103,
+          "size": 55,
+          "match_percent": 20.0
+        },
+        {
+          "name": "_ZL19cbToggleHasSpecularP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbToggleHasSpecular(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3868126,
+          "offset": 2978158,
+          "size": 56,
+          "match_percent": 20.0
+        },
+        {
+          "name": "_ZL12cbHighColourP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbHighColour(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3868182,
+          "offset": 2978214,
+          "size": 116,
+          "match_percent": 11.111111
+        },
+        {
+          "name": "_ZL11cbLowColourP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbLowColour(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3868298,
+          "offset": 2978330,
+          "size": 116,
+          "match_percent": 11.111111
+        },
+        {
+          "name": "_ZL10cbHighTimeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbHighTime(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3868414,
+          "offset": 2978446,
+          "size": 58,
+          "match_percent": 17.0
+        },
+        {
+          "name": "_ZL11cbRHighTimeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbRHighTime(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3868472,
+          "offset": 2978504,
+          "size": 58,
+          "match_percent": 17.0
+        },
+        {
+          "name": "_ZL9cbLowTimeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbLowTime(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3868530,
+          "offset": 2978562,
+          "size": 58,
+          "match_percent": 17.0
+        },
+        {
+          "name": "_ZL10cbRLowTimeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbRLowTime(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3868588,
+          "offset": 2978620,
+          "size": 58,
+          "match_percent": 17.0
+        },
+        {
+          "name": "_ZL11cbLightTypeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbLightType(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3868646,
+          "offset": 2978678,
+          "size": 63,
+          "match_percent": 18.181818
+        },
+        {
+          "name": "_ZL9cbAssocIDP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbAssocID(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3868709,
+          "offset": 2978741,
+          "size": 212,
+          "match_percent": 5.797102
+        },
+        {
+          "name": "_ZL11cbExcludeIDP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbExcludeID(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3868921,
+          "offset": 2978953,
+          "size": 212,
+          "match_percent": 5.797102
+        },
+        {
+          "name": "_ZL8cbUserIDP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbUserID(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3869133,
+          "offset": 2979165,
+          "size": 64,
+          "match_percent": 18.181818
+        },
+        {
+          "name": "_ZL11cbFogColourP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbFogColour(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3869197,
+          "offset": 2979229,
+          "size": 98,
+          "match_percent": 14.285714
+        },
+        {
+          "name": "_ZL12cbHazeColourP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbHazeColour(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3869295,
+          "offset": 2979327,
+          "size": 98,
+          "match_percent": 14.285714
+        },
+        {
+          "name": "_ZL10cbFogAlphaP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbFogAlpha(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3869393,
+          "offset": 2979425,
+          "size": 116,
+          "match_percent": 10.810811
+        },
+        {
+          "name": "_ZL12cbFogDensityP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbFogDensity(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3869509,
+          "offset": 2979541,
+          "size": 58,
+          "match_percent": 17.0
+        },
+        {
+          "name": "_ZL15cbFogDensityWiiP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbFogDensityWii(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3869567,
+          "offset": 2979599,
+          "size": 58,
+          "match_percent": 17.0
+        },
+        {
+          "name": "_ZL13cbHazeDensityP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbHazeDensity(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3869625,
+          "offset": 2979657,
+          "size": 116,
+          "match_percent": 10.810811
+        },
+        {
+          "name": "_ZL13cbBlurDensityP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbBlurDensity(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3869741,
+          "offset": 2979773,
+          "size": 94,
+          "match_percent": 13.333333
+        },
+        {
+          "name": "_ZL13cbFogStartPSPP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbFogStartPSP(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3869835,
+          "offset": 2979867,
+          "size": 58,
+          "match_percent": 17.0
+        },
+        {
+          "name": "_ZL11cbFogEndPSPP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbFogEndPSP(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3869893,
+          "offset": 2979925,
+          "size": 58,
+          "match_percent": 17.0
+        },
+        {
+          "name": "_ZL10cbFogStartP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbFogStart(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3869951,
+          "offset": 2979983,
+          "size": 57,
+          "match_percent": 17.0
+        },
+        {
+          "name": "_ZL8cbFogEndP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbFogEnd(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3870008,
+          "offset": 2980040,
+          "size": 58,
+          "match_percent": 17.0
+        },
+        {
+          "name": "_ZL11cbFogAdjRngP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbFogAdjRng(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3870066,
+          "offset": 2980098,
+          "size": 301,
+          "match_percent": 5.633803
+        },
+        {
+          "name": "_ZL12cbFogAdjNearP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbFogAdjNear(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3870367,
+          "offset": 2980399,
+          "size": 206,
+          "match_percent": 8.163265
+        },
+        {
+          "name": "_ZL11cbFogAdjFarP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbFogAdjFar(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3870573,
+          "offset": 2980605,
+          "size": 179,
+          "match_percent": 9.090909
+        },
+        {
+          "name": "_ZL10cbDOFFStopP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbDOFFStop(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3870752,
+          "offset": 2980784,
+          "size": 94,
+          "match_percent": 13.333333
+        },
+        {
+          "name": "_ZL11cbCopyLightP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbCopyLight(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3870846,
+          "offset": 2980878,
+          "size": 61,
+          "match_percent": 16.666666
+        },
+        {
+          "name": "_ZL12cbPasteLightP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPasteLight(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3870907,
+          "offset": 2980939,
+          "size": 394,
+          "match_percent": 3.508772
+        },
+        {
+          "name": "_ZL16cbPasteIntoLightP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPasteIntoLight(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3871301,
+          "offset": 2981333,
+          "size": 424,
+          "match_percent": 3.149606
+        },
+        {
+          "name": "_ZL13cbCopyToGroupP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbCopyToGroup(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3871725,
+          "offset": 2981757,
+          "size": 487,
+          "match_percent": 2.877698
+        },
+        {
+          "name": "_ZL11cbUndoLightP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbUndoLight(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3872212,
+          "offset": 2982244,
+          "size": 14,
+          "match_percent": 56.666668
+        },
+        {
+          "name": "_ZL11cbRedoLightP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbRedoLight(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3872226,
+          "offset": 2982258,
+          "size": 14,
+          "match_percent": 56.666668
+        },
+        {
+          "name": "_ZL9cbCopyFogP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbCopyFog(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3872240,
+          "offset": 2982272,
+          "size": 61,
+          "match_percent": 16.666666
+        },
+        {
+          "name": "_ZL10cbPasteFogP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPasteFog(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3872301,
+          "offset": 2982333,
+          "size": 130,
+          "match_percent": 9.756098
+        },
+        {
+          "name": "_ZL14cbPasteIntoFogP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPasteIntoFog(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3872431,
+          "offset": 2982463,
+          "size": 161,
+          "match_percent": 7.407407
+        },
+        {
+          "name": "_ZL10cbHideTypeP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbHideType(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3872592,
+          "offset": 2982624,
+          "size": 43,
+          "match_percent": 26.153847
+        },
+        {
+          "name": "_ZL11cbNoZBufferP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbNoZBuffer(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3872635,
+          "offset": 2982667,
+          "size": 36,
+          "match_percent": 30.90909
+        },
+        {
+          "name": "_ZL17cbLightPropertiesP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbLightProperties(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3872671,
+          "offset": 2982703,
+          "size": 82,
+          "match_percent": 13.793103
+        },
+        {
+          "name": "_ZL23cbCancelLightPropertiesP10eduimenu_sS0_",
+          "demangled_name": "cbCancelLightProperties(eduimenu_s*, eduimenu_s*)",
+          "address": 3872753,
+          "offset": 2982785,
+          "size": 168,
+          "match_percent": 7.692308
+        },
+        {
+          "name": "_ZL13cbSetControlsP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbSetControls(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3872921,
+          "offset": 2982953,
+          "size": 29,
+          "match_percent": 37.77778
+        },
+        {
+          "name": "_ZL23cbScaleAllMultipliersUpP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbScaleAllMultipliersUp(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3872950,
+          "offset": 2982982,
+          "size": 190,
+          "match_percent": 7.407407
+        },
+        {
+          "name": "_ZL25cbScaleAllMultipliersDownP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbScaleAllMultipliersDown(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3873140,
+          "offset": 2983172,
+          "size": 190,
+          "match_percent": 7.407407
+        },
+        {
           "name": "rtlScaleSetMultipliers",
           "demangled_name": "rtlScaleSetMultipliers",
           "address": 3873330,
           "offset": 2983362,
           "size": 91,
           "match_percent": 9.655172
+        },
+        {
+          "name": "_ZL6InitUIv",
+          "demangled_name": "InitUI()",
+          "address": 3873421,
+          "offset": 2983453,
+          "size": 9405,
+          "match_percent": 99.78677
+        },
+        {
+          "name": "_Z16edrtlBurnoutSavePcP9burnset_s",
+          "demangled_name": "edrtlBurnoutSave(char*, burnset_s*)",
+          "address": 3882826,
+          "offset": 2992858,
+          "size": 833,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z19edrtlBurnoutLoadSetPcP9burnset_s",
+          "demangled_name": "edrtlBurnoutLoadSet(char*, burnset_s*)",
+          "address": 3883659,
+          "offset": 2993691,
+          "size": 1380,
+          "match_percent": 99.925
+        },
+        {
+          "name": "edrtlBurnoutLoad",
+          "demangled_name": "edrtlBurnoutLoad",
+          "address": 3885039,
+          "offset": 2995071,
+          "size": 122,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z17edrtlResetBurnsetP9burnset_s",
+          "demangled_name": "edrtlResetBurnset(burnset_s*)",
+          "address": 3885161,
+          "offset": 2995193,
+          "size": 99,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z15edrtlAddBurnoutP7nuvec_s",
+          "demangled_name": "edrtlAddBurnout(nuvec_s*)",
+          "address": 3885260,
+          "offset": 2995292,
+          "size": 455,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z18edrtlRemoveBurnouti",
+          "demangled_name": "edrtlRemoveBurnout(int)",
+          "address": 3885715,
+          "offset": 2995747,
+          "size": 144,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z17edrtlPlaceBurnoutiP7nuvec_s",
+          "demangled_name": "edrtlPlaceBurnout(int, nuvec_s*)",
+          "address": 3885859,
+          "offset": 2995891,
+          "size": 119,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL25edrtlSetBurnoutStartAngleP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnoutStartAngle(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3885978,
+          "offset": 2996010,
+          "size": 55,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL27edrtlSetBurnoutMinIntensityP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnoutMinIntensity(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3886033,
+          "offset": 2996065,
+          "size": 55,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL23edrtlSetBurnoutEndAngleP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnoutEndAngle(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3886088,
+          "offset": 2996120,
+          "size": 55,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL27edrtlSetBurnoutMaxIntensityP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnoutMaxIntensity(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3886143,
+          "offset": 2996175,
+          "size": 55,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL26edrtlSetBurnoutGlobalScaleP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnoutGlobalScale(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3886198,
+          "offset": 2996230,
+          "size": 55,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL25edrtlSetBurnoutDispersionP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnoutDispersion(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3886253,
+          "offset": 2996285,
+          "size": 55,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL33edrtlSetBurnoutFragmentGlowFactorP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnoutFragmentGlowFactor(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3886308,
+          "offset": 2996340,
+          "size": 55,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL24edrtlSetBurnoutThresholdP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnoutThreshold(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3886363,
+          "offset": 2996395,
+          "size": 55,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL30edrtlSetBurnoutSourceAvailableP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnoutSourceAvailable(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3886418,
+          "offset": 2996450,
+          "size": 58,
+          "match_percent": 21.052631
+        },
+        {
+          "name": "_ZL31edrtlSetBurnoutSourceDirectionXP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnoutSourceDirectionX(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3886476,
+          "offset": 2996508,
+          "size": 55,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL31edrtlSetBurnoutSourceDirectionYP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnoutSourceDirectionY(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3886531,
+          "offset": 2996563,
+          "size": 55,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL31edrtlSetBurnoutSourceDirectionZP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnoutSourceDirectionZ(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3886586,
+          "offset": 2996618,
+          "size": 55,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL32edrtlSetBurnoutSourceInnerRadiusP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnoutSourceInnerRadius(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3886641,
+          "offset": 2996673,
+          "size": 55,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL35edrtlSetBurnoutSourceInnerIntensityP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnoutSourceInnerIntensity(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3886696,
+          "offset": 2996728,
+          "size": 55,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL32edrtlSetBurnoutSourceOuterRadiusP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnoutSourceOuterRadius(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3886751,
+          "offset": 2996783,
+          "size": 55,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL35edrtlSetBurnoutSourceOuterIntensityP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnoutSourceOuterIntensity(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3886806,
+          "offset": 2996838,
+          "size": 55,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL33edrtlSetBurnoutSourceFallOffPowerP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnoutSourceFallOffPower(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3886861,
+          "offset": 2996893,
+          "size": 55,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL27edrtlCancelBurnDefaultsMenuP10eduimenu_sS0_",
+          "demangled_name": "edrtlCancelBurnDefaultsMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3886916,
+          "offset": 2996948,
+          "size": 66,
+          "match_percent": 20.0
+        },
+        {
+          "name": "_ZL21edrtlBurnDefaultsMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlBurnDefaultsMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3886982,
+          "offset": 2997014,
+          "size": 1970,
+          "match_percent": 0.945627
+        },
+        {
+          "name": "_ZL25edrtlSetBurnoutNormalRateP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnoutNormalRate(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3888952,
+          "offset": 2998984,
+          "size": 58,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL28edrtlSetBurnoutOvershootRateP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnoutOvershootRate(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3889010,
+          "offset": 2999042,
+          "size": 58,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL29edrtlSetBurnoutOvershootCutinP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnoutOvershootCutin(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3889068,
+          "offset": 2999100,
+          "size": 58,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL30edrtlSetBurnoutOvershootAmountP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnoutOvershootAmount(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3889126,
+          "offset": 2999158,
+          "size": 58,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL28edrtlSetBurnoutOverbrightCapP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnoutOverbrightCap(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3889184,
+          "offset": 2999216,
+          "size": 58,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL26edrtlSetBurnoutOverdarkCapP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnoutOverdarkCap(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3889242,
+          "offset": 2999274,
+          "size": 58,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL30edrtlCancelBurnTransitionsMenuP10eduimenu_sS0_",
+          "demangled_name": "edrtlCancelBurnTransitionsMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3889300,
+          "offset": 2999332,
+          "size": 66,
+          "match_percent": 20.0
+        },
+        {
+          "name": "_ZL24edrtlBurnTransitionsMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlBurnTransitionsMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3889366,
+          "offset": 2999398,
+          "size": 845,
+          "match_percent": 2.197802
+        },
+        {
+          "name": "_ZL18edrtlSetBurnRadiusP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnRadius(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3890211,
+          "offset": 3000243,
+          "size": 58,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL19edrtlSetBurnFalloffP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnFalloff(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3890269,
+          "offset": 3000301,
+          "size": 58,
+          "match_percent": 18.88889
+        },
+        {
+          "name": "_ZL25edrtlCancelBurnRadiusMenuP10eduimenu_sS0_",
+          "demangled_name": "edrtlCancelBurnRadiusMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3890327,
+          "offset": 3000359,
+          "size": 66,
+          "match_percent": 20.0
+        },
+        {
+          "name": "_ZL19edrtlBurnRadiusMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlBurnRadiusMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3890393,
+          "offset": 3000425,
+          "size": 413,
+          "match_percent": 4.255319
+        },
+        {
+          "name": "_ZL24edrtlSetBurnsetThresholdP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnsetThreshold(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3890806,
+          "offset": 3000838,
+          "size": 94,
+          "match_percent": 12.5
+        },
+        {
+          "name": "_ZL24edrtlSetBurnsetIntensityP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnsetIntensity(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3890900,
+          "offset": 3000932,
+          "size": 94,
+          "match_percent": 12.5
+        },
+        {
+          "name": "_ZL20edrtlSetBurnsetFlareP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnsetFlare(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3890994,
+          "offset": 3001026,
+          "size": 94,
+          "match_percent": 12.5
+        },
+        {
+          "name": "_ZL21edrtlSetBurnsetRadiusP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnsetRadius(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3891088,
+          "offset": 3001120,
+          "size": 94,
+          "match_percent": 12.5
+        },
+        {
+          "name": "_ZL22edrtlSetBurnsetFalloffP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlSetBurnsetFalloff(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3891182,
+          "offset": 3001214,
+          "size": 94,
+          "match_percent": 12.5
+        },
+        {
+          "name": "_ZL22edrtlCancelBurnSetMenuP10eduimenu_sS0_",
+          "demangled_name": "edrtlCancelBurnSetMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3891276,
+          "offset": 3001308,
+          "size": 66,
+          "match_percent": 20.0
+        },
+        {
+          "name": "_ZL16edrtlBurnSetMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlBurnSetMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3891342,
+          "offset": 3001374,
+          "size": 877,
+          "match_percent": 1.95122
+        },
+        {
+          "name": "_ZL20edrtlBurnoutFileSaveP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlBurnoutFileSave(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3892219,
+          "offset": 3002251,
+          "size": 340,
+          "match_percent": 4.938271
+        },
+        {
+          "name": "_ZL20edrtlBurnoutFileLoadP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "edrtlBurnoutFileLoad(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3892559,
+          "offset": 3002591,
+          "size": 339,
+          "match_percent": 4.938271
+        },
+        {
+          "name": "_ZL23edrtlCancelBurnMainMenuP10eduimenu_sS0_",
+          "demangled_name": "edrtlCancelBurnMainMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3892898,
+          "offset": 3002930,
+          "size": 78,
+          "match_percent": 18.181818
+        },
+        {
+          "name": "_ZL17edrtlBurnMainMenuv",
+          "demangled_name": "edrtlBurnMainMenu()",
+          "address": 3892976,
+          "offset": 3003008,
+          "size": 695,
+          "match_percent": 2.816901
+        },
+        {
+          "name": "_ZL9edrtlInitv",
+          "demangled_name": "edrtlInit()",
+          "address": 3893671,
+          "offset": 3003703,
+          "size": 277,
+          "match_percent": 5.970149
+        },
+        {
+          "name": "_ZL10edrtlClosev",
+          "demangled_name": "edrtlClose()",
+          "address": 3893948,
+          "offset": 3003980,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL10edrtlEnterv",
+          "demangled_name": "edrtlEnter()",
+          "address": 3893953,
+          "offset": 3003985,
+          "size": 389,
+          "match_percent": 4.878049
+        },
+        {
+          "name": "_ZL10edrtlLeavev",
+          "demangled_name": "edrtlLeave()",
+          "address": 3894342,
+          "offset": 3004374,
+          "size": 50,
+          "match_percent": 28.571428
         },
         {
           "name": "_ZL14FindNearestRTLP7nuvec_si",
@@ -76156,6 +75975,14 @@
           "match_percent": 4.146341
         },
         {
+          "name": "_ZL12edrtlProcRTLfP7nupad_s",
+          "demangled_name": "edrtlProcRTL(float, nupad_s*)",
+          "address": 3896007,
+          "offset": 3006039,
+          "size": 3116,
+          "match_percent": 0.522876
+        },
+        {
           "name": "_ZL14FindNearestFogP7nuvec_s",
           "demangled_name": "FindNearestFog(nuvec_s*)",
           "address": 3899123,
@@ -76164,11 +75991,195 @@
           "match_percent": 3.193548
         },
         {
+          "name": "edrtlGetFogSet",
+          "demangled_name": "edrtlGetFogSet",
+          "address": 3899669,
+          "offset": 3009701,
+          "size": 63,
+          "match_percent": 20.0
+        },
+        {
+          "name": "_ZL13SelectPrevFogv",
+          "demangled_name": "SelectPrevFog()",
+          "address": 3899732,
+          "offset": 3009764,
+          "size": 181,
+          "match_percent": 99.9434
+        },
+        {
+          "name": "_ZL13SelectNextFogv",
+          "demangled_name": "SelectNextFog()",
+          "address": 3899913,
+          "offset": 3009945,
+          "size": 199,
+          "match_percent": 99.913795
+        },
+        {
+          "name": "_ZL12edrtlProcFogfP7nupad_s",
+          "demangled_name": "edrtlProcFog(float, nupad_s*)",
+          "address": 3900112,
+          "offset": 3010144,
+          "size": 1642,
+          "match_percent": 0.990099
+        },
+        {
+          "name": "_Z25edrtlDetermineNearestBurnfP9burnset_s",
+          "demangled_name": "edrtlDetermineNearestBurn(float, burnset_s*)",
+          "address": 3901754,
+          "offset": 3011786,
+          "size": 463,
+          "match_percent": 99.97656
+        },
+        {
+          "name": "_ZL13edrtlProcBurnfP7nupad_s",
+          "demangled_name": "edrtlProcBurn(float, nupad_s*)",
+          "address": 3902217,
+          "offset": 3012249,
+          "size": 1147,
+          "match_percent": 1.360544
+        },
+        {
+          "name": "edrtlCalculateBurnout",
+          "demangled_name": "edrtlCalculateBurnout",
+          "address": 3903364,
+          "offset": 3013396,
+          "size": 2023,
+          "match_percent": 0.680272
+        },
+        {
+          "name": "edrtlCalculateBurnoutEx",
+          "demangled_name": "edrtlCalculateBurnoutEx",
+          "address": 3905387,
+          "offset": 3015419,
+          "size": 110,
+          "match_percent": 10.0
+        },
+        {
+          "name": "_ZL15edrtlRndrLine3dP11nuvtx_tc1_sP7numtl_sP7numtx_s",
+          "demangled_name": "edrtlRndrLine3d(nuvtx_tc1_s*, numtl_s*, numtx_s*)",
+          "address": 3905497,
+          "offset": 3015529,
+          "size": 417,
+          "match_percent": 3.703704
+        },
+        {
+          "name": "_ZL9edrtlProcfP7nupad_s",
+          "demangled_name": "edrtlProc(float, nupad_s*)",
+          "address": 3905914,
+          "offset": 3015946,
+          "size": 207,
+          "match_percent": 7.857143
+        },
+        {
+          "name": "_ZL15edrtlDrawCursorv",
+          "demangled_name": "edrtlDrawCursor()",
+          "address": 3906121,
+          "offset": 3016153,
+          "size": 455,
+          "match_percent": 4.0
+        },
+        {
+          "name": "edrtlDrawLight",
+          "demangled_name": "edrtlDrawLight",
+          "address": 3906576,
+          "offset": 3016608,
+          "size": 45,
+          "match_percent": 28.571428
+        },
+        {
+          "name": "edrtlDrawLightEx",
+          "demangled_name": "edrtlDrawLightEx",
+          "address": 3906621,
+          "offset": 3016653,
+          "size": 2171,
+          "match_percent": 0.683761
+        },
+        {
+          "name": "_ZL15edrtlDrawLightsv",
+          "demangled_name": "edrtlDrawLights()",
+          "address": 3908792,
+          "offset": 3018824,
+          "size": 225,
+          "match_percent": 5.633803
+        },
+        {
+          "name": "edrtlDrawFog",
+          "demangled_name": "edrtlDrawFog",
+          "address": 3909017,
+          "offset": 3019049,
+          "size": 114,
+          "match_percent": 99.97143
+        },
+        {
+          "name": "_ZL13edrtlDrawFogsv",
+          "demangled_name": "edrtlDrawFogs()",
+          "address": 3909131,
+          "offset": 3019163,
+          "size": 83,
+          "match_percent": 15.384615
+        },
+        {
+          "name": "_ZL17edrtlDrawBurnoutsv",
+          "demangled_name": "edrtlDrawBurnouts()",
+          "address": 3909214,
+          "offset": 3019246,
+          "size": 465,
+          "match_percent": 2.941176
+        },
+        {
+          "name": "_ZL13edrtlDrawHelpv",
+          "demangled_name": "edrtlDrawHelp()",
+          "address": 3909679,
+          "offset": 3019711,
+          "size": 371,
+          "match_percent": 4.040404
+        },
+        {
+          "name": "_ZL16edrtlDrawRTLInfov",
+          "demangled_name": "edrtlDrawRTLInfo()",
+          "address": 3910050,
+          "offset": 3020082,
+          "size": 3428,
+          "match_percent": 0.45819
+        },
+        {
+          "name": "_ZL16edrtlDrawFogInfov",
+          "demangled_name": "edrtlDrawFogInfo()",
+          "address": 3913478,
+          "offset": 3023510,
+          "size": 1113,
+          "match_percent": 1.465202
+        },
+        {
+          "name": "_ZL17edrtlDrawBurnInfov",
+          "demangled_name": "edrtlDrawBurnInfo()",
+          "address": 3914591,
+          "offset": 3024623,
+          "size": 720,
+          "match_percent": 2.325581
+        },
+        {
+          "name": "_ZL11edrtlRenderv",
+          "demangled_name": "edrtlRender()",
+          "address": 3915311,
+          "offset": 3025343,
+          "size": 414,
+          "match_percent": 3.809524
+        },
+        {
           "name": "rtlFrameUpdate",
           "demangled_name": "rtlFrameUpdate",
           "address": 3915725,
           "offset": 3025757,
           "size": 97,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_GLOBAL__sub_I_rtl.c",
+          "demangled_name": "_GLOBAL__sub_I_rtl.c",
+          "address": 3916195,
+          "offset": 3026227,
+          "size": 29,
           "match_percent": 100.0
         },
         {
@@ -80227,14 +80238,6 @@
           "offset": 839904,
           "size": 362,
           "match_percent": 4.666666
-        },
-        {
-          "name": "IndexLights",
-          "demangled_name": "IndexLights",
-          "address": 3844733,
-          "offset": 2954765,
-          "size": 1753,
-          "match_percent": 0.915033
         },
         {
           "name": "_Z9SetLightsP11nucolour3_sP7nuvec_sS0_S2_S0_S2_S2_",
@@ -88895,6 +88898,30 @@
           "offset": 2198752,
           "size": 154,
           "match_percent": 94.416664
+        },
+        {
+          "name": "NuTimeBarInit",
+          "demangled_name": "NuTimeBarInit",
+          "address": 3088880,
+          "offset": 2198912,
+          "size": 42,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuTimeBarSetRenderHorizontal",
+          "demangled_name": "NuTimeBarSetRenderHorizontal",
+          "address": 3115024,
+          "offset": 2225056,
+          "size": 1349,
+          "match_percent": 1.504702
+        },
+        {
+          "name": "NuTimeBarSetRender",
+          "demangled_name": "NuTimeBarSetRender",
+          "address": 3116384,
+          "offset": 2226416,
+          "size": 2320,
+          "match_percent": 1.084991
         }
       ]
     },
@@ -89318,8 +89345,8 @@
       ]
     },
     {
-      "name": "nu2api/nu3d/nucamera.cpp.o",
-      "source": "src/nu2api/nu3d/nucamera.cpp",
+      "name": "nu2api/nu3d/nucamera.c.o",
+      "source": "src/nu2api/nu3d/nucamera.c",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nucamera.o",
       "functions": [
         {
@@ -89337,6 +89364,14 @@
           "offset": 1878095,
           "size": 1674,
           "match_percent": 99.994804
+        },
+        {
+          "name": "_Z22NuVecMtxTransformBlockP7nuvec_sS0_P7numtx_si",
+          "demangled_name": "NuVecMtxTransformBlock(nuvec_s*, nuvec_s*, numtx_s*, int)",
+          "address": 2769737,
+          "offset": 1879769,
+          "size": 358,
+          "match_percent": 100.0
         },
         {
           "name": "NuCameraClipTestExtents",
@@ -90508,22 +90543,6 @@
           "offset": 2202144,
           "size": 230,
           "match_percent": 7.983333
-        },
-        {
-          "name": "NuRndrSetDirectionalLights",
-          "demangled_name": "NuRndrSetDirectionalLights",
-          "address": 3841260,
-          "offset": 2951292,
-          "size": 228,
-          "match_percent": 21.15493
-        },
-        {
-          "name": "NuRndrSetSpecularLight",
-          "demangled_name": "NuRndrSetSpecularLight",
-          "address": 3841550,
-          "offset": 2951582,
-          "size": 170,
-          "match_percent": 42.638298
         }
       ]
     },
@@ -99489,14 +99508,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "NuTimeBarInit",
-          "demangled_name": "NuTimeBarInit",
-          "address": 3088880,
-          "offset": 2198912,
-          "size": 42,
-          "match_percent": 100.0
-        },
-        {
           "name": "NuOcclusionManagerInit",
           "demangled_name": "NuOcclusionManagerInit",
           "address": 3091280,
@@ -99591,22 +99602,6 @@
           "offset": 2224784,
           "size": 266,
           "match_percent": 31.018867
-        },
-        {
-          "name": "NuTimeBarSetRenderHorizontal",
-          "demangled_name": "NuTimeBarSetRenderHorizontal",
-          "address": 3115024,
-          "offset": 2225056,
-          "size": 1349,
-          "match_percent": 1.504702
-        },
-        {
-          "name": "NuTimeBarSetRender",
-          "demangled_name": "NuTimeBarSetRender",
-          "address": 3116384,
-          "offset": 2226416,
-          "size": 2320,
-          "match_percent": 1.084991
         },
         {
           "name": "NuQFntPrintV",
@@ -108956,14 +108951,6 @@
           "offset": 1770066,
           "size": 207,
           "match_percent": 99.98412
-        },
-        {
-          "name": "_Z22NuVecMtxTransformBlockP7nuvec_sS0_P7numtx_si",
-          "demangled_name": "NuVecMtxTransformBlock(nuvec_s*, nuvec_s*, numtx_s*, int)",
-          "address": 2769737,
-          "offset": 1879769,
-          "size": 358,
-          "match_percent": 100.0
         }
       ]
     },
@@ -117110,9 +117097,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -117142,7 +117126,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -117189,9 +117173,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -117221,7 +117202,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -117268,9 +117249,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -117300,7 +117278,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -117360,9 +117338,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -117392,7 +117367,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -117428,7 +117403,7 @@
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
-        "nu2api/nu3d/nucamera.cpp.o",
+        "nu2api/nu3d/nucamera.c.o",
         "nu2api/nu3d/nufadeobj.cpp.o",
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
@@ -117488,9 +117463,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -117520,7 +117492,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -117580,9 +117552,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -117612,7 +117581,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -117672,9 +117641,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -117704,7 +117670,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -117764,9 +117730,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -117796,7 +117759,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -117856,9 +117819,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -117888,7 +117848,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -117948,9 +117908,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -117980,7 +117937,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -118158,7 +118115,7 @@
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
-        "nu2api/nu3d/nucamera.cpp.o",
+        "nu2api/nu3d/nucamera.c.o",
         "nu2api/nu3d/nufadeobj.cpp.o",
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
@@ -118194,7 +118151,7 @@
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
-        "nu2api/nu3d/nucamera.cpp.o",
+        "nu2api/nu3d/nucamera.c.o",
         "nu2api/nu3d/nufadeobj.cpp.o",
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
@@ -118254,9 +118211,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -118286,7 +118240,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -118346,9 +118300,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -118378,7 +118329,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -118438,9 +118389,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -118470,7 +118418,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -118579,9 +118527,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -118611,7 +118556,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -118683,9 +118628,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -118715,7 +118657,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -118877,9 +118819,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -118909,7 +118848,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -119022,9 +118961,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -119054,7 +118990,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -119167,9 +119103,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -119199,7 +119132,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -119259,9 +119192,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -119291,7 +119221,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -119351,9 +119281,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -119383,7 +119310,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -119443,9 +119370,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -119475,7 +119399,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -119499,9 +119423,9 @@
       "address": 2755752,
       "offset": 1865784,
       "size": 62,
-      "match_percent": 34.238094,
+      "match_percent": 58.57143,
       "candidate_units": [
-        "nu2api/nu3d/nurndr.cpp.o"
+        "legoapi/render/core/rtl.c.o"
       ]
     },
     {
@@ -119561,9 +119485,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -119593,7 +119514,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -119653,9 +119574,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -119685,7 +119603,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -119756,9 +119674,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -119788,7 +119703,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -119848,9 +119763,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -119880,7 +119792,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -119953,9 +119865,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -119985,7 +119894,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -120045,9 +119954,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -120077,7 +119983,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -120113,7 +120019,7 @@
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
-        "nu2api/nu3d/nucamera.cpp.o",
+        "nu2api/nu3d/nucamera.c.o",
         "nu2api/nu3d/nufadeobj.cpp.o",
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
@@ -120173,9 +120079,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -120205,7 +120108,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -120265,9 +120168,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -120297,7 +120197,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -120357,9 +120257,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -120389,7 +120286,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -120449,9 +120346,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -120481,7 +120375,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -120604,9 +120498,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -120636,7 +120527,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -120696,9 +120587,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -120728,7 +120616,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -120788,9 +120676,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -120820,7 +120705,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -121136,7 +121021,7 @@
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
-        "nu2api/nu3d/nucamera.cpp.o",
+        "nu2api/nu3d/nucamera.c.o",
         "nu2api/nu3d/nufadeobj.cpp.o",
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
@@ -121162,7 +121047,7 @@
       "size": 52,
       "match_percent": 99.94118,
       "candidate_units": [
-        "legoapi/render/core/rtl.cpp.o"
+        "legoapi/render/core/rtl.c.o"
       ]
     },
     {
@@ -121173,7 +121058,7 @@
       "size": 62,
       "match_percent": 0.0,
       "candidate_units": [
-        "nu2api/nu3d/nurndr.cpp.o"
+        "legoapi/render/core/rtl.c.o"
       ]
     },
     {
@@ -121229,9 +121114,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -121261,7 +121143,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -121297,7 +121179,7 @@
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
-        "nu2api/nu3d/nucamera.cpp.o",
+        "nu2api/nu3d/nucamera.c.o",
         "nu2api/nu3d/nufadeobj.cpp.o",
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
@@ -121333,7 +121215,7 @@
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
-        "nu2api/nu3d/nucamera.cpp.o",
+        "nu2api/nu3d/nucamera.c.o",
         "nu2api/nu3d/nufadeobj.cpp.o",
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
@@ -121397,7 +121279,7 @@
       "match_percent": 88.22581,
       "candidate_units": [
         "legoapi/props/system/socksysall.cpp.o",
-        "legoapi/render/core/rtl.cpp.o"
+        "legoapi/render/core/rtl.c.o"
       ]
     },
     {
@@ -121441,9 +121323,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -121473,7 +121352,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -121509,7 +121388,7 @@
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
-        "nu2api/nu3d/nucamera.cpp.o",
+        "nu2api/nu3d/nucamera.c.o",
         "nu2api/nu3d/nufadeobj.cpp.o",
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
@@ -121545,7 +121424,7 @@
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurndr.c.o",
         "nu2api/nu3d/nubridge.cpp.o",
-        "nu2api/nu3d/nucamera.cpp.o",
+        "nu2api/nu3d/nucamera.c.o",
         "nu2api/nu3d/nufadeobj.cpp.o",
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
@@ -121571,7 +121450,7 @@
       "size": 52,
       "match_percent": 0.0,
       "candidate_units": [
-        "legoapi/render/core/rtl.cpp.o"
+        "legoapi/render/core/rtl.c.o"
       ]
     },
     {
@@ -121616,9 +121495,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -121648,7 +121524,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -122067,9 +121943,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -122099,7 +121972,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -122159,9 +122032,6 @@
         "gameapi/edtools/edmenucallbacks.cpp.o",
         "gameapi/edtools/edpartall.cpp.o",
         "gameapi/edtools/edpartcallbacks.cpp.o",
-        "gameapi/edtools/edrtl.cpp.o",
-        "gameapi/edtools/edrtlall.cpp.o",
-        "gameapi/edtools/edrtlcallbacks.cpp.o",
         "globals.cpp.o",
         "legoapi/actions/combat/whip.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
@@ -122191,7 +122061,7 @@
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
-        "legoapi/render/core/rtl.cpp.o",
+        "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
         "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
@@ -124201,14 +124071,6 @@
       "address": 3827344,
       "offset": 2937376,
       "size": 3315,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_rtl.c",
-      "demangled_name": "_GLOBAL__sub_I_rtl.c",
-      "address": 3916195,
-      "offset": 3026227,
-      "size": 29,
       "match_percent": 0.0
     },
     {
@@ -129325,10 +129187,10 @@
     }
   ],
   "summary": {
-    "bazel_units": 508,
+    "bazel_units": 505,
     "functions": 13454,
-    "assigned_functions": 12349,
+    "assigned_functions": 12350,
     "ambiguous_functions": 216,
-    "unassigned_functions": 889
+    "unassigned_functions": 888
   }
 }

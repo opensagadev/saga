@@ -1,3 +1,4 @@
+// Original camera TU basename is nucamera.c; compiled as C++ in this build.
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/nurendercontext.h"
@@ -7,30 +8,6 @@
 #include <string.h>
 
 NUMTX clip_test_mtx;
-
-// Original 0x2a5128: the render-stream camera packet closes the nucamera.c run.
-void NuIOSDLCameraCallback(void *arg) {
-    struct NuIOSCameraPacket {
-        i32 id;
-        NUMTX view;
-        NUMTX projection;
-        f32 viewport[4];
-    };
-    static i32 last_id = -1;
-    g_boundCameraPacket = arg;
-    auto *packet = static_cast<NuIOSCameraPacket *>(arg);
-    if (packet->id != last_id) {
-        NUMTX *view = &packet->view;
-        NUMTX *projection = view + 1;
-        f32 *viewport = reinterpret_cast<f32 *>(projection + 1);
-        last_id = packet->id;
-        NuRenderContextSetViewProj(view, projection);
-        NuRenderContextSetViewport(static_cast<i32>(viewport[0]), static_cast<i32>(viewport[1]),
-                                   static_cast<i32>(viewport[2]), static_cast<i32>(viewport[3]));
-    } else {
-        return;
-    }
-}
 
 void NuCameraSetProjectionMtx(NUMTX *mtx, f32 fov, f32 aspect, f32 near_clip, f32 far_clip) {
     near_clip = near_clip < 0.1f ? 0.1f : near_clip;
@@ -70,6 +47,19 @@ void NuCameraRestoreState(i32 handle) {
         // the stack count; the handle remains available for subsequent use.
         FaceYDirStream(NuAtan2D(-global_camera.mtx.m20, -global_camera.mtx.m22));
         NuRndrSetViewMtx(&vpsmtx, &vpc_vport_mtx, &vpc_sci_mtx);
+    }
+}
+
+void NuVecMtxTransformBlock(NUVEC *out, NUVEC *v, NUMTX *m, i32 count) {
+    i32 i;
+
+    for (i = 0; i < count; i++) {
+        out->x = v->x * m->m00 + v->y * m->m10 + v->z * m->m20 + m->m30;
+        out->y = v->x * m->m01 + v->y * m->m11 + v->z * m->m21 + m->m31;
+        out->z = v->x * m->m02 + v->y * m->m12 + v->z * m->m22 + m->m32;
+
+        out++;
+        v++;
     }
 }
 
@@ -222,4 +212,28 @@ SAGA_HOST_WEAK i32 NuCameraClipTestExtentsAxisAligned(NUVEC *center, NUVEC *exte
         }
     }
     return 1;
+}
+
+// Original 0x2a5128: the render-stream camera packet closes the nucamera.c run.
+void NuIOSDLCameraCallback(void *arg) {
+    struct NuIOSCameraPacket {
+        i32 id;
+        NUMTX view;
+        NUMTX projection;
+        f32 viewport[4];
+    };
+    static i32 lastId = -1;
+    g_boundCameraPacket = arg;
+    auto *packet = static_cast<NuIOSCameraPacket *>(arg);
+    if (packet->id != lastId) {
+        NUMTX *view = &packet->view;
+        NUMTX *projection = view + 1;
+        f32 *viewport = reinterpret_cast<f32 *>(projection + 1);
+        lastId = packet->id;
+        NuRenderContextSetViewProj(view, projection);
+        NuRenderContextSetViewport(static_cast<i32>(viewport[0]), static_cast<i32>(viewport[1]),
+                                   static_cast<i32>(viewport[2]), static_cast<i32>(viewport[3]));
+    } else {
+        return;
+    }
 }

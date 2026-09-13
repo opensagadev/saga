@@ -2241,10 +2241,6 @@ extern "C" {
         STUBBED();
     }
 
-    void cbModifierAdjust(void) {
-        STUBBED();
-    }
-
     void cbTriggerSubMenu(void) {
         STUBBED();
     }

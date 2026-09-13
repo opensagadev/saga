@@ -302,11 +302,3 @@ void LoadLights(WORLDINFO_s *world, char *path) {
     sprintf(filename, "%s.rtl", path);
     world->rtl_set = rtlLoadSet(filename, &world->giz_buffer, world->unknown_0108.addr);
 }
-
-extern "C" {
-
-    void IndexLights(rtlset *, VARIPTR *, i32) {
-        STUBBED();
-    }
-
-} // extern "C"

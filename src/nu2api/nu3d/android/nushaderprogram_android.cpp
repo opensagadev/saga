@@ -78,6 +78,7 @@ DECOMP_ASSERT(sizeof(ShaderProgramPool) == 0x810, "Shader program pool ABI");
 DECOMP_ASSERT(offsetof(ShaderProgramPool, occupied) == 0x800, "Shader program occupancy offset");
 DECOMP_ASSERT(offsetof(ShaderProgramPool, next) == 0x808, "Shader program cursor offset");
 static ShaderProgramPool programPool;
+NUSHADERPROGRAM *g_currentShaderProgram = nullptr;
 extern "C" {
     NUSHADERPROGRAMPARAMETER g_uniformParameterRecordStorage[1024];
 }

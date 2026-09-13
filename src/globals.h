@@ -529,8 +529,6 @@ extern i32 LevMusicOtherAmbient;
 extern i16 AreaMusic;
 extern i32 radios_playing;
 extern i32 last_chatter_sfx;
-extern u16 rtltimer1;
-extern f32 rtltimer1adv;
 
 // ------------------------------------------------------------------------
 // Camera

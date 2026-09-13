@@ -190,7 +190,6 @@ extern "C" {
     i32 NuHasError(void);
     void NuMtlAnimate(f32 frame_time);
     void NuTexAnimProcess(f32 frame_time);
-    void NuTimeBarSetRender(i32 set);
     void NuShaderManagerSetfv(i32 semantic, const f32 *values);
 
     // ---------------------------------------------------------------------------
@@ -4609,17 +4608,6 @@ extern "C" {
     void NuHtmlVBarGraph(void) {
         STUBBED();
     }
-    void NuTimeBarInit(void) {
-        VARIPTR unused = {};
-        NuTimeBarInitEx(NULL, unused);
-    }
-    void NuTimeBarSetRender(i32) {
-        STUBBED();
-    }
-    void NuTimeBarSetRenderHorizontal(void) {
-        STUBBED();
-    }
-
     // ---------------------------------------------------------------------------
     // Time
     // ---------------------------------------------------------------------------

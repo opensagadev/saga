@@ -14,6 +14,7 @@ extern "C" i32 NuTimeBarCreateSetEx2(VARIPTR *buffer, VARIPTR unused_buffer, i32
 extern "C" i32 NuTimeBarCreateSet(i32 *colours);
 extern "C" void NuTimeBarDestroySet(i32 set);
 extern "C" void NuTimeBarInitEx(VARIPTR *buffer, VARIPTR unused_buffer);
+extern "C" void NuTimeBarInit(void);
 extern "C" void NuTimeBarSlotReset(i32 set, i32 slot);
 extern "C" void _NuTimeBarSlotBegin(i32 set, i32 slot, const char *name);
 extern "C" u32 _NuTimeBarSlotEnd(i32 set, i32 slot);
@@ -24,5 +25,7 @@ extern "C" i32 NuTimeBarSlotLastValue(i32 set, i32 slot);
 extern "C" i32 NuTimeBarSlotLastValueMicroseconds(i32 set, i32 slot);
 extern "C" void NuTimeBarResetPeaks(void);
 extern "C" void NuTimeBarSetScaleY(void);
+extern "C" void NuTimeBarSetRenderHorizontal(void);
+extern "C" void NuTimeBarSetRender(i32 set);
 extern "C" void NuTimeBarEnable(i32 enabled);
 extern "C" void NuTimeBarIndicateGpuFrameOut(i32 enabled);

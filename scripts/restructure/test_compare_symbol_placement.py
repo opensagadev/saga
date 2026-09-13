@@ -2,6 +2,11 @@
 
 from contextlib import redirect_stdout
 from io import StringIO
+import json
+import os
+from pathlib import Path
+import tempfile
+import time
 import unittest
 
 from scripts.restructure.compare_symbol_placement import (
@@ -13,6 +18,7 @@ from scripts.restructure.compare_symbol_placement import (
     overall_progress,
     pair_symbols,
     print_overall_progress,
+    read_fresh_ledger,
     relative_positions,
     same_tu_constraints,
     same_tu_owner_splits,
@@ -34,6 +40,40 @@ def symbol(name, address, *, section=".text", section_base=0x1000, binding=0, si
 
 
 class CompareSymbolPlacementTests(unittest.TestCase):
+    def test_cached_ledger_must_match_elf_paths_and_units(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            original = root / "original.so"
+            current = root / "current.so"
+            units = root / "matching.json"
+            ledger = root / "ledger.json"
+            original.write_bytes(b"original")
+            current.write_bytes(b"current")
+            manifest = [{"source": "one.c", "object": "one.o"}]
+            units.write_text(json.dumps({"units": manifest}), encoding="utf-8")
+            contents = {
+                "original": str(original), "current": str(current),
+                "original_local_xrefs": [], "original_symbols": [],
+                "current_units": manifest,
+            }
+
+            def save_ledger():
+                ledger.write_text(json.dumps(contents), encoding="utf-8")
+                future = time.time() + 10
+                os.utime(ledger, (future, future))
+
+            save_ledger()
+            self.assertEqual(read_fresh_ledger(ledger, original, current, units), contents)
+            contents["current"] = str(root / "other.so")
+            save_ledger()
+            with self.assertRaisesRegex(ValueError, "different ELF inputs"):
+                read_fresh_ledger(ledger, original, current, units)
+            contents["current"] = str(current)
+            contents["current_units"] = [{"source": "other.c", "object": "one.o"}]
+            save_ledger()
+            with self.assertRaisesRegex(ValueError, "different unit manifest"):
+                read_fresh_ledger(ledger, original, current, units)
+
     def test_absolute_section_and_relative_deltas_are_distinct(self):
         original = [symbol("a", 0x1010), symbol("b", 0x1020)]
         current = [symbol("a", 0x2020, section_base=0x2000),

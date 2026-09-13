@@ -43,12 +43,11 @@
 // nurendercontext.cpp, and material state in numtl_android.cpp.
 // ---------------------------------------------------------------------------
 
-u32 g_boundShader = 0;
-NUSHADERPROGRAM *g_currentShaderProgram = nullptr;
 numtl_s *g_boundMaterial = nullptr;
 void *g_boundLightPacket = nullptr;
 usize g_boundVertexFormat = 0;
 u32 g_activeAttributes = 0;
+u32 g_boundShader = 0;
 
 // The original helper at 0x293168 updates the shared renderer cache.
 static void NuIOSBindVAO(u32 vao) {

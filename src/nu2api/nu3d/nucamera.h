@@ -86,6 +86,7 @@ typedef struct nucamerastate_s {
 #ifdef __cplusplus
 
 void NuCameraBuildClipPlanes(void);
+extern NUMTX clip_test_mtx;
 
 extern "C" {
     extern i32 cam_state_count;

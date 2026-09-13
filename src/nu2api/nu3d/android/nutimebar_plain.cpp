@@ -133,6 +133,11 @@ extern "C" void NuTimeBarInitEx(VARIPTR *buffer, VARIPTR unused_buffer) {
     NuTimeBar_Initialised = 1;
 }
 
+extern "C" void NuTimeBarInit(void) {
+    VARIPTR unused = {};
+    NuTimeBarInitEx(NULL, unused);
+}
+
 // ---------------------------------------------------------------------------
 // Public API — original addresses noted per function
 // ---------------------------------------------------------------------------
@@ -225,7 +230,8 @@ extern "C" void NuTimeBarSlotSetEx(i32 set, i32 slot, i32 value, const char *nam
         return;
     }
     if (slot == 6 && set == -1) {
-        value = static_cast<i32>(static_cast<u32>(static_cast<f64>(static_cast<f32>(static_cast<u32>(value))) * 63.556));
+        value =
+            static_cast<i32>(static_cast<u32>(static_cast<f64>(static_cast<f32>(static_cast<u32>(value))) * 63.556));
     }
     TimeBarSet *timebar = NuTimeBar_SetList[set + 1];
     i32 accumulator = 1 - timebar->toggle_flags[slot];
@@ -248,6 +254,14 @@ extern "C" void NuTimeBarResetPeaks(void) {
 }
 
 extern "C" void NuTimeBarSetScaleY(void) {
+    STUBBED();
+}
+
+extern "C" void NuTimeBarSetRenderHorizontal(void) {
+    STUBBED();
+}
+
+extern "C" void NuTimeBarSetRender(i32) {
     STUBBED();
 }
 
