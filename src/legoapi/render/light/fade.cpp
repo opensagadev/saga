@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/core/input/qrand.h"
 #include "nu2api/nu3d/numtl.h"
@@ -168,6 +169,7 @@ void Fade::InitFade() {
 }
 
 void Fade::UpdateFade() {
+    STUBBED();
 }
 
 void FadeWipe::DrawFade() {
@@ -196,6 +198,7 @@ void FadeWipe::InitFade() {
 }
 
 void FadeWipe::UpdateFade() {
+    STUBBED();
 }
 
 void FadeStill::DrawFade() {
@@ -236,12 +239,15 @@ void FadeStill::UpdateFade() {
 }
 
 void FadeLoop_SetObj(nugscn_s *, char *) {
+    STUBBED();
 }
 
 void FadeLoop_DrawObj(float) {
+    STUBBED();
 }
 
 void FadeLoop_UsingObj() {
+    STUBBED();
 }
 
 void CreateFadeMaterials() {
@@ -271,4 +277,5 @@ void CreateFadeMaterials() {
 }
 
 void FadeLoop(char *, i32, float, void (*)(float)) {
+    STUBBED();
 }

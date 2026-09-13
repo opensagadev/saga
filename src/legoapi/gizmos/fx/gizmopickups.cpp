@@ -839,6 +839,7 @@ static i32 GizmoPickups_Load(void *world_ptr, void *) {
 }
 
 void GizmoPickups_PostLoad(void *, void *) {
+    STUBBED();
 }
 
 void GizmoPickups_InitSys(GIZMOPICKUPSYS_s *pickup_sys) {

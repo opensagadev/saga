@@ -15,13 +15,16 @@ extern "C" void NuInitDebrisRenderer(VARIPTR *buffer, VARIPTR buffer_end);
 extern "C" void NuIOSMtlInit(void);
 
 extern "C" NUPADREC *PadRecPtr(void) {
+    STUBBED();
     return NULL;
 }
 
 void NuXboxLiveInit(void) {
+    STUBBED();
 }
 
 void InitializeGLMutex(void) {
+    STUBBED();
 }
 
 i32 NuInitHardwarePS(VARIPTR *buf, VARIPTR *buf_end, i32 heap_size) {
@@ -56,6 +59,7 @@ i32 NuInitHardwarePS(VARIPTR *buf, VARIPTR *buf_end, i32 heap_size) {
 }
 
 i32 NuInitHardwareParseArgsPS(i32 setup_tok, char **args) {
+    STUBBED();
     return 0;
 }
 

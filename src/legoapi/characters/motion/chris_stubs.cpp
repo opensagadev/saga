@@ -14,12 +14,15 @@ struct SHOPINPUT;
 GameObject_s *AnakinC = NULL;
 
 void ChrisAnakinADraw() {
+    STUBBED();
 }
 
 void ChrisAnakinDDraw() {
+    STUBBED();
 }
 
 void ChrisAnakinAUpdate(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void ChrisUnallocLevelStuff(WORLDINFO_s *world) {

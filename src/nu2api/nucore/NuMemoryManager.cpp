@@ -874,6 +874,7 @@ bool NuMemoryManager::PopContext(NuMemoryManager::PopDebugMode debug_mode) {
 }
 
 void NuMemoryManager::Validate() {
+    STUBBED();
 }
 
 void NuMemoryManager::ValidateAddress(void *ptr, const char *caller) {
@@ -897,9 +898,11 @@ void NuMemoryManager::ValidateAddress(void *ptr, const char *caller) {
 }
 
 void NuMemoryManager::ValidateAllocAlignment(u32 alignment) {
+    STUBBED();
 }
 
 void NuMemoryManager::ValidateAllocSize(u32 size) {
+    STUBBED();
 }
 
 void NuMemoryManager::ValidateBlockEndTags(Header *header, const char *caller) {
@@ -934,6 +937,7 @@ void NuMemoryManager::ValidateBlockEndTags(Header *header, const char *caller) {
 }
 
 void NuMemoryManager::ValidateBlockFlags(Header *header, u32 flags, const char *caller) {
+    STUBBED();
 }
 
 void NuMemoryManager::ValidateBlockIsAllocated(Header *header, const char *caller) {
@@ -966,6 +970,7 @@ void NuMemoryManager::ValidateBlockIsAllocated(Header *header, const char *calle
 }
 
 void NuMemoryManager::ValidateBlockIsPaged(void *block, const char *caller) {
+    STUBBED();
 }
 
 void NuMemoryManager::StatsAddFragment(NuMemoryManager::FreeHeader *header) {
@@ -1071,26 +1076,33 @@ done:
 }
 
 void NuMemoryManager::Dump(u32 _unknown, const char *filepath) {
+    STUBBED();
 }
 
 void NuMemoryManager::StrandBlocksForContext(Context *ctx, u32 &stranded_block_count, u32 &_unknown,
                                              Header *&largest_stranded, u32 &stranded_bytes_count) {
+    STUBBED();
 }
 
 void NuMemoryManager::FreeStrandedBlocks() {
+    STUBBED();
 }
 
 void NuMemoryManager::IErrorHandler::HandleError(NuMemoryManager *manager, ErrorCode code, const char *msg) {
+    STUBBED();
 }
 
 i32 NuMemoryManager::IErrorHandler::OpenDump(NuMemoryManager *manager, const char *filename, u32 &id) {
+    STUBBED();
     return 0;
 }
 
 void NuMemoryManager::IErrorHandler::CloseDump(NuMemoryManager *manager, u32 id) {
+    STUBBED();
 }
 
 void NuMemoryManager::IErrorHandler::Dump(NuMemoryManager *manager, u32 id, const char *msg) {
+    STUBBED();
 }
 
 void NuMemoryManager::ClearBlockDebugContext(void *ptr) {
@@ -1106,12 +1118,15 @@ void NuMemoryManager::ClearBlockDebugContext(void *ptr) {
 }
 
 void NuMemoryManager::DumpBlock(u32, NuSymbolQuery *, NuMemoryManager::Header *, u32, u32, u32) {
+    STUBBED();
 }
 
 void NuMemoryManager::DumpBlocksForContext(u32, NuSymbolQuery *, NuMemoryManager::Context *, u32) {
+    STUBBED();
 }
 
 void NuMemoryManager::FindAndTouchMatchingBlocks(NuMemoryManager::DebugHeader *, u32 *, u32) {
+    STUBBED();
 }
 
 u32 NuMemoryManager::GetAllocatedBytes() {
@@ -1294,6 +1309,7 @@ void NuMemoryManager::PushContext(const char *name) {
 }
 
 void NuMemoryManager::ReleaseExternalPage(void *) {
+    STUBBED();
 }
 
 void NuMemoryManager::SetBlockDebugContext(void *ptr, u32 ctx_id) {
@@ -1399,6 +1415,7 @@ void NuMemoryManager::ValidateBlock(void *ptr) {
 }
 
 void NuMemoryManager::ValidateBlockDeferredContent(NuMemoryManager::Header *, char const *) {
+    STUBBED();
 }
 
 void NuMemoryManager::VisitManagers(NuMemoryManager::IVisitor *visitor) {
@@ -1420,4 +1437,5 @@ void NuMemoryManager::VisitPages(NuMemoryManager::IPageVisitor *visitor) {
 }
 
 void NuMemoryManager::_MultiBlockAlloc(u32, u32, u32, void **, u32, char const *, u16) {
+    STUBBED();
 }

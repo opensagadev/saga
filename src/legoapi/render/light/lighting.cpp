@@ -135,6 +135,7 @@ void FindAndSetLights(nuvec_s *position, float scale, void *set) {
 }
 
 void LightSabreDebris(GameObject_s *) {
+    STUBBED();
 }
 
 void SetSpotLightMode() {
@@ -268,12 +269,15 @@ void SetLights_RTLDATA(rtldata_s *data, float scale) {
 }
 
 void FreeGameObjectLights() {
+    STUBBED();
 }
 
 void TurnEpisodeDoorLightsOn(i32) {
+    STUBBED();
 }
 
 void LightSabre_ColourFromObj(i32, i32 *) {
+    STUBBED();
 }
 
 void SetLights(NUCOLOUR3 *colour0, NUVEC *direction0, NUCOLOUR3 *colour1, NUVEC *direction1, NUCOLOUR3 *colour2,
@@ -302,6 +306,7 @@ void LoadLights(WORLDINFO_s *world, char *path) {
 extern "C" {
 
     void IndexLights(rtlset *, VARIPTR *, i32) {
+        STUBBED();
     }
 
 } // extern "C"

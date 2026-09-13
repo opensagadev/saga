@@ -51,6 +51,7 @@ struct FLOWBOX_s;
 i32 GizObstacle_CheckExcludeFlagsFn_LSW(GIZOBSTACLE_s *, GameObject_s *);
 
 static i32 DefaultGizmo_GetOutput(GIZMO *, i32, i32) {
+    STUBBED();
     return 0;
 }
 
@@ -626,6 +627,7 @@ const char *TeleportObjectInterface::GetTargetName() const {
 }
 
 void TeleportObjectInterface::TargetedFlash() {
+    STUBBED();
 }
 
 TeleportObjectInterface::TeleportObjectInterface(TELEPORT_s &value, i32 teleport_index)
@@ -1260,6 +1262,7 @@ NUVEC *GizmoGetPos(GIZMOSYS_s *, GIZMO_s *gizmo) {
 }
 
 i32 GizmoGetGuid(GIZMOSYS_s *, GIZMO_s *) {
+    STUBBED();
     return -1;
 }
 
@@ -1377,10 +1380,12 @@ void GizmoSysSetGame() {
 }
 
 i32 GizmoSys_BoltHit(GIZMOSYS_s *, void *, BOLT_s *, nuvec_s *, nuvec_s *, nuvec_s *, float, unsigned char *) {
+    STUBBED();
     return 0;
 }
 
 void ResetPaintPuzzle(WORLDINFO_s *) {
+    STUBBED();
 }
 
 i32 GizmoFileReadName(char *name) {
@@ -1417,12 +1422,15 @@ i32 GizmoIsNameUnique(GIZMOSYS *gizmo_sys, char *name) {
 }
 
 void GizmoSysWriteInfo(GIZMOSYS_s *, char *, nugscn_s *) {
+    STUBBED();
 }
 
 void UpdatePaintPuzzle(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void GizmoGetNumOutputs(GIZMOSYS_s *, GIZMO_s *) {
+    STUBBED();
 }
 
 i32 GizmoGetUniqueName(GIZMOSYS *gizmo_sys, char *prefix, char *name, char *result, i32 result_size) {

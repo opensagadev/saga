@@ -32,18 +32,23 @@ void setnextpoint(float x, float y) {
 }
 
 void BezierLinePos(VuVec &, VuVec &, VuVec &, VuVec &, VuVec &, float) {
+    STUBBED();
 }
 
 void BezierLineEval(VuVec &, VuVec &, VuVec &, VuVec &, VuVec &, float) {
+    STUBBED();
 }
 
 void CalcSplinePoint(flightspline_s *, _vuv_s *, float) {
+    STUBBED();
 }
 
 void BezierLineLength(VuVec &, VuVec &, VuVec &, VuVec &) {
+    STUBBED();
 }
 
 void BezierLineLength(VuVec &, VuVec &, VuVec &, VuVec &, float) {
+    STUBBED();
 }
 
 
@@ -138,6 +143,7 @@ i32 getnextdatapoint(float *value, i32 *delta) {
 }
 
 void FlightSpline_Init(WORLDINFO_s *, flightspline_s *, i32) {
+    STUBBED();
 }
 
 i32 LineIntersectXY(NUVEC *, NUVEC *, NUVEC *, NUVEC *, NUVEC *, NUVEC *);
@@ -259,6 +265,7 @@ void GetNearestSplinePos(NUVEC *origin, SPLINEPOS_s *result, NUGSPLINE *spline, 
 }
 
 void CalcSplinePointFromDist(flightspline_s *, _vuv_s *, float) {
+    STUBBED();
 }
 
 static LEVELSPLINE *LevSplList;
@@ -288,6 +295,7 @@ void LevelSplines_InitForGame(LEVELSPLINE *splines) {
 }
 
 void EvaluateSplineXZIntersection(nugspline_s *, i32, SPLINEPOS_s *, nugspline_s *, i32, SPLINEPOS_s *) {
+    STUBBED();
 }
 
 void setpoint(float x) {
@@ -296,6 +304,7 @@ void setpoint(float x) {
 }
 
 static __used__ f32 SplineLength(nugspline_s *, i32) {
+    STUBBED();
     return 0.0f;
 }
 

@@ -318,6 +318,7 @@ i32 HitTerrain() {
 }
 
 void KillRumble(GameObject_s *) {
+    STUBBED();
 }
 
 i32 CheckSphere(i32 vertex_index) {
@@ -382,6 +383,7 @@ i32 CheckSphere(i32 vertex_index) {
 }
 
 void FloatRumble(GameObject_s *) {
+    STUBBED();
 }
 
 i32 HitTerrPoly(tertype *surface, i32 group_index) {
@@ -447,6 +449,7 @@ i16 InsideLineXZ(f32 point_u, f32 point_v, f32 line_start_u, f32 line_start_v, f
 }
 
 void ObjHitShield(GameObject_s *, GameObject_s *, i32, BOLT_s *) {
+    STUBBED();
 }
 
 i32 CheckCylinder(i32 first_vertex, i32 second_vertex, i32 *vertex_mask, i32 remaining_vertex_mask) {
@@ -926,6 +929,7 @@ void CollideGameObjects(WORLDINFO_s *world) {
 }
 
 void CalculateRayBoxIntersection(VuVec const &, VuVec const &, VuVec const &, VuVec const &, float, float &) {
+    STUBBED();
 }
 
 f32 CalcCapsuleIntersectDistance(VuVec const &start, VuVec const &direction, f32 maximum_distance, VuVec const &centre,
@@ -1125,10 +1129,12 @@ i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 seconda
 }
 
 i32 CheckCol(nutex_s *, i32, i32, i32, i32) {
+    STUBBED();
     return true;
 }
 
 void HitRumble(GameObject_s *) {
+    STUBBED();
 }
 
 i32 ObjHitObj(GameObject_s *attacker, GameObject_s *target, i32 damage, u16 flags, i32 probe, i32) {

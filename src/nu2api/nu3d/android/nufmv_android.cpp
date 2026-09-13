@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "nu2api/nu3d/android/nufmv_android.h"
 #include "nu2api/nucore/nuvuvec.hpp"
 
@@ -9,6 +10,7 @@ i32 fmv_playing;
 i32 queue_cnt;
 
 void NuFmvInit(void) {
+    STUBBED();
 }
 
 i32 NuFmvPlayV(i32 option, ...) {

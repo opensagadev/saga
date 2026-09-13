@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "nu2api/nucore/NuInputDevice.h"
 #include "nu2api/nucore/NuTouchInputButton.h"
 
@@ -310,4 +311,5 @@ void NuInputDevice::DeadZone(NUPADANALOGVALUE input, f32 dead_zone) {
 }
 
 void NuInputDevice::ConvertToEmulatedTouchFromMouse(void) {
+    STUBBED();
 }

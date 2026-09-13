@@ -5,6 +5,7 @@
 #include "nu2api/numath/nufloat.h"
 
 void TTNetwork::Broadcast(NetMessage, unsigned char) {
+    STUBBED();
 }
 
 void TTNetwork::ClearMyHostAddress() {
@@ -12,6 +13,7 @@ void TTNetwork::ClearMyHostAddress() {
 }
 
 void TTNetwork::Display(ThingRenderData *) {
+    STUBBED();
 }
 
 const NetAddress &TTNetwork::GetMyAddress() const {
@@ -23,21 +25,27 @@ const NetAddress *TTNetwork::GetMyHostAddress() const {
 }
 
 void TTNetwork::Initialise() {
+    STUBBED();
 }
 
 void TTNetwork::ProcessEvenWhenPaused(ThingProcessData *) {
+    STUBBED();
 }
 
 void TTNetwork::ReliableBroadcast(NetMessage, unsigned char) {
+    STUBBED();
 }
 
 void TTNetwork::ReliableSend(NetMessage, unsigned char, NetPeer &, char const *, u32) {
+    STUBBED();
 }
 
 void TTNetwork::Resume() {
+    STUBBED();
 }
 
 void TTNetwork::Send(NetMessage, unsigned char, NetPeer &) {
+    STUBBED();
 }
 
 void TTNetwork::SetMyHostAddress(NetAddress const &address) {
@@ -46,20 +54,25 @@ void TTNetwork::SetMyHostAddress(NetAddress const &address) {
 }
 
 void TTNetwork::Shutdown() {
+    STUBBED();
 }
 
 bool TTNetwork::Suspend() {
+    STUBBED();
     return true;
 }
 
 TTNetwork::TTNetwork() {
+    STUBBED();
 }
 
 void TTNetwork::Update() {
+    STUBBED();
 }
 
 TTNetwork::~TTNetwork() {
 }
 
 static __used__ void NOSGetGuid() {
+    STUBBED();
 }

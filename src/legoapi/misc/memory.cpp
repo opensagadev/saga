@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/android/nuptl_android.h"
 
@@ -78,6 +79,7 @@ extern "C" {
 
 
     void CrashDataPtr(void) {
+        STUBBED();
     }
 
     i32 DebAlloc(void) {
@@ -177,6 +179,7 @@ extern "C" {
     }
 
     void DebFreeAllChunksInstantly(void) {
+        STUBBED();
     }
 
     void DebFreeInstantly(i32 *handle) {

@@ -530,12 +530,15 @@ void Particles_Load(WORLDINFO *world, char **debris_name, i32 count, i32 flags) 
 extern "C" {
 
     void AITerrInit(void) {
+        STUBBED();
     }
 
     void AITerrShadow(void) {
+        STUBBED();
     }
 
     void AITerrShadowOnPlatform(void) {
+        STUBBED();
     }
 
     i32 CheckForPlatInst(i32 instance) {
@@ -645,18 +648,23 @@ extern "C" {
     }
 
     void CreateScaledPARTEffect(void) {
+        STUBBED();
     }
 
     void CubeImpact(void) {
+        STUBBED();
     }
 
     void DebFreeAllCreatedEffects(void) {
+        STUBBED();
     }
 
     void DebFreeAllDMADebTablesInstantly(void) {
+        STUBBED();
     }
 
     void DebFreeAllPanelEffects(void) {
+        STUBBED();
     }
 
     void Debris(i32 update_panel_time) {
@@ -680,18 +688,23 @@ extern "C" {
     }
 
     void DebrisAllCollisionCheckScaleYFlag(void) {
+        STUBBED();
     }
 
     void DebrisCollisionCheck(void) {
+        STUBBED();
     }
 
     void DebrisCollisionCheckFlag(void) {
+        STUBBED();
     }
 
     void DebrisCollisionCheckScaleY(void) {
+        STUBBED();
     }
 
     void DebrisCollisionCheckScaleYFlag(void) {
+        STUBBED();
     }
 
 } // extern "C"
@@ -967,24 +980,31 @@ extern "C" {
     }
 
     void DebrisFindAllOfType(void) {
+        STUBBED();
     }
 
     void DebrisGetConeProperties(void) {
+        STUBBED();
     }
 
     void DebrisGetDuration(void) {
+        STUBBED();
     }
 
     void DebrisGetName(void) {
+        STUBBED();
     }
 
     void DebrisGetParticleCount(void) {
+        STUBBED();
     }
 
     void DebrisGetRingProperties(void) {
+        STUBBED();
     }
 
     void DebrisGetSeed(void) {
+        STUBBED();
     }
 
     void DebrisGlassClose(void) {
@@ -1152,6 +1172,7 @@ extern "C" {
     }
 
     void DebrisPreCheckCollisions(void) {
+        STUBBED();
     }
 
     void DebrisProcessTimeSlip(void) {
@@ -1166,6 +1187,7 @@ extern "C" {
     }
 
     void DebrisQueryPriority(void) {
+        STUBBED();
     }
 
     void DebrisReScale(i32 effect_index, f32 scale) {
@@ -1217,6 +1239,7 @@ extern "C" {
     }
 
     void DebrisReserveTrashableSpace(void) {
+        STUBBED();
     }
 
     void DebrisResetTimers(void) {
@@ -1286,9 +1309,11 @@ extern "C" {
     }
 
     void DebrisSetGroupID(void) {
+        STUBBED();
     }
 
     void DebrisSetPriority(void) {
+        STUBBED();
     }
 
     i32 debris_render_group;
@@ -1297,6 +1322,7 @@ extern "C" {
     }
 
     void DebrisSetRoomID(void) {
+        STUBBED();
     }
 
     void DebrisSetSeed(i32 seed) {
@@ -1313,9 +1339,11 @@ extern "C" {
     }
 
     void DebrisSetUserData(void) {
+        STUBBED();
     }
 
     void DebrisShift(void) {
+        STUBBED();
     }
 
     void DebrisStartOffsetEx(debkeydatatype_s *key, f32 offset) {
@@ -1363,21 +1391,27 @@ extern "C" {
     }
 
     void DebrisStatusAlwaysOn(void) {
+        STUBBED();
     }
 
     void DebrisStatusNormal(void) {
+        STUBBED();
     }
 
     void DebrisTorusCollisionCheck(void) {
+        STUBBED();
     }
 
     void DebrisTorusCollisionCheckFlag(void) {
+        STUBBED();
     }
 
     void DebrisTorusCollisionCheckScaleY(void) {
+        STUBBED();
     }
 
     void DebrisTorusCollisionCheckScaleYFlag(void) {
+        STUBBED();
     }
 
     void DebrisTrashableSetup(VARIPTR *buffer, VARIPTR *) {
@@ -1488,9 +1522,11 @@ extern "C" {
     }
 
     void DrawHitTerrain(void) {
+        STUBBED();
     }
 
     void DrawPlatform(void) {
+        STUBBED();
     }
 
     i32 FindPlatInst(i32 instance) {
@@ -1505,6 +1541,7 @@ extern "C" {
     }
 
     void NewMSituTerrEx(void) {
+        STUBBED();
     }
 
     i32 NewPlatInst(void *object, i32 instance) {
@@ -1545,6 +1582,7 @@ extern "C" {
     }
 
     void NewPlatInstMSitu(void) {
+        STUBBED();
     }
 
     void AddPickupTerr(i32 type, NUVEC *position) {
@@ -1697,6 +1735,7 @@ extern "C" {
     }
 
     void NewRayCastEx(void) {
+        STUBBED();
     }
 
     f32 NewRayCastGetEmbedDist(void) {
@@ -1721,28 +1760,36 @@ extern "C" {
     }
 
     void NewRayCastMask(void) {
+        STUBBED();
     }
 
     void NewRayCastPlatForm(void) {
+        STUBBED();
     }
 
     void NewRayCastScaleY(void) {
+        STUBBED();
     }
 
     i32 NewRayCastScaleYMask(NUVEC *, NUVEC *, f32, f32, i32, u32) {
+        STUBBED();
         return 0;
     }
 
     void NewRayCastSet(void) {
+        STUBBED();
     }
 
     void NewRayCastSetHandel(void) {
+        STUBBED();
     }
 
     void NewRayCastSetMask(void) {
+        STUBBED();
     }
 
     void NewScanHandel(void) {
+        STUBBED();
     }
 
     f32 NewShadowEx(NUVEC *position, i32 handle, f32 height_above, f32 height_below, i32 terrain_mask);
@@ -1782,6 +1829,7 @@ extern "C" {
     }
 
     void NewShadowHandelEx(void) {
+        STUBBED();
     }
 
     i32 NewShadowOnMSitu(void) {
@@ -1824,6 +1872,7 @@ extern "C" {
     }
 
     void NewTerrain(void) {
+        STUBBED();
     }
 
     i32 NewTerrainOnAPlatform(void *id) {
@@ -1836,6 +1885,7 @@ extern "C" {
     }
 
     void NewTerrainScaleY(void) {
+        STUBBED();
     }
 
     void NewTerrainScaleYMask(NUVEC *position, NUVEC *movement, u8 *hit_flags, i32 object_index, f32 radius,
@@ -2071,6 +2121,7 @@ extern "C" {
     }
 
     void PartTerrInit(void) {
+        STUBBED();
     }
 
     void PlatInstBounce(i32 index, f32 impulse, f32 spring, f32 damping) {
@@ -2303,9 +2354,11 @@ extern "C" {
     }
 
     void SortDebrisRenderStack(void) {
+        STUBBED();
     }
 
     void TerrDrawImpactPol(void) {
+        STUBBED();
     }
 
     const char *TerrErrorString(i32 error) {
@@ -2482,9 +2535,11 @@ extern "C" {
     }
 
     void UpdateDebrisRenderStackPriority(void) {
+        STUBBED();
     }
 
     void terraininit(void) {
+        STUBBED();
     }
 
     void terrainpickupinit(char *path, void **buffer) {

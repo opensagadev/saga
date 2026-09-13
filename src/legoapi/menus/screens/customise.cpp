@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include <stdio.h>
 #include <string.h>
 #include "legoapi/items/objects/gameobjects.h"
@@ -209,15 +210,19 @@ void Customiser_Reset(CUSTOMISER *customiser) {
 }
 
 void Customiser_Draw3D(CUSTOMISER *) {
+    STUBBED();
 }
 
 void Customiser_Update(CUSTOMISER *, WORLDINFO_s *) {
+    STUBBED();
 }
 
 void CustomiserMenu_End() {
+    STUBBED();
 }
 
 void Customiser_DumpAll(CUSTOMISER *, WORLDINFO_s *) {
+    STUBBED();
 }
 
 void Customiser_ResetModelTextureIDs(CUSTOMISER *customiser) {
@@ -270,22 +275,28 @@ resolved_icon:
 }
 
 void Customiser_LoadAll(CUSTOMISER *, WORLDINFO_s *) {
+    STUBBED();
 }
 
 void CustomiserMenu_Draw(MENU_s *) {
+    STUBBED();
 }
 
 void Customiser_Configure(char *, variptr_u *, variptr_u *, i32, i32, i32 (*)(CUSTOMPIECE *),
                           void (*)(CUSTOMPIECE *, nufpar_s *), i32 (*)(char *), CUSTOMISESAVE_s *, i16 *) {
+    STUBBED();
 }
 
 void Customiser_InitNames(CUSTOMISER *) {
+    STUBBED();
 }
 
 void CustomiserMenu_Update(MENU_s *) {
+    STUBBED();
 }
 
 void Customiser_PieceConfig(CUSTOMPIECE *, nufpar_s *) {
+    STUBBED();
 }
 
 i32 Customiser_MenuAvailable(CUSTOMISER *customiser) {
@@ -304,6 +315,7 @@ i32 Customiser_MenuAvailable(CUSTOMISER *customiser) {
 }
 
 void Customiser_PieceAvailable(CUSTOMPIECE *) {
+    STUBBED();
 }
 
 void Customiser_SetAnimsToLoad(CUSTOMISER *customiser, i32 enabled) {
@@ -355,12 +367,15 @@ void Customiser_SetNameAndIcon(CUSTOMISER *customiser, i32 index) {
 }
 
 void Customiser_DrawAccessories(CUSTOMISER *, GameObject_s *, numtx_s *) {
+    STUBBED();
 }
 
 void Customiser_DumpAccessories(CUSTOMISER *) {
+    STUBBED();
 }
 
 void Customiser_FindPieceByName(CUSTOMISER *, char *, i32 *, i32 *) {
+    STUBBED();
 }
 
 i32 Customiser_NextPieceLeft(CUSTOMISER *customiser, i32 index, i32 count, i32 unused, i32 category) {
@@ -513,18 +528,23 @@ void Customiser_LoadAccessories(CUSTOMISER *customiser, APICHARACTERMODELLIST_s 
 }
 
 void Customiser_TransformToPanel(CUSTOMISER *) {
+    STUBBED();
 }
 
 void Customiser_AddPartAccessories(CUSTOMISER *, GameObject_s *, i32, i32, float) {
+    STUBBED();
 }
 
 void Customiser_SetUpCharacterData(CUSTOMISER *) {
+    STUBBED();
 }
 
 void Customiser_SaveModelTextureIDs(CUSTOMISER *, CHARACTERMODEL_s *) {
+    STUBBED();
 }
 
 void Customiser_Set100PercentPieces(CUSTOMISER *) {
+    STUBBED();
 }
 
 void Customiser_CopyDefaultPiecesToSave(CUSTOMISER *customiser, CUSTOMISESAVE_s *save) {
@@ -574,11 +594,14 @@ void Customiser_GetActiveWeirdoIndex(i32 *index, i32 *count) {
 }
 
 void Customiser_RestoreModelTextureIDs(CUSTOMISER *) {
+    STUBBED();
 }
 
 static __used__ bool Customiser_PieceAvailable_Default(CUSTOMPIECE *) {
+    STUBBED();
     return {};
 }
 
 void Customise_GetToggleString(i32) {
+    STUBBED();
 }

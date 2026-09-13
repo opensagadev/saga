@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/world/world.h"
 struct HINT_s;
 
@@ -680,10 +681,12 @@ void ChatterSfx(GameObject_s *g, i32 a, float b) {
 }
 
 void Move_VEHICLE(GameObject_s *g) {
+    STUBBED();
     (void)g;
 }
 
 void DrawOffsetCode(GameObject_s *obj, i32 param) {
+    STUBBED();
     (void)obj;
     (void)param;
 }
@@ -729,12 +732,15 @@ i32 Player_HasPurpleForce(GameObject_s *obj) {
 }
 
 void PlayerTakeHit(GameObject_s *, GameObject_s *) {
+    STUBBED();
 }
 
 void PlayerItem_Set(PLAYERITEM_s *, PLAYERITEMTYPE_s *) {
+    STUBBED();
 }
 
 void Player_FindByID(i32) {
+    STUBBED();
 }
 
 NUVEC *Player_StartPos(GameObject_s *obj) {
@@ -790,6 +796,7 @@ i32 Players_BothActive() {
 }
 
 void PlayerItemType_Find(i32) {
+    STUBBED();
 }
 
 void (*Player_ClearContextFn)(GameObject_s *, i32);
@@ -811,6 +818,7 @@ i32 Player_HasFastBuild(GameObject_s *player) {
 }
 
 void PlayerItemTypes_Init(PLAYERITEMTYPE_s *) {
+    STUBBED();
 }
 
 void Player_ResetContexts(PLAYERPACKET_s *packet) {
@@ -1049,6 +1057,7 @@ i32 Player_HasDoubleBoltDamage(GameObject_s *object) {
 }
 
 void PlayerButton_OnHold_Callback(MechTouchUIElement &, TouchHolder &) {
+    STUBBED();
 }
 
 i32 Player_HasDoubleWeaponDamage(GameObject_s *object) {
@@ -1059,6 +1068,7 @@ i32 Player_HasDoubleWeaponDamage(GameObject_s *object) {
 }
 
 void PlayerButton_OnLeave_Callback(MechTouchUIElement &, TouchHolder &) {
+    STUBBED();
 }
 
 i32 Player_HasDoubleBoltDamage_FromBolt(BOLT_s *bolt) {
@@ -1073,18 +1083,22 @@ i32 Player_HasDoubleBoltDamage_FromBolt(BOLT_s *bolt) {
 }
 
 void PlayerButton_OnClick_Callback_NextButton(MechTouchUIElement &, TouchHolder &) {
+    STUBBED();
 }
 
 static __used__ i32 SelectOpponent(GameObject_s *, f32, f32, i32, i32) {
+    STUBBED();
     return 0;
 }
 
 static __used__ void Player_ClearContext_Game(GameObject_s *, i32) {
+    STUBBED();
 }
 
 u32 (*CanPushObstaclesFn)(GameObject_s *) = NULL;
 
 void KillPlayer(GameObject_s *, i32, i32, nuvec_s *) {
+    STUBBED();
 }
 
 namespace {
@@ -1544,6 +1558,7 @@ i32 AvailableToPlayer(u32 character_flags, i32 weapon_action, i32 context, i32 r
 }
 
 void GetNumLocalPlayers() {
+    STUBBED();
 }
 
 i32 UnderPlayerControl(GameObject_s *object) {
@@ -1612,14 +1627,17 @@ bool FindNearestPlayerToVec(nuvec_s *position, GameObject_s **nearest_player, fl
 }
 
 void SetPlayerGroupPosition(float, float, float) {
+    STUBBED();
 }
 
 i32 (*LastSafePosExtraFn)(GameObject_s *) = NULL;
 
 void CheckForPlayersTurnedOff() {
+    STUBBED();
 }
 
 void FindFurthestPlayerFromVec(nuvec_s *, GameObject_s **, float &, bool, u32) {
+    STUBBED();
 }
 
 void AveragePlayerCurrentSpeedMul() {

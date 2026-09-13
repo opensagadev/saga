@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/legoapi_types.h"
 
 #include "globals.h"
@@ -24,7 +25,9 @@ void NewTown_Init(WORLDINFO_s *world) {
 }
 
 void NewTown_Reset(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void NewTown_Update(WORLDINFO_s *) {
+    STUBBED();
 }

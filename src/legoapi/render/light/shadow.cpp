@@ -40,6 +40,7 @@ f32 BlobShadowFade(NUVEC *position, f32 fade_start, f32 fade_end, f32 alpha) {
 }
 
 void SetShadowLight() {
+    STUBBED();
 }
 
 void Shadow_SetMode() {
@@ -59,9 +60,11 @@ void Shadow_SetMode() {
 }
 
 void InitShadowLights() {
+    STUBBED();
 }
 
 void RenderShadowLights(i32) {
+    STUBBED();
 }
 
 void ConfigureComplexShadow(GameObject_s *object) {
@@ -79,9 +82,11 @@ void ConfigureComplexShadow(GameObject_s *object) {
 }
 
 void ResetShadowMapRendering() {
+    STUBBED();
 }
 
 void EnableShadowMapRendering(i32) {
+    STUBBED();
 }
 
 void ResetShadowMapRenderingFn() {

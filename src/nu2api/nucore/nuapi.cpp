@@ -105,6 +105,7 @@ void NuAPIInit(void) {
 }
 
 void NuCommandLine(i32 *argc, char ***argv) {
+    STUBBED();
 }
 
 void NuDisableOSMenuFreeze(void) {

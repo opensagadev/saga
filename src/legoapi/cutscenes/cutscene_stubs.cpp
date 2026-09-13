@@ -45,6 +45,7 @@ extern "C" {
 extern "C" {
 
     i32 CheckStreamFileID(void) {
+        STUBBED();
         return 0;
     }
 
@@ -55,6 +56,7 @@ extern "C" {
     }
 
     void DisplayCutSceneMemory(void) {
+        STUBBED();
     }
 
     void PauseGameCut(void) {
@@ -92,6 +94,7 @@ extern "C" {
     }
 
     void instCutSceneTimeElapsed(void) {
+        STUBBED();
     }
 
     i32 instNuGCutSceneAddCamTgt(instNUGCUTSCENE_s *instance, NUVEC *target, f32 start_frame, f32 duration,
@@ -109,9 +112,11 @@ extern "C" {
     }
 
     void instNuGCutSceneAddCleanUpItem(void) {
+        STUBBED();
     }
 
     void instNuGCutSceneCalculateAverageCentre(void) {
+        STUBBED();
     }
 
     void instNuGCutSceneChain(instNUGCUTSCENE_s *instance, instNUGCUTSCENE_s *next) {
@@ -119,9 +124,11 @@ extern "C" {
     }
 
     void instNuGCutSceneCharGetStartMtx(void) {
+        STUBBED();
     }
 
     void instNuGCutSceneCleanUp(void) {
+        STUBBED();
     }
 
     void instNuGCutSceneCreateCamTgtArray(instNUGCUTSCENE_s *instance, i32 count, VARIPTR *buf) {
@@ -145,6 +152,7 @@ extern "C" {
     }
 
     void instNuGCutSceneFind(void) {
+        STUBBED();
     }
 
     i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *instance) {
@@ -152,18 +160,23 @@ extern "C" {
     }
 
     void instNuGCutSceneJumpToEnd(void) {
+        STUBBED();
     }
 
     void instNuGCutSceneJumpToLastFrame(void) {
+        STUBBED();
     }
 
     void instNuGCutScenePlay(void) {
+        STUBBED();
     }
 
     void instNuGCutSceneResetCleanUp(void) {
+        STUBBED();
     }
 
     void instNuGCutSceneRotateY(void) {
+        STUBBED();
     }
 
     void instNuGCutSceneSetEndCallback(instNUGCUTSCENE_s *instance, void (*callback)(instNUGCUTSCENE_s *)) {
@@ -189,9 +202,11 @@ extern "C" {
     }
 
     void instNuGCutSceneSetPos(void) {
+        STUBBED();
     }
 
     void instNuGCutSceneSetRepeat(void) {
+        STUBBED();
     }
 
     void instNuGCutSceneStop(instNUGCUTSCENE_s *instance) {
@@ -260,12 +275,15 @@ extern "C" {
     }
 
     void instNuGCutSceneTranslate(void) {
+        STUBBED();
     }
 
     void instNuGCutSceneWaitAtEnd(void) {
+        STUBBED();
     }
 
     void instNuGCutSoundStream(void) {
+        STUBBED();
     }
 
     void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *instance, NUGCUTLOCATORSYS_s *system,

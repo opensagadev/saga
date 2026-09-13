@@ -250,12 +250,15 @@ void BountyHunterPursuitA_Init(WORLDINFO_s *world) {
 }
 
 void BountyHunterPursuitB_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void BountyHunterPursuitC_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void BountyHunterPursuitD_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void BountyHunterPursuitA_Reset(WORLDINFO_s *world) {
@@ -420,6 +423,7 @@ void BountyHunterPursuitC_Update(WORLDINFO_s *world) {
 }
 
 void BountyHunterPursuitD_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 // ===========================================================================
@@ -1121,6 +1125,7 @@ void KaminoE_Draw(WORLDINFO_s *world) {
 }
 
 void KaminoE_CheckPlatHit(BOLT_s *) {
+    STUBBED();
 }
 
 void KaminoF_Init(WORLDINFO_s *world) {
@@ -1198,6 +1203,7 @@ void FactoryB_Reset(WORLDINFO_s *world) {
 }
 
 void FactoryB_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void FactoryB_Draw(WORLDINFO_s *) {

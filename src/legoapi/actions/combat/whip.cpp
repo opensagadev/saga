@@ -8,7 +8,9 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 void Whip_Release(GameObject_s *) {
+    STUBBED();
 }
 
 void Whip_MoveCode(GameObject_s *) {
+    STUBBED();
 }

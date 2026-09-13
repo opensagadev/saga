@@ -529,6 +529,7 @@ extern "C" {
     }
 
     void APIObjectRemoveFromLOSTable(APIOBJECTSYS_s *, APIOBJECT *, APIOBJECT *) {
+        STUBBED();
     }
 
     void APIObjectDestroy(APIOBJECTSYS_s *system, APIOBJECT *object) {
@@ -708,8 +709,8 @@ extern "C" {
     }
 
     void AddCollisionSphere(void) {
+        STUBBED();
     }
-
 
     void APICharacterSysInit(VARIPTR *buf, VARIPTR buf_end, i32 char_count, i32 model_capacity, i32 model_id_capacity,
                              i32 extra_capacity, CHARACTERDATA *cdata_list, APICHARACTERLIGHTFN set_creature_lights) {
@@ -2783,6 +2784,7 @@ CHARACTERDATA *ConfigureCharacterList(char *file, VARIPTR *bufferStart, VARIPTR 
 }
 
     void WindShear(void) {
+        STUBBED();
     }
 
 } // extern "C"

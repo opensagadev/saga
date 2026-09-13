@@ -8,12 +8,15 @@ struct rtl_s;
 struct rtlidata_s;
 
 static __used__ double DistanceToPlane(nuvec_s *, nuvec_s *, nuvec_s *) {
+    STUBBED();
     return {};
 }
 
 static __used__ void *CreatePodRaceMine(nuvec_s *) {
+    STUBBED();
     return {};
 }
 
 static __used__ void BlockadeRunnerD_EjectCreature(int) {
+    STUBBED();
 }

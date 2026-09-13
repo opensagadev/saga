@@ -26,12 +26,15 @@ BLADE_s BladeTab[4] = {
 };
 
 void DeflectPart(PART_s *, GameObject_s *, float, float, i32, i32) {
+    STUBBED();
 }
 
 void IsDownSwipe(NuVec2 const &, NuVec2 const &) {
+    STUBBED();
 }
 
 void TakeHitCode(GameObject_s *) {
+    STUBBED();
 }
 
 void ComboHitFrame(GameObject_s *object, i32 damage) {
@@ -45,12 +48,15 @@ void ComboHitFrame(GameObject_s *object, i32 damage) {
 }
 
 void IsFacingTarget(nuvec_s *, nuvec_s *, i32, i32) {
+    STUBBED();
 }
 
 void StunGameObject(GameObject_s *, GameObject_s *, float, i32) {
+    STUBBED();
 }
 
 void ComboRotateCode(GameObject_s *, i32) {
+    STUBBED();
 }
 
 BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
@@ -119,6 +125,7 @@ void StartQuickShoot(GameObject_s *object, i32 action) {
 }
 
 void ForceNextLungeTarget(MechObjectInterface *) {
+    STUBBED();
 }
 
 void ForceNextShootTarget(MechObjectInterface &target) {
@@ -126,7 +133,9 @@ void ForceNextShootTarget(MechObjectInterface &target) {
 }
 
 void SetForcedAttackOpponent(MechObjectInterface *) {
+    STUBBED();
 }
 
 void Punch_Hit(GameObject_s *, GameObject_s *, float, float) {
+    STUBBED();
 }

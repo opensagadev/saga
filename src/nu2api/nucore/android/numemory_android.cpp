@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "nu2api/nucore/android/numemory_android.h"
 
 #include <stdio.h>
@@ -35,12 +36,15 @@ bool NuMemoryPS::Mem1EventHandler::ReleasePage(NuMemoryManager *manager, void *p
 }
 
 NuMemoryPS::Mem2EventHandler::Mem2EventHandler() {
+    STUBBED();
 }
 
 bool NuMemoryPS::Mem2EventHandler::AllocatePage(NuMemoryManager *manager, u32 size, u32 _unknown) {
+    STUBBED();
     return false;
 }
 
 bool NuMemoryPS::Mem2EventHandler::ReleasePage(NuMemoryManager *manager, void *ptr, u32 _unknown) {
+    STUBBED();
     return false;
 }

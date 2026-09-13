@@ -267,6 +267,7 @@ void DerotateMovementVector() {
 }
 
 i32 Transform_TargettedByObj(void *) {
+    STUBBED();
     return 0;
 }
 
@@ -279,6 +280,7 @@ void GizmoBlowup_TransformDraw_Game(GIZMOBLOWUP_s *blowup) {
 }
 
 void InterpolateRotationMatrix(numtx_s *, numtx_s *, numtx_s *, float) {
+    STUBBED();
 }
 
 void QuatInterpolateRotationMatrix(NUMTX *result, NUMTX *first, NUMTX *second, f32 fraction) {

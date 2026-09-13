@@ -8,4 +8,5 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 void GuideLine_FindNearest(nuvec_s *, WORLDINFO_s *, i32 *, float *) {
+    STUBBED();
 }

@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "globals.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 
@@ -1479,6 +1480,7 @@ void Hub_UpdateKit() {
 }
 
 void Hub_CallBarman(GameObject_s *) {
+    STUBBED();
 }
 
 void Hub_ClearStats() {
@@ -1501,6 +1503,7 @@ void Hub_ResetPanel() {
 }
 
 bool HubShopUnlocked() {
+    STUBBED();
     return true;
 }
 
@@ -1722,9 +1725,11 @@ void Hub_InitMiniKits(WORLDINFO_s *world) {
 }
 
 void Hub_DrawAreaStats(float, i32, i32) {
+    STUBBED();
 }
 
 void Hub_DrawStarField() {
+    STUBBED();
 }
 
 void Hub_MakeModelList() {
@@ -1927,6 +1932,7 @@ void Hub_UpdateMiniKits(WORLDINFO_s *world) {
 }
 
 void Hub_LockUnlockDoors(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void Hub_ActivateDoorMenu(LEVELDATA_s **level) {
@@ -1976,6 +1982,7 @@ void Hub_ActivateDoorMenu(LEVELDATA_s **level) {
 }
 
 bool HubCustomiserUnlocked() {
+    STUBBED();
     return true;
 }
 
@@ -2093,6 +2100,7 @@ initialize_selection:
 }
 
 bool HubMinikitViewerUnlocked() {
+    STUBBED();
     return true;
 }
 
@@ -2318,6 +2326,7 @@ void Hub_Reset(WORLDINFO_s *world) {
 // Private hub menu and drawing helpers.
 
 static __used__ void Hub_DrawArcadeStats(float) {
+    STUBBED();
 }
 
 static void Hub_DrawMiniKitCount(f32 x, f32 y, i32 count, i32 total, f32 alpha) {
@@ -2749,6 +2758,7 @@ static __used__ void Hub_DrawSelectModeMenu(int selected, float alpha) {
 }
 
 static __used__ void Hub_DrawSuperBonusStats(AREADATA_s *, float) {
+    STUBBED();
 }
 
 void WipeBackToHub() {

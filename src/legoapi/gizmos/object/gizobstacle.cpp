@@ -906,6 +906,7 @@ GIZOBSTACLE_s *GizObstacle_FindByName(GIZOBSTACLESYS_s *system, char *name) {
 }
 
 void GizObstacle_FindNearest(GIZOBSTACLESYS_s *, nuvec_s *, GameObject_s *, float *, i32) {
+    STUBBED();
 }
 
 void GizObstacle_JumpToStart(GIZOBSTACLE_s *obstacle) {
@@ -949,9 +950,11 @@ void GizObstacle_PlayBackwards(GIZOBSTACLE_s *obstacle) {
 }
 
 void GizObstacle_SetPushControlled(GIZOBSTACLE_s *, GameObject_s *, float) {
+    STUBBED();
 }
 
 void GizObstacle_SetDefaultSFXFn_LSW(void *, GIZOBSTACLE_s *) {
+    STUBBED();
 }
 
 void GizObstacle_SetTechnoControlled(GIZOBSTACLE_s *obstacle, float speed) {
@@ -980,6 +983,7 @@ void GizObstacle_EvalAveragePosAndRadius(GIZOBSTACLE_s *obstacle, i32 state) {
 // Obstacle modes dispatch through this exact eight-entry target table.
 
 static void GizObstacleUpdate_PushOnly(GIZOBSTACLE_s *) {
+    STUBBED();
 }
 
 static void GizObstacleUpdate_AutoStart(GIZOBSTACLE_s *obstacle) {
@@ -1156,6 +1160,7 @@ static void GizObstacleUpdate_Proximity(GIZOBSTACLE_s *obstacle) {
 }
 
 static void GizObstacleUpdate_TechnoOnly(GIZOBSTACLE_s *) {
+    STUBBED();
 }
 
 static i32 GizObstacle_SatisfyingTerrainChecks(GIZOBSTACLE_s *obstacle, GameObject_s *object) {

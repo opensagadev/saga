@@ -1178,9 +1178,11 @@ extern "C" {
     }
 
     void ResumeGameAudio(void) {
+        STUBBED();
     }
 
     void SOUND_SFXRequest_Table(void) {
+        STUBBED();
     }
 
     void SetAudioFadeLevel(f32 level) {
@@ -1696,6 +1698,7 @@ void SetSfxBitTab_OffEx(SoundTable *table, i32 sound) {
 }
 
 void SfxCheckMusicOnOff(OPTIONSSAVE_s *) {
+    STUBBED();
 }
 
 void AddLevelSfxFromName(char *sfx_name, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx_count) {

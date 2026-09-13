@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "nu2api/nu3d/android/nurain_android.h"
 #include "nu2api/nucore/nuvuvec.hpp"
 
@@ -15,9 +16,11 @@ extern "C" void NuRainProcess(void) {
 }
 
 void NuRainDrawDrop(i32, i32, f32, f32, i32) {
+    STUBBED();
 }
 
 void NuRainDrawShape(f32) {
+    STUBBED();
 }
 
 extern "C" void NuRainDraw(i32) {

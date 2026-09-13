@@ -21,7 +21,6 @@ static NUFRUSTRUM **frustra;
 static i32 *nfrustra;
 static i32 draw_portals;
 
-
 static i16 rooms_visited[16];
 
 static NUFRUSTRUM *allocateFrustrum(i16 plane_count, i16 room_id) {
@@ -281,7 +280,6 @@ void NuPortalMaxDepth(struct nugscn_s *scene, i32 depth) {
 static NUVEC *override_campos;
 extern i32 portals_enabled;
 static NUPLANE near_clip_plane;
-
 extern "C" i32 NuPortalVisibility(NUGSCN *scene) {
     Initialise_PS(scene);
     NUVEC *camera_position = override_campos != NULL ? override_campos : &world_campos;

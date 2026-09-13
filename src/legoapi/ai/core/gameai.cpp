@@ -52,4 +52,5 @@ void ResetAdaptiveDifficulty() {
 }
 
 void LoopCode(GameObject_s *, i32, i32, GAMEPAD_s *, i32) {
+    STUBBED();
 }

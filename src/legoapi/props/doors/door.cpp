@@ -1,6 +1,7 @@
 // Hub/exit-door subsystem: the door lookups and hub spawn bookkeeping that
 // Players_InitPositions uses to place the player at the correct exit door.
 
+#include "decomp.h"
 #include "legoapi/props/doors/door.h"
 
 #include "legoapi/world/area.h"
@@ -255,4 +256,5 @@ DOOR_s *Door_FindByName(WORLDINFO_s *world, char *name) {
     return NULL;
 }
 static __used__ void GoThroughDoor_ExtraCode(WORLDINFO_s *, DOOR_s *) {
+    STUBBED();
 }

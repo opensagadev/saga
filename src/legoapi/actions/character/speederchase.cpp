@@ -158,15 +158,19 @@ void PodKeyReset() {
 }
 
 void PodLoseSpeed(GameObject_s *, i32, i32) {
+    STUBBED();
 }
 
 void InitBikeParts() {
+    STUBBED();
 }
 
 void SpeederBlowupHack(GIZMOBLOWUP_s *, i32) {
+    STUBBED();
 }
 
 void FindPodHoverHeight(GameObject_s *) {
+    STUBBED();
 }
 
 extern i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32);
@@ -196,21 +200,27 @@ f32 GetVehicleSpeedMul(GameObject_s *object, f32 speed) {
 }
 
 void ObjIsTargetSpeeder(GameObject_s *) {
+    STUBBED();
 }
 
 void PodSeekSubCutSound() {
+    STUBBED();
 }
 
 void SpeederChaseA_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void PodSeekMushCutSound() {
+    STUBBED();
 }
 
 void ProcessCurrentSpeed(WORLDINFO_s *, speedup_s *) {
+    STUBBED();
 }
 
 void SpeederChaseA_Panel(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void SpeederChaseA_Reset(WORLDINFO_s *) {
@@ -226,12 +236,15 @@ void SpeederChaseA_Reset(WORLDINFO_s *) {
 }
 
 void SpeedersDroppedBack() {
+    STUBBED();
 }
 
 void SpeederChaseA_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void KillParts_SpeederBike(ADDPART_s *, i32, i32, GameObject_s *) {
+    STUBBED();
 }
 
 // Original 0x4f2e50, 258 bytes. The original returns an integer.
@@ -251,6 +264,7 @@ i32 ObjOpponentStillThere(GameObject_s *object, GameObject_s *opponent, f32 gap)
 }
 
 void PodSeekTuskanCutSound() {
+    STUBBED();
 }
 
 f32 SpeederChaseATATInOutMul(nuvec_s *start, nuvec_s *end) {
@@ -319,11 +333,13 @@ void SpeederChase_DrawMeleeTargets(i16 *character_ids, char *dimmed, i32 count) 
 }
 
 void SpeederChase_ObjIsAGroundTroop(GameObject_s *) {
+    STUBBED();
 }
 
 extern "C" {
 
     void cbSetAutoSpeed(void) {
+        STUBBED();
     }
 
 } // extern "C"

@@ -11,6 +11,7 @@ struct SHOPINPUT;
 extern "C" void NuTexAnimSetSignals(u32 signals);
 
 void Signal_MoveCode(WORLDINFO_s *, GameObject_s *) {
+    STUBBED();
 }
 
 void SetTexAnimSignals() {
@@ -18,7 +19,9 @@ void SetTexAnimSignals() {
 }
 
 void Signal_FindNearest(WORLDINFO_s *, nuvec_s *, GameObject_s *, float *) {
+    STUBBED();
 }
 
 void Signals_InitTerrain(WORLDINFO_s *) {
+    STUBBED();
 }

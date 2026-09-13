@@ -13,4 +13,5 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 void PortalGameObject(GameObject_s *, i32, i32, i16, nugscn_s *) {
+    STUBBED();
 }

@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "globals.h"
 #include "nu2api/nu3d/nutexanm.h"
 #include <string.h>
@@ -754,6 +755,7 @@ extern "C" nutexanimprog_s *NuTexAnimProgRead(VARIPTR *buffer, char *path) {
 }
 
 extern "C" void NuTexAnimProgReadCFG(void) {
+    STUBBED();
 }
 
 extern "C" nutexanimprog_s *NuTexAnimProgReadScript(char *path, VARIPTR *buffer) {

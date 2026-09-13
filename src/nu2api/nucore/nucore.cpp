@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include <float.h>
 #include "nu2api/nucore/nucore.hpp"
 #include "nu2api/nucore/nuapi.h"
@@ -252,6 +253,7 @@ void NuPostFilter::initSharedResources(i32, i32) {
 }
 
 void NuPostFilter::renderFrustum(numtx_s *) {
+    STUBBED();
 }
 
 
@@ -1104,6 +1106,7 @@ i32 NuDynamicLight::testShadowExtrusions(const VuVec &minimum, const VuVec &maxi
 }
 
 void NuMotionFilter::initResources() {
+    STUBBED();
 }
 
 NuMainFilterGen::NuMainFilterGen() {
@@ -1126,6 +1129,7 @@ void NuMainFilterGen::destroyResources() {
 }
 
 void NuMainFilterGen::destroyTextureResources() {
+    STUBBED();
 }
 
 void NuMainFilterGen::initResources() {
@@ -1595,6 +1599,7 @@ void NuPostFilterGen::copy(nueffecttex_s *, nuframebuffer_s *output) {
 }
 
 void NuPostFilterGen::copyDepth(nueffecttex_s *, nuframebuffer_s *) {
+    STUBBED();
 }
 
 void NuPostFilterGen::destroyResources() {
@@ -1603,9 +1608,11 @@ void NuPostFilterGen::destroyResources() {
 }
 
 void NuPostFilterGen::destroySharedResources() {
+    STUBBED();
 }
 
 void NuPostFilterGen::destroySharedTextureResources() {
+    STUBBED();
 }
 
 void NuPostFilterGen::initResources() {
@@ -1632,12 +1639,15 @@ void NuPostFilterGen::initSharedTextureResources(i32 width, i32 height) {
 }
 
 void NuPostFilterGen::renderFrustum(numtx_s *) {
+    STUBBED();
 }
 
 void NuPostFilterGen::renderQuad() {
+    STUBBED();
 }
 
 void NuPostFilterGen::renderQuadGrid() {
+    STUBBED();
 }
 
 __attribute__((weak)) void NuPostFilterGen::reset() {
@@ -1645,9 +1655,11 @@ __attribute__((weak)) void NuPostFilterGen::reset() {
 }
 
 __attribute__((weak)) void NuPostFilterGen::resetAll() {
+    STUBBED();
 }
 
 void NuDeferredFilter::initResources() {
+    STUBBED();
 }
 
 i32 NuDataPortManager::registerPort(char const *name, void *data) {
@@ -1701,6 +1713,7 @@ void NuMotionFilterGen::render() {
 }
 
 void NuSpeedBlurFilter::initResources() {
+    STUBBED();
 }
 
 NuDeferredFilterGen::NuDeferredFilterGen() {
@@ -1821,6 +1834,7 @@ void NuDeferredFilterGen::render() {
 }
 
 void NuDeferredFilterGen::renderStencilMask(NuDynamicLight &) {
+    STUBBED();
 }
 
 void NuDeferredFilterGen::resetAll() {
@@ -1832,9 +1846,11 @@ void NuDeferredFilterGen::resetAll() {
 }
 
 void NuMotionAccumFilter::initResources() {
+    STUBBED();
 }
 
 NuSpeedBlurFilterGen::NuSpeedBlurFilterGen() {
+    STUBBED();
 }
 
 void NuSpeedBlurFilterGen::computeSpeedBlur(VuVec &result) {
@@ -1865,6 +1881,7 @@ void NuSpeedBlurFilterGen::computeSpeedBlur(VuVec &result) {
 }
 
 void NuSpeedBlurFilterGen::destroyTextureResources() {
+    STUBBED();
 }
 
 void NuSpeedBlurFilterGen::initTextureResources(i32 width, i32 height) {
@@ -1927,6 +1944,7 @@ void NuMotionAccumFilterGen::destroyResources() {
 }
 
 void NuMotionAccumFilterGen::destroyTextureResources() {
+    STUBBED();
 }
 
 void NuMotionAccumFilterGen::initResources() {
@@ -1981,24 +1999,31 @@ void NuMotionAccumFilterGen::render() {
 }
 
 void NuNetEmu::FindPacket(nunetaddr_s *, i32) {
+    STUBBED();
 }
 
 NuNetEmu::NuNetEmu() {
+    STUBBED();
 }
 
 void NuNetEmu::RecvFrom(void *, i32, nunetaddr_s &) {
+    STUBBED();
 }
 
 void NuNetEmu::SendTo(void *, i32, nunetaddr_s *, i32) {
+    STUBBED();
 }
 
 void NuNetEmu::SetConditions(NuNetEmu::eConditions) {
+    STUBBED();
 }
 
 void NuNetEmu::SplitSendPacket(NuNetEmu::EmuPacket *) {
+    STUBBED();
 }
 
 void NuNetEmu::Update() {
+    STUBBED();
 }
 
 NUMTX NuDynamicLight::cacheCameraView;

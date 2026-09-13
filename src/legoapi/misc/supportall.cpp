@@ -166,6 +166,7 @@ extern i32 nbaddies_can_see_players;
 i32 reset_reimport;
 
 void CatchUpCode(GameObject_s *, float, float, i32) {
+    STUBBED();
 }
 
 struct TexQuadVertex {
@@ -238,12 +239,15 @@ i32 SuperWeirdo(GameObject_s *object) {
 }
 
 void bgProcClose() {
+    STUBBED();
 }
 
 void BurnoutApply(i32) {
+    STUBBED();
 }
 
 void bgprocFreeze() {
+    STUBBED();
 }
 
 extern i32 PDEBCOUNT;
@@ -278,9 +282,11 @@ void AddSlamDebris(GameObject_s *object) {
 }
 
 void CloakMovement(GameObject_s *) {
+    STUBBED();
 }
 
 void RndrTexQuad3D(VuMtx const &, i32, numtl_s *) {
+    STUBBED();
 }
 
 void CheckResetBits() {
@@ -549,9 +555,11 @@ void CheckResetBits() {
 }
 
 void bgProcAbortAll() {
+    STUBBED();
 }
 
 void bgprocUnFreeze() {
+    STUBBED();
 }
 
 extern AREADATA_s *PODRACE_ADATA;
@@ -636,6 +644,7 @@ void AddSurfaceDebris(GameObject_s *object) {
 }
 
 void bgprocIsFreezing() {
+    STUBBED();
 }
 
 extern "C" void DebFree(i32 *);
@@ -645,9 +654,11 @@ void DebFreeWithoutKey(debkeydatatype_s *key) {
 }
 
 void DebrisKillPlayers() {
+    STUBBED();
 }
 
 void RndrUnfilledCircle(float, float, float, float, float, i32, float, float, numtl_s *) {
+    STUBBED();
 }
 
 void DebrisProcessSpheres(uv1deb *data, float time, debinftype *effect, debkeydatatype_s *key, i32 finite) {
@@ -673,6 +684,7 @@ void DebrisProcessSpheres(uv1deb *data, float time, debinftype *effect, debkeyda
 }
 
 void DisplayListPrintItem(nudisplaylistitem_s *, i32, i32, i32 *, i32) {
+    STUBBED();
 }
 
 // Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
@@ -1171,9 +1183,11 @@ void DebrisProcessGeneration() {
 }
 
 void DisplayListRenderBuffer() {
+    STUBBED();
 }
 
 void DebrisGetControlStackLock() {
+    STUBBED();
 }
 
 static particlechunkrendertype_s *FindParticleRenderChunk(dma_particle_chunk_s *particle_chunk) {
@@ -1426,21 +1440,27 @@ void DebrisCleanUpDmaDebTypeTables() {
 }
 
 void DebrisReleaseControlStackLock() {
+    STUBBED();
 }
 
 void RndrStateBuildReflectionState(nuglobalrndrstate_s *) {
+    STUBBED();
 }
 
 void xxxNuDisplayListUpdateSpecial(nuhspecial_s *) {
+    STUBBED();
 }
 
 void DebrisSingleCollisionCheckScaleYFlag(i32, nuvec_s *, float, float, unsigned char) {
+    STUBBED();
 }
 
 void DebrisSingleTorusCollisionCheckScaleYFlag(i32, nuvec_s *, float, float, unsigned char) {
+    STUBBED();
 }
 
 void unref(unsigned char *, unsigned char *) {
+    STUBBED();
 }
 
 void TBRESET() {
@@ -1451,10 +1471,13 @@ void TBRESET() {
 }
 
 void TBOPENFN(char *, i32) {
+    STUBBED();
 }
 
 void RndrArrow(float, float, float, i32, i32) {
+    STUBBED();
 }
 
 void TBCLOSEFN(char *, i32) {
+    STUBBED();
 }

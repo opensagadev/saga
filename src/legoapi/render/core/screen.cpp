@@ -28,9 +28,11 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 void ClearScreen() {
+    STUBBED();
 }
 
 void RenderQuads(i16 *) {
+    STUBBED();
 }
 
 void InitAlphaList() {
@@ -273,12 +275,15 @@ void HandleStillRender() {
 }
 
 void PreRenderFlashHack() {
+    STUBBED();
 }
 
 void UCStretchToCorners(i16 *, i16 *) {
+    STUBBED();
 }
 
 void PostRenderFlashHack() {
+    STUBBED();
 }
 
 bool LookupPreloadedShaderObject(u32 key, u32 **shader, LoadedUniqueShaderRecord *records, u32 count) {

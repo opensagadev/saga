@@ -10,4 +10,5 @@ extern "C" void NuFramebufferClear(u32 clear_flags, u32 colour) {
 
 // original 0x2a2700 — EGL swap is owned by the render thread.
 extern "C" void NuFramebufferSwapBuffers(void) {
+    STUBBED();
 }

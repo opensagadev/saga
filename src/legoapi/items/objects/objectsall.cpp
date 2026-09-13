@@ -110,9 +110,11 @@ pushblock_s *BlockInBlock(WORLDINFO_s *world, pushblock_s *block, i32 excluded, 
 }
 
 void Boulder_Kill(PART_s *, i32) {
+    STUBBED();
 }
 
 void Boulder_Move(PART_s *, float) {
+    STUBBED();
 }
 
 void Buck_MoveCode(GameObject_s *object, i32 start) {
@@ -126,9 +128,11 @@ void Buck_MoveCode(GameObject_s *object, i32 start) {
 }
 
 void FindNextBreak(unsigned char *, i32) {
+    STUBBED();
 }
 
 void FindNearestBreak(unsigned char *, i32) {
+    STUBBED();
 }
 
 void BuckStartExtra_LSW(GameObject_s *object) {
@@ -178,6 +182,7 @@ i32 Conveyor_AdjustSpeed(NUVEC *velocity) {
 }
 
 void AddDevice(nufile_device_s *) {
+    STUBBED();
 }
 
 extern NUGSCN *IconScene_FindById(i32 character_id);
@@ -261,6 +266,7 @@ void LevelObjects_InitForLevel(WORLDINFO_s *world) {
 }
 
 void EquivalentObjects_Configure(WORLDINFO_s *world, char *config) {
+    STUBBED();
     (void)world;
     (void)config;
 }

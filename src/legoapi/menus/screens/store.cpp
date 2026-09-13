@@ -121,6 +121,7 @@ i32 Store_FindPack(i32 id, char *name) {
 }
 
 void Store_UnlockPack(i32, bool) {
+    STUBBED();
 }
 
 extern AREADATA *VADER_ADATA;
@@ -197,12 +198,15 @@ bool Store_IsPackAvailable(i32, char *reason) {
 }
 
 void StoreBundle_FindByName(char *) {
+    STUBBED();
 }
 
 void Store_RestorePurchases() {
+    STUBBED();
 }
 
 void Store_RootPackCustodian(i32, GameObject_s *) {
+    STUBBED();
 }
 
 void StoreProgressAICharacter(LEVEL_PROGRESS_s *progress) {
@@ -223,12 +227,15 @@ void StoreProgressAICharacter(LEVEL_PROGRESS_s *progress) {
 }
 
 void Store_HubDrawFloorTargets(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void Store_HubInitFloorTargets(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void Store_UprootPackCustodian(i32, GameObject_s *) {
+    STUBBED();
 }
 
 static __used__ void StoreUnlockEp2() {
@@ -282,14 +289,19 @@ static __used__ void StoreUnlockEp6() {
     }
 }
 static __used__ void StoreUnlockJedi() {
+    STUBBED();
 }
 static __used__ void StoreUnlockSith() {
+    STUBBED();
 }
 static __used__ void StoreUnlockBonus() {
+    STUBBED();
 }
 static __used__ void StoreUnlockArcade() {
+    STUBBED();
 }
 static __used__ void StoreUnlockBounty() {
+    STUBBED();
 }
 static __used__ void StoreUnlockChallenge() {
     HUB_AREAPANELX = HUB_AREAPANELX_ONETRUEJEDIGOLDBRICK;

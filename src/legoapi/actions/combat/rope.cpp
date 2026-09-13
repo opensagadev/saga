@@ -6,4 +6,5 @@
 #include "nu2api/nucore/nustring.h"
 
 void DrawRopeCurved(nuvec_s *, nuvec_s *, i32, i32, numtl_s *) {
+    STUBBED();
 }

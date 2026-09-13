@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "nu2api/nucore/implode.h"
 
 #include <stdarg.h>
@@ -133,9 +134,11 @@ isize ExplodeCompressedSize(char *buf) {
 extern "C" {
 
     void ExplodeBuffer(void) {
+        STUBBED();
     }
 
     void ExplodeExit(void) {
+        STUBBED();
     }
 
 } // extern "C"

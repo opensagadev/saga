@@ -866,6 +866,7 @@ f32 StatusIconsOnOff(f32 progress) {
 }
 
 void UpdateIconWibble() {
+    STUBBED();
 }
 
 void Prompt_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
@@ -1078,6 +1079,7 @@ void TrueHero_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet) {
 }
 
 i32 UpdateAchievements(STATUSPACKET_s *) {
+    STUBBED();
     return 0;
 }
 
@@ -1240,6 +1242,7 @@ void TrueHero_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float el
 }
 
 i32 InitStatusScreen_LSW(WORLDINFO_s *, STATUSPACKET_s *) {
+    STUBBED();
     return 0;
 }
 
@@ -1374,6 +1377,7 @@ f32 getFinishedStatusAlpha(STATUSPACKET_s *packet) {
 }
 
 void SuperStoryTime_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32) {
+    STUBBED();
 }
 
 void SuperStoryTime_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet) {
@@ -1389,6 +1393,7 @@ void LSW_registerStatusScreen() {
 }
 
 void SuperStoryScore_LSW_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32) {
+    STUBBED();
 }
 
 void SuperStoryScore_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet) {
@@ -1642,6 +1647,7 @@ void BonusWin_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 curren
     }
 }
 void BonusWin_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *) {
+    STUBBED();
 }
 void BonusTime_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current) {
     if (current == 0) {
@@ -1664,10 +1670,13 @@ void BonusTime_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 curre
     }
 }
 void BonusTime_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *) {
+    STUBBED();
 }
 void ChallangeCash_Draw(STATUS_STAGE_s *, STATUSPACKET_s *, i32) {
+    STUBBED();
 }
 void ChallangeCash_Skip(STATUS_STAGE_s *, STATUSPACKET_s *) {
+    STUBBED();
 }
 void BonusWin_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapsed) {
     if (stage->field_0x14 == 0) {
@@ -1708,6 +1717,7 @@ void BonusTime_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float e
     }
 }
 void ChallangeCash_Update(STATUS_STAGE_s *, STATUSPACKET_s *, float) {
+    STUBBED();
 }
 void BonusComplete_LSW_Draw(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, i32 current) {
     if (current == 0)

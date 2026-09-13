@@ -552,12 +552,15 @@ void Move_BARMAN(GameObject_s *object) {
 }
 
 void Move_CANNON(GameObject_s *) {
+    STUBBED();
 }
 
 void Move_WALKER(GameObject_s *) {
+    STUBBED();
 }
 
 void Move_CRITTER(GameObject_s *) {
+    STUBBED();
 }
 
 void Move_DEFAULT(GameObject_s *object) {
@@ -567,9 +570,11 @@ void Move_DEFAULT(GameObject_s *object) {
 }
 
 void Move_DRAGBOMB(GameObject_s *) {
+    STUBBED();
 }
 
 void Move_DROIDEKA(GameObject_s *) {
+    STUBBED();
 }
 
 i32 PodLevel(AREADATA_s *area);
@@ -646,12 +651,15 @@ i32 MovePlayer_POD(GameObject_s *object) {
 void Move_CHARACTER(GameObject_s *object);
 
 void Move_GEONOSIAN(GameObject_s *) {
+    STUBBED();
 }
 
 void Move_HOVERDROID(GameObject_s *) {
+    STUBBED();
 }
 
 void MovePlayerSpline(GameObject_s *) {
+    STUBBED();
 }
 
 i32 TwistLevel(LEVELDATA_s *level);
@@ -727,6 +735,7 @@ i32 MovePlayer_TWIST(GameObject_s *object) {
 }
 
 void Move_SPEEDERBIKE(GameObject_s *) {
+    STUBBED();
 }
 
 // Original: 1,000 bytes.
@@ -800,9 +809,11 @@ i32 MovePlayer_CIRCLE(GameObject_s *object) {
 }
 
 static __used__ void ZapCode(GameObject_s *, i32, i32) {
+    STUBBED();
 }
 
 static __used__ void FireCode(GameObject_s *, i32, i32, f32, i32) {
+    STUBBED();
 }
 
 static void SelfDestructCode(GameObject_s *object, i32 pressed) {
@@ -1215,9 +1226,11 @@ i32 MovePlayer_GUNSHIPIN(GameObject_s *object) {
 }
 
 void Move_REPUBLICGUNSHIP(GameObject_s *) {
+    STUBBED();
 }
 
 void Move_SUPERBATTLEDROID(GameObject_s *) {
+    STUBBED();
 }
 
 void MovePlayer_DIRECTIONAL(GameObject_s *object) {
@@ -2728,12 +2741,15 @@ vehicle_collision:
 }
 
 void Move_POD(GameObject_s *) {
+    STUBBED();
 }
 
 void Move_ATAT(GameObject_s *) {
+    STUBBED();
 }
 
 void Move_JAWA(GameObject_s *) {
+    STUBBED();
 }
 
 static bool JediHasAction(const GameObject_s *object, JEDI_ACTION action) {
@@ -4022,6 +4038,7 @@ static void DeactivatedCode(GameObject_s *object) {
 }
 
 static void DrawLightningBolts(GameObject_s *, GameObject_s *, i32) {
+    STUBBED();
 }
 
 static void ForcePushCode(GameObject_s *object, i32 held, i32) {
@@ -4788,30 +4805,38 @@ void MovePlayer_NETWORK(GameObject_s *object) {
 }
 
 void MoveToMarker::BlowUp() {
+    STUBBED();
 }
 
 void MoveToMarker::FadeOut() {
+    STUBBED();
 }
 
 MoveToMarker::MoveToMarker(MechObjectInterface &) {
+    STUBBED();
 }
 
 void MoveToMarker::Process(float) {
+    STUBBED();
 }
 
 void MoveToMarker::Render() {
+    STUBBED();
 }
 
 extern u8 show_lever_hint;
 
 struct _vuv_s;
 static __used__ void MakeWingFormation(_vuv_s *, _vuv_s *, f32, i32) {
+    STUBBED();
 }
 
 static __used__ void AtatPart_Stop(PART_s *) {
+    STUBBED();
 }
 
 static __used__ void AtatPart_Update(PART_s *) {
+    STUBBED();
 }
 
 i32 show_autojump_hint;
@@ -4909,6 +4934,7 @@ i32 CanStepBack(GameObject_s *object) {
 }
 
 void FlattenCode(GameObject_s *) {
+    STUBBED();
 }
 
 i32 Glide_Start(GameObject_s *object) {
@@ -4924,6 +4950,7 @@ i32 Glide_Start(GameObject_s *object) {
 }
 
 void JetPackCode(GameObject_s *, i32, i32, i32) {
+    STUBBED();
 }
 
 float SeekLinearF(float current, float target, float step) {
@@ -5371,6 +5398,7 @@ void StartFlatten(GameObject_s *source, GameObject_s *target) {
 }
 
 void Hang_MoveCode(GameObject_s *) {
+    STUBBED();
 }
 
 void HoldCode_Copy(GameObject_s *object) {
@@ -6129,9 +6157,11 @@ void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animati
 }
 
 void ForcedBackCode(GameObject_s *) {
+    STUBBED();
 }
 
 void Glide_MoveCode(GameObject_s *) {
+    STUBBED();
 }
 
 i32 SetObjOnSurface(GameObject_s *object, i32 mode) {
@@ -6604,9 +6634,11 @@ f32 SeekValF(f32 current, f32 target, f32 rate) {
 }
 
 void TurnCode(GameObject_s *, i32, GAMEPAD_s *) {
+    STUBBED();
 }
 
 void FloatCode(GameObject_s *) {
+    STUBBED();
 }
 
 void SlideCode(GameObject_s *object) {
@@ -6646,6 +6678,7 @@ void StartHold(GameObject_s *object) {
 }
 
 void StartTurn(GameObject_s *) {
+    STUBBED();
 }
 
 static void GrabCode(GameObject_s *object) {
@@ -6877,6 +6910,7 @@ static void CommunicateCode(GameObject_s *object, i32 pressed, i32) {
 }
 
 static __used__ void PunchCode(GameObject_s *, i32, i32, i32, i32, f32) {
+    STUBBED();
 }
 
 static __used__ void ShootThisFrame(GameObject_s *object, i32 bolt_id, i32 flags) {
@@ -7183,6 +7217,7 @@ finish:
 }
 
 static __used__ void DodgeCode(GameObject_s *, i32, i32) {
+    STUBBED();
 }
 
 extern i16 id_EWOK;
@@ -7361,6 +7396,7 @@ void Move_CHARACTER(GameObject_s *object) {
 }
 
 static __used__ void PooCode(GameObject_s *) {
+    STUBBED();
 }
 
 void Buck_MoveCode(GameObject_s *, i32);

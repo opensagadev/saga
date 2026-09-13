@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "nu2api/nucore/nuthread.h"
 
 #include <pthread.h>
@@ -102,15 +103,19 @@ i32 NuThreadCreate(void (*function)(void *), void *argument) {
 #endif
 
 void NuThreadSignalSend(void) {
+    STUBBED();
 }
 
 void NuThreadSignalRecieve(void) {
+    STUBBED();
 }
 
 void NuEnableVBlank() {
+    STUBBED();
 }
 
 void NuDisableVBlank() {
+    STUBBED();
 }
 
 nuthreaddisableswapfn *NuThreadDisableThreadSwap = &NuDisableVBlank;

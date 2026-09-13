@@ -408,6 +408,7 @@ struct SHOPINPUT;
 NUMTL *CreateCopyMat(NUMTL *, i32, i32, i32, i32);
 
 uv1deb *GenDebDummy(debkeydatatype_s *, debinftype *, float) {
+    STUBBED();
     return NULL;
 }
 

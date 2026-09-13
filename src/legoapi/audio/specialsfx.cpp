@@ -25,6 +25,7 @@ void PopBalloon(GameObject_s *object) {
 }
 
 void Disorientate(GameObject_s *, nuvec_s *) {
+    STUBBED();
 }
 
 extern "C" i32 GetSfxId(const char *name);
@@ -154,6 +155,7 @@ void NewSeekHalfLife(i32 &current, i32 target, float fraction) {
 }
 
 void DisorientateCode(GameObject_s *, nuvec_s *, float) {
+    STUBBED();
 }
 
 void UpdateSpecialSfx(WORLDINFO_s *world) {

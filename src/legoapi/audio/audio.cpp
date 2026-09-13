@@ -56,6 +56,7 @@ void PlayAMusic(i32 a, i32 b, i32 c, i32 d) {
     Music.transition_frames = 0;
 }
 i16 GetMusicIndex(char *name, nusound_filename_info_s *table, i32 def) {
+    STUBBED();
     (void)name;
     (void)table;
     (void)def;
@@ -93,6 +94,7 @@ f32 GetAudioFadeLevel() {
     return AUDIOFADELEVEL;
 }
 void SetBackgroundMusic(i32 track) {
+    STUBBED();
     // libTTapp.so 0x4df8b0: platform stub (eight NOPs and ret).
     // Title music is selected and started later by GamePlayMusic.
     (void)track;
@@ -190,9 +192,11 @@ void SpaceResetAudioPoint() {
     SetPreSeekStartPoint(0.0f);
 }
 i32 CheckMusicSwapInstant() {
+    STUBBED();
     return 0;
 }
 void UpdateBackgroundMusic() {
+    STUBBED();
 }
 extern "C" {
     i32 fake_seeking;

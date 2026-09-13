@@ -52,20 +52,25 @@ extern "C" {
 void rtlSwapSetEndianess(rtlset *);
 
 static __used__ rtl_s *GetNextRTL(void *, rtl_s *, char *, int *) {
+    STUBBED();
     return nullptr;
 }
 
 static __used__ void InsertLight(rtl_s *, rtlidata_s *, float) {
+    STUBBED();
 }
 
 static __used__ void InsertAntiLight(rtl_s *, rtlidata_s *, float) {
+    STUBBED();
 }
 
 static __used__ int FindNearestRTL(nuvec_s *, int) {
+    STUBBED();
     return 0;
 }
 
 static __used__ bool InsideLineXZ(float, float, float, float, float, float) {
+    STUBBED();
     return false;
 }
 
@@ -77,31 +82,39 @@ static f32 ClampUnit(f32 value) {
 }
 
 static __used__ int FindNearestFog(nuvec_s *) {
+    STUBBED();
     return 0;
 }
 
 static __used__ i32 rtlCalcLights(nuvec_s *, numtx_s *, f32, rtlidata_s *) {
+    STUBBED();
     return 0;
 }
 
 static __used__ void rtlCalcShadow(rtlidata_s *) {
+    STUBBED();
 }
 
 static __used__ void rtlProcessLight(rtl_s *, f32) {
+    STUBBED();
 }
 
 static __used__ void rtlSwapEndianess32(void *) {
+    STUBBED();
 }
 
 static void rtlApplySetScaleLoop(void *, rtlidata_s *, nuvec_s *, numtx_s *, i32, f32);
 
 static __used__ void rtlApplyModifiersToChainLight(rtl_s *) {
+    STUBBED();
 }
 
 static __used__ void rtlApplyModifiersToSingleLight(rtl_s *) {
+    STUBBED();
 }
 
 static __used__ i32 rtlCmp(rtl_s *, rtl_s *) {
+    STUBBED();
     return 0;
 }
 
@@ -113,12 +126,15 @@ extern "C" {
                                      const NUCOLOUR3 *);
 
     void fogAlloc(void) {
+        STUBBED();
     }
 
     void fogFree(void) {
+        STUBBED();
     }
 
     void rtlAlloc(void) {
+        STUBBED();
     }
 
     void rtlResetEx(rtldata_s *data, i32 reset_cached) {
@@ -346,6 +362,7 @@ extern "C" {
     }
 
     void rtlDynamicMasterEnable(i32 enabled) {
+        STUBBED();
     }
 
     bool rtlDynamicEnable(i32 id, i32 enabled) {
@@ -373,6 +390,7 @@ extern "C" {
     }
 
     void rtlDynamicSetDirection(void) {
+        STUBBED();
     }
 
     i32 rtlDynamicSetPos(i32 id, NUVEC *position) {
@@ -414,21 +432,27 @@ extern "C" {
     }
 
     void rtlFree(void) {
+        STUBBED();
     }
 
     void rtlGetCurrentSet(void) {
+        STUBBED();
     }
 
     void rtlGetEnvPath(void) {
+        STUBBED();
     }
 
     void rtlGetEnvSceneName(void) {
+        STUBBED();
     }
 
     void rtlGetEnvSet(void) {
+        STUBBED();
     }
 
     void rtlGetFogSet(void) {
+        STUBBED();
     }
 
     i32 rtlInitDynamic(VARIPTR *buffer, VARIPTR end, i32 max_lights) {
@@ -460,6 +484,7 @@ extern "C" {
     }
 
     void rtlProcessLights(void *, f32) {
+        STUBBED();
     }
 
     void rtlReset(rtldata_s *data) {
@@ -467,15 +492,19 @@ extern "C" {
     }
 
     void rtlSaveSet(void) {
+        STUBBED();
     }
 
     void rtlScaleSetMultipliers(void) {
+        STUBBED();
     }
 
     void rtlSetAssocName(void) {
+        STUBBED();
     }
 
     void rtlSetExt(void) {
+        STUBBED();
     }
 
     void rtlSetLights(rtldata_s *data) {
@@ -487,30 +516,39 @@ extern "C" {
     }
 
     void rtlSetMinR(void) {
+        STUBBED();
     }
 
     void rtlSetModifiers(void) {
+        STUBBED();
     }
 
     void rtlSetShadowFlickerBlendTime(void) {
+        STUBBED();
     }
 
     void rtlSetShadowFlickerScale(void) {
+        STUBBED();
     }
 
     void rtlSetSpecularLight(void) {
+        STUBBED();
     }
 
     void rtlSetSpecularValue(void) {
+        STUBBED();
     }
 
     void rtlSetUndoBuffer(void) {
+        STUBBED();
     }
 
     void rtlSetUserIdName(void) {
+        STUBBED();
     }
 
     void rtlSpecularValue(void) {
+        STUBBED();
     }
 
     void rtlResetDynamic(void) {
@@ -538,6 +576,7 @@ extern "C" {
     }
 
     void rtlGetDirection(usize rtl_set, i32 id, void **out) {
+        STUBBED();
         (void)rtl_set;
         (void)id;
         (void)out;
@@ -546,10 +585,13 @@ extern "C" {
 } // extern "C"
 
 void SelectNextRTL() {
+    STUBBED();
 }
 
 void SelectPrevRTL() {
+    STUBBED();
 }
 
 void rtlSwapSetEndianess(rtlset *) {
+    STUBBED();
 }

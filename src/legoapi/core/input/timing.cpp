@@ -13,6 +13,7 @@ i32 do_multiframe_update;
 static u32 FRAMES_TO_WAIT = 1;
 
 void TimingBars() {
+    STUBBED();
 }
 
 // Original C++ entry point 0x2a6020, distinct from the C entry point.

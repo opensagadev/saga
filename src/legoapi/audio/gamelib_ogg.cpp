@@ -6,6 +6,7 @@ struct nuqthdr_s;
 struct nuqtdim_s;
 
 static __used__ void bark_noise_hybridmp(int, abi_long const *, float const *, float *, float, int) {
+    STUBBED();
 }
 
 extern "C" {

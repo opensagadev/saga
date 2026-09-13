@@ -8,7 +8,9 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 void GizBombGen_FindByName(GIZBOMBGENSYS_s *, char *) {
+    STUBBED();
 }
 
 void Mine_Kill(PART_s *, i32) {
+    STUBBED();
 }

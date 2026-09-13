@@ -506,12 +506,15 @@ i32 Collection_GotAnyOfType(i32 type, u32 flags) {
 }
 
 static __used__ void Collection_GetSelectingPlayerIDs(i16 *) {
+    STUBBED();
 }
 
 void ReleaseEat(GameObject_s *) {
+    STUBBED();
 }
 
 void ShipDropCoins(starfighter_s *) {
+    STUBBED();
 }
 
 i32 AddToCollection(i32 id) {
@@ -552,6 +555,7 @@ void ResetCoinPacket(COINPACKET_s *packet) {
 }
 
 void UpdateCoinPacket(COINPACKET_s *, i32, i32) {
+    STUBBED();
 }
 
 u32 GizmoBlowups_TotalScore(void *);
@@ -625,6 +629,7 @@ COLLECTION_s *GetFreePlayCollection(i32 area) {
 }
 
 void ReCalculateCompletionPoints() {
+    STUBBED();
 }
 
 i32 Player_HasInvincibility(GameObject_s *object);

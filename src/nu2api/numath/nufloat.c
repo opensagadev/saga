@@ -108,7 +108,9 @@ f32 NuPowFast(f32 base, f32 exponent) {
 }
 /* Both exception controls are empty in the original Android binary. */
 void NuFpExceptionMask(void) {
+    STUBBED();
 }
 
 void NuFpException(void) {
+    STUBBED();
 }

@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nucore/nugcutscene.h"
@@ -316,12 +317,15 @@ void FindGameCutScenes() {
 }
 
 void FindSceneStateObj(nugscn_s *, SCENEPROGRESS_s *, nuhspecial_s *) {
+    STUBBED();
 }
 
 void instGetLookAtLocatorInfo(instNUGCUTSCENE_s *, instNUGCUTLOOKAT_s *) {
+    STUBBED();
 }
 
 void instNuGCutGetNextRigidInfo(instNUGCUTSCENE_s *, float, i32, numtx_s *, nuhspecial_s *) {
+    STUBBED();
 }
 
 i32 instNuGCutSceneSwapBuffers(instNUGCUTSCENE_s *instance, i32 force) {
@@ -359,4 +363,5 @@ void instNuGCutSceneEndButNotSystems(instNUGCUTSCENE_s *instance) {
 }
 
 void instNuGCutContainsInstancedRigids(instNUGCUTSCENE_s *) {
+    STUBBED();
 }

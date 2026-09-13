@@ -125,7 +125,9 @@ void ResetStreaks() {
 }
 
 void UpdateStreaks(float) {
+    STUBBED();
 }
 
 void AddStreakPoints(nuvec_s *, float, u32, void **, i32, void *) {
+    STUBBED();
 }

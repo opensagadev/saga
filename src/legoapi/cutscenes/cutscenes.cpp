@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/cutscenes/cutscenes.h"
 #include "globals.h"
@@ -718,6 +719,7 @@ void CutScene_SnapToEnd(CUTINFO *cut) {
 }
 
 void CutScene_StartAudio() {
+    STUBBED();
 }
 
 i32 CutScene_IsSkippable(CUTINFO *cut) {
@@ -1363,6 +1365,7 @@ void CutScenes_BGLoadManager() {
 }
 
 void CutScenes_ConfigureList(char *, variptr_u *, variptr_u) {
+    STUBBED();
 }
 
 void CutScene_PreUpdateFn_LSW(CUTINFO *cut) {
@@ -1387,6 +1390,7 @@ void CutScene_PreUpdateFn_LSW(CUTINFO *cut) {
 }
 
 void CutScene_PostUpdateFn_LSW() {
+    STUBBED();
 }
 
 i32 CutScene_PlayingOrRequested(CUTINFO *cut) {
@@ -1556,6 +1560,7 @@ void Fade_LSW_Update(STATUS_STAGE_s *stage, STATUSPACKET_s *packet, float elapse
 }
 
 void RelocateCutScene(NUGCUTSCENE_s *, variptr_u *) {
+    STUBBED();
 }
 
 i32 STATUS_R = 255;

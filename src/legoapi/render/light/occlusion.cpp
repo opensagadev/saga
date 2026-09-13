@@ -356,6 +356,7 @@ void OcclusionManager::BeginFrame() {
 }
 
 void OcclusionManager::EndFrame() {
+    STUBBED();
 }
 
 void OcclusionManager::Init(u32 capacity, VARIPTR *buffer, VARIPTR buffer_end) {
@@ -411,6 +412,7 @@ void OcclusionManager::OnCameraSet() {
 }
 
 void OcclusionManager::RenderStats() const {
+    STUBBED();
 }
 
 void OcclusionManager::RenderZPass() const {
@@ -426,4 +428,5 @@ OcclusionManager::~OcclusionManager() {
 }
 
 static __used__ void BoxTreeRndrRec(nuvisiboxtree_s *, unsigned char *, nuvisiboxtreenode_s *, int, float, nugscn_s *) {
+    STUBBED();
 }

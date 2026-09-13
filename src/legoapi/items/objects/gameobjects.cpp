@@ -432,6 +432,7 @@ static f32 Condition_ForceAtEnd(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, ch
 
 // The original executable returns zero unconditionally for this condition.
 static f32 Condition_NumForceObjects(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    STUBBED();
     return 0.0f;
 }
 
@@ -600,16 +601,19 @@ static f32 Condition_IsVisible(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, cha
 
 // The reference executable exposes this condition as an unconditional zero.
 static f32 Condition_Indy(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    STUBBED();
     return 0.0f;
 }
 
 // The Android reference executable reports false for the PSP platform.
 static f32 Condition_PSP(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    STUBBED();
     return 0.0f;
 }
 
 // The reference executable exposes this condition as an unconditional zero.
 static f32 Condition_CheatProgress(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    STUBBED();
     return 0.0f;
 }
 
@@ -1045,6 +1049,7 @@ static void *Condition_CutSceneExistsInit(AISYS_s *, char *name, AISCRIPT_s *) {
 }
 
 static f32 Condition_CutScenePlaying(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char *, void *) {
+    STUBBED();
     // The reference target returns zero unconditionally for this condition.
     return 0.0f;
 }
@@ -1860,9 +1865,11 @@ static i32 GameFindAlternativeSpecialObject(AISYS *, nuhspecial_s *special) {
 }
 
 static void GameAILoad(AISYS *, i32, NUGSCN *, VARIPTR *, VARIPTR *) {
+    STUBBED();
 }
 
 static void GlobalCharacterRender(NUVEC *, i16, i32, i32, EDCREATURE_s *) {
+    STUBBED();
 }
 
 static f32 GetCharacterGoalSpeed(APIOBJECT *object) {
@@ -3081,6 +3088,7 @@ void GameFog_Reset() {
 }
 
 void Game_KillPart(PART_s *, i32) {
+    STUBBED();
 }
 
 void GameAISysReset(AISYS_s *system) {
@@ -3231,6 +3239,7 @@ void MakeBaddiesForgetAboutParty(i32 check_hostility) {
 }
 
 void GameAttackInit() {
+    STUBBED();
 }
 
 extern "C" void MenuRegisterSoundFX(i32 move, i32 select, i32 back, i32 no_entry);
@@ -3238,6 +3247,7 @@ i32 GameAudio_GetSfxId(i32 sfx);
 void GameAudio_PlaySfxById(i32 sfx_id, nuvec_s *position, i32 flags, i32 volume);
 
 void GameFog_Update(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void *GameBufferAlloc(variptr_u *buf, variptr_u *buf_end, i32 size) {
@@ -3283,6 +3293,7 @@ char *GameObj_GetName(i32 model, GameObject_s *object, char *buffer) {
 }
 
 void Game_AutoSaving() {
+    STUBBED();
 }
 
 void GameAISysSetGame() {
@@ -3937,6 +3948,7 @@ void GameObjectSetCanUse(GameObject_s *object, void *target, unsigned char actio
 }
 
 void GameObjOwnsAnyCables(GameObject_s *) {
+    STUBBED();
 }
 
 void GameObjectDimensionsExtra_LSW(GameObject_s *object);
@@ -3979,6 +3991,7 @@ void GameAntiNodeData_Read(GAMEANTINODEDATA_s *data) {
 }
 
 void Game_GotAllGoldBricks() {
+    STUBBED();
 }
 
 APIOBJECT *GameAPIOBJECTFromObjID(u8 object_id) {
@@ -4077,6 +4090,7 @@ void GameRegisterGizActions() {
 }
 
 void GameBlowUpBlownUpFn_LSW(GIZMOBLOWUP_s *) {
+    STUBBED();
 }
 
 void GameLoadCharacterModels(APICHARACTERMODELLIST_s *list, i32 append, VARIPTR *buf, VARIPTR *buf_end, i32 area_models,
@@ -4401,6 +4415,7 @@ void GameCreatureOpponentSelection(AISYS_s *system, i32 count, APIOBJECT_s **obj
 }
 
 void GameObjectDimensionsExtra_LSW(GameObject_s *) {
+    STUBBED();
 }
 
 i32 AnakinGreenSabre(GameObject_s *object);
@@ -4913,6 +4928,7 @@ void GameMsg_DrawAdjustNewPos_CoinToTotal(GAMEMESSAGE_s *message) {
 }
 
 i32 Game_Exit(i32) {
+    STUBBED();
     return 0;
 }
 
@@ -5036,6 +5052,7 @@ void ThingManager::DisplayThings(ThingRenderData *data) {
 }
 
 void ThingManager::EffectsThings(ThingRenderData *) {
+    STUBBED();
 }
 
 // ThingManager::EnableActions @0x425930. Finds the first thing whose 0x4 id
@@ -5062,9 +5079,11 @@ void ThingManager::EnableActions(i32 id, i32 flags, i32 invert) {
 }
 
 void ThingManager::EnterLevelThings(ThingLevelData *) {
+    STUBBED();
 }
 
 void ThingManager::ExitLevelThings(ThingLevelData *) {
+    STUBBED();
 }
 
 // ThingManager::ProcessThings @0x425460. Pass 1 always runs
@@ -5133,9 +5152,11 @@ void ThingManager::ProcessThings(ThingProcessData *data) {
 }
 
 void ThingManager::RemoveDependanciesThings(ThingRemoveData *) {
+    STUBBED();
 }
 
 void ThingManager::RemoveTemporaryThings() {
+    STUBBED();
 }
 
 // ThingManager::RenderThings @0x425390. Single pass over Render,
@@ -5218,12 +5239,15 @@ ThingManager::~ThingManager() {
 }
 
 void ThingManager::cbEdTimingSelect(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
 }
 
 void ThingManager::cbEdTrackCancel(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
 }
 
 void ThingManager::edTimingEnter() {
+    STUBBED();
 }
 
 void ThingManager::edTimingInit() {
@@ -5231,69 +5255,91 @@ void ThingManager::edTimingInit() {
 }
 
 void ThingManager::edTimingProc(float, nupad_s *) {
+    STUBBED();
 }
 
 void ThingManager::edTimingRender() {
+    STUBBED();
 }
 
 void SpecialObject::Exists() const {
+    STUBBED();
 }
 
 void SpecialObject::GetCollision() const {
+    STUBBED();
 }
 
 void SpecialObject::GetCurrentPosition() const {
+    STUBBED();
 }
 
 void SpecialObject::GetCurrentTransform() const {
+    STUBBED();
 }
 
 void SpecialObject::GetInitialPosition() const {
+    STUBBED();
 }
 
 void SpecialObject::GetInitialTransform() const {
+    STUBBED();
 }
 
 void SpecialObject::GetMtl(i32) const {
+    STUBBED();
 }
 
 void SpecialObject::GetName() const {
+    STUBBED();
 }
 
 void SpecialObject::GetNumMtls() const {
+    STUBBED();
 }
 
 void SpecialObject::GetRadius() const {
+    STUBBED();
 }
 
 void SpecialObject::GetVisibility() const {
+    STUBBED();
 }
 
 void SpecialObject::Render(VuMtx const *) const {
+    STUBBED();
 }
 
 void SpecialObject::SetCollision(i32) {
+    STUBBED();
 }
 
 void SpecialObject::SetCurrentPosition(VuVec const *) {
+    STUBBED();
 }
 
 void SpecialObject::SetCurrentTransform(VuMtx const *) {
+    STUBBED();
 }
 
 void SpecialObject::SetInitialPosition(VuVec const *) {
+    STUBBED();
 }
 
 void SpecialObject::SetInitialTransform(VuMtx const *) {
+    STUBBED();
 }
 
 void SpecialObject::SetVisibility(i32) {
+    STUBBED();
 }
 
 SpecialObject::SpecialObject() {
+    STUBBED();
 }
 
 void GameThingManager::AddLevelOnlyThings() {
+    STUBBED();
 }
 
 // GameThingManager::AddOnceOnlyThings @0x4e8bb0: registers the MechSystems
@@ -5350,35 +5396,46 @@ i32 BaseThing::RemoveDependancies(ThingRemoveData *) {
 }
 
 void BaseThing::EnterLevel(ThingLevelData *) {
+    STUBBED();
 }
 
 void BaseThing::ExitLevel(ThingLevelData *) {
+    STUBBED();
 }
 
 void BaseThing::Reset(ThingResetData *) {
+    STUBBED();
 }
 
 void BaseThing::Process(ThingProcessData *) {
+    STUBBED();
 }
 
 void BaseThing::ProcessEvenWhenPaused(ThingProcessData *) {
+    STUBBED();
 }
 
 void BaseThing::ProcessOnlyWhenPaused(ThingProcessData *) {
+    STUBBED();
 }
 
 void BaseThing::Render(ThingRenderData *) {
+    STUBBED();
 }
 
 void BaseThing::Display(ThingRenderData *) {
+    STUBBED();
 }
 
 void BaseThing::Effects(ThingRenderData *) {
+    STUBBED();
 }
 
 static __used__ void LEGO_100PercentFn() {
+    STUBBED();
 }
 static __used__ void LEGO_AllGoldBricksFn() {
+    STUBBED();
 }
 
 i32 NoLayerKill(GameObject_s *object) {
@@ -6024,6 +6081,7 @@ void RememberPlayerIDs(i32, i32, i32);
 void Tag_NewTransfer(GameObject_s *, GameObject_s *);
 
 static void DrawPackButton(GAMEMESSAGE_s *, nuvec_s *, float) {
+    STUBBED();
 }
 
 void Tag_Check(GameObject_s *object) {
@@ -6222,6 +6280,7 @@ draw_icon:
 }
 
 void PowerUp_AddPart(nuvec_s *, nuvec_s *, float, float) {
+    STUBBED();
 }
 
 void ScaleGameObject(GameObject_s *object) {
@@ -6624,10 +6683,12 @@ void ManageGameObjects() {
 }
 
 f32 PowerUp_GetPanelY(i32) {
+    STUBBED();
     return 0.0f;
 }
 
 void PowerUp_Particles(WORLDINFO_s *, nuvec_s *) {
+    STUBBED();
 }
 
 extern i32 adaptivedifficulty[3];
@@ -7470,6 +7531,7 @@ void DeactivateGameObject(GameObject_s *object) {
 }
 
 i32 EquivalentObject_Find(WORLDINFO_s *, nuhspecial_s *) {
+    STUBBED();
     return 0;
 }
 

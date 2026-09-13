@@ -2358,6 +2358,7 @@ extern "C" void NuGCutSceneSysRender(i32 paused) {
 }
 
 static __used__ void CutScene_OverrideConfigFileName_LSW(char *, int, int) {
+    STUBBED();
 }
 
 void NewCopyAnims(instNUGCUTSCENE_s *instance) {

@@ -940,6 +940,7 @@ ADDGIZMOTYPE *GizTurrets_RegisterGizmo(i32 type_id) {
 }
 
 void GizTurrets_Hit(void *, GIZTURRET_s *, nuvec_s *, i32, i32) {
+    STUBBED();
 }
 
 GameObject_s *GizTurret_GetTgt(GIZTURRET_s *, numtx_s *matrix) {
@@ -1065,6 +1066,7 @@ GIZTURRET_s *GizTurret_FindByController(GIZTURRETSYS_s *system, GameObject_s &co
 }
 
 void GizTurrets_OpponentSelection(GIZTURRETSYS_s *, i32, APIOBJECT_s **, i32, APIOBJECT_s **) {
+    STUBBED();
 }
 
 void GizTurret_CalculateInterceptVector(nuvec_s *origin, numtx_s *matrix, nuvec_s *target, nuvec_s *velocity, f32 speed,

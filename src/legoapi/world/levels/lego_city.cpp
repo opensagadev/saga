@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/world.h"
 
@@ -7,6 +8,7 @@ static u8 prevOnMoonCar;
 static u8 prevOnTownCar;
 
 void LegoCity_Init(WORLDINFO_s *) {
+    STUBBED();
 }
 
 void LegoCity_Reset(WORLDINFO_s *world) {
@@ -41,4 +43,5 @@ void LegoCity_Reset(WORLDINFO_s *world) {
 }
 
 void LegoCity_Update(WORLDINFO_s *) {
+    STUBBED();
 }

@@ -2282,9 +2282,11 @@ void CharConfig_CalculateJumpStats(f32 jump_speed, f32 gravity, f32 *duration, f
 i32 Text_StripComments(char *text, char *destination, i32 separators);
 
 void CharVariant_Find(char *) {
+    STUBBED();
 }
 
 void CharVariants_Init(CHARVARIANT *, i32) {
+    STUBBED();
 }
 
 void CharCategories_Init(CHARCATEGORY *categories) {
@@ -2297,6 +2299,7 @@ void CharCategories_Init(CHARCATEGORY *categories) {
 }
 
 void CanWearHatsInFreePlay(i32) {
+    STUBBED();
 }
 
 i32 CharCategory_FindByName(char *name) {

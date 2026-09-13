@@ -252,6 +252,7 @@ static void StartAnimation(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, i16 an
 
 
 void Animate_POD(GameObject_s *) {
+    STUBBED();
 }
 
 void Animate_ATAT(GameObject_s *object) {
@@ -572,6 +573,7 @@ void AnimatePlayer(GameObject_s *object) {
 }
 
 void Animate_BEAST(GameObject_s *) {
+    STUBBED();
 }
 
 void Animate_BARMAN(GameObject_s *object) {
@@ -604,6 +606,7 @@ void Animate_WALKER(GameObject_s *object) {
 }
 
 void Animate_WEIRDO(GameObject_s *) {
+    STUBBED();
 }
 
 void Animate_CRITTER(GameObject_s *object) {
@@ -668,6 +671,7 @@ void Animate_DEFAULT(GameObject_s *object) {
 }
 
 void Animate_VEHICLE(GameObject_s *) {
+    STUBBED();
 }
 
 void Animate_DROIDEKA(GameObject_s *object) {

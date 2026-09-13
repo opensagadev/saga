@@ -45,12 +45,14 @@ static void VuQuatNormalise(NUQUAT *out, NUQUAT *in) {
 }
 
 static void VuVecMtxMul(NUVEC *out, NUVEC *v, NUMTX *m) {
+    STUBBED();
     (void)out;
     (void)v;
     (void)m;
 }
 
 static void VuVecSet(f32 *out, f32 x, f32 y, f32 z, f32 w) {
+    STUBBED();
     (void)out;
     (void)x;
     (void)y;

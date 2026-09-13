@@ -839,31 +839,41 @@ NUWCHAR NuGetWChar(NUFPAR *parser) {
 }
 
 static __used__ void SockCamATSTDIST(nufpar_s *, void *) {
+    STUBBED();
 }
 
 static __used__ void SockCamATSTLIFT(nufpar_s *, void *) {
+    STUBBED();
 }
 
 static __used__ void SockCamATSTTILT(nufpar_s *, void *) {
+    STUBBED();
 }
 
 static __used__ void SockManCam_MAX_X(nufpar_s *, void *) {
+    STUBBED();
 }
 
 static __used__ void SockManCam_MAX_Y(nufpar_s *, void *) {
+    STUBBED();
 }
 
 static __used__ void SockCamATSTCAMRANGE(nufpar_s *, void *) {
+    STUBBED();
 }
 
 static __used__ void SockCamATSTTILTRATE(nufpar_s *, void *) {
+    STUBBED();
 }
 
 static __used__ void SockTerrainCamInActive(nufpar_s *, void *) {
+    STUBBED();
 }
 
 static __used__ void SockCamCAMERARAYTILTDIST(nufpar_s *, void *) {
+    STUBBED();
 }
 
 static __used__ void SockCamCAMERARAYTILTHEIGHT(nufpar_s *, void *) {
+    STUBBED();
 }

@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "legoapi/menus/core/text.h"
 char *ASCII_UP = "\xc2\xac";
 #include "legoapi/legoapi_types.h"
@@ -280,6 +281,7 @@ void TextCrawl_Draw(float dt, i32 paragraphs, float alpha, char *text) {
     NuQFntPopPrintMode();
 }
 void TextPulseTimer(float) {
+    STUBBED();
 }
 static char **TTab_Original;
 static i32 Text_MaxOverallStrings;
@@ -355,6 +357,7 @@ void *Text_IsFontLoaded() {
     return app_fnt;
 }
 void TextDecodeCodeword(char *, char *) {
+    STUBBED();
 }
 static f32 QFONTSCALEX = 1.0f;
 static f32 QFONTSCALEY = 1.0f;
@@ -530,6 +533,7 @@ i32 Text_ExpandButtonString(char *input, char *output) {
     return 0;
 }
 void Text_InitDefaultStrings() {
+    STUBBED();
 }
 void Text_LoadAndFixUpStrings(unsigned char *filename, unsigned char **buffer, char **table, i32 count) {
     unsigned char *out = *buffer;
@@ -629,6 +633,7 @@ void Text_ExpandAllButtonStrings(char *input, char *output) {
     *output = '\0';
 }
 void Text_FillInExtendedSaveInfo() {
+    STUBBED();
 }
 void Text_InsertCommasIntoNumber(char *number, char *text, i32 length) {
     char separator;
@@ -703,6 +708,7 @@ extern "C" {
         return QFont2D;
     }
     void MatrixText(void) {
+        STUBBED();
     }
     void MenuSmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
                          u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw,
@@ -729,6 +735,7 @@ extern "C" {
         QFont2D = font;
     }
     void SmartText(void) {
+        STUBBED();
     }
     void SmartTextEx(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red,
                      u8 green, u8 blue, f32 max_width, i32 max_lines, void *message_box, i32 suppress_draw, u32 alpha) {
@@ -856,6 +863,7 @@ extern "C" {
         SmartTextFont = saved_font;
     }
     void SmartTextExDrop(void) {
+        STUBBED();
     }
     void SmartTextGetWidescreen(f32 *font_scale_x, f32 *coordinate_scale) {
         if (font_scale_x != nullptr)
@@ -875,6 +883,7 @@ extern "C" {
         STCOORDSCALE = coordinate_scale;
     }
     void SplitText(void) {
+        STUBBED();
     }
     void Text3D(char *text, f32 x, f32 y, f32 z, f32 x_scale, f32 y_scale, f32 z_scale, u32 alignment, u8 red, u8 green,
                 u8 blue) {
@@ -965,6 +974,7 @@ extern "C" {
         }
     }
     void UnloadGameFont(void) {
+        STUBBED();
     }
 }
 bool LookupHash(u32 key, u32 *value, HashRedirect *redirects, u32 count) {
@@ -1000,8 +1010,10 @@ bool LookupHash(u32 key, u32 *value, HashRedirect *redirects, u32 count) {
     }
 }
 void MultilineDump(char const *) {
+    STUBBED();
 }
 void GetMatchLength(unsigned char *, unsigned char *, abi_ulong) {
+    STUBBED();
 }
 i32 MakeLayerList_Name(CHARACTERMODEL_s *model, i16 *output, u32 mask) {
     if (output == NULL || model == NULL)
@@ -1051,10 +1063,13 @@ i32 UnicodeToIndexFast(vucharidx_s *map, i32 count, u16 unicode) {
     return -1;
 }
 void SplitTextFindNextWS(unsigned char *, i32) {
+    STUBBED();
 }
 void MatrixTextStringEncode(void *, unsigned char *, u16 *) {
+    STUBBED();
 }
 void GetLineW(u16 *, i32) {
+    STUBBED();
 }
 extern "C" void Text3DStringEncode(char *src, u16 *dst) {
     VUFNT *font = SmartTextFont;

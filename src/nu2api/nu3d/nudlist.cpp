@@ -1233,6 +1233,7 @@ extern "C" void NuDisplayListSwapBuffersEndFrame(void) {
 }
 
 extern "C" void NuDisplayListDraw2D(void) {
+    STUBBED();
 }
 
 void NuDisplayListEndScene(void) {

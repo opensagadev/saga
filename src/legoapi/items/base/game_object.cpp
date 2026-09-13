@@ -115,33 +115,43 @@ void InitGameObjectLights(void) {
 // as local `t` symbols matching res/libTTapp.so.
 
 static __used__ void ShieldCode(GameObject_s *) {
+    STUBBED();
 }
 
 static __used__ void TrenchMove(GameObject_s *) {
+    STUBBED();
 }
 
 static __used__ void Punch_HitHold(GameObject_s *, GameObject_s *) {
+    STUBBED();
 }
 
 static __used__ i32 Punch_GetDamage_LSW(GameObject_s *, GameObject_s *) {
+    STUBBED();
     return 0;
 }
 
 static __used__ void Punch_HitExtraCode_LSW(GameObject_s *, nuvec_s *) {
+    STUBBED();
 }
 
 static __used__ void TrenchKilledCallback(GameObject_s *) {
+    STUBBED();
 }
 
 static __used__ void SurfaceInfo_ExtraReflect(GameObject_s *) {
+    STUBBED();
 }
 
 static __used__ void PauseGame_ExtraCode() {
+    STUBBED();
 }
 
 static __used__ i32 SpecialObjectFilter(void *) {
+    STUBBED();
     return 0;
 }
 
 static __used__ void KilledTrooperCannon(GameObject_s *) {
+    STUBBED();
 }

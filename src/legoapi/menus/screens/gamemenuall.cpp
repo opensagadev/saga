@@ -254,6 +254,7 @@ void MenuExitSave(MENU_s *) {
 }
 
 void MenuDrawClips(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawHints(MENU_s *menu) {
@@ -262,6 +263,7 @@ void MenuDrawHints(MENU_s *menu) {
 }
 
 void MenuDrawStore(MENU_s *) {
+    STUBBED();
 }
 
 void MenuEnterLoad(MENU_s *menu) {
@@ -331,12 +333,15 @@ void MenuEnterSave(MENU_s *menu) {
 }
 
 void MenuExitStore(MENU_s *) {
+    STUBBED();
 }
 
 void MenuInitClips(MENU_s *) {
+    STUBBED();
 }
 
 void MenuInitStore(MENU_s *) {
+    STUBBED();
 }
 
 void MenuStartLoad() {
@@ -354,6 +359,7 @@ void MenuStartSave() {
 }
 
 void RenderFileSel() {
+    STUBBED();
 }
 
 void MakeMenuPacket() {
@@ -487,9 +493,11 @@ void MenuUpdateSave(MENU_s *menu) {
 }
 
 void ProcessFileSel(float, nupad_s *) {
+    STUBBED();
 }
 
 void RenderFileSel3(i32) {
+    STUBBED();
 }
 
 void EndMissionsMenu() {
@@ -611,9 +619,11 @@ void MenuExitOptions(MENU_s *) {
 }
 
 void MenuIsAvailable() {
+    STUBBED();
 }
 
 void MenuUpdateClips(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateHints(MENU_s *menu) {
@@ -624,15 +634,19 @@ void MenuUpdateHints(MENU_s *menu) {
 }
 
 void MenuUpdateStore(MENU_s *) {
+    STUBBED();
 }
 
 void ProcessFileSel3(float, nupad_s *) {
+    STUBBED();
 }
 
 void MenuDrawDeleting(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawEpisodes(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawFreePlay(MENU_s *) {
@@ -710,6 +724,7 @@ void MenuEnterOptions(MENU_s *) {
 }
 
 void MenuInitEpisodes(MENU_s *) {
+    STUBBED();
 }
 
 void MenuInitFreePlay(MENU_s *menu) {
@@ -791,6 +806,7 @@ void MenuUpdateSaving(MENU_s *) {
 }
 
 void MenuDrawBonusMode(MENU_s *) {
+    STUBBED();
 }
 
 
@@ -892,15 +908,19 @@ NUGSCN *IconScene_FindById(i32 character_id) {
 }
 
 void MenuDrawDebugStore(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawEndMission(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawFormatting(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawInsertCard(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawLoadCancel(MENU_s *menu) {
@@ -946,9 +966,11 @@ void MenuInitSelectMode(MENU_s *menu) {
 }
 
 void MenuUpdateDeleting(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateEpisodes(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateFreePlay(MENU_s *) {
@@ -1079,6 +1101,7 @@ collected_input:
 }
 
 void MenuDrawCardWarning(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawFileCorrupt(MENU_s *) {
@@ -1122,6 +1145,7 @@ void MenuEnterHeaderSave(MENU_s *) {
 }
 
 void MenuEnterInsertCard(MENU_s *) {
+    STUBBED();
 }
 
 void MenuExitCardWarning(MENU_s *) {
@@ -1129,12 +1153,15 @@ void MenuExitCardWarning(MENU_s *) {
 }
 
 void MenuUpdateBonusMode(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawEndChallenge(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawFormatCancel(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawNoMemoryCard(MENU_s *menu) {
@@ -1145,9 +1172,11 @@ void MenuDrawNoMemoryCard(MENU_s *menu) {
 }
 
 void MenuDrawStoreHolding(MENU_s *) {
+    STUBBED();
 }
 
 void MenuEnterCardWarning(MENU_s *) {
+    STUBBED();
 }
 
 void MenuEnterSaveConfirm(MENU_s *) {
@@ -1161,21 +1190,27 @@ void MenuEnterSaveConfirm(MENU_s *) {
 }
 
 void MenuExitStoreHolding(MENU_s *) {
+    STUBBED();
 }
 
 void MenuInitStoreHolding(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateDebugStore(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateEndMission(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateFormatting(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateInsertCard(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateLoadCancel(MENU_s *menu) {
@@ -1205,15 +1240,19 @@ void MenuUpdateSaveCancel(MENU_s *menu) {
 }
 
 void MenuDrawDeleteConfirm(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawFormatConfirm(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawStorePurchase(MENU_s *) {
+    STUBBED();
 }
 
 void MenuEnterNoMemoryCard(MENU_s *) {
+    STUBBED();
 }
 
 void MenuEnterStartNewGame(MENU_s *) {
@@ -1223,15 +1262,19 @@ void MenuEnterStartNewGame(MENU_s *) {
 }
 
 void MenuExitStorePurchase(MENU_s *) {
+    STUBBED();
 }
 
 void MenuInitStorePurchase(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateCardWarning(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateFileCorrupt(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateLoadConfirm(MENU_s *menu) {
@@ -1267,6 +1310,7 @@ void MenuUpdateSaveConfirm(MENU_s *menu) {
 }
 
 void MenuDrawAutoSaveCancel(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawNotEnoughSpace(MENU_s *) {
@@ -1290,54 +1334,71 @@ void MenuDrawSelectControls(MENU_s *menu) {
 }
 
 void MenuDrawStoreRestoring(MENU_s *) {
+    STUBBED();
 }
 
 void MenuExitStoreRestoring(MENU_s *) {
+    STUBBED();
 }
 
 void MenuInitStoreRestoring(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateEndChallenge(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateFormatCancel(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateNoMemoryCard(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateStoreHolding(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawAutoSaveWarning(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawDoNotRemoveCard(MENU_s *) {
+    STUBBED();
 }
 
 void MenuDrawViewTextStrings(MENU_s *) {
+    STUBBED();
 }
 
 void MenuEnterAutoSaveCancel(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateDeleteConfirm(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateFormatConfirm(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateStorePurchase(MENU_s *) {
+    STUBBED();
 }
 
 void MenuEnterAutoSaveWarning(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateAutoSaveCancel(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateNotEnoughSpace(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateRestoreNewGame(MENU_s *menu) {
@@ -1402,15 +1463,19 @@ void MenuUpdateSelectControls(MENU_s *menu) {
 }
 
 void MenuUpdateStoreRestoring(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateAutoSaveWarning(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateDoNotRemoveCard(MENU_s *) {
+    STUBBED();
 }
 
 void MenuUpdateViewTextStrings(MENU_s *) {
+    STUBBED();
 }
 
 extern "C" {
@@ -1506,9 +1571,11 @@ extern "C" {
     }
 
     void CreateColourPicker(void) {
+        STUBBED();
     }
 
     void CreateTestMenu(void) {
+        STUBBED();
     }
 
     void DrawMenu(i32 paused) {
@@ -1578,6 +1645,7 @@ extern "C" {
     }
 
     void DrawMenuBottomMessage(void) {
+        STUBBED();
     }
 
     void DrawMenuButtonPrompts(i32 confirm_prompt, i32 cancel_prompt, i32 enabled, u8 red, u8 green, u8 blue,
@@ -1586,6 +1654,7 @@ extern "C" {
     }
 
     void DrawMenuButtonPromptsEx(i32, i32, i32, i32, u8, u8, u8, u8) {
+        STUBBED();
     }
 
     void DrawMenuEntry(MENU *menu, char *text) {
@@ -1692,9 +1761,11 @@ extern "C" {
     }
 
     void DrawMenuHeaderMessage(void) {
+        STUBBED();
     }
 
     void DrawMenuTopMessage(void) {
+        STUBBED();
     }
 
     void Draw_CANCEL(MENU *menu) {
@@ -1704,21 +1775,27 @@ extern "C" {
     }
 
     void Draw_CHECKINGMEMORYCARD(void) {
+        STUBBED();
     }
 
     void Draw_DONOTREMOVEMEMORYCARD(void) {
+        STUBBED();
     }
 
     void Draw_NOTENOUGHSPACE(void) {
+        STUBBED();
     }
 
     void Draw_SPACENEEDED(void) {
+        STUBBED();
     }
 
     void FileSelKill(void) {
+        STUBBED();
     }
 
     void FlushMenuHighlights(void) {
+        STUBBED();
     }
 
     i32 MenuCurrentID(void) {
@@ -1726,6 +1803,7 @@ extern "C" {
     }
 
     void MenuDrawBackground(void) {
+        STUBBED();
     }
 
     i32 MenuGetSlotNum(void) {
@@ -1733,6 +1811,7 @@ extern "C" {
     }
 
     void MenuInCriticalMemoryCard(void) {
+        STUBBED();
     }
 
     i32 MenuInMemoryCard(void) {
@@ -1830,15 +1909,19 @@ extern "C" {
     }
 
     void MenuSetTopBottom(void) {
+        STUBBED();
     }
 
     void MessageBoxInitMtl(void) {
+        STUBBED();
     }
 
     void PetesHackOfDeath(void) {
+        STUBBED();
     }
 
     void ProcessFileSel2(void) {
+        STUBBED();
     }
 
     void RemapAddr(void *new_base, void *old_base, void **address) {
@@ -1846,6 +1929,7 @@ extern "C" {
     }
 
     void RenderFileSel2(void) {
+        STUBBED();
     }
 
     void SetButtonScaleMode(i32 mode) {
@@ -1853,9 +1937,11 @@ extern "C" {
     }
 
     void StartFileSel(void) {
+        STUBBED();
     }
 
     void TestMenu(void) {
+        STUBBED();
     }
 
     i32 UpdateMenu(u32 primary_held, u32 primary_pressed, u32 alternate_held, u32 alternate_pressed, f32 elapsed,
@@ -2084,9 +2170,11 @@ extern "C" {
     }
 
     void cbCancelSubMenu(void) {
+        STUBBED();
     }
 
     void cbCancelSubMenuFromItem(void) {
+        STUBBED();
     }
 
     i32 cbCompateDirentByDateAsc(NUFILE_INFO *first, NUFILE_INFO *second) {
@@ -2098,15 +2186,19 @@ extern "C" {
     }
 
     void cbCompateDirentByNameAsc(void) {
+        STUBBED();
     }
 
     void cbCompateDirentByNameDec(void) {
+        STUBBED();
     }
 
     void cbCompateDirentBySizeAsc(void) {
+        STUBBED();
     }
 
     void cbCompateDirentBySizeDec(void) {
+        STUBBED();
     }
 
     i32 cbInteractMenuScrollDown(edui_interact_s *interact) {
@@ -2130,12 +2222,15 @@ extern "C" {
     }
 
     void cbInteractMenuTitle(void) {
+        STUBBED();
     }
 
     void cbModifierAdjust(void) {
+        STUBBED();
     }
 
     void cbTriggerSubMenu(void) {
+        STUBBED();
     }
 
 } // extern "C"
