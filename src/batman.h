@@ -33,6 +33,7 @@
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nu3d/nudlist.h"
+#include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/android/nutimebar_plain.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numusic/numusic.h"
@@ -65,12 +66,8 @@ extern "C" {
     i32 NuRndrBeginScene(i32);
     void NuRndrEndScene(void);
     void NuRndrEndSceneEx(i32);
-    void NuRndrClear(i32, i32, float);
-    void NuRndrGradClear(i32, i32, i32, float);
     void NuRndrSwapStreamBuffers(void);
     void NuRndrGlobalFrameCountPause(i32);
-    void NuRndrShadowOnOff(i32);
-    void NuRndrLine3dDbgFlush(void);
     void NuRndrShadPolys(struct numtl_s *material);
     void NuRndrFx(i32, void *);
     void NuLgtLaserDraw(i32);

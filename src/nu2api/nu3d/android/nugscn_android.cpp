@@ -7,7 +7,7 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/NuRenderDevice.h"
-#include "nu2api/nu3d/android/nuiosdl_gl.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/nugscn.h"

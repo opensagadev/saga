@@ -357,7 +357,7 @@ struct rtlidata_s;
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/numtl.h"
-#include "nu2api/nu3d/android/nuiosdl_gl.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
 #include "nu2api/nu3d/android/nugscn_android.h"
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nucore/bgproc.h"
@@ -426,7 +426,6 @@ extern "C" void NuRndrGradRect2di(i32, i32, i32, i32, i32 *, numtl_s *);
 extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
 extern "C" void NuRndrGradRectUV2di(i32, i32, i32, i32, f32, f32, f32, f32, u32 *, numtl_s *);
 extern "C" void NuRndrRectUV2di(i32, i32, i32, i32, f32, f32, f32, f32, i32, numtl_s *);
-extern "C" void NuRndrClear(u32, u32, f32);
 extern char *apiGameName;
 extern char *apitxt_EMPTY;
 extern char *apitxt_PRESENT;
@@ -4176,10 +4175,6 @@ static __used__ void DisplayListMaterialClipUpdate(nudisplayscene_s *) {
 #include "nu2api/numath/numtx.h"
 #include "nu2api/nu3d/nurndr.h"
 
-extern "C" {
-    void NuRndrGradClear(i32 a, i32 b, i32 c, f32 d);
-    void NuRndrClear(u32 flags, u32 colour, f32 alpha);
-}
 extern i32 qrand(void);
 
 static NUGSCN *s_backdrop_scene = nullptr;

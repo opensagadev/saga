@@ -66,8 +66,6 @@ extern "C" {
     f32 NuFrameEnd(void);
     i32 NuRndrBeginScene(i32 flags);
     void NuRndrEndScene(void);
-    void NuRndrGradClear(i32 a, i32 b, i32 c, f32 d);
-    void NuRndrClear(u32 flags, u32 colour, f32 alpha);
     void NuMtlDestroy(NUMTL *mtl);
     NUMTL *NuMtlCreate(i32 count);
     void NuMtlUpdate(NUMTL *mtl);

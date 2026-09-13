@@ -23,7 +23,6 @@ struct SHOPINPUT;
 
 extern "C" void SetQFont2D(void);
 extern "C" i32 NuRndrBeginScene(i32 flags);
-extern "C" void NuRndrClear(i32 flags, i32 colour, f32 alpha);
 extern "C" void NuRndrEndScene(void);
 extern NUCAMERA *pNuCam;
 extern "C" f32 NuIOS_GetAspectRatio(void);

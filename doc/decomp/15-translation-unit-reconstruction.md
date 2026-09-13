@@ -1,7 +1,7 @@
 # Original translation-unit reconstruction
 
-At the latest measured target build, there are 514 current translation
-units and a 45.9193% whole-binary fuzzy match. This is a source-ownership
+At the latest measured target build, there are 510 current translation
+units and a 45.9231% whole-binary fuzzy match. This is a source-ownership
 overview; the matching percentage does not measure how many original file
 boundaries are known. “Reconstructed” below means the source boundary has
 evidence and passed a matching comparison; it does not mean every body is
@@ -26,7 +26,46 @@ PYTHONPATH=. python3 scripts/restructure/generate_original_tu_map.py \
 ```
 
 The ledgers are ignored. They preserve address, section, size, binding,
-aliases, and optionally candidate current owners.
+aliases, and optionally candidate current owners. For a compact whole-project
+structural dashboard, run after the target build and matching report:
+
+```sh
+PYTHONPATH=. python3 scripts/restructure/compare_symbol_placement.py \
+  --current bazel-out/k8-fastbuild/bin/src/libTTapp.so --units matching.json
+```
+
+It reports same-name source coverage by original section, clustering of
+uniquely attributed functions in original address order, verifiable
+function-to-local-state TU constraints and their largest splits, and the
+separate exact/fuzzy body-matching baseline. These independent measures are
+not combined into a false overall completion percentage; current-source
+candidate names are not proven original TU boundaries. A fresh local-xref
+ledger is reused or computed automatically. To compare a proposed TU slice,
+run:
+
+```sh
+PYTHONPATH=. python3 scripts/restructure/compare_symbol_placement.py \
+  --source src/nu2api/nu3d/android/nurndr_android.c \
+  --start 0x293168 --end 0x295f80 --section .text
+```
+
+The selected-source output is a compact ordered-symbol alignment score for the
+TU and overall same-TU consistency from original
+function-to-local-state references. The score is
+`2 × longest-common-subsequence / (original symbols + current symbols)`: it
+falls for missing, extra, or reordered names. Same-TU consistency reports both
+the satisfied fraction and the fraction of original state links that can be
+assessed; it is not a claim of total reconstruction progress. The script reuses
+a fresh ignored ledger or computes local-reference evidence itself; `--no-xrefs`
+skips that pass. Use `--diff` to print the original
+linked-ELF symbols by address, the selected current `.o` symbols by section
+offset, and their unified name-order diff. `--ranks` and
+`--ranks --show-addresses` expose finer placement diagnostics. `--global-order`
+adds a conservative whole-linked `.text`/`.data`/`.bss` order proxy, excluding
+duplicate local names. These order
+metrics do not measure matching bodies, prove TU boundaries, or cover GOT slots
+and relocations.
+This is not yet a byte-for-byte GOT-slot or dynamic-relocation placement diff.
 It inventories 32,596 allocated original symbols, including 14,541 text,
 9,384 read-only, 6,625 BSS, and 1,796 data entries; aliases remain distinct.
 The original/current target have 14,561/11,559 dynamic relocations, 190/186
@@ -76,7 +115,8 @@ linkage.
 | Android scene: embedded `nugscn_android.c` paths and scene run `0x2fd760–0x2fefbd` | `nu2api/nu3d/android/nugscn_android.cpp` and its header | Shared, offset-checked native scene type; teardown reconstructed. Creation/fixup and related graphics-data boundaries still need body/owner review. Original `NuGScnDestroyPS` has C++ linkage. |
 | Android display-list and primitive runs: local helpers/tables plus `0x29aaa9+` and `0x29cbc9–0x29d3d1` text | `nu2api/nu3d/android/nudlist_android.c`, `nuprim_android.c`, renderer neighbors | Principal source split is reconstructed; executor, callback, and primitive bodies still differ. These `.c` files require their measured C++ compilation mode. |
 | Android material/render state: local callback/data clusters | `nu2api/nu3d/android/numtl_android.cpp`, `nurndr_android.c` and renderer neighbors | Multiple evidenced slices moved; remaining render-state and callback codegen must be measured per unit. |
-| `nurndr_android.c`: original text `[0x293168, 0x295f80)` through its named constructor, with VAO, callback, blend, and shadow locals | Mostly `nu2api/nu3d/android/nuiosdl_gl.cpp`; smaller pieces in `nurndr_android.c`, renderer helpers, editor, and other files | **Open.** The 56 currently assigned functions in this run need one dependency/optimization review before an atomic move. Verified PIC references bind VAO records/count, blend-weight and blend-pointer arrays, shader attribute name data, and polygon vertex state to functions in this run. The existing `nurndr_android.c` also owns functions outside this original run; nearby generic rodata and preceding shadow globals still need xref proof. |
+| `nurndr_android.c`: original text `[0x293168, 0x295f80)` through its named constructor, with VAO, callback, blend, and shadow locals | `nu2api/nu3d/android/nurndr_android.c`; remaining helpers in renderer/editor neighbors | **Open.** The callback graph, blend allocations, shadow state, and exact no-op tail now share the correctly named `-O0` TU. Current ordered-symbol alignment for this run is 80.3% (47 of 62 original and 55 current symbols in order). The following original `nurndr.c` run is separate in `android/nurndr.c`; its specular and FX bodies remain in higher-optimized owners pending a measured optimization migration. VAO records/count and shader attribute-name data still need owner/type evidence. |
+| Android platform-stub run from `0x316a49`, including `NuRndrGradClear` and renderer no-ops | `nu2api/nucore/android/stubs_android.cpp`; formerly also `nurndr_grad.cpp` and `nurndr_noops.cpp` | Four adjacent functions moved to the 36-function run; all remain exact. The two tiny source files were removed. `NuRndrClear`/`NuRndrGradClear` now have canonical signatures in `nurndr.h`, replacing scattered local prototypes. |
 | Android portal visibility: contiguous `nuportal_android.c` helpers at `0x2fc209–0x2fc7fe` | `nu2api/nu3d/android/nuportal_android.cpp` with real platform header; shared portal engine remains in `nuportal.cpp` | Five helpers now co-located at the existing default optimization, preserving all three exact matches and whole score. Forced `-O2`/`-O3` trials regressed and were rejected. `PortalVisiFlags` remains original GLOBAL data. |
 | Android scratch, graphics clear, rain, FMV, and time: embedded paths/initializer runs | `nuscratch_android.c`, `ios_graphics.cpp`, `nurain_android.c`, `nufmv_android.cpp`, `nutime_android.c` | Source boundaries accepted; individual scratch/clear/media bodies remain incomplete. |
 | DDS and texture-animation owners: DDS initializer/local vectors and texture-animation run | `nu2api/nu3d/NuDDSFunctions.cpp`, `nu2api/nu3d/nutexanim.cpp` | File/data ownership largely reconstructed; DDS mip/description and some animation bodies remain. |

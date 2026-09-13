@@ -13,7 +13,7 @@
 //   2. Primitive drawing helpers that call the immediate-mode API in
 //      android/nuprim_android.c, including quad expansion there.
 //
-//   3. Frame present   — moved to the original android/nurndr_android.c TU.
+//   3. Frame present   — moved to the original android/nurndr.c TU.
 //
 // Remaining renderer entry points are retained as link stubs until their
 // subsystems are transcribed. Their signatures are not yet recovered, so

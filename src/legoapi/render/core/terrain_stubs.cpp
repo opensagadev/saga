@@ -15,6 +15,7 @@
 #include "nu2api/nu3d/android/nuptl_android.h"
 #include "gameapi/edtools/edstubs.h"
 #include "nu2api/nu3d/nucamera.h"
+#include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nucore/nustring.h"
 
 #include <stdio.h>
@@ -160,7 +161,6 @@ extern "C" {
     extern i32 debris_suspended;
     extern f32 debris_thinning_level;
     extern i32 forced_debris_thinning;
-
 
     void DebrisReScale(i32, f32);
     void DebReAlloc(debkeydatatype_s *, i32);
@@ -708,9 +708,6 @@ extern "C" {
     }
 
 } // extern "C"
-
-i32 NuRndrFlickerBeginScene(void);
-void NuRndrFlickerEnd(void);
 
 void DebrisTimeSlip(i32 group) {
     if (group == 0) {

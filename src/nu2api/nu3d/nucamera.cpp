@@ -1,10 +1,36 @@
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nurendercontext.h"
+#include "nu2api/nu3d/nushader.h"
 #include "nu2api/numath/nutrig.h"
 
 #include <string.h>
 
 NUMTX clip_test_mtx;
+
+// Original 0x2a5128: the render-stream camera packet closes the nucamera.c run.
+void NuIOSDLCameraCallback(void *arg) {
+    struct NuIOSCameraPacket {
+        i32 id;
+        NUMTX view;
+        NUMTX projection;
+        f32 viewport[4];
+    };
+    static i32 last_id = -1;
+    g_boundCameraPacket = arg;
+    auto *packet = static_cast<NuIOSCameraPacket *>(arg);
+    if (packet->id != last_id) {
+        NUMTX *view = &packet->view;
+        NUMTX *projection = view + 1;
+        f32 *viewport = reinterpret_cast<f32 *>(projection + 1);
+        last_id = packet->id;
+        NuRenderContextSetViewProj(view, projection);
+        NuRenderContextSetViewport(static_cast<i32>(viewport[0]), static_cast<i32>(viewport[1]),
+                                   static_cast<i32>(viewport[2]), static_cast<i32>(viewport[3]));
+    } else {
+        return;
+    }
+}
 
 void NuCameraSetProjectionMtx(NUMTX *mtx, f32 fov, f32 aspect, f32 near_clip, f32 far_clip) {
     near_clip = near_clip < 0.1f ? 0.1f : near_clip;

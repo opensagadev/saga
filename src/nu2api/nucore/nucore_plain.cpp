@@ -28,7 +28,7 @@ extern "C" {
 //   NuHtmlBegin                    → legoapi/misc/supportall @0x2d5ca0
 //   NuIOS_SetVertexFormat          → nuiosdl_gl.cpp          @0x29c070
 //   NuIOS_Wait/WakeRenderThread    → ios_graphics.cpp        @0xe34b0/0xe3590
-//   NuRenderContextSetZFunc        → nuiosdl_gl.cpp          @0x2a3860
+//   NuRenderContextSetZFunc        → this TU pending context extraction @0x2a3860
 //
 // The remaining ~350 symbols are grouped by subsystem below so a reader can
 // tell at a glance which domain still needs decompilation. Each group is
@@ -39,6 +39,7 @@ extern "C" {
 #include <stdio.h>
 #include <math.h>
 #include <float.h>
+#include <GLES2/gl2.h>
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nucore/numem.h"
 #include "nu2api/nucore/numemory.h"
@@ -78,6 +79,7 @@ void NuLgtArcLaserEx(i32 type, NUVEC *start, NUVEC *end, NUVEC *control, f32 wid
 #include "nu2api/nu3d/nuvport.h"
 #include "nu2api/nu3d/nuocclusion.h"
 #include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nurendercontext.h"
 #include "nu2api/nu3d/nuscreen.hpp"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nufloat.h"
@@ -224,7 +226,7 @@ extern "C" {
     // NuIOS_SetVertexFormat is transcribed in nuiosdl_gl.cpp (original 0x29c070).
     // NuIOS_WaitForRenderThreadCompletion is transcribed in ios_graphics.cpp (original 0xe34b0).
     // NuIOS_WakeRenderThread is transcribed in ios_graphics.cpp (original 0xe3590).
-    // NuRenderContextSetZFunc is transcribed in nuiosdl_gl.cpp (original 0x2a3860).
+    // NuRenderContextSetZFunc is transcribed below (original 0x2a3860).
 
     // ---------------------------------------------------------------------------
     // Camera (thin wrappers; full matrix work is in NuCameraSetEx)
@@ -2984,6 +2986,37 @@ extern "C" {
     void NuPostBloom(i32, const NuBloomParameters *parameters) {
         currentScene.bloom = *parameters;
     }
+    // Original 0x2a3860, in the render-context run.
+    void NuRenderContextSetZFunc(i32 zfunc) {
+        if (zfunc == g_renderContext_zFunc) {
+            return;
+        }
+
+        switch (zfunc) {
+            case 0: // depth test + write, LEQUAL
+                glEnable(GL_DEPTH_TEST);
+                glDepthMask(GL_TRUE);
+                glDepthFunc(GL_LEQUAL);
+                break;
+            case 1: // depth test, no write (decal / transparent)
+                glEnable(GL_DEPTH_TEST);
+                glDepthMask(GL_FALSE);
+                glDepthFunc(GL_LEQUAL);
+                break;
+            case 2: // no depth test, write enabled
+                glDisable(GL_DEPTH_TEST);
+                glDepthMask(GL_TRUE);
+                break;
+            case 3: // no depth test, no write (UI / 2D)
+                glDisable(GL_DEPTH_TEST);
+                glDepthMask(GL_FALSE);
+                break;
+            default:
+                break;
+        }
+        g_renderContext_zFunc = zfunc;
+    }
+
     void NuRenderContextInit(void) {
         extern f32 g_renderContext_viewProj[16];
         extern f32 g_renderContext_view[16];

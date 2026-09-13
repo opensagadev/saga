@@ -11,6 +11,7 @@
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nutex.h"
+#include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/NuRenderDevice.h"
 #include "nu2api/nu3d/nushader_plain.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
@@ -93,8 +94,6 @@ void DrawStillScreen(i32);
 extern "C" i32 NuRndrBeginScene(i32);
 extern "C" void NuRndrEndScene(void);
 extern "C" void NuBackbufferCopy(i32);
-extern "C" void NuRndrClear(i32, i32, f32);
-extern "C" void NuRndrGradClear(i32, i32, i32, f32);
 
 void NeedScreenGrab(i32 needed) {
     ScreenGrabNeeded = needed != 0;

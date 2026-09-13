@@ -41,7 +41,7 @@ extern "C" void DisplaySceneRndrSpecials(NUDLDLISTSCENE *, i32, void *);
 #include "nu2api/nucore/nuthread.h"
 #include "nu2api/nu3d/nupostresources.h"
 #include "nu2api/nu3d/nushader.h"
-#include "nu2api/nu3d/android/nuiosdl_gl.h"
+#include "nu2api/nu3d/android/nurndr_android.h"
 #include "nu2api/nu3d/android/nupostshaders.h"
 #include "nu2api/numath/nuvec4.h"
 #include "nu2api/numath/nufloat.h"
@@ -255,7 +255,6 @@ void NuPostFilter::initSharedResources(i32, i32) {
 void NuPostFilter::renderFrustum(numtx_s *) {
     STUBBED();
 }
-
 
 void NuDynamicLight::addShadowCasterScene(nugscn_s *scene) {
     if (render_set_capacity > 0) {
@@ -933,7 +932,6 @@ void NuDynamicLight::computeWarpEffect(NuDynamicLight::RenderSet &set) {
     NuMtxMulH(&result, &projected_light, &axes);
     set.warp = result;
 }
-
 
 void NuDynamicLight::refreshShadowTransform(RenderSet &set) {
     NUMTX inverse_camera;
