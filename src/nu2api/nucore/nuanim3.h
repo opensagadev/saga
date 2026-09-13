@@ -3,6 +3,7 @@
 #include "decomp.h"
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/fixed_width.h"
+#include "nu2api/nucore/nuhgobj.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/numath/nuvec.h"
 
@@ -106,6 +107,12 @@ extern "C" {
     void *NuAnimData2LoadBuff(char *path, VARIPTR *buf, VARIPTR *buf_end);
     void *NuAnimData2LoadBuffFromPAK(void *data, i32 file_size);
     f32 *NuAnimCurveExtractAllNodeCurves_3(ani3_animheader_s *animation, i32 node, f32 frame, char *curve_mask);
+    void NuAnimBuffAccumulate_3(nuanimbuff_s *buffer, ani3_animheader_s *animation, f32 time, i32 overwrite,
+                                f32 blend, i32 first_joint, nuhgobj_s *object, NUVEC *root_translation);
+    void NuAnimBuffEvaluate_3(nuanimbuff_s *buffer, nuhgobj_s *object, NUMTX *matrices,
+                              ani3_animheader_s *animation, NUHGOBJROOTFN root_fn,
+                              NUVEC *root_translation, void *root_data);
+    void NuAnimCurve2SetApplyToMatrix_3(ani3_animheader_s *animation, i32 node, f32 frame, NUMTX *matrix);
     void NuAnimData2CalcMatrix(struct nuanimdata_s *animation, i32 node, f32 frame, struct numtx_s *matrix);
     void NuAnimBuffEvaluateCallback(NUANIMBUFFEVALUATECB callback, void **data, i32 *joints);
     void *NuAnimBuffCreate(i32 max_joints, VARIPTR *buf);
@@ -148,6 +155,9 @@ i32 ANI_SimpleAni3PlayerV4Joint_Quat3(ani3_animheader_s *anim, f32 frame, nuanim
                                       i32 first_joint);
 i32 ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_animheader_s *anim, f32 frame, nuanimbuff_s *buffer, i32 joint_count,
                                        i32 first_joint);
+f32 CalcValue1648(char *data, i32 quarter, i32 stride, f32 fraction, ani3_scalemin_s *scale_min);
+void CalcValue1648Get2Values(char *data, i32 quarter, i32 stride, ani3_scalemin_s *scale_min,
+                             f32 *first, f32 *second);
 extern void *globalbuffer;
 extern i32 MaxAnimJoints;
 #endif
