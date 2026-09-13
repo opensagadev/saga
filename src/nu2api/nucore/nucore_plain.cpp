@@ -108,7 +108,6 @@ extern "C" {
     extern i32 g_writingSaveCriticalSection;
 }
 
-extern "C" void ANI_Ani3ExtractAllNodeCurves(ani3_animheader_s *, f32, f32 *, i32, char *);
 extern "C" {
     i32 nuspecial_clip_state = -1;
 }

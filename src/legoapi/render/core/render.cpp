@@ -1,4 +1,5 @@
 #include "legoapi/render/core/render.h"
+#include "nu2api/nu3d/android/nuportal_android.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "nu2api/nu3d/numtl.h"
@@ -508,7 +509,6 @@ namespace {
 
 DECOMP_ASSERT(sizeof(NuDisplaySpecialLayout) == 0xd0, "display special size");
 
-void SetAllInstancesHidden(NUGSCN *scene);
 
 // Camera zoom state
 f32 CameraZoom = 1.0f;
@@ -522,8 +522,6 @@ NUVIDEORESHEADER g_VideoResHeader;
 extern "C" {
     void RndrStateCopyGlobalState(NUGLOBALRNDRSTATE *state);
     i32 NuDisplayListRndrSpecial(nuhspecial_s *special, NUMTX *mtx, i32 skinned, void *skin_mtx, void *blend_values);
-    void Initialise_PS(NUGSCN *scene);
-    void SetAllInstancesVisible(NUGSCN *scene);
     void *NuVisiEvaluate(NUGSCN *scene, void *visibility_context);
 
     static void DisplaySceneSetClipResult(NUDLDLISTSCENE *scene, i32 clip_index, i32 clip_result) {

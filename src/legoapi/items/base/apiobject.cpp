@@ -710,12 +710,6 @@ extern "C" {
     void AddCollisionSphere(void) {
     }
 
-    void FlagRoomInstancesAsVisible(NUROOM *room, NUGSCN *) {
-        for (i32 i = 0; i < room->instance_count; ++i) {
-            PortalVisiFlags[room->instance_indices[i] >> 3] =
-                PortalVisiFlags[room->instance_indices[i] >> 3] | static_cast<u8>(1 << (room->instance_indices[i] & 7));
-        }
-    }
 
     void APICharacterSysInit(VARIPTR *buf, VARIPTR buf_end, i32 char_count, i32 model_capacity, i32 model_id_capacity,
                              i32 extra_capacity, CHARACTERDATA *cdata_list, APICHARACTERLIGHTFN set_creature_lights) {

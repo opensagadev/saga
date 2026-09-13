@@ -3,6 +3,9 @@
 #include "nu2api/nucore/common.h"
 #include "nu2api/numath/nuvec.h"
 
+extern u8 ForcePlayEndFrame;
+extern u8 ForceEulerToQuat;
+
 enum CHARACTER_ANIMATION_FLAGS : u32 {
     CHARACTER_ANIMATION_FLAG_SYNCHRONISED = 0x02,
     CHARACTER_ANIMATION_FLAG_ROOT_MOTION = 0x20,

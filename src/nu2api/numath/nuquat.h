@@ -25,6 +25,7 @@ extern "C" {
     void NuQuatHermiteInt(NUQUAT *out, NUQUAT *m, NUQUAT *a, NUQUAT *b, NUQUAT *c, f32 t);
 
     void NuQuatHarmonize(NUQUAT *a, NUQUAT *b);
+    void VuQuatSlerpFast(NUQUAT *out, NUQUAT *from, NUQUAT *to, f32 t);
 
     void NuQuatAdd(NUQUAT *out, NUQUAT *q0, NUQUAT *q1);
     void NuQuatSub(NUQUAT *out, NUQUAT *q0, NUQUAT *q1);

@@ -20,13 +20,11 @@
 #include "nushader_plain.h"
 #include "nu2api/nu3d/nu2api_nu3d_types.h"
 #include "nushader.h"
+#include "nushader_internal.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/android/nuiosdl_gl.h"
 #include "nu2api/nu3d/android/nutex_android.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
-
-// NuShaderObjectInit overload used by the manager.
-void NuShaderObjectInit(nushaderobject_s *, const nushaderobjectkey_s *, i32, u32, u32, eSHADERVERSION);
 
 using nu2api::HashRedirect;
 using nu2api::LoadedUniqueShaderRecord;
@@ -565,12 +563,6 @@ extern "C" void NuShaderManagerDestroy(void) {
 
 extern "C" void NuShaderManagerSetShaderSaveFolder(const char *folder) {
     std::strcpy(g_shaderSaveFolder, folder);
-}
-
-extern u32 g_boundShader;
-
-extern "C" {
-    extern void (*g_glConstantSetterTable[4])(u32 location, i32 count, const void *values);
 }
 
 extern "C" void NuShaderManagerBindShader(NUSHADEROBJECT *slot) {

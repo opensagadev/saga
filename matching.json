@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 45.876938,
+    "fuzzy_match_percent": 45.87699,
     "total_code": "4722419",
     "matched_code": "398998",
     "matched_code_percent": 8.449018,
@@ -47431,94 +47431,6 @@
           "match_percent": 99.98
         },
         {
-          "name": "_Z23CalcValue1648Get2ValuesPciiP15ani3_scalemin_sPfS2_",
-          "demangled_name": "CalcValue1648Get2Values(char*, int, int, ani3_scalemin_s*, float*, float*)",
-          "address": 2873488,
-          "offset": 1983520,
-          "size": 634,
-          "match_percent": 79.675156
-        },
-        {
-          "name": "_Z13CalcValue1648PciifP15ani3_scalemin_s",
-          "demangled_name": "CalcValue1648(char*, int, int, float, ani3_scalemin_s*)",
-          "address": 2874128,
-          "offset": 1984160,
-          "size": 591,
-          "match_percent": 54.21233
-        },
-        {
-          "name": "_Z33ANI_SimpleAni3PlayerV4Joint_Quat3P17ani3_animheader_sfP12nuanimbuff_sii",
-          "demangled_name": "ANI_SimpleAni3PlayerV4Joint_Quat3(ani3_animheader_s*, float, nuanimbuff_s*, int, int)",
-          "address": 2874720,
-          "offset": 1984752,
-          "size": 5389,
-          "match_percent": 29.507082
-        },
-        {
-          "name": "_Z34ANI_SimpleAni3PlayerV4Joint_Quat3WP17ani3_animheader_sfP12nuanimbuff_sii",
-          "demangled_name": "ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_animheader_s*, float, nuanimbuff_s*, int, int)",
-          "address": 2880112,
-          "offset": 1990144,
-          "size": 5132,
-          "match_percent": 23.291746
-        },
-        {
-          "name": "ANI_SimpleAni3PlayerV4Joint_EulerQuat",
-          "demangled_name": "ANI_SimpleAni3PlayerV4Joint_EulerQuat",
-          "address": 2885248,
-          "offset": 1995280,
-          "size": 4431,
-          "match_percent": 23.303432
-        },
-        {
-          "name": "ANI_SimpleAni3PlayerV4Joint",
-          "demangled_name": "ANI_SimpleAni3PlayerV4Joint",
-          "address": 2889680,
-          "offset": 1999712,
-          "size": 2126,
-          "match_percent": 18.765038
-        },
-        {
-          "name": "_Z39ANI_SimpleAni3PlayerV4Joint_Blend_Quat3P17ani3_animheader_sfP12nuanimbuff_sfiiP7nuvec_s",
-          "demangled_name": "ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3_animheader_s*, float, nuanimbuff_s*, float, int, int, nuvec_s*)",
-          "address": 2891808,
-          "offset": 2001840,
-          "size": 5155,
-          "match_percent": 34.82683
-        },
-        {
-          "name": "_Z40ANI_SimpleAni3PlayerV4Joint_Blend_Quat3WP17ani3_animheader_sfP12nuanimbuff_sfiiP7nuvec_s",
-          "demangled_name": "ANI_SimpleAni3PlayerV4Joint_Blend_Quat3W(ani3_animheader_s*, float, nuanimbuff_s*, float, int, int, nuvec_s*)",
-          "address": 2896976,
-          "offset": 2007008,
-          "size": 5110,
-          "match_percent": 32.298096
-        },
-        {
-          "name": "ANI_SimpleAni3PlayerV4Joint_Blend_EulerQuat",
-          "demangled_name": "ANI_SimpleAni3PlayerV4Joint_Blend_EulerQuat",
-          "address": 2902096,
-          "offset": 2012128,
-          "size": 4732,
-          "match_percent": 23.958164
-        },
-        {
-          "name": "ANI_SimpleAni3PlayerV4Joint_Blend",
-          "demangled_name": "ANI_SimpleAni3PlayerV4Joint_Blend",
-          "address": 2906832,
-          "offset": 2016864,
-          "size": 2692,
-          "match_percent": 39.83481
-        },
-        {
-          "name": "ANI_Ani3ExtractAllNodeCurves",
-          "demangled_name": "ANI_Ani3ExtractAllNodeCurves",
-          "address": 2909840,
-          "offset": 2019872,
-          "size": 1256,
-          "match_percent": 26.078865
-        },
-        {
           "name": "StateAnimEvaluate2",
           "demangled_name": "StateAnimEvaluate2",
           "address": 2987392,
@@ -47740,7 +47652,7 @@
           "address": 4885536,
           "offset": 3995568,
           "size": 850,
-          "match_percent": 84.02913
+          "match_percent": 84.29612
         },
         {
           "name": "_Z28GameAnimSet_IsAnimationResetP13GAMEANIMSET_s",
@@ -61772,14 +61684,6 @@
           "offset": 2056128,
           "size": 667,
           "match_percent": 2.101911
-        },
-        {
-          "name": "FlagRoomInstancesAsVisible",
-          "demangled_name": "FlagRoomInstancesAsVisible",
-          "address": 3129897,
-          "offset": 2239929,
-          "size": 166,
-          "match_percent": 92.41936
         },
         {
           "name": "AddCollisionSphere",
@@ -75903,38 +75807,6 @@
           "match_percent": 1.741667
         },
         {
-          "name": "Initialise_PS",
-          "demangled_name": "Initialise_PS",
-          "address": 3129865,
-          "offset": 2239897,
-          "size": 32,
-          "match_percent": 100.0
-        },
-        {
-          "name": "SetAllInstancesVisible",
-          "demangled_name": "SetAllInstancesVisible",
-          "address": 3130063,
-          "offset": 2240095,
-          "size": 56,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z21SetAllInstancesHiddenP8nugscn_s",
-          "demangled_name": "SetAllInstancesHidden(nugscn_s*)",
-          "address": 3130119,
-          "offset": 2240151,
-          "size": 56,
-          "match_percent": 100.0
-        },
-        {
-          "name": "clipRoomAgainstFrustrum",
-          "demangled_name": "clipRoomAgainstFrustrum",
-          "address": 3130175,
-          "offset": 2240207,
-          "size": 1216,
-          "match_percent": 68.35065
-        },
-        {
           "name": "FmvTimePS",
           "demangled_name": "FmvTimePS",
           "address": 3238664,
@@ -87505,6 +87377,53 @@
       ]
     },
     {
+      "name": "nu2api/nu3d/android/nuportal_android.cpp.o",
+      "source": "src/nu2api/nu3d/android/nuportal_android.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nuportal_android.o",
+      "functions": [
+        {
+          "name": "Initialise_PS",
+          "demangled_name": "Initialise_PS",
+          "address": 3129865,
+          "offset": 2239897,
+          "size": 32,
+          "match_percent": 100.0
+        },
+        {
+          "name": "FlagRoomInstancesAsVisible",
+          "demangled_name": "FlagRoomInstancesAsVisible",
+          "address": 3129897,
+          "offset": 2239929,
+          "size": 166,
+          "match_percent": 92.41936
+        },
+        {
+          "name": "SetAllInstancesVisible",
+          "demangled_name": "SetAllInstancesVisible",
+          "address": 3130063,
+          "offset": 2240095,
+          "size": 56,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z21SetAllInstancesHiddenP8nugscn_s",
+          "demangled_name": "SetAllInstancesHidden(nugscn_s*)",
+          "address": 3130119,
+          "offset": 2240151,
+          "size": 56,
+          "match_percent": 100.0
+        },
+        {
+          "name": "clipRoomAgainstFrustrum",
+          "demangled_name": "clipRoomAgainstFrustrum",
+          "address": 3130175,
+          "offset": 2240207,
+          "size": 1216,
+          "match_percent": 68.35065
+        }
+      ]
+    },
+    {
       "name": "nu2api/nu3d/android/nuposteffect_plain.cpp.o",
       "source": "src/nu2api/nu3d/android/nuposteffect_plain.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nuposteffect_plain.o",
@@ -95886,6 +95805,101 @@
           "offset": 1979520,
           "size": 2181,
           "match_percent": 79.093025
+        }
+      ]
+    },
+    {
+      "name": "nu2api/nucore/nuanim3.cpp.o",
+      "source": "src/nu2api/nucore/nuanim3.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nuanim3.o",
+      "functions": [
+        {
+          "name": "_Z23CalcValue1648Get2ValuesPciiP15ani3_scalemin_sPfS2_",
+          "demangled_name": "CalcValue1648Get2Values(char*, int, int, ani3_scalemin_s*, float*, float*)",
+          "address": 2873488,
+          "offset": 1983520,
+          "size": 634,
+          "match_percent": 79.675156
+        },
+        {
+          "name": "_Z13CalcValue1648PciifP15ani3_scalemin_s",
+          "demangled_name": "CalcValue1648(char*, int, int, float, ani3_scalemin_s*)",
+          "address": 2874128,
+          "offset": 1984160,
+          "size": 591,
+          "match_percent": 54.21233
+        },
+        {
+          "name": "_Z33ANI_SimpleAni3PlayerV4Joint_Quat3P17ani3_animheader_sfP12nuanimbuff_sii",
+          "demangled_name": "ANI_SimpleAni3PlayerV4Joint_Quat3(ani3_animheader_s*, float, nuanimbuff_s*, int, int)",
+          "address": 2874720,
+          "offset": 1984752,
+          "size": 5389,
+          "match_percent": 29.507082
+        },
+        {
+          "name": "_Z34ANI_SimpleAni3PlayerV4Joint_Quat3WP17ani3_animheader_sfP12nuanimbuff_sii",
+          "demangled_name": "ANI_SimpleAni3PlayerV4Joint_Quat3W(ani3_animheader_s*, float, nuanimbuff_s*, int, int)",
+          "address": 2880112,
+          "offset": 1990144,
+          "size": 5132,
+          "match_percent": 23.291746
+        },
+        {
+          "name": "ANI_SimpleAni3PlayerV4Joint_EulerQuat",
+          "demangled_name": "ANI_SimpleAni3PlayerV4Joint_EulerQuat",
+          "address": 2885248,
+          "offset": 1995280,
+          "size": 4431,
+          "match_percent": 23.303432
+        },
+        {
+          "name": "ANI_SimpleAni3PlayerV4Joint",
+          "demangled_name": "ANI_SimpleAni3PlayerV4Joint",
+          "address": 2889680,
+          "offset": 1999712,
+          "size": 2126,
+          "match_percent": 18.765038
+        },
+        {
+          "name": "_Z39ANI_SimpleAni3PlayerV4Joint_Blend_Quat3P17ani3_animheader_sfP12nuanimbuff_sfiiP7nuvec_s",
+          "demangled_name": "ANI_SimpleAni3PlayerV4Joint_Blend_Quat3(ani3_animheader_s*, float, nuanimbuff_s*, float, int, int, nuvec_s*)",
+          "address": 2891808,
+          "offset": 2001840,
+          "size": 5155,
+          "match_percent": 34.82683
+        },
+        {
+          "name": "_Z40ANI_SimpleAni3PlayerV4Joint_Blend_Quat3WP17ani3_animheader_sfP12nuanimbuff_sfiiP7nuvec_s",
+          "demangled_name": "ANI_SimpleAni3PlayerV4Joint_Blend_Quat3W(ani3_animheader_s*, float, nuanimbuff_s*, float, int, int, nuvec_s*)",
+          "address": 2896976,
+          "offset": 2007008,
+          "size": 5110,
+          "match_percent": 32.298096
+        },
+        {
+          "name": "ANI_SimpleAni3PlayerV4Joint_Blend_EulerQuat",
+          "demangled_name": "ANI_SimpleAni3PlayerV4Joint_Blend_EulerQuat",
+          "address": 2902096,
+          "offset": 2012128,
+          "size": 4732,
+          "match_percent": 23.958164
+        },
+        {
+          "name": "ANI_SimpleAni3PlayerV4Joint_Blend",
+          "demangled_name": "ANI_SimpleAni3PlayerV4Joint_Blend",
+          "address": 2906832,
+          "offset": 2016864,
+          "size": 2692,
+          "match_percent": 39.842182
+        },
+        {
+          "name": "ANI_Ani3ExtractAllNodeCurves",
+          "demangled_name": "ANI_Ani3ExtractAllNodeCurves",
+          "address": 2909840,
+          "offset": 2019872,
+          "size": 1256,
+          "match_percent": 26.078865
         }
       ]
     },
@@ -117276,6 +117290,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -117362,6 +117377,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -117448,6 +117464,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -117545,6 +117562,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -117676,6 +117694,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -117773,6 +117792,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -117870,6 +117890,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -117967,6 +117988,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -118064,6 +118086,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -118161,6 +118184,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -118468,6 +118492,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -118565,6 +118590,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -118662,6 +118688,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -118808,6 +118835,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -118917,6 +118945,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -118980,6 +119009,7 @@
         "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuprim_android.c.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -119140,6 +119170,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -119202,6 +119233,7 @@
         "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuprim_android.c.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -119314,6 +119346,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -119364,6 +119397,7 @@
         "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuprim_android.c.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -119488,6 +119522,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -119585,6 +119620,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -119682,6 +119718,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -119779,6 +119816,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -119840,6 +119878,7 @@
         "nu2api/nu3d/android/nudlist_android.c.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuprim_android.c.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -119926,6 +119965,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -120023,6 +120063,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -120131,6 +120172,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -120228,6 +120270,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -120338,6 +120381,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -120435,6 +120479,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -120566,6 +120611,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -120663,6 +120709,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -120760,6 +120807,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -120857,6 +120905,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -121017,6 +121066,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -121114,6 +121164,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -121211,6 +121262,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -121655,6 +121707,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -121880,6 +121933,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -122056,6 +122110,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -122512,6 +122567,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -122609,6 +122665,7 @@
         "legoapi/world/levels/senate.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuiosdl_gl.cpp.o",
+        "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
         "nu2api/nu3d/android/nurain_android.c.o",
         "nu2api/nu3d/android/nurndr_android.c.o",
@@ -129745,7 +129802,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 528,
+    "bazel_units": 530,
     "functions": 13454,
     "assigned_functions": 12344,
     "ambiguous_functions": 220,

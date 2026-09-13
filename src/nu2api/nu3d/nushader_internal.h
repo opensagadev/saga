@@ -1,5 +1,6 @@
 #pragma once
 
+#include "nu2api/nu3d/nu2api_nu3d_types.h"
 #include "nu2api/nu3d/nushader.h"
 
 struct GLSLTypeInfo {
@@ -16,6 +17,8 @@ extern "C" {
 
 extern "C" const GLSLTypeInfo *GetGLSLTypeInfo(GLenum type);
 NUSHADERUSAGEMASK *GetUsageMask(NUSHADERUSAGEMASK *mask);
+void NuShaderObjectInit(nushaderobject_s *object, const nushaderobjectkey_s *key, i32 param, u32 vertex_shader,
+                        u32 fragment_shader, eSHADERVERSION version);
 
 bool LinkShaderProgram(u32 program);
 bool ValidateShaderProgram(u32 program);

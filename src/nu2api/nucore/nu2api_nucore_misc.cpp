@@ -36,7 +36,6 @@ extern "C" void BeginCriticalSectionGL(const char *, i32);
 extern "C" void EndCriticalSectionGL(const char *, i32);
 extern i32 bgProcIsBgThread(void);
 
-extern "C" f32 *NuAnimCurveExtractAllNodeCurves_3(ani3_animheader_s *, i32, f32, char *);
 extern "C" void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
 extern "C" f32 NuAnimCurve2CalcValEx(nuanimcurve2_s *, nuanimtime_s *, u32);
 void NuGCutRigidCalcMtx_3(NUGCUTRIGID_s *, f32, numtx_s *);
@@ -51,11 +50,6 @@ i32 GetIntCurveVal(ani3_animheader_s *animation, f32 *values, i32 curve) {
 
 extern "C" void NuAnimBuffCreateScratch(nuanimbuff_s *buffer);
 extern "C" void NuAnimBuffDestroyScratch(nuanimbuff_s *buffer);
-extern "C" void NuAnimBuffAccumulate_3(nuanimbuff_s *buffer, ani3_animheader_s *animation, f32 time, i32 overwrite,
-                                       f32 blend, i32 first_joint, nuhgobj_s *object, NUVEC *root_translation);
-extern "C" void NuAnimBuffEvaluate_3(nuanimbuff_s *buffer, nuhgobj_s *object, NUMTX *matrices,
-                                     ani3_animheader_s *animation, NUHGOBJROOTFN root_fn, NUVEC *root_translation,
-                                     void *root_data);
 
 void NuHGobjRead(variptr_u *, char *) {
 }

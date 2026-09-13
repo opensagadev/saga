@@ -23,9 +23,11 @@
 #include "nu2api/nu3d/NuRenderDevice.h"
 #include "nu2api/nu3d/android/nutex_android.h"
 #include "nu2api/nu3d/android/nudlist_callbacks.h"
+#include "nu2api/nu3d/android/nugscn_android.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/nushader.h"
+#include "nu2api/nu3d/nushader_plain.h"
 #include "nu2api/nu3d/nurndrstat.h"
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/nutex.h"
@@ -52,24 +54,11 @@ u32 g_lastAlphaBlend = 0;
 i32 g_renderingReflection = 0; // original bss @0x99b360 — flips cull when reflecting.
 
 // The original helper at 0x293168 updates the shared renderer cache.
-extern u32 g_lastBoundVAO;
 static void NuIOSBindVAO(u32 vao) {
     if (vao != g_lastBoundVAO) {
         g_lastBoundVAO = vao;
     }
 }
-
-
-// ---------------------------------------------------------------------------
-// Cross-TU imports.
-// ---------------------------------------------------------------------------
-
-extern "C" void NuShaderManagerBindShader(NUSHADEROBJECT *shader);
-extern "C" void NuShaderObjectGLSLSetupMaterial(NUSHADEROBJECT *shader_obj, numtl_s *mtl);
-extern "C" NUSHADEROBJECT *NuShaderManagerGetShaderById(i32 id);
-extern "C" NUSHADEROBJECT *NuShaderManagerGetCurrentShader(void);
-
-extern NUAPI nuapi;
 
 static inline isize PtrToArgInt(const void *p) {
     union {
