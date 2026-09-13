@@ -498,10 +498,6 @@ extern "C" {
         return lower != value ? lower + 1.0f : value;
     }
 
-    f32 NuFrsqrt(f32 value) {
-        return value <= 0.0f ? 0.0f : 1.0f / sqrtf(value);
-    }
-
     i32 NuMiscNextPow2(i32 value) {
         i32 shift = 0;
         while ((1 << shift) < value)

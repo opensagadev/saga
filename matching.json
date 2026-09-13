@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 45.91694,
+    "fuzzy_match_percent": 45.91929,
     "total_code": "4722419",
-    "matched_code": "399613",
-    "matched_code_percent": 8.46204,
+    "matched_code": "399724",
+    "matched_code_percent": 8.464391,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4749,
-    "matched_functions_percent": 35.28494,
+    "matched_functions": 4752,
+    "matched_functions_percent": 35.307228,
     "total_units": 1
   },
   "text": {
@@ -36616,14 +36616,6 @@
           "match_percent": 99.06029
         },
         {
-          "name": "_Z23APIMenuDrawMemCardSlotsP6MENU_sf",
-          "demangled_name": "APIMenuDrawMemCardSlots(MENU_s*, float)",
-          "address": 4376336,
-          "offset": 3486368,
-          "size": 2474,
-          "match_percent": 0.843585
-        },
-        {
           "name": "_Z20APIMenuDrawGameStateffii",
           "demangled_name": "APIMenuDrawGameState(float, float, int, int)",
           "address": 4390272,
@@ -70454,6 +70446,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z23APIMenuDrawMemCardSlotsP6MENU_sf",
+          "demangled_name": "APIMenuDrawMemCardSlots(MENU_s*, float)",
+          "address": 4376336,
+          "offset": 3486368,
+          "size": 2474,
+          "match_percent": 0.843585
+        },
+        {
           "name": "MessageBoxInitMtl",
           "demangled_name": "MessageBoxInitMtl",
           "address": 4379824,
@@ -91098,14 +91098,6 @@
           "match_percent": 3.888889
         },
         {
-          "name": "NuTexDestroy",
-          "demangled_name": "NuTexDestroy",
-          "address": 3127056,
-          "offset": 2237088,
-          "size": 126,
-          "match_percent": 13.548388
-        },
-        {
           "name": "NuShaderUniformGetByString",
           "demangled_name": "NuShaderUniformGetByString",
           "address": 3185936,
@@ -91769,6 +91761,14 @@
           "offset": 2237072,
           "size": 9,
           "match_percent": 100.0
+        },
+        {
+          "name": "NuTexDestroy",
+          "demangled_name": "NuTexDestroy",
+          "address": 3127056,
+          "offset": 2237088,
+          "size": 126,
+          "match_percent": 13.548388
         },
         {
           "name": "_Z15NuTexGetManagerv",
@@ -106673,7 +106673,14 @@
           "offset": 1799369,
           "size": 83,
           "match_percent": 99.958336
-        },
+        }
+      ]
+    },
+    {
+      "name": "nu2api/numath/nufloat_android.c.o",
+      "source": "src/nu2api/numath/nufloat_android.c",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nufloat_android.o",
+      "functions": [
         {
           "name": "NuFsqrt",
           "demangled_name": "NuFsqrt",
@@ -106681,6 +106688,14 @@
           "offset": 1808981,
           "size": 85,
           "match_percent": 99.92
+        },
+        {
+          "name": "NuFrsqrt",
+          "demangled_name": "NuFrsqrt",
+          "address": 2699034,
+          "offset": 1809066,
+          "size": 99,
+          "match_percent": 99.89286
         },
         {
           "name": "NuFmax",
@@ -106696,6 +106711,14 @@
           "address": 2699176,
           "offset": 1809208,
           "size": 43,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_GLOBAL__sub_I_nufloat_android.c",
+          "demangled_name": "_GLOBAL__sub_I_nufloat_android.c",
+          "address": 2699592,
+          "offset": 1809624,
+          "size": 29,
           "match_percent": 100.0
         }
       ]
@@ -107399,14 +107422,6 @@
           "offset": 1798804,
           "size": 57,
           "match_percent": 100.0
-        },
-        {
-          "name": "NuFrsqrt",
-          "demangled_name": "NuFrsqrt",
-          "address": 2699034,
-          "offset": 1809066,
-          "size": 99,
-          "match_percent": 99.89286
         }
       ]
     },
@@ -117081,8 +117096,10 @@
       "address": 2454832,
       "offset": 1564864,
       "size": 41,
-      "match_percent": 21.25,
+      "match_percent": 100.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -117174,6 +117191,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -117253,6 +117271,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -117332,6 +117351,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -117341,8 +117361,10 @@
       "address": 2555156,
       "offset": 1665188,
       "size": 41,
-      "match_percent": 0.0,
+      "match_percent": 100.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -117422,6 +117444,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -117448,6 +117471,7 @@
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o",
         "nu2api/numath/numaths_plain.cpp.o",
         "nu2api/numath/numtx.cpp.o",
@@ -117466,8 +117490,10 @@
       "address": 2556632,
       "offset": 1666664,
       "size": 41,
-      "match_percent": 0.0,
+      "match_percent": 21.25,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -117547,6 +117573,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -117558,6 +117585,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -117637,6 +117666,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -117648,6 +117678,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -117727,6 +117759,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -117738,6 +117771,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -117817,6 +117852,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -117828,6 +117864,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -117907,6 +117945,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -117918,6 +117957,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -117997,6 +118038,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -118165,6 +118207,7 @@
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o",
         "nu2api/numath/numaths_plain.cpp.o",
         "nu2api/numath/numtx.cpp.o",
@@ -118200,6 +118243,7 @@
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o",
         "nu2api/numath/numaths_plain.cpp.o",
         "nu2api/numath/numtx.cpp.o",
@@ -118220,6 +118264,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -118299,6 +118345,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -118310,6 +118357,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -118389,6 +118438,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -118400,6 +118450,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -118479,6 +118531,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -118503,6 +118556,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -118618,6 +118673,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -118629,6 +118685,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -118720,6 +118778,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -118744,6 +118803,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -118935,6 +118996,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -118946,6 +119008,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -119101,6 +119165,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -119112,6 +119177,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -119267,6 +119334,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -119278,6 +119346,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -119357,6 +119427,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -119368,6 +119439,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -119447,6 +119520,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -119458,6 +119532,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -119537,6 +119613,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -119559,6 +119636,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -119676,6 +119755,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -119687,6 +119767,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -119766,6 +119848,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -119777,6 +119860,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -119867,6 +119952,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -119878,6 +119964,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -119957,6 +120045,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -119981,6 +120070,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -120060,6 +120151,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -120071,6 +120163,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -120150,6 +120244,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -120176,6 +120271,7 @@
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o",
         "nu2api/numath/numaths_plain.cpp.o",
         "nu2api/numath/numtx.cpp.o",
@@ -120196,6 +120292,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -120275,6 +120373,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -120286,6 +120385,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -120365,6 +120466,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -120376,6 +120478,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -120455,6 +120559,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -120466,6 +120571,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -120545,6 +120652,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -120619,6 +120727,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -120698,6 +120808,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -120709,6 +120820,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -120788,6 +120901,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -120799,6 +120913,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -120878,6 +120994,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -121184,6 +121301,7 @@
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o",
         "nu2api/numath/numaths_plain.cpp.o",
         "nu2api/numath/numtx.cpp.o",
@@ -121226,6 +121344,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -121316,6 +121436,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -121342,6 +121463,7 @@
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o",
         "nu2api/numath/numaths_plain.cpp.o",
         "nu2api/numath/numtx.cpp.o",
@@ -121377,6 +121499,7 @@
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o",
         "nu2api/numath/numaths_plain.cpp.o",
         "nu2api/numath/numtx.cpp.o",
@@ -121397,6 +121520,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -121524,6 +121649,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -121550,6 +121676,7 @@
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o",
         "nu2api/numath/numaths_plain.cpp.o",
         "nu2api/numath/numtx.cpp.o",
@@ -121585,6 +121712,7 @@
         "nu2api/nucore/nuapi.cpp.o",
         "nu2api/nucore/nupad.cpp.o",
         "nu2api/numath/nufloat.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o",
         "nu2api/numath/numaths_plain.cpp.o",
         "nu2api/numath/numtx.cpp.o",
@@ -121616,6 +121744,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -121695,6 +121825,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -122065,6 +122196,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -122144,6 +122277,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     },
@@ -122155,6 +122289,8 @@
       "size": 41,
       "match_percent": 0.0,
       "candidate_units": [
+        "nu2api/numath/nufloat_android.c.o",
+        "nu2api/numath/numaths.c.o",
         "nu2api/numath/vumath.c.o"
       ]
     },
@@ -122234,6 +122370,7 @@
         "nu2api/nucore/android/nuapi_android.cpp.o",
         "nu2api/nucore/android/nuthread.c.o",
         "nu2api/nucore/android/nutime_android.c.o",
+        "nu2api/numath/nufloat_android.c.o",
         "nu2api/numath/numaths.c.o"
       ]
     }
@@ -123637,14 +123774,6 @@
       "address": 2689824,
       "offset": 1799856,
       "size": 31,
-      "match_percent": 0.0
-    },
-    {
-      "name": "_GLOBAL__sub_I_nufloat_android.c",
-      "demangled_name": "_GLOBAL__sub_I_nufloat_android.c",
-      "address": 2699592,
-      "offset": 1809624,
-      "size": 29,
       "match_percent": 0.0
     },
     {
@@ -129369,10 +129498,10 @@
     }
   ],
   "summary": {
-    "bazel_units": 513,
+    "bazel_units": 514,
     "functions": 13454,
-    "assigned_functions": 12347,
+    "assigned_functions": 12348,
     "ambiguous_functions": 216,
-    "unassigned_functions": 891
+    "unassigned_functions": 890
   }
 }

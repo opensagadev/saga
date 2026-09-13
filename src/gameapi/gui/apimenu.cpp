@@ -462,10 +462,6 @@ void MenuReset(void) {
     GameMenuLevel = 0;
 }
 
-void APIMenuDrawMemCardSlots(MENU *menu, f32 time) {
-    UNIMPLEMENTED();
-}
-
 void APIMenuDrawGameState(f32 x, f32 y, i32 highlight, i32 slot) {
     UNIMPLEMENTED();
 }

@@ -15,9 +15,9 @@
 //
 //   3. Frame present   — moved to the original android/nurndr_android.c TU.
 //
-// All other entry points from the original TU are retained as link stubs
-// until their subsystems are transcribed.  Their signatures are not yet
-// recovered, so they are left as `void(void)`.
+// Remaining renderer entry points are retained as link stubs until their
+// subsystems are transcribed. Their signatures are not yet recovered, so
+// they are left as `void(void)`.
 
 #include <float.h>
 #include <string.h>
@@ -88,7 +88,6 @@ i32 g_NuPrim_VertexCount;
 // Display-list cursor for the 2D stream.  Defined in nudlist.cpp.
 extern VARIPTR *display_list_buffer;
 
-
 // ---------------------------------------------------------------------------
 // Forward declarations for C-visible helpers
 // ---------------------------------------------------------------------------
@@ -102,7 +101,6 @@ extern "C" {
     void NuDisplayListLinkMtl(nudisplaylist_s *list, NUMTL *mtl);
     VARIPTR *NuDisplayListLinkItems(nudisplaylist_s *list, i32 count);
 }
-
 
 // ---------------------------------------------------------------------------
 // Immediate-mode 2D API
@@ -1592,9 +1590,6 @@ extern "C" nu2api::ShaderUniformRecord *NuShaderUniformGetByString(const char *n
             return &g_shaderUniforms[i];
     }
     return NULL;
-}
-extern "C" void NuTexDestroy(i32) {
-    STUBBED();
 }
 static void NuTexGenTexture(void) {
     STUBBED();

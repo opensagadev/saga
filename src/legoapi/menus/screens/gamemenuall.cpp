@@ -214,6 +214,10 @@ static bool MenuCheatUnlocked(i32 cheat) {
     return (unlocked[cheat >> 5] & (1u << (cheat & 31))) != 0;
 }
 
+void APIMenuDrawMemCardSlots(MENU *menu, f32 time) {
+    UNIMPLEMENTED();
+}
+
 void MenuDrawLoad(MENU_s *menu) {
     NuStrCpy(MenuHeader, apitxt_LOADGAME);
     header_r = MENUHEADERR;

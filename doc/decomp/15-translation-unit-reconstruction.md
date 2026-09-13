@@ -1,7 +1,7 @@
 # Original translation-unit reconstruction
 
-At the latest measured target build, there are 513 current translation
-units and a 45.9169% whole-binary fuzzy match. This is a source-ownership
+At the latest measured target build, there are 514 current translation
+units and a 45.9193% whole-binary fuzzy match. This is a source-ownership
 overview; the matching percentage does not measure how many original file
 boundaries are known. “Reconstructed” below means the source boundary has
 evidence and passed a matching comparison; it does not mean every body is
@@ -50,15 +50,17 @@ The ledger also records 13,042 individual `.text` adjacency links as weak
 evidence, not TU assignments. Against current-build `STT_FILE` labels, only
 3,189 links were assessable and 89.84% joined the same file; address order
 alone is insufficient to reconstruct the original boundaries.
-The optional Capstone-based pass verifies 998 original function-to-LOCAL-object
-instruction references (989 writable state, nine read-only constants). Of
-496 links with unique current source candidates on both ends, 30 cross
-current-file boundaries, of which 29 have a size-concordant current object
-candidate. These are diagnostic, not automatic moves. The
+The optional Capstone-based pass verifies 9,347 original function-to-LOCAL-object
+instruction references (9,313 writable state, 23 read-only constants, 11
+unclassified). It follows branch/loop paths only while every reachable
+predecessor agrees on the exact EBX, ECX, or EDX PIC base, respecting each
+register's call-preservation rule. Of 4,643 links with unique current source
+candidates on both ends, 454 cross current-file boundaries, of which 434 have
+a size-concordant current object candidate. These are diagnostic, not automatic moves. The
 largest cluster links editor UI callbacks to local editor state. This pass
 requires Capstone; the default ledger does not.
-The writable-state links form 346 minimum same-TU components covering 1,201
-symbols, not complete files. Thirty-two components span the initializer-order
+The writable-state links form 772 minimum same-TU components covering 5,333
+symbols, not complete files. 288 components span the initializer-order
 blocks, mostly because a constructor references `VuVec` locals that appear
 *after* it in the symbol table. This directly demonstrates why those blocks
 cannot be treated as original file boundaries.
@@ -74,9 +76,11 @@ linkage.
 | Android scene: embedded `nugscn_android.c` paths and scene run `0x2fd760–0x2fefbd` | `nu2api/nu3d/android/nugscn_android.cpp` and its header | Shared, offset-checked native scene type; teardown reconstructed. Creation/fixup and related graphics-data boundaries still need body/owner review. Original `NuGScnDestroyPS` has C++ linkage. |
 | Android display-list and primitive runs: local helpers/tables plus `0x29aaa9+` and `0x29cbc9–0x29d3d1` text | `nu2api/nu3d/android/nudlist_android.c`, `nuprim_android.c`, renderer neighbors | Principal source split is reconstructed; executor, callback, and primitive bodies still differ. These `.c` files require their measured C++ compilation mode. |
 | Android material/render state: local callback/data clusters | `nu2api/nu3d/android/numtl_android.cpp`, `nurndr_android.c` and renderer neighbors | Multiple evidenced slices moved; remaining render-state and callback codegen must be measured per unit. |
+| `nurndr_android.c`: original text `[0x293168, 0x295f80)` through its named constructor, with VAO, callback, blend, and shadow locals | Mostly `nu2api/nu3d/android/nuiosdl_gl.cpp`; smaller pieces in `nurndr_android.c`, renderer helpers, editor, and other files | **Open.** The 56 currently assigned functions in this run need one dependency/optimization review before an atomic move. Verified PIC references bind VAO records/count, blend-weight and blend-pointer arrays, shader attribute name data, and polygon vertex state to functions in this run. The existing `nurndr_android.c` also owns functions outside this original run; nearby generic rodata and preceding shadow globals still need xref proof. |
 | Android portal visibility: contiguous `nuportal_android.c` helpers at `0x2fc209–0x2fc7fe` | `nu2api/nu3d/android/nuportal_android.cpp` with real platform header; shared portal engine remains in `nuportal.cpp` | Five helpers now co-located at the existing default optimization, preserving all three exact matches and whole score. Forced `-O2`/`-O3` trials regressed and were rejected. `PortalVisiFlags` remains original GLOBAL data. |
 | Android scratch, graphics clear, rain, FMV, and time: embedded paths/initializer runs | `nuscratch_android.c`, `ios_graphics.cpp`, `nurain_android.c`, `nufmv_android.cpp`, `nutime_android.c` | Source boundaries accepted; individual scratch/clear/media bodies remain incomplete. |
 | DDS and texture-animation owners: DDS initializer/local vectors and texture-animation run | `nu2api/nu3d/NuDDSFunctions.cpp`, `nu2api/nu3d/nutexanim.cpp` | File/data ownership largely reconstructed; DDS mip/description and some animation bodies remain. |
+| Texture manager: original `NuTexDestroy` at `0x2fb710` references LOCAL `texture_list` alongside texture allocation and lookup methods | `nu2api/nu3d/nutex.cpp`; formerly one destroy stub in `nurndr_plain.cpp` | The existing destroy stub now shares the `-O3` source owner with its real texture-list state and neighboring API. Whole/per-function matching is unchanged; its body remains unfinished. |
 | NuQT quadtree: contiguous `0x261783–0x2626f4` run and verified node layout | `nu2api/nucore/nuqt.cpp` and `nuqt.h` | Core owner reconstructed; insertion is still a body-level gap. |
 | NuMemory pool/manager: pool run, method ABI and vtable/local data | `nu2api/nucore/NuMemoryPool.cpp`, `NuMemoryManager.cpp` | Strong boundaries and many exact helpers; page lifecycle and large-bin methods remain. |
 | Animation action/context tables: consecutive `LEGOACT_*` and `LEGOCONTEXT_*` data | `legoapi/characters/motion/animation.cpp`, `contexts.cpp` | Tables and owner split reconstructed; some initialization/body ownership remains provisional. |
@@ -96,10 +100,11 @@ linkage.
 | Panel: `0x140950–0x1449c0` run; `Panel_Clear` and `DrawPanel` access the same local `redbrickslidetime` | `legoapi/menus/core/panel.cpp` and `legoapi/render/core/render.cpp` | `DrawTimer` and its state moved. **Open:** full `-O2` co-location is structurally supported but costs 0.0049 overall points via `DrawPanel`; `-O3` helps the initializer but drops `PanelRender` by 10 points. Both trials were rejected; the accessor remains temporary. |
 | Post-filter: `nupostfilter.cpp` local block, including `texturePool` at `0x11cd820` | `nu2api/nu3d/android/nupostfilter.cpp`; framebuffer pair in `nuposteffect_plain.cpp` | Measured split and genuine Init/Destroy flows improved matching. Both files require `-O2`. The 0x810-byte local pool has no verified text xref or field layout, so it is not fabricated in source. |
 | NuSound buffer: embedded `nusound_buffer.cpp :53` path and adjacent method run | `nu2api/nusound/nusound_buffer.cpp` | Owner and `-O3` are supported; allocation control flow improved, with other method bodies still open. |
-| `numaths.c`: text `[0x290b20, 0x292e9c)` including its trailing static initializer and constructor | `nu2api/numath/numaths.c`, compiled as C++; formerly split across seven math/engine files and two game files | All 37 reported exported functions in the measured run now share one source in original address order; the empty `nucamvu0.c` shell was removed. Including the existing `VuVec` header emits this TU's six original-sized LOCAL constants; the original-named constructor is now exact. Whole fuzzy rose 0.0283 points, seven exact functions gained, none lost. **Open:** original LOCAL `rand`/`VuVecSet` and final optimization calibration. The preceding `numath_includes.c` constructor and next-unit `VuVecSet` at `0x292e9c` remain separate. |
+| `numaths.c`: text `[0x290b20, 0x292e9c)` including its trailing static initializer and constructor | `nu2api/numath/numaths.c`, compiled as C++; formerly split across seven math/engine files and two game files | All 37 reported exported functions in the measured run now share one source in original address order; the empty `nucamvu0.c` shell was removed. The shared internal `VuVec` helper header emits this TU's byte-exact LOCAL `VuVecSet` and six original-sized LOCAL constants; its original-named constructor is exact. The initial consolidation raised whole fuzzy by 0.0292 points and gained eight exact functions, none lost. **Open:** original LOCAL `rand` and final optimization calibration. The preceding `numath_includes.c` constructor remains separate. |
+| `nufloat_android.c`: text `[0x292e9c, 0x293165)` with LOCAL `VuVecSet`, four exported float helpers, six LOCAL vectors, and its initializer | `nu2api/numath/nufloat_android.c`, compiled as C++; formerly split across `nufloat.c` and `numaths_plain.cpp` | The four existing bodies now form the evidenced original run. Its own `VuVecSet` and six constants come from the same narrow internal header as `numaths.c`; constructor and exported signatures retain their original names, binding, and sizes. The move adds a second byte-exact LOCAL helper and an exact constructor without regressing exported functions. |
 | Terrain data/collision: `gameliball.cpp` initializer block owns local `TerI`, `SphereData`, `PlatCallback`, and impact data | `legoapi/render/core/terrain*.cpp`, `gameliball.cpp`, terrain functions in `hits.cpp`, `transform.cpp`, `surfaces.cpp`, `episode.cpp` | **Open.** `TerI` users span six current files, including verified original terrain-run functions; a state-only move would need a false cross-TU bridge. The text run `0x36de60–0x38f460` also interleaves unrelated animation. Plan the complete dependency cut before migrating. |
 | Editor tools: local camera/UI/cursor/menu state under `_GLOBAL__sub_I_edtoolsall.cpp`, text span `0x330900–0x3a9c88`; separate RTL starts next | `gameapi/edtools/edtoolsall_plain.cpp`, `edtoolsall.cpp`, `edui.c`, editor callbacks | **Open.** The `-O2` plain owner already holds much real state and many exact helpers. Audit the UI/camera/file tail and local callbacks before co-location; the `edui.c` `__used__` stubs are not evidence for optimization or a real boundary. |
-| Menu/customiser, timing, and large catch-all files | `customise.cpp`, `timing.cpp`, `nucore_plain.cpp`, `edtoolsall*.cpp`, `aisys.cpp`, `gameobjects.cpp` | **Open.** Split only complete, evidenced dependent groups. Do not sacrifice exact neighbors to reproduce a basename or a speculative optimization level. |
+| Menu/customiser, timing, and large catch-all files | `customise.cpp`, `timing.cpp`, `nucore_plain.cpp`, `edtoolsall*.cpp`, `aisys.cpp`, `gameobjects.cpp` | **Open.** `APIMenuDrawMemCardSlots` now sits with load/save menu state in `gamemenuall.cpp`, leaving its existing public declaration in `apimenu.h`; its stub score is unchanged. Split further only in complete, evidenced dependent groups. Do not sacrifice exact neighbors to reproduce a basename or a speculative optimization level. |
 
 The numerical-solver locals `Newton_Raphson` and
 `Laguerre_With_Deflation` belong to the original Vorbis LPC run near
@@ -122,7 +127,7 @@ at 99.99% and 99.98%.
    obsolete files; avoid arbitrary one-function or functionless files.
 4. After each move, compare whole and per-function scores, exact transitions,
    symbol coverage, target/native/WASM builds, and Cantina smoke. Commit and
-   push tested batches around 2,000 changed lines.
+   push coherent tested batches at roughly hourly intervals.
 5. Prioritize the unresolved terrain LOCAL-state cut, editor callbacks, Panel
    co-location regression, and catch-all/resource owners. Do not invent
    unused pools or merge a constructor-delimited block without direct xrefs.
@@ -130,8 +135,11 @@ at 99.99% and 99.98%.
 The current `matching.json` lists eight units with no reported functions and
 40 with one. This is a review queue, not a deletion rule: some are legitimate
 data owners (`animation.cpp`, `contexts.cpp`) or initializer-only units
-(`legoai.cpp`). Remove or merge a tiny file only after checking its actual
-object symbols and the original TU evidence.
+(`legoai.cpp`). Even include-only `grabber.cpp`, `giztorpedo.cpp`, and
+`tightrope.cpp` emit original-named 93-byte constructors; textual function
+counts miss these. Remove or merge a tiny file only after checking its actual
+object symbols and the original TU evidence. Move stray source-local
+prototypes into real headers as their owning families are reconstructed.
 
 For each sensible move, compare function and whole scores, exact-match
 transitions, symbol coverage, and neighboring bodies. Run target, native,
