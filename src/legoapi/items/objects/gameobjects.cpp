@@ -1,4 +1,5 @@
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/items/objects/objectsall.h"
 #include "legoapi/items/collect/torpedo.h"
 #include "legoapi/actions/movement/carrying.h"
 #include "legoapi/actions/combat/hits.h"
@@ -8,6 +9,7 @@
 #include "legoapi/audio/audio.h"
 #include "legoapi/gizmos/transport/grapples.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/menus/screens/arcade.h"
 #include "decomp.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "gameapi/edtools/edfile.h"
@@ -140,7 +142,6 @@ extern "C" {
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).
 extern void *theThingManager;
-extern void ReleaseTakeOver(GameObject_s *object, i32 immediate);
 extern void oneAtOnce_MaintainArray();
 
 void legoSetMusicVolume(float);
@@ -161,7 +162,6 @@ void Player_ClearContext(GameObject_s *object, i32 mode);
 void Player_ResetContexts(PLAYERPACKET_s *packet);
 i32 SetObjOnSurface(GameObject_s *object, i32 mode);
 void PortalGameObject(GameObject_s *object, i32 enable, i32 immediate, i16 portal, nugscn_s *scene);
-i32 Arcade_GetMode(u32 *mode);
 void StarWars_GameAISysInit();
 void GameAISysSetGame();
 void ClearAICreatures();
@@ -5435,7 +5435,6 @@ i32 NoLayerKill(GameObject_s *object) {
 }
 
 void GetTakeOverPos(GameObject_s *, NUVEC *);
-void ReleaseTakeOver(GameObject_s *, i32);
 void TakeOverGameObject2(GameObject_s *, GameObject_s *, i32);
 void TakeOver2GetIn(GameObject_s *, GameObject_s *);
 void Move_BEAST(GameObject_s *);
@@ -5727,6 +5726,86 @@ void GetTakeOverPos(GameObject_s *object, nuvec_s *position) {
         position->x = object->apiobj.position.x;
         position->y = object->apiobj.field_0x194;
         position->z = object->apiobj.position.z;
+    }
+}
+
+void AICreatureResumeScript(GameObject_s *);
+f32 SpeederChaseATATInOutMul(NUVEC *, NUVEC *);
+
+static NUVEC SpeederChaseATATExitLandPos = {-159.0f, 6.869999885559082f, -17.600000381469727f};
+
+void ReleaseTakeOver(GameObject_s *object, i32) {
+    GameObject_s *rider = object->field_0xcc0;
+    if (rider == NULL)
+        return;
+    if (object->character_context == 0x3b) {
+        GameObject_s *vehicle = rider;
+        rider = object;
+        object = vehicle;
+    }
+    struct ScriptSnapshot {
+        AISCRIPTPROCESS process;
+        void *field_c8;
+    } rider_script, object_script;
+    DECOMP_ASSERT(sizeof(ScriptSnapshot) == 0xcc, "Takeover script snapshot ABI");
+    memcpy(&rider_script.process, &rider->ai.script_process, sizeof(rider_script.process));
+    rider_script.field_c8 = rider->ai.field_0xc8;
+    u8 rider_set = rider->ai.creature_set;
+    memcpy(&object_script.process, &object->ai.script_process, sizeof(object_script.process));
+    object_script.field_c8 = object->ai.field_0xc8;
+    u8 object_set = object->ai.creature_set;
+    u16 rider_flag = rider->apiobj.field_0x1f8 & 0x100;
+    u16 object_flag = object->apiobj.field_0x1f8 & 0x100;
+    if ((rider->field_0xf00 & 2) == 0 && TagCode(rider, object, 1, 0, 0) == 0)
+        return;
+    memcpy(&rider->ai.script_process, &object_script.process, sizeof(object_script.process));
+    rider->ai.field_0xc8 = object_script.field_c8;
+    memcpy(&object->ai.script_process, &rider_script.process, sizeof(rider_script.process));
+    object->ai.field_0xc8 = rider_script.field_c8;
+    rider->ai.creature_set = rider_set;
+    object->ai.creature_set = object_set;
+    AICreatureResumeScript(object);
+    rider->apiobj.field_0x1f8 = (rider->apiobj.field_0x1f8 & ~0x100) | object_flag;
+    object->apiobj.field_0x1f8 = (object->apiobj.field_0x1f8 & ~0x100) | rider_flag;
+    if (rider->field_0xcc0 != NULL) {
+        GetTakeOverPos(rider->field_0xcc0, &rider->apiobj.position);
+        rider->apiobj.pitch_angle = 0;
+        rider->apiobj.roll_angle = 0;
+        rider->apiobj.facing_angle = rider->field_0xcc0->apiobj.facing_angle;
+        rider->apiobj.field_0x276 = rider->apiobj.facing_angle;
+        rider->apiobj.movement_facing_angle = rider->field_0xcc0->apiobj.facing_angle;
+    }
+    GameObjectOrigin(rider);
+    rider->character_context = -1;
+    rider->field_0xcc0 = NULL;
+    if (object->id == id_ATAT && WORLD->current_level == SPEEDERCHASEA_LDATA) {
+        f32 multiplier = SpeederChaseATATInOutMul(&rider->apiobj.position, &SpeederChaseATATExitLandPos);
+        StartBigJump(rider, &SpeederChaseATATExitLandPos, 0, multiplier * 4.0f, 2.5f * multiplier, 0, 0);
+        GameCam_Blend(GameCam, 2.0f, 0.0f, 1);
+    } else {
+        Buck_StartRiderJump(rider, object);
+    }
+    GAMECHARACTERDATA *character = object->apiobj.character_data->game_character;
+    if (character->field_0x28 > 0.0f) {
+        object->apiobj.velocity.y -= 0.5f * rider->apiobj.velocity.y;
+    } else if ((character->flags_094[2] & 2) != 0) {
+        Buck_Start(object, rider);
+    }
+    object->field_0xcc0 = NULL;
+    rider->field_0xe23 &= 0x7f;
+    object->field_0xe23 &= 0x7f;
+    rider->ai.path_info.flags &= ~1;
+    object->saved_position = object->apiobj.position;
+    if (rider->apiobj.field_0x27c != -1 || object->apiobj.field_0x27c != -1) {
+        GameCam_Blend(GameCam, 0.3f, 0.0f, 1);
+    }
+    AISCRIPTPROCESS *rider_process = reinterpret_cast<AISCRIPTPROCESS *>(&rider->ai);
+    AISCRIPTPROCESS *object_process = reinterpret_cast<AISCRIPTPROCESS *>(&object->ai);
+    if (AIScriptSetBaseScriptStateByName(rider_process, const_cast<char *>("ReleasedTakeOver")) != 0) {
+        AIScriptProcess(WORLD->ai_sys, &rider->apiobj, &rider->ai, rider_process, FRAMETIME);
+    }
+    if (AIScriptSetBaseScriptStateByName(object_process, const_cast<char *>("ReleasedTakeOver")) != 0) {
+        AIScriptProcess(WORLD->ai_sys, &object->apiobj, &object->ai, object_process, FRAMETIME);
     }
 }
 

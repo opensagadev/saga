@@ -4,6 +4,7 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/menus/screens/arcade.h"
 #include "legoapi/world/world.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nufloat.h"
@@ -77,7 +78,6 @@ extern "C" i32 AddGameDebrisRot(APIDEBRISSYS_s *, i32, NUVEC *, i32, i16, i16);
 i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
 BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
 PART_s *Bolt_HitParts(BOLT_s *, NUVEC *, NUVEC *, NUVEC *, f32, i32);
-i32 Arcade_GetMode(u32 *);
 i32 CannotKill(GameObject_s *);
 i32 Player_HasInvincibility(GameObject_s *);
 void ObjHitShield(GameObject_s *, GameObject_s *, i32, BOLT_s *);

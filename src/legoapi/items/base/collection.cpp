@@ -35,8 +35,6 @@ struct starfighter_s;
 
 struct APICHARACTERMODELLIST_s;
 
-void GizmoPickup_CollectCoin(WORLDINFO_s *, nuvec_s *, i32, i32, GameObject_s *, i32);
-
 COLLECTID *TempCollectID = NULL;
 
 static i32 CollectCount;

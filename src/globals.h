@@ -1,6 +1,7 @@
 #pragma once
 
 #include "decomp.h"
+#include "legoapi/characters/motion/action_info.h"
 #include "legoapi/characters/motion/animation_ids.h"
 #include "legoapi/characters/motion/contexts.h"
 #include "legoapi/render/fx/game_deb.h"
@@ -29,8 +30,6 @@ struct AREASAVE_s;
 struct GAMECAMERA_s;
 struct TEXTCRAWL_s;
 struct COLLECTION_s;
-struct ACTIONINFO_s;
-struct EXTRAACTIONDATA_s;
 class FadeSystem;
 
 extern BOLT_s Bolt[32];
@@ -46,22 +45,6 @@ extern f32 nusound_fade_start;
 extern "C" NUVEC nusound_special_positions[5];
 extern f32 nusound_fade_end;
 extern i32 (*SetSoundFadeDistCallBackFn)(WORLDINFO_s *world);
-
-struct CHARACTER_CONTEXT_INFO_s {
-    const char *name;
-    i32 action;
-    u32 flags;
-    i32 parameter;
-};
-
-enum CHARACTER_CONTEXT_INFO_FLAGS : u32 {
-    CHARACTER_CONTEXT_INFO_FLAG_USE_FALL_ANIMATION = 0x00000008,
-    CHARACTER_CONTEXT_INFO_FLAG_OWNS_ANIMATION = 0x00000010,
-    CHARACTER_CONTEXT_INFO_FLAG_DISABLE_BLOB_SHADOW = 0x00020000,
-    CHARACTER_CONTEXT_INFO_FLAG_ALLOW_DISABLED_MOVEMENT_SHADOW = 0x00040000,
-    CHARACTER_CONTEXT_INFO_FLAG_TERRAIN_ORIGIN_AT_TOP = 0x00080000,
-    CHARACTER_CONTEXT_INFO_FLAG_TERRAIN_ORIGIN_AT_POSITION = 0x00100000,
-};
 
 enum TERRAIN_LAYER_FLAGS : u32 {
     TERRAIN_LAYER_FLAG_REJECT_CHARACTER_SHADOW = 0x00000001,

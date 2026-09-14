@@ -4,6 +4,7 @@
 
 #ifdef __cplusplus
 void *renderThread_main(void *arg);
+i64 getCurrentTime();
 
 extern "C" {
 #endif

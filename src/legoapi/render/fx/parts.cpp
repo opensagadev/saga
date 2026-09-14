@@ -235,7 +235,6 @@ void SetCoinType(i32 model, GIZMOPICKUP_s *pickup) {
     u8 count = GizmoPickupType[pickup->type_index].random_model_count;
     pickup->model_variant = count ? pickup->model_variant % count : 0;
 }
-void GizmoPickup_CollectCoin(WORLDINFO_s *, NUVEC *, i32, i32, GameObject_s *, i32);
 void CollectPowerUp(GameObject_s *, NUVEC *, u16, i32);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 void NewBuzz(nupad_s *, f32, i32);

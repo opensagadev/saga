@@ -1150,6 +1150,15 @@ float PodSprint_InStartCountdown(WORLDINFO_s *world) {
     return podsprint.speed;
 }
 
+float PodSprint_RollMul(GameObject_s *object) {
+    i16 id = static_cast<i16>(object->id);
+    if (id == id_CLONEARC || id == id_IMPERIALSHUTTLE || id == id_NABOOSTARFIGHTER)
+        return 0.6f;
+    if (id == id_XWING || id == id_SNOWSPEEDER || id == id_MILLENNIUMFALCON || id == id_NEW_REPUBLIC_GUNSHIP)
+        return 0.8f;
+    return 1.0f;
+}
+
 void PodSprintA_Init(WORLDINFO_s *world) {
     PODSPRINT_s *ps = &podsprint;
     memset(ps, 0, sizeof(*ps));
