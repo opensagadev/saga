@@ -79,9 +79,6 @@ volatile bool g_isBlockedInSwapScreen = false;
 // Immediate-mode 2D stream state
 // ---------------------------------------------------------------------------
 
-// Vertex count shared with the primitive implementation (see nuprim.h).
-i32 g_NuPrim_VertexCount;
-
 // Display-list cursor for the 2D stream.  Defined in nudlist.cpp.
 extern VARIPTR *display_list_buffer;
 

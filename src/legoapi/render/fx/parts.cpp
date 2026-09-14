@@ -84,7 +84,7 @@ ADDPART_s Default_ADDPART = {NULL,
                              {0, 0, 0}};
 
 struct rtlset;
-extern rtlset *PartRTL;
+rtlset *PartRTL = NULL;
 f32 PARTSCALEUPTIME = 0.5f;
 void NewPartOrderedRotation(PART_s *);
 void PartTimeSlip();
@@ -1406,6 +1406,10 @@ extern "C" {
 
     void FindPart(void) {
         STUBBED();
+    }
+
+    void SetPartRTLSet(usize rtl_set) {
+        PartRTL = reinterpret_cast<rtlset *>(rtl_set);
     }
 
     i32 GetMaxPartTypes(void) {

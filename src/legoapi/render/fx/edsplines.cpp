@@ -19,18 +19,6 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-static f32 curx;
-static f32 cury;
-static f32 nextx;
-static f32 dx;
-i32 size;
-
-void setnextpoint(float x, float y) {
-    nextx = x;
-    dx = (x - curx) / y;
-    size = static_cast<i32>(y);
-}
-
 void BezierLinePos(VuVec &, VuVec &, VuVec &, VuVec &, VuVec &, float) {
     STUBBED();
 }
@@ -50,7 +38,6 @@ void BezierLineLength(VuVec &, VuVec &, VuVec &, VuVec &) {
 void BezierLineLength(VuVec &, VuVec &, VuVec &, VuVec &, float) {
     STUBBED();
 }
-
 
 static void SplinePointAngles(NUGSPLINE *spline, i32 index, i32 looping, u16 *pitch, u16 *angle) {
     NUVEC *current = &spline->pts[index];
@@ -123,23 +110,6 @@ void PointAlongSpline(NUGSPLINE *spline, f32 along, NUVEC *position, u16 *angle,
         if (pitch != NULL)
             *pitch += (i32)(RotDiff(*pitch, next_pitch) * fraction);
     }
-}
-
-i32 getnextdatapoint(float *value, i32 *delta) {
-    const f32 next_y = cury + 1.0f;
-    const f32 old_x = curx;
-    *value = old_x;
-    const i32 old_value = static_cast<i32>(old_x);
-    cury = next_y;
-    --size;
-    const f32 next_x = old_x + dx;
-    curx = next_x;
-    *delta = static_cast<i32>(next_x) - old_value;
-    if (size != 0) {
-        return 0;
-    }
-    curx = nextx;
-    return -1;
 }
 
 void FlightSpline_Init(WORLDINFO_s *, flightspline_s *, i32) {
@@ -296,11 +266,6 @@ void LevelSplines_InitForGame(LEVELSPLINE *splines) {
 
 void EvaluateSplineXZIntersection(nugspline_s *, i32, SPLINEPOS_s *, nugspline_s *, i32, SPLINEPOS_s *) {
     STUBBED();
-}
-
-void setpoint(float x) {
-    curx = x;
-    cury = 0.0f;
 }
 
 static __used__ f32 SplineLength(nugspline_s *, i32) {

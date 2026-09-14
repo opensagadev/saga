@@ -37,7 +37,6 @@ _ENGINE_ROOT_SRCS = [
     "batman.cpp",
     "globals.cpp",
     "java/android.cpp",
-    "java/android_state.cpp",
 ]
 
 _ENGINE_SRCS = _ENGINE_ROOT_SRCS + glob(

@@ -389,22 +389,17 @@ extern "C" {
     }
 }
 
-static __used__ double ApplyAntilights(rtl_s *, rtlidata_s *, float) {
-    STUBBED();
-    return {};
-}
-
-static __used__ rtl_s *GetNextRTL(void *, rtl_s *, char *, int *) {
-    STUBBED();
-    return nullptr;
-}
-
 static __used__ void InsertLight(rtl_s *, rtlidata_s *, float) {
     STUBBED();
 }
 
 static __used__ void InsertAntiLight(rtl_s *, rtlidata_s *, float) {
     STUBBED();
+}
+
+static __used__ double ApplyAntilights(rtl_s *, rtlidata_s *, float) {
+    STUBBED();
+    return {};
 }
 
 static __used__ int FindNearestRTL(nuvec_s *, int) {
@@ -434,22 +429,9 @@ static __used__ i32 rtlCalcLights(nuvec_s *, numtx_s *, f32, rtlidata_s *) {
     return 0;
 }
 
-static __used__ void rtlCalcShadow(rtlidata_s *) {
+static __used__ rtl_s *GetNextRTL(void *, rtl_s *, char *, int *) {
     STUBBED();
-}
-
-static __used__ void rtlProcessLight(rtl_s *, f32) {
-    STUBBED();
-}
-
-static void rtlApplySetScaleLoop(void *, rtlidata_s *, nuvec_s *, numtx_s *, i32, f32);
-
-static __used__ void rtlApplyModifiersToChainLight(rtl_s *) {
-    STUBBED();
-}
-
-static __used__ void rtlApplyModifiersToSingleLight(rtl_s *) {
-    STUBBED();
+    return nullptr;
 }
 
 extern "C" {
@@ -556,6 +538,10 @@ static void rtlApplySetScaleLoop(void *set, rtlidata_s *lighting_data, NUVEC *po
     }
 }
 
+static __used__ void rtlCalcShadow(rtlidata_s *) {
+    STUBBED();
+}
+
 extern "C" {
     void rtlApplySetScale(void *set, rtldata_s *data, NUVEC *position, NUMTX *rotation, i32 identity, f32 scale) {
         rtlidata_s local_data;
@@ -586,6 +572,22 @@ extern "C" {
         rtlCalcShadow(lighting_data);
         _NuTimeBarSlotEnd(0, 6);
     }
+
+} // extern "C"
+
+static __used__ void rtlApplyModifiersToChainLight(rtl_s *) {
+    STUBBED();
+}
+
+static __used__ void rtlApplyModifiersToSingleLight(rtl_s *) {
+    STUBBED();
+}
+
+static __used__ void rtlProcessLight(rtl_s *, f32) {
+    STUBBED();
+}
+
+extern "C" {
 
     void rtlGetEnvPath(void) {
         STUBBED();
