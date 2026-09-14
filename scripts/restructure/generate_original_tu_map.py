@@ -17,7 +17,7 @@ import re
 import struct
 import subprocess
 
-from scripts.restructure.elf32 import SHF_ALLOC, read_elf32, workspace_root
+from scripts.restructure.elf32 import SHF_ALLOC, SHN_COMMON, read_elf32, workspace_root
 from scripts.restructure.inputs import read_units_manifest
 from scripts.restructure.text_adjacency import text_adjacency_edges
 
@@ -32,8 +32,20 @@ def allocated_symbols(sections: list[dict], symbols: list[dict]) -> list[dict]:
     return [
         symbol
         for symbol in symbols
-        if sections[symbol["section_index"]]["flags"] & SHF_ALLOC
+        if symbol["section_index"] < len(sections)
+        and sections[symbol["section_index"]]["flags"] & SHF_ALLOC
         and symbol["type"] not in EXCLUDED_TYPES
+    ]
+
+
+def current_unit_symbols(sections: list[dict], symbols: list[dict]) -> list[dict]:
+    """Include tentative COMMON definitions when attributing a current object."""
+    return [
+        symbol for symbol in symbols
+        if symbol["type"] not in EXCLUDED_TYPES
+        and (symbol["section_index"] == SHN_COMMON
+             or (symbol["section_index"] < len(sections)
+                 and sections[symbol["section_index"]]["flags"] & SHF_ALLOC))
     ]
 
 
@@ -312,14 +324,15 @@ def build_map(
     unit_records = []
     name_owners: dict[tuple[str, int, int], set[int]] = defaultdict(set)
     for unit_id, unit in enumerate(units or []):
-        sections, all_symbols = read_elf32(unit["object_path"])
-        object_symbols = allocated_symbols(sections, all_symbols)
+        sections, all_symbols = read_elf32(unit["object_path"], include_common_symbols=True)
+        object_symbols = current_unit_symbols(sections, all_symbols)
         entries = []
         for symbol in object_symbols:
             entries.append(
                 {
                     **symbol,
-                    "section": sections[symbol["section_index"]]["name"],
+                    "section": "COMMON" if symbol["section_index"] == SHN_COMMON
+                    else sections[symbol["section_index"]]["name"],
                 }
             )
             # A local symbol never establishes cross-TU ownership by name.

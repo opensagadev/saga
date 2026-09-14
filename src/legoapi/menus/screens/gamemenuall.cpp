@@ -12,6 +12,7 @@
 #include "legoapi/characters/motion.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/core/config/cheat.h"
+#include "legoapi/core/input/gamepads.h"
 #include "legoapi/menus/screens/gamemenuall.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
@@ -39,28 +40,20 @@ static f32 MissionIconTargetX[20];
 static f32 MissionIconX[20];
 extern i32 NextArea_FreePlay;
 void InitMission(MISSIONSYS *, i32);
-extern "C" GAMEPAD_s GamePad[64];
-extern u32 GAMEPAD_MENUSELECT, GAMEPAD_MENUCANCEL, GAMEPAD_DLEFT, GAMEPAD_DRIGHT;
-extern u32 GAMEPAD_TOGGLELEFT, GAMEPAD_TOGGLERIGHT;
 extern f32 ICONSIZE, ICONX, DROPINALPHA, HUB_EPISODETITLEY;
 extern i16 tSELECT, tSELECTED, tSELECTING, tEXIT, tCANCEL;
 void DrawCharIcon(i32, f32, f32, f32, f32, i32, f32, f32, i32, nuhspecial_s *);
 void Hub_DrawImportantBrick(i32, f32, f32, f32, i32, i32);
 void DrawPlayerIconPrompts(i32, i32, f32, i32, i32, i32, i32, i32, i32, f32, i32, i32, i32, i32);
 f32 GetAspectRatio();
-void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
-
-extern "C" void NewMenu(i32 menu_id, i32 menu_y, i32 param3);
 extern "C" void BackupMenu(void);
 extern "C" void BackupMenuNoFn(void);
-extern "C" bool TestForController(void);
 extern "C" void PlaySfxById(i32 sfx_id, nuvec_s *position);
 extern "C" void NuIOS_RecordFlurryEvent(char *event_name);
 extern "C" void DrawMenuButtonPrompts(i32 confirm_prompt, i32 cancel_prompt, i32 enabled, u8 red, u8 green, u8 blue,
                                       u8 alpha);
 extern "C" void DrawMenuButtonPromptsEx(i32 confirm_prompt, i32 cancel_prompt, i32 flags, i32 enabled, u8 red, u8 green,
                                         u8 blue, u8 alpha);
-i32 GameAudio_GetSfxId(i32 sfx);
 extern i32 SAVESLOTS;
 extern i32 MenuSFX;
 extern i32 MENUSFX_MENUSELECT;
@@ -1887,10 +1880,6 @@ extern "C" {
     }
 
     void MenuSetTopBottom(void) {
-        STUBBED();
-    }
-
-    void MessageBoxInitMtl(void) {
         STUBBED();
     }
 

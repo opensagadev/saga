@@ -28,6 +28,7 @@
 #include "nu2api/nucore/NuDeviceSpecs.h"
 #include "nu2api/nufile/nufile.h"
 #include "nu2api/nufile/nufpar.h"
+#include "nu2api/nusound/nusound.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "gameapi/edtools/edgra.h"
 

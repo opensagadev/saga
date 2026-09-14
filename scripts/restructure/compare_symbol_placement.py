@@ -254,9 +254,27 @@ def overall_order_alignment(original: list[dict], current: list[dict]) -> dict:
     }
 
 
+def original_identity_key(symbol: dict) -> tuple | None:
+    fields = ("name", "type", "binding")
+    if not all(field in symbol for field in fields):
+        return None
+    return symbol["name"], symbol["type"], 0 if symbol["binding"] == 0 else 1
+
+
+def original_identity_counts(symbols: dict[int, dict]) -> Counter:
+    """Use the same name/type/binding-class key as current owner lookup."""
+    return Counter(key for symbol in symbols.values() if (key := original_identity_key(symbol)) is not None)
+
+
+def uniquely_identified_original(symbol: dict, identities: Counter) -> bool:
+    key = original_identity_key(symbol)
+    return key is None or identities[key] == 1
+
+
 def same_tu_constraints(ledger: dict, start: int | None = None, end: int | None = None) -> dict:
     """Measure distinct strong original function-to-local-state owner pairs."""
     symbols = {symbol["symbol_index"]: symbol for symbol in ledger["original_symbols"]}
+    identities = original_identity_counts(symbols)
     relationships = {}
     for edge in ledger["original_local_xrefs"]:
         if edge["same_tu_evidence"] != STRONG_LOCAL_XREF or len(edge["object_symbol_indices"]) != 1:
@@ -272,6 +290,9 @@ def same_tu_constraints(ledger: dict, start: int | None = None, end: int | None 
     for (source_index, target_index), size_concordant in relationships.items():
         source = symbols[source_index]
         target = symbols[target_index]
+        if (not uniquely_identified_original(source, identities)
+                or not uniquely_identified_original(target, identities)):
+            continue
         source_owners = source.get("current_owner_candidates", [])
         target_owners = target.get("current_owner_candidates", [])
         if len(source_owners) != 1 or len(target_owners) != 1 or not size_concordant:
@@ -290,6 +311,7 @@ def same_tu_constraints(ledger: dict, start: int | None = None, end: int | None 
 def same_tu_owner_splits(ledger: dict, limit: int = 5) -> list[dict]:
     """Rank verifiable source/object splits without treating names as TU proof."""
     symbols = {symbol["symbol_index"]: symbol for symbol in ledger["original_symbols"]}
+    identities = original_identity_counts(symbols)
     units = {unit["id"]: unit["source"] for unit in ledger.get("current_units", [])}
     groups: dict[tuple[int, int], set[tuple[int, int]]] = defaultdict(set)
     for edge in ledger["original_local_xrefs"]:
@@ -301,6 +323,9 @@ def same_tu_owner_splits(ledger: dict, limit: int = 5) -> list[dict]:
         object_index = edge["object_symbol_indices"][0]
         function_owners = symbols[function_index].get("current_owner_candidates", [])
         object_owners = symbols[object_index].get("current_owner_candidates", [])
+        if (not uniquely_identified_original(symbols[function_index], identities)
+                or not uniquely_identified_original(symbols[object_index], identities)):
+            continue
         if len(function_owners) != 1 or len(object_owners) != 1:
             continue
         if function_owners[0] != object_owners[0]:

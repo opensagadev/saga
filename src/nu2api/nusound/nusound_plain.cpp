@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "nu2api/nucore/nupad.h"
 #include "nu2api/nusound/nusound.h"
 
 #include "nu2api/nusound/nusound_system.hpp"

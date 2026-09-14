@@ -171,6 +171,24 @@ class CompareSymbolPlacementTests(unittest.TestCase):
         self.assertEqual((metric["total"], metric["assessable"], metric["satisfied"]), (2, 2, 1))
         self.assertEqual(metric["percent"], 50.0)
 
+    def test_same_tu_metric_does_not_assign_duplicate_original_local_state(self):
+        ledger = {
+            "original_symbols": [
+                {**symbol("NuTimeStartFrame", 0x100, binding=1), "current_owner_candidates": [0]},
+                {**symbol("frameStartTime", 0x200, section=".bss"), "current_owner_candidates": [1]},
+                {**symbol("frameStartTime", 0x300, section=".bss", size=4), "current_owner_candidates": [1]},
+            ],
+            "current_units": [{"id": 0, "source": "time.cpp"}, {"id": 1, "source": "utility.cpp"}],
+            "original_local_xrefs": [
+                {"same_tu_evidence": "strong same-TU constraint; not an assignment",
+                 "function_symbol_index": 0x100, "object_symbol_indices": [0x200],
+                 "current_target_object_size_concordant": True},
+            ],
+        }
+        metric = same_tu_constraints(ledger)
+        self.assertEqual((metric["total"], metric["assessable"], metric["satisfied"]), (1, 0, 0))
+        self.assertEqual(same_tu_owner_splits(ledger), [])
+
     def test_overall_report_separates_coverage_grouping_and_verified_splits(self):
         ledger = {
             "original_symbols": [

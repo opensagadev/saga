@@ -8,6 +8,7 @@ import tempfile
 
 from scripts.restructure.generate_original_tu_map import (
     allocated_symbols,
+    current_unit_symbols,
     alias_groups,
     annotate_local_xrefs,
     local_xref_components,
@@ -16,6 +17,7 @@ from scripts.restructure.generate_original_tu_map import (
     local_initializer_blocks,
     original_build_clues,
 )
+from scripts.restructure.elf32 import SHN_COMMON
 from scripts.restructure.inputs import read_units_manifest
 
 
@@ -90,6 +92,16 @@ class OriginalTuMapTest(unittest.TestCase):
             [symbol["symbol_index"] for symbol in allocated_symbols(sections, symbols)],
             [1, 2, 3],
         )
+
+    def test_current_unit_symbols_include_common_without_changing_original_inventory(self):
+        sections = [{"flags": 0}, {"flags": 2}]
+        symbols = [
+            {"symbol_index": 2, "section_index": SHN_COMMON, "type": 1},
+            {"symbol_index": 1, "section_index": 1, "type": 1},
+            {"symbol_index": 3, "section_index": SHN_COMMON, "type": 3},
+        ]
+        self.assertEqual([item["symbol_index"] for item in allocated_symbols(sections, symbols)], [1])
+        self.assertEqual([item["symbol_index"] for item in current_unit_symbols(sections, symbols)], [2, 1])
 
     def test_alias_group_preserves_every_symbol_identity(self):
         base = {"section_index": 1, "address": 0x1234, "size": 4, "type": 1}
