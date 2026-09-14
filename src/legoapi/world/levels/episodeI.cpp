@@ -802,6 +802,22 @@ void PodRaceADraw(WORLDINFO_s *world) {
     }
 }
 
+void Action_MushroomCollapse(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+    STUBBED();
+}
+
+void PodSeekMushCutSound() {
+    STUBBED();
+}
+
+void PodSeekSubCutSound() {
+    STUBBED();
+}
+
+void PodSeekTuskanCutSound() {
+    STUBBED();
+}
+
 void PodRaceBUpdate(WORLDINFO_s *world) {
     if (Lap == 2) {
         GAMECAMERA_s *gamcam = GameCam;
@@ -907,6 +923,18 @@ void PodRaceCUpdate(WORLDINFO_s *world) {
         default:
             break;
     }
+}
+
+void Action_SetLapTime(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+    STUBBED();
+}
+
+void Action_CreatePod(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+    STUBBED();
+}
+
+void Action_Sebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+    STUBBED();
 }
 
 void PodRaceReset() {
@@ -1455,6 +1483,10 @@ void PodSprint_GetIAlongVals(nugspline_s *spline, i16 *out1, i16 *out2) {
         *out1 = 0;
         *out2 = ps->ai[idx].vals[0];
     }
+}
+
+void Action_NewSebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
+    STUBBED();
 }
 
 // ===========================================================================

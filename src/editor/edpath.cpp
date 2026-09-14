@@ -17,10 +17,6 @@ extern "C" {
     extern f32 default_path_heighttol;
     void creatureEditor_PathNodeMoved(EDAIPATHNODE_s *);
     void locatorEditor_PathNodeMoved(EDAIPATHNODE_s *);
-    eduiitem_s *eduiItemSelCreate(i32, const void *, i32, i32, void (*)(eduimenu_s *, eduiitem_s *, u32), char *);
-    eduiitem_s *eduiItemToggleCreate(i32, const void *, i32, i32, void (*)(eduimenu_s *, eduiitem_s *, u32), char *);
-    eduiitem_s *eduiItemTextPickCreate(i32, const void *, void (*)(eduimenu_s *, eduiitem_s *, u32), char *);
-    eduiitem_s *eduiItemCheckCreate(i32, const void *, i32, i32, void (*)(eduimenu_s *, eduiitem_s *, u32), char *);
     void aieditor_cbCancelMainMenu(eduimenu_s *, eduimenu_s *);
     void aieditor_cvSelectEditorMode(eduimenu_s *, eduiitem_s *, u32);
     void aieditor_cbSave(eduimenu_s *, eduiitem_s *, u32);

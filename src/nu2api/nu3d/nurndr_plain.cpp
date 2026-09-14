@@ -240,15 +240,6 @@ extern "C" void NuMtlCreateBuff3D(void) {
     STUBBED();
 }
 
-extern "C" void NuMtlFindVariantMtl(void) {
-    STUBBED();
-}
-extern "C" void NuMtlFindVariantMtlFromDesc(void) {
-    STUBBED();
-}
-extern "C" void NuMtlRegisterForOverride(void) {
-    STUBBED();
-}
 static void NuMtlSetRenderStatesPS(void) {
     STUBBED();
 }

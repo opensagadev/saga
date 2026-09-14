@@ -14,6 +14,13 @@ static WORLDINFO_s *BT_worldinfo;
 static NUGSCN *BT_scene;
 static i32 BT_gdeb_moving_count;
 
+// Configuration entry point and parser callbacks share the original BT state.
+void BoltTypes_Configure(WORLDINFO_s *world, char *config) {
+    STUBBED();
+    (void)world;
+    (void)config;
+}
+
 static __used__ void BT_canonlyhitplayers(nufpar_s *) {
     BT_bolttype->field_60 |= 0x80;
 }

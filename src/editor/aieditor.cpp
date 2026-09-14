@@ -15,10 +15,6 @@ extern "C" void aieditor_SetMode(i32 mode);
 extern "C" void AISYSRebuildFromEditorData(void);
 extern "C" i32 aieditor_Register(const char *, void (*)(), void (*)(), void (*)(), void (*)());
 extern "C" void aieditor_RegisterDefaultPathCnxTypes();
-extern "C" eduiitem_s *eduiItemCheckCreate(i32, const void *, i32, i32, void (*)(eduimenu_s *, eduiitem_s *, u32),
-                                           char *);
-extern "C" eduiitem_s *eduiItemSelCreate(i32, const void *, i32, i32, void (*)(eduimenu_s *, eduiitem_s *, u32),
-                                         char *);
 extern "C" void aieditor_cbCancelMainMenu(eduimenu_s *, eduimenu_s *);
 
 struct nupad_s;

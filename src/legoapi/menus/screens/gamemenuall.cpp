@@ -196,12 +196,6 @@ void Hub_UpdateFreePlaySelect();
 void WipeBackToHub();
 void NewLevelFromMenu(LEVELDATA_s *level, i32 menu_id, i32 menu_y, i32 remember_hub);
 
-static bool MenuAreaAllowsFreePlay(i32 area) {
-    return area >= 0 && area < AREACOUNT && (LOSTTEMPLE_ADATA == NULL || area != LOSTTEMPLE_ADATA->index) &&
-           FreePlayUnlocked() && (ADataList[area].flags & AREAFLAG_NO_FREEPLAY) == 0 && Game_AreaSave != NULL &&
-           Game_AreaSave[area].area_complete != 0;
-}
-
 extern CHEATSYSTEM CheatSystem;
 void Cheat_SetOn(i32 cheat, i32 enabled, i32 update_save);
 static f32 updateextras_current_y = 0.0f;
@@ -809,10 +803,6 @@ void MenuUpdateSaving(MENU_s *) {
     BackupMenu();
 }
 
-void MenuDrawBonusMode(MENU_s *) {
-    STUBBED();
-}
-
 void MenuUpdateLoading(MENU_s *) {
     if (memcard_loadneeded != 0) {
         memcard_loadmessage_delay = 1.0f;
@@ -942,30 +932,6 @@ void MenuDrawSaveCancel(MENU_s *menu) {
     menu->draw_y = MENUBOTY - MENUDY;
     DrawMenuEntry(menu, apitxt_YES);
     DrawMenuEntry(menu, apitxt_NO);
-}
-
-void MenuDrawSelectMode(MENU_s *menu) {
-    const i32 area = LDataList[hub_new_level].area_index;
-    const bool free_play_available = MenuAreaAllowsFreePlay(area);
-
-    if (area >= 0 && area < AREACOUNT && ADataList[area].name_id >= 0) {
-        NuStrCpy(MenuHeader, TTab[ADataList[area].name_id]);
-    }
-
-    GameDrawMenuEntry(menu, TTab[free_play_available ? tREPLAYSTORY : tSTORY]);
-    if (free_play_available) {
-        GameDrawMenuEntry(menu, TTab[tFREEPLAY]);
-    } else {
-        DrawMenuEntryEx(menu, TTab[tFREEPLAY], MenuA / 2);
-    }
-}
-
-void MenuInitSelectMode(MENU_s *menu) {
-    const i32 area = LDataList[hub_new_level].area_index;
-    hub_selectmode = MenuAreaAllowsFreePlay(area) ? 1 : 0;
-    menu->selected_row = static_cast<i16>(hub_selectmode);
-    menu->selected_item = hub_selectmode;
-    selectmodemode = 0;
 }
 
 void MenuUpdateDeleting(MENU_s *) {
@@ -1153,10 +1119,6 @@ void MenuEnterInsertCard(MENU_s *) {
 
 void MenuExitCardWarning(MENU_s *) {
     Menu_InWarningFlow = 0;
-}
-
-void MenuUpdateBonusMode(MENU_s *) {
-    STUBBED();
 }
 
 void MenuDrawEndChallenge(MENU_s *) {

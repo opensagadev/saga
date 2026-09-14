@@ -34,6 +34,14 @@ void edppPtlDestroy(i32 index);
 static edui_slider_s *repeatbox_x_item;
 static edui_slider_s *repeatbox_z_item;
 
+// These callbacks and the repeat-box sliders belong to the same original TU.
+static __used__ void cbPtlCancelRepeatBoxMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+static __used__ void cbPtlRepeatBoxMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
 static void UpdateTotalPtls(debinftype *effect) {
     f32 elapsed_time = 0.0f;
     f32 active_time = 0.0f;

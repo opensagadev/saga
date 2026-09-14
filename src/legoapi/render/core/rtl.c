@@ -87,6 +87,48 @@ extern "C" {
     }
 }
 
+void edrtlInitBurnset(burnset_s *set) {
+    set->parameters.field_00 = 1;
+    set->parameters.field_04 = 0.0f;
+    set->parameters.field_08 = 0.0f;
+    set->parameters.field_0c = 180.0f;
+    set->parameters.field_10 = 1.0f;
+    set->parameters.field_14 = 0.0f;
+    set->parameters.field_18 = 0;
+    set->parameters.field_1c = 0.0f;
+    set->parameters.field_20 = 4.0f;
+    set->parameters.field_24 = 0.0f;
+    set->parameters.field_28 = 0;
+    set->parameters.field_2c = 0.577f;
+    set->parameters.field_30 = 0.577f;
+    set->parameters.field_34 = 0.577f;
+    set->parameters.field_38 = 0.0f;
+    set->parameters.field_3c = 1.0f;
+    set->parameters.field_40 = 180.0f;
+    set->parameters.field_44 = 0.0f;
+    set->parameters.field_48 = 1.0f;
+    set->parameters.field_4c = 0.0f;
+    set->parameters.field_50 = 0.0f;
+    set->parameters_copy = set->parameters;
+    set->field_a8 = 0;
+    set->field_ac = 0;
+    set->field_b0 = 0;
+    set->field_b4 = 1;
+    set->field_b8 = 1.0f;
+    set->field_bc = 4.0f;
+    set->field_c0 = 0.2f;
+    set->field_c4 = 0.5f;
+    set->field_c8 = 1.9f;
+    set->field_cc = 0.0f;
+    set->active_count = 0;
+    set->selected_index = -1;
+    set->field_558 = 1.0f;
+    set->field_55c = 0.2f;
+    set->field_560 = 0;
+    for (i32 i = 0; i < 32; ++i)
+        set->burnouts[i].active = 0;
+}
+
 static __used__ double ApplyAntilights(rtl_s *, rtlidata_s *, float) {
     STUBBED();
     return {};
@@ -159,6 +201,22 @@ static __used__ void rtlApplyModifiersToChainLight(rtl_s *) {
 }
 
 static __used__ void rtlApplyModifiersToSingleLight(rtl_s *) {
+    STUBBED();
+}
+
+static void edrtlSaveUndo() {
+    STUBBED();
+}
+
+static void edrtlUndo() {
+    STUBBED();
+}
+
+static void edrtlRedo() {
+    STUBBED();
+}
+
+static void edrtlInvalidateUndo() {
     STUBBED();
 }
 
@@ -672,159 +730,6 @@ struct numtx_s;
 
 typedef rtlfog_s EDRTLFOG_s;
 
-static EDRTLFOG_s *SelectPrevFog() {
-    i32 index;
-    i32 count = 0;
-    index = curFogLoc - 1;
-    if (index < 0) {
-        index = 32;
-    }
-    if (curr_set != NULL) {
-        while (index != curFogLoc) {
-            if (curr_set->fog[index].type != 0) {
-                curFogLoc = index;
-                return &curr_set->fog[index];
-            }
-            if (index == 0) {
-                index = 32;
-            }
-            ++count;
-            if (count > 31) {
-                break;
-            }
-            --index;
-        }
-    }
-    return NULL;
-}
-
-static EDRTLFOG_s *SelectNextFog() {
-    i32 index;
-    i32 count = 0;
-    if (curFogLoc == -1 || curFogLoc == 31) {
-        index = 0;
-    } else {
-        index = curFogLoc + 1;
-    }
-    if (curr_set != NULL) {
-        while (index != curFogLoc) {
-            if (curr_set->fog[index].type != 0) {
-                curFogLoc = index;
-                return &curr_set->fog[index];
-            }
-            if (index > 31) {
-                index = -1;
-            }
-            ++count;
-            if (count > 31) {
-                break;
-            }
-            ++index;
-        }
-    }
-    return NULL;
-}
-
-// RTL editor subsystem stubs (static, internal linkage).
-
-static void edrtlClose() {
-    STUBBED();
-}
-static void edrtlEnter() {
-    STUBBED();
-}
-static void edrtlLeave() {
-    STUBBED();
-}
-static void edrtlRender() {
-    STUBBED();
-}
-static void edrtlProcFog(float, nupad_s *) {
-    STUBBED();
-}
-static void edrtlProcRTL(float, nupad_s *) {
-    STUBBED();
-}
-static void edrtlDrawFogs() {
-    STUBBED();
-}
-
-extern "C" void edrtlDrawFog(EDRTLFOG_s *fog) {
-    if (fog != NULL) {
-        i32 colour = (fog->colour & 0xffffff) | 0x80000000;
-        switch (fog->type) {
-            default:
-                break;
-            case 1:
-                RndrOSphere(&fog->position, fog->radius, colour, numsegs, 0);
-                break;
-        }
-    }
-}
-static void edrtlDrawHelp() {
-    STUBBED();
-}
-static void edrtlProcBurn(float, nupad_s *) {
-    STUBBED();
-}
-static void edrtlSaveUndo() {
-    STUBBED();
-}
-static void edrtlDrawCursor() {
-    STUBBED();
-}
-static void edrtlDrawLights() {
-    STUBBED();
-}
-static void edrtlRndrLine3d(nuvtx_tc1_s *, numtl_s *, numtx_s *) {
-    STUBBED();
-}
-static void edrtlBurnSetMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void edrtlDrawFogInfo() {
-    STUBBED();
-}
-static void edrtlDrawRTLInfo() {
-    STUBBED();
-}
-static void edrtlBurnMainMenu() {
-    STUBBED();
-}
-static void edrtlDrawBurnInfo() {
-    STUBBED();
-}
-static void edrtlDrawBurnouts() {
-    STUBBED();
-}
-static void edrtlSetBurnRadius(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void edrtlBurnRadiusMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void edrtlInvalidateUndo() {
-    STUBBED();
-}
-static void edrtlSetBurnFalloff(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void edrtlBurnoutFileLoad(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void edrtlBurnoutFileSave(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void edrtlSetBurnsetFlare(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void edrtlBurnDefaultsMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void edrtlSetBurnsetRadius(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
 extern NUQFNT *system_qfont;
 extern "C" {
     void CreateColourPicker();
@@ -833,14 +738,6 @@ extern "C" {
     void cbTriggerSubMenu(eduimenu_s *, eduiitem_s *, u32);
     void cbModifierAdjust(eduimenu_s *, eduiitem_s *, u32);
     void cbNearClipAtCursor(eduimenu_s *, eduiitem_s *, u32);
-    void eduiMenuFitWidth(eduimenu_s *, i32);
-    eduiitem_s *eduiItemSelCreate(usize, u32 *, i32, i32, void (*)(eduimenu_s *, eduiitem_s *, u32), char *);
-    eduiitem_s *eduiItemCheckCreate(usize, u32 *, i32, i32, void (*)(eduimenu_s *, eduiitem_s *, u32), char *);
-    eduiitem_s *eduiItemToggleCreate(usize, u32 *, i32, i32, void (*)(eduimenu_s *, eduiitem_s *, u32), char *);
-    eduiitem_s *eduiItemSliderCreate(usize, u32 *, i32, void (*)(eduimenu_s *, eduiitem_s *, u32), f32, f32, f32,
-                                     char *);
-    eduiitem_s *eduiItemSliderCreateInt(usize, u32 *, i32, void (*)(eduimenu_s *, eduiitem_s *, u32), i32, i32, i32,
-                                        char *);
 }
 
 static char *default_modifier_names[] = {"default"};
@@ -928,22 +825,46 @@ static eduiitem_s *fog_item;
 static eduiitem_s *fog_copy_item;
 static eduiitem_s *fog_paste_item;
 static eduiitem_s *fog_pasteinto_item;
-static void cbAssocID(eduimenu_s *, eduiitem_s *, u32) {
+static void cbCancelMenu(eduimenu_s *, eduimenu_s *) {
     STUBBED();
 }
-static void cbExcludeID(eduimenu_s *, eduiitem_s *, u32) {
+static void cbCancelDeleteMenu(eduimenu_s *, eduimenu_s *) {
     STUBBED();
 }
-static void cbUserID(eduimenu_s *, eduiitem_s *, u32) {
+static void cbDeleteYes(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
-static void cbLightType(eduimenu_s *, eduiitem_s *, u32) {
+static void cbDeleteNo(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static __used__ void RefreshUI() {
+    STUBBED();
+}
+static void cbLoad(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void cbSave(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void cbMultiplier(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void cbGroupID(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 static void cbModifierType(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 extern "C" void cbModifierAdjust(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void cbToggleCastShadow(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void cbToggleHasSpecular(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void cbHighColour(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 static void cbLowColour(eduimenu_s *, eduiitem_s *, u32) {
@@ -961,52 +882,61 @@ static void cbLowTime(eduimenu_s *, eduiitem_s *, u32) {
 static void cbRLowTime(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
-static void cbCancelLightProperties(eduimenu_s *, eduimenu_s *) {
+static void cbLightType(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
-static void cbHighColour(eduimenu_s *, eduiitem_s *, u32) {
+static void cbAssocID(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
-static void cbMultiplier(eduimenu_s *, eduiitem_s *, u32) {
+static void cbExcludeID(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
-static void cbGroupID(eduimenu_s *, eduiitem_s *, u32) {
+static void cbUserID(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
-static void cbToggleCastShadow(eduimenu_s *, eduiitem_s *, u32) {
+static void cbFogColour(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
-static void cbToggleHasSpecular(eduimenu_s *, eduiitem_s *, u32) {
+static void cbHazeColour(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
-static void cbHideType(eduimenu_s *, eduiitem_s *, u32) {
+static void cbFogAlpha(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
-static void cbCancelDeleteMenu(eduimenu_s *, eduimenu_s *) {
+static void cbFogDensity(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
-static void cbDeleteYes(eduimenu_s *, eduiitem_s *, u32) {
+static void cbFogDensityWii(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
-static void cbDeleteNo(eduimenu_s *, eduiitem_s *, u32) {
+static void cbHazeDensity(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
-static __used__ void RefreshUI() {
+static void cbBlurDensity(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
-static void cbScaleAllMultipliersUp(eduimenu_s *, eduiitem_s *, u32) {
+static void cbFogStartPSP(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
-static void cbScaleAllMultipliersDown(eduimenu_s *, eduiitem_s *, u32) {
+static void cbFogEndPSP(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
-static void cbLoad(eduimenu_s *, eduiitem_s *, u32) {
+static void cbFogStart(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
-static void cbCancelMenu(eduimenu_s *, eduimenu_s *) {
+static void cbFogEnd(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
-static void cbLightProperties(eduimenu_s *, eduiitem_s *, u32) {
+static void cbFogAdjRng(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void cbFogAdjNear(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void cbFogAdjFar(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void cbDOFFStop(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 static void cbCopyLight(eduimenu_s *, eduiitem_s *, u32) {
@@ -1027,60 +957,6 @@ static void cbUndoLight(eduimenu_s *, eduiitem_s *, u32) {
 static void cbRedoLight(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
-static void cbNoZBuffer(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void cbSave(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void cbSetControls(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void cbFogColour(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void cbFogAlpha(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void cbFogDensity(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void cbFogDensityWii(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void cbFogStart(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void cbFogEnd(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void cbFogStartPSP(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void cbFogEndPSP(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void cbHazeColour(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void cbHazeDensity(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void cbBlurDensity(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void cbFogAdjRng(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void cbFogAdjNear(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void cbFogAdjFar(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-static void cbDOFFStop(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
 static void cbCopyFog(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
@@ -1088,6 +964,27 @@ static void cbPasteFog(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 static void cbPasteIntoFog(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void cbHideType(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void cbNoZBuffer(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void cbLightProperties(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void cbCancelLightProperties(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+static void cbSetControls(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void cbScaleAllMultipliersUp(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void cbScaleAllMultipliersDown(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 static __used__ void InitUI() {
@@ -1296,150 +1193,6 @@ static __used__ void InitUI() {
 }
 
 // RTL editor callbacks from the same original text run.
-static void edrtlCancelBurnSetMenu(eduimenu_s *, eduimenu_s *) {
-    STUBBED();
-}
-
-static void edrtlSetBurnsetFalloff(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlCancelBurnMainMenu(eduimenu_s *, eduimenu_s *) {
-    STUBBED();
-}
-
-static void edrtlSetBurnoutEndAngle(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlBurnTransitionsMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlSetBurnoutThreshold(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlSetBurnsetIntensity(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlSetBurnsetThreshold(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlCancelBurnRadiusMenu(eduimenu_s *, eduimenu_s *) {
-    STUBBED();
-}
-
-static void edrtlSetBurnoutDispersion(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlSetBurnoutNormalRate(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlSetBurnoutStartAngle(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlSetBurnoutGlobalScale(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlSetBurnoutOverdarkCap(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlCancelBurnDefaultsMenu(eduimenu_s *, eduimenu_s *) {
-    STUBBED();
-}
-
-static void edrtlSetBurnoutMaxIntensity(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlSetBurnoutMinIntensity(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlSetBurnoutOverbrightCap(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlSetBurnoutOvershootRate(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlSetBurnoutOvershootCutin(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlCancelBurnTransitionsMenu(eduimenu_s *, eduimenu_s *) {
-    STUBBED();
-}
-
-static void edrtlSetBurnoutOvershootAmount(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlSetBurnoutSourceAvailable(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlSetBurnoutSourceDirectionX(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlSetBurnoutSourceDirectionY(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlSetBurnoutSourceDirectionZ(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlSetBurnoutSourceInnerRadius(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlSetBurnoutSourceOuterRadius(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlSetBurnoutFragmentGlowFactor(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlSetBurnoutSourceFallOffPower(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlSetBurnoutSourceInnerIntensity(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlSetBurnoutSourceOuterIntensity(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlInit() {
-    STUBBED();
-}
-
-static i32 edrtlProc(float, nupad_s *) {
-    STUBBED();
-    return 0;
-}
-
-static void edrtlRedo() {
-    STUBBED();
-}
-
-static void edrtlUndo() {
-    STUBBED();
-}
 
 // Burnset persistence and editing state from the same original RTL editor run.
 
@@ -1655,44 +1408,301 @@ void edrtlRemoveBurnout(i32 index) {
     edrtl_edit_burnset->selected_index = -1;
 }
 
-void edrtlInitBurnset(burnset_s *set) {
-    set->parameters.field_00 = 1;
-    set->parameters.field_04 = 0.0f;
-    set->parameters.field_08 = 0.0f;
-    set->parameters.field_0c = 180.0f;
-    set->parameters.field_10 = 1.0f;
-    set->parameters.field_14 = 0.0f;
-    set->parameters.field_18 = 0;
-    set->parameters.field_1c = 0.0f;
-    set->parameters.field_20 = 4.0f;
-    set->parameters.field_24 = 0.0f;
-    set->parameters.field_28 = 0;
-    set->parameters.field_2c = 0.577f;
-    set->parameters.field_30 = 0.577f;
-    set->parameters.field_34 = 0.577f;
-    set->parameters.field_38 = 0.0f;
-    set->parameters.field_3c = 1.0f;
-    set->parameters.field_40 = 180.0f;
-    set->parameters.field_44 = 0.0f;
-    set->parameters.field_48 = 1.0f;
-    set->parameters.field_4c = 0.0f;
-    set->parameters.field_50 = 0.0f;
-    set->parameters_copy = set->parameters;
-    set->field_a8 = 0;
-    set->field_ac = 0;
-    set->field_b0 = 0;
-    set->field_b4 = 1;
-    set->field_b8 = 1.0f;
-    set->field_bc = 4.0f;
-    set->field_c0 = 0.2f;
-    set->field_c4 = 0.5f;
-    set->field_c8 = 1.9f;
-    set->field_cc = 0.0f;
-    set->active_count = 0;
-    set->selected_index = -1;
-    set->field_558 = 1.0f;
-    set->field_55c = 0.2f;
-    set->field_560 = 0;
-    for (i32 i = 0; i < 32; ++i)
-        set->burnouts[i].active = 0;
+static void edrtlSetBurnoutStartAngle(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlSetBurnoutMinIntensity(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlSetBurnoutEndAngle(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlSetBurnoutMaxIntensity(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlSetBurnoutGlobalScale(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlSetBurnoutDispersion(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlSetBurnoutFragmentGlowFactor(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlSetBurnoutThreshold(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlSetBurnoutSourceAvailable(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlSetBurnoutSourceDirectionX(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlSetBurnoutSourceDirectionY(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlSetBurnoutSourceDirectionZ(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlSetBurnoutSourceInnerRadius(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlSetBurnoutSourceInnerIntensity(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlSetBurnoutSourceOuterRadius(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlSetBurnoutSourceOuterIntensity(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlSetBurnoutSourceFallOffPower(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlCancelBurnDefaultsMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edrtlSetBurnoutNormalRate(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlSetBurnoutOvershootRate(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlSetBurnoutOvershootCutin(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlSetBurnoutOvershootAmount(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlSetBurnoutOverbrightCap(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlSetBurnoutOverdarkCap(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlCancelBurnTransitionsMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edrtlBurnTransitionsMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlCancelBurnRadiusMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edrtlSetBurnsetThreshold(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlSetBurnsetIntensity(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlSetBurnsetFalloff(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
+static void edrtlCancelBurnSetMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edrtlCancelBurnMainMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
+
+static void edrtlBurnDefaultsMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void edrtlSetBurnRadius(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void edrtlSetBurnFalloff(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void edrtlBurnRadiusMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void edrtlSetBurnsetFlare(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void edrtlSetBurnsetRadius(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void edrtlBurnSetMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void edrtlBurnoutFileSave(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void edrtlBurnoutFileLoad(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void edrtlBurnMainMenu() {
+    STUBBED();
+}
+static void edrtlInit() {
+    STUBBED();
+}
+
+// RTL editor subsystem stubs (static, internal linkage).
+
+static void edrtlClose() {
+    STUBBED();
+}
+
+static void edrtlEnter() {
+    STUBBED();
+}
+
+static void edrtlLeave() {
+    STUBBED();
+}
+
+static void edrtlProcRTL(float, nupad_s *) {
+    STUBBED();
+}
+
+static EDRTLFOG_s *SelectPrevFog() {
+    i32 index;
+    i32 count = 0;
+    index = curFogLoc - 1;
+    if (index < 0) {
+        index = 32;
+    }
+    if (curr_set != NULL) {
+        while (index != curFogLoc) {
+            if (curr_set->fog[index].type != 0) {
+                curFogLoc = index;
+                return &curr_set->fog[index];
+            }
+            if (index == 0) {
+                index = 32;
+            }
+            ++count;
+            if (count > 31) {
+                break;
+            }
+            --index;
+        }
+    }
+    return NULL;
+}
+
+static EDRTLFOG_s *SelectNextFog() {
+    i32 index;
+    i32 count = 0;
+    if (curFogLoc == -1 || curFogLoc == 31) {
+        index = 0;
+    } else {
+        index = curFogLoc + 1;
+    }
+    if (curr_set != NULL) {
+        while (index != curFogLoc) {
+            if (curr_set->fog[index].type != 0) {
+                curFogLoc = index;
+                return &curr_set->fog[index];
+            }
+            if (index > 31) {
+                index = -1;
+            }
+            ++count;
+            if (count > 31) {
+                break;
+            }
+            ++index;
+        }
+    }
+    return NULL;
+}
+
+static void edrtlProcFog(float, nupad_s *) {
+    STUBBED();
+}
+
+static void edrtlProcBurn(float, nupad_s *) {
+    STUBBED();
+}
+
+static void edrtlRndrLine3d(nuvtx_tc1_s *, numtl_s *, numtx_s *) {
+    STUBBED();
+}
+
+static i32 edrtlProc(float, nupad_s *) {
+    STUBBED();
+    return 0;
+}
+
+static void edrtlDrawCursor() {
+    STUBBED();
+}
+
+static void edrtlDrawLights() {
+    STUBBED();
+}
+
+extern "C" void edrtlDrawFog(EDRTLFOG_s *fog) {
+    if (fog != NULL) {
+        i32 colour = (fog->colour & 0xffffff) | 0x80000000;
+        switch (fog->type) {
+            default:
+                break;
+            case 1:
+                RndrOSphere(&fog->position, fog->radius, colour, numsegs, 0);
+                break;
+        }
+    }
+}
+
+static void edrtlDrawFogs() {
+    STUBBED();
+}
+
+static void edrtlDrawBurnouts() {
+    STUBBED();
+}
+
+static void edrtlDrawHelp() {
+    STUBBED();
+}
+
+static void edrtlDrawRTLInfo() {
+    STUBBED();
+}
+
+static void edrtlDrawFogInfo() {
+    STUBBED();
+}
+
+static void edrtlDrawBurnInfo() {
+    STUBBED();
+}
+
+static void edrtlRender() {
+    STUBBED();
 }

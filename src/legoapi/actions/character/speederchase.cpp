@@ -203,15 +203,7 @@ void ObjIsTargetSpeeder(GameObject_s *) {
     STUBBED();
 }
 
-void PodSeekSubCutSound() {
-    STUBBED();
-}
-
 void SpeederChaseA_Init(WORLDINFO_s *) {
-    STUBBED();
-}
-
-void PodSeekMushCutSound() {
     STUBBED();
 }
 
@@ -261,10 +253,6 @@ i32 ObjOpponentStillThere(GameObject_s *object, GameObject_s *opponent, f32 gap)
         }
     }
     return result;
-}
-
-void PodSeekTuskanCutSound() {
-    STUBBED();
 }
 
 f32 SpeederChaseATATInOutMul(nuvec_s *start, nuvec_s *end) {

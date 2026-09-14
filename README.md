@@ -56,26 +56,26 @@ See https://ttdecomp.github.io/saga/
 |---|---:|---:|
 | `(root)` | 62.0% | 50.0% |
 | `MechInputTouch` | 28.3% | 34.6% |
-| `editor` | 8.1% | 13.9% |
-| `gameapi` | 31.5% | 19.0% |
+| `editor` | 8.2% | 13.9% |
+| `gameapi` | 31.1% | 17.3% |
 | `gameframework` | 92.5% | 34.4% |
 | `gamelib` | 27.7% | 24.1% |
 | `java` | 96.1% | 73.1% |
-| `legoapi` | 42.6% | 29.7% |
-| `legoapi/actions` | 39.3% | 10.5% |
+| `legoapi` | 42.7% | 30.2% |
+| `legoapi/actions` | 39.4% | 10.7% |
 | `legoapi/ai` | 48.0% | 24.3% |
 | `legoapi/audio` | 59.8% | 45.4% |
 | `legoapi/characters` | 42.8% | 19.8% |
 | `legoapi/core` | 30.7% | 22.5% |
 | `legoapi/cutscenes` | 41.5% | 17.5% |
-| `legoapi/gizmo` | 50.6% | 42.5% |
+| `legoapi/gizmo` | 52.1% | 42.9% |
 | `legoapi/gizmos` | 51.4% | 44.5% |
-| `legoapi/items` | 45.2% | 38.0% |
-| `legoapi/menus` | 31.7% | 27.8% |
+| `legoapi/items` | 45.3% | 38.1% |
+| `legoapi/menus` | 32.3% | 28.0% |
 | `legoapi/misc` | 29.3% | 13.7% |
-| `legoapi/props` | 59.6% | 23.2% |
+| `legoapi/props` | 61.2% | 42.1% |
 | `legoapi/render` | 39.7% | 24.0% |
-| `legoapi/world` | 40.2% | 29.6% |
+| `legoapi/world` | 38.9% | 29.0% |
 | `legogame` | 53.8% | 58.7% |
 | `nu2api` | 70.6% | 58.5% |
 

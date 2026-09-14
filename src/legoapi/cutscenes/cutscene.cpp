@@ -738,6 +738,14 @@ static i32 termcutstream_hack;
 extern "C" {
     instNUGCUTSCENE_s *cutscene_load_instance;
     i32 NumCommonStreamingBuffers = 2;
+
+    void instNuGCutSceneFind(void) {
+        STUBBED();
+    }
+
+    void instNuGCutSceneCleanUp(void) {
+        STUBBED();
+    }
 }
 
 static void NuGCutSceneFixPtrs_Title(NUGCUTSCENE_s *cutscene, isize anim_delta) {
@@ -888,7 +896,7 @@ extern "C" void NuGCutSceneSysInit(NUGCUTLOCATORFNENTRY_s *locator_functions) {
 }
 
 void NuGCutSceneSysInitVfx(NUGCUTLOOKUPLOCATORVFXFN lookup, NUGCUTTRIGGERLOCATORVFXFN trigger,
-                          NUGCUTRELEASELOCATORVFXFN release, NUGCUTUPDATELOCATORVFXFN update) {
+                           NUGCUTRELEASELOCATORVFXFN release, NUGCUTUPDATELOCATORVFXFN update) {
     LookupLocatorVfxFn = lookup;
     TriggerLocatorVfxFn = trigger;
     ReleaseLocatorVfxFn = release;
