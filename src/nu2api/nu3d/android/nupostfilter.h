@@ -7,8 +7,6 @@
 struct nuframebuffer_s;
 struct nueffecttex_s;
 
-extern i32 g_effectFlags;
-
 extern "C" bool NuPostEffectIsInitialised(u32 mask);
 extern "C" void NuPostEffectReset(void);
 extern "C" void NuPostEffectEnd(void);

@@ -112,7 +112,6 @@ void *CreateClimbObjectSys(VARIPTR *buf, VARIPTR *buf_end, i32 count);
 void ClearGameObjects(APIOBJECTSYS_s *api_object_sys);
 GameObject_s *AddGameObject(i32 id);
 i32 InitCreature(GameObject_s *obj, i32 id, i32 param);
-void InitGameObjectLights(void);
 
 // --- cutscene.cpp — cutscenes / character scenes ---
 i32 InStory(void);

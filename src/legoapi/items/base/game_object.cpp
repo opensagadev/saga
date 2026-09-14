@@ -3,6 +3,7 @@
 #include "decomp.h"
 #include "legoapi/actions/character/suit.h"
 #include "legoapi/render/core/rtl.h"
+#include "legoapi/render/light/lighting.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/core/input/gamepads.h"
@@ -27,7 +28,6 @@ extern void GetTopBot(GameObject_s *obj);
 extern void GameObjectDimensions(GameObject_s *obj);
 extern void GameObjectOrigin(GameObject_s *obj);
 extern void ResetCharacterIdle(GameObject_s *obj, i32 mode, i32 idle);
-extern void ResetLights(NUVEC *position, rtldata_s *data, void *set);
 extern "C" void ResetAnimPacket(void *packet, i32 enabled);
 extern void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
 
@@ -95,22 +95,6 @@ GameObject_s *AddGameObject(i32 id) {
     (void)id;
     return object;
 }
-void InitGameObjectLights(void) {
-    GameObject_s *object = Obj;
-    i32 i;
-    for (i = 0; i < 64; ++i)
-        object[i].dynamic_light_id = -1;
-    for (i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
-        if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001)
-            continue;
-        object->dynamic_light_id = rtlDynamicAlloc();
-        if (object->dynamic_light_id == -1)
-            continue;
-        rtlDynamicSetType(object->dynamic_light_id, 2);
-        rtlDynamicEnable(object->dynamic_light_id, 0);
-    }
-}
-
 // Local (static) game-object behaviour codes and per-object helpers. Stubbed
 // as local `t` symbols matching res/libTTapp.so.
 

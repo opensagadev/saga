@@ -87,4 +87,5 @@ extern "C" {
     void rtlApplySetScale(void *, rtldata_s *, NUVEC *, NUMTX *, i32, f32);
     void rtlDynamicMasterEnable(i32);
     void rtlSetLights(rtldata_s *);
+    rtlset *rtlLoadSet(char *, VARIPTR *, i32);
 }

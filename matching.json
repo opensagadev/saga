@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.109478,
+    "fuzzy_match_percent": 46.110394,
     "total_code": "4722419",
-    "matched_code": "400237",
-    "matched_code_percent": 8.475254,
+    "matched_code": "400273",
+    "matched_code_percent": 8.476016,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4761,
-    "matched_functions_percent": 35.3741,
+    "matched_functions": 4762,
+    "matched_functions_percent": 35.381527,
     "total_units": 1
   },
   "text": {
@@ -44250,6 +44250,14 @@
           "match_percent": 0.0
         },
         {
+          "name": "_Z10SetFlickerP12GameObject_sf",
+          "demangled_name": "SetFlicker(GameObject_s*, float)",
+          "address": 1033600,
+          "offset": 143632,
+          "size": 26,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z13ResetPlayerAIP12GameObject_s",
           "demangled_name": "ResetPlayerAI(GameObject_s*)",
           "address": 1033632,
@@ -46388,6 +46396,22 @@
           "offset": 531792,
           "size": 1074,
           "match_percent": 2.488479
+        },
+        {
+          "name": "_Z24LightSabre_ColourFromObjiPi",
+          "demangled_name": "LightSabre_ColourFromObj(int, int*)",
+          "address": 1424944,
+          "offset": 534976,
+          "size": 108,
+          "match_percent": 12.352942
+        },
+        {
+          "name": "_Z16LightSabreDebrisP12GameObject_s",
+          "demangled_name": "LightSabreDebris(GameObject_s*)",
+          "address": 1425056,
+          "offset": 535088,
+          "size": 637,
+          "match_percent": 3.2
         },
         {
           "name": "_Z24ForcePushed_SetTargetMomP12GameObject_sPf",
@@ -54218,21 +54242,6 @@
       ]
     },
     {
-      "name": "legoapi/gizmo/object/gizpanel.cpp.o",
-      "source": "src/legoapi/gizmo/object/gizpanel.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/0/gizpanel.o",
-      "functions": [
-        {
-          "name": "_Z14SetPanelLightsf",
-          "demangled_name": "SetPanelLights(float)",
-          "address": 4876144,
-          "offset": 3986176,
-          "size": 495,
-          "match_percent": 3.100775
-        }
-      ]
-    },
-    {
       "name": "legoapi/gizmo/object/gizportal.cpp.o",
       "source": "src/legoapi/gizmo/object/gizportal.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/0/gizportal.o",
@@ -55473,8 +55482,16 @@
     {
       "name": "legoapi/gizmos/fx/guidelines.cpp.o",
       "source": "src/legoapi/gizmos/fx/guidelines.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/0/guidelines.o",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/guidelines.o",
       "functions": [
+        {
+          "name": "_GLOBAL__sub_I_guidelines.cpp",
+          "demangled_name": "_GLOBAL__sub_I_guidelines.cpp",
+          "address": 921712,
+          "offset": 31744,
+          "size": 93,
+          "match_percent": 99.35294
+        },
         {
           "name": "_ZL29GuideLines_ReserveBufferSpacePv",
           "demangled_name": "GuideLines_ReserveBufferSpace(void*)",
@@ -55489,7 +55506,7 @@
           "address": 4910176,
           "offset": 4020208,
           "size": 166,
-          "match_percent": 98.36364
+          "match_percent": 98.90909
         },
         {
           "name": "_ZL15GuideLines_DrawPvS_f",
@@ -55513,7 +55530,7 @@
           "address": 4910416,
           "offset": 4020448,
           "size": 36,
-          "match_percent": 99.0
+          "match_percent": 100.0
         },
         {
           "name": "_ZL23GuideLines_GetMaxGizmosPv",
@@ -55594,6 +55611,14 @@
           "offset": 4021056,
           "size": 139,
           "match_percent": 8.571428
+        },
+        {
+          "name": "_Z21GuideLine_FindNearestP7nuvec_sP11WORLDINFO_sPiPf",
+          "demangled_name": "GuideLine_FindNearest(nuvec_s*, WORLDINFO_s*, int*, float*)",
+          "address": 4911168,
+          "offset": 4021200,
+          "size": 303,
+          "match_percent": 6.575343
         },
         {
           "name": "_Z24GuideLines_RegisterGizmoi",
@@ -55999,8 +56024,16 @@
     {
       "name": "legoapi/gizmos/object/gizpanel.cpp.o",
       "source": "src/legoapi/gizmos/object/gizpanel.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/1/gizpanel.o",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizpanel.o",
       "functions": [
+        {
+          "name": "_GLOBAL__sub_I_gizpanel.cpp",
+          "demangled_name": "_GLOBAL__sub_I_gizpanel.cpp",
+          "address": 898752,
+          "offset": 8784,
+          "size": 93,
+          "match_percent": 0.0
+        },
         {
           "name": "_ZL21GizPanel_GetMaxGizmosPv",
           "demangled_name": "GizPanel_GetMaxGizmos(void*)",
@@ -60696,14 +60729,6 @@
           "offset": 3753776,
           "size": 140,
           "match_percent": 100.0
-        },
-        {
-          "name": "_Z20InitGameObjectLightsv",
-          "demangled_name": "InitGameObjectLights()",
-          "address": 4877472,
-          "offset": 3987504,
-          "size": 201,
-          "match_percent": 95.0
         },
         {
           "name": "_ZL19SpecialObjectFilterPv",
@@ -71474,21 +71499,6 @@
       ]
     },
     {
-      "name": "legoapi/props/objects/guidelines.cpp.o",
-      "source": "src/legoapi/props/objects/guidelines.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/1/guidelines.o",
-      "functions": [
-        {
-          "name": "_Z21GuideLine_FindNearestP7nuvec_sP11WORLDINFO_sPiPf",
-          "demangled_name": "GuideLine_FindNearest(nuvec_s*, WORLDINFO_s*, int*, float*)",
-          "address": 4911168,
-          "offset": 4021200,
-          "size": 303,
-          "match_percent": 4.657534
-        }
-      ]
-    },
-    {
       "name": "legoapi/props/objects/ledge.cpp.o",
       "source": "src/legoapi/props/objects/ledge.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/ledge.o",
@@ -79933,30 +79943,6 @@
           "match_percent": 0.0
         },
         {
-          "name": "_Z10SetFlickerP12GameObject_sf",
-          "demangled_name": "SetFlicker(GameObject_s*, float)",
-          "address": 1033600,
-          "offset": 143632,
-          "size": 26,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z24LightSabre_ColourFromObjiPi",
-          "demangled_name": "LightSabre_ColourFromObj(int, int*)",
-          "address": 1424944,
-          "offset": 534976,
-          "size": 108,
-          "match_percent": 12.352942
-        },
-        {
-          "name": "_Z16LightSabreDebrisP12GameObject_s",
-          "demangled_name": "LightSabreDebris(GameObject_s*)",
-          "address": 1425056,
-          "offset": 535088,
-          "size": 637,
-          "match_percent": 3.2
-        },
-        {
           "name": "_Z9SetLightsP11nucolour3_sP7nuvec_sS0_S2_S0_S2_S2_",
           "demangled_name": "SetLights(nucolour3_s*, nuvec_s*, nucolour3_s*, nuvec_s*, nucolour3_s*, nuvec_s*, nuvec_s*)",
           "address": 4875216,
@@ -79979,6 +79965,14 @@
           "offset": 3985920,
           "size": 256,
           "match_percent": 27.181818
+        },
+        {
+          "name": "_Z14SetPanelLightsf",
+          "demangled_name": "SetPanelLights(float)",
+          "address": 4876144,
+          "offset": 3986176,
+          "size": 495,
+          "match_percent": 3.255814
         },
         {
           "name": "_Z11ResetLightsP7nuvec_sP9rtldata_sPv",
@@ -80011,6 +80005,14 @@
           "offset": 3987280,
           "size": 213,
           "match_percent": 61.85
+        },
+        {
+          "name": "_Z20InitGameObjectLightsv",
+          "demangled_name": "InitGameObjectLights()",
+          "address": 4877472,
+          "offset": 3987504,
+          "size": 201,
+          "match_percent": 95.0
         },
         {
           "name": "_Z20FreeGameObjectLightsv",
@@ -86867,7 +86869,7 @@
           "address": 2800064,
           "offset": 1910096,
           "size": 28,
-          "match_percent": 62.0
+          "match_percent": 85.57143
         },
         {
           "name": "NuPostEffectEnable",
@@ -86875,7 +86877,7 @@
           "address": 2800096,
           "offset": 1910128,
           "size": 195,
-          "match_percent": 93.68519
+          "match_percent": 98.77778
         },
         {
           "name": "NuPostEffectDisable",
@@ -86891,7 +86893,7 @@
           "address": 2800480,
           "offset": 1910512,
           "size": 214,
-          "match_percent": 78.86567
+          "match_percent": 85.283585
         },
         {
           "name": "NuPostEffectAddDynamicLight",
@@ -87003,7 +87005,7 @@
           "address": 2858192,
           "offset": 1968224,
           "size": 1077,
-          "match_percent": 40.152416
+          "match_percent": 40.728626
         }
       ]
     },
@@ -116679,18 +116681,6 @@
       ]
     },
     {
-      "name": "_GLOBAL__sub_I_gizpanel.cpp",
-      "demangled_name": "_GLOBAL__sub_I_gizpanel.cpp",
-      "address": 898752,
-      "offset": 8784,
-      "size": 93,
-      "match_percent": 0.0,
-      "candidate_units": [
-        "legoapi/gizmo/object/gizpanel.cpp.o",
-        "legoapi/gizmos/object/gizpanel.cpp.o"
-      ]
-    },
-    {
       "name": "_GLOBAL__sub_I_gizbombgen.cpp",
       "demangled_name": "_GLOBAL__sub_I_gizbombgen.cpp",
       "address": 900192,
@@ -116768,18 +116758,6 @@
       "candidate_units": [
         "gameapi/edtools/edsplines.cpp.o",
         "legoapi/render/fx/edsplines.cpp.o"
-      ]
-    },
-    {
-      "name": "_GLOBAL__sub_I_guidelines.cpp",
-      "demangled_name": "_GLOBAL__sub_I_guidelines.cpp",
-      "address": 921712,
-      "offset": 31744,
-      "size": 93,
-      "match_percent": 99.35294,
-      "candidate_units": [
-        "legoapi/gizmos/fx/guidelines.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o"
       ]
     },
     {
@@ -116997,7 +116975,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -117010,7 +116987,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -117071,7 +117047,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -117084,7 +117059,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -117145,7 +117119,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -117158,7 +117131,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -117232,7 +117204,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -117245,7 +117216,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -117354,7 +117324,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -117367,7 +117336,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -117441,7 +117409,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -117454,7 +117421,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -117528,7 +117494,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -117541,7 +117506,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -117615,7 +117579,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -117628,7 +117591,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -117702,7 +117664,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -117715,7 +117676,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -117789,7 +117749,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -117802,7 +117761,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -118088,7 +118046,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -118101,7 +118058,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -118175,7 +118131,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -118188,7 +118143,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -118262,7 +118216,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -118275,7 +118228,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -118398,7 +118350,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -118411,7 +118362,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -118497,7 +118447,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -118510,7 +118459,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -118686,7 +118634,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -118699,7 +118646,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -118826,7 +118772,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -118839,7 +118784,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -118966,7 +118910,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -118979,7 +118922,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -119053,7 +118995,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -119066,7 +119007,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -119140,7 +119080,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -119153,7 +119092,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -119227,7 +119165,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -119240,7 +119177,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -119340,7 +119276,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -119353,7 +119288,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -119427,7 +119361,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -119440,7 +119373,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -119525,7 +119457,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -119538,7 +119469,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -119612,7 +119542,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -119625,7 +119554,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -119712,7 +119640,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -119725,7 +119652,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -119799,7 +119725,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -119812,7 +119737,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -119921,7 +119845,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -119934,7 +119857,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120008,7 +119930,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -120021,7 +119942,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120095,7 +120015,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -120108,7 +120027,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120182,7 +120100,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -120195,7 +120112,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120332,7 +120248,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -120345,7 +120260,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120419,7 +120333,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -120432,7 +120345,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120506,7 +120418,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -120519,7 +120430,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -120941,7 +120851,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -120954,7 +120863,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121146,7 +121054,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -121159,7 +121066,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121314,7 +121220,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -121327,7 +121232,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121760,7 +121664,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -121773,7 +121676,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -121847,7 +121749,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -121860,7 +121761,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/guidelines.cpp.o",
         "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
@@ -128989,10 +128889,10 @@
     }
   ],
   "summary": {
-    "bazel_units": 490,
+    "bazel_units": 488,
     "functions": 13454,
-    "assigned_functions": 12352,
-    "ambiguous_functions": 214,
+    "assigned_functions": 12354,
+    "ambiguous_functions": 212,
     "unassigned_functions": 888
   }
 }

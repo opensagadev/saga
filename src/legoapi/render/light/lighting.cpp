@@ -10,6 +10,7 @@
 #include "legoapi/characters/motion.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/render/core/rtl.h"
+#include "legoapi/render/light/lighting.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nurndr.h"
@@ -23,12 +24,62 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-void SetLights(NUCOLOUR3 *colour0, NUVEC *direction0, NUCOLOUR3 *colour1, NUVEC *direction1, NUCOLOUR3 *colour2,
-               NUVEC *direction2, NUVEC *ambient);
+extern "C" {
+    NULIGHTINGSTATE NuRndrLightingStateCurrent = {};
+}
 
-void SetFlicker(GameObject_s *object, float duration) {
-    object->field_0x1024 = duration;
-    object->flicker_flags &= ~7;
+rtldata_s lev_rtldata;
+
+extern "C" {
+    void NuLightSpotFadeSet(u32);
+}
+
+static constexpr u32 kNeutralSpotLightFade = 0x80808080u;
+
+i32 Lighting_HighlightFlash;
+i32 (*Lighting_BlueFlickerFn)(GameObject_s *);
+i32 Lighting_FlashRedOnLastHeart;
+extern f32 GhostLightMul;
+
+void SetLights(NUCOLOUR3 *colour0, NUVEC *direction0, NUCOLOUR3 *colour1, NUVEC *direction1, NUCOLOUR3 *colour2,
+               NUVEC *direction2, NUVEC *ambient) {
+    NuRndrLightingStateCurrent.direction[0] = *direction0;
+    NuRndrLightingStateCurrent.direction[1] = *direction1;
+    NuRndrLightingStateCurrent.direction[2] = *direction2;
+    NuRndrLightingStateCurrent.intensity[0] = *colour0;
+    NuRndrLightingStateCurrent.intensity[1] = *colour1;
+    NuRndrLightingStateCurrent.intensity[2] = *colour2;
+    NuRndrSetDirectionalLightsPS(direction0, colour0, direction1, colour1, direction2, colour2);
+
+    NUCOLOUR3 *ambient_colour = reinterpret_cast<NUCOLOUR3 *>(ambient);
+    NuRndrLightingStateCurrent.ambient = *ambient_colour;
+    NuRndrSetAmbientLightPS(ambient_colour);
+}
+
+void SetLights_RTLDATA(rtldata_s *data, float scale) {
+    if (scale == 1.0f) {
+        rtlSetLights(data);
+        return;
+    }
+    rtldata_s scaled = *data;
+    for (i32 i = 0; i < 3; ++i) {
+        scaled.intensity[i].r *= scale;
+        scaled.intensity[i].g *= scale;
+        scaled.intensity[i].b *= scale;
+    }
+    scaled.ambient.x *= scale;
+    scaled.ambient.y *= scale;
+    scaled.ambient.z *= scale;
+    rtlSetLights(&scaled);
+}
+
+void SetLevelLights(void *set, float) {
+    rtlApplySetScale(set, &lev_rtldata, reinterpret_cast<NUVEC *>(&global_camera.mtx.m30), NULL, 0x10, 1.0f);
+    rtlSetLights(&lev_rtldata);
+}
+
+void SetPanelLights(float) {
+    STUBBED();
 }
 
 void ResetLights(nuvec_s *position, rtldata_s *data, void *set) {
@@ -36,10 +87,6 @@ void ResetLights(nuvec_s *position, rtldata_s *data, void *set) {
     if (position != NULL) {
         rtlApplySetScale(set, data, position, NULL, -1, 1.0f);
     }
-}
-
-extern "C" {
-    NULIGHTINGSTATE NuRndrLightingStateCurrent = {};
 }
 
 void SetZeroLights() {
@@ -56,24 +103,6 @@ void SetZeroLights() {
     NUCOLOUR3 *ambient = reinterpret_cast<NUCOLOUR3 *>(&nuvec_zero);
     NuRndrLightingStateCurrent.ambient = *ambient;
     NuRndrSetAmbientLightPS(ambient);
-}
-
-rtldata_s lev_rtldata;
-
-extern "C" {
-    void NuLightSpotFadeSet(u32);
-}
-
-static constexpr u32 kNeutralSpotLightFade = 0x80808080u;
-
-i32 Lighting_HighlightFlash;
-i32 (*Lighting_BlueFlickerFn)(GameObject_s *);
-i32 Lighting_FlashRedOnLastHeart;
-extern f32 GhostLightMul;
-
-void SetLevelLights(void *set, float) {
-    rtlApplySetScale(set, &lev_rtldata, reinterpret_cast<NUVEC *>(&global_camera.mtx.m30), NULL, 0x10, 1.0f);
-    rtlSetLights(&lev_rtldata);
 }
 
 void LightGameObject(GameObject_s *object, void *set) {
@@ -126,10 +155,6 @@ void FindAndSetLights(nuvec_s *position, float scale, void *set) {
     rtlApplySetScale(set, &lights, position, NULL, -1, scale);
     rtlDynamicMasterEnable(1);
     rtlSetLights(&lights);
-}
-
-void LightSabreDebris(GameObject_s *) {
-    STUBBED();
 }
 
 void SetSpotLightMode() {
@@ -245,50 +270,28 @@ void SetCreatureLights(APIOBJECT_s *object) {
     }
 }
 
-void SetLights_RTLDATA(rtldata_s *data, float scale) {
-    if (scale == 1.0f) {
-        rtlSetLights(data);
-        return;
-    }
-    rtldata_s scaled = *data;
-    for (i32 i = 0; i < 3; ++i) {
-        scaled.intensity[i].r *= scale;
-        scaled.intensity[i].g *= scale;
-        scaled.intensity[i].b *= scale;
-    }
-    scaled.ambient.x *= scale;
-    scaled.ambient.y *= scale;
-    scaled.ambient.z *= scale;
-    rtlSetLights(&scaled);
-}
-
 void FreeGameObjectLights() {
     STUBBED();
 }
-
-void LightSabre_ColourFromObj(i32, i32 *) {
-    STUBBED();
-}
-
-void SetLights(NUCOLOUR3 *colour0, NUVEC *direction0, NUCOLOUR3 *colour1, NUVEC *direction1, NUCOLOUR3 *colour2,
-               NUVEC *direction2, NUVEC *ambient) {
-    NuRndrLightingStateCurrent.direction[0] = *direction0;
-    NuRndrLightingStateCurrent.direction[1] = *direction1;
-    NuRndrLightingStateCurrent.direction[2] = *direction2;
-    NuRndrLightingStateCurrent.intensity[0] = *colour0;
-    NuRndrLightingStateCurrent.intensity[1] = *colour1;
-    NuRndrLightingStateCurrent.intensity[2] = *colour2;
-    NuRndrSetDirectionalLightsPS(direction0, colour0, direction1, colour1, direction2, colour2);
-
-    NUCOLOUR3 *ambient_colour = reinterpret_cast<NUCOLOUR3 *>(ambient);
-    NuRndrLightingStateCurrent.ambient = *ambient_colour;
-    NuRndrSetAmbientLightPS(ambient_colour);
-}
-
-extern "C" rtlset *rtlLoadSet(char *, VARIPTR *, i32);
 
 void LoadLights(WORLDINFO_s *world, char *path) {
     char filename[268];
     sprintf(filename, "%s.rtl", path);
     world->rtl_set = rtlLoadSet(filename, &world->giz_buffer, world->unknown_0108.addr);
+}
+
+void InitGameObjectLights(void) {
+    GameObject_s *object = Obj;
+    i32 i;
+    for (i = 0; i < 64; ++i)
+        object[i].dynamic_light_id = -1;
+    for (i = 0; i < HIGHGAMEOBJECT; ++i, ++object) {
+        if ((object->apiobj.field_0x1f8 & 0x1001) != 0x1001)
+            continue;
+        object->dynamic_light_id = rtlDynamicAlloc();
+        if (object->dynamic_light_id == -1)
+            continue;
+        rtlDynamicSetType(object->dynamic_light_id, 2);
+        rtlDynamicEnable(object->dynamic_light_id, 0);
+    }
 }

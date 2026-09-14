@@ -8,7 +8,6 @@
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
-#include "legoapi/characters/core/players.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/nufloat.h"
 
@@ -66,7 +65,6 @@ void Arcade_Kill(i32, i32);
 i32 qrand();
 GAMEPAD_s *ViewCamGetGamePad();
 i32 Cheat_IsOn(i32);
-void SetFlicker(GameObject_s *, f32);
 void Player_ClearContext(GameObject_s *, i32);
 extern "C" void AddGameDebris(APIDEBRISSYS_s *, i32, NUVEC *);
 extern "C" void NuSpecialSetVisibility(void *, i32);

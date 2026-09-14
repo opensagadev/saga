@@ -15,6 +15,7 @@
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/core/terrain.h"
+#include "legoapi/render/light/lighting.h"
 #include "legoapi/render/fx/parts.h"
 #include "legoapi/render/fx/spline_position.h"
 #include "nu2api/nucore/nupad.h"
@@ -152,8 +153,6 @@ void SnapCreaturePos(GameObject_s *object, NUVEC *position, i32 angle, AIPATHINF
 void MovePlayerSpline(GameObject_s *object);
 void GetTopBot(GameObject_s *object);
 void ResetRumble(RUMBLEPACKET *packet);
-void ResetLights(NUVEC *position, rtldata_s *data, void *set);
-void LightGameObject(GameObject_s *object, void *set);
 void InitSurfaceInfo(GameObject_s *object);
 i32 TightRope_SnapTo(GameObject_s *object, NUVEC *position);
 void Player_ClearContext(GameObject_s *object, i32 mode);
@@ -6703,7 +6702,6 @@ extern AREADATA *PODSPRINT_ADATA;
 extern i16 id_ANAKINSNEWPOD, id_ANAKINSNEWPODGREEN, id_SEBULBASPOD;
 extern f32 tieonsfxwait, tieoffsfxwait;
 void MovePlayer_NETWORK(GameObject_s *);
-void SetFlicker(GameObject_s *, f32);
 void UpdateRumble(RUMBLEPACKET *);
 void Player_ToggleCharacter(GameObject_s *, i32, i32);
 void AveragePlayerCurrentSpeedMul();

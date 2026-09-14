@@ -3,68 +3,13 @@
 #include "decomp.h"
 #include "legoapi/world/level.h"
 
-static i32 GuideLines_GetMaxGizmos(void *guideline) {
-    WORLDINFO *world = static_cast<WORLDINFO *>(guideline);
-    return world != NULL ? world->current_level->max_guidelines : 0;
-}
-
-static void GuideLines_AddGizmos(GIZMOSYS *gizmo_sys, i32, void *, void *) {
-    UNIMPLEMENTED();
-}
-
-static void GuideLines_Draw(void *, void *, float) {
-    UNIMPLEMENTED();
-}
-
-static char *GuideLine_GetGizmoName(GIZMO *gizmo) {
-    return gizmo != NULL ? static_cast<char *>(gizmo->object) : NULL;
-}
-
-static i32 GuideLine_GetOutput(GIZMO *gizmo, i32, i32) {
-    UNIMPLEMENTED();
-    return {};
-}
-
-static char *GuideLine_GetOutputName(GIZMO *gizmo, i32 output_index) {
-    UNIMPLEMENTED();
-    return {};
-}
-
-static i32 GuideLine_GetNumOutputs(GIZMO *gizmo) {
-    return 1;
-}
-
-static void GuideLine_Activate(GIZMO *gizmo, i32 active) {
-    if (gizmo != NULL) {
-        static_cast<GUIDELINE *>(gizmo->object)->active = active != 0;
-    }
-}
-
-static void GuideLine_SetVisibility(GIZMO *gizmo, i32 visible) {
-    if (gizmo != NULL) {
-        static_cast<GUIDELINE *>(gizmo->object)->visible = visible != 0;
-    }
-}
-
-static void *GuideLines_AllocateProgressData(VARIPTR *, VARIPTR *) {
-    UNIMPLEMENTED();
-    return {};
-}
-
 struct GUIDELINEPROGRESS {
     u32 state[2];
 };
 
-static void GuideLines_ClearProgress(void *, void *progress_data) {
-    if (progress_data != NULL) {
-        GUIDELINEPROGRESS *progress = static_cast<GUIDELINEPROGRESS *>(progress_data);
-        progress->state[0] = 0xffffffff;
-        progress->state[1] = 0xffffffff;
-    }
-}
-
-static void GuideLines_StoreProgress(void *, void *, void *) {
+static void *GuideLines_ReserveBufferSpace(void *) {
     UNIMPLEMENTED();
+    return {};
 }
 
 static void GuideLines_Reset(void *world_info, void *, void *progress_data) {
@@ -86,14 +31,73 @@ static void GuideLines_Reset(void *world_info, void *, void *progress_data) {
     }
 }
 
-static void *GuideLines_ReserveBufferSpace(void *) {
+static void GuideLines_Draw(void *, void *, float) {
+    UNIMPLEMENTED();
+}
+
+static void GuideLine_Activate(GIZMO *gizmo, i32 active) {
+    if (gizmo != NULL) {
+        static_cast<GUIDELINE *>(gizmo->object)->active = active != 0;
+    }
+}
+
+static void GuideLine_SetVisibility(GIZMO *gizmo, i32 visible) {
+    if (gizmo != NULL) {
+        static_cast<GUIDELINE *>(gizmo->object)->visible = visible != 0;
+    }
+}
+
+static i32 GuideLines_GetMaxGizmos(void *guideline) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(guideline);
+    return world != NULL ? world->current_level->max_guidelines : 0;
+}
+
+static char *GuideLine_GetGizmoName(GIZMO *gizmo) {
+    return gizmo != NULL ? static_cast<char *>(gizmo->object) : NULL;
+}
+
+static i32 GuideLine_GetOutput(GIZMO *gizmo, i32, i32) {
     UNIMPLEMENTED();
     return {};
+}
+
+static char *GuideLine_GetOutputName(GIZMO *gizmo, i32 output_index) {
+    UNIMPLEMENTED();
+    return {};
+}
+
+static i32 GuideLine_GetNumOutputs(GIZMO *gizmo) {
+    return 1;
+}
+
+static void GuideLines_ClearProgress(void *, void *progress_data) {
+    if (progress_data != NULL) {
+        GUIDELINEPROGRESS *progress = static_cast<GUIDELINEPROGRESS *>(progress_data);
+        progress->state[0] = 0xffffffff;
+        progress->state[1] = 0xffffffff;
+    }
+}
+
+static void *GuideLines_AllocateProgressData(VARIPTR *, VARIPTR *) {
+    UNIMPLEMENTED();
+    return {};
+}
+
+static void GuideLines_AddGizmos(GIZMOSYS *gizmo_sys, i32, void *, void *) {
+    UNIMPLEMENTED();
 }
 
 static i32 GuideLines_Load(void *, void *) {
     UNIMPLEMENTED();
     return {};
+}
+
+static void GuideLines_StoreProgress(void *, void *, void *) {
+    UNIMPLEMENTED();
+}
+
+void GuideLine_FindNearest(nuvec_s *, WORLDINFO_s *, i32 *, float *) {
+    STUBBED();
 }
 
 ADDGIZMOTYPE *GuideLines_RegisterGizmo(i32 type_id) {

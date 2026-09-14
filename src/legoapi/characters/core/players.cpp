@@ -26,6 +26,7 @@ struct HINT_s;
 #include "legoapi/characters/motion.h"
 #include "legoapi/props/system/socksys.h"
 #include "legoapi/render/fx.h"
+#include "legoapi/render/light/lighting.h"
 #include "legoapi/core/input/timer.h"
 #include "legogame/game.h"
 #include "nu2api/nu3d/nutex.h"
@@ -52,7 +53,6 @@ extern void GetTopBot(GameObject_s *obj);
 extern void GameObjectDimensions(GameObject_s *obj);
 extern void GameObjectOrigin(GameObject_s *obj);
 extern void ResetRumble(RUMBLEPACKET *packet);
-extern void ResetLights(NUVEC *position, rtldata_s *data, void *set);
 extern void CurrentStart(GameObject_s *obj, i32 mode, i32 start);
 extern void InitSurfaceInfo(GameObject_s *obj);
 extern i32 SetObjOnSurface(GameObject_s *obj, i32 mode);
@@ -1242,6 +1242,11 @@ void StarWars_AutoSetAICapabilities(GameObject_s *object);
 i32 CanPullLevers(i32 id);
 extern f32 DEFAULT_MOVE_RANGE;
 
+void SetFlicker(GameObject_s *object, float duration) {
+    object->field_0x1024 = duration;
+    object->flicker_flags &= ~7;
+}
+
 void InitPlayerAI(GameObject_s *object) {
     StarWars_AutoSetAICapabilities(object);
     u8 *b = reinterpret_cast<u8 *>(object);
@@ -1468,7 +1473,6 @@ i32 DeactivatePlayer(GameObject_s *object, f32 duration, GameObject_s *source) {
 void ResetPlayerPacket(PLAYERPACKET_s *, CHARACTERDATA_s *);
 void ResetCharacterIdle(GameObject_s *, i32, i32);
 void SetGameObjectCharacterData(GameObject_s *);
-void SetFlicker(GameObject_s *, f32);
 void ResetCoinPacket(COINPACKET_s *);
 
 void ResetPlayerMoves(GameObject_s *object) {
