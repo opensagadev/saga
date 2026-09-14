@@ -2,6 +2,7 @@
 #include "nu2api/nu3d/NuRenderDevice.h"
 
 #include "globals.h"
+#include "java/android.h"
 #include "nu2api/nu3d/android/NuGLES2Extensions.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nucore/nucore.hpp"

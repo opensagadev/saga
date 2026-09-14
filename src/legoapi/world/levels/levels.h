@@ -52,6 +52,7 @@ extern i32 active_neutral_count;
 extern i32 active_baddy_count;
 extern FadeSystem FadeSys;
 extern float statstime;
+extern float cointotaltime;
 #ifdef __cplusplus
 extern "C" i32 Paused;
 #else

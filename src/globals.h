@@ -538,11 +538,7 @@ extern NUCAMERA *pNuCam;
 // ------------------------------------------------------------------------
 // Platform & device info
 // ------------------------------------------------------------------------
-struct ANativeWindow;
-extern ANativeWindow *g_appWindow;
 extern volatile bool g_isBlockedInSwapScreen;
-extern char g_deviceManufacturer[256];
-extern char g_deviceModel[256];
 extern i32 g_isLowestEndDevice;
 extern i32 g_isLowEndDevice;
 extern i32 g_isMidRangeDevice;
@@ -555,7 +551,6 @@ extern i32 finishloop_backdroponly;
 // Render / compatibility options
 // ------------------------------------------------------------------------
 extern u8 g_forceSysMemVbs;
-extern i32 g_forceETC1;
 extern i32 texanimbits;
 extern i32 Reflections_On;
 extern i32 disable_narrow_socks;

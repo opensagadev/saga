@@ -5,6 +5,7 @@
 #include "decomp.h"
 #include "globals.h"
 #include "host/platform/graphics.hpp"
+#include "java/android.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nucore/nucore.hpp"
 #include "nu2api/nucore/nuapi.h"

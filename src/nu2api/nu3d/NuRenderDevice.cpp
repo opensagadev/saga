@@ -2,6 +2,7 @@
 
 #include "decomp.h"
 #include "globals.h"
+#include "java/android.h"
 #include "java/native_window.h"
 #include "nu2api/nu3d/nurndr.h"
 #include "nu2api/nu3d/android/nutex_ios_ex.h"

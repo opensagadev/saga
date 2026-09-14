@@ -230,6 +230,13 @@ def order_alignment(original: list[dict], current: list[dict], *, unique_only: b
     }
 
 
+def source_order_alignment(original: list[dict], current: list[dict], paired_count: int) -> dict:
+    """Avoid a false zero when input sections differ from linked output sections."""
+    metric = order_alignment(original, current)
+    metric["comparable"] = metric["common"] >= paired_count
+    return metric
+
+
 def substantive(symbols: list[dict]) -> list[dict]:
     return [symbol for symbol in symbols if symbol["type"] in {1, 2} and not is_assembler_label(symbol)]
 
@@ -517,7 +524,10 @@ def print_ranked_component_splits(ranked: list[dict], limit: int) -> None:
 
 def overall_progress(ledger: dict, matching: dict | None = None) -> dict:
     """Separate observable source coverage, order grouping, and constraints."""
-    originals = ledger["original_symbols"]
+    # Compiler-generated numeric labels are not stable source identities. A
+    # harmless recompile can renumber them and falsely move source coverage.
+    originals = [symbol for symbol in ledger["original_symbols"]
+                 if not is_assembler_label(symbol)]
     by_section = defaultdict(Counter)
     for symbol in originals:
         candidates = symbol.get("current_owner_candidates", [])
@@ -533,6 +543,7 @@ def overall_progress(ledger: dict, matching: dict | None = None) -> dict:
                                                      if count >= 5)
     return {
         "original_symbols": len(originals),
+        "assembler_labels_excluded": len(ledger["original_symbols"]) - len(originals),
         "current_units": len(ledger.get("current_units", [])),
         "by_section": {section: dict(counts) for section, counts in by_section.items()},
         "grouping": grouping,
@@ -554,7 +565,8 @@ def print_overall_progress(progress: dict) -> None:
 
     print("Overall structural progress (independent indicators, not a completion score):")
     print(f"  Current compile units: {progress['current_units']:,}")
-    print(f"  Original named allocated symbols: {progress['original_symbols']:,}")
+    print(f"  Original named allocated symbols: {progress['original_symbols']:,} "
+          f"({progress['assembler_labels_excluded']:,} unstable numeric assembler labels excluded)")
     for section in (".text", ".rodata", ".data", ".bss"):
         print(f"  {section} source coverage: {coverage(section)}")
     grouping = progress["grouping"]
@@ -677,10 +689,14 @@ def main() -> None:
         keys = {symbol_key(symbol) for symbol in original_order}
         current_order = substantive(current_order_symbols(current, keys, sections))
     if object_symbols is not None:
-        unit_metric = order_alignment(original_order, current_order)
-        print(f"TU ordered-symbol alignment: {unit_metric['percent']:.1f}% "
-              f"({unit_metric['ordered']} in order; {unit_metric['original']} original, "
-              f"{unit_metric['current']} current; {unit_metric['common']} shared)")
+        unit_metric = source_order_alignment(original_order, current_order, counts.get("paired", 0))
+        if unit_metric["comparable"]:
+            print(f"TU ordered-symbol alignment: {unit_metric['percent']:.1f}% "
+                  f"({unit_metric['ordered']} in order; {unit_metric['original']} original, "
+                  f"{unit_metric['current']} current; {unit_metric['common']} shared)")
+        else:
+            print("TU ordered-symbol alignment: n/a (some paired linked symbols use different "
+                  "input sections; inspect paired linked-order ranks)")
     overall_view = (args.source is None and args.start is None and args.end is None
                     and args.section is None)
     ledger = None

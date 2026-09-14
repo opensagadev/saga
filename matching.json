@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.11067,
+    "fuzzy_match_percent": 46.1107,
     "total_code": "4722419",
     "matched_code": "400297",
     "matched_code_percent": 8.476524,
@@ -52029,7 +52029,7 @@
           "address": 4919824,
           "offset": 4029856,
           "size": 408,
-          "match_percent": 99.42735
+          "match_percent": 99.470085
         },
         {
           "name": "_Z20GizmoSys_BoltHitPlatP10GIZMOSYS_sPvP6BOLT_sPh",
@@ -66675,6 +66675,14 @@
           "match_percent": 0.0
         },
         {
+          "name": "_Z11UpdateStatsv",
+          "demangled_name": "UpdateStats()",
+          "address": 1301680,
+          "offset": 411712,
+          "size": 3254,
+          "match_percent": 9.243243
+        },
+        {
           "name": "_Z11Panel_Clearv",
           "demangled_name": "Panel_Clear()",
           "address": 1313104,
@@ -66688,7 +66696,7 @@
           "address": 1316160,
           "offset": 426192,
           "size": 436,
-          "match_percent": 87.433334
+          "match_percent": 87.48889
         },
         {
           "name": "_Z9InitPaneli",
@@ -69085,14 +69093,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "_Z11UpdateStatsv",
-          "demangled_name": "UpdateStats()",
-          "address": 1301680,
-          "offset": 411712,
-          "size": 3254,
-          "match_percent": 9.243243
-        },
-        {
           "name": "_Z15ResetIconWibblev",
           "demangled_name": "ResetIconWibble()",
           "address": 1732912,
@@ -69266,7 +69266,7 @@
           "address": 2029872,
           "offset": 1139904,
           "size": 751,
-          "match_percent": 72.22078
+          "match_percent": 72.318184
         },
         {
           "name": "_Z25SuperStoryTime_LSW_UpdateP14STATUS_STAGE_sP14STATUSPACKET_sf",

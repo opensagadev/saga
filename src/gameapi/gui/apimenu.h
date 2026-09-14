@@ -161,6 +161,7 @@ extern "C" {
 void APIMenuDrawMemCardSlots(MENU *menu, f32 y);
 void APIMenuDrawGameState(f32 x, f32 y, i32 highlight, i32 slot);
 i32 GetMenuID(void);
+extern i32 newgamecam;
 void MenuInitSelectMode(MENU *menu);
 void MenuUpdateSelectMode(MENU *menu);
 void MenuDrawSelectMode(MENU *menu);

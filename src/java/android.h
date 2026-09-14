@@ -3,7 +3,15 @@
 #include "nu2api/nucore/common.h"
 
 struct AAssetManager;
+struct ANativeWindow;
+extern "C" {
+    extern char g_language[64];
+}
 extern AAssetManager *g_assetManager;
+extern ANativeWindow *g_appWindow;
+extern char g_deviceManufacturer[256];
+extern char g_deviceModel[256];
+extern i32 g_forceETC1;
 extern i32 g_obbMainVersion;
 extern i32 g_obbMainSize;
 extern i32 g_obbPatchVersion;

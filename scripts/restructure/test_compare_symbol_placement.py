@@ -25,6 +25,7 @@ from scripts.restructure.compare_symbol_placement import (
     relative_positions,
     same_tu_constraints,
     same_tu_owner_splits,
+    source_order_alignment,
     symbol_key,
 )
 
@@ -43,6 +44,15 @@ def symbol(name, address, *, section=".text", section_base=0x1000, binding=0, si
 
 
 class CompareSymbolPlacementTests(unittest.TestCase):
+    def test_source_order_alignment_rejects_input_section_mismatch(self):
+        original = [symbol("table", 0x1000, section=".data")]
+        input_data = [symbol("table", 0, section=".data.rel.local")]
+        selected = [item for item in input_data if item["section"] == ".data"]
+        metric = source_order_alignment(original, selected, paired_count=1)
+        self.assertEqual(metric["common"], 0)
+        self.assertFalse(metric["comparable"])
+        self.assertTrue(source_order_alignment(original, original, paired_count=1)["comparable"])
+
     def test_component_uses_elf_symbol_ids_not_json_positions(self):
         function = {**symbol("TerrainScan", 0x2000, binding=1), "symbol_index": 91,
                     "current_owner_candidates": [2]}
@@ -371,6 +381,16 @@ class CompareSymbolPlacementTests(unittest.TestCase):
         self.assertIn("1 current source splits", output.getvalue())
         self.assertIn("render.c -> state.c", output.getvalue())
         self.assertIn("Body matching in matching.json", output.getvalue())
+
+    def test_overall_coverage_ignores_unstable_numeric_assembler_labels(self):
+        ledger = {"original_symbols": [
+            {**symbol("UsefulFunction", 0x100, binding=1), "current_owner_candidates": [0]},
+            {**symbol(".L436", 0x110), "current_owner_candidates": []},
+        ], "current_units": [{"id": 0, "source": "useful.cpp"}]}
+        report = overall_progress(ledger)
+        self.assertEqual(report["original_symbols"], 1)
+        self.assertEqual(report["assembler_labels_excluded"], 1)
+        self.assertEqual(report["by_section"][".text"], {"unique": 1})
 
     def test_overall_report_without_xrefs_omits_constraint_claim(self):
         ledger = {"original_symbols": [{**symbol("first", 0x100),

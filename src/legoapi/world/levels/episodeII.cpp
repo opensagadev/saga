@@ -20,6 +20,7 @@
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/menus/core/gamemessage.h"
+#include "legoapi/menus/core/panel.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/render/core/render.h"
 #include "nu2api/nu3d/nuspecial.h"

@@ -9,6 +9,7 @@
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/menus/core/panel.h"
 #include "legoapi/menus/core/text.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
@@ -75,7 +76,6 @@ void SetLevelLights(void *, f32);
 void NewLevelFromMenu(LEVELDATA_s *, i32, i32, i32);
 void FindAndSetLights(NUVEC *, f32, void *);
 void SetZeroLights(void);
-void Panel_Clear(void);
 void GameFog_Reset(void);
 void EnableShadowMapRendering(i32);
 void ResetShadowMapRendering(void);

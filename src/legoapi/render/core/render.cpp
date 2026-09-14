@@ -5,6 +5,7 @@
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/menus/core/text.h"
+#include "legoapi/menus/core/panel.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/menus/screens/gamemenuall.h"
 #include "nu2api/nu3d/numtl.h"
@@ -2833,7 +2834,6 @@ static void DrawHitPoints(GameObject_s *object, float x, float y, float scale, f
 void TransformGameMessages(nuvec_s *, nuvec_s *, nuvec_s *);
 
 #include "nu2api/nucore/nupad.h"
-f32 Panel_GetRedBrickSlideTime();
 
 void Customiser_TransformToPanel(CUSTOMISER *);
 i32 Arcade_GetMode(u32 *);

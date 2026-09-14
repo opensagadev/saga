@@ -22,6 +22,7 @@
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/menus/core/panel.h"
 #include "legoapi/render/core/render.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/fx/game_deb.h"
@@ -88,7 +89,6 @@ void Batarangs_Reset(void);
 void Detonators_Reset(void);
 void ResetExplosions(void);
 void ShoveObjectSysReset(void);
-void Panel_Clear(void);
 void ResetGameMessages(void);
 void Tag_ResetTransfers(void);
 void Tag_SetMode(i32 mode);
