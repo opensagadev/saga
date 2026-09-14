@@ -1,5 +1,6 @@
 #include "decomp.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/actions/movement/carrying.h"
 #include "legoapi/actions/character/snake.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
@@ -8,6 +9,8 @@
 #include "legoapi/menus/core/panel.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/menus/screens/gamemenuall.h"
+#include "legoapi/render/light/fade_material.h"
+#include "legoapi/world/levels/levels.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/android/nuportal_android.h"
 #include "nu2api/nu3d/nuvport.h"
@@ -2125,10 +2128,7 @@ void Draw_NOMEMORYCARD() {
 }
 
 void DrawFadeScreenWipe() {
-    extern FadeSystem *pFadeInfo;
-
     NuRndrBeginScene(-1);
-    extern numtl_s *FadeMtl2;
     extern numtl_s *SolidMtl;
 
     // The original routine unconditionally dereferences the shared fade
@@ -2855,7 +2855,7 @@ extern "C" i16 id_YODA, id_QUIGONJINN, id_MACEWINDU, id_C3PO;
 extern i16 tDROPIN_INSERTCONTROLLER;
 extern u16 PowerUp_PanelYRot;
 extern f32 POWERUPOBJSIZE, minikittime, REDBRICKPOSX, REDBRICKPOSY, REDBRICKPOS2X, REDBRICKPOS2Y, PANEL_REDBRICKSCALE,
-    goldbricktime, BOSSICONY;
+    BOSSICONY;
 
 extern i32 screendump, save_paused, abort_load, gone_through_door_to_new_level, DoubleScore;
 extern i32 TERRAINCALLS, SHADOWCALLS, RAYCASTCALLS;
@@ -3607,7 +3607,6 @@ void CharScene_Draw(WORLDINFO_s *, i32, NUMTX *, NUMTX *);
 void CharMiniKit_Draw(i32, NUMTX *, i32, f32, f32);
 void Customiser_DrawAccessories(CUSTOMISER *, GameObject_s *, NUMTX *);
 i32 Batarang_GetObjectFromCharID(i32);
-void SuperCarry_DrawObject(GameObject_s *);
 void Grapple_DrawLine(GameObject_s *);
 void Transform_DrawTarget(NUVEC *, f32, f32);
 extern i16 id_ANAKINJEDISCARRED, id_WEIRDO1, id_WEIRDO2, id_CATAPULT, id_CHEWBACCA, id_WOOKIEE, id_TWOFACE;

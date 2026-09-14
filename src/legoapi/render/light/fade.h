@@ -1,6 +1,7 @@
 #pragma once
 
 #include "legoapi/legoapi_types.h"
+#include "legoapi/render/light/fade_material.h"
 
 void SetFramesToWait(u32 frames);
 

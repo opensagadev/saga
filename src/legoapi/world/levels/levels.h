@@ -33,6 +33,8 @@ struct GameObject_s;
 struct nuhspecial_s;
 struct GAMECUTSCENES_s; // full type in legoapi/legoapi_types.h
 
+extern f32 goldbricktime;
+
 extern GIZAIMESSAGESYS_s *gizaimessagesys;
 extern i16 trooper_boltid;
 extern i8 trooper_side[3];

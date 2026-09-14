@@ -18,6 +18,7 @@ struct HINT_s;
 #include "legoapi/world/levels/episode.h"
 #include "legoapi/world/level.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/actions/movement/carrying.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/props/doors/door.h"
@@ -792,7 +793,6 @@ void PlayerItemType_Find(i32) {
 
 void (*Player_ClearContextFn)(GameObject_s *, i32);
 void Whip_Release(GameObject_s *);
-void SuperCarry_Release(GameObject_s *);
 void SpecialMove_ReleaseVictim(GameObject_s *);
 
 void Player_ClearContext(GameObject_s *object, i32 mode) {

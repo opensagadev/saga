@@ -31,17 +31,6 @@
 #include <float.h>
 #include <string.h>
 
-
-i32 SuperCarry_Carrying(GameObject_s *object) {
-    if (LEGOCONTEXT_SUPERCARRY != -1 && object->character_context == LEGOCONTEXT_SUPERCARRY) {
-        if (static_cast<u8>(object->field_0x7a3 - 2) < 2)
-            return 1;
-        if (object->field_0x7a3 == 6)
-            return 1;
-    }
-    return 0;
-}
-
 void EvalAnim(nuhspecial_s *special, f32 frame, numtx_s *matrix, i32 include_instance_translation);
 i32 UseFallAnim(GameObject_s *object);
 i32 GetDefaultIdle(GameObject_s *object);
@@ -249,7 +238,6 @@ static void StartAnimation(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, i16 an
     packet->previous_time = packet->current_time;
     packet->blending = 0;
 }
-
 
 void Animate_POD(GameObject_s *) {
     STUBBED();
@@ -1889,7 +1877,6 @@ extern "C" {
                                                      f32 blend, i32 joint_count, i32 first_joint,
                                                      NUVEC *root_translation);
 
-
     void ANI_FixUpAddrs(ani3_animheader_s *anim, isize delta, i32) {
         if (anim->magic != 0x414e4934) {
             return;
@@ -1926,9 +1913,6 @@ extern "C" {
     // Original @0x2c17d0. The non-quaternion ANI4 player uses a compact
     // four-samples-per-word curve stream. Only groups enabled by the node's
     // translation/rotation/scale flags occupy space in that stream.
-
-
-
 
     f32 GetInstAnimEndFrame(nugscn_s *scene, nuinstanim_s *instance_animation) {
         if (instance_animation == NULL) {
@@ -2053,7 +2037,6 @@ extern "C" {
         return state;
     }
 
-
 } // extern "C"
 
 void SetAnimFrame(nuhspecial_s *special, float frame) {
@@ -2166,15 +2149,6 @@ i32 GizmoFileReadGameAnimSet(GAMEANIMSET_s *set, void *world_ptr,
 
     return success;
 }
-
-
-
-
-
-
-
-
-
 
 void EvalAnim(nuhspecial_s *special, float frame, numtx_s *matrix, i32 include_instance_translation) {
     if (matrix == NULL || special == NULL) {

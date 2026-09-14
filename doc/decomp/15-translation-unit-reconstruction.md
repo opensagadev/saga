@@ -1,9 +1,9 @@
 # Original translation-unit reconstruction
 
-At the latest measured target build, there are 486 current translation
-units, 4,763 exact functions, and a 46.1107% whole-binary fuzzy match. The independent structural
-dashboard reports 48.5% largest-run text grouping and 2,607/2,610
-assessable same-TU writable-state links satisfied (47.5% of original links
+At the latest measured target build, there are 484 current translation
+units, 4,763 exact functions, and a 46.1300% whole-binary fuzzy match. The independent structural
+dashboard reports 48.5% largest-run text grouping and 2,626/2,629
+assessable same-TU writable-state links satisfied (47.9% of original links
 are assessable; three verifiable source splits remain); neither is a
 completion percentage.
 The strict linked-GOT diagnostic currently sees 3,808 slots versus 4,758
@@ -25,7 +25,7 @@ On the current build with file labels hidden, adjacent local-text pairs identify
 the same TU with 90.1% precision, and initializer-delimited blocks have a
 90.0% majority-owner fraction. These are useful survey heuristics, not safe
 boundaries without corroborating local references and linked matching.
-All 486 current units emit at least one named symbol. Four have no matched
+All 484 current units emit at least one named symbol. Four have no matched
 function but still own real data or a tentative ELF `COMMON` definition;
 they are not automatically empty TU shells.
 
@@ -191,6 +191,8 @@ linkage.
 | Original cluster / strongest anchor | Current source owner(s) | State and remaining structure |
 |---|---|---|
 | Guideline gizmo: complete 17-function original run `0x4aec00–0x4af2f0`, with `GuideLine_FindNearest` between load/store and registration | `legoapi/gizmos/fx/guidelines.cpp` and its header; formerly a lone stub in `props/objects/guidelines.cpp` | All 17 paired functions now emit in exact original relative order (zero inversions); the redundant file and duplicate same-name initializer are gone. The moved stub improves 4.66→6.58%, `GuideLine_SetVisibility` becomes exact, and whole fuzzy rises slightly. Real nearest-line and other stub behavior remain open. |
+| Door parser: 14 LOCAL callbacks, `Doors_Configure`, LOCAL `D_worldinfo`/`D_door`, and 160-byte LOCAL keyword table at `0x485f20–0x4868a6` | `legoapi/props/doors/doors.cpp`; duplicate forced-emission callback stubs in `gameapi/ai/gameai_d.cpp` removed | Real callbacks now carry original local names/binding and all 19 assessable state links share the owner. The table's 19 strings and 19 callback pointers match original relocation order; the null terminator has no relocations. Exact matches remain 4,763 and fuzzy rises 46.1107→46.1300%; `D_vehicle` is still a stub and causes the three remaining pairwise order inversions in this slice. The full original door TU boundary remains provisional. |
+| SuperCarry/carrying: contiguous 13-function run `0x4fab00–0x4fd580`, initialized speed/state at `0x668d10–0x668d94`, and `_GLOBAL__sub_I_carrying.cpp` | `actions/movement/carrying.cpp`; formerly split with `supercarry.cpp` and one exact function in `characters/motion/gameanim.cpp` | All 13 paired functions now share the original-named owner, and the synthetic `supercarry.cpp` constructor is gone. All ten measured initialized globals and both BSS globals have original relative order; the carrying constructor stays 99.35% and all body scores/exact matches are unchanged. The text run still has ten pairwise inversions pending wider codegen work. One pre-existing `__used__` remains on a helper whose current callers pass only constants; removing it produces a constprop clone, so recover the original call path before retiring it. |
 | Lighting run: `SetLights_RTLDATA` through `LightGameObject` at `0x4a64e0–0x4a6e00` | `legoapi/render/light/lighting.cpp` and owner header; formerly also the lone `gizmo/object/gizpanel.cpp` stub and `InitGameObjectLights` in `items/base/game_object.cpp` | `SetPanelLights` and the unchanged 95%-matched initializer now share the original-address lighting group; the obsolete tiny file and panel-local prototype are gone. Source-order passes raise focused alignment to 60.0% (9 in order; 11 paired), with exact/fuzzy body matching preserved. The three RTL environment getters are still outside: their co-location lowered whole fuzzy to 46.110046% and was reverted. A complete runtime-order pass raised alignment to 73.3% but lowered `SetCreatureLights` enough to regress whole fuzzy by 0.000014 points, so it was reverted. |
 | Player and lightsaber strays: `SetFlicker` at `0x0fc580`; adjacent `LightSabre_ColourFromObj`/`LightSabreDebris` at `0x15be30–0x15c11d` | `characters/core/players.cpp` and `characters/motion/move.cpp`; formerly all three in `render/light/lighting.cpp` | The real 26-byte flicker body now sits in the player-AI run and uses a declaration in `players.h`; its three measured neighbors have zero order inversions and all body scores remain unchanged. The two lightsaber stubs were moved together to the motion source on address-neighborhood evidence; there is no verified local-state xref, so their complete original TU boundary remains provisional. Exact/fuzzy totals are unchanged. |
 | HTML run: seventeen contiguous functions at `0x2d5c30–0x2d73e9`, including the plotting helpers and LOCAL `curx`/`cury`/`nextx`/`dx` | The eleven output helpers remain in `legoapi/misc/supportall.cpp` (`-O2`); six graph functions and their state now share `nu2api/nucore/nuhtml.cpp` (`-O3`) and its public header | The six graph text symbols emit in original relative order, all ten assessed LOCAL-state links co-locate, and `size` plus four LOCAL variables retain their original binding/size and BSS order. The three 99.7%-matched plotting helpers and whole body score are preserved. **Open:** the broader original HTML TU boundary; complete-merge trials at both `-O2` and `-O3` kept 4,763 exact but lowered whole fuzzy 46.110670→46.110630% through `NuHtmlBitmap` and `getnextdatapoint`, so the split remains pending codegen evidence. Graph bodies remain stubbed. |

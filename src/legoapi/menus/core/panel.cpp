@@ -5,8 +5,10 @@
 #include "legoapi/world/mission.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/menus/core/panel.h"
+#include "legoapi/menus/core/text.h"
 #include "gameapi/gui/apimenu.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/render/light/fade_material.h"
 #include "legoapi/render/light/lighting.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/world/levels/levels.h"
@@ -17,6 +19,7 @@
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nuprim.h"
+#include "nu2api/nuandroid/ios_graphics.h"
 #include <stdio.h>
 
 struct AIROW_s;
@@ -24,20 +27,8 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-extern "C" void SetQFont2D(void);
-extern "C" i32 NuRndrBeginScene(i32 flags);
-extern "C" void NuRndrEndScene(void);
-extern NUCAMERA *pNuCam;
-extern "C" f32 NuIOS_GetAspectRatio(void);
 void TimingBars(void);
 void Arcade_ResetPanel(void);
-void TBOPENFN(char *name, i32 bar);
-void TBCLOSEFN(char *name, i32 bar);
-
-extern NUMTL *FadeMtl2;
-
-extern f32 goldbricktime;
-extern i32 SuperStory;
 
 static f32 redbrickslidetime;
 f32 TimerAlpha = 0.0f;
