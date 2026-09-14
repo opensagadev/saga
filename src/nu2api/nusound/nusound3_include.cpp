@@ -304,6 +304,28 @@ void NuSound3SampleLoadThread(void *arg) {
     }
 }
 
+i32 ActionFromQuiet(i32 idx) {
+    if (idx != -1) {
+        for (i32 entry = 0; ActionPairTab[entry * 14] != -1; entry++) {
+            if (ActionPairTab[entry * 14] == idx) {
+                return ActionPairTab[entry * 14 + 1];
+            }
+        }
+    }
+    return -1;
+}
+
+i32 AmbientFromQuiet(i32 idx) {
+    if (idx != -1) {
+        for (i32 entry = 0; AmbientPairTab[entry * 2] != -1; entry++) {
+            if (AmbientPairTab[entry * 2] == idx) {
+                return AmbientPairTab[entry * 2 + 1];
+            }
+        }
+    }
+    return -1;
+}
+
 nusound_filename_info_s *ConfigureMusic(char *file, VARIPTR *bufferStart, VARIPTR *bufferEnd) {
     (void)file;
     nusound_filename_info_s *finfo;

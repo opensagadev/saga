@@ -8,6 +8,7 @@ import struct
 SHF_ALLOC = 0x2
 SHT_SYMTAB = 2
 STT_FILE = 4
+SHN_COMMON = 0xFFF2
 
 
 def workspace_root() -> Path:
@@ -22,12 +23,12 @@ def _cstring(data: bytes, offset: int) -> str:
 
 
 def read_elf32(
-    path: Path, *, include_file_symbols: bool = False
+    path: Path, *, include_file_symbols: bool = False, include_common_symbols: bool = False
 ) -> tuple[list[dict], list[dict]]:
     """Read named, defined symbols, retaining indices and aliases.
 
-    FILE symbols have special section indices; request them only for
-    calibration against a binary that still has those markers.
+    FILE and COMMON symbols have special section indices. Request them only
+    when calibration or object-level ownership analysis needs them.
     """
     data = path.read_bytes()
     if data[:4] != b"\x7fELF" or data[4] != 1:
@@ -93,7 +94,8 @@ def read_elf32(
             is_file = (fields[3] & 0x0F) == STT_FILE
             if not fields[0] or (
                 section_index >= len(sections)
-                and not (include_file_symbols and is_file)
+                and not ((include_file_symbols and is_file)
+                         or (include_common_symbols and section_index == SHN_COMMON))
             ):
                 continue
             symbols.append(

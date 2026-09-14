@@ -101,8 +101,6 @@ void Particles_Load(WORLDINFO *world, char **debris_name, i32 count, i32 flags);
 extern "C" void ResetSounds(void);
 void SetLevelSfxBits(WORLDINFO *world);
 void ResetLevSfx(WORLDINFO *world);
-i32 ActionFromQuiet(i32 idx);
-i32 AmbientFromQuiet(i32 idx);
 bool InitSpecialSfx(WORLDINFO *world);
 void LoadSpecialSfxFile(WORLDINFO *world);
 

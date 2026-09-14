@@ -1,5 +1,6 @@
 #include "decomp.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/actions/character/snake.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
@@ -1454,10 +1455,6 @@ void DrawSaveSlots(MENU_s *menu, float y) {
     menu->item_height[4] = text3d_height * 2.0f;
 }
 
-void DrawSnakeBody(GameObject_s *) {
-    STUBBED();
-}
-
 void DrawAlphaImage(i32, i32, numtl_s *, i32, NuBloomParameters *) {
     STUBBED();
 }
@@ -1534,10 +1531,6 @@ void DrawItemMenu2D() {
         SmartTextEx(TTab[text_id], 0.0f, y, 1.0f, 0.8f, 0.8f, 0.8f, 0, 255, 255, 255, 1.7f, 1, NULL, 0,
                     static_cast<u32>(alpha));
     }
-}
-
-void DrawMessageBox(i32, float, float, float, float) {
-    STUBBED();
 }
 
 void DrawStatusText(char *text, u16 angle, float x, float y, float scale, u32 colour, i32 alignment) {
@@ -2274,10 +2267,6 @@ void DrawFadeScreenWipe() {
         NuRndrRect2di(solid_x, solid_y, solid_width, solid_height, 0, SolidMtl);
     }
     NuRndrEndScene();
-}
-
-void DrawMessageBoxRGBA(float, float, float, float, u32, u32, u32, u32, numtl_s *, i32, float) {
-    STUBBED();
 }
 
 void DrawSuperStoryTime(float, float, float, i32, i32) {

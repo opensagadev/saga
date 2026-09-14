@@ -658,6 +658,18 @@ void Text_InsertCommasIntoNumber(char *number, char *text, i32 length) {
     }
     text[output] = '\0';
 }
+extern "C" void MessageBoxInitMtl(void) {
+    STUBBED();
+}
+
+void DrawMessageBoxRGBA(float, float, float, float, u32, u32, u32, u32, numtl_s *, i32, float) {
+    STUBBED();
+}
+
+void DrawMessageBox(i32, float, float, float, float) {
+    STUBBED();
+}
+
 extern "C" {
     void FixUpButtonsInFont(VUFNT *game_font, VUFNT *button_font) {
         if (game_font == nullptr)

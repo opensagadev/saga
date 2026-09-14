@@ -151,33 +151,6 @@ extern "C" {
     i32 NuSound3SetReverb(i32 mode);
 }
 
-i32 ActionFromQuiet(i32 idx) {
-    static i16 ActionPairTab[14] = {-1};
-    if (idx != -1) {
-        i16 *pair = ActionPairTab;
-        while (*pair != -1) {
-            if (*pair == idx) {
-                return pair[1];
-            }
-            pair += 14;
-        }
-    }
-    return -1;
-}
-i32 AmbientFromQuiet(i32 idx) {
-    static i16 AmbientPairTab[2] = {-1};
-    if (idx != -1) {
-        i16 *pair = AmbientPairTab;
-        while (*pair != -1) {
-            if (*pair == idx) {
-                return pair[1];
-            }
-            pair += 2;
-        }
-    }
-    return -1;
-}
-
 extern "C" void ResetSounds(void) {
     memcpy(SfxBits, GlobalSfxBits, sizeof(SfxBits));
 }

@@ -1,3 +1,4 @@
+#include "decomp.h"
 #include "nu2api/nucore/nutime.h"
 
 #include "nu2api/nucore/nuapi.h"
@@ -26,6 +27,18 @@ void NuTimeWait(f32 milliseconds) {
         NuTimeSub(&difference, &current, &start);
         elapsed = NuTimeMilliSeconds(&difference);
     }
+}
+
+extern "C" void NuTimeStartFrame(void) {
+    STUBBED();
+}
+
+extern "C" void NuTimeGetStartFrame(void) {
+    STUBBED();
+}
+
+extern "C" void NuTimeGetSinceStartFrame(void) {
+    STUBBED();
 }
 
 f32 NuTimeScanlines(NUTIME *t) {

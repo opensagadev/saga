@@ -6,6 +6,10 @@
 // Text system (module legoapi/menus/core, text.cpp).
 
 struct vufnt_s;
+struct numtl_s;
+
+void DrawMessageBoxRGBA(f32, f32, f32, f32, u32, u32, u32, u32, numtl_s *, i32, f32);
+void DrawMessageBox(i32, f32, f32, f32, f32);
 
 void Text_InitLanguageList(LANGUAGEDATA *list);
 void Text_SetLanguage(i32 lang);
@@ -20,6 +24,7 @@ void TextCrawl_Draw(f32 dt, i32 paragraphs, f32 alpha, char *text);
 #ifdef __cplusplus
 extern "C" {
 #endif
+    void MessageBoxInitMtl(void);
     void SetQFont2D(void);
     void Text3DStringEncode(char *src, u16 *dst);
     void Set3DGameFont(vufnt_s *font);
