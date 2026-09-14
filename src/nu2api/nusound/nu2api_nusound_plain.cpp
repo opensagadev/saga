@@ -8,8 +8,6 @@
 
 typedef void (*SoundBitCallback)(i32 sound_id);
 
-i32 GroupBuffer_GetNumInGroup(i32 group_id);
-i32 GroupBuffer_GetSampleByIndex(i32 group_id, i32 sample_index);
 extern "C" void MusicPreSeek(i32 track);
 extern "C" void RestoreGameMusic(void);
 extern "C" edanim_param_s AnimParams[64];

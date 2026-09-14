@@ -10,7 +10,6 @@ struct nunativegscene_s;
 struct SHOPINPUT;
 
 i32 do_multiframe_update;
-static u32 FRAMES_TO_WAIT = 1;
 
 void TimingBars() {
     STUBBED();
@@ -21,10 +20,6 @@ i64 getCurrentTime() {
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
     return (i64)ts.tv_sec * 1000 + (i64)ts.tv_nsec;
-}
-
-void SetFramesToWait(u32 frames) {
-    FRAMES_TO_WAIT = frames;
 }
 
 void ResetFrameCounters() {

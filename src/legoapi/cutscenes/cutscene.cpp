@@ -1483,6 +1483,10 @@ extern "C" {
         background_cutscene_instances = NULL;
         active_cutscene_instances = active;
     }
+
+    void PetesHackOfDeath(void) {
+        STUBBED();
+    }
 } // extern "C"
 
 struct instNUGCUTSCENE_s;

@@ -20,7 +20,7 @@ extern "C" NUGCUTTRIGGERLOCATORVFXFN TriggerLocatorVfxFn;
 extern "C" NUGCUTRELEASELOCATORVFXFN ReleaseLocatorVfxFn;
 extern "C" NUGCUTUPDATELOCATORVFXFN UpdateLocatorVfxFn;
 void NuGCutSceneSysInitVfx(NUGCUTLOOKUPLOCATORVFXFN lookup, NUGCUTTRIGGERLOCATORVFXFN trigger,
-                            NUGCUTRELEASELOCATORVFXFN release, NUGCUTUPDATELOCATORVFXFN update);
+                           NUGCUTRELEASELOCATORVFXFN release, NUGCUTUPDATELOCATORVFXFN update);
 
 void EvaluateJointOrientationMtx(nugscn_s *scene, i32 joint_index, numtx_s *matrix);
 
@@ -40,8 +40,7 @@ struct NUGCUTLOCATOR_s {
 void NuGCutLocatorCalcMtx_3(NUGCUTLOCATOR_s *locator, numtx_s *mtx, f32 frame);
 i32 NuGCutLocatorIsVisble_3(NUGCUTLOCATOR_s *locator, f32 frame, f32 *scale, f32 *rate);
 extern "C" i32 NuGCutLocatorCalcMtx(NUGCUTLOCATOR_s *locator, f32 frame, NUMTX *mtx, nuanimtime_s *time);
-extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *locator, f32 frame, nuanimtime_s *time, f32 *scale,
-                                      f32 *rate);
+extern "C" i32 NuGCutLocatorIsVisble(NUGCUTLOCATOR_s *locator, f32 frame, nuanimtime_s *time, f32 *scale, f32 *rate);
 
 struct NUGCUTLOCATORTYPE_s {
     char *name;
@@ -392,6 +391,7 @@ void NuGCutSceneRemapFocusIdToLocaterNum(NUGCUTSCENE_s *cutscene, VARIPTR *buffe
 extern "C" NUGCUTSCENE_s *NuGCutSceneLoadAddr(NUGCUTSCENE_s *cutscene, i32 loaded_size, VARIPTR *buffer);
 extern "C" void NuGCutSceneDestroy(NUGCUTSCENE_s *cutscene);
 extern "C" void NuGCutSceneSysInit(NUGCUTLOCATORFNENTRY_s *locator_functions);
+extern "C" void PetesHackOfDeath(void);
 extern "C" void instNuGCutSceneCreateCamTgtArray(instNUGCUTSCENE_s *instance, i32 count, VARIPTR *buffer);
 extern "C" i32 instNuGCutSceneAddCamTgt(instNUGCUTSCENE_s *instance, NUVEC *target, f32 start_frame, f32 duration,
                                         i8 target_index);
