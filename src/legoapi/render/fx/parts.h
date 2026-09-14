@@ -5,6 +5,7 @@ extern "C" {
     extern ADDPART_s Default_ADDPART;
     PART_s *AddPart(ADDPART_s *part);
     void HitParts(void);
+    void SetPartRTLSet(usize rtl_set);
 }
 i32 FindPartDebris(PARTDEBSYS_s *system, char *name);
 void InitPartTable(char **names);

@@ -4,20 +4,34 @@
 #include "nu2api/nu3d/nurndrstat.h"
 #include <string.h>
 
+// Shared immediate-mode primitive state (BSS and initialized data).
+VARIPTR *g_NuPrim_StreamBufferPtr;
+i32 g_NuPrim_VertexCount;
+char g_NuPrim_NeedsOverbrightening;
+char g_NuPrim_NeedsHalfUVs;
+
+i32 NuPrimCSPos;
+NUPRIMSCALEMODE NuPrimCoordSystemStack[16];
+
+f32 NuPrim_XScale = 1.0f;
+f32 NuPrim_YScale = 1.0f;
+f32 NuPrim_XBias;
+f32 NuPrim_YBias;
+
 static u16 *g_NuPrim_VertexCountPtr;
 static u16 g_NuPrim_CurrentPrimType = 10000;
 
 extern "C" {
-static void NuPrimPushCoordSystem(NUPRIMSCALEMODE scale_mode) {
-    NuPrimCSPos++;
-    NuPrimSetCoordinateSystem(scale_mode);
-}
+    static void NuPrimPushCoordSystem(NUPRIMSCALEMODE scale_mode) {
+        NuPrimCSPos++;
+        NuPrimSetCoordinateSystem(scale_mode);
+    }
 }
 
 extern "C" {
-static NUDISPLAYLIST *NuDisplayListGet2dList(void) {
-    return &global_dlist_manager.dlist_2d;
-}
+    static NUDISPLAYLIST *NuDisplayListGet2dList(void) {
+        return &global_dlist_manager.dlist_2d;
+    }
 }
 
 static void NuDisplayListSetNext(NUDISPLAYLISTITEM *item, void *next) {

@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.110394,
+    "fuzzy_match_percent": 46.11067,
     "total_code": "4722419",
-    "matched_code": "400273",
-    "matched_code_percent": 8.476016,
+    "matched_code": "400297",
+    "matched_code_percent": 8.476524,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4762,
-    "matched_functions_percent": 35.381527,
+    "matched_functions": 4763,
+    "matched_functions_percent": 35.388958,
     "total_units": 1
   },
   "text": {
@@ -37537,12 +37537,6 @@
           "match_percent": 100.0
         }
       ]
-    },
-    {
-      "name": "java/android_state.cpp.o",
-      "source": "src/java/android_state.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_root/android_state.o",
-      "functions": []
     },
     {
       "name": "legoapi/actions/character/simpletons.cpp.o",
@@ -77904,30 +77898,6 @@
           "match_percent": 0.8
         },
         {
-          "name": "_Z8setpointf",
-          "demangled_name": "setpoint(float)",
-          "address": 2977408,
-          "offset": 2087440,
-          "size": 36,
-          "match_percent": 99.666664
-        },
-        {
-          "name": "_Z12setnextpointff",
-          "demangled_name": "setnextpoint(float, float)",
-          "address": 2977456,
-          "offset": 2087488,
-          "size": 64,
-          "match_percent": 99.75
-        },
-        {
-          "name": "_Z16getnextdatapointPfPi",
-          "demangled_name": "getnextdatapoint(float*, int*)",
-          "address": 2977520,
-          "offset": 2087552,
-          "size": 135,
-          "match_percent": 99.75
-        },
-        {
           "name": "_Z24LevelSplines_InitForGameP11LEVELSPLINE",
           "demangled_name": "LevelSplines_InitForGame(LEVELSPLINE*)",
           "address": 4673584,
@@ -79148,6 +79118,14 @@
           "match_percent": 2.123894
         },
         {
+          "name": "SetPartRTLSet",
+          "demangled_name": "SetPartRTLSet",
+          "address": 4320912,
+          "offset": 3430944,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
           "name": "PARTStartOffset",
           "demangled_name": "PARTStartOffset",
           "address": 4320944,
@@ -79481,21 +79459,6 @@
           "offset": 3972560,
           "size": 48,
           "match_percent": 100.0
-        }
-      ]
-    },
-    {
-      "name": "legoapi/render/fx/parts_stubs.cpp.o",
-      "source": "src/legoapi/render/fx/parts_stubs.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/parts_stubs.o",
-      "functions": [
-        {
-          "name": "SetPartRTLSet",
-          "demangled_name": "SetPartRTLSet",
-          "address": 4320912,
-          "offset": 3430944,
-          "size": 24,
-          "match_percent": 45.666668
         }
       ]
     },
@@ -89935,12 +89898,6 @@
       ]
     },
     {
-      "name": "nu2api/nu3d/nuprim.cpp.o",
-      "source": "src/nu2api/nu3d/nuprim.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nuprim.o",
-      "functions": []
-    },
-    {
       "name": "nu2api/nu3d/nuqfnt.cpp.o",
       "source": "src/nu2api/nu3d/nuqfnt.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nuqfnt.o",
@@ -98853,30 +98810,6 @@
           "match_percent": 7.924528
         },
         {
-          "name": "NuHtmlHBarGraph",
-          "demangled_name": "NuHtmlHBarGraph",
-          "address": 2973968,
-          "offset": 2084000,
-          "size": 1925,
-          "match_percent": 1.039604
-        },
-        {
-          "name": "NuHtmlVBarGraph",
-          "demangled_name": "NuHtmlVBarGraph",
-          "address": 2975904,
-          "offset": 2085936,
-          "size": 1498,
-          "match_percent": 2.542373
-        },
-        {
-          "name": "NuHtmlHLineGraph",
-          "demangled_name": "NuHtmlHLineGraph",
-          "address": 2977664,
-          "offset": 2087696,
-          "size": 1129,
-          "match_percent": 2.093023
-        },
-        {
           "name": "NuCameraIntersectsAABB",
           "demangled_name": "NuCameraIntersectsAABB",
           "address": 2981872,
@@ -100199,6 +100132,61 @@
           "offset": 2101344,
           "size": 120,
           "match_percent": 100.0
+        }
+      ]
+    },
+    {
+      "name": "nu2api/nucore/nuhtml.cpp.o",
+      "source": "src/nu2api/nucore/nuhtml.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nuhtml.o",
+      "functions": [
+        {
+          "name": "NuHtmlHBarGraph",
+          "demangled_name": "NuHtmlHBarGraph",
+          "address": 2973968,
+          "offset": 2084000,
+          "size": 1925,
+          "match_percent": 1.039604
+        },
+        {
+          "name": "NuHtmlVBarGraph",
+          "demangled_name": "NuHtmlVBarGraph",
+          "address": 2975904,
+          "offset": 2085936,
+          "size": 1498,
+          "match_percent": 2.542373
+        },
+        {
+          "name": "_Z8setpointf",
+          "demangled_name": "setpoint(float)",
+          "address": 2977408,
+          "offset": 2087440,
+          "size": 36,
+          "match_percent": 99.666664
+        },
+        {
+          "name": "_Z12setnextpointff",
+          "demangled_name": "setnextpoint(float, float)",
+          "address": 2977456,
+          "offset": 2087488,
+          "size": 64,
+          "match_percent": 99.75
+        },
+        {
+          "name": "_Z16getnextdatapointPfPi",
+          "demangled_name": "getnextdatapoint(float*, int*)",
+          "address": 2977520,
+          "offset": 2087552,
+          "size": 135,
+          "match_percent": 99.75
+        },
+        {
+          "name": "NuHtmlHLineGraph",
+          "demangled_name": "NuHtmlHLineGraph",
+          "address": 2977664,
+          "offset": 2087696,
+          "size": 1129,
+          "match_percent": 2.093023
         }
       ]
     },
@@ -116992,7 +116980,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -117064,7 +117051,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -117136,7 +117122,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -117221,7 +117206,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -117341,7 +117325,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -117426,7 +117409,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -117511,7 +117493,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -117596,7 +117577,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -117681,7 +117661,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -117766,7 +117745,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -118063,7 +118041,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -118148,7 +118125,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -118233,7 +118209,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -118367,7 +118342,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -118464,7 +118438,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -118651,7 +118624,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -118789,7 +118761,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -118927,7 +118898,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -119012,7 +118982,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -119097,7 +119066,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -119182,7 +119150,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -119293,7 +119260,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -119378,7 +119344,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -119474,7 +119439,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -119559,7 +119523,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -119657,7 +119620,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -119742,7 +119704,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -119862,7 +119823,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -119947,7 +119907,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -120032,7 +119991,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -120117,7 +120075,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -120265,7 +120222,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -120350,7 +120306,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -120435,7 +120390,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -120868,7 +120822,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -121071,7 +121024,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -121237,7 +121189,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -121681,7 +121632,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -121766,7 +121716,6 @@
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
         "legoapi/render/fx/inflate.cpp.o",
-        "legoapi/render/fx/parts_stubs.cpp.o",
         "nu2api/nu3d/android/nugscn_android.cpp.o",
         "nu2api/nu3d/android/nuportal_android.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -128889,7 +128838,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 488,
+    "bazel_units": 486,
     "functions": 13454,
     "assigned_functions": 12354,
     "ambiguous_functions": 212,
