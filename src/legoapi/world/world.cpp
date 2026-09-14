@@ -5,6 +5,7 @@
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/render/fx/game_deb.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmos/transport/teleport.h"
 #include "legoapi/render/fx/parts.h"
 #include "legoapi/render/light/lighting.h"
 

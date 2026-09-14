@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.13444,
+    "fuzzy_match_percent": 46.13459,
     "total_code": "4722419",
-    "matched_code": "401463",
-    "matched_code_percent": 8.501215,
+    "matched_code": "401849",
+    "matched_code_percent": 8.509389,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4766,
-    "matched_functions_percent": 35.411247,
+    "matched_functions": 4769,
+    "matched_functions_percent": 35.43354,
     "total_units": 1
   },
   "text": {
@@ -24796,101 +24796,6 @@
           "offset": 781920,
           "size": 3030,
           "match_percent": 89.22017
-        }
-      ]
-    },
-    {
-      "name": "gameapi/ai/gameai_tel.cpp.o",
-      "source": "src/gameapi/ai/gameai_tel.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/gameai_tel.o",
-      "functions": [
-        {
-          "name": "_ZL9Tel_1_wayP8nufpar_s",
-          "demangled_name": "Tel_1_way(nufpar_s*)",
-          "address": 1234912,
-          "offset": 344944,
-          "size": 25,
-          "match_percent": 99.85714
-        },
-        {
-          "name": "_ZL9Tel_crawlP8nufpar_s",
-          "demangled_name": "Tel_crawl(nufpar_s*)",
-          "address": 1234944,
-          "offset": 344976,
-          "size": 25,
-          "match_percent": 99.85714
-        },
-        {
-          "name": "_ZL13Tel_flip_flapP8nufpar_s",
-          "demangled_name": "Tel_flip_flap(nufpar_s*)",
-          "address": 1234976,
-          "offset": 345008,
-          "size": 25,
-          "match_percent": 99.85714
-        },
-        {
-          "name": "_ZL13Tel_Hacky_CamP8nufpar_s",
-          "demangled_name": "Tel_Hacky_Cam(nufpar_s*)",
-          "address": 1235008,
-          "offset": 345040,
-          "size": 25,
-          "match_percent": 99.85714
-        },
-        {
-          "name": "_ZL9Tel_rangeP8nufpar_s",
-          "demangled_name": "Tel_range(nufpar_s*)",
-          "address": 1235440,
-          "offset": 345472,
-          "size": 64,
-          "match_percent": 99.9375
-        },
-        {
-          "name": "_ZL12Tel_durationP8nufpar_s",
-          "demangled_name": "Tel_duration(nufpar_s*)",
-          "address": 1235504,
-          "offset": 345536,
-          "size": 57,
-          "match_percent": 99.92857
-        },
-        {
-          "name": "_ZL8Tel_nameP8nufpar_s",
-          "demangled_name": "Tel_name(nufpar_s*)",
-          "address": 1235568,
-          "offset": 345600,
-          "size": 112,
-          "match_percent": 99.57692
-        },
-        {
-          "name": "_ZL7Tel_objP8nufpar_s",
-          "demangled_name": "Tel_obj(nufpar_s*)",
-          "address": 1235680,
-          "offset": 345712,
-          "size": 103,
-          "match_percent": 99.916664
-        },
-        {
-          "name": "_ZL8Tel_flapP8nufpar_s",
-          "demangled_name": "Tel_flap(nufpar_s*)",
-          "address": 1235792,
-          "offset": 345824,
-          "size": 512,
-          "match_percent": 99.91453
-        },
-        {
-          "name": "_ZL10Tel_splineP8nufpar_s",
-          "demangled_name": "Tel_spline(nufpar_s*)",
-          "address": 1236304,
-          "offset": 346336,
-          "size": 285,
-          "match_percent": 92.78082
-        },
-        {
-          "name": "_Z19Teleports_ConfigureP11WORLDINFO_sPc",
-          "demangled_name": "Teleports_Configure(WORLDINFO_s*, char*)",
-          "address": 1236736,
-          "offset": 346768,
-          "size": 669,
-          "match_percent": 80.62162
         }
       ]
     },
@@ -52544,61 +52449,6 @@
       ]
     },
     {
-      "name": "legoapi/gizmo/gizmos/gizmos_hatmachine.cpp.o",
-      "source": "src/legoapi/gizmo/gizmos/gizmos_hatmachine.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizmos_hatmachine.o",
-      "functions": [
-        {
-          "name": "_Z23HatMachines_InitTerrainP11WORLDINFO_s",
-          "demangled_name": "HatMachines_InitTerrain(WORLDINFO_s*)",
-          "address": 2016656,
-          "offset": 1126688,
-          "size": 145,
-          "match_percent": 10.243902
-        },
-        {
-          "name": "_ZN12HATMACHINE_s22GetMechObjectInterfaceEv",
-          "demangled_name": "HATMACHINE_s::GetMechObjectInterface()",
-          "address": 2016816,
-          "offset": 1126848,
-          "size": 99,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN12HATMACHINE_s24ClearMechObjectInterfaceEv",
-          "demangled_name": "HATMACHINE_s::ClearMechObjectInterface()",
-          "address": 2016928,
-          "offset": 1126960,
-          "size": 31,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z22HatMachine_FindNearestP11WORLDINFO_sP7nuvec_sP12GameObject_sPf",
-          "demangled_name": "HatMachine_FindNearest(WORLDINFO_s*, nuvec_s*, GameObject_s*, float*)",
-          "address": 2016960,
-          "offset": 1126992,
-          "size": 463,
-          "match_percent": 3.62069
-        },
-        {
-          "name": "_Z20HatMachine_BeingUsedP12HATMACHINE_s",
-          "demangled_name": "HatMachine_BeingUsed(HATMACHINE_s*)",
-          "address": 2017424,
-          "offset": 1127456,
-          "size": 14,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z19HatMachine_MoveCodeP11WORLDINFO_sP12GameObject_si",
-          "demangled_name": "HatMachine_MoveCode(WORLDINFO_s*, GameObject_s*, int)",
-          "address": 2017840,
-          "offset": 1127872,
-          "size": 1955,
-          "match_percent": 1.074169
-        }
-      ]
-    },
-    {
       "name": "legoapi/gizmo/gizmos/gizmos_teleport.cpp.o",
       "source": "src/legoapi/gizmo/gizmos/gizmos_teleport.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizmos_teleport.o",
@@ -52674,61 +52524,6 @@
           "offset": 352912,
           "size": 349,
           "match_percent": 43.116882
-        }
-      ]
-    },
-    {
-      "name": "legoapi/gizmo/gizmos/gizmos_tubes.cpp.o",
-      "source": "src/legoapi/gizmo/gizmos/gizmos_tubes.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizmos_tubes.o",
-      "functions": [
-        {
-          "name": "_Z15Tube_FindByNameP11WORLDINFO_sPc",
-          "demangled_name": "Tube_FindByName(WORLDINFO_s*, char*)",
-          "address": 5137216,
-          "offset": 4247248,
-          "size": 117,
-          "match_percent": 77.78261
-        },
-        {
-          "name": "_Z15Tube_InCylinderP12GameObject_sP6TUBE_sPfi",
-          "demangled_name": "Tube_InCylinder(GameObject_s*, TUBE_s*, float*, int)",
-          "address": 5137728,
-          "offset": 4247760,
-          "size": 199,
-          "match_percent": 99.71429
-        },
-        {
-          "name": "_Z18Tube_InAnyCylinderP11WORLDINFO_sP12GameObject_si",
-          "demangled_name": "Tube_InAnyCylinder(WORLDINFO_s*, GameObject_s*, int)",
-          "address": 5137936,
-          "offset": 4247968,
-          "size": 133,
-          "match_percent": 99.69388
-        },
-        {
-          "name": "_Z14Tube_SetObjBitP6TUBE_si",
-          "demangled_name": "Tube_SetObjBit(TUBE_s*, int)",
-          "address": 5138080,
-          "offset": 4248112,
-          "size": 35,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z16Tube_IsObjBitSetP6TUBE_si",
-          "demangled_name": "Tube_IsObjBitSet(TUBE_s*, int)",
-          "address": 5138128,
-          "offset": 4248160,
-          "size": 31,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z13Tube_MoveCodeP12GameObject_sP11WORLDINFO_s",
-          "demangled_name": "Tube_MoveCode(GameObject_s*, WORLDINFO_s*)",
-          "address": 5139168,
-          "offset": 4249200,
-          "size": 536,
-          "match_percent": 39.253845
         }
       ]
     },
@@ -56175,12 +55970,60 @@
           "match_percent": 48.5313
         },
         {
+          "name": "_Z23HatMachines_InitTerrainP11WORLDINFO_s",
+          "demangled_name": "HatMachines_InitTerrain(WORLDINFO_s*)",
+          "address": 2016656,
+          "offset": 1126688,
+          "size": 145,
+          "match_percent": 10.243902
+        },
+        {
+          "name": "_ZN12HATMACHINE_s22GetMechObjectInterfaceEv",
+          "demangled_name": "HATMACHINE_s::GetMechObjectInterface()",
+          "address": 2016816,
+          "offset": 1126848,
+          "size": 99,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN12HATMACHINE_s24ClearMechObjectInterfaceEv",
+          "demangled_name": "HATMACHINE_s::ClearMechObjectInterface()",
+          "address": 2016928,
+          "offset": 1126960,
+          "size": 31,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z22HatMachine_FindNearestP11WORLDINFO_sP7nuvec_sP12GameObject_sPf",
+          "demangled_name": "HatMachine_FindNearest(WORLDINFO_s*, nuvec_s*, GameObject_s*, float*)",
+          "address": 2016960,
+          "offset": 1126992,
+          "size": 463,
+          "match_percent": 3.62069
+        },
+        {
+          "name": "_Z20HatMachine_BeingUsedP12HATMACHINE_s",
+          "demangled_name": "HatMachine_BeingUsed(HATMACHINE_s*)",
+          "address": 2017424,
+          "offset": 1127456,
+          "size": 14,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z24HatMachine_RegisterGizmoi",
           "demangled_name": "HatMachine_RegisterGizmo(int)",
           "address": 2017440,
           "offset": 1127472,
           "size": 386,
           "match_percent": 99.44615
+        },
+        {
+          "name": "_Z19HatMachine_MoveCodeP11WORLDINFO_sP12GameObject_si",
+          "demangled_name": "HatMachine_MoveCode(WORLDINFO_s*, GameObject_s*, int)",
+          "address": 2017840,
+          "offset": 1127872,
+          "size": 1955,
+          "match_percent": 1.074169
         }
       ]
     },
@@ -56986,6 +56829,38 @@
           "match_percent": 99.35294
         },
         {
+          "name": "_ZL9Tel_1_wayP8nufpar_s",
+          "demangled_name": "Tel_1_way(nufpar_s*)",
+          "address": 1234912,
+          "offset": 344944,
+          "size": 25,
+          "match_percent": 99.85714
+        },
+        {
+          "name": "_ZL9Tel_crawlP8nufpar_s",
+          "demangled_name": "Tel_crawl(nufpar_s*)",
+          "address": 1234944,
+          "offset": 344976,
+          "size": 25,
+          "match_percent": 99.85714
+        },
+        {
+          "name": "_ZL13Tel_flip_flapP8nufpar_s",
+          "demangled_name": "Tel_flip_flap(nufpar_s*)",
+          "address": 1234976,
+          "offset": 345008,
+          "size": 25,
+          "match_percent": 99.85714
+        },
+        {
+          "name": "_ZL13Tel_Hacky_CamP8nufpar_s",
+          "demangled_name": "Tel_Hacky_Cam(nufpar_s*)",
+          "address": 1235008,
+          "offset": 345040,
+          "size": 25,
+          "match_percent": 99.85714
+        },
+        {
           "name": "_ZL20Teleport_ActivateRevP7GIZMO_sii",
           "demangled_name": "Teleport_ActivateRev(GIZMO_s*, int, int)",
           "address": 1235040,
@@ -57047,7 +56922,63 @@
           "address": 1235312,
           "offset": 345344,
           "size": 117,
-          "match_percent": 99.61539
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL9Tel_rangeP8nufpar_s",
+          "demangled_name": "Tel_range(nufpar_s*)",
+          "address": 1235440,
+          "offset": 345472,
+          "size": 64,
+          "match_percent": 99.9375
+        },
+        {
+          "name": "_ZL12Tel_durationP8nufpar_s",
+          "demangled_name": "Tel_duration(nufpar_s*)",
+          "address": 1235504,
+          "offset": 345536,
+          "size": 57,
+          "match_percent": 99.92857
+        },
+        {
+          "name": "_ZL8Tel_nameP8nufpar_s",
+          "demangled_name": "Tel_name(nufpar_s*)",
+          "address": 1235568,
+          "offset": 345600,
+          "size": 112,
+          "match_percent": 99.96154
+        },
+        {
+          "name": "_ZL7Tel_objP8nufpar_s",
+          "demangled_name": "Tel_obj(nufpar_s*)",
+          "address": 1235680,
+          "offset": 345712,
+          "size": 103,
+          "match_percent": 99.916664
+        },
+        {
+          "name": "_ZL8Tel_flapP8nufpar_s",
+          "demangled_name": "Tel_flap(nufpar_s*)",
+          "address": 1235792,
+          "offset": 345824,
+          "size": 512,
+          "match_percent": 99.95727
+        },
+        {
+          "name": "_ZL10Tel_splineP8nufpar_s",
+          "demangled_name": "Tel_spline(nufpar_s*)",
+          "address": 1236304,
+          "offset": 346336,
+          "size": 285,
+          "match_percent": 92.91781
+        },
+        {
+          "name": "_Z19Teleports_ConfigureP11WORLDINFO_sPc",
+          "demangled_name": "Teleports_Configure(WORLDINFO_s*, char*)",
+          "address": 1236736,
+          "offset": 346768,
+          "size": 669,
+          "match_percent": 81.02702
         },
         {
           "name": "_Z22Teleport_RegisterGizmoi",
@@ -57055,7 +56986,7 @@
           "address": 1243232,
           "offset": 353264,
           "size": 340,
-          "match_percent": 92.62963
+          "match_percent": 92.81481
         }
       ]
     },
@@ -57182,7 +57113,7 @@
           "address": 5136656,
           "offset": 4246688,
           "size": 136,
-          "match_percent": 99.65116
+          "match_percent": 100.0
         },
         {
           "name": "_ZL10Tubes_LoadPvS_",
@@ -57201,12 +57132,52 @@
           "match_percent": 54.34694
         },
         {
+          "name": "_Z15Tube_FindByNameP11WORLDINFO_sPc",
+          "demangled_name": "Tube_FindByName(WORLDINFO_s*, char*)",
+          "address": 5137216,
+          "offset": 4247248,
+          "size": 117,
+          "match_percent": 78.108696
+        },
+        {
           "name": "_Z19Tubes_RegisterGizmoi",
           "demangled_name": "Tubes_RegisterGizmo(int)",
           "address": 5137344,
           "offset": 4247376,
           "size": 378,
-          "match_percent": 98.578125
+          "match_percent": 98.65625
+        },
+        {
+          "name": "_Z15Tube_InCylinderP12GameObject_sP6TUBE_sPfi",
+          "demangled_name": "Tube_InCylinder(GameObject_s*, TUBE_s*, float*, int)",
+          "address": 5137728,
+          "offset": 4247760,
+          "size": 199,
+          "match_percent": 99.98214
+        },
+        {
+          "name": "_Z18Tube_InAnyCylinderP11WORLDINFO_sP12GameObject_si",
+          "demangled_name": "Tube_InAnyCylinder(WORLDINFO_s*, GameObject_s*, int)",
+          "address": 5137936,
+          "offset": 4247968,
+          "size": 133,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z14Tube_SetObjBitP6TUBE_si",
+          "demangled_name": "Tube_SetObjBit(TUBE_s*, int)",
+          "address": 5138080,
+          "offset": 4248112,
+          "size": 35,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z16Tube_IsObjBitSetP6TUBE_si",
+          "demangled_name": "Tube_IsObjBitSet(TUBE_s*, int)",
+          "address": 5138128,
+          "offset": 4248160,
+          "size": 31,
+          "match_percent": 100.0
         },
         {
           "name": "_ZL12Tubes_UpdatePvS_f",
@@ -57215,6 +57186,14 @@
           "offset": 4248192,
           "size": 1000,
           "match_percent": 68.60268
+        },
+        {
+          "name": "_Z13Tube_MoveCodeP12GameObject_sP11WORLDINFO_s",
+          "demangled_name": "Tube_MoveCode(GameObject_s*, WORLDINFO_s*)",
+          "address": 5139168,
+          "offset": 4249200,
+          "size": 536,
+          "match_percent": 39.253845
         },
         {
           "name": "_Z9ObjInTubeP12GameObject_s",
@@ -128663,7 +128642,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 479,
+    "bazel_units": 476,
     "functions": 13454,
     "assigned_functions": 12354,
     "ambiguous_functions": 212,

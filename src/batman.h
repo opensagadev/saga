@@ -207,8 +207,6 @@ void TrafficAnimSys_Update(TRAFFICANIMSYS_s *);
 void TrafficAnimSys_Draw(TRAFFICANIMSYS_s *);
 void AIPathCnxControlSysUpdate(AIPATHCNXCONTROLSYS_s *);
 void ShoveObjectSysReset(void);
-void Teleports_UpdateAfterGameObjects(WORLDINFO_s *);
-void Teleports_UpdateBeforeGameObjects(WORLDINFO_s *);
 void Pulses_Update(PULSESYS_s *);
 void Level_Update(WORLDINFO_s *);
 void Bolts_Update(WORLDINFO_s *);

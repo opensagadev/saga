@@ -4,6 +4,7 @@
 #include "legoapi/items/collect/torpedo.h"
 #include "legoapi/actions/combat/hits.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/object/hatmachine.h"
 #include "legoapi/actions/character/snake.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "globals.h"
@@ -33,6 +34,7 @@ static f32 ForceBackRadius2 = 0.0f;
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/gizmos/object/gizpanel.h"
 #include "legoapi/gizmos/transport/tubes.h"
+#include "legoapi/gizmos/transport/teleport.h"
 #include "legoapi/gizmos/door/zipups.h"
 #include "legoapi/gizmos/transport/grapples.h"
 #include "legoapi/props/objects/tightrope.h"
@@ -105,7 +107,6 @@ void Ledge_MoveCode(WORLDINFO_s *world, GameObject_s *object);
 void LedgeTerrain_MoveCode(GameObject_s *object);
 void Climb_MoveCode(GameObject_s *object);
 void ForcedBackCode(GameObject_s *object);
-void Tube_MoveCode(GameObject_s *object, WORLDINFO_s *world);
 void PushCode(GameObject_s *object, i32 allow_grab);
 void BackFlipCode(GameObject_s *object);
 void TakeOverCode(GameObject_s *object, i32 tag_pressed);
@@ -113,14 +114,12 @@ void Glide_MoveCode(GameObject_s *object);
 void JumpCode(GameObject_s *object, i32 jump_pressed, i32 jump_held, u32 animation_set, i32 action_pressed,
               i32 action_held, i32 special_animation);
 void GizPanel_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 special_pressed);
-void HatMachine_MoveCode(WORLDINFO_s *world, GameObject_s *object, i32 special_pressed);
 void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed);
 void Lever_MoveCode(WORLDINFO_s *world, GameObject_s *object);
 i32 ThermalDetonator_MoveCode(GameObject_s *object);
 void Detonator_MoveCode(GameObject_s *object);
 extern "C" void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
 extern "C" void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
-void Teleport_MoveCode(GameObject_s *object, i32 special_pressed);
 void ComboRotateCode(GameObject_s *object, i32 action_held);
 void WeaponOutCode(GameObject_s *object);
 void WeaponInCode(GameObject_s *object);
@@ -220,7 +219,6 @@ void PeriscodeCode(GameObject_s *);
 i32 PodLevel(AREADATA_s *);
 void KeepOnScreen(GameObject_s *);
 void UpdateSnakeBody(GameObject_s *);
-void Teleport_NetMoveCode(GameObject_s *);
 void TractorBeamCode(GameObject_s *);
 void AddSurfaceRipples(GameObject_s *);
 extern i16 id_SNAKE;

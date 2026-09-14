@@ -48,12 +48,8 @@ TUBE *Tube_InAnyCylinder(WORLDINFO_s *world, GameObject_s *object, i32 ignore_he
 TUBE *Tube_FindByName(WORLDINFO_s *world, char *name);
 i32 Tube_IsObjBitSet(TUBE *tube, i32 object_index);
 void Tube_SetObjBit(TUBE *tube, i32 object_index);
+void Tube_MoveCode(GameObject_s *object, WORLDINFO_s *world);
 
 ADDGIZMOTYPE *Tubes_RegisterGizmo(i32 type_id);
 
-extern "C" {
-#endif
-
-#ifdef __cplusplus
-}
 #endif

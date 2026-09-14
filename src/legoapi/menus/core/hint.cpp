@@ -1,5 +1,6 @@
 #include "decomp.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/transport/teleport.h"
 #include "legoapi/menus/core/gamehint.h"
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
@@ -376,7 +377,6 @@ i32 GizForce_UpdateHint(HINT_s *);
 i32 ZipUps_UpdateHint(HINT_s *);
 i32 Tag_UpdateHint(HINT_s *);
 i32 Push_UpdateHints(HINT_s *);
-i32 Teleport_UpdateHints(HINT_s *);
 i32 GizPanel_UpdateHint(HINT_s *);
 i32 Shop_UpdateHint(HINT_s *);
 HINT_s Hints_LSW[55] = {

@@ -135,7 +135,6 @@ void LevelObjects_InitForLevel(WORLDINFO *world);
 void BoltTypes_Init(WORLDINFO *world);
 void BoltTypes_Configure(WORLDINFO *world, char *config);
 void EquivalentObjects_Configure(WORLDINFO *world, char *config);
-void Teleports_Configure(WORLDINFO *world, char *config);
 void Doors_Configure(WORLDINFO *world, char *config);
 void Faders_Configure(WORLDINFO *world, char *config);
 void CharPlatforms_Configure(WORLDINFO *world, char *config);
