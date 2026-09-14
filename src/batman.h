@@ -93,7 +93,6 @@ void GameDisplaySettings(LEVELDATADISPLAY *, i32 *);
 void LevelStreaming_Update(WORLDINFO_s *);
 void UpdateCutBorders(void);
 void DrawCutBorders(i32);
-void FixUpLayers(void);
 void ClearLevData(void);
 void WorldInfo_StreamLevel(bgprocinfo_s *);
 void LoadAreaCharacters(void);

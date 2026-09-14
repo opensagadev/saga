@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 45.995903,
+    "fuzzy_match_percent": 45.99639,
     "total_code": "4722419",
     "matched_code": "400617",
     "matched_code_percent": 8.4833,
@@ -42475,6 +42475,22 @@
           "match_percent": 99.58029
         },
         {
+          "name": "_Z13LayerFromNameP19GAMECHARACTERDATA_sPc",
+          "demangled_name": "LayerFromName(GAMECHARACTERDATA_s*, char*)",
+          "address": 4590208,
+          "offset": 3700240,
+          "size": 118,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z18MakeLayerList_NameP16CHARACTERMODEL_sPsj",
+          "demangled_name": "MakeLayerList_Name(CHARACTERMODEL_s*, short*, unsigned int)",
+          "address": 4590336,
+          "offset": 3700368,
+          "size": 277,
+          "match_percent": 99.60674
+        },
+        {
           "name": "_Z19CharCategories_InitP12CHARCATEGORY",
           "demangled_name": "CharCategories_Init(CHARCATEGORY*)",
           "address": 4590624,
@@ -44440,6 +44456,22 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z15AdjustLayerBitsjP12GameObject_s",
+          "demangled_name": "AdjustLayerBits(unsigned int, GameObject_s*)",
+          "address": 1089600,
+          "offset": 199632,
+          "size": 1295,
+          "match_percent": 0.0
+        },
+        {
+          "name": "_Z11FixUpLayersv",
+          "demangled_name": "FixUpLayers()",
+          "address": 1090896,
+          "offset": 200928,
+          "size": 265,
+          "match_percent": 94.93507
+        },
+        {
           "name": "_Z21Player_HasPurpleForceP12GameObject_s",
           "demangled_name": "Player_HasPurpleForce(GameObject_s*)",
           "address": 1091328,
@@ -44509,7 +44541,7 @@
           "address": 1372640,
           "offset": 482672,
           "size": 1370,
-          "match_percent": 66.43191
+          "match_percent": 66.37354
         },
         {
           "name": "_Z13PostResetCodeP12GameObject_s",
@@ -44661,7 +44693,7 @@
           "address": 4634576,
           "offset": 3744608,
           "size": 1943,
-          "match_percent": 10.489407
+          "match_percent": 10.457627
         },
         {
           "name": "_Z25FindFurthestPlayerFromVecP7nuvec_sPP12GameObject_sRfbj",
@@ -50029,30 +50061,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z15AdjustLayerBitsjP12GameObject_s",
-          "demangled_name": "AdjustLayerBits(unsigned int, GameObject_s*)",
-          "address": 1089600,
-          "offset": 199632,
-          "size": 1295,
-          "match_percent": 0.0
-        },
-        {
-          "name": "_Z11FixUpLayersv",
-          "demangled_name": "FixUpLayers()",
-          "address": 1090896,
-          "offset": 200928,
-          "size": 265,
-          "match_percent": 94.93507
-        },
-        {
-          "name": "_Z13LayerFromNameP19GAMECHARACTERDATA_sPc",
-          "demangled_name": "LayerFromName(GAMECHARACTERDATA_s*, char*)",
-          "address": 4590208,
-          "offset": 3700240,
-          "size": 118,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z21GizmoSysStoreProgressP10GIZMOSYS_sPvi",
           "demangled_name": "GizmoSysStoreProgress(GIZMOSYS_s*, void*, int)",
           "address": 4913632,
@@ -50482,7 +50490,7 @@
           "address": 4937184,
           "offset": 4047216,
           "size": 115,
-          "match_percent": 99.375
+          "match_percent": 99.6875
         }
       ]
     },
@@ -66929,22 +66937,6 @@
           "match_percent": 3.709678
         },
         {
-          "name": "_Z18UnicodeToIndexFastP11vucharidx_sit",
-          "demangled_name": "UnicodeToIndexFast(vucharidx_s*, int, unsigned short)",
-          "address": 2923984,
-          "offset": 2034016,
-          "size": 239,
-          "match_percent": 11.886076
-        },
-        {
-          "name": "_Z10LookupHashjPjP12HashRedirectj",
-          "demangled_name": "LookupHash(unsigned int, unsigned int*, HashRedirect*, unsigned int)",
-          "address": 3201296,
-          "offset": 2311328,
-          "size": 114,
-          "match_percent": 89.4898
-        },
-        {
           "name": "_Z22Text3DStringEncodeFontPhPtPv",
           "demangled_name": "Text3DStringEncodeFont(unsigned char*, unsigned short*, void*)",
           "address": 4368416,
@@ -67217,14 +67209,6 @@
           "match_percent": 93.11364
         },
         {
-          "name": "_Z18MakeLayerList_NameP16CHARACTERMODEL_sPsj",
-          "demangled_name": "MakeLayerList_Name(CHARACTERMODEL_s*, short*, unsigned int)",
-          "address": 4590336,
-          "offset": 3700368,
-          "size": 277,
-          "match_percent": 98.48315
-        },
-        {
           "name": "_Z21Text_InitLanguageListP12LANGUAGEDATA",
           "demangled_name": "Text_InitLanguageList(LANGUAGEDATA*)",
           "address": 4774640,
@@ -67358,7 +67342,7 @@
           "address": 4778720,
           "offset": 3888752,
           "size": 3008,
-          "match_percent": 68.088425
+          "match_percent": 68.72508
         },
         {
           "name": "_Z25MenuUpdateViewTextStringsP6MENU_s",
@@ -70806,22 +70790,6 @@
           "offset": 2166544,
           "size": 1536,
           "match_percent": 1.418919
-        },
-        {
-          "name": "_Z20DisplayListPrintItemP19nudisplaylistitem_siiPii",
-          "demangled_name": "DisplayListPrintItem(nudisplaylistitem_s*, int, int, int*, int)",
-          "address": 3065168,
-          "offset": 2175200,
-          "size": 2201,
-          "match_percent": 1.184211
-        },
-        {
-          "name": "_Z27DisplayListCreateDynMtlListP9variptr_uS_",
-          "demangled_name": "DisplayListCreateDynMtlList(variptr_u*, variptr_u)",
-          "address": 3077728,
-          "offset": 2187760,
-          "size": 546,
-          "match_percent": 76.833336
         },
         {
           "name": "_Z25DebrisGetControlStackLockv",
@@ -89282,6 +89250,14 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nudlist.o",
       "functions": [
         {
+          "name": "_Z19NuDisplayListCreateP16nudisplayscene_sP9variptr_uS1_iiiiiii",
+          "demangled_name": "NuDisplayListCreate(nudisplayscene_s*, variptr_u*, variptr_u, int, int, int, int, int, int, int)",
+          "address": 3049424,
+          "offset": 2159456,
+          "size": 681,
+          "match_percent": 53.326424
+        },
+        {
           "name": "_Z27NuDisplayListCreateMtlDlistP19nudisplaylistitem_sP7numtl_sP9variptr_uS3_",
           "demangled_name": "NuDisplayListCreateMtlDlist(nudisplaylistitem_s*, numtl_s*, variptr_u*, variptr_u)",
           "address": 3050112,
@@ -89367,7 +89343,15 @@
           "address": 3063792,
           "offset": 2173824,
           "size": 1261,
-          "match_percent": 65.229164
+          "match_percent": 65.27381
+        },
+        {
+          "name": "_Z20DisplayListPrintItemP19nudisplaylistitem_siiPii",
+          "demangled_name": "DisplayListPrintItem(nudisplaylistitem_s*, int, int, int*, int)",
+          "address": 3065168,
+          "offset": 2175200,
+          "size": 2201,
+          "match_percent": 1.184211
         },
         {
           "name": "NuDisplayListDebugToFile",
@@ -89383,7 +89367,7 @@
           "address": 3068064,
           "offset": 2178096,
           "size": 249,
-          "match_percent": 68.61429
+          "match_percent": 68.828575
         },
         {
           "name": "NuDisplayListDrawRenderScene",
@@ -89408,6 +89392,14 @@
           "offset": 2181808,
           "size": 887,
           "match_percent": 30.246809
+        },
+        {
+          "name": "_Z27DisplayListCreateDynMtlListP9variptr_uS_",
+          "demangled_name": "DisplayListCreateDynMtlList(variptr_u*, variptr_u)",
+          "address": 3077728,
+          "offset": 2187760,
+          "size": 546,
+          "match_percent": 76.833336
         },
         {
           "name": "_Z20NuDisplaySceneUnclipP16nudisplayscene_s",
@@ -89439,7 +89431,7 @@
           "address": 3085104,
           "offset": 2195136,
           "size": 2118,
-          "match_percent": 58.584026
+          "match_percent": 58.608986
         }
       ]
     },
@@ -90054,6 +90046,14 @@
           "offset": 2033456,
           "size": 354,
           "match_percent": 100.0
+        },
+        {
+          "name": "_Z18UnicodeToIndexFastP11vucharidx_sit",
+          "demangled_name": "UnicodeToIndexFast(vucharidx_s*, int, unsigned short)",
+          "address": 2923984,
+          "offset": 2034016,
+          "size": 239,
+          "match_percent": 11.886076
         },
         {
           "name": "NuQFntEncodeUnicodeChar",
@@ -91170,6 +91170,14 @@
           "offset": 2310480,
           "size": 563,
           "match_percent": 33.179104
+        },
+        {
+          "name": "_Z10LookupHashjPjP12HashRedirectj",
+          "demangled_name": "LookupHash(unsigned int, unsigned int*, HashRedirect*, unsigned int)",
+          "address": 3201296,
+          "offset": 2311328,
+          "size": 114,
+          "match_percent": 89.4898
         },
         {
           "name": "_ZN19ShaderManagerOpenGL12createShaderERK15ShaderObjectKeyP14NuShaderObjecti",
@@ -95281,14 +95289,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "_Z19NuDisplayListCreateP16nudisplayscene_sP9variptr_uS1_iiiiiii",
-          "demangled_name": "NuDisplayListCreate(nudisplayscene_s*, variptr_u*, variptr_u, int, int, int, int, int, int, int)",
-          "address": 3049424,
-          "offset": 2159456,
-          "size": 681,
-          "match_percent": 53.145077
-        },
-        {
           "name": "_Z17NuLgtArcLaserDrawi",
           "demangled_name": "NuLgtArcLaserDraw(int)",
           "address": 3072992,
@@ -95366,7 +95366,7 @@
           "address": 4424288,
           "offset": 3534320,
           "size": 937,
-          "match_percent": 15.371094
+          "match_percent": 15.3125
         },
         {
           "name": "_Z7NuATanff",

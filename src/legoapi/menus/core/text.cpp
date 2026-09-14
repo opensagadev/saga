@@ -996,87 +996,8 @@ void MenuDrawViewTextStrings(MENU_s *) {
     STUBBED();
 }
 
-bool LookupHash(u32 key, u32 *value, HashRedirect *redirects, u32 count) {
-    i32 upper = static_cast<i32>(count) - 1;
-    if (upper < 0) {
-        return false;
-    }
-
-    i32 index = upper / 2;
-    HashRedirect *redirect = &redirects[index];
-    if (redirect->key == key) {
-        *value = redirect->value;
-        return true;
-    }
-
-    i32 lower = 0;
-    while (true) {
-        if (key > redirect->key) {
-            lower = index + 1;
-        } else {
-            upper = index - 1;
-        }
-        if (lower > upper) {
-            return false;
-        }
-
-        index = (lower + upper) / 2;
-        redirect = &redirects[index];
-        if (redirect->key == key) {
-            *value = redirect->value;
-            return true;
-        }
-    }
-}
 void GetMatchLength(unsigned char *, unsigned char *, abi_ulong) {
     STUBBED();
-}
-i32 MakeLayerList_Name(CHARACTERMODEL_s *model, i16 *output, u32 mask) {
-    if (output == NULL || model == NULL)
-        return 0;
-    GAMECHARACTERDATA_s *data = &GCDataList[model->model_id];
-    i32 count = 0;
-    u32 flag = 1;
-    for (i32 bit = 0; bit < 32; ++bit, flag <<= 1) {
-        if ((mask & flag) == 0 || bit >= data->layer_count)
-            continue;
-        i32 layer;
-        if (data->layer_lookup == NULL) {
-            for (layer = 0; layer < data->layer_count; ++layer) {
-                if (data->layers[layer].mask_bit == bit)
-                    break;
-            }
-            if (layer == data->layer_count)
-                continue;
-        } else {
-            layer = data->layer_lookup[bit];
-            if (layer == -1)
-                continue;
-        }
-        const i16 hierarchy_layer = data->layers[layer].hierarchy_layer_index;
-        if (hierarchy_layer != -1) {
-            ++count;
-            *output++ = hierarchy_layer;
-        }
-    }
-    return count;
-}
-i32 UnicodeToIndexFast(vucharidx_s *map, i32 count, u16 unicode) {
-    if (count <= 0 || map[count - 1].unicode < unicode)
-        return -1;
-
-    i32 low = 0;
-    i32 high = count - 1;
-    while (low <= high) {
-        i32 middle = (low + high) >> 1;
-        if (map[middle].unicode == unicode)
-            return map[middle].index;
-        if (map[middle].unicode < unicode)
-            low = middle + 1;
-        else
-            high = middle - 1;
-    }
-    return -1;
 }
 void SplitTextFindNextWS(unsigned char *, i32) {
     STUBBED();

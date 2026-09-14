@@ -7,6 +7,8 @@ struct CHARCATEGORY;
 struct APIDEBRISSYS_s;
 GameObject_s *ActivateCharacter(char *name, nuvec_s *position, i32 angle);
 void DeactivateCharacter(char *name);
+i32 LayerFromName(GAMECHARACTERDATA_s *character, char *name);
+i32 MakeLayerList_Name(CHARACTERMODEL_s *model, i16 *output, u32 mask);
 
 struct CHARACTER_EFFECT_s {
     i16 character_id;
@@ -35,10 +37,10 @@ DECOMP_ASSERT(offsetof(CHARACTER_EFFECT_s, flags) == 0x14, "CHARACTER_EFFECT fla
 DECOMP_ASSERT(offsetof(CHARACTER_EFFECT_s, sound_id) == 0x28, "CHARACTER_EFFECT sound offset");
 
 extern "C" void AddAnimEffects(CHARACTERMODEL_s *model, CHARACTERDATA *character_data, ANIMPACKET_s *packet,
-                                NUMTX *locator_matrices, GameObject_s *object, CHARACTER_EFFECT_s *effects,
-                                WORLDINFO_s *world_info, f32 frame_time,
-                                void (*footprint_callback)(void *, GameObject_s *, i32, i32),
-                                APIDEBRISSYS_s *debris_sys);
+                               NUMTX *locator_matrices, GameObject_s *object, CHARACTER_EFFECT_s *effects,
+                               WORLDINFO_s *world_info, f32 frame_time,
+                               void (*footprint_callback)(void *, GameObject_s *, i32, i32),
+                               APIDEBRISSYS_s *debris_sys);
 
 struct CHARCONFIG_s {
     characterdata_s *character;

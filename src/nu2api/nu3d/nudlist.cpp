@@ -101,7 +101,6 @@ extern "C" void NuDisplayListCaptureEnd(void) {
 // Dispatch tables
 // ──────────────────────────────────────────────────────────────────────────────
 
-
 // ──────────────────────────────────────────────────────────────────────────────
 // Item helpers
 // ──────────────────────────────────────────────────────────────────────────────
@@ -152,22 +151,22 @@ extern "C" void NuDisplayListExecute(nudisplaylistitem_s *item, const nudl_handl
     // `item_table` points at the entry for type 0x80.
     for (;;) {
         switch (item->id) {
-        case kItemId_Next:
-            item = static_cast<nudisplaylistitem_s *>(item->next);
-            break;
-        case kItemId_Cnt:
-            ++item;
-            break;
-        case kItemId_Call: {
-            auto handler = item_table[static_cast<u32>(item->type) - kItemType_Mtl];
-            if (handler)
-                handler(item->next);
-            ++item;
-            break;
-        }
-        default:
-            // RET (and any unexpected id >=2 other than CALL) terminates.
-            return;
+            case kItemId_Next:
+                item = static_cast<nudisplaylistitem_s *>(item->next);
+                break;
+            case kItemId_Cnt:
+                ++item;
+                break;
+            case kItemId_Call: {
+                auto handler = item_table[static_cast<u32>(item->type) - kItemType_Mtl];
+                if (handler)
+                    handler(item->next);
+                ++item;
+                break;
+            }
+            default:
+                // RET (and any unexpected id >=2 other than CALL) terminates.
+                return;
         }
     }
 }
@@ -1251,6 +1250,83 @@ void NuDisplayListEndScene(void) {
 extern "C" void *DisplayListCreateFaceonTransformPS(VARIPTR *, NUMTX *, NUMTL *, void *);
 extern "C" void *DisplayListCreateGeomTransformPS(VARIPTR *, NUMTX *, NUMTL *, void *, void *);
 
+void NuDisplayListCreate(nudisplayscene_s *raw_scene, variptr_u *buffer, variptr_u, i32 item_count, i32 material_count,
+                         i32, i32, i32 sort_priority_count, i32, i32 allocate_materials) {
+    NUDLDLISTSCENE *scene = raw_scene;
+    scene->nitems = item_count;
+    scene->nmtls = material_count;
+
+    scene->items = reinterpret_cast<NUDISPLAYLISTITEM *>(ALIGN(buffer->addr, 0x10));
+    buffer->addr = reinterpret_cast<usize>(scene->items + item_count);
+
+    scene->mtls = reinterpret_cast<NUMTL **>(buffer->void_ptr);
+    buffer->addr += material_count * sizeof(NUMTL *);
+    scene->dlist_mtls = reinterpret_cast<NUDISPLAYLIST **>(ALIGN(buffer->addr, 0x10));
+    buffer->addr = reinterpret_cast<usize>(scene->dlist_mtls + material_count);
+    memset(scene->mtls, 0, material_count * sizeof(NUMTL *));
+    memset(scene->dlist_mtls, 0, material_count * sizeof(NUDISPLAYLIST *));
+
+    if (allocate_materials != 0) {
+        NUMTL *materials = reinterpret_cast<NUMTL *>(ALIGN(buffer->addr, 0x10));
+        buffer->addr = reinterpret_cast<usize>(materials + material_count);
+        for (i32 i = 0; i < material_count; ++i) {
+            scene->mtls[i] = &materials[i];
+        }
+    }
+
+    NUDISPLAYLIST *display_lists = reinterpret_cast<NUDISPLAYLIST *>(ALIGN(buffer->addr, 0x10));
+    buffer->addr = reinterpret_cast<usize>(display_lists + material_count);
+    memset(display_lists, 0, material_count * sizeof(NUDISPLAYLIST));
+
+    NUDISPLAYLISTITEM *first_items = reinterpret_cast<NUDISPLAYLISTITEM *>(ALIGN(buffer->addr, 0x10));
+    buffer->addr = reinterpret_cast<usize>(first_items + material_count);
+    memset(first_items, 0, material_count * sizeof(NUDISPLAYLISTITEM));
+
+    for (i32 i = 0; i < material_count; ++i) {
+        NUDISPLAYLIST *display_list = &display_lists[i];
+        scene->dlist_mtls[i] = display_list;
+        display_list->state = reinterpret_cast<NURNDRSTATE *>(ALIGN(buffer->addr, 4));
+        buffer->addr = reinterpret_cast<usize>(display_list->state + 1);
+        display_list->first = &first_items[i];
+
+        display_list->state->mtl = NULL;
+        display_list->state->tex_id = -1;
+        display_list->state->global_id = -1;
+        display_list->state->lights_id = -1;
+        display_list->state->camera_id = -1;
+        display_list->state->fog_id = -1;
+        display_list->state->konst_id = -1;
+        display_list->state->reflection_id = -1;
+
+        display_list->first->type = 0x8d;
+        display_list->first->id = 1;
+        display_list->first->next = NULL;
+    }
+    scene->local_state = NULL;
+
+    i32 used_size = ((((material_count + 7) >> 3) & ~0xf) + 0x10);
+    scene->mtl_used[0] = reinterpret_cast<u8 *>(ALIGN(buffer->addr, 0x10));
+    scene->mtl_used[1] = scene->mtl_used[0] + used_size;
+    scene->nsort_pris = sort_priority_count;
+    scene->sort_pris = reinterpret_cast<NUSORTPRI *>(scene->mtl_used[1] + used_size);
+    buffer->addr = reinterpret_cast<usize>(scene->sort_pris + sort_priority_count);
+    memset(scene->sort_pris, 0, sort_priority_count * sizeof(NUSORTPRI));
+
+    for (i32 i = 0; i < sort_priority_count; ++i) {
+        scene->sort_pris[i].display_scene = scene;
+        scene->sort_pris[i].nmtls = 0;
+        scene->sort_pris[i].mtl_first = 0;
+    }
+
+    for (i32 i = 0; i < material_count; ++i) {
+        NUDISPLAYLIST *display_list = scene->dlist_mtls[i];
+        display_list->scene_buffer = 0;
+        display_list->mtl_last = display_list->first;
+        display_list->scene_next = display_list->scene_first[0];
+    }
+    scene->flags &= 0xf1;
+}
+
 extern "C" void NuDisplayListBurstRndrSpecial(nuhspecial_s *handle, u32 count, NUMTX *matrices, i32 clip) {
     u16 visible[1024];
     if (handle == NULL)
@@ -1336,4 +1412,51 @@ extern "C" void NuDisplayListBurstRndrSpecial(nuhspecial_s *handle, u32 count, N
             }
         }
     }
+}
+
+void DisplayListPrintItem(nudisplaylistitem_s *, i32, i32, i32 *, i32) {
+    STUBBED();
+}
+
+void DisplayListCreateDynMtlList(variptr_u *buffer, variptr_u buffer_end) {
+    NUDLIST_MANAGER *manager = &global_dlist_manager;
+    NUDLDLISTSCENE *scene = &manager->dyn_mtl_dlist;
+
+    NuDisplayListCreate(scene, buffer, buffer_end, 0x400, 0x80, 0, 0, 0x80, 0, 0);
+    scene->nsort_pris = 0;
+    scene->name = const_cast<char *>("Dynamic Material Display Scene");
+
+    NUDISPLAYLISTITEM *material_item = scene->items;
+    for (i32 i = 0; i < 0x80; ++i) {
+        NUDISPLAYLIST *display_list = scene->dlist_mtls[i];
+        display_list->mtl_item = material_item;
+        display_list->dyn_geom = material_item + 6;
+        display_list->dlist = scene;
+        display_list->mtl_id = i;
+        material_item += 8;
+    }
+
+    manager->nnew_materials = 0;
+    manager->ndel_materials = 0;
+    manager->new_materials = reinterpret_cast<NUMTL **>(ALIGN(buffer->addr, 0x10));
+    manager->del_materials = manager->new_materials + 0x80;
+    manager->material_used = reinterpret_cast<u8 *>(manager->new_materials + 0x100);
+    manager->mtl_buffers_used = reinterpret_cast<u8 *>(manager->new_materials + 0x120);
+    buffer->addr = reinterpret_cast<usize>(manager->new_materials + 0x140);
+    memset(manager->material_used, 0, 0x80);
+    memset(manager->mtl_buffers_used, 0, 0x80);
+
+    manager->mtlbuff.addr = ALIGN(buffer->addr, 0x10);
+    manager->mtlbuffend.addr = manager->mtlbuff.addr + 0x4000;
+    *buffer = manager->mtlbuffend;
+
+    NUDISPLAYLIST *list = &manager->dlist_2d;
+    list->first->type = 0x8d;
+    list->first->id = 1;
+    list->first->next = nullptr;
+    list->mtl_last = list->first;
+    list->state = reinterpret_cast<NURNDRSTATE *>(ALIGN(buffer->addr, 4));
+    buffer->addr = reinterpret_cast<usize>(list->state + 1);
+    NuDisplayListReset(list);
+    scene->flags |= NUDL_SCENE_FLAG_NEEDS_BUILD;
 }

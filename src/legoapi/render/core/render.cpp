@@ -5,6 +5,7 @@
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/menus/core/text.h"
+#include "legoapi/characters/core/players.h"
 #include "legoapi/menus/screens/gamemenuall.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/nu3d/android/nuportal_android.h"
@@ -3750,7 +3751,6 @@ i32 Batarang_GetObjectFromCharID(i32);
 void SuperCarry_DrawObject(GameObject_s *);
 void Grapple_DrawLine(GameObject_s *);
 void Transform_DrawTarget(NUVEC *, f32, f32);
-u32 AdjustLayerBits(u32, GameObject_s *);
 extern i16 id_ANAKINJEDISCARRED, id_WEIRDO1, id_WEIRDO2, id_CATAPULT, id_CHEWBACCA, id_WOOKIEE, id_TWOFACE;
 extern i32 PickUpFlickerTest, PickUpFlickerFrames, PickupFlickerFrame;
 

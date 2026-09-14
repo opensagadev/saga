@@ -30,7 +30,6 @@ void NuErrorPrint(char *);
 void NuDebugMsgPrint(char *);
 extern i32 nuspecial_draw_state;
 extern NUQFNT *system_qfont;
-i32 UnicodeToIndexFast(VUCHARIDX *map, i32 count, u16 unicode);
 void NuLgtArcLaserEx(i32 type, NUVEC *start, NUVEC *end, NUVEC *control, f32 width, f32 segment_length, f32 wobble,
                      f32 duration, i32 colour, i32 flags);
 

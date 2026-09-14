@@ -1,6 +1,7 @@
 #include "decomp.h"
 
 #include "batman.h"
+#include "legoapi/characters/core/players.h"
 #include "legoapi/gizmo/base/gizflow.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "globals.h"

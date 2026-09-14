@@ -12,6 +12,8 @@
 
 void ActivatePlayer(GameObject_s *);
 i32 DeactivatePlayer(GameObject_s *, f32, GameObject_s *);
+u32 AdjustLayerBits(u32 mask, GameObject_s *object);
+void FixUpLayers();
 
 // Per-player saved progress.  Stride is 0x10 in the original binary.
 typedef struct playerprogress_s {
