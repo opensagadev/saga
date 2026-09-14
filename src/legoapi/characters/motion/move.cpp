@@ -15,6 +15,7 @@ static f32 ForceBackRadius2 = 0.0f;
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/actions/movement/carrying.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/core/input/qrand.h"
@@ -214,10 +215,8 @@ extern i16 id_BATTLEDROID, id_BUZZDROID, id_SUPERBATTLEDROID, id_PROBEDROID;
 extern i16 id_NAFFDROID1, id_NAFFDROID2, id_NAFFDROID4, id_MOUSEDROID;
 static void DodgeCode(GameObject_s *, i32, i32);
 void Grapple_MoveCode(GameObject_s *);
-void SuperCarry_MoveCode(WORLDINFO_s *, GameObject_s *);
 void SpecialMove_VictimCode(GameObject_s *);
 i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32);
-i32 SuperCarry_Carrying(GameObject_s *);
 void Torpedo_UpdateJobbies(GameObject_s *);
 void TorpedoCode(GameObject_s *, i32, f32);
 void PeriscodeCode(GameObject_s *);

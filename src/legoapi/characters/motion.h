@@ -64,8 +64,6 @@ extern f32 MAGNETOFFSET;
 i32 Climb_SetTargetMom(GameObject_s *object, u16 input_angle);
 i32 Glide_SetTargetMom(GameObject_s *object);
 i32 Slide_SetTargetMom(GameObject_s *object, u16 input_angle, f32 input_speed);
-i32 SuperCarry_SetTargetMom(GameObject_s *object, f32 input_speed);
-i32 SuperCarry_YRotation(GameObject_s *object, u16 input_angle);
 i32 TightRope_SetTargetMom(GameObject_s *object);
 void Climb_UpdateMagnetRotation(GameObject_s *object);
 f32 SpecialMove_GetDistanceApart(i32 index);

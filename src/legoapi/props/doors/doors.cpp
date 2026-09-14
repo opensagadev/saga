@@ -214,137 +214,135 @@ void Doors_SetLastDoor(DOOR_s *door) {
     }
 }
 
-namespace {
-    WORLDINFO_s *door_config_world;
-    DOOR_s *door_config;
+static WORLDINFO_s *D_worldinfo;
+static DOOR_s *D_door;
 
-    void D_spline(NUFPAR *parser) {
-        if (NuFParGetWord(parser) == 0 || NuStrLen(parser->word_buf) > 63) {
+static void D_spline(NUFPAR *parser) {
+    if (NuFParGetWord(parser) == 0 || NuStrLen(parser->word_buf) > 63) {
+        return;
+    }
+
+    NuStrCpy(D_door->name, parser->word_buf);
+    D_door->spline = NuSplineFind(D_worldinfo->current_gscn, D_door->name);
+    if (D_door->spline == NULL || D_door->spline->length < 4) {
+        D_door->spline = NULL;
+        D_door->name[0] = '\0';
+        return;
+    }
+
+    for (i32 i = 0; i < D_worldinfo->door_count; i++) {
+        DOOR_s *other = &D_worldinfo->doors[i];
+        if (other->spline == D_door->spline) {
+            D_door->spline = NULL;
+            D_door->name[0] = '\0';
             return;
         }
+    }
+}
 
-        NuStrCpy(door_config->name, parser->word_buf);
-        door_config->spline = NuSplineFind(door_config_world->current_gscn, door_config->name);
-        if (door_config->spline == NULL || door_config->spline->length < 4) {
-            door_config->spline = NULL;
-            door_config->name[0] = '\0';
-            return;
-        }
-
-        for (i32 i = 0; i < door_config_world->door_count; i++) {
-            DOOR_s *other = &door_config_world->doors[i];
-            if (other->spline == door_config->spline) {
-                door_config->spline = NULL;
-                door_config->name[0] = '\0';
-                return;
-            }
+static void D_level(NUFPAR *parser) {
+    if (NuFParGetWord(parser) != 0) {
+        i32 index = -1;
+        Level_FindByName(parser->word_buf, &index);
+        if (index != -1) {
+            D_door->level = static_cast<i16>(index);
         }
     }
+}
 
-    void D_level(NUFPAR *parser) {
-        if (NuFParGetWord(parser) != 0) {
-            i32 index = -1;
-            Level_FindByName(parser->word_buf, &index);
-            if (index != -1) {
-                door_config->level = static_cast<i16>(index);
-            }
+static void D_level_freeplay(NUFPAR *parser) {
+    if (NuFParGetWord(parser) != 0) {
+        i32 index = -1;
+        LEVELDATA_s *level = Level_FindByName(parser->word_buf, &index);
+        if (index != -1 && (level->flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) == 0) {
+            D_door->freeplay_level = static_cast<i16>(index);
         }
     }
+}
 
-    void D_level_freeplay(NUFPAR *parser) {
-        if (NuFParGetWord(parser) != 0) {
-            i32 index = -1;
-            LEVELDATA_s *level = Level_FindByName(parser->word_buf, &index);
-            if (index != -1 && (level->flags & (LEVEL_INTRO | LEVEL_MIDTRO | LEVEL_OUTRO)) == 0) {
-                door_config->freeplay_level = static_cast<i16>(index);
-            }
-        }
+static void D_cam_spline(NUFPAR *parser) {
+    if (NuFParGetWord(parser) == 0 || NuStrLen(parser->word_buf) > 31) {
+        return;
     }
-
-    void D_cam_spline(NUFPAR *parser) {
-        if (NuFParGetWord(parser) == 0 || NuStrLen(parser->word_buf) > 31) {
-            return;
-        }
-        NuStrCpy(door_config->camera_spline_name, parser->word_buf);
-        door_config->camera_spline = NuSplineFind(door_config_world->current_gscn, door_config->camera_spline_name);
-        if (door_config->camera_spline != NULL && door_config->camera_spline->length != 2) {
-            door_config->camera_spline_name[0] = '\0';
-            door_config->camera_spline = NULL;
-        }
+    NuStrCpy(D_door->camera_spline_name, parser->word_buf);
+    D_door->camera_spline = NuSplineFind(D_worldinfo->current_gscn, D_door->camera_spline_name);
+    if (D_door->camera_spline != NULL && D_door->camera_spline->length != 2) {
+        D_door->camera_spline_name[0] = '\0';
+        D_door->camera_spline = NULL;
     }
+}
 
-    void D_cam_wait(NUFPAR *parser) {
-        door_config->camera_wait = NuFParGetFloat(parser);
+static void D_cam_wait(NUFPAR *parser) {
+    D_door->camera_wait = NuFParGetFloat(parser);
+}
+
+static void D_cam_blend_time(NUFPAR *parser) {
+    D_door->camera_blend_time = NuFParGetFloat(parser);
+}
+
+static void D_cam_lookatplayers(NUFPAR *) {
+    D_door->flags |= DOOR_FLAG_CAMERA_LOOK_AT_PLAYERS;
+}
+
+static void D_one_way(NUFPAR *) {
+    D_door->flags |= DOOR_FLAG_ONE_WAY;
+}
+
+static void D_two_player_only(NUFPAR *) {
+    D_door->flags |= DOOR_FLAG_TWO_PLAYER_ONLY;
+}
+
+static void D_do_not_use(NUFPAR *) {
+    D_door->flags |= DOOR_FLAG_DO_NOT_USE;
+}
+
+static void D_next_sock(NUFPAR *parser) {
+    i32 next_sock = NuFParGetInt(parser);
+    if (static_cast<u32>(next_sock) < 64) {
+        D_door->next_sock = static_cast<u8>(next_sock);
     }
+}
 
-    void D_cam_blend_time(NUFPAR *parser) {
-        door_config->camera_blend_time = NuFParGetFloat(parser);
+static void D_vehicle(NUFPAR *parser) {
+    // Vehicle names are consumed here exactly as a list on the current
+    // line. Their name-to-type callback is registered by the game layer.
+    while (NuFParGetWord(parser) != 0) {
     }
+}
 
-    void D_cam_lookatplayers(NUFPAR *) {
-        door_config->flags |= DOOR_FLAG_CAMERA_LOOK_AT_PLAYERS;
+static void D_use_as_start(NUFPAR *) {
+    D_door->flags |= DOOR_FLAG_USE_AS_START;
+}
+
+static void D_cut_scene(NUFPAR *parser) {
+    if (NuFParGetWord(parser) != 0) {
+        WORLDINFO_s *world = WorldInfo_CurrentlyLoading();
+        D_door->cutscene = CutScene_Find(world->cutscene_sys, parser->word_buf);
     }
+}
 
-    void D_one_way(NUFPAR *) {
-        door_config->flags |= DOOR_FLAG_ONE_WAY;
-    }
-
-    void D_two_player_only(NUFPAR *) {
-        door_config->flags |= DOOR_FLAG_TWO_PLAYER_ONLY;
-    }
-
-    void D_do_not_use(NUFPAR *) {
-        door_config->flags |= DOOR_FLAG_DO_NOT_USE;
-    }
-
-    void D_next_sock(NUFPAR *parser) {
-        i32 next_sock = NuFParGetInt(parser);
-        if (static_cast<u32>(next_sock) < 64) {
-            door_config->next_sock = static_cast<u8>(next_sock);
-        }
-    }
-
-    void D_vehicle(NUFPAR *parser) {
-        // Vehicle names are consumed here exactly as a list on the current
-        // line. Their name-to-type callback is registered by the game layer.
-        while (NuFParGetWord(parser) != 0) {
-        }
-    }
-
-    void D_use_as_start(NUFPAR *) {
-        door_config->flags |= DOOR_FLAG_USE_AS_START;
-    }
-
-    void D_cut_scene(NUFPAR *parser) {
-        if (NuFParGetWord(parser) != 0) {
-            WORLDINFO_s *world = WorldInfo_CurrentlyLoading();
-            door_config->cutscene = CutScene_Find(world->cutscene_sys, parser->word_buf);
-        }
-    }
-
-    NUFPCOMJMP Door_ConfigKeywords[] = {
-        {const_cast<char *>("spline"), D_spline},
-        {const_cast<char *>("level"), D_level},
-        {const_cast<char *>("level_freeplay"), D_level_freeplay},
-        {const_cast<char *>("cam_spline"), D_cam_spline},
-        {const_cast<char *>("cam_wait"), D_cam_wait},
-        {const_cast<char *>("cam_blend_time"), D_cam_blend_time},
-        {const_cast<char *>("cam_lookatplayers"), D_cam_lookatplayers},
-        {const_cast<char *>("1_way"), D_one_way},
-        {const_cast<char *>("one_way"), D_one_way},
-        {const_cast<char *>("2_player_only"), D_two_player_only},
-        {const_cast<char *>("2_players_only"), D_two_player_only},
-        {const_cast<char *>("two_player_only"), D_two_player_only},
-        {const_cast<char *>("two_players_only"), D_two_player_only},
-        {const_cast<char *>("do_not_use"), D_do_not_use},
-        {const_cast<char *>("next_sock"), D_next_sock},
-        {const_cast<char *>("vehicle"), D_vehicle},
-        {const_cast<char *>("use_as_start"), D_use_as_start},
-        {const_cast<char *>("cut_scene"), D_cut_scene},
-        {const_cast<char *>("cutscene"), D_cut_scene},
-        {NULL, NULL},
-    };
-} // namespace
+static NUFPCOMJMP Door_ConfigKeywords[] = {
+    {const_cast<char *>("spline"), D_spline},
+    {const_cast<char *>("level"), D_level},
+    {const_cast<char *>("level_freeplay"), D_level_freeplay},
+    {const_cast<char *>("cam_spline"), D_cam_spline},
+    {const_cast<char *>("cam_wait"), D_cam_wait},
+    {const_cast<char *>("cam_blend_time"), D_cam_blend_time},
+    {const_cast<char *>("cam_lookatplayers"), D_cam_lookatplayers},
+    {const_cast<char *>("1_way"), D_one_way},
+    {const_cast<char *>("one_way"), D_one_way},
+    {const_cast<char *>("2_player_only"), D_two_player_only},
+    {const_cast<char *>("2_players_only"), D_two_player_only},
+    {const_cast<char *>("two_player_only"), D_two_player_only},
+    {const_cast<char *>("two_players_only"), D_two_player_only},
+    {const_cast<char *>("do_not_use"), D_do_not_use},
+    {const_cast<char *>("next_sock"), D_next_sock},
+    {const_cast<char *>("vehicle"), D_vehicle},
+    {const_cast<char *>("use_as_start"), D_use_as_start},
+    {const_cast<char *>("cut_scene"), D_cut_scene},
+    {const_cast<char *>("cutscene"), D_cut_scene},
+    {NULL, NULL},
+};
 
 void Doors_Init(WORLDINFO_s *world) {
     setlastdoor_last = NULL;
@@ -413,8 +411,8 @@ void Doors_Configure(WORLDINFO_s *world, char *config) {
                 continue;
             }
 
-            door_config_world = world;
-            door_config = door;
+            D_worldinfo = world;
+            D_door = door;
             door->name[0] = '\0';
             door->camera_spline_name[0] = '\0';
             door->spline = NULL;

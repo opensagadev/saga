@@ -1,4 +1,5 @@
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/actions/movement/carrying.h"
 #include "legoapi/actions/character/streaks.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/audio/audio.h"
@@ -80,7 +81,6 @@ void PartUpdate_Basketball(PART_s *);
 void PartImpact_Basketball(PART_s *);
 void AddSlamDebris(GameObject_s *);
 void Batarang_Release(GameObject_s *, i32);
-void SuperCarry_Throw(GameObject_s *, i32);
 void ThermalDetonator_Throw(GameObject_s *);
 void BobaRocket_Kill(PART_s *, i32);
 void BobaRocket_Move(PART_s *, f32);
