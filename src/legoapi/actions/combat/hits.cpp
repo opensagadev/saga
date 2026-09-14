@@ -6,6 +6,7 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/items/collect/torpedo.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/area.h"
@@ -58,7 +59,6 @@ i32 Player_HasInvincibility(GameObject_s *);
 i32 LoseCoins(GameObject_s *, i32);
 i32 ReleaseHearts();
 void AddPickups(i32, i32, i32, i32, NUVEC *, NUVEC *, f32, i32, f32, f32, GameObject_s *, i32, i32, bool);
-void DropTorpedoPickups(TORPEDOPACKET_s *, i32);
 void KillParts(GameObject_s *, i32, i32, i32, f32, i32, u16 *);
 void KillGameObject(GameObject_s *, i32, i32);
 void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);

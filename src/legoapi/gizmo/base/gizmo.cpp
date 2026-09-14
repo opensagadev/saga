@@ -27,7 +27,7 @@
 #include "legoapi/gizmos/trigger/gizrandom.h"
 #include "legoapi/gizmos/trigger/gizspecial.h"
 #include "legoapi/gizmos/trigger/giztimer.h"
-#include "legoapi/gizmos/traps/giztorpmachine.h"
+#include "legoapi/gizmo/object/giztorpedo.h"
 #include "legoapi/gizmos/traps/gizturrets.h"
 #include "legoapi/gizmos/transport/grapples.h"
 #include "legoapi/gizmos/object/hatmachine.h"

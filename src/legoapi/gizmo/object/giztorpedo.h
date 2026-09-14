@@ -5,8 +5,6 @@
 
 extern i32 giztorpmachine_gizmotype_id;
 
-#ifdef __cplusplus
-
 enum GIZTORPMACHINE_FLAGS : u8 {
     GIZTORPMACHINE_FLAG_ACTIVE = 1 << 0,
     GIZTORPMACHINE_FLAG_VISIBLE = 1 << 1,
@@ -41,11 +39,8 @@ typedef struct GIZTORPMACHINESYS_s {
 
 DECOMP_ASSERT(sizeof(GIZTORPMACHINESYS) == 0x0c, "GIZTORPMACHINESYS ABI");
 
+struct WORLDINFO_s;
+struct PART_s;
+i32 PartDraw_Torp(PART_s *part);
+GIZTORPMACHINE *GizTorpMachine_FindNearest(WORLDINFO_s *world, NUVEC *position, f32 *distance_squared);
 ADDGIZMOTYPE *GizTorpMachine_RegisterGizmo(i32 type_id);
-
-extern "C" {
-#endif
-
-#ifdef __cplusplus
-}
-#endif

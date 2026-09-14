@@ -18,6 +18,9 @@ void PostAnimate_FETT(GameObject_s *object);
 struct ANIMREDIRECT;
 struct ANIMLIST_s;
 extern "C" i16 id_GRABCONTROL;
+extern "C" i16 id_GRABMACHINE;
+extern "C" i16 id_GRABMAGNET;
+extern "C" i16 id_ROBOTBASE;
 extern "C" i16 id_JEDISTARFIGHTERYELLOWEP3;
 extern "C" i16 id_JEDISTARFIGHTERREDEP3;
 extern "C" i16 id_TIEINTERCEPTOR;
@@ -719,6 +722,7 @@ extern "C" {
     extern i16 id_MINITIEFIGHTER;
     extern i16 id_MINITIEINTERCEPTOR;
     extern i16 id_MINIXWING;
+    extern i16 id_MINIYWING;
     extern i16 id_SENTRYDROID;
     extern i16 id_SPEEDERBIKESNOW;
     extern i16 id_STAP2;

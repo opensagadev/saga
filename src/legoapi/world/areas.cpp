@@ -4,6 +4,7 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/items/base/apiobject.h"
+#include "legoapi/items/collect/torpedo.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/area.h"
@@ -51,7 +52,6 @@ static void AddToModelList(APICHARACTERMODELLIST_s *list, i32 *count, i32 capaci
 // taken as void* (untyped parser handle) to match the open/close contract.
 extern void ReCalculateCompletionPoints(void);
 extern void Hub_LockUnlockDoors(struct WORLDINFO_s *);
-extern void FreeTorpedoPacket(struct TORPEDOPACKET_s **);
 extern void RemoveGameObject(struct GameObject_s *, i32);
 GIZAIMESSAGE_s *CheckGizAIMessage(GIZAIMESSAGESYS_s *, const char *, GIZAIMESSAGE_s *);
 extern void CharScenes_AreaDump(void);

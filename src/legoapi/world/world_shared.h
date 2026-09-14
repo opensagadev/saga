@@ -10,6 +10,7 @@
 #include "globals.h"
 #include "legoapi/world/level.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/items/objects/grabber.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nucore/nulist.h"
@@ -138,7 +139,6 @@ void Teleports_Configure(WORLDINFO *world, char *config);
 void Doors_Configure(WORLDINFO *world, char *config);
 void Faders_Configure(WORLDINFO *world, char *config);
 void CharPlatforms_Configure(WORLDINFO *world, char *config);
-void Grabber_Configure(WORLDINFO *world, char *config);
 void Pulses_Configure(WORLDINFO *world, char *config);
 void TrafficAnimSys_Configure(WORLDINFO *world, char *config);
 void GizForceSFX_Configure(WORLDINFO *world, char *config);

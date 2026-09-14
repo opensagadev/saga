@@ -16,6 +16,7 @@ struct DETONATOR_s;
 struct PART_s;
 struct NUGCUTCHAR_s;
 struct BOLT_s;
+struct AREADATA_s;
 struct GameObject_s;
 struct CHARACTERMODEL_s;
 struct nuvec_s;
@@ -33,6 +34,10 @@ struct EXTRAACTIONDATA_s;
 class FadeSystem;
 
 extern BOLT_s Bolt[32];
+extern AREADATA_s *BOUNTYHUNTERPURSUIT_ADATA;
+extern AREADATA_s *DOGFIGHT_ADATA;
+extern AREADATA_s *GUNSHIP_ADATA;
+extern AREADATA_s *PODSPRINT_ADATA;
 extern i32 i_bolt;
 extern f32 BOLT_OVERRIDE_PLAYERBOLTSPEED;
 extern f32 BOLT_OVERRIDE_PLAYERBOLTDURATION;

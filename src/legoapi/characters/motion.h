@@ -49,6 +49,7 @@ i32 SetGizmoBlowUpTarget(GameObject_s *object, GIZMOBLOWUP_s *target);
 f32 Bolt_ObjTargetPosYAdjust(GameObject_s *object);
 i32 BoltType_FindIDByCreature(GameObject_s *object, i32 fallback);
 i32 GetShootDirection_LSW(GameObject_s *, NUVEC *);
+void GetShootOrigin_LSW(GameObject_s *, NUVEC *);
 extern CHARPIVOT CharPivot_LSW[32];
 void CharPivot_Init(CHARPIVOT *table);
 void CharPivot_Check(GameObject_s *object, NUVEC *velocity);
