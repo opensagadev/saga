@@ -22,6 +22,7 @@ extern "C" {
 void TickTockSfx(void);
 void GameAudio_PlaySfxById(i32 sfx_id, NUVEC *position, i32 flags, i32 volume);
 void GameAudio_AddSfx(i32 sfx, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx);
+i32 GameAudio_GetPlrSfxBits(void *object);
 void AddLevelSfxFromId(i32 sfx_id, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx);
 
 #endif

@@ -7,6 +7,7 @@
 #include "legoapi/characters/core/players.h"
 #include "legoapi/gizmo/base/gizflow.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmos/transport/teleport.h"
 #include "legoapi/menus/core/panel.h"
 #include "globals.h"
 #include "legoapi/render/fx.h"

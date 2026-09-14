@@ -7,6 +7,7 @@
 #include "legogame/game.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmos/object/hatmachine.h"
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/actions/character/transform.h"
 #include "legoapi/props/objects/signal.h"
@@ -262,7 +263,6 @@ void GizSpinners_InitTerrain(WORLDINFO_s *world);
 void SecurityDoors_InitTerrain(WORLDINFO_s *world);
 void Levers_InitTerrain(WORLDINFO_s *world);
 void GizPanel_InitTerrain(WORLDINFO_s *world);
-void HatMachines_InitTerrain(WORLDINFO_s *world);
 void GizmoBlowupsFinalSetup(WORLDINFO_s *world);
 void InitClimbObjectSys(WORLDINFO_s *world);
 void GizmoPushBlockInitAndReset(WORLDINFO_s *world, void *progress);

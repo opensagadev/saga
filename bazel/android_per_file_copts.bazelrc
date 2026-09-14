@@ -44,7 +44,6 @@ build:target --per_file_copt=^src/gameapi/ai/aisys/aistate\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/ai/aisys/aisys\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/ai/aisys/gameai_actions\.cpp$@-O3
 # Teleport parser callbacks in the target use optimized leaf/control-flow code.
-build:target --per_file_copt=^src/gameapi/ai/gameai_tel\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/items/objects/grabber\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/edtools/edfile\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/edtools/edsplines\.cpp$@-O3
@@ -169,15 +168,12 @@ build:target --per_file_copt=^src/legoapi/world/levels/episodeV\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levels/episodeVI\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levels/hub\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levels/episode\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_teleport\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_gizactions\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_gizmopickups\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/object/gizbuildit\.cpp$@-O3
 # Turret lookup and hint traversal use the same optimized leaf/loop forms as
 # the surrounding generated gizmo translation units.
 build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_grabber\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_hatmachine\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_tubes\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/world\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levelconfig\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/levels\.cpp$@-O3
@@ -222,6 +218,7 @@ build:target --per_file_copt=^src/legoapi/gizmos/traps/shards\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/props/objects/signal\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/props/objects/tubes\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/door/gizspinner\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/gizmo/gizmos/gizmos_teleport\.cpp$@-O2
 build:target --per_file_copt=^src/legoapi/gizmos/transport/teleport\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/props/objects/tightrope\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/transport/tubes\.cpp$@-O3

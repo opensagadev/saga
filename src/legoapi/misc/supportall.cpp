@@ -19,6 +19,7 @@
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/gizmo/base/gizflow.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmos/transport/teleport.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/legoapi_types.h"
@@ -108,7 +109,6 @@ extern rtldata_s lev_rtldata;
 void Hint_Reset(void);
 void Hint_CancelCurrent(void);
 void Hint_SetHintFromId(i32, i32, i32);
-void Teleports_Reset(WORLDINFO_s *);
 void TrafficAnimSys_Reset(TRAFFICANIMSYS_s *);
 void Pulses_Reset(PULSESYS_s *);
 void ResetRepeatSfx(void);
