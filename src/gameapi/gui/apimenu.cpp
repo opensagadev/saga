@@ -74,8 +74,6 @@ void Hint_LoadAllGameState(void);
 void NuIOS_RestoreInAppPurchases(void);
 void NewGame(void);
 void MenuDrawNewGame(MENU *menu);
-void MenuEnterNewGame(MENU *menu);
-void MenuExitNewGame(MENU *menu);
 void MenuUpdateNewGame(MENU *menu);
 void MenuDrawLoad(MENU *menu);
 void MenuDrawLoading(MENU *menu);
@@ -703,20 +701,6 @@ void MenuDrawNewGame(MENU *menu) {
         }
         NuStrCat(controls, control_text != NULL ? control_text : "?");
         DrawMenuEntryEx(menu, controls, static_cast<u8>(alpha));
-    }
-}
-
-void MenuEnterNewGame(MENU *menu) {
-    (void)menu;
-    if (MenuLoadOccurred == 0 && startnewgame_initiated == 0 && startnewgame == 0) {
-        saveload_autosave = -1;
-    }
-    MenuLoadOccurred = MenuSaveOccurred = 0;
-}
-
-void MenuExitNewGame(MENU *) {
-    if (PlayerProgress[0].active == 0 && PlayerProgress[1].active == 0) {
-        PlayerProgress[0].active = 1;
     }
 }
 

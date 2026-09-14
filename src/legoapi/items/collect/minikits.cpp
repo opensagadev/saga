@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "legoapi/items/collect/minikits.h"
 #include "globals.h"
 #include "legoapi/items/base/collection.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"

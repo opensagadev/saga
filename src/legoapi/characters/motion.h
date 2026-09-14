@@ -14,6 +14,7 @@ extern float DIEAIRJUMPSPEED;
 #include "nu2api/nucore/numechptr.hpp"
 
 // Character motion / animation / camera helpers (module legoapi/characters).
+extern NUVEC CustomisePos[2];
 extern "C" f32 CameraEmitterDistance(NUVEC *position);
 void Move_BEAST(GameObject_s *object);
 void Move_VEHICLE(GameObject_s *object);

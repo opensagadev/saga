@@ -38,10 +38,6 @@ i32 Gizmo_FindNuSpecial(nugscn_s *scene, nuhspecial_s *special, char *name, i32 
     return 0;
 }
 
-void ReleaseAllTakeOvers() {
-    STUBBED();
-}
-
 i32 GizmoGetGizmosUsingSpecial(GIZMOSYS *gizmo_sys, void *world, GIZMO **result, i32 result_capacity, char *name) {
     if (gizmo_sys == NULL || gizmotypes == NULL || result == NULL || gizmotypes->count <= 0 || result_capacity <= 0) {
         return 0;

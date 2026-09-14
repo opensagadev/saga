@@ -13,6 +13,7 @@ extern "C" {
 #include "legoapi/legoapi_types.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/gizmo/object/gizmopickup.h"
+#include "legoapi/items/collect/minikits.h"
 #include "legoapi/world/level.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/render/core/terrain.h"
@@ -156,7 +157,6 @@ void ConstantRumble(GameObject_s *, f32, f32);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 void Hint_SetComplete(i32);
 i32 GameAnimSet_IsAnimationReset(GAMEANIMSET_s *);
-void CollectMinikit(NUVEC *, char *, i32);
 GIZMOBLOWUP_s *FindNearestGizmoBlowUp(WORLDINFO_s *, NUVEC *, f32);
 static __used__ i32 IsGrabbable(GameObject_s *object) {
     return (object->apiobj.character_data->game_character->flags_090 & GAMECHARACTER_FLAG_GRAB_DISABLED) == 0;

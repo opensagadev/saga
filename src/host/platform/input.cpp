@@ -101,6 +101,14 @@ namespace NuInputDevicePS {
         return false;
     }
 
+    void EnableDPDPS(u32) {
+        STUBBED();
+    }
+
+    void DisableDPDPS(u32) {
+        STUBBED();
+    }
+
     NUPADTYPE GetTypePS(u32 device) {
         return device == host_touch_device ? NUPADTYPE_TOUCH : NUPADTYPE_GAMEPAD;
     }

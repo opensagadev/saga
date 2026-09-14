@@ -3,15 +3,24 @@
 #include <string.h>
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/customiser.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/core/config/cheat.h"
+#include "legoapi/gizmo/base/gizmessage.h"
+#include "legoapi/gizmo/object/takeoverobjects.h"
 #include "legoapi/items/base/apiobject.h"
+#include "legoapi/items/base/collection.h"
+#include "legoapi/items/collect/minikits.h"
 #include "legoapi/items/collect/torpedo.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/props/doors/door.h"
+#include "legoapi/render/fx/particles.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/areas.h"
+#include "legoapi/world/levels/levels.h"
 #include "legoapi/world/mission.h"
+#include "legogame/game.h"
 #include "legoapi/menus/screens/store.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nucore/nustring.h"
@@ -48,22 +57,6 @@ static void AddToModelList(APICHARACTERMODELLIST_s *list, i32 *count, i32 capaci
         }
     }
 }
-
-// Cross-module entry points used by this file (declared locally since they have
-// no single shared header in the reconstructed source).  The NuFPar* helpers are
-// taken as void* (untyped parser handle) to match the open/close contract.
-extern void ReCalculateCompletionPoints(void);
-extern void Hub_LockUnlockDoors(struct WORLDINFO_s *);
-extern void RemoveGameObject(struct GameObject_s *, i32);
-GIZAIMESSAGE_s *CheckGizAIMessage(GIZAIMESSAGESYS_s *, const char *, GIZAIMESSAGE_s *);
-extern void CharScenes_AreaDump(void);
-extern void Particles_DumpAreaPage(void);
-extern void Customiser_RestoreModelTextureIDs(struct CUSTOMISER *);
-extern void Customiser_DumpAccessories(struct CUSTOMISER *);
-extern void NewAreaMusicChanges(void);
-extern void ClearTakeOverObjectSys(void);
-extern void Door_Reset(void);
-extern void ResetMinikitCounter(void);
 
 void Areas_OpenAll(i32 mode) {
     i32 area_index;

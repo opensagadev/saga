@@ -1,6 +1,7 @@
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/cutscenes/cutscenes.h"
+#include "legoapi/audio/sfx.h"
 #include "globals.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "legoapi/characters/core/character.h"
@@ -144,7 +145,6 @@ void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
 extern "C" {
     void PauseGameAudio(void);
     void PauseGameCut(void);
-    void SetLinkedCutSceneMusic(void *context, i32 state);
     void PlaySfxById(i32 sfx_id, nuvec_s *position);
     extern instNUGCUTSCENE_s *cutscene_load_instance;
     void instNuGCutSceneServiceLoad(void);

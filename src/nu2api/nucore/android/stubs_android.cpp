@@ -1,5 +1,6 @@
 #include "decomp.h"
 #include "nu2api/nu3d/nurndr.h"
+#include "nu2api/nu3d/nuwater.h"
 
 struct nugobj_s;
 struct numtx_s;
@@ -23,6 +24,10 @@ extern "C" void NuSetPadDemoEndButtons(u32) {
 }
 
 extern "C" void NuPs2VideoSetPos(void) {
+    STUBBED();
+}
+
+extern "C" void NuWaterReset(void) {
     STUBBED();
 }
 

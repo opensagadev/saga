@@ -235,6 +235,13 @@ void MenuDrawSave(MENU_s *menu) {
     }
 }
 
+void MenuEnterNewGame(MENU_s *) {
+    if (MenuLoadOccurred == 0 && startnewgame_initiated == 0 && startnewgame == 0) {
+        saveload_autosave = -1;
+    }
+    MenuLoadOccurred = MenuSaveOccurred = 0;
+}
+
 void MenuExitLoad(MENU_s *) {
     Menu_InLoadFlow = 0;
 }
@@ -606,6 +613,12 @@ void MenuDrawOptions(MENU_s *menu) {
 
 void MenuExitOptions(MENU_s *) {
     RestoreOptions();
+}
+
+void MenuExitNewGame(MENU_s *) {
+    if (PlayerProgress[0].active == 0 && PlayerProgress[1].active == 0) {
+        PlayerProgress[0].active = 1;
+    }
 }
 
 void MenuIsAvailable() {

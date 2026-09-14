@@ -17,6 +17,7 @@
 #include "legoapi/menus/core/text.h"
 #include "legoapi/menus/screens/movies.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/render/fx/particles.h"
 #include "legoapi/render/light/shadow.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/areas.h"
@@ -133,13 +134,10 @@ extern "C" {
 
 i32 GetMenuID(void);
 
-void Particles_Start(WORLDINFO_s *);
-void Particles_Stop(WORLDINFO_s *);
 void Parts_Start(WORLDINFO_s *);
 void Parts_Stop(WORLDINFO_s *);
 void UpdateSpecialSfx(WORLDINFO_s *);
 void DebrisKillPlayers(void);
-void AddCameraRain(WORLDINFO_s *, i32);
 void UpdateRippleSet(ripple_set_s *);
 void DrawRippleSet(ripple_set_s *);
 void UpdateExplosions(void);
@@ -295,7 +293,6 @@ void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
 void FreeGameObjectLights(void);
 void ClearUpAreaData(void);
 void StoreStatusTakeOverObjectSys(void);
-void ReleaseAllTakeOvers(void);
 void StoreLevelProgress(WORLDINFO_s *);
 void ClearAreaProgress(i32, i32);
 void Hub_MakeModelList(void);

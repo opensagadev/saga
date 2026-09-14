@@ -204,14 +204,6 @@ const NuInputDevice *NuInputManager::GetFirstDeviceByType(NUPADTYPE type) const 
     return NULL;
 }
 
-void NuInputDevicePS::DisableDPDPS(u32) {
-    STUBBED();
-}
-
-void NuInputDevicePS::EnableDPDPS(u32) {
-    STUBBED();
-}
-
 void NuInputDevicePS::GetIdentifierPS(u32) {
     STUBBED();
 }

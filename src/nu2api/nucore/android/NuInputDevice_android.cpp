@@ -111,11 +111,6 @@ namespace NuInputDevicePS {
         return false;
     }
 
-    bool HasHeadphonesConnectedPS(u32 port) {
-        STUBBED();
-        return false;
-    }
-
     NUPADTYPE GetTypePS(u32 port) {
         return port == 0 ? NUPADTYPE_TOUCH : NUPADTYPE_GAMEPAD;
     }
@@ -135,6 +130,19 @@ namespace NuInputDevicePS {
 
     void SetMotorsPS(u32 port, f32 motor_1, f32 motor_2) {
         STUBBED();
+    }
+
+    void EnableDPDPS(u32) {
+        STUBBED();
+    }
+
+    void DisableDPDPS(u32) {
+        STUBBED();
+    }
+
+    bool HasHeadphonesConnectedPS(u32 port) {
+        STUBBED();
+        return false;
     }
 
     void ReadButtonsPS(u32 port, u32 *states) {

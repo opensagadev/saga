@@ -49,12 +49,6 @@ extern "C" {
         return 0;
     }
 
-    void ClearLinkedCutSceneMusic(void *context) {
-        if (context == NULL || Music.track_data == context) {
-            Music.track_data = NULL;
-        }
-    }
-
     void DisplayCutSceneMemory(void) {
         STUBBED();
     }
