@@ -3,8 +3,8 @@
 #include "nu2api/nu3d/nugscn.h"
 #include "nu2api/nucore/common.h"
 
-// Editor subsystem stubs — all symbols with the "ed" prefix.
-// Definitions are in edstubs.cpp.
+// Editor entry points; definitions are being assigned to their evidenced
+// source owners as translation units are reconstructed.
 
 #ifdef __cplusplus
 extern "C" {

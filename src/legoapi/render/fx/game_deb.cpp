@@ -19,43 +19,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-// Original game_deb.cpp action/context data; only the pointers are exported.
-EXTRAACTIONDATA_s ExtraActionData[] = {
-    {"run1", 3},
-    {"idle1", 1},
-    {"interface1", 24},
-    {"deactivated1", 65},
-    {"fall1", 5},
-    {"fire1", 2},
-    {"force1", 11},
-    {"walk1", 0},
-    {"tiptoe1", 4},
-    {"jump1", 6},
-    {"land1", 7},
-    {"shoot1", 22},
-    {"block", 26},
-    {"takehit1", 61},
-    {"punch1", 81},
-    {"trooperaccess", 69},
-    {"throw1", 101},
-    {"hunteraccess", 70},
-    {"stun1", 167},
-    {"stunned1", 170},
-    {"ride", 108},
-    {"ride_buggy", 112},
-    {"ride_gyrocopter", 131},
-    {"ride_bantha", 112},
-    {"ride_dewback", 131},
-    {"ride_landspeeder", 132},
-    {"ride_tauntaun", 134},
-    {"ride_speederbike", 192},
-    {"ride_heavyrepeatingcannon", 193},
-    {"ride_troopercannon", 194},
-    {"rideluke", 195},
-    {"rideluke_running", 196},
-    {NULL, 0},
-};
-
+// Original action/context lookup data, with its arrays and pointers in one owner.
 static CHARACTER_CONTEXT_INFO_s _CInfoTab[] = {
     {"NoContext", -1, 0x00001000, 0},
     {"Jump", -1, 0x01000000, 0},
@@ -159,8 +123,6 @@ static CHARACTER_CONTEXT_INFO_s _CInfoTab[] = {
     {"Whip", -1, 0x00000033, 1},
     {"NetWait", -1, 0x00000023, 0},
 };
-
-CHARACTER_CONTEXT_INFO_s *CInfo = &_CInfoTab[1];
 
 static ACTIONINFO_s ActionInfoList[] = {
     {"?", 0x0},
@@ -398,7 +360,44 @@ static ACTIONINFO_s ActionInfoList[] = {
     {"dig", 0x0},
     {"winch", 0x0},
 };
+
+CHARACTER_CONTEXT_INFO_s *CInfo = &_CInfoTab[1];
 ACTIONINFO_s *ActionInfo = &ActionInfoList[1];
+EXTRAACTIONDATA_s ExtraActionData[] = {
+    {"run1", 3},
+    {"idle1", 1},
+    {"interface1", 24},
+    {"deactivated1", 65},
+    {"fall1", 5},
+    {"fire1", 2},
+    {"force1", 11},
+    {"walk1", 0},
+    {"tiptoe1", 4},
+    {"jump1", 6},
+    {"land1", 7},
+    {"shoot1", 22},
+    {"block", 26},
+    {"takehit1", 61},
+    {"punch1", 81},
+    {"trooperaccess", 69},
+    {"throw1", 101},
+    {"hunteraccess", 70},
+    {"stun1", 167},
+    {"stunned1", 170},
+    {"ride", 108},
+    {"ride_buggy", 112},
+    {"ride_gyrocopter", 131},
+    {"ride_bantha", 112},
+    {"ride_dewback", 131},
+    {"ride_landspeeder", 132},
+    {"ride_tauntaun", 134},
+    {"ride_speederbike", 192},
+    {"ride_heavyrepeatingcannon", 193},
+    {"ride_troopercannon", 194},
+    {"rideluke", 195},
+    {"rideluke_running", 196},
+    {NULL, 0},
+};
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -1345,8 +1344,7 @@ extern "C" {
         for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
             debinftype *effect = debtab[i];
             if (i != ignore && effect != NULL &&
-                ((effect->page == 0 && edpp_page_used[0] != 0) ||
-                 (effect->page == 1 && edpp_page_used[1] != 0)) &&
+                ((effect->page == 0 && edpp_page_used[0] != 0) || (effect->page == 1 && edpp_page_used[1] != 0)) &&
                 NuStrICmp(effect->name, name) == 0) {
                 return i;
             }
@@ -1384,8 +1382,7 @@ extern "C" {
         for (i32 i = 1; i < EDPP_MAX_TYPES; ++i) {
             debinftype *effect = debtab[i];
             if (effect != NULL &&
-                ((effect->page == 0 && edpp_page_used[0] != 0) ||
-                 (effect->page == 1 && edpp_page_used[1] != 0)) &&
+                ((effect->page == 0 && edpp_page_used[0] != 0) || (effect->page == 1 && edpp_page_used[1] != 0)) &&
                 NuStrICmp(effect->name, name) == 0) {
                 return i;
             }
