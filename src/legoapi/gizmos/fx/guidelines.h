@@ -19,11 +19,7 @@ typedef struct GUIDELINE_s {
     u8 reserved_21[3];
 } GUIDELINE;
 
+void GuideLine_FindNearest(nuvec_s *, WORLDINFO_s *, i32 *, float *);
 ADDGIZMOTYPE *GuideLines_RegisterGizmo(i32 type_id);
 
-extern "C" {
-#endif
-
-#ifdef __cplusplus
-}
 #endif

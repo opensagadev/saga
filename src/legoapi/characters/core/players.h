@@ -11,6 +11,7 @@
 #include "nu2api/numath/nuvec.h"
 
 void ActivatePlayer(GameObject_s *);
+void SetFlicker(GameObject_s *object, f32 duration);
 i32 DeactivatePlayer(GameObject_s *, f32, GameObject_s *);
 u32 AdjustLayerBits(u32 mask, GameObject_s *object);
 void FixUpLayers();

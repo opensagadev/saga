@@ -5,6 +5,7 @@
 #include "legoapi/world/mission.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/render/light/lighting.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/world/area.h"
@@ -26,7 +27,6 @@ extern "C" i32 NuRndrBeginScene(i32 flags);
 extern "C" void NuRndrEndScene(void);
 extern NUCAMERA *pNuCam;
 extern "C" f32 NuIOS_GetAspectRatio(void);
-void SetPanelLights(f32 intensity);
 void TimingBars(void);
 void Arcade_ResetPanel(void);
 void TBOPENFN(char *name, i32 bar);

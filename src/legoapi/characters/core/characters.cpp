@@ -22,6 +22,7 @@
 #include "legoapi/menus/screens/store.h"
 #include "legoapi/menus/screens/shop.h"
 #include "legoapi/render/fx.h"
+#include "legoapi/render/light/lighting.h"
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/gizmos/object/lever.h"
 #include "legoapi/gizmos/door/zipups.h"
@@ -654,7 +655,6 @@ extern void GetTopBot(GameObject_s *obj);
 extern void GameObjectDimensions(GameObject_s *obj);
 extern void GameObjectOrigin(GameObject_s *obj);
 extern void ResetCharacterIdle(GameObject_s *obj, i32 mode, i32 idle);
-extern void ResetLights(NUVEC *position, rtldata_s *data, void *set);
 extern void ResetPlayerPacket(PLAYERPACKET_s *packet, CHARACTERDATA_s *data);
 
 static u32 LayerBit(u8 layer) {

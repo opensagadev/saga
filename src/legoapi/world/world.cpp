@@ -6,6 +6,7 @@
 #include "legoapi/render/fx/game_deb.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/render/fx/parts.h"
+#include "legoapi/render/light/lighting.h"
 
 #include <stdio.h>
 #include <string.h>

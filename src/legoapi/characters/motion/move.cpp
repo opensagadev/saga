@@ -242,7 +242,6 @@ f32 DIEAIRJUMPSPEED = 2.0f;
 void SetObjAsHeadTarget(GameObject_s *, GameObject_s *, i8, f32, f32, f32);
 void KillRumble(GameObject_s *);
 void PlayHurtSfx(GameObject_s *);
-void SetFlicker(GameObject_s *, f32);
 void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 extern i16 id_BATTLEDROIDSECURITY, id_PKDROID, id_PITDROID;
 void FindForcePushTarget(GameObject_s *, i32, i32);
@@ -3551,6 +3550,14 @@ static void ForceGlowCode(GameObject_s *object, i32 model) {
         }
     }
     object->field_0xd8c *= 1.125f;
+}
+
+void LightSabre_ColourFromObj(i32, i32 *) {
+    STUBBED();
+}
+
+void LightSabreDebris(GameObject_s *) {
+    STUBBED();
 }
 
 static void ForceCode(GameObject_s *object, i32 pressed, i32 held, i32) {

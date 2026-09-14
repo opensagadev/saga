@@ -53,7 +53,7 @@ enum NuPostEffectFlag : i32 {
     kEffect_MotionBlur = 0x80,
 };
 
-i32 g_effectFlags; // bss - see masks above
+static i32 g_effectFlags; // bss - see masks above
 static i32 g_effectsRan = 0;
 static u8 g_lastFrameEffect = 0;
 
@@ -77,11 +77,11 @@ template <typename T> static T *AllocatePostFilter() {
 
 // Original proxy descriptor is 12 bytes, including two one-byte flags.
 
-static NuProxyBuffer s_proxyColorBuffer;
-static NuProxyBuffer s_proxyNormalBuffer;
-static NuProxyBuffer s_proxyVelocityBuffer;
-static NuProxyBuffer s_proxyDepthBuffer;
-static NuProxyBuffer s_proxyDepthRTBuffer;
+static NuProxyBuffer proxyColorBuffer;
+static NuProxyBuffer proxyNormalBuffer;
+static NuProxyBuffer proxyVelocityBuffer;
+static NuProxyBuffer proxyDepthBuffer;
+static NuProxyBuffer proxyDepthRTBuffer;
 
 static constexpr i32 kProxyKind_Color = 0;
 static constexpr i32 kProxyKind_Normal = 1;
@@ -137,10 +137,10 @@ extern "C" void NuPostEffectEnd(void) {
     FilterEnd(motionFilter);
     FilterEnd(motionAccumFilter);
 
-    ResetProxyBuffer(&s_proxyColorBuffer, kProxyKind_Color);
-    ResetProxyBuffer(&s_proxyNormalBuffer, kProxyKind_Normal);
-    ResetProxyBuffer(&s_proxyVelocityBuffer, kProxyKind_Velocity);
-    ResetProxyBuffer(&s_proxyDepthBuffer, kProxyKind_Depth);
+    ResetProxyBuffer(&proxyColorBuffer, kProxyKind_Color);
+    ResetProxyBuffer(&proxyNormalBuffer, kProxyKind_Normal);
+    ResetProxyBuffer(&proxyVelocityBuffer, kProxyKind_Velocity);
+    ResetProxyBuffer(&proxyDepthBuffer, kProxyKind_Depth);
 }
 
 extern "C" void NuPostEffectInit(u32 flags, void *buffer, void *buffer_end) {
@@ -238,8 +238,8 @@ extern "C" void NuPostEffectRender(nuframebuffer_s *output) {
     if (output == NULL)
         output = NuFramebufferGetObject(1);
     NuFramebufferGetObject(0);
-    NuProxyBuffer *proxies[] = {&s_proxyColorBuffer, &s_proxyNormalBuffer, &s_proxyVelocityBuffer,
-                                &s_proxyDepthRTBuffer, &s_proxyDepthBuffer};
+    NuProxyBuffer *proxies[] = {&proxyColorBuffer, &proxyNormalBuffer, &proxyVelocityBuffer, &proxyDepthRTBuffer,
+                                &proxyDepthBuffer};
     const i32 attachments[] = {0, 1, 2, 2, 4};
     for (i32 i = 0; i < 5; ++i) {
         proxies[i]->texture = NuFramebufferGetAttachedTex(bound, attachments[i], NULL, NULL);
@@ -277,12 +277,12 @@ extern "C" nueffecttex_s *NuPostEffectGetDepthBuffer(i32 frame) {
     static nueffecttex_s *depthBufferCopy;
     if (depthFrameId != frame) {
         depthFrameId = frame;
-        if (s_proxyDepthBuffer.texture == NULL) {
+        if (proxyDepthBuffer.texture == NULL) {
             NuFramebufferResolve(4, false);
             depthBufferCopy = NuFramebufferGetAttachedTex(NuFramebufferGetBound(), 4, NULL, NULL);
         } else {
-            NuPostResolve(&s_proxyDepthBuffer);
-            depthBufferCopy = s_proxyDepthBuffer.texture;
+            NuPostResolve(&proxyDepthBuffer);
+            depthBufferCopy = proxyDepthBuffer.texture;
         }
     }
     return depthBufferCopy;
