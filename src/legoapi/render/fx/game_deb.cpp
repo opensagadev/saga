@@ -1024,6 +1024,9 @@ extern "C" {
     f32 renderglobaltime = 0.0f;
     f32 renderpanelglobaltime = 0.0f;
     f32 timeincrement = 0.0f;
+    void DebrisSetTimeIncrement(f32 increment) {
+        timeincrement = increment;
+    }
     i32 globalframes = 0;
     i32 update_debris_enabled = 1;
     u32 debrisseed = 0x5c0999;

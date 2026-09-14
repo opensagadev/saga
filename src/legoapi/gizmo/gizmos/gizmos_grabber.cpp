@@ -12,6 +12,7 @@ extern "C" {
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/world/level.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/render/core/terrain.h"
 #include "nu2api/numath/numtx.h"
 
 // Original 0x22aae0, 264 bytes.
@@ -128,7 +129,6 @@ extern "C" {
     extern f32 GameTimer;
     extern TERRAIN_SURFACE_s TerSurface[32];
     void NewTerrPlatformsOff();
-    i32 ShadowInfo();
     void PlaySfxAndSetPitch(const char *, NUVEC *, f32);
     f32 AnimListFrame(CHARACTERMODEL_s *, i32, i32);
     AIANTINODE_s *AIAntinodeCreateSingleFrame(NUVEC *, f32);

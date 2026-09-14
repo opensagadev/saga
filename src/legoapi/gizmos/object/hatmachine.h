@@ -9,6 +9,7 @@ extern i32 hatmachine_gizmotype_id;
 typedef struct HATMACHINE_s HATMACHINE;
 
 ADDGIZMOTYPE *HatMachine_RegisterGizmo(i32 type_id);
+void Hat_GetAbsTargetPos(HATMACHINE *machine, NUVEC *position);
 
 extern "C" {
 #endif

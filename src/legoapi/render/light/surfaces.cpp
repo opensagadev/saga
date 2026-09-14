@@ -1,6 +1,7 @@
 #include "decomp.h"
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/render/core/terrain.h"
 #include "nu2api/nu3d/glutils.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/numath/nutrig.h"
@@ -37,7 +38,6 @@ f32 FindReflectionNoPlatforms(NUVEC *position);
 i32 UnderWater(GameObject_s *object);
 void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
 extern "C" i32 NewShadowOnPlatform();
-extern "C" i32 ShadowInfo();
 
 void (*SurfaceInfo_ExtraReflectFn)(GameObject_s *object);
 

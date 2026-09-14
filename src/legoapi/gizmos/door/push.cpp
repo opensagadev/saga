@@ -5,6 +5,8 @@
 #include "globals.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/render/light/shadow.h"
 #include "nu2api/nucore/numem.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nuspecial.h"
@@ -74,8 +76,6 @@ void AddShoveObject(nuhspecial_s *, i16);
 extern "C" {
     void PlatOnOff(i32, i32);
     void NewTerrPlatformsOff();
-    i32 ShadowInfo();
-    i32 EShadowInfo();
 }
 void UpdatePushBlocks(void *world_ptr, void *, float) {
     static f32 snap_time = 0.25f;

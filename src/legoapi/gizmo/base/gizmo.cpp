@@ -949,6 +949,14 @@ void ResetPaintPuzzle(WORLDINFO_s *) {
     STUBBED();
 }
 
+void InitPaintPuzzle(WORLDINFO_s *) {
+    STUBBED();
+}
+
+void UpdatePaintPuzzle(WORLDINFO_s *) {
+    STUBBED();
+}
+
 i32 GizmoFileReadName(char *name) {
     i32 name_length = EdFileReadChar();
     if (name_length == 0) {
@@ -983,10 +991,6 @@ i32 GizmoIsNameUnique(GIZMOSYS *gizmo_sys, char *name) {
 }
 
 void GizmoSysWriteInfo(GIZMOSYS_s *, char *, nugscn_s *) {
-    STUBBED();
-}
-
-void UpdatePaintPuzzle(WORLDINFO_s *) {
     STUBBED();
 }
 

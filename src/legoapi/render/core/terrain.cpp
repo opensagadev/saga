@@ -1,6 +1,7 @@
 #include "decomp.h"
 #include "legoapi/world/world_shared.h"
 #include "legoapi/render/core/terrain.h"
+#include "legoapi/render/core/gameliball.h"
 
 #include <stdio.h>
 
@@ -134,9 +135,6 @@ i32 terraincnt;
 i32 curSphereter;
 i32 platinrange;
 TERRAIN_SHAPE *ShadPoly;
-extern "C" i32 ShadowIntensityInfo(void) {
-    return ShadPoly ? (i32)ShadPoly->normal_flags - 8 : -1;
-}
 TERRAIN_SHAPE *TerrPoly;
 extern "C" void NuRndrLine3dDbg(f32, f32, f32, f32, f32, f32, i32);
 
@@ -588,7 +586,6 @@ namespace {
 
 i16 debug_index;
 
-i32 ReadTerrain(unsigned char *base_path, i32 first_group, i16 **buffer, TERRSET *terrain);
 void TerrFlush();
 
 // Debris and terrain globals — accessed from DebrisSetThinningLevel etc.
@@ -3743,6 +3740,14 @@ extern "C" i32 TerrainTrackBack(NUVEC *position, NUVEC *direction, f32 radius, f
     return TerI->hit_type;
 }
 
+extern "C" i32 TerrainIntensityInfo() {
+    if (TerrPoly != NULL)
+        return static_cast<i32>(TerrPoly->normal_flags) - 8;
+    if (TerrWallInfo != 0)
+        return static_cast<i32>(TerrWallTab[3]) - 8;
+    return -1;
+}
+
 extern "C" i32 TerrainInfo() {
     if (TerrPoly != NULL)
         return TerrPoly->material[0];
@@ -3759,12 +3764,12 @@ extern "C" i32 TerrainInfoExtra() {
     return -1;
 }
 
-extern "C" i32 TerrainIntensityInfo() {
-    if (TerrPoly != NULL)
-        return static_cast<i32>(TerrPoly->normal_flags) - 8;
-    if (TerrWallInfo != 0)
-        return static_cast<i32>(TerrWallTab[3]) - 8;
-    return -1;
+extern "C" i32 ShadowInfo(void) {
+    return ShadPoly != NULL ? ShadPoly->material[0] : -1;
+}
+
+extern "C" i32 ShadowIntensityInfo(void) {
+    return ShadPoly ? (i32)ShadPoly->normal_flags - 8 : -1;
 }
 
 extern "C" void TerrTempMemory(void **buffer) {
@@ -3889,6 +3894,20 @@ extern "C" void NewRaySetDisablePalt(i32 disabled) {
 extern "C" void NewScanInit(void) {
     TempStackPtr = TempScanStack;
     TerrPlatDis = -1;
+}
+
+extern "C" void TerrainTrackFlush(void) {
+    if (CurTerr == NULL) {
+        return;
+    }
+
+    for (i32 slot_index = 0; slot_index < TERRAIN_TRACK_SLOT_COUNT; ++slot_index) {
+        CurTerr->track_slots[slot_index].id = NULL;
+    }
+}
+
+void NewScan(nuvec_s *, i32, i32) {
+    STUBBED();
 }
 
 void NewScanRot(nuvec_s *position, i32 terrain_mask) {
@@ -4111,4 +4130,12 @@ void NewScanRot(nuvec_s *position, i32 terrain_mask) {
     terminator[0] = 0;
     terminator[1] = 0;
     TerI->scan_list = TerI->scan_list_storage;
+}
+
+void NewScanHandelFull(nuvec_s *, nuvec_s *, f32, i32, i32) {
+    STUBBED();
+}
+
+void NewScanHandelSubset(i16 *, nuvec_s *, nuvec_s *, f32, i32) {
+    STUBBED();
 }

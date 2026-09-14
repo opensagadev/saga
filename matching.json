@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.064774,
+    "fuzzy_match_percent": 46.065376,
     "total_code": "4722419",
     "matched_code": "400186",
     "matched_code_percent": 8.4741745,
@@ -49168,21 +49168,6 @@
       ]
     },
     {
-      "name": "legoapi/cutscenes/cutscene_find.cpp.o",
-      "source": "src/legoapi/cutscenes/cutscene_find.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/cutscene_find.o",
-      "functions": [
-        {
-          "name": "_Z13CutScene_FindP6CUTSYSPc",
-          "demangled_name": "CutScene_Find(CUTSYS*, char*)",
-          "address": 4837520,
-          "offset": 3947552,
-          "size": 115,
-          "match_percent": 99.38776
-        }
-      ]
-    },
-    {
       "name": "legoapi/cutscenes/cutscene_stubs.cpp.o",
       "source": "src/legoapi/cutscenes/cutscene_stubs.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/cutscene_stubs.o",
@@ -49659,6 +49644,14 @@
           "match_percent": 99.680855
         },
         {
+          "name": "_Z13CutScene_FindP6CUTSYSPc",
+          "demangled_name": "CutScene_Find(CUTSYS*, char*)",
+          "address": 4837520,
+          "offset": 3947552,
+          "size": 115,
+          "match_percent": 99.69388
+        },
+        {
           "name": "_Z11NewCutSceneP7CUTINFOP6CUTSYSPci",
           "demangled_name": "NewCutScene(CUTINFO*, CUTSYS*, char*, int)",
           "address": 4837648,
@@ -49712,7 +49705,7 @@
           "address": 4838176,
           "offset": 3948208,
           "size": 140,
-          "match_percent": 69.24
+          "match_percent": 68.94
         },
         {
           "name": "_Z20CutScene_IsSkippableP7CUTINFO",
@@ -49720,7 +49713,7 @@
           "address": 4838320,
           "offset": 3948352,
           "size": 83,
-          "match_percent": 83.23077
+          "match_percent": 83.61539
         },
         {
           "name": "_Z14CutScenes_DrawP11WORLDINFO_s",
@@ -49736,7 +49729,7 @@
           "address": 4838928,
           "offset": 3948960,
           "size": 99,
-          "match_percent": 98.608696
+          "match_percent": 99.26087
         },
         {
           "name": "_Z20CutScenes_InitSystemP11CUTSCENESYS",
@@ -49776,7 +49769,7 @@
           "address": 4846656,
           "offset": 3956688,
           "size": 1487,
-          "match_percent": 44.397335
+          "match_percent": 44.357334
         },
         {
           "name": "_Z15CutScenes_StartP11WORLDINFO_s",
@@ -50699,6 +50692,14 @@
           "offset": 1224656,
           "size": 206,
           "match_percent": 6.5625
+        },
+        {
+          "name": "_Z15InitPaintPuzzleP11WORLDINFO_s",
+          "demangled_name": "InitPaintPuzzle(WORLDINFO_s*)",
+          "address": 2114832,
+          "offset": 1224864,
+          "size": 758,
+          "match_percent": 2.307692
         },
         {
           "name": "_Z17UpdatePaintPuzzleP11WORLDINFO_s",
@@ -54345,21 +54346,6 @@
       ]
     },
     {
-      "name": "legoapi/gizmo/object/gizobstacle.cpp.o",
-      "source": "src/legoapi/gizmo/object/gizobstacle.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/0/gizobstacle.o",
-      "functions": [
-        {
-          "name": "_Z15InitPaintPuzzleP11WORLDINFO_s",
-          "demangled_name": "InitPaintPuzzle(WORLDINFO_s*)",
-          "address": 2114832,
-          "offset": 1224864,
-          "size": 758,
-          "match_percent": 1.868132
-        }
-      ]
-    },
-    {
       "name": "legoapi/gizmo/object/gizpanel.cpp.o",
       "source": "src/legoapi/gizmo/object/gizpanel.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/0/gizpanel.o",
@@ -55750,8 +55736,16 @@
     {
       "name": "legoapi/gizmos/object/gizobstacle.cpp.o",
       "source": "src/legoapi/gizmos/object/gizobstacle.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/1/gizobstacle.o",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizobstacle.o",
       "functions": [
+        {
+          "name": "_GLOBAL__sub_I_gizobstacle.cpp",
+          "demangled_name": "_GLOBAL__sub_I_gizobstacle.cpp",
+          "address": 921424,
+          "offset": 31456,
+          "size": 93,
+          "match_percent": 99.35294
+        },
         {
           "name": "_Z31GizObstacle_SetDefaultSFXFn_LSWPvP13GIZOBSTACLE_s",
           "demangled_name": "GizObstacle_SetDefaultSFXFn_LSW(void*, GIZOBSTACLE_s*)",
@@ -56292,8 +56286,16 @@
     {
       "name": "legoapi/gizmos/object/hatmachine.cpp.o",
       "source": "src/legoapi/gizmos/object/hatmachine.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/0/hatmachine.o",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/hatmachine.o",
       "functions": [
+        {
+          "name": "_GLOBAL__sub_I_hatmachine.cpp",
+          "demangled_name": "_GLOBAL__sub_I_hatmachine.cpp",
+          "address": 898848,
+          "offset": 8880,
+          "size": 93,
+          "match_percent": 99.35294
+        },
         {
           "name": "_ZL23HatMachine_GetMaxGizmosPv",
           "demangled_name": "HatMachine_GetMaxGizmos(void*)",
@@ -56397,6 +56399,14 @@
           "offset": 1122576,
           "size": 141,
           "match_percent": 72.94231
+        },
+        {
+          "name": "_Z19Hat_GetAbsTargetPosP12HATMACHINE_sP7nuvec_s",
+          "demangled_name": "Hat_GetAbsTargetPos(HATMACHINE_s*, nuvec_s*)",
+          "address": 2012688,
+          "offset": 1122720,
+          "size": 161,
+          "match_percent": 100.0
         },
         {
           "name": "_ZL16HatMachine_ResetP12HATMACHINE_s",
@@ -66499,21 +66509,6 @@
       ]
     },
     {
-      "name": "legoapi/menus/core/gamemessages_stubs.cpp.o",
-      "source": "src/legoapi/menus/core/gamemessages_stubs.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gamemessages_stubs.o",
-      "functions": [
-        {
-          "name": "_Z9numeminitv",
-          "demangled_name": "numeminit()",
-          "address": 2456286,
-          "offset": 1566318,
-          "size": 10,
-          "match_percent": 80.0
-        }
-      ]
-    },
-    {
       "name": "legoapi/menus/core/hint.cpp.o",
       "source": "src/legoapi/menus/core/hint.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/hint.o",
@@ -70168,30 +70163,6 @@
           "offset": 966080,
           "size": 127,
           "match_percent": 18.26087
-        },
-        {
-          "name": "_Z7NewScanP7nuvec_sii",
-          "demangled_name": "NewScan(nuvec_s*, int, int)",
-          "address": 3636048,
-          "offset": 2746080,
-          "size": 5207,
-          "match_percent": 0.716912
-        },
-        {
-          "name": "_Z17NewScanHandelFullP7nuvec_sS0_fii",
-          "demangled_name": "NewScanHandelFull(nuvec_s*, nuvec_s*, float, int, int)",
-          "address": 3710864,
-          "offset": 2820896,
-          "size": 4872,
-          "match_percent": 0.3649
-        },
-        {
-          "name": "_Z19NewScanHandelSubsetPsP7nuvec_sS1_fi",
-          "demangled_name": "NewScanHandelSubset(short*, nuvec_s*, nuvec_s*, float, int)",
-          "address": 3715744,
-          "offset": 2825776,
-          "size": 2404,
-          "match_percent": 1.252174
         }
       ]
     },
@@ -70459,14 +70430,6 @@
           "offset": 2585600,
           "size": 1472,
           "match_percent": 45.322582
-        },
-        {
-          "name": "CrashDataPtr",
-          "demangled_name": "CrashDataPtr",
-          "address": 3700992,
-          "offset": 2811024,
-          "size": 22,
-          "match_percent": 12.5
         },
         {
           "name": "_ZN13MemoryManager9AllocPoolEji",
@@ -71686,21 +71649,6 @@
       ]
     },
     {
-      "name": "legoapi/props/objects/hatmachine.cpp.o",
-      "source": "src/legoapi/props/objects/hatmachine.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/1/hatmachine.o",
-      "functions": [
-        {
-          "name": "_Z19Hat_GetAbsTargetPosP12HATMACHINE_sP7nuvec_s",
-          "demangled_name": "Hat_GetAbsTargetPos(HATMACHINE_s*, nuvec_s*)",
-          "address": 2012688,
-          "offset": 1122720,
-          "size": 161,
-          "match_percent": 100.0
-        }
-      ]
-    },
-    {
       "name": "legoapi/props/objects/ledge.cpp.o",
       "source": "src/legoapi/props/objects/ledge.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/ledge.o",
@@ -72792,7 +72740,7 @@
           "address": 3595984,
           "offset": 2706016,
           "size": 1463,
-          "match_percent": 82.80851
+          "match_percent": 81.33777
         },
         {
           "name": "_Z17ReadTerrainPickupPhPPsP13TERRPICKUPSET",
@@ -72800,7 +72748,15 @@
           "address": 3602400,
           "offset": 2712432,
           "size": 512,
-          "match_percent": 53.80822
+          "match_percent": 57.32192
+        },
+        {
+          "name": "CrashDataPtr",
+          "demangled_name": "CrashDataPtr",
+          "address": 3700992,
+          "offset": 2811024,
+          "size": 22,
+          "match_percent": 12.5
         }
       ]
     },
@@ -74254,14 +74210,6 @@
           "offset": 2348696,
           "size": 38,
           "match_percent": 30.90909
-        },
-        {
-          "name": "ShadowInfo",
-          "demangled_name": "ShadowInfo",
-          "address": 3689120,
-          "offset": 2799152,
-          "size": 32,
-          "match_percent": 8.777778
         },
         {
           "name": "AddColourPick",
@@ -76313,7 +76261,7 @@
           "address": 3597696,
           "offset": 2707728,
           "size": 4578,
-          "match_percent": 32.267742
+          "match_percent": 32.325806
         },
         {
           "name": "_Z8TerrDrawP7tertypes",
@@ -76426,6 +76374,22 @@
           "offset": 2745760,
           "size": 73,
           "match_percent": 64.333336
+        },
+        {
+          "name": "TerrainTrackFlush",
+          "demangled_name": "TerrainTrackFlush",
+          "address": 3635984,
+          "offset": 2746016,
+          "size": 54,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z7NewScanP7nuvec_sii",
+          "demangled_name": "NewScan(nuvec_s*, int, int)",
+          "address": 3636048,
+          "offset": 2746080,
+          "size": 5207,
+          "match_percent": 0.716912
         },
         {
           "name": "_Z10NewScanRotP7nuvec_si",
@@ -76588,6 +76552,14 @@
           "match_percent": 73.07143
         },
         {
+          "name": "ShadowInfo",
+          "demangled_name": "ShadowInfo",
+          "address": 3689120,
+          "offset": 2799152,
+          "size": 32,
+          "match_percent": 88.77778
+        },
+        {
           "name": "ShadowIntensityInfo",
           "demangled_name": "ShadowIntensityInfo",
           "address": 3689152,
@@ -76626,6 +76598,22 @@
           "offset": 2820848,
           "size": 34,
           "match_percent": 99.5
+        },
+        {
+          "name": "_Z17NewScanHandelFullP7nuvec_sS0_fii",
+          "demangled_name": "NewScanHandelFull(nuvec_s*, nuvec_s*, float, int, int)",
+          "address": 3710864,
+          "offset": 2820896,
+          "size": 4872,
+          "match_percent": 0.3649
+        },
+        {
+          "name": "_Z19NewScanHandelSubsetPsP7nuvec_sS1_fi",
+          "demangled_name": "NewScanHandelSubset(short*, nuvec_s*, nuvec_s*, float, int)",
+          "address": 3715744,
+          "offset": 2825776,
+          "size": 2404,
+          "match_percent": 1.252174
         },
         {
           "name": "NewRaySetDisablePalt",
@@ -76722,29 +76710,6 @@
           "offset": 4320288,
           "size": 447,
           "match_percent": 92.2619
-        }
-      ]
-    },
-    {
-      "name": "legoapi/render/core/terrain_runtime.cpp.o",
-      "source": "src/legoapi/render/core/terrain_runtime.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/terrain_runtime.o",
-      "functions": [
-        {
-          "name": "DebrisSetTimeIncrement",
-          "demangled_name": "DebrisSetTimeIncrement",
-          "address": 3492368,
-          "offset": 2602400,
-          "size": 28,
-          "match_percent": 99.166664
-        },
-        {
-          "name": "TerrainTrackFlush",
-          "demangled_name": "TerrainTrackFlush",
-          "address": 3635984,
-          "offset": 2746016,
-          "size": 54,
-          "match_percent": 100.0
         }
       ]
     },
@@ -78278,6 +78243,14 @@
           "offset": 2576448,
           "size": 1226,
           "match_percent": 51.105072
+        },
+        {
+          "name": "DebrisSetTimeIncrement",
+          "demangled_name": "DebrisSetTimeIncrement",
+          "address": 3492368,
+          "offset": 2602400,
+          "size": 28,
+          "match_percent": 99.166664
         },
         {
           "name": "LookupDebrisEffectPageIgnore",
@@ -91717,12 +91690,6 @@
       ]
     },
     {
-      "name": "nu2api/nu3d/nutexanm.c.o",
-      "source": "src/nu2api/nu3d/nutexanm.c",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nutexanm.o",
-      "functions": []
-    },
-    {
       "name": "nu2api/nu3d/nuvport.cpp.o",
       "source": "src/nu2api/nu3d/nuvport.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nuvport.o",
@@ -94145,7 +94112,7 @@
     {
       "name": "nu2api/nucore/android/nuthread.c.o",
       "source": "src/nu2api/nucore/android/nuthread.c",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/0/nuthread.o",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nuthread.o",
       "functions": [
         {
           "name": "_ZL10ThreadMainy",
@@ -100713,6 +100680,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z9numeminitv",
+          "demangled_name": "numeminit()",
+          "address": 2456286,
+          "offset": 1566318,
+          "size": 10,
+          "match_percent": 80.0
+        },
+        {
           "name": "_Z16NuMemGetExternalv",
           "demangled_name": "NuMemGetExternal()",
           "address": 2456296,
@@ -103682,12 +103657,6 @@
           "match_percent": 99.9375
         }
       ]
-    },
-    {
-      "name": "nu2api/nucore/nuthread.cpp.o",
-      "source": "src/nu2api/nucore/nuthread.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/1/nuthread.o",
-      "functions": []
     },
     {
       "name": "nu2api/nucore/nutime.cpp.o",
@@ -116722,18 +116691,6 @@
       ]
     },
     {
-      "name": "_GLOBAL__sub_I_hatmachine.cpp",
-      "demangled_name": "_GLOBAL__sub_I_hatmachine.cpp",
-      "address": 898848,
-      "offset": 8880,
-      "size": 93,
-      "match_percent": 99.35294,
-      "candidate_units": [
-        "legoapi/gizmos/object/hatmachine.cpp.o",
-        "legoapi/props/objects/hatmachine.cpp.o"
-      ]
-    },
-    {
       "name": "_GLOBAL__sub_I_gizbombgen.cpp",
       "demangled_name": "_GLOBAL__sub_I_gizbombgen.cpp",
       "address": 900192,
@@ -116799,18 +116756,6 @@
       "match_percent": 0.0,
       "candidate_units": [
         "legoapi/menus/core/text.cpp.o"
-      ]
-    },
-    {
-      "name": "_GLOBAL__sub_I_gizobstacle.cpp",
-      "demangled_name": "_GLOBAL__sub_I_gizobstacle.cpp",
-      "address": 921424,
-      "offset": 31456,
-      "size": 93,
-      "match_percent": 99.35294,
-      "candidate_units": [
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
-        "legoapi/gizmos/object/gizobstacle.cpp.o"
       ]
     },
     {
@@ -117052,7 +116997,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -117127,7 +117071,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -117202,7 +117145,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -117290,7 +117232,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -117413,7 +117354,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -117501,7 +117441,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -117589,7 +117528,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -117677,7 +117615,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -117765,7 +117702,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -117853,7 +117789,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -118153,7 +118088,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -118241,7 +118175,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -118329,7 +118262,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -118466,7 +118398,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -118566,7 +118497,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -118756,7 +118686,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -118897,7 +118826,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -119038,7 +118966,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -119126,7 +119053,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -119214,7 +119140,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -119302,7 +119227,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -119416,7 +119340,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -119504,7 +119427,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -119603,7 +119525,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -119691,7 +119612,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -119792,7 +119712,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -119880,7 +119799,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -120003,7 +119921,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -120091,7 +120008,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -120179,7 +120095,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -120267,7 +120182,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -120418,7 +120332,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -120506,7 +120419,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -120594,7 +120506,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -121030,7 +120941,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -121236,7 +121146,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -121405,7 +121314,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -121852,7 +121760,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -121940,7 +121847,6 @@
         "legoapi/core/startup/startup.cpp.o",
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
-        "legoapi/gizmo/object/gizobstacle.cpp.o",
         "legoapi/gizmo/object/gizpanel.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
         "legoapi/gizmo/object/giztorpedo.cpp.o",
@@ -129083,10 +128989,10 @@
     }
   ],
   "summary": {
-    "bazel_units": 497,
+    "bazel_units": 490,
     "functions": 13454,
-    "assigned_functions": 12350,
-    "ambiguous_functions": 216,
+    "assigned_functions": 12352,
+    "ambiguous_functions": 214,
     "unassigned_functions": 888
   }
 }

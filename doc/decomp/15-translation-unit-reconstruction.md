@@ -1,8 +1,8 @@
 # Original translation-unit reconstruction
 
-At the latest measured target build, there are 497 current translation
-units and a 46.0648% whole-binary fuzzy match. The independent structural
-dashboard reports 48.0% largest-run text grouping and 99.6% of assessable
+At the latest measured target build, there are 490 current translation
+units and a 46.0654% whole-binary fuzzy match. The independent structural
+dashboard reports 48.1% largest-run text grouping and 99.7% of assessable
 same-TU writable-state links satisfied (only 40.9% of original links are
 assessable); neither is a completion percentage.
 This is a source-ownership overview; the matching percentage does not measure
@@ -20,8 +20,9 @@ On the current build with file labels hidden, adjacent local-text pairs identify
 the same TU with 90.1% precision, and initializer-delimited blocks have a
 90.0% majority-owner fraction. These are useful survey heuristics, not safe
 boundaries without corroborating local references and linked matching.
-All 497 current units emit at least one named symbol; a unit with no matched
-function may still own real data or a tentative ELF `COMMON` definition.
+All 490 current units emit at least one named symbol. Six have no matched
+function but still own real data or a tentative ELF `COMMON` definition;
+they are not automatically empty TU shells.
 
 For the complete text/data symbol surface, generate the machine ledger:
 
@@ -126,6 +127,31 @@ Three later one-function files were also retired: `FtpFile::Accept()` joined
 its FTP methods, `NuVecCheckForSNANs` joined its terrain caller, and
 `RandomIDFromFlags` joined the character-variant run. All three moves preserved
 the exact-match count; the public character declaration lives in `charconfig.h`.
+The mixed `terrain_runtime.cpp` was removed: `TerrainTrackFlush` now lives with
+terrain tracking, and `DebrisSetTimeIncrement` with debris timing state.
+The original LOCAL `crashdata` now lives with its three verified users in
+`gameliball.cpp`; `CrashDataPtr` moved there from generic memory code, and
+terrain file-loading callers use a real owner header. This raised assessable
+same-TU state links to 2,242/2,249 without an exact-match loss; whole fuzzy
+changed by -0.000072 percentage points.
+The data-only `nuthread.cpp` was retired: original BSS places
+`nu_current_thread_id` immediately after the six `nuthread.c` vectors, and
+the global now shares their TU. This preserves the body score; exact BSS
+offset order within the object remains a separate compiler-layout question.
+The data-only `nutexanm.c` was also retired: its critical-section global now
+shares `nutexanim.cpp` with all current users, and the four original BSS names
+(`g_texAnimCriticalSection`, `ntal_free`, `ntal_first`, `ntalsysbuff`) have the
+same relative order in the owning object. Exact/fuzzy matching is unchanged.
+The one-function menu placeholder `gamemessages_stubs.cpp` was removed:
+`numeminit` now sits between the exact `memmove` and near-exact
+`NuMemGetExternal` in their original memory-TU order, with its declaration in
+`numem.h`. Matching is unchanged.
+The exact `Hat_GetAbsTargetPos` also moved from a duplicate `props/objects`
+file into its original position between two hat-machine methods in the
+existing gizmo owner. Its real header now declares it; the exact match holds.
+`InitPaintPuzzle` left a one-function placeholder and now sits between its
+`Reset` and `Update` peers in `gizmo.cpp`, with the public trio declared in
+`gizmo.h`; exact matching is unchanged and fuzzy rises slightly.
 The ledger also records 13,042 individual `.text` adjacency links as weak
 evidence, not TU assignments. Against current-build `STT_FILE` labels, only
 3,189 links were assessable and 89.84% joined the same file; address order
@@ -201,6 +227,7 @@ linkage.
 | Socket parser: `SockPar*` callback run `0x3c0594–0x3c15da` and local parser arena in original `socksysall.c` | `legoapi/props/system/socksysall.cpp`; formerly callbacks/table in `gameapi/ai/gameai_sockpar.cpp` | All 46 existing callbacks and the unchanged keyword table now share the original parser-state owner; the emptied source was removed. The callback run has 47 paired symbols and one relative-order inversion, versus 497 before ordering; two verified local-state splits closed. Exact matches are unchanged, fuzzy improved slightly. The original table is 456 bytes versus the current 376, so its contents/layout remain open. |
 | Bolt-type parser: `BT_*` callbacks interleave bolt helpers at `0x47ee30–0x47fadd`, sharing four local parser-state objects and a `bolts.cpp` initializer | `legoapi/items/collect/bolts.cpp`; formerly also `gameapi/ai/gameai_bt.cpp` | The parser callbacks/state/configure stub now share the bolt owner. Measured `-O3` preserves all 11 prior exact bolt functions and raises whole fuzzy by 0.0308 points; the initializer rises from 0 to 99.35% and the separate file is removed. **Open:** the missing 216-byte keyword table, callback emission order, exact TU extent, and the distant `Bolt_HitPlat` fragment. |
 | Cutscene instance lists: `instNuGCutSceneFind`/`CleanUp` and `PetesHackOfDeath` reference local active/background lists; the latter directly follows `NuGCutSceneSysPostBackgroundLoad` | `legoapi/cutscenes/cutscene.cpp`; formerly two stubs in `cutscene_stubs.cpp` and the hack stub in `gamemenuall.cpp` | All three stubs now share the evidenced list owner, closing four verified splits total without changing body matching. The broader cutscene stub file remains unassigned. |
+| Cutscene lookup run: `CutScene_FindInst` → `CutScene_Find` → `NewCutScene` at `0x49d010–0x49d180` | `legoapi/cutscenes/cutscenes.cpp`; formerly `CutScene_Find` alone in `cutscene_find.cpp` | The lookup now emits between its original neighbors, improves from 99.39% to 99.69%, and retires the single-function source. Wider cutscene TU boundaries remain open. |
 | View-text menu pair: adjacent `MenuUpdateViewTextStrings`/`MenuDrawViewTextStrings` at `0x48f6a0–0x48fef0`; the draw method references local `Text_StringBits` | `legoapi/menus/core/text.cpp` and `text.h`; formerly both stubs in `gamemenuall.cpp` | Both share the text-state owner in original relative order, closing one verified split without changing matching. |
 | Panel: `0x140950–0x1449c0` run; `Panel_Clear` and `DrawPanel` access the same local `redbrickslidetime` | `legoapi/menus/core/panel.cpp` and `legoapi/render/core/render.cpp` | `DrawTimer` and its state moved. **Open:** full `-O2` co-location is structurally supported but costs 0.0049 overall points via `DrawPanel`; `-O3` helps the initializer but drops `PanelRender` by 10 points. Both trials were rejected; the accessor remains temporary. |
 | Post-filter: `nupostfilter.cpp` local block, including `texturePool` at `0x11cd820` | `nu2api/nu3d/android/nupostfilter.cpp`; framebuffer pair in `nuposteffect_plain.cpp` | Measured split and genuine Init/Destroy flows improved matching. Both files require `-O2`. The 0x810-byte local pool has no verified text xref or field layout, so it is not fabricated in source. |
@@ -215,7 +242,7 @@ linkage.
 | Message-box text: `MessageBoxInitMtl` → `DrawMessageBoxRGBA` → `DrawMessageBox` → `SmartTextEx` in the original `0x42d530–0x42dd80` run | `legoapi/menus/core/text.cpp`; formerly three stubs split between game-menu and render files | Three existing stubs now share the text owner and its local font-scale state; the measured run has 5/5 assessable local-state links co-located. Exact/fuzzy body matching is unchanged. |
 | `numaths.c`: text `[0x290b20, 0x292e9c)` including its trailing static initializer and constructor | `nu2api/numath/numaths.c`, compiled as C++; formerly split across seven math/engine files and two game files | All 37 reported exported functions in the measured run now share one source in original address order; the empty `nucamvu0.c` shell was removed. The shared internal `VuVec` helper header emits this TU's byte-exact LOCAL `VuVecSet` and six original-sized LOCAL constants; its original-named constructor is exact. The initial consolidation raised whole fuzzy by 0.0292 points and gained eight exact functions, none lost. **Open:** original LOCAL `rand` and final optimization calibration. The preceding `numath_includes.c` constructor remains separate. |
 | `nufloat_android.c`: text `[0x292e9c, 0x293165)` with LOCAL `VuVecSet`, four exported float helpers, six LOCAL vectors, and its initializer | `nu2api/numath/nufloat_android.c`, compiled as C++; formerly split across `nufloat.c` and `numaths_plain.cpp` | The four existing bodies now form the evidenced original run. Its own `VuVecSet` and six constants come from the same narrow internal header as `numaths.c`; constructor and exported signatures retain their original names, binding, and sizes. The move adds a second byte-exact LOCAL helper and an exact constructor without regressing exported functions. |
-| Terrain data/collision: `_GLOBAL__sub_I_gameliball.cpp` and original strong-local component 463 | `legoapi/render/core/terrain*.cpp`, `gameliball.cpp`, and functions across ten more owners | **Open atomic boundary:** 91 original functions and 48 LOCAL objects span 12 current sources. All 91 have current bodies, none exact; 34 corresponding state definitions are currently GLOBAL for cross-file access. `DrawWallSpline` already shares two wall statics with `terrain.cpp`. The full cut requires real types and every current state consumer to move together; do not relocalize state early or equate the initializer block with a complete TU. |
+| Terrain data/collision: `_GLOBAL__sub_I_gameliball.cpp` and original strong-local component 463 | `legoapi/render/core/terrain*.cpp`, `gameliball.cpp`, and functions across ten more owners | **Open atomic boundary:** 91 original functions and 48 LOCAL objects began split across 12 current sources, with 34 corresponding state definitions still GLOBAL for cross-file access. `DrawWallSpline` shares two wall statics with `terrain.cpp`; the five terrain/shadow getters now emit in original order, and three `NewScan*` stubs moved from `androidbatman.cpp` to the terrain owner. This closes three verified local-state splits without an exact/fuzzy regression (2,239/2,246 assessable links now co-located overall). The full cut requires real types and every state consumer to move together; do not relocalize state early or equate the initializer block with a complete TU. |
 | Editor tools: local camera/UI/cursor/menu state under `_GLOBAL__sub_I_edtoolsall.cpp`, text span `0x330900–0x3a9c88`; RTL follows | `gameapi/edtools/edtoolsall_plain.cpp`, `edtoolsall.cpp`, `edptlall.cpp`, remaining editor callbacks | **Open.** The `-O2` plain owner holds 49 local editor-UI callbacks from the removed `edui.c`, plus two menu callbacks referencing its state; 42 verified splits closed without body regression. Two repeat-box callbacks share the particle editor owner with both sliders, closing four more splits. Six called item-creation stubs have typed declarations in `edui.h`. A 28-stub `edptl*` co-location trial preserved every retained body's score, but all 28 moved static stubs disappeared under the owner's `-O2`, lowering whole fuzzy by 0.0058 points; it was reverted. Missing real callback-table references are a likely cause to investigate, not a reason to force emission. |
 | `rtl.c`: contiguous text `0x3a9c88–0x3bc1bf`, named initializer, adjacent writable state and pointer-table relocations | `legoapi/render/core/rtl.c`, compiled as C++; formerly `rtl.cpp`, `edrtl.cpp`, `edrtlall.cpp`, `edrtlcallbacks.cpp`, HUD and five smaller fragments | Core RTL and editor state now share the evidenced source: 200/203 original text names are present, including an exact initializer, and all 11 uniquely paired linked-`.data` names now have zero order inversions. The editor consolidation closed 51 verifiable local-state splits; its timer moved out of `globals.cpp`, and the batch gained two exact matches overall. Existing function definitions have since been reordered in coherent groups without altering bodies: ordered-symbol alignment rose from 23.9% to 66.3% (136 symbols in order), and pairwise inversions fell from 6,668 to 2,315. All 184 assessable RTL local-state links remain co-located; exact/fuzzy matching is unchanged by the ordering pass. **Open:** interleaved core/export order breaks, absent local VU/NuFabs helpers, much absent state, and byte-level pointer-table relocation order. Input `.data.rel.local` tables link into `.data`; that input-section name alone is not a placement regression. Retained `-O3` after an `-O2` trial lost 14 exact matches and 0.2534 fuzzy points. |
 | Menu/customiser, timing, and large catch-all files | `customise.cpp`, `timing.cpp`, `nucore_plain.cpp`, `edtoolsall*.cpp`, `aisys.cpp`, `gameobjects.cpp` | **Open.** `APIMenuDrawMemCardSlots` now sits with load/save menu state in `gamemenuall.cpp`, leaving its public declaration in `apimenu.h`. Complete gizmo-interface and `BaseThing`/`ThingManager` extraction trials lost exact matches and were reverted. Split further only in evidenced dependent groups; address adjacency or a cleaner basename alone is insufficient. |
@@ -240,11 +267,14 @@ at 99.99% and 99.98%.
    header ownership, and a sensible source boundary. Clean up catch-all and
    obsolete files; avoid arbitrary one-function or functionless files.
 4. After each move, compare whole and per-function scores, exact transitions,
-   symbol coverage, target/native/WASM builds, and Cantina smoke. Commit and
+   symbol coverage, target/native/WASM builds, and the available gameplay smoke. Commit and
    push coherent tested batches at roughly hourly intervals.
-5. Prioritize the unresolved terrain LOCAL-state cut, editor callbacks, Panel
-   co-location regression, and catch-all/resource owners. Do not invent
-   unused pools or merge a constructor-delimited block without direct xrefs.
+5. Prioritize the unresolved terrain LOCAL-state cut as one uncommitted
+   91-function/48-object closure, provisionally into the existing
+   `gameliball.cpp` initializer owner. Exclude interleaved editor callbacks
+   unless their own xrefs prove shared ownership. Then revisit editor
+   callbacks, the Panel co-location regression, and catch-all/resource owners;
+   do not invent unused pools or treat a constructor-delimited block as a TU.
 
 The current `matching.json` lists eight units with no reported functions and
 33 with one. This is a review queue, not a deletion rule: some are legitimate
@@ -257,8 +287,9 @@ prototypes into real headers as their owning families are reconstructed.
 
 For each sensible move, compare function and whole scores, exact-match
 transitions, symbol coverage, and neighboring bodies. Run target, native,
-WASM, repository checks, and the 120-frame Map/Cantina smoke at appropriate
-intervals. The original tiny-movement `MovePlayer` sanitizer flake is
+WASM, repository checks, and the 120-frame Map smoke at appropriate
+intervals. The current fixture lists Map but no Cantina gameplay destination;
+`--area Cantina` exits before simulation. The original tiny-movement `MovePlayer` sanitizer flake is
 documented by its prior history and is intentionally preserved for
 matching. No assembly, calling-convention or visibility attributes for
 score, fake initializers, dummy symbols, or source-local linker-only

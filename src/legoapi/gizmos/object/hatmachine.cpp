@@ -23,7 +23,6 @@
 
 #include <string.h>
 
-void Hat_GetAbsTargetPos(HATMACHINE_s *machine, NUVEC *target_position);
 void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
 void EnableShadowMapRendering(i32 enable);
 void ResetShadowMapRendering(void);
@@ -425,6 +424,18 @@ static void HatMachines_StoreProgress(void *world_ptr, void *, void *progress_pt
             progress->enabled_mask &= ~mask;
         }
     }
+}
+
+void Hat_GetAbsTargetPos(HATMACHINE_s *machine, NUVEC *position) {
+    if (position == NULL || machine == NULL) {
+        return;
+    }
+
+    NUVEC offset = machine->target_offset;
+    NuVecRotateY(&offset, &offset, machine->y_rotation);
+    offset.x += machine->position.x;
+    offset.z += machine->position.z;
+    *position = offset;
 }
 
 static void HatMachine_Reset(HATMACHINE_s *machine) {
