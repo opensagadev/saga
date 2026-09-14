@@ -349,7 +349,7 @@ The matching scripts also require an external `objdiff-cli` executable on
 `PATH`. Install the known-compatible revision with Rust's Cargo:
 
 ```sh
-cargo install --git https://github.com/opensagadev/objdiff.git --branch codex/i386-linked-got objdiff-cli
+cargo install --locked --git https://github.com/opensagadev/objdiff.git --branch codex/i386-linked-got objdiff-cli
 ```
 
 > (note the `codex/i386-linked-got` branch; we are currently using this experimental branch for the decomp, but are undecided how to reconcile it with the changes we would like to contribute to upstream objdiff. In the future, we may return to installing the fork from main, or even the upstream `encounter/objdiff`)
@@ -371,7 +371,7 @@ for browsing differences; building, matching reports, pre-commit, and CI do
 not need it. Install the known-compatible revision with Rust's Cargo:
 
 ```sh
-cargo install --git https://github.com/opensagadev/objdiff.git --branch codex/i386-linked-got objdiff-gui
+cargo install --locked --git https://github.com/opensagadev/objdiff.git --branch codex/i386-linked-got objdiff-gui
 # Generate its local project file and open the repository root:
 bazel run //scripts:generate_objdiff_gui_config
 # Then run the GUI:
