@@ -26,7 +26,6 @@ extern GAMEPAD_s GamePad[64];
 extern u32 GAMEPAD_MENUSELECT;
 extern u32 GAMEPAD_MENUCANCEL;
 
-extern void TurnEpisodeDoorLightsOn(i32);
 extern f32 *HUB_AREAPANELX;
 extern f32 HUB_AREAPANELX_ONETRUEJEDIGOLDBRICK[6];
 

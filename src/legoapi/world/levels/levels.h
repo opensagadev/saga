@@ -129,6 +129,7 @@ struct WORLDINFO_s;
 void UpdateStatusScreen(struct WORLDINFO_s *);
 void DrawStatusScreen(struct WORLDINFO_s *);
 void Hub_Draw3D(struct WORLDINFO_s *);
+void TurnEpisodeDoorLightsOn(i32);
 void Hub_Update(struct WORLDINFO_s *);
 void JediB_Init(struct WORLDINFO_s *);
 void MaulA_Init(struct WORLDINFO_s *);

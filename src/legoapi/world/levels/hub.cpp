@@ -25,6 +25,7 @@
 #include "legoapi/world/mission.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/world/levels/episode.h"
+#include "legoapi/world/levels/levels.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nuqfnt.h"
@@ -1507,6 +1508,10 @@ i32 Hub_BonusBuildIt(GIZBUILDIT_s *buildit) {
         }
     }
     return 0;
+}
+
+void TurnEpisodeDoorLightsOn(i32) {
+    STUBBED();
 }
 
 #include "nu2api/nu3d/nurndr.h"

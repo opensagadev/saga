@@ -272,10 +272,6 @@ void FreeGameObjectLights() {
     STUBBED();
 }
 
-void TurnEpisodeDoorLightsOn(i32) {
-    STUBBED();
-}
-
 void LightSabre_ColourFromObj(i32, i32 *) {
     STUBBED();
 }
