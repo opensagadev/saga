@@ -9,10 +9,9 @@
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/menus/screens/arcade.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
-
-i32 Arcade_GetMode(u32 *flags);
 
 void GizmoPickups_SetOnOff() {
     u32 arcade_flags;

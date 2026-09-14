@@ -251,6 +251,7 @@ void MosEisleyB_Init(struct WORLDINFO_s *);
 void MosEisleyD_Init(struct WORLDINFO_s *);
 void MosEisleyE_Init(struct WORLDINFO_s *);
 void PodSprintA_Init(struct WORLDINFO_s *);
+f32 PodSprint_RollMul(GameObject_s *object);
 void DookuC_DrawPanel(struct WORLDINFO_s *);
 void GrievousA_Update(struct WORLDINFO_s *);
 void HothBattleA_Draw(struct WORLDINFO_s *);

@@ -9,6 +9,7 @@
 #include <GLES2/gl2.h>
 #include <pthread.h>
 #include <string.h>
+#include <time.h>
 
 #include "decomp.h"
 #include "nu2api/nu3d/NuRenderDevice.h"
@@ -25,7 +26,6 @@
 #include "nu2api/nucore/nuthread.h"
 
 static volatile i32 renderThreadCS;
-i64 getCurrentTime();
 static i32 renderThreadIsLocked;
 pthread_t g_renderThread;
 thread_local i32 gt_currentThreadId = -1;
@@ -149,6 +149,13 @@ extern "C" void NuRenderThreadPrepareRender(void) {
         }
     }
     sceneParametersCount = 0;
+}
+
+// Original 0x2a6020: C++ render-thread clock helper, distinct from the C platform entry point.
+i64 getCurrentTime() {
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    return (i64)ts.tv_sec * 1000 + (i64)ts.tv_nsec;
 }
 
 // original 0x2a6080

@@ -47595,14 +47595,6 @@
           "match_percent": 0.0
         },
         {
-          "name": "_Z14getCurrentTimev",
-          "demangled_name": "getCurrentTime()",
-          "address": 2777120,
-          "offset": 1887152,
-          "size": 86,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z10TimingBarsv",
           "demangled_name": "TimingBars()",
           "address": 4752800,
@@ -47625,6 +47617,14 @@
           "offset": 3863136,
           "size": 123,
           "match_percent": 100.0
+        },
+        {
+          "name": "_Z19UpdatePickupFlickerv",
+          "demangled_name": "UpdatePickupFlicker()",
+          "address": 4753232,
+          "offset": 3863264,
+          "size": 133,
+          "match_percent": 10.243902
         }
       ]
     },
@@ -53585,14 +53585,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z15ReleaseTakeOverP12GameObject_si",
-          "demangled_name": "ReleaseTakeOver(GameObject_s*, int)",
-          "address": 2417200,
-          "offset": 1527232,
-          "size": 1175,
-          "match_percent": 84.60581
-        },
-        {
           "name": "_Z19SuperCounters_Reseti",
           "demangled_name": "SuperCounters_Reset(int)",
           "address": 4681920,
@@ -53647,46 +53639,6 @@
           "offset": 3793920,
           "size": 79,
           "match_percent": 87.69231
-        },
-        {
-          "name": "_Z19UpdatePickupFlickerv",
-          "demangled_name": "UpdatePickupFlicker()",
-          "address": 4753232,
-          "offset": 3863264,
-          "size": 133,
-          "match_percent": 10.243902
-        },
-        {
-          "name": "_Z22ClearTakeOverObjectSysv",
-          "demangled_name": "ClearTakeOverObjectSys()",
-          "address": 5232000,
-          "offset": 4342032,
-          "size": 41,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z22RegisterTakeOverObjectP12GameObject_s",
-          "demangled_name": "RegisterTakeOverObject(GameObject_s*)",
-          "address": 5232048,
-          "offset": 4342080,
-          "size": 338,
-          "match_percent": 91.71951
-        },
-        {
-          "name": "_Z28StoreStatusTakeOverObjectSysv",
-          "demangled_name": "StoreStatusTakeOverObjectSys()",
-          "address": 5232400,
-          "offset": 4342432,
-          "size": 449,
-          "match_percent": 63.46281
-        },
-        {
-          "name": "_Z30ReStoreStatusTakeOverObjectSysi",
-          "demangled_name": "ReStoreStatusTakeOverObjectSys(int)",
-          "address": 5232864,
-          "offset": 4342896,
-          "size": 857,
-          "match_percent": 68.49744
         }
       ]
     },
@@ -53923,6 +53875,45 @@
           "offset": 1184512,
           "size": 360,
           "match_percent": 95.183334
+        }
+      ]
+    },
+    {
+      "name": "legoapi/gizmo/object/takeoverobjects.cpp.o",
+      "source": "src/legoapi/gizmo/object/takeoverobjects.cpp",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/takeoverobjects.o",
+      "functions": [
+        {
+          "name": "_Z22ClearTakeOverObjectSysv",
+          "demangled_name": "ClearTakeOverObjectSys()",
+          "address": 5232000,
+          "offset": 4342032,
+          "size": 41,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z22RegisterTakeOverObjectP12GameObject_s",
+          "demangled_name": "RegisterTakeOverObject(GameObject_s*)",
+          "address": 5232048,
+          "offset": 4342080,
+          "size": 338,
+          "match_percent": 91.71951
+        },
+        {
+          "name": "_Z28StoreStatusTakeOverObjectSysv",
+          "demangled_name": "StoreStatusTakeOverObjectSys()",
+          "address": 5232400,
+          "offset": 4342432,
+          "size": 449,
+          "match_percent": 63.46281
+        },
+        {
+          "name": "_Z30ReStoreStatusTakeOverObjectSysi",
+          "demangled_name": "ReStoreStatusTakeOverObjectSys(int)",
+          "address": 5232864,
+          "offset": 4342896,
+          "size": 857,
+          "match_percent": 68.49744
         }
       ]
     },
@@ -63565,6 +63556,14 @@
           "offset": 1527120,
           "size": 106,
           "match_percent": 100.0
+        },
+        {
+          "name": "_Z15ReleaseTakeOverP12GameObject_si",
+          "demangled_name": "ReleaseTakeOver(GameObject_s*, int)",
+          "address": 2417200,
+          "offset": 1527232,
+          "size": 1175,
+          "match_percent": 84.60581
         },
         {
           "name": "_Z12TakeOverYodaP12GameObject_sS0_ii",
@@ -82247,6 +82246,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z17PodSprint_RollMulP12GameObject_s",
+          "demangled_name": "PodSprint_RollMul(GameObject_s*)",
+          "address": 2102560,
+          "offset": 1212592,
+          "size": 119,
+          "match_percent": 99.93939
+        },
+        {
           "name": "_Z15PodSprintA_InitP11WORLDINFO_s",
           "demangled_name": "PodSprintA_Init(WORLDINFO_s*)",
           "address": 2102688,
@@ -85027,21 +85034,6 @@
       ]
     },
     {
-      "name": "legoapi/world/levels/podsprint.cpp.o",
-      "source": "src/legoapi/world/levels/podsprint.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/podsprint.o",
-      "functions": [
-        {
-          "name": "_Z17PodSprint_RollMulP12GameObject_s",
-          "demangled_name": "PodSprint_RollMul(GameObject_s*)",
-          "address": 2102560,
-          "offset": 1212592,
-          "size": 119,
-          "match_percent": 99.93939
-        }
-      ]
-    },
-    {
       "name": "legoapi/world/levelstreaming.cpp.o",
       "source": "src/legoapi/world/levelstreaming.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/levelstreaming.o",
@@ -87254,6 +87246,14 @@
           "offset": 1886832,
           "size": 317,
           "match_percent": 96.27778
+        },
+        {
+          "name": "_Z14getCurrentTimev",
+          "demangled_name": "getCurrentTime()",
+          "address": 2777120,
+          "offset": 1887152,
+          "size": 86,
+          "match_percent": 100.0
         },
         {
           "name": "NuRenderThreadStartRender",

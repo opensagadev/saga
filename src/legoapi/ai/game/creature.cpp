@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "legoapi/ai/game/creature.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "globals.h"
 #include "legoapi/characters/core/character.h"

@@ -5,6 +5,7 @@
 #include "legoapi/ai/core/ai_sys_stubs.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/gizmos/transport/tubes.h"
+#include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/world/world.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/legoapi_types.h"
@@ -68,7 +69,6 @@ enum STARWARS_AI_CAPABILITY : u32 {
 };
 
 extern void SetSpecialMove(GameObject_s *, AIPATHNODE_s *, AIPATHNODE_s *, char);
-extern void ReleaseTakeOver(GameObject_s *, i32);
 
 static i32 StarWars_PrepareTakeOverJump(AIPACKET_s *packet, APIOBJECT_s *object, i32) {
     GameObject_s *owner = object->objptr;

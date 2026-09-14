@@ -873,8 +873,6 @@ static __used__ void GizActions_EnableSock(GIZFLOW_s *, FLOWBOX_s *, char **, in
     STUBBED();
 }
 
-void ReleaseTakeOver(GameObject_s *, i32);
-
 static __used__ void GizAction_ActivateChar(GIZFLOW_s *flow, FLOWBOX_s *, char **params, int count) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
     char *name = NULL;

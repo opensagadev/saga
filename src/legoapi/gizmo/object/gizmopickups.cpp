@@ -6,6 +6,7 @@
 #include "gamelib/util/gamelib_util_types.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/menus/screens/arcade.h"
 #include "legoapi/world/world.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/mission.h"
@@ -52,7 +53,6 @@ GIZMOPICKUPSYS_s GizmoPickupSys_Game = {
 };
 
 WORLDINFO_s *WorldInfo_CurrentlyActive();
-i32 Arcade_GetMode(u32 *);
 extern f32 COINMSGTIME;
 extern "C" void PlaySfx(char *, NUVEC *);
 void MakePartVector(NUVEC *, NUVEC *, f32);

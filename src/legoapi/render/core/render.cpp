@@ -12,6 +12,7 @@
 #include "legoapi/menus/core/gamemessages.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/menus/screens/gamemenuall.h"
+#include "legoapi/menus/screens/arcade.h"
 #include "legoapi/render/light/fade_material.h"
 #include "legoapi/world/levels/levels.h"
 #include "nu2api/nu3d/numtl.h"
@@ -2474,7 +2475,6 @@ void DrawPlayerIconPrompts(i32, i32, float, i32, i32, i32, i32, i32, i32, float,
 }
 
 extern f32 DropInOutScale(GameObject_s *object);
-extern f32 PodSprint_RollMul(GameObject_s *object);
 extern void ApplyExtraRotation(GameObject_s *object, NUMTX *matrix);
 extern AREADATA *DEATHSTARBATTLE2_ADATA;
 extern AREADATA *PODSPRINT_ADATA;
@@ -2833,7 +2833,6 @@ void TransformGameMessages(nuvec_s *, nuvec_s *, nuvec_s *);
 #include "nu2api/nucore/nupad.h"
 
 void Customiser_TransformToPanel(CUSTOMISER *);
-i32 Arcade_GetMode(u32 *);
 char *GameObj_GetName(i32, GameObject_s *, char *);
 f32 PowerUp_GetPanelY(i32);
 u32 Cheat_MultiplyScore(u32);

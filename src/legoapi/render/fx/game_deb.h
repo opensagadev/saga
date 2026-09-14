@@ -6,13 +6,6 @@ struct PartHeader;
 struct debinftype;
 struct debkeydatatype_s;
 struct uv1deb;
-struct ACTIONINFO_s;
-struct EXTRAACTIONDATA_s;
-struct CHARACTER_CONTEXT_INFO_s;
-
-extern ACTIONINFO_s *ActionInfo;
-extern EXTRAACTIONDATA_s ExtraActionData[];
-extern CHARACTER_CONTEXT_INFO_s *CInfo;
 extern "C" void DebrisSetTimeIncrement(f32 increment);
 extern "C" void DebrisStartOffsetEx(debkeydatatype_s *key, f32 offset);
 extern "C" void DebrisSetSeed(i32 seed);

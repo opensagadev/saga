@@ -1,6 +1,7 @@
 #include "decomp.h"
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/menus/screens/arcade.h"
 #include "nu2api/nu3d/nutex.h"
 
 struct AIROW_s;

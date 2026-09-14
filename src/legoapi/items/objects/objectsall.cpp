@@ -3,6 +3,7 @@
 #include "legoapi/actions/movement/jumping.h"
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/items/objects/objectsall.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world_shared.h"

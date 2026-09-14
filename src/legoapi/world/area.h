@@ -6,6 +6,7 @@
 #include "nu2api/nucore/common.h"
 
 struct SUPERCOUNTER;
+i32 Area_CharIDInCurrentList(i32 character_id);
 enum AREA_EPISODE_INDEX {
     AREA_EPISODE_I = 0,
     AREA_EPISODE_II = 1,

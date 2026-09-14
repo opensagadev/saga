@@ -19,6 +19,8 @@ void GizmoPickups_InitSys(GIZMOPICKUPSYS_s *pickup_sys);
 void SpecialMiniKits_Configure(WORLDINFO_s *world, char *config);
 void SpecialMiniKits_Reset(WORLDINFO_s *world);
 void SpecialMiniKits_Draw(WORLDINFO_s *world);
+void GizmoPickup_CollectCoin(WORLDINFO_s *world, NUVEC *position, i32 type_index, i32 model_variant,
+                             GameObject_s *object, i32 flags);
 GIZMOPICKUP_s *GizmoPickup_FindByName(WORLDINFO_s *world, char *name);
 i32 GizmoPickup_BeenTurnedOn(GIZMOPICKUP_s *pickup);
 GIZMOPICKUP_s *GizmoPickup_InBox(WORLDINFO_s *world, i32 type_index, NUVEC *minimum, NUVEC *maximum);
