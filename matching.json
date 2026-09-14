@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.060104,
+    "fuzzy_match_percent": 46.064667,
     "total_code": "4722419",
-    "matched_code": "400617",
-    "matched_code_percent": 8.4833,
+    "matched_code": "400186",
+    "matched_code_percent": 8.4741745,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4760,
-    "matched_functions_percent": 35.36667,
+    "matched_functions": 4759,
+    "matched_functions_percent": 35.359238,
     "total_units": 1
   },
   "text": {
@@ -73886,22 +73886,6 @@
           "match_percent": 5.526316
         },
         {
-          "name": "_Z19DrawPauseScreenWipev",
-          "demangled_name": "DrawPauseScreenWipe()",
-          "address": 4769776,
-          "offset": 3879808,
-          "size": 1103,
-          "match_percent": 35.45238
-        },
-        {
-          "name": "_Z15DrawStillScreeni",
-          "demangled_name": "DrawStillScreen(int)",
-          "address": 4771056,
-          "offset": 3881088,
-          "size": 337,
-          "match_percent": 50.47619
-        },
-        {
           "name": "_Z13DrawPauseFadev",
           "demangled_name": "DrawPauseFade()",
           "address": 4771408,
@@ -73955,7 +73939,7 @@
           "address": 4802480,
           "offset": 3912512,
           "size": 431,
-          "match_percent": 100.0
+          "match_percent": 99.85849
         },
         {
           "name": "_Z24DrawPanel3DObjectNoAlphafffffftttP12nuhspecial_si",
@@ -76040,7 +76024,15 @@
           "address": 4769088,
           "offset": 3879120,
           "size": 663,
-          "match_percent": 59.531746
+          "match_percent": 60.444443
+        },
+        {
+          "name": "_Z19DrawPauseScreenWipev",
+          "demangled_name": "DrawPauseScreenWipe()",
+          "address": 4769776,
+          "offset": 3879808,
+          "size": 1103,
+          "match_percent": 45.842857
         },
         {
           "name": "_Z15GrabStillScreenv",
@@ -76065,6 +76057,14 @@
           "offset": 3881056,
           "size": 23,
           "match_percent": 99.875
+        },
+        {
+          "name": "_Z15DrawStillScreeni",
+          "demangled_name": "DrawStillScreen(int)",
+          "address": 4771056,
+          "offset": 3881088,
+          "size": 337,
+          "match_percent": 78.74603
         },
         {
           "name": "_Z10ClearStillv",
