@@ -9,6 +9,7 @@
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/render/core/rtl.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nu3d/nurndr.h"
@@ -24,12 +25,6 @@ struct SHOPINPUT;
 
 void SetLights(NUCOLOUR3 *colour0, NUVEC *direction0, NUCOLOUR3 *colour1, NUVEC *direction1, NUCOLOUR3 *colour2,
                NUVEC *direction2, NUVEC *ambient);
-
-extern "C" {
-    void rtlResetEx(rtldata_s *data, i32 reset_cached);
-    void rtlApplySetScale(void *, rtldata_s *, NUVEC *, NUMTX *, i32, f32);
-    void rtlDynamicMasterEnable(i32 enabled);
-}
 
 void SetFlicker(GameObject_s *object, float duration) {
     object->field_0x1024 = duration;
@@ -66,7 +61,6 @@ void SetZeroLights() {
 rtldata_s lev_rtldata;
 
 extern "C" {
-    void rtlSetLights(rtldata_s *);
     void NuLightSpotFadeSet(u32);
 }
 

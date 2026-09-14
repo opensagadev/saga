@@ -226,42 +226,6 @@ static __used__ i32 rtlCmp(rtl_s *, rtl_s *) {
 }
 
 extern "C" {
-
-    void IndexLights(rtlset *, VARIPTR *, i32);
-    i32 NuRndrSetAmbientLightPS(const NUCOLOUR3 *);
-    i32 NuRndrSetDirectionalLightsPS(const NUVEC *, const NUCOLOUR3 *, const NUVEC *, const NUCOLOUR3 *, const NUVEC *,
-                                     const NUCOLOUR3 *);
-
-    void fogAlloc(void) {
-        STUBBED();
-    }
-
-    void fogFree(void) {
-        STUBBED();
-    }
-
-    void rtlAlloc(void) {
-        STUBBED();
-    }
-
-    void rtlResetEx(rtldata_s *data, i32 reset_cached) {
-        memset(data, 0, 0x48);
-        data->data[0x120] = 0;
-        *reinterpret_cast<f32 *>(data->data + 0x120) = 1.0f;
-        memset(data->data + 0x78, 0, 0x24);
-        const NUVEC default_direction = {1.0f, 0.0f, 0.0f};
-        for (i32 i = 0; i < 3; ++i) {
-            *reinterpret_cast<NUVEC *>(data->data + 0x9c + i * sizeof(NUVEC)) = default_direction;
-        }
-        *reinterpret_cast<f32 *>(data->data + 0x134) = 1.0f;
-        *reinterpret_cast<f32 *>(data->data + 0x138) = 0.0f;
-        *reinterpret_cast<f32 *>(data->data + 0x13c) = 0.0f;
-        if (reset_cached != 0) {
-            memset(data->data + 0x4c, 0, 0x2c);
-            *reinterpret_cast<f32 *>(data->data + 0x130) = 0.0f;
-        }
-    }
-
     static void rtlInsertLight(u8 *light, rtldata_s *data, f32 strength) {
         const bool ambient = light[0x58] == 1;
         const i32 pointer_offset = ambient ? 0x18 : 0x00;
@@ -560,17 +524,53 @@ extern "C" {
         STUBBED();
     }
 
-    void rtlFrameUpdate(f32 frame_time) {
-        rtltimer1 = static_cast<u16>(static_cast<i32>(rtltimer1adv * frame_time) + rtltimer1);
-        NuTimeBarSlotReset(0, 6);
+    void rtlResetDynamic(void) {
+        if (rtl_dynamic_pool != NULL) {
+            NULNKHDR *entry = NuLstGetNext(rtl_dynamic_pool, NULL);
+            while (entry != NULL) {
+                NULNKHDR *next = NuLstGetNext(rtl_dynamic_pool, entry);
+                NuLstFree(entry);
+                entry = next;
+            }
+            rtl_dynamic_cnt = 0;
+        }
     }
 
-    void rtlFree(void) {
+    i32 rtlInitDynamic(VARIPTR *buffer, VARIPTR end, i32 max_lights) {
+        rtl_dynamic_pool = NuLstCreateBuff(max_lights, sizeof(rtl_s), buffer, end, 0x10);
+        rtl_dynamic_max = max_lights;
+        rtl_dynamic_cnt = 0;
+        return max_lights;
+    }
+
+    void rtlSetShadowFlickerScale(void) {
+        STUBBED();
+    }
+
+    void rtlSetShadowFlickerBlendTime(void) {
         STUBBED();
     }
 
     void rtlGetCurrentSet(void) {
         STUBBED();
+    }
+
+    void rtlResetEx(rtldata_s *data, i32 reset_cached) {
+        memset(data, 0, 0x48);
+        data->data[0x120] = 0;
+        *reinterpret_cast<f32 *>(data->data + 0x120) = 1.0f;
+        memset(data->data + 0x78, 0, 0x24);
+        const NUVEC default_direction = {1.0f, 0.0f, 0.0f};
+        for (i32 i = 0; i < 3; ++i) {
+            *reinterpret_cast<NUVEC *>(data->data + 0x9c + i * sizeof(NUVEC)) = default_direction;
+        }
+        *reinterpret_cast<f32 *>(data->data + 0x134) = 1.0f;
+        *reinterpret_cast<f32 *>(data->data + 0x138) = 0.0f;
+        *reinterpret_cast<f32 *>(data->data + 0x13c) = 0.0f;
+        if (reset_cached != 0) {
+            memset(data->data + 0x4c, 0, 0x2c);
+            *reinterpret_cast<f32 *>(data->data + 0x130) = 0.0f;
+        }
     }
 
     void rtlGetEnvPath(void) {
@@ -583,17 +583,6 @@ extern "C" {
 
     void rtlGetEnvSet(void) {
         STUBBED();
-    }
-
-    void rtlGetFogSet(void) {
-        STUBBED();
-    }
-
-    i32 rtlInitDynamic(VARIPTR *buffer, VARIPTR end, i32 max_lights) {
-        rtl_dynamic_pool = NuLstCreateBuff(max_lights, sizeof(rtl_s), buffer, end, 0x10);
-        rtl_dynamic_max = max_lights;
-        rtl_dynamic_cnt = 0;
-        return max_lights;
     }
 
     rtlset *rtlLoadSet(char *path, VARIPTR *buffer, i32 buffer_end) {
@@ -653,14 +642,6 @@ extern "C" {
         STUBBED();
     }
 
-    void rtlSetShadowFlickerBlendTime(void) {
-        STUBBED();
-    }
-
-    void rtlSetShadowFlickerScale(void) {
-        STUBBED();
-    }
-
     void rtlSetSpecularLight(void) {
         STUBBED();
     }
@@ -673,20 +654,33 @@ extern "C" {
         STUBBED();
     }
 
+    void rtlAlloc(void) {
+        STUBBED();
+    }
+
+    void rtlFree(void) {
+        STUBBED();
+    }
+
+    void fogAlloc(void) {
+        STUBBED();
+    }
+
+    void fogFree(void) {
+        STUBBED();
+    }
+
+    void rtlGetFogSet(void) {
+        STUBBED();
+    }
+
     void rtlSpecularValue(void) {
         STUBBED();
     }
 
-    void rtlResetDynamic(void) {
-        if (rtl_dynamic_pool != NULL) {
-            NULNKHDR *entry = NuLstGetNext(rtl_dynamic_pool, NULL);
-            while (entry != NULL) {
-                NULNKHDR *next = NuLstGetNext(rtl_dynamic_pool, entry);
-                NuLstFree(entry);
-                entry = next;
-            }
-            rtl_dynamic_cnt = 0;
-        }
+    void rtlFrameUpdate(f32 frame_time) {
+        rtltimer1 = static_cast<u16>(static_cast<i32>(rtltimer1adv * frame_time) + rtltimer1);
+        NuTimeBarSlotReset(0, 6);
     }
 
 } // extern "C"

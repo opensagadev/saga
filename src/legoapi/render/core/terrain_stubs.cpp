@@ -233,9 +233,6 @@ extern "C" {
     extern debris_chunk_control_s *debris_chunk_control_stack[2];
     extern NUMTL *DebMat[10];
     extern i32 debris_suspended;
-    extern f32 debris_thinning_level;
-    extern i32 forced_debris_thinning;
-
     void DebrisReScale(i32, f32);
     void DebReAlloc(debkeydatatype_s *, i32);
     extern "C++" void DebrisProcessSpheres(uv1deb *, f32, debinftype *, debkeydatatype_s *, i32);
@@ -653,187 +650,7 @@ void DebrisTimeSlip(i32 group) {
     }
 }
 
-void DebrisDrawCalculateClipBoxes(debinftype *effect, debkeydatatype_s *key) {
-    NUMTX matrix = key->effect_orientation;
-    NuMtxTranslate(&matrix, &key->position);
-    f32 emission_time = effect->emission_period_random + effect->emission_pause;
-    f32 lifetime = effect->particle_lifetime;
-    NUVEC extent = {
-        (fabsf(effect->emitter_velocity.x) * emission_time + effect->field_04c * lifetime) + effect->field_058,
-        (fabsf(effect->emitter_velocity.y) * emission_time +
-         (fabsf(effect->field_048) + effect->field_050) * lifetime) +
-            effect->field_05c,
-        (fabsf(effect->emitter_velocity.z) * emission_time + effect->field_054 * lifetime) + effect->field_060};
-    NuVecMtxRotate(&extent, &extent, &key->emitter_orientation);
-    if (extent.x < 0.0f)
-        extent.x = -extent.x;
-    if (extent.y < 0.0f)
-        extent.y = -extent.y;
-    if (extent.z < 0.0f)
-        extent.z = -extent.z;
-    f32 padding = 0.0001f * effect->field_14c;
-    extent.x = (extent.x + padding) + 0.2f;
-    extent.y = (extent.y + padding) + 0.2f;
-    extent.z = (extent.z + padding) + 0.2f;
-    NUVEC minimum = {-extent.x, -extent.y, -extent.z};
-    if (effect->field_0a0 > 0.0f)
-        extent.y += (effect->field_0a0 * lifetime) * lifetime;
-    else if (effect->field_0a0 < 0.0f)
-        minimum.y = (effect->field_0a0 * lifetime) * lifetime - extent.y;
-    f32 horizontal = extent.x > extent.z ? extent.x : extent.z;
-    f32 radius;
-    if (extent.y > -minimum.y)
-        radius = horizontal > extent.y ? horizontal : extent.y;
-    else if (horizontal > -minimum.y)
-        radius = horizontal;
-    else
-        radius = extent.y > -minimum.y ? extent.y : -minimum.y;
-    key->clip_max = extent;
-    key->clip_matrix = matrix;
-    key->clip_radius = radius;
-    key->clip_min = minimum;
-}
-
 extern "C" {
-    static i32 debris_rt;
-    static i32 debris_initialised;
-    static NUMTL *debris_copy_mtl;
-    static f32 debrisu1;
-    static f32 debrisv1;
-    extern i32 PS2_REZ_W;
-    extern i32 PS2_REZ_H;
-    i32 NuPower2(i32 value);
-
-    static i32 DebrisCutSceneMode;
-    i32 DebrisSuspendDrawObjectSwitch = -1;
-    i32 g_renderingDebris;
-    extern NUMTX xzfacingmtx;
-    f32 CameraEmitterDistance(NUVEC *position);
-
-    void DebrisDraw(i32, i32 pass) {
-        if (debris_suspended != 0)
-            return;
-        _NuTimeBarSlotBegin(0, 12, "deb");
-        DebMat[7]->tex_id = static_cast<i16>(debris_rt);
-        i32 drawn = 0;
-        for (particlechunkrendertype_s *chunk = ParticleChunkRenderStack[pass]; chunk != NULL; chunk = chunk->next) {
-            if (chunk->particle_chunk == NULL)
-                continue;
-            debinftype *effect = chunk->effect;
-            debkeydatatype_s *key = chunk->key;
-            if (DebrisCutSceneMode != 0 && effect->cutscene_only != 0)
-                continue;
-            if (DebrisSuspendDrawObjectSwitch != -1 && key != NULL &&
-                key->trigger_second == DebrisSuspendDrawObjectSwitch)
-                continue;
-            if (effect->native_data == NULL) {
-                if (freeDmaDebType == EDPP_MAX_DMADEBTYPES)
-                    DebrisFreeOldestDmaDebTypeTable();
-                GenericDebinfoDmaTypeUpdate(effect);
-                if (effect->native_data == NULL)
-                    continue;
-            }
-            NUMTX matrix;
-            NUVEC position;
-            if (key != NULL) {
-                bool assigned = (effect->particle_keys[0] != -1 && &debkeydata[effect->particle_keys[0]] == key) ||
-                                (effect->particle_keys[1] != -1 && &debkeydata[effect->particle_keys[1]] == key) ||
-                                (effect->particle_keys[2] != -1 && &debkeydata[effect->particle_keys[2]] == key) ||
-                                (effect->particle_keys[3] != -1 && &debkeydata[effect->particle_keys[3]] == key) ||
-                                (effect->particle_keys[4] != -1 && &debkeydata[effect->particle_keys[4]] == key) ||
-                                (effect->particle_keys[5] != -1 && &debkeydata[effect->particle_keys[5]] == key) ||
-                                (effect->particle_keys[6] != -1 && &debkeydata[effect->particle_keys[6]] == key) ||
-                                (effect->particle_keys[7] != -1 && &debkeydata[effect->particle_keys[7]] == key);
-                bool visible = true;
-                if (!assigned && effect->sound_range > 0.0f && effect->use_explicit_clip_box == 0 &&
-                    key->cutoff_distance > effect->sound_range)
-                    visible = false;
-                if (key->field_2f7 == 0)
-                    continue;
-                if (visible && pass != 4 && effect->generator_type == 0 && effect->use_explicit_clip_box == 0 &&
-                    !assigned) {
-                    if (key->clip_radius == 0.0f || *edbits_editor_enabled != 0)
-                        DebrisDrawCalculateClipBoxes(effect, key);
-                    if (edbits_editmode == 0 && key->gscene != NULL && key->field_2f2 != -1)
-                        visible = NuPortalClipTest(key->gscene, &key->position, key->clip_radius, key->field_2f2) != 0;
-                    NUVEC minimum = key->clip_min;
-                    NUVEC maximum = key->clip_max;
-                    if (NuCameraClipTestExtents(&minimum, &maximum, &key->clip_matrix, 0.0f, 0) == 0)
-                        continue;
-                }
-                if (!visible)
-                    continue;
-                matrix = key->effect_orientation;
-                position = key->position;
-            } else {
-                if (effect->sound_range > 0.0f && effect->use_explicit_clip_box == 0 &&
-                    CameraEmitterDistance(&chunk->position) > effect->sound_range)
-                    continue;
-                matrix = chunk->effect_orientation;
-                position = chunk->position;
-            }
-            NuMtxTranslate(&matrix, &position);
-            f32 render_time;
-            if (pass == 4) {
-                NuMtxMulVU0(&matrix, &matrix, NuCameraGetMtx());
-                render_time = renderpanelglobaltime;
-                effect->last_render_time = panelglobaltime;
-            } else {
-                render_time = renderglobaltime;
-                effect->last_render_time = globaltime;
-            }
-            if (key != NULL && key->field_2fa != 0)
-                NuRndrSetParticleRotation(&key->particle_orientation);
-            else if (effect->camera_facing != 0)
-                NuRndrSetParticleRotation(&xzfacingmtx);
-            else
-                NuRndrSetParticleRotation(NULL);
-            NuMtxPreScaleX(&matrix, 1.0f);
-            i32 mode;
-            if (effect->particle_type == 7)
-                mode = 4;
-            else if (effect->use_explicit_clip_box != 0) {
-                NuRndrSetDebBox(reinterpret_cast<NUVEC *>(effect->fields_2f8));
-                mode = 6;
-            } else
-                mode = 0;
-            NuRndrParticleGroup(reinterpret_cast<uv1debdata *>(chunk->particle_chunk), chunk->effect->native_data,
-                                DebMat[static_cast<i8>(chunk->effect->particle_type)], render_time, &matrix, mode,
-                                effect->field_140, effect->field_144, effect->clip_extent, effect->field_044);
-            drawn = 1;
-        }
-        if (drawn != 0)
-            g_renderingDebris = g_renderingDebris == 0;
-        _NuTimeBarSlotEnd(0, 12);
-    }
-
-    void DebrisDrawGlassEx(i32 glass_type);
-
-    void DebrisDrawGlass(void) {
-        DebrisDrawGlassEx(0);
-    }
-
-    i32 DebrisGlassParticlesActive(void);
-    i32 NuRndrBeginSceneEx(i32, i32, i32);
-    void NuRndrEndScene(void);
-
-    void DebrisDrawGlassEx(i32 flicker) {
-        if (debris_initialised == 0)
-            return;
-        i32 reserved = NuTexReserve(NuTexGetReqSize(debris_rt, 0));
-        DebrisGlassParticlesActive();
-        if (flicker == 0)
-            NuRndrBeginSceneEx(-1, -2, 1);
-        else
-            NuRndrFlickerBeginScene();
-        if (DebrisGlassParticlesActive() != 0)
-            DebrisDraw(0, 2);
-        NuRainDraw(reserved);
-        if (flicker != 0)
-            NuRndrFlickerEnd();
-        NuRndrEndScene();
-        NuTexUnReserve();
-    }
 
     void DebrisEmitterMomentum(i32 handle, f32 x, f32 y, f32 z) {
         if (handle != -1) {
@@ -901,54 +718,6 @@ extern "C" {
 
     void DebrisGetRingProperties(void) {
         STUBBED();
-    }
-
-    void DebrisGlassClose(void) {
-        if (debris_initialised != 0) {
-            if (debris_copy_mtl != NULL) {
-                NuMtlDestroy(debris_copy_mtl);
-                debris_copy_mtl = NULL;
-            }
-            if (debris_rt != 0) {
-                NuTexDestroy(debris_rt);
-                debris_rt = 0;
-            }
-            debris_initialised = 0;
-        }
-    }
-
-    void DebrisGlassInit(void) {
-        if (debris_initialised != 0)
-            return;
-        if (debris_rt == 0) {
-            NUTEX texture = {NUTEX_RTT24, PS2_REZ_W, PS2_REZ_H};
-            debris_rt = NuTexCreate(&texture);
-        }
-        i32 texture_width = NuPower2(PS2_REZ_W);
-        debrisu1 = (static_cast<f32>(PS2_REZ_W) - 1.0f) / static_cast<f32>(texture_width);
-        i32 texture_height = NuPower2(PS2_REZ_H);
-        debrisv1 = (static_cast<f32>(PS2_REZ_H) - 1.0f) / static_cast<f32>(texture_height);
-        if (debris_copy_mtl == NULL) {
-            NUMTL *material = NuMtlCreateEx(1, 14);
-            material->diffuse_color = {1.0f, 1.0f, 1.0f};
-            material->opacity = 0.999f;
-            debris_copy_mtl = material;
-            material->tex_id = -1;
-            material->attribs.unknown_1_1_2 = 1;
-            material->attribs.unknown_1_4_8 = 1;
-            material->attribs.cull_mode = 2;
-            material->attribs.z_mode = 3;
-            material->attribs.alpha_mode = 0;
-            material->attribs.filter_mode = 0;
-            material->attribs.unknown_2_1_2 = 2;
-            material->attribs.unknown_2_4 = 1;
-            NuMtlUpdate(material);
-        }
-        debris_initialised = 1;
-    }
-
-    i32 DebrisGlassParticlesActive(void) {
-        return freedebchkptrg > 0;
     }
 
     void DebrisOrientation(i32 handle, i16 z, i16 y) {
@@ -1144,10 +913,6 @@ extern "C" {
         globaltime = 0.0f;
         renderglobaltime = 0.0f;
         globalframes = 0;
-    }
-
-    void DebrisSetCutSceneMode(i32 enabled) {
-        DebrisCutSceneMode = enabled;
     }
 
     void DebrisSetDetailLevels(i32 handle, i32 detail_levels) {

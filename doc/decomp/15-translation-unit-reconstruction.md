@@ -1,12 +1,13 @@
 # Original translation-unit reconstruction
 
 At the latest measured target build, there are 490 current translation
-units and a 46.1081% whole-binary fuzzy match. The independent structural
+units, 4,761 exact functions, and a 46.1095% whole-binary fuzzy match. The independent structural
 dashboard reports 48.3% largest-run text grouping and 99.8% of assessable
 same-TU writable-state links satisfied (47.3% of original links are
 assessable); neither is a completion percentage.
-The strict linked-GOT diagnostic currently covers 70.7% of original slots
-and agrees on 17.4% of shared-target order; this is a layout warning, not
+The strict linked-GOT diagnostic currently sees 3,809 slots versus 4,758
+original, covers 70.8% of original targets, and agrees on 17.4% of
+shared-target order; this is a layout warning, not
 evidence for a specific TU boundary.
 This is a source-ownership overview; the matching percentage does not measure
 how many original file boundaries are known. “Reconstructed” below means the source boundary has
@@ -101,8 +102,8 @@ PYTHONPATH=. python3 scripts/restructure/compare_got_order.py \
 It pairs only uniquely named, exact, allocated `R_386_RELATIVE` targets with
 matching section, type, binding, and size. Its two independent measures are
 shared-target coverage against all original `.got` slots and longest-common-
-subsequence order among shared targets. The current baseline is 3,365/4,758
-slots comparable (70.7%) and 584/3,365 comparable targets in order (17.4%).
+subsequence order among shared targets. The current baseline is 3,369/4,758
+slots comparable (70.8%) and 585/3,369 comparable targets in order (17.4%).
 Imports, aliases, duplicate targets, and `.got.plt` are excluded. Missing
 targets can reflect unfinished bodies; order differences can reflect several
 linker and source-layout causes. A same-named local in two different builds
@@ -111,8 +112,8 @@ measure proves a TU boundary, and
 this is not a byte-for-byte GOT-slot or dynamic-relocation placement diff.
 It inventories 32,596 allocated original symbols, including 14,541 text,
 9,384 read-only, 6,625 BSS, and 1,796 data entries; aliases remain distinct.
-The original/current target have 14,561/11,525 `.rel.dyn` relocations, 190/186
-PLT slots, and `0x4a58`/`0x3c0c` bytes of `.got`; these are linker/layout
+The original/current target have 14,561/11,491 `.rel.dyn` relocations, 190/186
+PLT slots, and `0x4a58`/`0x3b84` bytes of `.got`; these are linker/layout
 diagnostics, not TU ownership proof by themselves.
 The opt-in relocation pass records all 14,751 original dynamic relocation
 sites, including 4,758 in `.got`, 7,013 in `.data`, and 2,463 in
@@ -121,7 +122,7 @@ and an exact named static target at 11,114 sites. Its section offsets and
 pointer targets help test data grouping and GOT order; a relocation site
 or pointer target alone cannot establish the emitting TU.
 All 4,758 original `.got` slots have relocation entries, while the current
-target has 3,843 slots, a gap of 915. Missing code/data references from
+target has 3,809 slots, a gap of 949. Missing code/data references from
 unfinished bodies can cause this as well as TU layout; do not attribute the
 gap to file placement alone.
 Twelve symbol-free include/comment shells were removed; the include-only
@@ -255,11 +256,11 @@ linkage.
 | Message-box text: `MessageBoxInitMtl` → `DrawMessageBoxRGBA` → `DrawMessageBox` → `SmartTextEx` in the original `0x42d530–0x42dd80` run | `legoapi/menus/core/text.cpp`; formerly three stubs split between game-menu and render files | Three existing stubs now share the text owner and its local font-scale state; the measured run has 5/5 assessable local-state links co-located. Exact/fuzzy body matching is unchanged. |
 | `numaths.c`: text `[0x290b20, 0x292e9c)` including its trailing static initializer and constructor | `nu2api/numath/numaths.c`, compiled as C++; formerly split across seven math/engine files and two game files | All 37 reported exported functions in the measured run now share one source in original address order; the empty `nucamvu0.c` shell was removed. The shared internal `VuVec` helper header emits this TU's byte-exact LOCAL `VuVecSet` and six original-sized LOCAL constants; its original-named constructor is exact. The initial consolidation raised whole fuzzy by 0.0292 points and gained eight exact functions, none lost. **Open:** original LOCAL `rand` and final optimization calibration. The preceding `numath_includes.c` constructor remains separate. |
 | `nufloat_android.c`: text `[0x292e9c, 0x293165)` with LOCAL `VuVecSet`, four exported float helpers, six LOCAL vectors, and its initializer | `nu2api/numath/nufloat_android.c`, compiled as C++; formerly split across `nufloat.c` and `numaths_plain.cpp` | The four existing bodies now form the evidenced original run. Its own `VuVecSet` and six constants come from the same narrow internal header as `numaths.c`; constructor and exported signatures retain their original names, binding, and sizes. The move adds a second byte-exact LOCAL helper and an exact constructor without regressing exported functions. |
-| Terrain data/collision: `_GLOBAL__sub_I_gameliball.cpp` and original strong-local component 463 | `legoapi/render/core/terrain.cpp` with shared state declared in `terrain_internal.h`; other skin/AI/particle families remain in `terrain_stubs.cpp` | All 91 functions and 48 same-sized original LOCAL objects now share one source with original LOCAL binding; all 295 assessable state links are co-located, versus 116 cross-source links and 34 GLOBAL stand-ins before the cut. Exact matches remain 4,759, whole fuzzy rises 46.085390→46.108100%, and shared-target GOT order is unchanged. Target/native/WASM, 54 restructure tests, and the 120-frame Map/Cantina smoke pass. **Open:** component text-order alignment is only 45/91; this minimum same-TU closure does not prove the complete original file or adjacent editor ownership. A few unchanged bodies lost fuzzy points, consistent with codegen changes after restoring LOCAL state and same-TU visibility; precise instruction-level causes are not fully established. Do not reverse local binding merely to raise those scores. |
+| Terrain data/collision: `_GLOBAL__sub_I_gameliball.cpp` and original strong-local component 463 | `legoapi/render/core/terrain.cpp` with shared state declared in `terrain_internal.h`; other skin/AI/particle families remain in `terrain_stubs.cpp` | All 91 functions and 48 same-sized original LOCAL objects now share one source with original LOCAL binding; all 295 assessable state links are co-located, versus 116 cross-source links and 34 GLOBAL stand-ins before the cut. Definition-order cuts without body edits raised component text-order LCS from 45/91 to 50/91 and cut pair inversions 1,711→1,224. Original GLOBAL `Grass_Available` now emits in BSS; the 400-pointer `debris_name` array has its original extent, though its owner is still provisional. Target/native/WASM and the 120-frame Map/Cantina smoke pass; exact matching is 4,761 and whole fuzzy 46.109478%. A larger hit/scan reorder lowered whole fuzzy and was reverted. **Open:** this minimum same-TU closure does not prove the complete original file or adjacent editor ownership. Do not reverse local binding merely to raise scores. |
 | Terrain platform-skin cache: original strong-local component 467 under the same initializer block | `legoapi/render/core/terrain_stubs.cpp` | All six functions and ten LOCAL objects now share one source; its 25 writable-state pairs have no current split or provisional counterpart. The six emitted functions follow original address order, and seven adjacent cache BSS symbols follow original relative order; two later BSS names remain reversed. Restoring nine real LOCAL bindings improves whole fuzzy matching to 46.070103% without an exact-match loss. `SkinPlatform` itself remains outside this component pending a wider matching-safe cut. |
-| Debris generator/seed run: original component 446 and adjacent trigger processor; LOCAL `debrisseed` | `legoapi/render/fx/game_deb.cpp`; formerly four seed/generation functions in `terrain_stubs.cpp` and `supportall.cpp` | All 12 component functions and the original-named LOCAL seed now share one source in original relative order, with 12/12 state links co-located; the adjacent `DebrisProcessTriggers` and its shared helper moved with generation. Exact matches stay 4,759, whole fuzzy rises 46.079830→46.084892%, and linked GOT order is unchanged. The broader debris TU boundary remains under survey. |
+| Debris generation/render/glass: original seed component 446 and draw/glass local-state component 455 in the `0x3539b0–0x359bf0` run | `legoapi/render/fx/game_deb.cpp`; formerly split with `terrain_stubs.cpp` and `supportall.cpp` | All 12 seed-component functions and `debrisseed` share one owner (12/12 state links). The draw/glass/cutscene group, its six LOCAL BSS objects, and two directly used render globals now share that owner; all 20 uniquely paired symbols in the measured text span emit in original relative order. Ordinary declaration order restores the initialized detail → thinning → suspend-draw data run. The adjacent setter trio has correct initializers and public declarations. The batch gains two exact matches versus its prior commit (4,761 total), raises whole fuzzy to 46.109478%, and leaves strict GOT order at 17.4%; target/native/WASM, 54 restructure tests, and 120-frame Map/Cantina smoke pass. **Open:** the broader debris TU boundary and two adjacent user-data stubs remain unproven. |
 | Editor tools: local camera/UI/cursor/menu state under `_GLOBAL__sub_I_edtoolsall.cpp`, text span `0x330900–0x3a9c88`; RTL follows | `gameapi/edtools/edtoolsall_plain.cpp`, `edtoolsall.cpp`, `edptlall.cpp`, remaining editor callbacks | **Open.** The `-O2` plain owner holds 49 local editor-UI callbacks from the removed `edui.c`, plus two menu callbacks referencing its state; 42 verified splits closed without body regression. Two repeat-box callbacks share the particle editor owner with both sliders, closing four more splits. Six called item-creation stubs have typed declarations in `edui.h`. A 28-stub `edptl*` co-location trial preserved every retained body's score, but all 28 moved static stubs disappeared under the owner's `-O2`, lowering whole fuzzy by 0.0058 points; it was reverted. Missing real callback-table references are a likely cause to investigate, not a reason to force emission. |
-| `rtl.c`: contiguous text `0x3a9c88–0x3bc1bf`, named initializer, adjacent writable state and pointer-table relocations | `legoapi/render/core/rtl.c`, compiled as C++; formerly `rtl.cpp`, `edrtl.cpp`, `edrtlall.cpp`, `edrtlcallbacks.cpp`, HUD and five smaller fragments | Core RTL and editor state now share the evidenced source: 200/203 original text names are present, including an exact initializer, and all 11 uniquely paired linked-`.data` names now have zero order inversions. The editor consolidation closed 51 verifiable local-state splits; its timer moved out of `globals.cpp`, and the batch gained two exact matches overall. Coherent definition-order passes, without body edits, raised ordered-symbol alignment from 23.9% to 69.3% (142 symbols in order) and lowered pairwise inversions from 6,668 to 2,186; the latest name/lookup and dynamic-light passes retained all 4,759 exact functions and 46.085390% fuzzy matching. All 184 assessable RTL local-state links remain co-located. **Open:** interleaved core/export order breaks, absent local VU/NuFabs helpers, much absent state, and byte-level pointer-table relocation order. Input `.data.rel.local` tables link into `.data`; that input-section name alone is not a placement regression. Retained `-O3` after an `-O2` trial lost 14 exact matches and 0.2534 fuzzy points. |
+| `rtl.c`: contiguous text `0x3a9c88–0x3bc1bf`, named initializer, adjacent writable state and pointer-table relocations | `legoapi/render/core/rtl.c`, compiled as C++; formerly `rtl.cpp`, `edrtl.cpp`, `edrtlall.cpp`, `edrtlcallbacks.cpp`, HUD and five smaller fragments | Core RTL and editor state now share the evidenced source: 200/203 original text names are present, including an exact initializer, and all 11 uniquely paired linked-`.data` names now have zero order inversions. The editor consolidation closed 51 verifiable local-state splits; its timer moved out of `globals.cpp`, and the batch gained two exact matches overall. Coherent definition-order passes, without body edits, raised ordered-symbol alignment from 23.9% to 73.7% (151 symbols in order) and lowered pairwise inversions from 6,668 to 1,991; the latest allocation/free, reset, dynamic-light, and name/lookup passes caused no matching regression. All 184 assessable RTL local-state links remain co-located. **Open:** 30 interleaved core/export order breaks, absent local VU/NuFabs helpers, much absent state, and byte-level pointer-table relocation order. Input `.data.rel.local` tables link into `.data`; that input-section name alone is not a placement regression. Retained `-O3` after an `-O2` trial lost 14 exact matches and 0.2534 fuzzy points. |
 | Menu/customiser, timing, and large catch-all files | `customise.cpp`, `timing.cpp`, `nucore_plain.cpp`, `edtoolsall*.cpp`, `aisys.cpp`, `gameobjects.cpp` | **Open.** `APIMenuDrawMemCardSlots` now sits with load/save menu state in `gamemenuall.cpp`, leaving its public declaration in `apimenu.h`. Complete gizmo-interface and `BaseThing`/`ThingManager` extraction trials lost exact matches and were reverted. Split further only in evidenced dependent groups; address adjacency or a cleaner basename alone is insufficient. |
 
 Of the 103 non-component text neighbors in the terrain span, 39 are editor
@@ -298,16 +299,17 @@ at 99.99% and 99.98%.
 4. After each move, compare whole and per-function scores, exact transitions,
    symbol coverage, target/native/WASM builds, and the available gameplay smoke. Commit and
    push coherent tested batches at roughly hourly intervals.
-5. The terrain 91-function/48-object minimum closure is co-located; next
-   recover its internal text/data order and survey the 103 neighboring symbols
-   without assigning them by address alone. Keep the unrelated skin, AI and
-   particle families outside this cut until their own xrefs justify a move.
-   Revisit editor callbacks, the Panel co-location regression, and
-   catch-all/resource owners; do not invent unused pools or treat a
-   constructor-delimited block as a TU.
+5. The terrain 91-function/48-object minimum closure is co-located, with its
+   internal text order partly restored; continue its data-order and 103-neighbor
+   survey without assigning names by address alone. Keep the unrelated skin,
+   AI, and particle families outside this cut until xrefs justify a move.
+   The debris draw/glass locals link the cutscene setter to a larger render
+   component, now co-located; do not split it out alone. Revisit editor callbacks, Panel,
+   and catch-all/resource owners only with matching-safe evidence; do not
+   treat a constructor-delimited block as a proven TU.
 
 The current `matching.json` lists six units with no reported functions and
-29 with one. This is a review queue, not a deletion rule: some are legitimate
+28 with one. This is a review queue, not a deletion rule: some are legitimate
 data owners (`animation.cpp`, `contexts.cpp`) or initializer-only units
 (`legoai.cpp`). Even include-only `grabber.cpp`, `giztorpedo.cpp`, and
 `tightrope.cpp` emit original-named 93-byte constructors; textual function

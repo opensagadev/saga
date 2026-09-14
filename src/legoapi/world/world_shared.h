@@ -32,7 +32,7 @@ struct SCENEPROGRESS_s;
 extern LEVELDATA *PLATFORM_LDATA;
 
 // Terrain subsystem (defined in terrain.cpp, used by world.cpp)
-extern char *debris_name[147];
+extern char *debris_name[400];
 
 // Gizmo subsystem (defined in gizmo_sys.cpp, used by world.cpp)
 extern COLLECTION_s MiniKitCollection;
@@ -66,13 +66,7 @@ void SetCameraZoom(f32 zoom);
 // --- chris.cpp ---
 void ChrisAllocLevelStuff(WORLDINFO_s *world);
 
-// --- debris, grass, bridge, particles ---
-extern "C" {
-    void DebrisSetThinningLevel(f32 level);
-    void DebrisSetForcedThinning(i32 forced);
-    void DebrisSetDetailLevel(i32 level);
-}
-
+// --- grass, bridge, particles ---
 // Results written by the original terrain query pipeline.
 extern i16 TerrImpact;
 extern i32 terrhitflags;
