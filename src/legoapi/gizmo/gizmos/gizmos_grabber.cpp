@@ -13,6 +13,7 @@ extern "C" {
 #include "legoapi/world/level.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/render/core/terrain.h"
+#include "legoapi/render/core/rtl.h"
 #include "nu2api/numath/numtx.h"
 
 // Original 0x22aae0, 264 bytes.
@@ -589,11 +590,6 @@ void PartKill_Grabber(PART_s *part, i32) {
 #include "legoapi/characters/core/character.h"
 #include "nu2api/nucore/nuhgobj.h"
 #include "nu2api/nu3d/nurndr.h"
-extern "C" {
-    void rtlResetEx(rtldata_s *, i32);
-    void rtlApplySetScale(void *, rtldata_s *, NUVEC *, NUMTX *, i32, f32);
-    void rtlSetLights(rtldata_s *);
-}
 extern i32 CHARSHADOWS_ON, Paused, Reflections_On;
 extern LEVELDATA *BLOCKADERUNNERC_LDATA;
 extern MAKELAYERLISTFN MakeLayerList;

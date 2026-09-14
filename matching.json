@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.1081,
+    "fuzzy_match_percent": 46.109478,
     "total_code": "4722419",
-    "matched_code": "400186",
-    "matched_code_percent": 8.4741745,
+    "matched_code": "400237",
+    "matched_code_percent": 8.475254,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4759,
-    "matched_functions_percent": 35.359238,
+    "matched_functions": 4761,
+    "matched_functions_percent": 35.3741,
     "total_units": 1
   },
   "text": {
@@ -18415,7 +18415,7 @@
           "address": 1015456,
           "offset": 125488,
           "size": 13465,
-          "match_percent": 61.869213
+          "match_percent": 61.87245
         }
       ]
     },
@@ -42067,7 +42067,7 @@
           "address": 1210736,
           "offset": 320768,
           "size": 1363,
-          "match_percent": 84.75817
+          "match_percent": 84.77451
         },
         {
           "name": "_Z9LoadPerm2v",
@@ -76040,30 +76040,6 @@
           "match_percent": 14.474789
         },
         {
-          "name": "DebrisSetThinningLevel",
-          "demangled_name": "DebrisSetThinningLevel",
-          "address": 3513216,
-          "offset": 2623248,
-          "size": 36,
-          "match_percent": 96.14286
-        },
-        {
-          "name": "DebrisSetDetailLevel",
-          "demangled_name": "DebrisSetDetailLevel",
-          "address": 3513264,
-          "offset": 2623296,
-          "size": 24,
-          "match_percent": 99.166664
-        },
-        {
-          "name": "DebrisSetForcedThinning",
-          "demangled_name": "DebrisSetForcedThinning",
-          "address": 3513296,
-          "offset": 2623328,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
           "name": "TerrainSetImpactData",
           "demangled_name": "TerrainSetImpactData",
           "address": 3595872,
@@ -76365,7 +76341,7 @@
           "address": 3659168,
           "offset": 2769200,
           "size": 2601,
-          "match_percent": 31.145594
+          "match_percent": 31.14751
         },
         {
           "name": "_Z10HitTerrainv",
@@ -76725,7 +76701,7 @@
           "address": 3694496,
           "offset": 2804528,
           "size": 2403,
-          "match_percent": 13.430255
+          "match_percent": 15.797643
         },
         {
           "name": "NewRayCastGetTOFI",
@@ -77005,7 +76981,7 @@
           "address": 4665376,
           "offset": 3775408,
           "size": 455,
-          "match_percent": 50.980583
+          "match_percent": 51.07767
         },
         {
           "name": "_Z14LoadBridgeFileP11WORLDINFO_s",
@@ -77308,7 +77284,7 @@
           "address": 3486752,
           "offset": 2596784,
           "size": 607,
-          "match_percent": 55.674244
+          "match_percent": 55.71212
         },
         {
           "name": "DebrisSetRenderGroup",
@@ -77325,14 +77301,6 @@
           "offset": 2597424,
           "size": 769,
           "match_percent": 2.222222
-        },
-        {
-          "name": "_Z28DebrisDrawCalculateClipBoxesP10debinftypeP16debkeydatatype_s",
-          "demangled_name": "DebrisDrawCalculateClipBoxes(debinftype*, debkeydatatype_s*)",
-          "address": 3488176,
-          "offset": 2598208,
-          "size": 853,
-          "match_percent": 69.59524
         },
         {
           "name": "_Z14DebrisTimeSlipi",
@@ -77405,14 +77373,6 @@
           "offset": 2608144,
           "size": 24,
           "match_percent": 100.0
-        },
-        {
-          "name": "DebrisDraw",
-          "demangled_name": "DebrisDraw",
-          "address": 3502656,
-          "offset": 2612688,
-          "size": 2266,
-          "match_percent": 61.64876
         },
         {
           "name": "DebrisFindAllOfType",
@@ -77519,60 +77479,12 @@
           "match_percent": 12.0
         },
         {
-          "name": "DebrisGlassParticlesActive",
-          "demangled_name": "DebrisGlassParticlesActive",
-          "address": 3512208,
-          "offset": 2622240,
-          "size": 27,
-          "match_percent": 73.125
-        },
-        {
-          "name": "DebrisGlassClose",
-          "demangled_name": "DebrisGlassClose",
-          "address": 3512240,
-          "offset": 2622272,
-          "size": 100,
-          "match_percent": 99.75
-        },
-        {
-          "name": "DebrisGlassInit",
-          "demangled_name": "DebrisGlassInit",
-          "address": 3512352,
-          "offset": 2622384,
-          "size": 332,
-          "match_percent": 94.05556
-        },
-        {
-          "name": "DebrisDrawGlassEx",
-          "demangled_name": "DebrisDrawGlassEx",
-          "address": 3512688,
-          "offset": 2622720,
-          "size": 233,
-          "match_percent": 87.77193
-        },
-        {
-          "name": "DebrisDrawGlass",
-          "demangled_name": "DebrisDrawGlass",
-          "address": 3512928,
-          "offset": 2622960,
-          "size": 34,
-          "match_percent": 100.0
-        },
-        {
           "name": "DebrisSetUserData",
           "demangled_name": "DebrisSetUserData",
           "address": 3513040,
           "offset": 2623072,
           "size": 45,
           "match_percent": 38.18182
-        },
-        {
-          "name": "DebrisSetCutSceneMode",
-          "demangled_name": "DebrisSetCutSceneMode",
-          "address": 3513184,
-          "offset": 2623216,
-          "size": 24,
-          "match_percent": 99.85714
         },
         {
           "name": "Debris",
@@ -78218,7 +78130,7 @@
           "address": 3456608,
           "offset": 2566640,
           "size": 2413,
-          "match_percent": 64.74306
+          "match_percent": 64.56076
         },
         {
           "name": "DebrisSetup",
@@ -78251,6 +78163,14 @@
           "offset": 2583232,
           "size": 386,
           "match_percent": 77.29885
+        },
+        {
+          "name": "_Z28DebrisDrawCalculateClipBoxesP10debinftypeP16debkeydatatype_s",
+          "demangled_name": "DebrisDrawCalculateClipBoxes(debinftype*, debkeydatatype_s*)",
+          "address": 3488176,
+          "offset": 2598208,
+          "size": 853,
+          "match_percent": 69.59524
         },
         {
           "name": "DebrisSetTimeIncrement",
@@ -78298,7 +78218,7 @@
           "address": 3498224,
           "offset": 2608256,
           "size": 3346,
-          "match_percent": 47.484257
+          "match_percent": 47.491753
         },
         {
           "name": "_Z21DebrisProcessTriggersv",
@@ -78307,6 +78227,54 @@
           "offset": 2611616,
           "size": 1059,
           "match_percent": 78.61373
+        },
+        {
+          "name": "DebrisDraw",
+          "demangled_name": "DebrisDraw",
+          "address": 3502656,
+          "offset": 2612688,
+          "size": 2266,
+          "match_percent": 61.721073
+        },
+        {
+          "name": "DebrisGlassParticlesActive",
+          "demangled_name": "DebrisGlassParticlesActive",
+          "address": 3512208,
+          "offset": 2622240,
+          "size": 27,
+          "match_percent": 100.0
+        },
+        {
+          "name": "DebrisGlassClose",
+          "demangled_name": "DebrisGlassClose",
+          "address": 3512240,
+          "offset": 2622272,
+          "size": 100,
+          "match_percent": 99.75
+        },
+        {
+          "name": "DebrisGlassInit",
+          "demangled_name": "DebrisGlassInit",
+          "address": 3512352,
+          "offset": 2622384,
+          "size": 332,
+          "match_percent": 94.05556
+        },
+        {
+          "name": "DebrisDrawGlassEx",
+          "demangled_name": "DebrisDrawGlassEx",
+          "address": 3512688,
+          "offset": 2622720,
+          "size": 233,
+          "match_percent": 88.29825
+        },
+        {
+          "name": "DebrisDrawGlass",
+          "demangled_name": "DebrisDrawGlass",
+          "address": 3512928,
+          "offset": 2622960,
+          "size": 34,
+          "match_percent": 100.0
         },
         {
           "name": "DebrisSetSeed",
@@ -78323,6 +78291,38 @@
           "offset": 2623040,
           "size": 22,
           "match_percent": 12.5
+        },
+        {
+          "name": "DebrisSetCutSceneMode",
+          "demangled_name": "DebrisSetCutSceneMode",
+          "address": 3513184,
+          "offset": 2623216,
+          "size": 24,
+          "match_percent": 99.85714
+        },
+        {
+          "name": "DebrisSetThinningLevel",
+          "demangled_name": "DebrisSetThinningLevel",
+          "address": 3513216,
+          "offset": 2623248,
+          "size": 36,
+          "match_percent": 96.85714
+        },
+        {
+          "name": "DebrisSetDetailLevel",
+          "demangled_name": "DebrisSetDetailLevel",
+          "address": 3513264,
+          "offset": 2623296,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "DebrisSetForcedThinning",
+          "demangled_name": "DebrisSetForcedThinning",
+          "address": 3513296,
+          "offset": 2623328,
+          "size": 24,
+          "match_percent": 100.0
         }
       ]
     },

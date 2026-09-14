@@ -3,6 +3,7 @@
 #include "legoapi/world/level.h"
 #include "legoapi/world/world_shared.h"
 #include "legoapi/render/core/terrain.h"
+#include "legoapi/render/fx/game_deb.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/render/fx/parts.h"
 

@@ -66,6 +66,7 @@ extern "C" {
     f32 NuCeil(f32 value);
     f32 NuFrsqrt(f32 value);
     i32 NuMiscNextPow2(i32 value);
+    i32 NuPower2(i32 value);
     i32 NuMiscNextPow2Exp(i32 value);
     i32 NuMiscPow2Exp(i32 value);
 
