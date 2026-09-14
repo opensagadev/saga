@@ -278,10 +278,6 @@ button:disabled, input:disabled {
     background: var(--accent);
 }
 
-.progress-page .site-container {
-    max-width: 1120px;
-}
-
 .progress-overview {
     margin-bottom: 32px;
 }
@@ -310,6 +306,8 @@ button:disabled, input:disabled {
 }
 
 .report-layout {
+    margin-right: 24px;
+    margin-left: 24px;
     display: grid;
     grid-template-areas: "map" "legend" "filters";
     grid-template-columns: minmax(0, 1fr);
@@ -765,6 +763,11 @@ button:disabled, input:disabled {
 }
 
 @media (min-width: 640px) {
+    .report-layout {
+        margin-right: 40px;
+        margin-left: 40px;
+    }
+
     .site-container {
         padding-right: 40px;
         padding-left: 40px;
@@ -812,17 +815,17 @@ button:disabled, input:disabled {
 
 .row-label,
 .axis-label {
-    font-size: 11px;
+    font-size: 14px;
 }
 
 .section-label {
-    font-size: 10px;
+    font-size: 14px;
     pointer-events: none;
 }
 
 .unit-label,
 .function-label {
-    font-size: 11px;
+    font-size: 14px;
     font-weight: 500;
     pointer-events: none;
     paint-order: stroke fill;

@@ -32,8 +32,8 @@
 <body class="progress-page">
     <div id="site-shell">
         <!--__HEADER__-->
-        <main id="progress" class="site-container site-content">
-            <section class="progress-overview" aria-labelledby="progress-title">
+        <main id="progress" class="site-content">
+            <section class="site-container progress-overview" aria-labelledby="progress-title">
                 <h1 id="progress-title" class="site-title">Decompilation Progress</h1>
                 <dl class="progress-metrics">
                     <div><dt>Overall progress</dt><dd id="fuzzy-stat">-</dd></div>
@@ -605,7 +605,7 @@
             .append("g").attr("transform", `translate(${left},${bitmapY})`);
         let renderedLabelScale = 1;
         let renderedLabelLocalX = 0;
-        const labelCharacterWidth = 6.65;
+        const labelCharacterWidth = 8.5;
         const labelHorizontalPadding = 8;
         const truncatedLabelCharacters = 3;
 
@@ -690,7 +690,7 @@
                 treemapCanvas.setAttribute("aria-label",
                     "Function-size treemap with no visible functions");
                 treemapContext.fillStyle = resolveThemeColor("--muted");
-                treemapContext.font = `500 11px ${resolveThemeColor("--mono")}`;
+                treemapContext.font = `500 14px ${resolveThemeColor("--mono")}`;
                 treemapContext.textAlign = "center";
                 treemapContext.textBaseline = "middle";
                 treemapContext.fillText("No visible functions",
@@ -723,7 +723,7 @@
             const haloColor = resolveThemeColor("--page");
             const boundaryColor = resolveThemeColor("--ui-border-strong");
             const mono = resolveThemeColor("--mono");
-            treemapContext.font = `500 11px ${mono}`;
+            treemapContext.font = `500 14px ${mono}`;
             treemapContext.textAlign = "center";
             treemapContext.textBaseline = "middle";
             treemapContext.lineJoin = "round";
