@@ -1,6 +1,8 @@
 #include "decomp.h"
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/cutscenes/cutscenes.h"
 #include "nu2api/nucore/nugcutscene.h"
 #include "legoapi/world/world_shared.h"
 
@@ -27,9 +29,10 @@ struct instNUGCUTCHAR_s;
 struct NUGCUTCHAR_s;
 struct NUGCUTRIGID_s;
 struct instNUGCUTRIGID_s;
-extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
-i16 GetMusicIndex(char *name, nusound_filename_info_s *table, i32 default_index);
 
+static i32 CS_area = 0;
+CUTSYS *CS_cutsys = NULL;
+static WORLDINFO *CS_worldinfo = NULL;
 static CUTINFO *CS_CutInfo;
 static VARIPTR *CS_buffptr;
 static VARIPTR *CS_buffend;
@@ -97,9 +100,6 @@ static void CS_sfx(NUFPAR *fp) {
 i32 CUTCOUNT = 0;
 CUTINFO *CutList = NULL;
 i32 ACTIVECUTCOUNT = 0;
-i32 CS_area = 0;
-CUTSYS *CS_cutsys = NULL;
-WORLDINFO *CS_worldinfo = NULL;
 f32 CutSceneScale = 1.0f;
 extern "C" {
     u8 CUTSUBTITLEDEFAULT_R = 0xff;
@@ -1500,7 +1500,6 @@ extern "C" void NuAnimData2CalcTime(nuanimdata2_s *, f32, nuanimtime_s *);
 extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
                                         NUGCUTLOCATOR_s *, f32, NUMTX *, i32);
 void Draw3DObjectMtx(WORLDINFO_s *, i32, numtx_s *);
-extern CUTSCENESYS *CutSceneSys;
 
 static __used__ void LocatorFunction_Blaster(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
                                              NUGCUTLOCATOR_s *locator, float frame, numtx_s *parent_mtx, int) {
@@ -1721,7 +1720,6 @@ static void instNuGCutRigidSysUpdate(instNUGCUTSCENE_s *, float, int);
 static void instNuGCutCamSysUpdate(instNUGCUTSCENE_s *, float);
 static void instNuGCutTriggerSysUpdate(instNUGCUTSCENE_s *, float);
 static void instNuGCutSceneClipTest(instNUGCUTSCENE_s *);
-extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
 
 static inline i32 instNuGCutSceneRepeatCount(instNUGCUTSCENE_s *instance) {
     const u32 packed = *reinterpret_cast<u32 *>(&instance->flags_88);

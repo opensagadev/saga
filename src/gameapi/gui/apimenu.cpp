@@ -7,6 +7,7 @@
 #include "globals.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "gameframework/saveload.h"
+#include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/core/startup/game.h"
 #include "legoapi/core/startup/main.h"
@@ -144,11 +145,9 @@ void DropOut(i32 player, i32 show_effect, i32 silent, i32 force);
 LEVELDATA_s *CanSaveAndExit(WORLDINFO_s *world);
 void NewLevelFromMenu(LEVELDATA_s *level, i32 menu_id, i32 menu_y, i32 remember_hub);
 struct CUTSCENEPLAYERCLIP;
-extern CUTSCENEPLAYERCLIP *CutScenePlayer_Active(void);
 extern i32 saveload_autosave;
 extern FadeSystem FadeSys;
 extern i32 level_already_loaded;
-extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
 extern "C" i32 NewMode;
 extern i32 from_save_and_exit;
 extern i16 tCANCEL;

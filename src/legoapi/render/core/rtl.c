@@ -396,6 +396,33 @@ extern "C" {
         _NuTimeBarSlotEnd(0, 6);
     }
 
+    void rtlSetAssocName(void) {
+        STUBBED();
+    }
+
+    void rtlSetUserIdName(void) {
+        STUBBED();
+    }
+
+    i32 rtlFindByUserId(usize rtl_set, i32 user_id) {
+        if (rtl_set != 0) {
+            rtlset *set = reinterpret_cast<rtlset *>(rtl_set);
+            for (i32 i = 0; i < 128; ++i) {
+                if (set->lights[i].type != 0 && set->lights[i].field_68 == user_id) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
+    void rtlGetDirection(usize rtl_set, i32 id, void **out) {
+        STUBBED();
+        (void)rtl_set;
+        (void)id;
+        (void)out;
+    }
+
     i32 rtlDynamicAlloc(void) {
         if (rtl_dynamic_pool == NULL)
             return -1;
@@ -468,36 +495,14 @@ extern "C" {
         }
     }
 
-    void rtlDynamicMasterEnable(i32 enabled) {
-        STUBBED();
-    }
-
-    bool rtlDynamicEnable(i32 id, i32 enabled) {
-        if (rtl_dynamic_pool == NULL || id < 0 || id >= rtl_dynamic_max)
-            return false;
+    i32 rtlDynamicSetType(i32 id, i32 type) {
+        if (rtl_dynamic_pool == NULL || id < 0 || id >= rtl_dynamic_max || type <= 0 || type >= 9)
+            return 0;
         rtl_s *light = reinterpret_cast<rtl_s *>(NuLstGetByIdx(rtl_dynamic_pool, id));
         if (light == NULL)
-            return false;
-        bool previous = (light->flags & 1) == 0;
-        light->flags = (light->flags & ~1) | (enabled == 0);
-        return previous;
-    }
-
-    i32 rtlDynamicSetColours(i32 id, NUVEC *colour, NUVEC *secondary) {
-        if (rtl_dynamic_pool == NULL || id < 0 || id >= rtl_dynamic_max)
             return 0;
-        rtl_s *light = reinterpret_cast<rtl_s *>(NuLstGetByIdx(rtl_dynamic_pool, id));
-        if (light == NULL || (colour == NULL && secondary == NULL))
-            return 0;
-        if (colour != NULL)
-            light->colour = *colour;
-        if (secondary != NULL)
-            light->secondary_colour = *secondary;
+        light->type = type;
         return 1;
-    }
-
-    void rtlDynamicSetDirection(void) {
-        STUBBED();
     }
 
     i32 rtlDynamicSetPos(i32 id, NUVEC *position) {
@@ -523,14 +528,36 @@ extern "C" {
         return 1;
     }
 
-    i32 rtlDynamicSetType(i32 id, i32 type) {
-        if (rtl_dynamic_pool == NULL || id < 0 || id >= rtl_dynamic_max || type <= 0 || type >= 9)
+    i32 rtlDynamicSetColours(i32 id, NUVEC *colour, NUVEC *secondary) {
+        if (rtl_dynamic_pool == NULL || id < 0 || id >= rtl_dynamic_max)
             return 0;
         rtl_s *light = reinterpret_cast<rtl_s *>(NuLstGetByIdx(rtl_dynamic_pool, id));
-        if (light == NULL)
+        if (light == NULL || (colour == NULL && secondary == NULL))
             return 0;
-        light->type = type;
+        if (colour != NULL)
+            light->colour = *colour;
+        if (secondary != NULL)
+            light->secondary_colour = *secondary;
         return 1;
+    }
+
+    bool rtlDynamicEnable(i32 id, i32 enabled) {
+        if (rtl_dynamic_pool == NULL || id < 0 || id >= rtl_dynamic_max)
+            return false;
+        rtl_s *light = reinterpret_cast<rtl_s *>(NuLstGetByIdx(rtl_dynamic_pool, id));
+        if (light == NULL)
+            return false;
+        bool previous = (light->flags & 1) == 0;
+        light->flags = (light->flags & ~1) | (enabled == 0);
+        return previous;
+    }
+
+    void rtlDynamicSetDirection(void) {
+        STUBBED();
+    }
+
+    void rtlDynamicMasterEnable(i32 enabled) {
+        STUBBED();
     }
 
     void rtlFrameUpdate(f32 frame_time) {
@@ -606,10 +633,6 @@ extern "C" {
         STUBBED();
     }
 
-    void rtlSetAssocName(void) {
-        STUBBED();
-    }
-
     void rtlSetExt(void) {
         STUBBED();
     }
@@ -650,10 +673,6 @@ extern "C" {
         STUBBED();
     }
 
-    void rtlSetUserIdName(void) {
-        STUBBED();
-    }
-
     void rtlSpecularValue(void) {
         STUBBED();
     }
@@ -668,25 +687,6 @@ extern "C" {
             }
             rtl_dynamic_cnt = 0;
         }
-    }
-
-    i32 rtlFindByUserId(usize rtl_set, i32 user_id) {
-        if (rtl_set != 0) {
-            rtlset *set = reinterpret_cast<rtlset *>(rtl_set);
-            for (i32 i = 0; i < 128; ++i) {
-                if (set->lights[i].type != 0 && set->lights[i].field_68 == user_id) {
-                    return i;
-                }
-            }
-        }
-        return -1;
-    }
-
-    void rtlGetDirection(usize rtl_set, i32 id, void **out) {
-        STUBBED();
-        (void)rtl_set;
-        (void)id;
-        (void)out;
     }
 
 } // extern "C"

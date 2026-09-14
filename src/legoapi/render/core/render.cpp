@@ -2364,7 +2364,6 @@ u16 dco_prerotatez;
 f32 dco_reflectcoord = 2000000.0f;
 GAMECHARACTERDATA_s *dco_gcdata;
 CHARACTERMODEL_s *dco_cmodel;
-extern CUTSCENESYS *CutSceneSys;
 void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
 void QuatInterpolateRotationMatrix(NUMTX *, NUMTX *, NUMTX *, f32);
 void DrawObjectOnCharacter(WORLDINFO_s *world, GameObject_s *object, i32 object_id, nuhspecial_s *special, i32 locator,

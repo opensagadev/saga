@@ -6,6 +6,7 @@
 
 #include "globals.h"
 #include "legoapi/core/config/cheat.h"
+#include "legoapi/audio/audio.h"
 #include "legoapi/menus/screens/gamestatus_lsw.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/gizmo/base/gizmo.h"
@@ -42,14 +43,9 @@ void LevelScriptReStoreProgress(WORLDINFO_s *world, LEVELSCRIPTPROCESS_s *proces
     }
 }
 
-// Defined in legoapi/gameobjects.cpp
-void GameAudio_PlaySfxAndSetVolume(i32, nuvec_s *, float);
-
 // These are extern (U) in the original level.cpp.o — defined here as stubs
 // until the original defining file is decompiled.
 LEVELDATA *levelconfig_ldata = NULL;
-
-extern i16 GetMusicIndex(char *, nusound_filename_info_s *, i32);
 
 extern "C" {
     struct LEVELDATA_s *PODRACELEVELS[11]; // Arrival1-4, Intro, B, C, A, Outro1, Outro2, Status

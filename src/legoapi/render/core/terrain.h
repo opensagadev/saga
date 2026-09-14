@@ -11,9 +11,6 @@ struct terrsitu_s;
 struct PLATSKININFO;
 typedef tertype TERRAIN_SHAPE;
 
-extern TERRAIN_SHAPE *EShadPoly;
-extern TERRAIN_SHAPE *EShadRoofPoly;
-
 extern "C" i32 IgnoreWallSplines;
 extern "C" void PlatOnOff(i32 index, i32 enabled);
 extern "C" void TerrainSetImpactData(void *impact_data, i32 *impact_count, i32 maximum_impacts);
