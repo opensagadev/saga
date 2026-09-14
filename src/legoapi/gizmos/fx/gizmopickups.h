@@ -16,7 +16,9 @@ struct GIZMOPICKUPSYS_s;
 
 ADDGIZMOTYPE *GizmoPickups_RegisterGizmo(i32 type_id);
 void GizmoPickups_InitSys(GIZMOPICKUPSYS_s *pickup_sys);
+void SpecialMiniKits_Configure(WORLDINFO_s *world, char *config);
 void SpecialMiniKits_Reset(WORLDINFO_s *world);
+void SpecialMiniKits_Draw(WORLDINFO_s *world);
 GIZMOPICKUP_s *GizmoPickup_FindByName(WORLDINFO_s *world, char *name);
 i32 GizmoPickup_BeenTurnedOn(GIZMOPICKUP_s *pickup);
 GIZMOPICKUP_s *GizmoPickup_InBox(WORLDINFO_s *world, i32 type_index, NUVEC *minimum, NUVEC *maximum);
@@ -27,9 +29,4 @@ void AddPickups(i32 coin_count, i32 heart_count, i32 pickup_count, i32 unknown, 
                 f32 speed, i32 model, f32 radius, f32 duration, GameObject_s *owner, i32 flags, i32 extra,
                 bool visible);
 
-extern "C" {
-#endif
-
-#ifdef __cplusplus
-}
 #endif

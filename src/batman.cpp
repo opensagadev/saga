@@ -1,6 +1,8 @@
 #include "decomp.h"
 
 #include "batman.h"
+#include "legoapi/gizmo/base/gizflow.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
 #include "globals.h"
 #include "legoapi/render/fx.h"
 #include "nu2api/nusound/nusound_android.hpp"

@@ -1534,14 +1534,6 @@ void BoltTypes_Init(WORLDINFO_s *world) {
 }
 
 extern "C" {
-
-    void HitParts(void) {
-        STUBBED();
-    }
-
-} // extern "C"
-
-extern "C" {
     void NewTerrHitInfo(u8 *);
     void NewRayCastGetImpactNormal(NUVEC *);
     i32 NewShadowOnPlatform();

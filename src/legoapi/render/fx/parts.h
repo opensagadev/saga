@@ -4,6 +4,7 @@
 extern "C" {
     extern ADDPART_s Default_ADDPART;
     PART_s *AddPart(ADDPART_s *part);
+    void HitParts(void);
 }
 i32 FindPartDebris(PARTDEBSYS_s *system, char *name);
 void SetKillPartMom(NUVEC *momentum);

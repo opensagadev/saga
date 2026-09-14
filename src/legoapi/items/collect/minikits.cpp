@@ -386,10 +386,6 @@ void AllMiniKits_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet) {
     NextStatusStage(packet);
 }
 
-void SpecialMiniKits_Draw(WORLDINFO_s *) {
-    STUBBED();
-}
-
 void AddStatusMiniKitParts() {
     STUBBED();
 }
@@ -456,10 +452,4 @@ i32 EffectOffProgress_Update(LEVEL_PROGRESS_s *progress, char *name, i32 visible
         }
     }
     return 1;
-}
-
-void SpecialMiniKits_Configure(WORLDINFO_s *world, char *config) {
-    STUBBED();
-    (void)world;
-    (void)config;
 }

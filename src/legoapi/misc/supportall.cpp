@@ -17,6 +17,7 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/world/mission.h"
 #include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/gizmo/base/gizflow.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/items/objects/gameobjects.h"
@@ -57,7 +58,6 @@ void GameCameraMakeMiniCut(nugspline_s *, f32, f32, f32, f32, i32, i32);
 void Cheats_TurnOff(i32);
 void CutScene_StartAudio();
 void oneAtOnce_SetNumAttackers(i32);
-void ResetGizFlow(GIZFLOW_s *, GIZFLOWPROGRESS_s *);
 void EffectOffProgress_Reset(LEVEL_PROGRESS_s *);
 extern GameObject_s *alert_obj;
 extern f32 alert_timer;
@@ -131,7 +131,6 @@ void CharPlatforms_Reset(CHARPLATFORMSYS_s *);
 void CutScene_StartAudio();
 void oneAtOnce_SetNumAttackers(i32);
 void SetSoundFadeDist(WORLDINFO_s *, OPTIONSSAVE_s *);
-void ResetGizFlow(GIZFLOW_s *, GIZFLOWPROGRESS_s *);
 void EffectOffProgress_Reset(LEVEL_PROGRESS_s *);
 extern GAMECAMERA_s *GameCam;
 extern ripple_set_s *ripples;
