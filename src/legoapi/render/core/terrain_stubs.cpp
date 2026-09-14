@@ -275,7 +275,6 @@ extern "C" {
     extern f32 timeincrement;
     extern i32 globalframes;
     extern i32 update_debris_enabled;
-    extern u32 debrisseed;
     extern i32 debris_setup_called;
     extern usize debris_trash_space;
     extern usize debris_trash_size;
@@ -303,8 +302,6 @@ extern "C" {
         void DebrisCleanUpDmaDebTypeTables(void);
         void DebrisProcessAllocation(void);
         void DebrisProcessControlChunks(i32);
-        void DebrisProcessGeneration(void);
-        void DebrisProcessTriggers(void);
     }
 }
 
@@ -1134,10 +1131,6 @@ extern "C" {
         STUBBED();
     }
 
-    void DebrisGetSeed(void) {
-        STUBBED();
-    }
-
     void DebrisGlassClose(void) {
         if (debris_initialised != 0) {
             if (debris_copy_mtl != NULL) {
@@ -1456,10 +1449,6 @@ extern "C" {
         STUBBED();
     }
 
-    void DebrisSetSeed(i32 seed) {
-        debrisseed = static_cast<u32>(seed);
-    }
-
     void DebrisSetTrigger(i32 handle, i32 first, i32 second, i32 third) {
         if (handle != -1) {
             debkeydatatype_s &key = debkeydata[handle];
@@ -1475,39 +1464,6 @@ extern "C" {
 
     void DebrisShift(void) {
         STUBBED();
-    }
-
-    void DebrisStartOffsetEx(debkeydatatype_s *key, f32 offset) {
-        if (key == NULL) {
-            return;
-        }
-        const i16 effect_index = key->effect_index;
-        debinftype *effect = debtab[effect_index];
-        f32 now = effect->time_group == 4 ? panelglobaltime : globaltime;
-        f32 start;
-        f32 period;
-        if (effect->emission_period_random == 0.0f && effect->emission_pause_random == 0.0f) {
-            const f32 interval = effect->emission_period + effect->emission_pause;
-            start = static_cast<f32>(static_cast<i32>(now / interval)) * interval;
-            if (effect->generator_type == 7 && effect->emission_pause == 0.0f) {
-                const f32 frames = offset * 60.0f;
-                key->emitter_rotation_x = static_cast<i16>(static_cast<i32>(effect->field_050 * frames));
-                key->emitter_rotation_y = static_cast<i16>(static_cast<i32>(effect->field_054 * frames));
-            } else {
-                start += offset;
-            }
-            start += interval;
-            key->emission_time = start;
-            while (now < start) {
-                start -= interval;
-            }
-        } else {
-            start = now;
-            key->emission_time = start;
-        }
-        period = effect->emission_period;
-        key->previous_emission_time = -10.0f;
-        key->field_1e4 = NuRandFloatSeeded(&debrisseed) * effect->emission_period_random + start + period;
     }
 
     void DebrisStartOffset(i32 handle, f32 offset) {

@@ -525,7 +525,6 @@ void BoltTypes_Reset(WORLDINFO_s *world) {
     memset(world->bolt_types, 0, sizeof(world->bolt_types));
 }
 
-void AddPartDebris(PARTDEBSYS_s *, i32, NUVEC *);
 extern "C" void PlaySfx(char *, NUVEC *);
 i32 Player_HasDoubleBoltDamage_FromBolt(BOLT_s *);
 void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
@@ -1423,7 +1422,6 @@ static __used__ bool Bolt_RayCast(BOLT_s *bolt, NUVEC *start, NUVEC *movement, f
     return hit;
 }
 
-void AddPartDebris(PARTDEBSYS_s *, i32, NUVEC *);
 static __used__ void Bolt_Debris_Default(BOLT_s *bolt, nuvec_s *points, int point, nuvec_s *, int) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
     if (((bolt->flags & 0x40000200) == 0 && point == -1) || point == 0)

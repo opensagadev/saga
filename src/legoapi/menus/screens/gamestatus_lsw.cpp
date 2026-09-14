@@ -6,6 +6,7 @@
 #include "gameframework/saveload.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/characters/motion.h"
+#include "legoapi/items/base/collection.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
@@ -14,6 +15,7 @@
 #include "nu2api/numath/nutrig.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/menus/core/text.h"
+#include "legoapi/menus/screens/gamestatus_lsw.h"
 #include "gameapi/gui/apimenu.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "legoapi/render/core/render.h"
@@ -365,7 +367,6 @@ extern "C" void NuIOS_RecordFlurryEvent(char *);
 extern "C" i32 NuStrCpy(char *, const char *);
 void AddToCompletionPoints(u32);
 i32 AddToCollection(i32);
-i32 AllMiniKitsDone(AREASAVE_s *);
 i32 Mission_CurrentState(MISSIONSYS *);
 i32 newCharactersCollected(STATUSPACKET_s *);
 void StatusPacketReset(STATUSPACKET_s *);
@@ -1081,6 +1082,57 @@ void TrueHero_LSW_Skip(STATUS_STAGE_s *, STATUSPACKET_s *packet) {
 i32 UpdateAchievements(STATUSPACKET_s *) {
     STUBBED();
     return 0;
+}
+
+void DrawStatusScreen(WORLDINFO_s *) {
+    static u8 KitPart[0x2d0];
+
+    iconalphaoverride = -1.0f;
+    memset(KitPart, 0, sizeof(KitPart));
+
+    if (GAMEDEMO != 0 || FadeSys.fade > 0.0f) {
+        return;
+    }
+
+    STATUSPACKET_s *status = &StatusPacket;
+    if (status->status_flags == 0) {
+        return;
+    }
+
+    if (status->draw_background_callback != NULL) {
+        status->draw_background_callback(status);
+    }
+
+    for (STATUS_STAGE_s *stage = StatusStages; stage->type != -1; ++stage) {
+        if (stage->draw_callback != NULL) {
+            stage->draw_callback(stage, status, stage == status->stage);
+        }
+    }
+
+    STATUS_STAGE_s *stage = status->stage;
+    f32 alpha;
+    if (stage->type == 11) {
+        return;
+    } else if (stage->type == 12) {
+        alpha = 0.0f;
+    } else if (stage->type == 10) {
+        alpha = stage->field_0x18 < 1.0f ? 1.0f - stage->field_0x18 : 0.0f;
+    } else {
+        alpha = 1.0f;
+        if (stage->type == 19 && stage->field_0x14 != 0) {
+            const f32 time = stage->field_0x18;
+            if (time < 1.0f) {
+                alpha = 1.0f - time;
+            } else {
+                const f32 fade_start = stage->field_0x1c - 1.0f;
+                alpha = time < fade_start ? 0.0f : (time - fade_start) / (stage->field_0x1c - fade_start);
+            }
+        }
+    }
+
+    if (draw_player_icons != 0) {
+        DrawStatusIcons(status, icon_y, iconalphaoverride >= 0.0f ? iconalphaoverride : alpha);
+    }
 }
 
 void UpdateStatusScreen(WORLDINFO_s *) {

@@ -13,6 +13,8 @@ extern "C" {
 #endif
     void PlaySfx(char *name, nuvec_s *pos);
     i32 IsSfxLooping(i32 sfx_id);
+    void SetSfxBit_On(i32 sound);
+    void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pitch);
 #ifdef __cplusplus
 }
 #endif

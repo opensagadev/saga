@@ -4,6 +4,8 @@
 
 struct PartHeader;
 struct debinftype;
+struct debkeydatatype_s;
+struct uv1deb;
 struct ACTIONINFO_s;
 struct EXTRAACTIONDATA_s;
 struct CHARACTER_CONTEXT_INFO_s;
@@ -12,6 +14,13 @@ extern ACTIONINFO_s *ActionInfo;
 extern EXTRAACTIONDATA_s ExtraActionData[];
 extern CHARACTER_CONTEXT_INFO_s *CInfo;
 extern "C" void DebrisSetTimeIncrement(f32 increment);
+extern "C" void DebrisStartOffsetEx(debkeydatatype_s *key, f32 offset);
+extern "C" void DebrisSetSeed(i32 seed);
+extern "C" void DebrisGetSeed(void);
+void DebrisProcessGeneration(void);
+void DebrisProcessTriggers(void);
+void DebFreeWithoutKey(debkeydatatype_s *key);
+void DebrisProcessSpheres(uv1deb *data, f32 time, debinftype *effect, debkeydatatype_s *key, i32 finite);
 
 extern "C" {
     extern PartHeader **DmaDebTypes;
@@ -19,4 +28,9 @@ extern "C" {
     extern i32 freeDmaDebType;
     extern i32 edpp_types_used;
     extern debinftype **debtab;
+    extern i32 debris_render_group;
+    extern f32 debris_thinning_level;
+    extern i32 forced_debris_thinning;
+    extern i32 debris_detail_level;
+    void DebReAlloc(debkeydatatype_s *key, i32 particle_count);
 }

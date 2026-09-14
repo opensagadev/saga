@@ -7,6 +7,9 @@ extern "C" {
     void HitParts(void);
 }
 i32 FindPartDebris(PARTDEBSYS_s *system, char *name);
+void InitPartTable(char **names);
+void LoadPartFile(WORLDINFO_s *world);
+void AddPartDebris(PARTDEBSYS_s *system, i32 index, NUVEC *position);
 void SetKillPartMom(NUVEC *momentum);
 void PartImpact_Brick(PART_s *part);
 void PartStop_Flickerer(PART_s *part);

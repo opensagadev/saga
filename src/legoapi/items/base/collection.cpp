@@ -15,6 +15,7 @@ u32 GizmoBlowups_TotalScore(void *world);
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/area.h"
+#include "legoapi/world/levels/episode.h"
 #include "legoapi/world/world.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/characters/core/character.h"
@@ -38,8 +39,8 @@ void GizmoPickup_CollectCoin(WORLDINFO_s *, nuvec_s *, i32, i32, GameObject_s *,
 
 COLLECTID *TempCollectID = NULL;
 
-i32 CollectCount = 0;
-COLLECTID *CollectList = NULL;
+static i32 CollectCount;
+static COLLECTID *CollectList;
 i32 COLLECTION_COMPLETIONCOUNT = 0;
 
 i32 InCollectList_Index(i32 id, COLLECTID *list, i32 count) {
@@ -405,6 +406,15 @@ i32 Collection_GetIDList(COLLECTION_s *collection, u32 model_flag_mask, u32 requ
     return result_count;
 }
 
+void Collection_CreateMaster(char *file, i16 *idlist, COLLECTION_s *collection, i32 param4, float param5) {
+    collection->list = CollectList;
+    collection->count_x = (u16)param4;
+    collection->count_y = (u16)CollectCount;
+    collection->field_8 = idlist;
+    collection->field_c = file;
+    collection->field_10 = param5;
+}
+
 void Collection_CreateCustom(char *name, i16 *id_list, COLLECTION_s *collection, u32 required_model_flags,
                              u32 excluded_model_flags, u32 required_game_flags, i32 require_buyable, i32 columns,
                              VARIPTR *buffer, VARIPTR *, i32 use_all_characters, f32 scale) {
@@ -460,13 +470,45 @@ void Collection_CreateCustom(char *name, i16 *id_list, COLLECTION_s *collection,
     buffer->addr += static_cast<usize>(collection->count_y) * sizeof(COLLECTID);
 }
 
-void Collection_CreateMaster(char *file, i16 *idlist, COLLECTION_s *collection, i32 param4, float param5) {
-    collection->list = CollectList;
-    collection->count_x = (u16)param4;
-    collection->count_y = (u16)CollectCount;
-    collection->field_8 = idlist;
-    collection->field_c = file;
-    collection->field_10 = param5;
+COLLECTID *CollectIDUnlocked(i32 id) {
+    i32 index = InCollectList_Index(id, CollectList, CollectCount);
+    if (index == -1) {
+        return NULL;
+    }
+
+    COLLECTID *entry = &CollectList[index];
+    if (Game_CharacterSave != NULL && (Game_CharacterSave[id] & SAVE_CHARACTER_UNLOCKED) != 0) {
+        return entry;
+    }
+
+    switch (entry->type) {
+        case 0:
+            return entry;
+        case 2:
+            if (static_cast<i8>(entry->field2_0x3) == -1 || Game_AreaSave == NULL) {
+                return NULL;
+            }
+            return Game_AreaSave[entry->field2_0x3].area_complete != 0 ? entry : NULL;
+        case 3:
+            if (Episodes_Completed() != EPISODECOUNT) {
+                return NULL;
+            }
+            return Game_100PercentComplete() != 0 ? entry : NULL;
+        case 4:
+            return AllMiniKitsDone(Game_AreaSave) != 0 ? entry : NULL;
+        case 6:
+            if (Game_CompletionSave == NULL ||
+                reinterpret_cast<STATUSCOLLECT_s *>(Game_CompletionSave)->gold_bricks < entry->field6_0xa) {
+                return NULL;
+            }
+            return entry;
+        case 7:
+            return Game_100PercentComplete() != 0 ? entry : NULL;
+        case 8:
+            return Store_IsPackUnlocked(static_cast<i8>(entry->field2_0x3)) != 0 ? entry : NULL;
+        default:
+            return NULL;
+    }
 }
 
 i32 Collection_GotAnyOfType(i32 type, u32 flags) {
@@ -503,6 +545,10 @@ i32 Collection_GotAnyOfType(i32 type, u32 flags) {
     }
 
     return 0;
+}
+
+void CollectAllCharacters(i32) {
+    STUBBED();
 }
 
 static __used__ void Collection_GetSelectingPlayerIDs(i16 *) {

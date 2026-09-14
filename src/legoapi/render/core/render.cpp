@@ -380,11 +380,6 @@ struct rtlidata_s;
 
 extern i32 VehicleArea;
 extern i32 GAMEDEMO;
-extern STATUSPACKET_s StatusPacket;
-extern STATUS_STAGE_s *StatusStages;
-extern f32 iconalphaoverride;
-extern f32 icon_y;
-extern i32 draw_player_icons;
 extern f32 FORCEGLOWTIME;
 extern i16 tHINTS;
 extern i16 tCHARACTERS;
@@ -1888,57 +1883,6 @@ void DrawStatusBG_LSW(STATUSPACKET_s *status) {
     if (stage->field_0x14 == -1) {
         stage->field_0x18 = 0;
         stage->field_0x14 = 0;
-    }
-}
-
-void DrawStatusScreen(WORLDINFO_s *) {
-    static u8 KitPart[0x2d0];
-
-    iconalphaoverride = -1.0f;
-    memset(KitPart, 0, sizeof(KitPart));
-
-    if (GAMEDEMO != 0 || FadeSys.fade > 0.0f) {
-        return;
-    }
-
-    STATUSPACKET_s *status = &StatusPacket;
-    if (status->status_flags == 0) {
-        return;
-    }
-
-    if (status->draw_background_callback != NULL) {
-        status->draw_background_callback(status);
-    }
-
-    for (STATUS_STAGE_s *stage = StatusStages; stage->type != -1; ++stage) {
-        if (stage->draw_callback != NULL) {
-            stage->draw_callback(stage, status, stage == status->stage);
-        }
-    }
-
-    STATUS_STAGE_s *stage = status->stage;
-    f32 alpha;
-    if (stage->type == 11) {
-        return;
-    } else if (stage->type == 12) {
-        alpha = 0.0f;
-    } else if (stage->type == 10) {
-        alpha = stage->field_0x18 < 1.0f ? 1.0f - stage->field_0x18 : 0.0f;
-    } else {
-        alpha = 1.0f;
-        if (stage->type == 19 && stage->field_0x14 != 0) {
-            const f32 time = stage->field_0x18;
-            if (time < 1.0f) {
-                alpha = 1.0f - time;
-            } else {
-                const f32 fade_start = stage->field_0x1c - 1.0f;
-                alpha = time < fade_start ? 0.0f : (time - fade_start) / (stage->field_0x1c - fade_start);
-            }
-        }
-    }
-
-    if (draw_player_icons != 0) {
-        DrawStatusIcons(status, icon_y, iconalphaoverride >= 0.0f ? iconalphaoverride : alpha);
     }
 }
 

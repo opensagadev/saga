@@ -4,6 +4,7 @@
 #include "legoapi/world/world_shared.h"
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/render/fx/parts.h"
 
 #include <stdio.h>
 #include <string.h>

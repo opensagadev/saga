@@ -153,6 +153,38 @@ class CompareSymbolPlacementTests(unittest.TestCase):
         self.assertEqual(ranked_component_splits(ledger)[0]["id"], 7)
         self.assertEqual(ranked_component_splits(ledger)[0]["split"], 1)
 
+    def test_component_excludes_duplicate_original_local_identity(self):
+        function = {**symbol("NuTimeStartFrame", 0x100, binding=1),
+                    "current_owner_candidates": [1]}
+        state = {**symbol("_ZL14frameStartTime", 0x200, section=".bss", size=4),
+                 "current_owner_candidates": [2]}
+        other_state = {**symbol("_ZL14frameStartTime", 0x300, section=".bss", size=8),
+                       "current_owner_candidates": [2]}
+        ledger = {
+            "original_symbols": [function, state, other_state],
+            "current_units": [{"id": 1, "source": "time.cpp"},
+                              {"id": 2, "source": "utility.cpp"}],
+            "original_local_xrefs": [{
+                "id": "xref", "function_symbol_index": 0x100,
+                "object_symbol_indices": [0x200],
+                "same_tu_evidence": "strong same-TU constraint",
+            }],
+            "original_strong_local_xref_components": [{
+                "id": 7, "certainty": "minimum same-TU constraint",
+                "local_initializer_blocks": [3],
+                "function_symbol_indices": [0x100],
+                "object_symbol_indices": [0x200], "xref_ids": ["xref"],
+            }],
+        }
+        component = original_component(ledger, 7)
+        self.assertEqual(component["local_state_pairs"]["total"], 0)
+        self.assertEqual(component["local_state_pairs"]["split"], 0)
+        self.assertEqual(ranked_component_splits(ledger), [])
+        stream = StringIO()
+        with redirect_stdout(stream):
+            print_original_component(component)
+        self.assertIn("reuse an original name/type/binding identity", stream.getvalue())
+
     def test_cached_ledger_must_match_elf_paths_and_units(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

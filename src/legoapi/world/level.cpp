@@ -6,6 +6,7 @@
 
 #include "globals.h"
 #include "legoapi/core/config/cheat.h"
+#include "legoapi/menus/screens/gamestatus_lsw.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "nu2api/nu3d/nuspecial.h"
