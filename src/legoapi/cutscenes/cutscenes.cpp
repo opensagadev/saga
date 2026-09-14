@@ -8,7 +8,6 @@
 #include "legoapi/characters/motion.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/core/input/qrand.h"
-#include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/menus/core/text.h"
 #include "legoapi/world/area.h"
@@ -34,8 +33,6 @@
 #include "nu2api/nusound/nusound.h"
 
 #include <string.h>
-#include "MechInputTouch/MechInputTouch_types.h"
-#include "legoapi/world/level.h"
 #include <stdio.h>
 #include "legoapi/world/mission.h"
 #include "legoapi/world/levels/episode.h"
@@ -63,7 +60,6 @@ static void CutScene_RigidPostRender(NUGCUTRIGID_s *, instNUGCUTRIGID_s *, NUMTX
 static void CutScene_CreateCharacterInstance(NUGCUTCHAR_s *, instNUGCUTCHAR_s *, variptr_u *);
 
 extern "C" {
-    void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
     i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *instance);
     void instNuGCutScenePause(instNUGCUTSCENE_s *, u8);
     void instNuGCutSceneReset(instNUGCUTSCENE_s *);

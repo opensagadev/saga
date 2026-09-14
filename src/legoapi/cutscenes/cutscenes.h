@@ -4,7 +4,7 @@
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
 
-// Cutscene API (module legoapi/cutscenes, cutscenes.cpp).
+// Cutscene API shared by the cutscene owners.
 enum CUTSCENEPLAYER_CLIP_TYPE { CLIP_INTRO, CLIP_MIDTRO, CLIP_OUTRO, CLIP_ENDING };
 struct CUTSCENEPLAYERCLIP {
     i16 level_id;
@@ -27,6 +27,7 @@ struct CUTSCENEPLAYER_s {
 DECOMP_ASSERT(sizeof(CUTSCENEPLAYERCLIP) == 0x44, "Cutscene clip ABI");
 DECOMP_ASSERT(sizeof(CUTSCENEPLAYER_s) == 0x20, "Cutscene player ABI");
 extern CUTSCENEPLAYER_s *CutScenePlayer;
+extern CUTSCENESYS *CutSceneSys;
 extern "C" i32 (*CutScenePlayer_AcceptFn)(CUTSCENEPLAYERCLIP *);
 void CutScenePlayer_Configure(char *, VARIPTR *, VARIPTR *, i16 *, i16 *, i16 *, i16 *, i16 *);
 i32 CutScenePlayer_CountEpisodeClips(i32, i32, i16 *);
@@ -41,5 +42,6 @@ void CutScene_SnapToEnd(CUTINFO *cut);
 void CutScene_StoppedFn_LSW(CUTINFO *cut);
 i32 CutScene_PlayingOrRequested(CUTINFO *cut);
 i32 CutScene_IsSkippable(CUTINFO *cut);
+extern "C" void instNuGCutSceneEnd(instNUGCUTSCENE_s *instance);
 
 #endif
