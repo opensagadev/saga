@@ -12,6 +12,7 @@
 #include "legoapi/render/core/rtl.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/gizmo/object/giztorpedo.h"
 #include "legoapi/items/collect/torpedo.h"
 #include "legoapi/world/world.h"
@@ -112,7 +113,6 @@ extern "C" {
     extern f32 timeincrement;
     f32 CameraEmitterDistance(NUVEC *);
     void SetSfxBit_On(i32);
-    void PlaySfxByIdEx(i32, NUVEC *, f32, f32);
     void PlaySfxById(i32, NUVEC *);
     void DebrisEmitterMomentum(i32, f32, f32, f32);
     void DebrisParticleMomentum(i32, f32, f32, f32);

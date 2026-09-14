@@ -1,4 +1,6 @@
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
+#include "legoapi/world/areas.h"
 #include "nu2api/nucore/nustring.h"
 
 #include "batman.h"
@@ -184,8 +186,6 @@ extern i32 TimingBarSet;
 f32 GameShadow(GameObject_s *object, NUVEC *position, f32 probe_height, i32 terrain_mask);
 void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
 void SetAreaPickupGravity(i32 area, i32 level);
-void SuperCounter_ActivateGizmoPickup(GIZMO_s *gizmo, GIZMOPICKUP_s *pickup);
-void SuperCounters_ResetProcessed(WORLDINFO_s *world);
 void MiniKitDetector(NUVEC *position);
 
 namespace {
