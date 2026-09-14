@@ -45,7 +45,7 @@ build:target --per_file_copt=^src/gameapi/ai/aisys/aisys\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/ai/aisys/gameai_actions\.cpp$@-O3
 # Teleport parser callbacks in the target use optimized leaf/control-flow code.
 build:target --per_file_copt=^src/gameapi/ai/gameai_tel\.cpp$@-O3
-build:target --per_file_copt=^src/gameapi/ai/gameai_grab\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/items/objects/grabber\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/edtools/edfile\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/edtools/edsplines\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/edtools/edtoolsall_stubs\.cpp$@-O2
@@ -205,7 +205,7 @@ build:target --per_file_copt=^src/legoapi/gizmos/trigger/gizrandom\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/trigger/gizspecial\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/object/gizspecial\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/trigger/giztimers\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/gizmos/traps/giztorpmachine\.cpp$@-O3
+build:target --per_file_copt=^src/legoapi/gizmo/object/giztorpedo\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/traps/gizturret\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/transport/grapples\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmos/fx/guidelines\.cpp$@-O3

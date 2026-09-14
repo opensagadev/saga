@@ -1,4 +1,5 @@
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/items/collect/torpedo.h"
 #include "legoapi/actions/movement/carrying.h"
 #include "legoapi/actions/combat/hits.h"
 #include "legoapi/actions/character/streaks.h"
@@ -77,7 +78,6 @@ void GameObjectSetCanUse(GameObject_s *, void *, u8, u8, f32);
 i32 Suit_GetIndex(SUIT_s *);
 BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
 void Bolt_Shoot(GameObject_s *, i32, i32);
-void Torpedo_Shoot(GameObject_s *);
 void GameAudio_PlaySfxById(i32, NUVEC *, i32, i32);
 void PartUpdate_Basketball(PART_s *);
 void PartImpact_Basketball(PART_s *);
@@ -6414,7 +6414,6 @@ void ResetAICreature(GameObject_s *, AISYS_s *);
 void SpawnCreatureFromCrate(GameObject_s *, f32, f32);
 void SetToLastSafePos(GameObject_s *);
 GameObject_s *GetOtherActivePlayer(GameObject_s *);
-void FreeTorpedoPacket(TORPEDOPACKET_s **);
 void TakeOverGameObject(GameObject_s *, GameObject_s *, i32, i32);
 
 void ManageGameObjects() {

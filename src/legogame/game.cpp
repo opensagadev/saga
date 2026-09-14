@@ -44,7 +44,6 @@ void EnableShadowMapRenderingFn(void);
 extern BOLTTYPE_s GlobalBoltType[44];
 void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
 void Bolt_Debris_LSW(BOLT_s *, NUVEC *, i32, NUVEC *, i32);
-void GetShootOrigin_LSW(GameObject_s *, NUVEC *);
 i32 Bolt_HitPart_LSW(BOLT_s *, PART_s *);
 i32 Bolt_AlternateFire_LSW(GameObject_s *, i32);
 void BoltSys_Init(BOLTSYS *);

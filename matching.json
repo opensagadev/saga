@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.13165,
+    "fuzzy_match_percent": 46.13444,
     "total_code": "4722419",
     "matched_code": "401463",
     "matched_code_percent": 8.501215,
@@ -24800,85 +24800,6 @@
       ]
     },
     {
-      "name": "gameapi/ai/gameai_grab.cpp.o",
-      "source": "src/gameapi/ai/gameai_grab.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/gameai_grab.o",
-      "functions": [
-        {
-          "name": "_ZL13Grab_invert_xP8nufpar_s",
-          "demangled_name": "Grab_invert_x(nufpar_s*)",
-          "address": 2269888,
-          "offset": 1379920,
-          "size": 27,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL11Grab_shadowP8nufpar_s",
-          "demangled_name": "Grab_shadow(nufpar_s*)",
-          "address": 2270400,
-          "offset": 1380432,
-          "size": 119,
-          "match_percent": 99.96774
-        },
-        {
-          "name": "_ZL12Grab_move_xyP8nufpar_s",
-          "demangled_name": "Grab_move_xy(nufpar_s*)",
-          "address": 2270528,
-          "offset": 1380560,
-          "size": 53,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL11Grab_rotateP8nufpar_s",
-          "demangled_name": "Grab_rotate(nufpar_s*)",
-          "address": 2270592,
-          "offset": 1380624,
-          "size": 80,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL10Grab_scaleP8nufpar_s",
-          "demangled_name": "Grab_scale(nufpar_s*)",
-          "address": 2270672,
-          "offset": 1380704,
-          "size": 62,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL10Grab_speedP8nufpar_s",
-          "demangled_name": "Grab_speed(nufpar_s*)",
-          "address": 2270736,
-          "offset": 1380768,
-          "size": 62,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL11Grab_radiusP8nufpar_s",
-          "demangled_name": "Grab_radius(nufpar_s*)",
-          "address": 2270800,
-          "offset": 1380832,
-          "size": 62,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL9Grab_typeP8nufpar_s",
-          "demangled_name": "Grab_type(nufpar_s*)",
-          "address": 2270864,
-          "offset": 1380896,
-          "size": 213,
-          "match_percent": 99.8
-        },
-        {
-          "name": "_Z17Grabber_ConfigureP11WORLDINFO_sPc",
-          "demangled_name": "Grabber_Configure(WORLDINFO_s*, char*)",
-          "address": 2271088,
-          "offset": 1381120,
-          "size": 866,
-          "match_percent": 53.23858
-        }
-      ]
-    },
-    {
       "name": "gameapi/ai/gameai_tel.cpp.o",
       "source": "src/gameapi/ai/gameai_tel.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/gameai_tel.o",
@@ -46338,6 +46259,14 @@
           "match_percent": 3.292683
         },
         {
+          "name": "_Z21GetShootDirection_LSWP12GameObject_sP7nuvec_s",
+          "demangled_name": "GetShootDirection_LSW(GameObject_s*, nuvec_s*)",
+          "address": 1444288,
+          "offset": 554320,
+          "size": 707,
+          "match_percent": 81.057144
+        },
+        {
           "name": "_Z12SetObjTargetP12GameObject_sS0_",
           "demangled_name": "SetObjTarget(GameObject_s*, GameObject_s*)",
           "address": 1445472,
@@ -46384,6 +46313,14 @@
           "offset": 574512,
           "size": 2709,
           "match_percent": 0.934256
+        },
+        {
+          "name": "_Z18GetShootOrigin_LSWP12GameObject_sP7nuvec_s",
+          "demangled_name": "GetShootOrigin_LSW(GameObject_s*, nuvec_s*)",
+          "address": 1468512,
+          "offset": 578544,
+          "size": 176,
+          "match_percent": 99.175
         },
         {
           "name": "_Z11CanObjSlideP12GameObject_si",
@@ -46600,6 +46537,14 @@
           "offset": 628960,
           "size": 939,
           "match_percent": 2.201835
+        },
+        {
+          "name": "_Z16PodCollisionCodeP12GameObject_s",
+          "demangled_name": "PodCollisionCode(GameObject_s*)",
+          "address": 1520960,
+          "offset": 630992,
+          "size": 425,
+          "match_percent": 7.16092
         },
         {
           "name": "_Z8Move_PODP12GameObject_s",
@@ -52738,118 +52683,6 @@
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizmos_tubes.o",
       "functions": [
         {
-          "name": "_Z21Torpedo_UpdateJobbiesP12GameObject_s",
-          "demangled_name": "Torpedo_UpdateJobbies(GameObject_s*)",
-          "address": 2062448,
-          "offset": 1172480,
-          "size": 1639,
-          "match_percent": 36.174603
-        },
-        {
-          "name": "_Z21FindNearestTorpTargetP11WORLDINFO_sP7nuvec_sfPh",
-          "demangled_name": "FindNearestTorpTarget(WORLDINFO_s*, nuvec_s*, float, unsigned char*)",
-          "address": 2064096,
-          "offset": 1174128,
-          "size": 767,
-          "match_percent": 59.074257
-        },
-        {
-          "name": "_Z11TorpedoCodeP12GameObject_sif",
-          "demangled_name": "TorpedoCode(GameObject_s*, int, float)",
-          "address": 2064864,
-          "offset": 1174896,
-          "size": 2068,
-          "match_percent": 37.097828
-        },
-        {
-          "name": "_Z21HomeNearestTorpTargetP6BOLT_sP15TORPEDOPACKET_s",
-          "demangled_name": "HomeNearestTorpTarget(BOLT_s*, TORPEDOPACKET_s*)",
-          "address": 2066944,
-          "offset": 1176976,
-          "size": 1105,
-          "match_percent": 69.19575
-        },
-        {
-          "name": "_Z20Torpedo_InitRicochetP6BOLT_sP7nuvec_s",
-          "demangled_name": "Torpedo_InitRicochet(BOLT_s*, nuvec_s*)",
-          "address": 2068064,
-          "offset": 1178096,
-          "size": 128,
-          "match_percent": 65.51282
-        },
-        {
-          "name": "_Z16Torpedo_RicochetP6BOLT_sP15TORPEDOPACKET_s",
-          "demangled_name": "Torpedo_Ricochet(BOLT_s*, TORPEDOPACKET_s*)",
-          "address": 2068192,
-          "offset": 1178224,
-          "size": 1005,
-          "match_percent": 73.838425
-        },
-        {
-          "name": "_Z16TorpedoHitTargetP6BOLT_s",
-          "demangled_name": "TorpedoHitTarget(BOLT_s*)",
-          "address": 2069200,
-          "offset": 1179232,
-          "size": 530,
-          "match_percent": 79.852715
-        },
-        {
-          "name": "_Z12DrawTorpedosP12GameObject_s",
-          "demangled_name": "DrawTorpedos(GameObject_s*)",
-          "address": 2069760,
-          "offset": 1179792,
-          "size": 961,
-          "match_percent": 27.065727
-        },
-        {
-          "name": "_Z16Torpedo_InitBoltP6BOLT_s",
-          "demangled_name": "Torpedo_InitBolt(BOLT_s*)",
-          "address": 2070736,
-          "offset": 1180768,
-          "size": 76,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z18Torpedo_UpdateBoltP6BOLT_s",
-          "demangled_name": "Torpedo_UpdateBolt(BOLT_s*)",
-          "address": 2070816,
-          "offset": 1180848,
-          "size": 519,
-          "match_percent": 87.20168
-        },
-        {
-          "name": "_Z13Torpedo_ScaleP6BOLT_s",
-          "demangled_name": "Torpedo_Scale(BOLT_s*)",
-          "address": 2071344,
-          "offset": 1181376,
-          "size": 77,
-          "match_percent": 99.95238
-        },
-        {
-          "name": "_Z15Torpedo_EndBoltP6BOLT_s",
-          "demangled_name": "Torpedo_EndBolt(BOLT_s*)",
-          "address": 2071424,
-          "offset": 1181456,
-          "size": 138,
-          "match_percent": 99.92857
-        },
-        {
-          "name": "_Z13Torpedo_ShootP12GameObject_s",
-          "demangled_name": "Torpedo_Shoot(GameObject_s*)",
-          "address": 2071568,
-          "offset": 1181600,
-          "size": 394,
-          "match_percent": 65.74419
-        },
-        {
-          "name": "_Z26GizTorpMachine_FindNearestP11WORLDINFO_sP7nuvec_sPf",
-          "demangled_name": "GizTorpMachine_FindNearest(WORLDINFO_s*, nuvec_s*, float*)",
-          "address": 2074208,
-          "offset": 1184240,
-          "size": 260,
-          "match_percent": 99.63219
-        },
-        {
           "name": "_Z15Tube_FindByNameP11WORLDINFO_sPc",
           "demangled_name": "Tube_FindByName(WORLDINFO_s*, char*)",
           "address": 5137216,
@@ -54166,7 +53999,135 @@
           "address": 899232,
           "offset": 9264,
           "size": 93,
-          "match_percent": 29.411764
+          "match_percent": 99.35294
+        },
+        {
+          "name": "_Z13PartDraw_TorpP6PART_s",
+          "demangled_name": "PartDraw_Torp(PART_s*)",
+          "address": 2071968,
+          "offset": 1182000,
+          "size": 290,
+          "match_percent": 74.46342
+        },
+        {
+          "name": "_ZL21GizTorp_SetVisibilityP7GIZMO_si",
+          "demangled_name": "GizTorp_SetVisibility(GIZMO_s*, int)",
+          "address": 2072272,
+          "offset": 1182304,
+          "size": 36,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL16GizTorp_ActivateP7GIZMO_si",
+          "demangled_name": "GizTorp_Activate(GIZMO_s*, int)",
+          "address": 2072320,
+          "offset": 1182352,
+          "size": 34,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL14GizTorps_ResetPvS_S_",
+          "demangled_name": "GizTorps_Reset(void*, void*, void*)",
+          "address": 2072368,
+          "offset": 1182400,
+          "size": 60,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL14GizTorp_UpdatePvS_f",
+          "demangled_name": "GizTorp_Update(void*, void*, float)",
+          "address": 2072432,
+          "offset": 1182464,
+          "size": 109,
+          "match_percent": 81.51515
+        },
+        {
+          "name": "_ZL20GizTorp_GetMaxGizmosPv",
+          "demangled_name": "GizTorp_GetMaxGizmos(void*)",
+          "address": 2072544,
+          "offset": 1182576,
+          "size": 27,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL20GizTorp_GetGizmoNameP7GIZMO_s",
+          "demangled_name": "GizTorp_GetGizmoName(GIZMO_s*)",
+          "address": 2072576,
+          "offset": 1182608,
+          "size": 19,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL17GizTorp_GetOutputP7GIZMO_sii",
+          "demangled_name": "GizTorp_GetOutput(GIZMO_s*, int, int)",
+          "address": 2072608,
+          "offset": 1182640,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL21GizTorp_GetOutputNameP7GIZMO_si",
+          "demangled_name": "GizTorp_GetOutputName(GIZMO_s*, int)",
+          "address": 2072624,
+          "offset": 1182656,
+          "size": 29,
+          "match_percent": 98.75
+        },
+        {
+          "name": "_ZL21GizTorp_GetNumOutputsP7GIZMO_s",
+          "demangled_name": "GizTorp_GetNumOutputs(GIZMO_s*)",
+          "address": 2072656,
+          "offset": 1182688,
+          "size": 12,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL12GizTorp_LoadPvS_",
+          "demangled_name": "GizTorp_Load(void*, void*)",
+          "address": 2072672,
+          "offset": 1182704,
+          "size": 360,
+          "match_percent": 58.415253
+        },
+        {
+          "name": "_ZL27GizTorps_ReserveBufferSpacePv",
+          "demangled_name": "GizTorps_ReserveBufferSpace(void*)",
+          "address": 2073040,
+          "offset": 1183072,
+          "size": 211,
+          "match_percent": 87.906975
+        },
+        {
+          "name": "_ZL12GizTorp_DrawPvS_f",
+          "demangled_name": "GizTorp_Draw(void*, void*, float)",
+          "address": 2073264,
+          "offset": 1183296,
+          "size": 778,
+          "match_percent": 46.256683
+        },
+        {
+          "name": "_ZL17GizTorp_AddGizmosP10GIZMOSYS_siPvS1_",
+          "demangled_name": "GizTorp_AddGizmos(GIZMOSYS_s*, int, void*, void*)",
+          "address": 2074048,
+          "offset": 1184080,
+          "size": 146,
+          "match_percent": 81.408165
+        },
+        {
+          "name": "_Z26GizTorpMachine_FindNearestP11WORLDINFO_sP7nuvec_sPf",
+          "demangled_name": "GizTorpMachine_FindNearest(WORLDINFO_s*, nuvec_s*, float*)",
+          "address": 2074208,
+          "offset": 1184240,
+          "size": 260,
+          "match_percent": 99.97701
+        },
+        {
+          "name": "_Z28GizTorpMachine_RegisterGizmoi",
+          "demangled_name": "GizTorpMachine_RegisterGizmo(int)",
+          "address": 2074480,
+          "offset": 1184512,
+          "size": 360,
+          "match_percent": 95.183334
         }
       ]
     },
@@ -57943,133 +57904,6 @@
       ]
     },
     {
-      "name": "legoapi/gizmos/traps/giztorpmachine.cpp.o",
-      "source": "src/legoapi/gizmos/traps/giztorpmachine.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/giztorpmachine.o",
-      "functions": [
-        {
-          "name": "_Z13PartDraw_TorpP6PART_s",
-          "demangled_name": "PartDraw_Torp(PART_s*)",
-          "address": 2071968,
-          "offset": 1182000,
-          "size": 290,
-          "match_percent": 74.46342
-        },
-        {
-          "name": "_ZL21GizTorp_SetVisibilityP7GIZMO_si",
-          "demangled_name": "GizTorp_SetVisibility(GIZMO_s*, int)",
-          "address": 2072272,
-          "offset": 1182304,
-          "size": 36,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL16GizTorp_ActivateP7GIZMO_si",
-          "demangled_name": "GizTorp_Activate(GIZMO_s*, int)",
-          "address": 2072320,
-          "offset": 1182352,
-          "size": 34,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL14GizTorps_ResetPvS_S_",
-          "demangled_name": "GizTorps_Reset(void*, void*, void*)",
-          "address": 2072368,
-          "offset": 1182400,
-          "size": 60,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL14GizTorp_UpdatePvS_f",
-          "demangled_name": "GizTorp_Update(void*, void*, float)",
-          "address": 2072432,
-          "offset": 1182464,
-          "size": 109,
-          "match_percent": 81.51515
-        },
-        {
-          "name": "_ZL20GizTorp_GetMaxGizmosPv",
-          "demangled_name": "GizTorp_GetMaxGizmos(void*)",
-          "address": 2072544,
-          "offset": 1182576,
-          "size": 27,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL20GizTorp_GetGizmoNameP7GIZMO_s",
-          "demangled_name": "GizTorp_GetGizmoName(GIZMO_s*)",
-          "address": 2072576,
-          "offset": 1182608,
-          "size": 19,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL17GizTorp_GetOutputP7GIZMO_sii",
-          "demangled_name": "GizTorp_GetOutput(GIZMO_s*, int, int)",
-          "address": 2072608,
-          "offset": 1182640,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL21GizTorp_GetOutputNameP7GIZMO_si",
-          "demangled_name": "GizTorp_GetOutputName(GIZMO_s*, int)",
-          "address": 2072624,
-          "offset": 1182656,
-          "size": 29,
-          "match_percent": 98.75
-        },
-        {
-          "name": "_ZL21GizTorp_GetNumOutputsP7GIZMO_s",
-          "demangled_name": "GizTorp_GetNumOutputs(GIZMO_s*)",
-          "address": 2072656,
-          "offset": 1182688,
-          "size": 12,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL12GizTorp_LoadPvS_",
-          "demangled_name": "GizTorp_Load(void*, void*)",
-          "address": 2072672,
-          "offset": 1182704,
-          "size": 360,
-          "match_percent": 58.288136
-        },
-        {
-          "name": "_ZL27GizTorps_ReserveBufferSpacePv",
-          "demangled_name": "GizTorps_ReserveBufferSpace(void*)",
-          "address": 2073040,
-          "offset": 1183072,
-          "size": 211,
-          "match_percent": 87.906975
-        },
-        {
-          "name": "_ZL12GizTorp_DrawPvS_f",
-          "demangled_name": "GizTorp_Draw(void*, void*, float)",
-          "address": 2073264,
-          "offset": 1183296,
-          "size": 778,
-          "match_percent": 46.256683
-        },
-        {
-          "name": "_ZL17GizTorp_AddGizmosP10GIZMOSYS_siPvS1_",
-          "demangled_name": "GizTorp_AddGizmos(GIZMOSYS_s*, int, void*, void*)",
-          "address": 2074048,
-          "offset": 1184080,
-          "size": 146,
-          "match_percent": 81.408165
-        },
-        {
-          "name": "_Z28GizTorpMachine_RegisterGizmoi",
-          "demangled_name": "GizTorpMachine_RegisterGizmo(int)",
-          "address": 2074480,
-          "offset": 1184512,
-          "size": 360,
-          "match_percent": 95.1
-        }
-      ]
-    },
-    {
       "name": "legoapi/gizmos/traps/gizturret.cpp.o",
       "source": "src/legoapi/gizmos/traps/gizturret.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizturret.o",
@@ -61511,30 +61345,6 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z21GetShootDirection_LSWP12GameObject_sP7nuvec_s",
-          "demangled_name": "GetShootDirection_LSW(GameObject_s*, nuvec_s*)",
-          "address": 1444288,
-          "offset": 554320,
-          "size": 707,
-          "match_percent": 81.057144
-        },
-        {
-          "name": "_Z18GetShootOrigin_LSWP12GameObject_sP7nuvec_s",
-          "demangled_name": "GetShootOrigin_LSW(GameObject_s*, nuvec_s*)",
-          "address": 1468512,
-          "offset": 578544,
-          "size": 176,
-          "match_percent": 99.175
-        },
-        {
-          "name": "_Z16PodCollisionCodeP12GameObject_s",
-          "demangled_name": "PodCollisionCode(GameObject_s*)",
-          "address": 1520960,
-          "offset": 630992,
-          "size": 425,
-          "match_percent": 7.16092
-        },
-        {
           "name": "_Z18InitTorpedoPacketsv",
           "demangled_name": "InitTorpedoPackets()",
           "address": 2060656,
@@ -61573,6 +61383,118 @@
           "offset": 1172384,
           "size": 94,
           "match_percent": 100.0
+        },
+        {
+          "name": "_Z21Torpedo_UpdateJobbiesP12GameObject_s",
+          "demangled_name": "Torpedo_UpdateJobbies(GameObject_s*)",
+          "address": 2062448,
+          "offset": 1172480,
+          "size": 1639,
+          "match_percent": 36.174603
+        },
+        {
+          "name": "_Z21FindNearestTorpTargetP11WORLDINFO_sP7nuvec_sfPh",
+          "demangled_name": "FindNearestTorpTarget(WORLDINFO_s*, nuvec_s*, float, unsigned char*)",
+          "address": 2064096,
+          "offset": 1174128,
+          "size": 767,
+          "match_percent": 59.148514
+        },
+        {
+          "name": "_Z11TorpedoCodeP12GameObject_sif",
+          "demangled_name": "TorpedoCode(GameObject_s*, int, float)",
+          "address": 2064864,
+          "offset": 1174896,
+          "size": 2068,
+          "match_percent": 37.076088
+        },
+        {
+          "name": "_Z21HomeNearestTorpTargetP6BOLT_sP15TORPEDOPACKET_s",
+          "demangled_name": "HomeNearestTorpTarget(BOLT_s*, TORPEDOPACKET_s*)",
+          "address": 2066944,
+          "offset": 1176976,
+          "size": 1105,
+          "match_percent": 69.19575
+        },
+        {
+          "name": "_Z20Torpedo_InitRicochetP6BOLT_sP7nuvec_s",
+          "demangled_name": "Torpedo_InitRicochet(BOLT_s*, nuvec_s*)",
+          "address": 2068064,
+          "offset": 1178096,
+          "size": 128,
+          "match_percent": 65.51282
+        },
+        {
+          "name": "_Z16Torpedo_RicochetP6BOLT_sP15TORPEDOPACKET_s",
+          "demangled_name": "Torpedo_Ricochet(BOLT_s*, TORPEDOPACKET_s*)",
+          "address": 2068192,
+          "offset": 1178224,
+          "size": 1005,
+          "match_percent": 73.838425
+        },
+        {
+          "name": "_Z16TorpedoHitTargetP6BOLT_s",
+          "demangled_name": "TorpedoHitTarget(BOLT_s*)",
+          "address": 2069200,
+          "offset": 1179232,
+          "size": 530,
+          "match_percent": 79.852715
+        },
+        {
+          "name": "_Z23DrawTorpedoTargetSpritePvhf",
+          "demangled_name": "DrawTorpedoTargetSprite(void*, unsigned char, float)",
+          "address": 2069744,
+          "offset": 1179776,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z12DrawTorpedosP12GameObject_s",
+          "demangled_name": "DrawTorpedos(GameObject_s*)",
+          "address": 2069760,
+          "offset": 1179792,
+          "size": 961,
+          "match_percent": 27.065727
+        },
+        {
+          "name": "_Z16Torpedo_InitBoltP6BOLT_s",
+          "demangled_name": "Torpedo_InitBolt(BOLT_s*)",
+          "address": 2070736,
+          "offset": 1180768,
+          "size": 76,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z18Torpedo_UpdateBoltP6BOLT_s",
+          "demangled_name": "Torpedo_UpdateBolt(BOLT_s*)",
+          "address": 2070816,
+          "offset": 1180848,
+          "size": 519,
+          "match_percent": 87.20168
+        },
+        {
+          "name": "_Z13Torpedo_ScaleP6BOLT_s",
+          "demangled_name": "Torpedo_Scale(BOLT_s*)",
+          "address": 2071344,
+          "offset": 1181376,
+          "size": 77,
+          "match_percent": 99.95238
+        },
+        {
+          "name": "_Z15Torpedo_EndBoltP6BOLT_s",
+          "demangled_name": "Torpedo_EndBolt(BOLT_s*)",
+          "address": 2071424,
+          "offset": 1181456,
+          "size": 138,
+          "match_percent": 99.92857
+        },
+        {
+          "name": "_Z13Torpedo_ShootP12GameObject_s",
+          "demangled_name": "Torpedo_Shoot(GameObject_s*)",
+          "address": 2071568,
+          "offset": 1181600,
+          "size": 394,
+          "match_percent": 65.74419
         }
       ]
     },
@@ -64838,7 +64760,79 @@
           "address": 899904,
           "offset": 9936,
           "size": 93,
-          "match_percent": 29.411764
+          "match_percent": 99.35294
+        },
+        {
+          "name": "_ZL13Grab_invert_xP8nufpar_s",
+          "demangled_name": "Grab_invert_x(nufpar_s*)",
+          "address": 2269888,
+          "offset": 1379920,
+          "size": 27,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL11Grab_shadowP8nufpar_s",
+          "demangled_name": "Grab_shadow(nufpar_s*)",
+          "address": 2270400,
+          "offset": 1380432,
+          "size": 119,
+          "match_percent": 99.96774
+        },
+        {
+          "name": "_ZL12Grab_move_xyP8nufpar_s",
+          "demangled_name": "Grab_move_xy(nufpar_s*)",
+          "address": 2270528,
+          "offset": 1380560,
+          "size": 53,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL11Grab_rotateP8nufpar_s",
+          "demangled_name": "Grab_rotate(nufpar_s*)",
+          "address": 2270592,
+          "offset": 1380624,
+          "size": 80,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL10Grab_scaleP8nufpar_s",
+          "demangled_name": "Grab_scale(nufpar_s*)",
+          "address": 2270672,
+          "offset": 1380704,
+          "size": 62,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL10Grab_speedP8nufpar_s",
+          "demangled_name": "Grab_speed(nufpar_s*)",
+          "address": 2270736,
+          "offset": 1380768,
+          "size": 62,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL11Grab_radiusP8nufpar_s",
+          "demangled_name": "Grab_radius(nufpar_s*)",
+          "address": 2270800,
+          "offset": 1380832,
+          "size": 62,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL9Grab_typeP8nufpar_s",
+          "demangled_name": "Grab_type(nufpar_s*)",
+          "address": 2270864,
+          "offset": 1380896,
+          "size": 213,
+          "match_percent": 99.8
+        },
+        {
+          "name": "_Z17Grabber_ConfigureP11WORLDINFO_sPc",
+          "demangled_name": "Grabber_Configure(WORLDINFO_s*, char*)",
+          "address": 2271088,
+          "offset": 1381120,
+          "size": 866,
+          "match_percent": 53.23858
         }
       ]
     },
@@ -73020,14 +73014,6 @@
           "offset": 1169968,
           "size": 706,
           "match_percent": 3.088235
-        },
-        {
-          "name": "_Z23DrawTorpedoTargetSpritePvhf",
-          "demangled_name": "DrawTorpedoTargetSprite(void*, unsigned char, float)",
-          "address": 2069744,
-          "offset": 1179776,
-          "size": 9,
-          "match_percent": 100.0
         },
         {
           "name": "_Z15DrawPaintLightsv",
@@ -116929,9 +116915,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -116999,9 +116983,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117069,9 +117051,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117152,9 +117132,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117269,9 +117247,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117352,9 +117328,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117435,9 +117409,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117518,9 +117490,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117601,9 +117571,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117684,9 +117652,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -117977,9 +117943,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118060,9 +118024,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118143,9 +118105,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118275,9 +118235,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118370,9 +118328,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118555,9 +118511,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118691,9 +118645,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118827,9 +118779,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118910,9 +118860,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -118993,9 +118941,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119076,9 +119022,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119185,9 +119129,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119268,9 +119210,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119362,9 +119302,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119445,9 +119383,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119541,9 +119477,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119624,9 +119558,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119741,9 +119673,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119824,9 +119754,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119907,9 +119835,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -119990,9 +119916,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120136,9 +120060,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120219,9 +120141,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120302,9 +120222,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120732,9 +120650,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -120931,9 +120847,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -121093,9 +121007,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -121535,9 +121447,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -121618,9 +121528,7 @@
         "legoapi/core/startup/virtual.cpp.o",
         "legoapi/gizmo/object/gizbombgen.cpp.o",
         "legoapi/gizmo/object/gizportal.cpp.o",
-        "legoapi/gizmo/object/giztorpedo.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/items/objects/grabber.cpp.o",
         "legoapi/items/objects/things.cpp.o",
         "legoapi/menus/screens/movies.cpp.o",
         "legoapi/misc/buffers.cpp.o",
@@ -128755,7 +128663,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 481,
+    "bazel_units": 479,
     "functions": 13454,
     "assigned_functions": 12354,
     "ambiguous_functions": 212,

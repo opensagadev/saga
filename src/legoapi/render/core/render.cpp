@@ -1,5 +1,6 @@
 #include "decomp.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/items/collect/torpedo.h"
 #include "legoapi/actions/character/transform.h"
 #include "legoapi/actions/movement/carrying.h"
 #include "legoapi/actions/character/snake.h"
@@ -405,7 +406,6 @@ void DrawGameObjectsDraw(i32 pass);
 void EnableShadowMapRendering(i32 enable);
 void ResetShadowMapRendering();
 static void DrawParaphernalia(GameObject_s *object);
-void DrawTorpedos(GameObject_s *object);
 
 struct GAMEMESSAGE_s;
 struct HINT_s;
@@ -2661,10 +2661,6 @@ void DrawStatusTextFraction(i32, i32, float, float, u16, float, u32, float, floa
 }
 
 void DrawGameMessage_Targets(GAMEMESSAGE_s *, nuvec_s *, float) {
-    STUBBED();
-}
-
-void DrawTorpedoTargetSprite(void *, unsigned char, float) {
     STUBBED();
 }
 

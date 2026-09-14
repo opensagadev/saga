@@ -13,6 +13,7 @@
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/items/collect/bolts.h"
+#include "legoapi/items/collect/torpedo.h"
 #include "decomp.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nufile/nufpar.h"
@@ -42,11 +43,6 @@ static void Bolt_GetShootOrigin_Default(GameObject_s *, NUVEC *);
 static i32 Bolt_GetShootDirection_Default(GameObject_s *, NUVEC *);
 static void UpdateBolt_Geonosian(BOLT_s *);
 static void EndBolt_EwokTorpedo(BOLT_s *);
-void Torpedo_InitBolt(BOLT_s *);
-void Torpedo_UpdateBolt(BOLT_s *);
-void Torpedo_EndBolt(BOLT_s *);
-void Torpedo_InitRicochet(BOLT_s *, NUVEC *);
-f32 Torpedo_Scale(BOLT_s *);
 
 #include "legoapi/items/collect/bolttypes_lsw.inc"
 

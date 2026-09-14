@@ -1,6 +1,7 @@
 #include <string.h>
 #include "decomp.h"
 #include "legoapi/gizmo/object/gizmoblowups.h"
+#include "legoapi/items/objects/grabber.h"
 #include "nu2api/nu3d/nuspecial.h"
 extern "C" float FRAMETIME;
 #include "nu2api/numath/nutrig.h"
@@ -135,7 +136,6 @@ extern "C" {
     f32 AnimListFrame(CHARACTERMODEL_s *, i32, i32);
     AIANTINODE_s *AIAntinodeCreateSingleFrame(NUVEC *, f32);
 }
-extern GRABBER_s *Grab_grabber;
 extern WORLDINFO_s *WORLD;
 extern LEVELDATA *DEATHSTARESCAPEB_LDATA, *JABBASPALACEB_LDATA, *CLOUDCITYTRAPA_LDATA;
 extern NUVEC ShadNorm;

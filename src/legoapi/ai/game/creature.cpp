@@ -3,6 +3,7 @@
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/items/collect/torpedo.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/mission.h"
@@ -21,7 +22,6 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-void FreeTorpedoPacket(TORPEDOPACKET_s **packet);
 void RemoveGameObject(GameObject_s *object, i32 immediate);
 
 void ClearAICreatures() {

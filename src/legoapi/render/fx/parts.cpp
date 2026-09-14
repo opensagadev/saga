@@ -12,7 +12,8 @@
 #include "legoapi/render/core/rtl.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
-#include "legoapi/gizmos/traps/giztorpmachine.h"
+#include "legoapi/gizmo/object/giztorpedo.h"
+#include "legoapi/items/collect/torpedo.h"
 #include "legoapi/world/world.h"
 #include "legoapi/world/world_shared.h"
 #include "legoapi/world/level.h"
@@ -217,7 +218,6 @@ extern f32 ForceThrowSpeed, ForceThrowGravity;
 extern "C" void KillPart(PART_s *, i32);
 i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
 void DeflectPart(PART_s *, GameObject_s *, f32, f32, i32, i32);
-i32 getMaxTorpedos(GameObject_s *);
 void SetCoinType(i32 model, GIZMOPICKUP_s *pickup) {
     if (static_cast<u32>(model - 0xb7) <= 3) {
         pickup->type_index = 0;
@@ -2284,7 +2284,6 @@ void PartCollide_2D(PART_s *);
 void PartUpdate_Heart(PART_s *);
 void PartStop_Flickerer(PART_s *);
 i32 PartDraw_Flickerer(PART_s *);
-i32 PartDraw_Torp(PART_s *);
 
 void AddTorpedoAsPart(nuvec_s *position, nuvec_s *velocity, float scale, float lifetime) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();

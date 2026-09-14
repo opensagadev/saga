@@ -1,6 +1,7 @@
 #include "decomp.h"
 #include "legoapi/actions/movement/jumping.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/items/collect/torpedo.h"
 #include "legoapi/actions/combat/hits.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/actions/character/snake.h"
@@ -215,8 +216,6 @@ static void DodgeCode(GameObject_s *, i32, i32);
 void Grapple_MoveCode(GameObject_s *);
 void SpecialMove_VictimCode(GameObject_s *);
 i32 ObjInNarrowSock(GameObject_s *, SOCKSYS *, i32);
-void Torpedo_UpdateJobbies(GameObject_s *);
-void TorpedoCode(GameObject_s *, i32, f32);
 void PeriscodeCode(GameObject_s *);
 i32 PodLevel(AREADATA_s *);
 void KeepOnScreen(GameObject_s *);
@@ -2731,6 +2730,91 @@ vehicle_collision:
     if ((VehicleArea || (WORLD->area == SPEEDERCHASE_ADATA && object->id == id_SPEEDERBIKE)) &&
         !(WORLD->area != NULL && (PODSPRINT_ADATA != NULL && WORLD->area == PODSPRINT_ADATA)))
         VehicleCollisionCode(object);
+}
+
+i32 GetShootDirection_LSW(GameObject_s *object, nuvec_s *direction) {
+    NUVEC temporary;
+    if (direction == NULL)
+        direction = &temporary;
+    if (object->field_0x1086 == 4) {
+        NUMTX matrix = object->apiobj.field_0xb8;
+        NuMtxPreRotateY(&matrix, 0x8000);
+        NuVecMtxRotate(direction, &v001, &matrix);
+        return object->apiobj.facing_angle;
+    }
+    characterdata_s *model = object->apiobj.character_data;
+    GAMECHARACTERDATA *data = model->game_character;
+    if (data->weapon_shoot_joints[0] != -1 &&
+        ((object->id == id_ATAT && (object->apiobj.flags_low & 0x80) == 0) || object->id == id_CLONEWALKER ||
+         object->id == id_ATST || object->id == id_ATST_LOWRES)) {
+        direction->x = direction->y = 0.0f;
+        direction->z = object->id == id_ATAT ? 1.0f : -1.0f;
+        NuVecMtxRotate(direction, direction, &object->joint_matrices[data->weapon_shoot_joints[0]]);
+        return NuAtan2D(direction->x, direction->z);
+    }
+    i32 angle;
+    if ((model->model_flags & 0x2000) != 0 || (data->flags_090 & 0x80) != 0) {
+        angle = object->apiobj.facing_angle;
+        if (object->character_context == 0x2a &&
+            1.0f - object->context_animation_timer / object->airborne_action_duration >= 0.25f)
+            angle -= 0x8000;
+    } else
+        angle = object->apiobj.movement_facing_angle;
+    direction->x = NuTrigTable[static_cast<u16>(angle) >> 1];
+    direction->y = 0.0f;
+    direction->z = NuTrigTable[((static_cast<u16>(angle) + 0x4000) >> 1) & 0x7fff];
+    return angle;
+}
+
+void GetShootOrigin_LSW(GameObject_s *object, nuvec_s *position) {
+    *position = object->apiobj.collision_position;
+    if (object->id == id_ATAT) {
+        u16 angle = object->apiobj.field_0x276;
+        f32 scale = object->apiobj.field_0x1dc;
+        position->x += (NU_SIN_LUT(angle) * scale) * 1.5f;
+        position->z += (scale * NU_COS_LUT(angle)) * 1.5f;
+    }
+}
+
+i32 PODSPRINTDEB = 117;
+
+void PodCollisionCode(GameObject_s *object) {
+    static f32 magdif;
+
+    if (GamePlayTimer.time_elapsed < 1.0f) {
+        return;
+    }
+    if (object->apiobj.field_0x27c == -1) {
+        return;
+    }
+    if (static_cast<i8>(object->apiobj.flags_low) >= 0) {
+        return;
+    }
+    if (object->field_0x1084 == 0) {
+        return;
+    }
+    if (object->contact_normal.y > 0.574f || object->contact_normal.y < -0.574f) {
+        return;
+    }
+
+    if (PODSPRINT_ADATA != NULL) {
+        if (WORLD->area == PODSPRINT_ADATA) {
+            AddVariableShotDebrisEffectTimed1(WORLD->debris_sys->entries[PODSPRINTDEB].effect,
+                                              &object->contact_position, 50, FRAMETIME, 0, 0, NULL);
+            if (qrand() <= 0x7fff) {
+                NewBuzzFrames(object->pad_gamepad->pad, 1, 0);
+            }
+            return;
+        }
+    }
+
+    magdif = (1.0f / object->pre_terrain_speed) * object->post_terrain_speed;
+    if (1.0f > magdif) {
+        if (0.999f > magdif) {
+            ObjHitObj(NULL, object, 1, 0, 0, 1);
+        }
+        PodLoseSpeed(object, 0, 0);
+    }
 }
 
 void Move_POD(GameObject_s *) {
