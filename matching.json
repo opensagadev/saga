@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 45.960686,
+    "fuzzy_match_percent": 45.99573,
     "total_code": "4722419",
-    "matched_code": "400334",
-    "matched_code_percent": 8.477308,
+    "matched_code": "400617",
+    "matched_code_percent": 8.4833,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4758,
-    "matched_functions_percent": 35.35181,
+    "matched_functions": 4760,
+    "matched_functions_percent": 35.36667,
     "total_units": 1
   },
   "text": {
@@ -50026,7 +50026,7 @@
           "address": 921904,
           "offset": 31936,
           "size": 93,
-          "match_percent": 0.0
+          "match_percent": 99.35294
         },
         {
           "name": "_Z15AdjustLayerBitsjP12GameObject_s",
@@ -50058,7 +50058,7 @@
           "address": 4913632,
           "offset": 4023664,
           "size": 317,
-          "match_percent": 10.690722
+          "match_percent": 5.443299
         },
         {
           "name": "_Z22GizmoTypeStoreProgressP10GIZMOSYS_sPviiPc",
@@ -50075,6 +50075,14 @@
           "offset": 4025200,
           "size": 159,
           "match_percent": 100.0
+        },
+        {
+          "name": "_ZL24CheckOutputActionFlowBoxP9GIZFLOW_sP9FLOWBOX_sh",
+          "demangled_name": "CheckOutputActionFlowBox(GIZFLOW_s*, FLOWBOX_s*, unsigned char)",
+          "address": 4921104,
+          "offset": 4031136,
+          "size": 14,
+          "match_percent": 88.0
         },
         {
           "name": "_ZL13xFlowBoxCountP8nufpar_s",
@@ -50165,6 +50173,38 @@
           "match_percent": 99.85714
         },
         {
+          "name": "_ZL17ResetGizmoFlowBoxP9GIZFLOW_sP9FLOWBOX_s",
+          "demangled_name": "ResetGizmoFlowBox(GIZFLOW_s*, FLOWBOX_s*)",
+          "address": 4921472,
+          "offset": 4031504,
+          "size": 103,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL22CheckIfParentsFinishedP9GIZFLOW_sP9FLOWBOX_s",
+          "demangled_name": "CheckIfParentsFinished(GIZFLOW_s*, FLOWBOX_s*)",
+          "address": 4921584,
+          "offset": 4031616,
+          "size": 476,
+          "match_percent": 30.552238
+        },
+        {
+          "name": "_ZL23CheckOutputGizmoFlowBoxP9GIZFLOW_sP9FLOWBOX_sh",
+          "demangled_name": "CheckOutputGizmoFlowBox(GIZFLOW_s*, FLOWBOX_s*, unsigned char)",
+          "address": 4922064,
+          "offset": 4032096,
+          "size": 223,
+          "match_percent": 78.30769
+        },
+        {
+          "name": "_ZL14ProcessFlowBoxP9GIZFLOW_sP9FLOWBOX_sh",
+          "demangled_name": "ProcessFlowBox(GIZFLOW_s*, FLOWBOX_s*, unsigned char)",
+          "address": 4922288,
+          "offset": 4032320,
+          "size": 925,
+          "match_percent": 8.456522
+        },
+        {
           "name": "_ZL14xConditionTypeP8nufpar_s",
           "demangled_name": "xConditionType(nufpar_s*)",
           "address": 4923216,
@@ -50234,7 +50274,7 @@
           "address": 4924064,
           "offset": 4034096,
           "size": 608,
-          "match_percent": 99.71795
+          "match_percent": 99.8141
         },
         {
           "name": "_ZL5xNameP8nufpar_s",
@@ -50258,7 +50298,7 @@
           "address": 4924864,
           "offset": 4034896,
           "size": 626,
-          "match_percent": 75.35152
+          "match_percent": 73.454544
         },
         {
           "name": "_ZL6xGizmoP8nufpar_s",
@@ -50285,6 +50325,22 @@
           "match_percent": 99.90476
         },
         {
+          "name": "_ZL27CheckOutputConditionFlowBoxP9GIZFLOW_sP9FLOWBOX_sh",
+          "demangled_name": "CheckOutputConditionFlowBox(GIZFLOW_s*, FLOWBOX_s*, unsigned char)",
+          "address": 4926704,
+          "offset": 4036736,
+          "size": 146,
+          "match_percent": 73.48781
+        },
+        {
+          "name": "_ZL19ProcessGizmoFlowBoxP9GIZFLOW_sP9FLOWBOX_sh",
+          "demangled_name": "ProcessGizmoFlowBox(GIZFLOW_s*, FLOWBOX_s*, unsigned char)",
+          "address": 4926864,
+          "offset": 4036896,
+          "size": 270,
+          "match_percent": 77.36559
+        },
+        {
           "name": "_ZL10xConditionP8nufpar_s",
           "demangled_name": "xCondition(nufpar_s*)",
           "address": 4927136,
@@ -50298,7 +50354,7 @@
           "address": 4927392,
           "offset": 4037424,
           "size": 1301,
-          "match_percent": 10.175226
+          "match_percent": 69.2568
         },
         {
           "name": "_ZL6xChildP8nufpar_s",
@@ -50314,7 +50370,7 @@
           "address": 4928800,
           "offset": 4038832,
           "size": 1397,
-          "match_percent": 8.98324
+          "match_percent": 65.22905
         },
         {
           "name": "_ZL7xParentP8nufpar_s",
@@ -50325,6 +50381,38 @@
           "match_percent": 98.375
         },
         {
+          "name": "_ZL25Loop_CountLoopingInputsExP9FLOWBOX_sS0_ih",
+          "demangled_name": "Loop_CountLoopingInputsEx(FLOWBOX_s*, FLOWBOX_s*, int, unsigned char)",
+          "address": 4930384,
+          "offset": 4040416,
+          "size": 968,
+          "match_percent": 99.799194
+        },
+        {
+          "name": "_ZL14ResetForLoopExP9GIZFLOW_sP9FLOWBOX_sS2_i",
+          "demangled_name": "ResetForLoopEx(GIZFLOW_s*, FLOWBOX_s*, FLOWBOX_s*, int)",
+          "address": 4931360,
+          "offset": 4041392,
+          "size": 1392,
+          "match_percent": 99.88
+        },
+        {
+          "name": "_ZL23ProcessConditionFlowBoxP9GIZFLOW_sP9FLOWBOX_sh",
+          "demangled_name": "ProcessConditionFlowBox(GIZFLOW_s*, FLOWBOX_s*, unsigned char)",
+          "address": 4932752,
+          "offset": 4042784,
+          "size": 937,
+          "match_percent": 51.95167
+        },
+        {
+          "name": "_Z21DynamicAddGizmoToFlowP9GIZFLOW_sP7GIZMO_s",
+          "demangled_name": "DynamicAddGizmoToFlow(GIZFLOW_s*, GIZMO_s*)",
+          "address": 4933696,
+          "offset": 4043728,
+          "size": 432,
+          "match_percent": 99.42748
+        },
+        {
           "name": "_Z20PerformActionFlowBoxP9GIZFLOW_sP9FLOWBOX_s",
           "demangled_name": "PerformActionFlowBox(GIZFLOW_s*, FLOWBOX_s*)",
           "address": 4934128,
@@ -50333,12 +50421,28 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL20ProcessActionFlowBoxP9GIZFLOW_sP9FLOWBOX_sh",
+          "demangled_name": "ProcessActionFlowBox(GIZFLOW_s*, FLOWBOX_s*, unsigned char)",
+          "address": 4934240,
+          "offset": 4044272,
+          "size": 158,
+          "match_percent": 65.89286
+        },
+        {
           "name": "_Z11LoadGizFlowPvP10GIZMOSYS_sPcP9variptr_uS4_",
           "demangled_name": "LoadGizFlow(void*, GIZMOSYS_s*, char*, variptr_u*, variptr_u*)",
           "address": 4934432,
           "offset": 4044464,
           "size": 563,
           "match_percent": 83.46094
+        },
+        {
+          "name": "_Z20ResetGizFlowPointersP9GIZFLOW_s",
+          "demangled_name": "ResetGizFlowPointers(GIZFLOW_s*)",
+          "address": 4935008,
+          "offset": 4045040,
+          "size": 432,
+          "match_percent": 100.0
         },
         {
           "name": "_Z20GizFlowStoreProgressP9GIZFLOW_sP17GIZFLOWPROGRESS_s",
@@ -50354,7 +50458,23 @@
           "address": 4935744,
           "offset": 4045776,
           "size": 180,
-          "match_percent": 84.27586
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z12ResetGizFlowP9GIZFLOW_sP17GIZFLOWPROGRESS_s",
+          "demangled_name": "ResetGizFlow(GIZFLOW_s*, GIZFLOWPROGRESS_s*)",
+          "address": 4935936,
+          "offset": 4045968,
+          "size": 1120,
+          "match_percent": 51.286606
+        },
+        {
+          "name": "_Z14ProcessGizFlowP9GIZFLOW_sf",
+          "demangled_name": "ProcessGizFlow(GIZFLOW_s*, float)",
+          "address": 4937056,
+          "offset": 4047088,
+          "size": 120,
+          "match_percent": 99.666664
         },
         {
           "name": "_Z17FlowBoxFindByNameP9GIZFLOW_sPc",
@@ -51816,7 +51936,7 @@
           "address": 4913952,
           "offset": 4023984,
           "size": 285,
-          "match_percent": 44.077778
+          "match_percent": 43.02222
         },
         {
           "name": "_Z19GizmoSysEarlyUpdateP10GIZMOSYS_sPvf",
@@ -51920,7 +52040,7 @@
           "address": 4917376,
           "offset": 4027408,
           "size": 105,
-          "match_percent": 99.97436
+          "match_percent": 99.589745
         },
         {
           "name": "_Z13GizmoActivateP10GIZMOSYS_sP7GIZMO_sii",
@@ -51984,7 +52104,7 @@
           "address": 4919504,
           "offset": 4029536,
           "size": 206,
-          "match_percent": 94.77465
+          "match_percent": 94.35211
         },
         {
           "name": "_Z19GizmoNameUsesPrefixPcS_",
@@ -52000,7 +52120,7 @@
           "address": 4919824,
           "offset": 4029856,
           "size": 408,
-          "match_percent": 99.94017
+          "match_percent": 99.42735
         },
         {
           "name": "_Z20GizmoSys_BoltHitPlatP10GIZMOSYS_sPvP6BOLT_sPh",
@@ -52009,126 +52129,6 @@
           "offset": 4030272,
           "size": 158,
           "match_percent": 100.0
-        },
-        {
-          "name": "_ZL24CheckOutputActionFlowBoxP9GIZFLOW_sP9FLOWBOX_sh",
-          "demangled_name": "CheckOutputActionFlowBox(GIZFLOW_s*, FLOWBOX_s*, unsigned char)",
-          "address": 4921104,
-          "offset": 4031136,
-          "size": 14,
-          "match_percent": 88.0
-        },
-        {
-          "name": "_ZL17ResetGizmoFlowBoxP9GIZFLOW_sP9FLOWBOX_s",
-          "demangled_name": "ResetGizmoFlowBox(GIZFLOW_s*, FLOWBOX_s*)",
-          "address": 4921472,
-          "offset": 4031504,
-          "size": 103,
-          "match_percent": 99.57143
-        },
-        {
-          "name": "_ZL22CheckIfParentsFinishedP9GIZFLOW_sP9FLOWBOX_s",
-          "demangled_name": "CheckIfParentsFinished(GIZFLOW_s*, FLOWBOX_s*)",
-          "address": 4921584,
-          "offset": 4031616,
-          "size": 476,
-          "match_percent": 29.41791
-        },
-        {
-          "name": "_ZL23CheckOutputGizmoFlowBoxP9GIZFLOW_sP9FLOWBOX_sh",
-          "demangled_name": "CheckOutputGizmoFlowBox(GIZFLOW_s*, FLOWBOX_s*, unsigned char)",
-          "address": 4922064,
-          "offset": 4032096,
-          "size": 223,
-          "match_percent": 78.30769
-        },
-        {
-          "name": "_ZL14ProcessFlowBoxP9GIZFLOW_sP9FLOWBOX_sh",
-          "demangled_name": "ProcessFlowBox(GIZFLOW_s*, FLOWBOX_s*, unsigned char)",
-          "address": 4922288,
-          "offset": 4032320,
-          "size": 925,
-          "match_percent": 8.597826
-        },
-        {
-          "name": "_ZL27CheckOutputConditionFlowBoxP9GIZFLOW_sP9FLOWBOX_sh",
-          "demangled_name": "CheckOutputConditionFlowBox(GIZFLOW_s*, FLOWBOX_s*, unsigned char)",
-          "address": 4926704,
-          "offset": 4036736,
-          "size": 146,
-          "match_percent": 73.48781
-        },
-        {
-          "name": "_ZL19ProcessGizmoFlowBoxP9GIZFLOW_sP9FLOWBOX_sh",
-          "demangled_name": "ProcessGizmoFlowBox(GIZFLOW_s*, FLOWBOX_s*, unsigned char)",
-          "address": 4926864,
-          "offset": 4036896,
-          "size": 270,
-          "match_percent": 75.96774
-        },
-        {
-          "name": "_ZL25Loop_CountLoopingInputsExP9FLOWBOX_sS0_ih",
-          "demangled_name": "Loop_CountLoopingInputsEx(FLOWBOX_s*, FLOWBOX_s*, int, unsigned char)",
-          "address": 4930384,
-          "offset": 4040416,
-          "size": 968,
-          "match_percent": 99.799194
-        },
-        {
-          "name": "_ZL14ResetForLoopExP9GIZFLOW_sP9FLOWBOX_sS2_i",
-          "demangled_name": "ResetForLoopEx(GIZFLOW_s*, FLOWBOX_s*, FLOWBOX_s*, int)",
-          "address": 4931360,
-          "offset": 4041392,
-          "size": 1392,
-          "match_percent": 99.88
-        },
-        {
-          "name": "_ZL23ProcessConditionFlowBoxP9GIZFLOW_sP9FLOWBOX_sh",
-          "demangled_name": "ProcessConditionFlowBox(GIZFLOW_s*, FLOWBOX_s*, unsigned char)",
-          "address": 4932752,
-          "offset": 4042784,
-          "size": 937,
-          "match_percent": 51.95167
-        },
-        {
-          "name": "_Z21DynamicAddGizmoToFlowP9GIZFLOW_sP7GIZMO_s",
-          "demangled_name": "DynamicAddGizmoToFlow(GIZFLOW_s*, GIZMO_s*)",
-          "address": 4933696,
-          "offset": 4043728,
-          "size": 432,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL20ProcessActionFlowBoxP9GIZFLOW_sP9FLOWBOX_sh",
-          "demangled_name": "ProcessActionFlowBox(GIZFLOW_s*, FLOWBOX_s*, unsigned char)",
-          "address": 4934240,
-          "offset": 4044272,
-          "size": 158,
-          "match_percent": 65.89286
-        },
-        {
-          "name": "_Z20ResetGizFlowPointersP9GIZFLOW_s",
-          "demangled_name": "ResetGizFlowPointers(GIZFLOW_s*)",
-          "address": 4935008,
-          "offset": 4045040,
-          "size": 432,
-          "match_percent": 99.87603
-        },
-        {
-          "name": "_Z12ResetGizFlowP9GIZFLOW_sP17GIZFLOWPROGRESS_s",
-          "demangled_name": "ResetGizFlow(GIZFLOW_s*, GIZFLOWPROGRESS_s*)",
-          "address": 4935936,
-          "offset": 4045968,
-          "size": 1120,
-          "match_percent": 51.286606
-        },
-        {
-          "name": "_Z14ProcessGizFlowP9GIZFLOW_sf",
-          "demangled_name": "ProcessGizFlow(GIZFLOW_s*, float)",
-          "address": 4937056,
-          "offset": 4047088,
-          "size": 120,
-          "match_percent": 93.333336
         }
       ]
     },
@@ -55584,12 +55584,28 @@
           "match_percent": 37.25926
         },
         {
+          "name": "_Z25SpecialMiniKits_ConfigureP11WORLDINFO_sPc",
+          "demangled_name": "SpecialMiniKits_Configure(WORLDINFO_s*, char*)",
+          "address": 4988928,
+          "offset": 4098960,
+          "size": 1047,
+          "match_percent": 1.590909
+        },
+        {
           "name": "_Z21SpecialMiniKits_ResetP11WORLDINFO_s",
           "demangled_name": "SpecialMiniKits_Reset(WORLDINFO_s*)",
           "address": 4989984,
           "offset": 4100016,
           "size": 169,
           "match_percent": 98.23077
+        },
+        {
+          "name": "_Z20SpecialMiniKits_DrawP11WORLDINFO_s",
+          "demangled_name": "SpecialMiniKits_Draw(WORLDINFO_s*)",
+          "address": 4990160,
+          "offset": 4100192,
+          "size": 972,
+          "match_percent": 1.707317
         }
       ]
     },
@@ -61463,14 +61479,6 @@
           "match_percent": 1.834061
         },
         {
-          "name": "HitParts",
-          "demangled_name": "HitParts",
-          "address": 4315840,
-          "offset": 3425872,
-          "size": 445,
-          "match_percent": 3.75
-        },
-        {
           "name": "_ZL12BT_nodeflectP8nufpar_s",
           "demangled_name": "BT_nodeflect(nufpar_s*)",
           "address": 4714032,
@@ -62155,22 +62163,6 @@
           "offset": 4096816,
           "size": 138,
           "match_percent": 12.352942
-        },
-        {
-          "name": "_Z25SpecialMiniKits_ConfigureP11WORLDINFO_sPc",
-          "demangled_name": "SpecialMiniKits_Configure(WORLDINFO_s*, char*)",
-          "address": 4988928,
-          "offset": 4098960,
-          "size": 1047,
-          "match_percent": 1.590909
-        },
-        {
-          "name": "_Z20SpecialMiniKits_DrawP11WORLDINFO_s",
-          "demangled_name": "SpecialMiniKits_Draw(WORLDINFO_s*)",
-          "address": 4990160,
-          "offset": 4100192,
-          "size": 972,
-          "match_percent": 1.707317
         }
       ]
     },
@@ -79255,6 +79247,14 @@
           "offset": 3425680,
           "size": 179,
           "match_percent": 99.97561
+        },
+        {
+          "name": "HitParts",
+          "demangled_name": "HitParts",
+          "address": 4315840,
+          "offset": 3425872,
+          "size": 445,
+          "match_percent": 3.75
         },
         {
           "name": "KillPart",

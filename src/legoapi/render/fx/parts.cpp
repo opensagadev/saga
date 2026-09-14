@@ -2239,6 +2239,10 @@ void PartTimeSlip() {
     partglobaltime -= 800.0f;
 }
 
+extern "C" void HitParts(void) {
+    STUBBED();
+}
+
 extern i32 PDEBCOUNT;
 extern void *PDebNameList;
 

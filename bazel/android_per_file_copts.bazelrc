@@ -113,7 +113,8 @@ build:target --per_file_copt=^src/legoapi/world/area\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/base/gizmo\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/base/gizactions\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/base/gizmessage\.cpp$@-O3
-build:target --per_file_copt=^src/legoapi/gizmo/base/gizflow\.cpp$@-O2
+# The flow-box initializer and remap helpers match the target better at -O3.
+build:target --per_file_copt=^src/legoapi/gizmo/base/gizflow\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/gizmo/base/gizmo_sys\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/world/level\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/core/input/qrand\.cpp$@-O3

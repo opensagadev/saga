@@ -511,8 +511,7 @@ static void GizmoPickup_Activate(GIZMO *gizmo, i32 activate) {
         if ((pickup->state_flags & GIZMOPICKUP_STATE_ENABLED) != 0) {
             pickup->state_flags |= GIZMOPICKUP_STATE_ACTIVATED;
             i32 type_index = pickup->type_index;
-            if ((pickup->state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0 &&
-                GizmoPickupSys->alternate_type != -1) {
+            if ((pickup->state_flags & GIZMOPICKUP_STATE_ALTERNATE_TYPE) != 0 && GizmoPickupSys->alternate_type != -1) {
                 type_index = GizmoPickupSys->alternate_type;
             }
             GIZMO_PICKUP_TYPE *type = &GizmoPickupSys->types[type_index];
@@ -631,9 +630,8 @@ static GIZMOPICKUP_s *GizmoPickups_CollideList(GameObject_s *object, GIZMOPICKUP
         } else if (object->apiobj.collision_min.y <= pickup->position.y + radius_y &&
                    pickup->position.y - radius_y <= object->apiobj.collision_max.y) {
             if (object->field_0xcc0 == NULL) {
-                if (SphereSphereOverlapScaleY(&pickup->position, radius_x, radius_y,
-                                              &object->apiobj.collision_position, object->apiobj.collision_radius,
-                                              object->apiobj.field_0x1e0)) {
+                if (SphereSphereOverlapScaleY(&pickup->position, radius_x, radius_y, &object->apiobj.collision_position,
+                                              object->apiobj.collision_radius, object->apiobj.field_0x1e0)) {
                     return pickup;
                 }
             } else {
@@ -648,7 +646,6 @@ static GIZMOPICKUP_s *GizmoPickups_CollideList(GameObject_s *object, GIZMOPICKUP
     }
     return NULL;
 }
-
 
 static void *GizmoPickups_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end) {
     return GizmoBufferAlloc(buffer, buffer_end, sizeof(GIZMOPICKUPPROGRESS_s));
@@ -885,6 +882,12 @@ ADDGIZMOTYPE *GizmoPickups_RegisterGizmo(i32 type_id) {
     return &addtype;
 }
 
+void SpecialMiniKits_Configure(WORLDINFO_s *world, char *config) {
+    STUBBED();
+    (void)world;
+    (void)config;
+}
+
 void SpecialMiniKits_Reset(WORLDINFO_s *world) {
     WORLDINFO_s *world_info = world;
     SPECIALMINIKITSYS_s *system = world_info->special_minikits;
@@ -910,4 +913,8 @@ void SpecialMiniKits_Reset(WORLDINFO_s *world) {
             break;
         }
     }
+}
+
+void SpecialMiniKits_Draw(WORLDINFO_s *) {
+    STUBBED();
 }

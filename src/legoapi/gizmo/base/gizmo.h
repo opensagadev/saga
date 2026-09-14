@@ -138,6 +138,7 @@ void GizmoSetVisibility(GIZMOSYS *gizmo_sys, GIZMO *gizmo, i32 visibility, i32 u
 i32 GizmoGetVisibility(GIZMOSYS *gizmo_sys, GIZMO *gizmo);
 char *GizmoGetName(GIZMO *gizmo);
 void GizmoActivate(GIZMOSYS *gizmo_sys, GIZMO *gizmo, i32 unknown1, i32 unknown2);
+void GizmoActivateReverse(GIZMOSYS *gizmo_sys, GIZMO *gizmo, i32 reverse, i32 visibility, i32 unknown);
 char *GizmoGetOutputName(GIZMOSYS *gizmo_sys, GIZMO *gizmo, i32 output_index);
 i32 GizmoGetOutput(GIZMOSYS *gizmo_sys, GIZMO *gizmo, i32 unknown1, i32 unknown2);
 void GizmoSysEarlyUpdate(GIZMOSYS *gizmo_sys, void *world_info, float delta_time);

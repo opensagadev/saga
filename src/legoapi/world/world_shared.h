@@ -160,7 +160,6 @@ void CharPlatforms_Configure(WORLDINFO *world, char *config);
 void Grabber_Configure(WORLDINFO *world, char *config);
 void Pulses_Configure(WORLDINFO *world, char *config);
 void TrafficAnimSys_Configure(WORLDINFO *world, char *config);
-void SpecialMiniKits_Configure(WORLDINFO *world, char *config);
 void GizForceSFX_Configure(WORLDINFO *world, char *config);
 void RippleEffects_Configure(WORLDINFO *world, char *config);
 void PortalDoors_Configure(WORLDINFO *world, char *config);
