@@ -1,6 +1,7 @@
 #include "legoapi/world/world_shared.h"
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/render/core/terrain.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/fx/game_deb.h"
 #include "nu2api/numath/nufloat.h"

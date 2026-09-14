@@ -14,6 +14,7 @@
 #include "legoapi/cutscenes/cutscenes.h"
 #include "legoapi/core/config/cheat.h"
 #include "legoapi/render/fx.h"
+#include "legoapi/render/core/terrain.h"
 #include "legoapi/render/fx/parts.h"
 #include "legoapi/render/fx/spline_position.h"
 #include "nu2api/nucore/nupad.h"
@@ -132,7 +133,6 @@ extern "C" {
     void DebrisPosOrientationMtx(i32, NUMTX *);
     void DebFreeInstantly(i32 *);
     void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
-    f32 NewRayCastGetTOFI();
 }
 
 // Written by ThingManager's ctor (original global @0x124f2e0, .bss).

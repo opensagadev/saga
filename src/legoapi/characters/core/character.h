@@ -13,6 +13,8 @@ struct CHARFIXUP {
 typedef struct CHARFIXUP CHARFIXUP;
 
 struct GameObject_s;
+void PostAnimate_ASTROMECH(GameObject_s *object);
+void PostAnimate_FETT(GameObject_s *object);
 struct ANIMREDIRECT;
 struct ANIMLIST_s;
 extern "C" i16 id_GRABCONTROL;
@@ -644,6 +646,7 @@ extern "C" {
     extern i16 id_WOMPRAT;
     extern i16 id_DRAGBOMB;
     extern i16 id_DROIDEKA;
+    extern i16 id_MINIDROIDEKA;
     extern i16 id_CLOUDCITYCITIZEN;
     extern i16 id_GEONOSIAN;
     extern i16 id_BATMAN;
@@ -667,6 +670,8 @@ extern "C" {
     extern i16 id_MOONCAR;
     extern i16 id_MAPCAR;
     extern i16 id_ATAT;
+    extern i16 id_REPUBLICGUNSHIP;
+    extern i16 id_REPUBLICGUNSHIP_GREEN;
     extern i16 id_PROBEDROID;
     extern i16 id_YWING;
     extern i16 id_TIEFIGHTER;
@@ -692,6 +697,33 @@ extern "C" {
     extern i16 id_BOSSK;
     extern i16 id_IMPERIALGUARD;
     extern i16 id_UGNAUGHT;
+    extern i16 id_JAWA;
+    extern i16 id_4LOM;
+    extern i16 id_ATST_LOWRES;
+    extern i16 id_BIGGUN;
+    extern i16 id_BOBAFETT;
+    extern i16 id_CATAPULT;
+    extern i16 id_CLONEWALKER;
+    extern i16 id_EWOK;
+    extern i16 id_FLASHSPEEDER;
+    extern i16 id_KAMINOANDROID;
+    extern i16 id_MINIATAT;
+    extern i16 id_MINIIMPERIALSHUTTLE;
+    extern i16 id_MINIMILLENNIUMFALCON;
+    extern i16 id_MINIROYALSTARSHIP;
+    extern i16 id_MINISITHINFILTRATOR;
+    extern i16 id_MINISOLARSAILOR;
+    extern i16 id_MINISTARDESTROYER;
+    extern i16 id_MINITIEADVANCED;
+    extern i16 id_MINITIEBOMBER;
+    extern i16 id_MINITIEFIGHTER;
+    extern i16 id_MINITIEINTERCEPTOR;
+    extern i16 id_MINIXWING;
+    extern i16 id_SENTRYDROID;
+    extern i16 id_SPEEDERBIKESNOW;
+    extern i16 id_STAP2;
+    extern i16 id_WICKET;
+    extern i16 id_ZAMSSPEEDER;
 }
 
 void LoadSingleCharacter(bgprocinfo_s *info);

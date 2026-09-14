@@ -338,6 +338,7 @@ void LevelConfig_BeforeLoad(LEVELDATA *level, char *buffer, nufpcomjmp_s *keywor
 void LevelConfig_AfterLoad(LEVELDATA *level, char *buffer, nufpcomjmp_s *keywords);
 
 void Level_LoadConfigFile(WORLDINFO *world);
+i32 Text_StripComments(char *text, char *destination, i32 separators);
 
 // --- Cross-TU function prototypes (level-loading entry points) ---
 extern void CompleteLevel(WORLDINFO_s *);

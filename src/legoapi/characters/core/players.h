@@ -161,7 +161,6 @@ extern u32 GAMEPAD_SPECIAL;
 extern u32 GAMEPAD_TAG;
 extern u32 GAMEPAD_START;
 void ChatterSfx(GameObject_s *g, i32 a, float b);
-void Move_VEHICLE(GameObject_s *g);
 extern "C" void ComplexSockPosition(SOCKSYS *sock_sys, NUVEC *position, i32 prior_sock, i32 prior_segment,
                                     SOCKPOSITION *result);
 void *CutScenePlayer_Available(void);

@@ -95,6 +95,25 @@ GAMEANIMOBJ_s *GameAnimSet_AddObjectByName(GAMEANIMSET_s *set, nugscn_s *scene, 
 i32 GizmoFileReadGameAnimSet(GAMEANIMSET_s *set, void *world, void (*read_object_data)(GAMEANIMOBJ_s *, unsigned char),
                              unsigned char version, char *prefix, char *suffix);
 void Animate_JEDI(GameObject_s *object);
+void Animate_PROTOCOL(GameObject_s *object);
+void Animate_ASTROMECH(GameObject_s *object);
+void Animate_CANNON(GameObject_s *object);
+void Animate_VEHICLE(GameObject_s *object);
+void Animate_BEAST(GameObject_s *object);
+void Animate_BATTLEDROID(GameObject_s *object);
+void Animate_HOVERDROID(GameObject_s *object);
+void Animate_WALKER(GameObject_s *object);
+void Animate_ATAT(GameObject_s *object);
+void Animate_CRITTER(GameObject_s *object);
+void Animate_POD(GameObject_s *object);
+void Animate_WEIRDO(GameObject_s *object);
+void Animate_DROIDEKA(GameObject_s *object);
+void Animate_SUPERBATTLEDROID(GameObject_s *object);
+void Animate_BARMAN(GameObject_s *object);
+void Animate_REPUBLICGUNSHIP(GameObject_s *object);
+void Animate_SPEEDERBIKE(GameObject_s *object);
+void Animate_DEFAULT(GameObject_s *object);
+void Animate_GEONOSIAN(GameObject_s *object);
 void AnimatePlayer(GameObject_s *object);
 #ifdef __cplusplus
 extern "C" {
@@ -116,9 +135,8 @@ extern "C" {
     void ResetAnimPacket(ANIMPACKET_s *packet, i16 animation);
     f32 BlendTimeBetweenAnims(CHARACTERMODEL_s *model, i32 source_animation, i32 target_animation);
     i32 AnimsAvailableToBothCharacters(ANIMPACKET_s *packet, i32 first_character, i32 second_character);
-    void EvalModelAnim(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, numtx_s *world_matrix,
-                       numtx_s *joint_matrices, void ***dwa_output, NUVEC *locator_positions,
-                       numtx_s *locator_matrices, u32 layer_mask);
+    void EvalModelAnim(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, numtx_s *world_matrix, numtx_s *joint_matrices,
+                       void ***dwa_output, NUVEC *locator_positions, numtx_s *locator_matrices, u32 layer_mask);
     f32 AnimStopFrame(CHARACTERMODEL_s *model, i32 animation);
     void UpdateAnimPacket(CHARACTERMODEL_s *model, ANIMPACKET_s *packet, f32 frame_step, f32 movement_speed,
                           f32 blend_step, f32 backwards_multiplier);

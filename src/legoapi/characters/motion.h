@@ -15,11 +15,31 @@ extern float DIEAIRJUMPSPEED;
 
 // Character motion / animation / camera helpers (module legoapi/characters).
 void Move_BEAST(GameObject_s *object);
+void Move_VEHICLE(GameObject_s *object);
+void Move_JEDI(GameObject_s *object);
+void Move_DROIDGENERIC(GameObject_s *object);
+void Move_CANNON(GameObject_s *object);
+void Move_HOVERDROID(GameObject_s *object);
+void Move_WALKER(GameObject_s *object);
+void Move_ATAT(GameObject_s *object);
+void Move_CRITTER(GameObject_s *object);
+void Move_POD(GameObject_s *object);
+void Move_WEIRDO(GameObject_s *object);
+void Move_DROIDEKA(GameObject_s *object);
+void Move_SUPERBATTLEDROID(GameObject_s *object);
+void Move_BARMAN(GameObject_s *object);
+void Move_JAWA(GameObject_s *object);
+void Move_DRAGBOMB(GameObject_s *object);
+void Move_REPUBLICGUNSHIP(GameObject_s *object);
+void Move_SPEEDERBIKE(GameObject_s *object);
+void Move_GEONOSIAN(GameObject_s *object);
+void SetMoveAndAnimateFunctions(u32 model_flag_mask, u32 model_flag_value, u32 game_flag_mask, u32 game_flag_value,
+                                i32 movement_type, void *move_function, void *animate_function, void *draw_function);
 void GameCam_Blend(GAMECAMERA_s *camera, f32 duration, f32 curve, i32 mode);
 void GameCam_Judder(GAMECAMERA_s *camera, f32 amount, i32 axis, NUVEC *source);
 void SetHeadTarget(GameObject_s *object, NUVEC *position, i8 priority, f32 time, f32 minimum_delay, f32 maximum_delay);
-void PushAway(NUVEC *position, f32 radius, NUVEC *minimum, NUVEC *maximum, GameObject_s *object,
-              GameObject_s *excluded, f32 strength, u32 flags);
+void PushAway(NUVEC *position, f32 radius, NUVEC *minimum, NUVEC *maximum, GameObject_s *object, GameObject_s *excluded,
+              f32 strength, u32 flags);
 i32 SetObjTarget(GameObject_s *object, GameObject_s *target);
 i32 SetPartTarget(GameObject_s *object, PART_s *target);
 PART_s *TargetPart(GameObject_s *, NUVEC *, NUVEC *, f32, f32, i32, i32);

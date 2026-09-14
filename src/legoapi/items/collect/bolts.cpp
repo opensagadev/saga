@@ -2,7 +2,9 @@
 #include "legoapi/world/world.h"
 #include "legoapi/world/level.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/motion.h"
 #include "legoapi/render/fx.h"
+#include "legoapi/render/core/terrain.h"
 #include "legoapi/render/fx/parts.h"
 #include "globals.h"
 #include "legoapi/world/area.h"
@@ -950,8 +952,6 @@ static __used__ i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags, WORLDINFO_s *) {
     return 0;
 }
 
-extern i16 id_XWING, id_MINIXWING, id_MINITIEINTERCEPTOR, id_MINIATAT, id_MINIROYALSTARSHIP, id_MINIIMPERIALSHUTTLE;
-extern i16 id_MILLENNIUMFALCON, id_MINIMILLENNIUMFALCON, id_ATST, id_JEDISTARFIGHTERREDEP3, id_JEDISTARFIGHTERYELLOWEP3;
 i32 Bolt_AlternateFire_LSW(GameObject_s *object, i32 index) {
     i16 id = object->id;
     if (id == id_XWING || id == id_MINIXWING || id == id_MINITIEINTERCEPTOR || id == id_MINIATAT ||
@@ -977,41 +977,6 @@ f32 Bolt_ObjTargetPosYAdjust(GameObject_s *object) {
     return static_cast<f32>(random) * ((height + height) / 65535.0f) - height;
 }
 
-extern "C" i16 id_4LOM;
-extern "C" i16 id_ANAKINSSPEEDER;
-extern "C" i16 id_ANAKINSSPEEDER_GREEN;
-extern "C" i16 id_ATAT;
-extern "C" i16 id_ATST_LOWRES;
-extern "C" i16 id_BIGGUN;
-extern "C" i16 id_BOBAFETT;
-extern "C" i16 id_CATAPULT;
-extern "C" i16 id_CLONEWALKER;
-extern "C" i16 id_EWOK;
-extern "C" i16 id_FLASHSPEEDER;
-extern "C" i16 id_KAMINOANDROID;
-extern "C" i16 id_MINIDROIDEKA;
-extern "C" i16 id_MINISITHINFILTRATOR;
-extern "C" i16 id_MINISOLARSAILOR;
-extern "C" i16 id_MINISTARDESTROYER;
-extern "C" i16 id_MINITIEADVANCED;
-extern "C" i16 id_MINITIEBOMBER;
-extern "C" i16 id_MINITIEFIGHTER;
-extern "C" i16 id_NABOOSTARFIGHTERLIME;
-extern "C" i16 id_NEW_REPUBLIC_GUNSHIP_GREEN;
-extern "C" i16 id_PROBEDROID;
-extern "C" i16 id_REPUBLICGUNSHIP;
-extern "C" i16 id_REPUBLICGUNSHIP_GREEN;
-extern "C" i16 id_SENTRYDROID;
-extern "C" i16 id_SLAVE1;
-extern "C" i16 id_SPEEDERBIKESNOW;
-extern "C" i16 id_STAP2;
-extern "C" i16 id_TIEBOMBER;
-extern "C" i16 id_TIEFIGHTER;
-extern "C" i16 id_TIEFIGHTERDARTH;
-extern "C" i16 id_TIEINTERCEPTOR;
-extern "C" i16 id_WICKET;
-extern "C" i16 id_ZAMSSPEEDER;
-void Move_CANNON(GameObject_s *);
 extern AREADATA *DOGFIGHT_ADATA;
 i32 BoltType_FindIDByCreature(GameObject_s *object, i32 fallback) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
@@ -1182,7 +1147,6 @@ static bool Bolt_RayCast(BOLT_s *, NUVEC *, NUVEC *, f32);
 i32 GizmoSys_BoltHit(GIZMOSYS_s *, void *, BOLT_s *, NUVEC *, NUVEC *, NUVEC *, f32, u8 *);
 GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC *, BOLT_s *, u32, u8 *);
 i32 ObjHitObj_Flags(GameObject_s *);
-extern "C" f32 NewRayCastGetTOFI();
 i32 addbolt_noobjmom, addbolt_newsfx;
 NUVEC addbolt_newpos;
 i32 (*BoltInitSfxFn)(GameObject_s *);
@@ -1417,7 +1381,6 @@ void Bolt_Init(void *storage, NetMessage &message) {
         type->init_callback(bolt);
 }
 
-extern "C" void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i16, NUMTX *);
 static __used__ void UpdateBolt_Geonosian(BOLT_s *bolt) {
     WORLDINFO_s *world = WorldInfo_CurrentlyActive();
     i32 effect = world->debris_sys->entries[85].effect;

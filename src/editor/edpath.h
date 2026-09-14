@@ -15,3 +15,4 @@ extern "C" {
 }
 
 eduimenu_s *pathEditor_Process(nupad_s *pad);
+void pathEditorDrawConnectionInfo(nuvec_s *position, float scale, nuvec_s *direction, u32 flags, i32 mode);

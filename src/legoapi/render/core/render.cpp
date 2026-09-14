@@ -1575,10 +1575,6 @@ void DrawStatusText(char *text, u16 angle, float x, float y, float scale, u32 co
     NuQFntSetCoordinateSystem(NUQFNT_CSMODE_NORMALISED);
 }
 
-void DrawWallSpline(float) {
-    STUBBED();
-}
-
 void Draw3DObjectMtx(WORLDINFO_s *world, i32 object_index, numtx_s *mtx) {
     if (object_index == -1) {
         return;

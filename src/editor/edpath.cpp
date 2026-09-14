@@ -1,5 +1,6 @@
 #include "decomp.h"
 #include "editor/edpath.h"
+#include "editor/path_connections.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -32,13 +33,47 @@ extern "C" {
     f32 default_path_node_radius = .25f;
     extern char *(*SpecialRouteCharacterNameFn)(u8);
 }
-struct AIPATHCNXTYPE {
+struct AIPATHCNXTYPE_s {
+    u32 connection_flag;
+    void *context;
+    char name[0x40];
     u32 flags;
-    u32 unknown_4;
-    char name[0x44];
 };
-static AIPATHCNXTYPE aipathcnxtypes[32];
+DECOMP_ASSERT(sizeof(AIPATHCNXTYPE_s) == 0x4c, "editor path connection type size");
+DECOMP_ASSERT(offsetof(AIPATHCNXTYPE_s, flags) == 0x48, "editor path connection options offset");
+static AIPATHCNXTYPE_s aipathcnxtypes[32];
 static i32 naipathcnxtypes;
+
+extern "C" void aieditor_ClearAllPathCnxTypes(void) {
+    naipathcnxtypes = 0;
+    memset(aipathcnxtypes, 0, sizeof(aipathcnxtypes));
+}
+
+extern "C" void aieditor_RegisterDefaultPathCnxTypes(void) {
+    aieditor_RegisterPathCnxType("Permanent Block", 0x40000000, nullptr, 0);
+    aieditor_RegisterPathCnxType("Temporary Block", 0x80000000, nullptr, 0);
+    aieditor_RegisterPathCnxType("Link Obstacle", 0x20000000, nullptr, 1);
+}
+
+extern "C" void aieditor_RegisterPathCnxType(const char *name, u32 connection_flag, void *context, u32 flags) {
+    if (name == nullptr) {
+        return;
+    }
+    usize length = strlen(name);
+    if (length > 63 || connection_flag == 0 || naipathcnxtypes >= 32) {
+        return;
+    }
+    AIPATHCNXTYPE_s &type = aipathcnxtypes[naipathcnxtypes++];
+    memcpy(type.name, name, length + 1);
+    type.connection_flag = connection_flag;
+    type.context = context;
+    type.flags = flags;
+}
+
+void pathEditorDrawConnectionInfo(nuvec_s *, float, nuvec_s *, u32, i32) {
+    STUBBED();
+}
+
 static u32 attr[4] = {0x80000000, 0x80ff0000, 0x80808080, 0x80404040};
 static void DestroyAIPathNode(EDAIPATHNODE_s *, EDAIPATH_s *);
 extern "C" void aieditor_ClearMainMenu(void);
@@ -691,9 +726,9 @@ eduimenu_s *pathEditor_Process(nupad_s *pad) {
             if (connection && naipathcnxtypes != 0) {
                 eduiMenuAddItem(menu, eduiItemSelCreate(1, attr, 0, 0, NULL, "================="));
                 for (i32 i = 0; i < naipathcnxtypes; ++i) {
-                    eduiMenuAddItem(menu,
-                                    eduiItemToggleCreate(i, attr, (connection->flags & aipathcnxtypes[i].flags) != 0,
-                                                         i + 2, pathEditor_cbCnxFlagsToggle, aipathcnxtypes[i].name));
+                    eduiMenuAddItem(menu, eduiItemToggleCreate(
+                                              i, attr, (connection->flags & aipathcnxtypes[i].connection_flag) != 0,
+                                              i + 2, pathEditor_cbCnxFlagsToggle, aipathcnxtypes[i].name));
                     row = i + 3;
                 }
                 eduiMenuAddItem(menu, eduiItemSelCreate(1, attr, 0, 0, NULL, "================="));
