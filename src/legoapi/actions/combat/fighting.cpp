@@ -60,7 +60,6 @@ void ComboRotateCode(GameObject_s *, i32) {
 }
 
 BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
-void NewBuzzFrames(nupad_s *, i32, i32);
 void SetWeaponIn(GameObject_s *);
 void SetWeaponOut(GameObject_s *);
 DECOMP_ASSERT(offsetof(GameObject_s, field_0x7e4) == 0x7e4, "Quick shoot record offset");

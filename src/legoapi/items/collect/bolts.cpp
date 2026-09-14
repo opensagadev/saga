@@ -921,7 +921,6 @@ void Bolt_AddDeflectedBolt(BOLT_s *, nuvec_s *, nuvec_s *, unsigned char *) {
 }
 
 extern "C" TERRAIN_SURFACE_s TerSurface[32];
-i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *, i32, i32, i32, GameObject_s *, i32);
 static __used__ i32 Bolt_HitPlat(BOLT_s *bolt, u8 *hit_flags, WORLDINFO_s *) {
     u32 exclude = GetLevelExBlowupFlags();
     Bolt_PlayHitSfx(bolt);
@@ -1145,6 +1144,8 @@ void Bolt_Free(BOLT_s *bolt) {
 static bool Bolt_RayCast(BOLT_s *, NUVEC *, NUVEC *, f32);
 i32 GizmoSys_BoltHit(GIZMOSYS_s *, void *, BOLT_s *, NUVEC *, NUVEC *, NUVEC *, f32, u8 *);
 GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC *, BOLT_s *, u32, u8 *);
+// The original caller appears to treat this u16-returning function as i32;
+// correcting this declaration lowers its match.
 i32 ObjHitObj_Flags(GameObject_s *);
 i32 addbolt_noobjmom, addbolt_newsfx;
 NUVEC addbolt_newpos;

@@ -9,6 +9,10 @@
 extern void (*DisguiseAdjustFn)(i32 character_id, i32 hat, NUVEC *scale, NUVEC *offset);
 
 void DrawPaintLights(void);
+extern i32 dco_locatorposonly;
+void DrawObjectOnCharacter(WORLDINFO_s *world, GameObject_s *object, i32 object_id, nuhspecial_s *special, i32 locator,
+                           i32 second_locator, NUMTX *joints, i32 reflect, u32 layers, NUMTX *rotation,
+                           NUVEC *translation, f32 alpha, f32 scale);
 void BackDrop_ResetColours(void);
 extern f32 KITPOSY;
 extern f32 BOSSICONY;

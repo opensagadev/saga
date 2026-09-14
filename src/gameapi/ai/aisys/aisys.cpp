@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "legoapi/actions/combat/hits.h"
 #include "batman.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "globals.h"
@@ -53,7 +54,6 @@
 extern i32 Hub_GetRandomCharType();
 extern void *perm_debrissys;
 void SetHeadTarget(GameObject_s *object, NUVEC *position, i8 priority, f32 time, f32 minimum_delay, f32 maximum_delay);
-i32 ObjHitObj(GameObject_s *attacker, GameObject_s *target, i32 damage, u16 flags, i32 param_4, i32 context);
 void ResetForceBack();
 void SetForceBack(GameObject_s *object, NUVEC *position, f32 radius, i32 type);
 void AddGameMsgCount(NUVEC *position, i32 count, i32 total, u8 red, u8 green, u8 blue, f32 duration);
@@ -305,7 +305,6 @@ extern f32 ForceThrowSpeed, ForceThrowGravity;
 extern "C" PART_s *AddPart(ADDPART_s *);
 void PartCollide_3D(PART_s *);
 void MakeThrowVector(NUVEC *, NUVEC *, NUVEC *, NUVEC *, f32, f32);
-void NewRumble(nupad_s *, f32, i32);
 static i32 Action_SetCurrentSpeed(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
 
 i32 Action_SetState(AISYS *, AISCRIPTPROCESS *, AIPACKET *, char **, i32, i32, f32);
@@ -1128,7 +1127,7 @@ __used__ static i32 Action_GoToNode(AISYS *sys, AISCRIPTPROCESS *processor, AIPA
 
 void LevelScriptReStoreProgress(WORLDINFO_s *, LEVELSCRIPTPROCESS_s *);
 
-#include "legoapi/gizmos/object/technos.h"
+#include "legoapi/props/objects/techno.h"
 
 extern void oneAtOnce_SetDistPerRow(f32);
 

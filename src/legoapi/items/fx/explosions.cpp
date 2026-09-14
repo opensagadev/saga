@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "legoapi/actions/combat/hits.h"
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/legoapi_types.h"
@@ -18,8 +19,6 @@ struct SHOPINPUT;
 
 extern EXPLOSION Explosion[8];
 extern i32 i_explosion;
-
-u16 ObjHitObj_Flags(GameObject_s *object);
 
 EXPLOSION *AddExplosion(nuvec_s *position, float radius, float strength, GameObject_s *object, i32 effect, i32 flags) {
     EXPLOSION *explosion = &Explosion[i_explosion];
@@ -81,7 +80,6 @@ PART_s *Bolt_HitParts(BOLT_s *, NUVEC *, NUVEC *, NUVEC *, f32, i32);
 i32 Arcade_GetMode(u32 *);
 i32 CannotKill(GameObject_s *);
 i32 Player_HasInvincibility(GameObject_s *);
-i32 ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32);
 void ObjHitShield(GameObject_s *, GameObject_s *, i32, BOLT_s *);
 void NewBuzz(nupad_s *, f32, i32);
 void NewRumble(nupad_s *, f32, i32);

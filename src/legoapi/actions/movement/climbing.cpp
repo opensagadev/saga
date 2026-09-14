@@ -1,5 +1,6 @@
 #include "legoapi/legoapi_types.h"
 #include "decomp.h"
+#include "legoapi/actions/movement/jumping.h"
 #include "nu2api/numath/nutrig.h"
 #include "legoapi/core/input/gamepads.h"
 #include <math.h>
@@ -10,7 +11,6 @@
 #include <string.h>
 struct CLIMBOBJECT_s;
 
-void StartJump(GameObject_s *, i32);
 void FindAnglesXY(NUVEC *, u16 *, u16 *);
 void Climb_SetMagnetAction(GameObject_s *);
 void Climb_SetMagnetDrawOffsetTarget(GameObject_s *, NUVEC *);

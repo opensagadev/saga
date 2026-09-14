@@ -1,5 +1,6 @@
 #include <string.h>
 #include "decomp.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
 #include "nu2api/nu3d/nuspecial.h"
 extern "C" float FRAMETIME;
 #include "nu2api/numath/nutrig.h"
@@ -157,7 +158,6 @@ i32 GameAnimSet_IsAnimationReset(GAMEANIMSET_s *);
 void Pup_CollectCoin(WORLDINFO_s *, GIZMOPICKUP_s *, i32, GameObject_s *, i32);
 void CollectMinikit(NUVEC *, char *, i32);
 GIZMOBLOWUP_s *FindNearestGizmoBlowUp(WORLDINFO_s *, NUVEC *, f32);
-i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *, i32, i32, i32, GameObject_s *, i32);
 static __used__ i32 IsGrabbable(GameObject_s *object) {
     return (object->apiobj.character_data->game_character->flags_090 & GAMECHARACTER_FLAG_GRAB_DISABLED) == 0;
 }

@@ -7,6 +7,7 @@
 #include "legoapi/world/levels/levels.h"
 #include "legogame/game.h"
 #include "decomp.h"
+#include "legoapi/actions/character/speederchase.h"
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "globals.h"
 #include "legoapi/gizmo/base/gizmo.h"
@@ -199,8 +200,9 @@ f32 GetVehicleSpeedMul(GameObject_s *object, f32 speed) {
     return effective / ((GAMECHARACTERDATA_s *)object->apiobj.character_data->field11_0x24)->run_speed;
 }
 
-void ObjIsTargetSpeeder(GameObject_s *) {
+i32 ObjIsTargetSpeeder(GameObject_s *) {
     STUBBED();
+    return 0;
 }
 
 void SpeederChaseA_Init(WORLDINFO_s *) {

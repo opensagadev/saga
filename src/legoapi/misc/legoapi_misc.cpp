@@ -43,7 +43,6 @@ void CurrentStart(GameObject_s *, i32, i32) {
     STUBBED();
 }
 
-void NewRumble(nupad_s *, f32, i32);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 
 void ConstantRumble(GameObject_s *object, float strength, float phase) {

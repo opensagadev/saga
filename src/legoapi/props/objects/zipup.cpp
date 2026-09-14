@@ -3,6 +3,7 @@
 #include "MechInputTouch/MechInputTouch_types.h"
 #include "batman.h"
 #include "decomp.h"
+#include "legoapi/actions/movement/jumping.h"
 #include "gameapi/edtools/edfile.h"
 #include "gamelib/util/gamelib_util_types.h"
 #include "globals.h"
@@ -472,8 +473,6 @@ struct SHOPINPUT;
 i32 ObjLandReady(GameObject_s *);
 i32 SuperWeirdo(GameObject_s *);
 void SetHeadTarget(GameObject_s *, NUVEC *, i8, f32, f32, f32);
-void StartJump(GameObject_s *, i32);
-i32 StartFallLand(GameObject_s *, i32);
 void SetWeaponIn(GameObject_s *);
 void FastWeaponOut(GameObject_s *, i32);
 void Hint_SetComplete(i32);
@@ -734,7 +733,6 @@ void ZipUp_MoveCode(GameObject_s *object, i32 special_pressed) {
         NuVecAdd(&zipup->rider_target_position, hook, &zipup->rider_target_position);
     }
 }
-
 
 static void ZipUp_GetStartPoint(GameObject_s *object, NUVEC *position) {
     GAMECHARACTERDATA *character = object->apiobj.character_data->game_character;

@@ -29,7 +29,6 @@ struct SHOPINPUT;
 
 void AICreatureResumeScript(GameObject_s *);
 void GetTakeOverPos(GameObject_s *, NUVEC *);
-void GameObjectOrigin(GameObject_s *);
 i32 TagCode(GameObject_s *, GameObject_s *, i32, i32, i32);
 void Buck_StartRiderJump(GameObject_s *, GameObject_s *);
 void Buck_Start(GameObject_s *, GameObject_s *);

@@ -9,6 +9,7 @@
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/actions/character/transform.h"
+#include "legoapi/props/objects/signal.h"
 
 #include <string.h>
 
@@ -259,7 +260,6 @@ void GameAudio_Reset(void);
 void GameRegisterGizActions(void);
 void ResetSeeds(void);
 void GizSpinners_InitTerrain(WORLDINFO_s *world);
-void Signals_InitTerrain(WORLDINFO_s *world);
 void SecurityDoors_InitTerrain(WORLDINFO_s *world);
 void Levers_InitTerrain(WORLDINFO_s *world);
 void GizPanel_InitTerrain(WORLDINFO_s *world);

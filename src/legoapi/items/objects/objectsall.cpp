@@ -1,5 +1,6 @@
 #include "nu2api/nu3d/nuspecial.h"
 #include "decomp.h"
+#include "legoapi/actions/movement/jumping.h"
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/area.h"
@@ -27,7 +28,6 @@ struct SHOPINPUT;
 f32 BUCK_RIDERJUMPCLEARANCE = 1.0f;
 void (*BuckStartExtraFn)(GameObject_s *) = NULL;
 void NewRumble(nupad_s *, f32, i32);
-void StartJump(GameObject_s *, i32);
 
 void Buck_Start(GameObject_s *object, GameObject_s *rider) {
     if (LEGOCONTEXT_BUCK == -1 || LEGOACT_BUCK == -1 ||

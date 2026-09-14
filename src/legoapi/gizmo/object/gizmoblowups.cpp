@@ -1,5 +1,6 @@
 #include "legoapi/gizmos/object/newblowup.h"
 #include "legoapi/gizmo/object/gizmoblowups.h"
+#include "legoapi/actions/combat/hits.h"
 
 #include "decomp.h"
 #include "MechInputTouch/MechInputTouch_types.h"
@@ -60,7 +61,6 @@ void GizBlowup_DeleteTerrain();
 void GizmoBlowupUpdateMatrix(GIZMOBLOWUP_s *blowup);
 void GizmoBlowupCreateStuff(GIZMOBLOWUP_s *blowup);
 void GizmoBlowUp_AddEffects(NUVEC *position, GIZMOBLOWUP_s *blowup, i32 count, i32 flags, GameObject_s *object);
-i32 ObjHitObj(GameObject_s *attacker, GameObject_s *target, i32 type, u16 damage, i32 flags, i32 context);
 void GameAntinode_UnregisterAntiNode(GAMEANTINODESYS_s *system, GAMEANTINODE_s *node);
 i32 GizBlowup_InitSingleTerrain(GIZMOBLOWUP_s *blowup);
 void GizBlowup_DeleteSingleTerrain(GIZMOBLOWUP_s *blowup);

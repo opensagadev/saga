@@ -1,7 +1,9 @@
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/actions/movement/carrying.h"
+#include "legoapi/actions/combat/hits.h"
 #include "legoapi/actions/character/streaks.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/audio/audio.h"
 #include "legoapi/gizmos/transport/grapples.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
@@ -25,7 +27,7 @@
 #include "legoapi/ai/core/ai_sys_stubs.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/mission.h"
-#include "legoapi/gizmos/object/technos.h"
+#include "legoapi/props/objects/techno.h"
 #include "legoapi/world/world.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/characters/motion/gameanim.h"
@@ -33,6 +35,7 @@
 #include "legoapi/characters/core/CharacterObjectInterface.h"
 #include "legoapi/characters/core/charconfig.h"
 #include "legoapi/menus/core/gamehint.h"
+#include "legoapi/menus/core/gamemessages.h"
 #include "legoapi/gizmos/object/gizobstacles.h"
 #include "legoapi/gizmos/trigger/gizspecial.h"
 #include "legoapi/gizmos/traps/gizforce.h"
@@ -72,7 +75,6 @@ void SetObjAsHeadTarget(GameObject_s *, GameObject_s *, i8, f32, f32, f32);
 void SetBallooningHeight(GameObject_s *, f32);
 void GameObjectSetCanUse(GameObject_s *, void *, u8, u8, f32);
 i32 Suit_GetIndex(SUIT_s *);
-void GameObjectOrigin(GameObject_s *);
 BOLTTYPE_s *BoltType_FindByID(i32, WORLDINFO_s *);
 void Bolt_Shoot(GameObject_s *, i32, i32);
 void Torpedo_Shoot(GameObject_s *);
@@ -4412,13 +4414,9 @@ void GameObjectDimensionsExtra_LSW(GameObject_s *) {
 
 i32 AnakinGreenSabre(GameObject_s *object);
 extern "C" i16 id_THEEMPEROR, id_IMPERIALGUARD, id_BODYGUARD;
-void NewRumble(nupad_s *, f32, i32);
 i32 CannotKill(GameObject_s *object);
-u16 ObjHitObj_Flags(GameObject_s *object);
-i32 ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32);
 i32 SphereSphereOverlapScaleY(NUVEC *, f32, f32, NUVEC *, f32, f32);
 GIZMOBLOWUP_s *GizmoBlowUp_Hit(GameObject_s *, NUVEC *, i32, f32, NUVEC *, NUVEC *, BOLT_s *, u32, u8 *);
-i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *, i32, i32, i32, GameObject_s *, i32);
 void AlertSurroundingCreatures(GameObject_s *, NUVEC *);
 extern "C" i32 AddGameDebrisRot(APIDEBRISSYS_s *, i32, NUVEC *, i32, i16, i16);
 
@@ -5789,7 +5787,6 @@ void ResetForceGlow(PLAYERPACKET_s *);
 extern i32 CUTSKIPLOCK;
 void GizForce_ResetLOS(GameObject_s *);
 void AICreatureResumeScript(GameObject_s *);
-void NewBuzzFrames(nupad_s *, i32, i32);
 
 GameObject_s *player_tag_to;
 GameObject_s *player_tag_from;
@@ -6056,12 +6053,9 @@ void TakeOver2GetIn(GameObject_s *rider, GameObject_s *vehicle) {
 
 extern i32 VehicleArea;
 extern i32 menu_i_pack;
-extern ADDGAMEMSG AddGameMsg_Default;
 extern char *ASCII_DOWN;
 void CollideGameObjects(WORLDINFO_s *world);
 i32 GetMenuID();
-i32 FindGameMsgsWithID(i32, i32, i32, GAMEMESSAGE_s *);
-GAMEMESSAGE_s *AddGameMsg(ADDGAMEMSG *);
 void Hint_CancelCurrent();
 i32 InCollectList_Index(i32, COLLECTID *, i32);
 i32 NuIOS_AreInAppPurchasesAvailable();

@@ -1,4 +1,5 @@
 #include "legoapi/gizmo/base/gizmo.h"
+#include "legoapi/actions/combat/hits.h"
 #include "decomp.h"
 #include "globals.h"
 #include "MechInputTouch/MechInputTouch_types.h"
@@ -36,7 +37,7 @@
 #include "legoapi/gizmos/door/plugs.h"
 #include "legoapi/gizmos/door/push.h"
 #include "legoapi/gizmos/door/spinner.h"
-#include "legoapi/gizmos/object/technos.h"
+#include "legoapi/props/objects/techno.h"
 #include "legoapi/gizmos/transport/teleport.h"
 #include "legoapi/gizmos/transport/tubes.h"
 #include "legoapi/gizmos/door/zipups.h"
@@ -1070,7 +1071,6 @@ void GizmoActivateReverse(GIZMOSYS_s *system, GIZMO_s *gizmo, i32 reverse, i32 v
     }
 }
 
-u16 ObjHitObj_Flags(GameObject_s *object);
 i32 GizmoSys_SetBestBoltTarget(GIZMOSYS_s *system, void *, GameObject_s *object, nuvec_s *position, nuvec_s *direction,
                                f32 radius, f32 range_squared, i32 directional, i32 planar, i32 bolt_id) {
     if (gizmotypes == NULL || object == NULL || system == NULL)

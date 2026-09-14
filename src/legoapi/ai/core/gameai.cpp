@@ -4,7 +4,7 @@
 #include "nu2api/numath/numtx.h"
 #include "gameapi/ai/aisys/aisys.h"
 #include "legoapi/legoapi_types.h"
-#include "legoapi/gizmos/transport/tightropes.h"
+#include "legoapi/props/objects/tightrope.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/numath/nuvec.h"
 

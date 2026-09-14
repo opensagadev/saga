@@ -1,4 +1,5 @@
 #include "legoapi/actions/character/transform.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
 
 #include "nu2api/numath/nuquat.h"
 #include "decomp.h"
@@ -25,7 +26,6 @@ extern "C" i16 id_MINISLAVE1;
 
 void TurnCodeCamSafe(GameObject_s *object, NUMTX *matrix);
 void ResetForceGlow(PLAYERPACKET_s *packet);
-i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *object, i32 effects, i32 cause, i32 damage, GameObject_s *source, i32 respawn);
 
 void ApplyExtraRotation(GameObject_s *object, numtx_s *matrix) {
     switch (object->character_context) {

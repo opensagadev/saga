@@ -7,6 +7,7 @@
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nucore/nustring.h"
 #include "legoapi/menus/core/text.h"
+#include "legoapi/menus/core/gamemessages.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/render/core/render.h"
 #include "nu2api/numath/nutrig.h"
@@ -57,7 +58,6 @@ void SetDrawGoldBrick(STATUSPACKET_s *, i32);
 void IncreaseScore(u32 *, u64, i32);
 void NewStatusRumbleBuzz(i32, f32, f32, i32);
 extern "C" void PlaySfx(char *, nuvec_s *);
-i32 FindGameMsgsWithID(i32, i32, i32, GAMEMESSAGE_s *);
 void AddStatusMiniKitParts();
 void DrawStatusMiniKit(f32, f32, f32, f32, f32, i32, STATUSPACKET_s *, f32);
 void DrawMiniKitCount(f32, f32, i32, i32);

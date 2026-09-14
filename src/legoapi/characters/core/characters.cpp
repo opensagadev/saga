@@ -26,7 +26,7 @@
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/gizmos/object/lever.h"
 #include "legoapi/gizmos/door/zipups.h"
-#include "legoapi/gizmos/object/technos.h"
+#include "legoapi/props/objects/techno.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/areas.h"
 #include "legoapi/world/world.h"

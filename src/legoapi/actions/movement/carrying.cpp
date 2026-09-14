@@ -1,10 +1,17 @@
 #include "decomp.h"
 #include "globals.h"
+#include "legoapi/actions/character/speederchase.h"
+#include "legoapi/actions/character/transform.h"
+#include "legoapi/actions/combat/hits.h"
 #include "legoapi/actions/movement/carrying.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/world/world.h"
 #include "legoapi/gizmos/door/plugs.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
+#include "legoapi/menus/core/gamemessages.h"
+#include "legoapi/render/core/render.h"
+#include "legoapi/render/fx/parts.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/numath/nutrig.h"
@@ -18,16 +25,6 @@
 #include "nu2api/numath/nufloat.h"
 #include "legoapi/legoapi_types.h"
 
-void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
-void GizBlowup_Respawn(GIZMOBLOWUP_s *);
-void GizmoBlowUp_AddEffects(NUVEC *, GIZMOBLOWUP_s *, i32, i32, GameObject_s *);
-void DrawObjectOnCharacter(WORLDINFO_s *, GameObject_s *, i32, nuhspecial_s *, i32, i32, NUMTX *, i32, u32, NUMTX *,
-                           NUVEC *, f32, f32);
-void QuatInterpolateRotationMatrix(NUMTX *, NUMTX *, NUMTX *, f32);
-extern i32 dco_locatorposonly;
-extern ADDPART_s Default_ADDPART;
-extern "C" PART_s *AddPart(ADDPART_s *);
-u16 ObjHitObj_Flags(GameObject_s *);
 f32 SUPERCARRY_THROWSPEED_XZ = 3.0f;
 f32 SUPERCARRY_THROWSPEED_Y = 3.0f;
 f32 SUPERCARRY_RELEASESPEED_XZ = 2.0f;
@@ -38,24 +35,11 @@ f32 SUPERCARRY_OBJGRAVITY = -6.0f;
 i32 SuperCarry_KeepObjectLevel = 1;
 i32 SuperCarry_AlignObject = 1;
 
-i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *, i32, i32, i32, GameObject_s *, i32);
 u32 (*CanSuperCarryFn)(GameObject_s *) = NULL;
 
 i32 SuperCarry_UseActionButton = 0;
 i32 SuperCarry_PutDownDrop = 1;
 f32 SUPERCARRY_JUMPSPEED = 1.4f;
-extern f32 PUNCHGAP;
-extern i32 objopponent_ignoreaiopponent;
-extern ADDGAMEMSG AddGameMsg_Default;
-extern char *LEGOASCII_DOWN;
-extern char *txt_UNKNOWN;
-extern u8 PlayerRGB[2][3];
-GAMEMESSAGE_s *AddGameMsg(ADDGAMEMSG *);
-i32 ObjOpponentStillThere(GameObject_s *, GameObject_s *, f32);
-i32 ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32);
-void NewRumble(nupad_s *, f32, i32);
-void NewBuzzFrames(nupad_s *, i32, i32);
-
 // Original 0x4fab00, 184 bytes.
 static void SuperCarry_PartImpact(PART_s *part) {
     f32 intensity = NuVecMag(&part->velocity);
@@ -676,30 +660,6 @@ idle_or_walk:
     }
 }
 
-// Original 0x4fd340, 390 bytes.
-i32 SuperCarry_YRotation(GameObject_s *object, u16 input_angle) {
-    if (object->field_0x7a3 == 0) {
-        object->apiobj.facing_angle = SeekRot(object->apiobj.facing_angle, object->apiobj.movement_facing_angle, 12.0f);
-        object->apiobj.field_0x276 = object->apiobj.facing_angle;
-    } else if (object->field_0x7a3 == 5) {
-        if (object->force_target != NULL) {
-            object->apiobj.movement_facing_angle =
-                NuAtan2D(object->force_target->apiobj.collision_position.x - object->apiobj.collision_position.x,
-                         object->force_target->apiobj.collision_position.z - object->apiobj.collision_position.z);
-        }
-        object->apiobj.facing_angle = SeekRot(object->apiobj.facing_angle, object->apiobj.movement_facing_angle, 8.0f);
-        object->apiobj.field_0x276 = object->apiobj.facing_angle;
-    } else if (object->field_0x7a3 == 2 || object->field_0x7a3 == 3 || object->field_0x7a3 == 6) {
-        if (object->pad_gamepad->input_magnitude > 0.0f) {
-            object->apiobj.facing_angle = TurnRot(object->apiobj.facing_angle, input_angle,
-                                                  static_cast<i32>(16384.0f * object->field_0x768 * 8.0f), NULL);
-        }
-        object->apiobj.field_0x276 = SeekRot(object->apiobj.field_0x276, object->apiobj.facing_angle, 10.0f);
-        object->apiobj.movement_facing_angle = object->apiobj.facing_angle;
-    }
-    return 1;
-}
-
 // Original 0x4fd200, 312 bytes.
 i32 SuperCarry_SetTargetMom(GameObject_s *object, float input_speed) {
     object->target_velocity.x = 0.0f;
@@ -724,6 +684,30 @@ i32 SuperCarry_SetTargetMom(GameObject_s *object, float input_speed) {
         }
     }
     return 0;
+}
+
+// Original 0x4fd340, 390 bytes.
+i32 SuperCarry_YRotation(GameObject_s *object, u16 input_angle) {
+    if (object->field_0x7a3 == 0) {
+        object->apiobj.facing_angle = SeekRot(object->apiobj.facing_angle, object->apiobj.movement_facing_angle, 12.0f);
+        object->apiobj.field_0x276 = object->apiobj.facing_angle;
+    } else if (object->field_0x7a3 == 5) {
+        if (object->force_target != NULL) {
+            object->apiobj.movement_facing_angle =
+                NuAtan2D(object->force_target->apiobj.collision_position.x - object->apiobj.collision_position.x,
+                         object->force_target->apiobj.collision_position.z - object->apiobj.collision_position.z);
+        }
+        object->apiobj.facing_angle = SeekRot(object->apiobj.facing_angle, object->apiobj.movement_facing_angle, 8.0f);
+        object->apiobj.field_0x276 = object->apiobj.facing_angle;
+    } else if (object->field_0x7a3 == 2 || object->field_0x7a3 == 3 || object->field_0x7a3 == 6) {
+        if (object->pad_gamepad->input_magnitude > 0.0f) {
+            object->apiobj.facing_angle = TurnRot(object->apiobj.facing_angle, input_angle,
+                                                  static_cast<i32>(16384.0f * object->field_0x768 * 8.0f), NULL);
+        }
+        object->apiobj.field_0x276 = SeekRot(object->apiobj.field_0x276, object->apiobj.facing_angle, 10.0f);
+        object->apiobj.movement_facing_angle = object->apiobj.facing_angle;
+    }
+    return 1;
 }
 
 i32 SuperCarry_Carrying(GameObject_s *object) {

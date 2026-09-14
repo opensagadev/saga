@@ -5,6 +5,7 @@
 #include "legoapi/world/mission.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/menus/core/panel.h"
+#include "legoapi/menus/core/gamemessages.h"
 #include "legoapi/menus/core/text.h"
 #include "gameapi/gui/apimenu.h"
 #include "legoapi/render/core/render.h"
@@ -164,11 +165,8 @@ void Panel_Clear() {
     Arcade_ResetPanel();
 }
 
-extern ADDGAMEMSG AddGameMsg_Default;
 extern u8 CoinTab[4];
 extern f32 COINMSGTIME;
-GAMEMESSAGE_s *AddGameMsg(ADDGAMEMSG *);
-void EndScoreMessage(GAMEMESSAGE_s *);
 void GameMsg_DrawAdjustNewPos_CoinToTotal(GAMEMESSAGE_s *);
 extern "C" void PlaySfx(char *, NUVEC *);
 i32 CoinsGoToMainTotal();
