@@ -307,8 +307,6 @@ void ClearAreaProgress(i32, i32);
 void Hub_MakeModelList(void);
 void TerrainPlatformOldUpdate(void);
 void TerrainPlatformNewUpdate(void);
-void GrabStillScreen(void);
-void HandleStillRender(void);
 void PanelRender(WORLDINFO_s *);
 void InitCables(WORLDINFO_s *);
 void InitSnakes(WORLDINFO_s *);

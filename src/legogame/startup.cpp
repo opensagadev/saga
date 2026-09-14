@@ -28,6 +28,7 @@
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/core/input/timer.h"
+#include "legoapi/render/core/screen.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/levels/episode.h"
 #include "legoapi/world/levels/levels.h"
@@ -86,7 +87,6 @@ void Text_InitStringTable(i32, VARIPTR *, VARIPTR *);
 void Text_InitTable(TEXTENTRY *, i32, i32);
 void Text_LoadStrings(VARIPTR *, VARIPTR *);
 void Text_InitDefaultStrings(void);
-void InitStillRender(VARIPTR *buf, VARIPTR buf_end);
 void LevelProgress_ReserveBufferSpace(VARIPTR *buf, VARIPTR buf_end);
 void LevelObjects_InitForGame(LEVELOBJECT *tab, VARIPTR *buf, VARIPTR *buf_end, i32 a4, i32 a5);
 void LevelSplines_InitForGame(LEVELSPLINE *tab);

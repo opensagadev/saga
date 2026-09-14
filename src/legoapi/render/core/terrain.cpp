@@ -589,7 +589,6 @@ namespace {
 i16 debug_index;
 
 i32 ReadTerrain(unsigned char *base_path, i32 first_group, i16 **buffer, TERRSET *terrain);
-void NuVecCheckForSNANs(NUVEC *vector);
 void TerrFlush();
 
 // Debris and terrain globals — accessed from DebrisSetThinningLevel etc.
@@ -642,6 +641,18 @@ extern "C" void DebrisSetDetailLevel(i32 level) {
 // Constructs the fixed terrain header and its variable-sized group, index and
 // platform arrays in the caller's arena. The four bounds arrays and the cell
 // assignment array are temporary storage carved backwards from buf_end.
+#define IS_SNAN(x) (*(u32 *)&(x) == 0xffc00000)
+
+void NuVecCheckForSNANs(NUVEC *v) {
+    if (IS_SNAN(v->x) || IS_SNAN(v->y) || IS_SNAN(v->z)) {
+        v->x = 0.0f;
+        v->y = 1.0f;
+        v->z = 0.0f;
+    }
+}
+
+#undef IS_SNAN
+
 extern "C" void *TerrainInitEx(i32 level_num, void *buf, void *buf_end, i32 options, char *path, void *gscn,
                                i32 scene_id, u32 max_group_indices, u32 max_groups, u32 max_platforms) {
     (void)level_num;

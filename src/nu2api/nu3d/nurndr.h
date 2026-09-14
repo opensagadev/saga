@@ -71,6 +71,10 @@ extern "C" {
     i32 NuRndrSwapScreen(i32 mode);
     void NuRndrClear(i32 clear_flags, i32 background_colour, f32 alpha);
     void NuRndrGradClear(i32 clear_flags, i32 top_colour, i32 bottom_colour, f32 alpha);
+    void NuRndrGradRectUV2di(i32 x, i32 y, i32 width, i32 height, f32 u0, f32 v0, f32 u1, f32 v1, u32 *colours,
+                             struct numtl_s *material);
+    void NuRndrRectUV2di(i32 x, i32 y, i32 width, i32 height, f32 u0, f32 v0, f32 u1, f32 v1, i32 colour,
+                         struct numtl_s *material);
     i32 NuRndrSetBlendData(void);
     void NuRndrShadowOnOff(i32 enabled);
     void NuRndrLine3dDbgFlush(void);

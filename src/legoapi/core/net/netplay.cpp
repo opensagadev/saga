@@ -5,6 +5,7 @@
 #include "nu2api/numath/nuvec.h"
 #include "globals.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/render/core/screen.h"
 #include "legoapi/world/world.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
@@ -102,8 +103,6 @@ extern FadeSystem FadeSys;
 extern i32 reset_area;
 extern i32 grab_screen_image;
 extern i32 hub_from_mission;
-void NeedScreenGrab(i32);
-void GrabStillScreen();
 void InitChallenge(i32);
 void InitMission(MISSIONSYS_s *, i32);
 

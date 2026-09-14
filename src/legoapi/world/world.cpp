@@ -14,6 +14,7 @@
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/world/area.h"
 #include "legoapi/characters/core/character.h"
+#include "legoapi/characters/core/charconfig.h"
 #include "legoapi/world/level.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/items/base/collection.h"
@@ -992,7 +993,6 @@ extern "C" {
 }
 
 i32 InModelListDataFlags(APICHARACTERMODELLIST_s *, u32, u32, i32, i32);
-i32 RandomIDFromFlags(u32, u32, i32, APICHARACTERMODELLIST_s *, i32);
 void MakeFreePlayModelList(i32 model1, i32 model2, i32 area, i32 level, i32 param5) {
     i32 flags = 0;
     if (WORLD != NULL && WORLD->area != NULL && WORLD->area == HUB_ADATA && bonusmodearcade != 0)

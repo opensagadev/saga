@@ -21,6 +21,7 @@
 #include "legoapi/menus/screens/gamemenuall.h"
 #include "legoapi/props/doors/door.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/render/core/screen.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/mission.h"
 #include "legoapi/core/input/gamepads.h"
@@ -88,7 +89,6 @@ extern void Door_GoThrough(WORLDINFO_s *, DOOR_s *, i32);
 extern STOREPACK StorePack[11];
 extern GameObject_s *FindGameObject(i32, u32, i32, i32, i32);
 extern void Store_RootPackCustodian(i32, GameObject_s *);
-extern void NeedScreenGrab(i32);
 extern void BackDrop_ResetColours();
 extern void NewGameMode();
 extern f32 MainRenderTargetTime;
