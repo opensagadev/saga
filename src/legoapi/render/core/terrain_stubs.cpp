@@ -46,7 +46,7 @@ i16 shadhit;
 i16 eshadhit;
 TERRAIN_SHAPE *ShadRoofPoly;
 TERRAIN_SHAPE *EShadRoofPoly;
-extern TERRAIN_SHAPE *EShadPoly;
+TERRAIN_SHAPE *EShadPoly;
 extern void *ScaleTerrainT1;
 extern TERRAIN_SHAPE *ScaleTerrain;
 struct TerrainLastImpact_s {
@@ -107,6 +107,27 @@ i32 TerImpactDataMax;
 static TERRAIN_AXIS_FREEDOM_SHAPE *TerrShape;
 static i32 TerrShapeAdjCnt;
 
+void NewTerrStoreAnyInfo() {
+    TerrainQuery_s *query = TerI;
+    TERRAIN_SHAPE *surface = query->surface;
+    if (surface == NULL || query->terrain_group_index == -1) {
+        return;
+    }
+
+    if (surface->material[0] != 0) {
+        TerrainHitInfo[0] = surface->material[0];
+    }
+    if (surface->material[1] != 0) {
+        TerrainHitInfo[1] = surface->material[1];
+    }
+    if (surface->flags != 0) {
+        TerrainHitInfo[2] = surface->flags;
+    }
+    if (surface->normal_flags != 0) {
+        TerrainHitInfo[3] = surface->normal_flags;
+    }
+}
+
 extern "C" {
     void *NuScratchAlloc32(i32 size);
     void NuScratchRelease(void);
@@ -119,7 +140,6 @@ i32 HitTerrain(void);
 void TerrainImpactNorm(void);
 void RayImpact(NUVEC *);
 void StorePlatImpact(void);
-void NewTerrStoreAnyInfo(void);
 i32 TerrainPlatformEmbedded(NUVEC *movement);
 i32 TerrShapeSideStep(NUVEC *position, NUVEC *movement, u8 *hit_flags);
 void TerrainImpact(NUVEC *position, NUVEC *movement, u8 *hit_flags);
@@ -1584,6 +1604,14 @@ extern "C" {
         STUBBED();
     }
 
+    void AddMSituExtraTerrRot(void) {
+        STUBBED();
+    }
+
+    void AddCollisionSphere(void) {
+        STUBBED();
+    }
+
     void AddPickupTerr(i32 type, NUVEC *position) {
         if (CurTerr == NULL)
             return;
@@ -1691,6 +1719,10 @@ extern "C" {
         ++terrain->group_count;
         ++terrain->cells[TERRAIN_PLATFORM_CELL].group_count;
         return index;
+    }
+
+    void ReassignPickupInst(void) {
+        STUBBED();
     }
 
     i32 NewRayCast(NUVEC *position, NUVEC *movement, f32 radius, i32 scan_flags) {
@@ -1862,8 +1894,16 @@ extern "C" {
         }
     }
 
+    i32 EShadowInfo(void) {
+        return EShadPoly != NULL ? EShadPoly->material[1] : -1;
+    }
+
     i32 ShadowRoofInfo(void) {
         return ShadRoofPoly != NULL ? ShadRoofPoly->material[0] : -1;
+    }
+
+    i32 EShadowRoofInfo(void) {
+        return EShadRoofPoly != NULL ? EShadRoofPoly->material[1] : -1;
     }
 
     void NewTerrain(void) {

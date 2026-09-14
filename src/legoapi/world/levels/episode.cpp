@@ -15,8 +15,6 @@
 
 EPISODEDATA *EDataList = NULL;
 
-extern TerrainQuery_s *TerI;
-extern u8 TerrainHitInfo[4];
 extern f32 text3d_width;
 
 void Text_MakeScore(u32 score, char *text);
@@ -390,27 +388,6 @@ void DoubleScoreAlpha() {
 
 void TrooperShoot(WORLDINFO_s *, minitrooperteam_s *, minisnowtrooper_s *, u16 *, i32) {
     STUBBED();
-}
-
-void NewTerrStoreAnyInfo() {
-    TerrainQuery_s *query = TerI;
-    TERRAIN_SHAPE *surface = query->surface;
-    if (surface == NULL || query->terrain_group_index == -1) {
-        return;
-    }
-
-    if (surface->material[0] != 0) {
-        TerrainHitInfo[0] = surface->material[0];
-    }
-    if (surface->material[1] != 0) {
-        TerrainHitInfo[1] = surface->material[1];
-    }
-    if (surface->flags != 0) {
-        TerrainHitInfo[2] = surface->flags;
-    }
-    if (surface->normal_flags != 0) {
-        TerrainHitInfo[3] = surface->normal_flags;
-    }
 }
 
 void SetBobaRocketTarget(MechObjectInterface *) {

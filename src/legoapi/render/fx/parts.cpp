@@ -738,10 +738,6 @@ extern "C" {
 
     void AddVariableShotDebrisEffect(i32, NUVEC *, i32, i16, i16);
 
-    void AddMSituExtraTerrRot(void) {
-        STUBBED();
-    }
-
     i32 AddPARTEffect(i32 effect, NUVEC *position) {
         CheckPartCount();
         if (part_emits_used == 40 || part_types[effect].effect_ids[0] == -1)
@@ -1617,10 +1613,6 @@ extern "C" {
         memset(edpp_page_used, 0, sizeof(edpp_page_used));
         memset(edpp_page_on, 0, sizeof(edpp_page_on));
         edpp_instances_used = 0;
-    }
-
-    void ReassignPickupInst(void) {
-        STUBBED();
     }
 
     void RemovePARTEffect(i32 index) {

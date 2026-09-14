@@ -6,7 +6,6 @@
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
 #include "legoapi/render/core/terrain.h"
-#include "legoapi/render/light/shadow.h"
 #include "nu2api/nucore/numem.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nuspecial.h"
