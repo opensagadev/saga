@@ -6,17 +6,13 @@
 #include <stdio.h>
 #include "globals.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/render/core/terrain.h"
 #include "nu2api/numath/numtx.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nutrig.h"
 #include "legoapi/characters/core/players.h"
-extern "C" {
-    i16 FindPlatInst(i32);
-    i32 DeletePlatinst(i32);
-    i16 NewPlatPickupInst(void *, i32);
-}
 extern "C" void NewTerrPlatformsOff();
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
 

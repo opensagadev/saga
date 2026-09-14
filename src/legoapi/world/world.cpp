@@ -2,6 +2,7 @@
 #include "legoapi/world/world.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world_shared.h"
+#include "legoapi/render/core/terrain.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 
 #include <stdio.h>

@@ -1638,7 +1638,6 @@ extern "C" {
         i_part = 0;
     }
 
-    void FullReflect(NUVEC *, NUVEC *, NUVEC *);
     void DebrisStatusAlwaysOff(i32 *);
     i32 rtlDynamicSetPos(i32, NUVEC *);
 

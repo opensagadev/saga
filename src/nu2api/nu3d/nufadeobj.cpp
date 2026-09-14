@@ -4,6 +4,7 @@
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nufloat.h"
+#include "legoapi/render/core/terrain.h"
 #include <string.h>
 
 struct NuFadeObjGType {
@@ -103,11 +104,6 @@ extern "C" {
     NUMTX *NuFadeObjMtxs;
     i32 NuFadeObjDir, NuFadeObjDir2, NuFadeObjWave;
     i32 NuFadeObjMtxIndex, NuFadeObjDataIndex;
-    void *TerrainGetCur(void);
-    void TerrainSetCur(void *);
-    i32 DeletePlatinst(i32);
-    i32 NewPlatInst(NUMTX *, i32);
-    void PlatInstRotate(i32, i32);
     i32 stopfadeup;
     void NuFadeObjUpdateArray(NUVEC **positions) {
         i32 i, g, p, nearby;

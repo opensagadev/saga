@@ -15,6 +15,7 @@
 #include "gamelib/util/gamelib_util_types.h"
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/world/world_shared.h"
+#include "legoapi/render/core/terrain.h"
 #include "nu2api/numath/nuang.h"
 #include "nu2api/numath/nutrig.h"
 #include "legoapi/audio/sfx.h"
@@ -35,9 +36,6 @@ extern i32 plathitid;
 extern TERRAIN_SPHERE SphereData[16];
 
 i32 HitWallSpline();
-void DeRotatePoint(NUVEC *point);
-void DeRotateTerrain(tertype *surface);
-void RotateVec(NUVEC *source, NUVEC *destination);
 i16 InsidePolLines(f32 point_x, f32 point_y, f32 point_z, f32 edge_a_x, f32 edge_a_y, f32 edge_a_z, f32 edge_b_x,
                    f32 edge_b_y, f32 edge_b_z, NUVEC *normal);
 i32 CheckCylinder(i32 first_vertex, i32 second_vertex, i32 *vertex_mask, i32 remaining_vertex_mask);

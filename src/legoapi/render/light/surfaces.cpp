@@ -4,7 +4,6 @@
 #include "legoapi/render/core/terrain.h"
 #include "nu2api/nu3d/glutils.h"
 #include "nu2api/nu3d/numtl.h"
-#include "nu2api/numath/nutrig.h"
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -30,7 +29,6 @@ extern "C" {
 }
 
 extern TERRSET *CurTerr;
-extern TerrainQuery_s *TerI;
 extern NUVEC ShadNorm;
 
 f32 GameShadow(GameObject_s *object, NUVEC *position, f32 probe_height, i32 terrain_mask);
@@ -40,21 +38,6 @@ void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);
 extern "C" i32 NewShadowOnPlatform();
 
 void (*SurfaceInfo_ExtraReflectFn)(GameObject_s *object);
-
-TERRAIN_TRACK_SLOT *AllocTerrId() {
-    TERRSET *terrain = CurTerr;
-    if (terrain == NULL) {
-        return NULL;
-    }
-
-    for (i32 slot_index = 0; slot_index < TERRAIN_TRACK_SLOT_COUNT; ++slot_index) {
-        if (terrain->track_slots[slot_index].id == NULL) {
-            return &terrain->track_slots[slot_index];
-        }
-    }
-
-    return NULL;
-}
 
 NUMTL *CreateCopyMat(NUMTL *source, i32 enable_uv_mode, i32 alpha_mode, i32 depth_mode, i32 filter_mode) {
     if (source == NULL) {
@@ -160,44 +143,6 @@ void Surfaces_Reset() {
     }
     SURFACEBITS_DUST = dust;
     SURFACEBITS_NODUST = no_dust;
-}
-
-void DeRotateTerrain(tertype *surface) {
-    TerrainQuery_s *query = TerI;
-
-    const f32 sin_pitch = NuTrigTable[(static_cast<i32>(-query->movement_pitch) >> 1) & 0x7fff];
-    const f32 cos_pitch = NuTrigTable[(static_cast<i32>(16384.0f - query->movement_pitch) >> 1) & 0x7fff];
-    const f32 sin_yaw = NuTrigTable[(static_cast<i32>(-query->movement_yaw) >> 1) & 0x7fff];
-    const f32 cos_yaw = NuTrigTable[(static_cast<i32>(16384.0f - query->movement_yaw) >> 1) & 0x7fff];
-    const f32 start_z = query->local_start.z;
-    const f32 start_x = query->local_start.x;
-    const f32 start_y = query->local_start.y;
-
-    for (i32 vertex_index = 0; vertex_index < 3; ++vertex_index) {
-        const NUVEC &vertex = surface->vectors[vertex_index];
-        NUVEC &transformed = query->transformed_vertices[vertex_index];
-        const f32 relative_z = vertex.z - start_z;
-        const f32 relative_x = vertex.x - start_x;
-        const f32 rotated_x = relative_z * sin_yaw + relative_x * cos_yaw;
-        const f32 rotated_z = relative_z * cos_yaw - relative_x * sin_yaw;
-
-        transformed.x = rotated_x;
-        transformed.y = (vertex.y - start_y) * cos_pitch - rotated_z * sin_pitch;
-        transformed.z = (vertex.y - start_y) * sin_pitch + rotated_z * cos_pitch;
-    }
-
-    if (65536.0f > surface->normals[1].y) {
-        const NUVEC &vertex = surface->vectors[3];
-        NUVEC &transformed = query->transformed_vertices[3];
-        const f32 relative_z = vertex.z - start_z;
-        const f32 relative_x = vertex.x - start_x;
-        const f32 rotated_x = relative_z * sin_yaw + relative_x * cos_yaw;
-        const f32 rotated_z = relative_z * cos_yaw - relative_x * sin_yaw;
-
-        transformed.x = rotated_x;
-        transformed.y = (vertex.y - start_y) * cos_pitch - rotated_z * sin_pitch;
-        transformed.z = (vertex.y - start_y) * sin_pitch + rotated_z * cos_pitch;
-    }
 }
 
 void InitSurfaceInfo(GameObject_s *object) {

@@ -23,11 +23,8 @@ extern "C" TERRAIN_SURFACE_s TerSurface[32];
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 extern i32 PlatSkinMaxSize;
 
-TERRAIN_TRACK_SLOT *AllocTerrId();
-
 i32 SkinFlipTab[8] = {0, 1, 2, 3, 0, 2, 1, 3};
 NUVEC TerrainSkin(PLATSKININFO *, NUVEC *, f32, i32);
-NUVEC TerCrossProduct(NUVEC *, NUVEC *);
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 extern "C" void NewTerrPlatformsOff();
 extern "C" TERRAIN_SURFACE_s TerSurface[32];

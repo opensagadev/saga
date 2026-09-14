@@ -1389,12 +1389,6 @@ static __used__ void UpdateBolt_Geonosian(BOLT_s *bolt) {
 }
 
 i32 GameRayCast(NUVEC *, NUVEC *, f32, i32);
-extern "C" {
-    void PlatOnOff(i32, i32);
-    i32 TerrainPlatId();
-    i32 NewRayCastGetImpactTerrainType();
-    i32 IgnoreWallSplines;
-}
 static __used__ bool Bolt_RayCast(BOLT_s *bolt, NUVEC *start, NUVEC *movement, f32 radius) {
     NUVEC end;
     NuVecAdd(&end, start, movement);

@@ -6,6 +6,7 @@
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/gizmos/object/gizpanel.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/render/core/terrain.h"
 #include "legoapi/menus/core/gamehint.h"
 #include "legoapi/world/world_shared.h"
 #include "legoapi/world/mission.h"
@@ -28,11 +29,6 @@ static __used__ u8 droid_panel_active;
 static __used__ u8 bountyhunter_panel_active;
 
 extern "C" f32 GIZPANEL_PLAYERPOSLIFT;
-extern "C" {
-    i32 DeletePlatinst(i32 platform_id);
-    i16 NewPlatPickupInst(void *object, i32 object_type);
-    void PlatInstRotate(i32 platform_id, i32 enabled);
-}
 
 f32 GameShadow(GameObject_s *object, NUVEC *position, f32 probe_height, i32 terrain_mask);
 void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);

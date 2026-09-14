@@ -5,6 +5,7 @@
 
 #include "decomp.h"
 #include "legoapi/world/level.h"
+#include "legoapi/render/core/terrain.h"
 #include "globals.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/gizmo/base/GizBlowupObjectInterface.h"
@@ -830,7 +831,6 @@ void KaminoD_Init(WORLDINFO_s *world) {
 }
 
 #include "legoapi/gizmos/object/gizpanel.h"
-extern "C" i32 FindPlatInst(i32);
 
 void KaminoE_Init(WORLDINFO_s *world) {
     kaminoe_netpacket = SetLevelHack(0x14);

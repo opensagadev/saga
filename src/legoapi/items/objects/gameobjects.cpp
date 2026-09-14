@@ -279,7 +279,6 @@ static i32 GameObjectAIUpdateInterval(WORLDINFO_s *world, GameObject_s *object) 
 static const f32 AI_RESPAWN_DELAY = 2.0f;
 
 extern TERRSET *CurTerr;
-extern "C" i32 FindPlatInst(i32 instance);
 
 static f32 Condition_OnForcePlatform(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *packet, char *, void *argument) {
     GIZFORCE_s *force = static_cast<GIZFORCE_s *>(argument);
@@ -2065,10 +2064,6 @@ static i32 SpecialRouteCharacterTypeID(char *name) {
     return -1;
 }
 
-extern "C" {
-    f32 NewShadowEx(NUVEC *position, i32 handle, f32 height_above, f32 height_below, i32 terrain_mask);
-    void PlatOnOff(i32 platform_id, i32 enabled);
-}
 extern i32 TimingBarSet;
 extern i32 SHADOWCALLS;
 extern u32 LAYER_HOVERIGNORE;

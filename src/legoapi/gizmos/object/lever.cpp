@@ -7,6 +7,7 @@
 #include "gamelib/util/gamelib_util_types.h"
 #include "globals.h"
 #include "legoapi/audio/sfx.h"
+#include "legoapi/render/core/terrain.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion.h"
@@ -32,12 +33,6 @@
 #include "nu2api/numath/numtx.h"
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
-
-extern "C" {
-    i32 DeletePlatinst(i32 platform_id);
-    i16 NewPlatPickupInst(void *object, i32 object_type);
-    void PlatInstRotate(i32 platform_id, i32 enabled);
-}
 
 f32 GameShadow(GameObject_s *object, NUVEC *position, f32 probe_height, i32 platform_id);
 void FindAnglesZX(NUVEC *normal, u16 *x_rotation, u16 *z_rotation);

@@ -5,6 +5,7 @@
 #include "gameapi/edtools/edfile.h"
 #include "legoapi/audio/sfx.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/render/core/terrain.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
 #include "gamelib/util/gamelib_util_types.h"
@@ -38,12 +39,6 @@ enum HATMACHINE_ANIMATION_STATE {
 enum HATMACHINE_PLATFORM_TYPE {
     HATMACHINE_PLATFORM_COLLISION = 2,
 };
-
-extern "C" {
-    i32 DeletePlatinst(i32 platform_id);
-    i16 NewPlatPickupInst(void *object, i32 object_type);
-    void PlatInstRotate(i32 platform_id, i32 enabled);
-}
 
 struct HATMACHINEPROGRESS {
     i32 preserved_state;

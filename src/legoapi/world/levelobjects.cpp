@@ -1,10 +1,10 @@
 #include "legoapi/world/level.h"
+#include "legoapi/render/core/terrain.h"
 #include "globals.h"
 
 #include <string.h>
 
 extern "C" i32 NuSpecialExistsFn(void *);
-extern "C" i16 FindPlatInst(i32);
 
 void *LevObj_FindByPlatID(WORLDINFO_s *world, i32 platID) {
     i32 count = LEVELOBJECTCOUNT;
