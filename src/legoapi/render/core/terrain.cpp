@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "legoapi/actions/combat/hits.h"
 #include "legoapi/world/world_shared.h"
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/render/core/terrain_internal.h"
@@ -14,7 +15,7 @@
 #include "legoapi/characters/core/players.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/core/input/qrand.h"
-#include "legoapi/gizmos/object/technos.h"
+#include "legoapi/props/objects/techno.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/level.h"
 #include "nu2api/nucore/numemory.h"
@@ -58,7 +59,6 @@ extern AREADATA_s *PODRACE_ADATA;
 void NewRumble(nupad_s *pad, f32 strength, i32 mode);
 void NewBuzz(nupad_s *pad, f32 duration, i32 mode);
 void GameCam_Blend(GAMECAMERA_s *camera, f32 duration, f32 delay, i32 mode);
-i32 ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32);
 i32 NoLayerKill(GameObject_s *object);
 void ClearLastSafeTakeOver(GameObject_s *object);
 void Player_ClearContext(GameObject_s *object, i32 mode);

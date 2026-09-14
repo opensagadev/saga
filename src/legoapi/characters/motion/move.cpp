@@ -1,4 +1,7 @@
 #include "decomp.h"
+#include "legoapi/actions/movement/jumping.h"
+#include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/actions/combat/hits.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/actions/character/snake.h"
 #include "MechInputTouch/MechInputTouch_types.h"
@@ -23,15 +26,15 @@ static f32 ForceBackRadius2 = 0.0f;
 #include "legoapi/audio/sfx.h"
 #include "legoapi/gizmos/traps/gizforce.h"
 #include "legoapi/gizmos/traps/attractos.h"
-#include "legoapi/gizmos/trigger/signals.h"
+#include "legoapi/props/objects/signal.h"
 #include "legoapi/gizmos/door/securitydoors.h"
-#include "legoapi/gizmos/object/technos.h"
+#include "legoapi/props/objects/techno.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "legoapi/gizmos/object/gizpanel.h"
 #include "legoapi/gizmos/transport/tubes.h"
 #include "legoapi/gizmos/door/zipups.h"
 #include "legoapi/gizmos/transport/grapples.h"
-#include "legoapi/gizmos/transport/tightropes.h"
+#include "legoapi/props/objects/tightrope.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/menus/screens/shop.h"
 #include "legoapi/props/system/socksys.h"
@@ -79,7 +82,6 @@ i32 MovePlayer_GUNSHIPIN(GameObject_s *object);
 i32 MovePlayer_POD(GameObject_s *object);
 void ApplyGravity(GameObject_s *object, float *gravity, float hover_height, float seek_rate, float *ground_height);
 float VehicleTurnOrLoopOffset(GameObject_s *object);
-void GameObjectOrigin(GameObject_s *object);
 void ComboHitFrame(GameObject_s *object, i32 damage);
 i32 Grapple_LookAtPos(GameObject_s *object, NUVEC *position);
 NUVEC *Technos_TgtPos(TECHNO_s *techno);
@@ -93,7 +95,6 @@ void ShoveSystemCheckGameObject(GameObject_s *object);
 i32 GizmoBlowupCheckProximity(WORLDINFO_s *world, GameObject_s *object);
 void KeepWeaponOut(GameObject_s *object);
 void DropInOutCode(GameObject_s *object);
-void Signal_MoveCode(WORLDINFO_s *world, GameObject_s *object);
 void TakeHitCode(GameObject_s *object);
 void FloatCode(GameObject_s *object);
 void SlideCode(GameObject_s *object);
@@ -134,7 +135,6 @@ void BlockSfx(GameObject_s *object);
 i32 NewBlockAction(GameObject_s *object);
 void MakeJumpReachHeight(GameObject_s *, f32, i32);
 void PlayJumpSfx(GameObject_s *, i32);
-void NewRumble(nupad_s *, f32, i32);
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
 i32 GrappleSwingMode = 1;
 void Hint_SetComplete(i32);
@@ -150,7 +150,6 @@ extern i16 id_IMPERIALGUARD;
 extern i16 id_GAMORREANGUARD;
 BOLT_s *FindIncomingBolt(GameObject_s *, i32, i32);
 PART_s *FindIncomingPart(void *, NUVEC *, f32, u32, f32);
-i32 StartFallLand(GameObject_s *object, i32 action);
 void UpdateLastSafePosition(GameObject_s *object);
 extern "C" TERRAIN_SURFACE_s TerSurface[32];
 i32 NoLayerKill(GameObject_s *object);
@@ -190,7 +189,6 @@ i32 FaceOpponent(GameObject_s *object, NUVEC *position);
 void SetProtocolDroidDeactivatedAction(GameObject_s *);
 void NewBuzz(nupad_s *, f32, i32);
 void Arcade_AIKilled(i32);
-i32 ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32);
 i16 *objhitobj_killparts_yrot;
 i32 objhitobj_noimpactsfx;
 void Player_ClearContext(GameObject_s *, i32);
@@ -249,7 +247,6 @@ void BobaRocket_Move(PART_s *, f32);
 void Boulder_Move(PART_s *, f32);
 void Boulder_Kill(PART_s *, i32);
 extern "C" void NewPartRotation(PART_s *);
-void NewBuzzFrames(nupad_s *, i32, i32);
 void PlayGruntSfx(GameObject_s *);
 extern i32 dagobah_training;
 extern i16 id_LUKESKYWALKERDAGOBAH;

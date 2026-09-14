@@ -1,6 +1,7 @@
 #include <cstdio>
 
 #include "decomp.h"
+#include "legoapi/menus/core/gamemessages.h"
 #include "globals.h"
 #include "gameapi/gui/apimenu.h"
 #include "legoapi/audio/audio.h"

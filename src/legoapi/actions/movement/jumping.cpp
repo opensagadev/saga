@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "legoapi/actions/movement/jumping.h"
 #include "globals.h"
 #include "legoapi/audio/sfx.h"
 #include "legoapi/characters/core/character.h"
@@ -74,8 +75,6 @@ static const f32 PLAYER_JUMP_REENTRY_DELAY = 0.2f;
 void PlayJumpSfx(GameObject_s *object, i32 variant);
 void PlayLandSfx(GameObject_s *object, i32 variant, i32 force);
 
-void StartJump(GameObject_s *object, i32 movement_state);
-
 static GAMECHARACTERDATA *Jump_GetCharacterData(GameObject_s *object) {
     if (object == NULL || object->apiobj.character_data == NULL) {
         return NULL;
@@ -90,7 +89,6 @@ static bool Jump_HasAction(const GameObject_s *object, PLAYER_JUMP_ACTION action
 }
 
 void (*BigJump_EndOfLandFn)(GameObject_s *) = NULL;
-void StartEndOfJump(GameObject_s *);
 void FindSlamOrigin(GameObject_s *, NUVEC *, NUVEC *);
 void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
 void NewRumbleAllPlayers(f32, f32, i32, i32);

@@ -72,10 +72,16 @@ DECOMP_ASSERT(offsetof(TECHNO, target_mode) == 0x37, "TECHNO target mode offset"
 extern TECHNO_CONFIG TechnoSys;
 struct GAMEPAD_s;
 struct GameObject_s;
+struct WORLDINFO_s;
 TECHNO *Technos_FindControllingTechno(GameObject_s *object);
 void *Technos_FindTgt(TECHNO_s *techno);
 NUVEC *Technos_TgtPos(TECHNO_s *techno);
 i32 Techno_FindOperator(void *target, GAMEPAD_s **pad, GameObject_s **operator_object);
+TECHNO *Techno_FindNearest(WORLDINFO_s *world, nuvec_s *position, GameObject_s *object, f32 *distance);
+void Technos_MoveTarget(TECHNO_s *techno, GameObject_s *object);
+i32 GizTechno_CanUseTechno(GameObject_s *object, TECHNO_s *techno);
+i32 Techno_isReady(TECHNO_s *techno);
+void Techno_MoveCode(WORLDINFO_s *world, GameObject_s *object);
 
 extern i32 techno_gizmotype_id;
 

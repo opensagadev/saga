@@ -49,6 +49,7 @@ i32 Game_100PercentComplete();
 GameObject_s *FindGameObject(i32 id, u32 type, i32 a3, i32 a4, i32 a5);
 CABLE_s *CreateCable(GameObject_s *source, GameObject_s *target, i32 flags);
 void KillGameObject(GameObject_s *object, i32 reason, i32 flags);
+void GameObjectOrigin(GameObject_s *object);
 void InitSurfaceInfo(GameObject_s *object);
 i32 SetObjOnSurface(GameObject_s *object, i32 mode);
 i32 Game_IgnoreInput();

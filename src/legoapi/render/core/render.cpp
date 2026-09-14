@@ -1,5 +1,6 @@
 #include "decomp.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/actions/character/transform.h"
 #include "legoapi/actions/movement/carrying.h"
 #include "legoapi/actions/character/snake.h"
 #include "legoapi/core/input/gamepads.h"
@@ -7,6 +8,7 @@
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/menus/core/text.h"
 #include "legoapi/menus/core/panel.h"
+#include "legoapi/menus/core/gamemessages.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/menus/screens/gamemenuall.h"
 #include "legoapi/render/light/fade_material.h"
@@ -2366,7 +2368,6 @@ f32 dco_reflectcoord = 2000000.0f;
 GAMECHARACTERDATA_s *dco_gcdata;
 CHARACTERMODEL_s *dco_cmodel;
 void (*DisguiseAdjustFn)(i32, i32, NUVEC *, NUVEC *);
-void QuatInterpolateRotationMatrix(NUMTX *, NUMTX *, NUMTX *, f32);
 void DrawObjectOnCharacter(WORLDINFO_s *world, GameObject_s *object, i32 object_id, nuhspecial_s *special, i32 locator,
                            i32 second_locator, NUMTX *joints, i32 reflect, u32 layers, NUMTX *rotation,
                            NUVEC *translation, f32 alpha, f32 scale) {
@@ -2838,7 +2839,6 @@ void TransformGameMessages(nuvec_s *, nuvec_s *, nuvec_s *);
 void Customiser_TransformToPanel(CUSTOMISER *);
 i32 Arcade_GetMode(u32 *);
 char *GameObj_GetName(i32, GameObject_s *, char *);
-i32 FindGameMsgsWithID(i32, i32, i32, GAMEMESSAGE_s *);
 f32 PowerUp_GetPanelY(i32);
 u32 Cheat_MultiplyScore(u32);
 void Text_MakeScore(u32, char *);

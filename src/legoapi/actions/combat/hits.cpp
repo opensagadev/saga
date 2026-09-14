@@ -1,4 +1,6 @@
 #include "decomp.h"
+#include "legoapi/actions/combat/hits.h"
+#include "legoapi/actions/character/speederchase.h"
 #include "legoapi/gizmos/object/gizbuildits.h"
 #include "globals.h"
 #include "legoapi/characters/core/character.h"
@@ -53,7 +55,6 @@ void SnakeBeenHit(GameObject_s *);
 void PopBalloon(GameObject_s *);
 i32 Player_HasFastBuild(GameObject_s *);
 i32 Player_HasInvincibility(GameObject_s *);
-i32 ObjIsTargetSpeeder(GameObject_s *);
 i32 LoseCoins(GameObject_s *, i32);
 i32 ReleaseHearts();
 void AddPickups(i32, i32, i32, i32, NUVEC *, NUVEC *, f32, i32, f32, f32, GameObject_s *, i32, i32, bool);

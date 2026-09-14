@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.130043,
+    "fuzzy_match_percent": 46.13165,
     "total_code": "4722419",
-    "matched_code": "400297",
-    "matched_code_percent": 8.476524,
+    "matched_code": "401463",
+    "matched_code_percent": 8.501215,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4763,
-    "matched_functions_percent": 35.388958,
+    "matched_functions": 4766,
+    "matched_functions_percent": 35.411247,
     "total_units": 1
   },
   "text": {
@@ -37867,7 +37867,7 @@
           "address": 2349328,
           "offset": 1459360,
           "size": 98,
-          "match_percent": 16.153847
+          "match_percent": 16.923077
         },
         {
           "name": "_Z30SpeederChase_ObjIsAGroundTroopP12GameObject_s",
@@ -56463,197 +56463,6 @@
       ]
     },
     {
-      "name": "legoapi/gizmos/object/technos.cpp.o",
-      "source": "src/legoapi/gizmos/object/technos.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/technos.o",
-      "functions": [
-        {
-          "name": "_ZL26Technos_ReserveBufferSpacePv",
-          "demangled_name": "Technos_ReserveBufferSpace(void*)",
-          "address": 1943696,
-          "offset": 1053728,
-          "size": 84,
-          "match_percent": 76.17647
-        },
-        {
-          "name": "_ZL20Techno_SetVisibilityP7GIZMO_si",
-          "demangled_name": "Techno_SetVisibility(GIZMO_s*, int)",
-          "address": 1943792,
-          "offset": 1053824,
-          "size": 36,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL15Techno_ActivateP7GIZMO_si",
-          "demangled_name": "Techno_Activate(GIZMO_s*, int)",
-          "address": 1943840,
-          "offset": 1053872,
-          "size": 34,
-          "match_percent": 98.92857
-        },
-        {
-          "name": "_ZL19Technos_EarlyUpdatePvS_f",
-          "demangled_name": "Technos_EarlyUpdate(void*, void*, float)",
-          "address": 1943888,
-          "offset": 1053920,
-          "size": 53,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL20Technos_GetMaxGizmosPv",
-          "demangled_name": "Technos_GetMaxGizmos(void*)",
-          "address": 1943952,
-          "offset": 1053984,
-          "size": 27,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL19Techno_GetGizmoNameP7GIZMO_s",
-          "demangled_name": "Techno_GetGizmoName(GIZMO_s*)",
-          "address": 1943984,
-          "offset": 1054016,
-          "size": 19,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL20Techno_GetOutputNameP7GIZMO_si",
-          "demangled_name": "Techno_GetOutputName(GIZMO_s*, int)",
-          "address": 1944016,
-          "offset": 1054048,
-          "size": 22,
-          "match_percent": 99.875
-        },
-        {
-          "name": "_ZL20Techno_GetNumOutputsP7GIZMO_s",
-          "demangled_name": "Techno_GetNumOutputs(GIZMO_s*)",
-          "address": 1944048,
-          "offset": 1054080,
-          "size": 12,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL13Techno_GetPosP7GIZMO_s",
-          "demangled_name": "Techno_GetPos(GIZMO_s*)",
-          "address": 1944064,
-          "offset": 1054096,
-          "size": 27,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL13Technos_ResetPvS_S_",
-          "demangled_name": "Technos_Reset(void*, void*, void*)",
-          "address": 1944096,
-          "offset": 1054128,
-          "size": 409,
-          "match_percent": 81.62136
-        },
-        {
-          "name": "_ZL21Technos_ClearProgressPvS_",
-          "demangled_name": "Technos_ClearProgress(void*, void*)",
-          "address": 1944512,
-          "offset": 1054544,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL28Technos_AllocateProgressDataP9variptr_uS0_",
-          "demangled_name": "Technos_AllocateProgressData(variptr_u*, variptr_u*)",
-          "address": 1944544,
-          "offset": 1054576,
-          "size": 50,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL16Techno_GetOutputP7GIZMO_sii",
-          "demangled_name": "Techno_GetOutput(GIZMO_s*, int, int)",
-          "address": 1944608,
-          "offset": 1054640,
-          "size": 168,
-          "match_percent": 24.415094
-        },
-        {
-          "name": "_ZL12Technos_DrawPvS_f",
-          "demangled_name": "Technos_Draw(void*, void*, float)",
-          "address": 1944784,
-          "offset": 1054816,
-          "size": 1269,
-          "match_percent": 24.003311
-        },
-        {
-          "name": "_ZL18Technos_LateUpdatePvS_f",
-          "demangled_name": "Technos_LateUpdate(void*, void*, float)",
-          "address": 1946064,
-          "offset": 1056096,
-          "size": 152,
-          "match_percent": 99.68519
-        },
-        {
-          "name": "_ZL17Technos_AddGizmosP10GIZMOSYS_siPvS1_",
-          "demangled_name": "Technos_AddGizmos(GIZMOSYS_s*, int, void*, void*)",
-          "address": 1946224,
-          "offset": 1056256,
-          "size": 134,
-          "match_percent": 89.90476
-        },
-        {
-          "name": "_ZL12Technos_LoadPvS_",
-          "demangled_name": "Technos_Load(void*, void*)",
-          "address": 1946368,
-          "offset": 1056400,
-          "size": 415,
-          "match_percent": 21.100918
-        },
-        {
-          "name": "_ZL21Technos_StoreProgressPvS_S_",
-          "demangled_name": "Technos_StoreProgress(void*, void*, void*)",
-          "address": 1946784,
-          "offset": 1056816,
-          "size": 139,
-          "match_percent": 69.44898
-        },
-        {
-          "name": "_Z29Technos_FindControllingTechnoP12GameObject_s",
-          "demangled_name": "Technos_FindControllingTechno(GameObject_s*)",
-          "address": 1946928,
-          "offset": 1056960,
-          "size": 94,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z15Technos_FindTgtP8TECHNO_s",
-          "demangled_name": "Technos_FindTgt(TECHNO_s*)",
-          "address": 1947024,
-          "offset": 1057056,
-          "size": 474,
-          "match_percent": 0.0
-        },
-        {
-          "name": "_Z14Technos_TgtPosP8TECHNO_s",
-          "demangled_name": "Technos_TgtPos(TECHNO_s*)",
-          "address": 1947504,
-          "offset": 1057536,
-          "size": 189,
-          "match_percent": 99.72222
-        },
-        {
-          "name": "_Z21Technos_RegisterGizmoi",
-          "demangled_name": "Technos_RegisterGizmo(int)",
-          "address": 1948640,
-          "offset": 1058672,
-          "size": 390,
-          "match_percent": 98.62687
-        },
-        {
-          "name": "_Z19Techno_FindOperatorPvPP9GAMEPAD_sPP12GameObject_s",
-          "demangled_name": "Techno_FindOperator(void*, GAMEPAD_s**, GameObject_s**)",
-          "address": 1949968,
-          "offset": 1060000,
-          "size": 935,
-          "match_percent": 99.87234
-        }
-      ]
-    },
-    {
       "name": "legoapi/gizmos/transport/gizportal.cpp.o",
       "source": "src/legoapi/gizmos/transport/gizportal.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/1/gizportal.o",
@@ -57286,197 +57095,6 @@
           "offset": 353264,
           "size": 340,
           "match_percent": 92.62963
-        }
-      ]
-    },
-    {
-      "name": "legoapi/gizmos/transport/tightropes.cpp.o",
-      "source": "src/legoapi/gizmos/transport/tightropes.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/tightropes.o",
-      "functions": [
-        {
-          "name": "_ZL29TightRopes_ReserveBufferSpacePv",
-          "demangled_name": "TightRopes_ReserveBufferSpace(void*)",
-          "address": 1880944,
-          "offset": 990976,
-          "size": 85,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL18TightRope_ActivateP7GIZMO_si",
-          "demangled_name": "TightRope_Activate(GIZMO_s*, int)",
-          "address": 1881040,
-          "offset": 991072,
-          "size": 23,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL23TightRope_SetVisibilityP7GIZMO_si",
-          "demangled_name": "TightRope_SetVisibility(GIZMO_s*, int)",
-          "address": 1881072,
-          "offset": 991104,
-          "size": 23,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL23TightRopes_GetMaxGizmosPv",
-          "demangled_name": "TightRopes_GetMaxGizmos(void*)",
-          "address": 1881104,
-          "offset": 991136,
-          "size": 27,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL22TightRope_GetGizmoNameP7GIZMO_s",
-          "demangled_name": "TightRope_GetGizmoName(GIZMO_s*)",
-          "address": 1881136,
-          "offset": 991168,
-          "size": 19,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL19TightRope_GetOutputP7GIZMO_sii",
-          "demangled_name": "TightRope_GetOutput(GIZMO_s*, int, int)",
-          "address": 1881168,
-          "offset": 991200,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL23TightRope_GetOutputNameP7GIZMO_si",
-          "demangled_name": "TightRope_GetOutputName(GIZMO_s*, int)",
-          "address": 1881200,
-          "offset": 991232,
-          "size": 22,
-          "match_percent": 77.5
-        },
-        {
-          "name": "_ZL23TightRope_GetNumOutputsP7GIZMO_s",
-          "demangled_name": "TightRope_GetNumOutputs(GIZMO_s*)",
-          "address": 1881232,
-          "offset": 991264,
-          "size": 12,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL20TightRope_MoveUpdateP12GameObject_si",
-          "demangled_name": "TightRope_MoveUpdate(GameObject_s*, int)",
-          "address": 1881248,
-          "offset": 991280,
-          "size": 877,
-          "match_percent": 79.68229
-        },
-        {
-          "name": "_ZL16TightRopes_ResetPvS_S_",
-          "demangled_name": "TightRopes_Reset(void*, void*, void*)",
-          "address": 1882128,
-          "offset": 992160,
-          "size": 265,
-          "match_percent": 99.986115
-        },
-        {
-          "name": "_ZL24TightRopes_ClearProgressPvS_",
-          "demangled_name": "TightRopes_ClearProgress(void*, void*)",
-          "address": 1882400,
-          "offset": 992432,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL31TightRopes_AllocateProgressDataP9variptr_uS0_",
-          "demangled_name": "TightRopes_AllocateProgressData(variptr_u*, variptr_u*)",
-          "address": 1882432,
-          "offset": 992464,
-          "size": 50,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL15TightRopes_DrawPvS_f",
-          "demangled_name": "TightRopes_Draw(void*, void*, float)",
-          "address": 1882496,
-          "offset": 992528,
-          "size": 1134,
-          "match_percent": 1.956522
-        },
-        {
-          "name": "_ZL20TightRopes_AddGizmosP10GIZMOSYS_siPvS1_",
-          "demangled_name": "TightRopes_AddGizmos(GIZMOSYS_s*, int, void*, void*)",
-          "address": 1883632,
-          "offset": 993664,
-          "size": 141,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL15TightRopes_LoadPvS_",
-          "demangled_name": "TightRopes_Load(void*, void*)",
-          "address": 1883776,
-          "offset": 993808,
-          "size": 382,
-          "match_percent": 89.902916
-        },
-        {
-          "name": "_ZL24TightRopes_StoreProgressPvS_S_",
-          "demangled_name": "TightRopes_StoreProgress(void*, void*, void*)",
-          "address": 1884160,
-          "offset": 994192,
-          "size": 125,
-          "match_percent": 73.95652
-        },
-        {
-          "name": "_Z21TightRope_FindNearestP7nuvec_sP11WORLDINFO_sPiPf",
-          "demangled_name": "TightRope_FindNearest(nuvec_s*, WORLDINFO_s*, int*, float*)",
-          "address": 1884288,
-          "offset": 994320,
-          "size": 303,
-          "match_percent": 94.904106
-        },
-        {
-          "name": "_Z17TightRope_InRangeP12GameObject_sP11WORLDINFO_sP7nuvec_s",
-          "demangled_name": "TightRope_InRange(GameObject_s*, WORLDINFO_s*, nuvec_s*)",
-          "address": 1884592,
-          "offset": 994624,
-          "size": 531,
-          "match_percent": 65.94776
-        },
-        {
-          "name": "_ZL16TightRope_AttachP12GameObject_sP11WORLDINFO_s",
-          "demangled_name": "TightRope_Attach(GameObject_s*, WORLDINFO_s*)",
-          "address": 1885136,
-          "offset": 995168,
-          "size": 746,
-          "match_percent": 90.32022
-        },
-        {
-          "name": "_Z24TightRopes_RegisterGizmoi",
-          "demangled_name": "TightRopes_RegisterGizmo(int)",
-          "address": 1885888,
-          "offset": 995920,
-          "size": 372,
-          "match_percent": 99.409836
-        },
-        {
-          "name": "_Z16TightRope_SnapToP12GameObject_sP7nuvec_s",
-          "demangled_name": "TightRope_SnapTo(GameObject_s*, nuvec_s*)",
-          "address": 1886272,
-          "offset": 996304,
-          "size": 342,
-          "match_percent": 90.54054
-        },
-        {
-          "name": "_Z18TightRope_MoveCodeP12GameObject_si",
-          "demangled_name": "TightRope_MoveCode(GameObject_s*, int)",
-          "address": 1886624,
-          "offset": 996656,
-          "size": 1364,
-          "match_percent": 10.272727
-        },
-        {
-          "name": "_Z22TightRope_SetTargetMomP12GameObject_s",
-          "demangled_name": "TightRope_SetTargetMom(GameObject_s*)",
-          "address": 1888000,
-          "offset": 998032,
-          "size": 441,
-          "match_percent": 92.82758
         }
       ]
     },
@@ -59481,165 +59099,6 @@
           "offset": 4048336,
           "size": 374,
           "match_percent": 97.38983
-        }
-      ]
-    },
-    {
-      "name": "legoapi/gizmos/trigger/signals.cpp.o",
-      "source": "src/legoapi/gizmos/trigger/signals.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/signals.o",
-      "functions": [
-        {
-          "name": "_ZL26Signals_ReserveBufferSpacePv",
-          "demangled_name": "Signals_ReserveBufferSpace(void*)",
-          "address": 1888448,
-          "offset": 998480,
-          "size": 87,
-          "match_percent": 25.882353
-        },
-        {
-          "name": "_ZL15Signal_ActivateP7GIZMO_si",
-          "demangled_name": "Signal_Activate(GIZMO_s*, int)",
-          "address": 1888544,
-          "offset": 998576,
-          "size": 36,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL18Signal_ActivateRevP7GIZMO_sii",
-          "demangled_name": "Signal_ActivateRev(GIZMO_s*, int, int)",
-          "address": 1888592,
-          "offset": 998624,
-          "size": 83,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL13Signal_GetPosP7GIZMO_s",
-          "demangled_name": "Signal_GetPos(GIZMO_s*)",
-          "address": 1888688,
-          "offset": 998720,
-          "size": 27,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL20Signals_GetMaxGizmosPv",
-          "demangled_name": "Signals_GetMaxGizmos(void*)",
-          "address": 1888720,
-          "offset": 998752,
-          "size": 27,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL19Signal_GetGizmoNameP7GIZMO_s",
-          "demangled_name": "Signal_GetGizmoName(GIZMO_s*)",
-          "address": 1888752,
-          "offset": 998784,
-          "size": 19,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL16Signal_GetOutputP7GIZMO_sii",
-          "demangled_name": "Signal_GetOutput(GIZMO_s*, int, int)",
-          "address": 1888784,
-          "offset": 998816,
-          "size": 22,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL20Signal_GetOutputNameP7GIZMO_si",
-          "demangled_name": "Signal_GetOutputName(GIZMO_s*, int)",
-          "address": 1888816,
-          "offset": 998848,
-          "size": 22,
-          "match_percent": 99.875
-        },
-        {
-          "name": "_ZL20Signal_GetNumOutputsP7GIZMO_s",
-          "demangled_name": "Signal_GetNumOutputs(GIZMO_s*)",
-          "address": 1888848,
-          "offset": 998880,
-          "size": 12,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL21Signals_ClearProgressPvS_",
-          "demangled_name": "Signals_ClearProgress(void*, void*)",
-          "address": 1888864,
-          "offset": 998896,
-          "size": 140,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL28Signals_AllocateProgressDataP9variptr_uS0_",
-          "demangled_name": "Signals_AllocateProgressData(variptr_u*, variptr_u*)",
-          "address": 1889008,
-          "offset": 999040,
-          "size": 50,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL12Signals_DrawPvS_f",
-          "demangled_name": "Signals_Draw(void*, void*, float)",
-          "address": 1889072,
-          "offset": 999104,
-          "size": 884,
-          "match_percent": 2.009569
-        },
-        {
-          "name": "_ZL14Signals_UpdatePvS_f",
-          "demangled_name": "Signals_Update(void*, void*, float)",
-          "address": 1889968,
-          "offset": 1000000,
-          "size": 2426,
-          "match_percent": 0.924856
-        },
-        {
-          "name": "_ZL17Signals_AddGizmosP10GIZMOSYS_siPvS1_",
-          "demangled_name": "Signals_AddGizmos(GIZMOSYS_s*, int, void*, void*)",
-          "address": 1892400,
-          "offset": 1002432,
-          "size": 137,
-          "match_percent": 10.0
-        },
-        {
-          "name": "_ZL12Signals_LoadPvS_",
-          "demangled_name": "Signals_Load(void*, void*)",
-          "address": 1892544,
-          "offset": 1002576,
-          "size": 365,
-          "match_percent": 4.536082
-        },
-        {
-          "name": "_ZL13Signals_ResetPvS_S_",
-          "demangled_name": "Signals_Reset(void*, void*, void*)",
-          "address": 1892912,
-          "offset": 1002944,
-          "size": 761,
-          "match_percent": 3.606557
-        },
-        {
-          "name": "_ZL21Signals_StoreProgressPvS_S_",
-          "demangled_name": "Signals_StoreProgress(void*, void*, void*)",
-          "address": 1893680,
-          "offset": 1003712,
-          "size": 330,
-          "match_percent": 4.666666
-        },
-        {
-          "name": "_ZL25Signal_SetGizmoVisibilityP7GIZMO_si",
-          "demangled_name": "Signal_SetGizmoVisibility(GIZMO_s*, int)",
-          "address": 1894016,
-          "offset": 1004048,
-          "size": 140,
-          "match_percent": 91.21951
-        },
-        {
-          "name": "_Z21Signals_RegisterGizmoi",
-          "demangled_name": "Signals_RegisterGizmo(int)",
-          "address": 1894704,
-          "offset": 1004736,
-          "size": 378,
-          "match_percent": 98.578125
         }
       ]
     },
@@ -71539,6 +70998,150 @@
           "match_percent": 99.35294
         },
         {
+          "name": "_ZL26Signals_ReserveBufferSpacePv",
+          "demangled_name": "Signals_ReserveBufferSpace(void*)",
+          "address": 1888448,
+          "offset": 998480,
+          "size": 87,
+          "match_percent": 25.882353
+        },
+        {
+          "name": "_ZL15Signal_ActivateP7GIZMO_si",
+          "demangled_name": "Signal_Activate(GIZMO_s*, int)",
+          "address": 1888544,
+          "offset": 998576,
+          "size": 36,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL18Signal_ActivateRevP7GIZMO_sii",
+          "demangled_name": "Signal_ActivateRev(GIZMO_s*, int, int)",
+          "address": 1888592,
+          "offset": 998624,
+          "size": 83,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL13Signal_GetPosP7GIZMO_s",
+          "demangled_name": "Signal_GetPos(GIZMO_s*)",
+          "address": 1888688,
+          "offset": 998720,
+          "size": 27,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL20Signals_GetMaxGizmosPv",
+          "demangled_name": "Signals_GetMaxGizmos(void*)",
+          "address": 1888720,
+          "offset": 998752,
+          "size": 27,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL19Signal_GetGizmoNameP7GIZMO_s",
+          "demangled_name": "Signal_GetGizmoName(GIZMO_s*)",
+          "address": 1888752,
+          "offset": 998784,
+          "size": 19,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL16Signal_GetOutputP7GIZMO_sii",
+          "demangled_name": "Signal_GetOutput(GIZMO_s*, int, int)",
+          "address": 1888784,
+          "offset": 998816,
+          "size": 22,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL20Signal_GetOutputNameP7GIZMO_si",
+          "demangled_name": "Signal_GetOutputName(GIZMO_s*, int)",
+          "address": 1888816,
+          "offset": 998848,
+          "size": 22,
+          "match_percent": 99.875
+        },
+        {
+          "name": "_ZL20Signal_GetNumOutputsP7GIZMO_s",
+          "demangled_name": "Signal_GetNumOutputs(GIZMO_s*)",
+          "address": 1888848,
+          "offset": 998880,
+          "size": 12,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL21Signals_ClearProgressPvS_",
+          "demangled_name": "Signals_ClearProgress(void*, void*)",
+          "address": 1888864,
+          "offset": 998896,
+          "size": 140,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL28Signals_AllocateProgressDataP9variptr_uS0_",
+          "demangled_name": "Signals_AllocateProgressData(variptr_u*, variptr_u*)",
+          "address": 1889008,
+          "offset": 999040,
+          "size": 50,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL12Signals_DrawPvS_f",
+          "demangled_name": "Signals_Draw(void*, void*, float)",
+          "address": 1889072,
+          "offset": 999104,
+          "size": 884,
+          "match_percent": 2.009569
+        },
+        {
+          "name": "_ZL14Signals_UpdatePvS_f",
+          "demangled_name": "Signals_Update(void*, void*, float)",
+          "address": 1889968,
+          "offset": 1000000,
+          "size": 2426,
+          "match_percent": 0.924856
+        },
+        {
+          "name": "_ZL17Signals_AddGizmosP10GIZMOSYS_siPvS1_",
+          "demangled_name": "Signals_AddGizmos(GIZMOSYS_s*, int, void*, void*)",
+          "address": 1892400,
+          "offset": 1002432,
+          "size": 137,
+          "match_percent": 10.0
+        },
+        {
+          "name": "_ZL12Signals_LoadPvS_",
+          "demangled_name": "Signals_Load(void*, void*)",
+          "address": 1892544,
+          "offset": 1002576,
+          "size": 365,
+          "match_percent": 4.536082
+        },
+        {
+          "name": "_ZL13Signals_ResetPvS_S_",
+          "demangled_name": "Signals_Reset(void*, void*, void*)",
+          "address": 1892912,
+          "offset": 1002944,
+          "size": 761,
+          "match_percent": 3.606557
+        },
+        {
+          "name": "_ZL21Signals_StoreProgressPvS_S_",
+          "demangled_name": "Signals_StoreProgress(void*, void*, void*)",
+          "address": 1893680,
+          "offset": 1003712,
+          "size": 330,
+          "match_percent": 4.666666
+        },
+        {
+          "name": "_ZL25Signal_SetGizmoVisibilityP7GIZMO_si",
+          "demangled_name": "Signal_SetGizmoVisibility(GIZMO_s*, int)",
+          "address": 1894016,
+          "offset": 1004048,
+          "size": 140,
+          "match_percent": 91.21951
+        },
+        {
           "name": "_Z19Signals_InitTerrainP11WORLDINFO_s",
           "demangled_name": "Signals_InitTerrain(WORLDINFO_s*)",
           "address": 1894160,
@@ -71553,6 +71156,14 @@
           "offset": 1004320,
           "size": 414,
           "match_percent": 3.962264
+        },
+        {
+          "name": "_Z21Signals_RegisterGizmoi",
+          "demangled_name": "Signals_RegisterGizmo(int)",
+          "address": 1894704,
+          "offset": 1004736,
+          "size": 378,
+          "match_percent": 98.578125
         },
         {
           "name": "_Z15Signal_MoveCodeP11WORLDINFO_sP12GameObject_s",
@@ -71586,6 +71197,174 @@
           "match_percent": 99.35294
         },
         {
+          "name": "_ZL26Technos_ReserveBufferSpacePv",
+          "demangled_name": "Technos_ReserveBufferSpace(void*)",
+          "address": 1943696,
+          "offset": 1053728,
+          "size": 84,
+          "match_percent": 76.17647
+        },
+        {
+          "name": "_ZL20Techno_SetVisibilityP7GIZMO_si",
+          "demangled_name": "Techno_SetVisibility(GIZMO_s*, int)",
+          "address": 1943792,
+          "offset": 1053824,
+          "size": 36,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL15Techno_ActivateP7GIZMO_si",
+          "demangled_name": "Techno_Activate(GIZMO_s*, int)",
+          "address": 1943840,
+          "offset": 1053872,
+          "size": 34,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL19Technos_EarlyUpdatePvS_f",
+          "demangled_name": "Technos_EarlyUpdate(void*, void*, float)",
+          "address": 1943888,
+          "offset": 1053920,
+          "size": 53,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL20Technos_GetMaxGizmosPv",
+          "demangled_name": "Technos_GetMaxGizmos(void*)",
+          "address": 1943952,
+          "offset": 1053984,
+          "size": 27,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL19Techno_GetGizmoNameP7GIZMO_s",
+          "demangled_name": "Techno_GetGizmoName(GIZMO_s*)",
+          "address": 1943984,
+          "offset": 1054016,
+          "size": 19,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL20Techno_GetOutputNameP7GIZMO_si",
+          "demangled_name": "Techno_GetOutputName(GIZMO_s*, int)",
+          "address": 1944016,
+          "offset": 1054048,
+          "size": 22,
+          "match_percent": 99.875
+        },
+        {
+          "name": "_ZL20Techno_GetNumOutputsP7GIZMO_s",
+          "demangled_name": "Techno_GetNumOutputs(GIZMO_s*)",
+          "address": 1944048,
+          "offset": 1054080,
+          "size": 12,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL13Techno_GetPosP7GIZMO_s",
+          "demangled_name": "Techno_GetPos(GIZMO_s*)",
+          "address": 1944064,
+          "offset": 1054096,
+          "size": 27,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL13Technos_ResetPvS_S_",
+          "demangled_name": "Technos_Reset(void*, void*, void*)",
+          "address": 1944096,
+          "offset": 1054128,
+          "size": 409,
+          "match_percent": 81.91262
+        },
+        {
+          "name": "_ZL21Technos_ClearProgressPvS_",
+          "demangled_name": "Technos_ClearProgress(void*, void*)",
+          "address": 1944512,
+          "offset": 1054544,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL28Technos_AllocateProgressDataP9variptr_uS0_",
+          "demangled_name": "Technos_AllocateProgressData(variptr_u*, variptr_u*)",
+          "address": 1944544,
+          "offset": 1054576,
+          "size": 50,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL16Techno_GetOutputP7GIZMO_sii",
+          "demangled_name": "Techno_GetOutput(GIZMO_s*, int, int)",
+          "address": 1944608,
+          "offset": 1054640,
+          "size": 168,
+          "match_percent": 24.415094
+        },
+        {
+          "name": "_ZL12Technos_DrawPvS_f",
+          "demangled_name": "Technos_Draw(void*, void*, float)",
+          "address": 1944784,
+          "offset": 1054816,
+          "size": 1269,
+          "match_percent": 24.003311
+        },
+        {
+          "name": "_ZL18Technos_LateUpdatePvS_f",
+          "demangled_name": "Technos_LateUpdate(void*, void*, float)",
+          "address": 1946064,
+          "offset": 1056096,
+          "size": 152,
+          "match_percent": 99.96296
+        },
+        {
+          "name": "_ZL17Technos_AddGizmosP10GIZMOSYS_siPvS1_",
+          "demangled_name": "Technos_AddGizmos(GIZMOSYS_s*, int, void*, void*)",
+          "address": 1946224,
+          "offset": 1056256,
+          "size": 134,
+          "match_percent": 89.90476
+        },
+        {
+          "name": "_ZL12Technos_LoadPvS_",
+          "demangled_name": "Technos_Load(void*, void*)",
+          "address": 1946368,
+          "offset": 1056400,
+          "size": 415,
+          "match_percent": 21.100918
+        },
+        {
+          "name": "_ZL21Technos_StoreProgressPvS_S_",
+          "demangled_name": "Technos_StoreProgress(void*, void*, void*)",
+          "address": 1946784,
+          "offset": 1056816,
+          "size": 139,
+          "match_percent": 69.44898
+        },
+        {
+          "name": "_Z29Technos_FindControllingTechnoP12GameObject_s",
+          "demangled_name": "Technos_FindControllingTechno(GameObject_s*)",
+          "address": 1946928,
+          "offset": 1056960,
+          "size": 94,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z15Technos_FindTgtP8TECHNO_s",
+          "demangled_name": "Technos_FindTgt(TECHNO_s*)",
+          "address": 1947024,
+          "offset": 1057056,
+          "size": 474,
+          "match_percent": 0.0
+        },
+        {
+          "name": "_Z14Technos_TgtPosP8TECHNO_s",
+          "demangled_name": "Technos_TgtPos(TECHNO_s*)",
+          "address": 1947504,
+          "offset": 1057536,
+          "size": 189,
+          "match_percent": 99.72222
+        },
+        {
           "name": "_Z18Technos_MoveTargetP8TECHNO_sP12GameObject_s",
           "demangled_name": "Technos_MoveTarget(TECHNO_s*, GameObject_s*)",
           "address": 1947696,
@@ -71607,7 +71386,15 @@
           "address": 1948224,
           "offset": 1058256,
           "size": 406,
-          "match_percent": 99.833336
+          "match_percent": 99.97222
+        },
+        {
+          "name": "_Z21Technos_RegisterGizmoi",
+          "demangled_name": "Technos_RegisterGizmo(int)",
+          "address": 1948640,
+          "offset": 1058672,
+          "size": 390,
+          "match_percent": 98.62687
         },
         {
           "name": "_Z14Techno_isReadyP8TECHNO_s",
@@ -71615,7 +71402,7 @@
           "address": 1949040,
           "offset": 1059072,
           "size": 197,
-          "match_percent": 99.49152
+          "match_percent": 100.0
         },
         {
           "name": "_Z15Techno_MoveCodeP11WORLDINFO_sP12GameObject_s",
@@ -71624,6 +71411,14 @@
           "offset": 1059280,
           "size": 719,
           "match_percent": 26.120253
+        },
+        {
+          "name": "_Z19Techno_FindOperatorPvPP9GAMEPAD_sPP12GameObject_s",
+          "demangled_name": "Techno_FindOperator(void*, GAMEPAD_s**, GameObject_s**)",
+          "address": 1949968,
+          "offset": 1060000,
+          "size": 935,
+          "match_percent": 100.0
         }
       ]
     },
@@ -71638,7 +71433,191 @@
           "address": 897216,
           "offset": 7248,
           "size": 93,
-          "match_percent": 29.411764
+          "match_percent": 99.35294
+        },
+        {
+          "name": "_ZL29TightRopes_ReserveBufferSpacePv",
+          "demangled_name": "TightRopes_ReserveBufferSpace(void*)",
+          "address": 1880944,
+          "offset": 990976,
+          "size": 85,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL18TightRope_ActivateP7GIZMO_si",
+          "demangled_name": "TightRope_Activate(GIZMO_s*, int)",
+          "address": 1881040,
+          "offset": 991072,
+          "size": 23,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL23TightRope_SetVisibilityP7GIZMO_si",
+          "demangled_name": "TightRope_SetVisibility(GIZMO_s*, int)",
+          "address": 1881072,
+          "offset": 991104,
+          "size": 23,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL23TightRopes_GetMaxGizmosPv",
+          "demangled_name": "TightRopes_GetMaxGizmos(void*)",
+          "address": 1881104,
+          "offset": 991136,
+          "size": 27,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL22TightRope_GetGizmoNameP7GIZMO_s",
+          "demangled_name": "TightRope_GetGizmoName(GIZMO_s*)",
+          "address": 1881136,
+          "offset": 991168,
+          "size": 19,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL19TightRope_GetOutputP7GIZMO_sii",
+          "demangled_name": "TightRope_GetOutput(GIZMO_s*, int, int)",
+          "address": 1881168,
+          "offset": 991200,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL23TightRope_GetOutputNameP7GIZMO_si",
+          "demangled_name": "TightRope_GetOutputName(GIZMO_s*, int)",
+          "address": 1881200,
+          "offset": 991232,
+          "size": 22,
+          "match_percent": 77.5
+        },
+        {
+          "name": "_ZL23TightRope_GetNumOutputsP7GIZMO_s",
+          "demangled_name": "TightRope_GetNumOutputs(GIZMO_s*)",
+          "address": 1881232,
+          "offset": 991264,
+          "size": 12,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL20TightRope_MoveUpdateP12GameObject_si",
+          "demangled_name": "TightRope_MoveUpdate(GameObject_s*, int)",
+          "address": 1881248,
+          "offset": 991280,
+          "size": 877,
+          "match_percent": 79.68229
+        },
+        {
+          "name": "_ZL16TightRopes_ResetPvS_S_",
+          "demangled_name": "TightRopes_Reset(void*, void*, void*)",
+          "address": 1882128,
+          "offset": 992160,
+          "size": 265,
+          "match_percent": 99.986115
+        },
+        {
+          "name": "_ZL24TightRopes_ClearProgressPvS_",
+          "demangled_name": "TightRopes_ClearProgress(void*, void*)",
+          "address": 1882400,
+          "offset": 992432,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL31TightRopes_AllocateProgressDataP9variptr_uS0_",
+          "demangled_name": "TightRopes_AllocateProgressData(variptr_u*, variptr_u*)",
+          "address": 1882432,
+          "offset": 992464,
+          "size": 50,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL15TightRopes_DrawPvS_f",
+          "demangled_name": "TightRopes_Draw(void*, void*, float)",
+          "address": 1882496,
+          "offset": 992528,
+          "size": 1134,
+          "match_percent": 1.956522
+        },
+        {
+          "name": "_ZL20TightRopes_AddGizmosP10GIZMOSYS_siPvS1_",
+          "demangled_name": "TightRopes_AddGizmos(GIZMOSYS_s*, int, void*, void*)",
+          "address": 1883632,
+          "offset": 993664,
+          "size": 141,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL15TightRopes_LoadPvS_",
+          "demangled_name": "TightRopes_Load(void*, void*)",
+          "address": 1883776,
+          "offset": 993808,
+          "size": 382,
+          "match_percent": 89.902916
+        },
+        {
+          "name": "_ZL24TightRopes_StoreProgressPvS_S_",
+          "demangled_name": "TightRopes_StoreProgress(void*, void*, void*)",
+          "address": 1884160,
+          "offset": 994192,
+          "size": 125,
+          "match_percent": 73.95652
+        },
+        {
+          "name": "_Z21TightRope_FindNearestP7nuvec_sP11WORLDINFO_sPiPf",
+          "demangled_name": "TightRope_FindNearest(nuvec_s*, WORLDINFO_s*, int*, float*)",
+          "address": 1884288,
+          "offset": 994320,
+          "size": 303,
+          "match_percent": 94.904106
+        },
+        {
+          "name": "_Z17TightRope_InRangeP12GameObject_sP11WORLDINFO_sP7nuvec_s",
+          "demangled_name": "TightRope_InRange(GameObject_s*, WORLDINFO_s*, nuvec_s*)",
+          "address": 1884592,
+          "offset": 994624,
+          "size": 531,
+          "match_percent": 66.91791
+        },
+        {
+          "name": "_ZL16TightRope_AttachP12GameObject_sP11WORLDINFO_s",
+          "demangled_name": "TightRope_Attach(GameObject_s*, WORLDINFO_s*)",
+          "address": 1885136,
+          "offset": 995168,
+          "size": 746,
+          "match_percent": 90.32022
+        },
+        {
+          "name": "_Z24TightRopes_RegisterGizmoi",
+          "demangled_name": "TightRopes_RegisterGizmo(int)",
+          "address": 1885888,
+          "offset": 995920,
+          "size": 372,
+          "match_percent": 99.409836
+        },
+        {
+          "name": "_Z16TightRope_SnapToP12GameObject_sP7nuvec_s",
+          "demangled_name": "TightRope_SnapTo(GameObject_s*, nuvec_s*)",
+          "address": 1886272,
+          "offset": 996304,
+          "size": 342,
+          "match_percent": 90.54054
+        },
+        {
+          "name": "_Z18TightRope_MoveCodeP12GameObject_si",
+          "demangled_name": "TightRope_MoveCode(GameObject_s*, int)",
+          "address": 1886624,
+          "offset": 996656,
+          "size": 1364,
+          "match_percent": 10.272727
+        },
+        {
+          "name": "_Z22TightRope_SetTargetMomP12GameObject_s",
+          "demangled_name": "TightRope_SetTargetMom(GameObject_s*)",
+          "address": 1888000,
+          "offset": 998032,
+          "size": 441,
+          "match_percent": 92.82758
         }
       ]
     },
@@ -116961,7 +116940,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -117032,7 +117010,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -117103,7 +117080,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -117187,7 +117163,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -117217,7 +117192,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -117306,7 +117280,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -117390,7 +117363,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -117474,7 +117446,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -117558,7 +117529,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -117642,7 +117612,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -117726,7 +117695,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -117898,7 +117866,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -117933,7 +117900,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -118022,7 +117988,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -118106,7 +118071,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -118190,7 +118154,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -118323,7 +118286,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -118419,7 +118381,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -118605,7 +118566,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -118742,7 +118702,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -118879,7 +118838,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -118963,7 +118921,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -119047,7 +119004,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -119131,7 +119087,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -119241,7 +119196,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -119325,7 +119279,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -119420,7 +119373,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -119504,7 +119456,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -119601,7 +119552,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -119685,7 +119635,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -119715,7 +119664,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -119804,7 +119752,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -119888,7 +119835,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -119972,7 +119918,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -120056,7 +120001,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -120203,7 +120147,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -120287,7 +120230,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -120371,7 +120313,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -120681,7 +120622,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -120803,7 +120743,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -120833,7 +120772,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -120868,7 +120806,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -121005,7 +120942,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -121035,7 +120971,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -121070,7 +121005,6 @@
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/props/system/socksysall.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "nu2api/nu3d/android/nuptl_android.c.o",
@@ -121170,7 +121104,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -121613,7 +121546,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -121697,7 +121629,6 @@
         "legoapi/misc/supportall_stubs.cpp.o",
         "legoapi/misc/tm.cpp.o",
         "legoapi/props/doors/securitydoor.cpp.o",
-        "legoapi/props/objects/tightrope.cpp.o",
         "legoapi/render/core/nugraph.cpp.o",
         "legoapi/render/core/render_stubs.cpp.o",
         "legoapi/render/core/rtl.c.o",
@@ -128824,7 +128755,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 484,
+    "bazel_units": 481,
     "functions": 13454,
     "assigned_functions": 12354,
     "ambiguous_functions": 212,

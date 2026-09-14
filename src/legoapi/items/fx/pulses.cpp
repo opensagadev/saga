@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "legoapi/actions/combat/hits.h"
 #include "globals.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/gizmo/base/gizmo.h"
@@ -21,7 +22,6 @@ struct SHOPINPUT;
 
 void AddLevelSfxFromId(i32 sfx_id, i32 *sfx_ids, i32 *sfx_count, i32 max_sfx);
 void GameAudio_PlaySfxById(i32 sfx_id, NUVEC *position, i32 flags, i32 volume);
-i32 ObjHitObj(GameObject_s *attacker, GameObject_s *target, i32 damage, u16 flags, i32 unknown, i32 context);
 void TakeHitRumble(GameObject_s *object, f32 strength);
 void KillRumble(GameObject_s *object);
 extern "C" void AddFiniteShotDebrisEffect(i32 *handle, i32 effect, NUVEC *position, i32 count);

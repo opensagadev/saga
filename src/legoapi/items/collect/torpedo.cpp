@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "legoapi/actions/combat/hits.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
 #include "legoapi/items/base/apiobject.h"
@@ -22,7 +23,6 @@ struct SHOPINPUT;
 extern "C" void AddVariableShotDebrisEffectTimed1(i32 effect, NUVEC *position, i32 count, f32 time, i16 z_rotation,
                                                   i16 y_rotation, NUMTX *orientation);
 void AddPickups(i32, i32, i32, i32, NUVEC *, NUVEC *, f32, i32, f32, f32, GameObject_s *, i32, i32, bool);
-i32 ObjHitObj(GameObject_s *attacker, GameObject_s *target, i32 damage, u16 flags, i32 param, i32 context);
 void NewBuzzFrames(nupad_s *pad, i32 frames, i32 mode);
 extern AREADATA_s *PODSPRINT_ADATA;
 

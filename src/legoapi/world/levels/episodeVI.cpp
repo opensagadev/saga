@@ -1,4 +1,5 @@
 #include "gameapi/ai/aisys/aisys.h"
+#include "legoapi/actions/combat/hits.h"
 #include "legoapi/world/level.h"
 #include "legoapi/render/core/terrain.h"
 #include "nu2api/nu3d/nulgtlaser.h"
@@ -8,7 +9,6 @@
 #include "legoapi/audio/sfx.h"
 #include "nu2api/numath/nurand.h"
 #include "legoapi/core/input/qrand.h"
-i32 ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32);
 i32 Player_HasInvincibility(GameObject_s *);
 void GameAudio_PlaySfxById(i32, NUVEC *, i32, i32);
 extern "C" i32 GetSfxId(const char *);

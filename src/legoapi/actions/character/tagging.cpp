@@ -48,7 +48,6 @@ extern GameObject_s *player_tag_to;
 void ResetForceGlow(PLAYERPACKET_s *packet);
 void AICreatureResumeScript(GameObject_s *object);
 void GizForce_ResetLOS(GameObject_s *object);
-void NewBuzzFrames(nupad_s *pad, i32 frames, i32 flags);
 void GameCam_Blend(GAMECAMERA_s *camera, f32 duration, f32 curve, i32 mode);
 void GameAudio_PlaySfx(i32 sfx, NUVEC *position, i32 flags, i32 volume);
 void TakeOver2GetIn(GameObject_s *source, GameObject_s *target);
@@ -56,7 +55,6 @@ void TakeOverYoda(GameObject_s *source, GameObject_s *target, i32 mode, i32 blen
 extern i32 CUTSKIPLOCK;
 extern i16 id_LUKESKYWALKERDAGOBAH;
 extern "C" i32 menu_i_pack;
-void NewRumble(nupad_s *, f32, i32);
 void Hint_CancelCurrent();
 void GameCam_HitRoll();
 i32 NuIOS_AreInAppPurchasesAvailable();

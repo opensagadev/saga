@@ -8,6 +8,7 @@
 #include "legoapi/core/input/timer.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/menus/core/gamemessages.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/world.h"
 
@@ -38,16 +39,12 @@ void GizmoPickups_SetOnOff() {
     }
 }
 
-extern ADDGAMEMSG AddGameMsg_Default;
 extern i32 DoubleScore;
 extern TIMER BonusTimer;
 
-GAMEMESSAGE_s *AddGameMsg(ADDGAMEMSG *message);
 i32 CoinsGoToMainTotal();
-void EndScoreMessage(GAMEMESSAGE_s *message);
 void GameMsg_DrawAdjustNewPos_CoinToTotal(GAMEMESSAGE_s *message);
 void NewBuzz(nupad_s *pad, f32 amount, i32 flags);
-void NewBuzzFrames(nupad_s *pad, i32 frames, i32 flags);
 
 void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_index, i32 model_variant,
                              GameObject_s *object, i32) {

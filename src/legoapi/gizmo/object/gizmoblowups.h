@@ -19,6 +19,10 @@ void SetLevelExBlowupFlags(u32 flags);
 u32 GetLevelExBlowupFlags(void);
 
 void GizmoBlowUpTypeBlowUp(WORLDINFO_s *world, i32 type, nuvec_s *position);
+void GizmoBlowUp_AddEffects(nuvec_s *position, GIZMOBLOWUP_s *blowup, i32 count, i32 flags, GameObject_s *object);
+void GizBlowup_Respawn(GIZMOBLOWUP_s *blowup);
+i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *blowup, i32 effects, i32 hit_type, i32 damage, GameObject_s *object,
+                      i32 hit_context);
 void GizmoBlowupResetNameTable(void);
 void UpdateMidPos(GIZMOBLOWUP_s *blowup);
 void PlayAnim(nuinstanim_s *animation, float *playback, float speed, i32 backwards);

@@ -19,6 +19,7 @@
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/render/light/shadow.h"
 #include "legoapi/render/core/terrain.h"
+#include "legoapi/render/core/render.h"
 #include "legoapi/render/fx/parts.h"
 #include "legoapi/render/core/screen.h"
 #include "nu2api/nuandroid/ios_graphics.h"
@@ -84,8 +85,6 @@ f32 FindReflectionNoPlatforms(NUVEC *);
 extern "C" i32 NewShadowOnPlatform(void);
 void FindAnglesZX(NUVEC *, u16 *, u16 *);
 void CharScene_Draw(WORLDINFO_s *, i32, NUMTX *, NUMTX *);
-void DrawObjectOnCharacter(WORLDINFO_s *, GameObject_s *, i32, nuhspecial_s *, i32, i32, NUMTX *, i32, u32, NUMTX *,
-                           NUVEC *, f32, f32);
 i32 qrand(void);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);

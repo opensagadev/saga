@@ -17,7 +17,7 @@
 #include "legoapi/characters/motion.h"
 #include "legoapi/core/input/gamepads.h"
 #include "legoapi/core/input/qrand.h"
-#include "legoapi/gizmos/object/technos.h"
+#include "legoapi/props/objects/techno.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/world.h"

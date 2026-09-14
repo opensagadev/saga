@@ -1,4 +1,5 @@
 #include "legoapi/world/world.h"
+#include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/items/base/apiobject.h"
 #include <string.h>
@@ -39,7 +40,6 @@ extern "C" void AddVariableShotDebrisEffectTimed1(i32, NUVEC *, i32, f32, i16, i
 void TorpedoHitTarget(BOLT_s *);
 void GameCam_Judder(GAMECAMERA_s *, f32, i32, NUVEC *);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
-i32 GizmoBlowupBlowup(GIZMOBLOWUP_s *, i32, i32, i32, GameObject_s *, i32);
 void GizTurrets_Hit(void *, GIZTURRET_s *, NUVEC *, i32, i32);
 i32 GizObstacles_Hit(void *, GIZOBSTACLE_s *, NUVEC *, i32, i32);
 void Bolt_End(BOLT_s *, i32);
