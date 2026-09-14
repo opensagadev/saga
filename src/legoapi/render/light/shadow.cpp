@@ -14,8 +14,6 @@ struct SHOPINPUT;
 
 extern i32 VehicleArea;
 
-TERRAIN_SHAPE *EShadPoly;
-
 extern "C" void NuRndrShadowDirCol(const NUVEC *direction, u32 colour, f32 near_distance, f32 far_distance);
 
 f32 BlobShadowFade(NUVEC *position, f32 fade_start, f32 fade_end, f32 alpha) {
@@ -96,16 +94,3 @@ void ResetShadowMapRenderingFn() {
 void EnableShadowMapRenderingFn() {
     EnableShadowMapRendering(0);
 }
-
-extern "C" {
-
-    i32 EShadowInfo() {
-        return EShadPoly != NULL ? EShadPoly->material[1] : -1;
-    }
-
-    i32 EShadowRoofInfo(void) {
-        extern TERRAIN_SHAPE *EShadRoofPoly;
-        return EShadRoofPoly != NULL ? EShadRoofPoly->material[1] : -1;
-    }
-
-} // extern "C"

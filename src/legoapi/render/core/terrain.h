@@ -7,6 +7,10 @@ struct nuvec_s;
 struct TERRSET;
 struct TERRAIN_TRACK_SLOT;
 struct tertype;
+typedef tertype TERRAIN_SHAPE;
+
+extern TERRAIN_SHAPE *EShadPoly;
+extern TERRAIN_SHAPE *EShadRoofPoly;
 
 extern "C" i32 IgnoreWallSplines;
 extern "C" void PlatOnOff(i32 index, i32 enabled);
@@ -14,6 +18,7 @@ extern "C" void TerrainSetImpactData(void *impact_data, i32 *impact_count, i32 m
 extern "C" void TerrainPlatGetMtx(i32 index, NUMTX **previous, NUMTX **current);
 extern "C" void TerrainSetPlatConnectTol(f32 tolerance);
 TERRAIN_TRACK_SLOT *AllocTerrId(void);
+void NewTerrStoreAnyInfo(void);
 void DerotateMovementVector(void);
 void RotateVec(nuvec_s *source, nuvec_s *destination);
 nuvec_s TerCrossProduct(nuvec_s *a, nuvec_s *b);
@@ -52,9 +57,18 @@ extern "C" i32 TerrainIntensityInfo(void);
 extern "C" i32 TerrainInfo(void);
 extern "C" i32 TerrainInfoExtra(void);
 extern "C" i32 ShadowInfo(void);
+extern "C" i32 EShadowInfo(void);
+extern "C" i32 EShadowRoofInfo(void);
 extern "C" i32 ShadowIntensityInfo(void);
 extern "C" void TerrainTrackFlush(void);
 void NewScan(nuvec_s *, i32, i32);
 void NewScanHandelFull(nuvec_s *, nuvec_s *, f32, i32, i32);
 void NewScanHandelSubset(i16 *, nuvec_s *, nuvec_s *, f32, i32);
 void DrawWallSpline(float alpha);
+i32 CheckCylinder(i32 first_vertex, i32 second_vertex, i32 *vertex_mask, i32 remaining_vertex_mask);
+i32 CheckSphere(i32 vertex_index);
+i32 CheckSphereTer(nuvec_s *position, f32 radius);
+i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 secondary_end, tertype *surface);
+i32 HitTerrain(void);
+i32 HitTerrPoly(tertype *surface, i32 group_index);
+void RayImpact(nuvec_s *movement);

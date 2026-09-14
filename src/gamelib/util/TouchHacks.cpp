@@ -14,7 +14,7 @@
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuvec.h"
 #include "nu2api/nucore/nuvuvec.hpp"
-#include "legoapi/render/light/shadow.h"
+#include "legoapi/render/core/terrain.h"
 
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 i32 SuperWeirdo(GameObject_s *);

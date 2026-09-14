@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.065376,
+    "fuzzy_match_percent": 46.06568,
     "total_code": "4722419",
     "matched_code": "400186",
     "matched_code_percent": 8.4741745,
@@ -38540,62 +38540,6 @@
           "match_percent": 96.514084
         },
         {
-          "name": "_Z13CheckCylinderiiPii",
-          "demangled_name": "CheckCylinder(int, int, int*, int)",
-          "address": 3652976,
-          "offset": 2763008,
-          "size": 2731,
-          "match_percent": 21.29932
-        },
-        {
-          "name": "_Z11CheckSpherei",
-          "demangled_name": "CheckSphere(int)",
-          "address": 3655712,
-          "offset": 2765744,
-          "size": 626,
-          "match_percent": 80.539566
-        },
-        {
-          "name": "_Z14CheckSphereTerP7nuvec_sf",
-          "demangled_name": "CheckSphereTer(nuvec_s*, float)",
-          "address": 3656352,
-          "offset": 2766384,
-          "size": 484,
-          "match_percent": 70.150444
-        },
-        {
-          "name": "_Z7HitPolyffffP7tertype",
-          "demangled_name": "HitPoly(float, float, float, float, tertype*)",
-          "address": 3656848,
-          "offset": 2766880,
-          "size": 2316,
-          "match_percent": 39.964
-        },
-        {
-          "name": "_Z10HitTerrainv",
-          "demangled_name": "HitTerrain()",
-          "address": 3661776,
-          "offset": 2771808,
-          "size": 1337,
-          "match_percent": 69.71329
-        },
-        {
-          "name": "_Z11HitTerrPolyP7tertypei",
-          "demangled_name": "HitTerrPoly(tertype*, int)",
-          "address": 3663120,
-          "offset": 2773152,
-          "size": 828,
-          "match_percent": 56.042553
-        },
-        {
-          "name": "_Z9RayImpactP7nuvec_s",
-          "demangled_name": "RayImpact(nuvec_s*)",
-          "address": 3676304,
-          "offset": 2786336,
-          "size": 205,
-          "match_percent": 95.521736
-        },
-        {
           "name": "_Z27CalculateRayBoxIntersectionRK5VuVecS1_S1_S1_fRf",
           "demangled_name": "CalculateRayBoxIntersection(VuVec const&, VuVec const&, VuVec const&, VuVec const&, float, float&)",
           "address": 4444944,
@@ -59860,14 +59804,6 @@
           "match_percent": 2.101911
         },
         {
-          "name": "AddCollisionSphere",
-          "demangled_name": "AddCollisionSphere",
-          "address": 3689520,
-          "offset": 2799552,
-          "size": 97,
-          "match_percent": 10.384615
-        },
-        {
           "name": "AnimEndFrame",
           "demangled_name": "AnimEndFrame",
           "address": 3958557,
@@ -76392,12 +76328,60 @@
           "match_percent": 0.0
         },
         {
+          "name": "_Z13CheckCylinderiiPii",
+          "demangled_name": "CheckCylinder(int, int, int*, int)",
+          "address": 3652976,
+          "offset": 2763008,
+          "size": 2731,
+          "match_percent": 21.29932
+        },
+        {
+          "name": "_Z11CheckSpherei",
+          "demangled_name": "CheckSphere(int)",
+          "address": 3655712,
+          "offset": 2765744,
+          "size": 626,
+          "match_percent": 80.539566
+        },
+        {
+          "name": "_Z14CheckSphereTerP7nuvec_sf",
+          "demangled_name": "CheckSphereTer(nuvec_s*, float)",
+          "address": 3656352,
+          "offset": 2766384,
+          "size": 484,
+          "match_percent": 70.150444
+        },
+        {
+          "name": "_Z7HitPolyffffP7tertype",
+          "demangled_name": "HitPoly(float, float, float, float, tertype*)",
+          "address": 3656848,
+          "offset": 2766880,
+          "size": 2316,
+          "match_percent": 39.964
+        },
+        {
           "name": "_Z13HitWallSplinev",
           "demangled_name": "HitWallSpline()",
           "address": 3659168,
           "offset": 2769200,
           "size": 2601,
           "match_percent": 17.720306
+        },
+        {
+          "name": "_Z10HitTerrainv",
+          "demangled_name": "HitTerrain()",
+          "address": 3661776,
+          "offset": 2771808,
+          "size": 1337,
+          "match_percent": 70.41259
+        },
+        {
+          "name": "_Z11HitTerrPolyP7tertypei",
+          "demangled_name": "HitTerrPoly(tertype*, int)",
+          "address": 3663120,
+          "offset": 2773152,
+          "size": 828,
+          "match_percent": 56.042553
         },
         {
           "name": "_Z21ScanWallSplineTerrainiii",
@@ -76502,6 +76486,14 @@
           "offset": 2785904,
           "size": 422,
           "match_percent": 12.555555
+        },
+        {
+          "name": "_Z9RayImpactP7nuvec_s",
+          "demangled_name": "RayImpact(nuvec_s*)",
+          "address": 3676304,
+          "offset": 2786336,
+          "size": 205,
+          "match_percent": 95.521736
         },
         {
           "name": "TerrainWallAng",
@@ -76677,7 +76669,7 @@
           "address": 3722432,
           "offset": 2832464,
           "size": 578,
-          "match_percent": 70.59524
+          "match_percent": 70.51588
         },
         {
           "name": "_Z19ScanTerrainPlatformii",
@@ -77455,6 +77447,14 @@
           "match_percent": 87.17647
         },
         {
+          "name": "_Z19NewTerrStoreAnyInfov",
+          "demangled_name": "NewTerrStoreAnyInfo()",
+          "address": 3675664,
+          "offset": 2785696,
+          "size": 91,
+          "match_percent": 66.4
+        },
+        {
           "name": "ShadowDir",
           "demangled_name": "ShadowDir",
           "address": 3689200,
@@ -77463,10 +77463,26 @@
           "match_percent": 93.6875
         },
         {
+          "name": "EShadowInfo",
+          "demangled_name": "EShadowInfo",
+          "address": 3689280,
+          "offset": 2799312,
+          "size": 32,
+          "match_percent": 88.77778
+        },
+        {
           "name": "ShadowRoofInfo",
           "demangled_name": "ShadowRoofInfo",
           "address": 3689312,
           "offset": 2799344,
+          "size": 32,
+          "match_percent": 88.77778
+        },
+        {
+          "name": "EShadowRoofInfo",
+          "demangled_name": "EShadowRoofInfo",
+          "address": 3689344,
+          "offset": 2799376,
           "size": 32,
           "match_percent": 88.77778
         },
@@ -77493,6 +77509,14 @@
           "offset": 2799504,
           "size": 39,
           "match_percent": 59.333332
+        },
+        {
+          "name": "AddCollisionSphere",
+          "demangled_name": "AddCollisionSphere",
+          "address": 3689520,
+          "offset": 2799552,
+          "size": 97,
+          "match_percent": 16.153847
         },
         {
           "name": "AddPickupTerr",
@@ -77727,6 +77751,14 @@
           "match_percent": 66.13333
         },
         {
+          "name": "ReassignPickupInst",
+          "demangled_name": "ReassignPickupInst",
+          "address": 3702864,
+          "offset": 2812896,
+          "size": 130,
+          "match_percent": 10.0
+        },
+        {
           "name": "FindPlatInst",
           "demangled_name": "FindPlatInst",
           "address": 3703008,
@@ -77781,6 +77813,14 @@
           "offset": 2819040,
           "size": 427,
           "match_percent": 75.666664
+        },
+        {
+          "name": "AddMSituExtraTerrRot",
+          "demangled_name": "AddMSituExtraTerrRot",
+          "address": 3709440,
+          "offset": 2819472,
+          "size": 884,
+          "match_percent": 2.327586
         },
         {
           "name": "TerrainPlatformOldUpdate",
@@ -78928,22 +78968,6 @@
           "offset": 2705424,
           "size": 85,
           "match_percent": 100.0
-        },
-        {
-          "name": "ReassignPickupInst",
-          "demangled_name": "ReassignPickupInst",
-          "address": 3702864,
-          "offset": 2812896,
-          "size": 130,
-          "match_percent": 10.0
-        },
-        {
-          "name": "AddMSituExtraTerrRot",
-          "demangled_name": "AddMSituExtraTerrRot",
-          "address": 3709440,
-          "offset": 2819472,
-          "size": 884,
-          "match_percent": 2.327586
         },
         {
           "name": "PartRayCast",
@@ -80297,22 +80321,6 @@
           "offset": 1067552,
           "size": 232,
           "match_percent": 100.0
-        },
-        {
-          "name": "EShadowInfo",
-          "demangled_name": "EShadowInfo",
-          "address": 3689280,
-          "offset": 2799312,
-          "size": 32,
-          "match_percent": 88.77778
-        },
-        {
-          "name": "EShadowRoofInfo",
-          "demangled_name": "EShadowRoofInfo",
-          "address": 3689344,
-          "offset": 2799376,
-          "size": 32,
-          "match_percent": 88.77778
         },
         {
           "name": "_Z14BlobShadowFadeP7nuvec_sfff",
@@ -81887,14 +81895,6 @@
           "offset": 1309936,
           "size": 1341,
           "match_percent": 2.745098
-        },
-        {
-          "name": "_Z19NewTerrStoreAnyInfov",
-          "demangled_name": "NewTerrStoreAnyInfo()",
-          "address": 3675664,
-          "offset": 2785696,
-          "size": 91,
-          "match_percent": 66.4
         },
         {
           "name": "_Z22Episodes_ConfigureListPcP9variptr_uS1_iPi",

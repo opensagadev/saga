@@ -67,6 +67,36 @@ class CompareSymbolPlacementTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "no original strong-local component"):
             original_component(ledger, 8)
 
+    def test_component_distinguishes_unpaired_local_from_global_counterpart(self):
+        state = {**symbol("_ZL4TerI", 0x4000, section=".bss", size=4),
+                 "symbol_index": 48, "current_owner_candidates": []}
+        unit = {"id": 2, "source": "terrain.cpp", "symbols": [
+            symbol("TerI", 0, section=".bss", size=4, binding=1),
+        ]}
+        ledger = {
+            "original_symbols": [state],
+            "current_units": [unit],
+            "original_strong_local_xref_components": [{
+                "id": 7, "certainty": "minimum same-TU constraint",
+                "local_initializer_blocks": [3],
+                "function_symbol_indices": [], "object_symbol_indices": [48],
+            }],
+        }
+        component = original_component(ledger, 7)
+        self.assertEqual(component["objects"][0]["global_counterpart"], "terrain.cpp")
+        stream = StringIO()
+        with redirect_stdout(stream):
+            print_original_component(component)
+        self.assertIn("1/1 unpaired LOCAL objects", stream.getvalue())
+
+        unit["symbols"][0]["size"] = 8
+        self.assertIsNone(original_component(ledger, 7)["objects"][0]["global_counterpart"])
+        unit["symbols"][0]["size"] = 4
+        ledger["current_units"].append({"id": 3, "source": "other.cpp", "symbols": [
+            symbol("TerI", 0, section=".bss", size=4, binding=1),
+        ]})
+        self.assertIsNone(original_component(ledger, 7)["objects"][0]["global_counterpart"])
+
     def test_cached_ledger_must_match_elf_paths_and_units(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

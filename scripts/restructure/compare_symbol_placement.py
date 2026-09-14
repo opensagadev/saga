@@ -344,6 +344,20 @@ def original_component(ledger: dict, component_id: int) -> dict:
         raise ValueError(f"no original strong-local component with ID {component_id}")
     by_id = {symbol["symbol_index"]: symbol for symbol in ledger["original_symbols"]}
     units = {unit["id"]: unit["source"] for unit in ledger.get("current_units", [])}
+    global_objects = defaultdict(set)
+    for unit in ledger.get("current_units", []):
+        for symbol in unit.get("symbols", []):
+            if symbol["type"] == 1 and symbol["binding"] == 1:
+                global_objects[(symbol["name"], symbol["size"], symbol["section"])].add(unit["source"])
+
+    def global_counterpart(symbol: dict, owners: list[int]) -> str | None:
+        if owners or symbol["type"] != 1:
+            return None
+        name = re.fullmatch(r"_ZL(\d+)([A-Za-z_]\w*)", symbol["name"])
+        if name is None or len(name.group(2)) != int(name.group(1)):
+            return None
+        candidates = global_objects.get((name.group(2), symbol["size"], symbol["section"]), set())
+        return next(iter(candidates)) if len(candidates) == 1 else None
 
     def entries(indices: list[int]) -> list[dict]:
         result = []
@@ -358,6 +372,7 @@ def original_component(ledger: dict, component_id: int) -> dict:
                 "size": symbol["size"],
                 "owner": units.get(owners[0], f"unit {owners[0]}") if len(owners) == 1 else None,
                 "candidate_count": len(owners),
+                "global_counterpart": global_counterpart(symbol, owners),
             })
         return sorted(result, key=lambda item: (item["address"], item["symbol_index"]))
 
@@ -386,9 +401,15 @@ def print_original_component(component: dict, limit: int = 0) -> None:
         print(f"  {label} current-source candidates:")
         for owner, count in sorted(owners.items(), key=lambda pair: (-pair[1], pair[0])):
             print(f"    {count:>3}  {owner}")
+        if label == "Object":
+            counterparts = [symbol for symbol in symbols if symbol.get("global_counterpart")]
+            print(f"    {len(counterparts)}/{sum(not symbol['candidate_count'] for symbol in symbols)} "
+                  "unpaired LOCAL objects have one same-sized, same-section GLOBAL name counterpart")
         shown = symbols if limit == 0 else symbols[:limit]
         for symbol in shown:
             owner = symbol["owner"] or ("ambiguous" if symbol["candidate_count"] else "not paired")
+            if symbol.get("global_counterpart"):
+                owner += f"; GLOBAL counterpart in {symbol['global_counterpart']}"
             print(f"    0x{symbol['address']:08x}  {symbol['size']:>5}  "
                   f"{symbol['section']:<12}  {symbol['name']}  -> {owner}")
         if len(shown) < len(symbols):

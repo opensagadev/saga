@@ -38,20 +38,20 @@ static ACTIONINFO_s *APIActionInfo;
 static EXTRAACTIONDATA_s *APIExtraActionData;
 APICHARACTERSYS *apicharsys;
 extern "C" {
-i32 apiloadcharactermodels_append = 0;
-f32 animduration_blendouttime;
-u8 TempNumJoints;
-nuhgobj_s *Temphgobj;
-NUMTL *APITrans_Mtl[2];
-i32 notransparentchardraw;
-i32 drawcharactermodel_nobsa;
-i32 drawcharactermodel_noani;
-i32 drawcharactermodel_restpose;
-i32 drawcharactermodel_keepmergeaction;
-i32 drawcharactermodel_locatorsupdated;
-void (*APIObjResetShadowMapRenderingFn)(void);
-void (*APIObjEnableShadowMapRenderingFn)(void);
-void (*APIObjPlaySfxByIdFn)(i32, NUVEC *);
+    i32 apiloadcharactermodels_append = 0;
+    f32 animduration_blendouttime;
+    u8 TempNumJoints;
+    nuhgobj_s *Temphgobj;
+    NUMTL *APITrans_Mtl[2];
+    i32 notransparentchardraw;
+    i32 drawcharactermodel_nobsa;
+    i32 drawcharactermodel_noani;
+    i32 drawcharactermodel_restpose;
+    i32 drawcharactermodel_keepmergeaction;
+    i32 drawcharactermodel_locatorsupdated;
+    void (*APIObjResetShadowMapRenderingFn)(void);
+    void (*APIObjEnableShadowMapRenderingFn)(void);
+    void (*APIObjPlaySfxByIdFn)(i32, NUVEC *);
 }
 i32 apiloadcharactermodels_nopakfile = 0;
 static ANIMREDIRECTFN RedirectAnimFn;
@@ -708,10 +708,6 @@ extern "C" {
         }
     }
 
-    void AddCollisionSphere(void) {
-        STUBBED();
-    }
-
     void APICharacterSysInit(VARIPTR *buf, VARIPTR buf_end, i32 char_count, i32 model_capacity, i32 model_id_capacity,
                              i32 extra_capacity, CHARACTERDATA *cdata_list, APICHARACTERLIGHTFN set_creature_lights) {
         (void)buf_end;
@@ -858,7 +854,6 @@ static void GetAnimationPath(char *path, const char *default_dir, CHARACTERANIM_
 static bool ShouldLoadAnimation(const CHARACTERANIM_s &animation, i32 area_animation) {
     return (animation.flags & 0x8000) == 0 && ((animation.flags & 1) != 0) == (area_animation != 0);
 }
-
 
 extern "C" {
 
@@ -1063,7 +1058,6 @@ extern "C" {
         }
     }
 
-
     APICHARACTERMODEL *APICharacterLoaded(i32 character_id) {
         if (character_id == -1) {
             return NULL;
@@ -1194,33 +1188,32 @@ extern "C" {
                 model->model_data_c[packet->blend_animation_a] != NULL && packet->blend_animation_b >= 0 &&
                 packet->blend_animation_b < apicharsys->model_id_capacity &&
                 model->model_data_c[packet->blend_animation_b] != NULL) {
-                *dwa_output = NuHGobjEvalDwaBlend2(
-                    render_count, render_indices,
-                    static_cast<nuanimdata2_s *>(model->model_data_c[packet->blend_animation_a]),
-                    packet->blend_source_time,
-                    static_cast<nuanimdata2_s *>(model->model_data_c[packet->blend_animation_b]),
-                    packet->blend_target_time, packet->blend_elapsed / packet->blend_duration);
+                *dwa_output =
+                    NuHGobjEvalDwaBlend2(render_count, render_indices,
+                                         static_cast<nuanimdata2_s *>(model->model_data_c[packet->blend_animation_a]),
+                                         packet->blend_source_time,
+                                         static_cast<nuanimdata2_s *>(model->model_data_c[packet->blend_animation_b]),
+                                         packet->blend_target_time, packet->blend_elapsed / packet->blend_duration);
             } else if (packet->blending != 0 && packet->blend_animation_b >= 0 &&
                        packet->blend_animation_b < apicharsys->model_id_capacity &&
                        model->model_data_c[packet->blend_animation_b] != NULL) {
-                *dwa_output = NuHGobjEvalDwa2(
-                    render_count, render_indices,
-                    static_cast<nuanimdata2_s *>(model->model_data_c[packet->blend_animation_b]),
-                    packet->blend_target_time);
+                *dwa_output =
+                    NuHGobjEvalDwa2(render_count, render_indices,
+                                    static_cast<nuanimdata2_s *>(model->model_data_c[packet->blend_animation_b]),
+                                    packet->blend_target_time);
             } else if (packet->blending != 0 && packet->blend_animation_a >= 0 &&
                        packet->blend_animation_a < apicharsys->model_id_capacity &&
                        model->model_data_c[packet->blend_animation_a] != NULL) {
-                *dwa_output = NuHGobjEvalDwa2(
-                    render_count, render_indices,
-                    static_cast<nuanimdata2_s *>(model->model_data_c[packet->blend_animation_a]),
-                    packet->blend_source_time);
+                *dwa_output =
+                    NuHGobjEvalDwa2(render_count, render_indices,
+                                    static_cast<nuanimdata2_s *>(model->model_data_c[packet->blend_animation_a]),
+                                    packet->blend_source_time);
             } else if (packet->blending == 0 && packet->animation_index >= 0 &&
                        packet->animation_index < apicharsys->model_id_capacity &&
                        model->model_data_c[packet->animation_index] != NULL) {
                 *dwa_output = NuHGobjEvalDwa2(
                     render_count, render_indices,
-                    static_cast<nuanimdata2_s *>(model->model_data_c[packet->animation_index]),
-                    packet->current_time);
+                    static_cast<nuanimdata2_s *>(model->model_data_c[packet->animation_index]), packet->current_time);
             } else {
                 *dwa_output = NULL;
             }
@@ -1266,8 +1259,7 @@ extern "C" {
         }
 
         f32 time = static_cast<CHARACTERANIM_s *>(model->model_data_a[target_animation])->blend_in_time;
-        const f32 source_time =
-            static_cast<CHARACTERANIM_s *>(model->model_data_a[source_animation])->blend_out_time;
+        const f32 source_time = static_cast<CHARACTERANIM_s *>(model->model_data_a[source_animation])->blend_out_time;
         if (time > source_time) {
             time = source_time;
         }
@@ -1440,12 +1432,11 @@ extern "C" {
             CHARACTERANIM_s *current_info;
             if (packet->blending != 0) {
                 const i16 requested = packet->requested_animation;
-                CHARACTERANIM_s *requested_info = requested != -1
-                                                      ? static_cast<CHARACTERANIM_s *>(model->model_data_a[requested])
-                                                      : NULL;
+                CHARACTERANIM_s *requested_info =
+                    requested != -1 ? static_cast<CHARACTERANIM_s *>(model->model_data_a[requested]) : NULL;
                 if (requested != -1 && requested != packet->blend_animation_b &&
-                    model->model_data_b[requested] != NULL &&
-                    requested_info != NULL && requested_info->blend_in_time == 0.0f) {
+                    model->model_data_b[requested] != NULL && requested_info != NULL &&
+                    requested_info->blend_in_time == 0.0f) {
                     packet->animation_index = requested;
                     if (backwards != 0 &&
                         (requested_info->flags & CHARACTER_ANIMATION_FLAG_REVERSE_WITH_MOVEMENT) != 0) {
@@ -1502,8 +1493,10 @@ extern "C" {
             if (packet->previous_animation != -1 && packet->requested_animation != -1 &&
                 (packet->previous_animation != -1 && model->model_data_b[packet->previous_animation] != NULL) &&
                 (packet->requested_animation != -1 && model->model_data_b[packet->requested_animation] != NULL)) {
-                CHARACTERANIM_s *source_info = static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->previous_animation]);
-                CHARACTERANIM_s *target_info = static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->requested_animation]);
+                CHARACTERANIM_s *source_info =
+                    static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->previous_animation]);
+                CHARACTERANIM_s *target_info =
+                    static_cast<CHARACTERANIM_s *>(model->model_data_a[packet->requested_animation]);
                 if (source_info != NULL && target_info != NULL && source_info->blend_out_time > blend_step &&
                     target_info->blend_in_time > blend_step) {
                     packet->blending = 1;
@@ -2017,9 +2010,8 @@ extern "C" {
         APIObjPlaySfxByIdFn = play_sfx;
     }
 
-    void AddAnimEffects(CHARACTERMODEL_s *model, CHARACTERDATA *, ANIMPACKET_s *packet,
-                        NUMTX *locator_matrices, GameObject_s *object, CHARACTER_EFFECT_s *effects,
-                        WORLDINFO_s *world_info, f32 frame_time,
+    void AddAnimEffects(CHARACTERMODEL_s *model, CHARACTERDATA *, ANIMPACKET_s *packet, NUMTX *locator_matrices,
+                        GameObject_s *object, CHARACTER_EFFECT_s *effects, WORLDINFO_s *world_info, f32 frame_time,
                         void (*footprint_callback)(void *, GameObject_s *, i32, i32), APIDEBRISSYS_s *debris_sys) {
         if (world_info != NULL || effects == NULL) {
             return;
@@ -2069,8 +2061,7 @@ extern "C" {
                 if ((flags & 0x80) != 0 && api->intersects_water == 0) {
                     continue;
                 }
-                if ((flags & 0x03000000) != 0 &&
-                    (api->model_draw_result == 0 || (api->field_0x27d & 2) == 0)) {
+                if ((flags & 0x03000000) != 0 && (api->model_draw_result == 0 || (api->field_0x27d & 2) == 0)) {
                     continue;
                 }
             } else if ((flags & 0x03000000) != 0) {
@@ -2095,9 +2086,8 @@ extern "C" {
                     }
                     if ((packet->flags & ANIMPACKET_FLAG_PLAYING_REVERSED) == 0) {
                         if (animation_time > event_time) {
-                            if (packet->previous_time <= event_time ||
-                                ((packet->flags & ANIMPACKET_FLAG_LOOPED) != 0 &&
-                                 packet->previous_time > animation_time)) {
+                            if (packet->previous_time <= event_time || ((packet->flags & ANIMPACKET_FLAG_LOOPED) != 0 &&
+                                                                        packet->previous_time > animation_time)) {
                                 active = 1;
                             }
                         } else if ((packet->flags & ANIMPACKET_FLAG_LOOPED) != 0 &&
@@ -2207,7 +2197,7 @@ extern "C" {
                 if ((flags & 1) != 0) {
                     i32 count = effect->particle_rate > 0.0f
                                     ? ((flags & 0x800000) != 0 ? ParticlesPerSecond(effect->particle_rate, frame_time)
-                                                              : ParticlesPerFrame(effect->particle_rate, frame_time))
+                                                               : ParticlesPerFrame(effect->particle_rate, frame_time))
                                     : effect->particle_count;
                     if (count < 0) {
                         count = 1;
@@ -2336,10 +2326,10 @@ extern "C" {
 
     // Original @0x3d0563. Hierarchy evaluation, DWA, locator storage, character
     // surface effects, transparency and reflection.
-    i32 APIDrawCharacterModel(CHARACTERMODEL_s *model, CHARACTERDATA *character_data, ANIMPACKET_s *animation, NUMTX *matrix, NUMTX *,
-                              NUMTX *reflection_matrix, NUVEC *locator_positions, NUMTX *locator_matrices,
-                              GameObject_s *object, u32 flags, NUJOINTANIM_s *joint_overrides, i32 joint_override_count,
-                              WORLDINFO_s *world, f32 frame_time, NUMTX *output_matrices,
+    i32 APIDrawCharacterModel(CHARACTERMODEL_s *model, CHARACTERDATA *character_data, ANIMPACKET_s *animation,
+                              NUMTX *matrix, NUMTX *, NUMTX *reflection_matrix, NUVEC *locator_positions,
+                              NUMTX *locator_matrices, GameObject_s *object, u32 flags, NUJOINTANIM_s *joint_overrides,
+                              i32 joint_override_count, WORLDINFO_s *world, f32 frame_time, NUMTX *output_matrices,
                               void (*footprint_callback)(void *, GameObject_s *, i32, i32),
                               APIDEBRISSYS_s *debris_sys) {
         drawcharactermodel_locatorsupdated = 0;
@@ -2555,8 +2545,8 @@ extern "C" {
             if (locator_matrices != NULL && world == NULL && character_data != NULL &&
                 character_data->effects != NULL) {
                 AddAnimEffects(model, character_data, animation, locator_matrices, object,
-                               apicharsys->char_data[model->model_id].effects, world, frame_time,
-                               footprint_callback, debris_sys);
+                               apicharsys->char_data[model->model_id].effects, world, frame_time, footprint_callback,
+                               debris_sys);
             }
 
             const i32 render_flags = object == NULL || (object->apiobj.field_0x1f4 & 0x200) == 0;
@@ -2665,123 +2655,123 @@ extern "C" {
         return -1;
     }
 
-CHARACTERDATA *ConfigureCharacterList(char *file, VARIPTR *bufferStart, VARIPTR *bufferEnd, i32 count, i32 *countDest,
-                                      i32 count2, GAMECHARACTERDATA **dataList) {
-    bool bVar1;
-    bool bVar2;
-    nufpar_s *fp;
-    CHARACTERDATA *characterdata;
-    i16 dirnameOffsets[500];
-    i16 filenameOffsets[500];
-    char buf[10000];
-    CHARACTERDATA *cdatas;
-    i32 j;
-    usize offset;
-    i32 i;
-    CHARACTERDATA *cdata;
+    CHARACTERDATA *ConfigureCharacterList(char *file, VARIPTR *bufferStart, VARIPTR *bufferEnd, i32 count,
+                                          i32 *countDest, i32 count2, GAMECHARACTERDATA **dataList) {
+        bool bVar1;
+        bool bVar2;
+        nufpar_s *fp;
+        CHARACTERDATA *characterdata;
+        i16 dirnameOffsets[500];
+        i16 filenameOffsets[500];
+        char buf[10000];
+        CHARACTERDATA *cdatas;
+        i32 j;
+        usize offset;
+        i32 i;
+        CHARACTERDATA *cdata;
 
-    fp = NuFParCreate(file);
-    if (500 < count) {
-        count = 500;
-    }
-    bufferStart->void_ptr = (void *)ALIGN(bufferStart->addr, 4);
-    characterdata = (CHARACTERDATA *)bufferStart->void_ptr;
-    i = 0;
+        fp = NuFParCreate(file);
+        if (500 < count) {
+            count = 500;
+        }
+        bufferStart->void_ptr = (void *)ALIGN(bufferStart->addr, 4);
+        characterdata = (CHARACTERDATA *)bufferStart->void_ptr;
+        i = 0;
 
-    memset(buf, 0, 10000);
+        memset(buf, 0, 10000);
 
-    buf[0] = '\0';
-    offset = 0;
-    bVar2 = false;
-    cdata = characterdata;
-    while (NuFParGetLine(fp) != 0) {
-        NuFParGetWord(fp);
-        if (*fp->word_buf != '\0') {
-            if (bVar2) {
-                if (NuStrICmp(fp->word_buf, "char_end") == 0) {
-                    bVar2 = false;
-                    if ((dirnameOffsets[i] != -1) && (filenameOffsets[i] != -1)) {
-                        i = i + 1;
-                        cdata = cdata + 1;
+        buf[0] = '\0';
+        offset = 0;
+        bVar2 = false;
+        cdata = characterdata;
+        while (NuFParGetLine(fp) != 0) {
+            NuFParGetWord(fp);
+            if (*fp->word_buf != '\0') {
+                if (bVar2) {
+                    if (NuStrICmp(fp->word_buf, "char_end") == 0) {
+                        bVar2 = false;
+                        if ((dirnameOffsets[i] != -1) && (filenameOffsets[i] != -1)) {
+                            i = i + 1;
+                            cdata = cdata + 1;
+                        }
+                    } else if (NuStrICmp(fp->word_buf, "dir") == 0 && NuFParGetWord(fp) != 0) {
+                        i32 len = NuStrLen(fp->word_buf);
+                        if ((len + offset + 1) < 10000) {
+                            NuStrCpy(buf + offset, fp->word_buf);
+                            dirnameOffsets[i] = (i16)offset;
+                            offset = offset + len + 1;
+                        }
+                    } else if (NuStrICmp(fp->word_buf, "file") == 0 && NuFParGetWord(fp) != 0) {
+                        i32 len = NuStrLen(fp->word_buf);
+                        if ((len + offset + 1) < 10000) {
+                            NuStrCpy(buf + offset, fp->word_buf);
+                            filenameOffsets[i] = (i16)offset;
+                            offset = offset + len + 1;
+                        }
                     }
-                } else if (NuStrICmp(fp->word_buf, "dir") == 0 && NuFParGetWord(fp) != 0) {
-                    i32 len = NuStrLen(fp->word_buf);
-                    if ((len + offset + 1) < 10000) {
-                        NuStrCpy(buf + offset, fp->word_buf);
-                        dirnameOffsets[i] = (i16)offset;
-                        offset = offset + len + 1;
-                    }
-                } else if (NuStrICmp(fp->word_buf, "file") == 0 && NuFParGetWord(fp) != 0) {
-                    i32 len = NuStrLen(fp->word_buf);
-                    if ((len + offset + 1) < 10000) {
-                        NuStrCpy(buf + offset, fp->word_buf);
-                        filenameOffsets[i] = (i16)offset;
-                        offset = offset + len + 1;
-                    }
-                }
-            } else {
-                if (NuStrICmp(fp->word_buf, "char_start") == 0 && i < count) {
-                    bVar1 = true;
                 } else {
-                    bVar1 = false;
-                }
+                    if (NuStrICmp(fp->word_buf, "char_start") == 0 && i < count) {
+                        bVar1 = true;
+                    } else {
+                        bVar1 = false;
+                    }
 
-                if (bVar1) {
-                    bVar2 = true;
-                    dirnameOffsets[i] = -1;
-                    filenameOffsets[i] = -1;
-                    cdata->field0_0x0 = -1;
-                    cdata->model_flags = 0;
-                    cdata->dir = (char *)0x0;
-                    cdata->file = (char *)0x0;
-                    cdata->animations = NULL;
-                    cdata->field5_0x14 = 0;
-                    cdata->move_fn = NULL;
-                    cdata->animate_fn = NULL;
-                    cdata->draw_fn = NULL;
-                    cdata->field11_0x24 = 0;
-                    cdata->field12_0x28 = 0;
-                    cdata->field13_0x2c = 1.0f;
-                    cdata->field14_0x30 = 0.5f;
-                    cdata->field15_0x34 = -0.5f;
-                    cdata->field16_0x38 = 0.5f;
-                    cdata->field17_0x3c = 1.0f;
-                    cdata->flags = cdata->flags & 0xfe;
-                    cdata->field20_0x42 = -1;
-                    cdata->field21_0x44 = 0;
-                    cdata->field22_0x48 = 0;
+                    if (bVar1) {
+                        bVar2 = true;
+                        dirnameOffsets[i] = -1;
+                        filenameOffsets[i] = -1;
+                        cdata->field0_0x0 = -1;
+                        cdata->model_flags = 0;
+                        cdata->dir = (char *)0x0;
+                        cdata->file = (char *)0x0;
+                        cdata->animations = NULL;
+                        cdata->field5_0x14 = 0;
+                        cdata->move_fn = NULL;
+                        cdata->animate_fn = NULL;
+                        cdata->draw_fn = NULL;
+                        cdata->field11_0x24 = 0;
+                        cdata->field12_0x28 = 0;
+                        cdata->field13_0x2c = 1.0f;
+                        cdata->field14_0x30 = 0.5f;
+                        cdata->field15_0x34 = -0.5f;
+                        cdata->field16_0x38 = 0.5f;
+                        cdata->field17_0x3c = 1.0f;
+                        cdata->flags = cdata->flags & 0xfe;
+                        cdata->field20_0x42 = -1;
+                        cdata->field21_0x44 = 0;
+                        cdata->field22_0x48 = 0;
+                    }
                 }
             }
         }
-    }
-    NuFParDestroy(fp);
-    if (i < 1) {
-        characterdata = NULL;
-    } else {
-        bufferStart->void_ptr = cdata;
-        memmove(bufferStart->void_ptr, buf, offset);
-        for (j = 0; j < i; j = j + 1) {
-            characterdata[j].dir = (char *)((i32)dirnameOffsets[j] + (usize)bufferStart->void_ptr);
-            characterdata[j].file = (char *)((i32)filenameOffsets[j] + (usize)bufferStart->void_ptr);
-        }
-        bufferStart->void_ptr = (void *)((usize)bufferStart->void_ptr + offset);
-        bufferStart->void_ptr = (void *)ALIGN((usize)bufferStart->void_ptr, 4);
-        if (0 < count2) {
-            if (dataList != NULL) {
-                *dataList = (GAMECHARACTERDATA_s *)bufferStart->void_ptr;
-            }
+        NuFParDestroy(fp);
+        if (i < 1) {
+            characterdata = NULL;
+        } else {
+            bufferStart->void_ptr = cdata;
+            memmove(bufferStart->void_ptr, buf, offset);
             for (j = 0; j < i; j = j + 1) {
-                characterdata[j].field11_0x24 = bufferStart->void_ptr;
-                bufferStart->void_ptr = (void *)((usize)bufferStart->void_ptr + count2);
+                characterdata[j].dir = (char *)((i32)dirnameOffsets[j] + (usize)bufferStart->void_ptr);
+                characterdata[j].file = (char *)((i32)filenameOffsets[j] + (usize)bufferStart->void_ptr);
+            }
+            bufferStart->void_ptr = (void *)((usize)bufferStart->void_ptr + offset);
+            bufferStart->void_ptr = (void *)ALIGN((usize)bufferStart->void_ptr, 4);
+            if (0 < count2) {
+                if (dataList != NULL) {
+                    *dataList = (GAMECHARACTERDATA_s *)bufferStart->void_ptr;
+                }
+                for (j = 0; j < i; j = j + 1) {
+                    characterdata[j].field11_0x24 = bufferStart->void_ptr;
+                    bufferStart->void_ptr = (void *)((usize)bufferStart->void_ptr + count2);
+                }
+            }
+            bufferStart->void_ptr = (void *)ALIGN((usize)bufferStart->void_ptr, 4);
+            if (countDest != (i32 *)0x0) {
+                *countDest = i;
             }
         }
-        bufferStart->void_ptr = (void *)ALIGN((usize)bufferStart->void_ptr, 4);
-        if (countDest != (i32 *)0x0) {
-            *countDest = i;
-        }
+        return characterdata;
     }
-    return characterdata;
-}
 
     void WindShear(void) {
         STUBBED();
