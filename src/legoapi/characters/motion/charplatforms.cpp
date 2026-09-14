@@ -2,6 +2,7 @@
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/render/core/terrain.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nucore/nustring.h"
@@ -14,9 +15,7 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-extern "C" i16 FindPlatInst(i32);
 extern "C" void NewTerrPlatformsOff(void);
-extern "C" i32 ShadowInfo(void);
 extern TERRSET *CurTerr;
 extern TERRAIN_TRACK_SLOT *CurTrackInfo;
 extern i16 castnum;
@@ -31,7 +30,6 @@ NUVEC TerrainSkin(PLATSKININFO *, NUVEC *, f32, i32);
 NUVEC TerCrossProduct(NUVEC *, NUVEC *);
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
 extern "C" void NewTerrPlatformsOff();
-extern "C" i32 ShadowInfo();
 extern "C" TERRAIN_SURFACE_s TerSurface[32];
 
 void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO *info) {

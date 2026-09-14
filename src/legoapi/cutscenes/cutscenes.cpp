@@ -18,6 +18,7 @@
 #include "legoapi/world/level.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/render/light/shadow.h"
+#include "legoapi/render/core/terrain.h"
 #include "legoapi/render/core/screen.h"
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nu3d/nucamera.h"
@@ -91,7 +92,6 @@ void DrawObjectOnCharacter(WORLDINFO_s *, GameObject_s *, i32, nuhspecial_s *, i
 i32 qrand(void);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 f32 GameShadow(GameObject_s *, NUVEC *, f32, i32);
-extern "C" i32 ShadowInfo(void);
 extern "C" TERRAIN_SURFACE_s TerSurface[32];
 extern "C" void APITransparentCharDraw(nuhgobj_s *, NUMTX *, i32, i16 *, NUMTX *, void **, i32);
 extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s *, instNUGCUTLOCATOR_s *,
@@ -666,6 +666,19 @@ void *CutScene_FindInst(CUTSYS *system, char *name) {
             if (NuStrICmp(system->cuts[i]->name, name) == 0) {
                 return system->cuts[i]->instance;
             }
+        }
+    }
+    return NULL;
+}
+
+CUTINFO *CutScene_Find(CUTSYS *cutscene_system, char *name) {
+    if (name == NULL || cutscene_system == NULL) {
+        return NULL;
+    }
+
+    for (i32 i = 0; i < cutscene_system->count; ++i) {
+        if (NuStrICmp(cutscene_system->cuts[i]->name, name) == 0) {
+            return cutscene_system->cuts[i];
         }
     }
     return NULL;

@@ -77,11 +77,6 @@ extern "C" {
     extern particlechunkrendertype_s *ParticleChunkToRender;
     extern particlechunkrendertype_s *ParticleChunkRenderStack[5];
 
-
-    void CrashDataPtr(void) {
-        STUBBED();
-    }
-
     i32 DebAlloc(void) {
         if (freedebkeyptr >= maxdebkeys) {
             return -1;

@@ -23,6 +23,7 @@ i32 nta_labels[64];
 nutexanimlist_s ntalsysbuff[64];
 nutexanimlist_s *ntal_first;
 nutexanimlist_s *ntal_free;
+i32 g_texAnimCriticalSection;
 
 extern "C" void NuTexAnimSetMask(i32 mask) {
     script_mask = static_cast<u16>(mask);
@@ -375,15 +376,15 @@ extern "C" void NuTexAnimAddList(nutexanim_s *anim) {
     NuThreadCriticalSectionEnd(g_texAnimCriticalSection);
 }
 
-extern "C" nutexanim_s *NuTexAnimCreate(VARIPTR *buffer, nutexanimprog_s *program, numtl_s *material,
-                                          u16 *texture_ids, i32 texture_count) {
+extern "C" nutexanim_s *NuTexAnimCreate(VARIPTR *buffer, nutexanimprog_s *program, numtl_s *material, u16 *texture_ids,
+                                        i32 texture_count) {
     nutexanim_s *animation;
     if (buffer != NULL) {
         animation = reinterpret_cast<nutexanim_s *>(ALIGN(buffer->addr, 4));
         buffer->addr = reinterpret_cast<usize>(animation) + sizeof(nutexanim_s) + texture_count * sizeof(u16);
     } else {
-        animation = static_cast<nutexanim_s *>(
-            NU_ALLOC(sizeof(nutexanim_s) + texture_count * sizeof(u16), 4, 1, "", 0));
+        animation =
+            static_cast<nutexanim_s *>(NU_ALLOC(sizeof(nutexanim_s) + texture_count * sizeof(u16), 4, 1, "", 0));
     }
     animation->texture_count = texture_count;
     animation->material = material;
@@ -697,7 +698,8 @@ extern "C" nutexanimprog_s *NuTexAnimProgCreate(VARIPTR *buffer, i32 instruction
         program = reinterpret_cast<nutexanimprog_s *>(buffer->addr);
         buffer->addr += sizeof(nutexanimprog_s) + instruction_count * sizeof(i16);
     } else {
-        program = static_cast<nutexanimprog_s *>(NU_ALLOC(sizeof(nutexanimprog_s) + instruction_count * sizeof(i16), 4, 1, "", 0));
+        program = static_cast<nutexanimprog_s *>(
+            NU_ALLOC(sizeof(nutexanimprog_s) + instruction_count * sizeof(i16), 4, 1, "", 0));
     }
     if (program != NULL) {
         NuTexAnimProgInit(program);

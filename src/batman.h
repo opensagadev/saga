@@ -109,7 +109,6 @@ extern "C" {
 #endif
     void DebrisGlassInit(void);
     void Debris(i32);
-    void DebrisSetTimeIncrement(float);
     void DebrisSetCutSceneMode(i32);
     void DebrisDraw(i32, i32);
     void DebrisDrawGlass(void);
@@ -117,7 +116,6 @@ extern "C" {
     void UpdateParts(float);
     void SortDebrisRenderStack(void);
     void UpdateDebrisRenderStackPriority(void);
-    void TerrainTrackFlush(void);
     void RestoreGameCut(void);
     void rtlFrameUpdate(float);
     void rtlProcessLights(void *, float);

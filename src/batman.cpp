@@ -1,6 +1,8 @@
 #include "decomp.h"
 
 #include "batman.h"
+#include "legoapi/render/core/terrain.h"
+#include "legoapi/render/fx/game_deb.h"
 #include "legoapi/render/core/screen.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/gizmo/base/gizflow.h"

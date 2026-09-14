@@ -432,12 +432,3 @@ extern "C" {
     }
 
 } // extern "C"
-
-extern "C" {
-
-    i32 ShadowInfo(void) {
-        extern TERRAIN_SHAPE *ShadPoly;
-        return ShadPoly != NULL ? ShadPoly->material[0] : -1;
-    }
-
-} // extern "C"

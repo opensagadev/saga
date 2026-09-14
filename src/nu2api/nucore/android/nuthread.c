@@ -12,6 +12,8 @@ pthread_key_t g_currentThreadSpecificKey;
 // The original nuthread.c constructs this TU's six homogeneous vectors.
 #include "nu2api/nucore/nuvuvec.hpp"
 
+u32 nu_current_thread_id;
+
 static char NuThread_CriticalSectionsUsed[16];
 static pthread_mutex_t NuThread_CriticalSections[16];
 

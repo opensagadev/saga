@@ -170,6 +170,7 @@ i32 Gizmo_FindNuSpecial(nugscn_s *scene, nuhspecial_s *special, char *name, i32 
 NUVEC *GizmoGetPos(GIZMOSYS *gizmo_sys, GIZMO *gizmo);
 void InitPaintPuzzle(WORLDINFO_s *world);
 void ResetPaintPuzzle(WORLDINFO_s *world);
+void UpdatePaintPuzzle(WORLDINFO_s *world);
 GIZAIMESSAGE_s *CheckGizAIMessage(GIZAIMESSAGESYS_s *, char const *, GIZAIMESSAGE_s *);
 GIZAIMESSAGE_s *SetGizAIMessage(GIZAIMESSAGESYS_s *, char const *, float, GIZAIMESSAGE_s *);
 char *GizAIMessage_GetName(GIZAIMESSAGE_s *);

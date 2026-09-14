@@ -2,6 +2,7 @@
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/render/core/terrain.h"
+#include "legoapi/render/core/gameliball.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/fx/game_deb.h"
 #include "nu2api/numath/nufloat.h"
@@ -67,7 +68,6 @@ i32 PlatSkinCnt;
 static i32 PlatSkinResetTotal = -1;
 void SkinPlatformSize(i32, unsigned char *, PLATSKININFO *);
 extern i32 PlatImpactId;
-i32 ReadTerrainPickup(unsigned char *, i16 **, TERRPICKUPSET *);
 // Runtime-selected groups appended after the fixed terrain allocation.
 i32 curPickInst;
 i32 WallSplinesOnly;
