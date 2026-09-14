@@ -188,10 +188,8 @@ extern TERRAIN_SPHERE SphereData[16];
 i16 InsidePolLines(f32 point_x, f32 point_y, f32 point_z, f32 edge_a_x, f32 edge_a_y, f32 edge_a_z, f32 edge_b_x,
                    f32 edge_b_y, f32 edge_b_z, NUVEC *normal);
 
-void TerrainSkinAllocate(terrsitu_s *terrain_group);
 void ScanWallSplineTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags);
 void TerrainMoveImpactData();
-void PlatformConnect(char *track_id, NUVEC *position_delta, NUVEC *movement_delta, i32 platform_index);
 void TerrainImpactNorm();
 void Tag_Check(GameObject_s *object);
 void BigJumpCode(GameObject_s *object);
@@ -2627,52 +2625,6 @@ i32 TerrainBlockOnBlock(WORLDINFO_s *world, pushblock_s *block, nuvec_s *points,
     return 1;
 }
 
-extern PLATSKININFO *PlatSkinInfo;
-extern PLATSKINMEMINFO *SkinMemInfo;
-extern i32 PlatSkinCnt;
-extern i32 PlatSkinMaxStore;
-extern i32 PlatSkinMaxSize;
-extern i32 TerrainUpadteCnt;
-extern u8 *PlatSkinMem;
-void SkinPlatform(terrsitu_s *, unsigned char *, PLATSKININFO *);
-
-void TerrainSkinAllocate(terrsitu_s *terrain_group) {
-    TERRAIN_GROUP *group = reinterpret_cast<TERRAIN_GROUP *>(terrain_group);
-    i32 skin_index = ~static_cast<i32>(group->scene_index);
-    if (skin_index >= PlatSkinCnt)
-        return;
-    ++TerrainUpadteCnt;
-    PLATSKININFO *info = &PlatSkinInfo[skin_index];
-    if (group->data != NULL) {
-        SkinMemInfo[info->cache_slot].last_used = TerrainUpadteCnt;
-        return;
-    }
-    i32 slot = 0;
-    if (SkinMemInfo[0].skin_index != -1) {
-        i32 oldest = SkinMemInfo[0].last_used;
-        for (i32 i = 1; i < PlatSkinMaxStore; ++i) {
-            if (SkinMemInfo[i].skin_index == -1) {
-                slot = i;
-                break;
-            }
-            if (SkinMemInfo[i].last_used < oldest) {
-                oldest = SkinMemInfo[i].last_used;
-                slot = i;
-            }
-        }
-    }
-    PLATSKINMEMINFO *cache = &SkinMemInfo[slot];
-    if (cache->skin_index >= 0) {
-        CurTerr->groups[PlatSkinInfo[cache->skin_index].terrain_group].data = NULL;
-        for (i32 i = 0; i < 16; ++i)
-            CurTerr->index_levels[i].entry_count = 0;
-    }
-    group->data = info->terrain_data;
-    info->cache_slot = slot;
-    cache->skin_index = skin_index;
-    SkinPlatform(terrain_group, PlatSkinMem + slot * PlatSkinMaxSize, info);
-    SkinMemInfo[slot].last_used = TerrainUpadteCnt;
-}
 void ScanTerrIDRemovePlat(i32 platform_index) {
     TERRAIN_TRACK_SLOT *slot = CurTerr->track_slots;
     i32 remaining = TERRAIN_TRACK_SLOT_COUNT;
@@ -3978,8 +3930,6 @@ extern TERRAIN_SHAPE *ScaleTerrain;
 extern "C" void *NuScratchAlloc32(i32);
 extern "C" void NuScratchRelease();
 
-void TerrainSkinAllocate(terrsitu_s *terrain_group);
-
 namespace {
 
     // Target NewScanRot 0x378fb0 uses 0.1f on both horizontal axes when
@@ -5054,4 +5004,24 @@ void RayImpact(NUVEC *movement) {
             movement->z = 0.0f;
             break;
     }
+}
+
+void PlatformConnect(char *track_id, NUVEC *position_delta, NUVEC *movement_delta, i32 platform_index) {
+    if (CurTrackInfo == NULL) {
+        CurTrackInfo = AllocTerrId();
+        if (CurTrackInfo != NULL) {
+            CurTrackInfo->flags |= TERRAIN_TRACK_FLAG_CONNECTED;
+            CurTrackInfo->platform_index = static_cast<i16>(platform_index);
+            CurTrackInfo->id = track_id;
+            CurTrackInfo->platform_contact_state = TERRAIN_TRACK_CONTACT_ACTIVE;
+            position_delta->y = 0.0f;
+            movement_delta->y = 0.0f;
+        }
+    } else {
+        CurTrackInfo->flags |= TERRAIN_TRACK_FLAG_CONNECTED;
+        CurTrackInfo->platform_index = static_cast<i16>(platform_index);
+        CurTrackInfo->platform_contact_state = TERRAIN_TRACK_CONTACT_ACTIVE;
+    }
+
+    castnum = CurTerr->platforms[platform_index].terrain_group_index;
 }

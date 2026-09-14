@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.06568,
+    "fuzzy_match_percent": 46.075012,
     "total_code": "4722419",
     "matched_code": "400186",
     "matched_code_percent": 8.4741745,
@@ -34902,30 +34902,6 @@
           "match_percent": 68.933334
         },
         {
-          "name": "MenuInitialiseEx",
-          "demangled_name": "MenuInitialiseEx",
-          "address": 4348880,
-          "offset": 3458912,
-          "size": 395,
-          "match_percent": 70.16327
-        },
-        {
-          "name": "MenuInitialise",
-          "demangled_name": "MenuInitialise",
-          "address": 4349280,
-          "offset": 3459312,
-          "size": 104,
-          "match_percent": 100.0
-        },
-        {
-          "name": "MenuReset",
-          "demangled_name": "MenuReset",
-          "address": 4349776,
-          "offset": 3459808,
-          "size": 96,
-          "match_percent": 100.0
-        },
-        {
           "name": "MenuLoadTechnicalStrings",
           "demangled_name": "MenuLoadTechnicalStrings",
           "address": 4358976,
@@ -45131,22 +45107,6 @@
           "offset": 2739728,
           "size": 1575,
           "match_percent": 34.00277
-        },
-        {
-          "name": "_Z15PlatformConnectPcP7nuvec_sS1_i",
-          "demangled_name": "PlatformConnect(char*, nuvec_s*, nuvec_s*, int)",
-          "address": 3676512,
-          "offset": 2786544,
-          "size": 156,
-          "match_percent": 81.24324
-        },
-        {
-          "name": "_Z16SkinPlatformSizeiPhP12PLATSKININFO",
-          "demangled_name": "SkinPlatformSize(int, unsigned char*, PLATSKININFO*)",
-          "address": 3728512,
-          "offset": 2838544,
-          "size": 1697,
-          "match_percent": 33.47619
         },
         {
           "name": "_Z25FindReflectionNoPlatformsP7nuvec_s",
@@ -67944,7 +67904,7 @@
           "address": 2451728,
           "offset": 1561760,
           "size": 1760,
-          "match_percent": 10.0542
+          "match_percent": 10.338754
         },
         {
           "name": "RemapAddr",
@@ -68203,6 +68163,22 @@
           "match_percent": 100.0
         },
         {
+          "name": "MenuInitialiseEx",
+          "demangled_name": "MenuInitialiseEx",
+          "address": 4348880,
+          "offset": 3458912,
+          "size": 395,
+          "match_percent": 75.061226
+        },
+        {
+          "name": "MenuInitialise",
+          "demangled_name": "MenuInitialise",
+          "address": 4349280,
+          "offset": 3459312,
+          "size": 104,
+          "match_percent": 100.0
+        },
+        {
           "name": "MenuSetColours",
           "demangled_name": "MenuSetColours",
           "address": 4349392,
@@ -68243,6 +68219,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "MenuReset",
+          "demangled_name": "MenuReset",
+          "address": 4349776,
+          "offset": 3459808,
+          "size": 96,
+          "match_percent": 100.0
+        },
+        {
           "name": "MenuRegisterSoundFX",
           "demangled_name": "MenuRegisterSoundFX",
           "address": 4349872,
@@ -68272,7 +68256,7 @@
           "address": 4351424,
           "offset": 3461456,
           "size": 566,
-          "match_percent": 68.21951
+          "match_percent": 71.6748
         },
         {
           "name": "BackupMenu",
@@ -68456,7 +68440,7 @@
           "address": 4356000,
           "offset": 3466032,
           "size": 92,
-          "match_percent": 88.44444
+          "match_percent": 87.888885
         },
         {
           "name": "_Z15MenuIsAvailablev",
@@ -68648,7 +68632,7 @@
           "address": 4360288,
           "offset": 3470320,
           "size": 3870,
-          "match_percent": 16.404392
+          "match_percent": 16.410852
         },
         {
           "name": "SetButtonScaleMode",
@@ -68768,7 +68752,7 @@
           "address": 4394368,
           "offset": 3504400,
           "size": 175,
-          "match_percent": 84.244446
+          "match_percent": 99.91111
         },
         {
           "name": "_Z14MenuDrawNoDataP6MENU_s",
@@ -68784,7 +68768,7 @@
           "address": 4394592,
           "offset": 3504624,
           "size": 399,
-          "match_percent": 92.35955
+          "match_percent": 99.77528
         },
         {
           "name": "_Z22MenuDrawAutoSaveCancelP6MENU_s",
@@ -68832,7 +68816,7 @@
           "address": 4396112,
           "offset": 3506144,
           "size": 378,
-          "match_percent": 89.28395
+          "match_percent": 98.48148
         },
         {
           "name": "_Z21MenuDrawDeleteConfirmP6MENU_s",
@@ -68872,7 +68856,7 @@
           "address": 4397280,
           "offset": 3507312,
           "size": 197,
-          "match_percent": 70.789474
+          "match_percent": 99.92105
         },
         {
           "name": "_Z15IconScenes_InitPcP9variptr_uS1_",
@@ -76232,14 +76216,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "_Z19TerrainSkinAllocateP10terrsitu_s",
-          "demangled_name": "TerrainSkinAllocate(terrsitu_s*)",
-          "address": 3631424,
-          "offset": 2741456,
-          "size": 693,
-          "match_percent": 60.783783
-        },
-        {
           "name": "_Z22DerotateMovementVectorv",
           "demangled_name": "DerotateMovementVector()",
           "address": 3632128,
@@ -76494,6 +76470,14 @@
           "offset": 2786336,
           "size": 205,
           "match_percent": 95.521736
+        },
+        {
+          "name": "_Z15PlatformConnectPcP7nuvec_sS1_i",
+          "demangled_name": "PlatformConnect(char*, nuvec_s*, nuvec_s*, int)",
+          "address": 3676512,
+          "offset": 2786544,
+          "size": 156,
+          "match_percent": 81.24324
         },
         {
           "name": "TerrainWallAng",
@@ -77084,7 +77068,7 @@
           "address": 3493904,
           "offset": 2603936,
           "size": 670,
-          "match_percent": 91.7619
+          "match_percent": 90.492065
         },
         {
           "name": "CreateScaledEffect",
@@ -77413,6 +77397,14 @@
           "offset": 2736944,
           "size": 191,
           "match_percent": 7.368421
+        },
+        {
+          "name": "_Z19TerrainSkinAllocateP10terrsitu_s",
+          "demangled_name": "TerrainSkinAllocate(terrsitu_s*)",
+          "address": 3631424,
+          "offset": 2741456,
+          "size": 693,
+          "match_percent": 65.86487
         },
         {
           "name": "_Z11AllocTerrIdv",
@@ -77895,12 +77887,20 @@
           "match_percent": 6.0
         },
         {
+          "name": "_Z16SkinPlatformSizeiPhP12PLATSKININFO",
+          "demangled_name": "SkinPlatformSize(int, unsigned char*, PLATSKININFO*)",
+          "address": 3728512,
+          "offset": 2838544,
+          "size": 1697,
+          "match_percent": 34.42328
+        },
+        {
           "name": "PlatSkinMemRigister",
           "demangled_name": "PlatSkinMemRigister",
           "address": 3730224,
           "offset": 2840256,
           "size": 96,
-          "match_percent": 41.7
+          "match_percent": 57.65
         },
         {
           "name": "PlatSkinMemReset",
@@ -77916,7 +77916,7 @@
           "address": 3730512,
           "offset": 2840544,
           "size": 552,
-          "match_percent": 68.83871
+          "match_percent": 79.73548
         },
         {
           "name": "PlatInstSkinRegister",
@@ -77932,7 +77932,7 @@
           "address": 3731168,
           "offset": 2841200,
           "size": 1406,
-          "match_percent": 45.92521
+          "match_percent": 52.36011
         },
         {
           "name": "TerrainGetModelByInst",
@@ -80798,14 +80798,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "_Z20LevelObject_AddExtraPci",
-          "demangled_name": "LevelObject_AddExtra(char*, int)",
-          "address": 4674928,
-          "offset": 3784960,
-          "size": 187,
-          "match_percent": 42.938774
-        },
-        {
           "name": "_Z29LevelObject_FindIndexFromNamePc",
           "demangled_name": "LevelObject_FindIndexFromName(char*)",
           "address": 4676016,
@@ -81768,7 +81760,15 @@
           "address": 4674560,
           "offset": 3784592,
           "size": 367,
-          "match_percent": 31.22
+          "match_percent": 30.29
+        },
+        {
+          "name": "_Z20LevelObject_AddExtraPci",
+          "demangled_name": "LevelObject_AddExtra(char*, int)",
+          "address": 4674928,
+          "offset": 3784960,
+          "size": 187,
+          "match_percent": 65.95918
         },
         {
           "name": "_Z19LevObj_FixUpPlatIDsP11WORLDINFO_s",
@@ -81776,7 +81776,7 @@
           "address": 4676128,
           "offset": 3786160,
           "size": 185,
-          "match_percent": 43.305084
+          "match_percent": 43.22034
         },
         {
           "name": "_Z19LevObj_FindByPlatIDP11WORLDINFO_si",

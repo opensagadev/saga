@@ -7,6 +7,8 @@ struct nuvec_s;
 struct TERRSET;
 struct TERRAIN_TRACK_SLOT;
 struct tertype;
+struct terrsitu_s;
+struct PLATSKININFO;
 typedef tertype TERRAIN_SHAPE;
 
 extern TERRAIN_SHAPE *EShadPoly;
@@ -72,3 +74,9 @@ i32 HitPoly(f32 primary_start, f32 primary_end, f32 secondary_start, f32 seconda
 i32 HitTerrain(void);
 i32 HitTerrPoly(tertype *surface, i32 group_index);
 void RayImpact(nuvec_s *movement);
+void PlatformConnect(char *track_id, nuvec_s *position_delta, nuvec_s *movement_delta, i32 platform_index);
+void TerrainSkinAllocate(terrsitu_s *terrain_group);
+void SkinPlatform(terrsitu_s *terrain_group, unsigned char *buffer, PLATSKININFO *info);
+void SkinPlatformSize(i32 group_index, unsigned char *buffer, PLATSKININFO *info);
+nuvec_s TerrainSkin(PLATSKININFO *info, nuvec_s *position, f32 scale, i32 flags);
+extern i32 SkinFlipTab[8];
