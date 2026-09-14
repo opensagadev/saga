@@ -3,6 +3,7 @@
 #include "host/harness/save.hpp"
 #include "host/harness/window.hpp"
 #include "host/platform/runtime.hpp"
+#include "java/android.h"
 
 #include <cerrno>
 #include <cstdio>
@@ -10,8 +11,6 @@
 #include <cstring>
 
 #include <unistd.h>
-
-extern char g_language[16];
 
 namespace {
 
@@ -247,7 +246,7 @@ namespace {
         if (lang == nullptr) {
             lang = "en-us";
         }
-        snprintf(g_language, sizeof(g_language), "%.15s", lang);
+        snprintf(g_language, sizeof(g_language), "%.63s", lang);
         for (char *character = g_language; *character != '\0'; ++character) {
             if (*character == '_') {
                 *character = '-';

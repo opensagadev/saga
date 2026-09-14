@@ -13,6 +13,7 @@
 #include "host/harness/save.hpp"
 #include "host/harness/startup.hpp"
 #include "host/harness/window.hpp"
+#include "java/android.h"
 #include "legoapi/world/area.h"
 #include "legoapi/characters/core/players.h"
 #include "gameapi/gui/apimenu.h"
@@ -20,7 +21,6 @@
 extern i32 LEVELCOUNT;
 extern i32 NewMode;
 extern i32 Paused;
-extern char g_language[16];
 extern "C" void __real__Z7EndPermv();
 extern "C" void __real__Z8LoadPermv();
 extern "C" void __real_NuFrameBegin();

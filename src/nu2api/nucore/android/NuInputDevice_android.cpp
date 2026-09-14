@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include <math.h>
 #include "globals.h"
+#include "java/android.h"
 #include "java/native_window.h"
 
 #include "nu2api/nucore/NuInputDevice.h"

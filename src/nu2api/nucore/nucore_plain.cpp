@@ -34,6 +34,7 @@ void NuLgtArcLaserEx(i32 type, NUVEC *start, NUVEC *end, NUVEC *control, f32 wid
                      f32 duration, i32 colour, i32 flags);
 
 #include "decomp.h"
+#include "java/android.h"
 #include "java/java.h"
 #include "nu2api/nucore/common.h"
 #include "nu2api/nucore/nuanim3.h"
@@ -1201,10 +1202,8 @@ extern "C" {
         NuThreadCriticalSectionBegin(g_performingBgProcWorkCritSec);
         NuThreadCriticalSectionBegin(g_writingSaveCriticalSection);
     }
-    // Locale string filled by the platform layer (Java nativeSetLanguage on
-    // device; LANG environment on host) and cached result index.
-    char g_language[16] = {0}; // original bss @0x66f440
-    i32 g_languageIndex = -1;  // original .data @0x616b80
+    // Locale string is owned by the Android/JNI TU; cache only its index here.
+    i32 g_languageIndex = -1; // original .data @0x616b80
 
     // original 0xe3640 — exact locale-matching ladder of the original.
     i32 NuIOS_GetDeviceLanguage(void) {

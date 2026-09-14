@@ -12,6 +12,7 @@
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/gizmo/base/gizmo.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/menus/core/panel.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/world.h"

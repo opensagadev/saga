@@ -57,6 +57,12 @@ extern "C" {
 }
 
 extern "C" {
+    static void NuVecClear(NUVEC *v) {
+        v->x = v->y = v->z = 0.0f;
+    }
+}
+
+extern "C" {
     static __used__ void NuRndrSetDirectionalLights(NUVEC *dir0, NUCOLOUR3 *colour0, NUVEC *dir1, NUCOLOUR3 *colour1,
                                                     NUVEC *dir2, NUCOLOUR3 *colour2) {
         NuRndrSetDirectionalLightsPS(dir0, colour0, dir1, colour1, dir2, colour2);
@@ -123,12 +129,6 @@ void edrtlInitBurnset(burnset_s *set) {
     set->field_560 = 0;
     for (i32 i = 0; i < 32; ++i)
         set->burnouts[i].active = 0;
-}
-
-extern "C" {
-    static void NuVecClear(NUVEC *v) {
-        v->x = v->y = v->z = 0.0f;
-    }
 }
 
 extern "C" {
@@ -206,6 +206,16 @@ extern "C" {
         return -1;
     }
 
+    void rtlDynamicFree(i32 id) {
+        if (rtl_dynamic_pool != NULL && id >= 0 && id < rtl_dynamic_max) {
+            NULNKHDR *light = NuLstGetByIdx(rtl_dynamic_pool, id);
+            if (light != NULL) {
+                NuLstFree(light);
+                --rtl_dynamic_cnt;
+            }
+        }
+    }
+
     i32 rtlDynamicAllocTemplate(rtlset *set, i32 user_id) {
         i32 id = -1;
         i32 template_id = rtlFindByUserId(reinterpret_cast<usize>(set), user_id);
@@ -219,16 +229,6 @@ extern "C" {
             }
         }
         return -1;
-    }
-
-    void rtlDynamicFree(i32 id) {
-        if (rtl_dynamic_pool != NULL && id >= 0 && id < rtl_dynamic_max) {
-            NULNKHDR *light = NuLstGetByIdx(rtl_dynamic_pool, id);
-            if (light != NULL) {
-                NuLstFree(light);
-                --rtl_dynamic_cnt;
-            }
-        }
     }
 
     i32 rtlDynamicSetType(i32 id, i32 type) {
@@ -402,9 +402,22 @@ static __used__ double ApplyAntilights(rtl_s *, rtlidata_s *, float) {
     return {};
 }
 
-static __used__ int FindNearestRTL(nuvec_s *, int) {
-    STUBBED();
-    return 0;
+extern "C" {
+    void rtlSetModifiers(void) {
+        STUBBED();
+    }
+
+    void rtlSetLights(rtldata_s *data) {
+        const NUVEC *directions = reinterpret_cast<const NUVEC *>(data->data + 0x9c);
+        const NUCOLOUR3 *colours = reinterpret_cast<const NUCOLOUR3 *>(data->data + 0x78);
+        NuRndrSetDirectionalLightsPS(&directions[0], &colours[0], &directions[1], &colours[1], &directions[2],
+                                     &colours[2]);
+        NuRndrSetAmbientLightPS(reinterpret_cast<const NUCOLOUR3 *>(data->data + 0xc0));
+    }
+
+    void rtlSetSpecularLight(void) {
+        STUBBED();
+    }
 }
 
 static __used__ bool InsideLineXZ(float, float, float, float, float, float) {
@@ -419,11 +432,6 @@ static f32 ClampUnit(f32 value) {
     return value > 1.0f ? 1.0f : value;
 }
 
-static __used__ int FindNearestFog(nuvec_s *) {
-    STUBBED();
-    return 0;
-}
-
 static __used__ i32 rtlCalcLights(nuvec_s *, numtx_s *, f32, rtlidata_s *) {
     STUBBED();
     return 0;
@@ -432,6 +440,16 @@ static __used__ i32 rtlCalcLights(nuvec_s *, numtx_s *, f32, rtlidata_s *) {
 static __used__ rtl_s *GetNextRTL(void *, rtl_s *, char *, int *) {
     STUBBED();
     return nullptr;
+}
+
+extern "C" {
+    void rtlSpecularValue(void) {
+        STUBBED();
+    }
+
+    void rtlSetSpecularValue(void) {
+        STUBBED();
+    }
 }
 
 extern "C" {
@@ -629,36 +647,7 @@ static __used__ i32 rtlCmp(rtl_s *, rtl_s *) {
 }
 
 extern "C" {
-
-    void rtlScaleSetMultipliers(void) {
-        STUBBED();
-    }
-
-    void rtlSetExt(void) {
-        STUBBED();
-    }
-
-    void rtlSetLights(rtldata_s *data) {
-        const NUVEC *directions = reinterpret_cast<const NUVEC *>(data->data + 0x9c);
-        const NUCOLOUR3 *colours = reinterpret_cast<const NUCOLOUR3 *>(data->data + 0x78);
-        NuRndrSetDirectionalLightsPS(&directions[0], &colours[0], &directions[1], &colours[1], &directions[2],
-                                     &colours[2]);
-        NuRndrSetAmbientLightPS(reinterpret_cast<const NUCOLOUR3 *>(data->data + 0xc0));
-    }
-
     void rtlSetMinR(void) {
-        STUBBED();
-    }
-
-    void rtlSetModifiers(void) {
-        STUBBED();
-    }
-
-    void rtlSetSpecularLight(void) {
-        STUBBED();
-    }
-
-    void rtlSetSpecularValue(void) {
         STUBBED();
     }
 
@@ -686,43 +675,7 @@ extern "C" {
         STUBBED();
     }
 
-    void rtlSpecularValue(void) {
-        STUBBED();
-    }
-
-    void rtlFrameUpdate(f32 frame_time) {
-        rtltimer1 = static_cast<u16>(static_cast<i32>(rtltimer1adv * frame_time) + rtltimer1);
-        NuTimeBarSlotReset(0, 6);
-    }
-
 } // extern "C"
-
-void SelectNextRTL() {
-    STUBBED();
-}
-
-void SelectPrevRTL() {
-    STUBBED();
-}
-
-// Remaining exported RTL-editor APIs in the original rtl.c run.
-extern "C" {
-    void edrtlGetFogSet(void) {
-        STUBBED();
-    }
-    void edrtlCalculateBurnout(void) {
-        STUBBED();
-    }
-    void edrtlCalculateBurnoutEx(void) {
-        STUBBED();
-    }
-    void edrtlDrawLight(void) {
-        STUBBED();
-    }
-    void edrtlDrawLightEx(void) {
-        STUBBED();
-    }
-}
 
 // RTL editor state and callbacks from the same original rtl.c text/data run.
 
@@ -840,6 +793,9 @@ static void cbDeleteNo(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 static __used__ void RefreshUI() {
+    STUBBED();
+}
+extern "C" void rtlSetExt(void) {
     STUBBED();
 }
 static void cbLoad(eduimenu_s *, eduiitem_s *, u32) {
@@ -987,6 +943,9 @@ static void cbScaleAllMultipliersUp(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 static void cbScaleAllMultipliersDown(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+extern "C" void rtlScaleSetMultipliers(void) {
     STUBBED();
 }
 static __used__ void InitUI() {
@@ -1256,18 +1215,6 @@ i32 edrtlBurnoutSave(char *filename, burnset_s *set) {
     return 0;
 }
 void edrtlDetermineNearestBurn(float distance, burnset_s *set);
-void edrtlInitBurnset(burnset_s *set);
-i32 edrtlBurnoutLoadSet(char *filename, burnset_s *set);
-
-extern "C" burnset_s *edrtlBurnoutLoad(char *filename, VARIPTR *buffer) {
-    buffer->addr = (buffer->addr + 3) & ~static_cast<usize>(3);
-    burnset_s *set = static_cast<burnset_s *>(buffer->void_ptr);
-    edrtlInitBurnset(set);
-    set->field_560 = edrtlBurnoutLoadSet(filename, set);
-    edrtl_edit_burnset = set;
-    buffer->char_ptr += sizeof(burnset_s);
-    return set;
-}
 
 i32 edrtlBurnoutLoadSet(char *filename, burnset_s *set) {
     i32 max_version = 5;
@@ -1346,26 +1293,14 @@ i32 edrtlBurnoutLoadSet(char *filename, burnset_s *set) {
     return 0;
 }
 
-void edrtlDetermineNearestBurn(float distance, burnset_s *set) {
-    NUVEC delta;
-    float distance_squared;
-    if (set->selected_index != -1) {
-        NuVecSub(&delta, &pcpos, &set->burnouts[set->selected_index].position);
-        distance_squared = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
-        if (distance_squared == 0.0f)
-            return;
-    }
-    set->selected_index = -1;
-    for (i32 i = 0; i < 32; ++i) {
-        if (set->burnouts[i].active) {
-            NuVecSub(&delta, &pcpos, &set->burnouts[i].position);
-            distance_squared = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
-            if (distance < 0.0f || distance_squared < distance) {
-                set->selected_index = i;
-                distance = distance_squared;
-            }
-        }
-    }
+extern "C" burnset_s *edrtlBurnoutLoad(char *filename, VARIPTR *buffer) {
+    buffer->addr = (buffer->addr + 3) & ~static_cast<usize>(3);
+    burnset_s *set = static_cast<burnset_s *>(buffer->void_ptr);
+    edrtlInitBurnset(set);
+    set->field_560 = edrtlBurnoutLoadSet(filename, set);
+    edrtl_edit_burnset = set;
+    buffer->char_ptr += sizeof(burnset_s);
+    return set;
 }
 
 void edrtlResetBurnset(burnset_s *burnset) {
@@ -1396,18 +1331,18 @@ i32 edrtlAddBurnout(nuvec_s *position) {
     return -1;
 }
 
-void edrtlPlaceBurnout(i32 index, nuvec_s *position) {
-    if (!edrtl_edit_burnset || !edrtl_edit_burnset->burnouts[index].active)
-        return;
-    edrtl_edit_burnset->burnouts[index].position = *position;
-}
-
 void edrtlRemoveBurnout(i32 index) {
     if (!edrtl_edit_burnset || !edrtl_edit_burnset->burnouts[index].active)
         return;
     edrtl_edit_burnset->burnouts[index].active = 0;
     --edrtl_edit_burnset->active_count;
     edrtl_edit_burnset->selected_index = -1;
+}
+
+void edrtlPlaceBurnout(i32 index, nuvec_s *position) {
+    if (!edrtl_edit_burnset || !edrtl_edit_burnset->burnouts[index].active)
+        return;
+    edrtl_edit_burnset->burnouts[index].position = *position;
 }
 
 static void edrtlSetBurnoutStartAngle(eduimenu_s *, eduiitem_s *, u32) {
@@ -1482,6 +1417,10 @@ static void edrtlCancelBurnDefaultsMenu(eduimenu_s *, eduimenu_s *) {
     STUBBED();
 }
 
+static void edrtlBurnDefaultsMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+
 static void edrtlSetBurnoutNormalRate(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
@@ -1514,46 +1453,34 @@ static void edrtlBurnTransitionsMenu(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 
-static void edrtlCancelBurnRadiusMenu(eduimenu_s *, eduimenu_s *) {
-    STUBBED();
-}
-
-static void edrtlSetBurnsetThreshold(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlSetBurnsetIntensity(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlSetBurnsetFalloff(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
-
-static void edrtlCancelBurnSetMenu(eduimenu_s *, eduimenu_s *) {
-    STUBBED();
-}
-
-static void edrtlCancelBurnMainMenu(eduimenu_s *, eduimenu_s *) {
-    STUBBED();
-}
-
-static void edrtlBurnDefaultsMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
 static void edrtlSetBurnRadius(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 static void edrtlSetBurnFalloff(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
+static void edrtlCancelBurnRadiusMenu(eduimenu_s *, eduimenu_s *) {
+    STUBBED();
+}
 static void edrtlBurnRadiusMenu(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void edrtlSetBurnsetThreshold(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void edrtlSetBurnsetIntensity(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 static void edrtlSetBurnsetFlare(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 static void edrtlSetBurnsetRadius(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void edrtlSetBurnsetFalloff(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void edrtlCancelBurnSetMenu(eduimenu_s *, eduimenu_s *) {
     STUBBED();
 }
 static void edrtlBurnSetMenu(eduimenu_s *, eduiitem_s *, u32) {
@@ -1563,6 +1490,9 @@ static void edrtlBurnoutFileSave(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
 static void edrtlBurnoutFileLoad(eduimenu_s *, eduiitem_s *, u32) {
+    STUBBED();
+}
+static void edrtlCancelBurnMainMenu(eduimenu_s *, eduimenu_s *) {
     STUBBED();
 }
 static void edrtlBurnMainMenu() {
@@ -1586,7 +1516,29 @@ static void edrtlLeave() {
     STUBBED();
 }
 
+static __used__ int FindNearestRTL(nuvec_s *, int) {
+    STUBBED();
+    return 0;
+}
+
+void SelectNextRTL() {
+    STUBBED();
+}
+
+void SelectPrevRTL() {
+    STUBBED();
+}
+
 static void edrtlProcRTL(float, nupad_s *) {
+    STUBBED();
+}
+
+static __used__ int FindNearestFog(nuvec_s *) {
+    STUBBED();
+    return 0;
+}
+
+extern "C" void edrtlGetFogSet(void) {
     STUBBED();
 }
 
@@ -1647,7 +1599,37 @@ static void edrtlProcFog(float, nupad_s *) {
     STUBBED();
 }
 
+void edrtlDetermineNearestBurn(float distance, burnset_s *set) {
+    NUVEC delta;
+    float distance_squared;
+    if (set->selected_index != -1) {
+        NuVecSub(&delta, &pcpos, &set->burnouts[set->selected_index].position);
+        distance_squared = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
+        if (distance_squared == 0.0f)
+            return;
+    }
+    set->selected_index = -1;
+    for (i32 i = 0; i < 32; ++i) {
+        if (set->burnouts[i].active) {
+            NuVecSub(&delta, &pcpos, &set->burnouts[i].position);
+            distance_squared = delta.x * delta.x + delta.y * delta.y + delta.z * delta.z;
+            if (distance < 0.0f || distance_squared < distance) {
+                set->selected_index = i;
+                distance = distance_squared;
+            }
+        }
+    }
+}
+
 static void edrtlProcBurn(float, nupad_s *) {
+    STUBBED();
+}
+
+extern "C" void edrtlCalculateBurnout(void) {
+    STUBBED();
+}
+
+extern "C" void edrtlCalculateBurnoutEx(void) {
     STUBBED();
 }
 
@@ -1661,6 +1643,14 @@ static i32 edrtlProc(float, nupad_s *) {
 }
 
 static void edrtlDrawCursor() {
+    STUBBED();
+}
+
+extern "C" void edrtlDrawLight(void) {
+    STUBBED();
+}
+
+extern "C" void edrtlDrawLightEx(void) {
     STUBBED();
 }
 
@@ -1707,4 +1697,9 @@ static void edrtlDrawBurnInfo() {
 
 static void edrtlRender() {
     STUBBED();
+}
+
+extern "C" void rtlFrameUpdate(f32 frame_time) {
+    rtltimer1 = static_cast<u16>(static_cast<i32>(rtltimer1adv * frame_time) + rtltimer1);
+    NuTimeBarSlotReset(0, 6);
 }

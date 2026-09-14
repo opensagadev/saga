@@ -235,9 +235,6 @@ u32 GAMEPAD_SKIP = GAMEPAD_BUTTON_START | GAMEPAD_BUTTON_JUMP | GAMEPAD_BUTTON_T
 // ------------------------------------------------------------------------
 // Platform & device info
 // ------------------------------------------------------------------------
-ANativeWindow *g_appWindow = NULL;
-char g_deviceManufacturer[256] = {0};
-char g_deviceModel[256] = {0};
 i32 g_isLowestEndDevice = 0;
 i32 g_isLowEndDevice = 0;
 i32 g_isMidRangeDevice = 0;
@@ -249,7 +246,6 @@ u8 aicreature_sets_alive[16] = {};
 // Render / compatibility options
 // ------------------------------------------------------------------------
 u8 g_forceSysMemVbs = 0;
-i32 g_forceETC1 = 0;
 i32 Reflections_On = 1;
 i32 disable_narrow_socks = 0;
 nugspline_s *script_spline_selected = NULL;

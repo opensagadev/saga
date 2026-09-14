@@ -4,16 +4,13 @@
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
 
-// Core rendering and panel helpers (render.cpp and menus/core/panel.cpp).
+// Core rendering helpers.
 
 extern void (*DisguiseAdjustFn)(i32 character_id, i32 hat, NUVEC *scale, NUVEC *offset);
 
 void DrawPaintLights(void);
 void BackDrop_ResetColours(void);
-void DrawTimer(i32 time, i32 expanded, i32 reset);
 extern f32 KITPOSY;
-extern f32 TimerAlpha;
-extern f32 TimerScale;
 extern f32 BOSSICONY;
 void DrawBossHitPoints(GameObject_s *obj);
 void DrawStatusIcons(STATUSPACKET_s *status, f32 y, f32 alpha);

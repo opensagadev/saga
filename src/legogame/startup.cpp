@@ -21,6 +21,7 @@
 #include <time.h>
 
 #include "globals.h"
+#include "java/android.h"
 #include "legoapi/gizmo/object/gizmoblowups.h"
 #include "legoapi/gizmo/base/gizactions.h"
 #include "MechInputTouch/MechInputTouch_types.h"
