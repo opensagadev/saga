@@ -73,10 +73,6 @@ i32 GameAudio_GetPlrSfxBits(void *);
 void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 void Hint_SetComplete(i32);
 void AddShoveObject(nuhspecial_s *, i16);
-extern "C" {
-    void PlatOnOff(i32, i32);
-    void NewTerrPlatformsOff();
-}
 void UpdatePushBlocks(void *world_ptr, void *, float) {
     static f32 snap_time = 0.25f;
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);

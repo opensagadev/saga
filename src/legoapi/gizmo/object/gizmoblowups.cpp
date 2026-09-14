@@ -8,6 +8,7 @@
 #include "gamelib/util/gamelib_util_types.h"
 #include "gameapi/edtools/edfile.h"
 #include "legoapi/ai/game/gameantinode.h"
+#include "legoapi/render/core/terrain.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/characters/motion/gameanim.h"
@@ -61,11 +62,6 @@ void GizmoBlowupCreateStuff(GIZMOBLOWUP_s *blowup);
 void GizmoBlowUp_AddEffects(NUVEC *position, GIZMOBLOWUP_s *blowup, i32 count, i32 flags, GameObject_s *object);
 i32 ObjHitObj(GameObject_s *attacker, GameObject_s *target, i32 type, u16 damage, i32 flags, i32 context);
 void GameAntinode_UnregisterAntiNode(GAMEANTINODESYS_s *system, GAMEANTINODE_s *node);
-extern "C" void PlatOnOff(i32 platform, i32 enabled);
-extern "C" i32 NewPlatInst(void *object, i32 instance);
-extern "C" i32 FindPlatInst(i32 instance);
-extern "C" i32 DeletePlatinst(i32 platform);
-extern "C" void PlatInstRotate(i32 platform, i32 rotate);
 i32 GizBlowup_InitSingleTerrain(GIZMOBLOWUP_s *blowup);
 void GizBlowup_DeleteSingleTerrain(GIZMOBLOWUP_s *blowup);
 
@@ -229,7 +225,6 @@ i32 InitGizmoBlowups(WORLDINFO_s *world) {
     memset(world->gizmo_blowups, 0, world->current_level->max_gizmo_blowups * sizeof(GIZMOBLOWUP_s));
     return world->gizmo_blowups != NULL;
 }
-
 
 void GizBlowup_Respawn(GIZMOBLOWUP_s *blowup) {
     if (blowup == NULL)
@@ -754,7 +749,6 @@ ADDGIZMOTYPE *NewBlowup_RegisterGizmo(i32 type_id) {
 
 static i32 gizmoblowupnametable_numids;
 static char gizmoblowupnametable[32][32];
-
 
 i32 GizmoBlowupTypeNameBlank(char *name) {
     for (u32 offset = 0; offset < 0x20; offset += sizeof(i32)) {
@@ -2031,7 +2025,6 @@ GIZMOBLOWUP_s *GizmoBlowUp_Target(GameObject_s *object, nuvec_s *position, nuvec
     }
     return nearest != NULL ? nearest : fallback;
 }
-
 
 GIZMOBLOWUP_s *GizmoBlowUpOpponent(GameObject_s *object, f32 range, f32 extra_radius, f32 minimum_radius, i32 mode,
                                    u32 mask, u32 value, u32 secondary_mask) {

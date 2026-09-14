@@ -1,10 +1,45 @@
 #pragma once
 
 #include "nu2api/nucore/fixed_width.h"
+#include "nu2api/numath/numtx.h"
 
 struct nuvec_s;
+struct TERRSET;
+struct TERRAIN_TRACK_SLOT;
+struct tertype;
 
+extern "C" i32 IgnoreWallSplines;
+extern "C" void PlatOnOff(i32 index, i32 enabled);
+extern "C" void TerrainSetImpactData(void *impact_data, i32 *impact_count, i32 maximum_impacts);
+extern "C" void TerrainPlatGetMtx(i32 index, NUMTX **previous, NUMTX **current);
+extern "C" void TerrainSetPlatConnectTol(f32 tolerance);
+TERRAIN_TRACK_SLOT *AllocTerrId(void);
+void DerotateMovementVector(void);
+void RotateVec(nuvec_s *source, nuvec_s *destination);
+nuvec_s TerCrossProduct(nuvec_s *a, nuvec_s *b);
+void DeRotateTerrain(tertype *surface);
+void DeRotatePoint(nuvec_s *point);
+extern "C" f32 NewShadowEx(nuvec_s *position, i32 handle, f32 height_above, f32 height_below, i32 terrain_mask);
+extern "C" TERRSET *TerrainGetCur(void);
+extern "C" void TerrainSetCur(void *terrain);
+extern "C" void noterraininit(void);
+extern "C" void TerrSetPlatScanDist(f32 dist);
+extern "C" void TerrainPlatformOldUpdate(void);
+extern "C" void TerrainPlatformNewUpdate(void);
+extern "C" void TerrainSetWallDeflectYScale(f32 scale);
+extern "C" void FullDeflect(nuvec_s *normal, nuvec_s *movement, nuvec_s *result);
+void FullDeflectSmallY(nuvec_s *normal, nuvec_s *movement, nuvec_s *result);
+extern "C" void FullReflect(nuvec_s *normal, nuvec_s *movement, nuvec_s *result);
+extern "C" void NewTerrainScaleYMask(nuvec_s *position, nuvec_s *movement, u8 *hit_flags, i32 object_index, f32 radius,
+                                     f32 collision_radius, f32 object_scale, i32 embedded_retry, i32 scan_flags,
+                                     i32 terrain_mask);
+extern "C" void *TerrainInitEx(i32 level_num, void *buffer, void *buffer_end, i32 options, char *path, void *scene,
+                               i32 group, u32 flags, u32 terrain_flags, u32 mode);
 extern "C" i32 FindPlatInst(i32 instance_index);
+extern "C" i32 DeletePlatinst(i32 platform_index);
+extern "C" i32 NewPlatInst(void *object, i32 instance);
+extern "C" i16 NewPlatPickupInst(void *object, i32 object_type);
+extern "C" void PlatInstRotate(i32 platform_index, i32 enabled);
 extern "C" i32 TerrainPlatId();
 extern "C" void NewTerrPlatformsOff(void);
 extern "C" i32 NewRayCast(nuvec_s *origin, nuvec_s *direction, f32 distance, i32 flags);

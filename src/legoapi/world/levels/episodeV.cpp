@@ -10,6 +10,7 @@
 #include "legoapi/items/objects/gameobjects.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/render/core/terrain.h"
 #include "legoapi/render/fx/parts.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/world/world.h"
@@ -27,7 +28,6 @@ extern i32 dagobah_training;
 AILOCATOR_s *locator;
 GameObject_s *gameobj;
 extern u8 troopercannons_beenReset;
-extern "C" i32 FindPlatInst(i32 instance_ix);
 void Asteroid_PartKill(PART_s *, i32);
 void GizmoBlowupUpdateMatrix(GIZMOBLOWUP_s *);
 void PartCollide_3D(PART_s *);

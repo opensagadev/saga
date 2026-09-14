@@ -35,10 +35,6 @@ struct terrsitu_s;
 struct PLATSKININFO;
 struct GAMECAMERA_s;
 struct pushblock_s;
-extern "C" void PlatOnOff(i32 index, i32 enabled);
-extern "C" void TerrainSetImpactData(void *impact_data, i32 *impact_count, i32 maximum_impacts);
-extern "C" void TerrainPlatGetMtx(i32 index, NUMTX **previous, NUMTX **current);
-extern "C" void TerrainSetPlatConnectTol(f32 tolerance);
 void Surface_Deflect(NUVEC *normal, NUVEC *movement, NUVEC *result, i32 mode);
 extern i16 id_ATST;
 extern i16 id_SPEEDERBIKE;
@@ -178,7 +174,6 @@ static TERRAIN_SHAPE TerrPolyInfo;
 extern TERRSET *CurTerr;
 extern TerrainQuery_s *TerI;
 extern i32 WallSplinesOnly;
-extern "C" i32 IgnoreWallSplines;
 extern i32 curPickInst;
 extern i16 castnum;
 extern f32 wallover;
@@ -192,12 +187,7 @@ void TerrainSkinAllocate(terrsitu_s *terrain_group);
 void ScanWallSplineTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags);
 void NewTerrStoreAnyInfo();
 void TerrainMoveImpactData();
-void RotateVec(NUVEC *source, NUVEC *destination);
-TERRAIN_TRACK_SLOT *AllocTerrId();
 void PlatformConnect(char *track_id, NUVEC *position_delta, NUVEC *movement_delta, i32 platform_index);
-void FullDeflectSmallY(NUVEC *normal, NUVEC *movement, NUVEC *result);
-extern "C" void FullDeflect(NUVEC *normal, NUVEC *movement, NUVEC *result);
-void DerotateMovementVector();
 i32 HitTerrain();
 void TerrainImpactNorm();
 void Tag_Check(GameObject_s *object);
@@ -213,7 +203,6 @@ extern i32 TERRAINMASK_NONDROID;
 extern i32 LEGO_AIPATHCNX_BLOCKAGE;
 extern i32 LEGO_AIPATHCNX_FULLTERRAIN;
 extern i32 LEGO_AIPATHCNX_WALLSHUFFLE;
-NUVEC TerCrossProduct(NUVEC *a, NUVEC *b);
 
 void StorePlatImpact() {
     TerrainQuery_s *query = TerI;
@@ -1385,8 +1374,94 @@ NUVEC TerrainSkin(PLATSKININFO *info, nuvec_s *position, float weight, i32 mode)
     result.z = point.z;
     return result;
 }
+void DerotateMovementVector() {
+    TerrainQuery_s *query = TerI;
+
+    query->movement_yaw = static_cast<f32>(NuAtan2DA(query->movement.x, query->movement.z));
+    const f32 horizontal_length =
+        NuFsqrt(query->movement.x * query->movement.x + query->movement.z * query->movement.z);
+    query->movement_pitch = static_cast<f32>(NuAtan2DA(-query->movement.y, horizontal_length));
+    query->movement_length = NuFsqrt(query->movement.x * query->movement.x + query->movement.y * query->movement.y +
+                                     query->movement.z * query->movement.z);
+}
+
+void RotateVec(NUVEC *source, NUVEC *destination) {
+    TerrainQuery_s *query = TerI;
+    const f32 pitch = query->movement_pitch;
+    const f32 sin_pitch = NuTrigTable[(static_cast<i32>(pitch) >> 1) & (NUTRIGTABLE_COUNT - 1)];
+    const f32 cos_pitch = NuTrigTable[(static_cast<i32>(pitch + 16384.0f) >> 1) & (NUTRIGTABLE_COUNT - 1)];
+
+    const f32 rotated_z = source->y * sin_pitch + source->z * cos_pitch;
+    destination->y = source->y * cos_pitch - source->z * sin_pitch;
+
+    const f32 yaw = query->movement_yaw;
+    const f32 sin_yaw = NuTrigTable[(static_cast<i32>(yaw) >> 1) & (NUTRIGTABLE_COUNT - 1)];
+    const f32 cos_yaw = NuTrigTable[(static_cast<i32>(yaw + 16384.0f) >> 1) & (NUTRIGTABLE_COUNT - 1)];
+
+    destination->z = rotated_z * cos_yaw - source->x * sin_yaw;
+    destination->x = rotated_z * sin_yaw + source->x * cos_yaw;
+}
+
 void RotateTerrain(tertype *) {
     STUBBED();
+}
+
+void DeRotateTerrain(tertype *surface) {
+    TerrainQuery_s *query = TerI;
+
+    const f32 sin_pitch = NuTrigTable[(static_cast<i32>(-query->movement_pitch) >> 1) & 0x7fff];
+    const f32 cos_pitch = NuTrigTable[(static_cast<i32>(16384.0f - query->movement_pitch) >> 1) & 0x7fff];
+    const f32 sin_yaw = NuTrigTable[(static_cast<i32>(-query->movement_yaw) >> 1) & 0x7fff];
+    const f32 cos_yaw = NuTrigTable[(static_cast<i32>(16384.0f - query->movement_yaw) >> 1) & 0x7fff];
+    const f32 start_z = query->local_start.z;
+    const f32 start_x = query->local_start.x;
+    const f32 start_y = query->local_start.y;
+
+    for (i32 vertex_index = 0; vertex_index < 3; ++vertex_index) {
+        const NUVEC &vertex = surface->vectors[vertex_index];
+        NUVEC &transformed = query->transformed_vertices[vertex_index];
+        const f32 relative_z = vertex.z - start_z;
+        const f32 relative_x = vertex.x - start_x;
+        const f32 rotated_x = relative_z * sin_yaw + relative_x * cos_yaw;
+        const f32 rotated_z = relative_z * cos_yaw - relative_x * sin_yaw;
+
+        transformed.x = rotated_x;
+        transformed.y = (vertex.y - start_y) * cos_pitch - rotated_z * sin_pitch;
+        transformed.z = (vertex.y - start_y) * sin_pitch + rotated_z * cos_pitch;
+    }
+
+    if (65536.0f > surface->normals[1].y) {
+        const NUVEC &vertex = surface->vectors[3];
+        NUVEC &transformed = query->transformed_vertices[3];
+        const f32 relative_z = vertex.z - start_z;
+        const f32 relative_x = vertex.x - start_x;
+        const f32 rotated_x = relative_z * sin_yaw + relative_x * cos_yaw;
+        const f32 rotated_z = relative_z * cos_yaw - relative_x * sin_yaw;
+
+        transformed.x = rotated_x;
+        transformed.y = (vertex.y - start_y) * cos_pitch - rotated_z * sin_pitch;
+        transformed.z = (vertex.y - start_y) * sin_pitch + rotated_z * cos_pitch;
+    }
+}
+
+void DeRotatePoint(nuvec_s *point) {
+    TerrainQuery_s *query = TerI;
+
+    const f32 sin_pitch = NuTrigTable[(static_cast<i32>(-query->movement_pitch) >> 1) & 0x7fff];
+    const f32 cos_pitch = NuTrigTable[(static_cast<i32>(16384.0f - query->movement_pitch) >> 1) & 0x7fff];
+    const f32 sin_yaw = NuTrigTable[(static_cast<i32>(-query->movement_yaw) >> 1) & 0x7fff];
+    const f32 cos_yaw = NuTrigTable[(static_cast<i32>(16384.0f - query->movement_yaw) >> 1) & 0x7fff];
+
+    const f32 relative_z = point->z - query->position.z;
+    const f32 relative_x = point->x - query->position.x;
+
+    const f32 rotated_x = relative_z * sin_yaw + relative_x * cos_yaw;
+    const f32 rotated_z = relative_z * cos_yaw - relative_x * sin_yaw;
+
+    point->x = rotated_x;
+    const f32 relative_y = point->y + query->collision_radius - query->position.y;
+    point->z = relative_y * sin_pitch + rotated_z * cos_pitch;
+    point->y = relative_y * cos_pitch - rotated_z * sin_pitch;
 }
 
 namespace {
@@ -2433,9 +2508,6 @@ NUVEC TerrainStaticMtx(PLATSKININFO *info, nuvec_s *position, i32) {
     result.z = point.z;
     return result;
 }
-void ScanTerrainHandel(i32, i16 *) {
-    STUBBED();
-}
 extern "C" void NewShapeInit(NUVEC *offset) {
     offset->x = 0.0f;
     offset->y = 0.0f;
@@ -2796,6 +2868,96 @@ static NUMTX tertempmat;
 static NUVEC4 tertempvec4;
 
 i32 TerrainPlatformMoveCheck(nuvec_s *, nuvec_s *, i32, i32, i32);
+static f32 TerrWallDeflectYScale;
+
+extern "C" void TerrainScanWallSpline(TERRAIN_SPATIAL_NODE *node) {
+    if (node->point_count <= 2) {
+        node->points[0].y = 2147483648.0f;
+        return;
+    }
+    i32 count = node->point_count <= 14 ? node->point_count + 1 : 16;
+    f32 first_x = node->points[0].x;
+    f32 first_z = node->points[0].z;
+    // The original Android binary repeats this block without advancing
+    // the spline or terminating when point_count is greater than two.
+    for (;;) {
+        f32 min_x = first_x;
+        f32 max_x = first_x;
+        f32 min_z = first_z;
+        f32 max_z = first_z;
+        for (i32 i = 1; i < count; ++i) {
+            f32 x = node->points[i].x;
+            f32 z = node->points[i].z;
+            min_x = x < min_x ? x : min_x;
+            max_x = x > max_x ? x : max_x;
+            min_z = z < min_z ? z : min_z;
+            max_z = z > max_z ? z : max_z;
+        }
+        node->points[0].y = min_x;
+        node->points[1].y = max_x;
+        node->points[2].y = min_z;
+        node->points[3].y = max_z;
+    }
+}
+
+extern "C" void TerrainAddWallSpline(TERRAIN_SPATIAL_NODE *node, TERRSET *terrain) {
+    reinterpret_cast<TERRAIN_SPATIAL_NODE **>(node)[-1] = terrain->spatial_nodes;
+    terrain->spatial_nodes = node;
+}
+
+extern "C" void TerrainRemoveWallSpline(TERRAIN_SPATIAL_NODE *node, TERRSET *terrain) {
+    if (terrain == NULL)
+        return;
+    TERRAIN_SPATIAL_NODE *previous = terrain->spatial_nodes;
+    if (previous == NULL)
+        return;
+    if (previous == node) {
+        terrain->spatial_nodes = reinterpret_cast<TERRAIN_SPATIAL_NODE **>(previous)[-1];
+        return;
+    }
+    TERRAIN_SPATIAL_NODE *next = reinterpret_cast<TERRAIN_SPATIAL_NODE **>(previous)[-1];
+    while (next != NULL && next != node) {
+        previous = next;
+        next = reinterpret_cast<TERRAIN_SPATIAL_NODE **>(previous)[-1];
+    }
+    if (next == node)
+        reinterpret_cast<TERRAIN_SPATIAL_NODE **>(previous)[-1] = reinterpret_cast<TERRAIN_SPATIAL_NODE **>(node)[-1];
+}
+
+extern "C" void FullDeflect(NUVEC *normal, NUVEC *movement, NUVEC *result) {
+    const f32 normal_x = normal->x;
+    const f32 normal_y = normal->y;
+    const f32 normal_z = normal->z;
+    const f32 movement_x = movement->x;
+    const f32 movement_y = movement->y;
+    const f32 movement_z = movement->z;
+    const f32 deflection = -movement_y * normal_y - movement_x * normal_x - movement_z * normal_z + 0.0003f;
+    result->x = movement_x + normal_x * deflection;
+    result->y = movement_y + normal_y * deflection;
+    result->z = movement_z + normal_z * deflection;
+}
+
+void FullDeflectSmallY(NUVEC *normal, NUVEC *movement, NUVEC *result) {
+    // Move just far enough out of the surface to retain a small separation.
+    const f32 normal_x = normal->x;
+    const f32 normal_y = normal->y;
+    const f32 normal_z = normal->z;
+    const f32 movement_x = movement->x;
+    const f32 movement_y = movement->y;
+    const f32 movement_z = movement->z;
+    const f32 deflection = -movement_y * normal_y - movement_x * normal_x - movement_z * normal_z + 0.0003f;
+    result->x = movement_x + normal_x * deflection;
+    result->y = movement_y + normal_y * deflection * TerrWallDeflectYScale;
+    result->z = movement_z + normal_z * deflection;
+}
+
+i32 FullDeflectTest(nuvec_s *normal, nuvec_s *movement, nuvec_s *result) {
+    f32 deflection = ((-movement->y * normal->y - movement->x * normal->x) - movement->z * normal->z) + 0.0003f;
+    NUVEC output = {normal->x * deflection + movement->x, normal->y * deflection + movement->y,
+                    normal->z * deflection + movement->z};
+    *result = output;
+    return deflection > 0.0f;
+}
 
 void FullDeflectSize(nuvec_s *normal, nuvec_s *movement, nuvec_s *result) {
     f32 deflection = (-movement->y * normal->y - movement->x * normal->x) - movement->z * normal->z;
@@ -2810,6 +2972,19 @@ void FullDeflectSize(nuvec_s *normal, nuvec_s *movement, nuvec_s *result) {
         result->y *= scale;
         result->z *= scale;
     }
+}
+
+extern "C" void FullReflect(NUVEC *normal, NUVEC *movement, NUVEC *result) {
+    const f32 normal_x = normal->x;
+    const f32 normal_y = normal->y;
+    const f32 normal_z = normal->z;
+    const f32 movement_x = movement->x;
+    const f32 movement_y = movement->y;
+    const f32 movement_z = movement->z;
+    const f32 reflection = -movement_y * normal_y - movement_x * normal_x - movement_z * normal_z;
+    result->x = movement_x + 2.0f * (normal_x * reflection);
+    result->y = movement_y + 2.0f * (normal_y * reflection);
+    result->z = movement_z + 2.0f * (normal_z * reflection);
 }
 
 void FullReflectTest(nuvec_s *normal, nuvec_s *movement, nuvec_s *result) {
@@ -2827,18 +3002,14 @@ void FullReflectTest(nuvec_s *normal, nuvec_s *movement, nuvec_s *result) {
     }
 }
 
-i32 FullDeflectTest(nuvec_s *normal, nuvec_s *movement, nuvec_s *result) {
-    f32 deflection = ((-movement->y * normal->y - movement->x * normal->x) - movement->z * normal->z) + 0.0003f;
-    NUVEC output = {normal->x * deflection + movement->x, normal->y * deflection + movement->y,
-                    normal->z * deflection + movement->z};
-    *result = output;
-    return deflection > 0.0f;
-}
-
 static f32 TerConTol = 0.1f;
 
 extern "C" void TerrainSetPlatConnectTol(f32 tolerance) {
     TerConTol = tolerance;
+}
+
+extern "C" void TerrainSetWallDeflectYScale(f32 scale) {
+    TerrWallDeflectYScale = scale;
 }
 
 i32 PlatformChecks(i32 count, nuvec_s *movement) {
@@ -3254,6 +3425,14 @@ i32 TerrainPlatformMoveCheck(nuvec_s *position, nuvec_s *normal, i32 platform_in
     TerI->hit_type = saved_hit_type;
     return hit_type == 0;
 }
+NUVEC TerCrossProduct(NUVEC *a, NUVEC *b) {
+    NUVEC result;
+    result.x = a->y * b->z - a->z * b->y;
+    result.y = a->z * b->x - b->z * a->x;
+    result.z = a->x * b->y - b->x * a->y;
+    return result;
+}
+
 // The retained debug renderer reads the older 100-byte terrain record.
 struct TERRAIN_DEBUG_RECORD {
     u8 unknown_00[0x18];
@@ -3799,7 +3978,6 @@ extern i16 NuTerrPlatsOff;
 extern TERRAIN_SHAPE *ScaleTerrain;
 extern "C" void *NuScratchAlloc32(i32);
 extern "C" void NuScratchRelease();
-NUVEC TerCrossProduct(NUVEC *, NUVEC *);
 
 void TerrainSkinAllocate(terrsitu_s *terrain_group);
 
@@ -3887,13 +4065,29 @@ namespace {
 
 } // namespace
 
+extern "C" void NewScanInit(void) {
+    TempStackPtr = TempScanStack;
+    TerrPlatDis = -1;
+}
+
+void NewScanHandelFull(nuvec_s *, nuvec_s *, f32, i32, i32) {
+    STUBBED();
+}
+
+void NewScanHandelSubset(i16 *, nuvec_s *, nuvec_s *, f32, i32) {
+    STUBBED();
+}
+
+extern "C" void NewScanHandel(void) {
+    STUBBED();
+}
+
 extern "C" void NewRaySetDisablePalt(i32 disabled) {
     TerrPlatDis = disabled;
 }
 
-extern "C" void NewScanInit(void) {
-    TempStackPtr = TempScanStack;
-    TerrPlatDis = -1;
+void ScanTerrainHandel(i32, i16 *) {
+    STUBBED();
 }
 
 extern "C" void TerrainTrackFlush(void) {
@@ -4130,12 +4324,4 @@ void NewScanRot(nuvec_s *position, i32 terrain_mask) {
     terminator[0] = 0;
     terminator[1] = 0;
     TerI->scan_list = TerI->scan_list_storage;
-}
-
-void NewScanHandelFull(nuvec_s *, nuvec_s *, f32, i32, i32) {
-    STUBBED();
-}
-
-void NewScanHandelSubset(i16 *, nuvec_s *, nuvec_s *, f32, i32) {
-    STUBBED();
 }

@@ -38342,30 +38342,6 @@
           "match_percent": 78.42308
         },
         {
-          "name": "_Z22DerotateMovementVectorv",
-          "demangled_name": "DerotateMovementVector()",
-          "address": 3632128,
-          "offset": 2742160,
-          "size": 208,
-          "match_percent": 90.24
-        },
-        {
-          "name": "_Z9RotateVecP7nuvec_sS0_",
-          "demangled_name": "RotateVec(nuvec_s*, nuvec_s*)",
-          "address": 3632336,
-          "offset": 2742368,
-          "size": 216,
-          "match_percent": 46.796295
-        },
-        {
-          "name": "_Z13DeRotatePointP7nuvec_s",
-          "demangled_name": "DeRotatePoint(nuvec_s*)",
-          "address": 3633856,
-          "offset": 2743888,
-          "size": 257,
-          "match_percent": 92.261536
-        },
-        {
           "name": "_Z25InterpolateRotationMatrixP7numtx_sS0_S0_f",
           "demangled_name": "InterpolateRotationMatrix(numtx_s*, numtx_s*, numtx_s*, float)",
           "address": 4789232,
@@ -61325,38 +61301,6 @@
           "match_percent": 2.176166
         },
         {
-          "name": "TerrainSetWallDeflectYScale",
-          "demangled_name": "TerrainSetWallDeflectYScale",
-          "address": 3595952,
-          "offset": 2705984,
-          "size": 28,
-          "match_percent": 99.85714
-        },
-        {
-          "name": "FullDeflect",
-          "demangled_name": "FullDeflect",
-          "address": 3674384,
-          "offset": 2784416,
-          "size": 138,
-          "match_percent": 99.94444
-        },
-        {
-          "name": "_Z17FullDeflectSmallYP7nuvec_sS0_S0_",
-          "demangled_name": "FullDeflectSmallY(nuvec_s*, nuvec_s*, nuvec_s*)",
-          "address": 3674528,
-          "offset": 2784560,
-          "size": 146,
-          "match_percent": 99.91892
-        },
-        {
-          "name": "FullReflect",
-          "demangled_name": "FullReflect",
-          "address": 3675184,
-          "offset": 2785216,
-          "size": 142,
-          "match_percent": 99.97369
-        },
-        {
           "name": "_Z16FindIncomingBoltP12GameObject_sii",
           "demangled_name": "FindIncomingBolt(GameObject_s*, int, int)",
           "address": 4717760,
@@ -71171,14 +71115,6 @@
           "match_percent": 99.95122
         },
         {
-          "name": "_Z15TerCrossProductP7nuvec_sS0_",
-          "demangled_name": "TerCrossProduct(nuvec_s*, nuvec_s*)",
-          "address": 3618448,
-          "offset": 2728480,
-          "size": 99,
-          "match_percent": 100.0
-        },
-        {
           "name": "_Z18RatioBetweenPlanesP7nuvec_sS0_S0_S0_S0_",
           "demangled_name": "RatioBetweenPlanes(nuvec_s*, nuvec_s*, nuvec_s*, nuvec_s*, nuvec_s*)",
           "address": 3917444,
@@ -76240,6 +76176,14 @@
           "match_percent": 99.85714
         },
         {
+          "name": "TerrainSetWallDeflectYScale",
+          "demangled_name": "TerrainSetWallDeflectYScale",
+          "address": 3595952,
+          "offset": 2705984,
+          "size": 28,
+          "match_percent": 99.85714
+        },
+        {
           "name": "TerrTempMemory",
           "demangled_name": "TerrTempMemory",
           "address": 3597488,
@@ -76262,6 +76206,14 @@
           "offset": 2707728,
           "size": 4578,
           "match_percent": 32.325806
+        },
+        {
+          "name": "_Z15TerCrossProductP7nuvec_sS0_",
+          "demangled_name": "TerCrossProduct(nuvec_s*, nuvec_s*)",
+          "address": 3618448,
+          "offset": 2728480,
+          "size": 99,
+          "match_percent": 100.0
         },
         {
           "name": "_Z8TerrDrawP7tertypes",
@@ -76352,12 +76304,44 @@
           "match_percent": 60.783783
         },
         {
+          "name": "_Z22DerotateMovementVectorv",
+          "demangled_name": "DerotateMovementVector()",
+          "address": 3632128,
+          "offset": 2742160,
+          "size": 208,
+          "match_percent": 90.24
+        },
+        {
+          "name": "_Z9RotateVecP7nuvec_sS0_",
+          "demangled_name": "RotateVec(nuvec_s*, nuvec_s*)",
+          "address": 3632336,
+          "offset": 2742368,
+          "size": 216,
+          "match_percent": 46.796295
+        },
+        {
           "name": "_Z13RotateTerrainP7tertype",
           "demangled_name": "RotateTerrain(tertype*)",
           "address": 3632560,
           "offset": 2742592,
           "size": 540,
           "match_percent": 3.471074
+        },
+        {
+          "name": "_Z15DeRotateTerrainP7tertype",
+          "demangled_name": "DeRotateTerrain(tertype*)",
+          "address": 3633104,
+          "offset": 2743136,
+          "size": 749,
+          "match_percent": 70.20122
+        },
+        {
+          "name": "_Z13DeRotatePointP7nuvec_s",
+          "demangled_name": "DeRotatePoint(nuvec_s*)",
+          "address": 3633856,
+          "offset": 2743888,
+          "size": 257,
+          "match_percent": 92.261536
         },
         {
           "name": "_Z10ScanTerrIdPv",
@@ -76432,6 +76416,46 @@
           "match_percent": 13.344371
         },
         {
+          "name": "TerrainScanWallSpline",
+          "demangled_name": "TerrainScanWallSpline",
+          "address": 3674064,
+          "offset": 2784096,
+          "size": 175,
+          "match_percent": 51.7451
+        },
+        {
+          "name": "TerrainAddWallSpline",
+          "demangled_name": "TerrainAddWallSpline",
+          "address": 3674240,
+          "offset": 2784272,
+          "size": 24,
+          "match_percent": 100.0
+        },
+        {
+          "name": "TerrainRemoveWallSpline",
+          "demangled_name": "TerrainRemoveWallSpline",
+          "address": 3674272,
+          "offset": 2784304,
+          "size": 108,
+          "match_percent": 67.666664
+        },
+        {
+          "name": "FullDeflect",
+          "demangled_name": "FullDeflect",
+          "address": 3674384,
+          "offset": 2784416,
+          "size": 138,
+          "match_percent": 99.94444
+        },
+        {
+          "name": "_Z17FullDeflectSmallYP7nuvec_sS0_S0_",
+          "demangled_name": "FullDeflectSmallY(nuvec_s*, nuvec_s*, nuvec_s*)",
+          "address": 3674528,
+          "offset": 2784560,
+          "size": 146,
+          "match_percent": 99.91892
+        },
+        {
           "name": "_Z15FullDeflectTestP7nuvec_sS0_S0_",
           "demangled_name": "FullDeflectTest(nuvec_s*, nuvec_s*, nuvec_s*)",
           "address": 3674688,
@@ -76445,7 +76469,15 @@
           "address": 3674848,
           "offset": 2784880,
           "size": 330,
-          "match_percent": 99.95294
+          "match_percent": 98.07059
+        },
+        {
+          "name": "FullReflect",
+          "demangled_name": "FullReflect",
+          "address": 3675184,
+          "offset": 2785216,
+          "size": 142,
+          "match_percent": 99.97369
         },
         {
           "name": "_Z15FullReflectTestP7nuvec_sS0_S0_",
@@ -76453,7 +76485,7 @@
           "address": 3675328,
           "offset": 2785360,
           "size": 330,
-          "match_percent": 99.976746
+          "match_percent": 98.5814
         },
         {
           "name": "_Z21TerrainMoveImpactDatav",
@@ -76573,7 +76605,7 @@
           "address": 3694112,
           "offset": 2804144,
           "size": 302,
-          "match_percent": 78.202896
+          "match_percent": 81.76811
         },
         {
           "name": "NewShapeInit",
@@ -76614,6 +76646,14 @@
           "offset": 2825776,
           "size": 2404,
           "match_percent": 1.252174
+        },
+        {
+          "name": "NewScanHandel",
+          "demangled_name": "NewScanHandel",
+          "address": 3718176,
+          "offset": 2828208,
+          "size": 372,
+          "match_percent": 4.827586
         },
         {
           "name": "NewRaySetDisablePalt",
@@ -77383,6 +77423,14 @@
           "match_percent": 7.368421
         },
         {
+          "name": "_Z11AllocTerrIdv",
+          "demangled_name": "AllocTerrId()",
+          "address": 3635808,
+          "offset": 2745840,
+          "size": 80,
+          "match_percent": 100.0
+        },
+        {
           "name": "TerrainFreeId",
           "demangled_name": "TerrainFreeId",
           "address": 3635888,
@@ -77405,30 +77453,6 @@
           "offset": 2762928,
           "size": 72,
           "match_percent": 87.17647
-        },
-        {
-          "name": "TerrainScanWallSpline",
-          "demangled_name": "TerrainScanWallSpline",
-          "address": 3674064,
-          "offset": 2784096,
-          "size": 175,
-          "match_percent": 51.7451
-        },
-        {
-          "name": "TerrainAddWallSpline",
-          "demangled_name": "TerrainAddWallSpline",
-          "address": 3674240,
-          "offset": 2784272,
-          "size": 24,
-          "match_percent": 100.0
-        },
-        {
-          "name": "TerrainRemoveWallSpline",
-          "demangled_name": "TerrainRemoveWallSpline",
-          "address": 3674272,
-          "offset": 2784304,
-          "size": 108,
-          "match_percent": 67.666664
         },
         {
           "name": "ShadowDir",
@@ -77781,14 +77805,6 @@
           "offset": 2820816,
           "size": 22,
           "match_percent": 79.875
-        },
-        {
-          "name": "NewScanHandel",
-          "demangled_name": "NewScanHandel",
-          "address": 3718176,
-          "offset": 2828208,
-          "size": 372,
-          "match_percent": 4.827586
         },
         {
           "name": "NewRayCastSetHandel",
@@ -80384,22 +80400,6 @@
           "offset": 2565328,
           "size": 244,
           "match_percent": 57.984848
-        },
-        {
-          "name": "_Z15DeRotateTerrainP7tertype",
-          "demangled_name": "DeRotateTerrain(tertype*)",
-          "address": 3633104,
-          "offset": 2743136,
-          "size": 749,
-          "match_percent": 70.20122
-        },
-        {
-          "name": "_Z11AllocTerrIdv",
-          "demangled_name": "AllocTerrId()",
-          "address": 3635808,
-          "offset": 2745840,
-          "size": 80,
-          "match_percent": 100.0
         },
         {
           "name": "_Z21CreateUsefulMaterialsv",

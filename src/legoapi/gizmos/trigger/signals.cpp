@@ -2,13 +2,9 @@
 
 #include "decomp.h"
 #include "legoapi/world/level.h"
+#include "legoapi/render/core/terrain.h"
 
 #include <string.h>
-
-extern "C" {
-    i32 DeletePlatinst(i32 platform_id);
-    i16 NewPlatPickupInst(void *object, i32 object_type);
-}
 
 static i32 Signals_GetMaxGizmos(void *world_info) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_info);

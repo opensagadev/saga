@@ -9,6 +9,7 @@
 #include "gameapi/edtools/edcam.h"
 #include "gameapi/edtools/edstubs.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/render/core/terrain.h"
 #include "legoapi/render/fx.h"
 #include "legoapi/render/fx/game_deb.h"
 #include "nu2api/nucore/nutime.h"
@@ -120,7 +121,6 @@ extern "C" {
     extern i32 part_emits_used;
     extern NUGSCN *part_scene[32];
     extern i32 part_scene_pageid[32];
-    i32 FindPlatInst(i32);
     void PlatInstBounce(i32, f32, f32, f32);
     void CheckPartCount(void);
     void KillPartsByScene(NUGSCN *);

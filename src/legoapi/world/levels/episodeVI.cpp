@@ -1,5 +1,6 @@
 #include "gameapi/ai/aisys/aisys.h"
 #include "legoapi/world/level.h"
+#include "legoapi/render/core/terrain.h"
 #include "nu2api/nu3d/nulgtlaser.h"
 #include "legoapi/gizmos/traps/gizforce.h"
 #include "legoapi/gizmos/object/gizobstacles.h"
@@ -36,8 +37,6 @@ struct AIROW_s;
 struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
-
-extern "C" i32 FindPlatInst(i32 instance_ix);
 
 // Episode 6 level handlers, in the game's Episode_VI progression:
 // jabbas palace / sarlacc pit / speeder chase / endor battle / death star 2

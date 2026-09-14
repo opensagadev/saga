@@ -4,6 +4,7 @@
 #include "globals.h"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/items/objects/gameobjects.h"
+#include "legoapi/render/core/terrain.h"
 #include "legoapi/props/doors/door.h"
 #include "legoapi/gizmo/base/GizObstacleObjectInterface.h"
 #include "legoapi/gizmo/base/GizForceObjectInterface.h"
@@ -330,7 +331,6 @@ void VaderB_Init(WORLDINFO_s *) {
 
 i32 Vader_ObiWanKilledAnakin;
 void *vaderc_netpacket;
-extern "C" i32 FindPlatInst(i32);
 
 void VaderC_Init(WORLDINFO_s *world) {
     char *names[10] = {"rock1", "rock2", "rock3", "rock4", "rock5", "rock6", "rock7", "rock8", "rock10", "rock11"};

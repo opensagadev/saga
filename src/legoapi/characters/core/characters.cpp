@@ -22,6 +22,7 @@
 #include "legoapi/menus/screens/store.h"
 #include "legoapi/menus/screens/shop.h"
 #include "legoapi/render/fx.h"
+#include "legoapi/render/core/terrain.h"
 #include "legoapi/gizmos/object/lever.h"
 #include "legoapi/gizmos/door/zipups.h"
 #include "legoapi/gizmos/object/technos.h"

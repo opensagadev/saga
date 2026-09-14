@@ -4,6 +4,7 @@
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/numath/nufloat.h"
 #include "nu2api/numath/nuvec4.h"
+#include "legoapi/render/core/terrain.h"
 #include <stdio.h>
 
 i32 NuBridgeAlloc(void);
@@ -119,10 +120,6 @@ extern "C" {
     void NuBridgeOn(i32 enabled) {
         NuBridgeProc = enabled;
     }
-    void *TerrainGetCur(void);
-    void TerrainSetCur(void *terrain);
-    i32 DeletePlatinst(i32 index);
-    i32 NewPlatInst(NUMTX *matrix, i32 instance);
     i32 NuBridgeCreate(NUGSCN *scene, nuhspecial_s *first, nuhspecial_s *second, NUVEC *start, NUVEC *end, f32 width,
                        i16 rotation, f32 af4, f32 afc, f32 af8, f32 b00, i32 count, f32 b04, f32 b08, i32 ae7,
                        u32 colour) {

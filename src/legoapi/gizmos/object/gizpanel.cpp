@@ -10,6 +10,7 @@
 #include "legoapi/characters/motion.h"
 #include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/items/base/apiobject.h"
+#include "legoapi/render/core/terrain.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world.h"
 #include "nu2api/nucore/nustring.h"
@@ -37,11 +38,6 @@ extern "C" {
 }
 
 void FindAnglesXY(NUVEC *direction, u16 *x_rotation, u16 *y_rotation);
-extern "C" {
-    i32 DeletePlatinst(i32 platform_id);
-    i16 NewPlatPickupInst(void *object, i32 object_type);
-    void PlatInstRotate(i32 platform_id, i32 enabled);
-}
 
 static void GizPanel_CreateTerrain(GIZPANEL *panel) {
     if (panel == NULL) {

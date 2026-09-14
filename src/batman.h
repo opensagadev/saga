@@ -303,8 +303,6 @@ void ReleaseAllTakeOvers(void);
 void StoreLevelProgress(WORLDINFO_s *);
 void ClearAreaProgress(i32, i32);
 void Hub_MakeModelList(void);
-void TerrainPlatformOldUpdate(void);
-void TerrainPlatformNewUpdate(void);
 void PanelRender(WORLDINFO_s *);
 void InitCables(WORLDINFO_s *);
 void InitSnakes(WORLDINFO_s *);

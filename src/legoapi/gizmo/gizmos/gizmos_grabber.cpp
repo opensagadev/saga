@@ -493,7 +493,6 @@ void Grabber_Update(WORLDINFO_s *world) {
 
 #include "legoapi/gizmo/base/gizmo.h"
 extern i32 obstacle_gizmotype_id;
-extern "C" i32 FindPlatInst(i32);
 void Grabber_Reset(WORLDINFO_s *world) {
     GRABBER_s *g = world->grabber;
     if (g == NULL)

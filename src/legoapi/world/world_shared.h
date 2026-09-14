@@ -66,22 +66,11 @@ void SetCameraZoom(f32 zoom);
 // --- chris.cpp ---
 void ChrisAllocLevelStuff(WORLDINFO_s *world);
 
-// --- terrain.cpp — terrain / debris / grass / bridge / particles ---
+// --- debris, grass, bridge, particles ---
 extern "C" {
     void DebrisSetThinningLevel(f32 level);
     void DebrisSetForcedThinning(i32 forced);
     void DebrisSetDetailLevel(i32 level);
-    void noterraininit(void);
-    void TerrainSetCur(void *terrain);
-    void TerrSetPlatScanDist(f32 dist);
-    void TerrainPlatformOldUpdate(void);
-    void TerrainPlatformNewUpdate(void);
-    void TerrainSetWallDeflectYScale(f32 scale);
-    void NewTerrainScaleYMask(NUVEC *position, NUVEC *movement, u8 *hit_flags, i32 object_index, f32 radius,
-                              f32 collision_radius, f32 object_scale, i32 embedded_retry, i32 scan_flags,
-                              i32 terrain_mask);
-    void *TerrainInitEx(i32 param1, void *buf, void *buf_end, i32 param2, char *path, void *gscn, i32 param3,
-                        u32 param4, u32 param5, u32 param6);
 }
 
 // Results written by the original terrain query pipeline.

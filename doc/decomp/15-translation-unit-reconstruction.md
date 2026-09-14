@@ -3,8 +3,11 @@
 At the latest measured target build, there are 490 current translation
 units and a 46.0654% whole-binary fuzzy match. The independent structural
 dashboard reports 48.1% largest-run text grouping and 99.7% of assessable
-same-TU writable-state links satisfied (only 40.9% of original links are
+same-TU writable-state links satisfied (only 41.0% of original links are
 assessable); neither is a completion percentage.
+The strict linked-GOT diagnostic currently covers 70.7% of original slots
+and agrees on 17.4% of shared-target order; this is a layout warning, not
+evidence for a specific TU boundary.
 This is a source-ownership overview; the matching percentage does not measure
 how many original file boundaries are known. “Reconstructed” below means the source boundary has
 evidence and passed a matching comparison; it does not mean every body is
@@ -242,10 +245,19 @@ linkage.
 | Message-box text: `MessageBoxInitMtl` → `DrawMessageBoxRGBA` → `DrawMessageBox` → `SmartTextEx` in the original `0x42d530–0x42dd80` run | `legoapi/menus/core/text.cpp`; formerly three stubs split between game-menu and render files | Three existing stubs now share the text owner and its local font-scale state; the measured run has 5/5 assessable local-state links co-located. Exact/fuzzy body matching is unchanged. |
 | `numaths.c`: text `[0x290b20, 0x292e9c)` including its trailing static initializer and constructor | `nu2api/numath/numaths.c`, compiled as C++; formerly split across seven math/engine files and two game files | All 37 reported exported functions in the measured run now share one source in original address order; the empty `nucamvu0.c` shell was removed. The shared internal `VuVec` helper header emits this TU's byte-exact LOCAL `VuVecSet` and six original-sized LOCAL constants; its original-named constructor is exact. The initial consolidation raised whole fuzzy by 0.0292 points and gained eight exact functions, none lost. **Open:** original LOCAL `rand` and final optimization calibration. The preceding `numath_includes.c` constructor remains separate. |
 | `nufloat_android.c`: text `[0x292e9c, 0x293165)` with LOCAL `VuVecSet`, four exported float helpers, six LOCAL vectors, and its initializer | `nu2api/numath/nufloat_android.c`, compiled as C++; formerly split across `nufloat.c` and `numaths_plain.cpp` | The four existing bodies now form the evidenced original run. Its own `VuVecSet` and six constants come from the same narrow internal header as `numaths.c`; constructor and exported signatures retain their original names, binding, and sizes. The move adds a second byte-exact LOCAL helper and an exact constructor without regressing exported functions. |
-| Terrain data/collision: `_GLOBAL__sub_I_gameliball.cpp` and original strong-local component 463 | `legoapi/render/core/terrain*.cpp`, `gameliball.cpp`, and functions across ten more owners | **Open atomic boundary:** 91 original functions and 48 LOCAL objects began split across 12 current sources, with 34 corresponding state definitions still GLOBAL for cross-file access. `DrawWallSpline` shares two wall statics with `terrain.cpp`; the five terrain/shadow getters now emit in original order, and three `NewScan*` stubs moved from `androidbatman.cpp` to the terrain owner. This closes three verified local-state splits without an exact/fuzzy regression (2,239/2,246 assessable links now co-located overall). The full cut requires real types and every state consumer to move together; do not relocalize state early or equate the initializer block with a complete TU. |
+| Terrain data/collision: `_GLOBAL__sub_I_gameliball.cpp` and original strong-local component 463 | `legoapi/render/core/terrain*.cpp`, `gameliball.cpp`, and peripheral owners | **Open:** 91 functions/48 LOCAL objects now map to eight current sources, versus ten at survey time; 34 LOCAL objects lack same-name current owners. The address span also has 103 non-component functions (64 non-editor, 39 editor). Separate xrefs tie wall-deflect, loader, platform callback, and skin groups; two `.data` relocations tie editor descriptors to LOCAL callbacks. Neither bridges editor to the terrain core. Terrain/platform callers now use typed `terrain.h`; the nine-symbol wall-spline/deflection and five-function rotation runs are co-located in original order, while scan-control co-location closes one more verifiable local-state split (2,243/2,249 overall). Matching is unchanged. This component is a minimum same-TU constraint, not the complete original file. |
 | Editor tools: local camera/UI/cursor/menu state under `_GLOBAL__sub_I_edtoolsall.cpp`, text span `0x330900–0x3a9c88`; RTL follows | `gameapi/edtools/edtoolsall_plain.cpp`, `edtoolsall.cpp`, `edptlall.cpp`, remaining editor callbacks | **Open.** The `-O2` plain owner holds 49 local editor-UI callbacks from the removed `edui.c`, plus two menu callbacks referencing its state; 42 verified splits closed without body regression. Two repeat-box callbacks share the particle editor owner with both sliders, closing four more splits. Six called item-creation stubs have typed declarations in `edui.h`. A 28-stub `edptl*` co-location trial preserved every retained body's score, but all 28 moved static stubs disappeared under the owner's `-O2`, lowering whole fuzzy by 0.0058 points; it was reverted. Missing real callback-table references are a likely cause to investigate, not a reason to force emission. |
 | `rtl.c`: contiguous text `0x3a9c88–0x3bc1bf`, named initializer, adjacent writable state and pointer-table relocations | `legoapi/render/core/rtl.c`, compiled as C++; formerly `rtl.cpp`, `edrtl.cpp`, `edrtlall.cpp`, `edrtlcallbacks.cpp`, HUD and five smaller fragments | Core RTL and editor state now share the evidenced source: 200/203 original text names are present, including an exact initializer, and all 11 uniquely paired linked-`.data` names now have zero order inversions. The editor consolidation closed 51 verifiable local-state splits; its timer moved out of `globals.cpp`, and the batch gained two exact matches overall. Existing function definitions have since been reordered in coherent groups without altering bodies: ordered-symbol alignment rose from 23.9% to 66.3% (136 symbols in order), and pairwise inversions fell from 6,668 to 2,315. All 184 assessable RTL local-state links remain co-located; exact/fuzzy matching is unchanged by the ordering pass. **Open:** interleaved core/export order breaks, absent local VU/NuFabs helpers, much absent state, and byte-level pointer-table relocation order. Input `.data.rel.local` tables link into `.data`; that input-section name alone is not a placement regression. Retained `-O3` after an `-O2` trial lost 14 exact matches and 0.2534 fuzzy points. |
 | Menu/customiser, timing, and large catch-all files | `customise.cpp`, `timing.cpp`, `nucore_plain.cpp`, `edtoolsall*.cpp`, `aisys.cpp`, `gameobjects.cpp` | **Open.** `APIMenuDrawMemCardSlots` now sits with load/save menu state in `gamemenuall.cpp`, leaving its public declaration in `apimenu.h`. Complete gizmo-interface and `BaseThing`/`ThingManager` extraction trials lost exact matches and were reverted. Split further only in evidenced dependent groups; address adjacency or a cleaner basename alone is insufficient. |
+
+Of the 103 non-component text neighbors in the terrain span, 39 are editor
+callbacks/functions with their own descriptor evidence. The other 64 are
+predominantly terrain-named setup, collision, scan, skin, and platform code;
+`RenderQuads` and a few generic helpers remain provisional rather than
+assigned to the terrain TU by adjacency alone.
+A combined `SkinPlatform`/`PlatformConnect`/`SkinPlatformSize`/`SkinFlipTab`
+move built but lowered `SkinPlatform` 34.00277→33.96122 and whole fuzzy
+46.065376→46.065290; it was reverted pending wider TU consolidation.
 
 The numerical-solver locals `Newton_Raphson` and
 `Laguerre_With_Deflation` belong to the original Vorbis LPC run near
@@ -261,18 +273,21 @@ at 99.99% and 99.98%.
    every symbol from address adjacency alone.
 2. Calibrate each supported owner's compiler mode and optimization against
    exact neighbors (the portal helpers require the default mode; forced
-   `-O2`/`-O3` regressed), then move whole dependency groups with real
-   public/internal headers.
+   `-O2`/`-O3` regressed). The current terrain/gameliball and grass owner
+   compile at `-O3`, while `edtoolsall_plain.cpp` is `-O2`; this is a
+   migration risk, not proof of separate original TUs. Move whole dependency
+   groups with real public/internal headers.
 3. Review each moved unit for symbol binding/ABI, data and relocation effects,
    header ownership, and a sensible source boundary. Clean up catch-all and
    obsolete files; avoid arbitrary one-function or functionless files.
 4. After each move, compare whole and per-function scores, exact transitions,
    symbol coverage, target/native/WASM builds, and the available gameplay smoke. Commit and
    push coherent tested batches at roughly hourly intervals.
-5. Prioritize the unresolved terrain LOCAL-state cut as one uncommitted
-   91-function/48-object closure, provisionally into the existing
-   `gameliball.cpp` initializer owner. Exclude interleaved editor callbacks
-   unless their own xrefs prove shared ownership. Then revisit editor
+5. First classify the 103 text neighbors and source dependencies around the
+   unresolved terrain LOCAL-state component; then move its full
+   91-function/48-object closure as one uncommitted cut, provisionally into
+   the existing `gameliball.cpp` initializer owner. Exclude interleaved editor
+   callbacks unless their own xrefs prove shared ownership. Then revisit editor
    callbacks, the Panel co-location regression, and catch-all/resource owners;
    do not invent unused pools or treat a constructor-delimited block as a TU.
 

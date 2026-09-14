@@ -293,14 +293,6 @@ void PackCharIntoInt(char, char, char, char) {
     STUBBED();
 }
 
-NUVEC TerCrossProduct(NUVEC *a, NUVEC *b) {
-    NUVEC result;
-    result.x = a->y * b->z - a->z * b->y;
-    result.y = a->z * b->x - b->z * a->x;
-    result.z = a->x * b->y - b->x * a->y;
-    return result;
-}
-
 f32 DistanceToLineXZ(NUVEC *position, NUVEC *first, NUVEC *second) {
     u16 angle = -NuAtan2D(second->x - first->x, second->z - first->z);
     return NuFabs((position->x - first->x) * NU_COS_LUT(angle) + (position->z - first->z) * NU_SIN_LUT(angle));

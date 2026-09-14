@@ -65,12 +65,15 @@ u8 *PlatSkinMemEnd;
 i32 PlatSkinMax;
 i32 PlatSkinMaxSize;
 i32 PlatSkinCnt;
-static i32 PlatSkinResetTotal = -1;
 void SkinPlatformSize(i32, unsigned char *, PLATSKININFO *);
+static i32 PlatSkinResetTotal = -1;
 extern i32 PlatImpactId;
 // Runtime-selected groups appended after the fixed terrain allocation.
 i32 curPickInst;
 i32 WallSplinesOnly;
+extern "C" {
+    i32 IgnoreWallSplines;
+}
 f32 TerrPlatScanDist = 10.0f;
 i32 cntrots;
 struct TERRAIN_PLATFORM_CALLBACK {
@@ -79,7 +82,6 @@ struct TERRAIN_PLATFORM_CALLBACK {
 };
 static i32 PlatCodeCallback;
 static TERRAIN_PLATFORM_CALLBACK PlatCallback[8];
-extern "C" i32 DeletePlatinst(i32 platform_index);
 void ScanTerrIDRemovePlat(i32 platform_index);
 
 u8 TerrainHitInfo[4];
@@ -113,7 +115,6 @@ extern "C" {
 TERRAIN_TRACK_SLOT *ScanTerrId(void *hit_flags);
 void ScanTerrain(i32 scan_type, i32 terrain_mask, i32 scan_flags);
 i32 PlatformChecks(i32 count, NUVEC *movement);
-void DerotateMovementVector(void);
 i32 HitTerrain(void);
 void TerrainImpactNorm(void);
 void RayImpact(NUVEC *);
@@ -1786,10 +1787,6 @@ extern "C" {
         STUBBED();
     }
 
-    void NewScanHandel(void) {
-        STUBBED();
-    }
-
     f32 NewShadowEx(NUVEC *position, i32 handle, f32 height_above, f32 height_below, i32 terrain_mask);
 
     f32 NewShadow(NUVEC *position, f32 height_above, f32 height_below, i32 terrain_mask) {
@@ -2368,9 +2365,19 @@ extern "C" {
         return errors[index];
     }
 
-    void TerrainAddWallSpline(TERRAIN_SPATIAL_NODE *node, TERRSET *terrain) {
-        reinterpret_cast<TERRAIN_SPATIAL_NODE **>(node)[-1] = terrain->spatial_nodes;
-        terrain->spatial_nodes = node;
+    extern "C++" TERRAIN_TRACK_SLOT *AllocTerrId() {
+        TERRSET *terrain = CurTerr;
+        if (terrain == NULL) {
+            return NULL;
+        }
+
+        for (i32 slot_index = 0; slot_index < TERRAIN_TRACK_SLOT_COUNT; ++slot_index) {
+            if (terrain->track_slots[slot_index].id == NULL) {
+                return &terrain->track_slots[slot_index];
+            }
+        }
+
+        return NULL;
     }
 
     i32 TerrainFreeId(void *id) {
@@ -2472,56 +2479,6 @@ extern "C" {
             }
             default:
                 break;
-        }
-    }
-
-    void TerrainRemoveWallSpline(TERRAIN_SPATIAL_NODE *node, TERRSET *terrain) {
-        if (terrain == NULL)
-            return;
-        TERRAIN_SPATIAL_NODE *previous = terrain->spatial_nodes;
-        if (previous == NULL)
-            return;
-        if (previous == node) {
-            terrain->spatial_nodes = reinterpret_cast<TERRAIN_SPATIAL_NODE **>(previous)[-1];
-            return;
-        }
-        TERRAIN_SPATIAL_NODE *next = reinterpret_cast<TERRAIN_SPATIAL_NODE **>(previous)[-1];
-        while (next != NULL && next != node) {
-            previous = next;
-            next = reinterpret_cast<TERRAIN_SPATIAL_NODE **>(previous)[-1];
-        }
-        if (next == node)
-            reinterpret_cast<TERRAIN_SPATIAL_NODE **>(previous)[-1] =
-                reinterpret_cast<TERRAIN_SPATIAL_NODE **>(node)[-1];
-    }
-
-    void TerrainScanWallSpline(TERRAIN_SPATIAL_NODE *node) {
-        if (node->point_count <= 2) {
-            node->points[0].y = 2147483648.0f;
-            return;
-        }
-        i32 count = node->point_count <= 14 ? node->point_count + 1 : 16;
-        f32 first_x = node->points[0].x;
-        f32 first_z = node->points[0].z;
-        // The original Android binary repeats this block without advancing
-        // the spline or terminating when point_count is greater than two.
-        for (;;) {
-            f32 min_x = first_x;
-            f32 max_x = first_x;
-            f32 min_z = first_z;
-            f32 max_z = first_z;
-            for (i32 i = 1; i < count; ++i) {
-                f32 x = node->points[i].x;
-                f32 z = node->points[i].z;
-                min_x = x < min_x ? x : min_x;
-                max_x = x > max_x ? x : max_x;
-                min_z = z < min_z ? z : min_z;
-                max_z = z > max_z ? z : max_z;
-            }
-            node->points[0].y = min_x;
-            node->points[1].y = max_x;
-            node->points[2].y = min_z;
-            node->points[3].y = max_z;
         }
     }
 
