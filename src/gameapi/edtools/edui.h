@@ -177,6 +177,9 @@ extern "C" {
     i32 eduiProcessInteracts(eduimenu_s *menu, nupad_s *pad);
     void eduiFlushInteracts(void);
     i32 eduiCursorOverMenu(eduimenu_s *menu);
+    void cbInteractMenuTitle(void);
+    i32 cbInteractMenuScrollUp(edui_interact_s *interact);
+    i32 cbInteractMenuScrollDown(edui_interact_s *interact);
     void cbInteractMenuScrollTo(eduimenu_s *menu, char *text);
     void cbInteractMenuKeySelect(eduimenu_s *menu);
     eduimenu_s *eduiMenuCreate(i32 x, i32 y, i32 width, i32 height, void *font, EdUiMenuCallback callback, char *title);

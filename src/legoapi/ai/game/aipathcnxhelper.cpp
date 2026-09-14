@@ -388,10 +388,6 @@ AIPATHCNXHELPER_s *AIPathCnxHelperSys_AddHelper(AIPATHCNXHELPERSYS_s *system, AI
     return helper;
 }
 
-void pathEditorDrawConnectionInfo(nuvec_s *, float, nuvec_s *, u32, i32) {
-    STUBBED();
-}
-
 void AIPathCnxControllerSetOnRange(AIPATHCNXCONTROLLER_s *controller, i32 start_frame, i32 end_frame) {
     if (controller == NULL) {
         return;

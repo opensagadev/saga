@@ -682,11 +682,6 @@ void ChatterSfx(GameObject_s *g, i32 a, float b) {
     }
 }
 
-void Move_VEHICLE(GameObject_s *g) {
-    STUBBED();
-    (void)g;
-}
-
 void DrawOffsetCode(GameObject_s *obj, i32 param) {
     STUBBED();
     (void)obj;

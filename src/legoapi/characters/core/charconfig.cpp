@@ -1,10 +1,18 @@
 #include "legoapi/characters/core/charconfig.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/characters/motion/gameanim.h"
 #include "legoapi/gizmo/base/gizactions.h"
 #include "legoapi/world/level.h"
 #include "legoapi/render/fx.h"
 #include "nu2api/numusic/sfx.h"
+#include "nu2api/nufile/nufilepak.h"
+#include "nu2api/nufile/nufpar.h"
+#include "nu2api/nu3d/nutex.h"
+#include "nu2api/nucore/nustring.h"
+#include "globals.h"
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 extern "C" {
@@ -2201,82 +2209,6 @@ NUFPCOMJMP ConfigChar_GameKeywords[] = {
     {"variant", CC_variant},
     {NULL, NULL},
 };
-
-#include "decomp.h"
-#include "globals.h"
-#include "legoapi/characters/core/charconfig.h"
-#include "legoapi/characters/core/character.h"
-#include "legoapi/characters/core/players.h"
-#include "nu2api/nufile/nufilepak.h"
-#include "legoapi/gizmo/base/gizactions.h"
-#include "legoapi/legoapi_types.h"
-#include "legoapi/world/level.h"
-#include "nu2api/nucore/nustring.h"
-#include "nu2api/nufile/nufpar.h"
-#include "nu2api/nu3d/nutex.h"
-
-#include <stdio.h>
-#include <string.h>
-
-struct AIROW_s;
-struct nuqthdr_s;
-struct nunativegscene_s;
-struct SHOPINPUT;
-
-extern i16 id_MINIDROIDEKA;
-extern i16 id_SUPERBATTLEDROID;
-extern i16 id_JAWA;
-extern i16 id_UGNAUGHT;
-extern i16 id_REPUBLICGUNSHIP;
-extern i16 id_REPUBLICGUNSHIP_GREEN;
-extern i16 id_PROBEDROID;
-extern i16 id_IMPERIALGUARD;
-
-void Move_JEDI(GameObject_s *object);
-void Animate_JEDI(GameObject_s *object);
-void Move_DROIDGENERIC(GameObject_s *object);
-void Animate_PROTOCOL(GameObject_s *object);
-void Animate_ASTROMECH(GameObject_s *object);
-void PostAnimate_ASTROMECH(GameObject_s *object);
-void Move_CANNON(GameObject_s *object);
-void Animate_CANNON(GameObject_s *object);
-void Move_VEHICLE(GameObject_s *object);
-void Animate_VEHICLE(GameObject_s *object);
-void Move_BEAST(GameObject_s *object);
-void Animate_BEAST(GameObject_s *object);
-void Animate_BATTLEDROID(GameObject_s *object);
-void Move_HOVERDROID(GameObject_s *object);
-void Animate_HOVERDROID(GameObject_s *object);
-void Move_WALKER(GameObject_s *object);
-void Animate_WALKER(GameObject_s *object);
-void Move_ATAT(GameObject_s *object);
-void Animate_ATAT(GameObject_s *object);
-void Move_CRITTER(GameObject_s *object);
-void Animate_CRITTER(GameObject_s *object);
-void Move_POD(GameObject_s *object);
-void Animate_POD(GameObject_s *object);
-void PostAnimate_FETT(GameObject_s *object);
-void Move_WEIRDO(GameObject_s *object);
-void Animate_WEIRDO(GameObject_s *object);
-void Move_DROIDEKA(GameObject_s *object);
-void Animate_DROIDEKA(GameObject_s *object);
-void Move_SUPERBATTLEDROID(GameObject_s *object);
-void Animate_SUPERBATTLEDROID(GameObject_s *object);
-void Move_BARMAN(GameObject_s *object);
-void Animate_BARMAN(GameObject_s *object);
-void Move_JAWA(GameObject_s *object);
-void Move_DRAGBOMB(GameObject_s *object);
-void Move_REPUBLICGUNSHIP(GameObject_s *object);
-void Animate_REPUBLICGUNSHIP(GameObject_s *object);
-void Move_SPEEDERBIKE(GameObject_s *object);
-void Animate_SPEEDERBIKE(GameObject_s *object);
-void Animate_DEFAULT(GameObject_s *object);
-void Move_GEONOSIAN(GameObject_s *object);
-void Animate_GEONOSIAN(GameObject_s *object);
-void SetMoveAndAnimateFunctions(u32 model_flag_mask, u32 model_flag_value, u32 game_flag_mask, u32 game_flag_value,
-                                i32 movement_type, void *move_function, void *animate_function, void *draw_function);
-void CharConfig_CalculateJumpStats(f32 jump_speed, f32 gravity, f32 *duration, f32 *height);
-i32 Text_StripComments(char *text, char *destination, i32 separators);
 
 static CHARVARIANT *CharVariant;
 static i32 CHARVARIANTCOUNT;

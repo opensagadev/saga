@@ -1,5 +1,6 @@
 #include "decomp.h"
 #include "legoapi/world/world_shared.h"
+#include "legoapi/render/core/terrain.h"
 
 #include <stdio.h>
 
@@ -3446,6 +3447,10 @@ void DrawMSitu(i32 index) {
             batch = reinterpret_cast<TERRAIN_SHAPE_BATCH *>(entry);
         }
     }
+}
+
+void DrawWallSpline(float) {
+    STUBBED();
 }
 
 extern TERRSET *CurTerr;

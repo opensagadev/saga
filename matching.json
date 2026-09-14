@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 45.99639,
+    "fuzzy_match_percent": 46.060104,
     "total_code": "4722419",
     "matched_code": "400617",
     "matched_code_percent": 8.4833,
@@ -18521,36 +18521,20 @@
           "match_percent": 93.48
         },
         {
+          "name": "AISysSetPathCylinderCheck",
+          "demangled_name": "AISysSetPathCylinderCheck",
+          "address": 4174336,
+          "offset": 3284368,
+          "size": 30,
+          "match_percent": 99.875
+        },
+        {
           "name": "aieditor_Render",
           "demangled_name": "aieditor_Render",
           "address": 4174368,
           "offset": 3284400,
           "size": 999,
           "match_percent": 2.079208
-        },
-        {
-          "name": "aieditor_ClearAllPathCnxTypes",
-          "demangled_name": "aieditor_ClearAllPathCnxTypes",
-          "address": 4182272,
-          "offset": 3292304,
-          "size": 62,
-          "match_percent": 99.92308
-        },
-        {
-          "name": "aieditor_RegisterPathCnxType",
-          "demangled_name": "aieditor_RegisterPathCnxType",
-          "address": 4182336,
-          "offset": 3292368,
-          "size": 151,
-          "match_percent": 99.57143
-        },
-        {
-          "name": "aieditor_RegisterDefaultPathCnxTypes",
-          "demangled_name": "aieditor_RegisterDefaultPathCnxTypes",
-          "address": 4182496,
-          "offset": 3292528,
-          "size": 136,
-          "match_percent": 99.4
         },
         {
           "name": "aieditor_Init",
@@ -20692,6 +20676,38 @@
           "match_percent": 1.548387
         },
         {
+          "name": "aieditor_ClearAllPathCnxTypes",
+          "demangled_name": "aieditor_ClearAllPathCnxTypes",
+          "address": 4182272,
+          "offset": 3292304,
+          "size": 62,
+          "match_percent": 99.92308
+        },
+        {
+          "name": "aieditor_RegisterPathCnxType",
+          "demangled_name": "aieditor_RegisterPathCnxType",
+          "address": 4182336,
+          "offset": 3292368,
+          "size": 151,
+          "match_percent": 99.57143
+        },
+        {
+          "name": "aieditor_RegisterDefaultPathCnxTypes",
+          "demangled_name": "aieditor_RegisterDefaultPathCnxTypes",
+          "address": 4182496,
+          "offset": 3292528,
+          "size": 136,
+          "match_percent": 99.4
+        },
+        {
+          "name": "_Z28pathEditorDrawConnectionInfoP7nuvec_sfS0_ji",
+          "demangled_name": "pathEditorDrawConnectionInfo(nuvec_s*, float, nuvec_s*, unsigned int, int)",
+          "address": 4183600,
+          "offset": 3293632,
+          "size": 1838,
+          "match_percent": 1.304348
+        },
+        {
           "name": "_ZL18pathEditorDrawPathP10EDAIPATH_si",
           "demangled_name": "pathEditorDrawPath(EDAIPATH_s*, int)",
           "address": 4185440,
@@ -20857,7 +20873,7 @@
           "address": 4232752,
           "offset": 3342784,
           "size": 10501,
-          "match_percent": 0.0
+          "match_percent": 28.60559
         },
         {
           "name": "_ZL31pathEditor_cbDisconnectPathNodeP10eduimenu_sP10eduiitem_sj",
@@ -23636,7 +23652,7 @@
           "address": 1713520,
           "offset": 823552,
           "size": 6967,
-          "match_percent": 76.11042
+          "match_percent": 76.17874
         },
         {
           "name": "_ZL15Condition_TimerP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPcPv",
@@ -24700,7 +24716,7 @@
           "address": 4169520,
           "offset": 3279552,
           "size": 183,
-          "match_percent": 99.730156
+          "match_percent": 99.968254
         },
         {
           "name": "AILocatorSet_AssignNearestLocator",
@@ -24725,14 +24741,6 @@
           "offset": 3282112,
           "size": 1238,
           "match_percent": 69.13961
-        },
-        {
-          "name": "AISysSetPathCylinderCheck",
-          "demangled_name": "AISysSetPathCylinderCheck",
-          "address": 4174336,
-          "offset": 3284368,
-          "size": 30,
-          "match_percent": 99.875
         }
       ]
     },
@@ -32850,6 +32858,30 @@
           "match_percent": 15.0
         },
         {
+          "name": "cbInteractMenuTitle",
+          "demangled_name": "cbInteractMenuTitle",
+          "address": 3734576,
+          "offset": 2844608,
+          "size": 144,
+          "match_percent": 11.351352
+        },
+        {
+          "name": "cbInteractMenuScrollUp",
+          "demangled_name": "cbInteractMenuScrollUp",
+          "address": 3734720,
+          "offset": 2844752,
+          "size": 36,
+          "match_percent": 100.0
+        },
+        {
+          "name": "cbInteractMenuScrollDown",
+          "demangled_name": "cbInteractMenuScrollDown",
+          "address": 3734768,
+          "offset": 2844800,
+          "size": 36,
+          "match_percent": 100.0
+        },
+        {
           "name": "eduicbItemDestroyProp",
           "demangled_name": "eduicbItemDestroyProp",
           "address": 3735008,
@@ -40154,14 +40186,6 @@
           "match_percent": 7.777778
         },
         {
-          "name": "_Z28pathEditorDrawConnectionInfoP7nuvec_sfS0_ji",
-          "demangled_name": "pathEditorDrawConnectionInfo(nuvec_s*, float, nuvec_s*, unsigned int, int)",
-          "address": 4183600,
-          "offset": 3293632,
-          "size": 1838,
-          "match_percent": 1.304348
-        },
-        {
           "name": "_Z23AIPathCnxHelperSysResetP11WORLDINFO_sP20AIPATHCNXHELPERSYS_s",
           "demangled_name": "AIPathCnxHelperSysReset(WORLDINFO_s*, AIPATHCNXHELPERSYS_s*)",
           "address": 5244144,
@@ -44568,14 +44592,6 @@
           "match_percent": 4.470588
         },
         {
-          "name": "_Z12Move_VEHICLEP12GameObject_s",
-          "demangled_name": "Move_VEHICLE(GameObject_s*)",
-          "address": 1523712,
-          "offset": 633744,
-          "size": 4260,
-          "match_percent": 0.54732
-        },
-        {
           "name": "_Z24CheckForPlayersTurnedOffv",
           "demangled_name": "CheckForPlayersTurnedOff()",
           "address": 1835616,
@@ -46842,6 +46858,14 @@
           "offset": 631920,
           "size": 1814,
           "match_percent": 1.428572
+        },
+        {
+          "name": "_Z12Move_VEHICLEP12GameObject_s",
+          "demangled_name": "Move_VEHICLE(GameObject_s*)",
+          "address": 1523712,
+          "offset": 633744,
+          "size": 4260,
+          "match_percent": 0.54732
         },
         {
           "name": "_Z20Move_REPUBLICGUNSHIPP12GameObject_s",
@@ -68085,30 +68109,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "cbInteractMenuTitle",
-          "demangled_name": "cbInteractMenuTitle",
-          "address": 3734576,
-          "offset": 2844608,
-          "size": 144,
-          "match_percent": 11.351352
-        },
-        {
-          "name": "cbInteractMenuScrollUp",
-          "demangled_name": "cbInteractMenuScrollUp",
-          "address": 3734720,
-          "offset": 2844752,
-          "size": 36,
-          "match_percent": 100.0
-        },
-        {
-          "name": "cbInteractMenuScrollDown",
-          "demangled_name": "cbInteractMenuScrollDown",
-          "address": 3734768,
-          "offset": 2844800,
-          "size": 36,
-          "match_percent": 100.0
-        },
-        {
           "name": "cbCompateDirentByDateAsc",
           "demangled_name": "cbCompateDirentByDateAsc",
           "address": 3775344,
@@ -73614,14 +73614,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "_Z14DrawWallSplinef",
-          "demangled_name": "DrawWallSpline(float)",
-          "address": 3628256,
-          "offset": 2738288,
-          "size": 164,
-          "match_percent": 11.707317
-        },
-        {
           "name": "edDrawCross",
           "demangled_name": "edDrawCross",
           "address": 3837440,
@@ -76415,6 +76407,14 @@
           "offset": 2738208,
           "size": 66,
           "match_percent": 100.0
+        },
+        {
+          "name": "_Z14DrawWallSplinef",
+          "demangled_name": "DrawWallSpline(float)",
+          "address": 3628256,
+          "offset": 2738288,
+          "size": 164,
+          "match_percent": 11.707317
         },
         {
           "name": "_Z11TerrainSkinP12PLATSKININFOP7nuvec_sfi",

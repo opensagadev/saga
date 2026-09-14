@@ -10271,11 +10271,6 @@ extern "C" AIPATHCNX *AIPathFindPathCnxFromIX(AISYS *system, AIPATH *path, u8 fr
 }
 
 AIANTINODE dynamic_antinodes[64] = {};
-static i16 disable_cylinder_check;
-
-extern "C" void AISysSetPathCylinderCheck(i32 enabled) {
-    disable_cylinder_check = enabled == 0;
-}
 
 extern "C" f32 default_path_heighttol;
 

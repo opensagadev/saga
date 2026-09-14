@@ -60,7 +60,6 @@ extern "C" i16 id_GRABCONTROL, id_GRABR2CONTROL;
 float SLAMGRAVITY = -15.0f;
 static float applygravity_extrahoveroffset;
 
-
 void MovePlayer_DIRECTIONAL(GameObject_s *object);
 i32 CanStepBack(GameObject_s *object);
 i32 StepBackFromTarget(GameObject_s *object);
@@ -187,8 +186,6 @@ i32 ZapTarget(GameObject_s *);
 i32 CannotKill(GameObject_s *);
 i32 FaceOpponent(GameObject_s *object, NUVEC *position);
 void SetProtocolDroidDeactivatedAction(GameObject_s *);
-extern i16 id_JAWA;
-extern i16 id_GONKDROID;
 void NewBuzz(nupad_s *, f32, i32);
 void Arcade_AIKilled(i32);
 i32 ObjHitObj(GameObject_s *, GameObject_s *, i32, u16, i32, i32);
@@ -2742,6 +2739,11 @@ vehicle_collision:
 
 void Move_POD(GameObject_s *) {
     STUBBED();
+}
+
+void Move_VEHICLE(GameObject_s *g) {
+    STUBBED();
+    (void)g;
 }
 
 void Move_ATAT(GameObject_s *) {
@@ -5452,7 +5454,6 @@ i32 StartBackFlip(GameObject_s *object) {
     PlayJumpSfx(object, 2);
     return 1;
 }
-
 
 static void ClearLastSafeTakeoverSource(GameObject_s *object) {
     if (object->takeover_source != NULL &&

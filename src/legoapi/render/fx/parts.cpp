@@ -7,6 +7,7 @@
 #include "gamelib/util/gamelib_util_types.h"
 #include "gameapi/edtools/edfile.h"
 #include "legoapi/render/fx.h"
+#include "legoapi/render/core/terrain.h"
 #include "legoapi/render/core/rtl.h"
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
@@ -1267,14 +1268,6 @@ extern "C" {
     void AddVariableShotPARTEffect(void) {
         STUBBED();
     }
-
-    i32 NewRayCast(NUVEC *, NUVEC *, f32, i32);
-    void NewRayCastGetImpactNormal(NUVEC *);
-    i32 NewRayCastGetImpactTerrainType();
-    f32 NewRayCastGetTOFI();
-    f32 NewRayCastGetEmbedDist();
-    i32 NewRayCastHitWallSpline();
-    i32 TerrainPlatId();
 
     i32 PartRayCast(NUVEC *position, NUVEC *movement, f32 radius, i32 flags) {
         i32 hit = NewRayCast(position, movement, radius, flags);
