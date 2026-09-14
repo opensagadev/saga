@@ -43,6 +43,7 @@ extern "C" {
     void edGraDisableTerrainSwap();
     void edgraStartPage(i8 page);
     void edgraStopPage(i8 page);
+    i32 edgraLoadPage(char *path, void *gscn, i32 terrain, void *buf, void *buf_end);
 #ifdef __cplusplus
 }
 #endif

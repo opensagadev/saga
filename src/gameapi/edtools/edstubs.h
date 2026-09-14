@@ -34,7 +34,6 @@ extern "C" {
     void edpartStopPage(i8 page);
     void edbriStartPage(i32 page);
     void edgraStartPage(i8 page);
-    i32 edgraLoadPage(char *path, void *gscn, i32 terrain, void *buf, void *buf_end);
     i32 edbriLoadPage(char *path, void *gscn);
     void edpartSetParticlePage(i32 page);
     i32 edpartLoadPage(char *path, i32 param, void *gscn);

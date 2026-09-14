@@ -1327,10 +1327,6 @@ void MenuDrawDoNotRemoveCard(MENU_s *) {
     STUBBED();
 }
 
-void MenuDrawViewTextStrings(MENU_s *) {
-    STUBBED();
-}
-
 void MenuEnterAutoSaveCancel(MENU_s *) {
     STUBBED();
 }
@@ -1429,10 +1425,6 @@ void MenuUpdateAutoSaveWarning(MENU_s *) {
 }
 
 void MenuUpdateDoNotRemoveCard(MENU_s *) {
-    STUBBED();
-}
-
-void MenuUpdateViewTextStrings(MENU_s *) {
     STUBBED();
 }
 
@@ -1880,10 +1872,6 @@ extern "C" {
     }
 
     void MenuSetTopBottom(void) {
-        STUBBED();
-    }
-
-    void PetesHackOfDeath(void) {
         STUBBED();
     }
 

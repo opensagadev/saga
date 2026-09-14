@@ -10,6 +10,8 @@ struct numtl_s;
 
 void DrawMessageBoxRGBA(f32, f32, f32, f32, u32, u32, u32, u32, numtl_s *, i32, f32);
 void DrawMessageBox(i32, f32, f32, f32, f32);
+void MenuUpdateViewTextStrings(MENU_s *menu);
+void MenuDrawViewTextStrings(MENU_s *menu);
 
 void Text_InitLanguageList(LANGUAGEDATA *list);
 void Text_SetLanguage(i32 lang);

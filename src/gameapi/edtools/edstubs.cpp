@@ -24,16 +24,6 @@ extern "C" {
         (void)page;
     }
 
-    i32 edgraLoadPage(char *path, void *gscn, i32 terrain, void *buf, void *buf_end) {
-        STUBBED();
-        (void)path;
-        (void)gscn;
-        (void)terrain;
-        (void)buf;
-        (void)buf_end;
-        return -1;
-    }
-
     i32 edbriLoadPage(char *path, void *gscn) {
         STUBBED();
         (void)path;

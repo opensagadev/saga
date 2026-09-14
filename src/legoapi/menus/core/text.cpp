@@ -988,6 +988,14 @@ extern "C" {
         STUBBED();
     }
 }
+void MenuUpdateViewTextStrings(MENU_s *) {
+    STUBBED();
+}
+
+void MenuDrawViewTextStrings(MENU_s *) {
+    STUBBED();
+}
+
 bool LookupHash(u32 key, u32 *value, HashRedirect *redirects, u32 count) {
     i32 upper = static_cast<i32>(count) - 1;
     if (upper < 0) {

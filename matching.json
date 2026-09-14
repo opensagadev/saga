@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 45.99573,
+    "fuzzy_match_percent": 45.995903,
     "total_code": "4722419",
     "matched_code": "400617",
     "matched_code_percent": 8.4833,
@@ -30066,14 +30066,6 @@
           "offset": 2702864,
           "size": 182,
           "match_percent": 6.415094
-        },
-        {
-          "name": "edgraLoadPage",
-          "demangled_name": "edgraLoadPage",
-          "address": 3609776,
-          "offset": 2719808,
-          "size": 2212,
-          "match_percent": 0.791897
         }
       ]
     },
@@ -32784,6 +32776,14 @@
           "offset": 2717392,
           "size": 74,
           "match_percent": 100.0
+        },
+        {
+          "name": "edgraLoadPage",
+          "demangled_name": "edgraLoadPage",
+          "address": 3609776,
+          "offset": 2719808,
+          "size": 2212,
+          "match_percent": 1.141805
         },
         {
           "name": "edgraClearPage",
@@ -47969,14 +47969,6 @@
           "offset": 3863136,
           "size": 123,
           "match_percent": 100.0
-        },
-        {
-          "name": "_Z15SetFramesToWaitj",
-          "demangled_name": "SetFramesToWait(unsigned int)",
-          "address": 5239712,
-          "offset": 4349744,
-          "size": 24,
-          "match_percent": 99.85714
         }
       ]
     },
@@ -48602,6 +48594,14 @@
           "offset": 3516896,
           "size": 76,
           "match_percent": 99.82609
+        },
+        {
+          "name": "PetesHackOfDeath",
+          "demangled_name": "PetesHackOfDeath",
+          "address": 4406944,
+          "offset": 3516976,
+          "size": 26,
+          "match_percent": 12.5
         },
         {
           "name": "instNuGCutSceneCreate",
@@ -67361,6 +67361,22 @@
           "match_percent": 68.088425
         },
         {
+          "name": "_Z25MenuUpdateViewTextStringsP6MENU_s",
+          "demangled_name": "MenuUpdateViewTextStrings(MENU_s*)",
+          "address": 4781728,
+          "offset": 3891760,
+          "size": 220,
+          "match_percent": 5.405405
+        },
+        {
+          "name": "_Z23MenuDrawViewTextStringsP6MENU_s",
+          "demangled_name": "MenuDrawViewTextStrings(MENU_s*)",
+          "address": 4781952,
+          "offset": 3891984,
+          "size": 1902,
+          "match_percent": 1.995565
+        },
+        {
           "name": "_Z25Text_LocaliseDecimalPointPc",
           "demangled_name": "Text_LocaliseDecimalPoint(char*)",
           "address": 4783856,
@@ -69029,14 +69045,6 @@
           "match_percent": 70.789474
         },
         {
-          "name": "PetesHackOfDeath",
-          "demangled_name": "PetesHackOfDeath",
-          "address": 4406944,
-          "offset": 3516976,
-          "size": 26,
-          "match_percent": 12.5
-        },
-        {
           "name": "_Z15IconScenes_InitPcP9variptr_uS1_",
           "demangled_name": "IconScenes_Init(char*, variptr_u*, variptr_u*)",
           "address": 4588592,
@@ -69211,22 +69219,6 @@
           "offset": 3822944,
           "size": 1114,
           "match_percent": 1.909091
-        },
-        {
-          "name": "_Z25MenuUpdateViewTextStringsP6MENU_s",
-          "demangled_name": "MenuUpdateViewTextStrings(MENU_s*)",
-          "address": 4781728,
-          "offset": 3891760,
-          "size": 220,
-          "match_percent": 5.405405
-        },
-        {
-          "name": "_Z23MenuDrawViewTextStringsP6MENU_s",
-          "demangled_name": "MenuDrawViewTextStrings(MENU_s*)",
-          "address": 4781952,
-          "offset": 3891984,
-          "size": 1902,
-          "match_percent": 1.995565
         }
       ]
     },
@@ -70276,85 +70268,6 @@
           "offset": 3880912,
           "size": 9,
           "match_percent": 24.444445
-        }
-      ]
-    },
-    {
-      "name": "legoapi/misc/gamelib_utilities.cpp.o",
-      "source": "src/legoapi/misc/gamelib_utilities.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gamelib_utilities.o",
-      "functions": [
-        {
-          "name": "_Z21GroupBuffer_MoveToEndi",
-          "demangled_name": "GroupBuffer_MoveToEnd(int)",
-          "address": 3438640,
-          "offset": 2548672,
-          "size": 223,
-          "match_percent": 77.75641
-        },
-        {
-          "name": "_Z22GroupBuffer_AddToGroupii",
-          "demangled_name": "GroupBuffer_AddToGroup(int, int)",
-          "address": 3438864,
-          "offset": 2548896,
-          "size": 120,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z27GroupBuffer_RemoveFromGroupii",
-          "demangled_name": "GroupBuffer_RemoveFromGroup(int, int)",
-          "address": 3438992,
-          "offset": 2549024,
-          "size": 183,
-          "match_percent": 28.819672
-        },
-        {
-          "name": "_Z23GroupBuffer_RemoveGroupi",
-          "demangled_name": "GroupBuffer_RemoveGroup(int)",
-          "address": 3439184,
-          "offset": 2549216,
-          "size": 329,
-          "match_percent": 81.71698
-        },
-        {
-          "name": "_Z21GroupBuffer_MakeGroupi",
-          "demangled_name": "GroupBuffer_MakeGroup(int)",
-          "address": 3439520,
-          "offset": 2549552,
-          "size": 167,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z19GroupBuffer_InGroupii",
-          "demangled_name": "GroupBuffer_InGroup(int, int)",
-          "address": 3439696,
-          "offset": 2549728,
-          "size": 97,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z21GroupBuffer_GetSampleii",
-          "demangled_name": "GroupBuffer_GetSample(int, int)",
-          "address": 3439808,
-          "offset": 2549840,
-          "size": 271,
-          "match_percent": 80.8875
-        },
-        {
-          "name": "_Z25GroupBuffer_GetNumInGroupi",
-          "demangled_name": "GroupBuffer_GetNumInGroup(int)",
-          "address": 3440080,
-          "offset": 2550112,
-          "size": 27,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z28GroupBuffer_GetSampleByIndexii",
-          "demangled_name": "GroupBuffer_GetSampleByIndex(int, int)",
-          "address": 3440112,
-          "offset": 2550144,
-          "size": 40,
-          "match_percent": 100.0
         }
       ]
     },
@@ -79932,6 +79845,14 @@
           "offset": 4349664,
           "size": 74,
           "match_percent": 100.0
+        },
+        {
+          "name": "_Z15SetFramesToWaitj",
+          "demangled_name": "SetFramesToWait(unsigned int)",
+          "address": 5239712,
+          "offset": 4349744,
+          "size": 24,
+          "match_percent": 99.85714
         },
         {
           "name": "_ZN10FadeSystem4InitEv",
@@ -109809,6 +109730,78 @@
           "match_percent": 99.90909
         },
         {
+          "name": "_Z21GroupBuffer_MoveToEndi",
+          "demangled_name": "GroupBuffer_MoveToEnd(int)",
+          "address": 3438640,
+          "offset": 2548672,
+          "size": 223,
+          "match_percent": 77.75641
+        },
+        {
+          "name": "_Z22GroupBuffer_AddToGroupii",
+          "demangled_name": "GroupBuffer_AddToGroup(int, int)",
+          "address": 3438864,
+          "offset": 2548896,
+          "size": 120,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z27GroupBuffer_RemoveFromGroupii",
+          "demangled_name": "GroupBuffer_RemoveFromGroup(int, int)",
+          "address": 3438992,
+          "offset": 2549024,
+          "size": 183,
+          "match_percent": 28.819672
+        },
+        {
+          "name": "_Z23GroupBuffer_RemoveGroupi",
+          "demangled_name": "GroupBuffer_RemoveGroup(int)",
+          "address": 3439184,
+          "offset": 2549216,
+          "size": 329,
+          "match_percent": 81.71698
+        },
+        {
+          "name": "_Z21GroupBuffer_MakeGroupi",
+          "demangled_name": "GroupBuffer_MakeGroup(int)",
+          "address": 3439520,
+          "offset": 2549552,
+          "size": 167,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z19GroupBuffer_InGroupii",
+          "demangled_name": "GroupBuffer_InGroup(int, int)",
+          "address": 3439696,
+          "offset": 2549728,
+          "size": 97,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z21GroupBuffer_GetSampleii",
+          "demangled_name": "GroupBuffer_GetSample(int, int)",
+          "address": 3439808,
+          "offset": 2549840,
+          "size": 271,
+          "match_percent": 80.8875
+        },
+        {
+          "name": "_Z25GroupBuffer_GetNumInGroupi",
+          "demangled_name": "GroupBuffer_GetNumInGroup(int)",
+          "address": 3440080,
+          "offset": 2550112,
+          "size": 27,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z28GroupBuffer_GetSampleByIndexii",
+          "demangled_name": "GroupBuffer_GetSampleByIndex(int, int)",
+          "address": 3440112,
+          "offset": 2550144,
+          "size": 40,
+          "match_percent": 100.0
+        },
+        {
           "name": "GetSfxId",
           "demangled_name": "GetSfxId",
           "address": 3440480,
@@ -129111,7 +129104,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 501,
+    "bazel_units": 500,
     "functions": 13454,
     "assigned_functions": 12350,
     "ambiguous_functions": 216,

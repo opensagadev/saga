@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "gameapi/edtools/edstubs.h"
+#include "gameapi/edtools/edgra.h"
 #include "gameapi/gui/apimenu.h"
 #include "globals.h"
 #include "gamelib/util/gamelib_util_types.h"

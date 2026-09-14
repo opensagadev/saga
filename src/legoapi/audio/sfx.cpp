@@ -54,9 +54,6 @@ extern "C" {
     i32 CruiserD_LiftChase;
 }
 
-i32 GroupBuffer_GetSample(i32 group_id, i32 sequential);
-i32 GroupBuffer_GetNumInGroup(i32 group_id);
-i32 GroupBuffer_GetSampleByIndex(i32 group_id, i32 sample_index);
 void PlayAMusic(i32 stream, i32 track, i32 volume, i32 one_shot);
 
 extern "C" void NuGCutSetCutAudioStream(i32 stream);

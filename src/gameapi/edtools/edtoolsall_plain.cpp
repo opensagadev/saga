@@ -1040,6 +1040,15 @@ extern "C" {
     extern i32 edgra_page_vectors_valid[8];
     extern i32 edgra_page_calculate_done[8];
     NUMTX *edgra_page_matrix_stack[8];
+    i32 edgraLoadPage(char *path, void *gscn, i32 terrain, void *buf, void *buf_end) {
+        STUBBED();
+        (void)path;
+        (void)gscn;
+        (void)terrain;
+        (void)buf;
+        (void)buf_end;
+        return -1;
+    }
     void edgraClearPage(i8 page) {
         edgraStopPage(page);
         for (i32 i = 0; i < EDGRA_MAX_CLUMPS; ++i) {
