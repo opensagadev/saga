@@ -15,9 +15,11 @@ from scripts.restructure.compare_symbol_placement import (
     order_alignment,
     order_diff_lines,
     ordered_symbols,
+    original_component,
     overall_progress,
     pair_symbols,
     print_overall_progress,
+    print_original_component,
     read_fresh_ledger,
     relative_positions,
     same_tu_constraints,
@@ -40,6 +42,31 @@ def symbol(name, address, *, section=".text", section_base=0x1000, binding=0, si
 
 
 class CompareSymbolPlacementTests(unittest.TestCase):
+    def test_component_uses_elf_symbol_ids_not_json_positions(self):
+        function = {**symbol("TerrainScan", 0x2000, binding=1), "symbol_index": 91,
+                    "current_owner_candidates": [2]}
+        state = {**symbol("_ZL4TerI", 0x4000, section=".bss", size=4),
+                 "symbol_index": 48, "current_owner_candidates": []}
+        ledger = {
+            "original_symbols": [state, function],
+            "current_units": [{"id": 2, "source": "terrain.cpp"}],
+            "original_strong_local_xref_components": [{
+                "id": 7, "certainty": "minimum same-TU constraint",
+                "local_initializer_blocks": [3],
+                "function_symbol_indices": [91], "object_symbol_indices": [48],
+            }],
+        }
+        component = original_component(ledger, 7)
+        self.assertEqual(component["functions"][0]["name"], "TerrainScan")
+        self.assertEqual(component["functions"][0]["owner"], "terrain.cpp")
+        self.assertEqual(component["objects"][0]["name"], "_ZL4TerI")
+        stream = StringIO()
+        with redirect_stdout(stream):
+            print_original_component(component)
+        self.assertIn("1 functions, 1 LOCAL objects", stream.getvalue())
+        with self.assertRaisesRegex(ValueError, "no original strong-local component"):
+            original_component(ledger, 8)
+
     def test_cached_ledger_must_match_elf_paths_and_units(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

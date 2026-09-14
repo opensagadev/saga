@@ -2213,6 +2213,11 @@ NUFPCOMJMP ConfigChar_GameKeywords[] = {
 static CHARVARIANT *CharVariant;
 static i32 CHARVARIANTCOUNT;
 
+i32 RandomIDFromFlags(u32, u32, i32, APICHARACTERMODELLIST_s *, i32) {
+    STUBBED();
+    return -1;
+}
+
 void CharVariants_Init(CHARVARIANT *variants, i32 count) {
     if (count > 0 && variants != NULL) {
         CharVariant = variants;

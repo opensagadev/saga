@@ -10,6 +10,7 @@ void DeactivateCharacter(char *name);
 i32 LayerFromName(GAMECHARACTERDATA_s *character, char *name);
 i32 MakeLayerList_Name(CHARACTERMODEL_s *model, i16 *output, u32 mask);
 void CharConfig_CalculateJumpStats(f32 jump_speed, f32 gravity, f32 *duration, f32 *height);
+i32 RandomIDFromFlags(u32, u32, i32, APICHARACTERMODELLIST_s *, i32);
 
 struct CHARACTER_EFFECT_s {
     i16 character_id;

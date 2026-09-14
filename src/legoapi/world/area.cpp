@@ -1,5 +1,6 @@
 #include "decomp.h"
 #include "legoapi/world/area.h"
+#include "legoapi/render/core/screen.h"
 
 #include <stdlib.h>
 
@@ -161,8 +162,6 @@ extern void BackDrop_ResetColours(void);
 extern void BackDrop_Update(f32);
 extern void BackDrop_UpdateColours(i32);
 extern void BackDrop_Draw(f32, i32);
-extern void NeedScreenGrab(i32);
-extern void GrabStillScreen(void);
 extern i16 tTOUCHTOSTART;
 extern "C" i32 NuRndrBeginScene(i32);
 extern "C" void NuRndrEndScene(void);

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.064667,
+    "fuzzy_match_percent": 46.064774,
     "total_code": "4722419",
     "matched_code": "400186",
     "matched_code_percent": 8.4741745,
@@ -35214,21 +35214,6 @@
       ]
     },
     {
-      "name": "gamelib/NewTerrain.cpp.o",
-      "source": "src/gamelib/NewTerrain.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gamelib/NewTerrain.o",
-      "functions": [
-        {
-          "name": "_Z18NuVecCheckForSNANsP7nuvec_s",
-          "demangled_name": "NuVecCheckForSNANs(nuvec_s*)",
-          "address": 3597632,
-          "offset": 2707664,
-          "size": 53,
-          "match_percent": 100.0
-        }
-      ]
-    },
-    {
       "name": "gamelib/crc/crc.cpp.o",
       "source": "src/gamelib/crc/crc.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gamelib/crc.o",
@@ -35653,6 +35638,14 @@
           "match_percent": 42.0
         },
         {
+          "name": "_ZN7FtpFile6AcceptEv",
+          "demangled_name": "FtpFile::Accept()",
+          "address": 5430080,
+          "offset": 4540112,
+          "size": 16,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZN7FtpFile8SendDataEv",
           "demangled_name": "FtpFile::SendData()",
           "address": 5430096,
@@ -35675,21 +35668,6 @@
           "offset": 4540160,
           "size": 262,
           "match_percent": 6.774194
-        }
-      ]
-    },
-    {
-      "name": "gamelib/util/Ftp_stubs.cpp.o",
-      "source": "src/gamelib/util/Ftp_stubs.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gamelib/Ftp_stubs.o",
-      "functions": [
-        {
-          "name": "_ZN7FtpFile6AcceptEv",
-          "demangled_name": "FtpFile::Accept()",
-          "address": 5430080,
-          "offset": 4540112,
-          "size": 16,
-          "match_percent": 100.0
         }
       ]
     },
@@ -42537,6 +42515,14 @@
           "offset": 3700864,
           "size": 205,
           "match_percent": 96.61539
+        },
+        {
+          "name": "_Z17RandomIDFromFlagsjjiP23APICHARACTERMODELLIST_si",
+          "demangled_name": "RandomIDFromFlags(unsigned int, unsigned int, int, APICHARACTERMODELLIST_s*, int)",
+          "address": 4594640,
+          "offset": 3704672,
+          "size": 428,
+          "match_percent": 4.269231
         },
         {
           "name": "_Z17CharVariants_InitP11CHARVARIANTi",
@@ -54404,21 +54390,6 @@
       ]
     },
     {
-      "name": "legoapi/gizmo/object/gizrandom.cpp.o",
-      "source": "src/legoapi/gizmo/object/gizrandom.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/0/gizrandom.o",
-      "functions": [
-        {
-          "name": "_Z17RandomIDFromFlagsjjiP23APICHARACTERMODELLIST_si",
-          "demangled_name": "RandomIDFromFlags(unsigned int, unsigned int, int, APICHARACTERMODELLIST_s*, int)",
-          "address": 4594640,
-          "offset": 3704672,
-          "size": 428,
-          "match_percent": 3.807692
-        }
-      ]
-    },
-    {
       "name": "legoapi/gizmo/object/gizspecial.cpp.o",
       "source": "src/legoapi/gizmo/object/gizspecial.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/0/gizspecial.o",
@@ -59352,7 +59323,7 @@
     {
       "name": "legoapi/gizmos/trigger/gizrandom.cpp.o",
       "source": "src/legoapi/gizmos/trigger/gizrandom.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/1/gizrandom.o",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/gizrandom.o",
       "functions": [
         {
           "name": "_GLOBAL__sub_I_gizrandom.cpp",
@@ -75963,22 +75934,6 @@
           "match_percent": 4.468085
         },
         {
-          "name": "_Z16LoadShaderSourcePPcPijb",
-          "demangled_name": "LoadShaderSource(char**, int*, unsigned int, bool)",
-          "address": 3201728,
-          "offset": 2311760,
-          "size": 416,
-          "match_percent": 99.6383
-        },
-        {
-          "name": "_Z27LookupPreloadedShaderObjectjPPjP24LoadedUniqueShaderRecordj",
-          "demangled_name": "LookupPreloadedShaderObject(unsigned int, unsigned int**, LoadedUniqueShaderRecord*, unsigned int)",
-          "address": 3202144,
-          "offset": 2312176,
-          "size": 114,
-          "match_percent": 89.89796
-        },
-        {
           "name": "_Z11RenderQuadsPs",
           "demangled_name": "RenderQuads(short*)",
           "address": 3718160,
@@ -76345,12 +76300,20 @@
           "match_percent": 82.075
         },
         {
+          "name": "_Z18NuVecCheckForSNANsP7nuvec_s",
+          "demangled_name": "NuVecCheckForSNANs(nuvec_s*)",
+          "address": 3597632,
+          "offset": 2707664,
+          "size": 53,
+          "match_percent": 100.0
+        },
+        {
           "name": "TerrainInitEx",
           "demangled_name": "TerrainInitEx",
           "address": 3597696,
           "offset": 2707728,
           "size": 4578,
-          "match_percent": 32.325806
+          "match_percent": 32.267742
         },
         {
           "name": "_Z8TerrDrawP7tertypes",
@@ -76526,7 +76489,7 @@
           "address": 3675328,
           "offset": 2785360,
           "size": 330,
-          "match_percent": 98.5814
+          "match_percent": 99.976746
         },
         {
           "name": "_Z21TerrainMoveImpactDatav",
@@ -91178,6 +91141,22 @@
           "offset": 2311328,
           "size": 114,
           "match_percent": 89.4898
+        },
+        {
+          "name": "_Z16LoadShaderSourcePPcPijb",
+          "demangled_name": "LoadShaderSource(char**, int*, unsigned int, bool)",
+          "address": 3201728,
+          "offset": 2311760,
+          "size": 416,
+          "match_percent": 99.95744
+        },
+        {
+          "name": "_Z27LookupPreloadedShaderObjectjPPjP24LoadedUniqueShaderRecordj",
+          "demangled_name": "LookupPreloadedShaderObject(unsigned int, unsigned int**, LoadedUniqueShaderRecord*, unsigned int)",
+          "address": 3202144,
+          "offset": 2312176,
+          "size": 114,
+          "match_percent": 89.89796
         },
         {
           "name": "_ZN19ShaderManagerOpenGL12createShaderERK15ShaderObjectKeyP14NuShaderObjecti",
@@ -129104,7 +129083,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 500,
+    "bazel_units": 497,
     "functions": 13454,
     "assigned_functions": 12350,
     "ambiguous_functions": 216,

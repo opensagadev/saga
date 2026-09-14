@@ -18,6 +18,7 @@
 #include "legoapi/world/level.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/render/light/shadow.h"
+#include "legoapi/render/core/screen.h"
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nu3d/nucamera.h"
 #include "nu2api/nucore/nuhgobj.h"
@@ -78,7 +79,6 @@ void FindAndSetLights(NUVEC *, f32, void *);
 void SetZeroLights(void);
 void Panel_Clear(void);
 void GameFog_Reset(void);
-void NeedScreenGrab(i32);
 void EnableShadowMapRendering(i32);
 void ResetShadowMapRendering(void);
 i32 MatrixReflection(NUMTX *, i32, f32, f32, NUMTX *);

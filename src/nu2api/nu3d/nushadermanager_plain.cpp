@@ -38,6 +38,7 @@ char g_shaderSaveFolder[256] = "shaders";
 #include <cstring>
 
 #include "nu2api/nufile/nufile.h"
+#include "nu2api/nucore/nustring.h"
 #include "nu2api/nuandroid/ios_graphics.h"
 
 extern i32 file_criticalsection;
@@ -986,6 +987,76 @@ bool LookupHash(u32 key, u32 *value, HashRedirect *redirects, u32 count) {
         redirect = &redirects[index];
         if (redirect->key == key) {
             *value = redirect->value;
+            return true;
+        }
+    }
+}
+
+bool LoadShaderSource(char **source, i32 *size, u32 key, bool pixel_stage) {
+    static char storage[0x4000];
+
+    *source = NULL;
+    *size = 0;
+
+    char path[256];
+    sprintf(path, "%s/0x%08x.ios_%s", "builtshaders/ios", key, pixel_stage ? "pcode" : "vcode");
+
+    NUFILE file = NuFileOpen(path, NUFILE_READ);
+    if (file == 0) {
+        return false;
+    }
+
+    *size = NuFileOpenSize(file);
+    NuFileRead(file, storage, *size);
+    NuFileClose(file);
+
+    if (!pixel_stage) {
+        char *precision = strstr(storage, "precision mediump float;");
+        if (precision != NULL) {
+            const char *replacement = "precision highp float;  ";
+            memcpy(precision, replacement, NuStrLen(replacement));
+        }
+    } else {
+        char *precision = strstr(storage, "precision lowp float;");
+        if (precision != NULL && strstr(storage, "_envmap_samplerCube") != NULL) {
+            const char *replacement = "precision mediump float;";
+            memcpy(precision, replacement, NuStrLen(replacement));
+        }
+    }
+
+    storage[*size] = '\0';
+    *source = storage;
+    return true;
+}
+
+bool LookupPreloadedShaderObject(u32 key, u32 **shader, LoadedUniqueShaderRecord *records, u32 count) {
+    i32 upper = static_cast<i32>(count) - 1;
+    if (upper < 0) {
+        return false;
+    }
+
+    i32 index = upper / 2;
+    LoadedUniqueShaderRecord *record = &records[index];
+    if (record->key == key) {
+        *shader = &record->gl_shader;
+        return true;
+    }
+
+    i32 lower = 0;
+    while (true) {
+        if (key > record->key) {
+            lower = index + 1;
+        } else {
+            upper = index - 1;
+        }
+        if (lower > upper) {
+            return false;
+        }
+
+        index = (lower + upper) / 2;
+        record = &records[index];
+        if (record->key == key) {
+            *shader = &record->gl_shader;
             return true;
         }
     }

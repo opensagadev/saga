@@ -1,15 +1,13 @@
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/render/light/fade.h"
+#include "legoapi/render/core/screen.h"
 #include "legoapi/core/input/qrand.h"
 #include "nu2api/nu3d/numtl.h"
 #include "nu2api/numath/nutrig.h"
 extern f32 FRAMETIME;
 extern i32 pause_rndr_on;
 extern i32 wait_till_next_frame;
-extern void NeedScreenGrab(i32);
-extern void DrawStillScreen(i32);
-extern void DrawPauseScreenWipe(void);
 extern void DrawFadeScreenWipe(void);
 extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
 

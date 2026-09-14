@@ -80,12 +80,17 @@ void NetFtpManager::Update() {
 NetFtpManager::~NetFtpManager() {
 }
 
+void FtpFile::Accept(i32, void *) {
+    STUBBED();
+}
+
 void FtpFile::Accept(i32) {
     STUBBED();
 }
 
-void FtpFile::Accept(i32, void *) {
-    STUBBED();
+i32 FtpFile::Accept() {
+    accepted = true;
+    return 0;
 }
 
 void FtpFile::Init(i32, char const *, i32, NetAddress const &, void *, i32) {

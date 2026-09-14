@@ -426,8 +426,6 @@ extern "C" i32 NuRndrBeginScene(i32);
 extern "C" void NuRndrEndScene(void);
 extern "C" void NuRndrGradRect2di(i32, i32, i32, i32, i32 *, numtl_s *);
 extern "C" void NuRndrRect2di(i32, i32, i32, i32, i32, numtl_s *);
-extern "C" void NuRndrGradRectUV2di(i32, i32, i32, i32, f32, f32, f32, f32, u32 *, numtl_s *);
-extern "C" void NuRndrRectUV2di(i32, i32, i32, i32, f32, f32, f32, f32, i32, numtl_s *);
 extern char *apiGameName;
 extern char *apitxt_EMPTY;
 extern char *apitxt_PRESENT;
@@ -464,7 +462,6 @@ extern f32 text3d_width;
 extern FadeSystem FadeSys;
 extern f32 cointotaltime;
 extern f32 MainRenderTime;
-extern numtl_s *pause_rndr_mtl;
 extern i32 editor_active;
 extern i32 Paused;
 extern i32 PANELOFF;
@@ -1621,22 +1618,6 @@ void DrawStatusIcons(STATUSPACKET_s *status, float y, float alpha) {
     DrawCharIcon(static_cast<i16>(status->player0_model), -ICONX, y, 0.0f, size, 0xa5, icon_alpha, icon_alpha, 1, NULL);
 }
 
-void DrawStillScreen(i32 clear) {
-    NuRndrBeginScene(-1);
-    NuVpGetCurrentViewport();
-    if (clear != 0) {
-        NuRndrClear(0x500, 0, 1.0f);
-    }
-    if (MainRenderTime >= 1.0f) {
-        NuRndrRectUV2di(0, 0, 0x2800, 0xe00, 0.0f, 1.0f, 1.0f, 0.0f, 0x80808080u, pause_rndr_mtl);
-    } else {
-        const u32 colour = (static_cast<i32>(MainRenderTime * 128.0f) << 24) | 0x00808080u;
-        u32 colours[4] = {colour, colour, colour, colour};
-        NuRndrGradRectUV2di(0, 0, 0x2800, 0xe00, 0.0f, 1.0f, 1.0f, 0.0f, colours, pause_rndr_mtl);
-    }
-    NuRndrEndScene();
-}
-
 void DrawTouchPrompt(char *prompt, char *unused_label, bool hovered, bool large) {
     (void)unused_label;
     float text_x_offset;
@@ -2379,67 +2360,6 @@ void DrawGameObjectsDraw(i32) {
     }
 
     ResetShadowMapRendering();
-}
-
-void DrawPauseScreenWipe() {
-    NuRndrBeginScene(-1);
-
-    const f32 fade = FadeSys.fade;
-    i32 x = 0;
-    i32 y = 0;
-    i32 width = 0x2800;
-    i32 height = 0xe00;
-    f32 u0 = 0.0f;
-    f32 v0 = 1.0f;
-    f32 u1 = 1.0f;
-    f32 v1 = 0.0f;
-    u32 colours[4];
-
-    if ((FadeSys.direction & 3) != 0) {
-        if ((FadeSys.direction & 1) == 0) {
-            width = static_cast<i32>(fade * 10240.0f);
-            colours[0] = 0x80808080u;
-            colours[1] = 0x00808080u;
-            colours[2] = 0x80808080u;
-            colours[3] = 0x00808080u;
-            NuRndrGradRectUV2di(width, 0, 0x400, 0xe00, fade, 1.0f, fade + 0.1f, 0.0f, colours, pause_rndr_mtl);
-            u1 = fade;
-        } else {
-            u0 = 1.0f - fade;
-            x = static_cast<i32>(u0 * 10240.0f);
-            width = 0x2800 - x;
-            colours[0] = 0x00808080u;
-            colours[1] = 0x80808080u;
-            colours[2] = 0x00808080u;
-            colours[3] = 0x80808080u;
-            NuRndrGradRectUV2di(x - 0x400, 0, 0x400, 0xe00, u0 - 0.1f, 1.0f, u0, 0.0f, colours, pause_rndr_mtl);
-        }
-    } else if ((FadeSys.direction & 0xc) != 0) {
-        if ((FadeSys.direction & 4) == 0) {
-            height = static_cast<i32>(fade * 3584.0f);
-            colours[0] = 0x80808080u;
-            colours[1] = 0x80808080u;
-            colours[2] = 0x00808080u;
-            colours[3] = 0x00808080u;
-            NuRndrGradRectUV2di(0, height, 0x2800, 0x166, 0.0f, 1.0f - fade, 1.0f, 1.0f - (fade + 0.1f), colours,
-                                pause_rndr_mtl);
-            v1 = 1.0f - fade;
-        } else {
-            const f32 edge = 1.0f - fade;
-            y = static_cast<i32>(edge * 3584.0f);
-            height = 0xe00 - y;
-            colours[0] = 0x00808080u;
-            colours[1] = 0x00808080u;
-            colours[2] = 0x80808080u;
-            colours[3] = 0x80808080u;
-            NuRndrGradRectUV2di(0, y - 0x166, 0x2800, 0x166, 0.0f, 1.0f - (edge - 0.1f), 1.0f, 1.0f - edge, colours,
-                                pause_rndr_mtl);
-            v0 = 1.0f - edge;
-        }
-    }
-
-    NuRndrRectUV2di(x, y, width, height, u0, v0, u1, v1, 0x80808080u, pause_rndr_mtl);
-    NuRndrEndScene();
 }
 
 void Draw_AUTOSAVECANCEL() {

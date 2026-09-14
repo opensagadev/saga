@@ -336,6 +336,65 @@ def same_tu_owner_splits(ledger: dict, limit: int = 5) -> list[dict]:
              "pairs": len(pairs)} for owners, pairs in ranked]
 
 
+def original_component(ledger: dict, component_id: int) -> dict:
+    """Resolve a strong-local component through ELF symbol IDs, not list offsets."""
+    components = ledger.get("original_strong_local_xref_components", [])
+    component = next((item for item in components if item["id"] == component_id), None)
+    if component is None:
+        raise ValueError(f"no original strong-local component with ID {component_id}")
+    by_id = {symbol["symbol_index"]: symbol for symbol in ledger["original_symbols"]}
+    units = {unit["id"]: unit["source"] for unit in ledger.get("current_units", [])}
+
+    def entries(indices: list[int]) -> list[dict]:
+        result = []
+        for symbol_id in indices:
+            symbol = by_id[symbol_id]
+            owners = symbol.get("current_owner_candidates", [])
+            result.append({
+                "symbol_index": symbol_id,
+                "name": symbol["name"],
+                "address": symbol["address"],
+                "section": symbol["section"],
+                "size": symbol["size"],
+                "owner": units.get(owners[0], f"unit {owners[0]}") if len(owners) == 1 else None,
+                "candidate_count": len(owners),
+            })
+        return sorted(result, key=lambda item: (item["address"], item["symbol_index"]))
+
+    return {
+        "id": component_id,
+        "certainty": component["certainty"],
+        "initializer_blocks": component["local_initializer_blocks"],
+        "functions": entries(component["function_symbol_indices"]),
+        "objects": entries(component["object_symbol_indices"]),
+    }
+
+
+def print_original_component(component: dict, limit: int = 0) -> None:
+    functions = component["functions"]
+    objects = component["objects"]
+    first = min((symbol["address"] for symbol in functions), default=0)
+    last = max((symbol["address"] for symbol in functions), default=0)
+    print(f"Original strong-local component {component['id']}: "
+          f"{len(functions)} functions, {len(objects)} LOCAL objects; "
+          f"text symbols 0x{first:x}–0x{last:x}")
+    print(f"  Initializer blocks: {component['initializer_blocks']}; {component['certainty']}")
+    for label, symbols in (("Function", functions), ("Object", objects)):
+        owners = Counter(symbol["owner"] if symbol["owner"] is not None
+                         else "ambiguous" if symbol["candidate_count"] else "no same-name owner"
+                         for symbol in symbols)
+        print(f"  {label} current-source candidates:")
+        for owner, count in sorted(owners.items(), key=lambda pair: (-pair[1], pair[0])):
+            print(f"    {count:>3}  {owner}")
+        shown = symbols if limit == 0 else symbols[:limit]
+        for symbol in shown:
+            owner = symbol["owner"] or ("ambiguous" if symbol["candidate_count"] else "not paired")
+            print(f"    0x{symbol['address']:08x}  {symbol['size']:>5}  "
+                  f"{symbol['section']:<12}  {symbol['name']}  -> {owner}")
+        if len(shown) < len(symbols):
+            print(f"    ... {len(symbols) - len(shown)} more; use --limit 0 for all")
+
+
 def overall_progress(ledger: dict, matching: dict | None = None) -> dict:
     """Separate observable source coverage, order grouping, and constraints."""
     originals = ledger["original_symbols"]
@@ -393,7 +452,9 @@ def print_overall_progress(progress: dict) -> None:
         unassessable = constraints["total"] - constraints["assessable"]
         print(f"  Original writable-state TU constraints: "
               f"{constraints['satisfied']:,}/{constraints['assessable']:,} satisfied "
-              f"({constraints['percent']:.1f}%); {unsatisfied:,} current source splits, "
+              f"({constraints['percent']:.1f}% of assessable; "
+              f"{constraints['coverage_percent']:.1f}% of original pairs assessable); "
+              f"{unsatisfied:,} current source splits, "
               f"{unassessable:,} original pairs not yet assessable")
     elif constraints is None:
         print("  Original writable-state TU constraints: not computed")
@@ -450,6 +511,7 @@ def main() -> None:
                         help="matching.json source/object manifest")
     parser.add_argument("--ledger", type=Path, help="fresh original TU map with local xrefs for same-TU constraint metrics")
     parser.add_argument("--no-xrefs", action="store_true", help="skip same-TU evidence calculation")
+    parser.add_argument("--component", type=int, help="inspect an original strong-local component by its ID")
     parser.add_argument("--global-order", action="store_true", help="also show whole-linked text/data/BSS order proxy")
     parser.add_argument("--source", help="restrict to symbols in one current source object")
     parser.add_argument("--start", type=parse_address, help="inclusive original virtual address")
@@ -465,6 +527,8 @@ def main() -> None:
         parser.error("--end must be greater than --start")
     if args.limit < 0:
         parser.error("--limit must be nonnegative")
+    if args.component is not None and args.no_xrefs:
+        parser.error("--component requires local-xref evidence")
 
     original_sections, original_symbols = read_elf32(args.original)
     current_sections, current_symbols = read_elf32(args.current)
@@ -513,6 +577,15 @@ def main() -> None:
     if ledger is None and overall_view:
         ledger = build_map(args.original, args.current,
                            read_units_manifest(args.units, root), with_local_xrefs=False)
+    if args.component is not None:
+        if ledger is None or "original_strong_local_xref_components" not in ledger:
+            parser.error("--component requires a ledger with strong-local components")
+        try:
+            component = original_component(ledger, args.component)
+        except ValueError as error:
+            parser.error(str(error))
+        print_original_component(component, args.limit)
+        return
     if ledger is not None:
         if overall_view:
             matching = json.loads(args.units.read_text(encoding="utf-8"))
