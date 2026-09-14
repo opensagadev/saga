@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.1346,
+    "fuzzy_match_percent": 46.138817,
     "total_code": "4722419",
-    "matched_code": "401849",
-    "matched_code_percent": 8.509389,
+    "matched_code": "402062",
+    "matched_code_percent": 8.513899,
     "total_data": "14606528",
     "matched_data": "543696",
     "matched_data_percent": 3.722281,
     "total_functions": 13459,
-    "matched_functions": 4769,
-    "matched_functions_percent": 35.43354,
+    "matched_functions": 4770,
+    "matched_functions_percent": 35.44097,
     "total_units": 1
   },
   "text": {
@@ -34377,14 +34377,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "_Z16MenuEnterNewGameP6MENU_s",
-          "demangled_name": "MenuEnterNewGame(MENU_s*)",
-          "address": 1133776,
-          "offset": 243808,
-          "size": 78,
-          "match_percent": 100.0
-        },
-        {
           "name": "_ZL15MenuEnterTitlesP6MENU_s",
           "demangled_name": "MenuEnterTitles(MENU_s*)",
           "address": 1133856,
@@ -34430,7 +34422,7 @@
           "address": 1135312,
           "offset": 245344,
           "size": 336,
-          "match_percent": 86.44086
+          "match_percent": 86.60215
         },
         {
           "name": "_Z15MenuDrawNewGameP6MENU_s",
@@ -34438,7 +34430,7 @@
           "address": 1135648,
           "offset": 245680,
           "size": 549,
-          "match_percent": 99.522385
+          "match_percent": 99.94776
         },
         {
           "name": "_ZL17MenuUpdateMiniKitP6MENU_s",
@@ -34471,14 +34463,6 @@
           "offset": 247952,
           "size": 628,
           "match_percent": 85.509315
-        },
-        {
-          "name": "_Z15MenuExitNewGameP6MENU_s",
-          "demangled_name": "MenuExitNewGame(MENU_s*)",
-          "address": 1141584,
-          "offset": 251616,
-          "size": 34,
-          "match_percent": 100.0
         },
         {
           "name": "_ZL23MenuUpdateBonusCompleteP6MENU_s",
@@ -41063,6 +41047,14 @@
           "match_percent": 92.69231
         },
         {
+          "name": "ClearLinkedCutSceneMusic",
+          "demangled_name": "ClearLinkedCutSceneMusic",
+          "address": 3451152,
+          "offset": 2561184,
+          "size": 40,
+          "match_percent": 100.0
+        },
+        {
           "name": "SetLinkedCutSceneMusic",
           "demangled_name": "SetLinkedCutSceneMusic",
           "address": 3451200,
@@ -43776,6 +43768,150 @@
           "offset": 30784,
           "size": 93,
           "match_percent": 0.0
+        },
+        {
+          "name": "_ZL33Customiser_PieceAvailable_DefaultP11CUSTOMPIECE",
+          "demangled_name": "Customiser_PieceAvailable_Default(CUSTOMPIECE*)",
+          "address": 4848416,
+          "offset": 3958448,
+          "size": 55,
+          "match_percent": 24.444445
+        },
+        {
+          "name": "_Z25Customiser_SetAnimsToLoadP10CUSTOMISERi",
+          "demangled_name": "Customiser_SetAnimsToLoad(CUSTOMISER*, int)",
+          "address": 4848480,
+          "offset": 3958512,
+          "size": 218,
+          "match_percent": 93.521126
+        },
+        {
+          "name": "_Z24Customiser_NextPieceLeftP10CUSTOMISERiiii",
+          "demangled_name": "Customiser_NextPieceLeft(CUSTOMISER*, int, int, int, int)",
+          "address": 4848704,
+          "offset": 3958736,
+          "size": 309,
+          "match_percent": 79.25
+        },
+        {
+          "name": "_Z25Customiser_NextPieceRightP10CUSTOMISERiiii",
+          "demangled_name": "Customiser_NextPieceRight(CUSTOMISER*, int, int, int, int)",
+          "address": 4849024,
+          "offset": 3959056,
+          "size": 309,
+          "match_percent": 79.455444
+        },
+        {
+          "name": "_Z26Customiser_LoadAccessoriesP10CUSTOMISERP23APICHARACTERMODELLIST_s",
+          "demangled_name": "Customiser_LoadAccessories(CUSTOMISER*, APICHARACTERMODELLIST_s*)",
+          "address": 4849344,
+          "offset": 3959376,
+          "size": 732,
+          "match_percent": 61.291004
+        },
+        {
+          "name": "_Z26Customiser_DrawAccessoriesP10CUSTOMISERP12GameObject_sP7numtx_s",
+          "demangled_name": "Customiser_DrawAccessories(CUSTOMISER*, GameObject_s*, numtx_s*)",
+          "address": 4850080,
+          "offset": 3960112,
+          "size": 909,
+          "match_percent": 1.953488
+        },
+        {
+          "name": "_Z29Customiser_AddPartAccessoriesP10CUSTOMISERP12GameObject_siif",
+          "demangled_name": "Customiser_AddPartAccessories(CUSTOMISER*, GameObject_s*, int, int, float)",
+          "address": 4850992,
+          "offset": 3961024,
+          "size": 553,
+          "match_percent": 2.876712
+        },
+        {
+          "name": "_Z26Customiser_DumpAccessoriesP10CUSTOMISER",
+          "demangled_name": "Customiser_DumpAccessories(CUSTOMISER*)",
+          "address": 4851552,
+          "offset": 3961584,
+          "size": 2136,
+          "match_percent": 0.715706
+        },
+        {
+          "name": "_Z18Customiser_LoadAllP10CUSTOMISERP11WORLDINFO_s",
+          "demangled_name": "Customiser_LoadAll(CUSTOMISER*, WORLDINFO_s*)",
+          "address": 4853696,
+          "offset": 3963728,
+          "size": 1979,
+          "match_percent": 0.939597
+        },
+        {
+          "name": "_Z18Customiser_DumpAllP10CUSTOMISERP11WORLDINFO_s",
+          "demangled_name": "Customiser_DumpAll(CUSTOMISER*, WORLDINFO_s*)",
+          "address": 4855680,
+          "offset": 3965712,
+          "size": 232,
+          "match_percent": 7.826087
+        },
+        {
+          "name": "_Z31Customiser_ResetModelTextureIDsP10CUSTOMISER",
+          "demangled_name": "Customiser_ResetModelTextureIDs(CUSTOMISER*)",
+          "address": 4855920,
+          "offset": 3965952,
+          "size": 195,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z30Customiser_SaveModelTextureIDsP10CUSTOMISERP16CHARACTERMODEL_s",
+          "demangled_name": "Customiser_SaveModelTextureIDs(CUSTOMISER*, CHARACTERMODEL_s*)",
+          "address": 4856128,
+          "offset": 3966160,
+          "size": 255,
+          "match_percent": 5.6
+        },
+        {
+          "name": "_Z33Customiser_RestoreModelTextureIDsP10CUSTOMISER",
+          "demangled_name": "Customiser_RestoreModelTextureIDs(CUSTOMISER*)",
+          "address": 4856384,
+          "offset": 3966416,
+          "size": 277,
+          "match_percent": 6.153846
+        },
+        {
+          "name": "_Z30Customiser_Set100PercentPiecesP10CUSTOMISER",
+          "demangled_name": "Customiser_Set100PercentPieces(CUSTOMISER*)",
+          "address": 4856672,
+          "offset": 3966704,
+          "size": 102,
+          "match_percent": 12.0
+        },
+        {
+          "name": "_Z34Customiser_CopyDefaultPiecesToSaveP10CUSTOMISERP15CUSTOMISESAVE_s",
+          "demangled_name": "Customiser_CopyDefaultPiecesToSave(CUSTOMISER*, CUSTOMISESAVE_s*)",
+          "address": 4856784,
+          "offset": 3966816,
+          "size": 239,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z20Customiser_ConfigurePcP9variptr_uS1_iiPFiP11CUSTOMPIECEEPFvS3_P8nufpar_sEPFiS_EP15CUSTOMISESAVE_sPs",
+          "demangled_name": "Customiser_Configure(char*, variptr_u*, variptr_u*, int, int, int (*)(CUSTOMPIECE*), void (*)(CUSTOMPIECE*, nufpar_s*), int (*)(char*), CUSTOMISESAVE_s*, short*)",
+          "address": 4857024,
+          "offset": 3967056,
+          "size": 3117,
+          "match_percent": 1.033113
+        },
+        {
+          "name": "_Z26Customiser_FindPieceByNameP10CUSTOMISERPcPiS2_",
+          "demangled_name": "Customiser_FindPieceByName(CUSTOMISER*, char*, int*, int*)",
+          "address": 4860144,
+          "offset": 3970176,
+          "size": 200,
+          "match_percent": 7.826087
+        },
+        {
+          "name": "_Z18Customiser_GetIconP10CUSTOMISERP15CUSTOMISESAVE_si",
+          "demangled_name": "Customiser_GetIcon(CUSTOMISER*, CUSTOMISESAVE_s*, int)",
+          "address": 4860352,
+          "offset": 3970384,
+          "size": 132,
+          "match_percent": 89.55556
         }
       ]
     },
@@ -48787,14 +48923,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "ClearLinkedCutSceneMusic",
-          "demangled_name": "ClearLinkedCutSceneMusic",
-          "address": 3451152,
-          "offset": 2561184,
-          "size": 40,
-          "match_percent": 100.0
-        },
-        {
           "name": "PauseGameCut",
           "demangled_name": "PauseGameCut",
           "address": 3452448,
@@ -53645,14 +53773,6 @@
       "source": "src/legoapi/gizmo/object/gizspecial.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_legoapi/0/gizspecial.o",
       "functions": [
-        {
-          "name": "_Z19ReleaseAllTakeOversv",
-          "demangled_name": "ReleaseAllTakeOvers()",
-          "address": 2418384,
-          "offset": 1528416,
-          "size": 213,
-          "match_percent": 7.241379
-        },
         {
           "name": "_Z26GizmoGetGizmosUsingSpecialP10GIZMOSYS_sPvPP7GIZMO_siPc",
           "demangled_name": "GizmoGetGizmosUsingSpecial(GIZMOSYS_s*, void*, GIZMO_s**, int, char*)",
@@ -63494,6 +63614,14 @@
           "match_percent": 84.60581
         },
         {
+          "name": "_Z19ReleaseAllTakeOversv",
+          "demangled_name": "ReleaseAllTakeOvers()",
+          "address": 2418384,
+          "offset": 1528416,
+          "size": 213,
+          "match_percent": 100.0
+        },
+        {
           "name": "_Z12TakeOverYodaP12GameObject_sS0_ii",
           "demangled_name": "TakeOverYoda(GameObject_s*, GameObject_s*, int, int)",
           "address": 2418608,
@@ -66774,150 +66902,6 @@
           "offset": 931344,
           "size": 5352,
           "match_percent": 0.423654
-        },
-        {
-          "name": "_ZL33Customiser_PieceAvailable_DefaultP11CUSTOMPIECE",
-          "demangled_name": "Customiser_PieceAvailable_Default(CUSTOMPIECE*)",
-          "address": 4848416,
-          "offset": 3958448,
-          "size": 55,
-          "match_percent": 24.444445
-        },
-        {
-          "name": "_Z25Customiser_SetAnimsToLoadP10CUSTOMISERi",
-          "demangled_name": "Customiser_SetAnimsToLoad(CUSTOMISER*, int)",
-          "address": 4848480,
-          "offset": 3958512,
-          "size": 218,
-          "match_percent": 93.521126
-        },
-        {
-          "name": "_Z24Customiser_NextPieceLeftP10CUSTOMISERiiii",
-          "demangled_name": "Customiser_NextPieceLeft(CUSTOMISER*, int, int, int, int)",
-          "address": 4848704,
-          "offset": 3958736,
-          "size": 309,
-          "match_percent": 79.25
-        },
-        {
-          "name": "_Z25Customiser_NextPieceRightP10CUSTOMISERiiii",
-          "demangled_name": "Customiser_NextPieceRight(CUSTOMISER*, int, int, int, int)",
-          "address": 4849024,
-          "offset": 3959056,
-          "size": 309,
-          "match_percent": 79.455444
-        },
-        {
-          "name": "_Z26Customiser_LoadAccessoriesP10CUSTOMISERP23APICHARACTERMODELLIST_s",
-          "demangled_name": "Customiser_LoadAccessories(CUSTOMISER*, APICHARACTERMODELLIST_s*)",
-          "address": 4849344,
-          "offset": 3959376,
-          "size": 732,
-          "match_percent": 61.31746
-        },
-        {
-          "name": "_Z26Customiser_DrawAccessoriesP10CUSTOMISERP12GameObject_sP7numtx_s",
-          "demangled_name": "Customiser_DrawAccessories(CUSTOMISER*, GameObject_s*, numtx_s*)",
-          "address": 4850080,
-          "offset": 3960112,
-          "size": 909,
-          "match_percent": 1.953488
-        },
-        {
-          "name": "_Z29Customiser_AddPartAccessoriesP10CUSTOMISERP12GameObject_siif",
-          "demangled_name": "Customiser_AddPartAccessories(CUSTOMISER*, GameObject_s*, int, int, float)",
-          "address": 4850992,
-          "offset": 3961024,
-          "size": 553,
-          "match_percent": 2.876712
-        },
-        {
-          "name": "_Z26Customiser_DumpAccessoriesP10CUSTOMISER",
-          "demangled_name": "Customiser_DumpAccessories(CUSTOMISER*)",
-          "address": 4851552,
-          "offset": 3961584,
-          "size": 2136,
-          "match_percent": 0.715706
-        },
-        {
-          "name": "_Z18Customiser_LoadAllP10CUSTOMISERP11WORLDINFO_s",
-          "demangled_name": "Customiser_LoadAll(CUSTOMISER*, WORLDINFO_s*)",
-          "address": 4853696,
-          "offset": 3963728,
-          "size": 1979,
-          "match_percent": 0.939597
-        },
-        {
-          "name": "_Z18Customiser_DumpAllP10CUSTOMISERP11WORLDINFO_s",
-          "demangled_name": "Customiser_DumpAll(CUSTOMISER*, WORLDINFO_s*)",
-          "address": 4855680,
-          "offset": 3965712,
-          "size": 232,
-          "match_percent": 7.826087
-        },
-        {
-          "name": "_Z31Customiser_ResetModelTextureIDsP10CUSTOMISER",
-          "demangled_name": "Customiser_ResetModelTextureIDs(CUSTOMISER*)",
-          "address": 4855920,
-          "offset": 3965952,
-          "size": 195,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z30Customiser_SaveModelTextureIDsP10CUSTOMISERP16CHARACTERMODEL_s",
-          "demangled_name": "Customiser_SaveModelTextureIDs(CUSTOMISER*, CHARACTERMODEL_s*)",
-          "address": 4856128,
-          "offset": 3966160,
-          "size": 255,
-          "match_percent": 5.6
-        },
-        {
-          "name": "_Z33Customiser_RestoreModelTextureIDsP10CUSTOMISER",
-          "demangled_name": "Customiser_RestoreModelTextureIDs(CUSTOMISER*)",
-          "address": 4856384,
-          "offset": 3966416,
-          "size": 277,
-          "match_percent": 6.153846
-        },
-        {
-          "name": "_Z30Customiser_Set100PercentPiecesP10CUSTOMISER",
-          "demangled_name": "Customiser_Set100PercentPieces(CUSTOMISER*)",
-          "address": 4856672,
-          "offset": 3966704,
-          "size": 102,
-          "match_percent": 12.0
-        },
-        {
-          "name": "_Z34Customiser_CopyDefaultPiecesToSaveP10CUSTOMISERP15CUSTOMISESAVE_s",
-          "demangled_name": "Customiser_CopyDefaultPiecesToSave(CUSTOMISER*, CUSTOMISESAVE_s*)",
-          "address": 4856784,
-          "offset": 3966816,
-          "size": 239,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z20Customiser_ConfigurePcP9variptr_uS1_iiPFiP11CUSTOMPIECEEPFvS3_P8nufpar_sEPFiS_EP15CUSTOMISESAVE_sPs",
-          "demangled_name": "Customiser_Configure(char*, variptr_u*, variptr_u*, int, int, int (*)(CUSTOMPIECE*), void (*)(CUSTOMPIECE*, nufpar_s*), int (*)(char*), CUSTOMISESAVE_s*, short*)",
-          "address": 4857024,
-          "offset": 3967056,
-          "size": 3117,
-          "match_percent": 1.033113
-        },
-        {
-          "name": "_Z26Customiser_FindPieceByNameP10CUSTOMISERPcPiS2_",
-          "demangled_name": "Customiser_FindPieceByName(CUSTOMISER*, char*, int*, int*)",
-          "address": 4860144,
-          "offset": 3970176,
-          "size": 200,
-          "match_percent": 7.826087
-        },
-        {
-          "name": "_Z18Customiser_GetIconP10CUSTOMISERP15CUSTOMISESAVE_si",
-          "demangled_name": "Customiser_GetIcon(CUSTOMISER*, CUSTOMISESAVE_s*, int)",
-          "address": 4860352,
-          "offset": 3970384,
-          "size": 132,
-          "match_percent": 89.55556
         }
       ]
     },
@@ -66933,6 +66917,14 @@
           "offset": 24592,
           "size": 93,
           "match_percent": 99.35294
+        },
+        {
+          "name": "_Z16MenuEnterNewGameP6MENU_s",
+          "demangled_name": "MenuEnterNewGame(MENU_s*)",
+          "address": 1133776,
+          "offset": 243808,
+          "size": 78,
+          "match_percent": 100.0
         },
         {
           "name": "_Z22MenuDrawRestoreNewGameP6MENU_s",
@@ -66988,6 +66980,14 @@
           "address": 1141552,
           "offset": 251584,
           "size": 27,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z15MenuExitNewGameP6MENU_s",
+          "demangled_name": "MenuExitNewGame(MENU_s*)",
+          "address": 1141584,
+          "offset": 251616,
+          "size": 34,
           "match_percent": 100.0
         },
         {
@@ -67516,7 +67516,7 @@
           "address": 4351104,
           "offset": 3461136,
           "size": 314,
-          "match_percent": 99.95522
+          "match_percent": 99.50746
         },
         {
           "name": "_Z13MenuEnterSaveP6MENU_s",
@@ -68148,7 +68148,7 @@
           "address": 4588784,
           "offset": 3698816,
           "size": 332,
-          "match_percent": 85.89535
+          "match_percent": 86.06977
         },
         {
           "name": "_Z15IconScenes_Dumpv",
@@ -68156,7 +68156,7 @@
           "address": 4589120,
           "offset": 3699152,
           "size": 91,
-          "match_percent": 99.933334
+          "match_percent": 99.433334
         },
         {
           "name": "_Z20MenuUpdateDebugStoreP6MENU_s",
@@ -91817,21 +91817,6 @@
       ]
     },
     {
-      "name": "nu2api/nu3d/nuwater.cpp.o",
-      "source": "src/nu2api/nu3d/nuwater.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nuwater.o",
-      "functions": [
-        {
-          "name": "NuWaterReset",
-          "demangled_name": "NuWaterReset",
-          "address": 3238544,
-          "offset": 2348576,
-          "size": 5,
-          "match_percent": 100.0
-        }
-      ]
-    },
-    {
       "name": "nu2api/nu3d/nuwater_speed.cpp.o",
       "source": "src/nu2api/nu3d/nuwater_speed.cpp",
       "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_nu2api/nuwater_speed.o",
@@ -93395,6 +93380,22 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZN15NuInputDevicePS11EnableDPDPSEj",
+          "demangled_name": "NuInputDevicePS::EnableDPDPS(unsigned int)",
+          "address": 977472,
+          "offset": 87504,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZN15NuInputDevicePS12DisableDPDPSEj",
+          "demangled_name": "NuInputDevicePS::DisableDPDPS(unsigned int)",
+          "address": 977488,
+          "offset": 87520,
+          "size": 9,
+          "match_percent": 100.0
+        },
+        {
           "name": "_ZN15NuInputDevicePS24HasHeadphonesConnectedPSEj",
           "demangled_name": "NuInputDevicePS::HasHeadphonesConnectedPS(unsigned int)",
           "address": 977504,
@@ -94237,6 +94238,14 @@
           "demangled_name": "NuPs2VideoSetPos",
           "address": 3238539,
           "offset": 2348571,
+          "size": 5,
+          "match_percent": 100.0
+        },
+        {
+          "name": "NuWaterReset",
+          "demangled_name": "NuWaterReset",
+          "address": 3238544,
+          "offset": 2348576,
           "size": 5,
           "match_percent": 100.0
         },
@@ -101782,22 +101791,6 @@
           "offset": 86608,
           "size": 9,
           "match_percent": 62.5
-        },
-        {
-          "name": "_ZN15NuInputDevicePS11EnableDPDPSEj",
-          "demangled_name": "NuInputDevicePS::EnableDPDPS(unsigned int)",
-          "address": 977472,
-          "offset": 87504,
-          "size": 9,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZN15NuInputDevicePS12DisableDPDPSEj",
-          "demangled_name": "NuInputDevicePS::DisableDPDPS(unsigned int)",
-          "address": 977488,
-          "offset": 87520,
-          "size": 9,
-          "match_percent": 100.0
         },
         {
           "name": "NuPad_Interface_InputManagerInitialise",
@@ -128642,7 +128635,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 476,
+    "bazel_units": 475,
     "functions": 13454,
     "assigned_functions": 12354,
     "ambiguous_functions": 212,

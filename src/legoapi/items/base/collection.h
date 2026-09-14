@@ -41,6 +41,7 @@ i32 InCollectList_Index(i32 id, COLLECTID *list, i32 count);
 i32 Collection_Got(i32 id);
 COLLECTID *CollectIDUnlocked(i32 id);
 void CollectAllCharacters(i32 id);
+void ReCalculateCompletionPoints(void);
 i32 AllMiniKitsDone(AREASAVE_s *save);
 i32 Collection_GetIDList(COLLECTION_s *collection, u32 model_flag_mask, u32 required_model_flags, i16 *ids,
                          i32 *first_id, i32 *second_id, i32 unused);

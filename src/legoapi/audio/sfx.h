@@ -15,6 +15,8 @@ extern "C" {
     void PlaySfx(char *name, nuvec_s *pos);
     i32 IsSfxLooping(i32 sfx_id);
     void SetSfxBit_On(i32 sound);
+    void ClearLinkedCutSceneMusic(void *context);
+    void SetLinkedCutSceneMusic(void *context, i32 state);
 #ifdef __cplusplus
 }
 #endif

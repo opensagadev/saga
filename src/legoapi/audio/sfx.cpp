@@ -930,6 +930,12 @@ extern "C" {
         return NuSound3GetStereoStreamStatus(stream) != NUSOUND_STEREO_STREAM_FINISHED;
     }
 
+    void ClearLinkedCutSceneMusic(void *context) {
+        if (context == NULL || Music.track_data == context) {
+            Music.track_data = NULL;
+        }
+    }
+
     void PrepareAllSounds(void) {
         memset(SfxBits, 0xff, sizeof(SfxBits));
     }

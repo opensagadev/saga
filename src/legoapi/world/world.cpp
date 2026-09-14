@@ -2,9 +2,11 @@
 #include "legoapi/world/world.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/world_shared.h"
+#include "legoapi/audio/sfx.h"
 #include "legoapi/render/core/terrain.h"
 #include "legoapi/render/fx/game_deb.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/items/collect/minikits.h"
 #include "legoapi/gizmos/transport/teleport.h"
 #include "legoapi/render/fx/parts.h"
 #include "legoapi/render/light/lighting.h"
@@ -92,10 +94,8 @@ u32 LEGOOBJ_DEFAULTLASTCOIN = -1;
 void CutScenes_Destroy(CUTSYS *system);
 void CharScenes_LevelDump(WORLDINFO *world);
 void Customiser_DumpAll(CUSTOMISER *, WORLDINFO *);
-void CharacterMiniKits_Dump(WORLDINFO *);
 void DestroyRippleMtls(WORLDINFO *);
 extern "C" {
-    void ClearLinkedCutSceneMusic(void *);
     extern i32 edpp_page_on[8];
     extern i32 part_page_on[8];
 }

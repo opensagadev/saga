@@ -14,6 +14,7 @@ void MenuUpdateViewTextStrings(MENU_s *menu);
 void MenuDrawViewTextStrings(MENU_s *menu);
 
 void Text_InitLanguageList(LANGUAGEDATA *list);
+extern i16 tSTRANGER;
 void Text_SetLanguage(i32 lang);
 void Text_SetLanguage_Game(i32 language);
 extern void (*Text_GameSetLanguageFn)(i32 language);

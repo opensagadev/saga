@@ -5809,6 +5809,14 @@ void ReleaseTakeOver(GameObject_s *object, i32) {
     }
 }
 
+void ReleaseAllTakeOvers() {
+    for (i32 index = 0; index < 8; ++index) {
+        if (Player[index] != NULL) {
+            ReleaseTakeOver(Player[index], 0);
+        }
+    }
+}
+
 extern i16 id_ATAT;
 extern i16 id_ATST;
 extern i16 id_ATST_LOWRES;

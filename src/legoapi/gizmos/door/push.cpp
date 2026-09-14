@@ -10,7 +10,9 @@
 #include "nu2api/nucore/nustring.h"
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/numath/nutrig.h"
 
+#include <math.h>
 #include <string.h>
 
 struct PUSHPROGRESS {
@@ -43,22 +45,6 @@ void GizObstacles_AddTrigger(NUVEC *position);
 void MoveBlocks(WORLDINFO_s *world, pushblock_s *push_block, i32 index, NUVEC *velocity);
 void PushSeekComplete(pushblock_s *push_block, i32 snap_index);
 
-static i32 Push_GetMaxGizmos(void *world_ptr) {
-    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    return world != NULL ? world->current_level->max_push_blocks : 0;
-}
-
-static void Push_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *) {
-    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    for (i32 index = 0; index < world->push_block_count; ++index) {
-        if (NuStrLen(world->push_blocks[index].name) != 0) {
-            AddGizmo(gizmo_sys, type_id, NULL, &world->push_blocks[index]);
-        }
-    }
-}
-
-#include <math.h>
-#include "nu2api/numath/nutrig.h"
 extern "C" TERRAIN_SURFACE_s TerSurface[32];
 extern i32 LEGOHINT_PUSHBLOCKS;
 static NUVEC hothbtestpos = {29.0f, 0.0f, 13.0f};
@@ -354,6 +340,23 @@ void UpdatePushBlocks(void *world_ptr, void *, float) {
     }
 }
 
+static void *PushBlocks_ReserveBufferSpace(void *world_ptr) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
+    world->push_blocks = NULL;
+    world->push_block_count = 0;
+    if (world->current_level->max_push_blocks != 0) {
+        world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
+        world->push_blocks = static_cast<pushblock_s *>(world->giz_buffer.void_ptr);
+        world->giz_buffer.addr += world->current_level->max_push_blocks * sizeof(pushblock_s);
+    }
+    return world->push_blocks;
+}
+
+static i32 Push_GetMaxGizmos(void *world_ptr) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
+    return world != NULL ? world->current_level->max_push_blocks : 0;
+}
+
 static char *GizPush_GetGizmoName(GIZMO *gizmo) {
     if (gizmo == NULL) {
         return NULL;
@@ -361,48 +364,8 @@ static char *GizPush_GetGizmoName(GIZMO *gizmo) {
     return static_cast<pushblock_s *>(gizmo->object)->name;
 }
 
-i32 GizPush_GetOutput(GIZMO *gizmo, i32 output_index, i32) {
-    pushblock_s *push_block = static_cast<pushblock_s *>(gizmo->object);
-    if (push_block == NULL) {
-        return 0;
-    }
-    return GizPushBlock_EndFrameCompleted(push_block, output_index) != 0;
-}
-
-char *GizPush_GetOutputName(GIZMO *gizmo, i32 output_index) {
-    static char output_name[13] = "Any Complete";
-
-    pushblock_s *push_block = static_cast<pushblock_s *>(gizmo->object);
-    if (output_index < 0 || output_index > push_block->output_count) {
-        return NULL;
-    }
-    if (output_index == 0) {
-        return const_cast<char *>("Any Complete");
-    }
-    NuIToA(output_index, output_name, 10);
-    NuStrCat(output_name, " Complete");
-    return output_name;
-}
-
 i32 GizPush_GetNumOutputs(GIZMO *gizmo) {
     return static_cast<pushblock_s *>(gizmo->object)->output_count;
-}
-
-static void Push_Activate(GIZMO *gizmo, i32) {
-    UNIMPLEMENTED();
-}
-
-static void Push_SetVisibility(GIZMO *gizmo, i32) {
-    UNIMPLEMENTED();
-}
-
-static i32 Pushblocks_BoltHitPlat(void *, void *, BOLT *, unsigned char *) {
-    UNIMPLEMENTED();
-    return {};
-}
-
-static void *Push_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end) {
-    return GizmoBufferAlloc(buffer, buffer_end, 0x24c);
 }
 
 static void Push_ClearProgress(void *, void *progress_ptr) {
@@ -415,61 +378,21 @@ static void Push_ClearProgress(void *, void *progress_ptr) {
     }
 }
 
-static void Push_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
-    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    PUSHPROGRESS *progress = static_cast<PUSHPROGRESS *>(progress_ptr);
-    if (progress == NULL) {
-        return;
-    }
-
-    Push_ClearProgress(NULL, progress);
-    if (world == NULL || world->push_blocks == NULL || world->push_block_count <= 0) {
-        return;
-    }
-
-    for (i32 index = 0; index < world->push_block_count && index < 16; ++index) {
-        pushblock_s *push_block = &world->push_blocks[index];
-        const u32 mask = 1u << (index & 31);
-        const i32 mask_index = index >> 5;
-        u32 *visible_masks = &progress->visible_mask;
-        u32 *state_masks = &progress->state_mask;
-        u32 *position_masks = &progress->position_mask;
-
-        if ((push_block->flags_0ca & PUSHBLOCK_FLAG_VISIBLE) == 0) {
-            visible_masks[mask_index] &= ~mask;
-        }
-        if ((push_block->flags_0cb & PUSHBLOCK_FLAG_STATE) != 0) {
-            state_masks[mask_index] |= mask;
-        }
-
-        NUMTX *matrix =
-            NuSpecialExistsFn(&push_block->special) != 0 ? NuSpecialGetInstanceMtx(&push_block->special) : NULL;
-        progress->positions[index] = matrix != NULL ? *reinterpret_cast<NUVEC *>(&matrix->m30) : v000;
-
-        for (i32 end_index = 0; end_index < push_block->end_position_count; ++end_index) {
-            nuhspecial_s *special = &push_block->end_position_specials[end_index];
-            matrix = NuSpecialExistsFn(special) != 0 ? NuSpecialGetInstanceMtx(special) : NULL;
-            progress->end_positions[end_index][index] =
-                matrix != NULL ? *reinterpret_cast<NUVEC *>(&matrix->m30) : v000;
-        }
-        position_masks[mask_index] |= mask;
-    }
+static void *Push_AllocateProgressData(VARIPTR *buffer, VARIPTR *buffer_end) {
+    return GizmoBufferAlloc(buffer, buffer_end, 0x24c);
 }
 
-static void Push_Reset(void *world, void *, void *progress) {
-    ResetPushProgress(static_cast<WORLDINFO_s *>(world), progress);
+static void Push_SetVisibility(GIZMO *gizmo, i32) {
+    UNIMPLEMENTED();
 }
 
-static void *PushBlocks_ReserveBufferSpace(void *world_ptr) {
+static void Push_AddGizmos(GIZMOSYS *gizmo_sys, i32 type_id, void *world_ptr, void *) {
     WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
-    world->push_blocks = NULL;
-    world->push_block_count = 0;
-    if (world->current_level->max_push_blocks != 0) {
-        world->giz_buffer.addr = ALIGN(world->giz_buffer.addr, 4);
-        world->push_blocks = static_cast<pushblock_s *>(world->giz_buffer.void_ptr);
-        world->giz_buffer.addr += world->current_level->max_push_blocks * sizeof(pushblock_s);
+    for (i32 index = 0; index < world->push_block_count; ++index) {
+        if (NuStrLen(world->push_blocks[index].name) != 0) {
+            AddGizmo(gizmo_sys, type_id, NULL, &world->push_blocks[index]);
+        }
     }
-    return world->push_blocks;
 }
 
 static i32 edpush_Load(void *world_ptr, void *) {
@@ -556,6 +479,83 @@ static i32 edpush_Load(void *world_ptr, void *) {
     }
     world->push_block_count = valid_count;
     return 1;
+}
+
+char *GizPush_GetOutputName(GIZMO *gizmo, i32 output_index) {
+    static char output_name[13] = "Any Complete";
+
+    pushblock_s *push_block = static_cast<pushblock_s *>(gizmo->object);
+    if (output_index < 0 || output_index > push_block->output_count) {
+        return NULL;
+    }
+    if (output_index == 0) {
+        return const_cast<char *>("Any Complete");
+    }
+    NuIToA(output_index, output_name, 10);
+    NuStrCat(output_name, " Complete");
+    return output_name;
+}
+
+static void Push_StoreProgress(void *world_ptr, void *, void *progress_ptr) {
+    WORLDINFO *world = static_cast<WORLDINFO *>(world_ptr);
+    PUSHPROGRESS *progress = static_cast<PUSHPROGRESS *>(progress_ptr);
+    if (progress == NULL) {
+        return;
+    }
+
+    Push_ClearProgress(NULL, progress);
+    if (world == NULL || world->push_blocks == NULL || world->push_block_count <= 0) {
+        return;
+    }
+
+    for (i32 index = 0; index < world->push_block_count && index < 16; ++index) {
+        pushblock_s *push_block = &world->push_blocks[index];
+        const u32 mask = 1u << (index & 31);
+        const i32 mask_index = index >> 5;
+        u32 *visible_masks = &progress->visible_mask;
+        u32 *state_masks = &progress->state_mask;
+        u32 *position_masks = &progress->position_mask;
+
+        if ((push_block->flags_0ca & PUSHBLOCK_FLAG_VISIBLE) == 0) {
+            visible_masks[mask_index] &= ~mask;
+        }
+        if ((push_block->flags_0cb & PUSHBLOCK_FLAG_STATE) != 0) {
+            state_masks[mask_index] |= mask;
+        }
+
+        NUMTX *matrix =
+            NuSpecialExistsFn(&push_block->special) != 0 ? NuSpecialGetInstanceMtx(&push_block->special) : NULL;
+        progress->positions[index] = matrix != NULL ? *reinterpret_cast<NUVEC *>(&matrix->m30) : v000;
+
+        for (i32 end_index = 0; end_index < push_block->end_position_count; ++end_index) {
+            nuhspecial_s *special = &push_block->end_position_specials[end_index];
+            matrix = NuSpecialExistsFn(special) != 0 ? NuSpecialGetInstanceMtx(special) : NULL;
+            progress->end_positions[end_index][index] =
+                matrix != NULL ? *reinterpret_cast<NUVEC *>(&matrix->m30) : v000;
+        }
+        position_masks[mask_index] |= mask;
+    }
+}
+
+static i32 Pushblocks_BoltHitPlat(void *, void *, BOLT *, unsigned char *) {
+    UNIMPLEMENTED();
+    return {};
+}
+
+static void Push_Activate(GIZMO *gizmo, i32) {
+    UNIMPLEMENTED();
+}
+
+static void Push_Reset(void *world, void *, void *progress) {
+    ResetPushProgress(static_cast<WORLDINFO_s *>(world), progress);
+}
+
+i32 GizPush_GetOutput(GIZMO *gizmo, i32 output_index, i32) {
+    pushblock_s *push_block = static_cast<pushblock_s *>(gizmo->object);
+    if (push_block == NULL) {
+        return 0;
+    }
+    return GizPushBlock_EndFrameCompleted(push_block, output_index) != 0;
 }
 
 ADDGIZMOTYPE *Push_RegisterGizmo(i32 type_id) {

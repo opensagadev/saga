@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "legoapi/render/fx/particles.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/nu3d/nutex.h"
 #include "nu2api/nu3d/numtl.h"

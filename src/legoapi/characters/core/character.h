@@ -13,6 +13,7 @@ struct CHARFIXUP {
 typedef struct CHARFIXUP CHARFIXUP;
 
 struct GameObject_s;
+void CharScenes_AreaDump(void);
 void PostAnimate_ASTROMECH(GameObject_s *object);
 void PostAnimate_FETT(GameObject_s *object);
 struct ANIMREDIRECT;

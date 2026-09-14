@@ -28,6 +28,7 @@
 #include "gameframework/saveload.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/characters/core/players.h"
+#include "legoapi/items/collect/minikits.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/render/core/screen.h"
 #include "legoapi/world/area.h"
@@ -102,14 +103,11 @@ CHARACTERDATA *ConfigureCharacterList(char *path, VARIPTR *buf, VARIPTR *buf_end
                                       GAMECHARACTERDATA **gcdata);
 void CharScenes_Init(VARIPTR *buf, VARIPTR *buf_end);
 void FixUpCharacters(CHARFIXUP *fixup);
-void MiniKits_Init(VARIPTR *buf, VARIPTR *buf_end);
 void CharCategories_Init(CHARCATEGORY *cat);
 void Cheats_Init(CHEAT *cheats);
 LEVELDATA *Levels_ConfigureList(char *path, VARIPTR *buf, VARIPTR *buf_end, i32 max, i32 *count,
                                 void (*set_defaults)(LEVELDATA *, i32));
 void FixUpLevels(LEVELFIXUP *fixup);
-AREADATA *Areas_ConfigureList(char *path, VARIPTR *buf, VARIPTR *buf_end, i32 max, i32 *count);
-void FixUpAreas(void);
 EPISODEDATA *Episodes_ConfigureList(char *path, VARIPTR *buf, VARIPTR *buf_end, i32 max, i32 *count);
 void NewGame(void);
 void InitGameAfterConfig(void);
