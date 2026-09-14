@@ -646,6 +646,10 @@ extern "C" {
     extern i16 id_DROIDEKA;
     extern i16 id_CLOUDCITYCITIZEN;
     extern i16 id_GEONOSIAN;
+    extern i16 id_BATMAN;
+    extern i16 id_ROBIN;
+    extern i16 id_BODYGUARD;
+    extern i16 id_CHEWBACCA;
     extern i16 id_BOB;
     extern i16 id_WHIP;
     extern i16 id_JARJAR;

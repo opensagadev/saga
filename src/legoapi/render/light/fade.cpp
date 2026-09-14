@@ -231,19 +231,6 @@ i32 FadeSystem::SetFade(FADETYPE const &t, u32 frames) {
     return 0;
 }
 
-FADETYPE_VALUE Fade::GetFadeType() const {
-    return FADE_TYPE_SCREEN;
-}
-FADETYPE_VALUE FadeWipe::GetFadeType() const {
-    return FADE_TYPE_WIPE;
-}
-FADETYPE_VALUE FadeStillWipe::GetFadeType() const {
-    return FADE_TYPE_STILL_WIPE;
-}
-FADETYPE_VALUE FadeStill::GetFadeType() const {
-    return FADE_TYPE_STILL;
-}
-
 void FadeLoop_SetObj(nugscn_s *, char *) {
     STUBBED();
 }

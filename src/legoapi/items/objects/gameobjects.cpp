@@ -4032,7 +4032,6 @@ i32 GameDrawCharacterModel(CHARACTERMODEL_s *model, ANIMPACKET_s *animation, NUM
                                  auxiliary_matrix, object, flags, NULL, 0, WORLD, FRAMETIME, output_matrices, 0, NULL);
 }
 
-u32 AdjustLayerBits(u32, GameObject_s *);
 extern i16 id_ANAKINJEDISCARRED;
 
 void GameObjectToCameraCode(GameObject_s *object) {

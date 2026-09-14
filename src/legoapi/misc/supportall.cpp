@@ -141,7 +141,6 @@ extern "C" f32 tieonsfxwait;
 extern "C" f32 tieoffsfxwait;
 extern GameObject_s *alert_obj;
 extern f32 alert_timer;
-void NuDisplayListCreate(nudisplayscene_s *, variptr_u *, variptr_u, i32, i32, i32, i32, i32, i32, i32);
 
 struct AIROW_s;
 struct nuqthdr_s;
@@ -680,10 +679,6 @@ void DebrisProcessSpheres(uv1deb *data, float time, debinftype *effect, debkeyda
         key->sphere_skip_count = key->field_2c8;
     key->sphere_next_time =
         time + effect->particle_lifetime / static_cast<f32>(static_cast<i8>(effect->process_spheres));
-}
-
-void DisplayListPrintItem(nudisplaylistitem_s *, i32, i32, i32 *, i32) {
-    STUBBED();
 }
 
 // Debug-capture output helpers consumed by NuDisplayListCaptureSortPriority.
@@ -1367,50 +1362,6 @@ void DebrisProcessControlChunks(i32 panel_time) {
         // Unrecognized control states are removed from the active stack in the original.
     }
     DebrisReleaseControlStackLock();
-}
-
-// original 0x2ff660
-void DisplayListCreateDynMtlList(variptr_u *buffer, variptr_u buffer_end) {
-    NUDLIST_MANAGER *manager = &global_dlist_manager;
-    NUDLDLISTSCENE *scene = &manager->dyn_mtl_dlist;
-
-    NuDisplayListCreate(scene, buffer, buffer_end, 0x400, 0x80, 0, 0, 0x80, 0, 0);
-    scene->nsort_pris = 0;
-    scene->name = const_cast<char *>("Dynamic Material Display Scene");
-
-    NUDISPLAYLISTITEM *material_item = scene->items;
-    for (i32 i = 0; i < 0x80; ++i) {
-        NUDISPLAYLIST *display_list = scene->dlist_mtls[i];
-        display_list->mtl_item = material_item;
-        display_list->dyn_geom = material_item + 6;
-        display_list->dlist = scene;
-        display_list->mtl_id = i;
-        material_item += 8;
-    }
-
-    manager->nnew_materials = 0;
-    manager->ndel_materials = 0;
-    manager->new_materials = reinterpret_cast<NUMTL **>(ALIGN(buffer->addr, 0x10));
-    manager->del_materials = manager->new_materials + 0x80;
-    manager->material_used = reinterpret_cast<u8 *>(manager->new_materials + 0x100);
-    manager->mtl_buffers_used = reinterpret_cast<u8 *>(manager->new_materials + 0x120);
-    buffer->addr = reinterpret_cast<usize>(manager->new_materials + 0x140);
-    memset(manager->material_used, 0, 0x80);
-    memset(manager->mtl_buffers_used, 0, 0x80);
-
-    manager->mtlbuff.addr = ALIGN(buffer->addr, 0x10);
-    manager->mtlbuffend.addr = manager->mtlbuff.addr + 0x4000;
-    *buffer = manager->mtlbuffend;
-
-    NUDISPLAYLIST *list = &manager->dlist_2d;
-    list->first->type = 0x8d;
-    list->first->id = 1;
-    list->first->next = nullptr;
-    list->mtl_last = list->first;
-    list->state = reinterpret_cast<NURNDRSTATE *>(ALIGN(buffer->addr, 4));
-    buffer->addr = reinterpret_cast<usize>(list->state + 1);
-    NuDisplayListReset(list);
-    scene->flags |= NUDL_SCENE_FLAG_NEEDS_BUILD;
 }
 
 extern "C" {

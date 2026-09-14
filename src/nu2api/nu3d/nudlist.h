@@ -95,10 +95,9 @@ typedef struct nudisplaylist_s {
     u32 expansion_40;                    // 0x40
 } NUDISPLAYLIST;
 
-// original 0x2ec550 (_Z20DisplayListPrintItemP19nudisplaylistitem_siiPii --
-// C++ linkage in the original binary); body stubbed in supportall.cpp.
 void DisplayListLinkDynamicMtls(void);
-
+void NuDisplayListCreate(nudisplayscene_s *scene, VARIPTR *buffer, VARIPTR buffer_end, i32 item_count,
+                         i32 material_count, i32, i32, i32 sort_priority_count, i32, i32 allocate_materials);
 void DisplayListPrintItem(nudisplaylistitem_s *item, i32 index, i32 depth, i32 *, i32 file_handle);
 void DisplayListCreateDynMtlList(VARIPTR *buffer, VARIPTR buffer_end);
 
