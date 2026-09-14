@@ -1386,12 +1386,6 @@ void BoltTypes_Init(WORLDINFO_s *world) {
     (void)world;
 }
 
-void BoltTypes_Configure(WORLDINFO_s *world, char *config) {
-    STUBBED();
-    (void)world;
-    (void)config;
-}
-
 extern "C" {
 
     void HitParts(void) {

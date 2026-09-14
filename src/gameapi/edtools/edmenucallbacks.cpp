@@ -177,9 +177,6 @@ static void cbPtlVarStartMenu(eduimenu_s *, eduiitem_s *, u32) {
 static void cbPtlChangeEmitVel(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
-static void cbPtlRepeatBoxMenu(eduimenu_s *, eduiitem_s *, u32) {
-    STUBBED();
-}
 static void cbChangeGenRateMenu(eduimenu_s *, eduiitem_s *, u32) {
     STUBBED();
 }
@@ -338,9 +335,6 @@ static void cbPtlCancelStartVelMenu(eduimenu_s *, eduimenu_s *) {
 static void cbPtlCancelVarStartMenu(eduimenu_s *, eduimenu_s *) {
     STUBBED();
 }
-static void cbPtlCancelRepeatBoxMenu(eduimenu_s *, eduimenu_s *) {
-    STUBBED();
-}
 static void cbCancelChangeGenRateMenu(eduimenu_s *, eduimenu_s *) {
     STUBBED();
 }
@@ -381,14 +375,6 @@ extern "C" {
     }
 
     static void cbMMCancel(void) {
-        STUBBED();
-    }
-
-    static void cbMMEditorConfig(void *) {
-        STUBBED();
-    }
-
-    static void cbMMRegSel(void *, void *) {
         STUBBED();
     }
 

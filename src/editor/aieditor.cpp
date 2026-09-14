@@ -15,10 +15,6 @@ extern "C" void aieditor_SetMode(i32 mode);
 extern "C" void AISYSRebuildFromEditorData(void);
 extern "C" i32 aieditor_Register(const char *, void (*)(), void (*)(), void (*)(), void (*)());
 extern "C" void aieditor_RegisterDefaultPathCnxTypes();
-extern "C" eduiitem_s *eduiItemCheckCreate(i32, const void *, i32, i32, void (*)(eduimenu_s *, eduiitem_s *, u32),
-                                           char *);
-extern "C" eduiitem_s *eduiItemSelCreate(i32, const void *, i32, i32, void (*)(eduimenu_s *, eduiitem_s *, u32),
-                                         char *);
 extern "C" void aieditor_cbCancelMainMenu(eduimenu_s *, eduimenu_s *);
 
 struct nupad_s;
@@ -40,17 +36,17 @@ void antinodeEditor_Process(nupad_s *);
 void antinodeEditor_Render(i32, i32, f32, f32);
 
 extern "C" {
-i32 AIEDITOR_PATHS;
-i32 AIEDITOR_ROUTES = -1;
-i32 AIEDITOR_AREAS;
-i32 AIEDITOR_LOCATORS;
-i32 AIEDITOR_CREATURES;
-i32 AIEDITOR_ANTINODES;
+    i32 AIEDITOR_PATHS;
+    i32 AIEDITOR_ROUTES = -1;
+    i32 AIEDITOR_AREAS;
+    i32 AIEDITOR_LOCATORS;
+    i32 AIEDITOR_CREATURES;
+    i32 AIEDITOR_ANTINODES;
 }
 
 aieditor_settings_s aieditorsettings;
 extern "C" {
-extern void *ed_fnt;
+    extern void *ed_fnt;
 }
 struct EditorItemColours {
     u32 normal;

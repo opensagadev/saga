@@ -430,7 +430,6 @@ build:target --per_file_copt=^src/legoapi/render/fx/game_deb\.cpp$@-O3
 build:target --per_file_copt=^src/legoapi/actions/movement/supercarry\.cpp$@-O3
 build:target --per_file_copt=^src/nu2api/nuandroid/nuphoneos\.cpp$@-O3
 build:target --per_file_copt=^src/gameapi/edtools/edui\.cpp$@-O3
-build:target --per_file_copt=^src/gameapi/edtools/edui\.c$@-O3
 
 # Traffic animation parsing and runtime loops use the optimized Android code shape.
 build:target --per_file_copt=^src/legoapi/items/objects/traffic\.cpp$@-O3

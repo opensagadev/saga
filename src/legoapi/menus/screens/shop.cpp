@@ -2,6 +2,8 @@
 #include "gameapi/gui/apimenu.h"
 #include "gamelib/crc/crc.h"
 #include "globals.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/audio/sfx.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/items/base/collection.h"
@@ -27,9 +29,7 @@
 
 #include <string.h>
 #include <stdio.h>
-extern "C" void PlaySfx(char *, NUVEC *);
 extern "C" void NuIOS_RecordFlurryEvent(char *);
-void GameAudio_PlaySfx(i32, NUVEC *, i32, i32);
 void SetLevelLights(void *, f32);
 void DrawItem(nuhspecial_s *, nuvec_s *, float, float, float, u16, u16, u16);
 void Draw3DObject(WORLDINFO_s *, i32, nuvec_s *, u16, u16, u16, float, float, float, i32);
@@ -174,8 +174,6 @@ extern void DrawItemMenu2D();
 extern void InitAlphaList();
 extern void InitExtraList();
 extern HINT_s *Hint_FindHint(i32 hint_id);
-extern i16 HintTab[24];
-extern void GameCam_Blend(GAMECAMERA_s *camera, f32 duration, f32 curve, i32 mode);
 
 i32 DoShopMenu(MENU_s *menu) {
     i32 result = 0;
@@ -805,8 +803,6 @@ i32 CheckCash(shopitem_s *items, i32 item) {
 
 i32 CodeMenu(MENU_s *);
 
-extern void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
-extern void GameCam_Blend(GAMECAMERA_s *, f32, f32, i32);
 extern void Hint_CancelCurrent(void);
 extern void DrawSubItemMenu2D(void);
 extern void DrawSubItemMenu3D(void);
@@ -815,10 +811,7 @@ extern void DrawCodeMenu3D(void);
 static i32 SubItemMenu(MENU_s *);
 extern void Hint_ResetHint(i32, i32);
 extern void Hint_SetHintFromId(i32, i32, i32);
-extern i16 HintTab[24];
 extern i16 tUNKNOWN;
-extern "C" void PlaySfx(char *, NUVEC *);
-extern void AddToCompletionPoints(u32);
 
 static f32 ShopClamp01(f32 value) {
     return NuFmax(0.0f, NuFmin(value, 1.0f));
@@ -1533,7 +1526,6 @@ void DrawShop3D(WORLDINFO_s *world) {
     SetLevelLights(world->rtl_set, 1.0f);
 }
 
-
 void DrawCodeMenu() {
     if (cheattimer > 0.0f) {
         if (cheatname && cheattimer < 3.1499998569488525f && NuFmod(cheattimer, 0.35f) < 0.175f) {
@@ -1543,7 +1535,6 @@ void DrawCodeMenu() {
         cheattimer -= FRAMETIME;
     }
 }
-
 
 // The original shop inlines these NuMtx rotations (0x244679 onward).
 // Keep the arithmetic in sync with the canonical numtx.cpp implementations.
@@ -1603,7 +1594,6 @@ static inline void ShopRotateZ(NUMTX *m, NUANG a) {
 static void Shop_DrawCharacter(shopitem_s *item, NUVEC *position, f32 scale_value, f32 ypush, u16 xrot, u16 yrot,
                                u16 zrot);
 extern AREADATA *ANEWHOPE_ADATA;
-
 
 void DrawSubItems() {
     f32 alpha = 1.0f;
@@ -1823,7 +1813,6 @@ void DrawSubItems() {
     }
 }
 
-
 static void Shop_DrawCharacter(shopitem_s *item, NUVEC *position, f32 scale_value, f32 ypush, u16 xrot, u16 yrot,
                                u16 zrot) {
     if (!NuSpecialExistsFn(&iconback))
@@ -1865,7 +1854,6 @@ static void Shop_DrawCharacter(shopitem_s *item, NUVEC *position, f32 scale_valu
         }
     }
 }
-
 
 void DrawTopShelf(i32) {
     f32 alpha_scale = 1.0f;
@@ -1935,12 +1923,10 @@ void DrawTopShelf(i32) {
     }
 }
 
-
 void DrawShopPanel() {
     if (SHOPACTIVE && drawpanelptr)
         drawpanelptr();
 }
-
 
 void DrawCodeMenu3D() {
     i32 letters[6];

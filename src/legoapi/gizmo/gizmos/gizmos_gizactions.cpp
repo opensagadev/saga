@@ -26,10 +26,6 @@
 #include "nu2api/nu3d/nuspline.h"
 #include "legoapi/render/fx/spline_position.h"
 
-void Action_Sebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
-    STUBBED();
-}
-
 i32 Action_SetState(AISYS_s *, AISCRIPTPROCESS_s *processor, AIPACKET_s *, char **params, i32 param_count,
                     i32 is_first_time, float) {
     if (is_first_time == 0 || param_count == 0) {
@@ -97,23 +93,11 @@ void Action_CameraCut(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32
     STUBBED();
 }
 
-void Action_CreatePod(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
-    STUBBED();
-}
-
 void Action_PullLever(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
     STUBBED();
 }
 
 void Action_UseTechno(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
-    STUBBED();
-}
-
-void Action_NewSebulba(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
-    STUBBED();
-}
-
-void Action_SetLapTime(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
     STUBBED();
 }
 
@@ -603,10 +587,6 @@ change_character:
         }
     }
     return 0;
-}
-
-void Action_MushroomCollapse(AISYS_s *, AISCRIPTPROCESS_s *, AIPACKET_s *, char **, i32, i32, float) {
-    STUBBED();
 }
 
 i32 Action_GetLocatorFromSet(AISYS_s *sys, AISCRIPTPROCESS_s *processor, AIPACKET_s *packet, char **params,

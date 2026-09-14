@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 45.9281,
+    "fuzzy_match_percent": 45.92971,
     "total_code": "4722419",
     "matched_code": "400334",
     "matched_code_percent": 8.477308,
@@ -20665,7 +20665,7 @@
           "address": 4045696,
           "offset": 3155728,
           "size": 461,
-          "match_percent": 70.38655
+          "match_percent": 82.42857
         },
         {
           "name": "_ZL27pathEditor_cbRenamePathMenuP10eduimenu_sP10eduiitem_sj",
@@ -24995,6 +24995,14 @@
           "offset": 3827184,
           "size": 112,
           "match_percent": 99.965515
+        },
+        {
+          "name": "_Z19BoltTypes_ConfigureP11WORLDINFO_sPc",
+          "demangled_name": "BoltTypes_Configure(WORLDINFO_s*, char*)",
+          "address": 4722016,
+          "offset": 3832048,
+          "size": 623,
+          "match_percent": 2.857143
         }
       ]
     },
@@ -25193,381 +25201,6 @@
           "offset": 1381120,
           "size": 866,
           "match_percent": 53.23858
-        }
-      ]
-    },
-    {
-      "name": "gameapi/ai/gameai_sockpar.cpp.o",
-      "source": "src/gameapi/ai/gameai_sockpar.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/gameai_sockpar.o",
-      "functions": [
-        {
-          "name": "_ZL14SockParCircuitP8nufpar_sPv",
-          "demangled_name": "SockParCircuit(nufpar_s*, void*)",
-          "address": 3933588,
-          "offset": 3043620,
-          "size": 28,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL15SockParCurSpeedP8nufpar_sPv",
-          "demangled_name": "SockParCurSpeed(nufpar_s*, void*)",
-          "address": 3933616,
-          "offset": 3043648,
-          "size": 62,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL20SockParMidRangeInnerP8nufpar_sPv",
-          "demangled_name": "SockParMidRangeInner(nufpar_s*, void*)",
-          "address": 3933678,
-          "offset": 3043710,
-          "size": 62,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL20SockParMidRangeOuterP8nufpar_sPv",
-          "demangled_name": "SockParMidRangeOuter(nufpar_s*, void*)",
-          "address": 3933740,
-          "offset": 3043772,
-          "size": 139,
-          "match_percent": 99.97619
-        },
-        {
-          "name": "_ZL21SockParMidforceYscaleP8nufpar_sPv",
-          "demangled_name": "SockParMidforceYscale(nufpar_s*, void*)",
-          "address": 3933879,
-          "offset": 3043911,
-          "size": 62,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL15SockParMidforceP8nufpar_sPv",
-          "demangled_name": "SockParMidforce(nufpar_s*, void*)",
-          "address": 3933941,
-          "offset": 3043973,
-          "size": 273,
-          "match_percent": 95.80519
-        },
-        {
-          "name": "_ZL19SockParMidForceDownP8nufpar_sPv",
-          "demangled_name": "SockParMidForceDown(nufpar_s*, void*)",
-          "address": 3934214,
-          "offset": 3044246,
-          "size": 43,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL21SockParMidForceYScaleP8nufpar_sPv",
-          "demangled_name": "SockParMidForceYScale(nufpar_s*, void*)",
-          "address": 3934257,
-          "offset": 3044289,
-          "size": 62,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL22SockParCamScaleLateralP8nufpar_sPv",
-          "demangled_name": "SockParCamScaleLateral(nufpar_s*, void*)",
-          "address": 3934319,
-          "offset": 3044351,
-          "size": 43,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL19SockParCamLookRatioP8nufpar_sPv",
-          "demangled_name": "SockParCamLookRatio(nufpar_s*, void*)",
-          "address": 3934362,
-          "offset": 3044394,
-          "size": 145,
-          "match_percent": 99.948715
-        },
-        {
-          "name": "_ZL20SockParCamLockRatioYP8nufpar_sPv",
-          "demangled_name": "SockParCamLockRatioY(nufpar_s*, void*)",
-          "address": 3934507,
-          "offset": 3044539,
-          "size": 111,
-          "match_percent": 99.935486
-        },
-        {
-          "name": "_ZL17SockParCamPosSeekP8nufpar_sPv",
-          "demangled_name": "SockParCamPosSeek(nufpar_s*, void*)",
-          "address": 3934618,
-          "offset": 3044650,
-          "size": 85,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL17SockParCamAngSeekP8nufpar_sPv",
-          "demangled_name": "SockParCamAngSeek(nufpar_s*, void*)",
-          "address": 3934703,
-          "offset": 3044735,
-          "size": 85,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL18SockParCamSegAheadP8nufpar_sPv",
-          "demangled_name": "SockParCamSegAhead(nufpar_s*, void*)",
-          "address": 3934788,
-          "offset": 3044820,
-          "size": 50,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL22SockParCamLateralRatioP8nufpar_sPv",
-          "demangled_name": "SockParCamLateralRatio(nufpar_s*, void*)",
-          "address": 3934838,
-          "offset": 3044870,
-          "size": 86,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL23SockParCamVerticalRatioP8nufpar_sPv",
-          "demangled_name": "SockParCamVerticalRatio(nufpar_s*, void*)",
-          "address": 3934924,
-          "offset": 3044956,
-          "size": 65,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL16SockParCamOffsetP8nufpar_sPv",
-          "demangled_name": "SockParCamOffset(nufpar_s*, void*)",
-          "address": 3934989,
-          "offset": 3045021,
-          "size": 139,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL17SockParCamXOffsetP8nufpar_sPv",
-          "demangled_name": "SockParCamXOffset(nufpar_s*, void*)",
-          "address": 3935128,
-          "offset": 3045160,
-          "size": 65,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL17SockParCamYOffsetP8nufpar_sPv",
-          "demangled_name": "SockParCamYOffset(nufpar_s*, void*)",
-          "address": 3935193,
-          "offset": 3045225,
-          "size": 65,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL17SockParCamZOffsetP8nufpar_sPv",
-          "demangled_name": "SockParCamZOffset(nufpar_s*, void*)",
-          "address": 3935258,
-          "offset": 3045290,
-          "size": 65,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL20SockParCamRailOffsetP8nufpar_sPv",
-          "demangled_name": "SockParCamRailOffset(nufpar_s*, void*)",
-          "address": 3935323,
-          "offset": 3045355,
-          "size": 65,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL21SockParCamArenaOffsetP8nufpar_sPv",
-          "demangled_name": "SockParCamArenaOffset(nufpar_s*, void*)",
-          "address": 3935388,
-          "offset": 3045420,
-          "size": 65,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL23SockParOffsetBlendRatioP8nufpar_sPv",
-          "demangled_name": "SockParOffsetBlendRatio(nufpar_s*, void*)",
-          "address": 3935453,
-          "offset": 3045485,
-          "size": 113,
-          "match_percent": 53.060608
-        },
-        {
-          "name": "_ZL24SockParOffsetBlendXRatioP8nufpar_sPv",
-          "demangled_name": "SockParOffsetBlendXRatio(nufpar_s*, void*)",
-          "address": 3935566,
-          "offset": 3045598,
-          "size": 65,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL24SockParOffsetBlendYRatioP8nufpar_sPv",
-          "demangled_name": "SockParOffsetBlendYRatio(nufpar_s*, void*)",
-          "address": 3935631,
-          "offset": 3045663,
-          "size": 65,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL24SockParOffsetBlendZRatioP8nufpar_sPv",
-          "demangled_name": "SockParOffsetBlendZRatio(nufpar_s*, void*)",
-          "address": 3935696,
-          "offset": 3045728,
-          "size": 65,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL24SockParCamDistToTargetXZP8nufpar_sPv",
-          "demangled_name": "SockParCamDistToTargetXZ(nufpar_s*, void*)",
-          "address": 3935761,
-          "offset": 3045793,
-          "size": 92,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL22SockParCamPullBackYRefP8nufpar_sPv",
-          "demangled_name": "SockParCamPullBackYRef(nufpar_s*, void*)",
-          "address": 3935853,
-          "offset": 3045885,
-          "size": 43,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL22SockParCamDistToTargetP8nufpar_sPv",
-          "demangled_name": "SockParCamDistToTarget(nufpar_s*, void*)",
-          "address": 3935896,
-          "offset": 3045928,
-          "size": 65,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL19SockParCamDistRatioP8nufpar_sPv",
-          "demangled_name": "SockParCamDistRatio(nufpar_s*, void*)",
-          "address": 3935961,
-          "offset": 3045993,
-          "size": 65,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL14SockParYLimitsP8nufpar_sPv",
-          "demangled_name": "SockParYLimits(nufpar_s*, void*)",
-          "address": 3936026,
-          "offset": 3046058,
-          "size": 43,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL16SockParMoveAngleP8nufpar_sPv",
-          "demangled_name": "SockParMoveAngle(nufpar_s*, void*)",
-          "address": 3936069,
-          "offset": 3046101,
-          "size": 157,
-          "match_percent": 80.913795
-        },
-        {
-          "name": "_ZL16SockParCamBehindP8nufpar_sPv",
-          "demangled_name": "SockParCamBehind(nufpar_s*, void*)",
-          "address": 3936226,
-          "offset": 3046258,
-          "size": 130,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL19SockParCamBlendTimeP8nufpar_sPv",
-          "demangled_name": "SockParCamBlendTime(nufpar_s*, void*)",
-          "address": 3936356,
-          "offset": 3046388,
-          "size": 65,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL15SockParCam1ZoomP8nufpar_sPv",
-          "demangled_name": "SockParCam1Zoom(nufpar_s*, void*)",
-          "address": 3936421,
-          "offset": 3046453,
-          "size": 65,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL20SockParPullbackRatioP8nufpar_sPv",
-          "demangled_name": "SockParPullbackRatio(nufpar_s*, void*)",
-          "address": 3936486,
-          "offset": 3046518,
-          "size": 65,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL22SockParPullbackRatioXZP8nufpar_sPv",
-          "demangled_name": "SockParPullbackRatioXZ(nufpar_s*, void*)",
-          "address": 3936551,
-          "offset": 3046583,
-          "size": 92,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL28SockParCamHeightAboveTerrainP8nufpar_sPv",
-          "demangled_name": "SockParCamHeightAboveTerrain(nufpar_s*, void*)",
-          "address": 3936643,
-          "offset": 3046675,
-          "size": 65,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL15SockParCamShakeP8nufpar_sPv",
-          "demangled_name": "SockParCamShake(nufpar_s*, void*)",
-          "address": 3936708,
-          "offset": 3046740,
-          "size": 65,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL12SockParMisc1P8nufpar_sPv",
-          "demangled_name": "SockParMisc1(nufpar_s*, void*)",
-          "address": 3936773,
-          "offset": 3046805,
-          "size": 43,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL12SockParMisc2P8nufpar_sPv",
-          "demangled_name": "SockParMisc2(nufpar_s*, void*)",
-          "address": 3936816,
-          "offset": 3046848,
-          "size": 43,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL13SockParIgnoreP8nufpar_sPv",
-          "demangled_name": "SockParIgnore(nufpar_s*, void*)",
-          "address": 3936859,
-          "offset": 3046891,
-          "size": 85,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL14SockParTurnOffP8nufpar_sPv",
-          "demangled_name": "SockParTurnOff(nufpar_s*, void*)",
-          "address": 3936944,
-          "offset": 3046976,
-          "size": 43,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL11SockParNameP8nufpar_sPv",
-          "demangled_name": "SockParName(nufpar_s*, void*)",
-          "address": 3936987,
-          "offset": 3047019,
-          "size": 114,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_ZL10SockParObjP8nufpar_sPv",
-          "demangled_name": "SockParObj(nufpar_s*, void*)",
-          "address": 3937101,
-          "offset": 3047133,
-          "size": 373,
-          "match_percent": 3.883495
-        },
-        {
-          "name": "_ZL12SockParBlendP8nufpar_sPv",
-          "demangled_name": "SockParBlend(nufpar_s*, void*)",
-          "address": 3937579,
-          "offset": 3047611,
-          "size": 174,
-          "match_percent": 70.13725
         }
       ]
     },
@@ -27575,14 +27208,6 @@
           "match_percent": 15.0
         },
         {
-          "name": "_ZL24cbPtlCancelRepeatBoxMenuP10eduimenu_sS0_",
-          "demangled_name": "cbPtlCancelRepeatBoxMenu(eduimenu_s*, eduimenu_s*)",
-          "address": 3352352,
-          "offset": 2462384,
-          "size": 78,
-          "match_percent": 16.875
-        },
-        {
           "name": "_ZL21cbPtlCancelCutOffMenuP10eduimenu_sS0_",
           "demangled_name": "cbPtlCancelCutOffMenu(eduimenu_s*, eduimenu_s*)",
           "address": 3352432,
@@ -27813,14 +27438,6 @@
           "offset": 2487712,
           "size": 871,
           "match_percent": 1.888889
-        },
-        {
-          "name": "_ZL18cbPtlRepeatBoxMenuP10eduimenu_sP10eduiitem_sj",
-          "demangled_name": "cbPtlRepeatBoxMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
-          "address": 3378560,
-          "offset": 2488592,
-          "size": 674,
-          "match_percent": 1.594203
         },
         {
           "name": "_ZL17cbPtlEmitTimeMenuP10eduimenu_sP10eduiitem_sj",
@@ -28175,14 +27792,6 @@
           "match_percent": 1.603774
         },
         {
-          "name": "cbMMRegSel",
-          "demangled_name": "cbMMRegSel",
-          "address": 3732720,
-          "offset": 2842752,
-          "size": 61,
-          "match_percent": 18.333334
-        },
-        {
           "name": "cbSel",
           "demangled_name": "cbSel",
           "address": 3734528,
@@ -28261,14 +27870,6 @@
           "offset": 2900336,
           "size": 45,
           "match_percent": 25.384615
-        },
-        {
-          "name": "cbMMEditorConfig",
-          "demangled_name": "cbMMEditorConfig",
-          "address": 3796304,
-          "offset": 2906336,
-          "size": 62,
-          "match_percent": 18.333334
         },
         {
           "name": "_ZL15cbColourPickSelP10eduimenu_sP10eduiitem_sj",
@@ -29908,6 +29509,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "_ZL24cbPtlCancelRepeatBoxMenuP10eduimenu_sS0_",
+          "demangled_name": "cbPtlCancelRepeatBoxMenu(eduimenu_s*, eduimenu_s*)",
+          "address": 3352352,
+          "offset": 2462384,
+          "size": 78,
+          "match_percent": 26.25
+        },
+        {
           "name": "_ZL15edptlcbPageMenuP10eduimenu_sP10eduiitem_sj",
           "demangled_name": "edptlcbPageMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
           "address": 3358528,
@@ -29978,6 +29587,14 @@
           "offset": 2486592,
           "size": 439,
           "match_percent": 4.242424
+        },
+        {
+          "name": "_ZL18cbPtlRepeatBoxMenuP10eduimenu_sP10eduiitem_sj",
+          "demangled_name": "cbPtlRepeatBoxMenu(eduimenu_s*, eduiitem_s*, unsigned int)",
+          "address": 3378560,
+          "offset": 2488592,
+          "size": 674,
+          "match_percent": 3.043478
         },
         {
           "name": "_ZL16edptlcbGroupMenuP10eduimenu_sP10eduiitem_sj",
@@ -33400,6 +33017,54 @@
           "match_percent": 44.65333
         },
         {
+          "name": "cbMMRegSel",
+          "demangled_name": "cbMMRegSel",
+          "address": 3732720,
+          "offset": 2842752,
+          "size": 61,
+          "match_percent": 23.333334
+        },
+        {
+          "name": "eduicbInteractSel",
+          "demangled_name": "eduicbInteractSel",
+          "address": 3732784,
+          "offset": 2842816,
+          "size": 125,
+          "match_percent": 11.052631
+        },
+        {
+          "name": "eduicbProcessTexturePick",
+          "demangled_name": "eduicbProcessTexturePick",
+          "address": 3732912,
+          "offset": 2842944,
+          "size": 824,
+          "match_percent": 3.636364
+        },
+        {
+          "name": "eduicbProcessSlider",
+          "demangled_name": "eduicbProcessSlider",
+          "address": 3733744,
+          "offset": 2843776,
+          "size": 684,
+          "match_percent": 2.453988
+        },
+        {
+          "name": "eduicbProcessSeparator",
+          "demangled_name": "eduicbProcessSeparator",
+          "address": 3734432,
+          "offset": 2844464,
+          "size": 9,
+          "match_percent": 62.5
+        },
+        {
+          "name": "eduicbItemDestroyExpander",
+          "demangled_name": "eduicbItemDestroyExpander",
+          "address": 3734448,
+          "offset": 2844480,
+          "size": 78,
+          "match_percent": 15.0
+        },
+        {
           "name": "eduicbItemDestroyProp",
           "demangled_name": "eduicbItemDestroyProp",
           "address": 3735008,
@@ -33408,12 +33073,252 @@
           "match_percent": 100.0
         },
         {
+          "name": "eduicbItemDestroyFilter",
+          "demangled_name": "eduicbItemDestroyFilter",
+          "address": 3735200,
+          "offset": 2845232,
+          "size": 94,
+          "match_percent": 13.548388
+        },
+        {
           "name": "eduicbItemDestroy",
           "demangled_name": "eduicbItemDestroy",
           "address": 3735296,
           "offset": 2845328,
           "size": 190,
           "match_percent": 99.42105
+        },
+        {
+          "name": "eduicbItemSliderDestroy",
+          "demangled_name": "eduicbItemSliderDestroy",
+          "address": 3735488,
+          "offset": 2845520,
+          "size": 111,
+          "match_percent": 15.555555
+        },
+        {
+          "name": "eduicbItemFilePickDestroy",
+          "demangled_name": "eduicbItemFilePickDestroy",
+          "address": 3735600,
+          "offset": 2845632,
+          "size": 111,
+          "match_percent": 15.555555
+        },
+        {
+          "name": "eduicbItemTextPickDestroy",
+          "demangled_name": "eduicbItemTextPickDestroy",
+          "address": 3735712,
+          "offset": 2845744,
+          "size": 117,
+          "match_percent": 15.555555
+        },
+        {
+          "name": "eduicbProcessGraph",
+          "demangled_name": "eduicbProcessGraph",
+          "address": 3736512,
+          "offset": 2846544,
+          "size": 1367,
+          "match_percent": 1.898734
+        },
+        {
+          "name": "eduicbProcessGreyPick",
+          "demangled_name": "eduicbProcessGreyPick",
+          "address": 3737888,
+          "offset": 2847920,
+          "size": 297,
+          "match_percent": 5.753425
+        },
+        {
+          "name": "eduiRenderGraphLine",
+          "demangled_name": "eduiRenderGraphLine",
+          "address": 3739376,
+          "offset": 2849408,
+          "size": 334,
+          "match_percent": 5.316456
+        },
+        {
+          "name": "eduicbRenderSeparator",
+          "demangled_name": "eduicbRenderSeparator",
+          "address": 3741712,
+          "offset": 2851744,
+          "size": 283,
+          "match_percent": 5.753425
+        },
+        {
+          "name": "eduicbRenderGradPick",
+          "demangled_name": "eduicbRenderGradPick",
+          "address": 3742000,
+          "offset": 2852032,
+          "size": 1046,
+          "match_percent": 1.611722
+        },
+        {
+          "name": "eduicbRenderSel",
+          "demangled_name": "eduicbRenderSel",
+          "address": 3743056,
+          "offset": 2853088,
+          "size": 546,
+          "match_percent": 3.404255
+        },
+        {
+          "name": "eduicbRenderSliderInt",
+          "demangled_name": "eduicbRenderSliderInt",
+          "address": 3743616,
+          "offset": 2853648,
+          "size": 838,
+          "match_percent": 2.4
+        },
+        {
+          "name": "eduicbRenderTexturePick",
+          "demangled_name": "eduicbRenderTexturePick",
+          "address": 3744464,
+          "offset": 2854496,
+          "size": 1752,
+          "match_percent": 1.082474
+        },
+        {
+          "name": "eduicbRenderTextSelector",
+          "demangled_name": "eduicbRenderTextSelector",
+          "address": 3746224,
+          "offset": 2856256,
+          "size": 472,
+          "match_percent": 3.75
+        },
+        {
+          "name": "eduicbRenderNumber",
+          "demangled_name": "eduicbRenderNumber",
+          "address": 3746704,
+          "offset": 2856736,
+          "size": 464,
+          "match_percent": 3.818182
+        },
+        {
+          "name": "eduicbRenderGraph",
+          "demangled_name": "eduicbRenderGraph",
+          "address": 3747168,
+          "offset": 2857200,
+          "size": 4706,
+          "match_percent": 0.746888
+        },
+        {
+          "name": "eduicbRenderFilePick",
+          "demangled_name": "eduicbRenderFilePick",
+          "address": 3751888,
+          "offset": 2861920,
+          "size": 812,
+          "match_percent": 2.474227
+        },
+        {
+          "name": "eduicbRenderCheck",
+          "demangled_name": "eduicbRenderCheck",
+          "address": 3752704,
+          "offset": 2862736,
+          "size": 764,
+          "match_percent": 2.028986
+        },
+        {
+          "name": "eduicbRenderGreyPick",
+          "demangled_name": "eduicbRenderGreyPick",
+          "address": 3753472,
+          "offset": 2863504,
+          "size": 800,
+          "match_percent": 2.068965
+        },
+        {
+          "name": "eduicbRenderColourSlider",
+          "demangled_name": "eduicbRenderColourSlider",
+          "address": 3754272,
+          "offset": 2864304,
+          "size": 996,
+          "match_percent": 1.757322
+        },
+        {
+          "name": "eduicbRenderTextPick",
+          "demangled_name": "eduicbRenderTextPick",
+          "address": 3755280,
+          "offset": 2865312,
+          "size": 4406,
+          "match_percent": 0.558428
+        },
+        {
+          "name": "eduicbRenderSlider",
+          "demangled_name": "eduicbRenderSlider",
+          "address": 3759696,
+          "offset": 2869728,
+          "size": 882,
+          "match_percent": 2.038835
+        },
+        {
+          "name": "eduicbProcessExpander",
+          "demangled_name": "eduicbProcessExpander",
+          "address": 3761680,
+          "offset": 2871712,
+          "size": 111,
+          "match_percent": 10.769231
+        },
+        {
+          "name": "eduicbInteractExpander",
+          "demangled_name": "eduicbInteractExpander",
+          "address": 3761792,
+          "offset": 2871824,
+          "size": 224,
+          "match_percent": 4.788733
+        },
+        {
+          "name": "eduicbInteractProp",
+          "demangled_name": "eduicbInteractProp",
+          "address": 3762016,
+          "offset": 2872048,
+          "size": 761,
+          "match_percent": 2.065218
+        },
+        {
+          "name": "eduicbInteractFilter",
+          "demangled_name": "eduicbInteractFilter",
+          "address": 3762784,
+          "offset": 2872816,
+          "size": 5,
+          "match_percent": 0.0
+        },
+        {
+          "name": "eduicbProcessColourSlider",
+          "demangled_name": "eduicbProcessColourSlider",
+          "address": 3762800,
+          "offset": 2872832,
+          "size": 1052,
+          "match_percent": 2.288136
+        },
+        {
+          "name": "eduicbProcessColourPick",
+          "demangled_name": "eduicbProcessColourPick",
+          "address": 3763856,
+          "offset": 2873888,
+          "size": 1024,
+          "match_percent": 2.629482
+        },
+        {
+          "name": "eduicbInteractColourPick",
+          "demangled_name": "eduicbInteractColourPick",
+          "address": 3764880,
+          "offset": 2874912,
+          "size": 1174,
+          "match_percent": 2.181818
+        },
+        {
+          "name": "eduicbRenderColourPick",
+          "demangled_name": "eduicbRenderColourPick",
+          "address": 3766064,
+          "offset": 2876096,
+          "size": 2741,
+          "match_percent": 0.680713
+        },
+        {
+          "name": "eduicbRenderSelWithClipColour",
+          "demangled_name": "eduicbRenderSelWithClipColour",
+          "address": 3768816,
+          "offset": 2878848,
+          "size": 955,
+          "match_percent": 1.779661
         },
         {
           "name": "edmainSetReturn",
@@ -33656,6 +33561,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "eduicbProcessSel",
+          "demangled_name": "eduicbProcessSel",
+          "address": 3772992,
+          "offset": 2883024,
+          "size": 152,
+          "match_percent": 10.0
+        },
+        {
           "name": "eduiItemSetText",
           "demangled_name": "eduiItemSetText",
           "address": 3773152,
@@ -33669,7 +33582,7 @@
           "address": 3773936,
           "offset": 2883968,
           "size": 388,
-          "match_percent": 4.07767
+          "match_percent": 4.271845
         },
         {
           "name": "eduiItemSelWithClipColourCreate",
@@ -33685,7 +33598,7 @@
           "address": 3774432,
           "offset": 2884464,
           "size": 103,
-          "match_percent": 15.555555
+          "match_percent": 14.074074
         },
         {
           "name": "eduiItemToggleCreate",
@@ -33693,7 +33606,7 @@
           "address": 3774544,
           "offset": 2884576,
           "size": 103,
-          "match_percent": 15.555555
+          "match_percent": 14.074074
         },
         {
           "name": "eduiItemTextPickSetFmt",
@@ -33709,7 +33622,7 @@
           "address": 3774896,
           "offset": 2884928,
           "size": 436,
-          "match_percent": 4.0
+          "match_percent": 4.190476
         },
         {
           "name": "eduiItemFilePickSetFmt",
@@ -33766,6 +33679,14 @@
           "offset": 2887952,
           "size": 101,
           "match_percent": 12.352942
+        },
+        {
+          "name": "eduicbItemGradPickDestroy",
+          "demangled_name": "eduicbItemGradPickDestroy",
+          "address": 3778032,
+          "offset": 2888064,
+          "size": 91,
+          "match_percent": 15.555555
         },
         {
           "name": "eduiGradPickRead",
@@ -33917,7 +33838,7 @@
           "address": 3782448,
           "offset": 2892480,
           "size": 420,
-          "match_percent": 3.888889
+          "match_percent": 4.074074
         },
         {
           "name": "eduiItemSliderCreateInt",
@@ -33925,7 +33846,7 @@
           "address": 3782880,
           "offset": 2892912,
           "size": 146,
-          "match_percent": 11.351352
+          "match_percent": 10.27027
         },
         {
           "name": "eduiItemNumberCreate",
@@ -33966,6 +33887,14 @@
           "offset": 2893904,
           "size": 24,
           "match_percent": 100.0
+        },
+        {
+          "name": "eduicbProcessProp",
+          "demangled_name": "eduicbProcessProp",
+          "address": 3784608,
+          "offset": 2894640,
+          "size": 282,
+          "match_percent": 4.941176
         },
         {
           "name": "eduiItemPropCreateEx",
@@ -34024,6 +33953,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "eduicbPickCFGCancel",
+          "demangled_name": "eduicbPickCFGCancel",
+          "address": 3787216,
+          "offset": 2897248,
+          "size": 34,
+          "match_percent": 42.0
+        },
+        {
           "name": "edmainClose",
           "demangled_name": "edmainClose",
           "address": 3787264,
@@ -34078,6 +34015,14 @@
           "offset": 2898272,
           "size": 66,
           "match_percent": 20.0
+        },
+        {
+          "name": "eduicbProcessFilter",
+          "demangled_name": "eduicbProcessFilter",
+          "address": 3788320,
+          "offset": 2898352,
+          "size": 654,
+          "match_percent": 2.903226
         },
         {
           "name": "eduiItemFilterCreate",
@@ -34152,6 +34097,22 @@
           "match_percent": 6.774194
         },
         {
+          "name": "eduicbProcessGradPick",
+          "demangled_name": "eduicbProcessGradPick",
+          "address": 3791088,
+          "offset": 2901120,
+          "size": 1125,
+          "match_percent": 1.627907
+        },
+        {
+          "name": "eduicbProcessFilePick",
+          "demangled_name": "eduicbProcessFilePick",
+          "address": 3793264,
+          "offset": 2903296,
+          "size": 95,
+          "match_percent": 16.8
+        },
+        {
           "name": "eduiAddTextPickEntEx",
           "demangled_name": "eduiAddTextPickEntEx",
           "address": 3793360,
@@ -34174,6 +34135,22 @@
           "offset": 2903776,
           "size": 186,
           "match_percent": 8.936171
+        },
+        {
+          "name": "eduicbProcessTextPick",
+          "demangled_name": "eduicbProcessTextPick",
+          "address": 3793936,
+          "offset": 2903968,
+          "size": 2363,
+          "match_percent": 0.957447
+        },
+        {
+          "name": "cbMMEditorConfig",
+          "demangled_name": "cbMMEditorConfig",
+          "address": 3796304,
+          "offset": 2906336,
+          "size": 62,
+          "match_percent": 23.333334
         },
         {
           "name": "eduiGetActiveMenu",
@@ -34200,12 +34177,60 @@
           "match_percent": 8.235294
         },
         {
+          "name": "eduicbRenderProp",
+          "demangled_name": "eduicbRenderProp",
+          "address": 3799392,
+          "offset": 2909424,
+          "size": 3872,
+          "match_percent": 0.628141
+        },
+        {
+          "name": "eduicbRenderFilter",
+          "demangled_name": "eduicbRenderFilter",
+          "address": 3803264,
+          "offset": 2913296,
+          "size": 5,
+          "match_percent": 0.0
+        },
+        {
           "name": "eduiMenuDetach",
           "demangled_name": "eduiMenuDetach",
           "address": 3803280,
           "offset": 2913312,
           "size": 120,
           "match_percent": 99.5
+        },
+        {
+          "name": "eduicbSelectDirectoryExit",
+          "demangled_name": "eduicbSelectDirectoryExit",
+          "address": 3804656,
+          "offset": 2914688,
+          "size": 56,
+          "match_percent": 30.0
+        },
+        {
+          "name": "eduicbSelectDirectoryEntry",
+          "demangled_name": "eduicbSelectDirectoryEntry",
+          "address": 3804720,
+          "offset": 2914752,
+          "size": 359,
+          "match_percent": 5.060241
+        },
+        {
+          "name": "eduicbDestroyDirectoryList",
+          "demangled_name": "eduicbDestroyDirectoryList",
+          "address": 3805088,
+          "offset": 2915120,
+          "size": 56,
+          "match_percent": 30.0
+        },
+        {
+          "name": "eduicbRenderExpander",
+          "demangled_name": "eduicbRenderExpander",
+          "address": 3805472,
+          "offset": 2915504,
+          "size": 1601,
+          "match_percent": 1.176471
         },
         {
           "name": "eduiGetTopLevelParent",
@@ -34753,408 +34778,9 @@
       ]
     },
     {
-      "name": "gameapi/edtools/edui.c.o",
-      "source": "src/gameapi/edtools/edui.c",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/0/edui.o",
-      "functions": [
-        {
-          "name": "eduicbInteractSel",
-          "demangled_name": "eduicbInteractSel",
-          "address": 3732784,
-          "offset": 2842816,
-          "size": 125,
-          "match_percent": 11.052631
-        },
-        {
-          "name": "eduicbProcessTexturePick",
-          "demangled_name": "eduicbProcessTexturePick",
-          "address": 3732912,
-          "offset": 2842944,
-          "size": 824,
-          "match_percent": 3.636364
-        },
-        {
-          "name": "eduicbProcessSlider",
-          "demangled_name": "eduicbProcessSlider",
-          "address": 3733744,
-          "offset": 2843776,
-          "size": 684,
-          "match_percent": 2.453988
-        },
-        {
-          "name": "eduicbProcessSeparator",
-          "demangled_name": "eduicbProcessSeparator",
-          "address": 3734432,
-          "offset": 2844464,
-          "size": 9,
-          "match_percent": 62.5
-        },
-        {
-          "name": "eduicbItemDestroyExpander",
-          "demangled_name": "eduicbItemDestroyExpander",
-          "address": 3734448,
-          "offset": 2844480,
-          "size": 78,
-          "match_percent": 15.0
-        },
-        {
-          "name": "eduicbItemDestroyFilter",
-          "demangled_name": "eduicbItemDestroyFilter",
-          "address": 3735200,
-          "offset": 2845232,
-          "size": 94,
-          "match_percent": 13.548388
-        },
-        {
-          "name": "eduicbItemSliderDestroy",
-          "demangled_name": "eduicbItemSliderDestroy",
-          "address": 3735488,
-          "offset": 2845520,
-          "size": 111,
-          "match_percent": 15.555555
-        },
-        {
-          "name": "eduicbItemFilePickDestroy",
-          "demangled_name": "eduicbItemFilePickDestroy",
-          "address": 3735600,
-          "offset": 2845632,
-          "size": 111,
-          "match_percent": 15.555555
-        },
-        {
-          "name": "eduicbItemTextPickDestroy",
-          "demangled_name": "eduicbItemTextPickDestroy",
-          "address": 3735712,
-          "offset": 2845744,
-          "size": 117,
-          "match_percent": 15.555555
-        },
-        {
-          "name": "eduicbProcessGraph",
-          "demangled_name": "eduicbProcessGraph",
-          "address": 3736512,
-          "offset": 2846544,
-          "size": 1367,
-          "match_percent": 1.898734
-        },
-        {
-          "name": "eduicbProcessGreyPick",
-          "demangled_name": "eduicbProcessGreyPick",
-          "address": 3737888,
-          "offset": 2847920,
-          "size": 297,
-          "match_percent": 5.753425
-        },
-        {
-          "name": "eduiRenderGraphLine",
-          "demangled_name": "eduiRenderGraphLine",
-          "address": 3739376,
-          "offset": 2849408,
-          "size": 334,
-          "match_percent": 5.316456
-        },
-        {
-          "name": "eduicbRenderSeparator",
-          "demangled_name": "eduicbRenderSeparator",
-          "address": 3741712,
-          "offset": 2851744,
-          "size": 283,
-          "match_percent": 5.753425
-        },
-        {
-          "name": "eduicbRenderGradPick",
-          "demangled_name": "eduicbRenderGradPick",
-          "address": 3742000,
-          "offset": 2852032,
-          "size": 1046,
-          "match_percent": 1.611722
-        },
-        {
-          "name": "eduicbRenderSel",
-          "demangled_name": "eduicbRenderSel",
-          "address": 3743056,
-          "offset": 2853088,
-          "size": 546,
-          "match_percent": 3.404255
-        },
-        {
-          "name": "eduicbRenderSliderInt",
-          "demangled_name": "eduicbRenderSliderInt",
-          "address": 3743616,
-          "offset": 2853648,
-          "size": 838,
-          "match_percent": 2.4
-        },
-        {
-          "name": "eduicbRenderTexturePick",
-          "demangled_name": "eduicbRenderTexturePick",
-          "address": 3744464,
-          "offset": 2854496,
-          "size": 1752,
-          "match_percent": 1.082474
-        },
-        {
-          "name": "eduicbRenderTextSelector",
-          "demangled_name": "eduicbRenderTextSelector",
-          "address": 3746224,
-          "offset": 2856256,
-          "size": 472,
-          "match_percent": 3.75
-        },
-        {
-          "name": "eduicbRenderNumber",
-          "demangled_name": "eduicbRenderNumber",
-          "address": 3746704,
-          "offset": 2856736,
-          "size": 464,
-          "match_percent": 3.818182
-        },
-        {
-          "name": "eduicbRenderGraph",
-          "demangled_name": "eduicbRenderGraph",
-          "address": 3747168,
-          "offset": 2857200,
-          "size": 4706,
-          "match_percent": 0.746888
-        },
-        {
-          "name": "eduicbRenderFilePick",
-          "demangled_name": "eduicbRenderFilePick",
-          "address": 3751888,
-          "offset": 2861920,
-          "size": 812,
-          "match_percent": 2.474227
-        },
-        {
-          "name": "eduicbRenderCheck",
-          "demangled_name": "eduicbRenderCheck",
-          "address": 3752704,
-          "offset": 2862736,
-          "size": 764,
-          "match_percent": 2.028986
-        },
-        {
-          "name": "eduicbRenderGreyPick",
-          "demangled_name": "eduicbRenderGreyPick",
-          "address": 3753472,
-          "offset": 2863504,
-          "size": 800,
-          "match_percent": 2.068965
-        },
-        {
-          "name": "eduicbRenderColourSlider",
-          "demangled_name": "eduicbRenderColourSlider",
-          "address": 3754272,
-          "offset": 2864304,
-          "size": 996,
-          "match_percent": 1.757322
-        },
-        {
-          "name": "eduicbRenderTextPick",
-          "demangled_name": "eduicbRenderTextPick",
-          "address": 3755280,
-          "offset": 2865312,
-          "size": 4406,
-          "match_percent": 0.558428
-        },
-        {
-          "name": "eduicbRenderSlider",
-          "demangled_name": "eduicbRenderSlider",
-          "address": 3759696,
-          "offset": 2869728,
-          "size": 882,
-          "match_percent": 2.038835
-        },
-        {
-          "name": "eduicbProcessExpander",
-          "demangled_name": "eduicbProcessExpander",
-          "address": 3761680,
-          "offset": 2871712,
-          "size": 111,
-          "match_percent": 10.769231
-        },
-        {
-          "name": "eduicbInteractExpander",
-          "demangled_name": "eduicbInteractExpander",
-          "address": 3761792,
-          "offset": 2871824,
-          "size": 224,
-          "match_percent": 4.788733
-        },
-        {
-          "name": "eduicbInteractProp",
-          "demangled_name": "eduicbInteractProp",
-          "address": 3762016,
-          "offset": 2872048,
-          "size": 761,
-          "match_percent": 2.065218
-        },
-        {
-          "name": "eduicbInteractFilter",
-          "demangled_name": "eduicbInteractFilter",
-          "address": 3762784,
-          "offset": 2872816,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "eduicbProcessColourSlider",
-          "demangled_name": "eduicbProcessColourSlider",
-          "address": 3762800,
-          "offset": 2872832,
-          "size": 1052,
-          "match_percent": 2.288136
-        },
-        {
-          "name": "eduicbProcessColourPick",
-          "demangled_name": "eduicbProcessColourPick",
-          "address": 3763856,
-          "offset": 2873888,
-          "size": 1024,
-          "match_percent": 2.629482
-        },
-        {
-          "name": "eduicbInteractColourPick",
-          "demangled_name": "eduicbInteractColourPick",
-          "address": 3764880,
-          "offset": 2874912,
-          "size": 1174,
-          "match_percent": 2.181818
-        },
-        {
-          "name": "eduicbRenderColourPick",
-          "demangled_name": "eduicbRenderColourPick",
-          "address": 3766064,
-          "offset": 2876096,
-          "size": 2741,
-          "match_percent": 0.680713
-        },
-        {
-          "name": "eduicbRenderSelWithClipColour",
-          "demangled_name": "eduicbRenderSelWithClipColour",
-          "address": 3768816,
-          "offset": 2878848,
-          "size": 955,
-          "match_percent": 1.779661
-        },
-        {
-          "name": "eduicbProcessSel",
-          "demangled_name": "eduicbProcessSel",
-          "address": 3772992,
-          "offset": 2883024,
-          "size": 152,
-          "match_percent": 10.0
-        },
-        {
-          "name": "eduicbItemGradPickDestroy",
-          "demangled_name": "eduicbItemGradPickDestroy",
-          "address": 3778032,
-          "offset": 2888064,
-          "size": 91,
-          "match_percent": 15.555555
-        },
-        {
-          "name": "eduicbProcessProp",
-          "demangled_name": "eduicbProcessProp",
-          "address": 3784608,
-          "offset": 2894640,
-          "size": 282,
-          "match_percent": 4.941176
-        },
-        {
-          "name": "eduicbPickCFGCancel",
-          "demangled_name": "eduicbPickCFGCancel",
-          "address": 3787216,
-          "offset": 2897248,
-          "size": 34,
-          "match_percent": 42.0
-        },
-        {
-          "name": "eduicbProcessFilter",
-          "demangled_name": "eduicbProcessFilter",
-          "address": 3788320,
-          "offset": 2898352,
-          "size": 654,
-          "match_percent": 2.903226
-        },
-        {
-          "name": "eduicbProcessGradPick",
-          "demangled_name": "eduicbProcessGradPick",
-          "address": 3791088,
-          "offset": 2901120,
-          "size": 1125,
-          "match_percent": 1.627907
-        },
-        {
-          "name": "eduicbProcessFilePick",
-          "demangled_name": "eduicbProcessFilePick",
-          "address": 3793264,
-          "offset": 2903296,
-          "size": 95,
-          "match_percent": 16.8
-        },
-        {
-          "name": "eduicbProcessTextPick",
-          "demangled_name": "eduicbProcessTextPick",
-          "address": 3793936,
-          "offset": 2903968,
-          "size": 2363,
-          "match_percent": 0.957447
-        },
-        {
-          "name": "eduicbRenderProp",
-          "demangled_name": "eduicbRenderProp",
-          "address": 3799392,
-          "offset": 2909424,
-          "size": 3872,
-          "match_percent": 0.628141
-        },
-        {
-          "name": "eduicbRenderFilter",
-          "demangled_name": "eduicbRenderFilter",
-          "address": 3803264,
-          "offset": 2913296,
-          "size": 5,
-          "match_percent": 0.0
-        },
-        {
-          "name": "eduicbSelectDirectoryExit",
-          "demangled_name": "eduicbSelectDirectoryExit",
-          "address": 3804656,
-          "offset": 2914688,
-          "size": 56,
-          "match_percent": 30.0
-        },
-        {
-          "name": "eduicbSelectDirectoryEntry",
-          "demangled_name": "eduicbSelectDirectoryEntry",
-          "address": 3804720,
-          "offset": 2914752,
-          "size": 359,
-          "match_percent": 5.060241
-        },
-        {
-          "name": "eduicbDestroyDirectoryList",
-          "demangled_name": "eduicbDestroyDirectoryList",
-          "address": 3805088,
-          "offset": 2915120,
-          "size": 56,
-          "match_percent": 30.0
-        },
-        {
-          "name": "eduicbRenderExpander",
-          "demangled_name": "eduicbRenderExpander",
-          "address": 3805472,
-          "offset": 2915504,
-          "size": 1601,
-          "match_percent": 1.176471
-        }
-      ]
-    },
-    {
       "name": "gameapi/edtools/edui.cpp.o",
       "source": "src/gameapi/edtools/edui.cpp",
-      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/1/edui.o",
+      "object": "bazel-out/k8-fastbuild/bin/src/_objs/saga_target_gameapi/edui.o",
       "functions": [
         {
           "name": "eduicbItemExpanderClose",
@@ -38516,30 +38142,6 @@
           "offset": 640560,
           "size": 25,
           "match_percent": 100.0
-        },
-        {
-          "name": "_Z19PodSeekMushCutSoundv",
-          "demangled_name": "PodSeekMushCutSound()",
-          "address": 2089648,
-          "offset": 1199680,
-          "size": 163,
-          "match_percent": 10.5
-        },
-        {
-          "name": "_Z18PodSeekSubCutSoundv",
-          "demangled_name": "PodSeekSubCutSound()",
-          "address": 2089824,
-          "offset": 1199856,
-          "size": 146,
-          "match_percent": 12.0
-        },
-        {
-          "name": "_Z21PodSeekTuskanCutSoundv",
-          "demangled_name": "PodSeekTuskanCutSound()",
-          "address": 2089984,
-          "offset": 1200016,
-          "size": 146,
-          "match_percent": 12.0
         },
         {
           "name": "_Z11PodKeyResetv",
@@ -49257,6 +48859,14 @@
           "match_percent": 100.0
         },
         {
+          "name": "instNuGCutSceneFind",
+          "demangled_name": "instNuGCutSceneFind",
+          "address": 4412912,
+          "offset": 3522944,
+          "size": 92,
+          "match_percent": 13.333333
+        },
+        {
           "name": "_Z12NewCopyAnimsP17instNUGCUTSCENE_s",
           "demangled_name": "NewCopyAnims(instNUGCUTSCENE_s*)",
           "address": 4413104,
@@ -49367,6 +48977,14 @@
           "offset": 3545488,
           "size": 1013,
           "match_percent": 27.75926
+        },
+        {
+          "name": "instNuGCutSceneCleanUp",
+          "demangled_name": "instNuGCutSceneCleanUp",
+          "address": 4438912,
+          "offset": 3548944,
+          "size": 594,
+          "match_percent": 3.351955
         },
         {
           "name": "_ZL9CS_no_fogP8nufpar_s",
@@ -49935,14 +49553,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "instNuGCutSceneFind",
-          "demangled_name": "instNuGCutSceneFind",
-          "address": 4412912,
-          "offset": 3522944,
-          "size": 92,
-          "match_percent": 13.333333
-        },
-        {
           "name": "instNuGCutSceneAddCamTgt",
           "demangled_name": "instNuGCutSceneAddCamTgt",
           "address": 4413008,
@@ -50005,14 +49615,6 @@
           "offset": 3547504,
           "size": 119,
           "match_percent": 13.125
-        },
-        {
-          "name": "instNuGCutSceneCleanUp",
-          "demangled_name": "instNuGCutSceneCleanUp",
-          "address": 4438912,
-          "offset": 3548944,
-          "size": 594,
-          "match_percent": 3.351955
         },
         {
           "name": "DisplayCutSceneMemory",
@@ -53124,46 +52726,6 @@
           "offset": 965408,
           "size": 377,
           "match_percent": 4.285714
-        },
-        {
-          "name": "_Z23Action_MushroomCollapseP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
-          "demangled_name": "Action_MushroomCollapse(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
-          "address": 2089072,
-          "offset": 1199104,
-          "size": 562,
-          "match_percent": 3.065693
-        },
-        {
-          "name": "_Z17Action_SetLapTimeP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
-          "demangled_name": "Action_SetLapTime(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
-          "address": 2092032,
-          "offset": 1202064,
-          "size": 456,
-          "match_percent": 4.102564
-        },
-        {
-          "name": "_Z16Action_CreatePodP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
-          "demangled_name": "Action_CreatePod(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
-          "address": 2092496,
-          "offset": 1202528,
-          "size": 1815,
-          "match_percent": 1.057934
-        },
-        {
-          "name": "_Z14Action_SebulbaP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
-          "demangled_name": "Action_Sebulba(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
-          "address": 2094320,
-          "offset": 1204352,
-          "size": 1519,
-          "match_percent": 1.341853
-        },
-        {
-          "name": "_Z17Action_NewSebulbaP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
-          "demangled_name": "Action_NewSebulba(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
-          "address": 2107584,
-          "offset": 1217616,
-          "size": 1463,
-          "match_percent": 1.372549
         },
         {
           "name": "_Z21Action_BoulderSectionP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
@@ -62267,14 +61829,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "_Z19BoltTypes_ConfigureP11WORLDINFO_sPc",
-          "demangled_name": "BoltTypes_Configure(WORLDINFO_s*, char*)",
-          "address": 4722016,
-          "offset": 3832048,
-          "size": 623,
-          "match_percent": 2.857143
-        },
-        {
           "name": "_Z24Bolt_ObjTargetPosYAdjustP12GameObject_s",
           "demangled_name": "Bolt_ObjTargetPosYAdjust(GameObject_s*)",
           "address": 4722640,
@@ -68441,38 +67995,6 @@
           "match_percent": 100.0
         },
         {
-          "name": "_Z18MenuInitSelectModeP6MENU_s",
-          "demangled_name": "MenuInitSelectMode(MENU_s*)",
-          "address": 1790144,
-          "offset": 900176,
-          "size": 214,
-          "match_percent": 18.224138
-        },
-        {
-          "name": "_Z18MenuDrawSelectModeP6MENU_s",
-          "demangled_name": "MenuDrawSelectMode(MENU_s*)",
-          "address": 1790384,
-          "offset": 900416,
-          "size": 903,
-          "match_percent": 13.619289
-        },
-        {
-          "name": "_Z19MenuUpdateBonusModeP6MENU_s",
-          "demangled_name": "MenuUpdateBonusMode(MENU_s*)",
-          "address": 1791440,
-          "offset": 901472,
-          "size": 2720,
-          "match_percent": 0.769231
-        },
-        {
-          "name": "_Z17MenuDrawBonusModeP6MENU_s",
-          "demangled_name": "MenuDrawBonusMode(MENU_s*)",
-          "address": 1794160,
-          "offset": 904192,
-          "size": 974,
-          "match_percent": 2.058824
-        },
-        {
           "name": "_Z16MenuInitFreePlayP6MENU_s",
           "demangled_name": "MenuInitFreePlay(MENU_s*)",
           "address": 1795136,
@@ -72924,12 +72446,380 @@
           "match_percent": 93.425
         },
         {
+          "name": "_ZL14SockParCircuitP8nufpar_sPv",
+          "demangled_name": "SockParCircuit(nufpar_s*, void*)",
+          "address": 3933588,
+          "offset": 3043620,
+          "size": 28,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL15SockParCurSpeedP8nufpar_sPv",
+          "demangled_name": "SockParCurSpeed(nufpar_s*, void*)",
+          "address": 3933616,
+          "offset": 3043648,
+          "size": 62,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL20SockParMidRangeInnerP8nufpar_sPv",
+          "demangled_name": "SockParMidRangeInner(nufpar_s*, void*)",
+          "address": 3933678,
+          "offset": 3043710,
+          "size": 62,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL20SockParMidRangeOuterP8nufpar_sPv",
+          "demangled_name": "SockParMidRangeOuter(nufpar_s*, void*)",
+          "address": 3933740,
+          "offset": 3043772,
+          "size": 139,
+          "match_percent": 99.97619
+        },
+        {
+          "name": "_ZL21SockParMidforceYscaleP8nufpar_sPv",
+          "demangled_name": "SockParMidforceYscale(nufpar_s*, void*)",
+          "address": 3933879,
+          "offset": 3043911,
+          "size": 62,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL15SockParMidforceP8nufpar_sPv",
+          "demangled_name": "SockParMidforce(nufpar_s*, void*)",
+          "address": 3933941,
+          "offset": 3043973,
+          "size": 273,
+          "match_percent": 95.80519
+        },
+        {
+          "name": "_ZL19SockParMidForceDownP8nufpar_sPv",
+          "demangled_name": "SockParMidForceDown(nufpar_s*, void*)",
+          "address": 3934214,
+          "offset": 3044246,
+          "size": 43,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL21SockParMidForceYScaleP8nufpar_sPv",
+          "demangled_name": "SockParMidForceYScale(nufpar_s*, void*)",
+          "address": 3934257,
+          "offset": 3044289,
+          "size": 62,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL22SockParCamScaleLateralP8nufpar_sPv",
+          "demangled_name": "SockParCamScaleLateral(nufpar_s*, void*)",
+          "address": 3934319,
+          "offset": 3044351,
+          "size": 43,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL19SockParCamLookRatioP8nufpar_sPv",
+          "demangled_name": "SockParCamLookRatio(nufpar_s*, void*)",
+          "address": 3934362,
+          "offset": 3044394,
+          "size": 145,
+          "match_percent": 99.948715
+        },
+        {
+          "name": "_ZL20SockParCamLockRatioYP8nufpar_sPv",
+          "demangled_name": "SockParCamLockRatioY(nufpar_s*, void*)",
+          "address": 3934507,
+          "offset": 3044539,
+          "size": 111,
+          "match_percent": 99.935486
+        },
+        {
+          "name": "_ZL17SockParCamPosSeekP8nufpar_sPv",
+          "demangled_name": "SockParCamPosSeek(nufpar_s*, void*)",
+          "address": 3934618,
+          "offset": 3044650,
+          "size": 85,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL17SockParCamAngSeekP8nufpar_sPv",
+          "demangled_name": "SockParCamAngSeek(nufpar_s*, void*)",
+          "address": 3934703,
+          "offset": 3044735,
+          "size": 85,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL18SockParCamSegAheadP8nufpar_sPv",
+          "demangled_name": "SockParCamSegAhead(nufpar_s*, void*)",
+          "address": 3934788,
+          "offset": 3044820,
+          "size": 50,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL22SockParCamLateralRatioP8nufpar_sPv",
+          "demangled_name": "SockParCamLateralRatio(nufpar_s*, void*)",
+          "address": 3934838,
+          "offset": 3044870,
+          "size": 86,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL23SockParCamVerticalRatioP8nufpar_sPv",
+          "demangled_name": "SockParCamVerticalRatio(nufpar_s*, void*)",
+          "address": 3934924,
+          "offset": 3044956,
+          "size": 65,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL16SockParCamOffsetP8nufpar_sPv",
+          "demangled_name": "SockParCamOffset(nufpar_s*, void*)",
+          "address": 3934989,
+          "offset": 3045021,
+          "size": 139,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL17SockParCamXOffsetP8nufpar_sPv",
+          "demangled_name": "SockParCamXOffset(nufpar_s*, void*)",
+          "address": 3935128,
+          "offset": 3045160,
+          "size": 65,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL17SockParCamYOffsetP8nufpar_sPv",
+          "demangled_name": "SockParCamYOffset(nufpar_s*, void*)",
+          "address": 3935193,
+          "offset": 3045225,
+          "size": 65,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL17SockParCamZOffsetP8nufpar_sPv",
+          "demangled_name": "SockParCamZOffset(nufpar_s*, void*)",
+          "address": 3935258,
+          "offset": 3045290,
+          "size": 65,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL20SockParCamRailOffsetP8nufpar_sPv",
+          "demangled_name": "SockParCamRailOffset(nufpar_s*, void*)",
+          "address": 3935323,
+          "offset": 3045355,
+          "size": 65,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL21SockParCamArenaOffsetP8nufpar_sPv",
+          "demangled_name": "SockParCamArenaOffset(nufpar_s*, void*)",
+          "address": 3935388,
+          "offset": 3045420,
+          "size": 65,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL23SockParOffsetBlendRatioP8nufpar_sPv",
+          "demangled_name": "SockParOffsetBlendRatio(nufpar_s*, void*)",
+          "address": 3935453,
+          "offset": 3045485,
+          "size": 113,
+          "match_percent": 53.060608
+        },
+        {
+          "name": "_ZL24SockParOffsetBlendXRatioP8nufpar_sPv",
+          "demangled_name": "SockParOffsetBlendXRatio(nufpar_s*, void*)",
+          "address": 3935566,
+          "offset": 3045598,
+          "size": 65,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL24SockParOffsetBlendYRatioP8nufpar_sPv",
+          "demangled_name": "SockParOffsetBlendYRatio(nufpar_s*, void*)",
+          "address": 3935631,
+          "offset": 3045663,
+          "size": 65,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL24SockParOffsetBlendZRatioP8nufpar_sPv",
+          "demangled_name": "SockParOffsetBlendZRatio(nufpar_s*, void*)",
+          "address": 3935696,
+          "offset": 3045728,
+          "size": 65,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL24SockParCamDistToTargetXZP8nufpar_sPv",
+          "demangled_name": "SockParCamDistToTargetXZ(nufpar_s*, void*)",
+          "address": 3935761,
+          "offset": 3045793,
+          "size": 92,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL22SockParCamPullBackYRefP8nufpar_sPv",
+          "demangled_name": "SockParCamPullBackYRef(nufpar_s*, void*)",
+          "address": 3935853,
+          "offset": 3045885,
+          "size": 43,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL22SockParCamDistToTargetP8nufpar_sPv",
+          "demangled_name": "SockParCamDistToTarget(nufpar_s*, void*)",
+          "address": 3935896,
+          "offset": 3045928,
+          "size": 65,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL19SockParCamDistRatioP8nufpar_sPv",
+          "demangled_name": "SockParCamDistRatio(nufpar_s*, void*)",
+          "address": 3935961,
+          "offset": 3045993,
+          "size": 65,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL14SockParYLimitsP8nufpar_sPv",
+          "demangled_name": "SockParYLimits(nufpar_s*, void*)",
+          "address": 3936026,
+          "offset": 3046058,
+          "size": 43,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL16SockParMoveAngleP8nufpar_sPv",
+          "demangled_name": "SockParMoveAngle(nufpar_s*, void*)",
+          "address": 3936069,
+          "offset": 3046101,
+          "size": 157,
+          "match_percent": 80.913795
+        },
+        {
+          "name": "_ZL16SockParCamBehindP8nufpar_sPv",
+          "demangled_name": "SockParCamBehind(nufpar_s*, void*)",
+          "address": 3936226,
+          "offset": 3046258,
+          "size": 130,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL19SockParCamBlendTimeP8nufpar_sPv",
+          "demangled_name": "SockParCamBlendTime(nufpar_s*, void*)",
+          "address": 3936356,
+          "offset": 3046388,
+          "size": 65,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL15SockParCam1ZoomP8nufpar_sPv",
+          "demangled_name": "SockParCam1Zoom(nufpar_s*, void*)",
+          "address": 3936421,
+          "offset": 3046453,
+          "size": 65,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL20SockParPullbackRatioP8nufpar_sPv",
+          "demangled_name": "SockParPullbackRatio(nufpar_s*, void*)",
+          "address": 3936486,
+          "offset": 3046518,
+          "size": 65,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL22SockParPullbackRatioXZP8nufpar_sPv",
+          "demangled_name": "SockParPullbackRatioXZ(nufpar_s*, void*)",
+          "address": 3936551,
+          "offset": 3046583,
+          "size": 92,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL28SockParCamHeightAboveTerrainP8nufpar_sPv",
+          "demangled_name": "SockParCamHeightAboveTerrain(nufpar_s*, void*)",
+          "address": 3936643,
+          "offset": 3046675,
+          "size": 65,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL15SockParCamShakeP8nufpar_sPv",
+          "demangled_name": "SockParCamShake(nufpar_s*, void*)",
+          "address": 3936708,
+          "offset": 3046740,
+          "size": 65,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL12SockParMisc1P8nufpar_sPv",
+          "demangled_name": "SockParMisc1(nufpar_s*, void*)",
+          "address": 3936773,
+          "offset": 3046805,
+          "size": 43,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL12SockParMisc2P8nufpar_sPv",
+          "demangled_name": "SockParMisc2(nufpar_s*, void*)",
+          "address": 3936816,
+          "offset": 3046848,
+          "size": 43,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL13SockParIgnoreP8nufpar_sPv",
+          "demangled_name": "SockParIgnore(nufpar_s*, void*)",
+          "address": 3936859,
+          "offset": 3046891,
+          "size": 85,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL14SockParTurnOffP8nufpar_sPv",
+          "demangled_name": "SockParTurnOff(nufpar_s*, void*)",
+          "address": 3936944,
+          "offset": 3046976,
+          "size": 43,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL11SockParNameP8nufpar_sPv",
+          "demangled_name": "SockParName(nufpar_s*, void*)",
+          "address": 3936987,
+          "offset": 3047019,
+          "size": 114,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL10SockParObjP8nufpar_sPv",
+          "demangled_name": "SockParObj(nufpar_s*, void*)",
+          "address": 3937101,
+          "offset": 3047133,
+          "size": 373,
+          "match_percent": 3.883495
+        },
+        {
           "name": "_Z15GetSockEdgeEnumPc",
           "demangled_name": "GetSockEdgeEnum(char*)",
           "address": 3937474,
           "offset": 3047506,
           "size": 105,
           "match_percent": 99.93939
+        },
+        {
+          "name": "_ZL12SockParBlendP8nufpar_sPv",
+          "demangled_name": "SockParBlend(nufpar_s*, void*)",
+          "address": 3937579,
+          "offset": 3047611,
+          "size": 174,
+          "match_percent": 70.13725
         },
         {
           "name": "SockSysConfigureNuFPar",
@@ -82531,6 +82421,38 @@
           "match_percent": 59.517857
         },
         {
+          "name": "_Z23Action_MushroomCollapseP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
+          "demangled_name": "Action_MushroomCollapse(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
+          "address": 2089072,
+          "offset": 1199104,
+          "size": 562,
+          "match_percent": 3.065693
+        },
+        {
+          "name": "_Z19PodSeekMushCutSoundv",
+          "demangled_name": "PodSeekMushCutSound()",
+          "address": 2089648,
+          "offset": 1199680,
+          "size": 163,
+          "match_percent": 10.5
+        },
+        {
+          "name": "_Z18PodSeekSubCutSoundv",
+          "demangled_name": "PodSeekSubCutSound()",
+          "address": 2089824,
+          "offset": 1199856,
+          "size": 146,
+          "match_percent": 12.0
+        },
+        {
+          "name": "_Z21PodSeekTuskanCutSoundv",
+          "demangled_name": "PodSeekTuskanCutSound()",
+          "address": 2089984,
+          "offset": 1200016,
+          "size": 146,
+          "match_percent": 12.0
+        },
+        {
           "name": "_Z14PodRaceBUpdateP11WORLDINFO_s",
           "demangled_name": "PodRaceBUpdate(WORLDINFO_s*)",
           "address": 2090144,
@@ -82545,6 +82467,30 @@
           "offset": 1201184,
           "size": 869,
           "match_percent": 33.2891
+        },
+        {
+          "name": "_Z17Action_SetLapTimeP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
+          "demangled_name": "Action_SetLapTime(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
+          "address": 2092032,
+          "offset": 1202064,
+          "size": 456,
+          "match_percent": 4.102564
+        },
+        {
+          "name": "_Z16Action_CreatePodP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
+          "demangled_name": "Action_CreatePod(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
+          "address": 2092496,
+          "offset": 1202528,
+          "size": 1815,
+          "match_percent": 1.057934
+        },
+        {
+          "name": "_Z14Action_SebulbaP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
+          "demangled_name": "Action_Sebulba(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
+          "address": 2094320,
+          "offset": 1204352,
+          "size": 1519,
+          "match_percent": 1.341853
         },
         {
           "name": "_Z12PodRaceResetv",
@@ -82657,6 +82603,14 @@
           "offset": 1217360,
           "size": 255,
           "match_percent": 67.85507
+        },
+        {
+          "name": "_Z17Action_NewSebulbaP7AISYS_sP17AISCRIPTPROCESS_sP10AIPACKET_sPPciif",
+          "demangled_name": "Action_NewSebulba(AISYS_s*, AISCRIPTPROCESS_s*, AIPACKET_s*, char**, int, int, float)",
+          "address": 2107584,
+          "offset": 1217616,
+          "size": 1463,
+          "match_percent": 1.372549
         },
         {
           "name": "_Z12RetakeD_InitP11WORLDINFO_s",
@@ -85293,6 +85247,14 @@
           "match_percent": 84.28175
         },
         {
+          "name": "_Z18MenuInitSelectModeP6MENU_s",
+          "demangled_name": "MenuInitSelectMode(MENU_s*)",
+          "address": 1790144,
+          "offset": 900176,
+          "size": 214,
+          "match_percent": 18.224138
+        },
+        {
           "name": "_Z20MenuUpdateSelectModeP6MENU_s",
           "demangled_name": "MenuUpdateSelectMode(MENU_s*)",
           "address": 1790368,
@@ -85301,12 +85263,36 @@
           "match_percent": 100.0
         },
         {
+          "name": "_Z18MenuDrawSelectModeP6MENU_s",
+          "demangled_name": "MenuDrawSelectMode(MENU_s*)",
+          "address": 1790384,
+          "offset": 900416,
+          "size": 903,
+          "match_percent": 13.619289
+        },
+        {
           "name": "_Z17MenuInitBonusModeP6MENU_s",
           "demangled_name": "MenuInitBonusMode(MENU_s*)",
           "address": 1791296,
           "offset": 901328,
           "size": 140,
           "match_percent": 99.911766
+        },
+        {
+          "name": "_Z19MenuUpdateBonusModeP6MENU_s",
+          "demangled_name": "MenuUpdateBonusMode(MENU_s*)",
+          "address": 1791440,
+          "offset": 901472,
+          "size": 2720,
+          "match_percent": 0.769231
+        },
+        {
+          "name": "_Z17MenuDrawBonusModeP6MENU_s",
+          "demangled_name": "MenuDrawBonusMode(MENU_s*)",
+          "address": 1794160,
+          "offset": 904192,
+          "size": 974,
+          "match_percent": 2.058824
         },
         {
           "name": "_Z20Hub_ActivateDoorMenuPP11LEVELDATA_s",
@@ -89960,6 +89946,30 @@
           "match_percent": 99.94444
         },
         {
+          "name": "NuMtlRegisterForOverride",
+          "demangled_name": "NuMtlRegisterForOverride",
+          "address": 3092848,
+          "offset": 2202880,
+          "size": 241,
+          "match_percent": 7.164179
+        },
+        {
+          "name": "NuMtlFindVariantMtl",
+          "demangled_name": "NuMtlFindVariantMtl",
+          "address": 3093104,
+          "offset": 2203136,
+          "size": 204,
+          "match_percent": 5.3125
+        },
+        {
+          "name": "NuMtlFindVariantMtlFromDesc",
+          "demangled_name": "NuMtlFindVariantMtlFromDesc",
+          "address": 3103504,
+          "offset": 2213536,
+          "size": 89,
+          "match_percent": 14.482758
+        },
+        {
           "name": "NuMtlDestroy",
           "demangled_name": "NuMtlDestroy",
           "address": 3103600,
@@ -91136,36 +91146,12 @@
           "match_percent": 99.85714
         },
         {
-          "name": "NuMtlRegisterForOverride",
-          "demangled_name": "NuMtlRegisterForOverride",
-          "address": 3092848,
-          "offset": 2202880,
-          "size": 241,
-          "match_percent": 7.164179
-        },
-        {
-          "name": "NuMtlFindVariantMtl",
-          "demangled_name": "NuMtlFindVariantMtl",
-          "address": 3093104,
-          "offset": 2203136,
-          "size": 204,
-          "match_percent": 5.3125
-        },
-        {
           "name": "NuGScnRndr",
           "demangled_name": "NuGScnRndr",
           "address": 3099440,
           "offset": 2209472,
           "size": 92,
           "match_percent": 100.0
-        },
-        {
-          "name": "NuMtlFindVariantMtlFromDesc",
-          "demangled_name": "NuMtlFindVariantMtlFromDesc",
-          "address": 3103504,
-          "offset": 2213536,
-          "size": 89,
-          "match_percent": 14.482758
         },
         {
           "name": "NuGScnReadForMultiRender",
@@ -117393,7 +117379,6 @@
       "size": 48,
       "match_percent": 99.92308,
       "candidate_units": [
-        "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -118105,7 +118090,6 @@
       "size": 48,
       "match_percent": 99.92308,
       "candidate_units": [
-        "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -118141,7 +118125,6 @@
       "size": 120,
       "match_percent": 99.84375,
       "candidate_units": [
-        "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -120009,7 +119992,6 @@
       "size": 48,
       "match_percent": 99.92308,
       "candidate_units": [
-        "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -121011,7 +120993,6 @@
       "size": 48,
       "match_percent": 99.92308,
       "candidate_units": [
-        "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -121169,7 +121150,6 @@
       "size": 48,
       "match_percent": 99.92308,
       "candidate_units": [
-        "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -121205,7 +121185,6 @@
       "size": 120,
       "match_percent": 99.84375,
       "candidate_units": [
-        "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -121378,7 +121357,6 @@
       "size": 48,
       "match_percent": 99.92308,
       "candidate_units": [
-        "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -121414,7 +121392,6 @@
       "size": 120,
       "match_percent": 99.84375,
       "candidate_units": [
-        "gameapi/ai/gameai_sockpar.cpp.o",
         "gamelib/nuwind/nuwind_groups.cpp.o",
         "legoapi/ai/core/ai_sys.cpp.o",
         "legoapi/items/base/apiobject.cpp.o",
@@ -129187,7 +129164,7 @@
     }
   ],
   "summary": {
-    "bazel_units": 505,
+    "bazel_units": 503,
     "functions": 13454,
     "assigned_functions": 12350,
     "ambiguous_functions": 216,

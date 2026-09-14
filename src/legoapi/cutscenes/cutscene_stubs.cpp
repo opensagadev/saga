@@ -127,10 +127,6 @@ extern "C" {
         STUBBED();
     }
 
-    void instNuGCutSceneCleanUp(void) {
-        STUBBED();
-    }
-
     void instNuGCutSceneCreateCamTgtArray(instNUGCUTSCENE_s *instance, i32 count, VARIPTR *buf) {
         if (count == 0 || instance->camera_instance == NULL) {
             return;
@@ -149,10 +145,6 @@ extern "C" {
 
     void instNuGCutSceneEnable(instNUGCUTSCENE_s *instance) {
         instance->flags_89 &= ~0x8;
-    }
-
-    void instNuGCutSceneFind(void) {
-        STUBBED();
     }
 
     i32 instNuGCutSceneIsFinished(instNUGCUTSCENE_s *instance) {

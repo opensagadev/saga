@@ -2,6 +2,11 @@
 
 #include "decomp.h"
 #include "globals.h"
+#include "gameapi/gui/apimenu.h"
+#include "legoapi/audio/audio.h"
+#include "legoapi/audio/sfx.h"
+#include "legoapi/characters/motion.h"
+#include "legoapi/core/input/gamepads.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/area.h"
@@ -18,17 +23,12 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-extern void GameAudio_PlaySfx(i32, nuvec_s *, i32, i32);
-extern void NewRumbleAllPlayers(f32, f32, i32, i32);
-extern void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 extern void AddToGoldBricks();
 extern void IncreaseScore(u32 *, u64, i32);
 extern void SetBonusWinner(i32);
 extern void Arcade_CoinCollected(i32, u32 *, u32);
-extern "C" void PlaySfx(char *, nuvec_s *);
 extern void PlayRepeatSfx(char *, i32, f32, char, f32, nuvec_s *);
 extern i32 CoinsGoToMainTotal();
-extern "C" void NewMenu(i32, i32, i32);
 void ResetGameMessages();
 void AddFancyMessageRGB(char *, float, float, float, float, i32, unsigned char, unsigned char, unsigned char);
 
