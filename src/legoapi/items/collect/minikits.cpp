@@ -1,5 +1,6 @@
 #include "decomp.h"
 #include "globals.h"
+#include "legoapi/items/base/collection.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/world/area.h"

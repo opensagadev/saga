@@ -19,6 +19,7 @@
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/render/light/shadow.h"
 #include "legoapi/render/core/terrain.h"
+#include "legoapi/render/fx/parts.h"
 #include "legoapi/render/core/screen.h"
 #include "nu2api/nuandroid/ios_graphics.h"
 #include "nu2api/nu3d/nucamera.h"
@@ -98,7 +99,6 @@ extern "C" void instNuGCutLocatorUpdate(instNUGCUTSCENE_s *, NUGCUTLOCATORSYS_s 
                                         NUGCUTLOCATOR_s *, f32, NUMTX *, i32);
 CUTSCENEPLAYERCLIP *CutScenePlayer_Active(void);
 void CutScenePlayer_SetObjects(CUTINFO *);
-void AddPartDebris(PARTDEBSYS_s *, i32, nuvec_s *);
 extern "C" void DebrisSetRenderGroup(i32);
 extern AREADATA_s *BONUS_GUNSHIP_ADATA;
 extern AREADATA_s *GUNSHIP_ADATA;

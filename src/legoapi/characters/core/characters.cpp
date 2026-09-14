@@ -1344,10 +1344,6 @@ void CharScenes_LevelDump(WORLDINFO_s *world) {
     }
 }
 
-void CollectAllCharacters(i32) {
-    STUBBED();
-}
-
 extern VARIPTR characterbuffer_base;
 extern i32 CHARACTERBUFFERSIZE;
 extern i32 Area;

@@ -16,6 +16,7 @@ extern f32 TimerAlpha;
 extern f32 TimerScale;
 extern f32 BOSSICONY;
 void DrawBossHitPoints(GameObject_s *obj);
+void DrawStatusIcons(STATUSPACKET_s *status, f32 y, f32 alpha);
 void DrawMiniSnowTroopers(WORLDINFO_s *world);
 void DrawForceBackEffect(nuhspecial_s *special);
 void DrawSaveSlots(MENU_s *menu, float y);

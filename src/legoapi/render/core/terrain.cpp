@@ -612,8 +612,6 @@ char *debris_name[147] = {
     "BULLET2",        "BULLET_HIT",    "POD_SPARK",
 };
 i32 Grass_Available = 1;
-i32 PDEBCOUNT = 0;
-void *PDebNameList = NULL;
 
 extern "C" void DebrisSetThinningLevel(f32 level) {
     debris_thinning_level = level < 1.0f ? 1.0f : level;
@@ -1114,22 +1112,6 @@ void LoadBridgeFile(WORLDINFO *world) {
     if (NuFileExists(path)) {
         i32 page = edbriLoadPage(path, world->current_gscn);
         world->page_bridge = page;
-    }
-}
-void LoadPartFile(WORLDINFO *world) {
-    char path[256];
-    world->page_part = -1;
-    edpartSetParticlePage(world->page_pp);
-
-    if ((world->current_level->flags & (LEVEL_OUTRO | LEVEL_MIDTRO | LEVEL_INTRO)) == 0) {
-        sprintf(path, "%s.par", world->config_file);
-        i32 page = -1;
-        if (NuFileExists(path)) {
-            page = edpartLoadPage(path, 1, world->current_gscn);
-            world->page_part = page;
-        }
-        world->part_debris_sys = static_cast<PARTDEBSYS_s *>(
-            InitPartDebris(&world->giz_buffer, &world->unknown_0108, 0x40, PDEBCOUNT, (char **)PDebNameList, page));
     }
 }
 TERRAIN_TRACK_SLOT *ScanTerrId(void *id) {

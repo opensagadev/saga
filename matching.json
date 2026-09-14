@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.075012,
+    "fuzzy_match_percent": 46.084892,
     "total_code": "4722419",
     "matched_code": "400186",
     "matched_code_percent": 8.4741745,
@@ -42332,14 +42332,6 @@
           "offset": 3766832,
           "size": 120,
           "match_percent": 99.85294
-        },
-        {
-          "name": "_Z20CollectAllCharactersi",
-          "demangled_name": "CollectAllCharacters(int)",
-          "address": 5100528,
-          "offset": 4210560,
-          "size": 135,
-          "match_percent": 10.243902
         }
       ]
     },
@@ -60520,7 +60512,7 @@
           "address": 5093088,
           "offset": 4203120,
           "size": 133,
-          "match_percent": 81.113205
+          "match_percent": 85.90566
         },
         {
           "name": "_Z20Collection_ConfigurePcP9variptr_uS1_",
@@ -60528,7 +60520,7 @@
           "address": 5093232,
           "offset": 4203264,
           "size": 1034,
-          "match_percent": 63.891384
+          "match_percent": 67.0412
         },
         {
           "name": "_Z23Collection_CreateMasterPcPsP12COLLECTION_sif",
@@ -60536,7 +60528,7 @@
           "address": 5094272,
           "offset": 4204304,
           "size": 67,
-          "match_percent": 74.9375
+          "match_percent": 99.625
         },
         {
           "name": "_Z23Collection_CreateCustomPcPsP12COLLECTION_sjjjiiP9variptr_uS4_if",
@@ -60544,7 +60536,7 @@
           "address": 5094352,
           "offset": 4204384,
           "size": 2338,
-          "match_percent": 32.5841
+          "match_percent": 34.426605
         },
         {
           "name": "_Z17Collection_GetPosP12COLLECTION_siPfS1_",
@@ -60553,6 +60545,14 @@
           "offset": 4206736,
           "size": 94,
           "match_percent": 93.25
+        },
+        {
+          "name": "_Z17CollectIDUnlockedi",
+          "demangled_name": "CollectIDUnlocked(int)",
+          "address": 5096800,
+          "offset": 4206832,
+          "size": 305,
+          "match_percent": 29.685392
         },
         {
           "name": "_Z14Collection_Goti",
@@ -60576,7 +60576,7 @@
           "address": 5099968,
           "offset": 4210000,
           "size": 408,
-          "match_percent": 15.912
+          "match_percent": 38.384
         },
         {
           "name": "_Z15AddToCollectioni",
@@ -60585,6 +60585,14 @@
           "offset": 4210416,
           "size": 143,
           "match_percent": 94.875
+        },
+        {
+          "name": "_Z20CollectAllCharactersi",
+          "demangled_name": "CollectAllCharacters(int)",
+          "address": 5100528,
+          "offset": 4210560,
+          "size": 135,
+          "match_percent": 10.243902
         },
         {
           "name": "_Z20Collection_GetIDListP12COLLECTION_sjjPsPiS2_i",
@@ -69442,12 +69450,20 @@
           "match_percent": 33.90594
         },
         {
+          "name": "_Z16DrawStatusScreenP11WORLDINFO_s",
+          "demangled_name": "DrawStatusScreen(WORLDINFO_s*)",
+          "address": 2444672,
+          "offset": 1554704,
+          "size": 2554,
+          "match_percent": 11.941581
+        },
+        {
           "name": "_Z18UpdateStatusScreenP11WORLDINFO_s",
           "demangled_name": "UpdateStatusScreen(WORLDINFO_s*)",
           "address": 2447968,
           "offset": 1558000,
           "size": 879,
-          "match_percent": 55.80102
+          "match_percent": 56.030613
         },
         {
           "name": "_Z18UpdateAchievementsP14STATUSPACKET_s",
@@ -70139,14 +70155,6 @@
           "match_percent": 45.085106
         },
         {
-          "name": "_Z17CollectIDUnlockedi",
-          "demangled_name": "CollectIDUnlocked(int)",
-          "address": 5096800,
-          "offset": 4206832,
-          "size": 305,
-          "match_percent": 25.955055
-        },
-        {
           "name": "_ZL13_fseek64_wrapP7__sFILExi",
           "demangled_name": "_fseek64_wrap(__sFILE*, long long, int)",
           "address": 5256272,
@@ -70670,22 +70678,6 @@
           "match_percent": 85.21739
         },
         {
-          "name": "_Z23DebrisProcessGenerationv",
-          "demangled_name": "DebrisProcessGeneration()",
-          "address": 3498224,
-          "offset": 2608256,
-          "size": 3346,
-          "match_percent": 42.163418
-        },
-        {
-          "name": "_Z21DebrisProcessTriggersv",
-          "demangled_name": "DebrisProcessTriggers()",
-          "address": 3501584,
-          "offset": 2611616,
-          "size": 1059,
-          "match_percent": 78.61373
-        },
-        {
           "name": "_Z41DebrisSingleTorusCollisionCheckScaleYFlagiP7nuvec_sffh",
           "demangled_name": "DebrisSingleTorusCollisionCheckScaleYFlag(int, nuvec_s*, float, float, unsigned char)",
           "address": 3507920,
@@ -70756,14 +70748,6 @@
           "offset": 3862400,
           "size": 431,
           "match_percent": 3.36
-        },
-        {
-          "name": "_Z13AddPartDebrisP12PARTDEBSYS_siP7nuvec_s",
-          "demangled_name": "AddPartDebris(PARTDEBSYS_s*, int, nuvec_s*)",
-          "address": 4862576,
-          "offset": 3972608,
-          "size": 102,
-          "match_percent": 77.93104
         },
         {
           "name": "_Z5unrefPhS_",
@@ -73243,14 +73227,6 @@
           "offset": 1554048,
           "size": 656,
           "match_percent": 93.87705
-        },
-        {
-          "name": "_Z16DrawStatusScreenP11WORLDINFO_s",
-          "demangled_name": "DrawStatusScreen(WORLDINFO_s*)",
-          "address": 2444672,
-          "offset": 1554704,
-          "size": 2554,
-          "match_percent": 11.915808
         },
         {
           "name": "_ZL29DisplayListMaterialClipUpdateP16nudisplayscene_s",
@@ -76696,14 +76672,6 @@
           "match_percent": 99.82758
         },
         {
-          "name": "_Z12LoadPartFileP11WORLDINFO_s",
-          "demangled_name": "LoadPartFile(WORLDINFO_s*)",
-          "address": 4862208,
-          "offset": 3972240,
-          "size": 264,
-          "match_percent": 69.45283
-        },
-        {
           "name": "_Z14MakePlayPlanesP12GAMECAMERA_s",
           "demangled_name": "MakePlayPlanes(GAMECAMERA_s*)",
           "address": 5076992,
@@ -76909,14 +76877,6 @@
           "offset": 2583168,
           "size": 51,
           "match_percent": 32.307693
-        },
-        {
-          "name": "DebrisStartOffsetEx",
-          "demangled_name": "DebrisStartOffsetEx",
-          "address": 3473200,
-          "offset": 2583232,
-          "size": 386,
-          "match_percent": 77.24138
         },
         {
           "name": "DebrisStartOffset",
@@ -77253,22 +77213,6 @@
           "offset": 2622960,
           "size": 34,
           "match_percent": 100.0
-        },
-        {
-          "name": "DebrisSetSeed",
-          "demangled_name": "DebrisSetSeed",
-          "address": 3512976,
-          "offset": 2623008,
-          "size": 24,
-          "match_percent": 74.0
-        },
-        {
-          "name": "DebrisGetSeed",
-          "demangled_name": "DebrisGetSeed",
-          "address": 3513008,
-          "offset": 2623040,
-          "size": 22,
-          "match_percent": 12.5
         },
         {
           "name": "DebrisSetUserData",
@@ -78218,7 +78162,7 @@
           "address": 3422640,
           "offset": 2532672,
           "size": 1212,
-          "match_percent": 61.893238
+          "match_percent": 60.74377
         },
         {
           "name": "_Z25GenDebIndexImprovedRadialP16debkeydatatype_sP10debinftypef",
@@ -78226,7 +78170,7 @@
           "address": 3423856,
           "offset": 2533888,
           "size": 1548,
-          "match_percent": 65.385056
+          "match_percent": 64.43391
         },
         {
           "name": "_Z22GenDebIndexRadialRotorP16debkeydatatype_sP10debinftypef",
@@ -78234,7 +78178,7 @@
           "address": 3425408,
           "offset": 2535440,
           "size": 1108,
-          "match_percent": 58.36882
+          "match_percent": 59.71863
         },
         {
           "name": "_Z17GenDebIndexRadialP16debkeydatatype_sP10debinftypef",
@@ -78242,7 +78186,7 @@
           "address": 3426528,
           "offset": 2536560,
           "size": 1092,
-          "match_percent": 63.953125
+          "match_percent": 63.15625
         },
         {
           "name": "_Z11GenDebIndexP16debkeydatatype_sP10debinftypef",
@@ -78250,7 +78194,7 @@
           "address": 3427632,
           "offset": 2537664,
           "size": 1162,
-          "match_percent": 30.41367
+          "match_percent": 30.589928
         },
         {
           "name": "_Z11GenDebDummyP16debkeydatatype_sP10debinftypef",
@@ -78266,7 +78210,7 @@
           "address": 3433616,
           "offset": 2543648,
           "size": 1549,
-          "match_percent": 43.878788
+          "match_percent": 47.29201
         },
         {
           "name": "DebrisSetup2",
@@ -78274,7 +78218,7 @@
           "address": 3456608,
           "offset": 2566640,
           "size": 2413,
-          "match_percent": 64.56076
+          "match_percent": 64.74306
         },
         {
           "name": "DebrisSetup",
@@ -78290,7 +78234,7 @@
           "address": 3464896,
           "offset": 2574928,
           "size": 1517,
-          "match_percent": 69.7875
+          "match_percent": 69.975
         },
         {
           "name": "_Z18GenDebIndexBounceYP16debkeydatatype_sP10debinftypef",
@@ -78298,7 +78242,15 @@
           "address": 3466416,
           "offset": 2576448,
           "size": 1226,
-          "match_percent": 51.105072
+          "match_percent": 52.31884
+        },
+        {
+          "name": "DebrisStartOffsetEx",
+          "demangled_name": "DebrisStartOffsetEx",
+          "address": 3473200,
+          "offset": 2583232,
+          "size": 386,
+          "match_percent": 77.29885
         },
         {
           "name": "DebrisSetTimeIncrement",
@@ -78339,6 +78291,38 @@
           "offset": 2608096,
           "size": 42,
           "match_percent": 100.0
+        },
+        {
+          "name": "_Z23DebrisProcessGenerationv",
+          "demangled_name": "DebrisProcessGeneration()",
+          "address": 3498224,
+          "offset": 2608256,
+          "size": 3346,
+          "match_percent": 47.484257
+        },
+        {
+          "name": "_Z21DebrisProcessTriggersv",
+          "demangled_name": "DebrisProcessTriggers()",
+          "address": 3501584,
+          "offset": 2611616,
+          "size": 1059,
+          "match_percent": 78.61373
+        },
+        {
+          "name": "DebrisSetSeed",
+          "demangled_name": "DebrisSetSeed",
+          "address": 3512976,
+          "offset": 2623008,
+          "size": 24,
+          "match_percent": 99.85714
+        },
+        {
+          "name": "DebrisGetSeed",
+          "demangled_name": "DebrisGetSeed",
+          "address": 3513008,
+          "offset": 2623040,
+          "size": 22,
+          "match_percent": 12.5
         }
       ]
     },
@@ -79375,7 +79359,7 @@
           "address": 4861568,
           "offset": 3971600,
           "size": 68,
-          "match_percent": 64.4
+          "match_percent": 99.85
         },
         {
           "name": "_Z14FindPartDebrisP12PARTDEBSYS_sPc",
@@ -79384,6 +79368,22 @@
           "offset": 3972112,
           "size": 118,
           "match_percent": 100.0
+        },
+        {
+          "name": "_Z12LoadPartFileP11WORLDINFO_s",
+          "demangled_name": "LoadPartFile(WORLDINFO_s*)",
+          "address": 4862208,
+          "offset": 3972240,
+          "size": 264,
+          "match_percent": 64.49056
+        },
+        {
+          "name": "_Z13AddPartDebrisP12PARTDEBSYS_siP7nuvec_s",
+          "demangled_name": "AddPartDebris(PARTDEBSYS_s*, int, nuvec_s*)",
+          "address": 4862576,
+          "offset": 3972608,
+          "size": 102,
+          "match_percent": 89.965515
         },
         {
           "name": "_Z16PartImpact_BrickP6PART_s",

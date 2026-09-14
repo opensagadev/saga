@@ -83,7 +83,6 @@ void *InitPartDebris(VARIPTR *buf, VARIPTR *buf_end, i32 param1, i32 param2, cha
 void LoadTerrainFile(WORLDINFO *world);
 void LoadGrassFile(WORLDINFO *world);
 void LoadBridgeFile(WORLDINFO *world);
-void LoadPartFile(WORLDINFO *world);
 void Particles_Load(WORLDINFO *world, char **debris_name, i32 count, i32 flags);
 
 // --- sfx.cpp — sound / SFX / quiet tables ---

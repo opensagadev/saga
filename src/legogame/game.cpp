@@ -24,6 +24,7 @@
 #include "legoapi/world/area.h"
 #include "legoapi/characters/core/character.h"
 #include "legoapi/render/core/render.h"
+#include "legoapi/render/fx/parts.h"
 #include "nu2api/numath/nuvec.h"
 
 void NarrowSockExceptions_Init(NARROWSOCKEXCEPTION *);
@@ -60,7 +61,6 @@ void BuckStartExtra_LSW(GameObject_s *);
 void AddFancyMessageRGB(char *, f32, f32, f32, f32, i32, u8, u8, u8);
 void BuyAllShopExtras();
 void ReCalculateCompletionPoints();
-void AddPartDebris(PARTDEBSYS_s *, i32, NUVEC *);
 extern i32 Lighting_HighlightFlash;
 extern i32 (*Lighting_BlueFlickerFn)(GameObject_s *);
 i32 ObjZappedBlue(GameObject_s *);
@@ -257,7 +257,6 @@ f32 GameSetSoundVolume(OPTIONSSAVE_s *);
 f32 GameSetMusicVolume(OPTIONSSAVE_s *);
 void GameAudio_Reset(void);
 void GameRegisterGizActions(void);
-void InitPartTable(char **names);
 void ResetSeeds(void);
 void GizSpinners_InitTerrain(WORLDINFO_s *world);
 void Signals_InitTerrain(WORLDINFO_s *world);

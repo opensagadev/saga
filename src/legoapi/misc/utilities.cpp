@@ -8,6 +8,7 @@
 #include "nu2api/numath/nutrig.h"
 #include "nu2api/numath/nuvec.h"
 #include "globals.h"
+#include "legoapi/render/fx/game_deb.h"
 
 #include "nu2api/numath/nurand.h"
 
@@ -20,7 +21,6 @@ struct SHOPINPUT;
 
 extern i32 qseed;
 extern i32 GAMERAND;
-extern "C" void DebrisSetSeed(i32);
 extern "C" void NuPartSetSeed(i32);
 
 void HashString(unsigned char *) {

@@ -13,6 +13,7 @@
 #include "legoapi/gizmos/fx/gizmopickups.h"
 #include "legoapi/gizmos/traps/giztorpmachine.h"
 #include "legoapi/world/world.h"
+#include "legoapi/world/world_shared.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/area.h"
 #include "legoapi/characters/core/players.h"
@@ -28,9 +29,11 @@
 #include "nu2api/nu3d/nuspecial.h"
 #include "nu2api/nu3d/nurndrstat.h"
 #include "nu2api/nucore/nustring.h"
+#include "nu2api/nufile/nufile.h"
 
 #include <float.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
 ADDPART_s Default_ADDPART = {NULL,
@@ -2227,8 +2230,8 @@ extern "C" void HitParts(void) {
     STUBBED();
 }
 
-extern i32 PDEBCOUNT;
-extern void *PDebNameList;
+static i32 PDEBCOUNT;
+static char **PDebNameList;
 
 void InitPartTable(char **names) {
     PDEBCOUNT = 0;
@@ -2236,6 +2239,32 @@ void InitPartTable(char **names) {
     if (names != NULL) {
         while (names[PDEBCOUNT] != NULL) {
             ++PDEBCOUNT;
+        }
+    }
+}
+
+void LoadPartFile(WORLDINFO *world) {
+    char path[256];
+    world->page_part = -1;
+    edpartSetParticlePage(world->page_pp);
+
+    if ((world->current_level->flags & (LEVEL_OUTRO | LEVEL_MIDTRO | LEVEL_INTRO)) == 0) {
+        sprintf(path, "%s.par", world->config_file);
+        i32 page = -1;
+        if (NuFileExists(path)) {
+            page = edpartLoadPage(path, 1, world->current_gscn);
+            world->page_part = page;
+        }
+        world->part_debris_sys = static_cast<PARTDEBSYS_s *>(
+            InitPartDebris(&world->giz_buffer, &world->unknown_0108, 0x40, PDEBCOUNT, PDebNameList, page));
+    }
+}
+
+void AddPartDebris(PARTDEBSYS_s *system, i32 index, nuvec_s *position) {
+    if (index >= 0 && system != NULL && index < PDEBCOUNT) {
+        const i32 type = system->entries[index].type_id;
+        if (type != -1) {
+            AddFiniteShotPART(type, position, 1);
         }
     }
 }
@@ -2758,7 +2787,6 @@ i32 PartDraw_Flickerer(PART_s *part) {
     return 1;
 }
 
-void AddPartDebris(PARTDEBSYS_s *, i32, NUVEC *);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
 

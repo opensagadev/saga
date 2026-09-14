@@ -343,6 +343,7 @@ def original_component(ledger: dict, component_id: int) -> dict:
     if component is None:
         raise ValueError(f"no original strong-local component with ID {component_id}")
     by_id = {symbol["symbol_index"]: symbol for symbol in ledger["original_symbols"]}
+    identities = original_identity_counts(by_id)
     units = {unit["id"]: unit["source"] for unit in ledger.get("current_units", [])}
     global_objects = defaultdict(set)
     for unit in ledger.get("current_units", []):
@@ -372,6 +373,7 @@ def original_component(ledger: dict, component_id: int) -> dict:
                 "size": symbol["size"],
                 "owner": units.get(owners[0], f"unit {owners[0]}") if len(owners) == 1 else None,
                 "candidate_count": len(owners),
+                "original_identity_unique": uniquely_identified_original(symbol, identities),
                 "global_counterpart": global_counterpart(symbol, owners),
             })
         return sorted(result, key=lambda item: (item["address"], item["symbol_index"]))
@@ -390,6 +392,9 @@ def original_component(ledger: dict, component_id: int) -> dict:
         for object_id in xref["object_symbol_indices"]:
             obj = object_by_id.get(object_id)
             if function is None or obj is None:
+                continue
+            if (not uniquely_identified_original(by_id[function["symbol_index"]], identities)
+                    or not uniquely_identified_original(by_id[object_id], identities)):
                 continue
             object_owner = obj["owner"] or obj["global_counterpart"]
             state_pairs[(function["symbol_index"], object_id)] = {
@@ -434,6 +439,10 @@ def print_original_component(component: dict, limit: int = 0) -> None:
           f"{len(functions)} functions, {len(objects)} LOCAL objects; "
           f"text symbols 0x{first:x}–0x{last:x}")
     print(f"  Initializer blocks: {component['initializer_blocks']}; {component['certainty']}")
+    duplicate_count = sum(not symbol["original_identity_unique"] for symbol in functions + objects)
+    if duplicate_count:
+        print(f"  {duplicate_count} symbols reuse an original name/type/binding identity; "
+              "their local-state links are excluded from split counts")
     pairs = component.get("local_state_pairs", {})
     if pairs.get("total", 0):
         print(f"  Writable-state candidate links: {pairs['resolved']}/{pairs['total']} source-assigned, "

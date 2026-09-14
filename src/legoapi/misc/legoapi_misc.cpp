@@ -61,49 +61,6 @@ void ConstantRumble(GameObject_s *object, float strength, float phase) {
     }
 }
 
-extern i32 AllMiniKitsDone(AREASAVE_s *save);
-
-COLLECTID *CollectIDUnlocked(i32 id) {
-    i32 index = InCollectList_Index(id, CollectList, CollectCount);
-    if (index == -1) {
-        return NULL;
-    }
-
-    COLLECTID *entry = &CollectList[index];
-    if (Game_CharacterSave != NULL && (Game_CharacterSave[id] & SAVE_CHARACTER_UNLOCKED) != 0) {
-        return entry;
-    }
-
-    switch (entry->type) {
-        case 0:
-            return entry;
-        case 2:
-            if (static_cast<i8>(entry->field2_0x3) == -1 || Game_AreaSave == NULL) {
-                return NULL;
-            }
-            return Game_AreaSave[entry->field2_0x3].area_complete != 0 ? entry : NULL;
-        case 3:
-            if (Episodes_Completed() != EPISODECOUNT) {
-                return NULL;
-            }
-            return Game_100PercentComplete() != 0 ? entry : NULL;
-        case 4:
-            return AllMiniKitsDone(Game_AreaSave) != 0 ? entry : NULL;
-        case 6:
-            if (Game_CompletionSave == NULL ||
-                reinterpret_cast<STATUSCOLLECT_s *>(Game_CompletionSave)->gold_bricks < entry->field6_0xa) {
-                return NULL;
-            }
-            return entry;
-        case 7:
-            return Game_100PercentComplete() != 0 ? entry : NULL;
-        case 8:
-            return Store_IsPackUnlocked(static_cast<i8>(entry->field2_0x3)) != 0 ? entry : NULL;
-        default:
-            return NULL;
-    }
-}
-
 void ClearLastSafeTakeOver(GameObject_s *object) {
     if (object == NULL || (object->field_0xefa & 0x10) != 0) {
         return;

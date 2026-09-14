@@ -36,6 +36,7 @@ static f32 ForceBackRadius2 = 0.0f;
 #include "legoapi/props/system/socksys.h"
 #include "legoapi/render/core/rtl.h"
 #include "legoapi/render/fx.h"
+#include "legoapi/render/fx/parts.h"
 #include "legoapi/render/fx/spline_position.h"
 #include "legoapi/world/level.h"
 #include "legoapi/world/area.h"
@@ -4216,7 +4217,6 @@ static void ForcePushCode(GameObject_s *object, i32 held, i32) {
 }
 
 void NewRumbleAllPlayers(f32, f32, i32, i32);
-void AddPartDebris(PARTDEBSYS_s *, i32, NUVEC *);
 
 static void ForceThrowCode(GameObject_s *object, i32 pressed, i32) {
     if (object->character_context == 0x12) {

@@ -16,7 +16,6 @@ struct nuqthdr_s;
 struct nunativegscene_s;
 struct SHOPINPUT;
 
-void AddPartDebris(PARTDEBSYS_s *, i32, nuvec_s *);
 EXPLOSION *AddExplosion(nuvec_s *, f32, f32, GameObject_s *, i32, i32);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 void GameCam_NewShake(GAMECAMERA_s *, f32, f32, f32);
