@@ -4,6 +4,8 @@
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/world/mission.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/menus/core/panel.h"
 #include "legoapi/menus/core/gamemessages.h"
 #include "legoapi/menus/core/text.h"
@@ -165,7 +167,6 @@ void Panel_Clear() {
     Arcade_ResetPanel();
 }
 
-extern u8 CoinTab[4];
 extern f32 COINMSGTIME;
 void GameMsg_DrawAdjustNewPos_CoinToTotal(GAMEMESSAGE_s *);
 extern "C" void PlaySfx(char *, NUVEC *);

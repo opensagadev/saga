@@ -1701,8 +1701,6 @@ struct GIZMOPICKUPRUNTIMESYS_s {
 };
 DECOMP_ASSERT(sizeof(GIZMOPICKUPRUNTIMESYS_s) == 0x1c, "GIZMOPICKUP runtime system ABI");
 
-extern GIZMO_PICKUP_TYPE GizmoPickupType[10];
-extern GIZMOPICKUPSYS_s GizmoPickupSys_Game;
 i32 GetRandomCoinType();
 
 struct SPECIALMINIKIT_s {

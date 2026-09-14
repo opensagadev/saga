@@ -586,10 +586,6 @@ void AddToGoldBricks() {
     }
 }
 
-void Pup_CollectCoin(WORLDINFO_s *world, GIZMOPICKUP_s *pickup, i32 type, GameObject_s *object, i32 arg) {
-    GizmoPickup_CollectCoin(world, &pickup->position, type, pickup->model_variant, object, arg);
-}
-
 void ResetCoinPacket(COINPACKET_s *packet) {
     if (packet != NULL) {
         packet->scale = 1.0f;

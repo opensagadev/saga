@@ -30,6 +30,7 @@
 #include "legoapi/world/level.h"
 #include "legoapi/world/levels/levels.h"
 #include "legoapi/world/area.h"
+#include "legoapi/world/areas.h"
 #include "legoapi/world/mission.h"
 #include "nu2api/nu3d/nudlist.h"
 #include "nu2api/nu3d/numtl.h"
@@ -49,7 +50,6 @@
 void Hint_SetHintFromId(i32, i32, i32);
 void MakeBaddiesForgetAboutParty(i32);
 void ResetRadios();
-void SuperCounters_FixUpGizmos(WORLDINFO_s *);
 void AITriggerSetSysReset(AITRIGGERSETSYS_s *);
 void AITriggerSysAutoSetUp(WORLDINFO_s *, AITRIGGERSETSYS_s *);
 void ResetPlayer(GameObject_s *, i32, nuvec_s *, i32);
@@ -124,7 +124,6 @@ void InitPlayerAI(GameObject_s *object);
 void ResetPlayer(GameObject_s *, i32, nuvec_s *, i32);
 f32 GetVehicleAreaRememberSpeed();
 void ResetRadios();
-void SuperCounters_FixUpGizmos(WORLDINFO_s *);
 void AITriggerSetSysReset(AITRIGGERSETSYS_s *);
 void AITriggerSysAutoSetUp(WORLDINFO_s *, AITRIGGERSETSYS_s *);
 void CharPlatforms_Reset(CHARPLATFORMSYS_s *);

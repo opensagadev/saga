@@ -67,6 +67,7 @@ extern "C" {
     void ResetSounds(void);
 
     i32 GetSfxId(const char *name);
+    void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pitch);
 
 #ifdef __cplusplus
 }

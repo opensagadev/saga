@@ -7,6 +7,7 @@
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/core/input/timer.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/legoapi_types.h"
 #include "legoapi/menus/core/gamemessages.h"
 #include "legoapi/menus/screens/arcade.h"
@@ -130,36 +131,4 @@ void GizmoPickup_CollectCoin(WORLDINFO_s *world, nuvec_s *position, i32 type_ind
 static __used__ float GizmoPickups_Collide2D(GameObject_s *) {
     STUBBED();
     return 0;
-}
-
-static __used__ void Pup_CollectHeart(WORLDINFO_s *, GIZMOPICKUP_s *, i32, GameObject_s *, i32) {
-    STUBBED();
-}
-
-static __used__ void Pup_CollectCharKit(WORLDINFO_s *, GIZMOPICKUP_s *, i32, GameObject_s *, i32) {
-    STUBBED();
-}
-
-static __used__ void Pup_CollectMinikit(WORLDINFO_s *, GIZMOPICKUP_s *, i32, GameObject_s *, i32) {
-    STUBBED();
-}
-
-static __used__ void Pup_CollectPowerUp(WORLDINFO_s *, GIZMOPICKUP_s *, i32, GameObject_s *, i32) {
-    STUBBED();
-}
-
-static __used__ void Pup_CollectRedBrick(WORLDINFO_s *, GIZMOPICKUP_s *, i32, GameObject_s *, i32) {
-    STUBBED();
-}
-
-static __used__ void Pup_UpdatePowerUp(WORLDINFO_s *, GIZMOPICKUP_s *) {
-    STUBBED();
-}
-
-static __used__ void Pup_UpdateBlueCoin(WORLDINFO_s *, GIZMOPICKUP_s *) {
-    STUBBED();
-}
-
-static __used__ void Pup_UpdatePurpleCoin(WORLDINFO_s *, GIZMOPICKUP_s *) {
-    STUBBED();
 }

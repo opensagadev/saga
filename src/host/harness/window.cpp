@@ -20,6 +20,7 @@
 #include "host/platform/runtime.hpp"
 #include "legoapi/characters/core/players.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/level.h"
 #include "nu2api/nu3d/NuRenderDevice.h"

@@ -12,6 +12,7 @@ extern "C" {
 }
 #include "legoapi/legoapi_types.h"
 #include "legoapi/gizmos/fx/gizmopickups.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/world/level.h"
 #include "legoapi/characters/motion.h"
 #include "legoapi/render/core/terrain.h"
@@ -155,7 +156,6 @@ void ConstantRumble(GameObject_s *, f32, f32);
 void NewRumbleAllPlayers(f32, f32, i32, i32);
 void Hint_SetComplete(i32);
 i32 GameAnimSet_IsAnimationReset(GAMEANIMSET_s *);
-void Pup_CollectCoin(WORLDINFO_s *, GIZMOPICKUP_s *, i32, GameObject_s *, i32);
 void CollectMinikit(NUVEC *, char *, i32);
 GIZMOBLOWUP_s *FindNearestGizmoBlowUp(WORLDINFO_s *, NUVEC *, f32);
 static __used__ i32 IsGrabbable(GameObject_s *object) {

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "measures": {
-    "fuzzy_match_percent": 46.13459,
+    "fuzzy_match_percent": 46.1346,
     "total_code": "4722419",
     "matched_code": "401849",
     "matched_code_percent": 8.509389,
@@ -40724,7 +40724,7 @@
           "address": 1333968,
           "offset": 444000,
           "size": 12082,
-          "match_percent": 80.266205
+          "match_percent": 80.270065
         },
         {
           "name": "SOUND_SFXRequest_Table",
@@ -40933,22 +40933,6 @@
           "offset": 2551280,
           "size": 62,
           "match_percent": 100.0
-        },
-        {
-          "name": "_Z16HandleGroupLimiti",
-          "demangled_name": "HandleGroupLimit(int)",
-          "address": 3441312,
-          "offset": 2551344,
-          "size": 315,
-          "match_percent": 58.79121
-        },
-        {
-          "name": "PlaySfxByIdEx",
-          "demangled_name": "PlaySfxByIdEx",
-          "address": 3441632,
-          "offset": 2551664,
-          "size": 2176,
-          "match_percent": 25.873833
         },
         {
           "name": "PlaySfxByIdAndSetVolumeAndPitch",
@@ -41188,7 +41172,7 @@
           "address": 5010576,
           "offset": 4120608,
           "size": 215,
-          "match_percent": 49.07843
+          "match_percent": 49.17647
         },
         {
           "name": "_Z23GameAudio_GetPlrSfxBitsPv",
@@ -52185,76 +52169,12 @@
           "match_percent": 20.952381
         },
         {
-          "name": "_ZL18Pup_CollectCharKitP11WORLDINFO_sP13GIZMOPICKUP_siP12GameObject_si",
-          "demangled_name": "Pup_CollectCharKit(WORLDINFO_s*, GIZMOPICKUP_s*, int, GameObject_s*, int)",
-          "address": 1977984,
-          "offset": 1088016,
-          "size": 408,
-          "match_percent": 5.25
-        },
-        {
-          "name": "_ZL19Pup_CollectRedBrickP11WORLDINFO_sP13GIZMOPICKUP_siP12GameObject_si",
-          "demangled_name": "Pup_CollectRedBrick(WORLDINFO_s*, GIZMOPICKUP_s*, int, GameObject_s*, int)",
-          "address": 1981056,
-          "offset": 1091088,
-          "size": 415,
-          "match_percent": 4.719101
-        },
-        {
-          "name": "_ZL20Pup_UpdatePurpleCoinP11WORLDINFO_sP13GIZMOPICKUP_s",
-          "demangled_name": "Pup_UpdatePurpleCoin(WORLDINFO_s*, GIZMOPICKUP_s*)",
-          "address": 1981472,
-          "offset": 1091504,
-          "size": 226,
-          "match_percent": 7.777778
-        },
-        {
-          "name": "_ZL18Pup_UpdateBlueCoinP11WORLDINFO_sP13GIZMOPICKUP_s",
-          "demangled_name": "Pup_UpdateBlueCoin(WORLDINFO_s*, GIZMOPICKUP_s*)",
-          "address": 1982768,
-          "offset": 1092800,
-          "size": 226,
-          "match_percent": 7.777778
-        },
-        {
-          "name": "_ZL17Pup_UpdatePowerUpP11WORLDINFO_sP13GIZMOPICKUP_s",
-          "demangled_name": "Pup_UpdatePowerUp(WORLDINFO_s*, GIZMOPICKUP_s*)",
-          "address": 1983472,
-          "offset": 1093504,
-          "size": 77,
-          "match_percent": 22.105263
-        },
-        {
-          "name": "_ZL18Pup_CollectPowerUpP11WORLDINFO_sP13GIZMOPICKUP_siP12GameObject_si",
-          "demangled_name": "Pup_CollectPowerUp(WORLDINFO_s*, GIZMOPICKUP_s*, int, GameObject_s*, int)",
-          "address": 1984592,
-          "offset": 1094624,
-          "size": 61,
-          "match_percent": 24.705883
-        },
-        {
           "name": "_Z23GizmoPickup_CollectCoinP11WORLDINFO_sP7nuvec_siiP12GameObject_si",
           "demangled_name": "GizmoPickup_CollectCoin(WORLDINFO_s*, nuvec_s*, int, int, GameObject_s*, int)",
           "address": 1984864,
           "offset": 1094896,
           "size": 973,
           "match_percent": 20.91342
-        },
-        {
-          "name": "_ZL18Pup_CollectMinikitP11WORLDINFO_sP13GIZMOPICKUP_siP12GameObject_si",
-          "demangled_name": "Pup_CollectMinikit(WORLDINFO_s*, GIZMOPICKUP_s*, int, GameObject_s*, int)",
-          "address": 1986592,
-          "offset": 1096624,
-          "size": 85,
-          "match_percent": 20.0
-        },
-        {
-          "name": "_ZL16Pup_CollectHeartP11WORLDINFO_sP13GIZMOPICKUP_siP12GameObject_si",
-          "demangled_name": "Pup_CollectHeart(WORLDINFO_s*, GIZMOPICKUP_s*, int, GameObject_s*, int)",
-          "address": 1989040,
-          "offset": 1099072,
-          "size": 53,
-          "match_percent": 28.0
         },
         {
           "name": "_Z21GizmoPickups_SetOnOffv",
@@ -53585,60 +53505,76 @@
           "match_percent": 99.35294
         },
         {
-          "name": "_Z19SuperCounters_Reseti",
-          "demangled_name": "SuperCounters_Reset(int)",
-          "address": 4681920,
-          "offset": 3791952,
-          "size": 93,
-          "match_percent": 86.48148
-        },
-        {
-          "name": "_Z25SuperCounters_FixUpGizmosP11WORLDINFO_s",
-          "demangled_name": "SuperCounters_FixUpGizmos(WORLDINFO_s*)",
-          "address": 4682016,
-          "offset": 3792048,
-          "size": 345,
+          "name": "_ZL18Pup_CollectCharKitP11WORLDINFO_sP13GIZMOPICKUP_siP12GameObject_si",
+          "demangled_name": "Pup_CollectCharKit(WORLDINFO_s*, GIZMOPICKUP_s*, int, GameObject_s*, int)",
+          "address": 1977984,
+          "offset": 1088016,
+          "size": 408,
           "match_percent": 5.25
         },
         {
-          "name": "_Z24SuperCounters_FindPickupP11WORLDINFO_sP7GIZMO_sP7nuvec_sPP18SUPERCOUNTERPICKUP",
-          "demangled_name": "SuperCounters_FindPickup(WORLDINFO_s*, GIZMO_s*, nuvec_s*, SUPERCOUNTERPICKUP**)",
-          "address": 4682368,
-          "offset": 3792400,
-          "size": 518,
-          "match_percent": 3.636364
+          "name": "_ZL19Pup_CollectRedBrickP11WORLDINFO_sP13GIZMOPICKUP_siP12GameObject_si",
+          "demangled_name": "Pup_CollectRedBrick(WORLDINFO_s*, GIZMOPICKUP_s*, int, GameObject_s*, int)",
+          "address": 1981056,
+          "offset": 1091088,
+          "size": 415,
+          "match_percent": 4.719101
         },
         {
-          "name": "_Z32SuperCounter_ActivateGizmoPickupP7GIZMO_sP13GIZMOPICKUP_s",
-          "demangled_name": "SuperCounter_ActivateGizmoPickup(GIZMO_s*, GIZMOPICKUP_s*)",
-          "address": 4682896,
-          "offset": 3792928,
-          "size": 419,
-          "match_percent": 4.158416
+          "name": "_ZL20Pup_UpdatePurpleCoinP11WORLDINFO_sP13GIZMOPICKUP_s",
+          "demangled_name": "Pup_UpdatePurpleCoin(WORLDINFO_s*, GIZMOPICKUP_s*)",
+          "address": 1981472,
+          "offset": 1091504,
+          "size": 226,
+          "match_percent": 7.777778
         },
         {
-          "name": "_Z33SuperCounter_FindFromNameAndLevelPcP11WORLDINFO_sPP18SUPERCOUNTERPICKUP",
-          "demangled_name": "SuperCounter_FindFromNameAndLevel(char*, WORLDINFO_s*, SUPERCOUNTERPICKUP**)",
-          "address": 4683328,
-          "offset": 3793360,
-          "size": 255,
-          "match_percent": 6.153846
+          "name": "_ZL18Pup_UpdateBlueCoinP11WORLDINFO_sP13GIZMOPICKUP_s",
+          "demangled_name": "Pup_UpdateBlueCoin(WORLDINFO_s*, GIZMOPICKUP_s*)",
+          "address": 1982768,
+          "offset": 1092800,
+          "size": 226,
+          "match_percent": 7.777778
         },
         {
-          "name": "_Z25SuperCounter_AnyCollectedP12SUPERCOUNTERP11WORLDINFO_s",
-          "demangled_name": "SuperCounter_AnyCollected(SUPERCOUNTER*, WORLDINFO_s*)",
-          "address": 4683584,
-          "offset": 3793616,
-          "size": 294,
-          "match_percent": 4.827586
+          "name": "_ZL17Pup_UpdatePowerUpP11WORLDINFO_sP13GIZMOPICKUP_s",
+          "demangled_name": "Pup_UpdatePowerUp(WORLDINFO_s*, GIZMOPICKUP_s*)",
+          "address": 1983472,
+          "offset": 1093504,
+          "size": 77,
+          "match_percent": 22.105263
         },
         {
-          "name": "_Z28SuperCounters_ResetProcessedP11WORLDINFO_s",
-          "demangled_name": "SuperCounters_ResetProcessed(WORLDINFO_s*)",
-          "address": 4683888,
-          "offset": 3793920,
-          "size": 79,
-          "match_percent": 87.69231
+          "name": "_ZL18Pup_CollectPowerUpP11WORLDINFO_sP13GIZMOPICKUP_siP12GameObject_si",
+          "demangled_name": "Pup_CollectPowerUp(WORLDINFO_s*, GIZMOPICKUP_s*, int, GameObject_s*, int)",
+          "address": 1984592,
+          "offset": 1094624,
+          "size": 61,
+          "match_percent": 24.705883
+        },
+        {
+          "name": "_Z15Pup_CollectCoinP11WORLDINFO_sP13GIZMOPICKUP_siP12GameObject_si",
+          "demangled_name": "Pup_CollectCoin(WORLDINFO_s*, GIZMOPICKUP_s*, int, GameObject_s*, int)",
+          "address": 1985840,
+          "offset": 1095872,
+          "size": 77,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_ZL18Pup_CollectMinikitP11WORLDINFO_sP13GIZMOPICKUP_siP12GameObject_si",
+          "demangled_name": "Pup_CollectMinikit(WORLDINFO_s*, GIZMOPICKUP_s*, int, GameObject_s*, int)",
+          "address": 1986592,
+          "offset": 1096624,
+          "size": 85,
+          "match_percent": 20.0
+        },
+        {
+          "name": "_ZL16Pup_CollectHeartP11WORLDINFO_sP13GIZMOPICKUP_siP12GameObject_si",
+          "demangled_name": "Pup_CollectHeart(WORLDINFO_s*, GIZMOPICKUP_s*, int, GameObject_s*, int)",
+          "address": 1989040,
+          "offset": 1099072,
+          "size": 53,
+          "match_percent": 28.0
         }
       ]
     },
@@ -59604,14 +59540,6 @@
           "address": 1732848,
           "offset": 842880,
           "size": 63,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z15Pup_CollectCoinP11WORLDINFO_sP13GIZMOPICKUP_siP12GameObject_si",
-          "demangled_name": "Pup_CollectCoin(WORLDINFO_s*, GIZMOPICKUP_s*, int, GameObject_s*, int)",
-          "address": 1985840,
-          "offset": 1095872,
-          "size": 77,
           "match_percent": 100.0
         },
         {
@@ -80388,7 +80316,7 @@
           "address": 1213776,
           "offset": 323808,
           "size": 5414,
-          "match_percent": 35.945168
+          "match_percent": 35.959106
         },
         {
           "name": "_Z10FixUpAreasv",
@@ -80397,46 +80325,6 @@
           "offset": 344688,
           "size": 36,
           "match_percent": 100.0
-        },
-        {
-          "name": "_Z19Areas_ConfigureListPcP9variptr_uS1_iPi",
-          "demangled_name": "Areas_ConfigureList(char*, variptr_u*, variptr_u*, int, int*)",
-          "address": 4678368,
-          "offset": 3788400,
-          "size": 2441,
-          "match_percent": 71.10351
-        },
-        {
-          "name": "_Z15Area_FindByNamePcPi",
-          "demangled_name": "Area_FindByName(char*, int*)",
-          "address": 4681360,
-          "offset": 3791392,
-          "size": 157,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z11Areas_FixUpP9AREAFIXUP",
-          "demangled_name": "Areas_FixUp(AREAFIXUP*)",
-          "address": 4681520,
-          "offset": 3791552,
-          "size": 74,
-          "match_percent": 100.0
-        },
-        {
-          "name": "_Z20Area_FindStatusLevelP10AREADATA_sPi",
-          "demangled_name": "Area_FindStatusLevel(AREADATA_s*, int*)",
-          "address": 4681600,
-          "offset": 3791632,
-          "size": 147,
-          "match_percent": 91.666664
-        },
-        {
-          "name": "_Z22Area_FindNextPlayLeveli",
-          "demangled_name": "Area_FindNextPlayLevel(int)",
-          "address": 4681760,
-          "offset": 3791792,
-          "size": 155,
-          "match_percent": 42.384617
         },
         {
           "name": "_Z17AreaFromMiniKitIDi",
@@ -80491,7 +80379,7 @@
           "address": 1209360,
           "offset": 319392,
           "size": 842,
-          "match_percent": 46.689117
+          "match_percent": 47.139896
         },
         {
           "name": "_Z15ClearUpAreaDatav",
@@ -80510,6 +80398,14 @@
           "match_percent": 27.170732
         },
         {
+          "name": "_Z19Areas_ConfigureListPcP9variptr_uS1_iPi",
+          "demangled_name": "Areas_ConfigureList(char*, variptr_u*, variptr_u*, int, int*)",
+          "address": 4678368,
+          "offset": 3788400,
+          "size": 2441,
+          "match_percent": 71.10351
+        },
+        {
           "name": "_Z24Areas_ConfigureResidentsP9variptr_uS0_",
           "demangled_name": "Areas_ConfigureResidents(variptr_u*, variptr_u*)",
           "address": 4680816,
@@ -80518,12 +80414,100 @@
           "match_percent": 98.29078
         },
         {
+          "name": "_Z15Area_FindByNamePcPi",
+          "demangled_name": "Area_FindByName(char*, int*)",
+          "address": 4681360,
+          "offset": 3791392,
+          "size": 157,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z11Areas_FixUpP9AREAFIXUP",
+          "demangled_name": "Areas_FixUp(AREAFIXUP*)",
+          "address": 4681520,
+          "offset": 3791552,
+          "size": 74,
+          "match_percent": 100.0
+        },
+        {
+          "name": "_Z20Area_FindStatusLevelP10AREADATA_sPi",
+          "demangled_name": "Area_FindStatusLevel(AREADATA_s*, int*)",
+          "address": 4681600,
+          "offset": 3791632,
+          "size": 147,
+          "match_percent": 92.22222
+        },
+        {
+          "name": "_Z22Area_FindNextPlayLeveli",
+          "demangled_name": "Area_FindNextPlayLevel(int)",
+          "address": 4681760,
+          "offset": 3791792,
+          "size": 155,
+          "match_percent": 42.384617
+        },
+        {
+          "name": "_Z19SuperCounters_Reseti",
+          "demangled_name": "SuperCounters_Reset(int)",
+          "address": 4681920,
+          "offset": 3791952,
+          "size": 93,
+          "match_percent": 86.48148
+        },
+        {
+          "name": "_Z25SuperCounters_FixUpGizmosP11WORLDINFO_s",
+          "demangled_name": "SuperCounters_FixUpGizmos(WORLDINFO_s*)",
+          "address": 4682016,
+          "offset": 3792048,
+          "size": 345,
+          "match_percent": 5.25
+        },
+        {
+          "name": "_Z24SuperCounters_FindPickupP11WORLDINFO_sP7GIZMO_sP7nuvec_sPP18SUPERCOUNTERPICKUP",
+          "demangled_name": "SuperCounters_FindPickup(WORLDINFO_s*, GIZMO_s*, nuvec_s*, SUPERCOUNTERPICKUP**)",
+          "address": 4682368,
+          "offset": 3792400,
+          "size": 518,
+          "match_percent": 3.636364
+        },
+        {
+          "name": "_Z32SuperCounter_ActivateGizmoPickupP7GIZMO_sP13GIZMOPICKUP_s",
+          "demangled_name": "SuperCounter_ActivateGizmoPickup(GIZMO_s*, GIZMOPICKUP_s*)",
+          "address": 4682896,
+          "offset": 3792928,
+          "size": 419,
+          "match_percent": 4.158416
+        },
+        {
+          "name": "_Z33SuperCounter_FindFromNameAndLevelPcP11WORLDINFO_sPP18SUPERCOUNTERPICKUP",
+          "demangled_name": "SuperCounter_FindFromNameAndLevel(char*, WORLDINFO_s*, SUPERCOUNTERPICKUP**)",
+          "address": 4683328,
+          "offset": 3793360,
+          "size": 255,
+          "match_percent": 6.153846
+        },
+        {
+          "name": "_Z25SuperCounter_AnyCollectedP12SUPERCOUNTERP11WORLDINFO_s",
+          "demangled_name": "SuperCounter_AnyCollected(SUPERCOUNTER*, WORLDINFO_s*)",
+          "address": 4683584,
+          "offset": 3793616,
+          "size": 294,
+          "match_percent": 4.827586
+        },
+        {
+          "name": "_Z28SuperCounters_ResetProcessedP11WORLDINFO_s",
+          "demangled_name": "SuperCounters_ResetProcessed(WORLDINFO_s*)",
+          "address": 4683888,
+          "offset": 3793920,
+          "size": 79,
+          "match_percent": 87.69231
+        },
+        {
           "name": "_Z14Area_ConfigureiiP10EXTRAMODELPs",
           "demangled_name": "Area_Configure(int, int, EXTRAMODEL*, short*)",
           "address": 4683968,
           "offset": 3794000,
           "size": 5236,
-          "match_percent": 17.38191
+          "match_percent": 17.268845
         },
         {
           "name": "_Z25Areas_CompleteAllBuildUpsP10AREASAVE_s",
@@ -109684,6 +109668,22 @@
           "offset": 2550672,
           "size": 139,
           "match_percent": 100.0
+        },
+        {
+          "name": "_Z16HandleGroupLimiti",
+          "demangled_name": "HandleGroupLimit(int)",
+          "address": 3441312,
+          "offset": 2551344,
+          "size": 315,
+          "match_percent": 58.79121
+        },
+        {
+          "name": "PlaySfxByIdEx",
+          "demangled_name": "PlaySfxByIdEx",
+          "address": 3441632,
+          "offset": 2551664,
+          "size": 2176,
+          "match_percent": 25.885513
         },
         {
           "name": "_Z13InitSoundInfoi",

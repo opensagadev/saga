@@ -12,6 +12,7 @@
 #include "legoapi/core/input/qrand.h"
 #include "legoapi/items/base/apiobject.h"
 #include "legoapi/legoapi_types.h"
+#include "legoapi/gizmo/object/gizmopickup.h"
 #include "legoapi/world/area.h"
 #include "legoapi/world/levels/episode.h"
 #include "nu2api/nucore/nustring.h"

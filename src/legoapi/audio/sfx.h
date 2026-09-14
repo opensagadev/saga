@@ -4,9 +4,10 @@
 #include "decomp.h"
 #include "legoapi/legoapi_types.h"
 #include "nu2api/numath/nuvec.h"
+#include "nu2api/numusic/sfx.h"
 
-// Audio / SFX playback API (module legoapi/audio, sfx.cpp). PlaySfx is a
-// C-linkage symbol in the original (unmangled); TickTockSfx is C++.
+// Audio / SFX playback API. PlaySfx is a C-linkage symbol in the original
+// (unmangled); TickTockSfx is C++. PlaySfxByIdEx comes from its numusic owner header.
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,7 +15,6 @@ extern "C" {
     void PlaySfx(char *name, nuvec_s *pos);
     i32 IsSfxLooping(i32 sfx_id);
     void SetSfxBit_On(i32 sound);
-    void PlaySfxByIdEx(i32 sfx_id, nuvec_s *position, f32 volume, f32 pitch);
 #ifdef __cplusplus
 }
 #endif
