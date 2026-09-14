@@ -58,8 +58,7 @@ static void Pictures_FixUp(WORLDINFO *world);
 
 static void Credits_Init_Game(WORLDINFO *world) {
     static const char *const credit_music[] = {
-        "Ep1_EndCredits", "Ep2_EndCredits", "Ep3_EndCredits",
-        "Ep4_EndCredits", "Ep5_EndCredits", "Ep6_EndCredits",
+        "Ep1_EndCredits", "Ep2_EndCredits", "Ep3_EndCredits", "Ep4_EndCredits", "Ep5_EndCredits", "Ep6_EndCredits",
     };
     i32 episode = 0;
     if (LastAData != NULL) {
@@ -2272,24 +2271,6 @@ i32 LevelObject_FindIndexFromName_RefOnly(char *name) {
         }
     }
     return -1;
-}
-
-i32 LevelObject_AddExtra(char *name, i32 kind) {
-    if (LEVELOBJECTCOUNT < LEVELOBJECTMAX && ExtraLevelObject_NameTable != NULL) {
-        i32 nameLen = NuStrLen(name);
-        char *nameDest = ExtraLevelObject_NameTable + ExtraLevelObject_NameTableIndex;
-        LEVELOBJECT *obj = &ObjTabList[LEVELOBJECTCOUNT];
-        if (nameLen + 1 + ExtraLevelObject_NameTableIndex < ExtraLevelObject_NameTableSize) {
-            obj->kind = (u8)kind;
-            obj->name = nameDest;
-            LEVELOBJECTCOUNT++;
-            EXTRALEVELOBJECTCOUNT++;
-            NuStrCpy(nameDest, name);
-            ExtraLevelObject_NameTableIndex += nameLen + 1;
-            return 1;
-        }
-    }
-    return 0;
 }
 
 void GameAnimSys_ClearProgress(i32 idx) {

@@ -16,6 +16,7 @@ from scripts.restructure.compare_symbol_placement import (
     order_diff_lines,
     ordered_symbols,
     original_component,
+    ranked_component_splits,
     overall_progress,
     pair_symbols,
     print_overall_progress,
@@ -96,6 +97,61 @@ class CompareSymbolPlacementTests(unittest.TestCase):
             symbol("TerI", 0, section=".bss", size=4, binding=1),
         ]})
         self.assertIsNone(original_component(ledger, 7)["objects"][0]["global_counterpart"])
+
+    def test_component_reports_original_address_owner_runs(self):
+        functions = [
+            {**symbol(f"Fn{index}", 0x2000 + index * 16, binding=1),
+             "current_owner_candidates": [owner]}
+            for index, owner in enumerate([2, 2, 3, 2, 3])
+        ]
+        ledger = {
+            "original_symbols": functions,
+            "current_units": [{"id": 2, "source": "terrain.cpp"}, {"id": 3, "source": "terrain_stubs.cpp"}],
+            "original_strong_local_xref_components": [{
+                "id": 7, "certainty": "minimum same-TU constraint", "local_initializer_blocks": [3],
+                "function_symbol_indices": [symbol["symbol_index"] for symbol in functions],
+                "object_symbol_indices": [],
+            }],
+        }
+        stream = StringIO()
+        with redirect_stdout(stream):
+            print_original_component(original_component(ledger, 7))
+        self.assertIn("Original-address owner runs: 4 among 5 uniquely assigned functions "
+                      "(3 switches; longest run 2)", stream.getvalue())
+
+    def test_component_reports_provisional_local_state_split(self):
+        function = {**symbol("TerrainScan", 0x2000, binding=1),
+                    "symbol_index": 91, "current_owner_candidates": [2]}
+        state = {**symbol("_ZL4TerI", 0x4000, section=".bss", size=4),
+                 "symbol_index": 48, "current_owner_candidates": []}
+        ledger = {
+            "original_symbols": [function, state],
+            "current_units": [
+                {"id": 2, "source": "terrain.cpp"},
+                {"id": 3, "source": "terrain_stubs.cpp", "symbols": [
+                    symbol("TerI", 0, section=".bss", size=4, binding=1),
+                ]},
+            ],
+            "original_local_xrefs": [{
+                "id": "xref", "function_symbol_index": 91, "object_symbol_indices": [48],
+                "same_tu_evidence": "strong same-TU constraint", "object_alias_ambiguous": False,
+            }],
+            "original_strong_local_xref_components": [{
+                "id": 7, "certainty": "minimum same-TU constraint", "local_initializer_blocks": [3],
+                "function_symbol_indices": [91], "object_symbol_indices": [48], "xref_ids": ["xref"],
+            }],
+        }
+        component = original_component(ledger, 7)
+        self.assertEqual({key: component["local_state_pairs"][key]
+                          for key in ("total", "resolved", "split", "provisional")},
+                         {"total": 1, "resolved": 1, "split": 1, "provisional": 1})
+        self.assertEqual(component["local_state_pairs"]["top_split_functions"][0]["name"], "TerrainScan")
+        stream = StringIO()
+        with redirect_stdout(stream):
+            print_original_component(component)
+        self.assertIn("1/1 source-assigned, 1 cross-source; 1 use", stream.getvalue())
+        self.assertEqual(ranked_component_splits(ledger)[0]["id"], 7)
+        self.assertEqual(ranked_component_splits(ledger)[0]["split"], 1)
 
     def test_cached_ledger_must_match_elf_paths_and_units(self):
         with tempfile.TemporaryDirectory() as directory:

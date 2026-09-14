@@ -376,12 +376,52 @@ def original_component(ledger: dict, component_id: int) -> dict:
             })
         return sorted(result, key=lambda item: (item["address"], item["symbol_index"]))
 
+    functions = entries(component["function_symbol_indices"])
+    objects = entries(component["object_symbol_indices"])
+    function_by_id = {symbol["symbol_index"]: symbol for symbol in functions}
+    object_by_id = {symbol["symbol_index"]: symbol for symbol in objects}
+    xrefs = {xref["id"]: xref for xref in ledger.get("original_local_xrefs", [])}
+    state_pairs = {}
+    for xref_id in component.get("xref_ids", []):
+        xref = xrefs.get(xref_id)
+        if xref is None or xref.get("object_alias_ambiguous") or not xref.get("same_tu_evidence", "").startswith("strong"):
+            continue
+        function = function_by_id.get(xref["function_symbol_index"])
+        for object_id in xref["object_symbol_indices"]:
+            obj = object_by_id.get(object_id)
+            if function is None or obj is None:
+                continue
+            object_owner = obj["owner"] or obj["global_counterpart"]
+            state_pairs[(function["symbol_index"], object_id)] = {
+                "resolved": function["owner"] is not None and object_owner is not None,
+                "split": function["owner"] is not None and object_owner is not None
+                         and function["owner"] != object_owner,
+                "provisional": obj["owner"] is None and obj["global_counterpart"] is not None,
+                "function_name": function["name"],
+                "function_owner": function["owner"],
+                "object_owner": object_owner,
+            }
+
+    split_functions = Counter((pair["function_name"], pair["function_owner"], pair["object_owner"])
+                              for pair in state_pairs.values() if pair["split"])
+
     return {
         "id": component_id,
         "certainty": component["certainty"],
         "initializer_blocks": component["local_initializer_blocks"],
-        "functions": entries(component["function_symbol_indices"]),
-        "objects": entries(component["object_symbol_indices"]),
+        "functions": functions,
+        "objects": objects,
+        "local_state_pairs": {
+            "total": len(state_pairs),
+            "resolved": sum(pair["resolved"] for pair in state_pairs.values()),
+            "split": sum(pair["split"] for pair in state_pairs.values()),
+            "provisional": sum(pair["resolved"] and pair["provisional"] for pair in state_pairs.values()),
+            "top_split_functions": [
+                {"name": name, "function_owner": function_owner, "object_owner": object_owner, "pairs": count}
+                for (name, function_owner, object_owner), count in
+                sorted(split_functions.items(), key=lambda item: (-item[1], item[0]))[:5]
+            ],
+        },
     }
 
 
@@ -394,6 +434,14 @@ def print_original_component(component: dict, limit: int = 0) -> None:
           f"{len(functions)} functions, {len(objects)} LOCAL objects; "
           f"text symbols 0x{first:x}–0x{last:x}")
     print(f"  Initializer blocks: {component['initializer_blocks']}; {component['certainty']}")
+    pairs = component.get("local_state_pairs", {})
+    if pairs.get("total", 0):
+        print(f"  Writable-state candidate links: {pairs['resolved']}/{pairs['total']} source-assigned, "
+              f"{pairs['split']} cross-source; {pairs['provisional']} use same-name/size/section "
+              "GLOBAL counterparts (verify identities before migration)")
+        for item in pairs.get("top_split_functions", []):
+            print(f"    {item['pairs']} split pairs: {item['name']} "
+                  f"({item['function_owner']} -> {item['object_owner']})")
     for label, symbols in (("Function", functions), ("Object", objects)):
         owners = Counter(symbol["owner"] if symbol["owner"] is not None
                          else "ambiguous" if symbol["candidate_count"] else "no same-name owner"
@@ -401,6 +449,19 @@ def print_original_component(component: dict, limit: int = 0) -> None:
         print(f"  {label} current-source candidates:")
         for owner, count in sorted(owners.items(), key=lambda pair: (-pair[1], pair[0])):
             print(f"    {count:>3}  {owner}")
+        if label == "Function":
+            assigned = [symbol["owner"] for symbol in symbols if symbol["owner"] is not None]
+            runs = 0
+            longest = 0
+            current_run = 0
+            previous = None
+            for owner in assigned:
+                current_run = current_run + 1 if owner == previous else 1
+                runs += owner != previous
+                longest = max(longest, current_run)
+                previous = owner
+            print(f"    Original-address owner runs: {runs} among {len(assigned)} uniquely assigned functions "
+                  f"({max(runs - 1, 0)} switches; longest run {longest})")
         if label == "Object":
             counterparts = [symbol for symbol in symbols if symbol.get("global_counterpart")]
             print(f"    {len(counterparts)}/{sum(not symbol['candidate_count'] for symbol in symbols)} "
@@ -414,6 +475,35 @@ def print_original_component(component: dict, limit: int = 0) -> None:
                   f"{symbol['section']:<12}  {symbol['name']}  -> {owner}")
         if len(shown) < len(symbols):
             print(f"    ... {len(symbols) - len(shown)} more; use --limit 0 for all")
+
+
+def ranked_component_splits(ledger: dict) -> list[dict]:
+    """Rank unresolved minimum same-TU constraints, including provisional GLOBAL counterparts."""
+    ranked = []
+    for raw in ledger.get("original_strong_local_xref_components", []):
+        component = original_component(ledger, raw["id"])
+        pairs = component["local_state_pairs"]
+        if pairs["split"] == 0:
+            continue
+        owners = {symbol["owner"] for symbol in component["functions"] if symbol["owner"] is not None}
+        ranked.append({
+            "id": component["id"], "functions": len(component["functions"]),
+            "objects": len(component["objects"]), "sources": len(owners),
+            **{key: pairs[key] for key in ("total", "resolved", "split", "provisional")},
+        })
+    return sorted(ranked, key=lambda item: (-item["split"], -item["sources"], -item["functions"], item["id"]))
+
+
+def print_ranked_component_splits(ranked: list[dict], limit: int) -> None:
+    print("Candidate cross-source LOCAL-state links by original component "
+          "(name/size/section attribution; verify symbol identities before migration):")
+    print("  ID   splits  resolved/total  provisional  funcs  objects  sources")
+    shown = ranked if limit == 0 else ranked[:limit]
+    for item in shown:
+        print(f"  {item['id']:>3}  {item['split']:>6}  {item['resolved']:>4}/{item['total']:<5}  "
+              f"{item['provisional']:>11}  {item['functions']:>5}  {item['objects']:>7}  {item['sources']:>7}")
+    if len(shown) < len(ranked):
+        print(f"  ... {len(ranked) - len(shown)} more; use --top-components 0 for all")
 
 
 def overall_progress(ledger: dict, matching: dict | None = None) -> dict:
@@ -533,6 +623,8 @@ def main() -> None:
     parser.add_argument("--ledger", type=Path, help="fresh original TU map with local xrefs for same-TU constraint metrics")
     parser.add_argument("--no-xrefs", action="store_true", help="skip same-TU evidence calculation")
     parser.add_argument("--component", type=int, help="inspect an original strong-local component by its ID")
+    parser.add_argument("--top-components", type=int, help="rank this many original components by unresolved "
+                        "same-TU state splits; 0 prints all")
     parser.add_argument("--global-order", action="store_true", help="also show whole-linked text/data/BSS order proxy")
     parser.add_argument("--source", help="restrict to symbols in one current source object")
     parser.add_argument("--start", type=parse_address, help="inclusive original virtual address")
@@ -548,6 +640,10 @@ def main() -> None:
         parser.error("--end must be greater than --start")
     if args.limit < 0:
         parser.error("--limit must be nonnegative")
+    if args.top_components is not None and args.top_components < 0:
+        parser.error("--top-components must be nonnegative")
+    if args.top_components is not None and args.component is not None:
+        parser.error("--top-components and --component are mutually exclusive")
     if args.component is not None and args.no_xrefs:
         parser.error("--component requires local-xref evidence")
 
@@ -606,6 +702,11 @@ def main() -> None:
         except ValueError as error:
             parser.error(str(error))
         print_original_component(component, args.limit)
+        return
+    if args.top_components is not None:
+        if ledger is None or "original_strong_local_xref_components" not in ledger:
+            parser.error("--top-components requires a ledger with strong-local components")
+        print_ranked_component_splits(ranked_component_splits(ledger), args.top_components)
         return
     if ledger is not None:
         if overall_view:

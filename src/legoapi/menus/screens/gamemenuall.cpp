@@ -4,7 +4,7 @@
 #include <string.h>
 #include <math.h>
 #include "MechInputTouch/MechInputTouch_types.h"
-#include "gameapi/gui/apimenu.h"
+#include "gameapi/gui/apimenu_internal.h"
 #include "gameframework/saveload.h"
 #include "globals.h"
 #include "legoapi/legoapi_types.h"
@@ -60,7 +60,6 @@ extern i32 MENUSFX_MENUSELECT;
 extern i32 MENUSFX_MENUBACK;
 extern i32 MENUSFX_MENUNOENTRY;
 extern i32 MENUSFX_MENUMOVE;
-extern void (*drawslotsfn)(MENU *, f32);
 extern char *apitxt_LOADGAME;
 extern char *apitxt_SAVEGAME;
 extern char *apitxt_CONFIRMSAVE;
@@ -159,11 +158,11 @@ i32 SAVESIZE = 50;
 extern i32 memcard_autosave;
 extern i32 memcard_autosaveenabled;
 extern i32 memcard_autosavedisabled;
-extern i32 header_r;
-extern i32 header_g;
-extern i32 header_b;
-extern i32 MenuDisableHeaders;
-
+static i32 header_r;
+static i32 header_g;
+static i32 header_b;
+void (*drawslotinfofn)(f32, f32, i32, i32) = APIMenuDrawGameState;
+void (*drawslotsfn)(MENU *, f32) = APIMenuDrawMemCardSlots;
 static i32 lastslot;
 static i32 slideleft;
 static i32 slideright;
@@ -1205,6 +1204,69 @@ void MenuDrawFormatConfirm(MENU_s *) {
     STUBBED();
 }
 
+void MenuInitialiseEx(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count,
+                      void (*draw_save_slots_info_fn)(f32, f32, i32, i32), i32 is_fade_enabled, i32 is_shadow_enabled) {
+    char menus_used_str[64];
+
+    i32 menu_ids_used = TOTAL_MENUS_COUNT - RESERVED_MENUS_COUNT;
+    if (menu_id_count <= TOTAL_MENUS_COUNT - RESERVED_MENUS_COUNT) {
+        menu_ids_used = menu_id_count;
+    }
+
+    // menu_id_count describes the valid ID range, not the number of records.
+    // The game table is sparse (ID 0x1c is absent), sorted, and ends with the
+    // record for menu_id_count - 1.
+    for (i32 i = 0; i < menu_ids_used; i++) {
+        MenuInfo[RESERVED_MENUS_COUNT + i] = menu_info[i];
+        if (menu_info[i].id >= menu_ids_used - 1) {
+            break;
+        }
+    }
+
+    MenusUsed = menu_ids_used + RESERVED_MENUS_COUNT;
+    sprintf(menus_used_str, "Menus used: %d", MenusUsed);
+
+    MenuLanguages = language_count;
+    MenuHeader[0] = '\0';
+
+    header_r = MENUHEADERR;
+    header_g = MENUHEADERG;
+    header_b = MENUHEADERB;
+
+    if (draw_save_slots_info_fn != NULL) {
+        drawslotinfofn = draw_save_slots_info_fn;
+    }
+
+    MenuFadeEnabled = is_fade_enabled;
+    MenuDrawDropShadows = is_shadow_enabled;
+
+    NUMTL *menu_fade_mtl = NuMtlCreate(1);
+    MenuFadeMtl = menu_fade_mtl;
+
+    menu_fade_mtl->attribs.z_mode = 3;
+    menu_fade_mtl->attribs.alpha_mode = 1;
+
+    menu_fade_mtl->attribs.unknown_2_1_2 = 2;
+
+    menu_fade_mtl->attribs.unknown_1_1_2 = 1;
+    menu_fade_mtl->attribs.unknown_1_4_8 = 1;
+
+    menu_fade_mtl->attribs.unknown_2_4 = 1;
+
+    menu_fade_mtl->attribs.filter_mode = 1;
+
+    NuMtlUpdate(menu_fade_mtl);
+}
+
+void MenuInitialise(MENUFNINFO *menu_info, i32 menu_id_count, i32 language_count,
+                    void (*draw_save_slots_fn)(MENU *, f32), i32 is_fade_enabled, i32 is_shadow_enabled) {
+    MenuInitialiseEx(menu_info, menu_id_count, language_count, NULL, is_fade_enabled, is_shadow_enabled);
+
+    if (draw_save_slots_fn != NULL) {
+        drawslotsfn = draw_save_slots_fn;
+    }
+}
+
 void MenuDrawStorePurchase(MENU_s *) {
     STUBBED();
 }
@@ -1859,20 +1921,27 @@ extern "C" {
         MENUFLASH1B = flash1_b;
     }
 
-    void MenuSetHeaderDrawFn(void (*draw_fn)(void)) {
-        headerdrawfn = draw_fn;
-    }
-
-    void MenuSetPreDrawFn(void (*draw_fn)(MENU *)) {
-        predrawfn = draw_fn;
-    }
-
     void MenuSetPulsateSpeed(f32 speed) {
         menu_pulsate_speed = speed;
     }
 
     void MenuSetTopBottom(void) {
         STUBBED();
+    }
+
+    void MenuSetPreDrawFn(void (*draw_fn)(MENU *)) {
+        predrawfn = draw_fn;
+    }
+
+    void MenuSetHeaderDrawFn(void (*draw_fn)(void)) {
+        headerdrawfn = draw_fn;
+    }
+
+    void MenuReset(void) {
+        memset(GameMenu, 0, sizeof(GameMenu));
+        GameMenu[0].menu = -1;
+        MenuSFX = -1;
+        GameMenuLevel = 0;
     }
 
     void ProcessFileSel2(void) {

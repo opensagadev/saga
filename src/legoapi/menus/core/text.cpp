@@ -1,4 +1,5 @@
 #include "decomp.h"
+#include "gameapi/gui/apimenu_internal.h"
 #include "legoapi/menus/core/text.h"
 char *ASCII_UP = "\xc2\xac";
 #include "legoapi/legoapi_types.h"
@@ -17,7 +18,6 @@ char *ASCII_UP = "\xc2\xac";
 #include <stdio.h>
 #include <string.h>
 extern char **TTab;
-extern i32 MenuDrawDropShadows;
 f32 text3d_height;
 f32 text3d_width;
 void (*buttonmapfn)(char *, char *);
